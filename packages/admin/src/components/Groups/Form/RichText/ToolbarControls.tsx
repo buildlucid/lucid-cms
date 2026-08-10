@@ -15,7 +15,7 @@ import ToolbarButton from "./ToolbarButton";
 import type { RichTextOptions } from "./types";
 
 const ToolbarControls: Component<{
-	mode: "mobile" | "pill";
+	mode: "toolbar" | "pill";
 	disabled?: boolean;
 	options?: RichTextOptions;
 	activeHeading: number;

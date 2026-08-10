@@ -10,7 +10,7 @@ export interface HeadingOption {
 }
 
 const HeadingMenu: Component<{
-	mode: "mobile" | "pill";
+	mode: "toolbar" | "pill";
 	disabled?: boolean;
 	activeHeading: number;
 	options: HeadingOption[];
@@ -39,13 +39,10 @@ const HeadingMenu: Component<{
 		>
 			<DropdownMenu.Trigger
 				class={classNames(
-					"inline-flex items-center gap-1 rounded-md text-xs transition-colors duration-150 outline-none focus-visible:ring-1 focus:ring-primary-base disabled:opacity-50 disabled:cursor-not-allowed border",
+					"inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs transition-colors duration-150 outline-none focus-visible:ring-1 focus:ring-primary-base disabled:cursor-not-allowed disabled:opacity-50",
 					{
-						"h-7 bg-input-base px-2 text-title border-border":
-							props.mode === "mobile",
-						"h-7 px-2": props.mode === "pill",
 						"bg-primary-muted-bg text-primary-muted-contrast border-primary-muted-border":
-							props.activeHeading > 0,
+							props.mode === "toolbar" || props.activeHeading > 0,
 						"text-body hover:bg-background-hover hover:text-title border-transparent":
 							props.mode === "pill" && props.activeHeading === 0,
 					},

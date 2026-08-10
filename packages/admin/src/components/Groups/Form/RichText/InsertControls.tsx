@@ -9,7 +9,7 @@ import {
 	FaSolidImage,
 	FaSolidUpload,
 } from "solid-icons/fa";
-import { type Component, Show } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 import T from "@/translations";
 import { getRichTextMediaTypes, isRichTextOptionEnabled } from "./helpers";
 import ToolbarButton from "./ToolbarButton";
@@ -50,6 +50,15 @@ const InsertControls: Component<{
 	onFullscreenChange: (fullscreen: boolean) => void;
 }> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const hasReferenceControls = createMemo(
+		() =>
+			isRichTextOptionEnabled(props.options?.media) ||
+			isRichTextOptionEnabled(props.options?.variables) ||
+			isRichTextOptionEnabled(props.options?.bricks),
+	);
+
+	// ----------------------------------------
 	// Functions
 	const insertMedia = (upload: boolean) => {
 		const insertionRange = getReferenceInsertionRange(props.editor);
@@ -81,102 +90,100 @@ const InsertControls: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Show
-			when={
-				isRichTextOptionEnabled(props.options?.media) ||
-				isRichTextOptionEnabled(props.options?.variables) ||
-				isRichTextOptionEnabled(props.options?.bricks) ||
-				props.options?.fullscreen === true
-			}
-		>
-			<div class="flex flex-wrap items-center gap-1.5 border-b border-border px-2 py-1.5">
-				<Show when={isRichTextOptionEnabled(props.options?.media)}>
-					<ToolbarButton
-						mode="default"
-						isActive={false}
-						onClick={() => insertMedia(false)}
-						disabled={props.disabled}
-						title={T()("editor.rich.text.media.select")}
-					>
-						<FaSolidImage size={12} />
-					</ToolbarButton>
-					<ToolbarButton
-						mode="default"
-						isActive={false}
-						onClick={() => insertMedia(true)}
-						disabled={props.disabled}
-						title={T()("editor.rich.text.media.upload")}
-					>
-						<FaSolidUpload size={12} />
-					</ToolbarButton>
-				</Show>
-				<Show when={isRichTextOptionEnabled(props.options?.variables)}>
-					<ToolbarButton
-						mode="default"
-						isActive={false}
-						onClick={() => {
-							const insertionRange = getReferenceInsertionRange(props.editor);
-							props.options?.callbacks?.selectVariable?.({
-								onSelect: (selection) =>
-									insertReferenceNode(props.editor, insertionRange, {
-										type: richTextNodeNames.variable,
-										attrs: {
-											collectionKey: selection.collectionKey,
-											documentId: selection.documentId,
-											fieldKey: selection.fieldKey,
-										},
-									}),
-							});
-						}}
-						disabled={props.disabled}
-						title={T()("editor.rich.text.variable.add")}
-					>
-						<FaSolidDatabase size={12} />
-					</ToolbarButton>
-				</Show>
-				<Show when={isRichTextOptionEnabled(props.options?.bricks)}>
-					<ToolbarButton
-						mode="default"
-						isActive={false}
-						onClick={() => {
-							const insertionRange = getReferenceInsertionRange(props.editor);
-							props.options?.callbacks?.selectEmbeddedBrick?.({
-								onSelect: (ref) =>
-									insertReferenceNode(props.editor, insertionRange, {
-										type: richTextNodeNames.embeddedBrick,
-										attrs: { ref },
-									}),
-							});
-						}}
-						disabled={props.disabled}
-						title={T()("editor.rich.text.brick.add")}
-					>
-						<FaSolidCubes size={12} />
-					</ToolbarButton>
-				</Show>
-				<Show when={props.options?.fullscreen === true}>
-					<div class="ml-auto">
+		<>
+			<Show when={hasReferenceControls()}>
+				<div class="h-5 w-px bg-border" />
+			</Show>
+			<Show when={hasReferenceControls()}>
+				<div class="flex items-center gap-1.5">
+					<Show when={isRichTextOptionEnabled(props.options?.media)}>
 						<ToolbarButton
 							mode="default"
-							isActive={props.fullscreen}
-							onClick={() => props.onFullscreenChange(!props.fullscreen)}
+							isActive={false}
+							onClick={() => insertMedia(false)}
 							disabled={props.disabled}
-							title={
-								props.fullscreen
-									? T()("editor.rich.text.fullscreen.exit")
-									: T()("editor.rich.text.fullscreen.enter")
-							}
+							title={T()("editor.rich.text.media.select")}
 						>
-							{props.fullscreen ? (
-								<FaSolidCompress size={12} />
-							) : (
-								<FaSolidExpand size={12} />
-							)}
+							<FaSolidImage size={12} />
 						</ToolbarButton>
-					</div>
-				</Show>
-			</div>
-		</Show>
+						<ToolbarButton
+							mode="default"
+							isActive={false}
+							onClick={() => insertMedia(true)}
+							disabled={props.disabled}
+							title={T()("editor.rich.text.media.upload")}
+						>
+							<FaSolidUpload size={12} />
+						</ToolbarButton>
+					</Show>
+					<Show when={isRichTextOptionEnabled(props.options?.variables)}>
+						<ToolbarButton
+							mode="default"
+							isActive={false}
+							onClick={() => {
+								const insertionRange = getReferenceInsertionRange(props.editor);
+								props.options?.callbacks?.selectVariable?.({
+									onSelect: (selection) =>
+										insertReferenceNode(props.editor, insertionRange, {
+											type: richTextNodeNames.variable,
+											attrs: {
+												collectionKey: selection.collectionKey,
+												documentId: selection.documentId,
+												fieldKey: selection.fieldKey,
+											},
+										}),
+								});
+							}}
+							disabled={props.disabled}
+							title={T()("editor.rich.text.variable.add")}
+						>
+							<FaSolidDatabase size={12} />
+						</ToolbarButton>
+					</Show>
+					<Show when={isRichTextOptionEnabled(props.options?.bricks)}>
+						<ToolbarButton
+							mode="default"
+							isActive={false}
+							onClick={() => {
+								const insertionRange = getReferenceInsertionRange(props.editor);
+								props.options?.callbacks?.selectEmbeddedBrick?.({
+									onSelect: (ref) =>
+										insertReferenceNode(props.editor, insertionRange, {
+											type: richTextNodeNames.embeddedBrick,
+											attrs: { ref },
+										}),
+								});
+							}}
+							disabled={props.disabled}
+							title={T()("editor.rich.text.brick.add")}
+						>
+							<FaSolidCubes size={12} />
+						</ToolbarButton>
+					</Show>
+				</div>
+			</Show>
+			<Show when={props.options?.fullscreen === true}>
+				<div class="ml-auto">
+					<ToolbarButton
+						mode="default"
+						isActive={props.fullscreen}
+						onClick={() => props.onFullscreenChange(!props.fullscreen)}
+						disabled={props.disabled}
+						title={
+							props.fullscreen
+								? T()("editor.rich.text.fullscreen.exit")
+								: T()("editor.rich.text.fullscreen.enter")
+						}
+					>
+						{props.fullscreen ? (
+							<FaSolidCompress size={12} />
+						) : (
+							<FaSolidExpand size={12} />
+						)}
+					</ToolbarButton>
+				</div>
+			</Show>
+		</>
 	);
 };
 

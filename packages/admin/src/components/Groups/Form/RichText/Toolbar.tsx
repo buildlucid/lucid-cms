@@ -430,16 +430,16 @@ const Toolbar: Component<{
 	// Render
 	return (
 		<>
-			<InsertControls
-				editor={props.editor}
-				disabled={props.disabled}
-				options={props.options}
-				fullscreen={props.fullscreen}
-				onFullscreenChange={props.onFullscreenChange}
-			/>
-			<div class="md:hidden flex flex-wrap items-center gap-1.5 border-b border-border px-2 py-1.5">
+			<div
+				class={classNames(
+					"flex flex-wrap items-center gap-1.5 border-b border-border py-1.5",
+					{
+						"px-2": props.options?.appearance !== "seamless",
+					},
+				)}
+			>
 				<ToolbarControls
-					mode="mobile"
+					mode="toolbar"
 					disabled={props.disabled}
 					options={props.options}
 					activeHeading={activeHeading()}
@@ -472,6 +472,13 @@ const Toolbar: Component<{
 					onClearFormatting={() =>
 						props.editor.chain().focus().clearNodes().unsetAllMarks().run()
 					}
+				/>
+				<InsertControls
+					editor={props.editor}
+					disabled={props.disabled}
+					options={props.options}
+					fullscreen={props.fullscreen}
+					onFullscreenChange={props.onFullscreenChange}
 				/>
 			</div>
 
