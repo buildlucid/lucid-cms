@@ -151,14 +151,13 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 		event.stopPropagation();
 		if (!props.isEditable() || typeof props.mediaId !== "number") return;
 
+		const position = props.getPos();
+		if (typeof position !== "number") return;
+
 		props.selectMedia?.({
 			currentId: props.mediaId,
 			allowedTypes: props.allowedTypes,
-			onSelect: (nextId) => {
-				const position = props.getPos();
-				if (typeof position !== "number") return;
-				props.setMediaId(position, nextId);
-			},
+			onSelect: (nextId) => props.setMediaId(position, nextId),
 		});
 	};
 

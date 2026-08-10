@@ -35,6 +35,8 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 		) {
 			return;
 		}
+		const position = props.getPos();
+		if (typeof position !== "number") return;
 
 		props.selectVariable?.({
 			current: {
@@ -42,11 +44,7 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 				documentId: props.documentId,
 				fieldKey: props.fieldKey,
 			},
-			onSelect: (selection) => {
-				const position = props.getPos();
-				if (typeof position !== "number") return;
-				props.setSelection(position, selection);
-			},
+			onSelect: (selection) => props.setSelection(position, selection),
 		});
 	};
 

@@ -3,7 +3,7 @@ import {
 	LucidMedia,
 	LucidVariable,
 } from "@lucidcms/rich-text";
-import type { JSX } from "solid-js";
+import { type JSX, untrack } from "solid-js";
 import { render } from "solid-js/web";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -49,7 +49,7 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 				const mediaId = node.attrs.mediaId;
 				const reference =
 					typeof mediaId === "number"
-						? options?.references?.media?.(mediaId)
+						? untrack(() => options?.references?.media?.(mediaId))
 						: undefined;
 
 				return renderNodeView(() => (
@@ -113,7 +113,7 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 				const refValue = node.attrs.ref;
 				const brick =
 					typeof refValue === "string"
-						? options?.references?.embeddedBrick?.(refValue)
+						? untrack(() => options?.references?.embeddedBrick?.(refValue))
 						: undefined;
 				const config = options?.embeddedBrickConfigs?.find(
 					(item) => item.key === brick?.key,

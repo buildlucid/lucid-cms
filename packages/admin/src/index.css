@@ -525,6 +525,7 @@
 	/* Rich Text (TipTap) */
 	.rich-text-content {
 		@apply text-sm leading-5 tracking-normal text-body font-body;
+		caret-color: var(--lucid-body);
 	}
 	.rich-text-content h1 {
 		@apply text-base leading-6 tracking-normal font-semibold text-title mb-2 mt-3 first:mt-0;
@@ -865,4 +866,9 @@
 .code-editor-shell .cm-editor.cm-focused {
 	border: 0;
 	outline: none;
+}
+
+/* Tiptap injects its gap-cursor styles outside Tailwind's cascade layers. */
+.rich-text-content .ProseMirror-gapcursor::after {
+	border-top-color: var(--lucid-body);
 }

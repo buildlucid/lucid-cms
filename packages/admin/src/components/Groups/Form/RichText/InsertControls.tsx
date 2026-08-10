@@ -15,17 +15,31 @@ import { getRichTextMediaTypes, isRichTextOptionEnabled } from "./helpers";
 import ToolbarButton from "./ToolbarButton";
 import type { RichTextOptions } from "./types";
 
-/** Inserts after an already-selected atom instead of replacing that reference. */
-const insertReferenceNode = (editor: Editor, content: JSONContent) => {
+type ReferenceInsertionRange = {
+	from: number;
+	to: number;
+};
+
+/** Captures the insertion range before an asynchronous reference picker opens. */
+const getReferenceInsertionRange = (
+	editor: Editor,
+): ReferenceInsertionRange => {
 	const selection = editor.state.selection;
-	const chain = editor.chain().focus();
 
 	if (selection instanceof NodeSelection) {
-		chain.insertContentAt(selection.to, content).run();
-		return;
+		return { from: selection.to, to: selection.to };
 	}
 
-	chain.insertContent(content).run();
+	return { from: selection.from, to: selection.to };
+};
+
+/** Inserts at the captured range rather than whichever selection is active later. */
+const insertReferenceNode = (
+	editor: Editor,
+	range: ReferenceInsertionRange,
+	content: JSONContent,
+) => {
+	editor.chain().focus().insertContentAt(range, content).run();
 };
 
 const InsertControls: Component<{
@@ -38,13 +52,14 @@ const InsertControls: Component<{
 	// ----------------------------------------
 	// Functions
 	const insertMedia = (upload: boolean) => {
+		const insertionRange = getReferenceInsertionRange(props.editor);
 		const callback = upload
 			? props.options?.callbacks?.uploadMedia
 			: props.options?.callbacks?.selectMedia;
 		if (!callback) return;
 
 		const onInsert = (mediaId: number) =>
-			insertReferenceNode(props.editor, {
+			insertReferenceNode(props.editor, insertionRange, {
 				type: richTextNodeNames.media,
 				attrs: { mediaId },
 			});
@@ -99,10 +114,11 @@ const InsertControls: Component<{
 					<ToolbarButton
 						mode="default"
 						isActive={false}
-						onClick={() =>
+						onClick={() => {
+							const insertionRange = getReferenceInsertionRange(props.editor);
 							props.options?.callbacks?.selectVariable?.({
 								onSelect: (selection) =>
-									insertReferenceNode(props.editor, {
+									insertReferenceNode(props.editor, insertionRange, {
 										type: richTextNodeNames.variable,
 										attrs: {
 											collectionKey: selection.collectionKey,
@@ -110,8 +126,8 @@ const InsertControls: Component<{
 											fieldKey: selection.fieldKey,
 										},
 									}),
-							})
-						}
+							});
+						}}
 						disabled={props.disabled}
 						title={T()("editor.rich.text.variable.add")}
 					>
@@ -122,15 +138,16 @@ const InsertControls: Component<{
 					<ToolbarButton
 						mode="default"
 						isActive={false}
-						onClick={() =>
+						onClick={() => {
+							const insertionRange = getReferenceInsertionRange(props.editor);
 							props.options?.callbacks?.selectEmbeddedBrick?.({
 								onSelect: (ref) =>
-									insertReferenceNode(props.editor, {
+									insertReferenceNode(props.editor, insertionRange, {
 										type: richTextNodeNames.embeddedBrick,
 										attrs: { ref },
 									}),
-							})
-						}
+							});
+						}}
 						disabled={props.disabled}
 						title={T()("editor.rich.text.brick.add")}
 					>
