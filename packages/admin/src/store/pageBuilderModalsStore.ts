@@ -6,9 +6,14 @@ import type {
 	MediaRef,
 	MediaType,
 	RelationFieldValue,
+	RichTextUserVariableField,
 	UserRef,
 } from "@types";
 import { createStore } from "solid-js/store";
+import type {
+	RichTextVariableReference,
+	RichTextVariableSelection,
+} from "@/components/Groups/Form/RichText/types";
 
 type MediaDimensionValidation = NonNullable<
 	NonNullable<MediaFieldConfig["validation"]>["width"]
@@ -64,19 +69,12 @@ type ModalRegistry = {
 		data: {
 			zIndex?: number;
 			collectionKeys: string[];
-			selected?: {
-				collectionKey: string;
-				documentId: number;
-				fieldKey: string;
-			};
-			selectedRef?: DocumentRef;
+			userFields: RichTextUserVariableField[];
+			selected?: RichTextVariableReference;
+			selectedDocumentRef?: DocumentRef;
+			selectedUserRef?: NonNullable<UserRef>;
 		};
-		result: {
-			collectionKey: string;
-			documentId: number;
-			fieldKey: string;
-			document: DocumentRef;
-		};
+		result: RichTextVariableSelection;
 	};
 	embeddedBrickEdit: {
 		data: {

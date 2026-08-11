@@ -27,9 +27,18 @@ const value: RichTextJSON = {
 				{
 					type: "lucidVariable",
 					attrs: {
+						source: "document",
 						collectionKey: "settings",
 						documentId: 2,
 						fieldKey: "supportEmail",
+					},
+				},
+				{
+					type: "lucidVariable",
+					attrs: {
+						source: "user",
+						userId: 9,
+						fieldKey: "firstName",
 					},
 				},
 			],
@@ -91,6 +100,16 @@ const context = {
 				},
 			},
 		],
+		user: [
+			{
+				id: 9,
+				username: "william",
+				email: "william@example.com",
+				firstName: "William",
+				lastName: "Yallop",
+				profilePicture: null,
+			},
+		],
 	},
 	mediaImagePresets: {
 		"thumbnail-small": {
@@ -106,6 +125,7 @@ describe("rich-text response hydration", () => {
 		const hydrated = hydrateRichTextValue(value, context);
 		const link = hydrated.content?.[0]?.content?.[0]?.marks?.[0];
 		const variable = hydrated.content?.[0]?.content?.[1];
+		const userVariable = hydrated.content?.[0]?.content?.[2];
 		const media = hydrated.content?.[1];
 		const document = hydrated.content?.[2];
 
@@ -121,10 +141,20 @@ describe("rich-text response hydration", () => {
 		expect(variable).toMatchObject({
 			type: "lucidVariable",
 			attrs: {
+				source: "document",
 				collectionKey: "settings",
 				documentId: 2,
 				fieldKey: "supportEmail",
 				value: "aide@example.com",
+			},
+		});
+		expect(userVariable).toMatchObject({
+			type: "lucidVariable",
+			attrs: {
+				source: "user",
+				userId: 9,
+				fieldKey: "firstName",
+				value: "William",
 			},
 		});
 		expect(media).toMatchObject({
@@ -167,6 +197,7 @@ describe("rich-text response hydration", () => {
 			hydrated.content?.[0]?.content?.[0]?.marks?.[0]?.attrs?.href,
 		).toBeNull();
 		expect(hydrated.content?.[0]?.content?.[1]?.attrs?.value).toBeNull();
+		expect(hydrated.content?.[0]?.content?.[2]?.attrs?.value).toBeNull();
 		expect(hydrated.content?.[1]?.attrs?.media).toBeNull();
 		expect(hydrated.content?.[2]?.attrs).toEqual({
 			collectionKey: "pages",

@@ -70,8 +70,8 @@ const checkVariables = (field: CFConfig<"rich-text">, config: Config) => {
 	checkCollectionKeys({
 		field,
 		feature: translate("server:core.fields.rich.text.feature.variables"),
-		collectionKeys: Array.isArray(field.editor?.variables)
-			? field.editor.variables
+		collectionKeys: Array.isArray(field.editor?.variables?.document)
+			? field.editor.variables.document
 			: [],
 		config,
 	});

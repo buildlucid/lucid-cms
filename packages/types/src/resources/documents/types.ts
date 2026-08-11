@@ -579,6 +579,12 @@ export interface CollapsibleFieldConfig
 	fields: CollectionNonTabFieldConfig[];
 }
 
+export type RichTextUserVariableField =
+	| "firstName"
+	| "lastName"
+	| "username"
+	| "email";
+
 export interface RichTextFieldConfig
 	extends SharedCollectionFieldConfig<"rich-text">,
 		FieldConfigOptions<Record<string, unknown>> {
@@ -590,7 +596,10 @@ export interface RichTextFieldConfig
 		media?: boolean | MediaType[];
 		documents?: boolean | string[];
 		bricks?: boolean | string[];
-		variables?: boolean | string[];
+		variables?: {
+			document?: boolean | string[];
+			user?: RichTextUserVariableField[];
+		};
 		appearance?: "default" | "seamless";
 		fullscreen?: boolean;
 	};

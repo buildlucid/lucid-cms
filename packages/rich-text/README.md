@@ -153,7 +153,10 @@ collection.addRichText("body", {
     },
     media: true,
     documents: ["pages", "posts", "site-settings"],
-    variables: ["site-settings"],
+    variables: {
+      document: ["site-settings"],
+      user: ["firstName", "lastName", "username"],
+    },
     bricks: ["callout", "quote"],
     appearance: "seamless",
     fullscreen: true,
@@ -164,7 +167,8 @@ collection.addRichText("body", {
 - `links.internal` is `true` for every collection with routing configured, or an array of allowed collection keys.
 - `media` is `true` for every media type, or an allowed array of `image`, `video`, `audio`, `document`, `archive`, and `unknown`.
 - `documents` is `true` for every collection, or an allowed collection-key array.
-- `variables` is `true` for every collection, or an allowed collection-key array. The editor only exposes top-level scalar fields.
+- `variables.document` is `true` for every collection, or an allowed collection-key array. The editor only exposes top-level scalar fields.
+- `variables.user` is an explicit allow-list of `firstName`, `lastName`, `username`, and `email`.
 - `bricks` is `true` for every brick registered under `collection.bricks.embedded`, or an allowed brick-key array.
 - `appearance: "seamless"` removes the field chrome; `fullscreen` adds an editor fullscreen toggle.
 

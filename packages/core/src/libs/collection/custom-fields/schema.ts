@@ -6,6 +6,7 @@ import {
 	fieldConditionTranslationScopes,
 } from "./conditions/index.js";
 import { validateRangeConfig } from "./fields/range/schema.js";
+import { richTextUserVariableFields } from "./fields/rich-text/types.js";
 
 const operatorsRequiringValue: string[] = [
 	"equals",
@@ -122,7 +123,14 @@ const customFieldSchema = z.object({
 				.optional(),
 			documents: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
 			bricks: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
-			variables: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
+			variables: z
+				.object({
+					document: z
+						.union([z.boolean(), z.array(z.string().min(1))])
+						.optional(),
+					user: z.array(z.enum(richTextUserVariableFields)).optional(),
+				})
+				.optional(),
 			appearance: z.enum(["default", "seamless"]).optional(),
 			fullscreen: z.boolean().optional(),
 		})

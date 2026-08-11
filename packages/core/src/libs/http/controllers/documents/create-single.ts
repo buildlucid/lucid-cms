@@ -52,6 +52,7 @@ const createSingleController = factory.createHandlers(
 		})(context, {
 			collectionKey,
 			userId: c.get("auth").id,
+			authUser: c.get("auth"),
 			bricks,
 			fields,
 		});

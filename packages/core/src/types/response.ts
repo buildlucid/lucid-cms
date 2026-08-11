@@ -104,6 +104,7 @@ export type {
 	PublishOperationUser,
 	RelationFieldValue,
 	ResponseBody,
+	RichTextUserVariableField,
 	Role,
 	Settings,
 	SettingsInclude,

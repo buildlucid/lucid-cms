@@ -4,11 +4,18 @@ import { FaSolidTriangleExclamation } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import T from "@/translations";
 import { resolveFieldErrorMessage } from "@/utils/error-helpers";
-import type { RichTextOptions, RichTextVariableSelection } from "../types";
+import { isRichTextUserVariableField } from "../helpers";
+import type {
+	RichTextOptions,
+	RichTextVariableReference,
+	RichTextVariableSelection,
+} from "../types";
 
 export interface VariableNodeViewProps {
+	source: unknown;
 	collectionKey: unknown;
 	documentId: unknown;
+	userId: unknown;
 	fieldKey: unknown;
 	value: string;
 	available: boolean;
@@ -30,29 +37,48 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 		const message = props.errors()[0]?.message;
 		return message ? resolveFieldErrorMessage(message) : undefined;
 	});
+	const currentReference = createMemo<RichTextVariableReference | undefined>(
+		() => {
+			if (
+				props.source === "document" &&
+				typeof props.collectionKey === "string" &&
+				typeof props.documentId === "number" &&
+				typeof props.fieldKey === "string"
+			) {
+				return {
+					source: props.source,
+					collectionKey: props.collectionKey,
+					documentId: props.documentId,
+					fieldKey: props.fieldKey,
+				};
+			}
+			if (
+				props.source === "user" &&
+				typeof props.userId === "number" &&
+				isRichTextUserVariableField(props.fieldKey)
+			) {
+				return {
+					source: props.source,
+					userId: props.userId,
+					fieldKey: props.fieldKey,
+				};
+			}
+			return undefined;
+		},
+	);
 
 	// -------------------------------
 	// Functions
 	const editVariable = (event: MouseEvent) => {
 		event.preventDefault();
 		event.stopPropagation();
-		if (
-			!props.isEditable() ||
-			typeof props.collectionKey !== "string" ||
-			typeof props.documentId !== "number" ||
-			typeof props.fieldKey !== "string"
-		) {
-			return;
-		}
+		const current = currentReference();
+		if (!props.isEditable() || !current) return;
 		const position = props.getPos();
 		if (typeof position !== "number") return;
 
 		props.selectVariable?.({
-			current: {
-				collectionKey: props.collectionKey,
-				documentId: props.documentId,
-				fieldKey: props.fieldKey,
-			},
+			current,
 			onSelect: (selection) => props.setSelection(position, selection),
 		});
 	};

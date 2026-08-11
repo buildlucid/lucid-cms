@@ -61,8 +61,15 @@ export type RichTextFieldErrorReference =
 	  }
 	| {
 			type: "rich-text-variable";
+			source: "document";
 			collectionKey: string;
 			documentId: number;
+			fieldKey: string;
+	  }
+	| {
+			type: "rich-text-variable";
+			source: "user";
+			userId: number;
 			fieldKey: string;
 	  }
 	| {

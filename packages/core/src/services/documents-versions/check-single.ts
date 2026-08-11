@@ -1,6 +1,7 @@
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-order.js";
 import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
@@ -12,6 +13,7 @@ const checkSingle: ServiceFn<
 		{
 			collectionKey: string;
 			userId: number;
+			authUser?: LucidAuth;
 			documentId: number;
 			versionId: number;
 			bricks?: Array<BrickInputSchema>;
@@ -72,6 +74,7 @@ const checkSingle: ServiceFn<
 		collection: updateContextRes.data.collection,
 		bricks,
 		fields,
+		authUser: data.authUser,
 	});
 	if (checkValidateRes.error) return checkValidateRes;
 

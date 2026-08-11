@@ -49,6 +49,7 @@ describe("generateHTML", () => {
 							{
 								type: "lucidVariable",
 								attrs: {
+									source: "document",
 									collectionKey: "contacts",
 									documentId: 2,
 									fieldKey: "supportEmail",

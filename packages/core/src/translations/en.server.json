@@ -132,6 +132,7 @@
 	"core.fields.rich.text.media.not.allowed": "This media type is not allowed in this rich-text field.",
 	"core.fields.rich.text.document.not.allowed": "This document is not allowed in this rich-text field.",
 	"core.fields.rich.text.variable.not.allowed": "This data value is not allowed in this rich-text field.",
+	"core.fields.rich.text.variable.permission.denied": "You do not have permission to use this data value.",
 	"core.fields.rich.text.variable.field.not.found": "We couldn't find the field used by this data value.",
 	"core.fields.rich.text.link.not.allowed": "This internal link is not allowed in this rich-text field.",
 	"core.fields.rich.text.embedded.brick.not.found": "We couldn't find this embedded brick.",

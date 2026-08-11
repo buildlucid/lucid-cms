@@ -10,12 +10,14 @@ import type {
 	FieldTypes,
 } from "../../../libs/collection/custom-fields/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { LucidAuth } from "../../../types/hono.js";
 import type { FieldInputSchema } from "../../../types.js";
 import type {
 	ServiceContext,
 	ServiceFn,
 } from "../../../utils/services/types.js";
 import { analyzeEmbeddedBrickGraph } from "./prepare-bricks-and-fields.js";
+import resolveRichTextVariableAccess from "./resolve-rich-text-variable-access.js";
 
 export type ValidationData = Partial<Record<FieldTypes, unknown>>;
 
@@ -98,6 +100,7 @@ const fetchValidationData: ServiceFn<
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
+			authUser?: LucidAuth;
 		},
 	],
 	ValidationData
@@ -108,6 +111,14 @@ const fetchValidationData: ServiceFn<
 	const richTextValidationData = validationData[
 		"rich-text"
 	] as RichTextValidationData;
+	if (data.authUser) {
+		richTextValidationData.variableAccess = resolveRichTextVariableAccess({
+			collectionKeys: context.config.collections.map(
+				(collection) => collection.key,
+			),
+			user: data.authUser,
+		});
+	}
 	richTextValidationData.embeddedBricks = Object.fromEntries(
 		data.bricks.flatMap((brick) =>
 			brick.type === "embedded" ? [[brick.ref, brick.key]] : [],

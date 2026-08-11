@@ -3,6 +3,8 @@ import type { Extensions, JSONContent } from "@tiptap/core";
 
 export type RichTextJSON = JSONContent;
 
+export type RichTextVariableSource = "document" | "user";
+
 export const richTextNodeNames = {
 	document: "lucidDocument",
 	media: "lucidMedia",

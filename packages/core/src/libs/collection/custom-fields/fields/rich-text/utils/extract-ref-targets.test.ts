@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import extractRichTextRefTargets from "./extract-ref-targets.js";
 
-test("extracts and deduplicates rich text media and document references", () => {
+test("extracts and deduplicates rich text resource references", () => {
 	expect(
 		extractRichTextRefTargets({
 			type: "doc",
@@ -26,9 +26,18 @@ test("extracts and deduplicates rich text media and document references", () => 
 						{
 							type: "lucidVariable",
 							attrs: {
+								source: "document",
 								collectionKey: "settings",
 								documentId: 2,
 								fieldKey: "supportEmail",
+							},
+						},
+						{
+							type: "lucidVariable",
+							attrs: {
+								source: "user",
+								userId: 7,
+								fieldKey: "username",
 							},
 						},
 					],
@@ -52,6 +61,7 @@ test("extracts and deduplicates rich text media and document references", () => 
 			{ table: "lucid_document__settings", value: 2 },
 			{ table: "lucid_document__pages", value: 15 },
 		],
+		user: [{ table: "lucid_users", value: 7 }],
 	});
 });
 

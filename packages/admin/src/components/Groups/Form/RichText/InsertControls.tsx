@@ -13,8 +13,9 @@ import {
 import { type Component, createMemo, Show } from "solid-js";
 import T from "@/translations";
 import {
-	getRichTextDocumentFieldText,
+	getRichTextVariableAttrs,
 	isRichTextOptionEnabled,
+	isRichTextVariableOptionEnabled,
 } from "./helpers";
 import ToolbarButton from "./ToolbarButton";
 import type { RichTextOptions } from "./types";
@@ -59,7 +60,7 @@ const InsertControls: Component<{
 		() =>
 			isRichTextOptionEnabled(props.options?.media) ||
 			isRichTextOptionEnabled(props.options?.documents) ||
-			isRichTextOptionEnabled(props.options?.variables) ||
+			isRichTextVariableOptionEnabled(props.options?.variables) ||
 			isRichTextOptionEnabled(props.options?.bricks),
 	);
 
@@ -144,7 +145,9 @@ const InsertControls: Component<{
 							<FaSolidFileLines size={12} />
 						</ToolbarButton>
 					</Show>
-					<Show when={isRichTextOptionEnabled(props.options?.variables)}>
+					<Show
+						when={isRichTextVariableOptionEnabled(props.options?.variables)}
+					>
 						<ToolbarButton
 							mode="default"
 							isActive={false}
@@ -154,16 +157,10 @@ const InsertControls: Component<{
 									onSelect: (selection) =>
 										insertReferenceNode(props.editor, insertionRange, {
 											type: richTextNodeNames.variable,
-											attrs: {
-												collectionKey: selection.collectionKey,
-												documentId: selection.documentId,
-												fieldKey: selection.fieldKey,
-												value: getRichTextDocumentFieldText(
-													selection.document,
-													selection.fieldKey,
-													props.options?.locale,
-												),
-											},
+											attrs: getRichTextVariableAttrs(
+												selection,
+												props.options?.locale,
+											),
 										}),
 								});
 							}}

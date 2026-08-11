@@ -4,6 +4,7 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
@@ -18,6 +19,7 @@ const updateSingle: ServiceFn<
 		{
 			collectionKey: string;
 			userId: number;
+			authUser?: LucidAuth;
 			documentId: number;
 			versionId: number;
 
@@ -81,6 +83,7 @@ const updateSingle: ServiceFn<
 		collection: updateContextRes.data.collection,
 		bricks: hookResponse.data.bricks ?? [],
 		fields: hookResponse.data.fields ?? [],
+		authUser: data.authUser,
 	});
 	if (checkValidateRes.error) return checkValidateRes;
 

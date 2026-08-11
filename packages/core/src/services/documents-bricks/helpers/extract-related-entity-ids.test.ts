@@ -61,6 +61,14 @@ describe("extractRelatedEntityIds", () => {
 								content: [
 									{ type: "lucidMedia", attrs: { mediaId: 4 } },
 									{
+										type: "lucidVariable",
+										attrs: {
+											source: "user",
+											userId: 5,
+											fieldKey: "username",
+										},
+									},
+									{
 										type: "paragraph",
 										content: [
 											{
@@ -93,6 +101,8 @@ describe("extractRelatedEntityIds", () => {
 		expect(Array.from(result.data.media?.[0]?.values ?? [])).toEqual([4]);
 		expect(result.data.relation?.[0]?.table).toBe("lucid_document__articles");
 		expect(Array.from(result.data.relation?.[0]?.values ?? [])).toEqual([8]);
+		expect(result.data.user?.[0]?.table).toBe("lucid_users");
+		expect(Array.from(result.data.user?.[0]?.values ?? [])).toEqual([5]);
 	});
 
 	test("omits a rich-text ref to the document being fetched", async () => {

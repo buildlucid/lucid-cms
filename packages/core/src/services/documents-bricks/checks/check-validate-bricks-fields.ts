@@ -17,6 +17,7 @@ import type {
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
+import type { LucidAuth } from "../../../types/hono.js";
 import type {
 	BrickError,
 	ErrorCopy,
@@ -247,6 +248,7 @@ const checkValidateBricksFields: ServiceFn<
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
+			authUser?: LucidAuth;
 		},
 	],
 	undefined

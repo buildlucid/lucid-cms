@@ -10,9 +10,9 @@ import RestoreRevision from "@/components/Modals/Documents/RestoreRevision";
 import NavigationGuard from "@/components/Modals/NavigationGuard";
 import DocumentSelectPanel from "@/components/Panels/Documents/DocumentSelect";
 import EmbeddedBrickEditPanel from "@/components/Panels/Documents/EmbeddedBrickEdit";
-import RichTextVariableSelectPanel from "@/components/Panels/Documents/RichTextVariableSelect";
 import CreateUpdateMediaPanel from "@/components/Panels/Media/CreateUpdateMediaPanel";
 import MediaSelectPanel from "@/components/Panels/Media/MediaSelect";
+import RichTextVariableSelectPanel from "@/components/Panels/RichText/RichTextVariableSelect";
 import UserSelectPanel from "@/components/Panels/User/UserSelect";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/document/useDocumentState";
@@ -167,8 +167,11 @@ export const Modals: Component<{
 						richTextVariableSelectModal()?.data.zIndex ?? nestedPanelZIndex(),
 					collectionKeys:
 						richTextVariableSelectModal()?.data.collectionKeys ?? [],
+					userFields: richTextVariableSelectModal()?.data.userFields ?? [],
 					selected: richTextVariableSelectModal()?.data.selected,
-					selectedRef: richTextVariableSelectModal()?.data.selectedRef,
+					selectedDocumentRef:
+						richTextVariableSelectModal()?.data.selectedDocumentRef,
+					selectedUserRef: richTextVariableSelectModal()?.data.selectedUserRef,
 				}}
 				callbacks={{
 					onSelect: (selection) =>

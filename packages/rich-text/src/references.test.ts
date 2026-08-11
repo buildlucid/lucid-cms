@@ -34,9 +34,18 @@ describe("rich-text references", () => {
 						{
 							type: "lucidVariable",
 							attrs: {
+								source: "document",
 								collectionKey: "settings",
 								documentId: 33,
 								fieldKey: "siteName",
+							},
+						},
+						{
+							type: "lucidVariable",
+							attrs: {
+								source: "user",
+								userId: 9,
+								fieldKey: "firstName",
 							},
 						},
 					],
@@ -59,9 +68,19 @@ describe("rich-text references", () => {
 			},
 			{
 				type: "rich-text-variable",
+				source: "document",
 				collectionKey: "settings",
 				documentId: 33,
+				userId: undefined,
 				fieldKey: "siteName",
+			},
+			{
+				type: "rich-text-variable",
+				source: "user",
+				collectionKey: undefined,
+				documentId: undefined,
+				userId: 9,
+				fieldKey: "firstName",
 			},
 			{ type: "rich-text-embedded-brick", ref: "hero-ref" },
 		]);

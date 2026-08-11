@@ -1,5 +1,8 @@
 import type { ZodType } from "zod";
-import type { MediaType } from "../../../../../types/response.js";
+import type {
+	MediaType,
+	RichTextUserVariableField,
+} from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
@@ -8,6 +11,14 @@ import type {
 } from "../../types.js";
 import type { MediaValidationData } from "../media/types.js";
 import type { RelationValidationData } from "../relation/types.js";
+import type { UserValidationData } from "../user/types.js";
+
+export const richTextUserVariableFields = [
+	"firstName",
+	"lastName",
+	"username",
+	"email",
+] as const satisfies readonly RichTextUserVariableField[];
 
 export interface RichTextFieldConfig extends SharedFieldConfig {
 	type: "rich-text";
@@ -28,7 +39,10 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 		media?: boolean | MediaType[];
 		documents?: boolean | string[];
 		bricks?: boolean | string[];
-		variables?: boolean | string[];
+		variables?: {
+			document?: boolean | string[];
+			user?: RichTextUserVariableField[];
+		};
 		appearance?: "default" | "seamless";
 		fullscreen?: boolean;
 	};
@@ -47,6 +61,11 @@ export type RichTextRef = null;
 export type RichTextValidationData = {
 	media: MediaValidationData[];
 	documents: RelationValidationData[];
+	users: UserValidationData[];
+	variableAccess?: {
+		documentCollectionKeys: string[];
+		users: boolean;
+	};
 	collections: Record<
 		string,
 		{

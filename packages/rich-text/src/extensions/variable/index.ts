@@ -2,7 +2,7 @@ import { mergeAttributes, Node } from "@tiptap/core";
 import { richTextNodeNames } from "../../types.js";
 import { parseReferenceId } from "../utils.js";
 
-/** Inline atom that points to a top-level scalar document field. */
+/** Inline atom that points to a scalar value on a supported Lucid resource. */
 export const LucidVariable = Node.create({
 	name: richTextNodeNames.variable,
 	group: "inline",
@@ -11,6 +11,15 @@ export const LucidVariable = Node.create({
 	selectable: true,
 	addAttributes() {
 		return {
+			source: {
+				default: null,
+				parseHTML: (element) =>
+					element.getAttribute("data-lucid-variable-source"),
+				renderHTML: (attributes) =>
+					attributes.source === "document" || attributes.source === "user"
+						? { "data-lucid-variable-source": attributes.source }
+						: {},
+			},
 			collectionKey: {
 				default: null,
 				parseHTML: (element) =>
@@ -27,6 +36,15 @@ export const LucidVariable = Node.create({
 				renderHTML: (attributes) =>
 					typeof attributes.documentId === "number"
 						? { "data-lucid-document-id": String(attributes.documentId) }
+						: {},
+			},
+			userId: {
+				default: null,
+				parseHTML: (element) =>
+					parseReferenceId(element.getAttribute("data-lucid-user-id")),
+				renderHTML: (attributes) =>
+					typeof attributes.userId === "number"
+						? { "data-lucid-user-id": String(attributes.userId) }
 						: {},
 			},
 			fieldKey: {

@@ -9,7 +9,10 @@ import { createSignal, type JSX, untrack } from "solid-js";
 import { render } from "solid-js/web";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { getRichTextDocumentFieldText } from "./helpers";
+import {
+	getRichTextVariableAttrs,
+	isRichTextUserVariableField,
+} from "./helpers";
 import {
 	DocumentNodeView,
 	EmbeddedBrickNodeView,
@@ -156,52 +159,92 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 	LucidVariable.extend({
 		addNodeView() {
 			return ({ node, editor, getPos }) => {
-				const { collectionKey, documentId, fieldKey, value } = node.attrs;
-				const reference =
-					typeof collectionKey === "string" && typeof documentId === "number"
-						? untrack(() =>
-								options?.references?.document?.(collectionKey, documentId),
-							)
-						: undefined;
+				const [currentNode, setCurrentNode] = createSignal(node);
+				const attrs = () => currentNode().attrs;
+				const reference = () => {
+					const { source, collectionKey, documentId, userId } = attrs();
+					if (
+						source === "document" &&
+						typeof collectionKey === "string" &&
+						typeof documentId === "number"
+					) {
+						return untrack(() =>
+							options?.references?.document?.(collectionKey, documentId),
+						);
+					}
+					if (source === "user" && typeof userId === "number") {
+						return untrack(() => options?.references?.user?.(userId));
+					}
+					return undefined;
+				};
 
-				return renderNodeView(() => (
+				const nodeView = renderNodeView(() => (
 					<VariableNodeView
-						collectionKey={collectionKey}
-						documentId={documentId}
-						fieldKey={fieldKey}
-						value={getHydratedVariableText(value)}
-						available={reference !== undefined}
+						source={attrs().source}
+						collectionKey={attrs().collectionKey}
+						documentId={attrs().documentId}
+						userId={attrs().userId}
+						fieldKey={attrs().fieldKey}
+						value={getHydratedVariableText(attrs().value)}
+						available={reference() !== undefined}
 						isEditable={() => editor.isEditable}
 						getPos={getPos}
 						setSelection={(position, selection) => {
 							editor.view.dispatch(
-								editor.view.state.tr.setNodeMarkup(position, undefined, {
-									collectionKey: selection.collectionKey,
-									documentId: selection.documentId,
-									fieldKey: selection.fieldKey,
-									value: getRichTextDocumentFieldText(
-										selection.document,
-										selection.fieldKey,
-										options?.locale,
-									),
-								}),
+								editor.view.state.tr.setNodeMarkup(
+									position,
+									undefined,
+									getRichTextVariableAttrs(selection, options?.locale),
+								),
 							);
 						}}
 						selectVariable={options?.callbacks?.selectVariable}
-						errors={() =>
-							typeof collectionKey === "string" &&
-							typeof documentId === "number" &&
-							typeof fieldKey === "string"
-								? (options?.validation?.getReferenceErrors?.({
+						errors={() => {
+							const { source, collectionKey, documentId, userId, fieldKey } =
+								attrs();
+							if (
+								source === "document" &&
+								typeof collectionKey === "string" &&
+								typeof documentId === "number" &&
+								typeof fieldKey === "string"
+							) {
+								return (
+									options?.validation?.getReferenceErrors?.({
 										type: "rich-text-variable",
+										source,
 										collectionKey,
 										documentId,
 										fieldKey,
-									}) ?? [])
-								: []
-						}
+									}) ?? []
+								);
+							}
+							if (
+								source === "user" &&
+								typeof userId === "number" &&
+								isRichTextUserVariableField(fieldKey)
+							) {
+								return (
+									options?.validation?.getReferenceErrors?.({
+										type: "rich-text-variable",
+										source,
+										userId,
+										fieldKey,
+									}) ?? []
+								);
+							}
+							return [];
+						}}
 					/>
 				));
+
+				return {
+					...nodeView,
+					update: (nextNode) => {
+						if (nextNode.type !== node.type) return false;
+						setCurrentNode(nextNode);
+						return true;
+					},
+				};
 			};
 		},
 	}),

@@ -1,6 +1,7 @@
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkDuplicateOrder from "./checks/check-duplicate-order.js";
 import checkValidateBricksFields from "./checks/check-validate-bricks-fields.js";
@@ -16,6 +17,7 @@ const createMultiple: ServiceFn<
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
+			authUser?: LucidAuth;
 			skipValidation?: boolean;
 		},
 	],
@@ -40,6 +42,7 @@ const createMultiple: ServiceFn<
 			collection: data.collection,
 			bricks: data.bricks || [],
 			fields: data.fields || [],
+			authUser: data.authUser,
 		});
 		if (checkValidateRes.error) return checkValidateRes;
 	}

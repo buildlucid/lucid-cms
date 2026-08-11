@@ -13,8 +13,10 @@ export type RichTextReference =
 	  }
 	| {
 			type: "rich-text-variable";
+			source: unknown;
 			collectionKey: unknown;
 			documentId: unknown;
+			userId: unknown;
 			fieldKey: unknown;
 	  }
 	| {
@@ -53,8 +55,10 @@ export const extractRichTextReferences = (
 		if (node.type === richTextNodeNames.variable) {
 			references.push({
 				type: "rich-text-variable",
+				source: node.attrs?.source,
 				collectionKey: node.attrs?.collectionKey,
 				documentId: node.attrs?.documentId,
+				userId: node.attrs?.userId,
 				fieldKey: node.attrs?.fieldKey,
 			});
 		}

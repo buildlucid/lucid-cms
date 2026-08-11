@@ -7,6 +7,7 @@ import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import rollbackVersionCreate from "./helpers/rollback-version-create.js";
@@ -20,6 +21,7 @@ const createSingle: ServiceFn<
 			documentId: number;
 			collection: CollectionBuilder;
 			userId: number;
+			authUser?: LucidAuth;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
@@ -168,6 +170,7 @@ const createSingle: ServiceFn<
 		bricks: hookResponse.data.bricks,
 		fields: hookResponse.data.fields,
 		collection: data.collection,
+		authUser: data.authUser,
 		//* the source content is already persisted and may predate current field
 		//* validation; duplication still runs transform hooks before cloning it
 		skipValidation: data.origin?.type === "duplicate",

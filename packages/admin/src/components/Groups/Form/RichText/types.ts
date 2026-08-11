@@ -5,15 +5,31 @@ import type {
 	MediaRef,
 	MediaType,
 	RichTextFieldErrorReference,
+	RichTextUserVariableField,
+	UserRef,
 } from "@types";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 
-export type RichTextVariableSelection = {
-	collectionKey: string;
-	documentId: number;
-	fieldKey: string;
-	document: DocumentRef;
-};
+export type RichTextVariableReference =
+	| {
+			source: "document";
+			collectionKey: string;
+			documentId: number;
+			fieldKey: string;
+	  }
+	| {
+			source: "user";
+			userId: number;
+			fieldKey: RichTextUserVariableField;
+	  };
+
+export type RichTextVariableSelection =
+	| (Extract<RichTextVariableReference, { source: "document" }> & {
+			document: DocumentRef;
+	  })
+	| (Extract<RichTextVariableReference, { source: "user" }> & {
+			user: NonNullable<UserRef>;
+	  });
 
 export interface RichTextOptions {
 	headings?: boolean;
@@ -26,7 +42,10 @@ export interface RichTextOptions {
 	media?: boolean | MediaType[];
 	documents?: boolean | string[];
 	bricks?: boolean | string[];
-	variables?: boolean | string[];
+	variables?: {
+		document?: boolean | string[];
+		user?: RichTextUserVariableField[];
+	};
 	appearance?: "default" | "seamless";
 	fullscreen?: boolean;
 	internalLinkCollectionKeys?: string[];
@@ -40,6 +59,7 @@ export interface RichTextOptions {
 			collectionKey: string,
 			documentId: number,
 		) => DocumentRef | undefined;
+		user?: (id: number) => NonNullable<UserRef> | undefined;
 		embeddedBrick?: (ref: string) => { ref: string; key: string } | undefined;
 	};
 	validation?: {
@@ -59,7 +79,7 @@ export interface RichTextOptions {
 			onSelect: (document: DocumentRef) => void;
 		}) => void;
 		selectVariable?: (props: {
-			current?: Omit<RichTextVariableSelection, "document">;
+			current?: RichTextVariableReference;
 			onSelect: (selection: RichTextVariableSelection) => void;
 		}) => void;
 		selectEmbeddedBrick?: (props: { onSelect: (ref: string) => void }) => void;

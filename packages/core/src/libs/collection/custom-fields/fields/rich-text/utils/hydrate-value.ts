@@ -4,15 +4,19 @@ import type {
 	DocumentFieldValueMap,
 	DocumentRef,
 	Media,
+	RichTextUserVariableField,
 } from "../../../../../../types/response.js";
 import { getObject } from "../../../../../../utils/helpers/get-typed-value.js";
 import type { CustomFieldResponseFormatContext } from "../../../types.js";
+import type { UserRef } from "../../user/types.js";
 import { getLocalizedString, getMediaRenderData } from "./media-render-data.js";
+import { isRichTextUserVariableField } from "./reference-validation.js";
 
 type HydratableDocumentRef = DocumentRef<
 	string,
 	DocumentFieldMap | DocumentFieldValueMap | null
 >;
+type HydratableUserRef = NonNullable<UserRef>;
 
 const isDocumentRef = (value: unknown): value is HydratableDocumentRef => {
 	const reference = getObject(value);
@@ -32,6 +36,16 @@ const isMediaRef = (value: unknown): value is Media => {
 		typeof reference.type === "string" &&
 		file !== null &&
 		typeof file.url === "string"
+	);
+};
+
+const isUserRef = (value: unknown): value is HydratableUserRef => {
+	const reference = getObject(value);
+	return (
+		reference !== null &&
+		typeof reference.id === "number" &&
+		typeof reference.username === "string" &&
+		typeof reference.email === "string"
 	);
 };
 
@@ -65,6 +79,11 @@ const getDocumentFieldValue = (
 		: null;
 };
 
+const getUserFieldValue = (
+	reference: HydratableUserRef,
+	fieldKey: RichTextUserVariableField,
+): string | null => reference[fieldKey];
+
 /** Adds response-only render values while preserving each reference identity. */
 const hydrateRichTextValue = (
 	value: RichTextJSON,
@@ -72,6 +91,7 @@ const hydrateRichTextValue = (
 ): RichTextJSON => {
 	const documents = (context.refs?.relation ?? []).filter(isDocumentRef);
 	const media = (context.refs?.media ?? []).filter(isMediaRef);
+	const users = (context.refs?.user ?? []).filter(isUserRef);
 	const documentMap = new Map(
 		documents.map((reference) => [
 			`${reference.collectionKey}\0${reference.id}`,
@@ -79,6 +99,7 @@ const hydrateRichTextValue = (
 		]),
 	);
 	const mediaMap = new Map(media.map((reference) => [reference.id, reference]));
+	const userMap = new Map(users.map((reference) => [reference.id, reference]));
 
 	const visit = (node: RichTextJSON): RichTextJSON => {
 		const attrs = { ...node.attrs };
@@ -98,15 +119,28 @@ const hydrateRichTextValue = (
 		}
 
 		if (node.type === "lucidVariable") {
-			const reference =
-				typeof attrs.collectionKey === "string" &&
-				typeof attrs.documentId === "number"
-					? documentMap.get(`${attrs.collectionKey}\0${attrs.documentId}`)
-					: undefined;
-			attrs.value =
-				reference && typeof attrs.fieldKey === "string"
-					? getDocumentFieldValue(reference, attrs.fieldKey, context.locale)
+			if (attrs.source === "document") {
+				const reference =
+					typeof attrs.collectionKey === "string" &&
+					typeof attrs.documentId === "number"
+						? documentMap.get(`${attrs.collectionKey}\0${attrs.documentId}`)
+						: undefined;
+				attrs.value =
+					reference && typeof attrs.fieldKey === "string"
+						? getDocumentFieldValue(reference, attrs.fieldKey, context.locale)
+						: null;
+			} else if (
+				attrs.source === "user" &&
+				typeof attrs.userId === "number" &&
+				isRichTextUserVariableField(attrs.fieldKey)
+			) {
+				const reference = userMap.get(attrs.userId);
+				attrs.value = reference
+					? getUserFieldValue(reference, attrs.fieldKey)
 					: null;
+			} else {
+				attrs.value = null;
+			}
 		}
 
 		return {

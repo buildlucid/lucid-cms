@@ -65,13 +65,29 @@ const addMediaTarget = (
 	});
 };
 
-/** Extracts media and document targets embedded in rich-text JSON. */
+const addUserTarget = (
+	targets: Map<number, FieldRefTarget>,
+	attrs?: Record<string, unknown>,
+) => {
+	const userId = attrs?.userId;
+	if (typeof userId !== "number" || !Number.isInteger(userId) || userId <= 0) {
+		return;
+	}
+
+	targets.set(userId, {
+		table: "lucid_users",
+		value: userId,
+	});
+};
+
+/** Extracts resource targets embedded in rich-text JSON. */
 const extractRichTextRefTargets = (value: unknown): CustomFieldRefTargets => {
 	const json = asRichTextJSON(value);
 	if (!json) return {};
 
 	const mediaTargets = new Map<number, FieldRefTarget>();
 	const documentTargets = new Map<string, FieldRefTarget>();
+	const userTargets = new Map<number, FieldRefTarget>();
 
 	for (const reference of extractRichTextReferences(json)) {
 		if (reference.type === "rich-text-media") {
@@ -79,7 +95,8 @@ const extractRichTextRefTargets = (value: unknown): CustomFieldRefTargets => {
 		}
 		if (
 			reference.type === "rich-text-document" ||
-			reference.type === "rich-text-variable" ||
+			(reference.type === "rich-text-variable" &&
+				reference.source === "document") ||
 			reference.type === "rich-text-document-link"
 		) {
 			addDocumentTarget(documentTargets, {
@@ -87,10 +104,17 @@ const extractRichTextRefTargets = (value: unknown): CustomFieldRefTargets => {
 				documentId: reference.documentId,
 			});
 		}
+		if (
+			reference.type === "rich-text-variable" &&
+			reference.source === "user"
+		) {
+			addUserTarget(userTargets, { userId: reference.userId });
+		}
 	}
 	return {
 		media: Array.from(mediaTargets.values()),
 		relation: Array.from(documentTargets.values()),
+		...(userTargets.size > 0 ? { user: Array.from(userTargets.values()) } : {}),
 	};
 };
 

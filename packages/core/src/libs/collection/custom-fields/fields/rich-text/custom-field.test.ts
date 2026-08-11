@@ -330,7 +330,10 @@ const referenceField = new RichTextCustomField("references", {
 	editor: {
 		media: ["image"],
 		documents: ["pages"],
-		variables: ["settings"],
+		variables: {
+			document: ["settings"],
+			user: ["username"],
+		},
 		links: { internal: ["pages"] },
 		bricks: ["card"],
 	},
@@ -347,9 +350,18 @@ const referenceValue = {
 		{
 			type: "lucidVariable",
 			attrs: {
+				source: "document",
 				collectionKey: "settings",
 				documentId: 22,
 				fieldKey: "siteName",
+			},
+		},
+		{
+			type: "lucidVariable",
+			attrs: {
+				source: "user",
+				userId: 55,
+				fieldKey: "username",
 			},
 		},
 		{
@@ -390,6 +402,11 @@ const referenceValidationData: RichTextValidationData = {
 		{ id: 33, collection_key: "pages" },
 		{ id: 44, collection_key: "pages" },
 	],
+	users: [{ id: 55 }],
+	variableAccess: {
+		documentCollectionKeys: ["settings"],
+		users: true,
+	},
 	collections: {
 		settings: {
 			fields: [
@@ -414,6 +431,7 @@ test("validates rich-text reference targets", () => {
 		media: [11],
 		"document:settings": [22],
 		"document:pages": [44, 33],
+		user: [55],
 	});
 
 	const errors = validateField({
@@ -460,6 +478,94 @@ test("enforces the reference types configured for the rich-text editor", () => {
 	]);
 });
 
+test("rejects user variable fields that are not explicitly allowed", () => {
+	const errors = validateField({
+		field: {
+			key: "references",
+			type: "rich-text",
+			value: {
+				type: "doc",
+				content: [
+					{
+						type: "lucidVariable",
+						attrs: {
+							source: "user",
+							userId: 55,
+							fieldKey: "email",
+						},
+					},
+				],
+			},
+		},
+		instance: referenceField,
+		validationData: { "rich-text": referenceValidationData },
+		meta: { localized: false, defaultLocale: "en" },
+	});
+
+	expect(errors).toEqual([
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.rich.text.variable.not.allowed"),
+			meta: {
+				reference: {
+					type: "rich-text-variable",
+					source: "user",
+					userId: 55,
+					fieldKey: "email",
+				},
+			},
+		},
+	]);
+});
+
+test("requires read permission for rich-text variable targets", () => {
+	const errors = validateField({
+		field: { key: "references", type: "rich-text", value: referenceValue },
+		instance: referenceField,
+		validationData: {
+			"rich-text": {
+				...referenceValidationData,
+				variableAccess: {
+					documentCollectionKeys: [],
+					users: false,
+				},
+			},
+		},
+		meta: { localized: false, defaultLocale: "en" },
+	});
+
+	expect(errors).toEqual([
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.rich.text.variable.permission.denied"),
+			meta: {
+				reference: {
+					type: "rich-text-variable",
+					source: "document",
+					collectionKey: "settings",
+					documentId: 22,
+					fieldKey: "siteName",
+				},
+			},
+		},
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.rich.text.variable.permission.denied"),
+			meta: {
+				reference: {
+					type: "rich-text-variable",
+					source: "user",
+					userId: 55,
+					fieldKey: "username",
+				},
+			},
+		},
+	]);
+});
+
 test("returns reference metadata for missing rich-text targets", () => {
 	const errors = validateField({
 		field: {
@@ -479,6 +585,7 @@ test("returns reference metadata for missing rich-text targets", () => {
 				...referenceValidationData,
 				media: [],
 				documents: [],
+				users: [],
 				embeddedBricks: {},
 			},
 		},
@@ -511,9 +618,23 @@ test("returns reference metadata for missing rich-text targets", () => {
 			meta: {
 				reference: {
 					type: "rich-text-variable",
+					source: "document",
 					collectionKey: "settings",
 					documentId: 22,
 					fieldKey: "siteName",
+				},
+			},
+		},
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.user.validation.not.found"),
+			meta: {
+				reference: {
+					type: "rich-text-variable",
+					source: "user",
+					userId: 55,
+					fieldKey: "username",
 				},
 			},
 		},

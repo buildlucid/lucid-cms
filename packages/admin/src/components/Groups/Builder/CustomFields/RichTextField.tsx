@@ -9,17 +9,24 @@ import type {
 	MediaRef,
 	RelationFieldValue,
 	RichTextFieldErrorReference,
+	UserRef,
 } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import { RichText } from "@/components/Groups/Form";
 import type { RichTextOptions } from "@/components/Groups/Form/RichText";
+import {
+	getReadableRichTextUserVariableFields,
+	getReadableRichTextVariableCollectionKeys,
+} from "@/components/Groups/Form/RichText/helpers";
 import AddBrick from "@/components/Modals/Bricks/AddBrick";
+import { Permissions } from "@/constants/permissions";
 import useCustomFieldGeneration from "@/hooks/ai/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
 import api from "@/services/api";
 import brickStore from "@/store/brick-store";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
+import userStore from "@/store/userStore";
 import T from "@/translations";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
@@ -75,8 +82,8 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		() =>
 			editorConfig()?.links?.internal === true ||
 			Array.isArray(editorConfig()?.links?.internal) ||
-			editorConfig()?.variables === true ||
-			Array.isArray(editorConfig()?.variables) ||
+			editorConfig()?.variables?.document === true ||
+			Array.isArray(editorConfig()?.variables?.document) ||
 			editorConfig()?.documents === true ||
 			Array.isArray(editorConfig()?.documents),
 	);
@@ -112,13 +119,24 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			)
 			.map((collection) => collection.key);
 	});
-	const variableCollectionKeys = createMemo(() => {
-		const variables = editorConfig()?.variables;
-		if (Array.isArray(variables)) return variables;
-		if (variables === true) {
-			return (collections.data?.data ?? []).map((collection) => collection.key);
-		}
-		return [];
+	const variableCollectionKeys = createMemo(() =>
+		getReadableRichTextVariableCollectionKeys(
+			editorConfig()?.variables?.document,
+			(collections.data?.data ?? []).map((collection) => collection.key),
+		),
+	);
+	const userVariableFields = createMemo(() =>
+		getReadableRichTextUserVariableFields(
+			editorConfig()?.variables?.user,
+			userStore.get.hasPermission([Permissions.UsersRead]).all,
+		),
+	);
+	const variableOptions = createMemo<RichTextOptions["variables"]>(() => {
+		const collectionKeys = variableCollectionKeys();
+		const document = collectionKeys.length > 0 ? collectionKeys : undefined;
+		const user = userVariableFields();
+		if (!document && user.length === 0) return undefined;
+		return { document, user };
 	});
 	const documentNodeCollectionKeys = createMemo(() => {
 		const documents = editorConfig()?.documents;
@@ -168,6 +186,11 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			}) ?? undefined
 		);
 	};
+	const getUserRef = (userId: number): NonNullable<UserRef> | undefined =>
+		brickHelpers.getFieldRef({
+			fieldType: "user",
+			fieldValue: [userId],
+		}) ?? undefined;
 	const isCurrentDocument = (document: DocumentRef) => {
 		const current = currentDocumentRef();
 		return (
@@ -180,7 +203,9 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			case "rich-text-media":
 				return `media:${reference.mediaId}`;
 			case "rich-text-variable":
-				return `variable:${reference.collectionKey}:${reference.documentId}:${reference.fieldKey}`;
+				return reference.source === "document"
+					? `variable:document:${reference.collectionKey}:${reference.documentId}:${reference.fieldKey}`
+					: `variable:user:${reference.userId}:${reference.fieldKey}`;
 			case "rich-text-document-link":
 				return `document-link:${reference.collectionKey}:${reference.documentId}`;
 			case "rich-text-document":
@@ -217,8 +242,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					: false,
 		},
 		bricks: embeddedBrickConfigs().length > 0 ? editorConfig()?.bricks : false,
-		variables:
-			variableCollectionKeys().length > 0 ? editorConfig()?.variables : false,
+		variables: variableOptions(),
 		documents:
 			documentNodeCollectionKeys().length > 0
 				? editorConfig()?.documents
@@ -231,6 +255,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		references: {
 			media: getMediaRef,
 			document: getDocumentRef,
+			user: getUserRef,
 			embeddedBrick: (ref) => {
 				const brick = brickStore.get.bricks.find(
 					(item) => item.type === "embedded" && item.ref === ref,
@@ -307,14 +332,24 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					data: {
 						zIndex: RICH_TEXT_PICKER_Z_INDEX,
 						collectionKeys: variableCollectionKeys(),
+						userFields: userVariableFields(),
 						selected: current,
-						selectedRef: current
-							? getDocumentRef(current.collectionKey, current.documentId)
-							: undefined,
+						selectedDocumentRef:
+							current?.source === "document"
+								? getDocumentRef(current.collectionKey, current.documentId)
+								: undefined,
+						selectedUserRef:
+							current?.source === "user"
+								? getUserRef(current.userId)
+								: undefined,
 					},
 					onCallback: (selection) => {
-						if (!isCurrentDocument(selection.document)) {
-							brickStore.get.addRef("relation", selection.document);
+						if (selection.source === "document") {
+							if (!isCurrentDocument(selection.document)) {
+								brickStore.get.addRef("relation", selection.document);
+							}
+						} else {
+							brickStore.get.addRef("user", selection.user);
 						}
 						onSelect(selection);
 					},

@@ -8,7 +8,6 @@ import { getObject } from "../../../../../utils/helpers/get-typed-value.js";
 import richTextHasContent from "../../../../../utils/helpers/rich-text-has-content.js";
 import { copy } from "../../../../i18n/index.js";
 import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
-import { isFieldTypeRichTextVariable } from "../../capabilities.js";
 import CustomField from "../../custom-field.js";
 import type {
 	CFConfig,
@@ -33,9 +32,11 @@ import {
 	collectionIsAllowed,
 	isReferenceId,
 } from "./utils/reference-validation.js";
+import validateRichTextVariableReference from "./utils/validate-variable-reference.js";
 import {
 	richTextDocumentValidationGroupPrefix,
 	richTextMediaValidationGroup,
+	richTextUserValidationGroup,
 } from "./validate-input.js";
 
 class RichTextCustomField extends CustomField<"rich-text"> {
@@ -200,7 +201,8 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			}
 			if (
 				(reference.type === "rich-text-document" ||
-					reference.type === "rich-text-variable" ||
+					(reference.type === "rich-text-variable" &&
+						reference.source === "document") ||
 					reference.type === "rich-text-document-link") &&
 				typeof reference.collectionKey === "string" &&
 				isReferenceId(reference.documentId)
@@ -208,6 +210,14 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				const group = `${richTextDocumentValidationGroupPrefix}${reference.collectionKey}`;
 				input[group] ??= [];
 				input[group]?.push(reference.documentId);
+			}
+			if (
+				reference.type === "rich-text-variable" &&
+				reference.source === "user" &&
+				isReferenceId(reference.userId)
+			) {
+				input[richTextUserValidationGroup] ??= [];
+				input[richTextUserValidationGroup]?.push(reference.userId);
 			}
 		}
 		return input;
@@ -336,69 +346,12 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 			}
 
 			if (reference.type === "rich-text-variable") {
-				if (
-					typeof reference.collectionKey !== "string" ||
-					!isReferenceId(reference.documentId) ||
-					typeof reference.fieldKey !== "string" ||
-					reference.fieldKey.length === 0
-				) {
-					addError("variable:invalid", {
-						message: copy("server:core.fields.rich.text.reference.invalid"),
-					});
-					continue;
-				}
-
-				const key = `variable:${reference.collectionKey}:${reference.documentId}:${reference.fieldKey}`;
-				const meta = {
-					reference: {
-						type: "rich-text-variable" as const,
-						collectionKey: reference.collectionKey,
-						documentId: reference.documentId,
-						fieldKey: reference.fieldKey,
-					},
-				};
-				if (
-					!collectionIsAllowed(
-						this.config.editor?.variables,
-						reference.collectionKey,
-					)
-				) {
-					addError(key, {
-						message: copy("server:core.fields.rich.text.variable.not.allowed"),
-						meta,
-					});
-					continue;
-				}
-
-				const document = refData.documents.find(
-					(item) =>
-						item.id === reference.documentId &&
-						item.collection_key === reference.collectionKey,
-				);
-				if (!document) {
-					addError(key, {
-						message: copy("server:core.fields.relation.validation.not.found"),
-						meta,
-					});
-					continue;
-				}
-
-				const field = refData.collections[reference.collectionKey]?.fields.find(
-					(item) => item.key === reference.fieldKey,
-				);
-				if (
-					!field ||
-					!isFieldTypeRichTextVariable(field.type) ||
-					field.treeParent !== null ||
-					field.structuralParent !== null
-				) {
-					addError(key, {
-						message: copy(
-							"server:core.fields.rich.text.variable.field.not.found",
-						),
-						meta,
-					});
-				}
+				const result = validateRichTextVariableReference({
+					reference,
+					variables: this.config.editor?.variables,
+					validationData: refData,
+				});
+				if (result) addError(result.key, result.error);
 				continue;
 			}
 

@@ -7,6 +7,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { LucidAuth } from "../../types/hono.js";
 import {
 	generateKeyBetween,
 	isFractionalOrderKey,
@@ -24,6 +25,7 @@ const upsertSingle: ServiceFn<
 		{
 			collectionKey: string;
 			userId: number;
+			authUser?: LucidAuth;
 
 			documentId?: number;
 			bricks?: Array<BrickInputSchema>;
@@ -158,6 +160,7 @@ const upsertSingle: ServiceFn<
 		createDocumentVersion(context, {
 			documentId: upsertDocRes.data.id,
 			userId: data.userId,
+			authUser: data.authUser,
 			bricks: data.bricks,
 			fields: data.fields,
 			collection: collectionRes.data,

@@ -46,7 +46,10 @@ const BlogCollection = new CollectionBuilder("blog", {
 			},
 			media: true,
 			documents: ["page", "settings", "blog"],
-			variables: ["settings"],
+			variables: {
+				document: ["settings"],
+				user: ["firstName", "lastName", "username", "email"],
+			},
 			bricks: ["rt-callout"],
 			fullscreen: true,
 		},

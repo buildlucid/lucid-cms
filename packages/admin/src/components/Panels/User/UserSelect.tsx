@@ -100,7 +100,7 @@ interface UserSelectContentProps {
 	onSelect: (selection: { value: number[]; refs: UserRelationRef[] }) => void;
 }
 
-const UserSelectContent: Component<UserSelectContentProps> = (props) => {
+export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	//* ids drive selection - refs only exist for users picked this session, so
 	//* URL-hydrated ids without refs still pre-select their rows
 	const [selectedIds, setSelectedIds] = createSignal<number[]>([]);

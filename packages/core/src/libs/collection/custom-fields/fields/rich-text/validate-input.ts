@@ -2,10 +2,12 @@ import type { ServiceContext } from "../../../../../types.js";
 import type { FieldRelationValidationInput } from "../../types.js";
 import validateMediaInputData from "../media/validate-input.js";
 import validateRelationInputData from "../relation/validate-input.js";
+import validateUserInputData from "../user/validate-input.js";
 import type { RichTextValidationData } from "./types.js";
 
 export const richTextMediaValidationGroup = "media";
 export const richTextDocumentValidationGroupPrefix = "document:";
+export const richTextUserValidationGroup = "user";
 
 const validateRichTextInputData = async (
 	context: ServiceContext,
@@ -19,11 +21,14 @@ const validateRichTextInputData = async (
 		),
 	);
 
-	const [media, documents] = await Promise.all([
+	const [media, documents, users] = await Promise.all([
 		validateMediaInputData(context, {
 			default: input[richTextMediaValidationGroup] ?? [],
 		}),
 		validateRelationInputData(context, documentInput),
+		validateUserInputData(context, {
+			default: input[richTextUserValidationGroup] ?? [],
+		}),
 	]);
 
 	const collectionKeys = new Set(Object.keys(documentInput));
@@ -50,6 +55,7 @@ const validateRichTextInputData = async (
 	return {
 		media,
 		documents,
+		users,
 		collections,
 		embeddedBricks: {},
 		cyclicEmbeddedBricks: [],
