@@ -165,7 +165,6 @@ export const Modals: Component<{
 					setOpen: () => pageBuilderModalsStore.close("richTextVariableSelect"),
 					zIndex:
 						richTextVariableSelectModal()?.data.zIndex ?? nestedPanelZIndex(),
-					localised: richTextVariableSelectModal()?.data.localised,
 					collectionKeys:
 						richTextVariableSelectModal()?.data.collectionKeys ?? [],
 					selected: richTextVariableSelectModal()?.data.selected,
@@ -185,7 +184,6 @@ export const Modals: Component<{
 					setOpen: () => pageBuilderModalsStore.close("embeddedBrickEdit"),
 					brickRef: embeddedBrickEditModal()?.data.brickRef,
 					zIndex: embeddedBrickEditModal()?.data.zIndex ?? nestedPanelZIndex(),
-					localised: embeddedBrickEditModal()?.data.localised,
 				}}
 				collection={props.hooks.state.collection()}
 				documentId={props.hooks.state.document()?.id}

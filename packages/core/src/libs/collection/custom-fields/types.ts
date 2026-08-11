@@ -281,6 +281,7 @@ export type FieldRef =
 export type CustomFieldResponseFormatContext = {
 	locale: string;
 	refs: Partial<Record<string, unknown[]>> | null;
+	mediaImagePresets?: Config["media"]["images"]["presets"];
 };
 
 export type ContentFieldTypeGenerationContext<

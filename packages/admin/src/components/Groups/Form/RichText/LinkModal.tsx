@@ -8,6 +8,10 @@ import {
 	Show,
 } from "solid-js";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
+import {
+	type AnimatedTabItem,
+	AnimatedTabs,
+} from "@/components/Partials/AnimatedTabs";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
 import { Input } from "../Input";
@@ -57,13 +61,27 @@ const LinkModal: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const documentCollectionKeys = createMemo(
-		() => props.options?.documentCollectionKeys ?? [],
+	const internalLinkCollectionKeys = createMemo(
+		() => props.options?.internalLinkCollectionKeys ?? [],
 	);
 	const externalEnabled = createMemo(
 		() => props.options?.links?.external !== false,
 	);
-	const internalEnabled = createMemo(() => documentCollectionKeys().length > 0);
+	const internalEnabled = createMemo(
+		() => internalLinkCollectionKeys().length > 0,
+	);
+	const linkKindTabs = createMemo<AnimatedTabItem[]>(() => [
+		{
+			key: "external",
+			label: T()("editor.rich.text.link.external"),
+			class: "w-full justify-center px-2.5 py-1.5",
+		},
+		{
+			key: "document",
+			label: T()("editor.rich.text.link.document"),
+			class: "w-full justify-center px-2.5 py-1.5",
+		},
+	]);
 	const selectedDocumentLabel = createMemo(() => {
 		const document = documentRef();
 		if (!document) return "";
@@ -109,7 +127,7 @@ const LinkModal: Component<{
 	};
 	const selectDocument = () => {
 		props.options?.callbacks?.selectDocument?.({
-			collectionKeys: documentCollectionKeys(),
+			collectionKeys: internalLinkCollectionKeys(),
 			current: documentRef(),
 			onSelect: (document) => {
 				setDocumentRef(document);
@@ -172,26 +190,17 @@ const LinkModal: Component<{
 		>
 			<div class="flex flex-col gap-0 p-4 md:p-6">
 				<Show when={externalEnabled() && internalEnabled()}>
-					<div class="mb-4 flex rounded-md border border-border bg-card-base p-1">
-						<Button
-							type="button"
-							theme={kind() === "external" ? "primary" : "secondary-subtle"}
-							size="small"
-							classes="grow"
-							onClick={() => changeKind("external")}
-						>
-							{T()("editor.rich.text.link.external")}
-						</Button>
-						<Button
-							type="button"
-							theme={kind() === "document" ? "primary" : "secondary-subtle"}
-							size="small"
-							classes="grow"
-							onClick={() => changeKind("document")}
-						>
-							{T()("editor.rich.text.link.document")}
-						</Button>
-					</div>
+					<AnimatedTabs
+						items={linkKindTabs()}
+						activeKey={kind()}
+						onSelect={(key) => {
+							if (key === "external" || key === "document") changeKind(key);
+						}}
+						class="mb-4"
+						listClass="w-full gap-1 [&>li]:grow"
+						indicatorClass="shadow-xs"
+						fullWidth
+					/>
 				</Show>
 
 				<Input
@@ -222,8 +231,9 @@ const LinkModal: Component<{
 					<Label
 						id="rich_text_link_document"
 						label={T()("common.document")}
-						required
+						required={false}
 						theme="basic"
+						hideOptionalText
 					/>
 					<div class="mb-3 flex items-center justify-between gap-3 rounded-md border border-border bg-card-base p-3">
 						<div class="min-w-0">

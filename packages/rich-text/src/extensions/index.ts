@@ -5,6 +5,7 @@ import {
 	getExtensionField,
 } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import { LucidDocument } from "./document/index.js";
 import { LucidEmbeddedBrick } from "./embedded-brick/index.js";
 import { LucidLink } from "./link/index.js";
 import { LucidMedia } from "./media/index.js";
@@ -36,13 +37,14 @@ const createCoreExtensions = (): Extensions => {
 			link: false,
 		}),
 		LucidLink.configure({
-			openOnClick: true,
+			openOnClick: false,
 			HTMLAttributes: {
 				target: null,
 				rel: null,
 				class: null,
 			},
 		}),
+		LucidDocument,
 		LucidMedia,
 		LucidVariable,
 		LucidEmbeddedBrick,
@@ -66,6 +68,7 @@ export const mergeExtensions = (customExtensions?: Extensions): Extensions => {
 	return Array.from(mergedExtensions.values());
 };
 
+export { LucidDocument } from "./document/index.js";
 export { LucidEmbeddedBrick } from "./embedded-brick/index.js";
 export { LucidLink } from "./link/index.js";
 export { LucidMedia } from "./media/index.js";

@@ -11,6 +11,10 @@ describe("rich-text references", () => {
 			content: [
 				{ type: "lucidMedia", attrs: { mediaId: 11 } },
 				{
+					type: "lucidDocument",
+					attrs: { collectionKey: "posts", documentId: 44 },
+				},
+				{
 					type: "paragraph",
 					content: [
 						{
@@ -42,19 +46,24 @@ describe("rich-text references", () => {
 		};
 
 		expect(extractRichTextReferences(value)).toEqual([
-			{ type: "media", mediaId: 11 },
+			{ type: "rich-text-media", mediaId: 11 },
 			{
-				type: "document-link",
+				type: "rich-text-document",
+				collectionKey: "posts",
+				documentId: 44,
+			},
+			{
+				type: "rich-text-document-link",
 				collectionKey: "pages",
 				documentId: 22,
 			},
 			{
-				type: "variable",
+				type: "rich-text-variable",
 				collectionKey: "settings",
 				documentId: 33,
 				fieldKey: "siteName",
 			},
-			{ type: "embedded-brick", ref: "hero-ref" },
+			{ type: "rich-text-embedded-brick", ref: "hero-ref" },
 		]);
 	});
 
@@ -70,10 +79,10 @@ describe("rich-text references", () => {
 		};
 
 		expect(extractRichTextReferences(value)).toEqual([
-			{ type: "media", mediaId: "invalid" },
-			{ type: "embedded-brick", ref: "card-ref" },
-			{ type: "embedded-brick", ref: "card-ref" },
-			{ type: "embedded-brick", ref: null },
+			{ type: "rich-text-media", mediaId: "invalid" },
+			{ type: "rich-text-embedded-brick", ref: "card-ref" },
+			{ type: "rich-text-embedded-brick", ref: "card-ref" },
+			{ type: "rich-text-embedded-brick", ref: null },
 		]);
 		expect(extractEmbeddedBrickRefs(value)).toEqual(["card-ref"]);
 	});

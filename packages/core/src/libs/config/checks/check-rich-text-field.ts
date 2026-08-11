@@ -77,6 +77,17 @@ const checkVariables = (field: CFConfig<"rich-text">, config: Config) => {
 	});
 };
 
+const checkDocuments = (field: CFConfig<"rich-text">, config: Config) => {
+	checkCollectionKeys({
+		field,
+		feature: translate("server:core.fields.rich.text.feature.documents"),
+		collectionKeys: Array.isArray(field.editor?.documents)
+			? field.editor.documents
+			: [],
+		config,
+	});
+};
+
 const checkEmbeddedBricks = (
 	field: CFConfig<"rich-text">,
 	collection: CollectionBuilder,
@@ -117,6 +128,7 @@ const checkRichTextField = (
 	collection: CollectionBuilder,
 ) => {
 	checkInternalLinks(field, config);
+	checkDocuments(field, config);
 	checkVariables(field, config);
 	checkEmbeddedBricks(field, collection);
 };

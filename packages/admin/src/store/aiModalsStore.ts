@@ -6,6 +6,7 @@ import type {
 } from "@types";
 import type { Accessor } from "solid-js";
 import { createStore } from "solid-js/store";
+import type { RichTextOptions } from "@/components/Groups/Form/RichText";
 
 export type AiImageSource = {
 	file?: File | null;
@@ -96,6 +97,9 @@ export interface CustomFieldGenerationTarget {
 	}>;
 	value: (_localeCode?: string) => unknown;
 	document: Accessor<CustomFieldGenerationDocument>;
+	preview?: {
+		richTextOptions?: Accessor<RichTextOptions>;
+	};
 	setValue: (value: unknown, _localeCode?: string) => void | Promise<void>;
 	disabled?: Accessor<boolean>;
 }

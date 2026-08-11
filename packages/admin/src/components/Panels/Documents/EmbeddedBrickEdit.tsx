@@ -19,7 +19,6 @@ const EmbeddedBrickEditPanel: Component<{
 		setOpen: (open: boolean) => void;
 		brickRef?: string;
 		zIndex?: number;
-		localised?: boolean;
 	};
 	collection?: Collection;
 	documentId?: number;
@@ -113,7 +112,7 @@ const EmbeddedBrickEditPanel: Component<{
 				},
 			}}
 			fetchState={{ isLoading: false, isError: false }}
-			langauge={{ contentLocale: props.state.localised === true }}
+			langauge={{ contentLocale: props.collection?.localized === true }}
 			options={{ padding: "24", growContent: true, fullHeight: true }}
 			copy={{
 				title: title(),

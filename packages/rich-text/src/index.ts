@@ -1,6 +1,7 @@
 export type { StarterKitOptions as RichTextStarterKitOptions } from "@tiptap/starter-kit";
 export {
 	extensions,
+	LucidDocument,
 	LucidEmbeddedBrick,
 	LucidLink,
 	LucidMedia,

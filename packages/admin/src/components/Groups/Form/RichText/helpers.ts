@@ -1,20 +1,10 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { DocumentRef } from "@types";
 import T from "@/translations";
-import type { RichTextMediaType, RichTextOptions } from "./types";
 
 export const isRichTextOptionEnabled = (
 	value: boolean | unknown[] | undefined,
 ) => value === true || (Array.isArray(value) && value.length > 0);
-
-export const getRichTextMediaTypes = (
-	value: RichTextOptions["media"],
-): RichTextMediaType[] =>
-	value === true
-		? ["image", "audio", "video"]
-		: Array.isArray(value)
-			? value
-			: [];
 
 /** Checks whether rich-text JSON contains text or a reference node. */
 export const richTextHasContent = (
@@ -23,6 +13,7 @@ export const richTextHasContent = (
 	if (!value) return false;
 	if (typeof value.text === "string" && value.text.length > 0) return true;
 	if (
+		value.type === "lucidDocument" ||
 		value.type === "lucidMedia" ||
 		value.type === "lucidVariable" ||
 		value.type === "lucidEmbeddedBrick"

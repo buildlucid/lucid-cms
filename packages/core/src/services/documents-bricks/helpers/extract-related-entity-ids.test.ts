@@ -94,4 +94,60 @@ describe("extractRelatedEntityIds", () => {
 		expect(result.data.relation?.[0]?.table).toBe("lucid_document__articles");
 		expect(Array.from(result.data.relation?.[0]?.values ?? [])).toEqual([8]);
 	});
+
+	test("omits a rich-text ref to the document being fetched", async () => {
+		const table = "lucid_document__pages__fld" as const;
+		const result = await extractRelatedEntityIds(context, {
+			collection,
+			includeTypes: [],
+			includeFieldValueRefTargets: true,
+			brickSchema: [
+				{
+					name: table,
+					rawName: table,
+					type: "document-fields",
+					key: { collection: "pages" },
+					columns: [
+						{
+							name: "_body",
+							source: "field",
+							type: "json",
+							customField: { type: "rich-text" },
+						},
+					],
+				},
+			],
+			responses: [
+				{
+					[table]: [
+						{
+							id: 1,
+							collection_key: "pages",
+							document_id: 1,
+							document_version_id: 1,
+							locale: "en",
+							position: 0,
+							is_open: 1,
+							_body: {
+								type: "doc",
+								content: [
+									{
+										type: "lucidDocument",
+										attrs: {
+											collectionKey: "pages",
+											documentId: 1,
+										},
+									},
+								],
+							},
+						},
+					],
+				},
+			],
+		});
+
+		expect(result.error).toBeUndefined();
+		if (result.error) return;
+		expect(result.data.relation).toBeUndefined();
+	});
 });

@@ -24,7 +24,10 @@ import T from "@/translations";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
+import { documentResponseToRef } from "@/utils/relation-field-helpers";
 import { countFieldErrors } from "@/utils/structural-field-helpers";
+
+const RICH_TEXT_PICKER_Z_INDEX = 80;
 
 interface RichTextFieldProps {
 	state: {
@@ -46,7 +49,6 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	const fieldRenderState = useFieldRenderState();
 	const pageBuilderState = usePageBuilderState();
 	const [brickSelectOpen, setBrickSelectOpen] = createSignal(false);
-	const [fullscreen, setFullscreen] = createSignal(false);
 	let onEmbeddedBrickSelected: ((ref: string) => void) | undefined;
 
 	// -------------------------------
@@ -65,12 +67,18 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
 	const editorConfig = createMemo(() => props.state.fieldConfig.editor);
+	const mediaTypeFilter = createMemo(() => {
+		const media = editorConfig()?.media;
+		return Array.isArray(media) ? media : undefined;
+	});
 	const usesCollectionMetadata = createMemo(
 		() =>
 			editorConfig()?.links?.internal === true ||
 			Array.isArray(editorConfig()?.links?.internal) ||
 			editorConfig()?.variables === true ||
-			Array.isArray(editorConfig()?.variables),
+			Array.isArray(editorConfig()?.variables) ||
+			editorConfig()?.documents === true ||
+			Array.isArray(editorConfig()?.documents),
 	);
 
 	// -------------------------------
@@ -85,6 +93,10 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	const currentCollection = createMemo(() =>
 		pageBuilderState.documentState?.collection?.(),
 	);
+	const currentDocumentRef = createMemo(() => {
+		const document = pageBuilderState.documentState?.document?.();
+		return document ? documentResponseToRef(document) : undefined;
+	});
 	const routedCollectionKeys = createMemo(() => {
 		const internal = editorConfig()?.links?.internal;
 		if (internal !== true && !Array.isArray(internal)) return [];
@@ -108,6 +120,20 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		}
 		return [];
 	});
+	const documentNodeCollectionKeys = createMemo(() => {
+		const documents = editorConfig()?.documents;
+		if (Array.isArray(documents)) return documents;
+		if (documents === true) {
+			return (collections.data?.data ?? []).map((collection) => collection.key);
+		}
+		return [];
+	});
+	const documentCollections = createMemo(() => {
+		const allowed = new Set(documentNodeCollectionKeys());
+		return (collections.data?.data ?? []).filter((collection) =>
+			allowed.has(collection.key),
+		);
+	});
 	const embeddedBrickConfigs = createMemo(() => {
 		const bricks = editorConfig()?.bricks;
 		const configs = currentCollection()?.embeddedBricks ?? [];
@@ -129,11 +155,26 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	const getDocumentRef = (
 		collectionKey: string,
 		documentId: number,
-	): DocumentRef | undefined =>
-		brickHelpers.getFieldRef({
-			fieldType: "relation",
-			fieldValue: [{ collectionKey, id: documentId }],
-		});
+	): DocumentRef | undefined => {
+		const current = currentDocumentRef();
+		if (current?.collectionKey === collectionKey && current.id === documentId) {
+			return current;
+		}
+
+		return (
+			brickHelpers.getFieldRef({
+				fieldType: "relation",
+				fieldValue: [{ collectionKey, id: documentId }],
+			}) ?? undefined
+		);
+	};
+	const isCurrentDocument = (document: DocumentRef) => {
+		const current = currentDocumentRef();
+		return (
+			current?.collectionKey === document.collectionKey &&
+			current.id === document.id
+		);
+	};
 	const getReferenceKey = (reference: RichTextFieldErrorReference) => {
 		switch (reference.type) {
 			case "rich-text-media":
@@ -142,6 +183,8 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				return `variable:${reference.collectionKey}:${reference.documentId}:${reference.fieldKey}`;
 			case "rich-text-document-link":
 				return `document-link:${reference.collectionKey}:${reference.documentId}`;
+			case "rich-text-document":
+				return `document:${reference.collectionKey}:${reference.documentId}`;
 			case "rich-text-embedded-brick":
 				return `embedded-brick:${reference.ref}`;
 		}
@@ -176,7 +219,13 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		bricks: embeddedBrickConfigs().length > 0 ? editorConfig()?.bricks : false,
 		variables:
 			variableCollectionKeys().length > 0 ? editorConfig()?.variables : false,
-		documentCollectionKeys: routedCollectionKeys(),
+		documents:
+			documentNodeCollectionKeys().length > 0
+				? editorConfig()?.documents
+				: false,
+		internalLinkCollectionKeys: routedCollectionKeys(),
+		documentNodeCollectionKeys: documentNodeCollectionKeys(),
+		documentCollections: documentCollections(),
 		embeddedBrickConfigs: embeddedBrickConfigs(),
 		locale: fieldRenderState.contentLocale(),
 		references: {
@@ -193,13 +242,13 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			getReferenceErrors,
 		},
 		callbacks: {
-			selectMedia: ({ currentId, allowedTypes, onSelect }) => {
+			selectMedia: ({ currentId, onSelect }) => {
 				const currentRef =
 					typeof currentId === "number" ? getMediaRef(currentId) : undefined;
 				pageBuilderModalsStore.open("mediaSelect", {
 					data: {
-						zIndex: fullscreen() ? 80 : undefined,
-						types: allowedTypes,
+						zIndex: RICH_TEXT_PICKER_Z_INDEX,
+						types: mediaTypeFilter(),
 						multiple: false,
 						selected: currentId === undefined ? undefined : [currentId],
 						selectedRefs: currentRef ? [currentRef] : undefined,
@@ -213,14 +262,15 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					},
 				});
 			},
-			uploadMedia: ({ allowedTypes, onUpload }) => {
+			uploadMedia: ({ onUpload }) => {
 				pageBuilderModalsStore.open("mediaUpload", {
 					data: {
-						types: allowedTypes,
-						zIndex: fullscreen() ? 80 : undefined,
+						types: mediaTypeFilter(),
+						zIndex: RICH_TEXT_PICKER_Z_INDEX,
 					},
 					onCallback: (media) => {
-						if (!allowedTypes.some((type) => type === media.type)) return;
+						const typeFilter = mediaTypeFilter();
+						if (typeFilter && !typeFilter.includes(media.type)) return;
 						brickStore.get.addRef("media", media);
 						onUpload(media.id);
 					},
@@ -229,7 +279,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			selectDocument: ({ collectionKeys, current, onSelect }) => {
 				pageBuilderModalsStore.open("documentSelect", {
 					data: {
-						zIndex: 80,
+						zIndex: RICH_TEXT_PICKER_Z_INDEX,
 						collectionKeys,
 						multiple: false,
 						selected: current
@@ -245,7 +295,9 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					onCallback: ({ refs }) => {
 						const document = refs[0];
 						if (!document) return;
-						brickStore.get.addRef("relation", document);
+						if (!isCurrentDocument(document)) {
+							brickStore.get.addRef("relation", document);
+						}
 						onSelect(document);
 					},
 				});
@@ -253,8 +305,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			selectVariable: ({ current, onSelect }) => {
 				pageBuilderModalsStore.open("richTextVariableSelect", {
 					data: {
-						zIndex: fullscreen() ? 80 : undefined,
-						localised: props.state.localised,
+						zIndex: RICH_TEXT_PICKER_Z_INDEX,
 						collectionKeys: variableCollectionKeys(),
 						selected: current,
 						selectedRef: current
@@ -262,7 +313,9 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 							: undefined,
 					},
 					onCallback: (selection) => {
-						brickStore.get.addRef("relation", selection.document);
+						if (!isCurrentDocument(selection.document)) {
+							brickStore.get.addRef("relation", selection.document);
+						}
 						onSelect(selection);
 					},
 				});
@@ -275,8 +328,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				pageBuilderModalsStore.open("embeddedBrickEdit", {
 					data: {
 						brickRef: ref,
-						zIndex: fullscreen() ? 80 : undefined,
-						localised: props.state.localised,
+						zIndex: RICH_TEXT_PICKER_Z_INDEX,
 					},
 					onCallback: () => undefined,
 				}),
@@ -347,6 +399,11 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 			fields: brickHelpers.getCollectionPseudoBrickFields(),
 			bricks: brickHelpers.getUpsertBricks(),
 		}),
+		preview: {
+			richTextOptions,
+		},
+		// TODO: Extend rich-text AI generation once the model contract can safely
+		// describe and validate media, document, variable, and embedded-brick refs.
 		setValue: (value: unknown, localeCode?: string) => {
 			brickStore.get.setFieldValue({
 				brickIndex: fieldRenderState.brickIndex(),
@@ -423,13 +480,12 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 							}
 						: undefined
 				}
-				onFullscreenChange={setFullscreen}
 			/>
 			<Show when={embeddedBrickConfigs().length > 0}>
 				<AddBrick
 					state={{ open: brickSelectOpen(), setOpen: setBrickSelectOpen }}
 					data={{ brickConfig: embeddedBrickConfigs() }}
-					options={{ nested: fullscreen() }}
+					options={{ nested: true }}
 					callbacks={{
 						onSelect: (brickConfig) => {
 							const ref = brickStore.get.addEmbeddedBrick({ brickConfig });

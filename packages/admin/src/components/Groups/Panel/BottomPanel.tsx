@@ -76,6 +76,8 @@ export const BottomPanel: Component<{
 		growContent?: boolean;
 		/** Positions the panel close to the viewport top for workspace-style views. */
 		fullHeight?: boolean;
+		/** Presents the close action as the panel's primary progression action. */
+		primaryCloseAction?: boolean;
 	};
 	children: (_props?: {
 		contentLocale: Accessor<string | undefined>;
@@ -326,7 +328,11 @@ export const BottomPanel: Component<{
 														<div class="flex min-w-max gap-2">
 															<Button
 																size="medium"
-																theme="border-outline"
+																theme={
+																	props.options?.primaryCloseAction
+																		? "primary"
+																		: "border-outline"
+																}
 																type="button"
 																onClick={() => props.state.setOpen(false)}
 															>
@@ -392,7 +398,11 @@ export const BottomPanel: Component<{
 													<div class="flex min-w-max gap-2">
 														<Button
 															size="medium"
-															theme="border-outline"
+															theme={
+																props.options?.primaryCloseAction
+																	? "primary"
+																	: "border-outline"
+															}
 															type="button"
 															onClick={() => props.state.setOpen(false)}
 														>

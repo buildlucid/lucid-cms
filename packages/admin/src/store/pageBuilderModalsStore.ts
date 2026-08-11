@@ -63,7 +63,6 @@ type ModalRegistry = {
 	richTextVariableSelect: {
 		data: {
 			zIndex?: number;
-			localised?: boolean;
 			collectionKeys: string[];
 			selected?: {
 				collectionKey: string;
@@ -83,7 +82,6 @@ type ModalRegistry = {
 		data: {
 			brickRef: string;
 			zIndex?: number;
-			localised?: boolean;
 		};
 		result: undefined;
 	};

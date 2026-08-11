@@ -35,6 +35,14 @@ test("extracts and deduplicates rich text media and document references", () => 
 				},
 				{ type: "lucidMedia", attrs: { mediaId: 42 } },
 				{ type: "lucidMedia", attrs: { mediaId: 42 } },
+				{
+					type: "lucidDocument",
+					attrs: { collectionKey: "pages", documentId: 15 },
+				},
+				{
+					type: "lucidDocument",
+					attrs: { collectionKey: "pages", documentId: 15 },
+				},
 			],
 		}),
 	).toEqual({
@@ -42,6 +50,7 @@ test("extracts and deduplicates rich text media and document references", () => 
 		relation: [
 			{ table: "lucid_document__pages", value: 12 },
 			{ table: "lucid_document__settings", value: 2 },
+			{ table: "lucid_document__pages", value: 15 },
 		],
 	});
 });

@@ -5,6 +5,7 @@ import {
 	getFieldDatabaseConfig,
 	isStorageMode,
 } from "../../../libs/collection/custom-fields/storage/index.js";
+import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaColumn,
@@ -170,6 +171,27 @@ const appendRefTarget = (
 	tableEntry.values.add(target.value);
 };
 
+/**
+ * Identifies a document target that points back to the response row currently
+ * being hydrated. The caller can reuse the document already in its response.
+ */
+const isCurrentDocumentTarget = (
+	row: Select<LucidBricksTable>,
+	target: {
+		table: string;
+		value: unknown;
+	},
+) => {
+	if (target.value !== row.document_id) return false;
+
+	const tableNameRes = buildTableName(
+		"document",
+		{ collection: row.collection_key },
+		null,
+	);
+	return !tableNameRes.error && tableNameRes.data.name === target.table;
+};
+
 const shouldIncludeFieldType = (
 	fieldType: FieldTypes,
 	options: {
@@ -281,6 +303,12 @@ const extractRelatedEntityIds: ServiceFn<
 						}
 
 						for (const target of targets) {
+							if (
+								targetFieldType === "relation" &&
+								isCurrentDocumentTarget(row, target)
+							) {
+								continue;
+							}
 							appendRefTarget(refData, targetFieldType, target);
 						}
 					}

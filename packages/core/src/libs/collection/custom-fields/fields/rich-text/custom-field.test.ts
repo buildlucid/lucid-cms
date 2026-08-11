@@ -89,7 +89,12 @@ test("successfully validate field - rich text", async () => {
 	});
 	expect(requiredValidate).length(0);
 
-	for (const type of ["lucidMedia", "lucidVariable", "lucidEmbeddedBrick"]) {
+	for (const type of [
+		"lucidDocument",
+		"lucidMedia",
+		"lucidVariable",
+		"lucidEmbeddedBrick",
+	]) {
 		const atomValidate = validateField({
 			field: {
 				key: "required_rich_text",
@@ -324,6 +329,7 @@ const referenceField = new RichTextCustomField("references", {
 	localized: false,
 	editor: {
 		media: ["image"],
+		documents: ["pages"],
 		variables: ["settings"],
 		links: { internal: ["pages"] },
 		bricks: ["card"],
@@ -334,6 +340,10 @@ const referenceValue = {
 	type: "doc",
 	content: [
 		{ type: "lucidMedia", attrs: { mediaId: 11 } },
+		{
+			type: "lucidDocument",
+			attrs: { collectionKey: "pages", documentId: 44 },
+		},
 		{
 			type: "lucidVariable",
 			attrs: {
@@ -378,6 +388,7 @@ const referenceValidationData: RichTextValidationData = {
 	documents: [
 		{ id: 22, collection_key: "settings" },
 		{ id: 33, collection_key: "pages" },
+		{ id: 44, collection_key: "pages" },
 	],
 	collections: {
 		settings: {
@@ -402,7 +413,7 @@ test("validates rich-text reference targets", () => {
 	).toEqual({
 		media: [11],
 		"document:settings": [22],
-		"document:pages": [33],
+		"document:pages": [44, 33],
 	});
 
 	const errors = validateField({
@@ -480,6 +491,18 @@ test("returns reference metadata for missing rich-text targets", () => {
 			localeCode: null,
 			message: copy("server:core.fields.media.validation.not.found"),
 			meta: { reference: { type: "rich-text-media", mediaId: 11 } },
+		},
+		{
+			key: "references",
+			localeCode: null,
+			message: copy("server:core.fields.relation.validation.not.found"),
+			meta: {
+				reference: {
+					type: "rich-text-document",
+					collectionKey: "pages",
+					documentId: 44,
+				},
+			},
 		},
 		{
 			key: "references",

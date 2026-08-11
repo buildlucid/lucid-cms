@@ -26,5 +26,16 @@ describe("richTextHasContent", () => {
 				content: [{ type: "lucidMedia", attrs: { mediaId: 1 } }],
 			}),
 		).toBe(true);
+		expect(
+			richTextHasContent({
+				type: "doc",
+				content: [
+					{
+						type: "lucidDocument",
+						attrs: { collectionKey: "pages", documentId: 1 },
+					},
+				],
+			}),
+		).toBe(true);
 	});
 });

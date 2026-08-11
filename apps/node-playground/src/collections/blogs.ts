@@ -44,15 +44,18 @@ const BlogCollection = new CollectionBuilder("blog", {
 				external: true,
 				internal: ["page", "blog", "route-page"],
 			},
-			media: ["image", "audio", "video"],
+			media: true,
+			documents: ["page", "settings", "blog"],
 			variables: ["settings"],
 			bricks: ["rt-callout"],
 			fullscreen: true,
 		},
 	})
 	.addRichText("seamless_content", {
+		localized: false,
 		editor: {
 			appearance: "seamless",
+			bricks: ["rt-callout"],
 			fullscreen: true,
 		},
 	});

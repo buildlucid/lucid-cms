@@ -191,12 +191,17 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 
 		const input: FieldRelationValidationInput = {};
 		for (const reference of extractRichTextReferences(value as RichTextJSON)) {
-			if (reference.type === "media" && isReferenceId(reference.mediaId)) {
+			if (
+				reference.type === "rich-text-media" &&
+				isReferenceId(reference.mediaId)
+			) {
 				input[richTextMediaValidationGroup] ??= [];
 				input[richTextMediaValidationGroup]?.push(reference.mediaId);
 			}
 			if (
-				(reference.type === "variable" || reference.type === "document-link") &&
+				(reference.type === "rich-text-document" ||
+					reference.type === "rich-text-variable" ||
+					reference.type === "rich-text-document-link") &&
 				typeof reference.collectionKey === "string" &&
 				isReferenceId(reference.documentId)
 			) {
@@ -232,6 +237,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 
 		const errors: CustomFieldValidationError[] = [];
 		const checkedReferences = new Set<string>();
+
 		const addError = (key: string, error: CustomFieldValidationError) => {
 			if (checkedReferences.has(key)) return;
 			checkedReferences.add(key);
@@ -239,7 +245,54 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 		};
 
 		for (const reference of extractRichTextReferences(value as RichTextJSON)) {
-			if (reference.type === "media") {
+			if (reference.type === "rich-text-document") {
+				if (
+					typeof reference.collectionKey !== "string" ||
+					!isReferenceId(reference.documentId)
+				) {
+					addError("document:invalid", {
+						message: copy("server:core.fields.rich.text.reference.invalid"),
+					});
+					continue;
+				}
+
+				const key = `document:${reference.collectionKey}:${reference.documentId}`;
+				const meta = {
+					reference: {
+						type: "rich-text-document" as const,
+						collectionKey: reference.collectionKey,
+						documentId: reference.documentId,
+					},
+				};
+				if (
+					!collectionIsAllowed(
+						this.config.editor?.documents,
+						reference.collectionKey,
+					)
+				) {
+					addError(key, {
+						message: copy("server:core.fields.rich.text.document.not.allowed"),
+						meta,
+					});
+					continue;
+				}
+
+				if (
+					!refData.documents.some(
+						(item) =>
+							item.id === reference.documentId &&
+							item.collection_key === reference.collectionKey,
+					)
+				) {
+					addError(key, {
+						message: copy("server:core.fields.relation.validation.not.found"),
+						meta,
+					});
+				}
+				continue;
+			}
+
+			if (reference.type === "rich-text-media") {
 				if (!isReferenceId(reference.mediaId)) {
 					addError("media:invalid", {
 						message: copy("server:core.fields.rich.text.reference.invalid"),
@@ -282,7 +335,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				continue;
 			}
 
-			if (reference.type === "variable") {
+			if (reference.type === "rich-text-variable") {
 				if (
 					typeof reference.collectionKey !== "string" ||
 					!isReferenceId(reference.documentId) ||
@@ -349,7 +402,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				continue;
 			}
 
-			if (reference.type === "document-link") {
+			if (reference.type === "rich-text-document-link") {
 				if (
 					typeof reference.collectionKey !== "string" ||
 					!isReferenceId(reference.documentId)

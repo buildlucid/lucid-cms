@@ -74,10 +74,14 @@ const extractRichTextRefTargets = (value: unknown): CustomFieldRefTargets => {
 	const documentTargets = new Map<string, FieldRefTarget>();
 
 	for (const reference of extractRichTextReferences(json)) {
-		if (reference.type === "media") {
+		if (reference.type === "rich-text-media") {
 			addMediaTarget(mediaTargets, { mediaId: reference.mediaId });
 		}
-		if (reference.type === "variable" || reference.type === "document-link") {
+		if (
+			reference.type === "rich-text-document" ||
+			reference.type === "rich-text-variable" ||
+			reference.type === "rich-text-document-link"
+		) {
 			addDocumentTarget(documentTargets, {
 				collectionKey: reference.collectionKey,
 				documentId: reference.documentId,

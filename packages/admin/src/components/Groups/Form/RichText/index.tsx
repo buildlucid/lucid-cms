@@ -229,9 +229,14 @@ export const RichText: Component<RichTextProps> = (props) => {
 				fetchState={{ isLoading: false, isError: false }}
 				copy={{
 					title: props.copy?.label,
-					cancel: T()("editor.rich.text.fullscreen.exit"),
+					cancel: T()("common.done"),
 				}}
-				options={{ padding: "24", growContent: true, fullHeight: true }}
+				options={{
+					padding: "24",
+					growContent: true,
+					fullHeight: true,
+					primaryCloseAction: true,
+				}}
 			>
 				{(language) => (
 					<FullscreenEditor

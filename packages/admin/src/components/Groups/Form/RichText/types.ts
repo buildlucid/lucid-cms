@@ -1,12 +1,12 @@
 import type {
+	Collection,
 	DocumentRef,
 	FieldError,
 	MediaRef,
+	MediaType,
 	RichTextFieldErrorReference,
 } from "@types";
 import type { CollectionBrickConfig } from "@/types/collection-config";
-
-export type RichTextMediaType = "image" | "audio" | "video";
 
 export type RichTextVariableSelection = {
 	collectionKey: string;
@@ -23,12 +23,15 @@ export interface RichTextOptions {
 		external?: boolean;
 		internal?: boolean | string[];
 	};
-	media?: boolean | RichTextMediaType[];
+	media?: boolean | MediaType[];
+	documents?: boolean | string[];
 	bricks?: boolean | string[];
 	variables?: boolean | string[];
 	appearance?: "default" | "seamless";
 	fullscreen?: boolean;
-	documentCollectionKeys?: string[];
+	internalLinkCollectionKeys?: string[];
+	documentNodeCollectionKeys?: string[];
+	documentCollections?: Collection[];
 	embeddedBrickConfigs?: CollectionBrickConfig[];
 	locale?: string;
 	references?: {
@@ -47,13 +50,9 @@ export interface RichTextOptions {
 	callbacks?: {
 		selectMedia?: (props: {
 			currentId?: number;
-			allowedTypes: RichTextMediaType[];
 			onSelect: (id: number) => void;
 		}) => void;
-		uploadMedia?: (props: {
-			allowedTypes: RichTextMediaType[];
-			onUpload: (id: number) => void;
-		}) => void;
+		uploadMedia?: (props: { onUpload: (id: number) => void }) => void;
 		selectDocument?: (props: {
 			collectionKeys: string[];
 			current?: DocumentRef;

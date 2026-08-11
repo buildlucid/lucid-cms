@@ -6,12 +6,16 @@ import {
 	FaSolidCubes,
 	FaSolidDatabase,
 	FaSolidExpand,
+	FaSolidFileLines,
 	FaSolidImage,
 	FaSolidUpload,
 } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import T from "@/translations";
-import { getRichTextMediaTypes, isRichTextOptionEnabled } from "./helpers";
+import {
+	getRichTextDocumentFieldText,
+	isRichTextOptionEnabled,
+} from "./helpers";
 import ToolbarButton from "./ToolbarButton";
 import type { RichTextOptions } from "./types";
 
@@ -54,6 +58,7 @@ const InsertControls: Component<{
 	const hasReferenceControls = createMemo(
 		() =>
 			isRichTextOptionEnabled(props.options?.media) ||
+			isRichTextOptionEnabled(props.options?.documents) ||
 			isRichTextOptionEnabled(props.options?.variables) ||
 			isRichTextOptionEnabled(props.options?.bricks),
 	);
@@ -75,14 +80,12 @@ const InsertControls: Component<{
 
 		if (upload) {
 			props.options?.callbacks?.uploadMedia?.({
-				allowedTypes: getRichTextMediaTypes(props.options?.media),
 				onUpload: onInsert,
 			});
 			return;
 		}
 
 		props.options?.callbacks?.selectMedia?.({
-			allowedTypes: getRichTextMediaTypes(props.options?.media),
 			onSelect: onInsert,
 		});
 	};
@@ -116,6 +119,31 @@ const InsertControls: Component<{
 							<FaSolidUpload size={12} />
 						</ToolbarButton>
 					</Show>
+					<Show when={isRichTextOptionEnabled(props.options?.documents)}>
+						<ToolbarButton
+							mode="default"
+							isActive={false}
+							onClick={() => {
+								const insertionRange = getReferenceInsertionRange(props.editor);
+								props.options?.callbacks?.selectDocument?.({
+									collectionKeys:
+										props.options?.documentNodeCollectionKeys ?? [],
+									onSelect: (document) =>
+										insertReferenceNode(props.editor, insertionRange, {
+											type: richTextNodeNames.document,
+											attrs: {
+												collectionKey: document.collectionKey,
+												documentId: document.id,
+											},
+										}),
+								});
+							}}
+							disabled={props.disabled}
+							title={T()("editor.rich.text.document.add")}
+						>
+							<FaSolidFileLines size={12} />
+						</ToolbarButton>
+					</Show>
 					<Show when={isRichTextOptionEnabled(props.options?.variables)}>
 						<ToolbarButton
 							mode="default"
@@ -130,6 +158,11 @@ const InsertControls: Component<{
 												collectionKey: selection.collectionKey,
 												documentId: selection.documentId,
 												fieldKey: selection.fieldKey,
+												value: getRichTextDocumentFieldText(
+													selection.document,
+													selection.fieldKey,
+													props.options?.locale,
+												),
 											},
 										}),
 								});

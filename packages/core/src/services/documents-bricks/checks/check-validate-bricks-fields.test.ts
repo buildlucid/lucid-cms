@@ -1,7 +1,11 @@
 import { expect, test } from "vitest";
+import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { validateField } from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
+import {
+	recursiveFieldValidate,
+	validateField,
+} from "../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 
 const TranslatedCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
@@ -217,6 +221,38 @@ test("required localized fields validate every configured locale", async () => {
 	expect(withDirectValue).toEqual([
 		{
 			key: "required_translatable_field",
+			localeCode: "fr",
+			message: copy("server:core.fields.validation.required"),
+		},
+	]);
+});
+
+test("embedded brick fields follow collection localization independently", () => {
+	const embeddedBrick = new BrickBuilder("callout").addText("heading", {
+		localized: true,
+		validation: { required: true },
+	});
+
+	const errors = recursiveFieldValidate({
+		fields: [
+			{
+				key: "heading",
+				type: "text",
+				translations: { en: "English heading" },
+			},
+		],
+		instance: embeddedBrick,
+		validationData: { media: [], user: [], relation: [] },
+		meta: {
+			localized: true,
+			defaultLocale: "en",
+			locales: ["en", "fr"],
+		},
+	});
+
+	expect(errors).toEqual([
+		{
+			key: "heading",
 			localeCode: "fr",
 			message: copy("server:core.fields.validation.required"),
 		},

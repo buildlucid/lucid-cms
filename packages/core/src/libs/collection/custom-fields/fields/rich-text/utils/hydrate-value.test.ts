@@ -35,6 +35,10 @@ const value: RichTextJSON = {
 			],
 		},
 		{ type: "lucidMedia", attrs: { mediaId: 12 } },
+		{
+			type: "lucidDocument",
+			attrs: { collectionKey: "pages", documentId: 7 },
+		},
 	],
 };
 
@@ -73,9 +77,27 @@ const context = {
 				type: "image",
 				title: { en: "Photo", fr: "Photographie" },
 				alt: { en: "A photo", fr: "Une photographie" },
-				file: { url: "/photo.jpg" },
+				file: {
+					key: "photo.jpg",
+					url: "/photo.jpg",
+					fileName: "photo.jpg",
+					meta: {
+						mimeType: "image/jpeg",
+						width: 1200,
+						height: 800,
+						base64: "data:image/jpeg;base64,preview",
+						averageColor: "#334455",
+					},
+				},
 			},
 		],
+	},
+	mediaImagePresets: {
+		"thumbnail-small": {
+			height: 200,
+			format: "webp",
+			quality: 80,
+		},
 	},
 } satisfies CustomFieldResponseFormatContext;
 
@@ -85,6 +107,7 @@ describe("rich-text response hydration", () => {
 		const link = hydrated.content?.[0]?.content?.[0]?.marks?.[0];
 		const variable = hydrated.content?.[0]?.content?.[1];
 		const media = hydrated.content?.[1];
+		const document = hydrated.content?.[2];
 
 		expect(link).toMatchObject({
 			type: "link",
@@ -112,7 +135,24 @@ describe("rich-text response hydration", () => {
 					type: "image",
 					src: "/photo.jpg",
 					alt: "Une photographie",
+					base64: "data:image/jpeg;base64,preview",
+					presets: [
+						{
+							key: "thumbnail-small",
+							src: "/photo.jpg?preset=thumbnail-small",
+							mimeType: "image/webp",
+							width: 300,
+							height: 200,
+						},
+					],
 				},
+			},
+		});
+		expect(document).toMatchObject({
+			type: "lucidDocument",
+			attrs: {
+				collectionKey: "pages",
+				documentId: 7,
 			},
 		});
 	});
@@ -128,11 +168,31 @@ describe("rich-text response hydration", () => {
 		).toBeNull();
 		expect(hydrated.content?.[0]?.content?.[1]?.attrs?.value).toBeNull();
 		expect(hydrated.content?.[1]?.attrs?.media).toBeNull();
+		expect(hydrated.content?.[2]?.attrs).toEqual({
+			collectionKey: "pages",
+			documentId: 7,
+		});
 	});
 
 	test("removes only derived values before persistence", () => {
 		expect(
 			normalizeRichTextValue(hydrateRichTextValue(value, context)),
 		).toEqual(value);
+	});
+
+	test("removes legacy document payloads before persistence", () => {
+		expect(
+			normalizeRichTextValue({
+				type: "lucidDocument",
+				attrs: {
+					collectionKey: "pages",
+					documentId: 7,
+					document: { id: 7, collectionKey: "pages" },
+				},
+			}),
+		).toEqual({
+			type: "lucidDocument",
+			attrs: { collectionKey: "pages", documentId: 7 },
+		});
 	});
 });

@@ -21,7 +21,6 @@ import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import { formatDocumentFieldValue } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { documentResponseToRef } from "@/utils/relation-field-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import { DocumentSelectContent } from "./DocumentSelect";
 
@@ -31,7 +30,6 @@ const RichTextVariableSelectPanel: Component<{
 		setOpen: (open: boolean) => void;
 		zIndex?: number;
 		collectionKeys: string[];
-		localised?: boolean;
 		selected?: {
 			collectionKey: string;
 			documentId: number;
@@ -55,42 +53,8 @@ const RichTextVariableSelectPanel: Component<{
 	const [selectedFieldKey, setSelectedFieldKey] = createSignal<string>();
 
 	// ----------------------------------------
-	// Memos
-	const singleTargetCollectionKey = createMemo(() =>
-		props.state.collectionKeys.length === 1
-			? props.state.collectionKeys[0]
-			: undefined,
-	);
-
-	// ----------------------------------------
 	// Queries
-	const singleTargetCollection = api.collections.useGetSingle({
-		queryParams: {
-			location: { collectionKey: singleTargetCollectionKey },
-		},
-		enabled: () => props.state.open && !!singleTargetCollectionKey(),
-	});
-	const collectionKey = createMemo(
-		() =>
-			documentRef()?.collectionKey ??
-			(singleTargetCollection.data?.data.mode === "single"
-				? singleTargetCollectionKey()
-				: undefined),
-	);
-	const singleTargetDocument = api.documents.useGetSingle({
-		queryParams: {
-			location: {
-				collectionKey: singleTargetCollectionKey,
-				id: () => singleTargetCollection.data?.data.documentId ?? undefined,
-				version: "latest",
-			},
-			include: {},
-		},
-		enabled: () =>
-			props.state.open &&
-			singleTargetCollection.data?.data.mode === "single" &&
-			typeof singleTargetCollection.data?.data.documentId === "number",
-	});
+	const collectionKey = createMemo(() => documentRef()?.collectionKey);
 	const collection = api.collections.useGetSingle({
 		queryParams: {
 			location: { collectionKey },
@@ -106,17 +70,14 @@ const RichTextVariableSelectPanel: Component<{
 				isFieldTypeRichTextVariable(field.type),
 		),
 	);
-	const isSingleCollectionTarget = createMemo(
-		() => singleTargetCollection.data?.data.mode === "single",
-	);
-	const isResolvingSingleTarget = createMemo(
-		() =>
-			props.state.open &&
-			!!singleTargetCollectionKey() &&
-			(singleTargetCollection.isLoading ||
-				(isSingleCollectionTarget() && singleTargetDocument.isLoading)),
-	);
-
+	const currentDocumentSelection = createMemo(() => {
+		const document = documentRef();
+		if (!document) return undefined;
+		return {
+			values: [{ collectionKey: document.collectionKey, id: document.id }],
+			refs: [document],
+		};
+	});
 	// ----------------------------------------
 	// Effects
 	createEffect(() => {
@@ -131,17 +92,6 @@ const RichTextVariableSelectPanel: Component<{
 		) {
 			setDocumentRef(selectedRef);
 			setSelectedFieldKey(selected.fieldKey);
-			setStep("field");
-			return;
-		}
-
-		if (isSingleCollectionTarget()) {
-			setDocumentRef(
-				singleTargetDocument.data?.data
-					? documentResponseToRef(singleTargetDocument.data.data)
-					: undefined,
-			);
-			setSelectedFieldKey(undefined);
 			setStep("field");
 			return;
 		}
@@ -184,18 +134,16 @@ const RichTextVariableSelectPanel: Component<{
 		<div class="flex h-full flex-col">
 			<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
 				<div class="flex min-w-0 items-center gap-3">
-					<Show when={!isSingleCollectionTarget()}>
-						<Button
-							type="button"
-							theme="secondary-subtle"
-							size="icon-subtle"
-							onClick={() => setStep("document")}
-							aria-label={T()("common.back")}
-							title={T()("common.back")}
-						>
-							<FaSolidArrowLeft size={12} />
-						</Button>
-					</Show>
+					<Button
+						type="button"
+						theme="secondary-subtle"
+						size="icon-subtle"
+						onClick={() => setStep("document")}
+						aria-label={T()("common.back")}
+						title={T()("common.back")}
+					>
+						<FaSolidArrowLeft size={12} />
+					</Button>
 					<p class="truncate text-sm text-subtitle">
 						{T()("editor.rich.text.document.fallback", {
 							collection: documentRef()?.collectionKey,
@@ -272,15 +220,12 @@ const RichTextVariableSelectPanel: Component<{
 			zIndex={props.state.zIndex}
 			state={{ open: props.state.open, setOpen: props.state.setOpen }}
 			fetchState={{
-				isLoading:
-					isResolvingSingleTarget() ||
-					(step() === "field" && collection.isLoading),
-				isError:
-					singleTargetCollection.isError ||
-					singleTargetDocument.isError ||
-					(step() === "field" && collection.isError),
+				isLoading: step() === "field" && collection.isLoading,
+				isError: step() === "field" && collection.isError,
 			}}
-			langauge={{ contentLocale: props.state.localised === true }}
+			langauge={{
+				contentLocale: collection.data?.data.localized === true,
+			}}
 			options={{
 				padding: "24",
 				hideFooter: true,
@@ -299,8 +244,8 @@ const RichTextVariableSelectPanel: Component<{
 						<DocumentSelectContent
 							collectionKeys={props.state.collectionKeys}
 							multiple={false}
-							selected={undefined}
-							selectedRefs={undefined}
+							selected={currentDocumentSelection()?.values}
+							selectedRefs={currentDocumentSelection()?.refs}
 							onClose={() => props.state.setOpen(false)}
 							onSelect={(selection) => {
 								const selected = selection.refs[0];

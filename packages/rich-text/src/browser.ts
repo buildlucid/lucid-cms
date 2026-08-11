@@ -1,3 +1,4 @@
+import type { CollectionDocument } from "@lucidcms/types";
 import { generateJSON as tiptapGenerateJSON } from "@tiptap/core";
 import { extensions } from "./extensions/index.js";
 import { renderRichTextHTML } from "./render.js";
@@ -5,9 +6,11 @@ import type { RichTextJSON, RichTextRenderOptions } from "./types.js";
 import { generatePlainText } from "./utils/text.js";
 
 /** Renders rich-text JSON to HTML in browser runtimes. */
-export const generateHTML = (
+export const generateHTML = <
+	TDocument extends CollectionDocument = CollectionDocument,
+>(
 	json: RichTextJSON,
-	options?: RichTextRenderOptions,
+	options?: RichTextRenderOptions<TDocument>,
 ): string => renderRichTextHTML(json, options);
 
 /** Parses HTML into Lucid rich-text JSON in browser runtimes. */

@@ -31,6 +31,7 @@ import { PerPage } from "@/components/Groups/Query/PerPage";
 import { ResetFilters } from "@/components/Groups/Query/ResetFilters";
 import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
+import DocumentSelectSingle from "@/components/Partials/DocumentSelectSingle";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
 import useQueryState, {
 	numberFilter,
@@ -143,6 +144,8 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	//* query once this matches, so stale filters never hit a new collection
 	const [filterSchemaContextKey, setFilterSchemaContextKey] =
 		createSignal<string>();
+	let previousActiveCollectionKey: string | undefined;
+
 	const searchParams = useQueryState({
 		mode: "memory",
 		schema: {
@@ -238,7 +241,23 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		enabled: () =>
 			searchParams.ready() &&
 			collection.isSuccess &&
+			collection.data?.data.mode !== "single" &&
 			filterSchemaContextKey() === filterSchemaContext(),
+	});
+	const singleDocument = api.documents.useGetSingle({
+		queryParams: {
+			location: {
+				collectionKey: collectionKey,
+				id: () => collection.data?.data.documentId ?? undefined,
+				version: "latest",
+			},
+			//* single-document consumers (including variables) need the full field
+			//* payload; the endpoint only loads fields when refs or bricks are included
+			include: { refs: true },
+		},
+		enabled: () =>
+			collection.data?.data.mode === "single" &&
+			typeof collection.data?.data.documentId === "number",
 	});
 
 	// ----------------------------------------
@@ -297,10 +316,15 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				value: collection.data?.data.details.singularName,
 			}) || T()("common.collection"),
 	);
-	const isSuccess = createMemo(
-		() => documents.isSuccess || collection.isSuccess,
+	const isSingleCollection = createMemo(
+		() => collection.data?.data.mode === "single",
 	);
-	const isError = createMemo(() => documents.isError || collection.isError);
+	const singleDocumentExcluded = createMemo(
+		() =>
+			isSingleCollection() &&
+			typeof collection.data?.data.documentId === "number" &&
+			collection.data.data.documentId === excludedDocumentId(),
+	);
 	const collectionOptions = createMemo(() =>
 		allowedCollectionKeys().map((collectionKey) => {
 			const collection = collections.data?.data.find(
@@ -398,6 +422,47 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	createEffect(() => {
 		setSelectedDocuments(props.selectedRefs ?? []);
 	});
+	createEffect(() => {
+		const active = collectionKey();
+		if (!active) return;
+
+		const changed =
+			previousActiveCollectionKey !== undefined &&
+			previousActiveCollectionKey !== active;
+		previousActiveCollectionKey = active;
+
+		if (changed && !isMultiple()) setSelectedDocuments([]);
+	});
+	createEffect(() => {
+		const active = collectionKey();
+		const activeCollection = collection.data?.data;
+		if (
+			!active ||
+			activeCollection?.key !== active ||
+			activeCollection.mode !== "single"
+		) {
+			return;
+		}
+
+		if (
+			singleDocumentExcluded() ||
+			typeof activeCollection.documentId !== "number" ||
+			singleDocument.isError
+		) {
+			setSelectedDocuments([]);
+			return;
+		}
+
+		const document = singleDocument.data?.data;
+		if (
+			document?.collectionKey !== active ||
+			document.id !== activeCollection.documentId
+		) {
+			return;
+		}
+
+		setSelectedDocuments([documentResponseToRef(document)]);
+	});
 
 	// ----------------------------------------
 	// Functions
@@ -438,14 +503,16 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		<div class="flex flex-col h-full">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap items-center">
-					<FilterSectionToggle
-						open={filterSectionOpen()}
-						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-						searchParams={searchParams}
-						active={searchParams.hasFiltersApplied()}
-						disabled={getFilterFields().length === 0}
-					/>
-					<Sort sorts={documentSortOptions()} searchParams={searchParams} />
+					<Show when={!isSingleCollection()}>
+						<FilterSectionToggle
+							open={filterSectionOpen()}
+							onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
+							searchParams={searchParams}
+							active={searchParams.hasFiltersApplied()}
+							disabled={getFilterFields().length === 0}
+						/>
+						<Sort sorts={documentSortOptions()} searchParams={searchParams} />
+					</Show>
 					<Show when={allowedCollectionKeys().length > 1}>
 						<div class="w-56 max-w-full">
 							<Select
@@ -464,139 +531,166 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 							/>
 						</div>
 					</Show>
-					<Show when={searchParams.hasFiltersApplied()}>
+					<Show
+						when={!isSingleCollection() && searchParams.hasFiltersApplied()}
+					>
 						<ResetFilters onReset={searchParams.clearFilters} />
 					</Show>
 				</div>
-				<PerPage options={[10, 20, 40]} searchParams={searchParams} />
+				<Show when={!isSingleCollection()}>
+					<PerPage options={[10, 20, 40]} searchParams={searchParams} />
+				</Show>
 			</div>
 
-			<FilterSection
-				open={filterSectionOpen()}
-				setOpen={setFilterSectionOpen}
-				subject={collectionName()}
-				preserveSubjectCase={true}
-				fields={getFilterFields()}
-				searchParams={searchParams}
-				embedded={true}
-			/>
-
-			<DynamicContent
-				class="bg-card-base border border-border rounded-md"
-				state={{
-					isError: isError(),
-					isSuccess: isSuccess(),
-					searchParams: searchParams,
-					isEmpty: documents.data?.data.length === 0,
-					isLoading: collection.isLoading,
-				}}
-				options={{}}
-				slot={{
-					footer: (
-						<Paginated
-							state={{
-								searchParams: searchParams,
-								meta: documents.data?.meta,
-							}}
-							options={{
-								embedded: true,
-							}}
-						/>
-					),
-				}}
-				copy={{
-					noEntries: {
-						title: T()("empty.states.documents.title", {
-							collectionMultiple: collectionName(),
-						}),
-						description: T()("empty.states.documents.select.description", {
-							collectionMultiple: collectionName().toLowerCase(),
-							collectionSingle: collectionSingularName().toLowerCase(),
-						}),
-						button: T()("actions.create.document", {
-							collectionSingle: collectionSingularName(),
-						}),
-					},
-				}}
-				callback={{
-					resetFilters: searchParams.clearFilters,
-				}}
-			>
-				<Table
-					key={`documents.list.${collection.data?.data?.key}`}
-					rows={documents.data?.data.length || 0}
+			<Show when={!isSingleCollection()}>
+				<FilterSection
+					open={filterSectionOpen()}
+					setOpen={setFilterSectionOpen}
+					subject={collectionName()}
+					preserveSubjectCase={true}
+					fields={getFilterFields()}
 					searchParams={searchParams}
-					head={[
-						{
-							label: "",
-							key: "select",
-						},
-						...getTableHeadColumns(),
-						...workflowHeadColumn(),
-						{
-							label: T()("common.created.by"),
-							key: "createdBy",
-							icon: <FaSolidUser />,
-							minWidth: 180,
-						},
-						{
-							label: T()("common.updated.by"),
-							key: "updatedBy",
-							icon: <FaSolidUser />,
-							minWidth: 180,
-						},
-						{
-							label: T()("common.updated.at"),
-							key: "updated_at",
-							icon: <FaSolidCalendar />,
-						},
-					]}
-					state={{
-						isLoading: documents.isFetching,
-						isSuccess: documents.isSuccess,
-					}}
-					options={{
-						isSelectable: false,
-						padding: "16",
-					}}
-					theme="secondary"
-				>
-					{({ include, isSelectable, selected, setSelected }) => (
-						<Index each={documents.data?.data || []}>
-							{(doc, i) => (
-								<DocumentRow
-									index={i}
-									document={doc()}
-									fieldInclude={getCollectionFieldIncludes()}
-									collection={collection.data?.data as Collection}
-									collectionsByKey={relationCollectionsByKey()}
-									include={include}
-									contentLocale={contentLocale()}
-									selected={selected[i]}
+					embedded={true}
+				/>
+			</Show>
+
+			<Show
+				when={isSingleCollection() && collection.data?.data}
+				fallback={
+					<DynamicContent
+						class="bg-card-base border border-border rounded-md"
+						state={{
+							isError: documents.isError || collection.isError,
+							isSuccess: documents.isSuccess,
+							searchParams: searchParams,
+							isEmpty: documents.data?.data.length === 0,
+							isLoading: collection.isLoading,
+						}}
+						options={{}}
+						slot={{
+							footer: (
+								<Paginated
+									state={{
+										searchParams: searchParams,
+										meta: documents.data?.meta,
+									}}
 									options={{
-										isSelectable,
-										padding: "16",
-									}}
-									callbacks={{
-										setSelected: setSelected,
-										onClick: () => toggleSelectedDocument(doc()),
-									}}
-									theme="secondary"
-									current={false}
-									selection={{
-										selected: selectedDocuments().some(
-											(selectedDocument) =>
-												selectedDocument.id === doc().id &&
-												selectedDocument.collectionKey === doc().collectionKey,
-										),
-										onChange: () => toggleSelectedDocument(doc()),
+										embedded: true,
 									}}
 								/>
+							),
+						}}
+						copy={{
+							noEntries: {
+								title: T()("empty.states.documents.title", {
+									collectionMultiple: collectionName(),
+								}),
+								description: T()("empty.states.documents.select.description", {
+									collectionMultiple: collectionName().toLowerCase(),
+									collectionSingle: collectionSingularName().toLowerCase(),
+								}),
+								button: T()("actions.create.document", {
+									collectionSingle: collectionSingularName(),
+								}),
+							},
+						}}
+						callback={{
+							resetFilters: searchParams.clearFilters,
+						}}
+					>
+						<Table
+							key={`documents.list.${collection.data?.data?.key}`}
+							rows={documents.data?.data.length || 0}
+							searchParams={searchParams}
+							head={[
+								{
+									label: "",
+									key: "select",
+								},
+								...getTableHeadColumns(),
+								...workflowHeadColumn(),
+								{
+									label: T()("common.created.by"),
+									key: "createdBy",
+									icon: <FaSolidUser />,
+									minWidth: 180,
+								},
+								{
+									label: T()("common.updated.by"),
+									key: "updatedBy",
+									icon: <FaSolidUser />,
+									minWidth: 180,
+								},
+								{
+									label: T()("common.updated.at"),
+									key: "updated_at",
+									icon: <FaSolidCalendar />,
+								},
+							]}
+							state={{
+								isLoading: documents.isFetching,
+								isSuccess: documents.isSuccess,
+							}}
+							options={{
+								isSelectable: false,
+								padding: "16",
+							}}
+							theme="secondary"
+						>
+							{({ include, isSelectable, selected, setSelected }) => (
+								<Index each={documents.data?.data || []}>
+									{(doc, i) => (
+										<DocumentRow
+											index={i}
+											document={doc()}
+											fieldInclude={getCollectionFieldIncludes()}
+											collection={collection.data?.data as Collection}
+											collectionsByKey={relationCollectionsByKey()}
+											include={include}
+											contentLocale={contentLocale()}
+											selected={selected[i]}
+											options={{
+												isSelectable,
+												padding: "16",
+											}}
+											callbacks={{
+												setSelected: setSelected,
+												onClick: () => toggleSelectedDocument(doc()),
+											}}
+											theme="secondary"
+											current={false}
+											selection={{
+												selected: selectedDocuments().some(
+													(selectedDocument) =>
+														selectedDocument.id === doc().id &&
+														selectedDocument.collectionKey ===
+															doc().collectionKey,
+												),
+												onChange: () => toggleSelectedDocument(doc()),
+											}}
+										/>
+									)}
+								</Index>
 							)}
-						</Index>
-					)}
-				</Table>
-			</DynamicContent>
+						</Table>
+					</DynamicContent>
+				}
+			>
+				{(activeCollection) => (
+					<DocumentSelectSingle
+						collection={activeCollection()}
+						document={singleDocument.data?.data}
+						contentLocale={contentLocale()}
+						isLoading={
+							collection.isLoading ||
+							(typeof activeCollection().documentId === "number" &&
+								singleDocument.isLoading)
+						}
+						isError={collection.isError || singleDocument.isError}
+						isExcluded={singleDocumentExcluded()}
+					/>
+				)}
+			</Show>
 			<PanelFooterActions
 				selectedCount={selectedDocuments().length}
 				onClose={props.onClose}

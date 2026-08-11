@@ -1,5 +1,5 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
-import type { MediaRef, ProfilePicture } from "../media/types.js";
+import type { MediaRef, MediaType, ProfilePicture } from "../media/types.js";
 import type { UserRef } from "../users/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
@@ -526,7 +526,7 @@ export interface MediaFieldConfig
 		minItems?: number;
 		maxItems?: number;
 		extensions?: string[];
-		type?: import("../media/types.js").MediaType;
+		type?: MediaType;
 		width?: {
 			min?: number;
 			max?: number;
@@ -587,7 +587,8 @@ export interface RichTextFieldConfig
 			external?: boolean;
 			internal?: boolean | string[];
 		};
-		media?: boolean | Array<"image" | "audio" | "video">;
+		media?: boolean | MediaType[];
+		documents?: boolean | string[];
 		bricks?: boolean | string[];
 		variables?: boolean | string[];
 		appearance?: "default" | "seamless";

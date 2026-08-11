@@ -1,9 +1,10 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 
-/** Removes response-only render values without changing reference identities. */
+/** Removes derived and obsolete render values without changing reference IDs. */
 const normalizeRichTextValue = (node: RichTextJSON): RichTextJSON => {
 	const attrs = { ...node.attrs };
 
+	if (node.type === "lucidDocument") delete attrs.document;
 	if (node.type === "lucidMedia") delete attrs.media;
 	if (node.type === "lucidVariable") delete attrs.value;
 

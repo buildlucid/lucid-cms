@@ -25,7 +25,8 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 			external?: boolean;
 			internal?: boolean | string[];
 		};
-		media?: boolean | Array<Extract<MediaType, "image" | "audio" | "video">>;
+		media?: boolean | MediaType[];
+		documents?: boolean | string[];
 		bricks?: boolean | string[];
 		variables?: boolean | string[];
 		appearance?: "default" | "seamless";

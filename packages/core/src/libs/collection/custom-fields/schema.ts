@@ -106,8 +106,21 @@ const customFieldSchema = z.object({
 				})
 				.optional(),
 			media: z
-				.union([z.boolean(), z.array(z.enum(["image", "audio", "video"]))])
+				.union([
+					z.boolean(),
+					z.array(
+						z.enum([
+							"image",
+							"video",
+							"audio",
+							"document",
+							"archive",
+							"unknown",
+						]),
+					),
+				])
 				.optional(),
+			documents: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
 			bricks: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
 			variables: z.union([z.boolean(), z.array(z.string().min(1))]).optional(),
 			appearance: z.enum(["default", "seamless"]).optional(),

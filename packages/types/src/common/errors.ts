@@ -51,6 +51,11 @@ export type ErrorResult = Record<string, ErrorResultValue>;
 
 export type RichTextFieldErrorReference =
 	| {
+			type: "rich-text-document";
+			collectionKey: string;
+			documentId: number;
+	  }
+	| {
 			type: "rich-text-media";
 			mediaId: number;
 	  }

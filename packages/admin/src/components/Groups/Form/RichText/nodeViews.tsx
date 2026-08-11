@@ -1,14 +1,17 @@
 import {
+	LucidDocument,
 	LucidEmbeddedBrick,
 	LucidMedia,
 	LucidVariable,
 } from "@lucidcms/rich-text";
-import { type JSX, untrack } from "solid-js";
+import type { Editor } from "@tiptap/core";
+import { createSignal, type JSX, untrack } from "solid-js";
 import { render } from "solid-js/web";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { getRichTextDocumentFieldText, getRichTextMediaTypes } from "./helpers";
+import { getRichTextDocumentFieldText } from "./helpers";
 import {
+	DocumentNodeView,
 	EmbeddedBrickNodeView,
 	MediaNodeView,
 	VariableNodeView,
@@ -41,6 +44,18 @@ const getHydratedVariableText = (value: unknown): string => {
 	return "";
 };
 
+const removeNode = (
+	editor: Editor,
+	getPos: () => number | undefined,
+	nodeSize: number,
+) => {
+	const position = getPos();
+	if (typeof position !== "number") return;
+	editor.view.dispatch(
+		editor.view.state.tr.delete(position, position + nodeSize),
+	);
+};
+
 /** Builds editor node views for Lucid reference nodes. */
 export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 	LucidMedia.extend({
@@ -58,7 +73,6 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						reference={reference}
 						locale={options?.locale}
 						isEditable={() => editor.isEditable}
-						allowedTypes={getRichTextMediaTypes(options?.media)}
 						getPos={getPos}
 						setMediaId={(position, nextId) => {
 							editor.view.dispatch(
@@ -68,6 +82,7 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 								}),
 							);
 						}}
+						remove={() => removeNode(editor, getPos, node.nodeSize)}
 						selectMedia={options?.callbacks?.selectMedia}
 						errors={() =>
 							options?.validation?.getReferenceErrors?.({
@@ -77,6 +92,64 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						}
 					/>
 				));
+			};
+		},
+	}),
+	LucidDocument.extend({
+		addNodeView() {
+			return ({ node, editor, getPos }) => {
+				const [currentNode, setCurrentNode] = createSignal(node);
+				const attrs = () => currentNode().attrs;
+				const reference = () => {
+					const { collectionKey, documentId } = attrs();
+					return typeof collectionKey === "string" &&
+						typeof documentId === "number"
+						? untrack(() =>
+								options?.references?.document?.(collectionKey, documentId),
+							)
+						: undefined;
+				};
+				const nodeView = renderNodeView(() => (
+					<DocumentNodeView
+						collectionKey={attrs().collectionKey}
+						documentId={attrs().documentId}
+						reference={reference()}
+						collections={options?.documentCollections ?? []}
+						locale={options?.locale}
+						isEditable={() => editor.isEditable}
+						getPos={getPos}
+						setDocument={(position, document) => {
+							editor.view.dispatch(
+								editor.view.state.tr.setNodeMarkup(position, undefined, {
+									collectionKey: document.collectionKey,
+									documentId: document.id,
+								}),
+							);
+						}}
+						remove={() => removeNode(editor, getPos, currentNode().nodeSize)}
+						selectDocument={options?.callbacks?.selectDocument}
+						errors={() => {
+							const { collectionKey, documentId } = attrs();
+							return typeof collectionKey === "string" &&
+								typeof documentId === "number"
+								? (options?.validation?.getReferenceErrors?.({
+										type: "rich-text-document",
+										collectionKey,
+										documentId,
+									}) ?? [])
+								: [];
+						}}
+					/>
+				));
+
+				return {
+					...nodeView,
+					update: (nextNode) => {
+						if (nextNode.type !== node.type) return false;
+						setCurrentNode(nextNode);
+						return true;
+					},
+				};
 			};
 		},
 	}),
@@ -134,7 +207,7 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 	}),
 	LucidEmbeddedBrick.extend({
 		addNodeView() {
-			return ({ node, editor }) => {
+			return ({ node, editor, getPos }) => {
 				const refValue = node.attrs.ref;
 				const brick =
 					typeof refValue === "string"
@@ -161,6 +234,7 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						label={label}
 						description={description}
 						isEditable={() => editor.isEditable}
+						remove={() => removeNode(editor, getPos, node.nodeSize)}
 						editEmbeddedBrick={options?.callbacks?.editEmbeddedBrick}
 						errors={() =>
 							typeof refValue === "string"

@@ -25,6 +25,7 @@ import {
 	RichText,
 	Textarea,
 } from "@/components/Groups/Form";
+import type { RichTextOptions } from "@/components/Groups/Form/RichText";
 import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import Pill from "@/components/Partials/Pill";
@@ -78,9 +79,12 @@ const DraftEditor: Component<{
 	jsonValid?: boolean;
 	languages?: string[];
 	selectedLocaleCount: number;
+	richTextOptions?: RichTextOptions;
 	onChange: (_localeCode: string, _value: unknown) => void;
 	onJsonChange: (_localeCode: string, _value: string) => void;
 }> = (props) => {
+	// -----------------------------
+	// Memos
 	const codeValue = () => getCodeDraftValue(props.value);
 	const codeLanguages = () => {
 		const configured = props.languages ?? [];
@@ -91,6 +95,8 @@ const DraftEditor: Component<{
 	const codeLanguage = () =>
 		codeValue()?.language ?? codeLanguages()[0] ?? "text";
 
+	// -----------------------------
+	// Render
 	return (
 		<Switch>
 			<Match when={props.fieldType === "text"}>
@@ -161,6 +167,11 @@ const DraftEditor: Component<{
 					value={props.value as RichTextJSON}
 					onChange={(nextValue) => props.onChange(props.localeCode, nextValue)}
 					noMargin
+					options={{
+						...props.richTextOptions,
+						locale: props.localeCode,
+						fullscreen: false,
+					}}
 				/>
 			</Match>
 		</Switch>
@@ -201,6 +212,9 @@ const CustomFieldGenerationModal: Component = () => {
 	const targetId = createMemo(() => modal()?.data.targetId);
 	const isOpen = createMemo(() => modal() !== undefined);
 	const field = createMemo(() => target()?.field());
+	const richTextOptions = createMemo(() =>
+		target()?.preview?.richTextOptions?.(),
+	);
 	const defaultLocale = createMemo(() =>
 		getDefaultTranslationLocale(contentLocaleStore.get.locales),
 	);
@@ -938,6 +952,7 @@ const CustomFieldGenerationModal: Component = () => {
 														jsonValid={activeJsonValid()[activeLocale()]}
 														languages={field()?.languages}
 														selectedLocaleCount={1}
+														richTextOptions={richTextOptions()}
 														onChange={(targetLocale, nextValue) =>
 															setDraft(field()?.type, targetLocale, nextValue)
 														}
@@ -988,6 +1003,7 @@ const CustomFieldGenerationModal: Component = () => {
 																jsonValid={activeJsonValid()[localeCode]}
 																languages={field()?.languages}
 																selectedLocaleCount={selectedLocales().length}
+																richTextOptions={richTextOptions()}
 																onChange={(targetLocale, nextValue) =>
 																	setDraft(
 																		field()?.type,

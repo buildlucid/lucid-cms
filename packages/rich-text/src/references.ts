@@ -1,23 +1,29 @@
 import { type RichTextJSON, richTextNodeNames } from "./types.js";
 
+/** Raw references whose attributes remain unknown until application validation. */
 export type RichTextReference =
 	| {
-			type: "media";
+			type: "rich-text-document";
+			collectionKey: unknown;
+			documentId: unknown;
+	  }
+	| {
+			type: "rich-text-media";
 			mediaId: unknown;
 	  }
 	| {
-			type: "variable";
+			type: "rich-text-variable";
 			collectionKey: unknown;
 			documentId: unknown;
 			fieldKey: unknown;
 	  }
 	| {
-			type: "document-link";
+			type: "rich-text-document-link";
 			collectionKey: unknown;
 			documentId: unknown;
 	  }
 	| {
-			type: "embedded-brick";
+			type: "rich-text-embedded-brick";
 			ref: unknown;
 	  };
 
@@ -29,13 +35,24 @@ export const extractRichTextReferences = (
 	const references: RichTextReference[] = [];
 
 	const visit = (node: RichTextJSON) => {
+		if (node.type === richTextNodeNames.document) {
+			references.push({
+				type: "rich-text-document",
+				collectionKey: node.attrs?.collectionKey,
+				documentId: node.attrs?.documentId,
+			});
+		}
+
 		if (node.type === richTextNodeNames.media) {
-			references.push({ type: "media", mediaId: node.attrs?.mediaId });
+			references.push({
+				type: "rich-text-media",
+				mediaId: node.attrs?.mediaId,
+			});
 		}
 
 		if (node.type === richTextNodeNames.variable) {
 			references.push({
-				type: "variable",
+				type: "rich-text-variable",
 				collectionKey: node.attrs?.collectionKey,
 				documentId: node.attrs?.documentId,
 				fieldKey: node.attrs?.fieldKey,
@@ -44,7 +61,7 @@ export const extractRichTextReferences = (
 
 		if (node.type === richTextNodeNames.embeddedBrick) {
 			references.push({
-				type: "embedded-brick",
+				type: "rich-text-embedded-brick",
 				ref: node.attrs?.ref,
 			});
 		}
@@ -52,7 +69,7 @@ export const extractRichTextReferences = (
 		for (const mark of node.marks ?? []) {
 			if (mark.type !== "link" || mark.attrs?.kind !== "document") continue;
 			references.push({
-				type: "document-link",
+				type: "rich-text-document-link",
 				collectionKey: mark.attrs.collectionKey,
 				documentId: mark.attrs.documentId,
 			});
@@ -72,7 +89,8 @@ export const extractEmbeddedBrickRefs = (
 	return Array.from(
 		new Set(
 			extractRichTextReferences(json).flatMap((reference) =>
-				reference.type === "embedded-brick" && typeof reference.ref === "string"
+				reference.type === "rich-text-embedded-brick" &&
+				typeof reference.ref === "string"
 					? [reference.ref]
 					: [],
 			),

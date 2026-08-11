@@ -1,9 +1,20 @@
-import type { RichTextHydratedMedia, RichTextJSON } from "@lucidcms/rich-text";
-import type { DocumentRef, Media } from "../../../../../../types/response.js";
+import type { RichTextJSON } from "@lucidcms/rich-text";
+import type {
+	DocumentFieldMap,
+	DocumentFieldValueMap,
+	DocumentRef,
+	Media,
+} from "../../../../../../types/response.js";
 import { getObject } from "../../../../../../utils/helpers/get-typed-value.js";
 import type { CustomFieldResponseFormatContext } from "../../../types.js";
+import { getLocalizedString, getMediaRenderData } from "./media-render-data.js";
 
-const isDocumentRef = (value: unknown): value is DocumentRef => {
+type HydratableDocumentRef = DocumentRef<
+	string,
+	DocumentFieldMap | DocumentFieldValueMap | null
+>;
+
+const isDocumentRef = (value: unknown): value is HydratableDocumentRef => {
 	const reference = getObject(value);
 	return (
 		reference !== null &&
@@ -24,19 +35,8 @@ const isMediaRef = (value: unknown): value is Media => {
 	);
 };
 
-const getLocalizedString = (value: unknown, locale: string): string => {
-	const translations = getObject(value);
-	if (!translations) return "";
-	if (typeof translations[locale] === "string") return translations[locale];
-	return (
-		Object.values(translations).find(
-			(item): item is string => typeof item === "string",
-		) ?? ""
-	);
-};
-
 const getDocumentFieldValue = (
-	reference: DocumentRef,
+	reference: HydratableDocumentRef,
 	fieldKey: string,
 	locale: string,
 ): string | number | boolean | null => {
@@ -65,33 +65,6 @@ const getDocumentFieldValue = (
 		: null;
 };
 
-const getMediaRenderData = (
-	reference: Media,
-	locale: string,
-): RichTextHydratedMedia | null => {
-	if (reference.type === "image") {
-		return {
-			type: "image",
-			src: reference.file.url,
-			alt:
-				getLocalizedString(reference.alt, locale) ||
-				getLocalizedString(reference.title, locale),
-		};
-	}
-	if (reference.type === "audio") {
-		return { type: "audio", src: reference.file.url };
-	}
-	if (reference.type === "video") {
-		return {
-			type: "video",
-			src: reference.file.url,
-			poster: reference.poster?.file.url ?? null,
-		};
-	}
-
-	return null;
-};
-
 /** Adds response-only render values while preserving each reference identity. */
 const hydrateRichTextValue = (
 	value: RichTextJSON,
@@ -116,7 +89,11 @@ const hydrateRichTextValue = (
 					? mediaMap.get(attrs.mediaId)
 					: undefined;
 			attrs.media = reference
-				? getMediaRenderData(reference, context.locale)
+				? getMediaRenderData(
+						reference,
+						context.locale,
+						context.mediaImagePresets,
+					)
 				: null;
 		}
 
