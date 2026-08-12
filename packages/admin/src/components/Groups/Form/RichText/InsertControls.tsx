@@ -1,6 +1,7 @@
 import { richTextNodeNames } from "@lucidcms/rich-text";
 import type { Editor, JSONContent } from "@tiptap/core";
-import { NodeSelection } from "@tiptap/pm/state";
+import { GapCursor } from "@tiptap/pm/gapcursor";
+import { NodeSelection, Selection, TextSelection } from "@tiptap/pm/state";
 import {
 	FaSolidCompress,
 	FaSolidCubes,
@@ -38,13 +39,49 @@ const getReferenceInsertionRange = (
 	return { from: selection.from, to: selection.to };
 };
 
-/** Inserts at the captured range rather than whichever selection is active later. */
+/** Restores a valid forward-facing caret or gap cursor at the inserted node. */
+const focusReferenceInsertionEnd = (editor: Editor, position: number) => {
+	requestAnimationFrame(() => {
+		if (editor.isDestroyed) return;
+
+		const resolvedPosition = editor.state.doc.resolve(
+			Math.min(position, editor.state.doc.content.size),
+		);
+		const forwardSelection = Selection.near(resolvedPosition, 1);
+		const selection = resolvedPosition.parent.inlineContent
+			? TextSelection.create(editor.state.doc, resolvedPosition.pos)
+			: forwardSelection instanceof TextSelection
+				? forwardSelection
+				: new GapCursor(resolvedPosition);
+
+		editor.view.dispatch(
+			editor.state.tr.setSelection(selection).scrollIntoView(),
+		);
+		editor.view.focus();
+	});
+};
+
+/**
+ * Inserts at the captured range and restores the caret after the new node once
+ * the asynchronous picker has finished closing.
+ */
 const insertReferenceNode = (
 	editor: Editor,
 	range: ReferenceInsertionRange,
 	content: JSONContent,
 ) => {
-	editor.chain().focus().insertContentAt(range, content).run();
+	let insertionEnd = range.to;
+	const inserted = editor
+		.chain()
+		.insertContentAt(range, content)
+		.command(({ tr }) => {
+			insertionEnd = tr.selection.to;
+			return true;
+		})
+		.run();
+	if (!inserted) return;
+
+	focusReferenceInsertionEnd(editor, insertionEnd);
 };
 
 const InsertControls: Component<{
@@ -58,10 +95,11 @@ const InsertControls: Component<{
 	// Memos
 	const hasReferenceControls = createMemo(
 		() =>
-			isRichTextOptionEnabled(props.options?.media) ||
-			isRichTextOptionEnabled(props.options?.documents) ||
-			isRichTextVariableOptionEnabled(props.options?.variables) ||
-			isRichTextOptionEnabled(props.options?.bricks),
+			props.options?.referenceControls !== false &&
+			(isRichTextOptionEnabled(props.options?.media) ||
+				isRichTextOptionEnabled(props.options?.documents) ||
+				isRichTextVariableOptionEnabled(props.options?.variables) ||
+				isRichTextOptionEnabled(props.options?.bricks)),
 	);
 
 	// ----------------------------------------

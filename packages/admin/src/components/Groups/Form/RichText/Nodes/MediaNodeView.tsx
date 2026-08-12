@@ -18,6 +18,7 @@ import Pill from "@/components/Partials/Pill";
 import T from "@/translations";
 import { resolveFieldErrorMessage } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import { countFieldErrors } from "@/utils/structural-field-helpers";
 import type { RichTextOptions } from "../types";
 import NodeActions from "./NodeActions";
 
@@ -37,7 +38,8 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 	// -------------------------------
 	// Memos
 	const available = () => Boolean(props.reference?.file.url);
-	const hasErrors = createMemo(() => props.errors().length > 0);
+	const errorCount = createMemo(() => countFieldErrors(props.errors()));
+	const hasErrors = createMemo(() => errorCount() > 0);
 	const errorMessage = createMemo(() => {
 		const message = props.errors()[0]?.message;
 		return message ? resolveFieldErrorMessage(message) : undefined;
@@ -115,10 +117,15 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 			<Show
 				when={available() && props.reference ? props.reference : undefined}
 				fallback={
-					<div class="flex min-h-24 min-w-0 grow items-center gap-3 rounded-xl border border-error-base/30 bg-input-base px-5 py-8">
-						<span class="min-w-0 grow text-left text-xs font-medium text-error-base">
+					<div class="min-w-0 grow overflow-hidden rounded-lg border border-border bg-input-base px-4 py-3">
+						<p class="truncate text-sm font-medium text-title mb-0!">
+							{T()("editor.rich.text.media.fallback", {
+								id: typeof props.mediaId === "number" ? props.mediaId : "?",
+							})}
+						</p>
+						<p class="mt-1 text-xs font-medium text-error-base mb-0!">
 							{errorMessage() ?? T()("editor.rich.text.media.unavailable")}
-						</span>
+						</p>
 					</div>
 				}
 			>
@@ -262,14 +269,16 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 					</div>
 				)}
 			</Show>
-			<NodeActions
-				editLabel={T()("editor.rich.text.media.edit")}
-				removeLabel={T()("editor.rich.text.media.remove")}
-				editDisabled={typeof props.mediaId !== "number" || !props.isEditable()}
-				showRemove={props.isEditable()}
-				onEdit={selectMedia}
-				onRemove={props.remove}
-			/>
+			{props.isEditable() ? (
+				<NodeActions
+					editLabel={T()("editor.rich.text.media.edit")}
+					removeLabel={T()("editor.rich.text.media.remove")}
+					editDisabled={typeof props.mediaId !== "number"}
+					showRemove
+					onEdit={selectMedia}
+					onRemove={props.remove}
+				/>
+			) : null}
 		</div>
 	);
 };

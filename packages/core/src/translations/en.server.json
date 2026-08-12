@@ -161,7 +161,7 @@
 	"core.fields.media.validation.extension.invalid": "Media must be one of the following extensions: {{extensions}}",
 	"core.fields.media.validation.not.found": "We couldn't find the media you selected.",
 	"core.fields.user.validation.not.found": "We couldn't find the user you selected",
-	"core.fields.relation.validation.not.found": "We couldn't find the document you selected",
+	"core.fields.relation.validation.not.found": "We couldn't find the document you selected.",
 	"core.fields.relation.validation.min.items": "Select at least {{min}} items",
 	"core.fields.relation.validation.max.items": "Select no more than {{max}} items",
 	"core.fields.media.validation.type.missing": "This media does not have a type",

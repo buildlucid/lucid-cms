@@ -291,31 +291,46 @@ const Toolbar: Component<{
 			}
 
 			chain = chain.focus().extendMarkRange("link");
-			const href = values.kind === "external" ? values.url.trim() : null;
-			if (values.kind === "external" && !href) {
-				chain.unsetLink().run();
-				return;
+			let linkAttrs: {
+				href: string | null;
+				kind: "external" | "document";
+				collectionKey: string | null;
+				documentId: number | null;
+				target: string | null;
+				rel: string | null;
+			};
+
+			if (values.kind === "document") {
+				const document = values.document;
+				if (!document) {
+					chain.unsetLink().run();
+					return;
+				}
+				linkAttrs = {
+					href: null,
+					kind: "document",
+					collectionKey: document.collectionKey,
+					documentId: document.id,
+					target: values.openInNewTab ? "_blank" : null,
+					rel: values.openInNewTab ? "noopener noreferrer" : null,
+				};
+			} else {
+				const href = values.url.trim();
+				if (!href) {
+					chain.unsetLink().run();
+					return;
+				}
+				linkAttrs = {
+					href,
+					kind: "external",
+					collectionKey: null,
+					documentId: null,
+					target: values.openInNewTab ? "_blank" : null,
+					rel: values.openInNewTab ? "noopener noreferrer" : null,
+				};
 			}
 
 			const label = values.label.trim();
-			const linkAttrs =
-				values.kind === "document"
-					? {
-							href: null,
-							kind: "document",
-							collectionKey: values.collectionKey,
-							documentId: values.documentId,
-							target: values.openInNewTab ? "_blank" : null,
-							rel: values.openInNewTab ? "noopener noreferrer" : null,
-						}
-					: {
-							href,
-							kind: "external",
-							collectionKey: null,
-							documentId: null,
-							target: values.openInNewTab ? "_blank" : null,
-							rel: values.openInNewTab ? "noopener noreferrer" : null,
-						};
 
 			if (label) {
 				chain

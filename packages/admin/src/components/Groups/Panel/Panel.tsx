@@ -64,6 +64,7 @@ export const Panel: Component<{
 		descriptionIcon?: JSXElement;
 		fetchError?: string;
 		submit?: string;
+		cancel?: string;
 	};
 	callbacks?: {
 		onClose?: () => void;
@@ -326,7 +327,7 @@ export const Panel: Component<{
 																type="button"
 																onClick={() => props.state.setOpen(false)}
 															>
-																{T()("common.close")}
+																{props.copy?.cancel ?? T()("common.close")}
 															</Button>
 															<Show when={props.copy?.submit}>
 																<Button
@@ -391,7 +392,7 @@ export const Panel: Component<{
 															type="button"
 															onClick={() => props.state.setOpen(false)}
 														>
-															{T()("common.close")}
+															{props.copy?.cancel ?? T()("common.close")}
 														</Button>
 														<Show when={props.copy?.submit}>
 															<Button

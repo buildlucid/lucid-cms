@@ -5,8 +5,10 @@ import {
 	onCleanup,
 	onMount,
 	Show,
+	useContext,
 } from "solid-js";
 import { AiDraftReviewPill, AiIconButton } from "@/components/Groups/AI";
+import { PanelLayerContext } from "@/components/Groups/Panel/PanelLayerContext";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import aiModalsStore, {
@@ -214,7 +216,11 @@ const useCustomFieldGeneration = () => {
 			aiModalsStore.setApplying(false);
 		}
 	};
-	const open = (target: CustomFieldGenerationTarget, id = getTargetId()) => {
+	const open = (
+		target: CustomFieldGenerationTarget,
+		id = getTargetId(),
+		zIndex?: number,
+	) => {
 		if (!featureEnabled()) return;
 		if (spawnAiFeatureAccessToast(accessState())) return;
 		if (targetIsDisabled(target)) return;
@@ -223,6 +229,7 @@ const useCustomFieldGeneration = () => {
 			data: {
 				target,
 				targetId: id,
+				zIndex,
 			},
 		});
 	};
@@ -236,41 +243,45 @@ const useCustomFieldGeneration = () => {
 		target: CustomFieldGenerationTarget,
 	): Component => {
 		const id = getTargetId();
-		const ActionButton: Component = () => (
-			<Show when={featureEnabled()}>
-				<div class="relative">
-					<AiIconButton
-						label={T()("ai.custom.field.generate.action")}
-						tooltip={targetTooltip(target)}
-						disabled={targetIsDisabled(target)}
-						disabledClickable={accessState().disabled}
-						loading={isTargetLoading(id)}
-						quickActionActive={superKeyHeld() && !targetIsDisabled(target)}
-						variant="subtle"
-						onClick={(event) => {
-							event.preventDefault();
-							event.stopPropagation();
-							if (event.metaKey || superKeyHeld()) {
-								void generateAndApply(target, id);
-								return;
-							}
+		const ActionButton: Component = () => {
+			const panelLayer = useContext(PanelLayerContext);
 
-							open(target, id);
-						}}
-					/>
-					<Show when={pendingDirectGeneration()?.targetId === id}>
-						<AiDraftReviewPill
-							label={T()("ai.custom.field.generate.quick.review.label")}
-							disabled={aiModalsStore.get.isApplying}
-							onAccept={acceptDirectGeneration}
-							onReject={() => {
-								void rejectDirectGeneration(target);
+			return (
+				<Show when={featureEnabled()}>
+					<div class="relative">
+						<AiIconButton
+							label={T()("ai.custom.field.generate.action")}
+							tooltip={targetTooltip(target)}
+							disabled={targetIsDisabled(target)}
+							disabledClickable={accessState().disabled}
+							loading={isTargetLoading(id)}
+							quickActionActive={superKeyHeld() && !targetIsDisabled(target)}
+							variant="subtle"
+							onClick={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								if (event.metaKey || superKeyHeld()) {
+									void generateAndApply(target, id);
+									return;
+								}
+
+								open(target, id, panelLayer ? panelLayer() + 20 : undefined);
 							}}
 						/>
-					</Show>
-				</div>
-			</Show>
-		);
+						<Show when={pendingDirectGeneration()?.targetId === id}>
+							<AiDraftReviewPill
+								label={T()("ai.custom.field.generate.quick.review.label")}
+								disabled={aiModalsStore.get.isApplying}
+								onAccept={acceptDirectGeneration}
+								onReject={() => {
+									void rejectDirectGeneration(target);
+								}}
+							/>
+						</Show>
+					</div>
+				</Show>
+			);
+		};
 
 		return ActionButton;
 	};

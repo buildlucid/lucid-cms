@@ -1,4 +1,5 @@
 import type {
+	Collection,
 	DocumentRef,
 	ErrorResult,
 	FieldError,
@@ -20,8 +21,8 @@ import {
 	Switch,
 } from "solid-js";
 import Button from "@/components/Partials/Button";
+import DocumentReferencePreviewCard from "@/components/Partials/DocumentReferencePreviewCard";
 import DragDrop, { type DragDropCBT } from "@/components/Partials/DragDrop";
-import Pill from "@/components/Partials/Pill";
 import RelationCount from "@/components/Partials/RelationCount";
 import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
 import api from "@/services/api";
@@ -31,8 +32,9 @@ import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import T from "@/translations";
 import { moveArrayItem } from "@/utils/array-helpers";
 import {
-	getDocumentListingPreviewFields,
+	type DocumentListingPreviewField,
 	getDocumentPreviewLabel,
+	getDocumentReferencePreviewFields,
 } from "@/utils/document-table-helpers";
 import { normalizeFieldErrors } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
@@ -75,7 +77,12 @@ const getDocumentKey = (document: RelationFieldValue) =>
 	`${document.collectionKey}:${document.id}`;
 
 export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
 	const pageBuilderState = usePageBuilderState();
+
+	// ----------------------------------------
+	// Functions
 	const canOpenSelectModal = () =>
 		props.disabled !== true &&
 		props.collectionKeys.length > 0 &&
@@ -145,6 +152,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 		);
 	};
 
+	// ----------------------------------------
+	// Memos
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale || "",
 	);
@@ -177,24 +186,32 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	);
 	const canAddMore = createMemo(() => !hasReachedMaxItems());
 	const fieldErrors = createMemo(() => normalizeFieldErrors(props.errors));
+	const pageBuilderCollections = createMemo(() =>
+		pageBuilderState.documentState?.collections?.(),
+	);
 
-	const collections = api.collections.useGetAll({
+	// ----------------------------------------
+	// Queries
+	const collectionsQuery = api.collections.useGetAll({
 		queryParams: {
 			include: {
 				fields: true,
 			},
 		},
-		enabled: () => selectedDocuments().length > 0,
+		enabled: () =>
+			pageBuilderCollections() === undefined && selectedDocuments().length > 0,
 	});
+	const collections = createMemo<Collection[]>(
+		() => pageBuilderCollections() ?? collectionsQuery.data?.data ?? [],
+	);
 	const collectionsByKey = createMemo(() => {
 		return new Map(
-			(collections.data?.data ?? []).map((collection) => [
-				collection.key,
-				collection,
-			]),
+			collections().map((collection) => [collection.key, collection]),
 		);
 	});
 
+	// ----------------------------------------
+	// Functions
 	const getItemErrors = (itemIndex: number) => {
 		return fieldErrors().filter((error) => error.itemIndex === itemIndex);
 	};
@@ -228,12 +245,19 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 					: undefined),
 			contentLocale: contentLocale(),
 		});
-	const previewFields = (documentRef?: DocumentRef) =>
-		getDocumentListingPreviewFields({
+	const previewFields = (documentRef?: DocumentRef, documentLabel?: string) =>
+		getDocumentReferencePreviewFields({
 			collection: getDocumentCollection(documentRef),
 			documentRef,
 			contentLocale: contentLocale(),
-		}).slice(0, 3);
+			primaryLabel: documentLabel,
+		});
+	const documentSubtitle = (document: RelationFieldValue) =>
+		getSingularName(document) +
+		" · " +
+		T()("common.document") +
+		" #" +
+		document.id;
 	const relationVersionLabel = createMemo(() => {
 		const relationVersionType = pageBuilderState.relationVersionType?.();
 
@@ -243,6 +267,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 		return relationVersionType;
 	});
 
+	// ----------------------------------------
+	// Render
 	return (
 		<div
 			class={classNames("w-full", {
@@ -282,7 +308,11 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 													)}
 													singularName={getSingularName(document.value)}
 													versionLabel={relationVersionLabel()}
-													previewFields={previewFields(document.document)}
+													previewFields={previewFields(
+														document.document,
+														getDocumentLabel(document.document, document.value),
+													)}
+													documentSubtitle={documentSubtitle(document.value)}
 													hasError={hasItemError(index())}
 													removeSelectedDocument={removeSelectedDocument}
 													disabled={props.disabled}
@@ -332,31 +362,39 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							!isMultiple() && typeof selectedDocumentValue()?.id === "number"
 						}
 					>
-						<div class="group w-full border border-border rounded-md bg-input-base px-3 pt-2 pb-0">
-							<div class="flex items-center justify-between gap-3">
-								<div class="min-w-0">
-									<div class="flex flex-wrap items-center gap-2">
-										<Pill theme="outline" class="text-[10px]">
-											#{selectedDocumentValue()?.id}
-										</Pill>
-										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-subtitle">
-											{getDocumentLabel(
+						<DocumentReferencePreviewCard
+							class="group w-full"
+							title={getDocumentLabel(
+								selectedDocumentItem()?.document,
+								selectedDocumentItem()?.value,
+							)}
+							subtitle={
+								selectedDocumentItem()?.value
+									? documentSubtitle(selectedDocumentItem()?.value)
+									: undefined
+							}
+							fields={
+								selectedDocumentItem()?.document
+									? previewFields(
+											selectedDocumentItem()?.document,
+											getDocumentLabel(
 												selectedDocumentItem()?.document,
 												selectedDocumentItem()?.value,
-											)}
-										</span>
-									</div>
-								</div>
-								<div class="flex shrink-0 items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+											),
+										)
+									: []
+							}
+							actions={
+								<div class="flex items-center gap-0.5 opacity-100 transition-opacity duration-200 md:opacity-0 group-hover:opacity-100">
 									<Button
 										type="button"
 										theme="secondary-subtle"
 										size="icon-subtle"
 										onClick={openDocuSelectModal}
 										disabled={props.disabled}
+										aria-label={T()("common.edit")}
 									>
 										<FaSolidPen size={12} />
-										<span class="sr-only">{T()("common.edit")}</span>
 									</Button>
 									<Button
 										type="button"
@@ -364,49 +402,24 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										size="icon-subtle"
 										onClick={clearSelection}
 										disabled={props.disabled}
+										aria-label={T()("common.clear")}
 									>
 										<FaSolidXmark size={14} />
-										<span class="sr-only">{T()("common.clear")}</span>
 									</Button>
 								</div>
-							</div>
-
-							<Show
-								when={selectedDocumentItem()?.document}
-								fallback={
-									<div class="py-2">
+							}
+							footer={
+								selectedDocumentItem()?.document ? undefined : (
+									<div class="border-border border-t p-3">
 										<MissingDocumentRefNotice
 											document={selectedDocumentItem()?.value}
 											versionLabel={relationVersionLabel()}
 										/>
 									</div>
-								}
-							>
-								{(document) => (
-									<Show when={previewFields(document()).length > 0}>
-										<div class="py-2">
-											<div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-												<For each={previewFields(document())}>
-													{(preview) => (
-														<div
-															class="min-w-0 rounded-md border border-border px-2 py-1.5 bg-card-base"
-															title={`${preview.label}: ${preview.value}`}
-														>
-															<p class="text-[10px] uppercase tracking-wide text-unfocused truncate">
-																{preview.label}
-															</p>
-															<p class="text-xs text-subtitle truncate mt-0.5">
-																{preview.value}
-															</p>
-														</div>
-													)}
-												</For>
-											</div>
-										</div>
-									</Show>
-								)}
-							</Show>
-						</div>
+								)
+							}
+							invalid={hasItemError(0)}
+						/>
 					</Match>
 					<Match when={typeof selectedDocumentValue()?.id !== "number"}>
 						<Button
@@ -433,10 +446,14 @@ const MissingDocumentRefNotice: Component<{
 	singularName?: string;
 	versionLabel?: string;
 }> = (props) => {
+	// ----------------------------------------
+	// Memos
 	const documentLabel = createMemo(
 		() => props.singularName ?? T()("media.types.document"),
 	);
 
+	// ----------------------------------------
+	// Render
 	return (
 		<div class="rounded-md border border-warning-base/30 bg-warning-base/10 px-3 py-2.5">
 			<div class="flex items-start gap-2.5">
@@ -480,27 +497,32 @@ const DocumentSortableItem: Component<{
 	document: SelectedDocumentItem;
 	dragId: string;
 	documentLabel: string;
+	documentSubtitle: string;
 	singularName: string;
 	versionLabel?: string;
-	previewFields: { label: string; value: string }[];
+	previewFields: DocumentListingPreviewField[];
 	hasError: boolean;
 	removeSelectedDocument: (documentValue: RelationFieldValue) => void;
 	dragDrop: DragDropCBT;
 	disabled?: boolean;
 }> = (props) => {
+	// ----------------------------------------
+	// Render
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
-		<div
+		<DocumentReferencePreviewCard
 			data-dragkey={DOCUMENT_SELECT_DRAG_DROP_KEY}
 			data-dragref={props.dragId}
 			style={{
-				"view-transition-name": `document-select-item-${props.document.value.collectionKey}-${props.document.value.id}`,
+				"view-transition-name":
+					"document-select-item-" +
+					props.document.value.collectionKey +
+					"-" +
+					props.document.value.id,
 			}}
 			class={classNames(
-				"group rounded-md border bg-input-base px-3 py-2 ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
+				"group ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
 				{
-					"border-border": !props.hasError,
-					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
+					"ring-1 ring-inset ring-error-base": props.hasError,
 					"opacity-60": props.dragDrop.getDragging()?.ref === props.dragId,
 					"ring-1 ring-primary-base":
 						props.dragDrop.getDraggingTarget()?.ref === props.dragId &&
@@ -509,6 +531,40 @@ const DocumentSortableItem: Component<{
 					"cursor-grab active:cursor-grabbing": props.disabled !== true,
 				},
 			)}
+			title={props.documentLabel}
+			subtitle={props.documentSubtitle}
+			fields={props.document.document ? props.previewFields : []}
+			actions={
+				<div class="opacity-100 transition-opacity duration-200 md:opacity-0 group-hover:opacity-100">
+					<Button
+						type="button"
+						theme="danger-subtle"
+						size="icon-subtle"
+						onClick={() =>
+							props.removeSelectedDocument({
+								id: props.document.value.id,
+								collectionKey: props.document.value.collectionKey,
+							})
+						}
+						disabled={props.disabled}
+						aria-label={T()("common.remove")}
+					>
+						<FaSolidXmark size={14} />
+					</Button>
+				</div>
+			}
+			footer={
+				props.document.document ? undefined : (
+					<div class="border-border border-t p-3">
+						<MissingDocumentRefNotice
+							document={props.document.value}
+							singularName={props.singularName}
+							versionLabel={props.versionLabel}
+						/>
+					</div>
+				)
+			}
+			invalid={props.hasError}
 			draggable={props.disabled !== true}
 			onDragStart={(e) => {
 				brickStore.get.startRelationFieldDrag();
@@ -528,68 +584,6 @@ const DocumentSortableItem: Component<{
 				})
 			}
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
-		>
-			<div class="flex items-start justify-between gap-3">
-				<div class="min-w-0 flex-1">
-					<div class="flex flex-wrap items-center gap-2">
-						<Pill theme="outline" class="text-[10px]">
-							#{props.document.value.id}
-						</Pill>
-						<p class="truncate text-sm font-medium text-subtitle">
-							{props.documentLabel}
-						</p>
-					</div>
-					<Show
-						when={props.document.document}
-						fallback={
-							<div class="mt-2">
-								<MissingDocumentRefNotice
-									document={props.document.value}
-									singularName={props.singularName}
-									versionLabel={props.versionLabel}
-								/>
-							</div>
-						}
-					>
-						<Show when={props.previewFields.length > 0}>
-							<div class="mt-2 grid grid-cols-1 gap-2 md:grid-cols-3">
-								<For each={props.previewFields}>
-									{(preview) => (
-										<div
-											class="min-w-0 rounded-md border border-border bg-card-base px-2 py-1.5"
-											title={`${preview.label}: ${preview.value}`}
-										>
-											<p class="truncate text-[10px] uppercase tracking-wide text-unfocused">
-												{preview.label}
-											</p>
-											<p class="mt-0.5 truncate text-xs text-subtitle">
-												{preview.value}
-											</p>
-										</div>
-									)}
-								</For>
-							</div>
-						</Show>
-					</Show>
-				</div>
-				<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-					<Button
-						type="button"
-						theme="danger-subtle"
-						size="icon-subtle"
-						onClick={() =>
-							props.removeSelectedDocument({
-								id: props.document.value.id,
-								collectionKey: props.document.value.collectionKey,
-							})
-						}
-						disabled={props.disabled}
-						aria-label={T()("common.remove")}
-					>
-						<FaSolidXmark size={14} />
-					</Button>
-				</div>
-			</div>
-		</div>
+		/>
 	);
 };

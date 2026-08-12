@@ -13,6 +13,8 @@ interface ModalProps {
 		preventDismiss?: boolean;
 		size?: "large";
 		nested?: boolean;
+		/** Content layer. The overlay is placed ten layers below it. */
+		zIndex?: number;
 	};
 	children: JSXElement;
 }
@@ -36,16 +38,31 @@ export const Modal: Component<ModalProps> = (props) => {
 						"fixed inset-0 bg-overlay-base animate-animate-overlay-hide duration-200 transition-colors data-expanded:animate-animate-overlay-show",
 						{
 							"cursor-pointer": !preventDismiss(),
-							"z-40": props.options?.nested !== true,
-							"z-60": props.options?.nested === true,
+							"z-40":
+								props.options?.zIndex === undefined &&
+								props.options?.nested !== true,
+							"z-60":
+								props.options?.zIndex === undefined &&
+								props.options?.nested === true,
 						},
 					)}
+					style={{
+						"z-index":
+							props.options?.zIndex !== undefined
+								? props.options.zIndex - 10
+								: undefined,
+					}}
 				/>
 				<div
 					class={classNames("fixed inset-0", {
-						"z-50": props.options?.nested !== true,
-						"z-70": props.options?.nested === true,
+						"z-50":
+							props.options?.zIndex === undefined &&
+							props.options?.nested !== true,
+						"z-70":
+							props.options?.zIndex === undefined &&
+							props.options?.nested === true,
 					})}
+					style={{ "z-index": props.options?.zIndex }}
 				>
 					<Dialog.Content
 						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-animate-modal-hide data-expanded:animate-animate-modal-show"

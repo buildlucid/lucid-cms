@@ -288,6 +288,29 @@ export const getDocumentListingPreviewFields = (props: {
 		.filter((field): field is DocumentListingPreviewField => Boolean(field));
 };
 
+/**
+ * Builds a compact reference preview without repeating the primary label when
+ * other useful values exist. A lone label field is retained so sparse
+ * collections still show field data rather than an empty detail strip.
+ */
+export const getDocumentReferencePreviewFields = (props: {
+	collection?: Collection;
+	documentRef?: DocumentRef | InternalCollectionDocument;
+	contentLocale: string;
+	primaryLabel?: string;
+	limit?: number;
+}): Array<DocumentListingPreviewField> => {
+	const fields = getDocumentListingPreviewFields(props);
+	const secondaryFields = props.primaryLabel
+		? fields.filter((field) => field.value !== props.primaryLabel)
+		: fields;
+
+	return (secondaryFields.length > 0 ? secondaryFields : fields).slice(
+		0,
+		props.limit ?? 3,
+	);
+};
+
 /** Resolves the main document label used by relation UI and listing fallbacks. */
 export const getDocumentPreviewLabel = (props: {
 	collection?: Collection;

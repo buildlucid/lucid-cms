@@ -1,5 +1,11 @@
 # @lucidcms/core
 
+## v0.19.0-alpha.0 (unreleased)
+
+### Bug Fixes:
+
+- Fixed an issue with custom field ref validation where we didnt exclude soft-deleted entries.
+
 ## v0.18.0-alpha.0
 
 ### Features:

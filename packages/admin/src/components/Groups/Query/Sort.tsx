@@ -17,6 +17,7 @@ interface SortItemProps {
 export interface SortProps {
 	sorts: Array<SortItemProps["sort"]>;
 	searchParams: QueryStateResponse;
+	disabled?: boolean;
 }
 
 const SortItem: Component<SortItemProps> = (props) => {
@@ -123,9 +124,8 @@ export const Sort: Component<SortProps> = (props) => {
 	return (
 		<DropdownMenu.Root getAnchorRect={getAnchorRect}>
 			<DropdownMenu.Trigger
-				class={
-					"dropdown-trigger gap-2 pl-2 pr-3 h-9 text-sm bg-secondary-base hover:bg-secondary-hover text-secondary-contrast border border-transparent rounded-md fill-secondary-contrast flex items-center"
-				}
+				disabled={props.disabled}
+				class="dropdown-trigger flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary-base pr-3 pl-2 text-sm text-secondary-contrast fill-secondary-contrast hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-secondary-base"
 			>
 				<DropdownMenu.Icon>
 					<FaSolidSort />

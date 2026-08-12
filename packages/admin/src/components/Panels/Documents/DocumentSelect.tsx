@@ -16,6 +16,7 @@ import {
 	createMemo,
 	createSignal,
 	Index,
+	type JSXElement,
 	Show,
 } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
@@ -33,6 +34,7 @@ import { Sort } from "@/components/Groups/Query/Sort";
 import { Table } from "@/components/Groups/Table/Table";
 import DocumentSelectSingle from "@/components/Partials/DocumentSelectSingle";
 import DocumentRow from "@/components/Tables/Rows/DocumentRow";
+import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
 import useQueryState, {
 	numberFilter,
 	pagination,
@@ -122,6 +124,7 @@ interface DocumentSelectContentProps {
 	selected?: RelationFieldValue[];
 	selectedRefs?: DocumentRef[];
 	excludeDocument?: RelationFieldValue;
+	topbarSlot?: JSXElement;
 	onClose: () => void;
 	onSelect: (selection: {
 		value: RelationFieldValue[];
@@ -140,6 +143,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	);
 	const [activeCollectionKey, setActiveCollectionKey] = createSignal<string>();
 	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const pageBuilderState = usePageBuilderState();
 	//* collection key the filter schema was last built for - documents only
 	//* query once this matches, so stale filters never hit a new collection
 	const [filterSchemaContextKey, setFilterSchemaContextKey] =
@@ -188,22 +192,33 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			collectionKey: document.collectionKey,
 		})),
 	);
+	const pageBuilderCollections = createMemo(() =>
+		pageBuilderState.documentState?.collections?.(),
+	);
 
 	// ----------------------------------------
 	// Queries
-	const collection = api.collections.useGetSingle({
+	const collectionQuery = api.collections.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
 			},
 		},
-		enabled: () => !!collectionKey(),
+		enabled: () => pageBuilderCollections() === undefined && !!collectionKey(),
 	});
 
 	// ----------------------------------------
 	// Memos
+	const activeCollection = createMemo(() => {
+		const activeKey = collectionKey();
+		return (
+			pageBuilderCollections()?.find(
+				(collection) => collection.key === activeKey,
+			) ?? collectionQuery.data?.data
+		);
+	});
 	const getCollectionFieldIncludes = createMemo(() =>
-		collectionFieldIncludes(collection.data?.data),
+		collectionFieldIncludes(activeCollection()),
 	);
 	const getListingRefIncludes = createMemo(() =>
 		documentListingRefIncludes(getCollectionFieldIncludes()),
@@ -211,16 +226,32 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 
 	// ----------------------------------------
 	// Queries
-	const collections = api.collections.useGetAll({
+	const collectionsQuery = api.collections.useGetAll({
 		queryParams: {
 			include: {
 				fields: true,
 			},
 		},
 		enabled: () =>
-			allowedCollectionKeys().length > 1 ||
-			getCollectionFieldIncludes().some((field) => field.type === "relation"),
+			pageBuilderCollections() === undefined &&
+			(allowedCollectionKeys().length > 1 ||
+				getCollectionFieldIncludes().some(
+					(field) => field.type === "relation",
+				)),
 	});
+	const collections = createMemo(
+		() => pageBuilderCollections() ?? collectionsQuery.data?.data ?? [],
+	);
+	const collectionIsLoading = createMemo(() =>
+		pageBuilderCollections() === undefined
+			? collectionQuery.isLoading
+			: pageBuilderState.documentState?.collectionsQuery.isLoading === true,
+	);
+	const collectionIsError = createMemo(() =>
+		pageBuilderCollections() === undefined
+			? collectionQuery.isError
+			: pageBuilderState.documentState?.collectionsQuery.isError === true,
+	);
 	const documents = api.documents.useGetMultiple({
 		queryParams: {
 			queryString: searchParams.queryString,
@@ -240,15 +271,15 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		},
 		enabled: () =>
 			searchParams.ready() &&
-			collection.isSuccess &&
-			collection.data?.data.mode !== "single" &&
+			activeCollection() !== undefined &&
+			activeCollection()?.mode !== "single" &&
 			filterSchemaContextKey() === filterSchemaContext(),
 	});
 	const singleDocument = api.documents.useGetSingle({
 		queryParams: {
 			location: {
 				collectionKey: collectionKey,
-				id: () => collection.data?.data.documentId ?? undefined,
+				id: () => activeCollection()?.documentId ?? undefined,
 				version: "latest",
 			},
 			//* single-document consumers (including variables) need the full field
@@ -256,24 +287,21 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			include: { refs: true },
 		},
 		enabled: () =>
-			collection.data?.data.mode === "single" &&
-			typeof collection.data?.data.documentId === "number",
+			activeCollection()?.mode === "single" &&
+			typeof activeCollection()?.documentId === "number",
 	});
 
 	// ----------------------------------------
 	// Memos
 	const getFilterFields = createMemo(() =>
-		documentFilterSectionFields(collection.data?.data),
+		documentFilterSectionFields(activeCollection()),
 	);
 	const relationCollectionData = createMemo(() => {
 		const map = new Map(
-			(collections.data?.data ?? []).map((collection) => [
-				collection.key,
-				collection,
-			]),
+			collections().map((collection) => [collection.key, collection]),
 		);
-		const activeCollection = collection.data?.data;
-		if (activeCollection) map.set(activeCollection.key, activeCollection);
+		const active = activeCollection();
+		if (active) map.set(active.key, active);
 		return Array.from(map.values());
 	});
 	const relationCollectionsByKey = createMemo(
@@ -289,7 +317,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		tableHeadColumns(getCollectionFieldIncludes()),
 	);
 	const workflowHeadColumn = createMemo(() =>
-		collection.data?.data.workflow
+		activeCollection()?.workflow
 			? [
 					{
 						label: T()("documents.workflow.stage"),
@@ -307,27 +335,27 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection.data?.data.details.name,
+			value: activeCollection()?.details.name,
 		}),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: collection.data?.data.details.singularName,
+				value: activeCollection()?.details.singularName,
 			}) || T()("common.collection"),
 	);
 	const isSingleCollection = createMemo(
-		() => collection.data?.data.mode === "single",
+		() => activeCollection()?.mode === "single",
 	);
 	const singleDocumentExcluded = createMemo(
 		() =>
 			isSingleCollection() &&
-			typeof collection.data?.data.documentId === "number" &&
-			collection.data.data.documentId === excludedDocumentId(),
+			typeof activeCollection()?.documentId === "number" &&
+			activeCollection()?.documentId === excludedDocumentId(),
 	);
 	const collectionOptions = createMemo(() =>
 		allowedCollectionKeys().map((collectionKey) => {
-			const collection = collections.data?.data.find(
+			const collection = collections().find(
 				(collection) => collection.key === collectionKey,
 			);
 			return {
@@ -341,8 +369,8 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		}),
 	);
 	const documentSortOptions = createMemo(() => [
-		...collectionFieldSorts(collection.data?.data),
-		...(collection.data?.data.orderable === true
+		...collectionFieldSorts(activeCollection()),
+		...(activeCollection()?.orderable === true
 			? [
 					{
 						label: T()("documents.order.sort.label"),
@@ -388,9 +416,8 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		//* wait for the active collection's own config - a cached previous
 		//* collection would build the wrong filter schema
 		if (
-			collection.isSuccess &&
 			active &&
-			collection.data?.data.key === active &&
+			activeCollection()?.key === active &&
 			filterSchemaContextKey() !== filterSchemaContext()
 		) {
 			const filterSchema = buildDocumentFilterSchema(getFilterFields());
@@ -435,18 +462,18 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	});
 	createEffect(() => {
 		const active = collectionKey();
-		const activeCollection = collection.data?.data;
+		const activeCollectionData = activeCollection();
 		if (
 			!active ||
-			activeCollection?.key !== active ||
-			activeCollection.mode !== "single"
+			activeCollectionData?.key !== active ||
+			activeCollectionData.mode !== "single"
 		) {
 			return;
 		}
 
 		if (
 			singleDocumentExcluded() ||
-			typeof activeCollection.documentId !== "number" ||
+			typeof activeCollectionData.documentId !== "number" ||
 			singleDocument.isError
 		) {
 			setSelectedDocuments([]);
@@ -456,7 +483,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		const document = singleDocument.data?.data;
 		if (
 			document?.collectionKey !== active ||
-			document.id !== activeCollection.documentId
+			document.id !== activeCollectionData.documentId
 		) {
 			return;
 		}
@@ -503,16 +530,19 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		<div class="flex flex-col h-full">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap items-center">
-					<Show when={!isSingleCollection()}>
-						<FilterSectionToggle
-							open={filterSectionOpen()}
-							onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-							searchParams={searchParams}
-							active={searchParams.hasFiltersApplied()}
-							disabled={getFilterFields().length === 0}
-						/>
-						<Sort sorts={documentSortOptions()} searchParams={searchParams} />
-					</Show>
+					<FilterSectionToggle
+						open={!isSingleCollection() && filterSectionOpen()}
+						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
+						searchParams={searchParams}
+						active={!isSingleCollection() && searchParams.hasFiltersApplied()}
+						disabled={isSingleCollection() || getFilterFields().length === 0}
+					/>
+					<Sort
+						sorts={documentSortOptions()}
+						searchParams={searchParams}
+						disabled={isSingleCollection()}
+					/>
+					{props.topbarSlot}
 					<Show when={allowedCollectionKeys().length > 1}>
 						<div class="w-56 max-w-full">
 							<Select
@@ -537,9 +567,11 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						<ResetFilters onReset={searchParams.clearFilters} />
 					</Show>
 				</div>
-				<Show when={!isSingleCollection()}>
-					<PerPage options={[10, 20, 40]} searchParams={searchParams} />
-				</Show>
+				<PerPage
+					options={[10, 20, 40]}
+					searchParams={searchParams}
+					disabled={isSingleCollection()}
+				/>
 			</div>
 
 			<Show when={!isSingleCollection()}>
@@ -555,16 +587,16 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			</Show>
 
 			<Show
-				when={isSingleCollection() && collection.data?.data}
+				when={isSingleCollection() && activeCollection()}
 				fallback={
 					<DynamicContent
 						class="bg-card-base border border-border rounded-md"
 						state={{
-							isError: documents.isError || collection.isError,
+							isError: documents.isError || collectionIsError(),
 							isSuccess: documents.isSuccess,
 							searchParams: searchParams,
 							isEmpty: documents.data?.data.length === 0,
-							isLoading: collection.isLoading,
+							isLoading: collectionIsLoading(),
 						}}
 						options={{}}
 						slot={{
@@ -599,7 +631,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						}}
 					>
 						<Table
-							key={`documents.list.${collection.data?.data?.key}`}
+							key={`documents.list.${activeCollection()?.key ?? ""}`}
 							rows={documents.data?.data.length || 0}
 							searchParams={searchParams}
 							head={[
@@ -644,7 +676,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 											index={i}
 											document={doc()}
 											fieldInclude={getCollectionFieldIncludes()}
-											collection={collection.data?.data as Collection}
+											collection={activeCollection() as Collection}
 											collectionsByKey={relationCollectionsByKey()}
 											include={include}
 											contentLocale={contentLocale()}
@@ -682,11 +714,11 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						document={singleDocument.data?.data}
 						contentLocale={contentLocale()}
 						isLoading={
-							collection.isLoading ||
+							collectionIsLoading() ||
 							(typeof activeCollection().documentId === "number" &&
 								singleDocument.isLoading)
 						}
-						isError={collection.isError || singleDocument.isError}
+						isError={collectionIsError() || singleDocument.isError}
 						isExcluded={singleDocumentExcluded()}
 					/>
 				)}

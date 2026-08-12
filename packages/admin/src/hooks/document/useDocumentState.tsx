@@ -44,6 +44,15 @@ export function useDocumentState(props: {
 
 	// ------------------------------------------
 	// Queries
+	const collectionsQuery = api.collections.useGetAll({
+		queryParams: {
+			include: {
+				bricks: true,
+				fields: true,
+			},
+		},
+		refetchOnWindowFocus: false,
+	});
 	const collectionQuery = api.collections.useGetSingle({
 		queryParams: {
 			location: {
@@ -72,6 +81,11 @@ export function useDocumentState(props: {
 	// ------------------------------------------
 	// Memos
 	const collection = createMemo(() => collectionQuery.data?.data);
+	const collections = createMemo(() => collectionsQuery.data?.data ?? []);
+	const collectionsByKey = createMemo(
+		() =>
+			new Map(collections().map((collection) => [collection.key, collection])),
+	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
 			value: collection()?.details.name,
@@ -106,6 +120,7 @@ export function useDocumentState(props: {
 	// ------------------------------------------
 	// Return
 	return {
+		collectionsQuery,
 		collectionQuery,
 		documentQuery,
 		collectionKey,
@@ -116,6 +131,8 @@ export function useDocumentState(props: {
 		navigate,
 		queryClient,
 		collection,
+		collections,
+		collectionsByKey,
 		document,
 		isDocumentMutated,
 		shouldBlockNavigation,

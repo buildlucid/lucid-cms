@@ -8,6 +8,7 @@ import serviceHelpers from "@/utils/service-helpers";
 interface QueryParams {
 	queryString?: Accessor<string> | string;
 	include?: {
+		bricks?: Accessor<boolean | undefined> | boolean;
 		fields?: Accessor<boolean | undefined> | boolean;
 	};
 }

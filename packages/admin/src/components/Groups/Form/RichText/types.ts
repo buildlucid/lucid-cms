@@ -2,6 +2,7 @@ import type {
 	Collection,
 	DocumentRef,
 	FieldError,
+	InternalDocumentField,
 	MediaRef,
 	MediaType,
 	RichTextFieldErrorReference,
@@ -31,6 +32,12 @@ export type RichTextVariableSelection =
 			user: NonNullable<UserRef>;
 	  });
 
+export interface RichTextEmbeddedBrickReference {
+	ref: string;
+	key: string;
+	fields: InternalDocumentField[];
+}
+
 export interface RichTextOptions {
 	headings?: boolean;
 	underline?: boolean;
@@ -48,11 +55,16 @@ export interface RichTextOptions {
 	};
 	appearance?: "default" | "seamless";
 	fullscreen?: boolean;
+	/** Shows controls for inserting and editing media, documents, variables, and bricks. */
+	referenceControls?: boolean;
+	/** Layer used by the link editor when the rich-text field sits above the base UI. */
+	linkModalZIndex?: number;
 	internalLinkCollectionKeys?: string[];
 	documentNodeCollectionKeys?: string[];
 	documentCollections?: Collection[];
 	embeddedBrickConfigs?: CollectionBrickConfig[];
 	locale?: string;
+	collectionLocalized?: boolean;
 	references?: {
 		media?: (id: number) => NonNullable<MediaRef> | undefined;
 		document?: (
@@ -60,7 +72,7 @@ export interface RichTextOptions {
 			documentId: number,
 		) => DocumentRef | undefined;
 		user?: (id: number) => NonNullable<UserRef> | undefined;
-		embeddedBrick?: (ref: string) => { ref: string; key: string } | undefined;
+		embeddedBrick?: (ref: string) => RichTextEmbeddedBrickReference | undefined;
 	};
 	validation?: {
 		getReferenceErrors?: (
@@ -76,6 +88,7 @@ export interface RichTextOptions {
 		selectDocument?: (props: {
 			collectionKeys: string[];
 			current?: DocumentRef;
+			zIndex?: number;
 			onSelect: (document: DocumentRef) => void;
 		}) => void;
 		selectVariable?: (props: {

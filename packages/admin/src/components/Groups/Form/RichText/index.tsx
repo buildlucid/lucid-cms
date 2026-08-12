@@ -11,6 +11,7 @@ import {
 } from "solid-js";
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import T from "@/translations";
+import { normalizeFieldErrors } from "@/utils/error-helpers";
 import { DescribedBy } from "../DescribedBy";
 import { ErrorMessage } from "../ErrorMessage";
 import { Label } from "../Label";
@@ -74,6 +75,11 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 	const showPlaceholder = createMemo(
 		() => seamless() && !richTextHasContent(props.value),
 	);
+	const hasErrors = createMemo(() => {
+		if (!props.errors) return false;
+		if (normalizeFieldErrors(props.errors).length > 0) return true;
+		return !Array.isArray(props.errors) && props.errors.message !== undefined;
+	});
 
 	// ----------------------------------------
 	// Render
@@ -106,6 +112,7 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 						"rounded-md border border-border bg-input-base focus-within:border-primary-base":
 							!seamless(),
 						"bg-transparent": seamless(),
+						"border-border border-b": seamless() && hasErrors(),
 						"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
 					},
 				)}

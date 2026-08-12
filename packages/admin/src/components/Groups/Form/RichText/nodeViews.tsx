@@ -8,6 +8,7 @@ import type { Editor } from "@tiptap/core";
 import { createSignal, type JSX, untrack } from "solid-js";
 import { render } from "solid-js/web";
 import T from "@/translations";
+import { getBrickPreviewFields } from "@/utils/brick-preview-helpers";
 import helpers from "@/utils/helpers";
 import {
 	getRichTextVariableAttrs,
@@ -75,7 +76,9 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						mediaId={mediaId}
 						reference={reference}
 						locale={options?.locale}
-						isEditable={() => editor.isEditable}
+						isEditable={() =>
+							editor.isEditable && options?.referenceControls !== false
+						}
 						getPos={getPos}
 						setMediaId={(position, nextId) => {
 							editor.view.dispatch(
@@ -119,7 +122,9 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						reference={reference()}
 						collections={options?.documentCollections ?? []}
 						locale={options?.locale}
-						isEditable={() => editor.isEditable}
+						isEditable={() =>
+							editor.isEditable && options?.referenceControls !== false
+						}
 						getPos={getPos}
 						setDocument={(position, document) => {
 							editor.view.dispatch(
@@ -187,7 +192,9 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 						fieldKey={attrs().fieldKey}
 						value={getHydratedVariableText(attrs().value)}
 						available={reference() !== undefined}
-						isEditable={() => editor.isEditable}
+						isEditable={() =>
+							editor.isEditable && options?.referenceControls !== false
+						}
 						getPos={getPos}
 						setSelection={(position, selection) => {
 							editor.view.dispatch(
@@ -252,31 +259,47 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 		addNodeView() {
 			return ({ node, editor, getPos }) => {
 				const refValue = node.attrs.ref;
-				const brick =
+				const brick = () =>
 					typeof refValue === "string"
-						? untrack(() => options?.references?.embeddedBrick?.(refValue))
+						? options?.references?.embeddedBrick?.(refValue)
 						: undefined;
-				const config = options?.embeddedBrickConfigs?.find(
-					(item) => item.key === brick?.key,
-				);
-				const available = brick !== undefined && config !== undefined;
-				const label = available
-					? helpers.getLocaleValue({
-							value: config.details.name,
-							fallback: brick.key,
-						})
-					: "";
-				const description = available
-					? helpers.getLocaleValue({ value: config.details.summary })
-					: "";
+				const config = () =>
+					options?.embeddedBrickConfigs?.find(
+						(item) => item.key === brick()?.key,
+					);
+				const available = () => brick() !== undefined && config() !== undefined;
+				const label = () =>
+					available()
+						? helpers.getLocaleValue({
+								value: config()?.details.name,
+								fallback: brick()?.key,
+							})
+						: "";
+				const summary = () =>
+					available()
+						? helpers.getLocaleValue({
+								value: config()?.details.summary,
+							})
+						: "";
+				const previewFields = () =>
+					getBrickPreviewFields({
+						config: config(),
+						fields: brick()?.fields,
+						contentLocale: options?.locale ?? "",
+						collectionLocalized: options?.collectionLocalized === true,
+					});
 
 				return renderNodeView(() => (
 					<EmbeddedBrickNodeView
 						refValue={refValue}
-						available={available}
-						label={label}
-						description={description}
-						isEditable={() => editor.isEditable}
+						available={available()}
+						label={label()}
+						brickKey={brick()?.key}
+						summary={summary()}
+						previewFields={previewFields()}
+						isEditable={() =>
+							editor.isEditable && options?.referenceControls !== false
+						}
 						remove={() => removeNode(editor, getPos, node.nodeSize)}
 						editEmbeddedBrick={options?.callbacks?.editEmbeddedBrick}
 						errors={() =>

@@ -89,7 +89,7 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 		<span
 			contentEditable={false}
 			class={classNames(
-				"mx-0.5 inline-flex select-none items-center gap-1 rounded-full border py-0.5 pr-1 pl-2 align-baseline text-sm",
+				"m-0.5 inline-flex select-none items-center gap-1 rounded-full border py-0.5 pr-1 pl-2 align-baseline text-sm",
 				{
 					"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
 						props.available && !hasErrors(),
@@ -109,14 +109,16 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 						props.fieldKey ?? T()("editor.rich.text.variable.unavailable"),
 					)}
 			</span>
-			<button
-				type="button"
-				class="shrink-0 cursor-pointer select-none rounded-full px-1.5 py-0.5 text-xs text-current hover:bg-current/10 focus-visible:outline-2 focus-visible:outline-current"
-				onClick={editVariable}
-				aria-label={T()("editor.rich.text.variable.edit")}
-			>
-				{T()("common.edit")}
-			</button>
+			<Show when={props.isEditable()}>
+				<button
+					type="button"
+					class="shrink-0 cursor-pointer select-none rounded-full px-1.5 py-0.5 text-xs text-current hover:bg-current/10 focus-visible:outline-2 focus-visible:outline-current"
+					onClick={editVariable}
+					aria-label={T()("editor.rich.text.variable.edit")}
+				>
+					{T()("common.edit")}
+				</button>
+			</Show>
 		</span>
 	);
 };

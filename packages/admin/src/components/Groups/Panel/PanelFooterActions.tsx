@@ -1,4 +1,4 @@
-import type { Component } from "solid-js";
+import type { Component, JSXElement } from "solid-js";
 import Button from "@/components/Partials/Button";
 import T from "@/translations";
 import { PanelFooter } from "./PanelFooter";
@@ -9,6 +9,7 @@ interface PanelFooterActionsProps {
 	onConfirm: () => void;
 	confirmDisabled?: boolean;
 	cancelLabel?: string;
+	startSlot?: JSXElement;
 	class?: string;
 }
 
@@ -17,9 +18,12 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 	// Render
 	return (
 		<PanelFooter padding="24" class={props.class}>
-			<p class="text-sm text-subtitle">
-				{props.selectedCount} {T()("common.selected").toLowerCase()}
-			</p>
+			<div class="flex flex-wrap items-center gap-3">
+				{props.startSlot}
+				<p class="text-sm text-subtitle">
+					{props.selectedCount} {T()("common.selected").toLowerCase()}
+				</p>
+			</div>
 			<div class="flex flex-wrap items-center gap-2">
 				<Button
 					type="button"

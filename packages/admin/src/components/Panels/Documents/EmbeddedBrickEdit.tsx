@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { unwrap } from "solid-js/store";
 import { BrickBody } from "@/components/Groups/Builder";
-import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
+import { Panel } from "@/components/Groups/Panel/Panel";
 import brickStore from "@/store/brick-store";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -61,6 +61,11 @@ const EmbeddedBrickEditPanel: Component<{
 			fallback: brick()?.key ?? T()("editor.rich.text.brick.edit"),
 		}),
 	);
+	const summary = createMemo(() =>
+		helpers.getLocaleValue({
+			value: config()?.details.summary,
+		}),
+	);
 
 	// ----------------------------------------
 	// Effects
@@ -103,7 +108,7 @@ const EmbeddedBrickEditPanel: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<BottomPanel
+		<Panel
 			zIndex={props.state.zIndex}
 			state={{
 				open: props.state.open,
@@ -112,10 +117,10 @@ const EmbeddedBrickEditPanel: Component<{
 				},
 			}}
 			fetchState={{ isLoading: false, isError: false }}
-			langauge={{ contentLocale: props.collection?.localized === true }}
-			options={{ padding: "24", growContent: true, fullHeight: true }}
+			options={{ padding: "24", growContent: true }}
 			copy={{
 				title: title(),
+				description: summary(),
 				submit: T()("common.save"),
 				cancel: T()("common.cancel"),
 			}}
@@ -146,7 +151,7 @@ const EmbeddedBrickEditPanel: Component<{
 					)}
 				</Show>
 			)}
-		</BottomPanel>
+		</Panel>
 	);
 };
 

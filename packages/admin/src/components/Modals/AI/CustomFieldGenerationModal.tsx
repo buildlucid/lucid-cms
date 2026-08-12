@@ -80,6 +80,7 @@ const DraftEditor: Component<{
 	languages?: string[];
 	selectedLocaleCount: number;
 	richTextOptions?: RichTextOptions;
+	linkModalZIndex?: number;
 	onChange: (_localeCode: string, _value: unknown) => void;
 	onJsonChange: (_localeCode: string, _value: string) => void;
 }> = (props) => {
@@ -162,6 +163,7 @@ const DraftEditor: Component<{
 				/>
 			</Match>
 			<Match when={props.fieldType === "rich-text"}>
+				{/* Existing references remain visible, but new references must be added in the page builder. */}
 				<RichText
 					id={`ai-custom-field-generation-preview-rich-text-${props.localeCode}`}
 					value={props.value as RichTextJSON}
@@ -171,6 +173,8 @@ const DraftEditor: Component<{
 						...props.richTextOptions,
 						locale: props.localeCode,
 						fullscreen: false,
+						referenceControls: false,
+						linkModalZIndex: props.linkModalZIndex,
 					}}
 				/>
 			</Match>
@@ -207,6 +211,9 @@ const CustomFieldGenerationModal: Component = () => {
 	);
 	const modal = createMemo(() =>
 		aiModalsStore.getModal("customFieldGeneration"),
+	);
+	const richTextLinkModalZIndex = createMemo(
+		() => (modal()?.data.zIndex ?? 50) + 20,
 	);
 	const target = createMemo(() => modal()?.data.target);
 	const targetId = createMemo(() => modal()?.data.targetId);
@@ -766,6 +773,7 @@ const CustomFieldGenerationModal: Component = () => {
 				options={{
 					size: "large",
 					noPadding: true,
+					zIndex: modal()?.data.zIndex,
 				}}
 			>
 				<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
@@ -953,6 +961,7 @@ const CustomFieldGenerationModal: Component = () => {
 														languages={field()?.languages}
 														selectedLocaleCount={1}
 														richTextOptions={richTextOptions()}
+														linkModalZIndex={richTextLinkModalZIndex()}
 														onChange={(targetLocale, nextValue) =>
 															setDraft(field()?.type, targetLocale, nextValue)
 														}
@@ -1004,6 +1013,7 @@ const CustomFieldGenerationModal: Component = () => {
 																languages={field()?.languages}
 																selectedLocaleCount={selectedLocales().length}
 																richTextOptions={richTextOptions()}
+																linkModalZIndex={richTextLinkModalZIndex()}
 																onChange={(targetLocale, nextValue) =>
 																	setDraft(
 																		field()?.type,

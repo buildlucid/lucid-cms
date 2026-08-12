@@ -1228,14 +1228,19 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			V,
 			{
 				ids: number[];
+				isDeleted?: Select<LucidDocumentTable>["is_deleted"];
 			}
 		>,
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
-		const query = this.db
+		let query = this.db
 			.selectFrom(dynamicConfig.tableName)
 			.select("id")
 			.where("id", "in", props.ids);
+
+		if (props.isDeleted !== undefined) {
+			query = query.where("is_deleted", "=", props.isDeleted);
+		}
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectMultipleValidationIds",

@@ -70,6 +70,7 @@ const fetchDocumentsFromCollection = async (
 		const documentIdRes = await Document.selectMultipleValidationIds(
 			{
 				ids,
+				isDeleted: false,
 				validation: {
 					enabled: true,
 				},

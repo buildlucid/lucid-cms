@@ -47,7 +47,7 @@ const BlogCollection = new CollectionBuilder("blog", {
 			media: true,
 			documents: ["page", "settings", "blog"],
 			variables: {
-				document: ["settings"],
+				document: ["settings", "page"],
 				user: ["firstName", "lastName", "username", "email"],
 			},
 			bricks: ["rt-callout"],

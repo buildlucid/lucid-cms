@@ -10,6 +10,7 @@ const getAll: ServiceFn<
 	[
 		{
 			includeDocumentId?: boolean;
+			includeBricks?: boolean;
 			includeFields?: boolean;
 		},
 	],
@@ -61,7 +62,7 @@ const getAll: ServiceFn<
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
 				include: {
-					bricks: false,
+					bricks: data.includeBricks === true,
 					fields: data.includeFields === true,
 					documentId: true,
 				},
@@ -78,7 +79,7 @@ const getAll: ServiceFn<
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
 			include: {
-				bricks: false,
+				bricks: data.includeBricks === true,
 				fields: data.includeFields === true,
 				documentId: false,
 			},

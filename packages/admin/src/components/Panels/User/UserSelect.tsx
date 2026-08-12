@@ -5,6 +5,7 @@ import {
 	createMemo,
 	createSignal,
 	Index,
+	type JSXElement,
 	Show,
 } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
@@ -96,6 +97,7 @@ interface UserSelectContentProps {
 	multiple?: boolean;
 	selected?: number[];
 	selectedRefs?: UserRelationRef[];
+	topbarSlot?: JSXElement;
 	onClose: () => void;
 	onSelect: (selection: { value: number[]; refs: UserRelationRef[] }) => void;
 }
@@ -231,6 +233,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						]}
 						searchParams={searchParams}
 					/>
+					{props.topbarSlot}
 					<Show when={searchParams.hasFiltersApplied()}>
 						<ResetFilters onReset={searchParams.clearFilters} />
 					</Show>

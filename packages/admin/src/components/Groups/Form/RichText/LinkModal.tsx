@@ -1,4 +1,5 @@
 import type { DocumentRef } from "@types";
+import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -6,8 +7,10 @@ import {
 	createSignal,
 	on,
 	Show,
+	useContext,
 } from "solid-js";
 import { Modal, ModalFooter } from "@/components/Groups/Modal";
+import { PanelLayerContext } from "@/components/Groups/Panel/PanelLayerContext";
 import {
 	type AnimatedTabItem,
 	AnimatedTabs,
@@ -29,8 +32,7 @@ export type RichTextLinkUpdate =
 	| {
 			kind: "document";
 			label: string;
-			collectionKey: string;
-			documentId: number;
+			document?: Pick<DocumentRef, "collectionKey" | "id">;
 			openInNewTab: boolean;
 	  };
 
@@ -58,9 +60,14 @@ const LinkModal: Component<{
 	const [kind, setKind] = createSignal<"external" | "document">("external");
 	const [documentRef, setDocumentRef] = createSignal<DocumentRef>();
 	const [openInNewTab, setOpenInNewTab] = createSignal(false);
+	const parentLayer = useContext(PanelLayerContext);
 
 	// ----------------------------------------
 	// Memos
+	const modalLayer = createMemo(
+		() =>
+			props.options?.linkModalZIndex ?? (parentLayer ? parentLayer() + 20 : 70),
+	);
 	const internalLinkCollectionKeys = createMemo(
 		() => props.options?.internalLinkCollectionKeys ?? [],
 	);
@@ -129,6 +136,7 @@ const LinkModal: Component<{
 		props.options?.callbacks?.selectDocument?.({
 			collectionKeys: internalLinkCollectionKeys(),
 			current: documentRef(),
+			zIndex: modalLayer() + 20,
 			onSelect: (document) => {
 				setDocumentRef(document);
 				if (!label().trim()) {
@@ -140,12 +148,10 @@ const LinkModal: Component<{
 	const updateLink = () => {
 		if (kind() === "document") {
 			const document = documentRef();
-			if (!document || !selectedDocumentPath()) return;
 			props.callbacks.onUpdate({
 				kind: "document",
 				label: label(),
-				collectionKey: document.collectionKey,
-				documentId: document.id,
+				document,
 				openInNewTab: openInNewTab(),
 			});
 			return;
@@ -186,7 +192,7 @@ const LinkModal: Component<{
 	return (
 		<Modal
 			state={{ open: props.state.open, setOpen: closeModal }}
-			options={{ noPadding: true, nested: true }}
+			options={{ noPadding: true, nested: true, zIndex: modalLayer() }}
 		>
 			<div class="flex flex-col gap-0 p-4 md:p-6">
 				<Show when={externalEnabled() && internalEnabled()}>
@@ -248,14 +254,40 @@ const LinkModal: Component<{
 								</p>
 							</Show>
 						</div>
-						<Button
-							type="button"
-							theme="secondary"
-							size="small"
-							onClick={selectDocument}
-						>
-							{documentRef() ? T()("common.update") : T()("common.select")}
-						</Button>
+						<div class="flex shrink-0 items-center gap-1">
+							<Show
+								when={documentRef()}
+								fallback={
+									<Button
+										type="button"
+										theme="secondary"
+										size="small"
+										onClick={selectDocument}
+									>
+										{T()("common.select")}
+									</Button>
+								}
+							>
+								<Button
+									type="button"
+									theme="secondary-subtle"
+									size="icon-subtle"
+									onClick={selectDocument}
+									aria-label={T()("common.edit")}
+								>
+									<FaSolidPen size={12} />
+								</Button>
+								<Button
+									type="button"
+									theme="danger-subtle"
+									size="icon-subtle"
+									onClick={() => setDocumentRef(undefined)}
+									aria-label={T()("common.remove")}
+								>
+									<FaSolidXmark size={14} />
+								</Button>
+							</Show>
+						</div>
 					</div>
 				</Show>
 
@@ -303,7 +335,7 @@ const LinkModal: Component<{
 						onClick={updateLink}
 						disabled={
 							kind() === "document"
-								? !documentRef() || !selectedDocumentPath()
+								? Boolean(documentRef()) && !selectedDocumentPath()
 								: !url().trim()
 						}
 					>

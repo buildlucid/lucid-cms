@@ -109,6 +109,7 @@ type ModalRegistry = {
 		data: {
 			target: CustomFieldGenerationTarget;
 			targetId: string;
+			zIndex?: number;
 		};
 	};
 	mediaAltGeneration: {

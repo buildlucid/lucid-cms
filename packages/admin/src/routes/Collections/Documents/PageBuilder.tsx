@@ -314,7 +314,13 @@ const CollectionsDocumentsEditRoute: Component<{
 	// Render
 	return (
 		<Switch>
-			<Match when={uiState.isLoading() || getStateLoading()}>
+			<Match
+				when={
+					uiState.isLoading() ||
+					getStateLoading() ||
+					docState.collectionsQuery.isLoading
+				}
+			>
 				<div class="-mt-4 relative bg-background-base rounded-b-xl border border-border h-36">
 					<span class="absolute inset-4 bg-background-hover z-5 skeleton" />
 				</div>

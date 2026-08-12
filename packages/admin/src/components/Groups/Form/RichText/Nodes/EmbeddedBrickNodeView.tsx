@@ -1,9 +1,9 @@
 import type { FieldError } from "@types";
 import classNames from "classnames";
-import { FaSolidCubes } from "solid-icons/fa";
-import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import { FieldErrorBadge } from "@/components/Partials/FieldErrorBadge";
 import T from "@/translations";
+import type { BrickPreviewField } from "@/utils/brick-preview-helpers";
 import { countFieldErrors } from "@/utils/structural-field-helpers";
 import type { RichTextOptions } from "../types";
 import NodeActions from "./NodeActions";
@@ -12,7 +12,9 @@ export interface EmbeddedBrickNodeViewProps {
 	refValue: unknown;
 	available: boolean;
 	label: string;
-	description: string;
+	brickKey?: string;
+	summary?: string;
+	previewFields: BrickPreviewField[];
 	isEditable: () => boolean;
 	remove: () => void;
 	errors: Accessor<FieldError[]>;
@@ -28,7 +30,15 @@ const EmbeddedBrickNodeView: Component<EmbeddedBrickNodeViewProps> = (
 	// Memos
 	const errorCount = createMemo(() => countFieldErrors(props.errors()));
 	const hasErrors = createMemo(() => errorCount() > 0);
-
+	const previewFields = createMemo(() =>
+		props.available ? props.previewFields.slice(0, 3) : [],
+	);
+	const hasPreviewFields = createMemo(() => previewFields().length > 0);
+	const brickKey = createMemo(() =>
+		props.available && props.brickKey !== props.label
+			? props.brickKey
+			: undefined,
+	);
 	// -------------------------------
 	// Functions
 	const editBrick = (event: MouseEvent) => {
@@ -59,56 +69,76 @@ const EmbeddedBrickNodeView: Component<EmbeddedBrickNodeViewProps> = (
 			)}
 			data-lucid-rich-text-brick=""
 		>
-			<div
-				class={classNames(
-					"flex min-h-20 min-w-0 grow items-center gap-4 rounded-xl border bg-input-base px-5 py-4",
-					{
-						"border-border": props.available && !hasErrors(),
-						"border-error-base/50": !props.available || hasErrors(),
-					},
-				)}
-			>
-				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card-base text-icon-base">
-					<FaSolidCubes size={18} />
-				</div>
-				<div class="flex min-w-0 grow flex-col justify-center">
-					<Show
-						when={props.available}
-						fallback={
-							<span class="text-xs font-medium text-error-base">
-								{T()("editor.rich.text.brick.unavailable")}
-							</span>
-						}
-					>
-						<Show when={props.label}>
-							{(label) => (
-								<span class="text-sm font-medium text-title">{label()}</span>
-							)}
-						</Show>
-						<Show when={props.description}>
-							{(description) => (
-								<span class="mt-1 line-clamp-2 text-sm text-subtitle">
-									{description()}
+			<div class="min-w-0 grow overflow-hidden rounded-lg border border-border bg-input-base">
+				<div
+					class={classNames(
+						"flex min-w-0 items-start justify-between gap-4 bg-card-base px-4 py-2.5",
+						{ "border-border border-b": hasPreviewFields() },
+					)}
+				>
+					<div class="min-w-0 grow">
+						<div class="flex min-w-0 items-baseline gap-2">
+							<p class="truncate text-sm font-medium text-title mb-0!">
+								{props.available
+									? props.label
+									: T()("editor.rich.text.brick.unavailable")}
+							</p>
+							<Show when={brickKey()}>
+								<span class="shrink-0 truncate font-mono text-[11px] text-unfocused">
+									{brickKey()}
 								</span>
-							)}
+							</Show>
+						</div>
+						<Show when={props.available && props.summary}>
+							<p class="mt-0.5 line-clamp-2 text-xs text-subtitle mb-0!">
+								{props.summary}
+							</p>
 						</Show>
 						<Show when={hasErrors()}>
-							<span class="mt-2 text-xs font-medium text-error-base">
+							<p class="mt-1 text-xs font-medium text-error-base mb-0!">
 								{T()("editor.rich.text.brick.has.errors")}
-							</span>
+							</p>
 						</Show>
+					</div>
+					<Show when={hasErrors()}>
+						<div class="flex shrink-0 items-start">
+							<FieldErrorBadge count={errorCount()} compact />
+						</div>
 					</Show>
 				</div>
-				<FieldErrorBadge count={errorCount()} compact />
+				<Show when={hasPreviewFields()}>
+					<dl class="min-w-0">
+						<For each={previewFields()}>
+							{(field, index) => (
+								<div
+									class={classNames(
+										"flex min-w-0 items-center justify-between gap-4 px-4 py-2",
+										{ "border-border border-t": index() > 0 },
+									)}
+									title={`${field.label}: ${field.value}`}
+								>
+									<dt class="min-w-0 truncate text-xs leading-5 font-medium text-unfocused">
+										{field.label}
+									</dt>
+									<dd class="min-w-0 truncate text-right text-xs leading-5 text-subtitle">
+										{field.value || "—"}
+									</dd>
+								</div>
+							)}
+						</For>
+					</dl>
+				</Show>
 			</div>
-			<NodeActions
-				editLabel={T()("editor.rich.text.brick.edit")}
-				removeLabel={T()("editor.rich.text.brick.remove")}
-				editDisabled={!props.available || !props.isEditable()}
-				showRemove={props.isEditable()}
-				onEdit={editBrick}
-				onRemove={props.remove}
-			/>
+			{props.isEditable() ? (
+				<NodeActions
+					editLabel={T()("editor.rich.text.brick.edit")}
+					removeLabel={T()("editor.rich.text.brick.remove")}
+					editDisabled={!props.available}
+					showRemove
+					onEdit={editBrick}
+					onRemove={props.remove}
+				/>
+			) : null}
 		</div>
 	);
 };

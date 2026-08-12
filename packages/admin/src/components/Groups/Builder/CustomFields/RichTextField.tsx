@@ -23,7 +23,6 @@ import { Permissions } from "@/constants/permissions";
 import useCustomFieldGeneration from "@/hooks/ai/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/document/useFieldRenderState";
 import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
-import api from "@/services/api";
 import brickStore from "@/store/brick-store";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore";
 import userStore from "@/store/userStore";
@@ -78,25 +77,9 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		const media = editorConfig()?.media;
 		return Array.isArray(media) ? media : undefined;
 	});
-	const usesCollectionMetadata = createMemo(
-		() =>
-			editorConfig()?.links?.internal === true ||
-			Array.isArray(editorConfig()?.links?.internal) ||
-			editorConfig()?.variables?.document === true ||
-			Array.isArray(editorConfig()?.variables?.document) ||
-			editorConfig()?.documents === true ||
-			Array.isArray(editorConfig()?.documents),
+	const collections = createMemo(
+		() => pageBuilderState.documentState?.collections?.() ?? [],
 	);
-
-	// -------------------------------
-	// Queries
-	const collections = api.collections.useGetAll({
-		queryParams: {},
-		enabled: usesCollectionMetadata,
-	});
-
-	// -------------------------------
-	// Memos
 	const currentCollection = createMemo(() =>
 		pageBuilderState.documentState?.collection?.(),
 	);
@@ -110,7 +93,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		const allowedCollections = Array.isArray(internal)
 			? new Set(internal)
 			: null;
-		return (collections.data?.data ?? [])
+		return collections()
 			.filter(
 				(collection) =>
 					collection.routing !== null &&
@@ -122,7 +105,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	const variableCollectionKeys = createMemo(() =>
 		getReadableRichTextVariableCollectionKeys(
 			editorConfig()?.variables?.document,
-			(collections.data?.data ?? []).map((collection) => collection.key),
+			collections().map((collection) => collection.key),
 		),
 	);
 	const userVariableFields = createMemo(() =>
@@ -140,17 +123,22 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	});
 	const documentNodeCollectionKeys = createMemo(() => {
 		const documents = editorConfig()?.documents;
-		if (Array.isArray(documents)) return documents;
+		const readableCollectionKeys = new Set(
+			collections().map((collection) => collection.key),
+		);
+		if (Array.isArray(documents)) {
+			return documents.filter((collectionKey) =>
+				readableCollectionKeys.has(collectionKey),
+			);
+		}
 		if (documents === true) {
-			return (collections.data?.data ?? []).map((collection) => collection.key);
+			return Array.from(readableCollectionKeys);
 		}
 		return [];
 	});
 	const documentCollections = createMemo(() => {
 		const allowed = new Set(documentNodeCollectionKeys());
-		return (collections.data?.data ?? []).filter((collection) =>
-			allowed.has(collection.key),
-		);
+		return collections().filter((collection) => allowed.has(collection.key));
 	});
 	const embeddedBrickConfigs = createMemo(() => {
 		const bricks = editorConfig()?.bricks;
@@ -252,6 +240,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		documentCollections: documentCollections(),
 		embeddedBrickConfigs: embeddedBrickConfigs(),
 		locale: fieldRenderState.contentLocale(),
+		collectionLocalized: currentCollection()?.localized === true,
 		references: {
 			media: getMediaRef,
 			document: getDocumentRef,
@@ -260,7 +249,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				const brick = brickStore.get.bricks.find(
 					(item) => item.type === "embedded" && item.ref === ref,
 				);
-				return brick ? { ref: brick.ref, key: brick.key } : undefined;
+				return brick;
 			},
 		},
 		validation: {
@@ -301,10 +290,10 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					},
 				});
 			},
-			selectDocument: ({ collectionKeys, current, onSelect }) => {
+			selectDocument: ({ collectionKeys, current, zIndex, onSelect }) => {
 				pageBuilderModalsStore.open("documentSelect", {
 					data: {
-						zIndex: RICH_TEXT_PICKER_Z_INDEX,
+						zIndex: zIndex ?? RICH_TEXT_PICKER_Z_INDEX,
 						collectionKeys,
 						multiple: false,
 						selected: current

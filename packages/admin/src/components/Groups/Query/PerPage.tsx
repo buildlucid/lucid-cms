@@ -9,6 +9,7 @@ import T from "@/translations";
 export interface PerPageProps {
 	options?: Array<number>;
 	searchParams: QueryStateResponse;
+	disabled?: boolean;
 }
 
 export const PerPage: Component<PerPageProps> = (props) => {
@@ -26,7 +27,10 @@ export const PerPage: Component<PerPageProps> = (props) => {
 	// Render
 	return (
 		<DropdownMenu.Root>
-			<DropdownMenu.Trigger class="dropdown-trigger gap-2 px-2 h-9 text-sm bg-input-base hover:bg-secondary-hover hover:text-secondary-contrast text-input-contrast border border-border rounded-md fill-card-contrast flex items-center">
+			<DropdownMenu.Trigger
+				disabled={props.disabled}
+				class="dropdown-trigger flex h-9 items-center gap-2 rounded-md border border-border bg-input-base px-2 text-sm text-input-contrast fill-card-contrast hover:bg-secondary-hover hover:text-secondary-contrast disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-input-base disabled:hover:text-unfocused"
+			>
 				<span>
 					{T()("common.per.page", {
 						count: currentPerPage(),

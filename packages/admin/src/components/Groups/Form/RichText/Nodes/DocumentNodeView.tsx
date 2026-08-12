@@ -1,11 +1,15 @@
 import type { Collection, DocumentRef, FieldError } from "@types";
 import classNames from "classnames";
-import { FaSolidFileLines } from "solid-icons/fa";
-import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import { type Accessor, type Component, createMemo } from "solid-js";
+import DocumentReferencePreviewCard from "@/components/Partials/DocumentReferencePreviewCard";
 import T from "@/translations";
-import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
+import {
+	getDocumentPreviewLabel,
+	getDocumentReferencePreviewFields,
+} from "@/utils/document-table-helpers";
 import { resolveFieldErrorMessage } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
+import { countFieldErrors } from "@/utils/structural-field-helpers";
 import type { RichTextOptions } from "../types";
 import NodeActions from "./NodeActions";
 
@@ -34,7 +38,8 @@ const DocumentNodeView: Component<DocumentNodeViewProps> = (props) => {
 	const available = createMemo(
 		() => props.reference !== undefined && collection() !== undefined,
 	);
-	const hasErrors = createMemo(() => props.errors().length > 0);
+	const errorCount = createMemo(() => countFieldErrors(props.errors()));
+	const hasErrors = createMemo(() => errorCount() > 0);
 	const errorMessage = createMemo(() => {
 		const message = props.errors()[0]?.message;
 		return message ? resolveFieldErrorMessage(message) : undefined;
@@ -53,6 +58,22 @@ const DocumentNodeView: Component<DocumentNodeViewProps> = (props) => {
 				typeof props.collectionKey === "string"
 					? props.collectionKey
 					: T()("common.document"),
+		}),
+	);
+	const documentReferenceLabel = createMemo(
+		() =>
+			collectionLabel() +
+			" · " +
+			T()("common.document") +
+			" #" +
+			String(props.documentId ?? "?"),
+	);
+	const previewFields = createMemo(() =>
+		getDocumentReferencePreviewFields({
+			collection: collection(),
+			documentRef: props.reference,
+			contentLocale: props.locale ?? "",
+			primaryLabel: label(),
 		}),
 	);
 
@@ -90,51 +111,29 @@ const DocumentNodeView: Component<DocumentNodeViewProps> = (props) => {
 			)}
 			data-lucid-rich-text-document=""
 		>
-			<div
-				class={classNames(
-					"flex min-h-20 min-w-0 grow items-center gap-4 rounded-xl border bg-input-base px-5 py-4",
-					{
-						"border-border": available() && !hasErrors(),
-						"border-error-base/50": !available() || hasErrors(),
-					},
-				)}
-			>
-				<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card-base text-icon-base">
-					<FaSolidFileLines size={18} />
-				</div>
-				<div class="min-w-0 grow">
-					<Show
-						when={available()}
-						fallback={
-							<span class="text-xs font-medium text-error-base">
-								{errorMessage() ?? T()("editor.rich.text.document.unavailable")}
-							</span>
-						}
-					>
-						<p class="truncate text-sm font-medium text-title mb-0!">
-							{label()}
-						</p>
-						<p class="mt-1 truncate text-xs text-subtitle mb-0!">
-							{collectionLabel()} · #{String(props.documentId ?? "?")}
-						</p>
-						<Show when={errorMessage()}>
-							{(message) => (
-								<p class="mt-2 text-xs font-medium text-error-base mb-0!">
-									{message()}
-								</p>
-							)}
-						</Show>
-					</Show>
-				</div>
-			</div>
-			<NodeActions
-				editLabel={T()("editor.rich.text.document.edit")}
-				removeLabel={T()("editor.rich.text.document.remove")}
-				editDisabled={!props.isEditable()}
-				showRemove={props.isEditable()}
-				onEdit={editDocument}
-				onRemove={props.remove}
+			<DocumentReferencePreviewCard
+				class="min-w-0 grow"
+				title={available() ? label() : documentReferenceLabel()}
+				subtitle={available() ? documentReferenceLabel() : undefined}
+				fields={available() ? previewFields() : []}
+				notice={
+					!available() || hasErrors() ? (
+						<span class="text-xs font-medium text-error-base">
+							{errorMessage() ?? T()("editor.rich.text.document.unavailable")}
+						</span>
+					) : undefined
+				}
 			/>
+			{props.isEditable() ? (
+				<NodeActions
+					editLabel={T()("editor.rich.text.document.edit")}
+					removeLabel={T()("editor.rich.text.document.remove")}
+					editDisabled={false}
+					showRemove
+					onEdit={editDocument}
+					onRemove={props.remove}
+				/>
+			) : null}
 		</div>
 	);
 };
