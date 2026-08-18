@@ -42,3 +42,6 @@ db.sqlite
 .idea/
 .vscode/
 *.swp
+
+# ai
+AGENTS.md

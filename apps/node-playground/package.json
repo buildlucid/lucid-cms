@@ -38,6 +38,7 @@
 		"@lucidcms/plugin-filesystem": "*",
 		"@lucidcms/plugin-nodemailer": "*",
 		"@lucidcms/plugin-pages": "*",
+		"@lucidcms/plugin-redirects": "*",
 		"@lucidcms/plugin-redis": "*",
 		"@lucidcms/plugin-resend": "*",
 		"@lucidcms/plugin-s3": "*",

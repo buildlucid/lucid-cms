@@ -1,0 +1,5 @@
+{
+	"plugin.redirects.source.duplicate": "Another redirect already uses this starting path for the selected language.",
+	"plugin.redirects.source.check.failed": "The redirect source could not be checked.",
+	"plugin.redirects.target.self": "A redirect cannot point to its own source path."
+}

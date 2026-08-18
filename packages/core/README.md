@@ -59,6 +59,7 @@ AI features require a subscription with Lucid. This is planned to become publicl
 - [SQLite KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-sqlite-kv): registers a local SQLite-backed KV adapter.
 - [Redis](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-redis): registers a Redis-backed KV adapter.
 - [Cloudflare KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-kv): registers a Cloudflare KV adapter.
+- [Redirects](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-redirects): adds a manually managed, environment-aware redirects collection for website integrations.
 
 ## 🧩 Framework And Client Packages
 

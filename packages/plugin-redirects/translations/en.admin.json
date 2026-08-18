@@ -1,0 +1,21 @@
+{
+	"plugin.redirects.collection.name": "Redirects",
+	"plugin.redirects.collection.singular.name": "Redirect",
+	"plugin.redirects.collection.summary": "Send visitors from an old or incorrect web address to the right content or another website.",
+	"plugin.redirects.fields.from.label": "Redirect from",
+	"plugin.redirects.fields.from.summary": "Enter the old path, starting with a slash. For example, /old-page.",
+	"plugin.redirects.fields.target.type.label": "Redirect to",
+	"plugin.redirects.target.type.document": "Existing content",
+	"plugin.redirects.target.type.url": "A web address",
+	"plugin.redirects.fields.status.code.label": "Redirect type",
+	"plugin.redirects.fields.status.code.summary": "Use Permanent (301) for most redirects. Use a temporary redirect if the old page will return.",
+	"plugin.redirects.status.code.301": "Permanent (301) — recommended",
+	"plugin.redirects.status.code.302": "Temporary (302)",
+	"plugin.redirects.status.code.307": "Temporary, keep request method (307)",
+	"plugin.redirects.status.code.308": "Permanent, keep request method (308)",
+	"plugin.redirects.fields.target.document.label": "Destination content",
+	"plugin.redirects.fields.target.document.summary": "The redirect follows this content if its web address changes.",
+	"plugin.redirects.fields.target.url.label": "Destination web address",
+	"plugin.redirects.fields.target.url.summary": "Enter a path on this website, such as /new-page, or a full web address, such as https://example.com.",
+	"plugin.redirects.fields.locale.label": "Language"
+}

@@ -16,6 +16,7 @@ import { googleAuthPlugin } from "@lucidcms/plugin-google-auth";
 import { microsoftAuthPlugin } from "@lucidcms/plugin-microsoft-auth";
 import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
+import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
 // Collections
@@ -282,6 +283,9 @@ export default configureLucid({
 						ui: { fullSlug: true },
 					},
 				],
+			}),
+			redirectsPlugin({
+				collections: ["page"],
 			}),
 			// redisPlugin({
 			// 	connection: env.REDIS_CONNECTION,
