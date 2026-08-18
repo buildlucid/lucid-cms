@@ -2,9 +2,14 @@
 
 ## v0.19.0-alpha.0 (unreleased)
 
+### Features:
+
+- Added environment release status filters and indicators to document lists and the page builder. ([8143341](https://github.com/buildlucid/lucid-cms/commit/81433415091ee5998a2c48872525ed598133f099))
+- Added rich text tools for embedding bricks and documents, inserting document variables and uploading images directly in the editor. ([2b4a857](https://github.com/buildlucid/lucid-cms/commit/2b4a85755594bc0b1de0f4117d3772e24a7c1861))
+
 ### Bug Fixes:
 
-- Fixed an issue with custom field ref validation where we didnt exclude soft-deleted entries.
+- Fixed custom field reference validation accepting soft-deleted entries. ([83425cd](https://github.com/buildlucid/lucid-cms/commit/83425cd414f37171c529734f10ccf525675e73e3))
 
 ## v0.18.0-alpha.0
 
