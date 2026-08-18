@@ -4,53 +4,15 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { FaSolidInfo } from "solid-icons/fa";
-import {
-	type Accessor,
-	type Component,
-	createMemo,
-	For,
-	type JSXElement,
-	Show,
-} from "solid-js";
+import { type Accessor, type Component, createMemo } from "solid-js";
 import DateText from "@/components/Partials/DateText";
-import UserDisplay from "@/components/Partials/UserDisplay";
+import DetailsList, {
+	type DetailsListProps,
+} from "@/components/Partials/DetailsList";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import SidebarSection from "./Partials/SidebarSection";
-
-const DetailRow: Component<{
-	label: string;
-	value?: string | number | null;
-	children?: JSXElement;
-}> = (props) => (
-	<div class="flex items-start justify-between gap-3 border-b border-border pb-2 last:border-b-0 last:pb-0">
-		<dt class="text-body">{props.label}</dt>
-		<dd class="min-w-0 text-right text-title">
-			{props.children ?? props.value}
-		</dd>
-	</div>
-);
-
-const UserDetailValue: Component<{
-	user: InternalCollectionDocument["createdBy"];
-}> = (props) => (
-	<Show when={props.user} fallback="-">
-		{(user) => (
-			<UserDisplay
-				user={{
-					username:
-						user().username ?? user().email ?? T()("media.types.unknown"),
-					firstName: user().firstName,
-					lastName: user().lastName,
-					profilePicture: user().profilePicture,
-				}}
-				mode="short"
-				size="x-small"
-				nameFormat="simple"
-			/>
-		)}
-	</Show>
-);
+import UserDetailValue from "./Partials/UserDetailValue";
 
 export const DocumentDetails: Component<{
 	collection: Accessor<Collection | undefined>;
@@ -69,10 +31,29 @@ export const DocumentDetails: Component<{
 			}) || "-"
 		);
 	});
-	const details = createMemo(() => {
+	const updatedAt = createMemo(() => {
+		const document = props.document();
+		const metadata = props.autoSaveMetadata?.();
+		if (!document || !metadata) return document?.updatedAt;
+		if (metadata.id !== document.id) return document.updatedAt;
+		if (metadata.versionId !== document.versionId) return document.updatedAt;
+
+		return metadata.updatedAt;
+	});
+	const details = createMemo<DetailsListProps["items"]>(() => {
 		const document = props.document();
 
 		return [
+			{
+				label: T()("common.created.at"),
+				value: <DateText date={document?.createdAt ?? null} class="text-sm" />,
+				show: Boolean(document?.createdAt),
+			},
+			{
+				label: T()("common.updated.at"),
+				value: <DateText date={updatedAt() ?? null} class="text-sm" />,
+				show: Boolean(updatedAt()),
+			},
 			{
 				label: T()("common.document.id"),
 				value: props.documentId() ?? "-",
@@ -90,16 +71,17 @@ export const DocumentDetails: Component<{
 					: (document?.version ?? T()("common.unsaved")),
 				show: true,
 			},
-		].filter((detail) => detail.show);
-	});
-	const updatedAt = createMemo(() => {
-		const document = props.document();
-		const metadata = props.autoSaveMetadata?.();
-		if (!document || !metadata) return document?.updatedAt;
-		if (metadata.id !== document.id) return document.updatedAt;
-		if (metadata.versionId !== document.versionId) return document.updatedAt;
-
-		return metadata.updatedAt;
+			{
+				label: T()("common.created.by"),
+				value: <UserDetailValue user={document?.createdBy ?? null} />,
+				show: document !== undefined,
+			},
+			{
+				label: T()("common.updated.by"),
+				value: <UserDetailValue user={document?.updatedBy ?? null} />,
+				show: document !== undefined,
+			},
+		];
 	});
 
 	// ----------------------------------
@@ -110,33 +92,7 @@ export const DocumentDetails: Component<{
 			icon={<FaSolidInfo size={14} />}
 			preferenceKey="pageBuilder.sidebar.documentDetails"
 		>
-			<div class="rounded-md border border-border bg-card-base p-3">
-				<dl class="grid gap-2 text-xs">
-					<Show when={props.document()?.createdAt}>
-						<DetailRow label={T()("common.created.at")}>
-							<DateText date={props.document()?.createdAt} class="text-xs" />
-						</DetailRow>
-					</Show>
-					<Show when={updatedAt()}>
-						<DetailRow label={T()("common.updated.at")}>
-							<DateText date={updatedAt()} class="text-xs" />
-						</DetailRow>
-					</Show>
-					<For each={details()}>
-						{(detail) => (
-							<DetailRow label={detail.label} value={detail.value} />
-						)}
-					</For>
-					<Show when={props.document() !== undefined}>
-						<DetailRow label={T()("common.created.by")}>
-							<UserDetailValue user={props.document()?.createdBy ?? null} />
-						</DetailRow>
-						<DetailRow label={T()("common.updated.by")}>
-							<UserDetailValue user={props.document()?.updatedBy ?? null} />
-						</DetailRow>
-					</Show>
-				</dl>
-			</div>
+			<DetailsList type="text" padding={12} items={details()} />
 		</SidebarSection>
 	);
 };

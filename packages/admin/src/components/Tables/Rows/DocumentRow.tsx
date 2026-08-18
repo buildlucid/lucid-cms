@@ -9,6 +9,7 @@ import type { ActionDropdownProps } from "@/components/Partials/ActionDropdown";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import DocumentAuthorCol from "@/components/Tables/Columns/DocumentAuthorCol";
 import DocumentDynamicColumns from "@/components/Tables/Columns/DocumentDynamicColumns";
+import DocumentEnvironmentStatusCol from "@/components/Tables/Columns/DocumentEnvironmentStatusCol";
 import SelectCol from "@/components/Tables/Columns/SelectCol";
 import WorkflowAssigneeCol from "@/components/Tables/Columns/WorkflowAssigneeCol";
 import WorkflowStageCol from "@/components/Tables/Columns/WorkflowStageCol";
@@ -23,6 +24,7 @@ interface DocumentRowProps extends TableRowProps {
 	include: boolean[];
 	actions?: ActionDropdownProps["actions"];
 	contentLocale?: string;
+	showEnvironmentStatus?: boolean;
 	callbacks?: {
 		setSelected?: (i: number) => void;
 		onClick?: () => void;
@@ -42,9 +44,14 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const includeOffset = () => (props.selection ? 1 : 0);
+	const environmentOffset = () =>
+		props.showEnvironmentStatus ? props.collection.environments.length : 0;
 	const workflowOffset = () => (props.collection.workflow ? 2 : 0);
 	const authorStartIndex = () =>
-		includeOffset() + props.fieldInclude.length + workflowOffset();
+		includeOffset() +
+		environmentOffset() +
+		props.fieldInclude.length +
+		workflowOffset();
 
 	// ----------------------------------
 	// Render
@@ -90,17 +97,37 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 					);
 				}}
 			</For>
+			<Show when={props.showEnvironmentStatus}>
+				<For each={props.collection.environments}>
+					{(environment, i) => (
+						<DocumentEnvironmentStatusCol
+							document={props.document}
+							environmentKey={environment.key}
+							include={props.include}
+							index={includeOffset() + props.fieldInclude.length + i()}
+							padding={props.options?.padding}
+						/>
+					)}
+				</For>
+			</Show>
 			<Show when={props.collection.workflow}>
 				<WorkflowStageCol
 					document={props.document}
 					collection={props.collection}
 					include={props.include}
-					index={includeOffset() + props.fieldInclude.length}
+					index={
+						includeOffset() + environmentOffset() + props.fieldInclude.length
+					}
 				/>
 				<WorkflowAssigneeCol
 					document={props.document}
 					include={props.include}
-					index={includeOffset() + props.fieldInclude.length + 1}
+					index={
+						includeOffset() +
+						environmentOffset() +
+						props.fieldInclude.length +
+						1
+					}
 				/>
 			</Show>
 			<DocumentAuthorCol

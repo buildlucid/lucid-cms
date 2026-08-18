@@ -21,6 +21,7 @@ export type {
 	ConnectionStatus,
 	CustomFieldInputGenerateResponse,
 	DocumentBrick,
+	DocumentEnvironmentStatus,
 	DocumentField,
 	DocumentFieldGroup,
 	DocumentFieldMap,

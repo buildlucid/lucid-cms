@@ -12,6 +12,7 @@ import type {
 import type { Config } from "../../types.js";
 import type {
 	BrickFilters,
+	DocumentEnvironmentStatusFilter,
 	DocumentFilterGroup,
 	RelationDocumentFilter,
 } from "../../utils/helpers/group-document-filters.js";
@@ -423,6 +424,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			/** The version used to determine which version of the relation custom field refs to fetch */
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
 			documentFilters: QueryParamFilters;
+			environmentStatusFilters?: DocumentEnvironmentStatusFilter[];
 			brickFilters: BrickFilters[];
 			relationDocumentFilters: RelationDocumentFilter[];
 			query: GetMultipleQueryParams;
@@ -849,6 +851,19 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				queryCount = queryCount.where(assigneeFilter);
 			}
 
+			query = this.applyEnvironmentStatusFiltersToQuery(
+				query,
+				props.environmentStatusFilters,
+				dynamicConfig.tableName,
+				props.tables.versions,
+			);
+			queryCount = this.applyEnvironmentStatusFiltersToQuery(
+				queryCount,
+				props.environmentStatusFilters,
+				dynamicConfig.tableName,
+				props.tables.versions,
+			);
+
 			query = this.applyBrickFiltersToQuery(
 				query,
 				props.brickFilters,
@@ -861,6 +876,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 			);
+
 			query = this.applyRelationDocumentFiltersToQuery(
 				query,
 				props.relationDocumentFilters,
@@ -873,6 +889,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				dynamicConfig.tableName,
 				props.tables.versions,
 			);
+
 			query = this.applyDocumentFilterOrToQuery(
 				query,
 				props.filterOr,
@@ -1606,6 +1623,55 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			return eb.exists(subQuery.select(sql.lit(1).as("exists")));
 		});
 	}
+	/** Builds version-table checks for each environment's relationship to latest. */
+	buildEnvironmentStatusFilterExpressions<DB, Table extends keyof DB>(
+		eb: ExpressionBuilder<DB, Table>,
+		filters: DocumentEnvironmentStatusFilter[],
+		documentTableName: string,
+		versionTableName: string,
+	): OperandExpression<SqlBool>[] {
+		const { ref } = this.db.dynamic;
+
+		return filters.map((filter) => {
+			const environmentVersion = this.db
+				.selectFrom(
+					sql
+						.table<LucidVersionTable>(versionTableName)
+						.as("status_environment"),
+				)
+				.whereRef(
+					ref("status_environment.document_id"),
+					"=",
+					ref(`${documentTableName}.id`),
+				)
+				.where(ref("status_environment.type"), "=", filter.environmentKey);
+
+			if (filter.status === "unreleased") {
+				return eb.not(
+					eb.exists(environmentVersion.select(sql.lit(1).as("exists"))),
+				);
+			}
+
+			const comparison = environmentVersion
+				.innerJoin(
+					sql.table<LucidVersionTable>(versionTableName).as("status_latest"),
+					(join) =>
+						join.onRef(
+							ref("status_latest.document_id"),
+							"=",
+							ref("status_environment.document_id"),
+						),
+				)
+				.where(ref("status_latest.type"), "=", "latest")
+				.whereRef(
+					ref("status_environment.content_id"),
+					filter.status === "in-sync" ? "=" : "!=",
+					ref("status_latest.content_id"),
+				);
+
+			return eb.exists(comparison.select(sql.lit(1).as("exists")));
+		});
+	}
 	/** Applies document OR groups while keeping global filters outside the OR. */
 	applyDocumentFilterOrToQuery<DB, Table extends keyof DB, O>(
 		query: SelectQueryBuilder<DB, Table, O>,
@@ -1644,6 +1710,14 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				);
 				if (versionTableName !== undefined) {
 					expressions.push(
+						...this.buildEnvironmentStatusFilterExpressions(
+							eb,
+							group.environmentStatusFilters,
+							documentTableName,
+							versionTableName,
+						),
+					);
+					expressions.push(
 						...this.buildRelationDocumentFilterExpressions(
 							eb,
 							group.relationDocumentFilters,
@@ -1660,6 +1734,25 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 			return groupConditions.length > 0 ? eb.or(groupConditions) : eb.val(true);
 		});
+	}
+	applyEnvironmentStatusFiltersToQuery<DB, Table extends keyof DB, O>(
+		query: SelectQueryBuilder<DB, Table, O>,
+		filters: DocumentEnvironmentStatusFilter[] | undefined,
+		documentTableName: string,
+		versionTableName: string,
+	): SelectQueryBuilder<DB, Table, O> {
+		if (!filters || filters.length === 0) return query;
+
+		return query.where((eb) =>
+			eb.and(
+				this.buildEnvironmentStatusFilterExpressions(
+					eb,
+					filters,
+					documentTableName,
+					versionTableName,
+				),
+			),
+		);
 	}
 	applyRelationDocumentFiltersToQuery<DB, Table extends keyof DB, O>(
 		query: SelectQueryBuilder<DB, Table, O>,

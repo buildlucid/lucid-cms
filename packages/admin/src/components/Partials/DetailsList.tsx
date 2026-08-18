@@ -7,13 +7,16 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import Pill from "@/components/Partials/Pill";
+import Pill, { type PillProps } from "@/components/Partials/Pill";
 
-interface DetailsListProps {
+export interface DetailsListProps {
 	type: "text" | "pill";
+	padding?: 12 | 16;
 	items: Array<{
 		label: string;
 		value?: string | number | null | JSXElement;
+		pillTheme?: PillProps["theme"];
+		pillSize?: PillProps["size"];
 		show?: boolean;
 		stacked?: boolean;
 		wrap?: boolean;
@@ -28,8 +31,10 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 		<ul
 			class={classNames("w-full", {
 				"bg-card-base": props.theme !== "contained",
-				"mb-6 last:mb-0 border border-border rounded-md p-4":
+				"mb-6 last:mb-0 border border-border rounded-md":
 					props.theme !== "contained",
+				"p-3": props.theme !== "contained" && props.padding === 12,
+				"p-4": props.theme !== "contained" && props.padding !== 12,
 			})}
 		>
 			<For each={props.items}>
@@ -52,7 +57,12 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 										{item.label}
 									</span>
 									<Show when={item.value !== undefined}>
-										<Pill theme="primary">{item.value}</Pill>
+										<Pill
+											theme={item.pillTheme ?? "primary"}
+											size={item.pillSize}
+										>
+											{item.value}
+										</Pill>
 									</Show>
 								</Match>
 								<Match when={props.type === "text"}>

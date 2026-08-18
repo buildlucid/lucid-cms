@@ -332,6 +332,34 @@ describe("documentFilterFields", () => {
 });
 
 describe("documentFilterSectionFields", () => {
+	it("adds one fixed-value status filter for each environment", () => {
+		const collection = {
+			...buildCollection([]),
+			environments: [
+				{
+					key: "production",
+					name: literal("Production"),
+				},
+			],
+		} as Collection;
+
+		expect(documentFilterSectionFields(collection)).toEqual(
+			expect.arrayContaining([
+				{
+					key: "envStatus.production",
+					label: "Production Status",
+					type: "select",
+					options: [
+						{ value: "unreleased", label: "Unreleased" },
+						{ value: "out-of-sync", label: "Out of sync" },
+						{ value: "in-sync", label: "In sync" },
+					],
+					operators: ["="],
+				},
+			]),
+		);
+	});
+
 	it("adds management and configured workflow filters", () => {
 		const collection = {
 			...buildCollection([

@@ -422,6 +422,7 @@ describe("groupDocumentFilters", () => {
 		expect(result).toEqual({
 			documentFilters: {},
 			brickFilters: [],
+			environmentStatusFilters: [],
 		});
 	});
 
@@ -451,6 +452,7 @@ describe("groupDocumentFilters", () => {
 		expect(groupDocumentFilters(sampleSchema, filters)).toEqual({
 			documentFilters: {},
 			brickFilters: [],
+			environmentStatusFilters: [],
 		});
 
 		expect(
@@ -458,6 +460,22 @@ describe("groupDocumentFilters", () => {
 				includeWorkflow: true,
 			}).documentFilters,
 		).toEqual(filters);
+	});
+
+	it("groups status filters for configured environments", () => {
+		const filters: QueryParamFilters = {
+			"envStatus.production": { value: "out-of-sync" },
+			"environment.unknown": { value: "in-sync" },
+			"envStatus.preview": { value: "invalid-status" },
+		};
+
+		const result = groupDocumentFilters(sampleSchema, filters, {
+			environmentKeys: new Set(["production", "preview"]),
+		});
+
+		expect(result.environmentStatusFilters).toEqual([
+			{ environmentKey: "production", status: "out-of-sync" },
+		]);
 	});
 
 	it("should handle relation custom fields with _ prefix", () => {
@@ -1110,6 +1128,23 @@ describe("groupDocumentFilters", () => {
 					},
 				],
 			},
+		]);
+	});
+
+	it("groups environment status conditions for OR document filtering", () => {
+		const result = groupDocumentFilterConditions(
+			sampleSchema,
+			[
+				{
+					key: "envStatus.production",
+					value: "unreleased",
+				},
+			],
+			{ environmentKeys: new Set(["production"]) },
+		);
+
+		expect(result.environmentStatusFilters).toEqual([
+			{ environmentKey: "production", status: "unreleased" },
 		]);
 	});
 });

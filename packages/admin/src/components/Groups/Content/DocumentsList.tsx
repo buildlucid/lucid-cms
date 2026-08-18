@@ -9,6 +9,7 @@ import type {
 import {
 	FaSolidBarsProgress,
 	FaSolidCalendar,
+	FaSolidCloudArrowUp,
 	FaSolidUser,
 	FaSolidUserCheck,
 } from "solid-icons/fa";
@@ -112,6 +113,19 @@ export const DocumentsList: Component<{
 					},
 				]
 			: [],
+	);
+	const environmentHeadColumns = createMemo(() =>
+		(props.state.collection?.environments ?? []).map((environment) => ({
+			label:
+				helpers.getLocaleValue({
+					value: environment.name,
+					fallback: environment.key,
+				}) || environment.key,
+			key: `envStatus.${environment.key}`,
+			icon: <FaSolidCloudArrowUp />,
+			minWidth: 140,
+			sortable: false,
+		})),
 	);
 	const documentQueryEnabled = createMemo(
 		() =>
@@ -383,6 +397,7 @@ export const DocumentsList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					...getTableHeadColumns(),
+					...environmentHeadColumns(),
 					...workflowHeadColumn(),
 					{
 						label: T()("common.created.by"),
@@ -472,6 +487,7 @@ export const DocumentsList: Component<{
 								document={doc()}
 								fieldInclude={props.state.listing()}
 								collection={props.state.collection as Collection}
+								showEnvironmentStatus={environmentHeadColumns().length > 0}
 								collectionsByKey={relationCollectionsByKey()}
 								include={include}
 								contentLocale={contentLocale()}

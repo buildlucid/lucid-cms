@@ -27,6 +27,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/user-preferences";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import { getDocumentEnvironmentStatus } from "@/utils/document-environment-status";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
@@ -209,7 +210,12 @@ export const HeaderBar: Component<{
 		}
 
 		for (const environment of props.state.collection()?.environments ?? []) {
-			const isPublished = !!props.state.document()?.versions[environment.key];
+			const status = getDocumentEnvironmentStatus({
+				versions: props.state.document()?.versions,
+				environmentKey: environment.key,
+				latestContentId: versionContentId("latest"),
+			});
+			const isPublished = status !== "unreleased";
 
 			options.push({
 				label: helpers.getLocaleValue({ value: environment.name }),
@@ -222,8 +228,7 @@ export const HeaderBar: Component<{
 				}),
 				status: {
 					isPublished: isPublished,
-					upToDate:
-						versionContentId(environment.key) === versionContentId("latest"),
+					upToDate: status === "in-sync",
 				},
 			});
 		}
@@ -265,8 +270,12 @@ export const HeaderBar: Component<{
 		return environments.map((environment) => {
 			const label = environmentLabels.get(environment.key) || environment.key;
 
-			const isPromoted =
-				versionContentId(environment.key) === versionContentId("latest");
+			const environmentStatus = getDocumentEnvironmentStatus({
+				versions: document.versions,
+				environmentKey: environment.key,
+				latestContentId: versionContentId("latest"),
+			});
+			const isPromoted = environmentStatus === "in-sync";
 
 			const publishRequestTargetEnabled =
 				publishReview?.requiredFor.includes(environment.key) === true;
@@ -384,7 +393,7 @@ export const HeaderBar: Component<{
 				disabled: disabledToast !== undefined,
 				...(disabledToast ? { disabledToast } : {}),
 				status: {
-					isReleased: !!document.versions?.[environment.key],
+					isReleased: environmentStatus !== "unreleased",
 					upToDate: isPromoted,
 				},
 			};

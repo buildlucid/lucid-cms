@@ -21,6 +21,8 @@
 	"common.duplicate": "Duplicate",
 	"actions.with.collection": "{{action}} {{collectionSingle}}",
 	"documents.release.to": "Release to",
+	"documents.release.status": "Release Status",
+	"documents.environment.status.label": "{{environment}} Status",
 	"documents.release.request.publish.to": "Request release to",
 	"documents.release.status.up.to.date": "Up to date with latest",
 	"documents.release.status.out.of.date": "Out of sync",

@@ -8,6 +8,7 @@ import { Permissions } from "@/constants/permissions";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import userStore from "@/store/userStore";
 import { DocumentDetails } from "./DocumentDetails";
+import { EnvironmentStatus } from "./EnvironmentStatus";
 import { PublishRequests } from "./PublishRequests";
 import { Workflow } from "./Workflow";
 
@@ -34,6 +35,12 @@ export const Sidebar: Component<{
 			((props.collection()?.review?.requiredFor?.length ?? 0) > 0 ||
 				props.collection()?.capabilities.scheduling === true),
 	);
+	const hasEnvironmentStatus = createMemo(
+		() =>
+			(props.collection()?.environments.length ?? 0) > 0 &&
+			props.documentId() !== undefined &&
+			props.document() !== undefined,
+	);
 
 	// ----------------------------------
 	// Render
@@ -47,7 +54,17 @@ export const Sidebar: Component<{
 				disabled={props.disabled}
 				mutations={props.mutations}
 			/>
-			<Show when={hasWorkflow() && hasPendingReleases()}>
+			<Show
+				when={hasWorkflow() && (hasEnvironmentStatus() || hasPendingReleases())}
+			>
+				<div class="border-t border-border" aria-hidden="true" />
+			</Show>
+			<EnvironmentStatus
+				collection={props.collection}
+				document={props.document}
+				autoSaveMetadata={props.autoSaveMetadata}
+			/>
+			<Show when={hasEnvironmentStatus() && hasPendingReleases()}>
 				<div class="border-t border-border" aria-hidden="true" />
 			</Show>
 			<PublishRequests
@@ -55,7 +72,9 @@ export const Sidebar: Component<{
 				collectionKey={props.collectionKey}
 				documentId={props.documentId}
 			/>
-			<Show when={hasWorkflow() || hasPendingReleases()}>
+			<Show
+				when={hasWorkflow() || hasEnvironmentStatus() || hasPendingReleases()}
+			>
 				<div class="border-t border-border" aria-hidden="true" />
 			</Show>
 			<DocumentDetails

@@ -277,6 +277,37 @@ export const documentFilterSectionFields = (
 		type: "number",
 	});
 
+	for (const environment of collection?.environments ?? []) {
+		const environmentLabel =
+			helpers.getLocaleValue({
+				value: environment.name,
+				fallback: environment.key,
+			}) || environment.key;
+
+		result.push({
+			key: `envStatus.${environment.key}`,
+			label: T()("documents.environment.status.label", {
+				environment: environmentLabel,
+			}),
+			type: "select",
+			options: [
+				{
+					value: "unreleased",
+					label: T()("common.status.unreleased"),
+				},
+				{
+					value: "out-of-sync",
+					label: T()("common.status.out.of.sync"),
+				},
+				{
+					value: "in-sync",
+					label: T()("common.status.in.sync"),
+				},
+			],
+			operators: ["="],
+		});
+	}
+
 	if (collection?.workflow) {
 		result.push(
 			{

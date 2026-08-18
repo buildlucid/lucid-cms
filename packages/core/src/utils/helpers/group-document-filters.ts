@@ -1,3 +1,4 @@
+import type { DocumentEnvironmentStatus } from "@lucidcms/types";
 import registeredFields from "../../libs/collection/custom-fields/registered-fields.js";
 import { getFieldDatabaseConfig } from "../../libs/collection/custom-fields/storage/index.js";
 import type { RegisteredFieldDefinition } from "../../libs/collection/custom-fields/types.js";
@@ -25,6 +26,13 @@ const DOCUMENT_FIELDS_KEY = "fields";
 const BRICK_SEPERATOR = ".";
 const TREE_TABLE_FILTER_MODE: FieldDatabaseMode = "tree-table";
 const RELATION_TABLE_FILTER_MODE: FieldDatabaseMode = "relation-table";
+const ENVIRONMENT_STATUS_FILTER_PREFIX = "envStatus.";
+
+const environmentStatuses = new Set<DocumentEnvironmentStatus>([
+	"unreleased",
+	"out-of-sync",
+	"in-sync",
+]);
 
 export type BrickFieldFilters = {
 	key: string;
@@ -36,6 +44,11 @@ export type BrickFieldFilters = {
 export type BrickFilters = {
 	table: LucidBrickTableName;
 	filters: BrickFieldFilters[];
+};
+
+export type DocumentEnvironmentStatusFilter = {
+	environmentKey: string;
+	status: DocumentEnvironmentStatus;
 };
 
 /** Pre-resolved tables and conditions for filtering through one relation field. */
@@ -60,6 +73,7 @@ export type RelationDocumentFilter = {
 export type DocumentFilterGroup = {
 	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];
+	environmentStatusFilters: DocumentEnvironmentStatusFilter[];
 	relationDocumentFilters: RelationDocumentFilter[];
 };
 
@@ -71,6 +85,7 @@ type DocumentFilterEntry = {
 
 type DocumentFilterGroupingOptions = {
 	includeWorkflow?: boolean;
+	environmentKeys?: ReadonlySet<string>;
 	relationCollectionDefaults?: ReadonlyMap<string, string>;
 };
 
@@ -284,6 +299,7 @@ const groupDocumentFilterEntries = (
 ): {
 	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];
+	environmentStatusFilters: DocumentEnvironmentStatusFilter[];
 } => {
 	const validDocFilters = [
 		"id",
@@ -300,9 +316,26 @@ const groupDocumentFilterEntries = (
 
 	const documentFilters: QueryParamFilterCondition[] = [];
 	const brickFiltersMap = new Map<LucidBrickTableName, BrickFieldFilters[]>();
+	const environmentStatusFilters: DocumentEnvironmentStatusFilter[] = [];
 
 	for (const filter of filters) {
 		const { key, value, operator } = filter;
+
+		if (key.startsWith(ENVIRONMENT_STATUS_FILTER_PREFIX)) {
+			const environmentKey = key.slice(ENVIRONMENT_STATUS_FILTER_PREFIX.length);
+			if (
+				options?.environmentKeys?.has(environmentKey) &&
+				typeof value === "string" &&
+				environmentStatuses.has(value as DocumentEnvironmentStatus) &&
+				(operator === undefined || operator === "=")
+			) {
+				environmentStatusFilters.push({
+					environmentKey,
+					status: value as DocumentEnvironmentStatus,
+				});
+			}
+			continue;
+		}
 
 		//* handle document core filters
 		if (validDocFilters.includes(key)) {
@@ -447,6 +480,7 @@ const groupDocumentFilterEntries = (
 
 	return {
 		documentFilters,
+		environmentStatusFilters,
 		brickFilters: Array.from(brickFiltersMap.entries()).map(
 			([table, filters]) => ({ table, filters }),
 		),
@@ -460,8 +494,15 @@ const groupDocumentFilters = (
 ): {
 	documentFilters: QueryParamFilters;
 	brickFilters: BrickFilters[];
+	environmentStatusFilters: DocumentEnvironmentStatusFilter[];
 } => {
-	if (!filters) return { documentFilters: {}, brickFilters: [] };
+	if (!filters) {
+		return {
+			documentFilters: {},
+			brickFilters: [],
+			environmentStatusFilters: [],
+		};
+	}
 
 	const grouped = groupDocumentFilterEntries(
 		bricksTableSchema,
@@ -478,6 +519,7 @@ const groupDocumentFilters = (
 			grouped.documentFilters.map(({ key, ...filter }) => [key, filter]),
 		),
 		brickFilters: grouped.brickFilters,
+		environmentStatusFilters: grouped.environmentStatusFilters,
 	};
 };
 
@@ -489,8 +531,15 @@ export const groupDocumentFilterConditions = (
 ): {
 	documentFilters: QueryParamFilterCondition[];
 	brickFilters: BrickFilters[];
+	environmentStatusFilters: DocumentEnvironmentStatusFilter[];
 } => {
-	if (!filters) return { documentFilters: [], brickFilters: [] };
+	if (!filters) {
+		return {
+			documentFilters: [],
+			brickFilters: [],
+			environmentStatusFilters: [],
+		};
+	}
 
 	return groupDocumentFilterEntries(bricksTableSchema, filters, options);
 };

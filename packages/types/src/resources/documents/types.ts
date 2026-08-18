@@ -87,6 +87,11 @@ export type DocumentVersionSummary = {
 	createdBy: number | null;
 };
 
+export type DocumentEnvironmentStatus =
+	| "unreleased"
+	| "out-of-sync"
+	| "in-sync";
+
 export type DocumentFieldMap = Record<string, DocumentField>;
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.

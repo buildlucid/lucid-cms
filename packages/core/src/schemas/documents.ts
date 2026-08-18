@@ -645,6 +645,11 @@ export const controllerSchemas = {
 					"filter[workflowAssignee]": queryString.schema.filter(true, {
 						example: "1,2",
 					}),
+					"filter[envStatus.key]": queryString.schema.filter(false, {
+						description:
+							"Filter by an environment's release status: unreleased, out-of-sync or in-sync",
+						example: "out-of-sync",
+					}),
 					"filter[_customFieldKey]": queryString.schema.filter(true, {
 						description:
 							"Prefix custom field keys with an underscore to filter by them",

@@ -27,6 +27,22 @@ const contextWithQuery = (query: Record<string, string>) =>
 	}) as LucidHonoContext;
 
 describe("buildFormattedQuery", () => {
+	test("parses dotted environment status filter keys", async () => {
+		const query = await buildFormattedQuery(
+			contextWithQuery({
+				"filter[envStatus.production:=]": "out-of-sync",
+			}),
+			querySchema,
+		);
+
+		expect(query.filter).toEqual({
+			"envStatus.production": {
+				value: "out-of-sync",
+				operator: "=",
+			},
+		});
+	});
+
 	test("parses grouped OR filters without adding them to top-level filters", async () => {
 		const query = await buildFormattedQuery(
 			contextWithQuery({

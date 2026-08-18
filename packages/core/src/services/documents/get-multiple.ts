@@ -112,15 +112,21 @@ const getMultiple: ServiceFn<
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 	});
 	if (relationFiltersRes.error) return relationFiltersRes;
-	const { documentFilters, brickFilters } = groupDocumentFilters(
-		bricksTableSchemaRes.data,
-		data.query.filter,
-		{
+
+	const environmentKeys = new Set(
+		collectionRes.data.getData.environments.map(
+			(environment) => environment.key,
+		),
+	);
+
+	const { documentFilters, brickFilters, environmentStatusFilters } =
+		groupDocumentFilters(bricksTableSchemaRes.data, data.query.filter, {
 			includeWorkflow,
+			environmentKeys,
 			relationCollectionDefaults:
 				relationFiltersRes.data.relationCollectionDefaults,
-		},
-	);
+		});
+
 	const workflowAssigneeFilterValues = getFilterValues(
 		documentFilters.workflowAssignee,
 	);
@@ -128,6 +134,7 @@ const getMultiple: ServiceFn<
 	const filterOr = data.query.filterOr?.map((group, index) => ({
 		...groupDocumentFilterConditions(bricksTableSchemaRes.data, group, {
 			includeWorkflow,
+			environmentKeys,
 			relationCollectionDefaults:
 				relationFiltersRes.data.relationCollectionDefaults,
 		}),
@@ -140,6 +147,7 @@ const getMultiple: ServiceFn<
 			version: data.version,
 			query: data.query,
 			documentFilters,
+			environmentStatusFilters,
 			filterOr,
 			brickFilters: brickFilters,
 			relationDocumentFilters: relationFiltersRes.data.filters,

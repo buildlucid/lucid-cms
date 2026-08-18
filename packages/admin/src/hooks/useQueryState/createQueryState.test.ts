@@ -77,6 +77,29 @@ describe("createQueryState - memory mode", () => {
 		});
 	});
 
+	it("serialises dotted environment status filter keys", () => {
+		createRoot((dispose) => {
+			const query = createQueryState({
+				schema: {
+					filters: { "envStatus.production": textFilter() },
+				},
+				adapter: createTestUrlAdapter(),
+			});
+
+			query.setFilter("envStatus.production", {
+				value: "out-of-sync",
+				operator: "=",
+			});
+
+			expect(
+				new URLSearchParams(query.queryString()).get(
+					"filter[envStatus.production:=]",
+				),
+			).toBe("out-of-sync");
+			dispose();
+		});
+	});
+
 	it("builds the same query string as URL mode", () => {
 		createRoot((dispose) => {
 			const schema = buildSchema();

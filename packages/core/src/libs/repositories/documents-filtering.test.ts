@@ -1,6 +1,9 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import type { RelationDocumentFilter } from "../../utils/helpers/group-document-filters.js";
+import type {
+	DocumentEnvironmentStatusFilter,
+	RelationDocumentFilter,
+} from "../../utils/helpers/group-document-filters.js";
 import createLucidDatabase from "../db/create-lucid-database.js";
 import DocumentsRepository from "./documents.js";
 
@@ -252,5 +255,112 @@ describe("related document repository filters", async () => {
 		).execute();
 
 		expect(rows).toEqual([{ id: 2 }]);
+	});
+});
+
+describe("document environment status filters", async () => {
+	const db = new SQLiteAdapter({ database: ":memory:" });
+	const connection = await db.connect();
+	const database = createLucidDatabase({
+		client: connection.client,
+		adapter: db,
+	});
+	const Documents = new DocumentsRepository(database);
+	const documentTable = "lucid_document__pages";
+	const versionTable = "lucid_document__pages__ver";
+
+	beforeAll(async () => {
+		await connection.client.schema
+			.createTable(documentTable)
+			.addColumn("id", "integer", (column) => column.primaryKey())
+			.execute();
+		await connection.client.schema
+			.createTable(versionTable)
+			.addColumn("id", "integer", (column) => column.primaryKey())
+			.addColumn("document_id", "integer", (column) => column.notNull())
+			.addColumn("type", "text", (column) => column.notNull())
+			.addColumn("content_id", "text", (column) => column.notNull())
+			.execute();
+
+		await connection.client
+			.insertInto(documentTable)
+			.values([{ id: 1 }, { id: 2 }, { id: 3 }])
+			.execute();
+		await connection.client
+			.insertInto(versionTable)
+			.values([
+				{ id: 101, document_id: 1, type: "latest", content_id: "one" },
+				{ id: 102, document_id: 1, type: "production", content_id: "one" },
+				{ id: 201, document_id: 2, type: "latest", content_id: "two" },
+				{
+					id: 202,
+					document_id: 2,
+					type: "production",
+					content_id: "previous",
+				},
+				{ id: 301, document_id: 3, type: "latest", content_id: "three" },
+			])
+			.execute();
+	});
+
+	afterAll(() => connection.destroy());
+
+	const selectByStatus = async (filter: DocumentEnvironmentStatusFilter) => {
+		const baseQuery = connection.client
+			.selectFrom(documentTable)
+			.select(`${documentTable}.id`);
+
+		return Documents.applyEnvironmentStatusFiltersToQuery(
+			baseQuery,
+			[filter],
+			documentTable,
+			versionTable,
+		)
+			.orderBy(`${documentTable}.id`, "asc")
+			.execute();
+	};
+
+	test.each([
+		["in-sync", 1],
+		["out-of-sync", 2],
+		["unreleased", 3],
+	] as const)("matches %s documents", async (status, id) => {
+		await expect(
+			selectByStatus({ environmentKey: "production", status }),
+		).resolves.toEqual([{ id }]);
+	});
+
+	test("supports environment status conditions in OR groups", async () => {
+		const baseQuery = connection.client
+			.selectFrom(documentTable)
+			.select(`${documentTable}.id`);
+		const rows = await Documents.applyDocumentFilterOrToQuery(
+			baseQuery,
+			[
+				{
+					documentFilters: [],
+					brickFilters: [],
+					relationDocumentFilters: [],
+					environmentStatusFilters: [
+						{ environmentKey: "production", status: "in-sync" },
+					],
+				},
+				{
+					documentFilters: [],
+					brickFilters: [],
+					relationDocumentFilters: [],
+					environmentStatusFilters: [
+						{ environmentKey: "production", status: "out-of-sync" },
+					],
+				},
+			],
+			documentTable,
+			versionTable,
+			false,
+		)
+			.orderBy(`${documentTable}.id`, "asc")
+			.execute();
+
+		expect(rows).toEqual([{ id: 1 }, { id: 2 }]);
 	});
 });
