@@ -4,18 +4,18 @@ import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 } from "../runtime/types.js";
-import getMediaAdapter from "./get-adapter.js";
-import type { MediaAdapterInstance } from "./types.js";
+import getMediaStorageAdapter from "./get-adapter.js";
+import type { MediaStorageAdapterInstance } from "./types.js";
 
-/** Resolve the configured media adapter and run its init lifecycle hook. */
-export const getInitializedMediaAdapter = async (
+/** Resolve the configured media storage adapter and run its init lifecycle hook. */
+export const getInitializedMediaStorageAdapter = async (
 	config: Config,
 	options: {
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	} = {},
-): Promise<MediaAdapterInstance | null> => {
-	const adapter = await getMediaAdapter(config);
+): Promise<MediaStorageAdapterInstance | null> => {
+	const adapter = await getMediaStorageAdapter(config);
 	if (!adapter) return null;
 
 	const context = createAdapterLifecycleContext({
@@ -34,9 +34,9 @@ export const getInitializedMediaAdapter = async (
 	return adapter;
 };
 
-/** Run a media adapter destroy lifecycle hook when one exists. */
-export const destroyMediaAdapter = async (
-	adapter: MediaAdapterInstance | null | undefined,
+/** Run a media storage adapter destroy lifecycle hook when one exists. */
+export const destroyMediaStorageAdapter = async (
+	adapter: MediaStorageAdapterInstance | null | undefined,
 	options: {
 		config: Config;
 		env?: EnvironmentVariables;

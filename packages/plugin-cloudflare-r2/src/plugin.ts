@@ -1,6 +1,6 @@
 import { LucidError } from "@lucidcms/core";
 import type { LucidPluginResponse } from "@lucidcms/core/types";
-import cloudflareR2Adapter from "./adapter.js";
+import cloudflareR2StorageAdapter from "./adapter.js";
 import {
 	DEFAULT_MAX_UPLOAD_SIZE,
 	LUCID_VERSION,
@@ -53,7 +53,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 				draft.http.routes.push(...routes(resolvedOptions));
 			}
 
-			draft.media.adapter = cloudflareR2Adapter(resolvedOptions);
+			draft.media.storage = cloudflareR2StorageAdapter(resolvedOptions);
 		},
 	};
 };

@@ -1,16 +1,15 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { ImageProcessorInstance } from "@lucidcms/core/types";
+import type { MediaDeliveryAdapterInstance } from "@lucidcms/core/types";
 import mime from "mime-types";
 import sharp from "sharp";
 import rotateFocalPoint from "./rotate-focal-point.js";
 
-/**
- * The Sharp image processor
- */
-const sharpImageProcessor = (): ImageProcessorInstance => ({
-	type: "image-processor",
+/** Sharp-backed media delivery with on-demand image transformation. */
+const sharpMediaDeliveryAdapter = (): MediaDeliveryAdapterInstance => ({
+	type: "media-delivery-adapter",
 	key: "sharp",
-	process: async (_context, { stream, options }) => {
+	resolveFile: () => ({ type: "lucid" }),
+	processImage: async (_context, { stream, options }) => {
 		try {
 			const chunks: Buffer[] = [];
 			for await (const chunk of stream) {
@@ -135,4 +134,4 @@ const sharpImageProcessor = (): ImageProcessorInstance => ({
 	},
 });
 
-export default sharpImageProcessor;
+export default sharpMediaDeliveryAdapter;

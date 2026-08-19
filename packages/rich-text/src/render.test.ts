@@ -82,7 +82,6 @@ describe("generateHTML", () => {
 								height: 800,
 								base64: null,
 								averageColor: null,
-								presets: [],
 							},
 						},
 					},
@@ -116,7 +115,6 @@ describe("generateHTML", () => {
 									height: 800,
 									base64: null,
 									averageColor: null,
-									presets: [],
 								},
 							},
 						},
@@ -124,7 +122,7 @@ describe("generateHTML", () => {
 				],
 			}),
 		).toBe(
-			'<picture data-lucid-rich-text-picture=""><source srcset="/photo.jpg 1200w"><img data-lucid-rich-text-image="" src="/photo.jpg" alt="Photo" width="1200" height="800" loading="lazy" decoding="async"></picture><audio data-lucid-rich-text-audio="" controls preload="metadata"><source src="/audio.mp3" type="audio/mpeg"></audio><video data-lucid-rich-text-video="" controls preload="metadata" poster="/poster.jpg" data-lucid-rich-text-poster-srcset="/poster.jpg 1200w"><source src="/video.mp4" type="video/mp4"></video>',
+			'<picture data-lucid-rich-text-picture=""><img data-lucid-rich-text-image="" src="/photo.jpg" alt="Photo" width="1200" height="800" loading="lazy" decoding="async"></picture><audio data-lucid-rich-text-audio="" controls preload="metadata"><source src="/audio.mp3" type="audio/mpeg"></audio><video data-lucid-rich-text-video="" controls preload="metadata" poster="/poster.jpg"><source src="/video.mp4" type="video/mp4"></video>',
 		);
 	});
 
@@ -194,7 +192,7 @@ describe("generateHTML", () => {
 		);
 	});
 
-	test("renders responsive image presets with a removable placeholder", () => {
+	test("renders the original image with a removable placeholder", () => {
 		expect(
 			generateHTML({
 				type: "doc",
@@ -213,22 +211,13 @@ describe("generateHTML", () => {
 								height: 800,
 								base64: "data:image/jpeg;base64,preview",
 								averageColor: "#334455",
-								presets: [
-									{
-										key: "small",
-										src: "/photo.jpg?preset=small",
-										mimeType: "image/webp",
-										width: 300,
-										height: 200,
-									},
-								],
 							},
 						},
 					},
 				],
 			}),
 		).toBe(
-			'<picture data-lucid-rich-text-picture=""><source srcset="/photo.jpg?preset=small 300w, /photo.jpg 1200w"><img data-lucid-rich-text-image="" src="/photo.jpg?preset=small" alt="Photo" title="Photo" width="1200" height="800" loading="lazy" decoding="async" data-lucid-rich-text-image-placeholder="" style="background-image:url(&quot;data:image/jpeg;base64,preview&quot;);background-color:#334455;background-position:center;background-repeat:no-repeat;background-size:cover"></picture>',
+			'<picture data-lucid-rich-text-picture=""><img data-lucid-rich-text-image="" src="/photo.jpg" alt="Photo" title="Photo" width="1200" height="800" loading="lazy" decoding="async" data-lucid-rich-text-image-placeholder="" style="background-image:url(&quot;data:image/jpeg;base64,preview&quot;);background-color:#334455;background-position:center;background-repeat:no-repeat;background-size:cover"></picture>',
 		);
 	});
 

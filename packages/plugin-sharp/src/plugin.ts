@@ -1,13 +1,13 @@
 import { LucidError } from "@lucidcms/core";
-import type { LucidPlugin } from "@lucidcms/core/types";
-import sharpImageProcessor from "./adapter/index.js";
+import type { LucidPluginResponse } from "@lucidcms/core/types";
+import sharpMediaDeliveryAdapter from "./adapter/index.js";
 import {
 	LUCID_VERSION,
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 
-const plugin: LucidPlugin = () => {
+const plugin = (): LucidPluginResponse => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
@@ -21,7 +21,7 @@ const plugin: LucidPlugin = () => {
 		},
 		recipe: (draft) => {
 			draft.i18n.sources.push("@lucidcms/plugin-sharp/translations");
-			draft.media.images.processor = sharpImageProcessor();
+			draft.media.delivery = sharpMediaDeliveryAdapter();
 		},
 	};
 };

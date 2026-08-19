@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	checkHasMediaStrategy: vi.fn(),
+	checkHasMediaStorage: vi.fn(),
 	processImage: vi.fn(),
 }));
 
-vi.mock("../media/checks/check-has-media-strategy.js", () => ({
-	default: mocks.checkHasMediaStrategy,
+vi.mock("../media/checks/check-has-media-storage.js", () => ({
+	default: mocks.checkHasMediaStorage,
 }));
 
 vi.mock("../processed-images/process-image.js", () => ({
@@ -21,7 +21,7 @@ describe("cdn stream media", () => {
 	});
 
 	it("treats internal processed keys as missing", async () => {
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				stream: vi.fn(),
@@ -54,7 +54,7 @@ describe("cdn stream media", () => {
 			error: undefined,
 			data: undefined,
 		});
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: { stream },
 		});

@@ -137,7 +137,11 @@ const getMultiple: ServiceFn<
 			operation,
 			documentLabel: documentLabelRes.data,
 			latestContentId: latestRes.data?.content_id ?? null,
-			host: getBaseUrl(context),
+			mediaOptions: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 			permissions: {
 				review: canReviewTarget,
 				cancel:

@@ -244,6 +244,11 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 				collections: collectionsRes.data,
 				config: context.config,
 				host: baseUrl,
+				mediaOptions: {
+					host: baseUrl,
+					delivery: context.mediaDelivery,
+					imagePresets: context.config.media.images.presets,
+				},
 				refData,
 				refTypes: include.refTypes,
 				hasFields: true,

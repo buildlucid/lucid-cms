@@ -241,7 +241,8 @@ const getTranslation = (
 				value: string | null;
 				localeCode: string | null;
 		  }[]
-		| Record<string, string | null>,
+		| Record<string, string | null>
+		| null,
 	contentLocale?: string,
 ) => {
 	if (!contentLocale) return null;
@@ -252,7 +253,7 @@ const getTranslation = (
 	return translation?.value ?? null;
 };
 const getRecordTranslation = (
-	translations?: Record<string, string | null>,
+	translations?: Record<string, string | null> | null,
 	contentLocale?: string,
 ) => {
 	if (!contentLocale) return null;

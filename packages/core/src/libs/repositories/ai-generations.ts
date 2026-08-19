@@ -190,6 +190,11 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 									.select((mediaEb) => [
 										"lucid_media.id",
 										"lucid_media.key",
+										"lucid_media.status",
+										"lucid_media.storage_adapter_key",
+										"lucid_media.storage_adapter_reference",
+										"lucid_media.storage_adapter_data",
+										"lucid_media.public",
 										"lucid_media.origin",
 										"lucid_media.type",
 										"lucid_media.mime_type",

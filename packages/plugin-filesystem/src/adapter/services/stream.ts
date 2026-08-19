@@ -2,15 +2,15 @@ import { constants, createReadStream } from "node:fs";
 import { access, stat } from "node:fs/promises";
 import { copy } from "@lucidcms/core/plugin";
 import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterServiceStream,
+	FileSystemStorageAdapterOptions,
+	MediaStorageAdapterServiceStream,
 } from "@lucidcms/core/types";
 import { createBufferETag, matchesETag } from "../etag.js";
 import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
-export default (adapterOptions: FileSystemMediaAdapterOptions) => {
-	const stream: MediaAdapterServiceStream = async (_context, props) => {
+export default (adapterOptions: FileSystemStorageAdapterOptions) => {
+	const stream: MediaStorageAdapterServiceStream = async (_context, props) => {
 		try {
 			const { targetPath } = keyPaths(props.key, adapterOptions.uploadDir);
 			const fileType = await import("file-type");

@@ -1,4 +1,4 @@
-import type { MediaAdapterInstance } from "@lucidcms/core/types";
+import type { MediaStorageAdapterInstance } from "@lucidcms/core/types";
 import { AwsClient } from "aws4fetch";
 import { ADAPTER_KEY } from "./constants.js";
 import deleteMultiple from "./services/delete-multiple.js";
@@ -17,18 +17,18 @@ import uploadSingle from "./services/upload-single.js";
 import type { PluginOptions } from "./types.js";
 
 /**
- * Adapts the R2 binding to Lucid's media adapter contract and wires in the
+ * Adapts the R2 binding to Lucid's media storage contract and wires in the
  * optional HTTP fallback for URL generation when direct browser transfers are needed.
  */
-const cloudflareR2Adapter = (
+const cloudflareR2StorageAdapter = (
 	options: PluginOptions,
-): MediaAdapterInstance<PluginOptions> => {
+): MediaStorageAdapterInstance<PluginOptions> => {
 	const httpClient = options.http
 		? new AwsClient(options.http.clientOptions)
 		: null;
 
 	return {
-		type: "media-adapter",
+		type: "media-storage-adapter",
 		key: ADAPTER_KEY,
 		createUploadSession: createUploadSession(httpClient, options),
 		getUploadPartUrls: options.http
@@ -54,4 +54,4 @@ const cloudflareR2Adapter = (
 	};
 };
 
-export default cloudflareR2Adapter;
+export default cloudflareR2StorageAdapter;

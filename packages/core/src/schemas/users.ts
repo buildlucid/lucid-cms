@@ -6,6 +6,7 @@ import {
 	mediaCropInputSchema,
 	mediaImagePreviewResponseSchema,
 	mediaOriginSchema,
+	uploadSessionResponseSchema,
 } from "./media.js";
 
 const userIdParamSchema = z.object({
@@ -38,27 +39,6 @@ const profilePictureUploadSessionBodySchema = z.object({
 		example: 1048576,
 	}),
 });
-const uploadPartSchema = z.object({
-	partNumber: z.number().int().positive(),
-	etag: z.string().trim(),
-	size: z.number().nonnegative().optional(),
-});
-const profilePictureUploadSessionResponseSchema = z.discriminatedUnion("mode", [
-	z.object({
-		mode: z.literal("single"),
-		key: z.string(),
-		url: z.string(),
-		headers: z.record(z.string(), z.string()).optional(),
-	}),
-	z.object({
-		mode: z.literal("resumable"),
-		key: z.string(),
-		sessionId: z.string(),
-		partSize: z.number(),
-		expiresAt: z.string(),
-		uploadedParts: z.array(uploadPartSchema),
-	}),
-]);
 const updateProfilePictureBodySchema = z
 	.object({
 		crop: mediaCropInputSchema.nullable().optional(),
@@ -402,7 +382,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: userIdParamSchema,
-		response: profilePictureUploadSessionResponseSchema,
+		response: uploadSessionResponseSchema,
 	} satisfies ControllerSchema,
 	updateProfilePicture: {
 		body: updateProfilePictureBodySchema,

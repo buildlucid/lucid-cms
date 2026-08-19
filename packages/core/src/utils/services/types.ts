@@ -4,7 +4,8 @@ import type { DatabaseConnection } from "../../libs/db/types.js";
 import type { EmailAdapterInstance } from "../../libs/email/types.js";
 import type { TranslationStore, Translator } from "../../libs/i18n/types.js";
 import type { KVAdapterInstance } from "../../libs/kv/types.js";
-import type { MediaAdapterInstance } from "../../libs/media/types.js";
+import type { MediaDeliveryAdapterInstance } from "../../libs/media-delivery/types.js";
+import type { MediaStorageAdapterInstance } from "../../libs/media-storage/types.js";
 import type { QueueAdapterInstance } from "../../libs/queue/types.js";
 import type {
 	AdapterRuntimeContext,
@@ -31,8 +32,10 @@ export type CreateServiceContextOptions = {
 	queue?: QueueAdapterInstance;
 	/** Optional KV adapter instance available to services. */
 	kv?: KVAdapterInstance;
-	/** Optional initialized media adapter instance available to services. */
-	media?: MediaAdapterInstance | null;
+	/** Optional initialized media storage adapter available to services. */
+	mediaStorage?: MediaStorageAdapterInstance | null;
+	/** Optional initialized media delivery adapter available to services. */
+	mediaDelivery?: MediaDeliveryAdapterInstance;
 	/** Optional initialized email adapter instance available to services. */
 	email?: EmailAdapterInstance;
 	/**
@@ -52,7 +55,8 @@ export type ServiceContext = {
 	runtimeContext?: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
 	kv: KVAdapterInstance;
-	media: MediaAdapterInstance | null;
+	mediaStorage: MediaStorageAdapterInstance | null;
+	mediaDelivery: MediaDeliveryAdapterInstance;
 	email: EmailAdapterInstance;
 	translate: Translator;
 	request: {

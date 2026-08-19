@@ -2,14 +2,17 @@ import { copyFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { copy } from "@lucidcms/core/plugin";
 import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterServiceRenameKey,
+	FileSystemStorageAdapterOptions,
+	MediaStorageAdapterServiceRenameKey,
 } from "@lucidcms/core/types";
 import { keyPaths } from "../helpers.js";
 import { copyStoredMetadata, deleteStoredMetadata } from "../metadata.js";
 
-export default (options: FileSystemMediaAdapterOptions) => {
-	const rename: MediaAdapterServiceRenameKey = async (_context, props) => {
+export default (options: FileSystemStorageAdapterOptions) => {
+	const rename: MediaStorageAdapterServiceRenameKey = async (
+		_context,
+		props,
+	) => {
 		try {
 			const from = keyPaths(props.from, options.uploadDir);
 			const to = keyPaths(props.to, options.uploadDir);

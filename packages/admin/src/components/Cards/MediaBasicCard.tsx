@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/Groups/Form";
 import ActionDropdown from "@/components/Partials/ActionDropdown";
 import AspectRatio from "@/components/Partials/AspectRatio";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import { mediaStatusBorderClass } from "@/components/Partials/MediaStatusPreview";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
@@ -61,7 +62,10 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 	// Return
 	return (
 		<li
-			class="bg-card-base hover:bg-row-hover border-border border rounded-md group overflow-hidden relative cursor-pointer transition-colors duration-200"
+			class={classNames(
+				"bg-card-base hover:bg-row-hover border rounded-md group overflow-hidden relative cursor-pointer transition-colors duration-200",
+				mediaStatusBorderClass(props.media.status),
+			)}
 			onClick={() => {
 				props.onClick?.();
 			}}
@@ -95,7 +99,9 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 									props.rowTarget?.setTargetId(props.media.id);
 									props.rowTarget?.setTrigger("clear", true);
 								},
-								hide: props.media.type !== "image",
+								hide:
+									props.media.type !== "image" ||
+									props.media.status !== "ready",
 								permission: hasUpdatePermission(),
 								theme: "error",
 							},
@@ -117,8 +123,15 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 			>
 				<MediaPreview
 					media={{
+						status: props.media.status,
 						type: props.media.type,
 						url: props.media.file.url,
+						presets:
+							props.media.type === "image"
+								? props.media.file.presets
+								: undefined,
+						sources:
+							props.media.type === "video" ? props.media.sources : undefined,
 						poster:
 							props.media.type === "video" ? props.media.poster : undefined,
 					}}

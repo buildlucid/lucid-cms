@@ -254,7 +254,6 @@ const buildField = (
 					{
 						locale,
 						refs: data.refs ?? null,
-						mediaImagePresets: meta.config.media.images.presets,
 					},
 				);
 			} else {
@@ -282,7 +281,6 @@ const buildField = (
 		value: cfInstance.formatResponseValue(defaultValue.value, {
 			locale: meta.localization.default,
 			refs: data.refs ?? null,
-			mediaImagePresets: meta.config.media.images.presets,
 		}),
 		groupRef: meta.groupRef,
 	};

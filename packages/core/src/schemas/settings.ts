@@ -56,7 +56,7 @@ const settingsResponseSchema = z.object({
 		.object({
 			enabled: z.boolean().meta({
 				description:
-					"Whether media is supported. Based on if the media strategy has been set",
+					"Whether media is supported, based on whether a media storage adapter is configured",
 				example: true,
 			}),
 			storage: z.object({
@@ -109,16 +109,16 @@ const settingsResponseSchema = z.object({
 				description: "The queue adapter key",
 				example: "worker",
 			}),
-			media: z.string().nullable().meta({
-				description: "The media adapter key",
+			mediaStorage: z.string().nullable().meta({
+				description: "The media storage adapter key",
 				example: "file-system",
 			}),
 			email: z.string().meta({
 				description: "The email adapter key",
 				example: "smtp",
 			}),
-			imageProcessor: z.string().nullable().meta({
-				description: "The image processor key",
+			mediaDelivery: z.string().meta({
+				description: "The media delivery adapter key",
 				example: "custom",
 			}),
 			alertEmail: z.email().nullable().meta({

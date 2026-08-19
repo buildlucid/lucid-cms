@@ -1,7 +1,6 @@
 import constants from "../../constants/constants.js";
 import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { settingsFormatter } from "../../libs/formatters/index.js";
-import getImageProcessor from "../../libs/image-processor/get-adapter.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -19,13 +18,12 @@ const getSettings: ServiceFn<
 	],
 	Settings
 > = async (context, data) => {
-	const [optionsRes, processedImageCountRes, imageProcessor, mediaStorageUsed] =
+	const [optionsRes, processedImageCountRes, mediaStorageUsed] =
 		await Promise.all([
 			getOptions(context, {
 				names: ["system_alert_email"],
 			}),
 			getProcessedImageCount(context),
-			getImageProcessor(context.config),
 			getMediaStorageUsage(context),
 		]);
 	if (processedImageCountRes.error) return processedImageCountRes;
@@ -52,12 +50,12 @@ const getSettings: ServiceFn<
 			settings: {
 				mediaStorageUsed: mediaStorageUsed.data.total,
 				processedImageCount: processedImageCountRes.data,
-				mediaAdapterEnabled: context.media !== null,
-				mediaAdapterKey: context.media?.key ?? null,
+				mediaStorageAdapterEnabled: context.mediaStorage !== null,
+				mediaStorageAdapterKey: context.mediaStorage?.key ?? null,
 				emailAdapterKey: context.email.key,
 				emailSimulated: isEmailSimulated(context),
 				emailTemplates,
-				imageProcessorKey: imageProcessor.key,
+				mediaDeliveryAdapterKey: context.mediaDelivery.key,
 				systemAlertEmail: systemAlertEmailRes?.valueText ?? null,
 				runtimeKey: data.runtime,
 				queueKey: context.queue.key,

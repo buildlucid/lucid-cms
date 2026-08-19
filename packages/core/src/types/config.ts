@@ -19,16 +19,16 @@ import type {
 	LocaleDirection,
 	TranslationSource,
 } from "../libs/i18n/types.js";
-import type {
-	ImageProcessor,
-	ImageProcessorInstance,
-} from "../libs/image-processor/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
-	MediaAdapter,
-	MediaAdapterInstance,
-} from "../libs/media/types.js";
+	MediaDeliveryAdapter,
+	MediaDeliveryAdapterInstance,
+} from "../libs/media-delivery/types.js";
+import type {
+	MediaStorageAdapter,
+	MediaStorageAdapterInstance,
+} from "../libs/media-storage/types.js";
 import type { LucidPluginResponse } from "../libs/plugins/types.js";
 import type {
 	QueueAdapter,
@@ -378,12 +378,19 @@ export interface LucidConfig {
 	 */
 	media?: {
 		/**
-		 * The media adapter to use. This determines how media is stored, retrieved and deleted.
+		 * The storage adapter used to store, retrieve and delete media files.
 		 */
-		adapter?:
-			| MediaAdapter
-			| MediaAdapterInstance
-			| Promise<MediaAdapterInstance>;
+		storage?:
+			| MediaStorageAdapter
+			| MediaStorageAdapterInstance
+			| Promise<MediaStorageAdapterInstance>;
+		/**
+		 * The delivery adapter used to resolve media URLs and optional transformations.
+		 */
+		delivery?:
+			| MediaDeliveryAdapter
+			| MediaDeliveryAdapterInstance
+			| Promise<MediaDeliveryAdapterInstance>;
 		limits?: {
 			/**
 			 * The storage limit in bytes.
@@ -393,22 +400,13 @@ export interface LucidConfig {
 			 * The maximum upload size in bytes.
 			 */
 			uploadBytes?: number;
-			/**
-			 * The processed image limit per source file.
-			 */
-			processedImagesPerFile?: number;
 		};
 		/**
 		 * Image settings.
 		 */
 		images?: {
-			/** The image processor to use. */
-			processor?:
-				| ImageProcessor
-				| ImageProcessorInstance
-				| Promise<ImageProcessorInstance>;
 			/**
-			 * The image presets to use. These are used to generate the processed images.
+			 * Named image variants exposed by the configured delivery adapter.
 			 */
 			presets?: Record<
 				string,
@@ -421,10 +419,13 @@ export interface LucidConfig {
 					rotate?: 0 | 90 | 180 | 270;
 				}
 			>;
-			/**
-			 * If true, the processed images will be stored.
-			 */
-			storeProcessed?: boolean;
+			/** Lucid CDN caching for locally processed image variants. */
+			cache?: {
+				/** Store processed variants in the configured media storage. */
+				enabled?: boolean;
+				/** Maximum number of cached variants for each source file. */
+				maxVariantsPerFile?: number;
+			};
 			/**
 			 * If true, the format query parameter will be allowed on the CDN route. If enabled, there is a higher potential for abuse.
 			 */
@@ -589,20 +590,19 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	localization: LocalizationConfig;
 	i18n: Required<I18nConfig>;
 	media: {
-		adapter?:
-			| MediaAdapter
-			| MediaAdapterInstance
-			| Promise<MediaAdapterInstance>;
+		storage?:
+			| MediaStorageAdapter
+			| MediaStorageAdapterInstance
+			| Promise<MediaStorageAdapterInstance>;
+		delivery?:
+			| MediaDeliveryAdapter
+			| MediaDeliveryAdapterInstance
+			| Promise<MediaDeliveryAdapterInstance>;
 		limits: {
 			storageBytes: number | false;
 			uploadBytes: number;
-			processedImagesPerFile: number;
 		};
 		images: {
-			processor?:
-				| ImageProcessor
-				| ImageProcessorInstance
-				| Promise<ImageProcessorInstance>;
 			presets: Record<
 				string,
 				{
@@ -614,7 +614,10 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 					rotate?: 0 | 90 | 180 | 270;
 				}
 			>;
-			storeProcessed: boolean;
+			cache: {
+				enabled: boolean;
+				maxVariantsPerFile: number;
+			};
 			allowFormatQuery: boolean;
 			fallbackUrl?: string;
 		};

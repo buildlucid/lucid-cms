@@ -1,6 +1,6 @@
-import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
+import type { MediaStorageAdapterStreamBody } from "../../libs/media-storage/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkHasMediaStrategy from "../media/checks/check-has-media-strategy.js";
+import checkHasMediaStorage from "../media/checks/check-has-media-storage.js";
 
 /**
  * Stream media
@@ -21,7 +21,7 @@ const streamMedia: ServiceFn<
 		key: string;
 		contentLength: number | undefined;
 		contentType: string | undefined;
-		body: MediaAdapterStreamBody;
+		body: MediaStorageAdapterStreamBody;
 		etag?: string | null;
 		isPartialContent?: boolean;
 		totalSize?: number;
@@ -31,10 +31,10 @@ const streamMedia: ServiceFn<
 		};
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = await checkHasMediaStrategy(context);
-	if (mediaStrategyRes.error) return mediaStrategyRes;
+	const mediaStorageRes = await checkHasMediaStorage(context);
+	if (mediaStorageRes.error) return mediaStorageRes;
 
-	const res = await mediaStrategyRes.data.stream(context, {
+	const res = await mediaStorageRes.data.stream(context, {
 		key: data.mediaKey,
 		range: data.range,
 	});

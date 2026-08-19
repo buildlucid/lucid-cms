@@ -1,4 +1,4 @@
-import { validateSignedMediaUrl } from "@lucidcms/core/media";
+import { validateSignedMediaUrl } from "@lucidcms/core/media-storage";
 import { copy } from "@lucidcms/core/plugin";
 import type { ServiceFn } from "@lucidcms/core/types";
 

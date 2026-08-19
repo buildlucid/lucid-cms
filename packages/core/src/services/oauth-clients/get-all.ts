@@ -19,7 +19,11 @@ const getAll: ServiceFn<[], OAuthClient[]> = async (context) => {
 		data: clientsRes.data.map((client) =>
 			oauthClientsFormatter.formatSingle({
 				client,
-				host: getBaseUrl(context),
+				mediaOptions: {
+					host: getBaseUrl(context),
+					delivery: context.mediaDelivery,
+					imagePresets: context.config.media.images.presets,
+				},
 			}),
 		),
 	};

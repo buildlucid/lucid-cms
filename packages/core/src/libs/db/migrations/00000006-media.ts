@@ -54,6 +54,14 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("relation_type", adapter.getDataType("text"))
 				.addColumn("e_tag", adapter.getDataType("text"))
+				.addColumn("status", adapter.getDataType("text"), (col) =>
+					col.notNull().defaultTo("ready"),
+				)
+				.addColumn("storage_adapter_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("storage_adapter_reference", adapter.getDataType("text"))
+				.addColumn("storage_adapter_data", adapter.getDataType("json"))
 				.addColumn("origin", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
@@ -144,6 +152,14 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 					["parent_media_id", "relation_type"],
 				)
 				.addCheckConstraint(
+					"lucid_media_status_valid",
+					sql`status IN ('processing', 'ready', 'failed')`,
+				)
+				.addCheckConstraint(
+					"lucid_media_type_valid",
+					sql`type IN ('image', 'video', 'audio', 'document', 'archive', 'unknown')`,
+				)
+				.addCheckConstraint(
 					"lucid_media_owned_relation_complete",
 					sql`(
 						(parent_media_id IS NULL AND relation_type IS NULL) OR
@@ -188,6 +204,12 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_media_key")
 				.on("lucid_media")
 				.column("key")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_media_storage_adapter_reference")
+				.on("lucid_media")
+				.columns(["storage_adapter_key", "storage_adapter_reference"])
 				.execute();
 
 			await db.schema
@@ -269,7 +291,10 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("adapter_upload_id", adapter.getDataType("text"))
-				.addColumn("mode", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("protocol", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("client_data", adapter.getDataType("json"))
 				.addColumn("status", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
@@ -295,6 +320,14 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("expires_at", adapter.getDataType("timestamp"), (col) =>
 					col.notNull(),
+				)
+				.addCheckConstraint(
+					"lucid_media_upload_sessions_protocol_valid",
+					sql`protocol IN ('http', 'multipart-parts', 'tus')`,
+				)
+				.addCheckConstraint(
+					"lucid_media_upload_sessions_status_valid",
+					sql`status IN ('active', 'completed', 'aborted')`,
 				)
 				.execute();
 

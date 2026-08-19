@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceListUploadParts } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceListUploadParts } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types.js";
 import { objectUrl, parseParts } from "./helpers.js";
@@ -11,7 +11,7 @@ import { objectUrl, parseParts } from "./helpers.js";
 export const listUploadParts = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceListUploadParts => {
+): MediaStorageAdapterServiceListUploadParts => {
 	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {

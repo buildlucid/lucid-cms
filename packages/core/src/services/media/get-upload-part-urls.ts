@@ -1,5 +1,5 @@
 import { copy } from "../../libs/i18n/index.js";
-import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
+import { hasMultipartUploadSessions } from "../../libs/media-storage/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -20,7 +20,14 @@ const getUploadPartUrls: ServiceFn<
 > = async (context, data) => {
 	const MediaUploadSessions = new MediaUploadSessionsRepository(context.db);
 	const sessionRes = await MediaUploadSessions.selectSingle({
-		select: ["key", "adapter_key", "adapter_upload_id", "expires_at", "status"],
+		select: [
+			"key",
+			"adapter_key",
+			"adapter_upload_id",
+			"protocol",
+			"expires_at",
+			"status",
+		],
 		where: [
 			{ key: "session_id", operator: "=", value: data.sessionId },
 			{ key: "status", operator: "=", value: "active" },
@@ -34,17 +41,17 @@ const getUploadPartUrls: ServiceFn<
 	});
 	if (sessionRes.error) return sessionRes;
 
-	if (!context.media) {
+	if (!context.mediaStorage) {
 		return {
 			error: {
 				type: "basic",
 				status: 400,
-				message: copy("server:core.media.adapters.not.enabled"),
+				message: copy("server:core.media.storage.adapter.not.enabled"),
 			},
 			data: undefined,
 		};
 	}
-	if (sessionRes.data.adapter_key !== context.media.key) {
+	if (sessionRes.data.adapter_key !== context.mediaStorage.key) {
 		return {
 			error: {
 				type: "basic",
@@ -54,7 +61,10 @@ const getUploadPartUrls: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (!hasResumableUploadSessions(context.media)) {
+	if (
+		sessionRes.data.protocol !== "multipart-parts" ||
+		!hasMultipartUploadSessions(context.mediaStorage)
+	) {
 		return {
 			error: {
 				type: "basic",
@@ -79,7 +89,7 @@ const getUploadPartUrls: ServiceFn<
 		};
 	}
 
-	const urlsRes = await context.media.getUploadPartUrls(context, {
+	const urlsRes = await context.mediaStorage.getUploadPartUrls(context, {
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 		partNumbers: data.partNumbers,

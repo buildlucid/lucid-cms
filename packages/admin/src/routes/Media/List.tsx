@@ -41,6 +41,7 @@ const MediaListRoute: Component = () => {
 		schema: {
 			filters: {
 				title: textFilter(),
+				status: textFilter(),
 				extension: textFilter(),
 				type: textFilter(),
 				mimeType: textFilter(),
@@ -238,7 +239,7 @@ const MediaListRoute: Component = () => {
 							alerts={[
 								{
 									type: "warning",
-									message: T()("media.storage.strategy.missing.message"),
+									message: T()("media.storage.adapter.missing.message"),
 									show: settings.data?.data?.media?.enabled === false,
 								},
 							]}
@@ -316,6 +317,25 @@ const MediaListRoute: Component = () => {
 													type: "checkbox",
 													trueLabel: T()("common.public"),
 													falseLabel: T()("common.private"),
+												},
+												{
+													label: T()("common.status"),
+													key: "status",
+													type: "select",
+													options: [
+														{
+															label: T()("common.status.ready"),
+															value: "ready",
+														},
+														{
+															label: T()("common.status.processing"),
+															value: "processing",
+														},
+														{
+															label: T()("common.status.failed"),
+															value: "failed",
+														},
+													],
 												},
 												{
 													label: T()("common.mime.type"),

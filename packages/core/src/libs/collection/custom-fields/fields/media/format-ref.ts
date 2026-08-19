@@ -16,7 +16,11 @@ const formatMediaRef = (
 
 	return mediaFormatter.formatRef({
 		media: value,
-		host: params.host,
+		options: {
+			host: params.host,
+			delivery: params.mediaDelivery,
+			imagePresets: params.config.media.images.presets,
+		},
 	}) satisfies CFResponse<"media">["ref"];
 };
 

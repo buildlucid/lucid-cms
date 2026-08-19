@@ -1,3 +1,4 @@
+import type { JSONColumnType } from "kysely";
 import z from "zod";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable, TimestampMutable } from "../types.js";
@@ -22,9 +23,13 @@ export const mediaUploadSessionsTable = defineTable(
 				schema: z.string().nullable(),
 				type: "text",
 			},
-			mode: {
-				schema: z.enum(["single", "resumable"]),
+			protocol: {
+				schema: z.enum(["http", "multipart-parts", "tus"]),
 				type: "text",
+			},
+			client_data: {
+				schema: z.record(z.string(), z.unknown()).nullable(),
+				type: "json",
 			},
 			status: {
 				schema: z.enum(["active", "completed", "aborted"]),
@@ -75,7 +80,12 @@ export interface LucidMediaUploadSessions {
 	key: string;
 	adapter_key: string;
 	adapter_upload_id: string | null;
-	mode: "single" | "resumable";
+	protocol: "http" | "multipart-parts" | "tus";
+	client_data: JSONColumnType<
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
+	>;
 	status: "active" | "completed" | "aborted";
 	file_name: string;
 	mime_type: string;
@@ -85,5 +95,5 @@ export interface LucidMediaUploadSessions {
 	created_by: number | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutable;
-	expires_at: TimestampMutable;
+	expires_at: TimestampImmutable;
 }

@@ -7,12 +7,12 @@ import hasAccess from "../permission/has-access.js";
 interface SettingsPropsT {
 	mediaStorageUsed: number;
 	processedImageCount: number;
-	mediaAdapterEnabled: boolean;
-	mediaAdapterKey: string | null;
+	mediaStorageAdapterEnabled: boolean;
+	mediaStorageAdapterKey: string | null;
 	emailAdapterKey: string;
 	emailSimulated: boolean;
 	emailTemplates: string[];
-	imageProcessorKey: string | null;
+	mediaDeliveryAdapterKey: string;
 	systemAlertEmail: string | null;
 	runtimeKey: string;
 	queueKey: string;
@@ -59,15 +59,15 @@ const formatSingle = (props: {
 				: storageTotal - props.settings.mediaStorageUsed;
 
 		response.media = {
-			enabled: props.settings.mediaAdapterEnabled,
+			enabled: props.settings.mediaStorageAdapterEnabled,
 			storage: {
 				total: storageTotal === false ? null : storageTotal,
 				remaining: storageRemaining,
 				used: props.settings.mediaStorageUsed,
 			},
 			processed: {
-				stored: props.config.media.images.storeProcessed,
-				imageLimit: props.config.media.limits.processedImagesPerFile,
+				stored: props.config.media.images.cache.enabled,
+				imageLimit: props.config.media.images.cache.maxVariantsPerFile,
 				total: props.settings.processedImageCount,
 			},
 		};
@@ -84,9 +84,9 @@ const formatSingle = (props: {
 			database: props.settings.databaseKey,
 			kv: props.settings.kvKey,
 			queue: props.settings.queueKey,
-			media: props.settings.mediaAdapterKey,
+			mediaStorage: props.settings.mediaStorageAdapterKey,
 			email: props.settings.emailAdapterKey,
-			imageProcessor: props.settings.imageProcessorKey,
+			mediaDelivery: props.settings.mediaDeliveryAdapterKey,
 			alertEmail: props.settings.systemAlertEmail,
 		};
 	}

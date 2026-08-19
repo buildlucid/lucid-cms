@@ -1,5 +1,9 @@
 # @lucidcms/plugin-worker-queues
 
+## v1.2.0 (unreleased)
+
+- Added media storage and delivery adapter lifecycle support to queue consumers.
+
 ## v1.1.1
 
 - Updated queue job loading to use Lucid's managed database API, including adapter-safe decoding and validation of job data.

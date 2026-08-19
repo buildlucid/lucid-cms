@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	checkHasMediaStrategy: vi.fn(),
+	checkHasMediaStorage: vi.fn(),
 	checkCanStoreMedia: vi.fn(),
 	adjustInt: vi.fn(),
 	detectStreamMimeType: vi.fn(),
@@ -15,8 +15,8 @@ vi.mock("../checks/check-can-store-media.js", () => ({
 	default: mocks.checkCanStoreMedia,
 }));
 
-vi.mock("../checks/check-has-media-strategy.js", () => ({
-	default: mocks.checkHasMediaStrategy,
+vi.mock("../checks/check-has-media-storage.js", () => ({
+	default: mocks.checkHasMediaStorage,
 }));
 
 vi.mock("../helpers/detect-stream-mime-type.js", () => ({
@@ -37,12 +37,16 @@ describe("media sync strategy", () => {
 				size: 42,
 				mimeType: "application/octet-stream",
 				etag: "object-etag",
+				status: "processing",
+				adapterReference: "provider-file-id",
+				adapterData: { libraryId: "library-id" },
 			},
 		});
 		const stream = vi.fn();
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
+				key: "provider",
 				getMeta,
 				stream,
 				delete: vi.fn(),
@@ -80,6 +84,12 @@ describe("media sync strategy", () => {
 		expect(response.data?.mimeType).toBe("image/png");
 		expect(response.data?.type).toBe("image");
 		expect(response.data?.extension).toBe("png");
+		expect(response.data).toMatchObject({
+			status: "processing",
+			storageAdapterKey: "provider",
+			storageAdapterReference: "provider-file-id",
+			storageAdapterData: { libraryId: "library-id" },
+		});
 		expect(getMeta).toHaveBeenCalledWith(expect.any(Object), {
 			key: "public/upload",
 		});
@@ -103,7 +113,7 @@ describe("media sync strategy", () => {
 			data: undefined,
 		});
 
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				getMeta: vi.fn().mockResolvedValueOnce({
@@ -112,6 +122,7 @@ describe("media sync strategy", () => {
 						size: 42,
 						mimeType: "image/png",
 						etag: "object-etag",
+						status: "ready",
 					},
 				}),
 				stream: vi.fn(),

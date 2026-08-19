@@ -53,7 +53,11 @@ export type TelemetryEnvelope = {
 		is_ci: boolean;
 		adapters: {
 			database: FirstPartyRuntimeAdapterKey<"database"> | "custom";
-			media?: FirstPartyRuntimeAdapterKey<"media"> | "none" | "custom";
+			media_storage?:
+				| FirstPartyRuntimeAdapterKey<"mediaStorage">
+				| "none"
+				| "custom";
+			media_delivery?: FirstPartyRuntimeAdapterKey<"mediaDelivery"> | "custom";
 			queue?: FirstPartyRuntimeAdapterKey<"queue"> | "custom";
 			kv?: FirstPartyRuntimeAdapterKey<"kv"> | "custom";
 			email?: FirstPartyRuntimeAdapterKey<"email"> | "custom";

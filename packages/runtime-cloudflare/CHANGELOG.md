@@ -3,6 +3,7 @@
 ## v1.3.1 (unreleased)
 
 - Stopped removing Wrangler and Miniflare process listeners outside their supported disposal lifecycles, preventing shared `signal-exit` state from becoming inconsistent.
+- Split runtime media support checks into storage and delivery adapter capabilities.
 
 ## v1.3.0
 

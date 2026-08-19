@@ -30,7 +30,6 @@ import {
 } from "@/utils/document-filter-fields";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { getProcessedImageUrl } from "@/utils/media-url";
 import type {
 	MediaRelationRef,
 	UserRelationRef,
@@ -356,10 +355,11 @@ const MediaThumb: Component<{ media: MediaRelationRef }> = (props) => {
 			>
 				<Match when={props.media.type === "image"}>
 					<img
-						src={getProcessedImageUrl(props.media.file.url, {
-							preset: "thumbnail-small",
-							format: "webp",
-						})}
+						src={
+							("presets" in props.media.file
+								? props.media.file.presets["thumbnail-small"]?.url
+								: undefined) ?? props.media.file.url
+						}
 						alt=""
 						class="h-full w-full object-cover"
 						loading="lazy"

@@ -17,10 +17,11 @@ const RETRY_DELAYS = [0, 1000, 3000, 5000];
 const STORAGE_PREFIX = "lucid-upload-session";
 
 type StartUploadSession = () => Promise<ResponseBody<UploadSessionResponse>>;
-type ResumableUploadSession = Extract<
+type MultipartUploadSession = Extract<
 	UploadSessionResponse,
-	{ mode: "resumable" }
+	{ protocol: "multipart-parts" }
 >;
+type TusUploadSession = Extract<UploadSessionResponse, { protocol: "tus" }>;
 
 type UploadMediaFileProps = {
 	file: File;
@@ -44,6 +45,12 @@ type StoredUploadSession = {
 	sessionId: string;
 	key: string;
 	expiresAt: string;
+	tusUploadUrl?: string;
+};
+
+type ResolvedUploadSession = {
+	session: UploadSessionResponse;
+	tusUploadUrl?: string;
 };
 
 /**
@@ -97,7 +104,8 @@ const toUploadError = (error: unknown): ErrorResponse => {
  */
 const uploadWithXhr = (props: {
 	url: string;
-	body: Blob | File;
+	method?: "PUT" | "POST" | "PATCH";
+	body: XMLHttpRequestBodyInit;
 	headers?: Record<string, string>;
 	onProgress?: (_loaded: number) => void;
 	signal?: AbortSignal;
@@ -125,7 +133,7 @@ const uploadWithXhr = (props: {
 		};
 
 		props.signal?.addEventListener("abort", abort, { once: true });
-		xhr.open("PUT", props.url);
+		xhr.open(props.method ?? "PUT", props.url);
 		for (const [key, value] of Object.entries(props.headers ?? {})) {
 			xhr.setRequestHeader(key, value);
 		}
@@ -201,22 +209,19 @@ const withRetries = async <T>(
  * Reconciles a local resume pointer with the server before creating a new
  * session, keeping the server as the source of truth.
  */
-const getResumableSession = async (
+const getUploadSession = async (
 	storageKey: string,
 	start: StartUploadSession,
-): Promise<UploadSessionResponse> => {
+): Promise<ResolvedUploadSession> => {
 	const stored = getStoredSession(storageKey);
 	if (stored) {
 		try {
 			const existing = await getUploadSessionReq(stored.sessionId);
 			if (existing.data.canResume) {
 				return {
-					mode: "resumable",
-					key: existing.data.key,
-					sessionId: existing.data.sessionId,
-					partSize: existing.data.partSize,
-					expiresAt: existing.data.expiresAt,
-					uploadedParts: existing.data.uploadedParts,
+					session: existing.data,
+					tusUploadUrl:
+						existing.data.protocol === "tus" ? stored.tusUploadUrl : undefined,
 				};
 			}
 			localStorage.removeItem(storageKey);
@@ -226,7 +231,7 @@ const getResumableSession = async (
 	}
 
 	const created = await start();
-	if (created.data.mode === "resumable") {
+	if (created.data.protocol !== "http") {
 		putStoredSession(storageKey, {
 			sessionId: created.data.sessionId,
 			key: created.data.key,
@@ -235,16 +240,16 @@ const getResumableSession = async (
 	} else {
 		localStorage.removeItem(storageKey);
 	}
-	return created.data;
+	return { session: created.data };
 };
 
 /**
  * Uploads only missing chunks, reconciles hidden ETags with the server, and
  * completes the session after every part is accounted for.
  */
-const uploadResumable = async (
+const uploadMultipart = async (
 	file: File,
-	session: ResumableUploadSession,
+	session: MultipartUploadSession,
 	onProgress?: (_progress: number) => void,
 	signal?: AbortSignal,
 ): Promise<UploadResult<string>> => {
@@ -369,7 +374,10 @@ const uploadResumable = async (
 		Array.from(uploaded.values()).some((part) => part.etag.length === 0)
 	) {
 		const reconciled = await getUploadSessionReq(session.sessionId);
-		if (!reconciled.data.canResume) {
+		if (
+			!reconciled.data.canResume ||
+			reconciled.data.protocol !== "multipart-parts"
+		) {
 			return {
 				error: uploadError(T()("media.upload.session.not.resumable")),
 				data: undefined,
@@ -404,8 +412,180 @@ const uploadResumable = async (
 	};
 };
 
+/** Uploads a direct HTTP request and only then marks its Lucid session complete. */
+const uploadHttp = async (
+	file: File,
+	session: Extract<UploadSessionResponse, { protocol: "http" }>,
+	onProgress?: (_progress: number) => void,
+	signal?: AbortSignal,
+): Promise<UploadResult<string>> => {
+	let body: XMLHttpRequestBodyInit = file;
+	if (session.request.body.type === "form-data") {
+		const form = new FormData();
+		for (const [key, value] of Object.entries(session.request.body.fields)) {
+			form.append(key, value);
+		}
+		form.append(session.request.body.fileField, file);
+		body = form;
+	}
+
+	const uploadRes = await uploadWithXhr({
+		url: session.request.url,
+		method: session.request.method,
+		body,
+		headers: {
+			...(session.request.body.type === "raw" && file.type
+				? { "content-type": file.type }
+				: {}),
+			...session.request.headers,
+		},
+		signal,
+		onProgress: (loaded) => {
+			onProgress?.(
+				file.size === 0 ? 99 : Math.min((loaded / file.size) * 100, 99),
+			);
+		},
+	});
+	if (uploadRes.error) return uploadRes;
+
+	const complete = await completeUploadSessionReq({
+		sessionId: session.sessionId,
+	});
+	onProgress?.(100);
+	return { error: undefined, data: complete.data.key };
+};
+
+/** Encodes metadata values using the UTF-8 base64 format required by TUS. */
+const encodeTusMetadata = (metadata: Record<string, string>) =>
+	Object.entries(metadata)
+		.map(([key, value]) => {
+			const bytes = new TextEncoder().encode(value);
+			let binary = "";
+			for (const byte of bytes) binary += String.fromCharCode(byte);
+			return `${key} ${btoa(binary)}`;
+		})
+		.join(",");
+
+/** Creates a provider upload resource from its TUS creation endpoint. */
+const createTusUpload = async (
+	file: File,
+	session: TusUploadSession,
+	storageKey: string,
+	signal?: AbortSignal,
+): Promise<UploadResult<string>> => {
+	const metadata = encodeTusMetadata(session.metadata ?? {});
+	const response = await fetch(session.endpoint, {
+		method: "POST",
+		headers: {
+			...session.headers,
+			"Tus-Resumable": "1.0.0",
+			"Upload-Length": String(file.size),
+			...(metadata ? { "Upload-Metadata": metadata } : {}),
+		},
+		signal,
+	});
+	if (!response.ok) {
+		return {
+			error: uploadError(
+				response.statusText || T()("media.upload.failed"),
+				response.status,
+			),
+			data: undefined,
+		};
+	}
+
+	const location = response.headers.get("location");
+	if (!location) {
+		return {
+			error: uploadError(T()("media.upload.failed")),
+			data: undefined,
+		};
+	}
+
+	const uploadUrl = new URL(location, session.endpoint).toString();
+	putStoredSession(storageKey, {
+		sessionId: session.sessionId,
+		key: session.key,
+		expiresAt: session.expiresAt,
+		tusUploadUrl: uploadUrl,
+	});
+	return { error: undefined, data: uploadUrl };
+};
+
+/** Creates or resumes a TUS resource using the standard POST/HEAD/PATCH flow. */
+const uploadTus = async (
+	file: File,
+	session: TusUploadSession,
+	storageKey: string,
+	existingUploadUrl?: string,
+	onProgress?: (_progress: number) => void,
+	signal?: AbortSignal,
+): Promise<UploadResult<string>> => {
+	let uploadUrl = existingUploadUrl;
+	if (!uploadUrl) {
+		const createRes = await createTusUpload(file, session, storageKey, signal);
+		if (createRes.error) return createRes;
+		uploadUrl = createRes.data;
+	}
+
+	const headers = {
+		...session.headers,
+		"Tus-Resumable": "1.0.0",
+	};
+	const head = await fetch(uploadUrl, {
+		method: "HEAD",
+		headers,
+		signal,
+	});
+	if (!head.ok) {
+		return {
+			error: uploadError(
+				head.statusText || T()("media.upload.failed"),
+				head.status,
+			),
+			data: undefined,
+		};
+	}
+
+	const offset = Number(head.headers.get("upload-offset") ?? "0");
+	if (!Number.isSafeInteger(offset) || offset < 0 || offset > file.size) {
+		return {
+			error: uploadError(T()("media.upload.failed")),
+			data: undefined,
+		};
+	}
+
+	if (offset < file.size) {
+		const uploadRes = await uploadWithXhr({
+			url: uploadUrl,
+			method: "PATCH",
+			body: file.slice(offset),
+			headers: {
+				...headers,
+				"Upload-Offset": String(offset),
+				"Content-Type": "application/offset+octet-stream",
+			},
+			signal,
+			onProgress: (loaded) => {
+				onProgress?.(
+					file.size === 0
+						? 99
+						: Math.min(((offset + loaded) / file.size) * 100, 99),
+				);
+			},
+		});
+		if (uploadRes.error) return uploadRes;
+	}
+
+	const complete = await completeUploadSessionReq({
+		sessionId: session.sessionId,
+	});
+	onProgress?.(100);
+	return { error: undefined, data: complete.data.key };
+};
+
 /**
- * Shared admin upload entry point that hides adapter mode differences while
+ * Shared admin upload entry point that hides protocol differences while
  * exposing progress, abort, retry, and resume behavior.
  */
 export const uploadMediaFile = async (
@@ -414,42 +594,29 @@ export const uploadMediaFile = async (
 	try {
 		props.onProgress?.(0);
 		const storageKey = fingerprint(props.scope, props.file);
-		const session = await getResumableSession(storageKey, props.start);
-
-		if (session.mode === "single") {
-			const uploadRes = await uploadWithXhr({
-				url: session.url,
-				body: props.file,
-				headers: {
-					...(props.file.type ? { "content-type": props.file.type } : {}),
-					...session.headers,
-				},
-				signal: props.signal,
-				onProgress: (loaded) => {
-					props.onProgress?.(
-						props.file.size === 0 ? 100 : (loaded / props.file.size) * 100,
-					);
-				},
-			});
-			if (uploadRes.error) {
-				return {
-					error: uploadRes.error,
-					data: undefined,
-				};
-			}
-			props.onProgress?.(100);
-			return {
-				error: undefined,
-				data: session.key,
-			};
-		}
-
-		const key = await uploadResumable(
-			props.file,
-			session,
-			props.onProgress,
-			props.signal,
+		const { session, tusUploadUrl } = await getUploadSession(
+			storageKey,
+			props.start,
 		);
+
+		const key =
+			session.protocol === "http"
+				? await uploadHttp(props.file, session, props.onProgress, props.signal)
+				: session.protocol === "tus"
+					? await uploadTus(
+							props.file,
+							session,
+							storageKey,
+							tusUploadUrl,
+							props.onProgress,
+							props.signal,
+						)
+					: await uploadMultipart(
+							props.file,
+							session,
+							props.onProgress,
+							props.signal,
+						);
 		if (key.error) return key;
 		localStorage.removeItem(storageKey);
 		return key;

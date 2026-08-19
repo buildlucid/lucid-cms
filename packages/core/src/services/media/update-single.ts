@@ -176,7 +176,7 @@ const updateSingle: ServiceFn<
 		const updateRes = await updateMedia(context, {
 			previousSize: mediaRes.data.file_size,
 			previousKey: mediaRes.data.key,
-			previousType: mediaRes.data.type as MediaType,
+			previousType: mediaRes.data.type,
 			previousEtag: mediaRes.data.e_tag,
 			updatedKey: data.key,
 			allowedType: data.allowedType,
@@ -295,6 +295,10 @@ const updateSingle: ServiceFn<
 	const updateData: Partial<Update<LucidMedia>> = {
 		key: updateObjectRes?.key ?? renamedKey,
 		e_tag: updateObjectRes?.etag,
+		status: updateObjectRes?.status,
+		storage_adapter_key: updateObjectRes?.storageAdapterKey,
+		storage_adapter_reference: updateObjectRes?.storageAdapterReference,
+		storage_adapter_data: updateObjectRes?.storageAdapterData,
 		origin: data.origin,
 		ai_generation_id: aiGenerationRes.data,
 		type: updateObjectRes?.type,

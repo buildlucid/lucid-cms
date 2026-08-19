@@ -13,6 +13,11 @@ export const activeMediaCropSelect = (
 				.select([
 					"active_media_crop.id",
 					"active_media_crop.key",
+					"active_media_crop.status",
+					"active_media_crop.storage_adapter_key",
+					"active_media_crop.storage_adapter_reference",
+					"active_media_crop.storage_adapter_data",
+					"active_media_crop.public",
 					"active_media_crop.origin",
 					"active_media_crop.type",
 					"active_media_crop.mime_type",
@@ -64,6 +69,11 @@ export const mediaImageSelect = <Alias extends string>(
 				.select((eb) => [
 					"related_media_image.id",
 					"related_media_image.key",
+					"related_media_image.status",
+					"related_media_image.storage_adapter_key",
+					"related_media_image.storage_adapter_reference",
+					"related_media_image.storage_adapter_data",
+					"related_media_image.public",
 					"related_media_image.origin",
 					"related_media_image.type",
 					"related_media_image.mime_type",

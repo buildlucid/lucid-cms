@@ -3,14 +3,14 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { Readable } from "node:stream";
 import { copy } from "@lucidcms/core/plugin";
 import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterServiceUploadSingle,
+	FileSystemStorageAdapterOptions,
+	MediaStorageAdapterServiceUploadSingle,
 } from "@lucidcms/core/types";
 import { keyPaths } from "../helpers.js";
 import { deleteStoredMetadata, writeStoredMetadata } from "../metadata.js";
 
-export default (options: FileSystemMediaAdapterOptions) => {
-	const uploadSingle: MediaAdapterServiceUploadSingle = async (
+export default (options: FileSystemStorageAdapterOptions) => {
+	const uploadSingle: MediaStorageAdapterServiceUploadSingle = async (
 		_context,
 		props,
 	) => {

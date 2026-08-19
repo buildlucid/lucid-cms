@@ -1,11 +1,11 @@
-import type { ImageProcessorOptions } from "@lucidcms/core/types";
+import type { MediaTransformationOptions } from "@lucidcms/core/types";
 
-type FocalPoint = NonNullable<ImageProcessorOptions["focalPoint"]>;
+type FocalPoint = NonNullable<MediaTransformationOptions["focalPoint"]>;
 
 /** Rotates normalized focal coordinates with their source image. */
 export const rotateFocalPoint = (
 	focalPoint: FocalPoint,
-	rotate: ImageProcessorOptions["rotate"] = 0,
+	rotate: MediaTransformationOptions["rotate"] = 0,
 ): FocalPoint => {
 	switch (rotate) {
 		case 90:
@@ -22,7 +22,7 @@ export const rotateFocalPoint = (
 const rotatedDimensions = (props: {
 	width: number;
 	height: number;
-	rotate: ImageProcessorOptions["rotate"];
+	rotate: MediaTransformationOptions["rotate"];
 }) =>
 	props.rotate === 90 || props.rotate === 270
 		? { width: props.height, height: props.width }
@@ -33,7 +33,7 @@ const rotatedDimensions = (props: {
  * The outside fit is represented by resizing only its controlling axis.
  */
 export const buildResizeTransform = (props: {
-	options: ImageProcessorOptions;
+	options: MediaTransformationOptions;
 	sourceWidth: number;
 	sourceHeight: number;
 }): ImageTransform | undefined => {

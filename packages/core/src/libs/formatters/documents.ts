@@ -23,7 +23,7 @@ import documentFieldsFormatter from "./document-fields.js";
 import formatDocumentRoute from "./document-route.js";
 import documentWorkflowsFormatter from "./document-workflows.js";
 import formatter from "./helpers.js";
-import type { MediaPosterPropsT } from "./media.js";
+import type { MediaFormatterOptions, MediaPosterPropsT } from "./media.js";
 import mediaFormatter from "./media.js";
 
 const formatMultiple = (props: {
@@ -32,6 +32,7 @@ const formatMultiple = (props: {
 	collections: CollectionBuilder[];
 	config: Config;
 	host: string;
+	mediaOptions: MediaFormatterOptions;
 	hasFields: boolean;
 	hasBricks: boolean;
 	includeRefs?: boolean;
@@ -53,6 +54,7 @@ const formatMultiple = (props: {
 		collections: props.collections,
 		config: props.config,
 		host: props.host,
+		mediaOptions: props.mediaOptions,
 		bricksTableSchema: props.bricksTableSchema,
 	});
 	const refs = filterRefs(hydratedRefs, props.refTypes);
@@ -96,10 +98,11 @@ const formatMultiple = (props: {
 					? documentWorkflowsFormatter.formatSingle({
 							collection: props.collection,
 							workflow: workflowMap.get(d.id),
-							host: props.host,
+							mediaOptions: props.mediaOptions,
 						})
 					: undefined,
 			host: props.host,
+			mediaOptions: props.mediaOptions,
 		});
 	});
 };
@@ -111,7 +114,7 @@ const formatDocumentAuthor = (props: {
 	lastName?: string | null;
 	username?: string | null;
 	profilePicture?: MediaPosterPropsT[];
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 }): InternalCollectionDocument["createdBy"] => {
 	if (!props.id) return null;
 
@@ -123,7 +126,7 @@ const formatDocumentAuthor = (props: {
 		username: props.username ?? null,
 		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: props.profilePicture?.[0],
-			host: props.host,
+			options: props.mediaOptions,
 		}),
 	};
 };
@@ -137,6 +140,7 @@ const formatSingle = (props: {
 	workflow?: DocumentWorkflow | null;
 	config: Config;
 	host: string;
+	mediaOptions: MediaFormatterOptions;
 }): InternalCollectionDocument => {
 	const inlineWorkflow =
 		props.document.workflow_assignees !== undefined
@@ -153,7 +157,7 @@ const formatSingle = (props: {
 						updated_at: props.document.workflow_updated_at,
 						assignees: props.document.workflow_assignees,
 					},
-					host: props.host,
+					mediaOptions: props.mediaOptions,
 				})
 			: undefined;
 
@@ -191,7 +195,7 @@ const formatSingle = (props: {
 			lastName: props.document.cb_user_last_name,
 			username: props.document.cb_user_username,
 			profilePicture: props.document.cb_user_profile_picture,
-			host: props.host,
+			mediaOptions: props.mediaOptions,
 		}),
 		updatedBy: formatDocumentAuthor({
 			id: props.document.ub_user_id,
@@ -200,7 +204,7 @@ const formatSingle = (props: {
 			lastName: props.document.ub_user_last_name,
 			username: props.document.ub_user_username,
 			profilePicture: props.document.ub_user_profile_picture,
-			host: props.host,
+			mediaOptions: props.mediaOptions,
 		}),
 		createdAt: formatter.formatDate(props.document.created_at),
 		updatedAt: formatter.formatDate(props.document.updated_at),
@@ -247,6 +251,7 @@ const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 	collections: CollectionBuilder[];
 	config: Config;
 	host: string;
+	mediaOptions: MediaFormatterOptions;
 	hasFields: boolean;
 	hasBricks: boolean;
 	refData?: FieldRefResponse;
@@ -264,6 +269,7 @@ const formatContentMultiple = <TCollectionKey extends string = string>(props: {
 		collections: props.collections,
 		config: props.config,
 		host: props.host,
+		mediaOptions: props.mediaOptions,
 		bricksTableSchema: props.bricksTableSchema,
 		flattenRelationRefFields: true,
 	});
@@ -406,6 +412,7 @@ const formatRefs = (props: {
 	collections: CollectionBuilder[];
 	config: Config;
 	host: string;
+	mediaOptions: MediaFormatterOptions;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	fieldTypes?: FieldTypes[];
 	flattenRelationRefFields?: boolean;
@@ -432,6 +439,7 @@ const formatRefs = (props: {
 				collections: props.collections,
 				config: props.config,
 				host: props.host,
+				mediaDelivery: props.mediaOptions.delivery,
 				bricksTableSchema: props.bricksTableSchema,
 				relationRefMeta: props.data?.meta?.relation,
 				flattenRelationRefFields: props.flattenRelationRefFields,

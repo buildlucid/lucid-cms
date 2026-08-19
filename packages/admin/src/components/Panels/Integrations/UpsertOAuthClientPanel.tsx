@@ -27,7 +27,6 @@ import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
-import { getProcessedImageUrl } from "@/utils/media-url";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 const UpsertOAuthClientPanel: Component<{
@@ -135,10 +134,9 @@ const UpsertOAuthClientPanel: Component<{
 				value.logo
 					? {
 							name: value.logo.file.fileName ?? value.logo.file.key,
-							url: getProcessedImageUrl(value.logo.file.url, {
-								preset: "thumbnail-medium",
-								format: "webp",
-							}),
+							url:
+								value.logo.file.presets["thumbnail-medium"]?.url ??
+								value.logo.file.url,
 							originalUrl: value.logo.file.url,
 							type: value.logo.type,
 							mimeType: value.logo.file.meta.mimeType,

@@ -1,5 +1,10 @@
 # @lucidcms/plugin-cloudflare-r2
 
+## v1.1.0 (unreleased)
+
+- Migrated to the media storage adapter contract with explicit ready status plus HTTP and multipart-parts upload-session support.
+- Added a direct `cloudflareR2StorageAdapter` export for config-first usage.
+
 ## v1.0.5
 
 - Dropped `tenant` experiment support.

@@ -1,11 +1,11 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceGetMeta } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceGetMeta } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
 const getMetadata = (
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceGetMeta => {
+): MediaStorageAdapterServiceGetMeta => {
 	return async (context, { key }) => {
 		try {
 			const binding = resolveBinding(context, pluginOptions);
@@ -27,6 +27,7 @@ const getMetadata = (
 					size: object.size,
 					mimeType: object.httpMetadata?.contentType || null,
 					etag: object.etag || null,
+					status: "ready",
 				},
 			};
 		} catch (error) {

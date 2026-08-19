@@ -1,5 +1,5 @@
 import type { LucidPluginResponse } from "@lucidcms/core/types";
-import fileSystemMediaAdapter from "./adapter/index.js";
+import fileSystemStorageAdapter from "./adapter/index.js";
 import {
 	DEFAULT_UPLOAD_DIRECTORY,
 	LUCID_VERSION,
@@ -14,7 +14,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
 			draft.i18n.sources.push("@lucidcms/plugin-filesystem/translations");
-			draft.media.adapter = fileSystemMediaAdapter({
+			draft.media.storage = fileSystemStorageAdapter({
 				uploadDir: pluginOptions?.uploadDir ?? DEFAULT_UPLOAD_DIRECTORY,
 				secretKey: pluginOptions?.secretKey ?? draft.secrets.encryption,
 			});

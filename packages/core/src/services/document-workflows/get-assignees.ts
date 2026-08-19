@@ -47,7 +47,11 @@ const getAssignees: ServiceFn<
 		error: undefined,
 		data: documentWorkflowsFormatter.formatAssigneeUsers({
 			users: usersRes.data ?? [],
-			host: getBaseUrl(context),
+			mediaOptions: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 		}),
 	};
 };

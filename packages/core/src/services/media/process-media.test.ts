@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	selectSingleActivePresentationByKey: vi.fn(),
-	checkHasMediaStrategy: vi.fn(),
+	checkHasMediaStorage: vi.fn(),
 }));
 
 vi.mock("../../libs/repositories/index.js", () => ({
@@ -12,8 +12,8 @@ vi.mock("../../libs/repositories/index.js", () => ({
 	},
 }));
 
-vi.mock("./checks/check-has-media-strategy.js", () => ({
-	default: mocks.checkHasMediaStrategy,
+vi.mock("./checks/check-has-media-storage.js", () => ({
+	default: mocks.checkHasMediaStorage,
 }));
 
 import processMedia from "./process-media.js";
@@ -24,7 +24,7 @@ describe("media process service", () => {
 	});
 
 	it("returns the canonical media URL with supported processing query params", async () => {
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {},
 		});
@@ -33,8 +33,18 @@ describe("media process service", () => {
 			data: {
 				type: "image",
 				key: "public/123e4567e89b12d3a456426614174000",
+				status: "ready",
+				storage_adapter_key: "file-system",
+				storage_adapter_reference: null,
+				storage_adapter_data: null,
+				public: 1,
+				mime_type: "image/png",
 				file_name: "Screenshot 2026-03-26 at 15.png",
 				file_extension: "png",
+				width: 1200,
+				height: 800,
+				focal_x: null,
+				focal_y: null,
 			},
 		});
 		const response = await processMedia(
@@ -58,6 +68,12 @@ describe("media process service", () => {
 							allowFormatQuery: true,
 						},
 					},
+				},
+				mediaDelivery: {
+					type: "media-delivery-adapter",
+					key: "sharp",
+					resolveFile: () => ({ type: "lucid" }),
+					processImage: vi.fn(),
 				},
 			} as never,
 			{
@@ -92,7 +108,7 @@ describe("media process service", () => {
 		);
 
 		expect(response.error?.status).toBe(404);
-		expect(mocks.checkHasMediaStrategy).not.toHaveBeenCalled();
+		expect(mocks.checkHasMediaStorage).not.toHaveBeenCalled();
 		expect(mocks.selectSingleActivePresentationByKey).not.toHaveBeenCalled();
 	});
 });

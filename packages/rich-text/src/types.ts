@@ -12,14 +12,6 @@ export const richTextNodeNames = {
 	embeddedBrick: "lucidEmbeddedBrick",
 } as const;
 
-export type RichTextHydratedImagePreset = {
-	key: string;
-	src: string;
-	mimeType: string;
-	width: number | null;
-	height: number | null;
-};
-
 export type RichTextHydratedImage = {
 	src: string;
 	alt: string;
@@ -29,7 +21,6 @@ export type RichTextHydratedImage = {
 	height: number | null;
 	base64: string | null;
 	averageColor: string | null;
-	presets: RichTextHydratedImagePreset[];
 };
 
 export type RichTextHydratedMedia =

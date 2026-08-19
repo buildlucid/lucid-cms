@@ -19,7 +19,7 @@ describe("Cloudflare Images plugin", () => {
 		const instance = plugin({ binding: "CUSTOM_IMAGES" });
 		const draft = {
 			i18n: { sources: [] as Array<string | URL> },
-			media: { images: {} as { processor?: { key: string } } },
+			media: { delivery: undefined as { key: string } | undefined },
 		};
 
 		instance.recipe(draft as never);
@@ -27,7 +27,7 @@ describe("Cloudflare Images plugin", () => {
 		expect(draft.i18n.sources).toContain(
 			"@lucidcms/plugin-cloudflare-images/translations",
 		);
-		expect(draft.media.images.processor?.key).toBe("cloudflare-images");
+		expect(draft.media.delivery?.key).toBe("cloudflare-images");
 	});
 
 	it("requests the default and custom Images binding in prepare artifacts", async () => {

@@ -1,14 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	createAwaitingSync: vi.fn(),
 	createUploadRecord: vi.fn(),
 }));
 
 vi.mock("../../libs/repositories/index.js", () => ({
-	MediaAwaitingSyncRepository: class {
-		createSingle = mocks.createAwaitingSync;
-	},
 	MediaUploadSessionsRepository: class {
 		createSingle = mocks.createUploadRecord;
 	},
@@ -26,7 +22,7 @@ describe("create upload session", () => {
 
 		const response = await createUploadSession(
 			{
-				media: {
+				mediaStorage: {
 					createUploadSession: adapterCreateUploadSession,
 				},
 				config: {
@@ -54,22 +50,26 @@ describe("create upload session", () => {
 		const adapterCreateUploadSession = vi.fn().mockResolvedValueOnce({
 			error: undefined,
 			data: {
-				mode: "single",
+				protocol: "http",
 				key: "public/test.png",
-				url: "https://example.com/upload",
+				request: {
+					url: "https://example.com/upload",
+					method: "PUT",
+					body: { type: "raw" },
+				},
 			},
 		});
-		mocks.createAwaitingSync.mockResolvedValueOnce({
+		mocks.createUploadRecord.mockResolvedValueOnce({
 			error: undefined,
 			data: {
-				key: "public/test.png",
+				session_id: "session-id",
 			},
 		});
 
 		const response = await createUploadSession(
 			{
 				db: {},
-				media: {
+				mediaStorage: {
 					key: "file-system",
 					createUploadSession: adapterCreateUploadSession,
 				},
@@ -100,9 +100,11 @@ describe("create upload session", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data).toMatchObject({
-			mode: "single",
+			protocol: "http",
 			key: "public/test.png",
-			url: "https://example.com/upload",
+			request: {
+				url: "https://example.com/upload",
+			},
 		});
 	});
 
@@ -110,7 +112,7 @@ describe("create upload session", () => {
 		const adapterCreateUploadSession = vi.fn().mockResolvedValueOnce({
 			error: undefined,
 			data: {
-				mode: "resumable",
+				protocol: "multipart-parts",
 				key: "public/test.png",
 				uploadId: "adapter-upload-id",
 				partSize: 5,
@@ -128,7 +130,7 @@ describe("create upload session", () => {
 		const response = await createUploadSession(
 			{
 				db: {},
-				media: {
+				mediaStorage: {
 					key: "s3",
 					createUploadSession: adapterCreateUploadSession,
 					getUploadPartUrls: vi.fn(),
@@ -162,11 +164,85 @@ describe("create upload session", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data).toMatchObject({
-			mode: "resumable",
+			protocol: "multipart-parts",
 			key: "public/test.png",
 			partSize: 5,
 			expiresAt: "2026-05-02T10:00:00.000Z",
 			uploadedParts: [],
 		});
+	});
+
+	it("persists and returns TUS upload session data", async () => {
+		const adapterCreateUploadSession = vi.fn().mockResolvedValueOnce({
+			error: undefined,
+			data: {
+				protocol: "tus",
+				key: "public/video.mp4",
+				uploadId: "provider-video-id",
+				endpoint: "https://video.example.com/tusupload",
+				headers: { Authorization: "Bearer upload-token" },
+				metadata: { filetype: "video/mp4" },
+				expiresAt: "2026-05-02T10:00:00.000Z",
+			},
+		});
+		mocks.createUploadRecord.mockResolvedValueOnce({
+			error: undefined,
+			data: { session_id: "session-id" },
+		});
+
+		const response = await createUploadSession(
+			{
+				db: {},
+				mediaStorage: {
+					key: "video-provider",
+					createUploadSession: adapterCreateUploadSession,
+				},
+				request: {
+					url: "https://example.com/lucid/api/v1/media/upload-session",
+				},
+				config: {
+					host: "https://example.com",
+					db: {},
+					secrets: { cookie: "secret" },
+					media: { limits: { uploadBytes: 100 } },
+				},
+			} as never,
+			{
+				fileName: "video.mp4",
+				mimeType: "video/mp4",
+				size: 10,
+				public: true,
+				userId: 1,
+			},
+		);
+
+		expect(response.error).toBeUndefined();
+		expect(response.data).toMatchObject({
+			protocol: "tus",
+			key: "public/video.mp4",
+			endpoint: "https://video.example.com/tusupload",
+			headers: { Authorization: "Bearer upload-token" },
+		});
+		expect(adapterCreateUploadSession).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				fileName: "video.mp4",
+				mimeType: "video/mp4",
+				size: 10,
+			}),
+		);
+		expect(mocks.createUploadRecord).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					adapter_upload_id: "provider-video-id",
+					protocol: "tus",
+					client_data: {
+						endpoint: "https://video.example.com/tusupload",
+						headers: { Authorization: "Bearer upload-token" },
+						metadata: { filetype: "video/mp4" },
+					},
+				}),
+			}),
+		);
 	});
 });

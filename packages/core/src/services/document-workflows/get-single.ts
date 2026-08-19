@@ -40,7 +40,11 @@ const getSingle: ServiceFn<
 		data: documentWorkflowsFormatter.formatSingle({
 			collection: collectionRes.data,
 			workflow: workflowRes.data,
-			host: getBaseUrl(context),
+			mediaOptions: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 		}),
 	};
 };

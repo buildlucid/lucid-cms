@@ -23,10 +23,15 @@ import {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import {
-	destroyMediaAdapter,
-	getInitializedMediaAdapter,
-} from "../../media/lifecycle.js";
-import type { MediaAdapterInstance } from "../../media/types.js";
+	destroyMediaDeliveryAdapter,
+	getInitializedMediaDeliveryAdapter,
+} from "../../media-delivery/lifecycle.js";
+import type { MediaDeliveryAdapterInstance } from "../../media-delivery/types.js";
+import {
+	destroyMediaStorageAdapter,
+	getInitializedMediaStorageAdapter,
+} from "../../media-storage/lifecycle.js";
+import type { MediaStorageAdapterInstance } from "../../media-storage/types.js";
 import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
 import getCronJobs, { type CronJobKey } from "../../runtime/cron-jobs.js";
 import type {
@@ -42,7 +47,8 @@ const cronCommand = async (jobName?: string) => {
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let kv: KVAdapterInstance | undefined;
-	let media: MediaAdapterInstance | null | undefined;
+	let mediaStorage: MediaStorageAdapterInstance | null | undefined;
+	let mediaDelivery: MediaDeliveryAdapterInstance | undefined;
 	let email: EmailAdapterInstance | undefined;
 	let database: DatabaseConnection | undefined;
 
@@ -51,13 +57,23 @@ const cronCommand = async (jobName?: string) => {
 			await Promise.allSettled([
 				database?.destroy(),
 				destroyKVAdapter(kv, { config, env, runtimeContext }),
-				destroyMediaAdapter(media, { config, env, runtimeContext }),
+				destroyMediaStorageAdapter(mediaStorage, {
+					config,
+					env,
+					runtimeContext,
+				}),
+				destroyMediaDeliveryAdapter(mediaDelivery, {
+					config,
+					env,
+					runtimeContext,
+				}),
 				destroyEmailAdapter(email, { config, env, runtimeContext }),
 			]);
 		}
 		database = undefined;
 		kv = undefined;
-		media = undefined;
+		mediaStorage = undefined;
+		mediaDelivery = undefined;
 		email = undefined;
 	};
 
@@ -133,7 +149,11 @@ const cronCommand = async (jobName?: string) => {
 			env,
 			runtimeContext,
 		});
-		media = await getInitializedMediaAdapter(configRes.config, {
+		mediaStorage = await getInitializedMediaStorageAdapter(configRes.config, {
+			env,
+			runtimeContext,
+		});
+		mediaDelivery = await getInitializedMediaDeliveryAdapter(configRes.config, {
 			env,
 			runtimeContext,
 		});
@@ -150,7 +170,8 @@ const cronCommand = async (jobName?: string) => {
 			runtimeContext,
 			queue,
 			kv,
-			media,
+			mediaStorage,
+			mediaDelivery,
 			email,
 		});
 

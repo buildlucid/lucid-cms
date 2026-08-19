@@ -8,7 +8,6 @@ import ActionDropdown from "@/components/Partials/ActionDropdown";
 import IconContainer from "@/components/Partials/IconContainer";
 import api from "@/services/api";
 import T from "@/translations";
-import { getProcessedImageUrl } from "@/utils/media-url";
 
 const OAuthClientRow: Component<{
 	client: OAuthClient;
@@ -66,10 +65,10 @@ const OAuthClientRow: Component<{
 							>
 								{(logo) => (
 									<img
-										src={getProcessedImageUrl(logo().file.url, {
-											preset: "thumbnail-small",
-											format: "webp",
-										})}
+										src={
+											logo().file.presets["thumbnail-small"]?.url ??
+											logo().file.url
+										}
 										alt=""
 										class="size-full object-contain bg-white p-1"
 									/>

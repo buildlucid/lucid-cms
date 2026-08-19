@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceCreateUploadSession } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceCreateUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { DEFAULT_PART_SIZE, PRESIGNED_URL_EXPIRY } from "../../constants.js";
 import type { PluginOptions } from "../../types.js";
@@ -17,7 +17,7 @@ import {
 export const createUploadSession = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceCreateUploadSession => {
+): MediaStorageAdapterServiceCreateUploadSession => {
 	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {
@@ -101,7 +101,7 @@ export const createUploadSession = (
 			return {
 				error: undefined,
 				data: {
-					mode: "resumable",
+					protocol: "multipart-parts",
 					key: props.key,
 					uploadId,
 					partSize: DEFAULT_PART_SIZE,

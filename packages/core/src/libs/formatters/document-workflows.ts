@@ -5,7 +5,7 @@ import type {
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
 import formatter from "./helpers.js";
-import type { MediaPosterPropsT } from "./media.js";
+import type { MediaFormatterOptions, MediaPosterPropsT } from "./media.js";
 import mediaFormatter from "./media.js";
 
 type DocumentWorkflowFormatInput = {
@@ -40,7 +40,7 @@ const getEffectiveStage = (props: {
 const formatSingle = (props: {
 	workflow?: DocumentWorkflowFormatInput | null;
 	collection: CollectionBuilder;
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 }): DocumentWorkflow | null => {
 	const stage = getEffectiveStage({
 		collection: props.collection,
@@ -61,7 +61,7 @@ const formatSingle = (props: {
 					lastName: assignee.last_name ?? null,
 					profilePicture: mediaFormatter.formatMediaImagePreview({
 						poster: assignee.profile_picture?.[0],
-						host: props.host,
+						options: props.mediaOptions,
 					}),
 				},
 				assignedBy: assignee.assigned_by,
@@ -101,7 +101,7 @@ const formatAssigneeUsers = (props: {
 		lastName: string | null;
 		profile_picture?: MediaPosterPropsT[];
 	}>;
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 }): Array<DocumentWorkflowAssignee["user"]> =>
 	props.users.map((user) => ({
 		id: user.id,
@@ -111,7 +111,7 @@ const formatAssigneeUsers = (props: {
 		lastName: user.lastName,
 		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: user.profile_picture?.[0],
-			host: props.host,
+			options: props.mediaOptions,
 		}),
 	}));
 

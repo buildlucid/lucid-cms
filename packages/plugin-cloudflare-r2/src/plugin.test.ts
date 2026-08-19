@@ -1,5 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
+import type { MediaStorageAdapterInstance } from "@lucidcms/core/types";
 import { describe, expect, test } from "vitest";
 import { DEFAULT_MAX_UPLOAD_SIZE } from "./constants.js";
 import plugin from "./plugin.js";
@@ -83,36 +84,14 @@ describe("Cloudflare R2 plugin", () => {
 							sources: Array<string | URL>;
 						};
 						media: {
-							adapter?: {
-								createUploadSession: (
-									context: object,
-									props: {
-										key: string;
-										host: string;
-										secretKey: string;
-										mimeType: string;
-										extension?: string;
-										size: number;
-									},
-								) => Promise<{
-									error?: {
-										type: string;
-										message: string;
-									};
-									data?: {
-										key: string;
-										mode: "single";
-										url: string;
-									};
-								}>;
-							};
+							storage?: MediaStorageAdapterInstance;
 						};
 						http: {
 							routes: unknown[];
 						};
 					};
 					cloudflareR2Plugin.recipe(draft as never);
-					return draft.media.adapter;
+					return draft.media.storage;
 				})()
 			: undefined;
 
@@ -120,6 +99,7 @@ describe("Cloudflare R2 plugin", () => {
 			key: "public/test.png",
 			host: "https://example.com",
 			secretKey: "a".repeat(64),
+			fileName: "test.png",
 			mimeType: "image/png",
 			extension: "png",
 			size: 1024,
@@ -127,10 +107,12 @@ describe("Cloudflare R2 plugin", () => {
 
 		expect(result?.error).toBeUndefined();
 		expect(result?.data?.key).toBe("public/test.png");
-		expect(result?.data?.url).toContain(
+		expect(result?.data?.protocol).toBe("http");
+		if (result?.data?.protocol !== "http") return;
+		expect(result.data.request.url).toContain(
 			"/lucid/api/v1/media/r2/storage/upload?",
 		);
-		expect(result?.data?.url).toContain("extension=png");
+		expect(result.data.request.url).toContain("extension=png");
 	});
 
 	test("registers plugin-owned storage routes in binding-only mode", () => {

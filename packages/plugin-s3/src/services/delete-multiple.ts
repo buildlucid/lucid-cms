@@ -1,10 +1,10 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (
+	const deleteMultiple: MediaStorageAdapterServiceDeleteMultiple = async (
 		_context,
 		{ keys },
 	) => {

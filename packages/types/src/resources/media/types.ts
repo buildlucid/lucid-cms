@@ -8,6 +8,8 @@ export type MediaType =
 
 export type MediaOrigin = "human" | "ai_generated" | "ai_modified";
 
+export type MediaStatus = "processing" | "ready" | "failed";
+
 export type MediaSourceType = "original" | "crop";
 
 export interface MediaCropState {
@@ -61,9 +63,14 @@ export interface MediaFile<Meta extends MediaFileMeta = MediaFileMeta> {
 	meta: Meta;
 }
 
+export interface MediaPresetSource {
+	url: string;
+}
+
 export interface MediaOriginalFile {
 	key: string;
 	url: string;
+	presets: Record<string, MediaPresetSource>;
 	meta: MediaImageMeta;
 }
 
@@ -72,6 +79,7 @@ export type MediaImageFile =
 			key: string;
 			url: string;
 			fileName: string | null;
+			presets: Record<string, MediaPresetSource>;
 			sourceType: "original";
 			meta: MediaImageMeta;
 			original?: never;
@@ -81,17 +89,19 @@ export type MediaImageFile =
 			key: string;
 			url: string;
 			fileName: string | null;
+			presets: Record<string, MediaPresetSource>;
 			sourceType: "crop";
 			crop: MediaCropState;
 			meta: MediaImageMeta;
 			original: MediaOriginalFile;
 	  };
 
-export type MediaTranslationMap = Record<string, string | null>;
+export type MediaTranslationMap = Record<string, string | null> | null;
 
 interface MediaBase<Type extends MediaType> {
 	id: number;
 	type: Type;
+	status: MediaStatus;
 	folderId: number | null;
 	origin: MediaOrigin;
 	title: MediaTranslationMap;
@@ -111,7 +121,14 @@ export interface MediaImage extends MediaBase<"image"> {
 export interface MediaVideo extends MediaBase<"video"> {
 	description: MediaTranslationMap;
 	file: MediaFile;
+	sources: MediaVideoSource[];
 	poster: MediaPoster | null;
+}
+
+export interface MediaVideoSource {
+	url: string;
+	mimeType: string;
+	kind: "progressive" | "hls" | "dash";
 }
 
 export interface MediaAudio extends MediaBase<"audio"> {
@@ -148,6 +165,7 @@ export interface MediaTranslation {
 export interface MediaPoster {
 	id: number;
 	type: "image";
+	status: MediaStatus;
 	origin: MediaOrigin;
 	alt: MediaTranslationMap;
 	file: MediaImageFile;
@@ -158,6 +176,7 @@ export type MediaRef = Media;
 export interface MediaImagePreview {
 	id: number;
 	type: "image";
+	status: MediaStatus;
 	origin: MediaOrigin;
 	title: MediaTranslationMap;
 	alt: MediaTranslationMap;
@@ -178,23 +197,45 @@ export type UploadSessionPart = {
 
 export type UploadSessionResponse =
 	| {
-			mode: "single";
+			protocol: "http";
 			key: string;
-			url: string;
-			headers?: Record<string, string>;
+			sessionId: string;
+			expiresAt: string;
+			request: {
+				url: string;
+				method: "PUT" | "POST";
+				headers?: Record<string, string>;
+				body:
+					| { type: "raw" }
+					| {
+							type: "form-data";
+							fileField: string;
+							fields: Record<string, string>;
+					  };
+			};
 	  }
 	| {
-			mode: "resumable";
+			protocol: "multipart-parts";
 			key: string;
 			sessionId: string;
 			partSize: number;
 			expiresAt: string;
 			uploadedParts: UploadSessionPart[];
+	  }
+	| {
+			protocol: "tus";
+			key: string;
+			sessionId: string;
+			endpoint: string;
+			headers: Record<string, string>;
+			metadata?: Record<string, string>;
+			expiresAt: string;
 	  };
 
 export type UploadSessionStateResponse =
 	| {
 			canResume: true;
+			protocol: "multipart-parts";
 			key: string;
 			sessionId: string;
 			partSize: number;
@@ -202,9 +243,22 @@ export type UploadSessionStateResponse =
 			uploadedParts: UploadSessionPart[];
 	  }
 	| {
+			canResume: true;
+			protocol: "tus";
+			key: string;
+			sessionId: string;
+			endpoint: string;
+			headers: Record<string, string>;
+			metadata?: Record<string, string>;
+			expiresAt: string;
+	  }
+	| {
 			canResume: false;
 			sessionId: string;
-			reason: "adapter_not_resumable" | "adapter_changed";
+			reason:
+				| "protocol_not_resumable"
+				| "adapter_not_resumable"
+				| "adapter_changed";
 	  };
 
 export interface MediaShareLink {

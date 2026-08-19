@@ -1,7 +1,7 @@
 import type { PublishOperation } from "../../types/response.js";
 import type { PublishOperationDetailedQueryResponse } from "../repositories/document-publish-operations.js";
 import formatter from "./helpers.js";
-import type { MediaPosterPropsT } from "./media.js";
+import type { MediaFormatterOptions, MediaPosterPropsT } from "./media.js";
 import mediaFormatter from "./media.js";
 
 const formatUser = (params: {
@@ -11,7 +11,7 @@ const formatUser = (params: {
 	firstName?: string | null;
 	lastName?: string | null;
 	profilePicture?: MediaPosterPropsT[];
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 }): PublishOperation["requestedBy"] => {
 	if (!params.id) return null;
 	return {
@@ -22,7 +22,7 @@ const formatUser = (params: {
 		lastName: params.lastName ?? null,
 		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: params.profilePicture?.[0],
-			host: params.host,
+			options: params.mediaOptions,
 		}),
 	};
 };
@@ -32,7 +32,7 @@ type FormatSingleProps = {
 	documentLabel?: string | null;
 	latestContentId?: string | null;
 	permissions?: PublishOperation["permissions"];
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 };
 
 const formatSingle = (props: FormatSingleProps): PublishOperation => ({
@@ -58,7 +58,7 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 		firstName: props.operation.requested_by_first_name,
 		lastName: props.operation.requested_by_last_name,
 		profilePicture: props.operation.requested_by_profile_picture,
-		host: props.host,
+		mediaOptions: props.mediaOptions,
 	}),
 	requestComment: props.operation.request_comment,
 	decidedBy: formatUser({
@@ -68,7 +68,7 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 		firstName: props.operation.decided_by_first_name,
 		lastName: props.operation.decided_by_last_name,
 		profilePicture: props.operation.decided_by_profile_picture,
-		host: props.host,
+		mediaOptions: props.mediaOptions,
 	}),
 	decisionComment: props.operation.decision_comment,
 	decidedAt: formatter.formatDate(props.operation.decided_at),
@@ -98,7 +98,7 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 			lastName: assignee.last_name ?? null,
 			profilePicture: mediaFormatter.formatMediaImagePreview({
 				poster: assignee.profile_picture?.[0],
-				host: props.host,
+				options: props.mediaOptions,
 			}),
 		},
 		assignedBy: assignee.assigned_by,

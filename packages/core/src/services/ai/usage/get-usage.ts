@@ -31,7 +31,11 @@ const getUsage: ServiceFn<
 		data: {
 			data: aiUsageFormatter.formatMultiple({
 				aiUsage: aiUsageRes.data[0],
-				host: getBaseUrl(context),
+				mediaOptions: {
+					host: getBaseUrl(context),
+					delivery: context.mediaDelivery,
+					imagePresets: context.config.media.images.presets,
+				},
 				translate: context.translate,
 			}),
 			count: formatter.parseCount(aiUsageRes.data[1]?.count),

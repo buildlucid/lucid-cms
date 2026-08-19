@@ -1,5 +1,10 @@
 # @lucidcms/plugin-filesystem
 
+## v1.1.0 (unreleased)
+
+- Migrated to the media storage adapter contract, including explicit ready status, and the common HTTP upload-session completion flow.
+- Added a direct `filesystemStorageAdapter` export for config-first usage.
+
 ## v1.0.5
 
 - Dropped `tenant` experiment support.

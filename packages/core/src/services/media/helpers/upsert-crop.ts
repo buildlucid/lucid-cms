@@ -4,7 +4,12 @@ import {
 	MediaAwaitingSyncRepository,
 	MediaRepository,
 } from "../../../libs/repositories/index.js";
-import type { MediaCropInput, MediaOrigin } from "../../../types/response.js";
+import type {
+	MediaCropInput,
+	MediaOrigin,
+	MediaStatus,
+	MediaType,
+} from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import clearProcessedImage from "../../processed-images/clear-single.js";
 import checkAwaitingSync from "../checks/check-awaiting-sync.js";
@@ -15,7 +20,7 @@ import updateMedia from "../strategies/update.js";
 type CropParent = {
 	id: number;
 	key: string;
-	type: string;
+	type: MediaType;
 	origin: MediaOrigin;
 	public: BooleanInt;
 	relation_type?: "crop" | "poster" | null;
@@ -66,6 +71,10 @@ const upsertCrop: ServiceFn<
 		mimeType: string;
 		extension: string;
 		size: number;
+		status: MediaStatus;
+		storageAdapterKey: string;
+		storageAdapterReference: string | null;
+		storageAdapterData: Record<string, unknown> | null;
 	};
 
 	if (existingCropRes.data) {
@@ -100,6 +109,10 @@ const upsertCrop: ServiceFn<
 			mimeType: syncRes.data.mimeType,
 			extension: syncRes.data.extension,
 			size: syncRes.data.size,
+			status: syncRes.data.status,
+			storageAdapterKey: syncRes.data.storageAdapterKey,
+			storageAdapterReference: syncRes.data.storageAdapterReference,
+			storageAdapterData: syncRes.data.storageAdapterData,
 		};
 	}
 
@@ -107,6 +120,10 @@ const upsertCrop: ServiceFn<
 	const cropData = {
 		key: file.key,
 		e_tag: file.etag,
+		status: file.status,
+		storage_adapter_key: file.storageAdapterKey,
+		storage_adapter_reference: file.storageAdapterReference,
+		storage_adapter_data: file.storageAdapterData,
 		origin: data.parent.origin,
 		public: data.parent.public,
 		type: file.type,

@@ -1,8 +1,8 @@
 import constants from "../../constants/constants.js";
 
 export {
-	destroyMediaAdapter,
-	getInitializedMediaAdapter,
+	destroyMediaStorageAdapter,
+	getInitializedMediaStorageAdapter,
 } from "./lifecycle.js";
 export { splitBodyForProcessing, toNodeReadable } from "./normalize-body.js";
 export {
@@ -11,4 +11,4 @@ export {
 	validateSignedMediaUrl,
 } from "./signed-url.js";
 
-export const logScope = constants.logScopes.mediaAdapter;
+export const logScope = constants.logScopes.mediaStorageAdapter;

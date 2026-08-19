@@ -1,13 +1,13 @@
 import { Readable } from "node:stream";
 import { copy } from "@lucidcms/core/plugin";
 import type {
-	MediaAdapterServiceUploadSingle,
+	MediaStorageAdapterServiceUploadSingle,
 	ServiceContext,
 } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
-type UploadSingleProps = Parameters<MediaAdapterServiceUploadSingle>[1];
+type UploadSingleProps = Parameters<MediaStorageAdapterServiceUploadSingle>[1];
 
 /**
  * Centralizes writes to the R2 binding so direct adapter uploads and the
@@ -44,7 +44,7 @@ export const putObject = async (
  */
 const uploadSingle = (
 	options: PluginOptions,
-): MediaAdapterServiceUploadSingle => {
+): MediaStorageAdapterServiceUploadSingle => {
 	return async (context, props) => {
 		try {
 			const object = await putObject(options, context, props);

@@ -1,11 +1,11 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type { ErrorCopy, LucidErrorData } from "../../../types/errors.js";
-import type { MediaType } from "../../../types/response.js";
+import type { MediaStatus, MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
 import checkCanUpdateMedia from "../checks/check-can-update-media.js";
-import checkHasMediaStrategy from "../checks/check-has-media-strategy.js";
+import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const update: ServiceFn<
@@ -29,13 +29,17 @@ const update: ServiceFn<
 		key: string;
 		etag: string | null;
 		sourceDeleted: boolean;
+		status: MediaStatus;
+		storageAdapterKey: string;
+		storageAdapterReference: string | null;
+		storageAdapterData: Record<string, unknown> | null;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = await checkHasMediaStrategy(context);
-	if (mediaStrategyRes.error) return mediaStrategyRes;
+	const mediaStorageRes = await checkHasMediaStorage(context);
+	if (mediaStorageRes.error) return mediaStorageRes;
 
 	const cleanupUpdatedKey = async () => {
-		await mediaStrategyRes.data.delete(context, {
+		await mediaStorageRes.data.delete(context, {
 			key: data.updatedKey,
 		});
 	};
@@ -50,7 +54,7 @@ const update: ServiceFn<
 	};
 
 	// Fetch meta data from new file
-	const mediaMetaRes = await mediaStrategyRes.data.getMeta(context, {
+	const mediaMetaRes = await mediaStorageRes.data.getMeta(context, {
 		key: data.updatedKey,
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
@@ -66,7 +70,7 @@ const update: ServiceFn<
 
 	const fileMetaData = await validateUploadedMedia({
 		context,
-		stream: mediaStrategyRes.data.stream,
+		stream: mediaStorageRes.data.stream,
 		key: data.updatedKey,
 		fileName: data.fileName,
 		mimeType: mediaMetaRes.data.mimeType,
@@ -132,7 +136,7 @@ const update: ServiceFn<
 	const getVerifiedTargetMeta = async (options?: {
 		requireChangedEtag?: boolean;
 	}) => {
-		const targetMetaRes = await mediaStrategyRes.data.getMeta(context, {
+		const targetMetaRes = await mediaStorageRes.data.getMeta(context, {
 			key: data.targetKey,
 		});
 		if (targetMetaRes.error) return null;
@@ -176,7 +180,7 @@ const update: ServiceFn<
 	};
 
 	if (data.targetKey === data.previousKey) {
-		const updatedStreamRes = await mediaStrategyRes.data.stream(context, {
+		const updatedStreamRes = await mediaStorageRes.data.stream(context, {
 			key: data.updatedKey,
 		});
 		if (updatedStreamRes.error) {
@@ -186,7 +190,7 @@ const update: ServiceFn<
 			);
 		}
 
-		const uploadRes = await mediaStrategyRes.data.upload(context, {
+		const uploadRes = await mediaStorageRes.data.upload(context, {
 			key: data.targetKey,
 			body:
 				updatedStreamRes.data.body instanceof Uint8Array
@@ -214,7 +218,7 @@ const update: ServiceFn<
 		}
 
 		let sourceDeleted = true;
-		const deleteUpdatedRes = await mediaStrategyRes.data.delete(context, {
+		const deleteUpdatedRes = await mediaStorageRes.data.delete(context, {
 			key: data.updatedKey,
 		});
 		if (deleteUpdatedRes.error) {
@@ -231,11 +235,15 @@ const update: ServiceFn<
 				key: data.targetKey,
 				etag: targetMeta.etag,
 				sourceDeleted,
+				status: targetMeta.status,
+				storageAdapterKey: mediaStorageRes.data.key,
+				storageAdapterReference: targetMeta.adapterReference ?? null,
+				storageAdapterData: targetMeta.adapterData ?? null,
 			},
 		};
 	}
 
-	const promoteRes = await mediaStrategyRes.data.rename(context, {
+	const promoteRes = await mediaStorageRes.data.rename(context, {
 		from: data.updatedKey,
 		to: data.targetKey,
 	});
@@ -247,16 +255,16 @@ const update: ServiceFn<
 			);
 		}
 
-		const deleteUpdatedRes = await mediaStrategyRes.data.delete(context, {
+		const deleteUpdatedRes = await mediaStorageRes.data.delete(context, {
 			key: data.updatedKey,
 		});
 		const sourceDeleted = deleteUpdatedRes.error === undefined;
 
-		const deleteOldRes = await mediaStrategyRes.data.delete(context, {
+		const deleteOldRes = await mediaStorageRes.data.delete(context, {
 			key: data.previousKey,
 		});
 		if (deleteOldRes.error) {
-			await mediaStrategyRes.data.delete(context, {
+			await mediaStorageRes.data.delete(context, {
 				key: data.targetKey,
 			});
 			await revertStorageDelta(delta);
@@ -287,6 +295,10 @@ const update: ServiceFn<
 				key: data.targetKey,
 				etag: targetVerified.etag,
 				sourceDeleted,
+				status: targetVerified.status,
+				storageAdapterKey: mediaStorageRes.data.key,
+				storageAdapterReference: targetVerified.adapterReference ?? null,
+				storageAdapterData: targetVerified.adapterData ?? null,
 			},
 		};
 	}
@@ -296,11 +308,11 @@ const update: ServiceFn<
 		return await failUpdate(copy("server:core.errors.unknown"));
 	}
 
-	const deleteOldRes = await mediaStrategyRes.data.delete(context, {
+	const deleteOldRes = await mediaStorageRes.data.delete(context, {
 		key: data.previousKey,
 	});
 	if (deleteOldRes.error) {
-		await mediaStrategyRes.data.delete(context, {
+		await mediaStorageRes.data.delete(context, {
 			key: data.targetKey,
 		});
 		await revertStorageDelta(delta);
@@ -331,6 +343,10 @@ const update: ServiceFn<
 			key: data.targetKey,
 			etag: targetMeta.etag,
 			sourceDeleted: true,
+			status: targetMeta.status,
+			storageAdapterKey: mediaStorageRes.data.key,
+			storageAdapterReference: targetMeta.adapterReference ?? null,
+			storageAdapterData: targetMeta.adapterData ?? null,
 		},
 	};
 };

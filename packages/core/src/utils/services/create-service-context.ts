@@ -3,6 +3,7 @@ import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import { passthroughEmailAdapterInstance } from "../../libs/email/adapters/passthrough.js";
 import { createTranslator } from "../../libs/i18n/index.js";
 import { passthroughKVAdapter } from "../../libs/kv/index.js";
+import { passthroughMediaDeliveryAdapter } from "../../libs/media-delivery/index.js";
 import { passthroughQueueAdapter } from "../../libs/queue/index.js";
 import type { CreateServiceContextOptions, ServiceContext } from "./types.js";
 
@@ -29,7 +30,8 @@ const createServiceContext = (
 		runtimeContext: options.runtimeContext,
 		queue: options.queue ?? passthroughQueueAdapter(),
 		kv: options.kv ?? passthroughKVAdapter(),
-		media: options.media ?? null,
+		mediaStorage: options.mediaStorage ?? null,
+		mediaDelivery: options.mediaDelivery ?? passthroughMediaDeliveryAdapter(),
 		email: options.email ?? passthroughEmailAdapterInstance,
 		translate: createTranslator({
 			store: options.translationStore,

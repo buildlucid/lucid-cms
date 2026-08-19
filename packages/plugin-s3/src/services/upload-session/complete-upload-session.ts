@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceCompleteUploadSession } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceCompleteUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types/types.js";
 import { extractXmlValue, objectUrl } from "./helpers.js";
@@ -11,9 +11,13 @@ import { extractXmlValue, objectUrl } from "./helpers.js";
 export const completeUploadSession = (
 	client: AwsClient,
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceCompleteUploadSession => {
+): MediaStorageAdapterServiceCompleteUploadSession => {
 	return async (_context, props) => {
 		try {
+			if (props.protocol !== "multipart-parts") {
+				return { error: undefined, data: {} };
+			}
+
 			const body = `<CompleteMultipartUpload>${props.parts
 				.sort((a, b) => a.partNumber - b.partNumber)
 				.map(

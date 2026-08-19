@@ -1,5 +1,10 @@
 # @lucidcms/plugin-s3
 
+## v2.3.0 (unreleased)
+
+- Migrated to the media storage adapter contract with explicit ready status and protocol-based multipart upload sessions.
+- Added a direct `s3StorageAdapter` export for config-first usage.
+
 ## v2.2.5
 
 - Dropped `tenant` experiment support.

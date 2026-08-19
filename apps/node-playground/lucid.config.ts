@@ -17,6 +17,7 @@ import { microsoftAuthPlugin } from "@lucidcms/plugin-microsoft-auth";
 import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { redirectsPlugin } from "@lucidcms/plugin-redirects";
+import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
 // Collections
@@ -230,6 +231,7 @@ export default configureLucid({
 		plugins: [
 			workerQueuePlugin(),
 			filesystemPlugin(),
+			sharpPlugin(),
 			githubAuthPlugin({
 				clientId: env.GITHUB_CLIENT_ID,
 				clientSecret: env.GITHUB_CLIENT_SECRET,

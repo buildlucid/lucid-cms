@@ -1,11 +1,11 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceDeleteMultiple } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
 const deleteMultiple = (
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceDeleteMultiple => {
+): MediaStorageAdapterServiceDeleteMultiple => {
 	return async (context, { keys }) => {
 		try {
 			if (keys.length === 0) {

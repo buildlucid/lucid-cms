@@ -1,6 +1,6 @@
 import { LucidError } from "@lucidcms/core";
 import type { LucidPluginResponse } from "@lucidcms/core/types";
-import cloudflareImagesProcessor from "./adapter/index.js";
+import cloudflareImagesDeliveryAdapter from "./adapter/index.js";
 import {
 	LUCID_VERSION,
 	PLUGIN_KEY,
@@ -33,7 +33,7 @@ const plugin = (
 	},
 	recipe: (draft) => {
 		draft.i18n.sources.push("@lucidcms/plugin-cloudflare-images/translations");
-		draft.media.images.processor = cloudflareImagesProcessor(pluginOptions);
+		draft.media.delivery = cloudflareImagesDeliveryAdapter(pluginOptions);
 	},
 });
 

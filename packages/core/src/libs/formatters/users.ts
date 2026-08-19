@@ -4,7 +4,7 @@ import type { BooleanInt } from "../db/types.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
 import formatter from "./helpers.js";
-import type { MediaPosterPropsT } from "./media.js";
+import type { MediaFormatterOptions, MediaPosterPropsT } from "./media.js";
 import mediaFormatter from "./media.js";
 import userPermissionsFormatter from "./user-permissions.js";
 
@@ -53,7 +53,7 @@ type ContentAccountPropT = Pick<
 const formatMultiple = (props: {
 	users: UserPropT[];
 	authUser?: LucidAuth;
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 	locales: string[];
 	defaultLocale: string;
 }) => {
@@ -61,7 +61,7 @@ const formatMultiple = (props: {
 		formatSingle({
 			user: u,
 			authUser: props.authUser,
-			host: props.host,
+			mediaOptions: props.mediaOptions,
 			locales: props.locales,
 			defaultLocale: props.defaultLocale,
 		}),
@@ -71,7 +71,7 @@ const formatMultiple = (props: {
 const formatSingle = (props: {
 	user: UserPropT;
 	authUser?: LucidAuth;
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 	locales: string[];
 	defaultLocale: string;
 	pendingEmailChange?: {
@@ -106,7 +106,7 @@ const formatSingle = (props: {
 		isDeleted: formatter.formatBoolean(props.user.is_deleted ?? false),
 		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: props.user.profile_picture?.[0],
-			host: props.host,
+			options: props.mediaOptions,
 		}),
 	};
 
@@ -157,7 +157,7 @@ const formatSingle = (props: {
 
 const formatContentAccount = (props: {
 	user: ContentAccountPropT;
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 }): Account => ({
 	id: props.user.id,
 	username: props.user.username,
@@ -166,7 +166,7 @@ const formatContentAccount = (props: {
 	lastName: props.user.last_name,
 	profilePicture: mediaFormatter.formatMediaImagePreview({
 		poster: props.user.content_profile_picture?.[0],
-		host: props.host,
+		options: props.mediaOptions,
 	}),
 });
 

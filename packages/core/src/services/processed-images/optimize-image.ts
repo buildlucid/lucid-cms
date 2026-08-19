@@ -1,22 +1,27 @@
 import type { Readable } from "node:stream";
-import getImageProcessor from "../../libs/image-processor/get-adapter.js";
 import type {
-	ImageProcessorOptions,
-	ImageProcessorResult,
-} from "../../libs/image-processor/types.js";
+	MediaDeliveryProcessResult,
+	MediaTransformationOptions,
+} from "../../libs/media-delivery/types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const optimizeImage: ServiceFn<
 	[
 		{
 			stream: Readable;
-			options: ImageProcessorOptions;
+			options: MediaTransformationOptions;
 		},
 	],
-	ImageProcessorResult
+	MediaDeliveryProcessResult
 > = async (context, data) => {
-	const targetProcessor = await getImageProcessor(context.config);
-	return await targetProcessor.process(context, {
+	if (!context.mediaDelivery.processImage) {
+		return {
+			error: undefined,
+			data: { processed: false },
+		};
+	}
+
+	return await context.mediaDelivery.processImage(context, {
 		stream: data.stream,
 		options: data.options,
 	});

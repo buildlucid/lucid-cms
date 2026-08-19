@@ -1,5 +1,8 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterStreamBody, ServiceFn } from "@lucidcms/core/types";
+import type {
+	MediaStorageAdapterStreamBody,
+	ServiceFn,
+} from "@lucidcms/core/types";
 import { STORAGE_DOWNLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
 import { validateSignedMediaUrl } from "../utils/signed-media-url.js";
@@ -22,7 +25,7 @@ const storageDownload =
 			key: string;
 			contentLength: number | undefined;
 			contentType: string | undefined;
-			body: MediaAdapterStreamBody;
+			body: MediaStorageAdapterStreamBody;
 			isPartialContent?: boolean;
 			totalSize?: number;
 			range?: {

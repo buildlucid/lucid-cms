@@ -1,17 +1,18 @@
-import type { ImageProcessorInstance } from "@lucidcms/core/types";
+import type { MediaDeliveryAdapterInstance } from "@lucidcms/core/types";
 import { PROCESSOR_KEY } from "../constants.js";
 import type { CloudflareImagesPluginOptions } from "../types.js";
 import processImage from "./services/process-image.js";
 
 /**
- * Creates a Lucid image processor backed by Cloudflare's raw Images binding.
+ * Creates Lucid media delivery backed by Cloudflare's raw Images binding.
  */
-const cloudflareImagesProcessor = (
+const cloudflareImagesDeliveryAdapter = (
 	options: CloudflareImagesPluginOptions = {},
-): ImageProcessorInstance => ({
-	type: "image-processor",
+): MediaDeliveryAdapterInstance => ({
+	type: "media-delivery-adapter",
 	key: PROCESSOR_KEY,
-	process: processImage(options),
+	resolveFile: () => ({ type: "lucid" }),
+	processImage: processImage(options),
 });
 
-export default cloudflareImagesProcessor;
+export default cloudflareImagesDeliveryAdapter;

@@ -2,7 +2,7 @@
 
 > The official S3 plugin for Lucid
 
-The Lucid CMS S3 plugin registers the required media strategy functions to stream, upload, update and delete media from any S3 compatible storage solution. This plugin supports AWS S3, Cloudflare R2, and other S3-compatible storage providers.
+The Lucid CMS S3 plugin registers a media storage adapter for streaming, uploading, updating, and deleting media in any S3-compatible storage service. This plugin supports AWS S3, Cloudflare R2, and other S3-compatible providers.
 
 ## Installation
 

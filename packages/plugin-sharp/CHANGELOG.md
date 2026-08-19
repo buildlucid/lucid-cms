@@ -1,5 +1,10 @@
 # @lucidcms/plugin-sharp
 
+## v1.4.0 (unreleased)
+
+- Migrated Sharp image transformation to the media delivery adapter contract.
+- Added a direct `sharpMediaDeliveryAdapter` export for config-first usage.
+
 ## v1.3.0
 
 - Added preset rotation after EXIF auto-orientation, including rotated focal-point crop handling.

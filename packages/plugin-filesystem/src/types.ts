@@ -1,3 +1,3 @@
-import type { FileSystemMediaAdapterOptions } from "@lucidcms/core/types";
+import type { FileSystemStorageAdapterOptions } from "@lucidcms/core/types";
 
-export type PluginOptions = Partial<FileSystemMediaAdapterOptions>;
+export type PluginOptions = Partial<FileSystemStorageAdapterOptions>;

@@ -1,6 +1,6 @@
 import type { UploadSessionStateResponse } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
-import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
+import { hasMultipartUploadSessions } from "../../libs/media-storage/resumable-upload-sessions.js";
 import { MediaUploadSessionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -19,6 +19,8 @@ const getUploadSession: ServiceFn<
 			"key",
 			"adapter_key",
 			"adapter_upload_id",
+			"protocol",
+			"client_data",
 			"part_size",
 			"expires_at",
 			"status",
@@ -36,17 +38,17 @@ const getUploadSession: ServiceFn<
 	});
 	if (sessionRes.error) return sessionRes;
 
-	if (!context.media) {
+	if (!context.mediaStorage) {
 		return {
 			error: {
 				type: "basic",
 				status: 400,
-				message: copy("server:core.media.adapters.not.enabled"),
+				message: copy("server:core.media.storage.adapter.not.enabled"),
 			},
 			data: undefined,
 		};
 	}
-	if (sessionRes.data.adapter_key !== context.media.key) {
+	if (sessionRes.data.adapter_key !== context.mediaStorage.key) {
 		return {
 			error: undefined,
 			data: {
@@ -56,7 +58,65 @@ const getUploadSession: ServiceFn<
 			},
 		};
 	}
-	if (!hasResumableUploadSessions(context.media)) {
+	if (sessionRes.data.protocol === "http") {
+		return {
+			error: undefined,
+			data: {
+				canResume: false,
+				sessionId: sessionRes.data.session_id,
+				reason: "protocol_not_resumable",
+			},
+		};
+	}
+	if (sessionRes.data.protocol === "tus") {
+		const endpoint = sessionRes.data.client_data?.endpoint;
+		const headers = sessionRes.data.client_data?.headers;
+		const metadata = sessionRes.data.client_data?.metadata;
+		if (
+			typeof endpoint !== "string" ||
+			typeof headers !== "object" ||
+			headers === null ||
+			Array.isArray(headers)
+		) {
+			return {
+				error: undefined,
+				data: {
+					canResume: false,
+					sessionId: sessionRes.data.session_id,
+					reason: "protocol_not_resumable",
+				},
+			};
+		}
+
+		return {
+			error: undefined,
+			data: {
+				canResume: true,
+				protocol: "tus",
+				key: sessionRes.data.key,
+				sessionId: sessionRes.data.session_id,
+				expiresAt: new Date(sessionRes.data.expires_at).toISOString(),
+				endpoint,
+				headers: Object.fromEntries(
+					Object.entries(headers).filter(
+						(entry): entry is [string, string] => typeof entry[1] === "string",
+					),
+				),
+				metadata:
+					typeof metadata === "object" &&
+					metadata !== null &&
+					!Array.isArray(metadata)
+						? Object.fromEntries(
+								Object.entries(metadata).filter(
+									(entry): entry is [string, string] =>
+										typeof entry[1] === "string",
+								),
+							)
+						: undefined,
+			},
+		};
+	}
+	if (!hasMultipartUploadSessions(context.mediaStorage)) {
 		return {
 			error: undefined,
 			data: {
@@ -89,7 +149,7 @@ const getUploadSession: ServiceFn<
 		};
 	}
 
-	const partsRes = await context.media.listUploadParts(context, {
+	const partsRes = await context.mediaStorage.listUploadParts(context, {
 		key: sessionRes.data.key,
 		uploadId: sessionRes.data.adapter_upload_id,
 	});
@@ -99,12 +159,11 @@ const getUploadSession: ServiceFn<
 		error: undefined,
 		data: {
 			canResume: true,
+			protocol: "multipart-parts",
 			key: sessionRes.data.key,
 			sessionId: sessionRes.data.session_id,
 			partSize: sessionRes.data.part_size,
-			expiresAt: new Date(
-				sessionRes.data.expires_at as string | Date,
-			).toISOString(),
+			expiresAt: new Date(sessionRes.data.expires_at).toISOString(),
 			uploadedParts: partsRes.data.uploadedParts,
 		},
 	};

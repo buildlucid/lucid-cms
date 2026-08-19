@@ -14,29 +14,6 @@ const renderDimensions = (image: RichTextHydratedImage): string => {
 	return `${width}${height}`;
 };
 
-const getImageCandidates = (image: RichTextHydratedImage): string => {
-	const candidates = image.presets
-		.filter((preset) => preset.width)
-		.sort((a, b) => (a.width ?? 0) - (b.width ?? 0))
-		.map(
-			(preset) =>
-				`${escapeHTMLAttribute(preset.src)} ${preset.width as number}w`,
-		);
-
-	if (image.width) {
-		candidates.push(`${escapeHTMLAttribute(image.src)} ${image.width}w`);
-	}
-
-	return candidates.join(", ");
-};
-
-const getSmallestImageSource = (image: RichTextHydratedImage): string =>
-	[...image.presets].sort(
-		(a, b) =>
-			(a.width ?? a.height ?? Number.MAX_SAFE_INTEGER) -
-			(b.width ?? b.height ?? Number.MAX_SAFE_INTEGER),
-	)[0]?.src ?? image.src;
-
 const renderPlaceholderAttributes = (
 	image: RichTextHydratedImage,
 	marker: string,
@@ -58,14 +35,12 @@ const renderPlaceholderAttributes = (
 };
 
 const renderImage = (image: RichTextHydratedImage): string => {
-	const srcSet = getImageCandidates(image);
-	const source = srcSet ? `<source srcset="${srcSet}">` : "";
 	const placeholder = renderPlaceholderAttributes(
 		image,
 		"data-lucid-rich-text-image-placeholder",
 	);
 
-	return `<picture data-lucid-rich-text-picture="">${source}<img data-lucid-rich-text-image="" src="${escapeHTMLAttribute(getSmallestImageSource(image))}" alt="${escapeHTMLAttribute(image.alt)}"${image.title ? ` title="${escapeHTMLAttribute(image.title)}"` : ""}${renderDimensions(image)} loading="lazy" decoding="async"${placeholder}></picture>`;
+	return `<picture data-lucid-rich-text-picture=""><img data-lucid-rich-text-image="" src="${escapeHTMLAttribute(image.src)}" alt="${escapeHTMLAttribute(image.alt)}"${image.title ? ` title="${escapeHTMLAttribute(image.title)}"` : ""}${renderDimensions(image)} loading="lazy" decoding="async"${placeholder}></picture>`;
 };
 
 const renderVideo = (
@@ -73,11 +48,7 @@ const renderVideo = (
 ): string => {
 	const poster = media.poster;
 	const posterSrc = poster
-		? ` poster="${escapeHTMLAttribute(getSmallestImageSource(poster))}"`
-		: "";
-	const posterSrcSet = poster ? getImageCandidates(poster) : "";
-	const posterData = posterSrcSet
-		? ` data-lucid-rich-text-poster-srcset="${posterSrcSet}"`
+		? ` poster="${escapeHTMLAttribute(poster.src)}"`
 		: "";
 	const placeholder = poster
 		? renderPlaceholderAttributes(
@@ -89,7 +60,7 @@ const renderVideo = (
 		? ` type="${escapeHTMLAttribute(media.mimeType)}"`
 		: "";
 
-	return `<video data-lucid-rich-text-video="" controls preload="metadata"${posterSrc}${posterData}${placeholder}><source src="${escapeHTMLAttribute(media.src)}"${sourceType}></video>`;
+	return `<video data-lucid-rich-text-video="" controls preload="metadata"${posterSrc}${placeholder}><source src="${escapeHTMLAttribute(media.src)}"${sourceType}></video>`;
 };
 
 /** Renders the compact media data attached during document formatting. */

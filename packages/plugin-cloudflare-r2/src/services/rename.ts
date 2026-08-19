@@ -1,9 +1,11 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceRenameKey } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceRenameKey } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
-const rename = (pluginOptions: PluginOptions): MediaAdapterServiceRenameKey => {
+const rename = (
+	pluginOptions: PluginOptions,
+): MediaStorageAdapterServiceRenameKey => {
 	return async (context, props) => {
 		try {
 			const binding = resolveBinding(context, pluginOptions);

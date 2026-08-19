@@ -258,6 +258,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						.select((mediaEb) => [
 							"lucid_media.id",
 							"lucid_media.key",
+							"lucid_media.status",
+							"lucid_media.storage_adapter_key",
+							"lucid_media.storage_adapter_reference",
+							"lucid_media.storage_adapter_data",
+							"lucid_media.public",
 							"lucid_media.origin",
 							"lucid_media.folder_id",
 							"lucid_media.e_tag",
@@ -280,7 +285,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							"lucid_media.is_deleted",
 							"lucid_media.is_deleted_at",
 							"lucid_media.deleted_by",
-							"lucid_media.public",
 							this.database.fn
 								.jsonArrayFrom(
 									mediaEb
@@ -288,6 +292,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										.select([
 											"profile_crop.id",
 											"profile_crop.key",
+											"profile_crop.status",
+											"profile_crop.storage_adapter_key",
+											"profile_crop.storage_adapter_reference",
+											"profile_crop.storage_adapter_data",
+											"profile_crop.public",
 											"profile_crop.origin",
 											"profile_crop.type",
 											"profile_crop.mime_type",
@@ -417,6 +426,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 							.select((mediaEb) => [
 								"lucid_media.id",
 								"lucid_media.key",
+								"lucid_media.status",
+								"lucid_media.storage_adapter_key",
+								"lucid_media.storage_adapter_reference",
+								"lucid_media.storage_adapter_data",
+								"lucid_media.public",
 								"lucid_media.origin",
 								"lucid_media.folder_id",
 								"lucid_media.e_tag",
@@ -439,7 +453,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								"lucid_media.is_deleted",
 								"lucid_media.is_deleted_at",
 								"lucid_media.deleted_by",
-								"lucid_media.public",
 								this.database.fn
 									.jsonArrayFrom(
 										mediaEb
@@ -447,6 +460,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 											.select([
 												"profile_crop.id",
 												"profile_crop.key",
+												"profile_crop.status",
+												"profile_crop.storage_adapter_key",
+												"profile_crop.storage_adapter_reference",
+												"profile_crop.storage_adapter_data",
+												"profile_crop.public",
 												"profile_crop.origin",
 												"profile_crop.type",
 												"profile_crop.mime_type",
@@ -650,6 +668,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.select((mediaEb) => [
 										"lucid_media.id",
 										"lucid_media.key",
+										"lucid_media.status",
+										"lucid_media.storage_adapter_key",
+										"lucid_media.storage_adapter_reference",
+										"lucid_media.storage_adapter_data",
+										"lucid_media.public",
 										"lucid_media.origin",
 										"lucid_media.folder_id",
 										"lucid_media.e_tag",
@@ -672,7 +695,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										"lucid_media.is_deleted",
 										"lucid_media.is_deleted_at",
 										"lucid_media.deleted_by",
-										"lucid_media.public",
 										this.database.fn
 											.jsonArrayFrom(
 												mediaEb
@@ -680,6 +702,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 													.select([
 														"profile_crop.id",
 														"profile_crop.key",
+														"profile_crop.status",
+														"profile_crop.storage_adapter_key",
+														"profile_crop.storage_adapter_reference",
+														"profile_crop.storage_adapter_data",
+														"profile_crop.public",
 														"profile_crop.origin",
 														"profile_crop.type",
 														"profile_crop.mime_type",
@@ -836,6 +863,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.select((mediaEb) => [
 										"lucid_media.id",
 										"lucid_media.key",
+										"lucid_media.status",
+										"lucid_media.storage_adapter_key",
+										"lucid_media.storage_adapter_reference",
+										"lucid_media.storage_adapter_data",
+										"lucid_media.public",
 										"lucid_media.origin",
 										"lucid_media.type",
 										"lucid_media.mime_type",
@@ -858,6 +890,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 													.select([
 														"profile_crop.id",
 														"profile_crop.key",
+														"profile_crop.status",
+														"profile_crop.storage_adapter_key",
+														"profile_crop.storage_adapter_reference",
+														"profile_crop.storage_adapter_data",
+														"profile_crop.public",
 														"profile_crop.origin",
 														"profile_crop.type",
 														"profile_crop.mime_type",
@@ -997,6 +1034,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 									.select((mediaEb) => [
 										"lucid_media.id",
 										"lucid_media.key",
+										"lucid_media.status",
+										"lucid_media.storage_adapter_key",
+										"lucid_media.storage_adapter_reference",
+										"lucid_media.storage_adapter_data",
+										"lucid_media.public",
 										"lucid_media.origin",
 										"lucid_media.type",
 										"lucid_media.mime_type",
@@ -1019,6 +1061,11 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 													.select([
 														"profile_crop.id",
 														"profile_crop.key",
+														"profile_crop.status",
+														"profile_crop.storage_adapter_key",
+														"profile_crop.storage_adapter_reference",
+														"profile_crop.storage_adapter_data",
+														"profile_crop.public",
 														"profile_crop.origin",
 														"profile_crop.type",
 														"profile_crop.mime_type",

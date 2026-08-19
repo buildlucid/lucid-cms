@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY, STORAGE_DOWNLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";
@@ -13,7 +13,7 @@ import { createSignedMediaUrl } from "../utils/signed-media-url.js";
 export default (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceGetDownloadUrl => {
+): MediaStorageAdapterServiceGetDownloadUrl => {
 	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {

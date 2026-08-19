@@ -1,8 +1,8 @@
 # Lucid CMS - Cloudflare Images Plugin
 
-> The official Cloudflare Images processor for Lucid CMS
+> The official Cloudflare Images media delivery plugin for Lucid CMS
 
-This plugin registers an on-demand image processor backed by the Cloudflare Images binding. It transforms raw image bytes streamed from Lucid's media adapter, so the source does not need a public URL.
+This plugin registers a Lucid media delivery adapter backed by the Cloudflare Images binding. It transforms raw image bytes streamed from Lucid's storage adapter, so the source does not need a public URL.
 
 ## Installation
 
@@ -55,7 +55,7 @@ Use `cloudflareImagesPlugin({ binding: "CUSTOM_IMAGES" })` to select another bin
 
 ## Supported processing
 
-Source images are deliberately restricted to JPEG, PNG, and WebP. Output supports JPEG, PNG, WebP, and AVIF. Cloudflare may fall back from AVIF for images it cannot encode quickly; the processor reports the actual returned MIME type and extension.
+Source images are deliberately restricted to JPEG, PNG, and WebP. Output supports JPEG, PNG, WebP, and AVIF. Cloudflare may fall back from AVIF for images it cannot encode quickly; the adapter reports the actual returned MIME type and extension.
 
 The following fixed source limits are checked before transformation:
 

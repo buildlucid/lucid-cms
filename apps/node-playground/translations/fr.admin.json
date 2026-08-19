@@ -695,7 +695,7 @@
 	"dashboard.starting.points.roles.description": "Créer et configurer les autorisations de rôle",
 	"dashboard.starting.points.settings.title": "Présentation du système",
 	"dashboard.starting.points.settings.description": "Configurer les paramètres système et les intégrations",
-	"media.storage.strategy.missing.message": "La prise en charge des médias est désactivée car votre adaptateur multimédia n'est pas pris en charge dans votre environnement d'exécution.",
+	"media.storage.adapter.missing.message": "La prise en charge des médias est désactivée car votre adaptateur de stockage multimédia n'est pas pris en charge dans votre environnement d'exécution.",
 	"account.details.title": "Vos coordonnées",
 	"account.details.description": "Mettez à jour vos informations personnelles et les détails de votre compte",
 	"account.sessions.title": "Séances",

@@ -1,9 +1,9 @@
 import { Readable } from "node:stream";
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
-import sharpImageProcessor from "./index.js";
+import sharpMediaDeliveryAdapter from "./index.js";
 
-describe("sharpImageProcessor", () => {
+describe("sharpMediaDeliveryAdapter", () => {
 	it("auto-orients and applies explicit rotation before resizing", async () => {
 		const input = await sharp({
 			create: {
@@ -16,7 +16,9 @@ describe("sharpImageProcessor", () => {
 			.png()
 			.toBuffer();
 
-		const result = await sharpImageProcessor().process({} as never, {
+		const processImage = sharpMediaDeliveryAdapter().processImage;
+		if (!processImage) throw new Error("Expected image processing support");
+		const result = await processImage({} as never, {
 			stream: Readable.from(input),
 			options: {
 				rotate: 90,

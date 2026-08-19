@@ -1,6 +1,6 @@
 import mime from "mime-types";
 import { copy } from "../../libs/i18n/index.js";
-import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
+import type { MediaStorageAdapterStreamBody } from "../../libs/media-storage/types.js";
 import type { StreamSingleQueryParams } from "../../schemas/cdn.js";
 import {
 	generateProcessKey,
@@ -9,7 +9,7 @@ import {
 	resolveProcessingRequest,
 } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkHasMediaStrategy from "../media/checks/check-has-media-strategy.js";
+import checkHasMediaStorage from "../media/checks/check-has-media-storage.js";
 import processImage from "../processed-images/process-image.js";
 
 /**
@@ -32,7 +32,7 @@ const streamMedia: ServiceFn<
 		key: string;
 		contentLength: number | undefined;
 		contentType: string | undefined;
-		body: MediaAdapterStreamBody;
+		body: MediaStorageAdapterStreamBody;
 		etag?: string | null;
 		notModified?: boolean;
 		isPartialContent?: boolean;
@@ -43,8 +43,8 @@ const streamMedia: ServiceFn<
 		};
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = await checkHasMediaStrategy(context);
-	if (mediaStrategyRes.error) return mediaStrategyRes;
+	const mediaStorageRes = await checkHasMediaStorage(context);
+	if (mediaStorageRes.error) return mediaStorageRes;
 
 	const normalizedKey = normalizeMediaKey(data.key);
 	const isProcessedKey = isProcessedImageKey(normalizedKey);
@@ -69,7 +69,7 @@ const streamMedia: ServiceFn<
 	});
 
 	if (!processingRequest.hasProcessing) {
-		const res = await mediaStrategyRes.data.stream(context, {
+		const res = await mediaStorageRes.data.stream(context, {
 			key: normalizedKey,
 			ifNoneMatch: data.ifNoneMatch,
 			range: data.range,
@@ -95,7 +95,7 @@ const streamMedia: ServiceFn<
 	// Processed Image
 	let sourceExtension: string | null = processingRequest.format ?? null;
 	if (!sourceExtension) {
-		const metaRes = await mediaStrategyRes.data.getMeta(context, {
+		const metaRes = await mediaStorageRes.data.getMeta(context, {
 			key: normalizedKey,
 		});
 		if (metaRes.error) return metaRes;
@@ -115,7 +115,7 @@ const streamMedia: ServiceFn<
 		},
 	});
 
-	const res = await mediaStrategyRes.data.stream(context, {
+	const res = await mediaStorageRes.data.stream(context, {
 		key: processKey,
 		ifNoneMatch: data.ifNoneMatch,
 		range: data.range,

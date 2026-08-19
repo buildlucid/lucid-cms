@@ -2,7 +2,10 @@ import type { AiUsage } from "../../types/response.js";
 import { getNumber, getObject } from "../../utils/helpers/index.js";
 import type { Translator } from "../i18n/types.js";
 import formatter from "./helpers.js";
-import mediaFormatter, { type MediaPosterPropsT } from "./media.js";
+import mediaFormatter, {
+	type MediaFormatterOptions,
+	type MediaPosterPropsT,
+} from "./media.js";
 
 export interface AiUsagePropT {
 	id: number;
@@ -90,13 +93,13 @@ export const formatAiUsageFeatureLabel = (props: {
 
 const formatMultiple = (props: {
 	aiUsage: AiUsagePropT[];
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 	translate: Translator;
 }): AiUsage[] => {
 	return props.aiUsage.map((usage) =>
 		formatSingle({
 			aiUsage: usage,
-			host: props.host,
+			mediaOptions: props.mediaOptions,
 			translate: props.translate,
 		}),
 	);
@@ -104,7 +107,7 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	aiUsage: AiUsagePropT;
-	host: string;
+	mediaOptions: MediaFormatterOptions;
 	translate: Translator;
 }): AiUsage => {
 	const user =
@@ -117,7 +120,7 @@ const formatSingle = (props: {
 					lastName: props.aiUsage.last_name,
 					profilePicture: mediaFormatter.formatMediaImagePreview({
 						poster: props.aiUsage.profile_picture?.[0],
-						host: props.host,
+						options: props.mediaOptions,
 					}),
 				}
 			: null;

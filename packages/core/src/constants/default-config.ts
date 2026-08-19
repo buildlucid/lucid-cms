@@ -74,7 +74,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 		limits: {
 			storageBytes: false,
 			uploadBytes: 16777216,
-			processedImagesPerFile: 10,
 		},
 		images: {
 			presets: {
@@ -95,7 +94,10 @@ export const defaultConfig: Partial<LucidConfig> = {
 				},
 			},
 			allowFormatQuery: false,
-			storeProcessed: true,
+			cache: {
+				enabled: true,
+				maxVariantsPerFile: 10,
+			},
 		},
 		video: {},
 	},

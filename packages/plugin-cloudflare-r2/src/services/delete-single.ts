@@ -1,11 +1,11 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceDeleteSingle } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceDeleteSingle } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
 const deleteSingle = (
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceDeleteSingle => {
+): MediaStorageAdapterServiceDeleteSingle => {
 	return async (context, { key }) => {
 		try {
 			const binding = resolveBinding(context, pluginOptions);

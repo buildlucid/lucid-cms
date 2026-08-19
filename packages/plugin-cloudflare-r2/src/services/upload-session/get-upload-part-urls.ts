@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceGetUploadPartUrls } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceGetUploadPartUrls } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
 import type { PluginOptions } from "../../types.js";
@@ -12,7 +12,7 @@ import { objectUrl } from "./helpers.js";
 export const getUploadPartUrls = (
 	client: AwsClient | null,
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceGetUploadPartUrls => {
+): MediaStorageAdapterServiceGetUploadPartUrls => {
 	return async (_context, props) => {
 		try {
 			if (!pluginOptions.http) {

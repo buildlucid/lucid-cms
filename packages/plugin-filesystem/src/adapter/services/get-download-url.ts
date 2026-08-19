@@ -1,13 +1,13 @@
-import { createSignedMediaUrl } from "@lucidcms/core/media";
+import { createSignedMediaUrl } from "@lucidcms/core/media-storage";
 import { copy } from "@lucidcms/core/plugin";
 import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterServiceGetDownloadUrl,
+	FileSystemStorageAdapterOptions,
+	MediaStorageAdapterServiceGetDownloadUrl,
 } from "@lucidcms/core/types";
 import { FILE_SYSTEM_DOWNLOAD_PATH } from "../helpers.js";
 
-export default (options: FileSystemMediaAdapterOptions) => {
-	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (
+export default (options: FileSystemStorageAdapterOptions) => {
+	const getDownloadUrl: MediaStorageAdapterServiceGetDownloadUrl = async (
 		_context,
 		props,
 	) => {

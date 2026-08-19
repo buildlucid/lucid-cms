@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceAbortUploadSession } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceAbortUploadSession } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../../types/types.js";
 import { objectUrl } from "./helpers.js";
@@ -11,8 +11,12 @@ import { objectUrl } from "./helpers.js";
 export const abortUploadSession = (
 	client: AwsClient,
 	pluginOptions: PluginOptions,
-): MediaAdapterServiceAbortUploadSession => {
+): MediaStorageAdapterServiceAbortUploadSession => {
 	return async (_context, props) => {
+		if (props.protocol !== "multipart-parts") {
+			return { error: undefined, data: undefined };
+		}
+
 		try {
 			const signed = await client.sign(
 				new Request(

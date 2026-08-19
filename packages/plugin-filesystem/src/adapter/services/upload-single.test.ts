@@ -47,6 +47,7 @@ describe("file-system upload metadata", () => {
 		});
 		expect(metadataRes.error).toBeUndefined();
 		expect(metadataRes.data?.mimeType).toBe("image/svg+xml");
+		expect(metadataRes.data?.status).toBe("ready");
 
 		const metadataFile = await readFile(
 			await getStoredMetadataFilePath(),

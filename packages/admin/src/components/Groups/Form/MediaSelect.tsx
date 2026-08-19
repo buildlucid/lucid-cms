@@ -205,8 +205,11 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	const primaryMediaPreview = createMemo(() => {
 		const media = primarySelectedMedia();
 		return {
+			status: media?.status ?? "ready",
 			url: media?.file.url ?? "",
 			type: media?.type ?? "image",
+			presets: media?.type === "image" ? media.file.presets : undefined,
+			sources: media?.type === "video" ? media.sources : undefined,
 			poster: media?.type === "video" ? media.poster : undefined,
 		};
 	});
@@ -569,8 +572,15 @@ const MediaSortableItem: Component<{
 				<div class="pointer-events-none flex h-40 items-center justify-center [&_img]:max-h-40 [&_img]:h-auto [&_img]:w-auto [&_img]:max-w-full [&_video]:max-h-40 [&_video]:h-auto [&_video]:w-auto [&_video]:max-w-full">
 					<MediaPreview
 						media={{
+							status: props.media.status,
 							url: props.media.file.url,
 							type: props.media.type,
+							presets:
+								props.media.type === "image"
+									? props.media.file.presets
+									: undefined,
+							sources:
+								props.media.type === "video" ? props.media.sources : undefined,
 							poster:
 								props.media.type === "video" ? props.media.poster : undefined,
 						}}

@@ -25,7 +25,11 @@ const getSingle: ServiceFn<[{ id: number }], OAuthClient> = async (
 		error: undefined,
 		data: oauthClientsFormatter.formatSingle({
 			client: clientRes.data,
-			host: getBaseUrl(context),
+			mediaOptions: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 		}),
 	};
 };

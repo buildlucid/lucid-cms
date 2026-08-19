@@ -19,7 +19,8 @@ const featureSupportChecks = (
 			| "databaseAdapter"
 			| "queueAdapter"
 			| "kvAdapter"
-			| "mediaAdapter"
+			| "mediaStorageAdapter"
+			| "mediaDeliveryAdapter"
 			| "emailAdapter",
 	) => {
 		if (!key) return;
@@ -53,7 +54,16 @@ const featureSupportChecks = (
 	checkAdapter("Database", adapterKeys.database, "databaseAdapter");
 	checkAdapter("Queue", adapterKeys.queue, "queueAdapter");
 	checkAdapter("KV", adapterKeys.kv, "kvAdapter");
-	checkAdapter("Media", adapterKeys.media, "mediaAdapter");
+	checkAdapter(
+		"Media storage",
+		adapterKeys.mediaStorage,
+		"mediaStorageAdapter",
+	);
+	checkAdapter(
+		"Media delivery",
+		adapterKeys.mediaDelivery,
+		"mediaDeliveryAdapter",
+	);
 	checkAdapter("Email", adapterKeys.email, "emailAdapter");
 
 	// log issues based on severity

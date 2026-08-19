@@ -4,18 +4,18 @@ import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 } from "../runtime/types.js";
-import getImageProcessor from "./get-adapter.js";
-import type { ImageProcessorInstance } from "./types.js";
+import getMediaDeliveryAdapter from "./get-adapter.js";
+import type { MediaDeliveryAdapterInstance } from "./types.js";
 
-/** Resolve the configured image processor and run its init lifecycle hook. */
-export const getInitializedImageProcessor = async (
+/** Resolve the configured media delivery adapter and run its init hook. */
+export const getInitializedMediaDeliveryAdapter = async (
 	config: Config,
 	options: {
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	} = {},
-): Promise<ImageProcessorInstance> => {
-	const processor = await getImageProcessor(config);
+): Promise<MediaDeliveryAdapterInstance> => {
+	const adapter = await getMediaDeliveryAdapter(config);
 	const context = createAdapterLifecycleContext({
 		config,
 		env: options.env,
@@ -23,27 +23,27 @@ export const getInitializedImageProcessor = async (
 	});
 
 	try {
-		await processor.lifecycle?.init?.(context);
+		await adapter.lifecycle?.init?.(context);
 	} catch (error) {
-		await Promise.allSettled([processor.lifecycle?.destroy?.(context)]);
+		await Promise.allSettled([adapter.lifecycle?.destroy?.(context)]);
 		throw error;
 	}
 
-	return processor;
+	return adapter;
 };
 
-/** Run an image processor destroy lifecycle hook when one exists. */
-export const destroyImageProcessor = async (
-	processor: ImageProcessorInstance | undefined,
+/** Run a media delivery adapter destroy hook when one exists. */
+export const destroyMediaDeliveryAdapter = async (
+	adapter: MediaDeliveryAdapterInstance | undefined,
 	options: {
 		config: Config;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	},
 ): Promise<void> => {
-	if (!processor) return;
+	if (!adapter) return;
 
-	await processor.lifecycle?.destroy?.(
+	await adapter.lifecycle?.destroy?.(
 		createAdapterLifecycleContext({
 			config: options.config,
 			env: options.env,

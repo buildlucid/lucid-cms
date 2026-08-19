@@ -1,10 +1,10 @@
 import { PassThrough } from "node:stream";
-import type { ImageProcessorOptions } from "../../libs/image-processor/types.js";
+import type { MediaTransformationOptions } from "../../libs/media-delivery/types.js";
 import {
 	splitBodyForProcessing,
 	toNodeReadable,
-} from "../../libs/media/index.js";
-import type { MediaAdapterStreamBody } from "../../libs/media/types.js";
+} from "../../libs/media-storage/index.js";
+import type { MediaStorageAdapterStreamBody } from "../../libs/media-storage/types.js";
 import {
 	MediaRepository,
 	ProcessedImagesRepository,
@@ -12,7 +12,7 @@ import {
 import { createBufferETag, matchesETag } from "../../utils/http/etag.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import adjustStorageUsage from "../media/adjust-storage-usage.js";
-import checkHasMediaStrategy from "../media/checks/check-has-media-strategy.js";
+import checkHasMediaStorage from "../media/checks/check-has-media-storage.js";
 import checkCanStore from "./checks/check-can-store.js";
 import getSingleCount from "./get-single-count.js";
 import optimizeImage from "./optimize-image.js";
@@ -23,23 +23,23 @@ const processImage: ServiceFn<
 			key: string;
 			processKey: string;
 			ifNoneMatch?: string;
-			options: ImageProcessorOptions;
+			options: MediaTransformationOptions;
 		},
 	],
 	{
 		key: string;
 		contentLength: number | undefined;
 		contentType: string | undefined;
-		body: MediaAdapterStreamBody;
+		body: MediaStorageAdapterStreamBody;
 		etag?: string | null;
 		notModified?: boolean;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = await checkHasMediaStrategy(context);
-	if (mediaStrategyRes.error) return mediaStrategyRes;
+	const mediaStorageRes = await checkHasMediaStorage(context);
+	if (mediaStorageRes.error) return mediaStorageRes;
 
 	// get og image
-	const mediaRes = await mediaStrategyRes.data.stream(context, {
+	const mediaRes = await mediaStorageRes.data.stream(context, {
 		key: data.key,
 	});
 	if (mediaRes.error) return mediaRes;
@@ -141,7 +141,8 @@ const processImage: ServiceFn<
 
 	// Check if the processed image limit has been reached for this key, if so return processed image without saving
 	if (
-		processedCountRes.data >= context.config.media.limits.processedImagesPerFile
+		processedCountRes.data >=
+		context.config.media.images.cache.maxVariantsPerFile
 	) {
 		return {
 			error: undefined,
@@ -174,7 +175,7 @@ const processImage: ServiceFn<
 
 	const ProcessedImages = new ProcessedImagesRepository(context.db);
 
-	if (context.config.media.images.storeProcessed === true) {
+	if (context.config.media.images.cache.enabled) {
 		const storageLimit = context.config.media.limits.storageBytes;
 		const adjustStorageRes = await adjustStorageUsage(context, {
 			delta: imageRes.data.size,
@@ -202,7 +203,7 @@ const processImage: ServiceFn<
 					file_size: imageRes.data.size,
 				},
 			}),
-			mediaStrategyRes.data.upload(context, {
+			mediaStorageRes.data.upload(context, {
 				key: data.processKey,
 				body: imageRes.data.buffer,
 				mimeType: imageRes.data.mimeType,
@@ -229,7 +230,7 @@ const processImage: ServiceFn<
 						})
 					: Promise.resolve(),
 				uploadRes.error === undefined
-					? mediaStrategyRes.data.delete(context, {
+					? mediaStorageRes.data.delete(context, {
 							key: data.processKey,
 						})
 					: Promise.resolve(),

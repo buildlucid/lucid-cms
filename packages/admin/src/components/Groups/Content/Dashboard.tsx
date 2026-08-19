@@ -228,7 +228,7 @@ export const Dashboard: Component = () => {
 			items.push({
 				key: "media-disabled",
 				title: T()("dashboard.attention.media.disabled.title"),
-				description: T()("media.storage.strategy.missing.message"),
+				description: T()("media.storage.adapter.missing.message"),
 				icon: <FaSolidTriangleExclamation size={14} />,
 				tone: "warning",
 				action: {

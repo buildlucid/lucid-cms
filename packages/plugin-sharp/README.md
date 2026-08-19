@@ -1,8 +1,8 @@
 # Lucid CMS - Sharp Plugin
 
-> The official Sharp image processing for Lucid CMS
+> The official Sharp media delivery plugin for Lucid CMS
 
-This plugin registers a Sharp-backed image processor for Lucid media presets.
+This plugin registers a Lucid media delivery adapter that uses Sharp for on-demand image presets. Files remain behind Lucid's CDN endpoint.
 
 ## Installation
 

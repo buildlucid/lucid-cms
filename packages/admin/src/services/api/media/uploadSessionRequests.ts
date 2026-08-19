@@ -41,7 +41,7 @@ export const getUploadPartUrlsReq = (params: {
 
 export const completeUploadSessionReq = (params: {
 	sessionId: string;
-	parts: UploadSessionPart[];
+	parts?: UploadSessionPart[];
 }) => {
 	return request<ResponseBody<{ key: string }>>({
 		url: `/lucid/api/v1/media/upload-session/${params.sessionId}/complete`,

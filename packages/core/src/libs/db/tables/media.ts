@@ -1,6 +1,6 @@
-import type { ColumnType, Generated } from "kysely";
+import type { ColumnType, Generated, JSONColumnType } from "kysely";
 import z from "zod";
-import type { MediaOrigin } from "../../../types/response.js";
+import type { MediaOrigin, MediaType } from "../../../types/response.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
@@ -34,6 +34,22 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			schema: z.string().nullable(),
 			type: "text",
 		},
+		status: {
+			schema: z.enum(["processing", "ready", "failed"]),
+			type: "text",
+		},
+		storage_adapter_key: {
+			schema: z.string(),
+			type: "text",
+		},
+		storage_adapter_reference: {
+			schema: z.string().nullable(),
+			type: "text",
+		},
+		storage_adapter_data: {
+			schema: z.record(z.string(), z.unknown()).nullable(),
+			type: "json",
+		},
 		origin: {
 			schema: z.enum(["human", "ai_generated", "ai_modified"]),
 			type: "text",
@@ -50,7 +66,14 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			type: "boolean",
 		},
 		type: {
-			schema: z.string(),
+			schema: z.enum([
+				"image",
+				"video",
+				"audio",
+				"document",
+				"archive",
+				"unknown",
+			]),
 			type: "text",
 		},
 		mime_type: {
@@ -206,6 +229,14 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 					z.object({
 						id: z.number(),
 						key: z.string(),
+						status: z.enum(["processing", "ready", "failed"]),
+						storage_adapter_key: z.string(),
+						storage_adapter_reference: z.string().nullable(),
+						storage_adapter_data: z.record(z.string(), z.unknown()).nullable(),
+						public: z.union([
+							z.literal(adapter.config.defaults.boolean.true),
+							z.literal(adapter.config.defaults.boolean.false),
+						]),
 						origin: z.enum(["human", "ai_generated", "ai_modified"]),
 						type: z.string(),
 						mime_type: z.string(),
@@ -243,6 +274,16 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 								z.object({
 									id: z.number(),
 									key: z.string(),
+									status: z.enum(["processing", "ready", "failed"]),
+									storage_adapter_key: z.string(),
+									storage_adapter_reference: z.string().nullable(),
+									storage_adapter_data: z
+										.record(z.string(), z.unknown())
+										.nullable(),
+									public: z.union([
+										z.literal(adapter.config.defaults.boolean.true),
+										z.literal(adapter.config.defaults.boolean.false),
+									]),
 									origin: z.enum(["human", "ai_generated", "ai_modified"]),
 									type: z.string(),
 									mime_type: z.string(),
@@ -299,6 +340,14 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 					z.object({
 						id: z.number(),
 						key: z.string(),
+						status: z.enum(["processing", "ready", "failed"]),
+						storage_adapter_key: z.string(),
+						storage_adapter_reference: z.string().nullable(),
+						storage_adapter_data: z.record(z.string(), z.unknown()).nullable(),
+						public: z.union([
+							z.literal(adapter.config.defaults.boolean.true),
+							z.literal(adapter.config.defaults.boolean.false),
+						]),
 						origin: z.enum(["human", "ai_generated", "ai_modified"]),
 						type: z.string(),
 						mime_type: z.string(),
@@ -339,6 +388,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 	query: {
 		filters: {
 			key: "key",
+			status: "status",
 			mimeType: "mime_type",
 			type: "type",
 			extension: "file_extension",
@@ -375,10 +425,18 @@ export interface LucidMedia {
 	parent_media_id: number | null;
 	relation_type: "crop" | "poster" | null;
 	e_tag: string | null;
+	status: Generated<"processing" | "ready" | "failed">;
+	storage_adapter_key: string;
+	storage_adapter_reference: string | null;
+	storage_adapter_data: JSONColumnType<
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
+	>;
 	origin: MediaOrigin;
 	ai_generation_id: number | null;
 	public: BooleanInt;
-	type: string;
+	type: MediaType;
 	mime_type: string;
 	file_extension: string;
 	file_name: string | null;

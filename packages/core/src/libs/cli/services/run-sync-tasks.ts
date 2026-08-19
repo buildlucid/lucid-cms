@@ -39,7 +39,7 @@ const runSyncTasks = async (options: {
 		runtimeContext: options.runtimeContext,
 		queue: passthroughQueueAdapter(),
 		kv,
-		media: null,
+		mediaStorage: null,
 		email: passthroughEmailAdapterInstance,
 	});
 

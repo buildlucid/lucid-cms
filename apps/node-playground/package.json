@@ -42,6 +42,7 @@
 		"@lucidcms/plugin-redis": "*",
 		"@lucidcms/plugin-resend": "*",
 		"@lucidcms/plugin-s3": "*",
+		"@lucidcms/plugin-sharp": "*",
 		"@lucidcms/db-postgres": "*",
 		"@lucidcms/db-sqlite": "*",
 		"@lucidcms/plugin-worker-queues": "*",

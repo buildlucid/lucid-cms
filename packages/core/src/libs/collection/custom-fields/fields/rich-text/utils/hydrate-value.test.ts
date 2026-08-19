@@ -90,6 +90,11 @@ const context = {
 					key: "photo.jpg",
 					url: "/photo.jpg",
 					fileName: "photo.jpg",
+					presets: {
+						"thumbnail-small": {
+							url: "/photo-thumbnail-small.webp",
+						},
+					},
 					meta: {
 						mimeType: "image/jpeg",
 						width: 1200,
@@ -110,13 +115,6 @@ const context = {
 				profilePicture: null,
 			},
 		],
-	},
-	mediaImagePresets: {
-		"thumbnail-small": {
-			height: 200,
-			format: "webp",
-			quality: 80,
-		},
 	},
 } satisfies CustomFieldResponseFormatContext;
 
@@ -166,18 +164,10 @@ describe("rich-text response hydration", () => {
 					src: "/photo.jpg",
 					alt: "Une photographie",
 					base64: "data:image/jpeg;base64,preview",
-					presets: [
-						{
-							key: "thumbnail-small",
-							src: "/photo.jpg?preset=thumbnail-small",
-							mimeType: "image/webp",
-							width: 300,
-							height: 200,
-						},
-					],
 				},
 			},
 		});
+		expect(media?.attrs?.media).not.toHaveProperty("presets");
 		expect(document).toMatchObject({
 			type: "lucidDocument",
 			attrs: {

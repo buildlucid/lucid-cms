@@ -52,7 +52,6 @@ import {
 	isSupportedCropMimeType,
 	resolveStoredImageCropSource,
 } from "@/utils/image-crop";
-import { getProcessedImageUrl } from "@/utils/media-url";
 import {
 	getTranslation,
 	recordToTranslations,
@@ -243,19 +242,15 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						currentFile?.originalUrl ??
 						source.file.url)
 					: (currentFile?.url ??
-						getProcessedImageUrl(poster.file.url, {
-							preset: "thumbnail-medium",
-							format: "webp",
-						})),
+						poster.file.presets["thumbnail-medium"]?.url ??
+						poster.file.url),
 				focalPointUrl: cropRemoved
 					? (currentFile?.originalFocalPointUrl ??
 						currentFile?.originalUrl ??
 						source.file.url)
 					: (currentFile?.focalPointUrl ??
-						getProcessedImageUrl(poster.file.url, {
-							preset: "thumbnail-large",
-							format: "webp",
-						})),
+						poster.file.presets["thumbnail-large"]?.url ??
+						poster.file.url),
 				isNew: false,
 			};
 		}
@@ -1081,21 +1076,18 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						? resolveStoredImageCropSource(mediaData.file)
 						: undefined;
 				MediaFile.setCurrentFile({
+					status: mediaData.status,
 					name: mediaData.file.fileName ?? mediaData.file.key,
-					url: mediaData.file.url
-						? mediaData.type === "image"
-							? getProcessedImageUrl(mediaData.file.url, {
-									preset: "thumbnail-medium",
-									format: "webp",
-								})
-							: mediaData.file.url
-						: undefined,
-					focalPointUrl: mediaData.file.url
-						? getProcessedImageUrl(mediaData.file.url, {
-								preset: "thumbnail-large",
-								format: "webp",
-							})
-						: undefined,
+					url:
+						mediaData.type === "image"
+							? (mediaData.file.presets["thumbnail-medium"]?.url ??
+								mediaData.file.url)
+							: mediaData.file.url,
+					focalPointUrl:
+						mediaData.type === "image"
+							? (mediaData.file.presets["thumbnail-large"]?.url ??
+								mediaData.file.url)
+							: mediaData.file.url,
 					originalUrl: imageSource?.file.url ?? mediaData.file.url,
 					type: mediaData.type || undefined,
 					mimeType:
@@ -1119,43 +1111,32 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 						null,
 					crop: imageSource?.crop,
 					originalPreviewUrl: imageSource?.crop
-						? getProcessedImageUrl(imageSource.file.url, {
-								preset: "thumbnail-medium",
-								format: "webp",
-							})
+						? (imageSource.file.presets["thumbnail-medium"]?.url ??
+							imageSource.file.url)
 						: undefined,
 					originalFocalPointUrl: imageSource?.crop
-						? getProcessedImageUrl(imageSource.file.url, {
-								preset: "thumbnail-large",
-								format: "webp",
-							})
+						? (imageSource.file.presets["thumbnail-large"]?.url ??
+							imageSource.file.url)
 						: undefined,
 				});
 				PosterFile.reset();
 				if (poster) {
 					const posterSource = resolveStoredImageCropSource(poster.file);
 					PosterFile.setCurrentFile({
+						status: poster.status,
 						name: poster.file.fileName ?? T()("media.poster.label"),
-						url: getProcessedImageUrl(poster.file.url, {
-							preset: "thumbnail-medium",
-							format: "webp",
-						}),
-						focalPointUrl: getProcessedImageUrl(poster.file.url, {
-							preset: "thumbnail-large",
-							format: "webp",
-						}),
+						url:
+							poster.file.presets["thumbnail-medium"]?.url ?? poster.file.url,
+						focalPointUrl:
+							poster.file.presets["thumbnail-large"]?.url ?? poster.file.url,
 						originalUrl: posterSource.file.url,
 						originalPreviewUrl: posterSource.crop
-							? getProcessedImageUrl(posterSource.file.url, {
-									preset: "thumbnail-medium",
-									format: "webp",
-								})
+							? (posterSource.file.presets["thumbnail-medium"]?.url ??
+								posterSource.file.url)
 							: undefined,
 						originalFocalPointUrl: posterSource.crop
-							? getProcessedImageUrl(posterSource.file.url, {
-									preset: "thumbnail-large",
-									format: "webp",
-								})
+							? (posterSource.file.presets["thumbnail-large"]?.url ??
+								posterSource.file.url)
 							: undefined,
 						type: "image",
 						mimeType: posterSource.file.meta.mimeType,

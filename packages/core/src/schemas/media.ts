@@ -4,8 +4,9 @@ import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const mediaTranslationsResponseSchema = z
 	.record(z.string(), z.string().nullable())
+	.nullable()
 	.meta({
-		description: "Translated values keyed by locale code",
+		description: "Translated values keyed by locale code, or null when absent",
 	});
 
 const focalPointSchema = z.object({
@@ -24,6 +25,8 @@ export const mediaOriginSchema = z.enum([
 	"ai_generated",
 	"ai_modified",
 ]);
+
+export const mediaStatusSchema = z.enum(["processing", "ready", "failed"]);
 
 const mediaFileMetaResponseSchema = z.object({
 	mimeType: z
@@ -89,6 +92,12 @@ const mediaCropStateSchema = z.object({
 const mediaOriginalFileResponseSchema = z.object({
 	key: z.string(),
 	url: z.string(),
+	presets: z.record(
+		z.string(),
+		z.object({
+			url: z.string(),
+		}),
+	),
 	meta: mediaImageMetaResponseSchema,
 });
 
@@ -111,10 +120,22 @@ const mediaFileResponseSchema = mediaFileIdentityResponseSchema.extend({
 const mediaImageFileResponseSchema = z.discriminatedUnion("sourceType", [
 	mediaFileIdentityResponseSchema.extend({
 		sourceType: z.literal("original"),
+		presets: z.record(
+			z.string(),
+			z.object({
+				url: z.string(),
+			}),
+		),
 		meta: mediaImageMetaResponseSchema,
 	}),
 	mediaFileIdentityResponseSchema.extend({
 		sourceType: z.literal("crop"),
+		presets: z.record(
+			z.string(),
+			z.object({
+				url: z.string(),
+			}),
+		),
 		crop: mediaCropStateSchema,
 		meta: mediaImageMetaResponseSchema,
 		original: mediaOriginalFileResponseSchema,
@@ -147,26 +168,49 @@ const uploadPartSchema = z.object({
 	size: z.number().nonnegative().optional(),
 });
 
-const createUploadSessionResponseSchema = z.discriminatedUnion("mode", [
+export const uploadSessionResponseSchema = z.discriminatedUnion("protocol", [
 	z.object({
-		mode: z.literal("single"),
+		protocol: z.literal("http"),
 		key: z.string(),
-		url: z.string(),
-		headers: z.record(z.string(), z.string()).optional(),
+		sessionId: z.string(),
+		expiresAt: z.string(),
+		request: z.object({
+			url: z.string(),
+			method: z.enum(["PUT", "POST"]),
+			headers: z.record(z.string(), z.string()).optional(),
+			body: z.union([
+				z.object({ type: z.literal("raw") }),
+				z.object({
+					type: z.literal("form-data"),
+					fileField: z.string(),
+					fields: z.record(z.string(), z.string()),
+				}),
+			]),
+		}),
 	}),
 	z.object({
-		mode: z.literal("resumable"),
+		protocol: z.literal("multipart-parts"),
 		key: z.string(),
 		sessionId: z.string(),
 		partSize: z.number(),
 		expiresAt: z.string(),
 		uploadedParts: z.array(uploadPartSchema),
+	}),
+	z.object({
+		protocol: z.literal("tus"),
+		key: z.string(),
+		sessionId: z.string(),
+		endpoint: z.string(),
+		headers: z.record(z.string(), z.string()),
+		metadata: z.record(z.string(), z.string()).optional(),
+		expiresAt: z.string(),
 	}),
 ]);
 
 const getUploadSessionResponseSchema = z.discriminatedUnion("canResume", [
 	z.object({
 		canResume: z.literal(true),
+		protocol: z.literal("multipart-parts"),
 		key: z.string(),
 		sessionId: z.string(),
 		partSize: z.number(),
@@ -174,9 +218,23 @@ const getUploadSessionResponseSchema = z.discriminatedUnion("canResume", [
 		uploadedParts: z.array(uploadPartSchema),
 	}),
 	z.object({
+		canResume: z.literal(true),
+		protocol: z.literal("tus"),
+		key: z.string(),
+		sessionId: z.string(),
+		endpoint: z.string(),
+		headers: z.record(z.string(), z.string()),
+		metadata: z.record(z.string(), z.string()).optional(),
+		expiresAt: z.string(),
+	}),
+	z.object({
 		canResume: z.literal(false),
 		sessionId: z.string(),
-		reason: z.enum(["adapter_not_resumable", "adapter_changed"]),
+		reason: z.enum([
+			"protocol_not_resumable",
+			"adapter_not_resumable",
+			"adapter_changed",
+		]),
 	}),
 ]);
 
@@ -190,6 +248,7 @@ const uploadSessionParamsSchema = z.object({
 export const mediaImagePreviewResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 2 }),
 	type: z.literal("image"),
+	status: mediaStatusSchema,
 	origin: mediaOriginSchema.meta({
 		description: "The provenance origin of the media item",
 		example: "human",
@@ -202,6 +261,7 @@ export const mediaImagePreviewResponseSchema = z.object({
 const mediaPosterResponseSchema = z.object({
 	id: z.number().meta({ description: "Media ID", example: 2 }),
 	type: z.literal("image"),
+	status: mediaStatusSchema,
 	origin: mediaOriginSchema.meta({
 		description: "The provenance origin of the media item",
 		example: "human",
@@ -215,6 +275,7 @@ const mediaIdResponseSchema = z
 	.meta({ description: "Media ID", example: 1 });
 
 const mediaBaseResponseShape = {
+	status: mediaStatusSchema,
 	folderId: z.number().nullable().meta({
 		description: "Media folder ID",
 		example: 1,
@@ -269,6 +330,13 @@ const mediaResponseSchema = z.discriminatedUnion("type", [
 		...mediaBaseResponseShape,
 		description: mediaTranslationsResponseSchema,
 		file: mediaFileResponseSchema,
+		sources: z.array(
+			z.object({
+				url: z.string(),
+				mimeType: z.string(),
+				kind: z.enum(["progressive", "hls", "dash"]),
+			}),
+		),
 		poster: mediaPosterResponseSchema.nullable().meta({
 			description: "Poster image data",
 		}),
@@ -313,6 +381,9 @@ const mediaGetMultipleQueryStringSchema = z
 		}),
 		"filter[key]": queryString.schema.filter(false, {
 			example: "thumbnail-2022",
+		}),
+		"filter[status]": queryString.schema.filter(true, {
+			example: "ready,processing",
 		}),
 		"filter[mimeType]": queryString.schema.filter(true, {
 			example: "image/png,image/jpg",
@@ -367,6 +438,7 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 		.object({
 			title: queryFormatted.schema.filters.single.optional(),
 			key: queryFormatted.schema.filters.single.optional(),
+			status: queryFormatted.schema.filters.union.optional(),
 			mimeType: queryFormatted.schema.filters.union.optional(),
 			folderId: queryFormatted.schema.filters.single.optional(),
 			type: queryFormatted.schema.filters.union.optional(),
@@ -764,7 +836,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: createUploadSessionResponseSchema,
+		response: uploadSessionResponseSchema,
 	} satisfies ControllerSchema,
 	getUploadSession: {
 		body: undefined,
@@ -796,7 +868,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	completeUploadSession: {
 		body: z.object({
-			parts: z.array(uploadPartSchema).min(1),
+			parts: z.array(uploadPartSchema).min(1).optional(),
 		}),
 		query: {
 			string: undefined,

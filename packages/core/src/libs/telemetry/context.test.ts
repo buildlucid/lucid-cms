@@ -71,7 +71,8 @@ describe("telemetry context", () => {
 			},
 			adapterKeys: {
 				database: "sqlite",
-				media: "private-media-adapter",
+				mediaStorage: "private-media-storage-adapter",
+				mediaDelivery: "private-media-delivery-adapter",
 				queue: "worker",
 				kv: "redis",
 				email: "resend",
@@ -84,7 +85,8 @@ describe("telemetry context", () => {
 		expect(context.is_ci).toBe(false);
 		expect(context.adapters).toEqual({
 			database: "sqlite",
-			media: "custom",
+			media_storage: "custom",
+			media_delivery: "custom",
 			queue: "worker",
 			kv: "redis",
 			email: "resend",

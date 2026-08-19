@@ -165,7 +165,8 @@ const createLucidHost = async (
 		adapterKeys: {
 			queue: app.queue.key,
 			kv: app.kv.key,
-			media: app.media?.key ?? null,
+			mediaStorage: app.mediaStorage?.key ?? null,
+			mediaDelivery: app.mediaDelivery.key,
 			email: app.email.key,
 			database: resolved.config.db.adapter,
 		},
@@ -249,7 +250,8 @@ const createLucidHost = async (
 					runtimeContext: options.runtimeContext,
 					queue: app.queue,
 					kv: app.kv,
-					media: app.media,
+					mediaStorage: app.mediaStorage,
+					mediaDelivery: app.mediaDelivery,
 					email: app.email,
 					request,
 				});

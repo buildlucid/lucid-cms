@@ -10,6 +10,7 @@ import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { LucidBrickTableName } from "../../db/tables/index.js";
 import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyDescriptor, AdminCopyInput } from "../../i18n/types.js";
+import type { MediaDeliveryAdapterInstance } from "../../media-delivery/types.js";
 import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
 import type {
 	CollectionSchemaColumn,
@@ -281,7 +282,6 @@ export type FieldRef =
 export type CustomFieldResponseFormatContext = {
 	locale: string;
 	refs: Partial<Record<string, unknown[]>> | null;
-	mediaImagePresets?: Config["media"]["images"]["presets"];
 };
 
 export type ContentFieldTypeGenerationContext<
@@ -400,6 +400,7 @@ export type FieldRefParams = {
 	};
 	config: Config;
 	host: string;
+	mediaDelivery: MediaDeliveryAdapterInstance;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	relationRefMeta?: {
 		fieldsSchemaByCollection?: Record<

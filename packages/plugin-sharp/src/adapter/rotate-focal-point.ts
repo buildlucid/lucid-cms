@@ -1,11 +1,11 @@
-import type { ImageProcessorOptions } from "@lucidcms/core/types";
+import type { MediaTransformationOptions } from "@lucidcms/core/types";
 
-type FocalPoint = NonNullable<ImageProcessorOptions["focalPoint"]>;
+type FocalPoint = NonNullable<MediaTransformationOptions["focalPoint"]>;
 
 /** Keeps a focal point attached to the same content after clockwise rotation. */
 const rotateFocalPoint = (
 	focalPoint: FocalPoint,
-	rotate: ImageProcessorOptions["rotate"] = 0,
+	rotate: MediaTransformationOptions["rotate"] = 0,
 ): FocalPoint => {
 	switch (rotate) {
 		case 90:

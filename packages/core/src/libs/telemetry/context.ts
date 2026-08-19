@@ -86,13 +86,17 @@ const getAdapters = (
 	),
 	...(adapterKeys
 		? {
-				media:
-					adapterKeys.media === null
+				media_storage:
+					adapterKeys.mediaStorage === null
 						? ("none" as const)
 						: normalizeFirstPartyKey(
-								adapterKeys.media,
-								firstPartyRuntimeAdapterKeys.media,
+								adapterKeys.mediaStorage,
+								firstPartyRuntimeAdapterKeys.mediaStorage,
 							),
+				media_delivery: normalizeFirstPartyKey(
+					adapterKeys.mediaDelivery,
+					firstPartyRuntimeAdapterKeys.mediaDelivery,
+				),
 				queue: normalizeFirstPartyKey(
 					adapterKeys.queue,
 					firstPartyRuntimeAdapterKeys.queue,

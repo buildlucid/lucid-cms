@@ -25,7 +25,11 @@ const get: ServiceFn<[{ userId: number }], Account> = async (context, data) => {
 		error: undefined,
 		data: usersFormatter.formatContentAccount({
 			user: userRes.data,
-			host: getBaseUrl(context),
+			mediaOptions: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 		}),
 	};
 };

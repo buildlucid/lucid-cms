@@ -1,10 +1,13 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceRenameKey } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceRenameKey } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const rename: MediaAdapterServiceRenameKey = async (_context, props) => {
+	const rename: MediaStorageAdapterServiceRenameKey = async (
+		_context,
+		props,
+	) => {
 		try {
 			const signObjectRequest = async (
 				key: string,

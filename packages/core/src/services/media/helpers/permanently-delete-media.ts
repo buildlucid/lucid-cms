@@ -6,7 +6,7 @@ import {
 	ProcessedImagesRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkHasMediaStrategy from "../checks/check-has-media-strategy.js";
+import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 import deleteMediaObject from "../strategies/delete.js";
 import clearContentMediaSingleCache from "./clear-content-media-cache.js";
 
@@ -20,8 +20,8 @@ const permanentlyDeleteMedia: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	const mediaStrategyRes = await checkHasMediaStrategy(context);
-	if (mediaStrategyRes.error) return mediaStrategyRes;
+	const mediaStorageRes = await checkHasMediaStorage(context);
+	if (mediaStorageRes.error) return mediaStorageRes;
 
 	const Media = new MediaRepository(context.db);
 	const ProcessedImages = new ProcessedImagesRepository(context.db);
@@ -91,7 +91,7 @@ const permanentlyDeleteMedia: ServiceFn<
 	if (deleteMediaRes.error) return deleteMediaRes;
 
 	const [_, deleteObjectRes] = await Promise.all([
-		mediaStrategyRes.data.deleteMultiple(context, {
+		mediaStorageRes.data.deleteMultiple(context, {
 			keys: processedImagesRes.data.map((i) => i.key),
 		}),
 		deleteMediaObject(context, {

@@ -1,7 +1,9 @@
 import { Readable } from "node:stream";
-import type { MediaAdapterStreamBody } from "./types.js";
+import type { MediaStorageAdapterStreamBody } from "./types.js";
 
-export const toNodeReadable = (body: MediaAdapterStreamBody): Readable => {
+export const toNodeReadable = (
+	body: MediaStorageAdapterStreamBody,
+): Readable => {
 	if (body instanceof Readable) {
 		return body;
 	}
@@ -13,7 +15,7 @@ export const toNodeReadable = (body: MediaAdapterStreamBody): Readable => {
 	return Readable.fromWeb(body as never);
 };
 
-export const splitBodyForProcessing = (body: MediaAdapterStreamBody) => {
+export const splitBodyForProcessing = (body: MediaStorageAdapterStreamBody) => {
 	if (body instanceof ReadableStream) {
 		const [processingBody, fallbackBody] = body.tee();
 

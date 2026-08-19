@@ -1,7 +1,7 @@
 import type { OAuthClientAuthMethod } from "../db/tables/index.js";
 import type { BooleanInt } from "../db/types.js";
 import formatter from "./helpers.js";
-import type { MediaPosterPropsT } from "./media.js";
+import type { MediaFormatterOptions, MediaPosterPropsT } from "./media.js";
 import mediaFormatter from "./media.js";
 
 export type OAuthClientRow = {
@@ -21,7 +21,10 @@ export type OAuthClientRow = {
 	logo: MediaPosterPropsT[];
 };
 
-const formatSingle = (props: { client: OAuthClientRow; host: string }) => ({
+const formatSingle = (props: {
+	client: OAuthClientRow;
+	mediaOptions: MediaFormatterOptions;
+}) => ({
 	id: props.client.id,
 	clientId: props.client.client_id,
 	name: props.client.name,
@@ -30,7 +33,7 @@ const formatSingle = (props: { client: OAuthClientRow; host: string }) => ({
 	redirectUris: props.client.redirect_uris.map((row) => row.redirect_uri),
 	logo: mediaFormatter.formatMediaImagePreview({
 		poster: props.client.logo[0],
-		host: props.host,
+		options: props.mediaOptions,
 	}),
 	enabled: formatter.formatBoolean(props.client.enabled),
 	createdBy: props.client.created_by,

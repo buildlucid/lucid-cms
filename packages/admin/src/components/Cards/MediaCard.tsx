@@ -9,6 +9,7 @@ import ActionMenubar, {
 import AspectRatio from "@/components/Partials/AspectRatio";
 import ClickToCopy from "@/components/Partials/ClickToCopy";
 import MediaPreview from "@/components/Partials/MediaPreview";
+import { mediaStatusBorderClass } from "@/components/Partials/MediaStatusPreview";
 import { Permissions } from "@/constants/permissions";
 import type { AiFeatureAccessState } from "@/hooks/ai/access";
 import type useRowTarget from "@/hooks/useRowTarget";
@@ -40,7 +41,6 @@ interface MediaCardProps {
 	onCrop?: (_media: Media) => void;
 	aiAltAccessState?: AiFeatureAccessState;
 	aiAltFeatureEnabled?: boolean;
-	previewCacheKey?: string | number | null;
 }
 
 export const MediaCardLoading: Component = () => {
@@ -135,6 +135,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	});
 	const showCropAction = createMemo(() => {
 		return (
+			props.media.status === "ready" &&
 			props.media.type === "image" &&
 			isSupportedCropMimeType(props.media.file.meta.mimeType) &&
 			!props.showingDeleted?.() &&
@@ -171,7 +172,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			label: T()("media.images.action"),
 			type: "group",
 			icon: "image",
-			hide: props.media.type !== "image",
+			hide: props.media.type !== "image" || props.media.status !== "ready",
 			actions: [
 				{
 					label: T()("media.crop.action"),
@@ -215,7 +216,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			label: T()("media.share.links.action"),
 			type: "group",
 			icon: "link",
-			hide: props.showingDeleted?.(),
+			hide: props.showingDeleted?.() || props.media.status !== "ready",
 			actions: [
 				{
 					label: T()("media.share.links.create.action"),
@@ -268,7 +269,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			// @ts-expect-error
 			use:draggable
 			class={classNames(
-				"bg-card-base hover:bg-row-hover border-border border rounded-md group overflow-hidden relative transition-colors duration-200",
+				"bg-card-base hover:bg-row-hover border rounded-md group overflow-hidden relative transition-colors duration-200",
+				mediaStatusBorderClass(props.media.status),
 				{
 					"cursor-pointer": hasUpdatePermission() || props.showingDeleted?.(),
 				},
@@ -314,14 +316,19 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			>
 				<MediaPreview
 					media={{
+						status: props.media.status,
 						type: props.media.type,
 						url: props.media.file.url,
+						presets:
+							props.media.type === "image"
+								? props.media.file.presets
+								: undefined,
+						sources:
+							props.media.type === "video" ? props.media.sources : undefined,
 						poster:
 							props.media.type === "video" ? props.media.poster : undefined,
-						updatedAt: props.media.updatedAt,
 					}}
 					alt={alt() || displayTitle() || ""}
-					cacheKey={props.previewCacheKey ?? props.media.updatedAt}
 					imageFit={
 						props.media.type === "image" ||
 						(props.media.type === "video" && props.media.poster)

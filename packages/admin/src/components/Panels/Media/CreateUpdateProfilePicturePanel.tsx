@@ -26,7 +26,6 @@ import T from "@/translations";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import { resolveStoredImageCropSource } from "@/utils/image-crop";
-import { getProcessedImageUrl } from "@/utils/media-url";
 import {
 	getTranslation,
 	recordToTranslations,
@@ -367,26 +366,14 @@ const CreateUpdateProfilePicturePanel: Component<
 			const source = resolveStoredImageCropSource(file);
 			MediaFile.setCurrentFile({
 				name: file.fileName ?? file.key,
-				url: getProcessedImageUrl(file.url, {
-					preset: "thumbnail-medium",
-					format: "webp",
-				}),
-				focalPointUrl: getProcessedImageUrl(file.url, {
-					preset: "thumbnail-large",
-					format: "webp",
-				}),
+				url: file.presets["thumbnail-medium"]?.url ?? file.url,
+				focalPointUrl: file.presets["thumbnail-large"]?.url ?? file.url,
 				originalUrl: source.file.url,
 				originalPreviewUrl: source.crop
-					? getProcessedImageUrl(source.file.url, {
-							preset: "thumbnail-medium",
-							format: "webp",
-						})
+					? (source.file.presets["thumbnail-medium"]?.url ?? source.file.url)
 					: undefined,
 				originalFocalPointUrl: source.crop
-					? getProcessedImageUrl(source.file.url, {
-							preset: "thumbnail-large",
-							format: "webp",
-						})
+					? (source.file.presets["thumbnail-large"]?.url ?? source.file.url)
 					: undefined,
 				type: profilePicture.type,
 				mimeType: source.file.meta.mimeType,

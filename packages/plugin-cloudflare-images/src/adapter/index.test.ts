@@ -1,14 +1,14 @@
 /// <reference types="@cloudflare/workers-types" />
 
 import { Readable } from "node:stream";
-import type { ImageProcessorOptions } from "@lucidcms/core/types";
+import type { MediaTransformationOptions } from "@lucidcms/core/types";
 import { describe, expect, it, vi } from "vitest";
 import {
 	MAX_INPUT_BYTES,
 	MAX_JPEG_PNG_DIMENSION,
 	MAX_SOURCE_PIXELS,
 } from "../constants.js";
-import cloudflareImagesProcessor from "./index.js";
+import cloudflareImagesDeliveryAdapter from "./index.js";
 
 type MockBindingOptions = {
 	info?: ImageInfoResponse;
@@ -60,11 +60,16 @@ const createMockBinding = (options: MockBindingOptions = {}) => {
 const processImage = async (props?: {
 	binding?: ImagesBinding;
 	buffer?: Buffer;
-	options?: ImageProcessorOptions;
+	options?: MediaTransformationOptions;
 	bindingName?: string;
 }) => {
 	const bindingName = props?.bindingName ?? "LUCID_IMAGES";
-	return await cloudflareImagesProcessor({ binding: bindingName }).process(
+	const processImage = cloudflareImagesDeliveryAdapter({
+		binding: bindingName,
+	}).processImage;
+
+	if (!processImage) throw new Error("Expected image processing support");
+	return await processImage(
 		{
 			env: props?.binding ? { [bindingName]: props.binding } : {},
 		} as never,
@@ -86,7 +91,7 @@ const expectErrorKey = (
 	});
 };
 
-describe("cloudflareImagesProcessor", () => {
+describe("cloudflareImagesDeliveryAdapter", () => {
 	it("returns an error when the configured binding is missing", async () => {
 		const result = await processImage({ bindingName: "CUSTOM_IMAGES" });
 
@@ -372,7 +377,7 @@ describe("cloudflareImagesProcessor", () => {
 		const mock = createMockBinding();
 		const result = await processImage({
 			binding: mock.binding,
-			options: options as ImageProcessorOptions,
+			options: options as MediaTransformationOptions,
 		});
 
 		expectErrorKey(result, key);

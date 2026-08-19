@@ -34,7 +34,11 @@ const getMultiple: ServiceFn<
 			data: usersFormatter.formatMultiple({
 				users: usersRes.data[0],
 				authUser: data.authUser,
-				host: getBaseUrl(context),
+				mediaOptions: {
+					host: getBaseUrl(context),
+					delivery: context.mediaDelivery,
+					imagePresets: context.config.media.images.presets,
+				},
 				locales: context.config.localization.locales.map(
 					(locale) => locale.code,
 				),

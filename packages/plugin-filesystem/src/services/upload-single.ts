@@ -2,7 +2,7 @@ import { copy, getFileMetadata } from "@lucidcms/core/plugin";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../constants.js";
 import {
-	checkFileSystemMediaAdapter,
+	checkFileSystemStorageAdapter,
 	validatePresignedToken,
 } from "./checks/index.js";
 
@@ -19,13 +19,13 @@ const uploadSingle: ServiceFn<
 	],
 	boolean
 > = async (context, data) => {
-	const mediaAdapterRes = await checkFileSystemMediaAdapter(context, {
+	const mediaStorageAdapterRes = await checkFileSystemStorageAdapter(context, {
 		name: copy("server:plugin.filesystem.media.routes.upload.error.name"),
 		message: copy("server:plugin.filesystem.media.routes.upload.error.message"),
 	});
-	if (mediaAdapterRes.error) return mediaAdapterRes;
+	if (mediaStorageAdapterRes.error) return mediaStorageAdapterRes;
 
-	const adapterOptions = mediaAdapterRes.data.getOptions?.();
+	const adapterOptions = mediaStorageAdapterRes.data.getOptions?.();
 	const checkPresignedTokenRes = await validatePresignedToken(context, {
 		key: data.key,
 		token: data.token,
@@ -54,7 +54,7 @@ const uploadSingle: ServiceFn<
 	});
 	if (fileMetadataRes.error) return fileMetadataRes;
 
-	const uploadRes = await mediaAdapterRes.data.upload(context, {
+	const uploadRes = await mediaStorageAdapterRes.data.upload(context, {
 		key: data.key,
 		body: data.buffer,
 		mimeType: fileMetadataRes.data.mimeType,

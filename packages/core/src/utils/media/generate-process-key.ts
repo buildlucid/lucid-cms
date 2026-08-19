@@ -1,5 +1,5 @@
 import constants from "../../constants/constants.js";
-import type { ImageProcessorOptions } from "../../libs/image-processor/types.js";
+import type { MediaTransformationOptions } from "../../libs/media-delivery/types.js";
 import getKeyVisibility from "./get-key-visibility.js";
 import { getMediaKeyParts } from "./media-key-parts.js";
 import normalizeMediaKey from "./normalize-media-key.js";
@@ -10,7 +10,7 @@ import normalizeMediaKey from "./normalize-media-key.js";
  */
 const generateProcessKey = (data: {
 	key: string;
-	options: ImageProcessorOptions;
+	options: MediaTransformationOptions;
 	extension?: string | null;
 }) => {
 	const normalizedKey = normalizeMediaKey(data.key);

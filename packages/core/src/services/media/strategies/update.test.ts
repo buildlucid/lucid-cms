@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	checkHasMediaStrategy: vi.fn(),
+	checkHasMediaStorage: vi.fn(),
 	checkCanUpdateMedia: vi.fn(),
 	adjustInt: vi.fn(),
 	detectStreamMimeType: vi.fn(),
@@ -15,8 +15,8 @@ vi.mock("../checks/check-can-update-media.js", () => ({
 	default: mocks.checkCanUpdateMedia,
 }));
 
-vi.mock("../checks/check-has-media-strategy.js", () => ({
-	default: mocks.checkHasMediaStrategy,
+vi.mock("../checks/check-has-media-storage.js", () => ({
+	default: mocks.checkHasMediaStorage,
 }));
 
 vi.mock("../helpers/detect-stream-mime-type.js", () => ({
@@ -58,6 +58,7 @@ describe("media update strategy", () => {
 					size: 42,
 					mimeType: "image/png",
 					etag: "temporary-etag",
+					status: "ready",
 				},
 			})
 			.mockResolvedValueOnce({
@@ -66,10 +67,11 @@ describe("media update strategy", () => {
 					size: 42,
 					mimeType: "image/png",
 					etag: "canonical-etag",
+					status: "ready",
 				},
 			});
 
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				getMeta,
@@ -148,7 +150,7 @@ describe("media update strategy", () => {
 			data: undefined,
 		});
 
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				getMeta: vi.fn().mockResolvedValueOnce({
@@ -157,6 +159,7 @@ describe("media update strategy", () => {
 						size: 42,
 						mimeType: "image/png",
 						etag: "temporary-etag",
+						status: "ready",
 					},
 				}),
 				delete: deleteObject,
@@ -217,6 +220,7 @@ describe("media update strategy", () => {
 					size: 42,
 					mimeType: "image/png",
 					etag: "temporary-etag",
+					status: "ready",
 				},
 			})
 			.mockResolvedValueOnce({
@@ -225,10 +229,11 @@ describe("media update strategy", () => {
 					size: 42,
 					mimeType: "image/png",
 					etag: "canonical-etag",
+					status: "ready",
 				},
 			});
 
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				getMeta,

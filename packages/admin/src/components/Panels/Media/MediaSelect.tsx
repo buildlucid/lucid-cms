@@ -187,6 +187,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			filters: {
 				isDeleted: showingDeleted,
 				public: 1,
+				status: "ready",
 			},
 		},
 	});

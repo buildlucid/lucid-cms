@@ -126,6 +126,11 @@ const getSingle: ServiceFn<
 			fields: bricksRes.data.fields,
 			config: context.config,
 			host: getBaseUrl(context),
+			mediaOptions: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 			refs: bricksRes.data.refs,
 			workflow: workflowRes.data,
 		});
@@ -137,6 +142,11 @@ const getSingle: ServiceFn<
 			fields: [],
 			config: context.config,
 			host: getBaseUrl(context),
+			mediaOptions: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 			workflow: workflowRes.data,
 		});
 	}

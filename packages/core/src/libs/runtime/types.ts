@@ -110,7 +110,8 @@ export type PrepareHandler = (props: {
 export type AdapterKeys = {
 	queue: string;
 	kv: string;
-	media: string | null;
+	mediaStorage: string | null;
+	mediaDelivery: string;
 	email: string;
 	database: string;
 };
@@ -120,14 +121,16 @@ export type RuntimeSupport = {
 		databaseAdapter?: Array<{ key: string; message?: string }>;
 		queueAdapter?: Array<{ key: string; message?: string }>;
 		kvAdapter?: Array<{ key: string; message?: string }>;
-		mediaAdapter?: Array<{ key: string; message?: string }>;
+		mediaStorageAdapter?: Array<{ key: string; message?: string }>;
+		mediaDeliveryAdapter?: Array<{ key: string; message?: string }>;
 		emailAdapter?: Array<{ key: string; message?: string }>;
 	};
 	notices?: {
 		databaseAdapter?: Array<{ key: string; message: string }>;
 		queueAdapter?: Array<{ key: string; message: string }>;
 		kvAdapter?: Array<{ key: string; message: string }>;
-		mediaAdapter?: Array<{ key: string; message: string }>;
+		mediaStorageAdapter?: Array<{ key: string; message: string }>;
+		mediaDeliveryAdapter?: Array<{ key: string; message: string }>;
 		emailAdapter?: Array<{ key: string; message: string }>;
 	};
 };

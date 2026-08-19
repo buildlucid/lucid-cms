@@ -1,4 +1,4 @@
-import type { ImageProcessorOptions } from "@lucidcms/core/types";
+import type { MediaTransformationOptions } from "@lucidcms/core/types";
 import { isSupportedOutputFormat } from "./image-formats.js";
 
 const ROTATIONS = [0, 90, 180, 270] as const;
@@ -6,8 +6,8 @@ const ROTATIONS = [0, 90, 180, 270] as const;
 /** Whether a direct processor call contains a supported quarter-turn rotation. */
 export const isSupportedRotation = (
 	rotate: unknown,
-): rotate is NonNullable<ImageProcessorOptions["rotate"]> =>
-	ROTATIONS.includes(rotate as NonNullable<ImageProcessorOptions["rotate"]>);
+): rotate is NonNullable<MediaTransformationOptions["rotate"]> =>
+	ROTATIONS.some((supportedRotation) => supportedRotation === rotate);
 
 /** Whether a direct processor call contains a supported output format. */
 export const isSupportedFormat = (format: unknown) =>

@@ -110,11 +110,7 @@ const hydrateRichTextValue = (
 					? mediaMap.get(attrs.mediaId)
 					: undefined;
 			attrs.media = reference
-				? getMediaRenderData(
-						reference,
-						context.locale,
-						context.mediaImagePresets,
-					)
+				? getMediaRenderData(reference, context.locale)
 				: null;
 		}
 

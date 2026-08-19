@@ -31,7 +31,11 @@ const getSingle: ServiceFn<
 		error: undefined,
 		data: mediaFormatter.formatSingle({
 			media: mediaRes.data,
-			host: getBaseUrl(context),
+			options: {
+				host: getBaseUrl(context),
+				delivery: context.mediaDelivery,
+				imagePresets: context.config.media.images.presets,
+			},
 		}),
 	};
 };

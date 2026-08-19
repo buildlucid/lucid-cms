@@ -8,13 +8,16 @@ import type {
 	HttpExtensionRegister,
 	LucidRouteDefinition,
 } from "../http/types.js";
-import type {
-	ImageProcessor,
-	ImageProcessorInstance,
-} from "../image-processor/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
-import type { MediaAdapter, MediaAdapterInstance } from "../media/types.js";
+import type {
+	MediaDeliveryAdapter,
+	MediaDeliveryAdapterInstance,
+} from "../media-delivery/types.js";
+import type {
+	MediaStorageAdapter,
+	MediaStorageAdapterInstance,
+} from "../media-storage/types.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
 import type { Seed } from "../seed/types.js";
 
@@ -52,10 +55,12 @@ const TableDefinitionSchema = z.custom<TableDefinition>(
 
 // TODO: improve all function custom schemas bellow
 
-const ImageProcessorSchema = z.custom<
-	ImageProcessor | ImageProcessorInstance | Promise<ImageProcessorInstance>
+const MediaDeliveryAdapterSchema = z.custom<
+	| MediaDeliveryAdapter
+	| MediaDeliveryAdapterInstance
+	| Promise<MediaDeliveryAdapterInstance>
 >((data) => typeof data === "function" || typeof data === "object", {
-	message: "Expected an ImageProcessor function",
+	message: "Expected a MediaDeliveryAdapter function",
 });
 
 const QueueAdapterSchema = z.custom<
@@ -70,10 +75,12 @@ const KVAdapterSchema = z.custom<
 	message: "Expected a KVAdapter function",
 });
 
-const MediaAdapterSchema = z.custom<
-	MediaAdapter | MediaAdapterInstance | Promise<MediaAdapterInstance>
+const MediaStorageAdapterSchema = z.custom<
+	| MediaStorageAdapter
+	| MediaStorageAdapterInstance
+	| Promise<MediaStorageAdapterInstance>
 >((data) => typeof data === "function" || typeof data === "object", {
-	message: "Expected a MediaAdapter function",
+	message: "Expected a MediaStorageAdapter function",
 });
 
 const EmailAdapterSchema = z.custom<
@@ -263,14 +270,13 @@ const ConfigSchema = z.object({
 		})
 		.optional(),
 	media: z.object({
-		adapter: MediaAdapterSchema.optional(),
+		storage: MediaStorageAdapterSchema.optional(),
+		delivery: MediaDeliveryAdapterSchema.optional(),
 		limits: z.object({
 			storageBytes: z.union([z.number(), z.literal(false)]),
 			uploadBytes: z.number(),
-			processedImagesPerFile: z.number(),
 		}),
 		images: z.object({
-			processor: ImageProcessorSchema.optional(),
 			presets: z.record(
 				z.string(),
 				z.object({
@@ -298,7 +304,10 @@ const ConfigSchema = z.object({
 						.optional(),
 				}),
 			),
-			storeProcessed: z.boolean(),
+			cache: z.object({
+				enabled: z.boolean(),
+				maxVariantsPerFile: z.number(),
+			}),
 			allowFormatQuery: z.boolean(),
 			fallbackUrl: z.string().optional(),
 		}),

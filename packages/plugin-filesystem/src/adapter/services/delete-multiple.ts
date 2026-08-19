@@ -2,14 +2,14 @@ import { constants } from "node:fs";
 import { access, unlink } from "node:fs/promises";
 import { copy } from "@lucidcms/core/plugin";
 import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterServiceDeleteMultiple,
+	FileSystemStorageAdapterOptions,
+	MediaStorageAdapterServiceDeleteMultiple,
 } from "@lucidcms/core/types";
 import { keyPaths } from "../helpers.js";
 import { deleteStoredMetadata } from "../metadata.js";
 
-export default (options: FileSystemMediaAdapterOptions) => {
-	const deleteMultiple: MediaAdapterServiceDeleteMultiple = async (
+export default (options: FileSystemStorageAdapterOptions) => {
+	const deleteMultiple: MediaStorageAdapterServiceDeleteMultiple = async (
 		_context,
 		props,
 	) => {

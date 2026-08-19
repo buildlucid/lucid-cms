@@ -193,6 +193,11 @@ const getMultiple: ServiceFn<
 		collections: collectionsRes.data,
 		config: context.config,
 		host: getBaseUrl(context),
+		mediaOptions: {
+			host: getBaseUrl(context),
+			delivery: context.mediaDelivery,
+			imagePresets: context.config.media.images.presets,
+		},
 		refData,
 		refTypes: include.refTypes,
 		includeRefs: include.refs,

@@ -1,12 +1,12 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceGetDownloadUrl } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../constants.js";
 import type { PluginOptions } from "../types/types.js";
 import buildDownloadContentDisposition from "../utils/build-download-content-disposition.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const getDownloadUrl: MediaAdapterServiceGetDownloadUrl = async (
+	const getDownloadUrl: MediaStorageAdapterServiceGetDownloadUrl = async (
 		_context,
 		props,
 	) => {

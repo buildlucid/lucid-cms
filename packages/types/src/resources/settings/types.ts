@@ -35,9 +35,9 @@ export interface Settings {
 		database: string;
 		kv: string;
 		queue: string;
-		media: string | null;
+		mediaStorage: string | null;
 		email: string;
-		imageProcessor: string | null;
+		mediaDelivery: string;
 		alertEmail: string | null;
 	};
 }

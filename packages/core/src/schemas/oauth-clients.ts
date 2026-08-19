@@ -1,6 +1,9 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
-import { mediaImagePreviewResponseSchema } from "./media.js";
+import {
+	mediaImagePreviewResponseSchema,
+	uploadSessionResponseSchema,
+} from "./media.js";
 
 export const oauthClientAuthMethodSchema = z.enum([
 	"none",
@@ -47,29 +50,6 @@ const uploadSessionBodySchema = z.object({
 	mimeType: z.string().trim().min(1),
 	size: z.number().nonnegative(),
 });
-
-const uploadSessionResponseSchema = z.discriminatedUnion("mode", [
-	z.object({
-		mode: z.literal("single"),
-		key: z.string(),
-		url: z.string(),
-		headers: z.record(z.string(), z.string()).optional(),
-	}),
-	z.object({
-		mode: z.literal("resumable"),
-		key: z.string(),
-		sessionId: z.string(),
-		partSize: z.number(),
-		expiresAt: z.string(),
-		uploadedParts: z.array(
-			z.object({
-				partNumber: z.number().int().positive(),
-				etag: z.string(),
-				size: z.number().nonnegative().optional(),
-			}),
-		),
-	}),
-]);
 
 export const oauthClientResponseSchema = z.object({
 	id: z.number(),

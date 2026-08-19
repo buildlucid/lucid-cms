@@ -13,9 +13,13 @@ import {
 } from "@lucidcms/core/email";
 import { destroyKVAdapter, getInitializedKVAdapter } from "@lucidcms/core/kv";
 import {
-	destroyMediaAdapter,
-	getInitializedMediaAdapter,
-} from "@lucidcms/core/media";
+	destroyMediaDeliveryAdapter,
+	getInitializedMediaDeliveryAdapter,
+} from "@lucidcms/core/media-delivery";
+import {
+	destroyMediaStorageAdapter,
+	getInitializedMediaStorageAdapter,
+} from "@lucidcms/core/media-storage";
 import {
 	executeSingleJob,
 	logScope,
@@ -33,7 +37,8 @@ import type {
 	EmailAdapterInstance,
 	EnvironmentVariables,
 	KVAdapterInstance,
-	MediaAdapterInstance,
+	MediaDeliveryAdapterInstance,
+	MediaStorageAdapterInstance,
 	TranslationStore,
 } from "@lucidcms/core/types";
 import type { WorkerQueueAdapterOptions } from "./index.js";
@@ -124,7 +129,8 @@ const getConfig = async (): Promise<{
 
 const startConsumer = async () => {
 	let kvInstance: KVAdapterInstance | undefined;
-	let mediaInstance: MediaAdapterInstance | null | undefined;
+	let mediaStorageInstance: MediaStorageAdapterInstance | null | undefined;
+	let mediaDeliveryInstance: MediaDeliveryAdapterInstance | undefined;
 	let emailInstance: EmailAdapterInstance | undefined;
 	let adapterLifecycleContext: AdapterLifecycleContext | undefined;
 	let database: DatabaseConnection | undefined;
@@ -143,7 +149,11 @@ const startConsumer = async () => {
 			env,
 			runtimeContext,
 		});
-		mediaInstance = await getInitializedMediaAdapter(config, {
+		mediaStorageInstance = await getInitializedMediaStorageAdapter(config, {
+			env,
+			runtimeContext,
+		});
+		mediaDeliveryInstance = await getInitializedMediaDeliveryAdapter(config, {
 			env,
 			runtimeContext,
 		});
@@ -153,7 +163,8 @@ const startConsumer = async () => {
 			purpose: "queue-consumer",
 		});
 		const kv = kvInstance;
-		const media = mediaInstance;
+		const mediaStorage = mediaStorageInstance;
+		const mediaDelivery = mediaDeliveryInstance;
 		const email = emailInstance;
 
 		const internalQueueAdapter = passthroughQueueAdapter({
@@ -169,7 +180,8 @@ const startConsumer = async () => {
 			runtimeContext,
 			queue: internalQueueAdapter,
 			kv,
-			media,
+			mediaStorage,
+			mediaDelivery,
 			email,
 		});
 
@@ -197,7 +209,14 @@ const startConsumer = async () => {
 					await Promise.allSettled([
 						database?.destroy(),
 						destroyKVAdapter(kvInstance, adapterLifecycleContext),
-						destroyMediaAdapter(mediaInstance, adapterLifecycleContext),
+						destroyMediaStorageAdapter(
+							mediaStorageInstance,
+							adapterLifecycleContext,
+						),
+						destroyMediaDeliveryAdapter(
+							mediaDeliveryInstance,
+							adapterLifecycleContext,
+						),
 						destroyEmailAdapter(emailInstance, adapterLifecycleContext),
 					]);
 				}
@@ -337,7 +356,10 @@ const startConsumer = async () => {
 			await Promise.allSettled([
 				database?.destroy(),
 				destroyKVAdapter(kvInstance, adapterLifecycleContext),
-				destroyMediaAdapter(mediaInstance, adapterLifecycleContext),
+				destroyMediaStorageAdapter(
+					mediaStorageInstance,
+					adapterLifecycleContext,
+				),
 				destroyEmailAdapter(emailInstance, adapterLifecycleContext),
 			]);
 		}

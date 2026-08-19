@@ -1,7 +1,11 @@
 import z from "zod";
 import { translate } from "../libs/i18n/index.js";
 import type { ControllerSchema } from "../types.js";
-import { mediaCropInputSchema, mediaOriginSchema } from "./media.js";
+import {
+	mediaCropInputSchema,
+	mediaOriginSchema,
+	uploadSessionResponseSchema,
+} from "./media.js";
 import { contentAccountResponseSchema, userResponseSchema } from "./users.js";
 
 const profilePictureTranslationSchema = z.object({
@@ -263,28 +267,7 @@ export const controllerSchemas = {
 			formatted: undefined,
 		},
 		params: undefined,
-		response: z.discriminatedUnion("mode", [
-			z.object({
-				mode: z.literal("single"),
-				key: z.string(),
-				url: z.string(),
-				headers: z.record(z.string(), z.string()).optional(),
-			}),
-			z.object({
-				mode: z.literal("resumable"),
-				key: z.string(),
-				sessionId: z.string(),
-				partSize: z.number(),
-				expiresAt: z.string(),
-				uploadedParts: z.array(
-					z.object({
-						partNumber: z.number().int().positive(),
-						etag: z.string().trim(),
-						size: z.number().nonnegative().optional(),
-					}),
-				),
-			}),
-		]),
+		response: uploadSessionResponseSchema,
 	} satisfies ControllerSchema,
 	updateProfilePicture: {
 		body: z

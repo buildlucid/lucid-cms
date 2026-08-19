@@ -208,15 +208,15 @@ const SystemOverviewRoute: Component = () => {
 								},
 								{
 									label: T()("common.media"),
-									value: systemInfo()?.media ?? "-",
+									value: systemInfo()?.mediaStorage ?? "-",
 								},
 								{
 									label: T()("common.email"),
 									value: systemInfo()?.email ?? "-",
 								},
 								{
-									label: T()("common.image.processor"),
-									value: systemInfo()?.imageProcessor ?? "-",
+									label: T()("common.media.delivery"),
+									value: systemInfo()?.mediaDelivery ?? "-",
 								},
 							]}
 						/>

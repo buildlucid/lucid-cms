@@ -1,9 +1,11 @@
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceStream } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceStream } from "@lucidcms/core/types";
 import type { PluginOptions } from "../types.js";
 import { resolveBinding } from "../utils/resolve-binding.js";
 
-const stream = (pluginOptions: PluginOptions): MediaAdapterServiceStream => {
+const stream = (
+	pluginOptions: PluginOptions,
+): MediaStorageAdapterServiceStream => {
 	return async (context, { key, range, ifNoneMatch }) => {
 		try {
 			const binding = resolveBinding(context, pluginOptions);

@@ -100,7 +100,8 @@ describe("createLucidHost database ownership", () => {
 			"database",
 			"email",
 			"kv",
-			"media",
+			"mediaDelivery",
+			"mediaStorage",
 			"queue",
 		]);
 

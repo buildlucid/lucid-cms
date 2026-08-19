@@ -70,13 +70,33 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.select([
 				"source.type as source_type",
 				"source.key as source_key",
+				"source.status as source_status",
+				"source.storage_adapter_key as source_storage_adapter_key",
+				"source.storage_adapter_reference as source_storage_adapter_reference",
+				"source.storage_adapter_data as source_storage_adapter_data",
+				"source.public as source_public",
+				"source.mime_type as source_mime_type",
 				"source.file_name as source_file_name",
 				"source.file_extension as source_file_extension",
+				"source.width as source_width",
+				"source.height as source_height",
+				"source.focal_x as source_focal_x",
+				"source.focal_y as source_focal_y",
 				"active_crop.id as active_crop_id",
 				"active_crop.type as active_crop_type",
 				"active_crop.key as active_crop_key",
+				"active_crop.status as active_crop_status",
+				"active_crop.storage_adapter_key as active_crop_storage_adapter_key",
+				"active_crop.storage_adapter_reference as active_crop_storage_adapter_reference",
+				"active_crop.storage_adapter_data as active_crop_storage_adapter_data",
+				"active_crop.public as active_crop_public",
+				"active_crop.mime_type as active_crop_mime_type",
 				"active_crop.file_name as active_crop_file_name",
 				"active_crop.file_extension as active_crop_file_extension",
+				"active_crop.width as active_crop_width",
+				"active_crop.height as active_crop_height",
+				"active_crop.focal_x as active_crop_focal_x",
+				"active_crop.focal_y as active_crop_focal_y",
 			])
 			.where("requested.key", "=", props.key)
 			.limit(1);
@@ -89,12 +109,30 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				return {
 					type: result.active_crop_type ?? result.source_type,
 					key: result.active_crop_key ?? result.source_key,
+					status: result.active_crop_status ?? result.source_status,
+					storage_adapter_key:
+						result.active_crop_storage_adapter_key ??
+						result.source_storage_adapter_key,
+					storage_adapter_reference:
+						result.active_crop_id !== null
+							? result.active_crop_storage_adapter_reference
+							: result.source_storage_adapter_reference,
+					storage_adapter_data:
+						result.active_crop_id !== null
+							? result.active_crop_storage_adapter_data
+							: result.source_storage_adapter_data,
+					public: result.active_crop_public ?? result.source_public,
+					mime_type: result.active_crop_mime_type ?? result.source_mime_type,
 					file_name:
 						result.active_crop_id !== null
 							? result.active_crop_file_name
 							: result.source_file_name,
 					file_extension:
 						result.active_crop_file_extension ?? result.source_file_extension,
+					width: result.active_crop_width ?? result.source_width,
+					height: result.active_crop_height ?? result.source_height,
+					focal_x: result.active_crop_focal_x ?? result.source_focal_x,
+					focal_y: result.active_crop_focal_y ?? result.source_focal_y,
 				};
 			},
 			{
@@ -120,6 +158,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.select((eb) => [
 				"id",
 				"key",
+				"status",
+				"storage_adapter_key",
+				"storage_adapter_reference",
+				"storage_adapter_data",
 				"folder_id",
 				"parent_media_id",
 				"relation_type",
@@ -159,6 +201,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.select([
 								"poster.id",
 								"poster.key",
+								"poster.status",
+								"poster.storage_adapter_key",
+								"poster.storage_adapter_reference",
+								"poster.storage_adapter_data",
+								"poster.public",
 								"poster.origin",
 								"poster.type",
 								"poster.mime_type",
@@ -206,6 +253,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 											.select([
 												"poster_crop.id",
 												"poster_crop.key",
+												"poster_crop.status",
+												"poster_crop.storage_adapter_key",
+												"poster_crop.storage_adapter_reference",
+												"poster_crop.storage_adapter_data",
+												"poster_crop.public",
 												"poster_crop.origin",
 												"poster_crop.type",
 												"poster_crop.mime_type",
@@ -259,6 +311,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.select([
 								"crop.id",
 								"crop.key",
+								"crop.status",
+								"crop.storage_adapter_key",
+								"crop.storage_adapter_reference",
+								"crop.storage_adapter_data",
+								"crop.public",
 								"crop.origin",
 								"crop.type",
 								"crop.mime_type",
@@ -326,6 +383,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: [
 				"id",
 				"key",
+				"status",
+				"storage_adapter_key",
+				"storage_adapter_reference",
+				"storage_adapter_data",
 				"folder_id",
 				"parent_media_id",
 				"relation_type",
@@ -378,6 +439,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			.select((eb) => [
 				"id",
 				"key",
+				"status",
+				"storage_adapter_key",
+				"storage_adapter_reference",
+				"storage_adapter_data",
 				"folder_id",
 				"parent_media_id",
 				"relation_type",
@@ -417,6 +482,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.select([
 								"poster.id",
 								"poster.key",
+								"poster.status",
+								"poster.storage_adapter_key",
+								"poster.storage_adapter_reference",
+								"poster.storage_adapter_data",
+								"poster.public",
 								"poster.origin",
 								"poster.type",
 								"poster.mime_type",
@@ -464,6 +534,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 											.select([
 												"poster_crop.id",
 												"poster_crop.key",
+												"poster_crop.status",
+												"poster_crop.storage_adapter_key",
+												"poster_crop.storage_adapter_reference",
+												"poster_crop.storage_adapter_data",
+												"poster_crop.public",
 												"poster_crop.origin",
 												"poster_crop.type",
 												"poster_crop.mime_type",
@@ -517,6 +592,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.select([
 								"crop.id",
 								"crop.key",
+								"crop.status",
+								"crop.storage_adapter_key",
+								"crop.storage_adapter_reference",
+								"crop.storage_adapter_data",
+								"crop.public",
 								"crop.origin",
 								"crop.type",
 								"crop.mime_type",
@@ -582,6 +662,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: [
 				"id",
 				"key",
+				"status",
+				"storage_adapter_key",
+				"storage_adapter_reference",
+				"storage_adapter_data",
 				"folder_id",
 				"parent_media_id",
 				"relation_type",
@@ -693,6 +777,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					.select((eb) => [
 						"lucid_media.id",
 						"lucid_media.key",
+						"lucid_media.status",
+						"lucid_media.storage_adapter_key",
+						"lucid_media.storage_adapter_reference",
+						"lucid_media.storage_adapter_data",
 						"lucid_media.folder_id",
 						"lucid_media.parent_media_id",
 						"lucid_media.relation_type",
@@ -751,6 +839,11 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 									.select([
 										"poster.id",
 										"poster.key",
+										"poster.status",
+										"poster.storage_adapter_key",
+										"poster.storage_adapter_reference",
+										"poster.storage_adapter_data",
+										"poster.public",
 										"poster.origin",
 										"poster.type",
 										"poster.mime_type",
@@ -870,6 +963,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			select: [
 				"id",
 				"key",
+				"status",
+				"storage_adapter_key",
+				"storage_adapter_reference",
+				"storage_adapter_data",
 				"folder_id",
 				"parent_media_id",
 				"relation_type",

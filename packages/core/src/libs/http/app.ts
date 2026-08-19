@@ -25,19 +25,19 @@ import {
 import type { EmailAdapterInstance } from "../email/types.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
-import {
-	destroyImageProcessor,
-	getInitializedImageProcessor,
-} from "../image-processor/lifecycle.js";
-import type { ImageProcessorInstance } from "../image-processor/types.js";
 import { destroyKVAdapter, getInitializedKVAdapter } from "../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../kv/types.js";
 import logger, { destroyLogger } from "../logger/index.js";
 import {
-	destroyMediaAdapter,
-	getInitializedMediaAdapter,
-} from "../media/lifecycle.js";
-import type { MediaAdapterInstance } from "../media/types.js";
+	destroyMediaDeliveryAdapter,
+	getInitializedMediaDeliveryAdapter,
+} from "../media-delivery/lifecycle.js";
+import type { MediaDeliveryAdapterInstance } from "../media-delivery/types.js";
+import {
+	destroyMediaStorageAdapter,
+	getInitializedMediaStorageAdapter,
+} from "../media-storage/lifecycle.js";
+import type { MediaStorageAdapterInstance } from "../media-storage/types.js";
 import {
 	destroyQueueAdapter,
 	getInitializedQueueAdapter,
@@ -125,9 +125,9 @@ const createApp = async (props: {
 
 	let kvInstance: KVAdapterInstance | undefined;
 	let queueInstance: QueueAdapterInstance | undefined;
-	let mediaInstance: MediaAdapterInstance | null | undefined;
+	let mediaStorageInstance: MediaStorageAdapterInstance | null | undefined;
 	let emailInstance: EmailAdapterInstance | undefined;
-	let imageProcessorInstance: ImageProcessorInstance | undefined;
+	let mediaDeliveryAdapterInstance: MediaDeliveryAdapterInstance | undefined;
 	const destroyAdapterInstances = () =>
 		Promise.allSettled([
 			destroyQueueAdapter(queueInstance, {
@@ -140,7 +140,7 @@ const createApp = async (props: {
 				env: props.env,
 				runtimeContext: props.runtimeContext,
 			}),
-			destroyMediaAdapter(mediaInstance, {
+			destroyMediaStorageAdapter(mediaStorageInstance, {
 				config: props.config,
 				env: props.env,
 				runtimeContext: props.runtimeContext,
@@ -150,7 +150,7 @@ const createApp = async (props: {
 				env: props.env,
 				runtimeContext: props.runtimeContext,
 			}),
-			destroyImageProcessor(imageProcessorInstance, {
+			destroyMediaDeliveryAdapter(mediaDeliveryAdapterInstance, {
 				config: props.config,
 				env: props.env,
 				runtimeContext: props.runtimeContext,
@@ -166,18 +166,24 @@ const createApp = async (props: {
 			env: props.env,
 			runtimeContext: props.runtimeContext,
 		});
-		mediaInstance = await getInitializedMediaAdapter(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		});
+		mediaStorageInstance = await getInitializedMediaStorageAdapter(
+			props.config,
+			{
+				env: props.env,
+				runtimeContext: props.runtimeContext,
+			},
+		);
 		emailInstance = await getInitializedEmailAdapter(props.config, {
 			env: props.env,
 			runtimeContext: props.runtimeContext,
 		});
-		imageProcessorInstance = await getInitializedImageProcessor(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		});
+		mediaDeliveryAdapterInstance = await getInitializedMediaDeliveryAdapter(
+			props.config,
+			{
+				env: props.env,
+				runtimeContext: props.runtimeContext,
+			},
+		);
 	} catch (error) {
 		await destroyAdapterInstances();
 		await destroyLogger();
@@ -187,7 +193,7 @@ const createApp = async (props: {
 		!kvInstance ||
 		!queueInstance ||
 		!emailInstance ||
-		!imageProcessorInstance
+		!mediaDeliveryAdapterInstance
 	) {
 		throw new LucidError({
 			message: "Lucid could not initialize its application adapters.",
@@ -239,7 +245,8 @@ const createApp = async (props: {
 			c.set("runtimeContext", props.runtimeContext);
 			c.set("queue", queueInstance);
 			c.set("kv", kvInstance);
-			c.set("media", mediaInstance);
+			c.set("mediaStorage", mediaStorageInstance);
+			c.set("mediaDelivery", mediaDeliveryAdapterInstance);
 			c.set("email", emailInstance);
 			c.set("env", invocation.env ?? null);
 			c.set("cf", c.get("cf") ?? null);
@@ -513,7 +520,8 @@ const createApp = async (props: {
 		{
 			queue: queueInstance.key,
 			kv: kvInstance.key,
-			media: mediaInstance?.key ?? null,
+			mediaStorage: mediaStorageInstance?.key ?? null,
+			mediaDelivery: mediaDeliveryAdapterInstance.key,
 			email: emailInstance.key,
 			database: props.config.db.adapter,
 		},
@@ -543,7 +551,8 @@ const createApp = async (props: {
 			),
 		queue: queueInstance,
 		kv: kvInstance,
-		media: mediaInstance,
+		mediaStorage: mediaStorageInstance,
+		mediaDelivery: mediaDeliveryAdapterInstance,
 		email: emailInstance,
 		issues: supportChecksRes.issues,
 		destroy: () => {

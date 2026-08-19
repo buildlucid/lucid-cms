@@ -124,9 +124,9 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 						{(item) => (
 							<ReadonlyMediaPreview
 								media={{
+									status: item.status,
 									type: item.type,
 									url: item.file.url,
-									updatedAt: item.updatedAt,
 								}}
 								alt={
 									(item.type === "image"

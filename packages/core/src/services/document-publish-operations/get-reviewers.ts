@@ -106,7 +106,11 @@ const getReviewers: ServiceFn<
 			lastName: reviewer.lastName,
 			profilePicture: mediaFormatter.formatMediaImagePreview({
 				poster: reviewer.profile_picture?.[0],
-				host: getBaseUrl(context),
+				options: {
+					host: getBaseUrl(context),
+					delivery: context.mediaDelivery,
+					imagePresets: context.config.media.images.presets,
+				},
 			}),
 		})),
 	};

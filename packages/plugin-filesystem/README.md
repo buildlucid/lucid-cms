@@ -2,7 +2,7 @@
 
 > The official Filesystem storage plugin for Lucid CMS
 
-This plugin registers a local filesystem media adapter and the upload/download routes used for signed direct uploads in Lucid CMS.
+This plugin registers a local filesystem storage adapter and the upload/download routes used for signed direct uploads in Lucid CMS.
 
 ## Installation
 

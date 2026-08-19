@@ -3,14 +3,17 @@ import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
 import { copy } from "@lucidcms/core/plugin";
 import type {
-	FileSystemMediaAdapterOptions,
-	MediaAdapterServiceGetMeta,
+	FileSystemStorageAdapterOptions,
+	MediaStorageAdapterServiceGetMeta,
 } from "@lucidcms/core/types";
 import { keyPaths } from "../helpers.js";
 import { readStoredMetadata } from "../metadata.js";
 
-export default (options: FileSystemMediaAdapterOptions) => {
-	const getMetadata: MediaAdapterServiceGetMeta = async (_context, props) => {
+export default (options: FileSystemStorageAdapterOptions) => {
+	const getMetadata: MediaStorageAdapterServiceGetMeta = async (
+		_context,
+		props,
+	) => {
 		try {
 			const { targetPath } = keyPaths(props.key, options.uploadDir);
 			try {
@@ -47,6 +50,7 @@ export default (options: FileSystemMediaAdapterOptions) => {
 					size: stats.size,
 					mimeType: mimeType,
 					etag: etag,
+					status: "ready",
 				},
 			};
 		} catch (e) {

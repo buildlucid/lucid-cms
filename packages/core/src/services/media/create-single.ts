@@ -166,6 +166,10 @@ const createSingle: ServiceFn<
 		Media.createSingle({
 			data: {
 				key: mediaKey,
+				status: syncMediaRes.data.status,
+				storage_adapter_key: syncMediaRes.data.storageAdapterKey,
+				storage_adapter_reference: syncMediaRes.data.storageAdapterReference,
+				storage_adapter_data: syncMediaRes.data.storageAdapterData,
 				parent_media_id: null,
 				relation_type: null,
 				e_tag: syncMediaRes.data.etag ?? undefined,
@@ -219,8 +223,8 @@ const createSingle: ServiceFn<
 	if (deleteMediaSyncRes.error) return deleteMediaSyncRes;
 
 	if (mediaRes.data === undefined) {
-		if (context.media) {
-			await context.media.delete(context, {
+		if (context.mediaStorage) {
+			await context.mediaStorage.delete(context, {
 				key: mediaKey,
 			});
 		}
@@ -293,8 +297,8 @@ const createSingle: ServiceFn<
 			},
 		});
 		if (mediaTranslationsRes.error) {
-			if (context.media) {
-				await context.media.delete(context, {
+			if (context.mediaStorage) {
+				await context.mediaStorage.delete(context, {
 					key: mediaKey,
 				});
 			}
@@ -318,7 +322,11 @@ const createSingle: ServiceFn<
 
 	const media = mediaFormatter.formatSingle({
 		media: mediaFetchRes.data,
-		host: getBaseUrl(context),
+		options: {
+			host: getBaseUrl(context),
+			delivery: context.mediaDelivery,
+			imagePresets: context.config.media.images.presets,
+		},
 	});
 
 	const hookRes = await executeHooks(

@@ -2,7 +2,6 @@ import type { ProfilePicture } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import helpers from "@/utils/helpers";
-import { getProcessedImageUrl } from "@/utils/media-url";
 
 interface UserDisplayProps {
 	user: {
@@ -65,19 +64,16 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 				)}
 			>
 				<Show
-					when={props.user.profilePicture?.file.url}
+					when={props.user.profilePicture?.file}
 					fallback={helpers.formatUserInitials({
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
 						username: props.user.username,
 					})}
 				>
-					{(url) => (
+					{(file) => (
 						<img
-							src={getProcessedImageUrl(url(), {
-								preset: "thumbnail-small",
-								format: "webp",
-							})}
+							src={file().presets["thumbnail-small"]?.url ?? file().url}
 							alt=""
 							class="h-full w-full rounded-full object-cover"
 							loading="lazy"

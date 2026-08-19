@@ -108,9 +108,6 @@ export const MediaList: Component<{
 		createSignal<[number, number]>();
 	const [activeQuickCropSource, setActiveQuickCropSource] =
 		createSignal<ImageCropSource | null>(null);
-	const [quickCropPreviewKeys, setQuickCropPreviewKeys] = createSignal<
-		Record<number, number>
-	>({});
 
 	// ----------------------------------
 	// Memos
@@ -254,10 +251,6 @@ export const MediaList: Component<{
 		});
 		if (!success) return false;
 
-		setQuickCropPreviewKeys((keys) => ({
-			...keys,
-			[item.id]: Date.now(),
-		}));
 		await media.refetch();
 		return undefined;
 	};
@@ -443,9 +436,6 @@ export const MediaList: Component<{
 									onCrop={openQuickCrop}
 									aiAltAccessState={mediaAltGeneration.accessState()}
 									aiAltFeatureEnabled={mediaAltGeneration.isFeatureEnabled()}
-									previewCacheKey={
-										quickCropPreviewKeys()[item.id] ?? item.updatedAt
-									}
 								/>
 							)}
 						</For>

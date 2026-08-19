@@ -2,7 +2,7 @@
 
 > The official Cloudflare R2 plugin for Lucid
 
-This plugin registers the Lucid media adapter using a Cloudflare R2 binding. It can optionally fall back to S3-compatible HTTP signing when you want direct browser uploads instead of proxying uploads through the Worker.
+This plugin registers a Lucid media storage adapter using a Cloudflare R2 binding. It can optionally fall back to S3-compatible HTTP signing when you want direct browser uploads instead of proxying uploads through the Worker.
 
 ## Installation
 

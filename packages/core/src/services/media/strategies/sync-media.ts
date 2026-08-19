@@ -1,10 +1,10 @@
 import { copy } from "../../../libs/i18n/index.js";
-import type { MediaType } from "../../../types/response.js";
+import type { MediaStatus, MediaType } from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
 import checkCanStoreMedia from "../checks/check-can-store-media.js";
-import checkHasMediaStrategy from "../checks/check-has-media-strategy.js";
+import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
 const syncMedia: ServiceFn<
@@ -23,12 +23,16 @@ const syncMedia: ServiceFn<
 		size: number;
 		key: string;
 		etag: string | null;
+		status: MediaStatus;
+		storageAdapterKey: string;
+		storageAdapterReference: string | null;
+		storageAdapterData: Record<string, unknown> | null;
 	}
 > = async (context, data) => {
-	const mediaStrategyRes = await checkHasMediaStrategy(context);
-	if (mediaStrategyRes.error) return mediaStrategyRes;
+	const mediaStorageRes = await checkHasMediaStorage(context);
+	if (mediaStorageRes.error) return mediaStorageRes;
 
-	const mediaMetaRes = await mediaStrategyRes.data.getMeta(context, {
+	const mediaMetaRes = await mediaStorageRes.data.getMeta(context, {
 		key: data.key,
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
@@ -37,7 +41,7 @@ const syncMedia: ServiceFn<
 		size: mediaMetaRes.data.size,
 	});
 	if (proposedSizeRes.error) {
-		await mediaStrategyRes.data.delete(context, {
+		await mediaStorageRes.data.delete(context, {
 			key: data.key,
 		});
 		return proposedSizeRes;
@@ -45,14 +49,14 @@ const syncMedia: ServiceFn<
 
 	const fileMetaData = await validateUploadedMedia({
 		context,
-		stream: mediaStrategyRes.data.stream,
+		stream: mediaStorageRes.data.stream,
 		key: data.key,
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
 		allowedType: data.allowedType,
 	});
 	if (fileMetaData.error) {
-		await mediaStrategyRes.data.delete(context, {
+		await mediaStorageRes.data.delete(context, {
 			key: data.key,
 		});
 		return fileMetaData;
@@ -76,7 +80,7 @@ const syncMedia: ServiceFn<
 			};
 		}
 
-		await mediaStrategyRes.data.delete(context, {
+		await mediaStorageRes.data.delete(context, {
 			key: data.key,
 		});
 
@@ -117,6 +121,10 @@ const syncMedia: ServiceFn<
 			name: data.fileName,
 			key: data.key,
 			etag: mediaMetaRes.data.etag,
+			status: mediaMetaRes.data.status,
+			storageAdapterKey: mediaStorageRes.data.key,
+			storageAdapterReference: mediaMetaRes.data.adapterReference ?? null,
+			storageAdapterData: mediaMetaRes.data.adapterData ?? null,
 		},
 	};
 };

@@ -1,11 +1,11 @@
 import type { Readable } from "node:stream";
 import { copy } from "@lucidcms/core/plugin";
-import type { MediaAdapterServiceStream } from "@lucidcms/core/types";
+import type { MediaStorageAdapterServiceStream } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
 
 export default (client: AwsClient, pluginOptions: PluginOptions) => {
-	const stream: MediaAdapterServiceStream = async (
+	const stream: MediaStorageAdapterServiceStream = async (
 		_context,
 		{ key, range, ifNoneMatch },
 	) => {

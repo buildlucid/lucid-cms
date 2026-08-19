@@ -22,7 +22,11 @@ const formatUserRef = (
 		lastName: value.last_name,
 		profilePicture: mediaFormatter.formatMediaImagePreview({
 			poster: value.profile_picture?.[0],
-			host: params.host,
+			options: {
+				host: params.host,
+				delivery: params.mediaDelivery,
+				imagePresets: params.config.media.images.presets,
+			},
 		}),
 	} satisfies CFResponse<"user">["ref"];
 };

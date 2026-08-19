@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-	checkHasMediaStrategy: vi.fn(),
+	checkHasMediaStorage: vi.fn(),
 	optimizeImage: vi.fn(),
 	getSingleCount: vi.fn(),
 	selectSingle: vi.fn(),
@@ -15,8 +15,8 @@ vi.mock("../../libs/repositories/index.js", () => ({
 	ProcessedImagesRepository: class {},
 }));
 
-vi.mock("../media/checks/check-has-media-strategy.js", () => ({
-	default: mocks.checkHasMediaStrategy,
+vi.mock("../media/checks/check-has-media-storage.js", () => ({
+	default: mocks.checkHasMediaStorage,
 }));
 
 vi.mock("./get-single-count.js", () => ({
@@ -55,7 +55,7 @@ describe("processImage", () => {
 			},
 		});
 
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				stream: vi.fn().mockResolvedValue({
@@ -89,11 +89,12 @@ describe("processImage", () => {
 				config: {
 					db: {},
 					media: {
-						limits: {
-							processedImagesPerFile: 10,
-						},
+						limits: {},
 						images: {
-							storeProcessed: false,
+							cache: {
+								enabled: false,
+								maxVariantsPerFile: 10,
+							},
 						},
 					},
 				},
@@ -142,7 +143,7 @@ describe("processImage", () => {
 			},
 		});
 
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				stream: vi.fn().mockResolvedValue({
@@ -176,11 +177,12 @@ describe("processImage", () => {
 				config: {
 					db: {},
 					media: {
-						limits: {
-							processedImagesPerFile: 10,
-						},
+						limits: {},
 						images: {
-							storeProcessed: false,
+							cache: {
+								enabled: false,
+								maxVariantsPerFile: 10,
+							},
 						},
 					},
 				},
@@ -223,7 +225,7 @@ describe("processImage", () => {
 			.update(processedBuffer)
 			.digest("hex");
 
-		mocks.checkHasMediaStrategy.mockResolvedValueOnce({
+		mocks.checkHasMediaStorage.mockResolvedValueOnce({
 			error: undefined,
 			data: {
 				stream: vi.fn().mockResolvedValue({
@@ -262,11 +264,12 @@ describe("processImage", () => {
 				config: {
 					db: {},
 					media: {
-						limits: {
-							processedImagesPerFile: 10,
-						},
+						limits: {},
 						images: {
-							storeProcessed: false,
+							cache: {
+								enabled: false,
+								maxVariantsPerFile: 10,
+							},
 						},
 					},
 				},

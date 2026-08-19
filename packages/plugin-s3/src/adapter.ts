@@ -1,4 +1,4 @@
-import type { MediaAdapter } from "@lucidcms/core/types";
+import type { MediaStorageAdapter } from "@lucidcms/core/types";
 import getAwsClient from "./clients/aws-client.js";
 import deleteMultiple from "./services/delete-multiple.js";
 import deleteSingle from "./services/delete-single.js";
@@ -14,11 +14,11 @@ import { listUploadParts } from "./services/upload-session/list-upload-parts.js"
 import uploadSingle from "./services/upload-single.js";
 import type { PluginOptions } from "./types/types.js";
 
-const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
+const s3StorageAdapter: MediaStorageAdapter<PluginOptions> = (options) => {
 	const client = getAwsClient(options);
 
 	return {
-		type: "media-adapter",
+		type: "media-storage-adapter",
 		key: "s3",
 		createUploadSession: createUploadSession(client, options),
 		getUploadPartUrls: getUploadPartUrls(client, options),
@@ -36,4 +36,4 @@ const s3MediaAdapter: MediaAdapter<PluginOptions> = (options) => {
 	};
 };
 
-export default s3MediaAdapter;
+export default s3StorageAdapter;

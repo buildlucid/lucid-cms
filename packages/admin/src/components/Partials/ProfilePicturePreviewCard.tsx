@@ -211,8 +211,10 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 							<div class="relative z-10 h-full w-full min-w-0 overflow-hidden">
 								<MediaPreview
 									media={{
+										status: profilePicture().status,
 										url: profilePicture().file.url,
 										type: profilePicture().type,
+										presets: profilePicture().file.presets,
 									}}
 									alt={alt()}
 									richPreview={true}

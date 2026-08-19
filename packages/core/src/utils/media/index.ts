@@ -20,4 +20,5 @@ export {
 	isGeneratedMediaIdSegment,
 } from "./media-key-parts.js";
 export { default as normalizeMediaKey } from "./normalize-media-key.js";
+export { default as resolveDeliveryUrl } from "./resolve-delivery-url.js";
 export { default as resolveProcessingRequest } from "./resolve-processing-request.js";

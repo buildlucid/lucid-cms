@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
 import { copy } from "@lucidcms/core/plugin";
-import type { ImageProcessorServiceProcess } from "@lucidcms/core/types";
+import type { MediaDeliveryServiceProcessImage } from "@lucidcms/core/types";
 import {
 	DEFAULT_IMAGES_BINDING,
 	MAX_INPUT_BYTES,
@@ -41,7 +41,7 @@ import {
  */
 const processImage = (
 	pluginOptions: CloudflareImagesPluginOptions,
-): ImageProcessorServiceProcess => {
+): MediaDeliveryServiceProcessImage => {
 	return async (context, { stream, options }) => {
 		const bindingName = pluginOptions.binding ?? DEFAULT_IMAGES_BINDING;
 		const binding = resolveImagesBinding(context, bindingName);

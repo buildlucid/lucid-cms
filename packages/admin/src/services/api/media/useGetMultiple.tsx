@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
-import type { Media, ResponseBody } from "@types";
+import type { Media, MediaStatus, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
@@ -10,6 +10,7 @@ interface QueryParams {
 	filters?: {
 		name?: Accessor<string>;
 		key?: Accessor<string>;
+		status?: Accessor<MediaStatus | MediaStatus[]> | MediaStatus;
 		mimeType?: Accessor<string>;
 		extension?: Accessor<string>;
 		type?: Accessor<string | string[]>;

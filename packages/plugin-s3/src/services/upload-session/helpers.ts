@@ -1,4 +1,4 @@
-import type { MediaAdapterUploadPart } from "@lucidcms/core/types";
+import type { MediaStorageAdapterUploadPart } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";
 import type { PluginOptions } from "../../types/types.js";
@@ -18,7 +18,7 @@ export const extractXmlValue = (xml: string, tag: string) => {
 };
 
 /** Converts S3 list-parts XML into Lucid's adapter part shape for resume checks. */
-export const parseParts = (xml: string): MediaAdapterUploadPart[] => {
+export const parseParts = (xml: string): MediaStorageAdapterUploadPart[] => {
 	return Array.from(xml.matchAll(/<Part>([\s\S]*?)<\/Part>/g)).map((match) => {
 		const partXml = match[1] ?? "";
 		return {
@@ -58,9 +58,13 @@ export const createSingleUploadSession = async (
 	);
 
 	return {
-		mode: "single" as const,
+		protocol: "http" as const,
 		key,
-		url: response.url.toString(),
-		headers: Object.fromEntries(response.headers.entries()),
+		request: {
+			url: response.url.toString(),
+			method: "PUT" as const,
+			headers: Object.fromEntries(response.headers.entries()),
+			body: { type: "raw" as const },
+		},
 	};
 };

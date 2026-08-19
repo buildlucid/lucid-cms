@@ -28,7 +28,7 @@ const getRuntimeContext = (params: {
 							"The SQLite KV adapter is not supported in Cloudflare Workers. This will fall back to the passthrough adapter when using Wrangler or once deployed.",
 					},
 				],
-				mediaAdapter: [
+				mediaStorageAdapter: [
 					{
 						key: "file-system",
 						message:

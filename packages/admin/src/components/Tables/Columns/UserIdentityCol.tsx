@@ -2,7 +2,6 @@ import type { User } from "@types";
 import { type Component, Show } from "solid-js";
 import { Td } from "@/components/Groups/Table/Td";
 import helpers from "@/utils/helpers";
-import { getProcessedImageUrl } from "@/utils/media-url";
 
 interface UserIdentityColProps {
 	user: User;
@@ -27,19 +26,16 @@ const UserIdentityCol: Component<UserIdentityColProps> = (props) => {
 			<div class="flex min-w-0 items-center gap-2.5">
 				<span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-input-base text-[9px] font-bold text-title">
 					<Show
-						when={props.user.profilePicture?.file.url}
+						when={props.user.profilePicture?.file}
 						fallback={helpers.formatUserInitials({
 							firstName: props.user.firstName,
 							lastName: props.user.lastName,
 							username: props.user.username,
 						})}
 					>
-						{(url) => (
+						{(file) => (
 							<img
-								src={getProcessedImageUrl(url(), {
-									preset: "thumbnail-small",
-									format: "webp",
-								})}
+								src={file().presets["thumbnail-small"]?.url ?? file().url}
 								alt=""
 								class="h-full w-full rounded-full object-cover"
 								loading="lazy"

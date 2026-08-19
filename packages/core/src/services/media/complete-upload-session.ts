@@ -1,5 +1,5 @@
 import { copy } from "../../libs/i18n/index.js";
-import { hasResumableUploadSessions } from "../../libs/media/resumable-upload-sessions.js";
+import { hasMultipartUploadSessions } from "../../libs/media-storage/resumable-upload-sessions.js";
 import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
@@ -10,7 +10,7 @@ const completeUploadSession: ServiceFn<
 	[
 		{
 			sessionId: string;
-			parts: Array<{
+			parts?: Array<{
 				partNumber: number;
 				etag: string;
 				size?: number;
@@ -25,7 +25,14 @@ const completeUploadSession: ServiceFn<
 	const MediaAwaitingSync = new MediaAwaitingSyncRepository(context.db);
 
 	const sessionRes = await MediaUploadSessions.selectSingle({
-		select: ["session_id", "key", "adapter_key", "adapter_upload_id", "status"],
+		select: [
+			"session_id",
+			"key",
+			"adapter_key",
+			"adapter_upload_id",
+			"protocol",
+			"status",
+		],
 		where: [
 			{ key: "session_id", operator: "=", value: data.sessionId },
 			{ key: "status", operator: "=", value: "active" },
@@ -39,17 +46,17 @@ const completeUploadSession: ServiceFn<
 	});
 	if (sessionRes.error) return sessionRes;
 
-	if (!context.media) {
+	if (!context.mediaStorage) {
 		return {
 			error: {
 				type: "basic",
 				status: 400,
-				message: copy("server:core.media.adapters.not.enabled"),
+				message: copy("server:core.media.storage.adapter.not.enabled"),
 			},
 			data: undefined,
 		};
 	}
-	if (sessionRes.data.adapter_key !== context.media.key) {
+	if (sessionRes.data.adapter_key !== context.mediaStorage.key) {
 		return {
 			error: {
 				type: "basic",
@@ -59,37 +66,75 @@ const completeUploadSession: ServiceFn<
 			data: undefined,
 		};
 	}
-	if (!hasResumableUploadSessions(context.media)) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: copy(
-					"server:core.media.upload.sessions.resumable.not.supported",
-				),
+	if (sessionRes.data.protocol === "multipart-parts") {
+		if (!hasMultipartUploadSessions(context.mediaStorage)) {
+			return {
+				error: {
+					type: "basic",
+					status: 400,
+					message: copy(
+						"server:core.media.upload.sessions.resumable.not.supported",
+					),
+				},
+				data: undefined,
+			};
+		}
+		if (!sessionRes.data.adapter_upload_id) {
+			return {
+				error: {
+					type: "basic",
+					status: 400,
+					message: copy(
+						"server:core.media.upload.sessions.missing.adapter.upload.id",
+					),
+				},
+				data: undefined,
+			};
+		}
+		if (!data.parts?.length) {
+			return {
+				error: {
+					type: "basic",
+					status: 400,
+					message: copy(
+						"server:core.media.upload.sessions.parts.not.reconciled",
+					),
+				},
+				data: undefined,
+			};
+		}
+
+		const completeRes = await context.mediaStorage.completeUploadSession(
+			context,
+			{
+				protocol: "multipart-parts",
+				key: sessionRes.data.key,
+				uploadId: sessionRes.data.adapter_upload_id,
+				parts: data.parts,
 			},
-			data: undefined,
-		};
-	}
-	if (!sessionRes.data.adapter_upload_id) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: copy(
-					"server:core.media.upload.sessions.missing.adapter.upload.id",
-				),
-			},
-			data: undefined,
-		};
+		);
+		if (completeRes.error) return completeRes;
+	} else if (context.mediaStorage.completeUploadSession) {
+		const completeRes = await context.mediaStorage.completeUploadSession(
+			context,
+			sessionRes.data.protocol === "http"
+				? {
+						protocol: "http",
+						key: sessionRes.data.key,
+					}
+				: {
+						protocol: "tus",
+						key: sessionRes.data.key,
+						uploadId: sessionRes.data.adapter_upload_id ?? undefined,
+					},
+		);
+		if (completeRes.error) return completeRes;
 	}
 
-	const completeRes = await context.media.completeUploadSession(context, {
+	const metaRes = await context.mediaStorage.getMeta(context, {
 		key: sessionRes.data.key,
-		uploadId: sessionRes.data.adapter_upload_id,
-		parts: data.parts,
 	});
-	if (completeRes.error) return completeRes;
+	if (metaRes.error) return metaRes;
 
 	await MediaAwaitingSync.deleteSingle({
 		where: [{ key: "key", operator: "=", value: sessionRes.data.key }],

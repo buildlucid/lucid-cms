@@ -26,6 +26,7 @@ import ActionDropdown, {
 import ActionIcon, {
 	type ActionIconName,
 } from "@/components/Partials/ActionIcon";
+import MediaStatusPreview from "@/components/Partials/MediaStatusPreview";
 import ProgressBar from "@/components/Partials/ProgressBar";
 import Spinner from "@/components/Partials/Spinner";
 import T from "@/translations";
@@ -68,6 +69,7 @@ export interface SingleFileUploadProps {
 		setRemovedCurrent: (_value: boolean) => void;
 	};
 	currentFile?: {
+		status?: Media["status"];
 		type?: Media["type"];
 		url?: string;
 		focalPointUrl?: string;
@@ -318,6 +320,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					<Match when={showState() === "current-file"}>
 						<FilePreviewScreen
 							data={{
+								status: props.currentFile?.status,
 								url: props.currentFile?.url as string,
 								focalPointUrl: props.currentFile?.focalPointUrl,
 								type: props.currentFile?.type as Media["type"],
@@ -387,6 +390,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 
 interface FilePreviewScreenProps {
 	data: {
+		status?: Media["status"];
 		url: string;
 		focalPointUrl?: string;
 		type: Media["type"];
@@ -422,8 +426,14 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 
 	// ------------------------------------
 	// Memos
+	const isReady = createMemo(
+		() => props.data.status === undefined || props.data.status === "ready",
+	);
 	const showFocalPoint = createMemo(
-		() => props.data.type === "image" && props.focalPoint !== undefined,
+		() =>
+			isReady() &&
+			props.data.type === "image" &&
+			props.focalPoint !== undefined,
 	);
 	const quickActions = createMemo<PreviewQuickAction[]>(() => {
 		return [
@@ -436,21 +446,21 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 			{
 				label: T()("media.crop.action"),
 				icon: "crop" as const,
-				hide: props.actions.imageCrop === undefined,
+				hide: !isReady() || props.actions.imageCrop === undefined,
 				disabled: props.actions.imageCrop?.state.disabled,
 				onClick: () => props.actions.imageCrop?.callbacks.open(),
 			},
 			{
 				label: T()("media.crop.remove"),
 				icon: "trash" as const,
-				hide: props.actions.imageCrop?.state.hasCrop !== true,
+				hide: !isReady() || props.actions.imageCrop?.state.hasCrop !== true,
 				disabled: props.actions.imageCrop?.state.disabled,
 				onClick: () => props.actions.imageCrop?.callbacks.remove(),
 			},
 			{
 				label: T()("ai.media.image.generate.action"),
 				icon: "sparkle" as const,
-				hide: props.actions.imageGeneration === undefined,
+				hide: !isReady() || props.actions.imageGeneration === undefined,
 				disabled:
 					props.actions.imageGeneration?.state.disabled === true &&
 					props.actions.imageGeneration.state.disabledClickable !== true,
@@ -470,7 +480,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				label: T()("common.preview"),
 				type: "button" as const,
 				icon: "eye" as const,
-				hide: props.actions.downloadFile === undefined,
+				hide: !isReady() || props.actions.downloadFile === undefined,
 				onClick: () => props.actions.downloadFile?.(),
 			},
 			{
@@ -494,10 +504,13 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 	// ------------------------------------
 	// Effects
 	createEffect(() => {
+		props.data.status;
 		props.data.type;
 		props.data.url;
 
 		setRenderNativeMedia(false);
+		if (!isReady()) return;
+
 		let secondFrame: number | undefined;
 		const firstFrame = requestAnimationFrame(() => {
 			secondFrame = requestAnimationFrame(() => {
@@ -548,65 +561,72 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 					</For>
 				</div>
 			</div>
-			<Switch
+			<Show
+				when={!isReady()}
 				fallback={
-					<div
-						class={classNames(
-							"w-full h-full relative z-10 bg-input-base flex flex-col justify-center items-center",
-						)}
+					<Switch
+						fallback={
+							<div
+								class={classNames(
+									"w-full h-full relative z-10 bg-input-base flex flex-col justify-center items-center",
+								)}
+							>
+								<FaSolidFile class="w-10 h-10 mx-auto text-unfocused mb-5" />
+								<Show when={props.data.name}>
+									<p class="text-center text-sm font-medium text-subtitle">
+										{props.data.name}
+									</p>
+								</Show>
+							</div>
+						}
 					>
-						<FaSolidFile class="w-10 h-10 mx-auto text-unfocused mb-5" />
-						<Show when={props.data.name}>
-							<p class="text-center text-sm font-medium text-subtitle">
-								{props.data.name}
-							</p>
-						</Show>
-					</div>
+						<Match when={props.data.type === "image"}>
+							<div
+								class={classNames(
+									"w-full h-full relative z-10 p-4 rectangle-background",
+								)}
+							>
+								<img
+									src={props.data.url}
+									alt={props.data.name}
+									class="w-full h-full object-contain z-10 relative"
+								/>
+							</div>
+						</Match>
+						<Match when={props.data.type === "video"}>
+							<div
+								class={classNames(
+									"w-full h-full relative z-10 bg-input-base rectangle-background",
+								)}
+							>
+								<Show when={renderNativeMedia()}>
+									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+									<video
+										src={props.data.url}
+										class="w-full h-full object-contain z-10 relative"
+										controls
+										preload="auto"
+									/>
+								</Show>
+							</div>
+						</Match>
+						<Match when={props.data.type === "audio"}>
+							<div
+								class={classNames(
+									"w-full h-full relative z-10 bg-input-base flex justify-center items-center",
+								)}
+							>
+								<Show when={renderNativeMedia()}>
+									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+									<audio src={props.data.url} class="w-2/3" controls />
+								</Show>
+							</div>
+						</Match>
+					</Switch>
 				}
 			>
-				<Match when={props.data.type === "image"}>
-					<div
-						class={classNames(
-							"w-full h-full relative z-10 p-4 rectangle-background",
-						)}
-					>
-						<img
-							src={props.data.url}
-							alt={props.data.name}
-							class="w-full h-full object-contain z-10 relative"
-						/>
-					</div>
-				</Match>
-				<Match when={props.data.type === "video"}>
-					<div
-						class={classNames(
-							"w-full h-full relative z-10 bg-input-base rectangle-background",
-						)}
-					>
-						<Show when={renderNativeMedia()}>
-							{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-							<video
-								src={props.data.url}
-								class="w-full h-full object-contain z-10 relative"
-								controls
-								preload="auto"
-							/>
-						</Show>
-					</div>
-				</Match>
-				<Match when={props.data.type === "audio"}>
-					<div
-						class={classNames(
-							"w-full h-full relative z-10 bg-input-base flex justify-center items-center",
-						)}
-					>
-						<Show when={renderNativeMedia()}>
-							{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
-							<audio src={props.data.url} class="w-2/3" controls />
-						</Show>
-					</div>
-				</Match>
-			</Switch>
+				<MediaStatusPreview status={props.data.status ?? "failed"} />
+			</Show>
 			<Show when={props.progress?.active}>
 				<div class="absolute inset-x-0 bottom-0 z-20">
 					<ProgressBar

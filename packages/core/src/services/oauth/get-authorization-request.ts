@@ -90,7 +90,11 @@ const getAuthorizationRequest: ServiceFn<
 			clientUri: requestRes.data.client_uri,
 			clientLogo: mediaFormatter.formatMediaImagePreview({
 				poster: requestRes.data.client_logo[0],
-				host: getBaseUrl(context),
+				options: {
+					host: getBaseUrl(context),
+					delivery: context.mediaDelivery,
+					imagePresets: context.config.media.images.presets,
+				},
 			}),
 			scopes,
 			userScopes,
