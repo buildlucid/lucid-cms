@@ -22,18 +22,18 @@ const getImageRenderData = (
 ): RichTextHydratedImage => {
 	const title =
 		("title" in reference ? getLocalizedString(reference.title, locale) : "") ||
-		reference.file.fileName ||
-		reference.file.key;
+		reference.fileName ||
+		reference.key;
 
 	return {
-		src: reference.file.url,
+		src: reference.url,
 		alt: getLocalizedString(reference.alt, locale) || title,
 		title,
-		mimeType: reference.file.meta.mimeType,
-		width: reference.file.meta.width,
-		height: reference.file.meta.height,
-		base64: reference.file.meta.base64,
-		averageColor: reference.file.meta.averageColor,
+		mimeType: reference.meta.mimeType,
+		width: reference.meta.width,
+		height: reference.meta.height,
+		base64: reference.meta.base64,
+		averageColor: reference.meta.averageColor,
 	};
 };
 
@@ -44,8 +44,8 @@ export const getMediaRenderData = (
 ): RichTextHydratedMedia => {
 	const title =
 		getLocalizedString(reference.title, locale) ||
-		reference.file.fileName ||
-		reference.file.key;
+		reference.fileName ||
+		reference.key;
 
 	if (reference.type === "image") {
 		return {
@@ -56,9 +56,9 @@ export const getMediaRenderData = (
 	if (reference.type === "video") {
 		return {
 			type: "video",
-			src: reference.file.url,
+			src: reference.url,
 			title,
-			mimeType: reference.file.meta.mimeType,
+			mimeType: reference.meta.mimeType,
 			poster: reference.poster
 				? getImageRenderData(reference.poster, locale)
 				: null,
@@ -67,17 +67,17 @@ export const getMediaRenderData = (
 	if (reference.type === "audio") {
 		return {
 			type: "audio",
-			src: reference.file.url,
+			src: reference.url,
 			title,
-			mimeType: reference.file.meta.mimeType,
+			mimeType: reference.meta.mimeType,
 		};
 	}
 
 	return {
 		type: reference.type,
-		src: reference.file.url,
+		src: reference.url,
 		title,
-		fileName: reference.file.fileName || reference.file.key,
-		mimeType: reference.file.meta.mimeType,
+		fileName: reference.fileName || reference.key,
+		mimeType: reference.meta.mimeType,
 	};
 };

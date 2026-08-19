@@ -11,6 +11,95 @@ export interface ImageMeta {
 	isLight: boolean;
 }
 
+export interface VideoMeta {
+	width: number;
+	height: number;
+	duration: number | null;
+}
+
+export interface AudioMeta {
+	duration: number | null;
+}
+
+const mediaMetadataTimeout = 10000;
+
+const readTimedMediaMeta = async <T>(props: {
+	file: File;
+	type: "audio" | "video";
+	format: (element: HTMLMediaElement) => T | null;
+}): Promise<T | null> => {
+	if (!props.file.type.startsWith(`${props.type}/`)) return null;
+	const url = URL.createObjectURL(props.file);
+	const element = document.createElement(props.type);
+	element.preload = "metadata";
+	element.src = url;
+
+	try {
+		await new Promise<void>((resolve, reject) => {
+			const timeout = window.setTimeout(() => {
+				cleanup();
+				reject(new Error(`Timed out reading ${props.type} metadata.`));
+			}, mediaMetadataTimeout);
+			const cleanup = () => {
+				window.clearTimeout(timeout);
+				element.removeEventListener("loadedmetadata", onLoaded);
+				element.removeEventListener("error", onError);
+			};
+			const onLoaded = () => {
+				cleanup();
+				resolve();
+			};
+			const onError = () => {
+				cleanup();
+				reject(new Error(`Unable to read ${props.type} metadata.`));
+			};
+
+			element.addEventListener("loadedmetadata", onLoaded, { once: true });
+			element.addEventListener("error", onError, { once: true });
+			element.load();
+		});
+
+		return props.format(element);
+	} catch (error) {
+		console.warn(`Error extracting ${props.type} metadata:`, error);
+		return null;
+	} finally {
+		element.removeAttribute("src");
+		element.load();
+		URL.revokeObjectURL(url);
+	}
+};
+
+const formatDuration = (media: HTMLMediaElement) =>
+	Number.isFinite(media.duration) && media.duration >= 0
+		? media.duration
+		: null;
+
+/** Reads portable video metadata without loading the whole file into memory. */
+export const getVideoMeta = async (file: File): Promise<VideoMeta | null> =>
+	readTimedMediaMeta({
+		file,
+		type: "video",
+		format: (element) => {
+			const video = element as HTMLVideoElement;
+			if (video.videoWidth <= 0 || video.videoHeight <= 0) return null;
+
+			return {
+				width: video.videoWidth,
+				height: video.videoHeight,
+				duration: formatDuration(video),
+			};
+		},
+	});
+
+/** Reads portable audio duration without loading the whole file into memory. */
+export const getAudioMeta = async (file: File): Promise<AudioMeta | null> =>
+	readTimedMediaMeta({
+		file,
+		type: "audio",
+		format: (audio) => ({ duration: formatDuration(audio) }),
+	});
+
 const generateBase64Placeholder = async (
 	file: File,
 ): Promise<string | null> => {

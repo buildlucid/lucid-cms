@@ -36,8 +36,7 @@ const isMediaRef = (value: unknown): value is NonNullable<MediaRef> => {
 	return (
 		isObjectRecord(value) &&
 		typeof value.id === "number" &&
-		isObjectRecord(value.file) &&
-		typeof value.file.url === "string"
+		typeof value.url === "string"
 	);
 };
 

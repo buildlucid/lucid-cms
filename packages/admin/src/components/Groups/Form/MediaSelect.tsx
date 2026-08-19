@@ -82,8 +82,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 			(media?.type === "image"
 				? helpers.getTranslation(media.alt, contentLocale())
 				: null) ||
-			helpers.formatFileNameTitle(media?.file.fileName) ||
-			media?.file.key ||
+			helpers.formatFileNameTitle(media?.fileName) ||
+			media?.key ||
 			""
 		);
 	};
@@ -95,8 +95,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		);
 	};
 	const getMediaDimensions = (media?: MediaRelationRef) => {
-		const width = media?.type === "image" ? media.file.meta.width : null;
-		const height = media?.type === "image" ? media.file.meta.height : null;
+		const width = media?.type === "image" ? media.meta.width : null;
+		const height = media?.type === "image" ? media.meta.height : null;
 		if (!width || !height) return null;
 		return `${width}x${height}`;
 	};
@@ -206,9 +206,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 		const media = primarySelectedMedia();
 		return {
 			status: media?.status ?? "ready",
-			url: media?.file.url ?? "",
+			url: media?.url ?? "",
 			type: media?.type ?? "image",
-			presets: media?.type === "image" ? media.file.presets : undefined,
+			delivery: media?.delivery,
 			sources: media?.type === "video" ? media.sources : undefined,
 			poster: media?.type === "video" ? media.poster : undefined,
 		};
@@ -312,24 +312,24 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										</div>
 									</Show>
 									<div class="flex flex-wrap items-center gap-2 ">
-										<Show when={primarySelectedMedia()?.file.meta.fileSize}>
+										<Show when={primarySelectedMedia()?.meta.fileSize}>
 											<Pill theme="outline">
 												{helpers.bytesToSize(
-													primarySelectedMedia()?.file.meta.fileSize,
+													primarySelectedMedia()?.meta.fileSize,
 												)}
 											</Pill>
 										</Show>
 										<Show when={mediaDimensions()}>
 											<Pill theme="outline">{mediaDimensions()}</Pill>
 										</Show>
-										<Show when={primarySelectedMedia()?.file.meta.mimeType}>
+										<Show when={primarySelectedMedia()?.meta.mimeType}>
 											<Pill theme="outline">
-												{primarySelectedMedia()?.file.meta.mimeType}
+												{primarySelectedMedia()?.meta.mimeType}
 											</Pill>
 										</Show>
-										<Show when={primarySelectedMedia()?.file.meta.extension}>
+										<Show when={primarySelectedMedia()?.meta.extension}>
 											<Pill theme="outline">
-												{primarySelectedMedia()?.file.meta.extension.toUpperCase()}
+												{primarySelectedMedia()?.meta.extension.toUpperCase()}
 											</Pill>
 										</Show>
 									</div>
@@ -353,8 +353,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										<div class=" border-t-0flex items-center gap-2 min-w-0">
 											<ClickToCopy
 												type="simple"
-												text={primarySelectedMedia()?.file.key || ""}
-												value={primarySelectedMedia()?.file.url || ""}
+												text={primarySelectedMedia()?.key || ""}
+												value={primarySelectedMedia()?.url || ""}
 												class="text-xs text-unfocused max-w-full"
 											/>
 										</div>
@@ -559,12 +559,12 @@ const MediaSortableItem: Component<{
 						<Show when={props.dimensions}>
 							<Pill theme="outline">{props.dimensions}</Pill>
 						</Show>
-						<Show when={props.media.file.meta.mimeType}>
-							<Pill theme="outline">{props.media.file.meta.mimeType}</Pill>
+						<Show when={props.media.meta.mimeType}>
+							<Pill theme="outline">{props.media.meta.mimeType}</Pill>
 						</Show>
-						<Show when={props.media.file.meta.extension}>
+						<Show when={props.media.meta.extension}>
 							<Pill theme="outline">
-								{props.media.file.meta.extension.toUpperCase()}
+								{props.media.meta.extension.toUpperCase()}
 							</Pill>
 						</Show>
 					</div>
@@ -573,12 +573,9 @@ const MediaSortableItem: Component<{
 					<MediaPreview
 						media={{
 							status: props.media.status,
-							url: props.media.file.url,
+							url: props.media.url,
 							type: props.media.type,
-							presets:
-								props.media.type === "image"
-									? props.media.file.presets
-									: undefined,
+							delivery: props.media.delivery,
 							sources:
 								props.media.type === "video" ? props.media.sources : undefined,
 							poster:
@@ -599,8 +596,8 @@ const MediaSortableItem: Component<{
 					<div class="mt-1">
 						<ClickToCopy
 							type="simple"
-							text={props.media.file.key}
-							value={props.media.file.url}
+							text={props.media.key}
+							value={props.media.url}
 							class="text-xs text-unfocused max-w-full"
 						/>
 					</div>

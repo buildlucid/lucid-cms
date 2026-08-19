@@ -86,22 +86,15 @@ const context = {
 				type: "image",
 				title: { en: "Photo", fr: "Photographie" },
 				alt: { en: "A photo", fr: "Une photographie" },
-				file: {
-					key: "photo.jpg",
-					url: "/photo.jpg",
-					fileName: "photo.jpg",
-					presets: {
-						"thumbnail-small": {
-							url: "/photo-thumbnail-small.webp",
-						},
-					},
-					meta: {
-						mimeType: "image/jpeg",
-						width: 1200,
-						height: 800,
-						base64: "data:image/jpeg;base64,preview",
-						averageColor: "#334455",
-					},
+				key: "photo.jpg",
+				url: "/photo.jpg",
+				fileName: "photo.jpg",
+				meta: {
+					mimeType: "image/jpeg",
+					width: 1200,
+					height: 800,
+					base64: "data:image/jpeg;base64,preview",
+					averageColor: "#334455",
 				},
 			},
 		],

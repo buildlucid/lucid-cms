@@ -317,7 +317,7 @@ describe("@lucidcms/client", () => {
 			},
 		});
 
-		const response = await client.media.process({
+		const response = await client.media.resolveUrl({
 			key: "public/example.png",
 		});
 

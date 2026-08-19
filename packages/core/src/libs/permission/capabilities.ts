@@ -106,13 +106,13 @@ const getStaticCapabilityGroups = (): CapabilityGroup[] => {
 
 		if (group.key === "media_permissions") {
 			capabilities.push({
-				key: ExternalScopes.MediaProcess,
+				key: ExternalScopes.MediaResolveUrl,
 				details: {
-					name: copy("admin:integrations.scopes.media.process"),
+					name: copy("admin:integrations.scopes.media.resolve_url"),
 				},
 				core: true,
 				external: {
-					scope: ExternalScopes.MediaProcess,
+					scope: ExternalScopes.MediaResolveUrl,
 					userPermission: Permissions.MediaRead,
 				},
 				availableToIntegrations: true,

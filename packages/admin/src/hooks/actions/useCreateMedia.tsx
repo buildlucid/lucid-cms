@@ -9,7 +9,7 @@ import { createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import type { ImageMeta } from "@/utils/media-meta";
+import { getAudioMeta, getVideoMeta, type ImageMeta } from "@/utils/media-meta";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 export const useCreateMedia = () => {
@@ -99,6 +99,11 @@ export const useCreateMedia = () => {
 		},
 	): Promise<Media | null> => {
 		let fileKey = getKey();
+		const mediaType = helpers.getMediaType(file?.type);
+		const videoMeta =
+			file && mediaType === "video" ? await getVideoMeta(file) : null;
+		const audioMeta =
+			file && mediaType === "audio" ? await getAudioMeta(file) : null;
 
 		if (file) {
 			const uploadFileRes = await uploadFile(
@@ -116,8 +121,6 @@ export const useCreateMedia = () => {
 				)
 			: undefined;
 		if (options?.crop && !cropKey) return null;
-		const mediaType = helpers.getMediaType(file?.type);
-
 		const result = await createSingle.action.mutateAsync({
 			key: fileKey,
 			fileName: file?.name,
@@ -136,8 +139,22 @@ export const useCreateMedia = () => {
 			folderId: options?.folderId ?? getFolderId() ?? null,
 			posterId: mediaType === "video" ? options?.posterId : undefined,
 			isHidden: options?.isHidden,
-			width: mediaType === "image" ? imageMeta?.width : undefined,
-			height: mediaType === "image" ? imageMeta?.height : undefined,
+			width:
+				mediaType === "image"
+					? imageMeta?.width
+					: mediaType === "video"
+						? videoMeta?.width
+						: undefined,
+			height:
+				mediaType === "image"
+					? imageMeta?.height
+					: mediaType === "video"
+						? videoMeta?.height
+						: undefined,
+			duration:
+				mediaType === "video" || mediaType === "audio"
+					? (videoMeta?.duration ?? audioMeta?.duration ?? undefined)
+					: undefined,
 			focalPoint:
 				mediaType === "image" ? (options?.focalPoint ?? undefined) : undefined,
 			blurHash: mediaType === "image" ? imageMeta?.blurHash : undefined,

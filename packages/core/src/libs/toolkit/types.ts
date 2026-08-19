@@ -42,7 +42,7 @@ export type * from "./locales/index.js";
 export type * from "./media/get-multiple.js";
 export type * from "./media/get-single.js";
 export type * from "./media/index.js";
-export type * from "./media/process-media.js";
+export type * from "./media/resolve-url.js";
 export type * from "./previews/index.js";
 export type * from "./previews/resolve.js";
 export type * from "./previews/state.js";

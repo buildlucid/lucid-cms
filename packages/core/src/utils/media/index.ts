@@ -1,3 +1,4 @@
+export { default as mediaAdapterDataSchema } from "./adapter-data.js";
 export { default as buildDownloadContentDisposition } from "./build-download-content-disposition.js";
 export { default as changeKeyVisibility } from "./change-key-visibility.js";
 export { default as chooseAcceptHeaderFormat } from "./choose-accept-header-format.js";

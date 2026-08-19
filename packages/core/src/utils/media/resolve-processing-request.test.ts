@@ -15,6 +15,7 @@ describe("resolveProcessingRequest", () => {
 		});
 
 		expect(result.rotate).toBe(90);
+		expect(result.preset).toBe("portrait");
 		expect(result.publicQuery).toEqual({
 			preset: "portrait",
 			format: undefined,

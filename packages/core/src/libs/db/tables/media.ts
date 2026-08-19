@@ -1,6 +1,11 @@
 import type { ColumnType, Generated, JSONColumnType } from "kysely";
 import z from "zod";
-import type { MediaOrigin, MediaType } from "../../../types/response.js";
+import type {
+	MediaAdapterData,
+	MediaOrigin,
+	MediaType,
+} from "../../../types/response.js";
+import mediaAdapterDataSchema from "../../../utils/media/adapter-data.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
@@ -47,7 +52,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			type: "text",
 		},
 		storage_adapter_data: {
-			schema: z.record(z.string(), z.unknown()).nullable(),
+			schema: mediaAdapterDataSchema.nullable(),
 			type: "json",
 		},
 		origin: {
@@ -99,6 +104,10 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 		height: {
 			schema: z.number().nullable(),
 			type: "integer",
+		},
+		duration: {
+			schema: z.number().nullable(),
+			type: "real",
 		},
 		focal_x: {
 			schema: z.number().nullable(),
@@ -232,7 +241,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 						status: z.enum(["processing", "ready", "failed"]),
 						storage_adapter_key: z.string(),
 						storage_adapter_reference: z.string().nullable(),
-						storage_adapter_data: z.record(z.string(), z.unknown()).nullable(),
+						storage_adapter_data: mediaAdapterDataSchema.nullable(),
 						public: z.union([
 							z.literal(adapter.config.defaults.boolean.true),
 							z.literal(adapter.config.defaults.boolean.false),
@@ -277,9 +286,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 									status: z.enum(["processing", "ready", "failed"]),
 									storage_adapter_key: z.string(),
 									storage_adapter_reference: z.string().nullable(),
-									storage_adapter_data: z
-										.record(z.string(), z.unknown())
-										.nullable(),
+									storage_adapter_data: mediaAdapterDataSchema.nullable(),
 									public: z.union([
 										z.literal(adapter.config.defaults.boolean.true),
 										z.literal(adapter.config.defaults.boolean.false),
@@ -343,7 +350,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 						status: z.enum(["processing", "ready", "failed"]),
 						storage_adapter_key: z.string(),
 						storage_adapter_reference: z.string().nullable(),
-						storage_adapter_data: z.record(z.string(), z.unknown()).nullable(),
+						storage_adapter_data: mediaAdapterDataSchema.nullable(),
 						public: z.union([
 							z.literal(adapter.config.defaults.boolean.true),
 							z.literal(adapter.config.defaults.boolean.false),
@@ -429,9 +436,9 @@ export interface LucidMedia {
 	storage_adapter_key: string;
 	storage_adapter_reference: string | null;
 	storage_adapter_data: JSONColumnType<
-		Record<string, unknown> | null,
-		Record<string, unknown> | null,
-		Record<string, unknown> | null
+		MediaAdapterData | null,
+		MediaAdapterData | null,
+		MediaAdapterData | null
 	>;
 	origin: MediaOrigin;
 	ai_generation_id: number | null;
@@ -443,6 +450,7 @@ export interface LucidMedia {
 	file_size: number;
 	width: number | null;
 	height: number | null;
+	duration: number | null;
 	focal_x: number | null;
 	focal_y: number | null;
 	crop_x: number | null;

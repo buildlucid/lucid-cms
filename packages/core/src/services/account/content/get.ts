@@ -28,7 +28,6 @@ const get: ServiceFn<[{ userId: number }], Account> = async (context, data) => {
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
-				imagePresets: context.config.media.images.presets,
 			},
 		}),
 	};

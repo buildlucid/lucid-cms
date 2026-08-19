@@ -29,13 +29,11 @@ const isDocumentRef = (value: unknown): value is HydratableDocumentRef => {
 
 const isMediaRef = (value: unknown): value is Media => {
 	const reference = getObject(value);
-	const file = getObject(reference?.file);
 	return (
 		reference !== null &&
 		typeof reference.id === "number" &&
 		typeof reference.type === "string" &&
-		file !== null &&
-		typeof file.url === "string"
+		typeof reference.url === "string"
 	);
 };
 

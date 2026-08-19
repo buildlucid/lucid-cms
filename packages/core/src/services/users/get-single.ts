@@ -55,7 +55,6 @@ const getSingle: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
-				imagePresets: context.config.media.images.presets,
 			},
 			locales: context.config.localization.locales.map((locale) => locale.code),
 			defaultLocale: context.config.localization.defaultLocale,

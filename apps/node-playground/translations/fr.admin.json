@@ -909,7 +909,7 @@
 	"fields.json.invalid.save.warning": "Utilisation de la dernière sauvegarde valide",
 	"integrations.scopes.documents.read": "Lire des documents",
 	"integrations.scopes.media.read": "Lire les médias",
-	"integrations.scopes.media.process": "Médias de traitement",
+	"integrations.scopes.media.resolve_url": "Résoudre les URL des médias",
 	"integrations.scopes.locales.read": "Lire les paramètres régionaux",
 	"common.comment": "Commentaire",
 	"common.comments": "Commentaires",

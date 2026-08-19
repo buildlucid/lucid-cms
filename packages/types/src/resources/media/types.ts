@@ -42,6 +42,23 @@ export interface MediaFileMeta {
 	fileSize: number;
 }
 
+export type MediaAdapterDataValue =
+	| string
+	| number
+	| boolean
+	| null
+	| MediaAdapterDataValue[]
+	| { [key: string]: MediaAdapterDataValue };
+
+export type MediaAdapterData = Record<string, MediaAdapterDataValue>;
+
+export interface MediaDeliveryDetails {
+	adapter: string;
+	data: MediaAdapterData | null;
+	/** Whether `url` accepts Lucid image preset queries. */
+	supportsPresetQuery: boolean;
+}
+
 export interface MediaImageMeta extends MediaFileMeta {
 	width: number | null;
 	height: number | null;
@@ -56,45 +73,39 @@ export interface MediaImageMeta extends MediaFileMeta {
 	isLight: boolean | null;
 }
 
+export interface MediaVideoMeta extends MediaFileMeta {
+	width: number | null;
+	height: number | null;
+	duration: number | null;
+}
+
+export interface MediaAudioMeta extends MediaFileMeta {
+	duration: number | null;
+}
+
 export interface MediaFile<Meta extends MediaFileMeta = MediaFileMeta> {
 	key: string;
 	url: string;
 	fileName: string | null;
 	meta: Meta;
+	delivery: MediaDeliveryDetails;
 }
 
-export interface MediaPresetSource {
-	url: string;
-}
-
-export interface MediaOriginalFile {
-	key: string;
-	url: string;
-	presets: Record<string, MediaPresetSource>;
-	meta: MediaImageMeta;
+export interface MediaOriginalFile extends MediaFile<MediaImageMeta> {
+	sourceType: "original";
 }
 
 export type MediaImageFile =
-	| {
-			key: string;
-			url: string;
-			fileName: string | null;
-			presets: Record<string, MediaPresetSource>;
+	| (MediaFile<MediaImageMeta> & {
 			sourceType: "original";
-			meta: MediaImageMeta;
 			original?: never;
 			crop?: never;
-	  }
-	| {
-			key: string;
-			url: string;
-			fileName: string | null;
-			presets: Record<string, MediaPresetSource>;
+	  })
+	| (MediaFile<MediaImageMeta> & {
 			sourceType: "crop";
 			crop: MediaCropState;
-			meta: MediaImageMeta;
 			original: MediaOriginalFile;
-	  };
+	  });
 
 export type MediaTranslationMap = Record<string, string | null> | null;
 
@@ -113,16 +124,20 @@ interface MediaBase<Type extends MediaType> {
 	updatedAt: string | null;
 }
 
-export interface MediaImage extends MediaBase<"image"> {
-	alt: MediaTranslationMap;
-	file: MediaImageFile;
-}
+export type MediaImage = MediaBase<"image"> &
+	MediaImageFile & {
+		alt: MediaTranslationMap;
+	};
 
-export interface MediaVideo extends MediaBase<"video"> {
-	description: MediaTranslationMap;
-	file: MediaFile;
+export type MediaVideo = MediaBase<"video"> &
+	MediaVideoFile & {
+		description: MediaTranslationMap;
+		poster: MediaPoster | null;
+	};
+
+export interface MediaVideoFile extends MediaFile<MediaVideoMeta> {
 	sources: MediaVideoSource[];
-	poster: MediaPoster | null;
+	thumbnail: MediaVideoThumbnail | null;
 }
 
 export interface MediaVideoSource {
@@ -131,23 +146,28 @@ export interface MediaVideoSource {
 	kind: "progressive" | "hls" | "dash";
 }
 
-export interface MediaAudio extends MediaBase<"audio"> {
-	description: MediaTranslationMap;
-	file: MediaFile;
+export interface MediaVideoThumbnail {
+	url: string;
+	mimeType: string;
+	width: number | null;
+	height: number | null;
 }
 
-export interface MediaDocument extends MediaBase<"document"> {
-	summary: MediaTranslationMap;
-	file: MediaFile;
-}
+export type MediaAudio = MediaBase<"audio"> &
+	MediaAudioFile & {
+		description: MediaTranslationMap;
+	};
 
-export interface MediaArchive extends MediaBase<"archive"> {
-	file: MediaFile;
-}
+export type MediaAudioFile = MediaFile<MediaAudioMeta>;
 
-export interface MediaUnknown extends MediaBase<"unknown"> {
-	file: MediaFile;
-}
+export type MediaDocument = MediaBase<"document"> &
+	MediaFile & {
+		summary: MediaTranslationMap;
+	};
+
+export type MediaArchive = MediaBase<"archive"> & MediaFile;
+
+export type MediaUnknown = MediaBase<"unknown"> & MediaFile;
 
 export type Media =
 	| MediaImage
@@ -162,26 +182,22 @@ export interface MediaTranslation {
 	value: string | null;
 }
 
-export interface MediaPoster {
+type MediaImageReference = {
 	id: number;
 	type: "image";
 	status: MediaStatus;
 	origin: MediaOrigin;
 	alt: MediaTranslationMap;
-	file: MediaImageFile;
-}
+};
+
+export type MediaPoster = MediaImageReference & MediaImageFile;
 
 export type MediaRef = Media;
 
-export interface MediaImagePreview {
-	id: number;
-	type: "image";
-	status: MediaStatus;
-	origin: MediaOrigin;
-	title: MediaTranslationMap;
-	alt: MediaTranslationMap;
-	file: MediaImageFile;
-}
+export type MediaImagePreview = MediaImageReference &
+	MediaImageFile & {
+		title: MediaTranslationMap;
+	};
 
 export type ProfilePicture = MediaImagePreview;
 
@@ -293,6 +309,7 @@ export interface ShareLinkAccessGranted {
 		fileSize: number;
 		width: number | null;
 		height: number | null;
+		duration: number | null;
 		focalPoint: {
 			x: number;
 			y: number;
@@ -340,7 +357,7 @@ export interface MultipleMediaFolder {
 	breadcrumbs: MediaFolderBreadcrumb[];
 }
 
-export type MediaProcessOptions = {
+export type MediaResolveUrlOptions = {
 	preset?: string;
 	format?: "webp" | "avif" | "jpeg" | "png";
 };

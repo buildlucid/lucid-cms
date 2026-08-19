@@ -1,3 +1,3 @@
 export { default as getMultiple } from "./get-multiple.js";
 export { default as getSingle } from "./get-single.js";
-export { default as processMedia } from "./process-media.js";
+export { default as resolveUrl } from "./resolve-url.js";

@@ -247,7 +247,6 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 				mediaOptions: {
 					host: baseUrl,
 					delivery: context.mediaDelivery,
-					imagePresets: context.config.media.images.presets,
 				},
 				refData,
 				refTypes: include.refTypes,

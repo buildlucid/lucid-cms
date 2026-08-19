@@ -34,7 +34,6 @@ const getMultiple: ServiceFn<
 				options: {
 					host: getBaseUrl(context),
 					delivery: context.mediaDelivery,
-					imagePresets: context.config.media.images.presets,
 				},
 			}),
 			count: formatter.parseCount(mediaRes.data[1]?.count),

@@ -50,7 +50,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
 	const displayTitle = createMemo(() => {
-		return title() || helpers.formatFileNameTitle(props.media.file.fileName);
+		return title() || helpers.formatFileNameTitle(props.media.fileName);
 	});
 	const alt = createMemo(() => {
 		if (props.media.type !== "image") return null;
@@ -125,11 +125,8 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 					media={{
 						status: props.media.status,
 						type: props.media.type,
-						url: props.media.file.url,
-						presets:
-							props.media.type === "image"
-								? props.media.file.presets
-								: undefined,
+						url: props.media.url,
+						delivery: props.media.delivery,
 						sources:
 							props.media.type === "video" ? props.media.sources : undefined,
 						poster:

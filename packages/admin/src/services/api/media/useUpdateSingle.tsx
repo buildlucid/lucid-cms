@@ -34,6 +34,7 @@ interface Params {
 		folderId?: number | null;
 		width?: number | null;
 		height?: number | null;
+		duration?: number | null;
 		focalPoint?: MediaImageMeta["focalPoint"];
 		blurHash?: string | null;
 		averageColor?: string | null;

@@ -26,6 +26,7 @@ import T from "@/translations";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import { resolveStoredImageCropSource } from "@/utils/image-crop";
+import getMediaPreviewUrl from "@/utils/media-preview";
 import {
 	getTranslation,
 	recordToTranslations,
@@ -138,7 +139,7 @@ const CreateUpdateProfilePicturePanel: Component<
 				key: undefined,
 				title: hydrateTranslations(profilePictureMedia()?.title),
 				alt: hydrateTranslations(profilePictureMedia()?.alt),
-				focalPoint: profilePictureMedia()?.file.meta.focalPoint ?? null,
+				focalPoint: profilePictureMedia()?.meta.focalPoint ?? null,
 			},
 			{
 				key: createMedia.state.key(),
@@ -169,10 +170,10 @@ const CreateUpdateProfilePicturePanel: Component<
 		if (file) return { file, filename: file.name };
 
 		const profilePicture = profilePictureMedia();
-		if (profilePicture?.file.url) {
+		if (profilePicture?.url) {
 			return {
-				url: profilePicture.file.url,
-				filename: profilePicture.file.fileName ?? profilePicture.file.key,
+				url: profilePicture.url,
+				filename: profilePicture.fileName ?? profilePicture.key,
 			};
 		}
 
@@ -362,27 +363,27 @@ const CreateUpdateProfilePicturePanel: Component<
 		createMedia.setPublic(true);
 		MediaFile.reset();
 		if (profilePicture) {
-			const file = profilePicture.file;
+			const file = profilePicture;
 			const source = resolveStoredImageCropSource(file);
 			MediaFile.setCurrentFile({
 				name: file.fileName ?? file.key,
-				url: file.presets["thumbnail-medium"]?.url ?? file.url,
-				focalPointUrl: file.presets["thumbnail-large"]?.url ?? file.url,
-				originalUrl: source.file.url,
+				url: getMediaPreviewUrl(file, "thumbnail-medium"),
+				focalPointUrl: getMediaPreviewUrl(file, "thumbnail-large"),
+				originalUrl: source.source.url,
 				originalPreviewUrl: source.crop
-					? (source.file.presets["thumbnail-medium"]?.url ?? source.file.url)
+					? getMediaPreviewUrl(source.source, "thumbnail-medium")
 					: undefined,
 				originalFocalPointUrl: source.crop
-					? (source.file.presets["thumbnail-large"]?.url ?? source.file.url)
+					? getMediaPreviewUrl(source.source, "thumbnail-large")
 					: undefined,
 				type: profilePicture.type,
-				mimeType: source.file.meta.mimeType,
+				mimeType: source.source.meta.mimeType,
 				origin: profilePicture.origin,
-				width: source.file.meta.width,
-				height: source.file.meta.height,
+				width: source.source.meta.width,
+				height: source.source.meta.height,
 				focalPoint: file.meta.focalPoint ?? null,
 				originalFocalPoint:
-					source.file.meta.focalPoint ?? file.meta.focalPoint ?? null,
+					source.source.meta.focalPoint ?? file.meta.focalPoint ?? null,
 				crop: source.crop,
 			});
 		}

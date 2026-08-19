@@ -44,4 +44,5 @@ db.sqlite
 *.swp
 
 # ai
+.agents
 AGENTS.md

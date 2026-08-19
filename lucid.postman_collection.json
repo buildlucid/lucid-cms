@@ -2897,7 +2897,7 @@
 					"name": "Media",
 					"item": [
 						{
-							"name": "Process Single",
+							"name": "Resolve URL",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -2909,7 +2909,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"width\": 100,\n    \"height\": 100,\n    \"format\": \"webp\",\n    \"quality\": 80\n}",
+									"raw": "{\n    \"preset\": \"thumbnail-small\",\n    \"format\": \"webp\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2917,9 +2917,9 @@
 									}
 								},
 								"url": {
-									"raw": "{{BASE_URL}}/api/v1/content/media/process/key",
+									"raw": "{{BASE_URL}}/api/v1/content/media/resolve/key",
 									"host": ["{{BASE_URL}}"],
-									"path": ["api", "v1", "content", "media", "process", "key"]
+									"path": ["api", "v1", "content", "media", "resolve", "key"]
 								}
 							},
 							"response": []

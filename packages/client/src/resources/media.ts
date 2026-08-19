@@ -1,6 +1,6 @@
 import type {
 	Media,
-	MediaProcessOptions,
+	MediaResolveUrlOptions,
 	MediaUrl,
 	ResponseBody,
 } from "@lucidcms/types";
@@ -29,13 +29,12 @@ export type MediaGetSingleResponse = ResponseBody<Media>;
 
 export type MediaGetMultipleResponse = ResponseBody<Media[]>;
 
-export type MediaProcessInput = {
+export type MediaResolveUrlInput = MediaResolveUrlOptions & {
 	key: string;
-	body?: MediaProcessOptions;
 	request?: LucidRequestOptions;
 };
 
-export type MediaProcessResponse = ResponseBody<MediaUrl>;
+export type MediaResolveUrlResponse = ResponseBody<MediaUrl>;
 
 export interface LucidMediaClient {
 	/** Fetches one media item by id. */
@@ -48,10 +47,10 @@ export interface LucidMediaClient {
 		input?: MediaGetMultipleInput,
 	): Promise<LucidClientResponse<MediaGetMultipleResponse>>;
 
-	/** Processes a media key and returns the resolved media URL. */
-	process(
-		input: MediaProcessInput,
-	): Promise<LucidClientResponse<MediaProcessResponse>>;
+	/** Resolves a media key to a URL with optional image transformations. */
+	resolveUrl(
+		input: MediaResolveUrlInput,
+	): Promise<LucidClientResponse<MediaResolveUrlResponse>>;
 }
 
 /** Creates the media resource used by the public Lucid client. */
@@ -73,12 +72,15 @@ export const createMediaClient = (
 			query: input.query,
 			request: input.request,
 		}),
-	process: async (input) =>
-		await transport.request<MediaProcessResponse>({
-			operation: "media.process",
+	resolveUrl: async (input) =>
+		await transport.request<MediaResolveUrlResponse>({
+			operation: "media.resolveUrl",
 			method: "POST",
-			path: `/media/process/${encodePathPreservingSlashes(input.key)}`,
-			body: input.body,
+			path: `/media/resolve/${encodePathPreservingSlashes(input.key)}`,
+			body: {
+				preset: input.preset,
+				format: input.format,
+			},
 			request: input.request,
 		}),
 });

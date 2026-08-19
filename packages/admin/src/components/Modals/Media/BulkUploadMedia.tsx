@@ -28,7 +28,7 @@ import { createUploadSessionReq } from "@/services/api/media/useCreateUploadSess
 import T from "@/translations";
 import { validateSetError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
-import { getImageMeta } from "@/utils/media-meta";
+import { getAudioMeta, getImageMeta, getVideoMeta } from "@/utils/media-meta";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 type UploadStatus = "queued" | "uploading" | "creating" | "success" | "error";
@@ -215,14 +215,20 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 		});
 
 		try {
-			const imageMeta = await getImageMeta(row.file);
+			const [imageMeta, videoMeta, audioMeta] = await Promise.all([
+				getImageMeta(row.file),
+				getVideoMeta(row.file),
+				getAudioMeta(row.file),
+			]);
+
 			await createSingleReq({
 				key: uploadRes.data,
 				fileName: row.file.name,
 				origin: "human",
 				folderId: resolvedFolderId(),
-				width: imageMeta?.width,
-				height: imageMeta?.height,
+				width: imageMeta?.width ?? videoMeta?.width,
+				height: imageMeta?.height ?? videoMeta?.height,
+				duration: videoMeta?.duration ?? audioMeta?.duration ?? undefined,
 				blurHash: imageMeta?.blurHash,
 				averageColor: imageMeta?.averageColor,
 				base64: imageMeta?.base64,

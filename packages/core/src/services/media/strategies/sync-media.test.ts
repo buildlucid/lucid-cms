@@ -38,6 +38,9 @@ describe("media sync strategy", () => {
 				mimeType: "application/octet-stream",
 				etag: "object-etag",
 				status: "processing",
+				width: 1920,
+				height: 1080,
+				duration: 12.5,
 				adapterReference: "provider-file-id",
 				adapterData: { libraryId: "library-id" },
 			},
@@ -56,7 +59,7 @@ describe("media sync strategy", () => {
 			error: undefined,
 			data: undefined,
 		});
-		mocks.detectStreamMimeType.mockResolvedValueOnce("image/png");
+		mocks.detectStreamMimeType.mockResolvedValueOnce("video/mp4");
 		mocks.adjustInt.mockResolvedValueOnce({
 			error: undefined,
 			data: {
@@ -81,11 +84,14 @@ describe("media sync strategy", () => {
 		);
 
 		expect(response.error).toBeUndefined();
-		expect(response.data?.mimeType).toBe("image/png");
-		expect(response.data?.type).toBe("image");
-		expect(response.data?.extension).toBe("png");
+		expect(response.data?.mimeType).toBe("video/mp4");
+		expect(response.data?.type).toBe("video");
+		expect(response.data?.extension).toBe("mp4");
 		expect(response.data).toMatchObject({
 			status: "processing",
+			width: 1920,
+			height: 1080,
+			duration: 12.5,
 			storageAdapterKey: "provider",
 			storageAdapterReference: "provider-file-id",
 			storageAdapterData: { libraryId: "library-id" },

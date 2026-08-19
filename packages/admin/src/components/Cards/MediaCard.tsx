@@ -104,7 +104,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
 	const displayTitle = createMemo(() => {
-		return title() || helpers.formatFileNameTitle(props.media.file.fileName);
+		return title() || helpers.formatFileNameTitle(props.media.fileName);
 	});
 	const alt = createMemo(() => {
 		if (props.media.type !== "image") return null;
@@ -137,7 +137,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 		return (
 			props.media.status === "ready" &&
 			props.media.type === "image" &&
-			isSupportedCropMimeType(props.media.file.meta.mimeType) &&
+			isSupportedCropMimeType(props.media.meta.mimeType) &&
 			!props.showingDeleted?.() &&
 			props.onCrop !== undefined
 		);
@@ -318,11 +318,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					media={{
 						status: props.media.status,
 						type: props.media.type,
-						url: props.media.file.url,
-						presets:
-							props.media.type === "image"
-								? props.media.file.presets
-								: undefined,
+						url: props.media.url,
+						delivery: props.media.delivery,
 						sources:
 							props.media.type === "video" ? props.media.sources : undefined,
 						poster:
@@ -363,8 +360,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						<h3 class="mb-0.5 line-clamp-1 text-sm">{displayTitle() || "-"}</h3>
 						<ClickToCopy
 							type="simple"
-							text={props.media.file.key}
-							value={props.media.file.url}
+							text={props.media.key}
+							value={props.media.url}
 							class="text-xs"
 						/>
 					</div>

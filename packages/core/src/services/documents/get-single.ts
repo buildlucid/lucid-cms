@@ -129,7 +129,6 @@ const getSingle: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
-				imagePresets: context.config.media.images.presets,
 			},
 			refs: bricksRes.data.refs,
 			workflow: workflowRes.data,
@@ -145,7 +144,6 @@ const getSingle: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
-				imagePresets: context.config.media.images.presets,
 			},
 			workflow: workflowRes.data,
 		});

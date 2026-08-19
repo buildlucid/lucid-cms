@@ -1,20 +1,24 @@
-import type { Config } from "../../types/config.js";
 import type {
 	Media,
+	MediaAdapterData,
 	MediaCropState,
-	MediaFile,
-	MediaFileMeta,
 	MediaImageFile,
 	MediaImageMeta,
 	MediaImagePreview,
 	MediaOrigin,
+	MediaOriginalFile,
 	MediaPoster,
 	MediaStatus,
 	MediaTranslationMap,
 	MediaType,
+	MediaVideoFile,
 	MediaVideoSource,
+	MediaVideoThumbnail,
 } from "../../types/response.js";
-import { createMediaUrl, resolveDeliveryUrl } from "../../utils/media/index.js";
+import {
+	mediaAdapterDataSchema,
+	resolveDeliveryUrl,
+} from "../../utils/media/index.js";
 import type { MediaRef } from "../collection/custom-fields/fields/media/types.js";
 import type { BooleanInt } from "../db/types.js";
 import type {
@@ -34,7 +38,6 @@ type MediaTranslationProps = {
 export type MediaFormatterOptions = {
 	host: string;
 	delivery: MediaDeliveryAdapterInstance;
-	imagePresets: Config["media"]["images"]["presets"];
 };
 
 export interface MediaPosterPropsT {
@@ -43,7 +46,7 @@ export interface MediaPosterPropsT {
 	status: MediaStatus;
 	storage_adapter_key: string;
 	storage_adapter_reference: string | null;
-	storage_adapter_data: Record<string, unknown> | null;
+	storage_adapter_data: MediaAdapterData | null;
 	public: BooleanInt;
 	origin: MediaOrigin;
 	type: MediaType;
@@ -53,6 +56,7 @@ export interface MediaPosterPropsT {
 	file_size: number;
 	width: number | null;
 	height: number | null;
+	duration?: number | null;
 	focal_x?: number | null;
 	focal_y?: number | null;
 	crop_x?: number | null;
@@ -98,24 +102,6 @@ export const formatFocalPoint = (
 	};
 };
 
-const formatFileMeta = (media: MediaPosterPropsT): MediaFileMeta => ({
-	mimeType: media.mime_type,
-	extension: media.file_extension,
-	fileSize: media.file_size,
-});
-
-const formatImageMeta = (media: MediaPosterPropsT): MediaImageMeta => ({
-	...formatFileMeta(media),
-	width: media.width,
-	height: media.height,
-	focalPoint: formatFocalPoint(media.focal_x, media.focal_y),
-	blurHash: media.blur_hash,
-	averageColor: media.average_color,
-	base64: media.type === "image" ? (media.base64 ?? null) : null,
-	isDark: formatter.formatBoolean(media.is_dark),
-	isLight: formatter.formatBoolean(media.is_light),
-});
-
 const toDeliveryFile = (media: MediaPosterPropsT): MediaDeliveryFile => ({
 	key: media.key,
 	fileName: media.file_name,
@@ -124,6 +110,7 @@ const toDeliveryFile = (media: MediaPosterPropsT): MediaDeliveryFile => ({
 	extension: media.file_extension,
 	width: media.width,
 	height: media.height,
+	duration: media.duration ?? null,
 	focalPoint: formatFocalPoint(media.focal_x, media.focal_y),
 	storage: {
 		adapterKey: media.storage_adapter_key,
@@ -132,115 +119,112 @@ const toDeliveryFile = (media: MediaPosterPropsT): MediaDeliveryFile => ({
 	},
 });
 
-const createFileUrl = (
-	media: MediaPosterPropsT,
-	options: MediaFormatterOptions,
-) =>
-	resolveDeliveryUrl({
-		delivery: options.delivery,
-		file: toDeliveryFile(media),
-		host: options.host,
-		public: formatter.formatBoolean(media.public),
-	}) ??
-	createMediaUrl({
-		key: media.key,
-		host: options.host,
-		fileName: media.file_name,
-		extension: media.file_extension,
-	});
-
-const formatPresets = (
-	media: MediaPosterPropsT,
-	options: MediaFormatterOptions,
-): MediaImageFile["presets"] => {
-	const presets: MediaImageFile["presets"] = {};
-	if (media.status !== "ready") return presets;
-	const focalPoint =
-		formatFocalPoint(media.focal_x, media.focal_y) ?? undefined;
-
-	for (const [name, transformation] of Object.entries(options.imagePresets)) {
-		const url = resolveDeliveryUrl({
-			delivery: options.delivery,
-			file: toDeliveryFile(media),
-			host: options.host,
-			public: formatter.formatBoolean(media.public),
-			preset: name,
-			transformation: { ...transformation, focalPoint },
-		});
-		if (url) presets[name] = { url };
-	}
-
-	return presets;
-};
-
-const formatCropState = (media: MediaPosterPropsT): MediaCropState => {
-	const values = [
-		media.crop_x,
-		media.crop_y,
-		media.crop_width,
-		media.crop_height,
-		media.crop_rotation,
-		media.crop_skew_x,
-		media.crop_skew_y,
-	];
-	if (values.some((value) => typeof value !== "number")) {
-		throw new TypeError("Active crop media has incomplete crop state");
-	}
-
-	return {
-		x: media.crop_x as number,
-		y: media.crop_y as number,
-		width: media.crop_width as number,
-		height: media.crop_height as number,
-		rotation: media.crop_rotation as number,
-		skewX: media.crop_skew_x as number,
-		skewY: media.crop_skew_y as number,
-	};
-};
-
-const formatFileIdentity = (
-	media: MediaPosterPropsT,
-	options: MediaFormatterOptions,
-): Pick<MediaFile, "key" | "url" | "fileName"> => ({
-	key: media.key,
-	url: createFileUrl(media, options),
-	fileName: media.file_name,
-});
-
 const formatFile = (
 	media: MediaPosterPropsT,
 	options: MediaFormatterOptions,
-): MediaFile => ({
-	...formatFileIdentity(media, options),
-	meta: formatFileMeta(media),
-});
+) => {
+	const file = toDeliveryFile(media);
+	const isPublic = formatter.formatBoolean(media.public);
+	const url = resolveDeliveryUrl({
+		delivery: options.delivery,
+		file,
+		host: options.host,
+		public: isPublic,
+	});
+	const deliveryData =
+		isPublic && options.delivery.resolveResponseData
+			? mediaAdapterDataSchema
+					.nullable()
+					.parse(
+						options.delivery.resolveResponseData({ host: options.host, file }),
+					)
+			: null;
+
+	return {
+		key: media.key,
+		fileName: media.file_name,
+		url,
+		meta: {
+			mimeType: media.mime_type,
+			extension: media.file_extension,
+			fileSize: media.file_size,
+		},
+		delivery: {
+			adapter: options.delivery.key,
+			data: deliveryData,
+			supportsPresetQuery:
+				media.type === "image" &&
+				media.status === "ready" &&
+				Boolean(options.delivery.processImage) &&
+				(!isPublic ||
+					options.delivery.resolveFile({
+						host: options.host,
+						file,
+					}).type !== "external"),
+		},
+	};
+};
+const formatCropState = (media: MediaPosterPropsT): MediaCropState => {
+	const {
+		crop_x: x,
+		crop_y: y,
+		crop_width: width,
+		crop_height: height,
+		crop_rotation: rotation,
+		crop_skew_x: skewX,
+		crop_skew_y: skewY,
+	} = media;
+
+	if (
+		typeof x !== "number" ||
+		typeof y !== "number" ||
+		typeof width !== "number" ||
+		typeof height !== "number" ||
+		typeof rotation !== "number" ||
+		typeof skewX !== "number" ||
+		typeof skewY !== "number"
+	) {
+		throw new TypeError("Active crop media has incomplete crop state");
+	}
+
+	return { x, y, width, height, rotation, skewX, skewY };
+};
 
 const formatImageFile = (
 	media: MediaPosterPropsT,
 	options: MediaFormatterOptions,
 ): MediaImageFile => {
-	const activeCrop = media.crop?.[0];
-	if (!activeCrop) {
+	const formatSource = (source: MediaPosterPropsT) => {
+		const file = formatFile(source, options);
+
 		return {
-			...formatFileIdentity(media, options),
-			presets: formatPresets(media, options),
-			sourceType: "original",
-			meta: formatImageMeta(media),
+			...file,
+			meta: {
+				...file.meta,
+				width: source.width,
+				height: source.height,
+				focalPoint: formatFocalPoint(source.focal_x, source.focal_y),
+				blurHash: source.blur_hash,
+				averageColor: source.average_color,
+				base64: source.type === "image" ? (source.base64 ?? null) : null,
+				isDark: formatter.formatBoolean(source.is_dark),
+				isLight: formatter.formatBoolean(source.is_light),
+			},
 		};
-	}
+	};
+
+	const original = {
+		sourceType: "original",
+		...formatSource(media),
+	} satisfies MediaOriginalFile;
+	const activeCrop = media.crop?.[0];
+	if (!activeCrop) return original;
 
 	return {
-		...formatFileIdentity(activeCrop, options),
-		presets: formatPresets(activeCrop, options),
 		sourceType: "crop",
+		...formatSource(activeCrop),
 		crop: formatCropState(activeCrop),
-		meta: formatImageMeta(activeCrop),
-		original: {
-			key: media.key,
-			url: createFileUrl(media, options),
-			presets: formatPresets(media, options),
-			meta: formatImageMeta(media),
-		},
+		original,
 	};
 };
 
@@ -250,11 +234,11 @@ const translationsFor = (
 ): MediaTranslationMap => {
 	const translations = (media.translations ?? []).reduce<
 		Record<string, string | null>
-	>((translations, translation) => {
+	>((result, translation) => {
 		if (translation.locale_code !== null) {
-			translations[translation.locale_code] = translation[field] ?? null;
+			result[translation.locale_code] = translation[field] ?? null;
 		}
-		return translations;
+		return result;
 	}, {});
 
 	return Object.keys(translations).length > 0 ? translations : null;
@@ -265,15 +249,42 @@ const formatMediaImagePreview = (props: {
 	options: MediaFormatterOptions;
 }): MediaImagePreview | null => {
 	if (!props.poster) return null;
+	const image = formatImageFile(props.poster, props.options);
+	const title = translationsFor(props.poster, "title");
+	const alt = translationsFor(props.poster, "alt");
+
+	if (image.sourceType === "original") {
+		return {
+			id: props.poster.id,
+			type: "image",
+			status: props.poster.status,
+			sourceType: image.sourceType,
+			origin: props.poster.origin,
+			title,
+			alt,
+			key: image.key,
+			fileName: image.fileName,
+			url: image.url,
+			meta: image.meta,
+			delivery: image.delivery,
+		};
+	}
 
 	return {
 		id: props.poster.id,
 		type: "image",
 		status: props.poster.status,
+		sourceType: image.sourceType,
 		origin: props.poster.origin,
-		title: translationsFor(props.poster, "title"),
-		alt: translationsFor(props.poster, "alt"),
-		file: formatImageFile(props.poster, props.options),
+		title,
+		alt,
+		key: image.key,
+		fileName: image.fileName,
+		url: image.url,
+		meta: image.meta,
+		delivery: image.delivery,
+		crop: image.crop,
+		original: image.original,
 	};
 };
 
@@ -282,55 +293,102 @@ const formatPoster = (props: {
 	options: MediaFormatterOptions;
 }): MediaPoster | null => {
 	if (!props.poster) return null;
+	const image = formatImageFile(props.poster, props.options);
+	const alt = translationsFor(props.poster, "alt");
+
+	if (image.sourceType === "original") {
+		return {
+			id: props.poster.id,
+			type: "image",
+			status: props.poster.status,
+			sourceType: image.sourceType,
+			origin: props.poster.origin,
+			alt,
+			key: image.key,
+			fileName: image.fileName,
+			url: image.url,
+			meta: image.meta,
+			delivery: image.delivery,
+		};
+	}
 
 	return {
 		id: props.poster.id,
 		type: "image",
 		status: props.poster.status,
+		sourceType: image.sourceType,
 		origin: props.poster.origin,
-		alt: translationsFor(props.poster, "alt"),
-		file: formatImageFile(props.poster, props.options),
+		alt,
+		key: image.key,
+		fileName: image.fileName,
+		url: image.url,
+		meta: image.meta,
+		delivery: image.delivery,
+		crop: image.crop,
+		original: image.original,
 	};
 };
 
-const formatVideoSources = (
+const formatVideoFile = (
 	media: MediaPosterPropsT,
 	options: MediaFormatterOptions,
-	file: MediaFile,
-): MediaVideoSource[] => {
-	if (media.status !== "ready") return [];
+): MediaVideoFile => {
+	const file = formatFile(media, options);
+	let sources: MediaVideoSource[] = [];
+	let thumbnail: MediaVideoThumbnail | null = null;
 
-	if (formatter.formatBoolean(media.public)) {
-		const externalSources = options.delivery.resolveVideoSources?.({
+	if (media.status === "ready" && formatter.formatBoolean(media.public)) {
+		const resolvedVideo = options.delivery.resolveVideo?.({
 			host: options.host,
 			file: toDeliveryFile(media),
 		});
-		if (externalSources !== undefined && externalSources !== null) {
-			return externalSources;
+		if (resolvedVideo) {
+			sources = resolvedVideo.sources;
+			thumbnail = resolvedVideo.thumbnail
+				? {
+						url: resolvedVideo.thumbnail.url,
+						mimeType: resolvedVideo.thumbnail.mimeType,
+						width: resolvedVideo.thumbnail.width ?? null,
+						height: resolvedVideo.thumbnail.height ?? null,
+					}
+				: null;
 		}
 	}
 
-	return [
-		{
-			url: file.url,
-			mimeType: file.meta.mimeType,
-			kind: "progressive",
+	if (media.status === "ready" && sources.length === 0) {
+		sources = [
+			{
+				url: file.url,
+				mimeType: file.meta.mimeType,
+				kind: "progressive",
+			},
+		];
+	}
+
+	return {
+		...file,
+		meta: {
+			...file.meta,
+			width: media.width,
+			height: media.height,
+			duration: media.duration ?? null,
 		},
-	];
+		sources,
+		thumbnail,
+	};
 };
 
 const formatSingle = (props: {
 	media: MediaPropsT;
 	options: MediaFormatterOptions;
 }): Media => {
-	const common = {
-		status: props.media.status,
+	const details = {
 		folderId: props.media.folder_id,
 		origin: props.media.origin,
+		public: formatter.formatBoolean(props.media.public),
 		title: translationsFor(props.media, "title"),
 	};
-	const state = {
-		public: formatter.formatBoolean(props.media.public),
+	const lifecycle = {
 		isDeleted: formatter.formatBoolean(props.media.is_deleted),
 		isDeletedAt: formatter.formatDate(props.media.is_deleted_at),
 		deletedBy: props.media.deleted_by,
@@ -339,65 +397,110 @@ const formatSingle = (props: {
 	};
 
 	switch (props.media.type) {
-		case "image":
+		case "image": {
+			const image = formatImageFile(props.media, props.options);
+			const alt = translationsFor(props.media, "alt");
+
+			if (image.sourceType === "original") {
+				return {
+					id: props.media.id,
+					type: "image",
+					status: props.media.status,
+					sourceType: image.sourceType,
+					...details,
+					alt,
+					key: image.key,
+					fileName: image.fileName,
+					url: image.url,
+					meta: image.meta,
+					delivery: image.delivery,
+					...lifecycle,
+				};
+			}
+
 			return {
 				id: props.media.id,
 				type: "image",
-				...common,
-				alt: translationsFor(props.media, "alt"),
-				file: formatImageFile(props.media, props.options),
-				...state,
+				status: props.media.status,
+				sourceType: image.sourceType,
+				...details,
+				alt,
+				key: image.key,
+				fileName: image.fileName,
+				url: image.url,
+				meta: image.meta,
+				delivery: image.delivery,
+				crop: image.crop,
+				original: image.original,
+				...lifecycle,
 			};
+		}
 		case "video": {
-			const file = formatFile(props.media, props.options);
+			const file = formatVideoFile(props.media, props.options);
 			return {
 				id: props.media.id,
 				type: "video",
-				...common,
+				status: props.media.status,
+				...details,
 				description: translationsFor(props.media, "description"),
-				file,
-				sources: formatVideoSources(props.media, props.options, file),
+				...file,
 				poster: formatPoster({
 					poster: props.media.poster?.[0],
 					options: props.options,
 				}),
-				...state,
+				...lifecycle,
 			};
 		}
-		case "audio":
+		case "audio": {
+			const file = formatFile(props.media, props.options);
 			return {
 				id: props.media.id,
 				type: "audio",
-				...common,
+				status: props.media.status,
+				...details,
 				description: translationsFor(props.media, "description"),
-				file: formatFile(props.media, props.options),
-				...state,
+				key: file.key,
+				fileName: file.fileName,
+				url: file.url,
+				meta: {
+					...file.meta,
+					duration: props.media.duration ?? null,
+				},
+				delivery: file.delivery,
+				...lifecycle,
 			};
+		}
 		case "document":
 			return {
 				id: props.media.id,
 				type: "document",
-				...common,
+				status: props.media.status,
+				...details,
 				summary: translationsFor(props.media, "summary"),
-				file: formatFile(props.media, props.options),
-				...state,
+				...formatFile(props.media, props.options),
+				...lifecycle,
 			};
 		case "archive":
 			return {
 				id: props.media.id,
 				type: "archive",
-				...common,
-				file: formatFile(props.media, props.options),
-				...state,
+				status: props.media.status,
+				...details,
+				...formatFile(props.media, props.options),
+				...lifecycle,
 			};
-		default:
+		case "unknown":
 			return {
 				id: props.media.id,
 				type: "unknown",
-				...common,
-				file: formatFile(props.media, props.options),
-				...state,
+				status: props.media.status,
+				...details,
+				...formatFile(props.media, props.options),
+				...lifecycle,
 			};
+		default:
+			props.media.type satisfies never;
+			throw new TypeError(`Unsupported media type: ${props.media.type}`);
 	}
 };
 
@@ -417,6 +520,7 @@ const formatRef = (props: {
 	options: MediaFormatterOptions;
 }): MediaRef | null => {
 	if (!props.media) return null;
+
 	return formatSingle({
 		media: props.media,
 		options: props.options,

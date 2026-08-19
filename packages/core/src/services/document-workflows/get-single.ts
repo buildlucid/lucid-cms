@@ -43,7 +43,6 @@ const getSingle: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
-				imagePresets: context.config.media.images.presets,
 			},
 		}),
 	};

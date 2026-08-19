@@ -37,7 +37,7 @@ export interface MediaNodeViewProps {
 const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 	// -------------------------------
 	// Memos
-	const available = () => Boolean(props.reference?.file.url);
+	const available = () => Boolean(props.reference?.url);
 	const errorCount = createMemo(() => countFieldErrors(props.errors()));
 	const hasErrors = createMemo(() => errorCount() > 0);
 	const errorMessage = createMemo(() => {
@@ -53,8 +53,8 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 			(reference.type === "image"
 				? helpers.getTranslation(reference.alt, props.locale)
 				: "") ||
-			helpers.formatFileNameTitle(reference.file.fileName) ||
-			reference.file.key ||
+			helpers.formatFileNameTitle(reference.fileName) ||
+			reference.key ||
 			T()("editor.rich.text.media.fallback", { id: reference.id })
 		);
 	};
@@ -69,18 +69,18 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 		if (
 			!reference ||
 			(reference.type !== "image" && reference.type !== "video") ||
-			!("width" in reference.file.meta) ||
-			!reference.file.meta.width ||
-			!reference.file.meta.height
+			!("width" in reference.meta) ||
+			!reference.meta.width ||
+			!reference.meta.height
 		) {
 			return null;
 		}
 
-		return `${reference.file.meta.width} × ${reference.file.meta.height}`;
+		return `${reference.meta.width} × ${reference.meta.height}`;
 	};
 	const videoPoster = () => {
 		const reference = props.reference;
-		return reference?.type === "video" ? reference.poster?.file.url : undefined;
+		return reference?.type === "video" ? reference.poster?.url : undefined;
 	};
 
 	// -------------------------------
@@ -162,18 +162,18 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 											{T()("common.private")}
 										</Pill>
 									</Show>
-									<Show when={reference().file.meta.fileSize}>
+									<Show when={reference().meta.fileSize}>
 										<Pill theme="outline">
-											{helpers.bytesToSize(reference().file.meta.fileSize)}
+											{helpers.bytesToSize(reference().meta.fileSize)}
 										</Pill>
 									</Show>
 									<Show when={dimensions()}>
 										{(value) => <Pill theme="outline">{value()}</Pill>}
 									</Show>
-									<Show when={reference().file.meta.mimeType}>
+									<Show when={reference().meta.mimeType}>
 										{(mimeType) => <Pill theme="outline">{mimeType()}</Pill>}
 									</Show>
-									<Show when={reference().file.meta.extension}>
+									<Show when={reference().meta.extension}>
 										{(extension) => (
 											<Pill theme="outline">{extension().toUpperCase()}</Pill>
 										)}
@@ -211,7 +211,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 									</Match>
 									<Match when={reference().type === "image"}>
 										<img
-											src={reference().file.url}
+											src={reference().url}
 											alt={alt()}
 											class="relative z-10 max-h-64 h-auto w-auto max-w-full object-contain"
 											draggable={false}
@@ -220,7 +220,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 									<Match when={reference().type === "audio"}>
 										{/* biome-ignore lint/a11y/useMediaCaption: referenced CMS audio may not have a caption track */}
 										<audio
-											src={reference().file.url}
+											src={reference().url}
 											controls
 											class="relative z-10 m-5 max-h-64 w-[calc(100%-2.5rem)]"
 										/>
@@ -228,7 +228,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 									<Match when={reference().type === "video"}>
 										{/* biome-ignore lint/a11y/useMediaCaption: referenced CMS video may not have a caption track */}
 										<video
-											src={reference().file.url}
+											src={reference().url}
 											poster={videoPoster()}
 											controls
 											class="relative z-10 max-h-64 h-auto w-auto max-w-full bg-black object-contain"
@@ -249,8 +249,8 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 									<div class="flex min-w-0 items-center gap-2 mt-1">
 										<ClickToCopy
 											type="simple"
-											text={reference().file.key}
-											value={reference().file.url}
+											text={reference().key}
+											value={reference().url}
 											class="max-w-full text-xs text-unfocused"
 										/>
 									</div>

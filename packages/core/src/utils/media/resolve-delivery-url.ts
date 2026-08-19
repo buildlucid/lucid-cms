@@ -5,16 +5,29 @@ import type {
 } from "../../libs/media-delivery/types.js";
 import createMediaUrl from "./create-media-url.js";
 
-/** Resolves one safe public source without exposing delivery-adapter details. */
-const resolveDeliveryUrl = (props: {
+type ResolveDeliveryUrlProps = {
 	delivery: MediaDeliveryAdapterInstance;
 	file: MediaDeliveryFile;
 	host: string;
 	public: boolean;
 	preset?: string;
-	transformation?: MediaTransformationOptions;
 	query?: Record<string, string | undefined>;
-}): string | null => {
+};
+
+/** Resolves original files to a URL. Transformations return null when unsupported. */
+function resolveDeliveryUrl(
+	props: ResolveDeliveryUrlProps & { transformation?: undefined },
+): string;
+function resolveDeliveryUrl(
+	props: ResolveDeliveryUrlProps & {
+		transformation: MediaTransformationOptions;
+	},
+): string | null;
+function resolveDeliveryUrl(
+	props: ResolveDeliveryUrlProps & {
+		transformation?: MediaTransformationOptions;
+	},
+): string | null {
 	// Private files always stay behind Lucid authentication. Local delivery
 	// adapters can still transform them through the Lucid CDN route.
 	if (!props.public) {
@@ -34,6 +47,7 @@ const resolveDeliveryUrl = (props: {
 	const resolution = props.delivery.resolveFile({
 		host: props.host,
 		file: props.file,
+		preset: props.preset,
 		transformation: props.transformation,
 	});
 
@@ -60,6 +74,6 @@ const resolveDeliveryUrl = (props: {
 		extension: props.transformation?.format ?? props.file.extension,
 		query: props.query ?? (props.preset ? { preset: props.preset } : undefined),
 	});
-};
+}
 
 export default resolveDeliveryUrl;

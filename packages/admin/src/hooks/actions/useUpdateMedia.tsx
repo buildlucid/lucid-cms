@@ -9,7 +9,7 @@ import type {
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
-import type { ImageMeta } from "@/utils/media-meta";
+import { getAudioMeta, getVideoMeta, type ImageMeta } from "@/utils/media-meta";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 export const useUpdateMedia = (id: Accessor<number | undefined>) => {
@@ -96,6 +96,12 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 		if (!id()) return false;
 
 		let fileKey = getKey();
+		const mediaType = options?.type ?? "unknown";
+		const videoMeta =
+			file && mediaType === "video" ? await getVideoMeta(file) : null;
+		const audioMeta =
+			file && mediaType === "audio" ? await getAudioMeta(file) : null;
+
 		if (file) {
 			const uploadFileRes = await uploadFile(file);
 			if (!uploadFileRes) return false;
@@ -105,8 +111,6 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 			? await uploadFile(options.crop.file, false)
 			: undefined;
 		if (options?.crop && !cropKey) return false;
-		const mediaType = options?.type ?? "unknown";
-
 		await updateSingle.action.mutateAsync({
 			id: id() as number,
 			body: {
@@ -122,8 +126,22 @@ export const useUpdateMedia = (id: Accessor<number | undefined>) => {
 				origin: file ? (options?.origin ?? "human") : options?.origin,
 				aiGenerationRequestId: options?.aiGenerationRequestId,
 				folderId: getFolderId() ?? null,
-				width: mediaType === "image" ? imageMeta?.width : undefined,
-				height: mediaType === "image" ? imageMeta?.height : undefined,
+				width:
+					mediaType === "image"
+						? imageMeta?.width
+						: mediaType === "video"
+							? videoMeta?.width
+							: undefined,
+				height:
+					mediaType === "image"
+						? imageMeta?.height
+						: mediaType === "video"
+							? videoMeta?.height
+							: undefined,
+				duration:
+					mediaType === "video" || mediaType === "audio"
+						? (videoMeta?.duration ?? audioMeta?.duration ?? undefined)
+						: undefined,
 				focalPoint: mediaType === "image" ? getFocalPoint() : undefined,
 				blurHash: mediaType === "image" ? imageMeta?.blurHash : undefined,
 				averageColor:

@@ -1,10 +1,4 @@
-import type {
-	MediaPoster,
-	MediaPresetSource,
-	MediaStatus,
-	MediaType,
-	MediaVideoSource,
-} from "@types";
+import type { Media, MediaPoster, MediaVideoSource } from "@types";
 import {
 	FaSolidFile,
 	FaSolidFileAudio,
@@ -25,20 +19,20 @@ import {
 } from "solid-js";
 import Image from "@/components/Partials/Image";
 import MediaStatusPreview from "@/components/Partials/MediaStatusPreview";
+import getMediaPreviewUrl, {
+	type AdminImagePreset,
+} from "@/utils/media-preview";
 
 interface MediaPreviewProps {
-	media: {
-		status: MediaStatus;
-		type: MediaType;
-		url: string;
-		presets?: Record<string, MediaPresetSource>;
+	media: Pick<Media, "status" | "type" | "url"> & {
+		delivery?: Media["delivery"];
 		sources?: MediaVideoSource[];
 		poster?: MediaPoster | null;
 	};
 	richPreview?: boolean;
 	alt: string | null;
 	imageFit?: "cover" | "contain";
-	preset?: "thumbnail-small" | "thumbnail-medium" | "thumbnail-large";
+	preset?: AdminImagePreset;
 }
 
 const MediaPreview: Component<MediaPreviewProps> = (props) => {
@@ -94,7 +88,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 						<Image
 							classes={"rounded-t-md backface-hidden z-10 relative"}
 							fit={props.imageFit}
-							src={props.media.presets?.[preset()]?.url ?? props.media.url}
+							src={getMediaPreviewUrl(props.media, preset())}
 							alt={props.alt || ""}
 							loading="lazy"
 						/>
@@ -140,10 +134,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 											<Image
 												classes={"z-10 relative backface-hidden"}
 												fit={props.imageFit}
-												src={
-													poster().file.presets[preset()]?.url ??
-													poster().file.url
-												}
+												src={getMediaPreviewUrl(poster(), preset())}
 												alt={props.alt || ""}
 												loading="lazy"
 											/>

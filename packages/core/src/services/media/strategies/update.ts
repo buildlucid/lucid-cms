@@ -1,7 +1,12 @@
 import { copy } from "../../../libs/i18n/index.js";
 import type { ErrorCopy, LucidErrorData } from "../../../types/errors.js";
-import type { MediaStatus, MediaType } from "../../../types/response.js";
+import type {
+	MediaAdapterData,
+	MediaStatus,
+	MediaType,
+} from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
+import mediaAdapterDataSchema from "../../../utils/media/adapter-data.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
 import checkCanUpdateMedia from "../checks/check-can-update-media.js";
@@ -30,9 +35,12 @@ const update: ServiceFn<
 		etag: string | null;
 		sourceDeleted: boolean;
 		status: MediaStatus;
+		width: number | null;
+		height: number | null;
+		duration: number | null;
 		storageAdapterKey: string;
 		storageAdapterReference: string | null;
-		storageAdapterData: Record<string, unknown> | null;
+		storageAdapterData: MediaAdapterData | null;
 	}
 > = async (context, data) => {
 	const mediaStorageRes = await checkHasMediaStorage(context);
@@ -155,7 +163,12 @@ const update: ServiceFn<
 			return null;
 		}
 
-		return targetMetaRes.data;
+		return {
+			...targetMetaRes.data,
+			adapterData: mediaAdapterDataSchema
+				.nullable()
+				.parse(targetMetaRes.data.adapterData ?? null),
+		};
 	};
 
 	const failUpdate = async (
@@ -236,6 +249,9 @@ const update: ServiceFn<
 				etag: targetMeta.etag,
 				sourceDeleted,
 				status: targetMeta.status,
+				width: targetMeta.width ?? null,
+				height: targetMeta.height ?? null,
+				duration: targetMeta.duration ?? null,
 				storageAdapterKey: mediaStorageRes.data.key,
 				storageAdapterReference: targetMeta.adapterReference ?? null,
 				storageAdapterData: targetMeta.adapterData ?? null,
@@ -296,6 +312,9 @@ const update: ServiceFn<
 				etag: targetVerified.etag,
 				sourceDeleted,
 				status: targetVerified.status,
+				width: targetVerified.width ?? null,
+				height: targetVerified.height ?? null,
+				duration: targetVerified.duration ?? null,
 				storageAdapterKey: mediaStorageRes.data.key,
 				storageAdapterReference: targetVerified.adapterReference ?? null,
 				storageAdapterData: targetVerified.adapterData ?? null,
@@ -344,6 +363,9 @@ const update: ServiceFn<
 			etag: targetMeta.etag,
 			sourceDeleted: true,
 			status: targetMeta.status,
+			width: targetMeta.width ?? null,
+			height: targetMeta.height ?? null,
+			duration: targetMeta.duration ?? null,
 			storageAdapterKey: mediaStorageRes.data.key,
 			storageAdapterReference: targetMeta.adapterReference ?? null,
 			storageAdapterData: targetMeta.adapterData ?? null,

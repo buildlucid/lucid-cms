@@ -181,8 +181,8 @@ export const MediaList: Component<{
 
 		mediaAltGeneration.open({
 			image: () => ({
-				url: item.file.url,
-				filename: item.file.fileName ?? item.file.key,
+				url: item.url,
+				filename: item.fileName ?? item.key,
 			}),
 			media: () => ({
 				id: item.id,
@@ -205,12 +205,12 @@ export const MediaList: Component<{
 	};
 	const openQuickCrop = (item: Media) => {
 		if (item.type !== "image") return;
-		const source = resolveStoredImageCropSource(item.file);
+		const source = resolveStoredImageCropSource(item);
 		rowTarget.setTargetId(item.id);
 		setActiveQuickCropSource({
-			url: source.file.url,
-			name: item.file.fileName ?? item.file.key,
-			mimeType: source.file.meta.mimeType,
+			url: source.source.url,
+			name: item.fileName ?? item.key,
+			mimeType: source.source.meta.mimeType,
 			provenance: {
 				origin: item.origin,
 			},

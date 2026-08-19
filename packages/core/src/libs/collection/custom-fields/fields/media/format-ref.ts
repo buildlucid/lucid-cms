@@ -19,7 +19,6 @@ const formatMediaRef = (
 		options: {
 			host: params.host,
 			delivery: params.mediaDelivery,
-			imagePresets: params.config.media.images.presets,
 		},
 	}) satisfies CFResponse<"media">["ref"];
 };

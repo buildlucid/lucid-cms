@@ -90,6 +90,7 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 						>`COALESCE(active_crop.height, lucid_media.height)`.as(
 							"media_height",
 						),
+						"lucid_media.duration as media_duration",
 						sql<
 							number | null
 						>`COALESCE(active_crop.focal_x, lucid_media.focal_x)`.as(
@@ -139,6 +140,7 @@ export default class MediaShareLinksRepository extends StaticRepository<"lucid_m
 				"media_file_size",
 				"media_width",
 				"media_height",
+				"media_duration",
 				"media_focal_x",
 				"media_focal_y",
 				"media_poster_key",

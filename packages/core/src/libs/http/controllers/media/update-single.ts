@@ -61,6 +61,7 @@ const updateSingleController = factory.createHandlers(
 			summary: body.summary,
 			width: body.width,
 			height: body.height,
+			duration: body.duration,
 			focalPoint: body.focalPoint,
 			blurHash: body.blurHash,
 			averageColor: body.averageColor,

@@ -34,6 +34,9 @@ const shareAccessResponseSchema = z.discriminatedUnion("passwordRequired", [
 			fileSize: z.number(),
 			width: z.number().nullable(),
 			height: z.number().nullable(),
+			duration: z.number().nullable().meta({
+				description: "Audio or video duration in seconds",
+			}),
 			focalPoint: z
 				.object({
 					x: z.number(),

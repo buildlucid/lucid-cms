@@ -8,6 +8,7 @@ import ActionDropdown from "@/components/Partials/ActionDropdown";
 import IconContainer from "@/components/Partials/IconContainer";
 import api from "@/services/api";
 import T from "@/translations";
+import getMediaPreviewUrl from "@/utils/media-preview";
 
 const OAuthClientRow: Component<{
 	client: OAuthClient;
@@ -65,10 +66,7 @@ const OAuthClientRow: Component<{
 							>
 								{(logo) => (
 									<img
-										src={
-											logo().file.presets["thumbnail-small"]?.url ??
-											logo().file.url
-										}
+										src={getMediaPreviewUrl(logo(), "thumbnail-small")}
 										alt=""
 										class="size-full object-contain bg-white p-1"
 									/>

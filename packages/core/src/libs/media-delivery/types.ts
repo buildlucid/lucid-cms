@@ -1,5 +1,5 @@
 import type { Readable } from "node:stream";
-import type { MediaType } from "../../types/response.js";
+import type { MediaAdapterData, MediaType } from "../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -47,17 +47,20 @@ export type MediaDeliveryFile = {
 	extension: string;
 	width: number | null;
 	height: number | null;
+	duration: number | null;
 	focalPoint: { x: number; y: number } | null;
 	storage: {
 		adapterKey: string;
 		adapterReference: string | null;
-		adapterData: Record<string, unknown> | null;
+		adapterData: MediaAdapterData | null;
 	};
 };
 
 export type MediaDeliveryResolveFileParams = {
 	host: string;
 	file: MediaDeliveryFile;
+	/** The validated Lucid preset name, when the transformation came from one. */
+	preset?: string;
 	transformation?: MediaTransformationOptions;
 };
 
@@ -72,14 +75,31 @@ export type MediaDeliveryVideoSource = {
 	kind: "progressive" | "hls" | "dash";
 };
 
+export type MediaDeliveryVideoThumbnail = {
+	url: string;
+	mimeType: string;
+	width?: number | null;
+	height?: number | null;
+};
+
+export type MediaDeliveryVideo = {
+	sources: MediaDeliveryVideoSource[];
+	thumbnail?: MediaDeliveryVideoThumbnail | null;
+};
+
 export type MediaDeliveryResolveFile = (
 	params: MediaDeliveryResolveFileParams,
 ) => MediaDeliveryFileResolution;
 
-export type MediaDeliveryResolveVideoSources = (params: {
+export type MediaDeliveryResolveVideo = (params: {
 	host: string;
 	file: MediaDeliveryFile;
-}) => MediaDeliveryVideoSource[] | null;
+}) => MediaDeliveryVideo | null;
+
+export type MediaDeliveryResolveResponseData = (params: {
+	host: string;
+	file: MediaDeliveryFile;
+}) => MediaAdapterData | null;
 
 export type MediaDeliveryAdapter<T = undefined> = T extends undefined
 	? () => MediaDeliveryAdapterInstance | Promise<MediaDeliveryAdapterInstance>
@@ -91,7 +111,7 @@ export type MediaDeliveryAdapterInstance = {
 	/** The adapter type. */
 	type: "media-delivery-adapter";
 	/** A unique identifier for this delivery adapter. */
-	key: "passthrough" | "sharp" | string;
+	key: string;
 	lifecycle?: {
 		init?: (context: AdapterLifecycleContext) => Promise<void>;
 		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
@@ -100,6 +120,8 @@ export type MediaDeliveryAdapterInstance = {
 	resolveFile: MediaDeliveryResolveFile;
 	/** Process an image when the resolved URL uses Lucid's CDN. */
 	processImage?: MediaDeliveryServiceProcessImage;
-	/** Return provider-backed playback sources for a public video. */
-	resolveVideoSources?: MediaDeliveryResolveVideoSources;
+	/** Return provider-backed playback sources and a thumbnail for a public video. */
+	resolveVideo?: MediaDeliveryResolveVideo;
+	/** Return explicitly public, JSON-safe adapter data for content consumers. */
+	resolveResponseData?: MediaDeliveryResolveResponseData;
 };

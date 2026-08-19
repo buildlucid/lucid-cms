@@ -54,7 +54,27 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 	});
 	const imageMeta = createMemo(() => {
 		const item = media.data?.data;
-		return item?.type === "image" ? item.file.meta : null;
+		return item?.type === "image" ? item.meta : null;
+	});
+	const dimensions = createMemo(() => {
+		const item = media.data?.data;
+		if (item?.type !== "image" && item?.type !== "video") return null;
+		if (item.meta.width === null || item.meta.height === null) return null;
+
+		return `${item.meta.width} × ${item.meta.height}`;
+	});
+	const duration = createMemo(() => {
+		const item = media.data?.data;
+		if (item?.type !== "video" && item?.type !== "audio") return null;
+		if (item.meta.duration === null) return null;
+
+		return helpers.formatMediaDuration(item.meta.duration);
+	});
+	const focalPoint = createMemo(() => {
+		const point = imageMeta()?.focalPoint;
+		if (!point) return null;
+
+		return `${Math.round(point.x * 100)}%, ${Math.round(point.y * 100)}%`;
 	});
 	const folderOptions = createMemo(() => {
 		const folders = foldersHierarchy.data?.data || [];
@@ -126,7 +146,7 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 								media={{
 									status: item.status,
 									type: item.type,
-									url: item.file.url,
+									url: item.url,
 								}}
 								alt={
 									(item.type === "image"
@@ -224,21 +244,36 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 								{
 									label: T()("common.file.size"),
 									value: helpers.bytesToSize(
-										media.data?.data.file.meta.fileSize ?? 0,
+										media.data?.data.meta.fileSize ?? 0,
 									),
 								},
 								{
 									label: T()("common.dimensions"),
-									value: `${imageMeta()?.width} x ${imageMeta()?.height}`,
-									show: media.data?.data.type === "image",
+									value: dimensions(),
+									show: dimensions() !== null,
+								},
+								{
+									label: T()("common.duration"),
+									value: duration(),
+									show: duration() !== null,
+								},
+								{
+									label: T()("common.average.colour"),
+									value: imageMeta()?.averageColor,
+									show: Boolean(imageMeta()?.averageColor),
+								},
+								{
+									label: T()("common.focal.point"),
+									value: focalPoint(),
+									show: focalPoint() !== null,
 								},
 								{
 									label: T()("common.extension"),
-									value: media.data?.data.file.meta.extension,
+									value: media.data?.data.meta.extension,
 								},
 								{
 									label: T()("common.mime.type"),
-									value: media.data?.data.file.meta.mimeType,
+									value: media.data?.data.meta.mimeType,
 								},
 								{
 									label: T()("common.created.at"),

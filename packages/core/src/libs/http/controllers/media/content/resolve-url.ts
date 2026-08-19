@@ -16,33 +16,31 @@ import createServiceContext from "../../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const processMediaController = factory.createHandlers(
+const resolveUrlController = factory.createHandlers(
 	describeRoute({
 		description:
 			"Get a single media item by key and return the public CDN URL. This supports image presets and formats.",
 		tags: ["content-media"],
 		summary: "Get Media URL",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.content.processMedia.response),
+			schema: z.toJSONSchema(controllerSchemas.content.resolveUrl.response),
 		}),
 		parameters: openAPI.parameters({
-			params: controllerSchemas.content.processMedia.params,
+			params: controllerSchemas.content.resolveUrl.params,
 			headers: {
 				authorization: true,
 			},
 		}),
-		requestBody: openAPI.requestBody(
-			controllerSchemas.content.processMedia.body,
-		),
+		requestBody: openAPI.requestBody(controllerSchemas.content.resolveUrl.body),
 	}),
 	externalAuthentication(),
-	externalScopes([ExternalScopes.MediaProcess]),
-	validate("param", controllerSchemas.content.processMedia.params),
-	validate("json", controllerSchemas.content.processMedia.body),
+	externalScopes([ExternalScopes.MediaResolveUrl]),
+	validate("param", controllerSchemas.content.resolveUrl.params),
+	validate("json", controllerSchemas.content.resolveUrl.body),
 	async (c) => {
 		const context = createServiceContext(c);
 
-		const media = await serviceWrapper(mediaServices.content.processMedia, {
+		const media = await serviceWrapper(mediaServices.content.resolveUrl, {
 			transaction: true,
 			defaultError: {
 				type: "basic",
@@ -51,7 +49,7 @@ const processMediaController = factory.createHandlers(
 			},
 		})(context, {
 			key: c.req.valid("param").key,
-			body: c.req.valid("json"),
+			options: c.req.valid("json"),
 		});
 		if (media.error) throw new LucidAPIError(media.error);
 
@@ -64,4 +62,4 @@ const processMediaController = factory.createHandlers(
 	},
 );
 
-export default processMediaController;
+export default resolveUrlController;

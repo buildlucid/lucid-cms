@@ -37,6 +37,7 @@ export interface ShareLinkAccessPropsT {
 	media_file_size: number | null;
 	media_width: number | null;
 	media_height: number | null;
+	media_duration: number | null;
 	media_focal_x: number | null;
 	media_focal_y: number | null;
 	media_poster_key: string | null;
@@ -80,6 +81,10 @@ const formatShareAccess = (props: {
 			fileSize: link.media_file_size ?? 0,
 			width: link.media_width ?? null,
 			height: link.media_height ?? null,
+			duration:
+				mediaType === "video" || mediaType === "audio"
+					? (link.media_duration ?? null)
+					: null,
 			focalPoint: formatFocalPoint(link.media_focal_x, link.media_focal_y),
 			previewable,
 			shareUrl: props.shareUrl,

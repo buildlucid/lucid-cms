@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ControllerSchema } from "../types.js";
+import mediaAdapterDataSchema from "../utils/media/adapter-data.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const mediaTranslationsResponseSchema = z
@@ -79,6 +80,28 @@ const mediaImageMetaResponseSchema = mediaFileMetaResponseSchema
 		description: "Image file metadata",
 	});
 
+const mediaVideoMetaResponseSchema = mediaFileMetaResponseSchema.extend({
+	width: z.number().nullable().meta({
+		description: "Intrinsic video width",
+		example: 1920,
+	}),
+	height: z.number().nullable().meta({
+		description: "Intrinsic video height",
+		example: 1080,
+	}),
+	duration: z.number().nullable().meta({
+		description: "Video duration in seconds",
+		example: 12.5,
+	}),
+});
+
+const mediaAudioMetaResponseSchema = mediaFileMetaResponseSchema.extend({
+	duration: z.number().nullable().meta({
+		description: "Audio duration in seconds",
+		example: 180.5,
+	}),
+});
+
 const mediaCropStateSchema = z.object({
 	x: z.number().min(0).max(1),
 	y: z.number().min(0).max(1),
@@ -89,19 +112,7 @@ const mediaCropStateSchema = z.object({
 	skewY: z.number().min(-45).max(45),
 });
 
-const mediaOriginalFileResponseSchema = z.object({
-	key: z.string(),
-	url: z.string(),
-	presets: z.record(
-		z.string(),
-		z.object({
-			url: z.string(),
-		}),
-	),
-	meta: mediaImageMetaResponseSchema,
-});
-
-const mediaFileIdentityResponseSchema = z.object({
+const mediaFileIdentityResponseShape = {
 	key: z.string().meta({
 		description: "Storage key",
 		example: "public/123e4567e89b12d3a456426614174000",
@@ -111,36 +122,66 @@ const mediaFileIdentityResponseSchema = z.object({
 		description: "Original file name",
 		example: "placeholder-image.png",
 	}),
-});
+	delivery: z.object({
+		adapter: z.string().meta({
+			description: "Configured media delivery adapter key",
+		}),
+		data: mediaAdapterDataSchema.nullable().meta({
+			description: "JSON-safe data explicitly exposed by the delivery adapter",
+		}),
+		supportsPresetQuery: z.boolean().meta({
+			description: "Whether this URL accepts Lucid image preset queries",
+		}),
+	}),
+};
 
-const mediaFileResponseSchema = mediaFileIdentityResponseSchema.extend({
+const mediaImageOriginalResponseShape = {
+	...mediaFileIdentityResponseShape,
+	sourceType: z.literal("original"),
+	meta: mediaImageMetaResponseSchema,
+};
+
+const mediaOriginalFileResponseSchema = z.object(
+	mediaImageOriginalResponseShape,
+);
+
+const mediaFileResponseShape = {
+	...mediaFileIdentityResponseShape,
 	meta: mediaFileMetaResponseSchema,
+};
+
+const mediaAudioFileResponseShape = {
+	...mediaFileIdentityResponseShape,
+	meta: mediaAudioMetaResponseSchema,
+};
+
+const mediaVideoSourceResponseSchema = z.object({
+	url: z.string(),
+	mimeType: z.string(),
+	kind: z.enum(["progressive", "hls", "dash"]),
 });
 
-const mediaImageFileResponseSchema = z.discriminatedUnion("sourceType", [
-	mediaFileIdentityResponseSchema.extend({
-		sourceType: z.literal("original"),
-		presets: z.record(
-			z.string(),
-			z.object({
-				url: z.string(),
-			}),
-		),
-		meta: mediaImageMetaResponseSchema,
-	}),
-	mediaFileIdentityResponseSchema.extend({
-		sourceType: z.literal("crop"),
-		presets: z.record(
-			z.string(),
-			z.object({
-				url: z.string(),
-			}),
-		),
-		crop: mediaCropStateSchema,
-		meta: mediaImageMetaResponseSchema,
-		original: mediaOriginalFileResponseSchema,
-	}),
-]);
+const mediaVideoFileResponseShape = {
+	...mediaFileIdentityResponseShape,
+	meta: mediaVideoMetaResponseSchema,
+	sources: z.array(mediaVideoSourceResponseSchema),
+	thumbnail: z
+		.object({
+			url: z.string(),
+			mimeType: z.string(),
+			width: z.number().nullable(),
+			height: z.number().nullable(),
+		})
+		.nullable(),
+};
+
+const mediaImageCropResponseShape = {
+	...mediaFileIdentityResponseShape,
+	sourceType: z.literal("crop"),
+	crop: mediaCropStateSchema,
+	meta: mediaImageMetaResponseSchema,
+	original: mediaOriginalFileResponseSchema,
+};
 
 export const mediaCropInputSchema = z.object({
 	key: z.string().trim(),
@@ -245,7 +286,7 @@ const uploadSessionParamsSchema = z.object({
 	}),
 });
 
-export const mediaImagePreviewResponseSchema = z.object({
+const mediaImagePreviewResponseShape = {
 	id: z.number().meta({ description: "Media ID", example: 2 }),
 	type: z.literal("image"),
 	status: mediaStatusSchema,
@@ -255,10 +296,23 @@ export const mediaImagePreviewResponseSchema = z.object({
 	}),
 	title: mediaTranslationsResponseSchema,
 	alt: mediaTranslationsResponseSchema,
-	file: mediaImageFileResponseSchema,
-});
+};
 
-const mediaPosterResponseSchema = z.object({
+export const mediaImagePreviewResponseSchema = z.discriminatedUnion(
+	"sourceType",
+	[
+		z.object({
+			...mediaImagePreviewResponseShape,
+			...mediaImageOriginalResponseShape,
+		}),
+		z.object({
+			...mediaImagePreviewResponseShape,
+			...mediaImageCropResponseShape,
+		}),
+	],
+);
+
+const mediaPosterResponseShape = {
 	id: z.number().meta({ description: "Media ID", example: 2 }),
 	type: z.literal("image"),
 	status: mediaStatusSchema,
@@ -267,8 +321,18 @@ const mediaPosterResponseSchema = z.object({
 		example: "human",
 	}),
 	alt: mediaTranslationsResponseSchema,
-	file: mediaImageFileResponseSchema,
-});
+};
+
+const mediaPosterResponseSchema = z.discriminatedUnion("sourceType", [
+	z.object({
+		...mediaPosterResponseShape,
+		...mediaImageOriginalResponseShape,
+	}),
+	z.object({
+		...mediaPosterResponseShape,
+		...mediaImageCropResponseShape,
+	}),
+]);
 
 const mediaIdResponseSchema = z
 	.number()
@@ -315,28 +379,31 @@ const mediaStateResponseShape = {
 	}),
 };
 
-const mediaResponseSchema = z.discriminatedUnion("type", [
-	z.object({
-		id: mediaIdResponseSchema,
-		type: z.literal("image"),
-		...mediaBaseResponseShape,
-		alt: mediaTranslationsResponseSchema,
-		file: mediaImageFileResponseSchema,
-		...mediaStateResponseShape,
-	}),
+const mediaImageResponseShape = {
+	id: mediaIdResponseSchema,
+	type: z.literal("image"),
+	...mediaBaseResponseShape,
+	alt: mediaTranslationsResponseSchema,
+	...mediaStateResponseShape,
+};
+
+const mediaResponseSchema = z.union([
+	z.discriminatedUnion("sourceType", [
+		z.object({
+			...mediaImageResponseShape,
+			...mediaImageOriginalResponseShape,
+		}),
+		z.object({
+			...mediaImageResponseShape,
+			...mediaImageCropResponseShape,
+		}),
+	]),
 	z.object({
 		id: mediaIdResponseSchema,
 		type: z.literal("video"),
 		...mediaBaseResponseShape,
 		description: mediaTranslationsResponseSchema,
-		file: mediaFileResponseSchema,
-		sources: z.array(
-			z.object({
-				url: z.string(),
-				mimeType: z.string(),
-				kind: z.enum(["progressive", "hls", "dash"]),
-			}),
-		),
+		...mediaVideoFileResponseShape,
 		poster: mediaPosterResponseSchema.nullable().meta({
 			description: "Poster image data",
 		}),
@@ -347,7 +414,7 @@ const mediaResponseSchema = z.discriminatedUnion("type", [
 		type: z.literal("audio"),
 		...mediaBaseResponseShape,
 		description: mediaTranslationsResponseSchema,
-		file: mediaFileResponseSchema,
+		...mediaAudioFileResponseShape,
 		...mediaStateResponseShape,
 	}),
 	z.object({
@@ -355,21 +422,21 @@ const mediaResponseSchema = z.discriminatedUnion("type", [
 		type: z.literal("document"),
 		...mediaBaseResponseShape,
 		summary: mediaTranslationsResponseSchema,
-		file: mediaFileResponseSchema,
+		...mediaFileResponseShape,
 		...mediaStateResponseShape,
 	}),
 	z.object({
 		id: mediaIdResponseSchema,
 		type: z.literal("archive"),
 		...mediaBaseResponseShape,
-		file: mediaFileResponseSchema,
+		...mediaFileResponseShape,
 		...mediaStateResponseShape,
 	}),
 	z.object({
 		id: mediaIdResponseSchema,
 		type: z.literal("unknown"),
 		...mediaBaseResponseShape,
-		file: mediaFileResponseSchema,
+		...mediaFileResponseShape,
 		...mediaStateResponseShape,
 	}),
 ]);
@@ -698,7 +765,7 @@ export const controllerSchemas = {
 				.number()
 				.nullable()
 				.meta({
-					description: "The image width",
+					description: "The image or video width",
 					example: 100,
 				})
 				.optional(),
@@ -706,8 +773,17 @@ export const controllerSchemas = {
 				.number()
 				.nullable()
 				.meta({
-					description: "The image height",
+					description: "The image or video height",
 					example: 100,
+				})
+				.optional(),
+			duration: z
+				.number()
+				.nonnegative()
+				.nullable()
+				.meta({
+					description: "The audio or video duration in seconds",
+					example: 12.5,
 				})
 				.optional(),
 			focalPoint: focalPointSchema.nullable().optional().meta({
@@ -970,15 +1046,24 @@ export const controllerSchemas = {
 			width: z
 				.number()
 				.meta({
-					description: "The image width",
+					description: "The image or video width",
 					example: 100,
 				})
 				.optional(),
 			height: z
 				.number()
 				.meta({
-					description: "The image height",
+					description: "The image or video height",
 					example: 100,
+				})
+				.optional(),
+			duration: z
+				.number()
+				.nonnegative()
+				.nullable()
+				.meta({
+					description: "The audio or video duration in seconds",
+					example: 12.5,
 				})
 				.optional(),
 			focalPoint: focalPointSchema.optional().meta({
@@ -1048,7 +1133,7 @@ export const controllerSchemas = {
 		response: mediaResponseSchema,
 	} satisfies ControllerSchema,
 	content: {
-		processMedia: {
+		resolveUrl: {
 			body: z
 				.object({
 					preset: z.string().trim().optional(),

@@ -1,6 +1,11 @@
 import { copy } from "../../../libs/i18n/index.js";
-import type { MediaStatus, MediaType } from "../../../types/response.js";
+import type {
+	MediaAdapterData,
+	MediaStatus,
+	MediaType,
+} from "../../../types/response.js";
 import { formatBytes } from "../../../utils/helpers/index.js";
+import mediaAdapterDataSchema from "../../../utils/media/adapter-data.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
 import checkCanStoreMedia from "../checks/check-can-store-media.js";
@@ -24,9 +29,12 @@ const syncMedia: ServiceFn<
 		key: string;
 		etag: string | null;
 		status: MediaStatus;
+		width: number | null;
+		height: number | null;
+		duration: number | null;
 		storageAdapterKey: string;
 		storageAdapterReference: string | null;
-		storageAdapterData: Record<string, unknown> | null;
+		storageAdapterData: MediaAdapterData | null;
 	}
 > = async (context, data) => {
 	const mediaStorageRes = await checkHasMediaStorage(context);
@@ -36,6 +44,10 @@ const syncMedia: ServiceFn<
 		key: data.key,
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
+
+	const storageAdapterData = mediaAdapterDataSchema
+		.nullable()
+		.parse(mediaMetaRes.data.adapterData ?? null);
 
 	const proposedSizeRes = await checkCanStoreMedia(context, {
 		size: mediaMetaRes.data.size,
@@ -122,9 +134,12 @@ const syncMedia: ServiceFn<
 			key: data.key,
 			etag: mediaMetaRes.data.etag,
 			status: mediaMetaRes.data.status,
+			width: mediaMetaRes.data.width ?? null,
+			height: mediaMetaRes.data.height ?? null,
+			duration: mediaMetaRes.data.duration ?? null,
 			storageAdapterKey: mediaStorageRes.data.key,
 			storageAdapterReference: mediaMetaRes.data.adapterReference ?? null,
-			storageAdapterData: mediaMetaRes.data.adapterData ?? null,
+			storageAdapterData,
 		},
 	};
 };

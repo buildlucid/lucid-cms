@@ -322,7 +322,7 @@ export const controllerSchemas = {
 				.array(integrationScopeSchema)
 				.meta({
 					description: "Scopes granted to this integration.",
-					example: ["media:read", "media:process"],
+					example: ["media:read", "media:resolve-url"],
 				})
 				.optional(),
 		}),

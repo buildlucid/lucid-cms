@@ -91,7 +91,7 @@ const pages = await client.documents.getMultiple({
 
 ## Media
 
-Use the media client to fetch media items or generate processed media URLs.
+Use the media client to fetch media items or resolve transformed media URLs.
 
 ```typescript
 const media = await client.media.getMultiple({
@@ -104,12 +104,10 @@ const media = await client.media.getMultiple({
     },
 });
 
-const processed = await client.media.process({
+const resolved = await client.media.resolveUrl({
     key: "public/hero.jpg",
-    body: {
-        preset: "thumbnail-small",
-        format: "webp",
-    },
+    preset: "thumbnail-small",
+    format: "webp",
 });
 ```
 

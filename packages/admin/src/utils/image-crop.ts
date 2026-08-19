@@ -46,13 +46,13 @@ export type ImageCropSource = {
 export const resolveStoredImageCropSource = (file: MediaImageFile) => {
 	if (file.sourceType === "crop") {
 		return {
-			file: file.original,
+			source: file.original,
 			crop: file.crop,
 		};
 	}
 
 	return {
-		file,
+		source: file,
 		crop: undefined,
 	};
 };

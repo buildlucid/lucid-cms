@@ -1,5 +1,10 @@
 import type { Readable } from "node:stream";
-import type { MediaStatus, MediaType, ServiceResponse } from "../../types.js";
+import type {
+	MediaAdapterData,
+	MediaStatus,
+	MediaType,
+	ServiceResponse,
+} from "../../types.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
@@ -172,8 +177,11 @@ export type MediaStorageAdapterServiceGetMeta = (
 	mimeType: string | null;
 	etag: string | null;
 	status: MediaStatus;
+	width?: number | null;
+	height?: number | null;
+	duration?: number | null;
 	adapterReference?: string | null;
-	adapterData?: Record<string, unknown> | null;
+	adapterData?: MediaAdapterData | null;
 }>;
 
 export type MediaStorageAdapterStreamParams = {

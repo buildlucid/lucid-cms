@@ -96,6 +96,27 @@ const bytesToSize = (bytes?: number | null): string => {
 };
 
 // ---------------------------------------------
+// Format media duration as a compact timecode
+const formatMediaDuration = (duration?: number | null): string | null => {
+	if (
+		duration === undefined ||
+		duration === null ||
+		!Number.isFinite(duration)
+	) {
+		return null;
+	}
+
+	const totalSeconds = Math.max(0, Math.round(duration));
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const seconds = totalSeconds % 60;
+
+	return hours > 0
+		? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+		: `${minutes}:${String(seconds).padStart(2, "0")}`;
+};
+
+// ---------------------------------------------
 // Get media type from mime type
 const getMediaType = (mimeType?: string): Media["type"] => {
 	if (!mimeType) return "unknown";
@@ -287,6 +308,7 @@ const helpers = {
 	updateData,
 	resolveValue,
 	bytesToSize,
+	formatMediaDuration,
 	getMediaType,
 	formatFileNameTitle,
 	formatUserName,

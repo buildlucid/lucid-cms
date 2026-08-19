@@ -35,6 +35,7 @@ const createSingle: ServiceFn<
 			fileName: string;
 			width?: number;
 			height?: number;
+			duration?: number | null;
 			focalPoint?: {
 				x: number;
 				y: number;
@@ -161,6 +162,9 @@ const createSingle: ServiceFn<
 	});
 	if (aiGenerationRes.error) return aiGenerationRes;
 	const isImage = syncMediaRes.data.type === "image";
+	const hasDimensions = isImage || syncMediaRes.data.type === "video";
+	const hasDuration =
+		syncMediaRes.data.type === "video" || syncMediaRes.data.type === "audio";
 
 	const [mediaRes, deleteMediaSyncRes] = await Promise.all([
 		Media.createSingle({
@@ -181,8 +185,15 @@ const createSingle: ServiceFn<
 				file_extension: syncMediaRes.data.extension,
 				file_name: data.fileName,
 				file_size: syncMediaRes.data.size,
-				width: isImage ? (data.width ?? null) : null,
-				height: isImage ? (data.height ?? null) : null,
+				width: hasDimensions
+					? (syncMediaRes.data.width ?? data.width ?? null)
+					: null,
+				height: hasDimensions
+					? (syncMediaRes.data.height ?? data.height ?? null)
+					: null,
+				duration: hasDuration
+					? (syncMediaRes.data.duration ?? data.duration ?? null)
+					: null,
 				focal_x:
 					syncMediaRes.data.type === "image" && data.focalPoint
 						? Math.round(data.focalPoint.x * 10000)
@@ -325,7 +336,6 @@ const createSingle: ServiceFn<
 		options: {
 			host: getBaseUrl(context),
 			delivery: context.mediaDelivery,
-			imagePresets: context.config.media.images.presets,
 		},
 	});
 

@@ -5,6 +5,7 @@ import {
 	MediaRepository,
 } from "../../../libs/repositories/index.js";
 import type {
+	MediaAdapterData,
 	MediaCropInput,
 	MediaOrigin,
 	MediaStatus,
@@ -74,7 +75,7 @@ const upsertCrop: ServiceFn<
 		status: MediaStatus;
 		storageAdapterKey: string;
 		storageAdapterReference: string | null;
-		storageAdapterData: Record<string, unknown> | null;
+		storageAdapterData: MediaAdapterData | null;
 	};
 
 	if (existingCropRes.data) {

@@ -27,6 +27,7 @@ import useSingleFileUpload from "@/hooks/useSingleFileUpload";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
+import getMediaPreviewUrl from "@/utils/media-preview";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 const UpsertOAuthClientPanel: Component<{
@@ -133,16 +134,14 @@ const UpsertOAuthClientPanel: Component<{
 			LogoFile.setCurrentFile(
 				value.logo
 					? {
-							name: value.logo.file.fileName ?? value.logo.file.key,
-							url:
-								value.logo.file.presets["thumbnail-medium"]?.url ??
-								value.logo.file.url,
-							originalUrl: value.logo.file.url,
+							name: value.logo.fileName ?? value.logo.key,
+							url: getMediaPreviewUrl(value.logo, "thumbnail-medium"),
+							originalUrl: value.logo.url,
 							type: value.logo.type,
-							mimeType: value.logo.file.meta.mimeType,
+							mimeType: value.logo.meta.mimeType,
 							origin: value.logo.origin,
-							width: value.logo.file.meta.width,
-							height: value.logo.file.meta.height,
+							width: value.logo.meta.width,
+							height: value.logo.meta.height,
 						}
 					: undefined,
 			);

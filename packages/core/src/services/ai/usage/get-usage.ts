@@ -34,7 +34,6 @@ const getUsage: ServiceFn<
 				mediaOptions: {
 					host: getBaseUrl(context),
 					delivery: context.mediaDelivery,
-					imagePresets: context.config.media.images.presets,
 				},
 				translate: context.translate,
 			}),

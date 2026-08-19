@@ -4,7 +4,7 @@ export const ExternalScopes = {
 	MediaCreate: "media:create",
 	MediaUpdate: "media:update",
 	MediaDelete: "media:delete",
-	MediaProcess: "media:process",
+	MediaResolveUrl: "media:resolve-url",
 	LocalesRead: "locales:read",
 } as const;
 

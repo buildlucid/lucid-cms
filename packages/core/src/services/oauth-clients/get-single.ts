@@ -28,7 +28,6 @@ const getSingle: ServiceFn<[{ id: number }], OAuthClient> = async (
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
-				imagePresets: context.config.media.images.presets,
 			},
 		}),
 	};

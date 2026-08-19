@@ -203,6 +203,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 										"lucid_media.file_size",
 										"lucid_media.width",
 										"lucid_media.height",
+										"lucid_media.duration",
 										"lucid_media.focal_x",
 										"lucid_media.focal_y",
 										"lucid_media.blur_hash",

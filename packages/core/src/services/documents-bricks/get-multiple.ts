@@ -129,7 +129,6 @@ const getMultiple: ServiceFn<
 		mediaOptions: {
 			host: baseUrl,
 			delivery: context.mediaDelivery,
-			imagePresets: context.config.media.images.presets,
 		},
 		bricksTableSchema: selectedBricksTableSchema,
 		data: refData,

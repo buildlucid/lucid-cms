@@ -15,7 +15,7 @@ export type ExternalScope =
 	| "media:create"
 	| "media:update"
 	| "media:delete"
-	| "media:process"
+	| "media:resolve-url"
 	| "locales:read";
 
 export type IntegrationExpiry = "never" | "30-days" | "90-days" | "1-year";

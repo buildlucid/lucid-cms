@@ -33,6 +33,7 @@ const resolveProcessingRequest = (props: {
 
 	return {
 		selectedPreset,
+		preset: selectedPreset ? props.query.preset : undefined,
 		format,
 		quality: selectedPreset?.quality ?? constants.media.imagePresetQuality,
 		width: selectedPreset?.width,

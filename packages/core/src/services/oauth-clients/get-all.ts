@@ -22,7 +22,6 @@ const getAll: ServiceFn<[], OAuthClient[]> = async (context) => {
 				mediaOptions: {
 					host: getBaseUrl(context),
 					delivery: context.mediaDelivery,
-					imagePresets: context.config.media.images.presets,
 				},
 			}),
 		),

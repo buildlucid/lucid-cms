@@ -59,6 +59,7 @@ const updateSingle: ServiceFn<
 			}[];
 			width?: number | null;
 			height?: number | null;
+			duration?: number | null;
 			focalPoint?: {
 				x: number;
 				y: number;
@@ -197,6 +198,9 @@ const updateSingle: ServiceFn<
 	}
 
 	const finalType = updateObjectRes?.type ?? mediaRes.data.type;
+	const hasDimensions = finalType === "image" || finalType === "video";
+	const hasDuration = finalType === "video" || finalType === "audio";
+
 	const translations = prepareMediaTranslations({
 		title: data.title || [],
 		alt: finalType === "image" ? (data.alt ?? []) : [],
@@ -207,6 +211,7 @@ const updateSingle: ServiceFn<
 		summary: finalType === "document" ? (data.summary ?? []) : [],
 		mediaId: mediaRes.data.id,
 	});
+
 	if (data.posterId != null && finalType !== "video") {
 		return {
 			error: {
@@ -306,8 +311,21 @@ const updateSingle: ServiceFn<
 		file_extension: updateObjectRes?.extension,
 		file_name: data.fileName,
 		file_size: updateObjectRes?.size,
-		width: data.width,
-		height: data.height,
+		width: !hasDimensions
+			? null
+			: updateObjectRes
+				? (updateObjectRes.width ?? data.width ?? null)
+				: data.width,
+		height: !hasDimensions
+			? null
+			: updateObjectRes
+				? (updateObjectRes.height ?? data.height ?? null)
+				: data.height,
+		duration: !hasDuration
+			? null
+			: updateObjectRes
+				? (updateObjectRes.duration ?? data.duration ?? null)
+				: data.duration,
 		focal_x:
 			finalType !== "image"
 				? null

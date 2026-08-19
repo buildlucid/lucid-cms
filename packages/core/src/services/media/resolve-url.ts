@@ -1,11 +1,10 @@
-import type { MediaProcessOptions } from "@lucidcms/types";
+import type { MediaResolveUrlOptions } from "@lucidcms/types";
 import { copy } from "../../libs/i18n/index.js";
 import type { MediaDeliveryFile } from "../../libs/media-delivery/types.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { MediaUrl } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import {
-	createMediaUrl,
 	isProcessedImageKey,
 	normalizeMediaKey,
 	resolveDeliveryUrl,
@@ -14,11 +13,11 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
 
-const processMedia: ServiceFn<
+const resolveUrl: ServiceFn<
 	[
 		{
 			key: string;
-			body: MediaProcessOptions;
+			options: MediaResolveUrlOptions;
 		},
 	],
 	MediaUrl
@@ -68,6 +67,7 @@ const processMedia: ServiceFn<
 		extension: mediaRes.data.file_extension,
 		width: mediaRes.data.width,
 		height: mediaRes.data.height,
+		duration: mediaRes.data.duration,
 		focalPoint:
 			mediaRes.data.focal_x !== null && mediaRes.data.focal_y !== null
 				? {
@@ -88,19 +88,12 @@ const processMedia: ServiceFn<
 		return {
 			error: undefined,
 			data: {
-				url:
-					resolveDeliveryUrl({
-						delivery: context.mediaDelivery,
-						file,
-						host: baseUrl,
-						public: isPublic,
-					}) ??
-					createMediaUrl({
-						key: mediaRes.data.key,
-						host: baseUrl,
-						fileName: mediaRes.data.file_name,
-						extension: mediaRes.data.file_extension,
-					}),
+				url: resolveDeliveryUrl({
+					delivery: context.mediaDelivery,
+					file,
+					host: baseUrl,
+					public: isPublic,
+				}),
 			},
 		};
 	}
@@ -108,26 +101,19 @@ const processMedia: ServiceFn<
 	const processingRequest = resolveProcessingRequest({
 		presets: context.config.media.images.presets,
 		allowFormatQuery: context.config.media.images.allowFormatQuery,
-		query: data.body,
+		query: data.options,
 	});
 
 	if (!processingRequest.hasProcessing) {
 		return {
 			error: undefined,
 			data: {
-				url:
-					resolveDeliveryUrl({
-						delivery: context.mediaDelivery,
-						file,
-						host: baseUrl,
-						public: isPublic,
-					}) ??
-					createMediaUrl({
-						key: mediaRes.data.key,
-						host: baseUrl,
-						fileName: mediaRes.data.file_name,
-						extension: mediaRes.data.file_extension,
-					}),
+				url: resolveDeliveryUrl({
+					delivery: context.mediaDelivery,
+					file,
+					host: baseUrl,
+					public: isPublic,
+				}),
 			},
 		};
 	}
@@ -151,6 +137,7 @@ const processMedia: ServiceFn<
 					file,
 					host: baseUrl,
 					public: isPublic,
+					preset: processingRequest.preset,
 					transformation,
 					query: processingRequest.publicQuery,
 				}) ??
@@ -159,15 +146,9 @@ const processMedia: ServiceFn<
 					file,
 					host: baseUrl,
 					public: isPublic,
-				}) ??
-				createMediaUrl({
-					key: mediaRes.data.key,
-					host: baseUrl,
-					fileName: mediaRes.data.file_name,
-					extension: mediaRes.data.file_extension,
 				}),
 		},
 	};
 };
 
-export default processMedia;
+export default resolveUrl;

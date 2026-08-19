@@ -10,8 +10,8 @@ import type {
 import getMultiple from "./get-multiple.js";
 import type { ToolkitMediaGetSingleInput } from "./get-single.js";
 import getSingle from "./get-single.js";
-import type { ToolkitMediaProcessInput } from "./process-media.js";
-import processMedia from "./process-media.js";
+import type { ToolkitMediaResolveUrlInput } from "./resolve-url.js";
+import resolveUrl from "./resolve-url.js";
 
 export type ToolkitMedia = {
 	/** Returns multiple media items and a total count. */
@@ -20,15 +20,15 @@ export type ToolkitMedia = {
 	) => ServiceResponse<ToolkitMediaGetMultipleResult>;
 	/** Returns a single media item by ID. */
 	getSingle: (input: ToolkitMediaGetSingleInput) => ServiceResponse<Media>;
-	/** Returns a media URL, with optional processing such as resizing or format changes. */
-	processMedia: (input: ToolkitMediaProcessInput) => ServiceResponse<MediaUrl>;
+	/** Resolves a media URL, with optional image transformations. */
+	resolveUrl: (input: ToolkitMediaResolveUrlInput) => ServiceResponse<MediaUrl>;
 };
 
 /** Creates media helpers for a toolkit instance. */
 export const createMediaToolkit = (context: ServiceContext): ToolkitMedia => ({
 	getMultiple: (input) => getMultiple(context, input),
 	getSingle: (input) => getSingle(context, input),
-	processMedia: (input) => processMedia(context, input),
+	resolveUrl: (input) => resolveUrl(context, input),
 });
 
 export default createMediaToolkit;

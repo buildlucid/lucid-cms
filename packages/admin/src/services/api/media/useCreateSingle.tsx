@@ -33,6 +33,7 @@ interface Params {
 	isHidden?: boolean;
 	width?: number;
 	height?: number;
+	duration?: number;
 	focalPoint?: MediaImageMeta["focalPoint"];
 	blurHash?: string;
 	averageColor?: string;

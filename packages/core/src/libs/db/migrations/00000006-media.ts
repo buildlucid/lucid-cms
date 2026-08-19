@@ -88,6 +88,7 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("width", adapter.getDataType("integer"))
 				.addColumn("height", adapter.getDataType("integer"))
+				.addColumn("duration", adapter.getDataType("real"))
 				.addColumn("focal_x", adapter.getDataType("integer"))
 				.addColumn("focal_y", adapter.getDataType("integer"))
 				.addColumn("crop_x", adapter.getDataType("real"))
