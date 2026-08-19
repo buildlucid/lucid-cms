@@ -6,6 +6,15 @@
 
 - Added environment release status filters and indicators to document lists and the page builder. ([8143341](https://github.com/buildlucid/lucid-cms/commit/81433415091ee5998a2c48872525ed598133f099))
 - Added rich text tools for embedding bricks and documents, inserting document variables and uploading images directly in the editor. ([2b4a857](https://github.com/buildlucid/lucid-cms/commit/2b4a85755594bc0b1de0f4117d3772e24a7c1861))
+- Added separate media storage and delivery adapters with processing states and public adapter data. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
+- Added video playback sources and media metadata for dimensions and duration. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
+- Added direct upload sessions with HTTP, multipart and TUS support. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
+
+### Breaking Changes:
+
+- Replaced the legacy media and image processor config with `media.storage` and `media.delivery`. Image cache settings now live under `media.images.cache`. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
+- Moved media file properties to the top level of media responses and added status, delivery and media metadata fields. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
+- Renamed the media URL processing APIs to `resolveUrl`. Image transformations now use configured presets and supported formats. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
 
 ### Bug Fixes:
 
