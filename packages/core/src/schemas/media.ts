@@ -569,6 +569,24 @@ export const controllerSchemas = {
 		}),
 		response: mediaResponseSchema,
 	} satisfies ControllerSchema,
+	requestDownload: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().trim().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
+		response: z.object({
+			url: z.string().meta({
+				description: "A direct download URL for the media item",
+			}),
+		}),
+	} satisfies ControllerSchema,
 	deleteSingle: {
 		body: undefined,
 		query: {

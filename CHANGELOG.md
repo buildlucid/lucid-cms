@@ -9,6 +9,7 @@
 - Added separate media storage and delivery adapters with processing states and public adapter data. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
 - Added video playback sources and media metadata for dimensions and duration. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
 - Added direct upload sessions with HTTP, multipart and TUS support. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
+- Added direct media downloads to the admin media card actions with a confirmation prompt.
 - Added a publishing overview for tracking release status across collections and environments.
 
 ### Breaking Changes:

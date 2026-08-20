@@ -1,19 +1,16 @@
-import { minutesToMilliseconds } from "date-fns";
-import { getCookie } from "hono/cookie";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
-import { z } from "zod";
-import constants from "../../../../constants/constants.js";
-import { controllerSchemas } from "../../../../schemas/share.js";
-import {
-	mediaServices,
-	mediaShareLinkServices,
-} from "../../../../services/index.js";
+import z from "zod";
+import { controllerSchemas } from "../../../../schemas/media.js";
+import { mediaServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
-import createAuthCookieName from "../../../../utils/share-link/auth-cookie.js";
-import rateLimiter from "../../middleware/rate-limiter.js";
+import { copy } from "../../../i18n/index.js";
+import { Permissions } from "../../../permission/definitions.js";
+import authenticate from "../../middleware/authenticate.js";
+import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
+import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
@@ -22,45 +19,38 @@ const factory = createFactory();
 
 const requestDownloadController = factory.createHandlers(
 	describeRoute({
-		description:
-			"Request a direct download URL for a shared media item after validating share access.",
-		tags: ["share"],
-		summary: "Request Share Download URL",
+		description: "Request a direct download URL for a media item.",
+		tags: ["media"],
+		summary: "Request Media Download URL",
 		parameters: openAPI.parameters({
 			params: controllerSchemas.requestDownload.params,
+			headers: {
+				csrf: true,
+			},
 		}),
 		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.requestDownload.response),
 		}),
 	}),
-	rateLimiter({
-		mode: "ip",
-		scope: constants.rateLimit.scopes.low.scopeKey,
-		limit: constants.rateLimit.scopes.low.limit,
-		windowMs: minutesToMilliseconds(1),
-	}),
+	validateCSRF,
+	authenticate(),
+	permissions([Permissions.MediaRead]),
 	validate("param", controllerSchemas.requestDownload.params),
 	async (c) => {
-		const { token } = c.req.valid("param");
+		const { id } = c.req.valid("param");
 		const context = createServiceContext(c);
-		const sessionCookie = getCookie(c, createAuthCookieName(token));
-
-		const authorizeRes = await serviceWrapper(
-			mediaShareLinkServices.authorizeShare,
-			{ transaction: false },
-		)(context, {
-			token,
-			sessionCookie,
-			enforcePasswordSession: true,
-		});
-		if (authorizeRes.error) throw new LucidAPIError(authorizeRes.error);
 
 		const downloadRes = await serviceWrapper(mediaServices.requestDownload, {
 			transaction: false,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.media.download.error.name"),
+				message: copy("server:core.routes.media.download.error.message"),
+			},
 		})(context, {
 			target: {
-				type: "key",
-				key: authorizeRes.data.mediaKey,
+				type: "id",
+				id: Number.parseInt(id, 10),
 			},
 		});
 		if (downloadRes.error) throw new LucidAPIError(downloadRes.error);

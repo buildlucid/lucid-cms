@@ -296,6 +296,8 @@
 	"core.routes.media.folders.delete.error.message": "An error occurred while deleting the media folder.",
 	"core.routes.media.fetch.error.name": "Media(s) Fetch Error",
 	"core.routes.media.fetch.error.message": "An error occurred while fetching the media(s).",
+	"core.routes.media.download.error.name": "Media Download Error",
+	"core.routes.media.download.error.message": "An error occurred while preparing the media download.",
 	"core.routes.media.folders.fetch.error.name": "Media Folder(s) Fetch Error",
 	"core.routes.media.folders.fetch.error.message": "An error occurred while fetching the media folder(s).",
 	"core.routes.media.upload.session.error.name": "Upload Session Error",

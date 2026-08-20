@@ -35,6 +35,7 @@ import DeleteMediaBatch from "@/components/Modals/Media/DeleteMediaBatch";
 import DeleteMediaBatchPermanently from "@/components/Modals/Media/DeleteMediaBatchPermanently";
 import DeleteMediaFolder from "@/components/Modals/Media/DeleteMediaFolder";
 import DeleteMediaPermanently from "@/components/Modals/Media/DeleteMediaPermanently";
+import DownloadMedia from "@/components/Modals/Media/DownloadMedia";
 import ImageCropEditor from "@/components/Modals/Media/ImageCropEditor";
 import MoveToFolder, {
 	type MoveToFolderParams,
@@ -93,6 +94,7 @@ export const MediaList: Component<{
 			copyShareLinkURL: false,
 			deleteAllShareLinks: false,
 			quickCrop: false,
+			download: false,
 		},
 	});
 	const mediaAltGeneration = useMediaAltGeneration();
@@ -523,6 +525,15 @@ export const MediaList: Component<{
 					open: rowTarget.getTriggers().viewShareLinks,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("viewShareLinks", state);
+					},
+				}}
+			/>
+			<DownloadMedia
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().download,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("download", state);
 					},
 				}}
 			/>

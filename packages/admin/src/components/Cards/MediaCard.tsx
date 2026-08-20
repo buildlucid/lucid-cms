@@ -32,6 +32,7 @@ interface MediaCardProps {
 			| "viewShareLinks"
 			| "createShareLink"
 			| "deleteAllShareLinks"
+			| "download"
 		>
 	>;
 	contentLocale?: string;
@@ -77,7 +78,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			| "view"
 			| "viewShareLinks"
 			| "createShareLink"
-			| "deleteAllShareLinks",
+			| "deleteAllShareLinks"
+			| "download",
 	) => {
 		props.rowTarget.setTargetId(props.media.id);
 		props.rowTarget.setTrigger(trigger, true);
@@ -241,6 +243,14 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					theme: "error",
 				},
 			],
+		},
+		{
+			label: T()("common.download"),
+			type: "button",
+			icon: "download",
+			onClick: () => openMediaAction("download"),
+			permission: canReadMedia(),
+			hide: props.showingDeleted?.() || props.media.status !== "ready",
 		},
 		{
 			label: T()("common.delete"),
