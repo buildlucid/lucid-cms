@@ -4,6 +4,7 @@ import {
 	FaSolidBarsProgress,
 	FaSolidBox,
 	FaSolidBoxesStacked,
+	FaSolidCloudArrowUp,
 	FaSolidDesktop,
 	FaSolidEnvelope,
 	FaSolidGear,
@@ -32,6 +33,7 @@ interface IconLinkFullProps {
 	type: "link" | "button";
 	title: string;
 	href?: string;
+	exact?: boolean;
 	icon:
 		| "dashboard"
 		| "collection-multiple"
@@ -45,7 +47,8 @@ interface IconLinkFullProps {
 		| "queue"
 		| "integrations"
 		| "settings"
-		| "release-requests";
+		| "release-requests"
+		| "publishing";
 	active?: boolean;
 	permission?: boolean;
 	onClick?: () => void;
@@ -63,7 +66,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 	const routeIsActive = createMemo(
 		() =>
 			props.type === "link" &&
-			isNavigationLinkActive(location.pathname, props.href || "/"),
+			isNavigationLinkActive(location.pathname, props.href || "/", props.exact),
 	);
 
 	// ----------------------------------
@@ -121,6 +124,9 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 				<Match when={props.icon === "release-requests"}>
 					<FaSolidSquareArrowUpRight class={iconClasses} />
 				</Match>
+				<Match when={props.icon === "publishing"}>
+					<FaSolidCloudArrowUp class={iconClasses} />
+				</Match>
 			</Switch>
 		);
 	};
@@ -139,6 +145,7 @@ export const IconLinkFull: Component<IconLinkFullProps> = (props) => {
 							title={props.title}
 							href={props.href || "/"}
 							data-navigation-href={props.href || "/"}
+							data-navigation-exact={props.exact ? "true" : undefined}
 							data-navigation-force-active={props.active ? "true" : undefined}
 							link
 							class="h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-navigation-hover transition-colors duration-200 ease-in-out"

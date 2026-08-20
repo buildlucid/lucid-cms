@@ -13,6 +13,8 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getDocumentLabel from "./helpers/get-document-label.js";
 import {
+	getReleaseRequirementStatuses,
+	getReleaseRequirementTargets,
 	hasCollectionPermission,
 	unresolvedPublishOperationExecutionStatuses,
 } from "./helpers/index.js";
@@ -93,9 +95,15 @@ const getSingle: ServiceFn<
 
 	const Versions = new DocumentVersionsRepository(context.db);
 	const Bricks = new DocumentBricksRepository(context.db);
-	const latestRes = await Versions.selectSingle(
+
+	const releaseRequirementTargets = getReleaseRequirementTargets({
+		collection: collectionRes.data,
+		target: operationRes.data.target,
+	});
+
+	const versionsRes = await Versions.selectMultiple(
 		{
-			select: ["content_id"],
+			select: ["type", "content_id"],
 			where: [
 				{
 					key: "collection_key",
@@ -107,14 +115,24 @@ const getSingle: ServiceFn<
 					operator: "=",
 					value: operationRes.data.document_id,
 				},
-				{ key: "type", operator: "=", value: "latest" },
+				{
+					key: "type",
+					operator: "in",
+					value: ["latest", ...releaseRequirementTargets],
+				},
 			],
 		},
 		{
 			tableName: tableNamesRes.data.version,
 		},
 	);
-	if (latestRes.error) return latestRes;
+	if (versionsRes.error) return versionsRes;
+	const contentIdsByTarget = new Map(
+		(versionsRes.data ?? []).map((version) => [
+			version.type,
+			version.content_id,
+		]),
+	);
 
 	const documentLabelRes = await getDocumentLabel({
 		context,
@@ -130,7 +148,13 @@ const getSingle: ServiceFn<
 		data: documentPublishOperationsFormatter.formatSingle({
 			operation: operationRes.data,
 			documentLabel: documentLabelRes.data,
-			latestContentId: latestRes.data?.content_id ?? null,
+			latestContentId: contentIdsByTarget.get("latest") ?? null,
+			releaseRequirements: getReleaseRequirementStatuses({
+				collection: collectionRes.data,
+				target: operationRes.data.target,
+				sourceContentId: operationRes.data.source_content_id,
+				contentIdsByTarget,
+			}),
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,

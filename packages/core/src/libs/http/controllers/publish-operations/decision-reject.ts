@@ -15,7 +15,7 @@ const factory = createFactory();
 const decisionRejectController = factory.createHandlers(
 	describeRoute({
 		description: "Reject a publish operation.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Reject Publish Operation",
 		responses: openAPI.responses({
 			noProperties: true,

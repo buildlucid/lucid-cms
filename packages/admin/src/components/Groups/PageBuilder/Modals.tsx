@@ -306,15 +306,6 @@ export const Modals: Component<{
 							scheduledAt,
 							scheduledTimezone,
 						);
-						if (!scheduledAt) {
-							navigate(
-								getDocumentRoute("edit", {
-									collectionKey: props.hooks.state.collectionKey(),
-									documentId: props.hooks.state.documentId(),
-									version: target,
-								}),
-							);
-						}
 						resetReleaseState();
 					},
 					onCancel: () => {
@@ -355,15 +346,6 @@ export const Modals: Component<{
 							scheduledAt,
 							scheduledTimezone,
 						);
-						if (autoAccept && !scheduledAt) {
-							navigate(
-								getDocumentRoute("edit", {
-									collectionKey: props.hooks.state.collectionKey(),
-									documentId: props.hooks.state.documentId(),
-									version: target,
-								}),
-							);
-						}
 						resetReleaseState();
 					},
 					onCancel: () => {

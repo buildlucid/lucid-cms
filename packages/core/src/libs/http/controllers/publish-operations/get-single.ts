@@ -18,7 +18,7 @@ const factory = createFactory();
 const getSingleController = factory.createHandlers(
 	describeRoute({
 		description: "Get a publish operation.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Get Publish Operation",
 		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getSingle.response),

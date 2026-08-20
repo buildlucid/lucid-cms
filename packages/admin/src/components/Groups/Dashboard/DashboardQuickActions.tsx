@@ -53,7 +53,7 @@ const DashboardQuickActions: Component<{
 		<section>
 			<div class="mb-4">
 				<h2>{T()("dashboard.quick.actions.title")}</h2>
-				<p class="mt-1 text-sm text-body">
+				<p class="mt-0.5 text-sm text-body">
 					{T()("dashboard.quick.actions.description")}
 				</p>
 			</div>

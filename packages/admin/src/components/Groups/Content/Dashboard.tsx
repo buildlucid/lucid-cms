@@ -199,7 +199,7 @@ export const Dashboard: Component = () => {
 			title: T()("dashboard.quick.actions.review.releases.title"),
 			description: T()("dashboard.quick.actions.review.releases.description"),
 			icon: <FaSolidUserCheck size={14} />,
-			href: "/lucid/release-requests?filter[assignedToMe]=true",
+			href: "/lucid/publishing/requests?filter[assignedToMe]=true",
 			show: releaseRequestsAvailable(),
 		},
 		{
@@ -267,7 +267,7 @@ export const Dashboard: Component = () => {
 				tone: "info",
 				action: {
 					label: T()("dashboard.attention.review.now"),
-					href: "/lucid/release-requests?filter[assignedToMe]=true",
+					href: "/lucid/publishing/requests?filter[assignedToMe]=true",
 				},
 			});
 		}
@@ -283,7 +283,7 @@ export const Dashboard: Component = () => {
 				tone: "danger",
 				action: {
 					label: T()("dashboard.attention.view.failed"),
-					href: "/lucid/release-requests?filter[executionStatus]=failed",
+					href: "/lucid/publishing/requests?filter[executionStatus]=failed",
 				},
 			});
 		}

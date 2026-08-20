@@ -104,6 +104,7 @@ export type {
 	PreviewSession,
 	PreviewSessionURLResponse,
 	ProfilePicture,
+	PublishingOverview,
 	PublishOperation,
 	PublishOperationAssignee,
 	PublishOperationEvent,

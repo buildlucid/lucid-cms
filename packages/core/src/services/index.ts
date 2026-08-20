@@ -24,6 +24,7 @@ export * as optionServices from "./options/index.js";
 export * as permissionServices from "./permissions/index.js";
 export * as previewSessionServices from "./preview-sessions/index.js";
 export * as processedImageServices from "./processed-images/index.js";
+export * as publishingServices from "./publishing/index.js";
 export * as roleServices from "./roles/index.js";
 export * as securityAuditServices from "./security-audit/index.js";
 export * as seedServices from "./seed/index.js";

@@ -9,7 +9,7 @@ export interface Params {
 
 export const retryReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/publish-operations/${params.id}/retry`,
+		url: `/lucid/api/v1/publishing/requests/${params.id}/retry`,
 		csrf: true,
 		config: {
 			method: "POST",

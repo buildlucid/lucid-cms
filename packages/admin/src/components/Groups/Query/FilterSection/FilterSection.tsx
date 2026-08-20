@@ -5,6 +5,7 @@ import {
 	createEffect,
 	createMemo,
 	createSignal,
+	For,
 	Index,
 	on,
 	Show,
@@ -24,6 +25,12 @@ import {
 	operatorsForFieldType,
 } from "@/utils/document-filter-fields";
 import { formatFilterSectionSubject } from "@/utils/filter-fields";
+import {
+	type FilterSectionPreset,
+	type FilterSectionPresets,
+	isFilterPresetActive,
+	isFilterValueEmpty,
+} from "./preset-state";
 
 type RowRef =
 	//* top-level filter param - only exists in single-group mode
@@ -63,14 +70,8 @@ export interface FilterSectionProps {
 	/** standalone card styling for use inside panels instead of bleeding into
 	 * the list header card */
 	embedded?: boolean;
+	presets?: FilterSectionPresets;
 }
-
-const isValueEmpty = (value: FilterValue): boolean => {
-	if (value === undefined) return true;
-	if (typeof value === "string") return value.trim() === "";
-	if (Array.isArray(value)) return value.length === 0;
-	return false;
-};
 
 const identity = (ref: RowRef): string => {
 	if (ref.source === "top") return `top:${ref.key}`;
@@ -103,7 +104,8 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 		const result: OrFilterCondition[] = [];
 		for (const [key, state] of props.searchParams.filterStates()) {
 			if (!fieldsByKey().has(key)) continue;
-			if (state.operator === undefined && isValueEmpty(state.value)) continue;
+			if (state.operator === undefined && isFilterValueEmpty(state.value))
+				continue;
 			result.push({
 				key,
 				value: state.value,
@@ -474,7 +476,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 		const demotedDrafts: DraftRow[] = [];
 
 		for (const condition of topConditions()) {
-			if (isValueEmpty(condition.value)) {
+			if (isFilterValueEmpty(condition.value)) {
 				const draftId = nextDraftId++;
 				demotedDrafts.push({
 					draftId,
@@ -567,7 +569,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 	const commitDraftValue = (draftId: number, value: FilterValue) => {
 		const draft = drafts().find((d) => d.draftId === draftId);
 		if (!draft?.key) return;
-		if (isValueEmpty(value)) {
+		if (isFilterValueEmpty(value)) {
 			updateDraft(draftId, { value });
 			return;
 		}
@@ -651,7 +653,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 			});
 			return;
 		}
-		if (isValueEmpty(value)) {
+		if (isFilterValueEmpty(value)) {
 			demoteOrRowToDraft(row.ref.groupIndex, row.ref.conditionIndex, {
 				target: row.ref.groupIndex,
 				key: row.fieldKey,
@@ -677,6 +679,19 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 			}
 		});
 		if (isLastRow) props.setOpen(false);
+	};
+	const isPresetActive = (preset: FilterSectionPreset) => {
+		return isFilterPresetActive({
+			currentFilters: props.searchParams.filterStates(),
+			orFilterGroups: props.searchParams.orFilterGroups(),
+			hasDraftRows: drafts().length > 0,
+			preset,
+		});
+	};
+	const applyPreset = (preset: FilterSectionPreset) => {
+		setDrafts([]);
+		setRowOrder([]);
+		props.searchParams.replaceFilters(preset.filters);
 	};
 
 	/** Group index a row's + action should extend. */
@@ -738,7 +753,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 
 		if (top.length > 0) {
 			const nonEmptyTop = top.filter(
-				(condition) => !isValueEmpty(condition.value),
+				(condition) => !isFilterValueEmpty(condition.value),
 			);
 			const distributed = groups.map((group) => {
 				const groupKeys = new Set(group.map((condition) => condition.key));
@@ -782,6 +797,43 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 							: "-mx-4 md:-mx-6 -mb-4 md:-mb-6 mt-1.5 md:mt-3.5 px-4 md:px-6 py-4 bg-card-base border-t border-border"
 				}
 			>
+				<Show when={(props.presets?.items.length ?? 0) > 0}>
+					<div class="mb-4 border-b border-border pb-4">
+						<h3 class="mb-2 text-sm font-medium text-title">
+							{T()("filter.section.presets")}
+						</h3>
+						<div class="flex flex-wrap gap-2">
+							<For each={props.presets?.items}>
+								{(preset) => {
+									const active = () => isPresetActive(preset);
+
+									return (
+										<Button
+											theme="border-outline"
+											size="small"
+											type="button"
+											disabled={active()}
+											aria-pressed={active()}
+											classes={
+												active()
+													? "gap-1.5 border-secondary-base! bg-secondary-base! text-secondary-contrast! fill-secondary-contrast! opacity-100! cursor-default!"
+													: "gap-1.5"
+											}
+											onClick={() => applyPreset(preset)}
+										>
+											<span>{preset.label}</span>
+											<Show when={preset.loading || preset.value !== undefined}>
+												<span class="tabular-nums opacity-65">
+													{preset.loading ? "-" : preset.value}
+												</span>
+											</Show>
+										</Button>
+									);
+								}}
+							</For>
+						</div>
+					</div>
+				</Show>
 				<h3 class="text-sm font-medium text-title mb-3">
 					{T()("filter.section.title", {
 						subject: formatFilterSectionSubject(

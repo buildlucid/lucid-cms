@@ -15,7 +15,7 @@ const factory = createFactory();
 const rescheduleController = factory.createHandlers(
 	describeRoute({
 		description: "Reschedule a publish operation.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Reschedule Publish Operation",
 		responses: openAPI.responses({
 			noProperties: true,

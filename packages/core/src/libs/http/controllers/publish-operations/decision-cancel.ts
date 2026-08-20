@@ -15,7 +15,7 @@ const factory = createFactory();
 const decisionCancelController = factory.createHandlers(
 	describeRoute({
 		description: "Cancel a publish operation.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Cancel Publish Operation",
 		responses: openAPI.responses({
 			noProperties: true,

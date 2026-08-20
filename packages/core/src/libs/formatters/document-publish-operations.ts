@@ -31,6 +31,7 @@ type FormatSingleProps = {
 	operation: PublishOperationDetailedQueryResponse;
 	documentLabel?: string | null;
 	latestContentId?: string | null;
+	releaseRequirements?: PublishOperation["releaseRequirements"];
 	permissions?: PublishOperation["permissions"];
 	mediaOptions: MediaFormatterOptions;
 };
@@ -51,6 +52,7 @@ const formatSingle = (props: FormatSingleProps): PublishOperation => ({
 		props.latestContentId !== undefined &&
 		props.latestContentId !== null &&
 		props.latestContentId !== props.operation.source_content_id,
+	releaseRequirements: props.releaseRequirements ?? [],
 	requestedBy: formatUser({
 		id: props.operation.requested_by,
 		email: props.operation.requested_by_email,

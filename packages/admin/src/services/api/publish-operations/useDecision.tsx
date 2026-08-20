@@ -16,7 +16,7 @@ export interface Params {
 
 export const decisionReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/publish-operations/${params.id}/${params.action}`,
+		url: `/lucid/api/v1/publishing/requests/${params.id}/${params.action}`,
 		csrf: true,
 		config: {
 			method: "POST",

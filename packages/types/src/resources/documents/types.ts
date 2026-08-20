@@ -930,6 +930,10 @@ export type PublishOperation = {
 	sourceContentId: string;
 	snapshotVersionId: number;
 	isOutdated: boolean;
+	releaseRequirements: Array<{
+		target: string;
+		status: DocumentEnvironmentStatus;
+	}>;
 	requestedBy: PublishOperationUser;
 	requestComment: RichTextJSON | null;
 	decidedBy: PublishOperationUser;
@@ -953,6 +957,24 @@ export type PublishOperation = {
 	};
 	assignees: PublishOperationAssignee[];
 	events: PublishOperationEvent[];
+};
+
+export type PublishingOverview = {
+	collections: Array<{
+		collectionKey: string;
+		environments: Array<{
+			target: string;
+			unreleased: number;
+			outOfSync: number;
+			inSync: number;
+		}>;
+	}>;
+	releaseRequests: Array<{
+		target: string;
+		pending: number;
+		scheduled: number;
+		failed: number;
+	}>;
 };
 
 export type PublishOperationOverview = {

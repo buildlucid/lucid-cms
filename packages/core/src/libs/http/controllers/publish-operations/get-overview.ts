@@ -19,7 +19,7 @@ const factory = createFactory();
 const getOverviewController = factory.createHandlers(
 	describeRoute({
 		description: "Get publish operation overview counts.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Get Publish Operation Overview",
 		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getOverview.response),

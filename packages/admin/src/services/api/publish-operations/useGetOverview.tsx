@@ -22,7 +22,7 @@ const useGetOverview = (params: QueryHook<QueryParams>) => {
 		queryKey: ["publishOperations.getOverview", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<PublishOperationOverview>>({
-				url: "/lucid/api/v1/publish-operations/overview",
+				url: "/lucid/api/v1/publishing/requests/overview",
 				query: queryParams(),
 				config: {
 					method: "GET",

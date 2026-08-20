@@ -45,6 +45,12 @@ export const publishOperationResponseSchema = z.object({
 	sourceContentId: z.string(),
 	snapshotVersionId: z.number(),
 	isOutdated: z.boolean(),
+	releaseRequirements: z.array(
+		z.object({
+			target: z.string(),
+			status: z.enum(["unreleased", "out-of-sync", "in-sync"]),
+		}),
+	),
 	requestedBy: publishOperationUserSchema,
 	requestComment: richTextJSONSchema.nullable(),
 	decidedBy: publishOperationUserSchema,

@@ -15,7 +15,7 @@ const factory = createFactory();
 const retryController = factory.createHandlers(
 	describeRoute({
 		description: "Retry a failed publish operation.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Retry Publish Operation",
 		responses: openAPI.responses({
 			noProperties: true,

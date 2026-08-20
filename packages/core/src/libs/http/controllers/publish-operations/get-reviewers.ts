@@ -16,7 +16,7 @@ const factory = createFactory();
 const getReviewersController = factory.createHandlers(
 	describeRoute({
 		description: "Get users who can review a publish operation target.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Get Publish Operation Reviewers",
 		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getReviewers.response),

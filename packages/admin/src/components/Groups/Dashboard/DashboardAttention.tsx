@@ -30,7 +30,7 @@ const DashboardAttention: Component<{
 			<div class="mb-4 flex items-end justify-between gap-4">
 				<div>
 					<h2>{T()("dashboard.attention.title")}</h2>
-					<p class="mt-1 text-sm text-body">
+					<p class="mt-0.5 text-sm text-body">
 						{T()("dashboard.attention.description")}
 					</p>
 				</div>

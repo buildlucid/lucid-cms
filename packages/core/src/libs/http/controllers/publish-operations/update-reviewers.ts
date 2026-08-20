@@ -15,7 +15,7 @@ const factory = createFactory();
 const updateReviewersController = factory.createHandlers(
 	describeRoute({
 		description: "Update publish operation reviewers.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Update Publish Operation Reviewers",
 		responses: openAPI.responses({
 			noProperties: true,

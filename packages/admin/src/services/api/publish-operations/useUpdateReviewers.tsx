@@ -12,7 +12,7 @@ export interface Params {
 
 export const updateReviewersReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/publish-operations/${params.id}/reviewers`,
+		url: `/lucid/api/v1/publishing/requests/${params.id}/reviewers`,
 		csrf: true,
 		config: {
 			method: "POST",

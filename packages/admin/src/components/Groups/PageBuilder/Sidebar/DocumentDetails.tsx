@@ -89,7 +89,7 @@ export const DocumentDetails: Component<{
 	return (
 		<SidebarSection
 			title={T()("common.document.details")}
-			icon={<FaSolidInfo size={14} />}
+			icon={<FaSolidInfo size={12} />}
 			preferenceKey="pageBuilder.sidebar.documentDetails"
 		>
 			<DetailsList type="text" padding={12} items={details()} />

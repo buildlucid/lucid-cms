@@ -249,10 +249,17 @@ export const HeaderBar: Component<{
 		return options;
 	});
 	const releaseOptions = createMemo<ReleaseTriggerOption[]>(() => {
-		if (props.state.ui.showPublishButton?.() === false) return [];
 		const collection = props.state.collection();
 		const document = props.state.document();
-		if (!collection || !document) return [];
+		if (
+			props.mode !== "edit" ||
+			!collection ||
+			!document ||
+			collection.locked ||
+			document.isDeleted
+		) {
+			return [];
+		}
 
 		const environments = collection.environments ?? [];
 		const publishReview = collection.review;
@@ -399,6 +406,17 @@ export const HeaderBar: Component<{
 			};
 		});
 	});
+	const currentEnvironmentReleaseOption = createMemo(() => {
+		const version = props.version?.();
+		if (!version || version === "latest") return undefined;
+
+		const isEnvironment = props.state
+			.collection()
+			?.environments.some((environment) => environment.key === version);
+		if (!isEnvironment) return undefined;
+
+		return releaseOptions().find((option) => option.value === version);
+	});
 	const showViewSelector = createMemo(() => {
 		const collection = props.state.collection();
 		if (!collection) return false;
@@ -437,6 +455,20 @@ export const HeaderBar: Component<{
 
 	// ----------------------------------
 	// Functions
+	const openReleaseOption = (option: ReleaseTriggerOption) => {
+		if (option.disabledToast) {
+			spawnToast({
+				...option.disabledToast,
+				status: option.disabledToast.status ?? "warning",
+			});
+			return;
+		}
+
+		props.state.autoSave?.debouncedAutoSave.clear();
+		props.state.ui.setReleaseEnvironmentTarget(option.value);
+		props.state.ui.setReleaseEnvironmentAction(option.action ?? "publish");
+		props.state.ui.setReleaseEnvironmentOpen(true);
+	};
 	const copyPreviewUrl = async (mode: PreviewMode) => {
 		const documentId = props.state.documentID();
 		if (documentId === undefined) return;
@@ -633,6 +665,26 @@ export const HeaderBar: Component<{
 							</div>
 						</Show>
 						<div class="flex items-center gap-2.5 w-auto ml-auto">
+							<Show when={currentEnvironmentReleaseOption()}>
+								{(option) => (
+									<Button
+										type="button"
+										theme="secondary"
+										size="small"
+										aria-disabled={option().disabled === true}
+										classes={classNames({
+											"cursor-not-allowed opacity-80":
+												option().disabled === true,
+										})}
+										loading={props.state.ui.isCreatingPublishOperation?.()}
+										onClick={() => openReleaseOption(option())}
+									>
+										{T()("documents.release.update.environment", {
+											environment: option().label,
+										})}
+									</Button>
+								)}
+							</Show>
 							<Show when={props.state.showPreview?.()}>
 								<Button
 									type="button"
@@ -660,14 +712,7 @@ export const HeaderBar: Component<{
 							<Show when={props.state.ui.showUpsertButton?.()}>
 								<ReleaseTrigger
 									options={releaseOptions}
-									onSelect={async (option) => {
-										props.state.autoSave?.debouncedAutoSave.clear();
-										props.state.ui.setReleaseEnvironmentTarget(option.value);
-										props.state.ui.setReleaseEnvironmentAction(
-											option.action ?? "publish",
-										);
-										props.state.ui.setReleaseEnvironmentOpen(true);
-									}}
+									onSelect={openReleaseOption}
 									onSave={() => {
 										props.state.autoSave?.debouncedAutoSave.clear();
 										props.actions?.upsertDocumentAction?.();

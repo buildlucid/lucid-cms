@@ -15,7 +15,7 @@ const factory = createFactory();
 const decisionApproveController = factory.createHandlers(
 	describeRoute({
 		description: "Approve a publish operation.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Approve Publish Operation",
 		responses: openAPI.responses({
 			noProperties: true,

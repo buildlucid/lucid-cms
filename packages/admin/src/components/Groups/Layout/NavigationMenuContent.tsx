@@ -17,6 +17,7 @@ export type NavigationMenuContentProps = {
 	onLogout?: () => void;
 	user?: Pick<User, "username" | "firstName" | "lastName" | "profilePicture">;
 	canReadDocuments: boolean;
+	canReadPublishingOverview: boolean;
 	canReadPublishRequests: boolean;
 	canReadMedia: boolean;
 	canReadEmails: boolean;
@@ -59,6 +60,9 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 			props.canManageConnection ||
 			props.canReadJobs ||
 			props.canReadAiUsage,
+	);
+	const showPublishingSection = createMemo(
+		() => props.canReadPublishingOverview || props.canReadPublishRequests,
 	);
 	const orderedCollections = createMemo(() => [
 		...props.multiCollections,
@@ -152,9 +156,24 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						title={T()("email.activity")}
 						permission={props.canReadEmails}
 					/>
+
+					{/* Publishing */}
+					<Show when={showPublishingSection()}>
+						<div class="w-full mt-4 mb-2">
+							<span class="text-xs">{T()("common.publishing")}</span>
+						</div>
+					</Show>
 					<IconLinkFull
 						type="link"
-						href="/lucid/release-requests"
+						href="/lucid/publishing"
+						exact={true}
+						icon="publishing"
+						title={T()("common.overview")}
+						permission={props.canReadPublishingOverview}
+					/>
+					<IconLinkFull
+						type="link"
+						href="/lucid/publishing/requests"
 						icon="release-requests"
 						title={T()("publish.requests.list.title")}
 						permission={props.canReadPublishRequests}

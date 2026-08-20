@@ -12,11 +12,15 @@ const normalizeNavigationPath = (path: string) => {
 	return normalizedPath || "/";
 };
 
-export const isNavigationLinkActive = (pathname: string, href: string) => {
+export const isNavigationLinkActive = (
+	pathname: string,
+	href: string,
+	exact = false,
+) => {
 	const currentPath = normalizeNavigationPath(pathname);
 	const linkPath = normalizeNavigationPath(href);
 
-	if (linkPath === "/lucid") return currentPath === linkPath;
+	if (exact || linkPath === "/lucid") return currentPath === linkPath;
 
 	return currentPath === linkPath || currentPath.startsWith(`${linkPath}/`);
 };

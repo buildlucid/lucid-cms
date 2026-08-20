@@ -78,7 +78,7 @@ export const EnvironmentStatus: Component<{
 		<Show when={statusItems().length > 0}>
 			<SidebarSection
 				title={T()("documents.release.status")}
-				icon={<FaSolidCloudArrowUp size={14} />}
+				icon={<FaSolidCloudArrowUp size={12} />}
 				preferenceKey="pageBuilder.sidebar.environmentStatus"
 			>
 				<DetailsList type="pill" padding={12} items={statusItems()} />

@@ -1,10 +1,10 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { Collection, PublishOperation } from "@types";
+import classNames from "classnames";
 import {
 	FaSolidCircleInfo,
 	FaSolidClock,
 	FaSolidPaperPlane,
-	FaSolidTriangleExclamation,
 	FaSolidUserCheck,
 } from "solid-icons/fa";
 import {
@@ -22,6 +22,9 @@ import PublishOperationReviewers from "@/components/Modals/Documents/PublishOper
 import ReleaseScheduleFields from "@/components/Modals/Documents/ReleaseScheduleFields";
 import Button from "@/components/Partials/Button";
 import DateText from "@/components/Partials/DateText";
+import DetailsList, {
+	type DetailsListProps,
+} from "@/components/Partials/DetailsList";
 import Pill from "@/components/Partials/Pill";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import api from "@/services/api";
@@ -31,6 +34,7 @@ import {
 	formatPublishOperationUser,
 	getPublishOperationExecutionStatusLabel,
 	getPublishOperationStatusLabel,
+	hasPublishOperationContextChanged,
 } from "@/utils/publish-operations";
 import {
 	getDefaultTimezone,
@@ -44,11 +48,15 @@ import {
 } from "@/utils/rich-text";
 import { formatTargetName } from "./helpers";
 import ReleaseRequestCommentBlock from "./Partials/ReleaseRequestCommentBlock";
-import ReleaseRequestDetailRow from "./Partials/ReleaseRequestDetailRow";
 import SidebarSection from "./Partials/SidebarSection";
 
 type PublishOperationUser = PublishOperation["requestedBy"];
 type DecisionAction = "approve" | "reject" | "cancel";
+type ExecutionEvent = {
+	label: string;
+	date: string;
+	detail?: string | null;
+};
 
 const getDecisionTitle = (action?: DecisionAction) => {
 	switch (action) {
@@ -184,6 +192,30 @@ export const ReleaseRequestSidebar: Component<{
 			target: publishRequest.target,
 		});
 	});
+	const changedReleaseRequirementLabels = createMemo(() => {
+		const publishRequest = request();
+		if (!publishRequest) return [];
+
+		return publishRequest.releaseRequirements
+			.filter((requirement) => requirement.status !== "in-sync")
+			.map((requirement) =>
+				formatTargetName({
+					collection: props.collection(),
+					target: requirement.target,
+				}),
+			);
+	});
+	const releaseContextChanged = createMemo(() => {
+		const publishRequest = request();
+		return publishRequest
+			? hasPublishOperationContextChanged(publishRequest)
+			: false;
+	});
+	const releaseContextTooltip = createMemo(() =>
+		changedReleaseRequirementLabels().length > 0
+			? T()("publish.requests.context.changed")
+			: T()("publish.requests.snapshot.outdated"),
+	);
 	const statusLabel = createMemo(() => {
 		const publishRequest = request();
 		if (!publishRequest) return T()("common.loading");
@@ -202,6 +234,63 @@ export const ReleaseRequestSidebar: Component<{
 		return getPublishOperationExecutionStatusLabel(
 			publishRequest.executionStatus,
 		);
+	});
+	const requestDetails = createMemo<DetailsListProps["items"]>(() => {
+		const publishRequest = request();
+		if (!publishRequest) return [];
+
+		return [
+			{
+				label: T()("common.requested.by"),
+				value: (
+					<PublishOperationUserDetailValue user={publishRequest.requestedBy} />
+				),
+			},
+			{
+				label: T()("common.requested.at"),
+				value: <DateText date={publishRequest.createdAt} class="text-xs" />,
+				show: Boolean(publishRequest.createdAt),
+			},
+			{
+				label: T()("common.decided.by"),
+				value: (
+					<PublishOperationUserDetailValue user={publishRequest.decidedBy} />
+				),
+				show: Boolean(publishRequest.decidedBy),
+			},
+			{
+				label: T()("common.updated.at"),
+				value: <DateText date={publishRequest.decidedAt} class="text-xs" />,
+				show: Boolean(publishRequest.decidedAt),
+			},
+		];
+	});
+	const executionEvents = createMemo<ExecutionEvent[]>(() => {
+		const publishRequest = request();
+		if (!publishRequest) return [];
+
+		const events: ExecutionEvent[] = [];
+		if (publishRequest.scheduledAt) {
+			events.push({
+				label: getPublishOperationExecutionStatusLabel("scheduled"),
+				date: publishRequest.scheduledAt,
+				detail: publishRequest.scheduledTimezone,
+			});
+		}
+		if (publishRequest.executedAt) {
+			events.push({
+				label: getPublishOperationExecutionStatusLabel("executed"),
+				date: publishRequest.executedAt,
+			});
+		}
+		if (publishRequest.failedAt) {
+			events.push({
+				label: getPublishOperationExecutionStatusLabel("failed"),
+				date: publishRequest.failedAt,
+			});
+		}
+
+		return events;
 	});
 	const releaseTimingOptions = createMemo(() => [
 		{
@@ -230,6 +319,17 @@ export const ReleaseRequestSidebar: Component<{
 			publishRequest.permissions.reschedule ||
 			publishRequest.permissions.retry
 		);
+	});
+	const actionCount = createMemo(() => {
+		const publishRequest = request();
+		if (!publishRequest) return 0;
+
+		let count = 0;
+		if (publishRequest.status === "pending" && canReviewRequest()) count += 2;
+		if (canCancelRequest()) count += 1;
+		if (publishRequest.permissions.reschedule) count += 1;
+		if (publishRequest.permissions.retry) count += 1;
+		return count;
 	});
 
 	// ----------------------------------
@@ -378,23 +478,23 @@ export const ReleaseRequestSidebar: Component<{
 	// Render
 	return (
 		<>
-			<aside class="w-full shrink-0 bg-card-base p-4 md:p-5 flex-col flex gap-5 rounded-t-xl border-t border-border xl:sticky xl:top-(--document-header-bar-height) xl:h-[calc(100vh-var(--document-header-bar-height))] xl:w-80 xl:self-start xl:overflow-y-auto xl:rounded-tl-none xl:border-t-0 xl:border-l">
+			<aside class="w-full shrink-0 bg-card-base p-4 md:p-5 flex-col flex gap-5 rounded-t-xl border-t border-border xl:sticky xl:top-(--document-header-bar-height) xl:h-[calc(100vh-var(--document-header-bar-height))] xl:w-82.5 xl:self-start xl:overflow-y-auto xl:rounded-tl-none xl:border-t-0 xl:border-l">
 				<div class="flex flex-col gap-3">
-					<div class="flex items-start justify-between gap-3">
-						<h2 class="min-w-0 text-base font-semibold text-title">
+					<div class="flex items-center justify-between gap-3">
+						<h2 class="min-w-0 text-sm font-semibold text-title">
 							{request()
 								? T()("routes.publish.requests.detail.title", {
 										id: request()?.id,
 									})
 								: T()("publish.requests.detail.request.details")}
 						</h2>
-						<Show when={request()?.isOutdated}>
+						<Show when={releaseContextChanged()}>
 							<Pill
 								theme="warning-opaque"
-								tooltip={T()("publish.requests.snapshot.outdated")}
-								class="shrink-0 items-center gap-1.5"
+								size="small"
+								tooltip={releaseContextTooltip()}
+								class="shrink-0"
 							>
-								<FaSolidTriangleExclamation size={10} />
 								{T()("common.status.out.of.sync")}
 							</Pill>
 						</Show>
@@ -432,6 +532,17 @@ export const ReleaseRequestSidebar: Component<{
 						</div>
 					</dl>
 				</div>
+
+				<Show when={changedReleaseRequirementLabels().length > 0}>
+					<div class="rounded-md border border-warning-base/30 bg-warning-base/10 p-3 text-warning-base">
+						<p class="text-xs leading-5">
+							{T()("publish.requests.requirements.changed", {
+								requirements: changedReleaseRequirementLabels().join(", "),
+								target: targetLabel(),
+							})}
+						</p>
+					</div>
+				</Show>
 
 				<Show when={showActions()}>
 					<div class="grid gap-2">
@@ -483,6 +594,9 @@ export const ReleaseRequestSidebar: Component<{
 									type="button"
 									theme="primary"
 									size="small"
+									classes={
+										actionCount() === 3 ? "col-span-2 w-full" : undefined
+									}
 									loading={retry.action.isPending}
 									onClick={() => {
 										const publishRequest = request();
@@ -501,35 +615,10 @@ export const ReleaseRequestSidebar: Component<{
 
 				<SidebarSection
 					title={T()("publish.requests.detail.request.details")}
-					icon={<FaSolidCircleInfo size={14} />}
+					icon={<FaSolidCircleInfo size={12} />}
 					preferenceKey="releaseRequest.sidebar.details"
 				>
-					<div class="rounded-md border border-border bg-card-base p-3">
-						<dl class="grid gap-2 text-xs">
-							<ReleaseRequestDetailRow label={T()("common.requested.by")}>
-								<PublishOperationUserDetailValue
-									user={request()?.requestedBy ?? null}
-								/>
-							</ReleaseRequestDetailRow>
-							<Show when={request()?.createdAt}>
-								<ReleaseRequestDetailRow label={T()("common.requested.at")}>
-									<DateText date={request()?.createdAt} class="text-xs" />
-								</ReleaseRequestDetailRow>
-							</Show>
-							<Show when={request()?.decidedBy}>
-								<ReleaseRequestDetailRow label={T()("common.decided.by")}>
-									<PublishOperationUserDetailValue
-										user={request()?.decidedBy ?? null}
-									/>
-								</ReleaseRequestDetailRow>
-							</Show>
-							<Show when={request()?.decidedAt}>
-								<ReleaseRequestDetailRow label={T()("common.updated.at")}>
-									<DateText date={request()?.decidedAt} class="text-xs" />
-								</ReleaseRequestDetailRow>
-							</Show>
-						</dl>
-					</div>
+					<DetailsList type="text" padding={12} items={requestDetails()} />
 				</SidebarSection>
 
 				<Show
@@ -542,42 +631,52 @@ export const ReleaseRequestSidebar: Component<{
 				>
 					<SidebarSection
 						title={T()("common.execution.status")}
-						icon={<FaSolidClock size={14} />}
+						icon={<FaSolidClock size={12} />}
 						preferenceKey="releaseRequest.sidebar.execution"
 					>
-						<div class="rounded-md border border-border bg-card-base p-3">
-							<dl class="grid gap-2 text-xs">
-								<Show when={request()?.scheduledAt}>
-									<ReleaseRequestDetailRow label={T()("common.scheduled.for")}>
-										<DateText date={request()?.scheduledAt} class="text-xs" />
-									</ReleaseRequestDetailRow>
-								</Show>
-								<Show when={request()?.scheduledTimezone}>
-									<ReleaseRequestDetailRow
-										label={T()("common.scheduled.timezone")}
-										value={request()?.scheduledTimezone}
-									/>
-								</Show>
-								<Show when={request()?.executedAt}>
-									<ReleaseRequestDetailRow label={T()("common.executed.at")}>
-										<DateText date={request()?.executedAt} class="text-xs" />
-									</ReleaseRequestDetailRow>
-								</Show>
-								<Show when={request()?.failedAt}>
-									<ReleaseRequestDetailRow label={T()("common.failed.at")}>
-										<DateText date={request()?.failedAt} class="text-xs" />
-									</ReleaseRequestDetailRow>
-								</Show>
-								<Show when={request()?.executionErrorMessage}>
-									<ReleaseRequestDetailRow
-										label={T()("common.execution.error")}
+						<div class="overflow-hidden rounded-md border border-border bg-card-base">
+							<For each={executionEvents()}>
+								{(event) => (
+									<div class="border-b border-border px-3 py-2.5 last:border-b-0">
+										<div class="min-w-0">
+											<div class="flex items-start justify-between gap-3">
+												<span class="text-xs font-medium text-title">
+													{event.label}
+												</span>
+												<DateText
+													date={event.date}
+													includeTime={true}
+													class="text-xs text-body"
+												/>
+											</div>
+											<Show when={event.detail}>
+												{(detail) => (
+													<p class="mt-0.5 truncate text-xs text-body">
+														{detail()}
+													</p>
+												)}
+											</Show>
+										</div>
+									</div>
+								)}
+							</For>
+							<Show when={request()?.executionErrorMessage}>
+								{(message) => (
+									<div
+										class={classNames("bg-error-base/5 px-3 py-2.5", {
+											"border-t border-error-base/20":
+												executionEvents().length > 0,
+										})}
 									>
-										<span class="whitespace-pre-wrap">
-											{request()?.executionErrorMessage}
-										</span>
-									</ReleaseRequestDetailRow>
-								</Show>
-							</dl>
+										<p class="text-xs font-medium text-error-base">
+											{T()("common.execution.error")}
+										</p>
+										<p class="mt-0.5 whitespace-pre-wrap wrap-break-words text-xs leading-5 text-body">
+											{message()}
+										</p>
+									</div>
+								)}
+							</Show>
 						</div>
 					</SidebarSection>
 				</Show>
@@ -587,7 +686,7 @@ export const ReleaseRequestSidebar: Component<{
 				>
 					<SidebarSection
 						title={T()("common.reviewers")}
-						icon={<FaSolidUserCheck size={14} />}
+						icon={<FaSolidUserCheck size={12} />}
 						preferenceKey="releaseRequest.sidebar.reviewers"
 						meta={request()?.assignees.length}
 					>
@@ -643,7 +742,7 @@ export const ReleaseRequestSidebar: Component<{
 				<Show when={request()?.requestComment || request()?.decisionComment}>
 					<SidebarSection
 						title={T()("common.comment")}
-						icon={<FaSolidPaperPlane size={14} />}
+						icon={<FaSolidPaperPlane size={12} />}
 						preferenceKey="releaseRequest.sidebar.comments"
 					>
 						<div class="grid gap-2">

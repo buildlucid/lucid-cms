@@ -28,11 +28,11 @@ const SidebarSection: Component<{
 	return (
 		<Collapsible.Root open={open()} onOpenChange={setOpen}>
 			<section>
-				<Collapsible.Trigger class="group flex w-full items-center gap-2 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary-base">
-					<span class="flex size-5 shrink-0 items-center justify-center text-body">
+				<Collapsible.Trigger class="group flex w-full items-center gap-1.5 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary-base">
+					<span class="flex size-3 shrink-0 items-center justify-center text-body">
 						{props.icon}
 					</span>
-					<h3 class="min-w-0 flex-1 truncate text-base font-medium text-title">
+					<h3 class="min-w-0 flex-1 truncate text-sm font-medium text-title">
 						{props.title}
 					</h3>
 					<Show when={props.meta !== undefined}>

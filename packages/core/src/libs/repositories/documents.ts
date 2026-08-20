@@ -1630,6 +1630,67 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			return eb.exists(subQuery.select(sql.lit(1).as("exists")));
 		});
 	}
+	/** Counts each configured environment's relationship to latest without loading document content. */
+	async selectEnvironmentStatusOverview(
+		props: {
+			environmentKeys: string[];
+			versionTableName: LucidVersionTableName;
+		},
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		const statuses = [
+			"unreleased",
+			"out-of-sync",
+			"in-sync",
+		] as const satisfies readonly DocumentEnvironmentStatusFilter["status"][];
+
+		const exec = await this.executeQuery(
+			() =>
+				Promise.all(
+					props.environmentKeys.flatMap((environmentKey) =>
+						statuses.map(async (status) => {
+							let query = this.db
+								.selectFrom(dynamicConfig.tableName)
+								.select(sql<string | number>`count(*)`.as("count"))
+								.where(
+									"is_deleted",
+									"=",
+									this.dbAdapter.getDefault("boolean", "false"),
+								);
+
+							query = this.applyEnvironmentStatusFiltersToQuery(
+								query,
+								[{ environmentKey, status }],
+								dynamicConfig.tableName,
+								props.versionTableName,
+							);
+
+							const row = await query.executeTakeFirst();
+							return {
+								environmentKey,
+								status,
+								count: row?.count ?? 0,
+							};
+						}),
+					),
+				),
+			{
+				method: "selectEnvironmentStatusOverview",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: (exec.response.data ?? []).map((item) => ({
+				environmentKey: item.environmentKey,
+				status: item.status,
+				count: Number(item.count),
+			})),
+		};
+	}
+
 	/** Builds version-table checks for each environment's relationship to latest. */
 	buildEnvironmentStatusFilterExpressions<DB, Table extends keyof DB>(
 		eb: ExpressionBuilder<DB, Table>,

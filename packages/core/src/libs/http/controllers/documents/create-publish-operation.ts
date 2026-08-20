@@ -15,7 +15,7 @@ const factory = createFactory();
 const createPublishOperationController = factory.createHandlers(
 	describeRoute({
 		description: "Create a publish operation for a document.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Create Publish Operation",
 		responses: openAPI.responses({
 			noProperties: true,

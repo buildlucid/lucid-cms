@@ -47,6 +47,9 @@ const EmailListRoute = lazy(() => import("@/routes/Emails/List"));
 const ReleaseRequestsListRoute = lazy(
 	() => import("@/routes/ReleaseRequests/List"),
 );
+const PublishingOverviewRoute = lazy(
+	() => import("@/routes/Publishing/Overview"),
+);
 const AccountRoute = lazy(() => import("@/routes/Account"));
 const OAuthConsentRoute = lazy(() => import("@/routes/OAuthConsent"));
 const CollectionsDocumentsListRoute = lazy(
@@ -162,7 +165,16 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				<Route
-					path="/release-requests"
+					path="/publishing"
+					preload={preloadRoutes(PublishingOverviewRoute)}
+					component={() => (
+						<PermissionGuard permission={Permissions.PublishOperationsRead}>
+							<PublishingOverviewRoute />
+						</PermissionGuard>
+					)}
+				/>
+				<Route
+					path="/publishing/requests"
 					preload={preloadRoutes(ReleaseRequestsListRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.PublishOperationsRead}>

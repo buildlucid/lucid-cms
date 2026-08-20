@@ -21,7 +21,6 @@ import PublishOperationDecision, {
 } from "@/components/Modals/Documents/PublishOperationDecision";
 import PublishOperationReviewers from "@/components/Modals/Documents/PublishOperationReviewers";
 import PublishOperationSchedule from "@/components/Modals/Documents/PublishOperationSchedule";
-import ReleaseRequestOverview from "@/components/Partials/ReleaseRequestOverview";
 import ReleaseRequestRow from "@/components/Tables/Rows/ReleaseRequestRow";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import api from "@/services/api";
@@ -73,14 +72,6 @@ export const ReleaseRequestsList: Component<{
 				]),
 			),
 	);
-	const collectionKeyFilter = createMemo(() => {
-		const value = props.state.searchParams.filters().get("collectionKey");
-		return typeof value === "string" && value.length > 0 ? value : undefined;
-	});
-	const targetFilter = createMemo(() => {
-		const value = props.state.searchParams.filters().get("target");
-		return typeof value === "string" && value.length > 0 ? value : undefined;
-	});
 	const hasStatusFilter = createMemo(() => {
 		const value = props.state.searchParams.filters().get("status");
 		if (Array.isArray(value)) return value.length > 0;
@@ -103,15 +94,6 @@ export const ReleaseRequestsList: Component<{
 								"cancelled",
 							] satisfies PublishOperationStatus[]),
 				operationType: () => "request",
-			},
-		},
-		enabled: () => props.state.searchParams.ready(),
-	});
-	const overview = api.publishOperations.useGetOverview({
-		queryParams: {
-			filters: {
-				collectionKey: collectionKeyFilter,
-				target: targetFilter,
 			},
 		},
 		enabled: () => props.state.searchParams.ready(),
@@ -191,26 +173,13 @@ export const ReleaseRequestsList: Component<{
 	// Render
 	return (
 		<>
-			<ReleaseRequestOverview
-				overview={overview.data?.data}
-				loading={overview.isFetching}
-				searchParams={props.state.searchParams}
-			/>
 			<DynamicContent
-				class="mt-4 border-t border-border"
 				state={{
-					isError:
-						requests.isError ||
-						props.status.collections.isError ||
-						overview.isError,
-					isSuccess:
-						requests.isSuccess &&
-						props.status.collections.isSuccess &&
-						overview.isSuccess,
+					isError: requests.isError || props.status.collections.isError,
+					isSuccess: requests.isSuccess && props.status.collections.isSuccess,
 					isLoading:
 						requests.isLoading ||
 						props.status.collections.isLoading ||
-						overview.isLoading ||
 						!props.state.searchParams.ready(),
 					isEmpty: rows().length === 0,
 					searchParams: props.state.searchParams,

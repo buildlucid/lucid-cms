@@ -206,7 +206,7 @@ export const Workflow: Component<{
 		>
 			<SidebarSection
 				title={T()("common.workflow")}
-				icon={<FaSolidChartDiagram size={14} />}
+				icon={<FaSolidChartDiagram size={12} />}
 				preferenceKey="pageBuilder.sidebar.workflow"
 			>
 				<div class="relative space-y-3">

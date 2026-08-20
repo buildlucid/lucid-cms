@@ -11,7 +11,7 @@ import reschedule from "../../../controllers/publish-operations/reschedule.js";
 import retry from "../../../controllers/publish-operations/retry.js";
 import updateReviewers from "../../../controllers/publish-operations/update-reviewers.js";
 
-const publishOperationRoutes = new Hono<LucidHonoGeneric>()
+const publishingRequestRoutes = new Hono<LucidHonoGeneric>()
 	.get("/", ...getMultiple)
 	.get("/overview", ...getOverview)
 	.get("/reviewers", ...getReviewers)
@@ -23,4 +23,4 @@ const publishOperationRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:id/retry", ...retry)
 	.post("/:id/reviewers", ...updateReviewers);
 
-export default publishOperationRoutes;
+export default publishingRequestRoutes;

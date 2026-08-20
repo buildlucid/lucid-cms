@@ -511,6 +511,41 @@ describe("createQueryState - sorts and pagination", () => {
 });
 
 describe("createQueryState - reset", () => {
+	it("replaceFilters clears existing filter state before applying the replacement", () => {
+		createRoot((dispose) => {
+			const adapter = createTestUrlAdapter();
+			const query = createQueryState({
+				schema: buildSchema(),
+				adapter,
+			});
+
+			query.setParams({
+				filters: {
+					title: { value: "existing", operator: "contains" },
+					author: { value: [1], operator: "not-in" },
+				},
+				orFilterGroups: [[{ key: "isDeleted", value: false }]],
+				pagination: { page: 4, perPage: 20 },
+			});
+
+			query.replaceFilters({
+				isDeleted: { value: true, operator: "=" },
+			});
+
+			expect(query.filterStates().get("title")).toEqual({ value: "" });
+			expect(query.filterStates().get("author")).toEqual({ value: [] });
+			expect(query.filterStates().get("isDeleted")).toEqual({
+				value: true,
+				operator: "=",
+			});
+			expect(query.orFilterGroups()).toEqual([]);
+			expect(query.pagination()).toEqual({ page: 1, perPage: 20 });
+			expect(adapter.search()).not.toContain("existing");
+			expect(adapter.search()).not.toContain("not-in");
+			dispose();
+		});
+	});
+
 	it("clearFilters removes active filters instead of restoring defaults", () => {
 		createRoot((dispose) => {
 			const adapter = createTestUrlAdapter();

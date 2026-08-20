@@ -126,6 +126,15 @@ export const NavigationChrome: Component = () => {
 					userStore.get.hasPermission([collection.permissions.review]).all,
 			),
 	);
+	const showPublishingOverview = createMemo(
+		() =>
+			canReadPublishOperations() &&
+			(collections.data?.data ?? []).some(
+				(collection) =>
+					collection.environments.length > 0 &&
+					userStore.get.hasPermission([collection.permissions.read]).all,
+			),
+	);
 
 	// ----------------------------------
 	// Effects
@@ -143,6 +152,7 @@ export const NavigationChrome: Component = () => {
 					isNavigationLinkActive(
 						pathname,
 						link.dataset.navigationHref || link.href,
+						link.dataset.navigationExact === "true",
 					);
 				setNavigationLinkActiveState(link, active);
 			}
@@ -225,6 +235,7 @@ export const NavigationChrome: Component = () => {
 						onLogout={() => logout.action.mutate({})}
 						user={user() || undefined}
 						canReadDocuments={showCollections()}
+						canReadPublishingOverview={showPublishingOverview()}
 						canReadPublishRequests={showPublishRequests()}
 						canReadMedia={canReadMedia()}
 						canReadEmails={canReadEmails()}
@@ -309,6 +320,7 @@ export const NavigationChrome: Component = () => {
 								onLogout={() => logout.action.mutate({})}
 								user={user() || undefined}
 								canReadDocuments={showCollections()}
+								canReadPublishingOverview={showPublishingOverview()}
 								canReadPublishRequests={showPublishRequests()}
 								canReadMedia={canReadMedia()}
 								canReadEmails={canReadEmails()}

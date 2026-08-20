@@ -16,6 +16,8 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getDocumentLabel from "./helpers/get-document-label.js";
 import {
+	getReleaseRequirementStatuses,
+	getReleaseRequirementTargets,
 	getReviewableCollectionKeys,
 	hasCollectionPermission,
 	unresolvedPublishOperationExecutionStatuses,
@@ -85,9 +87,14 @@ const getMultiple: ServiceFn<
 			tablesByCollection.set(operation.collection_key, tableNames);
 		}
 
-		const latestRes = await Versions.selectSingle(
+		const releaseRequirementTargets = getReleaseRequirementTargets({
+			collection: collectionRes.data,
+			target: operation.target,
+		});
+
+		const versionsRes = await Versions.selectMultiple(
 			{
-				select: ["content_id"],
+				select: ["type", "content_id"],
 				where: [
 					{
 						key: "collection_key",
@@ -95,16 +102,26 @@ const getMultiple: ServiceFn<
 						value: operation.collection_key,
 					},
 					{ key: "document_id", operator: "=", value: operation.document_id },
-					{ key: "type", operator: "=", value: "latest" },
+					{
+						key: "type",
+						operator: "in",
+						value: ["latest", ...releaseRequirementTargets],
+					},
 				],
 			},
 			{
 				tableName: tableNames.version,
 			},
 		);
-		if (latestRes.error) {
-			return latestRes;
+		if (versionsRes.error) {
+			return versionsRes;
 		}
+		const contentIdsByTarget = new Map(
+			(versionsRes.data ?? []).map((version) => [
+				version.type,
+				version.content_id,
+			]),
+		);
 		const documentLabelRes = await getDocumentLabel({
 			context,
 			bricks: Bricks,
@@ -136,7 +153,13 @@ const getMultiple: ServiceFn<
 		formatData.push({
 			operation,
 			documentLabel: documentLabelRes.data,
-			latestContentId: latestRes.data?.content_id ?? null,
+			latestContentId: contentIdsByTarget.get("latest") ?? null,
+			releaseRequirements: getReleaseRequirementStatuses({
+				collection: collectionRes.data,
+				target: operation.target,
+				sourceContentId: operation.source_content_id,
+				contentIdsByTarget,
+			}),
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,

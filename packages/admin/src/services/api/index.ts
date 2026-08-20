@@ -15,6 +15,7 @@ import oauthClients from "./oauth-clients";
 import oauthConnections from "./oauth-connections";
 import permissions from "./permissions";
 import publishOperations from "./publish-operations";
+import publishing from "./publishing";
 import roles from "./roles";
 import settings from "./settings";
 import share from "./share";
@@ -30,6 +31,7 @@ const exportObject = {
 	roles,
 	permissions,
 	publishOperations,
+	publishing,
 	share,
 	media,
 	mediaFolders,

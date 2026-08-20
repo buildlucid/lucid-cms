@@ -6,6 +6,7 @@ import hasAccess from "../../../libs/permission/has-access.js";
 import type { QueueEvent } from "../../../libs/queue/types.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { LucidAuth } from "../../../types/hono.js";
+import type { PublishOperation } from "../../../types/response.js";
 
 /** Approval states that still represent an unresolved release for a document target. */
 export const activePublishOperationStatuses = ["pending", "approved"] as const;
@@ -75,6 +76,31 @@ export const getUnmetReleaseRequirementTargets = (params: {
 		(requiredTarget) =>
 			params.contentIdsByTarget.get(requiredTarget) !== params.sourceContentId,
 	);
+
+/** Describes whether each required environment still contains the submitted release snapshot. */
+export const getReleaseRequirementStatuses = (params: {
+	collection: CollectionBuilder;
+	target: string;
+	sourceContentId: string;
+	contentIdsByTarget: Map<string, string | null | undefined>;
+}): PublishOperation["releaseRequirements"] =>
+	getReleaseRequirementTargets({
+		collection: params.collection,
+		target: params.target,
+	}).map((requiredTarget) => {
+		const contentId = params.contentIdsByTarget.get(requiredTarget);
+		if (contentId === undefined || contentId === null) {
+			return {
+				target: requiredTarget,
+				status: "unreleased",
+			};
+		}
+
+		return {
+			target: requiredTarget,
+			status: contentId === params.sourceContentId ? "in-sync" : "out-of-sync",
+		};
+	});
 
 /** Checks scheduling support across collection config, target type, and runtime queue capability. */
 export const collectionTargetSupportsScheduling = (params: {

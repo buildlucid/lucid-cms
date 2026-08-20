@@ -44,7 +44,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 		queryKey: ["publishOperations.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<PublishOperation[]>>({
-				url: "/lucid/api/v1/publish-operations",
+				url: "/lucid/api/v1/publishing/requests",
 				query: queryParams(),
 				config: {
 					method: "GET",

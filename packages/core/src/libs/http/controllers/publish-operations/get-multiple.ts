@@ -19,7 +19,7 @@ const factory = createFactory();
 const getMultipleController = factory.createHandlers(
 	describeRoute({
 		description: "Get publish operations.",
-		tags: ["publish-operations"],
+		tags: ["publishing"],
 		summary: "Get Publish Operations",
 		responses: openAPI.responses({
 			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),

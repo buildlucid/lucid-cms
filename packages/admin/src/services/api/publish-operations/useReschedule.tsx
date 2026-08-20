@@ -13,7 +13,7 @@ export interface Params {
 
 export const rescheduleReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
-		url: `/lucid/api/v1/publish-operations/${params.id}/reschedule`,
+		url: `/lucid/api/v1/publishing/requests/${params.id}/reschedule`,
 		csrf: true,
 		config: {
 			method: "POST",

@@ -1,4 +1,5 @@
 import type {
+	PublishOperation,
 	PublishOperationExecutionStatus,
 	PublishOperationStatus,
 	PublishOperationUser,
@@ -7,13 +8,42 @@ import type { PillProps } from "@/components/Partials/Pill";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
+type PublishOperationPillTheme = Extract<
+	PillProps["theme"],
+	"warning-opaque" | "primary-opaque" | "error-opaque" | "outline"
+>;
+
+const getPublishOperationDotClass = (theme: PublishOperationPillTheme) => {
+	switch (theme) {
+		case "warning-opaque":
+			return "border-warning-base/60 bg-warning-base/40";
+		case "primary-opaque":
+			return "border-primary-muted-border bg-primary-muted-bg";
+		case "error-opaque":
+			return "border-error-base/60 bg-error-base/40";
+		case "outline":
+			return "border-border bg-input-base";
+	}
+};
+
+export const hasPublishOperationRequirementDrift = (
+	operation: Pick<PublishOperation, "releaseRequirements">,
+) =>
+	operation.releaseRequirements.some(
+		(requirement) => requirement.status !== "in-sync",
+	);
+
+export const hasPublishOperationContextChanged = (
+	operation: Pick<PublishOperation, "isOutdated" | "releaseRequirements">,
+) => operation.isOutdated || hasPublishOperationRequirementDrift(operation);
+
 export const formatPublishOperationUser = (user: PublishOperationUser) => {
 	return helpers.formatUserName(user, "username") || "-";
 };
 
 export const getPublishOperationStatusTheme = (
 	status: PublishOperationStatus,
-): PillProps["theme"] => {
+): PublishOperationPillTheme => {
 	switch (status) {
 		case "pending":
 			return "warning-opaque";
@@ -26,6 +56,11 @@ export const getPublishOperationStatusTheme = (
 			return "outline";
 	}
 };
+
+/** Uses the same status colours as the release-request table. */
+export const getPublishOperationStatusDotClass = (
+	status: PublishOperationStatus,
+) => getPublishOperationDotClass(getPublishOperationStatusTheme(status));
 
 export const getPublishOperationStatusLabel = (
 	status: PublishOperationStatus,
@@ -46,7 +81,7 @@ export const getPublishOperationStatusLabel = (
 
 export const getPublishOperationExecutionStatusTheme = (
 	status: PublishOperationExecutionStatus,
-): PillProps["theme"] => {
+): PublishOperationPillTheme => {
 	switch (status) {
 		case "awaiting_approval":
 		case "scheduled":
@@ -59,6 +94,12 @@ export const getPublishOperationExecutionStatusTheme = (
 			return "error-opaque";
 	}
 };
+
+/** Uses the same execution-state colours as the release-request table. */
+export const getPublishOperationExecutionStatusDotClass = (
+	status: PublishOperationExecutionStatus,
+) =>
+	getPublishOperationDotClass(getPublishOperationExecutionStatusTheme(status));
 
 export const getPublishOperationExecutionStatusLabel = (
 	status: PublishOperationExecutionStatus,

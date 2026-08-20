@@ -174,6 +174,25 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 		setFilter: (key: string, value: FilterValue | FilterState) => {
 			setParams({ filters: { [key]: value } });
 		},
+		replaceFilters: (filters: NonNullable<QueryStateParams["filters"]>) => {
+			const state = untrack(getState);
+			const schema = untrack(getSchema);
+			const cleared = clearFiltersState(state, schema);
+			commit(
+				applyParams(
+					cleared,
+					schema,
+					{
+						filters,
+						pagination: {
+							page: schema.pagination?.defaultPage ?? DEFAULT_PAGE,
+							perPage: state.pagination.perPage,
+						},
+					},
+					options,
+				),
+			);
+		},
 		setFilterOperator: (key: string, operator: string | undefined) => {
 			const state = untrack(getState);
 			const schema = untrack(getSchema);

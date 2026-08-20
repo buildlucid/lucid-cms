@@ -28,7 +28,7 @@ const useGetReviewers = (params: QueryHook<QueryParams>) => {
 		queryKey: ["publishOperations.getReviewers", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<PublishOperationReviewer[]>>({
-				url: "/lucid/api/v1/publish-operations/reviewers",
+				url: "/lucid/api/v1/publishing/requests/reviewers",
 				query: queryParams(),
 				config: {
 					method: "GET",

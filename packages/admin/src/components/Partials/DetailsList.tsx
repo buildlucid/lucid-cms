@@ -33,7 +33,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 				"bg-card-base": props.theme !== "contained",
 				"mb-6 last:mb-0 border border-border rounded-md":
 					props.theme !== "contained",
-				"p-3": props.theme !== "contained" && props.padding === 12,
+				"p-3": props.padding === 12,
 				"p-4": props.theme !== "contained" && props.padding !== 12,
 			})}
 		>

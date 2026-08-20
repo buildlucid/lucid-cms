@@ -1,8 +1,12 @@
 import type { PublishOperation } from "@types";
 import classNames from "classnames";
-import { type Component, Show } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 import { Td } from "@/components/Groups/Table/Td";
 import T from "@/translations";
+import {
+	hasPublishOperationContextChanged,
+	hasPublishOperationRequirementDrift,
+} from "@/utils/publish-operations";
 
 const ReleaseRequestTitleCol: Component<{
 	request: PublishOperation;
@@ -12,6 +16,17 @@ const ReleaseRequestTitleCol: Component<{
 		padding?: "16" | "24";
 	};
 }> = (props) => {
+	// ----------------------------------
+	// Memos
+	const releaseContextChanged = createMemo(() =>
+		hasPublishOperationContextChanged(props.request),
+	);
+	const releaseContextTooltip = createMemo(() =>
+		hasPublishOperationRequirementDrift(props.request)
+			? T()("publish.requests.context.changed")
+			: T()("publish.requests.snapshot.outdated"),
+	);
+
 	// ----------------------------------
 	// Render
 	return (
@@ -26,13 +41,13 @@ const ReleaseRequestTitleCol: Component<{
 					<span
 						class={classNames("size-2.5 shrink-0 rounded-full border", {
 							"border-primary-muted-border bg-primary-muted-bg":
-								!props.request.isOutdated,
+								!releaseContextChanged(),
 							"border-warning-base/60 bg-warning-base/40":
-								props.request.isOutdated,
+								releaseContextChanged(),
 						})}
 						title={
-							props.request.isOutdated
-								? T()("publish.requests.snapshot.outdated")
+							releaseContextChanged()
+								? releaseContextTooltip()
 								: T()("common.status.in.sync")
 						}
 					/>

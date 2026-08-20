@@ -177,7 +177,7 @@ export const PublishRequests: Component<{
 			<Show when={reviewEnabled()}>
 				<PublishOperationSection
 					title={T()("publish.requests.list.title")}
-					icon={<FaSolidPaperPlane size={14} />}
+					icon={<FaSolidPaperPlane size={12} />}
 					preferenceKey="pageBuilder.sidebar.releaseRequests"
 					emptyCopy={T()("empty.states.pending.publish.requests")}
 					collection={props.collection}
@@ -189,7 +189,7 @@ export const PublishRequests: Component<{
 			<Show when={schedulingEnabled()}>
 				<PublishOperationSection
 					title={T()("common.scheduled.releases")}
-					icon={<FaSolidCalendar size={14} />}
+					icon={<FaSolidCalendar size={12} />}
 					preferenceKey="pageBuilder.sidebar.scheduledReleases"
 					emptyCopy={T()("empty.states.scheduled.releases")}
 					collection={props.collection}

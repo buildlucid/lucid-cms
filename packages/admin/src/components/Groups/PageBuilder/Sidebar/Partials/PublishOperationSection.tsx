@@ -27,8 +27,8 @@ const PublishOperationSection: Component<{
 			<Switch>
 				<Match when={props.isLoading}>
 					<div class="flex flex-col gap-2">
-						<span class="skeleton h-20 rounded-md" />
-						<span class="skeleton h-20 rounded-md" />
+						<span class="skeleton h-14 rounded-md" />
+						<span class="skeleton h-14 rounded-md" />
 					</div>
 				</Match>
 				<Match when={props.rows.length === 0}>

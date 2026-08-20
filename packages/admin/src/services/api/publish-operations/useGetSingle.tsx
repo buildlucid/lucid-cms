@@ -21,7 +21,7 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 		queryKey: ["publishOperations.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<PublishOperation>>({
-				url: `/lucid/api/v1/publish-operations/${queryParams().location?.id}`,
+				url: `/lucid/api/v1/publishing/requests/${queryParams().location?.id}`,
 				config: {
 					method: "GET",
 				},

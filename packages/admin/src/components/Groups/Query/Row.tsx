@@ -174,6 +174,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 						searchParams={props.searchParams}
 						embedded={section().embedded}
 						preserveSubjectCase={section().preserveSubjectCase}
+						presets={section().presets}
 						parentPadding={props.options?.padding ?? "24"}
 					/>
 				)}

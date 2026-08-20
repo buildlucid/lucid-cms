@@ -19,7 +19,7 @@ const DashboardReleaseOverview: Component<{
 		<section>
 			<div class="mb-4">
 				<h2>{T()("dashboard.release.requests.title")}</h2>
-				<p class="mt-1 text-sm text-body">
+				<p class="mt-0.5 text-sm text-body">
 					{T()("dashboard.release.requests.description")}
 				</p>
 			</div>
@@ -31,7 +31,7 @@ const DashboardReleaseOverview: Component<{
 						value={props.overview?.assignedToMe}
 						description={T()("dashboard.release.requests.assigned.description")}
 						tone="blue"
-						href="/lucid/release-requests?filter[assignedToMe]=true"
+						href="/lucid/publishing/requests?filter[assignedToMe]=true"
 						loading={props.loading}
 						class={
 							"border-b border-border md:odd:border-r md:nth-last-[-n+2]:border-b-0 2xl:border-b-0 2xl:not-last:border-r"
@@ -43,7 +43,7 @@ const DashboardReleaseOverview: Component<{
 						value={props.overview?.pending}
 						description={T()("dashboard.release.requests.pending.description")}
 						tone="yellow"
-						href="/lucid/release-requests?filter[status]=pending"
+						href="/lucid/publishing/requests?filter[status]=pending"
 						loading={props.loading}
 						class={
 							"border-b border-border md:odd:border-r md:nth-last-[-n+2]:border-b-0 2xl:border-b-0 2xl:not-last:border-r"
@@ -57,7 +57,7 @@ const DashboardReleaseOverview: Component<{
 							"dashboard.release.requests.scheduled.description",
 						)}
 						tone="purple"
-						href="/lucid/release-requests?filter[executionStatus]=scheduled"
+						href="/lucid/publishing/requests?filter[executionStatus]=scheduled"
 						loading={props.loading}
 						class={
 							"border-b border-border md:odd:border-r md:nth-last-[-n+2]:border-b-0 2xl:border-b-0 2xl:not-last:border-r"
@@ -69,7 +69,7 @@ const DashboardReleaseOverview: Component<{
 						value={props.overview?.failed}
 						description={T()("dashboard.release.requests.failed.description")}
 						tone="red"
-						href="/lucid/release-requests?filter[executionStatus]=failed"
+						href="/lucid/publishing/requests?filter[executionStatus]=failed"
 						loading={props.loading}
 						class={
 							"border-b border-border md:odd:border-r md:nth-last-[-n+2]:border-b-0 2xl:border-b-0 2xl:not-last:border-r"

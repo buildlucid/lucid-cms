@@ -1,12 +1,14 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
 	PublishOperationExecutionStatus,
+	PublishOperationOverview,
 	PublishOperationStatus,
 } from "@types";
 import { type Component, createEffect, createMemo } from "solid-js";
 import { ReleaseRequestsList } from "@/components/Groups/Content";
 import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
+import type { FilterSectionPresets } from "@/components/Groups/Query/FilterSection";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import useQueryState, {
 	booleanFilter,
@@ -58,6 +60,25 @@ const ReleaseRequestsListRoute: Component = () => {
 	// Queries
 	const collections = api.collections.useGetAll({
 		queryParams: {},
+	});
+	const overview = api.publishOperations.useGetOverview({
+		queryParams: {
+			filters: {
+				collectionKey: () => {
+					const value = searchParams.filters().get("collectionKey");
+					return typeof value === "string" && value.length > 0
+						? value
+						: undefined;
+				},
+				target: () => {
+					const value = searchParams.filters().get("target");
+					return typeof value === "string" && value.length > 0
+						? value
+						: undefined;
+				},
+			},
+		},
+		enabled: () => searchParams.ready(),
 	});
 	// ----------------------------------
 	// Memos
@@ -117,6 +138,59 @@ const ReleaseRequestsListRoute: Component = () => {
 			label: key,
 		}));
 	});
+	const releaseRequestPresets = createMemo<FilterSectionPresets>(() => {
+		const data: PublishOperationOverview | undefined = overview.data?.data;
+		const loading = overview.isFetching;
+		const items: FilterSectionPresets["items"] = [
+			{
+				key: "pending",
+				label: T()("common.pending.review"),
+				value: data?.pending,
+				loading,
+				filters: {
+					status: {
+						value: "pending" satisfies PublishOperationStatus,
+						operator: "=",
+					},
+				},
+			},
+			{
+				key: "assigned",
+				label: T()("common.assigned.to.me"),
+				value: data?.assignedToMe,
+				loading,
+				filters: { assignedToMe: { value: true, operator: "=" } },
+			},
+			{
+				key: "approved",
+				label: T()("common.status.approved"),
+				value: data?.approved,
+				loading,
+				filters: {
+					status: {
+						value: "approved" satisfies PublishOperationStatus,
+						operator: "=",
+					},
+				},
+			},
+			{
+				key: "rejected",
+				label: T()("common.status.rejected"),
+				value: data?.rejected,
+				loading,
+				filters: {
+					status: {
+						value: "rejected" satisfies PublishOperationStatus,
+						operator: "=",
+					},
+				},
+			},
+		];
+
+		return {
+			items,
+		};
+	});
 	// ----------------------------------
 	// Effects
 	createEffect(() => {
@@ -157,6 +231,7 @@ const ReleaseRequestsListRoute: Component = () => {
 									}}
 									filterSection={{
 										subject: T()("routes.publish.requests.title"),
+										presets: releaseRequestPresets(),
 										fields: [
 											{
 												label: T()("common.collection"),

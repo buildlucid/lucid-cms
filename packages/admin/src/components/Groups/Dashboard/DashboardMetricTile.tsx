@@ -7,6 +7,7 @@ const DashboardMetricTile: Component<{
 	label: string;
 	value?: number | string;
 	description?: string;
+	descriptionLines?: 1 | 2;
 	tone: "grey" | "blue" | "green" | "purple" | "red" | "yellow";
 	href?: string;
 	loading?: boolean;
@@ -45,7 +46,12 @@ const DashboardMetricTile: Component<{
 					<span class="lowercase">{props.label}</span>
 				</span>
 				<Show when={props.description}>
-					<span class="mt-0.5 block line-clamp-1 text-sm leading-5 text-body">
+					<span
+						class={classNames("mt-0.5 text-sm leading-5 text-body", {
+							"line-clamp-1": props.descriptionLines !== 2,
+							"line-clamp-2": props.descriptionLines === 2,
+						})}
+					>
 						{props.description}
 					</span>
 				</Show>

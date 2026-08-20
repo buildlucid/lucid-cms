@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
+	getReleaseRequirementStatuses,
 	getReleaseRequirementTargets,
 	getUnmetReleaseRequirementTargets,
 	isInSchedulingDispatchWindow,
@@ -137,5 +138,34 @@ describe("Tests for publish operation release requirement helpers", () => {
 				contentIdsByTarget: new Map([["staging", "latest-content"]]),
 			}),
 		).toEqual([]);
+	});
+
+	test("reports each requirement against the submitted release content", () => {
+		expect(
+			getReleaseRequirementStatuses({
+				collection,
+				target: "production",
+				sourceContentId: "reviewed-content",
+				contentIdsByTarget: new Map([["staging", "newer-content"]]),
+			}),
+		).toEqual([{ target: "staging", status: "out-of-sync" }]);
+
+		expect(
+			getReleaseRequirementStatuses({
+				collection,
+				target: "production",
+				sourceContentId: "reviewed-content",
+				contentIdsByTarget: new Map(),
+			}),
+		).toEqual([{ target: "staging", status: "unreleased" }]);
+
+		expect(
+			getReleaseRequirementStatuses({
+				collection,
+				target: "production",
+				sourceContentId: "reviewed-content",
+				contentIdsByTarget: new Map([["staging", "reviewed-content"]]),
+			}),
+		).toEqual([{ target: "staging", status: "in-sync" }]);
 	});
 });

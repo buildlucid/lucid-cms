@@ -47,7 +47,7 @@ const DashboardContentShortcuts: Component<{
 		<section>
 			<div class="mb-4">
 				<h2>{T()("dashboard.content.title")}</h2>
-				<p class="mt-1 text-sm text-body">
+				<p class="mt-0.5 text-sm text-body">
 					{T()("dashboard.content.description")}
 				</p>
 			</div>
