@@ -9,14 +9,18 @@
 - Added separate media storage and delivery adapters with processing states and public adapter data. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
 - Added video playback sources and media metadata for dimensions and duration. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
 - Added direct upload sessions with HTTP, multipart and TUS support. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
-- Added direct media downloads to the admin media card actions with a confirmation prompt.
-- Added a publishing overview for tracking release status across collections and environments.
+- Added direct media downloads to the admin media card actions with a confirmation prompt. ([89ecd0c](https://github.com/buildlucid/lucid-cms/commit/89ecd0c4b666fe8f5a45acc47ec2db7a259776e0))
+- Added a publishing overview for tracking release status across collections and environments. ([f8c96ef](https://github.com/buildlucid/lucid-cms/commit/f8c96eff815a444307f47c6cb0648fe55d97a162))
+- Added `preview: true` and same-origin default preview URLs for routed collections. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
+- Preview tokens can now be resolved without integration credentials. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 
 ### Breaking Changes:
 
 - Replaced the legacy media and image processor config with `media.storage` and `media.delivery`. Image cache settings now live under `media.images.cache`. ([17542d8](https://github.com/buildlucid/lucid-cms/commit/17542d849f4b71d753574ef3799b5ddec20f67a1))
 - Moved media file properties to the top level of media responses and added status, delivery and media metadata fields. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
 - Renamed the media URL processing APIs to `resolveUrl`. Image transformations now use configured presets and supported formats. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
+- Collection preview objects now require an explicit `enabled` flag, so URL and breakpoint settings can remain configured while previews are disabled. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
+- The content preview endpoint now accepts tokens in a POST request body and returns only their mode and expiry. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 
 ### Bug Fixes:
 
