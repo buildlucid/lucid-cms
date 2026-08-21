@@ -1,20 +1,21 @@
 import { getToolbarAdminHref } from "./host.js";
-import type { ToolbarEditLink } from "./types.js";
+import type { ToolbarDocument } from "./types.js";
 
 /** Builds the Lucid admin URL for an editable document version. */
 export const buildToolbarEditHref = (
-	edit: ToolbarEditLink,
+	document: ToolbarDocument,
 	host?: string | URL,
 ): string | null => {
-	if (!edit.collectionKey || !Number.isInteger(edit.documentId)) return null;
+	if (!document.collectionKey || !Number.isInteger(document.id)) return null;
 
 	const adminHref = getToolbarAdminHref(host);
-	const collectionKey = encodeURIComponent(edit.collectionKey);
-	if (edit.version === "revision") {
-		if (!Number.isInteger(edit.versionId)) return null;
-		return `${adminHref}/collections/${collectionKey}/revision/${edit.documentId}/${edit.versionId}`;
+	const collectionKey = encodeURIComponent(document.collectionKey);
+	if (document.version === "revision") {
+		const versionId = document.meta?.versionId;
+		if (!Number.isInteger(versionId)) return null;
+		return `${adminHref}/collections/${collectionKey}/revision/${document.id}/${versionId}`;
 	}
 
-	const version = encodeURIComponent(edit.version ?? "latest");
-	return `${adminHref}/collections/${collectionKey}/${version}/${edit.documentId}`;
+	const version = encodeURIComponent(document.version ?? "latest");
+	return `${adminHref}/collections/${collectionKey}/${version}/${document.id}`;
 };

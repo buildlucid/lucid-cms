@@ -25,20 +25,7 @@ const PageCollection = new CollectionBuilder("page", {
 			name: "Production",
 		},
 	],
-	preview: {
-		breakpoints: [
-			{ key: "laptop", label: "Laptop", width: 1280 },
-			{ key: "tablet", label: "Tablet", width: 768 },
-			{ key: "mobile", label: "Mobile", width: 390 },
-		],
-		url: ({ env, path }) => {
-			const previewOrigin = env?.PREVIEW_ORIGIN;
-
-			return path && typeof previewOrigin === "string"
-				? new URL(path, previewOrigin)
-				: null;
-		},
-	},
+	preview: true,
 })
 	.addText("title", {
 		details: {

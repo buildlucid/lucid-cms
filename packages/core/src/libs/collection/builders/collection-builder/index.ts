@@ -9,6 +9,7 @@ import type {
 	CollectionData,
 	CollectionLabelFieldOptions,
 	CollectionListFieldOptions,
+	CollectionPreviewOptions,
 } from "./types.js";
 
 class CollectionBuilder<
@@ -157,10 +158,15 @@ class CollectionBuilder<
 			order: group.order ?? null,
 		};
 	};
-
 	// ------------------------------------
 	// Getters
+	get resolvedPreviewConfig(): CollectionPreviewOptions<TCollectionKey> | null {
+		const preview = this.config.preview;
+		if (preview === undefined) return null;
+		return preview === true ? { enabled: true } : preview;
+	}
 	get getData(): CollectionData {
+		const preview = this.resolvedPreviewConfig;
 		return {
 			key: this.key,
 			mode: this.config.mode,
@@ -230,10 +236,10 @@ class CollectionBuilder<
 						field: this.config.routing,
 					}
 				: null,
-			preview: this.config.preview
+			preview: preview?.enabled
 				? {
 						breakpoints:
-							this.config.preview.breakpoints?.map((breakpoint) => ({
+							preview.breakpoints?.map((breakpoint) => ({
 								...breakpoint,
 								label: normalizeCopy(breakpoint.label),
 							})) ?? [],

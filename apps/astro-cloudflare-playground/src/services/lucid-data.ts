@@ -65,10 +65,12 @@ const getLucidData = async ({
 			},
 		}),
 	]);
+	const activePreview = preview.data?.kind === "preview" ? preview.data : null;
+
 	const scopedPageEntry =
-		preview.data?.preview?.mode === "scoped" &&
-		preview.data.preview.entry.collectionKey === "page"
-			? preview.data.preview.entry
+		activePreview?.mode === "scoped" &&
+		activePreview.entry.collectionKey === "page"
+			? activePreview.entry
 			: null;
 
 	const [documentResponse, blogsResponse] = preview.error
@@ -80,7 +82,7 @@ const getLucidData = async ({
 				toolkit.documents.getSingle({
 					collectionKey: "page",
 					version: "production",
-					preview: preview.data.token,
+					preview: activePreview?.token,
 					query: {
 						filter: scopedPageEntry
 							? { id: { value: scopedPageEntry.documentId } }
@@ -91,7 +93,7 @@ const getLucidData = async ({
 				toolkit.documents.getMultiple({
 					collectionKey: "blog",
 					version: "production",
-					preview: preview.data.token,
+					preview: activePreview?.token,
 					query: {
 						include: ["refs.media"],
 						page: 1,
@@ -114,7 +116,7 @@ const getLucidData = async ({
 
 	const isPreviewError = preview.error
 		? true
-		: preview.data.active && isDocumentError;
+		: activePreview !== null && isDocumentError;
 
 	return {
 		raw: {
@@ -125,13 +127,13 @@ const getLucidData = async ({
 		},
 		document: asDocument(documentResponse.data, {
 			locale,
-			preview: preview.data?.active === true,
+			preview: activePreview !== null,
 		}),
 		blogs:
 			blogsResponse.data?.data.map((blog) =>
 				asDocument(blog, {
 					locale,
-					preview: preview.data?.active === true,
+					preview: activePreview !== null,
 				}),
 			) ?? [],
 		isPreviewError,

@@ -1,13 +1,13 @@
+import type { PreviewMode, PreviewRuntimeState } from "@lucidcms/types";
 import { normalizePreviewToken } from "../utils/preview.js";
 import { parseToolbarAuthentication } from "./authentication.js";
 import { declarativeToolbarTagName } from "./constants.js";
 import { setupToolbar } from "./loader.js";
 import type {
-	PreviewKind,
 	ToolbarController,
-	ToolbarEditLink,
+	ToolbarDocument,
 	ToolbarOptions,
-	ToolbarPreviewOptions,
+	ToolbarUpdate,
 } from "./types.js";
 
 const attributes = {
@@ -20,16 +20,22 @@ const attributes = {
 	editVersionId: "edit-version-id",
 	preview: "preview",
 	previewExitHref: "preview-exit-href",
+	previewExpiresAt: "preview-expires-at",
 	previewToken: "preview-token",
 } as const;
 
 const observedAttributes = Object.values(attributes);
+const setupAttributes = new Set<string>([
+	attributes.authStatus,
+	attributes.host,
+	attributes.previewExitHref,
+]);
 
 const HTMLElementBase = (
 	typeof HTMLElement === "undefined" ? class {} : HTMLElement
 ) as typeof HTMLElement;
 
-type DeclarativePreviewState = PreviewKind | "published";
+type DeclarativePreviewState = "auto" | "published" | PreviewMode;
 
 const readString = (
 	element: HTMLElement,
@@ -49,46 +55,61 @@ const readInteger = (
 	return Number.isInteger(parsed) ? parsed : undefined;
 };
 
-const readPreviewState = (
-	element: HTMLElement,
-): DeclarativePreviewState | null => {
+const readPreviewState = (element: HTMLElement): DeclarativePreviewState => {
 	const value = readString(element, attributes.preview)?.toLowerCase();
 	if (value === "scoped" || value === "perspective" || value === "published") {
 		return value;
 	}
-	return null;
+	return "auto";
 };
 
-const readEditOptions = (element: HTMLElement): ToolbarEditLink | undefined => {
+const readDocument = (element: HTMLElement): ToolbarDocument | null => {
 	const collectionKey = readString(element, attributes.editCollection);
-	const documentId = readInteger(element, attributes.editDocumentId);
-	if (!collectionKey || documentId === undefined) return undefined;
+	const id = readInteger(element, attributes.editDocumentId);
+	if (!collectionKey || id === undefined) return null;
 
+	const versionId = readInteger(element, attributes.editVersionId);
 	return {
 		collectionKey,
-		documentId,
-		version: readString(element, attributes.editVersion),
-		versionId: readInteger(element, attributes.editVersionId),
-		label: readString(element, attributes.editLabel),
+		id,
+		version: readString(element, attributes.editVersion) ?? "latest",
+		...(versionId === undefined ? {} : { meta: { versionId } }),
 	};
 };
 
-const readPreviewOptions = (
+const readPreview = (
 	element: HTMLElement,
 	previewToken: string | null,
 ): ToolbarOptions["preview"] => {
 	const state = readPreviewState(element);
-	if (state === "published") return false;
+	if (state === "published") return { kind: "published" };
+	if (state === "auto") return "auto";
 
-	const exitUrl = readString(element, attributes.previewExitHref);
-	if (state === null && previewToken === null && !exitUrl) return undefined;
+	const expiresAt = readString(element, attributes.previewExpiresAt);
+	if (
+		!previewToken ||
+		!expiresAt ||
+		!Number.isFinite(new Date(expiresAt).getTime())
+	) {
+		return "auto";
+	}
 
-	const preview: ToolbarPreviewOptions = {};
-	if (state) preview.mode = state;
-	if (previewToken) preview.token = previewToken;
-	if (exitUrl) preview.exitUrl = exitUrl;
-	return preview;
+	return {
+		kind: "preview",
+		mode: state,
+		token: previewToken,
+		expiresAt,
+	} satisfies PreviewRuntimeState;
 };
+
+const readUpdate = (
+	element: HTMLElement,
+	previewToken: string | null,
+): ToolbarUpdate => ({
+	document: readDocument(element),
+	editLabel: readString(element, attributes.editLabel),
+	preview: readPreview(element, previewToken),
+});
 
 const readToolbarOptions = (
 	element: HTMLElement,
@@ -98,8 +119,12 @@ const readToolbarOptions = (
 		element.getAttribute(attributes.authStatus),
 	),
 	host: readString(element, attributes.host),
-	edit: readEditOptions(element),
-	preview: readPreviewOptions(element, previewToken),
+	document: readDocument(element),
+	editLabel: readString(element, attributes.editLabel),
+	preview: readPreview(element, previewToken),
+	previewNavigation: {
+		exitUrl: readString(element, attributes.previewExitHref),
+	},
 });
 
 /** Declarative element for Lucid's isolated frontend toolbar. */
@@ -110,12 +135,13 @@ export class LucidToolbarElement extends HTMLElementBase {
 	#controller: ToolbarController | null = null;
 	#previewToken: string | null = null;
 	#removingPreviewToken = false;
+	#requiresSetup = true;
 	#syncQueued = false;
 
 	connectedCallback(): void {
 		const previewToken = this.getAttribute(attributes.previewToken);
 		if (previewToken !== null) this.#consumePreviewToken(previewToken);
-		if (readPreviewState(this) === "published") this.#previewToken = null;
+		this.#requiresSetup = true;
 		this.#queueSync();
 	}
 
@@ -141,20 +167,18 @@ export class LucidToolbarElement extends HTMLElementBase {
 		}
 
 		if (name === attributes.preview) {
-			const state = readPreviewState(this);
-			if (state === null || state === "published") {
+			const previewState = readPreviewState(this);
+			if (previewState !== "perspective" && previewState !== "scoped") {
 				this.#previewToken = null;
 			}
 		}
 
+		if (setupAttributes.has(name)) this.#requiresSetup = true;
 		if (this.isConnected) this.#queueSync();
 	}
 
 	#consumePreviewToken(value: string): void {
-		this.#previewToken =
-			readPreviewState(this) === "published"
-				? null
-				: normalizePreviewToken(value);
+		this.#previewToken = normalizePreviewToken(value);
 		this.#removingPreviewToken = true;
 		this.removeAttribute(attributes.previewToken);
 		this.#removingPreviewToken = false;
@@ -169,10 +193,17 @@ export class LucidToolbarElement extends HTMLElementBase {
 		targetWindow.queueMicrotask(() => {
 			this.#syncQueued = false;
 			if (!this.isConnected) return;
-			this.#controller?.cleanup();
-			this.#controller = setupToolbar(
-				readToolbarOptions(this, this.#previewToken),
-			);
+
+			if (!this.#controller || this.#requiresSetup) {
+				this.#controller?.cleanup();
+				this.#controller = setupToolbar(
+					readToolbarOptions(this, this.#previewToken),
+				);
+				this.#requiresSetup = false;
+				return;
+			}
+
+			void this.#controller.update(readUpdate(this, this.#previewToken));
 		});
 	}
 }

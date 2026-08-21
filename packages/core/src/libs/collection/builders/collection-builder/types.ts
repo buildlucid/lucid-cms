@@ -63,10 +63,17 @@ export type CollectionPreviewBreakpoint = {
 	width: number;
 };
 
-export type CollectionPreviewConfig<
+export type CollectionPreviewOptions<
 	TCollectionKey extends string = CollectionDocumentKey,
 > = {
-	url(
+	/** Whether previews are available for this collection. */
+	enabled: boolean;
+	/**
+	 * Builds the website URL used to preview a document. When omitted, Lucid uses
+	 * the document route on the same host. Return null if the document cannot be
+	 * previewed.
+	 */
+	url?(
 		props: CollectionPreviewURLResolverProps<TCollectionKey>,
 	): string | URL | null | Promise<string | URL | null>;
 	/** How long generated preview links remain valid, in seconds. Defaults to one hour. */
@@ -74,6 +81,10 @@ export type CollectionPreviewConfig<
 	/** Named viewport widths shown in the builder preview. */
 	breakpoints?: CollectionPreviewBreakpointConfig[];
 };
+
+export type CollectionPreviewConfig<
+	TCollectionKey extends string = CollectionDocumentKey,
+> = true | CollectionPreviewOptions<TCollectionKey>;
 
 export type PublishingReviewCommentRequirement = "required" | "optional";
 export type PublishingReviewConfig = {

@@ -1,5 +1,10 @@
 # @lucidcms/client
 
+## v0.5.0 (unreleased)
+
+- Reworked the toolbar for SPAs and server-rendered sites, with automatic authentication and preview handling, route updates and a Toolkit adapter.
+- Preview resolution now accepts tokens in the request body and returns only their mode and expiry.
+
 ## v0.4.0
 
 - Auth updated to support `ApiKey` and `Bearer` token authentication.

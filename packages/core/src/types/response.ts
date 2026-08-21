@@ -101,6 +101,8 @@ export type {
 	OAuthConnection,
 	Option,
 	PreviewMode,
+	PreviewResolution,
+	PreviewRuntimeState,
 	PreviewSession,
 	PreviewSessionURLResponse,
 	ProfilePicture,

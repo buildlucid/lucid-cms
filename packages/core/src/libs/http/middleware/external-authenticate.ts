@@ -30,17 +30,29 @@ const setOAuthBearerChallenge = (
 	);
 };
 
+type ExternalAuthenticationOptions =
+	| {
+			optional?: false;
+			principalType?: ExternalPrincipalType;
+	  }
+	| {
+			optional: true;
+			principalType?: never;
+	  };
+
 /**
  * Authenticates content API requests with an integration API key or OAuth access
  * token, then exposes the resolved principal and scopes to downstream handlers.
- * Pass a principal type to restrict the route to system- or user-scoped access.
+ * Optional routes accept missing credentials but still reject invalid ones.
  */
-const externalAuthentication = (options?: {
-	principalType?: ExternalPrincipalType;
-}) =>
+const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
 		const authorization = c.req.header("Authorization");
 		const apiKeyHeader = c.req.header("X-API-Key");
+		if (!authorization && !apiKeyHeader && options?.optional === true) {
+			return await next();
+		}
+
 		const runtimeContext = c.get("runtimeContext");
 		const connectionInfo = runtimeContext.getConnectionInfo(c);
 		const userAgent = c.req.header("user-agent") || null;

@@ -121,17 +121,11 @@ describe("@lucidcms/client", () => {
 				JSON.stringify({
 					data: {
 						mode: "scoped",
-						entry: {
-							collectionKey: "page",
-							documentId: 42,
-							version: "revision",
-							versionId: 7,
-						},
 						expiresAt: "2099-01-01T00:00:00.000Z",
 					},
 					meta: {
 						links: [],
-						path: `https://example.com/lucid/api/v1/content/preview/${token}`,
+						path: "https://example.com/lucid/api/v1/content/preview",
 						currentPage: null,
 						lastPage: null,
 						perPage: null,
@@ -158,17 +152,14 @@ describe("@lucidcms/client", () => {
 		expect(response.error).toBeUndefined();
 		expect(response.data?.data).toMatchObject({
 			mode: "scoped",
-			entry: {
-				collectionKey: "page",
-				documentId: 42,
-				version: "revision",
-				versionId: 7,
-			},
+			expiresAt: "2099-01-01T00:00:00.000Z",
 		});
 		const [url, init] = fetchMock.mock.calls[0] ?? [];
 		expect(String(url)).toBe(
-			`https://example.com/lucid/api/v1/content/preview/${token}`,
+			"https://example.com/lucid/api/v1/content/preview",
 		);
+		expect(init?.method).toBe("POST");
+		expect(init?.body).toBe(JSON.stringify({ token }));
 		expect(new Headers(init?.headers).get("authorization")).toBe(
 			"Bearer access-token",
 		);

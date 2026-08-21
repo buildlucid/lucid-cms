@@ -2,6 +2,7 @@
 
 ## v0.6.0 (unreleased)
 
+- Added shared types for frontend preview state and resolved preview metadata.
 - Added media status, image preset source and video playback source response types.
 - Reworked upload-session types around HTTP, multipart-parts and TUS protocols.
 - Split system media adapter reporting into storage and delivery keys.

@@ -1,5 +1,5 @@
 import { previewSessionServices } from "../../../services/index.js";
-import type { PreviewSession } from "../../../types.js";
+import type { PreviewRuntimeState, PreviewSession } from "../../../types.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -33,12 +33,14 @@ export type ToolkitPreviewStateInput = {
 	headers?: ToolkitPreviewResponseHeaders;
 };
 
-export type ToolkitPreviewState = {
-	active: boolean;
-	token: string | null;
-	source: ToolkitPreviewSource;
-	preview: PreviewSession | null;
-};
+export type ToolkitPreviewState =
+	| (Extract<PreviewRuntimeState, { kind: "published" }> & {
+			source: Extract<ToolkitPreviewSource, "exit" | null>;
+	  })
+	| (Extract<PreviewRuntimeState, { kind: "preview" }> & {
+			source: Extract<ToolkitPreviewSource, "query" | "stored">;
+			entry: PreviewSession["entry"];
+	  });
 
 const previewQueryParam = "preview";
 const previewExitValue = "exit";
@@ -79,10 +81,8 @@ const state = async (
 				return {
 					error: undefined,
 					data: {
-						active: false,
-						token: null,
+						kind: "published",
 						source: "exit",
-						preview: null,
 					},
 				};
 			}
@@ -93,10 +93,8 @@ const state = async (
 				return {
 					error: undefined,
 					data: {
-						active: false,
-						token: null,
+						kind: "published",
 						source: null,
-						preview: null,
 					},
 				};
 			}
@@ -122,10 +120,12 @@ const state = async (
 			return {
 				error: undefined,
 				data: {
-					active: true,
+					kind: "preview",
 					token,
 					source: hasQueryValue ? "query" : "stored",
-					preview: previewRes.data,
+					mode: previewRes.data.mode,
+					expiresAt: previewRes.data.expiresAt,
+					entry: previewRes.data.entry,
 				},
 			};
 		},

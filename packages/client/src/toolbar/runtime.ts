@@ -1,72 +1,26 @@
-import { previewQueryParam } from "../utils/preview.js";
-import type { ToolbarBootstrap } from "./bootstrap.js";
-import { defaultEditLabel } from "./constants.js";
-import {
-	cleanPreviewUrl,
-	clearStoredToken,
-	isCrossOriginEmbedded,
-	storeToken,
-	stripPreviewQuery,
-} from "./context.js";
+import type { PreviewRuntimeState } from "@lucidcms/types";
 import { createToolbarElement } from "./element.js";
 import { installToolbarNavigation } from "./navigation.js";
-import type { ToolbarController, ToolbarOptions } from "./types.js";
 
-const navigateToExitUrl = (targetWindow: Window, exitUrl: URL): void => {
-	if (exitUrl.origin === targetWindow.location.origin) {
-		targetWindow.location.assign(exitUrl.toString());
-		return;
-	}
-
-	const link = targetWindow.document.createElement("a");
-	link.href = exitUrl.toString();
-	link.rel = "noreferrer";
-	link.referrerPolicy = "no-referrer";
-	link.hidden = true;
-	(targetWindow.document.body ?? targetWindow.document.documentElement).append(
-		link,
-	);
-	link.click();
-	link.remove();
+export type ToolbarRuntimeModel = {
+	adminHref: string;
+	preview: PreviewRuntimeState;
+	edit: { href: string; label: string } | null;
+	propagateInternalLinks: boolean;
+	exitPreview: () => Promise<void>;
 };
 
-/** Mounts the full toolbar UI after the lightweight entrypoint has gated it. */
-export const setupToolbarRuntime = (
-	options: ToolbarOptions,
-	bootstrap: ToolbarBootstrap,
-	editAuthentication: Promise<boolean>,
-): ToolbarController => {
-	const { targetWindow, context, preview, previewOptions, adminUrl, editHref } =
-		bootstrap;
+export type ToolbarRuntime = {
+	readonly active: boolean;
+	update: (model: ToolbarRuntimeModel) => void;
+	cleanup: () => void;
+};
 
-	if (preview.active && preview.token) {
-		if (preview.mode === "perspective") {
-			storeToken(targetWindow, preview.token);
-		} else {
-			clearStoredToken(targetWindow);
-		}
-		const shouldStripToken =
-			previewOptions?.stripTokenFromUrl ??
-			(preview.mode === "perspective" && !isCrossOriginEmbedded(targetWindow));
-		if (shouldStripToken) stripPreviewQuery(targetWindow);
-	}
-
+/** Owns the toolbar DOM and browser navigation listeners. */
+export const setupToolbarRuntime = (targetWindow: Window): ToolbarRuntime => {
 	const element = createToolbarElement(targetWindow);
-	element.hidden = !preview.active;
 	let cleanedUp = false;
-	let exiting = false;
-	let editAuthenticated = false;
-	let authenticationResolved = editHref === null;
-
-	const cleanupNavigation = installToolbarNavigation({
-		targetWindow,
-		preview,
-		builder: context.builder,
-		propagateInternalLinks:
-			options.preview !== false &&
-			preview.mode === "perspective" &&
-			(previewOptions?.propagateInternalLinks ?? true),
-	});
+	let cleanupNavigation: () => void = () => undefined;
 
 	const cleanup = () => {
 		if (cleanedUp) return;
@@ -75,75 +29,29 @@ export const setupToolbarRuntime = (
 		element.remove();
 	};
 
-	const exitPreview = async () => {
-		if (exiting || !preview.active) return;
-		exiting = true;
-		try {
-			await previewOptions?.onExit?.();
-		} catch (error) {
-			exiting = false;
-			throw error;
-		}
-
-		clearStoredToken(targetWindow);
-		cleanup();
-		const exitUrl = previewOptions?.exitUrl
-			? new URL(previewOptions.exitUrl, targetWindow.location.href)
-			: cleanPreviewUrl(targetWindow);
-		exitUrl.searchParams.delete(previewQueryParam);
-		if (exitUrl.origin === targetWindow.location.origin) {
-			exitUrl.searchParams.set(previewQueryParam, "exit");
-		}
-		navigateToExitUrl(targetWindow, exitUrl);
-	};
-
-	const render = () => {
-		if (cleanedUp) return;
-		element.setModel({
-			adminHref: adminUrl.toString(),
-			previewMode: preview.active ? preview.mode : null,
-			edit:
-				editAuthenticated && editHref
-					? {
-							href: editHref,
-							label: options.edit?.label?.trim() || defaultEditLabel,
-						}
-					: null,
-			exitPreview: preview.active ? exitPreview : null,
-		});
-		element.hidden = !preview.active && !editAuthenticated;
-		if (element.hidden && !preview.active && authenticationResolved) {
-			cleanup();
-		}
-	};
-
-	render();
-
-	const ready = editHref
-		? editAuthentication
-				.then((authenticated) => {
-					authenticationResolved = true;
-					editAuthenticated = authenticated;
-					render();
-				})
-				.catch(() => {
-					authenticationResolved = true;
-					editAuthenticated = false;
-					render();
-				})
-		: Promise.resolve();
-
 	return {
 		get active() {
 			return !cleanedUp && element.isConnected && !element.hidden;
 		},
-		get element() {
-			return cleanedUp ? null : element;
+		update: (model) => {
+			if (cleanedUp) return;
+			cleanupNavigation();
+			cleanupNavigation = installToolbarNavigation({
+				targetWindow,
+				preview: model.preview,
+				propagateInternalLinks: model.propagateInternalLinks,
+			});
+			element.setModel({
+				adminHref: model.adminHref,
+				previewMode:
+					model.preview.kind === "preview" ? model.preview.mode : null,
+				edit: model.edit,
+				exitPreview:
+					model.preview.kind === "preview" ? model.exitPreview : null,
+			});
+			element.hidden =
+				model.preview.kind === "published" && model.edit === null;
 		},
-		preview,
-		context,
-		ready,
-		exitPreview,
 		cleanup,
 	};
 };

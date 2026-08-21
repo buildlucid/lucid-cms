@@ -1,7 +1,7 @@
+import type { PreviewMode } from "@lucidcms/types";
 import { toolbarTagName } from "./constants.js";
 import { editIcon, exitIcon, lucidIcon } from "./icons.js";
 import { toolbarStyles } from "./styles.js";
-import type { PreviewKind } from "./types.js";
 
 const toolbarMarkup = `
 	<style>${toolbarStyles}</style>
@@ -20,7 +20,7 @@ const toolbarMarkup = `
 
 type ToolbarElementModel = {
 	adminHref: string;
-	previewMode: PreviewKind | null;
+	previewMode: PreviewMode | null;
 	edit: { href: string; label: string } | null;
 	exitPreview: (() => Promise<void>) | null;
 };

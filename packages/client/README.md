@@ -233,7 +233,7 @@ const page = await client.documents.getSingle({
 
 ## Frontend Toolbar
 
-The `@lucidcms/client/toolbar` browser entry exports an isolated `<lucid-toolbar>` with Admin, edit-page, preview-status, and exit actions. Register the element once, then provide the current document and preview state as attributes; set `host` when Lucid is served from another origin.
+The `@lucidcms/client/toolbar` browser entry exports an isolated `<lucid-toolbar>` with Admin, edit-page, preview-status, and exit actions. Authentication and previews are resolved automatically. Set `host` when Lucid is served from another origin.
 
 ```html
 <script type="module">
@@ -245,31 +245,22 @@ The `@lucidcms/client/toolbar` browser entry exports an isolated `<lucid-toolbar
 </script>
 
 <lucid-toolbar
-    host="https://cms.example.com"
-    auth-status="authenticated"
     edit-collection="page"
     edit-document-id="42"
     edit-version="latest"
-    preview="perspective"
-    preview-token="PREVIEW_TOKEN"
 ></lucid-toolbar>
 ```
 
-For JavaScript-controlled integrations, `setupToolbar()` provides the same runtime with an explicit lifecycle controller instead of a Web Component.
+For JavaScript-controlled integrations, `setupToolbar()` returns a controller for SPA route updates and cleanup.
 
 ```typescript
 import { setupToolbar } from "@lucidcms/client/toolbar";
 
 const toolbar = setupToolbar({
-    host: "https://cms.example.com",
-    edit: {
+    document: {
         collectionKey: "page",
-        documentId: 42,
+        id: 42,
         version: "latest",
-    },
-    preview: {
-        mode: "perspective",
-        token: "PREVIEW_TOKEN",
     },
 });
 
@@ -292,10 +283,10 @@ For click-to-field targeting, pass the active preview state to `asDocument(..., 
 
 ## Toolkit Toolbar Helper
 
-Server-rendered frontends using the Lucid toolkit can pass the settled responses from `toolkit.auth.status()`, `toolkit.documents.getSingle()`, and `toolkit.previews.state()` to `resolveToolbarAttributes()`. It returns the complete `<lucid-toolbar>` attributes, or `null` when the toolbar should not be rendered.
+Server-rendered frontends using the Lucid Toolkit can create `<lucid-toolbar>` attributes with `toolbarFromToolkit()`.
 
 ```typescript
-import { resolveToolbarAttributes } from "@lucidcms/client";
+import { toolbarFromToolkit } from "@lucidcms/client/toolbar";
 
 const [authentication, preview] = await Promise.all([
     toolkit.auth.status(authOptions),
@@ -303,7 +294,7 @@ const [authentication, preview] = await Promise.all([
 ]);
 const document = await toolkit.documents.getSingle(documentOptions);
 
-const toolbarAttributes = resolveToolbarAttributes({
+const toolbarAttributes = toolbarFromToolkit({
     authentication,
     document,
     preview,

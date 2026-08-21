@@ -1,6 +1,18 @@
 import { copy } from "../../libs/i18n/index.js";
 import type { ServiceResponse } from "../services/types.js";
 
+/** Resolves a collection route against the CMS origin without allowing the path to replace it. */
+export const resolveDefaultPreviewUrl = (
+	baseUrl: string,
+	path: string | null,
+): URL | null => {
+	if (!path) return null;
+
+	const url = new URL("/", baseUrl);
+	url.pathname = path.startsWith("/") ? path : `/${path}`;
+	return url;
+};
+
 const normalizePreviewUrl = async (
 	resolved: string | URL | null,
 	token: string,

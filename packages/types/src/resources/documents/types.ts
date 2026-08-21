@@ -350,6 +350,22 @@ export type PreviewSessionURLResponse = {
 
 export type PreviewMode = "perspective" | "scoped";
 
+/** Browser runtime state shared by preview-aware Lucid integrations. */
+export type PreviewRuntimeState =
+	| { kind: "published" }
+	| {
+			kind: "preview";
+			token: string;
+			mode: PreviewMode;
+			expiresAt: string;
+	  };
+
+/** Public metadata returned after resolving a browser-held preview token. */
+export type PreviewResolution = Pick<
+	Extract<PreviewRuntimeState, { kind: "preview" }>,
+	"mode" | "expiresAt"
+>;
+
 export type PreviewSession = {
 	mode: PreviewMode;
 	entry: {

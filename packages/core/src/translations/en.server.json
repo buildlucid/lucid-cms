@@ -121,6 +121,7 @@
 	"core.config.collection.environment.version.map.collection.not.found": "Collection \"{{collection}}\" environment \"{{environment}}\" version mapping references unknown collection \"{{targetCollection}}\".",
 	"core.config.collection.environment.version.map.target.not.found": "Collection \"{{collection}}\" environment \"{{environment}}\" version mapping for collection \"{{targetCollection}}\" references unknown environment \"{{targetVersion}}\". Use \"latest\" or an environment configured on the target collection.",
 	"core.config.collection.routing.field.invalid": "Collection '{{collection}}' routing field '{{field}}' must be a top-level text, textarea, or number field.",
+	"core.config.collection.preview.routing.required": "Collection '{{collection}}' must configure routing when preview is enabled without a custom URL resolver.",
 	"core.fields.rich.text.collection.not.found": "Rich-text field '{{field}}' {{feature}} references unknown collection '{{collection}}'.",
 	"core.fields.rich.text.feature.internal.links": "internal links",
 	"core.fields.rich.text.feature.documents": "document nodes",

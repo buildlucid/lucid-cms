@@ -1,5 +1,5 @@
 ---
-import { resolveToolbarAttributes } from "@lucidcms/client";
+import { toolbarFromToolkit } from "@lucidcms/client/toolbar";
 import "../index.css";
 import getLucidData, { resolvePageLocale } from "../services/lucid-data";
 
@@ -49,7 +49,7 @@ const blogCards = result.blogs.map((blog) => {
 	};
 });
 
-const toolbarAttributes = resolveToolbarAttributes({
+const toolbarAttributes = toolbarFromToolkit({
 	authentication: result.raw.authentication,
 	document: result.raw.document,
 	preview: result.raw.preview,
@@ -66,7 +66,7 @@ const toolbarAttributes = resolveToolbarAttributes({
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
 			rel="stylesheet"
 		/>
-		{(result.raw.preview.data?.active || result.isPreviewError) && (
+		{(result.raw.preview.data?.kind === "preview" || result.isPreviewError) && (
 			<meta name="referrer" content="no-referrer" />
 		)}
 		<title>

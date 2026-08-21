@@ -158,6 +158,7 @@ test("collection preview configuration exposes normalized breakpoints without pr
 			singularName: "Page",
 		},
 		preview: {
+			enabled: true,
 			url: preview,
 			expiresIn: 120,
 			breakpoints: [
@@ -192,8 +193,8 @@ test("collection preview configuration exposes normalized breakpoints without pr
 			},
 		],
 	});
-	expect(collection.config.preview?.url).toBe(preview);
-	expect(collection.config.preview?.expiresIn).toBe(120);
+	expect(collection.resolvedPreviewConfig?.url).toBe(preview);
+	expect(collection.resolvedPreviewConfig?.expiresIn).toBe(120);
 	const adminCollection = collectionsFormatter.formatSingle({
 		collection,
 		adminTranslations: {
@@ -230,13 +231,43 @@ test("collection preview configuration exposes normalized breakpoints without pr
 			name: "Posts",
 			singularName: "Post",
 		},
-		preview: { url: preview },
+		preview: { enabled: true, url: preview },
 	});
 	expect(
 		collectionsFormatter.formatSingle({
 			collection: collectionWithoutBreakpoints,
 		}).preview,
 	).toEqual({ breakpoints: [] });
+
+	const shorthandCollection = new CollectionBuilder("shorthand", {
+		mode: "multiple",
+		details: {
+			name: "Shorthand pages",
+			singularName: "Shorthand page",
+		},
+		preview: true,
+	});
+	expect(shorthandCollection.resolvedPreviewConfig).toEqual({ enabled: true });
+	expect(shorthandCollection.getData.preview).toEqual({ breakpoints: [] });
+
+	const disabledCollection = new CollectionBuilder("disabled", {
+		mode: "multiple",
+		details: {
+			name: "Disabled pages",
+			singularName: "Disabled page",
+		},
+		preview: {
+			enabled: false,
+			url: preview,
+			breakpoints: [{ key: "mobile", label: "Mobile", width: 390 }],
+		},
+	});
+	expect(disabledCollection.config.preview).toMatchObject({
+		enabled: false,
+		url: preview,
+		breakpoints: [{ key: "mobile", label: "Mobile", width: 390 }],
+	});
+	expect(disabledCollection.getData.preview).toBeNull();
 });
 
 test("collection workflow features normalizes defaults", async () => {

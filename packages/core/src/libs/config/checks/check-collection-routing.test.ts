@@ -13,10 +13,35 @@ describe("checkCollectionRouting", () => {
 			mode: "multiple",
 			details,
 			routing: "path",
+			preview: true,
 		}).addText("path");
 
 		expect(() => checkCollectionRouting(collection)).not.toThrow();
 		expect(collection.getData.routing).toEqual({ field: "path" });
+	});
+
+	test("requires routing only for enabled previews using the default URL", () => {
+		const defaultPreview = new CollectionBuilder("default-preview", {
+			mode: "multiple",
+			details,
+			preview: true,
+		});
+		const customPreview = new CollectionBuilder("custom-preview", {
+			mode: "multiple",
+			details,
+			preview: { enabled: true, url: () => "https://example.com" },
+		});
+		const disabledPreview = new CollectionBuilder("disabled-preview", {
+			mode: "multiple",
+			details,
+			preview: { enabled: false },
+		});
+
+		expect(() => checkCollectionRouting(defaultPreview)).toThrow(
+			"must configure routing",
+		);
+		expect(() => checkCollectionRouting(customPreview)).not.toThrow();
+		expect(() => checkCollectionRouting(disabledPreview)).not.toThrow();
 	});
 
 	test("rejects missing, relational, and structurally nested fields", () => {

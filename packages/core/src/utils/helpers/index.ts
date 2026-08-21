@@ -23,7 +23,10 @@ export {
 export { default as hashPreviewToken } from "./hash-preview-token.js";
 export { default as isRequestSecure } from "./is-request-secure.js";
 export { normalizeEmailInput, trimStringInput } from "./normalize-input.js";
-export { default as normalizePreviewUrl } from "./normalize-preview-url.js";
+export {
+	default as normalizePreviewUrl,
+	resolveDefaultPreviewUrl,
+} from "./normalize-preview-url.js";
 export { default as resolveCustomFieldSorts } from "./resolve-custom-field-sorts.js";
 export { default as resolveEmailBrandName } from "./resolve-email-brand-name.js";
 export { default as richTextHasContent } from "./rich-text-has-content.js";

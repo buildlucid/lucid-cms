@@ -1,99 +1,90 @@
 import type {
-	CollectionDocument,
 	DocumentVersionType,
-	PreviewSession,
+	PreviewMode,
+	PreviewRuntimeState,
 } from "@lucidcms/types";
+import type { ToolbarDocument, ToolbarPreviewNavigation } from "./types.js";
 
-type DataResponse<TData> = {
-	data?: TData;
-};
-
-type AuthenticationState = {
-	authenticated: boolean;
-};
-
-type AuthenticationStatus = "authenticated" | "unauthenticated" | "unknown";
-
-type DocumentState = Pick<
-	CollectionDocument,
-	"collectionKey" | "id" | "version"
-> & {
-	meta?: Pick<NonNullable<CollectionDocument["meta"]>, "versionId">;
-};
-
-type PreviewState = {
-	active: boolean;
-	token: string | null;
-	preview: Pick<PreviewSession, "mode"> | null;
-};
-
-type ResolveToolbarAttributesInput = {
-	authentication: DataResponse<AuthenticationState>;
-	document: DataResponse<DocumentState>;
-	preview: DataResponse<PreviewState>;
-	/** Public host of the Lucid instance when it differs from the site origin. */
-	host?: string | URL;
-};
-
-type ToolbarAttributes = {
-	"auth-status": AuthenticationStatus;
+export type ToolbarAttributes = {
+	"auth-status": "auto" | "authenticated" | "unauthenticated";
 	host?: string;
 	"edit-collection"?: string;
 	"edit-document-id"?: number;
 	"edit-version"?: DocumentVersionType;
 	"edit-version-id"?: number;
-	preview: PreviewSession["mode"] | "published";
+	"edit-label"?: string;
+	preview: "auto" | "published" | PreviewMode;
 	"preview-token"?: string;
+	"preview-expires-at"?: string;
+	"preview-exit-href"?: string;
 };
 
-const resolveAuthenticationStatus = (
-	response: DataResponse<AuthenticationState>,
-): AuthenticationStatus => {
-	if (!response.data) return "unknown";
-	return response.data.authenticated ? "authenticated" : "unauthenticated";
+export type ToolbarAttributeOptions = {
+	/** Public host of the Lucid instance when it differs from the site origin. */
+	host?: string | URL;
+	document?: ToolbarDocument | null;
+	editLabel?: string;
+	authentication?: "auto" | boolean;
+	preview?: "auto" | PreviewRuntimeState;
+	previewNavigation?: Pick<ToolbarPreviewNavigation, "exitUrl">;
 };
 
-/** Resolves server responses into declarative toolbar element attributes. */
-export const resolveToolbarAttributes = ({
-	authentication,
-	document,
-	preview,
+const authenticationAttribute = (
+	authentication: ToolbarAttributeOptions["authentication"],
+): ToolbarAttributes["auth-status"] => {
+	if (authentication === true) return "authenticated";
+	if (authentication === false) return "unauthenticated";
+	return "auto";
+};
+
+/** Serializes generic toolbar configuration for `<lucid-toolbar>`. */
+export const createToolbarAttributes = ({
 	host,
-}: ResolveToolbarAttributesInput): ToolbarAttributes | null => {
-	const authenticationStatus = resolveAuthenticationStatus(authentication);
-	const previewState = preview.data;
-	const activePreview =
-		previewState?.active && previewState.token && previewState.preview
-			? {
-					mode: previewState.preview.mode,
-					token: previewState.token,
-				}
-			: null;
-	const editableDocument = document.data;
-	const editVersionId = editableDocument?.meta?.versionId;
-
-	if (!activePreview && !editableDocument) return null;
-	if (!activePreview && authenticationStatus === "unauthenticated") {
+	document = null,
+	editLabel,
+	authentication = "auto",
+	preview = "auto",
+	previewNavigation,
+}: ToolbarAttributeOptions = {}): ToolbarAttributes | null => {
+	if (
+		preview !== "auto" &&
+		preview.kind === "published" &&
+		(!document || authentication === false)
+	) {
 		return null;
 	}
 
+	const versionId = document?.meta?.versionId;
 	return {
-		"auth-status": authenticationStatus,
+		"auth-status": authenticationAttribute(authentication),
 		...(host === undefined ? {} : { host: String(host) }),
-		...(editableDocument
+		...(document
 			? {
-					"edit-collection": editableDocument.collectionKey,
-					"edit-document-id": editableDocument.id,
-					...(editableDocument.version
-						? { "edit-version": editableDocument.version }
+					"edit-collection": document.collectionKey,
+					"edit-document-id": document.id,
+					...(document.version === null
+						? {}
+						: { "edit-version": document.version }),
+					...(typeof versionId === "number" && Number.isInteger(versionId)
+						? { "edit-version-id": versionId }
 						: {}),
-					...(typeof editVersionId === "number" &&
-					Number.isInteger(editVersionId)
-						? { "edit-version-id": editVersionId }
-						: {}),
+					...(editLabel?.trim() ? { "edit-label": editLabel.trim() } : {}),
 				}
 			: {}),
-		preview: activePreview?.mode ?? "published",
-		...(activePreview ? { "preview-token": activePreview.token } : {}),
+		preview:
+			preview === "auto"
+				? "auto"
+				: preview.kind === "published"
+					? "published"
+					: preview.mode,
+		...(preview !== "auto" && preview.kind === "preview"
+			? {
+					"preview-token": preview.token,
+					"preview-expires-at": preview.expiresAt,
+				}
+			: {}),
+		...(previewNavigation?.exitUrl === undefined
+			? {}
+			: { "preview-exit-href": String(previewNavigation.exitUrl) }),
 	};
 };

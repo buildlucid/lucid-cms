@@ -1,66 +1,73 @@
-import type { DocumentVersionType, PreviewMode } from "@lucidcms/types";
+import type { CollectionDocument, PreviewRuntimeState } from "@lucidcms/types";
 
-export type PreviewModeSource = "explicit" | "url" | "stored";
-export type PreviewKind = PreviewMode;
+type MaybePromise<T> = T | Promise<T>;
 
-export type PreviewModeState = {
-	active: boolean;
-	token: string | null;
-	source: PreviewModeSource | null;
-	mode: PreviewKind | null;
+export type ToolbarDocument = Pick<
+	CollectionDocument,
+	"collectionKey" | "id" | "version"
+> & {
+	meta?: Pick<NonNullable<CollectionDocument["meta"]>, "versionId">;
 };
 
-export type ToolbarContextState = {
-	/** True only inside an iframe explicitly named by Lucid's builder. */
-	builder: boolean;
-};
+export type ToolbarAuthentication =
+	| "auto"
+	| boolean
+	| (() => MaybePromise<boolean>);
 
-export type ToolbarEditLink = {
-	collectionKey: string;
-	documentId: number;
-	version?: DocumentVersionType | null;
-	versionId?: number | null;
-	/** Defaults to `Edit page`. */
-	label?: string;
-};
-
-export type ToolbarPreviewOptions = {
-	/** Explicit preview token supplied by a server-rendered frontend. */
-	token?: string | null;
-	/** Server-resolved preview mode. Defaults to `perspective`. */
-	mode?: PreviewKind;
+export type ToolbarPreviewNavigation = {
 	/** URL requested when preview ends. Defaults to the current page. */
 	exitUrl?: string | URL;
-	/** Optional additional cleanup before navigating with `preview=exit`. */
-	onExit?: () => void | Promise<void>;
-	/** Override same-origin token forwarding. It defaults to enabled for perspective previews. */
+	/** Optional additional cleanup before preview exit navigation. */
+	onExit?: () => MaybePromise<void>;
+	/** Replaces full-page navigation when an application router owns navigation. */
+	navigate?: (url: URL) => MaybePromise<void>;
+	/** Override same-origin token forwarding for perspective previews. */
 	propagateInternalLinks?: boolean;
-	/** Remove the bearer token from the visible URL after activation. Perspective previews default to true outside a cross-origin iframe. */
+	/** Override removal of a resolved perspective token from the visible URL. */
 	stripTokenFromUrl?: boolean;
 };
 
+export type ToolbarError = {
+	kind: "authentication" | "preview" | "runtime";
+	cause: unknown;
+};
+
 export type ToolbarOptions = {
-	/** Public host of the Lucid instance. Defaults to the current origin; values without a protocol use HTTPS. */
+	/** Public host of the Lucid instance. Defaults to the current origin. */
 	host?: string | URL;
-	/** Document metadata used to build the authenticated edit-page action. */
-	edit?: ToolbarEditLink;
-	/** Preview controls, or `false` when the server explicitly resolved published mode. */
-	preview?: ToolbarPreviewOptions | false;
-	/** Override the Lucid session-status check used for the edit action. */
-	authentication?: boolean | (() => boolean | Promise<boolean>);
+	/** Initial document metadata used to build the edit-page action. */
+	document?: ToolbarDocument | null;
+	/** Defaults to `Edit page`. */
+	editLabel?: string;
+	/** Defaults to `auto`. */
+	authentication?: ToolbarAuthentication;
+	/** Defaults to `auto`. */
+	preview?: "auto" | PreviewRuntimeState;
+	previewNavigation?: ToolbarPreviewNavigation;
+	/** Reports resolution failures without breaking the host application. */
+	onError?: (error: ToolbarError) => void;
+};
+
+export type ToolbarUpdate = {
+	/** Complete route document state. `null` clears the previous edit action. */
+	document: ToolbarDocument | null;
+	/** Route URL used by automatic preview resolution. Defaults to the current URL. */
+	url?: string | URL;
+	/** Replaces the configured preview policy for this and later updates. */
+	preview?: "auto" | PreviewRuntimeState;
+	/** Replaces the configured edit label for this and later updates. */
+	editLabel?: string;
 };
 
 export type ToolbarController = {
 	/** Whether the toolbar pill is currently visible. */
 	readonly active: boolean;
-	/** The toolbar host, or `null` when inactive or cleaned up. */
-	readonly element: HTMLElement | null;
-	/** The resolved preview state. */
-	readonly preview: PreviewModeState;
-	/** The resolved browser context. */
-	readonly context: ToolbarContextState;
-	/** Resolves after optional edit-action authentication has completed. */
+	/** The latest resolved preview state. */
+	readonly preview: PreviewRuntimeState;
+	/** Resolves after the initial browser state has settled. */
 	readonly ready: Promise<void>;
+	/** Atomically applies route-owned state. The latest update wins. */
+	update: (update: ToolbarUpdate) => Promise<void>;
 	/** Clears preview state and restores the published page. */
 	exitPreview: () => Promise<void>;
 	/** Removes the toolbar and its browser listeners. */

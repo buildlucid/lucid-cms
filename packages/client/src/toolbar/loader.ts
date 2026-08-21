@@ -1,111 +1,288 @@
-import { getWindow } from "../utils/preview.js";
+import type { PreviewRuntimeState } from "@lucidcms/types";
+import {
+	getWindow,
+	isLucidBuilderPreview,
+	previewQueryParam,
+} from "../utils/preview.js";
 import { resolveToolbarAuthentication } from "./authentication.js";
-import { bootstrapToolbar } from "./bootstrap.js";
+import { defaultEditLabel } from "./constants.js";
+import {
+	cleanPreviewUrl,
+	clearStoredPreview,
+	isCrossOriginEmbedded,
+	storePreview,
+	stripPreviewQuery,
+} from "./context.js";
+import { getToolbarAdminUrl, resolveToolbarHost } from "./host.js";
+import { buildToolbarEditHref } from "./links.js";
+import { resolveBrowserPreview } from "./preview-resolution.js";
+import type { ToolbarRuntime, ToolbarRuntimeModel } from "./runtime.js";
 import type {
-	PreviewModeState,
-	ToolbarContextState,
 	ToolbarController,
+	ToolbarDocument,
 	ToolbarOptions,
+	ToolbarUpdate,
 } from "./types.js";
 
 const activeToolbarCleanups = new WeakMap<Window, () => void>();
+const publishedPreview = { kind: "published" } satisfies PreviewRuntimeState;
 
-const emptyPreview: PreviewModeState = {
+const inactiveController = (): ToolbarController => ({
 	active: false,
-	token: null,
-	source: null,
-	mode: null,
-};
-const emptyContext: ToolbarContextState = { builder: false };
-
-const inactiveController = (
-	preview: PreviewModeState = emptyPreview,
-	context: ToolbarContextState = emptyContext,
-): ToolbarController => ({
-	active: false,
-	element: null,
-	preview,
-	context,
+	preview: publishedPreview,
 	ready: Promise.resolve(),
+	update: async () => undefined,
 	exitPreview: async () => undefined,
 	cleanup: () => undefined,
 });
 
-/** Initializes the toolbar and returns its lifecycle controller. */
+const navigateToExitUrl = (targetWindow: Window, exitUrl: URL): void => {
+	if (exitUrl.origin === targetWindow.location.origin) {
+		targetWindow.location.assign(exitUrl.toString());
+		return;
+	}
+
+	const link = targetWindow.document.createElement("a");
+	link.href = exitUrl.toString();
+	link.rel = "noreferrer";
+	link.referrerPolicy = "no-referrer";
+	link.hidden = true;
+	(targetWindow.document.body ?? targetWindow.document.documentElement).append(
+		link,
+	);
+	link.click();
+	link.remove();
+};
+
+/** Initializes one long-lived toolbar controller for the current window. */
 export const setupToolbar = (
 	options: ToolbarOptions = {},
 ): ToolbarController => {
 	const targetWindow = getWindow();
-	if (!targetWindow) return inactiveController();
+	if (!targetWindow || isLucidBuilderPreview(targetWindow)) {
+		return inactiveController();
+	}
 
 	activeToolbarCleanups.get(targetWindow)?.();
-	const bootstrap = bootstrapToolbar(targetWindow, options);
-	if (bootstrap.context.builder) {
-		return inactiveController(bootstrap.preview, bootstrap.context);
-	}
-	if (!bootstrap.preview.active && !bootstrap.editHref) {
-		return inactiveController(bootstrap.preview, bootstrap.context);
-	}
-
+	const host = resolveToolbarHost(targetWindow, options.host);
+	const adminHref = getToolbarAdminUrl(host).toString();
+	let document: ToolbarDocument | null = options.document ?? null;
+	let editLabel = options.editLabel?.trim() || defaultEditLabel;
+	let previewPolicy = options.preview ?? "auto";
+	let previewState: PreviewRuntimeState = publishedPreview;
+	let runtime: ToolbarRuntime | null = null;
+	let runtimeModel: ToolbarRuntimeModel | null = null;
 	let cleanedUp = false;
-	let runtimeController: ToolbarController | null = null;
+	let exiting = false;
+	let revision = 0;
+	let previewAbortController: AbortController | null = null;
+
+	const reportError = (
+		kind: "authentication" | "preview" | "runtime",
+		cause: unknown,
+	) => {
+		options.onError?.({ kind, cause });
+	};
 
 	const clearActiveCleanup = () => {
 		if (activeToolbarCleanups.get(targetWindow) === cleanup) {
 			activeToolbarCleanups.delete(targetWindow);
 		}
 	};
+
 	const cleanup = () => {
 		if (cleanedUp) return;
 		cleanedUp = true;
-		runtimeController?.cleanup();
+		previewAbortController?.abort();
+		runtime?.cleanup();
 		clearActiveCleanup();
 	};
 
-	activeToolbarCleanups.set(targetWindow, cleanup);
-	const editAuthentication = bootstrap.editHref
-		? resolveToolbarAuthentication(
-				targetWindow,
-				bootstrap.host,
-				options.authentication,
-			).catch(() => false)
-		: Promise.resolve(false);
+	const render = async (
+		model: ToolbarRuntimeModel,
+		expectedRevision = revision,
+	) => {
+		const shouldLoad =
+			model.preview.kind === "preview" ||
+			model.edit !== null ||
+			runtime !== null;
+		if (!shouldLoad) return;
 
-	const ready = (async () => {
-		if (!bootstrap.preview.active && bootstrap.editHref) {
-			const authenticated = await editAuthentication;
-			if (!authenticated || cleanedUp) {
-				clearActiveCleanup();
+		if (!runtime) {
+			try {
+				const module = await import("./runtime.js");
+				if (cleanedUp || expectedRevision !== revision) return;
+				runtime ??= module.setupToolbarRuntime(targetWindow);
+			} catch (error) {
+				reportError("runtime", error);
 				return;
 			}
 		}
+		if (cleanedUp || expectedRevision !== revision) return;
+		runtimeModel = model;
+		runtime.update(model);
+	};
 
-		const { setupToolbarRuntime } = await import("./runtime.js");
-		if (cleanedUp) return;
-		runtimeController = setupToolbarRuntime(
-			options,
-			bootstrap,
-			editAuthentication,
+	const resolvePreview = async (
+		url: URL,
+		signal: AbortSignal,
+	): Promise<PreviewRuntimeState> => {
+		if (previewPolicy !== "auto") return previewPolicy;
+		try {
+			return await resolveBrowserPreview({
+				targetWindow,
+				host,
+				url,
+				signal,
+			});
+		} catch (error) {
+			if (!signal.aborted) reportError("preview", error);
+			return publishedPreview;
+		}
+	};
+
+	const reconcile = async (url: URL): Promise<void> => {
+		const currentRevision = ++revision;
+		previewAbortController?.abort();
+		previewAbortController = new AbortController();
+		const signal = previewAbortController.signal;
+		const editHref = document ? buildToolbarEditHref(document, host) : null;
+		const authentication = editHref
+			? resolveToolbarAuthentication(
+					targetWindow,
+					host,
+					options.authentication,
+				).catch((error) => {
+					reportError("authentication", error);
+					return false;
+				})
+			: Promise.resolve(false);
+
+		const [preview, authenticated] = await Promise.all([
+			resolvePreview(url, signal),
+			authentication,
+		]);
+		if (cleanedUp || signal.aborted || currentRevision !== revision) return;
+
+		previewState = preview;
+		if (preview.kind === "preview") {
+			if (preview.mode === "perspective") {
+				storePreview(targetWindow, host, preview);
+			} else {
+				clearStoredPreview(targetWindow, host);
+			}
+			const shouldStripToken =
+				options.previewNavigation?.stripTokenFromUrl ??
+				(preview.mode === "perspective" &&
+					!isCrossOriginEmbedded(targetWindow));
+			if (
+				shouldStripToken &&
+				new URL(targetWindow.location.href).searchParams.get(
+					previewQueryParam,
+				) === preview.token
+			) {
+				stripPreviewQuery(targetWindow);
+			}
+		} else if (previewPolicy !== "auto") {
+			clearStoredPreview(targetWindow, host);
+		}
+
+		if (
+			preview.kind === "published" &&
+			url.searchParams.get(previewQueryParam) === "exit" &&
+			new URL(targetWindow.location.href).searchParams.get(
+				previewQueryParam,
+			) === "exit"
+		) {
+			stripPreviewQuery(targetWindow);
+		}
+
+		await render(
+			{
+				adminHref,
+				preview,
+				edit:
+					authenticated && editHref
+						? { href: editHref, label: editLabel }
+						: null,
+				propagateInternalLinks:
+					preview.kind === "preview" &&
+					preview.mode === "perspective" &&
+					(options.previewNavigation?.propagateInternalLinks ?? true),
+				exitPreview,
+			},
+			currentRevision,
 		);
-		await runtimeController.ready;
-	})().catch(() => {
-		clearActiveCleanup();
-	});
+	};
+
+	const update = async (update: ToolbarUpdate): Promise<void> => {
+		if (cleanedUp) return;
+		const url = new URL(
+			update.url ?? targetWindow.location.href,
+			targetWindow.location.href,
+		);
+		document = update.document;
+		if (update.preview !== undefined) previewPolicy = update.preview;
+		if (update.editLabel !== undefined) {
+			editLabel = update.editLabel.trim() || defaultEditLabel;
+		}
+		await reconcile(url);
+	};
+
+	const exitPreview = async (): Promise<void> => {
+		if (exiting || previewState.kind === "published") return;
+		exiting = true;
+		const exitRevision = ++revision;
+		previewAbortController?.abort();
+		try {
+			await options.previewNavigation?.onExit?.();
+			const exitUrl = options.previewNavigation?.exitUrl
+				? new URL(options.previewNavigation.exitUrl, targetWindow.location.href)
+				: cleanPreviewUrl(targetWindow);
+			exitUrl.searchParams.delete(previewQueryParam);
+			if (exitUrl.origin === targetWindow.location.origin) {
+				exitUrl.searchParams.set(previewQueryParam, "exit");
+			}
+
+			clearStoredPreview(targetWindow, host);
+			previewPolicy = publishedPreview;
+			previewState = publishedPreview;
+			if (runtimeModel) {
+				await render(
+					{ ...runtimeModel, preview: publishedPreview },
+					exitRevision,
+				);
+			}
+
+			if (options.previewNavigation?.navigate) {
+				await options.previewNavigation.navigate(exitUrl);
+			} else {
+				navigateToExitUrl(targetWindow, exitUrl);
+			}
+		} catch (error) {
+			exiting = false;
+			throw error;
+		}
+		exiting = false;
+	};
+
+	activeToolbarCleanups.set(targetWindow, cleanup);
+	const ready = reconcile(new URL(targetWindow.location.href)).catch(
+		(error) => {
+			reportError("runtime", error);
+		},
+	);
 
 	return {
 		get active() {
-			return !cleanedUp && (runtimeController?.active ?? false);
+			return !cleanedUp && (runtime?.active ?? false);
 		},
-		get element() {
-			return cleanedUp ? null : (runtimeController?.element ?? null);
+		get preview() {
+			return previewState;
 		},
-		preview: bootstrap.preview,
-		context: bootstrap.context,
 		ready,
-		exitPreview: async () => {
-			await ready;
-			await runtimeController?.exitPreview();
-		},
+		update,
+		exitPreview,
 		cleanup,
 	};
 };

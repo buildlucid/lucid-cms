@@ -180,24 +180,28 @@ const CollectionConfigSchema = z
 			.optional(),
 		routing: z.string().trim().min(1).optional(),
 		preview: z
-			.object({
-				url: z.function(),
-				expiresIn: z
-					.number()
-					.int()
-					.positive()
-					.max(constants.collectionBuilder.previewMaxExpirationSeconds)
-					.optional(),
-				breakpoints: z
-					.array(
-						z.object({
-							key: previewBreakpointKeySchema,
-							label: adminCopyInputSchema,
-							width: z.number().int().min(280).max(2560),
-						}),
-					)
-					.optional(),
-			})
+			.union([
+				z.literal(true),
+				z.object({
+					enabled: z.boolean(),
+					url: z.function().optional(),
+					expiresIn: z
+						.number()
+						.int()
+						.positive()
+						.max(constants.collectionBuilder.previewMaxExpirationSeconds)
+						.optional(),
+					breakpoints: z
+						.array(
+							z.object({
+								key: previewBreakpointKeySchema,
+								label: adminCopyInputSchema,
+								width: z.number().int().min(280).max(2560),
+							}),
+						)
+						.optional(),
+				}),
+			])
 			.optional(),
 		hooks: z
 			.array(
@@ -257,7 +261,10 @@ const CollectionConfigSchema = z
 		}
 
 		const breakpointKeys =
-			data.preview?.breakpoints?.map((breakpoint) => breakpoint.key) ?? [];
+			data.preview === true
+				? []
+				: (data.preview?.breakpoints?.map((breakpoint) => breakpoint.key) ??
+					[]);
 		const duplicateBreakpointKeys = breakpointKeys.filter(
 			(key, index) => breakpointKeys.indexOf(key) !== index,
 		);

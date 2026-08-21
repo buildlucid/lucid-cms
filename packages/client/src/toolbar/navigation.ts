@@ -1,16 +1,14 @@
+import type { PreviewRuntimeState } from "@lucidcms/types";
 import {
-	builderPreviewContext,
 	previewContextQueryParam,
 	previewQueryParam,
 } from "../utils/preview.js";
 import { toolbarTagName } from "./constants.js";
-import type { PreviewModeState } from "./types.js";
 
 type PreviewNavigationOptions = {
 	targetWindow: Window;
-	preview: PreviewModeState;
+	preview: PreviewRuntimeState;
 	propagateInternalLinks: boolean;
-	builder: boolean;
 };
 
 const findAnchor = (
@@ -30,7 +28,7 @@ export const installToolbarNavigation = (
 	options: PreviewNavigationOptions,
 ): (() => void) => {
 	const { targetWindow, preview } = options;
-	if (!preview.active) return () => undefined;
+	if (preview.kind === "published") return () => undefined;
 
 	const onNavigate = (event: MouseEvent) => {
 		if (event.type === "click" && event.button !== 0) return;
@@ -56,16 +54,11 @@ export const installToolbarNavigation = (
 
 		if (
 			preview.mode === "perspective" &&
-			preview.token &&
 			options.propagateInternalLinks &&
 			!anchor.hasAttribute("download")
 		) {
 			url.searchParams.set(previewQueryParam, preview.token);
-			if (options.builder) {
-				url.searchParams.set(previewContextQueryParam, builderPreviewContext);
-			} else {
-				url.searchParams.delete(previewContextQueryParam);
-			}
+			url.searchParams.delete(previewContextQueryParam);
 		} else {
 			url.searchParams.delete(previewQueryParam);
 			url.searchParams.delete(previewContextQueryParam);

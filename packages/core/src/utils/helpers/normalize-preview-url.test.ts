@@ -1,5 +1,29 @@
 import { describe, expect, it } from "vitest";
-import normalizePreviewUrl from "./normalize-preview-url.js";
+import normalizePreviewUrl, {
+	resolveDefaultPreviewUrl,
+} from "./normalize-preview-url.js";
+
+describe("resolveDefaultPreviewUrl", () => {
+	it("resolves route paths on the configured CMS origin", () => {
+		expect(
+			resolveDefaultPreviewUrl(
+				"https://example.com/lucid",
+				"en/about",
+			)?.toString(),
+		).toBe("https://example.com/en/about");
+		expect(resolveDefaultPreviewUrl("https://example.com", null)).toBeNull();
+	});
+
+	it("does not allow a protocol-relative route path to replace the origin", () => {
+		const url = resolveDefaultPreviewUrl(
+			"https://example.com",
+			"//elsewhere.example/page",
+		);
+
+		expect(url?.origin).toBe("https://example.com");
+		expect(url?.pathname).toBe("//elsewhere.example/page");
+	});
+});
 
 describe("normalizePreviewUrl", () => {
 	it("preserves query values and hashes while adding the preview token", async () => {

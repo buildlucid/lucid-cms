@@ -83,6 +83,7 @@ test("collection preview breakpoints validate labels, keys and widths", async ()
 			singularName: "Page",
 		},
 		preview: {
+			enabled: true,
 			url: () => "https://example.com",
 			breakpoints: [
 				{
@@ -106,6 +107,22 @@ test("collection preview breakpoints validate labels, keys and widths", async ()
 	).resolves.toMatchObject({
 		success: true,
 	});
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({ ...config, preview: true }),
+	).resolves.toMatchObject({ success: true });
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			preview: { enabled: false, breakpoints: config.preview.breakpoints },
+		}),
+	).resolves.toMatchObject({ success: true });
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			preview: { breakpoints: config.preview.breakpoints },
+		}),
+	).resolves.toMatchObject({ success: false });
 
 	for (const width of [279, 2561, 390.5]) {
 		await expect(

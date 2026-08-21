@@ -10,8 +10,10 @@ import type {
 	PreviewSessionURLResponse,
 } from "../../types.js";
 import {
+	getBaseUrl,
 	hashPreviewToken,
 	normalizePreviewUrl,
+	resolveDefaultPreviewUrl,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getContentDocument from "../documents/content/get-single.js";
@@ -51,8 +53,8 @@ const create: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const preview = collectionRes.data.config.preview;
-	if (!preview) {
+	const preview = collectionRes.data.resolvedPreviewConfig;
+	if (!preview?.enabled) {
 		return {
 			error: {
 				type: "basic",
@@ -104,12 +106,14 @@ const create: ServiceFn<
 
 	let resolvedUrl: string | URL | null;
 	try {
-		resolvedUrl = await preview.url({
-			document: canonicalDocument,
-			env: context.env,
-			locale,
-			path,
-		});
+		resolvedUrl = preview.url
+			? await preview.url({
+					document: canonicalDocument,
+					env: context.env,
+					locale,
+					path,
+				})
+			: resolveDefaultPreviewUrl(getBaseUrl(context), path);
 	} catch {
 		return {
 			error: {
