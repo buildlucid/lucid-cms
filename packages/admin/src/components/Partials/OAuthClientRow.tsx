@@ -59,7 +59,13 @@ const OAuthClientRow: Component<{
 			<article class="border-b border-border p-4 last:border-b-0">
 				<div class="flex min-w-0 items-start justify-between gap-3">
 					<div class="flex min-w-0 items-start gap-3">
-						<IconContainer class="overflow-hidden">
+						<IconContainer
+							class={
+								props.client.logo
+									? "rectangle-background overflow-hidden"
+									: "overflow-hidden"
+							}
+						>
 							<Show
 								when={props.client.logo}
 								fallback={<FaSolidKey class="size-3.5 text-primary-base" />}
@@ -68,7 +74,7 @@ const OAuthClientRow: Component<{
 									<img
 										src={getMediaPreviewUrl(logo(), "thumbnail-small")}
 										alt=""
-										class="size-full object-contain bg-white p-1"
+										class="relative z-10 size-full object-contain"
 									/>
 								)}
 							</Show>
