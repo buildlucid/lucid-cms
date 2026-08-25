@@ -5,7 +5,6 @@ import type {
 	DocumentRef,
 	DocumentRoute,
 	DocumentVersionSummary,
-	FieldType,
 	Locale,
 	Media,
 	MediaAdapterData,
@@ -37,6 +36,9 @@ import type {
 	MediaVideoSource,
 	MediaVideoThumbnail,
 	ProfilePicture,
+	RefResource,
+	RefResourceMap,
+	Refs,
 	RelationFieldValue,
 	UserRef,
 } from "@lucidcms/types";
@@ -131,7 +133,6 @@ export interface CollectionDocument<
 	route: DocumentRoute | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
-	refs?: Partial<Record<FieldType | string, unknown[]>>;
 	meta?: CollectionDocumentMeta<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
@@ -266,6 +267,9 @@ export type {
 	MediaVideoSource,
 	MediaVideoThumbnail,
 	ProfilePicture,
+	RefResource,
+	RefResourceMap,
+	Refs,
 	RelationFieldValue,
 	UserRef,
 };

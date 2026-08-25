@@ -1,7 +1,6 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
 import { normalizeRelationCollections } from "../../../libs/collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
-import type { FieldRefVersionTypeResolver } from "../../../libs/collection/custom-fields/utils/ref-fetch.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import primeRuntimeSchemas from "../../../libs/collection/schema/runtime/prime-runtime-schemas.js";
 import {
@@ -18,6 +17,7 @@ import type {
 } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
+import type { DocumentRefVersionTypeResolver } from "../../../libs/refs/documents/types.js";
 import type {
 	QueryParamFilterCondition,
 	QueryParamFilterGroups,
@@ -266,7 +266,7 @@ const resolveRelationDocumentFilters: ServiceFn<
 			filter?: QueryParamFilters;
 			filterOr?: QueryParamFilterGroups;
 			relationVersionType: Exclude<DocumentVersionType, "revision">;
-			resolveVersionType?: FieldRefVersionTypeResolver;
+			resolveVersionType?: DocumentRefVersionTypeResolver;
 			allowedCollectionKeys?: string[];
 		},
 	],
@@ -356,7 +356,6 @@ const resolveRelationDocumentFilters: ServiceFn<
 					},
 					versionType:
 						data.resolveVersionType?.({
-							fieldType: "relation",
 							table: tableNamesRes.data.document,
 							collectionKey,
 						}) ?? data.relationVersionType,

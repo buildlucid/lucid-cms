@@ -23,7 +23,7 @@ const getUsageController = factory.createHandlers(
 		tags: ["ai"],
 		summary: "Get AI Usage",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getUsage.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getUsage.response),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

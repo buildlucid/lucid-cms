@@ -9,7 +9,11 @@ import type {
 	LucidRequestOptions,
 	LucidTransport,
 } from "../types/transport.js";
-import type { CollectionDocument, CollectionDocumentKey } from "../types.js";
+import type {
+	CollectionDocument,
+	CollectionDocumentKey,
+	Refs,
+} from "../types.js";
 import { encodePathSegment } from "../utils/url.js";
 
 /** Input for fetching one document from a collection. */
@@ -39,12 +43,12 @@ export type DocumentsGetMultipleInput<
 /** The response body returned when requesting one document from a collection. */
 export type DocumentsGetSingleResponse<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = ResponseBody<CollectionDocument<TCollectionKey>>;
+> = ResponseBody<CollectionDocument<TCollectionKey>, Refs>;
 
 /** The paginated response body returned when requesting multiple documents. */
 export type DocumentsGetMultipleResponse<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = ResponseBody<Array<CollectionDocument<TCollectionKey>>>;
+> = ResponseBody<Array<CollectionDocument<TCollectionKey>>, Refs>;
 
 export interface LucidDocumentsClient {
 	/** Fetches one document from a collection. */

@@ -21,7 +21,7 @@ const getMultipleController = factory.createHandlers(
 		tags: ["media-share-links"],
 		summary: "Get Media Share Links",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

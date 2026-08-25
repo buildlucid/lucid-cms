@@ -3,6 +3,7 @@ import type { FieldStaticConfig } from "../../types.js";
 
 export const mediaFieldConfig = {
 	type: "media",
+	resource: "media",
 	database: {
 		mode: "relation-table",
 		separator: "med",

@@ -21,7 +21,9 @@ const getWorkflowAssigneesController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Get Document Workflow Assignees",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getWorkflowAssignees.response),
+			dataSchema: z.toJSONSchema(
+				controllerSchemas.getWorkflowAssignees.response,
+			),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getWorkflowAssignees.params,

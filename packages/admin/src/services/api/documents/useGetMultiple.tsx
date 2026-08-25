@@ -2,6 +2,8 @@ import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type {
 	DocumentVersionType,
 	InternalCollectionDocument,
+	RefResource,
+	Refs,
 	ResponseBody,
 } from "@types";
 import { type Accessor, createMemo } from "solid-js";
@@ -9,7 +11,7 @@ import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
-type DocumentRefInclude = "refs" | `refs.${string}`;
+type DocumentRefInclude = "refs" | `refs.${RefResource}`;
 
 interface QueryParams {
 	queryString?: Accessor<string>;
@@ -43,7 +45,7 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["documents.getMultiple", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<InternalCollectionDocument[]>>({
+			request<ResponseBody<InternalCollectionDocument[], Refs>>({
 				url: `/lucid/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.versionType}`,

@@ -1,15 +1,21 @@
-import type { InternalCollectionDocument } from "@types";
-import { type Component, Show } from "solid-js";
+import type { Refs } from "@types";
+import { type Component, createMemo, Show } from "solid-js";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
+import { findDocumentUserRef } from "@/utils/document-ref-helpers";
 
 const UserDetailValue: Component<{
-	user: InternalCollectionDocument["createdBy"];
+	userId: number | null;
+	refs?: Refs;
 }> = (props) => {
+	// ----------------------------------
+	// Memos
+	const user = createMemo(() => findDocumentUserRef(props.refs, props.userId));
+
 	// ----------------------------------
 	// Render
 	return (
-		<Show when={props.user} fallback="-">
+		<Show when={user()} fallback={props.userId ? `#${props.userId}` : "-"}>
 			{(user) => (
 				<UserDisplay
 					user={{

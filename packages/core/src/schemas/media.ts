@@ -387,7 +387,7 @@ const mediaImageResponseShape = {
 	...mediaStateResponseShape,
 };
 
-const mediaResponseSchema = z.union([
+export const mediaResponseSchema = z.union([
 	z.discriminatedUnion("sourceType", [
 		z.object({
 			...mediaImageResponseShape,

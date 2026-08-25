@@ -3,6 +3,7 @@ import type { FieldStaticConfig } from "../../types.js";
 
 export const userFieldConfig = {
 	type: "user",
+	resource: "users",
 	database: {
 		mode: "relation-table",
 		separator: "usr",

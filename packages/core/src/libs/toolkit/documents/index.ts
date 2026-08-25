@@ -1,5 +1,4 @@
 import type {
-	CollectionDocument,
 	CollectionDocumentKey,
 	CollectionDocumentVersionKey,
 } from "../../../types.js";
@@ -12,7 +11,10 @@ import type {
 	ToolkitDocumentsGetMultipleResult,
 } from "./get-multiple.js";
 import getMultiple from "./get-multiple.js";
-import type { ToolkitDocumentsGetSingleInput } from "./get-single.js";
+import type {
+	ToolkitDocumentsGetSingleInput,
+	ToolkitDocumentsGetSingleResult,
+} from "./get-single.js";
 import getSingle from "./get-single.js";
 
 export type ToolkitDocumentVersion<
@@ -66,7 +68,7 @@ export type ToolkitDocuments = {
 	 */
 	getSingle: <TCollectionKey extends CollectionDocumentKey>(
 		input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
-	) => ServiceResponse<CollectionDocument<TCollectionKey>>;
+	) => ServiceResponse<ToolkitDocumentsGetSingleResult<TCollectionKey>>;
 };
 
 /** Creates document helpers for a toolkit instance. */

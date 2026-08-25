@@ -23,7 +23,7 @@ const duplicateSingleController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Duplicate Document",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.duplicateSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.duplicateSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.duplicateSingle.params,

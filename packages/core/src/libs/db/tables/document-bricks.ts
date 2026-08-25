@@ -3,6 +3,7 @@ import z from "zod";
 import type { BrickTypes } from "../../collection/builders/brick-builder/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type { BooleanInt } from "../types.js";
+import { isDocumentTableName } from "./document-table-name.js";
 
 export const documentBricksTable = defineTable(
 	"lucid_document__collection-key__fld",
@@ -77,7 +78,7 @@ export const documentBricksTable = defineTable(
 	{
 		priority: 200,
 		matches: (tableName) =>
-			tableName.startsWith("lucid_document__") &&
+			isDocumentTableName(tableName) &&
 			tableName.split("__").length >= 3 &&
 			!tableName.endsWith("__ver"),
 	},

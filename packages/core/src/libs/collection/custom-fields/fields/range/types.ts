@@ -26,13 +26,11 @@ export interface RangeFieldConfig extends SharedFieldConfig {
 export type RangeFieldProps = Partial<Omit<RangeFieldConfig, "type">>;
 
 export type RangeResValue = number[];
-export type RangeRef = null;
 
 export type RangeCustomFieldMapItem = {
 	props: RangeFieldProps;
 	config: RangeFieldConfig;
 	response: {
 		value: RangeResValue;
-		ref: RangeRef;
 	};
 };

@@ -27,7 +27,7 @@ const mediaImageGenerateController = factory.createHandlers(
 		tags: ["ai"],
 		summary: "Generate Media Image",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.mediaImageGenerate.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.mediaImageGenerate.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.mediaImageGenerate.body),
 		parameters: openAPI.parameters({

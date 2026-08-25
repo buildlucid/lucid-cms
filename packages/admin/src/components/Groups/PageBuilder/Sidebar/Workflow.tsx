@@ -1,8 +1,9 @@
 import { debounce } from "@solid-primitives/scheduled";
 import type {
 	Collection,
-	DocumentWorkflowAssignee,
 	InternalCollectionDocument,
+	Refs,
+	WorkflowUser,
 } from "@types";
 import { FaSolidChartDiagram } from "solid-icons/fa";
 import {
@@ -21,6 +22,7 @@ import api from "@/services/api";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import { sameNumericSet } from "@/utils/array-helpers";
+import { findDocumentUserRef } from "@/utils/document-ref-helpers";
 import helpers from "@/utils/helpers";
 import { getStageColor } from "./helpers";
 import SidebarSection from "./Partials/SidebarSection";
@@ -29,7 +31,7 @@ import WorkflowStageOption from "./Partials/WorkflowStageOption";
 type AssigneeOption = {
 	value: number;
 	label: string;
-	user: DocumentWorkflowAssignee["user"];
+	user: WorkflowUser;
 };
 type WorkflowUpdateBody = { stage?: string; assigneeIds?: number[] };
 
@@ -37,6 +39,7 @@ export const Workflow: Component<{
 	collection: Accessor<Collection | undefined>;
 	collectionKey: Accessor<string>;
 	document: Accessor<InternalCollectionDocument | undefined>;
+	refs: Accessor<Refs | undefined>;
 	documentId: Accessor<number | undefined>;
 	disabled: Accessor<boolean>;
 	mutations: UseDocumentMutations;
@@ -55,14 +58,14 @@ export const Workflow: Component<{
 			props.documentId(),
 			workflow()?.stage,
 			workflow()
-				?.assignees.map((assignee) => assignee.user.id)
+				?.assignees.map((assignee) => assignee.userId)
 				.sort((a, b) => a - b)
 				.join(","),
 			workflow()?.updatedAt,
 		].join(":"),
 	);
 	const currentAssigneeIds = createMemo(
-		() => workflow()?.assignees.map((assignee) => assignee.user.id) ?? [],
+		() => workflow()?.assignees.map((assignee) => assignee.userId) ?? [],
 	);
 	const hasUpdatePermission = createMemo(() => {
 		const permission = props.collection()?.permissions.update;
@@ -109,13 +112,24 @@ export const Workflow: Component<{
 	const syncWorkflowState = () => {
 		setStage(workflow()?.stage ?? workflowConfig()?.initial);
 		setAssignees(
-			workflow()?.assignees.map((assignee) => ({
-				value: assignee.user.id,
-				label:
-					helpers.formatUserName(assignee.user, "simple") ||
-					T()("media.types.unknown"),
-				user: assignee.user,
-			})) ?? [],
+			workflow()?.assignees.map((assignee) => {
+				const user = findDocumentUserRef(props.refs(), assignee.userId) ??
+					assigneeOptions().find((option) => option.value === assignee.userId)
+						?.user ?? {
+						id: assignee.userId,
+						email: null,
+						username: `#${assignee.userId}`,
+						firstName: null,
+						lastName: null,
+						profilePicture: null,
+					};
+				return {
+					value: assignee.userId,
+					label:
+						helpers.formatUserName(user, "simple") || `#${assignee.userId}`,
+					user,
+				};
+			}) ?? [],
 		);
 	};
 	const getWorkflowStageColor = (stageKey?: string | number) =>

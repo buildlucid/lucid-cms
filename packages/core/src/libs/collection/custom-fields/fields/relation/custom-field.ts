@@ -2,6 +2,7 @@ import z from "zod";
 import type { Select, ServiceResponse } from "../../../../../types.js";
 import type { LucidBricksTable } from "../../../../db/tables/index.js";
 import { copy } from "../../../../i18n/index.js";
+import type { RefTarget } from "../../../../refs/types.js";
 import buildSchemaIndex from "../../../helpers/build-schema-index.js";
 import buildTableName from "../../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
@@ -12,7 +13,6 @@ import type {
 	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
-	FieldRefTarget,
 	FieldRelationValidationInput,
 	GetIndexDefinitionProps,
 	GetSchemaDefinitionProps,
@@ -45,6 +45,7 @@ class RelationCustomField extends CustomField<"relation"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
+			resource: relationFieldConfig.resource,
 			collection: normalizeRelationCollections(this.props.collection),
 			details: {
 				label:
@@ -178,7 +179,7 @@ class RelationCustomField extends CustomField<"relation"> {
 	}
 	override getRelationFieldRefTargets(
 		row: Select<LucidBricksTable>,
-	): FieldRefTarget[] {
+	): RefTarget[] {
 		const relationValue = this.extractRelationFieldValue(row);
 		if (!relationValue) return [];
 
@@ -193,6 +194,7 @@ class RelationCustomField extends CustomField<"relation"> {
 
 		return [
 			{
+				resource: this.config.resource,
 				table: tableNameRes.data.name,
 				value: relationValue.id,
 			},

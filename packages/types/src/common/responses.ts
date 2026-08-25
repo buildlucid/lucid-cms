@@ -7,8 +7,9 @@ export type ResponseMetaLink = {
 	page: number;
 };
 
-export interface ResponseBody<D = unknown> {
+export interface ResponseBody<D = unknown, R = never> {
 	data: D;
+	refs?: [R] extends [never] ? never : R;
 	links?: {
 		first: string | null;
 		last: string | null;

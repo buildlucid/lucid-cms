@@ -199,7 +199,7 @@ const CollectionsDocumentsEditRoute: Component<{
 			} else {
 				brickStore.get.setBricks(document, collection);
 			}
-			brickStore.get.setRefs(document);
+			brickStore.get.setRefs(docState.refs());
 			brickStore.set("locked", uiState.isBuilderLocked());
 			didHydrateStore = true;
 		});
@@ -231,6 +231,7 @@ const CollectionsDocumentsEditRoute: Component<{
 			() => [
 				docState.collection(),
 				docState.document(),
+				docState.refs(),
 				docState.documentId(),
 				versionType(),
 				versionId(),
@@ -462,6 +463,7 @@ const CollectionsDocumentsEditRoute: Component<{
 										collection={docState.collection}
 										collectionKey={docState.collectionKey}
 										document={docState.document}
+										refs={docState.refs}
 										autoSaveMetadata={mutations.autoSaveMetadata}
 										documentId={docState.documentId}
 										disabled={disableWorkflow}

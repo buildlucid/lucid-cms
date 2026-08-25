@@ -22,7 +22,7 @@ const createProfilePictureUploadSessionController = factory.createHandlers(
 		tags: ["account"],
 		summary: "Create Profile Picture Upload Session",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(
+			dataSchema: z.toJSONSchema(
 				controllerSchemas.createProfilePictureUploadSession.response,
 			),
 		}),

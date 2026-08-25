@@ -19,13 +19,11 @@ export interface TabFieldConfig extends SharedFieldConfig {
 export type TabFieldProps = Partial<Omit<TabFieldConfig, "type" | "fields">>;
 
 export type TabResValue = null;
-export type TabRef = null;
 
 export type TabCustomFieldMapItem = {
 	props: TabFieldProps;
 	config: TabFieldConfig;
 	response: {
 		value: TabResValue;
-		ref: TabRef;
 	};
 };

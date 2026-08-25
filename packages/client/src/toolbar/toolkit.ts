@@ -11,7 +11,7 @@ type DataResponse<TData> = {
 
 export type ToolbarToolkitResponses = {
 	authentication: DataResponse<{ authenticated: boolean }>;
-	document: DataResponse<ToolbarDocument>;
+	document: DataResponse<{ document: ToolbarDocument }>;
 	preview: DataResponse<PreviewRuntimeState>;
 	/** Public host of the Lucid instance when it differs from the site origin. */
 	host?: string | URL;
@@ -30,7 +30,7 @@ export const toolbarFromToolkit = ({
 }: ToolbarToolkitResponses): ToolbarAttributes | null =>
 	createToolbarAttributes({
 		host,
-		document: document.data ?? null,
+		document: document.data?.document ?? null,
 		editLabel,
 		authentication:
 			authentication.data?.authenticated === undefined

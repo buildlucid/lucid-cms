@@ -25,7 +25,7 @@ const updateConnectionController = factory.createHandlers(
 		tags: ["oauth-connections"],
 		summary: "Update OAuth Connection",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(oauthConnectionResponseSchema),
+			dataSchema: z.toJSONSchema(oauthConnectionResponseSchema),
 		}),
 		parameters: openAPI.parameters({
 			headers: { csrf: true },

@@ -5,9 +5,7 @@ import LinkCustomField from "./custom-field.js";
 export default {
 	config: linkFieldConfig,
 	class: LinkCustomField,
-	fetchRefs: null,
 	validateInput: null,
-	formatRef: null,
 	contentTypeGen: createValueFieldTypeGenerator(
 		"{ url: string | null; target: string | null; label: string | null; } | null",
 	),

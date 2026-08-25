@@ -26,7 +26,7 @@ const mediaAltGenerateController = factory.createHandlers(
 		tags: ["ai"],
 		summary: "Generate Media Alt Text",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.mediaAlt.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.mediaAlt.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.mediaAlt.body),
 		parameters: openAPI.parameters({

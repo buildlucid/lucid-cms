@@ -235,12 +235,10 @@ test("document helpers accept toolkit collection documents without widening fiel
 });
 
 test("asDocument accepts optional toolkit documents for direct response wrapping", () => {
-	const page = asDocument(
-		undefined as CoreCollectionDocument<"page"> | undefined,
-		{
-			locale: "en",
-		},
-	);
+	const page = asDocument({
+		document: undefined as CoreCollectionDocument<"page"> | undefined,
+		locale: "en",
+	});
 
 	expectTypeOf(page).toMatchTypeOf<
 		| {
@@ -257,7 +255,8 @@ test("asDocument accepts optional toolkit documents for direct response wrapping
 });
 
 test("asDocuments preserves toolkit document and locale types", () => {
-	const pages = asDocuments([] as Array<CoreCollectionDocument<"page">>, {
+	const pages = asDocuments({
+		documents: [] as Array<CoreCollectionDocument<"page">>,
 		locale: "en",
 	});
 

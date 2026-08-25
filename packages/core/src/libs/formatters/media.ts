@@ -19,7 +19,6 @@ import {
 	mediaAdapterDataSchema,
 	resolveDeliveryUrl,
 } from "../../utils/media/index.js";
-import type { MediaRef } from "../collection/custom-fields/fields/media/types.js";
 import type { BooleanInt } from "../db/types.js";
 import type {
 	MediaDeliveryAdapterInstance,
@@ -515,23 +514,10 @@ const formatMultiple = (props: {
 		}),
 	);
 
-const formatRef = (props: {
-	media?: MediaPropsT | null;
-	options: MediaFormatterOptions;
-}): MediaRef | null => {
-	if (!props.media) return null;
-
-	return formatSingle({
-		media: props.media,
-		options: props.options,
-	});
-};
-
 export default {
 	formatMultiple,
 	formatSingle,
 	formatMediaImagePreview,
 	formatPoster,
-	formatRef,
 	formatFocalPoint,
 };

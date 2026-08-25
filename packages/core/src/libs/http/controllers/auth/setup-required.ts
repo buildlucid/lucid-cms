@@ -23,7 +23,7 @@ const setupRequiredController = factory.createHandlers(
 		tags: ["auth"],
 		summary: "Check Setup Required",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.setupRequired.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.setupRequired.response),
 		}),
 	}),
 	rateLimiter({

@@ -22,7 +22,7 @@ const updateLogoUploadSessionController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Create OAuth Client Logo Update Session",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(
+			dataSchema: z.toJSONSchema(
 				oauthClientSchemas.createLogoUploadSession.response,
 			),
 		}),

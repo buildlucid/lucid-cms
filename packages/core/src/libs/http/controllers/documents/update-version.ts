@@ -23,7 +23,7 @@ const updateVersionController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Update Document Version",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.updateVersion.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.updateVersion.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.updateVersion.body),
 		parameters: openAPI.parameters({

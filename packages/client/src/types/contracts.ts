@@ -1,3 +1,5 @@
+import type { RefResource } from "@lucidcms/types";
+
 export type FilterValue =
 	| string
 	| string[]
@@ -103,7 +105,7 @@ export type CollectionDocumentVersionKey<
 	? CollectionDocumentVersionKeysByCollection[TCollectionKey]
 	: DefaultCollectionDocumentVersionKey;
 
-export type DocumentRefInclude = "refs" | `refs.${string}`;
+export type DocumentRefInclude = "refs" | `refs.${RefResource}`;
 export type DocumentSingleInclude = "bricks" | "meta" | DocumentRefInclude;
 export type DocumentMultipleInclude = "meta" | DocumentRefInclude;
 

@@ -76,7 +76,7 @@ const create: ServiceFn<
 	});
 	if (documentRes.error) return documentRes;
 
-	const sourceVersionId = documentRes.data.meta?.versionId;
+	const sourceVersionId = documentRes.data.document.meta?.versionId;
 	if (
 		typeof sourceVersionId !== "number" ||
 		!Number.isInteger(sourceVersionId)
@@ -92,7 +92,7 @@ const create: ServiceFn<
 	}
 
 	const canonicalDocument = {
-		...documentRes.data,
+		...documentRes.data.document,
 		id: data.documentId,
 		collectionKey: data.collectionKey,
 		version: data.versionType,

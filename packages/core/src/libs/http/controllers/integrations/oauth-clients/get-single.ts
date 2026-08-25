@@ -22,7 +22,7 @@ const getSingleController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Get OAuth Client",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(oauthClientSchemas.getSingle.response),
+			dataSchema: z.toJSONSchema(oauthClientSchemas.getSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: oauthClientSchemas.getSingle.params,

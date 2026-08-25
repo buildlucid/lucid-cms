@@ -155,7 +155,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	// Functions
 	const getMediaRef = (id: number): NonNullable<MediaRef> | undefined =>
 		brickHelpers.getFieldRef({
-			fieldType: "media",
+			resource: "media",
 			fieldValue: [id],
 		}) ?? undefined;
 	const getDocumentRef = (
@@ -169,14 +169,14 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 
 		return (
 			brickHelpers.getFieldRef({
-				fieldType: "relation",
+				resource: "documents",
 				fieldValue: [{ collectionKey, id: documentId }],
 			}) ?? undefined
 		);
 	};
 	const getUserRef = (userId: number): NonNullable<UserRef> | undefined =>
 		brickHelpers.getFieldRef({
-			fieldType: "user",
+			resource: "users",
 			fieldValue: [userId],
 		}) ?? undefined;
 	const isCurrentDocument = (document: DocumentRef) => {
@@ -271,7 +271,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 						const id = value[0];
 						const ref = refs[0];
 						if (id === undefined || !ref) return;
-						brickStore.get.addRef("media", ref);
+						brickStore.get.addRef({ resource: "media", ref });
 						onSelect(id);
 					},
 				});
@@ -285,7 +285,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					onCallback: (media) => {
 						const typeFilter = mediaTypeFilter();
 						if (typeFilter && !typeFilter.includes(media.type)) return;
-						brickStore.get.addRef("media", media);
+						brickStore.get.addRef({ resource: "media", ref: media });
 						onUpload(media.id);
 					},
 				});
@@ -310,7 +310,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 						const document = refs[0];
 						if (!document) return;
 						if (!isCurrentDocument(document)) {
-							brickStore.get.addRef("relation", document);
+							brickStore.get.addRef({ resource: "documents", ref: document });
 						}
 						onSelect(document);
 					},
@@ -335,10 +335,16 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					onCallback: (selection) => {
 						if (selection.source === "document") {
 							if (!isCurrentDocument(selection.document)) {
-								brickStore.get.addRef("relation", selection.document);
+								brickStore.get.addRef({
+									resource: "documents",
+									ref: selection.document,
+								});
 							}
 						} else {
-							brickStore.get.addRef("user", selection.user);
+							brickStore.get.addRef({
+								resource: "users",
+								ref: selection.user,
+							});
 						}
 						onSelect(selection);
 					},

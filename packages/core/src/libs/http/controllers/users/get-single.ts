@@ -20,7 +20,7 @@ const getSingleController = factory.createHandlers(
 		tags: ["users"],
 		summary: "Get User",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getSingle.params,

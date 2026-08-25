@@ -21,13 +21,11 @@ export interface SelectFieldConfig extends SharedFieldConfig {
 export type SelectFieldProps = Partial<Omit<SelectFieldConfig, "type">>;
 
 export type SelectReValue = string | null;
-export type SelectRef = null;
 
 export type SelectCustomFieldMapItem = {
 	props: SelectFieldProps;
 	config: SelectFieldConfig;
 	response: {
 		value: SelectReValue;
-		ref: SelectRef;
 	};
 };

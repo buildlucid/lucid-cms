@@ -5,9 +5,7 @@ import CodeCustomField from "./custom-field.js";
 export default {
 	config: codeFieldConfig,
 	class: CodeCustomField,
-	fetchRefs: null,
 	validateInput: null,
-	formatRef: null,
 	contentTypeGen: createValueFieldTypeGenerator(
 		"{ language: string; value: string } | null",
 	),

@@ -20,7 +20,7 @@ const getOverviewController = factory.createHandlers(
 		tags: ["publishing"],
 		summary: "Get Publishing Overview",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getOverview.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getOverview.response),
 		}),
 	}),
 	authenticate(),

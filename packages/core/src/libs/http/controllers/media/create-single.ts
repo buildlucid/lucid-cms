@@ -23,7 +23,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["media"],
 		summary: "Create Media",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

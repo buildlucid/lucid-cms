@@ -7,6 +7,7 @@ import type {
 	TimestampImmutable,
 	TimestampMutable,
 } from "../types.js";
+import { isDocumentTableName } from "./document-table-name.js";
 
 export const documentsTable = defineTable(
 	"lucid_document__collection-key",
@@ -73,42 +74,6 @@ export const documentsTable = defineTable(
 					}),
 				),
 			},
-			cb_user_id: {
-				schema: z.number().nullable(),
-			},
-			cb_user_email: {
-				schema: z.email().nullable(),
-			},
-			cb_user_first_name: {
-				schema: z.string().nullable(),
-			},
-			cb_user_last_name: {
-				schema: z.string().nullable(),
-			},
-			cb_user_username: {
-				schema: z.string().nullable(),
-			},
-			cb_user_profile_picture: {
-				schema: z.array(z.any()).optional(),
-			},
-			ub_user_id: {
-				schema: z.number().nullable(),
-			},
-			ub_user_email: {
-				schema: z.email().nullable(),
-			},
-			ub_user_first_name: {
-				schema: z.string().nullable(),
-			},
-			ub_user_last_name: {
-				schema: z.string().nullable(),
-			},
-			ub_user_username: {
-				schema: z.string().nullable(),
-			},
-			ub_user_profile_picture: {
-				schema: z.array(z.any()).optional(),
-			},
 			workflow_assignees: {},
 			profile_picture: {},
 			crop: {},
@@ -117,11 +82,9 @@ export const documentsTable = defineTable(
 	}),
 	{
 		priority: 100,
-		matches: (tableName) => tableName.startsWith("lucid_document__"),
+		matches: isDocumentTableName,
 	},
 );
-
-export type LucidDocumentTableName = `lucid_document__${string}`;
 
 export interface LucidDocumentTable {
 	id: Generated<number>;

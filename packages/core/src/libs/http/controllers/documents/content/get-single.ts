@@ -2,7 +2,10 @@ import { hoursToSeconds } from "date-fns";
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import { controllerSchemas } from "../../../../../schemas/documents.js";
+import {
+	controllerSchemas,
+	documentRefsResponseSchema,
+} from "../../../../../schemas/documents.js";
 import { documentServices } from "../../../../../services/index.js";
 import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
@@ -26,7 +29,8 @@ const getSingleController = factory.createHandlers(
 		tags: ["content-documents"],
 		summary: "Get Document",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.content.getSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.content.getSingle.response),
+			refsSchema: z.toJSONSchema(documentRefsResponseSchema),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.content.getSingle.params,
@@ -102,7 +106,8 @@ const getSingleController = factory.createHandlers(
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: document.data,
+				data: document.data.document,
+				refs: document.data.refs,
 			}),
 		);
 	},

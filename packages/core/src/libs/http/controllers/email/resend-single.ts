@@ -26,7 +26,7 @@ const resendSingleController = factory.createHandlers(
 		tags: ["emails"],
 		summary: "Resend Email",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.resendSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.resendSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.resendSingle.params,

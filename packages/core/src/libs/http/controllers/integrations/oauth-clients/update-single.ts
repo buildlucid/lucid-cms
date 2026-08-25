@@ -23,7 +23,7 @@ const updateSingleController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Update OAuth Client",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(oauthClientSchemas.updateSingle.response),
+			dataSchema: z.toJSONSchema(oauthClientSchemas.updateSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

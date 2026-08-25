@@ -26,7 +26,7 @@ const regenerateKeysController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Regenerate Integration Key",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.regenerateKeys.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.regenerateKeys.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

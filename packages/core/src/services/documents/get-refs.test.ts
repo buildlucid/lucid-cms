@@ -7,22 +7,28 @@ const mocks = vi.hoisted(() => ({
 	selectMultipleUnion: vi.fn(),
 }));
 
-vi.mock("../../../../repositories/index.js", () => ({
+vi.mock("../../libs/repositories/index.js", () => ({
 	DocumentVersionsRepository: class {
 		selectMultipleUnion = mocks.selectMultipleUnion;
 	},
 }));
 
-vi.mock("../../../schema/runtime/prime-runtime-schemas.js", () => ({
-	default: mocks.primeRuntimeSchemas,
-}));
+vi.mock(
+	"../../libs/collection/schema/runtime/prime-runtime-schemas.js",
+	() => ({
+		default: mocks.primeRuntimeSchemas,
+	}),
+);
 
-vi.mock("../../../schema/runtime/runtime-schema-selectors.js", () => ({
-	getDocumentFieldsTableSchema: mocks.getDocumentFieldsTableSchema,
-	getDocumentVersionTableSchema: mocks.getDocumentVersionTableSchema,
-}));
+vi.mock(
+	"../../libs/collection/schema/runtime/runtime-schema-selectors.js",
+	() => ({
+		getDocumentFieldsTableSchema: mocks.getDocumentFieldsTableSchema,
+		getDocumentVersionTableSchema: mocks.getDocumentVersionTableSchema,
+	}),
+);
 
-import fetchRelationRefs from "./fetch-refs.js";
+import getDocumentRefs from "./get-refs.js";
 
 const context = {
 	db: {},
@@ -32,7 +38,7 @@ const context = {
 	},
 } as never;
 
-describe("relation field ref fetching", () => {
+describe("document ref fetching", () => {
 	beforeEach(() => {
 		mocks.getDocumentVersionTableSchema.mockImplementation(
 			(_context, collectionKey: string) =>
@@ -68,21 +74,12 @@ describe("relation field ref fetching", () => {
 	});
 
 	it("supports per-related-collection version types", async () => {
-		const response = await fetchRelationRefs(context, {
-			relations: [
-				{
-					table: "lucid_document__pages",
-					values: new Set([1, 1, "not-a-document-id"]),
-				},
-				{
-					table: "lucid_document__blog",
-					values: new Set([2]),
-				},
-				{
-					table: "lucid_media",
-					values: new Set([3]),
-				},
-			],
+		const response = await getDocumentRefs(context, {
+			targets: new Map([
+				["lucid_document__pages", new Set([1, "not-a-document-id"])],
+				["lucid_document__blog", new Set([2])],
+				["lucid_media", new Set([3])],
+			]),
 			versionType: "latest",
 			resolveVersionType: ({ collectionKey }) =>
 				collectionKey === "blog" ? "signed-off" : "staging",
@@ -114,13 +111,8 @@ describe("relation field ref fetching", () => {
 	});
 
 	it("returns no hydrated ref when the requested target version is missing", async () => {
-		const response = await fetchRelationRefs(context, {
-			relations: [
-				{
-					table: "lucid_document__pages",
-					values: new Set([1]),
-				},
-			],
+		const response = await getDocumentRefs(context, {
+			targets: new Map([["lucid_document__pages", new Set([1])]]),
 			versionType: "staging",
 		});
 

@@ -22,7 +22,7 @@ const getUsageChartController = factory.createHandlers(
 		tags: ["ai"],
 		summary: "Get AI Usage Chart",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getUsageChart.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getUsageChart.response),
 		}),
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getUsageChart.query.string,

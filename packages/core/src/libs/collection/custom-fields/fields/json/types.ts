@@ -29,13 +29,11 @@ export interface JsonFieldConfig extends SharedFieldConfig {
 export type JsonFieldProps = Partial<Omit<JsonFieldConfig, "type">>;
 
 export type JsonResValue = JsonValue | null;
-export type JsonRef = null;
 
 export type JsonCustomFieldMapItem = {
 	props: JsonFieldProps;
 	config: JsonFieldConfig;
 	response: {
 		value: JsonResValue;
-		ref: JsonRef;
 	};
 };

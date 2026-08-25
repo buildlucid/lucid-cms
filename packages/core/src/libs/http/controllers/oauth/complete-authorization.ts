@@ -22,7 +22,7 @@ const completeAuthorizationController = factory.createHandlers(
 		tags: ["oauth-connections"],
 		summary: "Complete OAuth Authorization",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(oauthSchemas.completeAuthorization.response),
+			dataSchema: z.toJSONSchema(oauthSchemas.completeAuthorization.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: { csrf: true },

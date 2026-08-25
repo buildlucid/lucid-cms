@@ -7,7 +7,10 @@ import {
 	versionTypesSchema,
 } from "./document-versions.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-import { mediaImagePreviewResponseSchema } from "./media.js";
+import {
+	mediaImagePreviewResponseSchema,
+	mediaResponseSchema,
+} from "./media.js";
 
 const previewTokenSchema = z.string().meta({
 	description: "An opaque preview token",
@@ -24,30 +27,6 @@ const contentDocumentVersionSchema = z
 		description: "Latest or a configured collection environment",
 		example: "production",
 	});
-
-const documentResponseUserSchema = z.object({
-	id: z.number().meta({
-		description: "The user ID",
-		example: 42,
-	}),
-	email: z.email().nullable().meta({
-		description: "The email address of the user",
-		example: "admin@lucidcms.io",
-	}),
-	firstName: z.string().nullable().meta({
-		description: "The first name of the user",
-		example: "John",
-	}),
-	lastName: z.string().nullable().meta({
-		description: "The last name of the user",
-		example: "Smith",
-	}),
-	username: z.string().nullable().meta({
-		description: "The username of the user",
-		example: "admin",
-	}),
-	profilePicture: mediaImagePreviewResponseSchema.nullable(),
-});
 
 const documentResponseVersionSchema = z.object({
 	id: z.number().nullable().meta({
@@ -90,7 +69,7 @@ const documentWorkflowSchema = z.object({
 	assignees: z.array(
 		z.object({
 			id: z.number(),
-			user: documentWorkflowUserSchema,
+			userId: z.number(),
 			assignedBy: z.number().nullable(),
 			assignedAt: z.string().nullable(),
 		}),
@@ -132,8 +111,8 @@ const documentResponseBaseSchema = z.object({
 		description: "Whether the document has been deleted",
 		example: false,
 	}),
-	createdBy: documentResponseUserSchema.nullable(),
-	updatedBy: documentResponseUserSchema.nullable(),
+	createdBy: z.number().nullable(),
+	updatedBy: z.number().nullable(),
 	createdAt: z.string().nullable().meta({
 		description: "The timestamp when this document was created",
 		example: "2025-04-08T09:00:00Z",
@@ -147,9 +126,30 @@ const documentResponseBaseSchema = z.object({
 export const documentResponseSchema = documentResponseBaseSchema.extend({
 	bricks: z.array(brickResponseSchema).nullable().optional(),
 	fields: z.array(fieldResponseSchema).nullable().optional(),
-	refs: z.record(z.string(), z.array(z.any())).nullable().optional(),
 	workflow: documentWorkflowSchema.nullable().optional(),
 });
+
+const documentRefResponseSchema = z.object({
+	id: z.number(),
+	versionId: z.number().optional(),
+	collectionKey: z.string(),
+	route: documentRouteSchema,
+	/** Admin responses retain field wrappers; content responses flatten them. */
+	fields: z.record(z.string(), z.unknown()).nullable(),
+});
+
+const documentUserRefResponseSchema = documentWorkflowUserSchema.extend({
+	email: z.email(),
+	username: z.string(),
+});
+
+export const documentRefsResponseSchema = z
+	.object({
+		documents: z.array(documentRefResponseSchema).optional(),
+		media: z.array(mediaResponseSchema).optional(),
+		users: z.array(documentUserRefResponseSchema).optional(),
+	})
+	.strict();
 
 const documentContentResponseSchema = z.object({
 	id: z.number(),
@@ -169,7 +169,6 @@ const documentContentResponseSchema = z.object({
 			}),
 		)
 		.optional(),
-	refs: z.record(z.string(), z.array(z.any())).optional(),
 	meta: z
 		.object({
 			versionId: z.number().nullable(),
@@ -184,7 +183,7 @@ const documentContentResponseSchema = z.object({
 
 const documentRefsIncludeSchema = z.union([
 	z.literal("refs"),
-	z.string().regex(/^refs\.[^,\s]+$/),
+	z.enum(["refs.documents", "refs.media", "refs.users"]),
 ]);
 
 //* underscore-prefixed top-level field sorts are resolved later
@@ -675,7 +674,9 @@ export const controllerSchemas = {
 							description:
 								"Target a repeater field by adding a repeater key after the brick key",
 						}),
-					include: queryString.schema.include("refs,refs.relation"),
+					include: queryString.schema.include(
+						"refs,refs.documents,refs.media,refs.users",
+					),
 					sort: queryString.schema.sort(
 						"createdAt,updatedAt,order,_customFieldKey",
 					),
@@ -744,7 +745,9 @@ export const controllerSchemas = {
 	getSingle: {
 		query: {
 			string: z.object({
-				include: queryString.schema.include("bricks,refs,refs.relation"),
+				include: queryString.schema.include(
+					"bricks,refs,refs.documents,refs.media,refs.users",
+				),
 			}),
 			formatted: z.object({
 				include: z
@@ -890,7 +893,7 @@ export const controllerSchemas = {
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include(
-							"bricks,refs,refs.relation,meta",
+							"bricks,refs,refs.documents,refs.media,refs.users,meta",
 						),
 						page: queryString.schema.page,
 						perPage: queryString.schema.perPage,
@@ -989,7 +992,9 @@ export const controllerSchemas = {
 								description:
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
-						include: queryString.schema.include("refs,refs.relation,meta"),
+						include: queryString.schema.include(
+							"refs,refs.documents,refs.media,refs.users,meta",
+						),
 						sort: queryString.schema.sort(
 							"createdAt,updatedAt,order,_customFieldKey",
 						),

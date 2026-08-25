@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
 import type {
 	CFConfig,
 	Config,
@@ -10,6 +9,7 @@ import type {
 	FieldValue,
 	InternalDocumentField,
 	InternalDocumentFieldGroup,
+	Refs,
 	Select,
 } from "../../types.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
@@ -48,10 +48,8 @@ interface FieldFormatData {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	/** The schema for the entire collection and all possible bricks */
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-	/** All relation meta data, users, media, documents etc. Used to populate the field meta data based on the CF type and value */
-	refData: FieldRefResponse;
 	/** Formatted refs used by custom fields to derive response-only values. */
-	refs?: Partial<Record<string, unknown[]>> | null;
+	refs?: Refs | null;
 }
 
 interface IntermediaryFieldValues {
@@ -124,7 +122,7 @@ const getTreeTableChildFieldConfig = (
 /**
  * The entry point for building out the InternalDocumentField array.
  *
- * Formats, creates groups, creates nested structure, marries refData etc.
+ * Formats stored rows into the nested internal document field shape.
  */
 const formatMultiple = (
 	data: FieldFormatData,
@@ -195,7 +193,6 @@ const buildFieldTree = (
 		const fieldValue = buildField(
 			{
 				values: fieldValues,
-				refData: data.refData,
 				refs: data.refs,
 			},
 			{
@@ -224,8 +221,7 @@ const buildFieldTree = (
 const buildField = (
 	data: {
 		values: IntermediaryFieldValues[];
-		refData: FieldRefResponse;
-		refs?: Partial<Record<string, unknown[]>> | null;
+		refs?: Refs | null;
 	},
 	meta: FieldFormatMeta & {
 		fieldConfig: CFConfig<FieldTypes>;
@@ -234,6 +230,8 @@ const buildField = (
 ): InternalDocumentField | null => {
 	const cfInstance = meta.builder.fields.get(meta.fieldConfig.key);
 	if (!cfInstance) return null;
+	const resource =
+		"resource" in meta.fieldConfig ? meta.fieldConfig.resource : undefined;
 
 	//* if the field supports translations, use the translations field key
 	if (
@@ -264,6 +262,7 @@ const buildField = (
 		return {
 			key: meta.fieldConfig.key,
 			type: meta.fieldConfig.type,
+			...(resource ? { resource } : {}),
 			groupRef: meta.groupRef,
 			translations: fieldTranslations,
 		};
@@ -278,6 +277,7 @@ const buildField = (
 	return {
 		key: meta.fieldConfig.key,
 		type: meta.fieldConfig.type,
+		...(resource ? { resource } : {}),
 		value: cfInstance.formatResponseValue(defaultValue.value, {
 			locale: meta.localization.default,
 			refs: data.refs ?? null,
@@ -336,7 +336,6 @@ const buildTreeGroups = (
 					brickRows: localeRows,
 					bricksQuery: data.bricksQuery,
 					bricksSchema: data.bricksSchema,
-					refData: data.refData,
 					refs: data.refs,
 				},
 				{

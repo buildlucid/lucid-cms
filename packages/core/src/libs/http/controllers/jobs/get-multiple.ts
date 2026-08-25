@@ -23,7 +23,7 @@ const getMultipleController = factory.createHandlers(
 		tags: ["jobs"],
 		summary: "Get Multiple Jobs",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

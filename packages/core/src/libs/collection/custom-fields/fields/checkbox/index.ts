@@ -6,9 +6,7 @@ import CheckboxCustomField from "./custom-field.js";
 export default {
 	config: checkboxFieldConfig,
 	class: CheckboxCustomField,
-	fetchRefs: null,
 	validateInput: null,
-	formatRef: null,
 	formatFilterValue: formatBooleanFilterValue,
 	contentTypeGen: createValueFieldTypeGenerator("boolean | null"),
 };

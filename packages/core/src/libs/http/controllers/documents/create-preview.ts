@@ -23,7 +23,7 @@ const createPreviewController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Create Preview",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.createPreview.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.createPreview.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createPreview.body),
 		parameters: openAPI.parameters({

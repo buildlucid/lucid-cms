@@ -72,7 +72,7 @@ const EmbeddedBrickNodeView: Component<EmbeddedBrickNodeViewProps> = (
 			<div class="min-w-0 grow overflow-hidden rounded-lg border border-border bg-input-base">
 				<div
 					class={classNames(
-						"flex min-w-0 items-start justify-between gap-4 bg-card-base px-4 py-2.5",
+						"flex min-w-0 items-start justify-between gap-4 bg-card-base px-3 py-2.5",
 						{ "border-border border-b": hasPreviewFields() },
 					)}
 				>
@@ -95,7 +95,7 @@ const EmbeddedBrickNodeView: Component<EmbeddedBrickNodeViewProps> = (
 							</p>
 						</Show>
 						<Show when={hasErrors()}>
-							<p class="mt-1 text-xs font-medium text-error-base mb-0!">
+							<p class="mt-0.5 text-xs font-medium text-error-base mb-0!">
 								{T()("editor.rich.text.brick.has.errors")}
 							</p>
 						</Show>
@@ -112,7 +112,7 @@ const EmbeddedBrickNodeView: Component<EmbeddedBrickNodeViewProps> = (
 							{(field, index) => (
 								<div
 									class={classNames(
-										"flex min-w-0 items-center justify-between gap-4 px-4 py-2",
+										"flex min-w-0 items-center justify-between gap-4 px-3 py-2",
 										{ "border-border border-t": index() > 0 },
 									)}
 									title={`${field.label}: ${field.value}`}

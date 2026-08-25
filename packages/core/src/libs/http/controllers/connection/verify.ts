@@ -23,7 +23,7 @@ const verifyController = factory.createHandlers(
 		tags: ["connection"],
 		summary: "Verify Lucid Connection",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.verify.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.verify.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: { csrf: true },

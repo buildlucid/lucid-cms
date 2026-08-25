@@ -18,7 +18,7 @@ const getAccountConnectionsController = factory.createHandlers(
 		tags: ["oauth-connections"],
 		summary: "Get Account OAuth Connections",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
+			dataSchema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
 		}),
 	}),
 	authenticate(),

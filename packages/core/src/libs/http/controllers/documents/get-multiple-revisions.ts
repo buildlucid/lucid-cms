@@ -22,7 +22,9 @@ const getMultipleRevisionsController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Get Multiple Revisions",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMultipleRevisions.response),
+			dataSchema: z.toJSONSchema(
+				controllerSchemas.getMultipleRevisions.response,
+			),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

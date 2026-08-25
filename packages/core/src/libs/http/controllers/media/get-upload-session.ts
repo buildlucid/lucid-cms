@@ -23,7 +23,7 @@ const getUploadSessionController = factory.createHandlers(
 		tags: ["media"],
 		summary: "Get Upload Session",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getUploadSession.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getUploadSession.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: { csrf: true },

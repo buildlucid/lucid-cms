@@ -24,7 +24,7 @@ const getUserConnectionsController = factory.createHandlers(
 		tags: ["oauth-connections"],
 		summary: "Get User OAuth Connections",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
+			dataSchema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
 		}),
 		parameters: openAPI.parameters({
 			params: oauthSchemas.userConnections.params,

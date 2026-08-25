@@ -25,7 +25,7 @@ const createSingleController = factory.createHandlers(
 		summary: "Create Role",
 
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

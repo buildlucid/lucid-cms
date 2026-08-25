@@ -50,7 +50,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 	});
 	const fieldRef = createMemo(() => {
 		return brickHelpers.getFieldRefs({
-			fieldType: "user",
+			resource: props.state.fieldConfig.resource,
 			fieldValue: fieldValue(),
 		});
 	});
@@ -93,7 +93,12 @@ export const UserField: Component<UserFieldProps> = (props) => {
 					: undefined;
 
 				batch(() => {
-					if (refs.length) brickStore.get.addRef("user", refs);
+					if (refs.length) {
+						brickStore.get.addRef({
+							resource: props.state.fieldConfig.resource,
+							ref: refs,
+						});
+					}
 					if (removedSelection) {
 						brickStore.get.clearFieldErrors({
 							brickIndex: fieldRenderState.brickIndex(),

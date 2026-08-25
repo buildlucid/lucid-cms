@@ -1,17 +1,23 @@
-import type { InternalCollectionDocument } from "@types";
-import type { Component } from "solid-js";
+import type { Refs } from "@types";
+import { type Component, createMemo, Show } from "solid-js";
 import { Td } from "@/components/Groups/Table/Td";
 import UserDisplay from "@/components/Partials/UserDisplay";
 import T from "@/translations";
+import { findDocumentUserRef } from "@/utils/document-ref-helpers";
 
 const DocumentAuthorCol: Component<{
-	user: InternalCollectionDocument["createdBy"];
+	userId: number | null;
+	refs?: Refs;
 	options?: {
 		include?: boolean;
 		padding?: "16" | "24";
 		minWidth?: number;
 	};
 }> = (props) => {
+	// ----------------------------------
+	// Memos
+	const user = createMemo(() => findDocumentUserRef(props.refs, props.userId));
+
 	// ----------------------------------
 	// Render
 	return (
@@ -22,24 +28,29 @@ const DocumentAuthorCol: Component<{
 				minWidth: props.options?.minWidth,
 			}}
 		>
-			{props.user ? (
-				<UserDisplay
-					user={{
-						username:
-							props.user.username ??
-							props.user.email ??
-							T()("media.types.unknown"),
-						firstName: props.user.firstName,
-						lastName: props.user.lastName,
-						profilePicture: props.user.profilePicture,
-					}}
-					mode="short"
-					size="x-small"
-					nameFormat="simple"
-				/>
-			) : (
-				<span class="text-sm text-body">{T()("common.none")}</span>
-			)}
+			<Show
+				when={user()}
+				fallback={
+					<span class="text-sm text-body">
+						{props.userId ? `#${props.userId}` : T()("common.none")}
+					</span>
+				}
+			>
+				{(user) => (
+					<UserDisplay
+						user={{
+							username:
+								user().username ?? user().email ?? T()("media.types.unknown"),
+							firstName: user().firstName,
+							lastName: user().lastName,
+							profilePicture: user().profilePicture,
+						}}
+						mode="short"
+						size="x-small"
+						nameFormat="simple"
+					/>
+				)}
+			</Show>
 		</Td>
 	);
 };

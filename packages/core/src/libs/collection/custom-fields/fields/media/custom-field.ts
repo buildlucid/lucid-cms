@@ -34,6 +34,7 @@ class MediaCustomField extends CustomField<"media"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
+			resource: mediaFieldConfig.resource,
 			details: {
 				label:
 					this.props?.details?.label ??

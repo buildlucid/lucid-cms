@@ -4,6 +4,7 @@ import type {
 	Collection,
 	InternalCollectionDocument,
 	PreviewMode,
+	Refs,
 	ResponseBody,
 } from "@types";
 import {
@@ -252,8 +253,8 @@ export const DocumentsList: Component<{
 			},
 			include: {
 				"refs.media": () => getListingRefIncludes()["refs.media"],
-				"refs.relation": () => getListingRefIncludes()["refs.relation"],
-				"refs.user": () => getListingRefIncludes()["refs.user"],
+				"refs.documents": () => getListingRefIncludes()["refs.documents"],
+				"refs.users": () => getListingRefIncludes()["refs.users"],
 			},
 		},
 		enabled: () => documentQueryEnabled(),
@@ -309,17 +310,16 @@ export const DocumentsList: Component<{
 
 		//* keep rows in place while the reorder mutation runs
 		const visibleIds = rows.map((row) => row.id).join(",");
-		queryClient.setQueriesData<ResponseBody<InternalCollectionDocument[]>>(
-			{ queryKey: ["documents.getMultiple"] },
-			(old) => {
-				if (!old?.data) return old;
-				if (old.data.map((row) => row.id).join(",") !== visibleIds) return old;
-				return {
-					...old,
-					data: reordered,
-				};
-			},
-		);
+		queryClient.setQueriesData<
+			ResponseBody<InternalCollectionDocument[], Refs>
+		>({ queryKey: ["documents.getMultiple"] }, (old) => {
+			if (!old?.data) return old;
+			if (old.data.map((row) => row.id).join(",") !== visibleIds) return old;
+			return {
+				...old,
+				data: reordered,
+			};
+		});
 
 		documentOrderSave.queue({
 			collectionKey: collectionKey(),
@@ -485,6 +485,7 @@ export const DocumentsList: Component<{
 							<DocumentRow
 								index={i}
 								document={doc()}
+								refs={documents.data?.refs}
 								fieldInclude={props.state.listing()}
 								collection={props.state.collection as Collection}
 								showEnvironmentStatus={environmentHeadColumns().length > 0}

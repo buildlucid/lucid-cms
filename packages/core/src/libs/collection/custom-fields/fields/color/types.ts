@@ -20,13 +20,11 @@ export interface ColorFieldConfig extends SharedFieldConfig {
 export type ColorFieldProps = Partial<Omit<ColorFieldConfig, "type">>;
 
 export type ColorResValue = string | null;
-export type ColorRef = null;
 
 export type ColorCustomFieldMapItem = {
 	props: ColorFieldProps;
 	config: ColorFieldConfig;
 	response: {
 		value: ColorResValue;
-		ref: ColorRef;
 	};
 };

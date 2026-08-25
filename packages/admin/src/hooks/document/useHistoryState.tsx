@@ -1,11 +1,16 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import type { DocumentVersion, InternalCollectionDocument } from "@types";
+import type {
+	DocumentVersion,
+	InternalCollectionDocument,
+	UserRef,
+} from "@types";
 import { createEffect, createMemo, createSignal } from "solid-js";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import { findDocumentUserRef } from "@/utils/document-ref-helpers";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -131,6 +136,7 @@ export function useHistoryState() {
 			},
 			include: {
 				bricks: false,
+				"refs.users": true,
 			},
 		},
 		enabled: () => canFetchRevisions(),
@@ -423,7 +429,10 @@ export function useHistoryState() {
 		}));
 	});
 	const selectedCreatedByUser = createMemo(() => {
-		return selectedVersionDocumentQuery.data?.data.createdBy ?? undefined;
+		return findDocumentUserRef(
+			selectedVersionDocumentQuery.data?.refs,
+			selectedItem()?.createdBy,
+		) satisfies UserRef | undefined;
 	});
 	const selectedRetention = createMemo((): RetentionInfo => {
 		const item = selectedItem();

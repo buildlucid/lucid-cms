@@ -23,7 +23,7 @@ const getAllController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Get All Integrations",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getAll.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getAll.response),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

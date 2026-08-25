@@ -23,7 +23,7 @@ const resolveUrlController = factory.createHandlers(
 		tags: ["content-media"],
 		summary: "Get Media URL",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.content.resolveUrl.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.content.resolveUrl.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.content.resolveUrl.params,

@@ -19,7 +19,7 @@ const statusController = factory.createHandlers(
 		tags: ["connection"],
 		summary: "Get Lucid Connection",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.status.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.status.response),
 		}),
 	}),
 	authenticate(),

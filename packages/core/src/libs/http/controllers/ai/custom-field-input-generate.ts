@@ -23,7 +23,7 @@ const customFieldInputGenerateController = factory.createHandlers(
 		tags: ["ai"],
 		summary: "Generate Custom Field Input",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.customFieldInput.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.customFieldInput.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.customFieldInput.body),
 		parameters: openAPI.parameters({

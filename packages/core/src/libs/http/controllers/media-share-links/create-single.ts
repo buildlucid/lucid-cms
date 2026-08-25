@@ -23,7 +23,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["media-share-links"],
 		summary: "Create Media Share Link",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.createSingle.params,

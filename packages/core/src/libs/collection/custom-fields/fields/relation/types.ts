@@ -1,8 +1,3 @@
-import type {
-	DocumentFieldMap,
-	DocumentFieldValueMap,
-	DocumentRoute,
-} from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
@@ -13,6 +8,7 @@ export type RelationCustomFieldValue = {
 
 export interface RelationFieldConfig extends SharedFieldConfig {
 	type: "relation";
+	resource: "documents";
 	collection: string | string[];
 	details: {
 		label?: AdminCopyInput;
@@ -31,19 +27,12 @@ export interface RelationFieldConfig extends SharedFieldConfig {
 }
 
 export type RelationFieldProps = Partial<
-	Omit<RelationFieldConfig, "type" | "collection">
+	Omit<RelationFieldConfig, "type" | "resource" | "collection">
 > & {
 	collection: string | string[];
 };
 
 export type RelationResValue = RelationCustomFieldValue[];
-export type RelationRef = {
-	id: number;
-	versionId?: number;
-	collectionKey: string;
-	route: DocumentRoute | null;
-	fields: DocumentFieldMap | DocumentFieldValueMap | null;
-};
 
 export type RelationValidationData = {
 	id: number;
@@ -55,6 +44,5 @@ export type RelationCustomFieldMapItem = {
 	config: RelationFieldConfig;
 	response: {
 		value: RelationResValue;
-		ref: RelationRef;
 	};
 };

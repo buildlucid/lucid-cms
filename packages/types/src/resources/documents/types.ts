@@ -1,6 +1,6 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
-import type { MediaRef, MediaType, ProfilePicture } from "../media/types.js";
-import type { UserRef } from "../users/types.js";
+import type { MediaType, ProfilePicture } from "../media/types.js";
+import type { RefResource } from "../refs/resource.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
 export type BrickType = "builder" | "fixed" | "embedded";
@@ -66,17 +66,6 @@ export type DocumentFieldValueResponse =
 	| number[]
 	| null
 	| undefined;
-
-type DocumentFieldRef = DocumentRef | MediaRef | UserRef | unknown;
-
-type DocumentAuthor = {
-	id: number;
-	email: string | null;
-	firstName: string | null;
-	lastName: string | null;
-	username: string | null;
-	profilePicture: ProfilePicture | null;
-} | null;
 
 export type DocumentVersionSummary = {
 	id: number;
@@ -241,6 +230,7 @@ export interface DocumentField<
 > {
 	key: TKey;
 	type: TType;
+	resource?: RefResource;
 	groupRef?: string;
 	translations?: CollectionDocumentTranslations<TValue>;
 	value?: TValue;
@@ -337,7 +327,6 @@ export interface CollectionDocument<
 	route: DocumentRoute | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
-	refs?: Partial<Record<FieldType | string, DocumentFieldRef[]>>;
 	meta?: CollectionDocumentMeta<
 		Extract<ResolveCollectionDocumentKey<TCollectionKey>, string>
 	>;
@@ -517,6 +506,7 @@ export interface DatetimeFieldConfig
 export interface RelationFieldConfig
 	extends SharedCollectionFieldConfig<"relation">,
 		FieldConfigOptions<RelationFieldValue[]> {
+	resource: "documents";
 	collection: string | string[];
 	details: RelationFieldDetails;
 	multiple?: boolean;
@@ -541,6 +531,7 @@ export interface LinkFieldConfig
 export interface MediaFieldConfig
 	extends SharedCollectionFieldConfig<"media">,
 		FieldConfigOptions<number[]> {
+	resource: "media";
 	details: RelationFieldDetails;
 	multiple?: boolean;
 	validation?: RequiredValidation & {
@@ -654,6 +645,7 @@ export interface TextareaFieldConfig
 export interface UserFieldConfig
 	extends SharedCollectionFieldConfig<"user">,
 		FieldConfigOptions<number[]> {
+	resource: "users";
 	details: RelationFieldDetails;
 	multiple?: boolean;
 	validation?: RequiredValidation & {
@@ -786,6 +778,14 @@ export interface Collection {
 	fields: CollectionFieldConfig[];
 }
 
+export type DocumentWorkflowAssignee = {
+	id: number;
+	userId: number;
+	assignedBy: number | null;
+	assignedAt: string | null;
+};
+
+/** User shape returned by the workflow-assignee options endpoint. */
 export type WorkflowUser = {
 	id: number;
 	email: string | null;
@@ -793,13 +793,6 @@ export type WorkflowUser = {
 	firstName: string | null;
 	lastName: string | null;
 	profilePicture: ProfilePicture | null;
-};
-
-export type DocumentWorkflowAssignee = {
-	id: number;
-	user: WorkflowUser;
-	assignedBy: number | null;
-	assignedAt: string | null;
 };
 
 export type DocumentWorkflow = {
@@ -823,6 +816,7 @@ export interface InternalDocumentBrick {
 export interface InternalDocumentField {
 	key: string;
 	type: FieldType;
+	resource?: RefResource;
 	groupRef?: string;
 	translations?: Record<string, DocumentFieldValueResponse>;
 	value?: DocumentFieldValueResponse;
@@ -844,13 +838,12 @@ export interface InternalCollectionDocument {
 	route: DocumentRoute | null;
 	versions: Record<string, DocumentVersionSummary | null>;
 	isDeleted: boolean;
-	createdBy: DocumentAuthor;
+	createdBy: number | null;
 	createdAt: string | null;
 	updatedAt: string | null;
-	updatedBy: DocumentAuthor;
+	updatedBy: number | null;
 	bricks?: Array<InternalDocumentBrick> | null;
 	fields?: Array<InternalDocumentField> | null;
-	refs?: Partial<Record<FieldType | string, DocumentFieldRef[]>> | null;
 	workflow?: DocumentWorkflow | null;
 }
 

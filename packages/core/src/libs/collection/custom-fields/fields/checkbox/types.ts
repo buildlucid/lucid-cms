@@ -21,13 +21,11 @@ export interface CheckboxFieldConfig extends SharedFieldConfig {
 export type CheckboxFieldProps = Partial<Omit<CheckboxFieldConfig, "type">>;
 
 export type CheckboxResValue = boolean | null;
-export type CheckboxRef = null;
 
 export type CheckboxCustomFieldMapItem = {
 	props: CheckboxFieldProps;
 	config: CheckboxFieldConfig;
 	response: {
 		value: CheckboxResValue;
-		ref: CheckboxRef;
 	};
 };

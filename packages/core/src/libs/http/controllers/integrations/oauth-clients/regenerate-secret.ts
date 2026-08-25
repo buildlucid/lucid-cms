@@ -23,7 +23,7 @@ const regenerateSecretController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Regenerate OAuth Client Secret",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(oauthClientSchemas.regenerateSecret.response),
+			dataSchema: z.toJSONSchema(oauthClientSchemas.regenerateSecret.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

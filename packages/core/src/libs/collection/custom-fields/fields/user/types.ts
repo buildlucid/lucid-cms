@@ -1,9 +1,9 @@
-import type { ProfilePicture } from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
 
 export interface UserFieldConfig extends SharedFieldConfig {
 	type: "user";
+	resource: "users";
 	details: {
 		label?: AdminCopyInput;
 		summary?: AdminCopyInput;
@@ -20,24 +20,14 @@ export interface UserFieldConfig extends SharedFieldConfig {
 	};
 }
 
-export type UserFieldProps = Partial<Omit<UserFieldConfig, "type">>;
+export type UserFieldProps = Partial<
+	Omit<UserFieldConfig, "type" | "resource">
+>;
 
 export type UserResValue = number[];
-export type UserRef = {
-	id: number;
-	username: string;
-	email: string;
-	firstName: string | null;
-	lastName: string | null;
-	profilePicture: ProfilePicture | null;
-} | null;
 
 export type UserValidationData = {
 	id: number;
-	// username: string;
-	// first_name: string | null;
-	// last_name: string | null;
-	// email: string;
 };
 
 export type UserCustomFieldMapItem = {
@@ -45,6 +35,5 @@ export type UserCustomFieldMapItem = {
 	config: UserFieldConfig;
 	response: {
 		value: UserResValue;
-		ref: UserRef;
 	};
 };

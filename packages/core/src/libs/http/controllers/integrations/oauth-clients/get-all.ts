@@ -21,7 +21,7 @@ const getAllController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Get OAuth Clients",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(oauthClientSchemas.getAll.response),
+			dataSchema: z.toJSONSchema(oauthClientSchemas.getAll.response),
 		}),
 	}),
 	authenticate(),

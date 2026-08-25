@@ -1,9 +1,5 @@
 import crypto from "node:crypto";
-import type { FieldRefResponse } from "../../services/documents-bricks/helpers/fetch-ref-data.js";
-import type {
-	InternalCollectionDocument,
-	InternalDocumentBrick,
-} from "../../types/response.js";
+import type { InternalDocumentBrick, Refs } from "../../types/response.js";
 import type { Config, InternalDocumentField, Select } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import {
@@ -25,8 +21,7 @@ const formatMultiple = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	collection: CollectionBuilder;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-	refData: FieldRefResponse;
-	refs?: InternalCollectionDocument["refs"];
+	refs?: Refs | null;
 	config: Config;
 	host: string;
 }): InternalDocumentBrick[] => {
@@ -80,7 +75,6 @@ const formatMultiple = (props: {
 						brickRows: rows,
 						bricksQuery: props.bricksQuery,
 						bricksSchema: props.bricksSchema,
-						refData: props.refData,
 						refs: props.refs,
 					},
 					{
@@ -107,8 +101,7 @@ const formatDocumentFields = (props: {
 	bricksQuery: BrickQueryResponse | DocumentQueryResponse;
 	collection: CollectionBuilder;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-	refData: FieldRefResponse;
-	refs?: InternalCollectionDocument["refs"];
+	refs?: Refs | null;
 	config: Config;
 	host: string;
 }): InternalDocumentField[] => {
@@ -131,7 +124,6 @@ const formatDocumentFields = (props: {
 			brickRows: rowOne,
 			bricksQuery: props.bricksQuery,
 			bricksSchema: props.bricksSchema,
-			refData: props.refData,
 			refs: props.refs,
 		},
 		{

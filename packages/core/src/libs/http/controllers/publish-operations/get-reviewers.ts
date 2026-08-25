@@ -19,7 +19,7 @@ const getReviewersController = factory.createHandlers(
 		tags: ["publishing"],
 		summary: "Get Publish Operation Reviewers",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getReviewers.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getReviewers.response),
 		}),
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getReviewers.query.string,

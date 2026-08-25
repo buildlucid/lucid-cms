@@ -22,7 +22,7 @@ const getOverviewController = factory.createHandlers(
 		tags: ["publishing"],
 		summary: "Get Publish Operation Overview",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getOverview.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getOverview.response),
 		}),
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getOverview.query.string,

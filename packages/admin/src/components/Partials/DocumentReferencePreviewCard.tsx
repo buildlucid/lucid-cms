@@ -44,7 +44,7 @@ const DocumentReferencePreviewCard: Component<
 				local.class,
 			)}
 		>
-			<div class="flex items-start justify-between gap-3 px-4 py-3">
+			<div class="flex items-start justify-between gap-3 px-3 py-2.5">
 				<div class="min-w-0 grow">
 					<p class="truncate text-sm font-medium text-title mb-0!">
 						{local.title}
@@ -76,7 +76,7 @@ const DocumentReferencePreviewCard: Component<
 					<For each={local.fields}>
 						{(field, index) => (
 							<div
-								class="min-w-0 border-border px-4 py-2.5 sm:not-first:border-l"
+								class="min-w-0 border-border px-3 py-2.5 sm:not-first:border-l"
 								classList={{
 									"border-t": index() > 0,
 									"sm:border-t-0": index() > 0,

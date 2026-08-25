@@ -4,10 +4,10 @@ import type {
 	CollectionDocumentTranslations,
 	DocumentBrick,
 	DocumentFieldValueMap,
-	DocumentRef,
-	MediaRef,
+	RefResource,
+	RefResourceMap,
+	Refs,
 	RelationFieldValue,
-	UserRef,
 } from "../../types.js";
 
 export type LocaleCode = CollectionDocumentLocaleCode | string;
@@ -79,6 +79,8 @@ export type DocumentViewOptions = {
 	locale?: LocaleCode;
 	/** Enables builder field annotations without relying on browser-only context. */
 	preview?: boolean;
+	/** Shared refs registry returned alongside the document response data. */
+	refs?: Refs;
 };
 
 export type DocumentViewOptionsWithLocale = DocumentViewOptions & {
@@ -87,26 +89,19 @@ export type DocumentViewOptionsWithLocale = DocumentViewOptions & {
 
 export type PreviewFieldAttributes = Readonly<Record<string, string>>;
 
-export type DocumentRefType = "relation" | "media" | "user" | (string & {});
-
-export type DocumentRefValue<TRefType extends DocumentRefType> =
-	TRefType extends "relation"
+export type DocumentRefValue<TResource extends RefResource> =
+	TResource extends "documents"
 		? RelationFieldValue[]
-		: TRefType extends "media" | "user"
+		: TResource extends "media" | "users"
 			? number[]
-			: unknown;
+			: never;
 
-export type DocumentRefsResult<TRefType extends DocumentRefType> =
-	TRefType extends "relation"
-		? Array<DocumentRef<string, DocumentFieldValueMap | null>>
-		: TRefType extends "media"
-			? Array<NonNullable<MediaRef>>
-			: TRefType extends "user"
-				? Array<NonNullable<UserRef>>
-				: unknown[];
+export type DocumentRefsResult<TResource extends RefResource> = Array<
+	RefResourceMap[TResource]
+>;
 
-export type DocumentRefResult<TRefType extends DocumentRefType> =
-	| DocumentRefsResult<TRefType>[number]
+export type DocumentRefResult<TResource extends RefResource> =
+	| DocumentRefsResult<TResource>[number]
 	| undefined;
 
 export type DocumentFieldLocaleValueResult<TValue> =
@@ -149,16 +144,16 @@ export type DocumentFieldView<
 			options?: DocumentViewOptions,
 		): DocumentFieldValueResult<TValue, THasLocale>;
 	};
-	/** Returns hydrated refs for this field from the document refs map. */
-	refs: <TRefType extends DocumentRefType>(
-		refType: TRefType,
+	/** Returns hydrated refs for this field from the response refs registry. */
+	refs: <TResource extends RefResource>(
+		resource: TResource,
 		options?: DocumentViewOptions,
-	) => DocumentRefsResult<TRefType>;
+	) => DocumentRefsResult<TResource>;
 	/** Returns the first hydrated ref for this field, when present. */
-	ref: <TRefType extends DocumentRefType>(
-		refType: TRefType,
+	ref: <TResource extends RefResource>(
+		resource: TResource,
 		options?: DocumentViewOptions,
-	) => DocumentRefResult<TRefType>;
+	) => DocumentRefResult<TResource>;
 	/** Returns repeater groups for this field as plain field views. */
 	groups: () => Array<
 		DocumentFieldGroupView<TDocument, GroupFieldsOf<TValue>, THasLocale>
@@ -261,14 +256,14 @@ export type DocumentView<
 			>
 		>;
 	};
-	/** Returns hydrated refs for stored relation values from the document refs map. */
-	refs: <TRefType extends DocumentRefType>(
-		refType: TRefType,
-		value: DocumentRefValue<TRefType>,
-	) => DocumentRefsResult<TRefType>;
+	/** Returns hydrated refs for stored relation values from the response refs registry. */
+	refs: <TResource extends RefResource>(
+		resource: TResource,
+		value: DocumentRefValue<TResource>,
+	) => DocumentRefsResult<TResource>;
 	/** Returns the first hydrated ref for stored relation values, when present. */
-	ref: <TRefType extends DocumentRefType>(
-		refType: TRefType,
-		value: DocumentRefValue<TRefType>,
-	) => DocumentRefResult<TRefType>;
+	ref: <TResource extends RefResource>(
+		resource: TResource,
+		value: DocumentRefValue<TResource>,
+	) => DocumentRefResult<TResource>;
 } & FieldAccessorMethods<TDocument, DocumentFieldsOf<TDocument>, THasLocale>;

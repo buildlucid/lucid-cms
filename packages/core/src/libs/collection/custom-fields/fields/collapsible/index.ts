@@ -5,8 +5,6 @@ import CollapsibleCustomField from "./custom-field.js";
 export default {
 	config: collapsibleFieldConfig,
 	class: CollapsibleCustomField,
-	fetchRefs: null,
 	validateInput: null,
-	formatRef: null,
 	contentTypeGen: createValueFieldTypeGenerator("null"),
 };

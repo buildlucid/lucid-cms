@@ -5,8 +5,6 @@ import SectionCustomField from "./custom-field.js";
 export default {
 	config: sectionFieldConfig,
 	class: SectionCustomField,
-	fetchRefs: null,
 	validateInput: null,
-	formatRef: null,
 	contentTypeGen: createValueFieldTypeGenerator("null"),
 };

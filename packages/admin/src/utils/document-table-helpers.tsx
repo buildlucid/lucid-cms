@@ -8,6 +8,7 @@ import type {
 	DocumentRef,
 	InternalCollectionDocument,
 	InternalDocumentField,
+	RefResource,
 } from "@types";
 import { FaSolidT, FaSolidUser } from "solid-icons/fa";
 import T from "@/translations";
@@ -140,23 +141,30 @@ export const collectionFieldIncludes = (collection?: Collection) => {
 	return fieldsRes;
 };
 
-const documentListingRefFieldTypes = ["media", "relation", "user"] as const;
-type DocumentListingRefFieldType =
-	(typeof documentListingRefFieldTypes)[number];
-export type DocumentListingRefInclude = `refs.${DocumentListingRefFieldType}`;
+const documentListingRefResources = [
+	"documents",
+	"media",
+	"users",
+] as const satisfies RefResource[];
+export type DocumentListingRefInclude = `refs.${RefResource}`;
 
 /**
- * Enables typed ref includes only for listed field types whose table cells need
- * hydrated ref data to render labels/previews.
+ * Enables response ref resources only for field types whose table cells need
+ * hydrated data to render labels/previews.
  */
 export const documentListingRefIncludes = (
 	fields: CollectionLeafFieldConfig[],
 ): Record<DocumentListingRefInclude, boolean> => {
-	const fieldTypes = new Set(fields.map((field) => field.type));
+	const fieldResources = new Set(
+		fields.flatMap((field) =>
+			"resource" in field && field.resource ? [field.resource] : [],
+		),
+	);
 
-	return documentListingRefFieldTypes.reduce(
-		(includes, fieldType) => {
-			includes[`refs.${fieldType}`] = fieldTypes.has(fieldType);
+	return documentListingRefResources.reduce(
+		(includes, resource) => {
+			includes[`refs.${resource}`] =
+				resource === "users" || fieldResources.has(resource);
 			return includes;
 		},
 		{} as Record<DocumentListingRefInclude, boolean>,

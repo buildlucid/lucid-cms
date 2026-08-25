@@ -27,13 +27,11 @@ export type CollapsibleFieldProps = Partial<
 >;
 
 export type CollapsibleResValue = null;
-export type CollapsibleRef = null;
 
 export type CollapsibleCustomFieldMapItem = {
 	props: CollapsibleFieldProps;
 	config: CollapsibleFieldConfig;
 	response: {
 		value: CollapsibleResValue;
-		ref: CollapsibleRef;
 	};
 };

@@ -24,7 +24,7 @@ const resolvePreviewController = factory.createHandlers(
 		tags: ["content-previews"],
 		summary: "Resolve Preview",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.resolve.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.resolve.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.resolve.body),
 		parameters: openAPI.parameters({ headers: { authorization: false } }),

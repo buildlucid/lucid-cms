@@ -19,7 +19,7 @@ const getScopesController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Get Account Integration Scopes",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getScopes.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getScopes.response),
 		}),
 	}),
 	authenticate(),

@@ -22,7 +22,7 @@ const getAuthorizationRequestController = factory.createHandlers(
 		tags: ["oauth-connections"],
 		summary: "Get OAuth Authorization Request",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(oauthSchemas.authorizationRequest.response),
+			dataSchema: z.toJSONSchema(oauthSchemas.authorizationRequest.response),
 		}),
 		parameters: openAPI.parameters({
 			params: oauthSchemas.authorizationRequest.params,

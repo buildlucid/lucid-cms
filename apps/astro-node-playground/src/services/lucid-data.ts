@@ -1,5 +1,5 @@
 import getToolkit from "@lucidcms/astro/toolkit";
-import { asDocument } from "@lucidcms/client";
+import { asDocument, asDocuments } from "@lucidcms/client";
 import type { AstroGlobal } from "astro";
 
 const previewCookieName = "lucid_preview";
@@ -65,8 +65,7 @@ const getLucidData = async ({
 			},
 		}),
 	]);
-	const activePreview =
-		preview.data?.kind === "preview" ? preview.data : null;
+	const activePreview = preview.data?.kind === "preview" ? preview.data : null;
 	const scopedPageEntry =
 		activePreview?.mode === "scoped" &&
 		activePreview.entry.collectionKey === "page"
@@ -125,17 +124,18 @@ const getLucidData = async ({
 			preview,
 			authentication,
 		},
-		document: asDocument(documentResponse.data, {
+		document: asDocument({
+			document: documentResponse.data?.document,
 			locale,
 			preview: activePreview !== null,
+			refs: documentResponse.data?.refs,
 		}),
-		blogs:
-			blogsResponse.data?.data.map((blog) =>
-				asDocument(blog, {
-					locale,
-					preview: activePreview !== null,
-				}),
-			) ?? [],
+		blogs: asDocuments({
+			documents: blogsResponse.data?.documents ?? [],
+			locale,
+			preview: activePreview !== null,
+			refs: blogsResponse.data?.refs,
+		}),
 		isPreviewError,
 		isDocumentError,
 		isBlogError,

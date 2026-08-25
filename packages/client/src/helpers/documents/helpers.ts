@@ -4,6 +4,9 @@ import type {
 	DocumentFieldValueMap,
 	DocumentRef,
 	MediaRef,
+	RefResource,
+	RefResourceMap,
+	Refs,
 	RelationFieldValue,
 	UserRef,
 } from "../../types.js";
@@ -15,14 +18,11 @@ import type {
 	DocumentBrickKeyOf,
 	DocumentRefResult,
 	DocumentRefsResult,
-	DocumentRefType,
 	DocumentViewOptions,
 	FieldKeyOf,
 } from "./types.js";
 
-type CollectionDocumentRef = NonNullable<
-	NonNullable<CollectionDocument["refs"]>[string]
->[number];
+type CollectionDocumentRef = RefResourceMap[RefResource];
 
 const isObjectRecord = (value: unknown): value is Record<string, unknown> => {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -56,6 +56,7 @@ export const buildViewOptions = (
 	return {
 		locale: options?.locale ?? context.locale,
 		preview: options?.preview ?? context.preview,
+		refs: options?.refs ?? context.refs,
 	};
 };
 
@@ -91,7 +92,7 @@ export const getFieldGroups = <TFields extends DocumentFieldValueMap>(
 	return value.filter((item): item is TFields => isObjectRecord(item));
 };
 
-const findRelationRef = (
+const findDocumentRef = (
 	refs: CollectionDocumentRef[],
 	relation: RelationFieldValue<string>,
 ): DocumentRef | undefined => {
@@ -135,36 +136,23 @@ const getRelationValues = (value: unknown): unknown[] => {
 	return Array.isArray(value) ? value : [value];
 };
 
-const getRelationId = (value: unknown): unknown => {
-	if (isObjectRecord(value) && "id" in value) return value.id;
-	return value;
-};
-
-const findGenericRef = (
-	refs: CollectionDocumentRef[],
-	relationValue: unknown,
-): unknown | undefined => {
-	const relationId = getRelationId(relationValue);
-
-	for (const ref of refs) {
-		if (Object.is(ref, relationValue)) return ref;
-		if (isObjectRecord(ref) && Object.is(ref.id, relationId)) return ref;
-	}
-
-	return undefined;
-};
-
-export const readRefs = <TRefType extends DocumentRefType>(
-	document: CollectionDocument,
-	refType: TRefType,
+export function readRefs<TResource extends RefResource>(
+	refsRegistry: Refs | undefined,
+	resource: TResource,
 	value: unknown,
 	options?: DocumentViewOptions,
-): DocumentRefsResult<TRefType> => {
+): DocumentRefsResult<TResource>;
+export function readRefs(
+	refsRegistry: Refs | undefined,
+	resource: RefResource,
+	value: unknown,
+	options?: DocumentViewOptions,
+): CollectionDocumentRef[] {
 	const relationValue = readFieldValue(value, options);
 
-	if (refType === "relation") {
+	if (resource === "documents") {
 		const relations = Array.isArray(relationValue) ? relationValue : [];
-		const refs = document.refs?.relation ?? [];
+		const refs = refsRegistry?.documents ?? [];
 		const matches: DocumentRef[] = [];
 
 		for (const relation of relations) {
@@ -172,19 +160,19 @@ export const readRefs = <TRefType extends DocumentRefType>(
 			if (typeof relation.id !== "number") continue;
 			if (typeof relation.collectionKey !== "string") continue;
 
-			const match = findRelationRef(refs, {
+			const match = findDocumentRef(refs, {
 				id: relation.id,
 				collectionKey: relation.collectionKey,
 			});
 			if (match) matches.push(match);
 		}
 
-		return matches as DocumentRefsResult<TRefType>;
+		return matches;
 	}
 
-	if (refType === "media") {
+	if (resource === "media") {
 		const relationIds = getRelationValues(relationValue);
-		const refs = document.refs?.media ?? [];
+		const refs = refsRegistry?.media ?? [];
 		const matches: Array<NonNullable<MediaRef>> = [];
 
 		for (const relationId of relationIds) {
@@ -194,49 +182,37 @@ export const readRefs = <TRefType extends DocumentRefType>(
 			if (match) matches.push(match);
 		}
 
-		return matches as DocumentRefsResult<TRefType>;
-	}
-
-	if (refType === "user") {
-		const relationIds = getRelationValues(relationValue);
-		const refs = document.refs?.user ?? [];
-		const matches: Array<NonNullable<UserRef>> = [];
-
-		for (const relationId of relationIds) {
-			if (typeof relationId !== "number") continue;
-
-			const match = findUserRefById(refs, relationId);
-			if (match) matches.push(match);
-		}
-
-		return matches as DocumentRefsResult<TRefType>;
+		return matches;
 	}
 
 	const relationValues = getRelationValues(relationValue);
-	const refs = document.refs?.[refType] ?? [];
-	const matches: unknown[] = [];
+	const refs = refsRegistry?.users ?? [];
+	const matches: Array<NonNullable<UserRef>> = [];
 
-	for (const relation of relationValues) {
-		const match = findGenericRef(refs, relation);
-		if (match !== undefined) matches.push(match);
+	for (const relationId of relationValues) {
+		if (typeof relationId !== "number") continue;
+
+		const match = findUserRefById(refs, relationId);
+		if (match) matches.push(match);
 	}
 
-	return matches as DocumentRefsResult<TRefType>;
-};
+	return matches;
+}
 
-export const readRef = <TRefType extends DocumentRefType>(
-	document: CollectionDocument,
-	refType: TRefType,
+export function readRef<TResource extends RefResource>(
+	refsRegistry: Refs | undefined,
+	resource: TResource,
 	value: unknown,
 	options?: DocumentViewOptions,
-): DocumentRefResult<TRefType> => {
-	return readRefs(
-		document,
-		refType,
-		value,
-		options,
-	)[0] as DocumentRefResult<TRefType>;
-};
+): DocumentRefResult<TResource>;
+export function readRef(
+	refsRegistry: Refs | undefined,
+	resource: RefResource,
+	value: unknown,
+	options?: DocumentViewOptions,
+): CollectionDocumentRef | undefined {
+	return readRefs(refsRegistry, resource, value, options)[0];
+}
 
 const getOrderedBricks = <TBrick extends DocumentBrick>(
 	bricks: TBrick[],

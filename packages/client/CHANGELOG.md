@@ -2,6 +2,7 @@
 
 ## v0.5.0 (unreleased)
 
+- Document responses now expose shared refs at the response level, and `asDocument` and `asDocuments` now accept one object containing the document data and refs.
 - Reworked the toolbar for SPAs and server-rendered sites, with automatic authentication and preview handling, route updates and a Toolkit adapter.
 - Preview resolution now accepts tokens in the request body and returns only their mode and expiry.
 

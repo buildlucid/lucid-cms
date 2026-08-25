@@ -148,8 +148,8 @@ export default Object.freeze({
 		embedded: "embedded",
 	} as const,
 	db: {
-		prefix: "lucid_",
-		nameSeparator: "__",
+		prefix: "lucid_" as const,
+		nameSeparator: "__" as const,
 		generatedColumnPrefix: "_" as const,
 		generatedIndexPrefix: "lucid_idx__" as const,
 		customFieldTablePrefix: "cf_" as const,

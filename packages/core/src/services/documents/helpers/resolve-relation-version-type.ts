@@ -1,8 +1,8 @@
 import constants from "../../../constants/constants.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
-import type { FieldRefVersionTypeResolver } from "../../../libs/collection/custom-fields/utils/ref-fetch.js";
 import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
+import type { DocumentRefVersionTypeResolver } from "../../../libs/refs/documents/types.js";
 import { DocumentPublishOperationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -10,7 +10,7 @@ type RelationVersionType = Exclude<DocumentVersionType, "revision">;
 
 export type RelationVersionTypeResolution = {
 	versionType: RelationVersionType;
-	resolveVersionType?: FieldRefVersionTypeResolver;
+	resolveVersionType?: DocumentRefVersionTypeResolver;
 };
 
 const latestRelationVersionType = "latest" satisfies RelationVersionType;
@@ -99,10 +99,8 @@ const createRelationVersionTypeResolver = (props: {
 	collections: CollectionBuilder[];
 	sourceCollectionKey: string;
 	sourceVersionType: RelationVersionType;
-}): FieldRefVersionTypeResolver => {
+}): DocumentRefVersionTypeResolver => {
 	return (input) => {
-		if (input.fieldType !== "relation") return props.sourceVersionType;
-
 		return resolveRelatedDocumentVersionType({
 			collections: props.collections,
 			sourceCollectionKey: props.sourceCollectionKey,

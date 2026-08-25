@@ -20,7 +20,7 @@ const getSystemConnectionsController = factory.createHandlers(
 		tags: ["oauth-connections"],
 		summary: "Get System OAuth Connections",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
+			dataSchema: z.toJSONSchema(z.array(oauthConnectionResponseSchema)),
 		}),
 	}),
 	authenticate(),

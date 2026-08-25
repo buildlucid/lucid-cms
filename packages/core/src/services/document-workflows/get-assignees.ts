@@ -1,4 +1,4 @@
-import type { DocumentWorkflowAssignee } from "@lucidcms/types";
+import type { WorkflowUser } from "@lucidcms/types";
 import collections from "../../libs/collection/collections.js";
 import { documentWorkflowsFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -14,7 +14,7 @@ const getAssignees: ServiceFn<
 			collectionKey: string;
 		},
 	],
-	Array<DocumentWorkflowAssignee["user"]>
+	WorkflowUser[]
 > = async (context, data) => {
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,

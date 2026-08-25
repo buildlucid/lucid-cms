@@ -48,7 +48,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	});
 	const fieldRef = createMemo(() => {
 		return brickHelpers.getFieldRefs({
-			fieldType: "media",
+			resource: props.state.fieldConfig.resource,
 			fieldValue: fieldValue(),
 		});
 	});
@@ -91,7 +91,12 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 					: undefined;
 
 				batch(() => {
-					if (refs.length) brickStore.get.addRef("media", refs);
+					if (refs.length) {
+						brickStore.get.addRef({
+							resource: props.state.fieldConfig.resource,
+							ref: refs,
+						});
+					}
 					if (removedSelection) {
 						brickStore.get.clearFieldErrors({
 							brickIndex: fieldRenderState.brickIndex(),

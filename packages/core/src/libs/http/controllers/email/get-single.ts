@@ -22,7 +22,7 @@ const getSingleController = factory.createHandlers(
 		tags: ["emails"],
 		summary: "Get Email",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getSingle.params,

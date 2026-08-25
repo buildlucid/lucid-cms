@@ -21,7 +21,7 @@ const getSettingsController = factory.createHandlers(
 		tags: ["settings"],
 		summary: "Get Settings",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getSettings.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getSettings.response),
 		}),
 		parameters: openAPI.parameters({
 			query: controllerSchemas.getSettings.query.string,

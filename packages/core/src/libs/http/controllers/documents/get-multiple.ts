@@ -1,7 +1,10 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import { controllerSchemas } from "../../../../schemas/documents.js";
+import {
+	controllerSchemas,
+	documentRefsResponseSchema,
+} from "../../../../schemas/documents.js";
 import { documentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -23,7 +26,8 @@ const getMultipleController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Get Multiple Documents",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			refsSchema: z.toJSONSchema(documentRefsResponseSchema),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({
@@ -60,7 +64,8 @@ const getMultipleController = factory.createHandlers(
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: documents.data.data,
+				data: documents.data.documents,
+				refs: documents.data.refs,
 				pagination: {
 					count: documents.data.count,
 					page: formattedQuery.page,

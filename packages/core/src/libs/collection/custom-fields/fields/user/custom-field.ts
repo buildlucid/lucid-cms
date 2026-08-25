@@ -34,6 +34,7 @@ class UserCustomField extends CustomField<"user"> {
 		this.config = {
 			key: this.key,
 			type: this.type,
+			resource: userFieldConfig.resource,
 			details: {
 				label:
 					this.props?.details?.label ??

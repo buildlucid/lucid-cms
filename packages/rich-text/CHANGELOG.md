@@ -1,5 +1,9 @@
 # @lucidcms/rich-text
 
+## v1.2.0 (unreleased)
+
+- Document node renderers now resolve related documents from the response-level refs object.
+
 ## v1.1.1
 
 - Fixed server-side rich text HTML generation in Cloudflare runtimes by using a DOM-free renderer.

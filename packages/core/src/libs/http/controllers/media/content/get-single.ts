@@ -26,7 +26,7 @@ const getSingleController = factory.createHandlers(
 		tags: ["content-media"],
 		summary: "Get Media",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.content.getSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.content.getSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.content.getSingle.params,

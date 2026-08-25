@@ -1,21 +1,18 @@
 import type { ColumnDataType } from "kysely";
 import type constants from "../../../constants/constants.js";
-import type { Config } from "../../../types/config.js";
 import type { ErrorCopy, FieldErrorMeta } from "../../../types/errors.js";
 import type {
 	FilterOperator,
 	FilterValue,
 } from "../../../types/query-params.js";
+import type { RefResource, Refs } from "../../../types/response.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
-import type { LucidBrickTableName } from "../../db/tables/index.js";
 import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyDescriptor, AdminCopyInput } from "../../i18n/types.js";
-import type { MediaDeliveryAdapterInstance } from "../../media-delivery/types.js";
 import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaIndex,
-	CollectionSchemaTable,
 } from "../schema/types.js";
 import type { FieldConditionConfig } from "./conditions/index.js";
 import type CustomField from "./custom-field.js";
@@ -181,6 +178,7 @@ export type FieldCapabilities = {
 
 export type FieldStaticConfig<T extends string = string> = {
 	type: T;
+	resource?: RefResource;
 	database: FieldDatabaseConfig<T>;
 	capabilities: FieldCapabilities;
 };
@@ -275,13 +273,9 @@ export type FieldValue =
 	| CustomFieldMap[FieldTypes]["response"]["value"]
 	| undefined;
 
-export type FieldRef =
-	| CustomFieldMap[FieldTypes]["response"]["ref"]
-	| undefined;
-
 export type CustomFieldResponseFormatContext = {
 	locale: string;
-	refs: Partial<Record<string, unknown[]>> | null;
+	refs: Refs | null;
 };
 
 export type ContentFieldTypeGenerationContext<
@@ -313,10 +307,7 @@ export type EmbeddedBrickRefExtractor = (value: unknown) => string[];
 export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	config: FieldStaticConfig<T>;
 	class: abstract new (...args: never[]) => unknown;
-	planFetchRefs?: unknown;
-	fetchRefs?: unknown;
 	validateInput?: unknown;
-	formatRef?: unknown;
 	formatFilterValue?: CustomFieldFilterFormatter | null;
 	nullifyReferences?: unknown;
 	contentTypeGen?: ContentFieldTypeGenerator<T> | null;
@@ -324,16 +315,6 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 };
 
 export type FieldRelationValidationInput = Record<string, number[]>;
-
-export type FieldRefTarget = {
-	table: string;
-	value: unknown;
-};
-
-/** Reference targets extracted from a column-backed custom-field value. */
-export type CustomFieldRefTargets = Partial<
-	Record<FieldTypes, FieldRefTarget[]>
->;
 
 // -----------------------------------------------
 // Validation/Errors
@@ -390,23 +371,3 @@ export type GetIndexDefinitionProps = {
 };
 
 export type IndexDefinition = CollectionSchemaIndex;
-
-export type FieldRefParams = {
-	collection: CollectionBuilder;
-	collections: CollectionBuilder[];
-	localization: {
-		locales: string[];
-		default: string;
-	};
-	config: Config;
-	host: string;
-	mediaDelivery: MediaDeliveryAdapterInstance;
-	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
-	relationRefMeta?: {
-		fieldsSchemaByCollection?: Record<
-			string,
-			CollectionSchemaTable<LucidBrickTableName>
-		>;
-	};
-	flattenRelationRefFields?: boolean;
-};

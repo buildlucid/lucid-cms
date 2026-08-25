@@ -26,13 +26,11 @@ export type RepeaterFieldProps = Partial<
 >;
 
 export type RepeaterResValue = null;
-export type RepeaterRef = null;
 
 export type RepeaterCustomFieldMapItem = {
 	props: RepeaterFieldProps;
 	config: RepeaterFieldConfig;
 	response: {
 		value: RepeaterResValue;
-		ref: RepeaterRef;
 	};
 };

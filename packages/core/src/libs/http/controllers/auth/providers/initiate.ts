@@ -32,7 +32,7 @@ const providerInitiateController = factory.createHandlers(
 		tags: ["auth"],
 		summary: "Initiate Provider Authentication",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.providerInitiate.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.providerInitiate.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.providerInitiate.params,

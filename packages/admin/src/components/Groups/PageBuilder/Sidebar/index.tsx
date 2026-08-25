@@ -2,6 +2,7 @@ import type {
 	Collection,
 	DocumentVersionUpdateResponse,
 	InternalCollectionDocument,
+	Refs,
 } from "@types";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import { Permissions } from "@/constants/permissions";
@@ -16,6 +17,7 @@ export const Sidebar: Component<{
 	collection: Accessor<Collection | undefined>;
 	collectionKey: Accessor<string>;
 	document: Accessor<InternalCollectionDocument | undefined>;
+	refs: Accessor<Refs | undefined>;
 	autoSaveMetadata?: Accessor<DocumentVersionUpdateResponse | null>;
 	documentId: Accessor<number | undefined>;
 	disabled: Accessor<boolean>;
@@ -50,6 +52,7 @@ export const Sidebar: Component<{
 				collection={props.collection}
 				collectionKey={props.collectionKey}
 				document={props.document}
+				refs={props.refs}
 				documentId={props.documentId}
 				disabled={props.disabled}
 				mutations={props.mutations}
@@ -80,6 +83,7 @@ export const Sidebar: Component<{
 			<DocumentDetails
 				collection={props.collection}
 				document={props.document}
+				refs={props.refs}
 				autoSaveMetadata={props.autoSaveMetadata}
 				documentId={props.documentId}
 			/>

@@ -42,6 +42,7 @@ const fieldConditionSchema = z
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const customFieldSchema = z.object({
 	type: z.string(),
+	resource: z.enum(["documents", "media", "users"]).optional(),
 	key: z
 		.string()
 		.refine((val) => !val.includes(constants.db.nameSeparator), {

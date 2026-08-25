@@ -1,5 +1,4 @@
 import type {
-	DocumentRef,
 	FieldError,
 	InternalDocumentField,
 	RelationFieldValue,
@@ -56,7 +55,7 @@ export const RelationField: Component<RelationFieldProps> = (props) => {
 	});
 	const fieldRef = createMemo(() => {
 		return brickHelpers.getFieldRefs({
-			fieldType: "relation",
+			resource: props.state.fieldConfig.resource,
 			fieldValue: fieldValue(),
 		});
 	});
@@ -108,7 +107,10 @@ export const RelationField: Component<RelationFieldProps> = (props) => {
 
 				batch(() => {
 					if (refs.length) {
-						brickStore.get.addRef("relation", refs as DocumentRef[]);
+						brickStore.get.addRef({
+							resource: props.state.fieldConfig.resource,
+							ref: refs,
+						});
 					}
 					if (removedSelection) {
 						brickStore.get.clearFieldErrors({

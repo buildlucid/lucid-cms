@@ -27,7 +27,9 @@ const getMultipleController = factory.createHandlers(
 		tags: ["content-media"],
 		summary: "Get Multiple Media",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.content.getMultiple.response),
+			dataSchema: z.toJSONSchema(
+				controllerSchemas.content.getMultiple.response,
+			),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

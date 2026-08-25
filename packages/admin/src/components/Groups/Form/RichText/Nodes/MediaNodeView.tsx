@@ -123,7 +123,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 								id: typeof props.mediaId === "number" ? props.mediaId : "?",
 							})}
 						</p>
-						<p class="mt-1 text-xs font-medium text-error-base mb-0!">
+						<p class="mt-0.5 text-xs font-medium text-error-base mb-0!">
 							{errorMessage() ?? T()("editor.rich.text.media.unavailable")}
 						</p>
 					</div>

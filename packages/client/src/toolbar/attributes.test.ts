@@ -69,6 +69,28 @@ describe("toolbarFromToolkit", () => {
 		});
 	});
 
+	it("reads the document from the toolkit response payload", () => {
+		expect(
+			toolbarFromToolkit({
+				authentication: { data: { authenticated: true } },
+				document: {
+					data: {
+						document: {
+							collectionKey: "page",
+							id: 42,
+							version: "published",
+						},
+					},
+				},
+				preview: { data: { kind: "published" } },
+			}),
+		).toMatchObject({
+			"edit-collection": "page",
+			"edit-document-id": 42,
+			"edit-version": "published",
+		});
+	});
+
 	it("falls back to browser resolution for unavailable responses", () => {
 		expect(
 			toolbarFromToolkit({

@@ -3,6 +3,7 @@ import type { FieldStaticConfig } from "../../types.js";
 
 export const relationFieldConfig = {
 	type: "relation",
+	resource: "documents",
 	database: {
 		mode: "relation-table",
 		separator: "rel",

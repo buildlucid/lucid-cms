@@ -21,7 +21,7 @@ const getMultipleController = factory.createHandlers(
 		tags: ["users"],
 		summary: "Get Multiple User Logins",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

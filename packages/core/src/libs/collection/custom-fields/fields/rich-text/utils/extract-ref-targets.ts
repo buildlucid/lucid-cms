@@ -2,8 +2,8 @@ import {
 	extractRichTextReferences,
 	type RichTextJSON,
 } from "@lucidcms/rich-text";
+import type { RefTarget } from "../../../../../refs/types.js";
 import buildTableName from "../../../../helpers/build-table-name.js";
-import type { CustomFieldRefTargets, FieldRefTarget } from "../../../types.js";
 
 const asRichTextJSON = (value: unknown): RichTextJSON | null => {
 	if (typeof value === "string") {
@@ -20,7 +20,7 @@ const asRichTextJSON = (value: unknown): RichTextJSON | null => {
 };
 
 const addDocumentTarget = (
-	targets: Map<string, FieldRefTarget>,
+	targets: Map<string, RefTarget>,
 	attrs?: Record<string, unknown>,
 ) => {
 	const documentId = attrs?.documentId;
@@ -41,13 +41,14 @@ const addDocumentTarget = (
 	if (tableNameRes.error) return;
 
 	targets.set(`${tableNameRes.data.name}:${documentId}`, {
+		resource: "documents",
 		table: tableNameRes.data.name,
 		value: documentId,
 	});
 };
 
 const addMediaTarget = (
-	targets: Map<number, FieldRefTarget>,
+	targets: Map<number, RefTarget>,
 	attrs?: Record<string, unknown>,
 ) => {
 	const mediaId = attrs?.mediaId;
@@ -60,13 +61,14 @@ const addMediaTarget = (
 	}
 
 	targets.set(mediaId, {
+		resource: "media",
 		table: "lucid_media",
 		value: mediaId,
 	});
 };
 
 const addUserTarget = (
-	targets: Map<number, FieldRefTarget>,
+	targets: Map<number, RefTarget>,
 	attrs?: Record<string, unknown>,
 ) => {
 	const userId = attrs?.userId;
@@ -75,19 +77,20 @@ const addUserTarget = (
 	}
 
 	targets.set(userId, {
+		resource: "users",
 		table: "lucid_users",
 		value: userId,
 	});
 };
 
 /** Extracts resource targets embedded in rich-text JSON. */
-const extractRichTextRefTargets = (value: unknown): CustomFieldRefTargets => {
+const extractRichTextRefTargets = (value: unknown): RefTarget[] => {
 	const json = asRichTextJSON(value);
-	if (!json) return {};
+	if (!json) return [];
 
-	const mediaTargets = new Map<number, FieldRefTarget>();
-	const documentTargets = new Map<string, FieldRefTarget>();
-	const userTargets = new Map<number, FieldRefTarget>();
+	const mediaTargets = new Map<number, RefTarget>();
+	const documentTargets = new Map<string, RefTarget>();
+	const userTargets = new Map<number, RefTarget>();
 
 	for (const reference of extractRichTextReferences(json)) {
 		if (reference.type === "rich-text-media") {
@@ -111,11 +114,11 @@ const extractRichTextRefTargets = (value: unknown): CustomFieldRefTargets => {
 			addUserTarget(userTargets, { userId: reference.userId });
 		}
 	}
-	return {
-		media: Array.from(mediaTargets.values()),
-		relation: Array.from(documentTargets.values()),
-		...(userTargets.size > 0 ? { user: Array.from(userTargets.values()) } : {}),
-	};
+	return [
+		...mediaTargets.values(),
+		...documentTargets.values(),
+		...userTargets.values(),
+	];
 };
 
 export default extractRichTextRefTargets;

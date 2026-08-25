@@ -1,4 +1,5 @@
 import type { DocumentVersionType } from "../libs/db/tables/index.js";
+import type { RefResource } from "./response.js";
 
 // -----------------------------------------------
 // Filters
@@ -152,7 +153,7 @@ export type QueryParams = {
 	perPage: QueryParamPagination["perPage"];
 };
 
-export type CollectionDocumentRefInclude = "refs" | `refs.${string}`;
+export type CollectionDocumentRefInclude = "refs" | `refs.${RefResource}`;
 export type CollectionDocumentSingleInclude =
 	| "bricks"
 	| "meta"

@@ -23,7 +23,7 @@ const validateInvitationController = factory.createHandlers(
 		tags: ["auth"],
 		summary: "Validate Invitation Token",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.validateInvitation.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.validateInvitation.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.validateInvitation.params,

@@ -23,7 +23,7 @@ const checkVersionController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Check Document Version Draft",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.checkVersion.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.checkVersion.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.checkVersion.body),
 		parameters: openAPI.parameters({

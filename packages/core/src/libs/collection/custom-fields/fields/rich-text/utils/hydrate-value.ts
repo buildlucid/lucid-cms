@@ -5,10 +5,10 @@ import type {
 	DocumentRef,
 	Media,
 	RichTextUserVariableField,
+	UserRef,
 } from "../../../../../../types/response.js";
 import { getObject } from "../../../../../../utils/helpers/get-typed-value.js";
 import type { CustomFieldResponseFormatContext } from "../../../types.js";
-import type { UserRef } from "../../user/types.js";
 import { getLocalizedString, getMediaRenderData } from "./media-render-data.js";
 import { isRichTextUserVariableField } from "./reference-validation.js";
 
@@ -87,9 +87,9 @@ const hydrateRichTextValue = (
 	value: RichTextJSON,
 	context: CustomFieldResponseFormatContext,
 ): RichTextJSON => {
-	const documents = (context.refs?.relation ?? []).filter(isDocumentRef);
+	const documents = (context.refs?.documents ?? []).filter(isDocumentRef);
 	const media = (context.refs?.media ?? []).filter(isMediaRef);
-	const users = (context.refs?.user ?? []).filter(isUserRef);
+	const users = (context.refs?.users ?? []).filter(isUserRef);
 	const documentMap = new Map(
 		documents.map((reference) => [
 			`${reference.collectionKey}\0${reference.id}`,

@@ -27,7 +27,7 @@ const getShareAccessController = factory.createHandlers(
 			params: controllerSchemas.getShareAccess.params,
 		}),
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getShareAccess.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getShareAccess.response),
 		}),
 	}),
 	rateLimiter({

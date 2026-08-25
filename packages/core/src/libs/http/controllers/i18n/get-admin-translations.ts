@@ -20,7 +20,9 @@ const getAdminTranslationsController = factory.createHandlers(
 		tags: ["i18n"],
 		summary: "Get Admin Translations",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getAdminTranslations.response),
+			dataSchema: z.toJSONSchema(
+				controllerSchemas.getAdminTranslations.response,
+			),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getAdminTranslations.params,

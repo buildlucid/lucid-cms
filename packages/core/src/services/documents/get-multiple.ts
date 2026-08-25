@@ -15,7 +15,7 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
-import type { InternalCollectionDocument } from "../../types/response.js";
+import type { InternalCollectionDocument, Refs } from "../../types/response.js";
 import {
 	getBaseUrl,
 	getFilterValues,
@@ -23,11 +23,9 @@ import {
 	groupDocumentFilters,
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import extractRelatedEntityIds from "../documents-bricks/helpers/extract-related-entity-ids.js";
-import fetchRefData, {
-	type FieldRefResponse,
-} from "../documents-bricks/helpers/fetch-ref-data.js";
+import collectDocumentRefTargets from "./helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
+import resolveDocumentRefs from "./helpers/resolve-document-refs.js";
 import resolveRelationDocumentFilters from "./helpers/resolve-relation-document-filters.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
@@ -40,8 +38,9 @@ const getMultiple: ServiceFn<
 		},
 	],
 	{
-		data: InternalCollectionDocument[];
+		documents: InternalCollectionDocument[];
 		count: number;
+		refs?: Refs;
 	}
 > = async (context, data) => {
 	if (
@@ -169,37 +168,33 @@ const getMultiple: ServiceFn<
 	);
 	if (documentsRes.error) return documentsRes;
 
-	const relationIdRes = await extractRelatedEntityIds(context, {
+	const baseUrl = getBaseUrl(context);
+	const refsRes = await resolveDocumentRefs(context, {
 		collection: collectionRes.data,
+		collections: collectionsRes.data,
 		brickSchema: bricksTableSchemaRes.data,
 		responses: documentsRes.data?.[0] ?? [],
-		includeTypes: include.refs ? include.refTypes : [],
-		includeFieldValueRefTargets: true,
-	});
-	if (relationIdRes.error) return relationIdRes;
-
-	const refDataRes = await fetchRefData(context, {
-		values: relationIdRes.data,
 		versionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+		refResources: include.refs,
+		refTargets: collectDocumentRefTargets({
+			documents: documentsRes.data?.[0] ?? [],
+			includeMeta: true,
+		}),
+		host: baseUrl,
 	});
-	if (refDataRes.error) return refDataRes;
-
-	const refData: FieldRefResponse = refDataRes.data;
+	if (refsRes.error) return refsRes;
 
 	const documents = documentsFormatter.formatMultiple({
 		documents: documentsRes.data?.[0] || [],
 		collection: collectionRes.data,
-		collections: collectionsRes.data,
 		config: context.config,
-		host: getBaseUrl(context),
+		host: baseUrl,
 		mediaOptions: {
-			host: getBaseUrl(context),
+			host: baseUrl,
 			delivery: context.mediaDelivery,
 		},
-		refData,
-		refTypes: include.refTypes,
-		includeRefs: include.refs,
+		hydratedRefs: refsRes.data.hydratedRefs,
 		hasFields: true,
 		hasBricks: false,
 		bricksTableSchema: bricksTableSchemaRes.data,
@@ -231,8 +226,9 @@ const getMultiple: ServiceFn<
 	return {
 		error: undefined,
 		data: {
-			data: afterFetchRes.data.documents,
+			documents: afterFetchRes.data.documents,
 			count: formatter.parseCount(documentsRes.data?.[1]?.count),
+			refs: refsRes.data.refs,
 		},
 	};
 };

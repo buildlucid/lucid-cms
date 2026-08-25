@@ -9,6 +9,7 @@ import type {
 	DocumentFieldGroupView,
 	DocumentRef,
 	DocumentView,
+	Refs,
 	RelationFieldValue,
 } from "../../types.js";
 
@@ -19,7 +20,6 @@ declare module "../../types.js" {
 			related_page: Array<RelationFieldValue<"page">>;
 			hero_image: number[];
 			authors: number[];
-			custom_owner: number[];
 			sections: Array<{
 				heading: string | null;
 				links: Array<{
@@ -68,7 +68,7 @@ declare module "../../types.js" {
 	}
 }
 
-const page = {
+const pageFixture = {
 	id: 1,
 	collectionKey: "page",
 	version: "published",
@@ -89,7 +89,6 @@ const page = {
 		],
 		hero_image: [10, 11],
 		authors: [101, 100],
-		custom_owner: [501],
 		sections: [
 			{
 				heading: "Hero",
@@ -150,7 +149,7 @@ const page = {
 		},
 	],
 	refs: {
-		relation: [
+		documents: [
 			{
 				id: 3,
 				collectionKey: "page",
@@ -230,7 +229,7 @@ const page = {
 				updatedAt: null,
 			},
 		],
-		user: [
+		users: [
 			{
 				id: 100,
 				username: "alice",
@@ -246,12 +245,6 @@ const page = {
 				firstName: "Bob",
 				lastName: "B",
 				profilePicture: null,
-			},
-		],
-		"custom-owner": [
-			{
-				id: 501,
-				name: "Custom owner",
 			},
 		],
 	},
@@ -278,30 +271,27 @@ const page = {
 		updatedAt: "2026-04-22T12:00:00.000Z",
 		updatedBy: 1,
 	},
-} satisfies CollectionDocument<"page">;
+} satisfies CollectionDocument<"page"> & { refs: Refs };
+const { refs, ...page } = pageFixture;
 
 describe("@lucidcms/client document helpers", () => {
 	test("wraps a document with locale-aware field, brick, and group helpers", () => {
-		const pageView = asDocument(page, {
+		const pageView = asDocument({
+			document: page,
 			locale: "en",
+			refs,
 		});
 
 		expect(pageView.field("page_title").value()).toBe("Homepage");
-		expect(pageView.field("related_page").ref("relation")?.id).toBe(2);
-		expect(pageView.ref("relation", page.fields.related_page)?.id).toBe(2);
+		expect(pageView.field("related_page").ref("documents")?.id).toBe(2);
+		expect(pageView.ref("documents", page.fields.related_page)?.id).toBe(2);
 		expect(
 			pageView
 				.field("hero_image")
 				.refs("media")
 				.map((ref) => ref.id),
 		).toEqual([10, 11]);
-		expect(pageView.field("authors").ref("user")?.id).toBe(101);
-		expect(pageView.field("custom_owner").refs("custom-owner")).toEqual([
-			{
-				id: 501,
-				name: "Custom owner",
-			},
-		]);
+		expect(pageView.field("authors").ref("users")?.id).toBe(101);
 		expect(pageView.brick("banner")?.field("title").value()).toBe(
 			"Still reading?",
 		);
@@ -339,7 +329,7 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("returns translated field objects until a locale is supplied", () => {
-		const pageView = asDocument(page);
+		const pageView = asDocument({ document: page });
 
 		expect(pageView.field("page_title").value()).toEqual({
 			en: "Homepage",
@@ -354,7 +344,7 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("supports changing locale on document and brick wrappers", () => {
-		const pageView = asDocument(page).withLocale("fr");
+		const pageView = asDocument({ document: page }).withLocale("fr");
 		const banner = pageView.brick({
 			type: "builder",
 			key: "banner",
@@ -368,12 +358,18 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("emits preview targets only when explicitly enabled", () => {
-		expect(asDocument(page).field("page_title").preview()).toEqual({});
 		expect(
-			asDocument(page, { preview: false }).field("page_title").preview(),
+			asDocument({ document: page }).field("page_title").preview(),
+		).toEqual({});
+		expect(
+			asDocument({ document: page, preview: false })
+				.field("page_title")
+				.preview(),
 		).toEqual({});
 
-		const pageView = asDocument(page, { preview: true }).withLocale("fr");
+		const pageView = asDocument({ document: page, preview: true }).withLocale(
+			"fr",
+		);
 		const rootAttributes = pageView.field("page_title").preview();
 		const brickAttributes = pageView
 			.brick({ type: "fixed" })
@@ -392,7 +388,7 @@ describe("@lucidcms/client document helpers", () => {
 			.groups()[1]
 			?.field("heading")
 			.preview();
-		const nestedGroupAttributes = asDocument(page, { preview: true })
+		const nestedGroupAttributes = asDocument({ document: page, preview: true })
 			.field("sections")
 			.groups()[1]
 			?.field("links")
@@ -457,13 +453,11 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("returns undefined for nullish documents and keeps optional chaining ergonomic", () => {
-		const missingPage = asDocument(
-			undefined as CollectionDocument<"page"> | undefined,
-			{
-				locale: "en",
-			},
-		);
-		const emptyPage = asDocument(null);
+		const missingPage = asDocument({
+			document: undefined as CollectionDocument<"page"> | undefined,
+			locale: "en",
+		});
+		const emptyPage = asDocument({ document: null });
 
 		expect(missingPage).toBeUndefined();
 		expect(emptyPage).toBeUndefined();
@@ -476,16 +470,17 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("wraps multiple documents with the same locale-aware helpers", () => {
-		const pages = asDocuments([page, { ...page, id: 2 }], {
+		const pages = asDocuments({
+			documents: [page, { ...page, id: 2 }],
 			locale: "fr",
 		});
-		const rawPages = asDocuments([page]);
+		const rawPages = asDocuments({ documents: [page] });
 
 		expect(pages.map((pageView) => pageView.id)).toEqual([1, 2]);
 		expect(
 			pages.map((pageView) => pageView.field("page_title").value()),
 		).toEqual(["Accueil", "Accueil"]);
-		expect(asDocuments([], { locale: "en" })).toEqual([]);
+		expect(asDocuments({ documents: [], locale: "en" })).toEqual([]);
 		expectTypeOf(pages).toEqualTypeOf<
 			Array<DocumentView<CollectionDocument<"page">, true>>
 		>();
@@ -495,10 +490,12 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("preserves collection-aware helper types", () => {
-		const pageView = asDocument(page, {
+		const pageView = asDocument({
+			document: page,
 			locale: "en",
+			refs,
 		});
-		const rawPageView = asDocument(page);
+		const rawPageView = asDocument({ document: page });
 
 		expectTypeOf(pageView).toEqualTypeOf<
 			DocumentView<CollectionDocument<"page">, true>
@@ -515,9 +512,9 @@ describe("@lucidcms/client document helpers", () => {
 		expectTypeOf(
 			rawPageView.field("page_title").value({ locale: "en" }),
 		).toEqualTypeOf<string | null | undefined>();
-		expectTypeOf(pageView.field("related_page").refs("relation")).toEqualTypeOf<
-			DocumentRef[]
-		>();
+		expectTypeOf(
+			pageView.field("related_page").refs("documents"),
+		).toEqualTypeOf<DocumentRef[]>();
 		expectTypeOf(pageView.brick("banner")).toEqualTypeOf<
 			| DocumentBrickView<
 					CollectionDocument<"page">,

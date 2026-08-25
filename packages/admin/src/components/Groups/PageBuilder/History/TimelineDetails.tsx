@@ -3,6 +3,7 @@ import type {
 	Collection,
 	InternalCollectionDocument,
 	PublishOperation,
+	UserRef,
 } from "@types";
 import classNames from "classnames";
 import {
@@ -70,8 +71,6 @@ const getRetentionTheme = (
 	}
 };
 
-type DocumentAuthor = NonNullable<InternalCollectionDocument["createdBy"]>;
-
 const TimelineDetails: Component<{
 	item: TimelineItem;
 	revisionName: string;
@@ -85,7 +84,7 @@ const TimelineDetails: Component<{
 	document: Accessor<InternalCollectionDocument | undefined>;
 	selectedVersionDocument: Accessor<InternalCollectionDocument | undefined>;
 	selectedVersionDocumentLoading: Accessor<boolean>;
-	createdByUser: Accessor<DocumentAuthor | undefined>;
+	createdByUser: Accessor<UserRef | undefined>;
 	retention: Accessor<RetentionInfo>;
 	releaseOperations: Accessor<PublishOperation[]>;
 	releaseOperationsLoading: Accessor<boolean>;
@@ -678,7 +677,7 @@ const DetailRow: Component<{
 );
 
 const AuthorDisplay: Component<{
-	user?: DocumentAuthor;
+	user?: UserRef;
 	fallbackId: number | null;
 }> = (props) => (
 	<Show

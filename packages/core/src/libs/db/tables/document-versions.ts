@@ -3,6 +3,7 @@ import z from "zod";
 import { versionTypesSchema } from "../../../schemas/document-versions.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable, TimestampMutable } from "../types.js";
+import { isDocumentTableName } from "./document-table-name.js";
 
 export const documentVersionsTable = defineTable(
 	"lucid_document__collection-key__ver",
@@ -57,7 +58,7 @@ export const documentVersionsTable = defineTable(
 	{
 		priority: 300,
 		matches: (tableName) =>
-			tableName.startsWith("lucid_document__") && tableName.endsWith("__ver"),
+			isDocumentTableName(tableName) && tableName.endsWith("__ver"),
 	},
 );
 

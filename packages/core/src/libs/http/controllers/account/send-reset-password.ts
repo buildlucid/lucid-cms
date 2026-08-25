@@ -24,7 +24,7 @@ const sendResetPasswordController = factory.createHandlers(
 		tags: ["account"],
 		summary: "Send Password Reset",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.sendResetPassword.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.sendResetPassword.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

@@ -5,8 +5,6 @@ import RepeaterCustomField from "./custom-field.js";
 export default {
 	config: repeaterFieldConfig,
 	class: RepeaterCustomField,
-	fetchRefs: null,
 	validateInput: null,
-	formatRef: null,
 	contentTypeGen: createValueFieldTypeGenerator("null"),
 };

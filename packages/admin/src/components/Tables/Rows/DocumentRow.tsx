@@ -1,4 +1,4 @@
-import type { Collection, InternalCollectionDocument } from "@types";
+import type { Collection, InternalCollectionDocument, Refs } from "@types";
 import { type Component, For, Show } from "solid-js";
 import type {
 	TableRowReorder,
@@ -18,6 +18,7 @@ import type { TableRowProps } from "@/types/components";
 
 interface DocumentRowProps extends TableRowProps {
 	document: InternalCollectionDocument;
+	refs?: Refs;
 	collection: Collection;
 	collectionsByKey?: Map<string, Collection>;
 	fieldInclude: CollectionLeafFieldConfig[];
@@ -89,6 +90,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 						<DocumentDynamicColumns
 							field={field}
 							document={props.document}
+							refs={props.refs}
 							include={props.include}
 							index={includeOffset() + i()}
 							collectionLocalized={props.collection.localized}
@@ -121,6 +123,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 				/>
 				<WorkflowAssigneeCol
 					document={props.document}
+					refs={props.refs}
 					include={props.include}
 					index={
 						includeOffset() +
@@ -131,7 +134,8 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 				/>
 			</Show>
 			<DocumentAuthorCol
-				user={props.document.createdBy}
+				userId={props.document.createdBy}
+				refs={props.refs}
 				options={{
 					include: props.include[authorStartIndex()],
 					padding: props.options?.padding,
@@ -139,7 +143,8 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 				}}
 			/>
 			<DocumentAuthorCol
-				user={props.document.updatedBy}
+				userId={props.document.updatedBy}
+				refs={props.refs}
 				options={{
 					include: props.include[authorStartIndex() + 1],
 					padding: props.options?.padding,

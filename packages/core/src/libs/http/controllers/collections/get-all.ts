@@ -20,7 +20,7 @@ const getAllController = factory.createHandlers(
 		tags: ["collections"],
 		summary: "Get All Collections",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getAll.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 	}),
 	authenticate(),

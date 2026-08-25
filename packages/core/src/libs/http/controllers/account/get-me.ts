@@ -20,7 +20,7 @@ const getMeController = factory.createHandlers(
 		tags: ["account"],
 		summary: "Get Authenticated User",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMe.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getMe.response),
 		}),
 	}),
 	authenticate(),

@@ -23,7 +23,9 @@ const mediaImageCompletionController = factory.createHandlers(
 		tags: ["ai"],
 		summary: "Check Media Image Generation",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.mediaImageCompletion.response),
+			dataSchema: z.toJSONSchema(
+				controllerSchemas.mediaImageCompletion.response,
+			),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

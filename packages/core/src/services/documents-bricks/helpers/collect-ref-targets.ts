@@ -1,6 +1,7 @@
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
+import fieldConfigs from "../../../libs/collection/custom-fields/field-configs.js";
 import {
 	getFieldDatabaseConfig,
 	isStorageMode,
@@ -15,24 +16,19 @@ import type {
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../../../libs/db/tables/index.js";
+import {
+	addRefTarget,
+	shouldIncludeRefResource,
+} from "../../../libs/refs/targets.js";
+import type { RefTargets } from "../../../libs/refs/types.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
-import {
-	type FieldTypes,
-	fieldTypes,
-	type Select,
-	type ServiceFn,
+import type {
+	FieldTypes,
+	RefResource,
+	Select,
+	ServiceFn,
 } from "../../../types.js";
-
-export type FieldRefValues = Partial<
-	Record<
-		FieldTypes,
-		Array<{
-			table: string;
-			values: Set<unknown>;
-		}>
-	>
->;
 
 /**
  * Resolves the custom field instance for a schema-backed field table.
@@ -142,36 +138,6 @@ const getColumnFieldInstances = (
 };
 
 /**
- * Adds a target to the deduplicated ref fetch map.
- */
-const appendRefTarget = (
-	refData: FieldRefValues,
-	fieldType: FieldTypes,
-	target: {
-		table: string;
-		value: unknown;
-	},
-) => {
-	if (refData[fieldType] === undefined) {
-		refData[fieldType] = [];
-	}
-
-	let tableEntry = refData[fieldType]?.find(
-		(entry) => entry.table === target.table,
-	);
-
-	if (!tableEntry) {
-		tableEntry = {
-			table: target.table,
-			values: new Set<unknown>(),
-		};
-		refData[fieldType]?.push(tableEntry);
-	}
-
-	tableEntry.values.add(target.value);
-};
-
-/**
  * Identifies a document target that points back to the response row currently
  * being hydrated. The caller can reuse the document already in its response.
  */
@@ -192,26 +158,12 @@ const isCurrentDocumentTarget = (
 	return !tableNameRes.error && tableNameRes.data.name === target.table;
 };
 
-const shouldIncludeFieldType = (
-	fieldType: FieldTypes,
-	options: {
-		includeTypes?: FieldTypes[];
-		excludeTypes?: FieldTypes[];
-	},
-) => {
-	if (options.includeTypes !== undefined) {
-		return options.includeTypes.includes(fieldType);
-	}
-
-	return options.excludeTypes?.includes(fieldType) !== true;
-};
-
 /**
- * Extracts custom field reference data from schemas and stored field values.
- * Works with arrays of BrickQueryResponse and/or DocumentQueryResponse types.
- * IDs can be used to fetch the data separately.
+ * Collects resource targets from relation storage and embedded field values.
+ * The caller controls direct relation resources, while embedded targets are
+ * always collected because fields may need them while formatting their values.
  */
-const extractRelatedEntityIds: ServiceFn<
+const collectRefTargets: ServiceFn<
 	[
 		{
 			collection: CollectionBuilder;
@@ -226,17 +178,13 @@ const extractRelatedEntityIds: ServiceFn<
 				columns: CollectionSchemaColumn[];
 			}[];
 			responses: (BrickQueryResponse | DocumentQueryResponse)[];
-			/** Pass an array of custom field types that should have relation data extracted. */
-			includeTypes?: FieldTypes[];
-			/** Includes ref targets discovered inside column-backed custom-field values. */
-			includeFieldValueRefTargets?: boolean;
-			/** Pass a Array of custom field types that should have relation data extracted */
-			excludeTypes?: FieldTypes[];
+			/** Direct relation resources requested for the public response. */
+			resources?: RefResource[];
 		},
 	],
-	FieldRefValues
+	RefTargets
 > = async (_, data) => {
-	const refData: FieldRefValues = {};
+	const targets: RefTargets = {};
 	const columnFieldInstances = new Map(
 		data.brickSchema.map((schema) => [
 			schema.name,
@@ -268,13 +216,15 @@ const extractRelatedEntityIds: ServiceFn<
 						schemaColumn.customField !== undefined
 					) {
 						const fieldType = schemaColumn.customField.type;
+						const fieldConfig = fieldConfigs[fieldType];
+						const resource =
+							"resource" in fieldConfig ? fieldConfig.resource : undefined;
 						if (
-							shouldIncludeFieldType(fieldType, {
-								includeTypes: data.includeTypes,
-								excludeTypes: data.excludeTypes,
-							})
+							resource &&
+							shouldIncludeRefResource(resource, data.resources)
 						) {
-							appendRefTarget(refData, fieldType, {
+							addRefTarget(targets, {
+								resource,
 								table: schemaColumn.foreignKey.table,
 								value: targetColumn,
 							});
@@ -286,57 +236,37 @@ const extractRelatedEntityIds: ServiceFn<
 						?.get(schemaColumn.name);
 					if (!columnFieldInstance) continue;
 
-					const fieldRefTargets =
-						columnFieldInstance.getFieldRefTargets(targetColumn);
-					for (const targetFieldType of fieldTypes) {
-						const targets = fieldRefTargets[targetFieldType];
-						if (!targets) continue;
+					for (const target of columnFieldInstance.getFieldRefTargets(
+						targetColumn,
+					)) {
 						if (
-							!shouldIncludeFieldType(targetFieldType, {
-								includeTypes: data.includeFieldValueRefTargets
-									? undefined
-									: data.includeTypes,
-								excludeTypes: data.excludeTypes,
-							})
+							target.resource === "documents" &&
+							isCurrentDocumentTarget(row, target)
 						) {
 							continue;
 						}
-
-						for (const target of targets) {
-							if (
-								targetFieldType === "relation" &&
-								isCurrentDocumentTarget(row, target)
-							) {
-								continue;
-							}
-							appendRefTarget(refData, targetFieldType, target);
-						}
+						addRefTarget(targets, target);
 					}
 				}
 
 				if (!fieldInstance) continue;
-				if (
-					!shouldIncludeFieldType(fieldInstance.type, {
-						includeTypes: data.includeTypes,
-						excludeTypes: data.excludeTypes,
-					})
-				) {
-					continue;
-				}
-
 				for (const relationTarget of fieldInstance.getRelationFieldRefTargets(
 					row,
 				)) {
-					appendRefTarget(refData, fieldInstance.type, relationTarget);
+					if (
+						shouldIncludeRefResource(relationTarget.resource, data.resources)
+					) {
+						addRefTarget(targets, relationTarget);
+					}
 				}
 			}
 		}
 	}
 
 	return {
-		data: refData,
+		data: targets,
 		error: undefined,
 	};
 };
 
-export default extractRelatedEntityIds;
+export default collectRefTargets;

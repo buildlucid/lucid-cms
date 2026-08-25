@@ -96,7 +96,8 @@ export const defaultErrorResponse = {
  * Used to construct a response object for OpenAPI
  */
 const responses = (config?: {
-	schema?: unknown;
+	dataSchema?: unknown;
+	refsSchema?: unknown;
 	paginated?: boolean;
 	noProperties?: boolean;
 }) => {
@@ -106,7 +107,7 @@ const responses = (config?: {
 		| OpenAPIV3.ReferenceObject
 	> = {};
 
-	if (config?.schema) {
+	if (config?.dataSchema) {
 		response[200] = {
 			description: translate("server:core.openapi.response.200"),
 			content: {
@@ -117,7 +118,8 @@ const responses = (config?: {
 							: {
 									type: "object",
 									properties: {
-										data: config.schema,
+										data: config.dataSchema,
+										...(config.refsSchema ? { refs: config.refsSchema } : {}),
 										meta: config.paginated ? paginatedMetaObject : metaObject,
 										...(config.paginated ? { links: linksObject } : {}),
 									},

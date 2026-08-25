@@ -54,15 +54,25 @@ test("extracts and deduplicates rich text resource references", () => {
 				},
 			],
 		}),
-	).toEqual({
-		media: [{ table: "lucid_media", value: 42 }],
-		relation: [
-			{ table: "lucid_document__pages", value: 12 },
-			{ table: "lucid_document__settings", value: 2 },
-			{ table: "lucid_document__pages", value: 15 },
-		],
-		user: [{ table: "lucid_users", value: 7 }],
-	});
+	).toEqual([
+		{ resource: "media", table: "lucid_media", value: 42 },
+		{
+			resource: "documents",
+			table: "lucid_document__pages",
+			value: 12,
+		},
+		{
+			resource: "documents",
+			table: "lucid_document__settings",
+			value: 2,
+		},
+		{
+			resource: "documents",
+			table: "lucid_document__pages",
+			value: 15,
+		},
+		{ resource: "users", table: "lucid_users", value: 7 },
+	]);
 });
 
 test("ignores malformed and external references", () => {
@@ -91,5 +101,5 @@ test("ignores malformed and external references", () => {
 				{ type: "lucidMedia", attrs: { mediaId: "42" } },
 			],
 		}),
-	).toEqual({ media: [], relation: [] });
+	).toEqual([]);
 });

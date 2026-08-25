@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { InternalCollectionDocument, ResponseBody } from "@types";
+import type { InternalCollectionDocument, Refs, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
@@ -28,7 +28,7 @@ const useGetSingleVersion = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
 		queryKey: ["documents.getSingle", queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<InternalCollectionDocument>>({
+			request<ResponseBody<InternalCollectionDocument, Refs>>({
 				url: `/lucid/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/${queryParams().location?.id}/${queryParams().location?.versionId}`,

@@ -265,8 +265,8 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			},
 			include: {
 				"refs.media": () => getListingRefIncludes()["refs.media"],
-				"refs.relation": () => getListingRefIncludes()["refs.relation"],
-				"refs.user": () => getListingRefIncludes()["refs.user"],
+				"refs.documents": () => getListingRefIncludes()["refs.documents"],
+				"refs.users": () => getListingRefIncludes()["refs.users"],
 			},
 		},
 		enabled: () =>
@@ -675,6 +675,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 										<DocumentRow
 											index={i}
 											document={doc()}
+											refs={documents.data?.refs}
 											fieldInclude={getCollectionFieldIncludes()}
 											collection={activeCollection() as Collection}
 											collectionsByKey={relationCollectionsByKey()}

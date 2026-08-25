@@ -23,13 +23,11 @@ export interface DatetimeFieldConfig extends SharedFieldConfig {
 export type DatetimeFieldProps = Partial<Omit<DatetimeFieldConfig, "type">>;
 
 export type DatetimeResValue = string | null;
-export type DatetimeRef = null;
 
 export type DatetimeCustomFieldMapItem = {
 	props: DatetimeFieldProps;
 	config: DatetimeFieldConfig;
 	response: {
 		value: DatetimeResValue;
-		ref: DatetimeRef;
 	};
 };

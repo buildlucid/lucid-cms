@@ -25,7 +25,7 @@ const getSingleController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Get User Integration",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: userIntegrationItemParamsSchema,

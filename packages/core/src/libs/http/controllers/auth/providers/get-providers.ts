@@ -22,7 +22,7 @@ const getProvidersController = factory.createHandlers(
 		tags: ["auth"],
 		summary: "Get Auth Providers",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getProviders.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getProviders.response),
 		}),
 	}),
 	rateLimiter({

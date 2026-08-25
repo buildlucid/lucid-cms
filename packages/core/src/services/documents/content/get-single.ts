@@ -9,10 +9,9 @@ import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetSingleQueryParams } from "../../../schemas/documents.js";
-import type { CollectionDocument } from "../../../types.js";
+import type { CollectionDocument, Refs } from "../../../types.js";
 import {
 	applyDefaultQueryFilters,
-	getBaseUrl,
 	groupDocumentFilterConditions,
 	groupDocumentFilters,
 } from "../../../utils/helpers/index.js";
@@ -23,6 +22,7 @@ import type {
 import getDocumentBricks from "../../documents-bricks/get-multiple.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionDocumentTarget } from "../../preview-sessions/types.js";
+import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
 import resolveRelationDocumentFilters from "../helpers/resolve-relation-document-filters.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
@@ -38,7 +38,10 @@ type ContentDocumentsGetSingleInput<TCollectionKey extends string = string> = {
 type ContentDocumentsGetSingleService = <TCollectionKey extends string>(
 	context: ServiceContext,
 	data: ContentDocumentsGetSingleInput<TCollectionKey>,
-) => ServiceResponse<CollectionDocument<TCollectionKey>>;
+) => ServiceResponse<{
+	document: CollectionDocument<TCollectionKey>;
+	refs?: Refs;
+}>;
 
 /** Fetches one content-facing document with a response type tied to the collection key. */
 const getSingle: ContentDocumentsGetSingleService = async <
@@ -46,7 +49,10 @@ const getSingle: ContentDocumentsGetSingleService = async <
 >(
 	context: ServiceContext,
 	data: ContentDocumentsGetSingleInput<TCollectionKey>,
-): ServiceResponse<CollectionDocument<TCollectionKey>> => {
+): ServiceResponse<{
+	document: CollectionDocument<TCollectionKey>;
+	refs?: Refs;
+}> => {
 	const versionTargetRes = await validateContentVersionTarget({
 		versionType: data.versionType,
 		versionId: data.versionId,
@@ -192,29 +198,32 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		versionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 		includeBricks: include.bricks,
-		includeRefs: include.refs,
-		refTypes: include.refTypes,
+		refResources: include.refs,
 		flattenRelationRefFields: true,
 		allowedDocumentCollectionKeys: allowedCollectionKeys,
+		refTargets: collectDocumentRefTargets({
+			documents: [documentRes.data],
+			includeMeta: include.meta,
+		}),
 	});
 	if (bricksRes.error) return bricksRes;
 
 	return {
 		error: undefined,
-		data: documentsFormatter.formatContentSingle<TCollectionKey>({
-			document: documentRes.data,
-			collection: collectionRes.data,
-			bricks: bricksRes.data.bricks,
-			fields: bricksRes.data.fields,
-			config: context.config,
-			refs: bricksRes.data.refs,
-			host: getBaseUrl(context),
-			include: {
-				bricks: include.bricks,
-				refs: include.refs,
-				meta: include.meta,
-			},
-		}),
+		data: {
+			document: documentsFormatter.formatContentSingle<TCollectionKey>({
+				document: documentRes.data,
+				collection: collectionRes.data,
+				bricks: bricksRes.data.bricks,
+				fields: bricksRes.data.fields,
+				config: context.config,
+				include: {
+					bricks: include.bricks,
+					meta: include.meta,
+				},
+			}),
+			refs: include.refs !== null ? (bricksRes.data.refs ?? {}) : undefined,
+		},
 	};
 };
 

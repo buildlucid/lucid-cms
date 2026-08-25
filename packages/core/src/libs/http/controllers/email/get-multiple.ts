@@ -23,7 +23,7 @@ const getMultipleController = factory.createHandlers(
 		tags: ["emails"],
 		summary: "Get Multiple Emails",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

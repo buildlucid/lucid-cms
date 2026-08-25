@@ -7,11 +7,12 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
-import type { InternalCollectionDocument } from "../../types.js";
+import type { InternalCollectionDocument, Refs } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getDocumentWorkflow from "../document-workflows/get-single.js";
 import getDocumentBricks from "../documents-bricks/get-multiple.js";
+import collectDocumentRefTargets from "./helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
 
@@ -25,7 +26,10 @@ const getSingle: ServiceFn<
 			query: GetSingleQueryParams;
 		},
 	],
-	InternalCollectionDocument
+	{
+		document: InternalCollectionDocument;
+		refs?: Refs;
+	}
 > = async (context, data) => {
 	const Document = new DocumentsRepository(context.db);
 
@@ -106,16 +110,21 @@ const getSingle: ServiceFn<
 	let document: InternalCollectionDocument;
 	const include = resolveDocumentIncludes(data.query.include);
 	const fetchRouteFields = collectionRes.data.getData.routing !== null;
+	let refs: Refs | undefined;
 
-	if (include.bricks || include.refs || fetchRouteFields) {
+	if (include.bricks || include.refs !== null || fetchRouteFields) {
 		const bricksRes = await getDocumentBricks(context, {
 			versionId: versionId,
 			collectionKey: documentRes.data.collection_key,
 			versionType: relationVersionTypeRes.data.versionType,
 			resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 			includeBricks: include.bricks,
-			includeRefs: include.refs,
-			refTypes: include.refTypes,
+			refResources: include.refs,
+			refTargets: collectDocumentRefTargets({
+				documents: [documentRes.data],
+				includeMeta: true,
+				workflows: [workflowRes.data],
+			}),
 		});
 		if (bricksRes.error) return bricksRes;
 
@@ -130,9 +139,9 @@ const getSingle: ServiceFn<
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
 			},
-			refs: bricksRes.data.refs,
 			workflow: workflowRes.data,
 		});
+		refs = include.refs !== null ? (bricksRes.data.refs ?? {}) : undefined;
 	} else {
 		document = documentsFormatter.formatSingle({
 			document: documentRes.data,
@@ -148,10 +157,9 @@ const getSingle: ServiceFn<
 			workflow: workflowRes.data,
 		});
 	}
-	if (!include.bricks && !include.refs) {
+	if (!include.bricks && include.refs === null) {
 		document.bricks = [];
 		document.fields = [];
-		document.refs = null;
 	}
 
 	const afterFetchRes = await executeHooks(
@@ -179,7 +187,10 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: afterFetchRes.data.documents[0] ?? document,
+		data: {
+			document: afterFetchRes.data.documents[0] ?? document,
+			refs,
+		},
 	};
 };
 

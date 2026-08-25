@@ -54,7 +54,7 @@ const value: RichTextJSON = {
 const context = {
 	locale: "fr",
 	refs: {
-		relation: [
+		documents: [
 			{
 				id: 7,
 				collectionKey: "pages",
@@ -98,7 +98,7 @@ const context = {
 				},
 			},
 		],
-		user: [
+		users: [
 			{
 				id: 9,
 				username: "william",

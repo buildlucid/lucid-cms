@@ -19,7 +19,7 @@ const getAllController = factory.createHandlers(
 		tags: ["permissions"],
 		summary: "Get All Permissions",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getAll.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getAll.response),
 		}),
 	}),
 	authenticate(),

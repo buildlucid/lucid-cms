@@ -22,7 +22,7 @@ const getController = factory.createHandlers(
 		tags: ["content-account"],
 		summary: "Get Account",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.content.get.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.content.get.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

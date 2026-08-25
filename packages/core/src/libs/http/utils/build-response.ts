@@ -6,6 +6,7 @@ import { normalizeHost } from "../../../utils/helpers/index.js";
 // Types
 interface BuildResponseParams {
 	data: unknown;
+	refs?: unknown;
 	pagination?: {
 		count: number;
 		page: number;
@@ -16,7 +17,7 @@ interface BuildResponseParams {
 type FormatAPIResponse = (
 	c: Context,
 	params: BuildResponseParams,
-) => ResponseBody;
+) => ResponseBody<unknown, unknown>;
 
 // --------------------------------------------------
 // Helpers
@@ -155,6 +156,7 @@ const formatAPIResponse: FormatAPIResponse = (c, params) => {
 
 	return {
 		data: params.data || null,
+		...(params.refs === undefined ? {} : { refs: params.refs }),
 		meta: meta,
 		links,
 	};

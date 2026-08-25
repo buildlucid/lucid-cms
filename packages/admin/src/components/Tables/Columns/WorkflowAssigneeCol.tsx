@@ -1,9 +1,11 @@
-import type { InternalCollectionDocument } from "@types";
+import type { InternalCollectionDocument, Refs } from "@types";
 import { type Component, createMemo } from "solid-js";
+import { findDocumentUserRef } from "@/utils/document-ref-helpers";
 import UserStackCol from "./UserStackCol";
 
 const WorkflowAssigneeCol: Component<{
 	document: InternalCollectionDocument;
+	refs?: Refs;
 	include: boolean[];
 	index: number;
 }> = (props) => {
@@ -11,7 +13,13 @@ const WorkflowAssigneeCol: Component<{
 	// Memos
 	const assignees = createMemo(
 		() =>
-			props.document.workflow?.assignees.map((assignee) => assignee.user) ?? [],
+			props.document.workflow?.assignees.map(
+				(assignee) =>
+					findDocumentUserRef(props.refs, assignee.userId) ?? {
+						id: assignee.userId,
+						username: `#${assignee.userId}`,
+					},
+			) ?? [],
 	);
 
 	// -----------------------------------

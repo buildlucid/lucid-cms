@@ -22,7 +22,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["documents"],
 		summary: "Create Document",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		requestBody: openAPI.requestBody(controllerSchemas.createSingle.body),
 		parameters: openAPI.parameters({

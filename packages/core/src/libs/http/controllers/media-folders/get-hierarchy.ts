@@ -19,7 +19,7 @@ const getAllController = factory.createHandlers(
 		tags: ["media-folders"],
 		summary: "Get Media Folders Hierarchy",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.hierarchy.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.hierarchy.response),
 		}),
 	}),
 	authenticate(),

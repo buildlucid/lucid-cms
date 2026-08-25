@@ -57,6 +57,7 @@ export * from "./document-bricks.js";
 export * from "./document-publish-operation-assignees.js";
 export * from "./document-publish-operation-events.js";
 export * from "./document-publish-operations.js";
+export * from "./document-table-name.js";
 export * from "./document-versions.js";
 export * from "./document-workflow-assignees.js";
 export * from "./document-workflows.js";

@@ -2,8 +2,8 @@ import type {
 	Collection,
 	DocumentRef,
 	InternalCollectionDocument,
+	Refs,
 	RelationFieldValue,
-	UserRef,
 } from "@types";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import contentLocaleStore from "@/store/contentLocaleStore";
@@ -11,10 +11,13 @@ import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import {
+	findDocumentUserRef,
+	isDocumentRef,
+} from "@/utils/document-ref-helpers";
+import {
 	formatDocumentFieldValue,
 	getDocumentPreviewLabel,
 } from "@/utils/document-table-helpers";
-import { isDocumentRef, isUserRef } from "@/utils/relation-field-helpers";
 import ColorCol from "./ColorCol";
 import DateCol from "./DateCol";
 import PillCol from "./PillCol";
@@ -24,6 +27,7 @@ import UserStackCol from "./UserStackCol";
 const DocumentDynamicColumns: Component<{
 	field: CollectionLeafFieldConfig;
 	document: InternalCollectionDocument;
+	refs?: Refs;
 	include: boolean[];
 	index: number;
 	collectionLocalized: boolean;
@@ -89,16 +93,10 @@ const DocumentDynamicColumns: Component<{
 				: [];
 		if (values.length === 0) return [];
 
-		const refs = props.document.refs?.user;
-		if (!refs) return [];
-
-		return values
-			.map((value) =>
-				refs.find((ref): ref is NonNullable<UserRef> => {
-					return isUserRef(ref) && ref.id === value;
-				}),
-			)
-			.filter(isUserRef);
+		return values.flatMap((value) => {
+			const user = findDocumentUserRef(props.refs, value);
+			return user ? [user] : [];
+		});
 	});
 	const relationFieldValues = createMemo(() => {
 		if (props.field.type !== "relation") return null;
@@ -120,7 +118,7 @@ const DocumentDynamicColumns: Component<{
 		const values = relationFieldValues();
 		if (!values?.length) return [];
 
-		const refs = props.document.refs?.relation;
+		const refs = props.refs?.documents;
 		if (!refs) return [];
 
 		return values

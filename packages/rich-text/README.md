@@ -103,6 +103,7 @@ const html = generateHTML(document.fields.body);
 
 const htmlWithReferences = generateHTML(document.fields.body, {
   document,
+  refs,
   renderers: {
     brick: ({ brick }) => (brick ? renderBrick(brick) : ""),
     document: ({ document: target }) =>
@@ -112,12 +113,12 @@ const htmlWithReferences = generateHTML(document.fields.body, {
 ```
 
 - Document links retain their document identity and receive the current URL as a response-only `href`. Missing links render as plain text.
-- Document nodes store only their collection and document IDs. When `document` is supplied, the renderer receives either that source document for a self-reference or the matching item from `document.refs.relation`. They render nothing unless `renderers.document` or `renderers.fallback` is supplied.
+- Document nodes store only their collection and document IDs. When `document` is supplied, the renderer receives either that source document for a self-reference or the matching item from `refs.documents`. They render nothing unless `renderers.document` or `renderers.fallback` is supplied.
 - Media nodes retain their media ID and receive compact response-only render data. Images render as responsive `<picture>` markup; files render as links.
 - Variable nodes retain their document and field identity and receive the current scalar value.
 - Embedded-brick nodes store a stable brick ref. When `document` is supplied, `renderers.brick` receives the matching item from `document.bricks`.
 
-The source document is optional. Fetch it with refs and bricks included when those callbacks need related documents or embedded-brick data; unresolved targets are passed as `null`.
+The source document and response-level refs registry are optional. Fetch refs and bricks when those callbacks need related documents or embedded-brick data; unresolved targets are passed as `null`.
 
 Hydrated link, media, and variable attributes are derived data. Lucid removes them before persisting an edited rich-text value.
 

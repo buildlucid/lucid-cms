@@ -56,7 +56,6 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 export type RichTextFieldProps = Partial<Omit<RichTextFieldConfig, "type">>;
 
 export type RichTextResValue = Record<string, unknown> | null;
-export type RichTextRef = null;
 
 export type RichTextValidationData = {
 	media: MediaValidationData[];
@@ -86,6 +85,5 @@ export type RichTextCustomFieldMapItem = {
 	config: RichTextFieldConfig;
 	response: {
 		value: RichTextResValue;
-		ref: RichTextRef;
 	};
 };

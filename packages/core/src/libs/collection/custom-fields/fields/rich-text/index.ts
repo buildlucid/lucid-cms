@@ -10,9 +10,7 @@ import validateRichTextInputData from "./validate-input.js";
 export default {
 	config: richTextFieldConfig,
 	class: RichTextCustomField,
-	fetchRefs: null,
 	validateInput: validateRichTextInputData,
-	formatRef: null,
 	contentTypeGen: createValueFieldTypeGenerator(
 		"Record<string, unknown> | null",
 	),

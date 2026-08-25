@@ -103,6 +103,7 @@ export function useDocumentState(props: {
 			return objectHash(prev) === objectHash(next);
 		},
 	});
+	const refs = createMemo(() => documentQuery.data?.refs);
 	const isDocumentMutated = createMemo(() => brickStore.getDocumentMutated());
 	const collectionAccessError = createMemo(
 		() => collectionQuery.isError && isInaccessibleError(collectionQuery.error),
@@ -134,6 +135,7 @@ export function useDocumentState(props: {
 		collections,
 		collectionsByKey,
 		document,
+		refs,
 		isDocumentMutated,
 		shouldBlockNavigation,
 		collectionAccessError,

@@ -3,11 +3,12 @@ import type {
 	Collection,
 	DocumentVersionCheckResponse,
 	FieldError,
-	FieldRef,
-	FieldTypes,
 	FieldValue,
 	InternalCollectionDocument,
 	InternalDocumentField,
+	RefResource,
+	RefResourceMap,
+	Refs,
 } from "@types";
 import { nanoid } from "nanoid";
 import { batch, untrack } from "solid-js";
@@ -20,11 +21,10 @@ import type {
 	CollectionNonTabFieldConfig,
 } from "@/types/collection-config";
 import brickHelpers, { clearTargetFieldErrors } from "@/utils/brick-helpers";
+import { upsertRefs } from "@/utils/document-ref-helpers";
 import { mergeDraftCheckFields } from "@/utils/draft-check-helpers";
-import { isDocumentRef } from "@/utils/relation-field-helpers";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
-import { isObjectRecord } from "@/utils/type-guards";
 import {
 	type BrickFieldIndex,
 	type BrickFieldPath,
@@ -54,6 +54,13 @@ interface BrickSnapshotPayload {
 	fields?: Array<InternalDocumentField>;
 }
 
+type AddRefInput = {
+	[TResource in RefResource]: {
+		resource: TResource;
+		ref: RefResourceMap[TResource] | RefResourceMap[TResource][];
+	};
+}[RefResource];
+
 const [get, set] = createStore<{
 	bricks: Array<BrickData>;
 	fieldsErrors: Array<FieldError>;
@@ -64,7 +71,7 @@ const [get, set] = createStore<{
 	autoSavePaused: boolean;
 	relationFieldDragCount: number;
 	locked: boolean;
-	refs: Partial<Record<FieldTypes, FieldRef[]>>;
+	refs: Refs;
 	collectionLocalized: boolean;
 	documentRevision: number;
 	contentRevision: number;
@@ -150,11 +157,8 @@ const [get, set] = createStore<{
 		parentRepeaterKey: string | undefined;
 		parentRef: string | undefined;
 	}) => void;
-	setRefs: (document?: InternalCollectionDocument) => void;
-	addRef: (
-		fieldType: "media" | "relation" | "user",
-		ref: FieldRef | FieldRef[],
-	) => void;
+	setRefs: (refs?: Refs) => void;
+	addRef: (input: AddRefInput) => void;
 	mergeDraftCheckResponse: (response: DocumentVersionCheckResponse) => void;
 	startRelationFieldDrag: () => void;
 	endRelationFieldDrag: () => void;
@@ -801,59 +805,42 @@ const [get, set] = createStore<{
 			if (groupToggled) markDocumentChange();
 		});
 	},
-	/** Replaces resolved document references so relation, media, and user fields can render their current labels. */
-	setRefs(document) {
-		const refs = structuredClone(unwrap(document?.refs));
-		set("refs", refs || {});
+	/** Replaces the resolved resource refs used by document fields and rich text. */
+	setRefs(responseRefs) {
+		set("refs", structuredClone(unwrap(responseRefs ?? {})));
 	},
 	/** Upserts resolved references by stable identity so newly selected records are available without a refetch. */
-	addRef(fieldType, ref) {
+	addRef(input) {
+		if (input.resource === "documents") {
+			set(
+				"refs",
+				"documents",
+				upsertRefs(get.refs.documents, input.ref, (existing, next) => {
+					return (
+						existing.collectionKey === next.collectionKey &&
+						existing.id === next.id
+					);
+				}),
+			);
+			return;
+		}
+
+		if (input.resource === "media") {
+			set(
+				"refs",
+				"media",
+				upsertRefs(get.refs.media, input.ref, (existing, next) => {
+					return existing.id === next.id;
+				}),
+			);
+			return;
+		}
+
 		set(
 			"refs",
-			produce((draft) => {
-				const refsToAdd = Array.isArray(ref) ? ref : [ref];
-				if (!draft[fieldType]) {
-					draft[fieldType] = [];
-				}
-
-				const refs = draft[fieldType];
-
-				for (const nextRef of refsToAdd) {
-					const existingIndex = refs.findIndex((existing) => {
-						if (!existing || !nextRef) return false;
-
-						if (fieldType === "relation") {
-							const existingDocumentRef = isDocumentRef(existing)
-								? existing
-								: undefined;
-							const nextDocumentRef = isDocumentRef(nextRef)
-								? nextRef
-								: undefined;
-
-							if (!existingDocumentRef || !nextDocumentRef) {
-								return false;
-							}
-
-							return (
-								existingDocumentRef.collectionKey ===
-									nextDocumentRef.collectionKey &&
-								existingDocumentRef.id === nextDocumentRef.id
-							);
-						}
-
-						if (!isObjectRecord(existing) || !isObjectRecord(nextRef)) {
-							return false;
-						}
-
-						return existing.id === nextRef.id;
-					});
-
-					if (existingIndex !== -1) {
-						refs[existingIndex] = nextRef;
-					} else {
-						refs.push(nextRef);
-					}
-				}
+			"users",
+			upsertRefs(get.refs.users, input.ref, (existing, next) => {
+				return existing.id === next.id;
 			}),
 		);
 	},

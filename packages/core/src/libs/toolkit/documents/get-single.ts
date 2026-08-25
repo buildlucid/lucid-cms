@@ -3,6 +3,7 @@ import type {
 	CollectionDocument,
 	CollectionDocumentKey,
 	CollectionDocumentSingleQuery,
+	Refs,
 } from "../../../types.js";
 import type {
 	ServiceContext,
@@ -25,10 +26,17 @@ export type ToolkitDocumentsGetSingleInput<
 	query?: ToolkitDocumentsGetSingleQuery<TCollectionKey>;
 };
 
+export type ToolkitDocumentsGetSingleResult<
+	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
+> = {
+	document: CollectionDocument<TCollectionKey>;
+	refs?: Refs;
+};
+
 const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
-): ServiceResponse<CollectionDocument<TCollectionKey>> => {
+): ServiceResponse<ToolkitDocumentsGetSingleResult<TCollectionKey>> => {
 	return runToolkitService(
 		() =>
 			documentServices.content.getSingle(context, {

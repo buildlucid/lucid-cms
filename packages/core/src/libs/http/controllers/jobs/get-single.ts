@@ -22,7 +22,7 @@ const getSingleController = factory.createHandlers(
 		tags: ["jobs"],
 		summary: "Get Job",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			params: controllerSchemas.getSingle.params,

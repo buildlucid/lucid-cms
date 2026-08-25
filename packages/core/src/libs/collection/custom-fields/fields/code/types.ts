@@ -34,13 +34,11 @@ export interface CodeFieldConfig extends SharedFieldConfig {
 export type CodeFieldProps = Partial<Omit<CodeFieldConfig, "type">>;
 
 export type CodeResValue = CodeValue | null;
-export type CodeRef = null;
 
 export type CodeCustomFieldMapItem = {
 	props: CodeFieldProps;
 	config: CodeFieldConfig;
 	response: {
 		value: CodeResValue;
-		ref: CodeRef;
 	};
 };

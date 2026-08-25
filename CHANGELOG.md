@@ -21,6 +21,7 @@
 - Renamed the media URL processing APIs to `resolveUrl`. Image transformations now use configured presets and supported formats. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
 - Collection preview objects now require an explicit `enabled` flag, so URL and breakpoint settings can remain configured while previews are disabled. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - The content preview endpoint now accepts tokens in a POST request body and returns only their mode and expiry. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
+- Document responses now return referenced documents, media and users in a top-level `refs` object.
 
 ### Bug Fixes:
 

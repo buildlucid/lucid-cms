@@ -1,7 +1,4 @@
-import type {
-	DocumentWorkflow,
-	DocumentWorkflowAssignee,
-} from "@lucidcms/types";
+import type { DocumentWorkflow, WorkflowUser } from "@lucidcms/types";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
 import formatter from "./helpers.js";
@@ -53,17 +50,7 @@ const formatSingle = (props: {
 		assignees:
 			props.workflow?.assignees?.map((assignee) => ({
 				id: assignee.id,
-				user: {
-					id: assignee.user_id,
-					email: assignee.email ?? null,
-					username: assignee.username ?? null,
-					firstName: assignee.first_name ?? null,
-					lastName: assignee.last_name ?? null,
-					profilePicture: mediaFormatter.formatMediaImagePreview({
-						poster: assignee.profile_picture?.[0],
-						options: props.mediaOptions,
-					}),
-				},
+				userId: assignee.user_id,
 				assignedBy: assignee.assigned_by,
 				assignedAt: formatter.formatDate(assignee.assigned_at),
 			})) ?? [],
@@ -102,7 +89,7 @@ const formatAssigneeUsers = (props: {
 		profile_picture?: MediaPosterPropsT[];
 	}>;
 	mediaOptions: MediaFormatterOptions;
-}): Array<DocumentWorkflowAssignee["user"]> =>
+}): WorkflowUser[] =>
 	props.users.map((user) => ({
 		id: user.id,
 		email: user.email,

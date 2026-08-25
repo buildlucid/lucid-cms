@@ -1,6 +1,7 @@
 import type { Select, ServiceResponse } from "../../../types.js";
 import type { LucidBricksTable } from "../../db/tables/index.js";
 import { copy } from "../../i18n/index.js";
+import type { RefTarget } from "../../refs/types.js";
 import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
@@ -11,11 +12,9 @@ import type {
 	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
 	CustomFieldGuidanceConfig,
-	CustomFieldRefTargets,
 	CustomFieldResponseFormatContext,
 	CustomFieldUserAiConfig,
 	CustomFieldValidateResponse,
-	FieldRefTarget,
 	FieldRelationValidationInput,
 	FieldTypes,
 	GetIndexDefinitionProps,
@@ -232,12 +231,12 @@ abstract class CustomField<T extends FieldTypes> {
 	 */
 	public getRelationFieldRefTargets(
 		_row: Select<LucidBricksTable>,
-	): FieldRefTarget[] {
+	): RefTarget[] {
 		return [];
 	}
 	/** Returns reference targets found in a column-backed field value. */
-	public getFieldRefTargets(_value: unknown): CustomFieldRefTargets {
-		return {};
+	public getFieldRefTargets(_value: unknown): RefTarget[] {
+		return [];
 	}
 	/** Runs field-specific validation once shared checks have passed. */
 	abstract uniqueValidation(

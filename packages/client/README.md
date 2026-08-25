@@ -143,12 +143,14 @@ const response = await client.documents.getSingle({
 });
 
 if (!response.error) {
-    const page = asDocument(response.data.data, {
+    const page = asDocument({
         locale: "en",
+        document: response.data.data,
+        refs: response.data.refs,
     });
 
     const title = page.field("page_title").value();
-    const relatedPage = page.field("related_page").ref("relation");
+    const relatedPage = page.field("related_page").ref("documents");
     const seo = page.brick({
         type: "fixed",
         key: "seo",
@@ -174,7 +176,11 @@ const response = await client.documents.getMultiple({
 });
 
 if (!response.error) {
-    const pages = asDocuments(response.data.data, { locale: "en" });
+    const pages = asDocuments({
+        locale: "en",
+        documents: response.data.data,
+        refs: response.data.refs,
+    });
 
     for (const page of pages) {
         console.log(page.field("page_title").value());
@@ -279,7 +285,7 @@ const preview = setupPreview();
 window.addEventListener("pagehide", preview.cleanup, { once: true });
 ```
 
-For click-to-field targeting, pass the active preview state to `asDocument(..., { preview: true })` and spread `field.preview()` onto the element rendering that field. It returns an empty object outside preview mode; consumers should not construct preview attributes or messages directly.
+For click-to-field targeting, pass the active preview state to `asDocument({ document, preview: true })` and spread `field.preview()` onto the element rendering that field. It returns an empty object outside preview mode; consumers should not construct preview attributes or messages directly.
 
 ## Toolkit Toolbar Helper
 

@@ -20,7 +20,7 @@ const csrfController = factory.createHandlers(
 		tags: ["auth"],
 		summary: "CSRF Token",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getCSRF.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getCSRF.response),
 		}),
 	}),
 	rateLimiter({

@@ -7,5 +7,6 @@ export type * from "./resources/integrations/index.js";
 export type * from "./resources/locales/index.js";
 export type * from "./resources/media/index.js";
 export type * from "./resources/queue/index.js";
+export type * from "./resources/refs/index.js";
 export type * from "./resources/settings/index.js";
 export type * from "./resources/users/index.js";

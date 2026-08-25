@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import extractRelatedEntityIds from "./extract-related-entity-ids.js";
+import collectRefTargets from "./collect-ref-targets.js";
 
 const collection = new CollectionBuilder("pages", {
 	mode: "multiple",
@@ -22,13 +22,12 @@ const context = {
 	},
 } as unknown as ServiceContext;
 
-describe("extractRelatedEntityIds", () => {
-	test("adds refs embedded in a JSON custom-field column to normal ref buckets", async () => {
+describe("collectRefTargets", () => {
+	test("adds refs embedded in a JSON custom-field column to resource buckets", async () => {
 		const table = "lucid_document__pages__fld" as const;
-		const result = await extractRelatedEntityIds(context, {
+		const result = await collectRefTargets(context, {
 			collection,
-			includeTypes: [],
-			includeFieldValueRefTargets: true,
+			resources: [],
 			brickSchema: [
 				{
 					name: table,
@@ -97,20 +96,22 @@ describe("extractRelatedEntityIds", () => {
 
 		expect(result.error).toBeUndefined();
 		if (result.error) return;
-		expect(result.data.media?.[0]?.table).toBe("lucid_media");
-		expect(Array.from(result.data.media?.[0]?.values ?? [])).toEqual([4]);
-		expect(result.data.relation?.[0]?.table).toBe("lucid_document__articles");
-		expect(Array.from(result.data.relation?.[0]?.values ?? [])).toEqual([8]);
-		expect(result.data.user?.[0]?.table).toBe("lucid_users");
-		expect(Array.from(result.data.user?.[0]?.values ?? [])).toEqual([5]);
+		expect(Array.from(result.data.media?.get("lucid_media") ?? [])).toEqual([
+			4,
+		]);
+		expect(
+			Array.from(result.data.documents?.get("lucid_document__articles") ?? []),
+		).toEqual([8]);
+		expect(Array.from(result.data.users?.get("lucid_users") ?? [])).toEqual([
+			5,
+		]);
 	});
 
 	test("omits a rich-text ref to the document being fetched", async () => {
 		const table = "lucid_document__pages__fld" as const;
-		const result = await extractRelatedEntityIds(context, {
+		const result = await collectRefTargets(context, {
 			collection,
-			includeTypes: [],
-			includeFieldValueRefTargets: true,
+			resources: [],
 			brickSchema: [
 				{
 					name: table,
@@ -158,6 +159,6 @@ describe("extractRelatedEntityIds", () => {
 
 		expect(result.error).toBeUndefined();
 		if (result.error) return;
-		expect(result.data.relation).toBeUndefined();
+		expect(result.data.documents).toBeUndefined();
 	});
 });

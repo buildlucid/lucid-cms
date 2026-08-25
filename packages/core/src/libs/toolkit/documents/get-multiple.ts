@@ -3,6 +3,7 @@ import type {
 	CollectionDocument,
 	CollectionDocumentKey,
 	CollectionDocumentMultipleQuery,
+	Refs,
 } from "../../../types.js";
 import type {
 	ServiceContext,
@@ -37,8 +38,9 @@ export type ToolkitDocumentsGetMultipleInput<
 export type ToolkitDocumentsGetMultipleResult<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = {
-	data: CollectionDocument<TCollectionKey>[];
+	documents: CollectionDocument<TCollectionKey>[];
 	count: number;
+	refs?: Refs;
 };
 
 const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(

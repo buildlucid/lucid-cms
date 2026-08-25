@@ -73,7 +73,7 @@ const duplicateSingle: ServiceFn<
 		versionId: sourceVersionId,
 		collectionKey: data.collectionKey,
 		versionType: "latest",
-		includeRefs: false,
+		refResources: null,
 	});
 	if (sourceContentRes.error) return sourceContentRes;
 	const sourceContent = prepareDuplicateContent(sourceContentRes.data);

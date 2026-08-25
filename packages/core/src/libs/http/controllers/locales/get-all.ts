@@ -19,7 +19,7 @@ const getAllController = factory.createHandlers(
 		tags: ["locales"],
 		summary: "Get All Locales",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getAll.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getAll.response),
 			paginated: true,
 		}),
 	}),

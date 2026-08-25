@@ -30,7 +30,7 @@ const requestDownloadController = factory.createHandlers(
 			params: controllerSchemas.requestDownload.params,
 		}),
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.requestDownload.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.requestDownload.response),
 		}),
 	}),
 	rateLimiter({

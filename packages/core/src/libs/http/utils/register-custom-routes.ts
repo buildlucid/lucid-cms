@@ -47,7 +47,7 @@ const buildOpenAPIOptions = (
 					responses: openAPI.responses(
 						schema?.response
 							? {
-									schema: z.toJSONSchema(schema.response),
+									dataSchema: z.toJSONSchema(schema.response),
 								}
 							: undefined,
 					),

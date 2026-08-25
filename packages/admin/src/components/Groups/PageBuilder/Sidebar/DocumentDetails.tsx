@@ -2,6 +2,7 @@ import type {
 	Collection,
 	DocumentVersionUpdateResponse,
 	InternalCollectionDocument,
+	Refs,
 } from "@types";
 import { FaSolidInfo } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo } from "solid-js";
@@ -17,6 +18,7 @@ import UserDetailValue from "./Partials/UserDetailValue";
 export const DocumentDetails: Component<{
 	collection: Accessor<Collection | undefined>;
 	document: Accessor<InternalCollectionDocument | undefined>;
+	refs: Accessor<Refs | undefined>;
 	autoSaveMetadata?: Accessor<DocumentVersionUpdateResponse | null>;
 	documentId: Accessor<number | undefined>;
 }> = (props) => {
@@ -73,12 +75,22 @@ export const DocumentDetails: Component<{
 			},
 			{
 				label: T()("common.created.by"),
-				value: <UserDetailValue user={document?.createdBy ?? null} />,
+				value: (
+					<UserDetailValue
+						userId={document?.createdBy ?? null}
+						refs={props.refs()}
+					/>
+				),
 				show: document !== undefined,
 			},
 			{
 				label: T()("common.updated.by"),
-				value: <UserDetailValue user={document?.updatedBy ?? null} />,
+				value: (
+					<UserDetailValue
+						userId={document?.updatedBy ?? null}
+						refs={props.refs()}
+					/>
+				),
 				show: document !== undefined,
 			},
 		];

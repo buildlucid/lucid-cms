@@ -21,7 +21,7 @@ const getMultipleController = factory.createHandlers(
 		tags: ["media-folders"],
 		summary: "Get Multiple Media Folders",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getMultiple.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getMultiple.response),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({

@@ -23,7 +23,7 @@ const getUploadPartUrlsController = factory.createHandlers(
 		tags: ["media"],
 		summary: "Get Upload Part URLs",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.getUploadPartUrls.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.getUploadPartUrls.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: { csrf: true },

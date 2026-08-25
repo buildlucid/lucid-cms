@@ -25,13 +25,10 @@ export interface LinkFieldConfig extends SharedFieldConfig {
 
 export type LinkFieldProps = Partial<Omit<LinkFieldConfig, "type">>;
 
-export type LinkRef = null;
-
 export type LinkCustomFieldMapItem = {
 	props: LinkFieldProps;
 	config: LinkFieldConfig;
 	response: {
 		value: LinkResValue;
-		ref: LinkRef;
 	};
 };

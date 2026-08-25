@@ -1,4 +1,4 @@
-import type { CollectionDocument, DocumentRef } from "@lucidcms/types";
+import type { CollectionDocument, DocumentRef, Refs } from "@lucidcms/types";
 import type {
 	Mark as ProseMirrorMark,
 	Node as ProseMirrorNode,
@@ -56,6 +56,7 @@ const isDocumentReference = (value: unknown): value is DocumentRef =>
  */
 const resolveDocumentNodeTarget = <TDocument extends CollectionDocument>(
 	sourceDocument: TDocument | null,
+	refs: Refs | undefined,
 	collectionKey: unknown,
 	documentId: unknown,
 ): RichTextRenderDocument<TDocument> | null => {
@@ -70,7 +71,7 @@ const resolveDocumentNodeTarget = <TDocument extends CollectionDocument>(
 		return sourceDocument;
 	}
 
-	for (const reference of sourceDocument?.refs?.relation ?? []) {
+	for (const reference of refs?.documents ?? []) {
 		if (
 			isDocumentReference(reference) &&
 			reference.collectionKey === collectionKey &&
@@ -92,6 +93,7 @@ const createRenderMappings = <
 }) => {
 	const renderers = props.options?.renderers;
 	const sourceDocument = props.options?.document ?? null;
+	const refs = props.options?.refs;
 	const embeddedBricks = new Map<string, RichTextRenderBrick<TDocument>>();
 	for (const brick of sourceDocument?.bricks ?? []) {
 		embeddedBricks.set(brick.ref, brick);
@@ -181,6 +183,7 @@ const createRenderMappings = <
 		const nodeJSON = node.toJSON() as RichTextJSON;
 		const document = resolveDocumentNodeTarget(
 			sourceDocument,
+			refs,
 			node.attrs.collectionKey,
 			node.attrs.documentId,
 		);

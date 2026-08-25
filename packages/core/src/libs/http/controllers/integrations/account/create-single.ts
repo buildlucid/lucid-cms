@@ -21,7 +21,7 @@ const createSingleController = factory.createHandlers(
 		tags: ["integrations"],
 		summary: "Create Account Integration",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.createSingle.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.createSingle.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: {

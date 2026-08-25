@@ -25,13 +25,11 @@ export type SectionFieldProps = Partial<
 >;
 
 export type SectionResValue = null;
-export type SectionRef = null;
 
 export type SectionCustomFieldMapItem = {
 	props: SectionFieldProps;
 	config: SectionFieldConfig;
 	response: {
 		value: SectionResValue;
-		ref: SectionRef;
 	};
 };

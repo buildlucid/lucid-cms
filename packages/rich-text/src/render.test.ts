@@ -234,8 +234,8 @@ describe("generateHTML", () => {
 			version: "latest",
 			route: { path: "/", label: "Home" },
 			fields: {},
-			refs: { relation: [reference] },
 		} satisfies CollectionDocument;
+		const refs = { documents: [reference] };
 		const value = {
 			type: "doc",
 			content: [
@@ -261,6 +261,7 @@ describe("generateHTML", () => {
 		expect(
 			generateHTML(value, {
 				document,
+				refs,
 				renderers: {
 					document: ({ document: target }) => {
 						if (

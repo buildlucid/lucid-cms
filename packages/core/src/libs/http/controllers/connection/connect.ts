@@ -30,7 +30,7 @@ const connectController = factory.createHandlers(
 		tags: ["connection"],
 		summary: "Connect to Lucid",
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.connect.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.connect.response),
 		}),
 		parameters: openAPI.parameters({
 			headers: { csrf: true },

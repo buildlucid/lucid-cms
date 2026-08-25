@@ -50,6 +50,14 @@ export const fieldConfigSchema = z.object({
 		description: "Type of the field (text, checkbox, media, etc.)",
 		example: "text",
 	}),
+	resource: z
+		.enum(["documents", "media", "users"])
+		.meta({
+			description:
+				"Response ref resource used to hydrate this field's stored identifiers",
+			example: "documents",
+		})
+		.optional(),
 	collection: z
 		.union([z.string(), z.array(z.string())])
 		.nullable()
@@ -482,6 +490,7 @@ export const fieldResponseBaseSchema = z.object({
 		description: "The type of field (e.g., text, number, media)",
 		example: "text",
 	}),
+	resource: z.enum(["documents", "media", "users"]).optional(),
 	groupRef: z
 		.string()
 		.meta({

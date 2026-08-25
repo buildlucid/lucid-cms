@@ -5,9 +5,7 @@ import JsonCustomField from "./custom-field.js";
 export default {
 	config: jsonFieldConfig,
 	class: JsonCustomField,
-	fetchRefs: null,
 	validateInput: null,
-	formatRef: null,
 	contentTypeGen: createValueFieldTypeGenerator(
 		"Record<string, unknown> | unknown[] | null",
 	),

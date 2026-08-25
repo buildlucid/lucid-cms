@@ -1,4 +1,4 @@
-import type { CollectionDocument, DocumentRef } from "@lucidcms/types";
+import type { CollectionDocument, DocumentRef, Refs } from "@lucidcms/types";
 import type { Extensions, JSONContent } from "@tiptap/core";
 
 export type RichTextJSON = JSONContent;
@@ -163,6 +163,8 @@ export type RichTextRenderOptions<
 > = {
 	/** Source document used to resolve document and embedded-brick nodes. */
 	document?: TDocument | null;
+	/** Shared refs registry returned alongside the source document. */
+	refs?: Refs;
 	/** Additional or replacement Tiptap extensions used by the static renderer. */
 	extensions?: Extensions;
 	renderers?: RichTextRenderers<TDocument>;

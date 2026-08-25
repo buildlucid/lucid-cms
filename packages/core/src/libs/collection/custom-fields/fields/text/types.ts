@@ -27,13 +27,11 @@ export interface TextFieldConfig extends SharedFieldConfig {
 export type TextFieldProps = Partial<Omit<TextFieldConfig, "type">>;
 
 export type TextResValue = string | null;
-export type TextRef = null;
 
 export type TextCustomFieldMapItem = {
 	props: TextFieldProps;
 	config: TextFieldConfig;
 	response: {
 		value: TextResValue;
-		ref: TextRef;
 	};
 };

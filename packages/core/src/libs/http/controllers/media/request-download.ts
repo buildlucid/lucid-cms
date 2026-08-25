@@ -29,7 +29,7 @@ const requestDownloadController = factory.createHandlers(
 			},
 		}),
 		responses: openAPI.responses({
-			schema: z.toJSONSchema(controllerSchemas.requestDownload.response),
+			dataSchema: z.toJSONSchema(controllerSchemas.requestDownload.response),
 		}),
 	}),
 	validateCSRF,

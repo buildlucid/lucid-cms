@@ -12,7 +12,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetMultipleQueryParams } from "../../../schemas/documents.js";
-import type { CollectionDocument } from "../../../types.js";
+import type { CollectionDocument, Refs } from "../../../types.js";
 import {
 	applyDefaultQueryFilters,
 	getBaseUrl,
@@ -23,13 +23,11 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import extractRelatedEntityIds from "../../documents-bricks/helpers/extract-related-entity-ids.js";
-import fetchRefData, {
-	type FieldRefResponse,
-} from "../../documents-bricks/helpers/fetch-ref-data.js";
 import authorizePreview from "../../preview-sessions/authorize.js";
 import type { PreviewSessionCollectionTarget } from "../../preview-sessions/types.js";
+import collectDocumentRefTargets from "../helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "../helpers/resolve-document-includes.js";
+import resolveDocumentRefs from "../helpers/resolve-document-refs.js";
 import resolveRelationDocumentFilters from "../helpers/resolve-relation-document-filters.js";
 import resolveRelationVersionType from "../helpers/resolve-relation-version-type.js";
 import validateContentVersionTarget from "../helpers/validate-content-version-target.js";
@@ -44,8 +42,9 @@ type ContentDocumentsGetMultipleInput<TCollectionKey extends string = string> =
 
 type ContentDocumentsGetMultipleResult<TCollectionKey extends string = string> =
 	{
-		data: CollectionDocument<TCollectionKey>[];
+		documents: CollectionDocument<TCollectionKey>[];
 		count: number;
+		refs?: Refs;
 	};
 
 type ContentDocumentsGetMultipleService = <TCollectionKey extends string>(
@@ -216,50 +215,43 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 	const documents = documentsRes.data?.[0] ?? [];
 	const baseUrl = getBaseUrl(context);
 
-	const relationIdRes = await extractRelatedEntityIds(context, {
+	const refsRes = await resolveDocumentRefs(context, {
 		collection: collectionRes.data,
+		collections: collectionsRes.data,
 		brickSchema: collectionFieldsTableSchemas,
 		responses: documents,
-		includeTypes: include.refs ? include.refTypes : [],
-		includeFieldValueRefTargets: true,
-	});
-	if (relationIdRes.error) return relationIdRes;
-
-	const refDataRes = await fetchRefData(context, {
-		values: relationIdRes.data,
 		versionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
+		refResources: include.refs,
+		refTargets: collectDocumentRefTargets({
+			documents,
+			includeMeta: include.meta,
+		}),
 		allowedDocumentCollectionKeys: allowedCollectionKeys,
+		host: baseUrl,
+		flattenRelationRefFields: true,
 	});
-	if (refDataRes.error) return refDataRes;
-
-	const refData: FieldRefResponse = refDataRes.data;
+	if (refsRes.error) return refsRes;
 
 	return {
 		error: undefined,
 		data: {
-			data: documentsFormatter.formatContentMultiple<TCollectionKey>({
+			documents: documentsFormatter.formatContentMultiple<TCollectionKey>({
 				documents,
 				collection: collectionRes.data,
-				collections: collectionsRes.data,
 				config: context.config,
 				host: baseUrl,
-				mediaOptions: {
-					host: baseUrl,
-					delivery: context.mediaDelivery,
-				},
-				refData,
-				refTypes: include.refTypes,
+				hydratedRefs: refsRes.data.hydratedRefs,
 				hasFields: true,
 				hasBricks: false,
 				bricksTableSchema: collectionFieldsTableSchemas,
 				include: {
 					bricks: false,
-					refs: include.refs,
 					meta: include.meta,
 				},
 			}),
 			count: formatter.parseCount(documentsRes.data?.[1]?.count),
+			refs: refsRes.data.refs,
 		},
 	};
 };
