@@ -5,6 +5,7 @@ import {
 } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
+import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
@@ -12,6 +13,7 @@ import type { ContentGetSingleQueryParams } from "../../../schemas/documents.js"
 import type { CollectionDocument, Refs } from "../../../types.js";
 import {
 	applyDefaultQueryFilters,
+	getBaseUrl,
 	groupDocumentFilterConditions,
 	groupDocumentFilters,
 } from "../../../utils/helpers/index.js";
@@ -208,15 +210,50 @@ const getSingle: ContentDocumentsGetSingleService = async <
 	});
 	if (bricksRes.error) return bricksRes;
 
+	const baseUrl = getBaseUrl(context);
+	const document = documentsFormatter.formatSingle({
+		document: documentRes.data,
+		collection: collectionRes.data,
+		bricks: bricksRes.data.bricks,
+		fields: bricksRes.data.fields,
+		config: context.config,
+		host: baseUrl,
+		mediaOptions: {
+			host: baseUrl,
+			delivery: context.mediaDelivery,
+		},
+	});
+
+	const afterFetchRes = await executeHooks(
+		context,
+		{
+			service: "documents",
+			event: "afterFetch",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		{
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: data.collectionKey,
+				collectionTableNames: tableNameRes.data,
+			},
+			data: {
+				versionType,
+				relationVersionType: relationVersionTypeRes.data.versionType,
+				documents: [document],
+			},
+		},
+	);
+	if (afterFetchRes.error) return afterFetchRes;
+
 	return {
 		error: undefined,
 		data: {
-			document: documentsFormatter.formatContentSingle<TCollectionKey>({
-				document: documentRes.data,
+			document: documentsFormatter.formatContentSingle({
+				document: afterFetchRes.data.documents[0] ?? document,
+				collectionKey: data.collectionKey,
 				collection: collectionRes.data,
-				bricks: bricksRes.data.bricks,
-				fields: bricksRes.data.fields,
-				config: context.config,
 				include: {
 					bricks: include.bricks,
 					meta: include.meta,

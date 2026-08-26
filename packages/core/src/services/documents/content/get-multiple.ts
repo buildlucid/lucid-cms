@@ -8,6 +8,7 @@ import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import formatter, {
 	documentsFormatter,
 } from "../../../libs/formatters/index.js";
+import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
@@ -212,19 +213,19 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 	);
 	if (documentsRes.error) return documentsRes;
 
-	const documents = documentsRes.data?.[0] ?? [];
+	const documentRows = documentsRes.data?.[0] ?? [];
 	const baseUrl = getBaseUrl(context);
 
 	const refsRes = await resolveDocumentRefs(context, {
 		collection: collectionRes.data,
 		collections: collectionsRes.data,
 		brickSchema: collectionFieldsTableSchemas,
-		responses: documents,
+		responses: documentRows,
 		versionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
 		refResources: include.refs,
 		refTargets: collectDocumentRefTargets({
-			documents,
+			documents: documentRows,
 			includeMeta: include.meta,
 		}),
 		allowedDocumentCollectionKeys: allowedCollectionKeys,
@@ -233,18 +234,51 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 	});
 	if (refsRes.error) return refsRes;
 
+	const documents = documentsFormatter.formatMultiple({
+		documents: documentRows,
+		collection: collectionRes.data,
+		config: context.config,
+		host: baseUrl,
+		mediaOptions: {
+			host: baseUrl,
+			delivery: context.mediaDelivery,
+		},
+		hydratedRefs: refsRes.data.hydratedRefs,
+		hasFields: true,
+		hasBricks: false,
+		bricksTableSchema: collectionFieldsTableSchemas,
+	});
+
+	const afterFetchRes = await executeHooks(
+		context,
+		{
+			service: "documents",
+			event: "afterFetch",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		{
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: data.collectionKey,
+				collectionTableNames: tableNameRes.data,
+			},
+			data: {
+				versionType,
+				relationVersionType: relationVersionTypeRes.data.versionType,
+				documents,
+			},
+		},
+	);
+	if (afterFetchRes.error) return afterFetchRes;
+
 	return {
 		error: undefined,
 		data: {
-			documents: documentsFormatter.formatContentMultiple<TCollectionKey>({
-				documents,
+			documents: documentsFormatter.formatContentMultiple({
+				documents: afterFetchRes.data.documents,
+				collectionKey: data.collectionKey,
 				collection: collectionRes.data,
-				config: context.config,
-				host: baseUrl,
-				hydratedRefs: refsRes.data.hydratedRefs,
-				hasFields: true,
-				hasBricks: false,
-				bricksTableSchema: collectionFieldsTableSchemas,
 				include: {
 					bricks: false,
 					meta: include.meta,

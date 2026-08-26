@@ -179,70 +179,23 @@ const formatVersions = (props: {
  * Formats multiple documents into the content-facing document shape while
  * preserving the caller's collection-key generic at the formatter boundary.
  */
-const formatContentMultiple = <TCollectionKey extends string = string>(props: {
-	documents: DocumentQueryResponse[];
+const formatContentMultiple = <TCollectionKey extends string>(props: {
+	documents: InternalCollectionDocument[];
+	collectionKey: TCollectionKey;
 	collection: CollectionBuilder;
-	config: Config;
-	host: string;
-	hasFields: boolean;
-	hasBricks: boolean;
-	hydratedRefs: Refs;
-	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	include: {
 		bricks: boolean;
 		meta: boolean;
 	};
 }): CollectionDocument<TCollectionKey>[] => {
-	return props.documents.map((d) => {
-		let fields: InternalDocumentField[] | null = null;
-		let bricks: InternalDocumentBrick[] | null = null;
-		if (props.hasFields) {
-			fields = documentBricksFormatter.formatDocumentFields({
-				bricksQuery: d,
-				bricksSchema: props.bricksTableSchema,
-				refs: props.hydratedRefs,
-				collection: props.collection,
-				config: props.config,
-				host: props.host,
-			});
-		}
-		if (props.hasBricks) {
-			bricks = documentBricksFormatter.formatMultiple({
-				bricksQuery: d,
-				bricksSchema: props.bricksTableSchema,
-				refs: props.hydratedRefs,
-				collection: props.collection,
-				config: props.config,
-				host: props.host,
-			});
-		}
-
-		return formatContentSingle<TCollectionKey>({
-			document: d,
+	return props.documents.map((document) =>
+		formatContentSingle({
+			document,
+			collectionKey: props.collectionKey,
 			collection: props.collection,
-			config: props.config,
-			fields: fields,
-			bricks: bricks || undefined,
 			include: props.include,
-		});
-	});
-};
-
-const formatContentMeta = (props: {
-	document: DocumentQueryResponse;
-	collection: CollectionBuilder;
-}) => {
-	return {
-		versionId: props.document.version_id ?? null,
-		versions: formatVersions({
-			document: props.document,
-			collection: props.collection,
 		}),
-		createdAt: formatter.formatDate(props.document.created_at),
-		updatedAt: formatter.formatDate(props.document.updated_at),
-		createdBy: props.document.created_by ?? null,
-		updatedBy: props.document.updated_by ?? null,
-	};
+	);
 };
 
 const formatContentBricks = (
@@ -272,45 +225,42 @@ const formatContentBricks = (
  * Formats one document into the content response shape used by the public
  * client package and toolkit helpers.
  */
-const formatContentSingle = <TCollectionKey extends string = string>(props: {
-	document: DocumentQueryResponse;
+const formatContentSingle = <TCollectionKey extends string>(props: {
+	document: InternalCollectionDocument;
+	collectionKey: TCollectionKey;
 	collection: CollectionBuilder;
-	bricks?: InternalDocumentBrick[];
-	fields?: InternalDocumentField[] | null;
-	config: Config;
 	include: {
 		bricks: boolean;
 		meta: boolean;
 	};
 }): CollectionDocument<TCollectionKey> => {
-	const contentRes: Record<string, unknown> = {
+	return {
 		id: props.document.id,
-		collectionKey: props.document.collection_key,
-		version: props.document.version_type ?? null,
-		route: formatDocumentRoute({
-			collection: props.collection,
-			documentId: props.document.id,
-			fields: props.fields,
-			locales: props.config.localization.locales.map((locale) => locale.code),
-		}),
+		collectionKey: props.collectionKey,
+		version: props.document.version,
+		route: props.document.route,
 		fields: documentFieldsFormatter.flattenFields(
-			props.fields ?? [],
+			props.document.fields ?? [],
 			props.collection.contentFieldTree,
 		),
-	};
-
-	if (props.include.bricks) {
-		contentRes.bricks = formatContentBricks(props.bricks, props.collection);
-	}
-
-	if (props.include.meta) {
-		contentRes.meta = formatContentMeta({
-			document: props.document,
-			collection: props.collection,
-		});
-	}
-
-	return contentRes as unknown as CollectionDocument<TCollectionKey>;
+		...(props.include.bricks
+			? {
+					bricks: formatContentBricks(props.document.bricks, props.collection),
+				}
+			: undefined),
+		...(props.include.meta
+			? {
+					meta: {
+						versionId: props.document.versionId,
+						versions: props.document.versions,
+						createdAt: props.document.createdAt,
+						updatedAt: props.document.updatedAt,
+						createdBy: props.document.createdBy,
+						updatedBy: props.document.updatedBy,
+					},
+				}
+			: undefined),
+	} satisfies CollectionDocument<string> as CollectionDocument<TCollectionKey>;
 };
 
 export default {

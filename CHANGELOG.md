@@ -27,6 +27,7 @@
 ### Bug Fixes:
 
 - Fixed custom field reference validation accepting soft-deleted entries. ([83425cd](https://github.com/buildlucid/lucid-cms/commit/83425cd414f37171c529734f10ccf525675e73e3))
+- Fixed content document endpoints not running document `afterFetch` hooks.
 
 ## v0.18.0-alpha.0
 
