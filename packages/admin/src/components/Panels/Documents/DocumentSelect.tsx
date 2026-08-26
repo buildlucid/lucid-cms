@@ -290,7 +290,6 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			activeCollection()?.mode === "single" &&
 			typeof activeCollection()?.documentId === "number",
 	});
-
 	// ----------------------------------------
 	// Memos
 	const getFilterFields = createMemo(() =>
@@ -353,6 +352,16 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			typeof activeCollection()?.documentId === "number" &&
 			activeCollection()?.documentId === excludedDocumentId(),
 	);
+	const singleDocumentSelected = createMemo(() => {
+		const document = singleDocument.data?.data;
+		if (!document) return false;
+
+		return selectedDocuments().some(
+			(selectedDocument) =>
+				selectedDocument.id === document.id &&
+				selectedDocument.collectionKey === document.collectionKey,
+		);
+	});
 	const collectionOptions = createMemo(() =>
 		allowedCollectionKeys().map((collectionKey) => {
 			const collection = collections().find(
@@ -460,37 +469,6 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 
 		if (changed && !isMultiple()) setSelectedDocuments([]);
 	});
-	createEffect(() => {
-		const active = collectionKey();
-		const activeCollectionData = activeCollection();
-		if (
-			!active ||
-			activeCollectionData?.key !== active ||
-			activeCollectionData.mode !== "single"
-		) {
-			return;
-		}
-
-		if (
-			singleDocumentExcluded() ||
-			typeof activeCollectionData.documentId !== "number" ||
-			singleDocument.isError
-		) {
-			setSelectedDocuments([]);
-			return;
-		}
-
-		const document = singleDocument.data?.data;
-		if (
-			document?.collectionKey !== active ||
-			document.id !== activeCollectionData.documentId
-		) {
-			return;
-		}
-
-		setSelectedDocuments([documentResponseToRef(document)]);
-	});
-
 	// ----------------------------------------
 	// Functions
 	const toggleSelectedDocument = (document: InternalCollectionDocument) => {
@@ -721,6 +699,11 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						}
 						isError={collectionIsError() || singleDocument.isError}
 						isExcluded={singleDocumentExcluded()}
+						selected={singleDocumentSelected()}
+						onSelect={() => {
+							const document = singleDocument.data?.data;
+							if (document) toggleSelectedDocument(document);
+						}}
 					/>
 				)}
 			</Show>

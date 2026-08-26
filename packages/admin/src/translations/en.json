@@ -681,8 +681,6 @@
 	"common.nothing.selected": "Nothing selected",
 	"documents.select.title": "Select Document",
 	"documents.select.description": "Select a document from your collection",
-	"documents.select.single.label": "Single collection",
-	"documents.select.single.description": "This collection has one document, so it is selected automatically. Confirm to continue, or choose another collection.",
 	"documents.select.single.empty": "This single collection does not have a document to select yet.",
 	"documents.select.single.excluded": "The document in this single collection cannot be selected here.",
 	"users.select.title": "Select User",

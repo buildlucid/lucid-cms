@@ -18,14 +18,14 @@ const checkField = (
 ) => {
 	switch (field.type) {
 		case "relation": {
-			const allMultipleCollections = config.collections
-				.filter((collection) => collection.getData.mode === "multiple")
-				.map((collection) => collection.key);
+			const collectionKeys = config.collections.map(
+				(collection) => collection.key,
+			);
 
 			for (const collectionKey of normalizeRelationCollections(
 				field.collection,
 			)) {
-				if (allMultipleCollections.includes(collectionKey)) {
+				if (collectionKeys.includes(collectionKey)) {
 					continue;
 				}
 

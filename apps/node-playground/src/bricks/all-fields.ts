@@ -169,7 +169,7 @@ const AllFieldsBrick = new BrickBuilder("all-fields", {
 		multiple: true,
 	})
 	.addRelation("related_pages", {
-		collection: "page",
+		collection: ["page", "blog", "settings"],
 		localized: false,
 		multiple: true,
 	})

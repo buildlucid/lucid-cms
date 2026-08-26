@@ -131,6 +131,12 @@ const PageCollection = new CollectionBuilder("page", {
 	.addUser("author", {
 		showInList: true,
 		multiple: true,
+	})
+	.addRelation("settings", {
+		collection: "settings",
+		details: {
+			label: "Settings",
+		},
 	});
 
 export default PageCollection;

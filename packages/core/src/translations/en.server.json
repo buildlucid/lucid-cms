@@ -438,7 +438,7 @@
 	"core.email.attachment.content.id.invalid": "Attachment content ID is invalid.",
 	"core.email.attachment.max.attachments": "Emails can include at most {{max}} attachments.",
 	"core.email.attachment.content.id.must.be.unique": "Attachment content IDs must be unique.",
-	"core.fields.relation.validation.collection.not.found": "The collection '{{collection}}' does not exist or is not of mode multiple for the relation field '{{field}}'.",
+	"core.fields.relation.validation.collection.not.found": "The collection '{{collection}}' does not exist for the relation field '{{field}}'.",
 	"core.field.has.relation.data": "The is missing relation data",
 	"core.security.secrets.encrypted.invalid": "The encrypted secret is invalid.",
 	"core.media.duplicate.key.error.name": "Media Duplicate Key Error",
