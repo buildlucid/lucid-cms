@@ -4,12 +4,12 @@ import type {
 	PreviewMode,
 } from "@types";
 import { type Accessor, createMemo } from "solid-js";
-import contentLocaleStore from "@/store/contentLocaleStore";
 
 export function useDocumentPreview(props: {
 	version: Accessor<string>;
 	document: Accessor<InternalCollectionDocument | undefined>;
 	autoSaveMetadata: Accessor<DocumentVersionUpdateResponse | null>;
+	locale: Accessor<string>;
 }) {
 	// ----------------------------------
 	// Memos
@@ -18,12 +18,7 @@ export function useDocumentPreview(props: {
 			? "scoped"
 			: "perspective",
 	);
-	const locale = createMemo(
-		() =>
-			contentLocaleStore.get.contentLocale ??
-			contentLocaleStore.get.locales.find((locale) => locale.isDefault)?.code ??
-			"",
-	);
+	const locale = createMemo(() => props.locale());
 	const saveStamp = createMemo(() => {
 		const autoSaveMetadata = props.autoSaveMetadata();
 		return [

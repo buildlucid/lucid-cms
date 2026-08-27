@@ -21,8 +21,10 @@ import type {
 import { BottomPanel } from "@/components/Groups/Panel/BottomPanel";
 import PanelFooterActions from "@/components/Groups/Panel/PanelFooterActions";
 import Button from "@/components/Partials/Button";
+import { resolveCollectionContentLocales } from "@/hooks/document/useDocumentLocalization";
 import { usePageBuilderState } from "@/hooks/document/usePageBuilderState";
 import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import { formatDocumentFieldValue } from "@/utils/document-table-helpers";
@@ -122,6 +124,12 @@ const RichTextVariableSelectPanel: Component<{
 				isFieldTypeRichTextVariable(field.type),
 		),
 	);
+	const documentLocales = createMemo(() =>
+		resolveCollectionContentLocales(
+			contentLocaleStore.get.locales,
+			collection()?.localized,
+		),
+	);
 	const currentDocumentSelection = createMemo(() => {
 		const document = documentRef();
 		if (!document) return undefined;
@@ -149,7 +157,7 @@ const RichTextVariableSelectPanel: Component<{
 					fieldConfig: field,
 					fieldData: documentRef()?.fields?.[field.key],
 					contentLocale,
-					collectionLocalized: collection()?.localized === true,
+					collectionLocalized: Boolean(collection()?.localized),
 				}) ?? "",
 		}));
 	const userFieldOptions = createMemo<RichTextVariableFieldOption[]>(() => {
@@ -258,7 +266,8 @@ const RichTextVariableSelectPanel: Component<{
 				contentLocale:
 					source() === "document" &&
 					step() === "field" &&
-					collection()?.localized === true,
+					Boolean(collection()?.localized),
+				locales: documentLocales(),
 			}}
 			options={{
 				padding: "24",

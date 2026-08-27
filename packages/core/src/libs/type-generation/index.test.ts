@@ -57,7 +57,7 @@ test("generates collection-aware client document types that lean on the public L
 				defaultMessage: "Page",
 			}),
 		},
-		localized: true,
+		localized: { locales: ["en", "fr"] },
 		environments: [
 			{
 				key: "published",
@@ -87,6 +87,11 @@ test("generates collection-aware client document types that lean on the public L
 			localized: false,
 		})
 		.endRepeater();
+	const ArticleCollection = new CollectionBuilder("article", {
+		mode: "multiple",
+		details: { name: "Articles", singularName: "Article" },
+		localized: { locales: ["de"], defaultLocale: "de" },
+	}).addText("title", { localized: true });
 
 	try {
 		process.chdir(tempDir);
@@ -94,7 +99,7 @@ test("generates collection-aware client document types that lean on the public L
 		await generateTypes({
 			configPath,
 			projectRoot: tempDir,
-			collections: [PageCollection],
+			collections: [PageCollection, ArticleCollection],
 			localization: {
 				locales: [
 					{
@@ -104,6 +109,10 @@ test("generates collection-aware client document types that lean on the public L
 					{
 						label: "French",
 						code: "fr",
+					},
+					{
+						label: "German",
+						code: "de",
 					},
 				],
 				defaultLocale: "en",
@@ -145,20 +154,17 @@ test("generates collection-aware client document types that lean on the public L
 		expect(typesContent).not.toContain('"server:custom.server.error": true;');
 		expect(clientContent).toContain(`from "@lucidcms/core/types";`);
 		expect(clientContent).toContain(
-			`export interface GeneratedCollectionDocumentLocaleCodes {
-	"en": true;
-	"fr": true;
+			`export interface GeneratedCollectionDocumentLocaleCodesByCollection {
+	"page": "en" | "fr";
+	"article": "de";
 }`,
 		);
 		expect(clientContent).toContain(
-			`export type GeneratedCollectionDocumentLocaleCode = Extract<keyof GeneratedCollectionDocumentLocaleCodes, string>;`,
-		);
-		expect(clientContent).toContain(
-			`export type CollectionDocumentLocaleCode = GeneratedCollectionDocumentLocaleCode | (string & {});`,
+			`export type CollectionDocumentLocaleCode<TCollectionKey extends string = string> = TCollectionKey extends keyof GeneratedCollectionDocumentLocaleCodesByCollection ? Extract<GeneratedCollectionDocumentLocaleCodesByCollection[TCollectionKey], string> : string;`,
 		);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentFields = {
-	"_page_title": CollectionDocumentTranslations<string | null>;
+	"_page_title": CollectionDocumentTranslations<string | null, "page">;
 	"_related_page": Array<RelationFieldValue<"page">>;
 	"_related_content": Array<RelationFieldValue<"page" | "blog">>;
 	"sections": Array<{
@@ -270,7 +276,7 @@ test("generates collection-aware client document types that lean on the public L
 		);
 		expect(clientContent).toContain(
 			`export type PageBannerBuilderBrickFields = {
-	"title": CollectionDocumentTranslations<string | null>;
+	"title": CollectionDocumentTranslations<string | null, "page">;
 	"call_to_actions": Array<{
 		"label": string | null;
 	}>;
@@ -298,7 +304,7 @@ test("generates collection-aware client document types that lean on the public L
 			"interface CollectionDocumentVersionKeysByCollection extends GeneratedCollectionDocumentVersionKeysByCollection {}",
 		);
 		expect(clientContent).toContain(
-			"interface CollectionDocumentLocaleCodes extends GeneratedCollectionDocumentLocaleCodes {}",
+			"interface CollectionDocumentLocaleCodesByCollection extends GeneratedCollectionDocumentLocaleCodesByCollection {}",
 		);
 	} finally {
 		process.chdir(cwd);

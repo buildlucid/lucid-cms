@@ -8,7 +8,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 		name: copy("admin:collections.simple.name"),
 		singularName: copy("admin:collections.simple.singularName"),
 	},
-	localized: true,
+	localized: { locales: ["fr"], defaultLocale: "fr" },
 	revisions: true,
 	bricks: {
 		builder: [SimpleBrick, SimpleFixedBrick],

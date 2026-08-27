@@ -7,6 +7,7 @@
 - Added media status, image preset source and video playback source response types.
 - Reworked upload-session types around HTTP, multipart-parts and TUS protocols.
 - Split system media adapter reporting into storage and delivery keys.
+- Added collection-scoped locale metadata and collection-aware document translation types.
 
 ## v0.5.0
 

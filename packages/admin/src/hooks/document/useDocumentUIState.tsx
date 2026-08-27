@@ -6,11 +6,11 @@ import type {
 import { type Accessor, createMemo, createSignal } from "solid-js";
 import type api from "@/services/api";
 import brickStore from "@/store/brick-store";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/user-preferences";
 import userStore from "@/store/userStore";
 import brickHelpers from "@/utils/brick-helpers";
 import useUserPreference from "../useUserPreference";
+import { createDocumentLocalization } from "./useDocumentLocalization";
 
 export function useDocumentUIState(props: {
 	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
@@ -32,7 +32,7 @@ export function useDocumentUIState(props: {
 		typeof api.documents.useCreatePublishOperation
 	>;
 }) {
-	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
+	const { contentLocale } = createDocumentLocalization(props.collection);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
 	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);

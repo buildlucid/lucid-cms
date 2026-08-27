@@ -94,6 +94,11 @@ export default configureLucid({
 					code: "fr",
 					direction: "ltr",
 				},
+				{
+					label: "German",
+					code: "de",
+					direction: "ltr",
+				},
 			],
 			defaultLocale: "en",
 		},

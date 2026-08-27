@@ -9,6 +9,9 @@ import type {
 	CFConfig,
 	FieldTypes,
 } from "../../../libs/collection/custom-fields/types.js";
+import resolveCollectionLocalization, {
+	isCollectionFieldLocalized,
+} from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -255,6 +258,11 @@ const formatFieldDefinitions = (props: {
 	fields: CFConfig<FieldTypes>[];
 	instances: Map<string, CustomField<FieldTypes>>;
 }): Record<string, DefinitionField> => {
+	const localization = resolveCollectionLocalization({
+		localization: props.context.config.localization,
+		collection: props.collection,
+	});
+
 	return props.fields.reduce<Record<string, DefinitionField>>((acc, field) => {
 		const fieldInstance = props.instances.get(field.key);
 		if (!fieldInstance) return acc;
@@ -269,9 +277,7 @@ const formatFieldDefinitions = (props: {
 
 		acc[fieldInstance.key] = {
 			type: fieldInstance.type,
-			localized:
-				props.collection.getData.localized === true &&
-				fieldInstance.localizedEnabled === true,
+			localized: isCollectionFieldLocalized(localization, fieldInstance),
 			...(details?.label ? { label: details.label } : {}),
 			...(details?.summary ? { summary: details.summary } : {}),
 			...(collection ? { collection } : {}),

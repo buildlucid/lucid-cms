@@ -14,6 +14,7 @@ import type {
 	FieldTypes,
 	FieldUIConfig,
 } from "../../../libs/collection/custom-fields/types.js";
+import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
@@ -253,6 +254,11 @@ const checkValidateBricksFields: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
+	const localization = resolveCollectionLocalization({
+		localization: context.config.localization,
+		collection: data.collection,
+	});
+
 	const bricks = filterReachableEmbeddedBricks({
 		fields: data.fields,
 		bricks: data.bricks,
@@ -287,17 +293,17 @@ const checkValidateBricksFields: ServiceFn<
 		bricks,
 		collection: data.collection,
 		validationData: refDataRes.data,
-		defaultLocale: context.config.localization.defaultLocale,
-		locales: context.config.localization.locales.map((locale) => locale.code),
+		defaultLocale: localization.defaultLocale,
+		locales: localization.locales,
 	});
 	const fieldErrors = recursiveFieldValidate({
 		fields: data.fields,
 		instance: data.collection,
 		validationData: refDataRes.data,
 		meta: {
-			localized: data.collection.getData.localized,
-			defaultLocale: context.config.localization.defaultLocale,
-			locales: context.config.localization.locales.map((locale) => locale.code),
+			localized: localization.enabled,
+			defaultLocale: localization.defaultLocale,
+			locales: localization.locales,
 		},
 	});
 
@@ -613,10 +619,7 @@ const getTranslationLocaleCodes = (
 ) => {
 	const submittedLocaleCodes = Object.keys(translations);
 	if (!meta.locales?.length) return submittedLocaleCodes;
-
-	return Array.from(
-		new Set([...getConfiguredLocaleCodes(meta), ...submittedLocaleCodes]),
-	);
+	return getConfiguredLocaleCodes(meta);
 };
 
 /**
@@ -672,6 +675,20 @@ export const validateField = (props: {
 
 	//* handle fields with translations
 	if (props.field.translations) {
+		if (fieldUsesTranslations && props.meta.locales?.length) {
+			const supportedLocales = new Set(getConfiguredLocaleCodes(props.meta));
+			for (const localeCode of Object.keys(props.field.translations)) {
+				if (supportedLocales.has(localeCode)) continue;
+				errors.push({
+					key: props.field.key,
+					localeCode,
+					message: copy("server:core.fields.validation.locale.unsupported", {
+						data: { locale: localeCode },
+					}),
+				});
+			}
+		}
+
 		const localeCodes = fieldUsesTranslations
 			? getTranslationLocaleCodes(props.meta, props.field.translations)
 			: Object.keys(props.field.translations);

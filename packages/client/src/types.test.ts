@@ -42,7 +42,7 @@ test("filter objects can narrow their accepted values", () => {
 declare module "./types.js" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
-			page_title: CollectionDocumentTranslations<string | null>;
+			page_title: CollectionDocumentTranslations<string | null, "page">;
 			related_page: Array<RelationFieldValue<"page">>;
 			sections: Array<{
 				heading: string | null;
@@ -56,7 +56,7 @@ declare module "./types.js" {
 					"banner",
 					"builder",
 					{
-						title: CollectionDocumentTranslations<string | null>;
+						title: CollectionDocumentTranslations<string | null, "page">;
 					}
 			  >
 			| DocumentBrick<
@@ -68,9 +68,10 @@ declare module "./types.js" {
 			  >;
 	}
 
-	interface CollectionDocumentLocaleCodes {
-		en: true;
-		fr: true;
+	interface CollectionDocumentLocaleCodesByCollection {
+		page: "en" | "fr";
+		article: "de";
+		settings: never;
 	}
 
 	interface CollectionDocumentFiltersByCollection {
@@ -112,7 +113,7 @@ declare module "./types.js" {
 declare module "@lucidcms/core/types" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
-			page_title: CoreCollectionDocumentTranslations<string | null>;
+			page_title: CoreCollectionDocumentTranslations<string | null, "page">;
 			related_page: Array<CoreRelationFieldValue<"page">>;
 			sections: Array<{
 				heading: string | null;
@@ -126,7 +127,7 @@ declare module "@lucidcms/core/types" {
 					"banner",
 					"builder",
 					{
-						title: CoreCollectionDocumentTranslations<string | null>;
+						title: CoreCollectionDocumentTranslations<string | null, "page">;
 					}
 			  >
 			| CoreDocumentBrick<
@@ -138,9 +139,10 @@ declare module "@lucidcms/core/types" {
 			  >;
 	}
 
-	interface CollectionDocumentLocaleCodes {
-		en: true;
-		fr: true;
+	interface CollectionDocumentLocaleCodesByCollection {
+		page: "en" | "fr";
+		article: "de";
+		settings: never;
 	}
 
 	interface CollectionDocumentVersionsByCollection {
@@ -154,7 +156,7 @@ declare module "@lucidcms/core/types" {
 
 test("collection documents narrow to generated plain field and brick types", () => {
 	expectTypeOf<CollectionDocument<"page">["fields"]>().toEqualTypeOf<{
-		page_title: CollectionDocumentTranslations<string | null>;
+		page_title: CollectionDocumentTranslations<string | null, "page">;
 		related_page: Array<RelationFieldValue<"page">>;
 		sections: Array<{
 			heading: string | null;
@@ -176,7 +178,7 @@ test("collection documents narrow to generated plain field and brick types", () 
 						"banner",
 						"builder",
 						{
-							title: CollectionDocumentTranslations<string | null>;
+							title: CollectionDocumentTranslations<string | null, "page">;
 						}
 				  >
 				| DocumentBrick<

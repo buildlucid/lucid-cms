@@ -15,7 +15,7 @@ export type {
 	CollectionDocumentFieldsByCollection,
 	CollectionDocumentKey,
 	CollectionDocumentLocaleCode,
-	CollectionDocumentLocaleCodes,
+	CollectionDocumentLocaleCodesByCollection,
 	CollectionDocumentMeta,
 	CollectionDocumentTranslations,
 	ConnectionStatus,

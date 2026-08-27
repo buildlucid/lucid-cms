@@ -90,7 +90,7 @@ export interface CollectionDocumentFieldsByCollection {}
 export interface CollectionDocumentBricksByCollection {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
-export interface CollectionDocumentLocaleCodes {}
+export interface CollectionDocumentLocaleCodesByCollection {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
 export interface CollectionDocumentVersionsByCollection {}
@@ -120,33 +120,22 @@ type CollectionDocumentVersionKeyKey = Extract<
 
 type KnownCollectionDocumentKey = CollectionDocumentFieldKey;
 
-type KnownCollectionDocumentLocaleCode = Extract<
-	keyof CollectionDocumentLocaleCodes,
-	string
->;
-
 export type CollectionDocumentKey = KnownCollectionDocumentKey | (string & {});
 
-type ExactCollectionDocumentTranslations<TValue> = {
-	[TLocaleCode in KnownCollectionDocumentLocaleCode]: TValue;
-};
+export type CollectionDocumentLocaleCode<
+	TCollectionKey extends string = string,
+> = TCollectionKey extends keyof CollectionDocumentLocaleCodesByCollection
+	? Extract<CollectionDocumentLocaleCodesByCollection[TCollectionKey], string>
+	: string;
 
-export type CollectionDocumentLocaleCode = [
-	KnownCollectionDocumentLocaleCode,
-] extends [never]
-	? string
-	: KnownCollectionDocumentLocaleCode | (string & {});
+export type CollectionDocumentTranslations<
+	TValue,
+	TCollectionKey extends string = string,
+> = Record<CollectionDocumentLocaleCode<TCollectionKey>, TValue>;
 
-export type CollectionDocumentTranslations<TValue> = [
-	KnownCollectionDocumentLocaleCode,
-] extends [never]
-	? Record<string, TValue>
-	: ExactCollectionDocumentTranslations<TValue> &
-			Partial<Record<string, TValue>>;
-
-export type DocumentRoute = {
-	path: string | CollectionDocumentTranslations<string | null>;
-	label: string | CollectionDocumentTranslations<string>;
+export type DocumentRoute<TCollectionKey extends string = string> = {
+	path: string | CollectionDocumentTranslations<string | null, TCollectionKey>;
+	label: string | CollectionDocumentTranslations<string, TCollectionKey>;
 };
 
 export type DocumentFieldPlainValue =
@@ -166,7 +155,7 @@ export interface DocumentRef<
 	id: number;
 	versionId?: number;
 	collectionKey: TCollectionKey;
-	route: DocumentRoute | null;
+	route: DocumentRoute<TCollectionKey> | null;
 	fields: TFields;
 }
 
@@ -227,12 +216,13 @@ export interface DocumentField<
 	TType extends FieldType = FieldType,
 	TValue = DocumentFieldValueResponse,
 	TGroupFields extends DocumentFieldMap = DocumentFieldMap,
+	TCollectionKey extends string = string,
 > {
 	key: TKey;
 	type: TType;
 	resource?: RefResource;
 	groupRef?: string;
-	translations?: CollectionDocumentTranslations<TValue>;
+	translations?: CollectionDocumentTranslations<TValue, TCollectionKey>;
 	value?: TValue;
 	groups?: Array<DocumentFieldGroup<TGroupFields>>;
 }
@@ -259,11 +249,12 @@ export type TranslatedDocumentField<
 	TType extends FieldType = FieldType,
 	TValue = DocumentFieldValueResponse,
 	THasGroupRef extends boolean = false,
+	TCollectionKey extends string = string,
 > = Omit<
-	DocumentField<TKey, TType, TValue>,
+	DocumentField<TKey, TType, TValue, DocumentFieldMap, TCollectionKey>,
 	"groupRef" | "groups" | "translations" | "value"
 > & {
-	translations: CollectionDocumentTranslations<TValue>;
+	translations: CollectionDocumentTranslations<TValue, TCollectionKey>;
 	value?: never;
 	groups?: never;
 } & DocumentFieldGroupRefShape<THasGroupRef>;
@@ -324,7 +315,7 @@ export interface CollectionDocument<
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
 	version: ResolveCollectionDocumentVersion<TCollectionKey> | null;
-	route: DocumentRoute | null;
+	route: DocumentRoute<TCollectionKey> | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
 	meta?: CollectionDocumentMeta<
@@ -720,7 +711,12 @@ export interface Collection {
 		singularName: ResolvedAdminCopy;
 		summary: ResolvedAdminCopy | null;
 	};
-	localized: boolean;
+	localized:
+		| false
+		| {
+				locales: string[];
+				defaultLocale: string;
+		  };
 	revisions: boolean;
 	locked: boolean;
 	listing: string[];

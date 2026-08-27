@@ -41,6 +41,18 @@ const versionMapCollectionKeySchema = z
 		message: `Collection key cannot contain '${constants.db.nameSeparator}'`,
 	});
 
+const collectionLocalizationSchema = z.union([
+	z.boolean(),
+	z.object({
+		locales: z.array(z.string().trim().min(1)).min(1),
+		defaultLocale: z.string().trim().min(1).optional(),
+	}),
+	z.object({
+		locales: z.never().optional(),
+		defaultLocale: z.string().trim().min(1),
+	}),
+]);
+
 const CollectionConfigSchema = z
 	.object({
 		key: z
@@ -71,8 +83,7 @@ const CollectionConfigSchema = z
 			summary: adminCopyInputSchema.optional(),
 		}),
 		locked: z.boolean().default(constants.collectionBuilder.locked).optional(),
-		localized: z
-			.boolean()
+		localized: collectionLocalizationSchema
 			.default(constants.collectionBuilder.localized)
 			.optional(),
 		revisions: z

@@ -1,12 +1,13 @@
-import type { Config } from "@lucidcms/core/types";
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
 import constructParentFullSlug from "./construct-parent-fullslug.js";
 
 const localization = {
+	enabled: false,
 	defaultLocale: "en",
-	locales: [{ code: "en" }],
-} as Config["localization"];
+	storageLocale: "en",
+	locales: ["en"],
+};
 
 const collection = {
 	key: "pages",

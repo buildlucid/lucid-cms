@@ -10,6 +10,7 @@ import { translate } from "../i18n/index.js";
 import { initializeLogger } from "../logger/index.js";
 import type { LucidConfigRecipe } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
+import checkCollectionLocalization from "./checks/check-collection-localization.js";
 import checkCollectionRouting from "./checks/check-collection-routing.js";
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
@@ -137,6 +138,7 @@ const processConfig = async (
 
 		for (const collection of configRes.collections) {
 			CollectionConfigSchema.parse(collection.config);
+			checkCollectionLocalization(configRes.localization, collection);
 			checkCollectionRouting(collection);
 
 			for (const field of collection.flatFields) {

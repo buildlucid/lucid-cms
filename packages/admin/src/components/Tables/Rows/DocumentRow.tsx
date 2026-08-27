@@ -93,7 +93,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 							refs={props.refs}
 							include={props.include}
 							index={includeOffset() + i()}
-							collectionLocalized={props.collection.localized}
+							collectionLocalized={props.collection.localized !== false}
 							collectionsByKey={props.collectionsByKey}
 						/>
 					);

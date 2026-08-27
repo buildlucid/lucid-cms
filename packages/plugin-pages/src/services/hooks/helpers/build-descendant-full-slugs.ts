@@ -6,6 +6,7 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../../../types/types.js";
+import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
 import constructChildFullSlug from "../../construct-child-fullslugs.js";
 import getDescendantFields from "../../get-descendant-fields.js";
 import resolveStoredRoutePrefixes from "../../resolve-stored-route-prefixes.js";
@@ -28,6 +29,12 @@ const buildDescendantFullSlugs: ServiceFn<
 		fullSlugs: Record<string, string | null>;
 	}>
 > = async (context, data) => {
+	const localization = resolvePagesCollectionLocalization({
+		localization: context.config.localization,
+		collection: data.collection,
+		collectionInstance: data.collectionInstance,
+	});
+
 	const descendantsRes = await getDescendantFields(context, {
 		ids: data.documentIds,
 		versionType: data.versionType,
@@ -47,7 +54,7 @@ const buildDescendantFullSlugs: ServiceFn<
 
 	return constructChildFullSlug({
 		descendants: descendantsRes.data,
-		localization: context.config.localization,
+		localization,
 		parentFullSlugField: data.parentFullSlugField,
 		collection: data.collection,
 		routePrefixes: routePrefixesRes.data,

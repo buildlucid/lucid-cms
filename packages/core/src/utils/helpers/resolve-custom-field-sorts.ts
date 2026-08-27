@@ -10,6 +10,7 @@ export type CustomFieldSort = {
 	key: string;
 	/** Generated document-fields value column. */
 	column: `_${string}`;
+	localized: boolean;
 };
 
 /** Resolves supported underscore-prefixed top-level field sort keys. */
@@ -35,6 +36,7 @@ const resolveCustomFieldSorts = (
 		results.push({
 			key: sort.key,
 			column: column.name as `_${string}`,
+			localized: column.customField.localized ?? false,
 		});
 	}
 

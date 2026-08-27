@@ -12,9 +12,9 @@ import {
 } from "solid-js";
 import { DynamicField } from "@/components/Groups/Builder/CustomFields/DynamicField";
 import { TabField } from "@/components/Groups/Builder/CustomFields/TabField";
+import { useDocumentLocalization } from "@/hooks/document/useDocumentLocalization";
 import { FieldRenderStateProvider } from "@/hooks/document/useFieldRenderState";
 import brickStore, { type BrickData } from "@/store/brick-store";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/user-preferences";
 import type {
 	CollectionFieldConfig,
@@ -25,7 +25,6 @@ import {
 	type FieldConditionScope,
 } from "@/utils/field-condition-helpers";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
-import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 
 interface BrickProps {
 	id?: string;
@@ -50,15 +49,13 @@ export const BrickBody: Component<BrickProps> = (props) => {
 	// State
 	const [getActiveTab, setActiveTab] = createSignal<string>();
 	const [contentMounted, setContentMounted] = createSignal(props.open);
+	const documentLocalization = useDocumentLocalization();
 
 	// ----------------------------------
 	// Memos
 	const configFields = createMemo(() => props.configFields || []);
 	const contentLocale = createMemo(
-		() => props.contentLocale?.() ?? contentLocaleStore.get.contentLocale ?? "",
-	);
-	const defaultLocale = createMemo(() =>
-		getDefaultTranslationLocale(contentLocaleStore.get.locales),
+		() => props.contentLocale?.() ?? documentLocalization.contentLocale() ?? "",
 	);
 	const flattenedConfigFields = createMemo(() =>
 		flattenStructuralScopeConfigs(configFields()),
@@ -82,12 +79,9 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					fieldConfig: field,
 					scopes: conditionScopes(),
 					contentLocale: contentLocale(),
-					defaultLocale: defaultLocale(),
+					defaultLocale: documentLocalization.defaultLocale(),
 				});
 			}),
-	);
-	const contentLocales = createMemo(
-		() => contentLocaleStore.get.locales.map((locale) => locale.code) || [],
 	);
 	const brickIndex = createMemo(() => props.brickIndex);
 	const collectionKey = createMemo(() => props.collectionKey);
@@ -126,7 +120,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 		brickStore.get.ensureFields({
 			brickIndex: brickIndex(),
 			fieldConfig: configFields(),
-			locales: contentLocales(),
+			locales: documentLocalization.localeCodes(),
 		});
 	});
 
@@ -201,8 +195,8 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						brickKey={brickKey}
 						documentId={documentId}
 						contentLocale={contentLocale}
-						defaultLocale={defaultLocale}
-						contentLocales={contentLocales}
+						defaultLocale={documentLocalization.defaultLocale}
+						contentLocales={documentLocalization.localeCodes}
 						missingFieldColumns={missingFieldColumns}
 						brickRef={brickRef}
 					>

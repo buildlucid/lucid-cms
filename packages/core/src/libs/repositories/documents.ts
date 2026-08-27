@@ -20,6 +20,9 @@ import resolveCustomFieldSorts, {
 	type CustomFieldSort,
 } from "../../utils/helpers/resolve-custom-field-sorts.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import resolveCollectionLocalization, {
+	type ResolvedCollectionLocalization,
+} from "../collection/helpers/resolve-collection-localization.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
@@ -623,6 +626,10 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				props.documentFieldsTableSchema,
 				props.query.sort,
 			);
+			const localization = resolveCollectionLocalization({
+				localization: props.config.localization,
+				collection: props.collection,
+			});
 
 			const builtQueries = queryBuilder.main(
 				{
@@ -667,7 +674,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									customFieldSorts,
 									documentFieldsTable: props.tables.documentFields,
 									versionsTable: props.tables.versions,
-									defaultLocale: props.config.localization.defaultLocale,
+									localization,
 								}),
 							},
 						},
@@ -1046,17 +1053,24 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		customFieldSorts: CustomFieldSort[];
 		documentFieldsTable: LucidBrickTableName;
 		versionsTable: LucidVersionTableName;
-		defaultLocale: string;
+		localization: ResolvedCollectionLocalization;
 	}) {
 		return Object.fromEntries(
-			props.customFieldSorts.map((sort) => [
-				sort.key,
-				sql`(select cf_sort.${sql.ref(sort.column)} from ${sql.table(
-					props.documentFieldsTable,
-				)} as cf_sort where cf_sort.document_version_id = ${sql.ref(
-					`${props.versionsTable}.id`,
-				)} and cf_sort.locale = ${props.defaultLocale} limit 1)`,
-			]),
+			props.customFieldSorts.map((sort) => {
+				const locale =
+					sort.localized && props.localization.enabled
+						? props.localization.defaultLocale
+						: props.localization.storageLocale;
+
+				return [
+					sort.key,
+					sql`(select cf_sort.${sql.ref(sort.column)} from ${sql.table(
+						props.documentFieldsTable,
+					)} as cf_sort where cf_sort.document_version_id = ${sql.ref(
+						`${props.versionsTable}.id`,
+					)} and cf_sort.locale = ${locale} limit 1)`,
+				];
+			}),
 		);
 	}
 	/** Normalizes scalar and array filter values for custom exists checks. */

@@ -82,9 +82,7 @@ const fetchRouteSegmentValues: ServiceFn<
 			const requiredLocales = [
 				...new Set(
 					targets.flatMap((target) =>
-						target.localized
-							? data.locales
-							: [context.config.localization.defaultLocale],
+						target.localized ? data.locales : [target.storageLocale],
 					),
 				),
 			];

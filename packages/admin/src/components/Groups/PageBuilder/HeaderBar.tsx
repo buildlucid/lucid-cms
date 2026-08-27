@@ -20,10 +20,10 @@ import Button from "@/components/Partials/Button";
 import ContentLocaleSelect from "@/components/Partials/ContentLocaleSelect";
 import DateText from "@/components/Partials/DateText";
 import type { UseDocumentAutoSave } from "@/hooks/document/useDocumentAutoSave";
+import { useDocumentLocalization } from "@/hooks/document/useDocumentLocalization";
 import type { UseDocumentMutations } from "@/hooks/document/useDocumentMutations";
 import type { UseDocumentUIState } from "@/hooks/document/useDocumentUIState";
 import api from "@/services/api";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import userPreferencesStore from "@/store/user-preferences";
 import userStore from "@/store/userStore";
 import T from "@/translations";
@@ -75,6 +75,7 @@ export const HeaderBar: Component<{
 	// ----------------------------------
 	// State / Hooks
 	let stickyBarRef: HTMLDivElement | undefined;
+	const documentLocalization = useDocumentLocalization();
 
 	// -------------------------------
 	// Queries & Mutations
@@ -83,13 +84,13 @@ export const HeaderBar: Component<{
 	// ----------------------------------
 	// Memos
 	const defaultLocale = createMemo(() => {
-		return contentLocaleStore.get.locales.find((locale) => locale.isDefault);
+		return documentLocalization.locales().find((locale) => locale.isDefault);
 	});
 	const displayLocale = createMemo(() => {
-		return defaultLocale() ?? contentLocaleStore.get.locales[0];
+		return defaultLocale() ?? documentLocalization.locales()[0];
 	});
 	const hasMultipleLocales = createMemo(() => {
-		return contentLocaleStore.get.locales.length > 1;
+		return documentLocalization.locales().length > 1;
 	});
 	const collectionSummary = createMemo(() => {
 		const fallback = T()("builder.header.summary.fallback", {
@@ -488,10 +489,7 @@ export const HeaderBar: Component<{
 				versionType: props.version?.() ?? "latest",
 				versionId: props.versionId?.(),
 				mode,
-				locale:
-					contentLocaleStore.get.contentLocale ||
-					defaultLocale()?.code ||
-					undefined,
+				locale: documentLocalization.contentLocale() || undefined,
 			});
 			if (!response.data.url) {
 				spawnToast({
@@ -638,11 +636,13 @@ export const HeaderBar: Component<{
 							<div class="flex items-center gap-2.5 w-full md:flex-1 md:min-w-0">
 								<Show
 									when={
-										props.state.collection()?.localized && hasMultipleLocales()
+										Boolean(props.state.collection()?.localized) &&
+										hasMultipleLocales()
 									}
 								>
 									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
 										<ContentLocaleSelect
+											locales={documentLocalization.locales()}
 											hasError={props.state.ui.brickTranslationErrors?.()}
 											showShortcut={true}
 										/>
@@ -650,7 +650,7 @@ export const HeaderBar: Component<{
 								</Show>
 								<Show
 									when={
-										(props.state.collection()?.localized !== true ||
+										(!props.state.collection()?.localized ||
 											!hasMultipleLocales()) &&
 										displayLocale()
 									}

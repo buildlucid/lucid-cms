@@ -1,3 +1,4 @@
+import type { Locale } from "@types";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import { Select } from "@/components/Groups/Form/Select";
 import useKeyboardShortcuts, {
@@ -11,13 +12,16 @@ interface ContentLocaleSelectProps {
 	setValue?: (_value: string | undefined) => void;
 	hasError?: boolean;
 	showShortcut?: boolean;
+	locales?: Locale[];
 }
 
 const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 	// ----------------------------------
 	// Memos
 	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
-	const locales = createMemo(() => contentLocaleStore.get.locales);
+	const locales = createMemo(
+		() => props.locales ?? contentLocaleStore.get.locales,
+	);
 	const hasMultipleLocales = createMemo(() => locales().length > 1);
 	const options = createMemo(() => {
 		return (

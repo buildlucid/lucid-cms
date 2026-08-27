@@ -95,6 +95,7 @@ const createFocus = (options?: {
 		collection: () => collection,
 		collectionKey: () => "page",
 		documentId: () => 1,
+		locales: () => ["en"],
 		hasUnsavedContent: () => options?.hasUnsavedContent ?? false,
 		hasUnsavedBuilderStructure: () =>
 			options?.hasUnsavedBuilderStructure ?? false,

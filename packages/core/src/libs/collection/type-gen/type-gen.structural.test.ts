@@ -28,7 +28,7 @@ test("client types nest section children and inline collapsible children", async
 
 	const file = generateCollectionClientTypes({
 		collections: [collection],
-		localization: { locales: [{ code: "en" }] },
+		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
 	const fieldsDeclaration = file.declarations.find(
@@ -63,7 +63,7 @@ test("sort key types only include order for orderable collections", async () => 
 
 	const file = generateCollectionClientTypes({
 		collections: [orderable, standard],
-		localization: { locales: [{ code: "en" }] },
+		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
 	const orderableSortDeclaration = file.declarations.find((declaration) =>
@@ -102,7 +102,7 @@ test("sort key types include sortable top-level custom fields regardless of list
 
 	const file = generateCollectionClientTypes({
 		collections: [collection],
-		localization: { locales: [{ code: "en" }] },
+		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
 	const sortDeclaration = file.declarations.find((declaration) =>
@@ -135,7 +135,7 @@ test("client types keep collection tabs transparent", async () => {
 
 	const file = generateCollectionClientTypes({
 		collections: [collection],
-		localization: { locales: [{ code: "en" }] },
+		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
 	const fieldsDeclaration = file.declarations.find(

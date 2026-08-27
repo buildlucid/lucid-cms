@@ -61,6 +61,7 @@ const getAll: ServiceFn<
 				allCollections: collectionDefinitions,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
+				localization: context.config.localization,
 				include: {
 					bricks: data.includeBricks === true,
 					fields: data.includeFields === true,
@@ -78,6 +79,7 @@ const getAll: ServiceFn<
 			allCollections: collectionDefinitions,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
+			localization: context.config.localization,
 			include: {
 				bricks: data.includeBricks === true,
 				fields: data.includeFields === true,

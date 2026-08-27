@@ -1,4 +1,8 @@
 import type { CollectionBuilder } from "@lucidcms/core";
+import {
+	isCollectionFieldLocalized,
+	resolveCollectionLocalization,
+} from "@lucidcms/core/plugin";
 import type { CFConfig } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
@@ -11,6 +15,10 @@ const buildRouteSegmentTargets = (data: {
 	collection: CollectionConfig;
 	collectionInstance: CollectionBuilder;
 	collections: CollectionBuilder[];
+	localization: {
+		locales: Array<{ code: string }>;
+		defaultLocale: string;
+	};
 	sourceKeys: string[];
 	selections: RouteSegmentSelection[];
 }) => {
@@ -35,6 +43,7 @@ const buildRouteSegmentTargets = (data: {
 
 			if (
 				!targetCollectionKey ||
+				!targetCollection ||
 				!selection ||
 				selection.collectionKey !== targetCollectionKey ||
 				typeof selection.documentId !== "number" ||
@@ -42,6 +51,10 @@ const buildRouteSegmentTargets = (data: {
 			) {
 				return { targets, missingRelation: segment.relation };
 			}
+			const targetLocalization = resolveCollectionLocalization({
+				localization: data.localization,
+				collection: targetCollection,
+			});
 
 			targets.push({
 				sourceKey,
@@ -50,7 +63,8 @@ const buildRouteSegmentTargets = (data: {
 				field: segment.field,
 				collectionKey: targetCollectionKey,
 				documentId: selection.documentId,
-				localized: targetField.localizedEnabled,
+				localized: isCollectionFieldLocalized(targetLocalization, targetField),
+				storageLocale: targetLocalization.storageLocale,
 			});
 		}
 	}

@@ -3,6 +3,10 @@ import type CustomField from "../../../libs/collection/custom-fields/custom-fiel
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
 import type { RegisteredFieldDefinition } from "../../../libs/collection/custom-fields/types.js";
+import resolveCollectionLocalization, {
+	isCollectionFieldLocalized,
+	type ResolvedCollectionLocalization,
+} from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
 
@@ -13,10 +17,9 @@ import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
  * - Normalizes the input value of the field using the custom field instance's normalizeInputValue method
  */
 const processFields = (props: {
-	collection: CollectionBuilder;
 	fields: Array<FieldInputSchema>;
 	customFields: Map<string, CustomField<FieldTypes>>;
-	localization: Config["localization"];
+	localization: ResolvedCollectionLocalization;
 }): Array<FieldInputSchema> => {
 	return props.fields.flatMap((field) => {
 		const cfInstance = props.customFields.get(field.key);
@@ -44,7 +47,6 @@ const processFields = (props: {
 			processedField.groups = field.groups.map((group) => ({
 				...group,
 				fields: processFields({
-					collection: props.collection,
 					fields: group.fields,
 					customFields: props.customFields,
 					localization: props.localization,
@@ -53,7 +55,7 @@ const processFields = (props: {
 		}
 
 		// if collection uses translations and the field supports translations
-		if (props.collection.getData.localized && cfInstance.localizedEnabled) {
+		if (isCollectionFieldLocalized(props.localization, cfInstance)) {
 			// if processField.value is given only and no translations key - add the value to the translations object with the locale object key being the default locale
 			if (processedField.value !== undefined && !processedField.translations) {
 				processedField.translations = {
@@ -177,13 +179,17 @@ const prepareBricksAndFields = (props: {
 	fields?: Array<FieldInputSchema>;
 	localization: Config["localization"];
 }) => {
+	const localization = resolveCollectionLocalization({
+		localization: props.localization,
+		collection: props.collection,
+	});
+
 	// Process collection fields
 	const preparedFields = props.fields
 		? processFields({
-				collection: props.collection,
 				fields: props.fields,
 				customFields: props.collection.fields,
-				localization: props.localization,
+				localization,
 			})
 		: undefined;
 
@@ -197,10 +203,9 @@ const prepareBricksAndFields = (props: {
 
 				// Process fields for this brick
 				const processedFields = processFields({
-					collection: props.collection,
 					fields: brick.fields,
 					customFields: brickDefinition.fields,
-					localization: props.localization,
+					localization,
 				});
 
 				return {

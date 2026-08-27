@@ -1,13 +1,10 @@
 import { copy } from "@lucidcms/core/plugin";
-import type {
-	Config,
-	FieldInputSchema,
-	ServiceResponse,
-} from "@lucidcms/core/types";
+import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
 import buildFullSlug from "../utils/build-fullslug-from-fullslug.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
+import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages-collection-localization.js";
 import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 
 const parentMatchesRoutePrefix = (
@@ -33,7 +30,7 @@ const parentMatchesRoutePrefix = (
 const constructParentFullSlug = (data: {
 	collection: CollectionConfig;
 	parentFields: Array<ParentPageQueryResponse>;
-	localization: Config["localization"];
+	localization: ResolvedPagesCollectionLocalization;
 	fields: {
 		slug: FieldInputSchema;
 	};
@@ -43,26 +40,26 @@ const constructParentFullSlug = (data: {
 	const fullSlug: Record<string, string | null> =
 		data.localization.locales.reduce<Record<string, string | null>>(
 			(acc, locale) => {
-				acc[locale.code] = null;
+				acc[locale] = null;
 				return acc;
 			},
 			{},
 		);
 
 	// if translations are enabled/set
-	if (data.collection.localized && data.fields.slug.translations) {
+	if (data.localization.enabled && data.fields.slug.translations) {
 		for (let i = 0; i < data.localization.locales.length; i++) {
 			const locale = data.localization.locales[i];
 			if (!locale) continue;
 			const routePrefix =
-				data.routePrefixes?.[locale.code] ??
+				data.routePrefixes?.[locale] ??
 				resolveCollectionPrefix({
 					collection: data.collection,
-					localeCode: locale.code,
+					localeCode: locale,
 				});
 			if (
 				data.collection.segments.length > 0 &&
-				!parentMatchesRoutePrefix(data.parentFields, locale.code, routePrefix)
+				!parentMatchesRoutePrefix(data.parentFields, locale, routePrefix)
 			) {
 				return {
 					error: {
@@ -73,7 +70,7 @@ const constructParentFullSlug = (data: {
 							fields: [
 								{
 									key: "parentPage",
-									localeCode: locale.code,
+									localeCode: locale,
 									message: copy(
 										"server:plugin.pages.route.segment.parent.mismatch",
 									),
@@ -85,10 +82,10 @@ const constructParentFullSlug = (data: {
 				};
 			}
 
-			fullSlug[locale.code] = buildFullSlug({
+			fullSlug[locale] = buildFullSlug({
 				parentFields: data.parentFields || [],
-				targetLocale: locale.code,
-				slug: data.fields.slug.translations[locale.code],
+				targetLocale: locale,
+				slug: data.fields.slug.translations[locale],
 				prefix: routePrefix,
 			});
 		}

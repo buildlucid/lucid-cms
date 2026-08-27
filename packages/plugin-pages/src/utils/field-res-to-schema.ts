@@ -1,10 +1,11 @@
 import type { FieldInputSchema } from "@lucidcms/core/types";
 import type { VersionFieldsQueryResponse } from "../services/get-document-version-fields.js";
+import type { ResolvedPagesCollectionLocalization } from "./resolve-pages-collection-localization.js";
 
 const fieldResToSchema = (
 	key: string,
-	localized: boolean,
-	defaultLocale: string,
+	fieldLocalized: boolean,
+	localization: ResolvedPagesCollectionLocalization,
 	items: VersionFieldsQueryResponse[],
 	relationCollectionKey?: string,
 ): FieldInputSchema => {
@@ -20,10 +21,11 @@ const fieldResToSchema = (
 		type: fieldType,
 	};
 
-	if (localized) {
+	if (fieldLocalized && localization.enabled) {
 		result.translations = {};
 
 		for (const item of items) {
+			if (!localization.locales.includes(item.locale)) continue;
 			if (fieldType === "text") {
 				// @ts-expect-error
 				result.translations[item.locale] = item[`_${key}`] as string | null;
@@ -38,7 +40,8 @@ const fieldResToSchema = (
 		}
 	} else {
 		const defaultItem =
-			items.find((item) => item.locale === defaultLocale) || items[0];
+			items.find((item) => item.locale === localization.storageLocale) ||
+			items[0];
 
 		if (fieldType === "text") {
 			// @ts-expect-error

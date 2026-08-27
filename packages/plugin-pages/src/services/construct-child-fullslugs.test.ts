@@ -1,13 +1,14 @@
-import type { Config } from "@lucidcms/core/types";
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
 import constructChildFullSlug from "./construct-child-fullslugs.js";
 import type { DescendantFieldsResponse } from "./get-descendant-fields.js";
 
 const localization = {
+	enabled: false,
 	defaultLocale: "en",
-	locales: [{ code: "en" }],
-} as Config["localization"];
+	storageLocale: "en",
+	locales: ["en"],
+};
 
 const baseCollection = {
 	key: "pages",
@@ -104,9 +105,11 @@ describe("constructChildFullSlug", () => {
 		const res = constructChildFullSlug({
 			descendants,
 			localization: {
+				enabled: true,
 				defaultLocale: "en",
-				locales: [{ code: "en" }, { code: "fr" }],
-			} as Config["localization"],
+				storageLocale: "en",
+				locales: ["en", "fr"],
+			},
 			collection: {
 				...baseCollection,
 				localized: true,

@@ -23,7 +23,7 @@ describe("resolveCustomFieldSorts", () => {
 					source: "field",
 					type: "text",
 					nullable: true,
-					customField: { type: "text" },
+					customField: { type: "text", localized: true },
 				},
 				{
 					name: "_summary",
@@ -81,12 +81,12 @@ describe("resolveCustomFieldSorts", () => {
 		]);
 
 		expect(result).toEqual([
-			{ key: "_title", column: "_title" },
-			{ key: "_summary", column: "_summary" },
-			{ key: "_views", column: "_views" },
-			{ key: "_publishedAt", column: "_publishedAt" },
-			{ key: "_category", column: "_category" },
-			{ key: "_featured", column: "_featured" },
+			{ key: "_title", column: "_title", localized: true },
+			{ key: "_summary", column: "_summary", localized: false },
+			{ key: "_views", column: "_views", localized: false },
+			{ key: "_publishedAt", column: "_publishedAt", localized: false },
+			{ key: "_category", column: "_category", localized: false },
+			{ key: "_featured", column: "_featured", localized: false },
 		]);
 	});
 

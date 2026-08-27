@@ -10,7 +10,14 @@ import type {
 	RelationFieldValue,
 } from "../../types.js";
 
-export type LocaleCode = CollectionDocumentLocaleCode | string;
+type DocumentCollectionKey<TDocument extends CollectionDocument> = Extract<
+	TDocument["collectionKey"],
+	string
+>;
+
+export type LocaleCode<
+	TDocument extends CollectionDocument = CollectionDocument,
+> = CollectionDocumentLocaleCode<DocumentCollectionKey<TDocument>>;
 
 type DocumentFieldsOf<TDocument extends CollectionDocument> =
 	TDocument["fields"];
@@ -75,16 +82,20 @@ export type FieldKeyOf<TFields extends DocumentFieldValueMap> = Extract<
 	string
 >;
 
-export type DocumentViewOptions = {
-	locale?: LocaleCode;
+export type DocumentViewOptions<
+	TDocument extends CollectionDocument = CollectionDocument,
+> = {
+	locale?: LocaleCode<TDocument>;
 	/** Enables builder field annotations without relying on browser-only context. */
 	preview?: boolean;
 	/** Shared refs registry returned alongside the document response data. */
 	refs?: Refs;
 };
 
-export type DocumentViewOptionsWithLocale = DocumentViewOptions & {
-	locale: LocaleCode;
+export type DocumentViewOptionsWithLocale<
+	TDocument extends CollectionDocument = CollectionDocument,
+> = DocumentViewOptions<TDocument> & {
+	locale: LocaleCode<TDocument>;
 };
 
 export type PreviewFieldAttributes = Readonly<Record<string, string>>;
@@ -132,27 +143,27 @@ export type DocumentFieldView<
 	key: string;
 	/** Returns a new field view that reads translated values for the locale. */
 	withLocale: (
-		locale: LocaleCode,
+		locale: LocaleCode<TDocument>,
 	) => DocumentFieldView<TDocument, TValue, true>;
 	/** Returns the field value, selecting a translated value when a locale is set. */
 	value: {
 		(): DocumentFieldValueResult<TValue, THasLocale>;
 		(
-			options: DocumentViewOptionsWithLocale,
+			options: DocumentViewOptionsWithLocale<TDocument>,
 		): DocumentFieldValueResult<TValue, true>;
 		(
-			options?: DocumentViewOptions,
+			options?: DocumentViewOptions<TDocument>,
 		): DocumentFieldValueResult<TValue, THasLocale>;
 	};
 	/** Returns hydrated refs for this field from the response refs registry. */
 	refs: <TResource extends RefResource>(
 		resource: TResource,
-		options?: DocumentViewOptions,
+		options?: DocumentViewOptions<TDocument>,
 	) => DocumentRefsResult<TResource>;
 	/** Returns the first hydrated ref for this field, when present. */
 	ref: <TResource extends RefResource>(
 		resource: TResource,
-		options?: DocumentViewOptions,
+		options?: DocumentViewOptions<TDocument>,
 	) => DocumentRefResult<TResource>;
 	/** Returns repeater groups for this field as plain field views. */
 	groups: () => Array<
@@ -181,7 +192,7 @@ export type DocumentFieldGroupView<
 	raw: TFields;
 	/** Returns a new group view that reads translated values for the locale. */
 	withLocale: (
-		locale: LocaleCode,
+		locale: LocaleCode<TDocument>,
 	) => DocumentFieldGroupView<TDocument, TFields, true>;
 } & FieldAccessorMethods<TDocument, TFields, THasLocale>;
 
@@ -198,7 +209,7 @@ export type DocumentBrickView<
 	type: TBrick["type"];
 	/** Returns a new brick view that reads translated values for the locale. */
 	withLocale: (
-		locale: LocaleCode,
+		locale: LocaleCode<TDocument>,
 	) => DocumentBrickView<TDocument, TBrick, true>;
 } & FieldAccessorMethods<TDocument, TBrick["fields"], THasLocale>;
 
@@ -210,7 +221,7 @@ export type DocumentView<
 	id: TDocument["id"];
 	collectionKey: TDocument["collectionKey"];
 	/** Returns a new document view that reads translated values for the locale. */
-	withLocale: (locale: LocaleCode) => DocumentView<TDocument, true>;
+	withLocale: (locale: LocaleCode<TDocument>) => DocumentView<TDocument, true>;
 	/** Returns the first matching brick by key or filter, ordered like the response. */
 	brick: {
 		<TKey extends DocumentBrickKeyOf<TDocument>>(

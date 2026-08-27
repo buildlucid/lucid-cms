@@ -1,4 +1,5 @@
 import { useNavigate } from "@solidjs/router";
+import type { Locale } from "@types";
 import classNames from "classnames";
 import { FaSolidTrash } from "solid-icons/fa";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
@@ -54,7 +55,7 @@ export interface StandardHeaderActions {
 		icon: JSXElement;
 		newTab?: boolean;
 	};
-	contentLocale?: boolean;
+	contentLocale?: boolean | Locale[];
 }
 
 export const Standard: Component<{
@@ -115,12 +116,20 @@ export const Standard: Component<{
 
 	const firstPrimaryAction = createMemo(() => primaryActions()[0]);
 	const showContentLocale = createMemo(() => {
+		const localeCount = Array.isArray(props.actions?.contentLocale)
+			? props.actions.contentLocale.length
+			: contentLocaleStore.get.locales.length;
 		return (
 			props.actions?.contentLocale !== undefined &&
 			props.actions.contentLocale !== false &&
-			contentLocaleStore.get.locales.length > 1
+			localeCount > 1
 		);
 	});
+	const contentLocales = createMemo(() =>
+		Array.isArray(props.actions?.contentLocale)
+			? props.actions.contentLocale
+			: undefined,
+	);
 	const showLinkAction = createMemo(() => {
 		return (
 			props.actions?.link !== undefined &&
@@ -173,7 +182,10 @@ export const Standard: Component<{
 					<div class="flex md:hidden items-center justify-end gap-2.5 w-full">
 						<Show when={showContentLocale()}>
 							<div class="w-full md:max-w-42">
-								<ContentLocaleSelect showShortcut={true} />
+								<ContentLocaleSelect
+									locales={contentLocales()}
+									showShortcut={true}
+								/>
 							</div>
 						</Show>
 						<HeaderPrimaryActions actions={primaryActions()} />
@@ -246,7 +258,10 @@ export const Standard: Component<{
 					<div class="hidden md:flex items-center justify-end space-x-2.5 w-full">
 						<Show when={showContentLocale()}>
 							<div class="w-full md:max-w-42">
-								<ContentLocaleSelect showShortcut={true} />
+								<ContentLocaleSelect
+									locales={contentLocales()}
+									showShortcut={true}
+								/>
 							</div>
 						</Show>
 						<HeaderPrimaryActions actions={primaryActions()} />

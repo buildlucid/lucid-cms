@@ -171,6 +171,37 @@ test("localeCode is correctly included or omitted based on translation support",
 	});
 });
 
+test("rejects translation keys outside the collection locale subset", () => {
+	const errors = validateField({
+		field: {
+			key: "translatable_field",
+			type: "text",
+			translations: {
+				fr: "Texte valide",
+				de: "Nicht unterstützt",
+			},
+		},
+		// biome-ignore lint/style/noNonNullAssertion: the fixture always registers this field
+		instance: TranslatedCollection.fields.get("translatable_field")!,
+		validationData: { media: [], user: [], relation: [] },
+		meta: {
+			localized: true,
+			locales: ["fr"],
+			defaultLocale: "fr",
+		},
+	});
+
+	expect(errors).toEqual([
+		{
+			key: "translatable_field",
+			localeCode: "de",
+			message: copy("server:core.fields.validation.locale.unsupported", {
+				data: { locale: "de" },
+			}),
+		},
+	]);
+});
+
 test("required localized fields validate every configured locale", async () => {
 	const validationData = {
 		media: [],

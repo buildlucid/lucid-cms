@@ -162,6 +162,7 @@ export const usePreviewFocus = (props: {
 	collection: Accessor<Collection | undefined>;
 	collectionKey: Accessor<string>;
 	documentId: Accessor<number | undefined>;
+	locales: Accessor<string[]>;
 	hasUnsavedContent: Accessor<boolean>;
 	hasUnsavedBuilderStructure: Accessor<boolean>;
 }) => {
@@ -223,12 +224,7 @@ export const usePreviewFocus = (props: {
 		}
 
 		cancelReveal();
-		if (
-			target.locale &&
-			contentLocaleStore.get.locales.some(
-				(locale) => locale.code === target.locale,
-			)
-		) {
+		if (target.locale && props.locales().includes(target.locale)) {
 			contentLocaleStore.get.setContentLocale(target.locale);
 		}
 		const controller = new AbortController();

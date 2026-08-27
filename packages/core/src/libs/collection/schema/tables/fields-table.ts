@@ -346,6 +346,7 @@ const createFieldTables = (props: {
 					foreignKey: column.foreignKey,
 					customField: {
 						type: field.type,
+						localized: fieldInstance.localizedEnabled,
 					},
 					//* holding off on default value contraint on custom field columns due to sqlite/libsql adapters not supporting the alter column operation and instead having to drop+add the column again resulting in data loss.
 					//* CF default values are a lot more likely to be edited than the others and in a way where a user wouldnt expect data loss - so until we have a solution here, no default contraints for CF exist
@@ -457,6 +458,7 @@ const createFieldTables = (props: {
 						foreignKey: column.foreignKey,
 						customField: {
 							type: field.type,
+							localized: fieldInstance.localizedEnabled,
 						},
 						default: props.db.supports("alterColumn") ? column.default : null,
 					}),

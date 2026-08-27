@@ -45,14 +45,14 @@ const createFieldView = <
 	document: TDocument;
 	key: string;
 	value: TValue;
-	context: DocumentViewOptions;
+	context: DocumentViewOptions<TDocument>;
 	brick?: PreviewFieldBrick;
 	path: Array<string | number>;
 }): DocumentFieldView<TDocument, TValue, THasLocale> => {
 	return {
 		raw: props.value,
 		key: props.key,
-		withLocale: (locale: LocaleCode) =>
+		withLocale: (locale: LocaleCode<TDocument>) =>
 			createFieldView({
 				document: props.document,
 				key: props.key,
@@ -64,7 +64,7 @@ const createFieldView = <
 				brick: props.brick,
 				path: props.path,
 			}) as DocumentFieldView<TDocument, TValue, true>,
-		value: (options?: DocumentViewOptions) =>
+		value: (options?: DocumentViewOptions<TDocument>) =>
 			readFieldValue(
 				props.value,
 				buildViewOptions(props.context, options),
@@ -73,7 +73,7 @@ const createFieldView = <
 			>,
 		refs: <TResource extends RefResource>(
 			resource: TResource,
-			options?: DocumentViewOptions,
+			options?: DocumentViewOptions<TDocument>,
 		) =>
 			readRefs(
 				props.context.refs,
@@ -83,7 +83,7 @@ const createFieldView = <
 			),
 		ref: <TResource extends RefResource>(
 			resource: TResource,
-			options?: DocumentViewOptions,
+			options?: DocumentViewOptions<TDocument>,
 		) =>
 			readRef(
 				props.context.refs,
@@ -123,7 +123,7 @@ const createFieldAccessorMethods = <
 >(props: {
 	document: TDocument;
 	fields: TFields;
-	context: DocumentViewOptions;
+	context: DocumentViewOptions<TDocument>;
 	brick?: PreviewFieldBrick;
 	path: Array<string | number>;
 }): FieldAccessorMethods<TDocument, TFields, THasLocale> => {
@@ -154,13 +154,13 @@ const createFieldGroupView = <
 >(props: {
 	document: TDocument;
 	group: TFields;
-	context: DocumentViewOptions;
+	context: DocumentViewOptions<TDocument>;
 	brick?: PreviewFieldBrick;
 	path: Array<string | number>;
 }): DocumentFieldGroupView<TDocument, TFields, THasLocale> => {
 	return {
 		raw: props.group,
-		withLocale: (locale: LocaleCode) =>
+		withLocale: (locale: LocaleCode<TDocument>) =>
 			createFieldGroupView<TDocument, TFields, true>({
 				document: props.document,
 				group: props.group,
@@ -188,7 +188,7 @@ const createBrickView = <
 >(props: {
 	document: TDocument;
 	brick: TBrick;
-	context: DocumentViewOptions;
+	context: DocumentViewOptions<TDocument>;
 }): DocumentBrickView<TDocument, TBrick, THasLocale> => {
 	const previewBrick: PreviewFieldBrick | undefined =
 		props.brick.type === "fixed" || props.brick.type === "builder"
@@ -211,7 +211,7 @@ const createBrickView = <
 		key: props.brick.key,
 		order: props.brick.order,
 		type: props.brick.type,
-		withLocale: (locale: LocaleCode) =>
+		withLocale: (locale: LocaleCode<TDocument>) =>
 			createBrickView<TDocument, TBrick, true>({
 				document: props.document,
 				brick: props.brick,
@@ -232,11 +232,11 @@ const createBrickView = <
 
 /** Wraps a document and reads translated fields using the supplied locale. */
 export function asDocument<TDocument extends CollectionDocument>(
-	input: { document: TDocument } & DocumentViewOptionsWithLocale,
+	input: { document: TDocument } & DocumentViewOptionsWithLocale<TDocument>,
 ): DocumentView<TDocument, true>;
 /** Wraps a document with typed helpers for fields, bricks, refs, and locales. */
 export function asDocument<TDocument extends CollectionDocument>(
-	input: { document: TDocument } & DocumentViewOptions,
+	input: { document: TDocument } & DocumentViewOptions<TDocument>,
 ): DocumentView<TDocument, false>;
 /** Returns undefined when the document is null or undefined. */
 export function asDocument(
@@ -246,18 +246,18 @@ export function asDocument(
 export function asDocument<TDocument extends CollectionDocument>(
 	input: {
 		document: TDocument | null | undefined;
-	} & DocumentViewOptionsWithLocale,
+	} & DocumentViewOptionsWithLocale<TDocument>,
 ): DocumentView<TDocument, true> | undefined;
 /** Wraps an optional document with typed helpers when it is present. */
 export function asDocument<TDocument extends CollectionDocument>(
 	input: {
 		document: TDocument | null | undefined;
-	} & DocumentViewOptions,
+	} & DocumentViewOptions<TDocument>,
 ): DocumentView<TDocument, false> | undefined;
 export function asDocument<TDocument extends CollectionDocument>(
 	input: {
 		document: TDocument | null | undefined;
-	} & DocumentViewOptions,
+	} & DocumentViewOptions<TDocument>,
 ): DocumentView<TDocument, boolean> | undefined {
 	const { document, ...options } = input;
 	if (!document) return undefined;
@@ -304,7 +304,7 @@ export function asDocument<TDocument extends CollectionDocument>(
 		raw: document,
 		id: document.id,
 		collectionKey: document.collectionKey,
-		withLocale: (locale: LocaleCode) =>
+		withLocale: (locale: LocaleCode<TDocument>) =>
 			asDocument({
 				document,
 				...options,
@@ -331,14 +331,16 @@ export function asDocument<TDocument extends CollectionDocument>(
 
 /** Wraps multiple documents and reads translated fields using the supplied locale. */
 export function asDocuments<TDocument extends CollectionDocument>(
-	input: { documents: readonly TDocument[] } & DocumentViewOptionsWithLocale,
+	input: {
+		documents: readonly TDocument[];
+	} & DocumentViewOptionsWithLocale<TDocument>,
 ): Array<DocumentView<TDocument, true>>;
 /** Wraps multiple documents with typed helpers for fields, bricks, refs, and locales. */
 export function asDocuments<TDocument extends CollectionDocument>(
-	input: { documents: readonly TDocument[] } & DocumentViewOptions,
+	input: { documents: readonly TDocument[] } & DocumentViewOptions<TDocument>,
 ): Array<DocumentView<TDocument, false>>;
 export function asDocuments<TDocument extends CollectionDocument>(
-	input: { documents: readonly TDocument[] } & DocumentViewOptions,
+	input: { documents: readonly TDocument[] } & DocumentViewOptions<TDocument>,
 ): Array<DocumentView<TDocument, boolean>> {
 	const { documents, ...options } = input;
 

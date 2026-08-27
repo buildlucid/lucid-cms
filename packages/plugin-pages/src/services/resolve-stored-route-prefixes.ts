@@ -37,6 +37,7 @@ const resolveStoredRoutePrefixes: ServiceFn<
 		collection: data.collection,
 		collectionInstance: data.collectionInstance,
 		collections: context.config.collections,
+		localization: context.config.localization,
 		sourceKeys,
 		selections: selectionsRes.data,
 	});
@@ -53,6 +54,7 @@ const resolveStoredRoutePrefixes: ServiceFn<
 
 	const prefixesRes = await resolveRouteSegmentValues(context, {
 		collection: data.collection,
+		collectionInstance: data.collectionInstance,
 		versionType: data.versionType,
 		targets,
 		sourceKeys,

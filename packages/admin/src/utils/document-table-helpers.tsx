@@ -278,7 +278,7 @@ export const getDocumentListingPreviewFields = (props: {
 				fieldConfig: field,
 				fieldData: documentField,
 				contentLocale: props.contentLocale,
-				collectionLocalized: collection.localized,
+				collectionLocalized: collection.localized !== false,
 			});
 
 			if (!value) return null;
@@ -339,7 +339,7 @@ export const getDocumentPreviewLabel = (props: {
 			fieldConfig: field,
 			fieldData: documentField,
 			contentLocale: props.contentLocale,
-			collectionLocalized: collection?.localized ?? false,
+			collectionLocalized: Boolean(collection?.localized),
 		});
 
 		if (value && value.trim().length > 0) return value;

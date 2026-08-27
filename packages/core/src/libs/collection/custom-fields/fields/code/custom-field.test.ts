@@ -360,7 +360,7 @@ test("defines a nullable json column for storage", async () => {
 test("generates the code field client value type", async () => {
 	const file = generateCollectionClientTypes({
 		collections: [CodeCollection],
-		localization: { locales: [{ code: "en" }] },
+		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 
 	const fieldsDeclaration = file.declarations.find(

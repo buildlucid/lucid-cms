@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import type { LucidBrickTableName } from "../../../libs/db/tables/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
@@ -26,7 +27,10 @@ const aggregateBrickTables = (params: {
 	const brickTables: Array<InsertBrickTables> = [];
 	const brickKeyTableNameMap: Map<string, LucidBrickTableName> = new Map();
 
-	const locales = params.localization.locales.map((locale) => locale.code);
+	const localization = resolveCollectionLocalization({
+		localization: params.localization,
+		collection: params.collection,
+	});
 
 	if (params.fields !== undefined && params.fields.length > 0) {
 		constructBrickTable(brickTables, {
@@ -36,8 +40,8 @@ const aggregateBrickTables = (params: {
 			versionId: params.versionId,
 			targetFields: params.fields,
 			localization: {
-				locales: locales,
-				defaultLocale: params.localization.defaultLocale,
+				locales: localization.rowLocales,
+				defaultLocale: localization.storageLocale,
 			},
 			brickKeyTableNameMap: brickKeyTableNameMap,
 			order: 0,
@@ -58,8 +62,8 @@ const aggregateBrickTables = (params: {
 				versionId: params.versionId,
 				targetFields: brick.fields || [],
 				localization: {
-					locales: locales,
-					defaultLocale: params.localization.defaultLocale,
+					locales: localization.rowLocales,
+					defaultLocale: localization.storageLocale,
 				},
 				brick: brick,
 				brickKeyTableNameMap: brickKeyTableNameMap,

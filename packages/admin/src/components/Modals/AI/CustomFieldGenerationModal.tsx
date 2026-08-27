@@ -29,12 +29,12 @@ import type { RichTextOptions } from "@/components/Groups/Form/RichText";
 import { Modal } from "@/components/Groups/Modal";
 import Button from "@/components/Partials/Button";
 import Pill from "@/components/Partials/Pill";
+import { useDocumentLocalization } from "@/hooks/document/useDocumentLocalization";
 import api from "@/services/api";
 import aiModalsStore, {
 	type CustomFieldGenerationFieldType,
 	type CustomFieldGenerationTarget,
 } from "@/store/aiModalsStore";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import siteStore from "@/store/siteStore";
 import T from "@/translations";
 import {
@@ -198,6 +198,7 @@ const CustomFieldGenerationModal: Component = () => {
 	const [lastCost, setLastCost] =
 		createSignal<CustomFieldInputGenerateResponse["usage"]["cost"]>();
 	const [clientError, setClientError] = createSignal<string>();
+	const documentLocalization = useDocumentLocalization();
 	let abortController: AbortController | undefined;
 
 	// -----------------------------
@@ -223,7 +224,7 @@ const CustomFieldGenerationModal: Component = () => {
 		target()?.preview?.richTextOptions?.(),
 	);
 	const defaultLocale = createMemo(() =>
-		getDefaultTranslationLocale(contentLocaleStore.get.locales),
+		getDefaultTranslationLocale(documentLocalization.locales()),
 	);
 	const sourceLocale = createMemo(() => {
 		const targets = selectedLocales();
@@ -232,7 +233,7 @@ const CustomFieldGenerationModal: Component = () => {
 	});
 	const localeOptions = createMemo(() => {
 		if (!field()?.localized) return [];
-		return contentLocaleStore.get.locales;
+		return documentLocalization.locales();
 	});
 	const guidanceOptions = createMemo(() =>
 		(field()?.guidance ?? []).map((item) => ({
@@ -301,9 +302,9 @@ const CustomFieldGenerationModal: Component = () => {
 		abortController = undefined;
 	};
 	const getLocaleLabel = (localeCode: string) => {
-		const locale = contentLocaleStore.get.locales.find(
-			(item) => item.code === localeCode,
-		);
+		const locale = documentLocalization
+			.locales()
+			.find((item) => item.code === localeCode);
 
 		if (!locale) return localeCode;
 		return `${locale.name ?? locale.code} (${locale.code})`;

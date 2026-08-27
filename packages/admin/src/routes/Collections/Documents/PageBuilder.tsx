@@ -110,11 +110,13 @@ const CollectionsDocumentsEditRoute: Component<{
 		version: versionType,
 		document: docState.document,
 		autoSaveMetadata: mutations.autoSaveMetadata,
+		locale: docState.contentLocale,
 	});
 	const previewFocus = usePreviewFocus({
 		collection: docState.collection,
 		collectionKey: docState.collectionKey,
 		documentId: docState.documentId,
+		locales: docState.contentLocales,
 		hasUnsavedContent: brickStore.getDocumentContentMutated,
 		hasUnsavedBuilderStructure: brickStore.getBuilderBrickStructureMutated,
 	});
@@ -185,7 +187,7 @@ const CollectionsDocumentsEditRoute: Component<{
 				brickStore.get.reset();
 			}
 
-			brickStore.set("collectionLocalized", collection.localized || false);
+			brickStore.set("collectionLocalized", collection.localized !== false);
 
 			//* preserve local unsaved edits during same-view background query updates
 			//* - Without this guard, selecting a relation field can trigger a refetch that rehydrates store fields from stale server data and wipes local changes

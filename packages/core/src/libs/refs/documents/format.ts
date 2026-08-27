@@ -1,4 +1,5 @@
 import type { RefResourceMap } from "../../../types.js";
+import resolveCollectionLocalization from "../../collection/helpers/resolve-collection-localization.js";
 import documentBricksFormatter from "../../formatters/document-bricks.js";
 import documentFieldsFormatter from "../../formatters/document-fields.js";
 import formatDocumentRoute from "../../formatters/document-route.js";
@@ -43,6 +44,10 @@ const formatDocumentRefs = (
 					collection.contentFieldTree,
 				)
 			: documentFieldsFormatter.objectifyFields(formattedFields);
+		const localization = resolveCollectionLocalization({
+			localization: context.config.localization,
+			collection,
+		});
 
 		return {
 			id: document.document_id,
@@ -52,9 +57,7 @@ const formatDocumentRefs = (
 				collection,
 				documentId: document.document_id,
 				fields: formattedFields,
-				locales: context.config.localization.locales.map(
-					(locale) => locale.code,
-				),
+				locales: localization.locales,
 			}),
 			fields: Object.keys(documentFields).length > 0 ? documentFields : null,
 		} satisfies RefResourceMap["documents"];

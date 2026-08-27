@@ -1,8 +1,10 @@
+import type { CollectionBuilder } from "@lucidcms/core";
 import { copy } from "@lucidcms/core/plugin";
 import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
 import type { CollectionConfig, RouteSegmentTarget } from "../types/types.js";
 import formatFullSlug from "../utils/format-fullslug.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
+import resolvePagesCollectionLocalization from "../utils/resolve-pages-collection-localization.js";
 import fetchRouteSegmentValues, {
 	targetKey,
 } from "./helpers/fetch-route-segment-values.js";
@@ -18,6 +20,7 @@ const resolveRouteSegmentValues: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
+			collectionInstance: CollectionBuilder;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			targets: RouteSegmentTarget[];
 			sourceKeys: string[];
@@ -25,9 +28,12 @@ const resolveRouteSegmentValues: ServiceFn<
 	],
 	Map<string, Record<string, string | null>>
 > = async (context, data) => {
-	const locales = data.collection.localized
-		? context.config.localization.locales.map((locale) => locale.code)
-		: [context.config.localization.defaultLocale];
+	const collectionLocalization = resolvePagesCollectionLocalization({
+		localization: context.config.localization,
+		collection: data.collection,
+		collectionInstance: data.collectionInstance,
+	});
+	const locales = collectionLocalization.locales;
 
 	if (data.collection.segments.length === 0) {
 		return {
@@ -72,9 +78,7 @@ const resolveRouteSegmentValues: ServiceFn<
 		for (const locale of locales) {
 			const values: string[] = [];
 			for (const target of sourceTargets) {
-				const targetLocale = target.localized
-					? locale
-					: context.config.localization.defaultLocale;
+				const targetLocale = target.localized ? locale : target.storageLocale;
 				const row = valuesRes.data.get(
 					targetKey(target.collectionKey, target.documentId, targetLocale),
 				);

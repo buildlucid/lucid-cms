@@ -8,6 +8,7 @@ import type {
 	Refs,
 } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type { LucidBrickTableName } from "../db/tables/index.js";
 import type { DocumentWorkflowDetailedQueryResponse } from "../repositories/document-workflows.js";
@@ -93,6 +94,11 @@ const formatSingle = (props: {
 	host: string;
 	mediaOptions: MediaFormatterOptions;
 }): InternalCollectionDocument => {
+	const localization = resolveCollectionLocalization({
+		localization: props.config.localization,
+		collection: props.collection,
+	});
+
 	const inlineWorkflow =
 		props.document.workflow_assignees !== undefined
 			? documentWorkflowsFormatter.formatSingle({
@@ -121,7 +127,7 @@ const formatSingle = (props: {
 			collection: props.collection,
 			documentId: props.document.id,
 			fields: props.fields,
-			locales: props.config.localization.locales.map((locale) => locale.code),
+			locales: localization.locales,
 		}),
 		versions: formatVersions({
 			document: props.document,

@@ -1,6 +1,6 @@
 import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { Dialog } from "@kobalte/core";
-import type { ErrorResponse } from "@types";
+import type { ErrorResponse, Locale } from "@types";
 import classNames from "classnames";
 import { FaSolidXmark } from "solid-icons/fa";
 import {
@@ -47,6 +47,7 @@ export const BottomPanel: Component<{
 		contentLocale?: boolean;
 		hascontentLocaleError?: boolean;
 		useDefaultcontentLocale?: boolean;
+		locales?: Locale[];
 	};
 	fetchState?: {
 		isLoading?: boolean;
@@ -108,23 +109,27 @@ export const BottomPanel: Component<{
 			return next;
 		});
 	};
+	const availableLocales = createMemo(
+		() => props.langauge?.locales ?? contentLocaleStore.get.locales,
+	);
 
 	const getDefaultContentLocale = () => {
-		if (!props.langauge?.useDefaultcontentLocale)
-			return contentLocaleStore.get.contentLocale;
-		const defaultLocale = contentLocaleStore.get.locales.find(
-			(locale) => locale.isDefault,
-		);
-		if (defaultLocale) return defaultLocale.code;
-		return contentLocaleStore.get.contentLocale;
+		const activeLocale = contentLocaleStore.get.contentLocale;
+		if (
+			!props.langauge?.useDefaultcontentLocale &&
+			availableLocales().some((locale) => locale.code === activeLocale)
+		) {
+			return activeLocale;
+		}
+		const defaultLocale = availableLocales().find((locale) => locale.isDefault);
+		return defaultLocale?.code ?? availableLocales()[0]?.code ?? activeLocale;
 	};
 
 	// ------------------------------
 	// Memos
 	const showContentLocaleSelect = createMemo(() => {
 		return (
-			props.langauge?.contentLocale === true &&
-			contentLocaleStore.get.locales.length > 1
+			props.langauge?.contentLocale === true && availableLocales().length > 1
 		);
 	});
 	const nestedLevel = createMemo(
@@ -166,8 +171,12 @@ export const BottomPanel: Component<{
 
 	createEffect(() => {
 		const defaultLang = getDefaultContentLocale();
-		if (contentLocale() === undefined && defaultLang !== undefined)
+		if (
+			!availableLocales().some((locale) => locale.code === contentLocale()) &&
+			defaultLang !== undefined
+		) {
 			setContentLocale(defaultLang);
+		}
 	});
 
 	// ------------------------------
@@ -279,6 +288,7 @@ export const BottomPanel: Component<{
 									<Show when={showContentLocaleSelect()}>
 										<div class="mt-2">
 											<ContentLocaleSelect
+												locales={availableLocales()}
 												value={contentLocale()}
 												setValue={setContentLocale}
 												hasError={props.langauge?.hascontentLocaleError}

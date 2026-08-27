@@ -15,8 +15,10 @@ import { Standard } from "@/components/Groups/Headers";
 import { Wrapper } from "@/components/Groups/Layout";
 import { QueryRow } from "@/components/Groups/Query/Row";
 import Button from "@/components/Partials/Button";
+import { createDocumentLocalization } from "@/hooks/document/useDocumentLocalization";
 import useQueryState, { sort } from "@/hooks/useQueryState";
 import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import {
@@ -91,6 +93,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 		enabled: () => !!collectionKey(),
 	});
 	const collectionData = createMemo(() => collection.data?.data);
+	const documentLocalization = createDocumentLocalization(collectionData);
 
 	// ----------------------------------
 	// Memos
@@ -168,6 +171,18 @@ const CollectionsDocumentsListRoute: Component = () => {
 		),
 	);
 	createEffect(() => {
+		if (!collectionData()) return;
+		if (
+			contentLocaleStore.get.contentLocale ===
+			documentLocalization.contentLocale()
+		) {
+			return;
+		}
+		contentLocaleStore.get.setContentLocale(
+			documentLocalization.contentLocale(),
+		);
+	});
+	createEffect(() => {
 		const activeCollection = collectionData();
 		if (collectionIsSuccess() && activeCollection) {
 			if (activeCollection.mode === "single") {
@@ -235,7 +250,9 @@ const CollectionsDocumentsListRoute: Component = () => {
 							description: collectionSummary(),
 						}}
 						actions={{
-							contentLocale: collectionData()?.localized ?? false,
+							contentLocale: collectionData()?.localized
+								? documentLocalization.locales()
+								: false,
 							createLink: {
 								link: getDocumentRoute("create", {
 									collectionKey: collectionKey() || "",

@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import constants from "../../constants/constants.js";
 import collections from "../../libs/collection/collections.js";
+import resolveCollectionLocalization from "../../libs/collection/helpers/resolve-collection-localization.js";
 import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { PreviewSessionsRepository } from "../../libs/repositories/index.js";
@@ -97,8 +98,29 @@ const create: ServiceFn<
 		collectionKey: data.collectionKey,
 		version: data.versionType,
 	};
-	const locale =
-		data.locale?.trim() || context.config.localization.defaultLocale;
+	const localization = resolveCollectionLocalization({
+		localization: context.config.localization,
+		collection: collectionRes.data,
+	});
+	const locale = data.locale?.trim() || localization.defaultLocale;
+	const previewLocales = localization.enabled
+		? localization.locales
+		: [localization.defaultLocale];
+
+	if (!previewLocales.includes(locale)) {
+		return {
+			error: {
+				type: "basic",
+				message: copy(
+					"server:core.documents.preview.locale.not.supported.message",
+					{ data: { locale } },
+				),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
 	const routePath = canonicalDocument.route?.path;
 	const path =
 		typeof routePath === "string" ? routePath : (routePath?.[locale] ?? null);

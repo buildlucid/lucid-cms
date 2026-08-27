@@ -35,6 +35,17 @@ export type CollectionGroupConfig = {
 	order: number | null;
 };
 
+export type CollectionLocalizationConfig =
+	| boolean
+	| {
+			locales: string[];
+			defaultLocale?: string;
+	  }
+	| {
+			locales?: never;
+			defaultLocale: string;
+	  };
+
 export type CollectionPreviewURLResolverProps<
 	TCollectionKey extends string = CollectionDocumentKey,
 > = {
@@ -127,7 +138,7 @@ export type CollectionConfigSchemaType<
 		summary?: AdminCopyInput;
 	};
 	locked?: boolean;
-	localized?: boolean;
+	localized?: CollectionLocalizationConfig;
 	revisions?: boolean;
 	autoSave?: boolean;
 	scheduling?: boolean;

@@ -105,10 +105,24 @@ const collectionResponseSchema = z.object({
 			},
 		}),
 	}),
-	localized: z.boolean().meta({
-		description: "Whether the collection supports localized content",
-		example: true,
-	}),
+	localized: z
+		.union([
+			z.literal(false),
+			z.object({
+				locales: z.array(z.string()).meta({
+					description: "Locale codes supported by this collection",
+					example: ["en", "fr"],
+				}),
+				defaultLocale: z.string().meta({
+					description: "The default content locale for this collection",
+					example: "en",
+				}),
+			}),
+		])
+		.meta({
+			description:
+				"The collection's resolved localization settings, or false when localization is disabled",
+		}),
 	revisions: z.boolean().meta({
 		description: "Whether the collection supports document revisions",
 		example: true,

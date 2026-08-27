@@ -167,6 +167,9 @@ class CollectionBuilder<
 	}
 	get getData(): CollectionData {
 		const preview = this.resolvedPreviewConfig;
+		const localized =
+			this.config.localized ?? constants.collectionBuilder.localized;
+
 		return {
 			key: this.key,
 			mode: this.config.mode,
@@ -178,7 +181,7 @@ class CollectionBuilder<
 			},
 			locked: this.config.locked ?? constants.collectionBuilder.locked,
 			revisions: this.config.revisions ?? constants.collectionBuilder.revisions,
-			localized: this.config.localized ?? constants.collectionBuilder.localized,
+			localized: localized !== false,
 			autoSave: this.config.autoSave ?? constants.collectionBuilder.autoSave,
 			scheduling:
 				this.config.scheduling ?? constants.collectionBuilder.scheduling,

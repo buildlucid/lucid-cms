@@ -2,6 +2,7 @@ import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
+import resolvePagesCollectionLocalization from "../../utils/resolve-pages-collection-localization.js";
 import {
 	checkCircularParents,
 	checkFieldsExist,
@@ -38,6 +39,11 @@ const beforeUpsertHandler =
 				data: undefined,
 			};
 		}
+		const localization = resolvePagesCollectionLocalization({
+			localization: context.config.localization,
+			collection: targetCollectionRes.data,
+			collectionInstance: data.meta.collection,
+		});
 
 		const checkFieldsExistRes = checkFieldsExist({
 			fields: {
@@ -58,7 +64,7 @@ const beforeUpsertHandler =
 		const { slug, parentPage, fullSlug } = checkFieldsExistRes.data;
 
 		const checkParentIsPageOfSelfRes = checkParentIsPageOfSelf({
-			defaultLocale: context.config.localization.defaultLocale,
+			defaultLocale: localization.storageLocale,
 			documentId: data.data.documentId,
 			fields: {
 				parentPage: parentPage,
@@ -67,8 +73,8 @@ const beforeUpsertHandler =
 		if (checkParentIsPageOfSelfRes.error) return checkParentIsPageOfSelfRes;
 
 		const checkRootSlugWithParentRes = checkRootSlugWithParent({
-			collection: targetCollectionRes.data,
-			defaultLocale: context.config.localization.defaultLocale,
+			localized: localization.enabled,
+			defaultLocale: localization.storageLocale,
 			fields: {
 				slug: slug,
 				parentPage: parentPage,
@@ -88,7 +94,7 @@ const beforeUpsertHandler =
 			const circularParentsRes = await checkCircularParents(context, {
 				documentId: data.data.documentId,
 				versionType: data.data.versionType,
-				defaultLocale: context.config.localization.defaultLocale,
+				defaultLocale: localization.storageLocale,
 				collectionKey: targetCollectionRes.data.key,
 				fields: {
 					parentPage: parentPage,
@@ -121,8 +127,7 @@ const beforeUpsertHandler =
 			const candidateFullSlugField = { ...fullSlug };
 			setFullSlug({
 				fullSlug: fullSlugRes.data,
-				defaultLocale: context.config.localization.defaultLocale,
-				collection: targetCollectionRes.data,
+				localization,
 				fields: {
 					fullSlug: candidateFullSlugField,
 				},
@@ -172,8 +177,7 @@ const beforeUpsertHandler =
 
 			setFullSlug({
 				fullSlug: fullSlugRes.data,
-				defaultLocale: context.config.localization.defaultLocale,
-				collection: targetCollectionRes.data,
+				localization,
 				fields: {
 					fullSlug: fullSlug,
 				},

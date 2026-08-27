@@ -6,6 +6,7 @@ import {
 	useContext,
 } from "solid-js";
 import type { UseDocumentAutoSave } from "./useDocumentAutoSave";
+import { DocumentLocalizationProvider } from "./useDocumentLocalization";
 import type { UseDocumentMutations } from "./useDocumentMutations";
 import type { UseDocumentState } from "./useDocumentState";
 import type { UseDocumentUIState } from "./useDocumentUIState";
@@ -32,23 +33,25 @@ export const PageBuilderStateProvider: ParentComponent<
 	PageBuilderStateContextValue
 > = (props) => {
 	return (
-		<PageBuilderStateContext.Provider
-			value={{
-				mode: props.mode,
-				version: props.version,
-				versionId: props.versionId,
-				relationVersionType: props.relationVersionType,
-				releaseRequest: props.releaseRequest,
-				disableWorkflow: props.disableWorkflow,
-				documentState: props.documentState,
-				mutations: props.mutations,
-				uiState: props.uiState,
-				autoSave: props.autoSave,
-				navigationGuard: props.navigationGuard,
-			}}
-		>
-			{props.children}
-		</PageBuilderStateContext.Provider>
+		<DocumentLocalizationProvider collection={props.documentState.collection}>
+			<PageBuilderStateContext.Provider
+				value={{
+					mode: props.mode,
+					version: props.version,
+					versionId: props.versionId,
+					relationVersionType: props.relationVersionType,
+					releaseRequest: props.releaseRequest,
+					disableWorkflow: props.disableWorkflow,
+					documentState: props.documentState,
+					mutations: props.mutations,
+					uiState: props.uiState,
+					autoSave: props.autoSave,
+					navigationGuard: props.navigationGuard,
+				}}
+			>
+				{props.children}
+			</PageBuilderStateContext.Provider>
+		</DocumentLocalizationProvider>
 	);
 };
 

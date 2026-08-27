@@ -60,6 +60,7 @@ const resolveRoutePrefix: ServiceFn<
 		collection: data.collection,
 		collectionInstance: data.collectionInstance,
 		collections: context.config.collections,
+		localization: context.config.localization,
 		sourceKeys: [currentSourceKey],
 		selections,
 	});
@@ -85,6 +86,7 @@ const resolveRoutePrefix: ServiceFn<
 
 	const prefixesRes = await resolveRouteSegmentValues(context, {
 		collection: data.collection,
+		collectionInstance: data.collectionInstance,
 		versionType: data.versionType,
 		targets,
 		sourceKeys: [currentSourceKey],

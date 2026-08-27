@@ -33,6 +33,7 @@ export type CollectionSchemaColumn = {
 	};
 	customField?: {
 		type: FieldTypes;
+		localized?: boolean;
 	};
 	unique?: boolean;
 	primary?: boolean;

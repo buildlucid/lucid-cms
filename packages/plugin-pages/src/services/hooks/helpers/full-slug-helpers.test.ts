@@ -1,3 +1,4 @@
+import { CollectionBuilder } from "@lucidcms/core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CollectionConfig } from "../../../types/types.js";
 
@@ -41,6 +42,10 @@ const collection = {
 	},
 	unique: true,
 } satisfies CollectionConfig;
+const collectionInstance = new CollectionBuilder("pages", {
+	mode: "multiple",
+	details: { name: "Pages", singularName: "Page" },
+});
 
 describe("page full-slug helpers", () => {
 	afterEach(() => {
@@ -63,7 +68,7 @@ describe("page full-slug helpers", () => {
 
 		const response = await resolveParentFullSlug(context, {
 			collection,
-			collectionInstance: {} as never,
+			collectionInstance,
 			collectionKey: "pages",
 			versionType: "latest",
 			tables: {} as never,
@@ -107,7 +112,7 @@ describe("page full-slug helpers", () => {
 			collectionKey: "pages",
 			tables: {} as never,
 			collection,
-			collectionInstance: {} as never,
+			collectionInstance,
 			parentFullSlugField: {
 				key: "fullSlug",
 				type: "text",

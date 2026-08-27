@@ -240,7 +240,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		documentCollections: documentCollections(),
 		embeddedBrickConfigs: embeddedBrickConfigs(),
 		locale: fieldRenderState.contentLocale(),
-		collectionLocalized: currentCollection()?.localized === true,
+		collectionLocalized: Boolean(currentCollection()?.localized),
 		references: {
 			media: getMediaRef,
 			document: getDocumentRef,

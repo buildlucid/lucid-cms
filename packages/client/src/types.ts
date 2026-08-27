@@ -55,7 +55,7 @@ export interface CollectionDocumentFieldsByCollection {}
 export interface CollectionDocumentBricksByCollection {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: generated types merge into this interface via module augmentation.
-export interface CollectionDocumentLocaleCodes {}
+export interface CollectionDocumentLocaleCodesByCollection {}
 
 type CollectionDocumentBrickKey = Extract<
 	keyof CollectionDocumentBricksByCollection,
@@ -68,29 +68,18 @@ type CollectionDocumentFieldKey = Extract<
 >;
 
 type KnownCollectionDocumentKey = CollectionDocumentFieldKey;
-type KnownCollectionDocumentLocaleCode = Extract<
-	keyof CollectionDocumentLocaleCodes,
-	string
->;
-
 export type CollectionDocumentKey = KnownCollectionDocumentKey | (string & {});
 
-type ExactCollectionDocumentTranslations<TValue> = {
-	[TLocaleCode in KnownCollectionDocumentLocaleCode]: TValue;
-};
+export type CollectionDocumentLocaleCode<
+	TCollectionKey extends string = string,
+> = TCollectionKey extends keyof CollectionDocumentLocaleCodesByCollection
+	? Extract<CollectionDocumentLocaleCodesByCollection[TCollectionKey], string>
+	: string;
 
-export type CollectionDocumentLocaleCode = [
-	KnownCollectionDocumentLocaleCode,
-] extends [never]
-	? string
-	: KnownCollectionDocumentLocaleCode | (string & {});
-
-export type CollectionDocumentTranslations<TValue> = [
-	KnownCollectionDocumentLocaleCode,
-] extends [never]
-	? Record<string, TValue>
-	: ExactCollectionDocumentTranslations<TValue> &
-			Partial<Record<string, TValue>>;
+export type CollectionDocumentTranslations<
+	TValue,
+	TCollectionKey extends string = string,
+> = Record<CollectionDocumentLocaleCode<TCollectionKey>, TValue>;
 
 type ResolveCollectionDocumentFields<TCollectionKey extends string> =
 	TCollectionKey extends CollectionDocumentFieldKey
@@ -130,7 +119,7 @@ export interface CollectionDocument<
 	id: number;
 	collectionKey: ResolveCollectionDocumentKey<TCollectionKey>;
 	version: ResolveCollectionDocumentVersion<TCollectionKey> | null;
-	route: DocumentRoute | null;
+	route: DocumentRoute<TCollectionKey> | null;
 	fields: ResolveCollectionDocumentFields<TCollectionKey>;
 	bricks?: Array<ResolveCollectionDocumentBricks<TCollectionKey>>;
 	meta?: CollectionDocumentMeta<

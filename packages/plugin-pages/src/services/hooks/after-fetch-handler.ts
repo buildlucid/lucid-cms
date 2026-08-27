@@ -8,6 +8,7 @@ import type {
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
+import resolvePagesCollectionLocalization from "../../utils/resolve-pages-collection-localization.js";
 import getTargetCollection from "../get-target-collection.js";
 import resolveParentFullSlug from "./helpers/resolve-parent-full-slug.js";
 
@@ -115,6 +116,11 @@ const afterFetchHandler =
 				data: undefined,
 			};
 		}
+		const localization = resolvePagesCollectionLocalization({
+			localization: context.config.localization,
+			collection: targetCollectionRes.data,
+			collectionInstance: data.meta.collection,
+		});
 
 		const documentResults = await Promise.all(
 			data.data.documents.map(async (document) => {
@@ -162,11 +168,9 @@ const afterFetchHandler =
 					data: updateFullSlugField({
 						document,
 						fullSlug: fullSlugRes.data,
-						defaultLocale: context.config.localization.defaultLocale,
+						defaultLocale: localization.storageLocale,
 						collection: data.meta.collection,
-						locales: context.config.localization.locales.map(
-							(locale) => locale.code,
-						),
+						locales: localization.locales,
 					}),
 				};
 			}),

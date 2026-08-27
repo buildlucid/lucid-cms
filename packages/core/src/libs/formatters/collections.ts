@@ -1,3 +1,4 @@
+import type { LocalizationConfig } from "../../types/config.js";
 import type { Collection } from "../../types/response.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
@@ -7,6 +8,7 @@ import type {
 	FieldTypes,
 } from "../collection/custom-fields/types.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
+import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
 import { hydrateAdminCopyDefaults } from "../i18n/hydrate-admin-copy-defaults.js";
 import {
 	resolveCollectionPermission,
@@ -18,6 +20,7 @@ const formatMultiple = (props: {
 	allCollections: CollectionBuilder[];
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
+	localization: LocalizationConfig;
 	include?: {
 		bricks?: boolean;
 		fields?: boolean;
@@ -38,6 +41,7 @@ const formatMultiple = (props: {
 			documentTargetCollectionKeys,
 			queueSupportsScheduling: props.queueSupportsScheduling,
 			adminTranslations: props.adminTranslations,
+			localization: props.localization,
 			include: props.include,
 			documents: props.documents,
 		}),
@@ -50,6 +54,7 @@ const formatSingle = (props: {
 	documentTargetCollectionKeys?: Set<string>;
 	queueSupportsScheduling?: boolean;
 	adminTranslations?: Record<string, string>;
+	localization: LocalizationConfig;
 	migrationStatus?: MigrationStatus;
 	include?: {
 		bricks?: boolean;
@@ -64,6 +69,12 @@ const formatSingle = (props: {
 	const collectionData = props.collection.getData;
 	const key = props.collection.key;
 	const resolvedPermissions = resolveCollectionPermissions(props.collection);
+
+	const localization = resolveCollectionLocalization({
+		localization: props.localization,
+		collection: props.collection,
+	});
+
 	const documentTargetCollectionKeys =
 		props.documentTargetCollectionKeys ??
 		getDocumentTargetCollectionKeys({
@@ -83,7 +94,12 @@ const formatSingle = (props: {
 			singularName: collectionData.details.singularName,
 			summary: collectionData.details.summary,
 		},
-		localized: collectionData.localized,
+		localized: localization.enabled
+			? {
+					locales: localization.locales,
+					defaultLocale: localization.defaultLocale,
+				}
+			: false,
 		revisions: collectionData.revisions,
 		locked: collectionData.locked,
 		listing: props.collection.listing,

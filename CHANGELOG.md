@@ -14,6 +14,7 @@
 - Added `preview: true` and same-origin default preview URLs for routed collections. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - Preview tokens can now be resolved without integration credentials. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - Added support for relation fields targeting single collections, including singleton document selection in the admin.
+- Added collection-level content locale subsets and default locale overrides, with matching admin controls, API responses, validation, persistence and generated types.
 
 ### Breaking Changes:
 

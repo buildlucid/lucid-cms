@@ -7,6 +7,7 @@ import {
 	isStorageMode,
 	isTreeTableType,
 } from "../collection/custom-fields/storage/index.js";
+import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type {
 	LucidBricksTable,
@@ -25,6 +26,10 @@ const formatMultiple = (props: {
 	config: Config;
 	host: string;
 }): InternalDocumentBrick[] => {
+	const localization = resolveCollectionLocalization({
+		localization: props.config.localization,
+		collection: props.collection,
+	});
 	const brickSchemas = props.bricksSchema.filter(
 		(schema) => schema.type === "brick",
 	);
@@ -81,10 +86,7 @@ const formatMultiple = (props: {
 						host: props.host,
 						builder: brickBuilder,
 						collection: props.collection,
-						localization: {
-							locales: props.config.localization.locales.map((l) => l.code),
-							default: props.config.localization.defaultLocale,
-						},
+						localization,
 						brickKey: brickKey,
 						config: props.config,
 						bricksTableSchema: props.bricksSchema,
@@ -105,6 +107,11 @@ const formatDocumentFields = (props: {
 	config: Config;
 	host: string;
 }): InternalDocumentField[] => {
+	const localization = resolveCollectionLocalization({
+		localization: props.config.localization,
+		collection: props.collection,
+	});
+
 	const documentFieldsSchema = props.bricksSchema.find(
 		(bs) => bs.type === "document-fields",
 	);
@@ -130,10 +137,7 @@ const formatDocumentFields = (props: {
 			host: props.host,
 			builder: props.collection,
 			collection: props.collection,
-			localization: {
-				locales: props.config.localization.locales.map((l) => l.code),
-				default: props.config.localization.defaultLocale,
-			},
+			localization,
 			brickKey: undefined,
 			config: props.config,
 			bricksTableSchema: props.bricksSchema,

@@ -695,7 +695,7 @@ describe("brick table construction", () => {
 			(item) => item.table === "lucid_document__article__card",
 		);
 
-		expect(table?.data).toHaveLength(2);
+		expect(table?.data).toHaveLength(1);
 		expect(
 			table?.data.every(
 				(row) =>
@@ -754,6 +754,44 @@ describe("brick table construction", () => {
 		);
 		expect(brickTables.find((table) => table.table.includes("__rel__"))).toBe(
 			undefined,
+		);
+	});
+
+	test("persists subset translations alongside direct fields on the storage locale", () => {
+		const collection = new CollectionBuilder("articles", {
+			mode: "multiple",
+			details: { name: "Articles", singularName: "Article" },
+			localized: { locales: ["fr"], defaultLocale: "fr" },
+		})
+			.addText("title", { localized: true })
+			.addText("reference", { localized: false });
+
+		const [fieldsTable] = aggregateBrickTables({
+			collection,
+			documentId: TEST_CONFIG.documentId,
+			versionId: TEST_CONFIG.versionId,
+			localization: TEST_CONFIG.localization,
+			fields: [
+				{ key: "title", type: "text", translations: { fr: "Bonjour" } },
+				{ key: "reference", type: "text", value: "shared" },
+			],
+			tableNameByteLimit: null,
+		});
+
+		expect(fieldsTable?.data).toHaveLength(2);
+		expect(fieldsTable?.data).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					locale: "en",
+					_title: null,
+					_reference: "shared",
+				}),
+				expect.objectContaining({
+					locale: "fr",
+					_title: "Bonjour",
+					_reference: null,
+				}),
+			]),
 		);
 	});
 });

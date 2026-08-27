@@ -1,19 +1,16 @@
-import type {
-	Config,
-	FieldInputSchema,
-	ServiceResponse,
-} from "@lucidcms/core/types";
+import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
 import type { CollectionConfig } from "../types/types.js";
 import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
+import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages-collection-localization.js";
 
 /**
  *  Constructs the fullSlug for the child documents
  */
 const constructChildFullSlug = (data: {
 	descendants: DescendantFieldsResponse[];
-	localization: Config["localization"];
+	localization: ResolvedPagesCollectionLocalization;
 	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
 	routePrefixes?: Map<number, Record<string, string | null>>;
@@ -38,7 +35,7 @@ const constructChildFullSlug = (data: {
 			descendant.document_version_id,
 		);
 
-		if (data.collection.localized) {
+		if (data.localization.enabled) {
 			if (
 				data.parentFullSlugField !== undefined &&
 				!data.parentFullSlugField.translations
@@ -47,22 +44,22 @@ const constructChildFullSlug = (data: {
 
 			for (const locale of data.localization.locales) {
 				const currentFullSlugValue =
-					data.parentFullSlugField?.translations?.[locale.code];
+					data.parentFullSlugField?.translations?.[locale];
 
 				if (data.parentFullSlugField !== undefined && !currentFullSlugValue) {
 					continue;
 				}
 
-				fullSlug[locale.code] = buildFullSlug({
-					targetLocale: locale.code,
+				fullSlug[locale] = buildFullSlug({
+					targetLocale: locale,
 					currentDescendant: descendant,
 					descendants: data.descendants,
 					topLevelFullSlug:
 						currentFullSlugValue ??
-						routePrefixes?.[locale.code] ??
+						routePrefixes?.[locale] ??
 						resolveCollectionPrefix({
 							collection: data.collection,
-							localeCode: locale.code,
+							localeCode: locale,
 						}),
 				});
 			}

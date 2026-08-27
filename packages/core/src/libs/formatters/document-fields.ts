@@ -17,6 +17,7 @@ import type CollectionBuilder from "../collection/builders/collection-builder/in
 import fieldConfigs from "../collection/custom-fields/field-configs.js";
 import { isStorageMode } from "../collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
+import type { ResolvedCollectionLocalization } from "../collection/helpers/resolve-collection-localization.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";
 import type {
 	LucidBricksTable,
@@ -31,10 +32,7 @@ export interface FieldFormatMeta {
 	builder: BrickBuilder | CollectionBuilder;
 	host: string;
 	collection: CollectionBuilder;
-	localization: {
-		locales: string[];
-		default: string;
-	};
+	localization: ResolvedCollectionLocalization;
 	/** Used to help workout the target brick schema item and the table name. Set to `undefined` if the brick table you're creating fields for is the `document-fields` one */
 	brickKey: string | undefined;
 	config: Config;
@@ -89,7 +87,7 @@ const getFieldValues = (
 		tableType: databaseConfig.tableType,
 	});
 
-	return meta.localization.locales.map((locale) => {
+	return meta.localization.rowLocales.map((locale) => {
 		const localeValues = relationRows
 			.filter((row) => row.locale === locale)
 			.sort((a, b) => a.position - b.position)
@@ -238,7 +236,7 @@ const buildField = (
 		!isTreeTableFieldType(meta.fieldConfig.type) &&
 		meta.fieldConfig.type !== "tab" &&
 		cfInstance.localizedEnabled === true &&
-		meta.collection.getData.localized === true
+		meta.localization.enabled
 	) {
 		const fieldTranslations: Record<string, FieldValue> = {};
 
@@ -270,7 +268,7 @@ const buildField = (
 
 	//* otherwise use the value key to just store the default locales value
 	const defaultValue = data.values.find(
-		(f) => f.locale === meta.localization.default,
+		(f) => f.locale === meta.localization.storageLocale,
 	);
 	if (!defaultValue) return null;
 
@@ -279,7 +277,7 @@ const buildField = (
 		type: meta.fieldConfig.type,
 		...(resource ? { resource } : {}),
 		value: cfInstance.formatResponseValue(defaultValue.value, {
-			locale: meta.localization.default,
+			locale: meta.localization.storageLocale,
 			refs: data.refs ?? null,
 		}),
 		groupRef: meta.groupRef,

@@ -202,7 +202,7 @@ test("formats decimal filter values", () => {
 test("generates a number array client value type", () => {
 	const file = generateCollectionClientTypes({
 		collections: [RangeCollection],
-		localization: { locales: [{ code: "en" }] },
+		localization: { locales: [{ code: "en" }], defaultLocale: "en" },
 	});
 	const fieldsDeclaration = file.declarations?.find(
 		(declaration) =>

@@ -1,21 +1,20 @@
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
-import type { CollectionConfig } from "../types/types.js";
+import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages-collection-localization.js";
 
 /**
  *  Update the fullSlug field with the computed value
  */
 const setFullSlug = (data: {
 	fullSlug: Record<string, string | null>;
-	collection: CollectionConfig;
-	defaultLocale: string;
+	localization: ResolvedPagesCollectionLocalization;
 	fields: {
 		fullSlug: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
-	if (data.collection.localized) {
+	if (data.localization.enabled) {
 		data.fields.fullSlug.translations = data.fullSlug;
 	} else {
-		data.fields.fullSlug.value = data.fullSlug[data.defaultLocale];
+		data.fields.fullSlug.value = data.fullSlug[data.localization.storageLocale];
 	}
 
 	return {

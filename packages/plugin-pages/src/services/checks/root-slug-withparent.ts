@@ -5,14 +5,13 @@ import type {
 	ServiceResponse,
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
-import type { CollectionConfig } from "../../types/types.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 
 /**
  *  If slug is / and parentPage is set (would cause fullSlug to be the same as parentPage just with trailing slash)
  */
 const checkRootSlugWithParent = (data: {
-	collection: CollectionConfig;
+	localized: boolean;
 	defaultLocale: string;
 	fields: {
 		slug: FieldInputSchema;
@@ -21,7 +20,7 @@ const checkRootSlugWithParent = (data: {
 }): Awaited<ServiceResponse<undefined>> => {
 	const parentPageId = getParentPageId(data.fields.parentPage);
 
-	if (data.collection.localized && data.fields.slug.translations) {
+	if (data.localized && data.fields.slug.translations) {
 		const fieldErrors: FieldError[] = [];
 		for (const [key, value] of Object.entries(data.fields.slug.translations)) {
 			if (value === "/" && parentPageId !== null) {

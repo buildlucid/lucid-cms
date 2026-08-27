@@ -4,6 +4,7 @@ import {
 } from "@lucidcms/core/plugin";
 import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../../types/types.js";
+import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
 import checkFullSlugUniqueness from "../../checks/fullslug-uniqueness.js";
 import constructChildFullSlug from "../../construct-child-fullslugs.js";
 import getDescendantFields from "../../get-descendant-fields.js";
@@ -104,9 +105,15 @@ const propagateRouteSegmentUpdates: ServiceFn<
 					});
 					if (routePrefixesRes.error) return routePrefixesRes;
 
+					const localization = resolvePagesCollectionLocalization({
+						localization: context.config.localization,
+						collection,
+						collectionInstance,
+					});
+
 					const fullSlugsRes = constructChildFullSlug({
 						descendants: affected,
-						localization: context.config.localization,
+						localization,
 						collection,
 						routePrefixes: routePrefixesRes.data,
 					});

@@ -9,6 +9,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
+import { createDocumentLocalization } from "./useDocumentLocalization";
 
 export function useDocumentState(props: {
 	mode: "create" | "edit";
@@ -25,9 +26,11 @@ export function useDocumentState(props: {
 	const documentId = createMemo(() =>
 		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
-	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const canFetchDocument = createMemo(() => {
-		if (contentLocale() === undefined || documentId() === undefined) {
+		if (
+			contentLocaleStore.get.contentLocale === undefined ||
+			documentId() === undefined
+		) {
 			return false;
 		}
 		if (props.version() === "revision" || props.version() === "snapshot") {
@@ -81,6 +84,11 @@ export function useDocumentState(props: {
 	// ------------------------------------------
 	// Memos
 	const collection = createMemo(() => collectionQuery.data?.data);
+	const {
+		contentLocale,
+		defaultLocale,
+		localeCodes: contentLocales,
+	} = createDocumentLocalization(collection);
 	const collections = createMemo(() => collectionsQuery.data?.data ?? []);
 	const collectionsByKey = createMemo(
 		() =>
@@ -129,6 +137,8 @@ export function useDocumentState(props: {
 		collectionName,
 		collectionSingularName,
 		contentLocale,
+		contentLocales,
+		defaultLocale,
 		navigate,
 		queryClient,
 		collection,

@@ -6,6 +6,7 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../../../types/types.js";
+import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
 import constructParentFullSlug from "../../construct-parent-fullslug.js";
 import getParentFields from "../../get-parent-fields.js";
 import resolveRoutePrefix from "../../resolve-route-prefix.js";
@@ -29,6 +30,12 @@ const resolveParentFullSlug: ServiceFn<
 	],
 	Record<string, string | null>
 > = async (context, data) => {
+	const localization = resolvePagesCollectionLocalization({
+		localization: context.config.localization,
+		collection: data.collection,
+		collectionInstance: data.collectionInstance,
+	});
+
 	const [parentFieldsRes, routePrefixRes] = await Promise.all([
 		getParentFields(context, {
 			defaultLocale: context.config.localization.defaultLocale,
@@ -54,7 +61,7 @@ const resolveParentFullSlug: ServiceFn<
 
 	return constructParentFullSlug({
 		parentFields: parentFieldsRes.data,
-		localization: context.config.localization,
+		localization,
 		collection: data.collection,
 		fields: {
 			slug: data.fields.slug,

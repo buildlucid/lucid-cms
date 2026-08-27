@@ -74,6 +74,39 @@ test("collection builder options passes schema validation", async () => {
 	expect(res.success).toBe(true);
 });
 
+test("collection localization accepts scoped locales or a default override", async () => {
+	const config = {
+		key: "articles",
+		mode: "multiple",
+		details: { name: "Articles", singularName: "Article" },
+	};
+
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			localized: { locales: ["fr", "de"], defaultLocale: "fr" },
+		}),
+	).resolves.toMatchObject({ success: true });
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			localized: { defaultLocale: "fr" },
+		}),
+	).resolves.toMatchObject({ success: true });
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			localized: {},
+		}),
+	).resolves.toMatchObject({ success: false });
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...config,
+			localized: { locales: [] },
+		}),
+	).resolves.toMatchObject({ success: false });
+});
+
 test("collection preview breakpoints validate labels, keys and widths", async () => {
 	const config = {
 		key: "pages",

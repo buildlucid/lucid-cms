@@ -1,6 +1,9 @@
 import type { CustomFieldInputGenerateResponse } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
 import collections from "../../../libs/collection/collections.js";
+import resolveCollectionLocalization, {
+	isCollectionFieldLocalized,
+} from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { CustomFieldInputV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
@@ -112,12 +115,40 @@ const customFieldInputGenerate: ServiceFn<
 		};
 	}
 
-	const fieldIsLocalized =
-		collection.getData.localized === true &&
-		targetField.localizedEnabled === true;
+	const localization = resolveCollectionLocalization({
+		localization: context.config.localization,
+		collection,
+	});
+
+	const fieldIsLocalized = isCollectionFieldLocalized(
+		localization,
+		targetField,
+	);
+	if (fieldIsLocalized) {
+		const requestedLocales = [
+			...(props.locale.source ? [props.locale.source] : []),
+			...props.locale.target,
+		];
+		const unsupportedLocale = requestedLocales.find(
+			(locale) => !localization.locales.includes(locale),
+		);
+		if (unsupportedLocale) {
+			return {
+				error: {
+					type: "basic",
+					status: 400,
+					message: copy(
+						"server:core.ai.custom.field.input.locale.unsupported",
+						{ data: { locale: unsupportedLocale } },
+					),
+				},
+				data: undefined,
+			};
+		}
+	}
 
 	const generationContext = normalizeCustomFieldGenerationLocale({
-		defaultLocale: context.config.localization.defaultLocale,
+		defaultLocale: localization.defaultLocale,
 		fieldIsLocalized,
 		locale: props.locale,
 		value: props.value,

@@ -101,4 +101,5 @@ export type RouteSegmentTarget = {
 	collectionKey: string;
 	documentId: number;
 	localized: boolean;
+	storageLocale: string;
 };

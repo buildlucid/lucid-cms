@@ -63,6 +63,7 @@ const getSingle: ServiceFn<
 				allCollections: collectionsRes.data,
 				queueSupportsScheduling: context.queue.support.scheduling,
 				adminTranslations,
+				localization: context.config.localization,
 				include: {
 					bricks: true,
 					fields: true,
@@ -87,6 +88,7 @@ const getSingle: ServiceFn<
 			allCollections: collectionsRes.data,
 			queueSupportsScheduling: context.queue.support.scheduling,
 			adminTranslations,
+			localization: context.config.localization,
 			migrationStatus: migrationStatus.data,
 			include: {
 				bricks: true,

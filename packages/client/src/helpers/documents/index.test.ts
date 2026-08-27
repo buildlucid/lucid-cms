@@ -16,7 +16,7 @@ import type {
 declare module "../../types.js" {
 	interface CollectionDocumentFieldsByCollection {
 		page: {
-			page_title: CollectionDocumentTranslations<string | null>;
+			page_title: CollectionDocumentTranslations<string | null, "page">;
 			related_page: Array<RelationFieldValue<"page">>;
 			hero_image: number[];
 			authors: number[];
@@ -35,7 +35,7 @@ declare module "../../types.js" {
 					"banner",
 					"builder",
 					{
-						title: CollectionDocumentTranslations<string | null>;
+						title: CollectionDocumentTranslations<string | null, "page">;
 					}
 			  >
 			| DocumentBrick<
@@ -54,9 +54,8 @@ declare module "../../types.js" {
 			  >;
 	}
 
-	interface CollectionDocumentLocaleCodes {
-		en: true;
-		fr: true;
+	interface CollectionDocumentLocaleCodesByCollection {
+		page: "en" | "fr";
 	}
 
 	interface CollectionDocumentVersionsByCollection {
@@ -507,7 +506,7 @@ describe("@lucidcms/client document helpers", () => {
 			DocumentView<CollectionDocument<"page">, false>
 		>();
 		expectTypeOf(rawPageView.field("page_title").value()).toEqualTypeOf<
-			CollectionDocumentTranslations<string | null>
+			CollectionDocumentTranslations<string | null, "page">
 		>();
 		expectTypeOf(
 			rawPageView.field("page_title").value({ locale: "en" }),
@@ -522,7 +521,7 @@ describe("@lucidcms/client document helpers", () => {
 						"banner",
 						"builder",
 						{
-							title: CollectionDocumentTranslations<string | null>;
+							title: CollectionDocumentTranslations<string | null, "page">;
 						}
 					>,
 					true
@@ -541,7 +540,7 @@ describe("@lucidcms/client document helpers", () => {
 						"banner",
 						"builder",
 						{
-							title: CollectionDocumentTranslations<string | null>;
+							title: CollectionDocumentTranslations<string | null, "page">;
 						}
 					>,
 					true

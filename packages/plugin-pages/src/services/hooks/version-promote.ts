@@ -3,6 +3,7 @@ import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import fieldResToSchema from "../../utils/field-res-to-schema.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
+import resolvePagesCollectionLocalization from "../../utils/resolve-pages-collection-localization.js";
 import {
 	checkCircularParents,
 	checkFieldsExist,
@@ -46,6 +47,11 @@ const versionPromoteHandler =
 			collectionKey: data.meta.collectionKey,
 		});
 		if (targetCollectionRes.error) return targetCollectionRes;
+		const localization = resolvePagesCollectionLocalization({
+			localization: context.config.localization,
+			collection: targetCollectionRes.data,
+			collectionInstance: data.meta.collection,
+		});
 
 		let createFullSlug = true;
 
@@ -66,20 +72,20 @@ const versionPromoteHandler =
 				slug: fieldResToSchema(
 					constants.fields.slug.key,
 					targetCollectionRes.data.localized,
-					context.config.localization.defaultLocale,
+					localization,
 					docVersionFieldRes.data || [],
 				),
 				parentPage: fieldResToSchema(
 					constants.fields.parentPage.key,
 					false,
-					context.config.localization.defaultLocale,
+					localization,
 					docVersionFieldRes.data || [],
 					targetCollectionRes.data.key,
 				),
 				fullSlug: fieldResToSchema(
 					constants.fields.fullSlug.key,
 					targetCollectionRes.data.localized,
-					context.config.localization.defaultLocale,
+					localization,
 					docVersionFieldRes.data || [],
 				),
 			},
@@ -97,7 +103,7 @@ const versionPromoteHandler =
 				const circularParentsRes = await checkCircularParents(context, {
 					documentId: data.data.documentId,
 					versionType: data.data.versionType,
-					defaultLocale: context.config.localization.defaultLocale,
+					defaultLocale: localization.storageLocale,
 					collectionKey: targetCollectionRes.data.key,
 					fields: {
 						parentPage: parentPage,
@@ -126,8 +132,7 @@ const versionPromoteHandler =
 			const candidateFullSlugField = { ...fullSlug };
 			setFullSlug({
 				fullSlug: fullSlugRes.data,
-				defaultLocale: context.config.localization.defaultLocale,
-				collection: targetCollectionRes.data,
+				localization,
 				fields: {
 					fullSlug: candidateFullSlugField,
 				},
@@ -168,8 +173,7 @@ const versionPromoteHandler =
 
 			setFullSlug({
 				fullSlug: fullSlugRes.data,
-				defaultLocale: context.config.localization.defaultLocale,
-				collection: targetCollectionRes.data,
+				localization,
 				fields: {
 					fullSlug: fullSlug,
 				},
@@ -181,7 +185,7 @@ const versionPromoteHandler =
 						documentId: data.data.documentId,
 						versionId: data.data.versionId,
 						slugs: slug.translations || {
-							[context.config.localization.defaultLocale]: slug.value || null,
+							[localization.storageLocale]: slug.value || null,
 						},
 					},
 				],

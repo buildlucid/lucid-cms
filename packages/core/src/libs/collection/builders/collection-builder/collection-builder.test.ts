@@ -3,6 +3,28 @@ import collectionsFormatter from "../../../formatters/collections.js";
 import { copy } from "../../../i18n/index.js";
 import CollectionBuilder from "./index.js";
 
+test("formats the resolved collection locale contract", () => {
+	const collection = new CollectionBuilder("articles", {
+		mode: "multiple",
+		details: { name: "Articles", singularName: "Article" },
+		localized: { locales: ["fr", "de"], defaultLocale: "de" },
+	});
+
+	expect(
+		collectionsFormatter.formatSingle({
+			collection,
+			localization: {
+				locales: [
+					{ label: "English", code: "en" },
+					{ label: "French", code: "fr" },
+					{ label: "German", code: "de" },
+				],
+				defaultLocale: "en",
+			},
+		}).localized,
+	).toEqual({ locales: ["fr", "de"], defaultLocale: "de" });
+});
+
 test("collection options are correct along with field includes and filters", async () => {
 	const pagesCollection = new CollectionBuilder("pages", {
 		mode: "multiple",
@@ -197,6 +219,10 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	expect(collection.resolvedPreviewConfig?.expiresIn).toBe(120);
 	const adminCollection = collectionsFormatter.formatSingle({
 		collection,
+		localization: {
+			locales: [{ label: "English", code: "en" }],
+			defaultLocale: "en",
+		},
 		adminTranslations: {
 			"tests.preview.desktop": "Desktop",
 		},
@@ -236,6 +262,10 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	expect(
 		collectionsFormatter.formatSingle({
 			collection: collectionWithoutBreakpoints,
+			localization: {
+				locales: [{ label: "English", code: "en" }],
+				defaultLocale: "en",
+			},
 		}).preview,
 	).toEqual({ breakpoints: [] });
 

@@ -9,6 +9,7 @@ import type {
 	ContentFieldTypeGenerationResult,
 	FieldTypes,
 } from "../custom-fields/types.js";
+import resolveCollectionLocalization from "../helpers/resolve-collection-localization.js";
 import {
 	dedupeStrings,
 	indentBlock,
@@ -18,14 +19,13 @@ import {
 
 type BuilderContext = BrickBuilder | CollectionBuilder;
 
-type CollectionTypeGenLocalization = {
-	locales: Array<{
-		code: string;
-	}>;
-};
+type CollectionTypeGenLocalization = Parameters<
+	typeof resolveCollectionLocalization
+>[0]["localization"];
 
 type RenderFieldContext = {
 	builder: BuilderContext;
+	collectionKey: string;
 	collectionUsesTranslations: boolean;
 	withinGroup: boolean;
 };
@@ -241,12 +241,13 @@ const renderBaseFieldType = (props: {
 	valueType?: string;
 	groupFieldsType?: string;
 	hasGroupRef: boolean;
+	collectionKey: string;
 }): string => {
 	switch (props.mode) {
 		case "groups":
 			return `Array<${props.groupFieldsType ?? "Record<string, never>"}>`;
 		case "translations":
-			return `CollectionDocumentTranslations<${props.valueType ?? "unknown"}>`;
+			return `CollectionDocumentTranslations<${props.valueType ?? "unknown"}, ${stringLiteral(props.collectionKey)}>`;
 		default:
 			return props.valueType ?? "unknown";
 	}
@@ -281,8 +282,16 @@ const renderField = (
 		declarations: fieldTypeGen.declarations,
 		hasGroupRef: context.withinGroup,
 		helpers: {
-			renderBaseFieldType,
-			renderFieldMap,
+			renderBaseFieldType: (props) =>
+				renderBaseFieldType({
+					...props,
+					collectionKey: context.collectionKey,
+				}),
+			renderFieldMap: (fields, options) =>
+				renderFieldMap(fields, {
+					...options,
+					collectionKey: context.collectionKey,
+				}),
 		},
 	});
 };
@@ -594,18 +603,16 @@ const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
 	]);
 };
 
-/** Returns the configured locale codes so translated field helpers can use them. */
-const getGeneratedLocaleCodes = (
-	localization: CollectionTypeGenLocalization,
-): string[] => {
-	return dedupeStrings(localization.locales.map((locale) => locale.code));
-};
-
 /** Builds all generated declarations for a single collection. */
 const buildCollectionTypeDeclarations = (
 	collection: CollectionBuilder,
 	collectionsByKey: Map<string, CollectionBuilder>,
+	localizationConfig: CollectionTypeGenLocalization,
 ) => {
+	const localization = resolveCollectionLocalization({
+		localization: localizationConfig,
+		collection,
+	});
 	const collectionFieldsTypeName = buildCollectionFieldsTypeName(
 		collection.key,
 	);
@@ -626,7 +633,8 @@ const buildCollectionTypeDeclarations = (
 	);
 	const collectionFields = renderFieldMap(collection.contentFieldTree, {
 		builder: collection,
-		collectionUsesTranslations: collection.getData.localized,
+		collectionKey: collection.key,
+		collectionUsesTranslations: localization.enabled,
 		withinGroup: false,
 	});
 	const collectionDeclarations = [...collectionFields.declarations];
@@ -666,7 +674,8 @@ const buildCollectionTypeDeclarations = (
 		});
 		const brickFields = renderFieldMap(brick.contentFieldTree, {
 			builder: brick,
-			collectionUsesTranslations: collection.getData.localized,
+			collectionKey: collection.key,
+			collectionUsesTranslations: localization.enabled,
 			withinGroup: false,
 		});
 
@@ -730,9 +739,7 @@ const buildGeneratedMapsDeclaration = (props: {
 	collections: CollectionBuilder[];
 	localization: CollectionTypeGenLocalization;
 }) => {
-	const localeEntries = getGeneratedLocaleCodes(props.localization).map(
-		(localeCode) => `${stringLiteral(localeCode)}: true;`,
-	);
+	const localeEntries: string[] = [];
 	const fieldEntries: string[] = [];
 	const brickEntries: string[] = [];
 	const filterEntries: string[] = [];
@@ -748,7 +755,12 @@ const buildGeneratedMapsDeclaration = (props: {
 		const generatedCollection = buildCollectionTypeDeclarations(
 			collection,
 			collectionsByKey,
+			props.localization,
 		);
+		const localization = resolveCollectionLocalization({
+			localization: props.localization,
+			collection,
+		});
 
 		declarations.push(...generatedCollection.declarations);
 		fieldEntries.push(
@@ -756,6 +768,13 @@ const buildGeneratedMapsDeclaration = (props: {
 		);
 		brickEntries.push(
 			`${stringLiteral(collection.key)}: ${generatedCollection.collectionBricksTypeName};`,
+		);
+		localeEntries.push(
+			`${stringLiteral(collection.key)}: ${
+				localization.locales.length > 0
+					? localization.locales.map(stringLiteral).join(" | ")
+					: "never"
+			};`,
 		);
 		filterEntries.push(
 			`${stringLiteral(collection.key)}: ${generatedCollection.collectionFiltersTypeName};`,
@@ -772,9 +791,8 @@ const buildGeneratedMapsDeclaration = (props: {
 	}
 
 	declarations.push(
-		`export interface GeneratedCollectionDocumentLocaleCodes {\n${localeEntries.length > 0 ? indentBlock(localeEntries.join("\n")) : ""}\n}`,
-		`export type GeneratedCollectionDocumentLocaleCode = Extract<keyof GeneratedCollectionDocumentLocaleCodes, string>;`,
-		`export type CollectionDocumentLocaleCode = GeneratedCollectionDocumentLocaleCode | (string & {});`,
+		`export interface GeneratedCollectionDocumentLocaleCodesByCollection {\n${localeEntries.length > 0 ? indentBlock(localeEntries.join("\n")) : ""}\n}`,
+		`export type CollectionDocumentLocaleCode<TCollectionKey extends string = string> = TCollectionKey extends keyof GeneratedCollectionDocumentLocaleCodesByCollection ? Extract<GeneratedCollectionDocumentLocaleCodesByCollection[TCollectionKey], string> : string;`,
 		`export interface GeneratedCollectionDocumentFieldsByCollection {\n${fieldEntries.length > 0 ? indentBlock(fieldEntries.join("\n")) : ""}\n}`,
 		`export interface GeneratedCollectionDocumentBricksByCollection {\n${brickEntries.length > 0 ? indentBlock(brickEntries.join("\n")) : ""}\n}`,
 		`export interface GeneratedCollectionDocumentFiltersByCollection {\n${filterEntries.length > 0 ? indentBlock(filterEntries.join("\n")) : ""}\n}`,
@@ -825,7 +843,7 @@ const generateCollectionClientTypes = (props: {
 			{
 				module: constants.typeGeneration.modules.coreTypes,
 				declarations: [
-					"interface CollectionDocumentLocaleCodes extends GeneratedCollectionDocumentLocaleCodes {}",
+					"interface CollectionDocumentLocaleCodesByCollection extends GeneratedCollectionDocumentLocaleCodesByCollection {}",
 					"interface CollectionDocumentFieldsByCollection extends GeneratedCollectionDocumentFieldsByCollection {}",
 					"interface CollectionDocumentBricksByCollection extends GeneratedCollectionDocumentBricksByCollection {}",
 					"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
@@ -837,7 +855,7 @@ const generateCollectionClientTypes = (props: {
 			{
 				module: constants.typeGeneration.modules.clientTypes,
 				declarations: [
-					"interface CollectionDocumentLocaleCodes extends GeneratedCollectionDocumentLocaleCodes {}",
+					"interface CollectionDocumentLocaleCodesByCollection extends GeneratedCollectionDocumentLocaleCodesByCollection {}",
 					"interface CollectionDocumentFieldsByCollection extends GeneratedCollectionDocumentFieldsByCollection {}",
 					"interface CollectionDocumentBricksByCollection extends GeneratedCollectionDocumentBricksByCollection {}",
 					"interface CollectionDocumentFiltersByCollection extends GeneratedCollectionDocumentFiltersByCollection {}",
