@@ -3,6 +3,26 @@ import type { FieldWidth } from "@lucidcms/core/types";
 export type CollectionPrefix = string | Record<string, string>;
 export type PagesFieldKey = "fullSlug" | "slug" | "parentPage" | "segments";
 
+export type PagesFieldPlacement =
+	| {
+			at: "start" | "end";
+			tab?: string;
+			before?: never;
+			after?: never;
+	  }
+	| {
+			before: string;
+			at?: never;
+			tab?: never;
+			after?: never;
+	  }
+	| {
+			after: string;
+			at?: never;
+			tab?: never;
+			before?: never;
+	  };
+
 export type CollectionRouteSegment = {
 	/** Relation field key registered on the pages collection. */
 	relation: string;
@@ -14,7 +34,7 @@ export type CollectionRouteSegment = {
 
 export interface CollectionUI {
 	fullSlug?: boolean;
-	tab?: string;
+	placement?: PagesFieldPlacement;
 	widths?: Partial<Record<PagesFieldKey, FieldWidth>>;
 }
 
@@ -41,7 +61,7 @@ export interface CollectionConfig {
 	segments: CollectionRouteSegment[];
 	ui: {
 		fullSlug: boolean;
-		tab?: string;
+		placement: PagesFieldPlacement;
 		widths: Record<PagesFieldKey, FieldWidth>;
 	};
 	unique: boolean;

@@ -41,6 +41,7 @@ describe("pages afterUpsert hook", () => {
 					],
 					ui: {
 						fullSlug: true,
+						placement: { at: "end" },
 						widths: {
 							fullSlug: 6,
 							slug: 6,

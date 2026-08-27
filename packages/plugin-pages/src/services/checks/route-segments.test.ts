@@ -16,6 +16,7 @@ const config = {
 	segments: [{ relation: "product", collection: "product", field: "key" }],
 	ui: {
 		fullSlug: true,
+		placement: { at: "end" },
 		widths: { fullSlug: 6, slug: 6, parentPage: 12, segments: 12 },
 	},
 	unique: true,

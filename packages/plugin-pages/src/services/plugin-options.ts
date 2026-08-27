@@ -13,7 +13,7 @@ const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 				segments: c.segments ?? [],
 				ui: {
 					fullSlug,
-					tab: c.ui?.tab,
+					placement: c.ui?.placement ?? { at: "end" },
 					widths: {
 						fullSlug: c.ui?.widths?.fullSlug ?? (fullSlug ? 6 : 12),
 						slug: c.ui?.widths?.slug ?? (fullSlug ? 6 : 12),

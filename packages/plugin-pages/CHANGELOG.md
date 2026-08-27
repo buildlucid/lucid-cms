@@ -5,6 +5,7 @@
 - Added relation-derived route segments and automatic collection routing through `fullSlug`.
 - Added generated route-segment relation fields and propagation when referenced segment values change.
 - Simplified route uniqueness configuration to a boolean because segment values now form part of the complete route.
+- Replaced `ui.tab` with `ui.placement` for positioning generated fields at the collection root, inside tabs, or relative to existing fields.
 
 ## v0.7.0
 

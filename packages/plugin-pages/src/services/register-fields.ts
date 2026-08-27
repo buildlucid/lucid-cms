@@ -2,6 +2,7 @@ import { type CollectionBuilder, copy, z } from "@lucidcms/core";
 import type { WritableDraft } from "immer";
 import constants from "../constants.js";
 import type { CollectionConfig } from "../types/types.js";
+import registerFieldsAtPlacement from "./register-fields-at-placement.js";
 
 const slugSlashMessage = 'Only use a slash when the slug is exactly "/".';
 const slugSpaceMessage = "The slug cannot contain spaces.";
@@ -12,98 +13,110 @@ const registerFields = (
 	collection: WritableDraft<CollectionBuilder>,
 	config: CollectionConfig,
 ) => {
-	if (config.ui.tab) collection.addToTab(config.ui.tab);
+	const fieldKeys = [
+		constants.fields.fullSlug.key,
+		constants.fields.slug.key,
+		constants.fields.parentPage.key,
+		...config.segments.map((segment) => segment.relation),
+	];
 
-	collection
-		.addText(constants.fields.fullSlug.key, {
-			details: {
-				label: copy("admin:plugin.pages.fields.full.slug.label", {
-					defaultMessage: "Full slug",
-				}),
-			},
-			localized: config.localized,
-			ui: {
-				hidden: !config.ui.fullSlug,
-				disabled: true,
-				width: config.ui.widths.fullSlug,
-			},
-			ai: {
-				enabled: false,
-			},
-			showInList: config.ui.fullSlug,
-		})
-		.addText(constants.fields.slug.key, {
-			details: {
-				label: copy("admin:plugin.pages.fields.slug.label", {
-					defaultMessage: "Slug",
-				}),
-			},
-			localized: config.localized,
-			ui: {
-				hidden: false,
-				disabled: false,
-				width: config.ui.widths.slug,
-			},
-			ai: {
-				enabled: false,
-			},
-			validation: {
-				required: true,
-				zod: z.string().superRefine((value, ctx) => {
-					if (value === "/") return;
-					if (value.includes("/")) {
-						ctx.addIssue({
-							code: "custom",
-							message: slugSlashMessage,
-						});
-						return;
-					}
-					if (/\s/.test(value)) {
-						ctx.addIssue({
-							code: "custom",
-							message: slugSpaceMessage,
-						});
-						return;
-					}
-					if (/^[a-zA-Z0-9_-]+$/.test(value)) return;
+	registerFieldsAtPlacement({
+		collection,
+		fieldKeys,
+		placement: config.ui.placement,
+		register: () => {
+			collection
+				.addText(constants.fields.fullSlug.key, {
+					details: {
+						label: copy("admin:plugin.pages.fields.full.slug.label", {
+							defaultMessage: "Full slug",
+						}),
+					},
+					localized: config.localized,
+					ui: {
+						hidden: !config.ui.fullSlug,
+						disabled: true,
+						width: config.ui.widths.fullSlug,
+					},
+					ai: {
+						enabled: false,
+					},
+					showInList: config.ui.fullSlug,
+				})
+				.addText(constants.fields.slug.key, {
+					details: {
+						label: copy("admin:plugin.pages.fields.slug.label", {
+							defaultMessage: "Slug",
+						}),
+					},
+					localized: config.localized,
+					ui: {
+						hidden: false,
+						disabled: false,
+						width: config.ui.widths.slug,
+					},
+					ai: {
+						enabled: false,
+					},
+					validation: {
+						required: true,
+						zod: z.string().superRefine((value, ctx) => {
+							if (value === "/") return;
+							if (value.includes("/")) {
+								ctx.addIssue({
+									code: "custom",
+									message: slugSlashMessage,
+								});
+								return;
+							}
+							if (/\s/.test(value)) {
+								ctx.addIssue({
+									code: "custom",
+									message: slugSpaceMessage,
+								});
+								return;
+							}
+							if (/^[a-zA-Z0-9_-]+$/.test(value)) return;
 
-					ctx.addIssue({
-						code: "custom",
-						message: slugFormatMessage,
-					});
-				}),
-			},
-			useAsLabel: true,
-			showInList: true,
-		})
-		.addRelation(constants.fields.parentPage.key, {
-			collection: collection.key,
-			details: {
-				label: copy("admin:plugin.pages.fields.parent.page.label", {
-					defaultMessage: "Parent page",
-				}),
-			},
-			multiple: false,
-			ui: {
-				hidden: false,
-				disabled: false,
-				width: config.ui.widths.parentPage,
-			},
-			showInList: true,
-		});
+							ctx.addIssue({
+								code: "custom",
+								message: slugFormatMessage,
+							});
+						}),
+					},
+					useAsLabel: true,
+					showInList: true,
+				})
+				.addRelation(constants.fields.parentPage.key, {
+					collection: collection.key,
+					details: {
+						label: copy("admin:plugin.pages.fields.parent.page.label", {
+							defaultMessage: "Parent page",
+						}),
+					},
+					multiple: false,
+					ui: {
+						hidden: false,
+						disabled: false,
+						width: config.ui.widths.parentPage,
+					},
+					showInList: true,
+				});
 
-	for (const segment of config.segments) {
-		collection.addRelation(segment.relation, {
-			collection: segment.collection,
-			multiple: false,
-			ui: {
-				width: config.ui.widths.segments,
-			},
-			validation: {
-				required: true,
-			},
-		});
-	}
+			for (const segment of config.segments) {
+				collection.addRelation(segment.relation, {
+					collection: segment.collection,
+					multiple: false,
+					ui: {
+						width: config.ui.widths.segments,
+					},
+					validation: {
+						required: true,
+					},
+				});
+			}
+		},
+	});
 };
 
 export default registerFields;

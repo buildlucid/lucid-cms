@@ -64,7 +64,7 @@ This plugin offers several configuration options to control its behavior. Aside 
 | `prefix` | `string \| Record<string, string>` | - | Optional prefix prepended to the start of the computed `fullSlug` for the collection |
 | `segments` | `Array<{ relation: string; collection: string; field: string }>` | `[]` | Related document values inserted between the prefix and page hierarchy |
 | `ui.fullSlug` | `boolean` | `false` | Shows the computed `fullSlug` field in the document builder and listing |
-| `ui.tab` | `string` | - | Places the plugin fields in an existing matching tab |
+| `ui.placement` | `{ at: "start" \| "end"; tab?: string } \| { before: string } \| { after: string }` | `{ at: "end" }` | Places the plugin fields at the collection root, in an existing tab, or relative to another field |
 | `ui.widths` | `Partial<Record<"fullSlug" \| "slug" \| "parentPage" \| "segments", FieldWidth>>` | - | Overrides the admin grid width of individual plugin fields |
 | `unique` | `boolean` | `true` | Controls route uniqueness validation for computed `fullSlug` values |
 
@@ -76,7 +76,30 @@ If set to `true`, the plugin will enable translations for the `slug` and `fullSl
 
 Set `ui.fullSlug` to `true` to show the computed `fullSlug` in the document builder and listing. The field remains disabled because its value is always calculated by the plugin.
 
-Set `ui.tab` to an existing tab key to place all three plugin fields in that tab, regardless of its position. When the tab does not exist, the option is ignored and the fields retain their normal positional placement.
+Use `ui.placement` to position the generated fields as one group. The group contains `fullSlug`, `slug`, `parentPage`, then route segment relations in their configured order.
+
+Place the fields relative to an existing root field or direct tab child:
+
+```typescript
+ui: {
+  placement: {
+    after: "pageTitle",
+  },
+}
+```
+
+An anchor inside a tab places the generated fields in that tab. To target the start or end of the collection root or a named tab directly, use `at`:
+
+```typescript
+ui: {
+  placement: {
+    at: "start",
+    tab: "routing",
+  },
+}
+```
+
+The plugin throws a configuration error when the anchor or tab does not exist. Nested repeater, section, and collapsible children cannot be used as anchors.
 
 Fields use Lucid's 12-column admin grid. When `fullSlug` is visible, it and `slug` each use half a row and `parentPage` uses a full row. Otherwise, all fields use a full row. A single route segment uses a full row; two or more use half a row each. Override individual values through `ui.widths` using `12`, `8`, `6`, `4`, or `3`.
 

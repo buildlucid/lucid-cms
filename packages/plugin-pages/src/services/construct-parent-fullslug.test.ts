@@ -15,6 +15,7 @@ const collection = {
 	segments: [],
 	ui: {
 		fullSlug: false,
+		placement: { at: "end" },
 		widths: {
 			fullSlug: 12,
 			slug: 12,

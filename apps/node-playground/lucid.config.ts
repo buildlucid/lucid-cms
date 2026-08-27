@@ -256,6 +256,7 @@ export default configureLucid({
 						},
 						ui: {
 							fullSlug: true,
+							placement: { after: "page_title" },
 						},
 					},
 					{
