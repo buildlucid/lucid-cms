@@ -1,5 +1,7 @@
+import { enqueueJobs } from "../../libs/queue/jobs/enqueue-jobs.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { hardDeleteSingleMediaJob } from "../media/jobs/hard-delete-single.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
@@ -42,9 +44,9 @@ const deleteExpiredDeletedMedia: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.addBatch(context, {
-		event: "media:delete",
-		payloads: softDeletedMediaRes.data.map((media) => ({
+	const queueRes = await enqueueJobs(context, {
+		job: hardDeleteSingleMediaJob,
+		payload: softDeletedMediaRes.data.map((media) => ({
 			mediaId: media.id,
 		})),
 	});

@@ -1,6 +1,7 @@
 export { default as checkSystemAlerts } from "./check-system-alerts.js";
 export { default as clearExpiredAuthStates } from "./clear-expired-auth-states.js";
 export { default as clearExpiredCollections } from "./clear-expired-collections.js";
+export { default as clearExpiredJobs } from "./clear-expired-jobs.js";
 export { default as clearExpiredLocales } from "./clear-expired-locales.js";
 export { default as clearExpiredOAuthData } from "./clear-expired-oauth-data.js";
 export { default as clearExpiredPreviewSessions } from "./clear-expired-preview-sessions.js";
@@ -11,5 +12,6 @@ export { default as deleteExpiredDeletedUsers } from "./delete-expired-deleted-u
 export { default as deleteExpiredRevisions } from "./delete-expired-revisions.js";
 export { default as deleteExpiredUnsyncedMedia } from "./delete-expired-unsynced-media.js";
 export { default as dispatchScheduledPublishOperations } from "./dispatch-scheduled-publish-operations.js";
+export { default as maintainJobQueue } from "./maintain-job-queue.js";
 export { default as updateMediaStorage } from "./update-media-storage.js";
 export { default as verifyConnections } from "./verify-connections.js";

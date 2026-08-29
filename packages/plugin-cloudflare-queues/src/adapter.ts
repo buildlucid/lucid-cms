@@ -1,10 +1,9 @@
 import { logger } from "@lucidcms/core";
-import { copy } from "@lucidcms/core/plugin";
-import { executeSingleJob, insertJobs, logScope } from "@lucidcms/core/queue";
+import { consumeJob, logScope } from "@lucidcms/core/queue";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
-import { ADAPTER_KEY, CONCURRENT_LIMIT } from "./constants.js";
-import { getDelaySeconds } from "./helper.js";
+import { ADAPTER_KEY, MAX_BATCH_SIZE, MAX_DELAY_MS } from "./constants.js";
 import type { PluginOptions } from "./types.js";
+import { getDelaySeconds } from "./utils/get-delay-seconds.js";
 import { resolveBinding } from "./utils/resolve-binding.js";
 
 const cloudflareQueuesAdapter = (
@@ -19,6 +18,7 @@ const cloudflareQueuesAdapter = (
 			get scheduling() {
 				return consumerSupported;
 			},
+			maxDelayMs: MAX_DELAY_MS,
 		},
 		lifecycle: {
 			init: async (params) => {
@@ -36,278 +36,26 @@ const cloudflareQueuesAdapter = (
 				});
 			},
 		},
-		add: async (context, params) => {
-			try {
-				const { event } = params;
-				if (params.options?.scheduledFor && !consumerSupported) {
-					return {
-						error: {
-							message: copy(
-								"server:plugin.cloudflare.queues.scheduling.production.only",
-							),
-						},
-						data: undefined,
-					};
-				}
-
-				logger.info({
-					message: "Adding job to Cloudflare queue",
-					scope: logScope,
-					data: { event },
-				});
-
-				const createJobRes = await insertJobs(context, {
-					event,
-					payloads: [params.payload],
-					options: params.options,
-					adapterKey: ADAPTER_KEY,
-				});
-				if (createJobRes.error) return createJobRes;
-
-				const jobData = createJobRes.data.jobs[0];
-				if (!jobData) {
-					return {
-						error: {
-							message: copy(
-								"server:plugin.cloudflare.queues.jobs.create.failed",
-								{
-									defaultMessage: "Failed to create job",
-								},
-							),
-						},
-						data: undefined,
-					};
-				}
-
-				if (consumerSupported) {
-					const binding = resolveBinding(context, options);
-					await binding.send(
-						{
-							jobId: jobData.jobId,
-							event,
-							payload: params.payload,
-						},
-						params.options?.scheduledFor
-							? {
-									delaySeconds: getDelaySeconds(params.options.scheduledFor),
-								}
-							: undefined,
-					);
-				} else {
-					const executeResult = await executeSingleJob(context, {
-						jobId: jobData.jobId,
-						event: event,
-						payload: params.payload,
-						attempts: 0,
-						maxAttempts: 1,
-						setNextRetryAt: false,
+		publish: async (context, messages) => {
+			if (!consumerSupported) {
+				for (const message of messages) {
+					await consumeJob(context, {
+						jobId: message.jobId,
+						retry: "immediate",
 					});
-
-					if (
-						executeResult.success === false &&
-						executeResult.shouldRetry === false
-					) {
-						return {
-							error: {
-								message: copy(
-									"server:plugin.cloudflare.queues.jobs.execute.failed",
-									{
-										defaultMessage: executeResult.message,
-									},
-								),
-							},
-							data: undefined,
-						};
-					}
 				}
-
-				return {
-					error: undefined,
-					data: {
-						jobId: jobData.jobId,
-						event,
-						status: createJobRes.data.status,
-					},
-				};
-			} catch (error) {
-				logger.error({
-					error,
-					event: "cloudflare-queue.job.add.failed",
-					message: "Error adding job to Cloudflare queue",
-					scope: logScope,
-					data: {
-						errorMessage:
-							error instanceof Error ? error.message : String(error),
-					},
-				});
-
-				return {
-					error: {
-						message: copy("server:plugin.cloudflare.queues.jobs.add.failed", {
-							defaultMessage: "Error adding job to Cloudflare queue",
-						}),
-					},
-					data: undefined,
-				};
+				return;
 			}
-		},
-		addBatch: async (context, params) => {
-			try {
-				const { event } = params;
-				if (params.options?.scheduledFor && !consumerSupported) {
-					return {
-						error: {
-							message: copy(
-								"server:plugin.cloudflare.queues.scheduling.production.only",
-							),
-						},
-						data: undefined,
-					};
-				}
 
-				logger.info({
-					message: "Adding batch jobs to Cloudflare queue",
-					scope: logScope,
-					data: { event, count: params.payloads.length },
-				});
+			const binding = resolveBinding(context, options);
 
-				const createJobsRes = await insertJobs(context, {
-					event,
-					payloads: params.payloads,
-					options: params.options,
-					adapterKey: ADAPTER_KEY,
-				});
-				if (createJobsRes.error) return createJobsRes;
-
-				if (consumerSupported) {
-					const binding = resolveBinding(context, options);
-					await binding.sendBatch(
-						createJobsRes.data.jobs.map((job) => ({
-							body: {
-								jobId: job.jobId,
-								event,
-								payload: job.payload,
-							},
-							...(params.options?.scheduledFor
-								? {
-										delaySeconds: getDelaySeconds(params.options.scheduledFor),
-									}
-								: {}),
-						})),
-					);
-				} else {
-					const jobChunks: Array<
-						{ jobId: string; payload: Record<string, unknown> }[]
-					> = [];
-					for (
-						let i = 0;
-						i < createJobsRes.data.jobs.length;
-						i += CONCURRENT_LIMIT
-					) {
-						const chunk = createJobsRes.data.jobs
-							.slice(i, i + CONCURRENT_LIMIT)
-							.map((job) => {
-								return { jobId: job.jobId, payload: job.payload };
-							});
-						jobChunks.push(chunk);
-					}
-
-					logger.debug({
-						message: "Processing batch jobs in chunks",
-						scope: logScope,
-						data: {
-							totalJobs: createJobsRes.data.jobs.length,
-							chunkCount: jobChunks.length,
-							concurrentLimit: CONCURRENT_LIMIT,
-						},
-					});
-
-					const allResults = await Promise.allSettled(
-						jobChunks.flatMap((chunk) =>
-							chunk.map((job) =>
-								executeSingleJob(context, {
-									jobId: job.jobId,
-									event,
-									payload: job.payload,
-									attempts: 0,
-									maxAttempts: 1,
-									setNextRetryAt: false,
-								}),
-							),
-						),
-					);
-
-					const failedJobs = allResults.filter((r) => r.status === "rejected");
-					if (failedJobs.length > 0) {
-						const firstError = failedJobs[0]?.reason;
-						const errorMessage =
-							firstError instanceof Error
-								? firstError.message
-								: "Unknown error";
-
-						logger.error({
-							error: firstError,
-							event: "cloudflare-queue.batch.partial-failure",
-							message: "Some batch jobs failed",
-							scope: logScope,
-							data: {
-								failedCount: failedJobs.length,
-								totalCount: allResults.length,
-							},
-						});
-
-						return {
-							error: {
-								message: copy(
-									"server:plugin.cloudflare.queues.jobs.batch.execute.failed",
-									{
-										defaultMessage: `${failedJobs.length} of ${allResults.length} jobs failed. First error: ${errorMessage}`,
-									},
-								),
-							},
-							data: undefined,
-						};
-					}
-
-					logger.debug({
-						message: "All batch jobs completed successfully",
-						scope: logScope,
-						data: { count: createJobsRes.data.jobs.length },
-					});
-				}
-
-				return {
-					error: undefined,
-					data: {
-						jobIds: createJobsRes.data.jobs.map((j) => j.jobId),
-						event,
-						status: createJobsRes.data.status,
-						count: createJobsRes.data.jobs.length,
-					},
-				};
-			} catch (error) {
-				logger.error({
-					error,
-					event: "cloudflare-queue.batch.add.failed",
-					message: "Error adding batch jobs to Cloudflare queue",
-					scope: logScope,
-					data: {
-						errorMessage:
-							error instanceof Error ? error.message : String(error),
-					},
-				});
-
-				return {
-					error: {
-						message: copy(
-							"server:plugin.cloudflare.queues.jobs.add.batch.failed",
-							{
-								defaultMessage: "Error adding batch jobs to Cloudflare queue",
-							},
-						),
-					},
-					data: undefined,
-				};
+			for (let index = 0; index < messages.length; index += MAX_BATCH_SIZE) {
+				await binding.sendBatch(
+					messages.slice(index, index + MAX_BATCH_SIZE).map((message) => ({
+						body: { version: message.version, jobId: message.jobId },
+						delaySeconds: getDelaySeconds(new Date(message.availableAt)),
+					})),
+				);
 			}
 		},
 	};

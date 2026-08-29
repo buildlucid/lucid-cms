@@ -49,6 +49,15 @@ vi.mock("node:worker_threads", () => ({
 import workerQueueAdapter from "./index.js";
 
 describe("worker queue adapter lifecycle", () => {
+	test("rejects invalid concurrency options", () => {
+		expect(() => workerQueueAdapter({ batchSize: 0 })).toThrow(
+			"batchSize must be a positive integer.",
+		);
+		expect(() => workerQueueAdapter({ concurrentLimit: Number.NaN })).toThrow(
+			"concurrentLimit must be a positive integer.",
+		);
+	});
+
 	test("waits for consumer cleanup before terminating the worker", async () => {
 		const adapter = workerQueueAdapter();
 		const context = {

@@ -1,10 +1,8 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
-import {
-	DocumentPublishOperationsRepository,
-	QueueJobsRepository,
-} from "../../libs/repositories/index.js";
+import { cancelJob } from "../../libs/queue/jobs/cancel-job.js";
+import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createEvent from "./helpers/create-event.js";
@@ -27,7 +25,6 @@ const cancel: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Operations = new DocumentPublishOperationsRepository(context.db);
-	const QueueJobs = new QueueJobsRepository(context.db);
 
 	const operationRes = await Operations.selectSingleDetailed({
 		where: [
@@ -92,18 +89,8 @@ const cancel: ServiceFn<
 	const comment = normalizeComment(data.comment);
 	const now = new Date().toISOString();
 	if (operationRes.data.scheduled_job_id) {
-		const cancelJobRes = await QueueJobs.updateSingle({
-			where: [
-				{
-					key: "job_id",
-					operator: "=",
-					value: operationRes.data.scheduled_job_id,
-				},
-			],
-			data: {
-				status: "cancelled",
-				updated_at: now,
-			},
+		const cancelJobRes = await cancelJob(context, {
+			id: operationRes.data.scheduled_job_id,
 		});
 		if (cancelJobRes.error) return cancelJobRes;
 	}

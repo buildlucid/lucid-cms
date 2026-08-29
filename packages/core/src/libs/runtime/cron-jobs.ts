@@ -16,10 +16,24 @@ export type CronJobDefinition = {
 
 const cronJobsMap = () =>
 	({
+		"maintain-job-queue": {
+			fn: cronServices.maintainJobQueue,
+			label: "Maintain job queue",
+			error: copy("server:core.queue.jobs.maintenance.failed"),
+			transaction: false,
+			schedule: "jobs",
+		},
 		"clear-expired-locales": {
 			fn: cronServices.clearExpiredLocales,
 			label: "Clear expired locales",
 			error: copy("server:core.maintenance.locales.expired.clear.failed"),
+			transaction: true,
+			schedule: "maintenance",
+		},
+		"clear-expired-jobs": {
+			fn: cronServices.clearExpiredJobs,
+			label: "Clear expired jobs",
+			error: copy("server:core.maintenance.jobs.expired.clear.failed"),
 			transaction: true,
 			schedule: "maintenance",
 		},

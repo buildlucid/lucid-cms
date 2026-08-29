@@ -21,28 +21,35 @@ const SystemQueueObservabilityRoute: Component = () => {
 		schema: {
 			filters: {
 				jobId: textFilter(),
-				eventType: textFilter(),
+				jobName: textFilter(),
+				jobVersion: numberFilter(),
 				status: textFilter(),
 				queueAdapterKey: textFilter(),
-				priority: numberFilter(),
 				attempts: numberFilter(),
 				maxAttempts: numberFilter(),
+				dispatchStatus: textFilter(),
+				dispatchAttempts: numberFilter(),
+				dispatchError: textFilter(),
 				errorMessage: textFilter(),
 				createdByUserId: numberFilter(),
 				createdAt: textFilter(),
-				scheduledFor: textFilter(),
+				availableAt: textFilter(),
 				startedAt: textFilter(),
 				completedAt: textFilter(),
 				failedAt: textFilter(),
-				nextRetryAt: textFilter(),
+				cancelledAt: textFilter(),
+				dispatchedAt: textFilter(),
+				leaseExpiresAt: textFilter(),
 			},
 			sorts: {
 				createdAt: sort({ defaultValue: "desc" }),
-				scheduledFor: sort(),
+				availableAt: sort(),
 				startedAt: sort(),
 				completedAt: sort(),
 				failedAt: sort(),
-				priority: sort(),
+				cancelledAt: sort(),
+				dispatchedAt: sort(),
+				dispatchAttempts: sort(),
 				attempts: sort(),
 			},
 		},
@@ -82,9 +89,14 @@ const SystemQueueObservabilityRoute: Component = () => {
 											type: "text",
 										},
 										{
-											label: T()("common.event.type"),
-											key: "eventType",
+											label: T()("jobs.name"),
+											key: "jobName",
 											type: "text",
+										},
+										{
+											label: T()("jobs.version"),
+											key: "jobVersion",
+											type: "number",
 										},
 										{
 											label: T()("common.status"),
@@ -92,12 +104,12 @@ const SystemQueueObservabilityRoute: Component = () => {
 											type: "select",
 											options: [
 												{
-													label: T()("common.status.pending"),
-													value: "pending",
+													label: T()("common.status.queued"),
+													value: "queued",
 												},
 												{
-													label: T()("common.status.processing"),
-													value: "processing",
+													label: T()("common.status.running"),
+													value: "running",
 												},
 												{
 													label: T()("common.status.completed"),
@@ -119,9 +131,19 @@ const SystemQueueObservabilityRoute: Component = () => {
 											type: "text",
 										},
 										{
-											label: T()("common.priority"),
-											key: "priority",
-											type: "number",
+											label: T()("jobs.dispatch.status"),
+											key: "dispatchStatus",
+											type: "select",
+											options: [
+												{
+													label: T()("common.status.pending"),
+													value: "pending",
+												},
+												{
+													label: T()("common.status.dispatched"),
+													value: "dispatched",
+												},
+											],
 										},
 										{
 											label: T()("common.attempts"),
@@ -149,8 +171,8 @@ const SystemQueueObservabilityRoute: Component = () => {
 											type: "datetime",
 										},
 										{
-											label: T()("common.scheduled.for"),
-											key: "scheduledFor",
+											label: T()("common.available.at"),
+											key: "availableAt",
 											type: "datetime",
 										},
 										{
@@ -169,8 +191,8 @@ const SystemQueueObservabilityRoute: Component = () => {
 											type: "datetime",
 										},
 										{
-											label: T()("common.next.retry.at"),
-											key: "nextRetryAt",
+											label: T()("common.cancelled.at"),
+											key: "cancelledAt",
 											type: "datetime",
 										},
 									],
@@ -181,8 +203,8 @@ const SystemQueueObservabilityRoute: Component = () => {
 										key: "createdAt",
 									},
 									{
-										label: T()("common.scheduled.for"),
-										key: "scheduledFor",
+										label: T()("common.available.at"),
+										key: "availableAt",
 									},
 									{
 										label: T()("common.started.at"),
@@ -195,10 +217,6 @@ const SystemQueueObservabilityRoute: Component = () => {
 									{
 										label: T()("common.failed.at"),
 										key: "failedAt",
-									},
-									{
-										label: T()("common.priority"),
-										key: "priority",
 									},
 									{
 										label: T()("common.attempts"),

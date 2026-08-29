@@ -8,6 +8,7 @@ import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { translate } from "../i18n/index.js";
 import { initializeLogger } from "../logger/index.js";
+import { getJobRegistry } from "../queue/registry.js";
 import type { LucidConfigRecipe } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
@@ -129,6 +130,9 @@ const processConfig = async (
 		// i18n checks
 		checkLocales(configRes.localization);
 		checkLocales(configRes.i18n);
+
+		// create / check job registry
+		getJobRegistry(configRes);
 
 		// collection checks
 		checkDuplicateBuilderKeys(

@@ -1,7 +1,9 @@
 import collections from "../../libs/collection/collections.js";
 import { getDocumentTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import { enqueueJobs } from "../../libs/queue/jobs/enqueue-jobs.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { deleteDocumentJob } from "../documents/jobs/delete-single.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
@@ -35,8 +37,8 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 	);
 
 	const expiredDocLookup = await Promise.all(
-		docTables.map(async (table) => {
-			const softDeletedDocsRes = await Documents.selectMultiple(
+		docTables.map((table) =>
+			Documents.selectMultiple(
 				{
 					select: ["id", "collection_key", "deleted_by", "created_by"],
 					where: [
@@ -58,25 +60,26 @@ const deleteExpiredDeletedDocuments: ServiceFn<[], undefined> = async (
 				{
 					tableName: table.name,
 				},
-			);
-			if (softDeletedDocsRes.error) return softDeletedDocsRes;
-
-			if (softDeletedDocsRes.data.length === 0) return;
-
-			const queueRes = await context.queue.addBatch(context, {
-				event: "documents:delete",
-				payloads: softDeletedDocsRes.data.map((document) => ({
-					id: document.id,
-					collectionKey: document.collection_key,
-					userId: document.deleted_by ?? document.created_by,
-				})),
-			});
-			if (queueRes.error) return queueRes;
-		}),
+			),
+		),
 	);
 	for (const result of expiredDocLookup) {
-		if (result?.error) return result;
+		if (result.error) return result;
 	}
+
+	const queueRes = await enqueueJobs(context, {
+		job: deleteDocumentJob,
+		payload: expiredDocLookup.flatMap((result) =>
+			result.error
+				? []
+				: result.data.map((document) => ({
+						id: document.id,
+						collectionKey: document.collection_key,
+						userId: document.deleted_by ?? document.created_by,
+					})),
+		),
+	});
+	if (queueRes.error) return queueRes;
 
 	return {
 		error: undefined,

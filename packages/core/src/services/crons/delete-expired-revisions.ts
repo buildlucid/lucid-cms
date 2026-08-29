@@ -1,5 +1,7 @@
 import collections from "../../libs/collection/collections.js";
+import { enqueueJobs } from "../../libs/queue/jobs/enqueue-jobs.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { deleteExpiredRevisionsJob } from "../documents-versions/jobs/delete-expired-revisions.js";
 
 /**
  * Queues jobs to delete expired revisions for each collection that has revisions enabled.
@@ -9,9 +11,11 @@ const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
 
-	const collectionsWithRevisions = collectionsRes.data.filter((collection) => {
-		const config = collection.getData;
-		return config.revisions && config.revisionRetentionDays !== false;
+	const collectionsWithRevisions = collectionsRes.data.flatMap((collection) => {
+		const retentionDays = collection.getData.revisionRetentionDays;
+		return collection.getData.revisions && retentionDays !== false
+			? [{ collection, retentionDays }]
+			: [];
 	});
 
 	if (collectionsWithRevisions.length === 0) {
@@ -21,22 +25,14 @@ const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueResults = await Promise.all(
-		collectionsWithRevisions.map(async (collection) => {
-			const queueRes = await context.queue.add(context, {
-				event: "document-versions:delete-expired",
-				payload: {
-					collectionKey: collection.key,
-					retentionDays: collection.getData.revisionRetentionDays,
-				},
-			});
-			return queueRes;
-		}),
-	);
-
-	for (const result of queueResults) {
-		if (result.error) return result;
-	}
+	const queueResult = await enqueueJobs(context, {
+		job: deleteExpiredRevisionsJob,
+		payload: collectionsWithRevisions.map(({ collection, retentionDays }) => ({
+			collectionKey: collection.key,
+			retentionDays,
+		})),
+	});
+	if (queueResult.error) return queueResult;
 
 	return {
 		error: undefined,

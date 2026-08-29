@@ -20,11 +20,7 @@ import {
 	destroyMediaStorageAdapter,
 	getInitializedMediaStorageAdapter,
 } from "@lucidcms/core/media-storage";
-import {
-	executeSingleJob,
-	logScope,
-	passthroughQueueAdapter,
-} from "@lucidcms/core/queue";
+import { drainJobs, logScope } from "@lucidcms/core/queue";
 import {
 	createServiceContext,
 	prepareTranslations,
@@ -39,14 +35,14 @@ import type {
 	KVAdapterInstance,
 	MediaDeliveryAdapterInstance,
 	MediaStorageAdapterInstance,
+	QueueAdapterInstance,
 	TranslationStore,
 } from "@lucidcms/core/types";
-import type { WorkerQueueAdapterOptions } from "./index.js";
-import selectJobsForProcessing from "./queries/select-jobs-for-processing.js";
+import type { WorkerQueueAdapterOptions } from "../types.js";
 
-const MIN_POLL_INTERVAL = 1000;
-const MAX_POLL_INTERVAL = 30000;
-const POLL_INTERVAL_INC = 1000;
+const MIN_POLL_INTERVAL = 1_000;
+const MAX_POLL_INTERVAL = 30_000;
+const POLL_INTERVAL_INC = 1_000;
 const DEFAULT_CONCURRENT_LIMIT = 5;
 const DEFAULT_BATCH_SIZE = 10;
 
@@ -59,10 +55,7 @@ const runtime = workerData.runtime as {
 const CONCURRENT_LIMIT = options.concurrentLimit ?? DEFAULT_CONCURRENT_LIMIT;
 const BATCH_SIZE = options.batchSize ?? DEFAULT_BATCH_SIZE;
 
-/**
- * Attempts to load the config through jiti if it exists.
- * Otherwise, we're likely in a production environment, in which try and load the config through the runtime's built config output.
- */
+/** Loads source config in development and compiled config in production. */
 const getConfig = async (): Promise<{
 	config: Config;
 	translationStore: TranslationStore;
@@ -83,7 +76,7 @@ const getConfig = async (): Promise<{
 			env: result.loaded.env,
 			runtimeContext: result.loaded.runtimeContext,
 		};
-	} catch (_) {
+	} catch {
 		const configPath = path.resolve(process.cwd(), runtime.configEntryPath);
 		const configDir = path.dirname(configPath);
 
@@ -167,9 +160,13 @@ const startConsumer = async () => {
 		const mediaDelivery = mediaDeliveryInstance;
 		const email = emailInstance;
 
-		const internalQueueAdapter = passthroughQueueAdapter({
-			bypassImmediateExecution: true,
-		});
+		let requestPoll: () => void = () => undefined;
+		const internalQueueAdapter: QueueAdapterInstance = {
+			type: "queue-adapter",
+			key: "worker",
+			support: { scheduling: true, maxDelayMs: null },
+			publish: async () => requestPoll(),
+		};
 		database = await config.db.connect(env);
 
 		const serviceContext = createServiceContext({
@@ -238,9 +235,7 @@ const startConsumer = async () => {
 			void shutdown({ exitCode: 0 });
 		});
 
-		/**
-		 * Polls for jobs and processes them
-		 */
+		/** Polls for ready jobs and processes them within the configured limits. */
 		const poll = (): Promise<void> => {
 			if (pollPromise) {
 				pollRequested = true;
@@ -249,9 +244,9 @@ const startConsumer = async () => {
 
 			pollPromise = (async () => {
 				try {
-					const jobsResult = await selectJobsForProcessing(serviceContext.db, {
+					const jobsResult = await drainJobs(serviceContext, {
 						limit: BATCH_SIZE,
-						currentTime: new Date(),
+						concurrentLimit: CONCURRENT_LIMIT,
 					});
 					if (jobsResult.error) {
 						logger.error({
@@ -266,37 +261,18 @@ const startConsumer = async () => {
 					logger.debug({
 						message: "Jobs found",
 						scope: logScope,
-						data: { jobs: jobsResult.data.length },
+						data: { jobs: jobsResult.data.found },
 					});
 
-					//* we slow the polling down if no jobs are found
-					if (jobsResult.data.length === 0) {
+					// Slow polling down while the queue is empty.
+					if (jobsResult.data.found === 0) {
 						pollInterval = Math.min(
 							pollInterval + POLL_INTERVAL_INC,
 							MAX_POLL_INTERVAL,
 						);
 					} else {
-						//* jobs found, reset to fast polling
+						// Return to fast polling as soon as work appears.
 						pollInterval = MIN_POLL_INTERVAL;
-
-						const chunks = [];
-						for (let i = 0; i < jobsResult.data.length; i += CONCURRENT_LIMIT) {
-							chunks.push(jobsResult.data.slice(i, i + CONCURRENT_LIMIT));
-						}
-
-						for (const chunk of chunks) {
-							await Promise.allSettled(
-								chunk.map((job) =>
-									executeSingleJob(serviceContext, {
-										jobId: job.job_id,
-										event: job.event_type,
-										payload: job.event_data,
-										attempts: job.attempts,
-										maxAttempts: job.max_attempts,
-									}),
-								),
-							);
-						}
 					}
 				} catch (error) {
 					logger.error({
@@ -338,6 +314,7 @@ const startConsumer = async () => {
 
 			void poll();
 		};
+		requestPoll = checkNow;
 
 		parentPort?.on("message", ({ type }) => {
 			if (type === "CHECK_NOW") checkNow();
@@ -358,6 +335,10 @@ const startConsumer = async () => {
 				destroyKVAdapter(kvInstance, adapterLifecycleContext),
 				destroyMediaStorageAdapter(
 					mediaStorageInstance,
+					adapterLifecycleContext,
+				),
+				destroyMediaDeliveryAdapter(
+					mediaDeliveryInstance,
 					adapterLifecycleContext,
 				),
 				destroyEmailAdapter(emailInstance, adapterLifecycleContext),

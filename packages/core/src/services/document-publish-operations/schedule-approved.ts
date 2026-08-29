@@ -1,15 +1,12 @@
 import { copy } from "../../libs/i18n/index.js";
-import {
-	DocumentPublishOperationsRepository,
-	QueueJobsRepository,
-} from "../../libs/repositories/index.js";
+import { cancelJob } from "../../libs/queue/jobs/cancel-job.js";
+import { enqueueJob } from "../../libs/queue/jobs/enqueue-job.js";
+import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import execute from "./execute.js";
 import createEvent from "./helpers/create-event.js";
-import {
-	isInSchedulingDispatchWindow,
-	publishOperationExecuteEvent,
-} from "./helpers/index.js";
+import { isInSchedulingDispatchWindow } from "./helpers/index.js";
+import { executePublishOperationJob } from "./jobs/execute.js";
 
 const scheduleApproved: ServiceFn<
 	[
@@ -22,7 +19,6 @@ const scheduleApproved: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Operations = new DocumentPublishOperationsRepository(context.db);
-	const QueueJobs = new QueueJobsRepository(context.db);
 
 	const operationRes = await Operations.selectSingle({
 		select: [
@@ -56,19 +52,10 @@ const scheduleApproved: ServiceFn<
 	}
 
 	if (operationRes.data.scheduled_job_id) {
-		await QueueJobs.updateSingle({
-			where: [
-				{
-					key: "job_id",
-					operator: "=",
-					value: operationRes.data.scheduled_job_id,
-				},
-			],
-			data: {
-				status: "cancelled",
-				updated_at: new Date().toISOString(),
-			},
+		const cancelJobRes = await cancelJob(context, {
+			id: operationRes.data.scheduled_job_id,
 		});
+		if (cancelJobRes.error) return cancelJobRes;
 	}
 
 	const actorUserId =
@@ -98,13 +85,13 @@ const scheduleApproved: ServiceFn<
 				};
 			}
 
-			const queueRes = await context.queue.add(context, {
-				event: publishOperationExecuteEvent,
+			const queueRes = await enqueueJob(context, {
+				job: executePublishOperationJob,
 				payload: {
 					operationId: operationRes.data.id,
 				},
 				options: {
-					scheduledFor: scheduledAt,
+					runAt: scheduledAt,
 					createdByUserId: actorUserId ?? undefined,
 				},
 			});

@@ -3,7 +3,7 @@ import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
 import logger from "../logger/index.js";
-import passthroughQueueAdapter from "../queue/adapters/passthrough.js";
+import inlineQueueAdapter from "../queue/adapters/inline.js";
 import {
 	destroyQueueAdapter,
 	getInitializedQueueAdapter,
@@ -63,7 +63,7 @@ const executeCronJob = async (
 
 /**
  * Creates the environment for running cron jobs
- * - creates a passthrough queue adapter so runtime adapters can build the ServiceContext. This allows crons to insert jobs into the queue.
+ * - creates an inline queue adapter when a runtime needs a local fallback.
  */
 const setupCronJobs = async (config: {
 	createQueue: boolean;
@@ -74,12 +74,7 @@ const setupCronJobs = async (config: {
 
 	//* depending on the runtime adapter, they may already have access to the host's queue adapter.
 	if (config.createQueue) {
-		//* we dont pass additionalJobHandlers as at least currently, we dont expose a way for devs to register their own CRON jobs,
-		//* meaning we dont need crons to be able to access job handlers that are not core.
-		queueInstance = passthroughQueueAdapter({
-			//* we bypass immediate execution as we only want to use the queue adapter so CRON job services can push jobs into the queue.
-			bypassImmediateExecution: true,
-		});
+		queueInstance = inlineQueueAdapter();
 	}
 
 	const schedules = Object.values(constants.cronSchedules);
@@ -92,7 +87,9 @@ const setupCronJobs = async (config: {
 				schedule?: string;
 			},
 		) => {
-			let cronQueue = context.queue ?? queueInstance;
+			let cronQueue = config.createQueue
+				? (queueInstance ?? context.queue)
+				: context.queue;
 			let createdQueue: QueueAdapterInstance | undefined;
 			try {
 				if (config.createQueue && config.runtimeContext) {

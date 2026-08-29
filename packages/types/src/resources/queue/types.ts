@@ -1,41 +1,37 @@
-export type QueueEvent<T extends string = string> =
-	| "alert:execute"
-	| "email:send"
-	| "media:delete"
-	| "media:delete-unsynced"
-	| "media:update-storage"
-	| "collections:delete"
-	| "locales:delete"
-	| "users:delete"
-	| "documents:delete"
-	| "document-versions:delete-expired"
-	| "document-publish-operation:execute"
-	| T;
-
-export type QueueJobStatus =
-	| "pending"
-	| "processing"
+/** The current lifecycle state of a durable job. */
+export type JobStatus =
+	| "queued"
+	| "running"
 	| "completed"
 	| "failed"
 	| "cancelled";
 
+/** Whether a queued job has been sent to its configured adapter. */
+export type JobDispatchStatus = "pending" | "dispatched";
+
+/** A durable job returned by the Lucid API. */
 export interface Job {
 	id: number;
 	jobId: string;
-	eventType: QueueEvent;
-	eventData: Record<string, unknown>;
+	jobName: string;
+	jobVersion: number;
+	displayData: Record<string, unknown> | null;
 	queueAdapterKey: string;
-	status: QueueJobStatus;
-	priority: number | null;
+	status: JobStatus;
 	attempts: number;
 	maxAttempts: number;
+	dispatchStatus: JobDispatchStatus;
+	dispatchAttempts: number;
+	dispatchError: string | null;
 	errorMessage: string | null;
 	createdAt: string | null;
-	scheduledFor: string | null;
+	availableAt: string | null;
 	startedAt: string | null;
 	completedAt: string | null;
 	failedAt: string | null;
-	nextRetryAt: string | null;
+	cancelledAt: string | null;
+	dispatchedAt: string | null;
+	leaseExpiresAt: string | null;
 	createdByUserId: number | null;
 	updatedAt: string | null;
 }

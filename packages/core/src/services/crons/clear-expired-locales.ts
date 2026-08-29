@@ -1,5 +1,7 @@
+import { enqueueJobs } from "../../libs/queue/jobs/enqueue-jobs.js";
 import { LocalesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { deleteLocaleJob } from "../locales/jobs/delete-single.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
@@ -37,9 +39,9 @@ const clearExpiredLocales: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.addBatch(context, {
-		event: "locales:delete",
-		payloads: expiredLocalesRes.data.map((locale) => ({
+	const queueRes = await enqueueJobs(context, {
+		job: deleteLocaleJob,
+		payload: expiredLocalesRes.data.map((locale) => ({
 			localeCode: locale.code,
 		})),
 	});

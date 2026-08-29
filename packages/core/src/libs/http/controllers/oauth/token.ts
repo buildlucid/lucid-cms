@@ -73,6 +73,7 @@ const tokenController = factory.createHandlers(
 		windowMs: minutesToMilliseconds(1),
 	}),
 	async (c: LucidHonoContext) => {
+		const context = createServiceContext(c);
 		const contentType = c.req
 			.header("content-type")
 			?.split(";")[0]
@@ -83,12 +84,16 @@ const tokenController = factory.createHandlers(
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
 			c.status(400);
+
 			return c.json(
-				oauthFormatter.formatError({
-					type: "validation",
-					code: "invalid_request",
-					status: 400,
-				}),
+				oauthFormatter.formatError(
+					{
+						type: "validation",
+						code: "invalid_request",
+						status: 400,
+					},
+					context.translate,
+				),
 			);
 		}
 
@@ -102,17 +107,21 @@ const tokenController = factory.createHandlers(
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
 			c.status(400);
+
 			return c.json(
-				oauthFormatter.formatError({
-					type: "validation",
-					code:
-						grantType &&
-						grantType !== "authorization_code" &&
-						grantType !== "refresh_token"
-							? "unsupported_grant_type"
-							: "invalid_request",
-					status: 400,
-				}),
+				oauthFormatter.formatError(
+					{
+						type: "validation",
+						code:
+							grantType &&
+							grantType !== "authorization_code" &&
+							grantType !== "refresh_token"
+								? "unsupported_grant_type"
+								: "invalid_request",
+						status: 400,
+					},
+					context.translate,
+				),
 			);
 		}
 
@@ -126,16 +135,19 @@ const tokenController = factory.createHandlers(
 			c.header("Referrer-Policy", "no-referrer");
 			c.header("WWW-Authenticate", 'Basic realm="oauth-token"');
 			c.status(401);
+
 			return c.json(
-				oauthFormatter.formatError({
-					type: "authorisation",
-					code: "invalid_client",
-					status: 401,
-				}),
+				oauthFormatter.formatError(
+					{
+						type: "authorisation",
+						code: "invalid_client",
+						status: 401,
+					},
+					context.translate,
+				),
 			);
 		}
 
-		const context = createServiceContext(c);
 		const clientRes = await serviceWrapper(oauthServices.authenticateClient, {
 			transaction: false,
 			defaultError: { type: "authorisation" },
@@ -148,7 +160,10 @@ const tokenController = factory.createHandlers(
 				c.header("WWW-Authenticate", 'Basic realm="oauth-token"');
 			}
 			c.status((clientRes.error.status ?? 500) as StatusCode);
-			return c.json(oauthFormatter.formatError(clientRes.error));
+
+			return c.json(
+				oauthFormatter.formatError(clientRes.error, context.translate),
+			);
 		}
 
 		const result =
@@ -176,7 +191,10 @@ const tokenController = factory.createHandlers(
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
 			c.status((result.error.status ?? 500) as StatusCode);
-			return c.json(oauthFormatter.formatError(result.error));
+
+			return c.json(
+				oauthFormatter.formatError(result.error, context.translate),
+			);
 		}
 
 		c.header("Cache-Control", "no-store");

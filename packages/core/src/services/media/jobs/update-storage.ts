@@ -1,11 +1,14 @@
+import z from "zod";
+import defineJob from "../../../libs/queue/define-job.js";
+import type { JobHandler } from "../../../libs/queue/types.js";
 import { OptionsRepository } from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
 import getStorageUsage from "../get-storage-usage.js";
 
-/**
- * Recalculates and updates media storage usage.
- */
-const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
+const input = z.object({});
+
+const updateMediaStorage: JobHandler<z.infer<typeof input>> = async (
+	context,
+) => {
 	const Options = new OptionsRepository(context.db);
 	const storageUsageRes = await getStorageUsage(context);
 	if (storageUsageRes.error) return storageUsageRes;
@@ -30,4 +33,12 @@ const updateMediaStorage: ServiceFn<[], undefined> = async (context) => {
 	};
 };
 
-export default updateMediaStorage;
+/**
+ * Recalculates and updates media storage usage.
+ */
+export const updateMediaStorageJob = defineJob({
+	name: "lucid:media.update-storage",
+	version: 1,
+	input,
+	handler: updateMediaStorage,
+});

@@ -1,5 +1,7 @@
+import { enqueueJobs } from "../../libs/queue/jobs/enqueue-jobs.js";
 import { CollectionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { deleteCollectionJob } from "../collections/jobs/delete-single.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
@@ -40,9 +42,9 @@ const clearExpiredCollections: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.addBatch(context, {
-		event: "collections:delete",
-		payloads: expiredCollectionsRes.data.map((collection) => ({
+	const queueRes = await enqueueJobs(context, {
+		job: deleteCollectionJob,
+		payload: expiredCollectionsRes.data.map((collection) => ({
 			collectionKey: collection.key,
 		})),
 	});

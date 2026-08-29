@@ -1,29 +1,51 @@
 import type { OAuthErrorResponse } from "../../schemas/oauth.js";
 import type { LucidErrorData } from "../../types/errors.js";
+import type { Translator } from "../i18n/types.js";
 
-const defaultErrorDescription = "The OAuth request could not be completed.";
-
-const errorDescriptions: Record<string, string> = {
-	invalid_request: "The OAuth request is invalid.",
-	invalid_client: "The OAuth client could not be validated.",
-	invalid_grant: "The OAuth grant is invalid or has expired.",
-	invalid_scope: "One or more requested scopes are invalid.",
-	invalid_token: "The OAuth access token is invalid.",
-	access_denied: "Access was denied.",
-	unsupported_response_type: "The OAuth response type is not supported.",
-	unsupported_grant_type: "The OAuth grant type is not supported.",
-	server_error: defaultErrorDescription,
-};
-
-/**
- * Formats a Lucid service error as an OAuth error response.
- */
-const formatError = (error: LucidErrorData | undefined): OAuthErrorResponse => {
+/** Formats a Lucid service error as a translated OAuth error response. */
+const formatError = (
+	error: LucidErrorData | undefined,
+	translate: Translator,
+): OAuthErrorResponse => {
 	const code = error?.code ?? "server_error";
+	let description: string;
+
+	switch (code) {
+		case "invalid_request":
+			description = translate("server:core.oauth.errors.invalid.request");
+			break;
+		case "invalid_client":
+			description = translate("server:core.oauth.errors.invalid.client");
+			break;
+		case "invalid_grant":
+			description = translate("server:core.oauth.errors.invalid.grant");
+			break;
+		case "invalid_scope":
+			description = translate("server:core.oauth.errors.invalid.scope");
+			break;
+		case "invalid_token":
+			description = translate("server:core.oauth.errors.invalid.token");
+			break;
+		case "access_denied":
+			description = translate("server:core.oauth.errors.access.denied");
+			break;
+		case "unsupported_response_type":
+			description = translate(
+				"server:core.oauth.errors.unsupported.response.type",
+			);
+			break;
+		case "unsupported_grant_type":
+			description = translate(
+				"server:core.oauth.errors.unsupported.grant.type",
+			);
+			break;
+		default:
+			description = translate("server:core.oauth.errors.default");
+	}
 
 	return {
 		error: code,
-		error_description: errorDescriptions[code] ?? defaultErrorDescription,
+		error_description: description,
 	};
 };
 

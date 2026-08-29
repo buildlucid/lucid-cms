@@ -23,7 +23,28 @@ export type {
 } from "./libs/permission/scopes.js";
 export * from "./libs/permission/types.js";
 export * from "./libs/plugins/types.js";
-export * from "./libs/queue/types.js";
+export type {
+	AnyJobDefinition,
+	DefineJobOptions,
+	JobCancelResult,
+	JobConsumptionResult,
+	JobDefinition,
+	JobDispatchStatus,
+	JobEnqueueOptions,
+	JobExecution,
+	JobHandler,
+	JobInput,
+	JobPayload,
+	JobPermanentFailure,
+	JobPermanentFailureHandler,
+	JobReceipt,
+	JobRetryPolicy,
+	JobStatus,
+	JobValue,
+	QueueAdapter,
+	QueueAdapterInstance,
+	QueueDeliveryMessage,
+} from "./libs/queue/types.js";
 export type {
 	CreateLucidHostOptions,
 	LucidHost,

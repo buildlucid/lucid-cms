@@ -3,25 +3,15 @@ import type { PluginOptions } from "../types.js";
 
 const WRANGLER_CONFIG_ARTIFACT_TYPE = "cloudflare:wrangler";
 
-type QueueWranglerBindingOptions = {
-	binding?: string;
-	queueName?: string;
-	consumer?: {
-		maxBatchSize?: number;
-		maxRetries?: number;
-		maxConcurrency?: number;
-	};
-};
-
 type CloudflareWranglerConfigArtifact = {
 	bindings: {
-		queues: true | string | QueueWranglerBindingOptions;
+		queues: true | string | PluginOptions;
 	};
 };
 
 const createQueueBinding = (
 	options: PluginOptions,
-): true | string | QueueWranglerBindingOptions => {
+): true | string | PluginOptions => {
 	const binding = {
 		...(options.binding ? { binding: options.binding } : {}),
 		...(options.queueName ? { queueName: options.queueName } : {}),

@@ -9,7 +9,7 @@ interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: {
 		jobId?: Accessor<string>;
-		eventType?: Accessor<string>;
+		jobName?: Accessor<string>;
 		status?: Accessor<string[]>;
 		queueAdapterKey?: Accessor<string>;
 	};

@@ -32,7 +32,7 @@ import {
 	getInitializedMediaStorageAdapter,
 } from "../../media-storage/lifecycle.js";
 import type { MediaStorageAdapterInstance } from "../../media-storage/types.js";
-import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
+import inlineQueueAdapter from "../../queue/adapters/inline.js";
 import getCronJobs, { type CronJobKey } from "../../runtime/cron-jobs.js";
 import type {
 	AdapterRuntimeContext,
@@ -141,9 +141,9 @@ const cronCommand = async (jobName?: string) => {
 			process.exit(1);
 		}
 
-		//* create a passthrough queue adapter with immediate execution enabled so
+		//* create an inline queue adapter so
 		//* any jobs pushed to the queue by the cron are executed straight away
-		const queue = passthroughQueueAdapter();
+		const queue = inlineQueueAdapter();
 		database = await configRes.config.db.connect(env);
 		kv = await getInitializedKVAdapter(configRes.config, {
 			env,

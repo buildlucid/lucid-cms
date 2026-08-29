@@ -1,13 +1,6 @@
-type MergeObject = Record<string, unknown>;
+import isPlainObject from "./is-plain-object.js";
 
-const isMergeObject = (value: unknown): value is MergeObject => {
-	if (!value || typeof value !== "object" || Array.isArray(value)) {
-		return false;
-	}
-
-	const prototype = Object.getPrototypeOf(value);
-	return prototype === Object.prototype || prototype === null;
-};
+type MergeObject = Record<PropertyKey, unknown>;
 
 const mergeValue = (targetValue: unknown, sourceValue: unknown): unknown => {
 	if (sourceValue === undefined) {
@@ -24,8 +17,8 @@ const mergeValue = (targetValue: unknown, sourceValue: unknown): unknown => {
 		return targetArray;
 	}
 
-	if (isMergeObject(sourceValue)) {
-		const targetObject = isMergeObject(targetValue) ? targetValue : {};
+	if (isPlainObject(sourceValue)) {
+		const targetObject = isPlainObject(targetValue) ? targetValue : {};
 		return deepMerge(targetObject, sourceValue);
 	}
 
@@ -37,8 +30,10 @@ const deepMerge = <Target extends object, Source extends object>(
 	source: Source,
 ) => {
 	const targetObject = target as MergeObject;
+	const sourceObject = source as MergeObject;
 
-	for (const [key, sourceValue] of Object.entries(source)) {
+	for (const key of Reflect.ownKeys(source)) {
+		const sourceValue = sourceObject[key];
 		targetObject[key] = mergeValue(targetObject[key], sourceValue);
 	}
 

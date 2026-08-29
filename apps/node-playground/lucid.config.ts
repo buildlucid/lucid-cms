@@ -1,10 +1,8 @@
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-
 import { configureLucid, z } from "@lucidcms/core";
 import { createRoute } from "@lucidcms/core/plugin";
-// import { passthroughQueueAdapter } from "@lucidcms/core/queue";
 import { createToolkit } from "@lucidcms/core/toolkit";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
@@ -192,12 +190,6 @@ export default configureLucid({
 		// email: {
 		// 	adapter: passthroughEmailAdapter,
 		// },
-		queue: {
-			// adapter: passthroughQueueAdapter,
-			// adapter: passthroughQueueAdapter({
-			// 	bypassImmediateExecution: false,
-			// }),
-		},
 		// hooks: [
 		// 	{
 		// 		service: "documents",

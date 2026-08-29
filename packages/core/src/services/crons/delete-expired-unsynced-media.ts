@@ -1,10 +1,13 @@
 import { addMilliseconds } from "date-fns";
 import constants from "../../constants/constants.js";
+import { enqueueJobs } from "../../libs/queue/jobs/enqueue-jobs.js";
 import {
 	MediaAwaitingSyncRepository,
 	MediaUploadSessionsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { abortUploadSessionJob } from "../media/jobs/abort-upload-session.js";
+import { deleteAwaitingSyncMediaJob } from "../media/jobs/delete-awaiting-sync.js";
 
 /**
  * Finds all expired media keys that are still awaiting sync and queues them for deletion
@@ -65,9 +68,9 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 	}
 
 	if (allExpiredMediaRes.data.length > 0) {
-		const queueRes = await context.queue.addBatch(context, {
-			event: "media:delete-unsynced",
-			payloads: allExpiredMediaRes.data.map((media) => ({
+		const queueRes = await enqueueJobs(context, {
+			job: deleteAwaitingSyncMediaJob,
+			payload: allExpiredMediaRes.data.map((media) => ({
 				key: media.key,
 			})),
 		});
@@ -75,9 +78,9 @@ const deleteExpiredUnsyncedMedia: ServiceFn<[], undefined> = async (
 	}
 
 	if (allExpiredSessionsRes.data.length > 0) {
-		const queueRes = await context.queue.addBatch(context, {
-			event: "media:abort-upload-session",
-			payloads: allExpiredSessionsRes.data.map((session) => ({
+		const queueRes = await enqueueJobs(context, {
+			job: abortUploadSessionJob,
+			payload: allExpiredSessionsRes.data.map((session) => ({
 				sessionId: session.session_id,
 			})),
 		});

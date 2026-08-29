@@ -1,11 +1,13 @@
 import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { getEmailResendState } from "../../libs/email/storage/index.js";
 import { copy } from "../../libs/i18n/index.js";
+import { enqueueJob } from "../../libs/queue/jobs/enqueue-job.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { sendEmailJob } from "./jobs/send-email.js";
 
 const resendSingle: ServiceFn<
 	[
@@ -82,8 +84,8 @@ const resendSingle: ServiceFn<
 	if (transactionRes.error) return transactionRes;
 	if (updateEmailRes.error) return updateEmailRes;
 
-	const queueRes = await context.queue.add(context, {
-		event: "email:send",
+	const queueRes = await enqueueJob(context, {
+		job: sendEmailJob,
 		payload: {
 			emailId: emailRes.data.id,
 			transactionId: transactionRes.data.id ?? 0,

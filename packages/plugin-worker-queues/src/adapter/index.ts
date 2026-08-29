@@ -1,225 +1,143 @@
-import { createRequire } from "node:module";
-import { dirname, join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { join } from "node:path";
 import { Worker } from "node:worker_threads";
 import { logger } from "@lucidcms/core";
-import { copy } from "@lucidcms/core/plugin";
-import { insertJobs, logScope } from "@lucidcms/core/queue";
+import { logScope } from "@lucidcms/core/queue";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
+import type { WorkerQueueAdapterOptions } from "../types.js";
+import resolveWorkerConsumerUrl from "../utils/resolve-worker-consumer-url.js";
+import validateOptions from "../utils/validate-options.js";
 
 const ADAPTER_KEY = "worker";
-const SHUTDOWN_TIMEOUT = 5000;
+const SHUTDOWN_TIMEOUT = 5_000;
+const MAX_RESTART_DELAY = 30_000;
+const RESTART_ATTEMPT_RESET_DELAY = 30_000;
 
-export type WorkerQueueAdapterOptions = {
-	concurrentLimit?: number;
-	batchSize?: number;
-};
-
-const resolveWorkerConsumerUrl = (): URL => {
-	// fallow-ignore-next-line unresolved-import -- consumer.ts compiles to consumer.mjs beside this adapter
-	const localConsumerUrl = new URL("./consumer.mjs", import.meta.url);
-
-	try {
-		const require = createRequire(import.meta.url);
-		const packageJsonPath = require.resolve(
-			"@lucidcms/plugin-worker-queues/package.json",
-		);
-		return pathToFileURL(
-			join(dirname(packageJsonPath), "dist", "adapter", "consumer.mjs"),
-		);
-	} catch {
-		return localConsumerUrl;
-	}
-};
-
-/**
- * The worker queue adapter
- */
-function workerQueueAdapter(): QueueAdapterInstance;
-function workerQueueAdapter(
-	options: WorkerQueueAdapterOptions,
-): QueueAdapterInstance;
-function workerQueueAdapter(
+/** Creates the database polling queue adapter. */
+const workerQueueAdapter = (
 	options: WorkerQueueAdapterOptions = {},
-): QueueAdapterInstance {
+): QueueAdapterInstance => {
+	validateOptions(options);
 	let worker: Worker | null = null;
+	let restartTimer: ReturnType<typeof setTimeout> | undefined;
+	let restartAttempts = 0;
+	let stopping = false;
 	let destroyPromise: Promise<void> | undefined;
-	const checkNow = () => worker?.postMessage({ type: "CHECK_NOW" });
 
 	return {
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
-		support: {
-			scheduling: true,
-		},
+		support: { scheduling: true, maxDelayMs: null },
 		lifecycle: {
 			init: async (params) => {
-				destroyPromise = undefined;
-				logger.debug({
-					message: "The worker queue has started",
-					scope: logScope,
-				});
 				if (!params.runtimeContext?.configEntryPoint) {
 					throw new Error(
 						"configEntryPoint is required. Your runtime likely does not support this queue adapter.",
 					);
 				}
 
-				const configEntryPath = join(
-					params.config.build.paths.outDir,
-					params.runtimeContext.configEntryPoint,
-				);
-
-				const workerUrl = resolveWorkerConsumerUrl();
-				worker = new Worker(workerUrl, {
-					workerData: {
-						options: {
-							concurrentLimit: options.concurrentLimit,
-							batchSize: options.batchSize,
-						},
-						runtime: {
-							configEntryPath: configEntryPath,
-							env: params.env,
-						},
+				stopping = false;
+				destroyPromise = undefined;
+				const workerData = {
+					options,
+					runtime: {
+						configEntryPath: join(
+							params.config.build.paths.outDir,
+							params.runtimeContext.configEntryPoint,
+						),
+						env: params.env,
 					},
+				};
+
+				const startWorker = () => {
+					if (stopping) return;
+
+					const nextWorker = new Worker(resolveWorkerConsumerUrl(), {
+						workerData,
+					});
+					worker = nextWorker;
+
+					const restartAttemptResetTimer = setTimeout(() => {
+						if (worker === nextWorker) restartAttempts = 0;
+					}, RESTART_ATTEMPT_RESET_DELAY);
+
+					nextWorker.on("error", (error) => {
+						logger.error({
+							error,
+							event: "worker-queue.consumer.error",
+							message: "The worker queue consumer failed",
+							scope: logScope,
+						});
+					});
+					nextWorker.on("exit", (code) => {
+						clearTimeout(restartAttemptResetTimer);
+						if (worker === nextWorker) worker = null;
+						if (stopping) return;
+
+						restartAttempts += 1;
+						const delay = Math.min(
+							1_000 * 2 ** (restartAttempts - 1),
+							MAX_RESTART_DELAY,
+						);
+
+						logger.warn({
+							message: "The worker queue consumer exited and will restart",
+							scope: logScope,
+							data: { code, delay },
+						});
+						restartTimer = setTimeout(startWorker, delay);
+					});
+				};
+
+				startWorker();
+				logger.debug({
+					message: "The worker queue has started",
+					scope: logScope,
 				});
 			},
 			destroy: () => {
 				destroyPromise ??= (async () => {
+					stopping = true;
+					if (restartTimer) clearTimeout(restartTimer);
+					restartTimer = undefined;
 					const activeWorker = worker;
 					worker = null;
 					if (!activeWorker) return;
 
 					await new Promise<void>((resolve) => {
 						let settled = false;
-						const cleanup = () => {
-							clearTimeout(timeout);
-							activeWorker.off("exit", handleExit);
-							activeWorker.off("message", handleMessage);
-						};
+
 						const finish = () => {
 							if (settled) return;
 							settled = true;
-							cleanup();
-							resolve();
+							clearTimeout(timeout);
+							activeWorker.off("exit", finish);
+							activeWorker.off("message", handleMessage);
+							void activeWorker.terminate().finally(resolve);
 						};
-						const terminate = () => {
-							if (settled) return;
-							settled = true;
-							cleanup();
-							void activeWorker.terminate().then(
-								() => resolve(),
-								() => resolve(),
-							);
-						};
-						const handleExit = () => finish();
 						const handleMessage = (message: { type?: string }) => {
-							if (message.type === "SHUTDOWN_COMPLETE") terminate();
+							if (message.type === "SHUTDOWN_COMPLETE") finish();
 						};
-						const timeout = setTimeout(terminate, SHUTDOWN_TIMEOUT);
 
-						activeWorker.once("exit", handleExit);
+						const timeout = setTimeout(finish, SHUTDOWN_TIMEOUT);
+
+						activeWorker.once("exit", finish);
 						activeWorker.on("message", handleMessage);
+
 						try {
 							activeWorker.postMessage({ type: "SHUTDOWN" });
 						} catch {
-							terminate();
+							finish();
 						}
 					});
 				})();
+
 				return destroyPromise;
 			},
 		},
-		add: async (context, params) => {
-			const { event } = params;
-			if (!worker) {
-				return {
-					error: {
-						message: copy("server:plugin.worker.queues.worker.not.started", {
-							defaultMessage: "Worker queue is not started",
-						}),
-					},
-					data: undefined,
-				};
-			}
-
-			logger.info({
-				message: "Adding job to the worker queue",
-				scope: logScope,
-				data: { event },
-			});
-
-			const createJobRes = await insertJobs(context, {
-				event,
-				payloads: [params.payload],
-				options: params.options,
-				adapterKey: ADAPTER_KEY,
-			});
-			if (createJobRes.error) return createJobRes;
-
-			const jobData = createJobRes.data.jobs[0];
-			if (!jobData) {
-				return {
-					error: {
-						message: copy("server:plugin.worker.queues.jobs.create.failed", {
-							defaultMessage: "Failed to create job",
-						}),
-					},
-					data: undefined,
-				};
-			}
-
-			checkNow();
-
-			return {
-				error: undefined,
-				data: {
-					jobId: jobData.jobId,
-					event,
-					status: createJobRes.data.status,
-				},
-			};
-		},
-		addBatch: async (context, params) => {
-			const { event } = params;
-			if (!worker) {
-				return {
-					error: {
-						message: copy("server:plugin.worker.queues.worker.not.started", {
-							defaultMessage: "Worker queue is not started",
-						}),
-					},
-					data: undefined,
-				};
-			}
-
-			logger.info({
-				message: "Adding batch jobs to the worker queue",
-				scope: logScope,
-				data: { event, count: params.payloads.length },
-			});
-
-			const createJobsRes = await insertJobs(context, {
-				event,
-				payloads: params.payloads,
-				options: params.options,
-				adapterKey: ADAPTER_KEY,
-			});
-			if (createJobsRes.error) return createJobsRes;
-
-			checkNow();
-
-			return {
-				error: undefined,
-				data: {
-					jobIds: createJobsRes.data.jobs.map((j) => j.jobId),
-					event,
-					status: createJobsRes.data.status,
-					count: createJobsRes.data.jobs.length,
-				},
-			};
+		publish: async () => {
+			worker?.postMessage({ type: "CHECK_NOW" });
 		},
 	};
-}
+};
 
 export default workerQueueAdapter;

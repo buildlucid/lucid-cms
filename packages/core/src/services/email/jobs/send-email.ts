@@ -1,3 +1,4 @@
+import z from "zod";
 import { normalizeEmailAttachments } from "../../../libs/email/attachments.js";
 import isEmailSimulated from "../../../libs/email/is-simulated.js";
 import {
@@ -9,22 +10,20 @@ import {
 import renderMustacheTemplate from "../../../libs/email/templates/render-mustache-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email/types.js";
 import { copy } from "../../../libs/i18n/index.js";
+import defineJob from "../../../libs/queue/define-job.js";
+import type { JobHandler } from "../../../libs/queue/types.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
 } from "../../../libs/repositories/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
 
-const sendEmail: ServiceFn<
-	[
-		{
-			emailId: number;
-			transactionId: number;
-		},
-	],
-	undefined
-> = async (context, data) => {
+const input = z.object({
+	emailId: z.number().int().positive(),
+	transactionId: z.number().int().nonnegative(),
+});
+
+const sendEmail: JobHandler<z.infer<typeof input>> = async (context, data) => {
 	const Emails = new EmailsRepository(context.db);
 	const EmailTransactions = new EmailTransactionsRepository(context.db);
 
@@ -223,4 +222,10 @@ const sendEmail: ServiceFn<
 	};
 };
 
-export default sendEmail;
+export const sendEmailJob = defineJob({
+	name: "lucid:email.send",
+	version: 1,
+	input,
+	handler: sendEmail,
+	describe: ({ emailId, transactionId }) => ({ emailId, transactionId }),
+});

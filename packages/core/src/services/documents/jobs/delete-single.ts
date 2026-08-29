@@ -1,23 +1,22 @@
-import type { ServiceFn } from "../../../utils/services/types.js";
+import z from "zod";
+import defineJob from "../../../libs/queue/define-job.js";
+import type { JobHandler } from "../../../libs/queue/types.js";
 import deletePreviewSessions from "../../preview-sessions/delete-for-documents.js";
 import beginSingleDeletion from "../helpers/begin-single-deletion.js";
 import executeDeleteHook from "../helpers/execute-delete-hook.js";
 import invalidateContentDocumentCache from "../helpers/invalidate-content-cache.js";
 import nullifyDocumentReferences from "../nullify-document-references.js";
 
-/**
- * Deletes a single document
- */
-const deleteDocument: ServiceFn<
-	[
-		{
-			id: number;
-			collectionKey: string;
-			userId: number;
-		},
-	],
-	undefined
-> = async (context, data) => {
+const input = z.object({
+	id: z.number().int().positive(),
+	collectionKey: z.string().min(1),
+	userId: z.number().int().positive(),
+});
+
+const deleteDocument: JobHandler<z.infer<typeof input>> = async (
+	context,
+	data,
+) => {
 	const beginRes = await beginSingleDeletion(context, {
 		id: data.id,
 		collectionKey: data.collectionKey,
@@ -79,4 +78,16 @@ const deleteDocument: ServiceFn<
 	};
 };
 
-export default deleteDocument;
+/**
+ * Deletes a single document
+ */
+export const deleteDocumentJob = defineJob({
+	name: "lucid:documents.delete",
+	version: 1,
+	input,
+	handler: deleteDocument,
+	describe: ({ id, collectionKey }) => ({
+		documentId: id,
+		collectionKey,
+	}),
+});

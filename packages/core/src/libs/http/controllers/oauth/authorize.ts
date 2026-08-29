@@ -62,7 +62,8 @@ const authorizeController = factory.createHandlers(
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
 			c.status(error.status);
-			return c.json(oauthFormatter.formatError(error));
+
+			return c.json(oauthFormatter.formatError(error, context.translate));
 		}
 
 		const result = await serviceWrapper(oauthServices.startAuthorization, {
@@ -83,7 +84,10 @@ const authorizeController = factory.createHandlers(
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
 			c.status((result.error.status ?? 500) as StatusCode);
-			return c.json(oauthFormatter.formatError(result.error));
+
+			return c.json(
+				oauthFormatter.formatError(result.error, context.translate),
+			);
 		}
 
 		c.header("Cache-Control", "no-store");

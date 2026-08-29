@@ -14,6 +14,7 @@ import type {
 	EmailSubject,
 } from "../../libs/email/types.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
+import { enqueueJob } from "../../libs/queue/jobs/enqueue-job.js";
 import {
 	EmailAttachmentsRepository,
 	EmailsRepository,
@@ -27,6 +28,7 @@ import {
 } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import mergeEmailContextData from "./helpers/merge-email-context-data.js";
+import { sendEmailJob } from "./jobs/send-email.js";
 
 const sendEmail: ServiceFn<
 	[
@@ -159,8 +161,8 @@ const sendEmail: ServiceFn<
 	});
 	if (initialTransactionRes.error) return initialTransactionRes;
 
-	const queueRes = await context.queue.add(context, {
-		event: "email:send",
+	const queueRes = await enqueueJob(context, {
+		job: sendEmailJob,
 		payload: {
 			emailId: newEmailRes.data.id,
 			transactionId: initialTransactionRes.data?.id ?? 0,

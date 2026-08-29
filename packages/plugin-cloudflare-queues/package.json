@@ -9,8 +9,7 @@
 		".": {
 			"types": "./dist/index.d.mts",
 			"default": "./dist/index.mjs"
-		},
-		"./translations": "./translations"
+		}
 	},
 	"scripts": {
 		"build": "tsc && tsdown",
@@ -23,8 +22,7 @@
 		"check:fix": "biome check --write ./src"
 	},
 	"files": [
-		"dist",
-		"translations"
+		"dist"
 	],
 	"author": "Build Lucid Ltd",
 	"repository": {

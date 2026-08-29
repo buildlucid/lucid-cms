@@ -1,9 +1,7 @@
 import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
-import {
-	DocumentPublishOperationsRepository,
-	QueueJobsRepository,
-} from "../../libs/repositories/index.js";
+import { cancelJobs } from "../../libs/queue/jobs/cancel-jobs.js";
+import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createEvent from "./helpers/create-event.js";
 import notifyPublishOperationUsers from "./notifications.js";
@@ -26,7 +24,6 @@ const cancelForDocuments: ServiceFn<
 	}
 
 	const Operations = new DocumentPublishOperationsRepository(context.db);
-	const QueueJobs = new QueueJobsRepository(context.db);
 
 	const activeRes = await Operations.selectMultiple({
 		select: ["id", "scheduled_job_id"],
@@ -71,13 +68,7 @@ const cancelForDocuments: ServiceFn<
 
 	const now = new Date().toISOString();
 	if (scheduledJobIds.length > 0) {
-		const cancelJobsRes = await QueueJobs.updateSingle({
-			where: [{ key: "job_id", operator: "in", value: scheduledJobIds }],
-			data: {
-				status: "cancelled",
-				updated_at: now,
-			},
-		});
+		const cancelJobsRes = await cancelJobs(context, { ids: scheduledJobIds });
 		if (cancelJobsRes.error) return cancelJobsRes;
 	}
 

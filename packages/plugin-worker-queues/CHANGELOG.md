@@ -2,6 +2,7 @@
 
 ## v1.2.0 (unreleased)
 
+- Updated the worker queue to drain durable jobs through one shared concurrency limit, with immediate wake-ups and core-managed retries, leases and cancellation.
 - Added media storage and delivery adapter lifecycle support to queue consumers.
 
 ## v1.1.1

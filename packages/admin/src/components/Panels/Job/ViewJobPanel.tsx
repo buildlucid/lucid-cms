@@ -58,8 +58,12 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 								value: job.data?.data.jobId ?? undefined,
 							},
 							{
-								label: T()("common.event.type"),
-								value: job.data?.data.eventType ?? undefined,
+								label: T()("jobs.name"),
+								value: job.data?.data.jobName ?? undefined,
+							},
+							{
+								label: T()("jobs.version"),
+								value: job.data?.data.jobVersion ?? undefined,
 							},
 							{
 								label: T()("common.status"),
@@ -70,8 +74,8 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 								value: job.data?.data.queueAdapterKey ?? undefined,
 							},
 							{
-								label: T()("common.priority"),
-								value: job.data?.data.priority ?? "-",
+								label: T()("jobs.dispatch.status"),
+								value: job.data?.data.dispatchStatus ?? undefined,
 							},
 							{
 								label: T()("common.attempts"),
@@ -86,8 +90,8 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 								value: dateHelpers.formatDate(job.data?.data.createdAt),
 							},
 							{
-								label: T()("common.scheduled.for"),
-								value: dateHelpers.formatDate(job.data?.data.scheduledFor),
+								label: T()("common.available.at"),
+								value: dateHelpers.formatDate(job.data?.data.availableAt),
 							},
 							{
 								label: T()("common.started.at"),
@@ -102,8 +106,12 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 								value: dateHelpers.formatDate(job.data?.data.failedAt),
 							},
 							{
-								label: T()("common.next.retry.at"),
-								value: dateHelpers.formatDate(job.data?.data.nextRetryAt),
+								label: T()("common.cancelled.at"),
+								value: dateHelpers.formatDate(job.data?.data.cancelledAt),
+							},
+							{
+								label: T()("jobs.dispatched.at"),
+								value: dateHelpers.formatDate(job.data?.data.dispatchedAt),
 							},
 						]}
 					/>
@@ -119,8 +127,8 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 							<p class="text-sm text-body">{job.data?.data.errorMessage}</p>
 						</div>
 					</Show>
-					<Show when={job.data?.data.eventData}>
-						<SectionHeading title={T()("jobs.payload")} />
+					<Show when={job.data?.data.displayData}>
+						<SectionHeading title={T()("jobs.details")} />
 						<div class="mb-4">
 							<Suspense
 								fallback={
@@ -128,8 +136,8 @@ const ViewJobPanel: Component<ViewJobPanelProps> = (props) => {
 								}
 							>
 								<JSONPreview
-									title={T()("jobs.payload")}
-									json={job.data?.data.eventData || {}}
+									title={T()("jobs.details")}
+									json={job.data?.data.displayData || {}}
 								/>
 							</Suspense>
 						</div>

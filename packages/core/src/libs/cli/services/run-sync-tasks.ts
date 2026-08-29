@@ -9,7 +9,7 @@ import {
 	getInitializedKVAdapter,
 } from "../../kv/lifecycle.js";
 import type { KVAdapterInstance } from "../../kv/types.js";
-import passthroughQueueAdapter from "../../queue/adapters/passthrough.js";
+import inlineQueueAdapter from "../../queue/adapters/inline.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 
@@ -37,7 +37,7 @@ const runSyncTasks = async (options: {
 		translationStore: options.translationStore,
 		env: options.env,
 		runtimeContext: options.runtimeContext,
-		queue: passthroughQueueAdapter(),
+		queue: inlineQueueAdapter(),
 		kv,
 		mediaStorage: null,
 		email: passthroughEmailAdapterInstance,

@@ -31,6 +31,7 @@ import type {
 } from "../libs/media-storage/types.js";
 import type { LucidPluginResponse } from "../libs/plugins/types.js";
 import type {
+	AnyJobDefinition,
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
@@ -447,12 +448,21 @@ export interface LucidConfig {
 	 */
 	queue?: {
 		/**
-		 * The queue adapter to use. If not provided, Lucid will use the passthrough queue adapter.
+		 * The queue adapter to use. If omitted, Lucid executes durable jobs inline.
 		 */
 		adapter?:
 			| QueueAdapter
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
+		/** Job definitions. */
+		jobs?: AnyJobDefinition[];
+		/** How long terminal jobs remain visible. */
+		retention?: {
+			/** Days to retain completed jobs. */
+			completedDays?: number;
+			/** Days to retain failed and cancelled jobs. */
+			failedDays?: number;
+		};
 	};
 	/**
 	 * Configure the purge behavior for retained deleted data.
@@ -625,11 +635,16 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			fallbackUrl?: string;
 		};
 	};
-	queue?: {
+	queue: {
 		adapter?:
 			| QueueAdapter
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
+		jobs: AnyJobDefinition[];
+		retention: {
+			completedDays: number;
+			failedDays: number;
+		};
 	};
 	retention: {
 		defaultPurgeAfterDays: number;

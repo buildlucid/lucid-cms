@@ -1,18 +1,15 @@
+import z from "zod";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
+import defineJob from "../../../libs/queue/define-job.js";
+import type { JobHandler } from "../../../libs/queue/types.js";
 import { LocalesRepository } from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
 
-/**
- * Deletes a single locale
- */
-const deleteLocale: ServiceFn<
-	[
-		{
-			localeCode: string;
-		},
-	],
-	undefined
-> = async (context, data) => {
+const input = z.object({ localeCode: z.string().min(1) });
+
+const deleteLocale: JobHandler<z.infer<typeof input>> = async (
+	context,
+	data,
+) => {
 	const Locales = new LocalesRepository(context.db);
 
 	const deleteRes = await Locales.deleteSingle({
@@ -41,4 +38,13 @@ const deleteLocale: ServiceFn<
 	};
 };
 
-export default deleteLocale;
+/**
+ * Deletes a single locale
+ */
+export const deleteLocaleJob = defineJob({
+	name: "lucid:locales.delete",
+	version: 1,
+	input,
+	handler: deleteLocale,
+	describe: ({ localeCode }) => ({ localeCode }),
+});

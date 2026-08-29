@@ -188,6 +188,7 @@ export default Object.freeze({
 	} as const,
 	retention: 30,
 	cronSchedules: {
+		jobs: "* * * * *",
 		maintenance: "0 0 * * *",
 		scheduledPublishing: "0 */4 * * *",
 	},

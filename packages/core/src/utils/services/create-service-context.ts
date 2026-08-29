@@ -4,7 +4,7 @@ import { passthroughEmailAdapterInstance } from "../../libs/email/adapters/passt
 import { createTranslator } from "../../libs/i18n/index.js";
 import { passthroughKVAdapter } from "../../libs/kv/index.js";
 import { passthroughMediaDeliveryAdapter } from "../../libs/media-delivery/index.js";
-import { passthroughQueueAdapter } from "../../libs/queue/index.js";
+import inlineQueueAdapter from "../../libs/queue/adapters/inline.js";
 import type { CreateServiceContextOptions, ServiceContext } from "./types.js";
 
 /**
@@ -28,7 +28,7 @@ const createServiceContext = (
 		config: options.config,
 		env: options.env ?? null,
 		runtimeContext: options.runtimeContext,
-		queue: options.queue ?? passthroughQueueAdapter(),
+		queue: options.queue ?? inlineQueueAdapter(),
 		kv: options.kv ?? passthroughKVAdapter(),
 		mediaStorage: options.mediaStorage ?? null,
 		mediaDelivery: options.mediaDelivery ?? passthroughMediaDeliveryAdapter(),

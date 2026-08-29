@@ -2,6 +2,7 @@
 
 ## v0.6.0 (unreleased)
 
+- Reworked queue resource types for durable, versioned jobs, including dispatch, cancellation and lease metadata.
 - Added shared reference types and moved document refs to the top-level response object.
 - Added shared types for frontend preview state and resolved preview metadata.
 - Added media status, image preset source and video playback source response types.

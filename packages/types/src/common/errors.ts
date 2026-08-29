@@ -25,6 +25,7 @@ export interface PublicErrorData {
 		| "invalid_scope"
 		| "invalid_token"
 		| "access_denied"
+		| "unsupported_response_type"
 		| "unsupported_grant_type"
 		| "server_error";
 	key?: string;

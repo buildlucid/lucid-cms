@@ -1,21 +1,15 @@
+import z from "zod";
 import formatter from "../../../libs/formatters/index.js";
+import defineJob from "../../../libs/queue/define-job.js";
+import type { JobHandler } from "../../../libs/queue/types.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
 import { invalidateAuthCache } from "../../auth/helpers/auth-cache.js";
 import checkNotLastUser from "../checks/check-not-last-user.js";
 import checkUserAccess from "../checks/check-user-access.js";
 
-/**
- * Deletes a single user
- */
-const deleteUser: ServiceFn<
-	[
-		{
-			id: number;
-		},
-	],
-	undefined
-> = async (context, data) => {
+const input = z.object({ id: z.number().int().positive() });
+
+const deleteUser: JobHandler<z.infer<typeof input>> = async (context, data) => {
 	const User = new UsersRepository(context.db);
 
 	const accessRes = await checkUserAccess(context, {
@@ -62,4 +56,13 @@ const deleteUser: ServiceFn<
 	};
 };
 
-export default deleteUser;
+/**
+ * Deletes a single user
+ */
+export const deleteUserJob = defineJob({
+	name: "lucid:users.delete",
+	version: 1,
+	input,
+	handler: deleteUser,
+	describe: ({ id }) => ({ userId: id }),
+});

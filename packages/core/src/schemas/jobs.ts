@@ -1,92 +1,11 @@
 import z from "zod";
+import {
+	jobDispatchStatusSchema,
+	jobPayloadSchema,
+	jobStatusSchema,
+} from "../libs/queue/schema.js";
 import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
-
-export const queueJobStatusSchema = z.union([
-	z.literal("pending"),
-	z.literal("processing"),
-	z.literal("completed"),
-	z.literal("failed"),
-	z.literal("cancelled"),
-]);
-
-const jobResponseSchema = z.object({
-	id: z.number().meta({
-		description: "The job ID",
-		example: 1,
-	}),
-	jobId: z.string().meta({
-		description: "The unique job identifier",
-		example: "job_abc123",
-	}),
-	eventType: z.string().meta({
-		description: "The type of event this job handles",
-		example: "email:send",
-	}),
-	eventData: z.record(z.string(), z.any()).meta({
-		description: "The data associated with the job event",
-		example: {
-			emailId: 123,
-			recipientEmail: "user@example.com",
-		},
-	}),
-	queueAdapterKey: z.string().meta({
-		description: "The queue adapter key used to process this job",
-		example: "passthrough",
-	}),
-	status: queueJobStatusSchema.meta({
-		description: "The current status of the job",
-		example: "completed",
-	}),
-	priority: z.number().nullable().meta({
-		description: "The priority level of the job (higher = more priority)",
-		example: 10,
-	}),
-	attempts: z.number().meta({
-		description: "The number of attempts made to process this job",
-		example: 1,
-	}),
-	maxAttempts: z.number().meta({
-		description: "The maximum number of attempts allowed for this job",
-		example: 3,
-	}),
-	errorMessage: z.string().nullable().meta({
-		description: "The error message if the job failed",
-		example: "Connection timeout",
-	}),
-	createdAt: z.string().nullable().meta({
-		description: "Timestamp when the job was created",
-		example: "2024-04-25T14:30:00.000Z",
-	}),
-	scheduledFor: z.string().nullable().meta({
-		description: "Timestamp when the job is scheduled to run",
-		example: "2024-04-25T14:30:00.000Z",
-	}),
-	startedAt: z.string().nullable().meta({
-		description: "Timestamp when the job started processing",
-		example: "2024-04-25T14:30:05.000Z",
-	}),
-	completedAt: z.string().nullable().meta({
-		description: "Timestamp when the job completed successfully",
-		example: "2024-04-25T14:30:10.000Z",
-	}),
-	failedAt: z.string().nullable().meta({
-		description: "Timestamp when the job failed",
-		example: "2024-04-25T14:30:08.000Z",
-	}),
-	nextRetryAt: z.string().nullable().meta({
-		description: "Timestamp when the job will be retried next",
-		example: "2024-04-25T14:35:00.000Z",
-	}),
-	createdByUserId: z.number().nullable().meta({
-		description: "The ID of the user who created the job",
-		example: 1,
-	}),
-	updatedAt: z.string().nullable().meta({
-		description: "Timestamp when the job was last updated",
-		example: "2024-04-25T14:30:10.000Z",
-	}),
-});
 
 export const controllerSchemas = {
 	getMultiple: {
@@ -94,53 +13,28 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[jobId]": queryString.schema.filter(false, {
-						example: "9d1fcfac-f491-43d4-a33b-4432b91a373c",
-					}),
-					"filter[eventType]": queryString.schema.filter(false, {
-						example: "email:send",
-					}),
-					"filter[status]": queryString.schema.filter(true, {
-						example: "completed",
-					}),
-					"filter[queueAdapterKey]": queryString.schema.filter(false, {
-						example: "passthrough",
-					}),
-					"filter[priority]": queryString.schema.filter(false, {
-						example: "5",
-					}),
-					"filter[attempts]": queryString.schema.filter(false, {
-						example: "1",
-					}),
-					"filter[maxAttempts]": queryString.schema.filter(false, {
-						example: "3",
-					}),
-					"filter[errorMessage]": queryString.schema.filter(false, {
-						example: "Connection refused",
-					}),
-					"filter[createdByUserId]": queryString.schema.filter(false, {
-						example: "1",
-					}),
-					"filter[createdAt]": queryString.schema.filter(false, {
-						example: "2026-01-01T00:00:00Z",
-					}),
-					"filter[scheduledFor]": queryString.schema.filter(false, {
-						example: "2026-01-01T00:00:00Z",
-					}),
-					"filter[startedAt]": queryString.schema.filter(false, {
-						example: "2026-01-01T00:00:00Z",
-					}),
-					"filter[completedAt]": queryString.schema.filter(false, {
-						example: "2026-01-01T00:00:00Z",
-					}),
-					"filter[failedAt]": queryString.schema.filter(false, {
-						example: "2026-01-01T00:00:00Z",
-					}),
-					"filter[nextRetryAt]": queryString.schema.filter(false, {
-						example: "2026-01-01T00:00:00Z",
-					}),
+					"filter[jobId]": queryString.schema.filter(false),
+					"filter[jobName]": queryString.schema.filter(false),
+					"filter[jobVersion]": queryString.schema.filter(false),
+					"filter[status]": queryString.schema.filter(true),
+					"filter[queueAdapterKey]": queryString.schema.filter(false),
+					"filter[attempts]": queryString.schema.filter(false),
+					"filter[maxAttempts]": queryString.schema.filter(false),
+					"filter[dispatchStatus]": queryString.schema.filter(true),
+					"filter[dispatchAttempts]": queryString.schema.filter(false),
+					"filter[dispatchError]": queryString.schema.filter(false),
+					"filter[errorMessage]": queryString.schema.filter(false),
+					"filter[createdByUserId]": queryString.schema.filter(false),
+					"filter[createdAt]": queryString.schema.filter(false),
+					"filter[availableAt]": queryString.schema.filter(false),
+					"filter[startedAt]": queryString.schema.filter(false),
+					"filter[completedAt]": queryString.schema.filter(false),
+					"filter[failedAt]": queryString.schema.filter(false),
+					"filter[cancelledAt]": queryString.schema.filter(false),
+					"filter[dispatchedAt]": queryString.schema.filter(false),
+					"filter[leaseExpiresAt]": queryString.schema.filter(false),
 					sort: queryString.schema.sort(
-						"createdAt,scheduledFor,startedAt,completedAt,failedAt,priority,attempts",
+						"createdAt,availableAt,startedAt,completedAt,failedAt,cancelledAt,dispatchedAt,leaseExpiresAt,attempts,dispatchAttempts",
 					),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -150,20 +44,25 @@ export const controllerSchemas = {
 				filter: z
 					.object({
 						jobId: queryFormatted.schema.filters.single.optional(),
-						eventType: queryFormatted.schema.filters.single.optional(),
+						jobName: queryFormatted.schema.filters.single.optional(),
+						jobVersion: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
 						queueAdapterKey: queryFormatted.schema.filters.single.optional(),
-						priority: queryFormatted.schema.filters.single.optional(),
 						attempts: queryFormatted.schema.filters.single.optional(),
 						maxAttempts: queryFormatted.schema.filters.single.optional(),
+						dispatchStatus: queryFormatted.schema.filters.union.optional(),
+						dispatchAttempts: queryFormatted.schema.filters.single.optional(),
+						dispatchError: queryFormatted.schema.filters.single.optional(),
 						errorMessage: queryFormatted.schema.filters.single.optional(),
 						createdByUserId: queryFormatted.schema.filters.single.optional(),
 						createdAt: queryFormatted.schema.filters.single.optional(),
-						scheduledFor: queryFormatted.schema.filters.single.optional(),
+						availableAt: queryFormatted.schema.filters.single.optional(),
 						startedAt: queryFormatted.schema.filters.single.optional(),
 						completedAt: queryFormatted.schema.filters.single.optional(),
 						failedAt: queryFormatted.schema.filters.single.optional(),
-						nextRetryAt: queryFormatted.schema.filters.single.optional(),
+						cancelledAt: queryFormatted.schema.filters.single.optional(),
+						dispatchedAt: queryFormatted.schema.filters.single.optional(),
+						leaseExpiresAt: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,
@@ -172,12 +71,15 @@ export const controllerSchemas = {
 						z.object({
 							key: z.enum([
 								"createdAt",
-								"scheduledFor",
+								"availableAt",
 								"startedAt",
 								"completedAt",
 								"failedAt",
-								"priority",
+								"cancelledAt",
+								"dispatchedAt",
+								"leaseExpiresAt",
 								"attempts",
+								"dispatchAttempts",
 							]),
 							direction: z.enum(["asc", "desc"]),
 						}),
@@ -188,21 +90,63 @@ export const controllerSchemas = {
 			}),
 		},
 		params: undefined,
-		response: z.array(jobResponseSchema),
+		response: z.array(
+			z.object({
+				id: z.number(),
+				jobId: z.string(),
+				jobName: z.string(),
+				jobVersion: z.number(),
+				displayData: jobPayloadSchema.nullable(),
+				queueAdapterKey: z.string(),
+				status: jobStatusSchema,
+				attempts: z.number(),
+				maxAttempts: z.number(),
+				dispatchStatus: jobDispatchStatusSchema,
+				dispatchAttempts: z.number(),
+				dispatchError: z.string().nullable(),
+				errorMessage: z.string().nullable(),
+				createdAt: z.string().nullable(),
+				availableAt: z.string().nullable(),
+				startedAt: z.string().nullable(),
+				completedAt: z.string().nullable(),
+				failedAt: z.string().nullable(),
+				cancelledAt: z.string().nullable(),
+				dispatchedAt: z.string().nullable(),
+				leaseExpiresAt: z.string().nullable(),
+				createdByUserId: z.number().nullable(),
+				updatedAt: z.string().nullable(),
+			}),
+		),
 	} satisfies ControllerSchema,
 	getSingle: {
 		body: undefined,
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
-		params: z.object({
-			id: z.string().trim().meta({
-				description: "The job ID",
-				example: 1,
-			}),
+		query: { string: undefined, formatted: undefined },
+		params: z.object({ id: z.string().trim() }),
+		response: z.object({
+			id: z.number(),
+			jobId: z.string(),
+			jobName: z.string(),
+			jobVersion: z.number(),
+			displayData: jobPayloadSchema.nullable(),
+			queueAdapterKey: z.string(),
+			status: jobStatusSchema,
+			attempts: z.number(),
+			maxAttempts: z.number(),
+			dispatchStatus: jobDispatchStatusSchema,
+			dispatchAttempts: z.number(),
+			dispatchError: z.string().nullable(),
+			errorMessage: z.string().nullable(),
+			createdAt: z.string().nullable(),
+			availableAt: z.string().nullable(),
+			startedAt: z.string().nullable(),
+			completedAt: z.string().nullable(),
+			failedAt: z.string().nullable(),
+			cancelledAt: z.string().nullable(),
+			dispatchedAt: z.string().nullable(),
+			leaseExpiresAt: z.string().nullable(),
+			createdByUserId: z.number().nullable(),
+			updatedAt: z.string().nullable(),
 		}),
-		response: jobResponseSchema,
 	} satisfies ControllerSchema,
 };
 

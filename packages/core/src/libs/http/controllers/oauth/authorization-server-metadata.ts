@@ -54,7 +54,10 @@ const authorizationServerMetadataController = factory.createHandlers(
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
 			c.status((result.error.status ?? 500) as StatusCode);
-			return c.json(oauthFormatter.formatError(result.error));
+
+			return c.json(
+				oauthFormatter.formatError(result.error, context.translate),
+			);
 		}
 
 		c.header("Cache-Control", "public, max-age=300");

@@ -15,7 +15,7 @@ export const getInitializedQueueAdapter = async (
 		runtimeContext?: AdapterRuntimeContext;
 	} = {},
 ): Promise<QueueAdapterInstance> => {
-	const adapter = await getQueueAdapter(config, options.runtimeContext);
+	const adapter = await getQueueAdapter(config);
 	const context = createAdapterLifecycleContext({
 		config,
 		env: options.env,

@@ -4,7 +4,7 @@ export const firstPartyRuntimeAdapterKeys = {
 	database: ["sqlite", "postgres", "libsql", "d1"],
 	mediaStorage: ["file-system", "s3", "cloudflare-r2"],
 	mediaDelivery: ["passthrough", "sharp", "cloudflare-images"],
-	queue: ["passthrough", "worker", "cloudflare-queues"],
+	queue: ["inline", "worker", "cloudflare-queues"],
 	kv: ["passthrough", "sqlite", "redis", "cloudflare-kv"],
 	email: ["passthrough", "resend", "nodemailer"],
 } as const;

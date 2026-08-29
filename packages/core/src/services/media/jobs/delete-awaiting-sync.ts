@@ -1,18 +1,15 @@
+import z from "zod";
+import defineJob from "../../../libs/queue/define-job.js";
+import type { JobHandler } from "../../../libs/queue/types.js";
 import { MediaAwaitingSyncRepository } from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 
-/**
- * Deletes expired media that is still awaiting sync
- */
-const deleteAwaitingSyncMedia: ServiceFn<
-	[
-		{
-			key: string;
-		},
-	],
-	undefined
-> = async (context, data) => {
+const input = z.object({ key: z.string().min(1) });
+
+const deleteAwaitingSyncMedia: JobHandler<z.infer<typeof input>> = async (
+	context,
+	data,
+) => {
 	const mediaStorageRes = await checkHasMediaStorage(context);
 	if (mediaStorageRes.error) return mediaStorageRes;
 
@@ -39,4 +36,13 @@ const deleteAwaitingSyncMedia: ServiceFn<
 	};
 };
 
-export default deleteAwaitingSyncMedia;
+/**
+ * Deletes expired media that is still awaiting sync
+ */
+export const deleteAwaitingSyncMediaJob = defineJob({
+	name: "lucid:media.delete-unsynced",
+	version: 1,
+	input,
+	handler: deleteAwaitingSyncMedia,
+	describe: ({ key }) => ({ key }),
+});

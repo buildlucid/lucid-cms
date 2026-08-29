@@ -1,23 +1,19 @@
+import z from "zod";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import defineJob from "../../../libs/queue/define-job.js";
+import type { JobHandler } from "../../../libs/queue/types.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
 
-/**
- * Deletes expired revisions for a specific collection.
- * A revision is considered expired if:
- * 1. It is older than the collection's revisionRetentionDays
- * 2. It is not referenced by any non-revision version's promoted_from field
- */
-const deleteExpiredRevisions: ServiceFn<
-	[
-		{
-			collectionKey: string;
-			retentionDays: number;
-		},
-	],
-	undefined
-> = async (context, data) => {
+const input = z.object({
+	collectionKey: z.string().min(1),
+	retentionDays: z.number().int().nonnegative(),
+});
+
+const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async (
+	context,
+	data,
+) => {
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
@@ -46,4 +42,19 @@ const deleteExpiredRevisions: ServiceFn<
 	};
 };
 
-export default deleteExpiredRevisions;
+/**
+ * Deletes expired revisions for a specific collection.
+ * A revision is considered expired if:
+ * 1. It is older than the collection's revisionRetentionDays
+ * 2. It is not referenced by any non-revision version's promoted_from field
+ */
+export const deleteExpiredRevisionsJob = defineJob({
+	name: "lucid:document-versions.delete-expired",
+	version: 1,
+	input,
+	handler: deleteExpiredRevisions,
+	describe: ({ collectionKey, retentionDays }) => ({
+		collectionKey,
+		retentionDays,
+	}),
+});

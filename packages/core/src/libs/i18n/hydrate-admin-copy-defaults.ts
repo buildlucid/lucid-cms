@@ -1,17 +1,7 @@
+import isPlainObject from "../../utils/helpers/is-plain-object.js";
 import type { AdminCopyDescriptor } from "./types.js";
 
 type AdminTranslationBundle = Record<string, string>;
-
-/**
- * Only hydrate response-shaped objects so builders, classes, and other runtime
- * instances keep their identity.
- */
-const isPlainObject = (value: unknown): value is Record<string, unknown> => {
-	if (value === null || typeof value !== "object") return false;
-
-	const prototype = Object.getPrototypeOf(value);
-	return prototype === Object.prototype || prototype === null;
-};
 
 /**
  * Detects admin copy descriptors by their transport shape before adding
@@ -45,6 +35,7 @@ const hydrateValue = (
 		return changed ? hydratedItems : value;
 	}
 
+	// Leave builders, classes, and other runtime instances untouched.
 	if (!isPlainObject(value)) return value;
 
 	if (isAdminCopyDescriptor(value)) {

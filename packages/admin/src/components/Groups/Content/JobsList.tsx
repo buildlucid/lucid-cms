@@ -92,15 +92,9 @@ export const JobsList: Component<{
 						sortable: true,
 					},
 					{
-						label: T()("common.max.attempts"),
-						key: "maxAttempts",
-						icon: <FaSolidListOl />,
-					},
-					{
-						label: T()("common.priority"),
-						key: "priority",
-						icon: <FaSolidListOl />,
-						sortable: true,
+						label: T()("jobs.dispatch.status"),
+						key: "dispatchStatus",
+						icon: <FaSolidT />,
 					},
 					{
 						label: T()("common.created.at"),
@@ -109,8 +103,8 @@ export const JobsList: Component<{
 						sortable: true,
 					},
 					{
-						label: T()("common.scheduled.for"),
-						key: "scheduledFor",
+						label: T()("common.available.at"),
+						key: "availableAt",
 						icon: <FaSolidCalendar />,
 						sortable: true,
 					},

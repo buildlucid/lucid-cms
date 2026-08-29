@@ -1,24 +1,22 @@
-import type { QueueJobPermanentFailureHandlerFn } from "../../../libs/queue/types.js";
+import z from "zod";
+import defineJob from "../../../libs/queue/define-job.js";
+import type {
+	JobHandler,
+	JobPermanentFailureHandler,
+} from "../../../libs/queue/types.js";
 import {
 	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
 } from "../../../libs/repositories/index.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
 import execute from "../execute.js";
 import createEvent from "../helpers/create-event.js";
 
-export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
-	Record<string, unknown>
-> = async (context, data) => {
-	const payloadOperationId = data.payload.operationId;
-	const operationId =
-		typeof payloadOperationId === "number"
-			? payloadOperationId
-			: typeof payloadOperationId === "string"
-				? Number.parseInt(payloadOperationId, 10)
-				: undefined;
-	if (operationId === undefined) return;
-	if (Number.isNaN(operationId)) return;
+const input = z.object({ operationId: z.number().int().positive() });
+
+export const markPublishOperationJobFailed: JobPermanentFailureHandler<
+	z.infer<typeof input>
+> = async (context, failure) => {
+	const operationId = failure.input.operationId;
 
 	const Operations = new DocumentPublishOperationsRepository(context.db);
 	const Events = new DocumentPublishOperationEventsRepository(context.db);
@@ -29,7 +27,7 @@ export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
 		data: {
 			execution_status: "failed",
 			failed_at: now,
-			execution_error_message: data.errorMessage,
+			execution_error_message: failure.errorMessage,
 			execution_error_data: {
 				source: "queue",
 			},
@@ -48,7 +46,7 @@ export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
 				operation_id: operationId,
 				event_type: "failed",
 				user_id: null,
-				comment: data.errorMessage,
+				comment: failure.errorMessage,
 				metadata: {
 					source: "queue",
 				},
@@ -62,7 +60,7 @@ export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
 		event: {
 			type: "failed",
 			userId: null,
-			comment: data.errorMessage,
+			comment: failure.errorMessage,
 			metadata: {
 				source: "queue",
 			},
@@ -70,18 +68,21 @@ export const markPublishOperationJobFailed: QueueJobPermanentFailureHandlerFn<
 	});
 };
 
-const executePublishOperationJob: ServiceFn<
-	[
-		{
-			operationId: number;
-		},
-	],
-	undefined
-> = async (context, data) => {
+const executePublishOperation: JobHandler<z.infer<typeof input>> = async (
+	context,
+	data,
+) => {
 	return execute(context, {
 		id: data.operationId,
 		markFailedOnError: false,
 	});
 };
 
-export default executePublishOperationJob;
+export const executePublishOperationJob = defineJob({
+	name: "lucid:document-publish-operation.execute",
+	version: 1,
+	input,
+	handler: executePublishOperation,
+	onPermanentFailure: markPublishOperationJobFailed,
+	describe: ({ operationId }) => ({ operationId }),
+});

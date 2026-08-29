@@ -28,7 +28,7 @@ export type CreateServiceContextOptions = {
 	env?: EnvironmentVariables | null;
 	/** Optional runtime context associated with the context. */
 	runtimeContext?: AdapterRuntimeContext;
-	/** Optional queue adapter instance available to services. */
+	/** Optional job delivery adapter instance available to services. */
 	queue?: QueueAdapterInstance;
 	/** Optional KV adapter instance available to services. */
 	kv?: KVAdapterInstance;

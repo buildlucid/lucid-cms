@@ -1,5 +1,7 @@
+import { enqueueJobs } from "../../libs/queue/jobs/enqueue-jobs.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { deleteUserJob } from "../users/jobs/delete-single.js";
 import getRetentionDays from "./helpers/get-retention-days.js";
 
 /**
@@ -37,9 +39,9 @@ const deleteExpiredDeletedUsers: ServiceFn<[], undefined> = async (context) => {
 		};
 	}
 
-	const queueRes = await context.queue.addBatch(context, {
-		event: "users:delete",
-		payloads: softDeletedUsersRes.data.map((user) => ({
+	const queueRes = await enqueueJobs(context, {
+		job: deleteUserJob,
+		payload: softDeletedUsersRes.data.map((user) => ({
 			id: user.id,
 		})),
 	});

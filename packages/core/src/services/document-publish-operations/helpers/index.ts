@@ -3,7 +3,6 @@ import type CollectionBuilder from "../../../libs/collection/builders/collection
 import { copy } from "../../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
-import type { QueueEvent } from "../../../libs/queue/types.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { LucidAuth } from "../../../types/hono.js";
 import type { PublishOperation } from "../../../types/response.js";
@@ -22,10 +21,6 @@ export const unresolvedPublishOperationExecutionStatuses = [
 /** Version type used to freeze publish operation snapshots before execution. */
 export const snapshotVersionType =
 	constants.collectionBuilder.publishing.snapshotVersionType;
-
-/** Queue event used to execute a stored publish operation from delayed dispatch. */
-export const publishOperationExecuteEvent =
-	"document-publish-operation:execute" satisfies QueueEvent;
 
 /** Lookahead for queue dispatch; keeps scheduling comfortably below provider delay limits. */
 export const schedulingDispatchWindowHours = 6;

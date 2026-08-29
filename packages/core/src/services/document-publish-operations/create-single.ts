@@ -2,12 +2,12 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../libs/i18n/index.js";
+import { cancelJob } from "../../libs/queue/jobs/cancel-job.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
 	DocumentPublishOperationsRepository,
 	DocumentsRepository,
 	DocumentVersionsRepository,
-	QueueJobsRepository,
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -240,7 +240,6 @@ const createSingle: ServiceFn<
 	const Documents = new DocumentsRepository(context.db);
 	const Operations = new DocumentPublishOperationsRepository(context.db);
 	const Assignees = new DocumentPublishOperationAssigneesRepository(context.db);
-	const QueueJobs = new QueueJobsRepository(context.db);
 
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
@@ -375,18 +374,8 @@ const createSingle: ServiceFn<
 		const now = new Date().toISOString();
 
 		if (activeRes.data.scheduled_job_id) {
-			const cancelJobRes = await QueueJobs.updateSingle({
-				where: [
-					{
-						key: "job_id",
-						operator: "=",
-						value: activeRes.data.scheduled_job_id,
-					},
-				],
-				data: {
-					status: "cancelled",
-					updated_at: now,
-				},
+			const cancelJobRes = await cancelJob(context, {
+				id: activeRes.data.scheduled_job_id,
 			});
 			if (cancelJobRes.error) return cancelJobRes;
 		}

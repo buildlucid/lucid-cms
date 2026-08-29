@@ -85,11 +85,17 @@ export type CloudflareR2BucketBindingOptions = {
 };
 
 export type CloudflareQueueBindingOptions = {
+	/** Cloudflare Queue binding name. */
 	binding?: string;
+	/** Wrangler Queue name. Defaults to a name derived from the worker and binding. */
 	queueName?: string;
+	/** Wrangler Queue consumer options. */
 	consumer?: {
+		/** Maximum messages Cloudflare delivers in one batch. */
 		maxBatchSize?: number;
+		/** Maximum delivery retries managed by Cloudflare. */
 		maxRetries?: number;
+		/** Maximum concurrent Cloudflare consumer invocations. */
 		maxConcurrency?: number;
 	};
 };

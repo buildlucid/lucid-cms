@@ -1,9 +1,9 @@
 import type { LucidPluginResponse } from "@lucidcms/core/types";
-import workerQueueAdapter, {
-	type WorkerQueueAdapterOptions,
-} from "./adapter/index.js";
+import workerQueueAdapter from "./adapter/index.js";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
+import type { WorkerQueueAdapterOptions } from "./types.js";
 
+/** Configures Lucid to process jobs in a polling worker thread. */
 const plugin = (
 	pluginOptions?: WorkerQueueAdapterOptions,
 ): LucidPluginResponse => {
@@ -11,14 +11,7 @@ const plugin = (
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-worker-queues/translations");
-			if (!draft.queue) {
-				draft.queue = {
-					adapter: workerQueueAdapter(pluginOptions ?? {}),
-				};
-			} else {
-				draft.queue.adapter = workerQueueAdapter(pluginOptions ?? {});
-			}
+			draft.queue.adapter = workerQueueAdapter(pluginOptions ?? {});
 		},
 	};
 };

@@ -10,17 +10,28 @@ import type {
 } from "@lucidcms/runtime-cloudflare/types";
 import cloudflareQueuesAdapter from "./adapter.js";
 import {
-	BASE_DELAY_SECONDS,
 	LUCID_VERSION,
-	MAX_RETRIES,
 	PLUGIN_KEY,
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 import type { PluginOptions } from "./types.js";
 import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
+const validateOptions = (options: PluginOptions) => {
+	for (const [name, value] of [
+		["binding", options.binding],
+		["queueName", options.queueName],
+	] as const) {
+		if (value !== undefined && value.trim().length === 0) {
+			throw new TypeError(`${name} cannot be empty.`);
+		}
+	}
+};
+
+/** Configures Lucid to publish and consume jobs with Cloudflare Queues. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 	const resolvedOptions = pluginOptions ?? {};
+	validateOptions(resolvedOptions);
 
 	return {
 		key: PLUGIN_KEY,
@@ -55,11 +66,7 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 					},
 					{
 						path: "@lucidcms/core/queue",
-						exports: [
-							"passthroughQueueAdapter",
-							"logScope",
-							"executeSingleJob",
-						],
+						exports: ["consumeJob", "logScope"],
 					},
 					{
 						path: "@lucidcms/core/runtime",
@@ -111,63 +118,36 @@ const host = await getOrCreateRuntimeHost(
 const invocation = host.createInvocation({ env });
 try {
     const serviceContext = await invocation.getServiceContext();
-    const internalQueueAdapter = passthroughQueueAdapter({
-        bypassImmediateExecution: true,
-    });
 
     for (const message of batch.messages) {
         try {
-            const { jobId, event, payload } = message.body;
+			const body = message.body;
+			if (!body || body.version !== 1 || typeof body.jobId !== "string") {
+				logger.error({
+					message: "Ignoring an invalid Cloudflare queue message",
+					scope: logScope,
+				});
+				message.ack();
+				continue;
+			}
+			const { jobId } = body;
 
             logger.debug({
                 message: "Processing Cloudflare queue message",
                 scope: logScope,
-                data: { jobId, event },
+				data: { jobId },
             });
 
-            const calculateExponentialBackoff = (attempts, baseDelaySeconds) => {
-                return baseDelaySeconds * (2 ** (attempts - 1));
-            };
-
-            const result = await executeSingleJob(
-                {
-                    ...serviceContext,
-                    queue: internalQueueAdapter,
-                },
-                {
-                    jobId,
-                    event,
-                    payload,
-                    attempts: message.attempts - 1, // starts at 1
-                    maxAttempts: ${resolvedOptions.maxRetries ?? MAX_RETRIES},
-                    setNextRetryAt: false,
-                },
-            );
-
-            if (result.success) {
-                logger.debug({
-                    message: "Job completed successfully",
-                    scope: logScope,
-                    data: { jobId, event },
-                });
-                message.ack();
-            } else if (result.shouldRetry) {
-                logger.debug({
-                    message: "Job failed, will retry",
-                    scope: logScope,
-                    data: { jobId, event, message: result.message },
-                });
-                message.retry({
-                    delaySeconds: calculateExponentialBackoff(message.attempts, ${resolvedOptions.baseDelaySeconds ?? BASE_DELAY_SECONDS}),
-                });
-            } else {
-                logger.error({
-                    message: "Job failed permanently",
-                    scope: logScope,
-                    data: { jobId, event, message: result.message },
-                });
-                message.ack();
-            }
+			const result = await consumeJob(serviceContext, { jobId });
+			if (result.type === "retry-transport") {
+				message.retry(
+					result.delayMs === undefined
+						? undefined
+						: { delaySeconds: Math.ceil(result.delayMs / 1000) },
+				);
+				continue;
+			}
+			message.ack();
         } catch (error) {
             logger.error({
                 message: "Error processing queue message",
@@ -211,17 +191,7 @@ try {
 			}
 		},
 		recipe: (draft) => {
-			draft.i18n.sources.push(
-				"@lucidcms/plugin-cloudflare-queues/translations",
-			);
-
-			if (draft.queue?.adapter) {
-				draft.queue.adapter = cloudflareQueuesAdapter(resolvedOptions);
-			} else {
-				draft.queue = {
-					adapter: cloudflareQueuesAdapter(resolvedOptions),
-				};
-			}
+			draft.queue.adapter = cloudflareQueuesAdapter(resolvedOptions);
 		},
 	};
 };

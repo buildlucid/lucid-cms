@@ -48,7 +48,7 @@ const JobRow: Component<JobRowProps> = (props) => {
 						? "primary-opaque"
 						: props.job.status === "failed"
 							? "error-opaque"
-							: props.job.status === "processing"
+							: props.job.status === "running"
 								? "primary-opaque"
 								: "outline"
 				}
@@ -73,39 +73,31 @@ const JobRow: Component<JobRowProps> = (props) => {
 				}}
 			/>
 			<PillCol
-				text={props.job.maxAttempts}
+				text={props.job.dispatchStatus}
 				theme={"outline"}
 				options={{
 					include: props?.include[3],
 					padding: props.options?.padding,
 				}}
 			/>
-			<PillCol
-				text={props.job.priority ?? "-"}
-				theme={"outline"}
+			<DateCol
+				date={props.job.createdAt}
 				options={{
 					include: props?.include[4],
 					padding: props.options?.padding,
 				}}
 			/>
 			<DateCol
-				date={props.job.createdAt}
+				date={props.job.availableAt}
 				options={{
 					include: props?.include[5],
 					padding: props.options?.padding,
 				}}
 			/>
 			<DateCol
-				date={props.job.scheduledFor}
-				options={{
-					include: props?.include[6],
-					padding: props.options?.padding,
-				}}
-			/>
-			<DateCol
 				date={props.job.completedAt}
 				options={{
-					include: props?.include[7],
+					include: props?.include[6],
 					padding: props.options?.padding,
 				}}
 			/>

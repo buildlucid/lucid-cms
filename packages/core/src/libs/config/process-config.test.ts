@@ -3,6 +3,8 @@ import z from "zod";
 import type { LucidConfig } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
+import defineJob from "../queue/define-job.js";
+import { getJobDefinitionRuntime } from "../queue/types.js";
 import processConfig from "./process-config.js";
 
 const createAdapter = (adapter: string) =>
@@ -76,4 +78,53 @@ test("applies plugin recipes during fresh config processing", async () => {
 	expect(init).toHaveBeenCalledOnce();
 	expect(processed.tables).toEqual([pluginTable]);
 	expect(processed.brand.name).toBe("Configured by plugin");
+});
+
+test("preserves job definitions while merging config", async () => {
+	const job = defineJob({
+		name: "test:config-job",
+		version: 1,
+		input: z.object({ value: z.string() }),
+		handler: async () => ({ error: undefined, data: undefined }),
+	});
+	const pluginJob = defineJob({
+		name: "test:plugin-job",
+		version: 1,
+		input: z.object({ value: z.string() }),
+		handler: async () => ({ error: undefined, data: undefined }),
+	});
+	const processed = await processConfig(
+		{
+			...config,
+			queue: { jobs: [job] },
+			plugins: [
+				{
+					key: "job-plugin",
+					lucid: "*",
+					recipe: (draft) => {
+						draft.queue.jobs.push(pluginJob);
+					},
+				},
+			],
+		},
+		{
+			resolvedDb: createAdapter("request"),
+			skipValidation: true,
+		},
+	);
+
+	expect(processed.queue.jobs).toHaveLength(2);
+	const storedConfigJob = processed.queue.jobs[0];
+	const storedPluginJob = processed.queue.jobs[1];
+	expect(storedConfigJob).toMatchObject({
+		type: "job-definition",
+		name: "test:config-job",
+		version: 1,
+	});
+	expect(
+		storedConfigJob && getJobDefinitionRuntime(storedConfigJob),
+	).toBeDefined();
+	expect(
+		storedPluginJob && getJobDefinitionRuntime(storedPluginJob),
+	).toBeDefined();
 });

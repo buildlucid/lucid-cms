@@ -1,29 +1,18 @@
 /// <reference types="@cloudflare/workers-types" />
 
+/** Configures the Cloudflare Queue binding and consumer. */
 export type PluginOptions = {
-	/**
-	 * Cloudflare Queue binding name. Defaults to "LUCID_QUEUE".
-	 */
+	/** Cloudflare Queue binding name. */
 	binding?: string;
-	/**
-	 * Wrangler Queue name. Defaults to a generated name based on the worker and
-	 * binding.
-	 */
+	/** Wrangler Queue name. Defaults to a name derived from the worker and binding. */
 	queueName?: string;
-	/**
-	 * Wrangler Queue consumer options.
-	 */
+	/** Wrangler Queue consumer options. */
 	consumer?: {
+		/** Maximum messages Cloudflare delivers in one batch. */
 		maxBatchSize?: number;
+		/** Maximum delivery retries managed by Cloudflare. */
 		maxRetries?: number;
+		/** Maximum concurrent Cloudflare consumer invocations. */
 		maxConcurrency?: number;
 	};
-	/**
-	 * The maximum number of attempts to retry a job. Defaults to 3.
-	 */
-	maxRetries?: number;
-	/**
-	 * The base delay in seconds for the exponential backoff. Defaults to 30 seconds.
-	 */
-	baseDelaySeconds?: number;
 };

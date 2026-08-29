@@ -34,6 +34,11 @@ export {
 	isTranslatableCopy,
 	translate,
 } from "./libs/i18n/index.js";
+export { default as defineJob } from "./libs/queue/define-job.js";
+export { cancelJob } from "./libs/queue/jobs/cancel-job.js";
+export { cancelJobs } from "./libs/queue/jobs/cancel-jobs.js";
+export { enqueueJob } from "./libs/queue/jobs/enqueue-job.js";
+export { enqueueJobs } from "./libs/queue/jobs/enqueue-jobs.js";
 export { default as defineSeed } from "./libs/seed/define-seed.js";
 export { resolveRelatedDocumentVersionType } from "./services/documents/helpers/resolve-relation-version-type.js";
 export { LucidAPIError } from "./utils/errors/index.js";

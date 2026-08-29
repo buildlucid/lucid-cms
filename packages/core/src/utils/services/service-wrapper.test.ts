@@ -2,7 +2,7 @@ import { afterAll, beforeAll, expect, test } from "vitest";
 import z from "zod";
 import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import passthroughKVAdapter from "../../libs/kv/adapters/passthrough.js";
-import passthroughQueueAdapter from "../../libs/queue/adapters/passthrough.js";
+import inlineQueueAdapter from "../../libs/queue/adapters/inline.js";
 import getTestConfig from "../test-helpers/get-test-config.js";
 import serviceWrapper from "./service-wrapper.js";
 import type { ServiceFn, ServiceResponse } from "./types.js";
@@ -71,7 +71,7 @@ test("basic - one level deep service wrapper success and error", async () => {
 		};
 	};
 
-	const queueAdapter = passthroughQueueAdapter();
+	const queueAdapter = inlineQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -178,7 +178,7 @@ test("basic - two level deep service wrapper success and error", async () => {
 		};
 	};
 
-	const queueAdapter = passthroughQueueAdapter();
+	const queueAdapter = inlineQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -273,7 +273,7 @@ test("transaction - one level deep service wrapper success and error", async () 
 		};
 	};
 
-	const queueAdapter = passthroughQueueAdapter();
+	const queueAdapter = inlineQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -393,7 +393,7 @@ test("transaction - two level deep service wrapper success and error", async () 
 		};
 	};
 
-	const queueAdapter = passthroughQueueAdapter();
+	const queueAdapter = inlineQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute
@@ -487,7 +487,7 @@ test("service wrapper schema validation", async () => {
 		};
 	};
 
-	const queueAdapter = passthroughQueueAdapter();
+	const queueAdapter = inlineQueueAdapter();
 	const kvAdapter = passthroughKVAdapter();
 
 	// Execute

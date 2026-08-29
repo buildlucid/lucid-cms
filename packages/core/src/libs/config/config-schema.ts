@@ -18,7 +18,12 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../media-storage/types.js";
-import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
+import {
+	type AnyJobDefinition,
+	isJobDefinition,
+	type QueueAdapter,
+	type QueueAdapterInstance,
+} from "../queue/types.js";
 import type { Seed } from "../seed/types.js";
 
 const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
@@ -65,8 +70,16 @@ const MediaDeliveryAdapterSchema = z.custom<
 
 const QueueAdapterSchema = z.custom<
 	QueueAdapter | QueueAdapterInstance | Promise<QueueAdapterInstance>
->((data) => typeof data === "function" || typeof data === "object", {
-	message: "Expected a QueueAdapter function",
+>(
+	(data) =>
+		typeof data === "function" || (typeof data === "object" && data !== null),
+	{
+		message: "Expected a queue adapter factory or instance",
+	},
+);
+
+const JobDefinitionSchema = z.custom<AnyJobDefinition>(isJobDefinition, {
+	message: "Expected a job definition created with defineJob",
 });
 
 const KVAdapterSchema = z.custom<
@@ -323,11 +336,14 @@ const ConfigSchema = z.object({
 			handler: z.unknown(),
 		}),
 	),
-	queue: z
-		.object({
-			adapter: QueueAdapterSchema.optional(),
-		})
-		.optional(),
+	queue: z.object({
+		adapter: QueueAdapterSchema.optional(),
+		jobs: z.array(JobDefinitionSchema),
+		retention: z.object({
+			completedDays: z.number().int().nonnegative(),
+			failedDays: z.number().int().nonnegative(),
+		}),
+	}),
 	kv: z
 		.object({
 			adapter: KVAdapterSchema.optional(),

@@ -1,5 +1,7 @@
+import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
+import { flushPendingJobs } from "../../libs/queue/jobs/flush-pending-jobs.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -52,21 +54,36 @@ const serviceWrapper =
 			}
 
 			//* If transactions are enabled
-			return await service.db.kysely.transaction().execute(async (tx) => {
-				const result = await fn(
-					{
-						...service,
-						db: service.db.withTransaction(tx),
-					},
-					...args,
-				);
-				if (result.error) {
-					//! Kysely needs function to throw for transaction to rollback !\\
-					throw new TransactionError(result.error);
-				}
+			const result = await service.db.kysely
+				.transaction()
+				.execute(async (tx) => {
+					const result = await fn(
+						{
+							...service,
+							db: service.db.withTransaction(tx),
+						},
+						...args,
+					);
+					if (result.error) {
+						//! Kysely needs function to throw for transaction to rollback !\\
+						throw new TransactionError(result.error);
+					}
 
-				return result;
-			});
+					return result;
+				});
+
+			const dispatch = await flushPendingJobs(service);
+			if (dispatch.error) {
+				logger.error({
+					error: dispatch.error,
+					event: "queue.jobs.dispatch.after-commit.failed",
+					message:
+						"Pending jobs could not be dispatched after the transaction committed",
+					scope: constants.logScopes.queueAdapter,
+				});
+			}
+
+			return result;
 		} catch (error) {
 			if (wrapperConfig.logError) {
 				logger.error({
