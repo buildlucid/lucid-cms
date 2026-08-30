@@ -6,8 +6,9 @@ import type {
 
 /**
  * A typed helper for defining custom HTTP routes in `config.http.routes`.
- * Route handlers receive Lucid's service context and the current Hono context,
- * while the optional schema and OpenAPI metadata describe the public contract.
+ * Route handlers receive the current Hono context, Lucid service context and a
+ * toolkit bound to that context. The optional schema and OpenAPI metadata
+ * describe the public contract.
  *
  * @example
  * const healthRoute = defineRoute({

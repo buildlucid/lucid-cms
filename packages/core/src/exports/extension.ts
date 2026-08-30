@@ -37,5 +37,4 @@ export {
 	getFileMetadata,
 } from "../utils/media/index.js";
 
-/** Stable logger scopes used by Lucid extensions. */
 export const logScopes = constants.logScopes;

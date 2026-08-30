@@ -22,10 +22,6 @@
 			"types": "./dist/exports/extension.d.mts",
 			"default": "./dist/exports/extension.mjs"
 		},
-		"./toolkit": {
-			"types": "./dist/exports/toolkit.d.mts",
-			"default": "./dist/exports/toolkit.mjs"
-		},
 		"./runtime": {
 			"types": "./dist/exports/runtime.d.mts",
 			"default": "./dist/exports/runtime.mjs"

@@ -4,7 +4,7 @@ import type {
 	CollectionDocumentSingleQuery,
 	Refs,
 } from "../../../exports/types.js";
-import { documentServices } from "../../../services/index.js";
+import getSingleDocument from "../../../services/documents/content/get-single.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -39,7 +39,7 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 ): ServiceResponse<ToolkitDocumentsGetSingleResult<TCollectionKey>> => {
 	return runToolkitService(
 		() =>
-			documentServices.content.getSingle(context, {
+			getSingleDocument(context, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: input.preview ?? undefined,

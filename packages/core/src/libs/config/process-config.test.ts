@@ -4,6 +4,8 @@ import type { LucidConfig } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
 import defineJob from "../queue/define-job.js";
+import coreJobs from "../queue/jobs/core-jobs.js";
+import { getJobRegistry } from "../queue/registry.js";
 import { getJobDefinitionRuntime } from "../queue/types.js";
 import processConfig from "./process-config.js";
 
@@ -113,9 +115,17 @@ test("preserves job definitions while merging config", async () => {
 		},
 	);
 
-	expect(processed.queue.jobs).toHaveLength(2);
-	const storedConfigJob = processed.queue.jobs[0];
-	const storedPluginJob = processed.queue.jobs[1];
+	const storedConfigJob = processed.queue.jobs.find(
+		(definition) => definition.name === job.name,
+	);
+	const storedPluginJob = processed.queue.jobs.find(
+		(definition) => definition.name === pluginJob.name,
+	);
+	expect(
+		[...getJobRegistry(processed).values()].map(
+			(definition) => definition.name,
+		),
+	).toEqual([...coreJobs, job, pluginJob].map((definition) => definition.name));
 	expect(storedConfigJob).toMatchObject({
 		type: "job-definition",
 		name: "test:config-job",

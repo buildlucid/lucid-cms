@@ -8,6 +8,7 @@ import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { translate } from "../i18n/index.js";
 import { initializeLogger } from "../logger/index.js";
+import coreJobs from "../queue/jobs/core-jobs.js";
 import { getJobRegistry } from "../queue/registry.js";
 import type { LucidConfigRecipe } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
@@ -113,6 +114,7 @@ const processConfig = async (
 			...pluginTranslationSources,
 			...userTranslationSources,
 		]);
+		draft.queue.jobs = castDraft([...coreJobs, ...draft.queue.jobs]);
 		draft.localization.locales = draft.localization.locales.map((locale) => ({
 			...locale,
 			direction: locale.direction ?? "ltr",

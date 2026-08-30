@@ -1,4 +1,4 @@
-import { emailServices } from "../../../services/index.js";
+import sendExternalEmail from "../../../services/email/send-external.js";
 import type { Email } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -40,7 +40,7 @@ const send = async (
 ): ServiceResponse<ToolkitEmailSendResult> => {
 	return runToolkitService(
 		() =>
-			emailServices.sendExternal(context, {
+			sendExternalEmail(context, {
 				to: input.to,
 				subject: input.subject,
 				template: input.template,

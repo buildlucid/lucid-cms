@@ -5,6 +5,7 @@ import type { Config } from "../../types/config.js";
 import type { LucidHonoContext, LucidHonoGeneric } from "../../types/hono.js";
 import type { RouteSchema } from "../../types/schema.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import type { Toolkit } from "../toolkit/types.js";
 
 export type HttpExtensionRegister = (
 	app: Hono<LucidHonoGeneric>,
@@ -62,12 +63,14 @@ export type LucidRouteHandlerResponse =
 export type LucidRouteHandler<TSchema> = (props: {
 	hono: LucidHonoContext;
 	context: ServiceContext;
+	toolkit: Toolkit;
 	input: LucidRouteInput<TSchema>;
 }) => LucidRouteHandlerResponse;
 
 export type LucidMiddlewareHandler = (props: {
 	hono: LucidHonoContext;
 	context: ServiceContext;
+	toolkit: Toolkit;
 	next: Next;
 }) => Response | undefined | Promise<Response | undefined> | Promise<void>;
 

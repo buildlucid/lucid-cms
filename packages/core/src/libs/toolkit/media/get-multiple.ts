@@ -1,5 +1,5 @@
 import type { ContentGetMultipleQueryParams } from "../../../schemas/media.js";
-import { mediaServices } from "../../../services/index.js";
+import getMultipleMedia from "../../../services/media/content/get-multiple.js";
 import type { Media } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -30,7 +30,7 @@ const getMultiple = async (
 ): ServiceResponse<ToolkitMediaGetMultipleResult> =>
 	runToolkitService(
 		() =>
-			mediaServices.content.getMultiple(context, {
+			getMultipleMedia(context, {
 				query: normalizePaginatedQuery(input.query),
 			}),
 		{

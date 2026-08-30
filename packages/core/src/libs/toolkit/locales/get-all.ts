@@ -1,4 +1,4 @@
-import { localeServices } from "../../../services/index.js";
+import getAllLocales from "../../../services/locales/content/get-all.js";
 import type { Locale } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -7,7 +7,7 @@ import type {
 import { runToolkitService } from "../utils.js";
 
 const getAll = async (context: ServiceContext): ServiceResponse<Locale[]> =>
-	runToolkitService(() => localeServices.content.getAll(context), {
+	runToolkitService(() => getAllLocales(context), {
 		name: {
 			key: "core.toolkit.locales.get.all.error.name",
 			defaultMessage: "Locales Toolkit Error",

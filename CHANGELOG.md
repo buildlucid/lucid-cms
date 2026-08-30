@@ -27,6 +27,7 @@
 - Document responses now return referenced documents, media and users in a top-level `refs` object.
 - Replaced event-based queue handlers and the `add`/`addBatch` adapter API with `defineJob`, `enqueueJob`/`enqueueJobs` and the durable `publish`/`consumeJob` contract.
 - Reorganised the public `@lucidcms/core` exports around the package root and the `/extension` and `/types` entry points.
+- Removed the `@lucidcms/core/toolkit` entry point. Import `createToolkit` from `@lucidcms/core` and toolkit types from `@lucidcms/core/types`.
 
 ### Bug Fixes:
 

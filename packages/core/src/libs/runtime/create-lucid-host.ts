@@ -2,7 +2,10 @@ import type z from "zod";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
-import type { ServiceContext } from "../../utils/services/types.js";
+import type {
+	CreateServiceContextOptions,
+	ServiceContext,
+} from "../../utils/services/types.js";
 import { resolveConfigDefinition } from "../config/resolve-config-definition.js";
 import type LucidDatabase from "../db/client/lucid-database.js";
 import createLucidDatabase from "../db/create-lucid-database.js";
@@ -12,10 +15,7 @@ import type { HttpExtension } from "../http/types.js";
 import prepareTranslations from "../i18n/prepare-translations.js";
 import type { TranslationBundles, TranslationStore } from "../i18n/types.js";
 import createToolkit from "../toolkit/create-toolkit.js";
-import type {
-	CreateToolkitServiceContextOptions,
-	Toolkit,
-} from "../toolkit/types.js";
+import type { Toolkit } from "../toolkit/types.js";
 import createLucidAdapters, {
 	type LucidAdapterOverrides,
 } from "./create-lucid-adapters.js";
@@ -60,11 +60,11 @@ export type CreateLucidHostOptions = CreateLucidHostSharedOptions &
 export type LucidInvocation = {
 	/** Returns the fully initialized service context for this invocation. */
 	getServiceContext(
-		request?: CreateToolkitServiceContextOptions["request"],
+		request?: CreateServiceContextOptions["request"],
 	): Promise<ServiceContext>;
 	/** Returns a public toolkit backed by this invocation. */
 	getToolkit(
-		request?: CreateToolkitServiceContextOptions["request"],
+		request?: CreateServiceContextOptions["request"],
 	): Promise<Toolkit>;
 	/** Handles an HTTP request using this invocation's database connection. */
 	handle(options: {
@@ -256,7 +256,7 @@ const createLucidHost = async (
 			};
 
 			const getServiceContext = async (
-				request?: CreateToolkitServiceContextOptions["request"],
+				request?: CreateServiceContextOptions["request"],
 			): Promise<ServiceContext> => {
 				const [database, db] = await Promise.all([
 					getDatabase(),

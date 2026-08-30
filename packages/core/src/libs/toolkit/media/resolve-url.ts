@@ -1,5 +1,5 @@
 import type { MediaResolveUrlOptions } from "@lucidcms/types";
-import { mediaServices } from "../../../services/index.js";
+import resolveMediaUrl from "../../../services/media/content/resolve-url.js";
 import type { MediaUrl } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -17,7 +17,7 @@ const resolveUrl = async (
 ): ServiceResponse<MediaUrl> =>
 	runToolkitService(
 		() =>
-			mediaServices.content.resolveUrl(context, {
+			resolveMediaUrl(context, {
 				key: input.key,
 				options: normalizeQuery({
 					preset: input.preset,

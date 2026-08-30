@@ -4,7 +4,7 @@ import type {
 	CollectionDocumentMultipleQuery,
 	Refs,
 } from "../../../exports/types.js";
-import { documentServices } from "../../../services/index.js";
+import getMultipleDocuments from "../../../services/documents/content/get-multiple.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -49,7 +49,7 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 ): ServiceResponse<ToolkitDocumentsGetMultipleResult<TCollectionKey>> => {
 	return runToolkitService(
 		() =>
-			documentServices.content.getMultiple(context, {
+			getMultipleDocuments(context, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: input.preview ?? undefined,

@@ -5,6 +5,7 @@ import type {
 	LucidHonoContext,
 	LucidHonoGeneric,
 } from "../../../types/hono.js";
+import createToolkit from "../../toolkit/create-toolkit.js";
 import validate from "../middleware/validate.js";
 import openAPI from "../openapi/index.js";
 import type { LucidRouteDefinition, LucidRouteInput } from "../types.js";
@@ -91,12 +92,15 @@ const buildRouteHandlers = (
 		? [validate("query", route.schema.query.string)]
 		: []),
 	...(route.schema?.body ? [validate("json", route.schema.body)] : []),
-	async (hono) =>
-		route.handler({
+	async (hono) => {
+		const context = createServiceContext(hono);
+		return route.handler({
 			hono,
-			context: createServiceContext(hono),
+			context,
+			toolkit: createToolkit(context),
 			input: await buildInput(hono, route),
-		}),
+		});
+	},
 ];
 
 /**

@@ -7,7 +7,6 @@ export default defineConfig({
 		"src/exports/types.ts",
 		"src/exports/build.ts",
 		"src/exports/extension.ts",
-		"src/exports/toolkit.ts",
 		"src/exports/runtime.ts",
 		"src/libs/cli/index.ts",
 	],

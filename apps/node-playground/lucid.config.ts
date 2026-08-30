@@ -2,7 +2,6 @@
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { configureLucid, defineRoute, z } from "@lucidcms/core";
-import { createToolkit } from "@lucidcms/core/toolkit";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
@@ -137,9 +136,7 @@ export default configureLucid({
 							"Sends the playground attachment test email via the Lucid toolkit.",
 						tags: ["Playground"],
 					},
-					handler: async ({ hono, context }) => {
-						const toolkit = createToolkit(context);
-
+					handler: async ({ hono, toolkit }) => {
 						const result = await toolkit.email.send({
 							to: "hello@williamyallop.com",
 							subject: "Lucid playground attachment test",

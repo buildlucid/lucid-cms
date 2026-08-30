@@ -48,7 +48,7 @@ const validateDefinition = (definition: {
 
 /**
  * Defines a durable, versioned job and its handler. Register the returned
- * definition in `queue.jobs` before passing it to `enqueueJob` or `enqueueJobs`.
+ * definition in `queue.jobs` before enqueueing it through `toolkit.jobs`.
  *
  * Lucid validates the input before storing it and again before execution. Job
  * handlers may run more than once after a consumer failure, so external side

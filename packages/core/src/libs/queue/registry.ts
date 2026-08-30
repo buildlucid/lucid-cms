@@ -1,6 +1,5 @@
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
-import coreJobs from "./jobs/core-jobs.js";
 import type { AnyJobDefinition } from "./types.js";
 
 const registries = new WeakMap<Config, ReadonlyMap<string, AnyJobDefinition>>();
@@ -15,7 +14,7 @@ const createJobRegistry = (
 	config: Config,
 ): ReadonlyMap<string, AnyJobDefinition> => {
 	const registry = new Map<string, AnyJobDefinition>();
-	for (const definition of [...coreJobs, ...(config.queue.jobs ?? [])]) {
+	for (const definition of config.queue.jobs) {
 		const key = getJobDefinitionKey(definition);
 		if (registry.has(key)) {
 			throw new LucidError({

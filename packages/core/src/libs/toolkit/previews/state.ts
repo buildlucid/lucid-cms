@@ -2,7 +2,7 @@ import type {
 	PreviewRuntimeState,
 	PreviewSession,
 } from "../../../exports/types.js";
-import { previewSessionServices } from "../../../services/index.js";
+import resolvePreviewSession from "../../../services/preview-sessions/resolve.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -103,7 +103,7 @@ const state = async (
 			}
 
 			await setPreviewResponseHeaders(input.headers);
-			const previewRes = await previewSessionServices.resolve(context, {
+			const previewRes = await resolvePreviewSession(context, {
 				token,
 			});
 			if (previewRes.error) {

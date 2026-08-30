@@ -1,4 +1,4 @@
-import { mediaServices } from "../../../services/index.js";
+import getSingleMedia from "../../../services/media/content/get-single.js";
 import type { Media } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -16,7 +16,7 @@ const getSingle = async (
 ): ServiceResponse<Media> =>
 	runToolkitService(
 		() =>
-			mediaServices.content.getSingle(context, {
+			getSingleMedia(context, {
 				id: input.id,
 			}),
 		{

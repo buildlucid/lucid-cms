@@ -1,5 +1,5 @@
 import type { PreviewSession } from "../../../exports/types.js";
-import { previewSessionServices } from "../../../services/index.js";
+import resolvePreviewSession from "../../../services/preview-sessions/resolve.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -15,7 +15,7 @@ const resolve = async (
 	input: ToolkitPreviewsResolveInput,
 ): ServiceResponse<PreviewSession> => {
 	return runToolkitService(
-		() => previewSessionServices.resolve(context, { token: input.token }),
+		() => resolvePreviewSession(context, { token: input.token }),
 		{
 			name: {
 				key: "core.toolkit.preview.resolve.error.name",

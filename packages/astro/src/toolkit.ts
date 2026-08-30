@@ -1,4 +1,4 @@
-import type { Toolkit } from "@lucidcms/core/toolkit";
+import type { Toolkit } from "@lucidcms/core/types";
 import type { LucidAstroContext } from "./types.js";
 
 /**

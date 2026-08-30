@@ -14,6 +14,7 @@ import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { copy, createTranslationStore } from "../i18n/index.js";
+import createToolkit from "../toolkit/create-toolkit.js";
 import defineJob from "./define-job.js";
 import { cancelJob } from "./jobs/cancel-job.js";
 import { consumeJob } from "./jobs/consume-job.js";
@@ -72,6 +73,46 @@ const createPullAdapter = (
 });
 
 describe("durable jobs", () => {
+	test("binds durable job controls to the toolkit", async () => {
+		const job = defineJob({
+			name: "test:toolkit",
+			version: 1,
+			input: z.object({ value: z.number() }),
+			handler: async () => ({ error: undefined, data: undefined }),
+		});
+		const context = await createContext({
+			jobs: [job],
+			adapter: createPullAdapter(),
+		});
+		const toolkit = createToolkit(context);
+
+		const enqueued = await toolkit.jobs.enqueueJob({
+			job,
+			payload: { value: 1 },
+		});
+		if (enqueued.error) throw new Error("Failed to enqueue the test job");
+		const cancelled = await toolkit.jobs.cancelJob({
+			id: enqueued.data.jobId,
+		});
+		const enqueuedBatch = await toolkit.jobs.enqueueJobs({
+			job,
+			payload: [{ value: 2 }, { value: 3 }],
+		});
+		if (enqueuedBatch.error) throw new Error("Failed to enqueue test jobs");
+		const cancelledBatch = await toolkit.jobs.cancelJobs({
+			ids: enqueuedBatch.data.map(({ jobId }) => jobId),
+		});
+
+		expect(cancelled).toEqual({
+			error: undefined,
+			data: { type: "cancelled" },
+		});
+		expect(cancelledBatch).toEqual({
+			error: undefined,
+			data: [{ type: "cancelled" }, { type: "cancelled" }],
+		});
+	});
+
 	test("stores validated input and executes a job only once", async () => {
 		const handler = vi.fn(async () => {
 			await new Promise((resolve) => setTimeout(resolve, 5));

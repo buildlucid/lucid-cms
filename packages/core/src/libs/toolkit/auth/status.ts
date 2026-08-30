@@ -1,5 +1,5 @@
 import constants from "../../../constants/constants.js";
-import { authServices } from "../../../services/index.js";
+import getAuthStatus from "../../../services/auth/get-status.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -49,7 +49,7 @@ const status = async (
 				input.cookies.get(constants.cookies.accessToken),
 				input.cookies.get(constants.cookies.refreshToken),
 			]);
-			const statusRes = await authServices.getStatus(context, {
+			const statusRes = await getAuthStatus(context, {
 				accessToken: accessToken ?? undefined,
 				refreshToken: refreshToken ?? undefined,
 			});

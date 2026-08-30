@@ -1,16 +1,17 @@
 import createAuthToolkit from "./auth/index.js";
 import createDocumentsToolkit from "./documents/index.js";
 import createEmailToolkit from "./email/index.js";
+import createJobsToolkit from "./jobs/index.js";
 import createLocalesToolkit from "./locales/index.js";
 import createMediaToolkit from "./media/index.js";
 import createPreviewsToolkit from "./previews/index.js";
 import type { Toolkit, ToolkitContext } from "./types.js";
 
 /**
- * Creates a server-side toolkit for reading Lucid data.
+ * Creates server-side helpers bound to a Lucid service context.
  *
- * Use this in server code when you want a small, read-focused API for Lucid
- * content, locales, media, and external email sends.
+ * Use this in server code to read Lucid content, work with media, enqueue jobs
+ * and send external emails without calling internal services directly.
  *
  * For client-side data fetching, use the Lucid SDK instead.
  *
@@ -36,6 +37,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => ({
 	auth: createAuthToolkit(context),
 	documents: createDocumentsToolkit(context),
 	email: createEmailToolkit(context),
+	jobs: createJobsToolkit(context),
 	locales: createLocalesToolkit(context),
 	media: createMediaToolkit(context),
 	previews: createPreviewsToolkit(context),
