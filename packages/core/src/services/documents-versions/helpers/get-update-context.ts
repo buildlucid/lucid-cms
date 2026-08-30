@@ -1,3 +1,4 @@
+import type { CollectionTableNames } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
 import getMigrationStatus from "../../../libs/collection/get-collection-migration-status.js";
@@ -7,7 +8,6 @@ import type { LucidVersionTable } from "../../../libs/db/tables/index.js";
 import type { Select } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
-import type { CollectionTableNames } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 

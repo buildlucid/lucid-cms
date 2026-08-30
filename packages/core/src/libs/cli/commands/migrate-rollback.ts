@@ -1,6 +1,6 @@
 import { confirm } from "@inquirer/prompts";
 import constants from "../../../constants/constants.js";
-import type { Config, EnvironmentVariables } from "../../../types.js";
+import type { Config, EnvironmentVariables } from "../../../exports/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";

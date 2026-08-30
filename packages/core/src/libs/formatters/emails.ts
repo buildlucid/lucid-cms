@@ -1,4 +1,3 @@
-import type { Email } from "../../types/response.js";
 import type {
 	BooleanInt,
 	EmailAttachment as EmailAttachmentInput,
@@ -6,7 +5,8 @@ import type {
 	EmailPriority,
 	EmailStorageConfig,
 	EmailType,
-} from "../../types.js";
+} from "../../exports/types.js";
+import type { Email } from "../../types/response.js";
 import { getEmailResendState } from "../email/storage/index.js";
 import formatter from "./helpers.js";
 

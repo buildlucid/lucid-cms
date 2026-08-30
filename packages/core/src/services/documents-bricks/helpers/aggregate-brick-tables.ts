@@ -1,13 +1,13 @@
+import type {
+	Config,
+	InternalDocumentBrick,
+	InternalDocumentField,
+} from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import type { LucidBrickTableName } from "../../../libs/db/tables/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
-import type {
-	Config,
-	InternalDocumentBrick,
-	InternalDocumentField,
-} from "../../../types.js";
 import constructBrickTable, {
 	type InsertBrickTables,
 } from "./construct-brick-table.js";

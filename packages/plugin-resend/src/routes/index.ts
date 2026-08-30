@@ -1,16 +1,16 @@
 import {
 	copy,
-	createRoute,
+	defineRoute,
 	LucidAPIError,
 	openAPI,
 	serviceWrapper,
-} from "@lucidcms/core/plugin";
+} from "@lucidcms/core";
 import { controllerSchemas } from "../schema/webhook.js";
 import webhook from "../services/webhook.js";
 import type { PluginOptions } from "../types/types.js";
 
 const routes = (pluginOptions: PluginOptions) => [
-	createRoute({
+	defineRoute({
 		method: "post",
 		path: "/lucid/api/v1/resend/webhook",
 		openAPI: {

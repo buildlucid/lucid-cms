@@ -36,10 +36,19 @@ const DashboardContentShortcuts: Component<{
 			value: collection.details.name,
 			fallback: collection.key,
 		}) || collection.key;
-	const collectionSummary = (collection: Collection) =>
-		helpers.getLocaleValue({
-			value: collection.details.summary,
+	const collectionSummary = (collection: Collection) => {
+		const fallback = T()("builder.header.summary.fallback", {
+			collectionSingle: helpers.getLocaleValue({
+				value: collection.details.singularName,
+			}),
 		});
+		const summary = helpers.getLocaleValue({
+			value: collection.details.summary,
+			fallback,
+		});
+
+		return summary.trim() || fallback;
+	};
 
 	// ----------------------------------
 	// Render

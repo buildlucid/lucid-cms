@@ -1,8 +1,8 @@
 import {
 	DEFAULT_KV_NAMESPACE,
-	getNamespacePrefix,
-	resolveKey,
-} from "@lucidcms/core/kv";
+	getKVNamespacePrefix,
+	resolveKVKey,
+} from "@lucidcms/core/extension";
 import type {
 	KVAdapterInstance,
 	KVDeleteManyParams,
@@ -32,14 +32,14 @@ return { value, redis.call("TTL", KEYS[1]) }
 const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 	let client: RedisClient | undefined;
 	const namespace = options.namespace ?? DEFAULT_KV_NAMESPACE;
-	const namespacePrefix = getNamespacePrefix(namespace);
+	const namespacePrefix = getKVNamespacePrefix(namespace);
 
 	const resolveRedisKey = (
 		key: string,
 		keyOptions?: {
 			hash?: boolean;
 		},
-	) => resolveKey(key, keyOptions, { maxKeyBytes: MAX_KEY_BYTES, namespace });
+	) => resolveKVKey(key, keyOptions, { maxKeyBytes: MAX_KEY_BYTES, namespace });
 
 	const getClient = () => {
 		if (!client) {

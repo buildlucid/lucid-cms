@@ -1,4 +1,4 @@
-import type { Config } from "../../types.js";
+import type { Config } from "../../exports/types.js";
 
 /**
  * Fetches available auth providers from the config.

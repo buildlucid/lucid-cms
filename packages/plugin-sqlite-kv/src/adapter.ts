@@ -1,10 +1,10 @@
 import path from "node:path";
 import {
 	DEFAULT_KV_NAMESPACE,
-	getNamespacePrefix,
-	resolveKey,
-} from "@lucidcms/core/kv";
-import { ensureLucidDirectoryExists } from "@lucidcms/core/plugin";
+	ensureLucidDirectoryExists,
+	getKVNamespacePrefix,
+	resolveKVKey,
+} from "@lucidcms/core/extension";
 import type {
 	KVAdapterInstance,
 	KVAdapterOptions,
@@ -60,7 +60,7 @@ type IncrementTransaction = (
 
 const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 	const namespace = options.namespace ?? DEFAULT_KV_NAMESPACE;
-	const namespacePrefix = getNamespacePrefix(namespace);
+	const namespacePrefix = getKVNamespacePrefix(namespace);
 	let database: SQLiteDatabase | undefined;
 	let statements: SQLiteStatements | undefined;
 	let setManyTransaction: SetManyTransaction | undefined;
@@ -73,7 +73,7 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 		keyOptions?: {
 			hash?: boolean;
 		},
-	) => resolveKey(key, keyOptions, { namespace });
+	) => resolveKVKey(key, keyOptions, { namespace });
 
 	const getExpiresAt = (
 		setOptions?:

@@ -1,3 +1,4 @@
+import type { FieldInputSchema } from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type { RichTextValidationData } from "../../../libs/collection/custom-fields/fields/rich-text/types.js";
@@ -11,7 +12,6 @@ import type {
 } from "../../../libs/collection/custom-fields/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { LucidAuth } from "../../../types/hono.js";
-import type { FieldInputSchema } from "../../../types.js";
 import type {
 	ServiceContext,
 	ServiceFn,

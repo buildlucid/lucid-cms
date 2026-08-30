@@ -1,10 +1,10 @@
-import { documentServices } from "../../../services/index.js";
 import type {
 	CollectionDocument,
 	CollectionDocumentKey,
 	CollectionDocumentMultipleQuery,
 	Refs,
-} from "../../../types.js";
+} from "../../../exports/types.js";
+import { documentServices } from "../../../services/index.js";
 import type {
 	ServiceContext,
 	ServiceResponse,

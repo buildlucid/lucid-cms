@@ -1,5 +1,5 @@
+import type { InferredColumn } from "../../../exports/types.js";
 import type { CollectionSchemaColumn } from "../../../libs/collection/schema/types.js";
-import type { InferredColumn } from "../../../types.js";
 import defaultValuesEqual from "../helpers/default-values-equal.js";
 import foreignKeysEqual from "../helpers/foreign-keys-equal.js";
 import type { ModifyColumnOperation } from "./types.js";

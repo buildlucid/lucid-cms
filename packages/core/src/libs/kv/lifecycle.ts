@@ -7,15 +7,16 @@ import type {
 import getKVAdapter from "./get-adapter.js";
 import type { KVAdapterInstance } from "./types.js";
 
-/** Resolve the configured KV adapter and run its init lifecycle hook. */
+/** Resolve or use a supplied KV adapter and run its init hook. */
 export const getInitializedKVAdapter = async (
 	config: Config,
 	options: {
+		adapter?: KVAdapterInstance;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	} = {},
 ): Promise<KVAdapterInstance> => {
-	const adapter = await getKVAdapter(config);
+	const adapter = options.adapter ?? (await getKVAdapter(config));
 	const context = createAdapterLifecycleContext({
 		config,
 		env: options.env,

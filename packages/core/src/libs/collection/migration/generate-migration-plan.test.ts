@@ -1,7 +1,7 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterAll, describe, expect, test, vi } from "vitest";
+import type { InferredTable } from "../../../exports/types.js";
 import type { CollectionSchema } from "../../../libs/collection/schema/types.js";
-import type { InferredTable } from "../../../types.js";
 import assessMigrationPlans from "./assess-migration-plan.js";
 import generateMigrationPlan from "./generate-migration-plan.js";
 

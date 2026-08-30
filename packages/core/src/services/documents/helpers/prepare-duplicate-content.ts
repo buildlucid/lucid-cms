@@ -1,11 +1,11 @@
+import type {
+	InternalDocumentBrick,
+	InternalDocumentField,
+} from "../../../exports/types.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
-import type {
-	InternalDocumentBrick,
-	InternalDocumentField,
-} from "../../../types.js";
 
 /** Converts response fields into input fields and removes layout-only entries. */
 const prepareFields = (fields: InternalDocumentField[]): FieldInputSchema[] => {

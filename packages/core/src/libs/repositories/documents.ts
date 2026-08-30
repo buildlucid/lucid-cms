@@ -1,6 +1,7 @@
 import type { ExpressionBuilder, OperandExpression, SqlBool } from "kysely";
 import { type SelectQueryBuilder, sql } from "kysely";
 import constants from "../../constants/constants.js";
+import type { Config } from "../../exports/types.js";
 import type {
 	ContentGetSingleQueryParams,
 	GetMultipleQueryParams,
@@ -9,7 +10,6 @@ import type {
 	QueryParamFilterCondition,
 	QueryParamFilters,
 } from "../../types/query-params.js";
-import type { Config } from "../../types.js";
 import type {
 	BrickFilters,
 	DocumentEnvironmentStatusFilter,

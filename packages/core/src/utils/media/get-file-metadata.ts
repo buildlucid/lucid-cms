@@ -1,5 +1,5 @@
 import mime from "mime-types";
-import type { MediaType } from "../../types.js";
+import type { MediaType } from "../../exports/types.js";
 import type { ServiceResponse } from "../services/types.js";
 import getMediaType from "./get-media-type.js";
 

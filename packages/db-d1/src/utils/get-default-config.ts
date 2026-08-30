@@ -1,5 +1,3 @@
-/// <reference types="@cloudflare/workers-types" />
-
 import type { EnvironmentVariables } from "@lucidcms/core/types";
 import { DEFAULT_D1_BINDING } from "../constants.js";
 import type { D1DialectConfig } from "../lib/kysely-d1.js";

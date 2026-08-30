@@ -65,16 +65,12 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 						default: "runtime",
 					},
 					{
-						path: "@lucidcms/core/queue",
-						exports: ["consumeJob", "logScope"],
+						path: "@lucidcms/core/extension",
+						exports: ["consumeJob", "logScopes"],
 					},
 					{
 						path: "@lucidcms/core/runtime",
-						exports: ["createLucidHost"],
-					},
-					{
-						path: "@lucidcms/core",
-						exports: ["logger"],
+						exports: ["createLucidHost", "logger"],
 					},
 					{
 						path: "@lucidcms/runtime-cloudflare/runtime",
@@ -125,7 +121,7 @@ try {
 			if (!body || body.version !== 1 || typeof body.jobId !== "string") {
 				logger.error({
 					message: "Ignoring an invalid Cloudflare queue message",
-					scope: logScope,
+					scope: logScopes.queueAdapter,
 				});
 				message.ack();
 				continue;
@@ -134,7 +130,7 @@ try {
 
             logger.debug({
                 message: "Processing Cloudflare queue message",
-                scope: logScope,
+                scope: logScopes.queueAdapter,
 				data: { jobId },
             });
 
@@ -151,7 +147,7 @@ try {
         } catch (error) {
             logger.error({
                 message: "Error processing queue message",
-                scope: logScope,
+                scope: logScopes.queueAdapter,
                 data: {
                     error: error instanceof Error ? error.message : String(error),
                     stack: error instanceof Error ? error.stack : undefined,

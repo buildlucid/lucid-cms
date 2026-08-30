@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants.js";
-import type { ServiceContext } from "../../../../../types.js";
+import type { ServiceContext } from "../../../../../exports/types.js";
 import type { LucidDocumentTableName } from "../../../../db/tables/index.js";
 import logger from "../../../../logger/index.js";
 import DocumentsRepository from "../../../../repositories/documents.js";

@@ -1,9 +1,9 @@
 import constants from "../../../constants/constants.js";
+import type { ServiceResponse } from "../../../exports/types.js";
 import registeredFields, {
 	registeredFieldTypes,
 } from "../../../libs/collection/custom-fields/registered-fields.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
-import type { ServiceResponse } from "../../../types.js";
 import { copy } from "../../i18n/index.js";
 import { collectionTableParts } from "./table-parts.js";
 

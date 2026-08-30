@@ -1,6 +1,6 @@
 import type { Hono } from "hono";
+import type { Config } from "../../../exports/types.js";
 import type { LucidHonoGeneric } from "../../../types/hono.js";
-import type { Config } from "../../../types.js";
 import type { HttpExtension, HttpExtensionPriority } from "../types.js";
 
 const runHttpExtensions = async (props: {

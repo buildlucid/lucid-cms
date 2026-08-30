@@ -1,4 +1,4 @@
-import type { OIDCUserInfo, ServiceResponse } from "../../../types.js";
+import type { OIDCUserInfo, ServiceResponse } from "../../../exports/types.js";
 import { copy } from "../../i18n/index.js";
 
 /**

@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ServiceResponse } from "../../../../../types.js";
+import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";

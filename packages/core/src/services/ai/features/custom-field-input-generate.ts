@@ -1,5 +1,6 @@
 import type { CustomFieldInputGenerateResponse } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
+import type { CustomFieldAiContextItem } from "../../../exports/types.js";
 import collections from "../../../libs/collection/collections.js";
 import resolveCollectionLocalization, {
 	isCollectionFieldLocalized,
@@ -14,7 +15,6 @@ import {
 } from "../../../libs/lucid-remote/utils.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
-import type { CustomFieldAiContextItem } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../../connection/token-manager.js";

@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
 import buildFullSlug from "../utils/build-fullslug-from-fullslug.js";

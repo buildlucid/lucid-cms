@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { addMilliseconds } from "date-fns";
 import constants from "../../../constants/constants.js";
+import type { InitiateAuth } from "../../../exports/types.js";
 import getAuthProviderAdapter from "../../../libs/auth-providers/get-adapter.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
 import buildCallbackRedirectUrl from "../../../libs/auth-providers/helpers/build-callback-redirect-url.js";
@@ -12,7 +13,6 @@ import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
-import type { InitiateAuth } from "../../../types.js";
 import createPkce from "../../../utils/helpers/create-pkce.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";

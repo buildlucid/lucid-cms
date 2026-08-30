@@ -1,4 +1,4 @@
-import type { Config } from "../../../types.js";
+import type { Config } from "../../../exports/types.js";
 import { translate } from "../../i18n/index.js";
 
 const checkLocales = (

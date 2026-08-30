@@ -1,5 +1,5 @@
+import type { Permission } from "../../exports/types.js";
 import type { UserPermission } from "../../types/response.js";
-import type { Permission } from "../../types.js";
 
 interface UserPermissionRolesPropsT {
 	id: number;

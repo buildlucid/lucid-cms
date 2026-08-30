@@ -1,9 +1,9 @@
+import type { InferredTable, ServiceResponse } from "../../../exports/types.js";
 import type {
 	CollectionSchemaTable,
 	CoreTableType,
 	TableType,
 } from "../../../libs/collection/schema/types.js";
-import type { InferredTable, ServiceResponse } from "../../../types.js";
 import { copy } from "../../i18n/index.js";
 import {
 	getFieldDatabaseConfig,

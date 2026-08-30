@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { InternalDocumentField } from "../../types.js";
+import type { InternalDocumentField } from "../../exports/types.js";
 import CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import formatDocumentRoute from "./document-route.js";
 

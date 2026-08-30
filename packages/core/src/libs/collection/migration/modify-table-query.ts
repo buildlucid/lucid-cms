@@ -1,7 +1,7 @@
 import type { AlterTableColumnAlteringBuilder } from "kysely";
 import constants from "../../../constants/constants.js";
+import type { ServiceFn } from "../../../exports/types.js";
 import logger from "../../../libs/logger/index.js";
-import type { ServiceFn } from "../../../types.js";
 import { copy } from "../../i18n/index.js";
 import { addColumn, dropColumn, modifyColumn } from "./column-builder.js";
 import { addIndex, dropIndex } from "./index-builder.js";

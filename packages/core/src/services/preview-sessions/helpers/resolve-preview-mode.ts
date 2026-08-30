@@ -1,7 +1,7 @@
 import constants from "../../../constants/constants.js";
+import type { PreviewMode } from "../../../exports/types.js";
 import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import type { PreviewMode } from "../../../types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 
 export const requiresPinnedPreviewVersion = (

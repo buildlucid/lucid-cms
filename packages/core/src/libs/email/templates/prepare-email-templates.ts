@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
-import type { Config } from "../../../types.js";
+import type { Config } from "../../../exports/types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
 import loadEmailTemplates from "./load-email-templates.js";

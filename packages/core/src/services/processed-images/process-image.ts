@@ -3,7 +3,7 @@ import type { MediaTransformationOptions } from "../../libs/media-delivery/types
 import {
 	splitBodyForProcessing,
 	toNodeReadable,
-} from "../../libs/media-storage/index.js";
+} from "../../libs/media-storage/normalize-body.js";
 import type { MediaStorageAdapterStreamBody } from "../../libs/media-storage/types.js";
 import {
 	MediaRepository,

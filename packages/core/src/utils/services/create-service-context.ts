@@ -2,8 +2,8 @@ import constants from "../../constants/constants.js";
 import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import { passthroughEmailAdapterInstance } from "../../libs/email/adapters/passthrough.js";
 import { createTranslator } from "../../libs/i18n/index.js";
-import { passthroughKVAdapter } from "../../libs/kv/index.js";
-import { passthroughMediaDeliveryAdapter } from "../../libs/media-delivery/index.js";
+import passthroughKVAdapter from "../../libs/kv/adapters/passthrough.js";
+import passthroughMediaDeliveryAdapter from "../../libs/media-delivery/adapters/passthrough.js";
 import inlineQueueAdapter from "../../libs/queue/adapters/inline.js";
 import type { CreateServiceContextOptions, ServiceContext } from "./types.js";
 

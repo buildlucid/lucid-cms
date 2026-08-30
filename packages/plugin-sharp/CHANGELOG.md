@@ -4,6 +4,7 @@
 
 - Migrated Sharp image transformation to the media delivery adapter contract.
 - Added a direct `sharpMediaDeliveryAdapter` export for config-first usage.
+- Updated imports to use the reorganised `@lucidcms/core` entry points.
 
 ## v1.3.0
 

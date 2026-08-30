@@ -1,5 +1,4 @@
-import type { CollectionBuilder } from "@lucidcms/core";
-import { copy } from "@lucidcms/core/plugin";
+import { type CollectionBuilder, copy } from "@lucidcms/core";
 import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
 import type { CollectionConfig } from "../types/types.js";
 import buildRouteSegmentTargets from "../utils/build-route-segment-targets.js";

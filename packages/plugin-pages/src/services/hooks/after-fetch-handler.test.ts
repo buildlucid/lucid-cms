@@ -1,5 +1,4 @@
 import { CollectionBuilder } from "@lucidcms/core";
-import type { InternalCollectionDocument } from "@lucidcms/core/types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PluginOptionsInternal } from "../../types/types.js";
 
@@ -11,6 +10,7 @@ vi.mock("../get-parent-fields.js", () => ({
 	default: mocks.getParentFields,
 }));
 
+import type { InternalCollectionDocument } from "@lucidcms/core/types";
 import afterFetchHandler from "./after-fetch-handler.js";
 
 const context = {

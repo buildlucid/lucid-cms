@@ -2,7 +2,7 @@ import type { CollectionBuilder } from "@lucidcms/core";
 import {
 	isCollectionFieldLocalized,
 	resolveCollectionLocalization,
-} from "@lucidcms/core/plugin";
+} from "@lucidcms/core/extension";
 import type { CFConfig } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,

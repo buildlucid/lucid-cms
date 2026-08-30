@@ -1,5 +1,5 @@
 import type { CollectionBuilder } from "@lucidcms/core";
-import { formatDocumentRoute } from "@lucidcms/core/plugin";
+import { formatDocumentRoute } from "@lucidcms/core/extension";
 import type {
 	FieldInputSchema,
 	InternalCollectionDocument,

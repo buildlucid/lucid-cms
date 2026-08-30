@@ -1,4 +1,4 @@
-import type { ServiceFn } from "../../types.js";
+import type { ServiceFn } from "../../exports/types.js";
 import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
 import beginSingleDeletion from "./helpers/begin-single-deletion.js";

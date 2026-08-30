@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { InternalCollectionDocument } from "../../types.js";
+import type { InternalCollectionDocument } from "../../exports/types.js";
 import executeHooks from "./execute-hooks.js";
 
 describe("execute hooks", () => {

@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({

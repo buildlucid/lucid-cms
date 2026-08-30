@@ -3,7 +3,7 @@ import type {
 	Config,
 	EnvironmentVariables,
 	ServiceContext,
-} from "../../../types.js";
+} from "../../../exports/types.js";
 import { LucidError } from "../../../utils/errors/index.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";

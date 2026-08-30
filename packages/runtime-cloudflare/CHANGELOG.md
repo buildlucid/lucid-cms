@@ -4,6 +4,7 @@
 
 - Stopped removing Wrangler and Miniflare process listeners outside their supported disposal lifecycles, preventing shared `signal-exit` state from becoming inconsistent.
 - Split runtime media support checks into storage and delivery adapter capabilities.
+- Updated imports to use the reorganised `@lucidcms/core` entry points.
 
 ## v1.3.0
 

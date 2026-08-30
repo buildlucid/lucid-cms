@@ -26,6 +26,7 @@
 - The content preview endpoint now accepts tokens in a POST request body and returns only their mode and expiry. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - Document responses now return referenced documents, media and users in a top-level `refs` object.
 - Replaced event-based queue handlers and the `add`/`addBatch` adapter API with `defineJob`, `enqueueJob`/`enqueueJobs` and the durable `publish`/`consumeJob` contract.
+- Reorganised the public `@lucidcms/core` exports around the package root and the `/extension` and `/types` entry points.
 
 ### Bug Fixes:
 

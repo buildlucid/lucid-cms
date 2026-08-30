@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ServiceResponse } from "../../../../../types.js";
+import type { ServiceResponse } from "../../../../../exports/types.js";
 import deepMerge from "../../../../../utils/helpers/deep-merge.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";

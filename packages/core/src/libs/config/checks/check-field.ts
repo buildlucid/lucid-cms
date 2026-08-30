@@ -1,4 +1,4 @@
-import type { Config } from "../../../types.js";
+import type { Config } from "../../../exports/types.js";
 import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import { normalizeRelationCollections } from "../../collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
 import type {

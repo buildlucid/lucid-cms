@@ -1,11 +1,11 @@
 import { Readable } from "node:stream";
 import {
 	copy,
-	createRoute,
+	defineRoute,
 	LucidAPIError,
 	rateLimiterMiddleware as rateLimiter,
 	serviceWrapper,
-} from "@lucidcms/core/plugin";
+} from "@lucidcms/core";
 import { stream } from "hono/streaming";
 import {
 	STORAGE_DOWNLOAD_ROUTE,
@@ -24,7 +24,7 @@ import buildDownloadContentDisposition from "../utils/build-download-content-dis
  * routes inside the plugin avoids teaching core about an R2-only concern.
  */
 const routes = (pluginOptions: PluginOptions) => [
-	createRoute({
+	defineRoute({
 		method: "get",
 		path: STORAGE_DOWNLOAD_ROUTE,
 		schema: controllerSchemas.storageDownload,
@@ -107,7 +107,7 @@ const routes = (pluginOptions: PluginOptions) => [
 			});
 		},
 	}),
-	createRoute({
+	defineRoute({
 		method: "put",
 		path: STORAGE_UPLOAD_ROUTE,
 		schema: controllerSchemas.storageUpload,

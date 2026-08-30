@@ -6,7 +6,7 @@ import type {
 	InternalDocumentBrick,
 	InternalDocumentField,
 	Refs,
-} from "../../types.js";
+} from "../../exports/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
 import type { CollectionSchemaTable } from "../collection/schema/types.js";

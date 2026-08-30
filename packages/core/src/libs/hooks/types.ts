@@ -1,12 +1,12 @@
 import type { Draft } from "immer";
-import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
-import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type { Config } from "../../types/config.js";
 import type {
 	CollectionTableNames,
 	InternalCollectionDocument,
 	Media,
-} from "../../types.js";
+} from "../../exports/types.js";
+import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
+import type { FieldInputSchema } from "../../schemas/collection-fields.js";
+import type { Config } from "../../types/config.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type {

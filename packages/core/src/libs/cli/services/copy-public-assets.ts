@@ -1,6 +1,6 @@
 import path from "node:path";
 import constants from "../../../constants/constants.js";
-import type { Config, ServiceResponse } from "../../../types.js";
+import type { Config, ServiceResponse } from "../../../exports/types.js";
 import prepareLucidPublicAssets from "../../compile/prepare-lucid-public-assets.js";
 
 /**

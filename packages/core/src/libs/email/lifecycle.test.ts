@@ -16,37 +16,16 @@ const createAdapter = (): EmailAdapterInstance => ({
 });
 
 describe("email adapter lifecycle", () => {
-	test("defaults lifecycle purpose to runtime", async () => {
+	test("initializes and destroys a supplied adapter", async () => {
 		const adapter = createAdapter();
-
-		await getInitializedEmailAdapter({
-			email: { adapter },
-		} as never);
-
-		expect(adapter.lifecycle?.init).toHaveBeenCalledWith(
-			expect.objectContaining({ purpose: "runtime" }),
-		);
-	});
-
-	test("passes lifecycle purpose through initialization and destruction", async () => {
-		const adapter = createAdapter();
-		const config = {
-			email: { adapter },
-		} as never;
+		const config = { email: {} } as never;
 
 		await getInitializedEmailAdapter(config, {
-			purpose: "queue-consumer",
+			adapter,
 		});
-		await destroyEmailAdapter(adapter, {
-			config,
-			purpose: "queue-consumer",
-		});
+		await destroyEmailAdapter(adapter, { config });
 
-		expect(adapter.lifecycle?.init).toHaveBeenCalledWith(
-			expect.objectContaining({ purpose: "queue-consumer" }),
-		);
-		expect(adapter.lifecycle?.destroy).toHaveBeenCalledWith(
-			expect.objectContaining({ purpose: "queue-consumer" }),
-		);
+		expect(adapter.lifecycle?.init).toHaveBeenCalledOnce();
+		expect(adapter.lifecycle?.destroy).toHaveBeenCalledOnce();
 	});
 });

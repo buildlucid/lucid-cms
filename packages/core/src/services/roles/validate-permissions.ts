@@ -1,8 +1,8 @@
+import type { Permission } from "../../exports/types.js";
 import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { getValidPermissions } from "../../libs/permission/registry.js";
 import type { ErrorResult } from "../../types/errors.js";
-import type { Permission } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const validatePermissions: ServiceFn<

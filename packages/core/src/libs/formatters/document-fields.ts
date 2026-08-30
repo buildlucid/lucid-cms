@@ -11,7 +11,7 @@ import type {
 	InternalDocumentFieldGroup,
 	Refs,
 	Select,
-} from "../../types.js";
+} from "../../exports/types.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import fieldConfigs from "../collection/custom-fields/field-configs.js";

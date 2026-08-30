@@ -1,6 +1,6 @@
+import type { RefResource } from "../../../exports/types.js";
 import { isRefResource } from "../../../libs/refs/registry.js";
 import type { RefResourceSelection } from "../../../libs/refs/types.js";
-import type { RefResource } from "../../../types.js";
 
 type DocumentRefInclude = "refs" | `refs.${RefResource}`;
 type DocumentInclude = "bricks" | "meta" | DocumentRefInclude;

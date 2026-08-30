@@ -1,4 +1,7 @@
-import { buildTableName, prefixGeneratedColName } from "@lucidcms/core/plugin";
+import {
+	buildTableName,
+	prefixGeneratedColName,
+} from "@lucidcms/core/extension";
 import type { LucidBrickTableName, ServiceFn } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,

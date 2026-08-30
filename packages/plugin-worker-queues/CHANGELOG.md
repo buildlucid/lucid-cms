@@ -4,6 +4,8 @@
 
 - Updated the worker queue to drain durable jobs through one shared concurrency limit, with immediate wake-ups and core-managed retries, leases and cancellation.
 - Added media storage and delivery adapter lifecycle support to queue consumers.
+- Moved queue consumer adapter setup and cleanup onto Lucid's shared adapter lifecycle.
+- Updated imports to use the reorganised `@lucidcms/core` entry points.
 
 ## v1.1.1
 

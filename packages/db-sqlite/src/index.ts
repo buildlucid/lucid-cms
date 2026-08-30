@@ -1,7 +1,7 @@
 import {
 	createDatabaseAdapterCreator,
 	DatabaseAdapter,
-} from "@lucidcms/core/db";
+} from "@lucidcms/core/extension";
 import type {
 	DatabaseConfig,
 	DatabaseConnection,

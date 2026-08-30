@@ -1,4 +1,4 @@
-import type { RefResourceMap } from "../../../types.js";
+import type { RefResourceMap } from "../../../exports/types.js";
 import resolveCollectionLocalization from "../../collection/helpers/resolve-collection-localization.js";
 import documentBricksFormatter from "../../formatters/document-bricks.js";
 import documentFieldsFormatter from "../../formatters/document-fields.js";

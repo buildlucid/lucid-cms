@@ -1,4 +1,4 @@
-import type { Config } from "../../../types.js";
+import type { Config } from "../../../exports/types.js";
 import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import { translate } from "../../i18n/index.js";
 

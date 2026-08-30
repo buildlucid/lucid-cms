@@ -1,5 +1,5 @@
+import type { InferredColumn } from "../../../exports/types.js";
 import type { CollectionSchemaColumn } from "../../../libs/collection/schema/types.js";
-import type { InferredColumn } from "../../../types.js";
 
 /**
  * Normalises the column schema for both the columns inferred from collection/brick's along with inferred columns from the DB Adapter implementation

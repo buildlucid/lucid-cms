@@ -1,7 +1,7 @@
 import { constants } from "node:fs";
 import { access, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { ensureLucidDirectoryExists } from "@lucidcms/core/plugin";
+import { ensureLucidDirectoryExists } from "@lucidcms/core/extension";
 
 type StoredFileMetadata = {
 	mimeType?: string | null;

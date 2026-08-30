@@ -1,7 +1,7 @@
 import type { InsertObject, UpdateObject } from "kysely";
 import z, { type ZodObject, type ZodType } from "zod";
 import constants from "../../../constants/constants.js";
-import type { LucidErrorData } from "../../../types.js";
+import type { LucidErrorData } from "../../../exports/types.js";
 import { LucidError, tidyZodError } from "../../../utils/errors/index.js";
 import type LucidDatabase from "../../db/client/lucid-database.js";
 import type {

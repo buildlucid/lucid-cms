@@ -3,19 +3,13 @@ import packageJson from "./package.json" with { type: "json" };
 
 export default defineConfig({
 	entry: [
-		"src/index.ts",
-		"src/types.ts",
-		"src/build.ts",
-		"src/plugin.ts",
-		"src/toolkit.ts",
-		"src/runtime.ts",
+		"src/exports/index.ts",
+		"src/exports/types.ts",
+		"src/exports/build.ts",
+		"src/exports/extension.ts",
+		"src/exports/toolkit.ts",
+		"src/exports/runtime.ts",
 		"src/libs/cli/index.ts",
-		"src/libs/queue/index.ts",
-		"src/libs/db/index.ts",
-		"src/libs/email/index.ts",
-		"src/libs/media-delivery/index.ts",
-		"src/libs/kv/index.ts",
-		"src/libs/media-storage/index.ts",
 	],
 	deps: {
 		neverBundle: [...Object.keys(packageJson.dependencies)],

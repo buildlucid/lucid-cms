@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ControllerSchema } from "../types.js";
+import type { ControllerSchema } from "../exports/types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaImagePreviewResponseSchema } from "./media.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";

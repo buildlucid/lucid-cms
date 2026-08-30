@@ -1,4 +1,4 @@
-import type { Select, ServiceResponse } from "../../../types.js";
+import type { Select, ServiceResponse } from "../../../exports/types.js";
 import type { LucidBricksTable } from "../../db/tables/index.js";
 import { copy } from "../../i18n/index.js";
 import type { RefTarget } from "../../refs/types.js";

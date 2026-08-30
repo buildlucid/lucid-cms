@@ -1,4 +1,4 @@
-import type { Refs } from "../../types.js";
+import type { Refs } from "../../exports/types.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import { refResourceKeys } from "./constants.js";
 import type {

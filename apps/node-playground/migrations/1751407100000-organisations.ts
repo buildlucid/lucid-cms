@@ -1,4 +1,4 @@
-import { defineMigration } from "@lucidcms/core/plugin";
+import { defineMigration } from "@lucidcms/core";
 
 export default defineMigration({
 	up: async (context) => {

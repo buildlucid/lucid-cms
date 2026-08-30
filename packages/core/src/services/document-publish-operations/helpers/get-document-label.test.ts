@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import type { CollectionTableNames } from "../../../exports/types.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { DocumentBricksRepository } from "../../../libs/repositories/index.js";
-import type { CollectionTableNames } from "../../../types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import getDocumentLabel from "./get-document-label.js";
 

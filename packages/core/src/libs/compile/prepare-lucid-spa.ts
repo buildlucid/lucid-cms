@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import { join } from "node:path";
 import constants from "../../constants/constants.js";
-import type { ServiceResponse } from "../../types.js";
+import type { ServiceResponse } from "../../exports/types.js";
 import getDirName from "../../utils/helpers/get-dir-name.js";
 import { copy } from "../i18n/index.js";
 

@@ -1,4 +1,4 @@
-import { buildTableName } from "@lucidcms/core/plugin";
+import { buildTableName } from "@lucidcms/core/extension";
 import type {
 	LucidBrickTableName,
 	ServiceResponse,

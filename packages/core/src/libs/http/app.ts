@@ -9,8 +9,8 @@ import type { StatusCode } from "hono/utils/http-status";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
+import type { Config, EnvironmentVariables } from "../../exports/types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
-import type { Config, EnvironmentVariables } from "../../types.js";
 import {
 	LucidAPIError,
 	LucidError,
@@ -18,31 +18,10 @@ import {
 } from "../../utils/errors/index.js";
 import { normalizeHost } from "../../utils/helpers/index.js";
 import type LucidDatabase from "../db/client/lucid-database.js";
-import {
-	destroyEmailAdapter,
-	getInitializedEmailAdapter,
-} from "../email/lifecycle.js";
-import type { EmailAdapterInstance } from "../email/types.js";
 import { createTranslator, resolveInterfaceLocale } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
-import { destroyKVAdapter, getInitializedKVAdapter } from "../kv/lifecycle.js";
-import type { KVAdapterInstance } from "../kv/types.js";
 import logger, { destroyLogger } from "../logger/index.js";
-import {
-	destroyMediaDeliveryAdapter,
-	getInitializedMediaDeliveryAdapter,
-} from "../media-delivery/lifecycle.js";
-import type { MediaDeliveryAdapterInstance } from "../media-delivery/types.js";
-import {
-	destroyMediaStorageAdapter,
-	getInitializedMediaStorageAdapter,
-} from "../media-storage/lifecycle.js";
-import type { MediaStorageAdapterInstance } from "../media-storage/types.js";
-import {
-	destroyQueueAdapter,
-	getInitializedQueueAdapter,
-} from "../queue/lifecycle.js";
-import type { QueueAdapterInstance } from "../queue/types.js";
+import type { LucidAdapterInstances } from "../runtime/create-lucid-adapters.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
@@ -90,6 +69,7 @@ const createApp = async (props: {
 	config: Config;
 	translationStore: TranslationStore;
 	runtimeContext: AdapterRuntimeContext;
+	adapters: LucidAdapterInstances;
 	env?: EnvironmentVariables;
 	http?: {
 		extensions?: HttpExtension[];
@@ -122,83 +102,6 @@ const createApp = async (props: {
 			...props.config.http.extensions,
 		],
 	});
-
-	let kvInstance: KVAdapterInstance | undefined;
-	let queueInstance: QueueAdapterInstance | undefined;
-	let mediaStorageInstance: MediaStorageAdapterInstance | null | undefined;
-	let emailInstance: EmailAdapterInstance | undefined;
-	let mediaDeliveryAdapterInstance: MediaDeliveryAdapterInstance | undefined;
-	const destroyAdapterInstances = () =>
-		Promise.allSettled([
-			destroyQueueAdapter(queueInstance, {
-				config: props.config,
-				env: props.env,
-				runtimeContext: props.runtimeContext,
-			}),
-			destroyKVAdapter(kvInstance, {
-				config: props.config,
-				env: props.env,
-				runtimeContext: props.runtimeContext,
-			}),
-			destroyMediaStorageAdapter(mediaStorageInstance, {
-				config: props.config,
-				env: props.env,
-				runtimeContext: props.runtimeContext,
-			}),
-			destroyEmailAdapter(emailInstance, {
-				config: props.config,
-				env: props.env,
-				runtimeContext: props.runtimeContext,
-			}),
-			destroyMediaDeliveryAdapter(mediaDeliveryAdapterInstance, {
-				config: props.config,
-				env: props.env,
-				runtimeContext: props.runtimeContext,
-			}),
-		]);
-
-	try {
-		kvInstance = await getInitializedKVAdapter(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		});
-		queueInstance = await getInitializedQueueAdapter(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		});
-		mediaStorageInstance = await getInitializedMediaStorageAdapter(
-			props.config,
-			{
-				env: props.env,
-				runtimeContext: props.runtimeContext,
-			},
-		);
-		emailInstance = await getInitializedEmailAdapter(props.config, {
-			env: props.env,
-			runtimeContext: props.runtimeContext,
-		});
-		mediaDeliveryAdapterInstance = await getInitializedMediaDeliveryAdapter(
-			props.config,
-			{
-				env: props.env,
-				runtimeContext: props.runtimeContext,
-			},
-		);
-	} catch (error) {
-		await destroyAdapterInstances();
-		await destroyLogger();
-		throw error;
-	}
-	if (
-		!kvInstance ||
-		!queueInstance ||
-		!emailInstance ||
-		!mediaDeliveryAdapterInstance
-	) {
-		throw new LucidError({
-			message: "Lucid could not initialize its application adapters.",
-		});
-	}
 
 	app
 		.use(logRoute)
@@ -243,11 +146,11 @@ const createApp = async (props: {
 			c.set("db", invocation.db);
 			c.set("translationStore", props.translationStore);
 			c.set("runtimeContext", props.runtimeContext);
-			c.set("queue", queueInstance);
-			c.set("kv", kvInstance);
-			c.set("mediaStorage", mediaStorageInstance);
-			c.set("mediaDelivery", mediaDeliveryAdapterInstance);
-			c.set("email", emailInstance);
+			c.set("queue", props.adapters.queue);
+			c.set("kv", props.adapters.kv);
+			c.set("mediaStorage", props.adapters.mediaStorage);
+			c.set("mediaDelivery", props.adapters.mediaDelivery);
+			c.set("email", props.adapters.email);
 			c.set("env", invocation.env ?? null);
 			c.set("cf", c.get("cf") ?? null);
 			c.set("caches", c.get("caches") ?? null);
@@ -511,18 +414,17 @@ const createApp = async (props: {
 			],
 		});
 	} catch (error) {
-		await destroyAdapterInstances();
 		await destroyLogger();
 		throw error;
 	}
 
 	const supportChecksRes = featureSupportChecks(
 		{
-			queue: queueInstance.key,
-			kv: kvInstance.key,
-			mediaStorage: mediaStorageInstance?.key ?? null,
-			mediaDelivery: mediaDeliveryAdapterInstance.key,
-			email: emailInstance.key,
+			queue: props.adapters.queue.key,
+			kv: props.adapters.kv.key,
+			mediaStorage: props.adapters.mediaStorage?.key ?? null,
+			mediaDelivery: props.adapters.mediaDelivery.key,
+			email: props.adapters.email.key,
 			database: props.config.db.adapter,
 		},
 		props.runtimeContext.support,
@@ -549,15 +451,9 @@ const createApp = async (props: {
 				),
 				options.executionContext as Parameters<typeof app.fetch>[2],
 			),
-		queue: queueInstance,
-		kv: kvInstance,
-		mediaStorage: mediaStorageInstance,
-		mediaDelivery: mediaDeliveryAdapterInstance,
-		email: emailInstance,
 		issues: supportChecksRes.issues,
 		destroy: () => {
 			destroyPromise ??= (async () => {
-				await destroyAdapterInstances();
 				await destroyLogger();
 			})();
 

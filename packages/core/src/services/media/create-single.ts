@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import type { Media } from "../../exports/types.js";
 import { mediaFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -14,7 +15,6 @@ import type {
 	MediaOrigin,
 	MediaType,
 } from "../../types/response.js";
-import type { Media } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../utils/services/types.js";

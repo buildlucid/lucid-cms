@@ -7,15 +7,16 @@ import type {
 import getQueueAdapter from "./get-adapter.js";
 import type { QueueAdapterInstance } from "./types.js";
 
-/** Resolve the configured queue adapter and run its init lifecycle hook. */
+/** Resolve or use a supplied queue adapter and run its init hook. */
 export const getInitializedQueueAdapter = async (
 	config: Config,
 	options: {
+		adapter?: QueueAdapterInstance;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	} = {},
 ): Promise<QueueAdapterInstance> => {
-	const adapter = await getQueueAdapter(config);
+	const adapter = options.adapter ?? (await getQueueAdapter(config));
 	const context = createAdapterLifecycleContext({
 		config,
 		env: options.env,

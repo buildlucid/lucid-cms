@@ -1,4 +1,11 @@
 import constants from "../../../constants/constants.js";
+import type {
+	BrickError,
+	ErrorCopy,
+	FieldError,
+	FieldInputSchema,
+	GroupError,
+} from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import {
@@ -19,13 +26,6 @@ import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { LucidAuth } from "../../../types/hono.js";
-import type {
-	BrickError,
-	ErrorCopy,
-	FieldError,
-	FieldInputSchema,
-	GroupError,
-} from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import fetchValidationData, {
 	type ValidationData,

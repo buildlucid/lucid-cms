@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ControllerSchema } from "../types.js";
+import type { ControllerSchema } from "../exports/types.js";
 import { tokenSchema } from "./media-share-links.js";
 
 const shareMediaTypeSchema = z.enum([

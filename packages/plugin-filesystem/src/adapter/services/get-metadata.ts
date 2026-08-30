@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { constants } from "node:fs";
 import { access, stat } from "node:fs/promises";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceGetMeta,

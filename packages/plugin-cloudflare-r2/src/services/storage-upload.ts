@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { DEFAULT_MAX_UPLOAD_SIZE, STORAGE_UPLOAD_PATH } from "../constants.js";
 import type { PluginOptions } from "../types.js";

@@ -7,6 +7,7 @@
 - Simplified route uniqueness configuration to a boolean because segment values now form part of the complete route.
 - Replaced `ui.tab` with `ui.placement` for positioning generated fields at the collection root, inside tabs, or relative to existing fields.
 - Updated localized routes, slugs and hierarchy propagation to respect each collection's configured locale subset and default.
+- Updated imports to use the reorganised `@lucidcms/core` entry points.
 
 ## v0.7.0
 

@@ -1,10 +1,10 @@
 import z from "zod";
+import type { ControllerSchema } from "../exports/types.js";
 import {
 	jobDispatchStatusSchema,
 	jobPayloadSchema,
 	jobStatusSchema,
 } from "../libs/queue/schema.js";
-import type { ControllerSchema } from "../types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 export const controllerSchemas = {

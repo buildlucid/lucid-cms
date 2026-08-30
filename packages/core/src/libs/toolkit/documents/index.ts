@@ -1,7 +1,7 @@
 import type {
 	CollectionDocumentKey,
 	CollectionDocumentVersionKey,
-} from "../../../types.js";
+} from "../../../exports/types.js";
 import type {
 	ServiceContext,
 	ServiceResponse,

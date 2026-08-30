@@ -1,7 +1,7 @@
 import type {
 	FieldInputSchema,
 	InternalDocumentField,
-} from "../../../types.js";
+} from "../../../exports/types.js";
 
 /**
  * Process fields and return field values by locale

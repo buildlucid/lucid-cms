@@ -16,6 +16,9 @@ import type {
 	CreateToolkitServiceContextOptions,
 	Toolkit,
 } from "../toolkit/types.js";
+import createLucidAdapters, {
+	type LucidAdapterOverrides,
+} from "./create-lucid-adapters.js";
 import type {
 	AdapterKeys,
 	AdapterRuntimeContext,
@@ -27,6 +30,8 @@ import type {
 
 type CreateLucidHostSharedOptions = {
 	runtimeContext: AdapterRuntimeContext;
+	/** Adapter instances to use instead of their configured equivalents. */
+	adapterOverrides?: LucidAdapterOverrides;
 	http?: {
 		extensions?: HttpExtension[];
 	};
@@ -111,13 +116,29 @@ const createLucidHost = async (
 						bundles: options.translationBundles,
 					})
 				).translationStore;
-	const app = await createApp({
+
+	const adapters = await createLucidAdapters({
 		config: resolved.config,
-		translationStore,
 		env: resolved.env,
 		runtimeContext: options.runtimeContext,
-		http: options.http,
+		overrides: options.adapterOverrides,
 	});
+	let app: Awaited<ReturnType<typeof createApp>>;
+
+	try {
+		app = await createApp({
+			config: resolved.config,
+			translationStore,
+			env: resolved.env,
+			runtimeContext: options.runtimeContext,
+			adapters: adapters.instances,
+			http: options.http,
+		});
+	} catch (error) {
+		await adapters.destroy();
+		throw error;
+	}
+
 	let runtimeDatabasePromise: Promise<DatabaseConnection> | undefined;
 	let runtimeLucidDatabasePromise: Promise<LucidDatabase> | undefined;
 	let destroyed = false;
@@ -158,16 +179,16 @@ const createLucidHost = async (
 		return runtimeLucidDatabasePromise;
 	};
 
-	const host: LucidHost = {
+	return {
 		config: resolved.config,
 		env: resolved.env,
 		runtimeContext: options.runtimeContext,
 		adapterKeys: {
-			queue: app.queue.key,
-			kv: app.kv.key,
-			mediaStorage: app.mediaStorage?.key ?? null,
-			mediaDelivery: app.mediaDelivery.key,
-			email: app.email.key,
+			queue: adapters.instances.queue.key,
+			kv: adapters.instances.kv.key,
+			mediaStorage: adapters.instances.mediaStorage?.key ?? null,
+			mediaDelivery: adapters.instances.mediaDelivery.key,
+			email: adapters.instances.email.key,
 			database: resolved.config.db.adapter,
 		},
 		translationStore,
@@ -248,11 +269,11 @@ const createLucidHost = async (
 					translationStore,
 					env,
 					runtimeContext: options.runtimeContext,
-					queue: app.queue,
-					kv: app.kv,
-					mediaStorage: app.mediaStorage,
-					mediaDelivery: app.mediaDelivery,
-					email: app.email,
+					queue: adapters.instances.queue,
+					kv: adapters.instances.kv,
+					mediaStorage: adapters.instances.mediaStorage,
+					mediaDelivery: adapters.instances.mediaDelivery,
+					email: adapters.instances.email,
 					request,
 				});
 			};
@@ -294,6 +315,7 @@ const createLucidHost = async (
 					return invocationDestroyPromise;
 				},
 			};
+
 			activeInvocations.add(invocation);
 			return invocation;
 		},
@@ -310,12 +332,15 @@ const createLucidHost = async (
 					databaseResult.status === "fulfilled"
 						? databaseResult.value
 						: undefined;
-				await Promise.allSettled([app.destroy(), database?.destroy()]);
+				await Promise.allSettled([
+					app.destroy(),
+					adapters.destroy(),
+					database?.destroy(),
+				]);
 			})();
 			return destroyPromise;
 		},
-	};
-	return host;
+	} satisfies LucidHost;
 };
 
 export default createLucidHost;

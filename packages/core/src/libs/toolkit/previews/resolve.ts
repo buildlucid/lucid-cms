@@ -1,5 +1,5 @@
+import type { PreviewSession } from "../../../exports/types.js";
 import { previewSessionServices } from "../../../services/index.js";
-import type { PreviewSession } from "../../../types.js";
 import type {
 	ServiceContext,
 	ServiceResponse,

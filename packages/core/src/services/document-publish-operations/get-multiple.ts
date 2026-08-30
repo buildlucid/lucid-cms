@@ -1,3 +1,4 @@
+import type { CollectionTableNames } from "../../exports/types.js";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import formatter, {
@@ -11,7 +12,6 @@ import {
 import type { GetMultipleQueryParams } from "../../schemas/publish-operation-management.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
-import type { CollectionTableNames } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getDocumentLabel from "./helpers/get-document-label.js";

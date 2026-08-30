@@ -1,5 +1,5 @@
+import type { Insert } from "../../../exports/types.js";
 import type { LucidMediaTranslations } from "../../../libs/db/tables/index.js";
-import type { Insert } from "../../../types.js";
 
 const prepareMediaTranslations = (props: {
 	title: {

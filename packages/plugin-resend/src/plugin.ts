@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,

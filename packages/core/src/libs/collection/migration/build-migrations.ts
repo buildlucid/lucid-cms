@@ -1,4 +1,4 @@
-import type { ServiceFn } from "../../../types.js";
+import type { ServiceFn } from "../../../exports/types.js";
 import { copy } from "../../i18n/index.js";
 import createTableQuery from "./create-table-query.js";
 import modifyTableQuery from "./modify-table-query.js";

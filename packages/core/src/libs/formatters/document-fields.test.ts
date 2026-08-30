@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { InternalDocumentField } from "../../types.js";
+import type { InternalDocumentField } from "../../exports/types.js";
 import BrickBuilder from "../collection/builders/brick-builder/index.js";
 import documentFieldsFormatter from "./document-fields.js";
 

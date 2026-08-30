@@ -1,6 +1,6 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
-import type { ServiceContext } from "../../types.js";
+import type { ServiceContext } from "../../exports/types.js";
 import createLucidDatabase from "../db/create-lucid-database.js";
 import type { DatabaseConnection } from "../db/types.js";
 import applyCollectionMigrations from "./apply-collection-migrations.js";

@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
@@ -29,8 +29,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				type: "email-adapter",
 				key: PLUGIN_IDENTIFIER,
 				lifecycle: {
-					init: async (context) => {
-						if (simulate || context.purpose === "queue-consumer") return;
+					init: async () => {
+						if (simulate) return;
 						await verifyOnce();
 					},
 					destroy: async () => {

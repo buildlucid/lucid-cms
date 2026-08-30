@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceGetUploadPartUrls } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import { PRESIGNED_URL_EXPIRY } from "../../constants.js";

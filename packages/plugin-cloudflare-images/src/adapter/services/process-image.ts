@@ -1,5 +1,5 @@
 import { Buffer } from "node:buffer";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { MediaDeliveryServiceProcessImage } from "@lucidcms/core/types";
 import {
 	DEFAULT_IMAGES_BINDING,

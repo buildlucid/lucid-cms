@@ -1,5 +1,5 @@
 import type { ZodObject } from "zod";
-import type { LucidDB, LucidErrorData } from "../../types.js";
+import type { LucidDB, LucidErrorData } from "../../exports/types.js";
 
 export type QueryErrorResult = {
 	error: LucidErrorData;

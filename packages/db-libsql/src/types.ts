@@ -2,7 +2,7 @@ import type {
 	DatabaseAdapterCreator,
 	DatabaseAdapterFactory,
 	DatabaseAdapterOptionsFactory,
-} from "@lucidcms/core/db";
+} from "@lucidcms/core/types";
 import type { LibSQLAdapter } from "./index.js";
 import type { LibsqlDialectConfig } from "./lib/kysely-libsql.js";
 

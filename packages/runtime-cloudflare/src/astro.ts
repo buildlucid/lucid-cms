@@ -1,5 +1,4 @@
-import { LucidError } from "@lucidcms/core";
-import { setupCronJobs } from "@lucidcms/core/runtime";
+import { LucidError, setupCronJobs } from "@lucidcms/core/runtime";
 import type {
 	EnvironmentVariables,
 	HttpExtension,

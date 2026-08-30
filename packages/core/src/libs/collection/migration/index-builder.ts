@@ -1,6 +1,6 @@
 import constants from "../../../constants/constants.js";
+import type { ServiceContext } from "../../../exports/types.js";
 import logger from "../../../libs/logger/index.js";
-import type { ServiceContext } from "../../../types.js";
 import type { CollectionSchemaIndex } from "../schema/types.js";
 
 export const addIndex = async (

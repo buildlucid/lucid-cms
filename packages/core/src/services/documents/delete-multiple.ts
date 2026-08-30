@@ -1,8 +1,8 @@
+import type { ServiceFn } from "../../exports/types.js";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
-import type { ServiceFn } from "../../types.js";
 import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
 import checkDocumentAccess from "./checks/check-document-access.js";

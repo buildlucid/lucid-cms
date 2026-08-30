@@ -1,13 +1,11 @@
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { configureLucid, z } from "@lucidcms/core";
-import { createRoute } from "@lucidcms/core/plugin";
+import { configureLucid, defineRoute, z } from "@lucidcms/core";
 import { createToolkit } from "@lucidcms/core/toolkit";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
-// import { passthroughEmailAdapter } from "@lucidcms/core/email";
 import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { githubAuthPlugin } from "@lucidcms/plugin-github-auth";
 import { googleAuthPlugin } from "@lucidcms/plugin-google-auth";
@@ -130,7 +128,7 @@ export default configureLucid({
 				},
 			},
 			routes: [
-				createRoute({
+				defineRoute({
 					method: "post",
 					path: "/send-test-email",
 					openAPI: {
@@ -187,9 +185,6 @@ export default configureLucid({
 				}),
 			],
 		},
-		// email: {
-		// 	adapter: passthroughEmailAdapter,
-		// },
 		// hooks: [
 		// 	{
 		// 		service: "documents",

@@ -1,4 +1,4 @@
-import type { RefResource } from "../../types.js";
+import type { RefResource } from "../../exports/types.js";
 
 export const refResourceKeys = [
 	"documents",

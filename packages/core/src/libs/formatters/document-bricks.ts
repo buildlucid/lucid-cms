@@ -1,6 +1,10 @@
 import crypto from "node:crypto";
+import type {
+	Config,
+	InternalDocumentField,
+	Select,
+} from "../../exports/types.js";
 import type { InternalDocumentBrick, Refs } from "../../types/response.js";
-import type { Config, InternalDocumentField, Select } from "../../types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import {
 	getFieldDatabaseConfig,

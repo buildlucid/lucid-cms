@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { LucidError } from "@lucidcms/core";
 import { prepareBuildArtifacts } from "@lucidcms/core/build";
+import { LucidError } from "@lucidcms/core/runtime";
 import type {
 	Config,
 	LucidConfigDefinition,

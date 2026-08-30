@@ -1,3 +1,4 @@
+import type { CollectionTableNames } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import {
 	formatDocumentLabelValue,
@@ -7,7 +8,6 @@ import {
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import { getDocumentFieldsTableSchema } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentBricksRepository } from "../../../libs/repositories/index.js";
-import type { CollectionTableNames } from "../../../types.js";
 import type {
 	ServiceContext,
 	ServiceResponse,

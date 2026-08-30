@@ -1,5 +1,5 @@
+import type { PreviewSession } from "../../exports/types.js";
 import { previewSessionsFormatter } from "../../libs/formatters/index.js";
-import type { PreviewSession } from "../../types.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveSession from "./helpers/resolve-session.js";
 

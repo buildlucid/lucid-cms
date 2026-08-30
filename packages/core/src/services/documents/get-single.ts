@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import type { InternalCollectionDocument, Refs } from "../../exports/types.js";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentVersionType } from "../../libs/db/tables/index.js";
@@ -7,7 +8,6 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
-import type { InternalCollectionDocument, Refs } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getDocumentWorkflow from "../document-workflows/get-single.js";

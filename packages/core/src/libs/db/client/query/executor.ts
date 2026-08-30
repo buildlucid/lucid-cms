@@ -1,7 +1,7 @@
 import type { Executable } from "kysely";
 import type { output as ZodOutput, ZodType } from "zod";
 import constants from "../../../../constants/constants.js";
-import type { LucidErrorData } from "../../../../types.js";
+import type { LucidErrorData } from "../../../../exports/types.js";
 import { tidyZodError } from "../../../../utils/errors/index.js";
 import { copy } from "../../../i18n/index.js";
 import logger from "../../../logger/index.js";

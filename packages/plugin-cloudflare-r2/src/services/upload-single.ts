@@ -1,5 +1,5 @@
 import { Readable } from "node:stream";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type {
 	MediaStorageAdapterServiceUploadSingle,
 	ServiceContext,

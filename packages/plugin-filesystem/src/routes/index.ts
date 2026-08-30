@@ -1,12 +1,12 @@
 import { Readable } from "node:stream";
 import {
-	buildDownloadContentDisposition,
 	copy,
-	createRoute,
+	defineRoute,
 	LucidAPIError,
 	rateLimiterMiddleware as rateLimiter,
 	serviceWrapper,
-} from "@lucidcms/core/plugin";
+} from "@lucidcms/core";
+import { buildDownloadContentDisposition } from "@lucidcms/core/extension";
 import { stream } from "hono/streaming";
 import {
 	FILE_SYSTEM_DOWNLOAD_ROUTE,
@@ -18,7 +18,7 @@ import { controllerSchemas } from "../schema/fs.js";
 import { downloadSingle, uploadSingle } from "../services/index.js";
 
 const routes = () => [
-	createRoute({
+	defineRoute({
 		method: "get",
 		path: FILE_SYSTEM_DOWNLOAD_ROUTE,
 		schema: controllerSchemas.download,
@@ -89,7 +89,7 @@ const routes = () => [
 			});
 		},
 	}),
-	createRoute({
+	defineRoute({
 		method: "put",
 		path: FILE_SYSTEM_UPLOAD_ROUTE,
 		schema: controllerSchemas.upload,

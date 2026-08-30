@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";

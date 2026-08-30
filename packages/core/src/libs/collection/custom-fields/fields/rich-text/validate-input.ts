@@ -1,4 +1,4 @@
-import type { ServiceContext } from "../../../../../types.js";
+import type { ServiceContext } from "../../../../../exports/types.js";
 import type { FieldRelationValidationInput } from "../../types.js";
 import validateMediaInputData from "../media/validate-input.js";
 import validateRelationInputData from "../relation/validate-input.js";

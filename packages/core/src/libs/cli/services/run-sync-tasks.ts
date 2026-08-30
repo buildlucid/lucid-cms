@@ -1,5 +1,5 @@
+import type { Config, EnvironmentVariables } from "../../../exports/types.js";
 import { syncServices } from "../../../services/index.js";
-import type { Config, EnvironmentVariables } from "../../../types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { DatabaseConnection } from "../../db/types.js";
 import { passthroughEmailAdapterInstance } from "../../email/adapters/passthrough.js";

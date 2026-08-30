@@ -1,4 +1,4 @@
-import type { ServiceFn } from "../../types.js";
+import type { ServiceFn } from "../../exports/types.js";
 import collections from "./collections.js";
 import generateMigrationPlan from "./migration/generate-migration-plan.js";
 import type {

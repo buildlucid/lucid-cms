@@ -1,4 +1,4 @@
-import type { Config, EnvironmentVariables } from "../../../types.js";
+import type { Config, EnvironmentVariables } from "../../../exports/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
 import type {

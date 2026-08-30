@@ -6,7 +6,8 @@ const mocks = vi.hoisted(() => ({
 	warn: vi.fn(),
 }));
 
-vi.mock("@lucidcms/core", () => ({
+vi.mock("@lucidcms/core", async (importOriginal) => ({
+	...(await importOriginal()),
 	logger: {
 		warn: mocks.warn,
 	},
@@ -43,7 +44,6 @@ const createAdapter = (transporter: Transporter, simulate = false) => {
 
 const runtimeContext = {
 	config: {},
-	purpose: "runtime",
 } as const;
 
 const email = {
@@ -74,18 +74,6 @@ describe("Nodemailer plugin", () => {
 		]);
 
 		expect(transporter.verify).toHaveBeenCalledTimes(1);
-	});
-
-	test("does not verify the transporter for queue consumers", async () => {
-		const transporter = createTransporter();
-		const adapter = createAdapter(transporter);
-
-		await adapter.lifecycle?.init?.({
-			...runtimeContext,
-			purpose: "queue-consumer",
-		} as never);
-
-		expect(transporter.verify).not.toHaveBeenCalled();
 	});
 
 	test("does not verify the transporter when email simulation is enabled", async () => {

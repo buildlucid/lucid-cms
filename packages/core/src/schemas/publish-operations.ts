@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ControllerSchema } from "../types.js";
+import type { ControllerSchema } from "../exports/types.js";
 import { richTextJSONSchema } from "./shared/rich-text.js";
 
 export const controllerSchemas = {

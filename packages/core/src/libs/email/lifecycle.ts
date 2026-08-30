@@ -1,28 +1,26 @@
 import type { Config } from "../../types/config.js";
 import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type {
-	AdapterLifecyclePurpose,
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 } from "../runtime/types.js";
 import getEmailAdapter from "./get-adapter.js";
 import type { EmailAdapterInstance } from "./types.js";
 
-/** Resolve the configured email adapter and run its init lifecycle hook. */
+/** Resolve or use a supplied email adapter and run its init hook. */
 export const getInitializedEmailAdapter = async (
 	config: Config,
 	options: {
+		adapter?: EmailAdapterInstance;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
-		purpose?: AdapterLifecyclePurpose;
 	} = {},
 ): Promise<EmailAdapterInstance> => {
-	const adapter = await getEmailAdapter(config);
+	const adapter = options.adapter ?? (await getEmailAdapter(config));
 	const context = createAdapterLifecycleContext({
 		config,
 		env: options.env,
 		runtimeContext: options.runtimeContext,
-		purpose: options.purpose,
 	});
 
 	try {
@@ -42,7 +40,6 @@ export const destroyEmailAdapter = async (
 		config: Config;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
-		purpose?: AdapterLifecyclePurpose;
 	},
 ): Promise<void> => {
 	if (!adapter) return;
@@ -52,7 +49,6 @@ export const destroyEmailAdapter = async (
 			config: options.config,
 			env: options.env,
 			runtimeContext: options.runtimeContext,
-			purpose: options.purpose,
 		}),
 	);
 };

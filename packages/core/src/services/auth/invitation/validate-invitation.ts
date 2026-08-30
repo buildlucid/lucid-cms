@@ -1,11 +1,11 @@
 import constants from "../../../constants/constants.js";
+import type { ValidateInvitation } from "../../../exports/types.js";
 import formatter from "../../../libs/formatters/index.js";
 import logger from "../../../libs/logger/index.js";
 import {
 	UsersRepository,
 	UserTokensRepository,
 } from "../../../libs/repositories/index.js";
-import type { ValidateInvitation } from "../../../types.js";
 import hashUserToken from "../../../utils/helpers/hash-user-token.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 

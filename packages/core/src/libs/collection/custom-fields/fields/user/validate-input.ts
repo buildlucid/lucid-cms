@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants.js";
-import type { ServiceContext } from "../../../../../types.js";
+import type { ServiceContext } from "../../../../../exports/types.js";
 import logger from "../../../../logger/index.js";
 import { UsersRepository } from "../../../../repositories/index.js";
 import type { FieldRelationValidationInput } from "../../types.js";

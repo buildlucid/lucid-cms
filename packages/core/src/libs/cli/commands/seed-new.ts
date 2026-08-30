@@ -4,7 +4,7 @@ import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import cliLogger from "../logger.js";
 
-const seedTemplate = `import { defineSeed } from "@lucidcms/core/plugin";
+const seedTemplate = `import { defineSeed } from "@lucidcms/core";
 
 export default defineSeed(async (context) => {
 	// Add idempotent operations with context.db.query(...) here.

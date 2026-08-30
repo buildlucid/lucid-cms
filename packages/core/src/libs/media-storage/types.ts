@@ -4,7 +4,7 @@ import type {
 	MediaStatus,
 	MediaType,
 	ServiceResponse,
-} from "../../types.js";
+} from "../../exports/types.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 

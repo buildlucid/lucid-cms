@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { ServiceContext } from "../../types.js";
+import type { ServiceContext } from "../../exports/types.js";
 import { copy } from "../i18n/index.js";
 import BrickBuilder from "./builders/brick-builder/index.js";
 import CollectionBuilder from "./builders/collection-builder/index.js";

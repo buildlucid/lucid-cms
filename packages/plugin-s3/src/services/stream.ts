@@ -1,5 +1,5 @@
 import type { Readable } from "node:stream";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { MediaStorageAdapterServiceStream } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";

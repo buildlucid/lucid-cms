@@ -1,80 +1,32 @@
 import { select } from "@inquirer/prompts";
-import type { Config } from "../../../types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import type { DatabaseConnection } from "../../db/types.js";
-import {
-	destroyEmailAdapter,
-	getInitializedEmailAdapter,
-} from "../../email/lifecycle.js";
-import type { EmailAdapterInstance } from "../../email/types.js";
 import { copy } from "../../i18n/index.js";
 import prepareTranslations from "../../i18n/prepare-translations.js";
-import type { TranslationStore } from "../../i18n/types.js";
-import {
-	destroyKVAdapter,
-	getInitializedKVAdapter,
-} from "../../kv/lifecycle.js";
-import type { KVAdapterInstance } from "../../kv/types.js";
 import {
 	startLoggerBuffering,
 	stopLoggerBuffering,
 } from "../../logger/index.js";
-import {
-	destroyMediaDeliveryAdapter,
-	getInitializedMediaDeliveryAdapter,
-} from "../../media-delivery/lifecycle.js";
-import type { MediaDeliveryAdapterInstance } from "../../media-delivery/types.js";
-import {
-	destroyMediaStorageAdapter,
-	getInitializedMediaStorageAdapter,
-} from "../../media-storage/lifecycle.js";
-import type { MediaStorageAdapterInstance } from "../../media-storage/types.js";
 import inlineQueueAdapter from "../../queue/adapters/inline.js";
+import createLucidAdapters, {
+	type LucidAdapters,
+} from "../../runtime/create-lucid-adapters.js";
 import getCronJobs, { type CronJobKey } from "../../runtime/cron-jobs.js";
-import type {
-	AdapterRuntimeContext,
-	EnvironmentVariables,
-} from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 import validateEnvVars from "../services/validate-env-vars.js";
 
 const cronCommand = async (jobName?: string) => {
-	let config: Config | undefined;
-	let translationStore: TranslationStore | undefined;
-	let env: EnvironmentVariables | undefined;
-	let runtimeContext: AdapterRuntimeContext | undefined;
-	let kv: KVAdapterInstance | undefined;
-	let mediaStorage: MediaStorageAdapterInstance | null | undefined;
-	let mediaDelivery: MediaDeliveryAdapterInstance | undefined;
-	let email: EmailAdapterInstance | undefined;
+	let adapters: LucidAdapters | undefined;
 	let database: DatabaseConnection | undefined;
 
-	const cleanupAdapters = async () => {
-		if (config && translationStore) {
-			await Promise.allSettled([
-				database?.destroy(),
-				destroyKVAdapter(kv, { config, env, runtimeContext }),
-				destroyMediaStorageAdapter(mediaStorage, {
-					config,
-					env,
-					runtimeContext,
-				}),
-				destroyMediaDeliveryAdapter(mediaDelivery, {
-					config,
-					env,
-					runtimeContext,
-				}),
-				destroyEmailAdapter(email, { config, env, runtimeContext }),
-			]);
-		}
+	const cleanup = async () => {
+		if (adapters) await adapters.destroy();
+		if (database) await database.destroy();
+		adapters = undefined;
 		database = undefined;
-		kv = undefined;
-		mediaStorage = undefined;
-		mediaDelivery = undefined;
-		email = undefined;
 	};
 
 	try {
@@ -123,15 +75,15 @@ const cronCommand = async (jobName?: string) => {
 			path: configPath,
 			prepareRuntime: true,
 		});
-		config = configRes.config;
-		runtimeContext = configRes.runtimeContext;
-		translationStore = (
+		const config = configRes.config;
+		const runtimeContext = configRes.runtimeContext;
+		const translationStore = (
 			await prepareTranslations({
 				config,
 				projectRoot: configRes.projectRoot,
 			})
 		).translationStore;
-		env = configRes.env;
+		const env = configRes.env;
 		const envValid = await validateEnvVars({
 			envSchema: configRes.envSchema,
 			env: configRes.env,
@@ -144,35 +96,23 @@ const cronCommand = async (jobName?: string) => {
 		//* create an inline queue adapter so
 		//* any jobs pushed to the queue by the cron are executed straight away
 		const queue = inlineQueueAdapter();
-		database = await configRes.config.db.connect(env);
-		kv = await getInitializedKVAdapter(configRes.config, {
+		adapters = await createLucidAdapters({
+			config,
 			env,
 			runtimeContext,
+			overrides: { queue },
 		});
-		mediaStorage = await getInitializedMediaStorageAdapter(configRes.config, {
-			env,
-			runtimeContext,
-		});
-		mediaDelivery = await getInitializedMediaDeliveryAdapter(configRes.config, {
-			env,
-			runtimeContext,
-		});
-		email = await getInitializedEmailAdapter(configRes.config, {
-			env,
-			runtimeContext,
-		});
+		const activeAdapters = adapters;
+		database = await config.db.connect(env);
+		const activeDatabase = database;
 
 		const serviceContext = createServiceContext({
-			config: configRes.config,
-			database,
+			config,
+			database: activeDatabase,
 			translationStore,
 			env,
 			runtimeContext,
-			queue,
-			kv,
-			mediaStorage,
-			mediaDelivery,
-			email,
+			...activeAdapters.instances,
 		});
 
 		//* run the selected cron job with retry support
@@ -212,7 +152,7 @@ const cronCommand = async (jobName?: string) => {
 				`Cron job "${job.label}" failed after ${maxRetries} attempts:`,
 				lastError ?? "Unknown error",
 			);
-			await cleanupAdapters();
+			await cleanup();
 			await stopLoggerBuffering();
 			process.exit(1);
 		}
@@ -230,11 +170,11 @@ const cronCommand = async (jobName?: string) => {
 			},
 		);
 
-		await cleanupAdapters();
+		await cleanup();
 		await stopLoggerBuffering();
 		process.exit(0);
 	} catch (error) {
-		await cleanupAdapters();
+		await cleanup();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error, "Failed to run cron job");
 		} else {

@@ -1,12 +1,11 @@
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { LucidError } from "@lucidcms/core";
+import { createTranslator, LucidError } from "@lucidcms/core";
 import {
 	prepareLucidPublicAssets,
 	prepareLucidSPA,
 } from "@lucidcms/core/build";
-import { createTranslator } from "@lucidcms/core/plugin";
 import { lookup as lookupMimeType } from "mime-types";
 import type { Plugin } from "vite";
 import constants from "../constants.js";

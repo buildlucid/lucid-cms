@@ -1,5 +1,5 @@
 import type { CollectionBuilder } from "@lucidcms/core";
-import { resolveCollectionLocalization } from "@lucidcms/core/plugin";
+import { resolveCollectionLocalization } from "@lucidcms/core/extension";
 import type { CollectionConfig } from "../types/types.js";
 
 export type ResolvedPagesCollectionLocalization = Pick<

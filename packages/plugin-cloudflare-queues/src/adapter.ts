@@ -1,5 +1,5 @@
 import { logger } from "@lucidcms/core";
-import { consumeJob, logScope } from "@lucidcms/core/queue";
+import { consumeJob, logScopes } from "@lucidcms/core/extension";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
 import { ADAPTER_KEY, MAX_BATCH_SIZE, MAX_DELAY_MS } from "./constants.js";
 import type { PluginOptions } from "./types.js";
@@ -26,13 +26,13 @@ const cloudflareQueuesAdapter = (
 
 				logger.debug({
 					message: `Cloudflare queue adapter initialised in ${consumerSupported ? "production" : "development"} mode`,
-					scope: logScope,
+					scope: logScopes.queueAdapter,
 				});
 			},
 			destroy: async () => {
 				logger.debug({
 					message: "Cloudflare queue adapter destroyed",
-					scope: logScope,
+					scope: logScopes.queueAdapter,
 				});
 			},
 		},

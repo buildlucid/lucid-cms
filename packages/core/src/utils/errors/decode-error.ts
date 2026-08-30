@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
+import type { PublicErrorData } from "../../exports/types.js";
 import { isTranslatableCopy } from "../../libs/i18n/copy.js";
 import { translate } from "../../libs/i18n/translate.js";
-import type { PublicErrorData } from "../../types.js";
 import LucidAPIError from "./lucid-api-error.js";
 
 const translateNestedErrorCopy = (value: unknown): unknown => {

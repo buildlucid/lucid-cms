@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core";
-import { prefixGeneratedColName } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName } from "@lucidcms/core/extension";
 import type { CollectionTableNames, ServiceFn } from "@lucidcms/core/types";
 import { fields, targetTypes } from "../constants.js";
 import type { RedirectIdentity } from "../utils/redirect-input.js";

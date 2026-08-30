@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import constants from "../../constants/constants.js";
-import type { Config, ServiceResponse } from "../../types.js";
+import type { Config, ServiceResponse } from "../../exports/types.js";
 import { getDirName } from "../../utils/helpers/index.js";
 import cliLogger from "../cli/logger.js";
 import { copy } from "../i18n/index.js";

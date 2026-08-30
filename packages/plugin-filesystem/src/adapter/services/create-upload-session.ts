@@ -1,5 +1,5 @@
-import { createSignedMediaUrl } from "@lucidcms/core/media-storage";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
+import { createSignedMediaUrl } from "@lucidcms/core/extension";
 import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceCreateUploadSession,

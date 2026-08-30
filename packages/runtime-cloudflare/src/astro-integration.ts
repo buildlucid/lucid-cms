@@ -1,4 +1,4 @@
-import { LucidError } from "@lucidcms/core";
+import { LucidError } from "@lucidcms/core/runtime";
 import type { RuntimeAdapter } from "@lucidcms/core/types";
 import prepareAstro from "./services/prepare-astro.js";
 import type { CloudflareRuntimeAdapter } from "./types.js";

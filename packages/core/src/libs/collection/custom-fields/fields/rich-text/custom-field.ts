@@ -3,7 +3,7 @@ import {
 	type RichTextJSON,
 } from "@lucidcms/rich-text";
 import z from "zod";
-import type { ServiceResponse } from "../../../../../types.js";
+import type { ServiceResponse } from "../../../../../exports/types.js";
 import { getObject } from "../../../../../utils/helpers/get-typed-value.js";
 import richTextHasContent from "../../../../../utils/helpers/rich-text-has-content.js";
 import { copy } from "../../../../i18n/index.js";

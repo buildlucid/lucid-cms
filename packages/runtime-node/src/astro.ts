@@ -1,4 +1,4 @@
-import { LucidError } from "@lucidcms/core";
+import { LucidError } from "@lucidcms/core/runtime";
 import type {
 	LucidHonoContext,
 	LucidInvocation,

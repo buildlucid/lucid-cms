@@ -1,11 +1,11 @@
-import type BrickBuilder from "../../../../libs/collection/builders/brick-builder/index.js";
-import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
-import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import type {
 	CFConfig,
 	FieldTypes,
 	ServiceResponse,
-} from "../../../../types.js";
+} from "../../../../exports/types.js";
+import type BrickBuilder from "../../../../libs/collection/builders/brick-builder/index.js";
+import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
+import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import { copy } from "../../../i18n/index.js";
 import fieldConfigs from "../../custom-fields/field-configs.js";
 import {

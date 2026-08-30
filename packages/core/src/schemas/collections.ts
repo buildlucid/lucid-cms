@@ -1,6 +1,6 @@
 import z from "zod";
+import type { ControllerSchema } from "../exports/types.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
-import type { ControllerSchema } from "../types.js";
 import { brickConfigSchema } from "./collection-bricks.js";
 import { fieldConfigSchema } from "./collection-fields.js";
 

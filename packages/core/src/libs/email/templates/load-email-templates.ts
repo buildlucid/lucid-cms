@@ -1,6 +1,6 @@
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
-import type { Config } from "../../../types.js";
+import type { Config } from "../../../exports/types.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import cliLogger from "../../cli/logger.js";
 import type { RenderedTemplates } from "../types.js";

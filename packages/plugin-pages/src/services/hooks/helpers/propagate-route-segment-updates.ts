@@ -1,7 +1,7 @@
 import {
 	getCollectionTableNames,
 	resolveRelatedDocumentVersionType,
-} from "@lucidcms/core/plugin";
+} from "@lucidcms/core/extension";
 import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../../types/types.js";
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";

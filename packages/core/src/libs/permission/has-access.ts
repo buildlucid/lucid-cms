@@ -1,4 +1,4 @@
-import type { LucidAuth, Permission } from "../../types.js";
+import type { LucidAuth, Permission } from "../../exports/types.js";
 
 /**
  * Checks if the user has the access based on permissions and resource ownership.

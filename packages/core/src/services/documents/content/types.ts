@@ -1,4 +1,4 @@
-import type { CollectionDocumentVersion } from "../../../types.js";
+import type { CollectionDocumentVersion } from "../../../exports/types.js";
 
 export type ContentDocumentVersionInput<
 	TCollectionKey extends string = string,

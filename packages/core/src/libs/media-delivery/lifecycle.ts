@@ -7,15 +7,16 @@ import type {
 import getMediaDeliveryAdapter from "./get-adapter.js";
 import type { MediaDeliveryAdapterInstance } from "./types.js";
 
-/** Resolve the configured media delivery adapter and run its init hook. */
+/** Resolve or use a supplied media delivery adapter and run its init hook. */
 export const getInitializedMediaDeliveryAdapter = async (
 	config: Config,
 	options: {
+		adapter?: MediaDeliveryAdapterInstance;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	} = {},
 ): Promise<MediaDeliveryAdapterInstance> => {
-	const adapter = await getMediaDeliveryAdapter(config);
+	const adapter = options.adapter ?? (await getMediaDeliveryAdapter(config));
 	const context = createAdapterLifecycleContext({
 		config,
 		env: options.env,

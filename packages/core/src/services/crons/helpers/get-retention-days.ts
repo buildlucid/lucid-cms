@@ -1,5 +1,5 @@
 import { subDays } from "date-fns";
-import type { Config } from "../../../types.js";
+import type { Config } from "../../../exports/types.js";
 
 export type RetentionDaysTypes = keyof NonNullable<
 	Config["retention"]["purgeAfterDays"]

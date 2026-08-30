@@ -1,4 +1,4 @@
-import type { MediaType } from "../../types.js";
+import type { MediaType } from "../../exports/types.js";
 
 /**
  * Gets the media type from a mime type.

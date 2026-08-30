@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import constants from "../../../constants/constants.js";
-import type { LucidHonoContext } from "../../../types.js";
+import type { LucidHonoContext } from "../../../exports/types.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";

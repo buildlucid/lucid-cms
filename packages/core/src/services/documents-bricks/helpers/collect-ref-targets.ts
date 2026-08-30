@@ -1,3 +1,9 @@
+import type {
+	FieldTypes,
+	RefResource,
+	Select,
+	ServiceFn,
+} from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
@@ -23,12 +29,6 @@ import {
 import type { RefTargets } from "../../../libs/refs/types.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
-import type {
-	FieldTypes,
-	RefResource,
-	Select,
-	ServiceFn,
-} from "../../../types.js";
 
 /**
  * Resolves the custom field instance for a schema-backed field table.

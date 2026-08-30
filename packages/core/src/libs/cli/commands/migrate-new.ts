@@ -4,7 +4,7 @@ import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import cliLogger from "../logger.js";
 
-const migrationTemplate = `import { defineMigration } from "@lucidcms/core/plugin";
+const migrationTemplate = `import { defineMigration } from "@lucidcms/core";
 
 export default defineMigration({
 	async up(context) {

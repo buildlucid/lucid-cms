@@ -1,3 +1,4 @@
+import type { Refs } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../../../libs/collection/schema/types.js";
 import type {
@@ -19,7 +20,6 @@ import type {
 } from "../../../libs/refs/types.js";
 import type { BrickQueryResponse } from "../../../libs/repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../../../libs/repositories/documents.js";
-import type { Refs } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import collectRefTargets from "../../documents-bricks/helpers/collect-ref-targets.js";
 

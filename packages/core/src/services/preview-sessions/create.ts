@@ -1,15 +1,15 @@
 import { randomBytes } from "node:crypto";
 import constants from "../../constants/constants.js";
+import type {
+	LucidAuth,
+	PreviewMode,
+	PreviewSessionURLResponse,
+} from "../../exports/types.js";
 import collections from "../../libs/collection/collections.js";
 import resolveCollectionLocalization from "../../libs/collection/helpers/resolve-collection-localization.js";
 import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { PreviewSessionsRepository } from "../../libs/repositories/index.js";
-import type {
-	LucidAuth,
-	PreviewMode,
-	PreviewSessionURLResponse,
-} from "../../types.js";
 import {
 	getBaseUrl,
 	hashPreviewToken,

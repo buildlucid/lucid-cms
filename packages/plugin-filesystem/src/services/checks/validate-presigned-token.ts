@@ -1,5 +1,5 @@
-import { validateSignedMediaUrl } from "@lucidcms/core/media-storage";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
+import { validateSignedMediaUrl } from "@lucidcms/core/extension";
 import type { ServiceFn } from "@lucidcms/core/types";
 
 const validatePresignedToken: ServiceFn<

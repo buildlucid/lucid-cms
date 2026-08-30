@@ -1,4 +1,5 @@
-import { copy, getFileMetadata } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
+import { getFileMetadata } from "@lucidcms/core/extension";
 import type { ServiceFn } from "@lucidcms/core/types";
 import { FILE_SYSTEM_UPLOAD_PATH } from "../constants.js";
 import {

@@ -1,3 +1,4 @@
+import type { CollectionDocument, Refs } from "../../../exports/types.js";
 import collections from "../../../libs/collection/collections.js";
 import {
 	getBricksTableSchema,
@@ -10,7 +11,6 @@ import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetSingleQueryParams } from "../../../schemas/documents.js";
-import type { CollectionDocument, Refs } from "../../../types.js";
 import {
 	applyDefaultQueryFilters,
 	getBaseUrl,

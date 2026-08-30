@@ -1,40 +1,24 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parentPort, workerData } from "node:worker_threads";
-import { logger } from "@lucidcms/core";
 import {
 	getConfigPath,
 	loadBuildProject,
 	resolveConfigDefinition,
 } from "@lucidcms/core/build";
+import { drainJobs, logScopes } from "@lucidcms/core/extension";
 import {
-	destroyEmailAdapter,
-	getInitializedEmailAdapter,
-} from "@lucidcms/core/email";
-import { destroyKVAdapter, getInitializedKVAdapter } from "@lucidcms/core/kv";
-import {
-	destroyMediaDeliveryAdapter,
-	getInitializedMediaDeliveryAdapter,
-} from "@lucidcms/core/media-delivery";
-import {
-	destroyMediaStorageAdapter,
-	getInitializedMediaStorageAdapter,
-} from "@lucidcms/core/media-storage";
-import { drainJobs, logScope } from "@lucidcms/core/queue";
-import {
+	createLucidAdapters,
 	createServiceContext,
+	logger,
 	prepareTranslations,
 } from "@lucidcms/core/runtime";
 import type {
-	AdapterLifecycleContext,
 	AdapterRuntimeContext,
 	Config,
 	DatabaseConnection,
-	EmailAdapterInstance,
 	EnvironmentVariables,
-	KVAdapterInstance,
-	MediaDeliveryAdapterInstance,
-	MediaStorageAdapterInstance,
+	LucidAdapters,
 	QueueAdapterInstance,
 	TranslationStore,
 } from "@lucidcms/core/types";
@@ -121,44 +105,11 @@ const getConfig = async (): Promise<{
 };
 
 const startConsumer = async () => {
-	let kvInstance: KVAdapterInstance | undefined;
-	let mediaStorageInstance: MediaStorageAdapterInstance | null | undefined;
-	let mediaDeliveryInstance: MediaDeliveryAdapterInstance | undefined;
-	let emailInstance: EmailAdapterInstance | undefined;
-	let adapterLifecycleContext: AdapterLifecycleContext | undefined;
+	let adapters: LucidAdapters | undefined;
 	let database: DatabaseConnection | undefined;
 
 	try {
 		const { config, translationStore, env, runtimeContext } = await getConfig();
-
-		adapterLifecycleContext = {
-			config,
-			env,
-			runtimeContext,
-			purpose: "queue-consumer",
-		};
-
-		kvInstance = await getInitializedKVAdapter(config, {
-			env,
-			runtimeContext,
-		});
-		mediaStorageInstance = await getInitializedMediaStorageAdapter(config, {
-			env,
-			runtimeContext,
-		});
-		mediaDeliveryInstance = await getInitializedMediaDeliveryAdapter(config, {
-			env,
-			runtimeContext,
-		});
-		emailInstance = await getInitializedEmailAdapter(config, {
-			env,
-			runtimeContext,
-			purpose: "queue-consumer",
-		});
-		const kv = kvInstance;
-		const mediaStorage = mediaStorageInstance;
-		const mediaDelivery = mediaDeliveryInstance;
-		const email = emailInstance;
 
 		let requestPoll: () => void = () => undefined;
 		const internalQueueAdapter: QueueAdapterInstance = {
@@ -167,19 +118,24 @@ const startConsumer = async () => {
 			support: { scheduling: true, maxDelayMs: null },
 			publish: async () => requestPoll(),
 		};
+		adapters = await createLucidAdapters({
+			config,
+			env,
+			runtimeContext,
+			overrides: {
+				queue: internalQueueAdapter,
+			},
+		});
+		const activeAdapters = adapters;
 		database = await config.db.connect(env);
-
+		const activeDatabase = database;
 		const serviceContext = createServiceContext({
 			config,
-			database: database,
+			database: activeDatabase,
 			translationStore,
 			env,
 			runtimeContext,
-			queue: internalQueueAdapter,
-			kv,
-			mediaStorage,
-			mediaDelivery,
-			email,
+			...activeAdapters.instances,
 		});
 
 		// -----------------------------------------
@@ -201,22 +157,9 @@ const startConsumer = async () => {
 					clearTimeout(pollTimeout);
 					pollTimeout = undefined;
 				}
-				if (pollPromise) await Promise.allSettled([pollPromise]);
-				if (adapterLifecycleContext) {
-					await Promise.allSettled([
-						database?.destroy(),
-						destroyKVAdapter(kvInstance, adapterLifecycleContext),
-						destroyMediaStorageAdapter(
-							mediaStorageInstance,
-							adapterLifecycleContext,
-						),
-						destroyMediaDeliveryAdapter(
-							mediaDeliveryInstance,
-							adapterLifecycleContext,
-						),
-						destroyEmailAdapter(emailInstance, adapterLifecycleContext),
-					]);
-				}
+				if (pollPromise) await pollPromise;
+				await activeAdapters.destroy();
+				await activeDatabase.destroy();
 
 				await logger.flush();
 				if (options.notifyParent) {
@@ -253,14 +196,14 @@ const startConsumer = async () => {
 							error: jobsResult.error,
 							event: "worker-queue.poll.query.failed",
 							message: "Error getting ready jobs",
-							scope: logScope,
+							scope: logScopes.queueAdapter,
 						});
 						return;
 					}
 
 					logger.debug({
 						message: "Jobs found",
-						scope: logScope,
+						scope: logScopes.queueAdapter,
 						data: { jobs: jobsResult.data.found },
 					});
 
@@ -279,7 +222,7 @@ const startConsumer = async () => {
 						error,
 						event: "worker-queue.poll.failed",
 						message: "Polling error",
-						scope: logScope,
+						scope: logScopes.queueAdapter,
 					});
 				}
 			})().finally(() => {
@@ -325,31 +268,18 @@ const startConsumer = async () => {
 
 		logger.debug({
 			message: "Starting queue polling",
-			scope: logScope,
+			scope: logScopes.queueAdapter,
 		});
 		checkNow();
 	} catch (error) {
-		if (adapterLifecycleContext) {
-			await Promise.allSettled([
-				database?.destroy(),
-				destroyKVAdapter(kvInstance, adapterLifecycleContext),
-				destroyMediaStorageAdapter(
-					mediaStorageInstance,
-					adapterLifecycleContext,
-				),
-				destroyMediaDeliveryAdapter(
-					mediaDeliveryInstance,
-					adapterLifecycleContext,
-				),
-				destroyEmailAdapter(emailInstance, adapterLifecycleContext),
-			]);
-		}
 		logger.error({
 			error,
 			event: "worker-queue.consumer.startup.failed",
 			message: "Consumer startup error",
-			scope: logScope,
+			scope: logScopes.queueAdapter,
 		});
+		if (adapters) await adapters.destroy();
+		if (database) await database.destroy();
 		await logger.flush();
 		process.exit(1);
 	}

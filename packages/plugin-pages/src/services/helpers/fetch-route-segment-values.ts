@@ -2,7 +2,7 @@ import {
 	buildTableName,
 	prefixGeneratedColName,
 	resolveRelatedDocumentVersionType,
-} from "@lucidcms/core/plugin";
+} from "@lucidcms/core/extension";
 import type {
 	DocumentVersionType,
 	LucidBrickTableName,

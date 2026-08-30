@@ -2,7 +2,7 @@ import type {
 	DatabaseAdapterCreator,
 	DatabaseAdapterFactory,
 	DatabaseAdapterOptionsFactory,
-} from "@lucidcms/core/db";
+} from "@lucidcms/core/types";
 import type postgresClient from "postgres";
 import type { PostgresAdapter } from "./index.js";
 

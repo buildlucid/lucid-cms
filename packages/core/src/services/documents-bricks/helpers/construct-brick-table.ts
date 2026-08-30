@@ -1,4 +1,10 @@
 import crypto from "node:crypto";
+import type {
+	FieldDatabaseMode,
+	Insert,
+	InternalDocumentBrick,
+	InternalDocumentField,
+} from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
@@ -19,12 +25,6 @@ import type {
 } from "../../../libs/db/tables/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
-import type {
-	FieldDatabaseMode,
-	Insert,
-	InternalDocumentBrick,
-	InternalDocumentField,
-} from "../../../types.js";
 import processFieldValues from "./process-field-values.js";
 
 export type InsertBrickTables = {

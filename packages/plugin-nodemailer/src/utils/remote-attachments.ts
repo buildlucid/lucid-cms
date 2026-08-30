@@ -2,7 +2,7 @@ import { lookup } from "node:dns/promises";
 import http from "node:http";
 import https from "node:https";
 import type { LookupFunction } from "node:net";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { EmailAttachment, ServiceResponse } from "@lucidcms/core/types";
 import ipaddr from "ipaddr.js";
 

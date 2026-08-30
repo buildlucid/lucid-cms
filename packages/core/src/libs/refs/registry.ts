@@ -1,4 +1,4 @@
-import type { RefResource } from "../../types.js";
+import type { RefResource } from "../../exports/types.js";
 import { refResourceKeys } from "./constants.js";
 import documentRefResource from "./documents/index.js";
 import mediaRefResource from "./media/index.js";

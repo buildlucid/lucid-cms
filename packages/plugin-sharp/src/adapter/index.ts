@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { MediaDeliveryAdapterInstance } from "@lucidcms/core/types";
 import mime from "mime-types";
 import sharp from "sharp";

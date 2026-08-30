@@ -1,4 +1,8 @@
-import type { CFConfig, FieldTypes, ServiceFn } from "../../../../../types.js";
+import type {
+	CFConfig,
+	FieldTypes,
+	ServiceFn,
+} from "../../../../../exports/types.js";
 import type { LucidBrickTableName } from "../../../../db/tables/index.js";
 import collections from "../../../collections.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";

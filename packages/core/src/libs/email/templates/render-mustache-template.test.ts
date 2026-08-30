@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { Config, ServiceContext } from "../../../types.js";
+import type { Config, ServiceContext } from "../../../exports/types.js";
 import { copy } from "../../i18n/index.js";
 import renderMustacheTemplate from "./render-mustache-template.js";
 

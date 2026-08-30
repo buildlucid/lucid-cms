@@ -1,5 +1,5 @@
+import type { ServiceResponse } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
-import type { ServiceResponse } from "../../../types.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import { copy } from "../../i18n/index.js";
 import createDocumentTable from "./tables/document-table.js";

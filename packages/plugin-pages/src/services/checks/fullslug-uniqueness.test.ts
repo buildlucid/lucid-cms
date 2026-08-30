@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig, ProjectedFullSlug } from "../../types/types.js";
 import {

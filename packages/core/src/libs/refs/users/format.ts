@@ -1,4 +1,4 @@
-import type { UserRef } from "../../../types.js";
+import type { UserRef } from "../../../exports/types.js";
 import mediaFormatter from "../../formatters/media.js";
 import type { UserRefData, UserRefResolveInput } from "./types.js";
 

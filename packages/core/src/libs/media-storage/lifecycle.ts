@@ -7,15 +7,18 @@ import type {
 import getMediaStorageAdapter from "./get-adapter.js";
 import type { MediaStorageAdapterInstance } from "./types.js";
 
-/** Resolve the configured media storage adapter and run its init lifecycle hook. */
+/** Resolve or use a supplied media storage adapter and run its init hook. */
 export const getInitializedMediaStorageAdapter = async (
 	config: Config,
 	options: {
+		adapter?: MediaStorageAdapterInstance | null;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	} = {},
 ): Promise<MediaStorageAdapterInstance | null> => {
-	const adapter = await getMediaStorageAdapter(config);
+	const adapter = Object.hasOwn(options, "adapter")
+		? (options.adapter ?? null)
+		: await getMediaStorageAdapter(config);
 	if (!adapter) return null;
 
 	const context = createAdapterLifecycleContext({

@@ -1,4 +1,3 @@
-import type { AdapterLifecycleContext } from "@lucidcms/core/types";
 import { describe, expect, test, vi } from "vitest";
 
 const workerState = vi.hoisted(() => ({
@@ -46,6 +45,7 @@ vi.mock("node:worker_threads", () => ({
 	},
 }));
 
+import type { AdapterLifecycleContext } from "@lucidcms/core/types";
 import workerQueueAdapter from "./index.js";
 
 describe("worker queue adapter lifecycle", () => {

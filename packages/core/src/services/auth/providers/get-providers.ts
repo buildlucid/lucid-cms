@@ -1,5 +1,5 @@
+import type { AuthProviders } from "../../../exports/types.js";
 import getAvailableProviders from "../../../libs/auth-providers/get-available-providers.js";
-import type { AuthProviders } from "../../../types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /** Lists the authentication providers available to the admin. */

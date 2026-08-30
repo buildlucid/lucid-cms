@@ -1,6 +1,9 @@
+import type {
+	CollectionTableNames,
+	ServiceFn,
+} from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
-import type { CollectionTableNames, ServiceFn } from "../../../types.js";
 
 const executeDeleteHook: ServiceFn<
 	[

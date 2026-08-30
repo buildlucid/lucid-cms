@@ -1,6 +1,9 @@
 import z from "zod";
 import constants from "../../../../../constants/constants.js";
-import type { LinkResValue, ServiceResponse } from "../../../../../types.js";
+import type {
+	LinkResValue,
+	ServiceResponse,
+} from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {

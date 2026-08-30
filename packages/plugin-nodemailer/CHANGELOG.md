@@ -1,5 +1,10 @@
 # @lucidcms/plugin-nodemailer
 
+## v1.1.8 (unreleased)
+
+- Nodemailer transporters are now verified whenever the adapter is initialized outside simulation mode.
+- Updated imports to use the reorganised `@lucidcms/core` entry points.
+
 ## v1.1.7
 
 - Bumped `@lucidcms/core` to `0.18.0-alpha.0`.

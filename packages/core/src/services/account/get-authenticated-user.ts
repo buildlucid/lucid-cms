@@ -1,3 +1,4 @@
+import type { User } from "../../exports/types.js";
 import { usersFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
@@ -5,7 +6,6 @@ import {
 	UsersRepository,
 } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type { User } from "../../types.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 

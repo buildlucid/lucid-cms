@@ -1,5 +1,4 @@
-import { z } from "@lucidcms/core";
-import { defineTable } from "@lucidcms/core/plugin";
+import { defineTable, z } from "@lucidcms/core";
 
 export type TestOrganisationTable = {
 	name: string;

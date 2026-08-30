@@ -1,10 +1,10 @@
 import { confirm } from "@inquirer/prompts";
-import { syncServices } from "../../../services/index.js";
 import type {
 	Config,
 	EnvironmentVariables,
 	ServiceContext,
-} from "../../../types.js";
+} from "../../../exports/types.js";
+import { syncServices } from "../../../services/index.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import applyCollectionMigrations from "../../collection/apply-collection-migrations.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";

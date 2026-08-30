@@ -1,4 +1,4 @@
-import type { ServiceFn } from "../../types.js";
+import type { ServiceFn } from "../../exports/types.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { CollectionMigrationsRepository } from "../repositories/index.js";
 import buildMigrations from "./migration/build-migrations.js";

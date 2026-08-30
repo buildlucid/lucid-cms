@@ -1,8 +1,8 @@
 import {
 	DEFAULT_KV_NAMESPACE,
-	getNamespacePrefix,
-	resolveKey,
-} from "@lucidcms/core/kv";
+	getKVNamespacePrefix,
+	resolveKVKey,
+} from "@lucidcms/core/extension";
 import type {
 	KVAdapterInstance,
 	KVDeleteManyParams,
@@ -21,13 +21,13 @@ const CLEAR_BATCH_SIZE = 100;
 
 const cloudflareKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 	const namespace = options.namespace ?? DEFAULT_KV_NAMESPACE;
-	const namespacePrefix = getNamespacePrefix(namespace);
+	const namespacePrefix = getKVNamespacePrefix(namespace);
 	const resolveCloudflareKey = (
 		key: string,
 		keyOptions?: {
 			hash?: boolean;
 		},
-	) => resolveKey(key, keyOptions, { maxKeyBytes: MAX_KEY_BYTES, namespace });
+	) => resolveKVKey(key, keyOptions, { maxKeyBytes: MAX_KEY_BYTES, namespace });
 
 	return {
 		type: "kv-adapter",

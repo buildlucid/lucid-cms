@@ -1,4 +1,4 @@
-import type { Config, EnvironmentVariables } from "../../../types.js";
+import type { Config, EnvironmentVariables } from "../../../exports/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import type { DatabaseConnection } from "../../db/types.js";

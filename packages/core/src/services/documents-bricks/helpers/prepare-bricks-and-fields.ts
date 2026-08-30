@@ -1,3 +1,8 @@
+import type {
+	Config,
+	FieldInputSchema,
+	FieldTypes,
+} from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
@@ -8,7 +13,6 @@ import resolveCollectionLocalization, {
 	type ResolvedCollectionLocalization,
 } from "../../../libs/collection/helpers/resolve-collection-localization.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { Config, FieldInputSchema, FieldTypes } from "../../../types.js";
 
 /**
  * - Processes fields to remove any that don't exist in the custom fields.

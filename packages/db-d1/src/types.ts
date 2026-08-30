@@ -4,7 +4,7 @@ import type {
 	DatabaseAdapterCreator,
 	DatabaseAdapterFactory,
 	DatabaseAdapterOptionsFactory,
-} from "@lucidcms/core/db";
+} from "@lucidcms/core/types";
 import type { D1Adapter } from "./index.js";
 import type { D1DialectConfig } from "./lib/kysely-d1.js";
 

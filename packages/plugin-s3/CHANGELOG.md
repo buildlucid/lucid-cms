@@ -4,6 +4,7 @@
 
 - Migrated to the media storage adapter contract with explicit ready status and protocol-based multipart upload sessions.
 - Added a direct `s3StorageAdapter` export for config-first usage.
+- Updated imports to use the reorganised `@lucidcms/core` entry points.
 
 ## v2.2.5
 

@@ -1,6 +1,6 @@
+import type { ServiceResponse } from "../../../../exports/types.js";
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
-import type { ServiceResponse } from "../../../../types.js";
 import buildSchemaIndex from "../../helpers/build-schema-index.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "../types.js";

@@ -1,4 +1,7 @@
-import type { DocumentRoute, InternalDocumentField } from "../../types.js";
+import type {
+	DocumentRoute,
+	InternalDocumentField,
+} from "../../exports/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import {
 	formatDocumentLabelValue,

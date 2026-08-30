@@ -1,5 +1,5 @@
 import { copy } from "@lucidcms/core";
-import { prefixGeneratedColName } from "@lucidcms/core/plugin";
+import { prefixGeneratedColName } from "@lucidcms/core/extension";
 import type {
 	CollectionTableNames,
 	DocumentVersionType,

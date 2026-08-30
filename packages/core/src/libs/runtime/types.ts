@@ -1,7 +1,7 @@
 import type { AddressInfo } from "node:net";
 import type z from "zod";
+import type { LucidHonoContext } from "../../exports/types.js";
 import type { Config, LucidConfig } from "../../types/config.js";
-import type { LucidHonoContext } from "../../types.js";
 import type { CLILogger } from "../cli/logger.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { DatabaseAdapterFactory } from "../db/adapter-factory.js";
@@ -153,9 +153,6 @@ export interface EnvironmentVariables extends Record<string, unknown> {}
 /** Controls whether a live database connection belongs to a runtime or invocation. */
 export type DatabaseConnectionScope = "runtime" | "invocation";
 
-/** Identifies which execution context owns an adapter lifecycle invocation. */
-export type AdapterLifecyclePurpose = "runtime" | "tooling" | "queue-consumer";
-
 export type AdapterLifecycleContext = {
 	config: Config;
 	/**
@@ -165,8 +162,6 @@ export type AdapterLifecycleContext = {
 	 */
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
-	/** Defaults to `runtime` when the caller does not specify a purpose. */
-	purpose?: AdapterLifecyclePurpose;
 };
 
 export type GetEnvVarsLogger = {

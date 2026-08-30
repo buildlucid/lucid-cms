@@ -2,7 +2,7 @@ import type {
 	CollectionDocument,
 	CollectionDocumentKey,
 	EnvironmentVariables,
-} from "../../../../types.js";
+} from "../../../../exports/types.js";
 import type {
 	LucidBrickTableName,
 	LucidDocumentTableName,

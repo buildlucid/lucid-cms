@@ -1,5 +1,5 @@
 import z from "zod";
-import type { ServiceResponse } from "../../../../../types.js";
+import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";

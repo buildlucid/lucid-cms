@@ -1,7 +1,5 @@
-import {
-	createDatabaseAdapterFactory,
-	type DatabaseAdapterFactory,
-} from "@lucidcms/core/db";
+import { createDatabaseAdapterFactory } from "@lucidcms/core/extension";
+import type { DatabaseAdapterFactory } from "@lucidcms/core/types";
 import { PostgresAdapter } from "../index.js";
 import type {
 	PostgresAdapterOptions,

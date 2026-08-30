@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
+import type { FieldInputSchema } from "../../../exports/types.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { FieldInputSchema } from "../../../types.js";
 import prepareBricksAndFields, {
 	analyzeEmbeddedBrickGraph,
 } from "./prepare-bricks-and-fields.js";

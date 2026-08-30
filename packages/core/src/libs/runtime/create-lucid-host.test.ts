@@ -5,6 +5,7 @@ import type { Config } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
 import type { DatabaseConnection } from "../db/types.js";
+import type { QueueAdapterInstance } from "../queue/types.js";
 import createLucidHost from "./create-lucid-host.js";
 
 const runtimeContext = {
@@ -151,6 +152,35 @@ describe("createLucidHost database ownership", () => {
 
 		await host.destroy();
 		expect(fixture.connections[0]?.destroy).toHaveBeenCalledOnce();
+	});
+
+	test("uses and manages a queue adapter override", async () => {
+		const fixture = createFixture();
+		const queue: QueueAdapterInstance = {
+			type: "queue-adapter",
+			key: "host-owned",
+			support: { scheduling: true, maxDelayMs: null },
+			lifecycle: {
+				init: vi.fn(),
+				destroy: vi.fn(),
+			},
+			publish: vi.fn(),
+		};
+		const host = await createLucidHost({
+			definition: fixture.definition,
+			runtimeContext,
+			databaseScope: "runtime",
+			adapterOverrides: { queue },
+		});
+
+		const context = await host.createInvocation().getServiceContext();
+
+		expect(context.queue).toBe(queue);
+		expect(host.adapterKeys.queue).toBe("host-owned");
+		expect(queue.lifecycle?.init).toHaveBeenCalledOnce();
+
+		await host.destroy();
+		expect(queue.lifecycle?.destroy).toHaveBeenCalledOnce();
 	});
 
 	test("uses the host environment for a runtime-scoped connection", async () => {

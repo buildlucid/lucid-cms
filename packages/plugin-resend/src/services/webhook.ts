@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type { EmailDeliveryStatus, ServiceFn } from "@lucidcms/core/types";
 import { Webhook } from "svix";
 import { controllerSchemas } from "../schema/webhook.js";

@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
-import type { Config } from "../../../types.js";
+import type { Config } from "../../../exports/types.js";
 import loadEmailTemplates from "./load-email-templates.js";
 
 let templateDirectory: string;

@@ -1,4 +1,4 @@
-import { defineSeed } from "@lucidcms/core/plugin";
+import { defineSeed } from "@lucidcms/core";
 import type { TestOrganisationTable } from "../src/tables/test-organisations.js";
 
 export default defineSeed(async (context) => {

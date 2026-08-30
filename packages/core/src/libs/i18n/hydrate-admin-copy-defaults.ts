@@ -71,7 +71,8 @@ const hydrateValue = (
  *
  * @example
  * ```ts
- * import { copy, hydrateAdminCopyDefaults } from "@lucidcms/core/plugin";
+ * import { copy } from "@lucidcms/core";
+ * import { hydrateAdminCopyDefaults } from "@lucidcms/core/extension";
  *
  * const details = hydrateAdminCopyDefaults(
  *   { name: copy("admin:collections.blog.name") },

@@ -1,6 +1,6 @@
 import { constants } from "node:fs";
 import { access, unlink } from "node:fs/promises";
-import { copy } from "@lucidcms/core/plugin";
+import { copy } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
 	MediaStorageAdapterServiceDeleteMultiple,

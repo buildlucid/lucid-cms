@@ -1,4 +1,4 @@
-import type { RefResource, Refs } from "../../types.js";
+import type { RefResource, Refs } from "../../exports/types.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 
 export type RefTarget = {

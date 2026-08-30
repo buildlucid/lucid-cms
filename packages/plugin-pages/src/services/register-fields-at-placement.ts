@@ -1,5 +1,9 @@
-import { type CollectionBuilder, LucidError } from "@lucidcms/core";
-import { copy, translate } from "@lucidcms/core/plugin";
+import {
+	type CollectionBuilder,
+	copy,
+	LucidError,
+	translate,
+} from "@lucidcms/core";
 import type { WritableDraft } from "immer";
 import { PLUGIN_KEY } from "../constants.js";
 import type { PagesFieldPlacement } from "../types/types.js";

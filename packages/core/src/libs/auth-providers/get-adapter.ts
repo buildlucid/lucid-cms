@@ -1,4 +1,4 @@
-import type { ServiceResponse } from "../../types.js";
+import type { ServiceResponse } from "../../exports/types.js";
 import { copy } from "../i18n/index.js";
 import createOAuth2Adapter from "./adapters/oauth2/adapter.js";
 import createOIDCAdapter from "./adapters/oidc/adapter.js";
