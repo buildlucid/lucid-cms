@@ -21,7 +21,7 @@
 		"migrate:fresh": "lucidcms migrate:fresh"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^14.1.4",
+		"@astrojs/cloudflare": "^14.3.0",
 		"@lucidcms/astro": "*",
 		"@lucidcms/client": "*",
 		"@lucidcms/core": "*",
@@ -30,7 +30,7 @@
 		"@lucidcms/plugin-cloudflare-r2": "*",
 		"@lucidcms/plugin-pages": "*",
 		"@lucidcms/runtime-cloudflare": "*",
-		"astro": "^7.1.3"
+		"astro": "^7.3.1"
 	},
 	"devDependencies": {
 		"wrangler": "^4.112.0"

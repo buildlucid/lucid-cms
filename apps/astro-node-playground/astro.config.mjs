@@ -6,6 +6,7 @@ import { defineConfig } from "astro/config";
 
 export default defineConfig({
 	output: "server",
+	session: false,
 	adapter: node({ mode: "standalone" }),
 	integrations: [lucidCMS()],
 });
