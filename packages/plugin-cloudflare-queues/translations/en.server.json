@@ -1,0 +1,5 @@
+{
+	"plugin.cloudflare.queues.jobs.consume.development.failed": "The Cloudflare queue could not finish consuming its jobs in development.",
+	"plugin.cloudflare.queues.binding.invalid": "The Cloudflare queue binding \"{{binding}}\" is missing or invalid.",
+	"plugin.cloudflare.queues.jobs.publish.failed": "The Cloudflare queue could not publish its jobs."
+}

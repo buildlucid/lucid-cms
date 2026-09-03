@@ -1,8 +1,8 @@
 import z from "zod";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import defineJob from "../../../libs/queue/define-job.js";
-import type { JobHandler } from "../../../libs/queue/types.js";
+import defineJob from "../../../libs/jobs/define-job.js";
+import type { JobHandler } from "../../../libs/jobs/types.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 
 const input = z.object({
@@ -49,7 +49,7 @@ const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async (
  * 2. It is not referenced by any non-revision version's promoted_from field
  */
 export const deleteExpiredRevisionsJob = defineJob({
-	name: "lucid:document-versions.delete-expired",
+	name: "core:delete-expired-revisions",
 	version: 1,
 	input,
 	handler: deleteExpiredRevisions,

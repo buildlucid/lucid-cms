@@ -1,34 +1,25 @@
-import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
-import logger from "../logger/index.js";
+import { LucidError } from "../../utils/errors/index.js";
 import type { MediaStorageAdapterInstance } from "./types.js";
 
-/** Get the configured media storage adapter. */
-const getMediaStorageAdapter = async (
-	config: Config,
-): Promise<MediaStorageAdapterInstance | null> => {
+/** Resolves the configured media storage adapter, returning null when omitted. */
+const getMediaStorageAdapter = async (config: {
+	media: Pick<Config["media"], "storage">;
+}): Promise<MediaStorageAdapterInstance | null> => {
+	if (!config.media.storage) return null;
+
 	try {
-		if (config.media.storage) {
-			const adapter =
-				typeof config.media.storage === "function"
-					? await config.media.storage()
-					: config.media.storage;
-
-			return await adapter;
-		}
-
-		return null;
+		return await (typeof config.media.storage === "function"
+			? config.media.storage()
+			: config.media.storage);
 	} catch (error) {
-		logger.error({
-			error,
-			event: "media-storage-adapter.initialization.failed",
-			scope: constants.logScopes.mediaStorageAdapter,
-			message: "Failed to initialize media storage adapter",
+		if (error instanceof LucidError) throw error;
+		throw new LucidError({
+			message: "The configured media storage adapter could not be initialized.",
 			data: {
 				errorMessage: error instanceof Error ? error.message : String(error),
 			},
 		});
-		return null;
 	}
 };
 

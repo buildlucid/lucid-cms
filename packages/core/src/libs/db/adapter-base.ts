@@ -15,7 +15,7 @@ import type { EnvironmentVariables } from "../runtime/types.js";
 import Migration00000001 from "./migrations/00000001-locales.js";
 import Migration00000002 from "./migrations/00000002-options.js";
 import Migration00000003 from "./migrations/00000003-users-and-permissions.js";
-import Migration00000004 from "./migrations/00000004-queues.js";
+import Migration00000004 from "./migrations/00000004-jobs.js";
 import Migration00000005 from "./migrations/00000005-emails.js";
 import Migration00000006 from "./migrations/00000006-media.js";
 import Migration00000007 from "./migrations/00000007-collections.js";
@@ -52,7 +52,7 @@ export default abstract class DatabaseAdapter {
 		"00000001-locales",
 		"00000002-options",
 		"00000003-users-and-permissions",
-		"00000004-queues",
+		"00000004-jobs",
 		"00000005-emails",
 		"00000006-media",
 		"00000007-collections",
@@ -391,7 +391,7 @@ export default abstract class DatabaseAdapter {
 			"00000001-locales": Migration00000001(this),
 			"00000002-options": Migration00000002(this),
 			"00000003-users-and-permissions": Migration00000003(this),
-			"00000004-queues": Migration00000004(this),
+			"00000004-jobs": Migration00000004(this),
 			"00000005-emails": Migration00000005(this),
 			"00000006-media": Migration00000006(this),
 			"00000007-collections": Migration00000007(this),

@@ -2,17 +2,15 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import { cancelJob } from "../../queue/jobs/cancel-job.js";
-import { cancelJobs } from "../../queue/jobs/cancel-jobs.js";
-import { enqueueJob } from "../../queue/jobs/enqueue-job.js";
-import { enqueueJobs } from "../../queue/jobs/enqueue-jobs.js";
+import { cancelJob, cancelJobs } from "../../jobs/cancel.js";
+import { enqueueJob, enqueueJobs } from "../../jobs/enqueue.js";
 import type {
 	AnyJobDefinition,
 	JobCancelResult,
 	JobEnqueueOptions,
 	JobInput,
 	JobReceipt,
-} from "../../queue/types.js";
+} from "../../jobs/types.js";
 
 /** Helpers for enqueueing and cancelling durable jobs. */
 export type ToolkitJobs = {

@@ -53,22 +53,26 @@ export type LucidAstroBridge = {
 	/** Handles an optional platform scheduled event. */
 	scheduled?(props: {
 		invocation: LucidInvocation;
-		controller: { cron: string };
+		controller: { cron: string; scheduledTime: number };
 		state: LucidAstroRuntimeState;
 	}): void | Promise<void>;
+};
+
+export type LucidAstroViteOptions = {
+	aliases?: Record<string, string>;
+	ssrExternal?: string[];
 };
 
 export type LucidAstroPrepareResult = {
 	/** Generated files that should not trigger another Vite restart. */
 	ignoredWatchFiles?: string[];
+	/** Runtime-specific Vite options resolved after preparing generated files. */
+	vite?: Pick<LucidAstroViteOptions, "aliases">;
 };
 
 /** Build-time contract for platform-specific Astro preparation. */
 export type LucidAstroIntegrationBridge = {
-	vite?: {
-		aliases?: Record<string, string>;
-		ssrExternal?: string[];
-	};
+	vite?: LucidAstroViteOptions;
 	/** Ensures the configured Astro adapter matches the Lucid runtime. */
 	validateAdapter(adapter: { name: string } | undefined): void;
 	/** Prepares platform artifacts after Lucid generates its runtime modules. */

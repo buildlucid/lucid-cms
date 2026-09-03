@@ -8,6 +8,8 @@ import type {
 	HttpExtensionRegister,
 	LucidRouteDefinition,
 } from "../http/types.js";
+import { isJobDefinition } from "../jobs/registry.js";
+import type { AnyJobDefinition } from "../jobs/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
 import { LogLevelSchema, LogTransportSchema } from "../logger/schema.js";
 import type {
@@ -18,12 +20,7 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../media-storage/types.js";
-import {
-	type AnyJobDefinition,
-	isJobDefinition,
-	type QueueAdapter,
-	type QueueAdapterInstance,
-} from "../queue/types.js";
+import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
 import type { Seed } from "../seed/types.js";
 
 const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
@@ -338,7 +335,9 @@ const ConfigSchema = z.object({
 	),
 	queue: z.object({
 		adapter: QueueAdapterSchema.optional(),
-		jobs: z.array(JobDefinitionSchema),
+	}),
+	jobs: z.object({
+		definitions: z.array(JobDefinitionSchema),
 		retention: z.object({
 			completedDays: z.number().int().nonnegative(),
 			failedDays: z.number().int().nonnegative(),

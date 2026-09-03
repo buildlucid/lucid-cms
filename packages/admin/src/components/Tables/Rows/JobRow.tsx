@@ -5,6 +5,7 @@ import { Tr } from "@/components/Groups/Table/Tr";
 import DateCol from "@/components/Tables/Columns/DateCol";
 import JobDetailsCol from "@/components/Tables/Columns/JobDetailsCol";
 import PillCol from "@/components/Tables/Columns/PillCol";
+import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
@@ -15,7 +16,7 @@ interface JobRowProps extends TableRowProps {
 	job: Job;
 	include: boolean[];
 	theme?: TableTheme;
-	rowTarget: ReturnType<typeof useRowTarget<"preview">>;
+	rowTarget?: ReturnType<typeof useRowTarget<"details">>;
 }
 
 const JobRow: Component<JobRowProps> = (props) => {
@@ -28,18 +29,23 @@ const JobRow: Component<JobRowProps> = (props) => {
 			options={props.options}
 			callbacks={props.callbacks}
 			theme={props.theme}
-			actions={[
-				{
-					label: T()("common.preview"),
-					type: "button",
-					icon: "eye",
-					onClick: () => {
-						props.rowTarget.setTargetId(props.job.id);
-						props.rowTarget.setTrigger("preview", true);
-					},
-					permission: userStore.get.hasPermission([Permissions.JobsRead]).all,
-				},
-			]}
+			actions={
+				props.rowTarget
+					? [
+							{
+								label: T()("common.details"),
+								type: "button",
+								icon: "info",
+								onClick: () => {
+									props.rowTarget?.setTargetId(props.job.id);
+									props.rowTarget?.setTrigger("details", true);
+								},
+								permission: userStore.get.hasPermission([Permissions.JobsRead])
+									.all,
+							},
+						]
+					: []
+			}
 		>
 			<PillCol
 				text={props.job.status}
@@ -64,16 +70,21 @@ const JobRow: Component<JobRowProps> = (props) => {
 					padding: props.options?.padding,
 				}}
 			/>
-			<PillCol
-				text={props.job.attempts}
-				theme={"outline"}
+			<TextCol
+				text={
+					props.job.scheduleKey ??
+					(props.job.triggerType === "schedule"
+						? T()("common.schedule")
+						: T()("jobs.trigger.enqueue"))
+				}
 				options={{
 					include: props?.include[2],
 					padding: props.options?.padding,
+					minWidth: 220,
 				}}
 			/>
 			<PillCol
-				text={props.job.dispatchStatus}
+				text={`${props.job.attempts}/${props.job.maxAttempts}`}
 				theme={"outline"}
 				options={{
 					include: props?.include[3],
@@ -88,16 +99,11 @@ const JobRow: Component<JobRowProps> = (props) => {
 				}}
 			/>
 			<DateCol
-				date={props.job.availableAt}
+				date={
+					props.job.completedAt ?? props.job.failedAt ?? props.job.cancelledAt
+				}
 				options={{
 					include: props?.include[5],
-					padding: props.options?.padding,
-				}}
-			/>
-			<DateCol
-				date={props.job.completedAt}
-				options={{
-					include: props?.include[6],
 					padding: props.options?.padding,
 				}}
 			/>

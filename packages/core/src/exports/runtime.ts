@@ -4,7 +4,7 @@ import logger from "../libs/logger/index.js";
 import createLucidAdapters from "../libs/runtime/create-lucid-adapters.js";
 import createLucidHost from "../libs/runtime/create-lucid-host.js";
 import { resolveDatabaseAdapter } from "../libs/runtime/resolve-database-adapter.js";
-import setupCronJobs from "../libs/runtime/setup-cron-jobs.js";
+import setupJobScheduler from "../libs/runtime/setup-job-scheduler.js";
 import withResponseCleanup from "../libs/runtime/with-response-cleanup.js";
 import { LucidError } from "../utils/errors/index.js";
 import createServiceContext from "../utils/services/create-service-context.js";
@@ -18,6 +18,6 @@ export {
 	prepareTranslations,
 	processConfig,
 	resolveDatabaseAdapter,
-	setupCronJobs,
+	setupJobScheduler,
 	withResponseCleanup,
 };

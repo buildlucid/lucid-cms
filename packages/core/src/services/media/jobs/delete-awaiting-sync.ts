@@ -1,6 +1,6 @@
 import z from "zod";
-import defineJob from "../../../libs/queue/define-job.js";
-import type { JobHandler } from "../../../libs/queue/types.js";
+import defineJob from "../../../libs/jobs/define-job.js";
+import type { JobHandler } from "../../../libs/jobs/types.js";
 import { MediaAwaitingSyncRepository } from "../../../libs/repositories/index.js";
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 
@@ -40,7 +40,7 @@ const deleteAwaitingSyncMedia: JobHandler<z.infer<typeof input>> = async (
  * Deletes expired media that is still awaiting sync
  */
 export const deleteAwaitingSyncMediaJob = defineJob({
-	name: "lucid:media.delete-unsynced",
+	name: "core:delete-unsynced-media",
 	version: 1,
 	input,
 	handler: deleteAwaitingSyncMedia,

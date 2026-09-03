@@ -15,6 +15,8 @@ export const Permissions = {
 	EmailSend: "email:send",
 	EmailDelete: "email:delete",
 	JobsRead: "jobs:read",
+	JobsRun: "jobs:run",
+	JobsUpdate: "jobs:update",
 	PublishOperationsRead: "publish-operations:read",
 	AiCustomFieldValue: "ai:custom-field-value",
 	AiImageGenerate: "ai:image-generate",

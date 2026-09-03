@@ -1,7 +1,7 @@
 import z from "zod";
 import formatter from "../../../libs/formatters/index.js";
-import defineJob from "../../../libs/queue/define-job.js";
-import type { JobHandler } from "../../../libs/queue/types.js";
+import defineJob from "../../../libs/jobs/define-job.js";
+import type { JobHandler } from "../../../libs/jobs/types.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
 import { invalidateAuthCache } from "../../auth/helpers/auth-cache.js";
 import checkNotLastUser from "../checks/check-not-last-user.js";
@@ -60,7 +60,7 @@ const deleteUser: JobHandler<z.infer<typeof input>> = async (context, data) => {
  * Deletes a single user
  */
 export const deleteUserJob = defineJob({
-	name: "lucid:users.delete",
+	name: "core:delete-user",
 	version: 1,
 	input,
 	handler: deleteUser,

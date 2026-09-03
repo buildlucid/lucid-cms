@@ -1,4 +1,4 @@
-import { LucidError, setupCronJobs } from "@lucidcms/core/runtime";
+import { LucidError, setupJobScheduler } from "@lucidcms/core/runtime";
 import type {
 	EnvironmentVariables,
 	HttpExtension,
@@ -134,19 +134,15 @@ const cloudflareAstroBridge = {
 	},
 	async scheduled(props: {
 		invocation: LucidInvocation;
-		controller: { cron: string };
+		controller: { cron: string; scheduledTime: number };
 		state: {
 			env: EnvironmentVariables;
 			runtimeContext: ReturnType<typeof getRuntimeContext>;
 		};
 	}) {
-		const cron = await setupCronJobs({
-			createQueue: false,
-			env: props.state.env,
-			runtimeContext: props.state.runtimeContext,
-		});
-		await cron.register(await props.invocation.getServiceContext(), {
-			schedule: props.controller.cron,
+		const scheduler = setupJobScheduler();
+		await scheduler.run(await props.invocation.getServiceContext(), {
+			scheduledAt: new Date(props.controller.scheduledTime),
 		});
 	},
 };

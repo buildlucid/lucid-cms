@@ -1,4 +1,4 @@
-import type { Email, EmailDeliveryStatus } from "@types";
+import type { EmailDeliveryStatus, EmailTransaction } from "@types";
 import type { Component } from "solid-js";
 import type { TableTheme } from "@/components/Groups/Table/Table";
 import { Tr } from "@/components/Groups/Table/Tr";
@@ -9,7 +9,7 @@ import type { TableRowProps } from "@/types/components";
 import DateCol from "../Columns/DateCol";
 
 interface EmailTransactionRowProps extends TableRowProps {
-	transaction: Email["transactions"][number];
+	transaction: EmailTransaction;
 	include: boolean[];
 	theme?: TableTheme;
 }

@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { Worker } from "node:worker_threads";
-import { logger } from "@lucidcms/core";
+import { copy, LucidError, logger } from "@lucidcms/core";
 import { logScopes } from "@lucidcms/core/extension";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
 import type { WorkerQueueAdapterOptions } from "../types.js";
@@ -26,13 +26,14 @@ const workerQueueAdapter = (
 	return {
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
-		support: { scheduling: true, maxDelayMs: null },
+		support: { delayedDelivery: true, maxDelayMs: null },
 		lifecycle: {
 			init: async (params) => {
 				if (!params.runtimeContext?.configEntryPoint) {
-					throw new Error(
-						"configEntryPoint is required. Your runtime likely does not support this queue adapter.",
-					);
+					throw new LucidError({
+						message:
+							"The worker queue needs a runtime with a config entry point.",
+					});
 				}
 
 				stopping = false;
@@ -135,7 +136,18 @@ const workerQueueAdapter = (
 			},
 		},
 		publish: async () => {
-			worker?.postMessage({ type: "CHECK_NOW" });
+			try {
+				worker?.postMessage({ type: "CHECK_NOW" });
+				return { error: undefined, data: undefined };
+			} catch (cause) {
+				return {
+					error: {
+						message: copy("server:plugin.worker.queues.jobs.check.failed"),
+						cause,
+					},
+					data: undefined,
+				};
+			}
 		},
 	};
 };

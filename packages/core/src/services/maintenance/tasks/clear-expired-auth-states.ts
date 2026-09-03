@@ -1,0 +1,26 @@
+import { AuthStatesRepository } from "../../../libs/repositories/index.js";
+import type { ServiceFn } from "../../../utils/services/types.js";
+
+/** Deletes expired authentication state rows. */
+const clearExpiredAuthStates: ServiceFn<[], undefined> = async (context) => {
+	const AuthStates = new AuthStatesRepository(context.db);
+	const now = new Date().toISOString();
+
+	const clearRes = await AuthStates.deleteMultiple({
+		where: [
+			{
+				key: "expiry_date",
+				operator: "<",
+				value: now,
+			},
+		],
+	});
+	if (clearRes.error) return clearRes;
+
+	return {
+		error: undefined,
+		data: undefined,
+	};
+};
+
+export default clearExpiredAuthStates;

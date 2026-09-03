@@ -36,6 +36,20 @@ afterEach(async () => {
 });
 
 describe("writeWranglerConfig", () => {
+	test("provisions one minutely scheduler trigger for builds", async () => {
+		const project = await createProject();
+		const result = await writeWranglerConfig({
+			configPath: project.configPath,
+			outputPath: project.buildOutputPath,
+			target: "build",
+		});
+
+		const config = await readGeneratedConfig(result.generatedConfigPath ?? "");
+		expect(config.triggers).toEqual({
+			crons: [constants.JOB_SCHEDULER_CRON],
+		});
+	});
+
 	test("generates bindings from prepare artifacts", async () => {
 		const project = await createProject();
 		const result = await writeWranglerConfig({
@@ -162,11 +176,14 @@ describe("writeWranglerConfig", () => {
 	test("uses manual Wrangler config paths without generating", async () => {
 		const project = await createProject();
 		const manualConfigPath = path.join(project.projectRoot, "wrangler.jsonc");
+		const manualConfig = JSON.stringify({
+			triggers: { crons: [constants.JOB_SCHEDULER_CRON] },
+		});
 		const generatedConfigPath = path.join(
 			project.projectRoot,
 			constants.WRANGLER_DEV_CONFIG_FILE,
 		);
-		await writeFile(manualConfigPath, "{}");
+		await writeFile(manualConfigPath, manualConfig);
 		await writeFile(
 			generatedConfigPath,
 			`// ${constants.WRANGLER_GENERATED_CONFIG_MARKER}\n{}\n`,
@@ -193,7 +210,7 @@ describe("writeWranglerConfig", () => {
 			configPath: manualConfigPath,
 			generated: false,
 		});
-		expect(await readFile(manualConfigPath, "utf-8")).toBe("{}");
+		expect(await readFile(manualConfigPath, "utf-8")).toBe(manualConfig);
 		await expect(readFile(generatedConfigPath, "utf-8")).rejects.toThrow();
 	});
 
@@ -203,7 +220,10 @@ describe("writeWranglerConfig", () => {
 			project.projectRoot,
 			constants.WRANGLER_DEV_CONFIG_FILE,
 		);
-		await writeFile(generatedConfigPath, "{}");
+		const manualConfig = JSON.stringify({
+			triggers: { crons: [constants.JOB_SCHEDULER_CRON] },
+		});
+		await writeFile(generatedConfigPath, manualConfig);
 
 		const result = await writeWranglerConfig({
 			configPath: project.configPath,
@@ -218,7 +238,7 @@ describe("writeWranglerConfig", () => {
 			configPath: generatedConfigPath,
 			generated: false,
 		});
-		expect(await readFile(generatedConfigPath, "utf-8")).toBe("{}");
+		expect(await readFile(generatedConfigPath, "utf-8")).toBe(manualConfig);
 	});
 
 	test("rejects overwriting an unmarked root generated config", async () => {
@@ -245,7 +265,12 @@ describe("writeWranglerConfig", () => {
 		);
 		const deployConfigDirectory = path.dirname(deployConfigPath);
 		await mkdir(deployConfigDirectory, { recursive: true });
-		await writeFile(path.join(project.projectRoot, "wrangler.jsonc"), "{}");
+		await writeFile(
+			path.join(project.projectRoot, "wrangler.jsonc"),
+			JSON.stringify({
+				triggers: { crons: [constants.JOB_SCHEDULER_CRON] },
+			}),
+		);
 		await writeFile(
 			deployConfigPath,
 			JSON.stringify({

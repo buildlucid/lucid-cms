@@ -65,10 +65,6 @@ export type AdapterOptions = {
 		 * nodejs_compat is always included.
 		 */
 		compatibilityFlags?: string[];
-		/**
-		 * Cron triggers to merge into the generated config.
-		 */
-		crons?: string[];
 	};
 };
 

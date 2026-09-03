@@ -137,25 +137,6 @@ export const emailsTable = defineTable("lucid_emails", (adapter) => ({
 				)
 				.optional(),
 		},
-		transactions: {
-			schema: z
-				.array(
-					z.object({
-						delivery_status: emailDeliveryStatusSchema,
-						message: z.string().nullable(),
-						strategy_identifier: z.string(),
-						strategy_data: z.record(z.string(), z.unknown()).nullable(),
-						simulate: z.union([
-							z.literal(adapter.config.defaults.boolean.true),
-							z.literal(adapter.config.defaults.boolean.false),
-						]),
-						external_message_id: z.string().nullable(),
-						created_at: z.union([z.string(), z.date()]).nullable(),
-						updated_at: z.union([z.string(), z.date()]).nullable(),
-					}),
-				)
-				.optional(),
-		},
 		strategy_data: {},
 	},
 	query: {

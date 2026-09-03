@@ -4,6 +4,7 @@ export { Dashboard } from "./Dashboard";
 export { DocumentsList } from "./DocumentsList";
 export { EmailsList } from "./EmailsList";
 export { IntegrationsList } from "./IntegrationsList";
+export { JobSchedulesList } from "./JobSchedulesList";
 export { JobsList } from "./JobsList";
 export { MediaList } from "./MediaList";
 export { OAuthClientsList } from "./OAuthClientsList";

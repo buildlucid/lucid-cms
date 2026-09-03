@@ -24,6 +24,9 @@ import type {
 	LucidEmailTransactions,
 	LucidIntegrationScopes,
 	LucidIntegrations,
+	LucidJobScheduleOverrides,
+	LucidJobScheduler,
+	LucidJobs,
 	LucidLocales,
 	LucidMedia,
 	LucidMediaAwaitingSync,
@@ -41,7 +44,6 @@ import type {
 	LucidOptions,
 	LucidPreviewSessions,
 	LucidProcessedImages,
-	LucidQueueJobs,
 	LucidRemoteConnections,
 	LucidRolePermissions,
 	LucidRoles,
@@ -67,6 +69,8 @@ export type TimestampImmutable = ColumnType<
 	string | undefined,
 	never
 >;
+
+export type TimestampRequired = ColumnType<string | Date, string, string>;
 
 export type BooleanInt = 0 | 1 | boolean;
 
@@ -263,7 +267,9 @@ export interface LucidDB {
 	lucid_oauth_refresh_tokens: LucidOAuthRefreshTokens;
 	lucid_collections: LucidCollections;
 	lucid_collection_migrations: LucidCollectionMigrations;
-	lucid_queue_jobs: LucidQueueJobs;
+	lucid_jobs: LucidJobs;
+	lucid_job_scheduler: LucidJobScheduler;
+	lucid_job_schedule_overrides: LucidJobScheduleOverrides;
 	lucid_ai_generations: LucidAiGenerations;
 	lucid_auth_states: LucidAuthStates;
 	[key: LucidDocumentTableName]: LucidDocumentTable;

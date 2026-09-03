@@ -19,6 +19,7 @@ import type {
 	LocaleDirection,
 	TranslationSource,
 } from "../libs/i18n/types.js";
+import type { AnyJobDefinition } from "../libs/jobs/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
 import type { LogLevel, LogTransport } from "../libs/logger/types.js";
 import type {
@@ -31,7 +32,6 @@ import type {
 } from "../libs/media-storage/types.js";
 import type { LucidPluginResponse } from "../libs/plugins/types.js";
 import type {
-	AnyJobDefinition,
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
@@ -444,7 +444,7 @@ export interface LucidConfig {
 		};
 	};
 	/**
-	 * Queue configuration for background job processing.
+	 * Queue configuration for durable job delivery.
 	 */
 	queue?: {
 		/**
@@ -454,9 +454,14 @@ export interface LucidConfig {
 			| QueueAdapter
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
-		/** Job definitions. */
-		jobs?: AnyJobDefinition[];
-		/** How long terminal jobs remain visible. */
+	};
+	/**
+	 * Durable job definitions and retention settings.
+	 */
+	jobs?: {
+		/** Job definitions registered by the project and its plugins. */
+		definitions?: AnyJobDefinition[];
+		/** How long terminal jobs and their schedule history remain visible. */
 		retention?: {
 			/** Days to retain completed jobs. */
 			completedDays?: number;
@@ -640,7 +645,9 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| QueueAdapter
 			| QueueAdapterInstance
 			| Promise<QueueAdapterInstance>;
-		jobs: AnyJobDefinition[];
+	};
+	jobs: {
+		definitions: AnyJobDefinition[];
 		retention: {
 			completedDays: number;
 			failedDays: number;

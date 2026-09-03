@@ -64,8 +64,8 @@ const SystemSettingsHeader: Component<{
 								permission: canReadAiUsage(),
 							},
 							{
-								label: T()("common.queue"),
-								href: "/lucid/system/queue-observability",
+								label: T()("routes.system.jobs.title"),
+								href: "/lucid/system/jobs",
 								permission: canReadJobs(),
 							},
 						]}

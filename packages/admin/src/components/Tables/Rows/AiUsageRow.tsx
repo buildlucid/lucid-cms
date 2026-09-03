@@ -10,8 +10,8 @@ import PillCol from "@/components/Tables/Columns/PillCol";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
-import { formatAiUsageDuration } from "@/utils/ai-usage";
 import formatAiCost from "@/utils/format-ai-cost";
+import formatDuration from "@/utils/format-duration";
 
 interface AiUsageRowProps extends TableRowProps {
 	aiUsage: AiUsage;
@@ -66,7 +66,7 @@ const AiUsageRow: Component<AiUsageRowProps> = (props) => {
 				)}
 			</Td>
 			<TextCol
-				text={formatAiUsageDuration(props.aiUsage.durationMs)}
+				text={formatDuration(props.aiUsage.durationMs)}
 				options={{ include: props.include[5] }}
 			/>
 			<DateCol

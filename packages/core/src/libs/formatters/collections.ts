@@ -18,7 +18,7 @@ import {
 const formatMultiple = (props: {
 	collections: CollectionBuilder[];
 	allCollections: CollectionBuilder[];
-	queueSupportsScheduling?: boolean;
+	queueSupportsDelayedDelivery?: boolean;
 	adminTranslations?: Record<string, string>;
 	localization: LocalizationConfig;
 	include?: {
@@ -39,7 +39,7 @@ const formatMultiple = (props: {
 		formatSingle({
 			collection: c,
 			documentTargetCollectionKeys,
-			queueSupportsScheduling: props.queueSupportsScheduling,
+			queueSupportsDelayedDelivery: props.queueSupportsDelayedDelivery,
 			adminTranslations: props.adminTranslations,
 			localization: props.localization,
 			include: props.include,
@@ -52,7 +52,7 @@ const formatSingle = (props: {
 	collection: CollectionBuilder;
 	allCollections?: CollectionBuilder[];
 	documentTargetCollectionKeys?: Set<string>;
-	queueSupportsScheduling?: boolean;
+	queueSupportsDelayedDelivery?: boolean;
 	adminTranslations?: Record<string, string>;
 	localization: LocalizationConfig;
 	migrationStatus?: MigrationStatus;
@@ -129,7 +129,7 @@ const formatSingle = (props: {
 		capabilities: {
 			scheduling:
 				collectionData.scheduling === true &&
-				props.queueSupportsScheduling === true,
+				props.queueSupportsDelayedDelivery === true,
 			preview: collectionData.preview !== null,
 		},
 		permissions: resolvedPermissions,

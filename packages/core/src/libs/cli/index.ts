@@ -2,8 +2,8 @@
 import { Command } from "commander";
 import packageJson from "../../../package.json" with { type: "json" };
 import buildCommand from "./commands/build.js";
-import cronCommand from "./commands/cron.js";
 import devCommand from "./commands/dev.js";
+import jobSchedulerCommand from "./commands/job-scheduler.js";
 import migrateCommand from "./commands/migrate.js";
 import migrateFreshCommand from "./commands/migrate-fresh.js";
 import migrateNewCommand from "./commands/migrate-new.js";
@@ -137,9 +137,9 @@ program
 	.action(seedNewCommand);
 
 program
-	.command("cron [job]")
-	.description("Run a cron job manually")
+	.command("jobs:schedule [job-or-schedule]")
+	.description("Run a registered job schedule")
 	.option("--remote", remoteOptionDescription)
-	.action(cronCommand);
+	.action(jobSchedulerCommand);
 
 program.parse();

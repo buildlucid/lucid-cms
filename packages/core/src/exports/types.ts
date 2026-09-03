@@ -18,6 +18,31 @@ export * from "../libs/email/types.js";
 export * from "../libs/hooks/types.js";
 export * from "../libs/http/types.js";
 export * from "../libs/i18n/types.js";
+export type {
+	AnyJobDefinition,
+	DefineJobOptions,
+	DefineJobSchedule,
+	JobCancelResult,
+	JobConsumptionResult,
+	JobDefinition,
+	JobDispatchStatus,
+	JobEnqueueOptions,
+	JobExecution,
+	JobHandler,
+	JobInput,
+	JobPayload,
+	JobPermanentFailure,
+	JobPermanentFailureHandler,
+	JobReceipt,
+	JobRetryPolicy,
+	JobSchedule,
+	JobScheduleMissed,
+	JobScheduleOverlap,
+	JobScheduleTiming,
+	JobStatus,
+	JobTrigger,
+	JobValue,
+} from "../libs/jobs/types.js";
 export * from "../libs/kv/types.js";
 export * from "../libs/logger/types.js";
 export * from "../libs/media-delivery/types.js";
@@ -33,23 +58,6 @@ export type {
 export * from "../libs/permission/types.js";
 export * from "../libs/plugins/types.js";
 export type {
-	AnyJobDefinition,
-	DefineJobOptions,
-	JobCancelResult,
-	JobConsumptionResult,
-	JobDefinition,
-	JobDispatchStatus,
-	JobEnqueueOptions,
-	JobExecution,
-	JobHandler,
-	JobInput,
-	JobPayload,
-	JobPermanentFailure,
-	JobPermanentFailureHandler,
-	JobReceipt,
-	JobRetryPolicy,
-	JobStatus,
-	JobValue,
 	QueueAdapter,
 	QueueAdapterInstance,
 	QueueDeliveryMessage,

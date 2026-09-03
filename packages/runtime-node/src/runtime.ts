@@ -31,6 +31,7 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 		hosts: {
 			astro: {
 				entrypoint: "@lucidcms/runtime-node/astro",
+				integrationEntrypoint: "@lucidcms/runtime-node/astro-integration",
 			},
 		},
 		configureLucid,
@@ -50,4 +51,5 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	};
 };
 
+export { default as createNodeJobScheduler } from "./services/create-node-job-scheduler.js";
 export { default as getRuntimeContext } from "./services/runtime-context.js";

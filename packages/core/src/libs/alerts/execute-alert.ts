@@ -1,13 +1,13 @@
 import z from "zod";
 import { copy } from "../i18n/index.js";
-import defineJob from "../queue/define-job.js";
-import { jobPayloadSchema } from "../queue/schema.js";
-import type { JobHandler } from "../queue/types.js";
+import defineJob from "../jobs/define-job.js";
+import { jobPayloadSchema } from "../jobs/payload.js";
+import type { JobHandler } from "../jobs/types.js";
 import { getAlertConfig } from "./alert-map.js";
 
 const input = z.object({
 	key: z.string().min(1),
-	source: z.enum(["cron", "programmatic"]).optional(),
+	source: z.enum(["schedule", "programmatic"]).optional(),
 	trigger: z.string().optional(),
 	metadata: jobPayloadSchema.optional(),
 });
@@ -39,7 +39,7 @@ const executeAlert: JobHandler<z.infer<typeof input>> = async (
 };
 
 export const executeAlertJob = defineJob({
-	name: "lucid:alert.execute",
+	name: "core:execute-alert",
 	version: 1,
 	input,
 	handler: executeAlert,

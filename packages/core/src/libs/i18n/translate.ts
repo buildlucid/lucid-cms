@@ -95,7 +95,7 @@ export function translate(
 /**
  * Creates a translator bound to a translation store and locale.
  *
- * Use this at request, service, adapter lifecycle, cron, and job boundaries when
+ * Use this at request, service, adapter lifecycle, scheduler, and job boundaries when
  * text should respect project and plugin translation overrides. The returned
  * translator resolves prefixed keys or any value created with `copy`.
  *

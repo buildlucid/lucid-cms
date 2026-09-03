@@ -1,7 +1,7 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
-import { cancelJob } from "../../libs/queue/jobs/cancel-job.js";
+import { cancelJob } from "../../libs/jobs/cancel.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";

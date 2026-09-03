@@ -14,7 +14,7 @@ import type {
 	EmailSubject,
 } from "../../libs/email/types.js";
 import { emailsFormatter } from "../../libs/formatters/index.js";
-import { enqueueJob } from "../../libs/queue/jobs/enqueue-job.js";
+import { enqueueJob } from "../../libs/jobs/enqueue.js";
 import {
 	EmailAttachmentsRepository,
 	EmailsRepository,

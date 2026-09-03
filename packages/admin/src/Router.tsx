@@ -40,9 +40,7 @@ const SystemAiUsageRoute = lazy(() => import("@/routes/System/AiUsage/View"));
 const SystemIntegrationsRoute = lazy(
 	() => import("@/routes/System/Integrations/View"),
 );
-const SystemQueueObservabilityRoute = lazy(
-	() => import("@/routes/System/QueueObservability/View"),
-);
+const SystemJobsRoute = lazy(() => import("@/routes/System/Jobs/View"));
 const EmailListRoute = lazy(() => import("@/routes/Emails/List"));
 const ReleaseRequestsListRoute = lazy(
 	() => import("@/routes/ReleaseRequests/List"),
@@ -225,11 +223,11 @@ const AppRouter: Component = () => {
 					)}
 				/>
 				<Route
-					path="/system/queue-observability"
-					preload={preloadRoutes(SystemQueueObservabilityRoute)}
+					path="/system/jobs"
+					preload={preloadRoutes(SystemJobsRoute)}
 					component={() => (
 						<PermissionGuard permission={Permissions.JobsRead}>
-							<SystemQueueObservabilityRoute />
+							<SystemJobsRoute />
 						</PermissionGuard>
 					)}
 				/>

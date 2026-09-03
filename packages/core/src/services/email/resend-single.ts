@@ -1,7 +1,7 @@
 import isEmailSimulated from "../../libs/email/is-simulated.js";
 import { getEmailResendState } from "../../libs/email/storage/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { enqueueJob } from "../../libs/queue/jobs/enqueue-job.js";
+import { enqueueJob } from "../../libs/jobs/enqueue.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,

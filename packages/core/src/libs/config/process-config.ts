@@ -7,9 +7,8 @@ import CollectionConfigSchema from "../collection/builders/collection-builder/sc
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { translate } from "../i18n/index.js";
+import { getJobRegistry } from "../jobs/registry.js";
 import { initializeLogger } from "../logger/index.js";
-import coreJobs from "../queue/jobs/core-jobs.js";
-import { getJobRegistry } from "../queue/registry.js";
 import type { LucidConfigRecipe } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
@@ -18,10 +17,12 @@ import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js"
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkField from "./checks/check-field.js";
 import checkFieldConditions from "./checks/check-field-conditions.js";
+import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import ConfigSchema from "./config-schema.js";
+import coreJobDefinitions from "./core-job-definitions.js";
 import mergeConfig from "./merge-config.js";
 import normalizeConfigSecrets from "./utils/normalize-config-secrets.js";
 
@@ -108,13 +109,13 @@ const processConfig = async (
 	}
 
 	const pluginTranslationSources = [...(configRes.i18n.sources ?? [])];
+	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
 
 	configRes = produce(configRes, (draft) => {
 		draft.i18n.sources = castDraft([
 			...pluginTranslationSources,
 			...userTranslationSources,
 		]);
-		draft.queue.jobs = castDraft([...coreJobs, ...draft.queue.jobs]);
 		draft.localization.locales = draft.localization.locales.map((locale) => ({
 			...locale,
 			direction: locale.direction ?? "ltr",
@@ -125,9 +126,20 @@ const processConfig = async (
 		}));
 	});
 
+	configRes = {
+		...configRes,
+		jobs: {
+			...configRes.jobs,
+			definitions: jobDefinitions,
+		},
+	};
+
 	if (!options?.skipValidation) {
 		// validate config
 		configRes = ConfigSchema.parse(configRes) as Config;
+
+		// job definitions
+		await checkJobDefinitions(configRes.jobs.definitions);
 
 		// i18n checks
 		checkLocales(configRes.localization);

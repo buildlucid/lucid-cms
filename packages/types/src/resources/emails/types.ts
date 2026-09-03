@@ -20,6 +20,19 @@ export type EmailAttachment = {
 	contentId: string | null;
 };
 
+export interface EmailTransaction {
+	id: number;
+	emailId: number;
+	deliveryStatus: EmailDeliveryStatus;
+	message: string | null;
+	strategyIdentifier: string;
+	strategyData: Record<string, unknown> | null;
+	simulate: boolean;
+	externalMessageId: string | null;
+	createdAt: string | null;
+	updatedAt: string | null;
+}
+
 export interface Email {
 	id: number;
 	mailDetails: {
@@ -45,16 +58,6 @@ export interface Email {
 		enabled: boolean;
 		reason?: "outsideResendWindow" | "unstoredData";
 	};
-	transactions: {
-		deliveryStatus: EmailDeliveryStatus;
-		message: string | null;
-		strategyIdentifier: string;
-		strategyData: Record<string, unknown> | null;
-		simulate: boolean;
-		externalMessageId: string | null;
-		createdAt: string | null;
-		updatedAt: string | null;
-	}[];
 	createdAt: string | null;
 	updatedAt?: string | null;
 }

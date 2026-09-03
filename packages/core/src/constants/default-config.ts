@@ -101,8 +101,9 @@ export const defaultConfig: Partial<LucidConfig> = {
 		},
 		video: {},
 	},
-	queue: {
-		jobs: [],
+	queue: {},
+	jobs: {
+		definitions: [],
 		retention: {
 			completedDays: 7,
 			failedDays: 30,

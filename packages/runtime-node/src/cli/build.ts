@@ -56,10 +56,9 @@ import { env as envSchema } from "${configArtifactImports.env}";
 import db from "${configArtifactImports.db}";
 import runtime from "${configArtifactImports.runtime}";
 import i18nTranslations from "./i18n-translations.json" with { type: "json" };
-import { createLucidHost, logger, setupCronJobs, withResponseCleanup } from "@lucidcms/core/runtime";
+import { createLucidHost, logger, withResponseCleanup } from "@lucidcms/core/runtime";
 import { serve } from "@hono/node-server";
-import cron from "node-cron";
-import { getRuntimeContext } from "@lucidcms/runtime-node/runtime";
+import { createNodeJobScheduler, getRuntimeContext } from "@lucidcms/runtime-node/runtime";
 
 const resolveRuntime = async () => {
 	const runtimeValue = typeof runtime === "function" ? runtime() : runtime;
@@ -96,20 +95,14 @@ const startServer = async () => {
 		const env = host.env;
 		const resolved = host.config;
 		let destroyPromise;
-		const cronTasks = [];
-		const activeCronJobs = new Set();
+		let jobScheduler;
 		destroyRuntime = () => {
 			destroyPromise ||= (async () => {
-				await Promise.allSettled(cronTasks.map((task) => task.destroy()));
-				await Promise.allSettled(activeCronJobs);
+				await jobScheduler?.destroy();
 				await host.destroy();
 			})();
 			return destroyPromise;
 		};
-
-		const cronJobSetup = await setupCronJobs({
-			createQueue: false,
-		});
 
 		const runtimeOptions = runtimeAdapter.getOptions?.();
 		const port =
@@ -135,33 +128,13 @@ const startServer = async () => {
 			port,
 			hostname,
 		});
-		for (const schedule of cronJobSetup.schedules) {
-			cronTasks.push(
-				cron.schedule(schedule, async () => {
-					const invocation = host.createInvocation({ env });
-					const task = (async () => {
-						try {
-							await cronJobSetup.register(
-								await invocation.getServiceContext({
-									url: resolved.host ?? "http://localhost:" + port,
-								}),
-								{ schedule },
-							);
-						} finally {
-							await invocation.destroy();
-						}
-					})();
-					activeCronJobs.add(task);
-					try {
-						await task;
-					} finally {
-						activeCronJobs.delete(task);
-					}
-				}, {
-					noOverlap: true,
-				}),
-			);
-		}
+		jobScheduler = createNodeJobScheduler({
+			createInvocation: () => host.createInvocation({ env }),
+			request: {
+				url: resolved.host ?? "http://localhost:" + port,
+			},
+		});
+		jobScheduler.start();
 
 		server.on("listening", () => {
 			const address = server.address();

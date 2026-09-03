@@ -57,6 +57,26 @@ export const emailTransactionsTable = defineTable(
 				type: "timestamp",
 			},
 		},
+		query: {
+			filters: {
+				deliveryStatus: "delivery_status",
+				strategyIdentifier: "strategy_identifier",
+				message: "message",
+				externalMessageId: "external_message_id",
+				simulate: "simulate",
+				createdAt: "created_at",
+				updatedAt: "updated_at",
+			},
+			sorts: {
+				createdAt: "created_at",
+				updatedAt: "updated_at",
+			},
+			operators: {
+				strategyIdentifier: "contains",
+				message: "contains",
+				externalMessageId: "contains",
+			},
+		} as const,
 	}),
 );
 

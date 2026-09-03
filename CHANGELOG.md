@@ -15,7 +15,7 @@
 - Preview tokens can now be resolved without integration credentials. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - Added support for relation fields targeting single collections, including singleton document selection in the admin.
 - Added collection-level content locale subsets and default locale overrides, with matching admin controls, API responses, validation, persistence and generated types.
-- Added durable, versioned jobs with project and plugin registration through `queue.jobs`, payload validation, scheduling, retries, cancellation, lease recovery, retention and queue observability.
+- Added durable jobs and recurring schedules, with retries, cancellation, queue adapters and admin monitoring.
 
 ### Breaking Changes:
 
@@ -25,7 +25,6 @@
 - Collection preview objects now require an explicit `enabled` flag, so URL and breakpoint settings can remain configured while previews are disabled. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - The content preview endpoint now accepts tokens in a POST request body and returns only their mode and expiry. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - Document responses now return referenced documents, media and users in a top-level `refs` object.
-- Replaced event-based queue handlers and the `add`/`addBatch` adapter API with `defineJob`, `enqueueJob`/`enqueueJobs` and the durable `publish`/`consumeJob` contract.
 - Reorganised the public `@lucidcms/core` exports around the package root and the `/extension` and `/types` entry points.
 - Removed the `@lucidcms/core/toolkit` entry point. Import `createToolkit` from `@lucidcms/core` and toolkit types from `@lucidcms/core/types`.
 
@@ -33,6 +32,7 @@
 
 - Fixed custom field reference validation accepting soft-deleted entries. ([83425cd](https://github.com/buildlucid/lucid-cms/commit/83425cd414f37171c529734f10ccf525675e73e3))
 - Fixed content document endpoints not running document `afterFetch` hooks.
+- Fixed configured queue, email, KV and media storage adapters silently falling back to built-in adapters when setup failed.
 
 ## v0.18.0-alpha.0
 

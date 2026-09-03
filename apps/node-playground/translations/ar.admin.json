@@ -32,7 +32,7 @@
 	"media.library.title": "مكتبة الوسائط",
 	"permissions.groups.access.and": "الوصول والصلاحيات",
 	"publish.requests.list.title": "طلبات النشر",
-	"queue.observability": "مراقبة قائمة الانتظار",
+	"routes.system.jobs.title": "المهام",
 	"roles.management": "إدارة الأدوار",
 	"settings.interface.cms.locale.description": "اختر لغتك المفضلة",
 	"settings.interface.cms.locale.title": "اللغة",

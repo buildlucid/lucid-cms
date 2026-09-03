@@ -146,7 +146,7 @@ const approve: ServiceFn<
 		!collectionTargetSupportsScheduling({
 			collection: collectionRes.data,
 			target: operationRes.data.target,
-			queueSupportsScheduling: context.queue.support.scheduling,
+			queueSupportsDelayedDelivery: context.queue.support.delayedDelivery,
 		})
 	) {
 		return {

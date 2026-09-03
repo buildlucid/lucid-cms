@@ -8,11 +8,14 @@ interface UseRowTargetProps<T extends string | number | symbol> {
 	triggers: Record<T, boolean>;
 }
 
-const useRowTarget = <T extends string | number | symbol>(
+const useRowTarget = <
+	T extends string | number | symbol,
+	TargetId extends string | number = number,
+>(
 	config: UseRowTargetProps<T>,
 ) => {
 	const [getTriggers, setTriggers] = createSignal(config.triggers);
-	const [getTargetId, setTargetId] = createSignal<number>();
+	const [getTargetId, setTargetId] = createSignal<TargetId>();
 
 	return {
 		getTriggers,

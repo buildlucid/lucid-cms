@@ -1,7 +1,7 @@
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
+import { flushPendingJobs } from "../../libs/jobs/dispatch.js";
 import logger from "../../libs/logger/index.js";
-import { flushPendingJobs } from "../../libs/queue/jobs/flush-pending-jobs.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -76,10 +76,10 @@ const serviceWrapper =
 			if (dispatch.error) {
 				logger.error({
 					error: dispatch.error,
-					event: "queue.jobs.dispatch.after-commit.failed",
+					event: "jobs.dispatch.after-commit.failed",
 					message:
 						"Pending jobs could not be dispatched after the transaction committed",
-					scope: constants.logScopes.queueAdapter,
+					scope: constants.logScopes.jobs,
 				});
 			}
 

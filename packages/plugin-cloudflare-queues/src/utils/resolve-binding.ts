@@ -1,6 +1,5 @@
-import { LucidError } from "@lucidcms/core";
 import type { ServiceContext } from "@lucidcms/core/types";
-import { DEFAULT_QUEUE_BINDING, PLUGIN_KEY } from "../constants.js";
+import { DEFAULT_QUEUE_BINDING } from "../constants.js";
 import type { PluginOptions } from "../types.js";
 
 /** Resolves the binding name convention used by Lucid's Wrangler generation. */
@@ -24,12 +23,5 @@ export const resolveBinding = (
 ) => {
 	const bindingName = resolveBindingName(options);
 	const binding = context.env?.[bindingName];
-	if (!isQueueBinding(binding)) {
-		throw new LucidError({
-			message: `Cloudflare queue binding "${bindingName}" is missing or invalid. Configure the queue binding in the Cloudflare runtime or pass the matching plugin binding option.`,
-			scope: PLUGIN_KEY,
-		});
-	}
-
-	return binding;
+	return isQueueBinding(binding) ? binding : undefined;
 };

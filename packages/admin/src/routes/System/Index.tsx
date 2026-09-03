@@ -4,6 +4,8 @@ import { Permissions } from "@/constants/permissions";
 import userStore from "@/store/userStore";
 
 const SystemIndexRoute: Component = () => {
+	// ----------------------------------
+	// Render
 	if (userStore.get.hasPermission([Permissions.SettingsRead]).all) {
 		return <Navigate href="/lucid/system/overview" />;
 	}
@@ -17,7 +19,7 @@ const SystemIndexRoute: Component = () => {
 	}
 
 	if (userStore.get.hasPermission([Permissions.JobsRead]).all) {
-		return <Navigate href="/lucid/system/queue-observability" />;
+		return <Navigate href="/lucid/system/jobs" />;
 	}
 
 	return <Navigate href="/lucid" />;

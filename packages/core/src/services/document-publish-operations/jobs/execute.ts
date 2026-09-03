@@ -1,9 +1,9 @@
 import z from "zod";
-import defineJob from "../../../libs/queue/define-job.js";
+import defineJob from "../../../libs/jobs/define-job.js";
 import type {
 	JobHandler,
 	JobPermanentFailureHandler,
-} from "../../../libs/queue/types.js";
+} from "../../../libs/jobs/types.js";
 import {
 	DocumentPublishOperationEventsRepository,
 	DocumentPublishOperationsRepository,
@@ -79,7 +79,7 @@ const executePublishOperation: JobHandler<z.infer<typeof input>> = async (
 };
 
 export const executePublishOperationJob = defineJob({
-	name: "lucid:document-publish-operation.execute",
+	name: "core:execute-publish-operation",
 	version: 1,
 	input,
 	handler: executePublishOperation,

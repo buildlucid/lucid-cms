@@ -14,7 +14,9 @@ import type { TableRowProps } from "@/types/components";
 interface EmailRowProps extends TableRowProps {
 	email: Email;
 	include: boolean[];
-	rowTarget: ReturnType<typeof useRowTarget<"preview" | "resend" | "delete">>;
+	rowTarget: ReturnType<
+		typeof useRowTarget<"preview" | "resend" | "delete" | "transactions">
+	>;
 }
 
 const EmailRow: Component<EmailRowProps> = (props) => {
@@ -59,6 +61,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTrigger("preview", true);
 					},
 					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
+					sortOrder: 0,
 				},
 				{
 					label: T()("email.resend.action"),
@@ -76,6 +79,18 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 						status: "warning",
 					},
 					actionExclude: true,
+					sortOrder: 1,
+				},
+				{
+					label: T()("common.transactions"),
+					type: "button",
+					icon: "clock",
+					onClick: () => {
+						props.rowTarget.setTargetId(props.email.id);
+						props.rowTarget.setTrigger("transactions", true);
+					},
+					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
+					sortOrder: 2,
 				},
 				{
 					label: T()("common.delete"),
@@ -88,6 +103,7 @@ const EmailRow: Component<EmailRowProps> = (props) => {
 					permission: userStore.get.hasPermission([Permissions.EmailDelete])
 						.all,
 					actionExclude: true,
+					sortOrder: 3,
 				},
 			]}
 		>

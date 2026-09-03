@@ -11,6 +11,7 @@ export { default as getBaseUrl, normalizeHost } from "./get-base-url.js";
 export { default as getDirName } from "./get-dir-name.js";
 export { default as getEmailFrom } from "./get-email-from.js";
 export { default as getFilterValues } from "./get-filter-values.js";
+export { default as getRetentionDays } from "./get-retention-days.js";
 export {
 	getNumber,
 	getObject,

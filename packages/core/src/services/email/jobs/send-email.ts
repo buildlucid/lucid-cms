@@ -10,8 +10,8 @@ import {
 import renderMustacheTemplate from "../../../libs/email/templates/render-mustache-template.js";
 import type { EmailStrategyResponse } from "../../../libs/email/types.js";
 import { copy } from "../../../libs/i18n/index.js";
-import defineJob from "../../../libs/queue/define-job.js";
-import type { JobHandler } from "../../../libs/queue/types.js";
+import defineJob from "../../../libs/jobs/define-job.js";
+import type { JobHandler } from "../../../libs/jobs/types.js";
 import {
 	EmailsRepository,
 	EmailTransactionsRepository,
@@ -223,7 +223,7 @@ const sendEmail: JobHandler<z.infer<typeof input>> = async (context, data) => {
 };
 
 export const sendEmailJob = defineJob({
-	name: "lucid:email.send",
+	name: "core:send-email",
 	version: 1,
 	input,
 	handler: sendEmail,

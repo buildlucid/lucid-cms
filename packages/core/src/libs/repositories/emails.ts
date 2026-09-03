@@ -64,28 +64,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"last_attempted_at",
 				"created_at",
 				"updated_at",
-				this.database.fn
-					.jsonArrayFrom(
-						eb
-							.selectFrom("lucid_email_transactions")
-							.select([
-								"lucid_email_transactions.delivery_status",
-								"lucid_email_transactions.message",
-								"lucid_email_transactions.strategy_identifier",
-								"lucid_email_transactions.strategy_data",
-								"lucid_email_transactions.simulate",
-								"lucid_email_transactions.external_message_id",
-								"lucid_email_transactions.created_at",
-								"lucid_email_transactions.updated_at",
-							])
-							.whereRef(
-								"lucid_email_transactions.email_id",
-								"=",
-								"lucid_emails.id",
-							)
-							.orderBy("lucid_email_transactions.created_at", "desc"),
-					)
-					.as("transactions"),
 			])
 			.where("id", "=", props.id);
 
@@ -117,7 +95,6 @@ export default class EmailsRepository extends StaticRepository<"lucid_emails"> {
 				"last_attempted_at",
 				"created_at",
 				"updated_at",
-				"transactions",
 			],
 		});
 	}

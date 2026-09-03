@@ -11,6 +11,7 @@
 			"import": "./dist/index.mjs",
 			"types": "./dist/index.d.mts"
 		},
+		"./translations": "./translations",
 		"./package.json": "./package.json"
 	},
 	"scripts": {
@@ -24,7 +25,8 @@
 		"check:fix": "biome check --write ./src"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"translations"
 	],
 	"author": "Build Lucid Ltd",
 	"repository": {

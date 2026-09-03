@@ -19,6 +19,10 @@
 			"types": "./dist/astro.d.mts",
 			"default": "./dist/astro.mjs"
 		},
+		"./astro-integration": {
+			"types": "./dist/astro-integration.d.mts",
+			"default": "./dist/astro-integration.mjs"
+		},
 		"./types": {
 			"types": "./dist/types.d.mts",
 			"default": "./dist/types.mjs"

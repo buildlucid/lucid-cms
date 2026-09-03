@@ -1,35 +1,26 @@
-import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
-import logger from "../logger/index.js";
+import { LucidError } from "../../utils/errors/index.js";
 import passthroughKVAdapter from "./adapters/passthrough.js";
 import type { KVAdapterInstance } from "./types.js";
 
-/**
- * Returns the ideal KV adapter based on config and the runtime environment
- */
-const getKVAdapter = async (config: Config): Promise<KVAdapterInstance> => {
+/** Resolves the configured KV adapter, using passthrough storage when omitted. */
+const getKVAdapter = async (
+	config: Pick<Config, "kv">,
+): Promise<KVAdapterInstance> => {
+	if (!config.kv?.adapter) return passthroughKVAdapter();
+
 	try {
-		if (config.kv?.adapter) {
-			const adapter =
-				typeof config.kv.adapter === "function"
-					? await config.kv.adapter()
-					: config.kv.adapter;
-
-			return await adapter;
-		}
-
-		return passthroughKVAdapter();
+		return await (typeof config.kv.adapter === "function"
+			? config.kv.adapter()
+			: config.kv.adapter);
 	} catch (error) {
-		logger.error({
-			error,
-			event: "kv-adapter.initialization.failed",
-			scope: constants.logScopes.kvAdapter,
-			message: "Failed to initialize KV adapter",
+		if (error instanceof LucidError) throw error;
+		throw new LucidError({
+			message: "The configured KV adapter could not be initialized.",
 			data: {
 				errorMessage: error instanceof Error ? error.message : String(error),
 			},
 		});
-		return passthroughKVAdapter();
 	}
 };
 

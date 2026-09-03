@@ -59,7 +59,7 @@ const getAll: ServiceFn<
 			data: collectionsFormatter.formatMultiple({
 				collections: collectionDefinitions,
 				allCollections: collectionDefinitions,
-				queueSupportsScheduling: context.queue.support.scheduling,
+				queueSupportsDelayedDelivery: context.queue.support.delayedDelivery,
 				adminTranslations,
 				localization: context.config.localization,
 				include: {
@@ -77,7 +77,7 @@ const getAll: ServiceFn<
 		data: collectionsFormatter.formatMultiple({
 			collections: collectionDefinitions,
 			allCollections: collectionDefinitions,
-			queueSupportsScheduling: context.queue.support.scheduling,
+			queueSupportsDelayedDelivery: context.queue.support.delayedDelivery,
 			adminTranslations,
 			localization: context.config.localization,
 			include: {

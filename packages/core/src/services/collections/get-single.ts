@@ -61,7 +61,7 @@ const getSingle: ServiceFn<
 			data: collectionsFormatter.formatSingle({
 				collection: collectionRes.data,
 				allCollections: collectionsRes.data,
-				queueSupportsScheduling: context.queue.support.scheduling,
+				queueSupportsDelayedDelivery: context.queue.support.delayedDelivery,
 				adminTranslations,
 				localization: context.config.localization,
 				include: {
@@ -86,7 +86,7 @@ const getSingle: ServiceFn<
 		data: collectionsFormatter.formatSingle({
 			collection: collectionRes.data,
 			allCollections: collectionsRes.data,
-			queueSupportsScheduling: context.queue.support.scheduling,
+			queueSupportsDelayedDelivery: context.queue.support.delayedDelivery,
 			adminTranslations,
 			localization: context.config.localization,
 			migrationStatus: migrationStatus.data,

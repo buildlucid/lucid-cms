@@ -23,10 +23,10 @@ export const snapshotVersionType =
 	constants.collectionBuilder.publishing.snapshotVersionType;
 
 /** Lookahead for queue dispatch; keeps scheduling comfortably below provider delay limits. */
-export const schedulingDispatchWindowHours = 6;
+export const schedulingDispatchWindowHours = 4;
 
 export const schedulingDispatchWindowMs =
-	schedulingDispatchWindowHours * 60 * 60 * 1000; // 6 hours
+	schedulingDispatchWindowHours * 60 * 60 * 1000;
 
 /** Returns environment targets that require release review for the collection. */
 export const getPublishOperationTargets = (collection: CollectionBuilder) => {
@@ -101,7 +101,7 @@ export const getReleaseRequirementStatuses = (params: {
 export const collectionTargetSupportsScheduling = (params: {
 	collection: CollectionBuilder;
 	target: string;
-	queueSupportsScheduling: boolean;
+	queueSupportsDelayedDelivery: boolean;
 }) => {
 	const targetIsEnvironment = params.collection.getData.environments.some(
 		(environment) => environment.key === params.target,
@@ -110,11 +110,11 @@ export const collectionTargetSupportsScheduling = (params: {
 	return (
 		targetIsEnvironment &&
 		params.collection.getData.scheduling === true &&
-		params.queueSupportsScheduling === true
+		params.queueSupportsDelayedDelivery === true
 	);
 };
 
-/** Determines whether a scheduled operation is close enough for a delayed queue job. */
+/** Determines whether a scheduled operation is close enough for a delayed job. */
 export const isInSchedulingDispatchWindow = (params: {
 	scheduledAt: Date;
 	now?: Date;

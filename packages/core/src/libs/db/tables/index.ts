@@ -18,6 +18,9 @@ import { emailTransactionsTable } from "./email-transactions.js";
 import { emailsTable } from "./emails.js";
 import { integrationScopesTable } from "./integration-scopes.js";
 import { integrationsTable } from "./integrations.js";
+import { jobScheduleOverridesTable } from "./job-schedule-overrides.js";
+import { jobSchedulerTable } from "./job-scheduler.js";
+import { jobsTable } from "./jobs.js";
 import { localesTable } from "./locales.js";
 import { lucidRemoteConnectionsTable } from "./lucid-remote-connections.js";
 import { mediaTable } from "./media.js";
@@ -36,7 +39,6 @@ import { oauthRefreshTokensTable } from "./oauth-refresh-tokens.js";
 import { optionsTable } from "./options.js";
 import { previewSessionsTable } from "./preview-sessions.js";
 import { processedImagesTable } from "./processed-images.js";
-import { queueJobsTable } from "./queue-jobs.js";
 import { rolePermissionsTable } from "./role-permissions.js";
 import { roleTranslationsTable } from "./role-translations.js";
 import { rolesTable } from "./roles.js";
@@ -68,6 +70,9 @@ export * from "./email-transactions.js";
 export * from "./emails.js";
 export * from "./integration-scopes.js";
 export * from "./integrations.js";
+export * from "./job-schedule-overrides.js";
+export * from "./job-scheduler.js";
+export * from "./jobs.js";
 export * from "./locales.js";
 export * from "./lucid-remote-connections.js";
 export * from "./media.js";
@@ -86,7 +91,6 @@ export * from "./oauth-refresh-tokens.js";
 export * from "./options.js";
 export * from "./preview-sessions.js";
 export * from "./processed-images.js";
-export * from "./queue-jobs.js";
 export * from "./role-permissions.js";
 export * from "./role-translations.js";
 export * from "./roles.js";
@@ -118,6 +122,8 @@ export const coreTableDefinitions = [
 	emailsTable,
 	integrationScopesTable,
 	integrationsTable,
+	jobSchedulerTable,
+	jobScheduleOverridesTable,
 	localesTable,
 	lucidRemoteConnectionsTable,
 	mediaTable,
@@ -136,7 +142,7 @@ export const coreTableDefinitions = [
 	optionsTable,
 	previewSessionsTable,
 	processedImagesTable,
-	queueJobsTable,
+	jobsTable,
 	rolePermissionsTable,
 	roleTranslationsTable,
 	rolesTable,

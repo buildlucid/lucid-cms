@@ -159,7 +159,7 @@ describe("createLucidHost database ownership", () => {
 		const queue: QueueAdapterInstance = {
 			type: "queue-adapter",
 			key: "host-owned",
-			support: { scheduling: true, maxDelayMs: null },
+			support: { delayedDelivery: true, maxDelayMs: null },
 			lifecycle: {
 				init: vi.fn(),
 				destroy: vi.fn(),

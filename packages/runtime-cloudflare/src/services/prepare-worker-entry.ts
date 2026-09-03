@@ -40,7 +40,7 @@ const prepareMainWorkerEntry = (
 		},
 		{
 			path: "@lucidcms/core/runtime",
-			exports: ["createLucidHost", "setupCronJobs", "withResponseCleanup"],
+			exports: ["createLucidHost", "setupJobScheduler", "withResponseCleanup"],
 		},
 		{
 			path: "./email-templates.json",
@@ -143,7 +143,7 @@ try {
 			name: "scheduled",
 			async: true,
 			params: ["controller", "env", "ctx"],
-			content: /** ts */ `const runCronService = async () => {
+			content: /** ts */ `const runJobScheduler = async () => {
     const runtimeContext = getRuntimeContext({
         server: "cloudflare",
         compiled: true,
@@ -163,20 +163,16 @@ try {
     );
     const invocation = host.createInvocation({ env });
     try {
-        const cronJobSetup = await setupCronJobs({
-            createQueue: false,
-            runtimeContext,
-            env,
-        });
-        await cronJobSetup.register(await invocation.getServiceContext(), {
-            schedule: controller.cron,
+        const jobScheduler = setupJobScheduler();
+        await jobScheduler.run(await invocation.getServiceContext(), {
+            scheduledAt: new Date(controller.scheduledTime),
         });
     } finally {
         await invocation.destroy();
     }
 };
 
-ctx.waitUntil(runCronService());`,
+ctx.waitUntil(runJobScheduler());`,
 		},
 	];
 

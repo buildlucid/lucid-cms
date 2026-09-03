@@ -21,7 +21,7 @@ const storageCheckAlert: ServiceFn<[AlertExecutionPayload], undefined> = async (
 		};
 	}
 
-	const source = data?.source ?? "cron";
+	const source = data?.source ?? "schedule";
 	const trigger = data?.trigger ?? "scheduled";
 	const triggerMetadata = data?.metadata ?? {};
 	const Alerts = new AlertsRepository(context.db);

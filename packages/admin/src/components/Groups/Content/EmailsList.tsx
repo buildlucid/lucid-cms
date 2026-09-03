@@ -15,6 +15,7 @@ import { Table } from "@/components/Groups/Table/Table";
 import DeleteEmail from "@/components/Modals/Email/DeleteEmail";
 import ResendEmail from "@/components/Modals/Email/ResendEmail";
 import PreviewEmailPanel from "@/components/Panels/Email/PreviewEmailPanel";
+import ViewEmailTransactionsPanel from "@/components/Panels/Email/ViewEmailTransactionsPanel";
 import EmailRow from "@/components/Tables/Rows/EmailRow";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
@@ -33,6 +34,7 @@ export const EmailsList: Component<{
 			preview: false,
 			delete: false,
 			resend: false,
+			transactions: false,
 		},
 	});
 
@@ -165,6 +167,15 @@ export const EmailsList: Component<{
 					open: rowTarget.getTriggers().preview,
 					setOpen: (state: boolean) => {
 						rowTarget.setTrigger("preview", state);
+					},
+				}}
+			/>
+			<ViewEmailTransactionsPanel
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().transactions,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("transactions", state);
 					},
 				}}
 			/>

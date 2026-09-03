@@ -115,8 +115,11 @@ const startConsumer = async () => {
 		const internalQueueAdapter: QueueAdapterInstance = {
 			type: "queue-adapter",
 			key: "worker",
-			support: { scheduling: true, maxDelayMs: null },
-			publish: async () => requestPoll(),
+			support: { delayedDelivery: true, maxDelayMs: null },
+			publish: async () => {
+				requestPoll();
+				return { error: undefined, data: undefined };
+			},
 		};
 		adapters = await createLucidAdapters({
 			config,

@@ -129,6 +129,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 							resolve: {
 								alias: {
 									...(nextProject.integrationBridge.vite?.aliases ?? {}),
+									...(prepared?.vite?.aliases ?? {}),
 									[constants.toolkitModuleId]: generated.runtimePath,
 								},
 							},

@@ -1,6 +1,6 @@
 import z from "zod";
-import defineJob from "../../../libs/queue/define-job.js";
-import type { JobHandler } from "../../../libs/queue/types.js";
+import defineJob from "../../../libs/jobs/define-job.js";
+import type { JobHandler } from "../../../libs/jobs/types.js";
 import permanentlyDeleteMedia from "../helpers/permanently-delete-media.js";
 
 const input = z.object({ mediaId: z.number().int().positive() });
@@ -21,7 +21,7 @@ const hardDeleteSingleMedia: JobHandler<z.infer<typeof input>> = async (
 };
 
 export const hardDeleteSingleMediaJob = defineJob({
-	name: "lucid:media.delete",
+	name: "core:delete-media",
 	version: 1,
 	input,
 	handler: hardDeleteSingleMedia,

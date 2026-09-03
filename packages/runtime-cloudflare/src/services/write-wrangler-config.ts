@@ -430,7 +430,7 @@ const applyRuntimeBindings = (props: {
 
 /**
  * Builds the final generated config while letting Lucid own Worker entry,
- * assets, cron, compatibility, and binding requirements.
+ * assets, scheduler, compatibility, and binding requirements.
  */
 const resolveConfig = async (props: {
 	projectRoot: string;
@@ -469,10 +469,7 @@ const resolveConfig = async (props: {
 		};
 
 		const triggers = isObject(config.triggers) ? { ...config.triggers } : {};
-		triggers.crons = unique([
-			...getStringArray(triggers.crons),
-			...(props.workerOptions?.crons ?? constants.DEFAULT_CRONS),
-		]);
+		triggers.crons = [constants.JOB_SCHEDULER_CRON];
 		config.triggers = triggers;
 	} else {
 		delete config.main;
@@ -531,7 +528,6 @@ const writeWranglerConfig = async (props: {
 				generatedConfigPath,
 			});
 		}
-
 		return {
 			configPath: manualConfigPath,
 			generated: false,

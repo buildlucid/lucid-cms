@@ -1,13 +1,9 @@
 import classNames from "classnames";
 import DOMPurify from "dompurify";
 import {
-	FaSolidCalendar,
-	FaSolidCommentDots,
-	FaSolidEnvelope,
 	FaSolidFile,
 	FaSolidImage,
 	FaSolidLink,
-	FaSolidTag,
 	FaSolidTriangleExclamation,
 } from "solid-icons/fa";
 import {
@@ -16,17 +12,14 @@ import {
 	createMemo,
 	createSignal,
 	For,
-	Index,
 	lazy,
 	Show,
 	Suspense,
 } from "solid-js";
 import { Panel } from "@/components/Groups/Panel";
-import { Table } from "@/components/Groups/Table/Table";
 import DetailsList from "@/components/Partials/DetailsList";
 import PanelTabs from "@/components/Partials/PanelTabs";
 import Pill from "@/components/Partials/Pill";
-import EmailTransactionRow from "@/components/Tables/Rows/EmailTransactionRow";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
@@ -91,9 +84,7 @@ interface PreviewEmailPanelProps {
 const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 	// ------------------------------
 	// State
-	const [activeTab, setActiveTab] = createSignal<
-		"details" | "data" | "transactions"
-	>("details");
+	const [activeTab, setActiveTab] = createSignal<"details" | "data">("details");
 
 	// ---------------------------------
 	// Queries
@@ -217,7 +208,6 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 						items={[
 							{ value: "details", label: T()("common.details") },
 							{ value: "data", label: T()("common.data") },
-							{ value: "transactions", label: T()("common.transactions") },
 						]}
 						active={activeTab()}
 						onChange={setActiveTab}
@@ -279,71 +269,6 @@ const PreviewEmailPanel: Component<PreviewEmailPanelProps> = (props) => {
 									json={email.data?.data.data || {}}
 								/>
 							</Suspense>
-						</div>
-					</Show>
-					<Show when={activeTab() === "transactions"}>
-						<div class="bg-card-base border border-border rounded-md">
-							<Table
-								key={"email.transactions"}
-								rows={email.data?.data.transactions?.length || 0}
-								head={[
-									{
-										label: T()("common.status"),
-										key: "status",
-										icon: <FaSolidEnvelope />,
-									},
-									{
-										label: T()("common.identifier"),
-										key: "identifier",
-										icon: <FaSolidTag />,
-									},
-									{
-										label: T()("common.message"),
-										key: "message",
-										icon: <FaSolidCommentDots />,
-									},
-									{
-										label: T()("common.created.at"),
-										key: "createdAt",
-										icon: <FaSolidCalendar />,
-									},
-									{
-										label: T()("common.updated.at"),
-										key: "updatedAt",
-										icon: <FaSolidCalendar />,
-									},
-								]}
-								state={{
-									isLoading: false,
-									isSuccess: true,
-								}}
-								options={{
-									isSelectable: false,
-									padding: "16",
-								}}
-								theme="secondary"
-							>
-								{({ include, isSelectable, selected, setSelected }) => (
-									<Index each={email.data?.data.transactions || []}>
-										{(transaction, i) => (
-											<EmailTransactionRow
-												index={i}
-												transaction={transaction()}
-												include={include}
-												selected={selected[i]}
-												options={{
-													isSelectable,
-													padding: "16",
-												}}
-												callbacks={{
-													setSelected: setSelected,
-												}}
-												theme="secondary"
-											/>
-										)}
-									</Index>
-								)}
-							</Table>
 						</div>
 					</Show>
 				</>

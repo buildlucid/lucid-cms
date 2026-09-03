@@ -36,7 +36,7 @@
 		"binding": "ASSETS"
 	},
 	"triggers": {
-		"crons": ["0 0 * * *"]
+		"crons": ["* * * * *"]
 	},
 	"build": {
 		"watch_dir": "./src",

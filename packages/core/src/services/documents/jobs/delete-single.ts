@@ -1,6 +1,6 @@
 import z from "zod";
-import defineJob from "../../../libs/queue/define-job.js";
-import type { JobHandler } from "../../../libs/queue/types.js";
+import defineJob from "../../../libs/jobs/define-job.js";
+import type { JobHandler } from "../../../libs/jobs/types.js";
 import deletePreviewSessions from "../../preview-sessions/delete-for-documents.js";
 import beginSingleDeletion from "../helpers/begin-single-deletion.js";
 import executeDeleteHook from "../helpers/execute-delete-hook.js";
@@ -82,7 +82,7 @@ const deleteDocument: JobHandler<z.infer<typeof input>> = async (
  * Deletes a single document
  */
 export const deleteDocumentJob = defineJob({
-	name: "lucid:documents.delete",
+	name: "core:delete-document",
 	version: 1,
 	input,
 	handler: deleteDocument,

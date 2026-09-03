@@ -1,11 +1,14 @@
 import type { BooleanInt } from "../db/types.js";
 
-const formatDate = (date: Date | string | null | undefined): string | null => {
+function formatDate(date: Date | string): string;
+function formatDate(date: null | undefined): null;
+function formatDate(date: Date | string | null | undefined): string | null;
+function formatDate(date: Date | string | null | undefined): string | null {
 	if (typeof date === "string") {
 		return date;
 	}
 	return date ? date.toISOString() : null;
-};
+}
 
 const parseJSON = <T>(json: string | null | undefined): T | null => {
 	if (typeof json === "object") return json;

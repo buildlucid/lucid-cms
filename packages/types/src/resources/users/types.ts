@@ -18,6 +18,8 @@ export type CorePermission =
 	| "email:delete"
 	| "email:send"
 	| "jobs:read"
+	| "jobs:run"
+	| "jobs:update"
 	| "publish-operations:read"
 	| `documents:${string}:${"read" | "create" | "update" | "delete" | "restore" | "publish" | "review"}`
 	| "ai:custom-field-value"

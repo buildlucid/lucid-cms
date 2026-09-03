@@ -56,19 +56,19 @@ describe("Tests for publish operation scheduling helpers", () => {
 		});
 	});
 
-	test("detects operations inside the 6-hour dispatch window", () => {
+	test("detects operations inside the 4-hour dispatch window", () => {
 		const now = new Date("2026-01-01T12:00:00.000Z");
 
 		expect(
 			isInSchedulingDispatchWindow({
 				now,
-				scheduledAt: new Date("2026-01-01T17:59:00.000Z"),
+				scheduledAt: new Date("2026-01-01T15:59:00.000Z"),
 			}),
 		).toBe(true);
 		expect(
 			isInSchedulingDispatchWindow({
 				now,
-				scheduledAt: new Date("2026-01-01T18:01:00.000Z"),
+				scheduledAt: new Date("2026-01-01T16:01:00.000Z"),
 			}),
 		).toBe(false);
 	});

@@ -1,14 +1,21 @@
-import type { Job } from "../../types/response.js";
-import type { LucidQueueJobs } from "../db/tables/queue-jobs.js";
+import type { Job, JobScheduleSummary } from "../../types/response.js";
+import type { LucidJobs } from "../db/tables/jobs.js";
 import type { Select } from "../db/types.js";
+import type {
+	JobScheduleOverride,
+	RegisteredJobSchedule,
+} from "../jobs/scheduler/registered-schedules.js";
 import formatter from "./helpers.js";
 
 type JobPropT = Pick<
-	Select<LucidQueueJobs>,
+	Select<LucidJobs>,
 	| "id"
 	| "job_id"
 	| "job_name"
 	| "job_version"
+	| "trigger_type"
+	| "schedule_key"
+	| "scheduled_for"
 	| "display_data"
 	| "queue_adapter_key"
 	| "status"
@@ -30,6 +37,20 @@ type JobPropT = Pick<
 	| "updated_at"
 >;
 
+type JobScheduleRunProp = Pick<
+	Select<LucidJobs>,
+	| "scheduled_for"
+	| "job_id"
+	| "status"
+	| "attempts"
+	| "max_attempts"
+	| "started_at"
+	| "completed_at"
+	| "failed_at"
+	| "cancelled_at"
+	| "error_message"
+>;
+
 const formatMultiple = (props: { jobs: JobPropT[] }) => {
 	return props.jobs.map((j) =>
 		formatSingle({
@@ -44,6 +65,9 @@ const formatSingle = (props: { job: JobPropT }): Job => {
 		jobId: props.job.job_id,
 		jobName: props.job.job_name,
 		jobVersion: props.job.job_version,
+		triggerType: props.job.trigger_type,
+		scheduleKey: props.job.schedule_key,
+		scheduledFor: formatter.formatDate(props.job.scheduled_for),
 		displayData: props.job.display_data,
 		queueAdapterKey: props.job.queue_adapter_key,
 		status: props.job.status,
@@ -66,7 +90,54 @@ const formatSingle = (props: { job: JobPropT }): Job => {
 	};
 };
 
+const formatSchedule = (props: {
+	binding: RegisteredJobSchedule;
+	nextRunAt: Date;
+	lastRun?: JobScheduleRunProp;
+	override?: JobScheduleOverride;
+}): JobScheduleSummary => {
+	const startedAt = formatter.formatDate(props.lastRun?.started_at);
+	const endedAt = formatter.formatDate(
+		props.lastRun?.completed_at ??
+			props.lastRun?.failed_at ??
+			props.lastRun?.cancelled_at,
+	);
+
+	return {
+		key: props.binding.key,
+		name: props.binding.schedule.name,
+		jobName: props.binding.job.name,
+		jobVersion: props.binding.job.version,
+		cron: props.binding.schedule.cron,
+		timezone: props.binding.schedule.timezone,
+		overlap: props.binding.schedule.overlap,
+		missed: props.binding.schedule.missed,
+		state: props.override ? "paused" : "active",
+		pausedAt: formatter.formatDate(props.override?.pausedAt),
+		pausedByUserId: props.override?.pausedByUserId ?? null,
+		nextRunAt: props.nextRunAt.toISOString(),
+		lastRun: props.lastRun
+			? {
+					scheduledFor: formatter.formatDate(props.lastRun.scheduled_for),
+					jobId: props.lastRun.job_id,
+					status: props.lastRun.status,
+					attempts: props.lastRun.attempts,
+					maxAttempts: props.lastRun.max_attempts,
+					durationMs:
+						startedAt && endedAt
+							? Math.max(
+									0,
+									new Date(endedAt).getTime() - new Date(startedAt).getTime(),
+								)
+							: null,
+					errorMessage: props.lastRun.error_message,
+				}
+			: null,
+	};
+};
+
 export default {
 	formatMultiple,
+	formatSchedule,
 	formatSingle,
 };

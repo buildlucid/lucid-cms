@@ -171,13 +171,14 @@ export default Object.freeze({
 	logScopes: {
 		lucid: "lucid",
 		migrations: "migrations",
-		cron: "cron",
+		scheduler: "scheduler",
 		config: "config",
 		sync: "sync",
 		query: "query",
 		http: "http",
 		validation: "validation",
 		typeGeneration: "type-generation",
+		jobs: "jobs",
 		kvAdapter: "kv-adapter",
 		queueAdapter: "queue-adapter",
 		mediaDeliveryAdapter: "media-delivery-adapter",
@@ -187,11 +188,7 @@ export default Object.freeze({
 		ai: "ai",
 	} as const,
 	retention: 30,
-	cronSchedules: {
-		jobs: "* * * * *",
-		maintenance: "0 0 * * *",
-		scheduledPublishing: "0 */4 * * *",
-	},
+	jobSchedulerCron: "* * * * *",
 	csrfExpiration: 604800, // 7 days in seconds
 	refreshTokenExpiration: 604800, // 7 days in seconds
 	accessTokenExpiration: 300, // 5 minutes in seconds

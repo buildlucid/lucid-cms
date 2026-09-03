@@ -292,9 +292,9 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					/>
 					<IconLinkFull
 						type="link"
-						href="/lucid/system/queue-observability"
+						href="/lucid/system/jobs"
 						icon="queue"
-						title={T()("queue.observability")}
+						title={T()("routes.system.jobs.title")}
 						permission={props.canReadJobs}
 					/>
 				</ul>

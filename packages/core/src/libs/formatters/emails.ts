@@ -1,12 +1,13 @@
 import type {
-	BooleanInt,
 	EmailAttachment as EmailAttachmentInput,
 	EmailDeliveryStatus,
 	EmailPriority,
 	EmailStorageConfig,
 	EmailType,
 } from "../../exports/types.js";
-import type { Email } from "../../types/response.js";
+import type { Email, EmailTransaction } from "../../types/response.js";
+import type { LucidEmailTransactions } from "../db/tables/email-transactions.js";
+import type { Select } from "../db/types.js";
 import { getEmailResendState } from "../email/storage/index.js";
 import formatter from "./helpers.js";
 
@@ -29,16 +30,6 @@ interface EmailPropT {
 	data?: Record<string, unknown> | null;
 	storage_strategy?: EmailStorageConfig | null;
 	attachments?: EmailAttachmentRowPropT[];
-	transactions?: {
-		delivery_status: EmailDeliveryStatus;
-		message: string | null;
-		strategy_identifier: string;
-		strategy_data: Record<string, unknown> | null;
-		simulate: BooleanInt;
-		external_message_id: string | null;
-		created_at: Date | string | null;
-		updated_at: Date | string | null;
-	}[];
 }
 
 interface EmailAttachmentRowPropT {
@@ -125,18 +116,6 @@ const formatSingle = (props: {
 			enabled: false,
 			reason: "outsideResendWindow",
 		},
-		transactions: props.email.transactions
-			? props.email.transactions.map((t) => ({
-					deliveryStatus: t.delivery_status,
-					message: t.message,
-					strategyIdentifier: t.strategy_identifier,
-					strategyData: t.strategy_data,
-					simulate: formatter.formatBoolean(t.simulate),
-					createdAt: formatter.formatDate(t.created_at),
-					externalMessageId: t.external_message_id,
-					updatedAt: formatter.formatDate(t.updated_at),
-				}))
-			: [],
 		attemptCount: props.email.attempt_count,
 		lastAttemptedAt: formatter.formatDate(props.email.last_attempted_at),
 		createdAt: formatter.formatDate(props.email.created_at),
@@ -144,7 +123,24 @@ const formatSingle = (props: {
 	};
 };
 
+const formatTransactions = (
+	transactions: Select<LucidEmailTransactions>[],
+): EmailTransaction[] =>
+	transactions.map((transaction) => ({
+		id: transaction.id,
+		emailId: transaction.email_id,
+		deliveryStatus: transaction.delivery_status,
+		message: transaction.message,
+		strategyIdentifier: transaction.strategy_identifier,
+		strategyData: transaction.strategy_data,
+		externalMessageId: transaction.external_message_id,
+		simulate: formatter.formatBoolean(transaction.simulate),
+		createdAt: formatter.formatDate(transaction.created_at),
+		updatedAt: formatter.formatDate(transaction.updated_at),
+	}));
+
 export default {
 	formatMultiple,
 	formatSingle,
+	formatTransactions,
 };

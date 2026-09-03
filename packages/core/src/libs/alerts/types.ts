@@ -1,6 +1,6 @@
 import type { ServiceFn } from "../../utils/services/types.js";
 
-export type AlertSource = "cron" | "programmatic";
+export type AlertSource = "schedule" | "programmatic";
 export type AlertTrigger = string;
 
 export type InternalAlertKey = "storage-check";

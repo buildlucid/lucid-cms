@@ -27,6 +27,8 @@ export const Permissions = {
 
 	// Job permissions
 	JobsRead: "jobs:read",
+	JobsRun: "jobs:run",
+	JobsUpdate: "jobs:update",
 
 	// Publish operation permissions
 	PublishOperationsRead: "publish-operations:read",
@@ -282,6 +284,24 @@ export const PermissionGroups = Object.freeze({
 				details: {
 					name: copy("admin:core.permissions.read.jobs", {
 						defaultMessage: "Read Jobs",
+					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.JobsRun,
+				details: {
+					name: copy("admin:core.permissions.run.jobs", {
+						defaultMessage: "Run Jobs",
+					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.JobsUpdate,
+				details: {
+					name: copy("admin:core.permissions.update.jobs", {
+						defaultMessage: "Update Job Schedules",
 					}),
 				},
 				core: true,

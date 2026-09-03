@@ -11,6 +11,7 @@ const plugin = (
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		recipe: (draft) => {
+			draft.i18n.sources.push("@lucidcms/plugin-worker-queues/translations");
 			draft.queue.adapter = workerQueueAdapter(pluginOptions ?? {});
 		},
 	};

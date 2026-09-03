@@ -61,8 +61,7 @@ const updateWranglerConfig = async (props: {
 		typeof config.triggers === "object" && config.triggers
 			? { ...(config.triggers as Record<string, unknown>) }
 			: {};
-	triggers.crons =
-		props.adapter.getOptions()?.worker?.crons ?? constants.DEFAULT_CRONS;
+	triggers.crons = [constants.JOB_SCHEDULER_CRON];
 	config.triggers = triggers;
 	await writeFileIfChanged(
 		prepared.wranglerConfigPath,

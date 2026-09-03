@@ -85,6 +85,7 @@
 		"boxen": "^8.0.1",
 		"chokidar": "^5.0.0",
 		"commander": "^15.0.0",
+		"cron-parser": "^5.10.0",
 		"date-fns": "^4.4.0",
 		"file-type": "^22.0.1",
 		"hono": "^4.12.27",

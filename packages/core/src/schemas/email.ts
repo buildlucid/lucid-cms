@@ -135,50 +135,6 @@ const emailResponseSchema = z.object({
 			example: "outsideResendWindow",
 		}),
 	}),
-	transactions: z.array(
-		z.object({
-			deliveryStatus: emailDeliveryStatusSchema.meta({
-				description: "The current delivery status of the email",
-				example: "sent",
-			}),
-			message: z.string().nullable().meta({
-				description: "The message associated with the email delivery",
-				example: "Email sent successfully",
-			}),
-			strategyIdentifier: z.string().meta({
-				description: "The identifier of the strategy used to send the email",
-				example: "smtp",
-			}),
-			strategyData: z
-				.record(z.string(), z.any())
-				.nullable()
-				.meta({
-					description: "The data associated with the email delivery",
-					example: {
-						username: "JohnDoe",
-						accountType: "premium",
-						verificationUrl: "https://example.com/verify/token123",
-					},
-				}),
-			externalMessageId: z.string().nullable().meta({
-				description:
-					"The external message ID of the email. Used for tracking the email in the provider's system.",
-				example: "1234567890",
-			}),
-			simulate: z.boolean().meta({
-				description: "Whether the email was simulated and not actually sent",
-				example: true,
-			}),
-			createdAt: z.string().nullable().meta({
-				description: "Timestamp when the email was created",
-				example: "2024-04-25T14:30:00.000Z",
-			}),
-			updatedAt: z.string().nullable().meta({
-				description: "Timestamp of the most recent delivery attempt",
-				example: "2024-04-25T14:31:10.000Z",
-			}),
-		}),
-	),
 	lastAttemptedAt: z.string().nullable().meta({
 		description: "The timestamp of the last attempt to send the email",
 		example: "2024-04-25T14:30:00.000Z",
@@ -323,8 +279,79 @@ export const controllerSchemas = {
 			}),
 		}),
 	} satisfies ControllerSchema,
+	getTransactions: {
+		body: undefined,
+		query: {
+			string: z
+				.object({
+					"filter[deliveryStatus]": queryString.schema.filter(true),
+					"filter[strategyIdentifier]": queryString.schema.filter(false),
+					"filter[message]": queryString.schema.filter(false, {
+						nullable: true,
+					}),
+					"filter[externalMessageId]": queryString.schema.filter(false, {
+						nullable: true,
+					}),
+					"filter[simulate]": queryString.schema.filter(false),
+					"filter[createdAt]": queryString.schema.filter(false),
+					"filter[updatedAt]": queryString.schema.filter(false),
+					sort: queryString.schema.sort("createdAt,updatedAt"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
+				})
+				.meta(queryString.meta),
+			formatted: z.object({
+				filter: z
+					.object({
+						deliveryStatus: queryFormatted.schema.filters.union.optional(),
+						strategyIdentifier: queryFormatted.schema.filters.single.optional(),
+						message: queryFormatted.schema.filters.single.optional(),
+						externalMessageId: queryFormatted.schema.filters.single.optional(),
+						simulate: queryFormatted.schema.filters.single.optional(),
+						createdAt: queryFormatted.schema.filters.single.optional(),
+						updatedAt: queryFormatted.schema.filters.single.optional(),
+					})
+					.optional(),
+				filterOr: queryFormatted.schema.filterOr,
+				sort: z
+					.array(
+						z.object({
+							key: z.enum(["createdAt", "updatedAt"]),
+							direction: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
+			}),
+		},
+		params: z.object({
+			id: z.string().trim().meta({
+				description: "The email ID",
+				example: "1",
+			}),
+		}),
+		response: z.array(
+			z.object({
+				id: z.number(),
+				emailId: z.number(),
+				deliveryStatus: emailDeliveryStatusSchema,
+				message: z.string().nullable(),
+				strategyIdentifier: z.string(),
+				strategyData: z.record(z.string(), z.unknown()).nullable(),
+				externalMessageId: z.string().nullable(),
+				simulate: z.boolean(),
+				createdAt: z.string().nullable(),
+				updatedAt: z.string().nullable(),
+			}),
+		),
+	} satisfies ControllerSchema,
 };
 
 export type GetMultipleQueryParams = z.infer<
 	typeof controllerSchemas.getMultiple.query.formatted
+>;
+
+export type GetTransactionsQueryParams = z.infer<
+	typeof controllerSchemas.getTransactions.query.formatted
 >;

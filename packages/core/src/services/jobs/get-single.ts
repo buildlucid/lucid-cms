@@ -1,6 +1,6 @@
 import { jobsFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { QueueJobsRepository } from "../../libs/repositories/index.js";
+import { JobsRepository } from "../../libs/repositories/index.js";
 import type { Job } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -12,7 +12,7 @@ const getSingle: ServiceFn<
 	],
 	Job
 > = async (context, data) => {
-	const Jobs = new QueueJobsRepository(context.db);
+	const Jobs = new JobsRepository(context.db);
 
 	const jobRes = await Jobs.selectSingleById({
 		select: [
@@ -20,6 +20,9 @@ const getSingle: ServiceFn<
 			"job_id",
 			"job_name",
 			"job_version",
+			"trigger_type",
+			"schedule_key",
+			"scheduled_for",
 			"display_data",
 			"queue_adapter_key",
 			"status",

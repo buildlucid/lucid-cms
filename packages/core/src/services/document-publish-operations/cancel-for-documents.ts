@@ -1,6 +1,6 @@
 import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
-import { cancelJobs } from "../../libs/queue/jobs/cancel-jobs.js";
+import { cancelJobs } from "../../libs/jobs/cancel.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createEvent from "./helpers/create-event.js";

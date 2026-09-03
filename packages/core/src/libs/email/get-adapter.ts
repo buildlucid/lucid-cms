@@ -1,38 +1,26 @@
-import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
-import logger from "../logger/index.js";
+import { LucidError } from "../../utils/errors/index.js";
 import passthroughEmailAdapter from "./adapters/passthrough.js";
 import type { EmailAdapterInstance } from "./types.js";
 
-/**
- * Get the preferred email adapter. Falls back to passthrough adapter.
- */
-const getEmailAdapter = async (
-	config: Config,
-): Promise<EmailAdapterInstance> => {
+/** Resolves the configured email adapter, using simulation when omitted. */
+const getEmailAdapter = async (config: {
+	email: Pick<Config["email"], "adapter">;
+}): Promise<EmailAdapterInstance> => {
+	if (!config.email.adapter) return passthroughEmailAdapter();
+
 	try {
-		if (config.email?.adapter) {
-			const adapter =
-				typeof config.email.adapter === "function"
-					? await config.email.adapter()
-					: config.email.adapter;
-
-			return await adapter;
-		}
-
-		return await passthroughEmailAdapter();
+		return await (typeof config.email.adapter === "function"
+			? config.email.adapter()
+			: config.email.adapter);
 	} catch (error) {
-		logger.error({
-			error,
-			event: "email-adapter.initialization.failed",
-			scope: constants.logScopes.emailAdapter,
-			message: "Failed to initialize email adapter",
+		if (error instanceof LucidError) throw error;
+		throw new LucidError({
+			message: "The configured email adapter could not be initialized.",
 			data: {
 				errorMessage: error instanceof Error ? error.message : String(error),
 			},
 		});
-
-		return await passthroughEmailAdapter();
 	}
 };
 

@@ -1,6 +1,6 @@
 import { copy } from "../../libs/i18n/index.js";
-import { cancelJob } from "../../libs/queue/jobs/cancel-job.js";
-import { enqueueJob } from "../../libs/queue/jobs/enqueue-job.js";
+import { cancelJob } from "../../libs/jobs/cancel.js";
+import { enqueueJob } from "../../libs/jobs/enqueue.js";
 import { DocumentPublishOperationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import execute from "./execute.js";
@@ -72,7 +72,7 @@ const scheduleApproved: ServiceFn<
 		let scheduledJobId: string | null = null;
 
 		if (isInSchedulingDispatchWindow({ scheduledAt, now })) {
-			if (!context.queue.support.scheduling) {
+			if (!context.queue.support.delayedDelivery) {
 				return {
 					error: {
 						type: "basic",

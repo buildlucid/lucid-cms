@@ -1,0 +1,3 @@
+{
+	"plugin.worker.queues.jobs.check.failed": "The worker queue could not request a job check."
+}

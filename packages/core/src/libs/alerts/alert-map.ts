@@ -2,7 +2,7 @@ import storageCheckAlert from "../../services/media/alerts/storage-check.js";
 import type { AlertConfig, InternalAlertKey } from "./types.js";
 
 /**
- * Registers internal alert producers so cron and jobs can execute them by key.
+ * Registers internal alert producers so schedules and jobs can execute them by key.
  */
 export const alertMap = {
 	"storage-check": {

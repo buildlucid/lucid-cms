@@ -1,5 +1,5 @@
 import formatter, { jobsFormatter } from "../../libs/formatters/index.js";
-import { QueueJobsRepository } from "../../libs/repositories/index.js";
+import { JobsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/jobs.js";
 import type { Job } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -15,7 +15,7 @@ const getMultiple: ServiceFn<
 		count: number;
 	}
 > = async (context, data) => {
-	const Jobs = new QueueJobsRepository(context.db);
+	const Jobs = new JobsRepository(context.db);
 
 	const jobsRes = await Jobs.selectMultipleFilteredFixed({
 		select: [
@@ -23,6 +23,9 @@ const getMultiple: ServiceFn<
 			"job_id",
 			"job_name",
 			"job_version",
+			"trigger_type",
+			"schedule_key",
+			"scheduled_for",
 			"display_data",
 			"queue_adapter_key",
 			"status",

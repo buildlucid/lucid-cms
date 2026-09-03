@@ -1,7 +1,12 @@
-import { logger } from "@lucidcms/core";
+import { copy, logger } from "@lucidcms/core";
 import { consumeJob, logScopes } from "@lucidcms/core/extension";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
-import { ADAPTER_KEY, MAX_BATCH_SIZE, MAX_DELAY_MS } from "./constants.js";
+import {
+	ADAPTER_KEY,
+	DEFAULT_QUEUE_BINDING,
+	MAX_BATCH_SIZE,
+	MAX_DELAY_MS,
+} from "./constants.js";
 import type { PluginOptions } from "./types.js";
 import { getDelaySeconds } from "./utils/get-delay-seconds.js";
 import { resolveBinding } from "./utils/resolve-binding.js";
@@ -14,11 +19,10 @@ const cloudflareQueuesAdapter = (
 	return {
 		type: "queue-adapter",
 		key: ADAPTER_KEY,
-		support: {
-			get scheduling() {
-				return consumerSupported;
-			},
-			maxDelayMs: MAX_DELAY_MS,
+		get support(): QueueAdapterInstance["support"] {
+			return consumerSupported
+				? { delayedDelivery: true, maxDelayMs: MAX_DELAY_MS }
+				: { delayedDelivery: false };
 		},
 		lifecycle: {
 			init: async (params) => {
@@ -39,24 +43,59 @@ const cloudflareQueuesAdapter = (
 		publish: async (context, messages) => {
 			if (!consumerSupported) {
 				for (const message of messages) {
-					await consumeJob(context, {
+					const result = await consumeJob(context, {
 						jobId: message.jobId,
 						retry: "immediate",
 					});
+					if (result.type === "retry-transport") {
+						return {
+							error: {
+								message: copy(
+									"server:plugin.cloudflare.queues.jobs.consume.development.failed",
+								),
+							},
+							data: undefined,
+						};
+					}
 				}
-				return;
+				return { error: undefined, data: undefined };
 			}
 
 			const binding = resolveBinding(context, options);
-
-			for (let index = 0; index < messages.length; index += MAX_BATCH_SIZE) {
-				await binding.sendBatch(
-					messages.slice(index, index + MAX_BATCH_SIZE).map((message) => ({
-						body: { version: message.version, jobId: message.jobId },
-						delaySeconds: getDelaySeconds(new Date(message.availableAt)),
-					})),
-				);
+			if (!binding) {
+				return {
+					error: {
+						message: copy("server:plugin.cloudflare.queues.binding.invalid", {
+							data: {
+								binding: options.binding ?? DEFAULT_QUEUE_BINDING,
+							},
+						}),
+					},
+					data: undefined,
+				};
 			}
+
+			try {
+				for (let index = 0; index < messages.length; index += MAX_BATCH_SIZE) {
+					await binding.sendBatch(
+						messages.slice(index, index + MAX_BATCH_SIZE).map((message) => ({
+							body: { version: message.version, jobId: message.jobId },
+							delaySeconds: getDelaySeconds(new Date(message.availableAt)),
+						})),
+					);
+				}
+			} catch (cause) {
+				return {
+					error: {
+						message: copy(
+							"server:plugin.cloudflare.queues.jobs.publish.failed",
+						),
+						cause,
+					},
+					data: undefined,
+				};
+			}
+			return { error: undefined, data: undefined };
 		},
 	};
 };

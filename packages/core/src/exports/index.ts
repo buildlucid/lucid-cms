@@ -22,8 +22,8 @@ export {
 	createTranslator,
 	translate,
 } from "../libs/i18n/index.js";
+export { default as defineJob } from "../libs/jobs/define-job.js";
 export { default as logger } from "../libs/logger/index.js";
-export { default as defineJob } from "../libs/queue/define-job.js";
 export { default as configureLucid } from "../libs/runtime/configure-lucid.js";
 export { default as defineSeed } from "../libs/seed/define-seed.js";
 export { default as createToolkit } from "../libs/toolkit/create-toolkit.js";

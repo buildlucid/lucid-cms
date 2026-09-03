@@ -2,7 +2,7 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { copy } from "../../libs/i18n/index.js";
-import { cancelJob } from "../../libs/queue/jobs/cancel-job.js";
+import { cancelJob } from "../../libs/jobs/cancel.js";
 import {
 	DocumentPublishOperationAssigneesRepository,
 	DocumentPublishOperationsRepository,
@@ -117,7 +117,7 @@ const createSingle: ServiceFn<
 		!collectionTargetSupportsScheduling({
 			collection,
 			target: data.target,
-			queueSupportsScheduling: context.queue.support.scheduling,
+			queueSupportsDelayedDelivery: context.queue.support.delayedDelivery,
 		})
 	) {
 		return {

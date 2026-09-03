@@ -19,6 +19,8 @@ export {
 	hydrateAdminCopyDefaults,
 	isTranslatableCopy,
 } from "../libs/i18n/index.js";
+export { consumeJob } from "../libs/jobs/consume/index.js";
+export { drainJobs } from "../libs/jobs/drain.js";
 export { DEFAULT_KV_NAMESPACE } from "../libs/kv/constants.js";
 export {
 	getNamespacePrefix as getKVNamespacePrefix,
@@ -28,8 +30,6 @@ export {
 	createSignedMediaUrl,
 	validateSignedMediaUrl,
 } from "../libs/media-storage/signed-url.js";
-export { consumeJob } from "../libs/queue/jobs/consume-job.js";
-export { drainJobs } from "../libs/queue/jobs/drain-jobs.js";
 export { resolveRelatedDocumentVersionType } from "../services/documents/helpers/resolve-relation-version-type.js";
 export { ensureLucidDirectoryExists } from "../utils/helpers/lucid-directory.js";
 export {

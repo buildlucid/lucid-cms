@@ -19,6 +19,9 @@ export { default as EmailTransactionsRepository } from "./email-transactions.js"
 export { default as EmailsRepository } from "./emails.js";
 export { default as IntegrationScopesRepository } from "./integration-scopes.js";
 export { default as IntegrationsRepository } from "./integrations.js";
+export { default as JobScheduleOverridesRepository } from "./job-schedule-overrides.js";
+export { default as JobSchedulerRepository } from "./job-scheduler.js";
+export { default as JobsRepository } from "./jobs.js";
 export { default as LocalesRepository } from "./locales.js";
 export { default as LucidRemoteConnectionsRepository } from "./lucid-remote-connections.js";
 export { default as MediaRepository } from "./media.js";
@@ -37,7 +40,6 @@ export { default as OAuthRefreshTokensRepository } from "./oauth-refresh-tokens.
 export { default as OptionsRepository } from "./options.js";
 export { default as PreviewSessionsRepository } from "./preview-sessions.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
-export { default as QueueJobsRepository } from "./queue-jobs.js";
 export { default as RolePermissionsRepository } from "./role-permissions.js";
 export { default as RoleTranslationsRepository } from "./role-translations.js";
 export { default as RolesRepository } from "./roles.js";
