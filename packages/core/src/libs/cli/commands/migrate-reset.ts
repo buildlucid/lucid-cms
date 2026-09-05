@@ -63,7 +63,7 @@ const migrateResetCommand = (props?: {
 				translationStore = (
 					await prepareTranslations({
 						config,
-						projectRoot: res.projectRoot,
+						files: res.resources.files.translations,
 					})
 				).translationStore;
 

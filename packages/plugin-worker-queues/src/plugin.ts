@@ -10,8 +10,8 @@ const plugin = (
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		sources: { translations: ["@lucidcms/plugin-worker-queues/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-worker-queues/translations");
 			draft.queue.adapter = workerQueueAdapter(pluginOptions ?? {});
 		},
 	};

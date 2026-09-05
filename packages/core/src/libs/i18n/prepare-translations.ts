@@ -3,6 +3,7 @@ import path from "node:path";
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
+import type { ResourceFile } from "../resources/types.js";
 import { loadTranslationSources } from "./load-project-translations.js";
 import { createTranslationStore } from "./store.js";
 import type { TranslationBundles, TranslationStore } from "./types.js";
@@ -40,7 +41,7 @@ export const writeTranslationArtifact = async (props: {
  */
 const prepareTranslations = async (props: {
 	config: Config;
-	projectRoot?: string;
+	files?: ResourceFile[];
 	bundles?: TranslationBundles;
 	outputPath?: string;
 }): Promise<PrepareTranslationsResult> => {
@@ -49,8 +50,7 @@ const prepareTranslations = async (props: {
 		bundles:
 			props.bundles ??
 			(await loadTranslationSources({
-				projectRoot: props.projectRoot,
-				sources: props.config.i18n.sources,
+				files: props.files,
 			})),
 	});
 

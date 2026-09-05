@@ -16,6 +16,7 @@ import type { ResolvedLucidProject } from "./project.js";
 export const prepareAssets = async (
 	project: ResolvedLucidProject,
 	assetRoot: string,
+	astroPublicDirectory: string,
 ) => {
 	await fs.rm(assetRoot, { recursive: true, force: true });
 	await ensureDirectory(assetRoot);
@@ -24,10 +25,12 @@ export const prepareAssets = async (
 		locale: "en",
 	});
 	const publicResult = await prepareLucidPublicAssets({
-		config: project.loaded.config,
+		// Astro already serves files at their original paths in its public directory.
+		files: project.loaded.resources.files.public.filter(
+			(file) => file.path !== path.resolve(astroPublicDirectory, file.name),
+		),
 		outDir: assetRoot,
 		projectRoot: project.loaded.projectRoot,
-		includeProjectPublic: false,
 		silent: true,
 	});
 
@@ -62,7 +65,6 @@ export const createDevAssetPlugin = (assetRoot: string): Plugin => ({
 			const pathname = decodeURIComponent(
 				new URL(request.url, "http://astro.local").pathname,
 			);
-			if (!pathname.startsWith(`${constants.mountPath}/`)) return next();
 
 			const filePath = path.resolve(assetRoot, pathname.slice(1));
 			const relativePath = path.relative(assetRoot, filePath);

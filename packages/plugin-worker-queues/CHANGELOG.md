@@ -6,6 +6,7 @@
 - Added media storage and delivery adapter lifecycle support to queue consumers.
 - Moved queue consumer adapter setup and cleanup onto Lucid's shared adapter lifecycle.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Moved translation registration to plugin `sources`.
 
 ## v1.1.1
 

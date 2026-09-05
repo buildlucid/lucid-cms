@@ -2,6 +2,10 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import ts from "typescript";
 import { LucidError } from "../../utils/errors/index.js";
+import type {
+	PreparedResources,
+	ResourceModuleFiles,
+} from "../resources/types.js";
 import {
 	type ConfigArtifactKey,
 	configArtifactEntries,
@@ -413,6 +417,7 @@ const renderArtifactSource = (props: {
 	target: ConfigArtifactKey;
 	outputPath: string;
 	expression?: ts.Expression;
+	modules?: ResourceModuleFiles;
 }) => {
 	const { neededStatements, neededIdentifiers } = resolveNeededStatements(
 		props.sourceFile,
@@ -458,9 +463,51 @@ const renderArtifactSource = (props: {
 				message: `Lucid config is missing the \`${props.target}\` artifact expression.`,
 			});
 		}
-		sections.push(
-			`export default ${props.expression.getText(props.sourceFile)};`,
-		);
+		if (props.target === "config" && props.modules) {
+			const usedNames = new Set<string>();
+			const visit = (node: ts.Node) => {
+				if (ts.isIdentifier(node)) usedNames.add(node.text);
+				ts.forEachChild(node, visit);
+			};
+			visit(props.sourceFile);
+			const uniqueName = (prefix: string) => {
+				let name = prefix;
+				for (let index = 1; usedNames.has(name); index++)
+					name = `${prefix}${index}`;
+				usedNames.add(name);
+				return name;
+			};
+			const registerName = uniqueName("lucidRegisterResources");
+			const factoryName = uniqueName("lucidConfigFactory");
+			sections.push(
+				`import { registerResourceModules as ${registerName} } from "@lucidcms/core/runtime";`,
+			);
+			const registrations: string[] = [];
+			let index = 0;
+			for (const [kind, files] of Object.entries(props.modules)) {
+				const names = files.map((file) => {
+					const name = uniqueName(`lucidResource${index++}`);
+					const specifier = ensureRelativeImportPath(
+						toImportPath(
+							path.relative(path.join(props.outputPath, "lucid"), file),
+						),
+					);
+					sections.push(`import ${name} from ${JSON.stringify(specifier)};`);
+					return name;
+				});
+				registrations.push(`${kind}: [${names.join(", ")}]`);
+			}
+			sections.push(
+				`const ${factoryName} = ${props.expression.getText(props.sourceFile)};`,
+			);
+			sections.push(
+				`export default (env) => ${registerName}(${factoryName}(env), { ${registrations.join(", ")} });`,
+			);
+		} else {
+			sections.push(
+				`export default ${props.expression.getText(props.sourceFile)};`,
+			);
+		}
 	}
 
 	return `${sections.join("\n\n")}\n`;
@@ -472,6 +519,7 @@ const renderArtifactSource = (props: {
 const prepareConfigArtifacts = async (props: {
 	configPath: string;
 	outputPath: string;
+	resources?: PreparedResources;
 }): Promise<PreparedConfigArtifacts> => {
 	const source = await readFile(props.configPath, "utf-8");
 	const sourceFile = ts.createSourceFile(
@@ -510,6 +558,7 @@ const prepareConfigArtifacts = async (props: {
 					target,
 					outputPath: props.outputPath,
 					expression: expressions[target],
+					modules: props.resources?.modules,
 				}),
 			);
 		}),

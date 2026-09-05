@@ -21,9 +21,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		sources: { translations: ["@lucidcms/plugin-resend/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-resend/translations");
-
 			const simulate = draft.email.simulate;
 
 			if (pluginOptions.webhook?.enabled) {

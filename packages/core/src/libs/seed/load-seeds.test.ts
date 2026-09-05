@@ -2,6 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, expect, test } from "vitest";
+import { prepareResources } from "../resources/prepare-resources.js";
 import loadSeeds from "./load-seeds.js";
 
 let projectRoot: string;
@@ -22,7 +23,7 @@ test("loads project, package and namespaced inline seed sources", async () => {
 		"seeds",
 	);
 	const packageSeeds = path.join(packageRoot, "seeds");
-	const projectSeeds = path.join(projectRoot, "seeds");
+	const projectSeeds = path.join(projectRoot, "src/lucid/seeds");
 
 	await Promise.all([
 		mkdir(packageSeeds, { recursive: true }),
@@ -48,12 +49,13 @@ test("loads project, package and namespaced inline seed sources", async () => {
 		),
 	]);
 
-	const seeds = await loadSeeds({
+	const prepared = await prepareResources(
+		{ sources: { seeds: ["@example/seeds/seeds"] } },
 		projectRoot,
-		sources: [
-			"@example/seeds/seeds",
-			{ name: "pages:example", seed: async () => {} },
-		],
+	);
+	const seeds = await loadSeeds({
+		files: prepared.resources.files.seeds,
+		definitions: [{ name: "pages:example", seed: async () => {} }],
 	});
 
 	expect(Object.keys(seeds).sort()).toEqual([

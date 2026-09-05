@@ -56,7 +56,7 @@ const migrateRollbackCommand = async (options?: {
 		translationStore = (
 			await prepareTranslations({
 				config,
-				projectRoot: res.projectRoot,
+				files: res.resources.files.translations,
 			})
 		).translationStore;
 
@@ -73,7 +73,10 @@ const migrateRollbackCommand = async (options?: {
 
 		cliLogger.info("Checking rollback status");
 
-		await prepareExternalMigrations(config, res.projectRoot);
+		await prepareExternalMigrations({
+			config,
+			files: res.resources.files.migrations,
+		});
 		database = await config.db.connect(env);
 
 		//* executed migrations that are no longer registered would fail the rollback midway, so surface them upfront

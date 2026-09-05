@@ -1,7 +1,7 @@
 import { defineSeed } from "@lucidcms/core";
-import type { TestOrganisationTable } from "../src/tables/test-organisations.js";
+import type { TestOrganisationTable } from "../tables/test-organisations.js";
 
-export default defineSeed(async (context) => {
+const testSeed = defineSeed(async (context) => {
 	const now = new Date().toISOString();
 
 	const result = await context.db
@@ -21,3 +21,5 @@ export default defineSeed(async (context) => {
 		.many();
 	if (result.error) throw result.error;
 });
+
+export default testSeed;

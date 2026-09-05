@@ -3,6 +3,7 @@
 ## v0.1.1 (unreleased)
 
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Moved translation registration to plugin `sources`.
 
 ## v0.1.0
 

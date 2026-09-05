@@ -6,7 +6,7 @@ export type TestOrganisationTable = {
 	updatedAt: string | Date;
 };
 
-export const testOrganisationsTable = defineTable<TestOrganisationTable>(
+const testOrganisationsTable = defineTable<TestOrganisationTable>(
 	"test-organisations",
 	{
 		columns: {
@@ -22,3 +22,5 @@ export const testOrganisationsTable = defineTable<TestOrganisationTable>(
 		},
 	},
 );
+
+export default testOrganisationsTable;

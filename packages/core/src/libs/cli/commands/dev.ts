@@ -37,6 +37,8 @@ const devCommand = async (options?: {
 	let rebuilding = false;
 	let isInitialRun = true;
 	let buildOutDir = "dist";
+	let resourceWatchPaths: string[] = [];
+	let resourceWatcher: ReturnType<typeof chokidar.watch> | undefined;
 	let buildWatchIgnore: string[] = [];
 	let telemetryReporter: CommandTelemetryReporter | undefined;
 
@@ -73,9 +75,15 @@ const devCommand = async (options?: {
 
 			const configResult = await loadConfigFile({
 				path: configPath,
+				collectConfigDependencies: true,
 				prepareRuntime: true,
 			});
-			buildOutDir = configResult.config.build.paths.outDir;
+			resourceWatchPaths = [
+				...configResult.resources.watch,
+				...configResult.configDependencies,
+			];
+			resourceWatcher?.add(resourceWatchPaths);
+			buildOutDir = configResult.config.build.outDir;
 			buildWatchIgnore = configResult.config.build.watch?.ignore ?? [];
 			if (reportingInitialRun) {
 				telemetryReporter ??= createCommandTelemetryReporter({
@@ -90,8 +98,8 @@ const devCommand = async (options?: {
 
 			const translations = await prepareTranslations({
 				config: configResult.config,
-				projectRoot: configResult.projectRoot,
-				outputPath: configResult.config.build.paths.outDir,
+				files: configResult.resources.files.translations,
+				outputPath: configResult.config.build.outDir,
 			});
 			const translationStore = translations.translationStore;
 			const translate = createTranslator({
@@ -135,10 +143,10 @@ const devCommand = async (options?: {
 			currentStage = "migration";
 			const migrateResult = await migrateCommand({
 				config: configResult.config,
+				migrationFiles: configResult.resources.files.migrations,
 				env: configResult.env,
 				runtimeContext: configResult.runtimeContext,
 				translationStore,
-				projectRoot: configResult.projectRoot,
 				mode: "return",
 			})({
 				skipSyncSteps: !isInitialRun,
@@ -172,11 +180,13 @@ const devCommand = async (options?: {
 			const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 				prepareEmailTemplates({
 					config: configResult.config,
+					files: configResult.resources.files.templates,
 					silent: false,
 					verbose: false,
 				}),
 				copyPublicAssets({
 					config: configResult.config,
+					files: configResult.resources.files.public,
 					silent: false,
 					verbose: false,
 				}),
@@ -342,7 +352,7 @@ const devCommand = async (options?: {
 	};
 
 	const watcher = chokidar
-		.watch([watchPath, configPath], {
+		.watch([watchPath, configPath, ...resourceWatchPaths], {
 			ignored: ignorePatterns,
 			ignoreInitial: true,
 			persistent: true,
@@ -367,6 +377,7 @@ const devCommand = async (options?: {
 			startServer();
 		});
 
+	resourceWatcher = watcher;
 	let shutdownPromise: Promise<void> | undefined;
 	const shutdown = () => {
 		shutdownPromise ??= (async () => {

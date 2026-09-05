@@ -1,8 +1,8 @@
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
-import type { Config } from "../../../exports/types.js";
 import { getDirName } from "../../../utils/helpers/index.js";
 import cliLogger from "../../cli/logger.js";
+import type { ResourceFile } from "../../resources/types.js";
 import type { RenderedTemplates } from "../types.js";
 
 const currentDir = getDirName(import.meta.url);
@@ -66,7 +66,7 @@ const processTemplatesInDirectory = async (
 };
 
 const loadEmailTemplates = async (props: {
-	config: Config;
+	files: ResourceFile[];
 	silent?: boolean;
 	verbose?: boolean;
 }): Promise<RenderedTemplates> => {
@@ -74,16 +74,7 @@ const loadEmailTemplates = async (props: {
 	const verbose = props.verbose ?? false;
 	const renderedTemplates: RenderedTemplates = {};
 
-	const projectTemplatePath = props.config.email.templates.directory;
 	const packageTemplatePath = path.join(currentDir, "../../../../templates");
-
-	await processTemplatesInDirectory(
-		projectTemplatePath,
-		renderedTemplates,
-		true,
-		silent,
-		verbose,
-	);
 	await processTemplatesInDirectory(
 		packageTemplatePath,
 		renderedTemplates,
@@ -91,6 +82,25 @@ const loadEmailTemplates = async (props: {
 		silent,
 		verbose,
 	);
+	const templates = await Promise.all(
+		props.files.map(async (file) => {
+			const name = getTemplateName(file.name);
+			if (!name) return undefined;
+			const [html, info] = await Promise.all([
+				readFile(file.path, "utf-8"),
+				stat(file.path),
+			]);
+			return { name, html, lastModified: info.mtime.toISOString() };
+		}),
+	);
+	// Apply overrides in source order, regardless of which read finishes first.
+	for (const template of templates) {
+		if (!template) continue;
+		renderedTemplates[template.name] = {
+			html: template.html,
+			lastModified: template.lastModified,
+		};
+	}
 
 	return renderedTemplates;
 };

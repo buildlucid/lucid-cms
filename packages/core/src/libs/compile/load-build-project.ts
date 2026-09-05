@@ -50,7 +50,7 @@ const loadBuildProject = async (props?: {
 	});
 	const translations = await prepareTranslations({
 		config: loaded.config,
-		projectRoot: loaded.projectRoot,
+		files: loaded.resources.files.translations,
 	});
 	const preparedLoaded = {
 		...loaded,
@@ -75,7 +75,7 @@ const loadBuildProject = async (props?: {
 			? import("../email/templates/load-email-templates.js").then(
 					({ default: loadEmailTemplates }) =>
 						loadEmailTemplates({
-							config: preparedLoaded.config,
+							files: preparedLoaded.resources.files.templates,
 							silent: props?.silent,
 						}),
 				)

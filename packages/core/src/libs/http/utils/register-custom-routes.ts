@@ -1,8 +1,6 @@
 import type { Handler, Hono, ValidationTargets } from "hono";
-import { splitRoutingPath } from "hono/utils/url";
 import { type DescribeRouteOptions, describeRoute } from "hono-openapi";
 import z from "zod";
-import constants from "../../../constants/constants.js";
 import type {
 	LucidHonoContext,
 	LucidHonoGeneric,
@@ -21,24 +19,10 @@ import type {
 } from "../types.js";
 import buildFormattedQuery from "./build-formatted-query.js";
 import createServiceContext from "./create-service-context.js";
+import { getRouteKey, getRoutePath } from "./route-identity.js";
 
 type ValidatedRequest = {
 	valid: (target: keyof ValidationTargets) => unknown;
-};
-
-const contentRoutePrefix = `/${constants.directories.base}/api/v1/content`;
-
-/** Ignores parameter names while preserving regex constraints and optionality. */
-const getRouteKey = (route: { method: string; path: string }) =>
-	`${route.method.toUpperCase()}:${splitRoutingPath(route.path)
-		.map((segment) => segment.replace(/^:[^{?]+/, ":param"))
-		.join("/")}`;
-
-const getRoutePath = (route: LucidCustomRouteDefinition) => {
-	if (!isContentRouteDefinition(route)) return route.path;
-	return route.path === "/"
-		? contentRoutePrefix
-		: `${contentRoutePrefix}${route.path}`;
 };
 
 const getValidatedValue = <T>(
@@ -174,29 +158,27 @@ const registerCustomRoutes = (
 	routes: LucidCustomRouteDefinition[],
 ) => {
 	const registeredRouteKeys = new Set(app.routes.map(getRouteKey));
-	const contentRouteKeys = new Set<string>();
+	const orderedRoutes = routes.toSorted(
+		(a, b) => (a.priority ?? 0) - (b.priority ?? 0),
+	);
 
-	for (const route of routes) {
+	for (const route of orderedRoutes) {
 		const path = getRoutePath(route);
 		const method = route.method.toUpperCase();
 		const key = getRouteKey({ method, path });
 		const isContentRoute = isContentRouteDefinition(route);
 
-		if (
-			registeredRouteKeys.has(key) &&
-			(isContentRoute || contentRouteKeys.has(key))
-		) {
+		if (registeredRouteKeys.has(key)) {
 			throw new LucidError({
-				message: `Content route "${method} ${path}" is already registered.`,
+				message: `${isContentRoute ? "Content route" : "Route"} "${method} ${path}" is already registered.`,
 				scope: "register-custom-routes",
 			});
 		}
 
 		registeredRouteKeys.add(key);
-		if (isContentRoute) contentRouteKeys.add(key);
 	}
 
-	for (const route of routes) {
+	for (const route of orderedRoutes) {
 		const path = getRoutePath(route);
 
 		const handlers = buildRouteHandlers(route);

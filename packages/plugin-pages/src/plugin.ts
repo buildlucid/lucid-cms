@@ -20,8 +20,8 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		toolkit,
+		sources: { translations: ["@lucidcms/plugin-pages/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-pages/translations");
 			const configuredCollections = [];
 
 			for (const collectionConfig of options.collections) {

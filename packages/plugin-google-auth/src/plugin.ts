@@ -1,15 +1,19 @@
-import path, { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
-	const currentDir = dirname(fileURLToPath(import.meta.url));
-
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		sources: {
+			public: [
+				{
+					input: new URL("../assets/google-icon.svg", import.meta.url),
+					output: "lucid-plugins/google-auth/icon.svg",
+				},
+			],
+		},
 		recipe: (draft) => {
 			const providers = draft.auth.providers.find((p) => p.key === "google");
 			if (providers) {
@@ -19,7 +23,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.auth.providers.push({
 				key: PLUGIN_IDENTIFIER,
 				name: "Google",
-				icon: "/lucid/assets/auth-provider-icons/google-icon.svg",
+				icon: "/lucid-plugins/google-auth/icon.svg",
 				enabled: pluginOptions.enabled ?? true,
 				type: "oidc" as const,
 				config: {
@@ -33,11 +37,6 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					userinfoEndpoint: "https://openidconnect.googleapis.com/v1/userinfo",
 					scopes: ["openid", "profile"],
 				},
-			});
-
-			draft.build.paths.copyPublic.push({
-				input: path.join(currentDir, "../assets/google-icon.svg"),
-				output: "lucid/assets/auth-provider-icons/google-icon.svg",
 			});
 		},
 	};

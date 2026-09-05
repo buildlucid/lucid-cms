@@ -23,6 +23,7 @@ import {
 	startLoggerBuffering,
 	stopLoggerBuffering,
 } from "../../logger/index.js";
+import type { ResourceFile } from "../../resources/types.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 import {
@@ -70,14 +71,20 @@ const requestMigrationApproval = async (
 };
 
 /** Runs database and risk-aware collection migrations for CLI/runtime callers. */
-const migrateCommand = (props?: {
-	config?: Config;
-	env?: EnvironmentVariables;
-	runtimeContext?: AdapterRuntimeContext;
-	translationStore?: TranslationStore;
-	projectRoot?: string;
-	mode: "process" | "return";
-}) => {
+const migrateCommand = (
+	props?: {
+		env?: EnvironmentVariables;
+		runtimeContext?: AdapterRuntimeContext;
+		mode: "process" | "return";
+	} & (
+		| {
+				config: Config;
+				translationStore: TranslationStore;
+				migrationFiles: ResourceFile[];
+		  }
+		| { config?: never; translationStore?: never; migrationFiles?: never }
+	),
+) => {
 	return async (options?: MigrateCommandOptions) => {
 		let config: Config | undefined;
 		let env: EnvironmentVariables | undefined = props?.env;
@@ -120,22 +127,23 @@ const migrateCommand = (props?: {
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
 			const yes = options?.yes ?? false;
 			const allowDestructive = options?.allowDestructive ?? false;
-			let projectRoot = props?.projectRoot;
+			let migrationFiles: ResourceFile[];
 
 			//* preflight: load and validate the project, then prepare all migrations
 			if (props?.config) {
 				config = props.config;
+				migrationFiles = props.migrationFiles;
 				translationStore = props.translationStore;
 			} else {
 				const res = await loadConfigFile({ prepareRuntime: true });
 				config = res.config;
 				env = res.env;
 				runtimeContext = res.runtimeContext;
-				projectRoot = res.projectRoot;
+				migrationFiles = res.resources.files.migrations;
 				translationStore = (
 					await prepareTranslations({
 						config,
-						projectRoot: res.projectRoot,
+						files: res.resources.files.translations,
 					})
 				).translationStore;
 
@@ -152,7 +160,7 @@ const migrateCommand = (props?: {
 			}
 			database = await config.db.connect(env);
 
-			await prepareExternalMigrations(config, projectRoot);
+			await prepareExternalMigrations({ config, files: migrationFiles });
 
 			const preflightContext = createServiceContext({
 				config,

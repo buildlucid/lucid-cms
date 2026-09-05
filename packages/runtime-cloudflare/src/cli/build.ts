@@ -21,7 +21,7 @@ const buildCommand =
 		options: AdapterOptions | undefined,
 		prepareArtifacts?: RuntimePrepareArtifacts,
 	): BuildHandler =>
-	async ({ configPath, outputPath, buildArtifacts, logger }) => {
+	async ({ configPath, outputPath, buildArtifacts, logger, resources }) => {
 		logger.instance.info(
 			"Using:",
 			logger.instance.color.blue("Cloudflare Worker Adapter"),
@@ -51,6 +51,7 @@ const buildCommand =
 			}
 
 			const configArtifacts = await prepareConfigArtifacts({
+				resources,
 				configPath,
 				outputPath,
 			});

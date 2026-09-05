@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
-import getConfigPath from "../../config/get-config-path.js";
+import { getResourceDirectory } from "../../resources/get-resource-directory.js";
 import cliLogger from "../logger.js";
 
 const seedTemplate = `import { defineSeed } from "@lucidcms/core";
@@ -21,8 +21,7 @@ const seedNewCommand = async (name: string) => {
 			process.exit(1);
 		}
 
-		const projectRoot = path.dirname(getConfigPath(process.cwd()));
-		const directory = path.join(projectRoot, constants.seeds.projectDirectory);
+		const directory = await getResourceDirectory("seeds");
 		const filePath = path.join(directory, `${name}.ts`);
 
 		await fs.mkdir(directory, { recursive: true });

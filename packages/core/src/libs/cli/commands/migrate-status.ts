@@ -46,7 +46,7 @@ const migrateStatusCommand = async (options?: {
 		runtimeContext = res.runtimeContext;
 		const { translationStore } = await prepareTranslations({
 			config,
-			projectRoot: res.projectRoot,
+			files: res.resources.files.translations,
 		});
 
 		const envValid = await validateEnvVars({
@@ -60,7 +60,10 @@ const migrateStatusCommand = async (options?: {
 
 		cliLogger.info("Checking the migration status");
 
-		await prepareExternalMigrations(config, res.projectRoot);
+		await prepareExternalMigrations({
+			config,
+			files: res.resources.files.migrations,
+		});
 		database = await config.db.connect(env);
 
 		//* database migration status

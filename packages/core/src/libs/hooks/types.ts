@@ -195,20 +195,6 @@ export type ExecuteHookData<
 	? HookData<S, E>
 	: TransformHookData<S, E>;
 
-type TransformHookPriority<
-	S extends keyof HookServiceHandlers,
-	E extends keyof HookServiceHandlers[S],
-> = [TransformHookData<S, E>] extends [never]
-	? { priority?: never }
-	: {
-			/**
-			 * Orders transform hooks before they run. Lower values execute first,
-			 * defaulting to `0` so negative priorities run before default hooks and
-			 * positive priorities run after them.
-			 */
-			priority?: number;
-		};
-
 export type LucidHook<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
@@ -216,7 +202,9 @@ export type LucidHook<
 	service: S;
 	event: E;
 	handler: HookServiceHandlers[S][E];
-} & TransformHookPriority<S, E>;
+	/** Lower priorities execute first. Defaults to zero. */
+	priority?: number;
+};
 
 export type LucidHookDocuments<
 	E extends keyof HookServiceHandlers["documents"],

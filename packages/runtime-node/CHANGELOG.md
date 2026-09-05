@@ -4,6 +4,7 @@
 
 - Added minutely job scheduling to production Astro builds running on Node.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Added build support for discovered resources and plugin sources.
 
 ## v1.2.1
 

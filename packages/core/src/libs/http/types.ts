@@ -83,6 +83,8 @@ export type LucidRouteMiddleware = MiddlewareHandler<LucidHonoGeneric>;
 export type LucidRouteDefinitionInput<
 	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
 > = {
+	/** Lower priorities register first. Defaults to zero. */
+	priority?: number;
 	method: LucidRouteMethod;
 	path: string;
 	schema?: TSchema;

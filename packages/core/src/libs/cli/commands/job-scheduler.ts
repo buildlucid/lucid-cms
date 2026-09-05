@@ -46,7 +46,7 @@ const jobSchedulerCommand = async (jobOrSchedule?: string) => {
 		const { config, env, runtimeContext } = configResult;
 		const translations = await prepareTranslations({
 			config,
-			projectRoot: configResult.projectRoot,
+			files: configResult.resources.files.translations,
 		});
 		const envValid = await validateEnvVars({
 			envSchema: configResult.envSchema,

@@ -12,6 +12,7 @@ import type { RedirectsPluginOptions } from "./types.js";
 const plugin: LucidPlugin<RedirectsPluginOptions> = (givenOptions) => ({
 	key: PLUGIN_KEY,
 	lucid: LUCID_VERSION,
+	sources: { translations: ["@lucidcms/plugin-redirects/translations"] },
 	recipe: (draft) => {
 		if (
 			draft.collections.some((collection) => collection.key === COLLECTION_KEY)
@@ -30,8 +31,6 @@ const plugin: LucidPlugin<RedirectsPluginOptions> = (givenOptions) => ({
 				environments: collection.config.environments,
 			})),
 		);
-
-		draft.i18n.sources.push("@lucidcms/plugin-redirects/translations");
 		draft.collections.push(createRedirectsCollection(options));
 		draft.hooks.push({
 			service: "documents",

@@ -65,6 +65,13 @@ export type {
 	QueueDeliveryMessage,
 } from "../libs/queue/types.js";
 export type {
+	PreparedResources,
+	ResourceDiscovery,
+	ResourceKind,
+	ResourceSource,
+	ResourceSources,
+} from "../libs/resources/types.js";
+export type {
 	CreateLucidAdaptersOptions,
 	LucidAdapterInstances,
 	LucidAdapterOverrides,

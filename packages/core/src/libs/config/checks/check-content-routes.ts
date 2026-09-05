@@ -1,10 +1,19 @@
 import type { Config } from "../../../types/config.js";
 import { isContentRouteDefinition } from "../../http/define-content-api-route.js";
+import { getRouteKey, getRoutePath } from "../../http/utils/route-identity.js";
 import { getInvalidExternalScopes } from "../../permission/scopes.js";
 
-/** Checks static content-route scopes against the configured capability registry. */
+/** Checks route uniqueness and static content-route scopes. */
 const checkContentRoutes = (config: Config) => {
+	const identities = new Set<string>();
 	for (const route of config.http.routes) {
+		const routePath = getRoutePath(route);
+		const identity = getRouteKey({ method: route.method, path: routePath });
+		if (identities.has(identity))
+			throw new Error(
+				`Route "${route.method.toUpperCase()} ${routePath}" is already registered.`,
+			);
+		identities.add(identity);
 		if (!isContentRouteDefinition(route)) continue;
 		if (route.access.type !== "scoped") continue;
 		if (typeof route.access.scopes === "function") continue;

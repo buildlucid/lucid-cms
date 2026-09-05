@@ -18,13 +18,12 @@ describe("Cloudflare Images plugin", () => {
 	it("registers translations and the configured processor", () => {
 		const instance = plugin({ binding: "CUSTOM_IMAGES" });
 		const draft = {
-			i18n: { sources: [] as Array<string | URL> },
 			media: { delivery: undefined as { key: string } | undefined },
 		};
 
 		instance.recipe(draft as never);
 
-		expect(draft.i18n.sources).toContain(
+		expect(instance.sources?.translations).toContain(
 			"@lucidcms/plugin-cloudflare-images/translations",
 		);
 		expect(draft.media.delivery?.key).toBe("cloudflare-images");

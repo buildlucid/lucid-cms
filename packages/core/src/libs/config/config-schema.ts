@@ -1,7 +1,5 @@
 import z from "zod";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
-import type { TableDefinition } from "../db/client/table/definition.js";
-import type { ExternalMigration } from "../db/types.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
 import type {
 	HttpExtension,
@@ -21,7 +19,15 @@ import type {
 	MediaStorageAdapterInstance,
 } from "../media-storage/types.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
-import type { Seed } from "../seed/types.js";
+import {
+	migrationSchema,
+	seedSchema,
+	tableSchema,
+} from "../resources/module-schemas.js";
+import {
+	ResourceDiscoverySchema,
+	ResourceSourcesSchema,
+} from "../resources/schema.js";
 
 const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
 	(data) => typeof data === "function",
@@ -41,18 +47,6 @@ const LucidRouteDefinitionSchema = z.custom<LucidCustomRouteDefinition>(
 	{
 		message: "Expected a Lucid route definition",
 	},
-);
-
-const TableDefinitionSchema = z.custom<TableDefinition>(
-	(data) =>
-		typeof data === "object" &&
-		data !== null &&
-		"name" in data &&
-		typeof data.name === "string" &&
-		data.name.trim().length > 0 &&
-		"resolve" in data &&
-		typeof data.resolve === "function",
-	{ message: "Expected a table definition created with defineTable" },
 );
 
 // TODO: improve all function custom schemas bellow
@@ -131,7 +125,9 @@ const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
 
 const ConfigSchema = z.object({
 	db: z.unknown(),
-	tables: z.array(TableDefinitionSchema),
+	tables: z.array(tableSchema),
+	discovery: ResourceDiscoverySchema,
+	sources: ResourceSourcesSchema,
 	host: z.string().trim().min(1).optional(),
 	http: z
 		.object({
@@ -215,48 +211,24 @@ const ConfigSchema = z.object({
 				}),
 			),
 			defaultLocale: z.string(),
-			sources: z.array(z.union([z.string(), z.instanceof(URL)])).optional(),
 		})
 		.optional(),
 	migrations: z
 		.object({
-			sources: z
+			definitions: z
 				.array(
-					z.union([
-						z.string(),
-						z.instanceof(URL),
-						z.object({
-							name: z.string(),
-							migration: z.custom<ExternalMigration>(
-								(data) =>
-									typeof data === "object" &&
-									data !== null &&
-									typeof (data as ExternalMigration).up === "function" &&
-									((data as ExternalMigration).down === undefined ||
-										typeof (data as ExternalMigration).down === "function"),
-								{ message: "Expected a migration definition" },
-							),
-						}),
-					]),
+					z.object({
+						name: z.string(),
+						migration: migrationSchema,
+					}),
 				)
 				.optional(),
 		})
 		.optional(),
 	seeds: z
 		.object({
-			sources: z
-				.array(
-					z.union([
-						z.string(),
-						z.instanceof(URL),
-						z.object({
-							name: z.string(),
-							seed: z.custom<Seed>((data) => typeof data === "function", {
-								message: "Expected a seed function",
-							}),
-						}),
-					]),
-				)
+			definitions: z
+				.array(z.object({ name: z.string(), seed: seedSchema }))
 				.optional(),
 		})
 		.optional(),
@@ -271,12 +243,7 @@ const ConfigSchema = z.object({
 			simulate: z.boolean().optional(),
 			resendWindowDays: z.number().int().min(0).optional(),
 			adapter: EmailAdapterSchema.optional(),
-			templates: z
-				.object({
-					directory: z.string().optional(),
-					rendered: z.record(z.string(), z.string()).optional(),
-				})
-				.optional(),
+			templates: z.record(z.string(), z.string()).optional(),
 		})
 		.optional(),
 	media: z.object({
@@ -353,22 +320,7 @@ const ConfigSchema = z.object({
 	plugins: z.array(z.unknown()),
 	build: z
 		.object({
-			paths: z
-				.object({
-					outDir: z.string().optional(),
-					copyPublic: z
-						.array(
-							z.union([
-								z.string(),
-								z.object({
-									input: z.string(),
-									output: z.string().optional(),
-								}),
-							]),
-						)
-						.optional(),
-				})
-				.optional(),
+			outDir: z.string().optional(),
 			watch: z
 				.object({
 					ignore: z.array(z.string()).optional(),

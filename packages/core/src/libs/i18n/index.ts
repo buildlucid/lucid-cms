@@ -51,7 +51,6 @@ export type {
 	TranslationBundle,
 	TranslationBundles,
 	TranslationScope,
-	TranslationSource,
 	TranslationStore,
 	TranslationValues,
 	Translator,

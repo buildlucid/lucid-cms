@@ -7,8 +7,8 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		sources: { translations: ["@lucidcms/plugin-sqlite-kv/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-sqlite-kv/translations");
 			if (!draft.kv) {
 				draft.kv = {
 					adapter: sqliteKVAdapter(pluginOptions),

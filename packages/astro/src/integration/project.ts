@@ -123,6 +123,7 @@ export const bootstrapDevProject = async (project: ResolvedLucidProject) => {
 	});
 	const result = await migrateCommand({
 		config: project.loaded.config,
+		migrationFiles: project.loaded.resources.files.migrations,
 		env: state.env ?? project.loaded.env,
 		runtimeContext: state.runtimeContext,
 		translationStore: project.loaded.translationStore,

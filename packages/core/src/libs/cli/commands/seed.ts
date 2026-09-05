@@ -23,7 +23,7 @@ import {
 	stopLoggerBuffering,
 } from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
-import { prepareSeeds } from "../../seed/load-seeds.js";
+import loadSeeds from "../../seed/load-seeds.js";
 import type { Seed } from "../../seed/types.js";
 import cliLogger from "../logger.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
@@ -34,7 +34,10 @@ const loadConfiguredSeeds = async () => {
 	const result = await loadConfigFile({ prepareRuntime: true });
 	return {
 		...result,
-		seeds: await prepareSeeds(result.config, result.projectRoot),
+		seeds: await loadSeeds({
+			definitions: result.config.seeds.definitions,
+			files: result.resources.files.seeds,
+		}),
 	};
 };
 
@@ -110,7 +113,7 @@ const seedCommand = async (
 		translationStore = (
 			await prepareTranslations({
 				config,
-				projectRoot: result.projectRoot,
+				files: result.resources.files.translations,
 			})
 		).translationStore;
 
@@ -164,7 +167,10 @@ const seedCommand = async (
 			}
 		}
 
-		await prepareExternalMigrations(config, result.projectRoot);
+		await prepareExternalMigrations({
+			config,
+			files: result.resources.files.migrations,
+		});
 		database = await config.db.connect(env);
 		cliLogger.info("Checking seed prerequisites");
 

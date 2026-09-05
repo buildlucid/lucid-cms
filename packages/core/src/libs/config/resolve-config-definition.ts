@@ -1,5 +1,5 @@
 import type z from "zod";
-import type { Config } from "../../types/config.js";
+import type { Config, LucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import {
 	collectRuntimePrepareArtifacts,
@@ -64,7 +64,9 @@ const isConfigDefinition = (value: unknown): value is LucidConfigDefinition => {
  * Config modules should stay declarative. This guard keeps the failure focused
  * on the public config shape before Lucid attempts any adapter resolution.
  */
-const assertConfigDefinition = (value: unknown): LucidConfigDefinition => {
+export const assertConfigDefinition = (
+	value: unknown,
+): LucidConfigDefinition => {
 	if (!isConfigDefinition(value)) {
 		throw new LucidError({
 			message: invalidConfigDefinitionMessage,
@@ -96,6 +98,8 @@ const resolveRuntimeAdapter = async (
  */
 export const resolveConfigDefinition = async (props: {
 	definition: unknown;
+	/** Build and CLI loaders can resolve project files before plugins consume the config. */
+	prepareConfig?: (config: LucidConfig) => Promise<LucidConfig>;
 	envSchema?: z.ZodType;
 	meta?: LucidConfigDefinitionMeta;
 	env?: EnvironmentVariables;
@@ -214,6 +218,8 @@ export const resolveConfigDefinition = async (props: {
 			rawConfig = wrappedDefinition.config(env || {});
 		}
 	}
+
+	if (props.prepareConfig) rawConfig = await props.prepareConfig(rawConfig);
 
 	const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
 

@@ -19,8 +19,8 @@ const plugin = (): LucidPluginResponse => {
 				});
 			}
 		},
+		sources: { translations: ["@lucidcms/plugin-sharp/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-sharp/translations");
 			draft.media.delivery = sharpMediaDeliveryAdapter();
 		},
 	};

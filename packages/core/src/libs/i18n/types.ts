@@ -113,14 +113,6 @@ export type TranslationBundle = Record<
 export type TranslationBundles = Record<string, TranslationBundle>;
 
 /**
- * A source for translation files. Relative/absolute paths, file URLs, and
- * package subpath specifiers are supported. Directories are scanned for
- * `<locale>.admin.json` and `<locale>.server.json`; files must use the same
- * naming convention.
- */
-export type TranslationSource = string | URL;
-
-/**
  * Options for resolving a translation key.
  */
 export type TranslateOptions = {

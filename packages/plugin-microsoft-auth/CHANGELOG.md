@@ -1,5 +1,9 @@
 # @lucidcms/plugin-microsoft-auth
 
+## v1.0.6 (unreleased)
+
+- Moved public asset registration to plugin `sources`.
+
 ## v1.0.5
 
 - Bumped `@lucidcms/core` to `0.18.0-alpha.0`.

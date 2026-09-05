@@ -18,7 +18,7 @@ const renderMustacheTemplate: ServiceFn<
 	],
 	string
 > = async (context, data) => {
-	const renderedTemplates = context.config.email.templates.rendered;
+	const renderedTemplates = context.config.email.templates;
 
 	//* use pre-rendered templates if available
 	if (renderedTemplates) {
@@ -44,7 +44,7 @@ const renderMustacheTemplate: ServiceFn<
 	try {
 		const templatesPath = path.resolve(
 			process.cwd(),
-			context.config.build.paths.outDir,
+			context.config.build.outDir,
 			constants.email.renderedOutput,
 		);
 		const renderedTemplates = JSON.parse(

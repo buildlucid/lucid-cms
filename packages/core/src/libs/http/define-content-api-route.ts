@@ -13,7 +13,8 @@ export const isContentRouteDefinition = (
 
 /**
  * Defines a custom route beneath Lucid's content endpoint with explicit external
- * access rules.
+ * access rules. Default export it from your routes directory, or add it to
+ * `config.http.routes`.
  *
  * @example
  * ```ts

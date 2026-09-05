@@ -5,6 +5,8 @@ import { pathToFileURL } from "node:url";
 import { afterEach, beforeEach, expect, test } from "vitest";
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
+import { collectResourceFiles } from "../resources/collect-files.js";
+import { prepareResources } from "../resources/prepare-resources.js";
 import { loadTranslationSources, prepareTranslations } from "./index.js";
 
 let projectRoot: string;
@@ -54,9 +56,17 @@ test("loads translation sources from paths and URLs in runtime precedence order"
 		}),
 	);
 
-	const bundles = await loadTranslationSources({
+	const prepared = await prepareResources(
+		{
+			discovery: { translations: "./translations" },
+			sources: {
+				translations: [pathToFileURL(pluginSource), "./user-translations"],
+			},
+		},
 		projectRoot,
-		sources: [pathToFileURL(pluginSource), "user-translations"],
+	);
+	const bundles = await loadTranslationSources({
+		files: prepared.resources.files.translations,
 	});
 
 	expect(bundles.en.server["test.order"]).toBe("Project");
@@ -78,19 +88,19 @@ test("loads a single translation file source", async () => {
 	);
 
 	const bundles = await loadTranslationSources({
-		projectRoot,
-		sources: [sourceFile],
-		includeProjectDirectory: false,
+		files: await collectResourceFiles(sourceFile),
 	});
 
 	expect(bundles.es.server["test.file"]).toBe("Single file");
 });
 
 test("loads translation sources from package subpath specifiers", async () => {
+	const prepared = await prepareResources(
+		{ sources: { translations: ["@lucidcms/plugin-pages/translations"] } },
+		process.cwd(),
+	);
 	const bundles = await loadTranslationSources({
-		projectRoot,
-		sources: ["@lucidcms/plugin-pages/translations"],
-		includeProjectDirectory: false,
+		files: prepared.resources.files.translations,
 	});
 
 	expect(bundles.en.admin["plugin.pages.fields.slug.label"]).toBe("Slug");
@@ -125,10 +135,12 @@ test("loads package sources from the project node_modules tree", async () => {
 		}),
 	);
 
-	const bundles = await loadTranslationSources({
+	const prepared = await prepareResources(
+		{ sources: { translations: ["@example/translations/translations"] } },
 		projectRoot,
-		sources: ["@example/translations/translations"],
-		includeProjectDirectory: false,
+	);
+	const bundles = await loadTranslationSources({
+		files: prepared.resources.files.translations,
 	});
 
 	expect(bundles.en.server["test.project-package"]).toBe("Project package");
@@ -150,10 +162,9 @@ test("prepares a translation store and writes the build artifact", async () => {
 		config: {
 			i18n: {
 				defaultLocale: "en",
-				sources: ["translations"],
 			},
 		} as Config,
-		projectRoot,
+		files: await collectResourceFiles(source),
 		outputPath,
 	});
 

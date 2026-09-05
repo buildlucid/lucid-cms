@@ -4,6 +4,7 @@ import constants from "../../../constants/constants.js";
 import type { Config } from "../../../exports/types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
+import type { ResourceFile } from "../../resources/types.js";
 import loadEmailTemplates from "./load-email-templates.js";
 
 /**
@@ -11,16 +12,17 @@ import loadEmailTemplates from "./load-email-templates.js";
  */
 const prepareEmailTemplates = async (props: {
 	config: Config;
+	files: ResourceFile[];
 	silent?: boolean;
 	verbose?: boolean;
 }): ServiceResponse<undefined> => {
 	try {
 		const renderedTemplates = await loadEmailTemplates(props);
 
-		await mkdir(props.config.build.paths.outDir, { recursive: true });
+		await mkdir(props.config.build.outDir, { recursive: true });
 
 		const outputPath = path.join(
-			props.config.build.paths.outDir,
+			props.config.build.outDir,
 			constants.email.renderedOutput,
 		);
 		await writeFile(outputPath, JSON.stringify(renderedTemplates, null, 2));

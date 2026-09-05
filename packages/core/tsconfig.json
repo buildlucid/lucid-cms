@@ -36,6 +36,7 @@
 		"./vitest.config.ts",
 		"./vitest.setup.ts",
 		"**/*.test.ts",
+		"**/*.test-d.ts",
 		"**/mock-config/**",
 		"./src/utils/test-helpers/config/**"
 	]

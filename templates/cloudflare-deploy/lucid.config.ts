@@ -5,7 +5,6 @@ import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
-import PageCollection from "./src/collections/pages.js";
 
 export const env = z.object({
 	LUCID_SECRET: z.string().length(64),
@@ -18,12 +17,11 @@ export default configureLucid({
 	db: d1,
 	config: (env) => ({
 		secrets: env.LUCID_SECRET,
-		collections: [PageCollection],
 		plugins: [
 			pagesPlugin({
 				collections: [
 					{
-						key: PageCollection.key,
+						key: "page",
 					},
 				],
 			}),

@@ -63,9 +63,7 @@ describe("worker queue adapter lifecycle", () => {
 		const context = {
 			config: {
 				build: {
-					paths: {
-						outDir: "/tmp/lucid-worker-test",
-					},
+					outDir: "/tmp/lucid-worker-test",
 				},
 			},
 			runtimeContext: {

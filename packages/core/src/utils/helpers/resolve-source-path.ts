@@ -2,101 +2,66 @@ import fs from "node:fs/promises";
 import { findPackageJSON } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { type PathConditions, resolveExports } from "resolve-pkg-maps";
 import { LucidError } from "../errors/index.js";
+import isPlainObject from "./is-plain-object.js";
 
-/**
- * Treats a missing source directory as optional project configuration,
- * while still allowing other filesystem/read errors to surface later.
- */
+/** Checks existence without suppressing permissions or other filesystem errors. */
 export const pathExists = async (targetPath: string) => {
 	try {
 		await fs.access(targetPath);
 		return true;
-	} catch {
-		return false;
+	} catch (error) {
+		if (error instanceof Error && "code" in error && error.code === "ENOENT")
+			return false;
+		throw error;
 	}
 };
 
-/**
- * Resolves a package source from the project that owns the Lucid config. Node's
- * `import.meta.resolve` is relative to this core module, which can point at a
- * different `node_modules` tree in nested workspace installs.
- */
-const resolveProjectPackagePath = async (
-	source: string,
-	projectRoot: string,
-) => {
-	const sourceParts = source.split("/");
-	const packageNamePartCount = source.startsWith("@") ? 2 : 1;
-	if (sourceParts.length <= packageNamePartCount) return undefined;
-
-	let packageJsonPath: string | undefined;
-	try {
-		packageJsonPath = findPackageJSON(
-			source,
-			pathToFileURL(path.join(projectRoot, "package.json")),
-		);
-	} catch {
-		return undefined;
-	}
-	if (!packageJsonPath) return undefined;
-
-	const sourcePath = path.join(
-		path.dirname(packageJsonPath),
-		...sourceParts.slice(packageNamePartCount),
+const isExportMap = (value: unknown): value is PathConditions => {
+	if (typeof value === "string") return true;
+	if (Array.isArray(value))
+		return value.every((entry) => !Array.isArray(entry) && isExportMap(entry));
+	return (
+		isPlainObject(value) &&
+		Object.values(value).every((entry) => entry === null || isExportMap(entry))
 	);
-	return (await pathExists(sourcePath)) ? sourcePath : undefined;
 };
 
-/**
- * Converts source strings, package specifiers, and file URLs into absolute
- * filesystem paths. Project config may use relative strings; plugins can use
- * exported package subpaths such as `@scope/plugin/translations`.
- */
+/** Resolves project-relative paths and exported package resources from the project that owns lucid.config. */
 export const resolveSourcePath = async (
 	source: string | URL,
-	options?: {
-		projectRoot?: string;
-		/**
-		 * Used in error messages to describe the source type. Eg. `Translation`, `Migration`.
-		 */
-		label?: string;
-	},
+	options?: { projectRoot?: string; label?: string },
 ) => {
 	if (source instanceof URL) return fileURLToPath(source);
 	if (path.isAbsolute(source)) return source;
-
-	const projectRoot = options?.projectRoot ?? process.cwd();
-	const projectPath = path.join(projectRoot, source);
-	if (await pathExists(projectPath)) return projectPath;
-	if (
-		source.startsWith(".") ||
-		(!source.startsWith("@") && !source.includes("/"))
-	) {
-		return projectPath;
-	}
-
+	const root = options?.projectRoot ?? process.cwd();
+	if (source.startsWith(".")) return path.resolve(root, source);
+	const local = path.resolve(root, source);
+	if (await pathExists(local)) return local;
 	try {
-		const projectPackagePath = await resolveProjectPackagePath(
+		const packageFile = findPackageJSON(
 			source,
-			projectRoot,
+			pathToFileURL(path.join(root, "package.json")),
 		);
-		if (projectPackagePath) return projectPackagePath;
-
-		const resolved = import.meta.resolve(source);
-		const resolvedUrl = new URL(resolved);
-
-		if (resolvedUrl.protocol !== "file:") {
-			throw new Error(`Expected a file URL but received "${resolved}".`);
-		}
-
-		return fileURLToPath(resolvedUrl);
+		if (!packageFile) throw new Error("Package was not found");
+		const json: unknown = JSON.parse(await fs.readFile(packageFile, "utf8"));
+		if (!isPlainObject(json)) throw new Error("Invalid package.json");
+		const parts = source.split("/");
+		const subpath = parts.slice(source.startsWith("@") ? 2 : 1).join("/");
+		if (!isExportMap(json.exports))
+			throw new Error("Package has no valid exports map");
+		const [target] = resolveExports(json.exports, subpath, ["node", "import"]);
+		if (!target) throw new Error(`Package does not export "${subpath}"`);
+		const resolved = path.resolve(path.dirname(packageFile), target);
+		const relative = path.relative(path.dirname(packageFile), resolved);
+		if (relative.startsWith("..") || path.isAbsolute(relative))
+			throw new Error("Package export escapes its package");
+		return resolved;
 	} catch (error) {
 		throw new LucidError({
-			message: `${options?.label ?? "Source"} package specifier "${source}" could not be resolved.`,
-			data: {
-				error: error instanceof Error ? error.message : error,
-			},
+			message: `${options?.label ?? "Resource source"} "${source}" could not be resolved from "${root}". Use ./ for relative paths or an exported package subpath.`,
+			data: { error },
 		});
 	}
 };

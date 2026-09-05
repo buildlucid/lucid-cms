@@ -1,7 +1,7 @@
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { configureLucid, defineRoute, z } from "@lucidcms/core";
+import { configureLucid, z } from "@lucidcms/core";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
@@ -15,17 +15,7 @@ import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
-// Collections
-import BlogCollection from "./src/collections/blogs.js";
-import MainMenuCollection from "./src/collections/main-menu.js";
-import PageCollection from "./src/collections/pages.js";
-import RouteGroupCollection from "./src/collections/route-groups.js";
-import RoutePageCollection from "./src/collections/route-pages.js";
-import SettingsCollection from "./src/collections/settings.js";
-import SimpleCollection from "./src/collections/simple.js";
-import TestCollection from "./src/collections/test.js";
-import transporter from "./src/services/email-transporter.js";
-import { testOrganisationsTable } from "./src/tables/test-organisations.js";
+import transporter from "./src/email-transporter.js";
 
 export const env = z.object({
 	DATABASE_URL: z.string(),
@@ -126,71 +116,7 @@ export default configureLucid({
 					origin: ["http://localhost:5173"],
 				},
 			},
-			routes: [
-				defineRoute({
-					method: "post",
-					path: "/send-test-email",
-					openAPI: {
-						summary: "Send playground test email",
-						description:
-							"Sends the playground attachment test email via the Lucid toolkit.",
-						tags: ["Playground"],
-					},
-					handler: async ({ hono, toolkit }) => {
-						const result = await toolkit.email.send({
-							to: "hello@williamyallop.com",
-							subject: "Lucid playground attachment test",
-							template: "attachment-test",
-							attachments: [
-								{
-									type: "url",
-									url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-									filename: "dummy.pdf",
-									contentType: "application/pdf",
-								},
-								{
-									type: "url",
-									url: "https://www.w3.org/assets/logos/w3c/w3c-no-bars.svg",
-									filename: "inline-logo.svg",
-									contentType: "image/svg+xml",
-									disposition: "inline",
-									contentId: "playground-inline-logo",
-								},
-							],
-							data: {
-								name: "William",
-								attachmentName: "dummy.pdf",
-							},
-						});
-
-						if (result.error) {
-							return hono.json(
-								{
-									error: {
-										name: result.error.name,
-										message: result.error.message,
-									},
-								},
-								result.error.status === 400 ? 400 : 500,
-							);
-						}
-
-						return hono.json({
-							data: result.data,
-						});
-					},
-				}),
-			],
 		},
-		// hooks: [
-		// 	{
-		// 		service: "documents",
-		// 		event: "beforeUpsert",
-		// 		handler: async (context, data) => {
-		// 			console.log("collection doc hook", data.meta.collectionKey);
-		// 		},
-		// 	},
-		// ],
 		// ai: {
 		// 	features: {
 		// 		imageGeneration: false,
@@ -206,17 +132,6 @@ export default configureLucid({
 		// 		},
 		// 	}
 		// },
-		tables: [testOrganisationsTable],
-		collections: [
-			PageCollection,
-			BlogCollection,
-			MainMenuCollection,
-			SettingsCollection,
-			TestCollection,
-			SimpleCollection,
-			RouteGroupCollection,
-			RoutePageCollection,
-		],
 		plugins: [
 			workerQueuePlugin(),
 			filesystemPlugin(),

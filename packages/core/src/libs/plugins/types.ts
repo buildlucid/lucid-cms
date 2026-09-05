@@ -1,5 +1,6 @@
 import type { Config } from "../../types/config.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
+import type { ResourceSources } from "../resources/types.js";
 import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
@@ -49,6 +50,8 @@ export type LucidPluginHooks = {
 export type LucidPluginRecipe = LucidConfigRecipe;
 
 export type LucidPluginResponse = {
+	/** Additional resources supplied by this plugin, loaded before config recipes. Use exported package subpaths or file URLs. */
+	sources?: ResourceSources;
 	/**
 	 * The unique key of the plugin.
 	 */

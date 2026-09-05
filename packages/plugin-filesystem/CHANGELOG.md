@@ -5,6 +5,7 @@
 - Migrated to the media storage adapter contract, including explicit ready status, and the common HTTP upload-session completion flow.
 - Added a direct `filesystemStorageAdapter` export for config-first usage.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Moved translation registration to plugin `sources`.
 
 ## v1.0.5
 

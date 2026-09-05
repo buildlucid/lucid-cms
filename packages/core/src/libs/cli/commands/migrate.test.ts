@@ -110,7 +110,13 @@ const commandFixture = (pendingCore: boolean, pendingExternal = false) => {
 		defaultLocale: "en",
 		bundles: {},
 	});
-	return { config, database, db, kv, translationStore };
+	const migrationFiles = [
+		{
+			path: "/project/src/lucid/migrations/1751400000000-example.ts",
+			name: "1751400000000-example.ts",
+		},
+	];
+	return { config, database, db, kv, translationStore, migrationFiles };
 };
 
 describe("migrateCommand collection policy", () => {
@@ -140,11 +146,16 @@ describe("migrateCommand collection policy", () => {
 
 		const result = await migrateCommand({
 			config: fixture.config,
+			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
 		})({ skipSyncSteps: true });
 
 		expect(result).toBe(true);
+		expect(prepareExternalMigrations).toHaveBeenCalledWith({
+			config: fixture.config,
+			files: fixture.migrationFiles,
+		});
 		expect(confirm).not.toHaveBeenCalled();
 		expect(applyCollectionMigrations).toHaveBeenCalledWith(
 			expect.any(Object),
@@ -162,6 +173,7 @@ describe("migrateCommand collection policy", () => {
 
 		const result = await migrateCommand({
 			config: fixture.config,
+			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
 		})({ skipSyncSteps: true });
@@ -184,6 +196,7 @@ describe("migrateCommand collection policy", () => {
 
 		const result = await migrateCommand({
 			config: fixture.config,
+			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
 		})({ yes: true, skipSyncSteps: true });
@@ -205,6 +218,7 @@ describe("migrateCommand collection policy", () => {
 
 		const result = await migrateCommand({
 			config: fixture.config,
+			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
 		})({ yes: true, skipSyncSteps: true });
@@ -226,6 +240,7 @@ describe("migrateCommand collection policy", () => {
 
 		const result = await migrateCommand({
 			config: fixture.config,
+			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
 		})({ allowDestructive: true, skipSyncSteps: true });
@@ -253,6 +268,7 @@ describe("migrateCommand collection policy", () => {
 
 		const result = await migrateCommand({
 			config: fixture.config,
+			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
 		})({ yes: true, skipSyncSteps: true });
@@ -276,6 +292,7 @@ describe("migrateCommand collection policy", () => {
 
 		const result = await migrateCommand({
 			config: fixture.config,
+			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
 		})({ yes: true, skipSyncSteps: true });

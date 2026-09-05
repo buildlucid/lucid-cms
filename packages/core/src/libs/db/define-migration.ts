@@ -2,7 +2,7 @@ import type { ExternalMigration } from "./types.js";
 
 /**
  * A typed helper for authoring external migration files. Migration files
- * registered via `config.migrations.sources` or the project `migrations/`
+ * registered via `config.migrations.definitions` or `src/lucid/migrations/`
  * directory must default export the result of this helper.
  *
  * External migrations run after Lucid's core and generated collection

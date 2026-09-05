@@ -1,10 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import constants from "../../constants/constants.js";
-import type { Config, ServiceResponse } from "../../exports/types.js";
+import type { ServiceResponse } from "../../exports/types.js";
 import { getDirName } from "../../utils/helpers/index.js";
 import cliLogger from "../cli/logger.js";
 import { copy } from "../i18n/index.js";
+import type { ResourceFile } from "../resources/types.js";
 
 const currentDir = getDirName(import.meta.url);
 
@@ -15,11 +16,6 @@ const pathExists = async (targetPath: string) => {
 	} catch {
 		return false;
 	}
-};
-
-const isDirectory = async (targetPath: string) => {
-	const stats = await fs.stat(targetPath);
-	return stats.isDirectory();
 };
 
 const ensureDir = async (dirPath: string) => {
@@ -80,10 +76,9 @@ const copyDirectoryContentsInto = async (
 };
 
 const prepareLucidPublicAssets = async (props: {
-	config: Config;
+	files: ResourceFile[];
 	outDir: string;
 	projectRoot?: string;
-	includeProjectPublic?: boolean;
 	silent?: boolean;
 	verbose?: boolean;
 }): ServiceResponse<undefined> => {
@@ -109,49 +104,14 @@ const prepareLucidPublicAssets = async (props: {
 			);
 		}
 
-		const additionalPublic = props.config.build.paths.copyPublic ?? [];
-		await Promise.all(
-			additionalPublic.map(async (entry) => {
-				const isString = typeof entry === "string";
-				const source = isString ? entry : entry.input;
-				const output = isString ? undefined : entry.output;
-
-				const absSource = path.isAbsolute(source)
-					? source
-					: path.join(projectRoot, source);
-				if (!(await pathExists(absSource))) return;
-
-				if (await isDirectory(absSource)) {
-					const destDir = output
-						? path.join(props.outDir, output)
-						: path.join(props.outDir, path.basename(absSource));
-					await copyDirectoryContentsInto(
-						absSource,
-						destDir,
-						silent,
-						verbose,
-						projectRoot,
-					);
-				} else {
-					const destFile = output
-						? path.join(props.outDir, output)
-						: path.join(props.outDir, path.basename(absSource));
-					await copyFileTo(absSource, destFile, silent, verbose, projectRoot);
-				}
-			}),
-		);
-
-		if (props.includeProjectPublic) {
-			const cwdPublic = path.join(projectRoot, constants.directories.public);
-			if ((await pathExists(cwdPublic)) && (await isDirectory(cwdPublic))) {
-				await copyDirectoryContentsInto(
-					cwdPublic,
-					props.outDir,
-					silent,
-					verbose,
-					projectRoot,
-				);
-			}
+		for (const file of props.files) {
+			await copyFileTo(
+				file.path,
+				path.join(props.outDir, file.name),
+				silent,
+				verbose,
+				projectRoot,
+			);
 		}
 
 		return {

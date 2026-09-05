@@ -22,6 +22,25 @@ const runtimeContext = {
 };
 
 describe("registerCustomRoutes", () => {
+	test("uses priority to register a specific route before a catch-all", async () => {
+		const app = new Hono<LucidHonoGeneric>();
+		registerCustomRoutes(app, [
+			defineRoute({
+				method: "get",
+				path: "/*",
+				priority: 10,
+				handler: ({ hono }) => hono.text("fallback"),
+			}),
+			defineRoute({
+				method: "get",
+				path: "/specific",
+				handler: ({ hono }) => hono.text("specific"),
+			}),
+		]);
+		expect(await (await app.request("/specific")).text()).toBe("specific");
+		expect(await (await app.request("/elsewhere")).text()).toBe("fallback");
+	});
+
 	test("mounts public content routes beneath the content endpoint", async () => {
 		const app = new Hono<LucidHonoGeneric>();
 		registerCustomRoutes(app, [
@@ -102,9 +121,7 @@ describe("registerCustomRoutes", () => {
 					handler: ({ hono }) => hono.text("custom"),
 				}),
 			]),
-		).toThrow(
-			'Content route "GET /lucid/api/v1/content/hello" is already registered.',
-		);
+		).toThrow('Route "GET /lucid/api/v1/content/hello" is already registered.');
 		expect(app.routes).toHaveLength(0);
 	});
 

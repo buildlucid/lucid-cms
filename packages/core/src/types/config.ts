@@ -4,7 +4,7 @@ import type CollectionBuilder from "../libs/collection/builders/collection-build
 import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
 import type { TableDefinition } from "../libs/db/client/table/definition.js";
-import type { MigrationSource } from "../libs/db/types.js";
+import type { MigrationDefinition } from "../libs/db/types.js";
 import type {
 	EmailAdapter,
 	EmailAdapterInstance,
@@ -17,7 +17,6 @@ import type {
 import type {
 	InterfaceDirection,
 	LocaleDirection,
-	TranslationSource,
 } from "../libs/i18n/types.js";
 import type { AnyJobDefinition } from "../libs/jobs/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../libs/kv/types.js";
@@ -35,14 +34,11 @@ import type {
 	QueueAdapter,
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
-import type { SeedSource } from "../libs/seed/types.js";
-
-export type CopyPublicEntry =
-	| string
-	| {
-			input: string;
-			output?: string;
-	  };
+import type {
+	ResourceDiscovery,
+	ResourceSources,
+} from "../libs/resources/types.js";
+import type { SeedDefinition } from "../libs/seed/types.js";
 
 export type LocalizationConfig = {
 	/**
@@ -90,12 +86,6 @@ export type I18nConfig = {
 	 * The default CMS interface locale code. Eg. `en`.
 	 */
 	defaultLocale: string;
-	/**
-	 * Translation files or directories to load for the CMS interface and API
-	 * messages. Plugins should register package-local sources with exported
-	 * package subpaths such as `@scope/plugin/translations`.
-	 */
-	sources?: TranslationSource[];
 };
 
 export type SecurityContentSecurityPolicy = {
@@ -214,6 +204,10 @@ export type SecretConfig = {
 
 // the version of config that is used in the lucid.config.ts file
 export interface LucidConfig {
+	/** Directories to discover relative to lucid.config. Defaults to src/lucid/<resource>, except public uses ./public. Set false to disable a lookup. */
+	discovery?: ResourceDiscovery;
+	/** Additional resource files, directories, package exports or file URLs. These remain enabled when project discovery is disabled. */
+	sources?: ResourceSources;
 	/**
 	 * Describes custom tables that already exist in the database, allowing
 	 * `context.db` to format and validate their queries. This does not create or
@@ -309,24 +303,23 @@ export interface LucidConfig {
 	 */
 	migrations?: {
 		/**
-		 * Migration files, directories or inline `{ name, migration }` entries to
+		 * Named migration definitions to
 		 * run after Lucid's core migrations, generated collection migrations and
 		 * collection sync. Migrations are created with the `defineMigration` helper
 		 * and names must start with a 13 digit timestamp, eg.
 		 * `1751400000000-example`.
 		 */
-		sources?: MigrationSource[];
+		definitions?: MigrationDefinition[];
 	};
 	/**
 	 * Repeatable data seed settings.
 	 */
 	seeds?: {
 		/**
-		 * Seed files, directories, package subpaths, file URLs or inline
-		 * `{ name, seed }` entries. Plugin seed names should use a namespace such
+		 * Named seed definitions. Plugin seed names should use a namespace such
 		 * as `pages:example` to avoid collisions without imposing one in code.
 		 */
-		sources?: SeedSource[];
+		definitions?: SeedDefinition[];
 	};
 	/**
 	 * Email settings.
@@ -361,18 +354,9 @@ export interface LucidConfig {
 		 */
 		resendWindowDays?: number;
 		/**
-		 * Email template settings.
+		 * Mustache template contents keyed by template name, available without reading files at runtime.
 		 */
-		templates?: {
-			/**
-			 * The path to the email templates directory. Files ending in .mustache and .html can be used to override or extend the default templates.
-			 */
-			directory?: string;
-			/**
-			 * Pre-rendered Mustache templates to use at runtime.
-			 */
-			rendered?: Record<string, string>;
-		};
+		templates?: Record<string, string>;
 	};
 	/**
 	 * Media settings.
@@ -519,16 +503,8 @@ export interface LucidConfig {
 	 * Build options.
 	 */
 	build?: {
-		paths?: {
-			/**
-			 * The output directory.
-			 */
-			outDir?: string;
-			/**
-			 * Additional files or directories to copy into the public output directory.
-			 */
-			copyPublic?: CopyPublicEntry[];
-		};
+		/** The output directory. Defaults to "dist". */
+		outDir?: string;
 		watch?: {
 			/**
 			 * The files to ignore.
@@ -549,13 +525,15 @@ export interface LucidConfig {
 }
 
 export interface Config extends z.infer<typeof ConfigSchema> {
+	discovery: Required<ResourceDiscovery>;
+	sources: ResourceSources;
 	db: DatabaseAdapter;
 	tables: TableDefinition[];
 	migrations: {
-		sources: MigrationSource[];
+		definitions: MigrationDefinition[];
 	};
 	seeds: {
-		sources: SeedSource[];
+		definitions: SeedDefinition[];
 	};
 	secrets: SecretConfig;
 	telemetry: boolean;
@@ -583,10 +561,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 			| Promise<EmailAdapterInstance>;
 		simulate: boolean;
 		resendWindowDays: number;
-		templates: {
-			directory: string;
-			rendered?: Record<string, string>;
-		};
+		templates?: Record<string, string>;
 	};
 	http: {
 		security: HttpSecurityConfig & {
@@ -670,10 +645,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		name: string;
 	};
 	build: {
-		paths: {
-			outDir: string;
-			copyPublic: CopyPublicEntry[];
-		};
+		outDir: string;
 		watch: {
 			ignore: string[];
 		};

@@ -16,6 +16,17 @@ const configureLucid: RuntimeConfigureLucid = (
 		...definition,
 		recipe: (draft) => {
 			definition.recipe?.(draft);
+			if (meta?.emailTemplates) {
+				draft.email.templates = {
+					...draft.email.templates,
+					...Object.fromEntries(
+						Object.entries(meta.emailTemplates).map(([key, value]) => [
+							key,
+							value.html,
+						]),
+					),
+				};
+			}
 			// Astro owns and serves the hosted public asset pipeline.
 			if (meta?.host === "astro") return;
 

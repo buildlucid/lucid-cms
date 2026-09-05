@@ -1,7 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import constants from "../../../constants/constants.js";
-import getConfigPath from "../../config/get-config-path.js";
+import { getResourceDirectory } from "../../resources/get-resource-directory.js";
 import cliLogger from "../logger.js";
 
 const migrationTemplate = `import { defineMigration } from "@lucidcms/core";
@@ -30,11 +29,7 @@ const migrateNewCommand = async (name: string) => {
 			process.exit(1);
 		}
 
-		const projectRoot = path.dirname(getConfigPath(process.cwd()));
-		const directory = path.join(
-			projectRoot,
-			constants.db.externalMigrationDirectory,
-		);
+		const directory = await getResourceDirectory("migrations");
 		const fileName = `${Date.now()}-${name}.ts`;
 		const filePath = path.join(directory, fileName);
 

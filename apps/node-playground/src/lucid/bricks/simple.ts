@@ -1,7 +1,6 @@
 import { BrickBuilder } from "@lucidcms/core";
 
-const SimpleBrick = new BrickBuilder("simple", {
-})
+const SimpleBrick = new BrickBuilder("simple", {})
 	.addText("heading", {
 		localized: false,
 	})

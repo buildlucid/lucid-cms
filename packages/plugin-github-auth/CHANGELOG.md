@@ -1,5 +1,9 @@
 # @lucidcms/plugin-github-auth
 
+## v1.0.6 (unreleased)
+
+- Moved public asset registration to plugin `sources`.
+
 ## v1.0.5
 
 - `type` correctly swapped over to `oauth2`.

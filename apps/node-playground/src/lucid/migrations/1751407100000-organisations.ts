@@ -1,6 +1,6 @@
 import { defineMigration } from "@lucidcms/core";
 
-export default defineMigration({
+const organisationsMigration = defineMigration({
 	up: async (context) => {
 		await context.db.kysely.schema
 			.createTable("test-organisations")
@@ -23,3 +23,5 @@ export default defineMigration({
 		await context.db.kysely.schema.dropTable("test-organisations").execute();
 	},
 });
+
+export default organisationsMigration;

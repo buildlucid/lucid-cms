@@ -2,19 +2,10 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
-import type { Config } from "../../../exports/types.js";
+import { collectResourceFiles } from "../../resources/collect-files.js";
 import loadEmailTemplates from "./load-email-templates.js";
 
 let templateDirectory: string;
-
-const createConfig = (): Config =>
-	({
-		email: {
-			templates: {
-				directory: templateDirectory,
-			},
-		},
-	}) as Config;
 
 describe("loadEmailTemplates", () => {
 	beforeEach(async () => {
@@ -43,7 +34,7 @@ describe("loadEmailTemplates", () => {
 		]);
 
 		const result = await loadEmailTemplates({
-			config: createConfig(),
+			files: await collectResourceFiles(templateDirectory),
 			silent: true,
 		});
 
@@ -60,7 +51,7 @@ describe("loadEmailTemplates", () => {
 		);
 
 		const result = await loadEmailTemplates({
-			config: createConfig(),
+			files: await collectResourceFiles(templateDirectory),
 			silent: true,
 		});
 

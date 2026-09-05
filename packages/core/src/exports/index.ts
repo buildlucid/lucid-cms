@@ -4,6 +4,7 @@ export { default as CollectionBuilder } from "../libs/collection/builders/collec
 export { default as FieldBuilder } from "../libs/collection/builders/field-builder/index.js";
 export { defineTable } from "../libs/db/client/index.js";
 export { default as defineMigration } from "../libs/db/define-migration.js";
+export { default as defineHook } from "../libs/hooks/define-hook.js";
 export { default as createMiddleware } from "../libs/http/create-middleware.js";
 export { default as defineContentApiRoute } from "../libs/http/define-content-api-route.js";
 export { default as defineRoute } from "../libs/http/define-route.js";

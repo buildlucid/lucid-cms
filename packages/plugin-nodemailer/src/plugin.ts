@@ -15,9 +15,8 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		sources: { translations: ["@lucidcms/plugin-nodemailer/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-nodemailer/translations");
-
 			const simulate = draft.email.simulate;
 			let verification: Promise<void> | undefined;
 			const verifyOnce = () => {

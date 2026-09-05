@@ -80,8 +80,8 @@ const serveCommand = async () => {
 		});
 		const translations = await prepareTranslations({
 			config: configRes.config,
-			projectRoot: configRes.projectRoot,
-			outputPath: configRes.config.build.paths.outDir,
+			files: configRes.resources.files.translations,
+			outputPath: configRes.config.build.outDir,
 		});
 		const translationStore = translations.translationStore;
 		const translate = createTranslator({
@@ -123,10 +123,10 @@ const serveCommand = async () => {
 		currentStage = "migration";
 		const migrateResult = await migrateCommand({
 			config: configRes.config,
+			migrationFiles: configRes.resources.files.migrations,
 			env: configRes.env,
 			runtimeContext: configRes.runtimeContext,
 			translationStore,
-			projectRoot: configRes.projectRoot,
 			mode: "return",
 		})({
 			skipSyncSteps: false,
@@ -155,11 +155,13 @@ const serveCommand = async () => {
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 			prepareEmailTemplates({
 				config: configRes.config,
+				files: configRes.resources.files.templates,
 				silent: false,
 				verbose: false,
 			}),
 			copyPublicAssets({
 				config: configRes.config,
+				files: configRes.resources.files.public,
 				silent: false,
 				verbose: false,
 			}),

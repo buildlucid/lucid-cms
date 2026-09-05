@@ -12,8 +12,8 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		sources: { translations: ["@lucidcms/plugin-filesystem/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-filesystem/translations");
 			draft.media.storage = fileSystemStorageAdapter({
 				uploadDir: pluginOptions?.uploadDir ?? DEFAULT_UPLOAD_DIRECTORY,
 				secretKey: pluginOptions?.secretKey ?? draft.secrets.encryption,

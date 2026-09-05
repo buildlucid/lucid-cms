@@ -11,6 +11,7 @@ import constants from "../constants.js";
 import getRuntimeContext from "../services/runtime-context.js";
 
 const buildCommand: BuildHandler = async ({
+	resources,
 	configPath,
 	outputPath,
 	buildArtifacts,
@@ -26,6 +27,7 @@ const buildCommand: BuildHandler = async ({
 
 	try {
 		const configArtifacts = await prepareConfigArtifacts({
+			resources,
 			configPath,
 			outputPath,
 		});

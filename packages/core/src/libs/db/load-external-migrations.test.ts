@@ -2,6 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, expect, test } from "vitest";
+import { prepareResources } from "../resources/prepare-resources.js";
 import loadExternalMigrations from "./load-external-migrations.js";
 
 let projectRoot: string;
@@ -38,9 +39,12 @@ test("loads package sources from the project node_modules tree", async () => {
 		"export default { up: async () => {}, down: async () => {} };",
 	);
 
-	const migrations = await loadExternalMigrations({
+	const prepared = await prepareResources(
+		{ sources: { migrations: ["@example/migrations/migrations"] } },
 		projectRoot,
-		sources: ["@example/migrations/migrations"],
+	);
+	const migrations = await loadExternalMigrations({
+		files: prepared.resources.files.migrations,
 	});
 
 	expect(Object.keys(migrations)).toEqual(["1751400000000-example"]);

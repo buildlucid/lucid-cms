@@ -82,13 +82,13 @@ const buildCommand = async (options?: {
 
 		currentStage = "artifacts";
 		if (options?.cacheSpa) {
-			await partialBuildDirClear(configRes.config.build.paths.outDir);
+			await partialBuildDirClear(configRes.config.build.outDir);
 		} else {
-			await rm(configRes.config.build.paths.outDir, {
+			await rm(configRes.config.build.outDir, {
 				recursive: true,
 				force: true,
 			});
-			await mkdir(configRes.config.build.paths.outDir);
+			await mkdir(configRes.config.build.outDir);
 		}
 
 		//* the path to the config, relative from the CWD
@@ -103,7 +103,7 @@ const buildCommand = async (options?: {
 
 		//* the path to the config, relative from the output directory
 		const outputRelativeConfigPath = path.relative(
-			configRes.config.build.paths.outDir,
+			configRes.config.build.outDir,
 			configPath,
 		);
 		const normalisedOutputRelativePath = outputRelativeConfigPath.replace(
@@ -113,18 +113,20 @@ const buildCommand = async (options?: {
 
 		await writeTranslationArtifact({
 			translationStore: configRes.translationStore,
-			outputPath: configRes.config.build.paths.outDir,
+			outputPath: configRes.config.build.outDir,
 		});
 
 		currentStage = "email_templates";
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 			prepareEmailTemplates({
 				config: configRes.config,
+				files: configRes.resources.files.templates,
 				silent,
 				verbose: true,
 			}),
 			copyPublicAssets({
 				config: configRes.config,
+				files: configRes.resources.files.public,
 				silent,
 				verbose: true,
 			}),
@@ -167,7 +169,7 @@ const buildCommand = async (options?: {
 			definition: configRes.definition,
 			silent,
 			configPath,
-			outputPath: configRes.config.build.paths.outDir,
+			outputPath: configRes.config.build.outDir,
 			outputRelativeConfigPath: normalisedOutputRelativePath,
 			customArtifactTypes: adapterRuntime.config?.customBuildArtifacts,
 		});
@@ -175,11 +177,12 @@ const buildCommand = async (options?: {
 		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
 			vite.buildApp(configRes.config),
 			adapterCLI.build({
+				resources: configRes.resources,
 				config: configRes.config,
 				translationStore,
 				definition: configRes.definition,
 				configPath,
-				outputPath: configRes.config.build.paths.outDir,
+				outputPath: configRes.config.build.outDir,
 				outputRelativeConfigPath: normalisedOutputRelativePath,
 				buildArtifacts: processedArtifacts,
 				logger: {
@@ -212,7 +215,7 @@ const buildCommand = async (options?: {
 
 		const relativeBuildPath = path.relative(
 			process.cwd(),
-			configRes.config.build.paths.outDir,
+			configRes.config.build.outDir,
 		);
 
 		cliLogger.info(
@@ -261,9 +264,7 @@ const buildCommand = async (options?: {
 		await runtimeBuildRes?.onComplete?.();
 		const endTime = startTime();
 
-		const distSize = await calculateOutDirSize(
-			configRes.config.build.paths.outDir,
-		);
+		const distSize = await calculateOutDirSize(configRes.config.build.outDir);
 
 		cliLogger.log(
 			cliLogger.createBadge("LUCID CMS"),

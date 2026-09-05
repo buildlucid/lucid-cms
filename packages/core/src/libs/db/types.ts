@@ -88,10 +88,10 @@ export type ExternalMigration = {
 	up: (context: ServiceContext) => Promise<void>;
 	down?: (context: ServiceContext) => Promise<void>;
 };
-export type MigrationSource =
-	| string
-	| URL
-	| { name: string; migration: ExternalMigration };
+export type MigrationDefinition = {
+	name: string;
+	migration: ExternalMigration;
+};
 
 export type DatabaseMigrationStatus = {
 	registered: string[];

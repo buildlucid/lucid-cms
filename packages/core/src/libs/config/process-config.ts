@@ -1,4 +1,4 @@
-import { castDraft, produce } from "immer";
+import { produce } from "immer";
 import defaultConfig from "../../constants/default-config.js";
 import type { Config, LucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
@@ -70,12 +70,6 @@ const processConfig = async (
 		configRes = normalizeConfigSecrets(configRes, options?.mode);
 	}
 
-	const userTranslationSources = [...(configRes.i18n.sources ?? [])];
-
-	configRes = produce(configRes, (draft) => {
-		draft.i18n.sources = [];
-	});
-
 	// merge plugin config
 	if (Array.isArray(configRes.plugins)) {
 		for (const pluginDef of configRes.plugins) {
@@ -110,14 +104,9 @@ const processConfig = async (
 		}
 	}
 
-	const pluginTranslationSources = [...(configRes.i18n.sources ?? [])];
 	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
 
 	configRes = produce(configRes, (draft) => {
-		draft.i18n.sources = castDraft([
-			...pluginTranslationSources,
-			...userTranslationSources,
-		]);
 		draft.localization.locales = draft.localization.locales.map((locale) => ({
 			...locale,
 			direction: locale.direction ?? "ltr",

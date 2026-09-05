@@ -42,7 +42,7 @@ const workerQueueAdapter = (
 					options,
 					runtime: {
 						configEntryPath: join(
-							params.config.build.paths.outDir,
+							params.config.build.outDir,
 							params.runtimeContext.configEntryPoint,
 						),
 						env: params.env,

@@ -31,8 +31,10 @@ const plugin = (
 			});
 		}
 	},
+	sources: {
+		translations: ["@lucidcms/plugin-cloudflare-images/translations"],
+	},
 	recipe: (draft) => {
-		draft.i18n.sources.push("@lucidcms/plugin-cloudflare-images/translations");
 		draft.media.delivery = cloudflareImagesDeliveryAdapter(pluginOptions);
 	},
 });

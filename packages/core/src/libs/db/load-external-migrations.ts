@@ -1,11 +1,11 @@
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+import { createJiti } from "jiti";
 import constants from "../../constants/constants.js";
 import type { Config } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
-import collectModuleFiles from "../../utils/helpers/collect-module-files.js";
-import { resolveSourcePath } from "../../utils/helpers/resolve-source-path.js";
-import type { ExternalMigration, MigrationSource } from "./types.js";
+import { migrationSchema } from "../resources/module-schemas.js";
+import type { ResourceFile } from "../resources/types.js";
+import type { ExternalMigration, MigrationDefinition } from "./types.js";
 
 //* a fixed width timestamp keeps lexicographic order in line with creation order
 const validateMigrationName = (name: string, origin: string) => {
@@ -17,47 +17,16 @@ const validateMigrationName = (name: string, origin: string) => {
 	}
 };
 
-/**
- * Loads configured migration sources and the optional project `migrations/`
- * directory. Sources can be files, directories or inline `{ name, migration }`
- * entries. Timestamped migration names can never clash with core migration
- * names and always sort after them.
- */
+/** Loads resolved migrations and explicit definitions when their command runs. */
 const loadExternalMigrations = async (props: {
-	sources?: MigrationSource[];
-	projectRoot?: string;
+	definitions?: MigrationDefinition[];
+	files?: ResourceFile[];
 }): Promise<Record<string, ExternalMigration>> => {
-	const filePaths = new Set<string>();
-	const inlineSources: Array<{ name: string; migration: ExternalMigration }> =
-		[];
-
-	for (const source of props.sources ?? []) {
-		if (typeof source === "object" && !(source instanceof URL)) {
-			inlineSources.push(source);
-			continue;
-		}
-
-		const sourcePath = await resolveSourcePath(source, {
-			projectRoot: props.projectRoot,
-			label: "Migration source",
-		});
-		for (const filePath of await collectModuleFiles(sourcePath, {
-			label: "Migration source",
-		})) {
-			filePaths.add(filePath);
-		}
-	}
-
-	if (props.projectRoot) {
-		const projectMigrations = await collectModuleFiles(
-			path.join(props.projectRoot, constants.db.externalMigrationDirectory),
-			{ label: "Migration source", optional: true },
-		);
-		for (const filePath of projectMigrations) {
-			filePaths.add(filePath);
-		}
-	}
-
+	const loader = createJiti(import.meta.url, {
+		fsCache: false,
+		moduleCache: false,
+		interopDefault: false,
+	});
 	const migrations: Record<string, ExternalMigration> = {};
 	const migrationOrigins: Record<string, string> = {};
 
@@ -79,37 +48,31 @@ const loadExternalMigrations = async (props: {
 		migrationOrigins[name] = origin;
 	};
 
-	for (const filePath of filePaths) {
+	for (const { path: filePath } of props.files ?? []) {
 		const fileName = path.basename(filePath);
 		const stem = fileName.slice(
 			0,
 			fileName.length - path.extname(fileName).length,
 		);
+
+		const migrationModule = await loader.import<{ default?: unknown }>(
+			filePath,
+		);
+		if (!("default" in migrationModule)) continue;
 		validateMigrationName(stem, filePath);
 
-		//* cache-busted so edits are picked up across config reloads (eg. dev watch mode)
-		const migrationModule: { default?: unknown } = await import(
-			/*! @vite-ignore */
-			`${pathToFileURL(filePath).href}?t=${Date.now()}`
-		);
-		if (
-			typeof migrationModule.default !== "object" ||
-			migrationModule.default === null ||
-			typeof (migrationModule.default as ExternalMigration).up !== "function" ||
-			((migrationModule.default as ExternalMigration).down !== undefined &&
-				typeof (migrationModule.default as ExternalMigration).down !==
-					"function")
-		) {
+		const migration = migrationSchema.safeParse(migrationModule.default);
+		if (!migration.success) {
 			throw new LucidError({
 				message: `Invalid migration file "${fileName}". Migration files must default export a migration created with the "defineMigration" helper.`,
 				data: { filePath },
 			});
 		}
 
-		addMigration(stem, migrationModule.default as ExternalMigration, filePath);
+		addMigration(stem, migration.data, filePath);
 	}
 
-	for (const source of inlineSources) {
+	for (const source of props.definitions ?? []) {
 		const origin = `inline source "${source.name}"`;
 		validateMigrationName(source.name, origin);
 		addMigration(source.name, source.migration, origin);
@@ -122,14 +85,14 @@ const loadExternalMigrations = async (props: {
  * Loads external migrations and registers them on the config's database adapter.
  * Only migration entry points should call this.
  */
-export const prepareExternalMigrations = async (
-	config: Config,
-	projectRoot?: string,
-) => {
-	config.db.registerExternalMigrations(
+export const prepareExternalMigrations = async (props: {
+	config: Config;
+	files: ResourceFile[];
+}) => {
+	props.config.db.registerExternalMigrations(
 		await loadExternalMigrations({
-			sources: config.migrations.sources,
-			projectRoot,
+			definitions: props.config.migrations.definitions,
+			files: props.files,
 		}),
 	);
 };

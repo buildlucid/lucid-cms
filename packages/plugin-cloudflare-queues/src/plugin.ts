@@ -186,10 +186,10 @@ try {
 				});
 			}
 		},
+		sources: {
+			translations: ["@lucidcms/plugin-cloudflare-queues/translations"],
+		},
 		recipe: (draft) => {
-			draft.i18n.sources.push(
-				"@lucidcms/plugin-cloudflare-queues/translations",
-			);
 			draft.queue.adapter = cloudflareQueuesAdapter(resolvedOptions);
 		},
 	};

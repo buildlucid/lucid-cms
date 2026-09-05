@@ -83,7 +83,7 @@ const getMatchingHooks = <
 	return hooks;
 };
 
-const getTransformHooks = <
+const getOrderedHooks = <
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
 >(
@@ -108,7 +108,7 @@ const executeEffectHooks = async <
 	options: HookOptions<S, E>,
 	args: ArgumentsType<HookServiceHandlers[S][E]>,
 ): ServiceResponse<HookData<S, E>> => {
-	for (const hook of getMatchingHooks(options)) {
+	for (const hook of getOrderedHooks(options)) {
 		const res = await (
 			hook.handler as unknown as (
 				...args: ArgumentsType<HookServiceHandlers[S][E]>
@@ -155,7 +155,7 @@ const executeTransformHooks = async <
 
 	let currentData = payload.data as TransformHookData<S, E>;
 
-	for (const hook of getTransformHooks(options)) {
+	for (const hook of getOrderedHooks(options)) {
 		const draft = createDraft(currentData);
 		const nextArgs = [
 			args[0],

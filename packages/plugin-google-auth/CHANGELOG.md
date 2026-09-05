@@ -1,5 +1,9 @@
 # @lucidcms/plugin-google-auth
 
+## v1.0.6 (unreleased)
+
+- Moved public asset registration to plugin `sources`.
+
 ## v1.0.5
 
 - `jwksEndpoint` endpoint added to config.

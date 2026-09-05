@@ -15,14 +15,14 @@ const getBuildPaths = (config: Config, cwd = process.cwd()) => {
 		//* the output location for the SPA
 		spaOutput: join(
 			cwd,
-			config.build.paths.outDir,
+			config.build.outDir,
 			constants.directories.public,
 			constants.directories.base,
 		),
 		//* the output location for the SPA index.html
 		spaDistHtml: join(
 			cwd,
-			config.build.paths.outDir,
+			config.build.outDir,
 			constants.directories.public,
 			constants.directories.base,
 			"index.html",
@@ -30,16 +30,12 @@ const getBuildPaths = (config: Config, cwd = process.cwd()) => {
 		//* the output location for the SPA plugins
 		spaPluginsOutput: join(
 			cwd,
-			config.build.paths.outDir,
+			config.build.outDir,
 			constants.directories.public,
 			constants.directories.base,
 			constants.directories.plugins,
 		),
-		publicDist: join(
-			cwd,
-			config.build.paths.outDir,
-			constants.directories.public,
-		),
+		publicDist: join(cwd, config.build.outDir, constants.directories.public),
 	};
 };
 

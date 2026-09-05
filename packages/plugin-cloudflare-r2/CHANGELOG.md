@@ -5,6 +5,7 @@
 - Migrated to the media storage adapter contract with explicit ready status plus HTTP and multipart-parts upload-session support.
 - Added a direct `cloudflareR2StorageAdapter` export for config-first usage.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Moved translation registration to plugin `sources`.
 
 ## v1.0.5
 

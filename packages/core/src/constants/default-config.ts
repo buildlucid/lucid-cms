@@ -1,8 +1,11 @@
-import type { Config, LucidConfig } from "../types/config.js";
+import { defaultDiscovery } from "../libs/resources/defaults.js";
+import type { Config } from "../types/config.js";
 import constants from "./constants.js";
 
-export const defaultConfig: Partial<LucidConfig> = {
+export const defaultConfig: Partial<Config> = {
 	tables: [],
+	discovery: defaultDiscovery,
+	sources: {},
 	telemetry: true,
 	logger: {
 		level: "info",
@@ -31,9 +34,6 @@ export const defaultConfig: Partial<LucidConfig> = {
 	email: {
 		simulate: false,
 		resendWindowDays: 7,
-		templates: {
-			directory: "./templates",
-		},
 	},
 	ai: {
 		enabled: true,
@@ -62,13 +62,12 @@ export const defaultConfig: Partial<LucidConfig> = {
 			},
 		],
 		defaultLocale: "en",
-		sources: [],
 	},
 	migrations: {
-		sources: [],
+		definitions: [],
 	},
 	seeds: {
-		sources: [],
+		definitions: [],
 	},
 	media: {
 		limits: {
@@ -113,10 +112,7 @@ export const defaultConfig: Partial<LucidConfig> = {
 	collections: [],
 	plugins: [],
 	build: {
-		paths: {
-			outDir: "dist",
-			copyPublic: [],
-		},
+		outDir: "dist",
 		watch: {
 			ignore: [],
 		},

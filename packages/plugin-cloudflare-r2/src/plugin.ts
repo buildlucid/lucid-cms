@@ -46,9 +46,8 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 				});
 			}
 		},
+		sources: { translations: ["@lucidcms/plugin-cloudflare-r2/translations"] },
 		recipe: (draft) => {
-			draft.i18n.sources.push("@lucidcms/plugin-cloudflare-r2/translations");
-
 			if (!resolvedOptions.http) {
 				draft.http.routes.push(...routes(resolvedOptions));
 			}

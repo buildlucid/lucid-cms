@@ -118,7 +118,7 @@ describe("execute hooks", () => {
 		]);
 	});
 
-	it("runs effect hooks sequentially without returning transformed data", async () => {
+	it("runs effect hooks by priority without returning transformed data", async () => {
 		const context = {} as never;
 		const payload = {
 			meta: {
@@ -173,6 +173,7 @@ describe("execute hooks", () => {
 							{
 								service: "documents",
 								event: "afterUpsert",
+								priority: -10,
 								handler: collectionHook,
 							},
 						],
@@ -184,7 +185,7 @@ describe("execute hooks", () => {
 
 		expect(response.error).toBeUndefined();
 		expect(response.data).toBeUndefined();
-		expect(order).toEqual(["global", "collection"]);
+		expect(order).toEqual(["collection", "global"]);
 		expect(globalHook).toHaveBeenCalledWith(context, payload);
 		expect(collectionHook).toHaveBeenCalledWith(context, payload);
 	});

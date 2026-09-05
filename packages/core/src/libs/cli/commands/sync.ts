@@ -52,7 +52,7 @@ const syncCommand = async (options?: {
 		translationStore = (
 			await prepareTranslations({
 				config,
-				projectRoot: res.projectRoot,
+				files: res.resources.files.translations,
 			})
 		).translationStore;
 

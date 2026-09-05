@@ -22,7 +22,9 @@ import {
 	loadProject,
 	type ResolvedLucidProject,
 } from "./integration/project.js";
-import collectWatchFiles from "./integration/watch.js";
+import collectWatchFiles, {
+	createResourceWatchPlugin,
+} from "./integration/watch.js";
 import { registerBuildContext } from "./internal/runtime.js";
 import type { LucidAstroOptions } from "./types.js";
 
@@ -42,6 +44,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				addMiddleware,
 				addWatchFile,
 				command,
+				config,
 				injectRoute,
 				isRestart,
 				logger,
@@ -68,7 +71,11 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					);
 					assetRoot = path.join(generatedDirectory, constants.assetDirectory);
 					await fs.rm(generatedDirectory, { recursive: true, force: true });
-					await prepareAssets(nextProject, assetRoot);
+					await prepareAssets(
+						nextProject,
+						assetRoot,
+						fileURLToPath(config.publicDir),
+					);
 
 					const buildContextId = `${nextProject.hostId}:${command}`;
 					registerBuildContext(buildContextId, nextProject.loaded.env);
@@ -96,7 +103,8 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 						),
 					];
 
-					for (const filePath of await collectWatchFiles(nextProject)) {
+					const resourceWatchFiles = collectWatchFiles(nextProject);
+					for (const filePath of resourceWatchFiles) {
 						addWatchFile(filePath);
 					}
 
@@ -133,7 +141,13 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 									[constants.toolkitModuleId]: generated.runtimePath,
 								},
 							},
-							plugins: [createDevAssetPlugin(assetRoot)],
+							plugins: [
+								createDevAssetPlugin(assetRoot),
+								createResourceWatchPlugin(
+									nextProject.configPath,
+									resourceWatchFiles,
+								),
+							],
 						},
 					});
 

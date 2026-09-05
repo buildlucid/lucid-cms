@@ -5,6 +5,7 @@
 - Fixed Astro dev servers hanging after `Ctrl+C` with Cloudflare runtimes by explicitly awaiting Lucid and Vite teardown for `SIGINT` and `SIGTERM`.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Updated the generated toolkit to use toolkit types from `@lucidcms/core/types`.
+- Added support for discovered resources and plugin sources in dev and builds.
 
 ## v0.3.1
 

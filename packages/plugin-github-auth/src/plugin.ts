@@ -1,15 +1,19 @@
-import path, { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
-	const currentDir = dirname(fileURLToPath(import.meta.url));
-
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		sources: {
+			public: [
+				{
+					input: new URL("../assets/github-icon.svg", import.meta.url),
+					output: "lucid-plugins/github-auth/icon.svg",
+				},
+			],
+		},
 		recipe: (draft) => {
 			const providers = draft.auth.providers.find((p) => p.key === "github");
 			if (providers) {
@@ -19,7 +23,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 			draft.auth.providers.push({
 				key: PLUGIN_IDENTIFIER,
 				name: "GitHub",
-				icon: "/lucid/assets/auth-provider-icons/github-icon.svg",
+				icon: "/lucid-plugins/github-auth/icon.svg",
 				enabled: pluginOptions.enabled ?? true,
 				type: "oauth2" as const,
 				config: {
@@ -31,10 +35,6 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 					userinfoEndpoint: "https://api.github.com/user",
 					scopes: ["read:user"],
 				},
-			});
-			draft.build.paths.copyPublic.push({
-				input: path.join(currentDir, "../assets/github-icon.svg"),
-				output: "lucid/assets/auth-provider-icons/github-icon.svg",
 			});
 		},
 	};
