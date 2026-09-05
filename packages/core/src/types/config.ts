@@ -12,7 +12,7 @@ import type {
 import type { AllHooks } from "../libs/hooks/types.js";
 import type {
 	HttpExtension,
-	LucidRouteDefinition,
+	LucidCustomRouteDefinition,
 } from "../libs/http/types.js";
 import type {
 	InterfaceDirection,
@@ -177,7 +177,7 @@ export type HttpConfig = {
 	/**
 	 * Custom HTTP routes to register after Lucid's core routes.
 	 */
-	routes?: LucidRouteDefinition[];
+	routes?: LucidCustomRouteDefinition[];
 	/**
 	 * Low-level HTTP app extensions.
 	 */
@@ -595,7 +595,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 		openAPI: {
 			enabled: boolean;
 		};
-		routes: LucidRouteDefinition[];
+		routes: LucidCustomRouteDefinition[];
 		extensions: HttpExtension[];
 	};
 	ai: {

@@ -8,7 +8,7 @@ import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
+import { ExternalScopes } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetSingleQueryParams } from "../../../schemas/documents.js";
 import {
@@ -100,7 +100,7 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		allowedCollectionKeys = collectionsRes.data
 			.filter((collection) =>
 				data.externalScopes?.includes(
-					getCollectionExternalScope(collection.key),
+					ExternalScopes.DocumentRead(collection.key),
 				),
 			)
 			.map((collection) => collection.key);

@@ -69,7 +69,7 @@ export const getValidExternalScopes = (
 /** Returns requested scopes that are unavailable for the configuration. */
 export const getInvalidExternalScopes = (
 	collections: CollectionBuilder[],
-	scopes: string[],
+	scopes: readonly string[],
 	options: {
 		principalType?: ExternalPrincipalType;
 	} = {},

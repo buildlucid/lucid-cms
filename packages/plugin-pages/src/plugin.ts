@@ -10,6 +10,7 @@ import {
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
 import { pluginOptions, registerFields } from "./services/index.js";
+import toolkit from "./toolkit.js";
 import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
@@ -18,6 +19,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	return {
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
+		toolkit,
 		recipe: (draft) => {
 			draft.i18n.sources.push("@lucidcms/plugin-pages/translations");
 			const configuredCollections = [];

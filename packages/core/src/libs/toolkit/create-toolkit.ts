@@ -5,7 +5,7 @@ import createJobsToolkit from "./jobs/index.js";
 import createLocalesToolkit from "./locales/index.js";
 import createMediaToolkit from "./media/index.js";
 import createPreviewsToolkit from "./previews/index.js";
-import type { Toolkit, ToolkitContext } from "./types.js";
+import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
 
 /**
  * Creates server-side helpers bound to a Lucid service context.
@@ -33,14 +33,42 @@ import type { Toolkit, ToolkitContext } from "./types.js";
  * });
  * ```
  */
-const createToolkit = (context: ToolkitContext): Toolkit => ({
-	auth: createAuthToolkit(context),
-	documents: createDocumentsToolkit(context),
-	email: createEmailToolkit(context),
-	jobs: createJobsToolkit(context),
-	locales: createLocalesToolkit(context),
-	media: createMediaToolkit(context),
-	previews: createPreviewsToolkit(context),
-});
+const createToolkit = (context: ToolkitContext): Toolkit => {
+	const core: CoreToolkit = {
+		auth: createAuthToolkit(context),
+		documents: createDocumentsToolkit(context),
+		email: createEmailToolkit(context),
+		jobs: createJobsToolkit(context),
+		locales: createLocalesToolkit(context),
+		media: createMediaToolkit(context),
+		previews: createPreviewsToolkit(context),
+	};
+	const toolkit = { ...core };
+
+	for (const plugin of context.config.plugins) {
+		if (!plugin.toolkit) continue;
+
+		const service = plugin.toolkit.create({ context, core });
+		if (
+			service === null ||
+			(typeof service !== "object" && typeof service !== "function") ||
+			("then" in service && service.then !== undefined)
+		) {
+			throw new TypeError(
+				`Toolkit service "${plugin.toolkit.key}" from plugin "${plugin.key}" must synchronously return a service object.`,
+			);
+		}
+
+		Object.defineProperty(toolkit, plugin.toolkit.key, {
+			configurable: true,
+			enumerable: true,
+			writable: true,
+			value: service,
+		});
+	}
+
+	// Config validates registrations; TypeScript cannot track their dynamic keys.
+	return toolkit as Toolkit;
+};
 
 export default createToolkit;

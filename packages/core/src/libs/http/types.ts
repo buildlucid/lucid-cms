@@ -5,6 +5,10 @@ import type { Config } from "../../types/config.js";
 import type { LucidHonoContext, LucidHonoGeneric } from "../../types/hono.js";
 import type { RouteSchema } from "../../types/schema.js";
 import type { ServiceContext } from "../../utils/services/types.js";
+import type {
+	ExternalPrincipalType,
+	ExternalScope,
+} from "../permission/external-scopes.js";
 import type { Toolkit } from "../toolkit/types.js";
 
 export type HttpExtensionRegister = (
@@ -90,3 +94,43 @@ export type LucidRouteDefinitionInput<
 export type LucidRouteDefinition<
 	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
 > = LucidRouteDefinitionInput<TSchema>;
+
+export type LucidContentRouteScopes = readonly [
+	ExternalScope,
+	...ExternalScope[],
+];
+
+export type LucidContentRouteAccess =
+	| {
+			type: "public";
+	  }
+	| {
+			type: "authenticated";
+			principalType?: ExternalPrincipalType;
+	  }
+	| {
+			type: "scoped";
+			principalType?: ExternalPrincipalType;
+			scopes:
+				| LucidContentRouteScopes
+				| ((props: { hono: LucidHonoContext }) => LucidContentRouteScopes);
+	  };
+
+export type LucidContentRouteDefinitionInput<
+	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
+> = Omit<LucidRouteDefinitionInput<TSchema>, "path"> & {
+	/** Path relative to `/lucid/api/v1/content`. */
+	path: `/${string}`;
+	/** External access required before the route handler can run. */
+	access: LucidContentRouteAccess;
+};
+
+export type LucidContentRouteDefinition<
+	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
+> = LucidContentRouteDefinitionInput<TSchema> & {
+	readonly type: "content-route";
+};
+
+export type LucidCustomRouteDefinition<
+	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
+> = LucidRouteDefinition<TSchema> | LucidContentRouteDefinition<TSchema>;

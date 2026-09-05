@@ -1,4 +1,4 @@
-export const ExternalScopes = {
+const externalScopeValues = {
 	AccountRead: "account:read",
 	MediaRead: "media:read",
 	MediaCreate: "media:create",
@@ -17,17 +17,62 @@ export type CollectionExternalScopeAction =
 	| "publish"
 	| "review";
 
-export type CollectionExternalScope =
-	`documents:${string}:${CollectionExternalScopeAction}`;
+export type CollectionExternalScope<
+	TAction extends CollectionExternalScopeAction = CollectionExternalScopeAction,
+> = `documents:${string}:${TAction}`;
+
+type DocumentScopeFactories = {
+	[TAction in CollectionExternalScopeAction as `Document${Capitalize<TAction>}`]: (
+		collectionKey: string,
+	) => CollectionExternalScope<TAction>;
+};
+
+/** Builds the external scope key for a collection action. */
+export const getCollectionExternalScope = <
+	const TAction extends CollectionExternalScopeAction,
+>(
+	collectionKey: string,
+	action: TAction,
+): CollectionExternalScope<TAction> => `documents:${collectionKey}:${action}`;
+
+const documentScopeFactories = {
+	DocumentRead: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "read"),
+	DocumentCreate: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "create"),
+	DocumentUpdate: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "update"),
+	DocumentDelete: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "delete"),
+	DocumentRestore: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "restore"),
+	DocumentPublish: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "publish"),
+	DocumentReview: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "review"),
+} satisfies DocumentScopeFactories;
+
+/**
+ * Scopes for controlling access to Lucid content.
+ *
+ * Use the document helpers with a collection key.
+ *
+ * @example
+ * const access = {
+ *   type: "scoped",
+ *   scopes: [
+ *     ExternalScopes.MediaRead,
+ *     ExternalScopes.DocumentRead("pages"),
+ *   ],
+ * } satisfies LucidContentRouteAccess;
+ */
+export const ExternalScopes = {
+	...externalScopeValues,
+	...documentScopeFactories,
+} as const;
 
 export type ExternalScope =
-	| (typeof ExternalScopes)[keyof typeof ExternalScopes]
+	| (typeof externalScopeValues)[keyof typeof externalScopeValues]
 	| CollectionExternalScope;
 
 export type ExternalPrincipalType = "system" | "user";
-
-/** Builds the external scope key for a collection action. */
-export const getCollectionExternalScope = (
-	collectionKey: string,
-	action: CollectionExternalScopeAction = "read",
-): CollectionExternalScope => `documents:${collectionKey}:${action}`;

@@ -9,7 +9,7 @@ import createServiceContext from "../utils/create-service-context.js";
 /** Throws when the current external credential lacks a required scope. */
 export const externalScopeCheck = (
 	c: LucidHonoContext,
-	requiredScopes: ExternalScope[],
+	requiredScopes: readonly ExternalScope[],
 ) => {
 	const auth = c.get("externalAuth");
 	const missingScopes = requiredScopes.filter(
@@ -42,7 +42,9 @@ export const externalScopeCheck = (
 };
 
 const externalScopes = (
-	requiredScopes: ExternalScope[] | ((c: LucidHonoContext) => ExternalScope[]),
+	requiredScopes:
+		| readonly ExternalScope[]
+		| ((c: LucidHonoContext) => readonly ExternalScope[]),
 ) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
 		externalScopeCheck(

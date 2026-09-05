@@ -49,6 +49,8 @@ export * from "../libs/media-delivery/types.js";
 export * from "../libs/media-storage/types.js";
 export type {
 	CollectionExternalScope,
+	CollectionExternalScopeAction,
+	ExternalPrincipalType,
 	ExternalScope,
 } from "../libs/permission/external-scopes.js";
 export type {

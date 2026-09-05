@@ -8,6 +8,7 @@
 - Replaced `ui.tab` with `ui.placement` for positioning generated fields at the collection root, inside tabs, or relative to existing fields.
 - Updated localized routes, slugs and hierarchy propagation to respect each collection's configured locale subset and default.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Added `toolkit.pages.getByFullSlug()` to fetch pages by their full slug with collection-specific types and preview support.
 
 ## v0.7.0
 

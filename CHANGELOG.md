@@ -16,6 +16,8 @@
 - Added support for relation fields targeting single collections, including singleton document selection in the admin.
 - Added collection-level content locale subsets and default locale overrides, with matching admin controls, API responses, validation, persistence and generated types.
 - Added durable jobs and recurring schedules, with retries, cancellation, queue adapters and admin monitoring.
+- Added `defineToolkit` so plugins can register type-safe toolkit services.
+- Added `defineContentApiRoute` for custom content endpoints with authentication and scope options.
 
 ### Breaking Changes:
 

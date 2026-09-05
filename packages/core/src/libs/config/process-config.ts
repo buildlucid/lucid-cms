@@ -13,6 +13,7 @@ import type { LucidConfigRecipe } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
 import checkCollectionRouting from "./checks/check-collection-routing.js";
+import checkContentRoutes from "./checks/check-content-routes.js";
 import checkDuplicateBuilderKeys from "./checks/check-duplicate-builder-keys.js";
 import checkDuplicateFieldKeys from "./checks/check-duplicate-field-keys.js";
 import checkField from "./checks/check-field.js";
@@ -21,6 +22,7 @@ import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
+import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
 import ConfigSchema from "./config-schema.js";
 import coreJobDefinitions from "./core-job-definitions.js";
 import mergeConfig from "./merge-config.js";
@@ -140,6 +142,12 @@ const processConfig = async (
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);
+
+		// plugin toolkit definitions
+		checkToolkitDefinitions(configRes.plugins);
+
+		// custom content routes
+		checkContentRoutes(configRes);
 
 		// i18n checks
 		checkLocales(configRes.localization);

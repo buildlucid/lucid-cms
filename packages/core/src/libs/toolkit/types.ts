@@ -10,8 +10,8 @@ import type { ToolkitPreviews } from "./previews/index.js";
 /** Lucid service context used by `createToolkit()`. */
 export type ToolkitContext = ServiceContext;
 
-/** Server-side helpers bound to a Lucid service context. */
-export type Toolkit = {
+/** Core server-side helpers provided by Lucid. */
+export type CoreToolkit = {
 	/** Helpers for resolving request authentication state. */
 	auth: ToolkitAuth;
 	/** Helpers for reading collection documents. */
@@ -26,6 +26,36 @@ export type Toolkit = {
 	media: ToolkitMedia;
 	/** Helpers for resolving and handling previews. */
 	previews: ToolkitPreviews;
+};
+
+/**
+ * Toolkit services registered by plugins.
+ *
+ * Plugins extend this interface through module augmentation so their services
+ * are available anywhere Lucid exposes the toolkit.
+ */
+// biome-ignore lint/suspicious/noEmptyInterface: plugins merge their services into this interface
+export interface ToolkitServices {}
+
+/** Server-side helpers bound to a Lucid service context. */
+export type Toolkit = CoreToolkit & ToolkitServices;
+
+export type ToolkitDefinitionInput<
+	TKey extends string = string,
+	TService extends object = object,
+> = {
+	readonly key: TKey;
+	readonly create: (props: {
+		context: ToolkitContext;
+		core: CoreToolkit;
+	}) => TService & { then?: never };
+};
+
+export type ToolkitDefinition<
+	TKey extends string = string,
+	TService extends object = object,
+> = ToolkitDefinitionInput<TKey, TService> & {
+	readonly type: "toolkit-definition";
 };
 
 export type * from "./auth/index.js";

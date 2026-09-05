@@ -9,6 +9,7 @@ import type {
 	RuntimeBuildArtifactCompile,
 	RuntimeBuildArtifactFile,
 } from "../runtime/types.js";
+import type { ToolkitDefinition } from "../toolkit/types.js";
 
 export type LucidPluginRuntimeHookResult = {
 	artifacts?: Array<
@@ -69,6 +70,10 @@ export type LucidPluginResponse = {
 		runtimeContext: AdapterRuntimeContext;
 		config: Config;
 	}) => void | Promise<void>;
+	/**
+	 * A plugin-owned service to add to Lucid's server toolkit.
+	 */
+	toolkit?: ToolkitDefinition;
 	/**
 	 * The recipe function where you can mutate the config.
 	 */

@@ -79,17 +79,23 @@ const getLucidData = async ({
 				{ error: preview.error, data: undefined },
 			]
 		: await Promise.all([
-				toolkit.documents.getSingle({
-					collectionKey: "page",
-					version: "production",
-					preview: activePreview?.token,
-					query: {
-						filter: scopedPageEntry
-							? { id: { value: scopedPageEntry.documentId } }
-							: { _fullSlug: { value: fullSlug } },
-						include: ["bricks"],
-					},
-				}),
+				scopedPageEntry
+					? toolkit.documents.getSingle({
+							collectionKey: "page",
+							version: "production",
+							preview: activePreview?.token,
+							query: {
+								filter: { id: { value: scopedPageEntry.documentId } },
+								include: ["bricks"],
+							},
+						})
+					: toolkit.pages.getByFullSlug({
+							collectionKey: "page",
+							fullSlug,
+							version: "production",
+							preview: activePreview?.token,
+							query: { include: ["bricks"] },
+						}),
 				toolkit.documents.getMultiple({
 					collectionKey: "blog",
 					version: "production",

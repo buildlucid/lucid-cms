@@ -14,7 +14,7 @@ import type {
 	LucidDocumentTableName,
 } from "../../libs/db/tables/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import { getCollectionExternalScope } from "../../libs/permission/external-scopes.js";
+import { ExternalScopes } from "../../libs/permission/external-scopes.js";
 import type {
 	DocumentRefData,
 	DocumentRefVersionTypeResolver,
@@ -73,7 +73,7 @@ const checkCollectionAccess: ServiceFn<
 	}
 
 	const missingScopes = missingCollectionKeys.map((collectionKey) =>
-		getCollectionExternalScope(collectionKey),
+		ExternalScopes.DocumentRead(collectionKey),
 	);
 	return {
 		data: undefined,

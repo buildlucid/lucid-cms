@@ -6,7 +6,7 @@ import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
 import type {
 	HttpExtension,
 	HttpExtensionRegister,
-	LucidRouteDefinition,
+	LucidCustomRouteDefinition,
 } from "../http/types.js";
 import { isJobDefinition } from "../jobs/registry.js";
 import type { AnyJobDefinition } from "../jobs/types.js";
@@ -36,7 +36,7 @@ const HttpExtensionSchema = z.object({
 	register: HttpExtensionRegisterSchema,
 }) satisfies z.ZodType<HttpExtension>;
 
-const LucidRouteDefinitionSchema = z.custom<LucidRouteDefinition>(
+const LucidRouteDefinitionSchema = z.custom<LucidCustomRouteDefinition>(
 	(data) => typeof data === "object" && data !== null,
 	{
 		message: "Expected a Lucid route definition",

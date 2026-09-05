@@ -11,7 +11,7 @@ import { LucidAPIError } from "../../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
-import { getCollectionExternalScope } from "../../../../permission/external-scopes.js";
+import { ExternalScopes } from "../../../../permission/external-scopes.js";
 import cache from "../../../middleware/cache.js";
 import externalAuthentication from "../../../middleware/external-authenticate.js";
 import externalScopes from "../../../middleware/external-scopes.js";
@@ -43,7 +43,7 @@ const getSingleController = factory.createHandlers(
 	externalAuthentication(),
 	validate("param", controllerSchemas.content.getSingle.params),
 	externalScopes((c) => [
-		getCollectionExternalScope(c.req.param("collectionKey") ?? ""),
+		ExternalScopes.DocumentRead(c.req.param("collectionKey") ?? ""),
 	]),
 	validate("query", controllerSchemas.content.getSingle.query.string),
 	cache({

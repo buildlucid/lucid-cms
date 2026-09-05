@@ -3,8 +3,11 @@ import z from "zod";
 import type { LucidConfig } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
+import defineContentApiRoute from "../http/define-content-api-route.js";
 import defineJob from "../jobs/define-job.js";
 import { getJobDefinitionRuntime, getJobRegistry } from "../jobs/registry.js";
+import { ExternalScopes } from "../permission/external-scopes.js";
+import defineToolkit from "../toolkit/define-toolkit.js";
 import coreJobDefinitions from "./core-job-definitions.js";
 import processConfig from "./process-config.js";
 
@@ -79,6 +82,91 @@ test("applies plugin recipes during fresh config processing", async () => {
 	expect(init).toHaveBeenCalledOnce();
 	expect(processed.tables).toEqual([pluginTable]);
 	expect(processed.brand.name).toBe("Configured by plugin");
+});
+
+test("rejects toolkit services that conflict with core services", async () => {
+	await expect(
+		processConfig(
+			{
+				...config,
+				secrets: "a".repeat(64),
+				plugins: [
+					{
+						key: "documents-plugin",
+						lucid: "*",
+						toolkit: defineToolkit({
+							key: "documents",
+							create: () => ({}),
+						}),
+						recipe: () => undefined,
+					},
+				],
+			},
+			{ resolvedDb: createAdapter("request") },
+		),
+	).rejects.toThrow(
+		'Toolkit service key "documents" from plugin "documents-plugin" is reserved by Lucid.',
+	);
+});
+
+test("rejects duplicate plugin toolkit service keys", async () => {
+	const toolkit = defineToolkit({
+		key: "search",
+		create: () => ({}),
+	});
+
+	await expect(
+		processConfig(
+			{
+				...config,
+				secrets: "a".repeat(64),
+				plugins: [
+					{
+						key: "first-search-plugin",
+						lucid: "*",
+						toolkit,
+						recipe: () => undefined,
+					},
+					{
+						key: "second-search-plugin",
+						lucid: "*",
+						toolkit,
+						recipe: () => undefined,
+					},
+				],
+			},
+			{ resolvedDb: createAdapter("request") },
+		),
+	).rejects.toThrow(
+		'Toolkit service key "search" is registered by more than one plugin.',
+	);
+});
+
+test("rejects static content-route scopes that cannot be granted", async () => {
+	await expect(
+		processConfig(
+			{
+				...config,
+				secrets: "a".repeat(64),
+				http: {
+					routes: [
+						defineContentApiRoute({
+							method: "get",
+							path: "/missing-collection",
+							access: {
+								type: "scoped",
+								scopes: [ExternalScopes.DocumentRead("missing")],
+							},
+							handler: ({ hono }) => hono.text("unreachable"),
+						}),
+					],
+				},
+			},
+			{ resolvedDb: createAdapter("request") },
+		),
+	).rejects.toThrow(
+		'Content route "GET /missing-collection" uses unavailable scopes: documents:missing:read.',
+	);
 });
 
 test("preserves job definitions while merging config", async () => {

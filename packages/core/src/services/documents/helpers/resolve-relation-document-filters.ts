@@ -16,7 +16,7 @@ import type {
 	LucidBrickTableName,
 } from "../../../libs/db/tables/index.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionExternalScope } from "../../../libs/permission/external-scopes.js";
+import { ExternalScopes } from "../../../libs/permission/external-scopes.js";
 import type { DocumentRefVersionTypeResolver } from "../../../libs/refs/documents/types.js";
 import type {
 	QueryParamFilterCondition,
@@ -290,7 +290,7 @@ const resolveRelationDocumentFilters: ServiceFn<
 		const allowedCollectionKeys = new Set(data.allowedCollectionKeys);
 		const missingScopes = targetCollectionKeys
 			.filter((collectionKey) => !allowedCollectionKeys.has(collectionKey))
-			.map((collectionKey) => getCollectionExternalScope(collectionKey));
+			.map((collectionKey) => ExternalScopes.DocumentRead(collectionKey));
 
 		if (missingScopes.length > 0) {
 			return {
