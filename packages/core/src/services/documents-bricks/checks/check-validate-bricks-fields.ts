@@ -8,6 +8,7 @@ import type {
 } from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import {
 	evaluateFieldCondition,
 	type FieldConditionTargetResolver,
@@ -77,7 +78,7 @@ const buildStructuralConditions = (
 	const conditions = new Map<string, FieldConditionConfig[]>();
 	let currentTabCondition: FieldConditionConfig | undefined;
 
-	for (const [key, field] of instance.fields) {
+	for (const [key, field] of getFieldBuilderState(instance).fields) {
 		if (field.type === "tab") {
 			currentTabCondition = getFieldCondition(field);
 			continue;
@@ -91,7 +92,8 @@ const buildStructuralConditions = (
 
 		let structuralParentKey = field.structuralParent;
 		while (structuralParentKey) {
-			const structuralParent = instance.fields.get(structuralParentKey);
+			const structuralParent =
+				getFieldBuilderState(instance).fields.get(structuralParentKey);
 			if (!structuralParent) break;
 
 			const structuralCondition = getFieldCondition(structuralParent);
@@ -123,7 +125,7 @@ const createConditionTargetResolver = (props: {
 	translationScope: FieldConditionTranslationScope;
 }): FieldConditionTargetResolver => {
 	return (fieldKey) => {
-		const target = props.instance.fields.get(fieldKey);
+		const target = getFieldBuilderState(props.instance).fields.get(fieldKey);
 		if (
 			!target ||
 			target.type === "repeater" ||
@@ -451,7 +453,9 @@ export const recursiveFieldValidate = (props: {
 
 	//*  validate all provided fields
 	for (const field of props.fields) {
-		const fieldInstance = props.instance.fields.get(field.key);
+		const fieldInstance = getFieldBuilderState(props.instance).fields.get(
+			field.key,
+		);
 		if (!fieldInstance) {
 			errors.push({
 				key: field.key,
@@ -554,7 +558,7 @@ export const recursiveFieldValidate = (props: {
 
 	//* check for required fields that are missing
 	const submittedFieldKeys = new Set(props.fields.map((field) => field.key));
-	props.instance.fields.forEach((fieldInstance, key) => {
+	getFieldBuilderState(props.instance).fields.forEach((fieldInstance, key) => {
 		if (submittedFieldKeys.has(key)) return;
 
 		//* skip fields that belong to a different tree-table parent context

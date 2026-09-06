@@ -1,8 +1,8 @@
 import { defaultDiscovery } from "../libs/resources/defaults.js";
-import type { Config } from "../types/config.js";
+import type { ResolvedLucidConfig } from "../types/config.js";
 import constants from "./constants.js";
 
-export const defaultConfig: Partial<Config> = {
+export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	tables: [],
 	discovery: defaultDiscovery,
 	sources: {},
@@ -122,7 +122,7 @@ export const defaultConfig: Partial<Config> = {
 	},
 	retention: {
 		defaultPurgeAfterDays: constants.retention,
-	} satisfies Config["retention"],
+	} satisfies ResolvedLucidConfig["retention"],
 };
 
 export default defaultConfig;

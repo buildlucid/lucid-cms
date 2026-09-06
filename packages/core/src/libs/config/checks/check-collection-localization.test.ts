@@ -15,7 +15,12 @@ const localization = {
 const collection = (localized?: CollectionLocalizationConfig) =>
 	new CollectionBuilder("articles", {
 		mode: "multiple",
-		details: { name: "Articles", singularName: "Article" },
+		details: {
+			labels: {
+				singular: "Article",
+				plural: "Articles",
+			},
+		},
 		localized,
 	});
 

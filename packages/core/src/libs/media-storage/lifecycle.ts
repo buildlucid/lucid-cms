@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type {
 	AdapterRuntimeContext,
@@ -9,7 +9,7 @@ import type { MediaStorageAdapterInstance } from "./types.js";
 
 /** Resolve or use a supplied media storage adapter and run its init hook. */
 export const getInitializedMediaStorageAdapter = async (
-	config: Config,
+	config: ResolvedLucidConfig,
 	options: {
 		adapter?: MediaStorageAdapterInstance | null;
 		env?: EnvironmentVariables;
@@ -41,7 +41,7 @@ export const getInitializedMediaStorageAdapter = async (
 export const destroyMediaStorageAdapter = async (
 	adapter: MediaStorageAdapterInstance | null | undefined,
 	options: {
-		config: Config;
+		config: ResolvedLucidConfig;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	},

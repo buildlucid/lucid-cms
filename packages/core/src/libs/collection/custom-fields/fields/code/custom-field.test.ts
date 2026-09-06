@@ -3,6 +3,7 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import generateCollectionClientTypes from "../../../type-gen/index.js";
 import CustomFieldSchema from "../../schema.js";
 import CodeCustomField from "./custom-field.js";
@@ -12,12 +13,14 @@ import CodeCustomField from "./custom-field.js";
 const CodeCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -53,7 +56,7 @@ test("successfully validate field - code", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("standard_code")!,
+		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -67,7 +70,7 @@ test("successfully validate field - code", async () => {
 			value: "",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("standard_code")!,
+		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -84,7 +87,7 @@ test("successfully validate field - code", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("required_code")!,
+		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -100,8 +103,9 @@ test("successfully validate field - code", async () => {
 				value: "console.log(1);",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("restricted_code")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(CodeCollection).fields.get("restricted_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -117,7 +121,7 @@ test("fail to validate field - code", async () => {
 			value: "invalid code value",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("standard_code")!,
+		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -139,7 +143,7 @@ test("fail to validate field - code", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("standard_code")!,
+		instance: getFieldBuilderState(CodeCollection).fields.get("standard_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -161,7 +165,7 @@ test("fail to validate field - code", async () => {
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("required_code")!,
+		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -184,7 +188,7 @@ test("fail to validate field - code", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("required_code")!,
+		instance: getFieldBuilderState(CodeCollection).fields.get("required_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -206,8 +210,9 @@ test("fail to validate field - code", async () => {
 				value: "body { color: red; }",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CodeCollection.fields.get("restricted_code")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(CodeCollection).fields.get("restricted_code")!,
 		validationData,
 		meta: validationMeta,
 	});
@@ -384,7 +389,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 			placeholder: copy("admin:tests.fields.field.placeholder", {

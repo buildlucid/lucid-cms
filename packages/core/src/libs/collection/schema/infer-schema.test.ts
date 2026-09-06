@@ -20,12 +20,14 @@ describe("Schema inference", async () => {
 		pagesCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.pages.name", {
-					defaultMessage: "Pages",
-				}),
-				singularName: copy("admin:tests.collections.pages.singularName", {
-					defaultMessage: "Page",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.pages.singularName", {
+						defaultMessage: "Page",
+					}),
+					plural: copy("admin:tests.collections.pages.name", {
+						defaultMessage: "Pages",
+					}),
+				},
 			},
 			bricks: {
 				fixed: [
@@ -202,12 +204,14 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.pages.name", {
-					defaultMessage: "Pages",
-				}),
-				singularName: copy("admin:tests.collections.pages.singularName", {
-					defaultMessage: "Page",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.pages.singularName", {
+						defaultMessage: "Page",
+					}),
+					plural: copy("admin:tests.collections.pages.name", {
+						defaultMessage: "Pages",
+					}),
+				},
 			},
 			bricks: {
 				fixed: [
@@ -245,12 +249,14 @@ describe("Schema inference", async () => {
 		const brickScopedCollection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.pages.name", {
-					defaultMessage: "Pages",
-				}),
-				singularName: copy("admin:tests.collections.pages.singularName", {
-					defaultMessage: "Page",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.pages.singularName", {
+						defaultMessage: "Page",
+					}),
+					plural: copy("admin:tests.collections.pages.name", {
+						defaultMessage: "Pages",
+					}),
+				},
 			},
 			bricks: {
 				fixed: [new BrickBuilder("content").addTab("meta").addText("title")],

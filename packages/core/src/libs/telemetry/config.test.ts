@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { isTelemetryEnabled } from "./config.js";
 
-const config = (telemetry: boolean) => ({ telemetry }) as Config;
+const config = (telemetry: boolean) => ({ telemetry }) as ResolvedLucidConfig;
 
 afterEach(() => {
 	vi.unstubAllEnvs();

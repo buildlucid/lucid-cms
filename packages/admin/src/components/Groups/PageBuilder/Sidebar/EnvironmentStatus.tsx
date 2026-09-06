@@ -52,7 +52,7 @@ export const EnvironmentStatus: Component<{
 		const document = props.document();
 		if (!collection || !document) return [];
 
-		return collection.environments.map((environment) => {
+		return collection.publishing.targets.map((environment) => {
 			const status = getDocumentEnvironmentStatus({
 				versions: document.versions,
 				environmentKey: environment.key,
@@ -62,7 +62,7 @@ export const EnvironmentStatus: Component<{
 			return {
 				label:
 					helpers.getLocaleValue({
-						value: environment.name,
+						value: environment.label,
 						fallback: environment.key,
 					}) || environment.key,
 				value: getDocumentEnvironmentStatusLabel(status),

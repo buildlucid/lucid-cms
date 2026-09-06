@@ -2,9 +2,9 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
@@ -14,7 +14,7 @@ class SectionCustomField extends CustomField<"section"> {
 	type = sectionFieldConfig.type;
 	config;
 	key: string;
-	props?: CFProps<"section">;
+	props?: FieldOptions<"section">;
 	protected override get sharedValidationFlags() {
 		return {
 			skipValidation: true,
@@ -22,7 +22,7 @@ class SectionCustomField extends CustomField<"section"> {
 			skipZodValidation: true,
 		} as const;
 	}
-	constructor(key: string, props?: CFProps<"section">) {
+	constructor(key: string, props?: FieldOptions<"section">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -35,7 +35,7 @@ class SectionCustomField extends CustomField<"section"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			output: this.props?.output ?? "nested",
 			ui: {
@@ -43,7 +43,7 @@ class SectionCustomField extends CustomField<"section"> {
 				width: this.props?.ui?.width,
 			},
 			fields: [],
-		} satisfies CFConfig<"section">;
+		} satisfies FieldConfig<"section">;
 	}
 	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
@@ -54,7 +54,7 @@ class SectionCustomField extends CustomField<"section"> {
 		};
 	}
 	formatResponseValue() {
-		return null satisfies CFResponse<"section">["value"];
+		return null satisfies FieldResponse<"section">["value"];
 	}
 	uniqueValidation() {
 		return {

@@ -1,16 +1,16 @@
 import type { Hono } from "hono";
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import type { LucidHonoGeneric } from "../../../types/hono.js";
-import type { HttpExtension, HttpExtensionPriority } from "../types.js";
+import type { HttpExtension, HttpExtensionPhase } from "../types.js";
 
 const runHttpExtensions = async (props: {
 	extensions: HttpExtension[];
-	priority: HttpExtensionPriority;
+	phase: HttpExtensionPhase;
 	app: Hono<LucidHonoGeneric>;
-	config: Config;
+	config: ResolvedLucidConfig;
 }) => {
 	for (const extension of props.extensions) {
-		if (extension.priority === props.priority) {
+		if (extension.phase === props.phase) {
 			await extension.register(props.app, props.config);
 		}
 	}

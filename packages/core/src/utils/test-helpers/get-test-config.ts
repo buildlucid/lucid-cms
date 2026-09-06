@@ -1,17 +1,17 @@
 import path from "node:path";
 import loadConfigFile from "../../libs/config/load-config-file.js";
 import type { DatabaseConnection } from "../../libs/db/types.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { getDirName } from "../helpers/index.js";
 
 const currentDir = getDirName(import.meta.url);
 
 export const getTestConfig = (configFileName = "lucid.config.ts") => {
-	let config: Config | undefined;
+	let config: ResolvedLucidConfig | undefined;
 	let database: DatabaseConnection | undefined;
 	const configPath = path.resolve(currentDir, "./config/", configFileName);
 
-	const getConfig = async (): Promise<Config> => {
+	const getConfig = async (): Promise<ResolvedLucidConfig> => {
 		if (!config) {
 			const result = await loadConfigFile({ path: configPath });
 			config = result.config;

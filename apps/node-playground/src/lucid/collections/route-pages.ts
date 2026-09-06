@@ -3,9 +3,11 @@ import { CollectionBuilder, copy, z } from "@lucidcms/core";
 const RoutePageCollection = new CollectionBuilder("route-page", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.route-page.name"),
-		singularName: copy("admin:collections.route-page.singularName"),
-		summary: copy("admin:collections.route-page.summary"),
+		labels: {
+			singular: copy("admin:collections.route-page.singularName"),
+			plural: copy("admin:collections.route-page.name"),
+		},
+		description: copy("admin:collections.route-page.summary"),
 	},
 	group: { key: "content" },
 	localized: true,

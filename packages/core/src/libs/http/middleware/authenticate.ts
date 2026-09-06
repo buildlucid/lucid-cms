@@ -106,7 +106,7 @@ const resolveAuthState = async (
 		await cached.context.kv.set(cached.context, {
 			key: cached.cacheKey,
 			value: authState,
-			expirationTtl: constants.authCacheExpiration,
+			ttlSeconds: constants.authCacheExpiration,
 			hash: true,
 		});
 	}

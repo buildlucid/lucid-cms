@@ -1,5 +1,8 @@
 import { confirm } from "@inquirer/prompts";
-import type { Config, EnvironmentVariables } from "../../../exports/types.js";
+import type {
+	EnvironmentVariables,
+	ResolvedLucidConfig,
+} from "../../../exports/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import type { DatabaseConnection } from "../../db/types.js";
@@ -16,10 +19,9 @@ import {
 } from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateResetCommand = (props?: {
-	config?: Config;
+	config?: ResolvedLucidConfig;
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
 	translationStore?: TranslationStore;
@@ -27,7 +29,7 @@ const migrateResetCommand = (props?: {
 }) => {
 	return async (options?: { force?: boolean; remote?: boolean }) => {
 		let kvInstance: KVAdapterInstance | undefined;
-		let config: Config | undefined;
+		let config: ResolvedLucidConfig | undefined;
 		let env: EnvironmentVariables | undefined = props?.env;
 		let runtimeContext: AdapterRuntimeContext | undefined =
 			props?.runtimeContext;
@@ -66,18 +68,6 @@ const migrateResetCommand = (props?: {
 						files: res.resources.files.translations,
 					})
 				).translationStore;
-
-				const envValid = await validateEnvVars({
-					envSchema: res.envSchema,
-					env: res.env,
-				});
-
-				if (!envValid) {
-					if (mode === "process") {
-						await stopLoggerBuffering();
-						process.exit(1);
-					} else return false;
-				}
 			}
 			if (!translationStore) {
 				throw new Error("Lucid could not resolve the translation store.");

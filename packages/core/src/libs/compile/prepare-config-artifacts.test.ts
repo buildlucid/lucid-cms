@@ -10,7 +10,7 @@ test("splits lucid config into isolated config, db, runtime, and env artifacts",
 
 	await writeFile(
 		configPath,
-		`import { configureLucid, z } from "@lucidcms/core";
+		`import { defineConfig, z } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import PagesPlugin from "@lucidcms/plugin-pages";
 import { libsql } from "@lucidcms/db-libsql";
@@ -36,7 +36,7 @@ export const env = z.object({
 	SECRET: z.string(),
 });
 
-export default configureLucid({ runtime, db, config });
+export default defineConfig({ runtime, db, config });
 `,
 	);
 	const outputPath = path.join(tempDir, "dist");
@@ -76,7 +76,7 @@ export default configureLucid({ runtime, db, config });
 		expect(envArtifact).toContain("export const env = z.object");
 		expect(envArtifact).toContain("LIBSQL_URL");
 		expect(envArtifact).toContain("LIBSQL_AUTH_TOKEN");
-		expect(envArtifact).not.toContain("configureLucid");
+		expect(envArtifact).not.toContain("defineConfig");
 		expect(envArtifact).not.toContain("@lucidcms/db-libsql");
 	} finally {
 		await rm(tempDir, { recursive: true, force: true });
@@ -89,7 +89,7 @@ test("splits a named env export", async () => {
 
 	await writeFile(
 		configPath,
-		`import { configureLucid, z } from "@lucidcms/core";
+		`import { defineConfig, z } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { libsql } from "@lucidcms/db-libsql";
 
@@ -108,7 +108,7 @@ export const env = z.object({
 	SECRET: z.string(),
 });
 
-export default configureLucid({ runtime: node, db: libsql, config });
+export default defineConfig({ runtime: node, db: libsql, config });
 `,
 	);
 	const outputPath = path.join(tempDir, "dist");
@@ -127,17 +127,17 @@ export default configureLucid({ runtime: node, db: libsql, config });
 	}
 });
 
-test("generates an empty env artifact when the named export is omitted", async () => {
+test("exports an undefined env schema when the named export is omitted", async () => {
 	const tempDir = await mkdtemp(path.join(tmpdir(), "lucid-config-artifacts-"));
 	const configPath = path.join(tempDir, "lucid.config.ts");
 
 	await writeFile(
 		configPath,
-		`import { configureLucid } from "@lucidcms/core";
+		`import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { libsql } from "@lucidcms/db-libsql";
 
-export default configureLucid({
+export default defineConfig({
 	runtime: node,
 	db: libsql,
 	config: () => ({
@@ -156,7 +156,7 @@ export default configureLucid({
 		});
 		const envArtifact = await readFile(artifacts.env, "utf-8");
 
-		expect(envArtifact).toBe("export {};\n");
+		expect(envArtifact).toBe("export const env = undefined;\n");
 	} finally {
 		await rm(tempDir, { recursive: true, force: true });
 	}

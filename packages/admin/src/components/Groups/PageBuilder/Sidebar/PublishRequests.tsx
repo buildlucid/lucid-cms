@@ -36,7 +36,7 @@ export const PublishRequests: Component<{
 	// ----------------------------------
 	// Memos
 	const environmentCount = createMemo(() =>
-		Math.max(props.collection()?.environments.length ?? 1, 1),
+		Math.max(props.collection()?.publishing.targets.length ?? 1, 1),
 	);
 	const canReadPublishOperations = createMemo(
 		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
@@ -56,7 +56,7 @@ export const PublishRequests: Component<{
 		},
 		enabled: () =>
 			canReadPublishOperations() &&
-			(props.collection()?.review?.requiredFor?.length ?? 0) > 0 &&
+			(props.collection()?.publishing.review?.requiredFor?.length ?? 0) > 0 &&
 			props.documentId() !== undefined,
 	});
 	const scheduledRequests = api.publishOperations.useGetMultiple({
@@ -85,7 +85,7 @@ export const PublishRequests: Component<{
 	// ----------------------------------
 	// Memos
 	const reviewEnabled = createMemo(
-		() => (props.collection()?.review?.requiredFor?.length ?? 0) > 0,
+		() => (props.collection()?.publishing.review?.requiredFor?.length ?? 0) > 0,
 	);
 	const schedulingEnabled = createMemo(
 		() => props.collection()?.capabilities.scheduling === true,

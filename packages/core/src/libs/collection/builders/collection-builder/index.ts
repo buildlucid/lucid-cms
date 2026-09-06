@@ -1,137 +1,179 @@
 import constants from "../../../../constants/constants.js";
+import deepMerge from "../../../../utils/helpers/deep-merge.js";
 import { normalizeCopy } from "../../../i18n/index.js";
-import type { CFProps } from "../../custom-fields/types.js";
+import type { FieldOptions } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 import FieldBuilder from "../field-builder/index.js";
 import type {
 	CollectionBrickConfig,
-	CollectionConfigSchemaType,
 	CollectionData,
 	CollectionLabelFieldOptions,
 	CollectionListFieldOptions,
+	CollectionOptions,
 	CollectionPreviewOptions,
 } from "./types.js";
+
+const collectionBrand = Symbol.for("lucidcms.collection-builder");
+
+/** Recognizes collection builders across separately loaded copies of core. */
+export const isCollectionBuilder = (
+	value: unknown,
+): value is CollectionBuilder =>
+	typeof value === "object" &&
+	value !== null &&
+	collectionBrand in value &&
+	value[collectionBrand] === true &&
+	"key" in value &&
+	typeof value.key === "string" &&
+	"config" in value &&
+	typeof value.config === "object" &&
+	value.config !== null &&
+	"clone" in value &&
+	typeof value.clone === "function" &&
+	"addFields" in value &&
+	typeof value.addFields === "function" &&
+	"moveFields" in value &&
+	typeof value.moveFields === "function";
 
 class CollectionBuilder<
 	const TCollectionKey extends string = string,
 > extends FieldBuilder {
+	readonly [collectionBrand] = true;
 	key: TCollectionKey;
-	config: CollectionConfigSchemaType<TCollectionKey>;
+	config: CollectionOptions<TCollectionKey> & { key: TCollectionKey };
 	listing: string[] = [];
 	labelFields: string[] = [];
-	constructor(
-		key: TCollectionKey,
-		config: Omit<CollectionConfigSchemaType<TCollectionKey>, "key">,
-	) {
+	constructor(key: TCollectionKey, config: CollectionOptions<TCollectionKey>) {
 		super();
 		this.key = key;
 		this.config = {
+			...deepMerge({}, config),
 			key: this.key,
-			...config,
 		};
 
 		if (this.config.bricks?.fixed) {
-			this.config.bricks.fixed = this.#removeDuplicateBricks(
-				config.bricks?.fixed,
-			);
+			this.config.bricks.fixed = this.#copyBricks(this.config.bricks?.fixed);
 		}
 		if (this.config.bricks?.builder) {
-			this.config.bricks.builder = this.#removeDuplicateBricks(
-				config.bricks?.builder,
+			this.config.bricks.builder = this.#copyBricks(
+				this.config.bricks?.builder,
 			);
 		}
 		if (this.config.bricks?.embedded) {
-			this.config.bricks.embedded = this.#removeDuplicateBricks(
-				config.bricks?.embedded,
+			this.config.bricks.embedded = this.#copyBricks(
+				this.config.bricks?.embedded,
 			);
 		}
 	}
+	/** Returns a collection with independent config, bricks and fields. */
+	override clone(): CollectionBuilder<TCollectionKey> {
+		const cloned = this.copyFieldsTo(
+			new CollectionBuilder(this.key, this.config),
+		);
+		cloned.listing = [...this.listing];
+		cloned.labelFields = [...this.labelFields];
+		return cloned;
+	}
 	// ------------------------------------
 	// Builder Methods
-	addText(key: string, props?: CFProps<"text"> & CollectionLabelFieldOptions) {
-		this.#fieldCollectionHelper(key, props);
+	addText(
+		key: string,
+		props?: FieldOptions<"text"> & CollectionLabelFieldOptions,
+	) {
 		super.addText(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	addNumber(
 		key: string,
-		props?: CFProps<"number"> & CollectionLabelFieldOptions,
+		props?: FieldOptions<"number"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props);
 		super.addNumber(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
-	addRange(key: string, props?: CFProps<"range"> & CollectionListFieldOptions) {
-		this.#fieldCollectionHelper(key, props);
+	addRange(
+		key: string,
+		props?: FieldOptions<"range"> & CollectionListFieldOptions,
+	) {
 		super.addRange(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	addCheckbox(
 		key: string,
-		props?: CFProps<"checkbox"> & CollectionListFieldOptions,
+		props?: FieldOptions<"checkbox"> & CollectionListFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props);
 		super.addCheckbox(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	addSelect(
 		key: string,
-		props?: CFProps<"select"> & CollectionLabelFieldOptions,
+		props?: FieldOptions<"select"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props);
 		super.addSelect(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	addTextarea(
 		key: string,
-		props?: CFProps<"textarea"> & CollectionLabelFieldOptions,
+		props?: FieldOptions<"textarea"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props);
 		super.addTextarea(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	addDateTime(
 		key: string,
-		props?: CFProps<"datetime"> & CollectionLabelFieldOptions,
+		props?: FieldOptions<"datetime"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props);
 		super.addDateTime(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
-	addUser(key: string, props?: CFProps<"user"> & CollectionListFieldOptions) {
-		this.#fieldCollectionHelper(key, props);
+	addUser(
+		key: string,
+		props?: FieldOptions<"user"> & CollectionListFieldOptions,
+	) {
 		super.addUser(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
-	addMedia(key: string, props?: CFProps<"media"> & CollectionListFieldOptions) {
-		this.#fieldCollectionHelper(key, props);
+	addMedia(
+		key: string,
+		props?: FieldOptions<"media"> & CollectionListFieldOptions,
+	) {
 		super.addMedia(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	addRelation(
 		key: string,
-		props: CFProps<"relation"> & CollectionListFieldOptions,
+		props: FieldOptions<"relation"> & CollectionListFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props);
 		super.addRelation(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	addColor(
 		key: string,
-		props?: CFProps<"color"> & CollectionLabelFieldOptions,
+		props?: FieldOptions<"color"> & CollectionLabelFieldOptions,
 	) {
-		this.#fieldCollectionHelper(key, props);
 		super.addColor(key, props);
+		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
 	// ------------------------------------
 	// Private Methods
-	#removeDuplicateBricks = (bricks?: Array<BrickBuilder>) => {
+	#copyBricks = (bricks?: Array<BrickBuilder>) => {
 		if (!bricks) return undefined;
-
-		return bricks.filter(
-			(brick, index) => bricks.findIndex((b) => b.key === brick.key) === index,
-		);
+		return bricks
+			.filter(
+				(brick, index) =>
+					bricks.findIndex((b) => b.key === brick.key) === index,
+			)
+			.map((brick) => brick.clone());
 	};
 	/** Tracks collection-level field display config while fields are registered. */
 	#fieldCollectionHelper = (
@@ -147,98 +189,103 @@ class CollectionBuilder<
 		if (typeof group === "string") {
 			return {
 				key: group,
-				name: null,
+				label: null,
 				order: null,
 			};
 		}
 
 		return {
 			key: group.key,
-			name: normalizeCopy(group.name) ?? null,
+			label: normalizeCopy(group.label) ?? null,
 			order: group.order ?? null,
 		};
 	};
 	// ------------------------------------
 	// Getters
-	get resolvedPreviewConfig(): CollectionPreviewOptions<TCollectionKey> | null {
+	get resolvedPreviewConfig():
+		| (CollectionPreviewOptions<TCollectionKey> & { enabled: boolean })
+		| null {
 		const preview = this.config.preview;
-		if (preview === undefined) return null;
-		return preview === true ? { enabled: true } : preview;
+		if (preview === undefined || preview === false) return null;
+		return preview === true
+			? { enabled: true }
+			: { ...deepMerge({}, preview), enabled: preview.enabled ?? true };
 	}
 	get getData(): CollectionData {
 		const preview = this.resolvedPreviewConfig;
-		const localized =
-			this.config.localized ?? constants.collectionBuilder.localized;
-
-		return {
+		const revisions =
+			this.config.revisions === true
+				? { enabled: true }
+				: this.config.revisions;
+		const publishing = this.config.publishing;
+		const review = publishing?.review;
+		const workflow = publishing?.workflow;
+		const data: CollectionData = {
 			key: this.key,
 			mode: this.config.mode,
 			group: this.#formatGroup(),
 			details: {
-				name: normalizeCopy(this.config.details.name),
-				singularName: normalizeCopy(this.config.details.singularName),
-				summary: normalizeCopy(this.config.details.summary) ?? null,
+				labels: {
+					singular: normalizeCopy(this.config.details.labels.singular),
+					plural: normalizeCopy(this.config.details.labels.plural),
+				},
+				description: normalizeCopy(this.config.details.description) ?? null,
 			},
 			locked: this.config.locked ?? constants.collectionBuilder.locked,
-			revisions: this.config.revisions ?? constants.collectionBuilder.revisions,
-			localized: localized !== false,
+			localized:
+				(this.config.localized ?? constants.collectionBuilder.localized) !==
+				false,
+			revisions: {
+				enabled: revisions?.enabled ?? constants.collectionBuilder.revisions,
+				retentionDays:
+					revisions?.retentionDays ??
+					constants.collectionBuilder.revisionRetentionDays,
+			},
 			autoSave: this.config.autoSave ?? constants.collectionBuilder.autoSave,
-			scheduling:
-				this.config.scheduling ?? constants.collectionBuilder.scheduling,
 			orderable: this.config.orderable ?? constants.collectionBuilder.orderable,
-			...(this.config.review
-				? {
-						review: {
-							requiredFor: this.config.review?.requiredFor ?? [],
+			listing: [...this.listing],
+			labelFields: [...this.labelFields],
+			publishing: {
+				scheduling:
+					publishing?.scheduling ?? constants.collectionBuilder.scheduling,
+				targets:
+					publishing?.targets?.map((target) => ({
+						...target,
+						label: normalizeCopy(target.label),
+						requires: [...(target.requires ?? [])],
+						collectionVersions: { ...target.collectionVersions },
+					})) ?? [],
+				review: review
+					? {
+							requiredFor: [...(review.requiredFor ?? [])],
 							allowSelfApproval:
-								this.config.review?.allowSelfApproval ??
+								review.allowSelfApproval ??
 								constants.collectionBuilder.publishing.allowSelfApproval,
 							comments: {
 								request:
-									this.config.review?.comments?.request ??
+									review.comments?.request ??
 									constants.collectionBuilder.publishing.comments.request,
 								decision:
-									this.config.review?.comments?.decision ??
+									review.comments?.decision ??
 									constants.collectionBuilder.publishing.comments.decision,
 							},
-						},
-					}
-				: {}),
-			...(this.config.workflow
-				? {
-						workflow: {
-							initial:
-								this.config.workflow.initial ??
-								this.config.workflow.stages[0]?.key ??
-								"",
-							stages: this.config.workflow.stages.map((stage) => ({
+						}
+					: undefined,
+				workflow: workflow
+					? {
+							initial: workflow.initial ?? workflow.stages[0]?.key ?? "",
+							stages: workflow.stages.map((stage) => ({
 								key: stage.key,
-								name: normalizeCopy(stage.name),
+								label: normalizeCopy(stage.label),
 								color:
 									stage.color ??
 									constants.collectionBuilder.publishing.workflow.color,
-								publishTargets: stage.publishTargets ?? [],
+								publishTargets: [...(stage.publishTargets ?? [])],
 							})),
-						},
-					}
-				: {}),
-			listing: this.listing,
-			labelFields: this.labelFields,
-			environments:
-				this.config.environments?.map((environment) => ({
-					...environment,
-					name: normalizeCopy(environment.name),
-					requires: environment.requires ?? [],
-					collectionVersions: environment.collectionVersions ?? {},
-				})) ?? [],
-			revisionRetentionDays:
-				this.config.revisionRetentionDays ??
-				constants.collectionBuilder.revisionRetentionDays,
-			routing: this.config.routing
-				? {
-						field: this.config.routing,
-					}
-				: null,
+						}
+					: undefined,
+			},
+			routing: this.config.routing ? { ...this.config.routing } : null,
 			preview: preview?.enabled
 				? {
 						breakpoints:
@@ -249,13 +296,14 @@ class CollectionBuilder<
 					}
 				: null,
 		};
+		return deepMerge({}, data);
 	}
 	get fixedBricks(): CollectionBrickConfig[] {
 		return (
 			this.config.bricks?.fixed?.map((brick) => ({
 				key: brick.key,
-				details: brick.config.details,
-				preview: brick.config.preview,
+				details: deepMerge({}, brick.config.details),
+				thumbnail: brick.config.thumbnail,
 				fields: brick.fieldTree,
 			})) ?? []
 		);
@@ -264,8 +312,8 @@ class CollectionBuilder<
 		return (
 			this.config.bricks?.builder?.map((brick) => ({
 				key: brick.key,
-				details: brick.config.details,
-				preview: brick.config.preview,
+				details: deepMerge({}, brick.config.details),
+				thumbnail: brick.config.thumbnail,
 				fields: brick.fieldTree,
 			})) ?? []
 		);
@@ -274,8 +322,8 @@ class CollectionBuilder<
 		return (
 			this.config.bricks?.embedded?.map((brick) => ({
 				key: brick.key,
-				details: brick.config.details,
-				preview: brick.config.preview,
+				details: deepMerge({}, brick.config.details),
+				thumbnail: brick.config.thumbnail,
 				fields: brick.fieldTree,
 			})) ?? []
 		);

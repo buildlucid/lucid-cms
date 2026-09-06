@@ -1,5 +1,5 @@
 import getToolkit from "@lucidcms/astro/toolkit";
-import { asDocument, asDocuments } from "@lucidcms/client";
+import { createDocumentView, createDocumentViews } from "@lucidcms/client";
 import type { AstroGlobal } from "astro";
 
 const previewCookieName = "lucid_preview";
@@ -124,13 +124,13 @@ const getLucidData = async ({
 			preview,
 			authentication,
 		},
-		document: asDocument({
+		document: createDocumentView({
 			document: documentResponse.data?.document,
 			locale,
 			preview: activePreview !== null,
 			refs: documentResponse.data?.refs,
 		}),
-		blogs: asDocuments({
+		blogs: createDocumentViews({
 			documents: blogsResponse.data?.documents ?? [],
 			locale,
 			preview: activePreview !== null,

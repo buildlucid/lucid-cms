@@ -1,26 +1,28 @@
-import type { ZodType } from "zod";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
-import type { FieldUIConfig, SharedFieldConfig } from "../../types.js";
+import type {
+	FieldUIConfig,
+	FieldValidation,
+	SharedFieldConfig,
+} from "../../types.js";
 
 export interface DatetimeFieldConfig extends SharedFieldConfig {
 	type: "datetime";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
 	localized?: boolean;
 	time?: boolean;
 	default?: string;
-	index?: true;
+	index?: boolean;
 	ui?: FieldUIConfig;
-	validation?: {
-		required?: boolean;
-		zod?: ZodType<unknown>;
-	};
+	validation?: FieldValidation<string>;
 }
 
-export type DatetimeFieldProps = Partial<Omit<DatetimeFieldConfig, "type">>;
+export type DatetimeFieldProps = Partial<
+	Omit<DatetimeFieldConfig, "key" | "type">
+>;
 
 export type DatetimeResValue = string | null;
 

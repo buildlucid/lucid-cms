@@ -28,7 +28,7 @@ export const DocumentDetails: Component<{
 		const collection = props.collection();
 		return (
 			helpers.getLocaleValue({
-				value: collection?.details.name,
+				value: collection?.details.labels.plural,
 				fallback: collection?.key,
 			}) || "-"
 		);

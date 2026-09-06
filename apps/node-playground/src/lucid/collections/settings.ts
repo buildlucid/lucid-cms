@@ -4,9 +4,11 @@ import SEOBrick from "../bricks/seo.js";
 const SettingsCollection = new CollectionBuilder("settings", {
 	mode: "single",
 	details: {
-		name: copy("admin:collections.settings.name"),
-		singularName: copy("admin:collections.settings.singularName"),
-		summary: copy("admin:collections.settings.summary"),
+		labels: {
+			singular: copy("admin:collections.settings.singularName"),
+			plural: copy("admin:collections.settings.name"),
+		},
+		description: copy("admin:collections.settings.summary"),
 	},
 	revisions: true,
 	bricks: {

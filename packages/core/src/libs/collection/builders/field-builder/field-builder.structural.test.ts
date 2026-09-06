@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import LucidError from "../../../../utils/errors/lucid-error.js";
-import type { CFConfig } from "../../custom-fields/types.js";
+import type { FieldConfig } from "../../custom-fields/types.js";
 import BrickBuilder from "../brick-builder/index.js";
-import FieldBuilder from "./index.js";
+import FieldBuilder, { getFieldBuilderState } from "./index.js";
 
 describe("section and collapsible builder support", () => {
 	test("sections nest their children in the field tree", () => {
@@ -20,7 +20,7 @@ describe("section and collapsible builder support", () => {
 			"outro",
 		]);
 
-		const section = instance.fieldTree[1] as CFConfig<"section">;
+		const section = instance.fieldTree[1] as FieldConfig<"section">;
 		expect(section.type).toBe("section");
 		expect(section.fields.map((f) => f.key)).toEqual(["label", "theme"]);
 	});
@@ -34,7 +34,7 @@ describe("section and collapsible builder support", () => {
 
 		expect(instance.fieldTree.map((f) => f.key)).toEqual(["advanced", "after"]);
 
-		const collapsible = instance.fieldTree[0] as CFConfig<"collapsible">;
+		const collapsible = instance.fieldTree[0] as FieldConfig<"collapsible">;
 		expect(collapsible.type).toBe("collapsible");
 		expect(collapsible.defaultOpen).toBe(true);
 		expect(collapsible.fields.map((f) => f.key)).toEqual(["anchorLabel"]);
@@ -49,10 +49,10 @@ describe("section and collapsible builder support", () => {
 			.endCollapsible()
 			.endSection();
 
-		const outer = instance.fieldTree[0] as CFConfig<"section">;
+		const outer = instance.fieldTree[0] as FieldConfig<"section">;
 		expect(outer.fields.map((f) => f.key)).toEqual(["outerText", "inner"]);
 
-		const inner = outer.fields[1] as CFConfig<"collapsible">;
+		const inner = outer.fields[1] as FieldConfig<"collapsible">;
 		expect(inner.fields.map((f) => f.key)).toEqual(["innerText"]);
 	});
 
@@ -81,22 +81,26 @@ describe("section and collapsible builder support", () => {
 			.endRepeater();
 
 		//* full tree keeps the section nested inside the repeater
-		const repeater = instance.fieldTree[0] as CFConfig<"repeater">;
+		const repeater = instance.fieldTree[0] as FieldConfig<"repeater">;
 		expect(repeater.fields.map((f) => f.key)).toEqual(["title", "meta"]);
-		const section = repeater.fields[1] as CFConfig<"section">;
+		const section = repeater.fields[1] as FieldConfig<"section">;
 		expect(section.fields.map((f) => f.key)).toEqual(["caption"]);
 
 		//* persisted tree keeps all children directly under the repeater
 		const persistedRepeater = instance
-			.persistedFieldTree[0] as CFConfig<"repeater">;
+			.persistedFieldTree[0] as FieldConfig<"repeater">;
 		expect(persistedRepeater.fields.map((f) => f.key)).toEqual([
 			"title",
 			"caption",
 		]);
 
 		//* both children share the repeater's storage scope
-		expect(instance.fields.get("title")?.treeParent).toBe("items");
-		expect(instance.fields.get("caption")?.treeParent).toBe("items");
+		expect(getFieldBuilderState(instance).fields.get("title")?.treeParent).toBe(
+			"items",
+		);
+		expect(
+			getFieldBuilderState(instance).fields.get("caption")?.treeParent,
+		).toBe("items");
 	});
 
 	test("repeaters nested inside sections keep their own children", () => {
@@ -108,15 +112,19 @@ describe("section and collapsible builder support", () => {
 			.addText("caption")
 			.endSection();
 
-		const section = instance.fieldTree[0] as CFConfig<"section">;
+		const section = instance.fieldTree[0] as FieldConfig<"section">;
 		expect(section.fields.map((f) => f.key)).toEqual(["images", "caption"]);
 
-		const repeater = section.fields[0] as CFConfig<"repeater">;
+		const repeater = section.fields[0] as FieldConfig<"repeater">;
 		expect(repeater.fields.map((f) => f.key)).toEqual(["image"]);
 
 		//* caption belongs to the section, not the repeater
-		expect(instance.fields.get("caption")?.treeParent).toBeNull();
-		expect(instance.fields.get("image")?.treeParent).toBe("images");
+		expect(
+			getFieldBuilderState(instance).fields.get("caption")?.treeParent,
+		).toBeNull();
+		expect(getFieldBuilderState(instance).fields.get("image")?.treeParent).toBe(
+			"images",
+		);
 	});
 
 	test("content field tree keeps sections nested and tabs transparent", () => {
@@ -137,10 +145,11 @@ describe("section and collapsible builder support", () => {
 			"advanced",
 		]);
 
-		const section = instance.contentFieldTree[1] as CFConfig<"section">;
+		const section = instance.contentFieldTree[1] as FieldConfig<"section">;
 		expect(section.fields.map((f) => f.key)).toEqual(["label"]);
 
-		const collapsible = instance.contentFieldTree[2] as CFConfig<"collapsible">;
+		const collapsible = instance
+			.contentFieldTree[2] as FieldConfig<"collapsible">;
 		expect(collapsible.output).toBe("inline");
 		expect(collapsible.fields.map((f) => f.key)).toEqual(["anchorLabel"]);
 	});
@@ -152,11 +161,11 @@ describe("section and collapsible builder support", () => {
 			.addText("label")
 			.endSection();
 
-		const tab = instance.fieldTree[0] as CFConfig<"tab">;
+		const tab = instance.fieldTree[0] as FieldConfig<"tab">;
 		expect(tab.type).toBe("tab");
 		expect(tab.fields.map((f) => f.key)).toEqual(["badge"]);
 
-		const section = tab.fields[0] as CFConfig<"section">;
+		const section = tab.fields[0] as FieldConfig<"section">;
 		expect(section.fields.map((f) => f.key)).toEqual(["label"]);
 	});
 
@@ -166,7 +175,7 @@ describe("section and collapsible builder support", () => {
 			.addText("label", { ui: { width: 4 } })
 			.endSection();
 
-		const section = instance.fieldTree[0] as CFConfig<"section">;
+		const section = instance.fieldTree[0] as FieldConfig<"section">;
 		expect(section.ui?.width).toBe(6);
 		expect(section.fields[0]?.ui?.width).toBe(4);
 	});
@@ -182,8 +191,8 @@ describe("tab targeting", () => {
 			.addToTab("content")
 			.addText("summary");
 
-		const contentTab = instance.fieldTree[0] as CFConfig<"tab">;
-		const settingsTab = instance.fieldTree[1] as CFConfig<"tab">;
+		const contentTab = instance.fieldTree[0] as FieldConfig<"tab">;
+		const settingsTab = instance.fieldTree[1] as FieldConfig<"tab">;
 
 		expect(contentTab.fields.map((field) => field.key)).toEqual([
 			"title",

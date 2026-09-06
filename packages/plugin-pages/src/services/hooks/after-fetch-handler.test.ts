@@ -45,8 +45,13 @@ const options = {
 
 const collection = new CollectionBuilder("pages", {
 	mode: "multiple",
-	details: { name: "Pages", singularName: "Page" },
-	routing: "fullSlug",
+	details: {
+		labels: {
+			singular: "Page",
+			plural: "Pages",
+		},
+	},
+	routing: { field: "fullSlug" },
 })
 	.addText("slug", { useAsLabel: true })
 	.addText("fullSlug");

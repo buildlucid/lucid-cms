@@ -191,7 +191,7 @@ export type DefineJobOptions<
 	input: ZodType<Input>;
 	/** Controls retries after the handler returns an error. */
 	retry?: JobRetryPolicy;
-	/** Runs the handler inside a database transaction when the adapter supports one. */
+	/** Start a transaction when supported. Omit to run without starting one. */
 	transaction?: boolean;
 	/** Recurring schedules that enqueue this job through the normal durable path. */
 	schedules?: readonly DefineJobSchedule<Input>[];

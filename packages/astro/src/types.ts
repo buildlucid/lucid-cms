@@ -1,11 +1,11 @@
 import type {
 	AdapterRuntimeContext,
-	Config,
 	DatabaseConnectionScope,
 	EnvironmentVariables,
 	HttpExtension,
 	LucidConfigDefinition,
 	LucidInvocation,
+	ResolvedLucidConfig,
 	RuntimeAdapter,
 	TranslationStore,
 } from "@lucidcms/core/types";
@@ -83,7 +83,7 @@ export type LucidAstroIntegrationBridge = {
 		projectRoot: string;
 		generatedDirectory: string;
 		runtimeModulePath: string;
-		config: Config;
+		config: ResolvedLucidConfig;
 		translationStore: TranslationStore;
 		definition: LucidConfigDefinition;
 	}):

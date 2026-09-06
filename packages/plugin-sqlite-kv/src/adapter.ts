@@ -82,11 +82,10 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 	) => {
 		let expiresAt: number | null = null;
 
-		if (setOptions?.expirationTtl) {
-			expiresAt =
-				Date.now() + setOptions.expirationTtl * MILLISECONDS_PER_SECOND;
-		} else if (setOptions?.expirationTimestamp) {
-			expiresAt = setOptions.expirationTimestamp * MILLISECONDS_PER_SECOND;
+		if (setOptions?.ttlSeconds) {
+			expiresAt = Date.now() + setOptions.ttlSeconds * MILLISECONDS_PER_SECOND;
+		} else if (setOptions?.expiresAtSeconds) {
+			expiresAt = setOptions.expiresAtSeconds * MILLISECONDS_PER_SECOND;
 		}
 
 		return expiresAt;
@@ -214,7 +213,7 @@ const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 
 						return {
 							value,
-							expirationTtl:
+							ttlSeconds:
 								expiresAt === null
 									? undefined
 									: Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)),

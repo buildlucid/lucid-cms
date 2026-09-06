@@ -1,6 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
 
-import type { MediaStorageAdapterInstance } from "@lucidcms/core/types";
 import { describe, expect, test } from "vitest";
 import { DEFAULT_MAX_UPLOAD_SIZE } from "./constants.js";
 import plugin from "./plugin.js";
@@ -69,33 +68,20 @@ describe("Cloudflare R2 plugin", () => {
 		const cloudflareR2Plugin = plugin({
 			binding: "MEDIA_BUCKET",
 		});
-		const adapter = cloudflareR2Plugin.recipe
-			? (() => {
-					const draft = {
-						i18n: {
-							sources: [],
-						},
-						media: {},
-						http: {
-							routes: [],
-						},
-					} as {
-						i18n: {
-							sources: Array<string | URL>;
-						};
-						media: {
-							storage?: MediaStorageAdapterInstance;
-						};
-						http: {
-							routes: unknown[];
-						};
-					};
-					cloudflareR2Plugin.recipe(draft as never);
-					return draft.media.storage;
-				})()
-			: undefined;
+		const defaults = cloudflareR2Plugin.defaults;
+		if (!defaults || typeof defaults === "function") {
+			throw new Error("R2 plugin did not provide adapter defaults.");
+		}
+		const adapter = defaults.media?.storage;
+		if (
+			!adapter ||
+			adapter instanceof Promise ||
+			typeof adapter === "function"
+		) {
+			throw new Error("R2 plugin did not register a storage adapter.");
+		}
 
-		const result = await adapter?.createUploadSession({} as never, {
+		const result = await adapter.createUploadSession({} as never, {
 			key: "public/test.png",
 			host: "https://example.com",
 			secretKey: "a".repeat(64),
@@ -105,10 +91,10 @@ describe("Cloudflare R2 plugin", () => {
 			size: 1024,
 		});
 
-		expect(result?.error).toBeUndefined();
-		expect(result?.data?.key).toBe("public/test.png");
-		expect(result?.data?.protocol).toBe("http");
-		if (result?.data?.protocol !== "http") return;
+		expect(result.error).toBeUndefined();
+		expect(result.data?.key).toBe("public/test.png");
+		expect(result.data?.protocol).toBe("http");
+		if (result.data?.protocol !== "http") return;
 		expect(result.data.request.url).toContain(
 			"/lucid/api/v1/media/r2/storage/upload?",
 		);
@@ -121,7 +107,7 @@ describe("Cloudflare R2 plugin", () => {
 		});
 		const draft = buildDraft();
 
-		cloudflareR2Plugin.recipe(draft as never);
+		cloudflareR2Plugin.configure?.(draft as never);
 
 		expect(draft.http.routes).toHaveLength(2);
 	});
@@ -140,7 +126,7 @@ describe("Cloudflare R2 plugin", () => {
 		});
 		const draft = buildDraft();
 
-		cloudflareR2Plugin.recipe(draft as never);
+		cloudflareR2Plugin.configure?.(draft as never);
 
 		expect(draft.http.routes).toHaveLength(0);
 	});

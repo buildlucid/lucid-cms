@@ -1,8 +1,8 @@
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import { normalizeRelationCollections } from "../../collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 } from "../../collection/custom-fields/types.js";
 import { translate } from "../../i18n/index.js";
@@ -12,8 +12,8 @@ import checkRichTextField from "./check-rich-text-field.js";
 
 /** Validates custom-field config that depends on other registered resources. */
 const checkField = (
-	field: CFConfig<FieldTypes>,
-	config: Config,
+	field: FieldConfig<FieldTypes>,
+	config: ResolvedLucidConfig,
 	collection: CollectionBuilder,
 ) => {
 	switch (field.type) {

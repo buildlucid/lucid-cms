@@ -2,7 +2,7 @@ import { BrickBuilder, copy } from "@lucidcms/core";
 
 const IntroBrick = new BrickBuilder("intro", {
 	details: {
-		name: copy("admin:bricks.intro.name"),
+		label: copy("admin:bricks.intro.name"),
 	},
 })
 	.addTab("content_tab", {

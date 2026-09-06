@@ -1,7 +1,7 @@
 import type DatabaseAdapter from "../../../db/adapter-base.js";
 import type { CustomFieldTableType } from "../../schema/types.js";
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldDatabaseConfig,
 	FieldDatabaseMode,
 	FieldTypes,
@@ -35,7 +35,7 @@ export type RelationTableSchemaProps = {
 	};
 };
 
-export type StorageFieldConfig = CFConfig<FieldTypes>;
+export type StorageFieldConfig = FieldConfig<FieldTypes>;
 
 export type StorageModeDefinition<M extends FieldDatabaseMode> = {
 	mode: M;

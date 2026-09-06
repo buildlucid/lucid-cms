@@ -1,10 +1,8 @@
 import { BrickBuilder, copy } from "@lucidcms/core";
 
 const TestingBrick = new BrickBuilder("testing", {
-	preview: {
-		image:
-			"https://usersnap.com/blog/wp-content/uploads/2021/03/7-Common-Types-of-Software-Testing@1x-1280x720.png",
-	},
+	thumbnail:
+		"https://usersnap.com/blog/wp-content/uploads/2021/03/7-Common-Types-of-Software-Testing@1x-1280x720.png",
 })
 	.addTab("content_tab", {
 		details: {
@@ -14,7 +12,7 @@ const TestingBrick = new BrickBuilder("testing", {
 	.addText("text-key", {
 		details: {
 			label: copy("admin:bricks.testing.fields.text-key.label"),
-			summary: copy("admin:bricks.testing.fields.text-key.summary"),
+			description: copy("admin:bricks.testing.fields.text-key.summary"),
 			placeholder: copy("admin:bricks.testing.fields.text-key.placeholder"),
 		},
 	})
@@ -68,7 +66,7 @@ const TestingBrick = new BrickBuilder("testing", {
 		details: {
 			label: copy("admin:bricks.testing.fields.textarea-key.label"),
 			placeholder: copy("admin:bricks.testing.fields.textarea-key.placeholder"),
-			summary: copy("admin:bricks.testing.fields.textarea-key.summary"),
+			description: copy("admin:bricks.testing.fields.textarea-key.summary"),
 		},
 	})
 	.addTab("advanced_tab", {
@@ -80,7 +78,7 @@ const TestingBrick = new BrickBuilder("testing", {
 	.addCode("code-key", {
 		details: {
 			label: copy("admin:bricks.testing.fields.code-key.label"),
-			summary: copy("admin:bricks.testing.fields.code-key.summary"),
+			description: copy("admin:bricks.testing.fields.code-key.summary"),
 			placeholder: copy("admin:bricks.testing.fields.code-key.placeholder"),
 		},
 	})

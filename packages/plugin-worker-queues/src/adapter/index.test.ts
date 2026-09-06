@@ -53,8 +53,8 @@ describe("worker queue adapter lifecycle", () => {
 		expect(() => workerQueueAdapter({ batchSize: 0 })).toThrow(
 			"batchSize must be a positive integer.",
 		);
-		expect(() => workerQueueAdapter({ concurrentLimit: Number.NaN })).toThrow(
-			"concurrentLimit must be a positive integer.",
+		expect(() => workerQueueAdapter({ maxConcurrentJobs: Number.NaN })).toThrow(
+			"maxConcurrentJobs must be a positive integer.",
 		);
 	});
 

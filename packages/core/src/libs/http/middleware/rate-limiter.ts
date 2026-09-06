@@ -121,11 +121,11 @@ const rateLimiter = (options: RateLimitOptions) =>
 			const ttl = Math.max(1, Math.ceil(options.windowMs / 1000));
 			const result = await kv.increment(context, {
 				key: `${key}:counter`,
-				expirationTtl: ttl,
+				ttlSeconds: ttl,
 			});
 
 			count = result.value;
-			resetSeconds = result.expirationTtl ?? ttl;
+			resetSeconds = result.ttlSeconds ?? ttl;
 		} else {
 			const now = Date.now();
 			const existing = await kv.get<RateLimitRecord>(context, { key });
@@ -148,7 +148,7 @@ const rateLimiter = (options: RateLimitOptions) =>
 				Math.ceil((record.resetTime - now) / 1000) +
 					constants.rateLimit.ttlBufferSeconds,
 			);
-			await kv.set(context, { key, value: record, expirationTtl: ttl });
+			await kv.set(context, { key, value: record, ttlSeconds: ttl });
 
 			count = record.count;
 			resetSeconds = Math.max(0, Math.ceil((record.resetTime - now) / 1000));

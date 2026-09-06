@@ -2,7 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import type { ZodType } from "zod";
 import constants from "../../constants/constants.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import generateCollectionClientTypes from "../collection/type-gen/index.js";
@@ -101,7 +101,7 @@ const generateTypes = async (props: {
 	configPath: string;
 	projectRoot?: string;
 	collections: CollectionBuilder[];
-	localization: Config["localization"];
+	localization: ResolvedLucidConfig["localization"];
 }) => {
 	const lucidDir = await ensureLucidDirectoryExists();
 	const configRelativePath = relative(lucidDir, props.configPath);

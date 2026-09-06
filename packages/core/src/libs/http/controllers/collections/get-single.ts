@@ -30,7 +30,7 @@ const getSingleController = factory.createHandlers(
 	authenticate(),
 	validate("param", controllerSchemas.getSingle.params),
 	collectionPermissions("read"),
-	async (c) => {
+	async (c): Promise<Response> => {
 		const { key } = c.req.valid("param");
 		const context = createServiceContext(c);
 

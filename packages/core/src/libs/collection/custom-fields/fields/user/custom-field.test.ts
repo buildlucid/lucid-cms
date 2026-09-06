@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import UserCustomField from "./custom-field.js";
 
@@ -10,12 +11,14 @@ import UserCustomField from "./custom-field.js";
 const UserCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -42,7 +45,7 @@ test("successfully validate field - user", async () => {
 			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: UserCollection.fields.get("standard_user")!,
+		instance: getFieldBuilderState(UserCollection).fields.get("standard_user")!,
 		validationData: {
 			media: [],
 			user: [
@@ -71,7 +74,7 @@ test("successfully validate field - user", async () => {
 			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: UserCollection.fields.get("required_user")!,
+		instance: getFieldBuilderState(UserCollection).fields.get("required_user")!,
 		validationData: {
 			media: [],
 			user: [
@@ -102,8 +105,9 @@ test("fail to validate field - user", async () => {
 				type: "user",
 				value: [1],
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: UserCollection.fields.get("required_user")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(UserCollection).fields.get("required_user")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -120,8 +124,9 @@ test("fail to validate field - user", async () => {
 				type: "user",
 				value: [],
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: UserCollection.fields.get("required_user")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(UserCollection).fields.get("required_user")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -160,7 +165,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: UserCollection.fields.get("multi_user")!,
+		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
 			user: [{ id: 1 }],
@@ -178,7 +183,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			value: [1, 2, 3, 4],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: UserCollection.fields.get("multi_user")!,
+		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
 			user: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
@@ -196,7 +201,7 @@ test("user field validates multiple item counts and indexed errors", async () =>
 			value: [1, 99, 100],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: UserCollection.fields.get("multi_user")!,
+		instance: getFieldBuilderState(UserCollection).fields.get("multi_user")!,
 		validationData: {
 			media: [],
 			user: [{ id: 1 }],
@@ -254,7 +259,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 		},

@@ -1,4 +1,3 @@
-import type { EmailAdapterInstance } from "@lucidcms/core/types";
 import type { Transporter } from "nodemailer";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -22,28 +21,22 @@ const createTransporter = () =>
 		verify: vi.fn().mockResolvedValue(true),
 	}) as unknown as Transporter;
 
-const createAdapter = (transporter: Transporter, simulate = false) => {
-	const draft = {
-		i18n: {
-			sources: [] as Array<string | URL>,
-		},
-		email: {
-			simulate,
-			adapter: undefined as EmailAdapterInstance | undefined,
-		},
-	};
-
-	plugin({ transporter }).recipe(draft as never);
-
-	if (!draft.email.adapter) {
+const createAdapter = (transporter: Transporter) => {
+	const definition = plugin({ transporter });
+	const defaults = definition.defaults;
+	if (typeof defaults !== "function") {
+		throw new Error("Nodemailer plugin did not provide adapter defaults.");
+	}
+	const adapter = defaults({ email: { simulate: false } } as never).email
+		?.adapter;
+	if (!adapter || adapter instanceof Promise || typeof adapter === "function") {
 		throw new Error("Nodemailer plugin did not register an email adapter.");
 	}
-
-	return draft.email.adapter;
+	return adapter;
 };
 
 const runtimeContext = {
-	config: {},
+	config: { email: { simulate: false } },
 } as const;
 
 const email = {
@@ -76,12 +69,16 @@ describe("Nodemailer plugin", () => {
 		expect(transporter.verify).toHaveBeenCalledTimes(1);
 	});
 
-	test("does not verify the transporter when email simulation is enabled", async () => {
+	test("honours the final simulation setting for verification and sending", async () => {
 		const transporter = createTransporter();
-		const adapter = createAdapter(transporter, true);
+		const adapter = createAdapter(transporter);
 
-		await adapter.lifecycle?.init?.(runtimeContext as never);
+		const context = { config: { email: { simulate: true } } };
+		await adapter.lifecycle?.init?.(context as never);
+		const result = await adapter.send(context as never, email);
 
+		expect(result.success).toBe(true);
+		expect(transporter.sendMail).not.toHaveBeenCalled();
 		expect(transporter.verify).not.toHaveBeenCalled();
 	});
 
@@ -103,7 +100,7 @@ describe("Nodemailer plugin", () => {
 		const transporter = createTransporter();
 		const adapter = createAdapter(transporter);
 
-		const result = await adapter.send({} as never, email as never);
+		const result = await adapter.send(runtimeContext as never, email);
 
 		expect(transporter.verify).not.toHaveBeenCalled();
 		expect(transporter.sendMail).toHaveBeenCalledTimes(1);

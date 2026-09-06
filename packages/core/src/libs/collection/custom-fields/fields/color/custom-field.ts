@@ -3,9 +3,9 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -18,7 +18,7 @@ class ColorCustomField extends CustomField<"color"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"color">) {
+	constructor(key: string, props?: FieldOptions<"color">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -31,7 +31,7 @@ class ColorCustomField extends CustomField<"color"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			presets: this.props?.presets ?? [],
 			localized: this.props?.localized ?? false,
@@ -44,7 +44,7 @@ class ColorCustomField extends CustomField<"color"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"color">;
+		} satisfies FieldConfig<"color">;
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -66,7 +66,7 @@ class ColorCustomField extends CustomField<"color"> {
 	formatResponseValue(value?: string | null) {
 		return (value ??
 			this.config.default ??
-			null) satisfies CFResponse<"color">["value"];
+			null) satisfies FieldResponse<"color">["value"];
 	}
 	override normalizeInputValue(value: unknown) {
 		return typeof value === "string" ? value.trim() : value;

@@ -33,8 +33,10 @@ describe("getDocumentLabel", () => {
 		const collection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
 			},
 		}).addSelect("status", {
 			showInList: true,

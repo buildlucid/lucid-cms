@@ -45,7 +45,7 @@ const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async (
 /**
  * Deletes expired revisions for a specific collection.
  * A revision is considered expired if:
- * 1. It is older than the collection's revisionRetentionDays
+ * 1. It is older than the collection's revisions.retentionDays
  * 2. It is not referenced by any non-revision version's promoted_from field
  */
 export const deleteExpiredRevisionsJob = defineJob({

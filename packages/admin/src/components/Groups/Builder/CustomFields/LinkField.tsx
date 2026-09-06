@@ -85,7 +85,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 					value: props.state.fieldConfig.details.label,
 				}),
 				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.summary,
+					value: props.state.fieldConfig.details.description,
 				}),
 			}}
 			altLocaleError={props.state.altLocaleError}

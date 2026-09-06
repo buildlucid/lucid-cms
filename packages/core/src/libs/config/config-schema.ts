@@ -1,11 +1,11 @@
 import z from "zod";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { isCollectionBuilder } from "../collection/builders/collection-builder/index.js";
+import type DatabaseAdapter from "../db/adapter-base.js";
 import type { EmailAdapter, EmailAdapterInstance } from "../email/types.js";
-import type {
-	HttpExtension,
-	HttpExtensionRegister,
-	LucidCustomRouteDefinition,
-} from "../http/types.js";
+import type { HttpExtension, HttpExtensionRegister } from "../http/types.js";
 import { isJobDefinition } from "../jobs/registry.js";
 import type { AnyJobDefinition } from "../jobs/types.js";
 import type { KVAdapter, KVAdapterInstance } from "../kv/types.js";
@@ -18,9 +18,13 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../media-storage/types.js";
+import { PluginDefinitionSchema } from "../plugins/schema.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
+import { defaultDiscovery } from "../resources/defaults.js";
 import {
+	hookSchema,
 	migrationSchema,
+	routeSchema,
 	seedSchema,
 	tableSchema,
 } from "../resources/module-schemas.js";
@@ -36,18 +40,13 @@ const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
 	},
 );
 
-const HttpExtensionSchema = z.object({
+const HttpExtensionSchema = z.strictObject({
 	name: z.string().trim().min(1),
-	priority: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+	phase: z.enum(["beforeMiddleware", "afterRoutes", "afterSetup"]),
 	register: HttpExtensionRegisterSchema,
 }) satisfies z.ZodType<HttpExtension>;
 
-const LucidRouteDefinitionSchema = z.custom<LucidCustomRouteDefinition>(
-	(data) => typeof data === "object" && data !== null,
-	{
-		message: "Expected a Lucid route definition",
-	},
-);
+const LucidRouteDefinitionSchema = routeSchema;
 
 // TODO: improve all function custom schemas bellow
 
@@ -55,9 +54,13 @@ const MediaDeliveryAdapterSchema = z.custom<
 	| MediaDeliveryAdapter
 	| MediaDeliveryAdapterInstance
 	| Promise<MediaDeliveryAdapterInstance>
->((data) => typeof data === "function" || typeof data === "object", {
-	message: "Expected a MediaDeliveryAdapter function",
-});
+>(
+	(data) =>
+		typeof data === "function" || (typeof data === "object" && data !== null),
+	{
+		message: "Expected a MediaDeliveryAdapter function",
+	},
+);
 
 const QueueAdapterSchema = z.custom<
 	QueueAdapter | QueueAdapterInstance | Promise<QueueAdapterInstance>
@@ -75,26 +78,38 @@ const JobDefinitionSchema = z.custom<AnyJobDefinition>(isJobDefinition, {
 
 const KVAdapterSchema = z.custom<
 	KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>
->((data) => typeof data === "function" || typeof data === "object", {
-	message: "Expected a KVAdapter function",
-});
+>(
+	(data) =>
+		typeof data === "function" || (typeof data === "object" && data !== null),
+	{
+		message: "Expected a KVAdapter function",
+	},
+);
 
 const MediaStorageAdapterSchema = z.custom<
 	| MediaStorageAdapter
 	| MediaStorageAdapterInstance
 	| Promise<MediaStorageAdapterInstance>
->((data) => typeof data === "function" || typeof data === "object", {
-	message: "Expected a MediaStorageAdapter function",
-});
+>(
+	(data) =>
+		typeof data === "function" || (typeof data === "object" && data !== null),
+	{
+		message: "Expected a MediaStorageAdapter function",
+	},
+);
 
 const EmailAdapterSchema = z.custom<
 	EmailAdapter | EmailAdapterInstance | Promise<EmailAdapterInstance>
->((data) => typeof data === "function" || typeof data === "object", {
-	message: "Expected an EmailAdapter function",
-});
+>(
+	(data) =>
+		typeof data === "function" || (typeof data === "object" && data !== null),
+	{
+		message: "Expected an EmailAdapter function",
+	},
+);
 
 const ContentSecurityPolicySchema = z
-	.object({
+	.strictObject({
 		defaultSrc: z.array(z.string()).optional(),
 		baseUri: z.array(z.string()).optional(),
 		childSrc: z.array(z.string()).optional(),
@@ -123,140 +138,129 @@ const ContentSecurityPolicySchema = z
 
 const OverridableHeaderSchema = z.union([z.boolean(), z.string()]);
 
-const ConfigSchema = z.object({
-	db: z.unknown(),
+const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
+	db: z.custom<DatabaseAdapter>(
+		(value) =>
+			!!value &&
+			typeof value === "object" &&
+			"connect" in value &&
+			typeof value.connect === "function",
+	),
 	tables: z.array(tableSchema),
-	discovery: ResourceDiscoverySchema,
+	discovery: ResourceDiscoverySchema.transform((value) => ({
+		...defaultDiscovery,
+		...value,
+	})),
 	sources: ResourceSourcesSchema,
 	host: z.string().trim().min(1).optional(),
-	http: z
-		.object({
-			security: z
-				.object({
-					trustProxyHeaders: z.boolean().optional(),
-					cors: z
-						.object({
-							origin: z.array(z.string()).optional(),
-							allowHeaders: z.array(z.string()).optional(),
-						})
-						.optional(),
-					headers: z
-						.object({
-							contentSecurityPolicy: ContentSecurityPolicySchema,
-							strictTransportSecurity: OverridableHeaderSchema.optional(),
-							xFrameOptions: OverridableHeaderSchema.optional(),
-							referrerPolicy: OverridableHeaderSchema.optional(),
-							crossOriginResourcePolicy: OverridableHeaderSchema.optional(),
-							crossOriginOpenerPolicy: OverridableHeaderSchema.optional(),
-							crossOriginEmbedderPolicy: OverridableHeaderSchema.optional(),
-						})
-						.optional(),
+	http: z.strictObject({
+		security: z.strictObject({
+			trustProxyHeaders: z.boolean(),
+			cors: z
+				.strictObject({
+					origin: z.array(z.string()).optional(),
+					allowHeaders: z.array(z.string()).optional(),
 				})
 				.optional(),
-			openAPI: z
-				.object({
-					enabled: z.boolean(),
+			headers: z
+				.strictObject({
+					contentSecurityPolicy: ContentSecurityPolicySchema,
+					strictTransportSecurity: OverridableHeaderSchema.optional(),
+					xFrameOptions: OverridableHeaderSchema.optional(),
+					referrerPolicy: OverridableHeaderSchema.optional(),
+					crossOriginResourcePolicy: OverridableHeaderSchema.optional(),
+					crossOriginOpenerPolicy: OverridableHeaderSchema.optional(),
+					crossOriginEmbedderPolicy: OverridableHeaderSchema.optional(),
 				})
 				.optional(),
-			routes: z.array(LucidRouteDefinitionSchema).optional(),
-			extensions: z.array(HttpExtensionSchema).optional(),
-		})
-		.optional(),
-	secrets: z.object({
+		}),
+		openAPI: z.strictObject({
+			enabled: z.boolean(),
+		}),
+		routes: z.array(LucidRouteDefinitionSchema),
+		extensions: z.array(HttpExtensionSchema),
+	}),
+	secrets: z.strictObject({
 		encryption: z.string().length(64),
 		cookie: z.string().length(64),
 		accessToken: z.string().length(64),
 		refreshToken: z.string().length(64),
 	}),
 	telemetry: z.boolean(),
-	logger: z.object({
+	logger: z.strictObject({
 		level: LogLevelSchema,
 		transport: LogTransportSchema.optional(),
 	}),
-	auth: z
-		.object({
-			password: z.object({
-				enabled: z.boolean().optional(),
-			}),
-			providers: z.array(AuthProviderSchema).optional(),
-		})
-		.optional(),
-	ai: z.object({
+	auth: z.strictObject({
+		password: z.strictObject({
+			enabled: z.boolean(),
+		}),
+		providers: z.array(AuthProviderSchema),
+	}),
+	ai: z.strictObject({
 		enabled: z.boolean(),
-		features: z.object({
+		features: z.strictObject({
 			imageGeneration: z.boolean(),
 			altGeneration: z.boolean(),
 			customFieldGeneration: z.boolean(),
 		}),
 	}),
-	localization: z
-		.object({
-			locales: z.array(
-				z.object({
-					label: z.string(),
-					code: z.string(),
-					direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
-				}),
-			),
-			defaultLocale: z.string(),
-		})
-		.optional(),
-	i18n: z
-		.object({
-			locales: z.array(
-				z.object({
-					label: z.string(),
-					code: z.string(),
-					direction: z.enum(["ltr", "rtl"]).default("ltr").optional(),
-				}),
-			),
-			defaultLocale: z.string(),
-		})
-		.optional(),
-	migrations: z
-		.object({
-			definitions: z
-				.array(
-					z.object({
-						name: z.string(),
-						migration: migrationSchema,
-					}),
-				)
-				.optional(),
-		})
-		.optional(),
-	seeds: z
-		.object({
-			definitions: z
-				.array(z.object({ name: z.string(), seed: seedSchema }))
-				.optional(),
-		})
-		.optional(),
-	email: z
-		.object({
-			from: z
-				.object({
-					email: z.string(),
-					name: z.string(),
-				})
-				.optional(),
-			simulate: z.boolean().optional(),
-			resendWindowDays: z.number().int().min(0).optional(),
-			adapter: EmailAdapterSchema.optional(),
-			templates: z.record(z.string(), z.string()).optional(),
-		})
-		.optional(),
-	media: z.object({
+	localization: z.strictObject({
+		locales: z.array(
+			z.strictObject({
+				label: z.string(),
+				code: z.string(),
+				direction: z.enum(["ltr", "rtl"]).default("ltr"),
+			}),
+		),
+		defaultLocale: z.string(),
+	}),
+	i18n: z.strictObject({
+		locales: z.array(
+			z.strictObject({
+				label: z.string(),
+				code: z.string(),
+				direction: z.enum(["ltr", "rtl"]).default("ltr"),
+			}),
+		),
+		defaultLocale: z.string(),
+	}),
+	migrations: z.strictObject({
+		definitions: z.array(
+			z.strictObject({
+				name: z.string(),
+				migration: migrationSchema,
+			}),
+		),
+	}),
+	seeds: z.strictObject({
+		definitions: z.array(
+			z.strictObject({ name: z.string(), seed: seedSchema }),
+		),
+	}),
+	email: z.strictObject({
+		from: z
+			.strictObject({
+				email: z.string().optional(),
+				name: z.string().optional(),
+			})
+			.optional(),
+		simulate: z.boolean(),
+		resendWindowDays: z.number().int().min(0),
+		adapter: EmailAdapterSchema.optional(),
+		templates: z.record(z.string(), z.string()).optional(),
+	}),
+	media: z.strictObject({
 		storage: MediaStorageAdapterSchema.optional(),
 		delivery: MediaDeliveryAdapterSchema.optional(),
-		limits: z.object({
+		limits: z.strictObject({
 			storageBytes: z.union([z.number(), z.literal(false)]),
 			uploadBytes: z.number(),
 		}),
-		images: z.object({
+		images: z.strictObject({
 			presets: z.record(
 				z.string(),
-				z.object({
+				z.strictObject({
 					width: z.number().optional(),
 					height: z.number().optional(),
 					fit: z
@@ -281,72 +285,60 @@ const ConfigSchema = z.object({
 						.optional(),
 				}),
 			),
-			cache: z.object({
+			cache: z.strictObject({
 				enabled: z.boolean(),
 				maxVariantsPerFile: z.number(),
 			}),
 			allowFormatQuery: z.boolean(),
 			fallbackUrl: z.string().optional(),
 		}),
-		video: z.object({
+		video: z.strictObject({
 			fallbackUrl: z.string().optional(),
 		}),
 	}),
-	hooks: z.array(
-		z.object({
-			service: z.string(),
-			event: z.string(),
-			priority: z.number().optional(),
-			handler: z.unknown(),
-		}),
-	),
-	queue: z.object({
+	hooks: z.array(hookSchema),
+	queue: z.strictObject({
 		adapter: QueueAdapterSchema.optional(),
 	}),
-	jobs: z.object({
+	jobs: z.strictObject({
 		definitions: z.array(JobDefinitionSchema),
-		retention: z.object({
+		retention: z.strictObject({
 			completedDays: z.number().int().nonnegative(),
 			failedDays: z.number().int().nonnegative(),
 		}),
 	}),
 	kv: z
-		.object({
+		.strictObject({
 			adapter: KVAdapterSchema.optional(),
-			namespace: z.union([z.string().min(1), z.literal(false)]).optional(),
 		})
 		.optional(),
-	collections: z.array(z.unknown()),
-	plugins: z.array(z.unknown()),
-	build: z
-		.object({
-			outDir: z.string().optional(),
-			watch: z
-				.object({
-					ignore: z.array(z.string()).optional(),
-				})
-				.optional(),
-		})
-		.optional(),
-	retention: z
-		.object({
-			defaultPurgeAfterDays: z.number().int().positive().optional(),
-			purgeAfterDays: z
-				.object({
-					removedLocales: z.number().int().positive().optional(),
-					deletedUsers: z.number().int().positive().optional(),
-					deletedMedia: z.number().int().positive().optional(),
-					removedCollections: z.number().int().positive().optional(),
-					deletedDocuments: z.number().int().positive().optional(),
-				})
-				.optional(),
-		})
-		.optional(),
-	brand: z
-		.object({
-			name: z.string().optional(),
-		})
-		.optional(),
+	collections: z.array(
+		z.custom<CollectionBuilder>(isCollectionBuilder, {
+			message: "Expected a collection created with CollectionBuilder",
+		}),
+	),
+	plugins: z.array(PluginDefinitionSchema),
+	build: z.strictObject({
+		outDir: z.string(),
+		watch: z.strictObject({
+			ignore: z.array(z.string()),
+		}),
+	}),
+	retention: z.strictObject({
+		defaultPurgeAfterDays: z.number().int().positive(),
+		purgeAfterDays: z
+			.strictObject({
+				removedLocales: z.number().int().positive().optional(),
+				deletedUsers: z.number().int().positive().optional(),
+				deletedMedia: z.number().int().positive().optional(),
+				removedCollections: z.number().int().positive().optional(),
+				deletedDocuments: z.number().int().positive().optional(),
+			})
+			.optional(),
+	}),
+	brand: z.strictObject({
+		name: z.string(),
+	}),
 });
 
 export default ConfigSchema;

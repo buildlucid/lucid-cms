@@ -16,11 +16,11 @@ npm install @lucidcms/runtime-node
 Use the Node runtime in your `lucid.config.ts` file.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
 
-export default configureLucid({
+export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
@@ -38,7 +38,7 @@ The `node` function accepts a single parameter, `options`, which is either an op
 | `server` | `{ port?: number; hostname?: string }` | The server options. The `lucidcms dev` and `lucidcms serve` scripts use these when serving the Node server |
 
 ```typescript
-export default configureLucid({
+export default defineConfig({
   runtime: node((env) => ({
     server: {
       port: Number(env.PORT ?? 6543),

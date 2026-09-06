@@ -12,8 +12,8 @@ const deleteExpiredRevisions: ServiceFn<[], undefined> = async (context) => {
 	if (collectionsRes.error) return collectionsRes;
 
 	const collectionsWithRevisions = collectionsRes.data.flatMap((collection) => {
-		const retentionDays = collection.getData.revisionRetentionDays;
-		return collection.getData.revisions && retentionDays !== false
+		const { enabled, retentionDays } = collection.getData.revisions;
+		return enabled && retentionDays !== false
 			? [{ collection, retentionDays }]
 			: [];
 	});

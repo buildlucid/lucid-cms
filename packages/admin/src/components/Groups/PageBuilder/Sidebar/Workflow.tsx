@@ -51,7 +51,9 @@ export const Workflow: Component<{
 
 	// ----------------------------------
 	// Memos
-	const workflowConfig = createMemo(() => props.collection()?.workflow);
+	const workflowConfig = createMemo(
+		() => props.collection()?.publishing.workflow,
+	);
 	const workflow = createMemo(() => props.document()?.workflow);
 	const workflowKey = createMemo(() =>
 		[
@@ -78,7 +80,7 @@ export const Workflow: Component<{
 				value: stage.key,
 				label:
 					helpers.getLocaleValue({
-						value: stage.name,
+						value: stage.label,
 						fallback: stage.key,
 					}) || stage.key,
 			})) ?? [],

@@ -1,12 +1,55 @@
 import { expect, test } from "vitest";
 import collectionsFormatter from "../../../formatters/collections.js";
 import { copy } from "../../../i18n/index.js";
+import { getFieldBuilderState } from "../field-builder/index.js";
 import CollectionBuilder from "./index.js";
+import CollectionSchema from "./schema.js";
+
+test("resolves revision settings independently from enablement", () => {
+	const options = {
+		mode: "multiple" as const,
+		details: { labels: { singular: "Page", plural: "Pages" } },
+	};
+	for (const [revisions, expected] of [
+		[undefined, { enabled: false, retentionDays: 30 }],
+		[true, { enabled: true, retentionDays: 30 }],
+		[{ enabled: true }, { enabled: true, retentionDays: 30 }],
+		[
+			{ enabled: false, retentionDays: 7 },
+			{ enabled: false, retentionDays: 7 },
+		],
+		[
+			{ enabled: true, retentionDays: false },
+			{ enabled: true, retentionDays: false },
+		],
+	] as const) {
+		const collection = new CollectionBuilder("pages", {
+			...options,
+			revisions,
+		});
+		expect(
+			CollectionSchema.safeParse({ key: "pages", ...options, revisions })
+				.success,
+		).toBe(true);
+		expect(collection.getData.revisions).toEqual(expected);
+	}
+	for (const revisions of [false, {}, { retentionDays: 7 }]) {
+		expect(
+			CollectionSchema.safeParse({ key: "pages", ...options, revisions })
+				.success,
+		).toBe(false);
+	}
+});
 
 test("formats the resolved collection locale contract", () => {
 	const collection = new CollectionBuilder("articles", {
 		mode: "multiple",
-		details: { name: "Articles", singularName: "Article" },
+		details: {
+			labels: {
+				singular: "Article",
+				plural: "Articles",
+			},
+		},
 		localized: { locales: ["fr", "de"], defaultLocale: "de" },
 	});
 
@@ -29,13 +72,15 @@ test("collection options are correct along with field includes and filters", asy
 	const pagesCollection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
-			summary: copy("admin:tests.collections.pages.summary", {
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
+			description: copy("admin:tests.collections.pages.summary", {
 				defaultMessage:
 					"Pages are used to create static content on your website.",
 			}),
@@ -125,30 +170,29 @@ test("collection options are correct along with field includes and filters", asy
 		.addRepeater("repeater_test")
 		.addText("repeater_text_test")
 		.endRepeater();
-
-	expect(pagesCollection.fields.size).toBe(16);
-
+	expect(getFieldBuilderState(pagesCollection).fields.size).toBe(16);
 	expect(pagesCollection.getData).toEqual({
 		key: "pages",
 		mode: "multiple",
 		group: null,
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
-			summary: copy("admin:tests.collections.pages.summary", {
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
+			description: copy("admin:tests.collections.pages.summary", {
 				defaultMessage:
 					"Pages are used to create static content on your website.",
 			}),
 		},
 		locked: false,
-		revisions: false,
+		revisions: { enabled: false, retentionDays: 30 },
 		localized: true,
 		autoSave: false,
-		scheduling: false,
 		orderable: false,
 		listing: [
 			"text_test",
@@ -164,10 +208,12 @@ test("collection options are correct along with field includes and filters", asy
 			"color_test",
 		],
 		labelFields: ["text_test"],
-		environments: [],
-		revisionRetentionDays: 30,
 		routing: null,
 		preview: null,
+		publishing: {
+			targets: [],
+			scheduling: false,
+		},
 	});
 });
 
@@ -176,13 +222,15 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 		preview: {
 			enabled: true,
 			url: preview,
-			expiresIn: 120,
+			expiresInSeconds: 120,
 			breakpoints: [
 				{
 					key: "mobile",
@@ -216,7 +264,7 @@ test("collection preview configuration exposes normalized breakpoints without pr
 		],
 	});
 	expect(collection.resolvedPreviewConfig?.url).toBe(preview);
-	expect(collection.resolvedPreviewConfig?.expiresIn).toBe(120);
+	expect(collection.resolvedPreviewConfig?.expiresInSeconds).toBe(120);
 	const adminCollection = collectionsFormatter.formatSingle({
 		collection,
 		localization: {
@@ -254,8 +302,10 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	const collectionWithoutBreakpoints = new CollectionBuilder("posts", {
 		mode: "multiple",
 		details: {
-			name: "Posts",
-			singularName: "Post",
+			labels: {
+				singular: "Post",
+				plural: "Posts",
+			},
 		},
 		preview: { enabled: true, url: preview },
 	});
@@ -272,8 +322,10 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	const shorthandCollection = new CollectionBuilder("shorthand", {
 		mode: "multiple",
 		details: {
-			name: "Shorthand pages",
-			singularName: "Shorthand page",
+			labels: {
+				singular: "Shorthand page",
+				plural: "Shorthand pages",
+			},
 		},
 		preview: true,
 	});
@@ -283,8 +335,10 @@ test("collection preview configuration exposes normalized breakpoints without pr
 	const disabledCollection = new CollectionBuilder("disabled", {
 		mode: "multiple",
 		details: {
-			name: "Disabled pages",
-			singularName: "Disabled page",
+			labels: {
+				singular: "Disabled page",
+				plural: "Disabled pages",
+			},
 		},
 		preview: {
 			enabled: false,
@@ -304,47 +358,50 @@ test("collection workflow features normalizes defaults", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
-		},
-		environments: [
-			{
-				key: "production",
-				name: copy("admin:tests.environments.production.name", {
-					defaultMessage: "Production",
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
 				}),
 			},
-		],
-		workflow: {
-			stages: [
+		},
+		publishing: {
+			targets: [
 				{
-					key: "todo",
-					name: copy("admin:tests.workflow.todo.name", {
-						defaultMessage: "To do",
+					key: "production",
+					label: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
 					}),
-				},
-				{
-					key: "done",
-					name: copy("admin:tests.workflow.done.name", {
-						defaultMessage: "Done",
-					}),
-					color: "green",
-					publishTargets: ["production"],
 				},
 			],
+			workflow: {
+				stages: [
+					{
+						key: "todo",
+						label: copy("admin:tests.workflow.todo.name", {
+							defaultMessage: "To do",
+						}),
+					},
+					{
+						key: "done",
+						label: copy("admin:tests.workflow.done.name", {
+							defaultMessage: "Done",
+						}),
+						color: "green",
+						publishTargets: ["production"],
+					},
+				],
+			},
 		},
 	});
-
-	expect(collection.getData.workflow).toEqual({
+	expect(collection.getData.publishing.workflow).toEqual({
 		initial: "todo",
 		stages: [
 			{
 				key: "todo",
-				name: copy("admin:tests.workflow.todo.name", {
+				label: copy("admin:tests.workflow.todo.name", {
 					defaultMessage: "To do",
 				}),
 				color: "grey",
@@ -352,7 +409,7 @@ test("collection workflow features normalizes defaults", async () => {
 			},
 			{
 				key: "done",
-				name: copy("admin:tests.workflow.done.name", {
+				label: copy("admin:tests.workflow.done.name", {
 					defaultMessage: "Done",
 				}),
 				color: "green",
@@ -366,37 +423,40 @@ test("collection environment version mappings normalizes defaults", async () => 
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
 		},
-		environments: [
-			{
-				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
-					defaultMessage: "Staging",
-				}),
-				collectionVersions: {
-					blog: "signed-off",
+		publishing: {
+			targets: [
+				{
+					key: "staging",
+					label: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+					collectionVersions: {
+						blog: "signed-off",
+					},
 				},
-			},
-			{
-				key: "production",
-				name: copy("admin:tests.environments.production.name", {
-					defaultMessage: "Production",
-				}),
-				requires: ["staging"],
-			},
-		],
+				{
+					key: "production",
+					label: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+					requires: ["staging"],
+				},
+			],
+		},
 	});
-
-	expect(collection.getData.environments).toEqual([
+	expect(collection.getData.publishing.targets).toEqual([
 		{
 			key: "staging",
-			name: copy("admin:tests.environments.staging.name", {
+			label: copy("admin:tests.environments.staging.name", {
 				defaultMessage: "Staging",
 			}),
 			requires: [],
@@ -406,7 +466,7 @@ test("collection environment version mappings normalizes defaults", async () => 
 		},
 		{
 			key: "production",
-			name: copy("admin:tests.environments.production.name", {
+			label: copy("admin:tests.environments.production.name", {
 				defaultMessage: "Production",
 			}),
 			requires: ["staging"],
@@ -420,14 +480,16 @@ test("collection group config normalizes shorthand and named groups", () => {
 		mode: "multiple",
 		group: "content",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 	});
 
 	expect(shorthandCollection.getData.group).toEqual({
 		key: "content",
-		name: null,
+		label: null,
 		order: null,
 	});
 
@@ -435,18 +497,20 @@ test("collection group config normalizes shorthand and named groups", () => {
 		mode: "multiple",
 		group: {
 			key: "content",
-			name: "Content",
+			label: "Content",
 			order: 10,
 		},
 		details: {
-			name: "Blogs",
-			singularName: "Blog",
+			labels: {
+				singular: "Blog",
+				plural: "Blogs",
+			},
 		},
 	});
 
 	expect(namedCollection.getData.group).toEqual({
 		key: "content",
-		name: { type: "lucid.literal", value: "Content" },
+		label: { type: "lucid.literal", value: "Content" },
 		order: 10,
 	});
 });
@@ -455,9 +519,11 @@ test("plain string copy on details and fields is normalised to literal copy", ()
 	const collection = new CollectionBuilder("snippets", {
 		mode: "multiple",
 		details: {
-			name: "Snippets",
-			singularName: "Snippet",
-			summary: "Reusable content snippets.",
+			labels: {
+				singular: "Snippet",
+				plural: "Snippets",
+			},
+			description: "Reusable content snippets.",
 		},
 	}).addText("title", {
 		details: {
@@ -467,9 +533,11 @@ test("plain string copy on details and fields is normalised to literal copy", ()
 	});
 
 	expect(collection.getData.details).toEqual({
-		name: { type: "lucid.literal", value: "Snippets" },
-		singularName: { type: "lucid.literal", value: "Snippet" },
-		summary: { type: "lucid.literal", value: "Reusable content snippets." },
+		labels: {
+			singular: { type: "lucid.literal", value: "Snippet" },
+			plural: { type: "lucid.literal", value: "Snippets" },
+		},
+		description: { type: "lucid.literal", value: "Reusable content snippets." },
 	});
 
 	const titleField = collection.fieldTree.find(

@@ -10,7 +10,7 @@ import type {
 } from "../../../db/tables/index.js";
 import type { CollectionBuilderHooks } from "../../../hooks/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
-import type { CFConfig, FieldTypes } from "../../custom-fields/types.js";
+import type { FieldConfig, FieldTypes } from "../../custom-fields/types.js";
 import type BrickBuilder from "../brick-builder/index.js";
 
 export type ShowInList = boolean;
@@ -21,17 +21,17 @@ export type CollectionListFieldOptions = {
 export type CollectionLabelFieldOptions = CollectionListFieldOptions & {
 	useAsLabel?: UseAsLabel;
 };
-export type CollectionEnvironmentVersionMap = Record<string, string>;
-export type CollectionGroupConfigInput =
+export type CollectionTargetVersionMap = Record<string, string>;
+export type CollectionGroupOptions =
 	| string
 	| {
 			key: string;
-			name?: AdminCopyInput;
+			label?: AdminCopyInput;
 			order?: number;
 	  };
 export type CollectionGroupConfig = {
 	key: string;
-	name: ResolvedAdminCopy | null;
+	label: ResolvedAdminCopy | null;
 	order: number | null;
 };
 
@@ -78,7 +78,7 @@ export type CollectionPreviewOptions<
 	TCollectionKey extends string = CollectionDocumentKey,
 > = {
 	/** Whether previews are available for this collection. */
-	enabled: boolean;
+	enabled?: boolean;
 	/**
 	 * Builds the website URL used to preview a document. When omitted, Lucid uses
 	 * the document route on the same host. Return null if the document cannot be
@@ -88,14 +88,14 @@ export type CollectionPreviewOptions<
 		props: CollectionPreviewURLResolverProps<TCollectionKey>,
 	): string | URL | null | Promise<string | URL | null>;
 	/** How long generated preview links remain valid, in seconds. Defaults to one hour. */
-	expiresIn?: number;
+	expiresInSeconds?: number;
 	/** Named viewport widths shown in the builder preview. */
 	breakpoints?: CollectionPreviewBreakpointConfig[];
 };
 
 export type CollectionPreviewConfig<
 	TCollectionKey extends string = CollectionDocumentKey,
-> = true | CollectionPreviewOptions<TCollectionKey>;
+> = boolean | CollectionPreviewOptions<TCollectionKey>;
 
 export type PublishingReviewCommentRequirement = "required" | "optional";
 export type PublishingReviewConfig = {
@@ -116,7 +116,7 @@ export type PublishingWorkflowStageColor =
 
 export type PublishingWorkflowStageConfig = {
 	key: string;
-	name: ResolvedAdminCopy;
+	label: ResolvedAdminCopy;
 	color: PublishingWorkflowStageColor;
 	publishTargets: string[];
 };
@@ -126,23 +126,15 @@ export type PublishingWorkflowConfig = {
 	stages: PublishingWorkflowStageConfig[];
 };
 
-export type CollectionConfigSchemaType<
-	TCollectionKey extends string = CollectionDocumentKey,
-> = {
-	key: TCollectionKey;
-	mode: "single" | "multiple";
-	group?: CollectionGroupConfigInput;
-	details: {
-		name: AdminCopyInput;
-		singularName: AdminCopyInput;
-		summary?: AdminCopyInput;
-	};
-	locked?: boolean;
-	localized?: CollectionLocalizationConfig;
-	revisions?: boolean;
-	autoSave?: boolean;
+export type CollectionRevisionOptions = {
+	/** Whether to keep previous document versions as revisions. */
+	enabled: boolean;
+	/** Days to keep revisions. False keeps them indefinitely. */
+	retentionDays?: number | false;
+};
+
+export type CollectionPublishingOptions = {
 	scheduling?: boolean;
-	orderable?: boolean;
 	review?: {
 		requiredFor?: string[];
 		allowSelfApproval?: boolean;
@@ -155,20 +147,36 @@ export type CollectionConfigSchemaType<
 		initial?: string;
 		stages: Array<{
 			key: string;
-			name: AdminCopyInput;
+			label: AdminCopyInput;
 			color?: PublishingWorkflowStageColor;
 			publishTargets?: string[];
 		}>;
 	};
-	environments?: Array<{
+	targets?: Array<{
 		key: string;
-		name: AdminCopyInput;
+		label: AdminCopyInput;
 		requires?: string[];
-		collectionVersions?: CollectionEnvironmentVersionMap;
+		collectionVersions?: CollectionTargetVersionMap;
 	}>;
-	revisionRetentionDays?: number | false;
+};
+
+export type CollectionOptions<
+	TCollectionKey extends string = CollectionDocumentKey,
+> = {
+	mode: "single" | "multiple";
+	group?: CollectionGroupOptions;
+	details: {
+		labels: { singular: AdminCopyInput; plural: AdminCopyInput };
+		description?: AdminCopyInput;
+	};
+	locked?: boolean;
+	localized?: CollectionLocalizationConfig;
+	revisions?: true | CollectionRevisionOptions;
+	autoSave?: boolean;
+	orderable?: boolean;
+	publishing?: CollectionPublishingOptions;
 	/** Top-level field containing each document's complete public path. */
-	routing?: string;
+	routing?: { field: string };
 	preview?: CollectionPreviewConfig<TCollectionKey>;
 	hooks?: CollectionBuilderHooks[];
 	bricks?: {
@@ -180,30 +188,30 @@ export type CollectionConfigSchemaType<
 
 export type CollectionData = {
 	key: string;
-	mode: CollectionConfigSchemaType["mode"];
+	mode: CollectionOptions["mode"];
 	group: CollectionGroupConfig | null;
 	details: {
-		name: ResolvedAdminCopy;
-		singularName: ResolvedAdminCopy;
-		summary: ResolvedAdminCopy | null;
+		labels: { singular: ResolvedAdminCopy; plural: ResolvedAdminCopy };
+		description: ResolvedAdminCopy | null;
 	};
 	locked: boolean;
-	revisions: boolean;
+	revisions: Required<CollectionRevisionOptions>;
 	localized: boolean;
 	autoSave: boolean;
-	scheduling: boolean;
 	orderable: boolean;
-	review?: PublishingReviewConfig;
-	workflow?: PublishingWorkflowConfig;
 	listing: string[];
 	labelFields: string[];
-	environments: {
-		key: string;
-		name: ResolvedAdminCopy;
-		requires: string[];
-		collectionVersions: CollectionEnvironmentVersionMap;
-	}[];
-	revisionRetentionDays: number | false;
+	publishing: {
+		scheduling: boolean;
+		review?: PublishingReviewConfig;
+		workflow?: PublishingWorkflowConfig;
+		targets: {
+			key: string;
+			label: ResolvedAdminCopy;
+			requires: string[];
+			collectionVersions: CollectionTargetVersionMap;
+		}[];
+	};
 	routing: {
 		field: string;
 	} | null;
@@ -220,8 +228,8 @@ export type FieldFilters = Array<{
 export interface CollectionBrickConfig {
 	key: BrickBuilder["key"];
 	details: BrickBuilder["config"]["details"];
-	preview: BrickBuilder["config"]["preview"];
-	fields: CFConfig<FieldTypes>[];
+	thumbnail: BrickBuilder["config"]["thumbnail"];
+	fields: FieldConfig<FieldTypes>[];
 }
 
 export type CollectionTableNames = {

@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 
 /**
@@ -8,7 +8,7 @@ import type { AdapterRuntimeContext } from "../runtime/types.js";
  */
 const checkAllPluginsCompatibility = async (props: {
 	runtimeContext: AdapterRuntimeContext;
-	config: Config;
+	config: ResolvedLucidConfig;
 }) => {
 	for (const plugin of props.config.plugins) {
 		if (plugin.checkCompatibility) {

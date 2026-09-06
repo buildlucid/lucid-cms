@@ -32,15 +32,17 @@ describe("brick table construction", () => {
 		const simpleCollection = new CollectionBuilder("simple", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.simple.name", {
-					defaultMessage: "Simple",
-				}),
-				singularName: copy("admin:tests.collections.simple.singularName", {
-					defaultMessage: "Simple",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.simple.singularName", {
+						defaultMessage: "Simple",
+					}),
+					plural: copy("admin:tests.collections.simple.name", {
+						defaultMessage: "Simple",
+					}),
+				},
 			},
 			localized: true,
-			revisions: true,
+			revisions: { enabled: true },
 			bricks: {
 				builder: [simpleBrick],
 			},
@@ -315,15 +317,17 @@ describe("brick table construction", () => {
 		const deepCollection = new CollectionBuilder("deep", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.deep.name", {
-					defaultMessage: "Deep",
-				}),
-				singularName: copy("admin:tests.collections.deep.singularName", {
-					defaultMessage: "Deep",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.deep.singularName", {
+						defaultMessage: "Deep",
+					}),
+					plural: copy("admin:tests.collections.deep.name", {
+						defaultMessage: "Deep",
+					}),
+				},
 			},
 			localized: true,
-			revisions: true,
+			revisions: { enabled: true },
 			bricks: {
 				builder: [deepBrick],
 			},
@@ -470,15 +474,17 @@ describe("brick table construction", () => {
 		const galleryCollection = new CollectionBuilder("gallery", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.gallery.name", {
-					defaultMessage: "Gallery",
-				}),
-				singularName: copy("admin:tests.collections.gallery.singularName", {
-					defaultMessage: "Gallery",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.gallery.singularName", {
+						defaultMessage: "Gallery",
+					}),
+					plural: copy("admin:tests.collections.gallery.name", {
+						defaultMessage: "Gallery",
+					}),
+				},
 			},
 			localized: true,
-			revisions: true,
+			revisions: { enabled: true },
 			bricks: {
 				builder: [galleryBrick],
 			},
@@ -666,12 +672,14 @@ describe("brick table construction", () => {
 		const collection = new CollectionBuilder("article", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.article.name", {
-					defaultMessage: "Articles",
-				}),
-				singularName: copy("admin:tests.collections.article.singularName", {
-					defaultMessage: "Article",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.article.singularName", {
+						defaultMessage: "Article",
+					}),
+					plural: copy("admin:tests.collections.article.name", {
+						defaultMessage: "Articles",
+					}),
+				},
 			},
 			bricks: { embedded: [card] },
 		});
@@ -709,15 +717,17 @@ describe("brick table construction", () => {
 		const articleCollection = new CollectionBuilder("articles", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.articles.name", {
-					defaultMessage: "Articles",
-				}),
-				singularName: copy("admin:tests.collections.articles.singularName", {
-					defaultMessage: "Article",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.articles.singularName", {
+						defaultMessage: "Article",
+					}),
+					plural: copy("admin:tests.collections.articles.name", {
+						defaultMessage: "Articles",
+					}),
+				},
 			},
 			localized: true,
-			revisions: true,
+			revisions: { enabled: true },
 		})
 			.addUser("author", {
 				multiple: true,
@@ -760,7 +770,12 @@ describe("brick table construction", () => {
 	test("persists subset translations alongside direct fields on the storage locale", () => {
 		const collection = new CollectionBuilder("articles", {
 			mode: "multiple",
-			details: { name: "Articles", singularName: "Article" },
+			details: {
+				labels: {
+					singular: "Article",
+					plural: "Articles",
+				},
+			},
 			localized: { locales: ["fr"], defaultLocale: "fr" },
 		})
 			.addText("title", { localized: true })

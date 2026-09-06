@@ -6,8 +6,10 @@ import registerFields from "../register-fields.js";
 import checkRouteSegments from "./route-segments.js";
 
 const details = {
-	name: "Documents",
-	singularName: "Document",
+	labels: {
+		singular: "Document",
+		plural: "Documents",
+	},
 };
 
 const config = {
@@ -67,8 +69,7 @@ describe("route segments", () => {
 					],
 				},
 			],
-		}).recipe(draft);
-
+		}).configure?.(draft);
 		expect(documentation.getData.routing).toEqual({ field: "fullSlug" });
 	});
 

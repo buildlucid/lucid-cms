@@ -1,4 +1,7 @@
-import type { Config, EnvironmentVariables } from "../../../exports/types.js";
+import type {
+	EnvironmentVariables,
+	ResolvedLucidConfig,
+} from "../../../exports/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import type { DatabaseConnection } from "../../db/types.js";
@@ -16,14 +19,10 @@ import {
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 
-const syncCommand = async (options?: {
-	skipEnvValidation?: boolean;
-	remote?: boolean;
-}) => {
+const syncCommand = async (_options?: { remote?: boolean }) => {
 	let kvInstance: KVAdapterInstance | undefined;
-	let config: Config | undefined;
+	let config: ResolvedLucidConfig | undefined;
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let translationStore: TranslationStore | undefined;
@@ -55,18 +54,6 @@ const syncCommand = async (options?: {
 				files: res.resources.files.translations,
 			})
 		).translationStore;
-
-		if (options?.skipEnvValidation !== true) {
-			const envValid = await validateEnvVars({
-				envSchema: res.envSchema,
-				env: res.env,
-			});
-
-			if (!envValid) {
-				await stopLoggerBuffering();
-				process.exit(1);
-			}
-		}
 
 		kvInstance = await getInitializedKVAdapter(config, {
 			env,

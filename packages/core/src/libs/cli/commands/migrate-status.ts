@@ -1,4 +1,7 @@
-import type { Config, EnvironmentVariables } from "../../../exports/types.js";
+import type {
+	EnvironmentVariables,
+	ResolvedLucidConfig,
+} from "../../../exports/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import assessMigrationPlans from "../../collection/migration/assess-migration-plan.js";
 import type {
@@ -17,7 +20,6 @@ import {
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 import { describeMigrationRiskReason } from "../services/migration-report.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 
 /**
  * A read-only preflight that reports what `migrate` would do and whether the
@@ -29,7 +31,7 @@ const migrateStatusCommand = async (options?: {
 	check?: boolean;
 	remote?: boolean;
 }) => {
-	let config: Config | undefined;
+	let config: ResolvedLucidConfig | undefined;
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let database: DatabaseConnection | undefined;
@@ -48,15 +50,6 @@ const migrateStatusCommand = async (options?: {
 			config,
 			files: res.resources.files.translations,
 		});
-
-		const envValid = await validateEnvVars({
-			envSchema: res.envSchema,
-			env: res.env,
-		});
-		if (!envValid) {
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
 
 		cliLogger.info("Checking the migration status");
 

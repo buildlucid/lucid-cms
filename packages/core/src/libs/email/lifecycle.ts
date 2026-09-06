@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type {
 	AdapterRuntimeContext,
@@ -9,7 +9,7 @@ import type { EmailAdapterInstance } from "./types.js";
 
 /** Resolve or use a supplied email adapter and run its init hook. */
 export const getInitializedEmailAdapter = async (
-	config: Config,
+	config: ResolvedLucidConfig,
 	options: {
 		adapter?: EmailAdapterInstance;
 		env?: EnvironmentVariables;
@@ -37,7 +37,7 @@ export const getInitializedEmailAdapter = async (
 export const destroyEmailAdapter = async (
 	adapter: EmailAdapterInstance | undefined,
 	options: {
-		config: Config;
+		config: ResolvedLucidConfig;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	},

@@ -1,5 +1,5 @@
-import { LucidError } from "@lucidcms/core";
-import type { LucidPluginResponse } from "@lucidcms/core/types";
+import { definePlugin, LucidError } from "@lucidcms/core";
+import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import sharpMediaDeliveryAdapter from "./adapter/index.js";
 import {
 	LUCID_VERSION,
@@ -7,8 +7,8 @@ import {
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 
-const plugin = (): LucidPluginResponse => {
-	return {
+const plugin = (): LucidPluginDefinition => {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		checkCompatibility: ({ runtimeContext }) => {
@@ -20,10 +20,8 @@ const plugin = (): LucidPluginResponse => {
 			}
 		},
 		sources: { translations: ["@lucidcms/plugin-sharp/translations"] },
-		recipe: (draft) => {
-			draft.media.delivery = sharpMediaDeliveryAdapter();
-		},
-	};
+		defaults: { media: { delivery: sharpMediaDeliveryAdapter() } },
+	});
 };
 
 export default plugin;

@@ -6,7 +6,7 @@ import {
 	createDatabaseAdapterFactory,
 } from "../db/adapter-factory.js";
 import type { LucidPluginHookRuntime } from "../plugins/types.js";
-import configureLucid from "../runtime/configure-lucid.js";
+import defineConfig from "../runtime/define-config.js";
 import resolveConfigDefinition from "./resolve-config-definition.js";
 
 const createAdapter = (adapter = "test") =>
@@ -35,7 +35,7 @@ test("resolves no-call runtime and database adapter creators", async () => {
 	});
 
 	const result = await resolveConfigDefinition({
-		definition: configureLucid({
+		definition: defineConfig({
 			runtime,
 			db,
 			config: (env) => ({
@@ -68,7 +68,7 @@ test("resolves a named env schema supplied separately from the config definition
 	const env = z.object({
 		SECRET: z.string(),
 	});
-	const definition = configureLucid({
+	const definition = defineConfig({
 		runtime: {
 			key: "node",
 			lucid: "0.0.0",
@@ -109,7 +109,7 @@ test("skips env schema validation and fills missing secrets during build resolut
 	const env = z.object({
 		SECRET: z.string().length(64),
 	});
-	const definition = configureLucid({
+	const definition = defineConfig({
 		runtime: {
 			key: "node",
 			lucid: "0.0.0",
@@ -198,7 +198,7 @@ test("passes supported prepare artifacts from db factories and plugins to the ru
 	);
 
 	await resolveConfigDefinition({
-		definition: configureLucid({
+		definition: defineConfig({
 			runtime: {
 				key: "test",
 				lucid: "0.0.0",
@@ -228,7 +228,7 @@ test("passes supported prepare artifacts from db factories and plugins to the ru
 						hooks: {
 							runtime: runtimeHook,
 						},
-						recipe: () => undefined,
+						configure: () => undefined,
 					},
 				],
 			}),
@@ -274,4 +274,42 @@ test("passes supported prepare artifacts from db factories and plugins to the ru
 		}),
 	);
 	expect(getEnvVars).toHaveBeenCalledTimes(2);
+});
+
+test("parsed env output reaches every consumer while runtime bindings survive", async () => {
+	const binding = { get: vi.fn() };
+	const transform = vi.fn((value: string) => `${value}:parsed`);
+	const resolveOptions = vi.fn();
+	const database = createAdapter("parsed-env");
+	const resolveDatabase = vi.fn(() => database);
+	const definition = defineConfig({
+		runtime: { key: "test", lucid: "*", resolveOptions },
+		db: createDatabaseAdapterCreator(() => database, {
+			adapter: "test",
+			resolve: resolveDatabase,
+		}),
+		config: (env) => {
+			expect(env).toMatchObject({
+				PORT: 4000,
+				REGION: "eu",
+				TOKEN: "raw:parsed",
+				BINDING: binding,
+			});
+			return { collections: [], plugins: [] };
+		},
+	});
+	const result = await resolveConfigDefinition({
+		definition,
+		env: { PORT: "4000", TOKEN: "raw", BINDING: binding },
+		envSchema: z.object({
+			PORT: z.coerce.number(),
+			REGION: z.string().default("eu"),
+			TOKEN: z.string().transform(transform),
+		}),
+		processConfigOptions: { skipValidation: true },
+	});
+	expect(transform).toHaveBeenCalledOnce();
+	expect(result.env?.BINDING).toBe(binding);
+	expect(resolveOptions).toHaveBeenCalledWith(result.env);
+	expect(resolveDatabase).toHaveBeenCalledWith(result.env);
 });

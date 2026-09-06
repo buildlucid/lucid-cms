@@ -374,26 +374,22 @@ export type WorkflowStageColor =
 export interface CollectionBrickConfig {
 	key: string;
 	details: {
-		name: ResolvedAdminCopy;
-		summary?: ResolvedAdminCopy;
+		label: ResolvedAdminCopy;
+		description?: ResolvedAdminCopy;
 	};
-	preview:
-		| {
-				image?: string;
-		  }
-		| undefined;
+	thumbnail: string | undefined;
 	fields: CollectionFieldConfig[];
 }
 
 type FieldDetails = {
 	label?: ResolvedAdminCopy;
-	summary?: ResolvedAdminCopy;
+	description?: ResolvedAdminCopy;
 	placeholder?: ResolvedAdminCopy;
 };
 
 type RelationFieldDetails = {
 	label?: ResolvedAdminCopy;
-	summary?: ResolvedAdminCopy;
+	description?: ResolvedAdminCopy;
 };
 
 export type FieldConditionOperator =
@@ -408,18 +404,31 @@ export type FieldConditionTranslationScope = "same" | "default" | "any";
 
 export type FieldConditionRuleValue = string | number | boolean | null;
 
-export interface FieldConditionRule {
+export type FieldConditionRule = {
 	field: string;
-	operator: FieldConditionOperator;
-	value?: FieldConditionRuleValue;
-}
+} & (
+	| {
+			operator: "equals" | "notEquals" | "contains" | "notContains";
+			value: FieldConditionRuleValue;
+	  }
+	| {
+			operator: "isEmpty" | "isNotEmpty";
+			value?: never;
+	  }
+);
 
-export interface FieldConditionConfig {
-	action?: "show" | "hide";
+export type FieldConditionExpression = FieldConditionRule | FieldConditionGroup;
+
+export type FieldConditionGroup =
+	| { all: FieldConditionExpression[]; any?: never }
+	| { any: FieldConditionExpression[]; all?: never };
+
+export type FieldConditionAction = "show" | "hide";
+
+export type FieldConditionConfig = FieldConditionGroup & {
+	action?: FieldConditionAction;
 	translationScope?: FieldConditionTranslationScope;
-	/** Outer array is OR'd, inner rule arrays are AND'd. */
-	groups: FieldConditionRule[][];
-}
+};
 
 export type FieldWidth = 12 | 8 | 6 | 4 | 3;
 
@@ -434,18 +443,13 @@ type FieldUIConfig = {
 
 type FieldConfigOptions<TDefault = unknown> = {
 	localized?: boolean;
-	index?: true;
+	index?: boolean;
 	default?: TDefault;
 	ui?: FieldUIConfig;
 };
 
 type RequiredValidation = {
 	required?: boolean;
-};
-
-type ZodValidation = RequiredValidation & {
-	// biome-ignore lint/suspicious/noExplicitAny: field config responses may include user-defined Zod schemas from core config.
-	zod?: any;
 };
 
 export type CollectionFieldAiConfig = {
@@ -484,14 +488,14 @@ export interface CodeFieldConfig
 	extends SharedCollectionFieldConfig<"code">,
 		FieldConfigOptions<CodeValue> {
 	languages: string[];
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface DatetimeFieldConfig
 	extends SharedCollectionFieldConfig<"datetime">,
 		FieldConfigOptions<string> {
 	time?: boolean;
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface RelationFieldConfig
@@ -510,7 +514,7 @@ export interface RelationFieldConfig
 export interface JsonFieldConfig
 	extends SharedCollectionFieldConfig<"json">,
 		FieldConfigOptions<Record<string, unknown> | unknown[] | null> {
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface LinkFieldConfig
@@ -544,7 +548,7 @@ export interface MediaFieldConfig
 export interface NumberFieldConfig
 	extends SharedCollectionFieldConfig<"number">,
 		FieldConfigOptions<number | null> {
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface RangeFieldConfig
@@ -554,7 +558,7 @@ export interface RangeFieldConfig
 	max: number;
 	step: number;
 	thumbs?: 1 | 2;
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface RepeaterFieldConfig
@@ -606,7 +610,7 @@ export interface RichTextFieldConfig
 		appearance?: "default" | "seamless";
 		fullscreen?: boolean;
 	};
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface SelectFieldConfig
@@ -624,13 +628,13 @@ export interface TabFieldConfig extends SharedCollectionFieldConfig<"tab"> {
 export interface TextFieldConfig
 	extends SharedCollectionFieldConfig<"text">,
 		FieldConfigOptions<string> {
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface TextareaFieldConfig
 	extends SharedCollectionFieldConfig<"textarea">,
 		FieldConfigOptions<string> {
-	validation?: ZodValidation;
+	validation?: RequiredValidation;
 }
 
 export interface UserFieldConfig
@@ -703,13 +707,12 @@ export interface Collection {
 	} | null;
 	group: {
 		key: string;
-		name: ResolvedAdminCopy | null;
+		label: ResolvedAdminCopy | null;
 		order: number | null;
 	} | null;
 	details: {
-		name: ResolvedAdminCopy;
-		singularName: ResolvedAdminCopy;
-		summary: ResolvedAdminCopy | null;
+		labels: { singular: ResolvedAdminCopy; plural: ResolvedAdminCopy };
+		description: ResolvedAdminCopy | null;
 	};
 	localized:
 		| false
@@ -717,40 +720,41 @@ export interface Collection {
 				locales: string[];
 				defaultLocale: string;
 		  };
-	revisions: boolean;
+	revisions: { enabled: boolean; retentionDays: number | false };
 	locked: boolean;
 	listing: string[];
 	labelFields: string[];
 	autoSave: boolean;
-	scheduling: boolean;
 	orderable: boolean;
-	revisionRetentionDays: number | false;
-	review?: {
-		requiredFor: string[];
-		allowSelfApproval: boolean;
-		comments: {
-			request: "required" | "optional";
-			decision: "required" | "optional";
+	publishing: {
+		scheduling: boolean;
+		review?: {
+			requiredFor: string[];
+			allowSelfApproval: boolean;
+			comments: {
+				request: "required" | "optional";
+				decision: "required" | "optional";
+			};
 		};
-	};
-	workflow?: {
-		initial: string;
-		stages: Array<{
+		workflow?: {
+			initial: string;
+			stages: Array<{
+				key: string;
+				label: ResolvedAdminCopy;
+				color: WorkflowStageColor;
+				publishTargets: string[];
+			}>;
+		};
+		targets: {
 			key: string;
-			name: ResolvedAdminCopy;
-			color: WorkflowStageColor;
-			publishTargets: string[];
-		}>;
+			label: ResolvedAdminCopy;
+			requires: string[];
+			permissions: {
+				publish: CollectionPermission<"publish">;
+				review: CollectionPermission<"review">;
+			};
+		}[];
 	};
-	environments: {
-		key: string;
-		name: ResolvedAdminCopy;
-		requires: string[];
-		permissions: {
-			publish: CollectionPermission<"publish">;
-			review: CollectionPermission<"review">;
-		};
-	}[];
 	preview: {
 		breakpoints: CollectionPreviewBreakpoint[];
 	} | null;

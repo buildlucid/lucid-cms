@@ -38,7 +38,7 @@ const CollectionNavLink: Component<CollectionNavLinkProps> = (props) => {
 					: "collection-single"
 			}
 			title={helpers.getLocaleValue({
-				value: props.collection.details.name,
+				value: props.collection.details.labels.plural,
 			})}
 		/>
 	);

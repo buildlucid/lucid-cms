@@ -3,9 +3,9 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -18,7 +18,7 @@ class NumberCustomField extends CustomField<"number"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"number">) {
+	constructor(key: string, props?: FieldOptions<"number">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -31,7 +31,7 @@ class NumberCustomField extends CustomField<"number"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			localized: this.props?.localized ?? false,
@@ -44,7 +44,7 @@ class NumberCustomField extends CustomField<"number"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"number">;
+		} satisfies FieldConfig<"number">;
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -66,7 +66,7 @@ class NumberCustomField extends CustomField<"number"> {
 	formatResponseValue(value?: number | null) {
 		return (value ??
 			this.config.default ??
-			null) satisfies CFResponse<"number">["value"];
+			null) satisfies FieldResponse<"number">["value"];
 	}
 	uniqueValidation(value: unknown) {
 		const valueSchema = z.number();

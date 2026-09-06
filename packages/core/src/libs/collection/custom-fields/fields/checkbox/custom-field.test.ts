@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import CheckboxCustomField from "./custom-field.js";
 
@@ -10,12 +11,14 @@ import CheckboxCustomField from "./custom-field.js";
 const CheckboxCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Pages",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Page",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Page",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Pages",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -34,8 +37,9 @@ test("successfully validate field - checkbox", async () => {
 			type: "checkbox",
 			value: 0,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CheckboxCollection.fields.get("standard_checkbox")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(CheckboxCollection).fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -55,8 +59,9 @@ test("successfully validate field - checkbox", async () => {
 			type: "checkbox",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CheckboxCollection.fields.get("required_chekbox")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(CheckboxCollection).fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -78,8 +83,9 @@ test("fail to validate field - checkbox", async () => {
 			type: "checkbox",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CheckboxCollection.fields.get("standard_checkbox")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(CheckboxCollection).fields.get("standard_checkbox")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -105,8 +111,9 @@ test("fail to validate field - checkbox", async () => {
 			type: "checkbox",
 			value: 0,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: CheckboxCollection.fields.get("required_chekbox")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(CheckboxCollection).fields.get("required_chekbox")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -134,7 +141,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 		},

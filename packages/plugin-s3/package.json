@@ -4,12 +4,12 @@
 	"private": false,
 	"description": "The official S3 plugin for Lucid CMS",
 	"type": "module",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"module": "dist/index.mjs",
 	"exports": {
 		".": {
-			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
 		},
 		"./translations": "./translations"
 	},

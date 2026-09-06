@@ -1,7 +1,7 @@
 import { select } from "@inquirer/prompts";
 import type {
-	Config,
 	EnvironmentVariables,
+	ResolvedLucidConfig,
 	ServiceContext,
 } from "../../../exports/types.js";
 import { LucidError } from "../../../utils/errors/index.js";
@@ -27,7 +27,6 @@ import loadSeeds from "../../seed/load-seeds.js";
 import type { Seed } from "../../seed/types.js";
 import cliLogger from "../logger.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 
 /** Loads seed definitions using the same resolved config root as migrations. */
 const loadConfiguredSeeds = async () => {
@@ -82,7 +81,7 @@ const seedCommand = async (
 	seedName?: string,
 	options?: { all?: boolean; remote?: boolean },
 ) => {
-	let config: Config | undefined;
+	let config: ResolvedLucidConfig | undefined;
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let translationStore: TranslationStore | undefined;
@@ -116,16 +115,6 @@ const seedCommand = async (
 				files: result.resources.files.translations,
 			})
 		).translationStore;
-
-		const envValid = await validateEnvVars({
-			envSchema: result.envSchema,
-			env,
-		});
-		if (!envValid) {
-			await cleanupAdapters();
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
 
 		if (seedName && options?.all) {
 			throw new LucidError({

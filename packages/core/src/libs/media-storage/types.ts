@@ -314,6 +314,6 @@ export type MediaStorageAdapterInstance<T = unknown> = {
 export type FileSystemStorageAdapterOptions = {
 	/** The directory where the files will be uploaded. Defaults to "uploads" */
 	uploadDir: string;
-	/** The secret key used to sign the URLs. Falls back to the configs keys.encryptionKey */
-	secretKey: string;
+	/** Signs media URLs. Defaults to the final config's secrets.encryption value. */
+	secretKey?: string;
 };

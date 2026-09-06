@@ -6,11 +6,13 @@ import formatDocumentRoute from "./document-route.js";
 const collection = new CollectionBuilder("pages", {
 	mode: "multiple",
 	details: {
-		name: "Pages",
-		singularName: "Page",
+		labels: {
+			singular: "Page",
+			plural: "Pages",
+		},
 	},
 	localized: true,
-	routing: "fullSlug",
+	routing: { field: "fullSlug" },
 })
 	.addText("title", { useAsLabel: true })
 	.addText("fullSlug", { localized: true });
@@ -93,8 +95,13 @@ describe("formatDocumentRoute", () => {
 	test("uses editor-facing select option labels", () => {
 		const selectCollection = new CollectionBuilder("articles", {
 			mode: "multiple",
-			details: { name: "Articles", singularName: "Article" },
-			routing: "path",
+			details: {
+				labels: {
+					singular: "Article",
+					plural: "Articles",
+				},
+			},
+			routing: { field: "path" },
 		})
 			.addSelect("status", {
 				useAsLabel: true,

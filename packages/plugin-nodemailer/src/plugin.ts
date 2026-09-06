@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, definePlugin } from "@lucidcms/core";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
@@ -12,91 +12,95 @@ import { resolveNodemailerAttachments } from "./utils/remote-attachments.js";
 import verifyTransporter from "./utils/verify-transporter.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
-	return {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		sources: { translations: ["@lucidcms/plugin-nodemailer/translations"] },
-		recipe: (draft) => {
-			const simulate = draft.email.simulate;
+		defaults: () => {
 			let verification: Promise<void> | undefined;
 			const verifyOnce = () => {
 				verification ??= verifyTransporter(pluginOptions.transporter);
 				return verification;
 			};
-
-			draft.email.adapter = {
-				type: "email-adapter",
-				key: PLUGIN_IDENTIFIER,
-				lifecycle: {
-					init: async () => {
-						if (simulate) return;
-						await verifyOnce();
-					},
-					destroy: async () => {
-						pluginOptions.transporter.close();
-						verification = undefined;
-					},
-				},
-				send: async (_context, email) => {
-					try {
-						if (simulate) {
-							return {
-								success: true,
-								deliveryStatus: "sent",
-								message: copy("server:plugin.nodemailer.email.send.success"),
-								data: null,
-							};
-						}
-						const attachmentsRes = await resolveNodemailerAttachments(
-							email.attachments,
-							pluginOptions.remoteAttachments,
-						);
-						if (attachmentsRes.error) {
-							return {
-								success: false,
-								deliveryStatus: "failed",
-								message:
-									attachmentsRes.error.message ??
-									copy("server:plugin.nodemailer.email.send.failed"),
-							};
-						}
-
-						const data = await pluginOptions.transporter.sendMail({
-							from: `${email.from.name} <${email.from.email}>`,
-							to: email.to,
-							subject: email.subject,
-							cc: email.cc,
-							bcc: email.bcc,
-							replyTo: email.replyTo,
-							priority: email.priority,
-							headers: {
-								...priorityHeaders[email.priority],
-								...(email.headers || {}),
+			return {
+				email: {
+					adapter: {
+						type: "email-adapter",
+						key: PLUGIN_IDENTIFIER,
+						lifecycle: {
+							init: async (context) => {
+								if (context.config.email.simulate) return;
+								await verifyOnce();
 							},
-							attachments: attachmentsRes.data,
-							text: email.text,
-							html: email.html,
-						});
-						return {
-							success: true,
-							deliveryStatus: "sent",
-							message: copy("server:plugin.nodemailer.email.send.success"),
-							data: isValidData(data) ? data : null,
-						};
-					} catch (error) {
-						return {
-							success: false,
-							deliveryStatus: "failed",
-							message:
-								error instanceof Error
-									? copy.literal(error.message)
-									: copy("server:plugin.nodemailer.email.send.failed"),
-						};
-					}
+							destroy: async () => {
+								pluginOptions.transporter.close();
+								verification = undefined;
+							},
+						},
+						send: async (context, email) => {
+							try {
+								if (context.config.email.simulate) {
+									return {
+										success: true,
+										deliveryStatus: "sent",
+										message: copy(
+											"server:plugin.nodemailer.email.send.success",
+										),
+										data: null,
+									};
+								}
+								const attachmentsRes = await resolveNodemailerAttachments(
+									email.attachments,
+									pluginOptions.remoteAttachments,
+								);
+								if (attachmentsRes.error) {
+									return {
+										success: false,
+										deliveryStatus: "failed",
+										message:
+											attachmentsRes.error.message ??
+											copy("server:plugin.nodemailer.email.send.failed"),
+									};
+								}
+
+								const data = await pluginOptions.transporter.sendMail({
+									from: `${email.from.name} <${email.from.email}>`,
+									to: email.to,
+									subject: email.subject,
+									cc: email.cc,
+									bcc: email.bcc,
+									replyTo: email.replyTo,
+									priority: email.priority,
+									headers: {
+										...priorityHeaders[email.priority],
+										...(email.headers || {}),
+									},
+									attachments: attachmentsRes.data,
+									text: email.text,
+									html: email.html,
+								});
+								return {
+									success: true,
+									deliveryStatus: "sent",
+									message: copy("server:plugin.nodemailer.email.send.success"),
+									data: isValidData(data) ? data : null,
+								};
+							} catch (error) {
+								return {
+									success: false,
+									deliveryStatus: "failed",
+									message:
+										error instanceof Error
+											? copy.literal(error.message)
+											: copy("server:plugin.nodemailer.email.send.failed"),
+								};
+							}
+						},
+					} satisfies EmailAdapterInstance,
 				},
-			} satisfies EmailAdapterInstance;
+			};
 		},
-	};
+	});
 };
 
 export default plugin;

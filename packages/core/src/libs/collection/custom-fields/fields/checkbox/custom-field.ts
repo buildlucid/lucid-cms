@@ -6,9 +6,9 @@ import formatter from "../../../../formatters/helpers.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -21,7 +21,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"checkbox">) {
+	constructor(key: string, props?: FieldOptions<"checkbox">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -34,7 +34,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				true: this.props?.details?.true,
 				false: this.props?.details?.false,
 			},
@@ -48,7 +48,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"checkbox">;
+		} satisfies FieldConfig<"checkbox">;
 	}
 	get errors() {
 		return deepMerge(super.errors, {
@@ -82,7 +82,7 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 	formatResponseValue(value?: BooleanInt | null) {
 		return formatter.formatBoolean(
 			Boolean(value) ?? this.config.default,
-		) satisfies CFResponse<"checkbox">["value"];
+		) satisfies FieldResponse<"checkbox">["value"];
 	}
 	uniqueValidation(value: unknown) {
 		const valueSchema = z.union([z.literal(1), z.literal(0), z.boolean()]);

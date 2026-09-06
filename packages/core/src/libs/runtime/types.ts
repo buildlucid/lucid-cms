@@ -1,7 +1,7 @@
 import type { AddressInfo } from "node:net";
 import type z from "zod";
 import type { LucidHonoContext } from "../../exports/types.js";
-import type { Config, LucidConfig } from "../../types/config.js";
+import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import type { CLILogger } from "../cli/logger.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import type { DatabaseAdapterFactory } from "../db/adapter-factory.js";
@@ -52,7 +52,9 @@ export type RuntimePrepareArtifacts = {
 };
 
 export type ServeHandler = (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
+	/** Parsed environment values and platform bindings from config loading. */
+	env: EnvironmentVariables | undefined;
 	translationStore: TranslationStore;
 	logger: {
 		instance: CLILogger;
@@ -83,7 +85,7 @@ export type RuntimeBuildArtifacts = {
 export type BuildHandler = (props: {
 	/** Resolved resource inputs to include when compiling the project config. */
 	resources: PreparedResources;
-	config: Config;
+	config: ResolvedLucidConfig;
 	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;
 	configPath: string;
@@ -157,7 +159,7 @@ export interface EnvironmentVariables extends Record<string, unknown> {}
 export type DatabaseConnectionScope = "runtime" | "invocation";
 
 export type AdapterLifecycleContext = {
-	config: Config;
+	config: ResolvedLucidConfig;
 	/**
 	 * Host environment available during adapter setup. Request-isolated runtimes
 	 * must resolve live I/O bindings from each service context instead of retaining
@@ -174,7 +176,7 @@ export type GetEnvVarsLogger = {
 
 export type RuntimeAdapterEnvLoader = (props: {
 	logger: GetEnvVarsLogger;
-}) => EnvironmentVariables | Promise<EnvironmentVariables>;
+}) => Record<string, unknown> | Promise<Record<string, unknown>>;
 
 export type RuntimeAdapterOptionsResolver = (
 	env: EnvironmentVariables,
@@ -186,8 +188,8 @@ export type RuntimeAdapterCLI = {
 	build: BuildHandler;
 };
 
-export type AdapterDefineConfig = (env: EnvironmentVariables) => LucidConfig;
-export type LucidConfigRecipe = (draft: Config) => void;
+export type LucidConfigFactory = (env: EnvironmentVariables) => LucidConfig;
+export type ConfigTransform = (draft: ResolvedLucidConfig) => void;
 
 export type LucidConfigDefinitionMeta = {
 	emailTemplates?: RenderedTemplates;
@@ -209,17 +211,15 @@ export type DatabaseAdapterValue =
 export type LucidConfigDefinition = {
 	runtime: RuntimeAdapterValue;
 	db: DatabaseAdapterValue;
-	config: AdapterDefineConfig;
+	config: LucidConfigFactory;
+	/** Applies final project changes after plugin configuration. */
+	configure?: ConfigTransform;
 };
 
-export type WrappedLucidConfigDefinition = LucidConfigDefinition & {
-	recipe?: LucidConfigRecipe;
-};
-
-export type RuntimeConfigureLucid = (
-	definition: WrappedLucidConfigDefinition,
+export type RuntimeAdaptConfig = (
+	definition: LucidConfigDefinition,
 	meta?: LucidConfigDefinitionMeta,
-) => WrappedLucidConfigDefinition;
+) => LucidConfigDefinition;
 
 /** Module entrypoints exposed by a runtime for a supported host. */
 export type RuntimeHostDefinition = {
@@ -238,12 +238,12 @@ export type RuntimeAdapter = Omit<
 	getEnvVars?: RuntimeAdapterEnvLoader;
 	resolveOptions?: RuntimeAdapterOptionsResolver;
 	cli?: RuntimeAdapterCLI;
-	configureLucid?: RuntimeConfigureLucid;
+	adaptConfig?: RuntimeAdaptConfig;
 };
 
-export type RuntimeConfigureLucidModule = {
-	configureLucid: RuntimeConfigureLucid;
-	default?: RuntimeConfigureLucid;
+export type RuntimeAdaptConfigModule = {
+	adaptConfig: RuntimeAdaptConfig;
+	default?: RuntimeAdaptConfig;
 };
 
 // ------------------------------------------------------------

@@ -4,10 +4,10 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldAiFormatResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -27,7 +27,7 @@ class CodeCustomField extends CustomField<"code"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"code">) {
+	constructor(key: string, props?: FieldOptions<"code">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -40,7 +40,7 @@ class CodeCustomField extends CustomField<"code"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			ai: this.props?.ai,
@@ -57,7 +57,7 @@ class CodeCustomField extends CustomField<"code"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"code">;
+		} satisfies FieldConfig<"code">;
 	}
 	override get supportsAi() {
 		return true;
@@ -106,7 +106,7 @@ class CodeCustomField extends CustomField<"code"> {
 
 		const parsed = codeValueSchema.safeParse(responseValue);
 		return parsed.success
-			? (parsed.data satisfies CFResponse<"code">["value"])
+			? (parsed.data satisfies FieldResponse<"code">["value"])
 			: null;
 	}
 	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {

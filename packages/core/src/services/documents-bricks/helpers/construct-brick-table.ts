@@ -1,12 +1,11 @@
 import crypto from "node:crypto";
 import type {
-	FieldDatabaseMode,
-	Insert,
 	InternalDocumentBrick,
 	InternalDocumentField,
 } from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import {
 	getFieldDatabaseConfig,
@@ -16,6 +15,7 @@ import {
 	treeTableMode,
 	treeTableSchemaColumns,
 } from "../../../libs/collection/custom-fields/storage/tree-table.js";
+import type { FieldDatabaseMode } from "../../../libs/collection/custom-fields/types.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
 import type { TableType } from "../../../libs/collection/schema/types.js";
@@ -23,6 +23,7 @@ import type {
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../../../libs/db/tables/index.js";
+import type { Insert } from "../../../libs/db/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import processFieldValues from "./process-field-values.js";
@@ -271,7 +272,7 @@ const constructRelationTableRows = (
 	const fieldOwner = getFieldOwner(params);
 	if (!fieldOwner) return [];
 
-	const fieldInstance = fieldOwner.fields.get(field.key);
+	const fieldInstance = getFieldBuilderState(fieldOwner).fields.get(field.key);
 	if (!fieldInstance) return [];
 
 	const valuesByLocale = processFieldValues(

@@ -5,7 +5,11 @@ import type {
 	RelationFieldValue as CoreRelationFieldValue,
 } from "@lucidcms/core/types";
 import { expectTypeOf, test } from "vitest";
-import { asDocument, asDocuments, createClient } from "./index.js";
+import {
+	createClient,
+	createDocumentView,
+	createDocumentViews,
+} from "./index.js";
 import { createDocumentsClient } from "./resources/documents.js";
 import type {
 	CollectionDocument,
@@ -26,7 +30,7 @@ import type {
 	FilterObject,
 	FilterOperator,
 	LucidClient,
-	LucidClientResponse,
+	Refs,
 	RelationFieldValue,
 } from "./types.js";
 
@@ -200,13 +204,14 @@ test("collection documents narrow to generated plain field and brick types", () 
 	expectTypeOf<CollectionDocument<"page">["meta"]>().toEqualTypeOf<
 		| {
 				versionId: number | null;
-				version: Record<
+				versions: Record<
 					"latest" | "published",
 					{
 						id: number;
 						promotedFrom: number | null;
 						contentId: string;
 						createdAt: string | null;
+						updatedAt: string | null;
 						createdBy: number | null;
 					} | null
 				>;
@@ -224,11 +229,10 @@ test("document helpers accept toolkit collection documents without widening fiel
 		CoreCollectionDocument<"page">["collectionKey"]
 	>().toEqualTypeOf<"page">();
 
-	type ToolkitDocumentView = ReturnType<
-		typeof asDocument<CoreCollectionDocument<"page">>
-	>;
+	const wrapDocument = (document: CoreCollectionDocument<"page">) =>
+		createDocumentView({ document });
 
-	expectTypeOf<ToolkitDocumentView>().toMatchTypeOf<{
+	expectTypeOf<ReturnType<typeof wrapDocument>>().toMatchTypeOf<{
 		collectionKey: "page";
 		field: (key: "page_title") => {
 			value: () => CoreCollectionDocumentTranslations<string | null>;
@@ -236,8 +240,8 @@ test("document helpers accept toolkit collection documents without widening fiel
 	}>();
 });
 
-test("asDocument accepts optional toolkit documents for direct response wrapping", () => {
-	const page = asDocument({
+test("createDocumentView accepts optional toolkit documents for direct response wrapping", () => {
+	const page = createDocumentView({
 		document: undefined as CoreCollectionDocument<"page"> | undefined,
 		locale: "en",
 	});
@@ -256,8 +260,8 @@ test("asDocument accepts optional toolkit documents for direct response wrapping
 	>();
 });
 
-test("asDocuments preserves toolkit document and locale types", () => {
-	const pages = asDocuments({
+test("createDocumentViews preserves toolkit document and locale types", () => {
+	const pages = createDocumentViews({
 		documents: [] as Array<CoreCollectionDocument<"page">>,
 		locale: "en",
 	});
@@ -287,10 +291,45 @@ test("document client methods infer the collection key through the response type
 	});
 
 	expectTypeOf(singleResponse).toEqualTypeOf<
-		Promise<LucidClientResponse<DocumentsGetSingleResponse<"page">>>
+		Promise<DocumentsGetSingleResponse<"page">>
 	>();
 	expectTypeOf(multipleResponse).toEqualTypeOf<
-		Promise<LucidClientResponse<DocumentsGetMultipleResponse<"page">>>
+		Promise<DocumentsGetMultipleResponse<"page">>
+	>();
+});
+
+test("document results expose typed data and shared refs directly", () => {
+	type SingleSuccess = Extract<
+		DocumentsGetSingleResponse<"page">,
+		{ error: undefined }
+	>;
+	type MultipleSuccess = Extract<
+		DocumentsGetMultipleResponse<"page">,
+		{ error: undefined }
+	>;
+	expectTypeOf<SingleSuccess["data"]>().toEqualTypeOf<
+		CollectionDocument<"page">
+	>();
+	expectTypeOf<MultipleSuccess["data"]>().toEqualTypeOf<
+		Array<CollectionDocument<"page">>
+	>();
+	expectTypeOf<SingleSuccess["refs"]>().toEqualTypeOf<Refs | undefined>();
+	expectTypeOf<SingleSuccess["response"]>().toEqualTypeOf<Response>();
+
+	const wrapResult = (result: DocumentsGetSingleResponse<"page">) =>
+		createDocumentView({
+			document: result.data,
+			refs: result.refs,
+			locale: "en",
+		});
+	expectTypeOf<ReturnType<typeof wrapResult>>().toMatchTypeOf<
+		| {
+				collectionKey: "page";
+				field: (key: "page_title") => {
+					value: () => string | null | undefined;
+				};
+		  }
+		| undefined
 	>();
 });
 
@@ -389,18 +428,14 @@ test("document client methods narrow version from the collection key", () => {
 			collectionKey: "page",
 			version: "published",
 		}),
-	).toEqualTypeOf<
-		Promise<LucidClientResponse<DocumentsGetSingleResponse<"page">>>
-	>();
+	).toEqualTypeOf<Promise<DocumentsGetSingleResponse<"page">>>();
 
 	expectTypeOf(
 		client.getMultiple({
 			collectionKey: "page",
 			version: "latest",
 		}),
-	).toEqualTypeOf<
-		Promise<LucidClientResponse<DocumentsGetMultipleResponse<"page">>>
-	>();
+	).toEqualTypeOf<Promise<DocumentsGetMultipleResponse<"page">>>();
 
 	client.getMultiple({
 		collectionKey: "page",

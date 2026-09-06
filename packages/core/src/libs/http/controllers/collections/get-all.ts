@@ -24,7 +24,7 @@ const getAllController = factory.createHandlers(
 		}),
 	}),
 	authenticate(),
-	async (c) => {
+	async (c): Promise<Response> => {
 		const context = createServiceContext(c);
 		const collectionsRes = await serviceWrapper(collectionServices.getAll, {
 			transaction: false,

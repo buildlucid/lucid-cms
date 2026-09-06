@@ -2,7 +2,7 @@
 
 > The official client package for Lucid CMS
 
-The Lucid CMS client provides a lightweight way to call Lucid's public document, media, and locale endpoints from browsers, edge runtimes, and modern Node environments. It returns the Lucid response body as-is and never throws request or response errors.
+The Lucid CMS client provides a lightweight way to call Lucid's public document, media, and locale endpoints from browsers, edge runtimes, and modern Node environments. It unwraps response data and returns shared refs and response metadata alongside it. It never throws request or response errors.
 
 ## Installation
 
@@ -121,10 +121,10 @@ const locales = await client.locales.getAll();
 
 ## Document Helpers
 
-You can also wrap a document response with `asDocument` to get locale-aware field and brick helpers without changing the raw client response shape.
+Wrap `result.data` with `createDocumentView` to read translated fields, bricks and refs. Pass `result.refs` as the shared refs registry. The original document, including its document metadata, remains available as `view.raw`.
 
 ```typescript
-import { asDocument, asDocuments, createClient } from "@lucidcms/client";
+import { createDocumentView, createDocumentViews, createClient } from "@lucidcms/client";
 
 const client = createClient({
     baseUrl: "https://example.com",
@@ -143,10 +143,10 @@ const response = await client.documents.getSingle({
 });
 
 if (!response.error) {
-    const page = asDocument({
+    const page = createDocumentView({
         locale: "en",
-        document: response.data.data,
-        refs: response.data.refs,
+        document: response.data,
+        refs: response.refs,
     });
 
     const title = page.field("page_title").value();
@@ -167,7 +167,7 @@ if (!response.error) {
 }
 ```
 
-For a multiple-document response, use `asDocuments` to apply the same options to every document:
+For a multiple-document response, use `createDocumentViews` to apply the same options to every document:
 
 ```typescript
 const response = await client.documents.getMultiple({
@@ -176,10 +176,10 @@ const response = await client.documents.getMultiple({
 });
 
 if (!response.error) {
-    const pages = asDocuments({
+    const pages = createDocumentViews({
         locale: "en",
-        documents: response.data.data,
-        refs: response.data.refs,
+        documents: response.data,
+        refs: response.refs,
     });
 
     for (const page of pages) {
@@ -215,7 +215,7 @@ const response = await client.documents.getSingle({
 if (response.error) {
     console.error(response.error.message);
 } else {
-    console.log(response.data.data);
+    console.log(response.data);
 }
 ```
 
@@ -285,7 +285,7 @@ const preview = setupPreview();
 window.addEventListener("pagehide", preview.cleanup, { once: true });
 ```
 
-For click-to-field targeting, pass the active preview state to `asDocument({ document, preview: true })` and spread `field.preview()` onto the element rendering that field. It returns an empty object outside preview mode; consumers should not construct preview attributes or messages directly.
+For click-to-field targeting, pass the active preview state to `createDocumentView({ document, preview: true })` and spread `field.preview()` onto the element rendering that field. It returns an empty object outside preview mode; consumers should not construct preview attributes or messages directly.
 
 ## Toolkit Toolbar Helper
 

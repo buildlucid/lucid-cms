@@ -43,7 +43,7 @@ const getMultipleController = factory.createHandlers(
 	externalScopes([ExternalScopes.MediaRead]),
 	validate("query", controllerSchemas.content.getMultiple.query.string),
 	cache({
-		ttl: minutesToSeconds(5),
+		ttlSeconds: minutesToSeconds(5),
 		mode: "include-query",
 		tags: [cacheKeys.http.tags.contentMedia],
 	}),

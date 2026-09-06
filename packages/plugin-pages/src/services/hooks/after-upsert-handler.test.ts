@@ -13,7 +13,12 @@ import afterUpsertHandler from "./after-upsert-handler.js";
 
 const routeGroup = new CollectionBuilder("route-group", {
 	mode: "multiple",
-	details: { name: "Route groups", singularName: "Route group" },
+	details: {
+		labels: {
+			singular: "Route group",
+			plural: "Route groups",
+		},
+	},
 }).addText("route_key");
 
 describe("pages afterUpsert hook", () => {

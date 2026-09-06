@@ -31,14 +31,14 @@ export type CoreToolkit = {
 /**
  * Toolkit services registered by plugins.
  *
- * Plugins extend this interface through module augmentation so their services
- * are available anywhere Lucid exposes the toolkit.
+ * Plugins extend this interface through module augmentation to describe their
+ * services. A service is only available when its plugin is configured.
  */
 // biome-ignore lint/suspicious/noEmptyInterface: plugins merge their services into this interface
 export interface ToolkitServices {}
 
-/** Server-side helpers bound to a Lucid service context. */
-export type Toolkit = CoreToolkit & ToolkitServices;
+/** Core helpers and any configured plugin services bound to a service context. */
+export type Toolkit = CoreToolkit & Partial<ToolkitServices>;
 
 export type ToolkitDefinitionInput<
 	TKey extends string = string,

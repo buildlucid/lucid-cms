@@ -1,7 +1,7 @@
 import { confirm } from "@inquirer/prompts";
 import type {
-	Config,
 	EnvironmentVariables,
+	ResolvedLucidConfig,
 	ServiceContext,
 } from "../../../exports/types.js";
 import { syncServices } from "../../../services/index.js";
@@ -33,11 +33,9 @@ import {
 } from "../services/migration-approval.js";
 import { reportMigrationAssessment } from "../services/migration-report.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 
 type MigrateCommandOptions = {
 	skipSyncSteps?: boolean;
-	skipEnvValidation?: boolean;
 	yes?: boolean;
 	allowDestructive?: boolean;
 	remote?: boolean;
@@ -78,7 +76,7 @@ const migrateCommand = (
 		mode: "process" | "return";
 	} & (
 		| {
-				config: Config;
+				config: ResolvedLucidConfig;
 				translationStore: TranslationStore;
 				migrationFiles: ResourceFile[];
 		  }
@@ -86,7 +84,7 @@ const migrateCommand = (
 	),
 ) => {
 	return async (options?: MigrateCommandOptions) => {
-		let config: Config | undefined;
+		let config: ResolvedLucidConfig | undefined;
 		let env: EnvironmentVariables | undefined = props?.env;
 		let runtimeContext: AdapterRuntimeContext | undefined =
 			props?.runtimeContext;
@@ -146,14 +144,6 @@ const migrateCommand = (
 						files: res.resources.files.translations,
 					})
 				).translationStore;
-
-				if (options?.skipEnvValidation !== true) {
-					const envValid = await validateEnvVars({
-						envSchema: res.envSchema,
-						env: res.env,
-					});
-					if (!envValid) return await stopCommand(1);
-				}
 			}
 			if (!config || !translationStore) {
 				throw new Error("Lucid could not resolve its migration configuration.");

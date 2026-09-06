@@ -16,16 +16,17 @@ export const parseJsonResponse = async (
 ): Promise<ParsedJsonResponse> => {
 	try {
 		const text = await response.text();
-		if (!text) {
-			return {
-				ok: true,
-				data: undefined,
-			};
+		const data: unknown = text ? JSON.parse(text) : undefined;
+		if (
+			response.ok &&
+			(typeof data !== "object" || data === null || !("data" in data))
+		) {
+			throw new TypeError("Lucid's response body must include data.");
 		}
 
 		return {
 			ok: true,
-			data: JSON.parse(text),
+			data,
 		};
 	} catch (error) {
 		return {

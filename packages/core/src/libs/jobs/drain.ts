@@ -6,7 +6,7 @@ import { consumeJob } from "./consume/index.js";
 const processJobs = async (
 	context: ServiceContext,
 	jobIds: readonly string[],
-	concurrentLimit: number,
+	maxConcurrentJobs: number,
 ) => {
 	let nextIndex = 0;
 	let processed = 0;
@@ -24,7 +24,7 @@ const processJobs = async (
 	};
 
 	await Promise.all(
-		Array.from({ length: Math.min(concurrentLimit, jobIds.length) }, () =>
+		Array.from({ length: Math.min(maxConcurrentJobs, jobIds.length) }, () =>
 			run(),
 		),
 	);
@@ -36,7 +36,7 @@ export const drainJobs: ServiceFn<
 	[
 		data: {
 			limit: number;
-			concurrentLimit: number;
+			maxConcurrentJobs: number;
 		},
 	],
 	{ found: number; processed: number }
@@ -50,7 +50,7 @@ export const drainJobs: ServiceFn<
 	const processed = await processJobs(
 		context,
 		candidates.data.map((candidate) => candidate.job_id),
-		data.concurrentLimit,
+		data.maxConcurrentJobs,
 	);
 
 	return {

@@ -50,24 +50,28 @@ test("generates collection-aware client document types that lean on the public L
 	const PageCollection = new CollectionBuilder("page", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.page.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.page.singularName", {
-				defaultMessage: "Page",
-			}),
-		},
-		localized: { locales: ["en", "fr"] },
-		environments: [
-			{
-				key: "published",
-				name: copy("admin:tests.environments.published.name", {
-					defaultMessage: "Published",
+			labels: {
+				singular: copy("admin:tests.collections.page.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.page.name", {
+					defaultMessage: "Pages",
 				}),
 			},
-		],
+		},
+		localized: { locales: ["en", "fr"] },
 		bricks: {
 			builder: [BannerBrick],
+		},
+		publishing: {
+			targets: [
+				{
+					key: "published",
+					label: copy("admin:tests.environments.published.name", {
+						defaultMessage: "Published",
+					}),
+				},
+			],
 		},
 	})
 		.addText("_page_title", {
@@ -89,7 +93,12 @@ test("generates collection-aware client document types that lean on the public L
 		.endRepeater();
 	const ArticleCollection = new CollectionBuilder("article", {
 		mode: "multiple",
-		details: { name: "Articles", singularName: "Article" },
+		details: {
+			labels: {
+				singular: "Article",
+				plural: "Articles",
+			},
+		},
 		localized: { locales: ["de"], defaultLocale: "de" },
 	}).addText("title", { localized: true });
 
@@ -153,27 +162,28 @@ test("generates collection-aware client document types that lean on the public L
 		expect(typesContent).not.toContain('"admin:custom.admin.title": true;');
 		expect(typesContent).not.toContain('"server:custom.server.error": true;');
 		expect(clientContent).toContain(`from "@lucidcms/core/types";`);
-		expect(clientContent).toContain(
-			`export interface GeneratedCollectionDocumentLocaleCodesByCollection {
+		expect(
+			clientContent,
+		).toContain(`export interface GeneratedCollectionDocumentLocaleCodesByCollection {
 	"page": "en" | "fr";
 	"article": "de";
-}`,
-		);
+}`);
 		expect(clientContent).toContain(
 			`export type CollectionDocumentLocaleCode<TCollectionKey extends string = string> = TCollectionKey extends keyof GeneratedCollectionDocumentLocaleCodesByCollection ? Extract<GeneratedCollectionDocumentLocaleCodesByCollection[TCollectionKey], string> : string;`,
 		);
-		expect(clientContent).toContain(
-			`export type PageCollectionDocumentFields = {
+		expect(
+			clientContent,
+		).toContain(`export type PageCollectionDocumentFields = {
 	"_page_title": CollectionDocumentTranslations<string | null, "page">;
 	"_related_page": Array<RelationFieldValue<"page">>;
 	"_related_content": Array<RelationFieldValue<"page" | "blog">>;
 	"sections": Array<{
 		"_section_title": string | null;
 	}>;
-}`,
-		);
-		expect(clientContent).toContain(
-			`export type PageCollectionDocumentFilters = {
+}`);
+		expect(
+			clientContent,
+		).toContain(`export type PageCollectionDocumentFilters = {
 	"id"?: FilterObject;
 	"createdBy"?: FilterObject;
 	"updatedBy"?: FilterObject;
@@ -257,8 +267,7 @@ test("generates collection-aware client document types that lean on the public L
 			"_label"?: FilterObject;
 		};
 	};
-}`,
-		);
+}`);
 		expect(clientContent).toContain(
 			`export type PageCollectionDocumentSortKey = "createdAt" | "updatedAt" | "_page_title";`,
 		);
@@ -274,14 +283,14 @@ test("generates collection-aware client document types that lean on the public L
 		expect(clientContent).toContain(
 			`export type CollectionDocumentKey = GeneratedCollectionDocumentKey | (string & {});`,
 		);
-		expect(clientContent).toContain(
-			`export type PageBannerBuilderBrickFields = {
+		expect(
+			clientContent,
+		).toContain(`export type PageBannerBuilderBrickFields = {
 	"title": CollectionDocumentTranslations<string | null, "page">;
 	"call_to_actions": Array<{
 		"label": string | null;
 	}>;
-}`,
-		);
+}`);
 		expect(clientContent).toContain(
 			`export type CollectionDocument<TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey> = CoreCollectionDocument<TCollectionKey>;`,
 		);

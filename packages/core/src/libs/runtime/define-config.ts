@@ -1,4 +1,3 @@
-import { produce } from "immer";
 import type { LucidConfigDefinition } from "./types.js";
 
 /**
@@ -9,7 +8,7 @@ import type { LucidConfigDefinition } from "./types.js";
  *
  * @example
  * ```ts
- * import { configureLucid, z } from "@lucidcms/core";
+ * import { defineConfig, z } from "@lucidcms/core";
  * import { node } from "@lucidcms/runtime-node";
  * import { sqlite } from "@lucidcms/db-sqlite";
  *
@@ -17,7 +16,7 @@ import type { LucidConfigDefinition } from "./types.js";
  *   SECRET: z.string().length(64),
  * });
  *
- * export default configureLucid({
+ * export default defineConfig({
  *   runtime: node,
  *   db: sqlite,
  *   config: (env) => ({
@@ -28,10 +27,10 @@ import type { LucidConfigDefinition } from "./types.js";
  * });
  * ```
  */
-const configureLucid = (
+const defineConfig = (
 	definition: LucidConfigDefinition,
 ): LucidConfigDefinition => {
-	return produce(definition, () => {});
+	return definition;
 };
 
-export default configureLucid;
+export default defineConfig;

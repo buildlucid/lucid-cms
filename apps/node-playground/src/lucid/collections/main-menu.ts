@@ -4,13 +4,15 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	mode: "multiple",
 	group: {
 		key: "navigation",
-		name: "Navigation",
+		label: "Navigation",
 		order: 1,
 	},
 	details: {
-		name: "Navigation Menus",
-		singularName: "Navigation Menu",
-		summary: "Manage website and documentation navigation menus.",
+		labels: {
+			singular: "Navigation Menu",
+			plural: "Navigation Menus",
+		},
+		description: "Manage website and documentation navigation menus.",
 	},
 	revisions: true,
 	localized: true,
@@ -97,14 +99,12 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		collection: ["page", "blog"],
 		details: {
 			label: "Document",
-			summary: "Link this item to a CMS document.",
+			description: "Link this item to a CMS document.",
 		},
 		multiple: false,
 		ui: {
 			condition: {
-				groups: [
-					[{ field: "linkType", operator: "equals", value: "document" }],
-				],
+				all: [{ field: "linkType", operator: "equals", value: "document" }],
 			},
 		},
 		validation: {
@@ -114,12 +114,12 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	.addLink("link", {
 		details: {
 			label: "Link",
-			summary: "Link this item to a custom URL.",
+			description: "Link this item to a custom URL.",
 		},
 		localized: true,
 		ui: {
 			condition: {
-				groups: [[{ field: "linkType", operator: "equals", value: "link" }]],
+				all: [{ field: "linkType", operator: "equals", value: "link" }],
 			},
 		},
 		validation: {
@@ -139,8 +139,8 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		default: false,
 		ui: {
 			condition: {
-				groups: [
-					[{ field: "location", operator: "equals", value: "documentation" }],
+				all: [
+					{ field: "location", operator: "equals", value: "documentation" },
 				],
 			},
 		},
@@ -148,16 +148,14 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	.addSection("badge", {
 		details: {
 			label: "Badge",
-			summary: "Optional badge shown beside documentation menu items.",
+			description: "Optional badge shown beside documentation menu items.",
 		},
 		output: "inline",
 		ui: {
 			condition: {
-				groups: [
-					[
-						{ field: "location", operator: "equals", value: "documentation" },
-						{ field: "showBadge", operator: "equals", value: true },
-					],
+				all: [
+					{ field: "location", operator: "equals", value: "documentation" },
+					{ field: "showBadge", operator: "equals", value: true },
 				],
 			},
 		},
@@ -246,13 +244,13 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		collection: ["page", "blog"],
 		details: {
 			label: "Document",
-			summary: "Link this item to a CMS document.",
+			description: "Link this item to a CMS document.",
 		},
 		multiple: false,
 		ui: {
 			condition: {
-				groups: [
-					[{ field: "childLinkType", operator: "equals", value: "document" }],
+				all: [
+					{ field: "childLinkType", operator: "equals", value: "document" },
 				],
 			},
 		},
@@ -263,14 +261,12 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	.addLink("childLink", {
 		details: {
 			label: "Link",
-			summary: "Link this item to a custom URL.",
+			description: "Link this item to a custom URL.",
 		},
 		localized: true,
 		ui: {
 			condition: {
-				groups: [
-					[{ field: "childLinkType", operator: "equals", value: "link" }],
-				],
+				all: [{ field: "childLinkType", operator: "equals", value: "link" }],
 			},
 		},
 		validation: {
@@ -290,8 +286,8 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		default: false,
 		ui: {
 			condition: {
-				groups: [
-					[{ field: "location", operator: "equals", value: "documentation" }],
+				all: [
+					{ field: "location", operator: "equals", value: "documentation" },
 				],
 			},
 		},
@@ -299,16 +295,15 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	.addSection("childBadge", {
 		details: {
 			label: "Badge",
-			summary: "Optional badge shown beside documentation child menu items.",
+			description:
+				"Optional badge shown beside documentation child menu items.",
 		},
 		output: "inline",
 		ui: {
 			condition: {
-				groups: [
-					[
-						{ field: "location", operator: "equals", value: "documentation" },
-						{ field: "childShowBadge", operator: "equals", value: true },
-					],
+				all: [
+					{ field: "location", operator: "equals", value: "documentation" },
+					{ field: "childShowBadge", operator: "equals", value: true },
 				],
 			},
 		},
@@ -397,19 +392,17 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		collection: ["page", "blog"],
 		details: {
 			label: "Document",
-			summary: "Link this item to a CMS document.",
+			description: "Link this item to a CMS document.",
 		},
 		multiple: false,
 		ui: {
 			condition: {
-				groups: [
-					[
-						{
-							field: "grandchildLinkType",
-							operator: "equals",
-							value: "document",
-						},
-					],
+				all: [
+					{
+						field: "grandchildLinkType",
+						operator: "equals",
+						value: "document",
+					},
 				],
 			},
 		},
@@ -420,19 +413,17 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	.addLink("grandchildLink", {
 		details: {
 			label: "Link",
-			summary: "Link this item to a custom URL.",
+			description: "Link this item to a custom URL.",
 		},
 		localized: true,
 		ui: {
 			condition: {
-				groups: [
-					[
-						{
-							field: "grandchildLinkType",
-							operator: "equals",
-							value: "link",
-						},
-					],
+				all: [
+					{
+						field: "grandchildLinkType",
+						operator: "equals",
+						value: "link",
+					},
 				],
 			},
 		},
@@ -453,8 +444,8 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 		default: false,
 		ui: {
 			condition: {
-				groups: [
-					[{ field: "location", operator: "equals", value: "documentation" }],
+				all: [
+					{ field: "location", operator: "equals", value: "documentation" },
 				],
 			},
 		},
@@ -462,17 +453,15 @@ const MainMenuCollection = new CollectionBuilder("main-menu", {
 	.addSection("grandchildBadge", {
 		details: {
 			label: "Badge",
-			summary:
+			description:
 				"Optional badge shown beside documentation grandchild menu items.",
 		},
 		output: "inline",
 		ui: {
 			condition: {
-				groups: [
-					[
-						{ field: "location", operator: "equals", value: "documentation" },
-						{ field: "grandchildShowBadge", operator: "equals", value: true },
-					],
+				all: [
+					{ field: "location", operator: "equals", value: "documentation" },
+					{ field: "grandchildShowBadge", operator: "equals", value: true },
 				],
 			},
 		},

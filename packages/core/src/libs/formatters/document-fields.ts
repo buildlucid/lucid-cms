@@ -1,19 +1,19 @@
 import crypto from "node:crypto";
 import type {
-	CFConfig,
-	Config,
 	DocumentField,
 	DocumentFieldPlainValue,
 	DocumentFieldValueMap,
+	FieldConfig,
 	FieldTypes,
 	FieldValue,
 	InternalDocumentField,
 	InternalDocumentFieldGroup,
 	Refs,
-	Select,
+	ResolvedLucidConfig,
 } from "../../exports/types.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import fieldConfigs from "../collection/custom-fields/field-configs.js";
 import { isStorageMode } from "../collection/custom-fields/storage/index.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
@@ -23,6 +23,7 @@ import type {
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import DocumentBricksFormatter from "./document-bricks.js";
@@ -35,7 +36,7 @@ export interface FieldFormatMeta {
 	localization: ResolvedCollectionLocalization;
 	/** Used to help workout the target brick schema item and the table name. Set to `undefined` if the brick table you're creating fields for is the `document-fields` one */
 	brickKey: string | undefined;
-	config: Config;
+	config: ResolvedLucidConfig;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 }
 
@@ -61,10 +62,12 @@ interface IntermediaryFieldValues {
 const getFieldValues = (
 	data: FieldFormatData,
 	meta: FieldFormatMeta & {
-		fieldConfig: CFConfig<FieldTypes>;
+		fieldConfig: FieldConfig<FieldTypes>;
 	},
 ): IntermediaryFieldValues[] => {
-	const fieldInstance = meta.builder.fields.get(meta.fieldConfig.key);
+	const fieldInstance = getFieldBuilderState(meta.builder).fields.get(
+		meta.fieldConfig.key,
+	);
 	if (!fieldInstance) return [];
 
 	const databaseConfig = fieldConfigs[meta.fieldConfig.type].database;
@@ -109,12 +112,12 @@ const isTreeTableFieldType = (type: FieldTypes): boolean => {
 };
 
 const getTreeTableChildFieldConfig = (
-	field: CFConfig<FieldTypes>,
-): CFConfig<FieldTypes>[] | null => {
+	field: FieldConfig<FieldTypes>,
+): FieldConfig<FieldTypes>[] | null => {
 	if (!isTreeTableFieldType(field.type)) return null;
 	if (!("fields" in field)) return null;
 	if (!Array.isArray(field.fields)) return null;
-	return field.fields as CFConfig<FieldTypes>[];
+	return field.fields as FieldConfig<FieldTypes>[];
 };
 
 /**
@@ -144,7 +147,7 @@ const formatMultiple = (
 const buildFieldTree = (
 	data: FieldFormatData,
 	meta: FieldFormatMeta & {
-		fieldConfig: CFConfig<FieldTypes>[];
+		fieldConfig: FieldConfig<FieldTypes>[];
 		treeLevel?: number;
 		groupRef?: string;
 	},
@@ -222,11 +225,13 @@ const buildField = (
 		refs?: Refs | null;
 	},
 	meta: FieldFormatMeta & {
-		fieldConfig: CFConfig<FieldTypes>;
+		fieldConfig: FieldConfig<FieldTypes>;
 		groupRef?: string;
 	},
 ): InternalDocumentField | null => {
-	const cfInstance = meta.builder.fields.get(meta.fieldConfig.key);
+	const cfInstance = getFieldBuilderState(meta.builder).fields.get(
+		meta.fieldConfig.key,
+	);
 	if (!cfInstance) return null;
 	const resource =
 		"resource" in meta.fieldConfig ? meta.fieldConfig.resource : undefined;
@@ -290,8 +295,8 @@ const buildField = (
 const buildTreeGroups = (
 	data: FieldFormatData,
 	meta: FieldFormatMeta & {
-		treeFieldConfig: CFConfig<FieldTypes>;
-		treeChildFields: CFConfig<FieldTypes>[];
+		treeFieldConfig: FieldConfig<FieldTypes>;
+		treeChildFields: FieldConfig<FieldTypes>[];
 		treeLevel: number;
 		groupRef?: string;
 	},
@@ -399,8 +404,8 @@ const flattenFieldValue = (
 };
 
 const isStructuralFieldConfig = (
-	config: CFConfig<FieldTypes>,
-): config is CFConfig<"section"> | CFConfig<"collapsible"> => {
+	config: FieldConfig<FieldTypes>,
+): config is FieldConfig<"section"> | FieldConfig<"collapsible"> => {
 	return config.type === "section" || config.type === "collapsible";
 };
 
@@ -412,7 +417,7 @@ const isStructuralFieldConfig = (
 const collectContentFieldValues = (
 	target: DocumentFieldValueMap,
 	fieldMap: Map<string, InternalDocumentField>,
-	configs: CFConfig<FieldTypes>[],
+	configs: FieldConfig<FieldTypes>[],
 ): void => {
 	for (const config of configs) {
 		if (config.type === "tab") {
@@ -437,7 +442,7 @@ const collectContentFieldValues = (
 		if (field.groups) {
 			const childConfigs =
 				"fields" in config && Array.isArray(config.fields)
-					? (config.fields as CFConfig<FieldTypes>[])
+					? (config.fields as FieldConfig<FieldTypes>[])
 					: undefined;
 			target[config.key] = field.groups.map((group) =>
 				flattenFields(group.fields || [], childConfigs),
@@ -456,7 +461,7 @@ const collectContentFieldValues = (
  */
 const flattenFields = (
 	fields: InternalDocumentField[],
-	contentFieldTree?: CFConfig<FieldTypes>[],
+	contentFieldTree?: FieldConfig<FieldTypes>[],
 ): DocumentFieldValueMap => {
 	if (!contentFieldTree) {
 		return fields.reduce((acc, field) => {

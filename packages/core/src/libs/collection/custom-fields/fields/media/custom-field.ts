@@ -4,11 +4,11 @@ import { copy } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -27,7 +27,7 @@ class MediaCustomField extends CustomField<"media"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"media">) {
+	constructor(key: string, props?: FieldOptions<"media">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -41,7 +41,7 @@ class MediaCustomField extends CustomField<"media"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			localized: this.props?.localized ?? false,
 			default: this.props?.default ?? [],
@@ -54,7 +54,7 @@ class MediaCustomField extends CustomField<"media"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"media">;
+		} satisfies FieldConfig<"media">;
 	}
 	override normalizeInputValue(value: unknown) {
 		return clampRelationInputValue(value, this.config.multiple);
@@ -106,7 +106,7 @@ class MediaCustomField extends CustomField<"media"> {
 		return normalizeStoredRelationValues(
 			value,
 			this.config.multiple,
-		) satisfies CFResponse<"media">["value"];
+		) satisfies FieldResponse<"media">["value"];
 	}
 	override get relationValueColumn() {
 		return "media_id";

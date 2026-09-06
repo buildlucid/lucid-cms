@@ -48,10 +48,10 @@ const promoteVersion: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 
 	if (data.requirePublishOperationForEnvironmentTarget === true) {
-		const isEnvironmentTarget = collectionRes.data.getData.environments.some(
-			(environment) => environment.key === data.toVersionType,
-		);
-
+		const isEnvironmentTarget =
+			collectionRes.data.getData.publishing.targets.some(
+				(environment) => environment.key === data.toVersionType,
+			);
 		if (isEnvironmentTarget) {
 			return {
 				error: {
@@ -199,7 +199,8 @@ const promoteVersion: ServiceFn<
 	//-------------------------------------------------------------------------------
 	// Mutate/create revisions and update the document
 	const shouldCreateRevision =
-		collectionRes.data.getData.revisions && data.createRevision !== false;
+		collectionRes.data.getData.revisions.enabled &&
+		data.createRevision !== false;
 
 	const [, upsertDocumentRes, createVersionRes] = await Promise.all([
 		shouldCreateRevision

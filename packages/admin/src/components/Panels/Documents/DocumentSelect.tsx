@@ -316,7 +316,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		tableHeadColumns(getCollectionFieldIncludes()),
 	);
 	const workflowHeadColumn = createMemo(() =>
-		activeCollection()?.workflow
+		activeCollection()?.publishing.workflow
 			? [
 					{
 						label: T()("documents.workflow.stage"),
@@ -334,13 +334,13 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: activeCollection()?.details.name,
+			value: activeCollection()?.details.labels.plural,
 		}),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: activeCollection()?.details.singularName,
+				value: activeCollection()?.details.labels.singular,
 			}) || T()("common.collection"),
 	);
 	const isSingleCollection = createMemo(
@@ -371,7 +371,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				value: collectionKey,
 				label:
 					helpers.getLocaleValue({
-						value: collection?.details.name,
+						value: collection?.details.labels.plural,
 						fallback: collectionKey,
 					}) || collectionKey,
 			};

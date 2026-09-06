@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AnyJobDefinition } from "./types.js";
 
 /** Marks a job definition and keeps its runtime handlers out of public fields. */
@@ -6,7 +6,10 @@ export const jobDefinitionInternal = Symbol(
 	"@lucidcms/core/job-definition-internal",
 );
 
-const registries = new WeakMap<Config, ReadonlyMap<string, AnyJobDefinition>>();
+const registries = new WeakMap<
+	ResolvedLucidConfig,
+	ReadonlyMap<string, AnyJobDefinition>
+>();
 
 /** Checks whether a config value was created with `defineJob`. */
 export const isJobDefinition = (value: unknown): value is AnyJobDefinition =>
@@ -28,7 +31,7 @@ export const getJobDefinitionKey = (definition: {
 
 /** Returns the registered core, project and plugin job definitions. */
 export const getJobRegistry = (
-	config: Config,
+	config: ResolvedLucidConfig,
 ): ReadonlyMap<string, AnyJobDefinition> => {
 	const existing = registries.get(config);
 	if (existing) return existing;
@@ -45,6 +48,6 @@ export const getJobRegistry = (
 
 /** Finds the definition registered for a stored job's name and version. */
 export const getRegisteredJob = (
-	config: Config,
+	config: ResolvedLucidConfig,
 	job: { name: string; version: number },
 ) => getJobRegistry(config).get(getJobDefinitionKey(job));

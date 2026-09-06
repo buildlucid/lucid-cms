@@ -162,9 +162,9 @@ const stripExportModifier = (statementText: string) =>
 		.replace(/^export\s+/, "");
 
 /**
- * Finds the object passed to `export default configureLucid(...)`.
+ * Finds the object passed to `export default defineConfig(...)`.
  */
-const findDefaultConfigureCall = (sourceFile: ts.SourceFile) => {
+const findDefaultConfigCall = (sourceFile: ts.SourceFile) => {
 	for (const statement of sourceFile.statements) {
 		if (!ts.isExportAssignment(statement)) continue;
 		if (!ts.isCallExpression(statement.expression)) continue;
@@ -177,7 +177,7 @@ const findDefaultConfigureCall = (sourceFile: ts.SourceFile) => {
 
 	throw new LucidError({
 		message:
-			"Lucid config artifact splitting requires `export default configureLucid({ runtime, db, config })`.",
+			"Lucid config artifact splitting requires `export default defineConfig({ runtime, db, config })`.",
 	});
 };
 
@@ -196,7 +196,7 @@ const getPropertyName = (name: ts.PropertyName): string | undefined => {
 const getObjectPropertyExpression = (
 	object: ts.ObjectLiteralExpression,
 	propertyName: string,
-): ts.Expression => {
+): ts.Expression | ts.MethodDeclaration | undefined => {
 	for (const property of object.properties) {
 		if (
 			ts.isShorthandPropertyAssignment(property) &&
@@ -206,6 +206,12 @@ const getObjectPropertyExpression = (
 		}
 
 		if (
+			ts.isMethodDeclaration(property) &&
+			getPropertyName(property.name) === propertyName
+		)
+			return property;
+
+		if (
 			ts.isPropertyAssignment(property) &&
 			getPropertyName(property.name) === propertyName
 		) {
@@ -213,9 +219,7 @@ const getObjectPropertyExpression = (
 		}
 	}
 
-	throw new LucidError({
-		message: `Lucid config is missing the top-level \`${propertyName}\` property.`,
-	});
+	return undefined;
 };
 
 /**
@@ -409,6 +413,21 @@ const renderImport = (
 	)};`;
 };
 
+/** Emits object methods as standalone functions while preserving their parameters and body. */
+const artifactExpressionText = (
+	expression: ts.Expression | ts.MethodDeclaration,
+	sourceFile: ts.SourceFile,
+) => {
+	if (!ts.isMethodDeclaration(expression))
+		return expression.getText(sourceFile);
+	const async = expression.modifiers?.some(
+		(modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword,
+	)
+		? "async "
+		: "";
+	return `${async}function${expression.asteriskToken ? "*" : ""}${sourceFile.text.slice(expression.name.end, expression.end)}`;
+};
+
 /**
  * Builds the source text for one split config artifact.
  */
@@ -416,13 +435,24 @@ const renderArtifactSource = (props: {
 	sourceFile: ts.SourceFile;
 	target: ConfigArtifactKey;
 	outputPath: string;
-	expression?: ts.Expression;
+	expression?: ts.Expression | ts.MethodDeclaration;
+	configure?: ts.Expression | ts.MethodDeclaration;
 	modules?: ResourceModuleFiles;
 }) => {
 	const { neededStatements, neededIdentifiers } = resolveNeededStatements(
 		props.sourceFile,
 		props.expression,
 	);
+	if (props.target === "config" && props.configure) {
+		const configureDependencies = resolveNeededStatements(
+			props.sourceFile,
+			props.configure,
+		);
+		for (const statement of configureDependencies.neededStatements)
+			neededStatements.add(statement);
+		for (const identifier of configureDependencies.neededIdentifiers)
+			neededIdentifiers.add(identifier);
+	}
 	const sections: string[] = [];
 
 	for (const statement of props.sourceFile.statements) {
@@ -452,10 +482,10 @@ const renderArtifactSource = (props: {
 	if (props.target === "env") {
 		if (props.expression) {
 			sections.push(
-				`export const env = ${props.expression.getText(props.sourceFile)};`,
+				`export const env = ${artifactExpressionText(props.expression, props.sourceFile)};`,
 			);
 		} else {
-			sections.push("export {};");
+			sections.push("export const env = undefined;");
 		}
 	} else {
 		if (!props.expression) {
@@ -498,23 +528,32 @@ const renderArtifactSource = (props: {
 				registrations.push(`${kind}: [${names.join(", ")}]`);
 			}
 			sections.push(
-				`const ${factoryName} = ${props.expression.getText(props.sourceFile)};`,
+				`const ${factoryName} = ${artifactExpressionText(props.expression, props.sourceFile)};`,
 			);
 			sections.push(
 				`export default (env) => ${registerName}(${factoryName}(env), { ${registrations.join(", ")} });`,
 			);
 		} else {
 			sections.push(
-				`export default ${props.expression.getText(props.sourceFile)};`,
+				`export default ${artifactExpressionText(props.expression, props.sourceFile)};`,
 			);
 		}
 	}
 
+	if (props.target === "config") {
+		let name = "lucidProjectConfigure";
+		for (let index = 1; props.sourceFile.text.includes(name); index++)
+			name = `lucidProjectConfigure${index}`;
+		sections.push(
+			`const ${name} = ${props.configure ? artifactExpressionText(props.configure, props.sourceFile) : "undefined"};`,
+		);
+		sections.push(`export { ${name} as configure };`);
+	}
 	return `${sections.join("\n\n")}\n`;
 };
 
 /**
- * Splits a `configureLucid` config file into runtime, db, env and config modules.
+ * Splits a defineConfig file into runtime, db, env and config modules.
  */
 const prepareConfigArtifacts = async (props: {
 	configPath: string;
@@ -529,7 +568,8 @@ const prepareConfigArtifacts = async (props: {
 		true,
 		getScriptKind(props.configPath),
 	);
-	const definition = findDefaultConfigureCall(sourceFile);
+	const definition = findDefaultConfigCall(sourceFile);
+	const configure = getObjectPropertyExpression(definition, "configure");
 	const expressions = {
 		config: getObjectPropertyExpression(definition, artifactProperties.config),
 		db: getObjectPropertyExpression(definition, artifactProperties.db),
@@ -558,6 +598,7 @@ const prepareConfigArtifacts = async (props: {
 					target,
 					outputPath: props.outputPath,
 					expression: expressions[target],
+					configure,
 					modules: props.resources?.modules,
 				}),
 			);

@@ -1,4 +1,3 @@
-import type { ZodType } from "zod";
 import type LucidDatabase from "../../libs/db/client/lucid-database.js";
 import type { DatabaseConnection } from "../../libs/db/types.js";
 import type { EmailAdapterInstance } from "../../libs/email/types.js";
@@ -11,13 +10,13 @@ import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 } from "../../libs/runtime/types.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidErrorData } from "../../types/errors.js";
 
 /** Inputs for building a service context from resolved Lucid runtime values. */
 export type CreateServiceContextOptions = {
 	/** Resolved Lucid config to build the service context from. */
-	config: Config;
+	config: ResolvedLucidConfig;
 	/** Live database connection owned by the current runtime or invocation. */
 	database: DatabaseConnection;
 	/** Prebuilt managed database boundary for the current runtime or invocation. */
@@ -50,7 +49,7 @@ export type CreateServiceContextOptions = {
 
 export type ServiceContext = {
 	db: LucidDatabase;
-	config: Config;
+	config: ResolvedLucidConfig;
 	env: EnvironmentVariables | null;
 	runtimeContext?: AdapterRuntimeContext;
 	queue: QueueAdapterInstance;
@@ -75,9 +74,8 @@ export type ServiceProps<T> = {
 };
 
 export type ServiceWrapperConfig = {
-	transaction: boolean; //* Decides whether the db queries should be within a transaction or not
-	schema?: ZodType<unknown>;
-	schemaArgIndex?: number; //* The index of the argument to parse the schema against
+	/** Start a transaction when supported. Existing transactions are reused. */
+	transaction: boolean;
 	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
 	logError?: boolean;
 };

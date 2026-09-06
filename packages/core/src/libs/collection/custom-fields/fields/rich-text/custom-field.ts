@@ -10,14 +10,14 @@ import { copy } from "../../../../i18n/index.js";
 import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
 	CustomFieldResponseFormatContext,
 	CustomFieldValidationError,
+	FieldConfig,
+	FieldOptions,
 	FieldRelationValidationInput,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -44,7 +44,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"rich-text">) {
+	constructor(key: string, props?: FieldOptions<"rich-text">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -57,7 +57,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			ai: this.props?.ai,
@@ -75,7 +75,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"rich-text">;
+		} satisfies FieldConfig<"rich-text">;
 	}
 	override get supportsAi() {
 		return true;
@@ -170,7 +170,7 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 	) {
 		const responseValue = (value ??
 			this.config.default ??
-			null) satisfies CFResponse<"rich-text">["value"];
+			null) satisfies FieldResponse<"rich-text">["value"];
 		if (!responseValue || !context) return responseValue;
 
 		return hydrateRichTextValue(responseValue, context);

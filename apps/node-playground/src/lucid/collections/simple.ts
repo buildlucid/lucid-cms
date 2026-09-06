@@ -5,8 +5,10 @@ import SimpleFixedBrick from "../bricks/simple-fixed.js";
 const SimpleCollection = new CollectionBuilder("simple", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.simple.name"),
-		singularName: copy("admin:collections.simple.singularName"),
+		labels: {
+			singular: copy("admin:collections.simple.singularName"),
+			plural: copy("admin:collections.simple.name"),
+		},
 	},
 	localized: { locales: ["fr"], defaultLocale: "fr" },
 	revisions: true,
@@ -30,7 +32,7 @@ const SimpleCollection = new CollectionBuilder("simple", {
 	.addRange("priceRange", {
 		details: {
 			label: copy("admin:collections.simple.fields.priceRange.label"),
-			summary: copy("admin:collections.simple.fields.priceRange.summary"),
+			description: copy("admin:collections.simple.fields.priceRange.summary"),
 		},
 		min: 0,
 		max: 100,

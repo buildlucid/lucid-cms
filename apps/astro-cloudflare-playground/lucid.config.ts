@@ -1,4 +1,4 @@
-import { configureLucid, z } from "@lucidcms/core";
+import { defineConfig, z } from "@lucidcms/core";
 import { postgres } from "@lucidcms/db-postgres";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
@@ -19,7 +19,7 @@ export const env = z.object({
 	ACCESS_TOKEN_SECRET: z.string(),
 });
 
-export default configureLucid({
+export default defineConfig({
 	runtime: cloudflare({
 		wrangler: "./wrangler.jsonc",
 	}),

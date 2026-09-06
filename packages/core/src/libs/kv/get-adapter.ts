@@ -1,11 +1,11 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import passthroughKVAdapter from "./adapters/passthrough.js";
 import type { KVAdapterInstance } from "./types.js";
 
 /** Resolves the configured KV adapter, using passthrough storage when omitted. */
 const getKVAdapter = async (
-	config: Pick<Config, "kv">,
+	config: Pick<ResolvedLucidConfig, "kv">,
 ): Promise<KVAdapterInstance> => {
 	if (!config.kv?.adapter) return passthroughKVAdapter();
 

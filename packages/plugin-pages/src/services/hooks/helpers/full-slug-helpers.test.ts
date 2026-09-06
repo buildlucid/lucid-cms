@@ -44,7 +44,12 @@ const collection = {
 } satisfies CollectionConfig;
 const collectionInstance = new CollectionBuilder("pages", {
 	mode: "multiple",
-	details: { name: "Pages", singularName: "Page" },
+	details: {
+		labels: {
+			singular: "Page",
+			plural: "Pages",
+		},
+	},
 });
 
 describe("page full-slug helpers", () => {

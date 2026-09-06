@@ -1,7 +1,5 @@
-import type z from "zod";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
-import type ConfigSchema from "../libs/config/config-schema.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
 import type { TableDefinition } from "../libs/db/client/table/definition.js";
 import type { MigrationDefinition } from "../libs/db/types.js";
@@ -29,7 +27,7 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../libs/media-storage/types.js";
-import type { LucidPluginResponse } from "../libs/plugins/types.js";
+import type { LucidPluginDefinition } from "../libs/plugins/types.js";
 import type {
 	QueueAdapter,
 	QueueAdapterInstance,
@@ -222,10 +220,6 @@ export interface LucidConfig {
 		 * The KV adapter to use. If not provided, Lucid will use the passthrough KV adapter.
 		 */
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
-		/**
-		 * Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter.
-		 */
-		namespace?: string | false;
 	};
 	/**
 	 * HTTP transport configuration.
@@ -498,7 +492,7 @@ export interface LucidConfig {
 	/**
 	 * A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config.
 	 */
-	plugins?: LucidPluginResponse[];
+	plugins?: LucidPluginDefinition[];
 	/**
 	 * Build options.
 	 */
@@ -524,7 +518,12 @@ export interface LucidConfig {
 	};
 }
 
-export interface Config extends z.infer<typeof ConfigSchema> {
+export interface ResolvedLucidConfig {
+	host?: string;
+	logger: {
+		level: LogLevel;
+		transport?: LogTransport;
+	};
 	discovery: Required<ResourceDiscovery>;
 	sources: ResourceSources;
 	db: DatabaseAdapter;
@@ -539,10 +538,6 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	telemetry: boolean;
 	kv?: {
 		adapter?: KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>;
-		/**
-		 * Prefix keys with a non-empty namespace. Set to false to disable namespacing for the default KV adapter.
-		 */
-		namespace?: string | false;
 	};
 	auth: {
 		password: {
@@ -552,8 +547,8 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	};
 	email: {
 		from?: {
-			email: string;
-			name: string;
+			email?: string;
+			name?: string;
 		};
 		adapter?:
 			| EmailAdapter
@@ -640,7 +635,7 @@ export interface Config extends z.infer<typeof ConfigSchema> {
 	};
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
-	plugins: Array<LucidPluginResponse>;
+	plugins: Array<LucidPluginDefinition>;
 	brand: {
 		name: string;
 	};

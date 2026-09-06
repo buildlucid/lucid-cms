@@ -1,7 +1,7 @@
 import type { LucidRoleTranslations } from "../../../libs/db/tables/index.js";
 import type { Insert } from "../../../libs/db/types.js";
 import type { AdminCopyInput, Translator } from "../../../libs/i18n/types.js";
-import type { Config } from "../../../types/config.js";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
 import type { TranslationsObj } from "../../../types/shared.js";
 
 export type RoleTranslationInput = TranslationsObj[];
@@ -23,7 +23,7 @@ export const getTranslationValue = (
  */
 export const normalizeTranslationArray = (
 	value: AdminCopyInput | undefined,
-	config: Pick<Config, "i18n">,
+	config: Pick<ResolvedLucidConfig, "i18n">,
 	translate: Translator,
 ): RoleTranslationInput => {
 	if (value === undefined) return [];

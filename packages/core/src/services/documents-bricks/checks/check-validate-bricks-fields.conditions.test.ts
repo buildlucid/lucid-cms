@@ -14,7 +14,7 @@ const showWhen = (
 	options?: Pick<FieldConditionConfig, "action" | "translationScope">,
 ): FieldConditionConfig => ({
 	...options,
-	groups: [[{ field, operator: "equals", value }]],
+	all: [{ field, operator: "equals", value }],
 });
 
 const selectOptions = [
@@ -33,12 +33,14 @@ const buildCollection = (key: string) =>
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: {
-			name: copy(`admin:tests.collections.${key}.name`, {
-				defaultMessage: key,
-			}),
-			singularName: copy(`admin:tests.collections.${key}.singularName`, {
-				defaultMessage: key,
-			}),
+			labels: {
+				singular: copy(`admin:tests.collections.${key}.singularName`, {
+					defaultMessage: key,
+				}),
+				plural: copy(`admin:tests.collections.${key}.name`, {
+					defaultMessage: key,
+				}),
+			},
 		},
 	});
 
@@ -107,9 +109,7 @@ describe("condition-hidden fields skip validation", () => {
 				ui: {
 					condition: {
 						action: "hide",
-						groups: [
-							[{ field: "menuType", operator: "equals", value: "docs" }],
-						],
+						all: [{ field: "menuType", operator: "equals", value: "docs" }],
 					},
 				},
 			});
@@ -562,12 +562,14 @@ describe("localized controllers evaluate per locale", () => {
 	const collection = new CollectionBuilder("localized_nav", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.localized.nav.name", {
-				defaultMessage: "Localized Nav",
-			}),
-			singularName: copy("admin:tests.collections.localized.nav.singularName", {
-				defaultMessage: "Localized Nav",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.localized.nav.singularName", {
+					defaultMessage: "Localized Nav",
+				}),
+				plural: copy("admin:tests.collections.localized.nav.name", {
+					defaultMessage: "Localized Nav",
+				}),
+			},
 		},
 		localized: true,
 	})
@@ -608,15 +610,17 @@ describe("localized controllers evaluate per locale", () => {
 		const collection = new CollectionBuilder("localized_default_nav", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.localized.default.nav.name", {
-					defaultMessage: "Localized Default Nav",
-				}),
-				singularName: copy(
-					"admin:tests.collections.localized.default.nav.singularName",
-					{
+				labels: {
+					singular: copy(
+						"admin:tests.collections.localized.default.nav.singularName",
+						{
+							defaultMessage: "Localized Default Nav",
+						},
+					),
+					plural: copy("admin:tests.collections.localized.default.nav.name", {
 						defaultMessage: "Localized Default Nav",
-					},
-				),
+					}),
+				},
 			},
 			localized: true,
 		})
@@ -647,15 +651,17 @@ describe("localized controllers evaluate per locale", () => {
 		const collection = new CollectionBuilder("localized_container_nav", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.localized.container.nav.name", {
-					defaultMessage: "Localized Container Nav",
-				}),
-				singularName: copy(
-					"admin:tests.collections.localized.container.nav.singularName",
-					{
+				labels: {
+					singular: copy(
+						"admin:tests.collections.localized.container.nav.singularName",
+						{
+							defaultMessage: "Localized Container Nav",
+						},
+					),
+					plural: copy("admin:tests.collections.localized.container.nav.name", {
 						defaultMessage: "Localized Container Nav",
-					},
-				),
+					}),
+				},
 			},
 			localized: true,
 		})
@@ -694,15 +700,17 @@ describe("localized controllers evaluate per locale", () => {
 		const collection = new CollectionBuilder("localized_any_nav", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.localized.any.nav.name", {
-					defaultMessage: "Localized Any Nav",
-				}),
-				singularName: copy(
-					"admin:tests.collections.localized.any.nav.singularName",
-					{
+				labels: {
+					singular: copy(
+						"admin:tests.collections.localized.any.nav.singularName",
+						{
+							defaultMessage: "Localized Any Nav",
+						},
+					),
+					plural: copy("admin:tests.collections.localized.any.nav.name", {
 						defaultMessage: "Localized Any Nav",
-					},
-				),
+					}),
+				},
 			},
 			localized: true,
 		})

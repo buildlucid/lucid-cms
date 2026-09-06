@@ -152,7 +152,7 @@ const create: ServiceFn<
 
 	const expiresAt = new Date(
 		Date.now() +
-			(preview.expiresIn ??
+			(preview.expiresInSeconds ??
 				constants.collectionBuilder.previewExpirationSeconds) *
 				1000,
 	).toISOString();

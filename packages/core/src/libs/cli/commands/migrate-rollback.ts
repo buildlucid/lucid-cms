@@ -1,6 +1,9 @@
 import { confirm } from "@inquirer/prompts";
 import constants from "../../../constants/constants.js";
-import type { Config, EnvironmentVariables } from "../../../exports/types.js";
+import type {
+	EnvironmentVariables,
+	ResolvedLucidConfig,
+} from "../../../exports/types.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import { prepareExternalMigrations } from "../../db/load-external-migrations.js";
@@ -18,7 +21,6 @@ import logger, {
 } from "../../logger/index.js";
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 
 const migrateRollbackCommand = async (options?: {
 	force?: boolean;
@@ -26,7 +28,7 @@ const migrateRollbackCommand = async (options?: {
 	steps?: number;
 }) => {
 	let kvInstance: KVAdapterInstance | undefined;
-	let config: Config | undefined;
+	let config: ResolvedLucidConfig | undefined;
 	let env: EnvironmentVariables | undefined;
 	let runtimeContext: AdapterRuntimeContext | undefined;
 	let translationStore: TranslationStore | undefined;
@@ -59,17 +61,6 @@ const migrateRollbackCommand = async (options?: {
 				files: res.resources.files.translations,
 			})
 		).translationStore;
-
-		const envValid = await validateEnvVars({
-			envSchema: res.envSchema,
-			env: res.env,
-		});
-
-		if (!envValid) {
-			await cleanup();
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
 
 		cliLogger.info("Checking rollback status");
 

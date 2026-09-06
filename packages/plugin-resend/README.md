@@ -2,7 +2,7 @@
 
 > The official Resend plugin for Lucid
 
-The Lucid CMS Resend plugin registers the email strategy config and uses Resend's REST API to send emails. This plugin is perfect for serverless environments such as Cloudflare Workers.
+The Lucid CMS Resend plugin registers an email adapter and uses Resend's REST API to send emails. This plugin is perfect for serverless environments such as Cloudflare Workers.
 
 ## Installation
 
@@ -15,12 +15,12 @@ npm install @lucidcms/plugin-resend
 To use the Resend plugin, you need to add it to your Lucid CMS config file. You'll need to provide the from email configuration and your Resend API key.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { resendPlugin } from "@lucidcms/plugin-resend";
 import { sqlite } from "@lucidcms/db-sqlite";
 
-export default configureLucid({
+export default defineConfig({
   runtime: node,
   db: sqlite,
   config: (env) => ({

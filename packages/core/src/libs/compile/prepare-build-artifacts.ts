@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import processBuildArtifacts from "../cli/services/process-build-artifacts.js";
 import { createTranslator } from "../i18n/index.js";
 import type { TranslationStore } from "../i18n/types.js";
@@ -9,7 +9,7 @@ import type {
 } from "../runtime/types.js";
 
 const prepareBuildArtifacts = async (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;
 	silent?: boolean;

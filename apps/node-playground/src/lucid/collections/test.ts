@@ -4,9 +4,11 @@ import IntroBrick from "../bricks/intro.js";
 const TestCollection = new CollectionBuilder("test", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.test.name"),
-		singularName: copy("admin:collections.test.singularName"),
-		summary: copy("admin:collections.test.summary"),
+		labels: {
+			singular: copy("admin:collections.test.singularName"),
+			plural: copy("admin:collections.test.name"),
+		},
+		description: copy("admin:collections.test.summary"),
 	},
 	localized: false,
 	revisions: true,

@@ -1,13 +1,13 @@
 import { subDays } from "date-fns";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 
 type RetentionCategory = keyof NonNullable<
-	Config["retention"]["purgeAfterDays"]
+	ResolvedLucidConfig["retention"]["purgeAfterDays"]
 >;
 
 /** Returns the expiry date for one configured retention category. */
 const getRetentionDays = (
-	retentionConfig: Config["retention"],
+	retentionConfig: ResolvedLucidConfig["retention"],
 	type: RetentionCategory,
 ) => {
 	const purgeAfterDays = retentionConfig.purgeAfterDays?.[type];

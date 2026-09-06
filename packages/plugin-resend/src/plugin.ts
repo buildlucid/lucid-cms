@@ -1,4 +1,4 @@
-import { copy } from "@lucidcms/core";
+import { copy, definePlugin } from "@lucidcms/core";
 import type { EmailAdapterInstance, LucidPlugin } from "@lucidcms/core/types";
 import {
 	LUCID_VERSION,
@@ -18,96 +18,99 @@ type ResendEmailResponse = {
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	const webhookEnabled = pluginOptions.webhook?.enabled ?? WEBHOOK_ENABLED;
 
-	return {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		sources: { translations: ["@lucidcms/plugin-resend/translations"] },
-		recipe: (draft) => {
-			const simulate = draft.email.simulate;
+		defaults: () => {
+			return {
+				email: {
+					adapter: {
+						type: "email-adapter",
+						key: PLUGIN_IDENTIFIER,
+						send: async (context, email) => {
+							try {
+								if (context.config.email.simulate) {
+									return {
+										success: true,
+										deliveryStatus: "sent",
+										message: copy("server:plugin.resend.email.send.success"),
+										data: null,
+									};
+								}
 
+								const emailPayload = {
+									from: `${email.from.name} <${email.from.email}>`,
+									to: email.to,
+									subject: email.subject,
+									html: email.html,
+									...(email.cc && { cc: email.cc }),
+									...(email.bcc && { bcc: email.bcc }),
+									...(email.replyTo && { reply_to: email.replyTo }),
+									...(email.text && { text: email.text }),
+									headers: {
+										...priorityHeaders[email.priority],
+										...(email.headers || {}),
+									},
+									attachments: email.attachments?.map((attachment) => ({
+										path: attachment.url,
+										filename: attachment.filename,
+										...(attachment.contentType && {
+											content_type: attachment.contentType,
+										}),
+										...(attachment.disposition === "inline" && {
+											content_id: attachment.contentId,
+										}),
+									})),
+								};
+
+								const response = await fetch("https://api.resend.com/emails", {
+									method: "POST",
+									headers: {
+										Authorization: `Bearer ${pluginOptions.apiKey}`,
+										"Content-Type": "application/json",
+									},
+									body: JSON.stringify(emailPayload),
+								});
+
+								const data = (await response.json()) as ResendEmailResponse;
+
+								if (!response.ok) {
+									return {
+										success: false,
+										deliveryStatus: "failed",
+										message: copy("server:plugin.resend.email.send.failed"),
+									};
+								}
+
+								return {
+									success: true,
+									deliveryStatus: webhookEnabled ? "sent" : "delivered",
+									message: copy("server:plugin.resend.email.send.success"),
+									data: isValidData(data) ? data : null,
+									externalMessageId: data.id,
+								};
+							} catch (error) {
+								return {
+									success: false,
+									deliveryStatus: "failed",
+									message:
+										error instanceof Error
+											? copy.literal(error.message)
+											: copy("server:plugin.resend.email.send.failed"),
+								};
+							}
+						},
+					} satisfies EmailAdapterInstance,
+				},
+			};
+		},
+		configure: (draft) => {
 			if (pluginOptions.webhook?.enabled) {
 				draft.http.routes.push(...routes(pluginOptions));
 			}
-
-			draft.email.adapter = {
-				type: "email-adapter",
-				key: PLUGIN_IDENTIFIER,
-				send: async (_context, email) => {
-					try {
-						if (simulate) {
-							return {
-								success: true,
-								deliveryStatus: "sent",
-								message: copy("server:plugin.resend.email.send.success"),
-								data: null,
-							};
-						}
-
-						const emailPayload = {
-							from: `${email.from.name} <${email.from.email}>`,
-							to: email.to,
-							subject: email.subject,
-							html: email.html,
-							...(email.cc && { cc: email.cc }),
-							...(email.bcc && { bcc: email.bcc }),
-							...(email.replyTo && { reply_to: email.replyTo }),
-							...(email.text && { text: email.text }),
-							headers: {
-								...priorityHeaders[email.priority],
-								...(email.headers || {}),
-							},
-							attachments: email.attachments?.map((attachment) => ({
-								path: attachment.url,
-								filename: attachment.filename,
-								...(attachment.contentType && {
-									content_type: attachment.contentType,
-								}),
-								...(attachment.disposition === "inline" && {
-									content_id: attachment.contentId,
-								}),
-							})),
-						};
-
-						const response = await fetch("https://api.resend.com/emails", {
-							method: "POST",
-							headers: {
-								Authorization: `Bearer ${pluginOptions.apiKey}`,
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify(emailPayload),
-						});
-
-						const data = (await response.json()) as ResendEmailResponse;
-
-						if (!response.ok) {
-							return {
-								success: false,
-								deliveryStatus: "failed",
-								message: copy("server:plugin.resend.email.send.failed"),
-							};
-						}
-
-						return {
-							success: true,
-							deliveryStatus: webhookEnabled ? "sent" : "delivered",
-							message: copy("server:plugin.resend.email.send.success"),
-							data: isValidData(data) ? data : null,
-							externalMessageId: data.id,
-						};
-					} catch (error) {
-						return {
-							success: false,
-							deliveryStatus: "failed",
-							message:
-								error instanceof Error
-									? copy.literal(error.message)
-									: copy("server:plugin.resend.email.send.failed"),
-						};
-					}
-				},
-			} satisfies EmailAdapterInstance;
 		},
-	};
+	});
 };
 
 export default plugin;

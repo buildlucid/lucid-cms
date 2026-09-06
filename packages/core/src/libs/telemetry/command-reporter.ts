@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type {
 	AdapterKeys,
 	AdapterRuntimeContext,
@@ -21,7 +21,7 @@ export type CommandTelemetryReporter = {
 
 /** Creates a once-only reporter for one initial CLI command invocation. */
 const createCommandTelemetryReporter = (options: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	env?: EnvironmentVariables;
 	runtimeContext: AdapterRuntimeContext;
 	projectRoot: string;

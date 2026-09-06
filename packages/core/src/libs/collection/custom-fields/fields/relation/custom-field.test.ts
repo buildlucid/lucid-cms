@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import RelationCustomField from "./custom-field.js";
 
@@ -10,12 +11,14 @@ import RelationCustomField from "./custom-field.js";
 const DocumentCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -55,8 +58,9 @@ test("successfully validate field - relation", async () => {
 			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("standard_doc")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DocumentCollection).fields.get("standard_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -81,8 +85,9 @@ test("successfully validate field - relation", async () => {
 			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("required_doc")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -109,8 +114,9 @@ test("fail to validate field - relation", async () => {
 			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("required_doc")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -137,8 +143,9 @@ test("fail to validate field - relation", async () => {
 			type: "relation",
 			value: [],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("required_doc")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DocumentCollection).fields.get("required_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -164,8 +171,9 @@ test("fail to validate field - relation", async () => {
 			type: "relation",
 			value: [{ id: 1, collectionKey: "page" }],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("wrong_collection")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DocumentCollection).fields.get("wrong_collection")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -199,7 +207,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 			value: [{ id: 1, collectionKey: "page" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("multi_doc")!,
+		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -222,7 +230,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 			],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("multi_doc")!,
+		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -249,7 +257,7 @@ test("relation field validates multiple item counts and indexed errors", async (
 			],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("multi_doc")!,
+		instance: getFieldBuilderState(DocumentCollection).fields.get("multi_doc")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -310,7 +318,9 @@ test("relation field validates multiple target collections", async () => {
 			],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("multi_collection_doc")!,
+		instance: getFieldBuilderState(DocumentCollection).fields.get(
+			"multi_collection_doc",
+		)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -331,7 +341,9 @@ test("relation field validates multiple target collections", async () => {
 			value: [{ id: 1, collectionKey: "author" }],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DocumentCollection.fields.get("multi_collection_doc")!,
+		instance: getFieldBuilderState(DocumentCollection).fields.get(
+			"multi_collection_doc",
+		)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -363,7 +375,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 		},

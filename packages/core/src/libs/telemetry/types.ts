@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { FirstPartyRuntimeAdapterKey } from "../runtime/constants.js";
 import type {
 	AdapterKeys,
@@ -80,7 +80,7 @@ export type TelemetryEnvelope = {
 };
 
 export type ReportTelemetryOptions = {
-	config: Config;
+	config: ResolvedLucidConfig;
 	env?: EnvironmentVariables;
 	runtimeContext: AdapterRuntimeContext;
 	projectRoot: string;

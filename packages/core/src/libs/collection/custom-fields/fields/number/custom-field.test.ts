@@ -3,6 +3,7 @@ import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import NumberCustomField from "./custom-field.js";
 
@@ -11,12 +12,14 @@ import NumberCustomField from "./custom-field.js";
 const NumberCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -40,8 +43,9 @@ test("successfully validate field - number", async () => {
 			type: "number",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("standard_number")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(NumberCollection).fields.get("standard_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -61,8 +65,9 @@ test("successfully validate field - number", async () => {
 			type: "number",
 			value: 1,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("required_number")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(NumberCollection).fields.get("required_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -83,7 +88,7 @@ test("successfully validate field - number", async () => {
 			value: 5,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("min_number")!,
+		instance: getFieldBuilderState(NumberCollection).fields.get("min_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -105,8 +110,9 @@ test("fail to validate field - number", async () => {
 			type: "number",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("standard_number")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(NumberCollection).fields.get("standard_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -132,8 +138,9 @@ test("fail to validate field - number", async () => {
 			type: "number",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("required_number")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(NumberCollection).fields.get("required_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -160,7 +167,7 @@ test("fail to validate field - number", async () => {
 			value: 1,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NumberCollection.fields.get("min_number")!,
+		instance: getFieldBuilderState(NumberCollection).fields.get("min_number")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -188,7 +195,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 			placeholder: copy("admin:tests.fields.field.placeholder", {
@@ -203,7 +210,7 @@ test("custom field config passes schema validation", async () => {
 		},
 		validation: {
 			required: true,
-			zod: z.string().min(5),
+			zod: z.number().min(5),
 		},
 	});
 	const res = await CustomFieldSchema.safeParseAsync(field.config);

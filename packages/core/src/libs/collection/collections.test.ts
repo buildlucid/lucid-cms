@@ -8,8 +8,10 @@ import collections from "./collections.js";
 const pages = new CollectionBuilder("pages", {
 	mode: "multiple",
 	details: {
-		name: copy.literal("Pages"),
-		singularName: copy.literal("Page"),
+		labels: {
+			singular: copy.literal("Page"),
+			plural: copy.literal("Pages"),
+		},
 	},
 	bricks: {
 		builder: [new BrickBuilder("content")],

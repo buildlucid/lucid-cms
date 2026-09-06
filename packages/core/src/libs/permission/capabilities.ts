@@ -140,7 +140,7 @@ const getCollectionCapabilityGroups = (
 	return collections.map((collection) => ({
 		key: `documents:${collection.key}`,
 		details: {
-			name: collection.getData.details.name,
+			name: collection.getData.details.labels.plural,
 		},
 		core: true,
 		capabilities: collectionPermissionActions.map(

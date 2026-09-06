@@ -235,7 +235,7 @@ export default Object.freeze({
 	defaultUploadDirectory: "uploads",
 	queue: {
 		maxAttempts: 3,
-		concurrentLimit: 5,
+		maxConcurrentJobs: 5,
 		batchSize: 10,
 	},
 	userTokens: {

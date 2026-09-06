@@ -39,7 +39,7 @@ const getSingleController = factory.createHandlers(
 	externalScopes([ExternalScopes.MediaRead]),
 	validate("param", controllerSchemas.content.getSingle.params),
 	cache({
-		ttl: minutesToSeconds(5),
+		ttlSeconds: minutesToSeconds(5),
 		mode: "static",
 		staticKey: (c) => {
 			const id = c.req.param("id");

@@ -1,12 +1,12 @@
 import { join } from "node:path";
 import constants from "../../../constants/constants.js";
-import type { Config } from "../../../types/config.js";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
 import getDirName from "../../../utils/helpers/get-dir-name.js";
 
 /**
  * Resolve all the required paths for the Vite build
  */
-const getBuildPaths = (config: Config, cwd = process.cwd()) => {
+const getBuildPaths = (config: ResolvedLucidConfig, cwd = process.cwd()) => {
 	const currentDir = getDirName(import.meta.url);
 
 	return {

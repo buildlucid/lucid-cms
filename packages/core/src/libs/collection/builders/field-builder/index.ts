@@ -1,5 +1,8 @@
 import LucidError from "../../../../utils/errors/lucid-error.js";
+import deepMerge from "../../../../utils/helpers/deep-merge.js";
 import { translate } from "../../../i18n/index.js";
+import cloneField from "../../custom-fields/clone-field.js";
+import createFieldSnapshot from "../../custom-fields/create-field-snapshot.js";
 import type CustomField from "../../custom-fields/custom-field.js";
 import CheckboxCustomField from "../../custom-fields/fields/checkbox/custom-field.js";
 import CodeCustomField from "../../custom-fields/fields/code/custom-field.js";
@@ -23,13 +26,13 @@ import UserCustomField from "../../custom-fields/fields/user/custom-field.js";
 import registeredFields from "../../custom-fields/registered-fields.js";
 import { isStorageMode } from "../../custom-fields/storage/index.js";
 import type {
-	CFConfig,
-	CFProps,
+	FieldConfig,
+	FieldOptions,
 	FieldTypes,
 	TabFieldConfig,
 } from "../../custom-fields/types.js";
 import normalizeFieldCopy from "../../custom-fields/utils/normalize-field-copy.js";
-import type { FieldBuilderMeta } from "./types.js";
+import type { FieldBuilderMeta, FieldSnapshot } from "./types.js";
 
 /**
  * - `full` includes every field: tabs at the root and structural fields with
@@ -46,7 +49,9 @@ type ContainerStackEntry = {
 	key: string;
 };
 
-type StructuralFieldConfig = CFConfig<"section"> | CFConfig<"collapsible">;
+type StructuralFieldConfig =
+	| FieldConfig<"section">
+	| FieldConfig<"collapsible">;
 
 const isStructuralFieldType = (
 	type: FieldTypes,
@@ -54,18 +59,31 @@ const isStructuralFieldType = (
 	return type === "section" || type === "collapsible";
 };
 
+type FieldBuilderState = {
+	fields: Map<string, CustomField<FieldTypes>>;
+	repeaterStack: string[];
+	containerStack: ContainerStackEntry[];
+	meta: FieldBuilderMeta;
+	activeTabKey: string | null;
+};
+
+const fieldState = Symbol.for("lucidcms.field-builder.state");
+
+/** Internal field instances used for persistence and validation. */
+export const getFieldBuilderState = (builder: FieldBuilder) =>
+	builder[fieldState];
+
 class FieldBuilder {
-	fields: Map<string, CustomField<FieldTypes>> = new Map();
-	repeaterStack: string[] = [];
-	containerStack: ContainerStackEntry[] = [];
-	meta: FieldBuilderMeta = {
-		fieldKeys: [],
-		repeaterDepth: {},
+	readonly [fieldState]: FieldBuilderState = {
+		fields: new Map(),
+		repeaterStack: [],
+		containerStack: [],
+		meta: { fieldKeys: [], repeaterDepth: {} },
+		activeTabKey: null,
 	};
-	activeTabKey: string | null = null;
-	private cachedFieldTree: CFConfig<FieldTypes>[] | null = null;
-	private cachedPersistedFieldTree: CFConfig<FieldTypes>[] | null = null;
-	private cachedContentFieldTree: CFConfig<FieldTypes>[] | null = null;
+	private cachedFieldTree: FieldConfig<FieldTypes>[] | null = null;
+	private cachedPersistedFieldTree: FieldConfig<FieldTypes>[] | null = null;
+	private cachedContentFieldTree: FieldConfig<FieldTypes>[] | null = null;
 
 	protected invalidateFieldTreeCache() {
 		this.cachedFieldTree = null;
@@ -74,49 +92,212 @@ class FieldBuilder {
 	}
 
 	private registerField(key: string, field: CustomField<FieldTypes>) {
+		if (this[fieldState].fields.has(key)) {
+			throw new LucidError({
+				message: `Field "${key}" is already registered.`,
+			});
+		}
+		if (field.props) field.props = deepMerge({}, field.props);
+		field.config = deepMerge({}, field.config);
 		normalizeFieldCopy(field.config);
 
 		if (field.type !== "tab") {
-			field.tabParent = this.activeTabKey;
+			field.tabParent = this[fieldState].activeTabKey;
 		}
 
-		const container = this.containerStack[this.containerStack.length - 1];
+		const container =
+			this[fieldState].containerStack[
+				this[fieldState].containerStack.length - 1
+			];
 		if (container && container.kind !== "repeater" && field.type !== "tab") {
 			field.structuralParent = container.key;
 		}
 
-		this.fields.set(key, field);
-		this.meta.fieldKeys.push(key);
+		this[fieldState].fields.set(key, field);
+		this[fieldState].meta.fieldKeys.push(key);
+		this.invalidateFieldTreeCache();
+		return this;
+	}
+
+	/** Returns a detached snapshot of fields and their placement. */
+	get fields(): ReadonlyMap<string, FieldSnapshot> {
+		return new Map(
+			Array.from(this[fieldState].fields, ([key, field]) => [
+				key,
+				createFieldSnapshot(field),
+			]),
+		);
+	}
+
+	/** Copies this builder without sharing field instances or cached output. */
+	clone(): FieldBuilder {
+		return this.copyFieldsTo(new FieldBuilder());
+	}
+
+	protected copyFieldsTo<T extends FieldBuilder>(target: T): T {
+		const source = this[fieldState];
+		const state = target[fieldState];
+		state.fields = new Map(
+			Array.from(source.fields, ([key, field]) => [key, cloneField(field)]),
+		);
+		state.meta = deepMerge({}, source.meta);
+		state.repeaterStack = [...source.repeaterStack];
+		state.containerStack = source.containerStack.map((entry) => ({ ...entry }));
+		state.activeTabKey = source.activeTabKey;
+		target.invalidateFieldTreeCache();
+		return target;
+	}
+
+	/** Adds independent copies of another builder's fields at the current position. */
+	addFields(builder: FieldBuilder) {
+		const source = builder[fieldState];
+		const target = this[fieldState];
+		if (source.repeaterStack.length || source.containerStack.length) {
+			throw new LucidError({
+				message:
+					"Complete the source builder's repeaters and structural containers before adding its fields.",
+			});
+		}
+		for (const field of source.fields.values()) {
+			if (target.fields.has(field.key)) {
+				throw new LucidError({
+					message: `Field "${field.key}" is already registered.`,
+				});
+			}
+			if (
+				field.type === "tab" &&
+				(target.repeaterStack.length || target.containerStack.length)
+			) {
+				throw new LucidError({
+					message:
+						"Cannot add fields containing tabs inside a repeater, section or collapsible.",
+				});
+			}
+		}
+		const repeater = target.repeaterStack.at(-1) ?? null;
+		const container = target.containerStack.at(-1);
+		const fields = Array.from(source.fields.values(), (original) => {
+			const field = cloneField(original);
+			if (field.type !== "tab") {
+				field.tabParent ??= target.activeTabKey;
+				if (field.treeParent === null) {
+					field.treeParent = repeater;
+					if (
+						field.structuralParent === null &&
+						container?.kind !== "repeater"
+					) {
+						field.structuralParent = container?.key ?? null;
+					}
+				}
+			}
+			return field;
+		});
+		for (const field of fields) {
+			target.fields.set(field.key, field);
+			target.meta.fieldKeys.push(field.key);
+		}
+		for (const [key, depth] of Object.entries(source.meta.repeaterDepth)) {
+			target.meta.repeaterDepth[key] = depth + target.repeaterStack.length;
+		}
+		target.activeTabKey = source.activeTabKey ?? target.activeTabKey;
+		this.invalidateFieldTreeCache();
+		return this;
+	}
+
+	/** Moves independent leaf fields to the root or a tab. The index excludes the moved fields. */
+	moveFields(
+		keys: readonly string[],
+		placement: { index: number; tab?: string | null },
+	) {
+		const state = this[fieldState];
+		if (state.repeaterStack.length || state.containerStack.length) {
+			throw new LucidError({
+				message:
+					"Complete all repeaters and structural containers before moving fields.",
+			});
+		}
+		const keySet = new Set(keys);
+		if (keySet.size !== keys.length) {
+			throw new LucidError({
+				message: "Each field can only appear once in a move.",
+			});
+		}
+		const fields = state.fields;
+		for (const key of keys) {
+			const field = fields.get(key);
+			if (!field)
+				throw new LucidError({ message: `Field "${key}" does not exist.` });
+			if (
+				field.treeParent !== null ||
+				field.structuralParent !== null ||
+				field.type === "tab" ||
+				field.type === "repeater" ||
+				isStructuralFieldType(field.type)
+			) {
+				throw new LucidError({
+					message: `Field "${key}" cannot be moved. Only independent leaf fields can move to the root or a tab.`,
+				});
+			}
+		}
+		const tab = placement.tab ?? null;
+		if (tab !== null && fields.get(tab)?.type !== "tab")
+			throw new LucidError({ message: `Tab "${tab}" does not exist.` });
+		const moved = Array.from(fields).filter(([key]) => keySet.has(key));
+		const remaining = Array.from(fields).filter(([key]) => !keySet.has(key));
+		if (
+			!Number.isInteger(placement.index) ||
+			placement.index < 0 ||
+			placement.index > remaining.length
+		)
+			throw new LucidError({
+				message: "Field placement index is outside the builder.",
+			});
+		if (
+			tab !== null &&
+			placement.index <= remaining.findIndex(([key]) => key === tab)
+		) {
+			throw new LucidError({
+				message: `Fields must be placed after their target tab "${tab}".`,
+			});
+		}
+		for (const [, field] of moved) {
+			field.tabParent = tab;
+		}
+		remaining.splice(placement.index, 0, ...moved);
+		this[fieldState].fields = new Map(remaining);
+		this[fieldState].meta.fieldKeys = remaining.map(([key]) => key);
 		this.invalidateFieldTreeCache();
 		return this;
 	}
 
 	// Custom Fields
-	public addRepeater(key: string, props?: CFProps<"repeater">) {
-		this.meta.repeaterDepth[key] = this.repeaterStack.length;
+	public addRepeater(key: string, props?: FieldOptions<"repeater">) {
 		this.registerField(key, new RepeaterCustomField(key, props));
-		this.repeaterStack.push(key);
-		this.containerStack.push({ kind: "repeater", key });
+		this[fieldState].meta.repeaterDepth[key] =
+			this[fieldState].repeaterStack.length;
+		this[fieldState].repeaterStack.push(key);
+		this[fieldState].containerStack.push({ kind: "repeater", key });
 		return this;
 	}
-	public addSection(key: string, props?: CFProps<"section">) {
+	public addSection(key: string, props?: FieldOptions<"section">) {
 		this.registerField(key, new SectionCustomField(key, props));
-		this.containerStack.push({ kind: "section", key });
+		this[fieldState].containerStack.push({ kind: "section", key });
 		return this;
 	}
-	public addCollapsible(key: string, props?: CFProps<"collapsible">) {
+	public addCollapsible(key: string, props?: FieldOptions<"collapsible">) {
 		this.registerField(key, new CollapsibleCustomField(key, props));
-		this.containerStack.push({ kind: "collapsible", key });
+		this[fieldState].containerStack.push({ kind: "collapsible", key });
 		return this;
 	}
-	public addTab(key: string, props?: CFProps<"tab">) {
+	public addTab(key: string, props?: FieldOptions<"tab">) {
+		this.registerField(key, new TabCustomField(key, props));
 		//* tabs restart the root grouping, so any dangling structural containers close
-		this.containerStack = [];
-		this.activeTabKey = key;
-		return this.registerField(key, new TabCustomField(key, props));
+		this[fieldState].containerStack = [];
+		this[fieldState].activeTabKey = key;
+		return this;
 	}
 	public addToTab(key: string) {
-		const field = this.fields.get(key);
+		const field = this[fieldState].fields.get(key);
 		if (!field) return this;
 
 		if (field.type !== "tab") {
@@ -130,66 +311,66 @@ class FieldBuilder {
 			});
 		}
 
-		this.containerStack = [];
-		this.activeTabKey = key;
+		this[fieldState].containerStack = [];
+		this[fieldState].activeTabKey = key;
 		return this;
 	}
-	public addText(key: string, props?: CFProps<"text">) {
+	public addText(key: string, props?: FieldOptions<"text">) {
 		return this.registerField(key, new TextCustomField(key, props));
 	}
-	public addRichText(key: string, props?: CFProps<"rich-text">) {
+	public addRichText(key: string, props?: FieldOptions<"rich-text">) {
 		return this.registerField(key, new RichTextCustomField(key, props));
 	}
-	public addMedia(key: string, props?: CFProps<"media">) {
+	public addMedia(key: string, props?: FieldOptions<"media">) {
 		return this.registerField(key, new MediaCustomField(key, props));
 	}
-	public addRelation(key: string, props: CFProps<"relation">) {
+	public addRelation(key: string, props: FieldOptions<"relation">) {
 		return this.registerField(key, new RelationCustomField(key, props));
 	}
-	public addNumber(key: string, props?: CFProps<"number">) {
+	public addNumber(key: string, props?: FieldOptions<"number">) {
 		return this.registerField(key, new NumberCustomField(key, props));
 	}
-	public addRange(key: string, props?: CFProps<"range">) {
+	public addRange(key: string, props?: FieldOptions<"range">) {
 		return this.registerField(key, new RangeCustomField(key, props));
 	}
-	public addCheckbox(key: string, props?: CFProps<"checkbox">) {
+	public addCheckbox(key: string, props?: FieldOptions<"checkbox">) {
 		return this.registerField(key, new CheckboxCustomField(key, props));
 	}
-	public addSelect(key: string, props?: CFProps<"select">) {
+	public addSelect(key: string, props?: FieldOptions<"select">) {
 		return this.registerField(key, new SelectCustomField(key, props));
 	}
-	public addTextarea(key: string, props?: CFProps<"textarea">) {
+	public addTextarea(key: string, props?: FieldOptions<"textarea">) {
 		return this.registerField(key, new TextareaCustomField(key, props));
 	}
-	public addJSON(key: string, props?: CFProps<"json">) {
+	public addJSON(key: string, props?: FieldOptions<"json">) {
 		return this.registerField(key, new JSONCF(key, props));
 	}
-	public addCode(key: string, props?: CFProps<"code">) {
+	public addCode(key: string, props?: FieldOptions<"code">) {
 		return this.registerField(key, new CodeCustomField(key, props));
 	}
-	public addColor(key: string, props?: CFProps<"color">) {
+	public addColor(key: string, props?: FieldOptions<"color">) {
 		return this.registerField(key, new ColorCustomField(key, props));
 	}
-	public addDateTime(key: string, props?: CFProps<"datetime">) {
+	public addDateTime(key: string, props?: FieldOptions<"datetime">) {
 		return this.registerField(key, new DateTimeCF(key, props));
 	}
-	public addLink(key: string, props?: CFProps<"link">) {
+	public addLink(key: string, props?: FieldOptions<"link">) {
 		return this.registerField(key, new LinkCustomField(key, props));
 	}
-	public addUser(key: string, props?: CFProps<"user">) {
+	public addUser(key: string, props?: FieldOptions<"user">) {
 		return this.registerField(key, new UserCustomField(key, props));
 	}
 	public endRepeater() {
-		const key = this.repeaterStack.pop();
+		const key = this[fieldState].repeaterStack.pop();
 		if (!key) return this;
 
 		//* close the repeater and any dangling structural containers inside it
-		while (this.containerStack.length > 0) {
-			const entry = this.containerStack.pop();
+		while (this[fieldState].containerStack.length > 0) {
+			const entry = this[fieldState].containerStack.pop();
 			if (entry?.kind === "repeater" && entry.key === key) break;
 		}
 
-		const fields = Array.from(this.fields.values());
+		const fields = Array.from(this[fieldState].fields.values());
 
 		// index of repeater that is being closed
 		const selectedRepeaterIndex = fields.findIndex(
@@ -214,38 +395,46 @@ class FieldBuilder {
 		return this;
 	}
 	public endSection() {
-		const top = this.containerStack[this.containerStack.length - 1];
-		if (top?.kind === "section") this.containerStack.pop();
+		const top =
+			this[fieldState].containerStack[
+				this[fieldState].containerStack.length - 1
+			];
+		if (top?.kind === "section") this[fieldState].containerStack.pop();
 		return this;
 	}
 	public endCollapsible() {
-		const top = this.containerStack[this.containerStack.length - 1];
-		if (top?.kind === "collapsible") this.containerStack.pop();
+		const top =
+			this[fieldState].containerStack[
+				this[fieldState].containerStack.length - 1
+			];
+		if (top?.kind === "collapsible") this[fieldState].containerStack.pop();
 		return this;
 	}
 	// Private Methods
-	private nestFields(mode: FieldTreeMode): CFConfig<FieldTypes>[] {
+	private nestFields(mode: FieldTreeMode): FieldConfig<FieldTypes>[] {
 		const nestStructural = mode !== "persisted";
-		const fields = Array.from(this.fields.values()).filter((field) => {
-			if (mode === "full") return true;
-			if (
-				isStorageMode(registeredFields[field.type].config.database, "ignore")
-			) {
-				return mode === "content" && isStructuralFieldType(field.type);
-			}
-			return true;
-		});
+		const fields = Array.from(this[fieldState].fields.values()).filter(
+			(field) => {
+				if (mode === "full") return true;
+				if (
+					isStorageMode(registeredFields[field.type].config.database, "ignore")
+				) {
+					return mode === "content" && isStructuralFieldType(field.type);
+				}
+				return true;
+			},
+		);
 
-		const result: CFConfig<FieldTypes>[] = [];
-		const tabMap: Map<string, CFConfig<"tab">> = new Map();
-		const repeaterMap: Map<string, CFConfig<"repeater">> = new Map();
+		const result: FieldConfig<FieldTypes>[] = [];
+		const tabMap: Map<string, FieldConfig<"tab">> = new Map();
+		const repeaterMap: Map<string, FieldConfig<"repeater">> = new Map();
 		const structuralMap: Map<string, StructuralFieldConfig> = new Map();
 
 		for (const field of fields) {
 			const config = JSON.parse(JSON.stringify(field.config));
 
 			if (field.type === "tab") {
-				const tab = config as CFConfig<"tab">;
+				const tab = config as FieldConfig<"tab">;
 				tabMap.set(field.key, tab);
 				result.push(tab);
 				continue;
@@ -253,7 +442,7 @@ class FieldBuilder {
 
 			// add repeaters/structural containers to their lookups
 			if (field.type === "repeater")
-				repeaterMap.set(field.key, config as CFConfig<"repeater">);
+				repeaterMap.set(field.key, config as FieldConfig<"repeater">);
 			if (nestStructural && isStructuralFieldType(field.type))
 				structuralMap.set(field.key, config as StructuralFieldConfig);
 
@@ -261,7 +450,7 @@ class FieldBuilder {
 				const structural = structuralMap.get(field.structuralParent);
 				if (structural) {
 					structural.fields.push(
-						config as Exclude<CFConfig<FieldTypes>, TabFieldConfig>,
+						config as Exclude<FieldConfig<FieldTypes>, TabFieldConfig>,
 					);
 					continue;
 				}
@@ -271,7 +460,7 @@ class FieldBuilder {
 				const repeater = repeaterMap.get(field.treeParent);
 				if (repeater)
 					repeater.fields.push(
-						config as Exclude<CFConfig<FieldTypes>, TabFieldConfig>,
+						config as Exclude<FieldConfig<FieldTypes>, TabFieldConfig>,
 					);
 				continue;
 			}
@@ -280,7 +469,7 @@ class FieldBuilder {
 				const tab = tabMap.get(field.tabParent);
 				if (tab) {
 					tab.fields.push(
-						config as Exclude<CFConfig<FieldTypes>, TabFieldConfig>,
+						config as Exclude<FieldConfig<FieldTypes>, TabFieldConfig>,
 					);
 					continue;
 				}
@@ -292,31 +481,31 @@ class FieldBuilder {
 		return result;
 	}
 	// Getters
-	get fieldTree(): CFConfig<FieldTypes>[] {
+	get fieldTree(): FieldConfig<FieldTypes>[] {
 		if (!this.cachedFieldTree) {
 			this.cachedFieldTree = this.nestFields("full");
 		}
 
-		return this.cachedFieldTree;
+		return this.cachedFieldTree.map((field) => deepMerge({}, field));
 	}
-	get persistedFieldTree(): CFConfig<FieldTypes>[] {
+	get persistedFieldTree(): FieldConfig<FieldTypes>[] {
 		if (!this.cachedPersistedFieldTree) {
 			this.cachedPersistedFieldTree = this.nestFields("persisted");
 		}
 
-		return this.cachedPersistedFieldTree;
+		return this.cachedPersistedFieldTree.map((field) => deepMerge({}, field));
 	}
-	get contentFieldTree(): CFConfig<FieldTypes>[] {
+	get contentFieldTree(): FieldConfig<FieldTypes>[] {
 		if (!this.cachedContentFieldTree) {
 			this.cachedContentFieldTree = this.nestFields("content");
 		}
 
-		return this.cachedContentFieldTree;
+		return this.cachedContentFieldTree.map((field) => deepMerge({}, field));
 	}
-	get flatFields(): CFConfig<FieldTypes>[] {
-		const config: CFConfig<FieldTypes>[] = [];
-		for (const [_, value] of this.fields) {
-			config.push(value.config);
+	get flatFields(): FieldConfig<FieldTypes>[] {
+		const config: FieldConfig<FieldTypes>[] = [];
+		for (const [_, value] of this[fieldState].fields) {
+			config.push(deepMerge({}, value.config));
 		}
 		return config;
 	}

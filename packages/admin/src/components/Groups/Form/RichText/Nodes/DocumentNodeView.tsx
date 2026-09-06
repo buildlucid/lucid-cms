@@ -53,7 +53,7 @@ const DocumentNodeView: Component<DocumentNodeViewProps> = (props) => {
 	);
 	const collectionLabel = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection()?.details.singularName,
+			value: collection()?.details.labels.singular,
 			fallback:
 				typeof props.collectionKey === "string"
 					? props.collectionKey

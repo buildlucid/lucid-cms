@@ -8,13 +8,7 @@ const mergeValue = (targetValue: unknown, sourceValue: unknown): unknown => {
 	}
 
 	if (Array.isArray(sourceValue)) {
-		const targetArray = Array.isArray(targetValue) ? targetValue : [];
-
-		sourceValue.forEach((item, index) => {
-			targetArray[index] = mergeValue(targetArray[index], item);
-		});
-
-		return targetArray;
+		return sourceValue.map((item) => mergeValue(undefined, item));
 	}
 
 	if (isPlainObject(sourceValue)) {

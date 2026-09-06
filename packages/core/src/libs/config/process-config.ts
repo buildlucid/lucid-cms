@@ -1,15 +1,14 @@
 import { produce } from "immer";
-import defaultConfig from "../../constants/default-config.js";
-import type { Config, LucidConfig } from "../../types/config.js";
+import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
 import BrickConfigSchema from "../collection/builders/brick-builder/schema.js";
 import CollectionConfigSchema from "../collection/builders/collection-builder/schema.js";
+import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import { translate } from "../i18n/index.js";
 import { getJobRegistry } from "../jobs/registry.js";
 import { initializeLogger } from "../logger/index.js";
-import type { LucidConfigRecipe } from "../runtime/types.js";
+import type { ConfigTransform } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
 import checkCollectionRouting from "./checks/check-collection-routing.js";
@@ -25,8 +24,7 @@ import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
 import ConfigSchema from "./config-schema.js";
 import coreJobDefinitions from "./core-job-definitions.js";
-import mergeConfig from "./merge-config.js";
-import normalizeConfigSecrets from "./utils/normalize-config-secrets.js";
+import resolveConfig from "./resolve-config.js";
 
 /**
  * Responsible for:
@@ -40,69 +38,26 @@ const processConfig = async (
 		skipValidation?: boolean;
 		mode?: "runtime" | "build";
 		resolvedDb?: DatabaseAdapter;
-		recipe?: LucidConfigRecipe;
+		configure?: ConfigTransform;
 	},
-): Promise<Config> => {
+): Promise<ResolvedLucidConfig> => {
 	if (Object.hasOwn(config, "db")) {
 		throw new LucidError({
 			message:
-				"Lucid config must not define `config.db`. Move your database adapter to the top-level `db` property passed to configureLucid().",
+				"Lucid config must not define `config.db`. Move your database adapter to the top-level `db` property passed to defineConfig().",
 		});
 	}
-
 	if (!options?.resolvedDb) {
 		throw new LucidError({
 			message:
-				"Lucid could not resolve the configured database adapter. Define it via `configureLucid({ db, config })`.",
+				"Lucid could not resolve the configured database adapter. Define it via `defineConfig({ db, config })`.",
 		});
 	}
 
-	let configRes = mergeConfig(config, defaultConfig);
-
-	Object.assign(configRes, {
-		db: options.resolvedDb,
+	let configRes = await resolveConfig(config, {
+		...options,
+		resolvedDb: options.resolvedDb,
 	});
-
-	configRes = normalizeConfigSecrets(configRes, options?.mode);
-
-	if (options?.recipe) {
-		configRes = produce(configRes, options.recipe);
-		configRes = normalizeConfigSecrets(configRes, options?.mode);
-	}
-
-	// merge plugin config
-	if (Array.isArray(configRes.plugins)) {
-		for (const pluginDef of configRes.plugins) {
-			if (!options?.skipValidation) {
-				const { default: checkPluginVersion } = await import(
-					"./checks/check-plugin-version.js"
-				);
-
-				checkPluginVersion({
-					key: pluginDef.key,
-					requiredVersions: pluginDef.lucid,
-				});
-			}
-			if (pluginDef.hooks?.init) {
-				const res = await pluginDef.hooks.init();
-				if (res.error) {
-					//* will get caught by the CLI
-					throw new LucidError({
-						scope: pluginDef.key,
-						message:
-							translate(res.error.message) ??
-							translate("server:core.plugins.init.failed", {
-								data: {
-									key: pluginDef.key,
-								},
-							}),
-					});
-				}
-			}
-
-			configRes = produce(configRes, pluginDef.recipe);
-		}
-	}
 
 	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
 
@@ -127,7 +82,7 @@ const processConfig = async (
 
 	if (!options?.skipValidation) {
 		// validate config
-		configRes = ConfigSchema.parse(configRes) as Config;
+		configRes = ConfigSchema.parse(configRes);
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);
@@ -169,7 +124,7 @@ const processConfig = async (
 			checkDuplicateFieldKeys(
 				"collection",
 				collection.key,
-				collection.meta.fieldKeys,
+				getFieldBuilderState(collection).meta.fieldKeys,
 			);
 
 			checkFieldConditions("collection", collection.key, collection);
@@ -177,12 +132,12 @@ const processConfig = async (
 			checkRepeaterDepth(
 				"collection",
 				collection.key,
-				collection.meta.repeaterDepth,
+				getFieldBuilderState(collection).meta.repeaterDepth,
 			);
 			checkOpenRepeaters(
 				"collection",
 				collection.key,
-				collection.repeaterStack,
+				getFieldBuilderState(collection).repeaterStack,
 			);
 
 			for (const brick of collection.brickInstances) {
@@ -192,10 +147,22 @@ const processConfig = async (
 					checkField(field, configRes, collection);
 				}
 
-				checkDuplicateFieldKeys("brick", brick.key, brick.meta.fieldKeys);
+				checkDuplicateFieldKeys(
+					"brick",
+					brick.key,
+					getFieldBuilderState(brick).meta.fieldKeys,
+				);
 				checkFieldConditions("brick", brick.key, brick);
-				checkRepeaterDepth("brick", brick.key, brick.meta.repeaterDepth);
-				checkOpenRepeaters("brick", brick.key, brick.repeaterStack);
+				checkRepeaterDepth(
+					"brick",
+					brick.key,
+					getFieldBuilderState(brick).meta.repeaterDepth,
+				);
+				checkOpenRepeaters(
+					"brick",
+					brick.key,
+					getFieldBuilderState(brick).repeaterStack,
+				);
 			}
 		}
 

@@ -46,8 +46,10 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 	// Memos
 	const includeOffset = () => (props.selection ? 1 : 0);
 	const environmentOffset = () =>
-		props.showEnvironmentStatus ? props.collection.environments.length : 0;
-	const workflowOffset = () => (props.collection.workflow ? 2 : 0);
+		props.showEnvironmentStatus
+			? props.collection.publishing.targets.length
+			: 0;
+	const workflowOffset = () => (props.collection.publishing.workflow ? 2 : 0);
 	const authorStartIndex = () =>
 		includeOffset() +
 		environmentOffset() +
@@ -100,7 +102,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 				}}
 			</For>
 			<Show when={props.showEnvironmentStatus}>
-				<For each={props.collection.environments}>
+				<For each={props.collection.publishing.targets}>
 					{(environment, i) => (
 						<DocumentEnvironmentStatusCol
 							document={props.document}
@@ -112,7 +114,7 @@ const DocumentRow: Component<DocumentRowProps> = (props) => {
 					)}
 				</For>
 			</Show>
-			<Show when={props.collection.workflow}>
+			<Show when={props.collection.publishing.workflow}>
 				<WorkflowStageCol
 					document={props.document}
 					collection={props.collection}

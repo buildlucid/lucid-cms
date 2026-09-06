@@ -2,7 +2,7 @@ import { BrickBuilder, copy } from "@lucidcms/core";
 
 const SEOBrick = new BrickBuilder("seo", {
 	details: {
-		name: copy("admin:bricks.seo.name"),
+		label: copy("admin:bricks.seo.name"),
 	},
 })
 	.addTab("basic_tab", {
@@ -13,7 +13,7 @@ const SEOBrick = new BrickBuilder("seo", {
 	.addText("label", {
 		details: {
 			label: copy("admin:bricks.seo.fields.label.label"),
-			summary: copy("admin:bricks.seo.fields.label.summary"),
+			description: copy("admin:bricks.seo.fields.label.summary"),
 		},
 		ai: {
 			instructions:
@@ -26,7 +26,7 @@ const SEOBrick = new BrickBuilder("seo", {
 	.addTextarea("meta_description", {
 		details: {
 			label: copy("admin:bricks.seo.fields.meta_description.label"),
-			summary: copy("admin:bricks.seo.fields.meta_description.summary"),
+			description: copy("admin:bricks.seo.fields.meta_description.summary"),
 		},
 		ai: {
 			instructions:
@@ -72,7 +72,7 @@ const SEOBrick = new BrickBuilder("seo", {
 	.addText("canonical_url", {
 		details: {
 			label: copy("admin:bricks.seo.fields.canonical_url.label"),
-			summary: copy("admin:bricks.seo.fields.canonical_url.summary"),
+			description: copy("admin:bricks.seo.fields.canonical_url.summary"),
 		},
 		ui: {
 			width: 6,
@@ -81,7 +81,7 @@ const SEOBrick = new BrickBuilder("seo", {
 	.addText("robots", {
 		details: {
 			label: copy("admin:bricks.seo.fields.robots.label"),
-			summary: copy("admin:bricks.seo.fields.robots.summary"),
+			description: copy("admin:bricks.seo.fields.robots.summary"),
 		},
 		ui: {
 			width: 6,
@@ -90,14 +90,14 @@ const SEOBrick = new BrickBuilder("seo", {
 	.addCollapsible("schema", {
 		details: {
 			label: copy("admin:bricks.seo.collapsibles.schema.label"),
-			summary: copy("admin:bricks.seo.collapsibles.schema.summary"),
+			description: copy("admin:bricks.seo.collapsibles.schema.summary"),
 		},
 		defaultOpen: false,
 	})
 	.addSelect("schema_type", {
 		details: {
 			label: copy("admin:bricks.seo.fields.schema_type.label"),
-			summary: copy("admin:bricks.seo.fields.schema_type.summary"),
+			description: copy("admin:bricks.seo.fields.schema_type.summary"),
 		},
 		options: [
 			{
@@ -126,7 +126,7 @@ const SEOBrick = new BrickBuilder("seo", {
 	.addText("schema_name", {
 		details: {
 			label: copy("admin:bricks.seo.fields.schema_name.label"),
-			summary: copy("admin:bricks.seo.fields.schema_name.summary"),
+			description: copy("admin:bricks.seo.fields.schema_name.summary"),
 		},
 		ui: {
 			width: 8,
@@ -135,13 +135,13 @@ const SEOBrick = new BrickBuilder("seo", {
 	.addTextarea("schema_description", {
 		details: {
 			label: copy("admin:bricks.seo.fields.schema_description.label"),
-			summary: copy("admin:bricks.seo.fields.schema_description.summary"),
+			description: copy("admin:bricks.seo.fields.schema_description.summary"),
 		},
 	})
 	.addJSON("schema_json", {
 		details: {
 			label: copy("admin:bricks.seo.fields.schema_json.label"),
-			summary: copy("admin:bricks.seo.fields.schema_json.summary"),
+			description: copy("admin:bricks.seo.fields.schema_json.summary"),
 		},
 	})
 	.endCollapsible();

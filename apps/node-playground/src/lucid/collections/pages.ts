@@ -8,9 +8,11 @@ import TestingBrick from "../bricks/testing.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.page.name"),
-		singularName: copy("admin:collections.page.singularName"),
-		summary: copy("admin:collections.page.summary"),
+		labels: {
+			singular: copy("admin:collections.page.singularName"),
+			plural: copy("admin:collections.page.name"),
+		},
+		description: copy("admin:collections.page.summary"),
 	},
 	group: {
 		key: "content",
@@ -20,47 +22,6 @@ const PageCollection = new CollectionBuilder("page", {
 	localized: { locales: ["en", "fr"], defaultLocale: "fr" },
 	revisions: true,
 	autoSave: true,
-	scheduling: true,
-	review: {
-		requiredFor: ["production"],
-		allowSelfApproval: true,
-		comments: {
-			request: "required",
-			decision: "optional",
-		},
-	},
-	workflow: {
-		stages: [
-			{
-				key: "todo",
-				name: copy("admin:collections.page.workflow.todo.name"),
-				color: "yellow",
-			},
-			{
-				key: "in-progress",
-				name: copy("admin:collections.page.workflow.in-progress.name"),
-				publishTargets: ["staging"],
-				color: "blue",
-			},
-			{
-				key: "done",
-				name: copy("admin:collections.page.workflow.done.name"),
-				publishTargets: ["production", "staging"],
-				color: "green",
-			},
-		],
-	},
-	environments: [
-		{
-			key: "staging",
-			name: copy("admin:collections.page.environments.staging.name"),
-		},
-		{
-			key: "production",
-			name: copy("admin:collections.page.environments.production.name"),
-			requires: ["staging"],
-		},
-	],
 	hooks: [
 		{
 			service: "documents",
@@ -111,11 +72,54 @@ const PageCollection = new CollectionBuilder("page", {
 		fixed: [SEOBrick],
 		builder: [BannerBrick, IntroBrick, TestingBrick, AllFieldsBrick],
 	},
+	publishing: {
+		targets: [
+			{
+				key: "staging",
+				label: copy("admin:collections.page.environments.staging.name"),
+			},
+			{
+				key: "production",
+				label: copy("admin:collections.page.environments.production.name"),
+				requires: ["staging"],
+			},
+		],
+		review: {
+			requiredFor: ["production"],
+			allowSelfApproval: true,
+			comments: {
+				request: "required",
+				decision: "optional",
+			},
+		},
+		workflow: {
+			stages: [
+				{
+					key: "todo",
+					label: copy("admin:collections.page.workflow.todo.name"),
+					color: "yellow",
+				},
+				{
+					key: "in-progress",
+					label: copy("admin:collections.page.workflow.in-progress.name"),
+					publishTargets: ["staging"],
+					color: "blue",
+				},
+				{
+					key: "done",
+					label: copy("admin:collections.page.workflow.done.name"),
+					publishTargets: ["production", "staging"],
+					color: "green",
+				},
+			],
+		},
+		scheduling: true,
+	},
 })
 	.addText("page_title", {
 		details: {
 			label: copy("admin:collections.page.fields.page_title.label"),
-			summary: copy("admin:collections.page.fields.page_title.summary"),
+			description: copy("admin:collections.page.fields.page_title.summary"),
 		},
 		ui: {
 			hidden: false,

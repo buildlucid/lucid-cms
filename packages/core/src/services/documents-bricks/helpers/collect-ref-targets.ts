@@ -1,11 +1,11 @@
 import type {
 	FieldTypes,
 	RefResource,
-	Select,
 	ServiceFn,
 } from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import fieldConfigs from "../../../libs/collection/custom-fields/field-configs.js";
 import {
@@ -22,6 +22,7 @@ import type {
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../../../libs/db/tables/index.js";
+import type { Select } from "../../../libs/db/types.js";
 import {
 	addRefTarget,
 	shouldIncludeRefResource,
@@ -59,7 +60,7 @@ const getRelationTableFieldInstance = (
 		: collection;
 	if (!owner) return null;
 
-	return owner.fields.get(fieldKey) ?? null;
+	return getFieldBuilderState(owner).fields.get(fieldKey) ?? null;
 };
 
 /**
@@ -121,7 +122,7 @@ const getColumnFieldInstances = (
 	if (!owner) return new Map();
 
 	const fieldsByColumn = new Map<string, CustomField<FieldTypes>>(
-		Array.from(owner.fields.values()).map((field) => [
+		Array.from(getFieldBuilderState(owner).fields.values()).map((field) => [
 			prefixGeneratedColName(field.key),
 			field,
 		]),

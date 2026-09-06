@@ -43,7 +43,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 		media: createMediaToolkit(context),
 		previews: createPreviewsToolkit(context),
 	};
-	const toolkit = { ...core };
+	const toolkit: Toolkit = { ...core };
 
 	for (const plugin of context.config.plugins) {
 		if (!plugin.toolkit) continue;
@@ -67,8 +67,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 		});
 	}
 
-	// Config validates registrations; TypeScript cannot track their dynamic keys.
-	return toolkit as Toolkit;
+	return toolkit;
 };
 
 export default createToolkit;

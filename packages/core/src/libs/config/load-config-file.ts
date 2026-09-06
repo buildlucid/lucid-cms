@@ -1,7 +1,7 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { ZodType } from "zod";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import cliLogger from "../cli/logger.js";
 import {
@@ -13,9 +13,9 @@ import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 	LucidConfigDefinition,
+	RuntimeAdaptConfig,
+	RuntimeAdaptConfigModule,
 	RuntimeAdapter,
-	RuntimeConfigureLucid,
-	RuntimeConfigureLucidModule,
 } from "../runtime/types.js";
 import getConfigPath from "./get-config-path.js";
 import { resolveConfigDefinition } from "./resolve-config-definition.js";
@@ -29,21 +29,25 @@ export type LoadConfigResult = {
 	configDependencies: string[];
 	projectRoot: string;
 	runtimeContext: AdapterRuntimeContext;
-	config: Config;
+	config: ResolvedLucidConfig;
 	adapter: RuntimeAdapter;
 	envSchema?: ZodType;
 	env: EnvironmentVariables | undefined;
+	/** Original values for integrations that create another runtime host. */
+	rawEnv: Record<string, unknown> | undefined;
 	definition: LucidConfigDefinition;
 };
 
 export const loadConfigFile = async (props?: {
 	path?: string;
 	silent?: boolean;
-	configureLucidPath?: string;
+	adaptConfigPath?: string;
 	/** Collects local config imports for development watchers. */
 	collectConfigDependencies?: boolean;
 	prepareRuntime?: boolean;
 	validateEnvSchema?: boolean;
+	/** Overrides the named env export before raw environment values are parsed. */
+	envSchema?: ZodType;
 	processConfigOptions?: Parameters<
 		typeof resolveConfigDefinition
 	>[0]["processConfigOptions"];
@@ -66,24 +70,23 @@ export const loadConfigFile = async (props?: {
 				dependencyEntryPath: collectConfigDependencies ? configPath : undefined,
 			});
 		const hasNamedEnvExport = Object.hasOwn(configModule, "env");
-		let configureLucid: RuntimeConfigureLucid | undefined;
+		let adaptConfig: RuntimeAdaptConfig | undefined;
 
-		if (props?.configureLucidPath) {
+		if (props?.adaptConfigPath) {
 			// Use Jiti here so host wrappers stay outside consumer bundler graphs.
-			const { module: configureLucidModule } = await loadConfigModule<
-				Partial<RuntimeConfigureLucidModule> & {
-					default?: RuntimeConfigureLucid;
+			const { module: adaptConfigModule } = await loadConfigModule<
+				Partial<RuntimeAdaptConfigModule> & {
+					default?: RuntimeAdaptConfig;
 				}
 			>({
 				loader: jiti,
-				specifier: props.configureLucidPath,
+				specifier: props.adaptConfigPath,
 			});
-			configureLucid =
-				configureLucidModule.configureLucid ?? configureLucidModule.default;
+			adaptConfig = adaptConfigModule.adaptConfig ?? adaptConfigModule.default;
 
-			if (typeof configureLucid !== "function") {
+			if (typeof adaptConfig !== "function") {
 				throw new LucidError({
-					message: `Lucid could not load the configureLucid() export from "${props.configureLucidPath}".`,
+					message: `Lucid could not load the adaptConfig() export from "${props.adaptConfigPath}".`,
 				});
 			}
 		}
@@ -96,8 +99,9 @@ export const loadConfigFile = async (props?: {
 				return prepared.config;
 			},
 			definition: configModule.default,
-			envSchema: hasNamedEnvExport ? configModule.env : undefined,
-			configureLucid,
+			envSchema:
+				props?.envSchema ?? (hasNamedEnvExport ? configModule.env : undefined),
+			adaptConfig,
 			configPath,
 			projectRoot,
 			prepareRuntime: props?.prepareRuntime,
@@ -121,6 +125,7 @@ export const loadConfigFile = async (props?: {
 			adapter: resolved.adapter,
 			envSchema: resolved.envSchema,
 			env: resolved.env,
+			rawEnv: resolved.rawEnv,
 			definition: resolved.definition,
 		};
 	}, projectRoot);

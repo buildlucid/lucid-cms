@@ -1,11 +1,11 @@
-import type { Config } from "../../types/config.js";
+import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
 import type { ResourceSources } from "../resources/types.js";
 import type {
 	AdapterRuntimeContext,
+	ConfigTransform,
 	EnvironmentVariables,
 	LucidConfigDefinition,
-	LucidConfigRecipe,
 	RuntimeArtifactCustom,
 	RuntimeBuildArtifactCompile,
 	RuntimeBuildArtifactFile,
@@ -21,18 +21,30 @@ export type LucidPluginRuntimeHookResult = {
 };
 
 export type LucidPluginHookInit = () => ServiceResponse<undefined>;
-export type LucidPluginRuntimeHookPhase = "prepare" | "build";
-export type LucidPluginHookRuntime = (props: {
-	phase: LucidPluginRuntimeHookPhase;
-	env?: EnvironmentVariables;
-	definition: LucidConfigDefinition;
-	paths?: {
-		configPath?: string;
-		projectRoot?: string;
-		outputPath?: string;
-		outputRelativeConfigPath?: string;
-	};
-}) => ServiceResponse<LucidPluginRuntimeHookResult>;
+export type LucidPluginRuntimeHookContext =
+	| {
+			phase: "prepare";
+			env: EnvironmentVariables;
+			definition: LucidConfigDefinition;
+			paths: {
+				configPath: string;
+				projectRoot: string;
+			};
+	  }
+	| {
+			phase: "build";
+			definition: LucidConfigDefinition;
+			paths: {
+				configPath: string;
+				outputPath: string;
+				outputRelativeConfigPath: string;
+			};
+	  };
+export type LucidPluginRuntimeHookPhase =
+	LucidPluginRuntimeHookContext["phase"];
+export type LucidPluginHookRuntime = (
+	props: LucidPluginRuntimeHookContext,
+) => ServiceResponse<LucidPluginRuntimeHookResult>;
 
 export type LucidPluginHooks = {
 	/**
@@ -47,9 +59,11 @@ export type LucidPluginHooks = {
 	runtime?: LucidPluginHookRuntime;
 };
 
-export type LucidPluginRecipe = LucidConfigRecipe;
+export type PluginConfigure = ConfigTransform;
 
-export type LucidPluginResponse = {
+export type PluginDefaults = Omit<Partial<LucidConfig>, "plugins">;
+
+export type LucidPluginDefinition = {
 	/** Additional resources supplied by this plugin, loaded before config recipes. Use exported package subpaths or file URLs. */
 	sources?: ResourceSources;
 	/**
@@ -71,18 +85,20 @@ export type LucidPluginResponse = {
 	 */
 	checkCompatibility?: (props: {
 		runtimeContext: AdapterRuntimeContext;
-		config: Config;
+		config: ResolvedLucidConfig;
 	}) => void | Promise<void>;
 	/**
 	 * A plugin-owned service to add to Lucid's server toolkit.
 	 */
 	toolkit?: ToolkitDefinition;
 	/**
-	 * The recipe function where you can mutate the config.
+	 * The configure function where you can mutate the config.
 	 */
-	recipe: LucidPluginRecipe;
+	configure?: PluginConfigure;
+	/** Supplies defaults before explicit project settings are applied. */
+	defaults?: PluginDefaults | ((config: ResolvedLucidConfig) => PluginDefaults);
 };
 
 export type LucidPlugin<T = undefined> = (
 	pluginOptions: T,
-) => LucidPluginResponse;
+) => LucidPluginDefinition;

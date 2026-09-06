@@ -5,8 +5,10 @@ import SeoBrick from "../bricks/seo.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: "Pages",
-		singularName: "Page",
+		labels: {
+			singular: "Page",
+			plural: "Pages",
+		},
 	},
 	bricks: {
 		fixed: [SeoBrick],

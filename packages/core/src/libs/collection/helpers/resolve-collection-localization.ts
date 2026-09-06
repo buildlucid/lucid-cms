@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../builders/collection-builder/index.js";
+import type { FieldSnapshot } from "../builders/field-builder/types.js";
 
 type CollectionLocalizationSource = {
 	locales: Array<{ code: string }>;
@@ -67,8 +68,11 @@ const resolveCollectionLocalization = (props: {
 
 const isCollectionFieldLocalized = (
 	localization: Pick<ResolvedCollectionLocalization, "enabled">,
-	field: { localizedEnabled: boolean },
-): boolean => localization.enabled && field.localizedEnabled;
+	field: Pick<FieldSnapshot, "config">,
+): boolean =>
+	localization.enabled &&
+	"localized" in field.config &&
+	field.config.localized === true;
 
 export { isCollectionFieldLocalized };
 export default resolveCollectionLocalization;

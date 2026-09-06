@@ -71,7 +71,7 @@ export const RangeField: Component<RangeFieldProps> = (props) => {
 					value: props.state.fieldConfig.details.label,
 				}),
 				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.summary,
+					value: props.state.fieldConfig.details.description,
 				}),
 			}}
 			errors={props.state.fieldError}

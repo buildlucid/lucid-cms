@@ -1,8 +1,8 @@
 import type { Context } from "hono";
 import type {
-	Config,
 	EnvironmentVariables,
 	Locale,
+	ResolvedLucidConfig,
 	UserPermission,
 } from "../exports/types.js";
 import type LucidDatabase from "../libs/db/client/lucid-database.js";
@@ -77,7 +77,7 @@ export type LucidExecutionContext = {
 };
 
 export type LucidHonoVariables = {
-	config: Config;
+	config: ResolvedLucidConfig;
 	db: LucidDatabase;
 	translationStore: TranslationStore;
 	runtimeContext: AdapterRuntimeContext;

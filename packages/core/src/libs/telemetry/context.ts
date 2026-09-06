@@ -1,5 +1,5 @@
 import packageJson from "../../../package.json" with { type: "json" };
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { firstPartyRuntimeAdapterKeys } from "../runtime/constants.js";
 import type {
 	AdapterKeys,
@@ -53,7 +53,7 @@ const getIsCI = (env?: EnvironmentVariables) =>
 		isTelemetryEnvFlagEnabled(getTelemetryEnvValue(env, key)),
 	);
 
-const getContentCounts = (config: Config) => {
+const getContentCounts = (config: ResolvedLucidConfig) => {
 	let fields = 0;
 	const collections = new Set<string>();
 	const bricks = new Set<string>();
@@ -77,7 +77,7 @@ const getContentCounts = (config: Config) => {
 };
 
 const getAdapters = (
-	config: Config,
+	config: ResolvedLucidConfig,
 	adapterKeys?: AdapterKeys,
 ): TelemetryEnvelope["context"]["adapters"] => ({
 	database: normalizeFirstPartyKey(
@@ -115,7 +115,7 @@ const getAdapters = (
 
 /** Builds the complete, allowlisted setup context sent with lifecycle events. */
 export const getTelemetryContext = (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	env?: EnvironmentVariables;
 	runtimeContext: AdapterRuntimeContext;
 	adapterKeys?: AdapterKeys;

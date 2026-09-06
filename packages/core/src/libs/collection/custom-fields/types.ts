@@ -1,4 +1,5 @@
 import type { ColumnDataType } from "kysely";
+import type { ZodType } from "zod";
 import type constants from "../../../constants/constants.js";
 import type { ErrorCopy, FieldErrorMeta } from "../../../types/errors.js";
 import type {
@@ -9,13 +10,13 @@ import type { RefResource, Refs } from "../../../types/response.js";
 import type DatabaseAdapter from "../../db/adapter-base.js";
 import type { OnDelete, OnUpdate } from "../../db/types.js";
 import type { AdminCopyDescriptor, AdminCopyInput } from "../../i18n/types.js";
+import type { FieldSnapshot } from "../builders/field-builder/types.js";
 import type { BrickBuilder, CollectionBuilder } from "../builders/index.js";
 import type {
 	CollectionSchemaColumn,
 	CollectionSchemaIndex,
 } from "../schema/types.js";
 import type { FieldConditionConfig } from "./conditions/index.js";
-import type CustomField from "./custom-field.js";
 import { checkboxFieldConfig } from "./fields/checkbox/config.js";
 import type { CheckboxCustomFieldMapItem } from "./fields/checkbox/types.js";
 import { codeFieldConfig } from "./fields/code/config.js";
@@ -104,13 +105,13 @@ export const fieldTypes = [
 export type FieldTypes = (typeof fieldTypes)[number];
 
 // -----------------------------------------------
-// Shared Field Config / Registry Metadata
+// Shared Field ResolvedLucidConfig / Registry Metadata
 export type SharedFieldConfig = {
 	key: string;
 	type: FieldTypes;
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 };
 
@@ -127,6 +128,12 @@ export type FieldUIConfig = {
 	disabled?: boolean;
 	condition?: FieldConditionConfig;
 	width?: FieldWidth;
+};
+
+export type FieldValidation<Value> = {
+	required?: boolean;
+	/** Validates the existing value. Schemas that change it are rejected. */
+	zod?: ZodType<Value, Value>;
 };
 
 export type OmitDefault<T> = T extends { default?: unknown }
@@ -211,7 +218,7 @@ export type CustomFieldAiContextItem =
 export type CustomFieldAiContext<T extends FieldTypes = FieldTypes> = {
 	collection: CollectionBuilder;
 	brick?: BrickBuilder;
-	field: CustomField<T>;
+	field: FieldSnapshot<T>;
 	locale: {
 		source?: string;
 		target: string[];
@@ -265,9 +272,9 @@ export type CustomFieldMap = {
 
 // -----------------------------------------------
 // Generic Types
-export type CFConfig<T extends FieldTypes> = CustomFieldMap[T]["config"];
-export type CFProps<T extends FieldTypes> = CustomFieldMap[T]["props"];
-export type CFResponse<T extends FieldTypes> = CustomFieldMap[T]["response"];
+export type FieldConfig<T extends FieldTypes> = CustomFieldMap[T]["config"];
+export type FieldOptions<T extends FieldTypes> = CustomFieldMap[T]["props"];
+export type FieldResponse<T extends FieldTypes> = CustomFieldMap[T]["response"];
 
 export type FieldValue =
 	| CustomFieldMap[FieldTypes]["response"]["value"]
@@ -281,7 +288,7 @@ export type CustomFieldResponseFormatContext = {
 export type ContentFieldTypeGenerationContext<
 	T extends FieldTypes = FieldTypes,
 > = {
-	field: CFConfig<T>;
+	field: FieldConfig<T>;
 };
 
 export type ContentFieldTypeGenerationResult = {

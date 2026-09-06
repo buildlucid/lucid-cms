@@ -3,7 +3,7 @@ import type {
 	DatabaseAdapterCreator,
 	DatabaseAdapterFactory,
 } from "../db/adapter-factory.js";
-import type { LucidPluginResponse } from "../plugins/types.js";
+import type { LucidPluginDefinition } from "../plugins/types.js";
 import type {
 	DatabaseAdapterValue,
 	EnvironmentVariables,
@@ -102,12 +102,12 @@ const collectDatabasePrepareArtifacts = async (props: {
 };
 
 const collectPluginPrepareArtifacts = async (props: {
-	plugins: Array<LucidPluginResponse>;
+	plugins: Array<LucidPluginDefinition>;
 	env: EnvironmentVariables;
 	definition: LucidConfigDefinition;
-	paths?: {
-		configPath?: string;
-		projectRoot?: string;
+	paths: {
+		configPath: string;
+		projectRoot: string;
 	};
 	target: RuntimePrepareArtifacts;
 	customArtifactTypes?: string[];
@@ -144,12 +144,12 @@ const collectPluginPrepareArtifacts = async (props: {
  */
 export const collectRuntimePrepareArtifacts = async (props: {
 	db: DatabaseAdapterValue;
-	plugins: Array<LucidPluginResponse>;
+	plugins: Array<LucidPluginDefinition>;
 	env: EnvironmentVariables;
 	definition: LucidConfigDefinition;
-	paths?: {
-		configPath?: string;
-		projectRoot?: string;
+	paths: {
+		configPath: string;
+		projectRoot: string;
 	};
 	customArtifactTypes?: string[];
 }): Promise<RuntimePrepareArtifacts> => {

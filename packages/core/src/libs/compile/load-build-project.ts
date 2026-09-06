@@ -1,6 +1,4 @@
 import type { ZodType } from "zod";
-import { LucidError } from "../../utils/errors/index.js";
-import validateEnvVars from "../cli/services/validate-env-vars.js";
 import getConfigPath from "../config/get-config-path.js";
 import loadConfigFile from "../config/load-config-file.js";
 import type { RenderedTemplates } from "../email/types.js";
@@ -33,7 +31,7 @@ const loadBuildProject = async (props?: {
 	/** Collects local config imports for development watchers. */
 	collectConfigDependencies?: boolean;
 	envSchema?: ZodType;
-	configureLucidPath?: string;
+	adaptConfigPath?: string;
 	prepareRuntime?: boolean;
 }): Promise<LoadBuildProjectResult> => {
 	const configPath = props?.configPath ?? getConfigPath(process.cwd());
@@ -41,9 +39,10 @@ const loadBuildProject = async (props?: {
 		path: configPath,
 		silent: props?.silent,
 		collectConfigDependencies: props?.collectConfigDependencies,
-		configureLucidPath: props?.configureLucidPath,
+		adaptConfigPath: props?.adaptConfigPath,
 		prepareRuntime: props?.prepareRuntime,
-		validateEnvSchema: false,
+		validateEnvSchema: props?.validateEnv ?? false,
+		envSchema: props?.envSchema,
 		processConfigOptions: {
 			mode: "build",
 		},
@@ -57,15 +56,10 @@ const loadBuildProject = async (props?: {
 		translationStore: translations.translationStore,
 	};
 
-	const [envValid, _typeGen, emailTemplates] = await Promise.all([
-		props?.validateEnv &&
-			validateEnvVars({
-				envSchema: props.envSchema ?? preparedLoaded.envSchema,
-				env: preparedLoaded.env,
-			}),
+	const [_typeGen, emailTemplates] = await Promise.all([
 		props?.generateTypes !== false &&
 			generateTypes({
-				envSchema: props?.envSchema ?? preparedLoaded.envSchema,
+				envSchema: preparedLoaded.envSchema,
 				configPath,
 				projectRoot: preparedLoaded.projectRoot,
 				collections: preparedLoaded.config.collections,
@@ -81,13 +75,6 @@ const loadBuildProject = async (props?: {
 				)
 			: undefined,
 	]);
-
-	if (props?.validateEnv && !envValid) {
-		throw new LucidError({
-			message:
-				"Lucid build could not validate the environment variables for lucid.config.ts.",
-		});
-	}
 
 	return {
 		configPath,

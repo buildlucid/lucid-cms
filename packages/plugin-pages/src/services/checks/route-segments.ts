@@ -4,7 +4,7 @@ import {
 	LucidError,
 	translate,
 } from "@lucidcms/core";
-import type { CFConfig } from "@lucidcms/core/types";
+import type { FieldConfig } from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../../constants.js";
 import type { CollectionConfig } from "../../types/types.js";
 
@@ -40,14 +40,14 @@ const checkRouteSegments = (data: {
 		const relation = data.collection.fields.get(segment.relation);
 		const relationConfig =
 			relation?.type === "relation"
-				? (relation.config as CFConfig<"relation">)
+				? (relation.config as FieldConfig<"relation">)
 				: null;
 		if (
 			!relationConfig ||
 			relation?.treeParent !== null ||
 			relation?.structuralParent !== null ||
 			relationConfig.multiple === true ||
-			relation?.localizedEnabled ||
+			relationConfig.localized === true ||
 			relationConfig.collection.length !== 1 ||
 			relationConfig.collection[0] !== segment.collection
 		) {

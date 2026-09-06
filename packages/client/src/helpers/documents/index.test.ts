@@ -1,13 +1,17 @@
+import { createServer } from "node:http";
 import { decodePreviewFieldTarget } from "@lucidcms/preview-protocol";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { asDocument, asDocuments } from "../../index.js";
+import {
+	createClient,
+	createDocumentView,
+	createDocumentViews,
+} from "../../index.js";
 import type {
 	CollectionDocument,
 	CollectionDocumentTranslations,
 	DocumentBrick,
 	DocumentBrickView,
 	DocumentFieldGroupView,
-	DocumentRef,
 	DocumentView,
 	Refs,
 	RelationFieldValue,
@@ -67,10 +71,11 @@ declare module "../../types.js" {
 	}
 }
 
-const pageFixture = {
+const pageFixture: CollectionDocument<"page"> & { refs: Refs } = {
 	id: 1,
 	collectionKey: "page",
 	version: "published",
+	route: null,
 	fields: {
 		page_title: {
 			en: "Homepage",
@@ -152,6 +157,7 @@ const pageFixture = {
 			{
 				id: 3,
 				collectionKey: "page",
+				route: null,
 				fields: {
 					page_title: "Contact",
 				},
@@ -159,6 +165,7 @@ const pageFixture = {
 			{
 				id: 2,
 				collectionKey: "page",
+				route: null,
 				fields: {
 					page_title: "About",
 				},
@@ -170,12 +177,14 @@ const pageFixture = {
 				type: "image",
 				folderId: null,
 				origin: "human",
-				title: [],
-				alt: [],
+				status: "ready",
+				title: {},
+				alt: {},
 				key: "media/11.jpg",
 				url: "/media/11.jpg",
 				fileName: "hero-secondary.jpg",
 				sourceType: "original",
+				delivery: { adapter: "local", data: null, supportsPresetQuery: true },
 				meta: {
 					mimeType: "image/jpeg",
 					extension: "jpg",
@@ -201,12 +210,14 @@ const pageFixture = {
 				type: "image",
 				folderId: null,
 				origin: "human",
-				title: [],
-				alt: [],
+				status: "ready",
+				title: {},
+				alt: {},
 				key: "media/10.jpg",
 				url: "/media/10.jpg",
 				fileName: "hero-primary.jpg",
 				sourceType: "original",
+				delivery: { adapter: "local", data: null, supportsPresetQuery: true },
 				meta: {
 					mimeType: "image/jpeg",
 					extension: "jpg",
@@ -255,6 +266,7 @@ const pageFixture = {
 				promotedFrom: null,
 				contentId: "page_home_latest",
 				createdAt: "2026-04-22T12:00:00.000Z",
+				updatedAt: "2026-04-22T12:00:00.000Z",
 				createdBy: 1,
 			},
 			published: {
@@ -262,6 +274,7 @@ const pageFixture = {
 				promotedFrom: null,
 				contentId: "page_home_published",
 				createdAt: "2026-04-20T12:00:00.000Z",
+				updatedAt: "2026-04-20T12:00:00.000Z",
 				createdBy: 1,
 			},
 		},
@@ -270,12 +283,95 @@ const pageFixture = {
 		updatedAt: "2026-04-22T12:00:00.000Z",
 		updatedBy: 1,
 	},
-} satisfies CollectionDocument<"page"> & { refs: Refs };
-const { refs, ...page } = pageFixture;
+};
+const { refs, ...rawPage } = pageFixture;
+const page: CollectionDocument<"page"> = rawPage;
 
 describe("@lucidcms/client document helpers", () => {
+	test("creates document views from HTTP results while preserving refs and metadata", async () => {
+		const links = { first: null, last: null, next: null, prev: null };
+		const meta = {
+			links: [],
+			path: "/lucid/api/v1/content/documents/page",
+			currentPage: 1,
+			lastPage: 1,
+			perPage: 10,
+			total: 1,
+		};
+		const server = createServer((request, response) => {
+			response.setHeader("content-type", "application/json");
+			response.setHeader("x-request-id", "document-views");
+			response.end(
+				JSON.stringify({
+					data: request.url?.includes("/documents/") ? [page] : page,
+					refs,
+					links,
+					meta,
+				}),
+			);
+		});
+		await new Promise<void>((resolve, reject) => {
+			server.once("error", reject);
+			server.listen(0, "127.0.0.1", resolve);
+		});
+		try {
+			const address = server.address();
+			if (!address || typeof address === "string") {
+				throw new Error("The test server did not bind to a TCP port.");
+			}
+			const client = createClient({
+				baseUrl: `http://127.0.0.1:${address.port}`,
+				auth: { type: "apiKey", apiKey: "test-key" },
+			});
+			const single = await client.documents.getSingle({
+				collectionKey: "page",
+				version: "latest",
+			});
+			const multiple = await client.documents.getMultiple({
+				collectionKey: "page",
+				version: "latest",
+			});
+			if (single.error) throw single.error;
+			if (multiple.error) throw multiple.error;
+
+			const view = createDocumentView({
+				document: single.data,
+				refs: single.refs,
+				locale: "en",
+			});
+			const views = createDocumentViews({
+				documents: multiple.data,
+				refs: multiple.refs,
+				locale: "fr",
+			});
+			expect(view.field("page_title").value()).toBe("Homepage");
+			expect(views[0]?.field("page_title").value()).toBe("Accueil");
+			expect(view.field("related_page").ref("documents")?.id).toBe(2);
+			expect(
+				views[0]
+					?.field("hero_image")
+					.refs("media")
+					.map((ref) => ref.id),
+			).toEqual([10, 11]);
+			expect(view.raw.meta).toEqual(page.meta);
+			for (const result of [single, multiple]) {
+				expect(result.meta).toEqual(meta);
+				expect(result.links).toEqual(links);
+				expect(result.refs).toEqual(refs);
+				expect(result.response.status).toBe(200);
+				expect(result.response.headers.get("x-request-id")).toBe(
+					"document-views",
+				);
+			}
+		} finally {
+			await new Promise<void>((resolve, reject) =>
+				server.close((error) => (error ? reject(error) : resolve())),
+			);
+		}
+	});
+
 	test("wraps a document with locale-aware field, brick, and group helpers", () => {
-		const pageView = asDocument({
+		const pageView = createDocumentView({
 			document: page,
 			locale: "en",
 			refs,
@@ -328,7 +424,7 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("returns translated field objects until a locale is supplied", () => {
-		const pageView = asDocument({ document: page });
+		const pageView = createDocumentView({ document: page });
 
 		expect(pageView.field("page_title").value()).toEqual({
 			en: "Homepage",
@@ -343,7 +439,7 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("supports changing locale on document and brick wrappers", () => {
-		const pageView = asDocument({ document: page }).withLocale("fr");
+		const pageView = createDocumentView({ document: page }).withLocale("fr");
 		const banner = pageView.brick({
 			type: "builder",
 			key: "banner",
@@ -358,17 +454,18 @@ describe("@lucidcms/client document helpers", () => {
 
 	test("emits preview targets only when explicitly enabled", () => {
 		expect(
-			asDocument({ document: page }).field("page_title").preview(),
+			createDocumentView({ document: page }).field("page_title").preview(),
 		).toEqual({});
 		expect(
-			asDocument({ document: page, preview: false })
+			createDocumentView({ document: page, preview: false })
 				.field("page_title")
 				.preview(),
 		).toEqual({});
 
-		const pageView = asDocument({ document: page, preview: true }).withLocale(
-			"fr",
-		);
+		const pageView = createDocumentView({
+			document: page,
+			preview: true,
+		}).withLocale("fr");
 		const rootAttributes = pageView.field("page_title").preview();
 		const brickAttributes = pageView
 			.brick({ type: "fixed" })
@@ -387,7 +484,10 @@ describe("@lucidcms/client document helpers", () => {
 			.groups()[1]
 			?.field("heading")
 			.preview();
-		const nestedGroupAttributes = asDocument({ document: page, preview: true })
+		const nestedGroupAttributes = createDocumentView({
+			document: page,
+			preview: true,
+		})
 			.field("sections")
 			.groups()[1]
 			?.field("links")
@@ -452,11 +552,11 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("returns undefined for nullish documents and keeps optional chaining ergonomic", () => {
-		const missingPage = asDocument({
+		const missingPage = createDocumentView({
 			document: undefined as CollectionDocument<"page"> | undefined,
 			locale: "en",
 		});
-		const emptyPage = asDocument({ document: null });
+		const emptyPage = createDocumentView({ document: null });
 
 		expect(missingPage).toBeUndefined();
 		expect(emptyPage).toBeUndefined();
@@ -469,17 +569,22 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("wraps multiple documents with the same locale-aware helpers", () => {
-		const pages = asDocuments({
+		const pages = createDocumentViews({
 			documents: [page, { ...page, id: 2 }],
 			locale: "fr",
 		});
-		const rawPages = asDocuments({ documents: [page] });
+		const rawPages = createDocumentViews({ documents: [page] });
 
 		expect(pages.map((pageView) => pageView.id)).toEqual([1, 2]);
 		expect(
 			pages.map((pageView) => pageView.field("page_title").value()),
 		).toEqual(["Accueil", "Accueil"]);
-		expect(asDocuments({ documents: [], locale: "en" })).toEqual([]);
+		expect(
+			createDocumentViews<CollectionDocument<"page">>({
+				documents: [],
+				locale: "en",
+			}),
+		).toEqual([]);
 		expectTypeOf(pages).toEqualTypeOf<
 			Array<DocumentView<CollectionDocument<"page">, true>>
 		>();
@@ -489,12 +594,12 @@ describe("@lucidcms/client document helpers", () => {
 	});
 
 	test("preserves collection-aware helper types", () => {
-		const pageView = asDocument({
+		const pageView = createDocumentView({
 			document: page,
 			locale: "en",
 			refs,
 		});
-		const rawPageView = asDocument({ document: page });
+		const rawPageView = createDocumentView({ document: page });
 
 		expectTypeOf(pageView).toEqualTypeOf<
 			DocumentView<CollectionDocument<"page">, true>
@@ -513,7 +618,7 @@ describe("@lucidcms/client document helpers", () => {
 		).toEqualTypeOf<string | null | undefined>();
 		expectTypeOf(
 			pageView.field("related_page").refs("documents"),
-		).toEqualTypeOf<DocumentRef[]>();
+		).toEqualTypeOf<NonNullable<Refs["documents"]>>();
 		expectTypeOf(pageView.brick("banner")).toEqualTypeOf<
 			| DocumentBrickView<
 					CollectionDocument<"page">,
@@ -569,9 +674,7 @@ describe("@lucidcms/client document helpers", () => {
 			Array<
 				DocumentFieldGroupView<
 					CollectionDocument<"page">,
-					{
-						heading: string | null;
-					},
+					CollectionDocument<"page">["fields"]["sections"][number],
 					true
 				>
 			>

@@ -1,7 +1,7 @@
 import type { ExpressionBuilder, OperandExpression, SqlBool } from "kysely";
 import { type SelectQueryBuilder, sql } from "kysely";
 import constants from "../../constants/constants.js";
-import type { Config } from "../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../exports/types.js";
 import type {
 	ContentGetSingleQueryParams,
 	GetMultipleQueryParams,
@@ -322,7 +322,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				| CollectionSchemaTable<LucidBrickTableName>
 				| undefined;
 			documentFieldRelationTableSchemas?: CollectionSchemaTable<LucidBrickTableName>[];
-			config: Config;
+			config: ResolvedLucidConfig;
 			includeWorkflow: boolean;
 			workflowAssigneeFilterValues?: Array<string | number>;
 			filterOr?: DocumentFilterGroup[];
@@ -719,7 +719,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			relationDocumentFilters: RelationDocumentFilter[];
 			query: ContentGetSingleQueryParams;
 			collection: CollectionBuilder;
-			config: Config;
+			config: ResolvedLucidConfig;
 			filterOr?: DocumentFilterGroup[];
 			tables: {
 				versions: LucidVersionTableName;

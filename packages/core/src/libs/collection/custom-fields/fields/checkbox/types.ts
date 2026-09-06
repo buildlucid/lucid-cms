@@ -5,20 +5,22 @@ export interface CheckboxFieldConfig extends SharedFieldConfig {
 	type: "checkbox";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 		true?: AdminCopyInput;
 		false?: AdminCopyInput;
 	};
 	localized?: boolean;
 	default?: boolean;
-	index?: true;
+	index?: boolean;
 	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};
 }
 
-export type CheckboxFieldProps = Partial<Omit<CheckboxFieldConfig, "type">>;
+export type CheckboxFieldProps = Partial<
+	Omit<CheckboxFieldConfig, "key" | "type">
+>;
 
 export type CheckboxResValue = boolean | null;
 

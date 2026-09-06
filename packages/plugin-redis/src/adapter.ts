@@ -177,11 +177,11 @@ const redisKVAdapter = (options: PluginOptions): KVAdapterInstance => {
 				resolvedKey,
 				ttl,
 			)) as [number, number];
-			const expirationTtl = result[1] > 0 ? result[1] : undefined;
+			const ttlSeconds = result[1] > 0 ? result[1] : undefined;
 
 			return {
 				value: result[0],
-				expirationTtl,
+				ttlSeconds,
 			};
 		},
 		clear: async (_context): Promise<void> => {

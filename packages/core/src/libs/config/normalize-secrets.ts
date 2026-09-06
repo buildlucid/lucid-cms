@@ -22,7 +22,7 @@ const assertRootSecret = (rootSecret: string) => {
 	});
 };
 
-const normalizeSecrets = (secrets: LucidConfig["secrets"]): SecretConfig => {
+const normalizeSecrets = (secrets: LucidConfig["secrets"] | undefined) => {
 	if (typeof secrets !== "string") {
 		return secrets;
 	}

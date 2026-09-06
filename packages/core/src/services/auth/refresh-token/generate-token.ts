@@ -92,7 +92,7 @@ const generateToken = async (
 	await kv.set(context, {
 		key: cacheKeys.auth.refresh(token),
 		value: { user_id: userId },
-		expirationTtl: constants.refreshTokenExpiration,
+		ttlSeconds: constants.refreshTokenExpiration,
 		hash: true,
 	});
 

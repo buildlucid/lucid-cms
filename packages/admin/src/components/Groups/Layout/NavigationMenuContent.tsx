@@ -37,7 +37,7 @@ export type NavigationMenuContentProps = {
 
 type CollectionNavGroup = {
 	key: string;
-	name: NonNullable<Collection["group"]>["name"];
+	name: NonNullable<Collection["group"]>["label"];
 	order: NonNullable<Collection["group"]>["order"];
 	collections: Collection[];
 };
@@ -87,8 +87,8 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 
 			const existingGroup = groupsByKey.get(group.key);
 			if (existingGroup) {
-				if (!existingGroup.name && group.name) {
-					existingGroup.name = group.name;
+				if (!existingGroup.name && group.label) {
+					existingGroup.name = group.label;
 				}
 				if (existingGroup.order === null && group.order !== null) {
 					existingGroup.order = group.order;
@@ -99,7 +99,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 
 			const collectionGroup = {
 				key: group.key,
-				name: group.name,
+				name: group.label,
 				order: group.order,
 				collections: [collection],
 			};

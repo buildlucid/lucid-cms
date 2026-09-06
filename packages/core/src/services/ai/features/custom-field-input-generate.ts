@@ -1,7 +1,9 @@
 import type { CustomFieldInputGenerateResponse } from "@lucidcms/types";
 import constants from "../../../constants/constants.js";
 import type { CustomFieldAiContextItem } from "../../../exports/types.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
+import createFieldSnapshot from "../../../libs/collection/custom-fields/create-field-snapshot.js";
 import resolveCollectionLocalization, {
 	isCollectionFieldLocalized,
 } from "../../../libs/collection/helpers/resolve-collection-localization.js";
@@ -91,7 +93,9 @@ const customFieldInputGenerate: ServiceFn<
 
 	const fieldSource = targetBrick ?? collection;
 
-	const targetField = fieldSource.fields.get(props.target.fieldKey);
+	const targetField = getFieldBuilderState(fieldSource).fields.get(
+		props.target.fieldKey,
+	);
 
 	if (!targetField) {
 		return {
@@ -197,7 +201,7 @@ const customFieldInputGenerate: ServiceFn<
 			contextItems = await targetField.aiConfig.context({
 				collection,
 				brick: targetBrick,
-				field: targetField,
+				field: createFieldSnapshot(targetField),
 				locale: generationContext.locale,
 			});
 		} catch (err) {

@@ -1,7 +1,7 @@
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { configureLucid, z } from "@lucidcms/core";
+import { defineConfig, z } from "@lucidcms/core";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
@@ -36,7 +36,7 @@ export const env = z.object({
 	// REDIS_CONNECTION: z.string(),
 });
 
-export default configureLucid({
+export default defineConfig({
 	runtime: node,
 	// runtime: node({
 	// 	server: {

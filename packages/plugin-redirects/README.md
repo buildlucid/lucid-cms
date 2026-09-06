@@ -15,12 +15,12 @@ npm install @lucidcms/plugin-redirects
 Add the plugin to your Lucid config and provide the collections editors can select as destinations.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
 
-export default configureLucid({
+export default defineConfig({
 	runtime: node,
   db: sqlite,
   config: () => ({
@@ -34,4 +34,4 @@ export default configureLucid({
 });
 ```
 
-Publishing environments are inferred when the selected collections use the same setup. Configure `environments` explicitly when they differ. Use `navigationGroup` to place Redirects in an existing admin group.
+Publishing targets are inferred when the selected collections use the same setup. Configure `targets` explicitly when they differ. Use `navigationGroup` to place Redirects in an existing admin group.

@@ -7,11 +7,11 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 	resource: "media";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 	localized?: boolean;
 	default?: number[];
-	index?: true;
+	index?: boolean;
 	multiple?: boolean;
 	ui?: FieldUIConfig;
 	validation?: {
@@ -32,7 +32,7 @@ export interface MediaFieldConfig extends SharedFieldConfig {
 }
 
 export type MediaFieldProps = Partial<
-	Omit<MediaFieldConfig, "type" | "resource">
+	Omit<MediaFieldConfig, "key" | "type" | "resource">
 >;
 
 export type MediaResValue = number[];

@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import { Permissions } from "../permission/definitions.js";
@@ -22,7 +22,7 @@ interface SettingsPropsT {
 
 const formatSingle = (props: {
 	settings: SettingsPropsT;
-	config: Config;
+	config: ResolvedLucidConfig;
 	includes: SettingsInclude[] | undefined;
 	authUser?: LucidAuth;
 }): Settings => {

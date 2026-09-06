@@ -7,12 +7,14 @@ import collectRefTargets from "./collect-ref-targets.js";
 const collection = new CollectionBuilder("pages", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.pages.name", {
-			defaultMessage: "Pages",
-		}),
-		singularName: copy("admin:tests.collections.pages.singularName", {
-			defaultMessage: "Page",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.pages.singularName", {
+				defaultMessage: "Page",
+			}),
+			plural: copy("admin:tests.collections.pages.name", {
+				defaultMessage: "Pages",
+			}),
+		},
 	},
 }).addRichText("body");
 

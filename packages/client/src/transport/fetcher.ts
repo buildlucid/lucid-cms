@@ -1,3 +1,4 @@
+import type { ResponseBody } from "@lucidcms/types";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
 	CreateClientOptions,
@@ -5,10 +6,6 @@ import type {
 	LucidRequestDescriptor,
 	LucidTransport,
 } from "../types/transport.js";
-import {
-	collectAbortSignals,
-	forwardAbortSignals,
-} from "../utils/transport/abort.js";
 import {
 	applyErrorMiddleware,
 	createClientErrorResponse,
@@ -38,9 +35,9 @@ export const createTransport = (
 	middleware: LucidMiddleware[],
 ): LucidTransport => {
 	return {
-		request: async <TData>(
+		request: async <TData, TRefs = never>(
 			descriptor: LucidRequestDescriptor,
-		): Promise<LucidClientResponse<TData>> => {
+		): Promise<LucidClientResponse<TData, TRefs>> => {
 			if (!options.baseUrl) {
 				return createConfigurationErrorResponse(
 					"`baseUrl` is required to create a Lucid client.",
@@ -122,29 +119,22 @@ export const createTransport = (
 
 				let timeoutId: ReturnType<typeof setTimeout> | undefined;
 				let didTimeout = false;
-				let cleanupAbortSignals = () => {};
-				const requestSignals = collectAbortSignals(
-					descriptor.request?.abortController?.signal,
-					init.signal,
-				);
-
-				if (requestSignals.length === 1 && init.signal !== requestSignals[0]) {
-					init = {
-						...init,
-						signal: requestSignals[0],
-					};
-				}
-
-				if (requestSignals.length > 1 || timeoutMs !== undefined) {
+				let cleanupAbortSignal = () => {};
+				if (timeoutMs !== undefined) {
 					const controller = new AbortController();
-					cleanupAbortSignals = forwardAbortSignals(controller, requestSignals);
-
-					if (timeoutMs !== undefined) {
-						timeoutId = setTimeout(() => {
-							didTimeout = true;
-							controller.abort();
-						}, timeoutMs);
+					const requestSignal = init.signal;
+					const abort = () => controller.abort(requestSignal?.reason);
+					if (requestSignal?.aborted) {
+						abort();
+					} else {
+						requestSignal?.addEventListener("abort", abort, { once: true });
 					}
+					cleanupAbortSignal = () =>
+						requestSignal?.removeEventListener("abort", abort);
+					timeoutId = setTimeout(() => {
+						didTimeout = true;
+						controller.abort();
+					}, timeoutMs);
 
 					init = {
 						...init,
@@ -157,7 +147,7 @@ export const createTransport = (
 					response = await fetchImpl(url, init);
 				} catch (error) {
 					if (timeoutId) clearTimeout(timeoutId);
-					cleanupAbortSignals();
+					cleanupAbortSignal();
 
 					let fetchError = createFetchError(error, didTimeout);
 					if (retryConfig) {
@@ -187,7 +177,7 @@ export const createTransport = (
 				}
 
 				if (timeoutId) clearTimeout(timeoutId);
-				cleanupAbortSignals();
+				cleanupAbortSignal();
 
 				for (const current of middleware) {
 					if (!current.onResponse) continue;
@@ -204,7 +194,7 @@ export const createTransport = (
 				const parsedBody = await parseJsonResponse(response);
 				if (!parsedBody.ok) {
 					let parseError = createParseError(
-						"Lucid returned a response that could not be parsed as JSON.",
+						"Lucid returned an invalid JSON response.",
 						parsedBody.error,
 					);
 
@@ -255,8 +245,12 @@ export const createTransport = (
 					return createClientErrorResponse(httpError, response);
 				}
 
+				const body = parsedBody.data as ResponseBody<TData, TRefs>;
 				return {
-					data: parsedBody.data as TData,
+					data: body.data,
+					refs: body.refs,
+					links: body.links,
+					meta: body.meta,
 					error: undefined,
 					response,
 				};

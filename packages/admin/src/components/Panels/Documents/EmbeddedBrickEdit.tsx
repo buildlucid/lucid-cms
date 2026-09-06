@@ -57,13 +57,13 @@ const EmbeddedBrickEditPanel: Component<{
 	);
 	const title = createMemo(() =>
 		helpers.getLocaleValue({
-			value: config()?.details.name,
+			value: config()?.details.label,
 			fallback: brick()?.key ?? T()("editor.rich.text.brick.edit"),
 		}),
 	);
 	const summary = createMemo(() =>
 		helpers.getLocaleValue({
-			value: config()?.details.summary,
+			value: config()?.details.description,
 		}),
 	);
 

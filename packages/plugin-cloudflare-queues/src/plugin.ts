@@ -1,6 +1,6 @@
-import { LucidError } from "@lucidcms/core";
+import { definePlugin, LucidError } from "@lucidcms/core";
 import type {
-	LucidPluginResponse,
+	LucidPluginDefinition,
 	RuntimeBuildArtifactCustom,
 } from "@lucidcms/core/types";
 import type {
@@ -29,11 +29,11 @@ const validateOptions = (options: PluginOptions) => {
 };
 
 /** Configures Lucid to publish and consume jobs with Cloudflare Queues. */
-const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
+const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	const resolvedOptions = pluginOptions ?? {};
 	validateOptions(resolvedOptions);
 
-	return {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		hooks: {
@@ -189,10 +189,8 @@ try {
 		sources: {
 			translations: ["@lucidcms/plugin-cloudflare-queues/translations"],
 		},
-		recipe: (draft) => {
-			draft.queue.adapter = cloudflareQueuesAdapter(resolvedOptions);
-		},
-	};
+		defaults: { queue: { adapter: cloudflareQueuesAdapter(resolvedOptions) } },
+	});
 };
 
 export default plugin;

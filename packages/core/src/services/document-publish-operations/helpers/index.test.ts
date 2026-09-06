@@ -78,28 +78,32 @@ describe("Tests for publish operation release requirement helpers", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
 		},
-		environments: [
-			{
-				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
-					defaultMessage: "Staging",
-				}),
-			},
-			{
-				key: "production",
-				name: copy("admin:tests.environments.production.name", {
-					defaultMessage: "Production",
-				}),
-				requires: ["staging", "staging"],
-			},
-		],
+		publishing: {
+			targets: [
+				{
+					key: "staging",
+					label: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+				},
+				{
+					key: "production",
+					label: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+					requires: ["staging", "staging"],
+				},
+			],
+		},
 	});
 
 	test("returns unique release requirement targets", () => {

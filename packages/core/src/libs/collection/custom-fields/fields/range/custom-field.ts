@@ -4,10 +4,10 @@ import { copy } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldErrorItem,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -28,7 +28,7 @@ class RangeCustomField extends CustomField<"range"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"range">) {
+	constructor(key: string, props?: FieldOptions<"range">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -49,7 +49,7 @@ class RangeCustomField extends CustomField<"range"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			min,
 			max,
@@ -65,7 +65,7 @@ class RangeCustomField extends CustomField<"range"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"range">;
+		} satisfies FieldConfig<"range">;
 	}
 	override normalizeInputValue(value: unknown) {
 		return normalizeRangeInputValue(value, this.config.thumbs);
@@ -111,7 +111,7 @@ class RangeCustomField extends CustomField<"range"> {
 			normalized.length > 0
 				? normalized
 				: normalizeStoredRangeValues(this.config.default, this.config.thumbs)
-		) satisfies CFResponse<"range">["value"];
+		) satisfies FieldResponse<"range">["value"];
 	}
 	override get relationValueColumn() {
 		return "value";

@@ -96,13 +96,13 @@ export function useDocumentState(props: {
 	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collection()?.details.name,
+			value: collection()?.details.labels.plural,
 		}),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: collection()?.details.singularName,
+				value: collection()?.details.labels.singular,
 			}) || T()("common.collection"),
 	);
 	const document = createMemo(() => documentQuery.data?.data, undefined, {

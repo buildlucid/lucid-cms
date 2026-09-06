@@ -39,7 +39,7 @@ const getExecutionContext = (
 
 const platformContextExtension: HttpExtension = {
 	name: "runtime-cloudflare:astro-context",
-	priority: 0,
+	phase: "beforeMiddleware",
 	register: (app) => {
 		app.use("*", async (context, next) => {
 			context.set(

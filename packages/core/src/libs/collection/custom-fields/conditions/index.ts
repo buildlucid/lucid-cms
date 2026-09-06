@@ -30,17 +30,28 @@ export type FieldConditionRuleValue = string | number | boolean | null;
 
 export type FieldConditionRule = {
 	field: string;
-	operator: FieldConditionOperator;
-	value?: FieldConditionRuleValue;
-};
+} & (
+	| {
+			operator: "equals" | "notEquals" | "contains" | "notContains";
+			value: FieldConditionRuleValue;
+	  }
+	| {
+			operator: "isEmpty" | "isNotEmpty";
+			value?: never;
+	  }
+);
+
+export type FieldConditionExpression = FieldConditionRule | FieldConditionGroup;
+
+export type FieldConditionGroup =
+	| { all: FieldConditionExpression[]; any?: never }
+	| { any: FieldConditionExpression[]; all?: never };
 
 export type FieldConditionAction = "show" | "hide";
 
-export type FieldConditionConfig = {
+export type FieldConditionConfig = FieldConditionGroup & {
 	action?: FieldConditionAction;
 	translationScope?: FieldConditionTranslationScope;
-	/** Outer array is OR'd, inner rule arrays are AND'd. */
-	groups: FieldConditionRule[][];
 };
 
 export type FieldConditionTargetResolution =
@@ -94,10 +105,10 @@ const isEmptyValue = (value: unknown): boolean => {
 
 const containsValue = (
 	value: unknown,
-	search: FieldConditionRuleValue | undefined,
+	search: FieldConditionRuleValue,
 ): boolean => {
 	if (Array.isArray(value)) {
-		return value.some((item) => conditionValuesEqual(item, search ?? null));
+		return value.some((item) => conditionValuesEqual(item, search));
 	}
 	if (typeof value === "string") {
 		if (typeof search === "string") {
@@ -120,9 +131,9 @@ export const evaluateConditionRule = (
 ): boolean => {
 	switch (rule.operator) {
 		case "equals":
-			return conditionValuesEqual(value, rule.value ?? null);
+			return conditionValuesEqual(value, rule.value);
 		case "notEquals":
-			return !conditionValuesEqual(value, rule.value ?? null);
+			return !conditionValuesEqual(value, rule.value);
 		case "isEmpty":
 			return isEmptyValue(value);
 		case "isNotEmpty":
@@ -131,17 +142,17 @@ export const evaluateConditionRule = (
 			return containsValue(value, rule.value);
 		case "notContains":
 			return !containsValue(value, rule.value);
-		default:
-			return false;
+		default: {
+			const exhaustive: never = rule;
+			return exhaustive;
+		}
 	}
 };
 
 /**
- * Evaluates a field condition and returns whether the field is visible.
- *
- * - Groups are OR'd, rules within a group are AND'd.
- * - Rules that reference an unresolvable target fail their group.
- * - Conditions without any non-empty rule group leave the field visible.
+ * Evaluates `all` and `any` groups using the same rules in the admin and server.
+ * An empty `all` group matches; an empty `any` group does not.
+ * A rule whose target cannot be resolved does not match.
  */
 export const evaluateFieldCondition = (
 	condition: FieldConditionConfig | undefined,
@@ -149,21 +160,22 @@ export const evaluateFieldCondition = (
 ): boolean => {
 	if (!condition) return true;
 
-	const groups = (condition.groups ?? []).filter((rules) => rules.length > 0);
-	if (groups.length === 0) return true;
-
-	const matched = groups.some((rules) =>
-		rules.every((rule) => {
-			const target = resolveTarget(rule.field);
+	const evaluate = (expression: FieldConditionExpression): boolean => {
+		if ("field" in expression) {
+			const target = resolveTarget(expression.field);
 			if (!target.resolved) return false;
 			if ("values" in target) {
 				return target.values.some((value) =>
-					evaluateConditionRule(rule, value),
+					evaluateConditionRule(expression, value),
 				);
 			}
-			return evaluateConditionRule(rule, target.value);
-		}),
-	);
+			return evaluateConditionRule(expression, target.value);
+		}
+		return expression.all
+			? expression.all.every(evaluate)
+			: expression.any.some(evaluate);
+	};
 
+	const matched = evaluate(condition);
 	return (condition.action ?? "show") === "show" ? matched : !matched;
 };

@@ -1,8 +1,8 @@
-import type { ZodType } from "zod";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
 	FieldUIConfig,
+	FieldValidation,
 	SharedFieldConfig,
 } from "../../types.js";
 
@@ -15,7 +15,7 @@ export interface CodeFieldConfig extends SharedFieldConfig {
 	type: "code";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
 	ai?: CustomFieldUserAiConfig<"code">;
@@ -23,15 +23,12 @@ export interface CodeFieldConfig extends SharedFieldConfig {
 	default?: CodeValue | null;
 	/** Language options offered in the admin editor. */
 	languages: string[];
-	index?: true;
+	index?: boolean;
 	ui?: FieldUIConfig;
-	validation?: {
-		required?: boolean;
-		zod?: ZodType<unknown>;
-	};
+	validation?: FieldValidation<CodeValue>;
 }
 
-export type CodeFieldProps = Partial<Omit<CodeFieldConfig, "type">>;
+export type CodeFieldProps = Partial<Omit<CodeFieldConfig, "key" | "type">>;
 
 export type CodeResValue = CodeValue | null;
 

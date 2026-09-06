@@ -43,17 +43,19 @@ const buildContext = () =>
 				{
 					key: "page",
 					getData: {
-						environments: [
-							{
-								key: "staging",
-								collectionVersions: { article: "review" },
-							},
-						],
+						publishing: {
+							targets: [
+								{
+									key: "staging",
+									collectionVersions: { article: "review" },
+								},
+							],
+						},
 					},
 				},
 				{
 					key: "article",
-					getData: { environments: [{ key: "review" }] },
+					getData: { publishing: { targets: [{ key: "review" }] } },
 				},
 			],
 		},

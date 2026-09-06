@@ -27,20 +27,22 @@ const buildContext = (collections: CollectionBuilder[] = []) =>
 const createCollection = (
 	key: string,
 	environments: NonNullable<
-		ConstructorParameters<typeof CollectionBuilder>[1]["environments"]
+		ConstructorParameters<typeof CollectionBuilder>[1]["publishing"]["targets"]
 	> = [],
 ) =>
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: {
-			name: copy(`admin:tests.collections.${key}.name`, {
-				defaultMessage: key,
-			}),
-			singularName: copy(`admin:tests.collections.${key}.singularName`, {
-				defaultMessage: key,
-			}),
+			labels: {
+				singular: copy(`admin:tests.collections.${key}.singularName`, {
+					defaultMessage: key,
+				}),
+				plural: copy(`admin:tests.collections.${key}.name`, {
+					defaultMessage: key,
+				}),
+			},
 		},
-		environments,
+		publishing: { targets: environments },
 	});
 
 describe("resolve relation version type", () => {
@@ -90,7 +92,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
+				label: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 				collectionVersions: {
@@ -101,7 +103,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: copy("admin:tests.environments.signed-off.name", {
+				label: copy("admin:tests.environments.signed-off.name", {
 					defaultMessage: "Signed off",
 				}),
 			},
@@ -130,7 +132,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
+				label: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 			},
@@ -138,7 +140,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
+				label: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 			},
@@ -165,7 +167,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
+				label: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 			},
@@ -173,7 +175,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: copy("admin:tests.environments.signed-off.name", {
+				label: copy("admin:tests.environments.signed-off.name", {
 					defaultMessage: "Signed off",
 				}),
 			},
@@ -261,7 +263,7 @@ describe("resolve relation version type", () => {
 		const pages = createCollection("pages", [
 			{
 				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
+				label: copy("admin:tests.environments.staging.name", {
 					defaultMessage: "Staging",
 				}),
 				collectionVersions: {
@@ -272,7 +274,7 @@ describe("resolve relation version type", () => {
 		const blog = createCollection("blog", [
 			{
 				key: "signed-off",
-				name: copy("admin:tests.environments.signed-off.name", {
+				label: copy("admin:tests.environments.signed-off.name", {
 					defaultMessage: "Signed off",
 				}),
 			},

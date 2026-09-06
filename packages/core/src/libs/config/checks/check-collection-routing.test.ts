@@ -3,8 +3,10 @@ import CollectionBuilder from "../../collection/builders/collection-builder/inde
 import checkCollectionRouting from "./check-collection-routing.js";
 
 const details = {
-	name: "Pages",
-	singularName: "Page",
+	labels: {
+		singular: "Page",
+		plural: "Pages",
+	},
 };
 
 describe("checkCollectionRouting", () => {
@@ -12,7 +14,7 @@ describe("checkCollectionRouting", () => {
 		const collection = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details,
-			routing: "path",
+			routing: { field: "path" },
 			preview: true,
 		}).addText("path");
 
@@ -49,17 +51,17 @@ describe("checkCollectionRouting", () => {
 			new CollectionBuilder("missing", {
 				mode: "multiple",
 				details,
-				routing: "path",
+				routing: { field: "path" },
 			}),
 			new CollectionBuilder("relational", {
 				mode: "multiple",
 				details,
-				routing: "path",
+				routing: { field: "path" },
 			}).addRelation("path", { collection: "relational" }),
 			new CollectionBuilder("nested", {
 				mode: "multiple",
 				details,
-				routing: "path",
+				routing: { field: "path" },
 			})
 				.addSection("seo")
 				.addText("path")

@@ -219,7 +219,7 @@ export function useDocumentUIState(props: {
 	 */
 	const showRevisionNavigation = createMemo(() => {
 		// if (props.mode === "create") return false;
-		return props.collection()?.revisions ?? false;
+		return Boolean(props.collection()?.revisions.enabled);
 	});
 
 	/**
@@ -312,7 +312,7 @@ export function useDocumentUIState(props: {
 
 		const environmentPermission = props
 			.collection()
-			?.environments.find((environment) => environment.key === target)
+			?.publishing.targets.find((environment) => environment.key === target)
 			?.permissions.publish;
 
 		const permission =
@@ -353,7 +353,7 @@ export function useDocumentUIState(props: {
 		if (props.mode === "history") return false;
 		if (props.version() !== "revision") return false;
 		if (props.document()?.isDeleted) return false;
-		if (props.collection()?.revisions === false) return false;
+		if (props.collection()?.revisions.enabled === false) return false;
 		if (props.versionId() === undefined) return false;
 		return true;
 	});

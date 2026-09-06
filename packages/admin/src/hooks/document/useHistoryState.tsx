@@ -213,13 +213,13 @@ export function useHistoryState() {
 	const collectionName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: collection()?.details.name,
+				value: collection()?.details.labels.plural,
 			}) || T()("common.collection"),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: collection()?.details.singularName,
+				value: collection()?.details.labels.singular,
 			}) || T()("common.collection"),
 	);
 	const groupedRevisions = createMemo(() => {
@@ -436,7 +436,8 @@ export function useHistoryState() {
 	});
 	const selectedRetention = createMemo((): RetentionInfo => {
 		const item = selectedItem();
-		const retentionDays = collection()?.revisionRetentionDays;
+		const revisions = collection()?.revisions;
+		const retentionDays = revisions?.enabled ? revisions.retentionDays : false;
 
 		if (item?.type !== "revision") {
 			return {

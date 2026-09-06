@@ -1,4 +1,4 @@
-import type { ErrorResponse } from "@lucidcms/types";
+import type { ErrorResponse, ResponseBody } from "@lucidcms/types";
 
 export type LucidClientErrorKind =
 	| "http"
@@ -19,16 +19,23 @@ export interface LucidClientError {
 	cause?: unknown;
 }
 
-export type LucidClientSuccess<T> = {
-	data: T;
+export type LucidClientSuccess<TData, TRefs = never> = ResponseBody<
+	TData,
+	TRefs
+> & {
 	error: undefined;
 	response: Response;
 };
 
 export type LucidClientFailure = {
 	data: undefined;
+	refs?: undefined;
+	links?: undefined;
+	meta?: undefined;
 	error: LucidClientError;
 	response?: Response;
 };
 
-export type LucidClientResponse<T> = LucidClientSuccess<T> | LucidClientFailure;
+export type LucidClientResponse<TData, TRefs = never> =
+	| LucidClientSuccess<TData, TRefs>
+	| LucidClientFailure;

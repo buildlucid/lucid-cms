@@ -111,20 +111,24 @@ const CreatePublishRequest: Component<{
 		},
 	]);
 	const requireComment = createMemo(
-		() => props.collection()?.review?.comments.request === "required",
+		() =>
+			props.collection()?.publishing.review?.comments.request === "required",
 	);
 	const requireDecisionComment = createMemo(
-		() => props.collection()?.review?.comments.decision === "required",
+		() =>
+			props.collection()?.publishing.review?.comments.decision === "required",
 	);
 	const commentText = createMemo(() => getRichTextPlainText(comment()));
 	const targetEnvironment = createMemo(() =>
 		props
 			.collection()
-			?.environments.find((environment) => environment.key === props.target()),
+			?.publishing.targets.find(
+				(environment) => environment.key === props.target(),
+			),
 	);
 	const canAutoAccept = createMemo(() => {
 		const environment = targetEnvironment();
-		const publishReview = props.collection()?.review;
+		const publishReview = props.collection()?.publishing.review;
 		if (!environment || publishReview?.allowSelfApproval !== true) {
 			return false;
 		}

@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
 import type { ResourceFile } from "../../resources/types.js";
@@ -11,7 +11,7 @@ import loadEmailTemplates from "./load-email-templates.js";
  * Writes all configured email templates to a JSON artifact in the build output.
  */
 const prepareEmailTemplates = async (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	files: ResourceFile[];
 	silent?: boolean;
 	verbose?: boolean;

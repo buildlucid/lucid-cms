@@ -28,7 +28,7 @@ const findEnvironment = (
 	collection: CollectionBuilder | undefined,
 	versionType: RelationVersionType,
 ) => {
-	return collection?.getData.environments.find(
+	return collection?.getData.publishing.targets.find(
 		(environment) => environment.key === versionType,
 	);
 };

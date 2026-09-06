@@ -1,6 +1,6 @@
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 	FieldUIConfig,
 	SharedFieldConfig,
@@ -10,13 +10,15 @@ export interface TabFieldConfig extends SharedFieldConfig {
 	type: "tab";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 	ui?: Pick<FieldUIConfig, "condition">;
-	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
+	fields: Exclude<FieldConfig<FieldTypes>, TabFieldConfig>[];
 }
 
-export type TabFieldProps = Partial<Omit<TabFieldConfig, "type" | "fields">>;
+export type TabFieldProps = Partial<
+	Omit<TabFieldConfig, "key" | "type" | "fields">
+>;
 
 export type TabResValue = null;
 

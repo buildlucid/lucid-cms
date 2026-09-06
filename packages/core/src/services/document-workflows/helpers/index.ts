@@ -9,8 +9,8 @@ import type {
  */
 export const getWorkflowConfig = (
 	collection: CollectionBuilder,
-): PublishingWorkflowConfig | undefined => collection.getData.workflow;
-
+): PublishingWorkflowConfig | undefined =>
+	collection.getData.publishing.workflow;
 /**
  * Finds a configured workflow stage by key without applying initial-stage fallback.
  */

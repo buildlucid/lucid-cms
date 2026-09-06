@@ -68,7 +68,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 					value: props.state.fieldConfig.details.label,
 				}),
 				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.summary,
+					value: props.state.fieldConfig.details.description,
 				}),
 				true: helpers.getLocaleValue({
 					value: props.state.fieldConfig.details.true,

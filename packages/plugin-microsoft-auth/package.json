@@ -3,12 +3,12 @@
 	"version": "1.0.5",
 	"description": "The official Microsoft authentication provider plugin for Lucid CMS",
 	"type": "module",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"module": "dist/index.mjs",
 	"exports": {
 		".": {
-			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
 		}
 	},
 	"scripts": {

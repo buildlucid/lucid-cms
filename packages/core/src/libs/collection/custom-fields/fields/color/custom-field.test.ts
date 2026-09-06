@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import ColorCustomField from "./custom-field.js";
 
@@ -10,12 +11,14 @@ import ColorCustomField from "./custom-field.js";
 const ColorCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -34,8 +37,9 @@ test("successfully validate field - color", async () => {
 			type: "color",
 			value: "#000000",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: ColorCollection.fields.get("standard_color")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(ColorCollection).fields.get("standard_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -55,8 +59,9 @@ test("successfully validate field - color", async () => {
 			type: "color",
 			value: "#000000",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: ColorCollection.fields.get("required_color")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -78,8 +83,9 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: 0,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: ColorCollection.fields.get("standard_color")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(ColorCollection).fields.get("standard_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -105,8 +111,9 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: "",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: ColorCollection.fields.get("required_color")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -132,8 +139,9 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: null,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: ColorCollection.fields.get("required_color")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -159,8 +167,9 @@ test("fail to validate field - color", async () => {
 			type: "color",
 			value: undefined,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: ColorCollection.fields.get("required_color")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(ColorCollection).fields.get("required_color")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -188,7 +197,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 		},

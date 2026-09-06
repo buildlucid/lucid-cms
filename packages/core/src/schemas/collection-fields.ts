@@ -1,4 +1,5 @@
-import z from "zod";
+import * as z from "zod";
+import { fieldConditionSchema } from "../libs/collection/custom-fields/conditions/schema.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 
 export const fieldInputSchema = z.object({
@@ -78,7 +79,7 @@ export const fieldConfigSchema = z.object({
 				},
 			})
 			.optional(),
-		summary: resolvedAdminCopySchema
+		description: resolvedAdminCopySchema
 			.meta({
 				description: "Description text for the field",
 				example: {
@@ -206,7 +207,7 @@ export const fieldConfigSchema = z.object({
 		.nullable()
 		.optional(),
 	index: z
-		.literal(true)
+		.boolean()
 		.meta({
 			description: "Whether Lucid generates an index for the field",
 			example: true,
@@ -270,63 +271,7 @@ export const fieldConfigSchema = z.object({
 				})
 				.nullable()
 				.optional(),
-			condition: z
-				.object({
-					action: z
-						.enum(["show", "hide"])
-						.meta({
-							description:
-								"Whether matching the condition shows or hides the field",
-							example: "show",
-						})
-						.optional(),
-					translationScope: z
-						.enum(["same", "default", "any"])
-						.meta({
-							description:
-								"How localized target field values are resolved while evaluating the condition",
-							example: "same",
-						})
-						.optional(),
-					groups: z
-						.array(
-							z.array(
-								z.object({
-									field: z.string().meta({
-										description:
-											"Key of the sibling or ancestor-scope field the rule evaluates against",
-										example: "menuType",
-									}),
-									operator: z
-										.enum([
-											"equals",
-											"notEquals",
-											"isEmpty",
-											"isNotEmpty",
-											"contains",
-											"notContains",
-										])
-										.meta({
-											description: "Comparison operator for the rule",
-											example: "equals",
-										}),
-									value: z
-										.union([z.string(), z.number(), z.boolean(), z.null()])
-										.meta({
-											description: "Value the rule compares against",
-											example: "docs",
-										})
-										.optional(),
-								}),
-							),
-						)
-						.meta({
-							description:
-								"Condition rule groups. Groups are OR'd, rules within a group are AND'd",
-						}),
-				})
-				.nullable()
-				.optional(),
+			condition: fieldConditionSchema.nullable().optional(),
 		})
 		.optional(),
 	validation: z
@@ -337,14 +282,6 @@ export const fieldConfigSchema = z.object({
 				.meta({
 					description: "Whether the field is required",
 					example: true,
-				})
-				.optional(),
-			zod: z
-				.any()
-				.nullable()
-				.meta({
-					description: "Custom Zod validation schema for the field",
-					example: "z.string().min(2).max(128)",
 				})
 				.optional(),
 			type: z

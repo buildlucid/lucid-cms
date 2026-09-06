@@ -1,13 +1,13 @@
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
-import type { CFConfig } from "../../collection/custom-fields/types.js";
+import type { FieldConfig } from "../../collection/custom-fields/types.js";
 import { translate } from "../../i18n/index.js";
 
 const checkCollectionKeys = (props: {
-	field: CFConfig<"rich-text">;
+	field: FieldConfig<"rich-text">;
 	feature: string;
 	collectionKeys: string[];
-	config: Config;
+	config: ResolvedLucidConfig;
 }) => {
 	const knownCollectionKeys = new Set(
 		props.config.collections.map((collection) => collection.key),
@@ -27,7 +27,10 @@ const checkCollectionKeys = (props: {
 	}
 };
 
-const checkInternalLinks = (field: CFConfig<"rich-text">, config: Config) => {
+const checkInternalLinks = (
+	field: FieldConfig<"rich-text">,
+	config: ResolvedLucidConfig,
+) => {
 	if (
 		field.editor?.links?.internal === true &&
 		config.collections.every((collection) => !collection.getData.routing)
@@ -66,7 +69,10 @@ const checkInternalLinks = (field: CFConfig<"rich-text">, config: Config) => {
 	}
 };
 
-const checkVariables = (field: CFConfig<"rich-text">, config: Config) => {
+const checkVariables = (
+	field: FieldConfig<"rich-text">,
+	config: ResolvedLucidConfig,
+) => {
 	checkCollectionKeys({
 		field,
 		feature: translate("server:core.fields.rich.text.feature.variables"),
@@ -77,7 +83,10 @@ const checkVariables = (field: CFConfig<"rich-text">, config: Config) => {
 	});
 };
 
-const checkDocuments = (field: CFConfig<"rich-text">, config: Config) => {
+const checkDocuments = (
+	field: FieldConfig<"rich-text">,
+	config: ResolvedLucidConfig,
+) => {
 	checkCollectionKeys({
 		field,
 		feature: translate("server:core.fields.rich.text.feature.documents"),
@@ -89,7 +98,7 @@ const checkDocuments = (field: CFConfig<"rich-text">, config: Config) => {
 };
 
 const checkEmbeddedBricks = (
-	field: CFConfig<"rich-text">,
+	field: FieldConfig<"rich-text">,
 	collection: CollectionBuilder,
 ) => {
 	const embeddedBricks = collection.config.bricks?.embedded ?? [];
@@ -123,8 +132,8 @@ const checkEmbeddedBricks = (
 
 /** Validates rich-text editor integrations against the processed config. */
 const checkRichTextField = (
-	field: CFConfig<"rich-text">,
-	config: Config,
+	field: FieldConfig<"rich-text">,
+	config: ResolvedLucidConfig,
 	collection: CollectionBuilder,
 ) => {
 	checkInternalLinks(field, config);

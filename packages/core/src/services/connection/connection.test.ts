@@ -16,7 +16,7 @@ import type {
 	RemoteConnectionData,
 } from "../../libs/lucid-remote/types.js";
 import { AiGenerationsRepository } from "../../libs/repositories/index.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import callback from "./callback.js";
 import connect from "./connect.js";
@@ -79,7 +79,7 @@ const lucidDatabase = createLucidDatabase({
 	adapter,
 });
 
-const makeConfig = (): Config =>
+const makeConfig = (): ResolvedLucidConfig =>
 	// @ts-expect-error
 	({
 		db: adapter,
@@ -92,7 +92,7 @@ const makeConfig = (): Config =>
 			refreshToken: testingConstants.key,
 		},
 		brand: { name: "Example CMS" },
-	}) as Config;
+	}) as ResolvedLucidConfig;
 
 const makeContext = (): ServiceContext =>
 	// @ts-expect-error

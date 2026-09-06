@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type {
 	AdapterRuntimeContext,
@@ -9,7 +9,7 @@ import type { QueueAdapterInstance } from "./types.js";
 
 /** Resolve or use a supplied queue adapter and run its init hook. */
 export const getInitializedQueueAdapter = async (
-	config: Config,
+	config: ResolvedLucidConfig,
 	options: {
 		adapter?: QueueAdapterInstance;
 		env?: EnvironmentVariables;
@@ -37,7 +37,7 @@ export const getInitializedQueueAdapter = async (
 export const destroyQueueAdapter = async (
 	adapter: QueueAdapterInstance | undefined,
 	options: {
-		config: Config;
+		config: ResolvedLucidConfig;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	},

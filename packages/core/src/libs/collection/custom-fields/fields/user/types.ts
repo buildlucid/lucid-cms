@@ -6,11 +6,11 @@ export interface UserFieldConfig extends SharedFieldConfig {
 	resource: "users";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 	localized?: boolean;
 	default?: number[];
-	index?: true;
+	index?: boolean;
 	multiple?: boolean;
 	ui?: FieldUIConfig;
 	validation?: {
@@ -21,7 +21,7 @@ export interface UserFieldConfig extends SharedFieldConfig {
 }
 
 export type UserFieldProps = Partial<
-	Omit<UserFieldConfig, "type" | "resource">
+	Omit<UserFieldConfig, "key" | "type" | "resource">
 >;
 
 export type UserResValue = number[];

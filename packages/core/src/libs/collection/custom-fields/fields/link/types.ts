@@ -11,19 +11,19 @@ export interface LinkFieldConfig extends SharedFieldConfig {
 	type: "link";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
 	localized?: boolean;
 	default?: LinkResValue;
-	index?: true;
+	index?: boolean;
 	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};
 }
 
-export type LinkFieldProps = Partial<Omit<LinkFieldConfig, "type">>;
+export type LinkFieldProps = Partial<Omit<LinkFieldConfig, "key" | "type">>;
 
 export type LinkCustomFieldMapItem = {
 	props: LinkFieldProps;

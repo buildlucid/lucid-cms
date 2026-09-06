@@ -1,8 +1,10 @@
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import { translate } from "../../i18n/index.js";
 
 const checkLocales = (
-	localesConfig: Config["localization"] | Config["i18n"],
+	localesConfig:
+		| ResolvedLucidConfig["localization"]
+		| ResolvedLucidConfig["i18n"],
 ) => {
 	if (localesConfig.locales.length === 0) {
 		throw new Error(translate("server:core.config.locales.empty"));

@@ -22,11 +22,11 @@ npm install @lucidcms/runtime-cloudflare
 Use the Cloudflare runtime in your `lucid.config.ts` file.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { libsql } from "@lucidcms/db-libsql";
 
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
@@ -48,7 +48,7 @@ The `cloudflare` function accepts a single parameter, `options`, which is either
 | `worker` | `{ name?: string; compatibilityDate?: string; compatibilityFlags?: string[] }` | Worker config that Lucid writes into the generated Wrangler config. The compatibility date defaults to Lucid's tested `2026-06-30`; update it explicitly after testing newer runtime behavior |
 
 ```typescript
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare((env) => ({
     environment: "staging",
     dev: {
@@ -103,7 +103,7 @@ The `--remote` flag tells the Cloudflare runtime to load remote bindings through
 If you already own a Wrangler config, pass its path to `wrangler`. Lucid will use that config for local Cloudflare env/binding loading and will not generate `wrangler.lucid.jsonc` or merge binding artifacts into your file:
 
 ```typescript
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare({
     wrangler: "./wrangler.jsonc",
   }),
@@ -119,12 +119,12 @@ Manual Wrangler mode means you own the bindings and deploy config. Lucid removes
 Cloudflare-aware Lucid packages can ask the runtime to generate their Wrangler bindings. For example, `db: d1`, `cloudflareKVPlugin()`, `cloudflareR2Plugin()`, `cloudflareQueuesPlugin()`, and `cloudflareImagesPlugin()` generate the matching D1, KV, R2, Queue, and Images bindings with Lucid's convention names. Pass binding/resource details to the plugin or adapter that owns the feature:
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { d1 } from "@lucidcms/db-d1";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare,
   db: d1({ databaseName: "lucid-db" }),
   config: () => ({
@@ -140,7 +140,7 @@ export default configureLucid({
 Use `bindings` when you want the runtime to force or override generated binding details:
 
 ```typescript
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare({
     bindings: {
       images: true,
@@ -163,12 +163,12 @@ export default configureLucid({
 Due to the nature of Cloudflare Workers, they don't support file system operations. Because of this, you'll want to avoid the [LocalStorage](https://lucidjs.build/en/cms/docs/plugins/localstorage) plugin. For Cloudflare R2 bindings, we recommend the [Cloudflare R2](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-r2) plugin. For other object stores, the [S3](https://lucidjs.build/en/cms/docs/plugins/s3) plugin remains the generic option.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({
@@ -188,7 +188,7 @@ Media is streamed through Lucid's `cdn` endpoint, including preset-driven image 
 ```typescript
 import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: () => ({

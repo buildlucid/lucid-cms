@@ -47,7 +47,7 @@ const getSingleController = factory.createHandlers(
 	]),
 	validate("query", controllerSchemas.content.getSingle.query.string),
 	cache({
-		ttl: hoursToSeconds(24),
+		ttlSeconds: hoursToSeconds(24),
 		mode: "include-query",
 		bypass: (c) => c.req.query("preview") !== undefined,
 		tags: (c) => {

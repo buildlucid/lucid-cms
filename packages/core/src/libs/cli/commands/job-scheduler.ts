@@ -21,7 +21,6 @@ import createLucidAdapters, {
 	type LucidAdapters,
 } from "../../runtime/create-lucid-adapters.js";
 import cliLogger from "../logger.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 
 /** Runs one registered job schedule through Lucid's durable job path. */
 const jobSchedulerCommand = async (jobOrSchedule?: string) => {
@@ -48,14 +47,6 @@ const jobSchedulerCommand = async (jobOrSchedule?: string) => {
 			config,
 			files: configResult.resources.files.translations,
 		});
-		const envValid = await validateEnvVars({
-			envSchema: configResult.envSchema,
-			env,
-		});
-		if (!envValid) {
-			await stopLoggerBuffering();
-			process.exit(1);
-		}
 
 		adapters = await createLucidAdapters({
 			config,

@@ -1,7 +1,7 @@
 import type {
-	Config,
 	InternalDocumentBrick,
 	InternalDocumentField,
+	ResolvedLucidConfig,
 } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import resolveCollectionLocalization from "../../../libs/collection/helpers/resolve-collection-localization.js";
@@ -21,7 +21,7 @@ const aggregateBrickTables = (params: {
 	bricks?: Array<BrickInputSchema> | Array<InternalDocumentBrick>;
 	fields?: Array<FieldInputSchema> | Array<InternalDocumentField>;
 	collection: CollectionBuilder;
-	localization: Config["localization"];
+	localization: ResolvedLucidConfig["localization"];
 	tableNameByteLimit: number | null;
 }) => {
 	const brickTables: Array<InsertBrickTables> = [];

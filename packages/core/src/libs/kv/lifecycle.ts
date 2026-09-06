@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type {
 	AdapterRuntimeContext,
@@ -9,7 +9,7 @@ import type { KVAdapterInstance } from "./types.js";
 
 /** Resolve or use a supplied KV adapter and run its init hook. */
 export const getInitializedKVAdapter = async (
-	config: Config,
+	config: ResolvedLucidConfig,
 	options: {
 		adapter?: KVAdapterInstance;
 		env?: EnvironmentVariables;
@@ -37,7 +37,7 @@ export const getInitializedKVAdapter = async (
 export const destroyKVAdapter = async (
 	adapter: KVAdapterInstance | undefined,
 	options: {
-		config: Config;
+		config: ResolvedLucidConfig;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	},

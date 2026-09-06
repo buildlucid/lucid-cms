@@ -1,5 +1,5 @@
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 	ServiceResponse,
 } from "../../../../exports/types.js";
@@ -7,6 +7,7 @@ import type BrickBuilder from "../../../../libs/collection/builders/brick-builde
 import type CollectionBuilder from "../../../../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../../../../libs/db/adapter-base.js";
 import { copy } from "../../../i18n/index.js";
+import { getFieldBuilderState } from "../../builders/field-builder/index.js";
 import fieldConfigs from "../../custom-fields/field-configs.js";
 import {
 	getFieldDatabaseConfig,
@@ -28,7 +29,7 @@ import type {
 
 const shouldIndexField = (
 	collection: CollectionBuilder,
-	field: CFConfig<FieldTypes>,
+	field: FieldConfig<FieldTypes>,
 ) => {
 	const hasConfiguredIndex = "index" in field && field.index === true;
 	const isListedField = collection.listing.includes(field.key);
@@ -95,7 +96,7 @@ const createCoreIndexes = (props: {
  */
 const createFieldTables = (props: {
 	collection: CollectionBuilder;
-	fields: CFConfig<FieldTypes>[];
+	fields: FieldConfig<FieldTypes>[];
 	db: DatabaseAdapter;
 	type: Exclude<TableType, "document" | "versions">;
 	documentTable: string;
@@ -305,9 +306,9 @@ const createFieldTables = (props: {
 			}
 			case "column": {
 				//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and tree-table tables) we need to update this
-				const fieldInstance = (props.brick || props.collection).fields.get(
-					field.key,
-				);
+				const fieldInstance = getFieldBuilderState(
+					props.brick || props.collection,
+				).fields.get(field.key);
 				if (!fieldInstance) {
 					return {
 						data: undefined,
@@ -382,9 +383,9 @@ const createFieldTables = (props: {
 				}
 
 				//* field keys are unique within a collection, if we ever change them to be unique within a block (base layer and tree-table tables) we need to update this
-				const fieldInstance = (props.brick || props.collection).fields.get(
-					field.key,
-				);
+				const fieldInstance = getFieldBuilderState(
+					props.brick || props.collection,
+				).fields.get(field.key);
 				if (!fieldInstance) {
 					return {
 						data: undefined,

@@ -59,7 +59,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 	);
 	const summary = createMemo(() =>
 		helpers.getLocaleValue({
-			value: fieldConfig().details?.summary,
+			value: fieldConfig().details?.description,
 		}),
 	);
 	const structuralFieldKeys = createMemo(() =>

@@ -27,19 +27,19 @@ export const Sidebar: Component<{
 	// Memos
 	const hasWorkflow = createMemo(
 		() =>
-			props.collection()?.workflow !== undefined &&
+			props.collection()?.publishing.workflow !== undefined &&
 			props.documentId() !== undefined &&
 			props.document() !== undefined,
 	);
 	const hasPendingReleases = createMemo(
 		() =>
 			userStore.get.hasPermission([Permissions.PublishOperationsRead]).all &&
-			((props.collection()?.review?.requiredFor?.length ?? 0) > 0 ||
+			((props.collection()?.publishing.review?.requiredFor?.length ?? 0) > 0 ||
 				props.collection()?.capabilities.scheduling === true),
 	);
 	const hasEnvironmentStatus = createMemo(
 		() =>
-			(props.collection()?.environments.length ?? 0) > 0 &&
+			(props.collection()?.publishing.targets.length ?? 0) > 0 &&
 			props.documentId() !== undefined &&
 			props.document() !== undefined,
 	);

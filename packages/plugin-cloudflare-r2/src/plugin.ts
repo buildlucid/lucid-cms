@@ -1,5 +1,5 @@
-import { LucidError } from "@lucidcms/core";
-import type { LucidPluginResponse } from "@lucidcms/core/types";
+import { definePlugin, LucidError } from "@lucidcms/core";
+import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import cloudflareR2StorageAdapter from "./adapter.js";
 import {
 	DEFAULT_MAX_UPLOAD_SIZE,
@@ -11,10 +11,10 @@ import routes from "./routes/index.js";
 import type { PluginOptions } from "./types.js";
 import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
-const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
+const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	const resolvedOptions = pluginOptions ?? {};
 
-	return {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		hooks: {
@@ -47,14 +47,15 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 			}
 		},
 		sources: { translations: ["@lucidcms/plugin-cloudflare-r2/translations"] },
-		recipe: (draft) => {
+		defaults: {
+			media: { storage: cloudflareR2StorageAdapter(resolvedOptions) },
+		},
+		configure: (draft) => {
 			if (!resolvedOptions.http) {
 				draft.http.routes.push(...routes(resolvedOptions));
 			}
-
-			draft.media.storage = cloudflareR2StorageAdapter(resolvedOptions);
 		},
-	};
+	});
 };
 
 export default plugin;

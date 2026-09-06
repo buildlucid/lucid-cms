@@ -4,24 +4,28 @@ import RichTextCalloutBrick from "../bricks/rich-text-callout.js";
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:collections.blog.name"),
-		singularName: copy("admin:collections.blog.singularName"),
-		summary: copy("admin:collections.blog.summary"),
+		labels: {
+			singular: copy("admin:collections.blog.singularName"),
+			plural: copy("admin:collections.blog.name"),
+		},
+		description: copy("admin:collections.blog.summary"),
 	},
 	group: {
 		key: "content",
 	},
 	localized: true,
-	scheduling: true,
 	bricks: {
 		embedded: [RichTextCalloutBrick],
 	},
-	environments: [
-		{
-			key: "staging",
-			name: copy("admin:collections.blog.environments.staging.name"),
-		},
-	],
+	publishing: {
+		targets: [
+			{
+				key: "staging",
+				label: copy("admin:collections.blog.environments.staging.name"),
+			},
+		],
+		scheduling: true,
+	},
 })
 	.addText("page_title", {
 		ui: {

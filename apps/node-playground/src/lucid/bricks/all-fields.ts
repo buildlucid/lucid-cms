@@ -2,8 +2,8 @@ import { BrickBuilder } from "@lucidcms/core";
 
 const AllFieldsBrick = new BrickBuilder("all-fields", {
 	details: {
-		name: "All custom fields",
-		summary:
+		label: "All custom fields",
+		description:
 			"Exercises every built-in field and structural field in the builder.",
 	},
 })

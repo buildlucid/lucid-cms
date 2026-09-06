@@ -1,4 +1,4 @@
-import type { PreviewResolution, ResponseBody } from "@lucidcms/types";
+import type { PreviewResolution } from "@lucidcms/types";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
 	LucidRequestOptions,
@@ -10,20 +10,18 @@ export type PreviewsResolveInput = {
 	request?: LucidRequestOptions;
 };
 
-export type PreviewsResolveResponse = ResponseBody<PreviewResolution>;
+export type PreviewsResolveResponse = LucidClientResponse<PreviewResolution>;
 
 export interface LucidPreviewsClient {
 	/** Validates a preview token and returns its browser runtime metadata. */
-	resolve(
-		input: PreviewsResolveInput,
-	): Promise<LucidClientResponse<PreviewsResolveResponse>>;
+	resolve(input: PreviewsResolveInput): Promise<PreviewsResolveResponse>;
 }
 
 export const createPreviewsClient = (
 	transport: LucidTransport,
 ): LucidPreviewsClient => ({
 	resolve: async (input) =>
-		await transport.request<PreviewsResolveResponse>({
+		await transport.request<PreviewResolution>({
 			operation: "previews.resolve",
 			method: "POST",
 			path: "/preview",

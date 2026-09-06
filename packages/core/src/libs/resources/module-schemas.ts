@@ -1,5 +1,6 @@
 import z from "zod";
-import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { isCollectionBuilder } from "../collection/builders/collection-builder/index.js";
 import type { TableDefinition } from "../db/client/table/definition.js";
 import type { ExternalMigration } from "../db/types.js";
 import { hookExecutionKinds } from "../hooks/hook-map.js";
@@ -17,7 +18,7 @@ const routeShape = z.looseObject({
 	method: z.enum(["get", "post", "put", "patch", "delete", "options"]),
 	path: z.string().startsWith("/"),
 	handler,
-	priority: z.number().optional(),
+	order: z.number().optional(),
 	middleware: z.array(handler).optional(),
 });
 
@@ -30,11 +31,11 @@ const routeAccessSchema = z.discriminatedUnion("type", [
 	}),
 ]);
 
-const hookShape = z.object({
+const hookShape = z.strictObject({
 	service: z.string(),
 	event: z.string(),
 	handler,
-	priority: z.number().optional(),
+	order: z.number().optional(),
 });
 
 const hookEvents = new Map(
@@ -44,7 +45,10 @@ const hookEvents = new Map(
 	]),
 );
 
-export const collectionSchema = z.instanceof(CollectionBuilder);
+export const collectionSchema = z.custom<CollectionBuilder>(
+	isCollectionBuilder,
+	{ error: "Expected a CollectionBuilder" },
+);
 
 export const routeSchema = z.custom<LucidCustomRouteDefinition>(
 	(value) => {

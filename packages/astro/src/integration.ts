@@ -78,7 +78,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					);
 
 					const buildContextId = `${nextProject.hostId}:${command}`;
-					registerBuildContext(buildContextId, nextProject.loaded.env);
+					registerBuildContext(buildContextId, nextProject.loaded.rawEnv);
 					const generated = await writeGeneratedModules({
 						project: nextProject,
 						directory: generatedDirectory,

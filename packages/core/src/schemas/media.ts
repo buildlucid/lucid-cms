@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
 import mediaAdapterDataSchema from "../utils/media/adapter-data.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";

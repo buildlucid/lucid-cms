@@ -11,7 +11,7 @@ import z from "zod";
 import getSchedules from "../../../services/jobs/get-schedules.js";
 import setScheduleState from "../../../services/jobs/set-schedule-state.js";
 import triggerSchedule from "../../../services/jobs/trigger-schedule.js";
-import type { Config } from "../../../types/config.js";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import { createTranslationStore } from "../../i18n/index.js";
@@ -59,7 +59,7 @@ const createContext = async (options: {
 	adapter?: QueueAdapterInstance;
 }) => {
 	const baseConfig = await testConfig.getConfig();
-	const config: Config = {
+	const config: ResolvedLucidConfig = {
 		...baseConfig,
 		jobs: {
 			...baseConfig.jobs,

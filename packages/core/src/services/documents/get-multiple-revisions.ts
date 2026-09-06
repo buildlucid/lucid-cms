@@ -30,7 +30,7 @@ const getMultipleRevisions: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	if (collectionRes.data.getData.revisions === false) {
+	if (collectionRes.data.getData.revisions.enabled === false) {
 		return {
 			error: {
 				type: "basic",

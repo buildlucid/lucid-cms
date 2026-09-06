@@ -14,11 +14,11 @@ npm install @lucidcms/db-postgres
 To use the Postgres database adapter, you need to add it to your Lucid CMS config file. You'll need to provide a PostgreSQL connection URL at a minimum.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { postgres } from "@lucidcms/db-postgres";
 
-export default configureLucid({
+export default defineConfig({
   runtime: node,
   db: postgres,
   config: () => ({

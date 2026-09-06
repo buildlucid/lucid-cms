@@ -159,7 +159,7 @@ const registerCustomRoutes = (
 ) => {
 	const registeredRouteKeys = new Set(app.routes.map(getRouteKey));
 	const orderedRoutes = routes.toSorted(
-		(a, b) => (a.priority ?? 0) - (b.priority ?? 0),
+		(a, b) => (a.order ?? 0) - (b.order ?? 0),
 	);
 
 	for (const route of orderedRoutes) {

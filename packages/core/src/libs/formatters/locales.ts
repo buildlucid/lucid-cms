@@ -1,4 +1,4 @@
-import type { Config } from "../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../exports/types.js";
 import type { Locale } from "../../types/response.js";
 import type { LucidLocales } from "../db/tables/index.js";
 import type { Select } from "../db/types.js";
@@ -6,7 +6,7 @@ import formatter from "./helpers.js";
 
 const formatMultiple = (props: {
 	locales: Select<LucidLocales>[];
-	localization: Config["localization"];
+	localization: ResolvedLucidConfig["localization"];
 }): Locale[] => {
 	return props.locales
 		.map((l) => {
@@ -27,8 +27,8 @@ const formatMultiple = (props: {
 
 const formatSingle = (props: {
 	locale: Select<LucidLocales>;
-	configLocale: Config["localization"]["locales"][0];
-	defaultLocale: Config["localization"]["defaultLocale"];
+	configLocale: ResolvedLucidConfig["localization"]["locales"][0];
+	defaultLocale: ResolvedLucidConfig["localization"]["defaultLocale"];
 }): Locale => {
 	return {
 		code: props.locale.code,

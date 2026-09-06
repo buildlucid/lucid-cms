@@ -112,7 +112,7 @@ const approve: ServiceFn<
 
 	if (
 		!bypassReviewChecks &&
-		collectionRes.data.getData.review?.allowSelfApproval === false &&
+		collectionRes.data.getData.publishing.review?.allowSelfApproval === false &&
 		operationRes.data.requested_by === data.user.id
 	) {
 		return {
@@ -128,7 +128,8 @@ const approve: ServiceFn<
 	const comment = normalizeComment(data.comment);
 	if (
 		!bypassReviewChecks &&
-		collectionRes.data.getData.review?.comments.decision === "required" &&
+		collectionRes.data.getData.publishing.review?.comments.decision ===
+			"required" &&
 		!comment.text
 	) {
 		return {

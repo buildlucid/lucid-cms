@@ -8,7 +8,7 @@ import { FILE_SYSTEM_UPLOAD_PATH } from "../helpers.js";
 
 export default (options: FileSystemStorageAdapterOptions) => {
 	const createUploadSession: MediaStorageAdapterServiceCreateUploadSession =
-		async (_context, props) => {
+		async (context, props) => {
 			try {
 				return {
 					error: undefined,
@@ -20,7 +20,8 @@ export default (options: FileSystemStorageAdapterOptions) => {
 								host: props.host,
 								path: FILE_SYSTEM_UPLOAD_PATH,
 								key: props.key,
-								secretKey: options.secretKey,
+								secretKey:
+									options.secretKey ?? context.config.secrets.encryption,
 								query: {
 									mimeType: props.mimeType,
 									extension: props.extension,

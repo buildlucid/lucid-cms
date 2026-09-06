@@ -87,7 +87,8 @@ const ReleaseRequestsListRoute: Component = () => {
 			new Set(
 				(collections.data?.data ?? [])
 					.filter(
-						(collection) => (collection.review?.requiredFor?.length ?? 0) > 0,
+						(collection) =>
+							(collection.publishing.review?.requiredFor?.length ?? 0) > 0,
 					)
 					.map((collection) => collection.key),
 			),
@@ -98,7 +99,7 @@ const ReleaseRequestsListRoute: Component = () => {
 			.map((collection) => ({
 				value: collection.key,
 				label:
-					helpers.getLocaleValue({ value: collection.details.name }) ||
+					helpers.getLocaleValue({ value: collection.details.labels.plural }) ||
 					collection.key,
 			})),
 	);
@@ -108,7 +109,7 @@ const ReleaseRequestsListRoute: Component = () => {
 				(collections.data?.data ?? []).map((collection) => [
 					collection.key,
 					helpers.getLocaleValue({
-						value: collection.details.singularName,
+						value: collection.details.labels.singular,
 						fallback: collection.key,
 					}) || collection.key,
 				]),
@@ -130,7 +131,7 @@ const ReleaseRequestsListRoute: Component = () => {
 			) {
 				continue;
 			}
-			for (const target of collection.review?.requiredFor ?? [])
+			for (const target of collection.publishing.review?.requiredFor ?? [])
 				keys.add(target);
 		}
 		return Array.from(keys).map((key) => ({

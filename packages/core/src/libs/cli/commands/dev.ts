@@ -21,7 +21,6 @@ import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import updateAvailable from "../services/update-available.js";
-import validateEnvVars from "../services/validate-env-vars.js";
 import migrateCommand from "./migrate.js";
 
 const devCommand = async (options?: {
@@ -122,11 +121,6 @@ const devCommand = async (options?: {
 				process.exit(1);
 			}
 
-			const envValid = await validateEnvVars({
-				envSchema: configResult.envSchema,
-				env: configResult.env,
-			});
-
 			generateTypes({
 				envSchema: configResult.envSchema,
 				configPath: configPath,
@@ -134,11 +128,6 @@ const devCommand = async (options?: {
 				collections: configResult.config.collections,
 				localization: configResult.config.localization,
 			});
-
-			if (!envValid) {
-				await stopLoggerBuffering();
-				process.exit(1);
-			}
 
 			currentStage = "migration";
 			const migrateResult = await migrateCommand({
@@ -150,7 +139,6 @@ const devCommand = async (options?: {
 				mode: "return",
 			})({
 				skipSyncSteps: !isInitialRun,
-				skipEnvValidation: true,
 			});
 
 			if (!migrateResult) {
@@ -229,6 +217,7 @@ const devCommand = async (options?: {
 
 			currentStage = "runtime_initialization";
 			const serverRes = await adapterCLI.serve({
+				env: configResult.env,
 				config: configResult.config,
 				translationStore,
 				logger: {

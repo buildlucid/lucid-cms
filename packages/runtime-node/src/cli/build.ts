@@ -53,7 +53,7 @@ const buildCommand: BuildHandler = async ({
 		});
 
 		const entry = /* ts */ `
-import configFactory from "${configArtifactImports.config}";
+import configFactory, { configure } from "${configArtifactImports.config}";
 import { env as envSchema } from "${configArtifactImports.env}";
 import db from "${configArtifactImports.db}";
 import runtime from "${configArtifactImports.runtime}";
@@ -83,6 +83,7 @@ const startServer = async () => {
 			runtime: runtimeAdapter,
 			db,
 			config: configFactory,
+			configure,
 		};
 		const runtimeContext = getRuntimeContext({
 			compiled: true,

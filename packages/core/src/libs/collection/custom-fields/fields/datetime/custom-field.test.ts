@@ -4,6 +4,7 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import DatetimeCustomField from "./custom-field.js";
 
@@ -12,12 +13,14 @@ import DatetimeCustomField from "./custom-field.js";
 const DateTimeCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -36,8 +39,9 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: "2024-06-15T14:14:21.704Z",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("standard_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -57,8 +61,9 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: 1676103221704,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("standard_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -78,8 +83,9 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: new Date("2024-06-15T14:14:21.704Z"),
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("standard_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -99,8 +105,9 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: "",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("standard_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -120,8 +127,9 @@ test("successfully validate field - datetime", async () => {
 			type: "datetime",
 			value: "2024-06-15T14:14:21.704Z",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("required_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("required_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -143,8 +151,9 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: true,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("standard_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -170,8 +179,9 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: "string",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("standard_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -197,8 +207,9 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: "20024-06-15T14:14:21.704",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("standard_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("standard_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -224,8 +235,9 @@ test("fail to validate field - datetime", async () => {
 			type: "datetime",
 			value: "",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: DateTimeCollection.fields.get("required_datetime")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(DateTimeCollection).fields.get("required_datetime")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -253,7 +265,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 			placeholder: copy("admin:tests.fields.field.placeholder", {
@@ -269,7 +281,9 @@ test("custom field config passes schema validation", async () => {
 		},
 		validation: {
 			required: true,
-			zod: z.date().min(new Date("2024-06-15T14:14:21.704Z")),
+			zod: z.iso
+				.datetime()
+				.refine((value) => value >= "2024-06-15T14:14:21.704Z"),
 		},
 	});
 

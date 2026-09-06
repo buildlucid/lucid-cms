@@ -25,14 +25,24 @@ describe("buildRouteSegmentTargets", () => {
 	}) => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
-			details: { name: "Pages", singularName: "Page" },
+			details: {
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
+			},
 		}).addRelation("category", {
 			collection: "categories",
 			multiple: false,
 		});
 		const categories = new CollectionBuilder("categories", {
 			mode: "multiple",
-			details: { name: "Categories", singularName: "Category" },
+			details: {
+				labels: {
+					singular: "Category",
+					plural: "Categories",
+				},
+			},
 			localized: { locales: ["fr"], defaultLocale: "fr" },
 		}).addText("slug", { localized: fieldLocalized });
 

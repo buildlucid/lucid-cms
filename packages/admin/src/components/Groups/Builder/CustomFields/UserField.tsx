@@ -127,7 +127,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 					value: props.state.fieldConfig.details.label,
 				}),
 				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.summary,
+					value: props.state.fieldConfig.details.description,
 				}),
 			}}
 			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}

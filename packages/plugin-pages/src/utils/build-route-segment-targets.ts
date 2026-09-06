@@ -3,7 +3,7 @@ import {
 	isCollectionFieldLocalized,
 	resolveCollectionLocalization,
 } from "@lucidcms/core/extension";
-import type { CFConfig } from "@lucidcms/core/types";
+import type { FieldConfig } from "@lucidcms/core/types";
 import type {
 	CollectionConfig,
 	RouteSegmentSelection,
@@ -34,7 +34,7 @@ const buildRouteSegmentTargets = (data: {
 		for (const [index, segment] of data.collection.segments.entries()) {
 			const selection = selections.get(`${sourceKey}:${index}`);
 			const relation = data.collectionInstance.fields.get(segment.relation);
-			const relationConfig = relation?.config as CFConfig<"relation">;
+			const relationConfig = relation?.config as FieldConfig<"relation">;
 			const targetCollectionKey = relationConfig.collection[0];
 			const targetCollection = data.collections.find(
 				(collection) => collection.key === targetCollectionKey,

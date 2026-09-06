@@ -32,7 +32,7 @@ const uploadSingle: ServiceFn<
 		token: data.token,
 		timestamp: data.timestamp,
 		path: FILE_SYSTEM_UPLOAD_PATH,
-		secretKey: adapterOptions?.secretKey ?? context.config.secrets.cookie,
+		secretKey: adapterOptions?.secretKey ?? context.config.secrets.encryption,
 		query: {
 			mimeType: data.mimeType,
 			extension: data.extension,

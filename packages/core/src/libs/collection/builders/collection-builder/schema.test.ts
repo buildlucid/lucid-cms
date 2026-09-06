@@ -7,13 +7,15 @@ test("collection builder options passes schema validation", async () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
-			summary: copy("admin:tests.collections.pages.summary", {
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
+			description: copy("admin:tests.collections.pages.summary", {
 				defaultMessage:
 					"Pages are used to create static content on your website.",
 			}),
@@ -78,7 +80,12 @@ test("collection localization accepts scoped locales or a default override", asy
 	const config = {
 		key: "articles",
 		mode: "multiple",
-		details: { name: "Articles", singularName: "Article" },
+		details: {
+			labels: {
+				singular: "Article",
+				plural: "Articles",
+			},
+		},
 	};
 
 	await expect(
@@ -112,8 +119,10 @@ test("collection preview breakpoints validate labels, keys and widths", async ()
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 		preview: {
 			enabled: true,
@@ -155,8 +164,7 @@ test("collection preview breakpoints validate labels, keys and widths", async ()
 			...config,
 			preview: { breakpoints: config.preview.breakpoints },
 		}),
-	).resolves.toMatchObject({ success: false });
-
+	).resolves.toMatchObject({ success: true });
 	for (const width of [279, 2561, 390.5]) {
 		await expect(
 			CollectionConfigSchema.safeParseAsync({
@@ -198,40 +206,44 @@ test("collection workflow features validates stages, targets and palette", async
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
-		},
-		workflow: {
-			initial: "todo",
-			stages: [
-				{
-					key: "todo",
-					name: copy("admin:tests.workflow.todo.name", {
-						defaultMessage: "To do",
-					}),
-				},
-				{
-					key: "done",
-					name: copy("admin:tests.workflow.done.name", {
-						defaultMessage: "Done",
-					}),
-					color: "green",
-					publishTargets: ["production"],
-				},
-			],
-		},
-		environments: [
-			{
-				key: "production",
-				name: copy("admin:tests.environments.production.name", {
-					defaultMessage: "Production",
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
 				}),
 			},
-		],
+		},
+		publishing: {
+			targets: [
+				{
+					key: "production",
+					label: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+				},
+			],
+			workflow: {
+				initial: "todo",
+				stages: [
+					{
+						key: "todo",
+						label: copy("admin:tests.workflow.todo.name", {
+							defaultMessage: "To do",
+						}),
+					},
+					{
+						key: "done",
+						label: copy("admin:tests.workflow.done.name", {
+							defaultMessage: "Done",
+						}),
+						color: "green",
+						publishTargets: ["production"],
+					},
+				],
+			},
+		},
 	};
 
 	await expect(
@@ -243,9 +255,11 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			workflow: {
-				initial: "missing",
-				stages: validConfig.workflow.stages,
+			publishing: {
+				workflow: {
+					initial: "missing",
+					stages: validConfig.publishing.workflow.stages,
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -255,21 +269,23 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			workflow: {
-				stages: [
-					{
-						key: "todo",
-						name: copy("admin:tests.workflow.todo.name", {
-							defaultMessage: "To do",
-						}),
-					},
-					{
-						key: "todo",
-						name: copy("admin:tests.workflow.duplicate.name", {
-							defaultMessage: "Duplicate",
-						}),
-					},
-				],
+			publishing: {
+				workflow: {
+					stages: [
+						{
+							key: "todo",
+							label: copy("admin:tests.workflow.todo.name", {
+								defaultMessage: "To do",
+							}),
+						},
+						{
+							key: "todo",
+							label: copy("admin:tests.workflow.duplicate.name", {
+								defaultMessage: "Duplicate",
+							}),
+						},
+					],
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -279,16 +295,18 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			workflow: {
-				stages: [
-					{
-						key: "todo",
-						name: copy("admin:tests.workflow.todo.name", {
-							defaultMessage: "To do",
-						}),
-						color: "orange",
-					},
-				],
+			publishing: {
+				workflow: {
+					stages: [
+						{
+							key: "todo",
+							label: copy("admin:tests.workflow.todo.name", {
+								defaultMessage: "To do",
+							}),
+							color: "orange",
+						},
+					],
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -298,16 +316,18 @@ test("collection workflow features validates stages, targets and palette", async
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			workflow: {
-				stages: [
-					{
-						key: "done",
-						name: copy("admin:tests.workflow.done.name", {
-							defaultMessage: "Done",
-						}),
-						publishTargets: ["missing"],
-					},
-				],
+			publishing: {
+				workflow: {
+					stages: [
+						{
+							key: "done",
+							label: copy("admin:tests.workflow.done.name", {
+								defaultMessage: "Done",
+							}),
+							publishTargets: ["missing"],
+						},
+					],
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -322,8 +342,10 @@ test("collection group config validates shorthand and named groups", async () =>
 			mode: "multiple",
 			group: "content",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -336,14 +358,16 @@ test("collection group config validates shorthand and named groups", async () =>
 			mode: "multiple",
 			group: {
 				key: "content",
-				name: copy("admin:tests.groups.content.name", {
+				label: copy("admin:tests.groups.content.name", {
 					defaultMessage: "Content",
 				}),
 				order: 10,
 			},
 			details: {
-				name: "Blogs",
-				singularName: "Blog",
+				labels: {
+					singular: "Blog",
+					plural: "Blogs",
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -356,8 +380,10 @@ test("collection group config validates shorthand and named groups", async () =>
 			mode: "multiple",
 			group: "",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -370,8 +396,10 @@ test("collection group config validates shorthand and named groups", async () =>
 			mode: "multiple",
 			group: "Content",
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -387,8 +415,10 @@ test("collection group config validates shorthand and named groups", async () =>
 				order: "first",
 			},
 			details: {
-				name: "Pages",
-				singularName: "Page",
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
 			},
 		}),
 	).resolves.toMatchObject({
@@ -402,25 +432,29 @@ test("collection environment version mappings passes schema validation", async (
 			key: "pages",
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.pages.name", {
-					defaultMessage: "Pages",
-				}),
-				singularName: copy("admin:tests.collections.pages.singularName", {
-					defaultMessage: "Page",
-				}),
-			},
-			environments: [
-				{
-					key: "staging",
-					name: copy("admin:tests.environments.staging.name", {
-						defaultMessage: "Staging",
+				labels: {
+					singular: copy("admin:tests.collections.pages.singularName", {
+						defaultMessage: "Page",
 					}),
-					collectionVersions: {
-						blog: "signed-off",
-						settings: "latest",
-					},
+					plural: copy("admin:tests.collections.pages.name", {
+						defaultMessage: "Pages",
+					}),
 				},
-			],
+			},
+			publishing: {
+				targets: [
+					{
+						key: "staging",
+						label: copy("admin:tests.environments.staging.name", {
+							defaultMessage: "Staging",
+						}),
+						collectionVersions: {
+							blog: "signed-off",
+							settings: "latest",
+						},
+					},
+				],
+			},
 		}),
 	).resolves.toMatchObject({
 		success: true,
@@ -432,28 +466,32 @@ test("collection environment requires features validates environment references"
 		key: "pages",
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
 		},
-		environments: [
-			{
-				key: "staging",
-				name: copy("admin:tests.environments.staging.name", {
-					defaultMessage: "Staging",
-				}),
-			},
-			{
-				key: "production",
-				name: copy("admin:tests.environments.production.name", {
-					defaultMessage: "Production",
-				}),
-				requires: ["staging"],
-			},
-		],
+		publishing: {
+			targets: [
+				{
+					key: "staging",
+					label: copy("admin:tests.environments.staging.name", {
+						defaultMessage: "Staging",
+					}),
+				},
+				{
+					key: "production",
+					label: copy("admin:tests.environments.production.name", {
+						defaultMessage: "Production",
+					}),
+					requires: ["staging"],
+				},
+			],
+		},
 	};
 
 	await expect(
@@ -465,15 +503,17 @@ test("collection environment requires features validates environment references"
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			environments: [
-				{
-					key: "production",
-					name: copy("admin:tests.environments.production.name", {
-						defaultMessage: "Production",
-					}),
-					requires: ["staging"],
-				},
-			],
+			publishing: {
+				targets: [
+					{
+						key: "production",
+						label: copy("admin:tests.environments.production.name", {
+							defaultMessage: "Production",
+						}),
+						requires: ["staging"],
+					},
+				],
+			},
 		}),
 	).resolves.toMatchObject({
 		success: false,
@@ -482,15 +522,17 @@ test("collection environment requires features validates environment references"
 	await expect(
 		CollectionConfigSchema.safeParseAsync({
 			...validConfig,
-			environments: [
-				{
-					key: "production",
-					name: copy("admin:tests.environments.production.name", {
-						defaultMessage: "Production",
-					}),
-					requires: ["production"],
-				},
-			],
+			publishing: {
+				targets: [
+					{
+						key: "production",
+						label: copy("admin:tests.environments.production.name", {
+							defaultMessage: "Production",
+						}),
+						requires: ["production"],
+					},
+				],
+			},
 		}),
 	).resolves.toMatchObject({
 		success: false,

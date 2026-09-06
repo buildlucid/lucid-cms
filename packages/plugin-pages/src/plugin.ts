@@ -1,4 +1,4 @@
-import { logger } from "@lucidcms/core";
+import { definePlugin, logger } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import { checkRouteSegments } from "./services/checks/index.js";
@@ -16,12 +16,12 @@ import type { PluginOptions } from "./types/types.js";
 const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 	const options = pluginOptions(plugin);
 
-	return {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		toolkit,
 		sources: { translations: ["@lucidcms/plugin-pages/translations"] },
-		recipe: (draft) => {
+		configure: (draft) => {
 			const configuredCollections = [];
 
 			for (const collectionConfig of options.collections) {
@@ -40,7 +40,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				}
 
 				registerFields(collectionInstance, collectionConfig);
-				collectionInstance.config.routing = "fullSlug";
+				collectionInstance.config.routing = { field: "fullSlug" };
 				configuredCollections.push({ collectionConfig, collectionInstance });
 
 				if (!collectionInstance.config.hooks) {
@@ -87,7 +87,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				});
 			}
 		},
-	};
+	});
 };
 
 export default plugin;

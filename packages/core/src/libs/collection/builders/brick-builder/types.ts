@@ -1,24 +1,20 @@
 import type constants from "../../../../constants/constants.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../../i18n/types.js";
 
-export interface BrickConfigProps {
+export interface BrickOptions {
 	details?: {
-		name?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		label?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
-	preview?: {
-		image?: string;
-	};
+	thumbnail?: string;
 }
 export interface BrickConfig {
 	key: string;
 	details: {
-		name: ResolvedAdminCopy;
-		summary?: ResolvedAdminCopy;
+		label: ResolvedAdminCopy;
+		description?: ResolvedAdminCopy;
 	};
-	preview?: {
-		image?: string;
-	};
+	thumbnail?: string;
 }
 
 export type BrickTypes =

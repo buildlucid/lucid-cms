@@ -3,7 +3,7 @@ import type { InternalCollectionDocument } from "../../exports/types.js";
 import executeHooks from "./execute-hooks.js";
 
 describe("execute hooks", () => {
-	it("runs transform hooks sequentially with Immer drafts and priority order", async () => {
+	it("runs transform hooks sequentially with Immer drafts and order order", async () => {
 		const document = {
 			id: 1,
 			collectionKey: "pages",
@@ -77,7 +77,7 @@ describe("execute hooks", () => {
 						{
 							service: "documents",
 							event: "afterFetch",
-							priority: 10,
+							order: 10,
 							handler: lateHook,
 						},
 					],
@@ -88,7 +88,7 @@ describe("execute hooks", () => {
 							{
 								service: "documents",
 								event: "afterFetch",
-								priority: -10,
+								order: -10,
 								handler: earlyHook,
 							},
 						],
@@ -118,7 +118,7 @@ describe("execute hooks", () => {
 		]);
 	});
 
-	it("runs effect hooks by priority without returning transformed data", async () => {
+	it("runs effect hooks by order without returning transformed data", async () => {
 		const context = {} as never;
 		const payload = {
 			meta: {
@@ -173,7 +173,7 @@ describe("execute hooks", () => {
 							{
 								service: "documents",
 								event: "afterUpsert",
-								priority: -10,
+								order: -10,
 								handler: collectionHook,
 							},
 						],

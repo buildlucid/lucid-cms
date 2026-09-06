@@ -224,7 +224,18 @@ export interface InferredTable {
 
 // ------------------------------------------------------------------------------
 // Database
-export interface LucidDB {
+type DynamicCollectionTables = {
+	[Table in
+		| LucidDocumentTableName
+		| LucidVersionTableName
+		| LucidBrickTableName]: Table extends LucidVersionTableName
+		? LucidVersionTable
+		: Table extends LucidBrickTableName
+			? LucidBricksTable
+			: LucidDocumentTable;
+};
+
+export interface LucidDB extends DynamicCollectionTables {
 	lucid_locales: LucidLocales;
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;
@@ -272,9 +283,4 @@ export interface LucidDB {
 	lucid_job_schedule_overrides: LucidJobScheduleOverrides;
 	lucid_ai_generations: LucidAiGenerations;
 	lucid_auth_states: LucidAuthStates;
-	[key: LucidDocumentTableName]: LucidDocumentTable;
-	// @ts-expect-error
-	[key: LucidVersionTableName]: LucidVersionTable;
-	// @ts-expect-error
-	[key: LucidBrickTableName]: LucidBricksTable;
 }

@@ -36,7 +36,7 @@ const getAllController = factory.createHandlers(
 	externalAuthentication(),
 	externalScopes([ExternalScopes.LocalesRead]),
 	cache({
-		ttl: hoursToSeconds(24),
+		ttlSeconds: hoursToSeconds(24),
 		mode: "static",
 		staticKey: cacheKeys.http.static.contentLocales,
 	}),

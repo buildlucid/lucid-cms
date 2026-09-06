@@ -7,12 +7,14 @@ const buildCollection = (key: string) =>
 	new CollectionBuilder(key, {
 		mode: "multiple",
 		details: {
-			name: copy(`admin:tests.collections.${key}.name`, {
-				defaultMessage: key,
-			}),
-			singularName: copy(`admin:tests.collections.${key}.singularName`, {
-				defaultMessage: key,
-			}),
+			labels: {
+				singular: copy(`admin:tests.collections.${key}.singularName`, {
+					defaultMessage: key,
+				}),
+				plural: copy(`admin:tests.collections.${key}.name`, {
+					defaultMessage: key,
+				}),
+			},
 		},
 	});
 
@@ -51,12 +53,14 @@ test("sort key types only include order for orderable collections", async () => 
 		mode: "multiple",
 		orderable: true,
 		details: {
-			name: copy("admin:tests.collections.projects.name", {
-				defaultMessage: "projects",
-			}),
-			singularName: copy("admin:tests.collections.projects.singularName", {
-				defaultMessage: "project",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.projects.singularName", {
+					defaultMessage: "project",
+				}),
+				plural: copy("admin:tests.collections.projects.name", {
+					defaultMessage: "projects",
+				}),
+			},
 		},
 	});
 	const standard = buildCollection("pages");

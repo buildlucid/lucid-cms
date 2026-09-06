@@ -1,13 +1,11 @@
-import type { Select, ServiceResponse } from "../../../exports/types.js";
+import type { ServiceResponse } from "../../../exports/types.js";
 import type { LucidBricksTable } from "../../db/tables/index.js";
+import type { Select } from "../../db/types.js";
 import { copy } from "../../i18n/index.js";
 import type { RefTarget } from "../../refs/types.js";
 import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldAiConfig,
 	CustomFieldAiFormatResponse,
 	CustomFieldErrorItem,
@@ -15,7 +13,10 @@ import type {
 	CustomFieldResponseFormatContext,
 	CustomFieldUserAiConfig,
 	CustomFieldValidateResponse,
+	FieldConfig,
+	FieldOptions,
 	FieldRelationValidationInput,
+	FieldResponse,
 	FieldTypes,
 	GetIndexDefinitionProps,
 	GetSchemaDefinitionProps,
@@ -44,8 +45,8 @@ abstract class CustomField<T extends FieldTypes> {
 
 	abstract type: T;
 	abstract key: string;
-	abstract props?: CFProps<T>;
-	abstract config: CFConfig<T>;
+	abstract props?: FieldOptions<T>;
+	abstract config: FieldConfig<T>;
 
 	/**
 	 * Field-level switches for shared validation phases.
@@ -69,7 +70,7 @@ abstract class CustomField<T extends FieldTypes> {
 	/** Normalized field metadata used by Lucid AI features. */
 	get aiConfig(): CustomFieldAiConfig {
 		const aiConfig = (
-			this.config as CFConfig<T> & {
+			this.config as FieldConfig<T> & {
 				ai?: CustomFieldUserAiConfig;
 			}
 		).ai;
@@ -88,7 +89,7 @@ abstract class CustomField<T extends FieldTypes> {
 		return null;
 	}
 	/** Public field display metadata. */
-	get details(): CFConfig<T>["details"] {
+	get details(): FieldConfig<T>["details"] {
 		return this.config.details;
 	}
 	/** Normalizes input values before validation and persistence. */
@@ -189,7 +190,7 @@ abstract class CustomField<T extends FieldTypes> {
 	abstract formatResponseValue(
 		value: unknown,
 		context?: CustomFieldResponseFormatContext,
-	): CFResponse<T>["value"];
+	): FieldResponse<T>["value"];
 	/** Serializes field values into relation-table row payloads when needed. */
 	public serializeRelationFieldValue(
 		_value: unknown,
@@ -307,7 +308,7 @@ abstract class CustomField<T extends FieldTypes> {
 		}
 		return { valid: true };
 	}
-	/** Applies optional zod checks when the field exposes a zod validator. */
+	/** Validates the existing value; configured schemas cannot transform it. */
 	private validateZodConstraint(value: unknown): CustomFieldValidateResponse {
 		if (this.sharedValidationFlags.skipZodValidation) {
 			return { valid: true };
@@ -322,7 +323,10 @@ abstract class CustomField<T extends FieldTypes> {
 		)
 			return { valid: true };
 
-		return zodSafeParse(value, this.config.validation.zod);
+		return zodSafeParse(value, this.config.validation.zod, {
+			preserveValue: true,
+			fieldKey: this.key,
+		});
 	}
 }
 

@@ -3,7 +3,7 @@ import type {
 	LucidConfigDefinition,
 	RuntimeBuildArtifact,
 } from "../../../libs/runtime/types.js";
-import type { Config } from "../../../types/config.js";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
 import cliLogger from "../../cli/logger.js";
 import { copy, createTranslator } from "../../i18n/index.js";
 import type { TranslationStore } from "../../i18n/types.js";
@@ -12,7 +12,7 @@ import type { TranslationStore } from "../../i18n/types.js";
  * Responsible for running the plugin runtime hooks and collecting artifacts.
  */
 const handlePluginRuntimeHooks = async (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;
 	silent?: boolean;

@@ -4,10 +4,10 @@ import { isJsonContainerValue } from "../../../../../utils/helpers/get-typed-val
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldAiFormatResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -21,7 +21,7 @@ class JsonCustomField extends CustomField<"json"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"json">) {
+	constructor(key: string, props?: FieldOptions<"json">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -34,7 +34,7 @@ class JsonCustomField extends CustomField<"json"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			ai: this.props?.ai,
@@ -48,7 +48,7 @@ class JsonCustomField extends CustomField<"json"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"json">;
+		} satisfies FieldConfig<"json">;
 	}
 	override get supportsAi() {
 		return true;
@@ -80,7 +80,7 @@ class JsonCustomField extends CustomField<"json"> {
 	formatResponseValue(value?: Record<string, unknown> | unknown[] | null) {
 		return (value ??
 			this.config.default ??
-			null) satisfies CFResponse<"json">["value"];
+			null) satisfies FieldResponse<"json">["value"];
 	}
 	override normalizeInputValue(value: unknown) {
 		if (typeof value === "string" && value.trim() === "") return null;

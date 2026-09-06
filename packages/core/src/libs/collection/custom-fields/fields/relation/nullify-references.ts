@@ -1,5 +1,5 @@
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 	ServiceFn,
 } from "../../../../../exports/types.js";
@@ -11,13 +11,13 @@ import type { CollectionSchemaTable } from "../../../schema/types.js";
 import { relationFieldConfig } from "./config.js";
 import { normalizeRelationCollections } from "./utils/normalize-relation-collections.js";
 
-type FieldConfig = CFConfig<FieldTypes>;
+type RelationTargetFieldConfig = FieldConfig<FieldTypes>;
 
 /**
  * Returns true when the field can reference the deleted collection.
  */
 const canReferenceCollection = (
-	field: FieldConfig,
+	field: RelationTargetFieldConfig,
 	targetCollectionKey: string,
 ): boolean => {
 	return (
@@ -51,7 +51,7 @@ const findRelationTable = (props: {
  * Recursively collects relation tables that reference the deleted collection.
  */
 const collectReferenceTargets = (props: {
-	fields: FieldConfig[];
+	fields: RelationTargetFieldConfig[];
 	schemas: CollectionSchemaTable<LucidBrickTableName>[];
 	collectionKey: string;
 	targetCollectionKey: string;

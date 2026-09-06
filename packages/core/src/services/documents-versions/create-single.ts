@@ -226,7 +226,7 @@ const createSingle: ServiceFn<
 	}
 
 	if (previousLatestId !== undefined) {
-		const finalizePreviousRes = data.collection.getData.revisions
+		const finalizePreviousRes = data.collection.getData.revisions.enabled
 			? await DocumentVersions.updateSingle(
 					{
 						where: [

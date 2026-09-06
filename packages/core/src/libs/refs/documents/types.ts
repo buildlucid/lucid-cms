@@ -1,4 +1,4 @@
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
 import type { CollectionSchemaTable } from "../../collection/schema/types.js";
 import type {
@@ -24,7 +24,7 @@ export type DocumentRefVersionTypeResolver = (input: {
 export type DocumentRefFormatContext = {
 	collection: CollectionBuilder;
 	collections: CollectionBuilder[];
-	config: Config;
+	config: ResolvedLucidConfig;
 	host: string;
 	bricksTableSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	flattenDocumentFields?: boolean;

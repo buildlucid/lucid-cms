@@ -13,12 +13,12 @@ npm install @lucidcms/plugin-sharp
 ## Setup
 
 ```ts
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { sqlite } from "@lucidcms/db-sqlite";
 
-export default configureLucid({
+export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({

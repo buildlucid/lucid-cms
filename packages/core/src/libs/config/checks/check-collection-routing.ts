@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../../collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../collection/builders/field-builder/index.js";
 import { translate } from "../../i18n/index.js";
 
 const routingFieldTypes = new Set(["text", "textarea", "number"]);
@@ -18,7 +19,7 @@ const checkCollectionRouting = (collection: CollectionBuilder) => {
 		return;
 	}
 
-	const field = collection.fields.get(routing.field);
+	const field = getFieldBuilderState(collection).fields.get(routing.field);
 	if (
 		field &&
 		field.treeParent === null &&

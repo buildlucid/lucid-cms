@@ -1,8 +1,7 @@
 import crypto from "node:crypto";
 import type {
-	Config,
 	InternalDocumentField,
-	Select,
+	ResolvedLucidConfig,
 } from "../../exports/types.js";
 import type { InternalDocumentBrick, Refs } from "../../types/response.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
@@ -17,6 +16,7 @@ import type {
 	LucidBricksTable,
 	LucidBrickTableName,
 } from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
 import type { BrickQueryResponse } from "../repositories/document-bricks.js";
 import type { DocumentQueryResponse } from "../repositories/documents.js";
 import documentFieldsFormatter from "./document-fields.js";
@@ -27,7 +27,7 @@ const formatMultiple = (props: {
 	collection: CollectionBuilder;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	refs?: Refs | null;
-	config: Config;
+	config: ResolvedLucidConfig;
 	host: string;
 }): InternalDocumentBrick[] => {
 	const localization = resolveCollectionLocalization({
@@ -108,7 +108,7 @@ const formatDocumentFields = (props: {
 	collection: CollectionBuilder;
 	bricksSchema: Array<CollectionSchemaTable<LucidBrickTableName>>;
 	refs?: Refs | null;
-	config: Config;
+	config: ResolvedLucidConfig;
 	host: string;
 }): InternalDocumentField[] => {
 	const localization = resolveCollectionLocalization({

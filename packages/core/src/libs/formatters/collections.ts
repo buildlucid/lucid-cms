@@ -2,9 +2,10 @@ import type { LocalizationConfig } from "../../types/config.js";
 import type { Collection } from "../../types/response.js";
 import type BrickBuilder from "../collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../collection/builders/field-builder/index.js";
 import type CustomField from "../collection/custom-fields/custom-field.js";
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 } from "../collection/custom-fields/types.js";
 import type { MigrationStatus } from "../collection/get-collection-migration-status.js";
@@ -90,9 +91,11 @@ const formatSingle = (props: {
 			? getDocumentId(key, props.documents)
 			: undefined,
 		details: {
-			name: collectionData.details.name,
-			singularName: collectionData.details.singularName,
-			summary: collectionData.details.summary,
+			labels: {
+				singular: collectionData.details.labels.singular,
+				plural: collectionData.details.labels.plural,
+			},
+			description: collectionData.details.description,
 		},
 		localized: localization.enabled
 			? {
@@ -105,30 +108,11 @@ const formatSingle = (props: {
 		listing: props.collection.listing,
 		labelFields: collectionData.labelFields,
 		autoSave: collectionData.autoSave,
-		scheduling: collectionData.scheduling,
 		orderable: collectionData.orderable,
-		revisionRetentionDays: collectionData.revisionRetentionDays,
-		review: collectionData.review,
-		workflow: collectionData.workflow,
-		environments: collectionData.environments.map((environment) => ({
-			key: environment.key,
-			name: environment.name,
-			requires: environment.requires,
-			permissions: {
-				publish: resolveCollectionPermission({
-					collection: props.collection,
-					action: "publish",
-				}),
-				review: resolveCollectionPermission({
-					collection: props.collection,
-					action: "review",
-				}),
-			},
-		})),
 		preview: collectionData.preview,
 		capabilities: {
 			scheduling:
-				collectionData.scheduling === true &&
+				collectionData.publishing.scheduling === true &&
 				props.queueSupportsDelayedDelivery === true,
 			preview: collectionData.preview !== null,
 		},
@@ -161,10 +145,30 @@ const formatSingle = (props: {
 		fields: props.include?.fields
 			? formatFields(
 					props.collection.fieldTree,
-					props.collection.fields,
+					getFieldBuilderState(props.collection).fields,
 					documentTargetCollectionKeys,
 				)
 			: [],
+		publishing: {
+			targets: collectionData.publishing.targets.map((environment) => ({
+				key: environment.key,
+				label: environment.label,
+				requires: environment.requires,
+				permissions: {
+					publish: resolveCollectionPermission({
+						collection: props.collection,
+						action: "publish",
+					}),
+					review: resolveCollectionPermission({
+						collection: props.collection,
+						action: "review",
+					}),
+				},
+			})),
+			review: collectionData.publishing.review,
+			workflow: collectionData.publishing.workflow,
+			scheduling: collectionData.publishing.scheduling,
+		},
 	};
 
 	return hydrateAdminCopyDefaults(formattedCollection, props.adminTranslations);
@@ -176,16 +180,16 @@ const formatBrick = (props: {
 }): Collection["fixedBricks"][number] => ({
 	key: props.brick.key,
 	details: props.brick.config.details,
-	preview: props.brick.config.preview,
+	thumbnail: props.brick.config.thumbnail,
 	fields: formatFields(
 		props.brick.fieldTree,
-		props.brick.fields,
+		getFieldBuilderState(props.brick).fields,
 		props.documentTargetCollectionKeys,
 	),
 });
 
 const formatFields = (
-	fields: CFConfig<FieldTypes>[],
+	fields: FieldConfig<FieldTypes>[],
 	instances: Map<string, CustomField<FieldTypes>>,
 	documentTargetCollectionKeys: Set<string>,
 ): Collection["fields"] => {
@@ -195,7 +199,7 @@ const formatFields = (
 };
 
 const formatField = (
-	field: CFConfig<FieldTypes>,
+	field: FieldConfig<FieldTypes>,
 	instances: Map<string, CustomField<FieldTypes>>,
 	documentTargetCollectionKeys: Set<string>,
 ): Collection["fields"][number] => {
@@ -213,7 +217,15 @@ const formatField = (
 		fields?: Collection["fields"];
 		ai?: Collection["fields"][number]["ai"];
 	};
-
+	if (
+		"validation" in field &&
+		field.validation &&
+		"zod" in field.validation &&
+		"validation" in formattedField
+	) {
+		const { zod: _schema, ...validation } = field.validation;
+		formattedField.validation = validation;
+	}
 	if (aiConfig) {
 		formattedField.ai = aiConfig;
 	} else {
@@ -251,7 +263,7 @@ const getDocumentTargetCollectionKeys = (props: {
 }) => new Set(props.collections.map((collection) => collection.key));
 
 const getFieldAiConfig = (
-	field: CFConfig<FieldTypes>,
+	field: FieldConfig<FieldTypes>,
 	fieldInstance: CustomField<FieldTypes>,
 ): Collection["fields"][number]["ai"] => {
 	if (!fieldInstance.supportsAi) return undefined;

@@ -2,11 +2,12 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import { generateHTML } from "@lucidcms/rich-text/server";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 } from "../../../libs/collection/custom-fields/types.js";
 import resolveCollectionLocalization, {
@@ -181,11 +182,11 @@ const getBrickInstance = (
  * Returns nested field config for fields that carry child fields.
  */
 const getNestedFieldConfig = (
-	field: CFConfig<FieldTypes>,
-): CFConfig<FieldTypes>[] | undefined => {
+	field: FieldConfig<FieldTypes>,
+): FieldConfig<FieldTypes>[] | undefined => {
 	if (!("fields" in field)) return undefined;
 	if (!Array.isArray(field.fields)) return undefined;
-	return field.fields as CFConfig<FieldTypes>[];
+	return field.fields as FieldConfig<FieldTypes>[];
 };
 
 /**
@@ -193,7 +194,7 @@ const getNestedFieldConfig = (
  */
 const getOptionsDefinition = (
 	context: ServiceContext,
-	field: CFConfig<FieldTypes>,
+	field: FieldConfig<FieldTypes>,
 ) => {
 	if (!("options" in field)) return undefined;
 	if (!Array.isArray(field.options)) return undefined;
@@ -222,7 +223,7 @@ const getOptionsDefinition = (
 /**
  * Returns relation collection targets for field definitions.
  */
-const getCollectionTargets = (field: CFConfig<FieldTypes>) => {
+const getCollectionTargets = (field: FieldConfig<FieldTypes>) => {
 	if (!("collection" in field)) return undefined;
 	return field.collection;
 };
@@ -230,7 +231,7 @@ const getCollectionTargets = (field: CFConfig<FieldTypes>) => {
 /**
  * Returns relation multiplicity for field definitions.
  */
-const getMultiple = (field: CFConfig<FieldTypes>) => {
+const getMultiple = (field: FieldConfig<FieldTypes>) => {
 	if (!("multiple" in field)) return undefined;
 	if (typeof field.multiple !== "boolean") return undefined;
 
@@ -238,7 +239,7 @@ const getMultiple = (field: CFConfig<FieldTypes>) => {
 };
 
 /** Returns the numeric constraints that describe a range field. */
-const getRangeConstraints = (field: CFConfig<FieldTypes>) => {
+const getRangeConstraints = (field: FieldConfig<FieldTypes>) => {
 	if (field.type !== "range") return undefined;
 
 	return {
@@ -255,7 +256,7 @@ const getRangeConstraints = (field: CFConfig<FieldTypes>) => {
 const formatFieldDefinitions = (props: {
 	context: ServiceContext;
 	collection: CollectionBuilder;
-	fields: CFConfig<FieldTypes>[];
+	fields: FieldConfig<FieldTypes>[];
 	instances: Map<string, CustomField<FieldTypes>>;
 }): Record<string, DefinitionField> => {
 	const localization = resolveCollectionLocalization({
@@ -279,7 +280,7 @@ const formatFieldDefinitions = (props: {
 			type: fieldInstance.type,
 			localized: isCollectionFieldLocalized(localization, fieldInstance),
 			...(details?.label ? { label: details.label } : {}),
-			...(details?.summary ? { summary: details.summary } : {}),
+			...(details?.description ? { summary: details.description } : {}),
 			...(collection ? { collection } : {}),
 			...(multiple !== undefined ? { multiple } : {}),
 			...(rangeConstraints ?? {}),
@@ -310,9 +311,8 @@ export const getTranslatedBrickDetails = (
 	const translate = context.translate.forLocale(
 		context.config.i18n.defaultLocale,
 	);
-	const name = translate(brick.config.details.name);
-	const summary = translate(brick.config.details.summary);
-
+	const name = translate(brick.config.details.label);
+	const summary = translate(brick.config.details.description);
 	if (!name && !summary) return undefined;
 
 	return {
@@ -339,7 +339,7 @@ const formatBrickDefinitions = (props: {
 					context: props.context,
 					collection: props.collection,
 					fields: brick.fieldTree,
-					instances: brick.fields,
+					instances: getFieldBuilderState(brick).fields,
 				}),
 			};
 
@@ -361,7 +361,7 @@ export const formatCustomFieldCollectionDefinition = (props: {
 			context: props.context,
 			collection: props.collection,
 			fields: props.collection.fieldTree,
-			instances: props.collection.fields,
+			instances: getFieldBuilderState(props.collection).fields,
 		}),
 		fixedBricks: formatBrickDefinitions({
 			context: props.context,
@@ -388,7 +388,10 @@ const formatCustomFieldDocumentContext = (
 	props: FormatProps,
 ): DocumentContext => {
 	return {
-		fields: formatFields(props.document?.fields, props.collection.fields),
+		fields: formatFields(
+			props.document?.fields,
+			getFieldBuilderState(props.collection).fields,
+		),
 		bricks:
 			props.document?.bricks?.flatMap((brick) => {
 				const brickInstance = getBrickInstance(props.collection, brick);
@@ -398,7 +401,10 @@ const formatCustomFieldDocumentContext = (
 					{
 						key: brick.key,
 						type: brick.type,
-						fields: formatFields(brick.fields, brickInstance.fields),
+						fields: formatFields(
+							brick.fields,
+							getFieldBuilderState(brickInstance).fields,
+						),
 					},
 				];
 			}) ?? [],

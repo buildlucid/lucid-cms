@@ -4,9 +4,9 @@ import type {
 	RedirectsPluginOptions,
 	RedirectsPluginOptionsInternal,
 } from "../types.js";
-import resolveEnvironments, {
-	type EnvironmentCollection,
-} from "../utils/resolve-environments.js";
+import resolveTargets, {
+	type TargetCollection,
+} from "../utils/resolve-targets.js";
 
 const resolvePluginOptions = (
 	given: RedirectsPluginOptions,
@@ -14,7 +14,7 @@ const resolvePluginOptions = (
 		locales: Array<{ code: string; label: string }>;
 		defaultLocale: string;
 	},
-	availableCollections: EnvironmentCollection[],
+	availableCollections: TargetCollection[],
 ): RedirectsPluginOptionsInternal => {
 	const collections = [
 		...new Set(given.collections.map((key) => key.trim()).filter(Boolean)),
@@ -41,7 +41,7 @@ const resolvePluginOptions = (
 
 	return {
 		collections,
-		environments: resolveEnvironments(given.environments, targetCollections),
+		targets: resolveTargets(given.targets, targetCollections),
 		navigationGroup: given.navigationGroup?.trim() || undefined,
 		locales: localization.locales.map((locale) => ({
 			code: locale.code,

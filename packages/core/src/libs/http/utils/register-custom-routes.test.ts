@@ -22,13 +22,13 @@ const runtimeContext = {
 };
 
 describe("registerCustomRoutes", () => {
-	test("uses priority to register a specific route before a catch-all", async () => {
+	test("uses order to register a specific route before a catch-all", async () => {
 		const app = new Hono<LucidHonoGeneric>();
 		registerCustomRoutes(app, [
 			defineRoute({
 				method: "get",
 				path: "/*",
-				priority: 10,
+				order: 10,
 				handler: ({ hono }) => hono.text("fallback"),
 			}),
 			defineRoute({

@@ -1,5 +1,5 @@
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
-import type { LucidPluginResponse } from "../../plugins/types.js";
+import type { LucidPluginDefinition } from "../../plugins/types.js";
 import type { CoreToolkit } from "../../toolkit/types.js";
 
 const coreToolkitKeys = {
@@ -15,7 +15,7 @@ const unsafeToolkitKeys = new Set(["__proto__", "constructor", "prototype"]);
 const toolkitKeyPattern = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
 /** Validates plugin toolkit definitions once, when Lucid processes config. */
-const checkToolkitDefinitions = (plugins: readonly LucidPluginResponse[]) => {
+const checkToolkitDefinitions = (plugins: readonly LucidPluginDefinition[]) => {
 	const registeredKeys = new Set<string>();
 
 	for (const plugin of plugins) {

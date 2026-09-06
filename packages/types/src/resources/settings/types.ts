@@ -13,8 +13,8 @@ export interface Settings {
 		simulated: boolean;
 		templates: string[];
 		from: {
-			email: string;
-			name: string;
+			email?: string;
+			name?: string;
 		} | null;
 	};
 	media?: {

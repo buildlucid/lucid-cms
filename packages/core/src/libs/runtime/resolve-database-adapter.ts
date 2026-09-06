@@ -66,7 +66,7 @@ export const resolveDatabaseAdapter = async (
 	if (!isDatabaseAdapter(adapter)) {
 		throw new LucidError({
 			message:
-				"Lucid could not resolve the configured database adapter. Pass a database adapter instance or adapter-level env factory to `configureLucid({ db })`, such as `db: libsql((env) => ({ ... }))`. Top-level `db: (env) => ...` callbacks are not supported.",
+				"Lucid could not resolve the configured database adapter. Pass a database adapter instance or adapter-level env factory to `defineConfig({ db })`, such as `db: libsql((env) => ({ ... }))`. Top-level `db: (env) => ...` callbacks are not supported.",
 		});
 	}
 

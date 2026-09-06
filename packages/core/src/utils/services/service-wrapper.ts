@@ -18,27 +18,7 @@ const serviceWrapper =
 	) =>
 	async (service: ServiceContext, ...args: T): ServiceResponse<R> => {
 		try {
-			//* Validate input if a schema is provided
-			if (wrapperConfig.schema) {
-				const result = await wrapperConfig.schema.safeParseAsync(
-					args[wrapperConfig.schemaArgIndex ?? 0],
-				);
-				if (result.success === false) {
-					return {
-						error: mergeServiceError(
-							{
-								type: "validation",
-								// message: result.error.message,
-								zod: result.error,
-							},
-							wrapperConfig.defaultError,
-						),
-						data: undefined,
-					};
-				}
-			}
-
-			//* If transactions are not enabled, unsupported by the DB, or the service is already in a parent transaction
+			// Reuse parent transactions and honour adapters without transaction support.
 			if (
 				!wrapperConfig.transaction ||
 				!service.config.db.supports("transaction") ||

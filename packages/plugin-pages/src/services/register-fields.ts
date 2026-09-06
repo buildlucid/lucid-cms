@@ -1,5 +1,4 @@
 import { type CollectionBuilder, copy, z } from "@lucidcms/core";
-import type { WritableDraft } from "immer";
 import constants from "../constants.js";
 import type { CollectionConfig } from "../types/types.js";
 import registerFieldsAtPlacement from "./register-fields-at-placement.js";
@@ -10,7 +9,7 @@ const slugFormatMessage =
 	"The slug may only contain letters, numbers, underscores, and hyphens.";
 
 const registerFields = (
-	collection: WritableDraft<CollectionBuilder>,
+	collection: CollectionBuilder,
 	config: CollectionConfig,
 ) => {
 	const fieldKeys = [

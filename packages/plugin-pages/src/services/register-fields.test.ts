@@ -1,5 +1,5 @@
 import { CollectionBuilder, copy, LucidError } from "@lucidcms/core";
-import type { CFConfig } from "@lucidcms/core/types";
+import type { FieldConfig } from "@lucidcms/core/types";
 import { expect, test } from "vitest";
 import type { ZodType } from "zod";
 import type {
@@ -42,12 +42,14 @@ test("slug validation returns specific English zod messages", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
 		},
 	});
 
@@ -55,7 +57,13 @@ test("slug validation returns specific English zod messages", () => {
 
 	const slugField = collection.flatFields.find((field) => field.key === "slug");
 	const schema = (
-		slugField as { validation?: { zod?: ZodType<unknown> } } | undefined
+		slugField as
+			| {
+					validation?: {
+						zod?: ZodType<unknown>;
+					};
+			  }
+			| undefined
 	)?.validation?.zod;
 	if (!schema) throw new Error("Expected slug field zod validation");
 
@@ -96,8 +104,10 @@ test("registers fields in an existing named tab with configured widths", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 	})
 		.addTab("content")
@@ -109,9 +119,8 @@ test("registers fields in an existing named tab with configured widths", () => {
 		collection as never,
 		createConfig({ placement: { at: "end", tab: "content" } }),
 	);
-
-	const contentTab = collection.fieldTree[0] as CFConfig<"tab">;
-	const settingsTab = collection.fieldTree[1] as CFConfig<"tab">;
+	const contentTab = collection.fieldTree[0] as FieldConfig<"tab">;
+	const settingsTab = collection.fieldTree[1] as FieldConfig<"tab">;
 	expect(contentTab.fields.map((field) => field.key)).toEqual([
 		"title",
 		"fullSlug",
@@ -131,8 +140,10 @@ test("registers fields after a root field", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 	})
 		.addText("title")
@@ -156,8 +167,10 @@ test("inherits the placement anchor tab", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 	})
 		.addTab("content")
@@ -170,9 +183,8 @@ test("inherits the placement anchor tab", () => {
 		collection as never,
 		createConfig({ placement: { before: "description" } }),
 	);
-
-	const contentTab = collection.fieldTree[0] as CFConfig<"tab">;
-	const settingsTab = collection.fieldTree[1] as CFConfig<"tab">;
+	const contentTab = collection.fieldTree[0] as FieldConfig<"tab">;
+	const settingsTab = collection.fieldTree[1] as FieldConfig<"tab">;
 	expect(contentTab.fields.map((field) => field.key)).toEqual([
 		"title",
 		"fullSlug",
@@ -187,8 +199,10 @@ test("registers fields at the start of the collection root", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 	}).addText("title");
 
@@ -209,8 +223,10 @@ test("rejects a missing placement tab", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 	}).addText("title");
 
@@ -227,8 +243,10 @@ test("rejects a nested placement anchor", () => {
 	const collection = new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: "Pages",
-			singularName: "Page",
+			labels: {
+				singular: "Page",
+				plural: "Pages",
+			},
 		},
 	})
 		.addSection("content")
@@ -241,7 +259,7 @@ test("rejects a nested placement anchor", () => {
 			createConfig({ placement: { after: "title" } }),
 		),
 	).toThrow(LucidError);
-	const section = collection.fieldTree[0] as CFConfig<"section">;
+	const section = collection.fieldTree[0] as FieldConfig<"section">;
 	expect(section.fields.map((field) => field.key)).toEqual(["title"]);
 });
 
@@ -249,8 +267,10 @@ test("registers route segment relations with responsive widths", () => {
 	const collection = new CollectionBuilder("docs", {
 		mode: "multiple",
 		details: {
-			name: "Docs",
-			singularName: "Doc",
+			labels: {
+				singular: "Doc",
+				plural: "Docs",
+			},
 		},
 	});
 
@@ -272,9 +292,9 @@ test("registers route segment relations with responsive widths", () => {
 		"version",
 	]);
 	expect(
-		segmentFields.map((field) => (field as CFConfig<"relation">).ui?.width),
+		segmentFields.map((field) => (field as FieldConfig<"relation">).ui?.width),
 	).toEqual([6, 6]);
 	expect(
-		segmentFields.map((field) => (field as CFConfig<"relation">).collection),
+		segmentFields.map((field) => (field as FieldConfig<"relation">).collection),
 	).toEqual([["products"], ["versions"]]);
 });

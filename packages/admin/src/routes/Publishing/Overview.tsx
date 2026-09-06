@@ -53,7 +53,7 @@ const PublishingOverviewRoute: Component = () => {
 	const readableCollections = createMemo(() =>
 		(collections.data?.data ?? []).filter(
 			(collection) =>
-				collection.environments.length > 0 &&
+				collection.publishing.targets.length > 0 &&
 				userStore.get.hasPermission([collection.permissions.read]).all,
 		),
 	);
@@ -74,17 +74,17 @@ const PublishingOverviewRoute: Component = () => {
 
 			const collectionName =
 				helpers.getLocaleValue({
-					value: collection.details.name,
+					value: collection.details.labels.plural,
 					fallback: collection.key,
 				}) || collection.key;
 
 			for (const environmentOverview of collectionOverview.environments) {
-				const environment = collection.environments.find(
+				const environment = collection.publishing.targets.find(
 					(item) => item.key === environmentOverview.target,
 				);
 				const environmentName =
 					helpers.getLocaleValue({
-						value: environment?.name,
+						value: environment?.label,
 						fallback: environmentOverview.target,
 					}) || environmentOverview.target;
 				const current = targetsByKey.get(environmentOverview.target) ?? {

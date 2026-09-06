@@ -75,8 +75,9 @@ const getMultiple: ServiceFn<
 		data.collectionKey,
 	);
 	if (documentFieldsTableSchemaRes.error) return documentFieldsTableSchemaRes;
-
-	const includeWorkflow = Boolean(collectionRes.data.getData.workflow);
+	const includeWorkflow = Boolean(
+		collectionRes.data.getData.publishing.workflow,
+	);
 	const documentFieldRelationTableSchemas = bricksTableSchemaRes.data.filter(
 		(schema) => {
 			const databaseConfig = getFieldDatabaseConfig(schema.type);
@@ -113,7 +114,7 @@ const getMultiple: ServiceFn<
 	if (relationFiltersRes.error) return relationFiltersRes;
 
 	const environmentKeys = new Set(
-		collectionRes.data.getData.environments.map(
+		collectionRes.data.getData.publishing.targets.map(
 			(environment) => environment.key,
 		),
 	);

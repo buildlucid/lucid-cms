@@ -4,7 +4,10 @@ import path from "node:path";
 import { describe, expect, test } from "vitest";
 import constants from "../../../constants/constants.js";
 import defaultConfig from "../../../constants/default-config.js";
-import type { Config, ServiceContext } from "../../../exports/types.js";
+import type {
+	ResolvedLucidConfig,
+	ServiceContext,
+} from "../../../exports/types.js";
 import { copy } from "../../i18n/index.js";
 import renderMustacheTemplate from "./render-mustache-template.js";
 
@@ -16,7 +19,7 @@ const createServiceContext = (
 			email: {
 				templates: renderedTemplates,
 			},
-		} as Config,
+		} as ResolvedLucidConfig,
 	}) as ServiceContext;
 
 describe("renderMustacheTemplate", () => {

@@ -233,9 +233,9 @@ describe("enqueueing durable jobs", () => {
 			return result.error ? result : { error: undefined, data: undefined };
 		};
 
-		const result = await serviceWrapper(enqueue, { transaction: true })(
-			context,
-		);
+		const result = await serviceWrapper(enqueue, {
+			transaction: true,
+		})(context);
 		expect(result.error).toBeUndefined();
 		expect(publish).toHaveBeenCalledOnce();
 	});

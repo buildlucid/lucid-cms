@@ -1,6 +1,7 @@
 import type { FieldInputSchema } from "../../../exports/types.js";
 import type BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import type { RichTextValidationData } from "../../../libs/collection/custom-fields/fields/rich-text/types.js";
 import registeredFields, {
 	registeredFieldTypes,
@@ -56,7 +57,7 @@ const collectFieldValidationInput = (
 	field: FieldInputSchema,
 	instance: CollectionBuilder | BrickBuilder,
 ): FieldRelationValidationInput | null => {
-	const fieldInstance = instance.fields.get(field.key);
+	const fieldInstance = getFieldBuilderState(instance).fields.get(field.key);
 	if (!fieldInstance) return null;
 
 	const mergedInput: FieldRelationValidationInput = {};
@@ -187,7 +188,7 @@ const extractRelationIdsFromFields = (
 	buckets: ValidationBuckets,
 ) => {
 	for (const field of fields) {
-		const fieldInstance = instance.fields.get(field.key);
+		const fieldInstance = getFieldBuilderState(instance).fields.get(field.key);
 		if (!fieldInstance) continue;
 
 		const fieldDefinition = registeredFields[fieldInstance.type];

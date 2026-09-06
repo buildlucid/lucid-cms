@@ -3,8 +3,8 @@ import path from "node:path";
 import { prepareBuildArtifacts } from "@lucidcms/core/build";
 import { LucidError } from "@lucidcms/core/runtime";
 import type {
-	Config,
 	LucidConfigDefinition,
+	ResolvedLucidConfig,
 	RuntimeAdapter,
 	TranslationStore,
 } from "@lucidcms/core/types";
@@ -21,7 +21,7 @@ type PrepareAstroOptions = {
 	projectRoot: string;
 	generatedDirectory: string;
 	runtimeModulePath: string;
-	config: Config;
+	config: ResolvedLucidConfig;
 	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;
 };

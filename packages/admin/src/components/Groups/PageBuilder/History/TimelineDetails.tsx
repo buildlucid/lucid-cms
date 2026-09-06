@@ -105,11 +105,11 @@ const TimelineDetails: Component<{
 	const formatTargetName = (target: string) => {
 		const environment = props
 			.collection()
-			?.environments.find((environment) => environment.key === target);
+			?.publishing.targets.find((environment) => environment.key === target);
 
 		return (
 			helpers.getLocaleValue({
-				value: environment?.name,
+				value: environment?.label,
 				fallback: target,
 			}) || target
 		);

@@ -1,39 +1,31 @@
+import deepMerge from "../../../../utils/helpers/deep-merge.js";
 import { copy, normalizeCopy } from "../../../i18n/index.js";
 import FieldBuilder from "../field-builder/index.js";
-import type { BrickConfig, BrickConfigProps } from "./types.js";
+import type { BrickConfig, BrickOptions } from "./types.js";
 
 class BrickBuilder extends FieldBuilder {
 	key: string;
 	config: BrickConfig;
-	constructor(key: string, config?: BrickConfigProps) {
+	constructor(key: string, config?: BrickOptions) {
 		super();
 		this.key = key;
+		const options = deepMerge({}, config ?? {});
 		this.config = {
 			key: this.key,
 			details: {
-				name:
-					normalizeCopy(config?.details?.name) ||
+				label:
+					normalizeCopy(options.details?.label) ||
 					copy(`admin:bricks.${this.key}.name`, {
 						defaultMessage: key,
 					}),
-				summary: normalizeCopy(config?.details?.summary),
+				description: normalizeCopy(options.details?.description),
 			},
-			preview: config?.preview || {},
+			thumbnail: options.thumbnail,
 		};
 	}
-	// Builder methods
-	public addFields(Builder: BrickBuilder | FieldBuilder) {
-		const fields = Array.from(Builder.fields.values());
-		for (const field of fields) {
-			if (field.type !== "tab" && field.tabParent === null) {
-				field.tabParent = this.activeTabKey;
-			}
-			this.fields.set(field.key, field);
-			this.meta.fieldKeys.push(field.key);
-		}
-		this.activeTabKey = Builder.activeTabKey ?? this.activeTabKey;
-		this.invalidateFieldTreeCache();
-		return this;
+	/** Returns a brick with independent config and field instances. */
+	override clone(): BrickBuilder {
+		return this.copyFieldsTo(new BrickBuilder(this.key, this.config));
 	}
 }
 

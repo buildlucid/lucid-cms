@@ -4,6 +4,7 @@ import { validateField } from "../../../../../services/documents-bricks/checks/c
 import type DatabaseAdapter from "../../../../db/adapter-base.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import generateCollectionClientTypes from "../../../type-gen/index.js";
 import CustomFieldSchema from "../../schema.js";
 import { formatNumberFilterValue } from "../../utils/filter-values.js";
@@ -12,12 +13,14 @@ import RangeCustomField from "./custom-field.js";
 const RangeCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 })
 	.addRange("standard_range", {
@@ -39,7 +42,7 @@ const RangeCollection = new CollectionBuilder("collection", {
 	});
 
 const validate = (key: string, value: unknown) => {
-	const instance = RangeCollection.fields.get(key);
+	const instance = getFieldBuilderState(RangeCollection).fields.get(key);
 	if (!instance) throw new Error(`Missing test field ${key}`);
 
 	return validateField({
@@ -90,7 +93,7 @@ test("range config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "Range",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "Pick a range",
 			}),
 		},

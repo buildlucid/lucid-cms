@@ -2,7 +2,7 @@ import { BrickBuilder } from "@lucidcms/core";
 
 const ContentBrick = new BrickBuilder("content", {
 	details: {
-		name: "Content",
+		label: "Content",
 	},
 })
 	.addText("heading", {

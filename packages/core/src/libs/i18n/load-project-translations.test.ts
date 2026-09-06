@@ -4,7 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, beforeEach, expect, test } from "vitest";
 import constants from "../../constants/constants.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { collectResourceFiles } from "../resources/collect-files.js";
 import { prepareResources } from "../resources/prepare-resources.js";
 import { loadTranslationSources, prepareTranslations } from "./index.js";
@@ -163,7 +163,7 @@ test("prepares a translation store and writes the build artifact", async () => {
 			i18n: {
 				defaultLocale: "en",
 			},
-		} as Config,
+		} as ResolvedLucidConfig,
 		files: await collectResourceFiles(source),
 		outputPath,
 	});

@@ -4,11 +4,11 @@ import { copy } from "../../../../i18n/index.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -27,7 +27,7 @@ class UserCustomField extends CustomField<"user"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"user">) {
+	constructor(key: string, props?: FieldOptions<"user">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -41,7 +41,7 @@ class UserCustomField extends CustomField<"user"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			localized: this.props?.localized ?? false,
 			default: this.props?.default ?? [],
@@ -54,7 +54,7 @@ class UserCustomField extends CustomField<"user"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"user">;
+		} satisfies FieldConfig<"user">;
 	}
 	override normalizeInputValue(value: unknown) {
 		return clampRelationInputValue(value, this.config.multiple);
@@ -106,7 +106,7 @@ class UserCustomField extends CustomField<"user"> {
 		return normalizeStoredRelationValues(
 			value,
 			this.config.multiple,
-		) satisfies CFResponse<"user">["value"];
+		) satisfies FieldResponse<"user">["value"];
 	}
 	override get relationValueColumn() {
 		return "user_id";

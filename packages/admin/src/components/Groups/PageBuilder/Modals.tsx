@@ -42,9 +42,10 @@ export const Modals: Component<{
 	const environmentLabel = createMemo(() => {
 		const target = props.hooks.uiState.getReleaseEnvironmentTarget();
 		if (!target) return "";
-		const environments = props.hooks.state.collection()?.environments ?? [];
+		const environments =
+			props.hooks.state.collection()?.publishing.targets ?? [];
 		const env = environments.find((e) => e.key === target);
-		return helpers.getLocaleValue({ value: env?.name }) || target;
+		return helpers.getLocaleValue({ value: env?.label }) || target;
 	});
 	const releaseEnvironmentIsOpen = createMemo(
 		() =>

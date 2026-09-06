@@ -25,10 +25,11 @@ test("bundles discovered definitions and their imports without needing the sourc
 		await write("package.json", '{"type":"module"}');
 		const configPath = await write(
 			"lucid.config.ts",
-			`import { configureLucid } from "@lucidcms/core";
+			`import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
-export default configureLucid({ runtime: node, db: sqlite, config: () => ({}) });`,
+import { greeting } from "./src/helper.js";
+export default defineConfig({ runtime: node, db: sqlite, config: () => ({ brand: {name: "Before"} }), configure(draft) { draft.brand.name = greeting; } });`,
 		);
 		await write(
 			"src/helper.ts",
@@ -43,7 +44,7 @@ export default defineRoute({ method: "get", path: "/hello", handler: () => new R
 		await write(
 			"src/lucid/collections/pages.ts",
 			`import { CollectionBuilder } from "@lucidcms/core";
-export default new CollectionBuilder("pages", {mode: "multiple", details: {name: "Pages", singularName: "Page"}}).addText("title");`,
+export default new CollectionBuilder("pages", {mode: "multiple", details: {labels: {plural: "Pages", singular: "Page"}}}).addText("title");`,
 		);
 		await write(
 			"src/lucid/tables/nested/events.ts",
@@ -105,9 +106,11 @@ console.log(JSON.stringify(result.loaded.resources));`,
 		await rm(configPath);
 		const runner = await write(
 			"run.mjs",
-			`import factory from ${JSON.stringify(pathToFileURL(bundledPath).href)};
+			`import factory, { configure } from ${JSON.stringify(pathToFileURL(bundledPath).href)};
 const config = factory({});
+configure(config);
 console.log(JSON.stringify({
+ brand: config.brand.name,
  collections: config.collections.map(value => value.key),
  tables: config.tables.map(value => ({name: value.name, resolve: typeof value.resolve})),
  route: await (await config.http.routes[0].handler()).text(),
@@ -117,6 +120,7 @@ console.log(JSON.stringify({
 		);
 		const result = await runNode(process.execPath, [runner]);
 		expect(JSON.parse(result.stdout)).toEqual({
+			brand: "compiled greeting",
 			collections: ["pages"],
 			tables: [{ name: "events", resolve: "function" }],
 			route: "compiled greeting",

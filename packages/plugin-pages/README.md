@@ -25,12 +25,12 @@ npm install @lucidcms/plugin-pages
 To use the Pages plugin, you need to add it to your Lucid CMS config file. You will need to provide it with the necessary configuration options, such as a list of collections to enable the plugin on.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { sqlite } from "@lucidcms/db-sqlite";
 
-export default configureLucid({
+export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({
@@ -124,7 +124,7 @@ pagesPlugin({
 });
 ```
 
-A page with product `lucid`, release `v1`, and slug `getting-started` resolves to `/docs/lucid/v1/getting-started`. Related target fields are fetched in batches, including when descendant routes need rebuilding. Updating a referenced segment field also rebuilds affected page routes and their descendants across mapped document environments.
+A page with product `lucid`, release `v1`, and slug `getting-started` resolves to `/docs/lucid/v1/getting-started`. Related target fields are fetched in batches, including when descendant routes need rebuilding. Updating a referenced segment field also rebuilds affected page routes and their descendants across mapped publishing targets.
 
 ### unique
 

@@ -6,7 +6,7 @@ import type {
 } from "../../exports/types.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type {
@@ -202,8 +202,8 @@ export type LucidHook<
 	service: S;
 	event: E;
 	handler: HookServiceHandlers[S][E];
-	/** Lower priorities execute first. Defaults to zero. */
-	priority?: number;
+	/** Lower values execute first. Defaults to zero. */
+	order?: number;
 };
 
 export type LucidHookDocuments<
@@ -289,7 +289,7 @@ export type HookOptions<
 > = {
 	service: S;
 	event: E;
-	config: Config;
+	config: ResolvedLucidConfig;
 	collectionInstance?: CollectionBuilder;
 };
 

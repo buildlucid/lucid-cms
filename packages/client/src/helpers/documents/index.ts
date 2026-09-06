@@ -1,1 +1,1 @@
-export { asDocument, asDocuments } from "./view.js";
+export { createDocumentView, createDocumentViews } from "./view.js";

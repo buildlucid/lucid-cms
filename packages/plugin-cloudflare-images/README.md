@@ -13,12 +13,12 @@ npm install @lucidcms/plugin-cloudflare-images
 ## Setup
 
 ```ts
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { d1 } from "@lucidcms/db-d1";
 
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare,
   db: d1,
   config: () => ({

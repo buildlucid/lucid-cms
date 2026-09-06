@@ -1,6 +1,7 @@
 import type z from "zod";
-import type { Config, LucidConfig } from "../../types/config.js";
+import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
+import parseEnv from "../runtime/parse-env.js";
 import {
 	collectRuntimePrepareArtifacts,
 	createRuntimePrepareArtifacts,
@@ -12,9 +13,8 @@ import type {
 	GetEnvVarsLogger,
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
+	RuntimeAdaptConfig,
 	RuntimeAdapter,
-	RuntimeConfigureLucid,
-	WrappedLucidConfigDefinition,
 } from "../runtime/types.js";
 import processConfig from "./process-config.js";
 
@@ -31,15 +31,17 @@ const defaultLoggerInstance = {
 } as unknown as GetEnvVarsLogger["instance"];
 
 export const invalidConfigDefinitionMessage =
-	"Lucid config must default export configureLucid({ runtime, db, config }).";
+	"Lucid config must default export defineConfig({ runtime, db, config }).";
 
 export type ResolveConfigDefinitionResult = {
-	config: Config;
+	config: ResolvedLucidConfig;
 	adapter: RuntimeAdapter;
 	runtimeContext: AdapterRuntimeContext;
 	envSchema?: z.ZodType;
 	env: EnvironmentVariables | undefined;
-	definition: WrappedLucidConfigDefinition;
+	/** Original values for integrations that create another runtime host. */
+	rawEnv: Record<string, unknown> | undefined;
+	definition: LucidConfigDefinition;
 };
 
 const isConfigDefinition = (value: unknown): value is LucidConfigDefinition => {
@@ -51,12 +53,15 @@ const isConfigDefinition = (value: unknown): value is LucidConfigDefinition => {
 		runtime?: unknown;
 		db?: unknown;
 		config?: unknown;
+		configure?: unknown;
 	};
 
 	return (
 		definition.runtime !== undefined &&
 		definition.db !== undefined &&
-		typeof definition.config === "function"
+		typeof definition.config === "function" &&
+		(definition.configure === undefined ||
+			typeof definition.configure === "function")
 	);
 };
 
@@ -73,6 +78,14 @@ export const assertConfigDefinition = (
 		});
 	}
 
+	const supportedKeys = new Set(["runtime", "db", "config", "configure"]);
+	const unknownKeys = Object.keys(value).filter(
+		(key) => !supportedKeys.has(key),
+	);
+	if (unknownKeys.length)
+		throw new LucidError({
+			message: `Unknown config definition keys: ${unknownKeys.join(", ")}. Use runtime, db, config and configure.`,
+		});
 	return value;
 };
 
@@ -85,7 +98,7 @@ const resolveRuntimeAdapter = async (
 	if (!resolved || typeof resolved !== "object") {
 		throw new LucidError({
 			message:
-				"Lucid could not resolve the configured runtime adapter. Pass a runtime adapter instance to `configureLucid({ runtime })`.",
+				"Lucid could not resolve the configured runtime adapter. Pass a runtime adapter instance to `defineConfig({ runtime })`.",
 		});
 	}
 
@@ -102,8 +115,8 @@ export const resolveConfigDefinition = async (props: {
 	prepareConfig?: (config: LucidConfig) => Promise<LucidConfig>;
 	envSchema?: z.ZodType;
 	meta?: LucidConfigDefinitionMeta;
-	env?: EnvironmentVariables;
-	configureLucid?: RuntimeConfigureLucid;
+	env?: Record<string, unknown>;
+	adaptConfig?: RuntimeAdaptConfig;
 	configPath?: string;
 	projectRoot?: string;
 	prepareRuntime?: boolean;
@@ -124,12 +137,12 @@ export const resolveConfigDefinition = async (props: {
 		configEntryPoint: null,
 	} satisfies AdapterRuntimeContext;
 
-	// Hosted integrations can supply their own configureLucid wrapper so the
+	// Hosted integrations can supply their own adaptConfig wrapper so the
 	// runtime adapter identity stays separate from host-specific config shaping.
-	const configureLucid =
-		props.configureLucid ?? adapter.configureLucid ?? ((value) => value);
+	const adaptConfig =
+		props.adaptConfig ?? adapter.adaptConfig ?? ((value) => value);
 
-	const wrappedDefinition = configureLucid(
+	const wrappedDefinition = adaptConfig(
 		{
 			...definition,
 			runtime: adapter,
@@ -159,7 +172,7 @@ export const resolveConfigDefinition = async (props: {
 	}
 	// Env loading is optional because some hosts, like Astro Cloudflare, already
 	// own request-time env loading and can pass it in directly.
-	let env =
+	let rawEnv =
 		props.env ??
 		(adapter.getEnvVars
 			? await adapter.getEnvVars({
@@ -172,15 +185,7 @@ export const resolveConfigDefinition = async (props: {
 	// Builds do not need runtime env validation; runtime commands validate env
 	// before using it.
 	const shouldValidateEnvSchema = props.validateEnvSchema ?? true;
-	const validateEnv = (envVars: EnvironmentVariables | undefined) => {
-		if (!shouldValidateEnvSchema || !envSchema || !envVars) {
-			return;
-		}
-
-		envSchema.parse(envVars);
-	};
-
-	validateEnv(env);
+	let env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
 
 	await adapter.resolveOptions?.(env ?? {});
 
@@ -208,11 +213,11 @@ export const resolveConfigDefinition = async (props: {
 		});
 
 		if (!props.env && adapter.getEnvVars) {
-			env = await adapter.getEnvVars({
+			rawEnv = await adapter.getEnvVars({
 				logger,
 			});
 
-			validateEnv(env);
+			env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
 
 			await adapter.resolveOptions?.(env ?? {});
 			rawConfig = wrappedDefinition.config(env || {});
@@ -227,7 +232,7 @@ export const resolveConfigDefinition = async (props: {
 	// and validation once the adapter/env/bootstrap layer has been resolved.
 	const config = await processConfig(rawConfig, {
 		...(props.processConfigOptions ?? {}),
-		recipe: wrappedDefinition.recipe,
+		configure: wrappedDefinition.configure,
 		resolvedDb: db,
 	});
 
@@ -237,6 +242,7 @@ export const resolveConfigDefinition = async (props: {
 		runtimeContext,
 		envSchema,
 		env,
+		rawEnv,
 		definition: wrappedDefinition,
 	};
 };

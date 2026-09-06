@@ -14,7 +14,7 @@ const serveCommand =
 		options: AdapterOptions | undefined,
 		platformProxy: PlatformProxy | undefined,
 	): ServeHandler =>
-	async ({ config, translationStore, logger, onListening }) => {
+	async ({ config, env, translationStore, logger, onListening }) => {
 		logger.instance.info(
 			"Using:",
 			logger.instance.color.blue("Cloudflare Worker Adapter"),
@@ -35,13 +35,13 @@ const serveCommand =
 			config,
 			translationStore,
 			runtimeContext: runtimeContext,
-			env: platformProxy?.env,
+			env,
 			databaseScope: "runtime",
 			http: {
 				extensions: [
 					{
 						name: "runtime-cloudflare:platform-context",
-						priority: 0,
+						phase: "beforeMiddleware",
 						register: async (app) => {
 							app.use("*", async (context, next) => {
 								context.set("cf", platformProxy?.cf ?? null);
@@ -70,7 +70,7 @@ const serveCommand =
 					},
 					{
 						name: "runtime-cloudflare:static-assets",
-						priority: 2,
+						phase: "afterSetup",
 						register: async (app, config) => {
 							const paths = getBuildPaths(config);
 							app.use(
@@ -134,9 +134,7 @@ const serveCommand =
 		try {
 			server = serve({
 				fetch: async (request, requestBindings) => {
-					const invocation = host.createInvocation({
-						env: platformProxy?.env,
-					});
+					const invocation = host.createInvocation();
 					try {
 						const response = await invocation.handle({
 							request,

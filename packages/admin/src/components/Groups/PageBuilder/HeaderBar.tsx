@@ -97,7 +97,7 @@ export const HeaderBar: Component<{
 			collectionSingle: props.state.collectionSingularName(),
 		});
 		const summary = helpers.getLocaleValue({
-			value: props.state.collection()?.details.summary,
+			value: props.state.collection()?.details.description,
 			fallback,
 		});
 
@@ -105,7 +105,7 @@ export const HeaderBar: Component<{
 	});
 	const actionCollectionSingularName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: props.state.collection()?.details.singularName,
+			value: props.state.collection()?.details.labels.singular,
 		}),
 	);
 	const matchingAutoSaveMetadata = createMemo(() => {
@@ -210,7 +210,8 @@ export const HeaderBar: Component<{
 			});
 		}
 
-		for (const environment of props.state.collection()?.environments ?? []) {
+		for (const environment of props.state.collection()?.publishing.targets ??
+			[]) {
 			const status = getDocumentEnvironmentStatus({
 				versions: props.state.document()?.versions,
 				environmentKey: environment.key,
@@ -219,7 +220,7 @@ export const HeaderBar: Component<{
 			const isPublished = status !== "unreleased";
 
 			options.push({
-				label: helpers.getLocaleValue({ value: environment.name }),
+				label: helpers.getLocaleValue({ value: environment.label }),
 				disabled: !isPublished,
 				type: "environment",
 				location: getDocumentRoute("edit", {
@@ -262,16 +263,16 @@ export const HeaderBar: Component<{
 			return [];
 		}
 
-		const environments = collection.environments ?? [];
-		const publishReview = collection.review;
-		const workflow = collection.workflow;
+		const environments = collection.publishing.targets ?? [];
+		const publishReview = collection.publishing.review;
+		const workflow = collection.publishing.workflow;
 		const workflowStage = workflow?.stages.find(
 			(stage) => stage.key === document.workflow?.stage,
 		);
 		const environmentLabels = new Map(
 			environments.map((environment) => [
 				environment.key,
-				helpers.getLocaleValue({ value: environment.name }) || environment.key,
+				helpers.getLocaleValue({ value: environment.label }) || environment.key,
 			]),
 		);
 
@@ -302,7 +303,7 @@ export const HeaderBar: Component<{
 
 			const workflowStageLabel =
 				helpers.getLocaleValue({
-					value: workflowStage?.name,
+					value: workflowStage?.label,
 					fallback: document.workflow?.stage,
 				}) ||
 				document.workflow?.stage ||
@@ -413,7 +414,7 @@ export const HeaderBar: Component<{
 
 		const isEnvironment = props.state
 			.collection()
-			?.environments.some((environment) => environment.key === version);
+			?.publishing.targets.some((environment) => environment.key === version);
 		if (!isEnvironment) return undefined;
 
 		return releaseOptions().find((option) => option.value === version);
@@ -422,13 +423,13 @@ export const HeaderBar: Component<{
 		const collection = props.state.collection();
 		if (!collection) return false;
 
-		const environments = collection.environments ?? [];
+		const environments = collection.publishing.targets ?? [];
 
 		return (
 			props.mode !== "create" &&
-			(collection.revisions ||
+			(collection.revisions.enabled ||
 				environments.length > 0 ||
-				(collection.review?.requiredFor?.length ?? 0) > 0)
+				(collection.publishing.review?.requiredFor?.length ?? 0) > 0)
 		);
 	});
 	const showCopyPreview = createMemo(() => {

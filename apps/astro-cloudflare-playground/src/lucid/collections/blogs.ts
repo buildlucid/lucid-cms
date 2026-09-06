@@ -3,16 +3,20 @@ import { CollectionBuilder, z } from "@lucidcms/core";
 const BlogCollection = new CollectionBuilder("blog", {
 	mode: "multiple",
 	details: {
-		name: "Blogs",
-		singularName: "Blog",
+		labels: {
+			singular: "Blog",
+			plural: "Blogs",
+		},
 	},
 	localized: true,
-	environments: [
-		{
-			key: "production",
-			name: "Production",
-		},
-	],
+	publishing: {
+		targets: [
+			{
+				key: "production",
+				label: "Production",
+			},
+		],
+	},
 })
 	.addText("title", {
 		details: {

@@ -20,12 +20,14 @@ describe("relation document filter grouping", async () => {
 	const Articles = new CollectionBuilder("articles", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.articles.name", {
-				defaultMessage: "Articles",
-			}),
-			singularName: copy("admin:tests.collections.articles.singularName", {
-				defaultMessage: "Article",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.articles.singularName", {
+					defaultMessage: "Article",
+				}),
+				plural: copy("admin:tests.collections.articles.name", {
+					defaultMessage: "Articles",
+				}),
+			},
 		},
 		bricks: { builder: [HeroBrick] },
 	})

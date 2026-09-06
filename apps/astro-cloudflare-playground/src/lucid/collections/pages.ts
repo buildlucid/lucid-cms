@@ -5,8 +5,10 @@ import SeoBrick from "../bricks/seo.js";
 const PageCollection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: "Pages",
-		singularName: "Page",
+		labels: {
+			singular: "Page",
+			plural: "Pages",
+		},
 	},
 	bricks: {
 		fixed: [SeoBrick],
@@ -15,17 +17,19 @@ const PageCollection = new CollectionBuilder("page", {
 	localized: true,
 	autoSave: true,
 	revisions: true,
-	review: {
-		requiredFor: ["production"],
-		allowSelfApproval: true,
-	},
-	environments: [
-		{
-			key: "production",
-			name: "Production",
-		},
-	],
 	preview: true,
+	publishing: {
+		targets: [
+			{
+				key: "production",
+				label: "Production",
+			},
+		],
+		review: {
+			requiredFor: ["production"],
+			allowSelfApproval: true,
+		},
+	},
 })
 	.addText("title", {
 		details: {

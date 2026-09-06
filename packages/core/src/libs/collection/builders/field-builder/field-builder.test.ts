@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { copy } from "../../../i18n/index.js";
-import FieldBuilder from "./index.js";
+import FieldBuilder, { getFieldBuilderState } from "./index.js";
 
 test("all fields should be added", async () => {
 	const instance = new FieldBuilder()
@@ -20,24 +20,38 @@ test("all fields should be added", async () => {
 		.addRepeater("repeater_test")
 		.addText("repeater_text_test")
 		.endRepeater();
-
-	expect(instance.fields.size).toBe(15);
-
-	expect(instance.fields.get("text_test")).toBeDefined();
-	expect(instance.fields.get("textarea_test")).toBeDefined();
-	expect(instance.fields.get("rich_text_test")).toBeDefined();
-	expect(instance.fields.get("number_test")).toBeDefined();
-	expect(instance.fields.get("range_test")).toBeDefined();
-	expect(instance.fields.get("checkbox_test")).toBeDefined();
-	expect(instance.fields.get("select_test")).toBeDefined();
-	expect(instance.fields.get("json_test")).toBeDefined();
-	expect(instance.fields.get("color_test")).toBeDefined();
-	expect(instance.fields.get("media_test")).toBeDefined();
-	expect(instance.fields.get("datetime_test")).toBeDefined();
-	expect(instance.fields.get("link_test")).toBeDefined();
-	expect(instance.fields.get("user_test")).toBeDefined();
-	expect(instance.fields.get("repeater_test")).toBeDefined();
-	expect(instance.fields.get("repeater_text_test")).toBeDefined();
+	expect(getFieldBuilderState(instance).fields.size).toBe(15);
+	expect(getFieldBuilderState(instance).fields.get("text_test")).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("textarea_test"),
+	).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("rich_text_test"),
+	).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("number_test"),
+	).toBeDefined();
+	expect(getFieldBuilderState(instance).fields.get("range_test")).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("checkbox_test"),
+	).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("select_test"),
+	).toBeDefined();
+	expect(getFieldBuilderState(instance).fields.get("json_test")).toBeDefined();
+	expect(getFieldBuilderState(instance).fields.get("color_test")).toBeDefined();
+	expect(getFieldBuilderState(instance).fields.get("media_test")).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("datetime_test"),
+	).toBeDefined();
+	expect(getFieldBuilderState(instance).fields.get("link_test")).toBeDefined();
+	expect(getFieldBuilderState(instance).fields.get("user_test")).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("repeater_test"),
+	).toBeDefined();
+	expect(
+		getFieldBuilderState(instance).fields.get("repeater_text_test"),
+	).toBeDefined();
 });
 
 test("repeater fields should be nested correctly", async () => {
@@ -120,7 +134,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.text.text_test.label", {
 					defaultMessage: "Text Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: true,
@@ -138,7 +152,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.textarea.textarea_test.label", {
 					defaultMessage: "Textarea Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: true,
@@ -156,7 +170,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.rich-text.rich_text_test.label", {
 					defaultMessage: "Rich Text Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: true,
@@ -177,7 +191,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.number.number_test.label", {
 					defaultMessage: "Number Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: false,
@@ -195,7 +209,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.range.range_test.label", {
 					defaultMessage: "Range Test",
 				}),
-				summary: undefined,
+				description: undefined,
 			},
 			min: 0,
 			max: 100,
@@ -219,7 +233,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.checkbox.checkbox_test.label", {
 					defaultMessage: "Checkbox Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				true: undefined,
 				false: undefined,
 			},
@@ -238,7 +252,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.select.select_test.label", {
 					defaultMessage: "Select Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: false,
@@ -257,7 +271,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.json.json_test.label", {
 					defaultMessage: "Json Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: false,
@@ -275,7 +289,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.color.color_test.label", {
 					defaultMessage: "Color Test",
 				}),
-				summary: undefined,
+				description: undefined,
 			},
 			presets: [],
 			localized: false,
@@ -293,7 +307,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.media.media_test.label", {
 					defaultMessage: "Media Test",
 				}),
-				summary: undefined,
+				description: undefined,
 			},
 			localized: false,
 			default: [],
@@ -311,7 +325,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.datetime.datetime_test.label", {
 					defaultMessage: "Datetime Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: false,
@@ -330,7 +344,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.link.link_test.label", {
 					defaultMessage: "Link Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: false,
@@ -352,7 +366,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.user.user_test.label", {
 					defaultMessage: "User Test",
 				}),
-				summary: undefined,
+				description: undefined,
 			},
 			localized: false,
 			default: [],
@@ -371,7 +385,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.repeater.repeater_test.label", {
 					defaultMessage: "Repeater Test",
 				}),
-				summary: undefined,
+				description: undefined,
 			},
 			ui: {
 				disabled: undefined,
@@ -386,7 +400,7 @@ test("flat fields should return correct config", async () => {
 				label: copy("admin:fields.text.repeater_text_test.label", {
 					defaultMessage: "Repeater Text Test",
 				}),
-				summary: undefined,
+				description: undefined,
 				placeholder: undefined,
 			},
 			localized: true,
@@ -399,29 +413,25 @@ test("flat fields should return correct config", async () => {
 		},
 	]);
 });
-
-test("fieldTree memoization invalidates on add operations", async () => {
+test("field snapshots reflect added fields", async () => {
 	const instance = new FieldBuilder().addText("text_test");
 
 	const initialTree = instance.fieldTree;
 	const cachedTree = instance.fieldTree;
-	expect(cachedTree).toBe(initialTree);
-
+	expect(cachedTree).toEqual(initialTree);
 	instance.addNumber("number_test");
 
 	const updatedTree = instance.fieldTree;
 	expect(updatedTree).not.toBe(initialTree);
 	expect(updatedTree.length).toBe(2);
 });
-
-test("persistedFieldTree memoization invalidates on repeater mutation", async () => {
+test("persisted field snapshots reflect completed repeaters", async () => {
 	const instance = new FieldBuilder()
 		.addRepeater("repeater_test")
 		.addText("text_test");
 
 	const beforeEnd = instance.persistedFieldTree;
-	expect(instance.persistedFieldTree).toBe(beforeEnd);
-
+	expect(instance.persistedFieldTree).toEqual(beforeEnd);
 	instance.endRepeater();
 
 	const afterEnd = instance.persistedFieldTree;

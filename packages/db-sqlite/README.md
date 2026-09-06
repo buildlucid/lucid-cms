@@ -15,11 +15,11 @@ To use the SQLite database adapter, you must add it to your Lucid CMS configurat
 If you don't pass options, Lucid will instantiate `SQLiteAdapter` with the default `./db.sqlite` path.
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
 import { sqlite } from "@lucidcms/db-sqlite";
 
-export default configureLucid({
+export default defineConfig({
   runtime: node,
   db: sqlite,
   config: () => ({

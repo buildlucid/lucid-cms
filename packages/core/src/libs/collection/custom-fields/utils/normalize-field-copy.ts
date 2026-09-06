@@ -1,6 +1,6 @@
 import { normalizeCopy } from "../../../i18n/index.js";
 import type { AdminCopyInput } from "../../../i18n/types.js";
-import type { CFConfig, FieldTypes } from "../types.js";
+import type { FieldConfig, FieldTypes } from "../types.js";
 
 /** Copy-bearing keys that may appear on a field config's `details` object. */
 const detailCopyKeys = ["label", "summary", "placeholder", "true", "false"];
@@ -13,7 +13,7 @@ const detailCopyKeys = ["label", "summary", "placeholder", "true", "false"];
  * runtime config only ever holds descriptor/literal objects. Keys that are not
  * present are left untouched so the config shape is preserved.
  */
-const normalizeFieldCopy = (config: CFConfig<FieldTypes>): void => {
+const normalizeFieldCopy = (config: FieldConfig<FieldTypes>): void => {
 	const details = (config as { details?: Record<string, AdminCopyInput> })
 		.details;
 	if (details) {

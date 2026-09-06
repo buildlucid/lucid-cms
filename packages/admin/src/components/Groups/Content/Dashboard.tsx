@@ -85,7 +85,7 @@ export const Dashboard: Component = () => {
 			canReadPublishOperations() &&
 			collectionsData().some(
 				(collection) =>
-					(collection.review?.requiredFor?.length ?? 0) > 0 &&
+					(collection.publishing.review?.requiredFor?.length ?? 0) > 0 &&
 					userStore.get.hasPermission([collection.permissions.review]).all,
 			),
 	);
@@ -147,7 +147,7 @@ export const Dashboard: Component = () => {
 		creatableCollections().map((collection) => {
 			const name =
 				helpers.getLocaleValue({
-					value: collection.details.singularName,
+					value: collection.details.labels.singular,
 					fallback: collection.key,
 				}) || collection.key;
 			return {

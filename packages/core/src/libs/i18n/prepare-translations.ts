@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../constants/constants.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
 import type { ResourceFile } from "../resources/types.js";
 import { loadTranslationSources } from "./load-project-translations.js";
@@ -40,7 +40,7 @@ export const writeTranslationArtifact = async (props: {
  * optionally writes the build artifact consumed by compiled runtimes.
  */
 const prepareTranslations = async (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	files?: ResourceFile[];
 	bundles?: TranslationBundles;
 	outputPath?: string;

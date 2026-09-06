@@ -8,7 +8,7 @@ const validateOptions = (options: WorkerQueueAdapterOptions) => {
 		}
 	};
 
-	assertPositiveInteger("concurrentLimit", options.concurrentLimit);
+	assertPositiveInteger("maxConcurrentJobs", options.maxConcurrentJobs);
 	assertPositiveInteger("batchSize", options.batchSize);
 };
 

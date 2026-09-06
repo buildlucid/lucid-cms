@@ -23,7 +23,7 @@ const DuplicateDocument: Component<DuplicateDocumentProps> = (props) => {
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: props.collection?.details.singularName,
+				value: props.collection?.details.labels.singular,
 			}) || T()("common.document"),
 	);
 

@@ -1,6 +1,6 @@
 type ExpirationOptions = {
-	expirationTtl?: number;
-	expirationTimestamp?: number;
+	ttlSeconds?: number;
+	expiresAtSeconds?: number;
 };
 
 /**
@@ -8,13 +8,13 @@ type ExpirationOptions = {
  * need for SETEX and EXPIRE.
  */
 const getRedisExpirationTtl = (kvOptions?: ExpirationOptions) => {
-	if (kvOptions?.expirationTtl) {
-		return kvOptions.expirationTtl;
+	if (kvOptions?.ttlSeconds) {
+		return kvOptions.ttlSeconds;
 	}
 
-	if (kvOptions?.expirationTimestamp) {
+	if (kvOptions?.expiresAtSeconds) {
 		const nowSeconds = Math.floor(Date.now() / 1000);
-		return Math.max(1, kvOptions.expirationTimestamp - nowSeconds);
+		return Math.max(1, kvOptions.expiresAtSeconds - nowSeconds);
 	}
 
 	return undefined;

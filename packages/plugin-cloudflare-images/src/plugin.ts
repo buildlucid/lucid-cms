@@ -1,5 +1,5 @@
-import { LucidError } from "@lucidcms/core";
-import type { LucidPluginResponse } from "@lucidcms/core/types";
+import { definePlugin, LucidError } from "@lucidcms/core";
+import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import cloudflareImagesDeliveryAdapter from "./adapter/index.js";
 import {
 	LUCID_VERSION,
@@ -11,32 +11,33 @@ import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
 const plugin = (
 	pluginOptions: CloudflareImagesPluginOptions = {},
-): LucidPluginResponse => ({
-	key: PLUGIN_KEY,
-	lucid: LUCID_VERSION,
-	hooks: {
-		runtime: async ({ phase }) => ({
-			error: undefined,
-			data: {
-				artifacts:
-					phase === "prepare" ? [createWranglerArtifact(pluginOptions)] : [],
-			},
-		}),
-	},
-	checkCompatibility: ({ runtimeContext }) => {
-		if (runtimeContext.runtime !== SUPPORTED_RUNTIME_ADAPTER_KEY) {
-			throw new LucidError({
-				message:
-					"Cloudflare Images plugin is only supported on the Cloudflare runtime adapter.",
-			});
-		}
-	},
-	sources: {
-		translations: ["@lucidcms/plugin-cloudflare-images/translations"],
-	},
-	recipe: (draft) => {
-		draft.media.delivery = cloudflareImagesDeliveryAdapter(pluginOptions);
-	},
-});
+): LucidPluginDefinition =>
+	definePlugin({
+		key: PLUGIN_KEY,
+		lucid: LUCID_VERSION,
+		hooks: {
+			runtime: async ({ phase }) => ({
+				error: undefined,
+				data: {
+					artifacts:
+						phase === "prepare" ? [createWranglerArtifact(pluginOptions)] : [],
+				},
+			}),
+		},
+		checkCompatibility: ({ runtimeContext }) => {
+			if (runtimeContext.runtime !== SUPPORTED_RUNTIME_ADAPTER_KEY) {
+				throw new LucidError({
+					message:
+						"Cloudflare Images plugin is only supported on the Cloudflare runtime adapter.",
+				});
+			}
+		},
+		sources: {
+			translations: ["@lucidcms/plugin-cloudflare-images/translations"],
+		},
+		defaults: {
+			media: { delivery: cloudflareImagesDeliveryAdapter(pluginOptions) },
+		},
+	});
 
 export default plugin;

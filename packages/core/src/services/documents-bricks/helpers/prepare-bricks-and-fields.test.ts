@@ -36,12 +36,14 @@ describe("testing prepareBricksAndFields", () => {
 	const simpleCollection = new CollectionBuilder("simple", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.simple.name", {
-				defaultMessage: "Simple",
-			}),
-			singularName: copy("admin:tests.collections.simple.singularName", {
-				defaultMessage: "Simple",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.simple.singularName", {
+					defaultMessage: "Simple",
+				}),
+				plural: copy("admin:tests.collections.simple.name", {
+					defaultMessage: "Simple",
+				}),
+			},
 		},
 		bricks: {
 			builder: [simpleBrick],
@@ -205,13 +207,14 @@ describe("testing prepareBricksAndFields", () => {
 		const collection = new CollectionBuilder("rich-content", {
 			mode: "multiple",
 			details: {
-				name: copy("admin:tests.collections.rich-content.name", {
-					defaultMessage: "Rich Content",
-				}),
-				singularName: copy(
-					"admin:tests.collections.rich-content.singularName",
-					{ defaultMessage: "Rich Content" },
-				),
+				labels: {
+					singular: copy("admin:tests.collections.rich-content.singularName", {
+						defaultMessage: "Rich Content",
+					}),
+					plural: copy("admin:tests.collections.rich-content.name", {
+						defaultMessage: "Rich Content",
+					}),
+				},
 			},
 			bricks: { embedded: [cardBrick] },
 		}).addRichText("body");
@@ -302,12 +305,14 @@ describe("testing prepareBricksAndFields", () => {
 		const collection = new CollectionBuilder("trim-test", {
 			mode: "single",
 			details: {
-				name: copy("admin:tests.collections.trim-test.name", {
-					defaultMessage: "Trim Test",
-				}),
-				singularName: copy("admin:tests.collections.trim-test.singularName", {
-					defaultMessage: "Trim Test",
-				}),
+				labels: {
+					singular: copy("admin:tests.collections.trim-test.singularName", {
+						defaultMessage: "Trim Test",
+					}),
+					plural: copy("admin:tests.collections.trim-test.name", {
+						defaultMessage: "Trim Test",
+					}),
+				},
 			},
 			localized: true,
 		})
@@ -377,15 +382,17 @@ describe("testing prepareBricksAndFields", () => {
 		const collection = new CollectionBuilder("json-empty-test", {
 			mode: "single",
 			details: {
-				name: copy("admin:tests.collections.json-empty-test.name", {
-					defaultMessage: "JSON Empty Test",
-				}),
-				singularName: copy(
-					"admin:tests.collections.json-empty-test.singularName",
-					{
+				labels: {
+					singular: copy(
+						"admin:tests.collections.json-empty-test.singularName",
+						{
+							defaultMessage: "JSON Empty Test",
+						},
+					),
+					plural: copy("admin:tests.collections.json-empty-test.name", {
 						defaultMessage: "JSON Empty Test",
-					},
-				),
+					}),
+				},
 			},
 		}).addJSON("metadata");
 
@@ -410,15 +417,17 @@ describe("testing prepareBricksAndFields", () => {
 		const collection = new CollectionBuilder("datetime-empty-test", {
 			mode: "single",
 			details: {
-				name: copy("admin:tests.collections.datetime-empty-test.name", {
-					defaultMessage: "Datetime Empty Test",
-				}),
-				singularName: copy(
-					"admin:tests.collections.datetime-empty-test.singularName",
-					{
+				labels: {
+					singular: copy(
+						"admin:tests.collections.datetime-empty-test.singularName",
+						{
+							defaultMessage: "Datetime Empty Test",
+						},
+					),
+					plural: copy("admin:tests.collections.datetime-empty-test.name", {
 						defaultMessage: "Datetime Empty Test",
-					},
-				),
+					}),
+				},
 			},
 		}).addDateTime("publishDate");
 

@@ -1,15 +1,15 @@
 import type { AdminCopyInput, ResolvedAdminCopy } from "../../i18n/types.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../builders/field-builder/index.js";
 import fieldConfigs from "../custom-fields/field-configs.js";
-import type { CFConfig, FieldTypes } from "../custom-fields/types.js";
+import type { FieldConfig, FieldTypes } from "../custom-fields/types.js";
 
 type SupportedLabelFieldType = {
 	[T in FieldTypes]: (typeof fieldConfigs)[T]["capabilities"]["canBeLabel"] extends true
 		? T
 		: never;
 }[FieldTypes];
-export type DocumentLabelFieldConfig = CFConfig<SupportedLabelFieldType>;
-
+export type DocumentLabelFieldConfig = FieldConfig<SupportedLabelFieldType>;
 const getCopyFallback = (
 	copy: AdminCopyInput | ResolvedAdminCopy | null | undefined,
 ) => {
@@ -24,8 +24,7 @@ const isSupportedLabelField = (
 	fieldKey: string | null | undefined,
 ) => {
 	if (!fieldKey) return false;
-
-	const field = collection.fields.get(fieldKey);
+	const field = getFieldBuilderState(collection).fields.get(fieldKey);
 	if (!field) return false;
 	if (field.treeParent !== null || field.structuralParent !== null)
 		return false;
@@ -40,12 +39,13 @@ export const getDocumentLabelField = (
 	const candidates = [
 		...collection.labelFields,
 		...collection.listing,
-		...collection.fields.keys(),
+		...getFieldBuilderState(collection).fields.keys(),
 	];
 
 	for (const fieldKey of candidates) {
 		if (!isSupportedLabelField(collection, fieldKey)) continue;
-		return collection.fields.get(fieldKey)?.config as DocumentLabelFieldConfig;
+		return getFieldBuilderState(collection).fields.get(fieldKey)
+			?.config as DocumentLabelFieldConfig;
 	}
 
 	return null;
@@ -58,8 +58,8 @@ export const getDocumentFallbackLabel = (
 ) => {
 	const details = collection.getData.details;
 	const collectionName =
-		getCopyFallback(details.singularName) ??
-		getCopyFallback(details.name) ??
+		getCopyFallback(details.labels.singular) ??
+		getCopyFallback(details.labels.plural) ??
 		collection.key;
 
 	return `${collectionName} #${documentId}`;

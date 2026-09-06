@@ -23,6 +23,7 @@ const buildCollection = (
 	builderBricks: unknown[] = [],
 ): Collection =>
 	({
+		publishing: { targets: [], scheduling: false },
 		fields,
 		fixedBricks,
 		builderBricks,
@@ -115,7 +116,7 @@ describe("documentFilterFields", () => {
 				[
 					{
 						key: "hero",
-						details: { name: literal("Hero") },
+						details: { label: literal("Hero") },
 						fields: [
 							{
 								key: "items",
@@ -180,7 +181,7 @@ describe("documentFilterFields", () => {
 				[
 					{
 						key: "hero",
-						details: { name: literal("Hero") },
+						details: { label: literal("Hero") },
 						fields: [
 							{
 								key: "heading",
@@ -193,7 +194,7 @@ describe("documentFilterFields", () => {
 				[
 					{
 						key: "banner",
-						details: { name: literal("Banner") },
+						details: { label: literal("Banner") },
 						fields: [
 							{
 								key: "image",
@@ -215,7 +216,7 @@ describe("documentFilterFields", () => {
 	it("dedupes options by query key", () => {
 		const brick = {
 			key: "hero",
-			details: { name: literal("Hero") },
+			details: { label: literal("Hero") },
 			fields: [{ key: "heading", type: "text", details: {} }],
 		};
 		const fields = documentFilterFields(buildCollection([], [brick], [brick]));
@@ -335,12 +336,15 @@ describe("documentFilterSectionFields", () => {
 	it("adds one fixed-value status filter for each environment", () => {
 		const collection = {
 			...buildCollection([]),
-			environments: [
-				{
-					key: "production",
-					name: literal("Production"),
-				},
-			],
+			publishing: {
+				scheduling: false,
+				targets: [
+					{
+						key: "production",
+						label: literal("Production"),
+					},
+				],
+			},
 		} as Collection;
 
 		expect(documentFilterSectionFields(collection)).toEqual(
@@ -365,16 +369,20 @@ describe("documentFilterSectionFields", () => {
 			...buildCollection([
 				{ key: "title", type: "text", details: { label: literal("Title") } },
 			]),
-			workflow: {
-				initial: "draft",
-				stages: [
-					{
-						key: "draft",
-						name: literal("Draft"),
-						color: "grey",
-						publishTargets: [],
-					},
-				],
+			publishing: {
+				targets: [],
+				scheduling: false,
+				workflow: {
+					initial: "draft",
+					stages: [
+						{
+							key: "draft",
+							label: literal("Draft"),
+							color: "grey",
+							publishTargets: [],
+						},
+					],
+				},
 			},
 		} as Collection;
 

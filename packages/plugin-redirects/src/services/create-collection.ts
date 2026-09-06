@@ -49,13 +49,15 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 		mode: "multiple",
 		group: options.navigationGroup ?? COLLECTION_KEY,
 		details: {
-			name: copy("admin:plugin.redirects.collection.name", {
-				defaultMessage: "Redirects",
-			}),
-			singularName: copy("admin:plugin.redirects.collection.singular.name", {
-				defaultMessage: "Redirect",
-			}),
-			summary: copy("admin:plugin.redirects.collection.summary", {
+			labels: {
+				singular: copy("admin:plugin.redirects.collection.singular.name", {
+					defaultMessage: "Redirect",
+				}),
+				plural: copy("admin:plugin.redirects.collection.name", {
+					defaultMessage: "Redirects",
+				}),
+			},
+			description: copy("admin:plugin.redirects.collection.summary", {
 				defaultMessage:
 					"Send visitors from an old or incorrect web address to the right content or another website.",
 			}),
@@ -63,9 +65,11 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 		localized: false,
 		revisions: true,
 		autoSave: false,
-		scheduling: false,
 		orderable: false,
-		environments: options.environments,
+		publishing: {
+			targets: options.targets,
+			scheduling: false,
+		},
 	});
 
 	if (options.locales.length > 1) {
@@ -92,7 +96,7 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 			label: copy("admin:plugin.redirects.fields.from.label", {
 				defaultMessage: "Redirect from",
 			}),
-			summary: copy("admin:plugin.redirects.fields.from.summary", {
+			description: copy("admin:plugin.redirects.fields.from.summary", {
 				defaultMessage:
 					"Enter the old path, starting with a slash. For example, /old-page.",
 			}),
@@ -142,7 +146,7 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 				label: copy("admin:plugin.redirects.fields.status.code.label", {
 					defaultMessage: "Redirect type",
 				}),
-				summary: copy("admin:plugin.redirects.fields.status.code.summary", {
+				description: copy("admin:plugin.redirects.fields.status.code.summary", {
 					defaultMessage:
 						"Use Permanent (301) for most redirects. Use a temporary redirect if the old page will return.",
 				}),
@@ -165,10 +169,13 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 				label: copy("admin:plugin.redirects.fields.target.document.label", {
 					defaultMessage: "Destination content",
 				}),
-				summary: copy("admin:plugin.redirects.fields.target.document.summary", {
-					defaultMessage:
-						"The redirect follows this content if its web address changes.",
-				}),
+				description: copy(
+					"admin:plugin.redirects.fields.target.document.summary",
+					{
+						defaultMessage:
+							"The redirect follows this content if its web address changes.",
+					},
+				),
 			},
 			localized: false,
 			multiple: false,
@@ -176,14 +183,12 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 			ui: {
 				width: 12,
 				condition: {
-					groups: [
-						[
-							{
-								field: fields.targetType,
-								operator: "equals",
-								value: targetTypes.document,
-							},
-						],
+					all: [
+						{
+							field: fields.targetType,
+							operator: "equals",
+							value: targetTypes.document,
+						},
 					],
 				},
 			},
@@ -194,7 +199,7 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 				label: copy("admin:plugin.redirects.fields.target.url.label", {
 					defaultMessage: "Destination web address",
 				}),
-				summary: copy("admin:plugin.redirects.fields.target.url.summary", {
+				description: copy("admin:plugin.redirects.fields.target.url.summary", {
 					defaultMessage:
 						"Enter a path on this website, such as /new-page, or a full web address, such as https://example.com.",
 				}),
@@ -209,14 +214,12 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 			ui: {
 				width: 12,
 				condition: {
-					groups: [
-						[
-							{
-								field: fields.targetType,
-								operator: "equals",
-								value: targetTypes.url,
-							},
-						],
+					all: [
+						{
+							field: fields.targetType,
+							operator: "equals",
+							value: targetTypes.url,
+						},
 					],
 				},
 			},

@@ -6,7 +6,7 @@ describe("@lucidcms/client", () => {
 		vi.restoreAllMocks();
 	});
 
-	test("serializes document queries and returns single document response bodies", async () => {
+	test("serializes document queries and unwraps single document responses", async () => {
 		const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
 			new Response(
 				JSON.stringify({
@@ -94,8 +94,8 @@ describe("@lucidcms/client", () => {
 		});
 
 		expect(response.error).toBeUndefined();
-		expect(response.data?.data.id).toBe(1);
-		expect(response.data?.meta.path).toBe(
+		expect(response.data?.id).toBe(1);
+		expect(response.meta?.path).toBe(
 			"https://example.com/lucid/api/v1/content/document/page",
 		);
 		expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -150,7 +150,7 @@ describe("@lucidcms/client", () => {
 		const response = await client.previews.resolve({ token });
 
 		expect(response.error).toBeUndefined();
-		expect(response.data?.data).toMatchObject({
+		expect(response.data).toMatchObject({
 			mode: "scoped",
 			expiresAt: "2099-01-01T00:00:00.000Z",
 		});
@@ -236,9 +236,9 @@ describe("@lucidcms/client", () => {
 		});
 
 		expect(response.error).toBeUndefined();
-		expect(response.data?.data).toEqual([]);
-		expect(response.data?.meta.total).toBe(0);
-		expect(response.data).toEqual({
+		expect(response.data).toEqual([]);
+		expect(response.meta?.total).toBe(0);
+		expect(response).toMatchObject({
 			data: [],
 			meta: {
 				links: [],
@@ -396,10 +396,25 @@ describe("@lucidcms/client", () => {
 		expect(response.error?.message).toBe(
 			"Middleware changed the error message.",
 		);
+		expect(response.data).toBeUndefined();
+		expect(response.response?.status).toBe(403);
 		expect(requestOrder).toEqual(["request", "response", "error"]);
 
 		const [, init] = fetchMock.mock.calls[0] ?? [];
 		expect(new Headers(init?.headers).get("x-client-test")).toBe("1");
+	});
+
+	test("returns a parse error when a successful response has no data envelope", async () => {
+		const httpResponse = Response.json({ unexpected: true });
+		const client = createClient({
+			baseUrl: "https://example.com",
+			auth: { type: "apiKey", apiKey: "client-key" },
+			fetch: vi.fn<typeof fetch>().mockResolvedValue(httpResponse),
+		});
+		const result = await client.locales.getAll();
+		expect(result.error?.kind).toBe("parse");
+		expect(result.data).toBeUndefined();
+		expect(result.response).toBe(httpResponse);
 	});
 
 	test("returns timeout errors as values", async () => {
@@ -428,7 +443,10 @@ describe("@lucidcms/client", () => {
 		expect(response.data).toBeUndefined();
 	});
 
-	test("accepts an AbortController and returns abort errors as values", async () => {
+	test.each([
+		undefined,
+		1000,
+	])("accepts an AbortSignal with timeout %s and returns abort errors as values", async (timeoutMs) => {
 		const fetchMock = vi.fn<typeof fetch>(
 			async (_input, init) =>
 				await new Promise<Response>((_resolve, reject) => {
@@ -455,7 +473,8 @@ describe("@lucidcms/client", () => {
 		const abortController = new AbortController();
 		const responsePromise = client.locales.getAll({
 			request: {
-				abortController,
+				signal: abortController.signal,
+				timeoutMs,
 			},
 		});
 

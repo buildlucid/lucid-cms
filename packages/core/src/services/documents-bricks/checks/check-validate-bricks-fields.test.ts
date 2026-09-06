@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
 	recursiveFieldValidate,
@@ -10,12 +11,14 @@ import {
 const TranslatedCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -32,13 +35,15 @@ const TranslatedCollection = new CollectionBuilder("collection", {
 const NonTranslatedCollection = new CollectionBuilder("non_translated", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:core.tests.collections.non.translated.name", {
-			defaultMessage: "Non-Translated",
-		}),
-		singularName: copy(
-			"admin:core.tests.collections.non.translated.singularName",
-			{ defaultMessage: "Non-Translated" },
-		),
+		labels: {
+			singular: copy(
+				"admin:core.tests.collections.non.translated.singularName",
+				{ defaultMessage: "Non-Translated" },
+			),
+			plural: copy("admin:core.tests.collections.non.translated.name", {
+				defaultMessage: "Non-Translated",
+			}),
+		},
 	},
 	localized: false,
 }).addText("text_field");
@@ -63,8 +68,11 @@ test("localeCode is correctly included or omitted based on translation support",
 				fr: "valid text",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TranslatedCollection.fields.get("translatable_field")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(TranslatedCollection).fields.get(
+				"translatable_field",
+			)!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -86,8 +94,11 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TranslatedCollection.fields.get("translatable_field")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(TranslatedCollection).fields.get(
+				"translatable_field",
+			)!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -109,8 +120,11 @@ test("localeCode is correctly included or omitted based on translation support",
 			type: "text",
 			value: 123, //* causes fail
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TranslatedCollection.fields.get("translatable_field")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(TranslatedCollection).fields.get(
+				"translatable_field",
+			)!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -133,7 +147,9 @@ test("localeCode is correctly included or omitted based on translation support",
 			value: 123, //* causes fail
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: NonTranslatedCollection.fields.get("text_field")!,
+		instance: getFieldBuilderState(NonTranslatedCollection).fields.get(
+			"text_field",
+		)!,
 		validationData,
 		meta: {
 			localized: NonTranslatedCollection.getData.localized,
@@ -156,7 +172,9 @@ test("localeCode is correctly included or omitted based on translation support",
 			value: 123, //* causes fail
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TranslatedCollection.fields.get("non_translatable_field")!,
+		instance: getFieldBuilderState(TranslatedCollection).fields.get(
+			"non_translatable_field",
+		)!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -181,8 +199,11 @@ test("rejects translation keys outside the collection locale subset", () => {
 				de: "Nicht unterstützt",
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: the fixture always registers this field
-		instance: TranslatedCollection.fields.get("translatable_field")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: the fixture always registers this field
+			getFieldBuilderState(TranslatedCollection).fields.get(
+				"translatable_field",
+			)!,
 		validationData: { media: [], user: [], relation: [] },
 		meta: {
 			localized: true,
@@ -218,7 +239,9 @@ test("required localized fields validate every configured locale", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TranslatedCollection.fields.get("required_translatable_field")!,
+		instance: getFieldBuilderState(TranslatedCollection).fields.get(
+			"required_translatable_field",
+		)!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,
@@ -241,7 +264,9 @@ test("required localized fields validate every configured locale", async () => {
 			value: "English title",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TranslatedCollection.fields.get("required_translatable_field")!,
+		instance: getFieldBuilderState(TranslatedCollection).fields.get(
+			"required_translatable_field",
+		)!,
 		validationData,
 		meta: {
 			localized: TranslatedCollection.getData.localized,

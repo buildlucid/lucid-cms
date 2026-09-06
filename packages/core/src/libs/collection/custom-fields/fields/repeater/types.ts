@@ -1,6 +1,6 @@
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 	FieldUIConfig,
 	SharedFieldConfig,
@@ -9,10 +9,10 @@ import type {
 
 export interface RepeaterFieldConfig extends SharedFieldConfig {
 	type: "repeater";
-	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
+	fields: Exclude<FieldConfig<FieldTypes>, TabFieldConfig>[];
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 	ui?: Pick<FieldUIConfig, "disabled" | "condition" | "width">;
 	validation?: {
@@ -22,7 +22,7 @@ export interface RepeaterFieldConfig extends SharedFieldConfig {
 }
 
 export type RepeaterFieldProps = Partial<
-	Omit<RepeaterFieldConfig, "type" | "fields">
+	Omit<RepeaterFieldConfig, "key" | "type" | "fields">
 >;
 
 export type RepeaterResValue = null;

@@ -1,4 +1,5 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
 import { normalizeRelationCollections } from "../../../libs/collection/custom-fields/fields/relation/utils/normalize-relation-collections.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
@@ -105,7 +106,9 @@ const relationFilterDescriptors = (
 		const builder = schema.key.brick
 			? bricks.find((brick) => brick.key === schema.key.brick)
 			: collection;
-		const field = builder?.fields.get(fieldKey);
+		const field = builder
+			? getFieldBuilderState(builder).fields.get(fieldKey)
+			: undefined;
 		if (field?.config.type !== "relation") continue;
 
 		const collectionKeyColumn = schema.columns.find(

@@ -99,7 +99,7 @@ export const DocumentsList: Component<{
 			),
 	);
 	const workflowHeadColumn = createMemo(() =>
-		props.state.collection?.workflow
+		props.state.collection?.publishing.workflow
 			? [
 					{
 						label: T()("documents.workflow.stage"),
@@ -116,10 +116,10 @@ export const DocumentsList: Component<{
 			: [],
 	);
 	const environmentHeadColumns = createMemo(() =>
-		(props.state.collection?.environments ?? []).map((environment) => ({
+		(props.state.collection?.publishing.targets ?? []).map((environment) => ({
 			label:
 				helpers.getLocaleValue({
-					value: environment.name,
+					value: environment.label,
 					fallback: environment.key,
 				}) || environment.key,
 			key: `envStatus.${environment.key}`,
@@ -187,18 +187,18 @@ export const DocumentsList: Component<{
 	);
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: props.state.collection?.details.name,
+			value: props.state.collection?.details.labels.plural,
 		}),
 	);
 	const collectionSingularName = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: props.state.collection?.details.singularName,
+				value: props.state.collection?.details.labels.singular,
 			}) || T()("common.collection"),
 	);
 	const actionCollectionSingularName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: props.state.collection?.details.singularName,
+			value: props.state.collection?.details.labels.singular,
 		}),
 	);
 	const getActionLabel = (action: string) => {

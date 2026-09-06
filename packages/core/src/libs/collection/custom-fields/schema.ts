@@ -1,43 +1,9 @@
 import z from "zod";
 import constants from "../../../constants/constants.js";
 import { adminCopyInputSchema } from "../../i18n/index.js";
-import {
-	fieldConditionOperators,
-	fieldConditionTranslationScopes,
-} from "./conditions/index.js";
+import { fieldConditionSchema } from "./conditions/schema.js";
 import { validateRangeConfig } from "./fields/range/schema.js";
 import { richTextUserVariableFields } from "./fields/rich-text/types.js";
-
-const operatorsRequiringValue: string[] = [
-	"equals",
-	"notEquals",
-	"contains",
-	"notContains",
-];
-
-const fieldConditionRuleSchema = z
-	.object({
-		field: z.string().trim().min(1),
-		operator: z.enum(fieldConditionOperators),
-		value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
-	})
-	.strict()
-	.refine(
-		(rule) =>
-			!operatorsRequiringValue.includes(rule.operator) ||
-			rule.value !== undefined,
-		{
-			message: "Condition rules with a comparison operator require a value",
-		},
-	);
-
-const fieldConditionSchema = z
-	.object({
-		action: z.enum(["show", "hide"]).optional(),
-		translationScope: z.enum(fieldConditionTranslationScopes).optional(),
-		groups: z.array(z.array(fieldConditionRuleSchema)),
-	})
-	.strict();
 
 // TODO: test this through lucid.config.* - have a feeling it isnt being used properly
 const customFieldSchema = z.object({
@@ -55,7 +21,7 @@ const customFieldSchema = z.object({
 	details: z
 		.object({
 			label: adminCopyInputSchema.optional(),
-			summary: adminCopyInputSchema.optional(),
+			description: adminCopyInputSchema.optional(),
 			true: adminCopyInputSchema.optional(),
 			false: adminCopyInputSchema.optional(),
 		})
@@ -96,7 +62,7 @@ const customFieldSchema = z.object({
 	min: z.number().optional(),
 	max: z.number().optional(),
 	step: z.number().positive().optional(),
-	index: z.literal(true).optional(),
+	index: z.boolean().optional(),
 	editor: z
 		.object({
 			links: z
@@ -166,7 +132,7 @@ const customFieldSchema = z.object({
 	languages: z.array(z.string()).optional(),
 	validation: z
 		.object({
-			zod: z.any().optional(),
+			zod: z.instanceof(z.ZodType).optional(),
 			required: z.boolean().optional(),
 			minItems: z.number().optional(),
 			maxItems: z.number().optional(),

@@ -1,4 +1,4 @@
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import { translate } from "../../i18n/index.js";
 
 const latestVersionType = "latest";
@@ -7,13 +7,13 @@ const latestVersionType = "latest";
  * Ensures configured collection version mappings point at known collections and
  * versions before cross-collection reads resolve against them at runtime.
  */
-const checkCollectionEnvironmentVersionMap = (config: Config) => {
+const checkCollectionEnvironmentVersionMap = (config: ResolvedLucidConfig) => {
 	const collectionsByKey = new Map(
 		config.collections.map((collection) => [collection.key, collection]),
 	);
 
 	for (const collection of config.collections) {
-		for (const environment of collection.getData.environments) {
+		for (const environment of collection.getData.publishing.targets) {
 			for (const [targetCollectionKey, targetVersionType] of Object.entries(
 				environment.collectionVersions ?? {},
 			)) {
@@ -37,7 +37,7 @@ const checkCollectionEnvironmentVersionMap = (config: Config) => {
 				if (targetVersionType === latestVersionType) continue;
 
 				const targetEnvironmentExists =
-					targetCollection.getData.environments.some(
+					targetCollection.getData.publishing.targets.some(
 						(targetEnvironment) => targetEnvironment.key === targetVersionType,
 					);
 

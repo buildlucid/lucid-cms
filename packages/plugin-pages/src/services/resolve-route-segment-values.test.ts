@@ -25,7 +25,12 @@ describe("resolveRouteSegmentValues", () => {
 	test("uses only the source collection's supported content locales", async () => {
 		const collectionInstance = new CollectionBuilder("pages", {
 			mode: "multiple",
-			details: { name: "Pages", singularName: "Page" },
+			details: {
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
+			},
 			localized: { locales: ["fr"], defaultLocale: "fr" },
 		});
 
@@ -47,7 +52,12 @@ describe("resolveRouteSegmentValues", () => {
 	test("uses the storage locale when the Pages fields are not localized", async () => {
 		const collectionInstance = new CollectionBuilder("pages", {
 			mode: "multiple",
-			details: { name: "Pages", singularName: "Page" },
+			details: {
+				labels: {
+					singular: "Page",
+					plural: "Pages",
+				},
+			},
 			localized: { locales: ["fr"], defaultLocale: "fr" },
 		});
 

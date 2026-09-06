@@ -2,9 +2,9 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
@@ -14,7 +14,7 @@ class TabCustomField extends CustomField<"tab"> {
 	type = tabFieldConfig.type;
 	config;
 	key: string;
-	props?: CFProps<"tab">;
+	props?: FieldOptions<"tab">;
 	protected override get sharedValidationFlags() {
 		return {
 			skipValidation: true,
@@ -22,7 +22,7 @@ class TabCustomField extends CustomField<"tab"> {
 			skipZodValidation: true,
 		} as const;
 	}
-	constructor(key: string, props?: CFProps<"tab">) {
+	constructor(key: string, props?: FieldOptions<"tab">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -35,13 +35,13 @@ class TabCustomField extends CustomField<"tab"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			ui: {
 				condition: this.props?.ui?.condition,
 			},
 			fields: [],
-		} satisfies CFConfig<"tab">;
+		} satisfies FieldConfig<"tab">;
 	}
 	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
@@ -52,7 +52,7 @@ class TabCustomField extends CustomField<"tab"> {
 		};
 	}
 	formatResponseValue() {
-		return null satisfies CFResponse<"tab">["value"];
+		return null satisfies FieldResponse<"tab">["value"];
 	}
 	uniqueValidation() {
 		return {

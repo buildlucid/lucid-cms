@@ -57,7 +57,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 	const schedules = normalizeSchedules(options.schedules);
 	const handler = options.transaction
 		? serviceWrapper(options.handler, {
-				transaction: true,
+				transaction: options.transaction,
 				logError: true,
 				defaultError: {
 					type: "basic",

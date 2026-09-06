@@ -1,7 +1,7 @@
 import path from "node:path";
 import { createJiti } from "jiti";
 import constants from "../../constants/constants.js";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import { migrationSchema } from "../resources/module-schemas.js";
 import type { ResourceFile } from "../resources/types.js";
@@ -86,7 +86,7 @@ const loadExternalMigrations = async (props: {
  * Only migration entry points should call this.
  */
 export const prepareExternalMigrations = async (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	files: ResourceFile[];
 }) => {
 	props.config.db.registerExternalMigrations(

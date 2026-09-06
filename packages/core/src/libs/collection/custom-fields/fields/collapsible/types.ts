@@ -1,6 +1,6 @@
 import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
-	CFConfig,
+	FieldConfig,
 	FieldTypes,
 	FieldUIConfig,
 	SharedFieldConfig,
@@ -12,18 +12,18 @@ export interface CollapsibleFieldConfig extends SharedFieldConfig {
 	type: "collapsible";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 	/** Controls how child fields are shaped in content API document responses. */
 	output: StructuralFieldOutput;
 	/** Whether the collapsible renders expanded by default in the admin. */
 	defaultOpen: boolean;
 	ui?: Pick<FieldUIConfig, "condition" | "width">;
-	fields: Exclude<CFConfig<FieldTypes>, TabFieldConfig>[];
+	fields: Exclude<FieldConfig<FieldTypes>, TabFieldConfig>[];
 }
 
 export type CollapsibleFieldProps = Partial<
-	Omit<CollapsibleFieldConfig, "type" | "fields">
+	Omit<CollapsibleFieldConfig, "key" | "type" | "fields">
 >;
 
 export type CollapsibleResValue = null;

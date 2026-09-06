@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { copy } from "../../../i18n/index.js";
-import FieldBuilder from "../field-builder/index.js";
+import FieldBuilder, { getFieldBuilderState } from "../field-builder/index.js";
 import BrickBuilder from "./index.js";
 
 test("all brick fields are added", async () => {
@@ -21,8 +21,7 @@ test("all brick fields are added", async () => {
 		.addRepeater("repeater_test")
 		.addText("repeater_text_test")
 		.endRepeater();
-
-	expect(brick.fields.size).toBe(15);
+	expect(getFieldBuilderState(brick).fields.size).toBe(15);
 });
 
 test("brick addFields custom field is working", async () => {
@@ -34,8 +33,7 @@ test("brick addFields custom field is working", async () => {
 		.addText("text_test")
 		.addFields(childBrickBuilder)
 		.addFields(childFieldBuilder);
-
-	expect(baseBrick.fields.size).toBe(3);
+	expect(getFieldBuilderState(baseBrick).fields.size).toBe(3);
 });
 
 test("tab fields are added and nesting is correct", async () => {
@@ -44,8 +42,7 @@ test("tab fields are added and nesting is correct", async () => {
 		.addText("text_test")
 		.addTab("repeater_tab")
 		.addCheckbox("checkbox_test");
-
-	expect(brick.fields.size).toBe(4);
+	expect(getFieldBuilderState(brick).fields.size).toBe(4);
 	expect(brick.persistedFieldTree.length).toBe(2);
 
 	const firstTab = brick.fieldTree[0];
@@ -64,29 +61,27 @@ test("tab fields are added and nesting is correct", async () => {
 test("brick config is correct", async () => {
 	const brick = new BrickBuilder("brick", {
 		details: {
-			name: copy("admin:tests.bricks.brick.name", {
+			label: copy("admin:tests.bricks.brick.name", {
 				defaultMessage: "Brick",
 			}),
-			summary: copy("admin:tests.bricks.brick.summary", {
+			description: copy("admin:tests.bricks.brick.summary", {
 				defaultMessage: "Brick Summary",
 			}),
 		},
-		preview: {
-			image: "https://placehold.co/600x400",
-		},
+		thumbnail: "https://placehold.co/600x400",
 	}).addText("text_test");
 
 	expect(brick.config).toEqual({
 		key: "brick",
 		details: {
-			name: copy("admin:tests.bricks.brick.name", {
+			label: copy("admin:tests.bricks.brick.name", {
 				defaultMessage: "Brick",
 			}),
-			summary: copy("admin:tests.bricks.brick.summary", {
+			description: copy("admin:tests.bricks.brick.summary", {
 				defaultMessage: "Brick Summary",
 			}),
 		},
-		preview: { image: "https://placehold.co/600x400" },
+		thumbnail: "https://placehold.co/600x400",
 	});
 });
 
@@ -95,8 +90,7 @@ test("field tree cache invalidates when adding tabs and external fields", async 
 	const brick = new BrickBuilder("brick").addText("text_test");
 
 	const initialTree = brick.fieldTree;
-	expect(brick.fieldTree).toBe(initialTree);
-
+	expect(brick.fieldTree).toEqual(initialTree);
 	brick.addTab("content_tab");
 	const afterTabTree = brick.fieldTree;
 	expect(afterTabTree).not.toBe(initialTree);

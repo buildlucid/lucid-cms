@@ -5,20 +5,20 @@ export interface SelectFieldConfig extends SharedFieldConfig {
 	type: "select";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
 	options: Array<{ label: AdminCopyInput; value: string }>;
 	localized?: boolean;
 	default?: string;
-	index?: true;
+	index?: boolean;
 	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};
 }
 
-export type SelectFieldProps = Partial<Omit<SelectFieldConfig, "type">>;
+export type SelectFieldProps = Partial<Omit<SelectFieldConfig, "key" | "type">>;
 
 export type SelectReValue = string | null;
 

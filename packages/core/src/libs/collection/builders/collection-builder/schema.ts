@@ -1,6 +1,7 @@
 import z from "zod";
 import constants from "../../../../constants/constants.js";
 import { adminCopyInputSchema } from "../../../i18n/index.js";
+import { hookSchema } from "../../../resources/module-schemas.js";
 
 const environmentKeySchema = z
 	.string()
@@ -8,7 +9,7 @@ const environmentKeySchema = z
 	.max(50)
 	.regex(/^[a-z0-9-_]+$/, {
 		message:
-			"Environment key must contain only lowercase letters, numbers, hyphens and underscores",
+			"Publishing target key must contain only lowercase letters, numbers, hyphens and underscores",
 	});
 
 const groupKeySchema = z
@@ -43,18 +44,18 @@ const versionMapCollectionKeySchema = z
 
 const collectionLocalizationSchema = z.union([
 	z.boolean(),
-	z.object({
+	z.strictObject({
 		locales: z.array(z.string().trim().min(1)).min(1),
 		defaultLocale: z.string().trim().min(1).optional(),
 	}),
-	z.object({
+	z.strictObject({
 		locales: z.never().optional(),
 		defaultLocale: z.string().trim().min(1),
 	}),
 ]);
 
 const CollectionConfigSchema = z
-	.object({
+	.strictObject({
 		key: z
 			.string()
 			.min(1)
@@ -70,133 +71,51 @@ const CollectionConfigSchema = z
 		group: z
 			.union([
 				groupKeySchema,
-				z.object({
+				z.strictObject({
 					key: groupKeySchema,
-					name: adminCopyInputSchema.optional(),
+					label: adminCopyInputSchema.optional(),
 					order: z.number().optional(),
 				}),
 			])
 			.optional(),
-		details: z.object({
-			name: adminCopyInputSchema,
-			singularName: adminCopyInputSchema,
-			summary: adminCopyInputSchema.optional(),
+		details: z.strictObject({
+			labels: z.strictObject({
+				singular: adminCopyInputSchema,
+				plural: adminCopyInputSchema,
+			}),
+			description: adminCopyInputSchema.optional(),
 		}),
 		locked: z.boolean().default(constants.collectionBuilder.locked).optional(),
 		localized: collectionLocalizationSchema
 			.default(constants.collectionBuilder.localized)
 			.optional(),
 		revisions: z
-			.boolean()
-			.default(constants.collectionBuilder.revisions)
+			.union([
+				z.literal(true),
+				z.strictObject({
+					enabled: z.boolean(),
+					retentionDays: z
+						.union([z.number().int().positive(), z.literal(false)])
+						.optional(),
+				}),
+			])
 			.optional(),
 		autoSave: z
 			.boolean()
 			.default(constants.collectionBuilder.autoSave)
 			.optional(),
-		scheduling: z
-			.boolean()
-			.default(constants.collectionBuilder.scheduling)
-			.optional(),
 		orderable: z
 			.boolean()
 			.default(constants.collectionBuilder.orderable)
 			.optional(),
-		review: z
-			.object({
-				requiredFor: z
-					.array(
-						z
-							.string()
-							.min(1)
-							.max(50)
-							.regex(/^[a-z0-9-_]+$/),
-					)
-					.optional(),
-				allowSelfApproval: z
-					.boolean()
-					.default(constants.collectionBuilder.publishing.allowSelfApproval)
-					.optional(),
-				comments: z
-					.object({
-						request: z
-							.enum(["required", "optional"])
-							.default(constants.collectionBuilder.publishing.comments.request)
-							.optional(),
-						decision: z
-							.enum(["required", "optional"])
-							.default(constants.collectionBuilder.publishing.comments.decision)
-							.optional(),
-					})
-					.optional(),
-			})
-			.optional(),
-		workflow: z
-			.object({
-				initial: z
-					.string()
-					.min(1)
-					.max(50)
-					.regex(/^[a-z0-9-_]+$/)
-					.optional(),
-				stages: z
-					.array(
-						z.object({
-							key: z
-								.string()
-								.min(1)
-								.max(50)
-								.regex(/^[a-z0-9-_]+$/),
-							name: adminCopyInputSchema,
-							color: z
-								.enum(
-									constants.collectionBuilder.publishing.workflow.stageColors,
-								)
-								.optional(),
-							publishTargets: z
-								.array(
-									z
-										.string()
-										.min(1)
-										.max(50)
-										.regex(/^[a-z0-9-_]+$/),
-								)
-								.optional(),
-						}),
-					)
-					.min(1),
-			})
-			.optional(),
-		environments: z
-			.array(
-				z.object({
-					key: environmentKeySchema.refine(
-						(val) =>
-							!constants.collectionBuilder.protectedEnvironments.includes(val),
-						{
-							message: `Environment key cannot be one of the protected environments: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
-						},
-					),
-					name: adminCopyInputSchema,
-					requires: z.array(environmentKeySchema).optional(),
-					collectionVersions: z
-						.record(versionMapCollectionKeySchema, environmentKeySchema)
-						.optional(),
-				}),
-			)
-			.optional(),
-		revisionRetentionDays: z
-			.union([z.number().int().positive(), z.literal(false)])
-			.default(constants.collectionBuilder.revisionRetentionDays)
-			.optional(),
-		routing: z.string().trim().min(1).optional(),
+		routing: z.strictObject({ field: z.string().trim().min(1) }).optional(),
 		preview: z
 			.union([
-				z.literal(true),
-				z.object({
-					enabled: z.boolean(),
+				z.boolean(),
+				z.strictObject({
+					enabled: z.boolean().optional(),
 					url: z.function().optional(),
-					expiresIn: z
+					expiresInSeconds: z
 						.number()
 						.int()
 						.positive()
@@ -204,7 +123,7 @@ const CollectionConfigSchema = z
 						.optional(),
 					breakpoints: z
 						.array(
-							z.object({
+							z.strictObject({
 								key: previewBreakpointKeySchema,
 								label: adminCopyInputSchema,
 								width: z.number().int().min(280).max(2560),
@@ -214,31 +133,120 @@ const CollectionConfigSchema = z
 				}),
 			])
 			.optional(),
-		hooks: z
-			.array(
-				z.object({
-					service: z.string(),
-					event: z.string(),
-					priority: z.number().optional(),
-					handler: z.unknown(),
-				}),
-			)
-			.optional(),
+		hooks: z.array(hookSchema).optional(),
 		bricks: z
-			.object({
+			.strictObject({
 				fixed: z.array(z.unknown()).optional(),
 				builder: z.array(z.unknown()).optional(),
 				embedded: z.array(z.unknown()).optional(),
 			})
 			.optional(),
+		publishing: z
+			.strictObject({
+				targets: z
+					.array(
+						z.strictObject({
+							key: environmentKeySchema.refine(
+								(val) =>
+									!constants.collectionBuilder.protectedEnvironments.includes(
+										val,
+									),
+								{
+									message: `Publishing target key cannot be one of the protected publishing targets: ${constants.collectionBuilder.protectedEnvironments.join(", ")}`,
+								},
+							),
+							label: adminCopyInputSchema,
+							requires: z.array(environmentKeySchema).optional(),
+							collectionVersions: z
+								.record(versionMapCollectionKeySchema, environmentKeySchema)
+								.optional(),
+						}),
+					)
+					.optional(),
+				review: z
+					.strictObject({
+						requiredFor: z
+							.array(
+								z
+									.string()
+									.min(1)
+									.max(50)
+									.regex(/^[a-z0-9-_]+$/),
+							)
+							.optional(),
+						allowSelfApproval: z
+							.boolean()
+							.default(constants.collectionBuilder.publishing.allowSelfApproval)
+							.optional(),
+						comments: z
+							.strictObject({
+								request: z
+									.enum(["required", "optional"])
+									.default(
+										constants.collectionBuilder.publishing.comments.request,
+									)
+									.optional(),
+								decision: z
+									.enum(["required", "optional"])
+									.default(
+										constants.collectionBuilder.publishing.comments.decision,
+									)
+									.optional(),
+							})
+							.optional(),
+					})
+					.optional(),
+				workflow: z
+					.strictObject({
+						initial: z
+							.string()
+							.min(1)
+							.max(50)
+							.regex(/^[a-z0-9-_]+$/)
+							.optional(),
+						stages: z
+							.array(
+								z.strictObject({
+									key: z
+										.string()
+										.min(1)
+										.max(50)
+										.regex(/^[a-z0-9-_]+$/),
+									label: adminCopyInputSchema,
+									color: z
+										.enum(
+											constants.collectionBuilder.publishing.workflow
+												.stageColors,
+										)
+										.optional(),
+									publishTargets: z
+										.array(
+											z
+												.string()
+												.min(1)
+												.max(50)
+												.regex(/^[a-z0-9-_]+$/),
+										)
+										.optional(),
+								}),
+							)
+							.min(1),
+					})
+					.optional(),
+				scheduling: z
+					.boolean()
+					.default(constants.collectionBuilder.scheduling)
+					.optional(),
+			})
+			.optional(),
 	})
 	.superRefine((data, ctx) => {
 		const environmentKeys = new Set(
-			data.environments?.map((environment) => environment.key) ?? [],
+			data.publishing?.targets?.map((environment) => environment.key) ?? [],
 		);
 
 		for (const [environmentIndex, environment] of (
-			data.environments ?? []
+			data.publishing?.targets ?? []
 		).entries()) {
 			for (const [targetIndex, target] of (
 				environment.requires ?? []
@@ -246,8 +254,14 @@ const CollectionConfigSchema = z
 				if (target === environment.key) {
 					ctx.addIssue({
 						code: "custom",
-						path: ["environments", environmentIndex, "requires", targetIndex],
-						message: `Environment "${environment.key}" cannot require itself`,
+						path: [
+							"publishing",
+							"targets",
+							environmentIndex,
+							"requires",
+							targetIndex,
+						],
+						message: `Publishing target "${environment.key}" cannot require itself`,
 					});
 					continue;
 				}
@@ -255,24 +269,29 @@ const CollectionConfigSchema = z
 				if (environmentKeys.has(target)) continue;
 				ctx.addIssue({
 					code: "custom",
-					path: ["environments", environmentIndex, "requires", targetIndex],
-					message: `Environment requires target "${target}" must reference a configured environment`,
+					path: [
+						"publishing",
+						"targets",
+						environmentIndex,
+						"requires",
+						targetIndex,
+					],
+					message: `Publishing target requires target "${target}" must reference a configured publishing target`,
 				});
 			}
 		}
-
-		const review = data.review;
+		const review = data.publishing?.review;
 		for (const [targetIndex, target] of (review?.requiredFor ?? []).entries()) {
 			if (environmentKeys.has(target)) continue;
 			ctx.addIssue({
 				code: "custom",
-				path: ["review", "requiredFor", targetIndex],
-				message: `Review requiredFor target "${target}" must reference a configured environment`,
+				path: ["publishing", "review", "requiredFor", targetIndex],
+				message: `Review requiredFor target "${target}" must reference a configured publishing target`,
 			});
 		}
 
 		const breakpointKeys =
-			data.preview === true
+			typeof data.preview === "boolean"
 				? []
 				: (data.preview?.breakpoints?.map((breakpoint) => breakpoint.key) ??
 					[]);
@@ -286,8 +305,7 @@ const CollectionConfigSchema = z
 				message: `Preview breakpoint keys must be unique: ${Array.from(new Set(duplicateBreakpointKeys)).join(", ")}`,
 			});
 		}
-
-		const workflow = data.workflow;
+		const workflow = data.publishing?.workflow;
 		if (!workflow) return;
 
 		const stageKeys = workflow.stages.map((stage) => stage.key);
@@ -297,7 +315,7 @@ const CollectionConfigSchema = z
 		if (duplicateStageKeys.length > 0) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["workflow", "stages"],
+				path: ["publishing", "workflow", "stages"],
 				message: `Workflow stage keys must be unique: ${Array.from(new Set(duplicateStageKeys)).join(", ")}`,
 			});
 		}
@@ -305,7 +323,7 @@ const CollectionConfigSchema = z
 		if (workflow.initial && !stageKeys.includes(workflow.initial)) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["workflow", "initial"],
+				path: ["publishing", "workflow", "initial"],
 				message:
 					"Workflow initial stage must reference one of the configured stages",
 			});
@@ -319,13 +337,14 @@ const CollectionConfigSchema = z
 				ctx.addIssue({
 					code: "custom",
 					path: [
+						"publishing",
 						"workflow",
 						"stages",
 						stageIndex,
 						"publishTargets",
 						targetIndex,
 					],
-					message: `Workflow publishTargets target "${target}" must reference a configured environment`,
+					message: `Workflow publishTargets target "${target}" must reference a configured publishing target`,
 				});
 			}
 		}

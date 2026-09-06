@@ -1,6 +1,6 @@
 import type { EnvironmentVariables } from "@lucidcms/core/types";
 import constants, { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
-import configureLucid from "./services/configure-lucid.js";
+import adaptConfig from "./services/adapt-config.js";
 import type {
 	AdapterOptions,
 	CloudflareAdapterOptionsValue,
@@ -43,7 +43,7 @@ export const cloudflare = (
 			customBuildArtifacts: [constants.WORKER_EXPORT_ARTIFACT_TYPE],
 			customPrepareArtifacts: [constants.WRANGLER_CONFIG_ARTIFACT_TYPE],
 		},
-		configureLucid,
+		adaptConfig,
 		getOptions: () => resolvedOptions,
 		resolveOptions,
 		getPlatformProxy: () => platformProxy,

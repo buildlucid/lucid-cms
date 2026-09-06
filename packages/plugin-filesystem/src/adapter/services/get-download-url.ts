@@ -8,7 +8,7 @@ import { FILE_SYSTEM_DOWNLOAD_PATH } from "../helpers.js";
 
 export default (options: FileSystemStorageAdapterOptions) => {
 	const getDownloadUrl: MediaStorageAdapterServiceGetDownloadUrl = async (
-		_context,
+		context,
 		props,
 	) => {
 		try {
@@ -19,7 +19,7 @@ export default (options: FileSystemStorageAdapterOptions) => {
 						host: props.host,
 						path: FILE_SYSTEM_DOWNLOAD_PATH,
 						key: props.key,
-						secretKey: options.secretKey,
+						secretKey: options.secretKey ?? context.config.secrets.encryption,
 						query: {
 							fileName: props.fileName ?? undefined,
 							extension: props.extension ?? undefined,

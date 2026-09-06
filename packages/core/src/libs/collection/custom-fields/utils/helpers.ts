@@ -1,12 +1,12 @@
 import z, { type ZodType } from "zod";
-import type { CFConfig, FieldTypes } from "../types.js";
+import type { FieldConfig, FieldTypes } from "../types.js";
 
 /**
  * Checks if the custom field config property has a runtime config object.
  */
 export const hasRuntimeConfig = (
-	config: CFConfig<FieldTypes>,
-): config is CFConfig<FieldTypes> & {
+	config: FieldConfig<FieldTypes>,
+): config is FieldConfig<FieldTypes> & {
 	localized?: boolean;
 	default?: unknown;
 } => {
@@ -21,8 +21,8 @@ export const hasRuntimeConfig = (
  * Checks if the custom field config property has a validation config object.
  */
 export const hasValidationConfig = (
-	config: CFConfig<FieldTypes>,
-): config is CFConfig<FieldTypes> & {
+	config: FieldConfig<FieldTypes>,
+): config is FieldConfig<FieldTypes> & {
 	validation?: {
 		required?: boolean;
 		zod?: ZodType<unknown>;

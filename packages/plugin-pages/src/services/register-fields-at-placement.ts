@@ -4,7 +4,6 @@ import {
 	LucidError,
 	translate,
 } from "@lucidcms/core";
-import type { WritableDraft } from "immer";
 import { PLUGIN_KEY } from "../constants.js";
 import type { PagesFieldPlacement } from "../types/types.js";
 
@@ -14,7 +13,7 @@ type ResolvedPlacement = {
 };
 
 const resolvePlacement = (
-	collection: WritableDraft<CollectionBuilder>,
+	collection: CollectionBuilder,
 	placement: PagesFieldPlacement,
 ): ResolvedPlacement => {
 	const fields = Array.from(collection.fields.values());
@@ -106,7 +105,7 @@ const resolvePlacement = (
 };
 
 const registerFieldsAtPlacement = (data: {
-	collection: WritableDraft<CollectionBuilder>;
+	collection: CollectionBuilder;
 	fieldKeys: readonly string[];
 	placement: PagesFieldPlacement;
 	register: () => void;
@@ -115,25 +114,10 @@ const registerFieldsAtPlacement = (data: {
 
 	data.register();
 
-	const fieldKeySet = new Set(data.fieldKeys);
-	const registeredFields = Array.from(data.collection.fields.entries()).filter(
-		([key]) => fieldKeySet.has(key),
-	);
-	for (const [, field] of registeredFields) {
-		field.tabParent = placement.tabParent;
-		field.treeParent = null;
-		field.structuralParent = null;
-	}
-
-	const fields = Array.from(data.collection.fields.entries()).filter(
-		([key]) => !fieldKeySet.has(key),
-	);
-	fields.splice(placement.index, 0, ...registeredFields);
-
-	data.collection.fields.clear();
-	for (const [key, field] of fields) {
-		data.collection.fields.set(key, field);
-	}
+	data.collection.moveFields(data.fieldKeys, {
+		index: placement.index,
+		tab: placement.tabParent,
+	});
 };
 
 export default registerFieldsAtPlacement;

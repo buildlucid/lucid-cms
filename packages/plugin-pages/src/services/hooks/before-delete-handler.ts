@@ -31,8 +31,9 @@ const beforeDeleteHandler =
 		// Process both latest and all configured environments
 		const versionTypes = [
 			"latest",
-			...(data.meta.collection.getData.environments?.map((env) => env.key) ||
-				[]),
+			...(data.meta.collection.getData.publishing.targets?.map(
+				(env) => env.key,
+			) || []),
 		];
 
 		for (const versionType of versionTypes) {

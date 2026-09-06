@@ -2,9 +2,9 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -23,7 +23,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			skipZodValidation: true,
 		} as const;
 	}
-	constructor(key: string, props?: CFProps<"repeater">) {
+	constructor(key: string, props?: FieldOptions<"repeater">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -36,7 +36,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			ui: {
 				disabled: this.props?.ui?.disabled,
@@ -45,7 +45,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 			},
 			fields: [],
 			validation: this.props?.validation,
-		} satisfies CFConfig<"repeater">;
+		} satisfies FieldConfig<"repeater">;
 	}
 	getSchemaDefinition(
 		_props: GetSchemaDefinitionProps,
@@ -58,7 +58,7 @@ class RepeaterCustomField extends CustomField<"repeater"> {
 		};
 	}
 	formatResponseValue() {
-		return null satisfies CFResponse<"repeater">["value"];
+		return null satisfies FieldResponse<"repeater">["value"];
 	}
 	uniqueValidation(value: unknown) {
 		if (

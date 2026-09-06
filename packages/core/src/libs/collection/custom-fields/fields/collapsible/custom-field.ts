@@ -2,9 +2,9 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	SchemaDefinition,
 } from "../../types.js";
 import keyToTitle from "../../utils/key-to-title.js";
@@ -14,7 +14,7 @@ class CollapsibleCustomField extends CustomField<"collapsible"> {
 	type = collapsibleFieldConfig.type;
 	config;
 	key: string;
-	props?: CFProps<"collapsible">;
+	props?: FieldOptions<"collapsible">;
 	protected override get sharedValidationFlags() {
 		return {
 			skipValidation: true,
@@ -22,7 +22,7 @@ class CollapsibleCustomField extends CustomField<"collapsible"> {
 			skipZodValidation: true,
 		} as const;
 	}
-	constructor(key: string, props?: CFProps<"collapsible">) {
+	constructor(key: string, props?: FieldOptions<"collapsible">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -35,7 +35,7 @@ class CollapsibleCustomField extends CustomField<"collapsible"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			output: this.props?.output ?? "nested",
 			defaultOpen: this.props?.defaultOpen ?? false,
@@ -44,7 +44,7 @@ class CollapsibleCustomField extends CustomField<"collapsible"> {
 				width: this.props?.ui?.width,
 			},
 			fields: [],
-		} satisfies CFConfig<"collapsible">;
+		} satisfies FieldConfig<"collapsible">;
 	}
 	getSchemaDefinition(): Awaited<ServiceResponse<SchemaDefinition>> {
 		return {
@@ -55,7 +55,7 @@ class CollapsibleCustomField extends CustomField<"collapsible"> {
 		};
 	}
 	formatResponseValue() {
-		return null satisfies CFResponse<"collapsible">["value"];
+		return null satisfies FieldResponse<"collapsible">["value"];
 	}
 	uniqueValidation() {
 		return {

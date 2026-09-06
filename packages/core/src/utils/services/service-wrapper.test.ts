@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, expect, test } from "vitest";
-import z from "zod";
 import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import passthroughKVAdapter from "../../libs/kv/adapters/passthrough.js";
 import inlineQueueAdapter from "../../libs/queue/adapters/inline.js";
 import getTestConfig from "../test-helpers/get-test-config.js";
+import createServiceContext from "./create-service-context.js";
 import serviceWrapper from "./service-wrapper.js";
 import type { ServiceFn, ServiceResponse } from "./types.js";
 import mergeServiceError from "./utils/merge-errors.js";
@@ -460,78 +460,4 @@ test("transaction - two level deep service wrapper success and error", async () 
 
 	expect(successDocuments.length).toBe(2);
 	expect(errorDocuments.length).toBe(0);
-});
-
-test("service wrapper schema validation", async () => {
-	const config = await testConfig.getConfig();
-	const database = await testConfig.getDatabase();
-	const lucidDatabase = createLucidDatabase({
-		client: database.client,
-		adapter: config.db,
-		collections: config.collections,
-	});
-
-	const schema = z.object({
-		key: z.string(),
-		value: z.string(),
-	});
-
-	// Setup
-	const testService: ServiceFn<
-		[Record<string, string>],
-		Record<string, string>
-	> = async (_, data) => {
-		return {
-			error: undefined,
-			data: data,
-		};
-	};
-
-	const queueAdapter = inlineQueueAdapter();
-	const kvAdapter = passthroughKVAdapter();
-
-	// Execute
-	const [success, error] = await Promise.all([
-		serviceWrapper(testService, {
-			transaction: false,
-			schema: schema,
-		})(
-			{
-				db: lucidDatabase,
-				config: config,
-				queue: queueAdapter,
-				kv: kvAdapter,
-				env: null,
-				request: { url: "https://test.com" },
-			},
-			{
-				key: "test",
-				value: "test",
-			},
-		),
-		serviceWrapper(testService, {
-			transaction: false,
-			schema: schema,
-		})(
-			{
-				db: lucidDatabase,
-				config: config,
-				queue: queueAdapter,
-				kv: kvAdapter,
-				env: null,
-				request: { url: "https://test.com" },
-			},
-			{
-				key: "test",
-				// @ts-expect-error
-				value: 100,
-			},
-		),
-	]);
-
-	expect(success.data).toEqual({
-		key: "test",
-		value: "test",
-	});
-	expect(error.error?.zod).toBeDefined();
 });

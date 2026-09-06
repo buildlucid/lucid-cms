@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type {
 	AdapterLifecycleContext,
 	AdapterRuntimeContext,
@@ -6,7 +6,7 @@ import type {
 } from "./types.js";
 
 export const createAdapterLifecycleContext = (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
 }): AdapterLifecycleContext => ({

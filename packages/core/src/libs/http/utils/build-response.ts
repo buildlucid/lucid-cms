@@ -4,9 +4,9 @@ import { normalizeHost } from "../../../utils/helpers/index.js";
 
 // --------------------------------------------------
 // Types
-interface BuildResponseParams {
-	data: unknown;
-	refs?: unknown;
+interface BuildResponseParams<Data = unknown, Refs = unknown> {
+	data: Data;
+	refs?: Refs;
 	pagination?: {
 		count: number;
 		page: number;
@@ -14,10 +14,9 @@ interface BuildResponseParams {
 	};
 }
 
-type FormatAPIResponse = (
-	c: Context,
-	params: BuildResponseParams,
-) => ResponseBody<unknown, unknown>;
+type FormattedAPIResponse<Data, Refs> = Omit<ResponseBody<Data>, "refs"> & {
+	refs?: Refs;
+};
 
 // --------------------------------------------------
 // Helpers
@@ -129,7 +128,10 @@ const buildLinks = (
 
 // --------------------------------------------------
 // Main
-const formatAPIResponse: FormatAPIResponse = (c, params) => {
+const formatAPIResponse = <Data, Refs = never>(
+	c: Context,
+	params: BuildResponseParams<Data, Refs>,
+): FormattedAPIResponse<Data, Refs> => {
 	let lastPage = null;
 
 	if (params.pagination) {
@@ -155,7 +157,7 @@ const formatAPIResponse: FormatAPIResponse = (c, params) => {
 	const links = buildLinks(c, params);
 
 	return {
-		data: params.data || null,
+		data: params.data,
 		...(params.refs === undefined ? {} : { refs: params.refs }),
 		meta: meta,
 		links,

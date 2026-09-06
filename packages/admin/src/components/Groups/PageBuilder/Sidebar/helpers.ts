@@ -9,13 +9,13 @@ export const formatTargetName = (props: {
 	collection?: Collection;
 	target: string;
 }) => {
-	const environment = props.collection?.environments.find(
+	const environment = props.collection?.publishing.targets.find(
 		(environment) => environment.key === props.target,
 	);
 
 	return (
 		helpers.getLocaleValue({
-			value: environment?.name,
+			value: environment?.label,
 			fallback: props.target,
 		}) || props.target
 	);
@@ -28,13 +28,13 @@ export const formatStageName = (props: {
 	collection?: Collection;
 	stageKey?: string | null;
 }) => {
-	const stage = props.collection?.workflow?.stages.find(
+	const stage = props.collection?.publishing.workflow?.stages.find(
 		(stage) => stage.key === props.stageKey,
 	);
 
 	return (
 		helpers.getLocaleValue({
-			value: stage?.name,
+			value: stage?.label,
 			fallback: props.stageKey ?? "",
 		}) ||
 		props.stageKey ||
@@ -50,7 +50,7 @@ export const getStageColor = (props: {
 	stageKey?: string | null;
 }): WorkflowStageColor => {
 	return (
-		props.collection?.workflow?.stages.find(
+		props.collection?.publishing.workflow?.stages.find(
 			(stage) => stage.key === props.stageKey,
 		)?.color ?? "grey"
 	);

@@ -4,16 +4,16 @@
 	"private": false,
 	"description": "The official Cloudflare D1 database adapter for Lucid CMS",
 	"type": "module",
-	"types": "./dist/index.d.ts",
+	"types": "./dist/index.d.mts",
 	"module": "dist/index.mjs",
 	"exports": {
 		".": {
-			"import": "./dist/index.mjs",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
 		},
 		"./types": {
-			"import": "./dist/types.mjs",
-			"types": "./dist/types.d.ts"
+			"types": "./dist/types.d.mts",
+			"import": "./dist/types.mjs"
 		}
 	},
 	"scripts": {

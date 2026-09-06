@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import {
 	fieldConfigSchema,
@@ -28,7 +28,7 @@ export const brickConfigSchema = z.object({
 		example: "banner",
 	}),
 	details: z.object({
-		name: resolvedAdminCopySchema.meta({
+		label: resolvedAdminCopySchema.meta({
 			description: "Display name for the brick",
 			example: {
 				type: "lucid.copy",
@@ -37,7 +37,7 @@ export const brickConfigSchema = z.object({
 				defaultMessage: "Banner",
 			},
 		}),
-		summary: resolvedAdminCopySchema
+		description: resolvedAdminCopySchema
 			.nullable()
 			.meta({
 				description: "Description text for the brick",
@@ -50,16 +50,10 @@ export const brickConfigSchema = z.object({
 			})
 			.optional(),
 	}),
-	preview: z.object({
-		image: z
-			.string()
-			.nullable()
-			.meta({
-				description: "Preview image URL for the brick",
-				example: "https://example.com/banner-brick.png",
-			})
-			.optional(),
-	}),
+	thumbnail: z
+		.string()
+		.optional()
+		.meta({ description: "Thumbnail URL shown when choosing a brick" }),
 	get fields() {
 		return z.array(fieldConfigSchema);
 	},

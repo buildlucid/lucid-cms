@@ -71,7 +71,8 @@ const reject: ServiceFn<
 
 	const comment = normalizeComment(data.comment);
 	if (
-		collectionRes.data.getData.review?.comments.decision === "required" &&
+		collectionRes.data.getData.publishing.review?.comments.decision ===
+			"required" &&
 		!comment.text
 	) {
 		return {

@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import MediaCustomField from "./custom-field.js";
 
@@ -10,12 +11,14 @@ import MediaCustomField from "./custom-field.js";
 const MediaCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -79,8 +82,9 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("standard_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("standard_media")!,
 		validationData: {
 			media: [
 				{
@@ -108,8 +112,9 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("required_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [
 				{
@@ -137,8 +142,9 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("min_width_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("min_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -166,8 +172,9 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("max_width_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("max_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -195,8 +202,9 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("min_height_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("min_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -224,8 +232,9 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("max_height_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("max_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -254,7 +263,7 @@ test("successfully validate field - media", async () => {
 			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("type_media")!,
+		instance: getFieldBuilderState(MediaCollection).fields.get("type_media")!,
 		validationData: {
 			media: [
 				{
@@ -282,8 +291,9 @@ test("successfully validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("extension_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("extension_media")!,
 		validationData: {
 			media: [
 				{
@@ -313,8 +323,9 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("required_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -341,8 +352,9 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("required_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("required_media")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -368,8 +380,9 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("min_width_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("min_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -408,8 +421,9 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("max_width_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("max_width_media")!,
 		validationData: {
 			media: [
 				{
@@ -448,8 +462,9 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("min_height_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("min_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -488,8 +503,9 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("max_height_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("max_height_media")!,
 		validationData: {
 			media: [
 				{
@@ -529,7 +545,7 @@ test("fail to validate field - media", async () => {
 			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("type_media")!,
+		instance: getFieldBuilderState(MediaCollection).fields.get("type_media")!,
 		validationData: {
 			media: [
 				{
@@ -568,8 +584,9 @@ test("fail to validate field - media", async () => {
 			type: "media",
 			value: [1],
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("extension_media")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(MediaCollection).fields.get("extension_media")!,
 		validationData: {
 			media: [
 				{
@@ -610,7 +627,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			value: [1],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("multi_media")!,
+		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
 				{
@@ -636,7 +653,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			value: [1, 2, 3, 4],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("multi_media")!,
+		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
 				{
@@ -683,7 +700,7 @@ test("media field validates multiple item counts and indexed errors", async () =
 			value: [1, 99, 100],
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: MediaCollection.fields.get("multi_media")!,
+		instance: getFieldBuilderState(MediaCollection).fields.get("multi_media")!,
 		validationData: {
 			media: [
 				{
@@ -749,7 +766,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 		},

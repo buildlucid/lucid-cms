@@ -1,4 +1,7 @@
-import type { Config, EnvironmentVariables } from "../../../exports/types.js";
+import type {
+	EnvironmentVariables,
+	ResolvedLucidConfig,
+} from "../../../exports/types.js";
 import { syncServices } from "../../../services/index.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { DatabaseConnection } from "../../db/types.js";
@@ -14,7 +17,7 @@ import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import cliLogger from "../logger.js";
 
 const runSyncTasks = async (options: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	database: DatabaseConnection;
 	translationStore: TranslationStore;
 	kv?: KVAdapterInstance;

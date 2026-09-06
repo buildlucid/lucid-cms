@@ -51,7 +51,7 @@ const getMultipleController = factory.createHandlers(
 	]),
 	validate("query", controllerSchemas.content.getMultiple.query.string),
 	cache({
-		ttl: hoursToSeconds(24),
+		ttlSeconds: hoursToSeconds(24),
 		mode: "include-query",
 		bypass: (c) => c.req.query("preview") !== undefined,
 		tags: (c) => {

@@ -347,11 +347,11 @@ export const getDocumentPreviewLabel = (props: {
 
 	const collectionName =
 		helpers.getLocaleValue({
-			value: collection?.details.singularName,
+			value: collection?.details.labels.singular,
 			fallback: collection?.key ?? document?.collectionKey,
 		}) ||
 		helpers.getLocaleValue({
-			value: collection?.details.name,
+			value: collection?.details.labels.plural,
 			fallback: document?.collectionKey ?? T()("media.types.document"),
 		}) ||
 		T()("media.types.document");

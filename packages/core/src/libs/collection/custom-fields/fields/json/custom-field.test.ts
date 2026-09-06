@@ -3,6 +3,7 @@ import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import JsonCustomField from "./custom-field.js";
 
@@ -11,12 +12,14 @@ import JsonCustomField from "./custom-field.js";
 const JSONCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -46,7 +49,7 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: JSONCollection.fields.get("standard_json")!,
+		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -66,7 +69,7 @@ test("successfully validate field - json", async () => {
 			value: "",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: JSONCollection.fields.get("standard_json")!,
+		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -89,7 +92,7 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: JSONCollection.fields.get("required_json")!,
+		instance: getFieldBuilderState(JSONCollection).fields.get("required_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -113,7 +116,7 @@ test("successfully validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: JSONCollection.fields.get("zod_json")!,
+		instance: getFieldBuilderState(JSONCollection).fields.get("zod_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -136,7 +139,7 @@ test("fail to validate field - json", async () => {
 			value: "invalid json",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: JSONCollection.fields.get("standard_json")!,
+		instance: getFieldBuilderState(JSONCollection).fields.get("standard_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -163,7 +166,7 @@ test("fail to validate field - json", async () => {
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: JSONCollection.fields.get("required_json")!,
+		instance: getFieldBuilderState(JSONCollection).fields.get("required_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -193,7 +196,7 @@ test("fail to validate field - json", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: JSONCollection.fields.get("zod_json")!,
+		instance: getFieldBuilderState(JSONCollection).fields.get("zod_json")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -232,7 +235,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 			placeholder: copy("admin:tests.fields.field.placeholder", {

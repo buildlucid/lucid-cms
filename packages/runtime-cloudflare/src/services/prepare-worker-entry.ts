@@ -25,6 +25,7 @@ const prepareMainWorkerEntry = (
 		{
 			path: configArtifacts.config,
 			default: "configFactory",
+			exports: ["configure"],
 		},
 		{
 			path: configArtifacts.env,
@@ -72,7 +73,7 @@ const prepareMainWorkerEntry = (
 const host = await getOrCreateRuntimeHost(
     runtimeHostKeys.http,
     () => createLucidHost({
-        definition: { runtime, db, config: configFactory },
+        definition: { runtime, db, config: configFactory, configure },
         envSchema,
         env,
         runtimeContext,
@@ -83,7 +84,7 @@ const host = await getOrCreateRuntimeHost(
             extensions: [
                 {
                     name: "runtime-cloudflare:platform-context",
-                    priority: 0,
+                    phase: "beforeMiddleware",
                     register: async (app) => {
                         app.use("*", async (c, next) => {
                             c.set("cf", c.req.raw.cf ?? null);
@@ -112,7 +113,7 @@ const host = await getOrCreateRuntimeHost(
                 },
                 {
                     name: "runtime-cloudflare:spa-shell",
-                    priority: 2,
+                    phase: "afterSetup",
                     register: async (app) => {
                         app.get("/lucid/*", async (c) => {
                             const url = new URL(c.req.url);
@@ -151,7 +152,7 @@ try {
     const host = await getOrCreateRuntimeHost(
         runtimeHostKeys.background,
         () => createLucidHost({
-            definition: { runtime, db, config: configFactory },
+            definition: { runtime, db, config: configFactory, configure },
             envSchema,
             env,
             runtimeContext,

@@ -2,7 +2,7 @@ import { BrickBuilder } from "@lucidcms/core";
 
 const SeoBrick = new BrickBuilder("seo", {
 	details: {
-		name: "SEO",
+		label: "SEO",
 	},
 })
 	.addText("metaTitle", {

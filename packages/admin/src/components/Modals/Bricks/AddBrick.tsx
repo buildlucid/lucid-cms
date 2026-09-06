@@ -46,7 +46,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 			if (!getSearchQuery()) return true;
 			return helpers
 				.getLocaleValue({
-					value: brickConfig.details.name,
+					value: brickConfig.details.label,
 					fallback: brickConfig.key,
 				})
 				.toLowerCase()
@@ -149,7 +149,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 											loading="lazy"
 										/>
 										{helpers.getLocaleValue({
-											value: brickConfig.details.name,
+											value: brickConfig.details.label,
 											fallback: brickConfig.key,
 										})}
 									</button>
@@ -163,7 +163,7 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 					<div class="border border-border bg-card-base h-full rounded-md flex items-center justify-center relative">
 						<div class="w-[80%]">
 							<Show
-								when={highlightedBrick()?.preview?.image}
+								when={highlightedBrick()?.thumbnail}
 								fallback={
 									<div class="flex items-center justify-center px-4 text-center">
 										<FaSolidImage size={22} />
@@ -174,10 +174,10 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 									data={{
 										brick: {
 											title: helpers.getLocaleValue({
-												value: highlightedBrick()?.details.name,
+												value: highlightedBrick()?.details.label,
 												fallback: highlightedBrick()?.key,
 											}),
-											image: highlightedBrick()?.preview?.image,
+											image: highlightedBrick()?.thumbnail,
 										},
 									}}
 									options={{
@@ -186,12 +186,12 @@ const AddBrick: Component<AddBrickProps> = (props) => {
 								/>
 							</Show>
 						</div>
-						<Show when={highlightedBrick()?.details.summary}>
+						<Show when={highlightedBrick()?.details.description}>
 							<div class="absolute top-4 right-4">
 								<FormTooltip
 									theme="inline"
 									copy={helpers.getLocaleValue({
-										value: highlightedBrick()?.details.summary,
+										value: highlightedBrick()?.details.description,
 										fallback: highlightedBrick()?.key,
 									})}
 								/>

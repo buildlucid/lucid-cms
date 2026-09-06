@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { createAdapterLifecycleContext } from "../runtime/adapter-lifecycle.js";
 import type {
 	AdapterRuntimeContext,
@@ -9,7 +9,7 @@ import type { MediaDeliveryAdapterInstance } from "./types.js";
 
 /** Resolve or use a supplied media delivery adapter and run its init hook. */
 export const getInitializedMediaDeliveryAdapter = async (
-	config: Config,
+	config: ResolvedLucidConfig,
 	options: {
 		adapter?: MediaDeliveryAdapterInstance;
 		env?: EnvironmentVariables;
@@ -37,7 +37,7 @@ export const getInitializedMediaDeliveryAdapter = async (
 export const destroyMediaDeliveryAdapter = async (
 	adapter: MediaDeliveryAdapterInstance | undefined,
 	options: {
-		config: Config;
+		config: ResolvedLucidConfig;
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 	},

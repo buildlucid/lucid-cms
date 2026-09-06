@@ -40,7 +40,7 @@ const downloadSingle: ServiceFn<
 		token: data.token,
 		timestamp: data.timestamp,
 		path: FILE_SYSTEM_DOWNLOAD_PATH,
-		secretKey: adapterOptions?.secretKey ?? context.config.secrets.cookie,
+		secretKey: adapterOptions?.secretKey ?? context.config.secrets.encryption,
 		query: {
 			fileName: data.fileName,
 			extension: data.extension,

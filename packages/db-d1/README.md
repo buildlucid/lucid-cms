@@ -15,11 +15,11 @@ npm install @lucidcms/db-d1
 ## Setup
 
 ```typescript
-import { configureLucid } from "@lucidcms/core";
+import { defineConfig } from "@lucidcms/core";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { d1 } from "@lucidcms/db-d1";
 
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare,
   db: d1,
   config: () => ({

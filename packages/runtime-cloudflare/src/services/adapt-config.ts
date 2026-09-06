@@ -1,17 +1,16 @@
 import type {
+	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
-	RuntimeConfigureLucid,
-	WrappedLucidConfigDefinition,
+	RuntimeAdaptConfig,
 } from "@lucidcms/core/types";
 
-const configureLucid: RuntimeConfigureLucid = (
-	definition: WrappedLucidConfigDefinition,
+const adaptConfig: RuntimeAdaptConfig = (
+	definition: LucidConfigDefinition,
 	meta?: LucidConfigDefinitionMeta,
 ) => {
 	return {
 		...definition,
-		recipe: (draft) => {
-			definition.recipe?.(draft);
+		configure: (draft) => {
 			if (meta?.emailTemplates) {
 				draft.email.templates = {
 					...(draft.email.templates ?? {}),
@@ -23,8 +22,9 @@ const configureLucid: RuntimeConfigureLucid = (
 					),
 				};
 			}
+			definition.configure?.(draft);
 		},
 	};
 };
 
-export default configureLucid;
+export default adaptConfig;

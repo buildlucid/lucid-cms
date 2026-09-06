@@ -9,7 +9,10 @@ import type { StatusCode } from "hono/utils/http-status";
 import { openAPIRouteHandler } from "hono-openapi";
 import packageJson from "../../../package.json" with { type: "json" };
 import constants from "../../constants/constants.js";
-import type { Config, EnvironmentVariables } from "../../exports/types.js";
+import type {
+	EnvironmentVariables,
+	ResolvedLucidConfig,
+} from "../../exports/types.js";
 import type { LucidHonoGeneric } from "../../types/hono.js";
 import {
 	LucidAPIError,
@@ -66,7 +69,7 @@ const createInvocationBindings = (
  * The entry point for creating the Hono app.
  */
 const createApp = async (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	translationStore: TranslationStore;
 	runtimeContext: AdapterRuntimeContext;
 	adapters: LucidAdapterInstances;
@@ -96,7 +99,7 @@ const createApp = async (props: {
 	await runHttpExtensions({
 		app,
 		config: props.config,
-		priority: 0,
+		phase: "beforeMiddleware",
 		extensions: [
 			...(props.http?.extensions ?? []),
 			...props.config.http.extensions,
@@ -247,7 +250,7 @@ const createApp = async (props: {
 		await runHttpExtensions({
 			app,
 			config: props.config,
-			priority: 1,
+			phase: "afterRoutes",
 			extensions: [
 				...props.config.http.extensions,
 				...(props.http?.extensions ?? []),
@@ -407,7 +410,7 @@ const createApp = async (props: {
 		await runHttpExtensions({
 			app,
 			config: props.config,
-			priority: 2,
+			phase: "afterSetup",
 			extensions: [
 				...props.config.http.extensions,
 				...(props.http?.extensions ?? []),

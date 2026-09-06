@@ -1,11 +1,11 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import inlineQueueAdapter from "./adapters/inline.js";
 import type { QueueAdapterInstance } from "./types.js";
 
 /** Resolves the configured queue adapter, using inline execution when omitted. */
 const getQueueAdapter = async (
-	config: Pick<Config, "queue">,
+	config: Pick<ResolvedLucidConfig, "queue">,
 ): Promise<QueueAdapterInstance> => {
 	try {
 		if (!config.queue.adapter) return inlineQueueAdapter();

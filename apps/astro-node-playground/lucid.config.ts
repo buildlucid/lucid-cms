@@ -1,4 +1,4 @@
-import { configureLucid, z } from "@lucidcms/core";
+import { defineConfig, z } from "@lucidcms/core";
 import { sqlite } from "@lucidcms/db-sqlite";
 import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
@@ -13,7 +13,7 @@ export const env = z.object({
 	ACCESS_TOKEN_SECRET: z.string(),
 });
 
-export default configureLucid({
+export default defineConfig({
 	runtime: node,
 	db: sqlite,
 	config: (env) => ({

@@ -1,6 +1,9 @@
 import path from "node:path";
 import constants from "../../../constants/constants.js";
-import type { Config, ServiceResponse } from "../../../exports/types.js";
+import type {
+	ResolvedLucidConfig,
+	ServiceResponse,
+} from "../../../exports/types.js";
 import prepareLucidPublicAssets from "../../compile/prepare-lucid-public-assets.js";
 import type { ResourceFile } from "../../resources/types.js";
 
@@ -8,7 +11,7 @@ import type { ResourceFile } from "../../resources/types.js";
  * Copies the public assets from various sources into the output directory.
  */
 const copyPublicAssets = async (props: {
-	config: Config;
+	config: ResolvedLucidConfig;
 	files: ResourceFile[];
 	silent?: boolean;
 	verbose?: boolean;

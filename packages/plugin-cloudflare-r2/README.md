@@ -13,7 +13,7 @@ npm install @lucidcms/plugin-cloudflare-r2
 ## Setup
 
 ```ts
-import { configureLucid, z } from "@lucidcms/core";
+import { defineConfig, z } from "@lucidcms/core";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
 import { libsql } from "@lucidcms/db-libsql";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
@@ -23,7 +23,7 @@ export const env = z.object({
   LIBSQL_AUTH_TOKEN: z.string().optional(),
 });
 
-export default configureLucid({
+export default defineConfig({
   runtime: cloudflare,
   db: libsql,
   config: (env) => ({

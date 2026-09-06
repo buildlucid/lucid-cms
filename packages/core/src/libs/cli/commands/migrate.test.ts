@@ -1,7 +1,7 @@
 import { confirm } from "@inquirer/prompts";
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { Config } from "../../../exports/types.js";
+import type { ResolvedLucidConfig } from "../../../exports/types.js";
 import { syncServices } from "../../../services/index.js";
 import applyCollectionMigrations from "../../collection/apply-collection-migrations.js";
 import type { CollectionMigrationPlan } from "../../collection/migration/types.js";
@@ -105,7 +105,7 @@ const commandFixture = (pendingCore: boolean, pendingExternal = false) => {
 		i18n: {
 			defaultLocale: "en",
 		},
-	} as unknown as Config;
+	} as unknown as ResolvedLucidConfig;
 	const translationStore = createTranslationStore({
 		defaultLocale: "en",
 		bundles: {},

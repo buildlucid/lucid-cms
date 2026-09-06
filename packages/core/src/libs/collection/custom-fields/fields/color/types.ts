@@ -5,19 +5,19 @@ export interface ColorFieldConfig extends SharedFieldConfig {
 	type: "color";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 	presets: string[];
 	localized?: boolean;
 	default?: string;
-	index?: true;
+	index?: boolean;
 	ui?: FieldUIConfig;
 	validation?: {
 		required?: boolean;
 	};
 }
 
-export type ColorFieldProps = Partial<Omit<ColorFieldConfig, "type">>;
+export type ColorFieldProps = Partial<Omit<ColorFieldConfig, "key" | "type">>;
 
 export type ColorResValue = string | null;
 

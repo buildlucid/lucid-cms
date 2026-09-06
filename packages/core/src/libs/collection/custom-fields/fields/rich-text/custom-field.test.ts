@@ -3,6 +3,7 @@ import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import RichTextCustomField from "./custom-field.js";
 import type { RichTextValidationData } from "./types.js";
@@ -12,12 +13,14 @@ import type { RichTextValidationData } from "./types.js";
 const RichTextCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -29,7 +32,7 @@ const RichTextCollection = new CollectionBuilder("collection", {
 	})
 	.addRichText("min_length_rich_text", {
 		validation: {
-			zod: z.object({
+			zod: z.looseObject({
 				type: z.literal("doc"),
 			}),
 		},
@@ -46,8 +49,11 @@ test("successfully validate field - rich text", async () => {
 				content: [{ type: "paragraph" }],
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: RichTextCollection.fields.get("standard_rich_text")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(RichTextCollection).fields.get(
+				"standard_rich_text",
+			)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -75,8 +81,11 @@ test("successfully validate field - rich text", async () => {
 				],
 			},
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: RichTextCollection.fields.get("required_rich_text")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(RichTextCollection).fields.get(
+				"required_rich_text",
+			)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -104,8 +113,11 @@ test("successfully validate field - rich text", async () => {
 					content: [{ type }],
 				},
 			},
-			// biome-ignore lint/style/noNonNullAssertion: test collection always registers this field
-			instance: RichTextCollection.fields.get("required_rich_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: test collection always registers this field
+				getFieldBuilderState(RichTextCollection).fields.get(
+					"required_rich_text",
+				)!,
 			validationData: {
 				media: [],
 				user: [],
@@ -130,7 +142,9 @@ test("successfully validate field - rich text", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: RichTextCollection.fields.get("min_length_rich_text")!,
+		instance: getFieldBuilderState(RichTextCollection).fields.get(
+			"min_length_rich_text",
+		)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -152,8 +166,11 @@ test("fail to validate field - rich text", async () => {
 			type: "rich-text",
 			value: 100,
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: RichTextCollection.fields.get("standard_rich_text")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(RichTextCollection).fields.get(
+				"standard_rich_text",
+			)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -183,8 +200,11 @@ test("fail to validate field - rich text", async () => {
 					content: [{ type: "paragraph" }],
 				},
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: RichTextCollection.fields.get("required_rich_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(RichTextCollection).fields.get(
+					"required_rich_text",
+				)!,
 			validationData: {
 				media: [],
 				user: [],
@@ -214,8 +234,11 @@ test("fail to validate field - rich text", async () => {
 					],
 				},
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: RichTextCollection.fields.get("required_rich_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(RichTextCollection).fields.get(
+					"required_rich_text",
+				)!,
 			validationData: {
 				media: [],
 				user: [],
@@ -232,8 +255,11 @@ test("fail to validate field - rich text", async () => {
 				type: "rich-text",
 				value: undefined,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: RichTextCollection.fields.get("required_rich_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(RichTextCollection).fields.get(
+					"required_rich_text",
+				)!,
 			validationData: {
 				media: [],
 				user: [],
@@ -250,8 +276,11 @@ test("fail to validate field - rich text", async () => {
 				type: "rich-text",
 				value: null,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: RichTextCollection.fields.get("required_rich_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(RichTextCollection).fields.get(
+					"required_rich_text",
+				)!,
 			validationData: {
 				media: [],
 				user: [],
@@ -305,7 +334,9 @@ test("fail to validate field - rich text", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: RichTextCollection.fields.get("min_length_rich_text")!,
+		instance: getFieldBuilderState(RichTextCollection).fields.get(
+			"min_length_rich_text",
+		)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -701,7 +732,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 			placeholder: copy("admin:tests.fields.field.placeholder", {
@@ -719,7 +750,7 @@ test("custom field config passes schema validation", async () => {
 		},
 		validation: {
 			required: true,
-			zod: z.object({
+			zod: z.looseObject({
 				type: z.literal("doc"),
 			}),
 		},

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import sendTelemetryEvent from "../lucid-remote/services/telemetry/index.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import { getOrCreateTelemetryId } from "./identity.js";
@@ -22,7 +22,7 @@ const config = {
 	auth: { password: { enabled: true }, providers: [] },
 	collections: [],
 	plugins: [],
-} as unknown as Config;
+} as unknown as ResolvedLucidConfig;
 
 const runtimeContext = {
 	runtime: "node",

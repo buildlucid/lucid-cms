@@ -1,10 +1,10 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import type { MediaStorageAdapterInstance } from "./types.js";
 
 /** Resolves the configured media storage adapter, returning null when omitted. */
 const getMediaStorageAdapter = async (config: {
-	media: Pick<Config["media"], "storage">;
+	media: Pick<ResolvedLucidConfig["media"], "storage">;
 }): Promise<MediaStorageAdapterInstance | null> => {
 	if (!config.media.storage) return null;
 

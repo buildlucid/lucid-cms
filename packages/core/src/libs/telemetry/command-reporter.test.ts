@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import createCommandTelemetryReporter from "./command-reporter.js";
 import reportTelemetry from "./report.js";
@@ -23,7 +23,7 @@ beforeEach(() => {
 describe("command telemetry reporter", () => {
 	test("reports at most one outcome for a command invocation", async () => {
 		const reporter = createCommandTelemetryReporter({
-			config: { telemetry: true } as Config,
+			config: { telemetry: true } as ResolvedLucidConfig,
 			runtimeContext,
 			projectRoot: "/project",
 			command: "dev",

@@ -17,14 +17,14 @@ const WorkflowStageCol: Component<{
 	// -----------------------------------
 	// Memos
 	const stage = createMemo(() =>
-		props.collection.workflow?.stages.find(
+		props.collection.publishing.workflow?.stages.find(
 			(stage) => stage.key === props.document.workflow?.stage,
 		),
 	);
 	const label = createMemo(
 		() =>
 			helpers.getLocaleValue({
-				value: stage()?.name,
+				value: stage()?.label,
 				fallback:
 					props.document.workflow?.stage ?? T()("documents.workflow.no.stage"),
 			}) || T()("documents.workflow.no.stage"),

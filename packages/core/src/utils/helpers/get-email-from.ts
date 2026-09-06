@@ -1,38 +1,27 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 
 /**
- * Returns the email "from" values based on the following priority:
- * 1. If config.email.from is set, use it
- * 2. If a host URL is provided, use noreply@{host} and "Lucid CMS" for the name
- * 3. Fallback to noreply@example.com and "Lucid CMS" for the name
+ * Keeps each configured sender value and fills missing values from the host
+ * and the default sender name.
  */
 const getEmailFrom = (
-	config: Config,
+	config: ResolvedLucidConfig,
 	url: string | undefined,
 ): {
 	email: string;
 	name: string;
 } => {
-	if (config.email.from?.email && config.email.from?.name) {
-		return {
-			email: config.email.from.email,
-			name: config.email.from.name,
-		};
-	}
-
+	let fallbackAddress = "noreply@example.com";
 	if (url) {
 		try {
 			const parsedUrl = new URL(url);
-			return {
-				email: `noreply@${parsedUrl.hostname}`,
-				name: "Lucid CMS",
-			};
+			fallbackAddress = `noreply@${parsedUrl.hostname}`;
 		} catch {}
 	}
 
 	return {
-		email: "noreply@example.com",
-		name: "Lucid CMS",
+		email: config.email.from?.email ?? fallbackAddress,
+		name: config.email.from?.name ?? "Lucid CMS",
 	};
 };
 

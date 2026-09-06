@@ -27,7 +27,6 @@ export type LucidRetryInput = false | Partial<LucidRetryConfig>;
 export type LucidRequestOptions = {
 	headers?: HeadersInit;
 	signal?: AbortSignal;
-	abortController?: AbortController;
 	timeoutMs?: number;
 	retry?: LucidRetryInput;
 };
@@ -93,7 +92,7 @@ export type CreateClientOptions = {
 };
 
 export interface LucidTransport {
-	request<TData>(
+	request<TData, TRefs = never>(
 		descriptor: LucidRequestDescriptor,
-	): Promise<LucidClientResponse<TData>>;
+	): Promise<LucidClientResponse<TData, TRefs>>;
 }

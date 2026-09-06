@@ -21,8 +21,8 @@ type MatchingHook<
 	E extends keyof HookServiceHandlers[S],
 > = {
 	handler: HookServiceHandlers[S][E];
-	priority?: number;
-	order: number;
+	order?: number;
+	registrationIndex: number;
 };
 
 type TransformPayload = {
@@ -49,7 +49,7 @@ const getMatchingHooks = <
 	options: HookOptions<S, E>,
 ) => {
 	const hooks: Array<MatchingHook<S, E>> = [];
-	let order = 0;
+	let registrationIndex = 0;
 
 	for (let i = 0; i < options.config.hooks.length; i++) {
 		const hook = options.config.hooks[i];
@@ -60,8 +60,8 @@ const getMatchingHooks = <
 
 		hooks.push({
 			handler: hook.handler as HookServiceHandlers[S][E],
-			priority: "priority" in hook ? hook.priority : undefined,
-			order: order++,
+			order: "order" in hook ? hook.order : undefined,
+			registrationIndex: registrationIndex++,
 		});
 	}
 
@@ -75,8 +75,8 @@ const getMatchingHooks = <
 
 		hooks.push({
 			handler: hook.handler as HookServiceHandlers[S][E],
-			priority: "priority" in hook ? hook.priority : undefined,
-			order: order++,
+			order: "order" in hook ? hook.order : undefined,
+			registrationIndex: registrationIndex++,
 		});
 	}
 
@@ -90,10 +90,10 @@ const getOrderedHooks = <
 	options: HookOptions<S, E>,
 ) => {
 	return getMatchingHooks(options).sort((a, b) => {
-		const priorityDiff = (a.priority ?? 0) - (b.priority ?? 0);
-		if (priorityDiff !== 0) return priorityDiff;
+		const orderDifference = (a.order ?? 0) - (b.order ?? 0);
+		if (orderDifference !== 0) return orderDifference;
 
-		return a.order - b.order;
+		return a.registrationIndex - b.registrationIndex;
 	});
 };
 

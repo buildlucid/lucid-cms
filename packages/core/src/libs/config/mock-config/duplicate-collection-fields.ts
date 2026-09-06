@@ -1,4 +1,4 @@
-import { CollectionBuilder, configureLucid, copy } from "@lucidcms/core";
+import { CollectionBuilder, copy, defineConfig } from "@lucidcms/core";
 import { sqlite } from "@lucidcms/db-sqlite";
 import { node } from "@lucidcms/runtime-node";
 import testingConstants from "../../../constants/testing-constants.js";
@@ -6,18 +6,20 @@ import testingConstants from "../../../constants/testing-constants.js";
 const collection = new CollectionBuilder("page", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.pages.name", {
-			defaultMessage: "Pages",
-		}),
-		singularName: copy("admin:tests.collections.pages.singularName", {
-			defaultMessage: "Page",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.pages.singularName", {
+				defaultMessage: "Page",
+			}),
+			plural: copy("admin:tests.collections.pages.name", {
+				defaultMessage: "Pages",
+			}),
+		},
 	},
 })
 	.addText("title")
 	.addText("title");
 
-export default configureLucid({
+export default defineConfig({
 	runtime: node,
 	db: sqlite({
 		database: ":memory:",

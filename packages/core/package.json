@@ -7,8 +7,8 @@
 	"module": "dist/exports/index.mjs",
 	"exports": {
 		".": {
-			"import": "./dist/exports/index.mjs",
-			"types": "./dist/exports/index.d.mts"
+			"types": "./dist/exports/index.d.mts",
+			"import": "./dist/exports/index.mjs"
 		},
 		"./cli": {
 			"types": "./dist/libs/cli/index.d.mts",

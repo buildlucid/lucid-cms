@@ -1,7 +1,7 @@
 import { SQLiteAdapter } from "@lucidcms/db-sqlite";
 import { describe, expect, test, vi } from "vitest";
 import z from "zod";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { defineTable } from "../db/client/table/definition.js";
 import type { DatabaseConnection } from "../db/types.js";
@@ -75,7 +75,7 @@ const createFixture = () => {
 						key: "host-lifecycle-test",
 						lucid: "*",
 						hooks: { init: pluginInit },
-						recipe: () => undefined,
+						configure: () => undefined,
 					},
 				],
 			}),
@@ -87,6 +87,58 @@ const createFixture = () => {
 };
 
 describe("createLucidHost database ownership", () => {
+	test("config and invocations share parsed env while fresh request bindings stay isolated", async () => {
+		const fixture = createFixture();
+		const transform = vi.fn((value: string) => Number(value));
+		const envSchema = z.object({ PORT: z.string().transform(transform) });
+		const binding = { fetch: vi.fn() };
+		const rawEnv = { PORT: "6543", BINDING: binding };
+		const config = vi.fn((env: Record<string, unknown>) => ({
+			...fixture.definition.config(),
+			brand: { name: String(env.PORT) },
+		}));
+		const host = await createLucidHost({
+			definition: { ...fixture.definition, config },
+			env: rawEnv,
+			envSchema,
+			runtimeContext,
+			databaseScope: "invocation",
+		});
+		try {
+			expect(config).toHaveBeenCalledWith(host.env);
+			expect(host.config.brand.name).toBe("6543");
+			const initial = await host
+				.createInvocation({ env: rawEnv })
+				.getServiceContext();
+			const reused = await host
+				.createInvocation({ env: host.env })
+				.getServiceContext();
+			expect(initial.env).toBe(host.env);
+			expect(reused.env).toBe(host.env);
+			expect(initial.env?.PORT).toBe(6543);
+			expect(initial.env?.BINDING).toBe(binding);
+			expect(transform).toHaveBeenCalledOnce();
+			expect(rawEnv.PORT).toBe("6543");
+
+			const nextBinding = { fetch: vi.fn() };
+			const nextEnv = { PORT: "6544", BINDING: nextBinding };
+			const next = await host
+				.createInvocation({ env: nextEnv })
+				.getServiceContext();
+			const repeated = await host
+				.createInvocation({ env: nextEnv })
+				.getServiceContext();
+			expect(next.env?.PORT).toBe(6544);
+			expect(next.env?.BINDING).toBe(nextBinding);
+			expect(repeated.env).toBe(next.env);
+			expect(transform).toHaveBeenCalledTimes(2);
+			expect(initial.env?.BINDING).toBe(binding);
+			expect(() => host.createInvocation({ env: { PORT: false } })).toThrow();
+		} finally {
+			await host.destroy();
+		}
+	});
+
 	test("creates and releases one database connection per invocation", async () => {
 		const fixture = createFixture();
 		const host = await createLucidHost({
@@ -230,7 +282,7 @@ describe("createLucidHost database ownership", () => {
 				extensions: [
 					{
 						name: "request-bindings-test",
-						priority: 2,
+						phase: "afterSetup",
 						register: (app) => {
 							app.get("/request-bindings", (context) =>
 								context.text(
@@ -332,7 +384,7 @@ describe("createLucidHost database ownership", () => {
 			databaseScope: "runtime",
 		});
 
-		expect((host.config as Config).db).toBe(fixture.adapter);
+		expect((host.config as ResolvedLucidConfig).db).toBe(fixture.adapter);
 		expect(host.config.tables).toEqual([pluginMetadataTable]);
 		expect("client" in host.config.db).toBe(false);
 		await host.destroy();

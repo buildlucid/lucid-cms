@@ -12,11 +12,11 @@ export interface RelationFieldConfig extends SharedFieldConfig {
 	collection: string | string[];
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 	};
 	localized?: boolean;
 	default?: RelationCustomFieldValue[];
-	index?: true;
+	index?: boolean;
 	multiple?: boolean;
 	ui?: FieldUIConfig;
 	validation?: {
@@ -27,7 +27,7 @@ export interface RelationFieldConfig extends SharedFieldConfig {
 }
 
 export type RelationFieldProps = Partial<
-	Omit<RelationFieldConfig, "type" | "resource" | "collection">
+	Omit<RelationFieldConfig, "key" | "type" | "resource" | "collection">
 > & {
 	collection: string | string[];
 };

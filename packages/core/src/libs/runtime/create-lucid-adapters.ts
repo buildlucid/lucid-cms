@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import {
 	destroyEmailAdapter,
@@ -38,7 +38,7 @@ export type LucidAdapterOverrides = Partial<LucidAdapterInstances>;
 
 /** Options for initializing Lucid's configured adapters. */
 export type CreateLucidAdaptersOptions = {
-	config: Config;
+	config: ResolvedLucidConfig;
 	env?: EnvironmentVariables;
 	runtimeContext?: AdapterRuntimeContext;
 	overrides?: LucidAdapterOverrides;

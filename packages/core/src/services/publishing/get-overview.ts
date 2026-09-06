@@ -25,7 +25,7 @@ const getOverview: ServiceFn<
 
 	const readableCollections = collectionsRes.data.filter(
 		(collection) =>
-			collection.getData.environments.length > 0 &&
+			collection.getData.publishing.targets.length > 0 &&
 			hasAccess({
 				user: data.user,
 				requiredPermissions: [
@@ -42,8 +42,7 @@ const getOverview: ServiceFn<
 			if (tableNamesRes.error) {
 				return { error: tableNamesRes.error, data: undefined };
 			}
-
-			const environmentKeys = collection.getData.environments.map(
+			const environmentKeys = collection.getData.publishing.targets.map(
 				(environment) => environment.key,
 			);
 			const statusRes = await Documents.selectEnvironmentStatusOverview(
@@ -93,7 +92,7 @@ const getOverview: ServiceFn<
 		new Set(
 			collectionsRes.data.flatMap((collection) =>
 				reviewableCollectionKeys.includes(collection.key)
-					? (collection.getData.review?.requiredFor ?? [])
+					? (collection.getData.publishing.review?.requiredFor ?? [])
 					: [],
 			),
 		),

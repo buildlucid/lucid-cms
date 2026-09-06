@@ -101,10 +101,10 @@ const execute: ServiceFn<
 		key: operation.collection_key,
 	});
 	if (collectionRes.error) return collectionRes;
-
-	const targetIsEnvironment = collectionRes.data.getData.environments.some(
-		(environment) => environment.key === operation.target,
-	);
+	const targetIsEnvironment =
+		collectionRes.data.getData.publishing.targets.some(
+			(environment) => environment.key === operation.target,
+		);
 	if (!targetIsEnvironment) {
 		return {
 			error: {

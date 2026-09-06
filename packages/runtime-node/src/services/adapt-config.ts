@@ -3,19 +3,18 @@ import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { getBuildPaths } from "@lucidcms/core/build";
 import type {
+	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
-	RuntimeConfigureLucid,
-	WrappedLucidConfigDefinition,
+	RuntimeAdaptConfig,
 } from "@lucidcms/core/types";
 
-const configureLucid: RuntimeConfigureLucid = (
-	definition: WrappedLucidConfigDefinition,
+const adaptConfig: RuntimeAdaptConfig = (
+	definition: LucidConfigDefinition,
 	meta?: LucidConfigDefinitionMeta,
 ) => {
 	return {
 		...definition,
-		recipe: (draft) => {
-			definition.recipe?.(draft);
+		configure: (draft) => {
 			if (meta?.emailTemplates) {
 				draft.email.templates = {
 					...draft.email.templates,
@@ -28,11 +27,14 @@ const configureLucid: RuntimeConfigureLucid = (
 				};
 			}
 			// Astro owns and serves the hosted public asset pipeline.
-			if (meta?.host === "astro") return;
+			if (meta?.host === "astro") {
+				definition.configure?.(draft);
+				return;
+			}
 
 			draft.http.extensions.push({
 				name: "runtime-node:static-assets",
-				priority: 2,
+				phase: "afterSetup",
 				register: async (app, config) => {
 					const paths = getBuildPaths(config);
 					app.use(
@@ -57,8 +59,9 @@ const configureLucid: RuntimeConfigureLucid = (
 					});
 				},
 			});
+			definition.configure?.(draft);
 		},
 	};
 };
 
-export default configureLucid;
+export default adaptConfig;

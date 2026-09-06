@@ -6,7 +6,7 @@ import type { NodeAdapterOptions } from "../types.js";
 
 const serveCommand =
 	(options: NodeAdapterOptions | undefined): ServeHandler =>
-	async ({ config, translationStore, logger, onListening }) => {
+	async ({ config, env, translationStore, logger, onListening }) => {
 		logger.instance.info(
 			"Using:",
 			logger.instance.color.blue("Node Runtime Adapter"),
@@ -26,7 +26,7 @@ const serveCommand =
 			config,
 			translationStore,
 			runtimeContext: runtimeContext,
-			env: process.env,
+			env,
 			databaseScope: "runtime",
 		});
 
@@ -54,7 +54,7 @@ const serveCommand =
 		try {
 			server = serve({
 				fetch: async (request, requestBindings) => {
-					const invocation = host.createInvocation({ env: process.env });
+					const invocation = host.createInvocation();
 					try {
 						const response = await invocation.handle({
 							request,

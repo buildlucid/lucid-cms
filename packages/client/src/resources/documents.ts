@@ -1,4 +1,3 @@
-import type { ResponseBody } from "@lucidcms/types";
 import type {
 	CollectionDocumentVersionKey,
 	DocumentsGetMultipleQuery,
@@ -40,26 +39,26 @@ export type DocumentsGetMultipleInput<
 	request?: LucidRequestOptions;
 };
 
-/** The response body returned when requesting one document from a collection. */
+/** The client result for one document, including shared refs and metadata. */
 export type DocumentsGetSingleResponse<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = ResponseBody<CollectionDocument<TCollectionKey>, Refs>;
+> = LucidClientResponse<CollectionDocument<TCollectionKey>, Refs>;
 
-/** The paginated response body returned when requesting multiple documents. */
+/** The client result for multiple documents, including pagination and refs. */
 export type DocumentsGetMultipleResponse<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
-> = ResponseBody<Array<CollectionDocument<TCollectionKey>>, Refs>;
+> = LucidClientResponse<Array<CollectionDocument<TCollectionKey>>, Refs>;
 
 export interface LucidDocumentsClient {
 	/** Fetches one document from a collection. */
 	getSingle<TCollectionKey extends CollectionDocumentKey>(
 		input: DocumentsGetSingleInput<TCollectionKey>,
-	): Promise<LucidClientResponse<DocumentsGetSingleResponse<TCollectionKey>>>;
+	): Promise<DocumentsGetSingleResponse<TCollectionKey>>;
 
 	/** Fetches a paginated list of documents from a collection. */
 	getMultiple<TCollectionKey extends CollectionDocumentKey>(
 		input: DocumentsGetMultipleInput<TCollectionKey>,
-	): Promise<LucidClientResponse<DocumentsGetMultipleResponse<TCollectionKey>>>;
+	): Promise<DocumentsGetMultipleResponse<TCollectionKey>>;
 }
 
 /** Creates the documents resource used by the public Lucid client. */
@@ -69,7 +68,7 @@ export const createDocumentsClient = (
 	getSingle: async <TCollectionKey extends CollectionDocumentKey>(
 		input: DocumentsGetSingleInput<TCollectionKey>,
 	) =>
-		await transport.request<DocumentsGetSingleResponse<TCollectionKey>>({
+		await transport.request<CollectionDocument<TCollectionKey>, Refs>({
 			operation: "documents.getSingle",
 			method: "GET",
 			path: `/document/${encodePathSegment(input.collectionKey)}`,
@@ -83,7 +82,7 @@ export const createDocumentsClient = (
 	getMultiple: async <TCollectionKey extends CollectionDocumentKey>(
 		input: DocumentsGetMultipleInput<TCollectionKey>,
 	) =>
-		await transport.request<DocumentsGetMultipleResponse<TCollectionKey>>({
+		await transport.request<Array<CollectionDocument<TCollectionKey>>, Refs>({
 			operation: "documents.getMultiple",
 			method: "GET",
 			path: `/documents/${encodePathSegment(input.collectionKey)}`,

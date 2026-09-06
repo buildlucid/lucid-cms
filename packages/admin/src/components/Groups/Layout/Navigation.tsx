@@ -122,7 +122,7 @@ export const NavigationChrome: Component = () => {
 			canReadPublishOperations() &&
 			(collections.data?.data ?? []).some(
 				(collection) =>
-					(collection.review?.requiredFor?.length ?? 0) > 0 &&
+					(collection.publishing.review?.requiredFor?.length ?? 0) > 0 &&
 					userStore.get.hasPermission([collection.permissions.review]).all,
 			),
 	);
@@ -131,7 +131,7 @@ export const NavigationChrome: Component = () => {
 			canReadPublishOperations() &&
 			(collections.data?.data ?? []).some(
 				(collection) =>
-					collection.environments.length > 0 &&
+					collection.publishing.targets.length > 0 &&
 					userStore.get.hasPermission([collection.permissions.read]).all,
 			),
 	);

@@ -1,6 +1,6 @@
 import type { EnvironmentVariables } from "@lucidcms/core/types";
 import { ADAPTER_KEY, LUCID_VERSION } from "./constants.js";
-import configureLucid from "./services/configure-lucid.js";
+import adaptConfig from "./services/adapt-config.js";
 import type {
 	NodeAdapterOptions,
 	NodeAdapterOptionsValue,
@@ -34,7 +34,7 @@ export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 				integrationEntrypoint: "@lucidcms/runtime-node/astro-integration",
 			},
 		},
-		configureLucid,
+		adaptConfig,
 		getEnvVars: async ({ logger }) => {
 			const { default: getEnvVars } = await import(
 				"./services/get-env-vars.js"

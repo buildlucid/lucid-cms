@@ -271,14 +271,14 @@ export const createRichTextNodeViewExtensions = (options?: RichTextOptions) => [
 				const label = () =>
 					available()
 						? helpers.getLocaleValue({
-								value: config()?.details.name,
+								value: config()?.details.label,
 								fallback: brick()?.key,
 							})
 						: "";
 				const summary = () =>
 					available()
 						? helpers.getLocaleValue({
-								value: config()?.details.summary,
+								value: config()?.details.description,
 							})
 						: "";
 				const previewFields = () =>

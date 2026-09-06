@@ -53,7 +53,6 @@ const migrateFreshCommand = async (options?: {
 
 		const migrateResult = await migrateCommand({ mode: "return" })({
 			skipSyncSteps: false,
-			skipEnvValidation: true,
 			allowDestructive: true,
 		});
 		if (!migrateResult) {

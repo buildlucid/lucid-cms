@@ -25,7 +25,7 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 	);
 	const collectionLabel = createMemo(() =>
 		helpers.getLocaleValue({
-			value: props.collection.details.name,
+			value: props.collection.details.labels.plural,
 			fallback: props.collection.key,
 		}),
 	);

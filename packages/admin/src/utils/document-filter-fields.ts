@@ -226,7 +226,7 @@ const collectFilterFields = (
 const brickLabel = (brick: CollectionBrickConfig): string => {
 	return (
 		helpers.getLocaleValue({
-			value: brick.details.name,
+			value: brick.details.label,
 			fallback: brick.key,
 		}) || brick.key
 	);
@@ -277,10 +277,10 @@ export const documentFilterSectionFields = (
 		type: "number",
 	});
 
-	for (const environment of collection?.environments ?? []) {
+	for (const environment of collection?.publishing.targets ?? []) {
 		const environmentLabel =
 			helpers.getLocaleValue({
-				value: environment.name,
+				value: environment.label,
 				fallback: environment.key,
 			}) || environment.key;
 
@@ -308,17 +308,17 @@ export const documentFilterSectionFields = (
 		});
 	}
 
-	if (collection?.workflow) {
+	if (collection?.publishing.workflow) {
 		result.push(
 			{
 				key: "workflowStage",
 				label: T()("documents.workflow.stage"),
 				type: "select",
-				options: collection.workflow.stages.map((stage) => ({
+				options: collection.publishing.workflow.stages.map((stage) => ({
 					value: stage.key,
 					label:
 						helpers.getLocaleValue({
-							value: stage.name,
+							value: stage.label,
 							fallback: stage.key,
 						}) || stage.key,
 				})),

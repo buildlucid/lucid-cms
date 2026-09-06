@@ -4,9 +4,9 @@ import type { ServiceResponse } from "../../../../../exports/types.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -19,7 +19,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"datetime">) {
+	constructor(key: string, props?: FieldOptions<"datetime">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -32,7 +32,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			localized: this.props?.localized ?? false,
@@ -46,7 +46,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"datetime">;
+		} satisfies FieldConfig<"datetime">;
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -69,7 +69,7 @@ class DatetimeCustomField extends CustomField<"datetime"> {
 	formatResponseValue(value?: string | null) {
 		return (value ??
 			this.config.default ??
-			null) satisfies CFResponse<"datetime">["value"];
+			null) satisfies FieldResponse<"datetime">["value"];
 	}
 	override normalizeInputValue(value: unknown) {
 		if (typeof value !== "string") return value;

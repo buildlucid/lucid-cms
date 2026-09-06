@@ -1,5 +1,5 @@
-import { LucidError } from "@lucidcms/core";
-import type { LucidPluginResponse } from "@lucidcms/core/types";
+import { definePlugin, LucidError } from "@lucidcms/core";
+import type { LucidPluginDefinition } from "@lucidcms/core/types";
 import cloudflareKVAdapter from "./adapter.js";
 import {
 	LUCID_VERSION,
@@ -9,10 +9,10 @@ import {
 import type { PluginOptions } from "./types.js";
 import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
-const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
+const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	const resolvedOptions = pluginOptions ?? {};
 
-	return {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		hooks: {
@@ -34,16 +34,8 @@ const plugin = (pluginOptions?: PluginOptions): LucidPluginResponse => {
 				});
 			}
 		},
-		recipe: (draft) => {
-			if (!draft.kv) {
-				draft.kv = {
-					adapter: cloudflareKVAdapter(resolvedOptions),
-				};
-			} else {
-				draft.kv.adapter = cloudflareKVAdapter(resolvedOptions);
-			}
-		},
-	};
+		defaults: { kv: { adapter: cloudflareKVAdapter(resolvedOptions) } },
+	});
 };
 
 export default plugin;

@@ -8,10 +8,9 @@ const getTranslatedCollectionDetails = (
 	const translate = context.translate.forLocale(
 		context.config.i18n.defaultLocale,
 	);
-	const name = translate(collection.config.details.name);
-	const singularName = translate(collection.config.details.singularName);
-	const summary = translate(collection.config.details.summary);
-
+	const name = translate(collection.config.details.labels.plural);
+	const singularName = translate(collection.config.details.labels.singular);
+	const summary = translate(collection.config.details.description);
 	if (!name && !singularName && !summary) return undefined;
 
 	return {

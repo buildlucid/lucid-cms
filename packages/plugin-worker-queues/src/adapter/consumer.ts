@@ -15,11 +15,11 @@ import {
 } from "@lucidcms/core/runtime";
 import type {
 	AdapterRuntimeContext,
-	Config,
 	DatabaseConnection,
 	EnvironmentVariables,
 	LucidAdapters,
 	QueueAdapterInstance,
+	ResolvedLucidConfig,
 	TranslationStore,
 } from "@lucidcms/core/types";
 import type { WorkerQueueAdapterOptions } from "../types.js";
@@ -27,7 +27,7 @@ import type { WorkerQueueAdapterOptions } from "../types.js";
 const MIN_POLL_INTERVAL = 1_000;
 const MAX_POLL_INTERVAL = 30_000;
 const POLL_INTERVAL_INC = 1_000;
-const DEFAULT_CONCURRENT_LIMIT = 5;
+const DEFAULT_MAX_CONCURRENT_JOBS = 5;
 const DEFAULT_BATCH_SIZE = 10;
 
 const options = workerData.options as WorkerQueueAdapterOptions;
@@ -36,12 +36,13 @@ const runtime = workerData.runtime as {
 	env: EnvironmentVariables | undefined;
 };
 
-const CONCURRENT_LIMIT = options.concurrentLimit ?? DEFAULT_CONCURRENT_LIMIT;
+const MAX_CONCURRENT_JOBS =
+	options.maxConcurrentJobs ?? DEFAULT_MAX_CONCURRENT_JOBS;
 const BATCH_SIZE = options.batchSize ?? DEFAULT_BATCH_SIZE;
 
 /** Loads source config in development and compiled config in production. */
 const getConfig = async (): Promise<{
-	config: Config;
+	config: ResolvedLucidConfig;
 	translationStore: TranslationStore;
 	env: EnvironmentVariables | undefined;
 	runtimeContext: AdapterRuntimeContext | undefined;
@@ -52,6 +53,7 @@ const getConfig = async (): Promise<{
 			configPath,
 			silent: true,
 			generateTypes: false,
+			validateEnv: true,
 			loadEmailTemplates: false,
 		});
 		return {
@@ -192,7 +194,7 @@ const startConsumer = async () => {
 				try {
 					const jobsResult = await drainJobs(serviceContext, {
 						limit: BATCH_SIZE,
-						concurrentLimit: CONCURRENT_LIMIT,
+						maxConcurrentJobs: MAX_CONCURRENT_JOBS,
 					});
 					if (jobsResult.error) {
 						logger.error({

@@ -1,9 +1,4 @@
-import type {
-	Media,
-	MediaResolveUrlOptions,
-	MediaUrl,
-	ResponseBody,
-} from "@lucidcms/types";
+import type { Media, MediaResolveUrlOptions, MediaUrl } from "@lucidcms/types";
 import type { MediaGetMultipleQuery } from "../types/contracts.js";
 import type { LucidClientResponse } from "../types/errors.js";
 import type {
@@ -25,32 +20,26 @@ export type MediaGetMultipleInput = {
 	request?: LucidRequestOptions;
 };
 
-export type MediaGetSingleResponse = ResponseBody<Media>;
+export type MediaGetSingleResponse = LucidClientResponse<Media>;
 
-export type MediaGetMultipleResponse = ResponseBody<Media[]>;
+export type MediaGetMultipleResponse = LucidClientResponse<Media[]>;
 
 export type MediaResolveUrlInput = MediaResolveUrlOptions & {
 	key: string;
 	request?: LucidRequestOptions;
 };
 
-export type MediaResolveUrlResponse = ResponseBody<MediaUrl>;
+export type MediaResolveUrlResponse = LucidClientResponse<MediaUrl>;
 
 export interface LucidMediaClient {
 	/** Fetches one media item by id. */
-	getSingle(
-		input: MediaGetSingleInput,
-	): Promise<LucidClientResponse<MediaGetSingleResponse>>;
+	getSingle(input: MediaGetSingleInput): Promise<MediaGetSingleResponse>;
 
 	/** Fetches a paginated list of media items. */
-	getMultiple(
-		input?: MediaGetMultipleInput,
-	): Promise<LucidClientResponse<MediaGetMultipleResponse>>;
+	getMultiple(input?: MediaGetMultipleInput): Promise<MediaGetMultipleResponse>;
 
 	/** Resolves a media key to a URL with optional image transformations. */
-	resolveUrl(
-		input: MediaResolveUrlInput,
-	): Promise<LucidClientResponse<MediaResolveUrlResponse>>;
+	resolveUrl(input: MediaResolveUrlInput): Promise<MediaResolveUrlResponse>;
 }
 
 /** Creates the media resource used by the public Lucid client. */
@@ -58,14 +47,14 @@ export const createMediaClient = (
 	transport: LucidTransport,
 ): LucidMediaClient => ({
 	getSingle: async (input) =>
-		await transport.request<MediaGetSingleResponse>({
+		await transport.request<Media>({
 			operation: "media.getSingle",
 			method: "GET",
 			path: `/media/${encodePathSegment(String(input.id))}`,
 			request: input.request,
 		}),
 	getMultiple: async (input = {}) =>
-		await transport.request<MediaGetMultipleResponse>({
+		await transport.request<Media[]>({
 			operation: "media.getMultiple",
 			method: "GET",
 			path: "/media",
@@ -73,7 +62,7 @@ export const createMediaClient = (
 			request: input.request,
 		}),
 	resolveUrl: async (input) =>
-		await transport.request<MediaResolveUrlResponse>({
+		await transport.request<MediaUrl>({
 			operation: "media.resolveUrl",
 			method: "POST",
 			path: `/media/resolve/${encodePathPreservingSlashes(input.key)}`,

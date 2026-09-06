@@ -4,10 +4,10 @@ import { copy } from "../../../../i18n/index.js";
 import { defaultTextFieldAiGuidance } from "../../ai-guidance.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldAiFormatResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -21,7 +21,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"textarea">) {
+	constructor(key: string, props?: FieldOptions<"textarea">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -34,7 +34,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			ai: this.props?.ai,
@@ -48,7 +48,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"textarea">;
+		} satisfies FieldConfig<"textarea">;
 	}
 	override get supportsAi() {
 		return true;
@@ -81,7 +81,7 @@ class TextareaCustomField extends CustomField<"textarea"> {
 	formatResponseValue(value?: string | null) {
 		return (value ??
 			this.config.default ??
-			null) satisfies CFResponse<"textarea">["value"];
+			null) satisfies FieldResponse<"textarea">["value"];
 	}
 	override formatAiGeneratedValue(value: unknown): CustomFieldAiFormatResponse {
 		return {

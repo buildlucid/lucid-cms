@@ -59,7 +59,7 @@ describe("consuming durable jobs", () => {
 
 		const drained = await drainJobs(context, {
 			limit: 10,
-			concurrentLimit: 2,
+			maxConcurrentJobs: 2,
 		});
 
 		expect(drained).toMatchObject({

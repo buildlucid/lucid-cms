@@ -1,9 +1,10 @@
+import { definePlugin } from "@lucidcms/core";
 import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
 
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
-	return {
+	return definePlugin({
 		key: PLUGIN_KEY,
 		lucid: LUCID_VERSION,
 		sources: {
@@ -14,7 +15,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				},
 			],
 		},
-		recipe: (draft) => {
+		configure: (draft) => {
 			const providers = draft.auth.providers.find((p) => p.key === "google");
 			if (providers) {
 				return;
@@ -39,7 +40,7 @@ const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 				},
 			});
 		},
-	};
+	});
 };
 
 export default plugin;

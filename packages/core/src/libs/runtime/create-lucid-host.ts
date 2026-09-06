@@ -1,5 +1,5 @@
 import type z from "zod";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type {
@@ -19,6 +19,7 @@ import type { Toolkit } from "../toolkit/types.js";
 import createLucidAdapters, {
 	type LucidAdapterOverrides,
 } from "./create-lucid-adapters.js";
+import parseEnv from "./parse-env.js";
 import type {
 	AdapterKeys,
 	AdapterRuntimeContext,
@@ -45,12 +46,12 @@ export type CreateLucidHostOptions = CreateLucidHostSharedOptions &
 		| {
 				definition: LucidConfigDefinition;
 				envSchema?: z.ZodType;
-				env?: EnvironmentVariables;
+				env?: Record<string, unknown>;
 				translationBundles?: TranslationBundles;
 				meta?: LucidConfigDefinitionMeta;
 		  }
 		| {
-				config: Config;
+				config: ResolvedLucidConfig;
 				translationStore: TranslationStore;
 				env?: EnvironmentVariables;
 		  }
@@ -78,13 +79,15 @@ export type LucidInvocation = {
 
 /** An initialized Lucid application host owned by an external runtime. */
 export type LucidHost = {
-	config: Config;
+	config: ResolvedLucidConfig;
 	env?: EnvironmentVariables;
 	runtimeContext: AdapterRuntimeContext;
 	adapterKeys: AdapterKeys;
 	translationStore: TranslationStore;
 	issues: Awaited<ReturnType<typeof createApp>>["issues"];
-	createInvocation(options?: { env?: EnvironmentVariables }): LucidInvocation;
+	createInvocation(options?: {
+		env?: Record<string, unknown>;
+	}): LucidInvocation;
 	destroy(): Promise<void>;
 };
 
@@ -97,6 +100,7 @@ const createLucidHost = async (
 			? {
 					config: options.config,
 					env: options.env,
+					rawEnv: options.env,
 				}
 			: await resolveConfigDefinition({
 					definition: options.definition,
@@ -107,6 +111,29 @@ const createLucidHost = async (
 						skipValidation: true,
 					},
 				});
+	const invocationEnvs = new WeakMap<
+		Record<string, unknown>,
+		EnvironmentVariables
+	>();
+	if (resolved.env) {
+		invocationEnvs.set(resolved.env, resolved.env);
+		if (resolved.rawEnv) invocationEnvs.set(resolved.rawEnv, resolved.env);
+	}
+	const resolveInvocationEnv = (
+		rawEnv: Record<string, unknown> | undefined,
+	) => {
+		if (!rawEnv) return resolved.env;
+		const cached = invocationEnvs.get(rawEnv);
+		if (cached) return cached;
+		const env =
+			parseEnv(
+				rawEnv,
+				"definition" in options ? options.envSchema : undefined,
+			) ?? rawEnv;
+		invocationEnvs.set(rawEnv, env);
+		invocationEnvs.set(env, env);
+		return env;
+	};
 	const translationStore =
 		"translationStore" in options
 			? options.translationStore
@@ -194,14 +221,14 @@ const createLucidHost = async (
 		translationStore,
 		issues: app.issues,
 		createInvocation: (invocationOptions?: {
-			env?: EnvironmentVariables;
+			env?: Record<string, unknown>;
 		}): LucidInvocation => {
 			if (destroyed) {
 				throw new LucidError({
 					message: "Cannot use a Lucid host after it has been destroyed.",
 				});
 			}
-			const env = invocationOptions?.env ?? resolved.env;
+			const env = resolveInvocationEnv(invocationOptions?.env);
 			let invocationDatabasePromise: Promise<DatabaseConnection> | undefined;
 			let invocationLucidDatabasePromise: Promise<LucidDatabase> | undefined;
 			let invocationDestroyed = false;

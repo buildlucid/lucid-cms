@@ -1,8 +1,10 @@
 import type { DocumentEnvironmentStatus } from "@lucidcms/types";
-import type { FieldDatabaseMode } from "../../exports/types.js";
 import registeredFields from "../../libs/collection/custom-fields/registered-fields.js";
 import { getFieldDatabaseConfig } from "../../libs/collection/custom-fields/storage/index.js";
-import type { RegisteredFieldDefinition } from "../../libs/collection/custom-fields/types.js";
+import type {
+	FieldDatabaseMode,
+	RegisteredFieldDefinition,
+} from "../../libs/collection/custom-fields/types.js";
 import prefixGeneratedColName from "../../libs/collection/helpers/prefix-generated-column-name.js";
 import type {
 	CollectionSchemaColumn,

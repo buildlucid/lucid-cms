@@ -9,7 +9,7 @@ const hashInstance = hasher({ sort: true, coerce: true });
 
 type CacheOptions = {
 	/** The time-to-live (TTL) for the cached response in seconds. */
-	ttl: number;
+	ttlSeconds: number;
 	/**
 	 * The mode for generating the cache key.
 	 *
@@ -171,7 +171,7 @@ const cache = (options: CacheOptions) =>
 					data: data,
 					cachedAt: Date.now(),
 				},
-				expirationTtl: options.ttl,
+				ttlSeconds: options.ttlSeconds,
 				hash: true,
 			});
 		}

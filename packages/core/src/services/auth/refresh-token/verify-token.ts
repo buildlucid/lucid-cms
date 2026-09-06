@@ -152,7 +152,7 @@ const verifyToken = async (
 		await kv.set(context, {
 			key: cacheKeys.auth.refresh(_refresh),
 			value: { user_id: tokenRes.data.user_id },
-			expirationTtl: constants.refreshTokenExpiration,
+			ttlSeconds: constants.refreshTokenExpiration,
 			hash: true,
 		});
 

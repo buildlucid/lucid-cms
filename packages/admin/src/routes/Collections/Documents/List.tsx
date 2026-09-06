@@ -131,12 +131,12 @@ const CollectionsDocumentsListRoute: Component = () => {
 	});
 	const collectionName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collectionData()?.details.name,
+			value: collectionData()?.details.labels.plural,
 		}),
 	);
 	const collectionSingularName = createMemo(() =>
 		helpers.getLocaleValue({
-			value: collectionData()?.details.singularName,
+			value: collectionData()?.details.labels.singular,
 		}),
 	);
 	const collectionSummary = createMemo(() => {
@@ -144,7 +144,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 			collectionSingle: collectionSingularName(),
 		});
 		const summary = helpers.getLocaleValue({
-			value: collectionData()?.details.summary,
+			value: collectionData()?.details.description,
 			fallback,
 		});
 
@@ -216,7 +216,7 @@ const CollectionsDocumentsListRoute: Component = () => {
 				key: field.key,
 				type: field.type,
 			})),
-			workflow: activeCollection.workflow !== undefined,
+			workflow: activeCollection.publishing.workflow !== undefined,
 		});
 		if (filterSchemaKey === nextFilterSchemaKey) return;
 		filterSchemaKey = nextFilterSchemaKey;

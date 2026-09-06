@@ -4,7 +4,7 @@ import { adminCopyInputSchema } from "../../../i18n/index.js";
 import { collectionTableParts } from "../../helpers/table-parts.js";
 
 // TODO: merge with brickConfigSchema from schemas/collection-bricks
-const BrickConfigSchema = z.object({
+const BrickConfigSchema = z.strictObject({
 	key: z
 		.string()
 		.max(constants.db.maxBuilderKeyLength)
@@ -19,11 +19,12 @@ const BrickConfigSchema = z.object({
 			message: `Brick key cannot be '${collectionTableParts.fields}'`,
 		}),
 	details: z
-		.object({
-			name: adminCopyInputSchema,
-			summary: adminCopyInputSchema.optional(),
+		.strictObject({
+			label: adminCopyInputSchema,
+			description: adminCopyInputSchema.optional(),
 		})
 		.optional(),
+	thumbnail: z.string().optional(),
 });
 
 export default BrickConfigSchema;

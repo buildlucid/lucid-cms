@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
-import type { LucidPluginResponse } from "../plugins/types.js";
+import { describe, expect, expectTypeOf, test } from "vitest";
+import type { LucidPluginDefinition } from "../plugins/types.js";
 import createToolkit from "./create-toolkit.js";
 import defineToolkit from "./define-toolkit.js";
 import type { CoreToolkit, ToolkitContext } from "./types.js";
@@ -24,6 +24,16 @@ declare module "./types.js" {
 }
 
 describe("createToolkit", () => {
+	test("does not promise services from unconfigured plugins", () => {
+		const plugins: LucidPluginDefinition[] = [];
+		const context = { config: { plugins } } as ToolkitContext;
+		const toolkit = createToolkit(context);
+
+		expectTypeOf(toolkit.testService).toEqualTypeOf<TestToolkit | undefined>();
+		expect(toolkit.testService).toBeUndefined();
+		expect(toolkit.documents).toBeDefined();
+	});
+
 	test("checks an augmented service against its registered type", () => {
 		const invalidDefinition = {
 			key: "testService" as const,
@@ -45,11 +55,11 @@ describe("createToolkit", () => {
 				getValue: () => "registered",
 			}),
 		});
-		const plugin: LucidPluginResponse = {
+		const plugin: LucidPluginDefinition = {
 			key: "test-plugin",
 			lucid: "*",
 			toolkit: definition,
-			recipe: () => undefined,
+			configure: () => undefined,
 		};
 		const context = {
 			config: { plugins: [plugin] },
@@ -57,31 +67,31 @@ describe("createToolkit", () => {
 
 		const toolkit = createToolkit(context);
 
-		expect(toolkit.testService.getValue()).toBe("registered");
-		expect(toolkit.testService.context).toBe(context);
-		expect(toolkit.testService.core.documents).toBe(toolkit.documents);
-		expect(toolkit.testService.core).not.toHaveProperty("testService");
+		expect(toolkit.testService?.getValue()).toBe("registered");
+		expect(toolkit.testService?.context).toBe(context);
+		expect(toolkit.testService?.core.documents).toBe(toolkit.documents);
+		expect(toolkit.testService?.core).not.toHaveProperty("testService");
 	});
 
 	test("supports class instances as services", () => {
-		const plugin: LucidPluginResponse = {
+		const plugin: LucidPluginDefinition = {
 			key: "class-plugin",
 			lucid: "*",
 			toolkit: defineToolkit({
 				key: "classService",
 				create: () => new ClassToolkit(),
 			}),
-			recipe: () => undefined,
+			configure: () => undefined,
 		};
 		const context = { config: { plugins: [plugin] } } as ToolkitContext;
 
-		expect(createToolkit(context).classService.getValue()).toBe(
+		expect(createToolkit(context).classService?.getValue()).toBe(
 			"class service",
 		);
 	});
 
 	test("rejects a service factory that does not return an object", () => {
-		const plugin: LucidPluginResponse = {
+		const plugin: LucidPluginDefinition = {
 			key: "invalid-plugin",
 			lucid: "*",
 			toolkit: defineToolkit({
@@ -89,7 +99,7 @@ describe("createToolkit", () => {
 				// @ts-expect-error JavaScript callers can return a primitive
 				create: () => "invalid",
 			}),
-			recipe: () => undefined,
+			configure: () => undefined,
 		};
 		const context = {
 			config: { plugins: [plugin] },
@@ -101,7 +111,7 @@ describe("createToolkit", () => {
 	});
 
 	test("rejects asynchronous factories at definition and runtime", () => {
-		const plugin: LucidPluginResponse = {
+		const plugin: LucidPluginDefinition = {
 			key: "async-plugin",
 			lucid: "*",
 			toolkit: defineToolkit({
@@ -109,7 +119,7 @@ describe("createToolkit", () => {
 				// @ts-expect-error factories must return their service synchronously
 				create: async () => ({ getValue: () => "async" }),
 			}),
-			recipe: () => undefined,
+			configure: () => undefined,
 		};
 		const context = { config: { plugins: [plugin] } } as ToolkitContext;
 

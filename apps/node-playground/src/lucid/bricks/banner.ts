@@ -2,12 +2,10 @@ import { BrickBuilder, copy } from "@lucidcms/core";
 
 const BannerBrick = new BrickBuilder("banner", {
 	details: {
-		name: copy("admin:bricks.banner.name"),
-		summary: copy("admin:bricks.banner.summary"),
+		label: copy("admin:bricks.banner.name"),
+		description: copy("admin:bricks.banner.summary"),
 	},
-	preview: {
-		image: "https://headless-dev.up.railway.app/public/banner-brick.png",
-	},
+	thumbnail: "https://headless-dev.up.railway.app/public/banner-brick.png",
 })
 	.addTab("content_tab", {
 		details: {
@@ -16,7 +14,7 @@ const BannerBrick = new BrickBuilder("banner", {
 	})
 	.addText("title", {
 		details: {
-			summary: copy("admin:bricks.banner.fields.title.summary"),
+			description: copy("admin:bricks.banner.fields.title.summary"),
 		},
 		default: "Welcome to our website",
 		validation: {
@@ -53,7 +51,7 @@ const BannerBrick = new BrickBuilder("banner", {
 	})
 	.addCheckbox("full_width", {
 		details: {
-			summary: copy("admin:bricks.banner.fields.full_width.summary"),
+			description: copy("admin:bricks.banner.fields.full_width.summary"),
 		},
 	});
 

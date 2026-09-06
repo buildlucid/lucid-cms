@@ -4,9 +4,9 @@ import deepMerge from "../../../../../utils/helpers/deep-merge.js";
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -19,7 +19,7 @@ class SelectCustomField extends CustomField<"select"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"select">) {
+	constructor(key: string, props?: FieldOptions<"select">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -32,7 +32,7 @@ class SelectCustomField extends CustomField<"select"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			options: this.props?.options ?? [],
@@ -46,7 +46,7 @@ class SelectCustomField extends CustomField<"select"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"select">;
+		} satisfies FieldConfig<"select">;
 	}
 	get errors() {
 		return deepMerge(super.errors, {
@@ -77,7 +77,7 @@ class SelectCustomField extends CustomField<"select"> {
 	formatResponseValue(value?: string | null) {
 		return (value ??
 			this.config.default ??
-			null) satisfies CFResponse<"select">["value"];
+			null) satisfies FieldResponse<"select">["value"];
 	}
 	uniqueValidation(value: unknown) {
 		const valueSchema = z.string();

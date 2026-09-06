@@ -1,5 +1,6 @@
-import type { OIDCUserInfo, ServiceResponse } from "../../../exports/types.js";
+import type { ServiceResponse } from "../../../exports/types.js";
 import { copy } from "../../i18n/index.js";
+import type { OIDCUserInfo } from "../types.js";
 
 /**
  * Maps a standard user info response to data we expect

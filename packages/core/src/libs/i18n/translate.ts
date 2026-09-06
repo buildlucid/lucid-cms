@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { createTranslationStore } from "./store.js";
 import type {
 	TranslatableCopy,
@@ -28,7 +28,7 @@ const coreTranslationStore = createTranslationStore({
  * ```
  */
 export const resolveInterfaceLocale = (props: {
-	config: Pick<Config, "i18n">;
+	config: Pick<ResolvedLucidConfig, "i18n">;
 	locale?: string | null;
 	acceptLanguage?: string | null;
 }) => {

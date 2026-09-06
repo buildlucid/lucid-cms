@@ -1,11 +1,11 @@
 import type {
 	CollectionDocument,
-	Config,
 	DocumentWorkflow,
 	InternalCollectionDocument,
 	InternalDocumentBrick,
 	InternalDocumentField,
 	Refs,
+	ResolvedLucidConfig,
 } from "../../exports/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import resolveCollectionLocalization from "../collection/helpers/resolve-collection-localization.js";
@@ -23,7 +23,7 @@ import type { MediaFormatterOptions } from "./media.js";
 const formatMultiple = (props: {
 	documents: DocumentQueryResponse[];
 	collection: CollectionBuilder;
-	config: Config;
+	config: ResolvedLucidConfig;
 	host: string;
 	mediaOptions: MediaFormatterOptions;
 	hasFields: boolean;
@@ -90,7 +90,7 @@ const formatSingle = (props: {
 	bricks?: InternalDocumentBrick[];
 	fields?: InternalDocumentField[] | null;
 	workflow?: DocumentWorkflow | null;
-	config: Config;
+	config: ResolvedLucidConfig;
 	host: string;
 	mediaOptions: MediaFormatterOptions;
 }): InternalCollectionDocument => {
@@ -158,9 +158,8 @@ const formatVersions = (props: {
 	const versions: InternalCollectionDocument["versions"] = {
 		latest: null,
 	};
-
-	if (props.collection.getData.environments) {
-		for (const env of props.collection.getData.environments) {
+	if (props.collection.getData.publishing.targets) {
+		for (const env of props.collection.getData.publishing.targets) {
 			versions[env.key] = null;
 		}
 	}

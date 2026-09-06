@@ -30,7 +30,7 @@ const buildRuntimeSource = (props: {
 	revision: string;
 }) => {
 	const imports = getConfigArtifactImportPaths(".");
-	return `import configFactory from ${JSON.stringify(imports.config)};
+	return `import configFactory, { configure } from ${JSON.stringify(imports.config)};
 import { env as envSchema } from ${JSON.stringify(imports.env)};
 import db from ${JSON.stringify(imports.db)};
 import runtime from ${JSON.stringify(imports.runtime)};
@@ -55,7 +55,7 @@ const resolveAdapter = async () => {
 };
 
 const createHost = (adapter, state) => createLucidHost({
-	definition: { runtime: adapter, db, config: configFactory },
+	definition: { runtime: adapter, db, config: configFactory, configure },
 	envSchema,
 	env: state.env,
 	runtimeContext: state.runtimeContext,

@@ -1,9 +1,10 @@
 import type {
-	Config,
 	FieldInputSchema,
 	FieldTypes,
+	ResolvedLucidConfig,
 } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../libs/collection/builders/field-builder/index.js";
 import type CustomField from "../../../libs/collection/custom-fields/custom-field.js";
 import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import { isStorageMode } from "../../../libs/collection/custom-fields/storage/index.js";
@@ -181,7 +182,7 @@ const prepareBricksAndFields = (props: {
 	collection: CollectionBuilder;
 	bricks?: Array<BrickInputSchema>;
 	fields?: Array<FieldInputSchema>;
-	localization: Config["localization"];
+	localization: ResolvedLucidConfig["localization"];
 }) => {
 	const localization = resolveCollectionLocalization({
 		localization: props.localization,
@@ -192,7 +193,7 @@ const prepareBricksAndFields = (props: {
 	const preparedFields = props.fields
 		? processFields({
 				fields: props.fields,
-				customFields: props.collection.fields,
+				customFields: getFieldBuilderState(props.collection).fields,
 				localization,
 			})
 		: undefined;
@@ -208,7 +209,7 @@ const prepareBricksAndFields = (props: {
 				// Process fields for this brick
 				const processedFields = processFields({
 					fields: brick.fields,
-					customFields: brickDefinition.fields,
+					customFields: getFieldBuilderState(brickDefinition).fields,
 					localization,
 				});
 

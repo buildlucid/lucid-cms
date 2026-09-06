@@ -17,27 +17,38 @@ describe("Cloudflare Images plugin", () => {
 
 	it("registers translations and the configured processor", () => {
 		const instance = plugin({ binding: "CUSTOM_IMAGES" });
-		const draft = {
-			media: { delivery: undefined as { key: string } | undefined },
-		};
-
-		instance.recipe(draft as never);
+		const defaults = instance.defaults;
+		if (!defaults || typeof defaults === "function") {
+			throw new Error("Images plugin did not provide adapter defaults.");
+		}
+		const adapter = defaults.media?.delivery;
+		if (
+			!adapter ||
+			adapter instanceof Promise ||
+			typeof adapter === "function"
+		) {
+			throw new Error("Images plugin did not register a delivery adapter.");
+		}
 
 		expect(instance.sources?.translations).toContain(
 			"@lucidcms/plugin-cloudflare-images/translations",
 		);
-		expect(draft.media.delivery?.key).toBe("cloudflare-images");
+		expect(adapter.key).toBe("cloudflare-images");
 	});
 
 	it("requests the default and custom Images binding in prepare artifacts", async () => {
 		const defaultResult = await plugin().hooks?.runtime?.({
 			phase: "prepare",
+			env: {},
+			paths: { configPath: "/tmp/lucid.config.ts", projectRoot: "/tmp" },
 			definition: {} as never,
 		});
 		const customResult = await plugin({
 			binding: "CUSTOM_IMAGES",
 		}).hooks?.runtime?.({
 			phase: "prepare",
+			env: {},
+			paths: { configPath: "/tmp/lucid.config.ts", projectRoot: "/tmp" },
 			definition: {} as never,
 		});
 

@@ -1,4 +1,4 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { EnvironmentVariables } from "../runtime/types.js";
 
 export const TELEMETRY_DISABLED_ENV = "LUCID_TELEMETRY_DISABLED";
@@ -16,7 +16,7 @@ const isEnabledFlag = (value: unknown) => {
 
 /** Resolves config and conventional environment opt-outs before any I/O. */
 export const isTelemetryEnabled = (
-	config: Config,
+	config: ResolvedLucidConfig,
 	env?: EnvironmentVariables,
 ) =>
 	config.telemetry &&

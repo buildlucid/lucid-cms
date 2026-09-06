@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 import { getTelemetryContext, getTelemetryCountBucket } from "./context.js";
 
@@ -41,7 +41,7 @@ const config = {
 			],
 		},
 	],
-} as unknown as Config;
+} as unknown as ResolvedLucidConfig;
 
 describe("telemetry context", () => {
 	test("buckets counts at privacy-preserving boundaries", () => {

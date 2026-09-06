@@ -1,4 +1,3 @@
-import type { ZodType } from "zod";
 import type {
 	MediaType,
 	RichTextUserVariableField,
@@ -7,6 +6,7 @@ import type { AdminCopyInput } from "../../../../i18n/types.js";
 import type {
 	CustomFieldUserAiConfig,
 	FieldUIConfig,
+	FieldValidation,
 	SharedFieldConfig,
 } from "../../types.js";
 import type { MediaValidationData } from "../media/types.js";
@@ -24,13 +24,13 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 	type: "rich-text";
 	details: {
 		label?: AdminCopyInput;
-		summary?: AdminCopyInput;
+		description?: AdminCopyInput;
 		placeholder?: AdminCopyInput;
 	};
 	ai?: CustomFieldUserAiConfig<"rich-text">;
 	localized?: boolean;
 	default?: Record<string, unknown>;
-	index?: true;
+	index?: boolean;
 	editor?: {
 		links?: {
 			external?: boolean;
@@ -47,13 +47,12 @@ export interface RichTextFieldConfig extends SharedFieldConfig {
 		fullscreen?: boolean;
 	};
 	ui?: FieldUIConfig;
-	validation?: {
-		required?: boolean;
-		zod?: ZodType<unknown> | undefined;
-	};
+	validation?: FieldValidation<Record<string, unknown>>;
 }
 
-export type RichTextFieldProps = Partial<Omit<RichTextFieldConfig, "type">>;
+export type RichTextFieldProps = Partial<
+	Omit<RichTextFieldConfig, "key" | "type">
+>;
 
 export type RichTextResValue = Record<string, unknown> | null;
 

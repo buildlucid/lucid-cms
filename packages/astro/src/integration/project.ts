@@ -105,7 +105,7 @@ export const checkProjectCompatibility = async (
 ) => {
 	const state = await project.bridge.resolveRuntime({
 		adapter: project.loaded.adapter,
-		fallbackEnv: project.loaded.env,
+		fallbackEnv: project.loaded.rawEnv,
 		compiled,
 	});
 	await checkAllPluginsCompatibility({
@@ -118,18 +118,17 @@ export const checkProjectCompatibility = async (
 export const bootstrapDevProject = async (project: ResolvedLucidProject) => {
 	const state = await project.bridge.resolveRuntime({
 		adapter: project.loaded.adapter,
-		fallbackEnv: project.loaded.env,
+		fallbackEnv: project.loaded.rawEnv,
 		compiled: false,
 	});
 	const result = await migrateCommand({
 		config: project.loaded.config,
 		migrationFiles: project.loaded.resources.files.migrations,
-		env: state.env ?? project.loaded.env,
+		env: project.loaded.env,
 		runtimeContext: state.runtimeContext,
 		translationStore: project.loaded.translationStore,
 		mode: "return",
 	})({
-		skipEnvValidation: true,
 		skipSyncSteps: false,
 	});
 

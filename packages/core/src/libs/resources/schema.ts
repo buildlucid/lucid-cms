@@ -11,7 +11,7 @@ export const ResourceDiscoverySchema = z
 	.default({});
 
 export const ResourceSourcesSchema = z
-	.object({
+	.strictObject({
 		collections: z.array(source).optional(),
 		tables: z.array(source).optional(),
 		routes: z.array(source).optional(),
@@ -25,7 +25,7 @@ export const ResourceSourcesSchema = z
 			.array(
 				z.union([
 					source,
-					z.object({ input: source, output: z.string().min(1) }),
+					z.strictObject({ input: source, output: z.string().min(1) }),
 				]),
 			)
 			.optional(),

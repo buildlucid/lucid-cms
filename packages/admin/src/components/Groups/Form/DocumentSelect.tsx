@@ -224,7 +224,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 		document?: Pick<RelationFieldValue, "collectionKey">,
 	) =>
 		helpers.getLocaleValue({
-			value: getDocumentCollection(document)?.details.singularName,
+			value: getDocumentCollection(document)?.details.labels.singular,
 			fallback: T()("media.types.document"),
 		});
 	const getDocumentLabel = (

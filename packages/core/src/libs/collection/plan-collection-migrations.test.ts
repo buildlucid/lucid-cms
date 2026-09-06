@@ -18,8 +18,10 @@ describe("planCollectionMigrations", async () => {
 		const pages = new CollectionBuilder("pages", {
 			mode: "multiple",
 			details: {
-				name: copy.literal("Pages"),
-				singularName: copy.literal("Page"),
+				labels: {
+					singular: copy.literal("Page"),
+					plural: copy.literal("Pages"),
+				},
 			},
 		}).addText("title");
 

@@ -49,7 +49,7 @@ const collectionResponseSchema = z.object({
 				description: "The collection group key",
 				example: "content",
 			}),
-			name: resolvedAdminCopySchema.nullable().meta({
+			label: resolvedAdminCopySchema.nullable().meta({
 				description: "Display name for the collection group",
 				example: {
 					type: "lucid.copy",
@@ -77,25 +77,27 @@ const collectionResponseSchema = z.object({
 		})
 		.optional(),
 	details: z.object({
-		name: resolvedAdminCopySchema.meta({
-			description: "Display name for the collection",
-			example: {
-				type: "lucid.copy",
-				scope: "admin",
-				key: "collections.page.name",
-				defaultMessage: "Pages",
-			},
+		labels: z.object({
+			singular: resolvedAdminCopySchema.meta({
+				description: "Singular display name for items in the collection",
+				example: {
+					type: "lucid.copy",
+					scope: "admin",
+					key: "collections.page.singularName",
+					defaultMessage: "Page",
+				},
+			}),
+			plural: resolvedAdminCopySchema.meta({
+				description: "Display name for the collection",
+				example: {
+					type: "lucid.copy",
+					scope: "admin",
+					key: "collections.page.name",
+					defaultMessage: "Pages",
+				},
+			}),
 		}),
-		singularName: resolvedAdminCopySchema.meta({
-			description: "Singular display name for items in the collection",
-			example: {
-				type: "lucid.copy",
-				scope: "admin",
-				key: "collections.page.singularName",
-				defaultMessage: "Page",
-			},
-		}),
-		summary: resolvedAdminCopySchema.nullable().meta({
+		description: resolvedAdminCopySchema.nullable().meta({
 			description: "Description text for the collection",
 			example: {
 				type: "lucid.copy",
@@ -123,54 +125,26 @@ const collectionResponseSchema = z.object({
 			description:
 				"The collection's resolved localization settings, or false when localization is disabled",
 		}),
-	revisions: z.boolean().meta({
-		description: "Whether the collection supports document revisions",
-		example: true,
+	revisions: z.object({
+		enabled: z.boolean(),
+		retentionDays: z.union([z.number(), z.literal(false)]).meta({
+			description:
+				"Number of days to retain unprotected revisions, or false to retain indefinitely",
+			example: 30,
+		}),
 	}),
 	autoSave: z.boolean().meta({
 		description: "Whether the collection supports auto-save",
 		example: true,
 	}),
-	scheduling: z.boolean().meta({
-		description: "Whether the collection has release scheduling enabled",
-		example: false,
-	}),
 	orderable: z.boolean().meta({
 		description: "Whether documents in the collection support manual ordering",
 		example: false,
-	}),
-	revisionRetentionDays: z.union([z.number(), z.literal(false)]).meta({
-		description:
-			"Number of days to retain unprotected revisions, or false to retain indefinitely",
-		example: 30,
 	}),
 	locked: z.boolean().meta({
 		description: "Whether the collection structure is locked from editing",
 		example: false,
 	}),
-	review: z
-		.object({
-			requiredFor: z.array(z.string()),
-			allowSelfApproval: z.boolean(),
-			comments: z.object({
-				request: z.enum(["required", "optional"]),
-				decision: z.enum(["required", "optional"]),
-			}),
-		})
-		.optional(),
-	workflow: z
-		.object({
-			initial: z.string(),
-			stages: z.array(
-				z.object({
-					key: z.string(),
-					name: resolvedAdminCopySchema,
-					color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
-					publishTargets: z.array(z.string()),
-				}),
-			),
-		})
-		.optional(),
 	listing: z.array(z.string()).meta({
 		description: "Field keys included in the document listing columns",
 		example: ["pageTitle", "author", "fullSlug", "slug"],
@@ -180,39 +154,6 @@ const collectionResponseSchema = z.object({
 			"Field keys used, in order, to build the main document display label",
 		example: ["pageTitle", "slug"],
 	}),
-	environments: z.array(
-		z.object({
-			key: z.string().meta({
-				description: "The environment key",
-				example: "production",
-			}),
-			name: resolvedAdminCopySchema.meta({
-				description: "Display name for the environment",
-				example: {
-					type: "lucid.copy",
-					scope: "admin",
-					key: "collections.page.environments.production.name",
-					defaultMessage: "Production",
-				},
-			}),
-			requires: z.array(z.string()).meta({
-				description:
-					"Environment keys that must match latest before releases can be created for this environment",
-				example: ["staging"],
-			}),
-			permissions: z.object({
-				publish: z.string().meta({
-					description: "Permission required to publish to this environment",
-					example: "documents:pages:publish",
-				}),
-				review: z.string().meta({
-					description:
-						"Permission required to review releases for this environment",
-					example: "documents:pages:review",
-				}),
-			}),
-		}),
-	),
 	preview: z
 		.object({
 			breakpoints: z.array(
@@ -297,6 +238,68 @@ const collectionResponseSchema = z.object({
 			example: [],
 		});
 	},
+	publishing: z.object({
+		targets: z.array(
+			z.object({
+				key: z.string().meta({
+					description: "The environment key",
+					example: "production",
+				}),
+				label: resolvedAdminCopySchema.meta({
+					description: "Display name for the environment",
+					example: {
+						type: "lucid.copy",
+						scope: "admin",
+						key: "collections.page.environments.production.name",
+						defaultMessage: "Production",
+					},
+				}),
+				requires: z.array(z.string()).meta({
+					description:
+						"Environment keys that must match latest before releases can be created for this environment",
+					example: ["staging"],
+				}),
+				permissions: z.object({
+					publish: z.string().meta({
+						description: "Permission required to publish to this environment",
+						example: "documents:pages:publish",
+					}),
+					review: z.string().meta({
+						description:
+							"Permission required to review releases for this environment",
+						example: "documents:pages:review",
+					}),
+				}),
+			}),
+		),
+		review: z
+			.object({
+				requiredFor: z.array(z.string()),
+				allowSelfApproval: z.boolean(),
+				comments: z.object({
+					request: z.enum(["required", "optional"]),
+					decision: z.enum(["required", "optional"]),
+				}),
+			})
+			.optional(),
+		workflow: z
+			.object({
+				initial: z.string(),
+				stages: z.array(
+					z.object({
+						key: z.string(),
+						label: resolvedAdminCopySchema,
+						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
+						publishTargets: z.array(z.string()),
+					}),
+				),
+			})
+			.optional(),
+		scheduling: z.boolean().meta({
+			description: "Whether the collection has release scheduling enabled",
+			example: false,
+		}),
+	}),
 });
 
 export const controllerSchemas = {

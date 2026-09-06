@@ -7,10 +7,10 @@ import type {
 import { copy } from "../../../../i18n/index.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldErrorItem,
+	FieldConfig,
+	FieldOptions,
+	FieldResponse,
 	GetSchemaDefinitionProps,
 	SchemaDefinition,
 } from "../../types.js";
@@ -23,7 +23,7 @@ class LinkCustomField extends CustomField<"link"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props?: CFProps<"link">) {
+	constructor(key: string, props?: FieldOptions<"link">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -36,7 +36,7 @@ class LinkCustomField extends CustomField<"link"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 				placeholder: this.props?.details?.placeholder,
 			},
 			localized: this.props?.localized ?? false,
@@ -53,7 +53,7 @@ class LinkCustomField extends CustomField<"link"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"link">;
+		} satisfies FieldConfig<"link">;
 	}
 	getSchemaDefinition(
 		props: GetSchemaDefinitionProps,
@@ -77,7 +77,7 @@ class LinkCustomField extends CustomField<"link"> {
 			url: value?.url ?? this.config.default.url ?? null,
 			label: value?.label ?? this.config.default.label ?? null,
 			target: value?.target ?? this.config.default.target ?? null,
-		} satisfies CFResponse<"link">["value"];
+		} satisfies FieldResponse<"link">["value"];
 	}
 	override normalizeInputValue(value: unknown) {
 		if (!value || typeof value !== "object" || Array.isArray(value))

@@ -3,6 +3,7 @@ import z from "zod";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import TextCutomField from "./custom-field.js";
 
@@ -11,12 +12,14 @@ import TextCutomField from "./custom-field.js";
 const TextCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -41,7 +44,7 @@ test("successfully validate field - text", async () => {
 			value: "Standard text",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("standard_text")!,
+		instance: getFieldBuilderState(TextCollection).fields.get("standard_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -62,7 +65,7 @@ test("successfully validate field - text", async () => {
 			value: "Required text",
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("required_text")!,
+		instance: getFieldBuilderState(TextCollection).fields.get("required_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -82,8 +85,9 @@ test("successfully validate field - text", async () => {
 			type: "text",
 			value: "Min length text",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("min_length_text")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(TextCollection).fields.get("min_length_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -106,7 +110,7 @@ test("fail to validate field - text", async () => {
 			value: 100,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("standard_text")!,
+		instance: getFieldBuilderState(TextCollection).fields.get("standard_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -133,8 +137,9 @@ test("fail to validate field - text", async () => {
 				type: "text",
 				value: undefined,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: TextCollection.fields.get("required_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -151,8 +156,9 @@ test("fail to validate field - text", async () => {
 				type: "text",
 				value: null,
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: TextCollection.fields.get("required_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -169,8 +175,9 @@ test("fail to validate field - text", async () => {
 				type: "text",
 				value: "",
 			},
-			// biome-ignore lint/style/noNonNullAssertion: explanation
-			instance: TextCollection.fields.get("required_text")!,
+			instance:
+				// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+				getFieldBuilderState(TextCollection).fields.get("required_text")!,
 			validationData: {
 				media: [],
 				user: [],
@@ -213,8 +220,9 @@ test("fail to validate field - text", async () => {
 			type: "text",
 			value: "1",
 		},
-		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: TextCollection.fields.get("min_length_text")!,
+		instance:
+			// biome-ignore lint/style/noNonNullAssertion: This field is registered in the test fixture.
+			getFieldBuilderState(TextCollection).fields.get("min_length_text")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -244,7 +252,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 			placeholder: copy("admin:tests.fields.field.placeholder", {
@@ -267,13 +275,11 @@ test("custom field config passes schema validation", async () => {
 	const res = await CustomFieldSchema.safeParseAsync(field.config);
 	expect(res.success).toBe(true);
 });
-
-test("custom field config rejects index false", async () => {
+test("custom field config accepts index false", async () => {
 	const res = await CustomFieldSchema.safeParseAsync({
 		type: "text",
 		key: "field",
 		index: false,
 	});
-
-	expect(res.success).toBe(false);
+	expect(res.success).toBe(true);
 });

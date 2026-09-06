@@ -3,6 +3,7 @@ import constants from "../../../../../constants/constants.js";
 import { validateField } from "../../../../../services/documents-bricks/checks/check-validate-bricks-fields.js";
 import { copy } from "../../../../i18n/index.js";
 import CollectionBuilder from "../../../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../../../builders/field-builder/index.js";
 import CustomFieldSchema from "../../schema.js";
 import LinkCustomField from "./custom-field.js";
 
@@ -11,12 +12,14 @@ import LinkCustomField from "./custom-field.js";
 const LinkCollection = new CollectionBuilder("collection", {
 	mode: "multiple",
 	details: {
-		name: copy("admin:tests.collections.collection.name", {
-			defaultMessage: "Test",
-		}),
-		singularName: copy("admin:tests.collections.collection.singularName", {
-			defaultMessage: "Test",
-		}),
+		labels: {
+			singular: copy("admin:tests.collections.collection.singularName", {
+				defaultMessage: "Test",
+			}),
+			plural: copy("admin:tests.collections.collection.name", {
+				defaultMessage: "Test",
+			}),
+		},
 	},
 	localized: true,
 })
@@ -46,7 +49,7 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("standard_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -71,7 +74,7 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("required_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -102,7 +105,9 @@ test("successfully validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("required_localized_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get(
+			"required_localized_link",
+		)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -130,7 +135,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("standard_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -163,7 +168,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("standard_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -198,7 +203,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("standard_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get("standard_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -227,7 +232,7 @@ test("fail to validate field - link", async () => {
 			value: undefined,
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("required_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -257,7 +262,7 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("required_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get("required_link")!,
 		validationData: {
 			media: [],
 			user: [],
@@ -289,7 +294,9 @@ test("fail to validate field - link", async () => {
 			},
 		},
 		// biome-ignore lint/style/noNonNullAssertion: explanation
-		instance: LinkCollection.fields.get("required_localized_link")!,
+		instance: getFieldBuilderState(LinkCollection).fields.get(
+			"required_localized_link",
+		)!,
 		validationData: {
 			media: [],
 			user: [],
@@ -318,7 +325,7 @@ test("custom field config passes schema validation", async () => {
 			label: copy("admin:tests.fields.field.label", {
 				defaultMessage: "title",
 			}),
-			summary: copy("admin:tests.fields.field.summary", {
+			description: copy("admin:tests.fields.field.summary", {
 				defaultMessage: "description",
 			}),
 			placeholder: copy("admin:tests.fields.field.placeholder", {

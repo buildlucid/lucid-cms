@@ -37,8 +37,8 @@ export type KVSetInput<T = unknown> = {
 	key: string;
 	value: T;
 	hash?: boolean;
-	expirationTtl?: number; // seconds
-	expirationTimestamp?: number; // unix timestamp in seconds
+	ttlSeconds?: number; // seconds
+	expiresAtSeconds?: number; // unix timestamp in seconds
 };
 
 export type KVGetParams = {
@@ -50,8 +50,8 @@ export type KVSetParams<T = unknown> = {
 	key: string;
 	value: T;
 	hash?: boolean;
-	expirationTtl?: number; // seconds
-	expirationTimestamp?: number; // unix timestamp in seconds
+	ttlSeconds?: number; // seconds
+	expiresAtSeconds?: number; // unix timestamp in seconds
 };
 
 export type KVHasParams = {
@@ -72,8 +72,8 @@ export type KVGetManyParams = {
 export type KVSetManyParams<T = unknown> = {
 	items: Array<KVSetInput<T>>;
 	hash?: boolean;
-	expirationTtl?: number; // seconds
-	expirationTimestamp?: number; // unix timestamp in seconds
+	ttlSeconds?: number; // seconds
+	expiresAtSeconds?: number; // unix timestamp in seconds
 };
 
 export type KVDeleteManyParams = {
@@ -84,14 +84,14 @@ export type KVDeleteManyParams = {
 export type KVIncrementParams = {
 	key: string;
 	hash?: boolean;
-	expirationTtl?: number; // seconds
-	expirationTimestamp?: number; // unix timestamp in seconds
+	ttlSeconds?: number; // seconds
+	expiresAtSeconds?: number; // unix timestamp in seconds
 };
 
 /** Result returned from an atomic counter increment operation. */
 export interface KVIncrementResult {
 	value: number;
-	expirationTtl?: number; // seconds
+	ttlSeconds?: number; // seconds
 }
 
 /**

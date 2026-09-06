@@ -1,6 +1,7 @@
 import z from "zod";
-import type { Select, ServiceResponse } from "../../../../../exports/types.js";
+import type { ServiceResponse } from "../../../../../exports/types.js";
 import type { LucidBricksTable } from "../../../../db/tables/index.js";
+import type { Select } from "../../../../db/types.js";
 import { copy } from "../../../../i18n/index.js";
 import type { RefTarget } from "../../../../refs/types.js";
 import buildSchemaIndex from "../../../helpers/build-schema-index.js";
@@ -8,12 +9,12 @@ import buildTableName from "../../../helpers/build-table-name.js";
 import prefixGeneratedColName from "../../../helpers/prefix-generated-column-name.js";
 import CustomField from "../../custom-field.js";
 import type {
-	CFConfig,
-	CFProps,
-	CFResponse,
 	CustomFieldErrorItem,
 	CustomFieldValidationError,
+	FieldConfig,
+	FieldOptions,
 	FieldRelationValidationInput,
+	FieldResponse,
 	GetIndexDefinitionProps,
 	GetSchemaDefinitionProps,
 	IndexDefinition,
@@ -38,7 +39,7 @@ class RelationCustomField extends CustomField<"relation"> {
 	config;
 	key;
 	props;
-	constructor(key: string, props: CFProps<"relation">) {
+	constructor(key: string, props: FieldOptions<"relation">) {
 		super();
 		this.key = key;
 		this.props = props;
@@ -53,7 +54,7 @@ class RelationCustomField extends CustomField<"relation"> {
 					copy(`admin:fields.${this.type}.${this.key}.label`, {
 						defaultMessage: keyToTitle(this.key),
 					}),
-				summary: this.props?.details?.summary,
+				description: this.props?.details?.description,
 			},
 			localized: this.props?.localized ?? false,
 			default: this.props?.default ?? [],
@@ -66,7 +67,7 @@ class RelationCustomField extends CustomField<"relation"> {
 				width: this.props?.ui?.width,
 			},
 			validation: this.props?.validation,
-		} satisfies CFConfig<"relation">;
+		} satisfies FieldConfig<"relation">;
 	}
 	override normalizeInputValue(value: unknown) {
 		return clampRelationFieldInput(value, this.config.multiple);
@@ -135,7 +136,7 @@ class RelationCustomField extends CustomField<"relation"> {
 		return normalizeStoredRelationCustomFieldValues(
 			value,
 			this.config.multiple,
-		) satisfies CFResponse<"relation">["value"];
+		) satisfies FieldResponse<"relation">["value"];
 	}
 	override serializeRelationFieldValue(
 		value: unknown,

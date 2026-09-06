@@ -1,7 +1,7 @@
 import type { Hono, MiddlewareHandler, Next, TypedResponse } from "hono";
 import type { DescribeRouteOptions } from "hono-openapi";
 import type z from "zod";
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidHonoContext, LucidHonoGeneric } from "../../types/hono.js";
 import type { RouteSchema } from "../../types/schema.js";
 import type { ServiceContext } from "../../utils/services/types.js";
@@ -13,14 +13,18 @@ import type { Toolkit } from "../toolkit/types.js";
 
 export type HttpExtensionRegister = (
 	app: Hono<LucidHonoGeneric>,
-	config: Config,
+	config: ResolvedLucidConfig,
 ) => void | Promise<void>;
 
-export type HttpExtensionPriority = 0 | 1 | 2;
+export type HttpExtensionPhase =
+	| "beforeMiddleware"
+	| "afterRoutes"
+	| "afterSetup";
 
 export type HttpExtension = {
 	name: string;
-	priority: HttpExtensionPriority;
+	/** Register before middleware, after routes, or after HTTP setup is complete. */
+	phase: HttpExtensionPhase;
 	register: HttpExtensionRegister;
 };
 
@@ -83,8 +87,8 @@ export type LucidRouteMiddleware = MiddlewareHandler<LucidHonoGeneric>;
 export type LucidRouteDefinitionInput<
 	TSchema extends RouteSchema | undefined = RouteSchema | undefined,
 > = {
-	/** Lower priorities register first. Defaults to zero. */
-	priority?: number;
+	/** Lower values register first. Defaults to zero. */
+	order?: number;
 	method: LucidRouteMethod;
 	path: string;
 	schema?: TSchema;

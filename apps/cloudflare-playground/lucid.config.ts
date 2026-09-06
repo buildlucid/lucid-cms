@@ -1,4 +1,4 @@
-import { configureLucid, z } from "@lucidcms/core";
+import { defineConfig, z } from "@lucidcms/core";
 import { d1 } from "@lucidcms/db-d1";
 import { cloudflareImagesPlugin } from "@lucidcms/plugin-cloudflare-images";
 import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
@@ -15,7 +15,7 @@ export const env = z.object({
 	ACCESS_TOKEN_SECRET: z.string(),
 });
 
-export default configureLucid({
+export default defineConfig({
 	runtime: cloudflare,
 	db: d1,
 	config: (env) => ({

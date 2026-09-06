@@ -2,11 +2,12 @@ import constants from "../../../constants/constants.js";
 import type { TypeGenerationFile } from "../../type-generation/types.js";
 import type BrickBuilder from "../builders/brick-builder/index.js";
 import type CollectionBuilder from "../builders/collection-builder/index.js";
+import { getFieldBuilderState } from "../builders/field-builder/index.js";
 import registeredFields from "../custom-fields/registered-fields.js";
 import { storageModes } from "../custom-fields/storage/index.js";
 import type {
-	CFConfig,
 	ContentFieldTypeGenerationResult,
+	FieldConfig,
 	FieldTypes,
 } from "../custom-fields/types.js";
 import resolveCollectionLocalization from "../helpers/resolve-collection-localization.js";
@@ -168,7 +169,7 @@ const renderFilterTree = (tree: FilterTreeNode): string => {
  * their `output` config to match the content response shape.
  */
 const collectFieldMapProperties = (
-	fields: CFConfig<FieldTypes>[],
+	fields: FieldConfig<FieldTypes>[],
 	context: RenderFieldContext,
 	properties: string[],
 	declarations: string[],
@@ -213,7 +214,7 @@ const collectFieldMapProperties = (
 
 /** Renders one content field list into a reusable object field map type. */
 const renderFieldMap = (
-	fields: CFConfig<FieldTypes>[],
+	fields: FieldConfig<FieldTypes>[],
 	context: RenderFieldContext,
 ): RenderedFieldMap => {
 	const properties: string[] = [];
@@ -236,7 +237,7 @@ const renderFieldMap = (
 
 /** Chooses the exact field helper type that matches the formatted content response shape. */
 const renderBaseFieldType = (props: {
-	field: CFConfig<FieldTypes>;
+	field: FieldConfig<FieldTypes>;
 	mode: "groups" | "translations" | "value";
 	valueType?: string;
 	groupFieldsType?: string;
@@ -255,11 +256,13 @@ const renderBaseFieldType = (props: {
 
 /** Resolves the generated field type for one field using its storage mode and translation config. */
 const renderField = (
-	field: CFConfig<FieldTypes>,
+	field: FieldConfig<FieldTypes>,
 	context: RenderFieldContext,
 ): RenderedField => {
 	const fieldDefinition = registeredFields[field.type];
-	const fieldInstance = context.builder.fields.get(field.key);
+	const fieldInstance = getFieldBuilderState(context.builder).fields.get(
+		field.key,
+	);
 	const fieldMode =
 		context.collectionUsesTranslations &&
 		fieldInstance?.localizedEnabled === true
@@ -346,7 +349,7 @@ const buildBrickFieldsTypeName = (props: {
 
 /** Collects the runtime filter paths supported by a field, including nested repeater children. */
 const collectFieldFilterPaths = (
-	field: CFConfig<FieldTypes>,
+	field: FieldConfig<FieldTypes>,
 	scope: FilterScope,
 	path: string[] = [],
 ): string[][] => {
@@ -388,7 +391,7 @@ const collectFieldFilterPaths = (
 
 /** Builds the nested DX filter tree for a collection field tree or brick field tree. */
 const collectFilterTree = (
-	fields: CFConfig<FieldTypes>[],
+	fields: FieldConfig<FieldTypes>[],
 	scope: FilterScope,
 ): FilterTreeNode => {
 	const tree = createFilterTreeNode();
@@ -465,7 +468,7 @@ const relationIdFilterType = (collection: string | string[]): string => {
 /** Narrows relation ID leaves without adding another traversal level. */
 const applyRelationIdFilterTypes = (props: {
 	tree: FilterTreeNode;
-	fields: CFConfig<FieldTypes>[];
+	fields: FieldConfig<FieldTypes>[];
 	scope: FilterScope;
 	path?: string[];
 }): void => {
@@ -530,7 +533,7 @@ const collectCollectionCustomFilterTree = (
 /** Adds an implicit first-target branch plus explicit one-hop collection branches. */
 const addRelationDocumentFilterBranches = (props: {
 	tree: FilterTreeNode;
-	fields: CFConfig<FieldTypes>[];
+	fields: FieldConfig<FieldTypes>[];
 	scope: FilterScope;
 	collectionsByKey: Map<string, CollectionBuilder>;
 	path?: string[];
@@ -591,7 +594,9 @@ const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 		"latest",
 		"revision",
 		constants.collectionBuilder.publishing.snapshotVersionType,
-		...collection.getData.environments.map((environment) => environment.key),
+		...collection.getData.publishing.targets.map(
+			(environment) => environment.key,
+		),
 	]);
 };
 
@@ -599,7 +604,9 @@ const getCollectionVersions = (collection: CollectionBuilder): string[] => {
 const getCollectionVersionKeys = (collection: CollectionBuilder): string[] => {
 	return dedupeStrings([
 		"latest",
-		...collection.getData.environments.map((environment) => environment.key),
+		...collection.getData.publishing.targets.map(
+			(environment) => environment.key,
+		),
 	]);
 };
 
@@ -644,7 +651,7 @@ const buildCollectionTypeDeclarations = (
 	for (const filterKey of collectionDocumentFilterKeys) {
 		addFilterPath(filterTree, [filterKey]);
 	}
-	if (collection.getData.workflow) {
+	if (collection.getData.publishing.workflow) {
 		addFilterPath(filterTree, ["workflowStage"]);
 	}
 

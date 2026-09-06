@@ -10,17 +10,19 @@ const buildCollection = () =>
 	new CollectionBuilder("pages", {
 		mode: "multiple",
 		details: {
-			name: copy("admin:tests.collections.pages.name", {
-				defaultMessage: "Pages",
-			}),
-			singularName: copy("admin:tests.collections.pages.singularName", {
-				defaultMessage: "Page",
-			}),
+			labels: {
+				singular: copy("admin:tests.collections.pages.singularName", {
+					defaultMessage: "Page",
+				}),
+				plural: copy("admin:tests.collections.pages.name", {
+					defaultMessage: "Pages",
+				}),
+			},
 		},
 	});
 
 const showWhen = (field: string, value: string): FieldConditionConfig => ({
-	groups: [[{ field, operator: "equals", value }]],
+	all: [{ field, operator: "equals", value }],
 });
 
 describe("checkFieldConditions", () => {
@@ -41,11 +43,9 @@ describe("checkFieldConditions", () => {
 				//* ancestor scopes: parent repeater and root
 				ui: {
 					condition: {
-						groups: [
-							[
-								{ field: "itemType", operator: "equals", value: "text" },
-								{ field: "menuType", operator: "equals", value: "docs" },
-							],
+						all: [
+							{ field: "itemType", operator: "equals", value: "text" },
+							{ field: "menuType", operator: "equals", value: "docs" },
 						],
 					},
 				},
@@ -100,7 +100,7 @@ describe("checkFieldConditions", () => {
 			.addText("headline", {
 				ui: {
 					condition: {
-						groups: [[{ field: "items", operator: "isNotEmpty" }]],
+						all: [{ field: "items", operator: "isNotEmpty" }],
 					},
 				},
 			});
@@ -185,9 +185,11 @@ describe("condition config schema", () => {
 					condition: {
 						action: "hide",
 						translationScope: "any",
-						groups: [
-							[{ field: "menuType", operator: "equals", value: "docs" }],
-							[{ field: "menuType", operator: "isEmpty" }],
+						any: [
+							{
+								all: [{ field: "menuType", operator: "equals", value: "docs" }],
+							},
+							{ all: [{ field: "menuType", operator: "isEmpty" }] },
 						],
 					},
 				},
@@ -205,9 +207,7 @@ describe("condition config schema", () => {
 			type: "text",
 			ui: {
 				condition: {
-					groups: [
-						[{ field: "menuType", operator: "greaterThan", value: "docs" }],
-					],
+					all: [{ field: "menuType", operator: "greaterThan", value: "docs" }],
 				},
 			},
 		});
@@ -220,7 +220,7 @@ describe("condition config schema", () => {
 			type: "text",
 			ui: {
 				condition: {
-					groups: [[{ field: "menuType", operator: "equals" }]],
+					all: [{ field: "menuType", operator: "equals" }],
 				},
 			},
 		});
@@ -234,7 +234,7 @@ describe("condition config schema", () => {
 			ui: {
 				condition: {
 					translationScope: "all",
-					groups: [[{ field: "menuType", operator: "equals", value: "docs" }]],
+					all: [{ field: "menuType", operator: "equals", value: "docs" }],
 				},
 			},
 		});

@@ -1,11 +1,11 @@
-import type { Config } from "../../types/config.js";
+import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
 import passthroughEmailAdapter from "./adapters/passthrough.js";
 import type { EmailAdapterInstance } from "./types.js";
 
 /** Resolves the configured email adapter, using simulation when omitted. */
 const getEmailAdapter = async (config: {
-	email: Pick<Config["email"], "adapter">;
+	email: Pick<ResolvedLucidConfig["email"], "adapter">;
 }): Promise<EmailAdapterInstance> => {
 	if (!config.email.adapter) return passthroughEmailAdapter();
 
