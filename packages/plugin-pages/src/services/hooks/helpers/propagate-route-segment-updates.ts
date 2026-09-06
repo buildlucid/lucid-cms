@@ -1,3 +1,4 @@
+import { copy } from "@lucidcms/core";
 import {
 	getCollectionTableNames,
 	resolveRelatedDocumentVersionType,
@@ -18,12 +19,23 @@ const propagateRouteSegmentUpdates: ServiceFn<
 		{
 			options: PluginOptionsInternal;
 			targetCollectionKey: string;
-			targetDocumentId: number;
-			targetVersionType: Exclude<DocumentVersionType, "revision">;
-		},
+		} & (
+			| {
+					targetDocumentId: number;
+					targetVersionType: Exclude<DocumentVersionType, "revision">;
+			  }
+			| { deletedDocumentIds: number[] }
+		),
 	],
 	undefined
 > = async (context, data) => {
+	const deletedTargets =
+		"deletedDocumentIds" in data
+			? {
+					collectionKey: data.targetCollectionKey,
+					documentIds: data.deletedDocumentIds,
+				}
+			: undefined;
 	const collectionResults = await Promise.all(
 		data.options.collections.map(async (collection) => {
 			const relationKeys = collection.segments
@@ -47,6 +59,7 @@ const propagateRouteSegmentUpdates: ServiceFn<
 				),
 			].filter((versionType) => {
 				return (
+					"deletedDocumentIds" in data ||
 					resolveRelatedDocumentVersionType({
 						collections: context.config.collections,
 						sourceCollectionKey: collection.key,
@@ -65,7 +78,10 @@ const propagateRouteSegmentUpdates: ServiceFn<
 				collectionKey: collection.key,
 				relationKeys,
 				targetCollectionKey: data.targetCollectionKey,
-				targetDocumentId: data.targetDocumentId,
+				targetDocumentIds:
+					"deletedDocumentIds" in data
+						? data.deletedDocumentIds
+						: [data.targetDocumentId],
 				versionTypes,
 				tables: tablesRes.data,
 			});
@@ -94,11 +110,16 @@ const propagateRouteSegmentUpdates: ServiceFn<
 							dependent,
 						]),
 					);
-					const affected = [...affectedVersions.values()];
+					const affected = [...affectedVersions.values()].filter(
+						(dependent) =>
+							deletedTargets?.collectionKey !== collection.key ||
+							!deletedTargets.documentIds.includes(dependent.document_id),
+					);
 					const routePrefixesRes = await resolveStoredRoutePrefixes(context, {
 						collection,
 						collectionInstance,
 						versionType,
+						excludedTargets: deletedTargets,
 						versionIds: affected.map(
 							(dependent) => dependent.document_version_id,
 						),
@@ -122,6 +143,9 @@ const propagateRouteSegmentUpdates: ServiceFn<
 					const uniquenessRes = await checkFullSlugUniqueness(context, {
 						collection,
 						projectedFullSlugs: fullSlugsRes.data,
+						duplicateMessage: deletedTargets
+							? copy("server:plugin.pages.full.slug.duplicate.on.delete")
+							: undefined,
 						versionType,
 						collectionKey: collection.key,
 						tables: tablesRes.data,

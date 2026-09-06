@@ -11,6 +11,7 @@
 - Added `toolkit.pages.getByFullSlug()` to fetch pages by their full slug with collection-specific types and preview support.
 - Moved translation registration to plugin `sources`.
 - Fixed routes and page hierarchies when locales are added after content is created.
+- Fixed page paths retaining route segments from deleted documents.
 
 ## v0.7.0
 

@@ -4,16 +4,23 @@ import type { PluginOptionsInternal } from "../../types/types.js";
 import { checkFullSlugUniqueness } from "../checks/index.js";
 import { getTargetCollection, updateFullSlugFields } from "../index.js";
 import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
+import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
 /**
- * Handles the before delete hook for documents. What this does is:
- * - Updates all of the descendants of the deleted document fullSlug fields so that they dont include the deleted document's slug
+ * Removes deleted parent pages and route segments from affected page paths.
  */
 const beforeDeleteHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"beforeDelete">["handler"] =>
 	async (context, data) => {
+		const segmentUpdatesRes = await propagateRouteSegmentUpdates(context, {
+			options,
+			targetCollectionKey: data.meta.collectionKey,
+			deletedDocumentIds: data.data.ids,
+		});
+		if (segmentUpdatesRes.error) return segmentUpdatesRes;
+
 		// ----------------------------------------------------------------
 		// Validation / Setup
 		const targetCollectionRes = getTargetCollection({

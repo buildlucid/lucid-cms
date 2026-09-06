@@ -26,7 +26,7 @@ const getRouteSegmentDependents: ServiceFn<
 			collectionKey: string;
 			relationKeys: string[];
 			targetCollectionKey: string;
-			targetDocumentId: number;
+			targetDocumentIds: number[];
 			versionTypes: Array<Exclude<DocumentVersionType, "revision">>;
 			tables: CollectionTableNames;
 		},
@@ -80,7 +80,7 @@ const getRouteSegmentDependents: ServiceFn<
 						.where(
 							sql<boolean>`${sql.ref(
 								`${relationAlias}.${prefixGeneratedColName("document_id")}`,
-							)} = ${data.targetDocumentId}`,
+							)} in (${sql.join(data.targetDocumentIds)})`,
 						)
 						.where(sql<boolean>`${sql.ref(`${relationAlias}.locale`)} is null`)
 						.where(sql<boolean>`${sql.ref(`${relationAlias}.position`)} = 0`)

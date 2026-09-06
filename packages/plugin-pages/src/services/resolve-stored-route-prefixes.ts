@@ -13,6 +13,7 @@ const resolveStoredRoutePrefixes: ServiceFn<
 			collectionInstance: CollectionBuilder;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			versionIds: number[];
+			excludedTargets?: { collectionKey: string; documentIds: number[] };
 		},
 	],
 	Map<number, Map<string | null, string | null>>
@@ -39,6 +40,7 @@ const resolveStoredRoutePrefixes: ServiceFn<
 		localization: context.config.localization,
 		sourceKeys,
 		selections: selectionsRes.data,
+		allowMissingRelations: true,
 	});
 	if (missingRelation) {
 		return {
@@ -55,7 +57,11 @@ const resolveStoredRoutePrefixes: ServiceFn<
 		collection: data.collection,
 		collectionInstance: data.collectionInstance,
 		versionType: data.versionType,
-		targets,
+		targets: targets.filter(
+			(target) =>
+				target.collectionKey !== data.excludedTargets?.collectionKey ||
+				!data.excludedTargets.documentIds.includes(target.documentId),
+		),
 		sourceKeys,
 	});
 	if (prefixesRes.error) return prefixesRes;

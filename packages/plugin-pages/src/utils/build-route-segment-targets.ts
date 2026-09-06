@@ -21,6 +21,7 @@ const buildRouteSegmentTargets = (data: {
 	};
 	sourceKeys: string[];
 	selections: RouteSegmentSelection[];
+	allowMissingRelations?: boolean;
 }) => {
 	const selections = new Map(
 		data.selections.map((selection) => [
@@ -33,6 +34,8 @@ const buildRouteSegmentTargets = (data: {
 	for (const sourceKey of data.sourceKeys) {
 		for (const [index, segment] of data.collection.segments.entries()) {
 			const selection = selections.get(`${sourceKey}:${index}`);
+			if (data.allowMissingRelations && selection?.documentId === undefined)
+				continue;
 			const relation = data.collectionInstance.fields.get(segment.relation);
 			const relationConfig = relation?.config as FieldConfig<"relation">;
 			const targetCollectionKey = relationConfig.collection[0];
