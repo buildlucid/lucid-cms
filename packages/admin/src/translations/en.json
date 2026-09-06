@@ -1,4 +1,6 @@
 {
+	"access.unavailable.title": "Unavailable access",
+	"access.unavailable.description": "These saved grants are currently unavailable. You can keep them or remove them.",
 	"common.status.in.sync": "In sync",
 	"common.status.out.of.sync": "Out of sync",
 	"common.status.not.latest": "Not latest",

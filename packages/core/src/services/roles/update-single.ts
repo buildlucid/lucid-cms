@@ -22,17 +22,18 @@ const updateSingle: ServiceFn<
 	undefined
 > = async (context, data) => {
 	const Roles = new RolesRepository(context.db);
-	const [roleRes, validatePermsRes] = await Promise.all([
-		checkRoleAccess(context, {
-			id: data.id,
-		}),
-		data.permissions !== undefined
-			? validatePermissions(context, {
-					permissions: data.permissions,
-				})
-			: undefined,
-	]);
+	const roleRes = await checkRoleAccess(context, { id: data.id });
 	if (roleRes.error) return roleRes;
+
+	const validatePermsRes =
+		data.permissions === undefined
+			? undefined
+			: await validatePermissions(context, {
+					permissions: data.permissions,
+					existingPermissions: (roleRes.data.permissions ?? []).map(
+						(entry) => entry.permission,
+					),
+				});
 	if (validatePermsRes?.error) return validatePermsRes;
 
 	if (formatter.formatBoolean(roleRes.data.locked)) {

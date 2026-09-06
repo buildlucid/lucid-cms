@@ -1,8 +1,4 @@
-import type {
-	ExternalScope,
-	ExternalScopeGroup,
-	IntegrationExpiry,
-} from "@types";
+import type { ExternalScopeGroup, IntegrationExpiry } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -10,6 +6,7 @@ import {
 	createMemo,
 	createSignal,
 	For,
+	Show,
 } from "solid-js";
 import InputGrid from "@/components/Containers/InputGrid";
 import {
@@ -19,6 +16,7 @@ import {
 	Switch,
 	Textarea,
 } from "@/components/Groups/Form";
+import UnavailableGrants from "@/components/Groups/Form/UnavailableGrants";
 import { Panel } from "@/components/Groups/Panel";
 import type { IntegrationServices } from "@/services/api/integrations";
 import T from "@/translations";
@@ -48,7 +46,7 @@ const UpsertIntegrationPanel: Component<UpsertIntegrationPanelProps> = (
 	const [getExpiry, setExpiry] = createSignal<IntegrationExpiry | undefined>(
 		"never",
 	);
-	const [getScopes, setScopes] = createSignal<ExternalScope[]>([]);
+	const [getScopes, setScopes] = createSignal<string[]>([]);
 
 	// ----------------------------------------
 	// Memos
@@ -177,7 +175,7 @@ const UpsertIntegrationPanel: Component<UpsertIntegrationPanelProps> = (
 		]);
 	};
 
-	const toggleScope = (scope: ExternalScope) => {
+	const toggleScope = (scope: string) => {
 		setScopes((scopes) =>
 			scopes.includes(scope)
 				? scopes.filter((selectedScope) => selectedScope !== scope)
@@ -319,6 +317,17 @@ const UpsertIntegrationPanel: Component<UpsertIntegrationPanelProps> = (
 							<h3 class="text-sm text-body">{T()("common.scopes")}</h3>
 						</div>
 						<div class="w-full">
+							<UnavailableGrants
+								keys={getScopes().filter(
+									(key) =>
+										!availableScopes.data?.data.some((group) =>
+											group.scopes.some((scope) => scope.key === key),
+										),
+								)}
+								onRemove={(key) =>
+									setScopes((values) => values.filter((value) => value !== key))
+								}
+							/>
 							<For each={availableScopes.data?.data}>
 								{(group) => (
 									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
@@ -336,6 +345,13 @@ const UpsertIntegrationPanel: Component<UpsertIntegrationPanelProps> = (
 													: T()("selectors.all")}
 											</button>
 										</div>
+										<Show when={group.details.description}>
+											<p class="text-xs text-unfocused mt-1">
+												{helpers.getLocaleValue({
+													value: group.details.description,
+												})}
+											</p>
+										</Show>
 										<div class="mt-2 flex flex-wrap gap-2">
 											<For each={group.scopes}>
 												{(scope) => (
@@ -347,6 +363,10 @@ const UpsertIntegrationPanel: Component<UpsertIntegrationPanelProps> = (
 															label: helpers.getLocaleValue({
 																value: scope.details.name,
 															}),
+															tooltip:
+																helpers.getLocaleValue({
+																	value: scope.details.description,
+																}) || undefined,
 														}}
 														theme="secondary"
 													/>

@@ -27,6 +27,7 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../libs/media-storage/types.js";
+import type { AccessGroup } from "../libs/permission/access-config.js";
 import type { LucidPluginDefinition } from "../libs/plugins/types.js";
 import type {
 	QueueAdapter,
@@ -238,6 +239,8 @@ export type SecretConfig = {
 
 /** Project settings returned by `defineConfig`'s `config` callback. Omitted options use Lucid or plugin defaults. */
 export interface LucidConfig {
+	/** Custom permission and integration scope groups. */
+	access?: AccessGroup[];
 	/** Directories to discover relative to lucid.config. Defaults to src/lucid/<resource>, except public uses ./public. Set false to disable a lookup. */
 	discovery?: ResourceDiscovery;
 	/** Additional resource files, directories, package exports or file URLs. These remain enabled when project discovery is disabled. */
@@ -566,6 +569,7 @@ export interface LucidConfig {
 
 /** Runtime configuration after defaults, plugin contributions and configure callbacks have been applied. */
 export interface ResolvedLucidConfig {
+	access: AccessGroup[];
 	host?: string;
 	logger: {
 		level: LogLevel;

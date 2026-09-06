@@ -126,6 +126,7 @@ const devCommand = async (options?: {
 				envSchema: configResult.envSchema,
 				configPath: configPath,
 				projectRoot: configResult.projectRoot,
+				access: configResult.config.access,
 				collections: configResult.config.collections,
 				localization: configResult.config.localization,
 			});

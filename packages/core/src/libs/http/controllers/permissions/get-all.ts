@@ -34,7 +34,7 @@ const getAllController = factory.createHandlers(
 		return c.json(
 			formatAPIResponse(c, {
 				data: permissionsFormatter.formatMultiple({
-					permissions: getGrantablePermissionRegistry(collectionsRes.data),
+					permissions: getGrantablePermissionRegistry(context.config),
 				}),
 			}),
 		);

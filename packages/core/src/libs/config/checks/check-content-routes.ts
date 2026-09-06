@@ -19,7 +19,7 @@ const checkContentRoutes = (config: ResolvedLucidConfig) => {
 		if (typeof route.access.scopes === "function") continue;
 
 		const invalidScopes = getInvalidExternalScopes(
-			config.collections,
+			config,
 			route.access.scopes,
 			{ principalType: route.access.principalType },
 		);

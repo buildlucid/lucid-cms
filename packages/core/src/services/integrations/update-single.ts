@@ -1,7 +1,8 @@
-import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
-import type { ExternalScope } from "../../libs/permission/external-scopes.js";
-import { getInvalidExternalScopes } from "../../libs/permission/scopes.js";
+import {
+	getInvalidExternalScopes,
+	isCoreExternalScope,
+} from "../../libs/permission/scopes.js";
 import {
 	IntegrationScopesRepository,
 	IntegrationsRepository,
@@ -27,14 +28,18 @@ const updateSingle: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
+	const checkExistsRes = await checkIntegrationAccess(context, {
+		id: data.id,
+		userId: data.userId,
+	});
+	if (checkExistsRes.error) return checkExistsRes;
+
+	const existingScopes = new Set(checkExistsRes.data.scopes);
 	const scopes = data.scopes ? [...new Set(data.scopes)] : undefined;
 	if (scopes !== undefined) {
-		const collectionsRes = await collections.getAll(context, {});
-		if (collectionsRes.error) return collectionsRes;
-
 		const invalidScopes = getInvalidExternalScopes(
-			collectionsRes.data,
-			scopes,
+			context.config,
+			scopes.filter((scope) => !existingScopes.has(scope)),
 			{
 				principalType: data.userId === null ? "system" : "user",
 			},
@@ -57,21 +62,17 @@ const updateSingle: ServiceFn<
 	const Integrations = new IntegrationsRepository(context.db);
 	const IntegrationScopes = new IntegrationScopesRepository(context.db);
 
-	const checkExistsRes = await checkIntegrationAccess(context, {
-		id: data.id,
-		userId: data.userId,
-	});
-	if (checkExistsRes.error) return checkExistsRes;
-
 	if (scopes !== undefined && data.userId !== null) {
 		const authority = await resolveUserAuthority(context, {
 			userId: data.userId,
-			scopes: scopes as ExternalScope[],
+			scopes: scopes,
 		});
 		if (authority.error) return authority;
 
 		const unavailableScopes = scopes.filter(
-			(scope) => !authority.data.scopes.includes(scope as ExternalScope),
+			(scope) =>
+				!existingScopes.has(scope) &&
+				!authority.data.scopes.some((allowed) => allowed === scope),
 		);
 		if (unavailableScopes.length > 0) {
 			return {
@@ -132,7 +133,7 @@ const updateSingle: ServiceFn<
 				data: scopes.map((scope) => ({
 					integration_id: data.id,
 					scope,
-					core: true,
+					core: isCoreExternalScope(context.config, scope),
 				})),
 			});
 			if (createScopesRes.error) return createScopesRes;

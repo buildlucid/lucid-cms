@@ -1,4 +1,3 @@
-import type { Permission } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -10,6 +9,7 @@ import {
 } from "solid-js";
 import InputGrid from "@/components/Containers/InputGrid";
 import { CheckboxButton, Input, Textarea } from "@/components/Groups/Form";
+import UnavailableGrants from "@/components/Groups/Form/UnavailableGrants";
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
 import T from "@/translations";
@@ -28,9 +28,9 @@ interface UpsertRolePanelProps {
 const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 	// ---------------------------------
 	// State
-	const [selectedPermissions, setSelectedPermissions] = createSignal<
-		Permission[]
-	>([]);
+	const [selectedPermissions, setSelectedPermissions] = createSignal<string[]>(
+		[],
+	);
 	const [name, setName] = createSignal("");
 	const [description, setDescription] = createSignal("");
 
@@ -223,6 +223,22 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 							<h3 class="text-sm text-body">{T()("common.permissions")}</h3>
 						</div>
 						<div class="w-full">
+							<UnavailableGrants
+								keys={selectedPermissions().filter(
+									(key) =>
+										!permissions.data?.data.some((group) =>
+											group.permissions.some(
+												(permission) => permission.key === key,
+											),
+										),
+								)}
+								onRemove={(key) =>
+									setSelectedPermissions((values) =>
+										values.filter((value) => value !== key),
+									)
+								}
+								disabled={isReadOnly()}
+							/>
 							<For each={permissions?.data?.data}>
 								{(option) => (
 									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
@@ -274,6 +290,13 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 												</button>
 											</Show>
 										</div>
+										<Show when={option.details.description}>
+											<p class="text-xs text-unfocused mt-1">
+												{helpers.getLocaleValue({
+													value: option.details.description,
+												})}
+											</p>
+										</Show>
 										<div class="mt-2 flex flex-wrap gap-2">
 											<For each={option.permissions}>
 												{(permission) => (

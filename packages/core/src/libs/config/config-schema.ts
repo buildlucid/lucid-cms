@@ -18,6 +18,7 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../media-storage/types.js";
+import { accessGroupSchema } from "../permission/access-config.js";
 import { PluginDefinitionSchema } from "../plugins/schema.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
 import { defaultDiscovery } from "../resources/defaults.js";
@@ -147,6 +148,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			typeof value.connect === "function",
 	),
 	tables: z.array(tableSchema),
+	access: z.array(accessGroupSchema).default([]),
 	discovery: ResourceDiscoverySchema.transform((value) => ({
 		...defaultDiscovery,
 		...value,

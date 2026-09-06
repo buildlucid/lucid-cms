@@ -1,7 +1,8 @@
-import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
-import type { ExternalScope } from "../../libs/permission/external-scopes.js";
-import { getInvalidExternalScopes } from "../../libs/permission/scopes.js";
+import {
+	getInvalidExternalScopes,
+	isCoreExternalScope,
+} from "../../libs/permission/scopes.js";
 import {
 	IntegrationScopesRepository,
 	IntegrationsRepository,
@@ -30,10 +31,8 @@ const createSingle: ServiceFn<
 	}
 > = async (context, data) => {
 	const scopes = [...new Set(data.scopes)];
-	const collectionsRes = await collections.getAll(context, {});
-	if (collectionsRes.error) return collectionsRes;
 
-	const invalidScopes = getInvalidExternalScopes(collectionsRes.data, scopes, {
+	const invalidScopes = getInvalidExternalScopes(context.config, scopes, {
 		principalType: data.userId === null ? "system" : "user",
 	});
 	if (invalidScopes.length > 0) {
@@ -53,12 +52,12 @@ const createSingle: ServiceFn<
 	if (data.userId !== null) {
 		const authority = await resolveUserAuthority(context, {
 			userId: data.userId,
-			scopes: scopes as ExternalScope[],
+			scopes: scopes,
 		});
 		if (authority.error) return authority;
 
 		const unavailableScopes = scopes.filter(
-			(scope) => !authority.data.scopes.includes(scope as ExternalScope),
+			(scope) => !authority.data.scopes.some((allowed) => allowed === scope),
 		);
 		if (unavailableScopes.length > 0) {
 			return {
@@ -131,7 +130,7 @@ const createSingle: ServiceFn<
 			data: scopes.map((scope) => ({
 				integration_id: newIntegrationRes.data.id,
 				scope,
-				core: true,
+				core: isCoreExternalScope(context.config, scope),
 			})),
 		});
 		if (scopeInsertRes.error) return scopeInsertRes;

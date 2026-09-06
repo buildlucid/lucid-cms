@@ -1,9 +1,9 @@
-import collections from "../../libs/collection/collections.js";
 import formatter, {
 	userPermissionsFormatter,
 } from "../../libs/formatters/index.js";
 import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import type { ExternalScope } from "../../libs/permission/external-scopes.js";
+import { filterExternalScopes } from "../../libs/permission/scopes.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
@@ -14,7 +14,7 @@ const resolveUserAuthority: ServiceFn<
 	[
 		{
 			userId: number;
-			scopes: ExternalScope[];
+			scopes: readonly string[];
 		},
 	],
 	{
@@ -25,8 +25,6 @@ const resolveUserAuthority: ServiceFn<
 		scopes: ExternalScope[];
 	}
 > = async (context, data) => {
-	const collectionsRes = await collections.getAll(context, {});
-	if (collectionsRes.error) return collectionsRes;
 	const Users = new UsersRepository(context.db);
 	const userRes = await Users.selectAccessTokenUser({
 		where: [
@@ -56,15 +54,19 @@ const resolveUserAuthority: ServiceFn<
 	const { permissions } = userPermissionsFormatter.formatMultiple({
 		roles: userRes.data.roles ?? [],
 	});
-	const effectiveScopes = data.scopes.filter((scope) => {
-		const capability = getExternalCapability(
-			collectionsRes.data,
-			scope,
-			"user",
-		);
+	const effectiveScopes = filterExternalScopes(
+		context.config,
+		data.scopes,
+		"user",
+	).filter((scope) => {
+		const capability = getExternalCapability(context.config, scope, "user");
 		if (!capability) return false;
 		if (capability.userPermission === null || superAdmin) return true;
-		return permissions?.includes(capability.userPermission) === true;
+		return (
+			permissions?.some(
+				(permission) => permission === capability.userPermission,
+			) === true
+		);
 	});
 
 	return {

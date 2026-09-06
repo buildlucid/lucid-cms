@@ -105,6 +105,7 @@ const serveCommand = async () => {
 			envSchema: configRes.envSchema,
 			configPath: configPath,
 			projectRoot: configRes.projectRoot,
+			access: configRes.config.access,
 			collections: configRes.config.collections,
 			localization: configRes.config.localization,
 		});

@@ -1,13 +1,12 @@
-import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
-import { getCapabilityRegistry } from "./capabilities.js";
+import { type AccessConfig, getCapabilityRegistry } from "./capabilities.js";
 import type {
 	ExternalPrincipalType,
 	ExternalScope,
 } from "./external-scopes.js";
 
 export type ExternalScopeDefinition = {
-	key: ExternalScope;
+	key: string;
 	details: {
 		name: ResolvedAdminCopy;
 		description?: ResolvedAdminCopy | null;
@@ -25,31 +24,33 @@ export type ExternalScopeGroup = {
 
 /** Builds the external scope view of the canonical capability catalogue. */
 export const getExternalScopeGroups = (
-	collections: CollectionBuilder[],
+	config: AccessConfig,
 	options: {
 		principalType?: ExternalPrincipalType;
 	} = {},
 ): ExternalScopeGroup[] => {
-	return getCapabilityRegistry(collections)
+	return getCapabilityRegistry(config)
 		.map(
 			(group): ExternalScopeGroup => ({
 				key: group.key,
 				details: group.externalDetails ?? group.details,
-				scopes: group.capabilities
-					.filter(
-						(capability) =>
-							capability.availableToIntegrations === true &&
-							capability.external !== undefined &&
-							(options.principalType === undefined ||
-								capability.external.principalTypes === undefined ||
-								capability.external.principalTypes.includes(
-									options.principalType,
-								)),
+				scopes: group.capabilities.flatMap((capability) => {
+					const external = capability.external;
+					if (
+						!capability.availableToIntegrations ||
+						!external ||
+						(options.principalType !== undefined &&
+							external.principalTypes !== undefined &&
+							!external.principalTypes.includes(options.principalType))
 					)
-					.map((capability) => ({
-						key: capability.external?.scope as ExternalScope,
-						details: capability.external?.details ?? capability.details,
-					})),
+						return [];
+					return [
+						{
+							key: external.scope,
+							details: external.details ?? capability.details,
+						},
+					];
+				}),
 			}),
 		)
 		.filter((group) => group.scopes.length > 0);
@@ -57,25 +58,43 @@ export const getExternalScopeGroups = (
 
 /** Returns every external scope available for the current configuration. */
 export const getValidExternalScopes = (
-	collections: CollectionBuilder[],
+	config: AccessConfig,
 	options: {
 		principalType?: ExternalPrincipalType;
 	} = {},
-): ExternalScope[] =>
-	getExternalScopeGroups(collections, options).flatMap((group) =>
+): string[] =>
+	getExternalScopeGroups(config, options).flatMap((group) =>
 		group.scopes.map((scope) => scope.key),
 	);
 
 /** Returns requested scopes that are unavailable for the configuration. */
 export const getInvalidExternalScopes = (
-	collections: CollectionBuilder[],
+	config: AccessConfig,
 	scopes: readonly string[],
 	options: {
 		principalType?: ExternalPrincipalType;
 	} = {},
 ) => {
-	const validScopes = new Set<string>(
-		getValidExternalScopes(collections, options),
-	);
+	const validScopes = new Set<string>(getValidExternalScopes(config, options));
 	return scopes.filter((scope) => !validScopes.has(scope));
 };
+
+/** Keeps only scopes registered for the credential's principal type. */
+export const filterExternalScopes = (
+	config: AccessConfig,
+	scopes: readonly string[],
+	principalType: ExternalPrincipalType,
+): ExternalScope[] => {
+	const registered = new Set(getValidExternalScopes(config, { principalType }));
+	return scopes.filter((scope): scope is ExternalScope =>
+		registered.has(scope),
+	);
+};
+
+/** Checks whether Lucid owns the registered scope. */
+export const isCoreExternalScope = (config: AccessConfig, scope: string) =>
+	getCapabilityRegistry(config).some((group) =>
+		group.capabilities.some(
+			(capability) => capability.core && capability.external?.scope === scope,
+		),
+	);

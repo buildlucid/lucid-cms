@@ -1,7 +1,7 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaImagePreview } from "../media/types.js";
 
-export type ExternalScope =
+export type CoreExternalScope =
 	| `documents:${string}:${
 			| "read"
 			| "create"
@@ -17,6 +17,14 @@ export type ExternalScope =
 	| "media:delete"
 	| "media:resolve-url"
 	| "locales:read";
+
+/** Project scopes added by Lucid type generation or a plugin. */
+// biome-ignore lint/suspicious/noEmptyInterface: generated types and plugins augment this interface
+export interface CustomExternalScopes {}
+
+export type ExternalScope =
+	| CoreExternalScope
+	| Extract<keyof CustomExternalScopes, string>;
 
 export type IntegrationExpiry = "never" | "30-days" | "90-days" | "1-year";
 
@@ -43,7 +51,7 @@ export interface ExternalScopeGroup {
 		description?: ResolvedAdminCopy | null;
 	};
 	scopes: Array<{
-		key: ExternalScope;
+		key: string;
 		details: {
 			name: ResolvedAdminCopy;
 			description?: ResolvedAdminCopy | null;

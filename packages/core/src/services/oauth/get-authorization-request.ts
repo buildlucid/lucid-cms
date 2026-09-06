@@ -1,4 +1,3 @@
-import collections from "../../libs/collection/collections.js";
 import { mediaFormatter } from "../../libs/formatters/index.js";
 import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import type { ExternalScope } from "../../libs/permission/external-scopes.js";
@@ -23,8 +22,6 @@ const getAuthorizationRequest: ServiceFn<
 	],
 	OAuthAuthorizationRequest
 > = async (context, input) => {
-	const collectionsRes = await collections.getAll(context, {});
-	if (collectionsRes.error) return collectionsRes;
 	const Requests = new OAuthAuthorizationRequestsRepository(context.db);
 	const requestRes = await Requests.selectSingleActiveWithLogo({
 		requestId: input.requestId,
@@ -46,20 +43,18 @@ const getAuthorizationRequest: ServiceFn<
 		.split(" ")
 		.filter(Boolean) as ExternalScope[];
 	const userScopes = scopes.filter((scope) => {
-		const capability = getExternalCapability(
-			collectionsRes.data,
-			scope,
-			"user",
-		);
+		const capability = getExternalCapability(context.config, scope, "user");
 		if (!capability) return false;
 		if (capability.userPermission === null || input.actor.superAdmin)
 			return true;
 		return (
-			input.actor.permissions?.includes(capability.userPermission) === true
+			input.actor.permissions?.some(
+				(permission) => permission === capability.userPermission,
+			) === true
 		);
 	});
-	const requestedScopes = new Set(scopes);
-	const scopeGroups = getExternalScopeGroups(collectionsRes.data)
+	const requestedScopes = new Set<string>(scopes);
+	const scopeGroups = getExternalScopeGroups(context.config)
 		.map((group) => ({
 			...group,
 			scopes: group.scopes.filter((scope) => requestedScopes.has(scope.key)),
@@ -67,7 +62,7 @@ const getAuthorizationRequest: ServiceFn<
 		.filter((group) => group.scopes.length > 0);
 	const supportsSystemPrincipal = scopes.every(
 		(scope) =>
-			getExternalCapability(collectionsRes.data, scope, "system") !== undefined,
+			getExternalCapability(context.config, scope, "system") !== undefined,
 	);
 
 	if (scopeGroups.flatMap((group) => group.scopes).length !== scopes.length) {

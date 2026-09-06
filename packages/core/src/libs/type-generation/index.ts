@@ -7,6 +7,7 @@ import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import generateCollectionClientTypes from "../collection/type-gen/index.js";
 import logger from "../logger/index.js";
+import generateAccessTypes from "./access-type.js";
 import generateEnvTypes from "./env-type.js";
 import generateTranslationCopyTypes from "./translation-copy-type.js";
 import type {
@@ -101,6 +102,7 @@ const generateTypes = async (props: {
 	configPath: string;
 	projectRoot?: string;
 	collections: CollectionBuilder[];
+	access: ResolvedLucidConfig["access"];
 	localization: ResolvedLucidConfig["localization"];
 }) => {
 	const lucidDir = await ensureLucidDirectoryExists();
@@ -108,6 +110,7 @@ const generateTypes = async (props: {
 
 	const contributions = (
 		await Promise.all([
+			generateAccessTypes(props.access),
 			generateEnvTypes({
 				schema: props.envSchema,
 				configRelativePath,

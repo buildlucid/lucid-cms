@@ -2,10 +2,64 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "vitest";
+import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import BrickBuilder from "../collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import resolveConfig from "../config/resolve-config.js";
 import { copy } from "../i18n/index.js";
 import generateTypes from "./index.js";
+
+test("generates project and plugin access keys and removes stale declarations", async () => {
+	const cwd = process.cwd();
+	const projectRoot = await mkdtemp(path.join(tmpdir(), "lucid-access-types-"));
+	const configPath = path.join(projectRoot, "lucid.config.ts");
+	const base = await getTestConfig().getConfig();
+	try {
+		process.chdir(projectRoot);
+		await writeFile(configPath, "export default {};\n");
+		const config = await resolveConfig(
+			{
+				...base,
+				access: [
+					{
+						key: "reports",
+						name: "Reports",
+						permissions: { "reports:read": { name: "Read reports" } },
+					},
+				],
+				plugins: [
+					{
+						key: "exports",
+						lucid: "*",
+						configure(config) {
+							config.access.push({
+								key: "exports",
+								name: "Exports",
+								scopes: { "exports:read": { userPermission: "reports:read" } },
+							});
+						},
+					},
+				],
+			},
+			{ resolvedDb: base.db, mode: "build" },
+		);
+		await generateTypes({ ...config, projectRoot, configPath });
+		const outputPath = path.join(projectRoot, ".lucid", "types.d.ts");
+		const generated = await readFile(outputPath, "utf8");
+		for (const module of ["@lucidcms/core/types", "@lucidcms/types"]) {
+			expect(generated).toContain(`declare module '${module}'`);
+		}
+		expect(generated.match(/"reports:read": true;/g)).toHaveLength(2);
+		expect(generated.match(/"exports:read": true;/g)).toHaveLength(2);
+		await generateTypes({ ...config, access: [], projectRoot, configPath });
+		const regenerated = await readFile(outputPath, "utf8");
+		expect(regenerated).not.toContain("reports:read");
+		expect(regenerated).not.toContain("exports:read");
+	} finally {
+		process.chdir(cwd);
+		await rm(projectRoot, { recursive: true, force: true });
+	}
+});
 
 test("generates collection-aware client document types that lean on the public Lucid contracts", async () => {
 	const cwd = process.cwd();
@@ -106,6 +160,7 @@ test("generates collection-aware client document types that lean on the public L
 		process.chdir(tempDir);
 
 		await generateTypes({
+			access: [],
 			configPath,
 			projectRoot: tempDir,
 			collections: [PageCollection, ArticleCollection],

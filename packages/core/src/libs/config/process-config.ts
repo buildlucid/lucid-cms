@@ -8,6 +8,7 @@ import CustomFieldSchema from "../collection/custom-fields/schema.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import { getJobRegistry } from "../jobs/registry.js";
 import { initializeLogger } from "../logger/index.js";
+import { getCapabilityRegistry } from "../permission/capabilities.js";
 import type { ConfigTransform } from "../runtime/types.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
@@ -89,6 +90,8 @@ const processConfig = async (
 
 		// plugin toolkit definitions
 		checkToolkitDefinitions(configRes.plugins);
+
+		getCapabilityRegistry(configRes);
 
 		// custom content routes
 		checkContentRoutes(configRes);

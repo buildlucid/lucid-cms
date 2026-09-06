@@ -1,4 +1,3 @@
-import collections from "../../libs/collection/collections.js";
 import formatter from "../../libs/formatters/index.js";
 import {
 	getValidPermissions,
@@ -20,12 +19,9 @@ type ManagedRoleDefinition = {
 };
 
 /**
- * Synchronizes internally managed roles and prunes grants that are no longer registered.
+ * Synchronizes managed roles and prunes removed core permissions. Custom grants stay saved while unavailable.
  */
 const syncRoles: ServiceFn<[], undefined> = async (context) => {
-	const collectionsRes = await collections.getAll(context, {});
-	if (collectionsRes.error) return collectionsRes;
-
 	const Roles = new RolesRepository(context.db);
 	const RolePermissions = new RolePermissionsRepository(context.db);
 
@@ -128,9 +124,14 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 		}
 	}
 
-	const validPermissions = getValidPermissions(collectionsRes.data);
+	const validPermissions = getValidPermissions(context.config);
 	const prunePermissionsRes = await RolePermissions.deleteMultiple({
 		where: [
+			{
+				key: "core",
+				operator: "=",
+				value: context.config.db.getDefault("boolean", "true"),
+			},
 			{
 				key: "permission",
 				operator: "not in",

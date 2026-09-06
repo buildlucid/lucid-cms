@@ -18,6 +18,7 @@
 - Added durable jobs and recurring schedules, with retries, cancellation, queue adapters and admin monitoring.
 - Added `defineToolkit` so plugins can register type-safe toolkit services.
 - Added `defineContentApiRoute` for custom content endpoints with authentication and scope options.
+- Added custom permissions and integration scopes through `lucid.config.access`, with labels, groups, user permission checks and generated type hints for middleware and routes.
 - Added automatic loading of resources from configurable folders, including subfolders and plugin resources.
 
 ### Breaking Changes:

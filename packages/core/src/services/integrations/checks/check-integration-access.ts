@@ -16,6 +16,7 @@ const checkIntegrationAccess: ServiceFn<
 		id: number;
 		key: string;
 		user_id: number | null;
+		scopes: string[];
 	}
 > = async (context, data) => {
 	const Integrations = new IntegrationsRepository(context.db);
@@ -39,6 +40,7 @@ const checkIntegrationAccess: ServiceFn<
 			id: integrationRes.data.id,
 			key: integrationRes.data.key,
 			user_id: integrationRes.data.user_id,
+			scopes: (integrationRes.data.scopes ?? []).map((entry) => entry.scope),
 		},
 	};
 };

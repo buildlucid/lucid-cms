@@ -1,4 +1,4 @@
-import type { ExternalScope } from "../../libs/permission/external-scopes.js";
+import { filterExternalScopes } from "../../libs/permission/scopes.js";
 import type { LucidOAuthExternalAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveUserAuthority from "../integrations/resolve-user-authority.js";
@@ -18,8 +18,10 @@ const resolveGrantAuthority: ServiceFn<
 	[AuthorityGrant],
 	LucidOAuthExternalAuth
 > = async (context, grant) => {
-	const grantedScopes = grant.scopes.map(
-		(entry) => entry.scope as ExternalScope,
+	const grantedScopes = filterExternalScopes(
+		context.config,
+		grant.scopes.map((entry) => entry.scope),
+		grant.principal_type,
 	);
 
 	if (grant.principal_type === "system") {

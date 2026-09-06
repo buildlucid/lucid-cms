@@ -1,6 +1,4 @@
-import collections from "../../libs/collection/collections.js";
 import { hydrateAdminCopyDefaults } from "../../libs/i18n/index.js";
-import type { ExternalScope } from "../../libs/permission/external-scopes.js";
 import type { ExternalScopeGroup } from "../../libs/permission/scopes.js";
 import {
 	getExternalScopeGroups,
@@ -18,23 +16,20 @@ const getScopes: ServiceFn<
 	],
 	ExternalScopeGroup[]
 > = async (context, data) => {
-	const collectionsRes = await collections.getAll(context, {});
-	if (collectionsRes.error) return collectionsRes;
-
-	let groups = getExternalScopeGroups(collectionsRes.data, {
+	let groups = getExternalScopeGroups(context.config, {
 		principalType: data.userId === undefined ? "system" : "user",
 	});
 
 	if (data.userId !== undefined) {
 		const authority = await resolveUserAuthority(context, {
 			userId: data.userId,
-			scopes: getValidExternalScopes(collectionsRes.data, {
+			scopes: getValidExternalScopes(context.config, {
 				principalType: "user",
-			}) as ExternalScope[],
+			}),
 		});
 		if (authority.error) return authority;
 
-		const allowedScopes = new Set(authority.data.scopes);
+		const allowedScopes = new Set<string>(authority.data.scopes);
 		groups = groups
 			.map((group) => ({
 				...group,

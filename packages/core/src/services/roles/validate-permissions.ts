@@ -1,5 +1,3 @@
-import type { Permission } from "../../exports/types.js";
-import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { getValidPermissions } from "../../libs/permission/registry.js";
 import type { ErrorResult } from "../../types/errors.js";
@@ -9,10 +7,12 @@ const validatePermissions: ServiceFn<
 	[
 		{
 			permissions: string[];
+			/** Previously assigned keys may be retained while unavailable. */
+			existingPermissions?: string[];
 		},
 	],
 	{
-		permission: Permission;
+		permission: string;
 	}[]
 > = async (context, data) => {
 	if (data.permissions.length === 0) {
@@ -22,23 +22,24 @@ const validatePermissions: ServiceFn<
 		};
 	}
 
-	const collectionsRes = await collections.getAll(context, {});
-	if (collectionsRes.error) return collectionsRes;
-
-	const validPermissions = getValidPermissions(collectionsRes.data);
+	const validPermissions = getValidPermissions(context.config);
 
 	const permErrors: Array<{
 		key: string;
 		error: ErrorResult;
 	}> = [];
 	const validPerms: Array<{
-		permission: Permission;
+		permission: string;
 	}> = [];
 
 	for (let i = 0; i < data.permissions.length; i++) {
-		const permission = data.permissions[i] as Permission;
+		const permission = data.permissions[i];
+		if (permission === undefined) continue;
 
-		if (!validPermissions.includes(permission)) {
+		if (
+			!validPermissions.includes(permission) &&
+			!data.existingPermissions?.includes(permission)
+		) {
 			const findError = permErrors.find((e) => e.key === permission);
 			if (!findError) {
 				permErrors.push({
@@ -66,7 +67,7 @@ const validatePermissions: ServiceFn<
 		return {
 			error: {
 				type: "basic",
-				status: 500,
+				status: 400,
 				errors: {
 					permissions: permErrors.reduce<ErrorResult>((acc, e) => {
 						acc[e.key] = e.error;

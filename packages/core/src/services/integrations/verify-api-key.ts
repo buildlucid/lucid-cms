@@ -3,7 +3,7 @@ import { scrypt } from "@noble/hashes/scrypt.js";
 import constants from "../../constants/constants.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
-import type { ExternalScope } from "../../libs/permission/external-scopes.js";
+import { filterExternalScopes } from "../../libs/permission/scopes.js";
 import { IntegrationsRepository } from "../../libs/repositories/index.js";
 import type { LucidApiKeyExternalAuth } from "../../types/hono.js";
 import { decrypt } from "../../utils/helpers/encrypt-decrypt.js";
@@ -96,8 +96,10 @@ const verifyApiKey: ServiceFn<
 		};
 	}
 
-	const scopes = (integrationRes.data.scopes || []).map(
-		(scope) => scope.scope as ExternalScope,
+	const scopes = filterExternalScopes(
+		context.config,
+		(integrationRes.data.scopes || []).map((scope) => scope.scope),
+		integrationRes.data.user_id === null ? "system" : "user",
 	);
 	if (integrationRes.data.user_id !== null) {
 		const authority = await resolveUserAuthority(context, {

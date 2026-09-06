@@ -35,7 +35,13 @@ export type CorePermission =
 	| "connection:update"
 	| "cache:clear";
 
-export type Permission = CorePermission;
+/** Project permissions added by Lucid type generation or a plugin. */
+// biome-ignore lint/suspicious/noEmptyInterface: generated types and plugins augment this interface
+export interface CustomPermissions {}
+
+export type Permission =
+	| CorePermission
+	| Extract<keyof CustomPermissions, string>;
 
 export type PermissionDetails = {
 	name: ResolvedAdminCopy;
@@ -43,7 +49,7 @@ export type PermissionDetails = {
 };
 
 export type PermissionDefinition = {
-	key: Permission;
+	key: string;
 	details: PermissionDetails;
 	core: boolean;
 };

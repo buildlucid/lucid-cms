@@ -4,6 +4,7 @@ import constants from "./constants.js";
 
 export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	tables: [],
+	access: [],
 	discovery: defaultDiscovery,
 	sources: {},
 	telemetry: true,

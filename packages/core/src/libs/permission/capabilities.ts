@@ -1,6 +1,9 @@
+import type { ResolvedLucidConfig } from "../../types/config.js";
+import LucidError from "../../utils/errors/lucid-error.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import { copy } from "../i18n/index.js";
+import { copy, normalizeCopy, translate } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
+import type { AccessPermission } from "./access-config.js";
 import {
 	collectionPermissionActions,
 	getCollectionPermission,
@@ -12,15 +15,11 @@ import {
 	ExternalScopes,
 	getCollectionExternalScope,
 } from "./external-scopes.js";
-import type {
-	Permission,
-	PermissionDetails,
-	StaticPermission,
-} from "./types.js";
+import type { PermissionDetails, StaticPermission } from "./types.js";
 
 export type ExternalCapability = {
-	scope: ExternalScope;
-	userPermission: Permission | null;
+	scope: string;
+	userPermission: string | null;
 	principalTypes?: ExternalPrincipalType[];
 	details?: PermissionDetails;
 };
@@ -29,7 +28,7 @@ export type CapabilityDefinition = {
 	key: string;
 	details: PermissionDetails;
 	core: boolean;
-	permission?: Permission;
+	permission?: string;
 	external?: ExternalCapability;
 	availableToIntegrations?: boolean;
 };
@@ -224,25 +223,141 @@ const accountCapabilityGroup: CapabilityGroup = {
 	],
 };
 
-/** Builds the canonical internal-permission and external-scope catalogue. */
+export type AccessConfig = Pick<ResolvedLucidConfig, "collections" | "access">;
+
+const resolveDetails = (details: AccessPermission): PermissionDetails => ({
+	name: normalizeCopy(details.name),
+	description: normalizeCopy(details.description),
+});
+
+const registries = new WeakMap<AccessConfig, CapabilityGroup[]>();
+
+/** Builds and validates the catalogue once for each resolved config. */
 export const getCapabilityRegistry = (
-	collections: CollectionBuilder[] = [],
+	config: AccessConfig,
 ): CapabilityGroup[] => {
-	return [
+	const cached = registries.get(config);
+	if (cached) return cached;
+
+	const groups: CapabilityGroup[] = [
 		accountCapabilityGroup,
 		...getStaticCapabilityGroups(),
-		...getCollectionCapabilityGroups(collections),
+		...getCollectionCapabilityGroups(config.collections),
 		localesCapabilityGroup,
 	];
+	const groupKeys = new Set(groups.map((group) => group.key));
+	const permissions = new Map(
+		groups.flatMap((group) =>
+			group.capabilities.flatMap((capability) =>
+				capability.permission
+					? [[capability.permission, capability.details] as const]
+					: [],
+			),
+		),
+	);
+	const scopes = new Set(
+		groups.flatMap((group) =>
+			group.capabilities.flatMap((capability) =>
+				capability.external ? [capability.external.scope] : [],
+			),
+		),
+	);
+	const reservedNamespaces = new Set(
+		[...permissions.keys(), ...scopes].map((key) => key.split(":")[0]),
+	);
+	reservedNamespaces.add("documents");
+	reservedNamespaces.add("lucid");
+	const checkKey = (
+		key: string,
+		registered: { has(key: string): boolean },
+		group: string,
+	) => {
+		if (reservedNamespaces.has(key.split(":")[0]) || registered.has(key))
+			throw new LucidError({
+				message: translate("server:core.config.access.key.conflict", {
+					data: { group, key },
+				}),
+			});
+	};
+	for (const group of config.access) {
+		if (groupKeys.has(group.key))
+			throw new LucidError({
+				message: translate("server:core.config.access.group.duplicate", {
+					data: { group: group.key },
+				}),
+			});
+		groupKeys.add(group.key);
+		for (const [key, details] of Object.entries(group.permissions ?? {})) {
+			checkKey(key, permissions, group.key);
+			permissions.set(key, resolveDetails(details));
+		}
+	}
+	for (const group of config.access) {
+		const capabilities: CapabilityDefinition[] = Object.entries(
+			group.permissions ?? {},
+		).map(([key, details]) => ({
+			key,
+			details: resolveDetails(details),
+			core: false,
+			permission: key,
+		}));
+		for (const [key, scope] of Object.entries(group.scopes ?? {})) {
+			checkKey(key, scopes, group.key);
+			scopes.add(key);
+			const permission =
+				scope.userPermission === null
+					? undefined
+					: permissions.get(scope.userPermission);
+			if (scope.userPermission !== null && !permission)
+				throw new LucidError({
+					message: translate(
+						"server:core.config.access.scope.permission.unknown",
+						{
+							data: { scope: key, permission: scope.userPermission },
+						},
+					),
+				});
+			const name = normalizeCopy(scope.name) ?? permission?.name;
+			if (name === undefined)
+				throw new LucidError({
+					message: translate("server:core.config.access.scope.name.required", {
+						data: { scope: key },
+					}),
+				});
+			capabilities.push({
+				key,
+				core: false,
+				details: {
+					name,
+					description:
+						normalizeCopy(scope.description) ?? permission?.description,
+				},
+				external: {
+					scope: key,
+					userPermission: scope.userPermission,
+					principalTypes: scope.principalTypes,
+				},
+				availableToIntegrations: true,
+			});
+		}
+		groups.push({
+			key: group.key,
+			details: resolveDetails(group),
+			core: false,
+			capabilities,
+		});
+	}
+	registries.set(config, groups);
+	return groups;
 };
 
 /** Finds the external capability registered for a scope. */
 export const getExternalCapability = (
-	collections: CollectionBuilder[],
+	config: AccessConfig,
 	scope: string,
 	principalType?: ExternalPrincipalType,
 ): ExternalCapability | undefined => {
-	const capability = getCapabilityRegistry(collections)
+	const capability = getCapabilityRegistry(config)
 		.flatMap((group) => group.capabilities)
 		.find(
 			(capability) =>

@@ -71,8 +71,16 @@ export const ExternalScopes = {
 	...documentScopeFactories,
 } as const;
 
-export type ExternalScope =
+export type CoreExternalScope =
 	| (typeof externalScopeValues)[keyof typeof externalScopeValues]
 	| CollectionExternalScope;
 
 export type ExternalPrincipalType = "system" | "user";
+
+/** Project scopes added by Lucid type generation or a plugin. */
+// biome-ignore lint/suspicious/noEmptyInterface: generated types and plugins augment this interface
+export interface CustomExternalScopes {}
+
+export type ExternalScope =
+	| CoreExternalScope
+	| Extract<keyof CustomExternalScopes, string>;

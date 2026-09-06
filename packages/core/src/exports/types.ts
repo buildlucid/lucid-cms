@@ -361,8 +361,15 @@ export type {
 	MediaStorageAdapterUploadSingleParams,
 } from "../libs/media-storage/types.js";
 export type {
+	AccessGroup,
+	AccessPermission,
+	AccessScope,
+} from "../libs/permission/access-config.js";
+export type {
 	CollectionExternalScope,
 	CollectionExternalScopeAction,
+	CoreExternalScope,
+	CustomExternalScopes,
 	ExternalPrincipalType,
 	ExternalScope,
 } from "../libs/permission/external-scopes.js";
@@ -374,6 +381,7 @@ export type {
 	CollectionPermission,
 	CollectionPermissionAction,
 	CorePermission,
+	CustomPermissions,
 	Permission,
 	PermissionDefinition,
 	PermissionDetails,

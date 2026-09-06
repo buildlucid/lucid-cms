@@ -11,6 +11,7 @@ import { LucidAPIError } from "../../../utils/errors/index.js";
 import formatter, { userPermissionsFormatter } from "../../formatters/index.js";
 import { copy } from "../../i18n/index.js";
 import cacheKeys from "../../kv/cache-keys.js";
+import { isRegisteredPermission } from "../../permission/registry.js";
 import { UsersRepository } from "../../repositories/index.js";
 import createServiceContext from "../utils/create-service-context.js";
 
@@ -112,6 +113,9 @@ const resolveAuthState = async (
 
 	return {
 		...authState,
+		permissions: authState.permissions?.filter((permission) =>
+			isRegisteredPermission(cached.context.config, permission),
+		),
 		exp: token.exp,
 		iat: token.iat,
 		nonce: token.nonce,

@@ -15,6 +15,7 @@ export { default as authenticateMiddleware } from "../libs/http/middleware/authe
 export { default as authorizePrivateMediaMiddleware } from "../libs/http/middleware/authorize-private-media.js";
 export { default as cacheMiddleware } from "../libs/http/middleware/cache.js";
 export { default as externalAuthenticationMiddleware } from "../libs/http/middleware/external-authenticate.js";
+export { default as externalScopesMiddleware } from "../libs/http/middleware/external-scopes.js";
 export { default as logRouteMiddleware } from "../libs/http/middleware/log-route.js";
 export { default as permissionsMiddleware } from "../libs/http/middleware/permissions.js";
 export { default as rateLimiterMiddleware } from "../libs/http/middleware/rate-limiter.js";
