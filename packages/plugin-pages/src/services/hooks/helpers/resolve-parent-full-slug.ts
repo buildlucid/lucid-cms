@@ -28,7 +28,7 @@ const resolveParentFullSlug: ServiceFn<
 			missingParentIsEmpty?: boolean;
 		},
 	],
-	Record<string, string | null>
+	Map<string | null, string | null>
 > = async (context, data) => {
 	const localization = resolvePagesCollectionLocalization({
 		localization: context.config.localization,
@@ -38,7 +38,7 @@ const resolveParentFullSlug: ServiceFn<
 
 	const [parentFieldsRes, routePrefixRes] = await Promise.all([
 		getParentFields(context, {
-			defaultLocale: context.config.localization.defaultLocale,
+			defaultLocale: localization.defaultLocale,
 			versionType: data.versionType,
 			collectionKey: data.collectionKey,
 			fields: {
@@ -67,6 +67,7 @@ const resolveParentFullSlug: ServiceFn<
 			slug: data.fields.slug,
 		},
 		routePrefixes: routePrefixRes.data,
+		missingParentIsEmpty: data.missingParentIsEmpty,
 	});
 };
 

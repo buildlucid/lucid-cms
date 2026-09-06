@@ -16,7 +16,6 @@ import getParentPageRelationTable from "../../utils/get-parent-page-relation-tab
 const checkCircularParents: ServiceFn<
 	[
 		{
-			defaultLocale: string;
 			documentId: number;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
@@ -62,7 +61,7 @@ const checkCircularParents: ServiceFn<
 								`${versionTable}.document_id as current_id`,
 								`${parentPageTable}.${parentPageField} as parent_id`,
 							])
-							.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
+							.where(`${parentPageTable}.locale`, "is", null)
 							.where(`${versionTable}.type`, "=", data.versionType)
 							.where(`${versionTable}.document_id`, "=", parentPageId)
 							.unionAll(
@@ -82,7 +81,7 @@ const checkCircularParents: ServiceFn<
 										`${versionTable}.document_id as current_id`,
 										`${parentPageTable}.${parentPageField} as parent_id`,
 									])
-									.where(`${parentPageTable}.locale`, "=", data.defaultLocale)
+									.where(`${parentPageTable}.locale`, "is", null)
 									.where(`${versionTable}.type`, "=", data.versionType),
 							),
 					)
@@ -104,7 +103,7 @@ const checkCircularParents: ServiceFn<
 						fields: [
 							{
 								key: constants.fields.parentPage.key,
-								localeCode: data.defaultLocale, //* parentPage doesnt use translations so always use default locale
+								localeCode: null,
 								message: copy("server:plugin.pages.parents.circular"),
 							},
 						],

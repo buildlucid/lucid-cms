@@ -22,11 +22,11 @@ interface Params {
 	origin?: Media["origin"];
 	aiGenerationRequestId?: string;
 	title?: {
-		localeCode: string;
+		localeCode: string | null;
 		value: string | null;
 	}[];
 	alt?: {
-		localeCode: string;
+		localeCode: string | null;
 		value: string | null;
 	}[];
 	crop?: MediaCropInput | null;

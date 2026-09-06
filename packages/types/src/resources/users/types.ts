@@ -133,14 +133,8 @@ export type InitiateAuth = {
 export interface Role {
 	id: number;
 	key: string | null;
-	name: {
-		localeCode: string;
-		value: string | null;
-	}[];
-	description: {
-		localeCode: string;
-		value: string | null;
-	}[];
+	name: string;
+	description: string | null;
 	locked: boolean;
 	permissions?: {
 		id: number;

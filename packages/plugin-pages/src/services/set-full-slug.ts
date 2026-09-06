@@ -5,16 +5,20 @@ import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages
  *  Update the fullSlug field with the computed value
  */
 const setFullSlug = (data: {
-	fullSlug: Record<string, string | null>;
+	fullSlug: Map<string | null, string | null>;
 	localization: ResolvedPagesCollectionLocalization;
 	fields: {
 		fullSlug: FieldInputSchema;
 	};
 }): Awaited<ServiceResponse<undefined>> => {
 	if (data.localization.enabled) {
-		data.fields.fullSlug.translations = data.fullSlug;
+		data.fields.fullSlug.translations = Object.fromEntries(
+			[...data.fullSlug].filter(([locale]) => locale !== null),
+		);
 	} else {
-		data.fields.fullSlug.value = data.fullSlug[data.localization.storageLocale];
+		data.fields.fullSlug.value = data.fullSlug.get(
+			data.localization.storageLocale,
+		);
 	}
 
 	return {

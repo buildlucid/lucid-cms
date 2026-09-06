@@ -32,11 +32,7 @@ export interface UserPropT {
 	}[];
 	roles?: {
 		id: number;
-		name?: string | null;
-		translations?: {
-			name: string | null;
-			locale_code: string | null;
-		}[];
+		name: string;
 		permissions?: {
 			permission: string;
 		}[];
@@ -54,16 +50,12 @@ const formatMultiple = (props: {
 	users: UserPropT[];
 	authUser?: LucidAuth;
 	mediaOptions: MediaFormatterOptions;
-	locales: string[];
-	defaultLocale: string;
 }) => {
 	return props.users.map((u) =>
 		formatSingle({
 			user: u,
 			authUser: props.authUser,
 			mediaOptions: props.mediaOptions,
-			locales: props.locales,
-			defaultLocale: props.defaultLocale,
 		}),
 	);
 };
@@ -72,8 +64,6 @@ const formatSingle = (props: {
 	user: UserPropT;
 	authUser?: LucidAuth;
 	mediaOptions: MediaFormatterOptions;
-	locales: string[];
-	defaultLocale: string;
 	pendingEmailChange?: {
 		email: string;
 		requestedAt: Date | string | null;
@@ -82,7 +72,6 @@ const formatSingle = (props: {
 }): User => {
 	const { roles, permissions } = userPermissionsFormatter.formatMultiple({
 		roles: props.user.roles || [],
-		defaultLocale: props.defaultLocale,
 	});
 
 	const canViewDetails = hasAccess({

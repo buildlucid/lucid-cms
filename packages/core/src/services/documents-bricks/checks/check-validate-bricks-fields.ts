@@ -56,7 +56,7 @@ type ConditionScopeLevel = {
 
 type ValidationMeta = {
 	localized: boolean;
-	defaultLocale: string;
+	defaultLocale: string | null;
 	locales?: string[];
 };
 
@@ -119,8 +119,8 @@ const buildStructuralConditions = (
 const createConditionTargetResolver = (props: {
 	instance: CollectionBuilder | BrickBuilder;
 	scopes: ConditionScopeLevel[];
-	locale: string;
-	defaultLocale: string;
+	locale: string | null;
+	defaultLocale: string | null;
 	collectionLocalized: boolean;
 	translationScope: FieldConditionTranslationScope;
 }): FieldConditionTargetResolver => {
@@ -174,7 +174,9 @@ const createConditionTargetResolver = (props: {
 					: props.locale;
 			return {
 				resolved: true,
-				value: target.normalizeInputValue(submitted.translations[locale]),
+				value: target.normalizeInputValue(
+					locale === null ? undefined : submitted.translations[locale],
+				),
 			};
 		}
 
@@ -206,8 +208,8 @@ const isFieldVisible = (props: {
 	fieldInstance: CustomField<FieldTypes>;
 	instance: CollectionBuilder | BrickBuilder;
 	scopes: ConditionScopeLevel[];
-	locale: string;
-	defaultLocale: string;
+	locale: string | null;
+	defaultLocale: string | null;
 	collectionLocalized: boolean;
 	structuralConditions: Map<string, FieldConditionConfig[]>;
 }): boolean => {
@@ -338,7 +340,7 @@ const validateBricks = (props: {
 	bricks: Array<BrickInputSchema>;
 	collection: CollectionBuilder;
 	validationData: ValidationData;
-	defaultLocale: string;
+	defaultLocale: string | null;
 	locales: string[];
 }): Array<BrickError> => {
 	const errors: BrickError[] = [];
@@ -438,7 +440,7 @@ export const recursiveFieldValidate = (props: {
 	const fieldVisibleForLocale = (
 		fieldKey: string,
 		fieldInstance: CustomField<FieldTypes>,
-		locale: string,
+		locale: string | null,
 	) =>
 		isFieldVisible({
 			fieldKey,
@@ -613,7 +615,7 @@ export const recursiveFieldValidate = (props: {
 
 const getConfiguredLocaleCodes = (meta: ValidationMeta) => {
 	const localeCodes = new Set(meta.locales ?? []);
-	localeCodes.add(meta.defaultLocale);
+	if (meta.defaultLocale !== null) localeCodes.add(meta.defaultLocale);
 	return Array.from(localeCodes);
 };
 

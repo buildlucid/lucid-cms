@@ -3,12 +3,13 @@ import type { CollectionConfig } from "../types/types.js";
 import constructChildFullSlug from "./construct-child-fullslugs.js";
 import type { DescendantFieldsResponse } from "./get-descendant-fields.js";
 
-const localization = {
-	enabled: false,
-	defaultLocale: "en",
-	storageLocale: "en",
-	locales: ["en"],
-};
+const localization: import("../utils/resolve-pages-collection-localization.js").ResolvedPagesCollectionLocalization =
+	{
+		enabled: false,
+		defaultLocale: null,
+		storageLocale: null,
+		locales: [null],
+	};
 
 const baseCollection = {
 	key: "pages",
@@ -35,7 +36,7 @@ describe("constructChildFullSlug", () => {
 				document_version_id: 20,
 				rows: [
 					{
-						locale: "en",
+						locale: null,
 						_slug: "Child",
 						_fullSlug: "/old-parent/child",
 						_parentPage: 1,
@@ -47,7 +48,7 @@ describe("constructChildFullSlug", () => {
 				document_version_id: 30,
 				rows: [
 					{
-						locale: "en",
+						locale: null,
 						_slug: "Grandchild",
 						_fullSlug: "/old-parent/child/grandchild",
 						_parentPage: 2,
@@ -70,12 +71,12 @@ describe("constructChildFullSlug", () => {
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/blog/child" },
+				fullSlugs: new Map([[null, "/blog/child"]]),
 			},
 			{
 				documentId: 3,
 				versionId: 30,
-				fullSlugs: { en: "/blog/child/grandchild" },
+				fullSlugs: new Map([[null, "/blog/child/grandchild"]]),
 			},
 		]);
 	});
@@ -107,7 +108,7 @@ describe("constructChildFullSlug", () => {
 			localization: {
 				enabled: true,
 				defaultLocale: "en",
-				storageLocale: "en",
+				storageLocale: null,
 				locales: ["en", "fr"],
 			},
 			collection: {
@@ -125,10 +126,12 @@ describe("constructChildFullSlug", () => {
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: {
-					en: "/blog/child",
-					fr: "/actualites/enfant",
-				},
+				fullSlugs: new Map(
+					Object.entries({
+						en: "/blog/child",
+						fr: "/actualites/enfant",
+					}),
+				),
 			},
 		]);
 	});
@@ -140,7 +143,7 @@ describe("constructChildFullSlug", () => {
 				document_version_id: 20,
 				rows: [
 					{
-						locale: "en",
+						locale: null,
 						_slug: "getting-started",
 						_fullSlug: "/old/getting-started",
 						_parentPage: null,
@@ -158,7 +161,7 @@ describe("constructChildFullSlug", () => {
 					{ relation: "product", collection: "products", field: "key" },
 				],
 			},
-			routePrefixes: new Map([[20, { en: "/docs/lucid/v1" }]]),
+			routePrefixes: new Map([[20, new Map([[null, "/docs/lucid/v1"]])]]),
 		});
 
 		expect(res.error).toBeUndefined();
@@ -166,7 +169,7 @@ describe("constructChildFullSlug", () => {
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/docs/lucid/v1/getting-started" },
+				fullSlugs: new Map([[null, "/docs/lucid/v1/getting-started"]]),
 			},
 		]);
 	});

@@ -4,6 +4,7 @@ import {
 	cmsAiGenerateAcceptedDataSchema,
 	cmsAiGenerateCompletedDataSchema,
 } from "../libs/lucid-remote/schema/ai.js";
+import { generatedContentSchema } from "../libs/lucid-remote/schema/generated-content.js";
 import { brickInputSchema } from "./collection-bricks.js";
 import { fieldInputSchema } from "./collection-fields.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
@@ -115,7 +116,8 @@ const localeSchema = z
 						message: "Target locales must be unique.",
 					});
 				}
-			}),
+			})
+			.nullable(),
 	})
 	.strict();
 
@@ -374,7 +376,7 @@ export const controllerSchemas = {
 			.object({
 				instruction: z.string().trim().min(1).max(8_000).optional(),
 				guidance: z.string().trim().min(1).optional(),
-				value: z.record(z.string().trim().min(2).max(32), z.unknown()),
+				value: z.unknown(),
 				document: z
 					.object({
 						fields: z.array(fieldInputSchema).optional(),
@@ -404,7 +406,7 @@ export const controllerSchemas = {
 					version: z.literal("v1"),
 				})
 				.strict(),
-			output: z.record(z.string().trim().min(2).max(32), z.unknown()),
+			output: generatedContentSchema(z.unknown()),
 		}),
 	} satisfies ControllerSchema,
 	mediaAlt: {
@@ -416,10 +418,7 @@ export const controllerSchemas = {
 						z
 							.object({
 								instruction: z.string().trim().min(1).max(8_000).optional(),
-								output: z.record(
-									z.string().trim().min(2).max(32),
-									z.string().trim(),
-								),
+								output: generatedContentSchema(z.string()),
 							})
 							.strict(),
 					)
@@ -436,10 +435,16 @@ export const controllerSchemas = {
 					.object({
 						id: z.union([z.string().trim().min(1), z.number()]).optional(),
 						name: z
-							.record(z.string().trim().min(2).max(32), z.string().trim())
+							.union([
+								z.string(),
+								z.record(z.string().trim().min(2).max(32), z.string()),
+							])
 							.optional(),
 						alt: z
-							.record(z.string().trim().min(2).max(32), z.string().trim())
+							.union([
+								z.string(),
+								z.record(z.string().trim().min(2).max(32), z.string()),
+							])
 							.optional(),
 					})
 					.strict(),
@@ -458,7 +463,7 @@ export const controllerSchemas = {
 					version: z.literal("v1"),
 				})
 				.strict(),
-			output: z.record(z.string().trim().min(2).max(32), z.string()),
+			output: generatedContentSchema(z.string()),
 		}),
 	} satisfies ControllerSchema,
 	mediaImageGenerate: {

@@ -37,7 +37,7 @@ export const DocumentPreview: Component<{
 	versionType: Accessor<DocumentVersionType>;
 	versionId: Accessor<number | undefined>;
 	mode: Accessor<PreviewMode>;
-	locale: Accessor<string>;
+	locale: Accessor<string | undefined>;
 	breakpoints: Accessor<CollectionPreviewBreakpoint[]>;
 	dirty: Accessor<boolean>;
 	saveStamp: Accessor<string>;

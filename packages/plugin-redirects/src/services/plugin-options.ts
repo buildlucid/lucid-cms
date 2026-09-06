@@ -12,7 +12,7 @@ const resolvePluginOptions = (
 	given: RedirectsPluginOptions,
 	localization: {
 		locales: Array<{ code: string; label: string }>;
-		defaultLocale: string;
+		defaultLocale: string | null;
 	},
 	availableCollections: TargetCollection[],
 ): RedirectsPluginOptionsInternal => {

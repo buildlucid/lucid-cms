@@ -37,9 +37,10 @@ import aiModalsStore, {
 } from "@/store/aiModalsStore";
 import siteStore from "@/store/siteStore";
 import T from "@/translations";
+import { generatedContentEntries } from "@/utils/ai-generated-content";
 import {
 	cloneGenerationValue,
-	createLocaleValueRecord,
+	createGenerationValue,
 	getCodeDraftValue,
 	isJsonField,
 	normalizeOutputValue,
@@ -64,16 +65,16 @@ const CURRENT_HISTORY_ITEM_ID = "current-value";
 type GenerationHistoryItem = {
 	id: string;
 	type: "current" | "generation";
-	values: Record<string, unknown>;
-	jsonText: Record<string, string>;
-	jsonValid: Record<string, boolean>;
-	generatedLocales: string[];
+	values: Map<string | null, unknown>;
+	jsonText: Map<string | null, string>;
+	jsonValid: Map<string | null, boolean>;
+	generatedLocales: Array<string | null>;
 	cost?: CustomFieldInputGenerateResponse["usage"]["cost"];
 };
 
 const DraftEditor: Component<{
 	fieldType: CustomFieldGenerationFieldType | undefined;
-	localeCode: string;
+	localeCode: string | null;
 	value: unknown;
 	jsonText?: string;
 	jsonValid?: boolean;
@@ -81,8 +82,8 @@ const DraftEditor: Component<{
 	selectedLocaleCount: number;
 	richTextOptions?: RichTextOptions;
 	linkModalZIndex?: number;
-	onChange: (_localeCode: string, _value: unknown) => void;
-	onJsonChange: (_localeCode: string, _value: string) => void;
+	onChange: (_localeCode: string | null | null, _value: unknown) => void;
+	onJsonChange: (_localeCode: string | null | null, _value: string) => void;
 }> = (props) => {
 	// -----------------------------
 	// Memos
@@ -171,7 +172,7 @@ const DraftEditor: Component<{
 					noMargin
 					options={{
 						...props.richTextOptions,
-						locale: props.localeCode,
+						locale: props.localeCode ?? undefined,
 						fullscreen: false,
 						referenceControls: false,
 						linkModalZIndex: props.linkModalZIndex,
@@ -187,7 +188,9 @@ const CustomFieldGenerationModal: Component = () => {
 	// State
 	const [instruction, setInstruction] = createSignal("");
 	const [guidance, setGuidance] = createSignal<string>();
-	const [selectedLocales, setSelectedLocales] = createSignal<string[]>([]);
+	const [selectedLocales, setSelectedLocales] = createSignal<
+		Array<string | null>
+	>([]);
 	const [historyItems, setHistoryItems] = createSignal<GenerationHistoryItem[]>(
 		[],
 	);
@@ -247,10 +250,14 @@ const CustomFieldGenerationModal: Component = () => {
 			historyItems()[0]
 		);
 	});
-	const activeValues = createMemo(() => activeHistoryItem()?.values ?? {});
-	const activeJsonText = createMemo(() => activeHistoryItem()?.jsonText ?? {});
+	const activeValues = createMemo(
+		() => activeHistoryItem()?.values ?? new Map(),
+	);
+	const activeJsonText = createMemo(
+		() => activeHistoryItem()?.jsonText ?? new Map(),
+	);
 	const activeJsonValid = createMemo(
-		() => activeHistoryItem()?.jsonValid ?? {},
+		() => activeHistoryItem()?.jsonValid ?? new Map(),
 	);
 	const isLoading = createMemo(() => generateField.action.isPending);
 	const responseError = createMemo(() => {
@@ -260,7 +267,7 @@ const CustomFieldGenerationModal: Component = () => {
 		() =>
 			isJsonField(field()?.type) &&
 			selectedLocales().some(
-				(localeCode) => activeJsonValid()[localeCode] === false,
+				(localeCode) => activeJsonValid().get(localeCode) === false,
 			),
 	);
 	const canGenerate = createMemo(
@@ -277,8 +284,8 @@ const CustomFieldGenerationModal: Component = () => {
 
 		return formatAiCost(cost);
 	});
-	const activeLocale = createMemo(
-		() => selectedLocales()[0] ?? defaultLocale(),
+	const activeLocale = createMemo(() =>
+		selectedLocales().length ? (selectedLocales()[0] ?? null) : defaultLocale(),
 	);
 	const fieldTypeLabel = createMemo(() => {
 		const type = field()?.type;
@@ -290,7 +297,7 @@ const CustomFieldGenerationModal: Component = () => {
 			.join(" ");
 	});
 	const fieldModeLabel = createMemo(() =>
-		field()?.localized
+		localeOptions().length > 0
 			? T()("ai.custom.field.generate.context.mode.localized")
 			: T()("ai.custom.field.generate.context.mode.single"),
 	);
@@ -301,7 +308,8 @@ const CustomFieldGenerationModal: Component = () => {
 		abortController?.abort();
 		abortController = undefined;
 	};
-	const getLocaleLabel = (localeCode: string) => {
+	const getLocaleLabel = (localeCode: string | null) => {
+		if (localeCode === null) return field()?.key ?? "";
 		const locale = documentLocalization
 			.locales()
 			.find((item) => item.code === localeCode);
@@ -309,24 +317,24 @@ const CustomFieldGenerationModal: Component = () => {
 		if (!locale) return localeCode;
 		return `${locale.name ?? locale.code} (${locale.code})`;
 	};
-	const cloneValueRecord = (values: Record<string, unknown>) => {
-		const clonedValues: Record<string, unknown> = {};
-		for (const [localeCode, value] of Object.entries(values)) {
-			clonedValues[localeCode] = cloneGenerationValue(value);
+	const cloneValueRecord = (values: Map<string | null, unknown>) => {
+		const clonedValues: Map<string | null, unknown> = new Map();
+		for (const [localeCode, value] of values.entries()) {
+			clonedValues.set(localeCode, cloneGenerationValue(value));
 		}
 		return clonedValues;
 	};
 	const createJsonState = (
 		type: CustomFieldGenerationFieldType | undefined,
-		values: Record<string, unknown>,
+		values: Map<string | null, unknown>,
 	) => {
-		const jsonText: Record<string, string> = {};
-		const jsonValid: Record<string, boolean> = {};
+		const jsonText: Map<string | null, string> = new Map();
+		const jsonValid: Map<string | null, boolean> = new Map();
 
 		if (isJsonField(type)) {
-			for (const [localeCode, value] of Object.entries(values)) {
-				jsonText[localeCode] = stringifyJsonValue(value);
-				jsonValid[localeCode] = true;
+			for (const [localeCode, value] of values.entries()) {
+				jsonText.set(localeCode, stringifyJsonValue(value));
+				jsonValid.set(localeCode, true);
 			}
 		}
 
@@ -337,32 +345,32 @@ const CustomFieldGenerationModal: Component = () => {
 	};
 	const normalizeTargetValue = (
 		requestTarget: CustomFieldGenerationTarget,
-		localeCode: string,
+		localeCode: string | null,
 	) => {
 		return normalizeOutputValue(
 			requestTarget.field().type,
-			requestTarget.value(localeCode),
+			requestTarget.value(localeCode ?? undefined),
 		);
 	};
 	const ensureHistoryItemLocales = (
 		item: GenerationHistoryItem,
 		requestTarget: CustomFieldGenerationTarget,
-		localeCodes: string[],
+		localeCodes: Array<string | null>,
 	): GenerationHistoryItem => {
 		let changed = false;
-		const nextValues = { ...item.values };
-		const nextJsonText = { ...item.jsonText };
-		const nextJsonValid = { ...item.jsonValid };
+		const nextValues = new Map(item.values);
+		const nextJsonText = new Map(item.jsonText);
+		const nextJsonValid = new Map(item.jsonValid);
 		const type = requestTarget.field().type;
 
 		for (const localeCode of localeCodes) {
-			if (Object.hasOwn(nextValues, localeCode)) continue;
+			if (nextValues.has(localeCode)) continue;
 
 			const initialValue = normalizeTargetValue(requestTarget, localeCode);
-			nextValues[localeCode] = cloneGenerationValue(initialValue);
+			nextValues.set(localeCode, cloneGenerationValue(initialValue));
 			if (isJsonField(type)) {
-				nextJsonText[localeCode] = stringifyJsonValue(initialValue);
-				nextJsonValid[localeCode] = true;
+				nextJsonText.set(localeCode, stringifyJsonValue(initialValue));
+				nextJsonValid.set(localeCode, true);
 			}
 			changed = true;
 		}
@@ -378,7 +386,7 @@ const CustomFieldGenerationModal: Component = () => {
 	};
 	const ensureActiveHistoryLocales = (
 		requestTarget: CustomFieldGenerationTarget,
-		localeCodes: string[],
+		localeCodes: Array<string | null>,
 	) => {
 		const activeId = activeHistoryItemId();
 		setHistoryItems((previous) =>
@@ -430,7 +438,7 @@ const CustomFieldGenerationModal: Component = () => {
 	);
 	const setDraft = (
 		type: CustomFieldGenerationFieldType | undefined,
-		localeCode: string,
+		localeCode: string | null,
 		value: unknown,
 	) => {
 		const normalized = normalizeOutputValue(type, value);
@@ -438,25 +446,19 @@ const CustomFieldGenerationModal: Component = () => {
 		setHistoryItems((previous) =>
 			previous.map((item) => {
 				if (item.id !== activeId) return item;
-				if (safeDeepEqual(item.values[localeCode], normalized)) return item;
+				if (safeDeepEqual(item.values.get(localeCode), normalized)) return item;
 
 				return {
 					...item,
-					values: {
-						...item.values,
-						[localeCode]: normalized,
-					},
+					values: new Map(item.values).set(localeCode, normalized),
 					jsonText: isJsonField(type)
-						? {
-								...item.jsonText,
-								[localeCode]: stringifyJsonValue(normalized),
-							}
+						? new Map(item.jsonText).set(
+								localeCode,
+								stringifyJsonValue(normalized),
+							)
 						: item.jsonText,
 					jsonValid: isJsonField(type)
-						? {
-								...item.jsonValid,
-								[localeCode]: true,
-							}
+						? new Map(item.jsonValid).set(localeCode, true)
 						: item.jsonValid,
 				};
 			}),
@@ -464,26 +466,28 @@ const CustomFieldGenerationModal: Component = () => {
 	};
 	const ensureDraftForLocale = (
 		requestTarget: CustomFieldGenerationTarget,
-		localeCode: string,
+		localeCode: string | null,
 	) => {
 		ensureActiveHistoryLocales(requestTarget, [localeCode]);
 	};
 	const initializeDraft = (requestTarget: CustomFieldGenerationTarget) => {
 		const request = requestTarget.request();
-		const initialLocale = requestTarget.field().localized
-			? (request.locale.target[0] ?? defaultLocale())
-			: defaultLocale();
+		const initialLocale =
+			requestTarget.field().localized &&
+			documentLocalization.locales().length > 0
+				? (request.locale.target[0] ?? defaultLocale())
+				: null;
 		const sourceLocale = defaultLocale();
 		const initialValue = normalizeTargetValue(requestTarget, initialLocale);
 		const sourceValue =
 			sourceLocale === initialLocale
 				? initialValue
 				: normalizeTargetValue(requestTarget, sourceLocale);
-		const initialValues = {
-			[initialLocale]: cloneGenerationValue(initialValue),
-		};
+		const initialValues = new Map([
+			[initialLocale, cloneGenerationValue(initialValue)],
+		]);
 		if (sourceLocale !== initialLocale) {
-			initialValues[sourceLocale] = cloneGenerationValue(sourceValue);
+			initialValues.set(sourceLocale, cloneGenerationValue(sourceValue));
 		}
 		const jsonState = createJsonState(
 			requestTarget.field().type,
@@ -548,8 +552,8 @@ const CustomFieldGenerationModal: Component = () => {
 		}
 
 		const baseValues = cloneValueRecord(activeValues());
-		const baseJsonText = { ...activeJsonText() };
-		const baseJsonValid = { ...activeJsonValid() };
+		const baseJsonText = new Map(activeJsonText());
+		const baseJsonValid = new Map(activeJsonValid());
 
 		try {
 			abortRequest();
@@ -564,8 +568,7 @@ const CustomFieldGenerationModal: Component = () => {
 				body: {
 					instruction: values.instruction,
 					guidance: values.guidance,
-					value: createLocaleValueRecord({
-						fieldLocalized: requestTarget.field().localized,
+					value: createGenerationValue({
 						selectedLocales: targetLocaleCodes,
 						sourceLocale: sourceLocale(),
 						values: baseValues,
@@ -578,44 +581,31 @@ const CustomFieldGenerationModal: Component = () => {
 						fieldKey: targetRequest.fieldKey,
 					},
 					locale: {
-						source: sourceLocale(),
-						target: targetLocaleCodes,
+						source: sourceLocale() ?? undefined,
+						target: targetLocaleCodes.includes(null)
+							? null
+							: targetLocaleCodes.filter((locale) => locale !== null),
 					},
 				},
 			});
 
 			if (!isOpen() || targetId() !== requestTargetId) return;
 
-			const responseLocales: string[] = [];
+			const responseLocales: Array<string | null> = [];
 			const nextValues = cloneValueRecord(baseValues);
-			const nextJsonText = { ...baseJsonText };
-			const nextJsonValid = { ...baseJsonValid };
+			const nextJsonText = new Map(baseJsonText);
+			const nextJsonValid = new Map(baseJsonValid);
 			const fieldType = requestTarget.field().type;
-			for (const localeCode of targetLocaleCodes) {
-				if (!Object.hasOwn(response.data.output, localeCode)) continue;
-				const normalized = normalizeOutputValue(
-					fieldType,
-					response.data.output[localeCode],
-				);
-				nextValues[localeCode] = cloneGenerationValue(normalized);
+			for (const [localeCode, value] of generatedContentEntries(
+				response.data.output,
+			)) {
+				const normalized = normalizeOutputValue(fieldType, value);
+				nextValues.set(localeCode, cloneGenerationValue(normalized));
 				if (isJsonField(fieldType)) {
-					nextJsonText[localeCode] = stringifyJsonValue(normalized);
-					nextJsonValid[localeCode] = true;
+					nextJsonText.set(localeCode, stringifyJsonValue(normalized));
+					nextJsonValid.set(localeCode, true);
 				}
 				responseLocales.push(localeCode);
-			}
-			if (responseLocales.length === 0) {
-				const fallbackValue = Object.values(response.data.output)[0];
-				const fallbackLocale = targetLocaleCodes[0];
-				if (fallbackLocale) {
-					const normalized = normalizeOutputValue(fieldType, fallbackValue);
-					nextValues[fallbackLocale] = cloneGenerationValue(normalized);
-					if (isJsonField(fieldType)) {
-						nextJsonText[fallbackLocale] = stringifyJsonValue(normalized);
-						nextJsonValid[fallbackLocale] = true;
-					}
-					responseLocales.push(fallbackLocale);
-				}
 			}
 			const nextGenerationIndex = generationSequence() + 1;
 			const nextGenerationId = `generation-${nextGenerationIndex}`;
@@ -667,14 +657,17 @@ const CustomFieldGenerationModal: Component = () => {
 			aiModalsStore.setApplying(true);
 			const values = activeValues();
 			for (const localeCode of selectedLocales()) {
-				await activeTarget.setValue(values[localeCode], localeCode);
+				await activeTarget.setValue(
+					values.get(localeCode),
+					localeCode ?? undefined,
+				);
 			}
 			close(false);
 		} finally {
 			aiModalsStore.setApplying(false);
 		}
 	};
-	const updateJsonDraft = (localeCode: string, value: string) => {
+	const updateJsonDraft = (localeCode: string | null, value: string) => {
 		const activeId = activeHistoryItemId();
 		try {
 			const parsedValue = JSON.parse(value);
@@ -683,18 +676,9 @@ const CustomFieldGenerationModal: Component = () => {
 					item.id === activeId
 						? {
 								...item,
-								values: {
-									...item.values,
-									[localeCode]: parsedValue,
-								},
-								jsonText: {
-									...item.jsonText,
-									[localeCode]: value,
-								},
-								jsonValid: {
-									...item.jsonValid,
-									[localeCode]: true,
-								},
+								values: new Map(item.values).set(localeCode, parsedValue),
+								jsonText: new Map(item.jsonText).set(localeCode, value),
+								jsonValid: new Map(item.jsonValid).set(localeCode, true),
 							}
 						: item,
 				),
@@ -705,21 +689,15 @@ const CustomFieldGenerationModal: Component = () => {
 					item.id === activeId
 						? {
 								...item,
-								jsonText: {
-									...item.jsonText,
-									[localeCode]: value,
-								},
-								jsonValid: {
-									...item.jsonValid,
-									[localeCode]: false,
-								},
+								jsonText: new Map(item.jsonText).set(localeCode, value),
+								jsonValid: new Map(item.jsonValid).set(localeCode, false),
 							}
 						: item,
 				),
 			);
 		}
 	};
-	const toggleLocale = (localeCode: string) => {
+	const toggleLocale = (localeCode: string | null) => {
 		const activeTarget = target();
 		if (!activeTarget || isLoading()) return;
 
@@ -956,9 +934,9 @@ const CustomFieldGenerationModal: Component = () => {
 													<DraftEditor
 														fieldType={field()?.type}
 														localeCode={activeLocale()}
-														value={activeValues()[activeLocale()]}
-														jsonText={activeJsonText()[activeLocale()]}
-														jsonValid={activeJsonValid()[activeLocale()]}
+														value={activeValues().get(activeLocale())}
+														jsonText={activeJsonText().get(activeLocale())}
+														jsonValid={activeJsonValid().get(activeLocale())}
 														languages={field()?.languages}
 														selectedLocaleCount={1}
 														richTextOptions={richTextOptions()}
@@ -1008,9 +986,9 @@ const CustomFieldGenerationModal: Component = () => {
 															<DraftEditor
 																fieldType={field()?.type}
 																localeCode={localeCode}
-																value={activeValues()[localeCode]}
-																jsonText={activeJsonText()[localeCode]}
-																jsonValid={activeJsonValid()[localeCode]}
+																value={activeValues().get(localeCode)}
+																jsonText={activeJsonText().get(localeCode)}
+																jsonValid={activeJsonValid().get(localeCode)}
 																languages={field()?.languages}
 																selectedLocaleCount={selectedLocales().length}
 																richTextOptions={richTextOptions()}

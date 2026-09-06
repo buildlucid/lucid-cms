@@ -221,6 +221,8 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		mediaOptions: {
 			host: baseUrl,
 			delivery: context.mediaDelivery,
+			defaultLocale: context.config.localization.defaultLocale,
+			locales: context.config.localization.locales,
 		},
 	});
 

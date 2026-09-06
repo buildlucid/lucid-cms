@@ -44,8 +44,8 @@ const findField = (
  */
 const updateFullSlugField = (data: {
 	document: InternalCollectionDocument;
-	fullSlug: Record<string, string | null>;
-	defaultLocale: string;
+	fullSlug: Map<string | null, string | null>;
+	defaultLocale: string | null;
 	collection: CollectionBuilder;
 	locales: string[];
 }): InternalCollectionDocument => {
@@ -65,14 +65,16 @@ const updateFullSlugField = (data: {
 						...field,
 						translations: {
 							...field.translations,
-							...data.fullSlug,
+							...Object.fromEntries(
+								[...data.fullSlug].filter(([locale]) => locale !== null),
+							),
 						},
 					};
 				}
 
 				return {
 					...field,
-					value: data.fullSlug[data.defaultLocale] ?? null,
+					value: data.fullSlug.get(data.defaultLocale) ?? null,
 				};
 			}) ?? null,
 	};
@@ -170,7 +172,7 @@ const afterFetchHandler =
 						fullSlug: fullSlugRes.data,
 						defaultLocale: localization.storageLocale,
 						collection: data.meta.collection,
-						locales: localization.locales,
+						locales: localization.enabled ? localization.locales : [],
 					}),
 				};
 			}),

@@ -26,7 +26,7 @@ export const documentBricksTable = defineTable(
 				type: "integer",
 			},
 			locale: {
-				schema: z.string(),
+				schema: z.string().nullable(),
 				type: "text",
 			},
 			position: {
@@ -96,7 +96,7 @@ export interface LucidBricksTable {
 	collection_key: string;
 	document_id: number;
 	document_version_id: number;
-	locale: string;
+	locale: string | null;
 	position: number;
 	is_open: BooleanInt;
 	// brick specific

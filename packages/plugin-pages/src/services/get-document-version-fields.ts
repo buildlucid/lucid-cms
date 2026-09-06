@@ -7,10 +7,12 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
+import getCollectionDefaultLocale from "../utils/get-collection-default-locale.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
+import resolveInheritedLocaleRows from "../utils/resolve-inherited-locale-rows.js";
 
 export type VersionFieldsQueryResponse = {
-	locale: string;
+	locale: string | null;
 	document_id: number;
 	_slug: string | null;
 	_fullSlug: string | null;
@@ -66,11 +68,7 @@ const getDocumentVersionFields: ServiceFn<
 								"=",
 								`${fieldsTable}.document_version_id`,
 							)
-							.on(
-								`${defaultFieldsAlias}.locale`,
-								"=",
-								context.config.localization.defaultLocale,
-							),
+							.on(`${defaultFieldsAlias}.locale`, "is", null),
 					)
 					.leftJoin(parentPageTable, (join) =>
 						join
@@ -79,11 +77,7 @@ const getDocumentVersionFields: ServiceFn<
 								"=",
 								`${defaultFieldsAlias}.id`,
 							)
-							.on(
-								`${parentPageTable}.locale`,
-								"=",
-								context.config.localization.defaultLocale,
-							),
+							.on(`${parentPageTable}.locale`, "is", null),
 					)
 					// @ts-expect-error
 					.select([
@@ -91,7 +85,7 @@ const getDocumentVersionFields: ServiceFn<
 						`${versionTable}.document_id`,
 						`${fieldsTable}.${slugColumn}`,
 						`${fieldsTable}.${fullSlugColumn}`,
-						`${parentPageTable}.${parentPageColumn}`,
+						`${parentPageTable}.${parentPageColumn} as _parentPage`,
 					])
 					.where(`${versionTable}.document_id`, "=", data.documentId)
 					.where(`${versionTable}.id`, "=", data.versionId)
@@ -111,7 +105,10 @@ const getDocumentVersionFields: ServiceFn<
 
 		return {
 			error: undefined,
-			data: fields as unknown as VersionFieldsQueryResponse[],
+			data: resolveInheritedLocaleRows(
+				fields as unknown as VersionFieldsQueryResponse[],
+				getCollectionDefaultLocale(context.config, data.collectionKey),
+			),
 		};
 	} catch (_error) {
 		return {

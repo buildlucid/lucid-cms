@@ -41,14 +41,13 @@ const cacheKeys = {
 		tags: {
 			contentLocales: "content-locales",
 			contentMedia: "content-media",
+			contentMediaSingle: (id: string | number) => `content-media:${id}`,
 			contentDocuments: "content-documents",
 			contentDocumentsCollection: (collectionKey: string) =>
 				`content-documents:${collectionKey}`,
 		},
 		static: {
 			contentLocales: `${HTTP_STATIC_PREFIX}content-locales`,
-			contentMediaSingle: (id: string | number) =>
-				`${HTTP_STATIC_PREFIX}content-media:${id}` as `${typeof HTTP_STATIC_PREFIX}content-media:${string}`,
 		},
 	},
 } as const;

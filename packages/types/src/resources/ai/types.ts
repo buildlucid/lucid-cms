@@ -1,3 +1,7 @@
+export type AiGeneratedContent<T> =
+	| { kind: "value"; value: T }
+	| { kind: "translations"; translations: Record<string, T> };
+
 import type { UserRef } from "../users/types.js";
 
 export type AiGenerateCost = {
@@ -47,7 +51,7 @@ export type CustomFieldInputGenerateResponse = {
 		key: "custom-field.input.generate";
 		version: "v1";
 	};
-	output: Record<string, unknown>;
+	output: AiGeneratedContent<unknown>;
 	usage: AiGenerateUsage;
 };
 
@@ -59,7 +63,7 @@ export type MediaAltGenerateResponse = {
 		key: "media.alt.generate";
 		version: "v1";
 	};
-	output: Record<string, string>;
+	output: AiGeneratedContent<string>;
 	usage: AiGenerateUsage;
 };
 

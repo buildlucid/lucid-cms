@@ -4,10 +4,11 @@ import mediaAdapterDataSchema from "../utils/media/adapter-data.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 const mediaTranslationsResponseSchema = z
-	.record(z.string(), z.string().nullable())
+	.union([z.string(), z.record(z.string(), z.string().nullable())])
 	.nullable()
 	.meta({
-		description: "Translated values keyed by locale code, or null when absent",
+		description:
+			"Unassigned text, translated values keyed by locale code, or null when absent",
 	});
 
 const focalPointSchema = z.object({
@@ -733,6 +734,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Title value",
@@ -746,6 +748,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Alt text value",
@@ -759,6 +762,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Description value",
@@ -772,6 +776,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Summary value",
@@ -1015,6 +1020,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Title value",
@@ -1028,6 +1034,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Alt text value",
@@ -1041,6 +1048,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Description value",
@@ -1054,6 +1062,7 @@ export const controllerSchemas = {
 						localeCode: z
 							.string()
 							.trim()
+							.nullable()
 							.meta({ description: "Locale code", example: "en" }),
 						value: z.string().trim().nullable().meta({
 							description: "Summary value",

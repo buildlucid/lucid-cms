@@ -235,6 +235,7 @@
 	"core.routes.email.resend.error.name": "Email Resend Error",
 	"core.routes.email.resend.error.message": "An error occurred while resending the email.",
 	"core.routes.ai.generate.error.name": "AI Generation Error",
+	"core.routes.ai.generate.invalid.output.message": "The generated content did not match the requested format or locales.",
 	"core.routes.ai.generate.error.message": "An error occurred while generating AI content.",
 	"core.routes.ai.usage.fetch.error.name": "AI Usage Fetch Error",
 	"core.routes.ai.usage.fetch.error.message": "An error occurred while fetching AI usage.",

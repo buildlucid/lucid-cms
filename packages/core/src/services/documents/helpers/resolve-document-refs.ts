@@ -71,6 +71,8 @@ const resolveDocumentRefs: ServiceFn<
 	const mediaFormat = {
 		host: data.host,
 		mediaDelivery: context.mediaDelivery,
+		defaultLocale: context.config.localization.defaultLocale,
+		locales: context.config.localization.locales,
 	};
 	const resolvers: RefResolvers = {
 		documents: (targets) =>

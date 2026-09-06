@@ -33,13 +33,14 @@ const getUpdateContext: ServiceFn<
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const tableNamesRes = await getTableNames(context, data.collectionKey);
+	const [tableNamesRes, documentAccessRes] = await Promise.all([
+		getTableNames(context, data.collectionKey),
+		checkDocumentAccess(context, {
+			collectionKey: data.collectionKey,
+			id: data.documentId,
+		}),
+	]);
 	if (tableNamesRes.error) return tableNamesRes;
-
-	const documentAccessRes = await checkDocumentAccess(context, {
-		collectionKey: data.collectionKey,
-		id: data.documentId,
-	});
 	if (documentAccessRes.error) return documentAccessRes;
 
 	if (collectionRes.data.getData.locked) {
@@ -54,9 +55,10 @@ const getUpdateContext: ServiceFn<
 		};
 	}
 
-	const migrationStatusRes = await getMigrationStatus(context, {
-		collection: collectionRes.data,
-	});
+	const [migrationStatusRes, migrationIdRes] = await Promise.all([
+		getMigrationStatus(context, { collection: collectionRes.data }),
+		getCurrentCollectionMigrationId(context, data.collectionKey),
+	]);
 	if (migrationStatusRes.error) return migrationStatusRes;
 
 	if (migrationStatusRes.data.requiresMigration) {
@@ -71,10 +73,6 @@ const getUpdateContext: ServiceFn<
 		};
 	}
 
-	const migrationIdRes = await getCurrentCollectionMigrationId(
-		context,
-		data.collectionKey,
-	);
 	if (migrationIdRes.error) return migrationIdRes;
 
 	const versionExistsRes = await Version.selectSingle(

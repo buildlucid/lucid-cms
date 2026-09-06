@@ -242,6 +242,8 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 		mediaOptions: {
 			host: baseUrl,
 			delivery: context.mediaDelivery,
+			defaultLocale: context.config.localization.defaultLocale,
+			locales: context.config.localization.locales,
 		},
 		hydratedRefs: refsRes.data.hydratedRefs,
 		hasFields: true,

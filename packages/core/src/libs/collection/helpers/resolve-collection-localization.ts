@@ -3,20 +3,25 @@ import type { FieldSnapshot } from "../builders/field-builder/types.js";
 
 type CollectionLocalizationSource = {
 	locales: Array<{ code: string }>;
-	defaultLocale: string;
+	defaultLocale: string | null;
 };
 
-export type ResolvedCollectionLocalization = {
-	enabled: boolean;
+type CollectionStorage = {
 	/** Locale codes exposed for translated collection content. */
 	locales: string[];
 	/** The locale used for collection-level defaults and localized content semantics. */
-	defaultLocale: string;
-	/** The stable project locale used to persist fields that are not localized. */
-	storageLocale: string;
+	defaultLocale: string | null;
+	/** Shared fields always use the null-locale row, independent of the default language. */
+	storageLocale: null;
 	/** Locale rows required to persist both localized and non-localized fields. */
-	rowLocales: string[];
+	rowLocales: Array<string | null>;
 };
+
+export type ResolvedCollectionLocalization = CollectionStorage &
+	(
+		| { enabled: false; defaultLocale: string | null }
+		| { enabled: true; defaultLocale: string }
+	);
 
 /**
  * Resolves a collection's localization shorthand against the validated project
@@ -30,13 +35,13 @@ const resolveCollectionLocalization = (props: {
 	const globalLocaleCodes = props.localization.locales.map(
 		(locale) => locale.code,
 	);
-	const storageLocale = props.localization.defaultLocale;
+	const storageLocale = null;
 
-	if (configured === false) {
+	if (configured === false || props.localization.defaultLocale === null) {
 		return {
 			enabled: false,
 			locales: [],
-			defaultLocale: storageLocale,
+			defaultLocale: props.localization.defaultLocale,
 			storageLocale,
 			rowLocales: [storageLocale],
 		};
@@ -52,17 +57,15 @@ const resolveCollectionLocalization = (props: {
 	);
 	const defaultLocale =
 		configured === true
-			? storageLocale
-			: (configured.defaultLocale ?? storageLocale);
+			? props.localization.defaultLocale
+			: (configured.defaultLocale ?? props.localization.defaultLocale);
 
 	return {
 		enabled: true,
 		locales,
 		defaultLocale,
 		storageLocale,
-		rowLocales: globalLocaleCodes.filter(
-			(locale) => locale === storageLocale || requestedLocaleSet.has(locale),
-		),
+		rowLocales: [null, ...locales],
 	};
 };
 

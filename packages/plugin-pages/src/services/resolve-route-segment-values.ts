@@ -25,7 +25,7 @@ const resolveRouteSegmentValues: ServiceFn<
 			sourceKeys: string[];
 		},
 	],
-	Map<string, Record<string, string | null>>
+	Map<string, Map<string | null, string | null>>
 > = async (context, data) => {
 	const collectionLocalization = resolvePagesCollectionLocalization({
 		localization: context.config.localization,
@@ -40,7 +40,7 @@ const resolveRouteSegmentValues: ServiceFn<
 			data: new Map(
 				data.sourceKeys.map((sourceKey) => [
 					sourceKey,
-					Object.fromEntries(
+					new Map(
 						locales.map((locale) => [
 							locale,
 							resolveCollectionPrefix({
@@ -69,10 +69,10 @@ const resolveRouteSegmentValues: ServiceFn<
 	});
 	if (valuesRes.error) return valuesRes;
 
-	const prefixes = new Map<string, Record<string, string | null>>();
+	const prefixes = new Map<string, Map<string | null, string | null>>();
 	for (const sourceKey of data.sourceKeys) {
 		const sourceTargets = targetsBySource.get(sourceKey) ?? [];
-		const valuesByLocale: Record<string, string | null> = {};
+		const valuesByLocale = new Map<string | null, string | null>();
 
 		for (const locale of locales) {
 			const values: string[] = [];
@@ -106,12 +106,15 @@ const resolveRouteSegmentValues: ServiceFn<
 				values.push(value);
 			}
 
-			valuesByLocale[locale] = formatFullSlug(
-				resolveCollectionPrefix({
-					collection: data.collection,
-					localeCode: locale,
-				}),
-				...values,
+			valuesByLocale.set(
+				locale,
+				formatFullSlug(
+					resolveCollectionPrefix({
+						collection: data.collection,
+						localeCode: locale,
+					}),
+					...values,
+				),
 			);
 		}
 

@@ -28,6 +28,8 @@ const get: ServiceFn<[{ userId: number }], Account> = async (context, data) => {
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
+				defaultLocale: context.config.localization.defaultLocale,
+				locales: context.config.localization.locales,
 			},
 		}),
 	};

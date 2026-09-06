@@ -38,7 +38,7 @@ import type {
 } from "../libs/resources/types.js";
 import type { SeedDefinition } from "../libs/seed/types.js";
 
-/** Content languages available to editors. The default locale must be included in `locales`. */
+/** Content languages available to editors. Omit localization to keep content unassigned. */
 export type LocalizationConfig = {
 	/**
 	 * A list of locales you want to write content in.
@@ -58,9 +58,9 @@ export type LocalizationConfig = {
 		direction?: LocaleDirection;
 	}[];
 	/**
-	 * The default content locale code. Eg. `en`.
+	 * The default language for content, or null when no locales are configured.
 	 */
-	defaultLocale: string;
+	defaultLocale: string | null;
 };
 
 /** Languages offered for the admin interface and server messages. Defaults to English. */

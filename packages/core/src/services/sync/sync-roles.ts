@@ -1,6 +1,5 @@
 import collections from "../../libs/collection/collections.js";
 import formatter from "../../libs/formatters/index.js";
-import type { AdminCopyInput } from "../../libs/i18n/types.js";
 import {
 	getValidPermissions,
 	isCorePermission,
@@ -9,20 +8,14 @@ import type { CorePermission } from "../../libs/permission/types.js";
 import {
 	RolePermissionsRepository,
 	RolesRepository,
-	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
-import {
-	getTranslationValue,
-	normalizeTranslationArray,
-	prepareRoleTranslations,
-} from "../roles/helpers/role-translations.js";
 
 type ManagedRoleDefinition = {
 	key: string;
-	name: AdminCopyInput;
-	description?: AdminCopyInput;
+	name: string;
+	description?: string;
 	permissions: CorePermission[];
 };
 
@@ -35,7 +28,6 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 
 	const Roles = new RolesRepository(context.db);
 	const RolePermissions = new RolePermissionsRepository(context.db);
-	const RoleTranslations = new RoleTranslationsRepository(context.db);
 
 	const rolesRes = await Roles.selectMultiple({
 		select: ["id", "key", "locked"],
@@ -71,25 +63,6 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 	}
 
 	for (const managedRole of managedRoles) {
-		const defaultRoleLocale = context.config.i18n.defaultLocale;
-		const nameTranslations = normalizeTranslationArray(
-			managedRole.name,
-			context.config,
-			context.translate,
-		);
-		const descriptionTranslations = normalizeTranslationArray(
-			managedRole.description,
-			context.config,
-			context.translate,
-		);
-		const defaultName =
-			getTranslationValue(nameTranslations, defaultRoleLocale) ??
-			nameTranslations[0]?.value ??
-			"";
-		const defaultDescription =
-			getTranslationValue(descriptionTranslations, defaultRoleLocale) ??
-			descriptionTranslations[0]?.value ??
-			null;
 		const existingRole = rolesRes.data.find(
 			(role) => role.key === managedRole.key,
 		);
@@ -101,6 +74,8 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 						data: {
 							key: managedRole.key,
 							locked: true,
+							name: managedRole.name,
+							description: managedRole.description ?? null,
 						},
 						returning: ["id"],
 						validation: {
@@ -110,6 +85,8 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 				: await Roles.updateSingle({
 						data: {
 							locked: true,
+							name: managedRole.name,
+							description: managedRole.description ?? null,
 							updated_at: new Date().toISOString(),
 						},
 						where: [
@@ -127,46 +104,6 @@ const syncRoles: ServiceFn<[], undefined> = async (context) => {
 		if (upsertRoleRes.error) return upsertRoleRes;
 
 		const syncedRoleId = upsertRoleRes.data.id;
-		const deleteTranslationsRes = await RoleTranslations.deleteMultiple({
-			where: [
-				{
-					key: "role_id",
-					operator: "=",
-					value: syncedRoleId,
-				},
-			],
-			returning: ["id"],
-		});
-		if (deleteTranslationsRes.error) return deleteTranslationsRes;
-
-		const translations = prepareRoleTranslations({
-			name: nameTranslations,
-			description: descriptionTranslations,
-			roleId: syncedRoleId,
-		});
-		if (
-			translations.every(
-				(translation) => translation.locale_code !== defaultRoleLocale,
-			)
-		) {
-			translations.push({
-				role_id: syncedRoleId,
-				locale_code: defaultRoleLocale,
-				name: defaultName,
-				description: defaultDescription,
-			});
-		}
-		if (translations.length > 0) {
-			const upsertTranslationsRes = await RoleTranslations.upsertMultiple({
-				data: translations,
-				returning: ["id"],
-				validation: {
-					enabled: true,
-				},
-			});
-			if (upsertTranslationsRes.error) return upsertTranslationsRes;
-		}
-
 		const deletePermissionsRes = await RolePermissions.deleteMultiple({
 			where: [
 				{

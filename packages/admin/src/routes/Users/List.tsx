@@ -20,10 +20,8 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState";
 import api from "@/services/api";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
-import helpers from "@/utils/helpers";
 
 const UsersListRoute: Component = () => {
 	// ----------------------------------
@@ -76,13 +74,7 @@ const UsersListRoute: Component = () => {
 	const roleOptions = createMemo(() =>
 		(roles.data?.data ?? []).map((role) => ({
 			value: String(role.id),
-			label:
-				helpers.getTranslation(
-					role.name,
-					contentLocaleStore.get.contentLocale,
-				) ??
-				role.name[0]?.value ??
-				String(role.id),
+			label: role.name,
 		})),
 	);
 	createEffect(() => {

@@ -26,7 +26,7 @@ const buildDescendantFullSlugs: ServiceFn<
 	Array<{
 		documentId: number;
 		versionId: number;
-		fullSlugs: Record<string, string | null>;
+		fullSlugs: Map<string | null, string | null>;
 	}>
 > = async (context, data) => {
 	const localization = resolvePagesCollectionLocalization({

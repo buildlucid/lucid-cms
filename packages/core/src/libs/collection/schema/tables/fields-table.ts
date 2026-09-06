@@ -177,7 +177,7 @@ const createFieldTables = (props: {
 			name: "locale",
 			source: "core",
 			type: props.db.getDataType("text"),
-			nullable: false,
+			nullable: true,
 			foreignKey: {
 				table: "lucid_locales",
 				column: "code",

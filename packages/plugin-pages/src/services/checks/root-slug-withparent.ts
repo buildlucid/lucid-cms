@@ -12,7 +12,7 @@ import getParentPageId from "../../utils/get-parent-page-id.js";
  */
 const checkRootSlugWithParent = (data: {
 	localized: boolean;
-	defaultLocale: string;
+	defaultLocale: string | null;
 	fields: {
 		slug: FieldInputSchema;
 		parentPage: FieldInputSchema;

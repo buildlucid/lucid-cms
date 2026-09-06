@@ -1,3 +1,4 @@
+import type { AiGeneratedContent } from "@lucidcms/types";
 import type { MediaAltGenerateResponse, ResponseBody } from "@types";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -10,7 +11,7 @@ interface Params {
 		instruction?: string;
 		previousResponses?: {
 			instruction?: string;
-			output: Record<string, string>;
+			output: AiGeneratedContent<string>;
 		}[];
 		image: {
 			data: string;
@@ -20,12 +21,12 @@ interface Params {
 		};
 		media: {
 			id?: string | number;
-			name?: Record<string, string>;
-			alt?: Record<string, string>;
+			name?: string | Record<string, string>;
+			alt?: string | Record<string, string>;
 		};
 		locale: {
 			source?: string;
-			target: string[];
+			target: string[] | null;
 		};
 	};
 }

@@ -66,7 +66,13 @@ const getMultipleController = factory.createHandlers(
 		},
 		keyContext: (c) => {
 			const auth = c.get("externalAuth");
+			const config = c.get("config");
 			return {
+				localization: config.localization,
+				collectionLocales: config.collections.map((collection) => [
+					collection.key,
+					collection.config.localized,
+				]),
 				principal:
 					auth.principal.type === "user"
 						? `user:${auth.principal.userId}`

@@ -1,5 +1,5 @@
 import type { Role } from "@types";
-import { type Component, createMemo } from "solid-js";
+import type { Component } from "solid-js";
 import { Tr } from "@/components/Groups/Table/Tr";
 import TextCol from "@/components/Tables/Columns/TextCol";
 import { Permissions } from "@/constants/permissions";
@@ -7,13 +7,11 @@ import type useRowTarget from "@/hooks/useRowTarget";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
-import { getTranslation } from "@/utils/translation-helpers";
 import DateCol from "../Columns/DateCol";
 import PillCol from "../Columns/PillCol";
 
 interface RoleRowProps extends TableRowProps {
 	role: Role;
-	contentLocale?: string;
 	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"view" | "update" | "delete">>;
 }
@@ -25,13 +23,6 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 		userStore.get.hasPermission([Permissions.RolesUpdate]).all;
 	const canRead = () =>
 		userStore.get.hasPermission([Permissions.RolesRead]).all;
-	const name = createMemo(() => {
-		return (
-			getTranslation(props.role.name, props.contentLocale) ||
-			getTranslation(props.role.name, props.role.name[0]?.localeCode ?? "en") ||
-			"-"
-		);
-	});
 
 	// ----------------------------------
 	// Render
@@ -69,7 +60,10 @@ const RoleRow: Component<RoleRowProps> = (props) => {
 			options={props.options}
 			callbacks={props.callbacks}
 		>
-			<TextCol text={name()} options={{ include: props?.include[0] }} />
+			<TextCol
+				text={props.role.name}
+				options={{ include: props?.include[0] }}
+			/>
 			<PillCol
 				text={
 					props.role.locked

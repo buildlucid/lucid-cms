@@ -10,7 +10,9 @@ import type {
 } from "@lucidcms/core/types";
 import { sql } from "kysely";
 import constants from "../constants.js";
+import getCollectionDefaultLocale from "../utils/get-collection-default-locale.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
+import resolveInheritedLocaleRows from "../utils/resolve-inherited-locale-rows.js";
 import type { DescendantFieldsResponse } from "./get-descendant-fields.js";
 
 export type RouteSegmentDependent = DescendantFieldsResponse & {
@@ -80,11 +82,7 @@ const getRouteSegmentDependents: ServiceFn<
 								`${relationAlias}.${prefixGeneratedColName("document_id")}`,
 							)} = ${data.targetDocumentId}`,
 						)
-						.where(
-							sql<boolean>`${sql.ref(`${relationAlias}.locale`)} = ${
-								context.config.localization.defaultLocale
-							}`,
-						)
+						.where(sql<boolean>`${sql.ref(`${relationAlias}.locale`)} is null`)
 						.where(sql<boolean>`${sql.ref(`${relationAlias}.position`)} = 0`)
 						.where(`${versionAlias}.type`, "in", data.versionTypes)
 						.where(
@@ -145,11 +143,7 @@ const getRouteSegmentDependents: ServiceFn<
 								"=",
 								`${fieldsAlias}.document_version_id`,
 							)
-							.on(
-								`${defaultFieldsAlias}.locale`,
-								"=",
-								context.config.localization.defaultLocale,
-							),
+							.on(`${defaultFieldsAlias}.locale`, "is", null),
 				)
 				.leftJoin(`${parentPageTable} as ${parentPageAlias}`, (join) =>
 					join
@@ -158,11 +152,7 @@ const getRouteSegmentDependents: ServiceFn<
 							"=",
 							`${defaultFieldsAlias}.id`,
 						)
-						.on(
-							`${parentPageAlias}.locale`,
-							"=",
-							context.config.localization.defaultLocale,
-						),
+						.on(`${parentPageAlias}.locale`, "is", null),
 				)
 				.select([
 					`${fieldsAlias}.document_version_id`,
@@ -191,7 +181,7 @@ const getRouteSegmentDependents: ServiceFn<
 	}
 	const fieldRows = fieldsResult.data as Array<{
 		document_version_id: number;
-		locale: string;
+		locale: string | null;
 		_slug: string | null;
 		_fullSlug: string | null;
 		_parentPage: number | null;
@@ -207,7 +197,17 @@ const getRouteSegmentDependents: ServiceFn<
 
 	return {
 		error: undefined,
-		data: [...dependents.values()].filter((dependent) => dependent.rows.length),
+		data: [...dependents.values()]
+			.filter((dependent) => dependent.rows.length)
+			.map((dependent) => ({
+				...dependent,
+				rows: resolveInheritedLocaleRows(
+					dependent.rows.map((row) => ({
+						...row,
+					})),
+					getCollectionDefaultLocale(context.config, data.collectionKey),
+				),
+			})),
 	};
 };
 

@@ -8,14 +8,14 @@ import type {
  */
 const processFieldValues = (
 	field: FieldInputSchema | InternalDocumentField,
-	locales: string[],
-	defaultLocale: string,
-): Map<string, unknown> => {
-	const valuesByLocale = new Map<string, unknown>();
+	locales: Array<string | null>,
+	defaultLocale: string | null,
+): Map<string | null, unknown> => {
+	const valuesByLocale = new Map<string | null, unknown>();
 
 	if (field.translations) {
 		for (const locale of locales) {
-			if (field.translations[locale] !== undefined) {
+			if (locale !== null && field.translations[locale] !== undefined) {
 				valuesByLocale.set(locale, field.translations[locale]);
 			} else {
 				valuesByLocale.set(locale, null);

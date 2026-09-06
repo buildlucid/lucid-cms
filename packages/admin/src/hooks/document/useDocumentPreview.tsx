@@ -9,7 +9,7 @@ export function useDocumentPreview(props: {
 	version: Accessor<string>;
 	document: Accessor<InternalCollectionDocument | undefined>;
 	autoSaveMetadata: Accessor<DocumentVersionUpdateResponse | null>;
-	locale: Accessor<string>;
+	locale: Accessor<string | null>;
 }) {
 	// ----------------------------------
 	// Memos
@@ -18,7 +18,7 @@ export function useDocumentPreview(props: {
 			? "scoped"
 			: "perspective",
 	);
-	const locale = createMemo(() => props.locale());
+	const locale = createMemo(() => props.locale() ?? undefined);
 	const saveStamp = createMemo(() => {
 		const autoSaveMetadata = props.autoSaveMetadata();
 		return [

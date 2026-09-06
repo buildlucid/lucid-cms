@@ -232,7 +232,7 @@ export type CustomFieldAiContext<T extends FieldTypes = FieldTypes> = {
 	field: FieldSnapshot<T>;
 	locale: {
 		source?: string;
-		target: string[];
+		target: string[] | null;
 	};
 };
 
@@ -302,7 +302,7 @@ export type FieldValue =
 	| undefined;
 
 export type CustomFieldResponseFormatContext = {
-	locale: string;
+	locale: string | null;
 	refs: Refs | null;
 };
 

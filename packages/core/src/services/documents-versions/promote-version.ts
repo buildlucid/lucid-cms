@@ -85,19 +85,17 @@ const promoteVersion: ServiceFn<
 		};
 	}
 
-	const bricksTableSchemaRes = await getBricksTableSchema(
-		context,
-		data.collectionKey,
-	);
+	const [bricksTableSchemaRes, tableNameRes, documentAccessRes] =
+		await Promise.all([
+			getBricksTableSchema(context, data.collectionKey),
+			getTableNames(context, data.collectionKey),
+			checkDocumentAccess(context, {
+				collectionKey: data.collectionKey,
+				id: data.documentId,
+			}),
+		]);
 	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
-
-	const tableNameRes = await getTableNames(context, data.collectionKey);
 	if (tableNameRes.error) return tableNameRes;
-
-	const documentAccessRes = await checkDocumentAccess(context, {
-		collectionKey: data.collectionKey,
-		id: data.documentId,
-	});
 	if (documentAccessRes.error) return documentAccessRes;
 
 	const [versionRes, bricksQueryRes] = await Promise.all([

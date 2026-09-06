@@ -35,6 +35,8 @@ type MediaTranslationProps = {
 };
 
 export type MediaFormatterOptions = {
+	defaultLocale: string | null;
+	locales: { code: string }[];
 	host: string;
 	delivery: MediaDeliveryAdapterInstance;
 };
@@ -230,17 +232,30 @@ const formatImageFile = (
 const translationsFor = (
 	media: MediaPosterPropsT,
 	field: "title" | "alt" | "description" | "summary",
+	options: Pick<MediaFormatterOptions, "defaultLocale" | "locales">,
 ): MediaTranslationMap => {
+	const { defaultLocale, locales } = options;
+	const unassigned = media.translations?.find(
+		(translation) => translation.locale_code === null,
+	);
+	if (defaultLocale === null) return unassigned?.[field] ?? null;
+
 	const translations = (media.translations ?? []).reduce<
 		Record<string, string | null>
 	>((result, translation) => {
-		if (translation.locale_code !== null) {
+		if (
+			locales.some((locale) => locale.code === translation.locale_code) &&
+			translation.locale_code !== null
+		) {
 			result[translation.locale_code] = translation[field] ?? null;
 		}
 		return result;
 	}, {});
 
-	return Object.keys(translations).length > 0 ? translations : null;
+	if (unassigned && !Object.hasOwn(translations, defaultLocale)) {
+		translations[defaultLocale] = unassigned[field] ?? null;
+	}
+	return translations;
 };
 
 const formatMediaImagePreview = (props: {
@@ -249,8 +264,8 @@ const formatMediaImagePreview = (props: {
 }): MediaImagePreview | null => {
 	if (!props.poster) return null;
 	const image = formatImageFile(props.poster, props.options);
-	const title = translationsFor(props.poster, "title");
-	const alt = translationsFor(props.poster, "alt");
+	const title = translationsFor(props.poster, "title", props.options);
+	const alt = translationsFor(props.poster, "alt", props.options);
 
 	if (image.sourceType === "original") {
 		return {
@@ -293,7 +308,7 @@ const formatPoster = (props: {
 }): MediaPoster | null => {
 	if (!props.poster) return null;
 	const image = formatImageFile(props.poster, props.options);
-	const alt = translationsFor(props.poster, "alt");
+	const alt = translationsFor(props.poster, "alt", props.options);
 
 	if (image.sourceType === "original") {
 		return {
@@ -385,7 +400,7 @@ const formatSingle = (props: {
 		folderId: props.media.folder_id,
 		origin: props.media.origin,
 		public: formatter.formatBoolean(props.media.public),
-		title: translationsFor(props.media, "title"),
+		title: translationsFor(props.media, "title", props.options),
 	};
 	const lifecycle = {
 		isDeleted: formatter.formatBoolean(props.media.is_deleted),
@@ -398,7 +413,7 @@ const formatSingle = (props: {
 	switch (props.media.type) {
 		case "image": {
 			const image = formatImageFile(props.media, props.options);
-			const alt = translationsFor(props.media, "alt");
+			const alt = translationsFor(props.media, "alt", props.options);
 
 			if (image.sourceType === "original") {
 				return {
@@ -441,7 +456,7 @@ const formatSingle = (props: {
 				type: "video",
 				status: props.media.status,
 				...details,
-				description: translationsFor(props.media, "description"),
+				description: translationsFor(props.media, "description", props.options),
 				...file,
 				poster: formatPoster({
 					poster: props.media.poster?.[0],
@@ -457,7 +472,7 @@ const formatSingle = (props: {
 				type: "audio",
 				status: props.media.status,
 				...details,
-				description: translationsFor(props.media, "description"),
+				description: translationsFor(props.media, "description", props.options),
 				key: file.key,
 				fileName: file.fileName,
 				url: file.url,
@@ -475,7 +490,7 @@ const formatSingle = (props: {
 				type: "document",
 				status: props.media.status,
 				...details,
-				summary: translationsFor(props.media, "summary"),
+				summary: translationsFor(props.media, "summary", props.options),
 				...formatFile(props.media, props.options),
 				...lifecycle,
 			};

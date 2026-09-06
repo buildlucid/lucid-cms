@@ -3,60 +3,27 @@ import { isCorePermission } from "../../libs/permission/registry.js";
 import {
 	RolePermissionsRepository,
 	RolesRepository,
-	RoleTranslationsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import {
-	getTranslationValue,
-	prepareRoleTranslations,
-	type RoleTranslationInput,
-} from "./helpers/role-translations.js";
 import validatePermissions from "./validate-permissions.js";
 
 const createSingle: ServiceFn<
 	[
 		{
-			name: RoleTranslationInput;
-			description?: RoleTranslationInput;
+			name: string;
+			description?: string | null;
 			permissions: string[];
 		},
 	],
 	number
 > = async (context, data) => {
 	const Roles = new RolesRepository(context.db);
-	const RoleTranslations = new RoleTranslationsRepository(context.db);
-	const defaultRoleLocale = context.config.i18n.defaultLocale;
-
-	const defaultName = getTranslationValue(data.name, defaultRoleLocale);
-	const defaultDescription = getTranslationValue(
-		data.description,
-		defaultRoleLocale,
-	);
-
-	if (!defaultName || defaultName.length < 2) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.errors.validation.message"),
-				status: 400,
-				errors: {
-					name: {
-						code: "invalid",
-						message: copy("server:core.fields.validation.required"),
-					},
-				},
-			},
-			data: undefined,
-		};
-	}
-
 	const [validatePermsRes, checkNameIsUniqueRes] = await Promise.all([
 		validatePermissions(context, {
 			permissions: data.permissions,
 		}),
-		Roles.selectRoleIdByTranslationName({
-			name: defaultName,
-			localeCode: defaultRoleLocale,
+		Roles.selectRoleIdByName({
+			name: data.name,
 		}),
 	]);
 	if (validatePermsRes.error) return validatePermsRes;
@@ -80,41 +47,13 @@ const createSingle: ServiceFn<
 	}
 
 	const newRolesRes = await Roles.createSingle({
-		data: {},
+		data: { name: data.name, description: data.description ?? null },
 		returning: ["id"],
 		validation: {
 			enabled: true,
 		},
 	});
 	if (newRolesRes.error) return newRolesRes;
-
-	const translations = prepareRoleTranslations({
-		name: data.name,
-		description: data.description,
-		roleId: newRolesRes.data.id,
-	});
-	if (
-		translations.every(
-			(translation) => translation.locale_code !== defaultRoleLocale,
-		)
-	) {
-		translations.push({
-			role_id: newRolesRes.data.id,
-			locale_code: defaultRoleLocale,
-			name: defaultName,
-			description: defaultDescription ?? null,
-		});
-	}
-	if (translations.length > 0) {
-		const roleTranslationsRes = await RoleTranslations.upsertMultiple({
-			data: translations,
-			returning: ["id"],
-			validation: {
-				enabled: true,
-			},
-		});
-		if (roleTranslationsRes.error) return roleTranslationsRes;
-	}
 
 	if (validatePermsRes.data.length > 0) {
 		const RolePermissions = new RolePermissionsRepository(context.db);

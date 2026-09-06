@@ -40,13 +40,12 @@ const getSingleController = factory.createHandlers(
 	validate("param", controllerSchemas.content.getSingle.params),
 	cache({
 		ttlSeconds: minutesToSeconds(5),
-		mode: "static",
-		staticKey: (c) => {
-			const id = c.req.param("id");
-			if (!id) return null;
-
-			return cacheKeys.http.static.contentMediaSingle(id);
-		},
+		mode: "path-only",
+		tags: (c) => [
+			cacheKeys.http.tags.contentMedia,
+			cacheKeys.http.tags.contentMediaSingle(c.req.param("id") ?? ""),
+		],
+		keyContext: (c) => ({ localization: c.get("config").localization }),
 	}),
 	async (c) => {
 		const { id } = c.req.valid("param");

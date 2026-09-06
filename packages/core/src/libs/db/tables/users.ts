@@ -213,15 +213,7 @@ export const usersTable = defineTable("lucid_users", (adapter) => ({
 				.array(
 					z.object({
 						id: z.number(),
-						name: z.string().nullable().optional(),
-						translations: z
-							.array(
-								z.object({
-									name: z.string().nullable(),
-									locale_code: z.string().nullable(),
-								}),
-							)
-							.optional(),
+						name: z.string(),
 						permissions: z
 							.array(
 								z.object({

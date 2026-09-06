@@ -3,7 +3,7 @@ import formatFullSlug from "./format-fullslug.js";
 
 const buildFullSlug = (data: {
 	parentFields: Array<ParentPageQueryResponse>;
-	targetLocale: string;
+	targetLocale: string | null;
 	slug: string | null | undefined;
 	prefix?: string;
 }): string | null => {

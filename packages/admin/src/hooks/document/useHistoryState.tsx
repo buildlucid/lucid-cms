@@ -7,7 +7,6 @@ import type {
 import { createEffect, createMemo, createSignal } from "solid-js";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
 import { findDocumentUserRef } from "@/utils/document-ref-helpers";
@@ -84,13 +83,8 @@ export function useHistoryState() {
 	const documentId = createMemo(() =>
 		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
-	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 	const canFetchRevisions = createMemo(() => {
-		return (
-			contentLocale() !== undefined &&
-			documentId() !== undefined &&
-			searchParams.ready()
-		);
+		return documentId() !== undefined && searchParams.ready();
 	});
 	const selectedVersion = createMemo(() => {
 		const item = selectedItem();

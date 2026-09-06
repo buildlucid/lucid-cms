@@ -49,6 +49,11 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 	// ---------------------------------
 	// Memos
 	const locales = createMemo(() => contentLocaleStore.get.locales);
+	const editableLocales = createMemo(() =>
+		locales().length
+			? locales().map((locale) => ({ code: locale.code }))
+			: [{ code: null }],
+	);
 	const showAltInput = createMemo(() => {
 		return media.data?.data.type === "image";
 	});
@@ -168,9 +173,9 @@ const ViewMediaPanel: Component<ViewMediaPanelProps> = (props) => {
 						onChange={setActiveTab}
 					/>
 					<Show when={activeTab() === "details"}>
-						<For each={locales()}>
+						<For each={editableLocales()}>
 							{(locale) => (
-								<Show when={locale.code === lang?.contentLocale()}>
+								<Show when={locale.code === (lang?.contentLocale() ?? null)}>
 									<Input
 										id={`name-${locale.code}`}
 										value={

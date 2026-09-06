@@ -16,7 +16,7 @@ export const buildRouteUniquenessItems = (data: {
 	const items: RouteUniquenessItem[] = [];
 
 	for (const projected of data.projectedFullSlugs) {
-		for (const [locale, fullSlug] of Object.entries(projected.fullSlugs)) {
+		for (const [locale, fullSlug] of projected.fullSlugs) {
 			const normalizedFullSlug = normalizePathValue(fullSlug);
 			if (typeof normalizedFullSlug !== "string") continue;
 

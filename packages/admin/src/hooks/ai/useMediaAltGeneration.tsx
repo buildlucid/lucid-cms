@@ -1,3 +1,4 @@
+import type { AiGeneratedContent } from "@lucidcms/types";
 import {
 	type Component,
 	createMemo,
@@ -15,6 +16,10 @@ import aiModalsStore, {
 import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import {
+	generatedContentEntries,
+	mediaGenerationValue,
+} from "@/utils/ai-generated-content";
 import { prepareAiImage } from "@/utils/ai-image";
 import { validateSetError } from "@/utils/error-handling";
 import spawnToast from "@/utils/spawn-toast";
@@ -87,7 +92,6 @@ const useMediaAltGeneration = () => {
 			!featureEnabled() ||
 			accessState().disabled ||
 			!targetHasImage(target) ||
-			target.locales().length === 0 ||
 			isBusy() ||
 			pendingDirectGeneration() !== undefined ||
 			target.disabled?.() === true
@@ -110,41 +114,15 @@ const useMediaAltGeneration = () => {
 		const modal = aiModalsStore.getModal("mediaAltGeneration");
 		return modal?.data.targetId === targetId;
 	};
-	const translationsToRecord = (translations?: TranslationValue[]) => {
-		if (!translations) return undefined;
-
-		const record = translations.reduce<Record<string, string>>(
-			(accumulator, translation) => {
-				if (!translation.localeCode || !translation.value) return accumulator;
-				accumulator[translation.localeCode] = translation.value;
-				return accumulator;
-			},
-			{},
-		);
-
-		return Object.keys(record).length > 0 ? record : undefined;
-	};
 	const buildGeneratedAlt = (
-		target: MediaAltGenerationTarget,
-		output: Record<string, string>,
-	) => {
-		const previousRows = target.media().alt ?? [];
-		const localeRows =
-			target.locales().length > 0
-				? target.locales().map((locale) => locale.code)
-				: Object.keys(output);
+		_target: MediaAltGenerationTarget,
+		output: AiGeneratedContent<string>,
+	) =>
+		generatedContentEntries(output).map(([localeCode, value]) => ({
+			localeCode,
+			value,
+		}));
 
-		return localeRows.map((localeCode) => {
-			const existing = previousRows.find(
-				(translation) => translation.localeCode === localeCode,
-			);
-
-			return {
-				localeCode,
-				value: output[localeCode] ?? existing?.value ?? null,
-			};
-		});
-	};
 	const generateAndApply = async (
 		target: MediaAltGenerationTarget,
 		id = getTargetId(),
@@ -176,12 +154,14 @@ const useMediaAltGeneration = () => {
 					},
 					media: {
 						id: media.id,
-						name: translationsToRecord(media.name),
-						alt: translationsToRecord(media.alt),
+						name: mediaGenerationValue(media.name),
+						alt: mediaGenerationValue(media.alt),
 					},
 					locale: {
-						source: getDefaultTranslationLocale(target.locales()),
-						target: target.locales().map((locale) => locale.code),
+						source: getDefaultTranslationLocale(target.locales()) ?? undefined,
+						target: target.locales().length
+							? target.locales().map((locale) => locale.code)
+							: null,
 					},
 				},
 			});

@@ -94,7 +94,6 @@ const beforeUpsertHandler =
 			const circularParentsRes = await checkCircularParents(context, {
 				documentId: data.data.documentId,
 				versionType: data.data.versionType,
-				defaultLocale: localization.storageLocale,
 				collectionKey: targetCollectionRes.data.key,
 				fields: {
 					parentPage: parentPage,

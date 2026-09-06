@@ -30,7 +30,7 @@ export interface RevisionsQueryResponse extends Select<LucidVersionTable> {
 	// brick count
 	[key: LucidBrickTableName]: Array<{
 		id: number;
-		locale: string;
+		locale: string | null;
 		brick_instance_id: string;
 		brick_type: BrickTypes;
 	}>;

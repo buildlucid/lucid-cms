@@ -245,7 +245,6 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("locale_code", adapter.getDataType("text"), (col) =>
 					col
 						.references("lucid_locales.code")
-						.notNull()
 						.onDelete("cascade")
 						.onUpdate("cascade"),
 				)
@@ -263,6 +262,14 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_media_translations_media_id")
 				.on("lucid_media_translations")
 				.column("media_id")
+				.execute();
+
+			await db.schema
+				.createIndex("idx_media_translations_unassigned")
+				.on("lucid_media_translations")
+				.column("media_id")
+				.unique()
+				.where(sql<boolean>`locale_code is null`)
 				.execute();
 
 			await db.schema

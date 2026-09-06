@@ -1,4 +1,8 @@
-import type { AiGenerateMode, AiGenerateUsage } from "@lucidcms/types";
+import type {
+	AiGeneratedContent,
+	AiGenerateMode,
+	AiGenerateUsage,
+} from "@lucidcms/types";
 
 export type CmsAiGenerateRequestInputText<TRole extends string = string> = {
 	type: "text";
@@ -118,7 +122,7 @@ export type CustomFieldInputTargetFieldContext = {
 	type: string;
 	label?: string;
 	summary?: string;
-	value: Record<string, unknown>;
+	value: unknown;
 };
 
 export type CustomFieldInputTargetContext = {
@@ -130,7 +134,7 @@ export type CustomFieldInputTargetContext = {
 export type CustomFieldInputV1Context = {
 	locale: {
 		source?: string;
-		target: string | string[];
+		target: string | string[] | null;
 	};
 	target: CustomFieldInputTargetContext;
 	collection: CustomFieldInputCollectionContext;
@@ -161,16 +165,16 @@ export type MediaAltGenerateV1Request = CmsAiGenerateBaseRequest<
 	{
 		locale: {
 			source?: string;
-			target: string | string[];
+			target: string | string[] | null;
 		};
 		media: {
 			id?: string | number;
-			name?: Record<string, string>;
-			alt?: Record<string, string>;
+			name?: string | Record<string, string>;
+			alt?: string | Record<string, string>;
 		};
 		previousResponses?: {
 			instruction?: string;
-			output: Record<string, string>;
+			output: AiGeneratedContent<string>;
 		}[];
 	}
 >;

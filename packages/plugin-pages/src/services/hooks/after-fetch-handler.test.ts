@@ -117,7 +117,7 @@ describe("pages afterFetch hook", () => {
 						_fullSlug: "/x",
 						_parentPage: null,
 						document_id: 1,
-						locale: "en",
+						locale: null,
 					},
 				],
 			})

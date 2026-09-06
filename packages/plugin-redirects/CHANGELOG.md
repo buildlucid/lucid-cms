@@ -4,6 +4,7 @@
 
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Moved translation registration to plugin `sources`.
+- Support redirects when no content locales are configured.
 
 ## v0.1.0
 

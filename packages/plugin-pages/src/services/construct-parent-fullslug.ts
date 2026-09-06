@@ -9,7 +9,7 @@ import type { ParentPageQueryResponse } from "./get-parent-fields.js";
 
 const parentMatchesRoutePrefix = (
 	parentFields: ParentPageQueryResponse[],
-	locale: string,
+	locale: string | null,
 	prefix: string | null | undefined,
 ) => {
 	const parentFullSlug = normalizePathValue(
@@ -34,17 +34,44 @@ const constructParentFullSlug = (data: {
 	fields: {
 		slug: FieldInputSchema;
 	};
-	routePrefixes?: Record<string, string | null>;
-}): Awaited<ServiceResponse<Record<string, string | null>>> => {
+	routePrefixes?: Map<string | null, string | null>;
+	missingParentIsEmpty?: boolean;
+}): Awaited<ServiceResponse<Map<string | null, string | null>>> => {
+	if (!data.missingParentIsEmpty && data.parentFields.length > 0) {
+		const missingParentLocale = data.localization.locales.find((locale) => {
+			const slug =
+				locale === null
+					? data.fields.slug.value
+					: data.fields.slug.translations?.[locale];
+			return (
+				typeof slug === "string" &&
+				slug.trim() !== "" &&
+				!normalizePathValue(
+					data.parentFields.find((field) => field.locale === locale)?._fullSlug,
+				)
+			);
+		});
+		if (missingParentLocale !== undefined) {
+			const message = copy("server:plugin.pages.parent.locale.route.missing");
+			return {
+				error: {
+					type: "basic",
+					status: 400,
+					message,
+					errors: {
+						fields: [
+							{ key: "parentPage", localeCode: missingParentLocale, message },
+						],
+					},
+				},
+				data: undefined,
+			};
+		}
+	}
 	// initialise fullSlug with null values for each locale
-	const fullSlug: Record<string, string | null> =
-		data.localization.locales.reduce<Record<string, string | null>>(
-			(acc, locale) => {
-				acc[locale] = null;
-				return acc;
-			},
-			{},
-		);
+	const fullSlug = new Map<string | null, string | null>(
+		data.localization.locales.map((locale) => [locale, null]),
+	);
 
 	// if translations are enabled/set
 	if (data.localization.enabled && data.fields.slug.translations) {
@@ -52,7 +79,7 @@ const constructParentFullSlug = (data: {
 			const locale = data.localization.locales[i];
 			if (!locale) continue;
 			const routePrefix =
-				data.routePrefixes?.[locale] ??
+				data.routePrefixes?.get(locale) ??
 				resolveCollectionPrefix({
 					collection: data.collection,
 					localeCode: locale,
@@ -82,16 +109,19 @@ const constructParentFullSlug = (data: {
 				};
 			}
 
-			fullSlug[locale] = buildFullSlug({
-				parentFields: data.parentFields || [],
-				targetLocale: locale,
-				slug: data.fields.slug.translations[locale],
-				prefix: routePrefix,
-			});
+			fullSlug.set(
+				locale,
+				buildFullSlug({
+					parentFields: data.parentFields || [],
+					targetLocale: locale,
+					slug: data.fields.slug.translations[locale],
+					prefix: routePrefix,
+				}),
+			);
 		}
 	} else {
 		const routePrefix =
-			data.routePrefixes?.[data.localization.defaultLocale] ??
+			data.routePrefixes?.get(data.localization.defaultLocale) ??
 			resolveCollectionPrefix({
 				collection: data.collection,
 				localeCode: data.localization.defaultLocale,
@@ -123,12 +153,15 @@ const constructParentFullSlug = (data: {
 				data: undefined,
 			};
 		}
-		fullSlug[data.localization.defaultLocale] = buildFullSlug({
-			parentFields: data.parentFields || [],
-			targetLocale: data.localization.defaultLocale,
-			slug: data.fields.slug.value,
-			prefix: routePrefix,
-		});
+		fullSlug.set(
+			data.localization.defaultLocale,
+			buildFullSlug({
+				parentFields: data.parentFields || [],
+				targetLocale: data.localization.defaultLocale,
+				slug: data.fields.slug.value,
+				prefix: routePrefix,
+			}),
+		);
 	}
 
 	return {

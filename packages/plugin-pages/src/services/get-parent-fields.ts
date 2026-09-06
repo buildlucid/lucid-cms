@@ -9,13 +9,14 @@ import type {
 import constants from "../constants.js";
 import getParentPageId from "../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
+import resolveInheritedLocaleRows from "../utils/resolve-inherited-locale-rows.js";
 
 export type ParentPageQueryResponse = {
 	_slug: string | null;
 	_fullSlug: string | null;
 	_parentPage: number | null;
 	document_id: number;
-	locale: string;
+	locale: string | null;
 };
 
 /**
@@ -24,7 +25,7 @@ export type ParentPageQueryResponse = {
 const getParentFields: ServiceFn<
 	[
 		{
-			defaultLocale: string;
+			defaultLocale: string | null;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			collectionKey: string;
 			fields: {
@@ -76,7 +77,7 @@ const getParentFields: ServiceFn<
 								"=",
 								`${fieldsTable}.document_version_id`,
 							)
-							.on(`${defaultFieldsAlias}.locale`, "=", data.defaultLocale),
+							.on(`${defaultFieldsAlias}.locale`, "is", null),
 					)
 					.leftJoin(parentPageTable, (join) =>
 						join
@@ -85,13 +86,13 @@ const getParentFields: ServiceFn<
 								"=",
 								`${defaultFieldsAlias}.id`,
 							)
-							.on(`${parentPageTable}.locale`, "=", data.defaultLocale),
+							.on(`${parentPageTable}.locale`, "is", null),
 					)
 					// @ts-expect-error
 					.select([
 						`${fieldsTable}.${slugColumn}`,
 						`${fieldsTable}.${fullSlugColumn}`,
-						`${parentPageTable}.${parentPageColumn}`,
+						`${parentPageTable}.${parentPageColumn} as _parentPage`,
 						`${versionTable}.document_id`,
 						`${fieldsTable}.locale`,
 					])
@@ -135,7 +136,10 @@ const getParentFields: ServiceFn<
 
 		return {
 			error: undefined,
-			data: parentFields as unknown as Array<ParentPageQueryResponse>,
+			data: resolveInheritedLocaleRows(
+				parentFields as unknown as Array<ParentPageQueryResponse>,
+				data.defaultLocale,
+			),
 		};
 	} catch (_error) {
 		return {

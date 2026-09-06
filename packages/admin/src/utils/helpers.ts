@@ -2,6 +2,7 @@ import type { Media, ResolvedAdminCopy, User } from "@types";
 import type { Accessor, Setter } from "solid-js";
 import { translateAdminCopy } from "@/translations";
 import safeDeepEqual from "@/utils/safe-deep-equal";
+import { getTranslation } from "./translation-helpers";
 
 // biome-ignore lint/suspicious/noExplicitAny: explanation
 type GenericObject = Record<string, any>;
@@ -256,23 +257,6 @@ const updateTranslation = (
 	});
 };
 
-const getTranslation = (
-	translations?:
-		| {
-				value: string | null;
-				localeCode: string | null;
-		  }[]
-		| Record<string, string | null>
-		| null,
-	contentLocale?: string,
-) => {
-	if (!contentLocale) return null;
-	if (translations && !Array.isArray(translations)) {
-		return translations[contentLocale] ?? null;
-	}
-	const translation = translations?.find((t) => t.localeCode === contentLocale);
-	return translation?.value ?? null;
-};
 const getRecordTranslation = (
 	translations?: Record<string, string | null> | null,
 	contentLocale?: string,

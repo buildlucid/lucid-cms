@@ -45,11 +45,7 @@ const getStoredRouteSegmentSelections: ServiceFn<
 							`${table}.${prefixGeneratedColName("document_id")} as document_id`,
 						])
 						.where(`${table}.document_version_id`, "in", versionIds)
-						.where(
-							`${table}.locale`,
-							"=",
-							context.config.localization.defaultLocale,
-						)
+						.where(`${table}.locale`, "is", null)
 						.where(`${table}.position`, "=", 0),
 				)
 				.many();

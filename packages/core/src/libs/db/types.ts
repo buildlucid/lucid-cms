@@ -47,7 +47,6 @@ import type {
 	LucidRemoteConnections,
 	LucidRolePermissions,
 	LucidRoles,
-	LucidRoleTranslations,
 	LucidSecurityAuditLogs,
 	LucidUserAuthProviders,
 	LucidUserLogins,
@@ -244,7 +243,6 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;
 	lucid_roles: LucidRoles;
-	lucid_role_translations: LucidRoleTranslations;
 	lucid_role_permissions: LucidRolePermissions;
 	lucid_user_roles: LucidUserRoles;
 	lucid_user_tokens: LucidUserTokens;

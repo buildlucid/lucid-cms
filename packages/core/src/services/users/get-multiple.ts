@@ -37,11 +37,9 @@ const getMultiple: ServiceFn<
 				mediaOptions: {
 					host: getBaseUrl(context),
 					delivery: context.mediaDelivery,
+					defaultLocale: context.config.localization.defaultLocale,
+					locales: context.config.localization.locales,
 				},
-				locales: context.config.localization.locales.map(
-					(locale) => locale.code,
-				),
-				defaultLocale: context.config.localization.defaultLocale,
 			}),
 			count: formatter.parseCount(usersRes.data[1]?.count),
 		},

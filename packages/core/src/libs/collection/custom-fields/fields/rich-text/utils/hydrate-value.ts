@@ -50,7 +50,7 @@ const isUserRef = (value: unknown): value is HydratableUserRef => {
 const getDocumentFieldValue = (
 	reference: HydratableDocumentRef,
 	fieldKey: string,
-	locale: string,
+	locale: string | null,
 ): string | number | boolean | null => {
 	const field = reference.fields?.[fieldKey];
 	const fieldRecord = getObject(field);
@@ -62,11 +62,12 @@ const getDocumentFieldValue = (
 	) {
 		const translations = getObject(fieldRecord.translations);
 		value = translations
-			? (translations[locale] ?? fieldRecord.value)
+			? ((locale === null ? undefined : translations[locale]) ??
+				fieldRecord.value)
 			: fieldRecord.value;
 	} else if (fieldRecord) {
 		value =
-			fieldRecord[locale] ??
+			(locale === null ? undefined : fieldRecord[locale]) ??
 			Object.values(fieldRecord).find((item) => item !== undefined);
 	}
 

@@ -8,6 +8,8 @@ export type MediaRefResolveInput = {
 	targets: RefResourceTargets;
 	format: {
 		host: string;
+		defaultLocale: string | null;
+		locales: { code: string }[];
 		mediaDelivery: MediaDeliveryAdapterInstance;
 	};
 };

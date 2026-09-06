@@ -29,15 +29,14 @@ const createSingle: ServiceFn<
 	],
 	number
 > = async (context, data) => {
-	const tableNamesRes = await getTableNames(context, data.collection.key);
+	const [tableNamesRes, migrationIdRes] = await Promise.all([
+		getTableNames(context, data.collection.key),
+		getCurrentCollectionMigrationId(context, data.collection.key),
+	]);
 	if (tableNamesRes.error) return tableNamesRes;
+	if (migrationIdRes.error) return migrationIdRes;
 
 	const DocumentVersions = new DocumentVersionsRepository(context.db);
-	const migrationIdRes = await getCurrentCollectionMigrationId(
-		context,
-		data.collection.key,
-	);
-	if (migrationIdRes.error) return migrationIdRes;
 
 	const versionType = "latest";
 

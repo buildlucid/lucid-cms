@@ -12,18 +12,9 @@ import InputGrid from "@/components/Containers/InputGrid";
 import { CheckboxButton, Input, Textarea } from "@/components/Groups/Form";
 import { Panel } from "@/components/Groups/Panel";
 import api from "@/services/api";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
-import {
-	createDefaultTranslations,
-	getDefaultTranslationLocale,
-	getTranslation,
-	mergeTranslations,
-	type TranslationValue,
-	updateTranslation,
-} from "@/utils/translation-helpers";
 
 interface UpsertRolePanelProps {
 	id?: Accessor<number | undefined>;
@@ -34,20 +25,14 @@ interface UpsertRolePanelProps {
 	viewOnly?: boolean;
 }
 
-type RoleTranslation = TranslationValue;
-
 const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 	// ---------------------------------
 	// State
 	const [selectedPermissions, setSelectedPermissions] = createSignal<
 		Permission[]
 	>([]);
-	const [nameTranslations, setNameTranslations] = createSignal<
-		RoleTranslation[]
-	>(createDefaultTranslations<RoleTranslation>(contentLocaleStore.get.locales));
-	const [descriptionTranslations, setDescriptionTranslations] = createSignal<
-		RoleTranslation[]
-	>(createDefaultTranslations<RoleTranslation>(contentLocaleStore.get.locales));
+	const [name, setName] = createSignal("");
+	const [description, setDescription] = createSignal("");
 
 	// ---------------------------------
 	// Query
@@ -82,22 +67,11 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 	// Effects
 	createEffect(() => {
 		if (role.isSuccess) {
-			const locales = contentLocaleStore.get.locales;
 			setSelectedPermissions(
 				role.data?.data.permissions?.map((p) => p.permission) || [],
 			);
-			setNameTranslations(
-				mergeTranslations<RoleTranslation>({
-					translations: role.data?.data.name,
-					locales,
-				}),
-			);
-			setDescriptionTranslations(
-				mergeTranslations<RoleTranslation>({
-					translations: role.data?.data.description,
-					locales,
-				}),
-			);
+			setName(role.data?.data.name ?? "");
+			setDescription(role.data?.data.description ?? "");
 		}
 	});
 
@@ -111,30 +85,15 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 		if (props.id === undefined) return permissions.isError;
 		return role.isError || permissions.isError;
 	});
-	const roleLocales = createMemo(() => contentLocaleStore.get.locales);
-	const defaultRoleLocale = createMemo(() =>
-		getDefaultTranslationLocale(roleLocales()),
-	);
-	const roleDisplayName = createMemo(() => {
-		return (
-			getTranslation(
-				role.data?.data.name,
-				contentLocaleStore.get.contentLocale,
-			) ??
-			getTranslation(role.data?.data.name, defaultRoleLocale()) ??
-			""
-		);
-	});
-
 	const panelTitle = createMemo(() => {
 		if (props.viewOnly) {
 			return T()("panels.roles.view.title", {
-				name: roleDisplayName(),
+				name: role.data?.data.name ?? "",
 			});
 		}
 		if (props.id === undefined) return T()("panels.roles.create.title");
 		return T()("panels.roles.update.title", {
-			name: roleDisplayName(),
+			name: role.data?.data.name ?? "",
 		});
 	});
 	const panelSubmit = createMemo(() => {
@@ -147,29 +106,20 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 		if (!props.id) return createRole.errors();
 		return updateRole.errors();
 	});
-	const hasTranslationErrors = createMemo(() => {
-		return Boolean(
-			getBodyError("name", errors) || getBodyError("description", errors),
-		);
-	});
 
 	const updateData = createMemo(() => {
 		return helpers.updateData(
 			{
-				name:
-					role.data?.data.name ??
-					createDefaultTranslations<RoleTranslation>(roleLocales()),
-				description:
-					role.data?.data.description ??
-					createDefaultTranslations<RoleTranslation>(roleLocales()),
+				name: role.data?.data.name ?? "",
+				description: role.data?.data.description ?? "",
 				permissions:
 					role.data?.data.permissions?.map(
 						(permission) => permission.permission,
 					) || [],
 			},
 			{
-				name: nameTranslations(),
-				description: descriptionTranslations(),
+				name: name(),
+				description: description(),
 				permissions: selectedPermissions() || [],
 			},
 		);
@@ -208,8 +158,8 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 					: () => {
 							if (!props.id) {
 								createRole.action.mutate({
-									name: nameTranslations(),
-									description: descriptionTranslations(),
+									name: name(),
+									description: description(),
 									permissions: selectedPermissions(),
 								});
 							} else {
@@ -221,12 +171,8 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 						},
 				reset: () => {
 					setSelectedPermissions([]);
-					setNameTranslations(
-						createDefaultTranslations<RoleTranslation>(roleLocales()),
-					);
-					setDescriptionTranslations(
-						createDefaultTranslations<RoleTranslation>(roleLocales()),
-					);
+					setName("");
+					setDescription("");
 					createRole.reset();
 					updateRole.reset();
 				},
@@ -241,157 +187,134 @@ const UpsertRolePanel: Component<UpsertRolePanelProps> = (props) => {
 			options={{
 				padding: "24",
 			}}
-			langauge={{
-				contentLocale: true,
-				hascontentLocaleError: hasTranslationErrors(),
-				useDefaultcontentLocale: true,
-			}}
 		>
-			{(lang) => {
-				const activeLocale = () => lang?.contentLocale() ?? defaultRoleLocale();
-
-				return (
-					<>
-						<InputGrid columns={2}>
-							<Input
-								id={`name-${activeLocale()}`}
-								name={`name-${activeLocale()}`}
-								type="text"
-								value={getTranslation(nameTranslations(), activeLocale()) ?? ""}
-								onChange={(value) => {
-									updateTranslation(setNameTranslations, {
-										localeCode: activeLocale(),
-										value,
-									});
-								}}
-								disabled={isReadOnly()}
-								copy={{
-									label: T()("common.name"),
-								}}
-								required={true}
-								errors={getBodyError("name", errors)}
-								noMargin={true}
-							/>
-						</InputGrid>
-						<Textarea
-							id={`description-${activeLocale()}`}
-							name={`description-${activeLocale()}`}
-							value={
-								getTranslation(descriptionTranslations(), activeLocale()) ?? ""
-							}
-							onChange={(value) => {
-								updateTranslation(setDescriptionTranslations, {
-									localeCode: activeLocale(),
-									value,
-								});
-							}}
+			{() => (
+				<>
+					<InputGrid columns={2}>
+						<Input
+							id="name"
+							name="name"
+							type="text"
+							value={name()}
+							onChange={setName}
 							disabled={isReadOnly()}
 							copy={{
-								label: T()("common.description"),
+								label: T()("common.name"),
 							}}
-							errors={getBodyError("description", errors)}
-							rows={4}
+							required={true}
+							errors={getBodyError("name", errors)}
+							noMargin={true}
 						/>
-						<div class="w-full mb-5 last:mb-0">
-							<div class="mb-1.5">
-								<h3 class="text-sm text-body">{T()("common.permissions")}</h3>
-							</div>
-							<div class="w-full">
-								<For each={permissions?.data?.data}>
-									{(option) => (
-										<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
-											<div class="flex justify-between items-start gap-3">
-												<h4 class="text-sm font-medium text-body">
-													{helpers.getLocaleValue({
-														value: option.details.name,
-														fallback: option.key,
-													})}
-												</h4>
-												<Show when={!isReadOnly()}>
-													<button
-														type="button"
-														class="text-xs text-unfocused hover:text-body transition-colors"
-														onClick={() => {
-															const groupIsSelected = option.permissions.every(
-																(permission) =>
-																	selectedPermissions().includes(
-																		permission.key,
-																	),
-															);
-
-															if (groupIsSelected) {
-																setSelectedPermissions((prev) =>
-																	prev.filter(
-																		(permission) =>
-																			!option.permissions.some(
-																				(optionPermission) =>
-																					optionPermission.key === permission,
-																			),
-																	),
-																);
-																return;
-															}
-
-															setSelectedPermissions((prev) => [
-																...new Set([
-																	...prev,
-																	...option.permissions.map(
-																		(permission) => permission.key,
-																	),
-																]),
-															]);
-														}}
-													>
-														{option.permissions.every((permission) =>
-															selectedPermissions().includes(permission.key),
-														)
-															? T()("common.clear")
-															: T()("selectors.all")}
-													</button>
-												</Show>
-											</div>
-											<div class="mt-2 flex flex-wrap gap-2">
-												<For each={option.permissions}>
-													{(permission) => (
-														<CheckboxButton
-															id={`permission-${option.key}-${permission.key}`}
-															value={selectedPermissions().includes(
-																permission.key,
-															)}
-															onChange={() => {
-																setSelectedPermissions((prev) => {
-																	if (prev.includes(permission.key)) {
-																		return prev.filter(
-																			(p) => p !== permission.key,
-																		);
-																	}
-																	return [...prev, permission.key];
-																});
-															}}
-															copy={{
-																label: helpers.getLocaleValue({
-																	value: permission.details.name,
-																	fallback: permission.key,
-																}),
-																tooltip:
-																	helpers.getLocaleValue({
-																		value: permission.details.description,
-																	}) || undefined,
-															}}
-															disabled={isReadOnly()}
-															theme="secondary"
-														/>
-													)}
-												</For>
-											</div>
-										</div>
-									)}
-								</For>
-							</div>
+					</InputGrid>
+					<Textarea
+						id="description"
+						name="description"
+						value={description()}
+						onChange={setDescription}
+						disabled={isReadOnly()}
+						copy={{
+							label: T()("common.description"),
+						}}
+						errors={getBodyError("description", errors)}
+						rows={4}
+					/>
+					<div class="w-full mb-5 last:mb-0">
+						<div class="mb-1.5">
+							<h3 class="text-sm text-body">{T()("common.permissions")}</h3>
 						</div>
-					</>
-				);
-			}}
+						<div class="w-full">
+							<For each={permissions?.data?.data}>
+								{(option) => (
+									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
+										<div class="flex justify-between items-start gap-3">
+											<h4 class="text-sm font-medium text-body">
+												{helpers.getLocaleValue({
+													value: option.details.name,
+													fallback: option.key,
+												})}
+											</h4>
+											<Show when={!isReadOnly()}>
+												<button
+													type="button"
+													class="text-xs text-unfocused hover:text-body transition-colors"
+													onClick={() => {
+														const groupIsSelected = option.permissions.every(
+															(permission) =>
+																selectedPermissions().includes(permission.key),
+														);
+
+														if (groupIsSelected) {
+															setSelectedPermissions((prev) =>
+																prev.filter(
+																	(permission) =>
+																		!option.permissions.some(
+																			(optionPermission) =>
+																				optionPermission.key === permission,
+																		),
+																),
+															);
+															return;
+														}
+
+														setSelectedPermissions((prev) => [
+															...new Set([
+																...prev,
+																...option.permissions.map(
+																	(permission) => permission.key,
+																),
+															]),
+														]);
+													}}
+												>
+													{option.permissions.every((permission) =>
+														selectedPermissions().includes(permission.key),
+													)
+														? T()("common.clear")
+														: T()("selectors.all")}
+												</button>
+											</Show>
+										</div>
+										<div class="mt-2 flex flex-wrap gap-2">
+											<For each={option.permissions}>
+												{(permission) => (
+													<CheckboxButton
+														id={`permission-${option.key}-${permission.key}`}
+														value={selectedPermissions().includes(
+															permission.key,
+														)}
+														onChange={() => {
+															setSelectedPermissions((prev) => {
+																if (prev.includes(permission.key)) {
+																	return prev.filter(
+																		(p) => p !== permission.key,
+																	);
+																}
+																return [...prev, permission.key];
+															});
+														}}
+														copy={{
+															label: helpers.getLocaleValue({
+																value: permission.details.name,
+																fallback: permission.key,
+															}),
+															tooltip:
+																helpers.getLocaleValue({
+																	value: permission.details.description,
+																}) || undefined,
+														}}
+														disabled={isReadOnly()}
+														theme="secondary"
+													/>
+												)}
+											</For>
+										</div>
+									</div>
+								)}
+							</For>
+						</div>
+					</div>
+				</>
+			)}
 		</Panel>
 	);
 };

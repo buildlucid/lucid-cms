@@ -15,6 +15,7 @@ import type {
 	CollectionConfig,
 	RouteSegmentTarget,
 } from "../../types/types.js";
+import getCollectionDefaultLocale from "../../utils/get-collection-default-locale.js";
 
 const targetKey = (
 	collectionKey: string,
@@ -29,7 +30,7 @@ const fetchRouteSegmentValues: ServiceFn<
 			collection: CollectionConfig;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			targets: RouteSegmentTarget[];
-			locales: string[];
+			locales: Array<string | null>;
 		},
 	],
 	Map<string, Record<string, unknown>>
@@ -131,7 +132,9 @@ const fetchRouteSegmentValues: ServiceFn<
 							"=",
 							context.config.db.getDefault("boolean", "false"),
 						)
-						.where(`${fieldsTable}.locale`, "in", requiredLocales),
+						.where(
+							sql<boolean>`(${sql.ref(`${fieldsTable}.locale`)} is null or ${requiredLocales.filter((locale) => locale !== null).length ? sql`${sql.ref(`${fieldsTable}.locale`)} in (${sql.join(requiredLocales.filter((locale) => locale !== null))})` : sql`false`})`,
+						),
 				)
 				.many();
 
@@ -153,6 +156,20 @@ const fetchRouteSegmentValues: ServiceFn<
 	for (const result of results) {
 		if (!result.data) continue;
 		for (const row of result.data.rows) {
+			if (
+				row.locale === null &&
+				getCollectionDefaultLocale(
+					context.config,
+					result.data.collectionKey,
+				) !== null
+			) {
+				const key = targetKey(
+					result.data.collectionKey,
+					row.document_id,
+					getCollectionDefaultLocale(context.config, result.data.collectionKey),
+				);
+				if (!rows.has(key)) rows.set(key, row);
+			}
 			rows.set(
 				targetKey(result.data.collectionKey, row.document_id, row.locale),
 				row,

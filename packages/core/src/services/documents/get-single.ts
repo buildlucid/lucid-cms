@@ -138,6 +138,8 @@ const getSingle: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
+				defaultLocale: context.config.localization.defaultLocale,
+				locales: context.config.localization.locales,
 			},
 			workflow: workflowRes.data,
 		});
@@ -153,6 +155,8 @@ const getSingle: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
+				defaultLocale: context.config.localization.defaultLocale,
+				locales: context.config.localization.locales,
 			},
 			workflow: workflowRes.data,
 		});

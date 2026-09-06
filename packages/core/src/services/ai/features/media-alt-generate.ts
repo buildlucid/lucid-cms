@@ -1,6 +1,10 @@
-import type { MediaAltGenerateResponse } from "@lucidcms/types";
+import type {
+	AiGeneratedContent,
+	MediaAltGenerateResponse,
+} from "@lucidcms/types";
 import z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
+import { generatedContentSchema } from "../../../libs/lucid-remote/schema/generated-content.js";
 import type { MediaAltGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
 import {
@@ -14,15 +18,13 @@ import checkFeatureEnabled from "../checks/check-feature-enabled.js";
 import storeFailedGeneration from "../storage/store-failed-generation.js";
 import storeGeneration from "../storage/store-generation.js";
 
-const mediaAltOutputSchema = z.record(z.string(), z.string());
-
 const mediaAltGenerate: ServiceFn<
 	[
 		{
 			instruction?: string;
 			previousResponses?: {
 				instruction?: string;
-				output: Record<string, string>;
+				output: AiGeneratedContent<string>;
 			}[];
 			image: {
 				data: string;
@@ -32,12 +34,12 @@ const mediaAltGenerate: ServiceFn<
 			};
 			media: {
 				id?: string | number;
-				name?: Record<string, string>;
-				alt?: Record<string, string>;
+				name?: string | Record<string, string>;
+				alt?: string | Record<string, string>;
 			};
 			locale: {
 				source?: string;
-				target: string[];
+				target: string[] | null;
 			};
 			userId: number;
 		},
@@ -146,44 +148,11 @@ const mediaAltGenerate: ServiceFn<
 		};
 	}
 
-	const outputParse = mediaAltOutputSchema.safeParse(responseData.output);
+	const outputParse = generatedContentSchema(
+		z.string(),
+		props.locale.target,
+	).safeParse(responseData.output);
 	if (!outputParse.success) {
-		const storeRes = await storeGeneration(context, {
-			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
-			userId: props.userId,
-			response: responseData,
-			targetType: "media-alt",
-			requestStartedAt,
-			status: "failed",
-			errorMessage: context.translate(
-				"server:core.routes.ai.generate.error.message",
-			),
-			target: {
-				mediaId: props.media.id ?? null,
-				locale: props.locale,
-				image: {
-					detail: props.image.detail,
-					filename: props.image.filename ?? null,
-					mimeType: props.image.mimeType,
-				},
-			},
-		});
-		if (storeRes.error) return storeRes;
-
-		return {
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy("server:core.routes.ai.generate.error.message"),
-			},
-			data: undefined,
-		};
-	}
-
-	const missingLocale = props.locale.target.find(
-		(locale) => outputParse.data[locale] === undefined,
-	);
-	if (missingLocale) {
 		const storeRes = await storeGeneration(context, {
 			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,

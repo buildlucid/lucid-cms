@@ -46,19 +46,19 @@ const createSingle: ServiceFn<
 			isDark?: boolean;
 			isLight?: boolean;
 			title?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			alt?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			description?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			summary?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			folderId?: number | null;
@@ -290,6 +290,7 @@ const createSingle: ServiceFn<
 	if (visibilityRes.error) return visibilityRes;
 
 	const translations = prepareMediaTranslations({
+		defaultLocale: context.config.localization.defaultLocale,
 		title: data.title || [],
 		alt: isImage ? (data.alt ?? []) : [],
 		description:
@@ -300,14 +301,19 @@ const createSingle: ServiceFn<
 		mediaId: mediaRes.data.id,
 	});
 	if (translations.length > 0) {
-		const mediaTranslationsRes = await MediaTranslations.upsertMultiple({
-			data: translations,
-			returning: ["id"],
-			validation: {
-				enabled: true,
-			},
-		});
-		if (mediaTranslationsRes.error) {
+		const translationResults = await Promise.all(
+			translations.map((translation) =>
+				MediaTranslations.upsertSingle({
+					data: translation,
+					returning: ["id"],
+					validation: { enabled: true },
+				}),
+			),
+		);
+		const mediaTranslationsRes = translationResults.find(
+			(result) => result.error,
+		);
+		if (mediaTranslationsRes?.error) {
 			if (context.mediaStorage) {
 				await context.mediaStorage.delete(context, {
 					key: mediaKey,
@@ -336,6 +342,8 @@ const createSingle: ServiceFn<
 		options: {
 			host: getBaseUrl(context),
 			delivery: context.mediaDelivery,
+			defaultLocale: context.config.localization.defaultLocale,
+			locales: context.config.localization.locales,
 		},
 	});
 

@@ -85,18 +85,18 @@ export interface CollectionConfig {
 export type ProjectedFullSlug = {
 	documentId: number;
 	versionId: number;
-	fullSlugs: Record<string, string | null>;
+	fullSlugs: Map<string | null, string | null>;
 };
 
 export type RouteUniquenessItem = {
 	documentId: number;
 	versionId: number;
-	locale: string;
+	locale: string | null;
 	fullSlug: string;
 };
 
 export type RouteUniquenessConflict = {
-	locale: string;
+	locale: string | null;
 	fullSlug: string;
 };
 
@@ -115,5 +115,5 @@ export type RouteSegmentTarget = {
 	collectionKey: string;
 	documentId: number;
 	localized: boolean;
-	storageLocale: string;
+	storageLocale: null;
 };

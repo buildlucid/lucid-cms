@@ -25,7 +25,7 @@ const resolveRoutePrefix: ServiceFn<
 			versionId?: number;
 		},
 	],
-	Record<string, string | null>
+	Map<string | null, string | null>
 > = async (context, data) => {
 	const storedSelections =
 		data.fields === undefined && data.versionId !== undefined
@@ -94,7 +94,7 @@ const resolveRoutePrefix: ServiceFn<
 
 	return {
 		error: undefined,
-		data: prefixesRes.data.get(currentSourceKey) ?? {},
+		data: prefixesRes.data.get(currentSourceKey) ?? new Map(),
 	};
 };
 

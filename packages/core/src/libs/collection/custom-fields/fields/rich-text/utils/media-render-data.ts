@@ -5,10 +5,15 @@ import type {
 import type { Media, MediaPoster } from "../../../../../../types/response.js";
 import { getObject } from "../../../../../../utils/helpers/get-typed-value.js";
 
-export const getLocalizedString = (value: unknown, locale: string): string => {
+export const getLocalizedString = (
+	value: unknown,
+	locale: string | null,
+): string => {
+	if (typeof value === "string") return value;
 	const translations = getObject(value);
 	if (!translations) return "";
-	if (typeof translations[locale] === "string") return translations[locale];
+	if (locale !== null && typeof translations[locale] === "string")
+		return translations[locale];
 	return (
 		Object.values(translations).find(
 			(item): item is string => typeof item === "string",
@@ -18,7 +23,7 @@ export const getLocalizedString = (value: unknown, locale: string): string => {
 
 const getImageRenderData = (
 	reference: Extract<Media, { type: "image" }> | MediaPoster,
-	locale: string,
+	locale: string | null,
 ): RichTextHydratedImage => {
 	const title =
 		("title" in reference ? getLocalizedString(reference.title, locale) : "") ||
@@ -40,7 +45,7 @@ const getImageRenderData = (
 /** Builds the compact, response-only media payload consumed by HTML rendering. */
 export const getMediaRenderData = (
 	reference: Media,
-	locale: string,
+	locale: string | null,
 ): RichTextHydratedMedia => {
 	const title =
 		getLocalizedString(reference.title, locale) ||

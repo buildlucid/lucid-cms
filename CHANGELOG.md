@@ -30,12 +30,15 @@
 - Document responses now return referenced documents, media and users in a top-level `refs` object.
 - Reorganised the public `@lucidcms/core` exports around the package root and the `/extension` and `/types` entry points.
 - Removed the `@lucidcms/core/toolkit` entry point. Import `createToolkit` from `@lucidcms/core` and toolkit types from `@lucidcms/core/types`.
+- Media text values now return a string when unassigned, or a locale record when translated.
+- Role names and descriptions are now plain strings.
 
 ### Bug Fixes:
 
 - Fixed custom field reference validation accepting soft-deleted entries. ([83425cd](https://github.com/buildlucid/lucid-cms/commit/83425cd414f37171c529734f10ccf525675e73e3))
 - Fixed content document endpoints not running document `afterFetch` hooks.
 - Fixed configured queue, email, KV and media storage adapters silently falling back to built-in adapters when setup failed.
+- Content now stays unassigned when no locales are configured and uses the current default locale when one is added.
 
 ## v0.18.0-alpha.0
 

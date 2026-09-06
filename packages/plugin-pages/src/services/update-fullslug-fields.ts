@@ -6,7 +6,9 @@ import type {
 	LucidVersionTableName,
 	ServiceFn,
 } from "@lucidcms/core/types";
+import { sql } from "kysely";
 import constants from "../constants.js";
+import getCollectionDefaultLocale from "../utils/get-collection-default-locale.js";
 import normalizePathValue from "../utils/normalize-path-value.js";
 
 /**
@@ -15,10 +17,11 @@ import normalizePathValue from "../utils/normalize-path-value.js";
 const updateFullSlugFields: ServiceFn<
 	[
 		{
+			collectionKey: string;
 			docFullSlugs: Array<{
 				documentId: number;
 				versionId: number;
-				fullSlugs: Record<string, string | null>;
+				fullSlugs: Map<string | null, string | null>;
 			}>;
 			versionType: Exclude<DocumentVersionType, "revision">;
 			tables: {
@@ -35,10 +38,14 @@ const updateFullSlugFields: ServiceFn<
 			constants.fields.fullSlug.key,
 		);
 
+		const defaultLocale = getCollectionDefaultLocale(
+			context.config,
+			data.collectionKey,
+		);
 		const updateFullSlugsPromises = [];
 
 		for (const doc of data.docFullSlugs) {
-			for (const [locale, fullSlug] of Object.entries(doc.fullSlugs)) {
+			for (const [locale, fullSlug] of doc.fullSlugs) {
 				updateFullSlugsPromises.push(
 					context.db
 						.query("pages.full-slug.update", (db) =>
@@ -56,7 +63,19 @@ const updateFullSlugFields: ServiceFn<
 									),
 								)
 								.where("document_version_id", "=", doc.versionId)
-								.where("locale", "=", locale),
+								.where((eb) =>
+									locale === null
+										? eb("locale", "is", null)
+										: locale !== defaultLocale
+											? eb("locale", "=", locale)
+											: eb.or([
+													eb("locale", "=", locale),
+													eb.and([
+														eb("locale", "is", null),
+														sql<boolean>`not exists (select 1 from ${sql.table(fieldsTable)} as assigned_fields where assigned_fields.document_version_id = ${doc.versionId} and assigned_fields.locale = ${locale})`,
+													]),
+												]),
+								),
 						)
 						.many(),
 				);

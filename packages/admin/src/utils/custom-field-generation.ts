@@ -85,31 +85,25 @@ export const cloneGenerationValue = <T>(value: T): T => {
 	}
 };
 
-/**
- * Builds the request value map, including source locale context for localized fields.
- */
-export const createLocaleValueRecord = (props: {
-	fieldLocalized: boolean;
-	selectedLocales: string[];
-	sourceLocale: string;
-	values: Record<string, unknown>;
+/** Builds scalar input or a translation record with source-language context. */
+export const createGenerationValue = (props: {
+	selectedLocales: Array<string | null>;
+	sourceLocale: string | null;
+	values: Map<string | null, unknown>;
 	target: CustomFieldGenerationTarget;
-}): Record<string, unknown> => {
-	const record = props.selectedLocales.reduce<Record<string, unknown>>(
-		(accumulator, localeCode) => {
-			const value = props.values[localeCode];
-			if (value !== undefined) accumulator[localeCode] = value;
-			return accumulator;
-		},
-		{},
+}): unknown => {
+	if (props.selectedLocales.includes(null)) return props.values.get(null);
+	const record = Object.fromEntries(
+		props.selectedLocales.flatMap((locale) =>
+			locale === null ? [] : [[locale, props.values.get(locale)]],
+		),
 	);
-
-	if (props.fieldLocalized && !Object.hasOwn(record, props.sourceLocale)) {
-		const sourceValue = props.target.value(props.sourceLocale);
-		if (sourceValue !== undefined) {
-			record[props.sourceLocale] = sourceValue;
-		}
+	if (
+		props.sourceLocale !== null &&
+		!Object.hasOwn(record, props.sourceLocale)
+	) {
+		const source = props.target.value(props.sourceLocale);
+		if (source !== undefined) record[props.sourceLocale] = source;
 	}
-
 	return record;
 };

@@ -11,57 +11,58 @@ type LocaleConfig = Pick<Locale, "code" | "isDefault">;
 /**
  * Picks the configured default locale for editable translation rows.
  */
-export const getDefaultTranslationLocale = (locales: LocaleConfig[]) => {
+export const getDefaultTranslationLocale = (
+	locales: LocaleConfig[],
+): string | null => {
 	return (
-		locales.find((locale) => locale.isDefault)?.code ?? locales[0]?.code ?? "en"
+		locales.find((locale) => locale.isDefault)?.code ?? locales[0]?.code ?? null
 	);
 };
 
 /**
  * Creates an empty translation row for every configured locale.
  */
-export const createDefaultTranslations = <
-	T extends TranslationValue = TranslationValue,
->(
+export const createDefaultTranslations = (
 	locales: LocaleConfig[],
-): T[] =>
+): TranslationValue[] =>
 	(locales.length > 0
 		? locales
 		: [{ code: getDefaultTranslationLocale(locales), isDefault: true }]
 	).map((locale) => ({
 		localeCode: locale.code,
 		value: null,
-	})) as T[];
+	}));
 
 /**
  * Converts config-shaped locale records into editable translation rows.
  */
-export const recordToTranslations = <
-	T extends TranslationValue = TranslationValue,
->(
+export const recordToTranslations = (
 	locales: LocaleConfig[],
-	record?: Record<string, string | null> | null,
-): T[] =>
-	createDefaultTranslations<T>(locales).map((translation) => ({
+	record?: string | Record<string, string | null> | null,
+): TranslationValue[] =>
+	createDefaultTranslations(locales).map((translation) => ({
 		...translation,
-		value: translation.localeCode
-			? (record?.[translation.localeCode] ?? null)
-			: null,
+		value:
+			typeof record === "string"
+				? translation.localeCode === getDefaultTranslationLocale(locales)
+					? record
+					: null
+				: translation.localeCode === null
+					? null
+					: (record?.[translation.localeCode] ?? null),
 	}));
 
 /**
  * Merges persisted translation rows into the currently configured locales.
  */
-export const mergeTranslations = <
-	T extends TranslationValue = TranslationValue,
->(params: {
-	translations?: T[];
+export const mergeTranslations = (params: {
+	translations?: TranslationValue[];
 	locales: LocaleConfig[];
 	fallbackValue?: string | null;
-}): T[] => {
+}): TranslationValue[] => {
 	const defaultLocale = getDefaultTranslationLocale(params.locales);
 
-	return createDefaultTranslations<T>(params.locales).map((translation) => ({
+	return createDefaultTranslations(params.locales).map((translation) => ({
 		...translation,
 		value:
 			params.translations?.find(
@@ -77,14 +78,19 @@ export const mergeTranslations = <
  * Reads a translation value for the active locale selector.
  */
 export const getTranslation = (
-	translations?: TranslationValue[] | Record<string, string | null> | null,
-	contentLocale?: string,
+	translations?:
+		| string
+		| TranslationValue[]
+		| Record<string, string | null>
+		| null,
+	contentLocale?: string | null,
 ) => {
-	if (!contentLocale) return null;
+	if (typeof translations === "string") return translations;
+	const locale = contentLocale ?? null;
 	if (translations && !Array.isArray(translations)) {
-		return translations[contentLocale] ?? null;
+		return locale === null ? null : (translations[locale] ?? null);
 	}
-	const translation = translations?.find((t) => t.localeCode === contentLocale);
+	const translation = translations?.find((t) => t.localeCode === locale);
 	return translation?.value ?? null;
 };
 

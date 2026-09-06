@@ -75,7 +75,7 @@ describe("buildRouteSegmentTargets", () => {
 				collectionKey: "categories",
 				documentId: 12,
 				localized: expectedLocalized,
-				storageLocale: "en",
+				storageLocale: null,
 			},
 		]);
 	});

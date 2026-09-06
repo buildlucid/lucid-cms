@@ -113,7 +113,7 @@ const create: ServiceFn<
 				type: "basic",
 				message: copy(
 					"server:core.documents.preview.locale.not.supported.message",
-					{ data: { locale } },
+					{ data: { locale: locale ?? "unassigned" } },
 				),
 				status: 400,
 			},
@@ -123,7 +123,11 @@ const create: ServiceFn<
 
 	const routePath = canonicalDocument.route?.path;
 	const path =
-		typeof routePath === "string" ? routePath : (routePath?.[locale] ?? null);
+		typeof routePath === "string"
+			? routePath
+			: locale === null
+				? null
+				: (routePath?.[locale] ?? null);
 	const token = randomBytes(32).toString("base64url");
 
 	let resolvedUrl: string | URL | null;

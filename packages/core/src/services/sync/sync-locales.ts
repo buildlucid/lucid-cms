@@ -40,6 +40,7 @@ const syncLocales: ServiceFn<[], undefined> = async (
 	// Get locale codes that are in the database but not in the config
 	const localesToDelete = localesRes.data.filter(
 		(locale) =>
+			localeCodes.length > 0 &&
 			!localeCodes.includes(locale.code) &&
 			formatter.formatBoolean(locale.is_deleted) === false,
 	);

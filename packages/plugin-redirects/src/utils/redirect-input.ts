@@ -3,7 +3,7 @@ import { fields, targetTypes } from "../constants.js";
 
 export type RedirectIdentity = {
 	from: string;
-	locale: string;
+	locale: string | null;
 	targetType: "document" | "url";
 	targetUrl: string | null;
 };
@@ -14,7 +14,7 @@ const fieldValue = (input: FieldInputSchema[] | undefined, key: string) =>
 /** Reads the non-localized values needed for redirect integrity checks. */
 export const getRedirectIdentity = (props: {
 	fields?: FieldInputSchema[];
-	defaultLocale: string;
+	defaultLocale: string | null;
 	hasLocaleField: boolean;
 }): RedirectIdentity | null => {
 	const fromValue = fieldValue(props.fields, fields.from);
@@ -28,8 +28,8 @@ export const getRedirectIdentity = (props: {
 		fromValue.trim().length === 0 ||
 		(targetTypeValue !== targetTypes.document &&
 			targetTypeValue !== targetTypes.url) ||
-		typeof localeValue !== "string" ||
-		localeValue.length === 0
+		(localeValue !== null &&
+			(typeof localeValue !== "string" || localeValue.length === 0))
 	) {
 		return null;
 	}

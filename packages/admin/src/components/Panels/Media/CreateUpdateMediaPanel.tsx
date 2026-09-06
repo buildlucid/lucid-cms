@@ -159,6 +159,11 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 		return props.id === undefined ? "create" : "update";
 	});
 	const locales = createMemo(() => contentLocaleStore.get.locales);
+	const editableLocales = createMemo(() =>
+		locales().length
+			? locales().map((locale) => ({ code: locale.code }))
+			: [{ code: null }],
+	);
 
 	// ---------------------------------
 	// Queries & Mutations
@@ -1295,9 +1300,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							}}
 							errors={getBodyError("featured", mutateErrors())}
 						/>
-						<For each={locales()}>
+						<For each={editableLocales()}>
 							{(locale, index) => (
-								<Show when={locale.code === lang?.contentLocale()}>
+								<Show when={locale.code === (lang?.contentLocale() ?? null)}>
 									<Input
 										id={`name-${locale.code}`}
 										value={
@@ -1642,9 +1647,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 							</Show>
 						</div>
 						<Show when={showPosterAltInput()}>
-							<For each={locales()}>
+							<For each={editableLocales()}>
 								{(locale, index) => (
-									<Show when={locale.code === lang?.contentLocale()}>
+									<Show when={locale.code === (lang?.contentLocale() ?? null)}>
 										<Textarea
 											id={`poster-alt-${locale.code}`}
 											value={getTranslation(posterAlt(), locale.code) || ""}

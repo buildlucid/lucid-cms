@@ -58,9 +58,9 @@ const getAuthenticatedUser: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
+				defaultLocale: context.config.localization.defaultLocale,
+				locales: context.config.localization.locales,
 			},
-			locales: context.config.localization.locales.map((locale) => locale.code),
-			defaultLocale: context.config.localization.defaultLocale,
 			pendingEmailChange: pendingEmailChangeRes.data
 				? {
 						email: pendingEmailChangeRes.data.new_email,

@@ -14,7 +14,7 @@ type FieldRenderStateContextValue = {
 	brickKey: Accessor<string | undefined>;
 	documentId: Accessor<number | undefined>;
 	contentLocale: Accessor<string>;
-	defaultLocale: Accessor<string>;
+	defaultLocale: Accessor<string | null>;
 	contentLocales: Accessor<string[]>;
 	missingFieldColumns: Accessor<string[]>;
 };
@@ -30,7 +30,7 @@ const FieldRenderStateContext = createContext<FieldRenderStateContextValue>({
 	defaultLocale: () =>
 		contentLocaleStore.get.locales.find((locale) => locale.isDefault)?.code ??
 		contentLocaleStore.get.locales[0]?.code ??
-		"en",
+		null,
 	contentLocales: () =>
 		contentLocaleStore.get.locales.map((locale) => locale.code) || [],
 	missingFieldColumns: () => [],

@@ -36,7 +36,7 @@ const resolveTargetInScopes = (
 	scopes: FieldConditionScope[],
 	fieldKey: string,
 	contentLocale: string,
-	defaultLocale: string,
+	defaultLocale: string | null,
 	translationScope: FieldConditionTranslationScope,
 ): FieldConditionTargetResolution => {
 	for (const scope of scopes) {
@@ -76,7 +76,11 @@ const resolveTargetInScopes = (
 				translationScope === "default"
 					? defaultLocale
 					: contentLocale || defaultLocale;
-			return { resolved: true, value: data.translations?.[locale] };
+
+			return {
+				resolved: true,
+				value: locale === null ? undefined : data.translations?.[locale],
+			};
 		}
 
 		return { resolved: true, value: data.value };
@@ -105,7 +109,7 @@ const evaluateConditionForField = (props: {
 	fieldConfig: CollectionFieldConfig;
 	scopes: FieldConditionScope[];
 	contentLocale: string;
-	defaultLocale: string;
+	defaultLocale: string | null;
 }): boolean => {
 	const translationScope = getConditionTranslationScope(
 		props.condition,
@@ -132,7 +136,7 @@ export const evaluateFieldVisibility = (props: {
 	fieldConfig: CollectionFieldConfig;
 	scopes: FieldConditionScope[];
 	contentLocale: string;
-	defaultLocale: string;
+	defaultLocale: string | null;
 }): boolean => {
 	const condition = props.fieldConfig.ui?.condition;
 	if (!condition) return true;

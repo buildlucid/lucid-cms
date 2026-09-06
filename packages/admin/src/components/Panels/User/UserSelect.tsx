@@ -33,9 +33,7 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState";
 import api from "@/services/api";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
-import helpers from "@/utils/helpers";
 import type { UserRelationRef } from "@/utils/relation-field-helpers";
 import { userResponseToRef } from "@/utils/relation-field-helpers";
 
@@ -153,13 +151,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	const roleOptions = createMemo(() =>
 		(roles.data?.data ?? []).map((role) => ({
 			value: String(role.id),
-			label:
-				helpers.getTranslation(
-					role.name,
-					contentLocaleStore.get.contentLocale,
-				) ??
-				role.name[0]?.value ??
-				String(role.id),
+			label: role.name,
 		})),
 	);
 

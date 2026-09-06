@@ -31,12 +31,12 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: { en: "/docs/v1/about" },
+				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/docs/v1/about" },
+				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 		]);
 
@@ -50,14 +50,14 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: { en: "/docs/v2/about" },
+				fullSlugs: new Map(Object.entries({ en: "/docs/v2/about" })),
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/docs/v1/about" },
+				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 		]);
 
@@ -71,14 +71,14 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: { en: "/Docs/V1/About" },
+				fullSlugs: new Map(Object.entries({ en: "/Docs/V1/About" })),
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/docs/v1/about" },
+				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 		]);
 
@@ -92,14 +92,16 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: { en: "/about", fr: "/a-propos" },
+				fullSlugs: new Map(Object.entries({ en: "/about", fr: "/a-propos" })),
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: { en: "/different", fr: "/a-propos" },
+				fullSlugs: new Map(
+					Object.entries({ en: "/different", fr: "/a-propos" }),
+				),
 			},
 		]);
 
@@ -118,12 +120,12 @@ describe("fullSlug route uniqueness", () => {
 				{
 					documentId: 1,
 					versionId: 10,
-					fullSlugs: { en: "/about" },
+					fullSlugs: new Map(Object.entries({ en: "/about" })),
 				},
 				{
 					documentId: 2,
 					versionId: 20,
-					fullSlugs: { en: "/about" },
+					fullSlugs: new Map(Object.entries({ en: "/about" })),
 				},
 			],
 			versionType: "latest",
@@ -147,7 +149,7 @@ describe("fullSlug route uniqueness", () => {
 				{
 					documentId: 1,
 					versionId: 10,
-					fullSlugs: { en: "/about" },
+					fullSlugs: new Map(Object.entries({ en: "/about" })),
 				},
 			],
 			versionType: "latest",

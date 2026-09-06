@@ -9,7 +9,7 @@ import {
 import { contentAccountResponseSchema, userResponseSchema } from "./users.js";
 
 const profilePictureTranslationSchema = z.object({
-	localeCode: z.string().trim().meta({
+	localeCode: z.string().trim().nullable().meta({
 		description: "The locale code for the translated profile picture metadata",
 		example: "en",
 	}),

@@ -5,7 +5,6 @@ import objectHash from "object-hash";
 import { type Accessor, createMemo } from "solid-js";
 import api from "@/services/api";
 import brickStore from "@/store/brick-store";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
@@ -27,10 +26,7 @@ export function useDocumentState(props: {
 		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
 	const canFetchDocument = createMemo(() => {
-		if (
-			contentLocaleStore.get.contentLocale === undefined ||
-			documentId() === undefined
-		) {
+		if (documentId() === undefined) {
 			return false;
 		}
 		if (props.version() === "revision" || props.version() === "snapshot") {

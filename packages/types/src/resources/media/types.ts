@@ -107,7 +107,8 @@ export type MediaImageFile =
 			original: MediaOriginalFile;
 	  });
 
-export type MediaTranslationMap = Record<string, string | null> | null;
+/** Unassigned text is a string; translated text is keyed by language. */
+export type MediaTranslationMap = string | Record<string, string | null> | null;
 
 interface MediaBase<Type extends MediaType> {
 	id: number;

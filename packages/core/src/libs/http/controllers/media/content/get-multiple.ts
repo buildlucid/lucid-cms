@@ -46,6 +46,7 @@ const getMultipleController = factory.createHandlers(
 		ttlSeconds: minutesToSeconds(5),
 		mode: "include-query",
 		tags: [cacheKeys.http.tags.contentMedia],
+		keyContext: (c) => ({ localization: c.get("config").localization }),
 	}),
 	async (c) => {
 		const formattedQuery = await buildFormattedQuery(

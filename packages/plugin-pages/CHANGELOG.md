@@ -10,6 +10,7 @@
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Added `toolkit.pages.getByFullSlug()` to fetch pages by their full slug with collection-specific types and preview support.
 - Moved translation registration to plugin `sources`.
+- Fixed routes and page hierarchies when locales are added after content is created.
 
 ## v0.7.0
 

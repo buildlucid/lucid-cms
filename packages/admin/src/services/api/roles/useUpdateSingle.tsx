@@ -7,14 +7,8 @@ import spawnToast from "@/utils/spawn-toast";
 interface Params {
 	id: number;
 	body: {
-		name?: {
-			localeCode: string | null;
-			value: string | null;
-		}[];
-		description?: {
-			localeCode: string | null;
-			value: string | null;
-		}[];
+		name?: string;
+		description?: string | null;
 		permissions?: string[];
 	};
 }

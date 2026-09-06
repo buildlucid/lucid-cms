@@ -93,6 +93,8 @@ const getAuthorizationRequest: ServiceFn<
 				options: {
 					host: getBaseUrl(context),
 					delivery: context.mediaDelivery,
+					defaultLocale: context.config.localization.defaultLocale,
+					locales: context.config.localization.locales,
 				},
 			}),
 			scopes,

@@ -2,7 +2,7 @@ import type { DescendantFieldsResponse } from "../services/get-descendant-fields
 import formatFullSlug from "./format-fullslug.js";
 
 const buildFullSlugFromSlugs = (data: {
-	targetLocale: string;
+	targetLocale: string | null;
 	currentDescendant: DescendantFieldsResponse;
 	descendants: Array<DescendantFieldsResponse>;
 	topLevelFullSlug?: string;

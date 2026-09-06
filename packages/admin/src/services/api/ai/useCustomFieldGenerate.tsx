@@ -10,7 +10,7 @@ interface Params {
 	body: {
 		instruction?: string;
 		guidance?: string;
-		value: Record<string, unknown>;
+		value: unknown;
 		document?: CustomFieldGenerationDocument;
 		target: {
 			collectionKey: string;
@@ -19,7 +19,7 @@ interface Params {
 		};
 		locale: {
 			source?: string;
-			target: string[];
+			target: string[] | null;
 		};
 	};
 }

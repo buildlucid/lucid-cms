@@ -37,7 +37,7 @@ const customFieldInputGenerate: ServiceFn<
 		{
 			instruction?: string;
 			guidance?: string;
-			value: Record<string, unknown>;
+			value: unknown;
 			document?: {
 				fields?: FieldInputSchema[];
 				bricks?: BrickInputSchema[];
@@ -49,7 +49,7 @@ const customFieldInputGenerate: ServiceFn<
 			};
 			locale: {
 				source?: string;
-				target: string[];
+				target: string[] | null;
 			};
 			userId: number;
 		},
@@ -131,7 +131,7 @@ const customFieldInputGenerate: ServiceFn<
 	if (fieldIsLocalized) {
 		const requestedLocales = [
 			...(props.locale.source ? [props.locale.source] : []),
-			...props.locale.target,
+			...(props.locale.target ?? []),
 		];
 		const unsupportedLocale = requestedLocales.find(
 			(locale) => !localization.locales.includes(locale),
@@ -324,15 +324,15 @@ const customFieldInputGenerate: ServiceFn<
 			data: undefined,
 		};
 	}
-	const responseForFormatting =
-		responseData as CustomFieldInputGenerateResponse;
+	const responseForFormatting = responseData;
 
 	const formattedOutputRes = formatCustomFieldOutput({
 		field: targetField,
 		output: responseForFormatting.output,
+		targetLocales: generationContext.locale.target,
 	});
 
-	const responseForStorage: CustomFieldInputGenerateResponse =
+	const responseForStorage =
 		formattedOutputRes.error === undefined
 			? {
 					...responseForFormatting,
@@ -365,7 +365,11 @@ const customFieldInputGenerate: ServiceFn<
 
 	return {
 		error: undefined,
-		data: responseForStorage,
+		data: {
+			...responseData,
+			feature: request.feature,
+			output: formattedOutputRes.data,
+		},
 	};
 };
 

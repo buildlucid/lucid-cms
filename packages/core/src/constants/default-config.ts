@@ -43,16 +43,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 			customFieldGeneration: true,
 		},
 	},
-	localization: {
-		locales: [
-			{
-				label: "English",
-				code: "en",
-				direction: "ltr",
-			},
-		],
-		defaultLocale: "en",
-	},
+	localization: { locales: [], defaultLocale: null },
 	i18n: {
 		locales: [
 			{

@@ -22,6 +22,8 @@ const getAll: ServiceFn<[], OAuthClient[]> = async (context) => {
 				mediaOptions: {
 					host: getBaseUrl(context),
 					delivery: context.mediaDelivery,
+					defaultLocale: context.config.localization.defaultLocale,
+					locales: context.config.localization.locales,
 				},
 			}),
 		),

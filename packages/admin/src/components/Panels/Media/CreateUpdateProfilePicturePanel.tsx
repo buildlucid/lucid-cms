@@ -1,10 +1,4 @@
-import type {
-	ErrorResponse,
-	Media,
-	MediaCropState,
-	MediaTranslation,
-	User,
-} from "@types";
+import type { ErrorResponse, Media, MediaCropState, User } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -95,6 +89,11 @@ const CreateUpdateProfilePicturePanel: Component<
 	// ---------------------------------
 	// Memos
 	const locales = createMemo(() => contentLocaleStore.get.locales);
+	const editableLocales = createMemo(() =>
+		locales().length
+			? locales().map((locale) => ({ code: locale.code }))
+			: [{ code: null }],
+	);
 	const profilePictureMedia = createMemo(() => props.state.media ?? null);
 
 	const panelMode = createMemo(() =>
@@ -218,14 +217,6 @@ const CreateUpdateProfilePicturePanel: Component<
 	function hydrateTranslations(translations?: Media["title"]) {
 		return recordToTranslations(locales(), translations);
 	}
-	function toProfileTranslations(translations?: MediaTranslation[]) {
-		return (translations || [])
-			.filter((translation) => translation.localeCode !== null)
-			.map((translation) => ({
-				localeCode: translation.localeCode as string,
-				value: translation.value,
-			}));
-	}
 	function setFileError(message: string) {
 		setUploadErrors({
 			status: 400,
@@ -321,8 +312,8 @@ const CreateUpdateProfilePicturePanel: Component<
 				: undefined,
 			aiGenerationRequestId:
 				MediaFile.getFileProvenance()?.aiGenerationRequestId,
-			title: toProfileTranslations(createMedia.state.title()),
-			alt: toProfileTranslations(createMedia.state.alt()),
+			title: createMedia.state.title(),
+			alt: createMedia.state.alt(),
 			crop:
 				cropFile && cropKey
 					? {
@@ -463,9 +454,9 @@ const CreateUpdateProfilePicturePanel: Component<
 							</button>
 						</div>
 					</div>
-					<For each={locales()}>
+					<For each={editableLocales()}>
 						{(locale, index) => (
-							<Show when={locale.code === lang?.contentLocale()}>
+							<Show when={locale.code === (lang?.contentLocale() ?? null)}>
 								<Input
 									id={`name-${locale.code}`}
 									value={

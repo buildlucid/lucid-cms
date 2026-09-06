@@ -2,10 +2,19 @@ import type { CollectionBuilder } from "@lucidcms/core";
 import { resolveCollectionLocalization } from "@lucidcms/core/extension";
 import type { CollectionConfig } from "../types/types.js";
 
-export type ResolvedPagesCollectionLocalization = Pick<
-	ReturnType<typeof resolveCollectionLocalization>,
-	"enabled" | "locales" | "defaultLocale" | "storageLocale"
->;
+export type ResolvedPagesCollectionLocalization =
+	| {
+			enabled: true;
+			locales: string[];
+			defaultLocale: string;
+			storageLocale: null;
+	  }
+	| {
+			enabled: false;
+			locales: [null];
+			defaultLocale: null;
+			storageLocale: null;
+	  };
 
 /** Resolves locale support for the collection and the plugin's slug fields. */
 const resolvePagesCollectionLocalization = (props: {
@@ -13,24 +22,26 @@ const resolvePagesCollectionLocalization = (props: {
 	collectionInstance: CollectionBuilder;
 	localization: {
 		locales: Array<{ code: string }>;
-		defaultLocale: string;
+		defaultLocale: string | null;
 	};
 }): ResolvedPagesCollectionLocalization => {
 	const collectionLocalization = resolveCollectionLocalization({
 		localization: props.localization,
 		collection: props.collectionInstance,
 	});
-	const enabled = props.collection.localized && collectionLocalization.enabled;
-
+	if (props.collection.localized && collectionLocalization.enabled) {
+		return {
+			enabled: true,
+			locales: collectionLocalization.locales,
+			defaultLocale: collectionLocalization.defaultLocale,
+			storageLocale: null,
+		};
+	}
 	return {
-		enabled,
-		locales: enabled
-			? collectionLocalization.locales
-			: [collectionLocalization.storageLocale],
-		defaultLocale: enabled
-			? collectionLocalization.defaultLocale
-			: collectionLocalization.storageLocale,
-		storageLocale: collectionLocalization.storageLocale,
+		enabled: false,
+		locales: [null],
+		defaultLocale: null,
+		storageLocale: null,
 	};
 };
 

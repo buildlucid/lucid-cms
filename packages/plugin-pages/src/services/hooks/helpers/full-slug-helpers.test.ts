@@ -66,7 +66,7 @@ describe("page full-slug helpers", () => {
 					_fullSlug: "/parent",
 					_parentPage: null,
 					document_id: 1,
-					locale: "en",
+					locale: null,
 				},
 			],
 		});
@@ -89,7 +89,7 @@ describe("page full-slug helpers", () => {
 		});
 
 		expect(response.error).toBeUndefined();
-		expect(response.data).toEqual({ en: "/parent/child" });
+		expect(response.data).toEqual(new Map([[null, "/parent/child"]]));
 	});
 
 	it("constructs descendant full slugs from the shared query result", async () => {
@@ -101,7 +101,7 @@ describe("page full-slug helpers", () => {
 					document_version_id: 22,
 					rows: [
 						{
-							locale: "en",
+							locale: null,
 							_slug: "child",
 							_fullSlug: "/child",
 							_parentPage: 1,
@@ -130,7 +130,7 @@ describe("page full-slug helpers", () => {
 			{
 				documentId: 2,
 				versionId: 22,
-				fullSlugs: { en: "/parent/child" },
+				fullSlugs: new Map([[null, "/parent/child"]]),
 			},
 		]);
 	});

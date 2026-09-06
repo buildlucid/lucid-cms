@@ -7,11 +7,8 @@ interface RolePropsT {
 	id: number;
 	key: string | null;
 	locked: BooleanInt;
-	translations?: Array<{
-		name: string | null;
-		description: string | null;
-		locale_code: string;
-	}>;
+	name: string;
+	description: string | null;
 	updated_at: Date | string | null;
 	created_at: Date | string | null;
 	permissions?: {
@@ -33,16 +30,8 @@ const formatSingle = (props: { role: RolePropsT }): Role => {
 	return {
 		id: props.role.id,
 		key: props.role.key,
-		name:
-			props.role.translations?.map((translation) => ({
-				value: translation.name,
-				localeCode: translation.locale_code,
-			})) ?? [],
-		description:
-			props.role.translations?.map((translation) => ({
-				value: translation.description,
-				localeCode: translation.locale_code,
-			})) ?? [],
+		name: props.role.name,
+		description: props.role.description,
 		locked: formatter.formatBoolean(props.role.locked),
 		permissions: props.role.permissions?.map((p) => {
 			return {

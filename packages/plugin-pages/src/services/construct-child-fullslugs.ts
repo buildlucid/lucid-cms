@@ -13,24 +13,24 @@ const constructChildFullSlug = (data: {
 	localization: ResolvedPagesCollectionLocalization;
 	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
-	routePrefixes?: Map<number, Record<string, string | null>>;
+	routePrefixes?: Map<number, Map<string | null, string | null>>;
 }): Awaited<
 	ServiceResponse<
 		Array<{
 			documentId: number;
 			versionId: number;
-			fullSlugs: Record<string, string | null>;
+			fullSlugs: Map<string | null, string | null>;
 		}>
 	>
 > => {
 	const documentFullSlugs: Array<{
 		documentId: number;
 		versionId: number;
-		fullSlugs: Record<string, string | null>;
+		fullSlugs: Map<string | null, string | null>;
 	}> = [];
 
 	for (const descendant of data.descendants) {
-		const fullSlug: Record<string, string | null> = {};
+		const fullSlug = new Map<string | null, string | null>();
 		const routePrefixes = data.routePrefixes?.get(
 			descendant.document_version_id,
 		);
@@ -50,18 +50,21 @@ const constructChildFullSlug = (data: {
 					continue;
 				}
 
-				fullSlug[locale] = buildFullSlug({
-					targetLocale: locale,
-					currentDescendant: descendant,
-					descendants: data.descendants,
-					topLevelFullSlug:
-						currentFullSlugValue ??
-						routePrefixes?.[locale] ??
-						resolveCollectionPrefix({
-							collection: data.collection,
-							localeCode: locale,
-						}),
-				});
+				fullSlug.set(
+					locale,
+					buildFullSlug({
+						targetLocale: locale,
+						currentDescendant: descendant,
+						descendants: data.descendants,
+						topLevelFullSlug:
+							currentFullSlugValue ??
+							routePrefixes?.get(locale) ??
+							resolveCollectionPrefix({
+								collection: data.collection,
+								localeCode: locale,
+							}),
+					}),
+				);
 			}
 		} else {
 			if (
@@ -70,18 +73,21 @@ const constructChildFullSlug = (data: {
 			)
 				break;
 
-			fullSlug[data.localization.defaultLocale] = buildFullSlug({
-				targetLocale: data.localization.defaultLocale,
-				currentDescendant: descendant,
-				descendants: data.descendants,
-				topLevelFullSlug:
-					data.parentFullSlugField?.value ??
-					routePrefixes?.[data.localization.defaultLocale] ??
-					resolveCollectionPrefix({
-						collection: data.collection,
-						localeCode: data.localization.defaultLocale,
-					}),
-			});
+			fullSlug.set(
+				data.localization.defaultLocale,
+				buildFullSlug({
+					targetLocale: data.localization.defaultLocale,
+					currentDescendant: descendant,
+					descendants: data.descendants,
+					topLevelFullSlug:
+						data.parentFullSlugField?.value ??
+						routePrefixes?.get(data.localization.defaultLocale) ??
+						resolveCollectionPrefix({
+							collection: data.collection,
+							localeCode: data.localization.defaultLocale,
+						}),
+				}),
+			);
 		}
 
 		documentFullSlugs.push({

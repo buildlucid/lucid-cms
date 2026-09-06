@@ -21,6 +21,8 @@ const formatUserRefs = (
 					options: {
 						host: context.host,
 						delivery: context.mediaDelivery,
+						defaultLocale: context.defaultLocale,
+						locales: context.locales,
 					},
 				}),
 			} satisfies NonNullable<UserRef>,

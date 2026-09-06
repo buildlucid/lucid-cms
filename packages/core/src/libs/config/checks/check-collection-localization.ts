@@ -9,6 +9,7 @@ const checkCollectionLocalization = (
 ) => {
 	const configured = collection.config.localized ?? false;
 	if (configured === false) return;
+	if (localization.defaultLocale === null && configured === true) return;
 
 	const globalLocaleCodes = localization.locales.map((locale) => locale.code);
 	const requestedLocales =
@@ -44,12 +45,12 @@ const checkCollectionLocalization = (
 			? localization.defaultLocale
 			: (configured.defaultLocale ?? localization.defaultLocale);
 
-	if (!requestedLocales.includes(defaultLocale)) {
+	if (defaultLocale === null || !requestedLocales.includes(defaultLocale)) {
 		throw new Error(
 			translate("server:core.config.collection.default.locale.not.found", {
 				data: {
 					collection: collection.key,
-					locale: defaultLocale,
+					locale: defaultLocale ?? "unassigned",
 				},
 			}),
 		);

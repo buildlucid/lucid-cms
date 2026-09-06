@@ -21,5 +21,5 @@ export type RedirectsPluginOptionsInternal = {
 		code: string;
 		label: string;
 	}>;
-	defaultLocale: string;
+	defaultLocale: string | null;
 };

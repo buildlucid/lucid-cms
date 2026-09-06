@@ -103,7 +103,6 @@ const versionPromoteHandler =
 				const circularParentsRes = await checkCircularParents(context, {
 					documentId: data.data.documentId,
 					versionType: data.data.versionType,
-					defaultLocale: localization.storageLocale,
 					collectionKey: targetCollectionRes.data.key,
 					fields: {
 						parentPage: parentPage,
@@ -180,13 +179,14 @@ const versionPromoteHandler =
 			});
 
 			const updateSlugRes = await updateSlugFields(context, {
+				collectionKey: data.meta.collectionKey,
 				docSlugs: [
 					{
 						documentId: data.data.documentId,
 						versionId: data.data.versionId,
-						slugs: slug.translations || {
-							[localization.storageLocale]: slug.value || null,
-						},
+						slugs: slug.translations
+							? new Map(Object.entries(slug.translations))
+							: new Map([[null, slug.value ?? null]]),
 					},
 				],
 				versionType: data.data.versionType,
@@ -195,6 +195,7 @@ const versionPromoteHandler =
 			if (updateSlugRes.error) return updateSlugRes;
 
 			const updateFullSlugRes = await updateFullSlugFields(context, {
+				collectionKey: data.meta.collectionKey,
 				docFullSlugs: [
 					{
 						documentId: data.data.documentId,

@@ -24,7 +24,6 @@ const logSecurityAudit: ServiceFn<
 
 	const actorRes = await Users.selectAuditActorById({
 		id: data.performedBy,
-		defaultLocale: context.config.localization.defaultLocale,
 		validation: {
 			enabled: true,
 		},

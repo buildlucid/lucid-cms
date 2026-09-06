@@ -15,7 +15,7 @@ export const mediaTranslationsTable = defineTable(
 				type: "integer",
 			},
 			locale_code: {
-				schema: z.string(),
+				schema: z.string().nullable(),
 				type: "text",
 			},
 			title: {
@@ -41,7 +41,7 @@ export const mediaTranslationsTable = defineTable(
 export interface LucidMediaTranslations {
 	id: Generated<number>;
 	media_id: number;
-	locale_code: string;
+	locale_code: string | null;
 	title: string | null;
 	alt: string | null;
 	description: string | null;

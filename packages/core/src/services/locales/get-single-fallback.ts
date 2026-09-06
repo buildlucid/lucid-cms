@@ -7,7 +7,7 @@ const getSingleFallback: ServiceFn<
 		},
 	],
 	{
-		code: string;
+		code: string | null;
 	}
 > = async (context, data) => {
 	const configLocale = context.config.localization.locales.find(

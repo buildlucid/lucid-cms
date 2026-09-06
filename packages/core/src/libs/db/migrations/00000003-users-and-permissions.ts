@@ -165,6 +165,10 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 							),
 						),
 				)
+				.addColumn("name", adapter.getDataType("text"), (col) =>
+					col.notNull().unique(),
+				)
+				.addColumn("description", adapter.getDataType("text"))
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col.defaultTo(
 						adapter.formatDefaultValue(
@@ -181,31 +185,6 @@ const Migration00000003: MigrationFn = (adapter: DatabaseAdapter) => {
 						),
 					),
 				)
-				.execute();
-
-			await db.schema
-				.createTable("lucid_role_translations")
-				.addColumn("id", adapter.getDataType("primary"), (col) =>
-					adapter.primaryKeyColumnBuilder(col),
-				)
-				.addColumn("role_id", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_roles.id").onDelete("cascade").notNull(),
-				)
-				.addColumn("locale_code", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("name", adapter.getDataType("text"))
-				.addColumn("description", adapter.getDataType("text"))
-				.addUniqueConstraint(
-					"lucid_role_translations_role_id_locale_code_unique",
-					["role_id", "locale_code"],
-				)
-				.execute();
-
-			await db.schema
-				.createIndex("idx_role_translations_role_id")
-				.on("lucid_role_translations")
-				.column("role_id")
 				.execute();
 
 			await db.schema

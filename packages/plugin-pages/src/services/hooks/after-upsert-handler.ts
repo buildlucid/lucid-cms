@@ -32,6 +32,7 @@ const afterUpsertHandler =
 
 			if (docFullSlugsRes.data.length > 0) {
 				const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
+					collectionKey: data.meta.collectionKey,
 					docFullSlugs: docFullSlugsRes.data,
 					versionType: data.data.versionType,
 					tables: data.meta.collectionTableNames,

@@ -84,21 +84,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						)
 						.select((eb) => [
 							"lucid_roles.id",
-							this.database.fn
-								.jsonArrayFrom(
-									eb
-										.selectFrom("lucid_role_translations")
-										.select([
-											"lucid_role_translations.name",
-											"lucid_role_translations.locale_code",
-										])
-										.whereRef(
-											"lucid_role_translations.role_id",
-											"=",
-											"lucid_roles.id",
-										),
-								)
-								.as("translations"),
+							"lucid_roles.name",
+
 							this.database.fn
 								.jsonArrayFrom(
 									eb
@@ -131,7 +118,6 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			V,
 			{
 				id: number;
-				defaultLocale: string;
 			}
 		>,
 	) {
@@ -149,12 +135,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 								"lucid_roles.id",
 								"lucid_user_roles.role_id",
 							)
-							.leftJoin("lucid_role_translations as translation", (join) =>
-								join
-									.onRef("translation.role_id", "=", "lucid_roles.id")
-									.on("translation.locale_code", "=", props.defaultLocale),
-							)
-							.select(["lucid_roles.id", "translation.name"])
+							.select(["lucid_roles.id", "lucid_roles.name"])
 							.whereRef("user_id", "=", "lucid_users.id")
 							.orderBy("lucid_roles.id", "asc"),
 					)
@@ -207,21 +188,8 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 						)
 						.select((eb) => [
 							"lucid_roles.id",
-							this.database.fn
-								.jsonArrayFrom(
-									eb
-										.selectFrom("lucid_role_translations")
-										.select([
-											"lucid_role_translations.name",
-											"lucid_role_translations.locale_code",
-										])
-										.whereRef(
-											"lucid_role_translations.role_id",
-											"=",
-											"lucid_roles.id",
-										),
-								)
-								.as("translations"),
+							"lucid_roles.name",
+
 							this.database.fn
 								.jsonArrayFrom(
 									eb
@@ -642,24 +610,7 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 										"lucid_roles.id",
 										"lucid_user_roles.role_id",
 									)
-									.select((eb) => [
-										"lucid_roles.id",
-										this.database.fn
-											.jsonArrayFrom(
-												eb
-													.selectFrom("lucid_role_translations")
-													.select([
-														"lucid_role_translations.name",
-														"lucid_role_translations.locale_code",
-													])
-													.whereRef(
-														"lucid_role_translations.role_id",
-														"=",
-														"lucid_roles.id",
-													),
-											)
-											.as("translations"),
-									])
+									.select(["lucid_roles.id", "lucid_roles.name"])
 									.whereRef("user_id", "=", "lucid_users.id"),
 							)
 							.as("roles"),

@@ -25,7 +25,7 @@ const collection = (localized?: CollectionLocalizationConfig) =>
 	});
 
 describe("resolveCollectionLocalization", () => {
-	test("keeps disabled collections on the project storage locale", () => {
+	test("keeps disabled collections on the shared null row", () => {
 		expect(
 			resolveCollectionLocalization({
 				localization,
@@ -35,8 +35,8 @@ describe("resolveCollectionLocalization", () => {
 			enabled: false,
 			locales: [],
 			defaultLocale: "en",
-			storageLocale: "en",
-			rowLocales: ["en"],
+			storageLocale: null,
+			rowLocales: [null],
 		});
 	});
 
@@ -50,8 +50,8 @@ describe("resolveCollectionLocalization", () => {
 			enabled: true,
 			locales: ["en", "fr", "de"],
 			defaultLocale: "en",
-			storageLocale: "en",
-			rowLocales: ["en", "fr", "de"],
+			storageLocale: null,
+			rowLocales: [null, "en", "fr", "de"],
 		});
 	});
 
@@ -68,8 +68,8 @@ describe("resolveCollectionLocalization", () => {
 			enabled: true,
 			locales: ["fr", "de"],
 			defaultLocale: "fr",
-			storageLocale: "en",
-			rowLocales: ["en", "fr", "de"],
+			storageLocale: null,
+			rowLocales: [null, "fr", "de"],
 		});
 	});
 

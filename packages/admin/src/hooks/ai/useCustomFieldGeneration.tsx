@@ -18,6 +18,7 @@ import contentLocaleStore from "@/store/contentLocaleStore";
 import siteStore from "@/store/siteStore";
 import userStore from "@/store/userStore";
 import T from "@/translations";
+import { generatedContentEntries } from "@/utils/ai-generated-content";
 import { validateSetError } from "@/utils/error-handling";
 import spawnToast from "@/utils/spawn-toast";
 import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
@@ -43,8 +44,8 @@ const isSuperKeyEvent = (event: KeyboardEvent) =>
 
 type PendingDirectGeneration = {
 	targetId: string;
-	localeCodes: string[];
-	originalValues: Record<string, unknown>;
+	localeCodes: Array<string | null>;
+	originalValues: Map<string | null, unknown>;
 };
 
 const useCustomFieldGeneration = () => {
@@ -80,23 +81,24 @@ const useCustomFieldGeneration = () => {
 
 	// -----------------------------
 	// Functions
-	const getTargetLocales = (target: CustomFieldGenerationTarget) => {
-		if (!target.field().localized) return [defaultLocale()];
+	const getTargetLocales = (
+		target: CustomFieldGenerationTarget,
+	): Array<string | null> => {
+		if (
+			!target.field().localized ||
+			target.request().locale.target.length === 0
+		)
+			return [null];
 		return target.request().locale.target;
 	};
-	const getTargetValueRecord = (
+	const getTargetValueMap = (
 		target: CustomFieldGenerationTarget,
-		localeCodes: string[],
-	) => {
-		return localeCodes.reduce<Record<string, unknown>>(
-			(accumulator, localeCode) => {
-				const value = target.value(localeCode);
-				if (value !== undefined) accumulator[localeCode] = value;
-				return accumulator;
-			},
-			{},
+		locales: Array<string | null>,
+	) =>
+		new Map(
+			locales.map((locale) => [locale, target.value(locale ?? undefined)]),
 		);
-	};
+
 	const targetIsDisabled = (target?: CustomFieldGenerationTarget) => {
 		if (!target) return true;
 		const request = target.request();
@@ -140,7 +142,7 @@ const useCustomFieldGeneration = () => {
 		const targetLocaleCodes = getTargetLocales(target);
 		const sourceLocale = targetLocaleCodes[0] ?? defaultLocale();
 		if (targetLocaleCodes.length === 0) return;
-		const originalValues = getTargetValueRecord(target, targetLocaleCodes);
+		const originalValues = getTargetValueMap(target, targetLocaleCodes);
 
 		try {
 			generateField.reset();
@@ -150,7 +152,9 @@ const useCustomFieldGeneration = () => {
 			const response = await generateField.action.mutateAsync({
 				shouldToast: () => false,
 				body: {
-					value: getTargetValueRecord(target, targetLocaleCodes),
+					value: targetLocaleCodes.includes(null)
+						? originalValues.get(null)
+						: Object.fromEntries(originalValues),
 					document: target.document(),
 					target: {
 						collectionKey: request.collectionKey,
@@ -158,8 +162,10 @@ const useCustomFieldGeneration = () => {
 						fieldKey: request.fieldKey,
 					},
 					locale: {
-						source: sourceLocale,
-						target: targetLocaleCodes,
+						source: sourceLocale ?? undefined,
+						target: targetLocaleCodes.includes(null)
+							? null
+							: targetLocaleCodes.filter((locale) => locale !== null),
 					},
 				},
 			});
@@ -167,11 +173,10 @@ const useCustomFieldGeneration = () => {
 			aiModalsStore.setLoading(false);
 			aiModalsStore.setApplying(true);
 
-			for (const localeCode of targetLocaleCodes) {
-				const value =
-					response.data.output[localeCode] ??
-					Object.values(response.data.output)[0];
-				await target.setValue(value, localeCode);
+			for (const [localeCode, value] of generatedContentEntries(
+				response.data.output,
+			)) {
+				await target.setValue(value, localeCode ?? undefined);
 			}
 			setPendingDirectGeneration({
 				targetId: id,
@@ -209,7 +214,10 @@ const useCustomFieldGeneration = () => {
 		try {
 			aiModalsStore.setApplying(true);
 			for (const localeCode of pending.localeCodes) {
-				await target.setValue(pending.originalValues[localeCode], localeCode);
+				await target.setValue(
+					pending.originalValues.get(localeCode),
+					localeCode ?? undefined,
+				);
 			}
 			setPendingDirectGeneration(undefined);
 		} finally {

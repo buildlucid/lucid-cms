@@ -1,3 +1,4 @@
+import type { AiGeneratedContent } from "@lucidcms/types";
 import type {
 	Locale,
 	MediaAltGenerateResponse,
@@ -29,14 +30,15 @@ import aiModalsStore, {
 } from "@/store/aiModalsStore";
 import siteStore from "@/store/siteStore";
 import T from "@/translations";
+import {
+	generatedContentEntries,
+	mediaGenerationValue,
+} from "@/utils/ai-generated-content";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
 import formatAiCost, { sumAiCredits } from "@/utils/format-ai-cost";
 import spawnToast from "@/utils/spawn-toast";
-import {
-	getDefaultTranslationLocale,
-	type TranslationValue,
-} from "@/utils/translation-helpers";
+import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 import GenerationHistory, {
 	type AiGenerationHistoryItem,
 } from "./GenerationHistory";
@@ -45,14 +47,14 @@ const CURRENT_ALT_ID = "current-alt";
 
 type GenerateValues = {
 	instruction?: string;
-	localeCodes?: string[];
+	localeCodes?: Array<string | null>;
 };
 
 export type MediaAltGenerationCandidate = {
 	id: string;
 	instruction?: string;
-	output: Record<string, string>;
-	originalOutput: Record<string, string>;
+	output: Map<string | null, string>;
+	originalOutput: Map<string | null, string>;
 	cost: MediaAltGenerateResponse["usage"]["cost"];
 };
 
@@ -63,8 +65,8 @@ const MediaAltGenerationModalContent: Component<{
 	};
 	imageUrl?: string;
 	locales: Locale[];
-	selectedLocales: string[];
-	currentAlt?: Record<string, string>;
+	selectedLocales: Array<string | null>;
+	currentAlt?: Map<string | null, string>;
 	generations: MediaAltGenerationCandidate[];
 	selectedGenerationId?: string;
 	error?: string;
@@ -75,9 +77,13 @@ const MediaAltGenerationModalContent: Component<{
 		onAccept: () => void | Promise<void>;
 		onClose: () => void;
 		onSelect: (_id: string) => void;
-		onToggleLocale: (_localeCode: string) => void;
-		onEdit: (_id: string, _localeCode: string, _value: string) => void;
-		onRevert: (_id: string, _localeCode: string) => void;
+		onToggleLocale: (_localeCode: string | null | null) => void;
+		onEdit: (
+			_id: string,
+			_localeCode: string | null | null,
+			_value: string,
+		) => void;
+		onRevert: (_id: string, _localeCode: string | null | null) => void;
 	};
 }> = (props) => {
 	// -----------------------------
@@ -97,13 +103,15 @@ const MediaAltGenerationModalContent: Component<{
 			props.selectedGenerationId === CURRENT_ALT_ID
 		);
 	});
-	const currentOutput = createMemo(() => props.currentAlt ?? {});
+	const currentOutput = createMemo(
+		() => props.currentAlt ?? new Map<string | null, string>(),
+	);
 	const activeGeneration = createMemo(() => {
 		return props.generations.find(
 			(generation) => generation.id === props.selectedGenerationId,
 		);
 	});
-	const activeOutput = createMemo<Record<string, string>>(() => {
+	const activeOutput = createMemo<Map<string | null, string>>(() => {
 		if (currentSelected()) return currentOutput();
 		return activeGeneration()?.output ?? currentOutput();
 	});
@@ -111,8 +119,11 @@ const MediaAltGenerationModalContent: Component<{
 		if (currentSelected()) return CURRENT_ALT_ID;
 		return activeGeneration()?.id;
 	});
+	const outputLocales = createMemo(() =>
+		props.locales.length ? props.locales : [{ code: null, name: null }],
+	);
 	const visibleLocales = createMemo(() =>
-		props.locales.filter((locale) =>
+		outputLocales().filter((locale) =>
 			props.selectedLocales.includes(locale.code),
 		),
 	);
@@ -127,16 +138,21 @@ const MediaAltGenerationModalContent: Component<{
 	});
 	const isEdited = (
 		generation: MediaAltGenerationCandidate,
-		localeCode: string,
+		localeCode: string | null,
 	) => {
 		return (
-			generation.output[localeCode] !== generation.originalOutput[localeCode]
+			generation.output.get(localeCode) !==
+			generation.originalOutput.get(localeCode)
 		);
 	};
-	const outputLocaleCount = (output: Record<string, string>) => {
-		return props.locales.filter((locale) => output[locale.code]).length;
+	const outputLocaleCount = (output: Map<string | null, string>) => {
+		return outputLocales().filter((locale) => output.get(locale.code)).length;
 	};
-	const localeLabel = (locale: Locale) => {
+	const localeLabel = (locale: {
+		code: string | null;
+		name: string | null;
+	}) => {
+		if (props.locales.length === 0) return T()("common.alt");
 		return `${locale.name ?? locale.code} · ${locale.code}`;
 	};
 	const historyItems = createMemo<AiGenerationHistoryItem[]>(() => [
@@ -145,7 +161,7 @@ const MediaAltGenerationModalContent: Component<{
 			label: T()("ai.media.alt.generate.history.current"),
 			meta: T()("ai.media.alt.generate.response.locale.count", {
 				count: outputLocaleCount(currentOutput()),
-				total: props.locales.length,
+				total: outputLocales().length,
 			}),
 		},
 		...props.generations.map((generation, index) => ({
@@ -155,7 +171,7 @@ const MediaAltGenerationModalContent: Component<{
 				formatAiCost(generation.cost) ??
 				T()("ai.media.alt.generate.response.locale.count", {
 					count: outputLocaleCount(generation.output),
-					total: props.locales.length,
+					total: outputLocales().length,
 				}),
 		})),
 	]);
@@ -332,7 +348,7 @@ const MediaAltGenerationModalContent: Component<{
 												return isEdited(generation, locale.code);
 											});
 											const value = createMemo(
-												() => activeOutput()[locale.code] ?? "",
+												() => activeOutput().get(locale.code) ?? "",
 											);
 											const fieldId = createMemo(
 												() =>
@@ -481,14 +497,16 @@ const MediaAltGenerationModal: Component = () => {
 	// -----------------------------
 	// State
 	const [currentAltDraft, setCurrentAltDraft] = createSignal<
-		Record<string, string>
-	>({});
+		Map<string | null, string>
+	>(new Map());
 	const [generations, setGenerations] = createSignal<
 		MediaAltGenerationCandidate[]
 	>([]);
 	const [selectedGenerationId, setSelectedGenerationId] =
 		createSignal<string>();
-	const [selectedLocales, setSelectedLocales] = createSignal<string[]>([]);
+	const [selectedLocales, setSelectedLocales] = createSignal<
+		Array<string | null>
+	>([]);
 	const [previewUrl, setPreviewUrl] = createSignal<string>();
 	const [clientError, setClientError] = createSignal<string>();
 	let generationId = 0;
@@ -529,70 +547,46 @@ const MediaAltGenerationModal: Component = () => {
 
 	// -----------------------------
 	// Functions
-	function translationsToRecord(translations?: TranslationValue[]) {
-		if (!translations) return undefined;
-
-		const record = translations.reduce<Record<string, string>>(
-			(accumulator, translation) => {
-				if (!translation.localeCode || !translation.value) return accumulator;
-				accumulator[translation.localeCode] = translation.value;
-				return accumulator;
-			},
-			{},
-		);
-
-		return Object.keys(record).length > 0 ? record : undefined;
-	}
-	function outputToRecord(output: Record<string, string>) {
-		const record = Object.entries(output).reduce<Record<string, string>>(
-			(accumulator, [localeCode, value]) => {
-				if (!value) return accumulator;
-				accumulator[localeCode] = value;
-				return accumulator;
-			},
-			{},
-		);
-
-		return Object.keys(record).length > 0 ? record : undefined;
+	function draftOutput(
+		output: Map<string | null, string>,
+	): AiGeneratedContent<string> {
+		if (output.has(null))
+			return { kind: "value", value: output.get(null) ?? "" };
+		return { kind: "translations", translations: Object.fromEntries(output) };
 	}
 	function buildCurrentAltDraft(target: MediaAltGenerationTarget) {
-		const output = translationsToRecord(target.media().alt) ?? {};
-		for (const locale of target.locales()) {
-			output[locale.code] ??= "";
-		}
+		const output = new Map(
+			(target.media().alt ?? []).map((row) => [
+				row.localeCode,
+				row.value ?? "",
+			]),
+		);
+		const locales = target.locales().length
+			? target.locales().map((locale) => locale.code)
+			: [null];
+		for (const locale of locales)
+			if (!output.has(locale)) output.set(locale, "");
 		return output;
 	}
 	function buildGeneratedAlt(
 		target: MediaAltGenerationTarget,
-		output: Record<string, string>,
-		targetLocaleCodes: string[],
-	) {
-		const previousRows = target.media().alt ?? [];
-		const targetLocaleSet = new Set(targetLocaleCodes);
-		const localeRows =
-			target.locales().length > 0
-				? target.locales().map((locale) => locale.code)
-				: Object.keys(output);
-
-		return localeRows.map((localeCode) => {
-			const existing = previousRows.find(
-				(translation) => translation.localeCode === localeCode,
-			);
-
-			return {
-				localeCode,
-				value: targetLocaleSet.has(localeCode)
-					? (output[localeCode] ?? existing?.value ?? null)
-					: (existing?.value ?? null),
-			};
-		}) as MediaTranslation[];
+		output: Map<string | null, string>,
+		targetLocaleCodes: Array<string | null>,
+	): MediaTranslation[] {
+		const rows = new Map(
+			(target.media().alt ?? []).map((row) => [row.localeCode, row.value]),
+		);
+		for (const locale of targetLocaleCodes)
+			rows.set(locale, output.get(locale) ?? null);
+		return [...rows].map(([localeCode, value]) => ({ localeCode, value }));
 	}
+
 	const abortRequest = () => {
 		abortController?.abort();
 		abortController = undefined;
 	};
 	const clear = () => {
-		setCurrentAltDraft({});
+		setCurrentAltDraft(new Map());
 		setGenerations([]);
 		setSelectedGenerationId(undefined);
 		setSelectedLocales([]);
@@ -642,7 +636,7 @@ const MediaAltGenerationModal: Component = () => {
 					instruction: values.instruction,
 					previousResponses: generations().map((generation) => ({
 						instruction: generation.instruction,
-						output: generation.output,
+						output: draftOutput(generation.output),
 					})),
 					image: {
 						data: preparedImage.data,
@@ -652,12 +646,20 @@ const MediaAltGenerationModal: Component = () => {
 					},
 					media: {
 						id: media.id,
-						name: translationsToRecord(media.name),
-						alt: outputToRecord(activeOutput()),
+						name: mediaGenerationValue(media.name),
+						alt: mediaGenerationValue(
+							[...activeOutput()].map(([localeCode, value]) => ({
+								localeCode,
+								value,
+							})),
+						),
 					},
 					locale: {
-						source: getDefaultTranslationLocale(requestTarget.locales()),
-						target: requestLocaleCodes,
+						source:
+							getDefaultTranslationLocale(requestTarget.locales()) ?? undefined,
+						target: requestLocaleCodes.includes(null)
+							? null
+							: requestLocaleCodes.filter((locale) => locale !== null),
 					},
 				},
 			});
@@ -671,8 +673,10 @@ const MediaAltGenerationModal: Component = () => {
 				{
 					id,
 					instruction: values.instruction,
-					output: { ...response.data.output },
-					originalOutput: { ...response.data.output },
+					output: new Map(generatedContentEntries(response.data.output)),
+					originalOutput: new Map(
+						generatedContentEntries(response.data.output),
+					),
 					cost: response.data.usage.cost,
 				},
 			]);
@@ -717,12 +721,15 @@ const MediaAltGenerationModal: Component = () => {
 			aiModalsStore.setApplying(false);
 		}
 	};
-	const editAltDraft = (id: string, localeCode: string, value: string) => {
+	const editAltDraft = (
+		id: string,
+		localeCode: string | null,
+		value: string,
+	) => {
 		if (id === CURRENT_ALT_ID) {
-			setCurrentAltDraft((previous) => ({
-				...previous,
-				[localeCode]: value,
-			}));
+			setCurrentAltDraft((previous) =>
+				new Map(previous).set(localeCode, value),
+			);
 			return;
 		}
 
@@ -732,30 +739,27 @@ const MediaAltGenerationModal: Component = () => {
 
 				return {
 					...generation,
-					output: {
-						...generation.output,
-						[localeCode]: value,
-					},
+					output: new Map(generation.output).set(localeCode, value),
 				};
 			}),
 		);
 	};
-	const revertGeneration = (id: string, localeCode: string) => {
+	const revertGeneration = (id: string, localeCode: string | null) => {
 		setGenerations((previous) =>
 			previous.map((generation) => {
 				if (generation.id !== id) return generation;
 
 				return {
 					...generation,
-					output: {
-						...generation.output,
-						[localeCode]: generation.originalOutput[localeCode] ?? "",
-					},
+					output: new Map(generation.output).set(
+						localeCode,
+						generation.originalOutput.get(localeCode) ?? "",
+					),
 				};
 			}),
 		);
 	};
-	const toggleLocale = (localeCode: string) => {
+	const toggleLocale = (localeCode: string | null) => {
 		if (isLoading() || aiModalsStore.get.isApplying) return;
 
 		const selected = selectedLocales();
@@ -792,12 +796,14 @@ const MediaAltGenerationModal: Component = () => {
 			if (!id || !activeTarget) return;
 
 			clear();
-			const localeCodes = activeTarget.locales().map((locale) => locale.code);
+			const localeCodes = activeTarget.locales().length
+				? activeTarget.locales().map((locale) => locale.code)
+				: [null];
 			setCurrentAltDraft(buildCurrentAltDraft(activeTarget));
 			setSelectedLocales(localeCodes);
 			setSelectedGenerationId(CURRENT_ALT_ID);
-			const currentOutput = translationsToRecord(activeTarget.media().alt);
-			if (currentOutput && Object.keys(currentOutput).length > 0) {
+			const currentOutput = activeTarget.media().alt;
+			if (currentOutput?.some((row) => Boolean(row.value))) {
 				return;
 			}
 

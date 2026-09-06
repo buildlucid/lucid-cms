@@ -10,7 +10,7 @@ const getRedirectIdentity: ServiceFn<
 			versionId: number;
 			tables: CollectionTableNames;
 			hasLocaleField: boolean;
-			defaultLocale: string;
+			defaultLocale: string | null;
 		},
 	],
 	RedirectIdentity | null

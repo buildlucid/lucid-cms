@@ -163,6 +163,8 @@ const getMultiple: ServiceFn<
 			mediaOptions: {
 				host: getBaseUrl(context),
 				delivery: context.mediaDelivery,
+				defaultLocale: context.config.localization.defaultLocale,
+				locales: context.config.localization.locales,
 			},
 			permissions: {
 				review: canReviewTarget,

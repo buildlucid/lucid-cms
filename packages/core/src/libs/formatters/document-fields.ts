@@ -53,7 +53,7 @@ interface FieldFormatData {
 
 interface IntermediaryFieldValues {
 	value: unknown;
-	locale: string;
+	locale: string | null;
 }
 
 /**
@@ -91,8 +91,15 @@ const getFieldValues = (
 	});
 
 	return meta.localization.rowLocales.map((locale) => {
+		const sourceLocale =
+			locale !== null &&
+			locale === meta.localization.defaultLocale &&
+			!data.brickRows.some((row) => row.locale === locale)
+				? null
+				: locale;
+
 		const localeValues = relationRows
-			.filter((row) => row.locale === locale)
+			.filter((row) => row.locale === sourceLocale)
 			.sort((a, b) => a.position - b.position)
 			.reduce<unknown[]>((acc, row) => {
 				const value = fieldInstance.extractRelationFieldValue(row);
@@ -194,6 +201,7 @@ const buildFieldTree = (
 		const fieldValue = buildField(
 			{
 				values: fieldValues,
+				defaultLocale: meta.localization.defaultLocale,
 				refs: data.refs,
 			},
 			{
@@ -222,6 +230,7 @@ const buildFieldTree = (
 const buildField = (
 	data: {
 		values: IntermediaryFieldValues[];
+		defaultLocale: string | null;
 		refs?: Refs | null;
 	},
 	meta: FieldFormatMeta & {
@@ -247,7 +256,11 @@ const buildField = (
 
 		//* populate the translations/meta
 		for (const locale of meta.localization.locales) {
-			const localeValue = data.values.find((v) => v.locale === locale);
+			const localeValue =
+				data.values.find((v) => v.locale === locale) ??
+				(locale === data.defaultLocale
+					? data.values.find((v) => v.locale === null)
+					: undefined);
 
 			if (localeValue) {
 				fieldTranslations[locale] = cfInstance.formatResponseValue(

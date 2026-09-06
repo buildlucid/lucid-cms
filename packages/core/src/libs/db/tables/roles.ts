@@ -24,6 +24,8 @@ export const rolesTable = defineTable("lucid_roles", (adapter) => ({
 			]),
 			type: "boolean",
 		},
+		name: { schema: z.string(), type: "text" },
+		description: { schema: z.string().nullable(), type: "text" },
 		updated_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
@@ -45,29 +47,18 @@ export const rolesTable = defineTable("lucid_roles", (adapter) => ({
 				)
 				.optional(),
 		},
-		translations: {
-			schema: z
-				.array(
-					z.object({
-						name: z.string().nullable(),
-						description: z.string().nullable(),
-						locale_code: z.string(),
-					}),
-				)
-				.optional(),
-		},
 	},
 	query: {
 		filters: {
-			name: "translation.name",
-			description: "translation.description",
+			name: "lucid_roles.name",
+			description: "lucid_roles.description",
 			roleIds: "lucid_roles.id",
 			locked: "lucid_roles.locked",
 			createdAt: "lucid_roles.created_at",
 			updatedAt: "lucid_roles.updated_at",
 		},
 		sorts: {
-			name: "translation.name",
+			name: "lucid_roles.name",
 			createdAt: "lucid_roles.created_at",
 		},
 		operators: {
@@ -79,6 +70,8 @@ export const rolesTable = defineTable("lucid_roles", (adapter) => ({
 
 export interface LucidRoles {
 	id: Generated<number>;
+	name: string;
+	description: string | null;
 	key: string | null;
 	locked: BooleanInt;
 	created_at: TimestampImmutable;

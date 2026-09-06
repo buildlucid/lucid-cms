@@ -4,14 +4,8 @@ import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 interface Params {
-	name: {
-		localeCode: string | null;
-		value: string | null;
-	}[];
-	description?: {
-		localeCode: string | null;
-		value: string | null;
-	}[];
+	name: string;
+	description?: string | null;
 	permissions: string[];
 }
 

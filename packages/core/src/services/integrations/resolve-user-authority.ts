@@ -55,7 +55,6 @@ const resolveUserAuthority: ServiceFn<
 	const superAdmin = formatter.formatBoolean(userRes.data.super_admin ?? false);
 	const { permissions } = userPermissionsFormatter.formatMultiple({
 		roles: userRes.data.roles ?? [],
-		defaultLocale: context.config.localization.defaultLocale,
 	});
 	const effectiveScopes = data.scopes.filter((scope) => {
 		const capability = getExternalCapability(

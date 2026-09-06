@@ -1,4 +1,5 @@
 {
+	"plugin.pages.parent.locale.route.missing": "The parent page has no route in this locale. Save a translated route on the parent first.",
 	"plugin.pages.collections.not.found": "Cannot find the collection of {{collection}}.",
 	"plugin.pages.fields.required.missing": "Cannot find required fields for the pages plugin.",
 	"plugin.pages.parents.self.denied": "A page cannot be its own parent, please select a different parent page.",

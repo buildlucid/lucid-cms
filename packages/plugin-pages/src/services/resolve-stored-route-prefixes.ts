@@ -15,7 +15,7 @@ const resolveStoredRoutePrefixes: ServiceFn<
 			versionIds: number[];
 		},
 	],
-	Map<number, Record<string, string | null>>
+	Map<number, Map<string | null, string | null>>
 > = async (context, data) => {
 	const versionIds = [...new Set(data.versionIds)];
 	const sourceKeys = versionIds.map(String);
@@ -65,7 +65,7 @@ const resolveStoredRoutePrefixes: ServiceFn<
 		data: new Map(
 			versionIds.map((versionId) => [
 				versionId,
-				prefixesRes.data.get(String(versionId)) ?? {},
+				prefixesRes.data.get(String(versionId)) ?? new Map(),
 			]),
 		),
 	};

@@ -42,19 +42,19 @@ const updateSingle: ServiceFn<
 			public?: boolean;
 			folderId?: number | null;
 			title?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			alt?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			description?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			summary?: {
-				localeCode: string;
+				localeCode: string | null;
 				value: string | null;
 			}[];
 			width?: number | null;
@@ -201,7 +201,14 @@ const updateSingle: ServiceFn<
 	const hasDimensions = finalType === "image" || finalType === "video";
 	const hasDuration = finalType === "video" || finalType === "audio";
 
+	const adoption = await MediaTranslations.adoptUnassigned({
+		localeCode: context.config.localization.defaultLocale,
+		mediaId: data.id,
+	});
+	if (adoption.error) return adoption;
+
 	const translations = prepareMediaTranslations({
+		defaultLocale: context.config.localization.defaultLocale,
 		title: data.title || [],
 		alt: finalType === "image" ? (data.alt ?? []) : [],
 		description:
@@ -389,15 +396,15 @@ const updateSingle: ServiceFn<
 				enabled: true,
 			},
 		}),
-		translations.length > 0
-			? MediaTranslations.upsertMultiple({
-					data: translations,
+		Promise.all(
+			translations.map((translation) =>
+				MediaTranslations.upsertSingle({
+					data: translation,
 					returning: ["id"],
-					validation: {
-						enabled: true,
-					},
-				})
-			: Promise.resolve({ error: undefined, data: undefined }),
+					validation: { enabled: true },
+				}),
+			),
+		),
 		shouldClearProcessed
 			? clearProcessedImage(context, {
 					id: mediaRes.data.id,
@@ -429,7 +436,8 @@ const updateSingle: ServiceFn<
 			: Promise.resolve({ error: undefined, data: undefined }),
 	]);
 	if (mediaUpdateRes.error) return mediaUpdateRes;
-	if (mediaTranslationsRes.error) return mediaTranslationsRes;
+	const failedTranslation = mediaTranslationsRes.find((result) => result.error);
+	if (failedTranslation?.error) return failedTranslation;
 	if (clearProcessedRes.error) return clearProcessedRes;
 	if (clearActiveCropProcessedRes.error) return clearActiveCropProcessedRes;
 	if (cropFocalRes.error) return cropFocalRes;

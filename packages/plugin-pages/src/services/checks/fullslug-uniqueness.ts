@@ -5,6 +5,7 @@ import type {
 	DocumentVersionType,
 	ErrorCopy,
 	FieldError,
+	LucidDB,
 	ServiceFn,
 	ServiceResponse,
 } from "@lucidcms/core/types";
@@ -15,6 +16,7 @@ import type {
 	ProjectedFullSlug,
 	RouteUniquenessItem,
 } from "../../types/types.js";
+import getCollectionDefaultLocale from "../../utils/get-collection-default-locale.js";
 import normalizePathValue from "../../utils/normalize-path-value.js";
 import {
 	buildRouteUniquenessItems,
@@ -51,60 +53,85 @@ const getExistingRouteItems = async (
 	} = data.tables;
 	const fullSlugColumn = prefixGeneratedColName(constants.fields.fullSlug.key);
 
+	const assignedLocales = localeValues.filter((locale) => locale !== null);
+	const includesUnassigned = localeValues.includes(null);
+
 	const rowsResult = await context.db
-		.query("pages.unique.existing-routes.find", (db) => {
-			const query = db
-				.selectFrom(documentTable)
-				.innerJoin(
-					versionTable,
-					// @ts-expect-error Dynamic generated table names are resolved at runtime.
-					`${versionTable}.document_id`,
-					`${documentTable}.id`,
-				)
-				.innerJoin(
-					fieldsTable,
-					// @ts-expect-error Dynamic generated table names are resolved at runtime.
-					`${fieldsTable}.document_version_id`,
-					`${versionTable}.id`,
-				)
-				// @ts-expect-error Dynamic generated table names are resolved at runtime.
+		.query<{
+			document_id: number;
+			document_version_id: number;
+			locale: string | null;
+			_fullSlug: string | null;
+		}>("pages.unique.existing-routes.find", (db) => {
+			const versions = sql<
+				LucidDB[CollectionTableNames["version"]]
+			>`${sql.table(versionTable)}`;
+
+			const fields = sql<
+				LucidDB[CollectionTableNames["documentFields"]]
+			>`${sql.table(fieldsTable)}`;
+
+			let query = db
+				.selectFrom(db.dynamic.table(documentTable).as("d"))
+				.innerJoin(versions.as("v"), "v.document_id", "d.id")
+				.innerJoin(fields.as("f"), "f.document_version_id", "v.id")
 				.select([
-					`${documentTable}.id as document_id`,
-					`${versionTable}.id as document_version_id`,
-					`${fieldsTable}.locale`,
-					`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
+					"d.id as document_id",
+					"v.id as document_version_id",
+					"f.locale",
+					sql<string | null>`${sql.ref(`f.${fullSlugColumn}`)}`.as("_fullSlug"),
 				])
-				// @ts-expect-error Dynamic generated table names are resolved at runtime.
-				.where(({ eb, and }) =>
-					and([
-						eb(
-							sql<string>`lower(${sql.ref(`${fieldsTable}.${fullSlugColumn}`)})`,
-							"in",
-							fullSlugValues,
-						),
-						eb(`${fieldsTable}.locale`, "in", localeValues),
-						eb(`${versionTable}.type`, "=", data.versionType),
-					]),
-				)
-				.where(`${documentTable}.collection_key`, "=", data.collectionKey)
 				.where(
-					`${documentTable}.is_deleted`,
+					sql<string>`lower(${sql.ref(`f.${fullSlugColumn}`)})`,
+					"in",
+					fullSlugValues,
+				)
+				.where((eb) =>
+					assignedLocales.length > 0
+						? eb.or([
+								eb("f.locale", "is", null),
+								eb("f.locale", "in", assignedLocales),
+							])
+						: eb("f.locale", "is", null),
+				)
+				.where("v.type", "=", data.versionType)
+				.where("d.collection_key", "=", data.collectionKey)
+				.where(
+					"d.is_deleted",
 					"=",
 					context.config.db.getDefault("boolean", "false"),
 				);
 
+			// An explicit row, including a cleared value, supersedes the inherited row.
+			if (!includesUnassigned) {
+				query = query.where((eb) => {
+					const assignedRow = eb
+						.selectFrom(fields.as("assigned_fields"))
+						.select("assigned_fields.id")
+						.whereRef("assigned_fields.document_version_id", "=", "v.id")
+						.where(
+							"assigned_fields.locale",
+							"=",
+							eb.val(
+								getCollectionDefaultLocale(context.config, data.collectionKey),
+							),
+						);
+
+					return eb.or([
+						eb("f.locale", "is not", null),
+						eb.not(eb.exists(assignedRow)),
+					]);
+				});
+			}
+
 			return data.excludeDocumentIds.length > 0
-				? query.where(`${documentTable}.id`, "not in", data.excludeDocumentIds)
+				? query.where("d.id", "not in", data.excludeDocumentIds)
 				: query;
 		})
 		.many();
 	if (rowsResult.error) return rowsResult;
-	const rows = rowsResult.data as Array<{
-		document_id: number;
-		document_version_id: number;
-		locale: string;
-		_fullSlug: string | null;
-	}>;
+
+	const rows = rowsResult.data;
 	const items: RouteUniquenessItem[] = [];
 
 	for (const row of rows) {
@@ -114,7 +141,11 @@ const getExistingRouteItems = async (
 		items.push({
 			documentId: row.document_id,
 			versionId: row.document_version_id,
-			locale: row.locale,
+			locale:
+				row.locale ??
+				(localeValues.includes(null)
+					? null
+					: getCollectionDefaultLocale(context.config, data.collectionKey)),
 			fullSlug,
 		});
 	}

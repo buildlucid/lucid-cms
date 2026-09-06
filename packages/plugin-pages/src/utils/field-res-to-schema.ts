@@ -1,7 +1,8 @@
-import type { FieldInputSchema } from "@lucidcms/core/types";
+import type { FieldInputSchema, FieldValue } from "@lucidcms/core/types";
 import type { VersionFieldsQueryResponse } from "../services/get-document-version-fields.js";
 import type { ResolvedPagesCollectionLocalization } from "./resolve-pages-collection-localization.js";
 
+/** Converts stored page fields into the input shape consumed by route hooks. */
 const fieldResToSchema = (
 	key: string,
 	fieldLocalized: boolean,
@@ -9,69 +10,31 @@ const fieldResToSchema = (
 	items: VersionFieldsQueryResponse[],
 	relationCollectionKey?: string,
 ): FieldInputSchema => {
-	// Determine field type based on key
-	const fieldType = getFieldTypeFromKey(key);
-
-	if (!fieldType) {
+	if (key !== "slug" && key !== "fullSlug" && key !== "parentPage") {
 		throw new Error(`Unable to determine field type for key: ${key}`);
 	}
-
-	const result: FieldInputSchema = {
-		key: key,
-		type: fieldType,
+	const valueFor = (item?: VersionFieldsQueryResponse): FieldValue => {
+		if (key !== "parentPage")
+			return item?.[key === "slug" ? "_slug" : "_fullSlug"] ?? null;
+		return typeof item?._parentPage === "number" && relationCollectionKey
+			? [{ id: item._parentPage, collectionKey: relationCollectionKey }]
+			: [];
 	};
-
+	const field: FieldInputSchema = {
+		key,
+		type: key === "parentPage" ? "relation" : "text",
+	};
 	if (fieldLocalized && localization.enabled) {
-		result.translations = {};
-
-		for (const item of items) {
-			if (!localization.locales.includes(item.locale)) continue;
-			if (fieldType === "text") {
-				// @ts-expect-error
-				result.translations[item.locale] = item[`_${key}`] as string | null;
-			} else if (fieldType === "relation") {
-				// @ts-expect-error
-				const relationId = item[`_${key}`];
-				result.translations[item.locale] =
-					typeof relationId === "number" && relationCollectionKey
-						? [{ id: relationId, collectionKey: relationCollectionKey }]
-						: [];
-			}
-		}
+		field.translations = Object.fromEntries(
+			items.flatMap((item) =>
+				item.locale !== null && localization.locales.includes(item.locale)
+					? [[item.locale, valueFor(item)]]
+					: [],
+			),
+		);
 	} else {
-		const defaultItem =
-			items.find((item) => item.locale === localization.storageLocale) ||
-			items[0];
-
-		if (fieldType === "text") {
-			// @ts-expect-error
-			result.value = defaultItem[`_${key}`] as string | null;
-		} else if (fieldType === "relation") {
-			// @ts-expect-error
-			const relationId = defaultItem[`_${key}`];
-			result.value =
-				typeof relationId === "number" && relationCollectionKey
-					? [{ id: relationId, collectionKey: relationCollectionKey }]
-					: [];
-		}
+		field.value = valueFor(items.find((item) => item.locale === null));
 	}
-
-	return result;
+	return field;
 };
-
-// Helper function to determine field type based on key
-function getFieldTypeFromKey(
-	key: string,
-): FieldInputSchema["type"] | undefined {
-	switch (key) {
-		case "slug":
-		case "fullSlug":
-			return "text";
-		case "parentPage":
-			return "relation";
-		default:
-			return undefined;
-	}
-}
-
 export default fieldResToSchema;

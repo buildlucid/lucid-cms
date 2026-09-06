@@ -83,7 +83,7 @@ const createRedirectsCollection = (options: RedirectsPluginOptionsInternal) => {
 				label: locale.label,
 				value: locale.code,
 			})),
-			default: options.defaultLocale,
+			default: options.defaultLocale ?? undefined,
 			index: true,
 			validation: { required: true },
 			ui: { width: 6 },

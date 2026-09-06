@@ -7,13 +7,15 @@ import type {
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
+import getCollectionDefaultLocale from "../utils/get-collection-default-locale.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
+import resolveInheritedLocaleRows from "../utils/resolve-inherited-locale-rows.js";
 
 export type DescendantFieldsResponse = {
 	document_id: number;
 	document_version_id: number;
 	rows: {
-		locale: string;
+		locale: string | null;
 		_slug: string | null;
 		_fullSlug: string | null;
 		_parentPage: number | null;
@@ -78,11 +80,7 @@ const getDescendantFields: ServiceFn<
 							.where(({ eb }) =>
 								eb(`${parentPageTable}.${parentPageColumn}`, "in", data.ids),
 							)
-							.where(
-								`${parentPageTable}.locale`,
-								"=",
-								context.config.localization.defaultLocale,
-							)
+							.where(`${parentPageTable}.locale`, "is", null)
 							.where(`${versionTable}.type`, "=", data.versionType)
 							.unionAll(
 								cte
@@ -102,11 +100,7 @@ const getDescendantFields: ServiceFn<
 										`${parentPageTable}.${parentPageColumn} as parent_id`,
 										`${parentPageTable}.document_version_id`,
 									])
-									.where(
-										`${parentPageTable}.locale`,
-										"=",
-										context.config.localization.defaultLocale,
-									)
+									.where(`${parentPageTable}.locale`, "is", null)
 									.where(`${versionTable}.type`, "=", data.versionType),
 							),
 					)
@@ -130,11 +124,7 @@ const getDescendantFields: ServiceFn<
 												"=",
 												`${fieldsTable}.document_version_id`,
 											)
-											.on(
-												`${defaultFieldsAlias}.locale`,
-												"=",
-												context.config.localization.defaultLocale,
-											),
+											.on(`${defaultFieldsAlias}.locale`, "is", null),
 									)
 									.leftJoin(parentPageTable, (join) =>
 										join
@@ -143,11 +133,7 @@ const getDescendantFields: ServiceFn<
 												"=",
 												`${defaultFieldsAlias}.id`,
 											)
-											.on(
-												`${parentPageTable}.locale`,
-												"=",
-												context.config.localization.defaultLocale,
-											),
+											.on(`${parentPageTable}.locale`, "is", null),
 									)
 									// @ts-expect-error
 									.select([
@@ -173,15 +159,23 @@ const getDescendantFields: ServiceFn<
 
 		return {
 			error: undefined,
-			data: descendants.filter((d, i, self) => {
-				return (
-					self.findIndex(
-						(e) =>
-							e.document_id === d.document_id &&
-							e.document_version_id === d.document_version_id,
-					) === i
-				);
-			}),
+			data: descendants
+				.map((d) => ({
+					...d,
+					rows: resolveInheritedLocaleRows(
+						d.rows,
+						getCollectionDefaultLocale(context.config, data.collectionKey),
+					),
+				}))
+				.filter((d, i, self) => {
+					return (
+						self.findIndex(
+							(e) =>
+								e.document_id === d.document_id &&
+								e.document_version_id === d.document_version_id,
+						) === i
+					);
+				}),
 		};
 	} catch (_error) {
 		return {

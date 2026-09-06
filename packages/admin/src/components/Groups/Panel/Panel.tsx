@@ -168,7 +168,7 @@ export const Panel: Component<{
 			!availableLocales().some((locale) => locale.code === contentLocale()) &&
 			defaultLang !== undefined
 		) {
-			setContentLocale(defaultLang);
+			setContentLocale(defaultLang ?? undefined);
 		}
 	});
 

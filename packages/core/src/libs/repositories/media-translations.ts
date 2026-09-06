@@ -5,21 +5,20 @@ import type { Insert, Select } from "../db/types.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
 
-export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid_media_translations"> {
+export default class MediaTranslationsRepository extends StaticRepository<"lucid_media_translations"> {
 	constructor(db: LucidDatabase) {
 		super(db, mediaTranslationsTable);
 	}
-
 	// ------------------------------------------
 	// queries
-	async upsertMultiple<
+	async upsertSingle<
 		K extends keyof Select<LucidMediaTranslations>,
 		V extends boolean = false,
 	>(
 		props: QueryProps<
 			V,
 			{
-				data: Partial<Insert<LucidMediaTranslations>>[];
+				data: Partial<Insert<LucidMediaTranslations>>;
 				returning?: K[];
 				returnAll?: true;
 			}
@@ -27,9 +26,12 @@ export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid
 	) {
 		const query = this.db
 			.insertInto("lucid_media_translations")
-			.values(props.data.map((data) => this.asInsertData(data)))
+			.values(this.asInsertData(props.data))
 			.onConflict((oc) =>
-				oc.columns(["media_id", "locale_code"]).doUpdateSet((eb) => ({
+				(props.data.locale_code === null
+					? oc.columns(["media_id"]).where("locale_code", "is", null)
+					: oc.columns(["media_id", "locale_code"])
+				).doUpdateSet((eb) => ({
 					title: eb.ref("excluded.title"),
 					alt: eb.ref("excluded.alt"),
 					description: eb.ref("excluded.description"),
@@ -46,18 +48,57 @@ export default class MediaAwaitingSyncRepository extends StaticRepository<"lucid
 
 		const exec = await this.executeQuery(
 			() =>
-				query.execute() as Promise<Pick<Select<LucidMediaTranslations>, K>[]>,
-			{
-				method: "upsertMultiple",
-			},
+				query.executeTakeFirst() as Promise<
+					Pick<Select<LucidMediaTranslations>, K> | undefined
+				>,
+			{ method: "upsertSingle" },
 		);
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
 			...props.validation,
-			mode: "multiple",
+			mode: "single",
 			select: props.returning as string[],
 			selectAll: props.returnAll,
 		});
+	}
+	/** Assigns unlabelled text once; an existing default translation takes precedence. */
+	async adoptUnassigned(props: { localeCode: string | null; mediaId: number }) {
+		if (props.localeCode === null) return { error: undefined, data: undefined };
+
+		const query = this.db
+			.updateTable("lucid_media_translations")
+			.set({ locale_code: props.localeCode })
+			.where("locale_code", "is", null)
+			.where("media_id", "=", props.mediaId);
+
+		const superseded = this.db
+			.deleteFrom("lucid_media_translations")
+			.where("media_id", "=", props.mediaId)
+			.where("locale_code", "is", null)
+			.where((eb) =>
+				eb.exists(
+					eb
+						.selectFrom("lucid_media_translations as assigned")
+						.select("assigned.id")
+						.whereRef(
+							"assigned.media_id",
+							"=",
+							"lucid_media_translations.media_id",
+						)
+						.where("assigned.locale_code", "=", props.localeCode),
+				),
+			);
+
+		const result = await this.executeQuery(
+			async () => {
+				await superseded.execute();
+				return query.execute();
+			},
+			{ method: "adoptUnassigned" },
+		);
+		if (result.response.error) return result.response;
+
+		return { error: undefined, data: undefined };
 	}
 }

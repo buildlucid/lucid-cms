@@ -1,5 +1,5 @@
 import { FaSolidCalendar, FaSolidLock, FaSolidT } from "solid-icons/fa";
-import { type Component, createMemo, Index } from "solid-js";
+import { type Component, Index } from "solid-js";
 import { Paginated } from "@/components/Groups/Footers";
 import { DynamicContent } from "@/components/Groups/Layout";
 import { Table } from "@/components/Groups/Table/Table";
@@ -10,7 +10,6 @@ import RoleRow from "@/components/Tables/Rows/RoleRow";
 import type { QueryStateResponse } from "@/hooks/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget";
 import api from "@/services/api";
-import contentLocaleStore from "@/store/contentLocaleStore";
 import T from "@/translations";
 
 export const RolesList: Component<{
@@ -28,10 +27,6 @@ export const RolesList: Component<{
 			delete: false,
 		},
 	});
-
-	// ----------------------------------
-	// Memos
-	const contentLocale = createMemo(() => contentLocaleStore.get.contentLocale);
 
 	// ----------------------------------
 	// Queries
@@ -123,7 +118,6 @@ export const RolesList: Component<{
 							<RoleRow
 								index={i}
 								role={role()}
-								contentLocale={contentLocale()}
 								include={include}
 								selected={selected[i]}
 								rowTarget={rowTarget}

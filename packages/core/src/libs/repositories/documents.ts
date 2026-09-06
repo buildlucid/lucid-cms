@@ -1068,7 +1068,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 						props.documentFieldsTable,
 					)} as cf_sort where cf_sort.document_version_id = ${sql.ref(
 						`${props.versionsTable}.id`,
-					)} and cf_sort.locale = ${locale} limit 1)`,
+					)} and ${locale === null ? sql`cf_sort.locale is null` : sql`(cf_sort.locale = ${locale} or cf_sort.locale is null)`} order by case when cf_sort.locale is null then 1 else 0 end limit 1)`,
 				];
 			}),
 		);

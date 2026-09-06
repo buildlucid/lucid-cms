@@ -79,7 +79,6 @@ const fetchAuthState = async (
 
 	const { permissions } = userPermissionsFormatter.formatMultiple({
 		roles: userRes.data.roles || [],
-		defaultLocale: context.config.localization.defaultLocale,
 	});
 
 	return {

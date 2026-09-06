@@ -65,7 +65,7 @@ export type CollectionPreviewURLResolverProps<
 	/** Environment values, or null when no environment is available. */
 	env: EnvironmentVariables | null;
 	/** Content locale requested for this preview. */
-	locale: string;
+	locale: string | null;
 	/** Document route path resolved for the requested preview locale. */
 	path: string | null;
 };

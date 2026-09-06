@@ -35,6 +35,7 @@ const devCommand = async (options?: {
 	let serverDestroy: (() => Promise<void>) | undefined;
 	let rebuilding = false;
 	let isInitialRun = true;
+	let syncedLocalization: string | undefined;
 	let buildOutDir = "dist";
 	let resourceWatchPaths: string[] = [];
 	let resourceWatcher: ReturnType<typeof chokidar.watch> | undefined;
@@ -129,6 +130,8 @@ const devCommand = async (options?: {
 				localization: configResult.config.localization,
 			});
 
+			const localizationKey = JSON.stringify(configResult.config.localization);
+
 			currentStage = "migration";
 			const migrateResult = await migrateCommand({
 				config: configResult.config,
@@ -138,7 +141,8 @@ const devCommand = async (options?: {
 				translationStore,
 				mode: "return",
 			})({
-				skipSyncSteps: !isInitialRun,
+				//* re-syncs on localisation changes
+				skipSyncSteps: !isInitialRun && syncedLocalization === localizationKey,
 			});
 
 			if (!migrateResult) {
@@ -146,7 +150,9 @@ const devCommand = async (options?: {
 				process.exit(2);
 			}
 
+			syncedLocalization = localizationKey;
 			currentStage = "admin_build";
+
 			const viteBuildRes = await vite.buildApp(configResult.config);
 			if (viteBuildRes.error) {
 				cliLogger.error(

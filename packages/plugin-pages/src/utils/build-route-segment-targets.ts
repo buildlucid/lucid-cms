@@ -17,7 +17,7 @@ const buildRouteSegmentTargets = (data: {
 	collections: CollectionBuilder[];
 	localization: {
 		locales: Array<{ code: string }>;
-		defaultLocale: string;
+		defaultLocale: string | null;
 	};
 	sourceKeys: string[];
 	selections: RouteSegmentSelection[];

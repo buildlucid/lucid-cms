@@ -13,7 +13,7 @@ const normalizePrefix = (
 
 const resolveCollectionPrefix = (data: {
 	collection: CollectionConfig;
-	localeCode: string;
+	localeCode: string | null;
 }): string | undefined => {
 	if (!data.collection.prefix) return undefined;
 
@@ -21,7 +21,11 @@ const resolveCollectionPrefix = (data: {
 		return normalizePrefix(data.collection.prefix);
 	}
 
-	return normalizePrefix(data.collection.prefix[data.localeCode]);
+	return normalizePrefix(
+		data.localeCode === null
+			? undefined
+			: data.collection.prefix[data.localeCode],
+	);
 };
 
 export default resolveCollectionPrefix;

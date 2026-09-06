@@ -213,7 +213,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 				direction: z.enum(["ltr", "rtl"]).default("ltr"),
 			}),
 		),
-		defaultLocale: z.string(),
+		defaultLocale: z.string().nullable(),
 	}),
 	i18n: z.strictObject({
 		locales: z.array(

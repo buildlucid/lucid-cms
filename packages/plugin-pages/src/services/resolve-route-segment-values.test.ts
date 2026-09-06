@@ -46,7 +46,9 @@ describe("resolveRouteSegmentValues", () => {
 		);
 
 		expect(result.error).toBeUndefined();
-		expect(result.data?.get("current")).toEqual({ fr: "fr" });
+		expect(result.data?.get("current")).toEqual(
+			new Map(Object.entries({ fr: "fr" })),
+		);
 	});
 
 	test("uses the storage locale when the Pages fields are not localized", async () => {
@@ -73,6 +75,6 @@ describe("resolveRouteSegmentValues", () => {
 		);
 
 		expect(result.error).toBeUndefined();
-		expect(result.data?.get("current")).toEqual({ en: "en" });
+		expect(result.data?.get("current")).toEqual(new Map([[null, null]]));
 	});
 });

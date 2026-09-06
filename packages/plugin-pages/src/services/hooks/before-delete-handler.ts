@@ -72,6 +72,7 @@ const beforeDeleteHandler =
 			if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
 
 			const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
+				collectionKey: data.meta.collectionKey,
 				docFullSlugs: docFullSlugsRes.data,
 				versionType,
 				tables: data.meta.collectionTableNames,

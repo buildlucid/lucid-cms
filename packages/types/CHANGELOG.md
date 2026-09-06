@@ -9,6 +9,7 @@
 - Reworked upload-session types around HTTP, multipart-parts and TUS protocols.
 - Split system media adapter reporting into storage and delivery keys.
 - Added collection-scoped locale metadata and collection-aware document translation types.
+- Updated types for unassigned content, scalar media text, AI response shapes and plain role details.
 
 ## v0.5.0
 

@@ -2,17 +2,6 @@ import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
-const roleTranslationSchema = z.object({
-	localeCode: z.string().trim().meta({
-		description: "The admin UI locale code for the translated role label",
-		example: "en",
-	}),
-	value: z.string().trim().nullable().meta({
-		description: "The translated value",
-		example: "Editors",
-	}),
-});
-
 const roleResponseSchema = z.object({
 	id: z.number().meta({
 		description: "The role ID",
@@ -23,12 +12,12 @@ const roleResponseSchema = z.object({
 			"The config-managed role key, if this role is managed by config",
 		example: "content-admin",
 	}),
-	name: z.array(roleTranslationSchema).meta({
-		description: "Internal admin UI translations for the role name",
-	}),
-	description: z.array(roleTranslationSchema).meta({
-		description: "Internal admin UI translations for the role description",
-	}),
+	name: z.string().trim().min(2).meta({ description: "The role name" }),
+	description: z
+		.string()
+		.trim()
+		.nullable()
+		.meta({ description: "The role description" }),
 	locked: z.boolean().meta({
 		description: "Whether this role is managed by config and cannot be edited",
 		example: false,
@@ -63,11 +52,9 @@ const roleResponseSchema = z.object({
 export const controllerSchemas = {
 	createSingle: {
 		body: z.object({
-			name: z.array(roleTranslationSchema).meta({
-				description: "Internal admin UI translations for the role name",
-			}),
-			description: z.array(roleTranslationSchema).optional().meta({
-				description: "Internal admin UI translations for the role description",
+			name: z.string().trim().min(2).meta({ description: "The role name" }),
+			description: z.string().trim().nullable().optional().meta({
+				description: "The role description",
 			}),
 			permissions: z.array(z.string().trim()).meta({
 				description: "A lit of permissions",
@@ -84,17 +71,16 @@ export const controllerSchemas = {
 	updateSingle: {
 		body: z.object({
 			name: z
-				.array(roleTranslationSchema)
-				.meta({
-					description: "Internal admin UI translations for the role name",
-				})
+				.string()
+				.trim()
+				.min(2)
+				.meta({ description: "The role name" })
 				.optional(),
 			description: z
-				.array(roleTranslationSchema)
-				.meta({
-					description:
-						"Internal admin UI translations for the role description",
-				})
+				.string()
+				.trim()
+				.nullable()
+				.meta({ description: "The role description" })
 				.optional(),
 			permissions: z
 				.array(z.string().trim())

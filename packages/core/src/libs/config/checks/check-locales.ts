@@ -6,6 +6,11 @@ const checkLocales = (
 		| ResolvedLucidConfig["localization"]
 		| ResolvedLucidConfig["i18n"],
 ) => {
+	if (
+		localesConfig.defaultLocale === null &&
+		localesConfig.locales.length === 0
+	)
+		return;
 	if (localesConfig.locales.length === 0) {
 		throw new Error(translate("server:core.config.locales.empty"));
 	}

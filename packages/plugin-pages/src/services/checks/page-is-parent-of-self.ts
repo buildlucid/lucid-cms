@@ -7,7 +7,7 @@ import getParentPageId from "../../utils/get-parent-page-id.js";
  *  Returns an error if the parentPage field is set to the same document as the current document
  */
 const checkParentIsPageOfSelf = (data: {
-	defaultLocale: string;
+	defaultLocale: string | null;
 	documentId: number;
 	fields: {
 		parentPage: FieldInputSchema;

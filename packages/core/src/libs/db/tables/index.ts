@@ -40,7 +40,6 @@ import { optionsTable } from "./options.js";
 import { previewSessionsTable } from "./preview-sessions.js";
 import { processedImagesTable } from "./processed-images.js";
 import { rolePermissionsTable } from "./role-permissions.js";
-import { roleTranslationsTable } from "./role-translations.js";
 import { rolesTable } from "./roles.js";
 import { securityAuditLogsTable } from "./security-audit-logs.js";
 import { userAuthProvidersTable } from "./user-auth-providers.js";
@@ -92,7 +91,6 @@ export * from "./options.js";
 export * from "./preview-sessions.js";
 export * from "./processed-images.js";
 export * from "./role-permissions.js";
-export * from "./role-translations.js";
 export * from "./roles.js";
 export * from "./security-audit-logs.js";
 export * from "./user-auth-providers.js";
@@ -144,7 +142,6 @@ export const coreTableDefinitions = [
 	processedImagesTable,
 	jobsTable,
 	rolePermissionsTable,
-	roleTranslationsTable,
 	rolesTable,
 	securityAuditLogsTable,
 	userAuthProvidersTable,

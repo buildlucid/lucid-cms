@@ -210,7 +210,7 @@ describe("brick table construction", () => {
 		expect(nestedItemsTable.priority).toBe(2);
 
 		// test field data
-		expect(fieldsTable.data).toHaveLength(2); // one per locale
+		expect(fieldsTable.data).toHaveLength(3); // shared row plus two locales
 
 		const enField = fieldsTable.data.find((item) => item.locale === "en");
 		const frField = fieldsTable.data.find((item) => item.locale === "fr");
@@ -219,10 +219,10 @@ describe("brick table construction", () => {
 		expect(frField?._simpleHeading).toBe("Homepage FR");
 
 		// test simple brick data
-		expect(simpleBrickTable.data).toHaveLength(2); // one per locale
+		expect(simpleBrickTable.data).toHaveLength(3); // shared row plus two locales
 
 		const enSimpleBrick = simpleBrickTable.data.find(
-			(item) => item.locale === "en",
+			(item) => item.locale === null,
 		);
 		const frSimpleBrick = simpleBrickTable.data.find(
 			(item) => item.locale === "fr",
@@ -232,7 +232,7 @@ describe("brick table construction", () => {
 		expect(frSimpleBrick?._heading).toBeNull();
 
 		// test items repeater data
-		expect(itemsTable.data).toHaveLength(4); // 2 items × 2 locales
+		expect(itemsTable.data).toHaveLength(6); // 2 items × 3 rows
 
 		// get parent references for further testing
 		const firstItemEn = itemsTable.data.find(
@@ -261,7 +261,7 @@ describe("brick table construction", () => {
 		expect(secondItemEn?._itemTitle).toBe("Title Two");
 
 		// test nested items
-		expect(nestedItemsTable.data).toHaveLength(8); // 4 nested items × 2 locales
+		expect(nestedItemsTable.data).toHaveLength(12); // 4 nested items × 3 rows
 
 		// group nested items by parent
 		const nestedItemsUnderFirst = nestedItemsTable.data.filter(
@@ -583,9 +583,9 @@ describe("brick table construction", () => {
 		expect(heroMediaRelationTable?.priority).toBe(1);
 		expect(itemMediaRelationTable?.priority).toBe(2);
 
-		const fieldRow = fieldsTable?.data.find((row) => row.locale === "en");
-		const brickRow = brickTable?.data.find((row) => row.locale === "en");
-		const repeaterRow = repeaterTable?.data.find((row) => row.locale === "en");
+		const fieldRow = fieldsTable?.data.find((row) => row.locale === null);
+		const brickRow = brickTable?.data.find((row) => row.locale === null);
+		const repeaterRow = repeaterTable?.data.find((row) => row.locale === null);
 
 		expect(fieldRow?.brick_id_ref).toBeTypeOf("number");
 		expect(brickRow?.brick_id_ref).toBeTypeOf("number");
@@ -596,7 +596,7 @@ describe("brick table construction", () => {
 				collection_key: "gallery",
 				document_id: TEST_CONFIG.documentId,
 				document_version_id: TEST_CONFIG.versionId,
-				locale: "en",
+				locale: null,
 				position: 0,
 				parent_id: fieldRow?.brick_id_ref,
 				_collection_key: "page",
@@ -606,7 +606,7 @@ describe("brick table construction", () => {
 				collection_key: "gallery",
 				document_id: TEST_CONFIG.documentId,
 				document_version_id: TEST_CONFIG.versionId,
-				locale: "en",
+				locale: null,
 				position: 1,
 				parent_id: fieldRow?.brick_id_ref,
 				_collection_key: "page",
@@ -619,7 +619,7 @@ describe("brick table construction", () => {
 				collection_key: "gallery",
 				document_id: TEST_CONFIG.documentId,
 				document_version_id: TEST_CONFIG.versionId,
-				locale: "en",
+				locale: null,
 				position: 0,
 				parent_id: brickRow?.brick_id_ref,
 				_media_id: 10,
@@ -628,7 +628,7 @@ describe("brick table construction", () => {
 				collection_key: "gallery",
 				document_id: TEST_CONFIG.documentId,
 				document_version_id: TEST_CONFIG.versionId,
-				locale: "en",
+				locale: null,
 				position: 1,
 				parent_id: brickRow?.brick_id_ref,
 				_media_id: 11,
@@ -640,7 +640,7 @@ describe("brick table construction", () => {
 				collection_key: "gallery",
 				document_id: TEST_CONFIG.documentId,
 				document_version_id: TEST_CONFIG.versionId,
-				locale: "en",
+				locale: null,
 				position: 0,
 				parent_id: repeaterRow?.parent_id_ref,
 				_media_id: 20,
@@ -649,7 +649,7 @@ describe("brick table construction", () => {
 				collection_key: "gallery",
 				document_id: TEST_CONFIG.documentId,
 				document_version_id: TEST_CONFIG.versionId,
-				locale: "en",
+				locale: null,
 				position: 1,
 				parent_id: repeaterRow?.parent_id_ref,
 				_media_id: 21,
@@ -797,7 +797,7 @@ describe("brick table construction", () => {
 		expect(fieldsTable?.data).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					locale: "en",
+					locale: null,
 					_title: null,
 					_reference: "shared",
 				}),

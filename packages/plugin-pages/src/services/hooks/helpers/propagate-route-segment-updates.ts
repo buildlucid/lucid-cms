@@ -132,6 +132,7 @@ const propagateRouteSegmentUpdates: ServiceFn<
 					if (uniquenessRes.error) return uniquenessRes;
 
 					return updateFullSlugFields(context, {
+						collectionKey: collection.key,
 						docFullSlugs: fullSlugsRes.data,
 						versionType,
 						tables: tablesRes.data,

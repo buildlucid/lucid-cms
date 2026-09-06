@@ -42,15 +42,15 @@ export type ConstructBrickTableParams = {
 	targetFields: ConstructField[];
 	fieldPath?: Array<string>;
 	priority?: number;
-	parentId?: Map<string, number> | null;
-	parentIdRef?: Map<string, number>;
-	brickIdByLocale?: Map<string, number>; // Track brick_id_refs by locale
+	parentId?: Map<string | null, number> | null;
+	parentIdRef?: Map<string | null, number>;
+	brickIdByLocale?: Map<string | null, number>; // Track brick_id_refs by locale
 	collection: CollectionBuilder;
 	documentId: number;
 	versionId: number;
 	localization: {
-		locales: string[];
-		defaultLocale: string;
+		locales: Array<string | null>;
+		defaultLocale: string | null;
 	};
 	brickKeyTableNameMap: Map<string, LucidBrickTableName>;
 	order: number;
@@ -79,8 +79,8 @@ type TableModeContext = Pick<
 type FieldModeHandlerContext = {
 	field: ConstructField;
 	params: ConstructBrickTableParams;
-	rowsByLocale: Map<string, Partial<Insert<LucidBricksTable>>>;
-	brickIdRefByLocale: Map<string, number>;
+	rowsByLocale: Map<string | null, Partial<Insert<LucidBricksTable>>>;
+	brickIdRefByLocale: Map<string | null, number>;
 	parentTableMode: FieldDatabaseMode;
 };
 
@@ -136,7 +136,7 @@ const getTablePriority = (params: {
 const applyTableModeColumns = (context: {
 	mode: FieldDatabaseMode;
 	row: Partial<Insert<LucidBricksTable>>;
-	locale: string;
+	locale: string | null;
 	params: TableModeContext;
 }): void => {
 	switch (context.mode) {
@@ -194,7 +194,7 @@ const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
 			return context.field.groups.flatMap((group, groupIndex) => {
 				if (!group.fields) return [];
 
-				const localeGroupRef = new Map<string, number>();
+				const localeGroupRef = new Map<string | null, number>();
 				for (const locale of context.params.localization.locales) {
 					localeGroupRef.set(locale, createTempRelationId());
 				}
@@ -420,8 +420,11 @@ const constructBrickTable = (
 		params.brick?.type === "embedded" && params.brick.ref
 			? params.brick.ref
 			: crypto.randomUUID();
-	const rowsByLocale = new Map<string, Partial<Insert<LucidBricksTable>>>();
-	const brickIdRefByLocale = new Map<string, number>();
+	const rowsByLocale = new Map<
+		string | null,
+		Partial<Insert<LucidBricksTable>>
+	>();
+	const brickIdRefByLocale = new Map<string | null, number>();
 
 	//* initialize rows for each locale
 	for (const locale of params.localization.locales) {
