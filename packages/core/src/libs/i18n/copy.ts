@@ -17,7 +17,9 @@ const translationValuesSchema = z
 	.optional();
 
 type DefineCopyOptions = {
+	/** Values for {{name}} placeholders. */
 	data?: TranslationValues;
+	/** Text to use when the translation key is missing. */
 	defaultMessage?: string;
 };
 
@@ -50,6 +52,7 @@ type DefineCopy = {
 };
 
 type CopyHelper = DefineCopy & {
+	/** Fixed text with optional {{name}} interpolation values. */
 	literal: (value: string, values?: TranslationValues) => LiteralCopy;
 };
 
@@ -188,27 +191,6 @@ export const resolvedAdminCopySchema = z.union([
 	literalCopySchema,
 ]);
 
-/**
- * Defines translatable copy without resolving it immediately.
- *
- * Prefix keys with `admin:` for admin UI copy and `server:` for API/service
- * copy. The prefix chooses the translation group; translation files still store
- * the unprefixed key.
- *
- * @example
- * ```ts
- * import { copy } from "@lucidcms/core";
- *
- * const label = copy("admin:collections.posts.name", {
- *   defaultMessage: "Posts",
- * });
- *
- * const message = copy("server:posts.not.found", {
- *   data: { id: 12 },
- *   defaultMessage: "Post {{id}} was not found.",
- * });
- * ```
- */
 function defineCopy(
 	prefixedKey: RegisteredAdminCopyKey,
 	options?: DefineCopyOptions,
@@ -247,10 +229,22 @@ function defineCopy(
 }
 
 /**
- * Describes already-written copy while keeping the value compatible with APIs
- * that accept translatable descriptors.
+ * Describes text to translate later. Keys must start with `admin:` or `server:`.
+ * Use `copy.literal()` for fixed text, with optional interpolation values.
+ *
+ * @example
+ * ```ts
+ * const title = copy("admin:collections.articles.title", {
+ *   defaultMessage: "Articles",
+ * });
+ * const message = copy("server:articles.missing", {
+ *   data: { id: 12 },
+ *   defaultMessage: "Article {{id}} was not found.",
+ * });
+ * ```
  */
 export const copy: CopyHelper = Object.assign(defineCopy, {
+	/** Fixed text with optional {{name}} interpolation values. */
 	literal: (value: string, values?: TranslationValues): LiteralCopy => ({
 		type: "lucid.literal",
 		value,

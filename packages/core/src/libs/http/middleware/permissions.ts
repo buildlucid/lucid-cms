@@ -25,6 +25,7 @@ export const permissionCheck = (
 	}
 };
 
+/** Requires the current admin user to have every supplied permission. Register authentication first. */
 const permissions = (permissions: Permission | Permission[]) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
 		permissionCheck(c, permissions);

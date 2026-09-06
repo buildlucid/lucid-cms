@@ -5,6 +5,7 @@ import type {
 } from "@lucidcms/types";
 import type { ToolbarDocument, ToolbarPreviewNavigation } from "./types.js";
 
+/** Attributes for the lucid-toolbar custom element. */
 export type ToolbarAttributes = {
 	"auth-status": "auto" | "authenticated" | "unauthenticated";
 	host?: string;
@@ -19,6 +20,7 @@ export type ToolbarAttributes = {
 	"preview-exit-href"?: string;
 };
 
+/** Toolbar settings that can be serialized into HTML attributes. */
 export type ToolbarAttributeOptions = {
 	/** Public host of the Lucid instance when it differs from the site origin. */
 	host?: string | URL;
@@ -37,7 +39,7 @@ const authenticationAttribute = (
 	return "auto";
 };
 
-/** Serializes generic toolbar configuration for `<lucid-toolbar>`. */
+/** Serializes toolbar settings for `<lucid-toolbar>`. Returns null when the known state has no edit or preview action to show. */
 export const createToolbarAttributes = ({
 	host,
 	document = null,

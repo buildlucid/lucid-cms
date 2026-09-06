@@ -48,23 +48,24 @@ export type LucidPluginHookRuntime = (
 
 export type LucidPluginHooks = {
 	/**
-	 * This hook is called when the plugin is initialized within the `processConfig` function.
+	 * Runs while loading configuration. Return a service result; an error stops initialization.
 	 */
 	init?: LucidPluginHookInit;
 	/**
-	 * This hook is called when the runtime needs plugin artifacts for build or setup work.
-	 *
-	 * Its artifacts are collected, processed and potentially passed to the runtime adapter based on the type.
+	 * Supplies files or runtime-specific artifacts for preparation and builds. Check `phase` to choose which artifacts to return.
 	 */
 	runtime?: LucidPluginHookRuntime;
 };
 
+/** A callback that mutates the resolved configuration draft. */
 export type PluginConfigure = ConfigTransform;
 
+/** Fallback project settings. Explicit project values take precedence. */
 export type PluginDefaults = Omit<Partial<LucidConfig>, "plugins">;
 
+/** A plugin returned by `definePlugin` and registered in project config. */
 export type LucidPluginDefinition = {
-	/** Additional resources supplied by this plugin, loaded before config recipes. Use exported package subpaths or file URLs. */
+	/** Additional resources supplied by this plugin. Use exported package subpaths or file URLs. */
 	sources?: ResourceSources;
 	/**
 	 * The unique key of the plugin.
@@ -92,13 +93,14 @@ export type LucidPluginDefinition = {
 	 */
 	toolkit?: ToolkitDefinition;
 	/**
-	 * The configure function where you can mutate the config.
+	 * Mutate the resolved config draft after plugin defaults and project settings are applied. The project configure callback runs last.
 	 */
 	configure?: PluginConfigure;
 	/** Supplies defaults before explicit project settings are applied. */
 	defaults?: PluginDefaults | ((config: ResolvedLucidConfig) => PluginDefaults);
 };
 
+/** Factory accepting plugin-specific options and returning a plugin definition. */
 export type LucidPlugin<T = undefined> = (
 	pluginOptions: T,
 ) => LucidPluginDefinition;

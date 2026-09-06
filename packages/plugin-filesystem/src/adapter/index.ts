@@ -11,6 +11,7 @@ import rename from "./services/rename.js";
 import stream from "./services/stream.js";
 import uploadSingle from "./services/upload-single.js";
 
+/** Creates local media storage. Use filesystemPlugin to also register HTTP upload and download routes. */
 const fileSystemStorageAdapter: MediaStorageAdapter<
 	FileSystemStorageAdapterOptions
 > = (options) => {

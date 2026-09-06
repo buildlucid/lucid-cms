@@ -4,6 +4,7 @@ import sqliteKVAdapter from "./adapter.js";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types.js";
 
+/** Provides KV storage in Lucid's database. Requires a SQLite-compatible database adapter. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,

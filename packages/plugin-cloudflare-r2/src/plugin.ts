@@ -11,6 +11,7 @@ import routes from "./routes/index.js";
 import type { PluginOptions } from "./types.js";
 import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
+/** Stores media in Cloudflare R2 and contributes bucket bindings to generated Wrangler config. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	const resolvedOptions = pluginOptions ?? {};
 

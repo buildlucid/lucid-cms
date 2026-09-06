@@ -9,9 +9,13 @@ import type { DatabaseCodec } from "../codecs/types.js";
 
 export type LogicalDataType = keyof DatabaseConfig["dataTypes"];
 
+/** Map public filter and sort names to database columns. */
 export type TableQueryDefinition = {
+	/** Public filter keys mapped to column names. */
 	filters?: Record<string, string>;
+	/** Public sort keys mapped to column names. */
 	sorts?: Record<string, string>;
+	/** Default filter operators keyed by filter name. */
 	operators?: Record<string, FilterOperator>;
 };
 
@@ -37,14 +41,18 @@ type TableColumnsDefinition<Row extends object> = {
 	>;
 };
 
+/** Columns and optional query/result schemas for a table. */
 export type TableDefinitionInput<
 	Row extends object,
 	PartialColumns extends boolean = false,
 > = {
+	/** Column schemas and portable data types. */
 	columns: PartialColumns extends true
 		? Partial<TableColumnsDefinition<Row>>
 		: TableColumnsDefinition<Row>;
+	/** Public filter and sort mappings. */
 	query?: TableQueryDefinition;
+	/** Named schemas for computed or joined results. */
 	results?: Record<string, TableResultDefinition>;
 };
 
@@ -69,9 +77,12 @@ export type ResolvedTableResult = TableResultDefinition;
 
 export type ResolvedTableQueryConfig = {
 	tableKeys: {
+		/** Public filter keys mapped to column names. */
 		filters?: Record<string, string>;
+		/** Public sort keys mapped to column names. */
 		sorts?: Record<string, string>;
 	};
+	/** Default filter operators keyed by filter name. */
 	operators?: Record<string, FilterOperator>;
 };
 
@@ -79,6 +90,7 @@ export type ResolvedTableDefinition<Name extends string = string> = {
 	name: Name;
 	columns: Readonly<Record<string, ResolvedTableColumn>>;
 	schema: ZodObject;
+	/** Public filter and sort mappings. */
 	query?: TableQueryDefinition;
 	queryConfig: ResolvedTableQueryConfig;
 	results: Readonly<Record<string, ResolvedTableResult>>;
@@ -86,6 +98,7 @@ export type ResolvedTableDefinition<Name extends string = string> = {
 	priority: number;
 };
 
+/** A registered table definition. Describes queries without creating or migrating the table. */
 export type TableDefinition<Name extends string = string> = {
 	name: Name;
 	resolve(adapter: DatabaseAdapter): ResolvedTableDefinition<Name>;
@@ -123,7 +136,9 @@ type CoreTableDefinitionInput<Name extends keyof LucidDB> =
 
 type AnyTableDefinitionInput = {
 	columns: Readonly<Record<string, TableColumnDefinition | undefined>>;
+	/** Public filter and sort mappings. */
 	query?: TableQueryDefinition;
+	/** Named schemas for computed or joined results. */
 	results?: Record<string, TableResultDefinition>;
 };
 

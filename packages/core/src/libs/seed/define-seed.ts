@@ -1,9 +1,9 @@
 import type { Seed } from "./types.js";
 
 /**
- * A typed helper for authoring repeatable project or plugin data seeds. Seeds
- * receive Lucid's service context, allowing direct database access or use of
- * the separately imported toolkit as its capabilities grow.
+ * Defines a repeatable data seed. Use the supplied service context for database
+ * queries or createToolkit(context) for content helpers. Seeds may run more than
+ * once, so check for existing data or use upserts. Throw to report failure.
  *
  * @example
  * export default defineSeed(async (context) => {

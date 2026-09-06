@@ -35,6 +35,25 @@ export const isCollectionBuilder = (
 	"moveFields" in value &&
 	typeof value.moveFields === "function";
 
+/**
+ * Defines a document collection and its fields. Register it in config or default export it from the collections directory.
+ *
+ * @example
+ * ```ts
+ * const pages = new CollectionBuilder("pages", {
+ *   mode: "multiple",
+ *   details: { labels: { singular: "Page", plural: "Pages" } },
+ *   revisions: true,
+ * })
+ *   .addText("title", {
+ *     useAsLabel: true,
+ *     validation: { required: true },
+ *   })
+ *   .addRepeater("links")
+ *     .addLink("link")
+ *   .endRepeater();
+ * ```
+ */
 class CollectionBuilder<
 	const TCollectionKey extends string = string,
 > extends FieldBuilder {
@@ -76,6 +95,7 @@ class CollectionBuilder<
 	}
 	// ------------------------------------
 	// Builder Methods
+	/** Adds a single-line text input. */
 	addText(
 		key: string,
 		props?: FieldOptions<"text"> & CollectionLabelFieldOptions,
@@ -84,6 +104,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a numeric input. */
 	addNumber(
 		key: string,
 		props?: FieldOptions<"number"> & CollectionLabelFieldOptions,
@@ -92,6 +113,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a slider with one or two numeric values. */
 	addRange(
 		key: string,
 		props?: FieldOptions<"range"> & CollectionListFieldOptions,
@@ -100,6 +122,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a boolean checkbox. */
 	addCheckbox(
 		key: string,
 		props?: FieldOptions<"checkbox"> & CollectionListFieldOptions,
@@ -108,6 +131,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a dropdown storing the selected option value. */
 	addSelect(
 		key: string,
 		props?: FieldOptions<"select"> & CollectionLabelFieldOptions,
@@ -116,6 +140,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a multiline plain-text input. */
 	addTextarea(
 		key: string,
 		props?: FieldOptions<"textarea"> & CollectionLabelFieldOptions,
@@ -124,6 +149,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a date input with optional time selection. */
 	addDateTime(
 		key: string,
 		props?: FieldOptions<"datetime"> & CollectionLabelFieldOptions,
@@ -132,6 +158,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a user picker. Values are user ID arrays, even for single selection. */
 	addUser(
 		key: string,
 		props?: FieldOptions<"user"> & CollectionListFieldOptions,
@@ -140,6 +167,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a media picker. Values are media ID arrays, even for single selection. */
 	addMedia(
 		key: string,
 		props?: FieldOptions<"media"> & CollectionListFieldOptions,
@@ -148,6 +176,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a document picker restricted to the configured collection keys. */
 	addRelation(
 		key: string,
 		props: FieldOptions<"relation"> & CollectionListFieldOptions,
@@ -156,6 +185,7 @@ class CollectionBuilder<
 		this.#fieldCollectionHelper(key, props);
 		return this;
 	}
+	/** Adds a color picker. */
 	addColor(
 		key: string,
 		props?: FieldOptions<"color"> & CollectionLabelFieldOptions,

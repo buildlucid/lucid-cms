@@ -230,25 +230,40 @@ const createBrickView = <
 	} as unknown as DocumentBrickView<TDocument, TBrick, THasLocale>;
 };
 
-/** Wraps a document and reads translated fields using the supplied locale. */
+/**
+ * Wraps a document with field, brick and reference helpers for one locale.
+ * Pass the response's sibling refs registry to resolve relation values.
+ *
+ * @example
+ * ```ts
+ * const result = await client.documents.getSingle({
+ *   collectionKey: "pages",
+ *   version: "published"
+ * });
+ * if (result.error) throw new Error(result.error.message);
+ *
+ * const page = createDocumentView({
+ *   document: result.data,
+ *   refs: result.refs,
+ *   locale: "en",
+ * });
+ * const title = page.field("title").value();
+ * ```
+ */
 export function createDocumentView<TDocument extends CollectionDocument>(
 	input: { document: TDocument } & DocumentViewOptionsWithLocale<TDocument>,
 ): DocumentView<TDocument, true>;
-/** Wraps a document with typed helpers for fields, bricks, refs, and locales. */
 export function createDocumentView<TDocument extends CollectionDocument>(
 	input: { document: TDocument } & DocumentViewOptions<TDocument>,
 ): DocumentView<TDocument, false>;
-/** Returns undefined when the document is null or undefined. */
 export function createDocumentView(
 	input: { document: null | undefined } & DocumentViewOptions,
 ): undefined;
-/** Wraps an optional document and reads translated fields using the supplied locale. */
 export function createDocumentView<TDocument extends CollectionDocument>(
 	input: {
 		document: TDocument | null | undefined;
 	} & DocumentViewOptionsWithLocale<TDocument>,
 ): DocumentView<TDocument, true> | undefined;
-/** Wraps an optional document with typed helpers when it is present. */
 export function createDocumentView<TDocument extends CollectionDocument>(
 	input: {
 		document: TDocument | null | undefined;

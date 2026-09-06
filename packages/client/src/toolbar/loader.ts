@@ -54,7 +54,7 @@ const navigateToExitUrl = (targetWindow: Window, exitUrl: URL): void => {
 	link.remove();
 };
 
-/** Initializes one long-lived toolbar controller for the current window. */
+/** Initializes a toolbar for the current window, replacing any previous toolbar. Returns an inactive controller during SSR or inside a builder preview. */
 export const setupToolbar = (
 	options: ToolbarOptions = {},
 ): ToolbarController => {

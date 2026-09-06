@@ -14,16 +14,23 @@ type ToolkitServiceKey = Extract<keyof ToolkitServices, string>;
  *
  * @example
  * ```ts
- * type SearchToolkit = ReturnType<typeof createSearchToolkit>;
+ * const createArticlesToolkit = (core: CoreToolkit) => ({
+ *   recent: () => core.documents.getMultiple({
+ *     collectionKey: "articles",
+ *     version: "published",
+ *     query: { perPage: 5 },
+ *   }),
+ * });
+ * type ArticlesToolkit = ReturnType<typeof createArticlesToolkit>;
  *
- * const searchToolkit = defineToolkit({
- *   key: "search",
- *   create: ({ context, core }) => createSearchToolkit(context, core.documents),
+ * const articlesToolkit = defineToolkit({
+ *   key: "articles",
+ *   create: ({ core }) => createArticlesToolkit(core),
  * });
  *
  * declare module "@lucidcms/core/types" {
  *   interface ToolkitServices {
- *     search: SearchToolkit;
+ *     articles: ArticlesToolkit;
  *   }
  * }
  * ```

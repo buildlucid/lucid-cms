@@ -7,6 +7,7 @@ import {
 	SUPPORTED_RUNTIME_ADAPTER_KEY,
 } from "./constants.js";
 
+/** Processes and delivers images with Sharp on the Node runtime. */
 const plugin = (): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,

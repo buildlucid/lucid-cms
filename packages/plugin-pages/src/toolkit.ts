@@ -7,6 +7,7 @@ import type {
 	ToolkitDocumentsGetSingleQuery,
 } from "@lucidcms/core/types";
 
+/** Collection, version and full path to look up. Additional query options control included content. */
 export type PagesGetByFullSlugInput<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,
 > = Omit<ToolkitDocumentsGetSingleInput<TCollectionKey>, "query"> & {
@@ -34,6 +35,7 @@ const createPagesToolkit = (core: CoreToolkit) => ({
 		}),
 });
 
+/** Page lookup helpers available on toolkit.pages when the pages plugin is configured. */
 export type PagesToolkit = ReturnType<typeof createPagesToolkit>;
 
 declare module "@lucidcms/core/types" {

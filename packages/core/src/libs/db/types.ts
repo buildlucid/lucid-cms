@@ -84,10 +84,14 @@ export type DatabaseConnection = {
 	destroy: () => Promise<void>;
 };
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
+/** A project-owned database migration. Use the supplied context for database access. */
 export type ExternalMigration = {
+	/** Apply the migration. Throw on failure. */
 	up: (context: ServiceContext) => Promise<void>;
+	/** Reverse the migration when rollback is supported. */
 	down?: (context: ServiceContext) => Promise<void>;
 };
+/** A migration with a unique name beginning with a 13-digit timestamp. */
 export type MigrationDefinition = {
 	name: string;
 	migration: ExternalMigration;

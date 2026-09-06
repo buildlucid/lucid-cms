@@ -12,23 +12,32 @@ import type {
 } from "../../email/types.js";
 import { runToolkitService } from "../utils.js";
 
+/** Template and recipients for a queued email. Success means the send was queued, not delivered. */
 export type ToolkitEmailSendInput = {
+	/** Recipient email address. */
 	to: string;
+	/** Subject text or callback receiving template data. */
 	subject: EmailSubject;
+	/** Registered Mustache template name. */
 	template: string;
 	cc?: string;
 	bcc?: string;
 	replyTo?: string;
+	/** Delivery priority. Defaults to normal. */
 	priority?: EmailPriority;
 	attachments?: EmailAttachment[];
+	/** Values passed to the template. */
 	data: Record<string, unknown>;
+	/** Rules for retaining and displaying template data in email history. */
 	storage?: EmailStorageConfig;
+	/** Sender overrides. Omitted values use config.email.from. */
 	from?: {
 		email?: string;
 		name?: string;
 	};
 };
 
+/** Queued job ID and the email record used to track delivery. */
 export type ToolkitEmailSendResult = {
 	jobId: string;
 	email: Email;

@@ -9,6 +9,7 @@ import {
 import resolvePluginOptions from "./services/plugin-options.js";
 import type { RedirectsPluginOptions } from "./types.js";
 
+/** Registers the redirects collection. The redirects collection key must be unused. */
 const plugin: LucidPlugin<RedirectsPluginOptions> = (givenOptions) =>
 	definePlugin({
 		key: PLUGIN_KEY,

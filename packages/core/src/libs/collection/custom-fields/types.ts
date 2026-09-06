@@ -105,7 +105,7 @@ export const fieldTypes = [
 export type FieldTypes = (typeof fieldTypes)[number];
 
 // -----------------------------------------------
-// Shared Field ResolvedLucidConfig / Registry Metadata
+// Shared field configuration and registry metadata
 export type SharedFieldConfig = {
 	key: string;
 	type: FieldTypes;
@@ -123,14 +123,21 @@ export type FieldWidth = (typeof fieldWidths)[number];
 /** Controls how structural fields shape their children in content responses. */
 export type StructuralFieldOutput = "nested" | "inline";
 
+/** Admin presentation. Hidden or disabled fields are not an access-control boundary. */
 export type FieldUIConfig = {
+	/** Hide the input from editors. */
 	hidden?: boolean;
+	/** Display the input without allowing edits. */
 	disabled?: boolean;
+	/** Show or hide the field according to other field values. */
 	condition?: FieldConditionConfig;
+	/** Width on the 12-column editor grid. */
 	width?: FieldWidth;
 };
 
+/** Required-value and Zod checks. Validation must preserve the input value. */
 export type FieldValidation<Value> = {
+	/** Require a non-empty value. */
 	required?: boolean;
 	/** Validates the existing value. Schemas that change it are rejected. */
 	zod?: ZodType<Value, Value>;
@@ -190,6 +197,7 @@ export type FieldStaticConfig<T extends string = string> = {
 	capabilities: FieldCapabilities;
 };
 
+/** A named generation instruction editors can choose. */
 export type CustomFieldGuidanceConfig = {
 	key: string;
 	label: AdminCopyDescriptor;
@@ -198,11 +206,14 @@ export type CustomFieldGuidanceConfig = {
 
 export type CustomFieldAiConfig<T extends FieldTypes = FieldTypes> = {
 	enabled: boolean;
+	/** Additional instructions sent when generating this field. */
 	instructions?: string;
 	guidance: CustomFieldGuidanceConfig[];
+	/** Supply additional text or JSON context for generation. */
 	context?: CustomFieldAiContextCallback<T>;
 };
 
+/** Labelled text or JSON supplied to the generation prompt. */
 export type CustomFieldAiContextItem =
 	| {
 			type: "text";
@@ -225,14 +236,20 @@ export type CustomFieldAiContext<T extends FieldTypes = FieldTypes> = {
 	};
 };
 
+/** Receives the collection, optional brick, field and locale selection. Return additional labelled text or JSON context. */
 export type CustomFieldAiContextCallback<T extends FieldTypes = FieldTypes> = (
 	context: CustomFieldAiContext<T>,
 ) => CustomFieldAiContextItem[] | Promise<CustomFieldAiContextItem[]>;
 
+/** Optional AI generation controls for a field. */
 export type CustomFieldUserAiConfig<T extends FieldTypes = FieldTypes> = {
+	/** Enable generation for this field when AI features are available. */
 	enabled?: boolean;
+	/** Additional instructions sent when generating this field. */
 	instructions?: string;
+	/** Named generation instructions offered to editors. */
 	guidance?: CustomFieldGuidanceConfig[];
+	/** Supply additional text or JSON context for generation. */
 	context?: CustomFieldAiContextCallback<T>;
 };
 
@@ -272,8 +289,12 @@ export type CustomFieldMap = {
 
 // -----------------------------------------------
 // Generic Types
+
+/** Field configuration including its key and type. */
 export type FieldConfig<T extends FieldTypes> = CustomFieldMap[T]["config"];
+/** Options accepted by the matching builder method. */
 export type FieldOptions<T extends FieldTypes> = CustomFieldMap[T]["props"];
+/** Value returned by the matching field type. */
 export type FieldResponse<T extends FieldTypes> = CustomFieldMap[T]["response"];
 
 export type FieldValue =
@@ -326,6 +347,7 @@ export type FieldRelationValidationInput = Record<string, number[]>;
 // -----------------------------------------------
 // Validation/Errors
 export type CustomFieldErrorItem = {
+	/** Show or hide the field according to other field values. */
 	condition?: (...args: unknown[]) => boolean;
 	message: ErrorCopy;
 };

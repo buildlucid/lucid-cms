@@ -9,6 +9,7 @@ import {
 import type { CloudflareImagesPluginOptions } from "./types.js";
 import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
+/** Provides Cloudflare Images transformations and adds the Images binding to generated Wrangler config. Requires the Cloudflare runtime. */
 const plugin = (
 	pluginOptions: CloudflareImagesPluginOptions = {},
 ): LucidPluginDefinition =>

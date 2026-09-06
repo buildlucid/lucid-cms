@@ -6,6 +6,7 @@ import type {
 import type { LibSQLAdapter } from "./index.js";
 import type { LibsqlDialectConfig } from "./lib/kysely-libsql.js";
 
+/** libSQL URL, authentication and client options. */
 export type LibSQLAdapterOptions = LibsqlDialectConfig;
 export type AdapterOptionsType = LibSQLAdapterOptions;
 

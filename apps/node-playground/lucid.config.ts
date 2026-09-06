@@ -134,7 +134,10 @@ export default defineConfig({
 		// },
 		plugins: [
 			workerQueuePlugin(),
-			filesystemPlugin(),
+			filesystemPlugin({
+				// uploadDir: "uploads",
+				// secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
+			}),
 			sharpPlugin(),
 			githubAuthPlugin({
 				clientId: env.GITHUB_CLIENT_ID,
@@ -194,15 +197,11 @@ export default defineConfig({
 			redirectsPlugin({
 				collections: ["page"],
 			}),
-			// redisPlugin({
-			// 	connection: env.REDIS_CONNECTION,
-			// }),
 			nodemailerPlugin({
 				transporter: transporter,
 			}),
-			// filesystemPlugin({
-			// 	uploadDir: "uploads",
-			// 	secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,
+			// redisPlugin({
+			// 	connection: env.REDIS_CONNECTION,
 			// }),
 			// resendPlugin({
 			// 	apiKey: env.LUCID_RESEND_API_KEY,
@@ -221,11 +220,9 @@ export default defineConfig({
 			// 	},
 			// }),
 		],
-		// build: {
-		// 	paths: {
-		// 		outDir: "out",
-		// 	},
-		// },
+		build: {
+			outDir: "out",
+		},
 		brand: {
 			name: "Playground",
 		},

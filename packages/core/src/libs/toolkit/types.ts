@@ -40,17 +40,21 @@ export interface ToolkitServices {}
 /** Core helpers and any configured plugin services bound to a service context. */
 export type Toolkit = CoreToolkit & Partial<ToolkitServices>;
 
+/** A named service factory registered by a plugin. */
 export type ToolkitDefinitionInput<
 	TKey extends string = string,
 	TService extends object = object,
 > = {
+	/** Unique toolkit namespace. Declare the same key in ToolkitServices for typed access. */
 	readonly key: TKey;
+	/** Create a service synchronously from the current context and core helpers. Async methods on the returned service are supported. */
 	readonly create: (props: {
 		context: ToolkitContext;
 		core: CoreToolkit;
 	}) => TService & { then?: never };
 };
 
+/** A toolkit extension returned by defineToolkit. */
 export type ToolkitDefinition<
 	TKey extends string = string,
 	TService extends object = object,

@@ -51,6 +51,7 @@ const createCoreExtensions = (): Extensions => {
 	]);
 };
 
+/** Default Tiptap extensions for Lucid content, including media, documents, variables and embedded bricks. */
 export const extensions = createCoreExtensions();
 
 /** Merges custom extensions by name over Lucid's defaults. */

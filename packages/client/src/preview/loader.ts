@@ -7,7 +7,7 @@ const inactiveController = (): PreviewController => ({
 	cleanup: () => undefined,
 });
 
-/** Lazily initializes Lucid's runtime inside its builder preview iframe. */
+/** Initializes the builder preview runtime when inside a Lucid preview iframe. Returns an inactive controller during SSR or outside a builder preview. */
 export const setupPreview = (): PreviewController => {
 	const targetWindow = getWindow();
 	if (!targetWindow) return inactiveController();

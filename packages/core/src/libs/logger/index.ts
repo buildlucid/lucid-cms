@@ -232,6 +232,7 @@ export const destroyLogger = async () => {
  */
 export const getLogger = (): LucidLogger => logger;
 
+/** Shared Lucid logger. Uses the configured level and transport and adds the active request ID when available. */
 const loggerProxy: LucidLogger = {
 	get level() {
 		return getLogger().level;

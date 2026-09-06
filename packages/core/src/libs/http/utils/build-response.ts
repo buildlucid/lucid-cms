@@ -128,6 +128,8 @@ const buildLinks = (
 
 // --------------------------------------------------
 // Main
+
+/** Builds the standard data, refs, meta and pagination links envelope. Pass the result to hono.json(); this helper does not send a response. */
 const formatAPIResponse = <Data, Refs = never>(
 	c: Context,
 	params: BuildResponseParams<Data, Refs>,

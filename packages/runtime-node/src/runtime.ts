@@ -7,6 +7,7 @@ import type {
 	NodeRuntimeAdapter,
 } from "./types.js";
 
+/** Creates the Node runtime without CLI tooling, for embedded hosts and compiled applications. */
 export const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	let resolvedOptions: NodeAdapterOptions | undefined =
 		typeof options === "function" ? undefined : options;

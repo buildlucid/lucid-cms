@@ -3,6 +3,7 @@ import { copy, normalizeCopy } from "../../../i18n/index.js";
 import FieldBuilder from "../field-builder/index.js";
 import type { BrickConfig, BrickOptions } from "./types.js";
 
+/** A reusable group of fields for fixed, builder or embedded content. Register the brick on a collection. */
 class BrickBuilder extends FieldBuilder {
 	key: string;
 	config: BrickConfig;

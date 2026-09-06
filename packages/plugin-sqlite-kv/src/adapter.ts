@@ -58,6 +58,7 @@ type IncrementTransaction = (
 	incrementOptions?: Omit<KVIncrementParams, "key">,
 ) => KVIncrementResult;
 
+/** Creates KV storage backed by Lucid's SQLite-compatible database. */
 const sqliteKVAdapter = (options: KVAdapterOptions = {}): KVAdapterInstance => {
 	const namespace = options.namespace ?? DEFAULT_KV_NAMESPACE;
 	const namespacePrefix = getKVNamespacePrefix(namespace);

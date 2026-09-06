@@ -1,6 +1,7 @@
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
+/** Factory that returns a configured adapter, synchronously or asynchronously. */
 export type KVAdapter<T = undefined> = T extends undefined
 	? () => KVAdapterInstance | Promise<KVAdapterInstance>
 	: (options: T) => KVAdapterInstance | Promise<KVAdapterInstance>;
@@ -36,62 +37,80 @@ export type KVKeyInput =
 export type KVSetInput<T = unknown> = {
 	key: string;
 	value: T;
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
-	ttlSeconds?: number; // seconds
-	expiresAtSeconds?: number; // unix timestamp in seconds
+	/** Lifetime in seconds, relative to the write. */
+	ttlSeconds?: number;
+	/** Absolute expiry as a Unix timestamp in seconds. */
+	expiresAtSeconds?: number;
 };
 
 export type KVGetParams = {
 	key: string;
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
 };
 
 export type KVSetParams<T = unknown> = {
 	key: string;
 	value: T;
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
-	ttlSeconds?: number; // seconds
-	expiresAtSeconds?: number; // unix timestamp in seconds
+	/** Lifetime in seconds, relative to the write. */
+	ttlSeconds?: number;
+	/** Absolute expiry as a Unix timestamp in seconds. */
+	expiresAtSeconds?: number;
 };
 
 export type KVHasParams = {
 	key: string;
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
 };
 
 export type KVDeleteParams = {
 	key: string;
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
 };
 
 export type KVGetManyParams = {
 	keys: KVKeyInput[];
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
 };
 
 export type KVSetManyParams<T = unknown> = {
 	items: Array<KVSetInput<T>>;
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
-	ttlSeconds?: number; // seconds
-	expiresAtSeconds?: number; // unix timestamp in seconds
+	/** Lifetime in seconds, relative to the write. */
+	ttlSeconds?: number;
+	/** Absolute expiry as a Unix timestamp in seconds. */
+	expiresAtSeconds?: number;
 };
 
 export type KVDeleteManyParams = {
 	keys: KVKeyInput[];
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
 };
 
 export type KVIncrementParams = {
 	key: string;
+	/** Hash the key before accessing the backing store. */
 	hash?: boolean;
-	ttlSeconds?: number; // seconds
-	expiresAtSeconds?: number; // unix timestamp in seconds
+	/** Lifetime in seconds, relative to the write. */
+	ttlSeconds?: number;
+	/** Absolute expiry as a Unix timestamp in seconds. */
+	expiresAtSeconds?: number;
 };
 
 /** Result returned from an atomic counter increment operation. */
 export interface KVIncrementResult {
 	value: number;
-	ttlSeconds?: number; // seconds
+	/** Lifetime in seconds, relative to the write. */
+	ttlSeconds?: number;
 }
 
 /**
@@ -107,6 +126,7 @@ export type KVIncrementCapability = {
 	) => Promise<KVIncrementResult>;
 };
 
+/** Adapter contract used by Lucid. Use the context supplied to each operation for current request and transaction state. */
 export type KVAdapterInstance = {
 	/** The adapter type */
 	type: "kv-adapter";

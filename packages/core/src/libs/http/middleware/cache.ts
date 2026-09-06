@@ -15,7 +15,7 @@ type CacheOptions = {
 	 *
 	 * - "path-only": only the path is used for the cache key, unless you specify includeHeaders
 	 * - "include-query": the query parameters are included in the cache key
-	 * - "static": a static key is used for the cache key
+	 * - "static": supply staticKey to share one key across requests
 	 */
 	mode: "path-only" | "include-query" | "static";
 	/** The headers to include in the cache key. */
@@ -119,7 +119,8 @@ const shouldBypassCache = (c: LucidHonoContext): boolean => {
 };
 
 /**
- * Middleware to cache responses based on the request context and options.
+ * Caches successful JSON response bodies in KV. Include every request value that
+ * changes the response in the key, or use bypass for personalized responses.
  */
 const cache = (options: CacheOptions) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {

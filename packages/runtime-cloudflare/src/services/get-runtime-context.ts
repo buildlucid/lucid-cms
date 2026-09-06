@@ -3,6 +3,7 @@ import { ADAPTER_KEY } from "../constants.js";
 import getCloudflareConnInfo from "../utils/cloudflare-conn-info.js";
 import getNodeConnInfo from "../utils/node-conn-info.js";
 
+/** Describes the runtime capabilities and request connection information. Set compiled to match whether source or built code is running. */
 const getRuntimeContext = (params: {
 	server: "node" | "cloudflare";
 	compiled: boolean;

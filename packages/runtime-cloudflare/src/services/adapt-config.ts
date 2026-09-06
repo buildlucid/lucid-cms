@@ -4,6 +4,7 @@ import type {
 	RuntimeAdaptConfig,
 } from "@lucidcms/core/types";
 
+/** Returns a config definition with runtime-specific setup. The original project configure callback still runs last. */
 const adaptConfig: RuntimeAdaptConfig = (
 	definition: LucidConfigDefinition,
 	meta?: LucidConfigDefinitionMeta,

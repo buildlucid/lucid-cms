@@ -30,6 +30,7 @@ import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
 import getDefaultPostgresConfig from "./utils/get-default-config.js";
 
+/** Database adapter for Postgres. Prefer the postgres factory in project config. */
 export class PostgresAdapter extends DatabaseAdapter {
 	readonly #options:
 		| PostgresAdapterOptions
@@ -330,6 +331,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 	}
 }
 
+/** Uses PostgreSQL. With no options, reads DATABASE_URL. Pass connection options or an environment callback to override it. */
 export const postgres = createDatabaseAdapterCreator(createPostgresAdapter, {
 	adapter: "postgres",
 	resolve: () => new PostgresAdapter(),

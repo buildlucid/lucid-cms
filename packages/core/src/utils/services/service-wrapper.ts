@@ -11,6 +11,27 @@ import type {
 import mergeServiceError from "./utils/merge-errors.js";
 import TransactionError from "./utils/transaction-error.js";
 
+/**
+ * Wraps a service with error conversion and optional database transactions.
+ * The returned function takes a ServiceContext followed by the service's arguments.
+ * Returned errors roll back a transaction opened here; existing transactions are reused.
+ * Adapters without transaction support run the service without one.
+ *
+ * @example
+ * ```ts
+ * const readDocuments = serviceWrapper(
+ *   async (context, collectionKey: string) => {
+ *     const toolkit = createToolkit(context);
+ *     return toolkit.documents.getMultiple({
+ *       collectionKey,
+ *       version: "published",
+ *       query: { perPage: 1 },
+ *     });
+ *   },
+ *   { transaction: false, logError: true },
+ * );
+ * ```
+ */
 const serviceWrapper =
 	<T extends unknown[], R>(
 		fn: ServiceFn<T, R>,

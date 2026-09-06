@@ -13,18 +13,28 @@ export type CodeValue = {
 
 export interface CodeFieldConfig extends SharedFieldConfig {
 	type: "code";
+	/** Copy shown beside the input in the admin. */
 	details: {
+		/** Field name shown to editors. */
 		label?: AdminCopyInput;
+		/** Help text explaining what to enter. */
 		description?: AdminCopyInput;
+		/** Hint shown while the input is empty. */
 		placeholder?: AdminCopyInput;
 	};
+	/** Generation instructions and context for this field. */
 	ai?: CustomFieldUserAiConfig<"code">;
+	/** Store a value per content locale when collection localization is enabled. Defaults to false. */
 	localized?: boolean;
+	/** Initial value for a new field. */
 	default?: CodeValue | null;
 	/** Language options offered in the admin editor. */
 	languages: string[];
+	/** Create a database index for this field. */
 	index?: boolean;
+	/** Editor visibility and layout. */
 	ui?: FieldUIConfig;
+	/** Checks applied when saving field values. */
 	validation?: FieldValidation<CodeValue>;
 }
 

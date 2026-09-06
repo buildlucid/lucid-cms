@@ -32,6 +32,7 @@ import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
 import getDefaultLibSQLConfig from "./utils/get-default-config.js";
 
+/** Database adapter for LibSQL. Prefer the libsql factory in project config. */
 export class LibSQLAdapter extends DatabaseAdapter {
 	readonly #options:
 		| LibsqlDialectConfig
@@ -288,6 +289,7 @@ export class LibSQLAdapter extends DatabaseAdapter {
 	}
 }
 
+/** Uses libSQL. With no options, reads LIBSQL_URL and optional LIBSQL_AUTH_TOKEN. Pass options or an environment callback to override them. */
 export const libsql = createDatabaseAdapterCreator(createLibSQLAdapter, {
 	adapter: "libsql",
 	resolve: () => new LibSQLAdapter(),

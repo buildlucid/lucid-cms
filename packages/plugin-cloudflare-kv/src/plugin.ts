@@ -9,6 +9,7 @@ import {
 import type { PluginOptions } from "./types.js";
 import { createWranglerArtifact } from "./utils/wrangler-artifact.js";
 
+/** Provides KV storage through a Cloudflare binding and contributes its Wrangler configuration. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	const resolvedOptions = pluginOptions ?? {};
 

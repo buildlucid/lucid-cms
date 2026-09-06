@@ -5,6 +5,7 @@ import type {
 } from "@lucidcms/core/types";
 import { ADAPTER_KEY } from "../constants.js";
 
+/** Describes the runtime capabilities and request connection information. Set compiled to match whether source or built code is running. */
 const getRuntimeContext = (params: { compiled: boolean }) =>
 	({
 		runtime: ADAPTER_KEY,

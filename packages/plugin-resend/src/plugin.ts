@@ -15,6 +15,7 @@ type ResendEmailResponse = {
 	id: string;
 };
 
+/** Sends email through Resend, with optional delivery-status webhooks. Configure email.from in Lucid config. */
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	const webhookEnabled = pluginOptions.webhook?.enabled ?? WEBHOOK_ENABLED;
 

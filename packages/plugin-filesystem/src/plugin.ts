@@ -9,6 +9,7 @@ import {
 import routes from "./routes/index.js";
 import type { PluginOptions } from "./types.js";
 
+/** Stores media on the local filesystem and registers upload and download routes. Requires the Node runtime. */
 const plugin = (pluginOptions?: PluginOptions): LucidPluginDefinition => {
 	return definePlugin({
 		key: PLUGIN_KEY,

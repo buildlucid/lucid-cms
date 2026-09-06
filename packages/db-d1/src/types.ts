@@ -12,6 +12,7 @@ export type D1DatabaseBinding = D1Database | D1DatabaseSession;
 
 export type D1AdapterOptions = D1DialectConfig;
 
+/** D1 binding and generated Wrangler database settings. */
 export type D1AdapterBindingOptions = {
 	/**
 	 * Cloudflare D1 binding name. Defaults to "LUCID_D1".
@@ -36,6 +37,7 @@ export type D1AdapterBindingOptions = {
 	remote?: boolean;
 };
 
+/** Resolve a D1 database or binding settings from the current environment. */
 export type D1AdapterOptionsFactory = DatabaseAdapterOptionsFactory<
 	D1AdapterOptions | D1AdapterBindingOptions
 >;

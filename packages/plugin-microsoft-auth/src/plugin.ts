@@ -3,6 +3,7 @@ import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_IDENTIFIER, PLUGIN_KEY } from "./constants.js";
 import type { PluginOptions } from "./types/types.js";
 
+/** Adds Microsoft sign-in. An existing provider with the microsoft key takes precedence. */
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	const tenant = pluginOptions.tenant ?? "organizations";
 

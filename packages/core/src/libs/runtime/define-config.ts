@@ -1,10 +1,10 @@
 import type { LucidConfigDefinition } from "./types.js";
 
 /**
- * Wraps your Lucid CMS config and gives it the right shape for `lucid.config.*`.
- * Use it to pass the runtime/database adapters and return the rest of your
- * config from the `config(env)` callback. Optionally export a named `env`
- * schema to validate and type environment variables.
+ * Defines the runtime, database and project settings in `lucid.config.*`.
+ * Return project settings from the `config(env)` callback. Export a named `env`
+ * schema to validate environment variables. Generated types provide typed env
+ * properties; parsing the schema also works before those types exist.
  *
  * @example
  * ```ts
@@ -19,10 +19,8 @@ import type { LucidConfigDefinition } from "./types.js";
  * export default defineConfig({
  *   runtime: node,
  *   db: sqlite,
- *   config: (env) => ({
- *     secrets: env.SECRET,
- *     collections: [],
- *     plugins: [],
+ *   config: (environment) => ({
+ *     secrets: env.parse(environment).SECRET,
  *   }),
  * });
  * ```

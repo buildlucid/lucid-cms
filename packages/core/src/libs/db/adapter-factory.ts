@@ -4,10 +4,12 @@ import type {
 } from "../runtime/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 
+/** Resolve connection options from parsed environment values. */
 export type DatabaseAdapterOptionsFactory<TOptions> = (
 	env: EnvironmentVariables,
 ) => TOptions | Promise<TOptions>;
 
+/** Resolves an adapter after environment variables are available. */
 export type DatabaseAdapterFactory<
 	TAdapter extends DatabaseAdapter = DatabaseAdapter,
 > = {
@@ -18,6 +20,7 @@ export type DatabaseAdapterFactory<
 	};
 };
 
+/** Callable database factory that can also be passed directly as defineConfig.db. */
 export type DatabaseAdapterCreator<
 	TAdapter extends DatabaseAdapter = DatabaseAdapter,
 > = DatabaseAdapterFactory<TAdapter> & {

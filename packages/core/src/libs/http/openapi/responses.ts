@@ -59,6 +59,7 @@ const linksObject: OpenAPIV3.SchemaObject = {
 	},
 };
 
+/** OpenAPI schema for Lucid's standard error response. */
 export const defaultErrorResponse = {
 	type: "object",
 	description: translate("server:core.openapi.response.default"),
@@ -93,12 +94,16 @@ export const defaultErrorResponse = {
 } as const;
 
 /**
- * Used to construct a response object for OpenAPI
+ * Describes the standard success envelope and default Lucid error response.
  */
 const responses = (config?: {
+	/** OpenAPI schema for the data property. Omission describes a 204 response. */
 	dataSchema?: unknown;
+	/** OpenAPI schema for the sibling refs registry. */
 	refsSchema?: unknown;
+	/** Include pagination metadata and links. */
 	paginated?: boolean;
+	/** Describe an unspecified nullable object instead of envelope properties. */
 	noProperties?: boolean;
 }) => {
 	const response: Record<

@@ -162,19 +162,27 @@ export type CollectionDocumentMultipleInclude =
 	| "meta"
 	| CollectionDocumentRefInclude;
 
+/** Filters and optional content to include when reading one document. */
 export type CollectionDocumentSingleQuery<
 	TCollectionKey extends string = string,
 > = {
+	/** One filter object combines conditions with AND; an array combines filter groups with OR. */
 	filter?: CollectionDocumentFilterInput<TCollectionKey>;
+	/** Request bricks, metadata or shared references in the response. */
 	include?: CollectionDocumentSingleInclude[];
 };
 
+/** Filters, sorting, includes and pagination for a document list. */
 export type CollectionDocumentMultipleQuery<
 	TCollectionKey extends string = string,
 > = {
+	/** One filter object combines conditions with AND; an array combines filter groups with OR. */
 	filter?: CollectionDocumentFilterInput<TCollectionKey>;
 	sort?: CollectionDocumentSorts<TCollectionKey>;
+	/** Request metadata or shared references in the response. */
 	include?: CollectionDocumentMultipleInclude[];
+	/** One-based page number. */
 	page?: QueryParamPagination["page"];
+	/** Maximum documents per page. Use -1 for all matches. */
 	perPage?: QueryParamPagination["perPage"];
 };

@@ -47,6 +47,7 @@ export type CreateServiceContextOptions = {
 	};
 };
 
+/** Database, adapters and request information passed to custom services, hooks and jobs. Use the supplied context for work in the current transaction. */
 export type ServiceContext = {
 	db: LucidDatabase;
 	config: ResolvedLucidConfig;
@@ -73,17 +74,22 @@ export type ServiceProps<T> = {
 	[key: string]: unknown;
 };
 
+/** Error handling and transaction options for `serviceWrapper`. */
 export type ServiceWrapperConfig = {
 	/** Start a transaction when supported. Existing transactions are reused. */
 	transaction: boolean;
+	/** Fallback error details merged with service errors. */
 	defaultError?: Omit<Partial<LucidErrorData>, "zod" | "errors">;
+	/** Log caught exceptions. Defaults to false. */
 	logError?: boolean;
 };
 
+/** An async result with either data or an error. Check `error` before using `data`. */
 export type ServiceResponse<T> = Promise<
 	{ error: LucidErrorData; data: undefined } | { error: undefined; data: T }
 >;
 
+/** A service that receives its context first and returns a Lucid result. */
 export type ServiceFn<T extends unknown[], R> = (
 	service: ServiceContext,
 	...args: T

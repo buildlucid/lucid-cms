@@ -32,7 +32,9 @@ export interface LucidClient {
 }
 
 /**
- * Returns a client for Lucid's external content endpoints.
+ * Creates a client for Lucid's external content endpoints.
+ * Results contain data with sibling refs, meta, links and response properties.
+ * Check error before reading data. Pass request.signal to cancel a request.
  *
  * @example
  * ```ts
@@ -46,7 +48,7 @@ export interface LucidClient {
  * 	},
  * });
  *
- * const page = await client.documents.getSingle({
+ * const result = await client.documents.getSingle({
  * 	collectionKey: "page",
  * 	version: "published",
  * 	query: {

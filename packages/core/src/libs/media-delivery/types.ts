@@ -6,16 +6,23 @@ import type {
 } from "../../utils/services/types.js";
 import type { AdapterLifecycleContext } from "../runtime/types.js";
 
+/** Image transformation request. Supported options depend on the delivery adapter. */
 export type MediaTransformationOptions = {
+	/** Target width in pixels. */
 	width?: number;
+	/** Target height in pixels. */
 	height?: number;
 	fit?: "cover" | "contain" | "fill" | "inside" | "outside";
+	/** Normalized crop focus coordinates from 0 to 1. */
 	focalPoint?: { x: number; y: number };
 	format?: "webp" | "avif" | "jpeg" | "png";
+	/** Output quality from 1 to 100. */
 	quality?: number;
+	/** Clockwise rotation in degrees. */
 	rotate?: 0 | 90 | 180 | 270;
 };
 
+/** Return processed: false to leave the original image unchanged, or provide the processed bytes and file metadata. */
 export type MediaDeliveryProcessResult =
 	| {
 			processed: false;
@@ -26,6 +33,7 @@ export type MediaDeliveryProcessResult =
 			mimeType: string;
 			size: number;
 			extension: string;
+			/** Whether Lucid may cache these processed bytes in media storage. */
 			shouldStore: boolean;
 	  };
 
@@ -64,6 +72,7 @@ export type MediaDeliveryResolveFileParams = {
 	transformation?: MediaTransformationOptions;
 };
 
+/** Serve through Lucid, use an external URL, or report that the requested file is unsupported. */
 export type MediaDeliveryFileResolution =
 	| { type: "lucid" }
 	| { type: "external"; url: string }
@@ -78,7 +87,9 @@ export type MediaDeliveryVideoSource = {
 export type MediaDeliveryVideoThumbnail = {
 	url: string;
 	mimeType: string;
+	/** Target width in pixels. */
 	width?: number | null;
+	/** Target height in pixels. */
 	height?: number | null;
 };
 
@@ -91,22 +102,26 @@ export type MediaDeliveryResolveFile = (
 	params: MediaDeliveryResolveFileParams,
 ) => MediaDeliveryFileResolution;
 
+/** Return playback sources and an optional thumbnail, or null when video delivery is unsupported. */
 export type MediaDeliveryResolveVideo = (params: {
 	host: string;
 	file: MediaDeliveryFile;
 }) => MediaDeliveryVideo | null;
 
+/** Return only public JSON-safe provider metadata for content API responses. */
 export type MediaDeliveryResolveResponseData = (params: {
 	host: string;
 	file: MediaDeliveryFile;
 }) => MediaAdapterData | null;
 
+/** Factory that returns a configured adapter, synchronously or asynchronously. */
 export type MediaDeliveryAdapter<T = undefined> = T extends undefined
 	? () => MediaDeliveryAdapterInstance | Promise<MediaDeliveryAdapterInstance>
 	: (
 			options: T,
 		) => MediaDeliveryAdapterInstance | Promise<MediaDeliveryAdapterInstance>;
 
+/** Adapter contract used by Lucid. Use the context supplied to each operation for current request and transaction state. */
 export type MediaDeliveryAdapterInstance = {
 	/** The adapter type. */
 	type: "media-delivery-adapter";

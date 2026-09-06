@@ -15,6 +15,7 @@ import type { ExternalScope } from "../libs/permission/external-scopes.js";
 import type { QueueAdapterInstance } from "../libs/queue/types.js";
 import type { AdapterRuntimeContext } from "../libs/runtime/types.js";
 
+/** Authenticated admin identity and permissions set by authenticateMiddleware. */
 export type LucidAuth = {
 	id: number;
 	username: string;
@@ -63,6 +64,7 @@ export type LucidOAuthExternalAuth = LucidExternalAuthBase & {
 		  };
 };
 
+/** External credential, scopes and principal set by externalAuthenticationMiddleware. */
 export type LucidExternalAuth =
 	| LucidApiKeyExternalAuth
 	| LucidOAuthExternalAuth;
@@ -101,4 +103,5 @@ export type LucidHonoGeneric = {
 	Variables: LucidHonoVariables;
 };
 
+/** Hono request context carrying Lucid variables. Prefer defineRoute or createMiddleware for direct access to service helpers. */
 export type LucidHonoContext = Context<LucidHonoGeneric>;

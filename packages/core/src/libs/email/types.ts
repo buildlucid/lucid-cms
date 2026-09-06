@@ -31,6 +31,7 @@ export type EmailTemplateData = Record<string, unknown> & {
 	context: EmailContextData;
 };
 
+/** A subject string or callback receiving template data, including Lucid context. */
 export type EmailSubject = string | ((data: EmailTemplateData) => string);
 
 /**
@@ -84,14 +85,18 @@ export type EmailAttachment =
 			contentId: string;
 	  });
 
+/** Provider delivery outcome. Include an externalMessageId when later webhook events can update delivery status. */
 export type EmailStrategyResponse = {
 	success: boolean;
 	deliveryStatus: EmailDeliveryStatus;
 	message: TranslatableCopy;
+	/** Provider message identifier used to correlate delivery events. */
 	externalMessageId?: string | null;
+	/** Provider metadata retained with the send result. */
 	data?: Record<string, unknown> | null;
 };
 
+/** Rendered email and delivery options passed to the configured provider. */
 export type EmailAdapterSendParams = {
 	to: string;
 	subject: string;
@@ -108,18 +113,22 @@ export type EmailAdapterSendParams = {
 	headers?: EmailHeaders | null;
 	attachments?: EmailAttachment[];
 	data: Record<string, unknown>;
+	/** Name of the template used to render this email. */
 	template: string;
 };
 
+/** Send the rendered email and report provider success or failure. */
 export type EmailAdapterServiceSend = (
 	context: ServiceContext,
 	params: EmailAdapterSendParams,
 ) => Promise<EmailStrategyResponse>;
 
+/** Factory that returns a configured adapter, synchronously or asynchronously. */
 export type EmailAdapter<T = undefined> = T extends undefined
 	? () => EmailAdapterInstance | Promise<EmailAdapterInstance>
 	: (options: T) => EmailAdapterInstance | Promise<EmailAdapterInstance>;
 
+/** Adapter contract used by Lucid. Use the context supplied to each operation for current request and transaction state. */
 export type EmailAdapterInstance = {
 	/** The adapter type */
 	type: "email-adapter";

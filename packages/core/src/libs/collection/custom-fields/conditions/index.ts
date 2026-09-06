@@ -23,11 +23,13 @@ export const fieldConditionTranslationScopes = [
 	"any",
 ] as const;
 
+/** Which translation of the referenced field to compare. */
 export type FieldConditionTranslationScope =
 	(typeof fieldConditionTranslationScopes)[number];
 
 export type FieldConditionRuleValue = string | number | boolean | null;
 
+/** Compare another field by key. Empty checks do not take a comparison value. */
 export type FieldConditionRule = {
 	field: string;
 } & (
@@ -43,14 +45,27 @@ export type FieldConditionRule = {
 
 export type FieldConditionExpression = FieldConditionRule | FieldConditionGroup;
 
+/** Match every expression with `all`, or at least one with `any`. Groups may be nested. */
 export type FieldConditionGroup =
 	| { all: FieldConditionExpression[]; any?: never }
 	| { any: FieldConditionExpression[]; all?: never };
 
 export type FieldConditionAction = "show" | "hide";
 
+/**
+ * Show or hide a field using other field values.
+ *
+ * @example
+ * ```ts
+ * const condition: FieldConditionConfig = {
+ *   all: [{ field: "showSubtitle", operator: "equals", value: true }],
+ * };
+ * ```
+ */
 export type FieldConditionConfig = FieldConditionGroup & {
+	/** Show when the condition matches by default. Use hide to invert the result. */
 	action?: FieldConditionAction;
+	/** Read the same locale, the default locale or any locale. */
 	translationScope?: FieldConditionTranslationScope;
 };
 

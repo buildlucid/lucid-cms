@@ -38,6 +38,7 @@ import type {
 } from "../libs/resources/types.js";
 import type { SeedDefinition } from "../libs/seed/types.js";
 
+/** Content languages available to editors. The default locale must be included in `locales`. */
 export type LocalizationConfig = {
 	/**
 	 * A list of locales you want to write content in.
@@ -62,6 +63,7 @@ export type LocalizationConfig = {
 	defaultLocale: string;
 };
 
+/** Languages offered for the admin interface and server messages. Defaults to English. */
 export type I18nConfig = {
 	/**
 	 * A list of locales supported by the Lucid CMS interface.
@@ -86,36 +88,61 @@ export type I18nConfig = {
 	defaultLocale: string;
 };
 
+/** Content Security Policy directives. Use CSP source expressions such as `"'self'"` or an HTTPS origin. */
 export type SecurityContentSecurityPolicy = {
+	/** Fallback sources for directives without their own source list. */
 	defaultSrc?: string[];
+	/** Allowed document base URLs. */
 	baseUri?: string[];
+	/** Allowed child browsing contexts. */
 	childSrc?: string[];
+	/** Allowed fetch, WebSocket and other connection destinations. */
 	connectSrc?: string[];
+	/** Allowed font sources. */
 	fontSrc?: string[];
+	/** Allowed form submission destinations. */
 	formAction?: string[];
+	/** Origins allowed to embed the app. */
 	frameAncestors?: string[];
+	/** Allowed iframe sources. */
 	frameSrc?: string[];
+	/** Allowed image sources. */
 	imgSrc?: string[];
+	/** Allowed web app manifest sources. */
 	manifestSrc?: string[];
+	/** Allowed audio and video sources. */
 	mediaSrc?: string[];
+	/** Allowed embedded object sources. */
 	objectSrc?: string[];
+	/** Sandbox restrictions to enable. */
 	sandbox?: string[];
+	/** Allowed script sources. */
 	scriptSrc?: string[];
+	/** Allowed inline script attributes. */
 	scriptSrcAttr?: string[];
+	/** Allowed script element sources. */
 	scriptSrcElem?: string[];
+	/** Allowed style sources. */
 	styleSrc?: string[];
+	/** Allowed inline style attributes. */
 	styleSrcAttr?: string[];
+	/** Allowed stylesheet element sources. */
 	styleSrcElem?: string[];
+	/** Use an empty array to request HTTPS upgrades for insecure resources. */
 	upgradeInsecureRequests?: string[];
+	/** Allowed worker sources. */
 	workerSrc?: string[];
+	/** Trusted Types enforcement targets. */
 	requireTrustedTypesFor?: string[];
+	/** Allowed Trusted Types policy names. */
 	trustedTypes?: string[];
 };
 
+/** Proxy trust, cross-origin access and response headers for the HTTP app. */
 export type HttpSecurityConfig = {
 	/**
 	 * Whether proxy-forwarded protocol headers should be trusted when
-	 * determining secure request context.
+	 * determining secure request context. Defaults to false.
 	 */
 	trustProxyHeaders?: boolean;
 	/**
@@ -132,22 +159,29 @@ export type HttpSecurityConfig = {
 		allowHeaders?: string[];
 	};
 	/**
-	 * The secure headers configuration.
+	 * Response security headers. Use true for the standard header value, false to omit it, or a string for an explicit value.
 	 */
 	headers?: {
 		/**
 		 * Content-Security-Policy directives.
 		 */
 		contentSecurityPolicy?: SecurityContentSecurityPolicy;
+		/** HTTPS transport policy. */
 		strictTransportSecurity?: boolean | string;
+		/** Embedding policy. */
 		xFrameOptions?: boolean | string;
+		/** Referrer information sent to other origins. */
 		referrerPolicy?: boolean | string;
+		/** Who may load this app's resources. */
 		crossOriginResourcePolicy?: boolean | string;
+		/** Cross-origin browsing context isolation. */
 		crossOriginOpenerPolicy?: boolean | string;
+		/** Requirements for cross-origin embedded resources. */
 		crossOriginEmbedderPolicy?: boolean | string;
 	};
 };
 
+/** Routes, app extensions and HTTP security settings. */
 export type HttpConfig = {
 	/**
 	 * HTTP transport and response security settings.
@@ -158,7 +192,7 @@ export type HttpConfig = {
 	 */
 	openAPI?: {
 		/**
-		 * Whether the OpenAPI documentation site is enabled.
+		 * Serve the OpenAPI documentation site. Defaults to false.
 		 */
 		enabled?: boolean;
 	};
@@ -172,15 +206,17 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
+/** Choose which AI tools are available when `ai.enabled` is true. */
 export type AiFeatureConfig = {
-	/* Enables AI Image generation */
+	/** Allow image generation. Defaults to true. */
 	imageGeneration?: boolean;
-	/* Enables AI alt text generation */
+	/** Allow media alt text generation. Defaults to true. */
 	altGeneration?: boolean;
-	/* Enables AI custom field value generation */
+	/** Allow field value generation. Defaults to true. */
 	customFieldGeneration?: boolean;
 };
 
+/** Separate secrets for encryption and signing. Keep these stable between deployments. */
 export type SecretConfig = {
 	/**
 	 * Used to encrypt user secrets and API keys. Must be `64 characters` long.
@@ -200,7 +236,7 @@ export type SecretConfig = {
 	refreshToken: string;
 };
 
-// the version of config that is used in the lucid.config.ts file
+/** Project settings returned by `defineConfig`'s `config` callback. Omitted options use Lucid or plugin defaults. */
 export interface LucidConfig {
 	/** Directories to discover relative to lucid.config. Defaults to src/lucid/<resource>, except public uses ./public. Set false to disable a lookup. */
 	discovery?: ResourceDiscovery;
@@ -245,7 +281,7 @@ export interface LucidConfig {
 	 */
 	logger?: {
 		/**
-		 * The log level to use.
+		 * Minimum severity to write. Defaults to "info".
 		 */
 		level?: LogLevel;
 		/**
@@ -262,7 +298,7 @@ export interface LucidConfig {
 		 */
 		password?: {
 			/**
-			 * Whether password authentication is enabled.
+			 * Allow sign-in with a password. Defaults to true.
 			 */
 			enabled?: boolean;
 		};
@@ -276,7 +312,7 @@ export interface LucidConfig {
 	 */
 	ai?: {
 		/**
-		 * Whether AI features are available in the admin UI and backend feature endpoints.
+		 * Allow AI tools in the admin and API. Defaults to true.
 		 */
 		enabled?: boolean;
 		/**
@@ -340,11 +376,11 @@ export interface LucidConfig {
 			| EmailAdapterInstance
 			| Promise<EmailAdapterInstance>;
 		/**
-		 * When set to true, the plugin will not send emails but will still return as a success
+		 * Report successful email sends without contacting the email provider. Defaults to false.
 		 */
 		simulate?: boolean;
 		/**
-		 * Number of days an email can be resent for after it was created.
+		 * Days after creation during which an email may be resent. Defaults to 7.
 		 */
 		resendWindowDays?: number;
 		/**
@@ -370,13 +406,14 @@ export interface LucidConfig {
 			| MediaDeliveryAdapter
 			| MediaDeliveryAdapterInstance
 			| Promise<MediaDeliveryAdapterInstance>;
+		/** Upload and total storage limits. */
 		limits?: {
 			/**
-			 * The storage limit in bytes.
+			 * Total storage limit in bytes. Defaults to false, with no limit.
 			 */
 			storageBytes?: number | false;
 			/**
-			 * The maximum upload size in bytes.
+			 * Maximum upload size in bytes. Defaults to 16 MiB.
 			 */
 			uploadBytes?: number;
 		};
@@ -390,19 +427,25 @@ export interface LucidConfig {
 			presets?: Record<
 				string,
 				{
+					/** Target width in pixels. */
 					width?: number;
+					/** Target height in pixels. */
 					height?: number;
+					/** How the image fits the requested dimensions. Support depends on the delivery adapter. */
 					fit?: "cover" | "contain" | "fill" | "inside" | "outside";
+					/** Output image format. */
 					format?: "webp" | "avif" | "jpeg" | "png";
+					/** Output quality from 1 to 100. */
 					quality?: number;
+					/** Clockwise rotation in degrees. */
 					rotate?: 0 | 90 | 180 | 270;
 				}
 			>;
 			/** Lucid CDN caching for locally processed image variants. */
 			cache?: {
-				/** Store processed variants in the configured media storage. */
+				/** Store processed variants in the configured media storage. Defaults to true. */
 				enabled?: boolean;
-				/** Maximum number of cached variants for each source file. */
+				/** Maximum cached variants per source file. Defaults to 10. */
 				maxVariantsPerFile?: number;
 			};
 			/**
@@ -414,6 +457,7 @@ export interface LucidConfig {
 			 */
 			fallbackUrl?: string;
 		};
+		/** Fallback delivery for missing videos. */
 		video?: {
 			/**
 			 * The fallback video URL to redirect to when a video cannot be found.
@@ -441,9 +485,9 @@ export interface LucidConfig {
 		definitions?: AnyJobDefinition[];
 		/** How long terminal jobs and their schedule history remain visible. */
 		retention?: {
-			/** Days to retain completed jobs. */
+			/** Non-negative number of days to retain completed jobs. Defaults to 7. */
 			completedDays?: number;
-			/** Days to retain failed and cancelled jobs. */
+			/** Non-negative number of days to retain failed and cancelled jobs. Defaults to 30. */
 			failedDays?: number;
 		};
 	};
@@ -456,7 +500,7 @@ export interface LucidConfig {
 		 */
 		defaultPurgeAfterDays?: number;
 		/**
-		 * Define purge windows for specific retained data types.
+		 * Override retention for specific data types with a positive whole number of days.
 		 */
 		purgeAfterDays?: {
 			/**
@@ -486,11 +530,12 @@ export interface LucidConfig {
 	 */
 	hooks?: Array<AllHooks>;
 	/**
-	 * A list of collections instances to register. These can be imported from `@lucidcms/core`.
+	 * CollectionBuilder instances to register alongside discovered collections.
 	 */
 	collections?: CollectionBuilder[];
 	/**
-	 * A list of Lucid plugins to register. Plugins simply merge their own config with the Lucid config.
+	 * Plugins to register. Their defaults provide fallbacks; explicit project settings win.
+	 * Plugin configure callbacks run afterwards, then the project configure callback runs last.
 	 */
 	plugins?: LucidPluginDefinition[];
 	/**
@@ -499,6 +544,7 @@ export interface LucidConfig {
 	build?: {
 		/** The output directory. Defaults to "dist". */
 		outDir?: string;
+		/** Files excluded from development rebuilds. */
 		watch?: {
 			/**
 			 * The files to ignore.
@@ -508,7 +554,7 @@ export interface LucidConfig {
 	};
 	/**
 	 * Brand configuration for white-labelling your Lucid CMS instance.
-	 * These values are used in emails and, in future, the admin interface.
+	 * The name is used in outgoing emails.
 	 */
 	brand?: {
 		/**
@@ -518,6 +564,7 @@ export interface LucidConfig {
 	};
 }
 
+/** Runtime configuration after defaults, plugin contributions and configure callbacks have been applied. */
 export interface ResolvedLucidConfig {
 	host?: string;
 	logger: {

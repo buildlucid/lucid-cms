@@ -13,6 +13,7 @@ export type {
 	RichTextFieldErrorReference,
 } from "@lucidcms/types";
 
+/** Server translation descriptor or literal text. Create one with copy() or copy.literal(). */
 export type ErrorCopy = ServerCopyDescriptor | LiteralCopy;
 
 export type ErrorResultValue =
@@ -48,11 +49,14 @@ export interface BrickError extends Omit<PublicBrickError, "fields"> {
 	fields: FieldError[];
 }
 
+/** Structured failure returned by services or passed to LucidAPIError. Use copy() or copy.literal() for name and message. */
 export interface LucidErrorData
 	extends Omit<PublicErrorData, "name" | "message" | "errors"> {
 	name?: ErrorCopy;
 	message?: ErrorCopy;
 	errors?: ErrorResult;
+	/** Zod validation failure to format as field errors in an HTTP response. */
 	zod?: z.ZodError;
+	/** Original exception retained for diagnostics. */
 	cause?: unknown;
 }

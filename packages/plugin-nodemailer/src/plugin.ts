@@ -11,6 +11,7 @@ import isValidData from "./utils/is-valid-data.js";
 import { resolveNodemailerAttachments } from "./utils/remote-attachments.js";
 import verifyTransporter from "./utils/verify-transporter.js";
 
+/** Sends email through your Nodemailer transporter. Configure email.from in Lucid config. */
 const plugin: LucidPlugin<PluginOptions> = (pluginOptions) => {
 	return definePlugin({
 		key: PLUGIN_KEY,

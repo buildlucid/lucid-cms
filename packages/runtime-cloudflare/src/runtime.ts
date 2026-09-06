@@ -8,6 +8,7 @@ import type {
 	PreparedWranglerConfig,
 } from "./types.js";
 
+/** Creates the Cloudflare runtime without CLI tooling, for embedded hosts and compiled applications. */
 export const cloudflare = (
 	options?: CloudflareAdapterOptionsValue,
 ): CloudflareRuntimeAdapter => {

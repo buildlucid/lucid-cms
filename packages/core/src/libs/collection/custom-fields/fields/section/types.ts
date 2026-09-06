@@ -10,12 +10,16 @@ import type {
 
 export interface SectionFieldConfig extends SharedFieldConfig {
 	type: "section";
+	/** Copy shown beside the input in the admin. */
 	details: {
+		/** Field name shown to editors. */
 		label?: AdminCopyInput;
+		/** Help text explaining what to enter. */
 		description?: AdminCopyInput;
 	};
-	/** Controls how child fields are shaped in content API document responses. */
+	/** Use nested to group child values under this field key, or inline to place them alongside siblings. Defaults to nested. */
 	output: StructuralFieldOutput;
+	/** Editor visibility and layout. */
 	ui?: Pick<FieldUIConfig, "condition" | "width">;
 	fields: Exclude<FieldConfig<FieldTypes>, TabFieldConfig>[];
 }

@@ -8,6 +8,7 @@ export type LucidClientErrorKind =
 	| "parse"
 	| "configuration";
 
+/** A failed request, including its category and whether it is eligible for retry. */
 export interface LucidClientError {
 	kind: LucidClientErrorKind;
 	name: string;
@@ -19,6 +20,7 @@ export interface LucidClientError {
 	cause?: unknown;
 }
 
+/** Successful result. The payload is data; refs, meta, links and the original Response are siblings. */
 export type LucidClientSuccess<TData, TRefs = never> = ResponseBody<
 	TData,
 	TRefs
@@ -27,6 +29,7 @@ export type LucidClientSuccess<TData, TRefs = never> = ResponseBody<
 	response: Response;
 };
 
+/** Failed result. Data is undefined; response is present only when an HTTP response was received. */
 export type LucidClientFailure = {
 	data: undefined;
 	refs?: undefined;
@@ -36,6 +39,7 @@ export type LucidClientFailure = {
 	response?: Response;
 };
 
+/** Check error before reading data. HTTP, network, parse, timeout and cancellation failures use the same result shape. */
 export type LucidClientResponse<TData, TRefs = never> =
 	| LucidClientSuccess<TData, TRefs>
 	| LucidClientFailure;

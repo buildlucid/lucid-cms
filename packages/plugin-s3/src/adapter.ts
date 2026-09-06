@@ -14,6 +14,7 @@ import { listUploadParts } from "./services/upload-session/list-upload-parts.js"
 import uploadSingle from "./services/upload-single.js";
 import type { PluginOptions } from "./types/types.js";
 
+/** Creates an S3-compatible media storage adapter. Use it as media.storage when configuring storage directly. */
 const s3StorageAdapter: MediaStorageAdapter<PluginOptions> = (options) => {
 	const client = getAwsClient(options);
 

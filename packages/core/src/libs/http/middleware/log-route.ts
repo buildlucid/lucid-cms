@@ -2,6 +2,7 @@ import { createMiddleware } from "hono/factory";
 import type { LucidHonoContext } from "../../../types/hono.js";
 import logger from "../../logger/index.js";
 
+/** Logs the request method, path and elapsed time after the handler finishes. */
 const logRoute = createMiddleware(async (c: LucidHonoContext, next) => {
 	const start = Date.now();
 	const method = c.req.method;

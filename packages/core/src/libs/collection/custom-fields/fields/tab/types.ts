@@ -8,10 +8,14 @@ import type {
 
 export interface TabFieldConfig extends SharedFieldConfig {
 	type: "tab";
+	/** Copy shown beside the input in the admin. */
 	details: {
+		/** Field name shown to editors. */
 		label?: AdminCopyInput;
+		/** Help text explaining what to enter. */
 		description?: AdminCopyInput;
 	};
+	/** Editor visibility and layout. */
 	ui?: Pick<FieldUIConfig, "condition">;
 	fields: Exclude<FieldConfig<FieldTypes>, TabFieldConfig>[];
 }

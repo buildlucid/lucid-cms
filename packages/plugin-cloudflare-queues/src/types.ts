@@ -2,7 +2,7 @@
 
 /** Configures the Cloudflare Queue binding and consumer. */
 export type PluginOptions = {
-	/** Cloudflare Queue binding name. */
+	/** Cloudflare Queue binding name. Defaults to LUCID_QUEUE. */
 	binding?: string;
 	/** Wrangler Queue name. Defaults to a name derived from the worker and binding. */
 	queueName?: string;

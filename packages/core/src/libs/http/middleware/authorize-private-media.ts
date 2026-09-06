@@ -10,9 +10,8 @@ import { copy } from "../../i18n/index.js";
 import { authenticationCheck } from "./authenticate.js";
 
 /**
- * Determines if a private media request should proceed
- *
- * @todo Add support for team and user specific private media
+ * Requires admin authentication for private media keys. Public keys pass through.
+ * Register after validation of the route's key parameter.
  */
 const authorizePrivateMedia = createMiddleware(
 	async (c: LucidHonoContext, next) => {

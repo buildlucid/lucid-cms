@@ -26,7 +26,13 @@ export const isContentRouteDefinition = (
  *     scopes: [ExternalScopes.DocumentRead("pages")],
  *   },
  *   handler: async ({ hono, toolkit }) => {
- *     // ...
+ *     const result = await toolkit.documents.getMultiple({
+ *       collectionKey: "pages",
+ *       version: "published",
+ *     });
+ *     if (result.error) throw new LucidAPIError(result.error);
+ *
+ *     return hono.json(result.data);
  *   },
  * });
  * ```

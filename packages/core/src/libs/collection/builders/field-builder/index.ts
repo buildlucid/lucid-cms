@@ -73,6 +73,11 @@ const fieldState = Symbol.for("lucidcms.field-builder.state");
 export const getFieldBuilderState = (builder: FieldBuilder) =>
 	builder[fieldState];
 
+/**
+ * Builds reusable fields with chainable methods. Keys must be unique across the builder, including nested groups.
+ * Close each repeater with `endRepeater()` before adding fields outside it.
+ * Use `addFields()` to copy a completed group into a collection or brick.
+ */
 class FieldBuilder {
 	readonly [fieldState]: FieldBuilderState = {
 		fields: new Map(),
@@ -271,6 +276,7 @@ class FieldBuilder {
 	}
 
 	// Custom Fields
+	/** Starts a repeatable group. Subsequent fields belong to it until `endRepeater()`. */
 	public addRepeater(key: string, props?: FieldOptions<"repeater">) {
 		this.registerField(key, new RepeaterCustomField(key, props));
 		this[fieldState].meta.repeaterDepth[key] =
@@ -279,16 +285,19 @@ class FieldBuilder {
 		this[fieldState].containerStack.push({ kind: "repeater", key });
 		return this;
 	}
+	/** Starts a section of child fields. Close it with `endSection()`. */
 	public addSection(key: string, props?: FieldOptions<"section">) {
 		this.registerField(key, new SectionCustomField(key, props));
 		this[fieldState].containerStack.push({ kind: "section", key });
 		return this;
 	}
+	/** Starts a collapsible group of child fields. Close it with `endCollapsible()`. */
 	public addCollapsible(key: string, props?: FieldOptions<"collapsible">) {
 		this.registerField(key, new CollapsibleCustomField(key, props));
 		this[fieldState].containerStack.push({ kind: "collapsible", key });
 		return this;
 	}
+	/** Starts a root-level tab for subsequent fields. Finish repeaters before starting a tab. */
 	public addTab(key: string, props?: FieldOptions<"tab">) {
 		this.registerField(key, new TabCustomField(key, props));
 		//* tabs restart the root grouping, so any dangling structural containers close
@@ -296,6 +305,7 @@ class FieldBuilder {
 		this[fieldState].activeTabKey = key;
 		return this;
 	}
+	/** Adds subsequent fields to an existing tab. An unknown key leaves the current tab unchanged. */
 	public addToTab(key: string) {
 		const field = this[fieldState].fields.get(key);
 		if (!field) return this;
@@ -315,51 +325,67 @@ class FieldBuilder {
 		this[fieldState].activeTabKey = key;
 		return this;
 	}
+	/** Adds a single-line text input. */
 	public addText(key: string, props?: FieldOptions<"text">) {
 		return this.registerField(key, new TextCustomField(key, props));
 	}
+	/** Adds a rich-text editor storing a structured JSON document. */
 	public addRichText(key: string, props?: FieldOptions<"rich-text">) {
 		return this.registerField(key, new RichTextCustomField(key, props));
 	}
+	/** Adds a media picker. Values are media ID arrays, even for single selection. */
 	public addMedia(key: string, props?: FieldOptions<"media">) {
 		return this.registerField(key, new MediaCustomField(key, props));
 	}
+	/** Adds a document picker restricted to the configured collection keys. */
 	public addRelation(key: string, props: FieldOptions<"relation">) {
 		return this.registerField(key, new RelationCustomField(key, props));
 	}
+	/** Adds a numeric input. */
 	public addNumber(key: string, props?: FieldOptions<"number">) {
 		return this.registerField(key, new NumberCustomField(key, props));
 	}
+	/** Adds a slider with one or two numeric values. */
 	public addRange(key: string, props?: FieldOptions<"range">) {
 		return this.registerField(key, new RangeCustomField(key, props));
 	}
+	/** Adds a boolean checkbox. */
 	public addCheckbox(key: string, props?: FieldOptions<"checkbox">) {
 		return this.registerField(key, new CheckboxCustomField(key, props));
 	}
+	/** Adds a dropdown storing the selected option value. */
 	public addSelect(key: string, props?: FieldOptions<"select">) {
 		return this.registerField(key, new SelectCustomField(key, props));
 	}
+	/** Adds a multiline plain-text input. */
 	public addTextarea(key: string, props?: FieldOptions<"textarea">) {
 		return this.registerField(key, new TextareaCustomField(key, props));
 	}
+	/** Adds an editor for a JSON object or array. */
 	public addJSON(key: string, props?: FieldOptions<"json">) {
 		return this.registerField(key, new JSONCF(key, props));
 	}
+	/** Adds a code editor storing its language and source text. */
 	public addCode(key: string, props?: FieldOptions<"code">) {
 		return this.registerField(key, new CodeCustomField(key, props));
 	}
+	/** Adds a color picker. */
 	public addColor(key: string, props?: FieldOptions<"color">) {
 		return this.registerField(key, new ColorCustomField(key, props));
 	}
+	/** Adds a date input with optional time selection. */
 	public addDateTime(key: string, props?: FieldOptions<"datetime">) {
 		return this.registerField(key, new DateTimeCF(key, props));
 	}
+	/** Adds a link with a URL, target and label. */
 	public addLink(key: string, props?: FieldOptions<"link">) {
 		return this.registerField(key, new LinkCustomField(key, props));
 	}
+	/** Adds a user picker. Values are user ID arrays, even for single selection. */
 	public addUser(key: string, props?: FieldOptions<"user">) {
 		return this.registerField(key, new UserCustomField(key, props));
 	}
+	/** Closes the current repeater and any sections or collapsibles still open inside it. */
 	public endRepeater() {
 		const key = this[fieldState].repeaterStack.pop();
 		if (!key) return this;
@@ -394,6 +420,7 @@ class FieldBuilder {
 
 		return this;
 	}
+	/** Closes the current section, if it is the innermost open container. */
 	public endSection() {
 		const top =
 			this[fieldState].containerStack[
@@ -402,6 +429,7 @@ class FieldBuilder {
 		if (top?.kind === "section") this[fieldState].containerStack.pop();
 		return this;
 	}
+	/** Closes the current collapsible, if it is the innermost open container. */
 	public endCollapsible() {
 		const top =
 			this[fieldState].containerStack[
@@ -481,6 +509,7 @@ class FieldBuilder {
 		return result;
 	}
 	// Getters
+	/** Returns a detached field tree including tabs and child groups. */
 	get fieldTree(): FieldConfig<FieldTypes>[] {
 		if (!this.cachedFieldTree) {
 			this.cachedFieldTree = this.nestFields("full");
@@ -488,6 +517,7 @@ class FieldBuilder {
 
 		return this.cachedFieldTree.map((field) => deepMerge({}, field));
 	}
+	/** Returns a detached tree of stored fields, excluding layout-only containers. */
 	get persistedFieldTree(): FieldConfig<FieldTypes>[] {
 		if (!this.cachedPersistedFieldTree) {
 			this.cachedPersistedFieldTree = this.nestFields("persisted");
@@ -495,6 +525,7 @@ class FieldBuilder {
 
 		return this.cachedPersistedFieldTree.map((field) => deepMerge({}, field));
 	}
+	/** Returns a detached content tree with sections and collapsibles; tabs are omitted. */
 	get contentFieldTree(): FieldConfig<FieldTypes>[] {
 		if (!this.cachedContentFieldTree) {
 			this.cachedContentFieldTree = this.nestFields("content");
@@ -502,6 +533,7 @@ class FieldBuilder {
 
 		return this.cachedContentFieldTree.map((field) => deepMerge({}, field));
 	}
+	/** Returns detached field configurations in registration order. */
 	get flatFields(): FieldConfig<FieldTypes>[] {
 		const config: FieldConfig<FieldTypes>[] = [];
 		for (const [_, value] of this[fieldState].fields) {

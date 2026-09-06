@@ -69,9 +69,11 @@ export type DocumentBeforeUpsertHookOrigin =
 			sourceVersionType: "latest";
 	  };
 
+/** Explains whether this is a save, validation check or duplication. Check willPersist before performing side effects. */
 export type DocumentBeforeUpsertHookExecution = {
 	mode: "upsert" | "check";
 	action: "create" | "update";
+	/** Whether this operation intends to write the document. */
 	willPersist: boolean;
 	origin: DocumentBeforeUpsertHookOrigin;
 };
@@ -162,11 +164,13 @@ export type MediaAfterDeleteHookData = {
 	hardDelete: boolean;
 };
 
+/** Mutable data and event metadata. Return undefined data to keep draft edits, or return replacement data. */
 export type TransformHookPayload<TMeta, TData> = {
 	meta: TMeta;
 	data: Draft<TData>;
 };
 
+/** Event data and metadata for side effects. Return a service result with undefined data. */
 export type EffectHookPayload<TMeta, TData> = {
 	meta: TMeta;
 	data: TData;
@@ -195,6 +199,7 @@ export type ExecuteHookData<
 	? HookData<S, E>
 	: TransformHookData<S, E>;
 
+/** A lifecycle event subscription. Use `defineHook` to infer handler arguments. */
 export type LucidHook<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
@@ -213,6 +218,7 @@ export type LucidHookDocuments<
 // --------------------------------------------------
 // service handlers
 
+/** Handler signatures by service and event. Each receives ServiceContext first. */
 export type HookServiceHandlers = {
 	documents: {
 		beforeUpsert: ServiceFn<
@@ -310,6 +316,7 @@ export type HookResponse<
 // service config
 
 // used for collection builder hook config
+/** Document hooks registered only for one collection. */
 export type CollectionBuilderHooks =
 	| LucidHookDocuments<"beforeUpsert">
 	| LucidHookDocuments<"afterUpsert">

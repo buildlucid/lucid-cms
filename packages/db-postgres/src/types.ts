@@ -11,7 +11,9 @@ export type PostgresClientOptions = Omit<
 	"onnotice"
 >;
 
+/** PostgreSQL URL and postgres client options. */
 export type PostgresAdapterOptions = PostgresClientOptions & {
+	/** PostgreSQL connection URL. */
 	url: string;
 };
 

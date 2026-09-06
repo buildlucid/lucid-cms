@@ -35,9 +35,9 @@ export type JobRetryPolicy =
 			readonly type: "exponential";
 			/** Total attempts, including the first execution. */
 			readonly maxAttempts: number;
-			/** Delay before the first retry. */
+			/** Delay before the first retry, in milliseconds. */
 			readonly baseDelayMs: number;
-			/** Maximum delay between attempts. */
+			/** Maximum delay between attempts, in milliseconds. */
 			readonly maxDelayMs: number;
 			/** Whether retry delays are randomized to spread concurrent work. */
 			readonly jitter: "none" | "full";
@@ -77,9 +77,9 @@ export type DefineJobSchedule<Input extends JobPayload | null> =
 		readonly name: string;
 		/** Static input enqueued for each occurrence. */
 		readonly input: Input;
-		/** Whether a new occurrence can run while an earlier one remains active. */
+		/** Whether a new occurrence can run while an earlier one remains active. Defaults to skip. */
 		readonly overlap?: JobScheduleOverlap;
-		/** How to handle occurrences missed between scheduler ticks. */
+		/** How to handle occurrences missed between scheduler ticks. Defaults to run-once. */
 		readonly missed?: JobScheduleMissed;
 	};
 
@@ -120,7 +120,7 @@ export type JobPermanentFailure<Input extends JobPayload | null> = {
 	readonly errorMessage: string;
 };
 
-/** Handles cleanup when a job exhausts its attempts or cannot be decoded. */
+/** Handles permanent failure when the stored input can still be parsed by the job schema. */
 export type JobPermanentFailureHandler<Input extends JobPayload | null> = (
 	context: ServiceContext,
 	failure: JobPermanentFailure<Input>,
@@ -189,7 +189,7 @@ export type DefineJobOptions<
 	version: number;
 	/** Validates payloads before they are stored or handled. */
 	input: ZodType<Input>;
-	/** Controls retries after the handler returns an error. */
+	/** Defaults to 3 attempts with exponential backoff, a 1-second base, a 5-minute cap and full jitter. */
 	retry?: JobRetryPolicy;
 	/** Start a transaction when supported. Omit to run without starting one. */
 	transaction?: boolean;

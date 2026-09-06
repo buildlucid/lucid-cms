@@ -19,11 +19,13 @@ export type MediaStorageAdapterUploadBody =
 	| Buffer;
 
 export type MediaStorageAdapterUploadPart = {
+	/** One-based multipart upload part number. */
 	partNumber: number;
 	etag: string;
 	size?: number;
 };
 
+/** Instructions for uploading a file directly over HTTP, multipart parts or TUS. */
 export type MediaStorageAdapterCreateUploadSessionResponse =
 	| {
 			protocol: "http";
@@ -45,6 +47,7 @@ export type MediaStorageAdapterCreateUploadSessionResponse =
 			protocol: "multipart-parts";
 			key: string;
 			uploadId: string;
+			/** Size of each upload part in bytes, except the final part. */
 			partSize: number;
 			expiresAt?: string;
 			uploadedParts: MediaStorageAdapterUploadPart[];
@@ -67,9 +70,11 @@ export type MediaStorageAdapterCreateUploadSessionParams = {
 	fileName: string;
 	mimeType: string;
 	extension?: string;
+	/** File size in bytes. */
 	size: number;
 };
 
+/** Create an upload session for the requested key and return instructions the browser can follow. */
 export type MediaStorageAdapterServiceCreateUploadSession = (
 	context: ServiceContext,
 	params: MediaStorageAdapterCreateUploadSessionParams,
@@ -82,11 +87,13 @@ export type MediaStorageAdapterGetUploadPartUrlsParams = {
 	expiresAt: string;
 };
 
+/** Return signed URLs for the requested multipart part numbers. */
 export type MediaStorageAdapterServiceGetUploadPartUrls = (
 	context: ServiceContext,
 	params: MediaStorageAdapterGetUploadPartUrlsParams,
 ) => ServiceResponse<{
 	parts: Array<{
+		/** One-based multipart upload part number. */
 		partNumber: number;
 		url: string;
 		headers?: Record<string, string>;
@@ -98,6 +105,7 @@ export type MediaStorageAdapterListUploadPartsParams = {
 	uploadId: string;
 };
 
+/** List parts already uploaded so an interrupted upload can resume. */
 export type MediaStorageAdapterServiceListUploadParts = (
 	context: ServiceContext,
 	params: MediaStorageAdapterListUploadPartsParams,
@@ -122,6 +130,7 @@ export type MediaStorageAdapterCompleteUploadSessionParams =
 			uploadId?: string;
 	  };
 
+/** Finalize an upload and return its ETag when available. */
 export type MediaStorageAdapterServiceCompleteUploadSession = (
 	context: ServiceContext,
 	params: MediaStorageAdapterCompleteUploadSessionParams,
@@ -145,6 +154,7 @@ export type MediaStorageAdapterAbortUploadSessionParams =
 			uploadId?: string;
 	  };
 
+/** Abandon an upload and release unfinished provider resources. */
 export type MediaStorageAdapterServiceAbortUploadSession = (
 	context: ServiceContext,
 	params: MediaStorageAdapterAbortUploadSessionParams,
@@ -158,6 +168,7 @@ export type MediaStorageAdapterGetDownloadUrlParams = {
 	extension?: string | null;
 };
 
+/** Return a download URL for the requested storage key. */
 export type MediaStorageAdapterServiceGetDownloadUrl = (
 	context: ServiceContext,
 	params: MediaStorageAdapterGetDownloadUrlParams,
@@ -169,10 +180,12 @@ export type MediaStorageAdapterGetMetaParams = {
 	key: string;
 };
 
+/** Read stored file metadata and availability status. */
 export type MediaStorageAdapterServiceGetMeta = (
 	context: ServiceContext,
 	params: MediaStorageAdapterGetMetaParams,
 ) => ServiceResponse<{
+	/** File size in bytes. */
 	size: number;
 	mimeType: string | null;
 	etag: string | null;
@@ -186,13 +199,18 @@ export type MediaStorageAdapterServiceGetMeta = (
 
 export type MediaStorageAdapterStreamParams = {
 	key: string;
+	/** ETag to compare before returning file content. */
 	ifNoneMatch?: string;
+	/** Inclusive byte offsets to read. */
 	range?: {
+		/** First byte offset. */
 		start: number;
+		/** Last byte offset. Omission reads through the end of the file. */
 		end?: number;
 	};
 };
 
+/** Read a file, optionally honoring an ETag or byte range. Return content metadata alongside the body. */
 export type MediaStorageAdapterServiceStream = (
 	context: ServiceContext,
 	params: MediaStorageAdapterStreamParams,
@@ -204,7 +222,9 @@ export type MediaStorageAdapterServiceStream = (
 	notModified?: boolean;
 	isPartialContent?: boolean;
 	totalSize?: number;
+	/** Inclusive byte offsets to read. */
 	range?: {
+		/** First byte offset. */
 		start: number;
 		end: number;
 	};
@@ -215,10 +235,12 @@ export type MediaStorageAdapterUploadSingleParams = {
 	body: MediaStorageAdapterUploadBody;
 	mimeType: string;
 	extension: string;
+	/** File size in bytes. */
 	size: number;
 	type: MediaType;
 };
 
+/** Upload the supplied bytes or stream under the requested storage key. */
 export type MediaStorageAdapterServiceUploadSingle = (
 	context: ServiceContext,
 	params: MediaStorageAdapterUploadSingleParams,
@@ -254,6 +276,7 @@ export type MediaStorageAdapterServiceRenameKey = (
 	params: MediaStorageAdapterRenameKeyParams,
 ) => ServiceResponse<undefined>;
 
+/** Factory that returns a configured adapter, synchronously or asynchronously. */
 export type MediaStorageAdapter<T = undefined> = T extends undefined
 	? () => MediaStorageAdapterInstance | Promise<MediaStorageAdapterInstance>
 	: (
@@ -262,6 +285,7 @@ export type MediaStorageAdapter<T = undefined> = T extends undefined
 			| MediaStorageAdapterInstance<T>
 			| Promise<MediaStorageAdapterInstance<T>>;
 
+/** Adapter contract used by Lucid. Use the context supplied to each operation for current request and transaction state. */
 export type MediaStorageAdapterInstance<T = unknown> = {
 	/** The adapter type */
 	type: "media-storage-adapter";
@@ -280,9 +304,6 @@ export type MediaStorageAdapterInstance<T = unknown> = {
 		 */
 		destroy?: (context: AdapterLifecycleContext) => Promise<void>;
 	};
-	/**
-	 * The media storage adapter services
-	 */
 	/** Create an upload session using one of Lucid's supported protocols. */
 	createUploadSession: MediaStorageAdapterServiceCreateUploadSession;
 	/** Generate upload URLs for multipart upload parts. */

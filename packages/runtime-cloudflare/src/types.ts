@@ -5,6 +5,7 @@ import type {
 } from "@lucidcms/core/types";
 import type { PlatformProxy } from "wrangler";
 
+/** Import to include in a generated Worker module. */
 export type CloudflareWorkerImport = {
 	path: string;
 	default?: string;
@@ -17,6 +18,7 @@ export type CloudflareWorkerImport = {
 	>;
 };
 
+/** Named Worker handler to generate from source text. */
 export type CloudflareWorkerExport = {
 	name: string;
 	content: string;
@@ -24,6 +26,7 @@ export type CloudflareWorkerExport = {
 	params?: string[];
 };
 
+/** Imports and handlers contributed by a plugin runtime hook. */
 export type CloudflareWorkerExportArtifact = {
 	imports: CloudflareWorkerImport[];
 	exports: CloudflareWorkerExport[];
@@ -33,13 +36,17 @@ export type CloudflareWranglerConfigArtifact = {
 	bindings?: CloudflareBindingsOptions;
 };
 
+/** Worker, binding and local development settings accepted by cloudflare(). */
 export type AdapterOptions = {
 	/**
 	 * Wrangler environment used when Lucid loads local Cloudflare bindings and env.
 	 */
 	environment?: string;
+	/** Local development listener settings. */
 	dev?: {
+		/** Local development port. */
 		port?: number;
+		/** Local development hostname. */
 		hostname?: string;
 	};
 	/**
@@ -52,6 +59,7 @@ export type AdapterOptions = {
 	 * Cloudflare-aware plugins and adapters can also provide these automatically.
 	 */
 	bindings?: CloudflareBindingsOptions;
+	/** Settings for the generated Worker. */
 	worker?: {
 		/**
 		 * The generated Worker name. Defaults to the package name or project

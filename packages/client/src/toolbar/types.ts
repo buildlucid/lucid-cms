@@ -2,6 +2,7 @@ import type { CollectionDocument, PreviewRuntimeState } from "@lucidcms/types";
 
 type MaybePromise<T> = T | Promise<T>;
 
+/** Document identity used to build the toolbar edit action. */
 export type ToolbarDocument = Pick<
 	CollectionDocument,
 	"collectionKey" | "id" | "version"
@@ -9,6 +10,7 @@ export type ToolbarDocument = Pick<
 	meta?: Pick<NonNullable<CollectionDocument["meta"]>, "versionId">;
 };
 
+/** Resolve auth automatically, provide a known status, or check it with a callback. */
 export type ToolbarAuthentication =
 	| "auto"
 	| boolean
@@ -32,6 +34,7 @@ export type ToolbarError = {
 	cause: unknown;
 };
 
+/** Browser toolbar settings for edit links, authentication and preview navigation. */
 export type ToolbarOptions = {
 	/** Public host of the Lucid instance. Defaults to the current origin. */
 	host?: string | URL;
@@ -43,11 +46,13 @@ export type ToolbarOptions = {
 	authentication?: ToolbarAuthentication;
 	/** Defaults to `auto`. */
 	preview?: "auto" | PreviewRuntimeState;
+	/** Preview exit behavior and client-router integration. */
 	previewNavigation?: ToolbarPreviewNavigation;
 	/** Reports resolution failures without breaking the host application. */
 	onError?: (error: ToolbarError) => void;
 };
 
+/** New page state to apply after client-side navigation. */
 export type ToolbarUpdate = {
 	/** Complete route document state. `null` clears the previous edit action. */
 	document: ToolbarDocument | null;
@@ -59,6 +64,7 @@ export type ToolbarUpdate = {
 	editLabel?: string;
 };
 
+/** Mounted toolbar state and lifecycle methods. Call cleanup when the host is disposed. */
 export type ToolbarController = {
 	/** Whether the toolbar pill is currently visible. */
 	readonly active: boolean;

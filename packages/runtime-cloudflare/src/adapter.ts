@@ -5,6 +5,7 @@ import type {
 	CloudflareRuntimeAdapter,
 } from "./types.js";
 
+/** Creates the Cloudflare runtime for defineConfig, including CLI development and build support. Options may be resolved from environment values. */
 const cloudflare = (
 	options?: CloudflareAdapterOptionsValue,
 ): CloudflareRuntimeAdapter => {

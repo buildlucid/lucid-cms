@@ -49,6 +49,7 @@ const resolveScope = async (
 	return typeof scope === "function" ? scope(c) : scope;
 };
 
+/** Limits requests using the configured KV adapter. Exceeding the limit returns HTTP 429 with Retry-After. Authenticate first when using user or client mode. */
 const rateLimiter = (options: RateLimitOptions) =>
 	createMiddleware(async (c: LucidHonoContext, next) => {
 		if (options.skip && (await options.skip(c))) {

@@ -5,16 +5,20 @@ import constants from "../../../constants/constants.js";
 import { translate } from "../../i18n/index.js";
 
 /**
- * Used to construct parameters JSON schema for OpenAPI.
+ * Describes route parameters, query input and selected Lucid headers for OpenAPI.
  */
 const parameters = (props: {
 	headers?: {
-		// Undefined omits the header, boolean controls whether it is required.
+		/** Include the CSRF header. True marks it required; omission leaves it out. */
 		csrf?: boolean;
+		/** Include the Authorization header. True marks it required. */
 		authorization?: boolean;
+		/** Include the idempotency header. True marks it required. */
 		idempotencyKey?: boolean;
 	};
+	/** Zod schema for path parameters. */
 	params?: ZodType;
+	/** Zod schema for query parameters. */
 	query?: ZodType;
 }) => {
 	const routeParameters: DescribeRouteOptions["parameters"] = [];

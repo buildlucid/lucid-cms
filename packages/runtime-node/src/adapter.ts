@@ -1,6 +1,7 @@
 import { node as createNodeRuntime } from "./runtime.js";
 import type { NodeAdapterOptionsValue, NodeRuntimeAdapter } from "./types.js";
 
+/** Creates the Node runtime for defineConfig, including CLI development and build support. Options may be resolved from environment values. */
 const node = (options?: NodeAdapterOptionsValue): NodeRuntimeAdapter => {
 	const runtime = createNodeRuntime(options);
 

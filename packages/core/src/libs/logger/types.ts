@@ -4,6 +4,7 @@ import type { LogLevelSchema } from "./schema.js";
 export type LogLevel = z.infer<typeof LogLevelSchema>;
 export type LogEntryLevel = Exclude<LogLevel, "silent">;
 
+/** Structured log entry accepted by logger methods. */
 export type LogInput = {
 	/**
 	 * The active HTTP request identifier when the entry belongs to a request.
@@ -13,9 +14,13 @@ export type LogInput = {
 	 * A stable identifier for the event. Useful when querying structured logs.
 	 */
 	event?: string;
+	/** Component or plugin responsible for this event. */
 	scope?: string;
+	/** Human-readable description of what happened. */
 	message: string;
+	/** Structured details useful when investigating the event. */
 	data?: Record<string, unknown>;
+	/** Original error or cause to include with the entry. */
 	error?: unknown;
 };
 
@@ -37,7 +42,9 @@ export type LogEntry = Readonly<
  */
 export type LogTransport = {
 	write: (entry: LogEntry) => void;
+	/** Finish writing buffered entries. */
 	flush?: () => Promise<void> | void;
+	/** Flush pending work and release transport resources. */
 	destroy?: () => Promise<void> | void;
 };
 

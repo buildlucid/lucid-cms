@@ -1,6 +1,7 @@
 import type { CollectionDocument, DocumentRef, Refs } from "@lucidcms/types";
 import type { Extensions, JSONContent } from "@tiptap/core";
 
+/** Tiptap JSON document stored by Lucid rich-text fields. */
 export type RichTextJSON = JSONContent;
 
 export type RichTextVariableSource = "document" | "user";
@@ -84,14 +85,18 @@ export type RichTextElement =
 	| "variable"
 	| "brick";
 
+/** Node or mark being rendered, its rendered children and Lucid's default HTML. */
 export type RichTextElementRendererProps<Element extends string = string> = {
 	element: Element;
 	node: RichTextJSON;
 	mark?: RichTextRenderMark;
+	/** HTML already rendered for child nodes. */
 	children: string;
+	/** Default markup for this element, including its children. */
 	defaultHTML: string;
 };
 
+/** Return replacement HTML for one element. Escape any untrusted values you add to the markup. */
 export type RichTextElementRenderer<Element extends string = string> = (
 	props: RichTextElementRendererProps<Element>,
 ) => string;
@@ -105,10 +110,12 @@ export type RichTextFallbackRendererProps<
 	brick?: RichTextRenderBrick<TDocument> | null;
 };
 
+/** Return HTML for elements without a more specific renderer. */
 export type RichTextFallbackRenderer<
 	TDocument extends CollectionDocument = CollectionDocument,
 > = (props: RichTextFallbackRendererProps<TDocument>) => string;
 
+/** Optional HTML renderers keyed by element type. Unspecified elements use Lucid's defaults. */
 export type RichTextRenderers<
 	TDocument extends CollectionDocument = CollectionDocument,
 > = {
@@ -158,6 +165,7 @@ export type RichTextRenderers<
 	fallback?: RichTextFallbackRenderer<TDocument>;
 };
 
+/** Source document, shared refs and rendering overrides for generateHTML. */
 export type RichTextRenderOptions<
 	TDocument extends CollectionDocument = CollectionDocument,
 > = {
@@ -167,5 +175,6 @@ export type RichTextRenderOptions<
 	refs?: Refs;
 	/** Additional or replacement Tiptap extensions used by the static renderer. */
 	extensions?: Extensions;
+	/** Override HTML for selected elements, or provide a fallback. */
 	renderers?: RichTextRenderers<TDocument>;
 };

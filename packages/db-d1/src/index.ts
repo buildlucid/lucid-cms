@@ -32,6 +32,7 @@ import formatType from "./utils/format-type.js";
 import getDefaultD1Config from "./utils/get-default-config.js";
 import { createD1WranglerArtifact } from "./utils/wrangler-artifact.js";
 
+/** Database adapter for D1. Prefer the d1 factory in project config. */
 export class D1Adapter extends DatabaseAdapter {
 	readonly #options:
 		| D1AdapterBindingOptions
@@ -386,6 +387,7 @@ export class D1Adapter extends DatabaseAdapter {
 
 export { DEFAULT_D1_BINDING };
 
+/** Uses Cloudflare D1. With no options, reads the LUCID_D1 binding. Pass binding options to contribute Wrangler settings, or an environment callback for a database binding. */
 export const d1 = createDatabaseAdapterCreator(createD1Adapter, {
 	adapter: "d1",
 	resolve: () => new D1Adapter(),

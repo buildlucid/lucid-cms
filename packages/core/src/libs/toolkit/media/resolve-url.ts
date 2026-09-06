@@ -7,7 +7,9 @@ import type {
 } from "../../../utils/services/types.js";
 import { normalizeQuery, runToolkitService } from "../utils.js";
 
+/** Storage key and optional named preset or format for media URL resolution. */
 export type ToolkitMediaResolveUrlInput = MediaResolveUrlOptions & {
+	/** Media storage key, including its visibility prefix. */
 	key: string;
 };
 

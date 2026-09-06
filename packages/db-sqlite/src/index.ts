@@ -28,6 +28,7 @@ import formatOnUpdate from "./utils/format-on-update.js";
 import formatType from "./utils/format-type.js";
 import normalizeSQLiteConfig from "./utils/normalize-config.js";
 
+/** Database adapter for SQLite. Prefer the sqlite factory in project config. */
 export class SQLiteAdapter extends DatabaseAdapter {
 	readonly #options: SQLiteAdapterOptions | SQLiteAdapterOptionsFactory;
 
@@ -282,6 +283,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 	}
 }
 
+/** Uses a local SQLite file. With no options, opens ./db.sqlite. Pass a database path or an environment callback for custom settings. */
 export const sqlite = createDatabaseAdapterCreator(createSQLiteAdapter, {
 	adapter: "sqlite",
 	resolve: () => new SQLiteAdapter(),

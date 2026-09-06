@@ -5,7 +5,21 @@ import { renderRichTextHTML } from "./render.js";
 import type { RichTextJSON, RichTextRenderOptions } from "./types.js";
 import { generatePlainText } from "./utils/text.js";
 
-/** Renders rich-text JSON to HTML in server runtimes. */
+/**
+ * Renders rich-text JSON to HTML in server runtimes.
+ * Pass the source document and sibling refs to resolve embedded content.
+ *
+ * @example
+ * ```ts
+ * const html = generateHTML(richTextValue, {
+ *   document,
+ *   refs,
+ *   renderers: {
+ *     paragraph: ({ children }) => `<p class="prose">${children}</p>`,
+ *   },
+ * });
+ * ```
+ */
 export const generateHTML = <
 	TDocument extends CollectionDocument = CollectionDocument,
 >(

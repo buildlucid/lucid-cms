@@ -158,6 +158,7 @@ export interface EnvironmentVariables extends Record<string, unknown> {}
 /** Controls whether a live database connection belongs to a runtime or invocation. */
 export type DatabaseConnectionScope = "runtime" | "invocation";
 
+/** Host setup and teardown context. Read request-specific bindings from ServiceContext during operations. */
 export type AdapterLifecycleContext = {
 	config: ResolvedLucidConfig;
 	/**
@@ -188,7 +189,9 @@ export type RuntimeAdapterCLI = {
 	build: BuildHandler;
 };
 
+/** Receives parsed environment values and returns project settings synchronously. */
 export type LucidConfigFactory = (env: EnvironmentVariables) => LucidConfig;
+/** Mutates the resolved config draft synchronously. Returning a replacement config is unsupported. */
 export type ConfigTransform = (draft: ResolvedLucidConfig) => void;
 
 export type LucidConfigDefinitionMeta = {
@@ -208,9 +211,13 @@ export type DatabaseAdapterValue =
 	| DatabaseAdapterFactory
 	| Promise<DatabaseAdapterFactory>;
 
+/** Runtime, database and project configuration passed to defineConfig. */
 export type LucidConfigDefinition = {
+	/** Runtime adapter or factory for the deployment platform. */
 	runtime: RuntimeAdapterValue;
+	/** Database adapter or environment-aware factory. */
 	db: DatabaseAdapterValue;
+	/** Return project settings using the parsed environment. */
 	config: LucidConfigFactory;
 	/** Applies final project changes after plugin configuration. */
 	configure?: ConfigTransform;
@@ -229,6 +236,7 @@ export type RuntimeHostDefinition = {
 	integrationEntrypoint?: string;
 };
 
+/** Deployment platform adapter with optional CLI and host integration support. */
 export type RuntimeAdapter = Omit<
 	z.infer<typeof RuntimeAdapterSchema>,
 	"hosts"

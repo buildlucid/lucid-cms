@@ -10,14 +10,18 @@ import type {
 
 export interface CollapsibleFieldConfig extends SharedFieldConfig {
 	type: "collapsible";
+	/** Copy shown beside the input in the admin. */
 	details: {
+		/** Field name shown to editors. */
 		label?: AdminCopyInput;
+		/** Help text explaining what to enter. */
 		description?: AdminCopyInput;
 	};
-	/** Controls how child fields are shaped in content API document responses. */
+	/** Use nested to group child values under this field key, or inline to place them alongside siblings. Defaults to nested. */
 	output: StructuralFieldOutput;
-	/** Whether the collapsible renders expanded by default in the admin. */
+	/** Whether the collapsible starts expanded. Defaults to false. */
 	defaultOpen: boolean;
+	/** Editor visibility and layout. */
 	ui?: Pick<FieldUIConfig, "condition" | "width">;
 	fields: Exclude<FieldConfig<FieldTypes>, TabFieldConfig>[];
 }

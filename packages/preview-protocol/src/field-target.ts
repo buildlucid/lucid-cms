@@ -5,7 +5,7 @@ import {
 import type { PreviewFieldTarget } from "./types.js";
 import { isPreviewFieldTarget } from "./validators.js";
 
-/** Encodes a validated field target for safe use in preview markup. */
+/** Encodes a field target for preview markup. Returns null for invalid targets or values exceeding the attribute length limit. */
 export const encodePreviewFieldTarget = (
 	target: PreviewFieldTarget,
 ): string | null => {
@@ -19,7 +19,7 @@ export const encodePreviewFieldTarget = (
 		: null;
 };
 
-/** Decodes untrusted preview markup into a validated field target. */
+/** Decodes preview markup into a field target. Returns null for invalid or unsupported values. */
 export const decodePreviewFieldTarget = (
 	value: string,
 ): PreviewFieldTarget | null => {

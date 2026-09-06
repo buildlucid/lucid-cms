@@ -6,31 +6,16 @@ import type { ErrorResult, LucidErrorData } from "../../types/errors.js";
 import errorTypeDefaults from "./error-type-defaults.js";
 
 /**
- * The LucidAPIError class should be used to throw errors within the API request lifecycle. This will be caught by Hono's error handler and will return a formatted error response. If the error is a Zod error, it will be formatted into a more readable format.
- * @class
- * @extends Error
- * @param {LucidErrorData} error
- * @returns {void}
+ * Throw inside an HTTP handler to return a formatted Lucid error response.
+ * Supply a Zod error with `zod` to include field validation details.
+ *
  * @example
+ * ```ts
  * throw new LucidAPIError({
- *    type: "basic",
- *    name: "Fetch User Error",
- *    message: "Error while fetching user data",
- *    status: 500,
+ *   status: 404,
+ *   message: copy.literal("The requested article was not found."),
  * });
- * @example
- * throw new LucidAPIError({
- *    type: "validation",
- *    name: "Validation Error",
- *    message: "Validation error occurred",
- *    status: 400,
- *    errors: {
- *        email: {
- *             code: "invalid_email",
- *             message: "Invalid email address",
- *        },
- *    },
- * });
+ * ```
  */
 class LucidAPIError extends Error {
 	error: LucidErrorData;
