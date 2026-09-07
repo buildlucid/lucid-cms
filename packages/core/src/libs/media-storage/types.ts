@@ -16,7 +16,7 @@ export type MediaStorageAdapterStreamBody =
 export type MediaStorageAdapterUploadBody =
 	| Readable
 	| ReadableStream<Uint8Array>
-	| Buffer;
+	| Uint8Array;
 
 export type MediaStorageAdapterUploadPart = {
 	/** One-based multipart upload part number. */
@@ -322,7 +322,7 @@ export type MediaStorageAdapterInstance<T = unknown> = {
 	stream: MediaStorageAdapterServiceStream;
 	/** Upload media */
 	upload: MediaStorageAdapterServiceUploadSingle;
-	/** Delete media */
+	/** Delete media. Succeed when the object is already absent so cleanup can be retried. */
 	delete: MediaStorageAdapterServiceDeleteSingle;
 	/** Delete multiple media items */
 	deleteMultiple: MediaStorageAdapterServiceDeleteMultiple;

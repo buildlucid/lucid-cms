@@ -1,5 +1,5 @@
 import type { ContentGetMultipleQueryParams } from "../../../schemas/media.js";
-import getMultipleMedia from "../../../services/media/content/get-multiple.js";
+import getMultipleMedia from "../../../services/media/get-multiple.js";
 import type { Media } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -32,21 +32,19 @@ const getMultiple = async (
 	context: ServiceContext,
 	input: ToolkitMediaGetMultipleInput = {},
 ): ServiceResponse<ToolkitMediaGetMultipleResult> =>
-	runToolkitService(
-		() =>
+	runToolkitService({
+		handler: () =>
 			getMultipleMedia(context, {
 				query: normalizePaginatedQuery(input.query),
 			}),
-		{
-			name: {
-				key: "core.toolkit.media.get.multiple.error.name",
-				defaultMessage: "Media Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.media.get.multiple.error.message",
-				defaultMessage: "Lucid toolkit could not fetch multiple media items.",
-			},
+		name: {
+			key: "core.toolkit.media.get.multiple.error.name",
+			defaultMessage: "Media Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.media.get.multiple.error.message",
+			defaultMessage: "Lucid toolkit could not fetch multiple media items.",
+		},
+	});
 
 export default getMultiple;

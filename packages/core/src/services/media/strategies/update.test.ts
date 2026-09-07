@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	checkHasMediaStorage: vi.fn(),
-	checkCanUpdateMedia: vi.fn(),
+	checkCanStoreMedia: vi.fn(),
 	adjustInt: vi.fn(),
 	detectStreamMimeType: vi.fn(),
 }));
@@ -11,8 +11,8 @@ vi.mock("../../options/adjust-int.js", () => ({
 	default: mocks.adjustInt,
 }));
 
-vi.mock("../checks/check-can-update-media.js", () => ({
-	default: mocks.checkCanUpdateMedia,
+vi.mock("../checks/check-can-store-media.js", () => ({
+	default: mocks.checkCanStoreMedia,
 }));
 
 vi.mock("../checks/check-has-media-storage.js", () => ({
@@ -80,7 +80,7 @@ describe("media update strategy", () => {
 				delete: deleteObject,
 			},
 		});
-		mocks.checkCanUpdateMedia.mockResolvedValueOnce({
+		mocks.checkCanStoreMedia.mockResolvedValueOnce({
 			error: undefined,
 			data: undefined,
 		});
@@ -165,7 +165,7 @@ describe("media update strategy", () => {
 				delete: deleteObject,
 			},
 		});
-		mocks.checkCanUpdateMedia.mockResolvedValueOnce({
+		mocks.checkCanStoreMedia.mockResolvedValueOnce({
 			error: undefined,
 			data: undefined,
 		});
@@ -242,7 +242,7 @@ describe("media update strategy", () => {
 				rename,
 			},
 		});
-		mocks.checkCanUpdateMedia.mockResolvedValueOnce({
+		mocks.checkCanStoreMedia.mockResolvedValueOnce({
 			error: undefined,
 			data: undefined,
 		});

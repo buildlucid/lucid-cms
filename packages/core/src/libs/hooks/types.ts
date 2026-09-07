@@ -149,18 +149,18 @@ export type PublishOperationAfterEventHookData = {
 
 export type MediaAfterCreateHookData = {
 	id: number;
-	userId: number;
+	userId: number | null;
 	media: Media;
 };
 
 export type MediaAfterUpdateHookData = {
 	id: number;
-	userId: number;
+	userId: number | null;
 };
 
 export type MediaAfterDeleteHookData = {
 	ids: number[];
-	userId: number;
+	userId: number | null;
 	hardDelete: boolean;
 };
 

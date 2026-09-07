@@ -3,7 +3,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 
 /** Soft-deletes a source's crop while retaining its object and stale URL. */
 const deactivateCrop: ServiceFn<
-	[{ parentId: number; userId: number }],
+	[{ parentId: number; userId: number | null }],
 	undefined
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db);
@@ -22,6 +22,7 @@ const deactivateCrop: ServiceFn<
 		returning: ["id"],
 	});
 	if (cropRes.error) return cropRes;
+
 	return { error: undefined, data: undefined };
 };
 

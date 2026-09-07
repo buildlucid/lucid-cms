@@ -1,3 +1,4 @@
+import type z from "zod";
 import constants from "../../constants/constants.js";
 import type {
 	ContentGetMultipleQueryParams,
@@ -32,6 +33,20 @@ type ToolkitServiceErrorConfig = {
 	name?: ToolkitServiceErrorCopy;
 	message: ToolkitServiceErrorCopy;
 };
+
+type ToolkitServiceOptions<T, TInput> = ToolkitServiceErrorConfig &
+	(
+		| {
+				schema: z.ZodType<TInput>;
+				input: unknown;
+				handler: (input: TInput) => ServiceResponse<T>;
+		  }
+		| {
+				schema?: never;
+				input?: never;
+				handler: () => ServiceResponse<T>;
+		  }
+	);
 
 type ServiceDocumentFilter = NonNullable<
 	| ContentGetSingleQueryParams["filter"]
@@ -127,33 +142,24 @@ export const normalizePaginatedDocumentQuery = <
 export const normalizeQuery = <T extends object>(query?: T): T =>
 	({ ...(query ?? {}) }) as T;
 
-/** Converts unexpected exceptions into standard Lucid service error values. */
-export const runToolkitService = async <T>(
-	callback: () => ServiceResponse<T>,
-	errorConfig: ToolkitServiceErrorConfig,
+/** Validates optional input, passes parsed values to the handler and converts unexpected errors to service results. */
+export const runToolkitService = async <T, TInput = never>(
+	options: ToolkitServiceOptions<T, TInput>,
 ): ServiceResponse<T> => {
 	try {
-		const response = await callback();
+		if (options.schema) {
+			const parsed = await options.schema.safeParseAsync(options.input);
+			if (!parsed.success) {
+				return {
+					error: { type: "validation", status: 400, zod: parsed.error },
+					data: undefined,
+				};
+			}
 
-		if (response.error || response.data !== undefined) {
-			return response;
+			return await options.handler(parsed.data);
 		}
 
-		return {
-			error: {
-				type: "basic",
-				name: errorConfig.name
-					? copy(`server:${errorConfig.name.key}`, {
-							defaultMessage: errorConfig.name.defaultMessage,
-						})
-					: undefined,
-				message: copy(`server:${errorConfig.message.key}`, {
-					defaultMessage: errorConfig.message.defaultMessage,
-				}),
-				status: 500,
-			},
-			data: undefined,
-		} satisfies ResolvedServiceResponse<T>;
+		return await options.handler();
 	} catch (error) {
 		if (error instanceof Error) {
 			const decodedError = decodeError(error);
@@ -161,15 +167,15 @@ export const runToolkitService = async <T>(
 			return {
 				error: {
 					type: "basic",
-					name: errorConfig.name
-						? copy(`server:${errorConfig.name.key}`, {
-								defaultMessage: errorConfig.name.defaultMessage,
+					name: options.name
+						? copy(`server:${options.name.key}`, {
+								defaultMessage: options.name.defaultMessage,
 							})
 						: copy("server:core.errors.default.name", {
 								defaultMessage: decodedError.name,
 							}),
-					message: copy(`server:${errorConfig.message.key}`, {
-						defaultMessage: errorConfig.message.defaultMessage,
+					message: copy(`server:${options.message.key}`, {
+						defaultMessage: options.message.defaultMessage,
 					}),
 					status: decodedError.status,
 					code: decodedError.code,
@@ -182,15 +188,15 @@ export const runToolkitService = async <T>(
 		return {
 			error: {
 				type: "basic",
-				name: errorConfig.name
-					? copy(`server:${errorConfig.name.key}`, {
-							defaultMessage: errorConfig.name.defaultMessage,
+				name: options.name
+					? copy(`server:${options.name.key}`, {
+							defaultMessage: options.name.defaultMessage,
 						})
 					: copy("server:core.errors.default.name", {
 							defaultMessage: constants.errors.name,
 						}),
-				message: copy(`server:${errorConfig.message.key}`, {
-					defaultMessage: errorConfig.message.defaultMessage,
+				message: copy(`server:${options.message.key}`, {
+					defaultMessage: options.message.defaultMessage,
 				}),
 				status: constants.errors.status,
 			},

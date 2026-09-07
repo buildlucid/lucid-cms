@@ -43,7 +43,7 @@ const getAllController = factory.createHandlers(
 	async (c) => {
 		const context = createServiceContext(c);
 
-		const locales = await serviceWrapper(localeServices.content.getAll, {
+		const locales = await serviceWrapper(localeServices.getAll, {
 			transaction: false,
 			defaultError: {
 				type: "basic",

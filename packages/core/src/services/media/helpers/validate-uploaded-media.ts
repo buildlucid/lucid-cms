@@ -20,6 +20,7 @@ const validateUploadedMedia = async (props: {
 	fileName: string;
 	mimeType: string | null;
 	allowedType?: MediaType;
+	mimeTypes?: readonly string[];
 	expectedType?: MediaType;
 }): ServiceResponse<FileMetadata> => {
 	const detectedMimeType = await detectStreamMimeType(
@@ -63,6 +64,28 @@ const validateUploadedMedia = async (props: {
 	}
 
 	const fileMetaData = detectedMetaRes?.data ?? storedMetaRes.data;
+
+	if (
+		props.mimeTypes &&
+		!props.mimeTypes.some((allowed) =>
+			allowed.endsWith("/*")
+				? fileMetaData.mimeType.startsWith(allowed.slice(0, -1))
+				: allowed === fileMetaData.mimeType,
+		)
+	) {
+		return {
+			error: {
+				status: 400,
+				errors: {
+					file: {
+						code: "media_error",
+						message: copy("server:core.media.upload.mime.invalid"),
+					},
+				},
+			},
+			data: undefined,
+		};
+	}
 
 	if (
 		props.allowedType !== undefined &&

@@ -1,4 +1,5 @@
 import { copy } from "@lucidcms/core";
+import { toWebReadable } from "@lucidcms/core/extension";
 import type { MediaStorageAdapterServiceUploadSingle } from "@lucidcms/core/types";
 import type { AwsClient } from "aws4fetch";
 import type { PluginOptions } from "../types/types.js";
@@ -13,16 +14,17 @@ export default (client: AwsClient, pluginOptions: PluginOptions) => {
 			const headers = new Headers();
 
 			applyMetadataHeaders(headers, props);
+			headers.set("X-Amz-Content-Sha256", "UNSIGNED-PAYLOAD");
+			headers.set("Content-Length", String(props.size));
+
+			const body =
+				props.body instanceof Uint8Array
+					? new Uint8Array(props.body)
+					: toWebReadable(props.body);
 
 			const response = await client.sign(
-				new Request(
-					`${pluginOptions.endpoint}/${pluginOptions.bucket}/${props.key}`,
-					{
-						method: "PUT",
-						body: props.body as unknown as BodyInit,
-						headers: headers,
-					},
-				),
+				`${pluginOptions.endpoint}/${pluginOptions.bucket}/${props.key}`,
+				{ method: "PUT", body, headers },
 			);
 
 			const result = await fetch(response);

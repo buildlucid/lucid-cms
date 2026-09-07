@@ -20,6 +20,7 @@
 - Added `defineContentApiRoute` for custom content endpoints with authentication and scope options.
 - Added custom permissions and integration scopes through `lucid.config.access`, with labels, groups, user permission checks and generated type hints for middleware and routes.
 - Added automatic loading of resources from configurable folders, including subfolders and plugin resources.
+- Added toolkit services for uploading and managing media files.
 
 ### Breaking Changes:
 

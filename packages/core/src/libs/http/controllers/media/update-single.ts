@@ -54,6 +54,7 @@ const updateSingleController = factory.createHandlers(
 			fileName: body.fileName,
 			key: body.key,
 			public: body.public,
+			isHidden: body.isHidden,
 			folderId: body.folderId,
 			title: body.title,
 			alt: body.alt,

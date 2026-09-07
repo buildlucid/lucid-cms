@@ -14,19 +14,17 @@ const resolve = async (
 	context: ServiceContext,
 	input: ToolkitPreviewsResolveInput,
 ): ServiceResponse<PreviewSession> => {
-	return runToolkitService(
-		() => resolvePreviewSession(context, { token: input.token }),
-		{
-			name: {
-				key: "core.toolkit.preview.resolve.error.name",
-				defaultMessage: "Preview Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.preview.resolve.error.message",
-				defaultMessage: "Lucid toolkit could not resolve the preview.",
-			},
+	return runToolkitService({
+		handler: () => resolvePreviewSession(context, { token: input.token }),
+		name: {
+			key: "core.toolkit.preview.resolve.error.name",
+			defaultMessage: "Preview Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.preview.resolve.error.message",
+			defaultMessage: "Lucid toolkit could not resolve the preview.",
+		},
+	});
 };
 
 export default resolve;

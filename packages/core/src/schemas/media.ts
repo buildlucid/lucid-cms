@@ -546,6 +546,362 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 	perPage: queryFormatted.schema.perPage,
 });
 
+/** Fields used to register an uploaded media file. */
+export const createMediaSchema = z.object({
+	crop: mediaCropInputSchema.optional(),
+	key: z.string().trim().meta({
+		description: "The media key",
+		example: "public/123e4567e89b12d3a456426614174000",
+	}),
+	folderId: z
+		.number()
+		.nullable()
+		.meta({
+			description: "The media folder ID",
+			example: 1,
+		})
+		.optional(),
+	fileName: z.string().trim().meta({
+		description: "The filename",
+		example: "funny-cats.jpg",
+	}),
+	origin: mediaOriginSchema.meta({
+		description: "The provenance origin of the media item",
+		example: "human",
+	}),
+	aiGenerationRequestId: z.string().trim().optional().meta({
+		description: "The AI generation request ID to link to this media item",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+	}),
+	title: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Title value",
+				}),
+			}),
+		)
+		.optional(),
+	alt: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Alt text value",
+				}),
+			}),
+		)
+		.optional(),
+	description: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Description value",
+				}),
+			}),
+		)
+		.optional(),
+	summary: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Summary value",
+				}),
+			}),
+		)
+		.optional(),
+	width: z
+		.number()
+		.meta({
+			description: "The image or video width",
+			example: 100,
+		})
+		.optional(),
+	height: z
+		.number()
+		.meta({
+			description: "The image or video height",
+			example: 100,
+		})
+		.optional(),
+	duration: z
+		.number()
+		.nonnegative()
+		.nullable()
+		.meta({
+			description: "The audio or video duration in seconds",
+			example: 12.5,
+		})
+		.optional(),
+	focalPoint: focalPointSchema.optional().meta({
+		description: "The image focal point",
+	}),
+	blurHash: z
+		.string()
+		.trim()
+		.meta({
+			description: "The blur hash",
+			example: "AQABAAAABAAAAgAA...",
+		})
+		.optional(),
+	averageColor: z
+		.string()
+		.trim()
+		.meta({
+			description: "The average color",
+			example: "rgba(255, 255, 255, 1)",
+		})
+		.optional(),
+	base64: z
+		.string()
+		.trim()
+		.nullable()
+		.meta({
+			description: "Tiny base64-encoded image placeholder",
+			example:
+				"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
+		})
+		.optional(),
+	isDark: z
+		.boolean()
+		.meta({
+			description: "Whether the image is dark",
+			example: true,
+		})
+		.optional(),
+	isLight: z
+		.boolean()
+		.meta({
+			description: "Whether the image is light",
+			example: true,
+		})
+		.optional(),
+	posterId: z
+		.number()
+		.nullable()
+		.meta({
+			description: "The poster media ID",
+			example: 1,
+		})
+		.optional(),
+	isHidden: z
+		.boolean()
+		.meta({
+			description: "Whether the media should be hidden from library lists",
+			example: true,
+		})
+		.optional(),
+});
+
+/** Fields used to update media details or replace its file. */
+export const updateMediaSchema = z.object({
+	isHidden: z.boolean().optional().meta({
+		description: "Whether the media should be hidden from library lists",
+	}),
+	crop: mediaCropInputSchema.nullable().optional(),
+	key: z
+		.string()
+		.trim()
+		.meta({
+			description: "The media key",
+			example: "public/123e4567e89b12d3a456426614174000",
+		})
+		.optional(),
+	public: z
+		.boolean()
+		.meta({
+			description: "Whether the media is public",
+			example: true,
+		})
+		.optional(),
+	origin: mediaOriginSchema.optional().meta({
+		description: "The provenance origin of the media item",
+		example: "ai_generated",
+	}),
+	aiGenerationRequestId: z.string().trim().optional().meta({
+		description: "The AI generation request ID to link to this media item",
+		example: "123e4567-e89b-12d3-a456-426614174000",
+	}),
+	folderId: z
+		.number()
+		.nullable()
+		.meta({
+			description: "The media folder ID",
+			example: 1,
+		})
+		.optional(),
+	fileName: z
+		.string()
+		.trim()
+		.meta({
+			description: "The filename",
+			example: "funny-cats.jpg",
+		})
+		.optional(),
+	title: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Title value",
+				}),
+			}),
+		)
+		.optional(),
+	alt: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Alt text value",
+				}),
+			}),
+		)
+		.optional(),
+	description: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Description value",
+				}),
+			}),
+		)
+		.optional(),
+	summary: z
+		.array(
+			z.object({
+				localeCode: z
+					.string()
+					.trim()
+					.nullable()
+					.meta({ description: "Locale code", example: "en" }),
+				value: z.string().trim().nullable().meta({
+					description: "Summary value",
+				}),
+			}),
+		)
+		.optional(),
+	width: z
+		.number()
+		.nullable()
+		.meta({
+			description: "The image or video width",
+			example: 100,
+		})
+		.optional(),
+	height: z
+		.number()
+		.nullable()
+		.meta({
+			description: "The image or video height",
+			example: 100,
+		})
+		.optional(),
+	duration: z
+		.number()
+		.nonnegative()
+		.nullable()
+		.meta({
+			description: "The audio or video duration in seconds",
+			example: 12.5,
+		})
+		.optional(),
+	focalPoint: focalPointSchema.nullable().optional().meta({
+		description: "The image focal point",
+	}),
+	blurHash: z
+		.string()
+		.trim()
+		.nullable()
+		.meta({
+			description: "The blur hash",
+			example: "AQABAAAABAAAAgAA...",
+		})
+		.optional(),
+	averageColor: z
+		.string()
+		.trim()
+		.nullable()
+		.meta({
+			description: "The average color",
+			example: "rgba(255, 255, 255, 1)",
+		})
+		.optional(),
+	base64: z
+		.string()
+		.trim()
+		.nullable()
+		.meta({
+			description: "Tiny base64-encoded image placeholder",
+			example:
+				"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
+		})
+		.optional(),
+	isDark: z
+		.boolean()
+		.nullable()
+		.meta({
+			description: "Whether the image is dark",
+			example: true,
+		})
+		.optional(),
+	isLight: z
+		.boolean()
+		.nullable()
+		.meta({
+			description: "Whether the image is light",
+			example: true,
+		})
+		.optional(),
+	isDeleted: z
+		.boolean()
+		.meta({
+			description: "Whether the media is deleted",
+			example: true,
+		})
+		.optional(),
+	posterId: z
+		.number()
+		.nullable()
+		.meta({
+			description: "The poster media ID",
+			example: 1,
+		})
+		.optional(),
+});
+
 export const controllerSchemas = {
 	getMultiple: {
 		query: {
@@ -687,191 +1043,8 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	updateSingle: {
-		body: z.object({
-			crop: mediaCropInputSchema.nullable().optional(),
-			key: z
-				.string()
-				.trim()
-				.meta({
-					description: "The media key",
-					example: "public/123e4567e89b12d3a456426614174000",
-				})
-				.optional(),
-			public: z
-				.boolean()
-				.meta({
-					description: "Whether the media is public",
-					example: true,
-				})
-				.optional(),
-			origin: mediaOriginSchema.optional().meta({
-				description: "The provenance origin of the media item",
-				example: "ai_generated",
-			}),
-			aiGenerationRequestId: z.string().trim().optional().meta({
-				description: "The AI generation request ID to link to this media item",
-				example: "123e4567-e89b-12d3-a456-426614174000",
-			}),
-			folderId: z
-				.number()
-				.nullable()
-				.meta({
-					description: "The media folder ID",
-					example: 1,
-				})
-				.optional(),
-			fileName: z
-				.string()
-				.trim()
-				.meta({
-					description: "The filename",
-					example: "funny-cats.jpg",
-				})
-				.optional(),
-			title: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Title value",
-						}),
-					}),
-				)
-				.optional(),
-			alt: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Alt text value",
-						}),
-					}),
-				)
-				.optional(),
-			description: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Description value",
-						}),
-					}),
-				)
-				.optional(),
-			summary: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Summary value",
-						}),
-					}),
-				)
-				.optional(),
-			width: z
-				.number()
-				.nullable()
-				.meta({
-					description: "The image or video width",
-					example: 100,
-				})
-				.optional(),
-			height: z
-				.number()
-				.nullable()
-				.meta({
-					description: "The image or video height",
-					example: 100,
-				})
-				.optional(),
-			duration: z
-				.number()
-				.nonnegative()
-				.nullable()
-				.meta({
-					description: "The audio or video duration in seconds",
-					example: 12.5,
-				})
-				.optional(),
-			focalPoint: focalPointSchema.nullable().optional().meta({
-				description: "The image focal point",
-			}),
-			blurHash: z
-				.string()
-				.trim()
-				.nullable()
-				.meta({
-					description: "The blur hash",
-					example: "AQABAAAABAAAAgAA...",
-				})
-				.optional(),
-			averageColor: z
-				.string()
-				.trim()
-				.nullable()
-				.meta({
-					description: "The average color",
-					example: "rgba(255, 255, 255, 1)",
-				})
-				.optional(),
-			base64: z
-				.string()
-				.trim()
-				.nullable()
-				.meta({
-					description: "Tiny base64-encoded image placeholder",
-					example:
-						"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
-				})
-				.optional(),
-			isDark: z
-				.boolean()
-				.nullable()
-				.meta({
-					description: "Whether the image is dark",
-					example: true,
-				})
-				.optional(),
-			isLight: z
-				.boolean()
-				.nullable()
-				.meta({
-					description: "Whether the image is light",
-					example: true,
-				})
-				.optional(),
-			isDeleted: z
-				.boolean()
-				.meta({
-					description: "Whether the media is deleted",
-					example: true,
-				})
-				.optional(),
-			posterId: z
-				.number()
-				.nullable()
-				.meta({
-					description: "The poster media ID",
-					example: 1,
-				})
-				.optional(),
-		}),
+		body: updateMediaSchema,
+
 		query: {
 			string: undefined,
 			formatted: undefined,
@@ -988,170 +1161,8 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	createSingle: {
-		body: z.object({
-			crop: mediaCropInputSchema.optional(),
-			key: z.string().trim().meta({
-				description: "The media key",
-				example: "public/123e4567e89b12d3a456426614174000",
-			}),
-			folderId: z
-				.number()
-				.nullable()
-				.meta({
-					description: "The media folder ID",
-					example: 1,
-				})
-				.optional(),
-			fileName: z.string().trim().meta({
-				description: "The filename",
-				example: "funny-cats.jpg",
-			}),
-			origin: mediaOriginSchema.meta({
-				description: "The provenance origin of the media item",
-				example: "human",
-			}),
-			aiGenerationRequestId: z.string().trim().optional().meta({
-				description: "The AI generation request ID to link to this media item",
-				example: "123e4567-e89b-12d3-a456-426614174000",
-			}),
-			title: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Title value",
-						}),
-					}),
-				)
-				.optional(),
-			alt: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Alt text value",
-						}),
-					}),
-				)
-				.optional(),
-			description: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Description value",
-						}),
-					}),
-				)
-				.optional(),
-			summary: z
-				.array(
-					z.object({
-						localeCode: z
-							.string()
-							.trim()
-							.nullable()
-							.meta({ description: "Locale code", example: "en" }),
-						value: z.string().trim().nullable().meta({
-							description: "Summary value",
-						}),
-					}),
-				)
-				.optional(),
-			width: z
-				.number()
-				.meta({
-					description: "The image or video width",
-					example: 100,
-				})
-				.optional(),
-			height: z
-				.number()
-				.meta({
-					description: "The image or video height",
-					example: 100,
-				})
-				.optional(),
-			duration: z
-				.number()
-				.nonnegative()
-				.nullable()
-				.meta({
-					description: "The audio or video duration in seconds",
-					example: 12.5,
-				})
-				.optional(),
-			focalPoint: focalPointSchema.optional().meta({
-				description: "The image focal point",
-			}),
-			blurHash: z
-				.string()
-				.trim()
-				.meta({
-					description: "The blur hash",
-					example: "AQABAAAABAAAAgAA...",
-				})
-				.optional(),
-			averageColor: z
-				.string()
-				.trim()
-				.meta({
-					description: "The average color",
-					example: "rgba(255, 255, 255, 1)",
-				})
-				.optional(),
-			base64: z
-				.string()
-				.trim()
-				.nullable()
-				.meta({
-					description: "Tiny base64-encoded image placeholder",
-					example:
-						"data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoKAAcAAUAmJQBOgCH5AQAA",
-				})
-				.optional(),
-			isDark: z
-				.boolean()
-				.meta({
-					description: "Whether the image is dark",
-					example: true,
-				})
-				.optional(),
-			isLight: z
-				.boolean()
-				.meta({
-					description: "Whether the image is light",
-					example: true,
-				})
-				.optional(),
-			posterId: z
-				.number()
-				.nullable()
-				.meta({
-					description: "The poster media ID",
-					example: 1,
-				})
-				.optional(),
-			isHidden: z
-				.boolean()
-				.meta({
-					description: "Whether the media should be hidden from library lists",
-					example: true,
-				})
-				.optional(),
-		}),
+		body: createMediaSchema,
+
 		query: {
 			string: undefined,
 			formatted: undefined,

@@ -43,25 +43,23 @@ const getSingle = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
 ): ServiceResponse<ToolkitDocumentsGetSingleResult<TCollectionKey>> => {
-	return runToolkitService(
-		() =>
+	return runToolkitService({
+		handler: () =>
 			getSingleDocument(context, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: input.preview ?? undefined,
 				query: normalizeDocumentQuery(input.query),
 			}),
-		{
-			name: {
-				key: "core.toolkit.documents.get.single.error.name",
-				defaultMessage: "Documents Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.documents.get.single.error.message",
-				defaultMessage: "Lucid toolkit could not fetch a document.",
-			},
+		name: {
+			key: "core.toolkit.documents.get.single.error.name",
+			defaultMessage: "Documents Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.documents.get.single.error.message",
+			defaultMessage: "Lucid toolkit could not fetch a document.",
+		},
+	});
 };
 
 export default getSingle;

@@ -42,8 +42,8 @@ const status = async (
 	context: ServiceContext,
 	input: ToolkitAuthStatusInput,
 ): ServiceResponse<ToolkitAuthStatus> => {
-	return runToolkitService<ToolkitAuthStatus>(
-		async () => {
+	return runToolkitService<ToolkitAuthStatus>({
+		handler: async () => {
 			await setAuthResponseHeaders(input.headers);
 			const [accessToken, refreshToken] = await Promise.all([
 				input.cookies.get(constants.cookies.accessToken),
@@ -69,18 +69,15 @@ const status = async (
 				data: { authenticated: true },
 			};
 		},
-		{
-			name: {
-				key: "core.toolkit.auth.status.error.name",
-				defaultMessage: "Authentication Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.auth.status.error.message",
-				defaultMessage:
-					"Lucid toolkit could not resolve authentication status.",
-			},
+		name: {
+			key: "core.toolkit.auth.status.error.name",
+			defaultMessage: "Authentication Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.auth.status.error.message",
+			defaultMessage: "Lucid toolkit could not resolve authentication status.",
+		},
+	});
 };
 
 export default status;

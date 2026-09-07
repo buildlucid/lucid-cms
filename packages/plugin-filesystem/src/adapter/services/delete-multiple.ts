@@ -1,5 +1,4 @@
-import { constants } from "node:fs";
-import { access, unlink } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import { copy } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
@@ -16,11 +15,8 @@ export default (options: FileSystemStorageAdapterOptions) => {
 		try {
 			for (const key of props.keys) {
 				const { targetPath } = keyPaths(key, options.uploadDir);
-				try {
-					await access(targetPath, constants.F_OK);
-					await unlink(targetPath);
-					await deleteStoredMetadata(options.uploadDir, key);
-				} catch {}
+				await rm(targetPath, { force: true });
+				await deleteStoredMetadata(options.uploadDir, key);
 			}
 			return {
 				error: undefined,

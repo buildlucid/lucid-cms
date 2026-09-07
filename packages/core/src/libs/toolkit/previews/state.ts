@@ -66,8 +66,8 @@ const state = async (
 	context: ServiceContext,
 	input: ToolkitPreviewStateInput,
 ): ServiceResponse<ToolkitPreviewState> => {
-	return runToolkitService<ToolkitPreviewState>(
-		async () => {
+	return runToolkitService<ToolkitPreviewState>({
+		handler: async () => {
 			const url = new URL(input.url);
 			const hasQueryValue = url.searchParams.has(previewQueryParam);
 			const isBuilderPreview =
@@ -132,17 +132,15 @@ const state = async (
 				},
 			};
 		},
-		{
-			name: {
-				key: "core.toolkit.preview.resolve.error.name",
-				defaultMessage: "Preview Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.preview.resolve.error.message",
-				defaultMessage: "Lucid toolkit could not handle the preview.",
-			},
+		name: {
+			key: "core.toolkit.preview.resolve.error.name",
+			defaultMessage: "Preview Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.preview.resolve.error.message",
+			defaultMessage: "Lucid toolkit could not handle the preview.",
+		},
+	});
 };
 
 export default state;

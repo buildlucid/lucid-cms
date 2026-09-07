@@ -39,46 +39,34 @@ const updateSingle: ServiceFn<
 			id: number;
 			key?: string;
 			fileName?: string;
-			public?: boolean;
 			folderId?: number | null;
-			title?: {
-				localeCode: string | null;
-				value: string | null;
-			}[];
-			alt?: {
-				localeCode: string | null;
-				value: string | null;
-			}[];
-			description?: {
-				localeCode: string | null;
-				value: string | null;
-			}[];
-			summary?: {
-				localeCode: string | null;
-				value: string | null;
-			}[];
+			public?: boolean;
+			isHidden?: boolean;
+			isDeleted?: boolean;
+			origin?: MediaOrigin;
+			aiGenerationRequestId?: string;
+			title?: { localeCode: string | null; value: string | null }[];
+			alt?: { localeCode: string | null; value: string | null }[];
+			description?: { localeCode: string | null; value: string | null }[];
+			summary?: { localeCode: string | null; value: string | null }[];
 			width?: number | null;
 			height?: number | null;
 			duration?: number | null;
-			focalPoint?: {
-				x: number;
-				y: number;
-			} | null;
+			focalPoint?: { x: number; y: number } | null;
 			blurHash?: string | null;
 			averageColor?: string | null;
 			base64?: string | null;
 			isDark?: boolean | null;
 			isLight?: boolean | null;
-			isDeleted?: boolean;
 			posterId?: number | null;
 			crop?: MediaCropInput | null;
-			origin?: MediaOrigin;
-			aiGenerationRequestId?: string;
+			expectedSize?: number;
+			validation?: { maxBytes?: number; mimeTypes?: readonly string[] };
 			allowedType?: MediaType;
-			userId: number;
+			userId: number | null;
 		},
 	],
-	number | undefined
+	number
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db);
 	const MediaTranslations = new MediaTranslationsRepository(context.db);
@@ -101,6 +89,7 @@ const updateSingle: ServiceFn<
 		},
 	});
 	if (mediaRes.error) return mediaRes;
+
 	if (mediaRes.data.relation_type === "crop") {
 		return {
 			error: {
@@ -181,6 +170,8 @@ const updateSingle: ServiceFn<
 			previousEtag: mediaRes.data.e_tag,
 			updatedKey: data.key,
 			allowedType: data.allowedType,
+			expectedSize: data.expectedSize,
+			validation: data.validation,
 			fileName: data.fileName,
 			targetKey:
 				targetPublic === currentPublic
@@ -304,6 +295,12 @@ const updateSingle: ServiceFn<
 	});
 	if (aiGenerationRes.error) return aiGenerationRes;
 
+	const focalPoint = updateObjectRes
+		? (data.focalPoint ?? null)
+		: data.focalPoint;
+	const preserveOriginalFocalPoint =
+		activeCrop !== undefined && updateObjectRes === undefined;
+
 	const updateData: Partial<Update<LucidMedia>> = {
 		key: updateObjectRes?.key ?? renamedKey,
 		e_tag: updateObjectRes?.etag,
@@ -336,30 +333,34 @@ const updateSingle: ServiceFn<
 		focal_x:
 			finalType !== "image"
 				? null
-				: activeCrop !== undefined && updateObjectRes === undefined
+				: preserveOriginalFocalPoint || focalPoint === undefined
 					? undefined
-					: data.focalPoint === undefined
-						? undefined
-						: data.focalPoint === null
-							? null
-							: Math.round(data.focalPoint.x * 10000),
+					: focalPoint === null
+						? null
+						: Math.round(focalPoint.x * 10000),
 		focal_y:
 			finalType !== "image"
 				? null
-				: activeCrop !== undefined && updateObjectRes === undefined
+				: preserveOriginalFocalPoint || focalPoint === undefined
 					? undefined
-					: data.focalPoint === undefined
-						? undefined
-						: data.focalPoint === null
-							? null
-							: Math.round(data.focalPoint.y * 10000),
-		blur_hash: data.blurHash,
-		average_color: data.averageColor,
-		base64: finalType !== "image" ? null : data.base64,
-		is_dark: data.isDark,
-		is_light: data.isLight,
+					: focalPoint === null
+						? null
+						: Math.round(focalPoint.y * 10000),
+		blur_hash: updateObjectRes ? (data.blurHash ?? null) : data.blurHash,
+		average_color: updateObjectRes
+			? (data.averageColor ?? null)
+			: data.averageColor,
+		base64:
+			finalType !== "image"
+				? null
+				: updateObjectRes
+					? (data.base64 ?? null)
+					: data.base64,
+		is_dark: updateObjectRes ? (data.isDark ?? null) : data.isDark,
+		is_light: updateObjectRes ? (data.isLight ?? null) : data.isLight,
 		folder_id: data.folderId,
 		public: isPublic ?? data.public,
+		is_hidden: mediaRes.data.parent_media_id == null ? data.isHidden : true,
 		is_deleted: data.isDeleted,
 		is_deleted_at: data.isDeleted
 			? new Date().toISOString()

@@ -26,6 +26,7 @@ export {
 	getNamespacePrefix as getKVNamespacePrefix,
 	resolveKey as resolveKVKey,
 } from "../libs/kv/utils.js";
+export { toWebReadable } from "../libs/media-storage/normalize-body.js";
 export {
 	createSignedMediaUrl,
 	validateSignedMediaUrl,

@@ -8,7 +8,7 @@ import renameMedia from "../strategies/rename.js";
 
 /** Synchronizes visibility and storage keys across all owned descendants. */
 const syncOwnedVisibility: ServiceFn<
-	[{ parentId: number; public: boolean; userId: number }],
+	[{ parentId: number; public: boolean; userId: number | null }],
 	undefined
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db);

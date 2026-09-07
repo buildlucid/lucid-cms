@@ -7,7 +7,7 @@ const deleteSinglePermanently: ServiceFn<
 	[
 		{
 			id: number;
-			userId: number;
+			userId: number | null;
 		},
 	],
 	undefined

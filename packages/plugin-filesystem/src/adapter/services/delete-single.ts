@@ -1,5 +1,4 @@
-import { constants } from "node:fs";
-import { access, unlink } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import { copy } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
@@ -15,17 +14,7 @@ export default (options: FileSystemStorageAdapterOptions) => {
 	) => {
 		try {
 			const { targetPath } = keyPaths(props.key, options.uploadDir);
-			try {
-				await access(targetPath, constants.F_OK);
-			} catch {
-				return {
-					error: {
-						message: copy("server:plugin.filesystem.media.files.not.found"),
-					},
-					data: undefined,
-				};
-			}
-			await unlink(targetPath);
+			await rm(targetPath, { force: true });
 			await deleteStoredMetadata(options.uploadDir, props.key);
 			return {
 				error: undefined,

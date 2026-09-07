@@ -9,7 +9,7 @@ import { formatBytes } from "../../../utils/helpers/index.js";
 import mediaAdapterDataSchema from "../../../utils/media/adapter-data.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import adjustStorageUsage from "../adjust-storage-usage.js";
-import checkCanUpdateMedia from "../checks/check-can-update-media.js";
+import checkCanStoreMedia from "../checks/check-can-store-media.js";
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
 import validateUploadedMedia from "../helpers/validate-uploaded-media.js";
 
@@ -17,6 +17,8 @@ const update: ServiceFn<
 	[
 		{
 			fileName: string;
+			expectedSize?: number;
+			validation?: { maxBytes?: number; mimeTypes?: readonly string[] };
 			previousEtag?: string | null;
 			previousSize: number;
 			previousKey: string;
@@ -67,9 +69,23 @@ const update: ServiceFn<
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
 
-	// Ensure we available storage space
-	const proposedSizeRes = await checkCanUpdateMedia(context, {
+	if (
+		data.expectedSize !== undefined &&
+		mediaMetaRes.data.size !== data.expectedSize
+	) {
+		return {
+			error: {
+				status: 400,
+				message: copy("server:core.media.upload.size.mismatch"),
+			},
+			data: undefined,
+		};
+	}
+
+	// Check the upload size.
+	const proposedSizeRes = await checkCanStoreMedia(context, {
 		size: mediaMetaRes.data.size,
+		maxBytes: data.validation?.maxBytes,
 	});
 	if (proposedSizeRes.error) {
 		await cleanupUpdatedKey();
@@ -83,6 +99,7 @@ const update: ServiceFn<
 		fileName: data.fileName,
 		mimeType: mediaMetaRes.data.mimeType,
 		allowedType: data.allowedType,
+		mimeTypes: data.validation?.mimeTypes,
 		expectedType: data.previousType,
 	});
 	if (fileMetaData.error) {

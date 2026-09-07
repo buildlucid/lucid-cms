@@ -47,8 +47,8 @@ const send = async (
 	context: ServiceContext,
 	input: ToolkitEmailSendInput,
 ): ServiceResponse<ToolkitEmailSendResult> => {
-	return runToolkitService(
-		() =>
+	return runToolkitService({
+		handler: () =>
 			sendExternalEmail(context, {
 				to: input.to,
 				subject: input.subject,
@@ -62,17 +62,15 @@ const send = async (
 				storage: input.storage,
 				from: input.from,
 			}),
-		{
-			name: {
-				key: "core.toolkit.email.send.error.name",
-				defaultMessage: "Email Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.email.send.error.message",
-				defaultMessage: "Lucid toolkit could not send the email.",
-			},
+		name: {
+			key: "core.toolkit.email.send.error.name",
+			defaultMessage: "Email Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.email.send.error.message",
+			defaultMessage: "Lucid toolkit could not send the email.",
+		},
+	});
 };
 
 export default send;

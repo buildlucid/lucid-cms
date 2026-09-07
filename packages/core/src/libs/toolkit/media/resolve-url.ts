@@ -1,5 +1,5 @@
 import type { MediaResolveUrlOptions } from "@lucidcms/types";
-import resolveMediaUrl from "../../../services/media/content/resolve-url.js";
+import resolveMediaUrl from "../../../services/media/resolve-url.js";
 import type { MediaUrl } from "../../../types/response.js";
 import type {
 	ServiceContext,
@@ -17,8 +17,8 @@ const resolveUrl = async (
 	context: ServiceContext,
 	input: ToolkitMediaResolveUrlInput,
 ): ServiceResponse<MediaUrl> =>
-	runToolkitService(
-		() =>
+	runToolkitService({
+		handler: () =>
 			resolveMediaUrl(context, {
 				key: input.key,
 				options: normalizeQuery({
@@ -26,16 +26,14 @@ const resolveUrl = async (
 					format: input.format,
 				}),
 			}),
-		{
-			name: {
-				key: "core.toolkit.media.resolve_url.error.name",
-				defaultMessage: "Media Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.media.resolve_url.error.message",
-				defaultMessage: "Lucid toolkit could not resolve the media URL.",
-			},
+		name: {
+			key: "core.toolkit.media.resolve_url.error.name",
+			defaultMessage: "Media Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.media.resolve_url.error.message",
+			defaultMessage: "Lucid toolkit could not resolve the media URL.",
+		},
+	});
 
 export default resolveUrl;

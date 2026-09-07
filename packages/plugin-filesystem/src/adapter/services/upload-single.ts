@@ -1,6 +1,7 @@
 import { createWriteStream } from "node:fs";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { copy } from "@lucidcms/core";
 import type {
 	FileSystemStorageAdapterOptions,
@@ -25,7 +26,7 @@ export default (options: FileSystemStorageAdapterOptions) => {
 
 		try {
 			await mkdir(targetDir, { recursive: true });
-			if (Buffer.isBuffer(props.body)) {
+			if (props.body instanceof Uint8Array) {
 				await writeFile(targetPath, props.body);
 			} else {
 				const writeStream = createWriteStream(targetPath);
@@ -33,11 +34,8 @@ export default (options: FileSystemStorageAdapterOptions) => {
 					props.body instanceof Readable
 						? props.body
 						: Readable.fromWeb(props.body as never);
-				readable.pipe(writeStream);
-				await new Promise<void>((resolve, reject) => {
-					writeStream.on("finish", resolve);
-					writeStream.on("error", reject);
-				});
+
+				await pipeline(readable, writeStream);
 			}
 
 			await writeStoredMetadata(options.uploadDir, props.key, {

@@ -33,7 +33,7 @@ const upsertCrop: ServiceFn<
 		{
 			parent: CropParent;
 			crop: MediaCropInput;
-			userId: number;
+			userId: number | null;
 		},
 	],
 	{ id: number; key: string }
@@ -63,6 +63,7 @@ const upsertCrop: ServiceFn<
 		}),
 	]);
 	if (awaitingSyncRes.error) return awaitingSyncRes;
+
 	if (existingCropRes.error) return existingCropRes;
 
 	let file: {
@@ -95,6 +96,7 @@ const upsertCrop: ServiceFn<
 			fileName: data.crop.fileName,
 		});
 		if (updateRes.error) return updateRes;
+
 		file = { ...updateRes.data, type: "image" };
 	} else {
 		const syncRes = await syncMedia(context, {
@@ -103,6 +105,7 @@ const upsertCrop: ServiceFn<
 			allowedType: "image",
 		});
 		if (syncRes.error) return syncRes;
+
 		file = {
 			key: syncRes.data.key,
 			etag: syncRes.data.etag,

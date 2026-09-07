@@ -15,15 +15,13 @@ const deleteObject: ServiceFn<
 	const mediaStorageRes = await checkHasMediaStorage(context);
 	if (mediaStorageRes.error) return mediaStorageRes;
 
-	const [_, updateStorageRes] = await Promise.all([
-		mediaStorageRes.data.delete(context, {
-			key: data.key,
-		}),
-		adjustStorageUsage(context, {
-			delta: -(data.size + data.processedSize),
-			min: 0,
-		}),
-	]);
+	const deleted = await mediaStorageRes.data.delete(context, { key: data.key });
+	if (deleted.error) return deleted;
+
+	const updateStorageRes = await adjustStorageUsage(context, {
+		delta: -(data.size + data.processedSize),
+		min: 0,
+	});
 	if (updateStorageRes.error) return updateStorageRes;
 
 	return {

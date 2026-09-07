@@ -17,6 +17,8 @@ const syncMedia: ServiceFn<
 		{
 			key: string;
 			fileName: string;
+			expectedSize?: number;
+			validation?: { maxBytes?: number; mimeTypes?: readonly string[] };
 			allowedType?: MediaType;
 		},
 	],
@@ -45,12 +47,26 @@ const syncMedia: ServiceFn<
 	});
 	if (mediaMetaRes.error) return mediaMetaRes;
 
+	if (
+		data.expectedSize !== undefined &&
+		data.expectedSize !== mediaMetaRes.data.size
+	) {
+		return {
+			error: {
+				status: 400,
+				message: copy("server:core.media.upload.size.mismatch"),
+			},
+			data: undefined,
+		};
+	}
+
 	const storageAdapterData = mediaAdapterDataSchema
 		.nullable()
 		.parse(mediaMetaRes.data.adapterData ?? null);
 
 	const proposedSizeRes = await checkCanStoreMedia(context, {
 		size: mediaMetaRes.data.size,
+		maxBytes: data.validation?.maxBytes,
 	});
 	if (proposedSizeRes.error) {
 		await mediaStorageRes.data.delete(context, {
@@ -66,6 +82,7 @@ const syncMedia: ServiceFn<
 		mimeType: mediaMetaRes.data.mimeType,
 		fileName: data.fileName,
 		allowedType: data.allowedType,
+		mimeTypes: data.validation?.mimeTypes,
 	});
 	if (fileMetaData.error) {
 		await mediaStorageRes.data.delete(context, {
@@ -81,6 +98,7 @@ const syncMedia: ServiceFn<
 		min: 0,
 	});
 	if (adjustStorageRes.error) return adjustStorageRes;
+
 	if (!adjustStorageRes.data.applied) {
 		if (storageLimit === false) {
 			return {

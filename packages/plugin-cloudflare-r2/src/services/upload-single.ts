@@ -1,5 +1,5 @@
-import { Readable } from "node:stream";
 import { copy } from "@lucidcms/core";
+import { toWebReadable } from "@lucidcms/core/extension";
 import type {
 	MediaStorageAdapterServiceUploadSingle,
 	ServiceContext,
@@ -20,11 +20,9 @@ export const putObject = async (
 ) => {
 	const binding = resolveBinding(context, pluginOptions);
 	const body =
-		props.body instanceof Readable
-			? (Readable.toWeb(props.body) as unknown as ReadableStream)
-			: props.body;
+		props.body instanceof Uint8Array ? props.body : toWebReadable(props.body);
 
-	return await binding.put(props.key, body, {
+	const options: R2PutOptions = {
 		httpMetadata: {
 			...pluginOptions.upload?.httpMetadata,
 			contentType: props.mimeType,
@@ -34,7 +32,26 @@ export const putObject = async (
 			extension: props.extension,
 		},
 		storageClass: pluginOptions.upload?.storageClass,
-	});
+	};
+
+	if (
+		body instanceof ReadableStream &&
+		typeof FixedLengthStream !== "undefined"
+	) {
+		const fixed = new FixedLengthStream(props.size);
+		const abort = new AbortController();
+		try {
+			const [object] = await Promise.all([
+				binding.put(props.key, fixed.readable, options),
+				body.pipeTo(fixed.writable, { signal: abort.signal }),
+			]);
+			return object;
+		} finally {
+			abort.abort();
+		}
+	}
+
+	return binding.put(props.key, body, options);
 };
 
 /**

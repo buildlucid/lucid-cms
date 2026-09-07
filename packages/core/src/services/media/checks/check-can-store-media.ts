@@ -6,11 +6,15 @@ const checkCanStoreMedia: ServiceFn<
 	[
 		{
 			size: number;
+			maxBytes?: number;
 		},
 	],
 	undefined
 > = async (context, data) => {
-	const maxFileSize = context.config.media.limits.uploadBytes;
+	const maxFileSize = Math.min(
+		context.config.media.limits.uploadBytes,
+		data.maxBytes ?? Infinity,
+	);
 
 	if (data.size > maxFileSize) {
 		return {
@@ -21,7 +25,7 @@ const checkCanStoreMedia: ServiceFn<
 						size: formatBytes(maxFileSize),
 					},
 				}),
-				status: 500,
+				status: 413,
 				errors: {
 					file: {
 						code: "storage",

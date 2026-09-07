@@ -11,7 +11,7 @@ const deleteSingle: ServiceFn<
 	[
 		{
 			id: number;
-			userId: number;
+			userId: number | null;
 		},
 	],
 	undefined

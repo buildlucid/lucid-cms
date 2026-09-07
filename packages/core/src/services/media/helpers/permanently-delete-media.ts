@@ -59,51 +59,33 @@ const permanentlyDeleteMedia: ServiceFn<
 	const failedChildDelete = childDeleteResults.find((result) => result.error);
 	if (failedChildDelete) return failedChildDelete;
 
-	const [processedImagesRes, deleteMediaRes] = await Promise.all([
-		ProcessedImages.selectMultiple({
-			select: ["key", "file_size"],
-			where: [
-				{
-					key: "media_key",
-					operator: "=",
-					value: getMediaRes.data.key,
-				},
-			],
-			validation: {
-				enabled: true,
-			},
-		}),
-		Media.deleteSingle({
-			where: [
-				{
-					key: "id",
-					operator: "=",
-					value: data.id,
-				},
-			],
-			returning: ["file_size", "id", "key"],
-			validation: {
-				enabled: true,
-			},
-		}),
-	]);
+	const processedImagesRes = await ProcessedImages.selectMultiple({
+		select: ["key", "file_size"],
+		where: [{ key: "media_key", operator: "=", value: getMediaRes.data.key }],
+		validation: { enabled: true },
+	});
 	if (processedImagesRes.error) return processedImagesRes;
-	if (deleteMediaRes.error) return deleteMediaRes;
 
-	const [_, deleteObjectRes] = await Promise.all([
-		mediaStorageRes.data.deleteMultiple(context, {
-			keys: processedImagesRes.data.map((i) => i.key),
-		}),
-		deleteMediaObject(context, {
-			key: deleteMediaRes.data.key,
-			size: deleteMediaRes.data.file_size,
-			processedSize: processedImagesRes.data.reduce(
-				(acc, i) => acc + i.file_size,
-				0,
-			),
-		}),
-	]);
-	if (deleteObjectRes.error) return deleteObjectRes;
+	const processedDelete = await mediaStorageRes.data.deleteMultiple(context, {
+		keys: processedImagesRes.data.map((image) => image.key),
+	});
+	if (processedDelete.error) return processedDelete;
+
+	const deletedObject = await deleteMediaObject(context, {
+		key: getMediaRes.data.key,
+		size: getMediaRes.data.file_size,
+		processedSize: processedImagesRes.data.reduce(
+			(sum, image) => sum + image.file_size,
+			0,
+		),
+	});
+	if (deletedObject.error) return deletedObject;
+
+	const deletedMedia = await Media.deleteSingle({
+		where: [{ key: "id", operator: "=", value: data.id }],
+		validation: { enabled: true },
+	});
+	if (deletedMedia.error) return deletedMedia;
 
 	if (data.invalidateCache !== false) {
 		await Promise.all([

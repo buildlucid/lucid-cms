@@ -42,7 +42,7 @@ describe("create upload session", () => {
 			},
 		);
 
-		expect(response.error?.status).toBe(500);
+		expect(response.error?.status).toBe(413);
 		expect(adapterCreateUploadSession).not.toHaveBeenCalled();
 	});
 

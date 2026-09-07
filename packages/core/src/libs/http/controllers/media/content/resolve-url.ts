@@ -40,7 +40,7 @@ const resolveUrlController = factory.createHandlers(
 	async (c) => {
 		const context = createServiceContext(c);
 
-		const media = await serviceWrapper(mediaServices.content.resolveUrl, {
+		const media = await serviceWrapper(mediaServices.resolveUrl, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

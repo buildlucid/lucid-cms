@@ -22,7 +22,7 @@ export type CoreToolkit = {
 	jobs: ToolkitJobs;
 	/** Helpers for reading enabled locales. */
 	locales: ToolkitLocales;
-	/** Helpers for reading and processing media. */
+	/** Helpers for uploading, updating, reading and deleting media. */
 	media: ToolkitMedia;
 	/** Helpers for resolving and handling previews. */
 	previews: ToolkitPreviews;
@@ -72,10 +72,16 @@ export type * from "./email/send.js";
 export type * from "./jobs/index.js";
 export type * from "./locales/get-all.js";
 export type * from "./locales/index.js";
+export type * from "./media/delete-single.js";
 export type * from "./media/get-multiple.js";
 export type * from "./media/get-single.js";
 export type * from "./media/index.js";
+export type * from "./media/replace-file.js";
+export type * from "./media/request-download.js";
 export type * from "./media/resolve-url.js";
+export type * from "./media/stream.js";
+export type * from "./media/update-single.js";
+export type * from "./media/upload-file.js";
 export type * from "./previews/index.js";
 export type * from "./previews/resolve.js";
 export type * from "./previews/state.js";

@@ -56,25 +56,23 @@ const getMultiple = async <TCollectionKey extends CollectionDocumentKey>(
 	context: ServiceContext,
 	input: ToolkitDocumentsGetMultipleInput<TCollectionKey>,
 ): ServiceResponse<ToolkitDocumentsGetMultipleResult<TCollectionKey>> => {
-	return runToolkitService(
-		() =>
+	return runToolkitService({
+		handler: () =>
 			getMultipleDocuments(context, {
 				collectionKey: input.collectionKey,
 				versionType: input.version,
 				preview: input.preview ?? undefined,
 				query: normalizePaginatedDocumentQuery(input.query),
 			}),
-		{
-			name: {
-				key: "core.toolkit.documents.get.multiple.error.name",
-				defaultMessage: "Documents Toolkit Error",
-			},
-			message: {
-				key: "core.toolkit.documents.get.multiple.error.message",
-				defaultMessage: "Lucid toolkit could not fetch multiple documents.",
-			},
+		name: {
+			key: "core.toolkit.documents.get.multiple.error.name",
+			defaultMessage: "Documents Toolkit Error",
 		},
-	);
+		message: {
+			key: "core.toolkit.documents.get.multiple.error.message",
+			defaultMessage: "Lucid toolkit could not fetch multiple documents.",
+		},
+	});
 };
 
 export default getMultiple;
