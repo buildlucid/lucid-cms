@@ -26,6 +26,10 @@
 			"types": "./dist/exports/runtime.d.mts",
 			"default": "./dist/exports/runtime.mjs"
 		},
+		"./toolkit": {
+			"types": "./dist/exports/toolkit.d.mts",
+			"default": "./dist/exports/toolkit.mjs"
+		},
 		"./types": {
 			"types": "./dist/exports/types.d.mts",
 			"default": "./dist/exports/types.mjs"

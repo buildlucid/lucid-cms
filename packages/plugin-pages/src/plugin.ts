@@ -10,7 +10,7 @@ import {
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
 import { pluginOptions, registerFields } from "./services/index.js";
-import toolkit from "./toolkit.js";
+import toolkit from "./toolkit/index.js";
 import type { PluginOptions } from "./types/types.js";
 
 /** Adds slug, parent-page and full-path fields to selected collections, plus route maintenance hooks and toolkit.pages. */

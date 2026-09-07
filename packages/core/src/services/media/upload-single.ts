@@ -48,20 +48,7 @@ const uploadSingle: ServiceFn<
 	],
 	{ id: number }
 > = async (context, input) => {
-	let file: ReturnType<typeof normalizeUploadFile>;
-	try {
-		file = normalizeUploadFile(input.file);
-	} catch (error) {
-		return {
-			error: {
-				type: "validation",
-				status: 400,
-				message: copy("server:core.media.upload.file.invalid"),
-				cause: error,
-			},
-			data: undefined,
-		};
-	}
+	const file = normalizeUploadFile(input.file);
 
 	const storage = await checkHasMediaStorage(context);
 	if (storage.error) return storage;

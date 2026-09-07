@@ -9,13 +9,13 @@ import type {
 import type {
 	ToolkitDocumentsGetMultipleInput,
 	ToolkitDocumentsGetMultipleResult,
-} from "./get-multiple.js";
-import getMultiple from "./get-multiple.js";
+} from "./get-multiple/index.js";
+import getMultiple from "./get-multiple/index.js";
 import type {
 	ToolkitDocumentsGetSingleInput,
 	ToolkitDocumentsGetSingleResult,
-} from "./get-single.js";
-import getSingle from "./get-single.js";
+} from "./get-single/index.js";
+import getSingle from "./get-single/index.js";
 
 export type ToolkitDocumentVersion<
 	TCollectionKey extends CollectionDocumentKey = CollectionDocumentKey,

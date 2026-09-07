@@ -5,7 +5,7 @@ import type {
 import status, {
 	type ToolkitAuthStatus,
 	type ToolkitAuthStatusInput,
-} from "./status.js";
+} from "./status/index.js";
 
 export type ToolkitAuth = {
 	/** Resolves authentication status from a server-rendered frontend request. */

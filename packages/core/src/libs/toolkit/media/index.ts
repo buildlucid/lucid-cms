@@ -3,21 +3,21 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import deleteSingle from "./delete-single.js";
+import deleteSingle from "./delete-single/index.js";
 import type {
 	ToolkitMediaGetMultipleInput,
 	ToolkitMediaGetMultipleResult,
-} from "./get-multiple.js";
-import getMultiple from "./get-multiple.js";
-import type { ToolkitMediaGetSingleInput } from "./get-single.js";
-import getSingle from "./get-single.js";
-import replaceFile from "./replace-file.js";
-import requestDownload from "./request-download.js";
-import type { ToolkitMediaResolveUrlInput } from "./resolve-url.js";
-import resolveUrl from "./resolve-url.js";
-import stream from "./stream.js";
-import updateSingle from "./update-single.js";
-import uploadFile from "./upload-file.js";
+} from "./get-multiple/index.js";
+import getMultiple from "./get-multiple/index.js";
+import type { ToolkitMediaGetSingleInput } from "./get-single/index.js";
+import getSingle from "./get-single/index.js";
+import replaceFile from "./replace-file/index.js";
+import requestDownload from "./request-download/index.js";
+import type { ToolkitMediaResolveUrlInput } from "./resolve-url/index.js";
+import resolveUrl from "./resolve-url/index.js";
+import stream from "./stream/index.js";
+import updateSingle from "./update-single/index.js";
+import uploadFile from "./upload-file/index.js";
 
 export type ToolkitMedia = {
 	/** Updates media details without uploading a file and returns its ID. */

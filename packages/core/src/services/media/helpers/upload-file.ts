@@ -1,5 +1,4 @@
 import type { Readable } from "node:stream";
-import z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
 import { toWebReadable } from "../../../libs/media-storage/normalize-body.js";
 import { LucidAPIError } from "../../../utils/errors/index.js";
@@ -17,35 +16,26 @@ export type MediaUploadFile =
 			| { body: ReadableStream<Uint8Array> | Readable; size: number }
 	  ));
 
-const fileSchema = z.object({
-	fileName: z.string().trim().min(1),
-	mimeType: z.string().trim().optional(),
-	size: z.number().int().nonnegative(),
-});
-
 /** Normalizes upload sources without reading the entire file into memory. */
 export const normalizeUploadFile = (file: MediaUploadFile) => {
 	if (file instanceof File) {
 		return {
-			...fileSchema.parse({
-				fileName: file.name,
-				mimeType: file.type,
-				size: file.size,
-			}),
+			fileName: file.name.trim(),
+			mimeType: file.type.trim(),
+			size: file.size,
 			body: file.stream(),
 		};
 	}
+
 	return {
-		...fileSchema.parse({
-			fileName: file.fileName,
-			mimeType: file.mimeType,
-			size:
-				file.body instanceof Uint8Array
+		fileName: file.fileName.trim(),
+		mimeType: file.mimeType?.trim(),
+		size:
+			"size" in file
+				? file.body instanceof Uint8Array
 					? file.body.byteLength
-					: "size" in file
-						? file.size
-						: undefined,
-		}),
+					: file.size
+				: file.body.byteLength,
 		body: file.body,
 	};
 };

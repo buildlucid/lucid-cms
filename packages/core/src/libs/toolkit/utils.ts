@@ -90,19 +90,6 @@ const normalizeToolkitDocumentFilters = (
 	return filterOr.length > 0 ? { filterOr } : {};
 };
 
-/** Applies Lucid's default pagination when toolkit callers omit it. */
-export const normalizePaginatedQuery = <T extends PaginatedQuery>(
-	query?: T,
-): Omit<T, "page" | "perPage"> & { page: number; perPage: number } => {
-	const normalizedQuery = query ?? ({} as T);
-
-	return {
-		...normalizedQuery,
-		page: normalizedQuery.page ?? constants.query.page,
-		perPage: normalizedQuery.perPage ?? constants.query.perPage,
-	};
-};
-
 /** Flattens nested document filters so toolkit calls match the internal service query shape. */
 export const normalizeDocumentQuery = <T extends DocumentQuery>(
 	query?: T,
@@ -137,10 +124,6 @@ export const normalizePaginatedDocumentQuery = <
 		perPage: perPage ?? constants.query.perPage,
 	};
 };
-
-/** Clones optional query objects so toolkit services can pass a stable shape downstream. */
-export const normalizeQuery = <T extends object>(query?: T): T =>
-	({ ...(query ?? {}) }) as T;
 
 /** Validates optional input, passes parsed values to the handler and converts unexpected errors to service results. */
 export const runToolkitService = async <T, TInput = never>(

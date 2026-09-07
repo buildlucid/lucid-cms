@@ -3,11 +3,11 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import resolve, { type ToolkitPreviewsResolveInput } from "./resolve.js";
+import resolve, { type ToolkitPreviewsResolveInput } from "./resolve/index.js";
 import state, {
 	type ToolkitPreviewState,
 	type ToolkitPreviewStateInput,
-} from "./state.js";
+} from "./state/index.js";
 
 export type ToolkitPreviews = {
 	/** Resolves preview state and synchronizes its session for a frontend request. */

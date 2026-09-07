@@ -3,7 +3,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../../utils/services/types.js";
-import getAll from "./get-all.js";
+import getAll from "./get-all/index.js";
 
 export type ToolkitLocales = {
 	/** Returns all enabled locales. */

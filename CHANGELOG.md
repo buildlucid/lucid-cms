@@ -21,6 +21,7 @@
 - Added custom permissions and integration scopes through `lucid.config.access`, with labels, groups, user permission checks and generated type hints for middleware and routes.
 - Added automatic loading of resources from configurable folders, including subfolders and plugin resources.
 - Added toolkit services for uploading and managing media files.
+- Added toolkit input validation, on-demand service loading and a dedicated toolkit entry point.
 
 ### Breaking Changes:
 
