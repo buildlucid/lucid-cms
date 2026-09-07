@@ -15,7 +15,9 @@ import {
 } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import withTransaction from "../../utils/services/with-transaction.js";
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
+import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
@@ -27,7 +29,7 @@ const promoteVersion: ServiceFn<
 			toVersionType: "latest" | string;
 			collectionKey: string;
 			documentId: number;
-			userId: number;
+			userId: number | null;
 			skipRevisionCheck?: boolean;
 			/** If set to false, a revision will not be created even if the collection supports revisions. */
 			createRevision?: boolean;
@@ -35,336 +37,358 @@ const promoteVersion: ServiceFn<
 		},
 	],
 	undefined
-> = async (context, data) => {
-	const Versions = new DocumentVersionsRepository(context.db);
-	const Documents = new DocumentsRepository(context.db);
-	const DocumentBricks = new DocumentBricksRepository(context.db);
-
-	// -------------------------------------------------------------------------------
-	// Initial data fetch and error checking
-	const collectionRes = await collections.getSingle(context, {
-		key: data.collectionKey,
-	});
-	if (collectionRes.error) return collectionRes;
-
-	if (data.requirePublishOperationForEnvironmentTarget === true) {
-		const isEnvironmentTarget =
-			collectionRes.data.getData.publishing.targets.some(
-				(environment) => environment.key === data.toVersionType,
-			);
-		if (isEnvironmentTarget) {
-			return {
-				error: {
-					type: "basic",
-					name: copy("server:core.collections.permission.error.name"),
-					message: copy(
-						"server:core.publish.operations.required.for.environment.target",
-					),
-					status: 403,
-				},
-				data: undefined,
-			};
-		}
-	}
-
-	//* check the schema status and if a migration is required
-	const migrationStatusRes = await migrationStatus(context, {
-		collection: collectionRes.data,
-	});
-	if (migrationStatusRes.error) return migrationStatusRes;
-
-	if (migrationStatusRes.data.requiresMigration) {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.error.schema.migration.required.name"),
-				message: copy("server:core.error.schema.migration.required.message"),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
-	const [bricksTableSchemaRes, tableNameRes, documentAccessRes] =
-		await Promise.all([
-			getBricksTableSchema(context, data.collectionKey),
-			getTableNames(context, data.collectionKey),
-			checkDocumentAccess(context, {
-				collectionKey: data.collectionKey,
-				id: data.documentId,
-			}),
-		]);
-	if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
-	if (tableNameRes.error) return tableNameRes;
-	if (documentAccessRes.error) return documentAccessRes;
-
-	const [versionRes, bricksQueryRes] = await Promise.all([
-		Versions.selectSingle(
-			{
-				select: ["id", "type", "document_id", "content_id"],
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.fromVersionId,
-					},
-				],
-				validation: {
-					enabled: true,
-					defaultError: {
-						message: copy("server:core.documents.version.not.found.message"),
-						status: 404,
-					},
-				},
-			},
-			{
-				tableName: tableNameRes.data.version,
-			},
-		),
-		DocumentBricks.selectMultipleByVersionId(
-			{
-				versionId: data.fromVersionId,
-				documentId: data.documentId,
-				bricksSchema: bricksTableSchemaRes.data,
-			},
-			{
-				tableName: tableNameRes.data.version,
-			},
-		),
-	]);
-	if (versionRes.error) return versionRes;
-	if (bricksQueryRes.error) return bricksQueryRes;
-
-	if (bricksQueryRes.data === undefined) {
-		return {
-			error: {
-				status: 404,
-				message: copy("server:core.documents.version.not.found.message"),
-			},
-			data: undefined,
-		};
-	}
-
-	// Additional error checks
-	if (versionRes.data.document_id !== data.documentId) {
-		return {
-			error: {
-				type: "basic",
-				message: copy("server:core.documents.version.document.mismatch"),
-				status: 404,
-			},
-			data: undefined,
-		};
-	}
-	if (versionRes.data.type === data.toVersionType) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: copy("server:core.documents.versions.promote.same.version"),
-			},
-			data: undefined,
-		};
-	}
-	if (versionRes.data.type === "revision" && data.skipRevisionCheck !== true) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: copy("server:core.documents.revisions.promote.denied"),
-			},
-			data: undefined,
-		};
-	}
-	if (collectionRes.data.getData.locked === true) {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.error.locked.collection.name"),
-				message: copy("server:core.error.locked.collection.message"),
-				status: 400,
-			},
-			data: undefined,
-		};
-	}
-
-	const migrationIdRes = await getCurrentCollectionMigrationId(
+> = (context, data) =>
+	withTransaction(
 		context,
-		data.collectionKey,
-	);
-	if (migrationIdRes.error) return migrationIdRes;
+		async (context) => {
+			const acquired = await acquireDocumentWrites(context, {
+				collectionKey: data.collectionKey,
+				ids: [data.documentId],
+			});
+			if (acquired.error) return acquired;
 
-	//-------------------------------------------------------------------------------
-	// Mutate/create revisions and update the document
-	const shouldCreateRevision =
-		collectionRes.data.getData.revisions.enabled &&
-		data.createRevision !== false;
+			await using _claims = acquired.data;
 
-	const [, upsertDocumentRes, createVersionRes] = await Promise.all([
-		shouldCreateRevision
-			? Versions.updateSingle(
+			const Versions = new DocumentVersionsRepository(context.db);
+			const Documents = new DocumentsRepository(context.db);
+			const DocumentBricks = new DocumentBricksRepository(context.db);
+
+			// -------------------------------------------------------------------------------
+			// Initial data fetch and error checking
+			const collectionRes = await collections.getSingle(context, {
+				key: data.collectionKey,
+			});
+			if (collectionRes.error) return collectionRes;
+			if (data.requirePublishOperationForEnvironmentTarget === true) {
+				const isEnvironmentTarget =
+					collectionRes.data.getData.publishing.targets.some(
+						(environment) => environment.key === data.toVersionType,
+					);
+				if (isEnvironmentTarget) {
+					return {
+						error: {
+							type: "basic",
+							name: copy("server:core.collections.permission.error.name"),
+							message: copy(
+								"server:core.publish.operations.required.for.environment.target",
+							),
+							status: 403,
+						},
+						data: undefined,
+					};
+				}
+			}
+
+			//* check the schema status and if a migration is required
+			const migrationStatusRes = await migrationStatus(context, {
+				collection: collectionRes.data,
+			});
+			if (migrationStatusRes.error) return migrationStatusRes;
+			if (migrationStatusRes.data.requiresMigration) {
+				return {
+					error: {
+						type: "basic",
+						name: copy("server:core.error.schema.migration.required.name"),
+						message: copy(
+							"server:core.error.schema.migration.required.message",
+						),
+						status: 400,
+					},
+					data: undefined,
+				};
+			}
+
+			const [bricksTableSchemaRes, tableNameRes, documentAccessRes] =
+				await Promise.all([
+					getBricksTableSchema(context, data.collectionKey),
+					getTableNames(context, data.collectionKey),
+					checkDocumentAccess(context, {
+						collectionKey: data.collectionKey,
+						id: data.documentId,
+					}),
+				]);
+			if (bricksTableSchemaRes.error) return bricksTableSchemaRes;
+			if (tableNameRes.error) return tableNameRes;
+			if (documentAccessRes.error) return documentAccessRes;
+
+			const [versionRes, bricksQueryRes] = await Promise.all([
+				Versions.selectSingle(
 					{
+						select: ["id", "type", "document_id", "content_id"],
 						where: [
 							{
-								key: "document_id",
+								key: "id",
 								operator: "=",
-								value: data.documentId,
-							},
-							{
-								key: "type",
-								operator: "=",
-								value: data.toVersionType,
+								value: data.fromVersionId,
 							},
 						],
-						data: {
-							type: "revision",
-							collection_migration_id: migrationIdRes.data,
-							promoted_from: data.fromVersionId,
-							created_by: data.userId,
+						validation: {
+							enabled: true,
+							defaultError: {
+								message: copy(
+									"server:core.documents.version.not.found.message",
+								),
+								status: 404,
+							},
 						},
 					},
 					{
 						tableName: tableNameRes.data.version,
 					},
-				)
-			: Versions.deleteSingle(
+				),
+				DocumentBricks.selectMultipleByVersionId(
 					{
-						where: [
-							{
-								key: "document_id",
-								operator: "=",
-								value: data.documentId,
-							},
-							{
-								key: "type",
-								operator: "=",
-								value: data.toVersionType,
-							},
-						],
+						versionId: data.fromVersionId,
+						documentId: data.documentId,
+						bricksSchema: bricksTableSchemaRes.data,
 					},
 					{
 						tableName: tableNameRes.data.version,
 					},
 				),
-		Documents.upsertSingle(
-			{
-				data: {
-					id: data.documentId,
-					collection_key: data.collectionKey,
-					collection_migration_id: migrationIdRes.data,
-					created_by: data.userId,
-					updated_by: data.userId,
-					is_deleted: false,
-					updated_at: new Date().toISOString(),
-				},
-				returning: ["id"],
-				validation: {
-					enabled: true,
-					defaultError: {
-						status: 400,
-						message: copy("server:core.documents.create.failed"),
+			]);
+			if (versionRes.error) return versionRes;
+			if (bricksQueryRes.error) return bricksQueryRes;
+			if (bricksQueryRes.data === undefined) {
+				return {
+					error: {
+						status: 404,
+						message: copy("server:core.documents.version.not.found.message"),
 					},
-				},
-			},
-			{
-				tableName: tableNameRes.data.document,
-			},
-		),
-		Versions.createSingle(
-			{
-				data: {
-					document_id: data.documentId,
-					collection_key: data.collectionKey,
-					collection_migration_id: migrationIdRes.data,
-					type: data.toVersionType,
-					promoted_from: data.fromVersionId,
-					content_id: versionRes.data.content_id,
-					created_by: data.userId,
-					updated_by: data.userId,
-				},
-				returning: ["id"],
-				validation: {
-					enabled: true,
-					defaultError: {
-						status: 400,
-						message: copy("server:core.documents.create.failed"),
+					data: undefined,
+				};
+			}
+
+			// Additional error checks
+			if (versionRes.data.document_id !== data.documentId) {
+				return {
+					error: {
+						type: "basic",
+						message: copy("server:core.documents.version.document.mismatch"),
+						status: 404,
 					},
-				},
-			},
-			{
-				tableName: tableNameRes.data.version,
-			},
-		),
-	]);
-	if (upsertDocumentRes.error) return upsertDocumentRes;
-	if (createVersionRes.error) return createVersionRes;
+					data: undefined,
+				};
+			}
 
-	// -------------------------------------------------------------------------------
-	// Create new brick tale rows for the new version
-	const baseUrl = getBaseUrl(context);
-	const brickTables = aggregateBrickTables({
-		collection: collectionRes.data,
-		documentId: data.documentId,
-		versionId: createVersionRes.data.id,
-		localization: context.config.localization,
-		bricks: documentBricksFormatter.formatMultiple({
-			bricksQuery: bricksQueryRes.data,
-			bricksSchema: bricksTableSchemaRes.data,
-			collection: collectionRes.data,
-			config: context.config,
-			host: baseUrl,
-		}),
-		fields: documentBricksFormatter.formatDocumentFields({
-			bricksQuery: bricksQueryRes.data,
-			bricksSchema: bricksTableSchemaRes.data,
-			collection: collectionRes.data,
-			config: context.config,
-			host: baseUrl,
-		}),
-		tableNameByteLimit: context.config.db.config.tableNameByteLimit,
-	});
-	const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
+			if (versionRes.data.type === data.toVersionType) {
+				return {
+					error: {
+						type: "basic",
+						status: 400,
+						message: copy(
+							"server:core.documents.versions.promote.same.version",
+						),
+					},
+					data: undefined,
+				};
+			}
 
-	const insertRes = await insertBrickTables(context, {
-		tables: sortedTables,
-		collection: collectionRes.data,
-	});
-	if (insertRes.error) return insertRes;
+			if (
+				versionRes.data.type === "revision" &&
+				data.skipRevisionCheck !== true
+			) {
+				return {
+					error: {
+						type: "basic",
+						status: 400,
+						message: copy("server:core.documents.revisions.promote.denied"),
+					},
+					data: undefined,
+				};
+			}
 
-	// -------------------------------------------------------------------------------
-	// Execute hook
-	const hookResponse = await executeHooks(
-		context,
-		{
-			service: "documents",
-			event: "versionPromote",
-			config: context.config,
-			collectionInstance: collectionRes.data,
-		},
-		{
-			meta: {
+			if (collectionRes.data.getData.locked === true) {
+				return {
+					error: {
+						type: "basic",
+						name: copy("server:core.error.locked.collection.name"),
+						message: copy("server:core.error.locked.collection.message"),
+						status: 400,
+					},
+					data: undefined,
+				};
+			}
+
+			const migrationIdRes = await getCurrentCollectionMigrationId(
+				context,
+				data.collectionKey,
+			);
+			if (migrationIdRes.error) return migrationIdRes;
+
+			//-------------------------------------------------------------------------------
+			// Mutate/create revisions and update the document
+			const shouldCreateRevision =
+				collectionRes.data.getData.revisions.enabled &&
+				data.createRevision !== false;
+
+			const [, upsertDocumentRes, createVersionRes] = await Promise.all([
+				shouldCreateRevision
+					? Versions.updateSingle(
+							{
+								where: [
+									{
+										key: "document_id",
+										operator: "=",
+										value: data.documentId,
+									},
+									{
+										key: "type",
+										operator: "=",
+										value: data.toVersionType,
+									},
+								],
+								data: {
+									type: "revision",
+									collection_migration_id: migrationIdRes.data,
+									promoted_from: data.fromVersionId,
+									created_by: data.userId,
+								},
+							},
+							{
+								tableName: tableNameRes.data.version,
+							},
+						)
+					: Versions.deleteSingle(
+							{
+								where: [
+									{
+										key: "document_id",
+										operator: "=",
+										value: data.documentId,
+									},
+									{
+										key: "type",
+										operator: "=",
+										value: data.toVersionType,
+									},
+								],
+							},
+							{
+								tableName: tableNameRes.data.version,
+							},
+						),
+				Documents.upsertSingle(
+					{
+						data: {
+							id: data.documentId,
+							collection_key: data.collectionKey,
+							collection_migration_id: migrationIdRes.data,
+							created_by: data.userId,
+							updated_by: data.userId,
+							is_deleted: false,
+							updated_at: new Date().toISOString(),
+						},
+						returning: ["id"],
+						validation: {
+							enabled: true,
+							defaultError: {
+								status: 400,
+								message: copy("server:core.documents.create.failed"),
+							},
+						},
+					},
+					{
+						tableName: tableNameRes.data.document,
+					},
+				),
+				Versions.createSingle(
+					{
+						data: {
+							document_id: data.documentId,
+							collection_key: data.collectionKey,
+							collection_migration_id: migrationIdRes.data,
+							type: data.toVersionType,
+							promoted_from: data.fromVersionId,
+							content_id: versionRes.data.content_id,
+							created_by: data.userId,
+							updated_by: data.userId,
+						},
+						returning: ["id"],
+						validation: {
+							enabled: true,
+							defaultError: {
+								status: 400,
+								message: copy("server:core.documents.create.failed"),
+							},
+						},
+					},
+					{
+						tableName: tableNameRes.data.version,
+					},
+				),
+			]);
+			if (upsertDocumentRes.error) return upsertDocumentRes;
+			if (createVersionRes.error) return createVersionRes;
+
+			// -------------------------------------------------------------------------------
+			// Create new brick tale rows for the new version
+			const baseUrl = getBaseUrl(context);
+			const brickTables = aggregateBrickTables({
 				collection: collectionRes.data,
-				collectionKey: data.collectionKey,
-				userId: data.userId,
-				collectionTableNames: tableNameRes.data,
-			},
-			data: {
 				documentId: data.documentId,
 				versionId: createVersionRes.data.id,
-				versionType: data.toVersionType,
-			},
+				localization: context.config.localization,
+				bricks: documentBricksFormatter.formatMultiple({
+					bricksQuery: bricksQueryRes.data,
+					bricksSchema: bricksTableSchemaRes.data,
+					collection: collectionRes.data,
+					config: context.config,
+					host: baseUrl,
+				}),
+				fields: documentBricksFormatter.formatDocumentFields({
+					bricksQuery: bricksQueryRes.data,
+					bricksSchema: bricksTableSchemaRes.data,
+					collection: collectionRes.data,
+					config: context.config,
+					host: baseUrl,
+				}),
+				tableNameByteLimit: context.config.db.config.tableNameByteLimit,
+			});
+			const sortedTables = brickTables.sort((a, b) => a.priority - b.priority);
+
+			const insertRes = await insertBrickTables(context, {
+				tables: sortedTables,
+				collection: collectionRes.data,
+			});
+			if (insertRes.error) return insertRes;
+
+			// -------------------------------------------------------------------------------
+			// Execute hook
+			const hookResponse = await executeHooks(
+				context,
+				{
+					service: "documents",
+					event: "versionPromote",
+					config: context.config,
+					collectionInstance: collectionRes.data,
+				},
+				{
+					meta: {
+						collection: collectionRes.data,
+						collectionKey: data.collectionKey,
+						userId: data.userId,
+						collectionTableNames: tableNameRes.data,
+					},
+					data: {
+						documentId: data.documentId,
+						versionId: createVersionRes.data.id,
+						versionType: data.toVersionType,
+					},
+				},
+			);
+			if (hookResponse.error) return hookResponse;
+
+			await invalidateContentDocumentCache(context, data.collectionKey);
+
+			// -------------------------------------------------------------------------------
+			// Success
+			return {
+				error: undefined,
+				data: undefined,
+			};
 		},
+		{ isolate: true },
 	);
-	if (hookResponse.error) return hookResponse;
-
-	await invalidateContentDocumentCache(context, data.collectionKey);
-
-	// -------------------------------------------------------------------------------
-	// Success
-	return {
-		error: undefined,
-		data: undefined,
-	};
-};
 
 export default promoteVersion;

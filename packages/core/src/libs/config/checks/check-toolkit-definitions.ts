@@ -4,6 +4,7 @@ import type { CoreToolkit } from "../../toolkit/types.js";
 
 const coreToolkitKeys = {
 	auth: true,
+	collections: true,
 	documents: true,
 	email: true,
 	jobs: true,

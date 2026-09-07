@@ -51,6 +51,7 @@ export const documentBricksTable = defineTable(
 					.optional(),
 				type: "text",
 			},
+			group_instance_id: { schema: z.string().optional(), type: "text" },
 			brick_instance_id: {
 				schema: z.string().optional(),
 				type: "text",
@@ -102,6 +103,7 @@ export interface LucidBricksTable {
 	// brick specific
 	brick_type?: BrickTypes;
 	brick_instance_id?: string;
+	group_instance_id?: string;
 	// brick and document-field specific
 	brick_id_ref?: number;
 	// repeater specific

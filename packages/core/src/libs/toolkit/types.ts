@@ -1,5 +1,6 @@
 import type { ServiceContext } from "../../utils/services/types.js";
 import type { ToolkitAuth } from "./auth/index.js";
+import type { ToolkitCollections } from "./collections/index.js";
 import type { ToolkitDocuments } from "./documents/index.js";
 import type { ToolkitEmail } from "./email/index.js";
 import type { ToolkitJobs } from "./jobs/index.js";
@@ -14,7 +15,9 @@ export type ToolkitContext = ServiceContext;
 export type CoreToolkit = {
 	/** Helpers for resolving request authentication state. */
 	auth: ToolkitAuth;
-	/** Helpers for reading collection documents. */
+	/** Effective database schemas for custom collection queries. */
+	collections: ToolkitCollections;
+	/** Helpers for creating, editing, reading and deleting collection documents. */
 	documents: ToolkitDocuments;
 	/** Helpers for sending external emails. */
 	email: ToolkitEmail;
@@ -64,9 +67,17 @@ export type ToolkitDefinition<
 
 export type * from "./auth/index.js";
 export type * from "./auth/status/index.js";
+export type * from "./collections/get-schema/index.js";
+export type * from "./collections/index.js";
+export type * from "./documents/create-single/index.js";
+export type * from "./documents/delete-multiple/index.js";
+export type * from "./documents/delete-single/index.js";
+export type * from "./documents/get-editable/index.js";
 export type * from "./documents/get-multiple/index.js";
 export type * from "./documents/get-single/index.js";
 export type * from "./documents/index.js";
+export type * from "./documents/patch-single/index.js";
+export type * from "./documents/update-single/index.js";
 export type * from "./email/index.js";
 export type * from "./email/send/index.js";
 export type * from "./jobs/index.js";

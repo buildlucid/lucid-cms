@@ -7,7 +7,7 @@ import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import rollbackVersionCreate from "./helpers/rollback-version-create.js";
@@ -20,8 +20,8 @@ const createSingle: ServiceFn<
 		{
 			documentId: number;
 			collection: CollectionBuilder;
-			userId: number;
-			authUser?: LucidAuth;
+			userId: number | null;
+			authUser?: LucidUser;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
@@ -224,40 +224,24 @@ const createSingle: ServiceFn<
 		return hookAfterRes;
 	}
 
-	if (previousLatestId !== undefined) {
-		const finalizePreviousRes = data.collection.getData.revisions.enabled
-			? await DocumentVersions.updateSingle(
+	if (
+		previousLatestId !== undefined &&
+		!data.collection.getData.revisions.enabled
+	) {
+		const finalizePreviousRes = await DocumentVersions.deleteSingle(
+			{
+				where: [
 					{
-						where: [
-							{
-								key: "id",
-								operator: "=",
-								value: previousLatestId,
-							},
-						],
-						data: {
-							collection_migration_id: migrationIdRes.data,
-							created_by: data.userId,
-						},
+						key: "id",
+						operator: "=",
+						value: previousLatestId,
 					},
-					{
-						tableName: tableNamesRes.data.version,
-					},
-				)
-			: await DocumentVersions.deleteSingle(
-					{
-						where: [
-							{
-								key: "id",
-								operator: "=",
-								value: previousLatestId,
-							},
-						],
-					},
-					{
-						tableName: tableNamesRes.data.version,
-					},
-				);
+				],
+			},
+			{
+				tableName: tableNamesRes.data.version,
+			},
+		);
 
 		if (finalizePreviousRes.error) {
 			await rollbackVersionCreate(context, {

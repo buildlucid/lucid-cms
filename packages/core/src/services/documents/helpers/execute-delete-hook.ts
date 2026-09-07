@@ -12,7 +12,7 @@ const executeDeleteHook: ServiceFn<
 			collection: CollectionBuilder;
 			collectionKey: string;
 			tableNames: CollectionTableNames;
-			userId: number;
+			userId: number | null;
 			ids: number[];
 			hardDelete: boolean;
 		},

@@ -1,4 +1,6 @@
 {
+	"plugin.pages.toolkit.get-by-full-slug.error.name": "Pages Toolkit Error",
+	"plugin.pages.toolkit.get-by-full-slug.error.message": "Lucid toolkit could not find the page by its full slug.",
 	"plugin.pages.parent.locale.route.missing": "The parent page has no route in this locale. Save a translated route on the parent first.",
 	"plugin.pages.collections.not.found": "Cannot find the collection of {{collection}}.",
 	"plugin.pages.fields.required.missing": "Cannot find required fields for the pages plugin.",

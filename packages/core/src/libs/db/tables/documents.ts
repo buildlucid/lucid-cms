@@ -13,6 +13,7 @@ export const documentsTable = defineTable(
 	"lucid_document__collection-key",
 	(adapter) => ({
 		columns: {
+			write_lock: { schema: z.string().nullable(), type: "text" },
 			id: {
 				schema: z.number(),
 				type: "primary",
@@ -91,11 +92,12 @@ export interface LucidDocumentTable {
 	collection_key: string;
 	collection_migration_id: number;
 	order: string | null;
+	write_lock: string | null;
 	is_deleted: BooleanInt;
 	is_deleted_at: TimestampMutable;
-	deleted_by: number;
-	created_by: number;
+	deleted_by: number | null;
+	created_by: number | null;
 	created_at: TimestampImmutable;
-	updated_by: number;
+	updated_by: number | null;
 	updated_at: TimestampMutable;
 }

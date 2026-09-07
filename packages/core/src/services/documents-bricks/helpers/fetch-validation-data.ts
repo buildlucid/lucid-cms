@@ -12,7 +12,7 @@ import type {
 	FieldTypes,
 } from "../../../libs/collection/custom-fields/types.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { LucidAuth } from "../../../types/hono.js";
+import type { LucidUser } from "../../../types/hono.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -101,7 +101,7 @@ const fetchValidationData: ServiceFn<
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
-			authUser?: LucidAuth;
+			authUser?: LucidUser;
 		},
 	],
 	ValidationData

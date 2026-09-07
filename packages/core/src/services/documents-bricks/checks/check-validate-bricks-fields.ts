@@ -26,12 +26,13 @@ import resolveCollectionLocalization from "../../../libs/collection/helpers/reso
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { LucidAuth } from "../../../types/hono.js";
+import type { LucidUser } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import fetchValidationData, {
 	type ValidationData,
 } from "../helpers/fetch-validation-data.js";
 import { filterReachableEmbeddedBricks } from "../helpers/prepare-bricks-and-fields.js";
+import checkDuplicateRefs from "./check-duplicate-refs.js";
 
 const isRequiredFieldConfig = (
 	config: CustomField<FieldTypes>["config"],
@@ -150,6 +151,7 @@ const createConditionTargetResolver = (props: {
 			) {
 				return { resolved: true, match: "any", values: [target.defaultValue] };
 			}
+
 			return { resolved: true, value: target.defaultValue };
 		}
 
@@ -253,11 +255,14 @@ const checkValidateBricksFields: ServiceFn<
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
-			authUser?: LucidAuth;
+			authUser?: LucidUser;
 		},
 	],
 	undefined
 > = async (context, data) => {
+	const refs = checkDuplicateRefs(data);
+	if (refs.error) return refs;
+
 	const localization = resolveCollectionLocalization({
 		localization: context.config.localization,
 		collection: data.collection,
@@ -287,6 +292,7 @@ const checkValidateBricksFields: ServiceFn<
 			data: undefined,
 		};
 	}
+
 	const refDataRes = await fetchValidationData(context, {
 		...data,
 		bricks,
@@ -625,6 +631,7 @@ const getTranslationLocaleCodes = (
 ) => {
 	const submittedLocaleCodes = Object.keys(translations);
 	if (!meta.locales?.length) return submittedLocaleCodes;
+
 	return getConfiguredLocaleCodes(meta);
 };
 

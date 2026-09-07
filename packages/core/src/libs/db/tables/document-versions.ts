@@ -38,11 +38,11 @@ export const documentVersionsTable = defineTable(
 				type: "text",
 			},
 			created_by: {
-				schema: z.number(),
+				schema: z.number().nullable(),
 				type: "integer",
 			},
 			updated_by: {
-				schema: z.number(),
+				schema: z.number().nullable(),
 				type: "integer",
 			},
 			updated_at: {

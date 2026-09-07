@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import type {
 	DocumentField,
 	DocumentFieldPlainValue,
@@ -30,6 +29,8 @@ import DocumentBricksFormatter from "./document-bricks.js";
 import formatter from "./helpers.js";
 
 export interface FieldFormatMeta {
+	/** Read authoring values without display defaults or hydrated references. */
+	editable?: boolean;
 	builder: BrickBuilder | CollectionBuilder;
 	host: string;
 	collection: CollectionBuilder;
@@ -145,6 +146,7 @@ const formatMultiple = (
 		brickKey: meta.brickKey,
 		config: meta.config,
 		bricksTableSchema: meta.bricksTableSchema,
+		editable: meta.editable,
 	});
 };
 
@@ -182,6 +184,7 @@ const buildFieldTree = (
 					groupRef: meta.groupRef,
 					config: meta.config,
 					bricksTableSchema: meta.bricksTableSchema,
+					editable: meta.editable,
 				}),
 			});
 			continue;
@@ -196,6 +199,7 @@ const buildFieldTree = (
 			brickKey: meta.brickKey,
 			config: meta.config,
 			bricksTableSchema: meta.bricksTableSchema,
+			editable: meta.editable,
 		});
 
 		const fieldValue = buildField(
@@ -214,6 +218,7 @@ const buildFieldTree = (
 				config: meta.config,
 				groupRef: meta.groupRef,
 				bricksTableSchema: meta.bricksTableSchema,
+				editable: meta.editable,
 			},
 		);
 		if (fieldValue) fieldsRes.push(fieldValue);
@@ -263,13 +268,12 @@ const buildField = (
 					: undefined);
 
 			if (localeValue) {
-				fieldTranslations[locale] = cfInstance.formatResponseValue(
-					localeValue.value,
-					{
-						locale,
-						refs: data.refs ?? null,
-					},
-				);
+				fieldTranslations[locale] = meta.editable
+					? cfInstance.formatEditableValue(localeValue.value)
+					: cfInstance.formatResponseValue(localeValue.value, {
+							locale,
+							refs: data.refs ?? null,
+						});
 			} else {
 				fieldTranslations[locale] = null;
 			}
@@ -294,10 +298,12 @@ const buildField = (
 		key: meta.fieldConfig.key,
 		type: meta.fieldConfig.type,
 		...(resource ? { resource } : {}),
-		value: cfInstance.formatResponseValue(defaultValue.value, {
-			locale: meta.localization.storageLocale,
-			refs: data.refs ?? null,
-		}),
+		value: meta.editable
+			? cfInstance.formatEditableValue(defaultValue.value)
+			: cfInstance.formatResponseValue(defaultValue.value, {
+					locale: meta.localization.storageLocale,
+					refs: data.refs ?? null,
+				}),
 		groupRef: meta.groupRef,
 	};
 };
@@ -327,25 +333,19 @@ const buildTreeGroups = (
 		relationIds: data.brickRows.flatMap((b) => b.id),
 	});
 
-	//* group by the position
+	//* group locale rows by their persistent item identity
 	const groups = Map.groupBy(treeRows, (item) => {
-		return item.position;
+		return item.group_instance_id;
 	});
-	groups.forEach((localeRows, key) => {
+	groups.forEach((localeRows) => {
 		//* open state is shared for now - if this is to change in the future, the insert/response format for this needs changing
 		const openState = localeRows[0]?.is_open ?? false;
-		const ref = generateGroupRef(
-			meta.collection.key,
-			meta.brickKey,
-			meta.treeFieldConfig.key,
-			key,
-			meta.treeLevel,
-			meta.groupRef,
-		);
+		const ref = localeRows[0]?.group_instance_id;
+		if (!ref) return;
 
 		groupsRes.push({
 			ref: ref,
-			order: key,
+			order: localeRows[0]?.position ?? 0,
 			open: formatter.formatBoolean(openState),
 			fields: buildFieldTree(
 				{
@@ -365,6 +365,7 @@ const buildTreeGroups = (
 					config: meta.config,
 					groupRef: ref,
 					bricksTableSchema: meta.bricksTableSchema,
+					editable: meta.editable,
 				},
 			),
 		});
@@ -491,26 +492,6 @@ const flattenFields = (
 	const result: DocumentFieldValueMap = {};
 	collectContentFieldValues(result, fieldMap, contentFieldTree);
 	return result;
-};
-
-/**
- * Generates a unique deterministic reference for a group
- */
-const generateGroupRef = (
-	collectionKey: string,
-	brickKey: string | undefined,
-	treeFieldKey: string,
-	position: number,
-	treeLevel: number,
-	parentGroupRef?: string,
-): string => {
-	return crypto
-		.createHash("sha256")
-		.update(
-			`${collectionKey}-${brickKey || "document"}-${treeFieldKey}-${position}-${treeLevel}-${parentGroupRef || "root"}`,
-		)
-		.digest("hex")
-		.substring(0, 36);
 };
 
 export default {

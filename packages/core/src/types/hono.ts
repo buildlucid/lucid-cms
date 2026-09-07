@@ -16,12 +16,16 @@ import type { QueueAdapterInstance } from "../libs/queue/types.js";
 import type { AdapterRuntimeContext } from "../libs/runtime/types.js";
 
 /** Authenticated admin identity and permissions set by authenticateMiddleware. */
-export type LucidAuth = {
+export type LucidUser = {
 	id: number;
 	username: string;
 	email: string;
 	superAdmin: boolean;
 	permissions: UserPermission["permissions"] | undefined;
+};
+
+/** Admin identity with the verified access token metadata. */
+export type LucidAuth = LucidUser & {
 	exp: number;
 	iat: number;
 	nonce: string;

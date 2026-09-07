@@ -16,7 +16,7 @@ const duplicateSingle: ServiceFn<
 		{
 			collectionKey: string;
 			documentId: number;
-			userId: number;
+			userId: number | null;
 		},
 	],
 	number
@@ -45,7 +45,6 @@ const duplicateSingle: ServiceFn<
 		},
 	);
 	if (sourceDocumentRes.error) return sourceDocumentRes;
-
 	if (formatter.formatBoolean(sourceDocumentRes.data.is_deleted)) {
 		return {
 			error: {
@@ -76,6 +75,7 @@ const duplicateSingle: ServiceFn<
 		refResources: null,
 	});
 	if (sourceContentRes.error) return sourceContentRes;
+
 	const sourceContent = prepareDuplicateContent(sourceContentRes.data);
 
 	return upsertSingle(context, {

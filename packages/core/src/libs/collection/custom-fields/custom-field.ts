@@ -1,7 +1,8 @@
 import type { ServiceResponse } from "../../../exports/types.js";
+import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 import type { LucidBricksTable } from "../../db/tables/index.js";
 import type { Select } from "../../db/types.js";
-import { copy } from "../../i18n/index.js";
+import { copy, translate } from "../../i18n/index.js";
 import type { RefTarget } from "../../refs/types.js";
 import buildSchemaIndex from "../helpers/build-schema-index.js";
 import prefixGeneratedColName from "../helpers/prefix-generated-column-name.js";
@@ -18,6 +19,7 @@ import type {
 	FieldRelationValidationInput,
 	FieldResponse,
 	FieldTypes,
+	FieldValue,
 	GetIndexDefinitionProps,
 	GetSchemaDefinitionProps,
 	IndexDefinition,
@@ -191,6 +193,25 @@ abstract class CustomField<T extends FieldTypes> {
 		value: unknown,
 		context?: CustomFieldResponseFormatContext,
 	): FieldResponse<T>["value"];
+	/** Decodes stored authoring values without relation hydration or default substitution for null. */
+	public formatEditableValue(value: unknown): FieldValue {
+		if (value == null) return null;
+		if (
+			typeof value === "string" ||
+			typeof value === "number" ||
+			typeof value === "boolean" ||
+			Array.isArray(value) ||
+			isPlainObject(value)
+		)
+			return value;
+		if (value instanceof Date) return value.toISOString();
+
+		throw new TypeError(
+			translate("server:core.fields.storage.value.unsupported", {
+				data: { key: this.key },
+			}),
+		);
+	}
 	/** Serializes field values into relation-table row payloads when needed. */
 	public serializeRelationFieldValue(
 		_value: unknown,

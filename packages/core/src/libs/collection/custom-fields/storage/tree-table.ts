@@ -3,6 +3,7 @@ import type { TreeTableModeDefinition } from "./types.js";
 
 export const treeTableSchemaColumns = {
 	rootId: "brick_id",
+	instanceId: "group_instance_id",
 	parentId: "parent_id",
 	parentIdRef: "parent_id_ref",
 } as const;
@@ -56,6 +57,11 @@ export const treeTableMode: TreeTableModeDefinition = {
 					name: treeTableSchemaColumns.parentIdRef,
 					type: props.db.getDataType("integer"),
 					nullable: true,
+				},
+				{
+					name: treeTableSchemaColumns.instanceId,
+					type: props.db.getDataType("text"),
+					nullable: false,
 				},
 			],
 		};

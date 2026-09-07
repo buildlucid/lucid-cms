@@ -8,7 +8,7 @@ const createInitial: ServiceFn<
 		{
 			collectionKey: string;
 			documentId: number;
-			userId: number;
+			userId: number | null;
 		},
 	],
 	undefined

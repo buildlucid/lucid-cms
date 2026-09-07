@@ -11,6 +11,7 @@ import type {
 	FieldTypes,
 } from "../custom-fields/types.js";
 import resolveCollectionLocalization from "../helpers/resolve-collection-localization.js";
+import { generateAuthoringTypes } from "./authoring.js";
 import {
 	dedupeStrings,
 	indentBlock,
@@ -746,6 +747,9 @@ const buildGeneratedMapsDeclaration = (props: {
 	collections: CollectionBuilder[];
 	localization: CollectionTypeGenLocalization;
 }) => {
+	const dataEntries: string[] = [];
+	const editableEntries: string[] = [];
+	const patchEntries: string[] = [];
 	const localeEntries: string[] = [];
 	const fieldEntries: string[] = [];
 	const brickEntries: string[] = [];
@@ -769,6 +773,26 @@ const buildGeneratedMapsDeclaration = (props: {
 			collection,
 		});
 
+		const authoring = generateAuthoringTypes(
+			{ collection, localization: props.localization },
+			(shape) =>
+				renderField(shape.field, {
+					builder: shape.owner,
+					collectionKey: collection.key,
+					collectionUsesTranslations: false,
+					withinGroup: false,
+				}),
+		);
+		declarations.push(...authoring.declarations);
+		dataEntries.push(
+			`${stringLiteral(collection.key)}: ${authoring.dataName};`,
+		);
+		editableEntries.push(
+			`${stringLiteral(collection.key)}: ${authoring.editableName};`,
+		);
+		patchEntries.push(
+			`${stringLiteral(collection.key)}: ${authoring.patchName};`,
+		);
 		declarations.push(...generatedCollection.declarations);
 		fieldEntries.push(
 			`${stringLiteral(collection.key)}: ${generatedCollection.collectionFieldsTypeName};`,
@@ -798,6 +822,9 @@ const buildGeneratedMapsDeclaration = (props: {
 	}
 
 	declarations.push(
+		`export interface GeneratedCollectionDocumentDataByCollection { ${dataEntries.join("\n")} }`,
+		`export interface GeneratedCollectionDocumentEditableByCollection { ${editableEntries.join("\n")} }`,
+		`export interface GeneratedCollectionDocumentPatchByCollection { ${patchEntries.join("\n")} }`,
 		`export interface GeneratedCollectionDocumentLocaleCodesByCollection {\n${localeEntries.length > 0 ? indentBlock(localeEntries.join("\n")) : ""}\n}`,
 		`export type CollectionDocumentLocaleCode<TCollectionKey extends string = string> = TCollectionKey extends keyof GeneratedCollectionDocumentLocaleCodesByCollection ? Extract<GeneratedCollectionDocumentLocaleCodesByCollection[TCollectionKey], string> : string;`,
 		`export interface GeneratedCollectionDocumentFieldsByCollection {\n${fieldEntries.length > 0 ? indentBlock(fieldEntries.join("\n")) : ""}\n}`,
@@ -850,6 +877,9 @@ const generateCollectionClientTypes = (props: {
 			{
 				module: constants.typeGeneration.modules.coreTypes,
 				declarations: [
+					"interface CollectionDocumentDataByCollection extends GeneratedCollectionDocumentDataByCollection {}",
+					"interface CollectionDocumentEditableByCollection extends GeneratedCollectionDocumentEditableByCollection {}",
+					"interface CollectionDocumentPatchByCollection extends GeneratedCollectionDocumentPatchByCollection {}",
 					"interface CollectionDocumentLocaleCodesByCollection extends GeneratedCollectionDocumentLocaleCodesByCollection {}",
 					"interface CollectionDocumentFieldsByCollection extends GeneratedCollectionDocumentFieldsByCollection {}",
 					"interface CollectionDocumentBricksByCollection extends GeneratedCollectionDocumentBricksByCollection {}",

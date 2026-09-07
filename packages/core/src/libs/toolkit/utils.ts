@@ -11,7 +11,7 @@ import type {
 import decodeError from "../../utils/errors/decode-error.js";
 import flattenDocumentFilters from "../../utils/helpers/flatten-document-filters.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
-import { copy } from "../i18n/index.js";
+import { copy, type ServerCopyDescriptor } from "../i18n/index.js";
 
 type PaginatedQuery = {
 	page?: number;
@@ -24,10 +24,10 @@ type DocumentQuery = {
 
 type ResolvedServiceResponse<T> = Awaited<ServiceResponse<T>>;
 
-type ToolkitServiceErrorCopy = {
-	key: string;
-	defaultMessage: string;
-};
+type ToolkitServiceErrorCopy = Pick<
+	ServerCopyDescriptor,
+	"key" | "defaultMessage"
+>;
 
 type ToolkitServiceErrorConfig = {
 	name?: ToolkitServiceErrorCopy;

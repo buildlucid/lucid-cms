@@ -12,7 +12,7 @@ const restoreRevision: ServiceFn<
 		{
 			documentId: number;
 			versionId: number;
-			userId: number;
+			userId: number | null;
 			collectionKey: string;
 		},
 	],
@@ -24,7 +24,6 @@ const restoreRevision: ServiceFn<
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
-
 	if (collectionRes.data.getData.revisions.enabled === false) {
 		return {
 			error: {
@@ -69,7 +68,6 @@ const restoreRevision: ServiceFn<
 		},
 	);
 	if (documentRes.error) return documentRes;
-
 	if (formatter.formatBoolean(documentRes.data.is_deleted)) {
 		return {
 			error: {

@@ -15,7 +15,7 @@ const beginSingleDeletion: ServiceFn<
 		{
 			id: number;
 			collectionKey: string;
-			userId: number;
+			userId: number | null;
 			hardDelete: boolean;
 			activeOnly?: boolean;
 			rejectLocked?: boolean;
@@ -31,7 +31,6 @@ const beginSingleDeletion: ServiceFn<
 		key: data.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
-
 	if (data.rejectLocked && collectionRes.data.getData.locked) {
 		return {
 			error: {

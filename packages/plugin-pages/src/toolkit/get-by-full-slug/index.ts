@@ -37,11 +37,9 @@ const getByFullSlug = <TCollectionKey extends CollectionDocumentKey>(
 		},
 		name: {
 			key: "plugin.pages.toolkit.get-by-full-slug.error.name",
-			defaultMessage: "Pages Toolkit Error",
 		},
 		message: {
 			key: "plugin.pages.toolkit.get-by-full-slug.error.message",
-			defaultMessage: "Lucid toolkit could not find the page by its full slug.",
 		},
 	});
 

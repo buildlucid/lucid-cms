@@ -41,6 +41,7 @@ export type ConstructBrickTableParams = {
 	brick?: BrickInputSchema | InternalDocumentBrick;
 	targetFields: ConstructField[];
 	fieldPath?: Array<string>;
+	groupRef?: string;
 	priority?: number;
 	parentId?: Map<string | null, number> | null;
 	parentIdRef?: Map<string | null, number>;
@@ -63,6 +64,7 @@ type ChildTableBuild = Pick<
 	| "type"
 	| "targetFields"
 	| "fieldPath"
+	| "groupRef"
 	| "priority"
 	| "parentId"
 	| "parentIdRef"
@@ -73,7 +75,12 @@ type ChildTableBuild = Pick<
 
 type TableModeContext = Pick<
 	ConstructBrickTableParams,
-	"type" | "fieldPath" | "parentId" | "parentIdRef" | "brickIdByLocale"
+	| "type"
+	| "groupRef"
+	| "fieldPath"
+	| "parentId"
+	| "parentIdRef"
+	| "brickIdByLocale"
 >;
 
 type FieldModeHandlerContext = {
@@ -141,6 +148,7 @@ const applyTableModeColumns = (context: {
 }): void => {
 	switch (context.mode) {
 		case "tree-table":
+			context.row[treeTableSchemaColumns.instanceId] = context.params.groupRef;
 			context.row[treeTableSchemaColumns.parentId] =
 				context.params.parentId?.get(context.locale) || null;
 			context.row[treeTableSchemaColumns.parentIdRef] =
@@ -203,6 +211,7 @@ const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
 					{
 						type: databaseConfig.tableType,
 						targetFields: group.fields,
+						groupRef: group.ref,
 						fieldPath: fieldPath,
 						parentId:
 							context.parentTableMode === "tree-table"
@@ -313,9 +322,11 @@ const constructRelationTableRows = (
 const genTableMapKey = (params: {
 	brickKey?: string;
 	fieldPath?: Array<string>;
+	groupRef?: string;
 }): string => {
 	const prefix = params.brickKey ?? "pseudo-brick";
 	if (!params.fieldPath || params.fieldPath.length === 0) return prefix;
+
 	return `${prefix}:${params.fieldPath.join(":")}`;
 };
 
@@ -352,6 +363,7 @@ const constructBrickTable = (
 				params.tableNameByteLimit,
 			);
 			if (brickTableNameRes.error) return;
+
 			tableName = brickTableNameRes.data.name;
 			params.brickKeyTableNameMap.set(mapKey, brickTableNameRes.data.name);
 		}
@@ -397,6 +409,7 @@ const constructBrickTable = (
 			params.tableNameByteLimit,
 		);
 		if (brickTableNameRes.error) return;
+
 		tableName = brickTableNameRes.data.name;
 		params.brickKeyTableNameMap.set(mapKey, brickTableNameRes.data.name);
 	}
@@ -416,10 +429,7 @@ const constructBrickTable = (
 		tableIndex = brickTables.length - 1;
 	}
 
-	const brickInstanceId =
-		params.brick?.type === "embedded" && params.brick.ref
-			? params.brick.ref
-			: crypto.randomUUID();
+	const brickInstanceId = params.brick?.ref ?? crypto.randomUUID();
 	const rowsByLocale = new Map<
 		string | null,
 		Partial<Insert<LucidBricksTable>>
@@ -497,6 +507,7 @@ const constructBrickTable = (
 			versionId: params.versionId,
 			targetFields: childBuild.targetFields,
 			fieldPath: childBuild.fieldPath,
+			groupRef: childBuild.groupRef,
 			priority: childBuild.priority,
 			parentId: childBuild.parentId,
 			parentIdRef: childBuild.parentIdRef,

@@ -84,6 +84,11 @@ class CheckboxCustomField extends CustomField<"checkbox"> {
 			Boolean(value) ?? this.config.default,
 		) satisfies FieldResponse<"checkbox">["value"];
 	}
+	override formatEditableValue(value: unknown) {
+		return value == null
+			? null
+			: formatter.formatBoolean(value === true || value === 1);
+	}
 	uniqueValidation(value: unknown) {
 		const valueSchema = z.union([z.literal(1), z.literal(0), z.boolean()]);
 

@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import type {
 	InternalDocumentField,
 	ResolvedLucidConfig,
@@ -29,6 +28,7 @@ const formatMultiple = (props: {
 	refs?: Refs | null;
 	config: ResolvedLucidConfig;
 	host: string;
+	editable?: boolean;
 }): InternalDocumentBrick[] => {
 	const localization = resolveCollectionLocalization({
 		localization: props.config.localization,
@@ -66,10 +66,7 @@ const formatMultiple = (props: {
 			);
 			if (!brickBuilder) continue;
 
-			const ref =
-				firstRow.brick_type === "embedded"
-					? firstRow.brick_instance_id
-					: generateBrickRef(props.collection.key, brickKey, firstRow.id);
+			const ref = firstRow.brick_instance_id;
 			if (!ref) continue;
 
 			brickResponses.push({
@@ -94,6 +91,7 @@ const formatMultiple = (props: {
 						brickKey: brickKey,
 						config: props.config,
 						bricksTableSchema: props.bricksSchema,
+						editable: props.editable,
 					},
 				),
 			});
@@ -110,6 +108,7 @@ const formatDocumentFields = (props: {
 	refs?: Refs | null;
 	config: ResolvedLucidConfig;
 	host: string;
+	editable?: boolean;
 }): InternalDocumentField[] => {
 	const localization = resolveCollectionLocalization({
 		localization: props.config.localization,
@@ -145,6 +144,7 @@ const formatDocumentFields = (props: {
 			brickKey: undefined,
 			config: props.config,
 			bricksTableSchema: props.bricksSchema,
+			editable: props.editable,
 		},
 	);
 };
@@ -248,21 +248,6 @@ const getRelationRows = (props: {
 			typeof row.parent_id === "number" &&
 			props.relationIds.includes(row.parent_id),
 	);
-};
-
-/**
- * Generates a unique deterministic reference for a brick
- */
-const generateBrickRef = (
-	collectionKey: string,
-	brickKey: string,
-	brickInstanceId: number | string,
-): string => {
-	return crypto
-		.createHash("sha256")
-		.update(`${collectionKey}-${brickKey}-${brickInstanceId}`)
-		.digest("hex")
-		.substring(0, 36);
 };
 
 export default {

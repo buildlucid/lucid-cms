@@ -461,6 +461,7 @@ export type {
 	Seed,
 	SeedDefinition,
 } from "../libs/seed/types.js";
+export type * from "../libs/toolkit/documents/types.js";
 export type {
 	CoreToolkit,
 	Toolkit,
@@ -469,16 +470,26 @@ export type {
 	ToolkitAuthResponseHeaders,
 	ToolkitAuthStatus,
 	ToolkitAuthStatusInput,
+	ToolkitCollections,
+	ToolkitCollectionsGetSchemaInput,
+	ToolkitCollectionsGetSchemaResult,
 	ToolkitContext,
 	ToolkitDefinition,
 	ToolkitDefinitionInput,
 	ToolkitDocuments,
+	ToolkitDocumentsCreateSingleInput,
+	ToolkitDocumentsDeleteMultipleInput,
+	ToolkitDocumentsDeleteMultipleResult,
+	ToolkitDocumentsDeleteSingleInput,
+	ToolkitDocumentsGetEditableInput,
 	ToolkitDocumentsGetMultipleInput,
 	ToolkitDocumentsGetMultipleQuery,
 	ToolkitDocumentsGetMultipleResult,
 	ToolkitDocumentsGetSingleInput,
 	ToolkitDocumentsGetSingleQuery,
 	ToolkitDocumentsGetSingleResult,
+	ToolkitDocumentsPatchSingleInput,
+	ToolkitDocumentsUpdateSingleInput,
 	ToolkitDocumentVersion,
 	ToolkitEmail,
 	ToolkitEmailSendInput,
@@ -547,6 +558,7 @@ export type {
 	LucidHonoVariables,
 	LucidLocale,
 	LucidOAuthExternalAuth,
+	LucidUser,
 } from "../types/hono.js";
 export type {
 	CollectionDocumentFilterInput,

@@ -91,6 +91,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					is_deleted_at: eb.ref("excluded.is_deleted_at"),
 					deleted_by: eb.ref("excluded.deleted_by"),
 					updated_at: eb.ref("excluded.updated_at"),
+					updated_by: eb.ref("excluded.updated_by"),
 				})),
 			)
 			.$if(
@@ -146,6 +147,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					is_deleted_at: eb.ref("excluded.is_deleted_at"),
 					deleted_by: eb.ref("excluded.deleted_by"),
 					updated_at: eb.ref("excluded.updated_at"),
+					updated_by: eb.ref("excluded.updated_by"),
 				})),
 			)
 			.$if(
@@ -1364,6 +1366,41 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 			return eb.exists(comparison.select(sql.lit(1).as("exists")));
 		});
+	}
+	/** Claims a document only when no other writer owns it. An empty result means it was not claimed. */
+	async acquireWriteLock(
+		props: { id: number; token: string },
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		const query = this.db
+			.updateTable(dynamicConfig.tableName)
+			.set({ write_lock: props.token })
+			.where("id", "=", props.id)
+			.where("write_lock", "is", null)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "acquireWriteLock",
+			tableName: dynamicConfig.tableName,
+		});
+		return exec.response;
+	}
+	/** Releases only the claim owned by this writer. */
+	async releaseWriteLock(
+		props: { id: number; token: string },
+		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
+	) {
+		const query = this.db
+			.updateTable(dynamicConfig.tableName)
+			.set({ write_lock: null })
+			.where("id", "=", props.id)
+			.where("write_lock", "=", props.token);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "releaseWriteLock",
+			tableName: dynamicConfig.tableName,
+		});
+		return exec.response;
 	}
 	/** Applies document OR groups while keeping global filters outside the OR. */
 	applyDocumentFilterOrToQuery<DB, Table extends keyof DB, O>(

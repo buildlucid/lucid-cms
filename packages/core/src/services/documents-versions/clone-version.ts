@@ -23,7 +23,7 @@ const cloneVersion: ServiceFn<
 			toVersionType: string;
 			collectionKey: string;
 			documentId: number;
-			userId: number;
+			userId: number | null;
 		},
 	],
 	{
@@ -44,7 +44,6 @@ const cloneVersion: ServiceFn<
 		collection: collectionRes.data,
 	});
 	if (migrationStatusRes.error) return migrationStatusRes;
-
 	if (migrationStatusRes.data.requiresMigration) {
 		return {
 			error: {
@@ -102,7 +101,6 @@ const cloneVersion: ServiceFn<
 	if (versionRes.error) return versionRes;
 	if (bricksQueryRes.error) return bricksQueryRes;
 	if (migrationIdRes.error) return migrationIdRes;
-
 	if (bricksQueryRes.data === undefined) {
 		return {
 			error: {

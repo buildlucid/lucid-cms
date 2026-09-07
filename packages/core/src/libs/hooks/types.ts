@@ -55,7 +55,7 @@ type DocumentHookMeta = CollectionHookMeta & {
 };
 
 type DocumentUserHookMeta = DocumentHookMeta & {
-	userId: number;
+	userId: number | null;
 };
 
 export type DocumentBeforeUpsertHookOrigin =
@@ -123,7 +123,7 @@ export type DocumentVersionPromoteHookData = {
 export type DocumentWorkflowAfterUpdateHookData = {
 	collectionKey: string;
 	documentId: number;
-	userId: number;
+	userId: number | null;
 	previousStage: string;
 	nextStage: string;
 	previousAssigneeIds: number[];

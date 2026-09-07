@@ -90,6 +90,36 @@ describe("runToolkitService", () => {
 			data: undefined,
 		});
 	});
+
+	test.each([
+		"plugin.example",
+		"project.custom",
+	])("accepts %s translation keys for toolkit errors", async (namespace) => {
+		expectTypeOf<
+			Parameters<typeof runToolkitService>[0]["message"]["key"]
+		>().toEqualTypeOf<string>();
+
+		const result = await runToolkitService({
+			handler: async () => {
+				throw new Error("Service failed");
+			},
+			name: { key: `${namespace}.error.name` },
+			message: { key: `${namespace}.error.message` },
+		});
+
+		expect(result.error).toMatchObject({
+			name: {
+				type: "lucid.copy",
+				scope: "server",
+				key: `${namespace}.error.name`,
+			},
+			message: {
+				type: "lucid.copy",
+				scope: "server",
+				key: `${namespace}.error.message`,
+			},
+		});
+	});
 });
 
 describe("toolkit document query normalization", () => {

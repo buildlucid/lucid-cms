@@ -1,4 +1,5 @@
 import createAuthToolkit from "./auth/index.js";
+import createCollectionsToolkit from "./collections/index.js";
 import createDocumentsToolkit from "./documents/index.js";
 import createEmailToolkit from "./email/index.js";
 import createJobsToolkit from "./jobs/index.js";
@@ -36,6 +37,7 @@ import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
 const createToolkit = (context: ToolkitContext): Toolkit => {
 	const core: CoreToolkit = {
 		auth: createAuthToolkit(context),
+		collections: createCollectionsToolkit(context),
 		documents: createDocumentsToolkit(context),
 		email: createEmailToolkit(context),
 		jobs: createJobsToolkit(context),

@@ -1,11 +1,12 @@
-import type { LucidAuth, Permission } from "../../exports/types.js";
+import type { Permission } from "../../exports/types.js";
+import type { LucidUser } from "../../types/hono.js";
 
 /**
  * Checks if the user has the access based on permissions and resource ownership.
  */
 const hasAccess = (params: {
 	/** The user to check the access for, if not provided, the access will be denied */
-	user?: LucidAuth;
+	user?: LucidUser;
 	/** The permissions that must all be present */
 	requiredPermissions?: Permission[];
 	/** The permissions where at least one must be present */

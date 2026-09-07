@@ -72,6 +72,12 @@ const createDocumentTable = (props: {
 						nullable: true,
 					},
 					{
+						name: "write_lock",
+						source: "core",
+						type: props.db.getDataType("text"),
+						nullable: true,
+					},
+					{
 						name: "is_deleted",
 						source: "core",
 						type: props.db.getDataType("boolean"),
