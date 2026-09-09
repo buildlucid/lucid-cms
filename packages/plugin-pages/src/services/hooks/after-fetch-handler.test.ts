@@ -10,7 +10,10 @@ vi.mock("../get-parent-fields.js", () => ({
 	default: mocks.getParentFields,
 }));
 
-import type { InternalCollectionDocument } from "@lucidcms/core/types";
+import type {
+	DocumentVersionType,
+	InternalCollectionDocument,
+} from "@lucidcms/core/types";
 import afterFetchHandler from "./after-fetch-handler.js";
 
 const context = {
@@ -88,7 +91,7 @@ const createDocument = (props: {
 
 const createHookPayload = (
 	documents: InternalCollectionDocument[],
-	versionType = "snapshot",
+	versionType: DocumentVersionType = "snapshot",
 ) => ({
 	meta: {
 		collection,
@@ -97,7 +100,7 @@ const createHookPayload = (
 	},
 	data: {
 		versionType,
-		relationVersionType: "staging",
+		relationVersionType: "staging" as const,
 		documents,
 	},
 });
@@ -140,7 +143,11 @@ describe("pages afterFetch hook", () => {
 				fullSlug: "/missing/z",
 			}),
 		]);
-		const response = await afterFetchHandler(options)(context, payload);
+		const response = await afterFetchHandler(options)({
+			context,
+			toolkit: {} as never,
+			...payload,
+		});
 
 		expect(response.error).toBeUndefined();
 		expect(response.data).toBeUndefined();
@@ -157,9 +164,10 @@ describe("pages afterFetch hook", () => {
 	});
 
 	it("does not derive fullSlugs for non-snapshot versions", async () => {
-		const response = await afterFetchHandler(options)(
+		const response = await afterFetchHandler(options)({
 			context,
-			createHookPayload(
+			toolkit: {} as never,
+			...createHookPayload(
 				[
 					createDocument({
 						id: 2,
@@ -170,7 +178,7 @@ describe("pages afterFetch hook", () => {
 				],
 				"latest",
 			),
-		);
+		});
 
 		expect(response.error).toBeUndefined();
 		expect(response.data).toBeUndefined();

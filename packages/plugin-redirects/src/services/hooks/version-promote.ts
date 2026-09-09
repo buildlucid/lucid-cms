@@ -8,14 +8,14 @@ const versionPromoteHandler =
 	(
 		options: RedirectsPluginOptionsInternal,
 	): LucidHookDocuments<"versionPromote">["handler"] =>
-	async (context, payload) => {
-		if (payload.meta.collectionKey !== COLLECTION_KEY) {
+	async ({ context, data, meta }) => {
+		if (meta.collectionKey !== COLLECTION_KEY) {
 			return { error: undefined, data: undefined };
 		}
 
 		const identityRes = await getRedirectIdentity(context, {
-			versionId: payload.data.versionId,
-			tables: payload.meta.collectionTableNames,
+			versionId: data.versionId,
+			tables: meta.collectionTableNames,
 			hasLocaleField: options.locales.length > 1,
 			defaultLocale: options.defaultLocale,
 		});
@@ -24,9 +24,9 @@ const versionPromoteHandler =
 
 		return checkRedirectUniqueness(context, {
 			identity: identityRes.data,
-			versionType: payload.data.versionType,
-			documentId: payload.data.documentId,
-			tables: payload.meta.collectionTableNames,
+			versionType: data.versionType,
+			documentId: data.documentId,
+			tables: meta.collectionTableNames,
 			hasLocaleField: options.locales.length > 1,
 		});
 	};

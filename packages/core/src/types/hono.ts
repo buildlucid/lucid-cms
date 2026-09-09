@@ -107,5 +107,5 @@ export type LucidHonoGeneric = {
 	Variables: LucidHonoVariables;
 };
 
-/** Hono request context carrying Lucid variables. Prefer defineRoute or createMiddleware for direct access to service helpers. */
+/** Hono request context carrying Lucid variables. Prefer defineRoute or defineMiddleware for direct access to service helpers. */
 export type LucidHonoContext = Context<LucidHonoGeneric>;

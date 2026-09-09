@@ -36,6 +36,7 @@
 - Removed the `@lucidcms/core/toolkit` entry point. Import `createToolkit` from `@lucidcms/core` and toolkit types from `@lucidcms/core/types`.
 - Media text values now return a string when unassigned, or a locale record when translated.
 - Role names and descriptions are now plain strings.
+- Hook handlers now receive one object containing context, toolkit, data and metadata.
 
 ### Bug Fixes:
 

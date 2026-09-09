@@ -10,6 +10,7 @@ import {
 import deleteMultiple from "../../../services/documents/delete-multiple.js";
 import acquireDocumentWrites from "../../../services/documents/helpers/acquire-document-writes.js";
 import readDocumentContent from "../../../services/documents/helpers/read-document-content.js";
+import restoreMultiple from "../../../services/documents/restore-multiple.js";
 import upsertSingle from "../../../services/documents/upsert-single.js";
 import updateVersion from "../../../services/documents-versions/update-single.js";
 import syncCollections from "../../../services/sync/sync-collections.js";
@@ -164,6 +165,88 @@ describe("document authoring toolkit", () => {
 				table.columns.some((column) => column.name === "group_instance_id"),
 			),
 		).toBe(true);
+	});
+
+	test("includes each document's bricks in batch reads only when requested", async () => {
+		const first = await create("First batch document");
+		const second = await create("Second batch document");
+		assert(first.data && second.data);
+		const ids = [first.data.id, second.data.id];
+		const filter = { id: { value: ids, operator: "in" as const } };
+		const defaults = await toolkit.documents.getMultiple({
+			collectionKey: collection.key,
+			version: "latest",
+			query: { filter },
+		});
+		assert(defaults.data, JSON.stringify(defaults.error));
+		expect(defaults.data.count).toBe(2);
+		for (const document of defaults.data.documents) {
+			expect(document.bricks).toBeUndefined();
+		}
+
+		const included = await toolkit.documents.getMultiple({
+			collectionKey: collection.key,
+			version: "latest",
+			query: { filter, include: ["bricks"] },
+		});
+		assert(included.data, JSON.stringify(included.error));
+		expect(included.data.count).toBe(2);
+		for (const document of included.data.documents) {
+			const single = await toolkit.documents.getSingle({
+				collectionKey: collection.key,
+				version: "latest",
+				query: {
+					filter: { id: { value: document.id } },
+					include: ["bricks"],
+				},
+			});
+			assert(single.data, JSON.stringify(single.error));
+			expect(document.bricks).toEqual(single.data.document.bricks);
+			expect(document.bricks).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						key: "hero",
+						fields: { heading: { en: "Heading", fr: "Titre" } },
+					}),
+				]),
+			);
+		}
+	});
+
+	test("runs restore hooks with a toolkit that can read the restored document", async () => {
+		const created = await create("Restored document");
+		assert(created.data);
+		const target = { collectionKey: collection.key, id: created.data.id };
+		expect(
+			(await toolkit.documents.deleteSingle({ ...target, actor })).error,
+		).toBeUndefined();
+		const hooks = context.config.hooks;
+		const restored = vi.fn();
+		context.config.hooks = [
+			...hooks,
+			{
+				service: "documents",
+				event: "afterRestore",
+				handler: async ({ context, toolkit, meta, data }) => {
+					expect(context.db.isTransaction).toBe(true);
+					expect(meta.collectionKey).toBe(collection.key);
+					expect(data.ids).toEqual([target.id]);
+					const read = await toolkit.documents.getEditable(target);
+					assert(read.data, JSON.stringify(read.error));
+					restored(read.data.id);
+					return { error: undefined, data: undefined };
+				},
+			},
+		];
+		try {
+			const result = await serviceWrapper(restoreMultiple, {
+				transaction: true,
+			})(context, { collectionKey: collection.key, ids: [target.id] });
+			expect(result.error).toBeUndefined();
+			expect(restored).toHaveBeenCalledExactlyOnceWith(target.id);
+		} finally {
+			context.config.hooks = hooks;
+		}
 	});
 
 	test("merges locales, preserves nested identities, rejects stale tokens and avoids empty revisions", async () => {
@@ -435,7 +518,7 @@ describe("document authoring toolkit", () => {
 			{
 				service: "documents",
 				event: "afterDelete",
-				handler: async (_, { data }) => {
+				handler: async ({ data }) => {
 					if (data.ids.includes(firstId))
 						throw new Error("Unexpected deletion hook failure.");
 
@@ -762,8 +845,8 @@ describe("document authoring toolkit", () => {
 			{
 				service: "documents",
 				event: "beforeUpsert",
-				handler: async (context) => {
-					const nested = await createToolkit(context).documents.updateSingle({
+				handler: async ({ toolkit }) => {
+					const nested = await toolkit.documents.updateSingle({
 						...target,
 						actor,
 						data: { fields: { title: { en: "Nested" } } },

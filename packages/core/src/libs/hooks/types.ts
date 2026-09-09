@@ -7,12 +7,16 @@ import type {
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
-import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type {
 	DocumentPublishOperationEventType,
 	DocumentVersionType,
 } from "../db/tables/index.js";
+import type { Toolkit } from "../toolkit/types.js";
 
 // --------------------------------------------------
 // types
@@ -25,6 +29,7 @@ export type HookExecutionKindMap = {
 		afterUpsert: "effect";
 		afterFetch: "transform";
 		beforeDelete: "effect";
+		afterRestore: "effect";
 		afterDelete: "effect";
 		versionPromote: "effect";
 	};
@@ -35,15 +40,12 @@ export type HookExecutionKindMap = {
 		afterEvent: "effect";
 	};
 	media: {
+		afterRestore: "effect";
 		afterCreate: "effect";
 		afterUpdate: "effect";
 		afterDelete: "effect";
 	};
 };
-
-export type ArgumentsType<T> = T extends (...args: infer U) => unknown
-	? U
-	: never;
 
 type CollectionHookMeta = {
 	collection: CollectionBuilder;
@@ -218,72 +220,82 @@ export type LucidHookDocuments<
 // --------------------------------------------------
 // service handlers
 
-/** Handler signatures by service and event. Each receives ServiceContext first. */
+/** A hook receives event data, metadata and helpers bound to the current transaction. */
+type HookHandler<
+	TPayload extends EffectHookPayload<unknown, unknown>,
+	TData,
+> = (
+	args: TPayload & {
+		context: ServiceContext;
+		toolkit: Toolkit;
+	},
+) => ServiceResponse<TData>;
+
+/** Handler signatures by service and event. */
 export type HookServiceHandlers = {
 	documents: {
-		beforeUpsert: ServiceFn<
-			[
-				TransformHookPayload<
-					DocumentBeforeUpsertHookMeta,
-					DocumentBeforeUpsertHookData
-				>,
-			],
+		beforeUpsert: HookHandler<
+			TransformHookPayload<
+				DocumentBeforeUpsertHookMeta,
+				DocumentBeforeUpsertHookData
+			>,
 			DocumentBeforeUpsertHookData | undefined
 		>;
-		afterUpsert: ServiceFn<
-			[EffectHookPayload<DocumentUserHookMeta, DocumentAfterUpsertHookData>],
+		afterUpsert: HookHandler<
+			EffectHookPayload<DocumentUserHookMeta, DocumentAfterUpsertHookData>,
 			undefined
 		>;
-		afterFetch: ServiceFn<
-			[TransformHookPayload<DocumentHookMeta, DocumentAfterFetchHookData>],
+		afterFetch: HookHandler<
+			TransformHookPayload<DocumentHookMeta, DocumentAfterFetchHookData>,
 			DocumentAfterFetchHookData | undefined
 		>;
-		beforeDelete: ServiceFn<
-			[EffectHookPayload<DocumentDeleteHookMeta, DocumentDeleteHookData>],
+		beforeDelete: HookHandler<
+			EffectHookPayload<DocumentDeleteHookMeta, DocumentDeleteHookData>,
 			undefined
 		>;
-		afterDelete: ServiceFn<
-			[EffectHookPayload<DocumentDeleteHookMeta, DocumentDeleteHookData>],
+		afterDelete: HookHandler<
+			EffectHookPayload<DocumentDeleteHookMeta, DocumentDeleteHookData>,
 			undefined
 		>;
-		versionPromote: ServiceFn<
-			[EffectHookPayload<DocumentUserHookMeta, DocumentVersionPromoteHookData>],
+		afterRestore: HookHandler<
+			EffectHookPayload<DocumentHookMeta, DocumentDeleteHookData>,
+			undefined
+		>;
+		versionPromote: HookHandler<
+			EffectHookPayload<DocumentUserHookMeta, DocumentVersionPromoteHookData>,
 			undefined
 		>;
 	};
 	documentWorkflows: {
-		afterUpdate: ServiceFn<
-			[
-				EffectHookPayload<
-					DocumentUserHookMeta,
-					DocumentWorkflowAfterUpdateHookData
-				>,
-			],
+		afterUpdate: HookHandler<
+			EffectHookPayload<
+				DocumentUserHookMeta,
+				DocumentWorkflowAfterUpdateHookData
+			>,
 			undefined
 		>;
 	};
 	publishOperations: {
-		afterEvent: ServiceFn<
-			[
-				EffectHookPayload<
-					CollectionHookMeta,
-					PublishOperationAfterEventHookData
-				>,
-			],
+		afterEvent: HookHandler<
+			EffectHookPayload<CollectionHookMeta, PublishOperationAfterEventHookData>,
 			undefined
 		>;
 	};
 	media: {
-		afterCreate: ServiceFn<
-			[EffectHookPayload<MediaHookMeta, MediaAfterCreateHookData>],
+		afterRestore: HookHandler<
+			EffectHookPayload<MediaHookMeta, { ids: number[] }>,
 			undefined
 		>;
-		afterUpdate: ServiceFn<
-			[EffectHookPayload<MediaHookMeta, MediaAfterUpdateHookData>],
+		afterCreate: HookHandler<
+			EffectHookPayload<MediaHookMeta, MediaAfterCreateHookData>,
 			undefined
 		>;
-		afterDelete: ServiceFn<
-			[EffectHookPayload<MediaHookMeta, MediaAfterDeleteHookData>],
+		afterUpdate: HookHandler<
+			EffectHookPayload<MediaHookMeta, MediaAfterUpdateHookData>,
+			undefined
+		>;
+		afterDelete: HookHandler<
+			EffectHookPayload<MediaHookMeta, MediaAfterDeleteHookData>,
 			undefined
 		>;
 	};
@@ -299,18 +311,21 @@ export type HookOptions<
 	collectionInstance?: CollectionBuilder;
 };
 
+export type HookPayload<
+	S extends keyof HookServiceHandlers,
+	E extends keyof HookServiceHandlers[S],
+> =
+	HookServiceHandlers[S][E] extends HookHandler<infer Payload, infer _Data>
+		? Payload
+		: never;
+
 export type HookData<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
 > =
-	HookServiceHandlers[S][E] extends ServiceFn<infer _Args, infer Data>
+	HookServiceHandlers[S][E] extends HookHandler<infer _Args, infer Data>
 		? Data
 		: never;
-
-export type HookResponse<
-	S extends keyof HookServiceHandlers,
-	E extends keyof HookServiceHandlers[S],
-> = Awaited<ServiceResponse<HookData<S, E>>>;
 
 // --------------------------------------------------
 // service config
@@ -323,6 +338,8 @@ export type CollectionBuilderHooks =
 	| LucidHookDocuments<"afterFetch">
 	| LucidHookDocuments<"beforeDelete">
 	| LucidHookDocuments<"afterDelete">
+	| LucidHookDocuments<"afterRestore">
+	| LucidHookDocuments<"versionPromote">
 	| LucidHook<"documentWorkflows", "afterUpdate">
 	| LucidHook<"publishOperations", "afterEvent">;
 
@@ -332,6 +349,7 @@ export type DocumentHooks =
 	| LucidHook<"documents", "afterFetch">
 	| LucidHook<"documents", "beforeDelete">
 	| LucidHook<"documents", "afterDelete">
+	| LucidHook<"documents", "afterRestore">
 	| LucidHook<"documents", "versionPromote">;
 
 export type DocumentWorkflowHooks = LucidHook<
@@ -345,6 +363,7 @@ export type PublishOperationHooks = LucidHook<
 >;
 
 export type MediaHooks =
+	| LucidHook<"media", "afterRestore">
 	| LucidHook<"media", "afterCreate">
 	| LucidHook<"media", "afterUpdate">
 	| LucidHook<"media", "afterDelete">;

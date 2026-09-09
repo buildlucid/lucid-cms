@@ -1,6 +1,7 @@
 import type { ServiceFn } from "../../exports/types.js";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
@@ -96,6 +97,25 @@ const restoreMultiple: ServiceFn<
 		{ tableName: tableNamesRes.data.document },
 	);
 	if (updateRes.error) return updateRes;
+
+	const hooks = await executeHooks(
+		context,
+		{
+			service: "documents",
+			event: "afterRestore",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		{
+			meta: {
+				collectionKey: data.collectionKey,
+				collection: collectionRes.data,
+				collectionTableNames: tableNamesRes.data,
+			},
+			data: { ids: data.ids },
+		},
+	);
+	if (hooks.error) return hooks;
 
 	await invalidateContentDocumentCache(context, data.collectionKey);
 

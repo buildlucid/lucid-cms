@@ -9,33 +9,33 @@ const afterUpsertHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"afterUpsert">["handler"] =>
-	async (context, data) => {
+	async ({ context, data, meta }) => {
 		// ----------------------------------------------------------------
 		// Rebuild descendants when the changed document is itself a page.
 		const pageCollection = options.collections.find(
-			(collection) => collection.key === data.meta.collectionKey,
+			(collection) => collection.key === meta.collectionKey,
 		);
-		const currentFullSlugField = data.data.fields.find(
+		const currentFullSlugField = data.fields.find(
 			(field) => field.key === constants.fields.fullSlug.key,
 		);
 		if (pageCollection && currentFullSlugField) {
 			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
-				documentIds: [data.data.documentId],
-				versionType: data.data.versionType,
+				documentIds: [data.documentId],
+				versionType: data.versionType,
 				collectionKey: pageCollection.key,
-				tables: data.meta.collectionTableNames,
+				tables: meta.collectionTableNames,
 				collection: pageCollection,
-				collectionInstance: data.meta.collection,
+				collectionInstance: meta.collection,
 				parentFullSlugField: currentFullSlugField,
 			});
 			if (docFullSlugsRes.error) return docFullSlugsRes;
 
 			if (docFullSlugsRes.data.length > 0) {
 				const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
-					collectionKey: data.meta.collectionKey,
+					collectionKey: meta.collectionKey,
 					docFullSlugs: docFullSlugsRes.data,
-					versionType: data.data.versionType,
-					tables: data.meta.collectionTableNames,
+					versionType: data.versionType,
+					tables: meta.collectionTableNames,
 				});
 				if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
 			}
@@ -45,9 +45,9 @@ const afterUpsertHandler =
 		// Rebuild pages that use this document as a route segment.
 		const propagationRes = await propagateRouteSegmentUpdates(context, {
 			options,
-			targetCollectionKey: data.meta.collectionKey,
-			targetDocumentId: data.data.documentId,
-			targetVersionType: data.data.versionType,
+			targetCollectionKey: meta.collectionKey,
+			targetDocumentId: data.documentId,
+			targetVersionType: data.versionType,
 		});
 		if (propagationRes.error) return propagationRes;
 

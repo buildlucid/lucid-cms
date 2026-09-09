@@ -12,17 +12,17 @@ const beforeUpsertHandler =
 	(
 		options: RedirectsPluginOptionsInternal,
 	): LucidHookDocuments<"beforeUpsert">["handler"] =>
-	async (context, payload) => {
-		if (payload.meta.collectionKey !== COLLECTION_KEY) {
-			return { error: undefined, data: payload.data };
+	async ({ context, data, meta }) => {
+		if (meta.collectionKey !== COLLECTION_KEY) {
+			return { error: undefined, data: data };
 		}
 
 		const identity = getRedirectIdentity({
-			fields: payload.data.fields,
+			fields: data.fields,
 			defaultLocale: options.defaultLocale,
 			hasLocaleField: options.locales.length > 1,
 		});
-		if (!identity) return { error: undefined, data: payload.data };
+		if (!identity) return { error: undefined, data: data };
 
 		if (isDirectSelfRedirect(identity)) {
 			const message = copy("server:plugin.redirects.target.self", {
@@ -49,14 +49,14 @@ const beforeUpsertHandler =
 
 		const uniqueRes = await checkRedirectUniqueness(context, {
 			identity,
-			versionType: payload.data.versionType,
-			documentId: payload.data.documentId,
-			tables: payload.meta.collectionTableNames,
+			versionType: data.versionType,
+			documentId: data.documentId,
+			tables: meta.collectionTableNames,
 			hasLocaleField: options.locales.length > 1,
 		});
 		if (uniqueRes.error) return uniqueRes;
 
-		return { error: undefined, data: payload.data };
+		return { error: undefined, data: data };
 	};
 
 export default beforeUpsertHandler;

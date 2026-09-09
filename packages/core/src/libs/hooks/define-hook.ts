@@ -12,7 +12,7 @@ import type { AllHooks } from "./types.js";
  * const logMedia = defineHook({
  *   service: "media",
  *   event: "afterCreate",
- *   handler: async (_context, { data }) => {
+ *   handler: async ({ context, data }) => {
  *     logger.info({
  *       message: "Media created",
  *       data: { media: data },

@@ -25,13 +25,13 @@ const beforeUpsertHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"beforeUpsert">["handler"] =>
-	async (context, data) => {
+	async ({ context, data, meta }) => {
 		// ----------------------------------------------------------------
 		// Validation / Setup
 
 		const targetCollectionRes = getTargetCollection({
 			options,
-			collectionKey: data.meta.collectionKey,
+			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
 			return {
@@ -42,20 +42,20 @@ const beforeUpsertHandler =
 		const localization = resolvePagesCollectionLocalization({
 			localization: context.config.localization,
 			collection: targetCollectionRes.data,
-			collectionInstance: data.meta.collection,
+			collectionInstance: meta.collection,
 		});
 
 		const checkFieldsExistRes = checkFieldsExist({
 			fields: {
-				slug: data.data.fields?.find(
+				slug: data.fields?.find(
 					(f) => f.key === constants.fields.slug.key && f.type === "text",
 				),
-				parentPage: data.data.fields?.find(
+				parentPage: data.fields?.find(
 					(f) =>
 						f.key === constants.fields.parentPage.key && f.type === "relation",
 				),
 				//* dont care what this value is - only needed to update translations/value
-				fullSlug: data.data.fields?.find(
+				fullSlug: data.fields?.find(
 					(f) => f.key === constants.fields.fullSlug.key && f.type === "text",
 				),
 			},
@@ -65,7 +65,7 @@ const beforeUpsertHandler =
 
 		const checkParentIsPageOfSelfRes = checkParentIsPageOfSelf({
 			defaultLocale: localization.storageLocale,
-			documentId: data.data.documentId,
+			documentId: data.documentId,
 			fields: {
 				parentPage: parentPage,
 			},
@@ -86,19 +86,19 @@ const beforeUpsertHandler =
 		// Build, validate and set fullSlug
 
 		const parentPageId = getParentPageId(parentPage);
-		const isDuplicate = data.meta.execution.origin.type === "duplicate";
+		const isDuplicate = meta.execution.origin.type === "duplicate";
 		const duplicateSlugSource = getDuplicateSlugSource(slug);
 
 		// parent page checks and query
 		if (parentPageId !== null) {
 			const circularParentsRes = await checkCircularParents(context, {
-				documentId: data.data.documentId,
-				versionType: data.data.versionType,
+				documentId: data.documentId,
+				versionType: data.versionType,
 				collectionKey: targetCollectionRes.data.key,
 				fields: {
 					parentPage: parentPage,
 				},
-				tables: data.meta.collectionTableNames,
+				tables: meta.collectionTableNames,
 			});
 			if (circularParentsRes.error) return circularParentsRes;
 		}
@@ -111,14 +111,14 @@ const beforeUpsertHandler =
 			// fullSlug construction
 			const fullSlugRes = await resolveParentFullSlug(context, {
 				collection: targetCollectionRes.data,
-				collectionInstance: data.meta.collection,
+				collectionInstance: meta.collection,
 				collectionKey: targetCollectionRes.data.key,
-				versionType: data.data.versionType,
-				tables: data.meta.collectionTableNames,
+				versionType: data.versionType,
+				tables: meta.collectionTableNames,
 				fields: {
 					slug: slug,
 					parentPage,
-					all: data.data.fields ?? [],
+					all: data.fields ?? [],
 				},
 			});
 			if (fullSlugRes.error) return fullSlugRes;
@@ -134,19 +134,19 @@ const beforeUpsertHandler =
 
 			const projectedFullSlugs = [
 				{
-					documentId: data.data.documentId,
-					versionId: data.data.versionId,
+					documentId: data.documentId,
+					versionId: data.versionId,
 					fullSlugs: fullSlugRes.data,
 				},
 			];
 
 			const descendantFullSlugsRes = await buildDescendantFullSlugs(context, {
-				documentIds: [data.data.documentId],
-				versionType: data.data.versionType,
+				documentIds: [data.documentId],
+				versionType: data.versionType,
 				collectionKey: targetCollectionRes.data.key,
-				tables: data.meta.collectionTableNames,
+				tables: meta.collectionTableNames,
 				collection: targetCollectionRes.data,
-				collectionInstance: data.meta.collection,
+				collectionInstance: meta.collection,
 				parentFullSlugField: candidateFullSlugField,
 			});
 			if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
@@ -157,9 +157,9 @@ const beforeUpsertHandler =
 				{
 					collection: targetCollectionRes.data,
 					projectedFullSlugs,
-					versionType: data.data.versionType,
+					versionType: data.versionType,
 					collectionKey: targetCollectionRes.data.key,
-					tables: data.meta.collectionTableNames,
+					tables: meta.collectionTableNames,
 					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
 				},
 			);

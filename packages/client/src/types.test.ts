@@ -434,15 +434,7 @@ test("document client methods narrow version from the collection key", () => {
 		client.getMultiple({
 			collectionKey: "page",
 			version: "latest",
+			query: { include: ["bricks"] },
 		}),
 	).toEqualTypeOf<Promise<DocumentsGetMultipleResponse<"page">>>();
-
-	client.getMultiple({
-		collectionKey: "page",
-		version: "latest",
-		query: {
-			// @ts-expect-error client list responses do not support brick hydration
-			include: ["bricks"],
-		},
-	});
 });

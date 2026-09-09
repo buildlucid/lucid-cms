@@ -1,66 +1,110 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { InternalCollectionDocument } from "../../exports/types.js";
+import createServiceContext from "../../utils/services/create-service-context.js";
+import type { ServiceContext } from "../../utils/services/types.js";
+import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { copy, createTranslationStore } from "../i18n/index.js";
+import defineHook from "./define-hook.js";
 import executeHooks from "./execute-hooks.js";
+import type { HookPayload, LucidHookDocuments } from "./types.js";
+
+const collection = new CollectionBuilder("pages", {
+	mode: "multiple",
+	details: { labels: { singular: "Page", plural: "Pages" } },
+});
+const meta = {
+	collection,
+	collectionKey: collection.key,
+	collectionTableNames: {
+		version: "lucid_document__pages__ver",
+		document: "lucid_document__pages",
+		documentFields: "lucid_document__pages__fields",
+	},
+} satisfies HookPayload<"documents", "afterFetch">["meta"];
 
 describe("execute hooks", () => {
-	it("runs transform hooks sequentially with Immer drafts and order order", async () => {
-		const document = {
+	const fixture = getTestConfig();
+	let context: ServiceContext;
+
+	beforeAll(async () => {
+		context = createServiceContext({
+			config: await fixture.getConfig(),
+			database: await fixture.getDatabase(),
+			translationStore: createTranslationStore({
+				defaultLocale: "en",
+				bundles: {},
+			}),
+		});
+	});
+	afterAll(() => fixture.destroy());
+
+	it("runs ordered transforms with drafts and replacement data", async () => {
+		const document: InternalCollectionDocument = {
 			id: 1,
 			collectionKey: "pages",
+			version: "snapshot",
+			versionId: 2,
+			route: null,
+			versions: {},
+			isDeleted: false,
+			createdBy: null,
+			createdAt: null,
+			updatedAt: null,
+			updatedBy: null,
 			fields: [],
-		} as unknown as InternalCollectionDocument;
-		const context = {} as never;
+		};
 		const order: string[] = [];
-
-		const defaultHook = vi.fn(async (_context, payload) => {
-			order.push("default");
-			payload.data.documents[0]?.fields?.push({
-				key: "default",
-				type: "text",
-				value: "Default",
-			});
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
+		const defaultHook = vi.fn<LucidHookDocuments<"afterFetch">["handler"]>(
+			async ({ context: hookContext, toolkit, data, meta: hookMeta }) => {
+				expect(hookContext).toBe(context);
+				expect(hookMeta).toBe(meta);
+				expect(toolkit.documents.getMultiple).toBeTypeOf("function");
+				order.push("default");
+				data.documents[0]?.fields?.push({
+					key: "default",
+					type: "text",
+					value: "Default",
+				});
+				return { error: undefined, data: undefined };
+			},
+		);
+		const earlyHook = defineHook({
+			service: "documents",
+			event: "afterFetch",
+			order: -10,
+			handler: async ({ data }) => {
+				order.push("early");
+				data.documents[0]?.fields?.push({
+					key: "early",
+					type: "text",
+					value: "Early",
+				});
+				return { error: undefined, data: undefined };
+			},
 		});
-		const earlyHook = vi.fn(async (_context, payload) => {
-			order.push("early");
-			payload.data.documents[0]?.fields?.push({
-				key: "early",
-				type: "text",
-				value: "Early",
-			});
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
+		const lateHook = defineHook({
+			service: "documents",
+			event: "afterFetch",
+			order: 10,
+			handler: async ({ data }) => {
+				order.push("late");
+				return {
+					error: undefined,
+					data: {
+						...data,
+						documents: data.documents.map((document) => ({
+							...document,
+							fields: [
+								...(document.fields ?? []).map((field) => ({ ...field })),
+								{ key: "late", type: "text" as const, value: "Late" },
+							],
+						})),
+					},
+				};
+			},
 		});
-		const lateHook = vi.fn(async (_context, payload) => {
-			order.push("late");
-
-			return {
-				error: undefined,
-				data: {
-					...payload.data,
-					// @ts-expect-error
-					documents: payload.data.documents.map((document) => ({
-						...document,
-						fields: [
-							// @ts-expect-error
-							...(document.fields ?? []).map((field) => ({ ...field })),
-							{
-								key: "late",
-								type: "text",
-								value: "Late",
-							},
-						],
-					})),
-				},
-			};
-		});
+		collection.config.hooks = [earlyHook];
 
 		const response = await executeHooks(
 			context,
@@ -68,39 +112,16 @@ describe("execute hooks", () => {
 				service: "documents",
 				event: "afterFetch",
 				config: {
+					...context.config,
 					hooks: [
-						{
-							service: "documents",
-							event: "afterFetch",
-							handler: defaultHook,
-						},
-						{
-							service: "documents",
-							event: "afterFetch",
-							order: 10,
-							handler: lateHook,
-						},
+						{ service: "documents", event: "afterFetch", handler: defaultHook },
+						lateHook,
 					],
-				} as never,
-				collectionInstance: {
-					config: {
-						hooks: [
-							{
-								service: "documents",
-								event: "afterFetch",
-								order: -10,
-								handler: earlyHook,
-							},
-						],
-					},
-				} as never,
+				},
+				collectionInstance: collection,
 			},
 			{
-				meta: {
-					collection: {} as never,
-					collectionKey: "pages",
-					collectionTableNames: {} as never,
-				},
+				meta,
 				data: {
 					versionType: "snapshot",
 					relationVersionType: "staging",
@@ -116,69 +137,55 @@ describe("execute hooks", () => {
 			{ key: "default", type: "text", value: "Default" },
 			{ key: "late", type: "text", value: "Late" },
 		]);
+		expect(document.fields).toEqual([]);
 	});
 
-	it("runs effect hooks by order without returning transformed data", async () => {
-		const context = {} as never;
-		const payload = {
-			meta: {
-				collection: {} as never,
-				collectionKey: "pages",
-				userId: 1,
-				collectionTableNames: {} as never,
-			},
-			data: {
-				documentId: 1,
-				versionId: 2,
-				versionType: "latest" as const,
-				bricks: [],
-				fields: [],
-			},
-		};
+	it("runs effect hooks by order with one shared toolkit and payload", async () => {
+		const payload = { meta, data: { ids: [1] } };
 		const order: string[] = [];
-		const globalHook = vi.fn(async (_context, _data) => {
-			order.push("global");
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		});
-		const collectionHook = vi.fn(async (_context, _data) => {
-			order.push("collection");
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		});
+		const globalHook = vi.fn<LucidHookDocuments<"afterRestore">["handler"]>(
+			async () => {
+				order.push("global");
+				return { error: undefined, data: undefined };
+			},
+		);
+		const collectionHook = vi.fn<LucidHookDocuments<"afterRestore">["handler"]>(
+			async () => {
+				order.push("collection");
+				return { error: undefined, data: undefined };
+			},
+		);
+		const ignoredHook = vi.fn(async () => ({
+			error: undefined,
+			data: undefined,
+		}));
+		collection.config.hooks = [
+			{
+				service: "documents",
+				event: "afterRestore",
+				order: -10,
+				handler: collectionHook,
+			},
+			{ service: "documents", event: "beforeDelete", handler: ignoredHook },
+		];
 
 		const response = await executeHooks(
 			context,
 			{
 				service: "documents",
-				event: "afterUpsert",
+				event: "afterRestore",
 				config: {
+					...context.config,
 					hooks: [
 						{
 							service: "documents",
-							event: "afterUpsert",
+							event: "afterRestore",
 							handler: globalHook,
 						},
+						{ service: "media", event: "afterRestore", handler: ignoredHook },
 					],
-				} as never,
-				collectionInstance: {
-					config: {
-						hooks: [
-							{
-								service: "documents",
-								event: "afterUpsert",
-								order: -10,
-								handler: collectionHook,
-							},
-						],
-					},
-				} as never,
+				},
+				collectionInstance: collection,
 			},
 			payload,
 		);
@@ -186,95 +193,61 @@ describe("execute hooks", () => {
 		expect(response.error).toBeUndefined();
 		expect(response.data).toBeUndefined();
 		expect(order).toEqual(["collection", "global"]);
-		expect(globalHook).toHaveBeenCalledWith(context, payload);
-		expect(collectionHook).toHaveBeenCalledWith(context, payload);
+		expect(ignoredHook).not.toHaveBeenCalled();
+		const args = globalHook.mock.calls[0]?.[0];
+		expect(args?.context).toBe(context);
+		expect(args?.data).toBe(payload.data);
+		expect(args?.meta).toBe(payload.meta);
+		expect(args?.toolkit.documents.getMultiple).toBeTypeOf("function");
+		expect(collectionHook.mock.calls[0]?.[0]).toBe(args);
 	});
 
-	it("matches collection hooks by service and event", async () => {
-		const context = {} as never;
-		const payload = {
-			meta: {
-				collection: {} as never,
-				collectionKey: "pages",
-			},
-			data: {
-				operationId: 1,
-				collectionKey: "pages",
-				documentId: 2,
-				target: "staging",
-				event: {
-					id: 3,
-					type: "created" as const,
-					userId: 4,
-					comment: null,
-					metadata: {},
-					createdAt: new Date().toISOString(),
-				},
-			},
+	it("stops when a hook returns an error", async () => {
+		const error = {
+			type: "basic" as const,
+			message: copy.literal("Test hook failure"),
 		};
-		const order: string[] = [];
-		const globalHook = vi.fn(async (_context, _payload) => {
-			order.push("global");
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		});
-		const collectionHook = vi.fn(async (_context, _payload) => {
-			order.push("collection");
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		});
-		const ignoredHook = vi.fn(async () => {
-			order.push("ignored");
-
-			return {
-				error: undefined,
-				data: undefined,
-			};
-		});
-
+		const nextHook = vi.fn(async () => ({ error: undefined, data: undefined }));
 		const response = await executeHooks(
 			context,
 			{
-				service: "publishOperations",
-				event: "afterEvent",
+				service: "media",
+				event: "afterRestore",
 				config: {
+					...context.config,
 					hooks: [
 						{
-							service: "publishOperations",
-							event: "afterEvent",
-							handler: globalHook,
+							service: "media",
+							event: "afterRestore",
+							handler: async () => ({ error, data: undefined }),
 						},
+						{ service: "media", event: "afterRestore", handler: nextHook },
 					],
-				} as never,
-				collectionInstance: {
-					config: {
-						hooks: [
-							{
-								service: "documents",
-								event: "afterEvent",
-								handler: ignoredHook,
-							},
-							{
-								service: "publishOperations",
-								event: "afterEvent",
-								handler: collectionHook,
-							},
-						],
-					},
-				} as never,
+				},
 			},
+			{ meta: {}, data: { ids: [1] } },
+		);
+
+		expect(response.error).toBe(error);
+		expect(nextHook).not.toHaveBeenCalled();
+	});
+
+	it("returns the original data when no transform hooks match", async () => {
+		const payload: HookPayload<"documents", "afterFetch"> = {
+			meta,
+			data: {
+				versionType: "latest",
+				relationVersionType: "latest",
+				documents: [],
+			},
+		};
+		const response = await executeHooks(
+			context,
+			{ service: "documents", event: "afterFetch", config: context.config },
 			payload,
 		);
 
 		expect(response.error).toBeUndefined();
-		expect(response.data).toBeUndefined();
-		expect(order).toEqual(["global", "collection"]);
-		expect(ignoredHook).not.toHaveBeenCalled();
+		expect(response.data).toBe(payload.data);
 	});
 });

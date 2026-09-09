@@ -59,7 +59,9 @@ describe("pages afterUpsert hook", () => {
 			],
 		} as never;
 
-		const result = await afterUpsertHandler(options)(context, {
+		const result = await afterUpsertHandler(options)({
+			context,
+			toolkit: {} as never,
 			meta: {
 				collection: routeGroup,
 				collectionKey: "route-group",

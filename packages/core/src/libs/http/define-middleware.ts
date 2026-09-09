@@ -5,12 +5,12 @@ import type { LucidMiddlewareHandler } from "./types.js";
 import createServiceContext from "./utils/create-service-context.js";
 
 /**
- * Creates Hono middleware with Lucid's service context and toolkit.
+ * Defines Hono middleware with Lucid's service context and toolkit.
  *
  * Use this for middleware registered on custom Lucid routes. The handler also
  * receives Hono's `next` function so it can continue the request pipeline.
  */
-const createMiddleware =
+const defineMiddleware =
 	(handler: LucidMiddlewareHandler): MiddlewareHandler<LucidHonoGeneric> =>
 	async (hono, next) => {
 		const context = createServiceContext(hono);
@@ -22,4 +22,4 @@ const createMiddleware =
 		});
 	};
 
-export default createMiddleware;
+export default defineMiddleware;

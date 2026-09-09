@@ -26,7 +26,7 @@ const PageCollection = new CollectionBuilder("page", {
 		{
 			service: "documents",
 			event: "beforeUpsert",
-			handler: async (_context, _data) => {
+			handler: async () => {
 				// console.log("beforeUpsert hook collection", data.data);
 				return {
 					error: undefined,
@@ -37,7 +37,7 @@ const PageCollection = new CollectionBuilder("page", {
 		{
 			service: "documents",
 			event: "afterUpsert",
-			handler: async (_context, _data) => {
+			handler: async () => {
 				// console.log("afterUpsert hook collection", data.data);
 				return {
 					error: undefined,
@@ -48,7 +48,7 @@ const PageCollection = new CollectionBuilder("page", {
 		{
 			service: "documents",
 			event: "beforeDelete",
-			handler: async (_context, _data) => {
+			handler: async () => {
 				// console.log("beforeDelete hook collection", data.data);
 				return {
 					error: undefined,
@@ -59,7 +59,7 @@ const PageCollection = new CollectionBuilder("page", {
 		{
 			service: "documents",
 			event: "afterDelete",
-			handler: async (_context, _data) => {
+			handler: async () => {
 				// console.log("afterDelete hook collection", data.data);
 				return {
 					error: undefined,

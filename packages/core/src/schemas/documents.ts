@@ -993,7 +993,7 @@ export const controllerSchemas = {
 									"Target a repeater field by adding a repeater key after the brick key",
 							}),
 						include: queryString.schema.include(
-							"refs,refs.documents,refs.media,refs.users,meta",
+							"bricks,refs,refs.documents,refs.media,refs.users,meta",
 						),
 						sort: queryString.schema.sort(
 							"createdAt,updatedAt,order,_customFieldKey",
@@ -1040,7 +1040,13 @@ export const controllerSchemas = {
 					filterOr: queryFormatted.schema.filterOr,
 					sort: documentSortSchema,
 					include: z
-						.array(z.union([z.literal("meta"), documentRefsIncludeSchema]))
+						.array(
+							z.union([
+								z.literal("bricks"),
+								z.literal("meta"),
+								documentRefsIncludeSchema,
+							]),
+						)
 						.optional(),
 					page: queryFormatted.schema.page,
 					perPage: queryFormatted.schema.perPage,

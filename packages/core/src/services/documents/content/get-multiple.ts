@@ -180,7 +180,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 	}));
 
 	const collectionFieldsTableSchemas = bricksTableSchemaRes.data.filter(
-		(schema) => schema.key.brick === undefined,
+		(schema) => include.bricks || schema.key.brick === undefined,
 	);
 	const collectionFieldRelationTableSchemas =
 		collectionFieldsTableSchemas.filter(
@@ -247,7 +247,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 		},
 		hydratedRefs: refsRes.data.hydratedRefs,
 		hasFields: true,
-		hasBricks: false,
+		hasBricks: include.bricks,
 		bricksTableSchema: collectionFieldsTableSchemas,
 	});
 
@@ -282,7 +282,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 				collectionKey: data.collectionKey,
 				collection: collectionRes.data,
 				include: {
-					bricks: false,
+					bricks: include.bricks,
 					meta: include.meta,
 				},
 			}),

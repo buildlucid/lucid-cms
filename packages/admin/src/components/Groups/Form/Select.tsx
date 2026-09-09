@@ -98,6 +98,12 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 	// ----------------------------------------
 	// Effects
 	createEffect(() => {
+		if (props.disabled) {
+			setOpen(false);
+		}
+	});
+
+	createEffect(() => {
 		props.search?.onChange(debouncedValue());
 	});
 
@@ -136,7 +142,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
-				onOpenChange={setOpen}
+				onOpenChange={(open) => setOpen(!props.disabled && open)}
 				flip={true}
 				gutter={5}
 			>
@@ -152,6 +158,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 					hideOptionalText={props.hideOptionalText}
 				/>
 				<DropdownMenu.Trigger
+					id={props.id}
 					aria-label={props.ariaLabel}
 					class={classNames(
 						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors",
@@ -165,7 +172,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 					onBlur={() => setInputFocus(false)}
 					disabled={props.disabled}
 				>
-					<div class="flex items-center">
+					<div class="flex min-w-0 flex-1 items-center text-left">
 						<Show
 							when={
 								props.shortcut &&
@@ -179,7 +186,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 						</Show>
 						{renderSelectedValue()}
 					</div>
-					<div class="flex items-center gap-1">
+					<div class="ml-2 flex shrink-0 items-center gap-1">
 						<Show when={props.shortcut && props.shortcutDisplay === "compact"}>
 							<span
 								class="bg-background-base hidden px-1.5 py-1 rounded-md border border-border text-body md:inline-flex items-center justify-center"
@@ -197,9 +204,14 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 						>
 							<button
 								type="button"
+								disabled={props.disabled}
 								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-icon-faded hover:bg-error-base hover:text-error-contrast duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
 								onClick={(e) => {
 									e.stopPropagation();
+									if (props.disabled) {
+										return;
+									}
+
 									props.onChange(undefined);
 								}}
 							>
@@ -279,19 +291,19 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 							<ul class="flex flex-col">
 								<For each={props.options}>
 									{(option) => (
-										<li
-											class="flex items-center justify-between text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-primary-hover focus:text-primary-contrast"
-											onClick={() => {
+										<DropdownMenu.Item
+											as="li"
+											textValue={option.label}
+											disabled={props.disabled}
+											class="flex items-center justify-between gap-2 text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
+											onSelect={() => {
+												if (props.disabled) {
+													return;
+												}
+
 												props.onChange(option.value);
 												setDebouncedValue("");
 												setOpen(false);
-											}}
-											onKeyDown={(e) => {
-												if (e.key === "Enter") {
-													props.onChange(option.value);
-													setDebouncedValue("");
-													setOpen(false);
-												}
 											}}
 										>
 											{props.renderOption ? (
@@ -300,12 +312,14 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 													selected: props.value === option.value,
 												})
 											) : (
-												<span>{option.label}</span>
+												<span class="min-w-0 flex-1 truncate">
+													{option.label}
+												</span>
 											)}
 											<Show when={props.value === option.value}>
-												<FaSolidCheck size={14} class="text-current mr-2" />
+												<FaSolidCheck size={14} class="shrink-0 text-current" />
 											</Show>
-										</li>
+										</DropdownMenu.Item>
 									)}
 								</For>
 							</ul>

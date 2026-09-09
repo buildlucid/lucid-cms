@@ -159,6 +159,7 @@ export type CollectionDocumentSingleInclude =
 	| "meta"
 	| CollectionDocumentRefInclude;
 export type CollectionDocumentMultipleInclude =
+	| "bricks"
 	| "meta"
 	| CollectionDocumentRefInclude;
 
@@ -179,7 +180,7 @@ export type CollectionDocumentMultipleQuery<
 	/** One filter object combines conditions with AND; an array combines filter groups with OR. */
 	filter?: CollectionDocumentFilterInput<TCollectionKey>;
 	sort?: CollectionDocumentSorts<TCollectionKey>;
-	/** Request metadata or shared references in the response. */
+	/** Request bricks, metadata or shared references in the response. */
 	include?: CollectionDocumentMultipleInclude[];
 	/** One-based page number. */
 	page?: QueryParamPagination["page"];

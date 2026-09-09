@@ -3,85 +3,30 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
-import { copy } from "../i18n/index.js";
+import createToolkit from "../toolkit/create-toolkit.js";
+import type { Toolkit } from "../toolkit/types.js";
 import { hookExecutionKinds } from "./hook-map.js";
 import type {
-	ArgumentsType,
 	ExecuteHookData,
 	HookData,
-	HookExecutionKind,
 	HookOptions,
-	HookResponse,
+	HookPayload,
 	HookServiceHandlers,
 	TransformHookData,
 } from "./types.js";
 
-type MatchingHook<
+type HookArguments<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
-> = {
-	handler: HookServiceHandlers[S][E];
-	order?: number;
-	registrationIndex: number;
+> = HookPayload<S, E> & {
+	context: ServiceContext;
+	toolkit: Toolkit;
 };
 
-type TransformPayload = {
-	data: unknown;
-};
-
-type HookPayloadArguments<T> = T extends (
-	context: ServiceContext,
-	...args: infer Args
-) => unknown
-	? Args
-	: never;
-
-const hasTransformPayload = (value: unknown): value is TransformPayload => {
-	if (typeof value !== "object" || value === null) return false;
-
-	return "data" in value;
-};
-
-const getMatchingHooks = <
+type MatchingHookHandler<
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
->(
-	options: HookOptions<S, E>,
-) => {
-	const hooks: Array<MatchingHook<S, E>> = [];
-	let registrationIndex = 0;
-
-	for (let i = 0; i < options.config.hooks.length; i++) {
-		const hook = options.config.hooks[i];
-		if (hook === undefined) continue;
-		if (hook.service !== options.service || hook.event !== options.event) {
-			continue;
-		}
-
-		hooks.push({
-			handler: hook.handler as HookServiceHandlers[S][E],
-			order: "order" in hook ? hook.order : undefined,
-			registrationIndex: registrationIndex++,
-		});
-	}
-
-	if (options.collectionInstance?.config.hooks === undefined) return hooks;
-
-	for (let i = 0; i < options.collectionInstance.config.hooks.length; i++) {
-		const hook = options.collectionInstance.config.hooks[i];
-		if (hook === undefined) continue;
-		if (hook.service !== options.service) continue;
-		if (hook.event !== options.event) continue;
-
-		hooks.push({
-			handler: hook.handler as HookServiceHandlers[S][E],
-			order: "order" in hook ? hook.order : undefined,
-			registrationIndex: registrationIndex++,
-		});
-	}
-
-	return hooks;
-};
+> = (args: HookArguments<S, E>) => ServiceResponse<HookData<S, E>>;
 
 const getOrderedHooks = <
 	S extends keyof HookServiceHandlers,
@@ -89,32 +34,34 @@ const getOrderedHooks = <
 >(
 	options: HookOptions<S, E>,
 ) => {
-	return getMatchingHooks(options).sort((a, b) => {
-		const orderDifference = (a.order ?? 0) - (b.order ?? 0);
-		if (orderDifference !== 0) return orderDifference;
+	const hooks = [
+		...options.config.hooks,
+		...(options.collectionInstance?.config.hooks ?? []),
+	];
 
-		return a.registrationIndex - b.registrationIndex;
-	});
+	return hooks
+		.filter(
+			(hook) =>
+				hook.service === options.service && hook.event === options.event,
+		)
+		.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+		.map(
+			// The service and event check selects the matching handler signature.
+			(hook) => hook.handler as unknown as MatchingHookHandler<S, E>,
+		);
 };
 
-/**
- * Runs hooks that only perform side effects. Each matching hook receives the
- * same arguments and any returned data is ignored by design.
- */
+/** Runs side effects in order, stopping at the first error. */
 const executeEffectHooks = async <
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
 >(
-	options: HookOptions<S, E>,
-	args: ArgumentsType<HookServiceHandlers[S][E]>,
+	hooks: MatchingHookHandler<S, E>[],
+	args: HookArguments<S, E>,
 ): ServiceResponse<HookData<S, E>> => {
-	for (const hook of getOrderedHooks(options)) {
-		const res = await (
-			hook.handler as unknown as (
-				...args: ArgumentsType<HookServiceHandlers[S][E]>
-			) => Promise<HookResponse<S, E>>
-		)(...args);
-		if (res.error) return res;
+	for (const handler of hooks) {
+		const result = await handler(args);
+		if (result.error) return result;
 	}
 
 	return {
@@ -124,62 +71,30 @@ const executeEffectHooks = async <
 };
 
 /**
- * Runs hooks as ordered transforms. The `data` payload is drafted with Immer for
- * each hook, so handlers can mutate only the parts they care about or return a
- * full replacement value. The finalized data is passed to the next hook.
+ * Passes a fresh data draft to each hook. Hooks can mutate the draft or return
+ * replacement data, which becomes the next hook's input.
  */
 const executeTransformHooks = async <
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
 >(
-	options: HookOptions<S, E>,
-	args: ArgumentsType<HookServiceHandlers[S][E]>,
+	hooks: MatchingHookHandler<S, E>[],
+	args: HookArguments<S, E>,
 ): ServiceResponse<TransformHookData<S, E>> => {
-	const payload = args[1];
-	if (!hasTransformPayload(payload)) {
-		return {
-			error: {
-				type: "basic",
-				name: copy("server:core.hooks.execution.error.name"),
-				message: copy("server:core.hooks.transform.payload.error.message", {
-					data: {
-						service: String(options.service),
-						event: String(options.event),
-					},
-				}),
-				status: 500,
-			},
-			data: undefined,
-		};
-	}
+	let currentData = args.data as TransformHookData<S, E>;
 
-	let currentData = payload.data as TransformHookData<S, E>;
-
-	for (const hook of getOrderedHooks(options)) {
+	for (const handler of hooks) {
 		const draft = createDraft(currentData);
-		const nextArgs = [
-			args[0],
-			{
-				...payload,
-				data: draft,
-			},
-		] as ArgumentsType<HookServiceHandlers[S][E]>;
+		const result = await handler({ ...args, data: draft });
+		if (result.error) return result;
 
-		const res = await (
-			hook.handler as unknown as (
-				...args: ArgumentsType<HookServiceHandlers[S][E]>
-			) => Promise<HookResponse<S, E>>
-		)(...nextArgs);
-		if (res.error) return res;
-
-		if (res.data === undefined || res.data === draft) {
+		if (result.data === undefined || result.data === draft) {
 			currentData = finishDraft(draft) as TransformHookData<S, E>;
 			continue;
 		}
 
 		finishDraft(draft);
-
-		currentData = res.data as TransformHookData<S, E>;
+		currentData = result.data as TransformHookData<S, E>;
 	}
 
 	return {
@@ -188,33 +103,36 @@ const executeTransformHooks = async <
 	};
 };
 
-/**
- * Dispatches hooks through the configured execution kind while keeping one
- * caller interface for both effect and transform events.
- */
+/** Runs matching lifecycle hooks with helpers bound to the current transaction. */
 const executeHooks = async <
 	S extends keyof HookServiceHandlers,
 	E extends keyof HookServiceHandlers[S],
 >(
 	context: ServiceContext,
 	options: HookOptions<S, E>,
-	...args: HookPayloadArguments<HookServiceHandlers[S][E]>
+	payload: HookPayload<S, E>,
 ): ServiceResponse<ExecuteHookData<S, E>> => {
-	const hookArgs = [context, ...args] as ArgumentsType<
-		HookServiceHandlers[S][E]
-	>;
-	const executionKind =
-		(hookExecutionKinds as Record<string, Record<string, HookExecutionKind>>)[
-			String(options.service)
-		]?.[String(options.event)] ?? "effect";
+	const hooks = getOrderedHooks(options);
+	const executionKind = hookExecutionKinds[options.service][options.event];
+
+	if (hooks.length === 0) {
+		return {
+			error: undefined,
+			data: (executionKind === "transform"
+				? payload.data
+				: undefined) as ExecuteHookData<S, E>,
+		};
+	}
+
+	const args = { ...payload, context, toolkit: createToolkit(context) };
 
 	if (executionKind === "transform") {
-		return executeTransformHooks(options, hookArgs) as ServiceResponse<
+		return executeTransformHooks(hooks, args) as ServiceResponse<
 			ExecuteHookData<S, E>
 		>;
 	}
 
-	return executeEffectHooks(options, hookArgs) as ServiceResponse<
+	return executeEffectHooks(hooks, args) as ServiceResponse<
 		ExecuteHookData<S, E>
 	>;
 };

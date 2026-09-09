@@ -1,3 +1,4 @@
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
@@ -78,6 +79,13 @@ const restoreMultiple: ServiceFn<
 		validation: { enabled: true },
 	});
 	if (updateRes.error) return updateRes;
+
+	const hooks = await executeHooks(
+		context,
+		{ service: "media", event: "afterRestore", config: context.config },
+		{ meta: {}, data: { ids: data.ids } },
+	);
+	if (hooks.error) return hooks;
 
 	await Promise.all([
 		...data.ids.map((id) => clearContentMediaSingleCache(context, id)),

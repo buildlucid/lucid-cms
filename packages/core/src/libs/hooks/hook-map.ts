@@ -9,12 +9,17 @@ import type {
  * side effects. Transform hooks run sequentially with Immer-drafted data while
  * effect hooks keep the lightweight fire-in-order behaviour.
  */
-export const hookExecutionKinds = {
+export const hookExecutionKinds: {
+	[S in keyof HookServiceHandlers]: {
+		[E in keyof HookServiceHandlers[S]]: HookExecutionKind;
+	};
+} = {
 	documents: {
 		beforeUpsert: "transform",
 		afterUpsert: "effect",
 		afterFetch: "transform",
 		beforeDelete: "effect",
+		afterRestore: "effect",
 		afterDelete: "effect",
 		versionPromote: "effect",
 	},
@@ -25,12 +30,9 @@ export const hookExecutionKinds = {
 		afterEvent: "effect",
 	},
 	media: {
+		afterRestore: "effect",
 		afterCreate: "effect",
 		afterUpdate: "effect",
 		afterDelete: "effect",
 	},
-} satisfies {
-	[S in keyof HookServiceHandlers]: {
-		[E in keyof HookServiceHandlers[S]]: HookExecutionKind;
-	};
-} & HookExecutionKindMap;
+} satisfies HookExecutionKindMap;

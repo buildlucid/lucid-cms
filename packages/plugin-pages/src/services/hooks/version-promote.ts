@@ -24,18 +24,20 @@ const versionPromoteHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"versionPromote">["handler"] =>
-	async (context, data) => {
+	async ({ context, toolkit, data, meta }) => {
 		// ----------------------------------------------------------------
 		// Validation / Setup
 		if (
 			!options.collections.some(
-				(collection) => collection.key === data.meta.collectionKey,
+				(collection) => collection.key === meta.collectionKey,
 			)
 		) {
-			return afterUpsertHandler(options)(context, {
-				meta: data.meta,
+			return afterUpsertHandler(options)({
+				context,
+				toolkit,
+				meta,
 				data: {
-					...data.data,
+					...data,
 					bricks: [],
 					fields: [],
 				},
@@ -44,24 +46,24 @@ const versionPromoteHandler =
 
 		const targetCollectionRes = getTargetCollection({
 			options,
-			collectionKey: data.meta.collectionKey,
+			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) return targetCollectionRes;
 		const localization = resolvePagesCollectionLocalization({
 			localization: context.config.localization,
 			collection: targetCollectionRes.data,
-			collectionInstance: data.meta.collection,
+			collectionInstance: meta.collection,
 		});
 
 		let createFullSlug = true;
 
 		// fetch the document versions, slug and parent page fields
 		const docVersionFieldRes = await getDocumentVersionFields(context, {
-			documentId: data.data.documentId,
-			versionId: data.data.versionId,
-			versionType: data.data.versionType,
+			documentId: data.documentId,
+			versionId: data.versionId,
+			versionType: data.versionType,
 			collectionKey: targetCollectionRes.data.key,
-			tables: data.meta.collectionTableNames,
+			tables: meta.collectionTableNames,
 		});
 		if (docVersionFieldRes.error) return docVersionFieldRes;
 		if (docVersionFieldRes.data === null) createFullSlug = false;
@@ -101,13 +103,13 @@ const versionPromoteHandler =
 			// parent page checks and query
 			if (parentPageId !== null) {
 				const circularParentsRes = await checkCircularParents(context, {
-					documentId: data.data.documentId,
-					versionType: data.data.versionType,
+					documentId: data.documentId,
+					versionType: data.versionType,
 					collectionKey: targetCollectionRes.data.key,
 					fields: {
 						parentPage: parentPage,
 					},
-					tables: data.meta.collectionTableNames,
+					tables: meta.collectionTableNames,
 				});
 				if (circularParentsRes.error) return circularParentsRes;
 			}
@@ -115,16 +117,16 @@ const versionPromoteHandler =
 			// fullSlug construction
 			const fullSlugRes = await resolveParentFullSlug(context, {
 				collection: targetCollectionRes.data,
-				collectionInstance: data.meta.collection,
+				collectionInstance: meta.collection,
 				collectionKey: targetCollectionRes.data.key,
-				versionType: data.data.versionType,
-				tables: data.meta.collectionTableNames,
+				versionType: data.versionType,
+				tables: meta.collectionTableNames,
 				fields: {
 					slug: slug,
 					parentPage,
 					all: [slug, parentPage, fullSlug],
 				},
-				documentVersionId: data.data.versionId,
+				documentVersionId: data.versionId,
 			});
 			if (fullSlugRes.error) return fullSlugRes;
 
@@ -139,19 +141,19 @@ const versionPromoteHandler =
 
 			const projectedFullSlugs = [
 				{
-					documentId: data.data.documentId,
-					versionId: data.data.versionId,
+					documentId: data.documentId,
+					versionId: data.versionId,
 					fullSlugs: fullSlugRes.data,
 				},
 			];
 
 			const descendantFullSlugsRes = await buildDescendantFullSlugs(context, {
-				documentIds: [data.data.documentId],
-				versionType: data.data.versionType,
+				documentIds: [data.documentId],
+				versionType: data.versionType,
 				collectionKey: targetCollectionRes.data.key,
-				tables: data.meta.collectionTableNames,
+				tables: meta.collectionTableNames,
 				collection: targetCollectionRes.data,
-				collectionInstance: data.meta.collection,
+				collectionInstance: meta.collection,
 				parentFullSlugField: candidateFullSlugField,
 			});
 			if (descendantFullSlugsRes.error) return descendantFullSlugsRes;
@@ -162,9 +164,9 @@ const versionPromoteHandler =
 				{
 					collection: targetCollectionRes.data,
 					projectedFullSlugs,
-					versionType: data.data.versionType,
+					versionType: data.versionType,
 					collectionKey: targetCollectionRes.data.key,
-					tables: data.meta.collectionTableNames,
+					tables: meta.collectionTableNames,
 					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
 				},
 			);
@@ -179,49 +181,51 @@ const versionPromoteHandler =
 			});
 
 			const updateSlugRes = await updateSlugFields(context, {
-				collectionKey: data.meta.collectionKey,
+				collectionKey: meta.collectionKey,
 				docSlugs: [
 					{
-						documentId: data.data.documentId,
-						versionId: data.data.versionId,
+						documentId: data.documentId,
+						versionId: data.versionId,
 						slugs: slug.translations
 							? new Map(Object.entries(slug.translations))
 							: new Map([[null, slug.value ?? null]]),
 					},
 				],
-				versionType: data.data.versionType,
-				tables: data.meta.collectionTableNames,
+				versionType: data.versionType,
+				tables: meta.collectionTableNames,
 			});
 			if (updateSlugRes.error) return updateSlugRes;
 
 			const updateFullSlugRes = await updateFullSlugFields(context, {
-				collectionKey: data.meta.collectionKey,
+				collectionKey: meta.collectionKey,
 				docFullSlugs: [
 					{
-						documentId: data.data.documentId,
-						versionId: data.data.versionId,
+						documentId: data.documentId,
+						versionId: data.versionId,
 						fullSlugs: fullSlugRes.data,
 					},
 				],
-				versionType: data.data.versionType,
-				tables: data.meta.collectionTableNames,
+				versionType: data.versionType,
+				tables: meta.collectionTableNames,
 			});
 			if (updateFullSlugRes.error) return updateFullSlugRes;
 		}
 
 		// ----------------------------------------------------------------
 		// run the afterUpsert hook to update all of the documents versions potential descendants
-		const afterUpsertRes = await afterUpsertHandler(options)(context, {
+		const afterUpsertRes = await afterUpsertHandler(options)({
+			context,
+			toolkit,
 			meta: {
-				collection: data.meta.collection,
-				collectionKey: data.meta.collectionKey,
-				userId: data.meta.userId,
-				collectionTableNames: data.meta.collectionTableNames,
+				collection: meta.collection,
+				collectionKey: meta.collectionKey,
+				userId: meta.userId,
+				collectionTableNames: meta.collectionTableNames,
 			},
 			data: {
-				documentId: data.data.documentId,
-				versionId: data.data.versionId,
-				versionType: data.data.versionType,
+				documentId: data.documentId,
+				versionId: data.versionId,
+				versionType: data.versionType,
 				bricks: [],
 				fields: [slug, parentPage, fullSlug],
 			},

@@ -13,11 +13,11 @@ const beforeDeleteHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"beforeDelete">["handler"] =>
-	async (context, data) => {
+	async ({ context, data, meta }) => {
 		const segmentUpdatesRes = await propagateRouteSegmentUpdates(context, {
 			options,
-			targetCollectionKey: data.meta.collectionKey,
-			deletedDocumentIds: data.data.ids,
+			targetCollectionKey: meta.collectionKey,
+			deletedDocumentIds: data.ids,
 		});
 		if (segmentUpdatesRes.error) return segmentUpdatesRes;
 
@@ -25,7 +25,7 @@ const beforeDeleteHandler =
 		// Validation / Setup
 		const targetCollectionRes = getTargetCollection({
 			options,
-			collectionKey: data.meta.collectionKey,
+			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
 			//* early return as doesnt apply to the current collection
@@ -38,19 +38,18 @@ const beforeDeleteHandler =
 		// Process both latest and all configured environments
 		const versionTypes = [
 			"latest",
-			...(data.meta.collection.getData.publishing.targets?.map(
-				(env) => env.key,
-			) || []),
+			...(meta.collection.getData.publishing.targets?.map((env) => env.key) ||
+				[]),
 		];
 
 		for (const versionType of versionTypes) {
 			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
-				documentIds: data.data.ids,
+				documentIds: data.ids,
 				versionType,
 				collectionKey: targetCollectionRes.data.key,
-				tables: data.meta.collectionTableNames,
+				tables: meta.collectionTableNames,
 				collection: targetCollectionRes.data,
-				collectionInstance: data.meta.collection,
+				collectionInstance: meta.collection,
 			});
 			if (docFullSlugsRes.error) return docFullSlugsRes;
 
@@ -69,8 +68,8 @@ const beforeDeleteHandler =
 					projectedFullSlugs: docFullSlugsRes.data,
 					versionType,
 					collectionKey: targetCollectionRes.data.key,
-					tables: data.meta.collectionTableNames,
-					excludeDocumentIds: [...data.data.ids, ...projectedDocumentIds],
+					tables: meta.collectionTableNames,
+					excludeDocumentIds: [...data.ids, ...projectedDocumentIds],
 					duplicateMessage: copy(
 						"server:plugin.pages.full.slug.duplicate.on.delete",
 					),
@@ -79,10 +78,10 @@ const beforeDeleteHandler =
 			if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
 
 			const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
-				collectionKey: data.meta.collectionKey,
+				collectionKey: meta.collectionKey,
 				docFullSlugs: docFullSlugsRes.data,
 				versionType,
-				tables: data.meta.collectionTableNames,
+				tables: meta.collectionTableNames,
 			});
 			if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
 		}

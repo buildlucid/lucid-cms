@@ -100,8 +100,8 @@ const afterFetchHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"afterFetch">["handler"] =>
-	async (context, data) => {
-		if (data.data.versionType !== snapshotVersionType) {
+	async ({ context, data, meta }) => {
+		if (data.versionType !== snapshotVersionType) {
 			return {
 				error: undefined,
 				data: undefined,
@@ -110,7 +110,7 @@ const afterFetchHandler =
 
 		const targetCollectionRes = getTargetCollection({
 			options,
-			collectionKey: data.meta.collectionKey,
+			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
 			return {
@@ -121,11 +121,11 @@ const afterFetchHandler =
 		const localization = resolvePagesCollectionLocalization({
 			localization: context.config.localization,
 			collection: targetCollectionRes.data,
-			collectionInstance: data.meta.collection,
+			collectionInstance: meta.collection,
 		});
 
 		const documentResults = await Promise.all(
-			data.data.documents.map(async (document) => {
+			data.documents.map(async (document) => {
 				const fields = document.fields;
 				if (!fields || fields.length === 0) {
 					return { error: undefined, data: document };
@@ -152,10 +152,10 @@ const afterFetchHandler =
 
 				const fullSlugRes = await resolveParentFullSlug(context, {
 					collection: targetCollectionRes.data,
-					collectionInstance: data.meta.collection,
+					collectionInstance: meta.collection,
 					collectionKey: targetCollectionRes.data.key,
-					versionType: data.data.relationVersionType,
-					tables: data.meta.collectionTableNames,
+					versionType: data.relationVersionType,
+					tables: meta.collectionTableNames,
 					fields: {
 						slug,
 						parentPage,
@@ -171,7 +171,7 @@ const afterFetchHandler =
 						document,
 						fullSlug: fullSlugRes.data,
 						defaultLocale: localization.storageLocale,
-						collection: data.meta.collection,
+						collection: meta.collection,
 						locales: localization.enabled ? localization.locales : [],
 					}),
 				};
@@ -180,7 +180,7 @@ const afterFetchHandler =
 		const failedDocument = documentResults.find((result) => result.error);
 		if (failedDocument?.error) return failedDocument;
 
-		data.data.documents = documentResults.flatMap((result) =>
+		data.documents = documentResults.flatMap((result) =>
 			result.data ? [result.data] : [],
 		);
 

@@ -3,6 +3,7 @@ import type { ErrorResult } from "@types";
 import classnames from "classnames";
 import { FaSolidCheck, FaSolidSort } from "solid-icons/fa";
 import {
+	createEffect,
 	createSignal,
 	For,
 	type JSXElement,
@@ -58,6 +59,10 @@ export function SelectMultiple<
 	// ----------------------------------------
 	// Functions
 	const setValues = (value: Value[]) => {
+		if (props.disabled) {
+			return;
+		}
+
 		props.onChange(value);
 	};
 	const removeValue = (value: Value) => {
@@ -73,6 +78,14 @@ export function SelectMultiple<
 	};
 
 	// ----------------------------------------
+	// Effects
+	createEffect(() => {
+		if (props.disabled) {
+			setOpen(false);
+		}
+	});
+
+	// ----------------------------------------
 	// Render
 	return (
 		<div
@@ -83,7 +96,7 @@ export function SelectMultiple<
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
-				onOpenChange={setOpen}
+				onOpenChange={(open) => setOpen(!props.disabled && open)}
 				flip={true}
 				gutter={5}
 			>
@@ -99,6 +112,8 @@ export function SelectMultiple<
 					hideOptionalText={props.hideOptionalText}
 				/>
 				<DropdownMenu.Trigger
+					id={props.id}
+					aria-label={props.copy?.label}
 					class={classnames(
 						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
 						props.triggerClasses,
@@ -114,7 +129,12 @@ export function SelectMultiple<
 							props.selectedValuesContainerClasses ?? "gap-1",
 						)}
 					>
-						<For each={props.values}>
+						<For
+							each={props.values}
+							fallback={
+								<span class="text-body">{props.copy?.placeholder}</span>
+							}
+						>
 							{(value) => (
 								<span
 									class={classnames(
@@ -156,7 +176,8 @@ export function SelectMultiple<
 
 										return (
 											<DropdownMenu.Item
-												class="flex items-center justify-between text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
+												disabled={props.disabled}
+												class="flex items-center justify-between gap-2 text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
 												onSelect={() => {
 													toggleValue(option);
 												}}
@@ -168,10 +189,15 @@ export function SelectMultiple<
 														selected: selected(),
 													})
 												) : (
-													<span>{option.label}</span>
+													<span class="min-w-0 flex-1 truncate">
+														{option.label}
+													</span>
 												)}
 												<Show when={selected()}>
-													<FaSolidCheck size={14} class="fill-current mr-2" />
+													<FaSolidCheck
+														size={14}
+														class="shrink-0 fill-current"
+													/>
 												</Show>
 											</DropdownMenu.Item>
 										);

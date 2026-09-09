@@ -107,7 +107,7 @@ export type CollectionDocumentVersionKey<
 
 export type DocumentRefInclude = "refs" | `refs.${RefResource}`;
 export type DocumentSingleInclude = "bricks" | "meta" | DocumentRefInclude;
-export type DocumentMultipleInclude = "meta" | DocumentRefInclude;
+export type DocumentMultipleInclude = "bricks" | "meta" | DocumentRefInclude;
 
 export type DocumentsGetSingleQuery<TCollectionKey extends string = string> = {
 	filter?: CollectionDocumentFilters<TCollectionKey>;
