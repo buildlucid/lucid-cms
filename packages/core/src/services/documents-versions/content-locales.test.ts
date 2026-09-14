@@ -25,6 +25,7 @@ import {
 	MediaTranslationsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
+import createToolkit from "../../libs/toolkit/create-toolkit.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
@@ -563,6 +564,7 @@ describe("unassigned content locales", () => {
 		expect(
 			(
 				await updateFullSlugFields(context, {
+					toolkit: createToolkit(context),
 					collectionKey: collection.key,
 					versionType: "latest",
 					tables,
