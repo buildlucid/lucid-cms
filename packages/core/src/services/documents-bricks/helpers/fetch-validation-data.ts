@@ -11,6 +11,8 @@ import type {
 	FieldRelationValidationInput,
 	FieldTypes,
 } from "../../../libs/collection/custom-fields/types.js";
+import { addRefTarget } from "../../../libs/refs/targets.js";
+import { DocumentReferencesRepository } from "../../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { LucidUser } from "../../../types/hono.js";
 import type {
@@ -102,6 +104,7 @@ const fetchValidationData: ServiceFn<
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
 			authUser?: LucidUser;
+			existingVersion?: { id: number; documentId: number };
 		},
 	],
 	ValidationData
@@ -112,6 +115,32 @@ const fetchValidationData: ServiceFn<
 	const richTextValidationData = validationData[
 		"rich-text"
 	] as RichTextValidationData;
+	if (data.existingVersion && buckets["rich-text"]) {
+		const DocumentReferences = new DocumentReferencesRepository(context.db);
+		const retained = await DocumentReferences.selectMultiple({
+			select: ["target_resource", "target_table", "target_id"],
+			where: [
+				{ key: "collection_key", operator: "=", value: data.collection.key },
+				{
+					key: "document_id",
+					operator: "=",
+					value: data.existingVersion.documentId,
+				},
+				{ key: "version_id", operator: "=", value: data.existingVersion.id },
+				{ key: "kind", operator: "=", value: "embedded" },
+			],
+		});
+		if (retained.error) return retained;
+
+		richTextValidationData.retainedReferences = {};
+		for (const reference of retained.data ?? []) {
+			addRefTarget(richTextValidationData.retainedReferences, {
+				resource: reference.target_resource,
+				table: reference.target_table,
+				value: reference.target_id,
+			});
+		}
+	}
 	if (data.authUser) {
 		richTextValidationData.variableAccess = resolveRichTextVariableAccess({
 			collectionKeys: context.config.collections.map(

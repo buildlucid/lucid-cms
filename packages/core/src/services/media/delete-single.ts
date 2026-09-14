@@ -6,6 +6,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
 import checkMediaAccess from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
+import notifyChange from "./notify-change.js";
 
 const deleteSingle: ServiceFn<
 	[
@@ -69,6 +70,12 @@ const deleteSingle: ServiceFn<
 			},
 		);
 		if (hookRes.error) return hookRes;
+
+		const changed = await notifyChange(context, {
+			change: { type: "deleted", permanent: false },
+			ids: [deleteMediaRes.data.id],
+		});
+		if (changed.error) return changed;
 	}
 
 	return {

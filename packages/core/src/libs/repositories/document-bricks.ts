@@ -1,3 +1,5 @@
+import z from "zod";
+import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { CollectionSchemaColumn } from "../collection/schema/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import { documentBricksTable } from "../db/tables/document-bricks.js";
@@ -119,6 +121,75 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		return this.validateResponse(exec, {
 			enabled: false,
 			mode: "single",
+		});
+	}
+	/** Read stored field values in bounded pages during reference schema refreshes. */
+	async selectReferenceValues(
+		props: { afterId: number; limit: number },
+		dynamicConfig: DynamicConfig<LucidBrickTableName>,
+	) {
+		const schema = z.looseObject({
+			id: z.number(),
+			document_id: z.number(),
+			document_version_id: z.number(),
+			collection_key: z.string(),
+			locale: z.string().nullable(),
+			position: z.number(),
+		});
+		const query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.selectAll()
+			.where("id", ">", props.afterId)
+			.orderBy("id")
+			.limit(props.limit);
+
+		const exec = await this.executeQuery(
+			() => query.execute() as Promise<z.infer<typeof schema>[]>,
+			{
+				method: "selectReferenceValues",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			enabled: true,
+			mode: "multiple",
+			selectAll: true,
+			schema,
+		});
+	}
+	/** Remove relation rows and return the documents whose content changed. */
+	async deleteRelationReferences(
+		props: { collectionKey: string; documentId?: number },
+		dynamicConfig: DynamicConfig<LucidBrickTableName>,
+	) {
+		let query = this.db
+			.deleteFrom(dynamicConfig.tableName)
+			.where(
+				prefixGeneratedColName("collection_key"),
+				"=",
+				props.collectionKey,
+			);
+		if (props.documentId !== undefined) {
+			query = query.where(
+				prefixGeneratedColName("document_id"),
+				"=",
+				props.documentId,
+			);
+		}
+		const result = await this.executeQuery(
+			() => query.returning("document_id").execute(),
+			{
+				method: "deleteRelationReferences",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		if (result.response.error) return result.response;
+		return this.validateResponse(result, {
+			enabled: true,
+			mode: "multiple",
+			select: ["document_id"],
 		});
 	}
 }

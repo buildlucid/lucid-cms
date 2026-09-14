@@ -5,12 +5,12 @@ import abortUploadSessionService from "../abort-upload-session.js";
 
 const input = z.object({ sessionId: z.string().min(1) });
 
-const abortUploadSession: JobHandler<z.infer<typeof input>> = async (
+const abortUploadSession: JobHandler<z.infer<typeof input>> = async ({
 	context,
-	data,
-) => {
+	input,
+}) => {
 	return abortUploadSessionService(context, {
-		sessionId: data.sessionId,
+		sessionId: input.sessionId,
 	});
 };
 
@@ -19,5 +19,5 @@ export const abortUploadSessionJob = defineJob({
 	version: 1,
 	input,
 	handler: abortUploadSession,
-	describe: ({ sessionId }) => ({ sessionId }),
+	describe: ({ input: { sessionId } }) => ({ sessionId }),
 });

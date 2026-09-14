@@ -15,7 +15,7 @@ const input = z.object({ operationId: z.number().int().positive() });
 
 export const markPublishOperationJobFailed: JobPermanentFailureHandler<
 	z.infer<typeof input>
-> = async (context, failure) => {
+> = async ({ context, failure }) => {
 	const operationId = failure.input.operationId;
 
 	const Operations = new DocumentPublishOperationsRepository(context.db);
@@ -68,12 +68,12 @@ export const markPublishOperationJobFailed: JobPermanentFailureHandler<
 	});
 };
 
-const executePublishOperation: JobHandler<z.infer<typeof input>> = async (
+const executePublishOperation: JobHandler<z.infer<typeof input>> = async ({
 	context,
-	data,
-) => {
+	input,
+}) => {
 	return execute(context, {
-		id: data.operationId,
+		id: input.operationId,
 		markFailedOnError: false,
 	});
 };
@@ -84,5 +84,5 @@ export const executePublishOperationJob = defineJob({
 	input,
 	handler: executePublishOperation,
 	onPermanentFailure: markPublishOperationJobFailed,
-	describe: ({ operationId }) => ({ operationId }),
+	describe: ({ input: { operationId } }) => ({ operationId }),
 });

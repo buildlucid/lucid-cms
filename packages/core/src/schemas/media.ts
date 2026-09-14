@@ -444,6 +444,7 @@ export const mediaResponseSchema = z.union([
 
 const mediaGetMultipleQueryStringSchema = z
 	.object({
+		"filter[id]": queryString.schema.filter(true, { example: "1,2" }),
 		"filter[title]": queryString.schema.filter(false, {
 			example: "Thumbnail",
 		}),
@@ -504,6 +505,7 @@ const mediaGetMultipleQueryStringSchema = z
 const mediaGetMultipleQueryFormattedSchema = z.object({
 	filter: z
 		.object({
+			id: queryFormatted.schema.filters.union.optional(),
 			title: queryFormatted.schema.filters.single.optional(),
 			key: queryFormatted.schema.filters.single.optional(),
 			status: queryFormatted.schema.filters.union.optional(),

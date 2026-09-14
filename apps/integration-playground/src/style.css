@@ -1314,3 +1314,46 @@ footer {
 		animation: none;
 	}
 }
+
+.topbar [hidden],
+#pages [hidden] {
+	display: none;
+}
+
+.page-nav {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-right: auto;
+	margin-left: 36px;
+}
+.page-nav a {
+	border-radius: 7px;
+	padding: 9px 16px;
+	color: var(--body);
+	text-decoration: none;
+	font-size: 12px;
+	font-weight: 600;
+}
+.page-nav a:hover {
+	background: var(--input);
+	color: var(--title);
+}
+.page-nav a[aria-current="page"] {
+	background: var(--primary-muted);
+	color: var(--primary);
+}
+
+@media (max-width: 600px) {
+	.topbar {
+		flex-wrap: wrap;
+		gap: 18px;
+	}
+	.page-nav {
+		order: 3;
+		margin: 0;
+		width: 100%;
+		border-top: 1px solid var(--border);
+		padding-top: 12px;
+	}
+}

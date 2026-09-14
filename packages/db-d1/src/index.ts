@@ -5,6 +5,7 @@ import {
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
+	DatabaseLimits,
 	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
@@ -38,7 +39,7 @@ export class D1Adapter extends DatabaseAdapter {
 		| D1AdapterBindingOptions
 		| D1AdapterOptionsFactory
 		| undefined;
-
+	readonly limits: DatabaseLimits = { maxQueryParameters: 100 };
 	constructor(options?: D1AdapterBindingOptions | D1AdapterOptionsFactory) {
 		super("d1");
 		this.#options = options;

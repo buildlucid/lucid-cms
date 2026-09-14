@@ -394,6 +394,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 	},
 	query: {
 		filters: {
+			id: "id",
 			key: "key",
 			status: "status",
 			mimeType: "mime_type",

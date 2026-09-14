@@ -4,6 +4,7 @@ import formatter from "../../libs/formatters/index.js";
 import logger from "../../libs/logger/index.js";
 import { CollectionsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import notifyCollection from "../document-references/notify-collection.js";
 
 /**
  * Responsible for syncing active collections to the DB.
@@ -120,6 +121,13 @@ const syncCollections: ServiceFn<[], undefined> = async (context) => {
 		return updateDeletedRes;
 	if (typeof updateRestoredRes !== "boolean" && updateRestoredRes.error)
 		return updateRestoredRes;
+
+	for (const collection of [...collectionsToDelete, ...unDeletedCollections]) {
+		const notified = await notifyCollection(context, {
+			collectionKey: collection.key,
+		});
+		if (notified.error) return notified;
+	}
 
 	return {
 		error: undefined,

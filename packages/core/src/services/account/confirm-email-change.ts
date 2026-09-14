@@ -7,6 +7,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import notifyDependants from "../document-references/notify-dependants.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import getUserToken from "../user-tokens/get-single.js";
 
@@ -192,6 +193,13 @@ const confirmEmailChange: ServiceFn<
 	if (updateUserRes.error) return updateUserRes;
 	if (consumeTokenRes.error) return consumeTokenRes;
 	if (auditRes.error) return auditRes;
+
+	const references = await notifyDependants(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [requestRes.data.user_id],
+	});
+	if (references.error) return references;
 
 	return {
 		error: undefined,

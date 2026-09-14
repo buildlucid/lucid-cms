@@ -229,7 +229,7 @@ abstract class CustomField<T extends FieldTypes> {
 	 * Extracts a single field value item from a relation-table row.
 	 */
 	public extractRelationFieldValue(
-		row: Select<LucidBricksTable>,
+		row: Partial<Select<LucidBricksTable>>,
 	): unknown | null {
 		const relationValueColumn = this.relationValueColumn;
 		if (!relationValueColumn) return null;
@@ -252,7 +252,7 @@ abstract class CustomField<T extends FieldTypes> {
 	 * foreign keys.
 	 */
 	public getRelationFieldRefTargets(
-		_row: Select<LucidBricksTable>,
+		_row: Partial<Select<LucidBricksTable>>,
 	): RefTarget[] {
 		return [];
 	}

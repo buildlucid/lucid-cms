@@ -15,18 +15,18 @@ const input = z.object({
 /**
  * Runs a single alert producer resolved from the registered alert map.
  */
-const executeAlert: JobHandler<z.infer<typeof input>> = async (
+const executeAlert: JobHandler<z.infer<typeof input>> = async ({
 	context,
-	data,
-) => {
-	const config = getAlertConfig(data.key);
+	input,
+}) => {
+	const config = getAlertConfig(input.key);
 	if (!config) {
 		return {
 			error: {
 				type: "basic",
 				message: copy("server:core.alerts.unknown.key.message", {
 					data: {
-						key: data.key,
+						key: input.key,
 					},
 				}),
 				status: 400,
@@ -35,7 +35,7 @@ const executeAlert: JobHandler<z.infer<typeof input>> = async (
 		};
 	}
 
-	return config.service(context, data);
+	return config.service(context, input);
 };
 
 export const executeAlertJob = defineJob({
@@ -43,7 +43,7 @@ export const executeAlertJob = defineJob({
 	version: 1,
 	input,
 	handler: executeAlert,
-	describe: ({ key, source, trigger }) => ({
+	describe: ({ input: { key, source, trigger } }) => ({
 		key,
 		...(source ? { source } : {}),
 		...(trigger ? { trigger } : {}),

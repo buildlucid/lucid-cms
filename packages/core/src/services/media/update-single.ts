@@ -30,6 +30,7 @@ import resolveAiGeneration from "./helpers/resolve-ai-generation.js";
 import resolvePoster from "./helpers/resolve-poster.js";
 import syncOwnedVisibility from "./helpers/sync-owned-visibility.js";
 import upsertCrop from "./helpers/upsert-crop.js";
+import notifyChange from "./notify-change.js";
 import renameMedia from "./strategies/rename.js";
 import updateMedia from "./strategies/update.js";
 
@@ -545,6 +546,26 @@ const updateSingle: ServiceFn<
 		},
 	);
 	if (hookRes.error) return hookRes;
+
+	if (data.posterId !== undefined && data.posterId !== null) {
+		const changedPoster = await notifyChange(context, {
+			ids: [data.posterId],
+			change: { type: "updated" },
+		});
+		if (changedPoster.error) return changedPoster;
+	}
+
+	const changed = await notifyChange(context, {
+		ids: [data.id],
+		change:
+			data.isDeleted === undefined ||
+			data.isDeleted === formatter.formatBoolean(mediaRes.data.is_deleted)
+				? { type: "updated" }
+				: data.isDeleted
+					? { type: "deleted", permanent: false }
+					: { type: "restored" },
+	});
+	if (changed.error) return changed;
 
 	return {
 		error: undefined,

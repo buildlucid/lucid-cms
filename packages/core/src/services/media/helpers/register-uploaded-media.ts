@@ -14,6 +14,7 @@ import { getBaseUrl } from "../../../utils/helpers/index.js";
 import getKeyVisibility from "../../../utils/media/get-key-visibility.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type createSingle from "../create-single.js";
+import notifyChange from "../notify-change.js";
 import type syncMedia from "../strategies/sync-media.js";
 import prepareMediaTranslations from "./prepare-media-translations.js";
 import resolveAiGeneration from "./resolve-ai-generation.js";
@@ -268,6 +269,20 @@ const registerUploadedMedia: ServiceFn<
 		where: [{ key: "key", operator: "=", value: data.key }],
 	});
 	if (cleared.error) return cleared;
+
+	if (data.posterId !== undefined && data.posterId !== null) {
+		const changedPoster = await notifyChange(context, {
+			ids: [data.posterId],
+			change: { type: "updated" },
+		});
+		if (changedPoster.error) return changedPoster;
+	}
+
+	const changed = await notifyChange(context, {
+		change: { type: "created" },
+		ids: [mediaFetchRes.data.id],
+	});
+	if (changed.error) return changed;
 
 	return {
 		error: undefined,

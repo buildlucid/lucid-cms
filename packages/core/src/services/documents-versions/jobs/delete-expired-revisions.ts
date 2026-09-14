@@ -3,28 +3,31 @@ import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
-import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
+import {
+	DocumentReferencesRepository,
+	DocumentVersionsRepository,
+} from "../../../libs/repositories/index.js";
 
 const input = z.object({
 	collectionKey: z.string().min(1),
 	retentionDays: z.number().int().nonnegative(),
 });
 
-const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async (
+const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async ({
 	context,
-	data,
-) => {
+	input,
+}) => {
 	const collectionRes = await collections.getSingle(context, {
-		key: data.collectionKey,
+		key: input.collectionKey,
 	});
 	if (collectionRes.error) return collectionRes;
 
-	const tableNamesRes = await getTableNames(context, data.collectionKey);
+	const tableNamesRes = await getTableNames(context, input.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
 	const DocumentVersions = new DocumentVersionsRepository(context.db);
 	const cutoffDate = new Date();
-	cutoffDate.setDate(cutoffDate.getDate() - data.retentionDays);
+	cutoffDate.setDate(cutoffDate.getDate() - input.retentionDays);
 
 	const deleteRes = await DocumentVersions.deleteExpiredRevisions(
 		{
@@ -35,6 +38,13 @@ const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async (
 		},
 	);
 	if (deleteRes.error) return deleteRes;
+
+	const DocumentReferences = new DocumentReferencesRepository(context.db);
+	const pruned = await DocumentReferences.pruneVersions({
+		collectionKey: input.collectionKey,
+		versionTable: tableNamesRes.data.version,
+	});
+	if (pruned.error) return pruned;
 
 	return {
 		error: undefined,
@@ -53,7 +63,7 @@ export const deleteExpiredRevisionsJob = defineJob({
 	version: 1,
 	input,
 	handler: deleteExpiredRevisions,
-	describe: ({ collectionKey, retentionDays }) => ({
+	describe: ({ input: { collectionKey, retentionDays } }) => ({
 		collectionKey,
 		retentionDays,
 	}),

@@ -13,8 +13,9 @@ const beforeDeleteHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"beforeDelete">["handler"] =>
-	async ({ context, data, meta }) => {
+	async ({ context, toolkit, data, meta }) => {
 		const segmentUpdatesRes = await propagateRouteSegmentUpdates(context, {
+			toolkit,
 			options,
 			targetCollectionKey: meta.collectionKey,
 			deletedDocumentIds: data.ids,
@@ -78,7 +79,9 @@ const beforeDeleteHandler =
 			if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
 
 			const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
+				toolkit,
 				collectionKey: meta.collectionKey,
+				excludeDocumentIds: data.ids,
 				docFullSlugs: docFullSlugsRes.data,
 				versionType,
 				tables: meta.collectionTableNames,

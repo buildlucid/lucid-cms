@@ -72,8 +72,11 @@ const withConfigLoader = async <T>(
 	} finally {
 		hooks.deregister();
 		nativeLoads.delete(loader);
+		// Native imports can still depend on CommonJS cache entries after config loading.
+		// Reload project files while retaining installed dependencies and their shared exports.
 		for (const file of Object.keys(loader.cache))
-			if (!previous.has(file)) delete loader.cache[file];
+			if (!previous.has(file) && !file.split(path.sep).includes("node_modules"))
+				delete loader.cache[file];
 	}
 };
 

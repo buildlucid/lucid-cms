@@ -4,7 +4,7 @@ import type { JobHandler } from "../../../libs/jobs/types.js";
 import { OptionsRepository } from "../../../libs/repositories/index.js";
 import getStorageUsage from "../get-storage-usage.js";
 
-const updateMediaStorage: JobHandler = async (context) => {
+const updateMediaStorage: JobHandler = async ({ context }) => {
 	const Options = new OptionsRepository(context.db);
 	const storageUsageRes = await getStorageUsage(context);
 	if (storageUsageRes.error) return storageUsageRes;

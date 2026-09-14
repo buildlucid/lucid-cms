@@ -6,6 +6,7 @@ import { MediaRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkMediaAccess from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
+import notifyChange from "./notify-change.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -86,6 +87,12 @@ const restoreMultiple: ServiceFn<
 		{ meta: {}, data: { ids: data.ids } },
 	);
 	if (hooks.error) return hooks;
+
+	const changed = await notifyChange(context, {
+		change: { type: "restored" },
+		ids: data.ids,
+	});
+	if (changed.error) return changed;
 
 	await Promise.all([
 		...data.ids.map((id) => clearContentMediaSingleCache(context, id)),

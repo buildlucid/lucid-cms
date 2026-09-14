@@ -30,6 +30,7 @@ import hydrateRichTextValue from "./utils/hydrate-value.js";
 import normalizeRichTextValue from "./utils/normalize-value.js";
 import {
 	collectionIsAllowed,
+	hasRetainedDocumentReference,
 	isReferenceId,
 } from "./utils/reference-validation.js";
 import validateRichTextVariableReference from "./utils/validate-variable-reference.js";
@@ -292,6 +293,11 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 						(item) =>
 							item.id === reference.documentId &&
 							item.collection_key === reference.collectionKey,
+					) &&
+					!hasRetainedDocumentReference(
+						refData,
+						reference.collectionKey,
+						reference.documentId,
 					)
 				) {
 					addError(key, {
@@ -314,6 +320,13 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 					(item) => item.id === reference.mediaId,
 				);
 				if (!media) {
+					if (
+						this.config.editor?.media &&
+						refData.retainedReferences?.media
+							?.get("lucid_media")
+							?.has(reference.mediaId)
+					)
+						continue;
 					addError(`media:${reference.mediaId}`, {
 						message: copy("server:core.fields.media.validation.not.found"),
 						meta: {
@@ -392,6 +405,11 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 						(item) =>
 							item.id === reference.documentId &&
 							item.collection_key === reference.collectionKey,
+					) &&
+					!hasRetainedDocumentReference(
+						refData,
+						reference.collectionKey,
+						reference.documentId,
 					)
 				) {
 					addError(key, {

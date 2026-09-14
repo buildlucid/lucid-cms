@@ -5,6 +5,7 @@ import {
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
+	DatabaseLimits,
 	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
@@ -36,7 +37,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 		| PostgresAdapterOptions
 		| PostgresAdapterOptionsFactory
 		| undefined;
-
+	readonly limits: DatabaseLimits = { maxQueryParameters: 65_535 };
 	constructor(
 		options?: PostgresAdapterOptions | PostgresAdapterOptionsFactory,
 	) {

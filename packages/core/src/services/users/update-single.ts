@@ -10,6 +10,7 @@ import { formatEmailSubject } from "../../utils/helpers/index.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import notifyDependants from "../document-references/notify-dependants.js";
 import sendEmail from "../email/send-email.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import prepareUpdateSingleAuditLogs from "./helpers/prepare-update-single-audit-logs.js";
@@ -221,6 +222,13 @@ const updateSingle: ServiceFn<
 
 	if (updateRolesRes.error) return updateRolesRes;
 	if (updateUserRes.error) return updateUserRes;
+
+	const references = await notifyDependants(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [data.userId],
+	});
+	if (references.error) return references;
 
 	const auditResults = await Promise.all(
 		auditLogsRes.data.logs.map((auditLog) =>

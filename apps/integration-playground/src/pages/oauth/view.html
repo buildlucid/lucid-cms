@@ -1,30 +1,4 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="referrer" content="no-referrer" />
-		<meta name="color-scheme" content="dark" />
-		<meta name="theme-color" content="#0a0a0a" />
-		<title>Lucid OAuth Playground</title>
-	</head>
-	<body>
-		<div class="page-shell">
-			<header class="topbar">
-				<a class="brand" href="/" aria-label="Lucid OAuth Playground home">
-					<span class="brand-mark"><img src="/lucid-mark.svg" alt="" /></span>
-					<span>
-						<strong>Lucid</strong>
-						<small>OAuth Playground</small>
-					</span>
-				</a>
-				<div class="server-state" id="server-state" data-state="idle">
-					<span class="status-dot"></span>
-					<span id="server-state-label">Not connected</span>
-				</div>
-			</header>
-
-			<main>
+<section id="oauth-page" aria-label="OAuth">
 				<section class="hero">
 					<div>
 						<p class="eyebrow">Integration test bench</p>
@@ -237,7 +211,7 @@
 								</button>
 							</div>
 
-							<div class="response-shell">
+							<div class="response-shell" id="oauth-response">
 								<div class="response-toolbar">
 									<div>
 										<span class="response-dot"></span>
@@ -263,13 +237,4 @@
 						</section>
 					</div>
 				</div>
-			</main>
-
-			<footer>
-				<span>Lucid OAuth Playground</span>
-				<span>Credentials stay in this browser tab.</span>
-			</footer>
-		</div>
-		<script type="module" src="/src/main.ts"></script>
-	</body>
-</html>
+			</section>

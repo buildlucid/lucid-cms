@@ -282,6 +282,7 @@ const devCommand = async (options?: {
 				await checkAllPluginsCompatibility({
 					runtimeContext: serverRes.runtimeContext,
 					config: configResult.config,
+					translate,
 				});
 			}
 

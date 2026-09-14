@@ -15,6 +15,7 @@ export const hookExecutionKinds: {
 	};
 } = {
 	documents: {
+		afterChange: "effect",
 		beforeUpsert: "transform",
 		afterUpsert: "effect",
 		afterFetch: "transform",
@@ -30,6 +31,7 @@ export const hookExecutionKinds: {
 		afterEvent: "effect",
 	},
 	media: {
+		afterChange: "effect",
 		afterRestore: "effect",
 		afterCreate: "effect",
 		afterUpdate: "effect",

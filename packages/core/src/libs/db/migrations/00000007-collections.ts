@@ -30,6 +30,71 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.execute();
 
+			// Reverse lookups retain embedded identities when their target is deleted.
+			await db.schema
+				.createTable("lucid_document_references")
+				.addColumn("generation", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
+					col.notNull().references("lucid_collections.key").onDelete("cascade"),
+				)
+				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("version_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("source_table", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("source_column", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("locale", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("kind", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("target_resource", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("target_table", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("target_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_references_owner")
+				.on("lucid_document_references")
+				.columns([
+					"collection_key",
+					"version_id",
+					"source_table",
+					"source_column",
+					"locale",
+					"kind",
+					"target_resource",
+					"target_table",
+					"target_id",
+				])
+				.unique()
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_references_target")
+				.on("lucid_document_references")
+				.columns(["target_resource", "target_table", "target_id"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_references_document")
+				.on("lucid_document_references")
+				.columns(["collection_key", "document_id"])
+				.execute();
+
 			// Migrations
 			await db.schema
 				.createTable("lucid_collection_migrations")

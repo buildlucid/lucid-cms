@@ -1,4 +1,5 @@
 import type { ServiceFn } from "../../exports/types.js";
+import syncReferenceSchema from "../../services/document-references/sync-schema.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import { CollectionMigrationsRepository } from "../repositories/index.js";
 import buildMigrations from "./migration/build-migrations.js";
@@ -37,6 +38,12 @@ const applyCollectionMigrationBatch = serviceWrapper<
 			data: data.migrationEntry,
 		});
 		if (migrationEntryRes.error) return migrationEntryRes;
+
+		const references = await syncReferenceSchema(
+			context,
+			data.migrationEntry.collection_schema,
+		);
+		if (references.error) return references;
 
 		return { data: undefined, error: undefined };
 	},

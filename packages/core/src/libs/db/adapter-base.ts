@@ -11,6 +11,7 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import { translate } from "../i18n/index.js";
 import logger from "../logger/index.js";
 import type { EnvironmentVariables } from "../runtime/types.js";
+import createToolkit from "../toolkit/create-toolkit.js";
 // Migrations
 import Migration00000001 from "./migrations/00000001-locales.js";
 import Migration00000002 from "./migrations/00000002-options.js";
@@ -28,11 +29,15 @@ import Migration00000013 from "./migrations/00000013-preview-sessions.js";
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
+	DatabaseLimits,
 	DatabaseMigrationStatus,
 	ExternalMigration,
 	InferredTable,
 	KyselyDB,
 } from "./types.js";
+import getQueryBatchSize, {
+	type QueryBatchOptions,
+} from "./utils/get-query-batch-size.js";
 
 export default abstract class DatabaseAdapter {
 	adapter: string;
@@ -361,9 +366,14 @@ export default abstract class DatabaseAdapter {
 							message: `A service context is required to execute external migration "${name}".`,
 						});
 					}
-					return migration.up({
+					const migrationContext: ServiceContext = {
 						...context,
 						db: context.db.withKysely(db as KyselyDB),
+					};
+
+					return migration.up({
+						context: migrationContext,
+						toolkit: createToolkit(migrationContext),
 					});
 				},
 				down: down
@@ -373,9 +383,14 @@ export default abstract class DatabaseAdapter {
 									message: `A service context is required to execute external migration "${name}".`,
 								});
 							}
-							return down({
+							const migrationContext: ServiceContext = {
 								...context,
 								db: context.db.withKysely(db as KyselyDB),
+							};
+
+							return down({
+								context: migrationContext,
+								toolkit: createToolkit(migrationContext),
 							});
 						}
 					: undefined,
@@ -404,5 +419,10 @@ export default abstract class DatabaseAdapter {
 		};
 
 		return migrations;
+	}
+	abstract readonly limits: DatabaseLimits;
+	/** Reserves fixed parameters and caps the work performed by each query. */
+	getQueryBatchSize(options: QueryBatchOptions): number {
+		return getQueryBatchSize(this.limits.maxQueryParameters, options);
 	}
 }

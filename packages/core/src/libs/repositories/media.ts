@@ -430,7 +430,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			],
 		});
 	}
-	/** Fetches top-level media and their active owned derivatives in one query. */
+	/** Fetches existing media references and their active owned derivatives in one query. */
 	async selectMultipleByIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -655,6 +655,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					.as("translations"),
 			])
 			.where("id", "in", props.ids)
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
 			.where("parent_media_id", "is", null);
 
 		const exec = await this.executeQuery(() => query.execute(), {
@@ -939,6 +940,7 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 								filters: {
 									title: "translation.title",
 									...this.config.queryConfig.tableKeys.filters,
+									id: "lucid_media.id",
 								},
 								sorts: {
 									title: "title_sort",

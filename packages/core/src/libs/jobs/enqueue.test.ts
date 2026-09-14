@@ -84,7 +84,7 @@ describe("enqueueing durable jobs", () => {
 			name: "test:execute-once",
 			version: 1,
 			input: z.object({ value: z.number() }),
-			describe: ({ value }) => ({ value }),
+			describe: ({ input: { value } }) => ({ value }),
 			handler,
 		});
 		const publish = vi.fn(async () => ({ error: undefined, data: undefined }));

@@ -5,6 +5,7 @@ import type { CustomFieldValidationError } from "../../../types.js";
 import type { RichTextFieldConfig, RichTextValidationData } from "../types.js";
 import {
 	collectionIsAllowed,
+	hasRetainedDocumentReference,
 	isReferenceId,
 	isRichTextUserVariableField,
 } from "./reference-validation.js";
@@ -85,7 +86,14 @@ const validateRichTextVariableReference = (props: {
 				item.id === reference.documentId &&
 				item.collection_key === reference.collectionKey,
 		);
-		if (!document) {
+		if (
+			!document &&
+			!hasRetainedDocumentReference(
+				validationData,
+				reference.collectionKey,
+				reference.documentId,
+			)
+		) {
 			return {
 				key,
 				error: {
@@ -163,7 +171,12 @@ const validateRichTextVariableReference = (props: {
 			};
 		}
 
-		if (!validationData.users.some((user) => user.id === reference.userId)) {
+		if (
+			!validationData.users.some((user) => user.id === reference.userId) &&
+			!validationData.retainedReferences?.users
+				?.get("lucid_users")
+				?.has(reference.userId)
+		) {
 			return {
 				key,
 				error: {

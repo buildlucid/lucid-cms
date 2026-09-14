@@ -25,6 +25,7 @@ import {
 import type { AdapterRuntimeContext } from "../../runtime/types.js";
 import loadSeeds from "../../seed/load-seeds.js";
 import type { Seed } from "../../seed/types.js";
+import createToolkit from "../../toolkit/create-toolkit.js";
 import cliLogger from "../logger.js";
 import runSyncTasks from "../services/run-sync-tasks.js";
 
@@ -227,14 +228,18 @@ const seedCommand = async (
 			const seed = seeds[name] as Seed;
 			cliLogger.info(`Running seed "${name}"...`);
 			if (config.db.supports("transaction")) {
-				await seedContext.db.kysely.transaction().execute((transaction) =>
-					seed({
+				await seedContext.db.kysely.transaction().execute((transaction) => {
+					const context: ServiceContext = {
 						...seedContext,
 						db: seedContext.db.withTransaction(transaction),
-					}),
-				);
+					};
+					return seed({ context, toolkit: createToolkit(context) });
+				});
 			} else {
-				await seed(seedContext);
+				await seed({
+					context: seedContext,
+					toolkit: createToolkit(seedContext),
+				});
 			}
 			cliLogger.success(
 				`Seed "${name}" completed`,

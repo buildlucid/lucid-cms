@@ -9,7 +9,7 @@ const afterUpsertHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"afterUpsert">["handler"] =>
-	async ({ context, data, meta }) => {
+	async ({ context, toolkit, data, meta }) => {
 		// ----------------------------------------------------------------
 		// Rebuild descendants when the changed document is itself a page.
 		const pageCollection = options.collections.find(
@@ -33,9 +33,11 @@ const afterUpsertHandler =
 			if (docFullSlugsRes.data.length > 0) {
 				const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
 					collectionKey: meta.collectionKey,
+					excludeDocumentIds: [data.documentId],
 					docFullSlugs: docFullSlugsRes.data,
 					versionType: data.versionType,
 					tables: meta.collectionTableNames,
+					toolkit,
 				});
 				if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
 			}
@@ -44,6 +46,7 @@ const afterUpsertHandler =
 		// ----------------------------------------------------------------
 		// Rebuild pages that use this document as a route segment.
 		const propagationRes = await propagateRouteSegmentUpdates(context, {
+			toolkit,
 			options,
 			targetCollectionKey: meta.collectionKey,
 			targetDocumentId: data.documentId,

@@ -1,9 +1,9 @@
 {
-	"name": "@lucidcms/oauth-playground",
+	"name": "@lucidcms/integration-playground",
 	"version": "0.0.1",
 	"private": true,
 	"license": "MIT",
-	"description": "A browser-based test bench for Lucid API key and OAuth integrations.",
+	"description": "A browser playground for Lucid OAuth, integration keys and Typesense search.",
 	"type": "module",
 	"scripts": {
 		"dev": "vite --host localhost",
@@ -27,5 +27,8 @@
 	},
 	"engines": {
 		"node": "^24.0.0"
+	},
+	"dependencies": {
+		"zod": "^4.4.3"
 	}
 }

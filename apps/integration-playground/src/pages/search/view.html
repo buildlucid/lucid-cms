@@ -1,0 +1,71 @@
+<section id="search-page" aria-label="Search" hidden>
+	<section class="hero">
+		<div>
+			<p class="eyebrow">Typesense search</p>
+			<h1>Search your pages and media.</h1>
+			<p class="hero-copy">Try a query, switch languages and check the results from your Lucid instance.</p>
+		</div>
+		<span class="protocol-badge">Lucid content API</span>
+	</section>
+	<div class="search-grid">
+		<section class="panel search-connection">
+			<div class="panel-heading">
+				<div><p class="panel-kicker">Connection</p><h2>Your Lucid instance</h2></div>
+			</div>
+			<label class="field">
+				<span>Lucid URL</span>
+				<input id="search-url" type="url" spellcheck="false" autocomplete="url" required />
+			</label>
+			<label class="field">
+				<span>Authentication</span>
+				<select id="search-auth">
+					<option value="api-key">Integration key</option>
+					<option value="oauth">OAuth session</option>
+				</select>
+			</label>
+			<label class="field" id="search-key-field">
+				<span>Integration key</span>
+				<input id="search-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your Lucid integration key" />
+			</label>
+			<p class="search-hint" id="search-auth-hint">Use a key with permission to read the page collection. The key stays in this tab.</p>
+			<div class="section-divider"></div>
+			<p class="search-hint">Results come from the node playground's published pages and public media. Content changes appear once the background jobs have run.</p>
+			<a class="text-button" href="#oauth">Open OAuth setup <span aria-hidden="true">→</span></a>
+		</section>
+		<section class="panel search-results-panel">
+			<form id="search-form">
+				<div class="panel-heading">
+					<div><p class="panel-kicker">Indexed content</p><h2>Find content</h2></div>
+				</div>
+				<label class="field search-source-field"><span>Search in</span><select id="search-source"><option value="pages">Published pages</option><option value="media">Public media</option></select></label>
+				<div class="search-controls">
+					<label class="field search-query-field">
+						<span>Search query</span>
+						<input id="search-query" type="search" placeholder="Try a title…" maxlength="200" required />
+					</label>
+					<label class="field">
+						<span>Language</span>
+						<select id="search-locale"><option value="en">English</option><option value="fr">French</option></select>
+					</label>
+					<button class="button button-primary" id="search-submit" type="submit">Search <span aria-hidden="true">↗</span></button>
+				</div>
+			</form>
+			<p class="search-error" id="search-error" role="alert" hidden></p>
+			<div class="search-summary" aria-live="polite" aria-atomic="true">
+				<strong id="search-status">Ready to search</strong><span id="search-time"></span>
+			</div>
+			<div id="search-results" aria-busy="false">
+				<div class="empty-state"><div class="empty-icon" aria-hidden="true">⌕</div><strong>Your results will appear here</strong><p>Enter a query and connect with an integration key or your OAuth session.</p></div>
+			</div>
+			<nav class="search-pagination" id="search-pagination" aria-label="Search results" hidden>
+				<button class="button button-secondary" id="search-previous" type="button">Previous</button>
+				<span id="search-page-label"></span>
+				<button class="button button-secondary" id="search-next" type="button">Next</button>
+			</nav>
+			<details class="search-response" id="search-response" hidden>
+				<summary>View API response</summary>
+				<pre id="search-response-value"></pre>
+			</details>
+		</section>
+	</div>
+</section>

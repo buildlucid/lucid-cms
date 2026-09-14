@@ -7,6 +7,7 @@ import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runti
 import type { LucidBricksTable } from "../../libs/db/tables/index.js";
 import { DocumentBricksRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import recordTable from "../document-references/record-table.js";
 import type { InsertBrickTables } from "./helpers/construct-brick-table.js";
 
 /**
@@ -100,6 +101,15 @@ const insertBrickTables: ServiceFn<
 		const isTreeTableInsert =
 			fieldDatabaseConfig !== null &&
 			isStorageMode(fieldDatabaseConfig, "tree-table");
+
+		if (schema) {
+			const references = await recordTable(context, {
+				collection: data.collection,
+				schema,
+				rows: table.data,
+			});
+			if (references.error) return references;
+		}
 
 		// insert rows for this table
 		const response = await Bricks.createMultiple(

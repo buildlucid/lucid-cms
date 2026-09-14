@@ -4,7 +4,7 @@ const metadataPath = "/oauth-client.json";
 
 const getClientMetadata = (origin: string) => ({
 	client_id: `${origin}${metadataPath}`,
-	client_name: "Lucid OAuth Playground",
+	client_name: "Lucid Integration Playground",
 	...(origin.startsWith("https:") ? { client_uri: origin } : {}),
 	redirect_uris: [`${origin}/callback`],
 	grant_types: ["authorization_code", "refresh_token"],
@@ -43,7 +43,7 @@ const clientMetadataPlugin = (origin: string): Plugin => {
 
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), "");
-	const port = Number(env.OAUTH_PLAYGROUND_PORT ?? 5173);
+	const port = Number(env.INTEGRATION_PLAYGROUND_PORT ?? 5173);
 	const clientOrigin = new URL(
 		env.VITE_OAUTH_CLIENT_ORIGIN ?? `http://localhost:${port}`,
 	).origin;

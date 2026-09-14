@@ -3,7 +3,11 @@ import {
 	getCollectionTableNames,
 	resolveRelatedDocumentVersionType,
 } from "@lucidcms/core/extension";
-import type { DocumentVersionType, ServiceFn } from "@lucidcms/core/types";
+import type {
+	DocumentVersionType,
+	ServiceFn,
+	Toolkit,
+} from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../../types/types.js";
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
 import checkFullSlugUniqueness from "../../checks/fullslug-uniqueness.js";
@@ -18,6 +22,7 @@ const propagateRouteSegmentUpdates: ServiceFn<
 	[
 		{
 			options: PluginOptionsInternal;
+			toolkit: Toolkit;
 			targetCollectionKey: string;
 		} & (
 			| {
@@ -156,7 +161,14 @@ const propagateRouteSegmentUpdates: ServiceFn<
 					if (uniquenessRes.error) return uniquenessRes;
 
 					return updateFullSlugFields(context, {
+						toolkit: data.toolkit,
 						collectionKey: collection.key,
+						excludeDocumentIds:
+							collection.key === data.targetCollectionKey
+								? "deletedDocumentIds" in data
+									? data.deletedDocumentIds
+									: [data.targetDocumentId]
+								: [],
 						docFullSlugs: fullSlugsRes.data,
 						versionType,
 						tables: tablesRes.data,

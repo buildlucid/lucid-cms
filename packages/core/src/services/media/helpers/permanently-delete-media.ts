@@ -4,9 +4,15 @@ import { invalidateHttpCacheTags } from "../../../libs/kv/http-cache.js";
 import {
 	MediaRepository,
 	ProcessedImagesRepository,
+	UsersRepository,
 } from "../../../libs/repositories/index.js";
+
 import type { ServiceFn } from "../../../utils/services/types.js";
+import notifyDependants from "../../document-references/notify-dependants.js";
+import removeTarget from "../../document-references/remove-target.js";
+
 import checkHasMediaStorage from "../checks/check-has-media-storage.js";
+import notifyChange from "../notify-change.js";
 import deleteMediaObject from "../strategies/delete.js";
 import clearContentMediaSingleCache from "./clear-content-media-cache.js";
 
@@ -81,11 +87,31 @@ const permanentlyDeleteMedia: ServiceFn<
 	});
 	if (deletedObject.error) return deletedObject;
 
+	const Users = new UsersRepository(context.db);
+	const users = await Users.selectProfilePictureUserIds({
+		mediaIds: [data.id],
+	});
+	if (users.error) return users;
+
 	const deletedMedia = await Media.deleteSingle({
 		where: [{ key: "id", operator: "=", value: data.id }],
 		validation: { enabled: true },
 	});
 	if (deletedMedia.error) return deletedMedia;
+
+	const changedUsers = await notifyDependants(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: users.data,
+	});
+	if (changedUsers.error) return changedUsers;
+
+	const removedReferences = await removeTarget(context, {
+		resource: "media",
+		table: "lucid_media",
+		ids: [data.id],
+	});
+	if (removedReferences.error) return removedReferences;
 
 	if (data.invalidateCache !== false) {
 		await Promise.all([
@@ -93,6 +119,12 @@ const permanentlyDeleteMedia: ServiceFn<
 			invalidateHttpCacheTags(context, [cacheKeys.http.tags.contentMedia]),
 		]);
 	}
+
+	const changed = await notifyChange(context, {
+		change: { type: "deleted", permanent: true },
+		ids: childrenRes.data.map((child) => child.id),
+	});
+	if (changed.error) return changed;
 
 	return {
 		error: undefined,

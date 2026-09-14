@@ -2,6 +2,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { MediaCropInput, MediaOrigin } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import notifyDependants from "../document-references/notify-dependants.js";
 import createMedia from "../media/create-single.js";
 import updateMedia from "../media/update-single.js";
 
@@ -123,6 +124,13 @@ const updateProfilePicture: ServiceFn<
 		});
 		if (updateUserRes.error) return updateUserRes;
 
+		const references = await notifyDependants(context, {
+			resource: "users",
+			table: "lucid_users",
+			ids: [data.targetUserId],
+		});
+		if (references.error) return references;
+
 		return {
 			error: undefined,
 			data: undefined,
@@ -186,6 +194,13 @@ const updateProfilePicture: ServiceFn<
 		},
 	});
 	if (updateUserRes.error) return updateUserRes;
+
+	const references = await notifyDependants(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [data.targetUserId],
+	});
+	if (references.error) return references;
 
 	return {
 		error: undefined,

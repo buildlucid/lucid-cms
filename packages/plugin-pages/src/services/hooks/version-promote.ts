@@ -197,7 +197,9 @@ const versionPromoteHandler =
 			if (updateSlugRes.error) return updateSlugRes;
 
 			const updateFullSlugRes = await updateFullSlugFields(context, {
+				toolkit,
 				collectionKey: meta.collectionKey,
+				excludeDocumentIds: [data.documentId],
 				docFullSlugs: [
 					{
 						documentId: data.documentId,

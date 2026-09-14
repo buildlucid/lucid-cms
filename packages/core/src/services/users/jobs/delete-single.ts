@@ -4,16 +4,20 @@ import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
 import { UsersRepository } from "../../../libs/repositories/index.js";
 import { invalidateAuthCache } from "../../auth/helpers/auth-cache.js";
+import removeTarget from "../../document-references/remove-target.js";
 import checkNotLastUser from "../checks/check-not-last-user.js";
 import checkUserAccess from "../checks/check-user-access.js";
 
 const input = z.object({ id: z.number().int().positive() });
 
-const deleteUser: JobHandler<z.infer<typeof input>> = async (context, data) => {
+const deleteUser: JobHandler<z.infer<typeof input>> = async ({
+	context,
+	input,
+}) => {
 	const User = new UsersRepository(context.db);
 
 	const accessRes = await checkUserAccess(context, {
-		id: data.id,
+		id: input.id,
 	});
 	if (accessRes.error) return accessRes;
 
@@ -23,7 +27,7 @@ const deleteUser: JobHandler<z.infer<typeof input>> = async (context, data) => {
 			{
 				key: "id",
 				operator: "=",
-				value: data.id,
+				value: input.id,
 			},
 		],
 		validation: {
@@ -42,11 +46,18 @@ const deleteUser: JobHandler<z.infer<typeof input>> = async (context, data) => {
 			{
 				key: "id",
 				operator: "=",
-				value: data.id,
+				value: input.id,
 			},
 		],
 	});
 	if (deleteRes.error) return deleteRes;
+
+	const removedReferences = await removeTarget(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [input.id],
+	});
+	if (removedReferences.error) return removedReferences;
 
 	await invalidateAuthCache(context);
 
@@ -64,5 +75,5 @@ export const deleteUserJob = defineJob({
 	version: 1,
 	input,
 	handler: deleteUser,
-	describe: ({ id }) => ({ userId: id }),
+	describe: ({ input: { id } }) => ({ userId: id }),
 });

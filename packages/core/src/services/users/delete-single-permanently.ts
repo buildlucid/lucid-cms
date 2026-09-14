@@ -3,6 +3,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import removeTarget from "../document-references/remove-target.js";
 import checkNotLastUser from "./checks/check-not-last-user.js";
 import checkUserAccess from "./checks/check-user-access.js";
 
@@ -74,6 +75,13 @@ const deleteSinglePermanently: ServiceFn<
 		},
 	});
 	if (deleteUserRes.error) return deleteUserRes;
+
+	const references = await removeTarget(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [data.userId],
+	});
+	if (references.error) return references;
 
 	await invalidateAuthCache(context);
 

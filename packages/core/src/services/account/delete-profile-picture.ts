@@ -1,6 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import notifyDependants from "../document-references/notify-dependants.js";
 import deleteMediaPermanently from "../media/delete-single-permanently.js";
 
 const deleteProfilePicture: ServiceFn<
@@ -78,6 +79,13 @@ const deleteProfilePicture: ServiceFn<
 		},
 	});
 	if (updateUserRes.error) return updateUserRes;
+
+	const references = await notifyDependants(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [data.targetUserId],
+	});
+	if (references.error) return references;
 
 	const deleteMediaRes = await deleteMediaPermanently(context, {
 		id: userRes.data.profile_picture_media_id,

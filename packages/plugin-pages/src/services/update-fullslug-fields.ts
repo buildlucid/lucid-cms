@@ -5,6 +5,7 @@ import type {
 	LucidBrickTableName,
 	LucidVersionTableName,
 	ServiceFn,
+	Toolkit,
 } from "@lucidcms/core/types";
 import { sql } from "kysely";
 import constants from "../constants.js";
@@ -18,6 +19,8 @@ const updateFullSlugFields: ServiceFn<
 	[
 		{
 			collectionKey: string;
+			toolkit: Toolkit;
+			excludeDocumentIds?: number[];
 			docFullSlugs: Array<{
 				documentId: number;
 				versionId: number;
@@ -88,10 +91,13 @@ const updateFullSlugFields: ServiceFn<
 			return { error: failedUpdate.error, data: undefined };
 		}
 
-		return {
-			error: undefined,
-			data: undefined,
-		};
+		return data.toolkit.documents.notifyChange({
+			change: { type: "updated", version: data.versionType },
+			collectionKey: data.collectionKey,
+			ids: data.docFullSlugs
+				.map((doc) => doc.documentId)
+				.filter((id) => !data.excludeDocumentIds?.includes(id)),
+		});
 	} catch (_error) {
 		return {
 			error: {

@@ -13,6 +13,7 @@ import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { redirectsPlugin } from "@lucidcms/plugin-redirects";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
+import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
 import transporter from "./src/email-transporter.js";
@@ -34,6 +35,8 @@ export const env = z.object({
 	MICROSOFT_CLIENT_SECRET: z.string(),
 	MICROSOFT_TENANT_ID: z.string(),
 	// REDIS_CONNECTION: z.string(),
+	TYPESENSE_HOST: z.string().min(1),
+	TYPESENSE_API_KEY: z.string().min(1),
 });
 
 export default defineConfig({
@@ -134,6 +137,66 @@ export default defineConfig({
 		// },
 		plugins: [
 			workerQueuePlugin(),
+			typesensePlugin({
+				host: env.TYPESENSE_HOST,
+				apiKey: env.TYPESENSE_API_KEY,
+				indexes: [
+					{
+						key: "pages",
+						alias: "lucid_node_pages",
+						schema: {
+							fields: [
+								{ name: "title", type: "string", optional: true },
+								{ name: "path", type: "string", optional: true },
+								{ name: "documentId", type: "int32" },
+								{ name: "locale", type: "string", facet: true },
+							],
+						},
+						sources: [
+							{
+								kind: "collection",
+								key: "pages",
+								collection: "page",
+								version: "production",
+								locales: ["en", "fr"],
+								fields: {
+									title: "page_title",
+									path: "fullSlug",
+									documentId: ({ document }) => document.id,
+									locale: ({ locale }) => locale,
+								},
+							},
+						],
+					},
+					{
+						key: "media",
+						alias: "lucid_node_pages_media",
+						schema: {
+							fields: [
+								{ name: "title", type: "string", optional: true },
+								{ name: "url", type: "string" },
+								{ name: "mediaId", type: "int32" },
+								{ name: "mediaType", type: "string", facet: true },
+								{ name: "locale", type: "string", facet: true },
+							],
+						},
+						sources: [
+							{
+								kind: "media",
+								key: "media",
+								locales: ["en", "fr"],
+								fields: {
+									title: "title",
+									url: "url",
+									mediaId: ({ media }) => media.id,
+									mediaType: ({ media }) => media.type,
+									locale: ({ locale }) => locale,
+								},
+							},
+						],
+					},
+				],
+			}),
 			filesystemPlugin({
 				// uploadDir: "uploads",
 				// secretKey: env.LUCID_LOCAL_STORAGE_SECRET_KEY,

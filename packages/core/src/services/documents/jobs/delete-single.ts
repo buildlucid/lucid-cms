@@ -15,8 +15,8 @@ export const deleteDocumentJob = defineJob({
 	name: "core:delete-document",
 	version: 1,
 	input,
-	handler: deleteDocument,
-	describe: ({ id, collectionKey }) => ({
+	handler: ({ context, input }) => deleteDocument(context, input),
+	describe: ({ input: { id, collectionKey } }) => ({
 		documentId: id,
 		collectionKey,
 	}),

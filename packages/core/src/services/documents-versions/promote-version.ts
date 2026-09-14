@@ -10,15 +10,19 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
+	DocumentReferencesRepository,
 	DocumentsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
+
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
+import notifyChange from "../documents/notify-change.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 
@@ -353,6 +357,14 @@ const promoteVersion: ServiceFn<
 			});
 			if (insertRes.error) return insertRes;
 
+			const DocumentReferences = new DocumentReferencesRepository(context.db);
+			const pruned = await DocumentReferences.pruneVersions({
+				collectionKey: data.collectionKey,
+				versionTable: tableNameRes.data.version,
+				documentId: data.documentId,
+			});
+			if (pruned.error) return pruned;
+
 			// -------------------------------------------------------------------------------
 			// Execute hook
 			const hookResponse = await executeHooks(
@@ -380,6 +392,16 @@ const promoteVersion: ServiceFn<
 			if (hookResponse.error) return hookResponse;
 
 			await invalidateContentDocumentCache(context, data.collectionKey);
+
+			const changed = await notifyChange(context, {
+				change: {
+					type: data.toVersionType === "latest" ? "updated" : "published",
+					version: data.toVersionType,
+				},
+				collectionKey: data.collectionKey,
+				ids: [data.documentId],
+			});
+			if (changed.error) return changed;
 
 			// -------------------------------------------------------------------------------
 			// Success

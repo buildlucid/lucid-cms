@@ -4,6 +4,7 @@ import { MediaRepository } from "../../../libs/repositories/index.js";
 import changeKeyVisibility from "../../../utils/media/change-key-visibility.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import clearProcessedImage from "../../processed-images/clear-single.js";
+import notifyChange from "../notify-change.js";
 import renameMedia from "../strategies/rename.js";
 
 /** Synchronizes visibility and storage keys across all owned descendants. */
@@ -68,7 +69,16 @@ const syncOwnedVisibility: ServiceFn<
 	const failedChild = childResults.find((result) => result.error);
 	if (failedChild) return failedChild;
 
-	return { error: undefined, data: undefined };
+	const changed = await notifyChange(context, {
+		change: { type: "updated" },
+		ids: childrenRes.data.map((child) => child.id),
+	});
+	if (changed.error) return changed;
+
+	return {
+		error: undefined,
+		data: undefined,
+	};
 };
 
 export default syncOwnedVisibility;

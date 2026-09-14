@@ -2,6 +2,7 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkMediaAccess from "./checks/check-media-access.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
+import notifyChange from "./notify-change.js";
 
 const deleteSinglePermanently: ServiceFn<
 	[
@@ -39,6 +40,12 @@ const deleteSinglePermanently: ServiceFn<
 		},
 	);
 	if (hookRes.error) return hookRes;
+
+	const changed = await notifyChange(context, {
+		change: { type: "deleted", permanent: true },
+		ids: [data.id],
+	});
+	if (changed.error) return changed;
 
 	return {
 		error: undefined,

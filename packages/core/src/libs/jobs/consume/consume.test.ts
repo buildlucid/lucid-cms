@@ -132,6 +132,16 @@ describe("consuming durable jobs", () => {
 		});
 		expect(result).toEqual({ type: "failed" });
 		expect(onPermanentFailure).toHaveBeenCalledOnce();
+		expect(onPermanentFailure).toHaveBeenCalledWith({
+			context,
+			failure: {
+				jobId: enqueued.data.jobId,
+				input: { value: 1 },
+				attempts: 2,
+				errorMessage: "Expected failure",
+			},
+			toolkit: expect.objectContaining({ jobs: expect.any(Object) }),
+		});
 
 		const stored = await context.db.kysely
 			.selectFrom("lucid_jobs")

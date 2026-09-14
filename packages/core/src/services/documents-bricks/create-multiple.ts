@@ -13,6 +13,7 @@ const createMultiple: ServiceFn<
 	[
 		{
 			versionId: number;
+			previousVersionId?: number;
 			documentId: number;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
@@ -43,6 +44,13 @@ const createMultiple: ServiceFn<
 			bricks: data.bricks || [],
 			fields: data.fields || [],
 			authUser: data.authUser,
+			existingVersion:
+				data.previousVersionId === undefined
+					? undefined
+					: {
+							id: data.previousVersionId,
+							documentId: data.documentId,
+						},
 		});
 		if (checkValidateRes.error) return checkValidateRes;
 	}

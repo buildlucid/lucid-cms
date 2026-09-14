@@ -11,6 +11,7 @@ import type {
 import getMultiple from "./get-multiple/index.js";
 import type { ToolkitMediaGetSingleInput } from "./get-single/index.js";
 import getSingle from "./get-single/index.js";
+import notifyChange from "./notify-change/index.js";
 import replaceFile from "./replace-file/index.js";
 import requestDownload from "./request-download/index.js";
 import type { ToolkitMediaResolveUrlInput } from "./resolve-url/index.js";
@@ -50,6 +51,10 @@ export type ToolkitMedia = {
 	getSingle: (input: ToolkitMediaGetSingleInput) => ServiceResponse<Media>;
 	/** Resolves a media URL, with optional image transformations. */
 	resolveUrl: (input: ToolkitMediaResolveUrlInput) => ServiceResponse<MediaUrl>;
+	/** Reports changed IDs after direct writes. Does not save content or run authoring hooks. */
+	notifyChange: (
+		input: Parameters<typeof notifyChange>[1],
+	) => ReturnType<typeof notifyChange>;
 };
 
 /** Creates media helpers for a toolkit instance. */
@@ -63,6 +68,7 @@ export const createMediaToolkit = (context: ServiceContext): ToolkitMedia => ({
 	getMultiple: (input) => getMultiple(context, input),
 	getSingle: (input) => getSingle(context, input),
 	resolveUrl: (input) => resolveUrl(context, input),
+	notifyChange: (input) => notifyChange(context, input),
 });
 
 export default createMediaToolkit;

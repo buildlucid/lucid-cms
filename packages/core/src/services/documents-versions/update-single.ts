@@ -13,6 +13,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
+import notifyChange from "../documents/notify-change.js";
 import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-order.js";
 import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
@@ -96,6 +97,7 @@ const updateSingle: ServiceFn<
 			if (checkBrickOrderRes.error) return checkBrickOrderRes;
 
 			const checkValidateRes = await checkValidateBricksFields(context, {
+				existingVersion: { id: data.versionId, documentId: data.documentId },
 				collection: updateContextRes.data.collection,
 				bricks: hookResponse.data.bricks ?? [],
 				fields: hookResponse.data.fields ?? [],
@@ -184,6 +186,13 @@ const updateSingle: ServiceFn<
 			if (documentUpdate.error) return documentUpdate;
 
 			await invalidateContentDocumentCache(context, data.collectionKey);
+
+			const changed = await notifyChange(context, {
+				change: { type: "updated", version: updateContextRes.data.versionType },
+				collectionKey: data.collectionKey,
+				ids: [data.documentId],
+			});
+			if (changed.error) return changed;
 
 			return {
 				error: undefined,

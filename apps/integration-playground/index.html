@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="referrer" content="no-referrer" />
+		<meta name="color-scheme" content="dark" />
+		<meta name="theme-color" content="#0a0a0a" />
+		<title>Lucid Integration Playground</title>
+	</head>
+	<body>
+		<div class="page-shell">
+			<header class="topbar">
+				<a class="brand" href="/" aria-label="Lucid Integration Playground home">
+					<span class="brand-mark"><img src="/lucid-mark.svg" alt="" /></span>
+					<span>
+						<strong>Lucid</strong>
+						<small>Integration Playground</small>
+					</span>
+				</a>
+				<nav class="page-nav" aria-label="Playground pages">
+					<a href="#oauth" data-page="oauth">OAuth</a>
+					<a href="#search" data-page="search">Search</a>
+				</nav>
+				<div class="server-state" id="server-state" data-state="idle">
+					<span class="status-dot"></span>
+					<span id="server-state-label">Not connected</span>
+				</div>
+			</header>
+
+			<main id="pages"></main>
+
+			<footer>
+				<span>Lucid Integration Playground</span>
+				<span>Credentials stay in this browser tab.</span>
+			</footer>
+		</div>
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>

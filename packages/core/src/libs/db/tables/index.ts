@@ -8,6 +8,7 @@ import { documentBricksTable } from "./document-bricks.js";
 import { documentPublishOperationAssigneesTable } from "./document-publish-operation-assignees.js";
 import { documentPublishOperationEventsTable } from "./document-publish-operation-events.js";
 import { documentPublishOperationsTable } from "./document-publish-operations.js";
+import { documentReferencesTable } from "./document-references.js";
 import { documentVersionsTable } from "./document-versions.js";
 import { documentWorkflowAssigneesTable } from "./document-workflow-assignees.js";
 import { documentWorkflowsTable } from "./document-workflows.js";
@@ -58,6 +59,7 @@ export * from "./document-bricks.js";
 export * from "./document-publish-operation-assignees.js";
 export * from "./document-publish-operation-events.js";
 export * from "./document-publish-operations.js";
+export * from "./document-references.js";
 export * from "./document-table-name.js";
 export * from "./document-versions.js";
 export * from "./document-workflow-assignees.js";
@@ -149,4 +151,5 @@ export const coreTableDefinitions = [
 	userRolesTable,
 	userTokensTable,
 	usersTable,
+	documentReferencesTable,
 ] as const;

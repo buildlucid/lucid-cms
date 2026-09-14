@@ -1,4 +1,5 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
+import type { Translator } from "../i18n/types.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
 
 /**
@@ -9,12 +10,14 @@ import type { AdapterRuntimeContext } from "../runtime/types.js";
 const checkAllPluginsCompatibility = async (props: {
 	runtimeContext: AdapterRuntimeContext;
 	config: ResolvedLucidConfig;
+	translate: Translator;
 }) => {
 	for (const plugin of props.config.plugins) {
 		if (plugin.checkCompatibility) {
 			await plugin.checkCompatibility({
 				runtimeContext: props.runtimeContext,
 				config: props.config,
+				translate: props.translate,
 			});
 		}
 	}

@@ -37,6 +37,9 @@
 - Media text values now return a string when unassigned, or a locale record when translated.
 - Role names and descriptions are now plain strings.
 - Hook handlers now receive one object containing context, toolkit, data and metadata.
+- Job handlers now receive `{ context, input, execution, toolkit }`. Job descriptions receive `{ input }`, and permanent failure handlers receive `{ context, failure, toolkit }`.
+- Migration `up`/`down` callbacks and seed handlers now receive `{ context, toolkit }`, with the toolkit bound to the active database context.
+- Database adapters must define `limits.maxQueryParameters`.
 
 ### Bug Fixes:
 

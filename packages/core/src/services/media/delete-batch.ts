@@ -10,6 +10,7 @@ import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
 import checkMediaAccess from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
+import notifyChange from "./notify-change.js";
 
 const deleteBatch: ServiceFn<
 	[
@@ -167,6 +168,12 @@ const deleteBatch: ServiceFn<
 			},
 		);
 		if (hookRes.error) return hookRes;
+
+		const changed = await notifyChange(context, {
+			change: { type: "deleted", permanent: false },
+			ids: [...deletedMediaIds],
+		});
+		if (changed.error) return changed;
 	}
 
 	return { error: undefined, data: undefined };

@@ -23,12 +23,15 @@ const input = z.object({
 	transactionId: z.number().int().nonnegative(),
 });
 
-const sendEmail: JobHandler<z.infer<typeof input>> = async (context, data) => {
+const sendEmail: JobHandler<z.infer<typeof input>> = async ({
+	context,
+	input,
+}) => {
 	const Emails = new EmailsRepository(context.db);
 	const EmailTransactions = new EmailTransactionsRepository(context.db);
 
 	const emailRes = await Emails.selectSingleById({
-		id: data.emailId,
+		id: input.emailId,
 		validation: {
 			enabled: true,
 			defaultError: {
@@ -98,7 +101,7 @@ const sendEmail: JobHandler<z.infer<typeof input>> = async (context, data) => {
 				},
 			}),
 			EmailTransactions.updateSingle({
-				where: [{ key: "id", operator: "=", value: data.transactionId }],
+				where: [{ key: "id", operator: "=", value: input.transactionId }],
 				data: {
 					delivery_status: "failed",
 					message: context.translate.english(preSendError.message) ?? null,
@@ -198,7 +201,7 @@ const sendEmail: JobHandler<z.infer<typeof input>> = async (context, data) => {
 				{
 					key: "id",
 					operator: "=",
-					value: data.transactionId,
+					value: input.transactionId,
 				},
 			],
 			data: {
@@ -227,5 +230,8 @@ export const sendEmailJob = defineJob({
 	version: 1,
 	input,
 	handler: sendEmail,
-	describe: ({ emailId, transactionId }) => ({ emailId, transactionId }),
+	describe: ({ input: { emailId, transactionId } }) => ({
+		emailId,
+		transactionId,
+	}),
 });

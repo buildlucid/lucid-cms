@@ -6,7 +6,7 @@ import cliLogger from "../logger.js";
 const migrationTemplate = `import { defineMigration } from "@lucidcms/core";
 
 export default defineMigration({
-	async up(context) {
+	async up({ context }) {
 		// await context.db.kysely.schema
 		// 	.createTable("example")
 		// 	.addColumn("id", context.config.db.getDataType("primary"), (col) =>
@@ -14,7 +14,7 @@ export default defineMigration({
 		// 	)
 		// 	.execute();
 	},
-	async down(context) {
+	async down({ context }) {
 		// await context.db.kysely.schema.dropTable("example").execute();
 	},
 });

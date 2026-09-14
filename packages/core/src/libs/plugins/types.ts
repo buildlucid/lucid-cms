@@ -1,5 +1,6 @@
 import type { LucidConfig, ResolvedLucidConfig } from "../../types/config.js";
 import type { ServiceResponse } from "../../utils/services/types.js";
+import type { Translator } from "../i18n/types.js";
 import type { ResourceSources } from "../resources/types.js";
 import type {
 	AdapterRuntimeContext,
@@ -87,6 +88,7 @@ export type LucidPluginDefinition = {
 	checkCompatibility?: (props: {
 		runtimeContext: AdapterRuntimeContext;
 		config: ResolvedLucidConfig;
+		translate: Translator;
 	}) => void | Promise<void>;
 	/**
 	 * A plugin-owned service to add to Lucid's server toolkit.

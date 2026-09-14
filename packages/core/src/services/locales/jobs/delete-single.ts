@@ -2,14 +2,17 @@ import z from "zod";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
 import cacheKeys from "../../../libs/kv/cache-keys.js";
-import { LocalesRepository } from "../../../libs/repositories/index.js";
+import {
+	DocumentReferencesRepository,
+	LocalesRepository,
+} from "../../../libs/repositories/index.js";
 
 const input = z.object({ localeCode: z.string().min(1) });
 
-const deleteLocale: JobHandler<z.infer<typeof input>> = async (
+const deleteLocale: JobHandler<z.infer<typeof input>> = async ({
 	context,
-	data,
-) => {
+	input,
+}) => {
 	const Locales = new LocalesRepository(context.db);
 
 	const deleteRes = await Locales.deleteSingle({
@@ -17,7 +20,7 @@ const deleteLocale: JobHandler<z.infer<typeof input>> = async (
 			{
 				key: "code",
 				operator: "=",
-				value: data.localeCode,
+				value: input.localeCode,
 			},
 		],
 		returning: ["code"],
@@ -26,6 +29,13 @@ const deleteLocale: JobHandler<z.infer<typeof input>> = async (
 		},
 	});
 	if (deleteRes.error) return deleteRes;
+
+	const DocumentReferences = new DocumentReferencesRepository(context.db);
+
+	const removedReferences = await DocumentReferences.deleteByLocale({
+		locale: input.localeCode,
+	});
+	if (removedReferences.error) return removedReferences;
 
 	await context.kv.delete(context, {
 		key: cacheKeys.http.static.contentLocales,
@@ -46,5 +56,5 @@ export const deleteLocaleJob = defineJob({
 	version: 1,
 	input,
 	handler: deleteLocale,
-	describe: ({ localeCode }) => ({ localeCode }),
+	describe: ({ input: { localeCode } }) => ({ localeCode }),
 });

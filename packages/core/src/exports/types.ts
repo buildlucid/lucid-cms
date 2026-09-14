@@ -155,6 +155,7 @@ export type {
 export type {
 	DatabaseConfig,
 	DatabaseConnection,
+	DatabaseLimits,
 	DatabaseMigrationStatus,
 	ExternalMigration,
 	InferredColumn,
@@ -166,6 +167,7 @@ export type {
 	OnDelete,
 	OnUpdate,
 } from "../libs/db/types.js";
+export type { QueryBatchOptions } from "../libs/db/utils/get-query-batch-size.js";
 export type {
 	EmailStorageConfig,
 	EmailStorageEncryptRule,
@@ -199,6 +201,7 @@ export type {
 	DocumentBeforeUpsertHookData,
 	DocumentBeforeUpsertHookExecution,
 	DocumentBeforeUpsertHookOrigin,
+	DocumentChangeMetadata,
 	DocumentDeleteHookData,
 	DocumentHooks,
 	DocumentVersionPromoteHookData,
@@ -211,6 +214,7 @@ export type {
 	MediaAfterCreateHookData,
 	MediaAfterDeleteHookData,
 	MediaAfterUpdateHookData,
+	MediaChangeMetadata,
 	MediaHooks,
 	PublishOperationAfterEventHookData,
 	PublishOperationHooks,
@@ -461,7 +465,9 @@ export type {
 	Seed,
 	SeedDefinition,
 } from "../libs/seed/types.js";
+export type { ToolkitDocumentsNotifyChangeInput } from "../libs/toolkit/documents/notify-change/index.js";
 export type * from "../libs/toolkit/documents/types.js";
+export type { ToolkitMediaNotifyChangeInput } from "../libs/toolkit/media/notify-change/index.js";
 export type {
 	CoreToolkit,
 	Toolkit,

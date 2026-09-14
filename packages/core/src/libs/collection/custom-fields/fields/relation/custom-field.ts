@@ -150,7 +150,7 @@ class RelationCustomField extends CustomField<"relation"> {
 		}));
 	}
 	override extractRelationFieldValue(
-		row: Select<LucidBricksTable>,
+		row: Partial<Select<LucidBricksTable>>,
 	): RelationCustomFieldValue | null {
 		const documentId = row[prefixGeneratedColName("document_id")];
 		const collectionKey = row[prefixGeneratedColName("collection_key")];
@@ -179,7 +179,7 @@ class RelationCustomField extends CustomField<"relation"> {
 		}, {});
 	}
 	override getRelationFieldRefTargets(
-		row: Select<LucidBricksTable>,
+		row: Partial<Select<LucidBricksTable>>,
 	): RefTarget[] {
 		const relationValue = this.extractRelationFieldValue(row);
 		if (!relationValue) return [];

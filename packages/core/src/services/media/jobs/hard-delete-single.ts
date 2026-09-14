@@ -5,12 +5,12 @@ import permanentlyDeleteMedia from "../helpers/permanently-delete-media.js";
 
 const input = z.object({ mediaId: z.number().int().positive() });
 
-const hardDeleteSingleMedia: JobHandler<z.infer<typeof input>> = async (
+const hardDeleteSingleMedia: JobHandler<z.infer<typeof input>> = async ({
 	context,
-	data,
-) => {
+	input,
+}) => {
 	const deleteRes = await permanentlyDeleteMedia(context, {
-		id: data.mediaId,
+		id: input.mediaId,
 	});
 	if (deleteRes.error) return deleteRes;
 
@@ -25,5 +25,5 @@ export const hardDeleteSingleMediaJob = defineJob({
 	version: 1,
 	input,
 	handler: hardDeleteSingleMedia,
-	describe: ({ mediaId }) => ({ mediaId }),
+	describe: ({ input: { mediaId } }) => ({ mediaId }),
 });

@@ -5,7 +5,7 @@ import type { JobHandler, JobInput } from "../jobs/types.js";
 import { getAlertConfigs } from "./alert-map.js";
 import { executeAlertJob } from "./execute-alert.js";
 
-const checkSystemAlerts: JobHandler = async (context) => {
+const checkSystemAlerts: JobHandler = async ({ context }) => {
 	const payload: JobInput<typeof executeAlertJob>[] = [];
 	for (const config of getAlertConfigs()) {
 		if (!config.nightly) continue;

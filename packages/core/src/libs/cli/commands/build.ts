@@ -78,6 +78,7 @@ const buildCommand = async (options?: {
 		await checkAllPluginsCompatibility({
 			runtimeContext: configRes.runtimeContext,
 			config: configRes.config,
+			translate,
 		});
 
 		currentStage = "artifacts";
@@ -211,6 +212,7 @@ const buildCommand = async (options?: {
 		await checkAllPluginsCompatibility({
 			runtimeContext: runtimeBuildRes.runtimeContext,
 			config: configRes.config,
+			translate,
 		});
 
 		const relativeBuildPath = path.relative(

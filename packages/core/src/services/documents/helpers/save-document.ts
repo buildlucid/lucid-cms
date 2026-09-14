@@ -17,6 +17,7 @@ import createInitialDocumentWorkflow from "../../document-workflows/create-initi
 import createDocumentVersion from "../../documents-versions/create-single.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
 import checkSingleCollectionDocumentCount from "../checks/check-single-collection-document-count.js";
+import notifyChange from "../notify-change.js";
 import cleanupFailedCreate from "./cleanup-failed-create.js";
 import invalidateContentDocumentCache from "./invalidate-content-cache.js";
 
@@ -209,6 +210,16 @@ const saveDocument: ServiceFn<
 		if (updated.error) return updated;
 	}
 	await invalidateContentDocumentCache(context, data.collectionKey);
+
+	const changed = await notifyChange(context, {
+		change:
+			data.documentId === undefined
+				? { type: "created" }
+				: { type: "updated", version: "latest" },
+		collectionKey: data.collectionKey,
+		ids: [upsertDocRes.data.id],
+	});
+	if (changed.error) return changed;
 
 	return {
 		error: undefined,

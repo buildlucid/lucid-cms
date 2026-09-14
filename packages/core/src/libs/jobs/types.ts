@@ -1,7 +1,11 @@
 import type z from "zod";
 import type { ZodType } from "zod";
 import type { LucidErrorData } from "../../types/errors.js";
-import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
+import type { Toolkit } from "../toolkit/types.js";
 import type {
 	jobDispatchStatusSchema,
 	jobScheduleMissedSchema,
@@ -107,10 +111,12 @@ export type JobExecution = {
 };
 
 /** Job handlers may run again after a crash and must make side effects idempotent. */
-export type JobHandler<Input extends JobPayload | null = null> = ServiceFn<
-	[input: Input, execution: JobExecution],
-	undefined
->;
+export type JobHandler<Input extends JobPayload | null = null> = (args: {
+	context: ServiceContext;
+	input: Input;
+	execution: JobExecution;
+	toolkit: Toolkit;
+}) => ServiceResponse<undefined>;
 
 /** Details passed to a job's permanent failure hook. */
 export type JobPermanentFailure<Input extends JobPayload | null> = {
@@ -121,10 +127,12 @@ export type JobPermanentFailure<Input extends JobPayload | null> = {
 };
 
 /** Handles permanent failure when the stored input can still be parsed by the job schema. */
-export type JobPermanentFailureHandler<Input extends JobPayload | null> = (
-	context: ServiceContext,
-	failure: JobPermanentFailure<Input>,
-) => Promise<void> | void;
+export type JobPermanentFailureHandler<Input extends JobPayload | null> =
+	(args: {
+		context: ServiceContext;
+		failure: JobPermanentFailure<Input>;
+		toolkit: Toolkit;
+	}) => Promise<void> | void;
 
 type JobPayloadParseResult =
 	| { success: true; data: JobPayload | null }
@@ -195,10 +203,10 @@ export type DefineJobOptions<
 	transaction?: boolean;
 	/** Recurring schedules that enqueue this job through the normal durable path. */
 	schedules?: readonly DefineJobSchedule<Input>[];
-	/** Handles one validated job execution. */
+	/** Handles one validated execution. */
 	handler: JobHandler<Input>;
 	/** Returns JSON-safe metadata shown in the admin UI. */
-	describe?: (input: Input) => JobPayload;
+	describe?: (args: { input: Input }) => JobPayload;
 	/** Runs after permanent failure; hook errors are logged without changing the job. */
 	onPermanentFailure?: JobPermanentFailureHandler<Input>;
 };

@@ -9,6 +9,7 @@ export { default as DocumentBricksRepository } from "./document-bricks.js";
 export { default as DocumentPublishOperationAssigneesRepository } from "./document-publish-operation-assignees.js";
 export { default as DocumentPublishOperationEventsRepository } from "./document-publish-operation-events.js";
 export { default as DocumentPublishOperationsRepository } from "./document-publish-operations.js";
+export { default as DocumentReferencesRepository } from "./document-references.js";
 export { default as DocumentVersionsRepository } from "./document-versions.js";
 export { default as DocumentWorkflowAssigneesRepository } from "./document-workflow-assignees.js";
 export { default as DocumentWorkflowsRepository } from "./document-workflows.js";

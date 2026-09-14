@@ -6,6 +6,7 @@ import {
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
+	DatabaseLimits,
 	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
@@ -38,7 +39,7 @@ export class LibSQLAdapter extends DatabaseAdapter {
 		| LibsqlDialectConfig
 		| LibSQLAdapterOptionsFactory
 		| undefined;
-
+	readonly limits: DatabaseLimits = { maxQueryParameters: 32_766 };
 	constructor(options?: LibsqlDialectConfig | LibSQLAdapterOptionsFactory) {
 		super("libsql");
 		this.#options = options;

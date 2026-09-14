@@ -21,10 +21,26 @@ import type { Toolkit } from "../toolkit/types.js";
 // --------------------------------------------------
 // types
 
+/** Describes every ID in a notification. Notify separately for different changes. */
+export type DocumentChangeMetadata =
+	| { type: "created" }
+	| { type: "updated"; version?: string }
+	| { type: "deleted"; permanent: boolean }
+	| { type: "restored" }
+	| { type: "published"; version: string }
+	| { type: "referencesUpdated"; version: string };
+
+export type MediaChangeMetadata =
+	| { type: "created" }
+	| { type: "updated" }
+	| { type: "deleted"; permanent: boolean }
+	| { type: "restored" };
+
 export type HookExecutionKind = "effect" | "transform";
 
 export type HookExecutionKindMap = {
 	documents: {
+		afterChange: "effect";
 		beforeUpsert: "transform";
 		afterUpsert: "effect";
 		afterFetch: "transform";
@@ -40,6 +56,7 @@ export type HookExecutionKindMap = {
 		afterEvent: "effect";
 	};
 	media: {
+		afterChange: "effect";
 		afterRestore: "effect";
 		afterCreate: "effect";
 		afterUpdate: "effect";
@@ -234,6 +251,13 @@ type HookHandler<
 /** Handler signatures by service and event. */
 export type HookServiceHandlers = {
 	documents: {
+		afterChange: HookHandler<
+			EffectHookPayload<
+				CollectionHookMeta,
+				{ ids: number[]; change?: DocumentChangeMetadata }
+			>,
+			undefined
+		>;
 		beforeUpsert: HookHandler<
 			TransformHookPayload<
 				DocumentBeforeUpsertHookMeta,
@@ -282,6 +306,13 @@ export type HookServiceHandlers = {
 		>;
 	};
 	media: {
+		afterChange: HookHandler<
+			EffectHookPayload<
+				MediaHookMeta,
+				{ ids: number[]; change?: MediaChangeMetadata }
+			>,
+			undefined
+		>;
 		afterRestore: HookHandler<
 			EffectHookPayload<MediaHookMeta, { ids: number[] }>,
 			undefined
@@ -333,6 +364,7 @@ export type HookData<
 // used for collection builder hook config
 /** Document hooks registered only for one collection. */
 export type CollectionBuilderHooks =
+	| LucidHookDocuments<"afterChange">
 	| LucidHookDocuments<"beforeUpsert">
 	| LucidHookDocuments<"afterUpsert">
 	| LucidHookDocuments<"afterFetch">
@@ -344,6 +376,7 @@ export type CollectionBuilderHooks =
 	| LucidHook<"publishOperations", "afterEvent">;
 
 export type DocumentHooks =
+	| LucidHook<"documents", "afterChange">
 	| LucidHook<"documents", "beforeUpsert">
 	| LucidHook<"documents", "afterUpsert">
 	| LucidHook<"documents", "afterFetch">
@@ -363,6 +396,7 @@ export type PublishOperationHooks = LucidHook<
 >;
 
 export type MediaHooks =
+	| LucidHook<"media", "afterChange">
 	| LucidHook<"media", "afterRestore">
 	| LucidHook<"media", "afterCreate">
 	| LucidHook<"media", "afterUpdate">

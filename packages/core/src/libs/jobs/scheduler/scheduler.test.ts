@@ -111,17 +111,18 @@ describe("job schedules", () => {
 		);
 
 		await consumeJob(context, { jobId: stored.job_id });
-		expect(handler).toHaveBeenCalledWith(
+		expect(handler).toHaveBeenCalledWith({
 			context,
-			{ value: 42 },
-			expect.objectContaining({
+			input: { value: 42 },
+			execution: expect.objectContaining({
 				trigger: {
 					type: "schedule",
 					scheduleKey: "test:scheduled-job/every-minute",
 					scheduledFor: scheduledAt.toISOString(),
 				},
 			}),
-		);
+			toolkit: expect.objectContaining({ jobs: expect.any(Object) }),
+		});
 
 		const counts = await context.db.kysely
 			.selectFrom("lucid_jobs")

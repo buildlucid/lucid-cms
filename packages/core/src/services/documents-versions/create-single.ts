@@ -4,11 +4,16 @@ import getCurrentCollectionMigrationId from "../../libs/collection/migration/get
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
-import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
+import {
+	DocumentReferencesRepository,
+	DocumentVersionsRepository,
+} from "../../libs/repositories/index.js";
+
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import rollbackVersionCreate from "./helpers/rollback-version-create.js";
 
@@ -165,6 +170,7 @@ const createSingle: ServiceFn<
 	// Save bricks for the new version
 	const createMultipleBricks = await createDocumentBricks(context, {
 		versionId: newVersionRes.data.id,
+		previousVersionId: previousLatestId,
 		documentId: data.documentId,
 		bricks: hookResponse.data.bricks,
 		fields: hookResponse.data.fields,
@@ -255,6 +261,14 @@ const createSingle: ServiceFn<
 			return finalizePreviousRes;
 		}
 	}
+
+	const DocumentReferences = new DocumentReferencesRepository(context.db);
+	const pruned = await DocumentReferences.pruneVersions({
+		collectionKey: data.collection.key,
+		versionTable: tableNamesRes.data.version,
+		documentId: data.documentId,
+	});
+	if (pruned.error) return pruned;
 
 	return {
 		error: undefined,

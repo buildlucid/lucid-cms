@@ -5,7 +5,7 @@ import { DocumentPublishOperationsRepository } from "../../../libs/repositories/
 import { schedulingDispatchWindowMs } from "../helpers/index.js";
 import scheduleApproved from "../schedule-approved.js";
 
-const dispatchScheduled: JobHandler = async (context) => {
+const dispatchScheduled: JobHandler = async ({ context }) => {
 	if (!context.queue.support.delayedDelivery) {
 		return { error: undefined, data: undefined };
 	}

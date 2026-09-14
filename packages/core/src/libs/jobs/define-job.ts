@@ -1,10 +1,13 @@
 import serviceWrapper from "../../utils/services/service-wrapper.js";
+import type { ServiceFn } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
+import createToolkit from "../toolkit/create-toolkit.js";
 import { isJobPayload } from "./payload.js";
 import { jobDefinitionInternal } from "./registry.js";
 import type {
 	DefineJobOptions,
 	JobDefinition,
+	JobExecution,
 	JobPayload,
 	JobSchedule,
 } from "./types.js";
@@ -44,7 +47,7 @@ const normalizeSchedules = <Input extends JobPayload | null>(
  * 		timezone: "UTC",
  * 		input: { documentId: 1 },
  * 	}],
- * 	handler: async (context, input, execution) => {
+ * 	handler: async ({ context, input, execution, toolkit }) => {
  * 		await rebuildIndex(input.documentId, execution.jobId);
  * 		return { error: undefined, data: undefined };
  * 	},
@@ -55,8 +58,20 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 ): JobDefinition<Name, Input> => {
 	const retry = options.retry ?? DEFAULT_RETRY_POLICY;
 	const schedules = normalizeSchedules(options.schedules);
+
+	const execute: ServiceFn<
+		[input: Input, execution: JobExecution],
+		undefined
+	> = (context, input, execution) =>
+		options.handler({
+			context,
+			input,
+			execution,
+			toolkit: createToolkit(context),
+		});
+
 	const handler = options.transaction
-		? serviceWrapper(options.handler, {
+		? serviceWrapper(execute, {
 				transaction: options.transaction,
 				logError: true,
 				defaultError: {
@@ -65,7 +80,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 					message: copy("server:core.jobs.execution.failed"),
 				},
 			})
-		: options.handler;
+		: execute;
 
 	const parse = async (input: unknown) => {
 		const result = await options.input.safeParseAsync(input);
@@ -132,7 +147,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 					}
 
 					try {
-						const description = options.describe(parsed.data);
+						const description = options.describe({ input: parsed.data });
 						if (!isJobPayload(description)) {
 							return {
 								success: false,
@@ -164,11 +179,16 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 									failure.input,
 								);
 								if (!parsed.success) return;
-								await options.onPermanentFailure?.(context, {
-									jobId: failure.jobId,
-									input: parsed.data,
-									attempts: failure.attempts,
-									errorMessage: failure.errorMessage,
+
+								await options.onPermanentFailure?.({
+									context,
+									failure: {
+										jobId: failure.jobId,
+										input: parsed.data,
+										attempts: failure.attempts,
+										errorMessage: failure.errorMessage,
+									},
+									toolkit: createToolkit(context),
 								});
 							},
 						}

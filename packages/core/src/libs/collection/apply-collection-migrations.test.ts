@@ -23,7 +23,7 @@ describe("applyCollectionMigrations", () => {
 		// @ts-expect-error
 		context = {
 			db: createLucidDatabase({ client: connection.client, adapter: db }),
-			config: { db, tables: [] },
+			config: { db, tables: [], collections: [] },
 		} as ServiceContext;
 	});
 

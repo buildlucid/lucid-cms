@@ -4,6 +4,7 @@ import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import { checkRouteSegments } from "./services/checks/index.js";
 import {
 	afterFetchHandler,
+	afterRestoreHandler,
 	afterUpsertHandler,
 	beforeDeleteHandler,
 	beforeUpsertHandler,
@@ -85,6 +86,11 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 					service: "documents",
 					event: "versionPromote",
 					handler: versionPromoteHandler(options),
+				});
+				draft.hooks.push({
+					service: "documents",
+					event: "afterRestore",
+					handler: afterRestoreHandler(options),
 				});
 			}
 		},

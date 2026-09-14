@@ -25,7 +25,10 @@ import CollectionBuilder from "../../collection/builders/collection-builder/inde
 import planCollectionMigrations from "../../collection/plan-collection-migrations.js";
 import { getTableNames } from "../../collection/schema/runtime/runtime-schema-selectors.js";
 import { copy, createTranslationStore } from "../../i18n/index.js";
-import { UsersRepository } from "../../repositories/index.js";
+import {
+	DocumentReferencesRepository,
+	UsersRepository,
+} from "../../repositories/index.js";
 import createToolkit from "../create-toolkit.js";
 
 const hero = new BrickBuilder("hero").addText("heading", { localized: true });
@@ -49,7 +52,10 @@ const collection = new CollectionBuilder("authoring", {
 	.addText("title", { localized: true, validation: { required: true } })
 	.addCheckbox("featured", { default: false })
 	.addJSON("settings", { localized: false })
-	.addRichText("body", { localized: false, editor: { bricks: true } })
+	.addRichText("body", {
+		localized: false,
+		editor: { bricks: true, documents: ["authoring"] },
+	})
 	.addSection("meta")
 	.addText("subtitle", { localized: false })
 	.endSection()
@@ -129,6 +135,96 @@ describe("document authoring toolkit", () => {
 		toolkit = createToolkit(context);
 	});
 	afterAll(() => fixture.destroy());
+
+	test("reports final content changes, preserves deleted IDs and rolls back failing subscribers", async () => {
+		const original = context.config.hooks;
+		const changed: number[][] = [];
+		const saves = vi.fn();
+		context.config.hooks = [
+			...original,
+			{
+				service: "documents",
+				event: "afterUpsert",
+				handler: async () => {
+					saves();
+					return { error: undefined, data: undefined };
+				},
+			},
+			{
+				service: "documents",
+				event: "afterChange",
+				handler: async ({ context, data }) => {
+					expect(context.db.isTransaction).toBe(true);
+					changed.push(data.ids);
+					return { error: undefined, data: undefined };
+				},
+			},
+		];
+		try {
+			const created = await create("Change notification");
+			assert(created.data);
+			expect(changed).toEqual([[created.data.id]]);
+			const target = {
+				collectionKey: collection.key,
+				id: created.data.id,
+				actor,
+			};
+			expect(
+				(
+					await toolkit.documents.updateSingle({
+						...target,
+						data: { fields: { title: { en: "Changed" } } },
+					})
+				).error,
+			).toBeUndefined();
+			expect(
+				(await toolkit.documents.deleteSingle({ ...target, hard: true })).error,
+			).toBeUndefined();
+			expect(changed).toEqual([
+				[created.data.id],
+				[created.data.id],
+				[created.data.id],
+			]);
+			const savedCount = saves.mock.calls.length;
+			expect(
+				(
+					await serviceWrapper(
+						async (tx) =>
+							createToolkit(tx).documents.notifyChange({
+								collectionKey: collection.key,
+								ids: [created.data.id, created.data.id],
+							}),
+						{ transaction: true },
+					)(context)
+				).error,
+			).toBeUndefined();
+			expect(changed.at(-1)).toEqual([created.data.id]);
+			expect(saves).toHaveBeenCalledTimes(savedCount);
+
+			context.config.hooks = [
+				...original,
+				{
+					service: "documents",
+					event: "afterChange",
+					handler: async () => ({
+						error: { message: copy("server:core.errors.default.message") },
+						data: undefined,
+					}),
+				},
+			];
+			const failed = await create("Rolled back subscriber");
+			expect(failed.error).toBeDefined();
+			const read = await toolkit.documents.getMultiple({
+				collectionKey: collection.key,
+				version: "latest",
+				query: { filter: { title: { value: "Rolled back subscriber" } } },
+			});
+			assert(read.data);
+			expect(read.data.documents).toHaveLength(0);
+		} finally {
+			context.config.hooks = original;
+		}
+	});
 
 	test("creates userless documents, applies defaults, and exposes the physical schema", async () => {
 		const created = await create();
@@ -211,6 +307,160 @@ describe("document authoring toolkit", () => {
 				]),
 			);
 		}
+	});
+
+	test("soft delete clears native incoming references while preserving embedded and outgoing references", async () => {
+		const target = await create("Referenced target");
+		const other = await create("Other target");
+		assert(target.data && other.data);
+		const targetId = target.data.id;
+		const otherId = other.data.id;
+		const body = {
+			type: "doc",
+			content: [
+				{
+					type: "lucidDocument",
+					attrs: { collectionKey: collection.key, documentId: targetId },
+				},
+			],
+		};
+		const owner = await toolkit.documents.createSingle({
+			collectionKey: collection.key,
+			actor,
+			data: {
+				fields: {
+					title: { en: "Owner", fr: "Propriétaire" },
+					related: [
+						{ collectionKey: collection.key, id: targetId },
+						{ collectionKey: collection.key, id: otherId },
+					],
+					body,
+				},
+			},
+		});
+		assert(owner.data, JSON.stringify(owner.error));
+		expect(
+			(
+				await toolkit.documents.updateSingle({
+					collectionKey: collection.key,
+					id: targetId,
+					actor,
+					data: {
+						fields: {
+							related: [{ collectionKey: collection.key, id: otherId }],
+						},
+					},
+				})
+			).error,
+		).toBeUndefined();
+
+		const DocumentReferences = new DocumentReferencesRepository(context.db);
+		const readReferences = async () => {
+			const result = await DocumentReferences.selectMultiple({
+				select: ["document_id", "version_id", "target_id", "kind"],
+				where: [
+					{ key: "collection_key", operator: "=", value: collection.key },
+				],
+			});
+			assert(result.data, JSON.stringify(result.error));
+			return result.data;
+		};
+		const before = await readReferences();
+		expect(before).toContainEqual(
+			expect.objectContaining({
+				document_id: owner.data.id,
+				target_id: targetId,
+				kind: "direct",
+			}),
+		);
+		expect(before).toContainEqual(
+			expect.objectContaining({
+				document_id: owner.data.id,
+				target_id: targetId,
+				kind: "embedded",
+			}),
+		);
+		expect(
+			(
+				await toolkit.documents.deleteSingle({
+					collectionKey: collection.key,
+					id: targetId,
+					actor,
+				})
+			).error,
+		).toBeUndefined();
+
+		const after = await readReferences();
+		expect(
+			after.filter(
+				(row) => row.target_id === targetId && row.kind === "direct",
+			),
+		).toEqual([]);
+		expect(
+			after.filter(
+				(row) => row.target_id === targetId && row.kind === "embedded",
+			),
+		).toEqual(
+			before.filter(
+				(row) => row.target_id === targetId && row.kind === "embedded",
+			),
+		);
+		expect(after.filter((row) => row.document_id === targetId)).toEqual(
+			before.filter((row) => row.document_id === targetId),
+		);
+		const editable = await toolkit.documents.getEditable({
+			collectionKey: collection.key,
+			id: owner.data.id,
+		});
+		assert(editable.data);
+		expect(editable.data.data.fields?.body).toEqual(body);
+		expect(editable.data.data.fields?.related).toEqual([
+			{ collectionKey: collection.key, id: otherId },
+		]);
+
+		expect(
+			(
+				await serviceWrapper(restoreMultiple, { transaction: true })(context, {
+					collectionKey: collection.key,
+					ids: [targetId],
+				})
+			).error,
+		).toBeUndefined();
+		expect(await readReferences()).toEqual(after);
+
+		expect(
+			(
+				await toolkit.documents.deleteSingle({
+					collectionKey: collection.key,
+					id: targetId,
+					actor,
+					hard: true,
+				})
+			).error,
+		).toBeUndefined();
+		expect(
+			(
+				await toolkit.documents.updateSingle({
+					collectionKey: collection.key,
+					id: owner.data.id,
+					actor,
+					data: { fields: { featured: true } },
+				})
+			).error,
+		).toBeUndefined();
+		const retained = await toolkit.documents.getEditable({
+			collectionKey: collection.key,
+			id: owner.data.id,
+		});
+		expect(retained.data?.data.fields?.body).toEqual(body);
+
+		// An existing missing node is allowed; a new document cannot introduce that target.
+		const invalid = await toolkit.documents.createSingle({
+			collectionKey: collection.key,
+			actor,
+			data: { fields: { title: { en: "Invalid", fr: "Invalide" }, body } },
+		});
+		expect(invalid.error?.status).toBe(400);
 	});
 
 	test("runs restore hooks with a toolkit that can read the restored document", async () => {

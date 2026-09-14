@@ -3,6 +3,7 @@ import type {
 	RichTextUserVariableField,
 } from "../../../../../types/response.js";
 import type { AdminCopyInput } from "../../../../i18n/types.js";
+import type { RefTargets } from "../../../../refs/types.js";
 import type {
 	CustomFieldUserAiConfig,
 	FieldUIConfig,
@@ -79,6 +80,8 @@ export type RichTextFieldProps = Partial<
 export type RichTextResValue = Record<string, unknown> | null;
 
 export type RichTextValidationData = {
+	/** Stored embedded identities may outlive their targets and remain editable. */
+	retainedReferences?: RefTargets;
 	media: MediaValidationData[];
 	documents: RelationValidationData[];
 	users: UserValidationData[];

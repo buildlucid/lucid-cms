@@ -10,6 +10,7 @@ import {
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import urlAddPath from "../../../utils/helpers/url-add-path.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import notifyDependants from "../../document-references/notify-dependants.js";
 
 /**
  * Applies a verified OAuth 2.0 or OIDC provider identity to a user account.
@@ -213,6 +214,13 @@ const processProviderAuth: ServiceFn<
 		]);
 		if (linkRes?.error) return linkRes;
 		if (updateUserRes.error) return updateUserRes;
+
+		const references = await notifyDependants(context, {
+			resource: "users",
+			table: "lucid_users",
+			ids: [invitationTokenRes.data.user_id],
+		});
+		if (references.error) return references;
 
 		return {
 			error: undefined,

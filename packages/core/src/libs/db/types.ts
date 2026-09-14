@@ -1,6 +1,7 @@
 import type { ColumnDataType, ColumnType, Kysely, Transaction } from "kysely";
 import type { Migration } from "kysely/migration";
 import type { ServiceContext } from "../../utils/services/types.js";
+import type { Toolkit } from "../toolkit/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 import type {
 	LucidAiGenerations,
@@ -14,6 +15,7 @@ import type {
 	LucidDocumentPublishOperationAssignees,
 	LucidDocumentPublishOperationEvents,
 	LucidDocumentPublishOperations,
+	LucidDocumentReferences,
 	LucidDocumentTable,
 	LucidDocumentTableName,
 	LucidDocumentWorkflowAssignees,
@@ -74,6 +76,7 @@ export type TimestampRequired = ColumnType<string | Date, string, string>;
 export type BooleanInt = 0 | 1 | boolean;
 
 export type KyselyDB = Kysely<LucidDB> | Transaction<LucidDB>;
+
 export type DatabaseConnection = {
 	/** Live Kysely client owned by one runtime or invocation scope. */
 	client: Kysely<LucidDB>;
@@ -82,14 +85,17 @@ export type DatabaseConnection = {
 	/** Releases every resource owned by this connection. */
 	destroy: () => Promise<void>;
 };
+
 export type MigrationFn = (adapter: DatabaseAdapter) => Migration;
+
 /** A project-owned database migration. Use the supplied context for database access. */
 export type ExternalMigration = {
 	/** Apply the migration. Throw on failure. */
-	up: (context: ServiceContext) => Promise<void>;
+	up: (args: { context: ServiceContext; toolkit: Toolkit }) => Promise<void>;
 	/** Reverse the migration when rollback is supported. */
-	down?: (context: ServiceContext) => Promise<void>;
+	down?: (args: { context: ServiceContext; toolkit: Toolkit }) => Promise<void>;
 };
+
 /** A migration with a unique name beginning with a 13-digit timestamp. */
 export type MigrationDefinition = {
 	name: string;
@@ -124,6 +130,11 @@ export type DefaultValueType<T> = T extends object
 
 export type OnDelete = "cascade" | "set null" | "restrict" | "no action";
 export type OnUpdate = "cascade" | "set null" | "no action" | "restrict";
+
+export type DatabaseLimits = {
+	/** Maximum bound parameters in one SQL statement. */
+	readonly maxQueryParameters: number;
+};
 
 export type DatabaseConfig = {
 	/**
@@ -258,6 +269,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_document_publish_operations: LucidDocumentPublishOperations;
 	lucid_document_publish_operation_assignees: LucidDocumentPublishOperationAssignees;
 	lucid_document_publish_operation_events: LucidDocumentPublishOperationEvents;
+	lucid_document_references: LucidDocumentReferences;
 	lucid_document_workflows: LucidDocumentWorkflows;
 	lucid_document_workflow_assignees: LucidDocumentWorkflowAssignees;
 	lucid_preview_sessions: LucidPreviewSessions;

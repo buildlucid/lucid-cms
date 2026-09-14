@@ -1131,4 +1131,39 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			mode: "multiple",
 		});
 	}
+	/** Uses the profile-picture foreign-key index. Capture before media deletion nullifies it. */
+	async selectProfilePictureUserIds(props: { mediaIds: number[] }) {
+		const ids = new Set<number>();
+		const size = this.dbAdapter.getQueryBatchSize({
+			parametersPerItem: 1,
+			maxItems: 500,
+		});
+
+		for (let offset = 0; offset < props.mediaIds.length; offset += size) {
+			const query = this.db
+				.selectFrom("lucid_users")
+				.select("id")
+				.where(
+					"profile_picture_media_id",
+					"in",
+					props.mediaIds.slice(offset, offset + size),
+				);
+
+			const result = await this.executeQuery(() => query.execute(), {
+				method: "selectProfilePictureUserIds",
+			});
+			if (result.response.error) return result.response;
+
+			const validated = await this.validateResponse(result, {
+				enabled: true,
+				mode: "multiple",
+				select: ["id"],
+			});
+			if (validated.error) return validated;
+
+			for (const row of validated.data) ids.add(row.id);
+		}
+
+		return { error: undefined, data: [...ids] };
+	}
 }

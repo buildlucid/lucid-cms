@@ -256,6 +256,7 @@ const checkValidateBricksFields: ServiceFn<
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
 			authUser?: LucidUser;
+			existingVersion?: { id: number; documentId: number };
 		},
 	],
 	undefined

@@ -1,6 +1,7 @@
 import type { LucidVersionTableName } from "../../../libs/db/tables/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
+import { DocumentReferencesRepository } from "../../../libs/repositories/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -106,6 +107,14 @@ const rollbackVersionCreate: ServiceFn<
 			},
 		});
 	}
+
+	const DocumentReferences = new DocumentReferencesRepository(context.db);
+	const pruned = await DocumentReferences.pruneVersions({
+		collectionKey: data.collectionKey,
+		versionTable: data.tableName,
+		documentId: data.documentId,
+	});
+	if (pruned.error) return pruned;
 
 	if (rollbackError) {
 		return {

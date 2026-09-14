@@ -6,7 +6,7 @@ import cliLogger from "../logger.js";
 
 const seedTemplate = `import { defineSeed } from "@lucidcms/core";
 
-export default defineSeed(async (context) => {
+export default defineSeed(async ({ context }) => {
 	// Add idempotent operations with context.db.query(...) here.
 });
 `;

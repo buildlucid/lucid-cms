@@ -447,4 +447,34 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 
 		return exec.response;
 	}
+	/** Referencing versions whose owner document still exists and is not in the bin. */
+	async selectExistingDocumentVersions(
+		props: { ids: number[]; documentTable: LucidDocumentTableName },
+		dynamicConfig: DynamicConfig<LucidVersionTableName>,
+	) {
+		const query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select(["id", "document_id", "type"])
+			.where("id", "in", props.ids)
+			.where(
+				"document_id",
+				"in",
+				this.db
+					.selectFrom(props.documentTable)
+					.select("id")
+					.where("is_deleted", "=", false),
+			);
+
+		const result = await this.executeQuery(() => query.execute(), {
+			method: "selectExistingDocumentVersions",
+			tableName: dynamicConfig.tableName,
+		});
+		if (result.response.error) return result.response;
+
+		return this.validateResponse(result, {
+			enabled: true,
+			mode: "multiple",
+			select: ["id", "document_id", "type"],
+		});
+	}
 }

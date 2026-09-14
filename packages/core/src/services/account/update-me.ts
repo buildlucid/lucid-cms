@@ -5,6 +5,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import { normalizeEmailInput } from "../../utils/helpers/normalize-input.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
+import notifyDependants from "../document-references/notify-dependants.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import checkUpdatePassword from "./checks/check-update-password.js";
 import requestEmailChange from "./request-email-change.js";
@@ -151,6 +152,13 @@ const updateMe: ServiceFn<
 
 	if (updateMeRes.error) return updateMeRes;
 	if (updatePasswordAuditRes?.error) return updatePasswordAuditRes;
+
+	const references = await notifyDependants(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [data.auth.id],
+	});
+	if (references.error) return references;
 
 	if (emailChanged) {
 		const requestEmailChangeRes = await requestEmailChange(context, {

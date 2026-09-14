@@ -79,6 +79,7 @@ describe("pages afterUpsert hook", () => {
 
 		expect(result.error).toBeUndefined();
 		expect(mocks.propagateRouteSegmentUpdates).toHaveBeenCalledWith(context, {
+			toolkit: {},
 			options,
 			targetCollectionKey: "route-group",
 			targetDocumentId: 4,

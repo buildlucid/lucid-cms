@@ -71,6 +71,7 @@ const checkSingle: ServiceFn<
 	if (checkBrickOrderRes.error) return checkBrickOrderRes;
 
 	const checkValidateRes = await checkValidateBricksFields(context, {
+		existingVersion: { id: data.versionId, documentId: data.documentId },
 		collection: updateContextRes.data.collection,
 		bricks,
 		fields,

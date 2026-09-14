@@ -29,7 +29,7 @@ const tasks = [
 	deleteExpiredRevisions,
 ];
 
-const deleteExpiredData: JobHandler = async (context) => {
+const deleteExpiredData: JobHandler = async ({ context }) => {
 	for (const task of tasks) {
 		const result = await task(context);
 		if (result.error) return result;

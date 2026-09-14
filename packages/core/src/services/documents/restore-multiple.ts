@@ -6,6 +6,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
+import notifyChange from "./notify-change.js";
 
 const restoreMultiple: ServiceFn<
 	[
@@ -118,6 +119,13 @@ const restoreMultiple: ServiceFn<
 	if (hooks.error) return hooks;
 
 	await invalidateContentDocumentCache(context, data.collectionKey);
+
+	const changed = await notifyChange(context, {
+		change: { type: "restored" },
+		collectionKey: data.collectionKey,
+		ids: data.ids,
+	});
+	if (changed.error) return changed;
 
 	return { error: undefined, data: undefined };
 };

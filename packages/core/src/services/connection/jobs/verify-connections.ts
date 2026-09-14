@@ -4,7 +4,7 @@ import type { JobHandler } from "../../../libs/jobs/types.js";
 import { resolveEffectiveConnection } from "../storage.js";
 import verifyConnection from "../verify.js";
 
-const verifyConnections: JobHandler = async (context) => {
+const verifyConnections: JobHandler = async ({ context }) => {
 	const connection = await resolveEffectiveConnection(context);
 	if (connection.error) return connection;
 

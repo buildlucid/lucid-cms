@@ -243,6 +243,7 @@ const serveCommand = async () => {
 		await checkAllPluginsCompatibility({
 			runtimeContext: serverRes.runtimeContext,
 			config: configRes.config,
+			translate,
 		});
 
 		currentStage = "finalize";

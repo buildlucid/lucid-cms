@@ -7,6 +7,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import checkMediaAccess from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
+import notifyChange from "./notify-change.js";
 
 const deleteMultiplePermanently: ServiceFn<
 	[
@@ -96,6 +97,12 @@ const deleteMultiplePermanently: ServiceFn<
 		},
 	);
 	if (hookRes.error) return hookRes;
+
+	const changed = await notifyChange(context, {
+		change: { type: "deleted", permanent: true },
+		ids: data.ids,
+	});
+	if (changed.error) return changed;
 
 	return {
 		error: undefined,

@@ -2,11 +2,11 @@ import type { Seed } from "./types.js";
 
 /**
  * Defines a repeatable data seed. Use the supplied service context for database
- * queries or createToolkit(context) for content helpers. Seeds may run more than
+ * queries or the supplied toolkit for content helpers. Seeds may run more than
  * once, so check for existing data or use upserts. Throw to report failure.
  *
  * @example
- * export default defineSeed(async (context) => {
+ * export default defineSeed(async ({ context }) => {
  * 	const result = await context.db.query("seed.example.insert", (db) =>
  * 		db
  * 			.$extendTables<{ my_table: { name: string } }>()

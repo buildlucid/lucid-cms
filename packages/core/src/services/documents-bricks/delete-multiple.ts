@@ -1,5 +1,9 @@
 import { getBricksTableSchema } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import { DocumentBricksRepository } from "../../libs/repositories/index.js";
+import {
+	DocumentBricksRepository,
+	DocumentReferencesRepository,
+} from "../../libs/repositories/index.js";
+
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const deleteMultiple: ServiceFn<
@@ -57,9 +61,16 @@ const deleteMultiple: ServiceFn<
 		if (result.error) return result;
 	}
 
+	const DocumentReferences = new DocumentReferencesRepository(context.db);
+	const removeVersionRes = await DocumentReferences.deleteByVersion({
+		collectionKey: data.collectionKey,
+		versionId: data.versionId,
+	});
+	if (removeVersionRes.error) return removeVersionRes;
+
 	return {
-		error: undefined,
 		data: undefined,
+		error: undefined,
 	};
 };
 

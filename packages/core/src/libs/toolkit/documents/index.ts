@@ -20,6 +20,7 @@ import type {
 	ToolkitDocumentsGetSingleResult,
 } from "./get-single/index.js";
 import getSingle from "./get-single/index.js";
+import notifyChange from "./notify-change/index.js";
 import patchSingle from "./patch-single/index.js";
 import updateSingle from "./update-single/index.js";
 
@@ -173,6 +174,10 @@ export type ToolkitDocuments = {
 	getSingle: <TCollectionKey extends CollectionDocumentKey>(
 		input: ToolkitDocumentsGetSingleInput<TCollectionKey>,
 	) => ServiceResponse<ToolkitDocumentsGetSingleResult<TCollectionKey>>;
+	/** Reports changed IDs after direct writes. Does not save content or run authoring hooks. */
+	notifyChange: (
+		input: Parameters<typeof notifyChange>[1],
+	) => ReturnType<typeof notifyChange>;
 };
 
 /** Creates document helpers for a toolkit instance. */
@@ -187,6 +192,7 @@ export const createDocumentsToolkit = (
 	deleteMultiple: (input) => deleteMultiple(context, input),
 	getMultiple: (input) => getMultiple(context, input),
 	getSingle: (input) => getSingle(context, input),
+	notifyChange: (input) => notifyChange(context, input),
 });
 
 export default createDocumentsToolkit;

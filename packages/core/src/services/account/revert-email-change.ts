@@ -8,6 +8,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import revokeUserTokens from "../auth/refresh-token/revoke-user-tokens.js";
+import notifyDependants from "../document-references/notify-dependants.js";
 import logSecurityAudit from "../security-audit/log-security-audit.js";
 import getUserToken from "../user-tokens/get-single.js";
 
@@ -282,6 +283,13 @@ const revertEmailChange: ServiceFn<
 	if (consumeTokenRes.error) return consumeTokenRes;
 	if (auditRes.error) return auditRes;
 	if (revokeRefreshTokensRes.error) return revokeRefreshTokensRes;
+
+	const references = await notifyDependants(context, {
+		resource: "users",
+		table: "lucid_users",
+		ids: [requestRes.data.user_id],
+	});
+	if (references.error) return references;
 
 	return {
 		error: undefined,

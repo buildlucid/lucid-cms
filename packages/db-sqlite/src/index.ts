@@ -5,6 +5,7 @@ import {
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
+	DatabaseLimits,
 	EnvironmentVariables,
 	InferredColumn,
 	InferredIndex,
@@ -31,7 +32,7 @@ import normalizeSQLiteConfig from "./utils/normalize-config.js";
 /** Database adapter for SQLite. Prefer the sqlite factory in project config. */
 export class SQLiteAdapter extends DatabaseAdapter {
 	readonly #options: SQLiteAdapterOptions | SQLiteAdapterOptionsFactory;
-
+	readonly limits: DatabaseLimits = { maxQueryParameters: 32_766 };
 	constructor(
 		options: SQLiteAdapterOptions | SQLiteAdapterOptionsFactory = {},
 	) {

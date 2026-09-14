@@ -1,7 +1,7 @@
 import { defineMigration } from "@lucidcms/core";
 
 const organisationsMigration = defineMigration({
-	up: async (context) => {
+	up: async ({ context }) => {
 		await context.db.kysely.schema
 			.createTable("test-organisations")
 			.addColumn("name", context.config.db.getDataType("text"), (col) =>
@@ -19,7 +19,7 @@ const organisationsMigration = defineMigration({
 			)
 			.execute();
 	},
-	down: async (context) => {
+	down: async ({ context }) => {
 		await context.db.kysely.schema.dropTable("test-organisations").execute();
 	},
 });
