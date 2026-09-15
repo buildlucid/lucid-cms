@@ -1,0 +1,144 @@
+import classNames from "classnames";
+import { FaSolidCaretUp, FaSolidMinus } from "solid-icons/fa";
+import {
+	type Component,
+	createMemo,
+	type JSXElement,
+	Match,
+	Switch,
+} from "solid-js";
+import type { TableTheme } from "@/components/Table/Table";
+import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
+
+interface ThProps {
+	key?: string;
+	index?: number;
+	classes?: string;
+	icon?: JSXElement;
+	label?: string;
+	searchParams?: QueryStateResponse;
+	options?: {
+		include?: boolean;
+		width?: number;
+		minWidth?: number;
+		sortable?: boolean;
+		padding?: "16" | "24";
+	};
+	theme?: TableTheme;
+	children?: JSXElement;
+}
+
+// Head Column
+
+export const TableHeaderCell: Component<ThProps> = (props) => {
+	// ----------------------------------
+	// Memos
+	const sort = createMemo(() => {
+		if (props.searchParams === undefined) return undefined;
+		if (props.options?.sortable === false) return undefined;
+		if (props.key === undefined) return undefined;
+
+		const sorts = props.searchParams.sorts();
+		const sort = sorts.get(props.key);
+		return sort;
+	});
+	const sortFull = createMemo(() => {
+		if (sort() === undefined) return undefined;
+		if (sort() === "asc") return "ascending";
+		if (sort() === "desc") return "descending";
+	});
+
+	// ----------------------------------------
+	// Render
+	return (
+		<th
+			class={classNames(
+				"text-left relative gap-2.5 px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
+				{
+					"hover:bg-card-base":
+						props.options?.sortable &&
+						(props.theme === "primary" || props.theme === undefined),
+					"hover:bg-card-hover":
+						props.options?.sortable &&
+						(props.theme === "secondary" || props.theme === "contained"),
+					hidden: props.options?.include === false,
+					"bg-background-base":
+						props.theme === "primary" || props.theme === undefined,
+					"bg-card-base": props.theme === "secondary",
+					"bg-input-base": props.theme === "contained",
+					"first:pl-4 md:first:pl-6 last:pr-4 md:last:pr-6":
+						props.options?.padding === "24" ||
+						props.options?.padding === undefined,
+				},
+				props?.classes,
+			)}
+			style={{
+				width: props.options?.width ? `${props.options.width}px` : undefined,
+				"min-width": props.options?.minWidth
+					? `${props.options.minWidth}px`
+					: undefined,
+			}}
+			aria-sort={sortFull()}
+		>
+			<Switch>
+				<Match when={props?.label !== undefined}>
+					<Switch>
+						<Match when={props.options?.sortable !== true}>
+							<div class="flex items-center min-h-12.5 gap-2.5">
+								<span class="text-sm fill-body">{props?.icon}</span>
+								<span class="text-sm text-body">{props?.label}</span>
+							</div>
+						</Match>
+						<Match when={props.options?.sortable === true}>
+							<button
+								class="justify-between gap-2.5 flex items-center w-full min-h-12.5"
+								onClick={() => {
+									if (props.searchParams === undefined) return;
+									if (props.key === undefined) return;
+
+									let sortValue: "asc" | "desc" | undefined;
+									if (sort() === undefined) {
+										sortValue = "asc";
+									} else if (sort() === "asc") {
+										sortValue = "desc";
+									} else if (sort() === "desc") {
+										sortValue = undefined;
+									}
+
+									props.searchParams.setParams({
+										sorts: {
+											[props.key]: sortValue,
+										},
+									});
+								}}
+								type="button"
+							>
+								<div class="flex items-center gap-2.5">
+									<span class="text-sm fill-body">{props?.icon}</span>
+									<span class="text-sm text-body">{props?.label}</span>
+								</div>
+								<Switch>
+									<Match when={sort() === "desc" || sort() === "asc"}>
+										<FaSolidCaretUp
+											aria-hidden="true"
+											class={classNames("w-3 h-3 text-icon-base", {
+												"transform rotate-180": sort() === "desc",
+											})}
+										/>
+									</Match>
+									<Match when={sort() === undefined}>
+										<FaSolidMinus
+											aria-hidden="true"
+											class="w-3 h-3 text-icon-base ml-2"
+										/>
+									</Match>
+								</Switch>
+							</button>
+						</Match>
+					</Switch>
+				</Match>
+				<Match when={props.children !== undefined}>{props.children}</Match>
+			</Switch>
+		</th>
+	);
+};

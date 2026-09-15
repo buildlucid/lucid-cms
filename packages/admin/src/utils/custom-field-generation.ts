@@ -1,7 +1,7 @@
 import type {
 	CustomFieldGenerationFieldType,
 	CustomFieldGenerationTarget,
-} from "@/store/aiModalsStore";
+} from "@/store/aiModalsStore/aiModalsStore";
 import { createEmptyRichTextValue } from "@/utils/rich-text";
 
 /**

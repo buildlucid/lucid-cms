@@ -1,0 +1,209 @@
+import classNames from "classnames";
+import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
+import DateText from "@/components/DateText/DateText";
+import type {
+	TimelineCardType,
+	TimelineItem,
+	UseDocumentHistoryState,
+} from "@/hooks/useDocumentHistoryState/useDocumentHistoryState";
+import T from "@/translations";
+
+const TimelineCardWrapper: Component<{
+	item: TimelineItem;
+	state: UseDocumentHistoryState;
+	level: number;
+	parentType?: TimelineCardType;
+	isLastSibling?: boolean;
+}> = (props) => {
+	// ----------------------------------
+	// Memos
+	const isSelected = createMemo(() => props.state.isItemSelected(props.item));
+
+	// ----------------------------------
+	// Render
+	return (
+		<div
+			class={classNames("relative flex flex-col", {
+				"mb-3 last:mb-0": props.level > 0,
+			})}
+		>
+			<Switch>
+				<Match when={props.item.type === "latest"}>
+					<TimelineCard
+						item={props.item}
+						parentType={props.parentType}
+						isSelected={isSelected()}
+						onClick={() => props.state.handleSelectItem(props.item)}
+					/>
+				</Match>
+				<Match when={props.item.type === "revision"}>
+					<TimelineCard
+						item={props.item}
+						parentType={props.parentType}
+						isSelected={isSelected()}
+						onClick={() => props.state.handleSelectItem(props.item)}
+					/>
+				</Match>
+				<Match when={props.item.type === "snapshot"}>
+					<TimelineCard
+						item={props.item}
+						parentType={props.parentType}
+						isSelected={isSelected()}
+						onClick={() => props.state.handleSelectItem(props.item)}
+					/>
+				</Match>
+				<Match when={props.item.type === "environment"}>
+					<TimelineCard
+						item={props.item}
+						parentType={props.parentType}
+						isSelected={isSelected()}
+						onClick={() => props.state.handleSelectItem(props.item)}
+						isLastSibling={props.isLastSibling}
+					/>
+				</Match>
+			</Switch>
+			<Show
+				when={
+					props.item.environmentVersions &&
+					props.item.environmentVersions.length > 0
+				}
+			>
+				<div class="relative mt-3 ml-1 pl-7 space-y-3">
+					<For each={props.item.environmentVersions}>
+						{(envItem, index) => (
+							<TimelineCardWrapper
+								item={envItem}
+								state={props.state}
+								level={1}
+								parentType={props.item.type}
+								isLastSibling={
+									index() === (props.item.environmentVersions?.length ?? 0) - 1
+								}
+							/>
+						)}
+					</For>
+				</div>
+			</Show>
+		</div>
+	);
+};
+
+const TimelineCard: Component<{
+	item: TimelineItem;
+	parentType?: TimelineCardType;
+	isSelected: boolean;
+	onClick: () => void;
+	isLastSibling?: boolean;
+}> = (props) => {
+	// ----------------------------------
+	// Memos
+	const isUnreleasedEnvironment = createMemo(() => {
+		return props.item.type === "environment" && !props.item.isReleased;
+	});
+	const isEnvironmentInSyncWithPromoted = createMemo(() => {
+		return (
+			props.item.type === "environment" &&
+			props.item.isReleased &&
+			props.item.inSyncWithPromotedFrom
+		);
+	});
+
+	// ----------------------------------
+	// Render
+	return (
+		<>
+			<Show when={props.item.type === "environment"}>
+				<span
+					class={classNames(
+						"absolute -left-4 -top-2.5 border-l border-dashed border-secondary-base/40",
+						{
+							"bottom-0": !props.isLastSibling,
+							"bottom-1/2": props.isLastSibling,
+						},
+					)}
+				/>
+			</Show>
+			<div class="relative">
+				<span
+					class={classNames(
+						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors duration-200",
+						{
+							"border-primary-muted-border bg-primary-muted-bg":
+								props.isSelected,
+							"border-secondary-base/60 bg-background-base": !props.isSelected,
+						},
+					)}
+				/>
+				<span
+					class={classNames(
+						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full transition-colors duration-200",
+						{
+							"bg-primary-base": props.isSelected,
+							"bg-secondary-base": !props.isSelected,
+						},
+					)}
+				/>
+				<button
+					type="button"
+					max-w-72
+					class={classNames(
+						"group relative flex w-full text-left overflow-hidden rounded-md border border-border p-3 md:p-4 transition-colors duration-200 outline-none bg-card-base focus-visible:ring-1 focus-visible:ring-primary-base",
+						{
+							"hover:bg-card-hover": !isUnreleasedEnvironment(),
+							"opacity-70 cursor-not-allowed": isUnreleasedEnvironment(),
+						},
+					)}
+					onClick={() => {
+						if (isUnreleasedEnvironment()) return;
+						props.onClick();
+					}}
+				>
+					<span
+						class={classNames(
+							"absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r",
+							{
+								"from-primary-muted-bg to-primary-muted-bg":
+									props.item.type === "latest" ||
+									isEnvironmentInSyncWithPromoted(),
+								"from-warning-base/60 to-warning-base/20":
+									props.item.type === "environment" &&
+									!isUnreleasedEnvironment() &&
+									!isEnvironmentInSyncWithPromoted(),
+								"from-error-base/60 to-error-base/20":
+									isUnreleasedEnvironment(),
+							},
+						)}
+					/>
+
+					<div class="flex items-start justify-between gap-3 w-full">
+						<div class="min-w-0 flex-1">
+							<div class="flex items-center justify-between gap-2">
+								<h3 class="text-sm font-semibold text-title truncate capitalize">
+									<Switch>
+										<Match when={props.item.type === "latest"}>
+											{T()("common.status.latest")}
+										</Match>
+										<Match when={props.item.type === "environment"}>
+											{props.item.version}
+										</Match>
+										<Match when={props.item.type === "revision"}>
+											{T()("common.revision")} #{props.item.id}
+										</Match>
+										<Match when={props.item.type === "snapshot"}>
+											{T()("common.snapshot")} #{props.item.id}
+										</Match>
+									</Switch>
+								</h3>
+							</div>
+							<div class="mt-1 flex items-center gap-2 text-sm text-body">
+								<DateText date={props.item.timelineAt} class="text-body" />
+							</div>
+						</div>
+					</div>
+				</button>
+			</div>
+		</>
+	);
+};
+
+export default TimelineCardWrapper;

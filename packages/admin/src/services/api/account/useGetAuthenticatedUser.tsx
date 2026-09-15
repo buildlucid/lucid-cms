@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, User } from "@types";
 import { createEffect, createMemo } from "solid-js";
-import userStore from "@/store/userStore";
+import userStore from "@/store/userStore/userStore";
 import type { QueryHook } from "@/types/utils";
 import getLoginRedirectURL from "@/utils/login-route";
 import request from "@/utils/request";

@@ -1,0 +1,366 @@
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
+import { useParams } from "@solidjs/router";
+import {
+	FaSolidCalendar,
+	FaSolidDownload,
+	FaSolidFile,
+	FaSolidFileAudio,
+	FaSolidFileLines,
+	FaSolidFileVideo,
+	FaSolidFileZipper,
+	FaSolidPlay,
+} from "solid-icons/fa";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
+import Button from "@/components/Button/Button";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import { Form } from "@/components/Form/Form";
+import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
+import Spinner from "@/components/Spinner/Spinner";
+import api from "@/services/api";
+import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
+import { LucidError } from "@/utils/error-handling";
+import helpers from "@/utils/helpers";
+
+const MediaSharePage: Component = () => {
+	// --------------------------------------------
+	// State & Hooks
+	const params = useParams<{ token: string }>();
+	const [password, setPassword] = createSignal("");
+	const [showVideoPreview, setShowVideoPreview] = createSignal(false);
+	let videoPreviewRef: HTMLVideoElement | undefined;
+
+	const token = createMemo(() => params.token);
+
+	// --------------------------------------------
+	// Queries & Mutations
+	const shareAccess = api.share.useGetAccess({
+		queryParams: {
+			location: {
+				token,
+			},
+		},
+		enabled: () => token() !== undefined,
+	});
+	const authorizeShare = api.share.useAuthorize();
+	const requestDownload = api.share.useRequestDownload();
+
+	// --------------------------------------------
+	// Memos
+	const accessData = createMemo(() => shareAccess.data?.data);
+	const accessError = createMemo(() => {
+		const error = shareAccess.error;
+		if (error instanceof LucidError) return error.errorRes;
+		return undefined;
+	});
+	const grantedAccess = createMemo(() => {
+		const access = accessData();
+		if (!access || access.passwordRequired) return undefined;
+		return access;
+	});
+	const shareUrl = createMemo(() => grantedAccess()?.media.shareUrl ?? "");
+	const posterShareUrl = createMemo(
+		() => grantedAccess()?.media.poster?.shareUrl,
+	);
+	const isExpired = createMemo(() => {
+		if (accessError()?.status === 410) return true;
+		return grantedAccess()?.hasExpired === true;
+	});
+	const canRenderInlinePreview = createMemo(() => {
+		const access = grantedAccess();
+		if (!access) return false;
+		return access.media.previewable;
+	});
+	const formattedExpiresAt = createMemo(() => {
+		const expiresAt = grantedAccess()?.expiresAt;
+		if (!expiresAt) return T()("media.share.route.expiry.none");
+		return (
+			dateHelpers.formatFullDate(expiresAt) ||
+			T()("media.share.route.expiry.none")
+		);
+	});
+
+	// --------------------------------------------
+	// Effects
+	createEffect(() => {
+		posterShareUrl();
+		shareUrl();
+		setShowVideoPreview(false);
+	});
+
+	createEffect(() => {
+		if (!showVideoPreview()) return;
+		videoPreviewRef?.play().catch(() => {
+			// Browser autoplay policies can still block playback in some contexts.
+		});
+	});
+
+	// --------------------------------------------
+	// Render
+	return (
+		<Switch>
+			<Match when={shareAccess.isLoading}>
+				<div class="flex items-center justify-center h-full">
+					<Spinner size="sm" />
+				</div>
+			</Match>
+			<Match when={isExpired()}>
+				<ErrorBlock
+					content={{
+						image: notifyIllustration,
+						title: T()("media.share.links.expired.title"),
+						description: T()("media.share.links.expired.message"),
+					}}
+				/>
+			</Match>
+			<Match when={shareAccess.isError}>
+				<ErrorBlock
+					content={{
+						image: notifyIllustration,
+						title: T()("media.share.route.error.title"),
+						description: T()("media.share.route.error.description"),
+					}}
+				/>
+			</Match>
+			<Match when={shareAccess.isSuccess && accessData() !== undefined}>
+				<div class="w-full">
+					<Show
+						when={accessData()?.passwordRequired}
+						fallback={
+							<div class="w-full max-w-lg mx-auto space-y-3">
+								<div class="rounded-md border border-border bg-card-base overflow-hidden">
+									<div class="w-full max-w-full flex items-center justify-center rectangle-background">
+										<div class="relative z-10 w-full max-w-full flex items-center justify-center">
+											<Switch>
+												<Match
+													when={
+														canRenderInlinePreview() &&
+														grantedAccess()?.media.type === "image"
+													}
+												>
+													<img
+														src={shareUrl()}
+														alt={grantedAccess()?.name || ""}
+														class="max-w-full max-h-[40vh] object-contain"
+													/>
+												</Match>
+												<Match
+													when={
+														canRenderInlinePreview() &&
+														grantedAccess()?.media.type === "video"
+													}
+												>
+													<div class="w-full aspect-video flex items-center justify-center min-w-0">
+														<Show
+															when={posterShareUrl() && !showVideoPreview()}
+															fallback={
+																// biome-ignore lint/a11y/useMediaCaption: explanation
+																<video
+																	ref={videoPreviewRef}
+																	src={shareUrl()}
+																	class="w-full h-full object-contain"
+																	controls
+																	autoplay
+																/>
+															}
+														>
+															<div class="w-full h-full relative bg-input-base overflow-hidden">
+																<img
+																	src={posterShareUrl()}
+																	alt={grantedAccess()?.name || ""}
+																	class="w-full h-full object-cover"
+																/>
+																<button
+																	type="button"
+																	aria-label={T()("media.player.video.play")}
+																	onClick={() => {
+																		setShowVideoPreview(true);
+																	}}
+																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white fill-white transition-colors hover:bg-black/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-base"
+																>
+																	<span class="w-14 h-14 rounded-full bg-black/60 border border-white/25 flex items-center justify-center">
+																		<FaSolidPlay class="ml-1 w-5 h-5" />
+																	</span>
+																</button>
+															</div>
+														</Show>
+													</div>
+												</Match>
+												<Match
+													when={
+														canRenderInlinePreview() &&
+														grantedAccess()?.media.type === "audio"
+													}
+												>
+													<div class="w-full p-4 flex flex-col items-center gap-2">
+														{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
+														<audio
+															src={shareUrl()}
+															class="w-full max-w-xs"
+															controls
+														/>
+													</div>
+												</Match>
+												<Match when={true}>
+													<div class="flex flex-col gap-2 items-center justify-center text-icon-faded p-4">
+														<Switch>
+															<Match
+																when={grantedAccess()?.media.type === "archive"}
+															>
+																<FaSolidFileZipper size={40} />
+															</Match>
+															<Match
+																when={grantedAccess()?.media.type === "audio"}
+															>
+																<FaSolidFileAudio size={40} />
+															</Match>
+															<Match
+																when={grantedAccess()?.media.type === "video"}
+															>
+																<FaSolidFileVideo size={40} />
+															</Match>
+															<Match
+																when={
+																	grantedAccess()?.media.type === "document"
+																}
+															>
+																<FaSolidFileLines size={40} />
+															</Match>
+															<Match when={true}>
+																<FaSolidFile size={40} />
+															</Match>
+														</Switch>
+														<p class="text-sm text-body">
+															{T()("media.share.route.preview.unavailable")}
+														</p>
+													</div>
+												</Match>
+											</Switch>
+										</div>
+									</div>
+								</div>
+								<div class="rounded-md border border-border bg-card-base p-4 space-y-4">
+									<div>
+										<h2 class="text-base truncate">
+											{grantedAccess()?.name || T()("common.untitled")}
+										</h2>
+										<Show when={grantedAccess()?.description}>
+											<p class="text-sm text-body mt-1">
+												{grantedAccess()?.description}
+											</p>
+										</Show>
+									</div>
+
+									{/* Media metadata */}
+									<div class="space-y-2 text-sm">
+										<div class="flex justify-between gap-4">
+											<span class="text-body">{T()("common.file.size")}</span>
+											<span>
+												{helpers.bytesToSize(grantedAccess()?.media.fileSize)}
+											</span>
+										</div>
+										<div class="flex justify-between gap-4">
+											<span class="text-body">{T()("common.type")}</span>
+											<span class="truncate">
+												{grantedAccess()?.media.mimeType}
+											</span>
+										</div>
+									</div>
+
+									{/* Share link metadata */}
+									<div class="border-t border-border pt-4 space-y-2 text-sm">
+										<div class="flex justify-between gap-4 items-start">
+											<span class="text-body flex items-center gap-1.5">
+												<FaSolidCalendar class="shrink-0 mt-0.5" />
+												{T()("common.expires.at")}
+											</span>
+											<span class="text-right">{formattedExpiresAt()}</span>
+										</div>
+									</div>
+								</div>
+								<Button
+									theme="border-outline"
+									size="medium"
+									loading={requestDownload.action.isPending}
+									onClick={() => {
+										if (!token()) return;
+										requestDownload.action.mutate({ token: token() });
+									}}
+									classes="w-full"
+								>
+									<span class="flex items-center justify-center gap-2">
+										<FaSolidDownload />
+										<span>{T()("media.share.route.download")}</span>
+									</span>
+								</Button>
+							</div>
+						}
+					>
+						<div class="max-w-md mx-auto">
+							<h2 class="mb-1 text-center">
+								{T()("media.share.route.password.title")}
+							</h2>
+							<p class="text-sm text-body text-center mb-5">
+								{T()("media.share.route.password.description")}
+							</p>
+						</div>
+						<div class="max-w-md mx-auto mt-4">
+							<Form
+								state={{
+									isLoading: authorizeShare.action.isPending,
+									errors: authorizeShare.errors(),
+								}}
+								content={{
+									submit: T()("media.share.route.password.button"),
+								}}
+								options={{
+									buttonFullWidth: true,
+									buttonSize: "large",
+								}}
+								onSubmit={() => {
+									if (!token()) return;
+									authorizeShare.action.mutate(
+										{
+											token: token(),
+											body: { password: password() },
+										},
+										{
+											onSuccess: () => {
+												setPassword("");
+												shareAccess.refetch();
+											},
+										},
+									);
+								}}
+							>
+								<InsetLabelInput
+									id="sharePassword"
+									name="sharePassword"
+									type="password"
+									value={password()}
+									onChange={setPassword}
+									copy={{
+										label: T()("common.password"),
+									}}
+									required={true}
+									autoFoucs={true}
+									autoComplete="current-password"
+								/>
+							</Form>
+						</div>
+					</Show>
+				</div>
+			</Match>
+		</Switch>
+	);
+};
+
+export default MediaSharePage;

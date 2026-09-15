@@ -1,0 +1,91 @@
+import type { ProfilePicture } from "@types";
+import { type Component, For, Show } from "solid-js";
+import { TableCell } from "@/components/TableCell/TableCell";
+import UserDisplay from "@/components/UserDisplay/UserDisplay";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
+
+export type UserStackColUser = {
+	id?: number | null;
+	email?: string | null;
+	username?: string | null;
+	firstName?: string | null;
+	lastName?: string | null;
+	profilePicture?: ProfilePicture | null;
+};
+
+const TableUserStackCell: Component<{
+	users: UserStackColUser[];
+	options?: {
+		include?: boolean;
+		padding?: "16" | "24";
+		minWidth?: number;
+	};
+	maxVisible?: number;
+}> = (props) => {
+	// ----------------------------------
+	// Functions
+	const displayName = (user: UserStackColUser) => {
+		return helpers.formatUserName(user, "simple") || T()("media.types.unknown");
+	};
+
+	// ----------------------------------
+	// Render
+	return (
+		<TableCell
+			options={{
+				include: props.options?.include,
+				padding: props.options?.padding,
+				minWidth: props.options?.minWidth,
+			}}
+		>
+			<Show
+				when={props.users.length > 0}
+				fallback={<span class="text-sm text-body">{T()("common.none")}</span>}
+			>
+				<div class="flex min-w-45 items-center gap-3">
+					<div class="flex shrink-0 -space-x-2">
+						<For each={props.users.slice(0, props.maxVisible ?? 4)}>
+							{(user) => (
+								<span class="rounded-full ring-2 ring-card-base">
+									<UserDisplay
+										user={{
+											username:
+												user.username ??
+												user.email ??
+												T()("media.types.unknown"),
+											firstName: user.firstName,
+											lastName: user.lastName,
+											profilePicture: user.profilePicture,
+										}}
+										mode="icon"
+										size="x-small"
+									/>
+								</span>
+							)}
+						</For>
+					</div>
+					<div class="min-w-0">
+						<p class="truncate text-sm text-subtitle">
+							<For each={props.users}>
+								{(user, index) => (
+									<>
+										{index() > 0 ? ", " : ""}
+										{displayName(user)}
+									</>
+								)}
+							</For>
+						</p>
+						<Show when={props.users.length > (props.maxVisible ?? 4)}>
+							<p class="text-xs text-body">
+								+{props.users.length - (props.maxVisible ?? 4)}
+							</p>
+						</Show>
+					</div>
+				</div>
+			</Show>
+		</TableCell>
+	);
+};
+
+export default TableUserStackCell;

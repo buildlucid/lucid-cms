@@ -2,7 +2,7 @@ import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import type { Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-import type { ResolvedTheme } from "@/store/themeStore";
+import type { ResolvedTheme } from "@/store/themeStore/themeStore";
 
 export const EDITOR_MAX_HEIGHT = "24rem";
 

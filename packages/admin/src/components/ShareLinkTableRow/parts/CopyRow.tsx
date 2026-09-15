@@ -1,0 +1,51 @@
+import { FaSolidCopy } from "solid-icons/fa";
+import type { Component } from "solid-js";
+import { TableCell } from "@/components/TableCell/TableCell";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
+
+interface TextColProps {
+	text?: string | number | null;
+	value: string;
+	options?: {
+		include?: boolean;
+		maxLines?: number;
+		padding?: "16" | "24";
+	};
+}
+
+const TextCol: Component<TextColProps> = (props) => {
+	// ----------------------------------
+	// Functions
+	const copyToClipboard = (e: Event) => {
+		e.stopPropagation();
+
+		navigator.clipboard.writeText(props.value);
+		spawnToast({
+			title: T()("toasts.common.copy.to.clipboard.title"),
+			status: "success",
+		});
+	};
+
+	// ----------------------------------
+	// Render
+	return (
+		<TableCell
+			options={{
+				include: props?.options?.include,
+				padding: props?.options?.padding,
+			}}
+		>
+			<button
+				type="button"
+				onClick={copyToClipboard}
+				class="flex items-center gap-2 ring-offset-4 ring-offset-card-base rounded-sm line-clamp-1"
+			>
+				<FaSolidCopy />
+				<span class="text-sm">{props.text || "-"}</span>
+			</button>
+		</TableCell>
+	);
+};
+
+export default TextCol;

@@ -3,7 +3,7 @@ import type {
 	InternalDocumentField,
 	ResponseBody,
 } from "@types";
-import type { BrickData } from "@/store/brick-store";
+import type { BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";

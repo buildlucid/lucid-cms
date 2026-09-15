@@ -1,0 +1,46 @@
+import type { Accessor, Component } from "solid-js";
+import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import T from "@/translations";
+
+const RestoreRevisionModal: Component<{
+	versionId: Accessor<number | null>;
+	state: {
+		open: boolean;
+		setOpen: (_open: boolean) => void;
+	};
+	loading?: boolean;
+	error?: string;
+	callbacks: {
+		onConfirm: (versionId: number) => void | Promise<void>;
+		onCancel: () => void;
+	};
+}> = (props) => {
+	return (
+		<ConfirmationModal
+			theme="primary"
+			state={{
+				open: props.state.open,
+				setOpen: props.state.setOpen,
+				isLoading: props.loading,
+				isError: !!props.error,
+			}}
+			copy={{
+				title: T()("modals.common.restore.revision.title"),
+				description: T()("modals.common.restore.revision.description", {
+					id: props.versionId() ?? "",
+				}),
+				error: props.error,
+			}}
+			callbacks={{
+				onConfirm: async () => {
+					const versionId = props.versionId();
+					if (versionId === null) return console.error("No versionId provided");
+					await props.callbacks.onConfirm(versionId);
+				},
+				onCancel: props.callbacks.onCancel,
+			}}
+		/>
+	);
+};
+
+export default RestoreRevisionModal;

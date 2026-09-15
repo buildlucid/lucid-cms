@@ -1,0 +1,152 @@
+import { useNavigate, useParams } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
+import type { DocumentVersionType } from "@types";
+import objectHash from "object-hash";
+import { type Accessor, createMemo } from "solid-js";
+import api from "@/services/api";
+import brickStore from "@/store/brickStore/brickStore";
+import T from "@/translations";
+import { isInaccessibleError } from "@/utils/error-handling";
+import helpers from "@/utils/helpers";
+import { createDocumentLocalization } from "../useDocumentLocalization/useDocumentLocalization";
+
+export function useDocumentState(props: {
+	mode: "create" | "edit";
+	version: Accessor<DocumentVersionType>;
+	versionId: Accessor<number | undefined>;
+}) {
+	const params = useParams();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+
+	// ------------------------------------------
+	// Memos
+	const collectionKey = createMemo(() => params.collectionKey || "");
+	const documentId = createMemo(() =>
+		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
+	);
+	const canFetchDocument = createMemo(() => {
+		if (documentId() === undefined) {
+			return false;
+		}
+		if (props.version() === "revision" || props.version() === "snapshot") {
+			return props.versionId() !== undefined;
+		}
+		return true;
+	});
+	const versionUrlParam = createMemo(() => {
+		if (props.version() === "revision" || props.version() === "snapshot") {
+			return props.versionId();
+		}
+		return props.version();
+	});
+
+	// ------------------------------------------
+	// Queries
+	const collectionsQuery = api.collections.useGetAll({
+		queryParams: {
+			include: {
+				bricks: true,
+				fields: true,
+			},
+		},
+		refetchOnWindowFocus: false,
+	});
+	const collectionQuery = api.collections.useGetSingle({
+		queryParams: {
+			location: {
+				collectionKey: collectionKey,
+			},
+		},
+		enabled: () => !!collectionKey(),
+		refetchOnWindowFocus: false,
+	});
+	const documentQuery = api.documents.useGetSingle({
+		queryParams: {
+			location: {
+				collectionKey: collectionKey,
+				id: documentId,
+				version: versionUrlParam,
+			},
+			include: {
+				bricks: true,
+				refs: true,
+			},
+		},
+		enabled: () => canFetchDocument(),
+		refetchOnWindowFocus: false,
+	});
+
+	// ------------------------------------------
+	// Memos
+	const collection = createMemo(() => collectionQuery.data?.data);
+	const {
+		contentLocale,
+		defaultLocale,
+		localeCodes: contentLocales,
+	} = createDocumentLocalization(collection);
+	const collections = createMemo(() => collectionsQuery.data?.data ?? []);
+	const collectionsByKey = createMemo(
+		() =>
+			new Map(collections().map((collection) => [collection.key, collection])),
+	);
+	const collectionName = createMemo(() =>
+		helpers.getLocaleValue({
+			value: collection()?.details.labels.plural,
+		}),
+	);
+	const collectionSingularName = createMemo(
+		() =>
+			helpers.getLocaleValue({
+				value: collection()?.details.labels.singular,
+			}) || T()("common.collection"),
+	);
+	const document = createMemo(() => documentQuery.data?.data, undefined, {
+		equals: (prev, next) => {
+			if (!prev || !next) return prev === next;
+			return objectHash(prev) === objectHash(next);
+		},
+	});
+	const refs = createMemo(() => documentQuery.data?.refs);
+	const isDocumentMutated = createMemo(() => brickStore.getDocumentMutated());
+	const collectionAccessError = createMemo(
+		() => collectionQuery.isError && isInaccessibleError(collectionQuery.error),
+	);
+	const documentAccessError = createMemo(
+		() => documentQuery.isError && isInaccessibleError(documentQuery.error),
+	);
+	const shouldBlockNavigation = createMemo(() => {
+		//* nothing to guard when the document can't be loaded
+		if (documentAccessError()) return false;
+		if (props.version() !== "latest") return false;
+		return isDocumentMutated();
+	});
+
+	// ------------------------------------------
+	// Return
+	return {
+		collectionsQuery,
+		collectionQuery,
+		documentQuery,
+		collectionKey,
+		documentId,
+		collectionName,
+		collectionSingularName,
+		contentLocale,
+		contentLocales,
+		defaultLocale,
+		navigate,
+		queryClient,
+		collection,
+		collections,
+		collectionsByKey,
+		document,
+		refs,
+		isDocumentMutated,
+		shouldBlockNavigation,
+		collectionAccessError,
+		documentAccessError,
+	};
+}
+
+export type UseDocumentState = ReturnType<typeof useDocumentState>;

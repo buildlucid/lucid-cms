@@ -1,0 +1,63 @@
+import type { Accessor, Component } from "solid-js";
+import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import api from "@/services/api";
+import T from "@/translations";
+
+interface RestoreUserProps {
+	id: Accessor<number | undefined>;
+	state: {
+		open: boolean;
+		setOpen: (_open: boolean) => void;
+	};
+}
+
+const RestoreUserModal: Component<RestoreUserProps> = (props) => {
+	// ----------------------------------------
+	// Mutations
+	const restoreUsers = api.users.useRestore({
+		onSuccess: () => {
+			props.state.setOpen(false);
+		},
+	});
+
+	// ------------------------------
+	// Render
+	return (
+		<ConfirmationModal
+			theme="primary"
+			state={{
+				open: props.state.open,
+				setOpen: props.state.setOpen,
+				isLoading: restoreUsers.action.isPending,
+				isError: restoreUsers.action.isError,
+			}}
+			copy={{
+				title: T()("modals.common.restore.users.title"),
+				description: T()("modals.common.restore.users.description"),
+				error: restoreUsers.errors()?.message,
+			}}
+			callbacks={{
+				onConfirm: () => {
+					const id = props.id();
+					if (!id) {
+						console.log("No user ID supplied!");
+						props.state.setOpen(false);
+						restoreUsers.reset();
+						return;
+					}
+					restoreUsers.action.mutate({
+						body: {
+							ids: [id],
+						},
+					});
+				},
+				onCancel: () => {
+					props.state.setOpen(false);
+					restoreUsers.reset();
+				},
+			}}
+		/>
+	);
+};
+
+export default RestoreUserModal;

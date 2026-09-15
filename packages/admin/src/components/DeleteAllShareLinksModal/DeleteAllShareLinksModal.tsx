@@ -1,0 +1,57 @@
+import type { Accessor, Component } from "solid-js";
+import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import api from "@/services/api";
+import T from "@/translations";
+
+interface DeleteAllShareLinksProps {
+	id: Accessor<number | undefined>;
+	state: {
+		open: boolean;
+		setOpen: (_open: boolean) => void;
+	};
+}
+
+const DeleteAllShareLinksModal: Component<DeleteAllShareLinksProps> = (
+	props,
+) => {
+	// ----------------------------------------
+	// Mutations
+	const deleteAllShareLinks = api.mediaShareLinks.useDeleteAllForMedia({
+		onSuccess: () => {
+			props.state.setOpen(false);
+		},
+	});
+
+	// ------------------------------
+	// Render
+	return (
+		<ConfirmationModal
+			state={{
+				open: props.state.open,
+				setOpen: props.state.setOpen,
+				isLoading: deleteAllShareLinks.action.isPending,
+				isError: deleteAllShareLinks.action.isError,
+			}}
+			copy={{
+				title: T()("modals.common.delete.all.share.links.title"),
+				description: T()("modals.common.delete.all.share.links.description"),
+				error: deleteAllShareLinks.errors()?.message,
+			}}
+			callbacks={{
+				onConfirm: () => {
+					const id = props.id();
+					if (!id) return console.error("No id provided");
+					deleteAllShareLinks.action.mutate({
+						mediaId: id,
+					});
+				},
+				onCancel: () => {
+					props.state.setOpen(false);
+					deleteAllShareLinks.reset();
+				},
+			}}
+		/>
+	);
+};
+
+export default DeleteAllShareLinksModal;

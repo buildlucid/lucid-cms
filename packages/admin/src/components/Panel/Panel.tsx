@@ -1,0 +1,431 @@
+import notifyIllustration from "@assets/illustrations/notify.svg?url";
+import { Dialog } from "@kobalte/core";
+import type { ErrorResponse, Locale } from "@types";
+import classNames from "classnames";
+import { FaSolidXmark } from "solid-icons/fa";
+import {
+	type Accessor,
+	type Component,
+	createContext,
+	createEffect,
+	createMemo,
+	createSignal,
+	type JSXElement,
+	Match,
+	onCleanup,
+	Show,
+	Switch,
+	useContext,
+} from "solid-js";
+import Button from "@/components/Button/Button";
+import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
+import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import { PanelFooter } from "@/components/PanelFooter/PanelFooter";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
+import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
+import T from "@/translations";
+import { PanelLayerContext } from "./PanelLayerContext";
+
+interface PanelNestingState {
+	level: Accessor<number>;
+	setChildOpen: (id: symbol, open: boolean) => void;
+}
+
+const PanelNestingContext = createContext<PanelNestingState>();
+
+export const Panel: Component<{
+	/** Visual stack depth. Nested panels infer this automatically. */
+	nestedLevel?: number;
+	/** Base stack layer. Use a higher value when opening above another panel. */
+	zIndex?: number;
+	state: {
+		open: boolean;
+		setOpen: (_open: boolean) => void;
+	};
+	langauge?: {
+		contentLocale?: boolean;
+		hascontentLocaleError?: boolean;
+		useDefaultcontentLocale?: boolean;
+		locales?: Locale[];
+	};
+	fetchState?: {
+		isLoading?: boolean;
+		isError?: boolean;
+	};
+	mutateState?: {
+		isLoading?: boolean;
+		isError?: boolean;
+		isDisabled?: boolean;
+		errors?: ErrorResponse;
+	};
+	copy?: {
+		title?: string;
+		description?: string;
+		descriptionIcon?: JSXElement;
+		fetchError?: string;
+		submit?: string;
+		cancel?: string;
+	};
+	callbacks?: {
+		onClose?: () => void;
+		onSubmit?: () => void;
+		reset?: () => void;
+	};
+	options?: {
+		hideFooter?: boolean;
+		padding?: "16" | "24";
+		growContent?: boolean;
+	};
+	children: (_props?: {
+		contentLocale: Accessor<string | undefined>;
+		setContentLocale: (_value: string) => void;
+	}) => JSXElement;
+}> = (props) => {
+	// ------------------------------
+	// State
+	const [lastFocusedElement, setLastfocusedElement] =
+		createSignal<Element | null>(null);
+	const [contentLocale, setContentLocale] = createSignal<string | undefined>(
+		undefined,
+	);
+	const interfaceDirection = useInterfaceDirection();
+	const parentPanel = useContext(PanelNestingContext);
+	const panelId = Symbol("panel");
+	const [openChildPanels, setOpenChildPanels] = createSignal<Set<symbol>>(
+		new Set(),
+	);
+
+	// ------------------------------
+	// Functions
+	const setChildOpen = (id: symbol, open: boolean) => {
+		setOpenChildPanels((current) => {
+			if (current.has(id) === open) return current;
+			const next = new Set(current);
+			if (open) next.add(id);
+			else next.delete(id);
+			return next;
+		});
+	};
+	const availableLocales = createMemo(
+		() => props.langauge?.locales ?? contentLocaleStore.get.locales,
+	);
+
+	const getDefaultContentLocale = () => {
+		const activeLocale = contentLocaleStore.get.contentLocale;
+		if (
+			!props.langauge?.useDefaultcontentLocale &&
+			availableLocales().some((locale) => locale.code === activeLocale)
+		) {
+			return activeLocale;
+		}
+		const defaultLocale = availableLocales().find((locale) => locale.isDefault);
+		return defaultLocale?.code ?? availableLocales()[0]?.code ?? activeLocale;
+	};
+
+	// ------------------------------
+	// Memos
+	const showContentLocaleSelect = createMemo(() => {
+		return (
+			props.langauge?.contentLocale === true && availableLocales().length > 1
+		);
+	});
+	const nestedLevel = createMemo(
+		() => props.nestedLevel ?? (parentPanel?.level() ?? -1) + 1,
+	);
+	const zIndex = createMemo(() => (props.zIndex ?? 40) + nestedLevel() * 2);
+	const isCovered = createMemo(() => openChildPanels().size > 0);
+	const nestingState: PanelNestingState = {
+		level: nestedLevel,
+		setChildOpen,
+	};
+	const PanelChildren = () =>
+		props.children({
+			contentLocale: contentLocale,
+			setContentLocale: setContentLocale,
+		});
+
+	// ------------------------------
+	// Effects
+	createEffect(() => {
+		parentPanel?.setChildOpen(panelId, props.state.open);
+	});
+	onCleanup(() => parentPanel?.setChildOpen(panelId, false));
+
+	createEffect(() => {
+		if (props.state.open) {
+			setLastfocusedElement(document.activeElement);
+			setContentLocale(getDefaultContentLocale());
+		}
+		if (props.state.open === false) {
+			props.callbacks?.reset?.();
+		}
+	});
+
+	createEffect(() => {
+		const defaultLang = getDefaultContentLocale();
+		if (
+			!availableLocales().some((locale) => locale.code === contentLocale()) &&
+			defaultLang !== undefined
+		) {
+			setContentLocale(defaultLang ?? undefined);
+		}
+	});
+
+	// ------------------------------
+	// Render
+	return (
+		<Dialog.Root open={props.state.open} onOpenChange={props.state.setOpen}>
+			<Dialog.Portal>
+				<Dialog.Overlay
+					class={classNames(
+						"fixed inset-0 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						{
+							"bg-overlay-base": nestedLevel() === 0,
+							"bg-transparent": nestedLevel() > 0,
+						},
+					)}
+					style={{ "z-index": zIndex() }}
+				/>
+				<div
+					class="fixed inset-4 flex justify-end transition-transform duration-300 ease-out"
+					style={{
+						"z-index": zIndex(),
+						transform: isCovered()
+							? `translateX(${interfaceDirection.isLTR() ? "-24px" : "24px"})`
+							: "translateX(0)",
+					}}
+					data-nested-level={nestedLevel()}
+					data-covered={isCovered() ? "" : undefined}
+				>
+					<Dialog.Content
+						class={classNames(
+							"w-full relative flex flex-col rounded-xl scrollbar border border-border max-w-200 bg-background-base outline-hidden overflow-y-auto",
+							{
+								"animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in":
+									interfaceDirection.isLTR(),
+								"animate-animate-slide-from-left-out data-expanded:animate-animate-slide-from-left-in":
+									interfaceDirection.isRTL(),
+							},
+						)}
+						onPointerDownOutside={(e) => {
+							const target = e.target as HTMLElement;
+							if (target.closest("[data-panel-ignore]")) {
+								e.stopPropagation();
+								e.preventDefault();
+							}
+						}}
+						onCloseAutoFocus={() => {
+							let element = lastFocusedElement();
+							if (element instanceof HTMLBodyElement || !element) {
+								element = document.querySelector(
+									"button:not([tabindex='-1']), a:not([tabindex='-1'])",
+								);
+							}
+							// @ts-expect-error
+							if (element && "focus" in element) element.focus();
+						}}
+					>
+						<Switch>
+							{/* Loading / Not Open */}
+							<Match when={!props.state.open || props.fetchState?.isLoading}>
+								<div
+									class={classNames(
+										"skeleton absolute rounded-xl overflow-hidden",
+										{
+											"inset-4": props.options?.padding === "16",
+											"inset-6 md:inset-5": props.options?.padding === "24",
+										},
+									)}
+								/>
+							</Match>
+							{/* Fetch Error */}
+							<Match when={props.fetchState?.isError}>
+								<div class="flex items-center h-full justify-center">
+									<ErrorBlock
+										content={{
+											image: notifyIllustration,
+											title: props.copy?.fetchError,
+										}}
+									/>
+								</div>
+							</Match>
+							{/* Open */}
+							<Match when={props.state.open}>
+								{/* Header */}
+								<div
+									class={classNames("border-b border-border", {
+										"mx-4 py-4 mb-4": props.options?.padding === "16",
+										"mx-4 md:mx-6 py-4 md:pt-6 mb-4":
+											props.options?.padding === "24",
+									})}
+								>
+									<div class="flex justify-between items-start gap-x-10">
+										<div>
+											<Show when={props.copy?.title}>
+												<h2 class="text-base font-semibold text-title">
+													{props.copy?.title}
+												</h2>
+											</Show>
+											<Show when={props.copy?.description}>
+												<p class="mt-1 flex items-start gap-2 text-sm text-body">
+													<Show when={props.copy?.descriptionIcon}>
+														<span class="mt-1.5 text-warning-base">
+															{props.copy?.descriptionIcon}
+														</span>
+													</Show>
+													<span>{props.copy?.description}</span>
+												</p>
+											</Show>
+										</div>
+										<Dialog.CloseButton class="flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus-visible:ring-1 ring-primary-base bg-background-base justify-center">
+											<FaSolidXmark class="text-current" />
+											<span class="sr-only">{T()("common.back")}</span>
+										</Dialog.CloseButton>
+									</div>
+									<Show when={showContentLocaleSelect()}>
+										<div class="mt-2">
+											<ContentLocaleSelect
+												locales={availableLocales()}
+												value={contentLocale()}
+												setValue={setContentLocale}
+												hasError={props.langauge?.hascontentLocaleError}
+												showShortcut={true}
+											/>
+										</div>
+									</Show>
+								</div>
+								{/* Body */}
+								<Show
+									when={props.callbacks?.onSubmit}
+									fallback={
+										<div class="grow flex flex-col justify-between">
+											{/* content */}
+											<div
+												class={classNames({
+													"px-4": props.options?.padding === "16",
+													"px-4 md:px-6": props.options?.padding === "24",
+													grow: props.options?.growContent,
+												})}
+											>
+												<PanelNestingContext.Provider value={nestingState}>
+													<PanelLayerContext.Provider value={zIndex}>
+														<PanelChildren />
+													</PanelLayerContext.Provider>
+												</PanelNestingContext.Provider>
+											</div>
+											<Show when={!props.options?.hideFooter}>
+												<div
+													class={classNames({
+														"px-4": props.options?.padding === "16",
+														"px-4 md:px-6": props.options?.padding === "24",
+													})}
+												>
+													<PanelFooter padding={props.options?.padding}>
+														<div class="min-w-0">
+															<Show when={props.mutateState?.errors?.message}>
+																<ErrorMessage
+																	theme="basic"
+																	message={props.mutateState?.errors?.message}
+																/>
+															</Show>
+														</div>
+														<div class="flex min-w-max gap-2">
+															<Button
+																size="medium"
+																theme="border-outline"
+																type="button"
+																onClick={() => props.state.setOpen(false)}
+															>
+																{props.copy?.cancel ?? T()("common.close")}
+															</Button>
+															<Show when={props.copy?.submit}>
+																<Button
+																	type="submit"
+																	theme="primary"
+																	size="medium"
+																	loading={props.mutateState?.isLoading}
+																	disabled={props.mutateState?.isDisabled}
+																>
+																	{props.copy?.submit}
+																</Button>
+															</Show>
+														</div>
+													</PanelFooter>
+												</div>
+											</Show>
+										</div>
+									}
+								>
+									<form
+										class="grow flex flex-col justify-between"
+										onSubmit={(e) => {
+											e.preventDefault();
+											if (props.callbacks?.onSubmit)
+												props.callbacks?.onSubmit();
+										}}
+									>
+										{/* content */}
+										<div
+											class={classNames({
+												"px-4": props.options?.padding === "16",
+												"px-4 md:px-6": props.options?.padding === "24",
+												grow: props.options?.growContent,
+											})}
+										>
+											<PanelNestingContext.Provider value={nestingState}>
+												<PanelLayerContext.Provider value={zIndex}>
+													<PanelChildren />
+												</PanelLayerContext.Provider>
+											</PanelNestingContext.Provider>
+										</div>
+										<Show when={!props.options?.hideFooter}>
+											<div
+												class={classNames({
+													"px-4": props.options?.padding === "16",
+													"px-4 md:px-6": props.options?.padding === "24",
+												})}
+											>
+												<PanelFooter padding={props.options?.padding}>
+													<div class="min-w-0">
+														<Show when={props.mutateState?.errors?.message}>
+															<ErrorMessage
+																theme="basic"
+																message={props.mutateState?.errors?.message}
+															/>
+														</Show>
+													</div>
+													<div class="flex min-w-max gap-2">
+														<Button
+															size="medium"
+															theme="border-outline"
+															type="button"
+															onClick={() => props.state.setOpen(false)}
+														>
+															{props.copy?.cancel ?? T()("common.close")}
+														</Button>
+														<Show when={props.copy?.submit}>
+															<Button
+																type="submit"
+																theme="primary"
+																size="medium"
+																loading={props.mutateState?.isLoading}
+																disabled={props.mutateState?.isDisabled}
+															>
+																{props.copy?.submit}
+															</Button>
+														</Show>
+													</div>
+												</PanelFooter>
+											</div>
+										</Show>
+									</form>
+								</Show>
+							</Match>
+						</Switch>
+					</Dialog.Content>
+				</div>
+			</Dialog.Portal>
+		</Dialog.Root>
+	);
+};

@@ -11,7 +11,7 @@ import type {
 	UserRef,
 } from "@types";
 import { nanoid } from "nanoid";
-import brickStore, { type BrickData } from "@/store/brick-store";
+import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import { isDocumentRef } from "@/utils/document-ref-helpers";
 

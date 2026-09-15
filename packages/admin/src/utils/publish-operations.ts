@@ -4,7 +4,7 @@ import type {
 	PublishOperationStatus,
 	PublishOperationUser,
 } from "@types";
-import type { PillProps } from "@/components/Partials/Pill";
+import type { PillProps } from "@/components/Pill/Pill";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 

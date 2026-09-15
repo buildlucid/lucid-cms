@@ -1,0 +1,165 @@
+import type { Media } from "@types";
+import classNames from "classnames";
+import { type Accessor, type Component, createMemo, Show } from "solid-js";
+import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
+import AspectRatio from "@/components/AspectRatio/AspectRatio";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
+import MediaPreview from "@/components/MediaPreview/MediaPreview";
+import { mediaStatusBorderClass } from "@/components/MediaStatusPreview/MediaStatusPreview";
+import { Permissions } from "@/constants/permissions";
+import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
+import userStore from "@/store/userStore/userStore";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
+
+interface MediaBasicCardProps {
+	media: Media;
+	current: boolean;
+	contentLocale?: string;
+	onClick?: () => void;
+	onSelect?: () => void;
+	selected?: boolean;
+	isSelectable?: boolean;
+	rowTarget?: ReturnType<typeof useRowTarget<"clear" | "restore">>;
+	showingDeleted?: Accessor<boolean>;
+}
+
+export const MediaBasicCardLoading: Component = () => {
+	// ----------------------------------
+	// Return
+	return (
+		<li class={"bg-background-base border-border border rounded-md"}>
+			<AspectRatio ratio="16:9">
+				<span class="skeleton block w-full h-full rounded-b-none" />
+			</AspectRatio>
+			<div class="p-2.5">
+				<span class="skeleton block h-5 w-1/2 mb-2" />
+				<span class="skeleton block h-5 w-full" />
+			</div>
+		</li>
+	);
+};
+
+const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
+	// ----------------------------------
+	// Memos
+	const hasUpdatePermission = createMemo(() => {
+		return userStore.get.hasPermission([Permissions.MediaUpdate]).all;
+	});
+	const title = createMemo(() => {
+		return helpers.getTranslation(props.media.title, props.contentLocale);
+	});
+	const displayTitle = createMemo(() => {
+		return title() || helpers.formatFileNameTitle(props.media.fileName);
+	});
+	const alt = createMemo(() => {
+		if (props.media.type !== "image") return null;
+		return helpers.getTranslation(props.media.alt, props.contentLocale);
+	});
+	const showRestore = createMemo(() => props.showingDeleted?.() === true);
+
+	// ----------------------------------
+	// Return
+	return (
+		<li
+			class={classNames(
+				"bg-card-base hover:bg-row-hover border rounded-md group overflow-hidden relative cursor-pointer transition-colors duration-200",
+				mediaStatusBorderClass(props.media.status),
+			)}
+			onClick={() => {
+				props.onClick?.();
+			}}
+			onKeyDown={(e) => {
+				if (e.key === "Enter") {
+					props.onClick?.();
+				}
+			}}
+		>
+			<Show when={props.rowTarget !== undefined}>
+				<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
+					<ActionDropdown
+						actions={[
+							{
+								label: T()("common.restore"),
+								type: "button",
+								icon: "restore",
+								onClick: () => {
+									props.rowTarget?.setTargetId(props.media.id);
+									props.rowTarget?.setTrigger("restore", true);
+								},
+								permission: hasUpdatePermission(),
+								hide: showRestore() === false,
+								theme: "primary",
+							},
+							{
+								label: T()("media.processed.clear.action"),
+								type: "button",
+								icon: "broom",
+								onClick: () => {
+									props.rowTarget?.setTargetId(props.media.id);
+									props.rowTarget?.setTrigger("clear", true);
+								},
+								hide:
+									props.media.type !== "image" ||
+									props.media.status !== "ready",
+								permission: hasUpdatePermission(),
+								theme: "error",
+							},
+						]}
+						options={{
+							border: true,
+						}}
+					/>
+				</div>
+			</Show>
+			{/* Image */}
+			<AspectRatio
+				ratio="16:9"
+				innerClass={classNames("overflow-hidden", {
+					"rectangle-background":
+						props.media.type === "image" ||
+						(props.media.type === "video" && props.media.poster),
+				})}
+			>
+				<MediaPreview
+					media={{
+						status: props.media.status,
+						type: props.media.type,
+						url: props.media.url,
+						delivery: props.media.delivery,
+						sources:
+							props.media.type === "video" ? props.media.sources : undefined,
+						poster:
+							props.media.type === "video" ? props.media.poster : undefined,
+					}}
+					alt={alt() || displayTitle() || ""}
+					imageFit={
+						props.media.type === "image" ||
+						(props.media.type === "video" && props.media.poster)
+							? "contain"
+							: undefined
+					}
+				/>
+			</AspectRatio>
+			{/* Content */}
+			<div class="border-t border-border p-2">
+				<div class="flex items-center gap-3">
+					<Show when={props.isSelectable}>
+						<Checkbox
+							value={props.selected === true}
+							onChange={() => props.onSelect?.()}
+							copy={{}}
+							noMargin={true}
+							fullWidth={false}
+						/>
+					</Show>
+					<h3 class="line-clamp-1 text-sm flex-1">
+						{displayTitle() || T()("empty.states.translation")}
+					</h3>
+				</div>
+			</div>
+		</li>
+	);
+};
+
+export default MediaBasicCard;

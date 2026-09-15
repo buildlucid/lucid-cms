@@ -1,0 +1,439 @@
+import type {
+	Collection,
+	DocumentVersionType,
+	InternalCollectionDocument,
+} from "@types";
+import { type Accessor, createMemo, createSignal } from "solid-js";
+import type api from "@/services/api";
+import brickStore from "@/store/brickStore/brickStore";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
+import userStore from "@/store/userStore/userStore";
+import brickHelpers from "@/utils/brick-helpers";
+import { createDocumentLocalization } from "../useDocumentLocalization/useDocumentLocalization";
+import useUserPreference from "../useUserPreference/useUserPreference";
+
+export function useDocumentUIState(props: {
+	collectionQuery: ReturnType<typeof api.collections.useGetSingle>;
+	collection: Accessor<Collection | undefined>;
+	collectionKey: Accessor<string>;
+	documentQuery: ReturnType<typeof api.documents.useGetSingle>;
+	document: Accessor<InternalCollectionDocument | undefined>;
+	mode: "create" | "edit" | "history";
+	version: Accessor<"latest" | string>;
+	versionId: Accessor<number | undefined>;
+	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
+	createSingleVersionMutation?: ReturnType<
+		typeof api.documents.useCreateSingleVersion
+	>;
+	updateSingleVersionMutation?: ReturnType<
+		typeof api.documents.useUpdateSingleVersion
+	>;
+	createPublishOperationMutation?: ReturnType<
+		typeof api.documents.useCreatePublishOperation
+	>;
+}) {
+	const { contentLocale } = createDocumentLocalization(props.collection);
+	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
+	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
+	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
+	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
+		createSignal<number | null>(null);
+	const [autoSaveUserEnabled] = useUserPreference({
+		value: userPreferencesStore.getAutoSaveEnabled,
+		setValue: userPreferencesStore.setAutoSaveEnabled,
+		defaultValue: true,
+	});
+	const [getPreferredPreviewOpen, setPreviewOpen] = useUserPreference({
+		value: () =>
+			props.collectionKey()
+				? userPreferencesStore.getCollectionPreviewOpen(props.collectionKey())
+				: undefined,
+		setValue: (open) => {
+			if (props.collectionKey()) {
+				userPreferencesStore.setCollectionPreviewOpen(
+					props.collectionKey(),
+					open,
+				);
+			}
+		},
+		defaultValue: false,
+	});
+
+	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
+		createSignal(false);
+	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
+		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
+	const [getReleaseEnvironmentAction, setReleaseEnvironmentAction] =
+		createSignal<"publish" | "request" | null>(null);
+
+	/**
+	 * Checkss if services requests are loading or not
+	 */
+	const isLoading = createMemo(() => {
+		return props.collectionQuery.isLoading || props.documentQuery.isLoading;
+	});
+
+	/**
+	 * Checks if loading the required resources was successful
+	 */
+	const isSuccess = createMemo(() => {
+		if (props.mode === "create") {
+			return props.collectionQuery.isSuccess;
+		}
+		return props.collectionQuery.isSuccess && props.documentQuery.isSuccess;
+	});
+
+	/**
+	 * Checks if the documnet is saving
+	 */
+	const isSaving = createMemo(() => {
+		return (
+			props.createSingleVersionMutation?.action.isPending ||
+			props.createDocumentMutation?.action.isPending
+			// props.updateSingleVersionMutation?.action.isPending
+		);
+	});
+
+	/**
+	 * Checks if auto save is currently running
+	 */
+	const isAutoSaving = createMemo(() => {
+		return props.updateSingleVersionMutation?.action.isPending || false;
+	});
+
+	/**
+	 * Checks if a publish operation mutation is currently running
+	 */
+	const isCreatingPublishOperation = createMemo(() => {
+		return props.createPublishOperationMutation?.action.isPending || false;
+	});
+
+	/**
+	 * Collates mutation errors for the update and create doc services
+	 */
+	const mutateErrors = createMemo(() => {
+		return (
+			props.createSingleVersionMutation?.errors() ||
+			props.createDocumentMutation?.errors()
+		);
+	});
+
+	/**
+	 * Checks for any translations errors
+	 */
+	const brickTranslationErrors = createMemo(() => {
+		return brickHelpers.hasErrorsOnOtherLocale({
+			fieldErrors: brickStore.get.fieldsErrors,
+			brickErrors: brickStore.get.brickErrors,
+			currentLocale: contentLocale() || "",
+		});
+	});
+
+	/**
+	 * Determines if the collection needs migrating
+	 */
+	const collectionNeedsMigrating = createMemo(() => {
+		return props.collection()?.migrationStatus?.requiresMigration === true;
+	});
+
+	/**
+	 * Determines if the auto save is enabled on the collection
+	 */
+	const autoSave = createMemo(() => {
+		return props.collection()?.autoSave;
+	});
+
+	/**
+	 * Determines if auto-save is actively running (both collection config AND user preference enabled)
+	 */
+	const isAutoSaveActive = createMemo(() => {
+		if (props.mode === "create") return false;
+		if (props.mode === "history") return false;
+		if (props.version() !== "latest") return false;
+		if (props.document()?.isDeleted) return false;
+		const permission = props.collection()?.permissions.update;
+		if (!permission) return false;
+
+		return (
+			userStore.get.hasPermission([permission]).all &&
+			autoSave() &&
+			autoSaveUserEnabled()
+		);
+	});
+
+	/**
+	 * Determines if the save button should be disabled
+	 */
+	const saveDisabled = createMemo(() => {
+		if (isAutoSaveActive()) {
+			return isSaving() || isAutoSaving() || brickStore.getDocumentMutated();
+		}
+		return !brickStore.getDocumentMutated() || isSaving();
+	});
+
+	/**
+	 * Determines if you can publish the document
+	 */
+	const canPublishDocument = createMemo(() => {
+		// Fallback, if the document has been mutated and not saved
+		return !brickStore.getDocumentMutated() && !isSaving() && !mutateErrors();
+	});
+
+	/**
+	 * Determines if the builder should be locked
+	 */
+	const isBuilderLocked = createMemo(() => {
+		if (props.mode === "history") return true;
+
+		// lock builder if collection is locked
+		if (props.collection()?.locked === true) {
+			return true;
+		}
+
+		// lock builder if document is deleted
+		if (props.document()?.isDeleted === true) {
+			return true;
+		}
+
+		// lock version, if not the latest version
+		if (props.version() !== "latest") {
+			return true;
+		}
+
+		// builder not locked
+		return false;
+	});
+
+	/**
+	 * Checks if there is a published version of the document
+	 */
+	const isPublished = createMemo(() => {
+		return (
+			props.document()?.versions?.published?.id !== null &&
+			props.document()?.versions?.published?.id !== undefined
+		);
+	});
+
+	/**
+	 * Determines if the revision navigation should show
+	 */
+	const showRevisionNavigation = createMemo(() => {
+		// if (props.mode === "create") return false;
+		return Boolean(props.collection()?.revisions.enabled);
+	});
+
+	/**
+	 * Determines when the upsert button should be visible
+	 */
+	const showUpsertButton = createMemo(() => {
+		if (isBuilderLocked()) return false;
+
+		if (props.mode === "create") return true;
+		if (props.version() === "latest") return true;
+
+		return false;
+	});
+
+	/**
+	 * Determines if the publish button should be visible
+	 */
+	const showPublishButton = createMemo(() => {
+		if (props.mode === "create" || isBuilderLocked()) return false;
+		if (props.version() !== "latest") return false;
+		return true;
+	});
+
+	/**
+	 * Determines if the delete document button should be visible
+	 */
+	const showDeleteButton = createMemo(() => {
+		if (props.document()?.isDeleted) return false;
+		return props.mode === "edit" && props.collection()?.mode === "multiple";
+	});
+
+	/**
+	 * Determines if the duplicate document button should be visible
+	 */
+	const showDuplicateButton = createMemo(() => {
+		if (props.mode !== "edit") return false;
+		if (props.version() !== "latest") return false;
+		if (props.document()?.isDeleted) return false;
+		if (props.collection()?.locked) return false;
+		return props.collection()?.mode === "multiple";
+	});
+
+	/**
+	 * Prevents duplication until the latest local changes have been persisted
+	 */
+	const duplicateDisabled = createMemo(
+		() => brickStore.getDocumentMutated() || isSaving() || isAutoSaving(),
+	);
+
+	/**
+	 * Determines if the user should be able to save (update/create) documents
+	 */
+	const hasSavePermission = createMemo(() => {
+		if (props.mode === "create") {
+			const permission = props.collection()?.permissions.create;
+			if (!permission) return false;
+
+			return userStore.get.hasPermission([permission]).all;
+		}
+
+		const permission = props.collection()?.permissions.update;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
+	});
+
+	/**
+	 * Determines if the auto save should be enabled
+	 */
+	const hasAutoSavePermission = createMemo(() => {
+		if (props.mode === "create") return false;
+		if (props.mode === "history") return false;
+		if (props.version() !== "latest") return false;
+		if (props.document()?.isDeleted) return false;
+
+		const permission = props.collection()?.permissions.update;
+		if (!permission) return false;
+
+		return (
+			userStore.get.hasPermission([permission]).all &&
+			props.collection()?.autoSave
+		);
+	});
+
+	/**
+	 * Determines if the user has publish permission
+	 */
+	const hasPublishPermission = createMemo(() => {
+		const target = getReleaseEnvironmentTarget();
+
+		const environmentPermission = props
+			.collection()
+			?.publishing.targets.find((environment) => environment.key === target)
+			?.permissions.publish;
+
+		const permission =
+			target !== null
+				? environmentPermission
+				: props.collection()?.permissions.publish;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
+	});
+
+	/**
+	 * Determines if the user has delete permission
+	 */
+	const hasDeletePermission = createMemo(() => {
+		const permission = props.collection()?.permissions.delete;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
+	});
+
+	/**
+	 * Duplicating reads the source and creates a new document
+	 */
+	const hasDuplicatePermission = createMemo(() => {
+		const permissions = props.collection()?.permissions;
+		if (!permissions) return false;
+
+		return userStore.get.hasPermission([permissions.read, permissions.create])
+			.all;
+	});
+
+	/**
+	 * Determines if the restore reviision button should be visible
+	 */
+	const showRestoreRevisionButton = createMemo(() => {
+		if (props.mode === "create") return false;
+		if (props.mode === "history") return false;
+		if (props.version() !== "revision") return false;
+		if (props.document()?.isDeleted) return false;
+		if (props.collection()?.revisions.enabled === false) return false;
+		if (props.versionId() === undefined) return false;
+		return true;
+	});
+
+	/**
+	 * Determines if the document preview is available for the current view
+	 */
+	const showPreview = createMemo(() => {
+		const version = props.version();
+		const requiresVersionId = version === "revision" || version === "snapshot";
+
+		return (
+			props.mode === "edit" &&
+			props.document()?.id !== undefined &&
+			(!requiresVersionId || props.versionId() !== undefined) &&
+			props.document()?.isDeleted !== true &&
+			props.collection()?.capabilities.preview === true
+		);
+	});
+	const getPreviewOpen = createMemo(
+		() => showPreview() && getPreferredPreviewOpen(),
+	);
+
+	/**
+	 * Determines if the user has permission to restore documents
+	 */
+	const hasRestorePermission = createMemo(() => {
+		const permission = props.collection()?.permissions.restore;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
+	});
+
+	// ------------------------------------------
+	// Return
+	return {
+		getDeleteOpen,
+		setDeleteOpen,
+		getDuplicateOpen,
+		setDuplicateOpen,
+		getRestoreRevisionOpen,
+		setRestoreRevisionOpen,
+		getRestoreRevisionVersionId,
+		setRestoreRevisionVersionId,
+		getPreviewOpen,
+		setPreviewOpen,
+		getReleaseEnvironmentOpen,
+		setReleaseEnvironmentOpen,
+		getReleaseEnvironmentTarget,
+		setReleaseEnvironmentTarget,
+		getReleaseEnvironmentAction,
+		setReleaseEnvironmentAction,
+		isLoading,
+		isSuccess,
+		isSaving,
+		isAutoSaving,
+		brickTranslationErrors,
+		saveDisabled,
+		canPublishDocument,
+		isBuilderLocked,
+		isPublished,
+		showRevisionNavigation,
+		showUpsertButton,
+		hasSavePermission,
+		hasPublishPermission,
+		showPublishButton,
+		showDeleteButton,
+		hasDeletePermission,
+		showDuplicateButton,
+		duplicateDisabled,
+		hasDuplicatePermission,
+		collectionNeedsMigrating,
+		autoSave,
+		hasAutoSavePermission,
+		isCreatingPublishOperation,
+		isAutoSaveActive,
+		showRestoreRevisionButton,
+		showPreview,
+		hasRestorePermission,
+		autoSaveUserEnabled,
+	};
+}
+export type UseDocumentUIState = ReturnType<typeof useDocumentUIState>;

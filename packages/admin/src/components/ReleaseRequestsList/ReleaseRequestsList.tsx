@@ -1,0 +1,332 @@
+import type {
+	Collection,
+	PublishOperation,
+	PublishOperationStatus,
+} from "@types";
+import {
+	FaSolidCalendar,
+	FaSolidCircleCheck,
+	FaSolidClock,
+	FaSolidComment,
+	FaSolidT,
+	FaSolidUser,
+	FaSolidUsers,
+} from "solid-icons/fa";
+import { type Component, createMemo, createSignal, Index } from "solid-js";
+import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import PublishOperationDecisionModal, {
+	type PublishOperationDecisionAction,
+} from "@/components/PublishOperationDecisionModal/PublishOperationDecisionModal";
+import PublishOperationReviewersModal from "@/components/PublishOperationReviewersModal/PublishOperationReviewersModal";
+import PublishOperationScheduleModal from "@/components/PublishOperationScheduleModal/PublishOperationScheduleModal";
+import ReleaseRequestTableRow from "@/components/ReleaseRequestTableRow/ReleaseRequestTableRow";
+import { Table } from "@/components/Table/Table";
+import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
+import api from "@/services/api";
+import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
+import userStore from "@/store/userStore/userStore";
+import T from "@/translations";
+import spawnToast from "@/utils/spawn-toast";
+
+export const ReleaseRequestsList: Component<{
+	state: {
+		searchParams: QueryStateResponse;
+	};
+	data: {
+		collections: Collection[];
+		collectionLabels: Map<string, string>;
+		reviewCollectionKeys: Set<string>;
+	};
+	status: {
+		collections: {
+			isError: boolean;
+			isSuccess: boolean;
+			isLoading: boolean;
+		};
+	};
+}> = (props) => {
+	// ----------------------------------
+	// State / Hooks
+	const [selectedOperation, setSelectedOperation] =
+		createSignal<PublishOperation>();
+	const [decisionOpen, setDecisionOpen] = createSignal(false);
+	const [decisionAction, setDecisionAction] =
+		createSignal<PublishOperationDecisionAction>();
+	const [scheduleOpen, setScheduleOpen] = createSignal(false);
+	const [reviewersOpen, setReviewersOpen] = createSignal(false);
+
+	// -------------------------------
+	// Queries & Mutations
+	const retry = api.publishOperations.useRetry();
+	const createPreview = api.documents.useCreatePreview();
+
+	// ----------------------------------
+	// Memos
+	const collectionMap = createMemo(
+		() =>
+			new Map(
+				props.data.collections.map((collection) => [
+					collection.key,
+					collection,
+				]),
+			),
+	);
+	const hasStatusFilter = createMemo(() => {
+		const value = props.state.searchParams.filters().get("status");
+		if (Array.isArray(value)) return value.length > 0;
+		return typeof value === "string" && value.length > 0;
+	});
+
+	// -------------------------------
+	// Queries
+	const requests = api.publishOperations.useGetMultiple({
+		queryParams: {
+			queryString: props.state.searchParams.queryString,
+			filters: {
+				status: () =>
+					hasStatusFilter()
+						? undefined
+						: ([
+								"pending",
+								"approved",
+								"rejected",
+								"cancelled",
+							] satisfies PublishOperationStatus[]),
+				operationType: () => "request",
+			},
+		},
+		enabled: () => props.state.searchParams.ready(),
+	});
+
+	// ------------------------------
+	// Memos
+	const rows = createMemo(() =>
+		(requests.data?.data ?? []).filter((request) =>
+			props.data.reviewCollectionKeys.has(request.collectionKey),
+		),
+	);
+	const selectedCollection = createMemo(() => {
+		const operation = selectedOperation();
+		if (!operation) return undefined;
+
+		return collectionMap().get(operation.collectionKey);
+	});
+
+	// ----------------------------------
+	// Functions
+	const openDecision = (
+		operation: PublishOperation,
+		action: PublishOperationDecisionAction,
+	) => {
+		setSelectedOperation(operation);
+		setDecisionAction(action);
+		setDecisionOpen(true);
+	};
+	const openSchedule = (operation: PublishOperation) => {
+		setSelectedOperation(operation);
+		setScheduleOpen(true);
+	};
+	const openReviewers = (operation: PublishOperation) => {
+		setSelectedOperation(operation);
+		setReviewersOpen(true);
+	};
+	const copyPreviewUrl = async (operation: PublishOperation) => {
+		try {
+			const response = await createPreview.action.mutateAsync({
+				collectionKey: operation.collectionKey,
+				documentId: operation.documentId,
+				versionType: "snapshot",
+				versionId: operation.snapshotVersionId,
+				mode: "scoped",
+				locale: contentLocaleStore.get.contentLocale || undefined,
+			});
+			if (!response.data.url) {
+				spawnToast({
+					title: T()("preview.unavailable.title"),
+					message: T()("preview.unavailable.message"),
+					status: "warning",
+				});
+				return;
+			}
+
+			await navigator.clipboard.writeText(response.data.url);
+			spawnToast({
+				title: T()("toasts.common.copy.to.clipboard.title"),
+				status: "success",
+			});
+		} catch {
+			return;
+		}
+	};
+	const previewAvailable = (operation: PublishOperation) =>
+		collectionMap().get(operation.collectionKey)?.capabilities.preview === true;
+	const previewPermission = (operation: PublishOperation) => {
+		const permission = collectionMap().get(operation.collectionKey)?.permissions
+			.read;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).some;
+	};
+
+	// ----------------------------------------
+	// Render
+	return (
+		<>
+			<DynamicContent
+				state={{
+					isError: requests.isError || props.status.collections.isError,
+					isSuccess: requests.isSuccess && props.status.collections.isSuccess,
+					isLoading:
+						requests.isLoading ||
+						props.status.collections.isLoading ||
+						!props.state.searchParams.ready(),
+					isEmpty: rows().length === 0,
+					searchParams: props.state.searchParams,
+				}}
+				slot={{
+					footer: (
+						<PaginatedFooter
+							state={{
+								searchParams: props.state.searchParams,
+								meta: requests.data?.meta,
+							}}
+							options={{
+								padding: "24",
+							}}
+						/>
+					),
+				}}
+				copy={{
+					noEntries: {
+						title: T()("empty.states.publish.requests.title"),
+						description: T()("empty.states.publish.requests.description"),
+					},
+				}}
+			>
+				<Table
+					key={"release-requests.list"}
+					rows={rows().length}
+					searchParams={props.state.searchParams}
+					head={[
+						{
+							label: T()("documents.release.request"),
+							key: "request",
+							icon: <FaSolidT />,
+							minWidth: 320,
+						},
+						{
+							label: T()("common.status"),
+							key: "status",
+							icon: <FaSolidCircleCheck />,
+						},
+						{
+							label: T()("common.execution.status"),
+							key: "executionStatus",
+							icon: <FaSolidClock />,
+						},
+						{
+							label: T()("common.requested.by"),
+							key: "requestedBy",
+							icon: <FaSolidUser />,
+						},
+						{
+							label: T()("common.reviewers"),
+							key: "reviewers",
+							icon: <FaSolidUsers />,
+						},
+						{
+							label: T()("common.comments"),
+							key: "comments",
+							icon: <FaSolidComment />,
+							minWidth: 280,
+						},
+						{
+							label: T()("common.requested.at"),
+							key: "createdAt",
+							icon: <FaSolidCalendar />,
+							sortable: true,
+						},
+						{
+							label: T()("common.scheduled.for"),
+							key: "scheduledAt",
+							icon: <FaSolidCalendar />,
+							sortable: true,
+						},
+					]}
+					state={{
+						isLoading: requests.isFetching,
+						isSuccess: requests.isSuccess,
+					}}
+					options={{
+						isSelectable: false,
+					}}
+				>
+					{({ include, isSelectable, selected, setSelected }) => (
+						<Index each={rows()}>
+							{(request, i) => (
+								<ReleaseRequestTableRow
+									index={i}
+									request={request()}
+									collectionLabel={
+										props.data.collectionLabels.get(request().collectionKey) ??
+										request().collectionKey
+									}
+									include={include}
+									selected={selected[i]}
+									options={{
+										isSelectable,
+									}}
+									preview={{
+										available: previewAvailable(request()),
+										permission: previewPermission(request()),
+										loading: createPreview.action.isPending,
+										onCopy: () => void copyPreviewUrl(request()),
+									}}
+									callbacks={{
+										setSelected,
+										openDecision,
+										openSchedule,
+										openReviewers,
+										retry: (operation) => {
+											void retry.action.mutateAsync({
+												id: operation.id,
+											});
+										},
+									}}
+								/>
+							)}
+						</Index>
+					)}
+				</Table>
+			</DynamicContent>
+			<PublishOperationDecisionModal
+				collection={selectedCollection}
+				operation={selectedOperation}
+				action={decisionAction}
+				state={{
+					open: decisionOpen(),
+					setOpen: setDecisionOpen,
+				}}
+				callbacks={{
+					onClose: () => setDecisionAction(undefined),
+					onSuccess: () => setDecisionAction(undefined),
+				}}
+			/>
+			<PublishOperationScheduleModal
+				operation={selectedOperation}
+				state={{
+					open: scheduleOpen(),
+					setOpen: setScheduleOpen,
+				}}
+			/>
+			<PublishOperationReviewersModal
+				operation={selectedOperation}
+				state={{
+					open: reviewersOpen(),
+					setOpen: setReviewersOpen,
+				}}
+			/>
+		</>
+	);
+};

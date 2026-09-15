@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import type { ResponseBody } from "@types";
-import siteStore from "@/store/siteStore";
-import userStore from "@/store/userStore";
+import siteStore from "@/store/siteStore/siteStore";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";

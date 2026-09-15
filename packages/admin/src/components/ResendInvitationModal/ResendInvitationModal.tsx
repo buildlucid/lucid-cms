@@ -1,0 +1,53 @@
+import type { Accessor, Component } from "solid-js";
+import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import api from "@/services/api";
+import T from "@/translations";
+
+const ResendInvitationModal: Component<{
+	id: Accessor<number | undefined>;
+	state: {
+		open: boolean;
+		setOpen: (_open: boolean) => void;
+	};
+}> = (props) => {
+	const resendInvitation = api.users.useResendInvitation({
+		onSuccess: () => {
+			props.state.setOpen(false);
+		},
+	});
+
+	return (
+		<ConfirmationModal
+			theme="primary"
+			state={{
+				open: props.state.open,
+				setOpen: props.state.setOpen,
+				isLoading: resendInvitation.action.isPending,
+				isError: resendInvitation.action.isError,
+			}}
+			copy={{
+				title: T()("modals.users.resend.invitation.title"),
+				description: T()("modals.users.resend.invitation.description"),
+				error: resendInvitation.errors()?.message,
+			}}
+			callbacks={{
+				onConfirm: () => {
+					const id = props.id();
+					if (!id) {
+						console.error("No id provided for resend invitation");
+						return;
+					}
+					resendInvitation.action.mutate({
+						userId: id,
+					});
+				},
+				onCancel: () => {
+					props.state.setOpen(false);
+					resendInvitation.reset();
+				},
+			}}
+		/>
+	);
+};
+
+export default ResendInvitationModal;

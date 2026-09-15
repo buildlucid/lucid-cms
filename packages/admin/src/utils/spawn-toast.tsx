@@ -1,5 +1,5 @@
 import toast from "solid-toast";
-import CustomToast from "@/components/Partials/CustomToast";
+import CustomToast from "@/components/CustomToast/CustomToast";
 
 interface SpawnToastProps {
 	title: string;

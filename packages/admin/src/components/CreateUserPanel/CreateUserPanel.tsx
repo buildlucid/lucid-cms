@@ -1,0 +1,205 @@
+import { type Component, createMemo, createSignal, Show } from "solid-js";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
+import { Input } from "@/components/Input/Input";
+import InputGrid from "@/components/InputGrid/InputGrid";
+import { Panel } from "@/components/Panel/Panel";
+import type { SelectMultipleValueT } from "@/components/SelectMultiple/SelectMultiple";
+import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
+import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
+import T from "@/translations";
+import { getBodyError } from "@/utils/error-helpers";
+
+interface CreateUserPanelProps {
+	state: {
+		open: boolean;
+		setOpen: (_state: boolean) => void;
+	};
+}
+
+const CreateUserPanel: Component<CreateUserPanelProps> = (props) => {
+	// ------------------------------
+	// State
+	const [getSelectedRoles, setSelectedRoles] = createSignal<
+		SelectMultipleValueT[]
+	>([]);
+	const [getUsername, setUsername] = createSignal<string>("");
+	const [getFirstName, setFirstName] = createSignal<string>("");
+	const [getLastName, setLastName] = createSignal<string>("");
+	const [getEmail, setEmail] = createSignal<string>("");
+	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
+
+	// ---------------------------------
+	// Queries
+	const roles = api.roles.useGetMultiple({
+		queryParams: {
+			include: {
+				permissions: false,
+			},
+			perPage: -1,
+		},
+		enabled: () => props.state.open,
+	});
+
+	// ---------------------------------
+	// Mutations
+	const createUser = api.users.useCreateSingle({
+		onSuccess: () => {
+			props.state.setOpen(false);
+		},
+	});
+
+	// ---------------------------------
+	// Memos
+	const isLoading = createMemo(() => {
+		return roles.isLoading;
+	});
+	const isError = createMemo(() => {
+		return roles.isError;
+	});
+	const mutationIsPending = createMemo(() => {
+		return createUser.action.isPending;
+	});
+	const roleOptions = createMemo(() => {
+		return (
+			roles.data?.data.map((role) => ({
+				value: role.id,
+				label: role.name,
+			})) ?? []
+		);
+	});
+	// ---------------------------------
+	// Render
+	return (
+		<Panel
+			state={{
+				open: props.state.open,
+				setOpen: props.state.setOpen,
+			}}
+			fetchState={{
+				isLoading: isLoading(),
+				isError: isError(),
+			}}
+			mutateState={{
+				isLoading: mutationIsPending(),
+				errors: createUser.errors(),
+			}}
+			callbacks={{
+				onSubmit: () => {
+					createUser.action.mutate({
+						body: {
+							email: getEmail(),
+							username: getUsername(),
+							firstName: getFirstName() || undefined,
+							lastName: getLastName() || undefined,
+							superAdmin: userStore.get.user?.superAdmin
+								? getIsSuperAdmin()
+								: undefined,
+							roleIds: getSelectedRoles().map((role) => role.value) as number[],
+						},
+					});
+				},
+				reset: () => {
+					createUser.reset();
+					setUsername("");
+					setFirstName("");
+					setLastName("");
+					setEmail("");
+					setIsSuperAdmin(false);
+					setSelectedRoles([]);
+				},
+			}}
+			copy={{
+				title: T()("panels.users.create.title"),
+				description: T()("panels.users.create.description"),
+				submit: T()("common.create"),
+			}}
+			options={{
+				padding: "24",
+			}}
+		>
+			{() => (
+				<>
+					<Input
+						id="username"
+						value={getUsername()}
+						onChange={setUsername}
+						name={"username"}
+						type="text"
+						copy={{
+							label: T()("common.username"),
+						}}
+						required={true}
+						errors={getBodyError("username", createUser.errors)}
+					/>
+					<InputGrid columns={2}>
+						<Input
+							id="firstName"
+							value={getFirstName()}
+							onChange={setFirstName}
+							name={"firstName"}
+							type="text"
+							copy={{
+								label: T()("common.first.name"),
+							}}
+							noMargin={true}
+							errors={getBodyError("firstName", createUser.errors)}
+						/>
+						<Input
+							id="lastName"
+							value={getLastName()}
+							onChange={setLastName}
+							name={"lastName"}
+							type="text"
+							copy={{
+								label: T()("common.last.name"),
+							}}
+							noMargin={true}
+							errors={getBodyError("lastName", createUser.errors)}
+						/>
+					</InputGrid>
+					<InputGrid columns={1}>
+						<Input
+							id="email"
+							value={getEmail()}
+							onChange={setEmail}
+							name={"email"}
+							type="text"
+							copy={{
+								label: T()("common.email"),
+							}}
+							noMargin={true}
+							required={true}
+							errors={getBodyError("email", createUser.errors)}
+						/>
+					</InputGrid>
+					<SelectMultiple
+						id="roleIds"
+						values={getSelectedRoles()}
+						onChange={setSelectedRoles}
+						name={"roleIds"}
+						copy={{
+							label: T()("common.roles"),
+						}}
+						options={roleOptions()}
+						errors={getBodyError("roleIds", createUser.errors)}
+					/>
+					<Show when={userStore.get.user?.superAdmin}>
+						<Checkbox
+							id="superAdmin"
+							value={getIsSuperAdmin()}
+							onChange={(value) => setIsSuperAdmin(value)}
+							name={"superAdmin"}
+							copy={{
+								label: T()("users.super.admin.label"),
+							}}
+							errors={getBodyError("superAdmin", createUser.errors)}
+						/>
+					</Show>
+				</>
+			)}
+		</Panel>
+	);
+};
+
+export default CreateUserPanel;

@@ -1,5 +1,5 @@
 import type { CustomFieldInputGenerateResponse, ResponseBody } from "@types";
-import type { CustomFieldGenerationDocument } from "@/store/aiModalsStore";
+import type { CustomFieldGenerationDocument } from "@/store/aiModalsStore/aiModalsStore";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";

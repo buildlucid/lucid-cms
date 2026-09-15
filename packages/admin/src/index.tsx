@@ -1,7 +1,7 @@
 /* @refresh reload */
 import "./index.css";
 import { render } from "solid-js/web";
-import "@/store/themeStore";
+import "@/store/themeStore/themeStore";
 import App from "./App";
 
 const root = document.getElementById("root");

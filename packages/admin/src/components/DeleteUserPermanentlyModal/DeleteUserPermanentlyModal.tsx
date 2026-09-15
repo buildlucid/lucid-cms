@@ -1,0 +1,57 @@
+import type { Accessor, Component } from "solid-js";
+import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import api from "@/services/api";
+import T from "@/translations";
+
+interface DeleteUserPermanentlyProps {
+	id: Accessor<number | undefined>;
+	state: {
+		open: boolean;
+		setOpen: (_open: boolean) => void;
+	};
+}
+
+const DeleteUserPermanentlyModal: Component<DeleteUserPermanentlyProps> = (
+	props,
+) => {
+	// ----------------------------------------
+	// Mutations
+	const permaDelete = api.users.useDeleteSinglePermanently({
+		onSuccess: () => {
+			props.state.setOpen(false);
+		},
+	});
+
+	// ------------------------------
+	// Render
+	return (
+		<ConfirmationModal
+			state={{
+				open: props.state.open,
+				setOpen: props.state.setOpen,
+				isLoading: permaDelete.action.isPending,
+				isError: permaDelete.action.isError,
+			}}
+			copy={{
+				title: T()("modals.common.delete.user.permanently.title"),
+				description: T()("modals.common.delete.user.permanently.description"),
+				error: permaDelete.errors()?.message,
+			}}
+			callbacks={{
+				onConfirm: () => {
+					const id = props.id();
+					if (!id) return console.error("No id provided");
+					permaDelete.action.mutate({
+						id: id,
+					});
+				},
+				onCancel: () => {
+					props.state.setOpen(false);
+					permaDelete.reset();
+				},
+			}}
+		/>
+	);
+};
+
+export default DeleteUserPermanentlyModal;

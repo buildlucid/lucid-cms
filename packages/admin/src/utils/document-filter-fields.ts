@@ -6,7 +6,7 @@ import {
 	numberFilter,
 	type QueryFilterSchema,
 	textFilter,
-} from "@/hooks/useQueryState";
+} from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 import type {
 	CollectionBrickConfig,
