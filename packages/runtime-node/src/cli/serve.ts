@@ -1,4 +1,6 @@
-import { serve } from "@hono/node-server";
+import { createServer } from "node:http";
+import { getRequestListener } from "@hono/node-server";
+import { createCliAdmin } from "@lucidcms/core/build";
 import { createLucidHost, withResponseCleanup } from "@lucidcms/core/runtime";
 import type { ServeHandler } from "@lucidcms/core/types";
 import getRuntimeContext from "../services/runtime-context.js";
@@ -6,7 +8,15 @@ import type { NodeAdapterOptions } from "../types.js";
 
 const serveCommand =
 	(options: NodeAdapterOptions | undefined): ServeHandler =>
-	async ({ config, env, translationStore, logger, onListening }) => {
+	async ({
+		config,
+		env,
+		translationStore,
+		logger,
+		onListening,
+		mode,
+		projectRoot,
+	}) => {
 		logger.instance.info(
 			"Using:",
 			logger.instance.color.blue("Node Runtime Adapter"),
@@ -50,65 +60,80 @@ const serveCommand =
 			}
 		}
 
-		let server: ReturnType<typeof serve>;
-		try {
-			server = serve({
-				fetch: async (request, requestBindings) => {
-					const invocation = host.createInvocation();
-					try {
-						const response = await invocation.handle({
-							request,
-							requestBindings,
-						});
-						return withResponseCleanup(response, () => invocation.destroy());
-					} catch (error) {
-						await invocation.destroy();
-						throw error;
-					}
-				},
-				port: options?.server?.port ?? 6543,
-				hostname: options?.server?.hostname,
-			});
-		} catch (error) {
-			await host.destroy();
-			throw error;
-		}
+		const server = createServer();
 
-		server.on("listening", () => {
-			const address = server.address();
-			onListening({
-				address: address,
-				adapterKeys: host.adapterKeys,
-			});
-		});
-
-		server.on("close", () => {
-			logger.instance.info("Shutting down Node Adapter development server...", {
-				silent: logger.silent,
-				spaceBefore: true,
-			});
-			void host.destroy();
-		});
-
+		let admin: Awaited<ReturnType<typeof createCliAdmin>> | undefined;
 		let destroyPromise: Promise<void> | undefined;
-		return {
-			destroy: () => {
-				destroyPromise ??= (async () => {
+
+		const destroy = () => {
+			destroyPromise ??= (async () => {
+				try {
+					await admin?.close();
+				} finally {
 					try {
-						if (server.listening) {
-							await new Promise<void>((resolve, reject) => {
-								server.close((error) => {
-									if (error) reject(error);
-									else resolve();
-								});
-							});
-						}
+						if (server.listening) await server[Symbol.asyncDispose]();
 					} finally {
 						await host.destroy();
 					}
-				})();
-				return destroyPromise;
-			},
+				}
+			})();
+			return destroyPromise;
+		};
+
+		try {
+			if (mode === "development") {
+				admin = await createCliAdmin({ server, projectRoot });
+			}
+
+			const listener = getRequestListener(async (request, requestBindings) => {
+				const invocation = host.createInvocation();
+				try {
+					const response = await invocation.handle({
+						request,
+						requestBindings,
+					});
+
+					const result = await withResponseCleanup(response, () =>
+						invocation.destroy(),
+					);
+
+					return admin ? await admin.handleResponse(request, result) : result;
+				} catch (error) {
+					await invocation.destroy();
+					throw error;
+				}
+			});
+
+			server.on("request", (request, response) => {
+				if (!admin) return void listener(request, response);
+				admin.middleware(request, response, () => {
+					void listener(request, response);
+				});
+			});
+
+			await new Promise<void>((resolve, reject) => {
+				server.once("error", reject);
+				server.listen(
+					options?.server?.port ?? 6543,
+					options?.server?.hostname,
+					() => {
+						server.off("error", reject);
+						resolve();
+					},
+				);
+			});
+
+			await onListening({
+				address: server.address(),
+				adapterKeys: host.adapterKeys,
+			});
+		} catch (error) {
+			await destroy();
+			throw error;
+		}
+
+		return {
+			destroy,
 			runtimeContext: runtimeContext,
 			adapterKeys: host.adapterKeys,
 		};

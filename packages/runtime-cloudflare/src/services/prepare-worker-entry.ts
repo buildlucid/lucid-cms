@@ -41,7 +41,12 @@ const prepareMainWorkerEntry = (
 		},
 		{
 			path: "@lucidcms/core/runtime",
-			exports: ["createLucidHost", "setupJobScheduler", "withResponseCleanup"],
+			exports: [
+				"createLucidHost",
+				"setupJobScheduler",
+				"withResponseCleanup",
+				"shouldServeAdminShell",
+			],
 		},
 		{
 			path: "./email-templates.json",
@@ -115,7 +120,8 @@ const host = await getOrCreateRuntimeHost(
                     name: "runtime-cloudflare:spa-shell",
                     phase: "afterSetup",
                     register: async (app) => {
-                        app.get("/lucid/*", async (c) => {
+                        app.get("/lucid/*", async (c, next) => {
+                            if (!shouldServeAdminShell(c.req.path, c.req.method)) return next();
                             const url = new URL(c.req.url);
                             const indexRequest = new Request(url.origin + "/lucid/index.html");
                             const indexAsset = await c.env.ASSETS.fetch(indexRequest);

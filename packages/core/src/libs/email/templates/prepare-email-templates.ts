@@ -1,7 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../../exports/types.js";
+import writeFileIfChanged from "../../../utils/helpers/write-file-if-changed.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
 import type { ResourceFile } from "../../resources/types.js";
@@ -25,7 +26,10 @@ const prepareEmailTemplates = async (props: {
 			props.config.build.outDir,
 			constants.email.renderedOutput,
 		);
-		await writeFile(outputPath, JSON.stringify(renderedTemplates, null, 2));
+		await writeFileIfChanged(
+			outputPath,
+			JSON.stringify(renderedTemplates, null, 2),
+		);
 
 		return {
 			error: undefined,
@@ -34,12 +38,10 @@ const prepareEmailTemplates = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message: copy(
-					"server:core.email.templates.prepare.failed",
+				message:
 					error instanceof Error
-						? { defaultMessage: error.message }
-						: undefined,
-				),
+						? copy.literal(error.message)
+						: copy("server:core.email.templates.prepare.failed"),
 				status: 500,
 			},
 			data: undefined,

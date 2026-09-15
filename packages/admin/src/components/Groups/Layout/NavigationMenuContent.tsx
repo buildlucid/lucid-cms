@@ -1,3 +1,4 @@
+import packageJson from "@lucidcms/admin/package.json" with { type: "json" };
 import type { Collection, User } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
@@ -6,9 +7,6 @@ import { IconLinkFull } from "@/components/Groups/Navigation";
 import CollectionNavLink from "@/components/Partials/CollectionNavLink";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import packageJson from "../../../../../../packages/core/package.json" with {
-	type: "json",
-};
 
 export type NavigationMenuContentProps = {
 	class?: string;

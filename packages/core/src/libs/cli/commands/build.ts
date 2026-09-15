@@ -1,5 +1,5 @@
-import { mkdir, readdir, rm, stat } from "node:fs/promises";
-import path, { join } from "node:path";
+import { mkdir, rm } from "node:fs/promises";
+import path from "node:path";
 import constants from "../../../constants/constants.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
@@ -26,7 +26,6 @@ import copyPublicAssets from "../services/copy-public-assets.js";
  * The CLI build command. Responsible for calling the adapters build handler.
  */
 const buildCommand = async (options?: {
-	cacheSpa?: boolean;
 	silent?: boolean;
 	remote?: boolean;
 }) => {
@@ -82,15 +81,8 @@ const buildCommand = async (options?: {
 		});
 
 		currentStage = "artifacts";
-		if (options?.cacheSpa) {
-			await partialBuildDirClear(configRes.config.build.outDir);
-		} else {
-			await rm(configRes.config.build.outDir, {
-				recursive: true,
-				force: true,
-			});
-			await mkdir(configRes.config.build.outDir);
-		}
+		await rm(configRes.config.build.outDir, { recursive: true, force: true });
+		await mkdir(configRes.config.build.outDir, { recursive: true });
 
 		//* the path to the config, relative from the CWD
 		const relativeConfigPath = path.relative(process.cwd(), configPath);
@@ -163,6 +155,7 @@ const buildCommand = async (options?: {
 			process.exit(1);
 		}
 		const translationStore = configRes.translationStore;
+
 		currentStage = "artifacts";
 		const processedArtifacts = await prepareBuildArtifacts({
 			config: configRes.config,
@@ -174,39 +167,25 @@ const buildCommand = async (options?: {
 			outputRelativeConfigPath: normalisedOutputRelativePath,
 			customArtifactTypes: adapterRuntime.config?.customBuildArtifacts,
 		});
+
+		currentStage = "admin_build";
+		await vite.buildApp(configRes.config, silent);
+
 		currentStage = "runtime_build";
-		const [viteBuildRes, runtimeBuildRes] = await Promise.all([
-			vite.buildApp(configRes.config),
-			adapterCLI.build({
-				resources: configRes.resources,
-				config: configRes.config,
-				translationStore,
-				definition: configRes.definition,
-				configPath,
-				outputPath: configRes.config.build.outDir,
-				outputRelativeConfigPath: normalisedOutputRelativePath,
-				buildArtifacts: processedArtifacts,
-				logger: {
-					instance: cliLogger,
-					silent,
-				},
-			}),
-		]);
-		if (viteBuildRes.error) {
-			cliLogger.error(
-				translate.english(viteBuildRes.error.message) ??
-					"There was an error while building the SPA or component plugins",
-				{
-					silent,
-				},
-			);
-			await stopLoggerBuffering();
-			await telemetryReporter.report({
-				outcome: "failed",
-				stage: "admin_build",
-			});
-			process.exit(1);
-		}
+		const runtimeBuildRes = await adapterCLI.build({
+			resources: configRes.resources,
+			config: configRes.config,
+			translationStore,
+			definition: configRes.definition,
+			configPath,
+			outputPath: configRes.config.build.outDir,
+			outputRelativeConfigPath: normalisedOutputRelativePath,
+			buildArtifacts: processedArtifacts,
+			logger: {
+				instance: cliLogger,
+				silent,
+			},
+		});
 
 		currentStage = undefined;
 		await checkAllPluginsCompatibility({
@@ -221,7 +200,7 @@ const buildCommand = async (options?: {
 		);
 
 		cliLogger.info(
-			"SPA and component plugins built:",
+			"Admin application built:",
 			cliLogger.color.green(
 				`./${relativeBuildPath}/${constants.directories.public}/${constants.directories.base}`,
 			),
@@ -302,42 +281,6 @@ const buildCommand = async (options?: {
 			});
 		}
 		process.exit(1);
-	}
-};
-
-/**
- * Partially clear the build directory while preserving the SPA build output
- */
-const partialBuildDirClear = async (outDir: string | undefined) => {
-	if (!outDir) return;
-
-	const items = await readdir(outDir, { recursive: true });
-
-	const preservePaths = [
-		path.join(constants.directories.public, constants.directories.base),
-	];
-
-	for (const item of items) {
-		const itemPath = join(outDir, item);
-
-		try {
-			const stats = await stat(itemPath);
-			if (!stats.isFile()) continue;
-		} catch {
-			continue;
-		}
-
-		const shouldPreserve = preservePaths.some(
-			(preservePath) =>
-				item.includes(preservePath) ||
-				item === preservePath ||
-				itemPath.includes(preservePath) ||
-				itemPath === join(outDir, preservePath),
-		);
-
-		if (!shouldPreserve) {
-			await rm(itemPath, { force: true });
-		}
 	}
 };
 

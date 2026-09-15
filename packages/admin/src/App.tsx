@@ -4,7 +4,6 @@ import { Toaster } from "solid-toast";
 import Router from "@/Router";
 import { getLocale, getReady, initAdminTranslations } from "@/translations";
 import { LucidError } from "./utils/error-handling";
-import "solid-devtools";
 
 const App: Component = () => {
 	const queryClient = new QueryClient({

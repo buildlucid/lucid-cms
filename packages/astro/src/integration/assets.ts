@@ -2,17 +2,14 @@ import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { createTranslator, LucidError } from "@lucidcms/core";
-import {
-	prepareLucidPublicAssets,
-	prepareLucidSPA,
-} from "@lucidcms/core/build";
+import { prepareLucidPublicAssets } from "@lucidcms/core/build";
 import { lookup as lookupMimeType } from "mime-types";
 import type { Plugin } from "vite";
 import constants from "../constants.js";
 import { collectFiles, ensureDirectory, pathExists } from "./filesystem.js";
 import type { ResolvedLucidProject } from "./project.js";
 
-/** Prepares the Lucid public assets and admin application for Astro. */
+/** Prepares Lucid public resources that Astro does not already serve. */
 export const prepareAssets = async (
 	project: ResolvedLucidProject,
 	assetRoot: string,
@@ -39,18 +36,6 @@ export const prepareAssets = async (
 			message:
 				translate.english(publicResult.error.message) ??
 				"Lucid could not prepare its Astro public assets.",
-		});
-	}
-
-	const spaResult = await prepareLucidSPA({
-		outDir: path.join(assetRoot, constants.mountPath.slice(1)),
-	});
-
-	if (spaResult.error) {
-		throw new LucidError({
-			message:
-				translate.english(spaResult.error.message) ??
-				"Lucid could not prepare its Astro admin assets.",
 		});
 	}
 };
@@ -91,15 +76,11 @@ export const createDevAssetPlugin = (assetRoot: string): Plugin => ({
 /** Copies generated Lucid assets into Astro's completed build. */
 export const copyAssets = async (assetRoot: string, buildDirectory: string) => {
 	if (!(await pathExists(assetRoot))) return;
-	const clientDirectory = path.join(buildDirectory, "client");
-	const outputDirectory = (await pathExists(clientDirectory))
-		? clientDirectory
-		: buildDirectory;
 
 	await Promise.all(
 		(await collectFiles(assetRoot)).map(async (filePath) => {
 			const outputPath = path.join(
-				outputDirectory,
+				buildDirectory,
 				path.relative(assetRoot, filePath),
 			);
 			await ensureDirectory(path.dirname(outputPath));

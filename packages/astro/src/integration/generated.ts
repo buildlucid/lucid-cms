@@ -35,11 +35,11 @@ import { env as envSchema } from ${JSON.stringify(imports.env)};
 import db from ${JSON.stringify(imports.db)};
 import runtime from ${JSON.stringify(imports.runtime)};
 import bridge from ${JSON.stringify(props.project.bridgeEntrypoint)};
-import { createLucidHost } from "@lucidcms/core/runtime";
-import { createLucidSpaResponse, destroyRuntimeHostRevision, getBuildContext, getOrCreateInvocation, getOrCreateRuntimeHost, getRuntimeHostState, shouldServeLucidSpaShell } from "@lucidcms/astro/internal/runtime";
+import { createAdminShellResponse, createLucidHost, shouldServeAdminShell } from "@lucidcms/core/runtime";
+import { destroyRuntimeHostRevision, getBuildContext, getOrCreateInvocation, getOrCreateRuntimeHost, getRuntimeHostState } from "@lucidcms/astro/internal/runtime";
 import emailTemplates from "./${constants.files.emailTemplates}";
 import translationBundles from "./${constants.files.translations}";
-import spaHtml from "./${constants.files.spa}";
+${props.compiled ? `import spaHtml from "./${constants.files.spa}";` : ""}
 
 const hostKey = ${JSON.stringify(props.project.hostId)};
 const revision = ${JSON.stringify(props.revision)};
@@ -131,9 +131,13 @@ export const handle = async (context) => {
 	const { invocation, state } = await getLucidInvocation(context);
 	const response = await bridge.handle({ invocation, context, state });
 	const pathname = new URL(context.request.url).pathname;
-	return response.status === 404 && shouldServeLucidSpaShell(pathname, context.request.method)
-		? createLucidSpaResponse(spaHtml, context.request.method)
-		: response;
+	${
+		props.compiled
+			? `return response.status === 404 && shouldServeAdminShell(pathname, context.request.method)
+		? createAdminShellResponse(spaHtml, context.request.method)
+		: response;`
+			: "return response;"
+	}
 };
 
 export const getToolkit = async (context) => {
@@ -147,7 +151,8 @@ export default getToolkit;
 
 const buildMiddlewareSource =
 	() => `import { defineMiddleware } from "astro:middleware";
-import { destroyInvocationScopes, hasInvocationScopes, withResponseCleanup } from "@lucidcms/astro/internal/runtime";
+import { withResponseCleanup } from "@lucidcms/core/runtime";
+import { destroyInvocationScopes, hasInvocationScopes } from "@lucidcms/astro/internal/runtime";
 
 export const onRequest = defineMiddleware(async (context, next) => {
 	try {
@@ -176,15 +181,7 @@ export const writeGeneratedModules = async (props: {
 		configPath: props.project.configPath,
 		outputPath: props.directory,
 	});
-	const spaHtml = await fs.readFile(
-		path.join(
-			props.directory,
-			constants.assetDirectory,
-			constants.mountPath.slice(1),
-			constants.files.index,
-		),
-		"utf-8",
-	);
+
 	const emailTemplatesSource = moduleSource(
 		props.project.emailTemplates,
 		"emailTemplates",
@@ -193,7 +190,7 @@ export const writeGeneratedModules = async (props: {
 		props.project.loaded.translationStore.bundles,
 		"translationBundles",
 	);
-	const spaSource = moduleSource(spaHtml, "spaHtml");
+	const spaSource = moduleSource("", "spaHtml");
 	const revision = await createProjectRevision(
 		[
 			props.project.configPath,
@@ -234,3 +231,10 @@ export const writeGeneratedModules = async (props: {
 
 	return { middlewarePath, routePath, runtimePath };
 };
+
+/** Replaces the build placeholder before Astro compiles the server entrypoint. */
+export const writeSpaModule = (directory: string, html: string) =>
+	fs.writeFile(
+		path.join(directory, constants.files.spa),
+		moduleSource(html, "spaHtml"),
+	);

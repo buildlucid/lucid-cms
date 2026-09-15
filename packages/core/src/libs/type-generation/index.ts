@@ -1,9 +1,9 @@
-import { writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import type { ZodType } from "zod";
 import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { ensureLucidDirectoryExists } from "../../utils/helpers/lucid-directory.js";
+import writeFileIfChanged from "../../utils/helpers/write-file-if-changed.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import generateCollectionClientTypes from "../collection/type-gen/index.js";
 import logger from "../logger/index.js";
@@ -135,7 +135,7 @@ const generateTypes = async (props: {
 		files.map(async (file) => {
 			const filePath = join(lucidDir, file.filename);
 
-			await writeFile(filePath, renderTypeGenerationFile(file));
+			await writeFileIfChanged(filePath, renderTypeGenerationFile(file));
 
 			logger.debug({
 				message: `Generated ${filePath}`,

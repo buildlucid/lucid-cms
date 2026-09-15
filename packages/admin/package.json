@@ -2,15 +2,26 @@
 	"name": "@lucidcms/admin",
 	"version": "0.18.0-alpha.0",
 	"description": "The admin SolidJS SPA for Lucid CMS.",
-	"private": true,
+	"private": false,
 	"type": "module",
-	"files": [],
+	"files": [
+		"dist",
+		"src",
+		"!src/build",
+		"!src/**/*.test.*",
+		"index.html",
+		"tailwind.config.js"
+	],
 	"exports": {
+		"./build": {
+			"types": "./dist/build/index.d.mts",
+			"default": "./dist/build/index.mjs"
+		},
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"build": "NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit && vite build",
-		"dev": "vite",
+		"build": "NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit && tsdown",
+		"dev": "tsdown --watch",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",
 		"lint": "biome lint ./src",
@@ -34,10 +45,16 @@
 	],
 	"license": "MIT",
 	"devDependencies": {
+		"@biomejs/biome": "^2.5.1",
 		"@lucidcms/preview-protocol": "*",
 		"@types/classnames": "^2.3.4",
+		"@types/node": "^24.13.2",
 		"@types/object-hash": "^3.0.6",
-		"typescript": "^6.0.3"
+		"happy-dom": "^20.8.4",
+		"solid-devtools": "^0.34.5",
+		"tsdown": "^0.22.3",
+		"typescript": "^6.0.3",
+		"vitest": "^4.1.9"
 	},
 	"dependencies": {
 		"@codemirror/commands": "^6.10.4",
@@ -75,14 +92,13 @@
 		"i18next": "^26.3.1",
 		"nanoid": "^5.1.15",
 		"object-hash": "^3.0.0",
-		"vite": "^8.1.0",
 		"solid-codemirror": "^2.3.3",
-		"solid-devtools": "^0.34.5",
 		"solid-icons": "^1.2.0",
 		"solid-js": "^1.9.13",
 		"solid-tiptap": "^0.8.0",
 		"solid-toast": "^0.5.0",
 		"tailwindcss": "^4.3.1",
+		"vite": "^8.1.0",
 		"vite-plugin-solid": "^2.11.12"
 	},
 	"volta": {
@@ -90,5 +106,8 @@
 	},
 	"engines": {
 		"node": "^24.0.0"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

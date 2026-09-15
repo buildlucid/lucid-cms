@@ -63,12 +63,6 @@ const persistLocale = (locale: string) => {
 	}
 };
 
-const getFetchURL = (url: string): string => {
-	return import.meta.env.PROD
-		? url
-		: `${import.meta.env.VITE_API_DEV_URL}${url}`;
-};
-
 const storedLocale = getStoredLocale();
 const [getLocale, setLocaleSignal] = createSignal<SupportedLocales>(
 	storedLocale ?? FALLBACK_LOCALE,
@@ -183,7 +177,7 @@ export const loadAdminTranslations = async (
 		const target = locale
 			? `/lucid/api/v1/i18n/admin/${encodeURIComponent(locale)}`
 			: "/lucid/api/v1/i18n/admin";
-		const response = await fetch(getFetchURL(target), {
+		const response = await fetch(target, {
 			method: "GET",
 			credentials: "include",
 			headers: locale ? { [interfaceLocaleHeader]: locale } : undefined,

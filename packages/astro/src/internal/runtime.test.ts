@@ -1,3 +1,4 @@
+import { withResponseCleanup } from "@lucidcms/core/runtime";
 import { describe, expect, test, vi } from "vitest";
 import {
 	destroyInvocationScopes,
@@ -6,7 +7,6 @@ import {
 	getOrCreateRuntimeHost,
 	getRuntimeHostState,
 	hasInvocationScopes,
-	withResponseCleanup,
 } from "./runtime.js";
 
 describe("Astro invocation lifecycle", () => {

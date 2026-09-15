@@ -231,7 +231,11 @@ const createApp = async (props: {
 				locale,
 			});
 
-			if (c.req.url.includes(`/${constants.directories.base}/api`)) {
+			c.status(404);
+
+			const apiPath = `/${constants.directories.base}/api`;
+
+			if (c.req.path === apiPath || c.req.path.startsWith(`${apiPath}/`)) {
 				return c.json({
 					status: 404,
 					code: "not_found",
@@ -239,7 +243,6 @@ const createApp = async (props: {
 					message: translate("server:core.routes.not.found.message"),
 				} satisfies PublicErrorData);
 			}
-			c.status(404);
 			return c.text(translate("server:core.pages.not.found"));
 		});
 

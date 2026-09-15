@@ -125,7 +125,6 @@ export default Object.freeze({
 		public: "public",
 		lucid: ".lucid",
 		base: "lucid",
-		viteBuild: "spa",
 		plugins: "plugins",
 	},
 	typeGeneration: {

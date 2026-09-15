@@ -1,8 +1,9 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
+import writeFileIfChanged from "../../utils/helpers/write-file-if-changed.js";
 import type { ResourceFile } from "../resources/types.js";
 import { loadTranslationSources } from "./load-project-translations.js";
 import { createTranslationStore } from "./store.js";
@@ -21,7 +22,7 @@ export const writeTranslationArtifact = async (props: {
 }) => {
 	try {
 		await mkdir(props.outputPath, { recursive: true });
-		await writeFile(
+		await writeFileIfChanged(
 			path.join(props.outputPath, constants.i18n.renderedOutput),
 			JSON.stringify(props.translationStore.bundles, null, 2),
 		);

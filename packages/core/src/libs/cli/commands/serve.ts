@@ -1,4 +1,3 @@
-import constants from "../../../constants/constants.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
@@ -18,11 +17,12 @@ import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
+import { getServerUrl, logServerReady } from "../services/server-logger.js";
 import updateAvailable from "../services/update-available.js";
 import migrateCommand from "./migrate.js";
 
 /**
- * The CLI serve command. Directly starts the dev server
+ * Builds the admin application and serves it alongside the runtime
  */
 const serveCommand = async () => {
 	startLoggerBuffering();
@@ -34,7 +34,7 @@ const serveCommand = async () => {
 	let startupListening = false;
 	let startupCompleted = false;
 	let startupAdapterKeys: AdapterKeys | undefined;
-	const coreUpdateAvailable = updateAvailable();
+	const coreUpdateAvailable = updateAvailable().catch(() => undefined);
 
 	const maybeReportStartup = () => {
 		if (!startupListening || !startupCompleted || !startupAdapterKeys) return;
@@ -69,6 +69,7 @@ const serveCommand = async () => {
 			path: configPath,
 			prepareRuntime: true,
 		});
+		destroy = configRes.adapter.cli?.dispose;
 		telemetryReporter = createCommandTelemetryReporter({
 			config: configRes.config,
 			env: configRes.env,
@@ -127,18 +128,7 @@ const serveCommand = async () => {
 		}
 
 		currentStage = "admin_build";
-		const viteBuildRes = await vite.buildApp(configRes.config);
-		if (viteBuildRes.error) {
-			cliLogger.error(
-				translate.english(viteBuildRes.error.message) ?? "Failed to build app",
-			);
-			await stopLoggerBuffering();
-			await telemetryReporter.report({
-				outcome: "failed",
-				stage: "admin_build",
-			});
-			process.exit(1);
-		}
+		await vite.buildApp(configRes.config);
 
 		currentStage = "email_templates";
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
@@ -186,6 +176,8 @@ const serveCommand = async () => {
 
 		currentStage = "runtime_initialization";
 		const serverRes = await adapterCLI.serve({
+			mode: "static",
+			projectRoot: configRes.projectRoot,
 			env: configRes.env,
 			config: configRes.config,
 			translationStore,
@@ -198,41 +190,12 @@ const serveCommand = async () => {
 				startupAdapterKeys = props.adapterKeys;
 				maybeReportStartup();
 
-				const serverUrl =
-					typeof props.address === "string"
-						? props.address
-						: props.address
-							? `http://${props.address.address === "::" ? "localhost" : props.address.address}:${props.address.port}`
-							: "unknown";
-
-				const coreUpdateAvailabeRes = await coreUpdateAvailable;
-				coreUpdateAvailabeRes.renderUpdateBox();
-
-				cliLogger.log(
-					cliLogger.createBadge("LUCID CMS"),
-					"Development server ready",
-					{
-						spaceBefore: !coreUpdateAvailabeRes.show,
-						spaceAfter: true,
-					},
-				);
-
-				cliLogger.log(
-					"🔐 Admin panel      ",
-					cliLogger.color.blue(`${serverUrl}/lucid`),
-					{ symbol: "line" },
-				);
-
-				cliLogger.log(
-					"📖 Documentation    ",
-					cliLogger.color.blue(constants.documentation),
-					{ symbol: "line" },
-				);
-
-				cliLogger.log(cliLogger.color.gray("Press CTRL-C to stop the server"), {
-					spaceBefore: true,
-					spaceAfter: true,
-				});
+				logServerReady(getServerUrl(props.address));
+				void coreUpdateAvailable
+					.then((update) => {
+						if (!shutdownPromise) update?.renderUpdateBox();
+					})
+					.catch(() => {});
 
 				await stopLoggerBuffering();
 			},

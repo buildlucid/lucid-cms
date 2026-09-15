@@ -163,22 +163,38 @@ describe("migrateCommand collection policy", () => {
 		);
 	});
 
-	test("prompts for warning changes with a default of false", async () => {
+	test.each([
+		"decline",
+		"interrupt",
+	])("restores the host after a migration prompt: %s", async (outcome) => {
 		const fixture = commandFixture(false);
 		vi.mocked(planCollectionMigrations).mockResolvedValue({
 			data: collectionPlan("warning"),
 			error: undefined,
 		});
-		vi.mocked(confirm).mockResolvedValue(false);
+		const closePrompt = vi.fn();
+		const onPrompt = vi.fn(() => closePrompt);
+		vi.mocked(confirm).mockImplementation(async () => {
+			expect(onPrompt).toHaveBeenCalledOnce();
+			expect(closePrompt).not.toHaveBeenCalled();
+			if (outcome === "interrupt") {
+				const error = new Error("Interrupted");
+				error.name = "ExitPromptError";
+				throw error;
+			}
+			return false;
+		});
 
 		const result = await migrateCommand({
 			config: fixture.config,
 			migrationFiles: fixture.migrationFiles,
 			translationStore: fixture.translationStore,
 			mode: "return",
+			onPrompt,
 		})({ skipSyncSteps: true });
 
 		expect(result).toBe(false);
+		expect(closePrompt).toHaveBeenCalledOnce();
 		expect(confirm).toHaveBeenCalledWith(
 			expect.objectContaining({ default: false }),
 		);

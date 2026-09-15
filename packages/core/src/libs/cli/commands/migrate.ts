@@ -36,6 +36,8 @@ import runSyncTasks from "../services/run-sync-tasks.js";
 
 type MigrateCommandOptions = {
 	skipSyncSteps?: boolean;
+	/** Keep no-op checks quiet; migration plans, approvals and failures remain visible. */
+	quiet?: boolean;
 	yes?: boolean;
 	allowDestructive?: boolean;
 	remote?: boolean;
@@ -44,6 +46,7 @@ type MigrateCommandOptions = {
 /** Runs an interactive approval gate and reports non-interactive policy errors. */
 const requestMigrationApproval = async (
 	action: MigrationApprovalAction,
+	onPrompt?: () => () => void,
 ): Promise<boolean> => {
 	if (action === "proceed") return true;
 	if (action === "reject-destructive") {
@@ -54,6 +57,7 @@ const requestMigrationApproval = async (
 	}
 
 	const destructive = action === "prompt-destructive";
+	const closePrompt = onPrompt?.();
 	try {
 		return await confirm({
 			message: destructive
@@ -65,6 +69,8 @@ const requestMigrationApproval = async (
 		if (error instanceof Error && error.name === "ExitPromptError")
 			return false;
 		throw error;
+	} finally {
+		closePrompt?.();
 	}
 };
 
@@ -74,6 +80,8 @@ const migrateCommand = (
 		env?: EnvironmentVariables;
 		runtimeContext?: AdapterRuntimeContext;
 		mode: "process" | "return";
+		/** Hosts can suspend prompt-interrupting output until the returned cleanup runs. */
+		onPrompt?: () => () => void;
 	} & (
 		| {
 				config: ResolvedLucidConfig;
@@ -123,6 +131,7 @@ const migrateCommand = (
 			startLoggerBuffering();
 			const startTime = cliLogger.startTimer();
 			const skipSyncSteps = options?.skipSyncSteps ?? false;
+			const quiet = options?.quiet ?? false;
 			const yes = options?.yes ?? false;
 			const allowDestructive = options?.allowDestructive ?? false;
 			let migrationFiles: ResourceFile[];
@@ -160,7 +169,7 @@ const migrateCommand = (
 				runtimeContext,
 			});
 
-			cliLogger.info("Checking the migration status");
+			cliLogger.info("Checking the migration status", { silent: quiet });
 			const initialPlanResult =
 				await planCollectionMigrations(preflightContext);
 			if (initialPlanResult.error) {
@@ -209,7 +218,7 @@ const migrateCommand = (
 
 			//* no-op path: keep sync behavior but avoid initializing migration adapters
 			if (!needsDatabaseMigrations && !needsCollectionMigrations) {
-				cliLogger.success("No migrations are required");
+				cliLogger.success("No migrations are required", { silent: quiet });
 				if (!skipSyncSteps) {
 					const syncResult = await runSyncTasks({
 						config,
@@ -227,6 +236,7 @@ const migrateCommand = (
 					cliLogger.color.green("successfully"),
 					"in",
 					cliLogger.color.green(cliLogger.formatMilliseconds(endTime)),
+					{ silent: quiet },
 				);
 				await cleanupAdapters();
 				if (mode === "process") {
@@ -243,7 +253,10 @@ const migrateCommand = (
 				yes,
 				allowDestructive,
 			});
-			const initiallyApproved = await requestMigrationApproval(initialApproval);
+			const initiallyApproved = await requestMigrationApproval(
+				initialApproval,
+				props?.onPrompt,
+			);
 			if (!initiallyApproved) {
 				if (initialApproval === "reject-destructive") {
 					return await stopCommand(1);
@@ -308,6 +321,7 @@ const migrateCommand = (
 				});
 				const increasedRiskApproved = await requestMigrationApproval(
 					increasedRiskApproval,
+					props?.onPrompt,
 				);
 				if (!increasedRiskApproved) {
 					return await stopCommand(

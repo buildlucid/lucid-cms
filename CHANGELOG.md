@@ -23,6 +23,7 @@
 - Added toolkit services for uploading and managing media files.
 - Added toolkit input validation, on-demand service loading and a dedicated toolkit entry point.
 - Added typed document toolkit services for creating, updating, patching and deleting documents, with editable reads, conflict checks and collection schema access.
+- The admin SPA is now built programmatically from `@lucidcms/admin`, with live updates during development, cached builds and clearer server restart logs.
 
 ### Breaking Changes:
 

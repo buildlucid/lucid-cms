@@ -1,21 +1,13 @@
-import type {
-	ResolvedLucidConfig,
-	ServiceResponse,
-} from "../../../exports/types.js";
-import getBuildPaths from "../../cli/services/get-build-paths.js";
-import prepareLucidSPA from "../../compile/prepare-lucid-spa.js";
+import { buildAdmin } from "@lucidcms/admin/build";
+import type { ResolvedLucidConfig } from "../../../types/config.js";
+import getBuildPaths from "../../runtime/get-build-paths.js";
 
-/**
- * Programatically build the admin SPA with Vite.
- */
-const buildApp = async (
-	config: ResolvedLucidConfig,
-): ServiceResponse<undefined> => {
-	const paths = getBuildPaths(config);
-
-	return prepareLucidSPA({
-		outDir: paths.spaOutput,
+/** Builds the admin into the standalone application's public directory. */
+const buildApp = async (config: ResolvedLucidConfig, silent = false) => {
+	await buildAdmin({
+		projectRoot: process.cwd(),
+		outDir: getBuildPaths(config).spaOutput,
+		logLevel: silent ? "silent" : "warn",
 	});
 };
-
 export default buildApp;

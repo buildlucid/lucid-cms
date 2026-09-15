@@ -10,7 +10,7 @@ export default defineConfig({
 					exclude: ["**/node_modules/**", "packages/admin/**"],
 				},
 			},
-			"./packages/admin/vite.config.ts",
+			"./packages/admin/vitest.config.ts",
 		],
 	},
 });

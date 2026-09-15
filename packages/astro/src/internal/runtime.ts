@@ -1,8 +1,4 @@
-import { withResponseCleanup } from "@lucidcms/core/runtime";
 import type { EnvironmentVariables } from "@lucidcms/core/types";
-import constants from "../constants.js";
-
-export { withResponseCleanup };
 
 const buildContextsSymbol = Symbol.for("@lucidcms/astro:build-contexts");
 const runtimeHostsSymbol = Symbol.for("@lucidcms/astro:hosts");
@@ -248,28 +244,3 @@ export const destroyRuntimeHosts = async (hostKey: string) => {
 	runtimeHosts.delete(hostKey);
 	await destroyRuntimeHostState(state);
 };
-
-/** Checks whether a missed Lucid route should fall back to the admin shell. */
-export const shouldServeLucidSpaShell = (pathname: string, method: string) => {
-	if (method !== "GET" && method !== "HEAD") return false;
-	if (
-		pathname !== constants.mountPath &&
-		!pathname.startsWith(`${constants.mountPath}/`)
-	) {
-		return false;
-	}
-
-	return !constants.nonSpaPrefixes.some(
-		(prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-	);
-};
-
-/** Creates the admin shell response used for client-side Lucid routes. */
-export const createLucidSpaResponse = (html: string, method: string) =>
-	new Response(method === "HEAD" ? null : html, {
-		status: 200,
-		headers: {
-			"Cache-Control": "no-store",
-			"Content-Type": "text/html; charset=utf-8",
-		},
-	});

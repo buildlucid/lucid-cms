@@ -65,9 +65,17 @@ const getLatestVersion = async (packageName: string) => {
 	try {
 		const response = await fetch(
 			`https://registry.npmjs.org/${packageName}/latest`,
+			{ signal: AbortSignal.timeout(3000) },
 		);
-		const data = await response.json();
-		return data.version as string;
+		if (!response.ok) return null;
+
+		const data: unknown = await response.json();
+		return data &&
+			typeof data === "object" &&
+			"version" in data &&
+			typeof data.version === "string"
+			? data.version
+			: null;
 	} catch {
 		return null;
 	}

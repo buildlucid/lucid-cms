@@ -126,125 +126,130 @@ export const resolveConfigDefinition = async (props: {
 }): Promise<ResolveConfigDefinitionResult> => {
 	const definition = assertConfigDefinition(props.definition);
 	const adapter = await resolveRuntimeAdapter(definition.runtime);
-	const logger = props.logger ?? {
-		instance: defaultLoggerInstance,
-		silent: true,
-	};
-	const runtimeContext = {
-		runtime: adapter.key,
-		compiled: false,
-		getConnectionInfo: () => ({}),
-		configEntryPoint: null,
-	} satisfies AdapterRuntimeContext;
+	try {
+		const logger = props.logger ?? {
+			instance: defaultLoggerInstance,
+			silent: true,
+		};
+		const runtimeContext = {
+			runtime: adapter.key,
+			compiled: false,
+			getConnectionInfo: () => ({}),
+			configEntryPoint: null,
+		} satisfies AdapterRuntimeContext;
 
-	// Hosted integrations can supply their own adaptConfig wrapper so the
-	// runtime adapter identity stays separate from host-specific config shaping.
-	const adaptConfig =
-		props.adaptConfig ?? adapter.adaptConfig ?? ((value) => value);
+		// Hosted integrations can supply their own adaptConfig wrapper so the
+		// runtime adapter identity stays separate from host-specific config shaping.
+		const adaptConfig =
+			props.adaptConfig ?? adapter.adaptConfig ?? ((value) => value);
 
-	const wrappedDefinition = adaptConfig(
-		{
-			...definition,
-			runtime: adapter,
-		},
-		props.meta,
-	);
+		const wrappedDefinition = adaptConfig(
+			{
+				...definition,
+				runtime: adapter,
+			},
+			props.meta,
+		);
 
-	const prepareRuntimeContext =
-		props.prepareRuntime &&
-		adapter.cli?.prepare &&
-		props.configPath &&
-		props.projectRoot
-			? {
-					prepare: adapter.cli.prepare,
-					configPath: props.configPath,
-					projectRoot: props.projectRoot,
-				}
-			: undefined;
+		const prepareRuntimeContext =
+			props.prepareRuntime &&
+			adapter.cli?.prepare &&
+			props.configPath &&
+			props.projectRoot
+				? {
+						prepare: adapter.cli.prepare,
+						configPath: props.configPath,
+						projectRoot: props.projectRoot,
+					}
+				: undefined;
 
-	if (prepareRuntimeContext) {
-		await prepareRuntimeContext.prepare({
-			configPath: prepareRuntimeContext.configPath,
-			projectRoot: prepareRuntimeContext.projectRoot,
-			prepareArtifacts: createRuntimePrepareArtifacts(),
-			logger,
-		});
-	}
-	// Env loading is optional because some hosts, like Astro Cloudflare, already
-	// own request-time env loading and can pass it in directly.
-	let rawEnv =
-		props.env ??
-		(adapter.getEnvVars
-			? await adapter.getEnvVars({
-					logger,
+		if (prepareRuntimeContext) {
+			await prepareRuntimeContext.prepare({
+				configPath: prepareRuntimeContext.configPath,
+				projectRoot: prepareRuntimeContext.projectRoot,
+				prepareArtifacts: createRuntimePrepareArtifacts(),
+				logger,
+			});
+		}
+		// Env loading is optional because some hosts, like Astro Cloudflare, already
+		// own request-time env loading and can pass it in directly.
+		let rawEnv =
+			props.env ??
+			(adapter.getEnvVars
+				? await adapter.getEnvVars({
+						logger,
+					})
+				: undefined);
+
+		const envSchema = props.envSchema;
+
+		// Builds do not need runtime env validation; runtime commands validate env
+		// before using it.
+		const shouldValidateEnvSchema = props.validateEnvSchema ?? true;
+		let env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
+
+		await adapter.resolveOptions?.(env ?? {});
+
+		let rawConfig = wrappedDefinition.config(env || {});
+		const prepareArtifacts = prepareRuntimeContext
+			? await collectRuntimePrepareArtifacts({
+					db: wrappedDefinition.db,
+					plugins: rawConfig.plugins ?? [],
+					env: env ?? {},
+					definition: wrappedDefinition,
+					paths: {
+						configPath: prepareRuntimeContext.configPath,
+						projectRoot: prepareRuntimeContext.projectRoot,
+					},
+					customArtifactTypes: adapter.config?.customPrepareArtifacts,
 				})
-			: undefined);
+			: createRuntimePrepareArtifacts();
 
-	const envSchema = props.envSchema;
-
-	// Builds do not need runtime env validation; runtime commands validate env
-	// before using it.
-	const shouldValidateEnvSchema = props.validateEnvSchema ?? true;
-	let env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
-
-	await adapter.resolveOptions?.(env ?? {});
-
-	let rawConfig = wrappedDefinition.config(env || {});
-	const prepareArtifacts = prepareRuntimeContext
-		? await collectRuntimePrepareArtifacts({
-				db: wrappedDefinition.db,
-				plugins: rawConfig.plugins ?? [],
-				env: env ?? {},
-				definition: wrappedDefinition,
-				paths: {
-					configPath: prepareRuntimeContext.configPath,
-					projectRoot: prepareRuntimeContext.projectRoot,
-				},
-				customArtifactTypes: adapter.config?.customPrepareArtifacts,
-			})
-		: createRuntimePrepareArtifacts();
-
-	if (prepareRuntimeContext && prepareArtifacts.custom.length > 0) {
-		await prepareRuntimeContext.prepare({
-			configPath: prepareRuntimeContext.configPath,
-			projectRoot: prepareRuntimeContext.projectRoot,
-			prepareArtifacts,
-			logger,
-		});
-
-		if (!props.env && adapter.getEnvVars) {
-			rawEnv = await adapter.getEnvVars({
+		if (prepareRuntimeContext && prepareArtifacts.custom.length > 0) {
+			await prepareRuntimeContext.prepare({
+				configPath: prepareRuntimeContext.configPath,
+				projectRoot: prepareRuntimeContext.projectRoot,
+				prepareArtifacts,
 				logger,
 			});
 
-			env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
+			if (!props.env && adapter.getEnvVars) {
+				rawEnv = await adapter.getEnvVars({
+					logger,
+				});
 
-			await adapter.resolveOptions?.(env ?? {});
-			rawConfig = wrappedDefinition.config(env || {});
+				env = shouldValidateEnvSchema ? parseEnv(rawEnv, envSchema) : rawEnv;
+
+				await adapter.resolveOptions?.(env ?? {});
+				rawConfig = wrappedDefinition.config(env || {});
+			}
 		}
+
+		if (props.prepareConfig) rawConfig = await props.prepareConfig(rawConfig);
+
+		const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
+
+		// processConfig remains the shared source of truth for plugin init, merging
+		// and validation once the adapter/env/bootstrap layer has been resolved.
+		const config = await processConfig(rawConfig, {
+			...(props.processConfigOptions ?? {}),
+			configure: wrappedDefinition.configure,
+			resolvedDb: db,
+		});
+
+		return {
+			config,
+			adapter,
+			runtimeContext,
+			envSchema,
+			env,
+			rawEnv,
+			definition: wrappedDefinition,
+		};
+	} catch (error) {
+		await adapter.cli?.dispose?.();
+		throw error;
 	}
-
-	if (props.prepareConfig) rawConfig = await props.prepareConfig(rawConfig);
-
-	const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
-
-	// processConfig remains the shared source of truth for plugin init, merging
-	// and validation once the adapter/env/bootstrap layer has been resolved.
-	const config = await processConfig(rawConfig, {
-		...(props.processConfigOptions ?? {}),
-		configure: wrappedDefinition.configure,
-		resolvedDb: db,
-	});
-
-	return {
-		config,
-		adapter,
-		runtimeContext,
-		envSchema,
-		env,
-		rawEnv,
-		definition: wrappedDefinition,
-	};
 };
 
 export default resolveConfigDefinition;

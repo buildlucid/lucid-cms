@@ -40,7 +40,7 @@
 	},
 	"build": {
 		"watch_dir": "./src",
-		"command": "lucidcms build --cache-spa --silent",
+		"command": "lucidcms build --silent",
 		"cwd": "./"
 	}
 	// "hyperdrive": [

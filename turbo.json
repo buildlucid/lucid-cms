@@ -11,18 +11,21 @@
 		},
 		"@lucidcms/admin#build": {
 			"dependsOn": ["^build"],
-			"outputs": ["../core/spa/**"]
+			"outputs": ["dist/**"],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"src/build/**",
+				"../core/src/libs/collection/custom-fields/**",
+				"../core/src/constants/**",
+				"../preview-protocol/src/**"
+			]
 		},
 		"@lucidcms/email-templates#build": {
 			"cache": false,
 			"outputs": ["../core/templates/**"]
 		},
 		"@lucidcms/core#build": {
-			"dependsOn": [
-				"^build",
-				"@lucidcms/admin#build",
-				"@lucidcms/email-templates#build"
-			],
+			"dependsOn": ["^build", "@lucidcms/email-templates#build"],
 			"outputs": []
 		},
 		"lint": {},

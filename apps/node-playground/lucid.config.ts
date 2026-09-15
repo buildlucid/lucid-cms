@@ -283,9 +283,9 @@ export default defineConfig({
 			// 	},
 			// }),
 		],
-		build: {
-			outDir: "out",
-		},
+		// build: {
+		// 	outDir: "out",
+		// },
 		brand: {
 			name: "Playground",
 		},

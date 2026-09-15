@@ -26,6 +26,11 @@ const cloudflare = (
 	};
 
 	runtime.cli = {
+		dispose: async () => {
+			const proxy = runtime.getPlatformProxy();
+			runtime.setPlatformProxy(undefined);
+			await proxy?.dispose();
+		},
 		prepare: async (props) => {
 			const { default: prepareCommand } = await import("./cli/prepare.js");
 			return prepareCommand(runtime.getOptions(), {

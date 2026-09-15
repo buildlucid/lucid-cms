@@ -29,6 +29,7 @@ program
 program
 	.command("dev")
 	.description("Start development server")
+	.option("--no-clear-screen", "Preserve terminal output when restarting")
 	.option(
 		"-w, --watch [path]",
 		"Watch for file changes (optionally specify path to watch)",
@@ -45,10 +46,6 @@ program
 program
 	.command("build")
 	.description("Build for production")
-	.option(
-		"--cache-spa",
-		"Skip clearing SPA build output during clean. The SPA will only be rebuilt when changes are detected.",
-	)
 	.option("--silent", "Suppress all logging output")
 	.option("--remote", remoteOptionDescription)
 	.action(buildCommand);

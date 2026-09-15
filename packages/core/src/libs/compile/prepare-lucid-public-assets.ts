@@ -30,7 +30,22 @@ const copyFileTo = async (
 	projectRoot: string,
 ) => {
 	await ensureDir(path.dirname(destFile));
+	const source = await fs.stat(srcFile);
+	const target = await fs.stat(destFile).catch((error: unknown) => {
+		if (error instanceof Error && "code" in error && error.code === "ENOENT")
+			return undefined;
+		throw error;
+	});
+
+	if (
+		source.size === target?.size &&
+		source.mtime.getTime() === target.mtime.getTime()
+	) {
+		return;
+	}
+
 	await fs.copyFile(srcFile, destFile);
+	await fs.utimes(destFile, source.atime, source.mtime);
 
 	const relativeOutPath = path.relative(projectRoot, destFile);
 	const displayPath =
@@ -121,12 +136,12 @@ const prepareLucidPublicAssets = async (props: {
 	} catch (error) {
 		return {
 			error: {
-				message: copy("server:core.build.public.assets.copy.failed", {
-					defaultMessage:
-						error instanceof Error
-							? error.message
-							: "An error occurred while copying public assets",
-				}),
+				message:
+					error instanceof Error
+						? copy.literal(error.message)
+						: copy("server:core.build.public.assets.copy.failed", {
+								defaultMessage: "An error occurred while copying public assets",
+							}),
 			},
 			data: undefined,
 		};

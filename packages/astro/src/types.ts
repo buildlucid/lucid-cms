@@ -9,6 +9,9 @@ import type {
 	RuntimeAdapter,
 	TranslationStore,
 } from "@lucidcms/core/types";
+import type { AstroConfig } from "astro";
+
+type SsrEnvironment = NonNullable<AstroConfig["vite"]["environments"]>[string];
 
 /** Runtime-specific state resolved for an Astro execution context. */
 export type LucidAstroRuntimeState = {
@@ -61,6 +64,8 @@ export type LucidAstroBridge = {
 export type LucidAstroViteOptions = {
 	aliases?: Record<string, string>;
 	ssrExternal?: string[];
+	/** Platform settings for Astro's server environment. */
+	ssrEnvironment?: Pick<SsrEnvironment, "optimizeDeps" | "build">;
 };
 
 export type LucidAstroPrepareResult = {

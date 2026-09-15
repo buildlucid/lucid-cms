@@ -1,9 +1,14 @@
 import { readFileSync } from "node:fs";
+import { createServer } from "node:http";
 import { relative } from "node:path";
-import { serve } from "@hono/node-server";
+import { getRequestListener } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { getBuildPaths } from "@lucidcms/core/build";
-import { createLucidHost, withResponseCleanup } from "@lucidcms/core/runtime";
+import { createCliAdmin, getBuildPaths } from "@lucidcms/core/build";
+import {
+	createLucidHost,
+	shouldServeAdminShell,
+	withResponseCleanup,
+} from "@lucidcms/core/runtime";
 import type { LucidHonoVariables, ServeHandler } from "@lucidcms/core/types";
 import type { PlatformProxy } from "wrangler";
 import getRuntimeContext from "../services/get-runtime-context.js";
@@ -14,7 +19,15 @@ const serveCommand =
 		options: AdapterOptions | undefined,
 		platformProxy: PlatformProxy | undefined,
 	): ServeHandler =>
-	async ({ config, env, translationStore, logger, onListening }) => {
+	async ({
+		config,
+		env,
+		translationStore,
+		logger,
+		onListening,
+		mode,
+		projectRoot,
+	}) => {
 		logger.instance.info(
 			"Using:",
 			logger.instance.color.blue("Cloudflare Worker Adapter"),
@@ -73,25 +86,30 @@ const serveCommand =
 						phase: "afterSetup",
 						register: async (app, config) => {
 							const paths = getBuildPaths(config);
-							app.use(
-								"/*",
-								serveStatic({
-									rewriteRequestPath: (path) => {
-										const relativeClientDist = relative(
-											process.cwd(),
-											paths.publicDist,
-										);
-										return `${relativeClientDist}${path}`;
-									},
-								}),
-							);
-							app.get("/lucid", (c) => {
-								const html = readFileSync(paths.spaDistHtml, "utf-8");
-								return c.html(html);
+							const servePublicAssets = serveStatic({
+								rewriteRequestPath: (path) => {
+									const relativeClientDist = relative(
+										process.cwd(),
+										paths.publicDist,
+									);
+									return `${relativeClientDist}${path}`;
+								},
 							});
-							app.get("/lucid/*", (c) => {
-								const html = readFileSync(paths.spaDistHtml, "utf-8");
-								return c.html(html);
+							app.use("/*", (c, next) => {
+								if (
+									mode === "development" &&
+									shouldServeAdminShell(c.req.path, c.req.method)
+								)
+									return next();
+								return servePublicAssets(c, next);
+							});
+
+							if (mode === "development") return;
+
+							app.get("/lucid/*", (c, next) => {
+								if (!shouldServeAdminShell(c.req.path, c.req.method))
+									return next();
+								return c.html(readFileSync(paths.spaDistHtml, "utf-8"));
 							});
 						},
 					},
@@ -121,77 +139,88 @@ const serveCommand =
 				});
 			}
 		}
-		let destroyPromise: Promise<void> | undefined;
+		let destroyRuntimePromise: Promise<void> | undefined;
 		const destroyRuntime = () => {
-			destroyPromise ??= Promise.allSettled([
+			destroyRuntimePromise ??= Promise.allSettled([
 				host.destroy(),
 				platformProxy?.dispose(),
 			]).then(() => undefined);
-			return destroyPromise;
+			return destroyRuntimePromise;
 		};
 
-		let server: ReturnType<typeof serve>;
-		try {
-			server = serve({
-				fetch: async (request, requestBindings) => {
-					const invocation = host.createInvocation();
-					try {
-						const response = await invocation.handle({
-							request,
-							executionContext: platformProxy?.ctx,
-							requestBindings,
-						});
-						return withResponseCleanup(response, () => invocation.destroy());
-					} catch (error) {
-						await invocation.destroy();
-						throw error;
-					}
-				},
-				port: options?.dev?.port ?? 6543,
-				hostname: options?.dev?.hostname,
-			});
-		} catch (error) {
-			await destroyRuntime();
-			throw error;
-		}
+		const server = createServer();
 
-		server.on("listening", () => {
-			const address = server.address();
-			onListening({
-				address: address,
-				adapterKeys: host.adapterKeys,
-			});
-		});
-		server.on("close", () => {
-			logger.instance.info(
-				"Shutting down Cloudflare Worker Adapter development server...",
-				{
-					spaceBefore: true,
-					silent: logger.silent,
-				},
-			);
-			void destroyRuntime();
-		});
+		let admin: Awaited<ReturnType<typeof createCliAdmin>> | undefined;
+		let destroyPromise: Promise<void> | undefined;
 
-		let serverDestroyPromise: Promise<void> | undefined;
-		return {
-			destroy: () => {
-				serverDestroyPromise ??= (async () => {
+		const destroy = () => {
+			destroyPromise ??= (async () => {
+				try {
+					await admin?.close();
+				} finally {
 					try {
-						if (server.listening) {
-							await new Promise<void>((resolve, reject) => {
-								server.close((error) => {
-									if (error) reject(error);
-									else resolve();
-								});
-							});
-						}
+						if (server.listening) await server[Symbol.asyncDispose]();
 					} finally {
 						await destroyRuntime();
 					}
-				})();
-				return serverDestroyPromise;
-			},
+				}
+			})();
+			return destroyPromise;
+		};
+
+		try {
+			if (mode === "development") {
+				admin = await createCliAdmin({ server, projectRoot });
+			}
+
+			const listener = getRequestListener(async (request, requestBindings) => {
+				const invocation = host.createInvocation();
+
+				try {
+					const response = await invocation.handle({
+						request,
+						executionContext: platformProxy?.ctx,
+						requestBindings,
+					});
+					const result = await withResponseCleanup(response, () =>
+						invocation.destroy(),
+					);
+					return admin ? await admin.handleResponse(request, result) : result;
+				} catch (error) {
+					await invocation.destroy();
+					throw error;
+				}
+			});
+			server.on("request", (request, response) => {
+				if (!admin) return void listener(request, response);
+				admin.middleware(request, response, () => {
+					void listener(request, response);
+				});
+			});
+
+			await new Promise<void>((resolve, reject) => {
+				server.once("error", reject);
+				server.listen(
+					options?.dev?.port ?? 6543,
+					options?.dev?.hostname,
+					() => {
+						server.off("error", reject);
+						resolve();
+					},
+				);
+			});
+
+			await onListening({
+				address: server.address(),
+				adapterKeys: host.adapterKeys,
+			});
+		} catch (error) {
+			await destroy();
+			throw error;
+		}
+
+		return {
+			destroy,
 			runtimeContext: runtimeContext,
 			adapterKeys: host.adapterKeys,
 		};

@@ -52,6 +52,8 @@ export type RuntimePrepareArtifacts = {
 };
 
 export type ServeHandler = (props: {
+	mode: "development" | "static";
+	projectRoot: string;
 	config: ResolvedLucidConfig;
 	/** Parsed environment values and platform bindings from config loading. */
 	env: EnvironmentVariables | undefined;
@@ -184,6 +186,8 @@ export type RuntimeAdapterOptionsResolver = (
 ) => void | Promise<void>;
 
 export type RuntimeAdapterCLI = {
+	/** Releases resources allocated while loading CLI configuration. Must be idempotent. */
+	dispose?: () => Promise<void>;
 	prepare?: PrepareHandler;
 	serve: ServeHandler;
 	build: BuildHandler;
@@ -195,6 +199,8 @@ export type LucidConfigFactory = (env: EnvironmentVariables) => LucidConfig;
 export type ConfigTransform = (draft: ResolvedLucidConfig) => void;
 
 export type LucidConfigDefinitionMeta = {
+	/** Development hosts render the admin through Vite. */
+	admin?: "development" | "static";
 	emailTemplates?: RenderedTemplates;
 	/** Identifies the framework or host resolving this definition. */
 	host?: string;

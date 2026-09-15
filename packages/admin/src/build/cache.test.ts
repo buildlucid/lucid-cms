@@ -1,0 +1,60 @@
+import { mkdir, mkdtemp, rm, utimes, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { afterEach, expect, test } from "vitest";
+import { getAdminBuildKey } from "./cache.js";
+
+const roots: string[] = [];
+afterEach(async () => {
+	await Promise.all(
+		roots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
+	);
+});
+
+const fixture = async () => {
+	const root = await mkdtemp(path.join(tmpdir(), "lucid-admin-key-"));
+	roots.push(root);
+	for (const directory of ["src", "dist/build", "dist/shared"]) {
+		await mkdir(path.join(root, directory), { recursive: true });
+	}
+	for (const file of [
+		"src/index.tsx",
+		"dist/build/config.mjs",
+		"dist/shared/preview.js",
+		"package.json",
+		"tailwind.config.js",
+		"index.html",
+	]) {
+		await writeFile(path.join(root, file), file);
+	}
+	return root;
+};
+
+test("rebuilds without a dependency lockfile", async () => {
+	const root = await fixture();
+	expect(await getAdminBuildKey(root, root)).toBeUndefined();
+});
+
+test("invalidates source, compiler, shared helper and lockfile changes, including additions and removals", async () => {
+	const root = await fixture();
+	await writeFile(path.join(root, "package-lock.json"), "first lock");
+	const original = await getAdminBuildKey(root, root);
+	expect(original).toBeTypeOf("string");
+	await utimes(path.join(root, "src/index.tsx"), new Date(0), new Date(0));
+	expect(await getAdminBuildKey(root, root)).toBe(original);
+	let previous = original;
+	for (const file of [
+		"src/index.tsx",
+		"dist/build/config.mjs",
+		"dist/shared/preview.js",
+		"package-lock.json",
+		"src/new.tsx",
+	]) {
+		await writeFile(path.join(root, file), "changed");
+		const next = await getAdminBuildKey(root, root);
+		expect(next).not.toBe(previous);
+		previous = next;
+	}
+	await rm(path.join(root, "src/new.tsx"));
+	expect(await getAdminBuildKey(root, root)).not.toBe(previous);
+});

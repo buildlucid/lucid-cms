@@ -24,9 +24,7 @@ interface RequestConfig<Data> {
 }
 
 export const getFetchURL = (url: string, query?: QueryBuilderProps): string => {
-	let targetUrl = import.meta.env.PROD
-		? url
-		: `${import.meta.env.VITE_API_DEV_URL}${url}`;
+	let targetUrl = url;
 	if (query) {
 		const queryString = queryBuilder(query);
 		if (queryString) targetUrl += `?${queryString}`;

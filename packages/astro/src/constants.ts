@@ -13,14 +13,7 @@ const constants = {
 		emailTemplates: "email-templates.ts",
 		translations: "translations.ts",
 		spa: "spa.ts",
-		index: "index.html",
 	},
-	nonSpaPrefixes: [
-		`${mountPath}/api`,
-		`${mountPath}/cdn`,
-		`${mountPath}/documentation`,
-		`${mountPath}/openapi`,
-	],
 } as const;
 
 export default constants;

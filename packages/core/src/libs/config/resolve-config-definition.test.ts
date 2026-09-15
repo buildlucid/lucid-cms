@@ -17,6 +17,33 @@ const createAdapter = (adapter = "test") =>
 		dropAllTables: vi.fn(),
 	}) as unknown as DatabaseAdapter;
 
+test("releases CLI resources when configuration fails after loading the environment", async () => {
+	const dispose = vi.fn(async () => undefined);
+	const getEnvVars = vi.fn(async () => ({}));
+	const definition = defineConfig({
+		runtime: {
+			key: "test",
+			lucid: "0.0.0",
+			getEnvVars,
+			cli: {
+				dispose,
+				serve: vi.fn(),
+				build: vi.fn(),
+			},
+		},
+		db: createAdapter(),
+		config: () => {
+			throw new Error("Invalid project configuration");
+		},
+	});
+
+	await expect(resolveConfigDefinition({ definition })).rejects.toThrow(
+		"Invalid project configuration",
+	);
+	expect(getEnvVars).toHaveBeenCalledOnce();
+	expect(dispose).toHaveBeenCalledOnce();
+});
+
 test("resolves no-call runtime and database adapter creators", async () => {
 	const adapter = createAdapter("creator");
 	const runtime = () => ({

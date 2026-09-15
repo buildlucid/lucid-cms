@@ -13,6 +13,7 @@ import type {
 	AdapterRuntimeContext,
 	EnvironmentVariables,
 	LucidConfigDefinition,
+	LucidConfigDefinitionMeta,
 	RuntimeAdaptConfig,
 	RuntimeAdaptConfigModule,
 	RuntimeAdapter,
@@ -42,6 +43,7 @@ export const loadConfigFile = async (props?: {
 	path?: string;
 	silent?: boolean;
 	adaptConfigPath?: string;
+	meta?: LucidConfigDefinitionMeta;
 	/** Collects local config imports for development watchers. */
 	collectConfigDependencies?: boolean;
 	prepareRuntime?: boolean;
@@ -102,6 +104,7 @@ export const loadConfigFile = async (props?: {
 			envSchema:
 				props?.envSchema ?? (hasNamedEnvExport ? configModule.env : undefined),
 			adaptConfig,
+			meta: props?.meta,
 			configPath,
 			projectRoot,
 			prepareRuntime: props?.prepareRuntime,

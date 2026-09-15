@@ -1,21 +1,26 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { getConfigPath } from "@lucidcms/core/build";
+import { buildAdmin, getConfigPath } from "@lucidcms/core/build";
 import type { AstroIntegration } from "astro";
 import constants from "./constants.js";
+import { createDevAdminPlugin } from "./integration/admin.js";
 import {
 	copyAssets,
 	createDevAssetPlugin,
 	prepareAssets,
 } from "./integration/assets.js";
-import { writeGeneratedModules } from "./integration/generated.js";
+import {
+	writeGeneratedModules,
+	writeSpaModule,
+} from "./integration/generated.js";
 import {
 	type DevServerLifecycle,
 	getDevServerLifecycle,
 	teardownDevProject,
 	teardownProject,
 } from "./integration/lifecycle.js";
+import { pauseMigrationWaitLog } from "./integration/logging.js";
 import {
 	bootstrapDevProject,
 	checkProjectCompatibility,
@@ -33,6 +38,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 	let project: ResolvedLucidProject | undefined;
 	let generatedDirectory = "";
 	let assetRoot = "";
+	let assetsCopied = false;
 	let devBootstrap: Promise<void> | undefined;
 	let devLifecycle: DevServerLifecycle | undefined;
 	let projectCommand: "dev" | "build" | "sync" | undefined;
@@ -70,6 +76,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 						constants.generatedDirectory,
 					);
 					assetRoot = path.join(generatedDirectory, constants.assetDirectory);
+					assetsCopied = false;
 					await fs.rm(generatedDirectory, { recursive: true, force: true });
 					await prepareAssets(
 						nextProject,
@@ -98,6 +105,8 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					});
 					const ignoredWatchFiles = [
 						`${generatedDirectory.split(path.sep).join("/")}/**`,
+						`${path.join(projectRoot, ".lucid/vite").split(path.sep).join("/")}/**`,
+						`${path.join(projectRoot, ".lucid/cache").split(path.sep).join("/")}/**`,
 						...(prepared?.ignoredWatchFiles ?? []).map((filePath) =>
 							path.resolve(projectRoot, filePath).split(path.sep).join("/"),
 						),
@@ -134,6 +143,13 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 										},
 									}
 								: {}),
+							...(nextProject.integrationBridge.vite?.ssrEnvironment
+								? {
+										environments: {
+											ssr: nextProject.integrationBridge.vite.ssrEnvironment,
+										},
+									}
+								: {}),
 							resolve: {
 								alias: {
 									...(nextProject.integrationBridge.vite?.aliases ?? {}),
@@ -143,6 +159,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 							},
 							plugins: [
 								createDevAssetPlugin(assetRoot),
+								createDevAdminPlugin(projectRoot),
 								createResourceWatchPlugin(
 									nextProject.configPath,
 									resourceWatchFiles,
@@ -152,7 +169,10 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					});
 
 					if (command === "dev" && isRestart) {
-						devBootstrap = bootstrapDevProject(nextProject);
+						devBootstrap = bootstrapDevProject(nextProject, {
+							onPrompt: () =>
+								pauseMigrationWaitLog(logger, "astro:config:setup"),
+						});
 						await devBootstrap;
 					}
 					project = nextProject;
@@ -200,11 +220,13 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					throw error;
 				}
 			},
-			"astro:server:setup": async ({ server }) => {
+			"astro:server:setup": async ({ server, logger }) => {
 				if (!project) return;
 				devLifecycle?.setServer(server);
 				try {
-					devBootstrap ??= bootstrapDevProject(project);
+					devBootstrap ??= bootstrapDevProject(project, {
+						onPrompt: () => pauseMigrationWaitLog(logger, "astro:server:setup"),
+					});
 					await devBootstrap;
 				} catch (error) {
 					await devLifecycle?.shutdown().catch(() => {});
@@ -218,14 +240,31 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 					await teardownDevProject(project);
 				}
 			},
+			"astro:build:start": async () => {
+				if (!project) return;
+				try {
+					const outDir = path.join(assetRoot, "lucid");
+					await buildAdmin({ projectRoot: project.loaded.projectRoot, outDir });
+					await writeSpaModule(
+						generatedDirectory,
+						await fs.readFile(path.join(outDir, "index.html"), "utf8"),
+					);
+				} catch (error) {
+					await teardownProject(project, "build");
+					throw error;
+				}
+			},
+			"astro:build:generated": async ({ dir }) => {
+				await copyAssets(assetRoot, fileURLToPath(dir));
+				assetsCopied = true;
+			},
 			"astro:build:done": async ({ dir }) => {
 				if (!project) return;
 				const directory = fileURLToPath(dir);
 				try {
-					await Promise.all([
-						copyAssets(assetRoot, directory),
-						project.integrationBridge.buildDone?.({ directory }),
-					]);
+					// Astro skips build:generated when no routes are prerendered.
+					if (!assetsCopied) await copyAssets(assetRoot, directory);
+					await project.integrationBridge.buildDone?.({ directory });
 				} finally {
 					await teardownProject(project, "build");
 				}

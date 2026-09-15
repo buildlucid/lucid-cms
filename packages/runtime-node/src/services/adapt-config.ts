@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { relative } from "node:path";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { getBuildPaths } from "@lucidcms/core/build";
+import { getBuildPaths, shouldServeAdminShell } from "@lucidcms/core/runtime";
 import type {
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
@@ -38,25 +38,30 @@ const adaptConfig: RuntimeAdaptConfig = (
 				phase: "afterSetup",
 				register: async (app, config) => {
 					const paths = getBuildPaths(config);
-					app.use(
-						"/*",
-						serveStatic({
-							rewriteRequestPath: (path) => {
-								const relativeClientDist = relative(
-									process.cwd(),
-									paths.publicDist,
-								);
-								return `${relativeClientDist}${path}`;
-							},
-						}),
-					);
-					app.get("/lucid", (c) => {
-						const html = readFileSync(paths.spaDistHtml, "utf-8");
-						return c.html(html);
+					const servePublicAssets = serveStatic({
+						rewriteRequestPath: (path) => {
+							const relativeClientDist = relative(
+								process.cwd(),
+								paths.publicDist,
+							);
+							return `${relativeClientDist}${path}`;
+						},
 					});
-					app.get("/lucid/*", (c) => {
-						const html = readFileSync(paths.spaDistHtml, "utf-8");
-						return c.html(html);
+
+					app.use("/*", (c, next) => {
+						if (
+							meta?.admin === "development" &&
+							shouldServeAdminShell(c.req.path, c.req.method)
+						)
+							return next();
+						return servePublicAssets(c, next);
+					});
+
+					if (meta?.admin === "development") return;
+
+					app.get("/lucid/*", (c, next) => {
+						if (!shouldServeAdminShell(c.req.path, c.req.method)) return next();
+						return c.html(readFileSync(paths.spaDistHtml, "utf-8"));
 					});
 				},
 			});

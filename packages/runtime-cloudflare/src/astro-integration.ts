@@ -10,6 +10,26 @@ type AstroAdapter = {
 /** Build-time Astro bridge for the Cloudflare runtime. */
 const cloudflareAstroIntegration = {
 	vite: {
+		ssrEnvironment: {
+			// Late optimization restarts the Worker while its initial modules are loading.
+			optimizeDeps: {
+				include: [
+					"astro/assets/services/noop",
+					"astro/logger/console",
+					"kysely/migration",
+				],
+			},
+			build: {
+				rolldownOptions: {
+					output: {
+						codeSplitting: {
+							// Zod's cyclic modules must initialize together in the Worker.
+							groups: [{ name: "zod", test: /[/\\]node_modules[/\\]zod[/\\]/ }],
+						},
+					},
+				},
+			},
+		},
 		aliases: {
 			"cross-fetch": "cross-fetch/dist/browser-ponyfill.js",
 		},

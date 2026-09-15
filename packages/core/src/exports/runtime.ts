@@ -11,6 +11,12 @@ import createServiceContext from "../utils/services/create-service-context.js";
 
 export { registerResourceModules } from "../libs/resources/register-modules.js";
 export {
+	createAdminShellResponse,
+	isAdminPath,
+	shouldServeAdminShell,
+} from "../libs/runtime/admin.js";
+export { default as getBuildPaths } from "../libs/runtime/get-build-paths.js";
+export {
 	createLucidAdapters,
 	createLucidHost,
 	createServiceContext,

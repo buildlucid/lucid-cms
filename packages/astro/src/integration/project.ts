@@ -1,5 +1,5 @@
 import path from "node:path";
-import { LucidError } from "@lucidcms/core";
+import { createTranslator, LucidError } from "@lucidcms/core";
 import {
 	checkAllPluginsCompatibility,
 	loadBuildProject,
@@ -110,12 +110,19 @@ export const checkProjectCompatibility = async (
 	});
 	await checkAllPluginsCompatibility({
 		config: project.loaded.config,
+		translate: createTranslator({
+			store: project.loaded.translationStore,
+			locale: "en",
+		}),
 		runtimeContext: state.runtimeContext,
 	});
 };
 
 /** Runs Lucid migrations and sync tasks before the Astro development server starts. */
-export const bootstrapDevProject = async (project: ResolvedLucidProject) => {
+export const bootstrapDevProject = async (
+	project: ResolvedLucidProject,
+	options?: Pick<NonNullable<Parameters<typeof migrateCommand>[0]>, "onPrompt">,
+) => {
 	const state = await project.bridge.resolveRuntime({
 		adapter: project.loaded.adapter,
 		fallbackEnv: project.loaded.rawEnv,
@@ -128,6 +135,7 @@ export const bootstrapDevProject = async (project: ResolvedLucidProject) => {
 		runtimeContext: state.runtimeContext,
 		translationStore: project.loaded.translationStore,
 		mode: "return",
+		onPrompt: options?.onPrompt,
 	})({
 		skipSyncSteps: false,
 	});

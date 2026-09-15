@@ -14,11 +14,6 @@ export default defineConfig({
 			},
 		},
 	},
-	build: {
-		minify: true,
-		outDir: "../core/spa",
-		emptyOutDir: true,
-	},
 	optimizeDeps: {
 		include: ["@codemirror/state", "@codemirror/view"],
 	},
@@ -29,10 +24,6 @@ export default defineConfig({
 		}),
 		solidPlugin(),
 	],
-	base: "/lucid",
-	server: {
-		port: 3000,
-	},
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),

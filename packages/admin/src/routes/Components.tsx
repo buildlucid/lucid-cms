@@ -19,7 +19,6 @@ import {
 import { Standard } from "@/components/Groups/Headers";
 import { DynamicContent, Wrapper } from "@/components/Groups/Layout";
 import Button from "@/components/Partials/Button";
-import PluginLoader from "@/components/PluginLoader";
 
 const ComponentsRoute: Component = () => {
 	// ----------------------------------------
@@ -514,13 +513,6 @@ const ComponentsRoute: Component = () => {
 							}}
 						/>
 					</InfoRow.Content>
-				</InfoRow.Root>
-
-				<InfoRow.Root
-					title="Dynamic Plugin"
-					description="A proof of concept for dynamic component plugin loading"
-				>
-					<PluginLoader />
 				</InfoRow.Root>
 			</DynamicContent>
 		</Wrapper>

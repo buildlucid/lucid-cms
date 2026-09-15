@@ -6,6 +6,8 @@
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Updated the generated toolkit to use toolkit types from `@lucidcms/core/types`.
 - Added support for discovered resources and plugin sources in dev and builds.
+- Added live admin updates during development and programmatic SPA builds during `astro build`, with separate Vite settings for the admin.
+- Stopped Astro's waiting message from interrupting migration prompts.
 
 ## v0.3.1
 

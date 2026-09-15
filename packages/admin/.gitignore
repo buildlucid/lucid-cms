@@ -1,5 +1,6 @@
 node_modules
 dist
+!src/build/
 .DS_Store
 ._*
 .idea/
