@@ -39,16 +39,17 @@ export const logAdminUrl = (url: string) =>
 		symbol: "line",
 	});
 
-const timeFormatter = new Intl.DateTimeFormat("en-GB", {
-	hour: "2-digit",
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+	hour: "numeric",
 	minute: "2-digit",
 	second: "2-digit",
+	hour12: true,
 });
 
 export const logRestart = (message: string) => {
 	cliLogger.log(
 		cliLogger.color.gray(timeFormatter.format(new Date())),
-		cliLogger.color.blue("[lucid]"),
+		cliLogger.color.blue("[core]"),
 		message,
 	);
 };

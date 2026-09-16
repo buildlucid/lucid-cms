@@ -1,7 +1,22 @@
 /// <reference types="@cloudflare/workers-types" />
 
+import { createTranslator } from "@lucidcms/core";
 import { describe, expect, it } from "vitest";
 import plugin from "./plugin.js";
+
+const translate = createTranslator({
+	store: {
+		defaultLocale: "en",
+		bundles: {},
+		resolve: ({ key }) => key,
+		copy: (value) => {
+			if (value === undefined || typeof value === "string") return value;
+			return value.type === "lucid.literal" ? value.value : value.key;
+		},
+		admin: () => ({}),
+	},
+	locale: "en",
+});
 
 describe("Cloudflare Images plugin", () => {
 	it("requires the Cloudflare runtime", () => {
@@ -11,6 +26,7 @@ describe("Cloudflare Images plugin", () => {
 			instance.checkCompatibility?.({
 				runtimeContext: { runtime: "node" } as never,
 				config: {} as never,
+				translate,
 			}),
 		).toThrow(/Cloudflare runtime adapter/);
 	});

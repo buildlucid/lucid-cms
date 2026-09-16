@@ -145,6 +145,7 @@ const writeLog = (state: LoggerState, level: LogEntryLevel, log: LogInput) => {
 		...log,
 		...(requestId ? { requestId } : {}),
 		level,
+		owner: log.owner ?? "core",
 		timestamp: new Date().toISOString(),
 	};
 

@@ -88,7 +88,7 @@ export const Form: Component<{
 								<Show when={showSubmitButton()}>
 									<Button
 										size={props.options?.buttonSize || "medium"}
-										classes={classNames({
+										class={classNames({
 											"w-full": props.options?.buttonFullWidth,
 										})}
 										type="submit"

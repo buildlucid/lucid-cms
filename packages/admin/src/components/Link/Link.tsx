@@ -18,7 +18,6 @@ interface LinkProps extends JSX.HTMLAttributes<HTMLAnchorElement> {
 
 	replace?: boolean;
 	href?: string;
-	classes?: string;
 	permission?: boolean;
 	target?: string;
 	rel?: string;
@@ -29,7 +28,7 @@ const Link: Component<LinkProps> = (props) => {
 	// Memos
 	const classes = createMemo(() => {
 		return classnames(
-			"flex items-center justify-center text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative font-base",
+			"flex items-center justify-center text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
 			{
 				"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast ring-primary-base":
 					props.theme === "primary",
@@ -55,10 +54,10 @@ const Link: Component<LinkProps> = (props) => {
 	// Render
 	return (
 		<A
-			class={classnames(classes(), props.classes)}
+			{...props}
+			class={classnames(classes(), props.class)}
 			href={props.href || ""}
 			replace={props.replace}
-			{...props}
 			onClick={(e) => {
 				if (props.permission === false) {
 					spawnToast({

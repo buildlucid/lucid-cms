@@ -676,7 +676,7 @@ export const PageBuilderHeader: Component<{
 										theme="secondary"
 										size="small"
 										aria-disabled={option().disabled === true}
-										classes={classNames({
+										class={classNames({
 											"cursor-not-allowed opacity-80":
 												option().disabled === true,
 										})}
@@ -698,7 +698,7 @@ export const PageBuilderHeader: Component<{
 									title={T()("common.preview")}
 									aria-label={T()("common.preview")}
 									aria-pressed={props.state.previewOpen?.()}
-									classes={
+									class={
 										props.state.previewOpen?.()
 											? "border-secondary-base! bg-secondary-base! text-secondary-contrast! fill-secondary-contrast! hover:bg-secondary-hover!"
 											: undefined

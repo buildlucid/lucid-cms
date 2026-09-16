@@ -6,6 +6,8 @@ export type LogEntryLevel = Exclude<LogLevel, "silent">;
 
 /** Structured log entry accepted by logger methods. */
 export type LogInput = {
+	/** Component responsible for the entry. Defaults to "core". */
+	owner?: string;
 	/**
 	 * The active HTTP request identifier when the entry belongs to a request.
 	 */
@@ -14,7 +16,7 @@ export type LogInput = {
 	 * A stable identifier for the event. Useful when querying structured logs.
 	 */
 	event?: string;
-	/** Component or plugin responsible for this event. */
+	/** Subsystem or context within the owner responsible for this event. */
 	scope?: string;
 	/** Human-readable description of what happened. */
 	message: string;
@@ -28,7 +30,9 @@ export type LogInput = {
  * A complete log record passed to the configured transport.
  */
 export type LogEntry = Readonly<
-	LogInput & {
+	Omit<LogInput, "owner"> & {
+		/** Component responsible for the entry. */
+		owner: string;
 		level: LogEntryLevel;
 		timestamp: string;
 	}

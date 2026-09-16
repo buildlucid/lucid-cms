@@ -3,6 +3,7 @@ import { Worker } from "node:worker_threads";
 import { copy, LucidError, logger } from "@lucidcms/core";
 import { logScopes } from "@lucidcms/core/extension";
 import type { QueueAdapterInstance } from "@lucidcms/core/types";
+import { PLUGIN_KEY } from "../constants.js";
 import type { WorkerQueueAdapterOptions } from "../types.js";
 import resolveWorkerConsumerUrl from "../utils/resolve-worker-consumer-url.js";
 import validateOptions from "../utils/validate-options.js";
@@ -66,6 +67,7 @@ const workerQueueAdapter = (
 							error,
 							event: "worker-queue.consumer.error",
 							message: "The worker queue consumer failed",
+							owner: PLUGIN_KEY,
 							scope: logScopes.queueAdapter,
 						});
 					});
@@ -82,6 +84,7 @@ const workerQueueAdapter = (
 
 						logger.warn({
 							message: "The worker queue consumer exited and will restart",
+							owner: PLUGIN_KEY,
 							scope: logScopes.queueAdapter,
 							data: { code, delay },
 						});
@@ -92,6 +95,7 @@ const workerQueueAdapter = (
 				startWorker();
 				logger.debug({
 					message: "The worker queue has started",
+					owner: PLUGIN_KEY,
 					scope: logScopes.queueAdapter,
 				});
 			},

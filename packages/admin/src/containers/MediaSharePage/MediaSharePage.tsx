@@ -294,7 +294,7 @@ const MediaSharePage: Component = () => {
 										if (!token()) return;
 										requestDownload.action.mutate({ token: token() });
 									}}
-									classes="w-full"
+									class="w-full"
 								>
 									<span class="flex items-center justify-center gap-2">
 										<FaSolidDownload />

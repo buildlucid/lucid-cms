@@ -77,12 +77,7 @@ const EmailChangeConfirmPage: Component = () => {
 						{T()("routes.auth.email.change.confirmed.title")}
 					</h1>
 					<p>{T()("routes.auth.email.change.confirmed.description")}</p>
-					<Link
-						theme="primary"
-						size="medium"
-						href="/lucid/login"
-						classes="mt-8"
-					>
+					<Link theme="primary" size="medium" href="/lucid/login" class="mt-8">
 						{T()("common.back.to.login")}
 					</Link>
 				</div>

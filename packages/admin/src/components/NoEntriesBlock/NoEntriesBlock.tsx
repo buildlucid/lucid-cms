@@ -46,7 +46,7 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 					<Button
 						theme={props.options?.buttonTheme ?? "primary"}
 						size="small"
-						classes="mt-4"
+						class="mt-4"
 						onClick={props.callbacks?.action}
 						permission={props.permissions?.create}
 					>

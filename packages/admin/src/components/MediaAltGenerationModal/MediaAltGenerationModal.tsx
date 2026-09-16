@@ -307,7 +307,7 @@ const MediaAltGenerationModalContent: Component<{
 							type="submit"
 							theme="secondary"
 							size="medium"
-							classes="w-full min-w-0! gap-2"
+							class="w-full min-w-0! gap-2"
 							loading={props.isLoading}
 							disabled={
 								props.selectedLocales.length === 0 ||

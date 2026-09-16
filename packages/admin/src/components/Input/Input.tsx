@@ -45,6 +45,7 @@ export const Input: Component<{
 	fieldColumnIsMissing?: boolean;
 	labelRightSlot?: JSXElement;
 	rightAction?: JSXElement;
+	class?: string;
 }> = (props) => {
 	const [inputFocus, setInputFocus] = createSignal(false);
 	const [passwordVisible, setPasswordVisible] = createSignal(false);
@@ -60,9 +61,13 @@ export const Input: Component<{
 	// Render
 	return (
 		<div
-			class={classnames("group w-full relative", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
+			class={classnames(
+				"group w-full relative",
+				{
+					"mb-3 last:mb-0": props.noMargin !== true,
+				},
+				props.class,
+			)}
 		>
 			<FormLabel
 				id={props.id}

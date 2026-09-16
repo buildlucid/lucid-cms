@@ -1,5 +1,6 @@
 /// <reference types="@cloudflare/workers-types" />
 
+import { createTranslator } from "@lucidcms/core";
 import { describe, expect, test } from "vitest";
 import { DEFAULT_MAX_UPLOAD_SIZE } from "./constants.js";
 import plugin from "./plugin.js";
@@ -33,6 +34,20 @@ const buildConfig = (uploadBytes: number) =>
 		},
 	}) as never;
 
+const translate = createTranslator({
+	store: {
+		defaultLocale: "en",
+		bundles: {},
+		resolve: ({ key }) => key,
+		copy: (value) => {
+			if (value === undefined || typeof value === "string") return value;
+			return value.type === "lucid.literal" ? value.value : value.key;
+		},
+		admin: () => ({}),
+	},
+	locale: "en",
+});
+
 describe("Cloudflare R2 plugin", () => {
 	test("requires the Cloudflare runtime", () => {
 		const cloudflareR2Plugin = plugin({
@@ -45,6 +60,7 @@ describe("Cloudflare R2 plugin", () => {
 					runtime: "node",
 				} as never,
 				config: buildConfig(16 * 1024 * 1024),
+				translate,
 			}),
 		).toThrow(/Cloudflare runtime adapter/);
 	});
@@ -60,6 +76,7 @@ describe("Cloudflare R2 plugin", () => {
 					runtime: "cloudflare",
 				} as never,
 				config: buildConfig(DEFAULT_MAX_UPLOAD_SIZE + 1),
+				translate,
 			}),
 		).toThrow(/http fallback/);
 	});

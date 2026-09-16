@@ -60,6 +60,7 @@ export const writeHttpEntry = (
 		color: consoleColors.http,
 		colors: options.colors,
 		label: "HTTP",
+		owner: entry.owner,
 		timestamp: formatTimestamp(entry.timestamp, options.timestamps),
 	});
 	const statusLabel = colorize(String(status), statusColor, options.colors);

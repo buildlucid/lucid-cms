@@ -24,7 +24,7 @@ const NodeActions: Component<NodeActionsProps> = (props) => {
 				type="button"
 				theme="secondary-subtle"
 				size="icon-subtle"
-				classes="rounded-full!"
+				class="rounded-full!"
 				onClick={props.onEdit}
 				disabled={props.editDisabled}
 				aria-label={props.editLabel}

@@ -14,15 +14,15 @@ afterEach(async () => {
 const fixture = async () => {
 	const root = await mkdtemp(path.join(tmpdir(), "lucid-admin-key-"));
 	roots.push(root);
-	for (const directory of ["src", "dist/build", "dist/shared"]) {
+	for (const directory of ["src/styles", "dist/build", "dist/shared"]) {
 		await mkdir(path.join(root, directory), { recursive: true });
 	}
 	for (const file of [
 		"src/index.tsx",
+		"src/styles/theme.css",
 		"dist/build/config.mjs",
 		"dist/shared/preview.js",
 		"package.json",
-		"tailwind.config.js",
 		"index.html",
 	]) {
 		await writeFile(path.join(root, file), file);
@@ -45,6 +45,7 @@ test("invalidates source, compiler, shared helper and lockfile changes, includin
 	let previous = original;
 	for (const file of [
 		"src/index.tsx",
+		"src/styles/theme.css",
 		"dist/build/config.mjs",
 		"dist/shared/preview.js",
 		"package-lock.json",

@@ -288,7 +288,7 @@ const TimelineDetails: Component<{
 							theme="border-outline"
 							size="small"
 							href={viewHref()}
-							classes="w-full"
+							class="w-full"
 						>
 							{props.item.type === "latest"
 								? T()("common.edit")
@@ -299,7 +299,7 @@ const TimelineDetails: Component<{
 								type="button"
 								theme="secondary"
 								size="small"
-								classes="w-full"
+								class="w-full"
 								loading={props.restore.loading}
 								permission={props.restore.permission}
 								onClick={props.onRestore}

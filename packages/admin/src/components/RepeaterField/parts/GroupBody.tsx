@@ -259,7 +259,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						theme="secondary-subtle"
 						size="icon-subtle"
 						tabIndex="-1"
-						classes={classNames(
+						class={classNames(
 							"text-icon-faded hover:text-icon-hover transition-all duration-200",
 							{
 								"transform rotate-180": groupOpen(),

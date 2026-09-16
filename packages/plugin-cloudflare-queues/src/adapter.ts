@@ -6,6 +6,7 @@ import {
 	DEFAULT_QUEUE_BINDING,
 	MAX_BATCH_SIZE,
 	MAX_DELAY_MS,
+	PLUGIN_KEY,
 } from "./constants.js";
 import type { PluginOptions } from "./types.js";
 import { getDelaySeconds } from "./utils/get-delay-seconds.js";
@@ -30,12 +31,14 @@ const cloudflareQueuesAdapter = (
 
 				logger.debug({
 					message: `Cloudflare queue adapter initialised in ${consumerSupported ? "production" : "development"} mode`,
+					owner: PLUGIN_KEY,
 					scope: logScopes.queueAdapter,
 				});
 			},
 			destroy: async () => {
 				logger.debug({
 					message: "Cloudflare queue adapter destroyed",
+					owner: PLUGIN_KEY,
 					scope: logScopes.queueAdapter,
 				});
 			},

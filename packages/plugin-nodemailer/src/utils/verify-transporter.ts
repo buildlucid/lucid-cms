@@ -11,7 +11,7 @@ const verifyTransporter = async (transporter: Transporter) => {
 				error,
 				event: "nodemailer.transport.not-ready",
 				message: "Nodemailer transporter is not ready",
-				scope: PLUGIN_KEY,
+				owner: PLUGIN_KEY,
 				data: {
 					errorMessage: error.message,
 				},
@@ -21,7 +21,7 @@ const verifyTransporter = async (transporter: Transporter) => {
 
 		logger.warn({
 			message: "Nodemailer transporter is not ready",
-			scope: PLUGIN_KEY,
+			owner: PLUGIN_KEY,
 		});
 	}
 };

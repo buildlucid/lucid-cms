@@ -594,7 +594,7 @@ const ImageCropEditorModal: Component<{
 												type="button"
 												theme="secondary-toggle"
 												size="small"
-												classes="h-8 text-xs"
+												class="h-8 text-xs"
 												active={activeRatio() === preset}
 												disabled={disabled()}
 												onClick={() => applyRatioPreset(preset)}

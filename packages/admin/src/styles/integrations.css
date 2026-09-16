@@ -1,0 +1,13 @@
+/* Prevent CodeMirror's pre-theme focus outline from flashing inside its shell. */
+
+.code-editor-shell .cm-editor,
+.code-editor-shell .cm-editor.cm-focused {
+	border: 0;
+	outline: none;
+}
+
+/* Tiptap injects its gap-cursor styles outside Tailwind's cascade layers. */
+
+.rich-text-content .ProseMirror-gapcursor::after {
+	border-top-color: var(--lucid-body);
+}

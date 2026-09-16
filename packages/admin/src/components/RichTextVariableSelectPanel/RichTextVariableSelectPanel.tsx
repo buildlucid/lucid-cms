@@ -406,7 +406,7 @@ const RichTextVariableSelectPanel: Component<{
 											type="button"
 											theme="border-outline"
 											size="medium"
-											classes="gap-2"
+											class="gap-2"
 											onClick={() => setStep("target")}
 										>
 											<FaSolidArrowLeft size={12} />

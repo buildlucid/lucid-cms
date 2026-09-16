@@ -258,7 +258,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								size="small"
 								onClick={openMediaSelectModal}
 								disabled={props.disabled || !canAddMore()}
-								classes="capitalize"
+								class="capitalize"
 							>
 								{T()("media.select.action", {
 									type: props.type || "media",
@@ -270,7 +270,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								size="small"
 								onClick={openMediaUploadPanel}
 								disabled={props.disabled || !canAddMore()}
-								classes="capitalize"
+								class="capitalize"
 							>
 								{T()("media.upload.action")}
 							</Button>
@@ -453,7 +453,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									size="small"
 									onClick={openMediaSelectModal}
 									disabled={props.disabled || !canAddMore()}
-									classes="capitalize"
+									class="capitalize"
 								>
 									{T()("media.select.action", {
 										type: props.type || "media",
@@ -465,7 +465,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									size="small"
 									onClick={openMediaUploadPanel}
 									disabled={props.disabled || !canAddMore()}
-									classes="capitalize"
+									class="capitalize"
 								>
 									{T()("media.upload.action")}
 								</Button>

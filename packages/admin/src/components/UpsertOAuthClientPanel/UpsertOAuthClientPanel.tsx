@@ -381,7 +381,7 @@ const UpsertOAuthClientPanel: Component<{
 												type="button"
 												theme="danger-outline"
 												size="icon"
-												classes="h-10! w-10! min-w-[40px]!"
+												class="h-10! w-10! min-w-[40px]!"
 												onClick={() => removeRedirectUri(index)}
 												disabled={redirectUris().length === 1}
 												title={T()("common.remove")}
@@ -393,7 +393,7 @@ const UpsertOAuthClientPanel: Component<{
 												type="button"
 												theme="border-outline"
 												size="icon"
-												classes="h-10! w-10! min-w-[40px]!"
+												class="h-10! w-10! min-w-[40px]!"
 												onClick={() => addRedirectUri(index)}
 												disabled={redirectUris().length >= 20}
 												title={T()("oauth.clients.redirect.add")}

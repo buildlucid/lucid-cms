@@ -21,6 +21,7 @@ import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
+import { startProgress } from "../services/progress.js";
 
 /**
  * The CLI build command. Responsible for calling the adapters build handler.
@@ -35,6 +36,7 @@ const buildCommand = async (options?: {
 	const silent = options?.silent ?? false;
 	let telemetryReporter: CommandTelemetryReporter | undefined;
 	let currentStage: TelemetryStage | undefined;
+	const progress = startProgress("Preparing build…", silent);
 
 	try {
 		const buildProject = await loadBuildProject({
@@ -110,6 +112,7 @@ const buildCommand = async (options?: {
 		});
 
 		currentStage = "email_templates";
+		progress.update("Preparing email templates and public assets…");
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 			prepareEmailTemplates({
 				config: configRes.config,
@@ -157,6 +160,7 @@ const buildCommand = async (options?: {
 		const translationStore = configRes.translationStore;
 
 		currentStage = "artifacts";
+		progress.update("Preparing build artifacts…");
 		const processedArtifacts = await prepareBuildArtifacts({
 			config: configRes.config,
 			translationStore,
@@ -169,9 +173,11 @@ const buildCommand = async (options?: {
 		});
 
 		currentStage = "admin_build";
+		progress.update("Building admin application…");
 		await vite.buildApp(configRes.config, silent);
 
 		currentStage = "runtime_build";
+		progress.update("Building server…");
 		const runtimeBuildRes = await adapterCLI.build({
 			resources: configRes.resources,
 			config: configRes.config,
@@ -242,10 +248,12 @@ const buildCommand = async (options?: {
 		);
 
 		currentStage = "finalize";
+		progress.update("Finishing build…");
 		await runtimeBuildRes?.onComplete?.();
 		const endTime = startTime();
 
 		const distSize = await calculateOutDirSize(configRes.config.build.outDir);
+		progress.stop();
 
 		cliLogger.log(
 			cliLogger.createBadge("LUCID CMS"),
@@ -268,6 +276,7 @@ const buildCommand = async (options?: {
 		});
 		process.exit(0);
 	} catch (error) {
+		progress.stop();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error, "Failed to build the application");
 		} else {

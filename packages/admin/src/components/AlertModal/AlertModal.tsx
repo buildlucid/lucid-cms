@@ -34,7 +34,7 @@ export const AlertModal: Component<{
 			<AlertDialog.Portal>
 				<AlertDialog.Overlay
 					class={classNames(
-						"fixed inset-0 z-40 bg-overlay-base animate-animate-overlay-hide duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						"fixed inset-0 z-40 bg-overlay-base animate-overlay-hide duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
 							"cursor-pointer": !preventDismiss(),
 						},
@@ -42,7 +42,7 @@ export const AlertModal: Component<{
 				/>
 				<div class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
 					<AlertDialog.Content
-						class="z-50 max-w-2xl w-full overflow-hidden bg-background-base rounded-xl border-border border m-auto animate-animate-modal-hide data-expanded:animate-animate-modal-show"
+						class="z-50 max-w-2xl w-full overflow-hidden bg-background-base rounded-xl border-border border m-auto animate-modal-hide data-expanded:animate-modal-show"
 						onEscapeKeyDown={(event) => {
 							if (preventDismiss()) event.preventDefault();
 						}}

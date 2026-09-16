@@ -51,6 +51,7 @@ const writeDefaultEntry = (
 		color: consoleColors[entry.level],
 		colors: options.colors,
 		label: levelLabels[entry.level],
+		owner: entry.owner,
 		scope: entry.scope,
 		timestamp: formatTimestamp(entry.timestamp, options.timestamps),
 	});

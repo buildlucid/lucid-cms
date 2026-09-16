@@ -186,7 +186,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 									size="small"
 									onClick={openUserSelectModal}
 									disabled={props.disabled || !canAddMore()}
-									classes="capitalize"
+									class="capitalize"
 								>
 									{T()("users.select.action")}
 								</Button>
@@ -256,7 +256,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 							size="small"
 							onClick={openUserSelectModal}
 							disabled={props.disabled || !canAddMore()}
-							classes="capitalize"
+							class="capitalize"
 						>
 							{T()("users.select.action")}
 						</Button>

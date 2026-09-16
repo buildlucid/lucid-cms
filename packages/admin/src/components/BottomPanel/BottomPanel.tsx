@@ -186,7 +186,7 @@ export const BottomPanel: Component<{
 			<Dialog.Portal>
 				<Dialog.Overlay
 					class={classNames(
-						"fixed inset-0 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						"fixed inset-0 animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
 							"bg-overlay-base": nestedLevel() === 0,
 							"bg-transparent": nestedLevel() > 0,
@@ -214,7 +214,7 @@ export const BottomPanel: Component<{
 					data-covered={isCovered() ? "" : undefined}
 				>
 					<Dialog.Content
-						class="w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-animate-slide-from-bottom-out data-expanded:animate-animate-slide-from-bottom-in outline-hidden overflow-y-auto"
+						class="w-full h-full relative flex flex-col rounded-t-xl scrollbar border border-border bg-background-base animate-slide-from-bottom-out data-expanded:animate-slide-from-bottom-in outline-hidden overflow-y-auto"
 						onPointerDownOutside={(e) => {
 							const target = e.target as HTMLElement;
 							if (target.closest("[data-panel-ignore]")) {

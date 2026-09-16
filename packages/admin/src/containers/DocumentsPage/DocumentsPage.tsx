@@ -305,7 +305,7 @@ const DocumentsPage: Component = () => {
 												size="small"
 												type="button"
 												active={orderMode()}
-												classes="gap-2"
+												class="gap-2"
 												onClick={() => {
 													if (orderMode()) {
 														exitOrderMode();

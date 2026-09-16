@@ -1322,7 +1322,7 @@ const MediaImageGenerationModal: Component = () => {
 									type="submit"
 									theme="secondary"
 									size="medium"
-									classes="w-full min-w-0! gap-2"
+									class="w-full min-w-0! gap-2"
 									loading={isLoading()}
 									disabled={!canGenerate()}
 								>
@@ -1392,7 +1392,7 @@ const MediaImageGenerationModal: Component = () => {
 																	type="button"
 																	theme="secondary"
 																	size="small"
-																	classes="gap-2"
+																	class="gap-2"
 																	onClick={() =>
 																		useGenerationAsSource(generation())
 																	}
@@ -1404,7 +1404,7 @@ const MediaImageGenerationModal: Component = () => {
 																	type="button"
 																	theme="border-outline"
 																	size="small"
-																	classes="gap-2"
+																	class="gap-2"
 																	disabled={isLoading()}
 																	onClick={() => retryGeneration(generation())}
 																>
@@ -1470,7 +1470,7 @@ const MediaImageGenerationModal: Component = () => {
 																	type="button"
 																	theme="border-outline"
 																	size="small"
-																	classes="gap-2"
+																	class="gap-2"
 																	disabled={isLoading()}
 																	onClick={() =>
 																		resumePendingGeneration(resumablePending())
@@ -1488,7 +1488,7 @@ const MediaImageGenerationModal: Component = () => {
 																	type="button"
 																	theme="danger-outline"
 																	size="small"
-																	classes="gap-2"
+																	class="gap-2"
 																	disabled={isLoading()}
 																	onClick={() =>
 																		discardPendingGeneration(resumablePending())

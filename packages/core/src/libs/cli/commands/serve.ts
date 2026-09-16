@@ -17,6 +17,7 @@ import generateTypes from "../../type-generation/index.js";
 import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
+import { startProgress } from "../services/progress.js";
 import { getServerUrl, logServerReady } from "../services/server-logger.js";
 import updateAvailable from "../services/update-available.js";
 import migrateCommand from "./migrate.js";
@@ -35,6 +36,7 @@ const serveCommand = async () => {
 	let startupCompleted = false;
 	let startupAdapterKeys: AdapterKeys | undefined;
 	const coreUpdateAvailable = updateAvailable().catch(() => undefined);
+	const progress = startProgress("Preparing server…");
 
 	const maybeReportStartup = () => {
 		if (!startupListening || !startupCompleted || !startupAdapterKeys) return;
@@ -48,6 +50,7 @@ const serveCommand = async () => {
 
 	let shutdownPromise: Promise<void> | undefined;
 	const shutdown = () => {
+		progress.stop();
 		shutdownPromise ??= (async () => {
 			try {
 				await destroy?.();
@@ -112,6 +115,7 @@ const serveCommand = async () => {
 		});
 
 		currentStage = "migration";
+		progress.update("Preparing database…");
 		const migrateResult = await migrateCommand({
 			config: configRes.config,
 			migrationFiles: configRes.resources.files.migrations,
@@ -119,6 +123,7 @@ const serveCommand = async () => {
 			runtimeContext: configRes.runtimeContext,
 			translationStore,
 			mode: "return",
+			onPrompt: progress.pause,
 		})({
 			skipSyncSteps: false,
 		});
@@ -128,9 +133,11 @@ const serveCommand = async () => {
 		}
 
 		currentStage = "admin_build";
+		progress.update("Building admin application…");
 		await vite.buildApp(configRes.config);
 
 		currentStage = "email_templates";
+		progress.update("Preparing email templates and public assets…");
 		const [emailTemplatesRes, publicAssetsRes] = await Promise.all([
 			prepareEmailTemplates({
 				config: configRes.config,
@@ -175,6 +182,7 @@ const serveCommand = async () => {
 		);
 
 		currentStage = "runtime_initialization";
+		progress.update("Starting server…");
 		const serverRes = await adapterCLI.serve({
 			mode: "static",
 			projectRoot: configRes.projectRoot,
@@ -186,6 +194,7 @@ const serveCommand = async () => {
 				silent: false,
 			},
 			onListening: async (props) => {
+				progress.stop();
 				startupListening = true;
 				startupAdapterKeys = props.adapterKeys;
 				maybeReportStartup();
@@ -215,6 +224,7 @@ const serveCommand = async () => {
 		startupAdapterKeys = serverRes.adapterKeys;
 		maybeReportStartup();
 	} catch (error) {
+		progress.stop();
 		await destroy?.();
 		if (error instanceof Error) {
 			cliLogger.errorInstance(error, "Failed to start the server");

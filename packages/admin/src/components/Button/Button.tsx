@@ -21,7 +21,6 @@ interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
 
 	onClick?: (e: MouseEvent) => void;
 	type?: "button" | "submit" | "reset";
-	classes?: string;
 	loading?: boolean;
 	disabled?: boolean;
 	active?: boolean;
@@ -33,7 +32,7 @@ const Button: Component<ButtonProps> = (props) => {
 	// Memos
 	const classes = createMemo(() => {
 		return classnames(
-			"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 font-base",
+			"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80",
 			{
 				"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast ring-primary-base":
 					props.theme === "primary",
@@ -94,7 +93,7 @@ const Button: Component<ButtonProps> = (props) => {
 		<button
 			{...props}
 			type={props.type}
-			class={classnames(classes(), props.classes, {
+			class={classnames(classes(), props.class, {
 				"pointer-events-none": props.loading,
 			})}
 			onClick={buttonOnClick}

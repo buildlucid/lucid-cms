@@ -9,8 +9,7 @@
 		"src",
 		"!src/build",
 		"!src/**/*.test.*",
-		"index.html",
-		"tailwind.config.js"
+		"index.html"
 	],
 	"exports": {
 		"./build": {

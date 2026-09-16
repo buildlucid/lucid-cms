@@ -111,7 +111,7 @@ const DocumentHistoryPage: Component = () => {
 									size="small"
 									onClick={state.loadMore}
 									loading={state.isLoading()}
-									classes="w-full"
+									class="w-full"
 								>
 									{T()("common.load.more")}
 								</Button>

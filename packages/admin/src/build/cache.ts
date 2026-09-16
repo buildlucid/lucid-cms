@@ -62,9 +62,7 @@ export const getAdminBuildKey = async (
 	const files = [
 		...sources,
 		...locks,
-		...["package.json", "index.html", "tailwind.config.js"].map((name) =>
-			path.join(adminRoot, name),
-		),
+		...["package.json", "index.html"].map((name) => path.join(adminRoot, name)),
 	].sort();
 	const hash = createHash("sha256");
 

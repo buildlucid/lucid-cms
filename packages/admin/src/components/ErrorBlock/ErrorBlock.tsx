@@ -44,7 +44,7 @@ const ErrorBlock: Component<{
 					<Link
 						theme={"primary"}
 						size="small"
-						classes="mt-4"
+						class="mt-4"
 						href={props.link?.href || ""}
 					>
 						{props.link?.text || ""}

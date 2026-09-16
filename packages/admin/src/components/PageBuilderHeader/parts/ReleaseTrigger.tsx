@@ -103,7 +103,7 @@ export const ReleaseTrigger: Component<{
 				onClick={handleSaveClick}
 				disabled={props.saveDisabled}
 				class={classNames(
-					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative font-base gap-2",
+					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
 					"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base",
 					"px-4 h-9 text-sm",
 					{
@@ -123,7 +123,7 @@ export const ReleaseTrigger: Component<{
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger
 						class={classNames(
-							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative font-base gap-2",
+							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
 							"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base",
 							"px-2 w-9 h-9 text-sm",
 							{

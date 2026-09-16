@@ -337,7 +337,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									size="small"
 									onClick={openDocuSelectModal}
 									disabled={props.disabled || !canAddMore()}
-									classes="capitalize"
+									class="capitalize"
 								>
 									{T()("documents.select.action")}
 								</Button>
@@ -428,7 +428,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							size="small"
 							onClick={openDocuSelectModal}
 							disabled={props.disabled || !canAddMore()}
-							classes="capitalize"
+							class="capitalize"
 						>
 							{T()("documents.select.action")}
 						</Button>

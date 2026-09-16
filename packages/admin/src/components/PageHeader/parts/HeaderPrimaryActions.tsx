@@ -96,7 +96,7 @@ const HeaderPrimaryActions: Component<{
 					disabled={action.disabled && !action.disabledClickable}
 					aria-disabled={action.disabled ? "true" : undefined}
 					onClick={() => handleButtonAction(action)}
-					classes={classNames({
+					class={classNames({
 						"opacity-80 cursor-not-allowed": action.disabled,
 					})}
 				>

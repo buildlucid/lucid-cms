@@ -222,7 +222,7 @@ const ActionList: Component<{
 								<FaSolidChevronRight size={14} />
 							</DropdownMenu.SubTrigger>
 							<DropdownMenu.Portal>
-								<DropdownMenu.SubContent class="bg-dropdown-base border border-border shadow-md animate-animate-dropdown focus:outline-hidden scrollbar rounded-md w-50 p-1.5 z-60 ml-1">
+								<DropdownMenu.SubContent class="bg-dropdown-base border border-border shadow-md animate-dropdown focus:outline-hidden scrollbar rounded-md w-50 p-1.5 z-60 ml-1">
 									<ActionList
 										actions={action.actions ?? []}
 										onSelect={props.onSelect}

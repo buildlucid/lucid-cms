@@ -35,7 +35,7 @@ const NavigationAccountMenu: Component<{
 	const itemClasses =
 		"group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm fill-dropdown-contrast outline-none transition-colors hover:bg-dropdown-hover hover:text-dropdown-contrast focus-visible:bg-dropdown-hover focus-visible:text-dropdown-contrast data-[highlighted]:bg-dropdown-hover data-[highlighted]:text-dropdown-contrast";
 	const submenuClasses =
-		"z-60 ml-1 w-48 rounded-md border border-border bg-dropdown-base p-1.5 shadow-md outline-none animate-animate-dropdown";
+		"z-60 ml-1 w-48 rounded-md border border-border bg-dropdown-base p-1.5 shadow-md outline-none animate-dropdown";
 
 	// -------------------------------
 	// Memos

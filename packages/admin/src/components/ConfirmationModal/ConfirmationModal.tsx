@@ -42,9 +42,9 @@ export const ConfirmationModal: Component<{
 			}}
 		>
 			<AlertDialog.Portal>
-				<AlertDialog.Overlay class="fixed inset-0 z-40 bg-overlay-base animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show" />
+				<AlertDialog.Overlay class="fixed inset-0 z-40 bg-overlay-base animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-overlay-show" />
 				<div class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-					<AlertDialog.Content class="z-50 bg-background-base rounded-xl border-border border max-w-2xl w-full m-auto animate-animate-modal-hide data-expanded:animate-animate-modal-show">
+					<AlertDialog.Content class="z-50 bg-background-base rounded-xl border-border border max-w-2xl w-full m-auto animate-modal-hide data-expanded:animate-modal-show">
 						<div class="flex justify-between mx-4 md:mx-6 py-4 md:py-6">
 							<div class="flex flex-col gap-1">
 								<AlertDialog.Title class="text-base font-semibold text-title">

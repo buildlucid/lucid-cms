@@ -1567,7 +1567,7 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 													posterImageGenerationTarget,
 												) && !mediaImageGeneration.accessState().disabled
 											}
-											classes={
+											class={
 												mediaImageGeneration.accessState().disabled
 													? "opacity-80 cursor-not-allowed"
 													: undefined

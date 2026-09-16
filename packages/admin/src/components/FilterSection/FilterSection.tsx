@@ -814,7 +814,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 											type="button"
 											disabled={active()}
 											aria-pressed={active()}
-											classes={
+											class={
 												active()
 													? "gap-1.5 border-secondary-base! bg-secondary-base! text-secondary-contrast! fill-secondary-contrast! opacity-100! cursor-default!"
 													: "gap-1.5"
@@ -880,7 +880,7 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 						theme="border-outline"
 						size="small"
 						type="button"
-						classes="gap-1.5"
+						class="gap-1.5"
 						title={T()("filter.section.add.group")}
 						aria-label={T()("filter.section.add.group")}
 						onClick={() => addDraft("new")}

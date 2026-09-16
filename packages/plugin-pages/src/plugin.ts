@@ -33,7 +33,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				if (!collectionInstance) {
 					logger.warn({
 						message: "Pages collection was not found",
-						scope: PLUGIN_KEY,
+						owner: PLUGIN_KEY,
 						data: {
 							collection: collectionConfig.key,
 						},

@@ -401,7 +401,7 @@ export const PreviewCanvas: Component<{
 							type="button"
 							theme="border-outline"
 							size="small"
-							classes="mt-4"
+							class="mt-4"
 							onClick={props.onRetry}
 						>
 							{T()("preview.retry")}

@@ -35,7 +35,7 @@ export const Modal: Component<ModalProps> = (props) => {
 			<Dialog.Portal>
 				<Dialog.Overlay
 					class={classNames(
-						"fixed inset-0 bg-overlay-base animate-animate-overlay-hide duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						"fixed inset-0 bg-overlay-base animate-overlay-hide duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
 							"cursor-pointer": !preventDismiss(),
 							"z-40":
@@ -65,7 +65,7 @@ export const Modal: Component<ModalProps> = (props) => {
 					style={{ "z-index": props.options?.zIndex }}
 				>
 					<Dialog.Content
-						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-animate-modal-hide data-expanded:animate-animate-modal-show"
+						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-modal-hide data-expanded:animate-modal-show"
 						onEscapeKeyDown={(event) => {
 							if (preventDismiss()) event.preventDefault();
 						}}

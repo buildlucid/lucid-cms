@@ -595,9 +595,7 @@ export const ReleaseRequestSidebar: Component<{
 									type="button"
 									theme="primary"
 									size="small"
-									classes={
-										actionCount() === 3 ? "col-span-2 w-full" : undefined
-									}
+									class={actionCount() === 3 ? "col-span-2 w-full" : undefined}
 									loading={retry.action.isPending}
 									onClick={() => {
 										const publishRequest = request();

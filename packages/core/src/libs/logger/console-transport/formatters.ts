@@ -18,6 +18,13 @@ export const levelLabels: Record<LogEntryLevel, string> = {
 	debug: "DEBUG",
 };
 
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+	hour: "numeric",
+	minute: "2-digit",
+	second: "2-digit",
+	hour12: true,
+});
+
 /**
  * Routes each log level through the matching console output stream.
  */
@@ -65,9 +72,7 @@ export const formatTimestamp = (timestamp: string, enabled: boolean) => {
 	const date = new Date(timestamp);
 	if (Number.isNaN(date.getTime())) return timestamp;
 
-	return [date.getHours(), date.getMinutes(), date.getSeconds()]
-		.map((part) => String(part).padStart(2, "0"))
-		.join(":");
+	return timeFormatter.format(date);
 };
 
 /**
@@ -136,6 +141,7 @@ export const createPrefix = (props: {
 	color: string;
 	colors: boolean;
 	label: string;
+	owner: string;
 	scope?: string;
 	timestamp?: string;
 }) => {
@@ -145,6 +151,7 @@ export const createPrefix = (props: {
 		parts.push(colorize(props.timestamp, consoleColors.dim, props.colors));
 	}
 
+	parts.push(colorize(`[${props.owner}]`, consoleColors.info, props.colors));
 	parts.push(colorize(props.label, props.color, props.colors));
 
 	if (props.scope) {

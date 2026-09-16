@@ -179,7 +179,7 @@ export const Panel: Component<{
 			<Dialog.Portal>
 				<Dialog.Overlay
 					class={classNames(
-						"fixed inset-0 animate-animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-animate-overlay-show",
+						"fixed inset-0 animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
 							"bg-overlay-base": nestedLevel() === 0,
 							"bg-transparent": nestedLevel() > 0,
@@ -202,9 +202,9 @@ export const Panel: Component<{
 						class={classNames(
 							"w-full relative flex flex-col rounded-xl scrollbar border border-border max-w-200 bg-background-base outline-hidden overflow-y-auto",
 							{
-								"animate-animate-slide-from-right-out data-expanded:animate-animate-slide-from-right-in":
+								"animate-slide-from-right-out data-expanded:animate-slide-from-right-in":
 									interfaceDirection.isLTR(),
-								"animate-animate-slide-from-left-out data-expanded:animate-animate-slide-from-left-in":
+								"animate-slide-from-left-out data-expanded:animate-slide-from-left-in":
 									interfaceDirection.isRTL(),
 							},
 						)}

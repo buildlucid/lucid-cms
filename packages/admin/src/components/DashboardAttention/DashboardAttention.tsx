@@ -106,7 +106,7 @@ const DashboardAttention: Component<{
 													{(href) => (
 														<A
 															href={href()}
-															class="flex h-8 items-center justify-center rounded-md border border-border bg-input-base px-2 text-center text-sm font-base text-subtitle transition-colors duration-200 hover:border-transparent hover:bg-secondary-hover hover:text-secondary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
+															class="flex h-8 items-center justify-center rounded-md border border-border bg-input-base px-2 text-center text-sm text-subtitle transition-colors duration-200 hover:border-transparent hover:bg-secondary-hover hover:text-secondary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
 														>
 															{action().label}
 														</A>

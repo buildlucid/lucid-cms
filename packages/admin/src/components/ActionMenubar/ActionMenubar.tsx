@@ -152,7 +152,7 @@ const ActionMenubar: Component<ActionMenubarProps> = (props) => {
 				<Menubar.Portal>
 					<Menubar.Content
 						class={classNames(
-							"bg-dropdown-base border border-border shadow-md animate-animate-dropdown focus:outline-hidden scrollbar rounded-md w-50 p-1.5 mt-2",
+							"bg-dropdown-base border border-border shadow-md animate-dropdown focus:outline-hidden scrollbar rounded-md w-50 p-1.5 mt-2",
 							{
 								"z-40": props.options?.raised,
 								"z-60": props.options?.raised !== true,
@@ -202,7 +202,7 @@ const ActionList: Component<{
 									<FaSolidChevronRight size={14} />
 								</Menubar.SubTrigger>
 								<Menubar.Portal>
-									<Menubar.SubContent class="bg-dropdown-base border border-border shadow-md animate-animate-dropdown focus:outline-hidden scrollbar rounded-md w-50 p-1.5 z-60 ml-1">
+									<Menubar.SubContent class="bg-dropdown-base border border-border shadow-md animate-dropdown focus:outline-hidden scrollbar rounded-md w-50 p-1.5 z-60 ml-1">
 										<ActionList
 											actions={action.actions ?? []}
 											onSelect={props.onSelect}

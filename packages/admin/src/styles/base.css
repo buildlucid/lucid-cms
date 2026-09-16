@@ -1,0 +1,82 @@
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentColor);
+	}
+
+	* {
+		scrollbar-color: var(--lucid-scrollbar-thumb) var(--lucid-scrollbar-track);
+		scrollbar-width: thin;
+	}
+
+	/* Typography */
+
+	h1 {
+		@apply text-base md:text-lg tracking-wider font-bold text-title;
+	}
+
+	h2 {
+		@apply text-base font-bold text-title;
+	}
+
+	h3 {
+		@apply text-base font-medium text-title;
+	}
+
+	h4 {
+		@apply text-base font-medium text-title font-body;
+	}
+
+	h5 {
+		@apply text-base font-medium text-title font-body;
+	}
+
+	h6 {
+		@apply text-base font-medium text-title font-body;
+	}
+
+	p,
+	li,
+	a {
+		@apply text-base font-normal tracking-wide leading-relaxed text-body font-body;
+	}
+
+	a,
+	button {
+		@apply hover:text-primary-hover duration-200 transition-colors ease-in-out focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base;
+	}
+
+	button {
+		@apply cursor-pointer;
+	}
+
+	/* Other */
+
+	body {
+		@apply bg-background-base text-body font-body;
+	}
+
+	::-moz-selection {
+		@apply bg-primary-base text-primary-contrast;
+	}
+
+	::selection {
+		@apply bg-primary-base text-primary-contrast;
+	}
+
+	input[type="date"]::-webkit-calendar-picker-indicator,
+	input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+	input[type="time"]::-webkit-calendar-picker-indicator {
+		@apply opacity-60;
+	}
+
+	[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+	[data-theme="dark"]
+		input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+	[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator {
+		@apply invert;
+	}
+}

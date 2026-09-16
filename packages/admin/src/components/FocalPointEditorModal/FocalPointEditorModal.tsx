@@ -239,7 +239,7 @@ const FocalPointEditorModal: Component<{
 					type="button"
 					theme="danger-subtle"
 					size="medium"
-					classes="self-start"
+					class="self-start"
 					onClick={() => setDraft(CENTER_FOCAL_POINT)}
 				>
 					{T()("common.reset")}

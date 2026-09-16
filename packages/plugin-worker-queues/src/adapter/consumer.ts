@@ -22,6 +22,7 @@ import type {
 	ResolvedLucidConfig,
 	TranslationStore,
 } from "@lucidcms/core/types";
+import { PLUGIN_KEY } from "../constants.js";
 import type { WorkerQueueAdapterOptions } from "../types.js";
 
 const MIN_POLL_INTERVAL = 1_000;
@@ -201,6 +202,7 @@ const startConsumer = async () => {
 							error: jobsResult.error,
 							event: "worker-queue.poll.query.failed",
 							message: "Error getting ready jobs",
+							owner: PLUGIN_KEY,
 							scope: logScopes.queueAdapter,
 						});
 						return;
@@ -208,6 +210,7 @@ const startConsumer = async () => {
 
 					logger.debug({
 						message: "Jobs found",
+						owner: PLUGIN_KEY,
 						scope: logScopes.queueAdapter,
 						data: { jobs: jobsResult.data.found },
 					});
@@ -227,6 +230,7 @@ const startConsumer = async () => {
 						error,
 						event: "worker-queue.poll.failed",
 						message: "Polling error",
+						owner: PLUGIN_KEY,
 						scope: logScopes.queueAdapter,
 					});
 				}
@@ -273,6 +277,7 @@ const startConsumer = async () => {
 
 		logger.debug({
 			message: "Starting queue polling",
+			owner: PLUGIN_KEY,
 			scope: logScopes.queueAdapter,
 		});
 		checkNow();
@@ -281,6 +286,7 @@ const startConsumer = async () => {
 			error,
 			event: "worker-queue.consumer.startup.failed",
 			message: "Consumer startup error",
+			owner: PLUGIN_KEY,
 			scope: logScopes.queueAdapter,
 		});
 		if (adapters) await adapters.destroy();

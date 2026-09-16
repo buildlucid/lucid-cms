@@ -36,7 +36,7 @@ const DropdownContent: Component<DropdownContentProps> = (props) => {
 				as={props.options?.as}
 				onOpenAutoFocus={props.options?.onOpenAutoFocus}
 				class={classNames(
-					"bg-dropdown-base border border-border px-2.5 py-2.5 shadow-md animate-animate-dropdown focus:outline-hidden scrollbar",
+					"bg-dropdown-base border border-border px-2.5 py-2.5 shadow-md animate-dropdown focus:outline-hidden scrollbar",
 					{
 						"rounded-md": props.options?.rounded,
 						"max-h-60 overflow-y-auto": props.options?.maxHeight === "md",
