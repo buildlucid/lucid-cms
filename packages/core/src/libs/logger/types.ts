@@ -6,6 +6,8 @@ export type LogEntryLevel = Exclude<LogLevel, "silent">;
 
 /** Structured log entry accepted by logger methods. */
 export type LogInput = {
+	/** Emit this key once per owner until the logger is reinitialized. */
+	dedupeKey?: string;
 	/** Component responsible for the entry. Defaults to "core". */
 	owner?: string;
 	/**

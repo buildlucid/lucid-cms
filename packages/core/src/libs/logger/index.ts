@@ -19,13 +19,14 @@ const LOG_LEVELS: Record<LogLevel, number> = {
 } as const;
 
 type LoggerState = {
+	emittedKeys: Set<string>;
 	destroyed: boolean;
 	level: LogLevel;
 	transport: LogTransport;
 };
 
 let isBuffering = false;
-let logBuffer: LogEntry[] = [];
+let logBuffer: Array<LogEntry | (() => void)> = [];
 
 /**
  * Reports provider failures without allowing logging to interrupt application work.
@@ -63,6 +64,12 @@ const getActiveRequestId = () => {
  */
 const safelyWrite = (state: LoggerState, entry: LogEntry) => {
 	if (state.destroyed) return;
+
+	if (entry.dedupeKey !== undefined) {
+		const key = JSON.stringify([entry.owner, entry.dedupeKey]);
+		if (state.emittedKeys.has(key)) return;
+		state.emittedKeys.add(key);
+	}
 
 	try {
 		const result = state.transport.write(entry) as unknown;
@@ -126,6 +133,7 @@ const createLogger = (state: LoggerState): LucidLogger => ({
  * Creates the default process logger backed by the human-readable console transport.
  */
 const createDefaultState = (): LoggerState => ({
+	emittedKeys: new Set(),
 	destroyed: false,
 	level: "info",
 	transport: createConsoleTransport(),
@@ -179,6 +187,7 @@ export const initializeLogger = async (props?: {
 
 	const level = props?.level ?? "info";
 	loggerState = {
+		emittedKeys: new Set(),
 		destroyed: false,
 		level,
 		transport:
@@ -199,6 +208,12 @@ export const startLoggerBuffering = () => {
 	isBuffering = true;
 };
 
+/** Defers already-formatted tool output until CLI startup buffering ends. */
+export const writeBufferedLog = (write: () => void) => {
+	if (isBuffering) logBuffer.push(write);
+	else write();
+};
+
 /**
  * Drains CLI-buffered entries through the current transport and flushes it.
  */
@@ -213,6 +228,11 @@ export const stopLoggerBuffering = async () => {
 	}
 
 	for (const entry of bufferedEntries) {
+		if (typeof entry === "function") {
+			entry();
+			continue;
+		}
+
 		if (shouldLog(loggerState.level, entry.level)) {
 			safelyWrite(loggerState, entry);
 		}

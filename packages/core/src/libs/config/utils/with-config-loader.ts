@@ -26,7 +26,8 @@ const withConfigLoader = async <T>(
 	const loader = createJiti(import.meta.url, {
 		fsCache: false,
 		moduleCache: true,
-		interopDefault: false,
+		// Cached CommonJS exports need the same default-import shape as native imports.
+		interopDefault: true,
 	});
 	const previous = new Set(Object.keys(loader.cache));
 	const state = { roots: new Set([projectRoot]), files: new Set<string>() };

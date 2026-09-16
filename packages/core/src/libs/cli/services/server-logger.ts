@@ -1,6 +1,11 @@
 import type { AddressInfo } from "node:net";
 import { clearScreenDown, cursorTo } from "node:readline";
 import constants from "../../../constants/constants.js";
+import {
+	createPrefix,
+	formatTimestamp,
+	shouldUseConsoleColors,
+} from "../../logger/console-transport/formatters.js";
 import cliLogger from "../logger.js";
 
 export const getServerUrl = (address: AddressInfo | string | null) => {
@@ -39,17 +44,13 @@ export const logAdminUrl = (url: string) =>
 		symbol: "line",
 	});
 
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-	hour: "numeric",
-	minute: "2-digit",
-	second: "2-digit",
-	hour12: true,
-});
-
 export const logRestart = (message: string) => {
 	cliLogger.log(
-		cliLogger.color.gray(timeFormatter.format(new Date())),
-		cliLogger.color.blue("[core]"),
+		createPrefix({
+			colors: shouldUseConsoleColors(),
+			owner: "core",
+			timestamp: formatTimestamp(new Date().toISOString(), true),
+		}),
 		message,
 	);
 };

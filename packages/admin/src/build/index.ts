@@ -11,6 +11,7 @@ import path from "node:path";
 import {
 	build,
 	type Connect,
+	createLogger,
 	createServer,
 	type HttpServer,
 	type LogLevel,
@@ -84,10 +85,18 @@ export const buildAdmin = async (options: AdminBuildOptions) => {
 export const createAdminDevServer = async (options: {
 	projectRoot: string;
 	server: HttpServer;
+	/** Optional output sink for hosts that buffer startup messages. */
+	loggerConsole?: Console;
 }) => {
 	const vite = await createServer({
 		...createAdminConfig(options.projectRoot),
 		mode: "development",
+		customLogger: options.loggerConsole
+			? createLogger("info", {
+					allowClearScreen: false,
+					console: options.loggerConsole,
+				})
+			: undefined,
 		appType: "custom",
 		server: {
 			middlewareMode: true,

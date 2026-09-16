@@ -7,6 +7,7 @@ import { PLUGIN_KEY } from "../constants.js";
 import type { WorkerQueueAdapterOptions } from "../types.js";
 import resolveWorkerConsumerUrl from "../utils/resolve-worker-consumer-url.js";
 import validateOptions from "../utils/validate-options.js";
+import { relayWorkerLog } from "./worker-logging.js";
 
 const ADAPTER_KEY = "worker";
 const SHUTDOWN_TIMEOUT = 5_000;
@@ -57,6 +58,8 @@ const workerQueueAdapter = (
 						workerData,
 					});
 					worker = nextWorker;
+
+					nextWorker.on("message", relayWorkerLog);
 
 					const restartAttemptResetTimer = setTimeout(() => {
 						if (worker === nextWorker) restartAttempts = 0;

@@ -10,6 +10,7 @@ import { drainJobs, logScopes } from "@lucidcms/core/extension";
 import {
 	createLucidAdapters,
 	createServiceContext,
+	initializeLogger,
 	logger,
 	prepareTranslations,
 } from "@lucidcms/core/runtime";
@@ -17,6 +18,7 @@ import type {
 	AdapterRuntimeContext,
 	DatabaseConnection,
 	EnvironmentVariables,
+	LogLevel,
 	LucidAdapters,
 	QueueAdapterInstance,
 	ResolvedLucidConfig,
@@ -24,6 +26,7 @@ import type {
 } from "@lucidcms/core/types";
 import { PLUGIN_KEY } from "../constants.js";
 import type { WorkerQueueAdapterOptions } from "../types.js";
+import type { WorkerLogMessage } from "./worker-logging.js";
 
 const MIN_POLL_INTERVAL = 1_000;
 const MAX_POLL_INTERVAL = 30_000;
@@ -107,12 +110,30 @@ const getConfig = async (): Promise<{
 	}
 };
 
+/** Lets the host apply its logging colours, filtering and configured transport. */
+const forwardLogsToParent = async (level: LogLevel = "info") => {
+	const port = parentPort;
+	if (!port) return;
+
+	await initializeLogger({
+		level,
+		transport: {
+			write: (entry) => {
+				port.postMessage({ type: "LOG", entry } satisfies WorkerLogMessage);
+			},
+		},
+	});
+};
+
 const startConsumer = async () => {
 	let adapters: LucidAdapters | undefined;
 	let database: DatabaseConnection | undefined;
+	let logsForwarded = false;
 
 	try {
 		const { config, translationStore, env, runtimeContext } = await getConfig();
+		await forwardLogsToParent(config.logger.level);
+		logsForwarded = true;
 
 		let requestPoll: () => void = () => undefined;
 		const internalQueueAdapter: QueueAdapterInstance = {
@@ -282,6 +303,8 @@ const startConsumer = async () => {
 		});
 		checkNow();
 	} catch (error) {
+		if (!logsForwarded) await forwardLogsToParent();
+
 		logger.error({
 			error,
 			event: "worker-queue.consumer.startup.failed",

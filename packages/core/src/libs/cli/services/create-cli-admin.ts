@@ -1,4 +1,5 @@
 import { createAdminDevServer } from "@lucidcms/admin/build";
+import { writeBufferedLog } from "../../logger/index.js";
 import {
 	createAdminShellResponse,
 	isAdminPath,
@@ -16,10 +17,22 @@ type CliAdmin = Pick<
 const createCliAdmin = async (
 	options: Parameters<typeof createAdminDevServer>[0],
 ): Promise<CliAdmin> => {
-	const admin = await createAdminDevServer(options);
+	const admin = await createAdminDevServer({
+		...options,
+		loggerConsole: {
+			...console,
+			log: (...args: unknown[]) => writeBufferedLog(() => console.log(...args)),
+			warn: (...args: unknown[]) =>
+				writeBufferedLog(() => console.warn(...args)),
+			error: (...args: unknown[]) =>
+				writeBufferedLog(() => console.error(...args)),
+		},
+	});
+
 	const middleware: typeof admin.middleware = (request, response, next) => {
 		const pathname = new URL(request.url ?? "/", "http://lucid.local").pathname;
 		if (!isAdminPath(pathname)) return next();
+
 		admin.middleware(request, response, (error: unknown) => {
 			if (error) {
 				response.statusCode = 500;

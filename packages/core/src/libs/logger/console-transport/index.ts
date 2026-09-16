@@ -9,6 +9,7 @@ import {
 	getConsoleLogger,
 	getErrorMessage,
 	levelLabels,
+	shouldUseConsoleColors,
 } from "./formatters.js";
 import { writeHttpEntry } from "./http.js";
 import type {
@@ -75,10 +76,7 @@ const createConsoleTransport = (
 	inputOptions: ConsoleTransportOptions = {},
 ): LogTransport => {
 	const options: ResolvedConsoleTransportOptions = {
-		colors:
-			inputOptions.colors ??
-			(typeof process !== "undefined" &&
-				Boolean(process.stdout?.isTTY || process.stderr?.isTTY)),
+		colors: inputOptions.colors ?? shouldUseConsoleColors(),
 		timestamps: inputOptions.timestamps ?? true,
 		verbose: inputOptions.verbose ?? false,
 	};

@@ -8,6 +8,7 @@ const verifyTransporter = async (transporter: Transporter) => {
 	} catch (error) {
 		if (error instanceof Error) {
 			logger.warn({
+				dedupeKey: `transport.not-ready:${error.message}`,
 				error,
 				event: "nodemailer.transport.not-ready",
 				message: "Nodemailer transporter is not ready",
@@ -20,6 +21,7 @@ const verifyTransporter = async (transporter: Transporter) => {
 		}
 
 		logger.warn({
+			dedupeKey: "transport.not-ready",
 			message: "Nodemailer transporter is not ready",
 			owner: PLUGIN_KEY,
 		});
