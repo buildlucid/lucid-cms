@@ -373,3 +373,15 @@ export default { service: "documents", event: "afterFetch", handler: async () =>
 		(await prepareResources({}, root)).config.http?.routes?.[0]?.path,
 	).toBe("/fixed");
 });
+
+test("reports the resource path and preserves the cause when an import fails", async () => {
+	const file = await write(
+		"src/lucid/routes/broken.ts",
+		'throw new Error("Route dependency failed"); export default {};',
+	);
+	await expect(prepareResources({}, root)).rejects.toMatchObject({
+		name: "LucidError",
+		message: `Invalid routes module in "${file}": Route dependency failed`,
+		cause: expect.objectContaining({ message: "Route dependency failed" }),
+	});
+});
