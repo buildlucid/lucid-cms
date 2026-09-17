@@ -19,7 +19,12 @@ export default defineConfig({
 		include: ["@codemirror/state", "@codemirror/view"],
 	},
 	plugins: [
-		adminExtensionsPlugin({ configPath: fileURLToPath(import.meta.url) }),
+		adminExtensionsPlugin({
+			configPath: fileURLToPath(import.meta.url),
+			stylesheetPath: fileURLToPath(
+				new URL("./src/index.css", import.meta.url),
+			),
+		}),
 		tailwindcss(),
 		devtools({
 			autoname: true,

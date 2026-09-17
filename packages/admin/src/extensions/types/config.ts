@@ -23,6 +23,6 @@ export type AdminConfig = {
 	routes?: AdminRoute[];
 	/** Local browser modules, or HTTPS classic scripts loaded with defer. */
 	scripts?: AdminModulePath[];
-	/** Local CSS modules or HTTPS stylesheet URLs. */
+	/** Local stylesheets compiled with the admin CSS, or HTTPS stylesheet URLs. */
 	stylesheets?: AdminModulePath[];
 };

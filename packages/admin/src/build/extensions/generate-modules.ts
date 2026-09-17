@@ -52,12 +52,13 @@ export const generateRegistry = async (
 	].join("\n");
 };
 
-/** Local assets enter Vite's module graph; HTTPS assets remain HTML tags. */
+/** Local CSS joins the admin stylesheet; scripts are modules and HTTPS assets are HTML tags. */
 export const generateAssets = async (
 	admin: AdminConfig,
 	resolve: ResolveModule,
 ) => {
 	const imports: string[] = [];
+	const stylesheets: string[] = [];
 	const tags: HtmlTagDescriptor[] = [];
 	for (const kind of ["stylesheets", "scripts"] as const) {
 		for (const reference of admin[kind] ?? []) {
@@ -77,11 +78,11 @@ export const generateAssets = async (
 							},
 				);
 			} else {
-				imports.push(
-					`import ${JSON.stringify(await resolve(reference, kind))};`,
-				);
+				const id = await resolve(reference, kind);
+				if (kind === "stylesheets") stylesheets.push(id);
+				else imports.push(`import ${JSON.stringify(id)};`);
 			}
 		}
 	}
-	return { code: imports.join("\n"), tags };
+	return { code: imports.join("\n"), stylesheets, tags };
 };

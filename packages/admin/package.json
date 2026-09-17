@@ -17,6 +17,7 @@
 			"default": "./dist/build/index.mjs"
 		},
 		"./package.json": "./package.json",
+		"./theme.css": "./src/exports/theme.css",
 		"./types": {
 			"types": "./dist/types/types.d.mts"
 		},

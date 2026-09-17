@@ -66,8 +66,9 @@ test("bundles project and browser package entries without executing them, includ
 		);
 		await writeFile(
 			path.join(root, "main.js"),
-			'import { routes, brickSlots, fieldSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.testRegistry = { routes, brickSlots, fieldSlots };',
+			'import "./main.css"; import { routes, brickSlots, fieldSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.testRegistry = { routes, brickSlots, fieldSlots };',
 		);
+		await writeFile(path.join(root, "main.css"), "");
 		await build({
 			configFile: false,
 			root,
@@ -75,6 +76,7 @@ test("bundles project and browser package entries without executing them, includ
 			plugins: [
 				adminExtensionsPlugin({
 					configPath: path.join(root, "lucid.config.js"),
+					stylesheetPath: path.join(root, "main.css"),
 					admin: {
 						routes: [{ key: "test", path: "reports", component: "./Page.jsx" }],
 						slots: [
@@ -120,6 +122,9 @@ test("includes remote assets on the first development HTML response", async () =
 		plugins: [
 			adminExtensionsPlugin({
 				configPath: fileURLToPath(import.meta.url),
+				stylesheetPath: fileURLToPath(
+					new URL("../../index.css", import.meta.url),
+				),
 				admin: {
 					scripts: ["https://example.com/challenge.js"],
 					stylesheets: ["https://example.com/theme.css"],
@@ -222,11 +227,13 @@ test.each([
 		);
 		await writeFile(
 			path.join(adminRoot, "main.js"),
-			'import { routes, brickSlots, fieldSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots };',
+			'import "./main.css"; import { routes, brickSlots, fieldSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots };',
 		);
+		await writeFile(path.join(adminRoot, "main.css"), "");
 		const plugin = () =>
 			adminExtensionsPlugin({
 				configPath,
+				stylesheetPath: path.join(adminRoot, "main.css"),
 				admin: {
 					routes: [
 						{
@@ -272,7 +279,8 @@ test.each([
 				"\0virtual:lucid-admin-assets",
 			);
 			expect(assets?.code).toContain("apps/cms/startup.js");
-			expect(assets?.code).toContain("apps/cms/style.css");
+			const stylesheet = await server.transformRequest("/main.css");
+			expect(stylesheet?.code).toContain(".nested-theme");
 		} finally {
 			await server.close();
 		}

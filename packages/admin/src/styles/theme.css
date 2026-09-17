@@ -83,3 +83,5 @@
 @utility grid-cols-main-layout {
 	grid-template-columns: auto 1fr;
 }
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));

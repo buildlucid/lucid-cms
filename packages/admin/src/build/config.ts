@@ -56,7 +56,11 @@ export const createAdminConfig = ({
 	publicDir: false,
 	cacheDir: path.join(projectRoot, ".lucid/vite/admin"),
 	plugins: [
-		adminExtensionsPlugin({ configPath, admin }),
+		adminExtensionsPlugin({
+			configPath,
+			admin,
+			stylesheetPath: path.join(adminRoot, "src/index.css"),
+		}),
 		tailwindcss(),
 		solid(),
 	],

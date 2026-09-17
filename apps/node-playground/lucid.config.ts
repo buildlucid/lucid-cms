@@ -1,3 +1,4 @@
+import { brickSlotKeys, fieldSlotKeys } from "@lucidcms/admin/slots";
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
@@ -135,6 +136,42 @@ export default defineConfig({
 		// 		},
 		// 	}
 		// },
+		admin: {
+			routes: [
+				{
+					key: "playground",
+					path: "playground",
+					component: "./src/lucid/admin/Diagnostics.tsx",
+					navigation: {
+						label: "Admin playground",
+						group: "content",
+						icon: "extensions",
+					},
+				},
+			],
+			slots: [
+				{
+					key: "meta-title-length",
+					slot: fieldSlotKeys.after,
+					match: { collection: "page", brick: "seo", field: "label" },
+					component: "./src/lucid/admin/MetaTitleLength.tsx",
+				},
+				{
+					key: "seo-summary",
+					slot: brickSlotKeys.beforeFields,
+					match: { collection: "page", brick: "seo", kind: "fixed" },
+					component: "./src/lucid/admin/BrickSummary.tsx",
+				},
+				{
+					key: "seo-values",
+					slot: brickSlotKeys.afterFields,
+					match: { brick: "seo" },
+					component: "./src/lucid/admin/BrickValues.tsx",
+				},
+			],
+			scripts: ["./src/lucid/admin/startup.ts"],
+			stylesheets: ["./src/lucid/admin/styles.css"],
+		},
 		plugins: [
 			workerQueuePlugin(),
 			typesensePlugin({
