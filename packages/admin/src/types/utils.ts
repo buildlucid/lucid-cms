@@ -4,3 +4,7 @@ export interface QueryHook<T> {
 	enabled?: () => boolean;
 	refetchOnWindowFocus?: boolean;
 }
+
+export type ReadonlyData<T> = T extends object
+	? { readonly [Key in keyof T]: ReadonlyData<T[Key]> }
+	: T;

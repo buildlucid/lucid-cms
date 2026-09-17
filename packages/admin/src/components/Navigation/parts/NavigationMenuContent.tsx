@@ -1,3 +1,4 @@
+import { routes as extensionRoutes } from "virtual:lucid-admin";
 import packageJson from "@lucidcms/admin/package.json" with { type: "json" };
 import type { Collection, User } from "@types";
 import classNames from "classnames";
@@ -6,6 +7,10 @@ import CollectionNavLink from "@/components/CollectionNavLink/CollectionNavLink"
 import { NavigationLink } from "@/components/NavigationLink/NavigationLink";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import {
+	getNavigationGroups,
+	type NavigationGroup,
+} from "../navigation-groups";
 import NavigationAccountMenu from "./NavigationAccountMenu";
 
 export type NavigationMenuContentProps = {
@@ -31,13 +36,6 @@ export type NavigationMenuContentProps = {
 	collectionsIsError: boolean;
 	multiCollections: Collection[];
 	singleCollections: Collection[];
-};
-
-type CollectionNavGroup = {
-	key: string;
-	name: NonNullable<Collection["group"]>["label"];
-	order: NonNullable<Collection["group"]>["order"];
-	collections: Collection[];
 };
 
 export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
@@ -75,54 +73,29 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 			props.collectionsIsError ||
 			ungroupedCollections().length > 0,
 	);
-	const collectionGroups = createMemo(() => {
-		const groups: CollectionNavGroup[] = [];
-		const groupsByKey = new Map<string, CollectionNavGroup>();
-
-		for (const collection of orderedCollections()) {
-			const group = collection.group;
-			if (!group) continue;
-
-			const existingGroup = groupsByKey.get(group.key);
-			if (existingGroup) {
-				if (!existingGroup.name && group.label) {
-					existingGroup.name = group.label;
-				}
-				if (existingGroup.order === null && group.order !== null) {
-					existingGroup.order = group.order;
-				}
-				existingGroup.collections.push(collection);
-				continue;
-			}
-
-			const collectionGroup = {
-				key: group.key,
-				name: group.label,
-				order: group.order,
-				collections: [collection],
-			};
-			groups.push(collectionGroup);
-			groupsByKey.set(group.key, collectionGroup);
-		}
-
-		return [...groups].sort((groupA, groupB) => {
-			if (groupA.order === null && groupB.order === null) return 0;
-			if (groupA.order === null) return 1;
-			if (groupB.order === null) return -1;
-			return groupA.order - groupB.order;
-		});
-	});
-	const getGroupName = (group: CollectionNavGroup) => {
-		if (!group.name) return "";
+	const navigationGroups = createMemo(() =>
+		getNavigationGroups({
+			collections:
+				props.canReadDocuments &&
+				!props.collectionsIsLoading &&
+				!props.collectionsIsError
+					? orderedCollections()
+					: [],
+			routes: extensionRoutes,
+			extensionsLabel: T()("common.extensions"),
+		}),
+	);
+	const getGroupName = (group: NavigationGroup) => {
+		if (!group.label) return "";
 
 		return helpers.getLocaleValue({
-			value: group.name,
+			value: group.label,
 		});
 	};
-	const getGroupTitle = (group: CollectionNavGroup) => {
+	const getGroupTitle = (group: NavigationGroup) => {
 		return getGroupName(group) || group.key;
 	};
-	const groupUsesFallbackTitle = (group: CollectionNavGroup) => {
+	const groupUsesFallbackTitle = (group: NavigationGroup) => {
 		return getGroupName(group).length === 0;
 	};
 
@@ -177,32 +150,39 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						permission={props.canReadPublishRequests}
 					/>
 
-					{/* Collections */}
-					<Show when={props.canReadDocuments}>
-						<Show
-							when={!props.collectionsIsLoading && !props.collectionsIsError}
-						>
-							<For each={collectionGroups()}>
-								{(group) => (
-									<>
-										<div class="w-full mt-4 mb-2">
-											<span
-												class={classNames("text-xs", {
-													capitalize: groupUsesFallbackTitle(group),
+					{/* Collection and extension groups */}
+					<For each={navigationGroups()}>
+						{(group) => (
+							<>
+								<div class="w-full mt-4 mb-2">
+									<span
+										class={classNames("text-xs", {
+											capitalize: groupUsesFallbackTitle(group),
+										})}
+									>
+										{getGroupTitle(group)}
+									</span>
+								</div>
+								<For each={group.items}>
+									{(item) =>
+										item.kind === "collection" ? (
+											<CollectionNavLink collection={item.collection} />
+										) : (
+											<NavigationLink
+												type="link"
+												href={item.path}
+												icon={item.navigation.icon ?? "extensions"}
+												title={helpers.getLocaleValue({
+													value: item.navigation.label,
 												})}
-											>
-												{getGroupTitle(group)}
-											</span>
-										</div>
-										<For each={group.collections}>
-											{(collection) => (
-												<CollectionNavLink collection={collection} />
-											)}
-										</For>
-									</>
-								)}
-							</For>
-						</Show>
+											/>
+										)
+									}
+								</For>
+							</>
+						)}
+					</For>
+					<Show when={props.canReadDocuments}>
 						<Show when={showFallbackCollections()}>
 							<div class="w-full mt-4 mb-2">
 								<span class="text-xs">{T()("common.collections")}</span>

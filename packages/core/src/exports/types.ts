@@ -1,4 +1,17 @@
 export type {
+	AdminConfig,
+	AdminModulePath,
+	AdminNavigationGroup,
+	AdminNavigationIcon,
+	AdminRoute,
+	AdminRouteNavigation,
+	AdminSlot,
+	BrickSlot,
+	BrickSlotMatch,
+	FieldSlot,
+	FieldSlotMatch,
+} from "@lucidcms/admin/types";
+export type {
 	AuthAdapter,
 	AuthAdapterCallbackResult,
 	AuthAdapterGetAuthUrlParams,

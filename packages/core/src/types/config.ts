@@ -1,3 +1,4 @@
+import type { AdminConfig } from "@lucidcms/admin/types";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
@@ -536,6 +537,8 @@ export interface LucidConfig {
 	 * CollectionBuilder instances to register alongside discovered collections.
 	 */
 	collections?: CollectionBuilder[];
+	/** Browser components and assets. Modules are imported only by the admin build. */
+	admin?: AdminConfig;
 	/**
 	 * Plugins to register. Their defaults provide fallbacks; explicit project settings win.
 	 * Plugin configure callbacks run afterwards, then the project configure callback runs last.
@@ -686,6 +689,7 @@ export interface ResolvedLucidConfig {
 	};
 	hooks: Array<AllHooks>;
 	collections: CollectionBuilder[];
+	admin: Required<AdminConfig>;
 	plugins: Array<LucidPluginDefinition>;
 	brand: {
 		name: string;

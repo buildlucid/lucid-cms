@@ -1,5 +1,7 @@
+import { routes as extensionRoutes } from "virtual:lucid-admin";
 import { Route, Router } from "@solidjs/router";
 import { type Component, lazy } from "solid-js";
+import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import AuthRoutes from "@/components/AuthRoutes/AuthRoutes";
 import MainLayout from "@/components/MainLayout/MainLayout";
 import OAuthRoutes from "@/components/OAuthRoutes/OAuthRoutes";
@@ -102,6 +104,16 @@ const AppRouter: Component = () => {
 				<Route path="/" component={DashboardRoute} />
 				<Route path="/components" component={ComponentsRoute} />
 				<Route path="/account" component={AccountRoute} />
+				{extensionRoutes.map((route) => (
+					<Route
+						path={route.path.slice("/lucid".length)}
+						component={() => (
+							<AdminExtensionBoundary name={route.key}>
+								<route.component />
+							</AdminExtensionBoundary>
+						)}
+					/>
+				))}
 				{/* Collections */}
 				<Route
 					path="/collections/:collectionKey"

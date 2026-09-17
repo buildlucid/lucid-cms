@@ -16,6 +16,8 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"paths": {
+			"@lucidcms/admin/types": ["src/exports/types.ts"],
+			"@lucidcms/admin/slots": ["src/exports/slots.ts"],
 			"@/*": ["src/*"],
 			"@types": ["../core/src/exports/types.ts"],
 			"@field-conditions": [

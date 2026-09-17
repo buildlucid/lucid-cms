@@ -11,6 +11,7 @@ import {
 	FaSolidHouse,
 	FaSolidMoneyCheck,
 	FaSolidPhotoFilm,
+	FaSolidPuzzlePiece,
 	FaSolidRightFromBracket,
 	FaSolidSquareArrowUpRight,
 	FaSolidUserLock,
@@ -24,31 +25,37 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import { Dynamic } from "solid-js/web";
+import type { AdminNavigationIcon } from "@/extensions/types/navigation";
 import {
 	isNavigationLinkActive,
 	setNavigationLinkActiveState,
 } from "@/utils/navigation";
+
+const icons = {
+	dashboard: FaSolidHouse,
+	"collection-multiple": FaSolidBoxesStacked,
+	"collection-single": FaSolidBox,
+	media: FaSolidPhotoFilm,
+	users: FaSolidUsers,
+	overview: FaSolidMoneyCheck,
+	roles: FaSolidUserLock,
+	email: FaSolidEnvelope,
+	logout: FaSolidRightFromBracket,
+	queue: FaSolidBarsProgress,
+	integrations: FaSolidDesktop,
+	settings: FaSolidGear,
+	"release-requests": FaSolidSquareArrowUpRight,
+	publishing: FaSolidCloudArrowUp,
+	extensions: FaSolidPuzzlePiece,
+} satisfies Record<AdminNavigationIcon, typeof FaSolidHouse>;
 
 interface IconLinkFullProps {
 	type: "link" | "button";
 	title: string;
 	href?: string;
 	exact?: boolean;
-	icon:
-		| "dashboard"
-		| "collection-multiple"
-		| "collection-single"
-		| "media"
-		| "users"
-		| "overview"
-		| "roles"
-		| "email"
-		| "logout"
-		| "queue"
-		| "integrations"
-		| "settings"
-		| "release-requests"
-		| "publishing";
+	icon: AdminNavigationIcon;
 	active?: boolean;
 	permission?: boolean;
 	onClick?: () => void;
@@ -82,55 +89,6 @@ export const NavigationLink: Component<IconLinkFullProps> = (props) => {
 	// Classes
 	const iconClasses = classNames("size-3.5 text-current");
 
-	const Icons: Component = () => {
-		return (
-			<Switch>
-				<Match when={props.icon === "dashboard"}>
-					<FaSolidHouse class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "collection-multiple"}>
-					<FaSolidBoxesStacked class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "collection-single"}>
-					<FaSolidBox class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "media"}>
-					<FaSolidPhotoFilm class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "users"}>
-					<FaSolidUsers class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "overview"}>
-					<FaSolidMoneyCheck class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "roles"}>
-					<FaSolidUserLock class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "email"}>
-					<FaSolidEnvelope class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "logout"}>
-					<FaSolidRightFromBracket class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "queue"}>
-					<FaSolidBarsProgress class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "integrations"}>
-					<FaSolidDesktop class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "settings"}>
-					<FaSolidGear class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "release-requests"}>
-					<FaSolidSquareArrowUpRight class={iconClasses} />
-				</Match>
-				<Match when={props.icon === "publishing"}>
-					<FaSolidCloudArrowUp class={iconClasses} />
-				</Match>
-			</Switch>
-		);
-	};
-
 	// ----------------------------------
 	// Render
 	return (
@@ -154,7 +112,7 @@ export const NavigationLink: Component<IconLinkFullProps> = (props) => {
 								"pointer-events-none": props.loading,
 							}}
 						>
-							<Icons />
+							<Dynamic component={icons[props.icon]} class={iconClasses} />
 							<span class="block text-sm font-medium">{props.title}</span>
 						</a>
 					</Match>
@@ -173,7 +131,7 @@ export const NavigationLink: Component<IconLinkFullProps> = (props) => {
 							onClick={props.onClick}
 							disabled={props.loading}
 						>
-							<Icons />
+							<Dynamic component={icons[props.icon]} class={iconClasses} />
 							<span class="block text-sm font-medium">{props.title}</span>
 						</button>
 					</Match>

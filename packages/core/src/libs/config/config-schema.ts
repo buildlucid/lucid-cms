@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
+import { adminConfigSchema } from "../admin/schema.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { isCollectionBuilder } from "../collection/builders/collection-builder/index.js";
@@ -319,6 +320,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			message: "Expected a collection created with CollectionBuilder",
 		}),
 	),
+	admin: adminConfigSchema,
 	plugins: z.array(PluginDefinitionSchema),
 	build: z.strictObject({
 		outDir: z.string(),

@@ -150,6 +150,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 			</button>
 			{/* Body */}
 			<BrickBody
+				brickConfig={config()}
 				id={`fixed-brick-content-${props.brick.key}`}
 				open={brickOpen()}
 				brick={props.brick}

@@ -1,6 +1,7 @@
 import { mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../../constants/constants.js";
+import buildApp from "../../admin/build-app.js";
 import loadBuildProject from "../../compile/load-build-project.js";
 import prepareBuildArtifacts from "../../compile/prepare-build-artifacts.js";
 import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
@@ -17,7 +18,6 @@ import createCommandTelemetryReporter, {
 	type CommandTelemetryReporter,
 } from "../../telemetry/command-reporter.js";
 import type { TelemetryStage } from "../../telemetry/types.js";
-import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import calculateOutDirSize from "../services/calculate-outdir-size.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
@@ -174,7 +174,12 @@ const buildCommand = async (options?: {
 
 		currentStage = "admin_build";
 		progress.update("Building admin application…");
-		await vite.buildApp(configRes.config, silent);
+		await buildApp({
+			config: configRes.config,
+			projectRoot: configRes.projectRoot,
+			configPath,
+			silent,
+		});
 
 		currentStage = "runtime_build";
 		progress.update("Building server…");

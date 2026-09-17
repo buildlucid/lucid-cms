@@ -159,7 +159,11 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 							},
 							plugins: [
 								createDevAssetPlugin(assetRoot),
-								createDevAdminPlugin(projectRoot),
+								createDevAdminPlugin({
+									projectRoot,
+									configPath: nextProject.configPath,
+									admin: nextProject.loaded.config.admin,
+								}),
 								createResourceWatchPlugin(
 									nextProject.configPath,
 									resourceWatchFiles,
@@ -244,7 +248,12 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 				if (!project) return;
 				try {
 					const outDir = path.join(assetRoot, "lucid");
-					await buildAdmin({ projectRoot: project.loaded.projectRoot, outDir });
+					await buildAdmin({
+						configPath: project.configPath,
+						projectRoot: project.loaded.projectRoot,
+						outDir,
+						admin: project.loaded.config.admin,
+					});
 					await writeSpaModule(
 						generatedDirectory,
 						await fs.readFile(path.join(outDir, "index.html"), "utf8"),

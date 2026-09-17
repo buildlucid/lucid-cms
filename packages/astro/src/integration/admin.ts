@@ -3,7 +3,12 @@ import { isAdminPath, shouldServeAdminShell } from "@lucidcms/core/runtime";
 import type { Plugin } from "vite";
 
 /** Shares Astro's listener while keeping the admin's compiler settings separate. */
-export const createDevAdminPlugin = (projectRoot: string): Plugin => {
+export const createDevAdminPlugin = (
+	options: Pick<
+		Parameters<typeof createAdminDevServer>[0],
+		"projectRoot" | "configPath" | "admin"
+	>,
+): Plugin => {
 	let admin: Awaited<ReturnType<typeof createAdminDevServer>> | undefined;
 	return {
 		name: "lucid:admin-dev",
@@ -14,7 +19,7 @@ export const createDevAdminPlugin = (projectRoot: string): Plugin => {
 			}
 
 			admin = await createAdminDevServer({
-				projectRoot,
+				...options,
 				server: server.httpServer,
 			});
 			const currentAdmin = admin;

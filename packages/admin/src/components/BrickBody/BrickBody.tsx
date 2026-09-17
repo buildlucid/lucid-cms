@@ -10,6 +10,8 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
+import BrickSlots from "@/components/BrickSlots/BrickSlots";
+import { brickSlotKeys } from "@/components/BrickSlots/constants";
 import { DynamicField } from "@/components/DynamicField/DynamicField";
 import { TabField } from "@/components/TabField/TabField";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
@@ -17,6 +19,7 @@ import { FieldRenderStateProvider } from "@/hooks/useFieldRenderState/useFieldRe
 import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import type {
+	CollectionBrickConfig,
 	CollectionFieldConfig,
 	CollectionFieldConfigByType,
 } from "@/types/collection-config";
@@ -27,6 +30,7 @@ import {
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 
 interface BrickProps {
+	brickConfig?: CollectionBrickConfig;
 	id?: string;
 	open: boolean;
 	brick: BrickData;
@@ -200,6 +204,13 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						missingFieldColumns={missingFieldColumns}
 						brickRef={brickRef}
 					>
+						<BrickSlots
+							slot={brickSlotKeys.beforeFields}
+							config={props.brickConfig}
+							brick={props.brick}
+							collectionKey={props.collectionKey}
+							contentLocale={contentLocale()}
+						/>
 						{/* Tabs */}
 						<Show when={allTabs().length > 0}>
 							<TabField
@@ -225,6 +236,13 @@ export const BrickBody: Component<BrickProps> = (props) => {
 								/>
 							)}
 						</Index>
+						<BrickSlots
+							slot={brickSlotKeys.afterFields}
+							config={props.brickConfig}
+							brick={props.brick}
+							collectionKey={props.collectionKey}
+							contentLocale={contentLocale()}
+						/>
 					</FieldRenderStateProvider>
 				</Show>
 			</div>

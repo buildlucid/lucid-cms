@@ -1,0 +1,28 @@
+import type {
+	BrickSlot,
+	BrickSlotMatch,
+} from "../../components/BrickSlots/types.js";
+import type {
+	FieldSlot,
+	FieldSlotMatch,
+} from "../../components/FieldSlots/types.js";
+import type { AdminRoute } from "./route.js";
+
+/** Project-relative path, exported package subpath, absolute path or file URL. */
+export type AdminModulePath = string | URL;
+export type AdminSlot = {
+	key: string;
+	component: AdminModulePath;
+} & (
+	| { slot: BrickSlot; match?: BrickSlotMatch }
+	| { slot: FieldSlot; match?: FieldSlotMatch }
+);
+
+export type AdminConfig = {
+	slots?: AdminSlot[];
+	routes?: AdminRoute[];
+	/** Local browser modules, or HTTPS classic scripts loaded with defer. */
+	scripts?: AdminModulePath[];
+	/** Local CSS modules or HTTPS stylesheet URLs. */
+	stylesheets?: AdminModulePath[];
+};

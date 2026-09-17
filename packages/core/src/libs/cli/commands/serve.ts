@@ -1,3 +1,4 @@
+import buildApp from "../../admin/build-app.js";
 import getConfigPath from "../../config/get-config-path.js";
 import loadConfigFile from "../../config/load-config-file.js";
 import prepareEmailTemplates from "../../email/templates/prepare-email-templates.js";
@@ -14,7 +15,6 @@ import createCommandTelemetryReporter, {
 } from "../../telemetry/command-reporter.js";
 import type { TelemetryStage } from "../../telemetry/types.js";
 import generateTypes from "../../type-generation/index.js";
-import vite from "../../vite/index.js";
 import cliLogger from "../logger.js";
 import copyPublicAssets from "../services/copy-public-assets.js";
 import { startProgress } from "../services/progress.js";
@@ -134,7 +134,11 @@ const serveCommand = async () => {
 
 		currentStage = "admin_build";
 		progress.update("Building admin application…");
-		await vite.buildApp(configRes.config);
+		await buildApp({
+			config: configRes.config,
+			projectRoot: configRes.projectRoot,
+			configPath,
+		});
 
 		currentStage = "email_templates";
 		progress.update("Preparing email templates and public assets…");
@@ -185,6 +189,7 @@ const serveCommand = async () => {
 		progress.update("Starting server…");
 		const serverRes = await adapterCLI.serve({
 			mode: "static",
+			configPath,
 			projectRoot: configRes.projectRoot,
 			env: configRes.env,
 			config: configRes.config,

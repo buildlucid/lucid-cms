@@ -16,7 +16,14 @@
 			"types": "./dist/build/index.d.mts",
 			"default": "./dist/build/index.mjs"
 		},
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./types": {
+			"types": "./dist/types/types.d.mts"
+		},
+		"./slots": {
+			"types": "./dist/slots/slots.d.mts",
+			"default": "./dist/slots/slots.mjs"
+		}
 	},
 	"scripts": {
 		"build": "NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit && tsdown",
@@ -98,7 +105,8 @@
 		"solid-toast": "^0.5.0",
 		"tailwindcss": "^4.3.1",
 		"vite": "^8.1.0",
-		"vite-plugin-solid": "^2.11.12"
+		"vite-plugin-solid": "^2.11.12",
+		"@lucidcms/types": "^0.5.0"
 	},
 	"volta": {
 		"node": "24.11.1"

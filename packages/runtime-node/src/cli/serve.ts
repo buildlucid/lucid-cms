@@ -16,6 +16,7 @@ const serveCommand =
 		onListening,
 		mode,
 		projectRoot,
+		configPath,
 	}) => {
 		logger.instance.info(
 			"Using:",
@@ -82,7 +83,12 @@ const serveCommand =
 
 		try {
 			if (mode === "development") {
-				admin = await createCliAdmin({ server, projectRoot });
+				admin = await createCliAdmin({
+					server,
+					projectRoot,
+					configPath,
+					admin: config.admin,
+				});
 			}
 
 			const listener = getRequestListener(async (request, requestBindings) => {

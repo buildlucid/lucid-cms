@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import devtools from "solid-devtools/vite";
 import solidPlugin from "vite-plugin-solid";
 import { defineConfig } from "vitest/config";
+import { adminExtensionsPlugin } from "./src/build/extensions/plugin.js";
 
 export default defineConfig({
 	test: {
@@ -18,6 +19,7 @@ export default defineConfig({
 		include: ["@codemirror/state", "@codemirror/view"],
 	},
 	plugins: [
+		adminExtensionsPlugin({ configPath: fileURLToPath(import.meta.url) }),
 		tailwindcss(),
 		devtools({
 			autoname: true,

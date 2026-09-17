@@ -297,6 +297,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			</div>
 			{/* Body */}
 			<BrickBody
+				brickConfig={config()}
 				id={`builder-brick-content-${props.brick.ref}`}
 				open={brickOpen()}
 				brick={props.brick}

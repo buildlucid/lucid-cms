@@ -137,6 +137,7 @@ const EmbeddedBrickEditPanel: Component<{
 				>
 					{(resolvedBrick) => (
 						<BrickBody
+							brickConfig={config()}
 							open={true}
 							brick={resolvedBrick()}
 							brickIndex={brickIndex()}

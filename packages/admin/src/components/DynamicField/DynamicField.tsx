@@ -13,6 +13,8 @@ import { CheckboxField } from "@/components/CheckboxField/CheckboxField";
 import { CodeField } from "@/components/CodeField/CodeField";
 import { CollapsibleField } from "@/components/CollapsibleField/CollapsibleField";
 import { ColorField } from "@/components/ColorField/ColorField";
+import { fieldSlotKeys } from "@/components/FieldSlots/constants";
+import FieldSlots from "@/components/FieldSlots/FieldSlots";
 import { InputField } from "@/components/InputField/InputField";
 import { JSONField } from "@/components/JSONField/JSONField";
 import { LinkField } from "@/components/LinkField/LinkField";
@@ -53,6 +55,18 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// -------------------------------
 	// Memos
 	const fieldConfig = createMemo(() => props.fieldConfig);
+	const slotField = createMemo(() => {
+		const config = fieldConfig();
+		if (
+			config.type === "tab" ||
+			config.type === "section" ||
+			config.type === "collapsible" ||
+			config.type === "repeater" ||
+			config.ui?.hidden
+		)
+			return undefined;
+		return config;
+	});
 	const fieldPath = createMemo(() => [
 		...(props.pathPrefix ?? []),
 		fieldConfig().key,
@@ -195,6 +209,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 				})}
 			>
 				<div class="w-full h-full">
+					<FieldSlots
+						slot={fieldSlotKeys.before}
+						config={slotField()}
+						data={fieldData()}
+					/>
 					<Switch>
 						<Match when={fieldConfig().type === "tab"}>
 							<div
@@ -519,6 +538,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 							/>
 						</Match>
 					</Switch>
+					<FieldSlots
+						slot={fieldSlotKeys.after}
+						config={slotField()}
+						data={fieldData()}
+					/>
 				</div>
 			</div>
 		</Show>

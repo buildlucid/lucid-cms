@@ -54,6 +54,7 @@ export type RuntimePrepareArtifacts = {
 export type ServeHandler = (props: {
 	mode: "development" | "static";
 	projectRoot: string;
+	configPath: string;
 	config: ResolvedLucidConfig;
 	/** Parsed environment values and platform bindings from config loading. */
 	env: EnvironmentVariables | undefined;

@@ -1,4 +1,5 @@
 {
+	"admin.extension.failed": "Could not load admin component: {{name}}",
 	"access.unavailable.title": "Unavailable access",
 	"access.unavailable.description": "These saved grants are currently unavailable. You can keep them or remove them.",
 	"common.status.in.sync": "In sync",
@@ -105,6 +106,7 @@
 	"common.standard": "Standard",
 	"documents.revisions.restore.action": "Restore Revision",
 	"common.bricks": "Bricks",
+	"common.extensions": "Extensions",
 	"common.collections": "Collections",
 	"common.refresh": "Refresh",
 	"common.change.order": "Change Order",
