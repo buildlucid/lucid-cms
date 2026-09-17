@@ -22,6 +22,12 @@ const isBlank = (value: FilterValue): boolean => {
 	return false;
 };
 
+/**
+ * @example
+ * ```ts
+ * textFilter({ defaultOperator: "like" });
+ * ```
+ */
 export const textFilter = (config?: {
 	defaultValue?: string;
 	defaultOperator?: string;
@@ -53,6 +59,12 @@ export const textFilter = (config?: {
 	};
 };
 
+/**
+ * @example
+ * ```ts
+ * numberFilter({ defaultValue: 10 });
+ * ```
+ */
 export const numberFilter = (config?: {
 	defaultValue?: number;
 	defaultOperator?: string;
@@ -85,6 +97,12 @@ export const numberFilter = (config?: {
 	};
 };
 
+/**
+ * @example
+ * ```ts
+ * booleanFilter({ defaultValue: true });
+ * ```
+ */
 export const booleanFilter = (config?: {
 	defaultValue?: boolean;
 	defaultOperator?: string;
@@ -117,6 +135,12 @@ export const booleanFilter = (config?: {
 	};
 };
 
+/**
+ * @example
+ * ```ts
+ * arrayFilter({ defaultValue: ["draft", "published"] });
+ * ```
+ */
 export const arrayFilter = (config?: {
 	defaultValue?: (string | number)[];
 	defaultOperator?: string;
@@ -154,11 +178,23 @@ export const arrayFilter = (config?: {
 	};
 };
 
+/**
+ * @example
+ * ```ts
+ * sort({ defaultValue: "asc" });
+ * ```
+ */
 export const sort = (config?: { defaultValue?: SortDirection }): SortCodec => ({
 	kind: "sort",
 	defaultValue: config?.defaultValue,
 });
 
+/**
+ * @example
+ * ```ts
+ * pagination({ defaultPerPage: 20 });
+ * ```
+ */
 export const pagination = (config?: {
 	defaultPage?: number;
 	defaultPerPage?: number;

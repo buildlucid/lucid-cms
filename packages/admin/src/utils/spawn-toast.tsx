@@ -8,6 +8,16 @@ interface SpawnToastProps {
 	duration?: number;
 }
 
+/**
+ * Shows a notification. Status defaults to info; duration is in milliseconds.
+ *
+ * @example
+ * ```ts
+ * import { toast } from "@lucidcms/admin/utils";
+ *
+ * toast({ title: "Settings saved", status: "success" });
+ * ```
+ */
 const spawnToast = (props: SpawnToastProps) => {
 	toast.custom(
 		(t) => (

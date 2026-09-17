@@ -1,5 +1,3 @@
-import type { ResponseBody } from "@types";
-import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 export const csrfSessionKey = "_csrf";
@@ -10,24 +8,29 @@ export const csrfReq = async () => {
 		return csrfToken;
 	}
 
-	const res = await request<
-		ResponseBody<{
-			_csrf: string;
-		}>
-	>({
-		url: "/lucid/api/v1/auth/csrf",
-		config: {
-			method: "GET",
-		},
+	// This bootstrap request must never trigger a session refresh itself.
+	const response = await fetch("/lucid/api/v1/auth/csrf", {
+		credentials: "include",
 	});
+	if (!response.ok) throw new Error("Unable to load the CSRF token.");
 
-	if (res.data) {
-		sessionStorage.setItem(csrfSessionKey, res.data._csrf);
-		return res.data._csrf;
+	const result: unknown = await response.json();
+	if (
+		result &&
+		typeof result === "object" &&
+		"data" in result &&
+		result.data &&
+		typeof result.data === "object" &&
+		"_csrf" in result.data &&
+		typeof result.data._csrf === "string"
+	) {
+		sessionStorage.setItem(csrfSessionKey, result.data._csrf);
+		return result.data._csrf;
 	}
 
 	return null;
 };
+
 export const clearCsrfSession = () => {
 	sessionStorage.removeItem(csrfSessionKey);
 };

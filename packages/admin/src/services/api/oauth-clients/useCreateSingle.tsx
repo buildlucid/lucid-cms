@@ -3,6 +3,7 @@ import type {
 	OAuthClientCreateResponse,
 	ResponseBody,
 } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -40,16 +41,14 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 			request<ResponseBody<OAuthClientCreateResponse>>({
 				url: "/lucid/api/v1/integrations/oauth-clients",
 				csrf: true,
-				config: {
-					method: "POST",
-					body,
-				},
+				method: "POST",
+				body,
 			}),
 		getSuccessToast: () => ({
 			title: T()("oauth.clients.created.title"),
 			message: T()("oauth.clients.created.message"),
 		}),
-		invalidates: ["oauthClients.getAll"],
+		invalidates: [queryKeys.oauthClients.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

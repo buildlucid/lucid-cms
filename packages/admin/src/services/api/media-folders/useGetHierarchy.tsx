@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { MediaFolder, ResponseBody } from "@types";
 import { createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -17,14 +18,16 @@ const useGetHierarchy = (params?: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["mediaFolders.getHierarchy", queryKey(), params?.key?.()],
+		queryKey: [
+			...queryKeys.mediaFolders.hierarchy(),
+			queryKey(),
+			params?.key?.(),
+		],
 		queryFn: () =>
 			request<ResponseBody<MediaFolder[]>>({
 				url: "/lucid/api/v1/media/folders/hierarchy",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params?.enabled ? params.enabled() : true;

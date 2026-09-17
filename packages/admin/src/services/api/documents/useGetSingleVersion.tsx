@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/solid-query";
-import type { InternalCollectionDocument, Refs, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
+import { getRequestInterfaceLocale } from "@/translations";
 import type { QueryHook } from "@/types/utils";
-import request from "@/utils/request";
+import helpers from "@/utils/helpers";
 import serviceHelpers from "@/utils/service-helpers";
+import { getSingleReq } from "./useGetSingle";
 
 interface QueryParams {
 	location: {
@@ -18,28 +20,46 @@ interface QueryParams {
 }
 
 const useGetSingleVersion = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+	const queryParams = createMemo(() => {
+		const paramsValue = serviceHelpers.getQueryParams<QueryParams>(
+			params.queryParams,
+		);
+		return {
+			queryString: paramsValue.queryString,
+			filters: paramsValue.filters,
+			include: paramsValue.include,
+			exclude: paramsValue.exclude,
+			perPage: paramsValue.perPage,
+		};
+	});
 
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["documents.getSingle", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<InternalCollectionDocument, Refs>>({
-				url: `/lucid/api/v1/documents/${
-					queryParams().location?.collectionKey
-				}/${queryParams().location?.id}/${queryParams().location?.versionId}`,
+		queryKey: queryKeys.documents.detail(
+			helpers.resolveValue(params.queryParams.location.collectionKey),
+			helpers.resolveValue(params.queryParams.location.id),
+			helpers.resolveValue(params.queryParams.location.versionId),
+			queryParams(),
+			getRequestInterfaceLocale(),
+		),
+		queryFn: ({ signal }) =>
+			getSingleReq({
+				collectionKey: helpers.resolveValue(
+					params.queryParams.location.collectionKey,
+				),
+				documentId: helpers.resolveValue(params.queryParams.location.id),
+				version: helpers.resolveValue(params.queryParams.location.versionId),
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				signal,
+				displayErrorToast: false,
 			}),
-		get enabled() {
-			return params.enabled ? params.enabled() : true;
-		},
+		enabled:
+			helpers.resolveValue(params.queryParams.location.collectionKey) !==
+				undefined &&
+			helpers.resolveValue(params.queryParams.location.id) !== undefined &&
+			helpers.resolveValue(params.queryParams.location.versionId) !== undefined,
+		...(params.enabled ? { enabled: params.enabled() } : {}),
 		refetchOnWindowFocus: params.refetchOnWindowFocus,
 	}));
 };

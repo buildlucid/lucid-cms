@@ -15,10 +15,8 @@ export const acceptInvitationReq = (params: Params) => {
 	return request<ResponseBody>({
 		url: `/lucid/api/v1/auth/invitation/accept/${params.token}`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 

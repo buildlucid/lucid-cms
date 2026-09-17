@@ -1,4 +1,5 @@
 import type { JobReceipt, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,12 +12,10 @@ const useTriggerSchedule = () =>
 			request<ResponseBody<JobReceipt>>({
 				url: "/lucid/api/v1/jobs/schedules/trigger",
 				csrf: true,
-				config: {
-					method: "POST",
-					body: params,
-				},
+				method: "POST",
+				body: params,
 			}),
-		invalidates: ["jobs.getSchedules", "jobs.getMultiple"],
+		invalidates: [queryKeys.jobs.schedules(), queryKeys.jobs.list()],
 		getSuccessToast: () => ({
 			title: T()("toasts.jobs.schedule.triggered.title"),
 			message: T()("toasts.jobs.schedule.triggered.message"),

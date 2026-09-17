@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { OAuthClient, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 
@@ -7,13 +8,11 @@ const useGetAll = (params: QueryHook<Record<string, never>>) => {
 	// ----------------------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["oauthClients.getAll", params.key?.()],
+		queryKey: [...queryKeys.oauthClients.list(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<OAuthClient[]>>({
 				url: "/lucid/api/v1/integrations/oauth-clients",
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params.enabled ? params.enabled() : true;

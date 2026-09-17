@@ -26,7 +26,10 @@
 			"@field-capabilities": [
 				"../core/src/libs/collection/custom-fields/capabilities.ts"
 			],
-			"@assets/*": ["src/assets/*"]
+			"@assets/*": ["src/assets/*"],
+			"@lucidcms/admin/hooks": ["src/exports/hooks.ts"],
+			"@lucidcms/admin/services": ["src/exports/services.ts"],
+			"@lucidcms/admin/utils": ["src/exports/utils.ts"]
 		}
 	}
 }

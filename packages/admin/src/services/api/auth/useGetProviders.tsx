@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { AuthProviders, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 
@@ -8,13 +9,11 @@ interface QueryParams {}
 
 const useGetProviders = (params: QueryHook<QueryParams>) => {
 	return useQuery(() => ({
-		queryKey: ["auth.getProviders", params.key?.()],
+		queryKey: [...queryKeys.auth.providers(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<AuthProviders>>({
 				url: "/lucid/api/v1/auth/providers",
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		retry: 0,
 		get enabled() {

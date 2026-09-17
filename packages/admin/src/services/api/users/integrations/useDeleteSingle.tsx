@@ -1,5 +1,6 @@
 import type { ResponseBody } from "@types";
 import type { Accessor } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -12,9 +13,7 @@ export const deleteSingleReq = (userId: number, params: Params) => {
 	return request<ResponseBody<null>>({
 		url: `/lucid/api/v1/users/${userId}/integrations/${params.id}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -37,7 +36,7 @@ const bindUseDeleteSingle =
 					name: T()("integrations.singular").toLowerCase(),
 				}),
 			}),
-			invalidates: ["integrations.getAll"],
+			invalidates: [queryKeys.integrations.list()],
 			onSuccess: props.onSuccess,
 			onError: props.onError,
 		});

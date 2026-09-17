@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { Email, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -27,14 +28,12 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["email.getMultiple", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.email.list(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<Email[]>>({
 				url: "/lucid/api/v1/emails",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		placeholderData: keepPreviousData,
 		get enabled() {

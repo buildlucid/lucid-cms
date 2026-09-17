@@ -14,10 +14,8 @@ export const createProfilePictureUploadSessionReq = (params: Params) => {
 	return request<ResponseBody<UploadSessionResponse>>({
 		url: "/lucid/api/v1/account/profile-picture/upload-session",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 

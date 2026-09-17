@@ -1,4 +1,5 @@
 import type { ErrorResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -13,9 +14,7 @@ export const restoreRevisionReq = (params: Params) => {
 	return request<ResponseBody<null>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/restore-revision`,
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 
@@ -38,7 +37,7 @@ const useRestoreRevision = (props: UsePromoteSingleProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: ["documents.getMultiple", "documents.getSingle"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

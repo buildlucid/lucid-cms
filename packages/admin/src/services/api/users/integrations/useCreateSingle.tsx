@@ -4,6 +4,7 @@ import type {
 	ResponseBody,
 } from "@types";
 import type { Accessor } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -20,15 +21,13 @@ export const createSingleReq = (userId: number, params: Params) => {
 	return request<ResponseBody<IntegrationCreateResponse>>({
 		url: `/lucid/api/v1/users/${userId}/integrations`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: {
-				name: params.name,
-				description: params.description,
-				enabled: params.enabled,
-				expiry: params.expiry,
-				scopes: params.scopes,
-			},
+		method: "POST",
+		body: {
+			name: params.name,
+			description: params.description,
+			enabled: params.enabled,
+			expiry: params.expiry,
+			scopes: params.scopes,
 		},
 	});
 };
@@ -51,7 +50,7 @@ const bindUseCreateSingle =
 				title: T()("toasts.common.integration.created.title"),
 				message: T()("toasts.common.integration.created.message"),
 			}),
-			invalidates: ["integrations.getAll"],
+			invalidates: [queryKeys.integrations.list()],
 			onSuccess: props?.onSuccess,
 			onError: props?.onError,
 		});

@@ -1,4 +1,5 @@
 import type { MediaImageGenerateResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -54,13 +55,11 @@ export const mediaImageGenerateReq = (params: Params) => {
 	return request<ResponseBody<MediaImageGenerateResponse>>({
 		url: "/lucid/api/v1/ai/media-image",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-			signal: params.signal,
-			headers: {
-				"idempotency-key": params.idempotencyKey,
-			},
+		method: "POST",
+		body: params.body,
+		signal: params.signal,
+		headers: {
+			"idempotency-key": params.idempotencyKey,
 		},
 	});
 };
@@ -71,7 +70,7 @@ const useMediaImageGenerate = () => {
 		ResponseBody<MediaImageGenerateResponse>
 	>({
 		mutationFn: mediaImageGenerateReq,
-		invalidates: ["ai.getUsage", "ai.getUsageChart"],
+		invalidates: [queryKeys.ai.usage(), queryKeys.ai.usageChart()],
 		getSuccessToast: (_data, params) =>
 			params.shouldToast?.() === false
 				? undefined

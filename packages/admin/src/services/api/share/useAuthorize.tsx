@@ -12,10 +12,8 @@ interface Params {
 const authorizeReq = (params: Params) => {
 	return request<ResponseBody<{ success: boolean }>>({
 		url: `/lucid/api/v1/share/${params.token}/authorize`,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 

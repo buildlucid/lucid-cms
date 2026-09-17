@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { EmailTransaction, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -19,12 +20,12 @@ const useGetTransactions = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["email.getTransactions", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.email.transactions(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<EmailTransaction[]>>({
 				url: `/lucid/api/v1/emails/${queryParams().location?.emailId}/transactions`,
 				query: queryParams(),
-				config: { method: "GET" },
+				method: "GET",
 			}),
 		placeholderData: keepPreviousData,
 		get enabled() {

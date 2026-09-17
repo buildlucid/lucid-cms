@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { PublishOperationReviewer, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import helpers from "@/utils/helpers";
 import request from "@/utils/request";
@@ -25,14 +26,16 @@ const useGetReviewers = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["publishOperations.getReviewers", queryKey(), params.key?.()],
+		queryKey: [
+			...queryKeys.publishOperations.reviewers(),
+			queryKey(),
+			params.key?.(),
+		],
 		queryFn: () =>
 			request<ResponseBody<PublishOperationReviewer[]>>({
 				url: "/lucid/api/v1/publishing/requests/reviewers",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			const query = new URLSearchParams(queryParams().queryString);

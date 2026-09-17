@@ -1,5 +1,7 @@
 import { useLocation, useNavigate } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
 import type { ResponseBody, User } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import { getLoginReturnPath } from "@/utils/login-route";
 import request from "@/utils/request";
@@ -14,10 +16,8 @@ export const loginReq = (params: Params) => {
 	return request<ResponseBody<User>>({
 		url: "/lucid/api/v1/auth/login",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params,
-		},
+		method: "POST",
+		body: params,
 	});
 };
 
@@ -28,6 +28,7 @@ interface UseLoginProps {
 
 const useLogin = (props?: UseLoginProps) => {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const location = useLocation();
 
 	// -----------------------------
@@ -38,8 +39,9 @@ const useLogin = (props?: UseLoginProps) => {
 			title: T()("toasts.common.login.success.title"),
 			message: T()("toasts.common.login.success.message"),
 		}),
-		invalidates: ["roles.getMultiple", "roles.getSingle"],
+		invalidates: [queryKeys.roles.list(), queryKeys.roles.detail()],
 		onSuccess: () => {
+			queryClient.clear();
 			navigate(getLoginReturnPath(location.search));
 			props?.onSuccess?.();
 		},

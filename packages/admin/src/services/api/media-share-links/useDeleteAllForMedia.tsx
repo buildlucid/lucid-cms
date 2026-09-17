@@ -1,3 +1,4 @@
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -10,9 +11,7 @@ export const deleteAllForMediaReq = (params: Params) => {
 	return request<undefined>({
 		url: `/lucid/api/v1/media/${params.mediaId}/share-links`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -30,7 +29,7 @@ const useDeleteAllForMedia = (props?: UseDeleteAllForMediaProps) => {
 			title: T()("toasts.media.share.links.delete.all.title"),
 			message: T()("toasts.media.share.links.delete.all.message"),
 		}),
-		invalidates: ["mediaShareLinks.getMultiple"],
+		invalidates: [queryKeys.mediaShareLinks.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

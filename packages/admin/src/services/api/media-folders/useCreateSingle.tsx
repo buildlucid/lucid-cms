@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -12,10 +13,8 @@ export const createSingleReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: "/lucid/api/v1/media/folders",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params,
-		},
+		method: "POST",
+		body: params,
 	});
 };
 
@@ -33,7 +32,10 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 			title: T()("toasts.media.folder.create.title"),
 			message: T()("toasts.media.folder.create.message"),
 		}),
-		invalidates: ["mediaFolders.getMultiple", "mediaFolders.getHierarchy"],
+		invalidates: [
+			queryKeys.mediaFolders.list(),
+			queryKeys.mediaFolders.hierarchy(),
+		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

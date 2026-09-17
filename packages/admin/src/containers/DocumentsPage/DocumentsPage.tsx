@@ -18,6 +18,7 @@ import { QueryRow } from "@/components/QueryRow/QueryRow";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import useQueryState, { sort } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -48,10 +49,8 @@ const DocumentsPage: Component = () => {
 				createdAt: sort(),
 			},
 		},
-		options: {
-			awaitSchema: true,
-			singleSort: true,
-		},
+		awaitSchema: true,
+		singleSort: true,
 	});
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 	const [orderMode, setOrderMode] = createSignal(false);
@@ -284,7 +283,7 @@ const DocumentsPage: Component = () => {
 									}}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
-											queryKey: ["documents.getMultiple"],
+											queryKey: queryKeys.documents.all(),
 										});
 									}}
 									filterSection={

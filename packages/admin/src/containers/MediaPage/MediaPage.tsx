@@ -27,6 +27,7 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import mediaStore from "@/store/mediaStore/mediaStore";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
@@ -66,9 +67,7 @@ const MediaPage: Component = () => {
 			},
 			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 	const params = useParams();
 	const mediaImageGeneration = useMediaImageGeneration();
@@ -297,10 +296,10 @@ const MediaPage: Component = () => {
 										setShowingDeleted={setShowingDeleted}
 										onRefresh={() => {
 											queryClient.invalidateQueries({
-												queryKey: ["media.getMultiple"],
+												queryKey: queryKeys.media.lists(),
 											});
 											queryClient.invalidateQueries({
-												queryKey: ["mediaFolders.getMultiple"],
+												queryKey: queryKeys.mediaFolders.list(),
 											});
 										}}
 										filterSection={{

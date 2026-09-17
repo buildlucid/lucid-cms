@@ -24,6 +24,18 @@
 		"./slots": {
 			"types": "./dist/slots/slots.d.mts",
 			"default": "./dist/slots/slots.mjs"
+		},
+		"./hooks": {
+			"types": "./dist/browser/hooks.d.mts",
+			"default": "./src/exports/hooks.ts"
+		},
+		"./services": {
+			"types": "./dist/browser/services.d.mts",
+			"default": "./src/exports/services.ts"
+		},
+		"./utils": {
+			"types": "./dist/browser/utils.d.mts",
+			"default": "./src/exports/utils.ts"
 		}
 	},
 	"scripts": {

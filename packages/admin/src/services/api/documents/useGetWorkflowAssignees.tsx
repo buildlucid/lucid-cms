@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, WorkflowUser } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,16 +19,18 @@ const useGetWorkflowAssignees = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["documents.getWorkflowAssignees", queryKey(), params.key?.()],
+		queryKey: [
+			...queryKeys.documents.workflowAssignees(),
+			queryKey(),
+			params.key?.(),
+		],
 		queryFn: () =>
 			request<ResponseBody<WorkflowUser[]>>({
 				url: `/lucid/api/v1/documents/${
 					queryParams().location?.collectionKey
 				}/workflow/assignees`,
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params.enabled ? params.enabled() : true;

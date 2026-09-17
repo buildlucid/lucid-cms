@@ -12,6 +12,7 @@ import type { AdminRoute } from "./route.js";
 export type AdminModulePath = string | URL;
 export type AdminSlot = {
 	key: string;
+	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
 	component: AdminModulePath;
 } & (
 	| { slot: BrickSlot; match?: BrickSlotMatch }

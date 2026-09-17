@@ -1,6 +1,8 @@
-import type { Collection, InternalDocumentField } from "@lucidcms/types";
 import type { Component } from "solid-js";
-import type { ReadonlyData } from "../../types/utils.js";
+import type {
+	BrickState,
+	EditorContext,
+} from "../../extensions/editor/types.js";
 import type { brickSlotKeys } from "./constants.js";
 
 export type BrickSlot = (typeof brickSlotKeys)[keyof typeof brickSlotKeys];
@@ -11,11 +13,11 @@ export type BrickSlotMatch = {
 	kind?: "fixed" | "builder" | "embedded";
 };
 
-/** Experimental read-only view of the active brick and its unsaved fields. */
+/** A read-only view of this brick instance and its unsaved fields. */
 export type BrickSlotProps = {
-	readonly brick: ReadonlyData<Collection["fixedBricks"][number]>;
-	readonly fields: ReadonlyData<InternalDocumentField[]>;
-	readonly contentLocale: string;
+	readonly slot: BrickSlot;
+	readonly brick: BrickState;
+	readonly context: EditorContext;
 };
 
 export type BrickSlotComponent = Component<BrickSlotProps>;

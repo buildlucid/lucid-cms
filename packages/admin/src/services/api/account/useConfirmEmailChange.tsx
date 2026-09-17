@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,9 +12,7 @@ export const confirmEmailChangeReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: `/lucid/api/v1/account/email-change/confirm/${params.token}`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-		},
+		method: "PATCH",
 	});
 };
 
@@ -29,7 +28,7 @@ const useConfirmEmailChange = (props?: UseConfirmEmailChangeProps) => {
 			title: T()("toasts.email.change.confirm.success.title"),
 			message: T()("toasts.email.change.confirm.success.message"),
 		}),
-		invalidates: ["users.getSingle"],
+		invalidates: [queryKeys.account.all(), queryKeys.users.detail()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

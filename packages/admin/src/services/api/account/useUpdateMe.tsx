@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -17,17 +18,15 @@ export const updateMeReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: "/lucid/api/v1/account",
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: {
-				firstName: params.firstName,
-				lastName: params.lastName,
-				username: params.username,
-				email: params.email,
-				currentPassword: params.currentPassword,
-				newPassword: params.newPassword,
-				passwordConfirmation: params.passwordConfirmation,
-			},
+		method: "PATCH",
+		body: {
+			firstName: params.firstName,
+			lastName: params.lastName,
+			username: params.username,
+			email: params.email,
+			currentPassword: params.currentPassword,
+			newPassword: params.newPassword,
+			passwordConfirmation: params.passwordConfirmation,
 		},
 	});
 };
@@ -51,7 +50,11 @@ const useUpdateMe = (props?: useUpdateMeProps) => {
 						: T()("toasts.account.update.message"),
 			};
 		},
-		invalidates: ["users.getMultiple", "users.getSingle"],
+		invalidates: [
+			queryKeys.account.all(),
+			queryKeys.users.list(),
+			queryKeys.users.detail(),
+		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

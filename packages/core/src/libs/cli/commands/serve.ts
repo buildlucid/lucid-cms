@@ -109,6 +109,7 @@ const serveCommand = async () => {
 			envSchema: configRes.envSchema,
 			configPath: configPath,
 			projectRoot: configRes.projectRoot,
+			translationFiles: configRes.resources.files.translations,
 			access: configRes.config.access,
 			collections: configRes.config.collections,
 			localization: configRes.config.localization,

@@ -7,8 +7,11 @@ import type {
 	ResponseBody,
 } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
+import { getRequestInterfaceLocale } from "@/translations";
 import type { QueryHook } from "@/types/utils";
-import request from "@/utils/request";
+import helpers from "@/utils/helpers";
+import request, { type RequestParams } from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 type DocumentRefInclude = "refs" | `refs.${RefResource}`;
@@ -28,29 +31,62 @@ interface QueryParams {
 	>;
 }
 
+export const getSingleReq = ({
+	collectionKey,
+	documentId,
+	version,
+	...options
+}: Pick<RequestParams, "signal" | "displayErrorToast" | "query"> & {
+	collectionKey: string | undefined;
+	documentId: number | undefined;
+	version: string | number | undefined;
+}) =>
+	request<ResponseBody<InternalCollectionDocument, Refs>>({
+		url: `/lucid/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${documentId}/${encodeURIComponent(String(version))}`,
+		...options,
+	});
+
 const useGetSingle = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+	const queryParams = createMemo(() => {
+		const paramsValue = serviceHelpers.getQueryParams<QueryParams>(
+			params.queryParams,
+		);
+		return {
+			queryString: paramsValue.queryString,
+			filters: paramsValue.filters,
+			include: paramsValue.include,
+			exclude: paramsValue.exclude,
+			perPage: paramsValue.perPage,
+		};
+	});
 
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["documents.getSingle", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<InternalCollectionDocument, Refs>>({
-				url: `/lucid/api/v1/documents/${
-					queryParams().location?.collectionKey
-				}/${queryParams().location?.id}/${queryParams().location?.version}`,
+		queryKey: queryKeys.documents.detail(
+			helpers.resolveValue(params.queryParams.location.collectionKey),
+			helpers.resolveValue(params.queryParams.location.id),
+			helpers.resolveValue(params.queryParams.location.version),
+			queryParams(),
+			getRequestInterfaceLocale(),
+		),
+		queryFn: ({ signal }) =>
+			getSingleReq({
+				collectionKey: helpers.resolveValue(
+					params.queryParams.location.collectionKey,
+				),
+				documentId: helpers.resolveValue(params.queryParams.location.id),
+				version: helpers.resolveValue(params.queryParams.location.version),
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				signal,
+				displayErrorToast: false,
 			}),
-		get enabled() {
-			return params.enabled ? params.enabled() : true;
-		},
+		enabled:
+			helpers.resolveValue(params.queryParams.location.collectionKey) !==
+				undefined &&
+			helpers.resolveValue(params.queryParams.location.id) !== undefined &&
+			helpers.resolveValue(params.queryParams.location.version) !== undefined,
+		...(params.enabled ? { enabled: params.enabled() } : {}),
 		refetchOnWindowFocus: params.refetchOnWindowFocus,
 	}));
 };

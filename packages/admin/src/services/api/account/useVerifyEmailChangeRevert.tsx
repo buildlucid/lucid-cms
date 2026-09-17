@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody } from "@types";
 import { createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,13 +19,15 @@ const useVerifyEmailChangeRevert = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["account.verifyEmailChangeRevert", queryKey(), params.key?.()],
+		queryKey: [
+			...queryKeys.account.verifyEmailChangeRevert(),
+			queryKey(),
+			params.key?.(),
+		],
 		queryFn: () =>
 			request<ResponseBody<undefined>>({
 				url: `/lucid/api/v1/account/email-change/revert/${queryParams().location?.token}`,
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		retry: 0,
 		get enabled() {

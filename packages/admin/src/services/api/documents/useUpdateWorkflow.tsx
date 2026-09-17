@@ -1,4 +1,5 @@
 import type { ErrorResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -16,10 +17,8 @@ export const updateWorkflowReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/workflow`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: params.body,
-		},
+		method: "PATCH",
+		body: params.body,
 	});
 };
 
@@ -38,7 +37,7 @@ const useUpdateWorkflow = (props?: UseUpdateWorkflowProps) => {
 					title: T()("toasts.common.workflow.updated.title"),
 					message: T()("toasts.common.workflow.updated.message"),
 				}),
-		invalidates: ["documents.getMultiple", "documents.getSingle"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

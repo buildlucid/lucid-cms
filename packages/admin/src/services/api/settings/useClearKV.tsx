@@ -7,9 +7,7 @@ export const clearKVReq = () => {
 	return request<ResponseBody<null>>({
 		url: "/lucid/api/v1/settings/kv",
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 

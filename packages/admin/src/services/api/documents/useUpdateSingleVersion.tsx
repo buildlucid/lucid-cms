@@ -1,9 +1,11 @@
+import type { QueryKey } from "@tanstack/solid-query";
 import type {
 	DocumentVersionUpdateResponse,
 	ErrorResponse,
 	InternalDocumentField,
 	ResponseBody,
 } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -22,10 +24,8 @@ export const updateSingleVersionReq = (params: Params) => {
 	return request<ResponseBody<DocumentVersionUpdateResponse>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: params.body,
-		},
+		method: "PATCH",
+		body: params.body,
 	});
 };
 
@@ -37,7 +37,7 @@ interface UseUpdateSingleVersionProps {
 	onError?: (_errors: ErrorResponse | undefined, _params: Params) => void;
 	onMutate?: (_params: Params) => void;
 	getCollectionName: () => string;
-	invalidates?: string[];
+	invalidates?: readonly QueryKey[];
 }
 
 const useUpdateSingleVersion = (props: UseUpdateSingleVersionProps) => {
@@ -48,7 +48,7 @@ const useUpdateSingleVersion = (props: UseUpdateSingleVersionProps) => {
 		ResponseBody<DocumentVersionUpdateResponse>
 	>({
 		mutationFn: updateSingleVersionReq,
-		invalidates: props.invalidates ?? ["documents.getMultiple"],
+		invalidates: props.invalidates ?? [queryKeys.documents.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 		onMutate: props?.onMutate,

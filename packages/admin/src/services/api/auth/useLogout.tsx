@@ -1,5 +1,7 @@
 import { useNavigate } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -15,9 +17,7 @@ export const logoutReq = () => {
 	>({
 		url: "/lucid/api/v1/auth/logout",
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 
@@ -28,6 +28,7 @@ interface UseLogoutProps {
 
 const useLogout = (props?: UseLogoutProps) => {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 
 	// -----------------------------
 	// Mutation
@@ -42,8 +43,9 @@ const useLogout = (props?: UseLogoutProps) => {
 			title: T()("toasts.common.logout.success.title"),
 			message: T()("toasts.common.logout.success.message"),
 		}),
-		invalidates: ["roles.getMultiple", "roles.getSingle"],
+		invalidates: [queryKeys.roles.list(), queryKeys.roles.detail()],
 		onSuccess: () => {
+			queryClient.clear();
 			userStore.get.reset();
 			siteStore.get.reset();
 			navigate("/lucid/login");

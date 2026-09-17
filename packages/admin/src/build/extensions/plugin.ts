@@ -24,6 +24,7 @@ export const adminExtensionsPlugin = (options: {
 	const { configPath, admin = {} } = options;
 	const configDirectory = path.dirname(configPath);
 	const stylesheetPath = normalizePath(options.stylesheetPath);
+	const componentDirectories = new Set<string>();
 	let registry = "";
 	let assets: Awaited<ReturnType<typeof generateAssets>> = {
 		code: "",
@@ -35,6 +36,7 @@ export const adminExtensionsPlugin = (options: {
 		name: "lucid:admin-extensions",
 		enforce: "pre",
 		async buildStart() {
+			componentDirectories.clear();
 			const resolve = async (reference: AdminModulePath, label: string) => {
 				const source =
 					typeof reference === "string" ? reference : fileURLToPath(reference);
@@ -56,7 +58,15 @@ export const adminExtensionsPlugin = (options: {
 				return resolved.id;
 			};
 
-			registry = await generateRegistry(admin, resolve);
+			registry = await generateRegistry(admin, async (reference, label) => {
+				const id = await resolve(reference, label);
+				const file = id.split("?", 1)[0];
+				// Tailwind scans directories, not the component's import graph. Keep
+				// each source local to its component rather than widening to a common root.
+				if (path.isAbsolute(file))
+					componentDirectories.add(normalizePath(path.dirname(file)));
+				return id;
+			});
 			assets = await generateAssets(admin, resolve);
 		},
 		resolveId(id) {
@@ -71,7 +81,7 @@ export const adminExtensionsPlugin = (options: {
 		transform(source, id) {
 			if (
 				id.split("?", 1)[0] !== stylesheetPath ||
-				assets.stylesheets.length === 0
+				(assets.stylesheets.length === 0 && componentDirectories.size === 0)
 			)
 				return;
 			return {
@@ -80,6 +90,9 @@ export const adminExtensionsPlugin = (options: {
 					...assets.stylesheets.map(
 						(file) => `@import ${JSON.stringify(normalizePath(file))};`,
 					),
+					...Array.from(componentDirectories)
+						.sort()
+						.map((directory) => `@source ${JSON.stringify(directory)};`),
 				].join("\n"),
 				map: null,
 			};

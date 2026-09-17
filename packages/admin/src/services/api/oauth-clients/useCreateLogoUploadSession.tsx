@@ -25,10 +25,8 @@ const useCreateLogoUploadSession = () => {
 						? "/lucid/api/v1/integrations/oauth-clients/logo/upload-session"
 						: `/lucid/api/v1/integrations/oauth-clients/${params.id}/logo/upload-session`,
 				csrf: true,
-				config: {
-					method: "POST",
-					body: params.body,
-				},
+				method: "POST",
+				body: params.body,
 			}),
 	});
 };

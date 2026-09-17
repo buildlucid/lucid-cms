@@ -1,4 +1,5 @@
 import type { ResponseBody, Role } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -12,9 +13,7 @@ export const deleteSinglePermanentlyReq = (params: Params) => {
 	return request<ResponseBody<Role>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/permanent`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -37,7 +36,7 @@ const useDeleteSinglePermanently = (props: UseDeleteProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: ["documents.getMultiple"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

@@ -26,6 +26,7 @@ import { Table } from "@/components/Table/Table";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -275,7 +276,7 @@ export const DocumentsList: Component<{
 		onError: () => {
 			//* restore server order after failed reorder
 			queryClient.invalidateQueries({
-				queryKey: ["documents.getMultiple"],
+				queryKey: queryKeys.documents.all(),
 			});
 			spawnToast({
 				title: T()("documents.order.reorder.failed.title"),
@@ -290,7 +291,7 @@ export const DocumentsList: Component<{
 		save: (update) => updateDocumentOrder.action.mutateAsync(update),
 		onSaved: () =>
 			queryClient.invalidateQueries({
-				queryKey: ["documents.getMultiple"],
+				queryKey: queryKeys.documents.all(),
 			}),
 	});
 
@@ -312,7 +313,7 @@ export const DocumentsList: Component<{
 		const visibleIds = rows.map((row) => row.id).join(",");
 		queryClient.setQueriesData<
 			ResponseBody<InternalCollectionDocument[], Refs>
-		>({ queryKey: ["documents.getMultiple"] }, (old) => {
+		>({ queryKey: queryKeys.documents.all() }, (old) => {
 			if (!old?.data) return old;
 			if (old.data.map((row) => row.id).join(",") !== visibleIds) return old;
 			return {

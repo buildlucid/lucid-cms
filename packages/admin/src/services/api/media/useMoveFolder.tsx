@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -14,10 +15,8 @@ export const moveFolderReq = (params: Params) => {
 	return request<ResponseBody<null>>({
 		url: `/lucid/api/v1/media/${params.id}/move`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: params.body,
-		},
+		method: "PATCH",
+		body: params.body,
 	});
 };
 
@@ -34,10 +33,9 @@ const useMoveFolder = (props?: UseMoveFolderProps) => {
 			message: T()("toasts.media.update.message"),
 		}),
 		invalidates: [
-			"media.getMultiple",
-			"media.getSingle",
-			"mediaFolders.getMultiple",
-			"mediaFolders.getHierarchy",
+			queryKeys.media.all(),
+			queryKeys.mediaFolders.list(),
+			queryKeys.mediaFolders.hierarchy(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

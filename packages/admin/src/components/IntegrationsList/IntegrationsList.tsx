@@ -25,6 +25,7 @@ import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -155,7 +156,7 @@ export const IntegrationsList: Component<{
 								searchParams={props.state.searchParams}
 								onRefresh={() => {
 									queryClient.invalidateQueries({
-										queryKey: ["integrations.getAll"],
+										queryKey: queryKeys.integrations.list(),
 									});
 								}}
 								filterSection={{

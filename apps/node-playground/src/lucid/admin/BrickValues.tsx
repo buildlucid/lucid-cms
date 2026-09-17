@@ -7,7 +7,16 @@ const BrickValues: BrickSlotComponent = (props) => (
 	>
 		<strong class="text-title">After fields: live read-only values</strong>
 		<pre class="mt-2 max-h-60 overflow-auto text-xs text-body">
-			{JSON.stringify(props.fields, null, 2)}
+			{JSON.stringify(
+				props.brick.fields.map((field) => ({
+					key: field.key,
+					type: field.type,
+					value: field.value,
+					errors: field.errors,
+				})),
+				null,
+				2,
+			)}
 		</pre>
 	</aside>
 );

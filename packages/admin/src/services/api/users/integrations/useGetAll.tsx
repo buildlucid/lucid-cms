@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { Integration, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -23,7 +24,7 @@ const bindUseGetAll =
 		// Query
 		return useQuery(() => ({
 			queryKey: [
-				"integrations.getAll",
+				...queryKeys.integrations.list(),
 				"user",
 				userId(),
 				queryKey(),
@@ -33,9 +34,7 @@ const bindUseGetAll =
 				request<ResponseBody<Integration[]>>({
 					url: `/lucid/api/v1/users/${userId()}/integrations`,
 					query: queryParams(),
-					config: {
-						method: "GET",
-					},
+					method: "GET",
 				}),
 			placeholderData: keepPreviousData,
 			get enabled() {

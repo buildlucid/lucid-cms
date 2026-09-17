@@ -1,4 +1,5 @@
 import type { Integration, IntegrationExpiry, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -19,10 +20,8 @@ export const updateSingleReq = (params: Params) => {
 	return request<ResponseBody<Integration>>({
 		url: `/lucid/api/v1/account/integrations/${params.id}`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: params.body,
-		},
+		method: "PATCH",
+		body: params.body,
 	});
 };
 
@@ -36,7 +35,10 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 	// Mutation
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Integration>>({
 		mutationFn: updateSingleReq,
-		invalidates: ["integrations.getAll", "integrations.getSingle"],
+		invalidates: [
+			queryKeys.integrations.list(),
+			queryKeys.integrations.detail(),
+		],
 		onSuccess: () => {
 			spawnToast({
 				title: T()("toasts.integrations.update.title"),

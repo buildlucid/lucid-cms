@@ -1,3 +1,4 @@
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -10,9 +11,7 @@ export const deleteSingleReq = (params: Params) => {
 	return request<undefined>({
 		url: `/lucid/api/v1/media/${params.id}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -30,7 +29,7 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 			title: T()("toasts.media.deleted.title"),
 			message: T()("toasts.media.deleted.message"),
 		}),
-		invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
+		invalidates: [queryKeys.media.lists(), queryKeys.mediaFolders.list()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

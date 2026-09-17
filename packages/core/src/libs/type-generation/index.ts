@@ -7,6 +7,7 @@ import writeFileIfChanged from "../../utils/helpers/write-file-if-changed.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import generateCollectionClientTypes from "../collection/type-gen/index.js";
 import logger from "../logger/index.js";
+import type { ResourceFile } from "../resources/types.js";
 import generateAccessTypes from "./access-type.js";
 import generateEnvTypes from "./env-type.js";
 import generateTranslationCopyTypes from "./translation-copy-type.js";
@@ -101,6 +102,7 @@ const generateTypes = async (props: {
 	envSchema?: ZodType;
 	configPath: string;
 	projectRoot?: string;
+	translationFiles?: ResourceFile[];
 	collections: CollectionBuilder[];
 	access: ResolvedLucidConfig["access"];
 	localization: ResolvedLucidConfig["localization"];
@@ -117,6 +119,7 @@ const generateTypes = async (props: {
 			}),
 			generateTranslationCopyTypes({
 				projectRoot: props.projectRoot,
+				files: props.translationFiles,
 			}),
 		])
 	).filter((result): result is TypeGenerationContribution => Boolean(result));

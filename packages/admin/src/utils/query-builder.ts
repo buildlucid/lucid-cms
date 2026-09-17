@@ -15,27 +15,19 @@ const queryBuilder = (query: QueryBuilderProps) => {
 	// create new url with query string
 	const params = new URLSearchParams(query.queryString || "");
 
-	// Append include query
-	if (query.include !== undefined && Object.keys(query.include).length > 0) {
-		let includeString = params.get("include") || "";
-		for (const key of Object.keys(query.include)) {
-			if (query.include?.[key]) {
-				includeString += `${key},`;
-			}
+	// Merge explicit includes/excludes with existing query parameters.
+	for (const key of ["include", "exclude"] as const) {
+		const entries = query[key];
+		if (!entries) continue;
+
+		const values = new Set((params.get(key) ?? "").split(",").filter(Boolean));
+		for (const [name, enabled] of Object.entries(entries)) {
+			if (enabled) values.add(name);
+			else values.delete(name);
 		}
-		includeString = includeString.slice(0, -1);
-		if (includeString.length > 0) params.append("include", includeString);
-	}
-	// Append exclude query
-	if (query.exclude !== undefined && Object.keys(query.exclude).length > 0) {
-		let excludeString = params.get("exclude") || "";
-		for (const key of Object.keys(query.exclude)) {
-			if (query.exclude?.[key]) {
-				excludeString += `${key},`;
-			}
-		}
-		excludeString = excludeString.slice(0, -1);
-		if (excludeString.length > 0) params.append("exclude", excludeString);
+
+		if (values.size) params.set(key, [...values].join(","));
+		else params.delete(key);
 	}
 
 	// Append filters query
@@ -45,18 +37,28 @@ const queryBuilder = (query: QueryBuilderProps) => {
 			if (value === undefined || value === null) continue;
 
 			if (Array.isArray(value)) {
-				params.append(`filter[${key}]`, value.join(","));
+				params.set(`filter[${key}]`, value.join(","));
 			}
 
 			if (typeof value === "string" || typeof value === "number") {
-				params.append(`filter[${key}]`, value.toString());
+				params.set(`filter[${key}]`, value.toString());
 			}
 		}
 	}
 
+	if (query.page !== undefined) params.set("page", String(query.page));
+	if (query.sort) {
+		params.set(
+			"sort",
+			Object.entries(query.sort)
+				.map(([key, direction]) => (direction === "desc" ? `-${key}` : key))
+				.join(","),
+		);
+	}
+
 	// Append perPage query
 	if (query.perPage !== undefined) {
-		params.append("perPage", query.perPage.toString());
+		params.set("perPage", query.perPage.toString());
 	}
 
 	return params.toString();

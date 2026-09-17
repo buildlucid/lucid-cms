@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { ConnectionStatus, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,14 +19,12 @@ const useGetStatus = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["connection.getStatus", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.connection.status(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<ConnectionStatus>>({
 				url: "/lucid/api/v1/connection/status",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		staleTime: CONNECTION_STATUS_STALE_TIME_MS,
 		get enabled() {

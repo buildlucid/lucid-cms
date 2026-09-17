@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -12,9 +13,7 @@ export const deleteSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -37,7 +36,7 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: ["documents.getMultiple"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

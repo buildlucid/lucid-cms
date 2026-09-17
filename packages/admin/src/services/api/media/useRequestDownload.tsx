@@ -10,9 +10,7 @@ const requestDownloadReq = (params: Params) => {
 	return request<ResponseBody<{ url: string }>>({
 		url: `/lucid/api/v1/media/${params.id}/download`,
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 

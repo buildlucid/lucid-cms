@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,9 +12,7 @@ export const deleteProcessedImagesReq = (params: Params) => {
 	return request<ResponseBody<null>>({
 		url: `/lucid/api/v1/media/${params.id}/processed`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -31,7 +30,7 @@ const useDeleteProcessedImages = (props: UseDeleteProcessedImagesProps) => {
 			title: T()("toasts.common.delete.processed.images.title"),
 			message: T()("toasts.common.delete.processed.images.message"),
 		}),
-		invalidates: ["settings.getSettings"],
+		invalidates: [queryKeys.settings.detail()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

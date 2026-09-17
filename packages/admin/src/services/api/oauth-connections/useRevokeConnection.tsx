@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { OAuthConnectionOwner } from "./types";
@@ -15,11 +16,9 @@ const useRevokeConnection = (props?: { onSuccess?: () => void }) =>
 			request<ResponseBody<null>>({
 				url: `${getOAuthConnectionsPath(params.owner)}/${params.id}`,
 				csrf: true,
-				config: {
-					method: "DELETE",
-				},
+				method: "DELETE",
 			}),
-		invalidates: ["oauthConnections.getAll"],
+		invalidates: [queryKeys.oauthConnections.list()],
 		onSuccess: props?.onSuccess,
 	});
 

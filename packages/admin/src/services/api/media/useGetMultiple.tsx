@@ -1,8 +1,10 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { Media, MediaStatus, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
+import { getRequestInterfaceLocale } from "@/translations";
 import type { QueryHook } from "@/types/utils";
-import request from "@/utils/request";
+import request, { type RequestParams } from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 interface QueryParams {
@@ -21,28 +23,41 @@ interface QueryParams {
 	perPage?: number;
 }
 
+export const getMultipleReq = (
+	options: Pick<RequestParams, "signal" | "displayErrorToast" | "query"> = {},
+) =>
+	request<ResponseBody<Media[]>>({
+		url: "/lucid/api/v1/media",
+		...options,
+	});
+
 const useGetMultiple = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+	const queryParams = createMemo(() => {
+		const paramsValue = serviceHelpers.getQueryParams<QueryParams>(
+			params.queryParams,
+		);
+		return {
+			queryString: paramsValue.queryString,
+			filters: paramsValue.filters,
+			include: paramsValue.include,
+			exclude: paramsValue.exclude,
+			perPage: paramsValue.perPage,
+		};
+	});
 
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["media.getMultiple", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<Media[]>>({
-				url: "/lucid/api/v1/media",
+		queryKey: queryKeys.media.list(queryParams(), getRequestInterfaceLocale()),
+		queryFn: ({ signal }) =>
+			getMultipleReq({
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				signal,
+				displayErrorToast: false,
 			}),
 		placeholderData: keepPreviousData,
-		get enabled() {
-			return params.enabled ? params.enabled() : true;
-		},
+		...(params.enabled ? { enabled: params.enabled() } : {}),
+		refetchOnWindowFocus: params.refetchOnWindowFocus,
 	}));
 };
 

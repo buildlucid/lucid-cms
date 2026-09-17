@@ -29,13 +29,32 @@ const createUrlStorageAdapter = (): QueryStateStorageAdapter => {
 	};
 };
 
-export interface UseQueryStateConfig {
-	mode: "url" | "memory";
+export interface UseQueryStateConfig extends QueryStateOptions {
+	mode?: "url" | "memory";
 	schema?: QueryStateSchema;
-	options?: QueryStateOptions;
 }
 
-const useQueryState = (config: UseQueryStateConfig): QueryStateResponse => {
+/**
+ * Keeps filters, sorting and pagination in the URL. Use mode: "memory" for local state.
+ *
+ * @example
+ * ```ts
+ * import { textFilter, useQueryState } from "@lucidcms/admin/hooks";
+ *
+ * const state = useQueryState({
+ *   schema: {
+ *     filters: {
+ *       title: textFilter(),
+ *     },
+ *   },
+ * });
+ *
+ * state.setFilter("title", "Home");
+ * ```
+ */
+const useQueryState = (
+	config: UseQueryStateConfig = {},
+): QueryStateResponse => {
 	const adapter =
 		config.mode === "memory"
 			? createMemoryStorageAdapter()
@@ -43,7 +62,7 @@ const useQueryState = (config: UseQueryStateConfig): QueryStateResponse => {
 
 	return createQueryState({
 		schema: config.schema,
-		options: config.options,
+		options: { singleSort: config.singleSort, awaitSchema: config.awaitSchema },
 		adapter,
 	});
 };

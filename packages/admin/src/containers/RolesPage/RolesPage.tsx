@@ -11,6 +11,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import { queryKeys } from "@/services/query-keys";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
@@ -33,9 +34,7 @@ const RolesPage: Component = () => {
 				createdAt: sort(),
 			},
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 	const [openCreateRolePanel, setOpenCreateRolePanel] = createSignal(false);
 
@@ -69,7 +68,7 @@ const RolesPage: Component = () => {
 									searchParams={searchParams}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
-											queryKey: ["roles.getMultiple"],
+											queryKey: queryKeys.roles.list(),
 										});
 									}}
 									filterSection={{

@@ -9,6 +9,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 
 const EmailsPage: Component = () => {
@@ -37,9 +38,7 @@ const EmailsPage: Component = () => {
 				attemptCount: sort(),
 			},
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 
 	// ----------------------------------
@@ -59,7 +58,7 @@ const EmailsPage: Component = () => {
 									searchParams={searchParams}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
-											queryKey: ["email.getMultiple"],
+											queryKey: queryKeys.email.list(),
 										});
 									}}
 									filterSection={{

@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,9 +12,7 @@ export const revertEmailChangeReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: `/lucid/api/v1/account/email-change/revert/${params.token}`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-		},
+		method: "PATCH",
 	});
 };
 
@@ -29,7 +28,7 @@ const useRevertEmailChange = (props?: UseRevertEmailChangeProps) => {
 			title: T()("toasts.email.change.revert.success.title"),
 			message: T()("toasts.email.change.revert.success.message"),
 		}),
-		invalidates: ["users.getSingle"],
+		invalidates: [queryKeys.account.all(), queryKeys.users.detail()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

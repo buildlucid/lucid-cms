@@ -1,5 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -16,10 +17,8 @@ export const setupReq = (params: Params) => {
 	return request<ResponseBody<null>>({
 		url: "/lucid/api/v1/auth/setup",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params,
-		},
+		method: "POST",
+		body: params,
 	});
 };
 
@@ -39,7 +38,7 @@ const useSetup = (props?: UseSetupProps) => {
 			title: T()("toasts.common.setup.success.title"),
 			message: T()("toasts.common.setup.success.message"),
 		}),
-		invalidates: ["auth.setupRequired"],
+		invalidates: [queryKeys.auth.setupRequired()],
 		onSuccess: () => {
 			navigate("/lucid/login");
 			props?.onSuccess?.();

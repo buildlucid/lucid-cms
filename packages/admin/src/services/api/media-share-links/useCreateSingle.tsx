@@ -1,4 +1,5 @@
 import type { MediaShareLink, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -21,10 +22,8 @@ export const createSingleReq = (params: Params) => {
 	return request<ResponseBody<Response>>({
 		url: `/lucid/api/v1/media/${params.mediaId}/share-links`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 
@@ -42,7 +41,7 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 			title: T()("toasts.media.share.link.create.title"),
 			message: T()("toasts.media.share.link.create.message"),
 		}),
-		invalidates: ["mediaShareLinks.getMultiple"],
+		invalidates: [queryKeys.mediaShareLinks.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

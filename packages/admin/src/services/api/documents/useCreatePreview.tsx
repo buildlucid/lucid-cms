@@ -21,14 +21,12 @@ export const createPreviewReq = (params: CreatePreviewParams) => {
 	return request<ResponseBody<PreviewSessionURLResponse>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/preview`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: {
-				locale: params.locale,
-				mode: params.mode,
-				versionType: params.versionType,
-				versionId: params.versionId,
-			},
+		method: "POST",
+		body: {
+			locale: params.locale,
+			mode: params.mode,
+			versionType: params.versionType,
+			versionId: params.versionId,
 		},
 	});
 };

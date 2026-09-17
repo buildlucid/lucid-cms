@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -13,10 +14,8 @@ export const restoreReq = (params: Params) => {
 	return request<ResponseBody>({
 		url: "/lucid/api/v1/users/restore",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 
@@ -34,7 +33,7 @@ const useRestore = (props?: UseRestoreProps) => {
 			title: T()("toasts.users.restore.title"),
 			message: T()("toasts.users.restore.message"),
 		}),
-		invalidates: ["users.getMultiple"],
+		invalidates: [queryKeys.users.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

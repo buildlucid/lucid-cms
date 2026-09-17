@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -14,9 +15,7 @@ export const regenerateKeyReq = (params: Params) => {
 	return request<ResponseBody<ResponseBodyVal>>({
 		url: `/lucid/api/v1/integrations/${params.id}/regenerate-keys`,
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 
@@ -37,7 +36,7 @@ const useRegenerateAPIKey = (props: UseGenerateAPIKeyProps) => {
 			title: T()("toasts.integrations.api.keys.regenerate.title"),
 			message: T()("toasts.integrations.api.keys.regenerate.message"),
 		}),
-		invalidates: ["integrations.getAll"],
+		invalidates: [queryKeys.integrations.list()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

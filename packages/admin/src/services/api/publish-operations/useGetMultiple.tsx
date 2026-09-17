@@ -7,6 +7,7 @@ import type {
 	ResponseBody,
 } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -41,14 +42,16 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["publishOperations.getMultiple", queryKey(), params.key?.()],
+		queryKey: [
+			...queryKeys.publishOperations.list(),
+			queryKey(),
+			params.key?.(),
+		],
 		queryFn: () =>
 			request<ResponseBody<PublishOperation[]>>({
 				url: "/lucid/api/v1/publishing/requests",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		placeholderData: keepPreviousData,
 		get enabled() {

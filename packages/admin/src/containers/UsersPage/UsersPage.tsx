@@ -20,6 +20,7 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
@@ -53,9 +54,7 @@ const UsersPage: Component = () => {
 				isLocked: sort(),
 			},
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 	const [openCreateUserPanel, setOpenCreateUserPanel] = createSignal(false);
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
@@ -118,7 +117,7 @@ const UsersPage: Component = () => {
 									setShowingDeleted={setShowingDeleted}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
-											queryKey: ["users.getMultiple"],
+											queryKey: queryKeys.users.list(),
 										});
 									}}
 									filterSection={{

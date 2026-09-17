@@ -9,9 +9,7 @@ export const getUploadSessionReq = (sessionId: string) => {
 	return request<ResponseBody<UploadSessionStateResponse>>({
 		url: `/lucid/api/v1/media/upload-session/${sessionId}`,
 		csrf: true,
-		config: {
-			method: "GET",
-		},
+		method: "GET",
 	});
 };
 
@@ -30,11 +28,9 @@ export const getUploadPartUrlsReq = (params: {
 	>({
 		url: `/lucid/api/v1/media/upload-session/${params.sessionId}/parts`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: {
-				partNumbers: params.partNumbers,
-			},
+		method: "POST",
+		body: {
+			partNumbers: params.partNumbers,
 		},
 	});
 };
@@ -46,11 +42,9 @@ export const completeUploadSessionReq = (params: {
 	return request<ResponseBody<{ key: string }>>({
 		url: `/lucid/api/v1/media/upload-session/${params.sessionId}/complete`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: {
-				parts: params.parts,
-			},
+		method: "POST",
+		body: {
+			parts: params.parts,
 		},
 	});
 };
@@ -59,8 +53,6 @@ export const abortUploadSessionReq = (sessionId: string) => {
 	return request<ResponseBody<undefined>>({
 		url: `/lucid/api/v1/media/upload-session/${sessionId}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };

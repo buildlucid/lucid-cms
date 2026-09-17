@@ -1,4 +1,5 @@
 import type { CustomFieldInputGenerateResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import type { CustomFieldGenerationDocument } from "@/store/aiModalsStore/aiModalsStore";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -28,11 +29,9 @@ export const customFieldGenerateReq = (params: Params) => {
 	return request<ResponseBody<CustomFieldInputGenerateResponse>>({
 		url: "/lucid/api/v1/ai/custom-field",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-			signal: params.signal,
-		},
+		method: "POST",
+		body: params.body,
+		signal: params.signal,
 	});
 };
 
@@ -42,7 +41,7 @@ const useCustomFieldGenerate = () => {
 		ResponseBody<CustomFieldInputGenerateResponse>
 	>({
 		mutationFn: customFieldGenerateReq,
-		invalidates: ["ai.getUsage", "ai.getUsageChart"],
+		invalidates: [queryKeys.ai.usage(), queryKeys.ai.usageChart()],
 		getSuccessToast: (_data, params) =>
 			params.shouldToast?.() === false
 				? undefined

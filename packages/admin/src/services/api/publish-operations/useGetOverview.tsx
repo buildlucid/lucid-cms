@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { PublishOperationOverview, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -19,14 +20,16 @@ const useGetOverview = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["publishOperations.getOverview", queryKey(), params.key?.()],
+		queryKey: [
+			...queryKeys.publishOperations.overview(),
+			queryKey(),
+			params.key?.(),
+		],
 		queryFn: () =>
 			request<ResponseBody<PublishOperationOverview>>({
 				url: "/lucid/api/v1/publishing/requests/overview",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params.enabled ? params.enabled() : true;

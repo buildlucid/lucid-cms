@@ -1,15 +1,23 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, User } from "@types";
-import { createEffect, createMemo } from "solid-js";
+import { createEffect } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import userStore from "@/store/userStore/userStore";
 import type { QueryHook } from "@/types/utils";
 import getLoginRedirectURL from "@/utils/login-route";
-import request from "@/utils/request";
-import serviceHelpers from "@/utils/service-helpers";
+import request, { type RequestParams } from "@/utils/request";
 
 // biome-ignore lint/suspicious/noEmptyInterface: explanation
 interface QueryParams {}
+
+export const getAuthenticatedUserReq = (
+	options: Pick<RequestParams, "signal" | "displayErrorToast"> = {},
+) =>
+	request<ResponseBody<User>>({
+		url: "/lucid/api/v1/account",
+		...options,
+	});
 
 const useGetAuthenticatedUser = (
 	params: QueryHook<QueryParams>,
@@ -19,20 +27,13 @@ const useGetAuthenticatedUser = (
 ) => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	const query = useQuery(() => ({
-		queryKey: ["users.getSingle", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<User>>({
-				url: "/lucid/api/v1/account",
-				config: {
-					method: "GET",
-				},
-			}),
+		queryKey: queryKeys.account.session(),
+		queryFn: ({ signal }) =>
+			getAuthenticatedUserReq({ signal, displayErrorToast: false }),
+		retry: false,
+		staleTime: 30_000,
 		get enabled() {
 			return params.enabled ? params.enabled() : true;
 		},

@@ -1,6 +1,6 @@
 import type { ErrorResponse } from "@types";
 import { clearCsrfSession, csrfReq } from "@/services/api/auth/useCsrf";
-import useRefreshToken from "@/services/api/auth/useRefreshToken";
+import { refreshTokenReq } from "@/services/api/auth/useRefreshToken";
 import {
 	getRequestInterfaceLocale,
 	interfaceLocaleHeader,
@@ -8,121 +8,170 @@ import {
 import { handleSiteErrors, LucidError } from "@/utils/error-handling";
 import queryBuilder, { type QueryBuilderProps } from "@/utils/query-builder";
 
-export interface RequestParams<Data> {
+export interface RequestParams<Data = unknown> {
 	url: string;
+	method?: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 	query?: QueryBuilderProps;
-	csrf?: boolean;
-	config?: RequestConfig<Data>;
-}
-
-interface RequestConfig<Data> {
-	method: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
 	body?: Data | FormData;
 	headers?: Record<string, string>;
 	signal?: AbortSignal;
+	csrf?: boolean;
 	displayErrorToast?: boolean;
 }
 
 export const getFetchURL = (url: string, query?: QueryBuilderProps): string => {
-	let targetUrl = url;
-	if (query) {
-		const queryString = queryBuilder(query);
-		if (queryString) targetUrl += `?${queryString}`;
+	const serialized = query ? queryBuilder(query) : "";
+	if (!serialized) return url;
+
+	const [pathname, hash] = url.split("#", 2);
+	const [base, search] = pathname.split("?", 2);
+	const params = new URLSearchParams(search);
+
+	for (const [key, value] of new URLSearchParams(serialized)) {
+		params.set(key, value);
 	}
-	return targetUrl;
+
+	return `${base}?${params}${hash ? `#${hash}` : ""}`;
 };
 
-const prepareRequestBody = <Data>(
-	body?: Data | FormData,
-): string | FormData | undefined => {
-	if (!body) return undefined;
-	return body instanceof FormData ? body : JSON.stringify(body);
+const parseError = (data: unknown, response: Response): ErrorResponse => {
+	const record = data && typeof data === "object" ? data : {};
+
+	return {
+		status: response.status,
+		name:
+			"name" in record && typeof record.name === "string"
+				? record.name
+				: "Request failed",
+		message:
+			"message" in record && typeof record.message === "string"
+				? record.message
+				: response.statusText || "Request failed",
+		code:
+			"code" in record && typeof record.code === "string"
+				? record.code
+				: undefined,
+		// Validation details are checked when extracted by getFieldError.
+		...("errors" in record && record.errors && typeof record.errors === "object"
+			? { errors: record.errors as ErrorResponse["errors"] }
+			: {}),
+	};
 };
 
-const prepareHeaders = async (
-	csrf?: boolean,
-	headers: Record<string, string> = {},
-	body?: string | FormData | undefined,
-): Promise<Record<string, string>> => {
-	const updatedHeaders = { ...headers };
-	const interfaceLocale = getRequestInterfaceLocale();
-	if (interfaceLocale) updatedHeaders[interfaceLocaleHeader] = interfaceLocale;
-	if (csrf) {
-		const csrfToken = await csrfReq();
-		if (csrfToken) updatedHeaders["X-CSRF-Token"] = csrfToken;
-	}
-	if (headers["Content-Type"] === undefined && typeof body === "string") {
-		updatedHeaders["Content-Type"] = "application/json";
-	}
-	return updatedHeaders;
-};
-
-const handleResponse = async <ResponseBody, Data = unknown>(
+/** Internal typed transport for the CMS API. Public callers provide a response parser. */
+const request = async <ResponseBody = unknown, Data = unknown>(
 	params: RequestParams<Data>,
-	fetchRes: Response,
 ): Promise<ResponseBody> => {
-	if (fetchRes.status === 204 || fetchRes.status === 201) {
-		return {} as ResponseBody;
-	}
+	const method = params.method ?? "GET";
+	const csrf = params.csrf ?? method !== "GET";
+	const body =
+		params.body === undefined
+			? undefined
+			: params.body instanceof FormData
+				? params.body
+				: JSON.stringify(params.body);
+	let refreshed = false;
+	let refreshedCsrf = false;
 
-	const data = await fetchRes.json();
+	while (true) {
+		params.signal?.throwIfAborted();
+		const headers: Record<string, string> = { ...params.headers };
 
-	if (fetchRes.status === 401) {
-		if ((data as ErrorResponse).code === "authorisation") {
-			return useRefreshToken(params);
+		const locale = getRequestInterfaceLocale();
+		if (locale) headers[interfaceLocaleHeader] = locale;
+
+		if (csrf) {
+			const token = await csrfReq();
+			if (token) headers["X-CSRF-Token"] = token;
 		}
-	}
 
-	if (fetchRes.status === 403) {
-		if ((data as ErrorResponse).code === "csrf") {
+		if (
+			typeof body === "string" &&
+			!Object.keys(headers).some((key) => key.toLowerCase() === "content-type")
+		) {
+			headers["Content-Type"] = "application/json";
+		}
+
+		const response = await fetch(getFetchURL(params.url, params.query), {
+			method,
+			credentials: "include",
+			body,
+			headers,
+			signal: params.signal,
+		});
+
+		const text = response.status === 204 ? "" : await response.text();
+		let data: unknown;
+
+		try {
+			data = text ? JSON.parse(text) : undefined;
+		} catch {
+			if (response.ok) {
+				throw new Error("The API returned an invalid JSON response.");
+			}
+		}
+
+		if (response.ok) return data as ResponseBody;
+
+		const error = parseError(data, response);
+		if (
+			response.status === 401 &&
+			error.code === "authorisation" &&
+			!refreshed
+		) {
+			refreshed = true;
+			if (await refreshTokenReq()) continue;
+		}
+
+		if (
+			response.status === 403 &&
+			error.code === "csrf" &&
+			csrf &&
+			!refreshedCsrf
+		) {
+			refreshedCsrf = true;
 			clearCsrfSession();
-			return await request(params);
+			continue;
 		}
-	}
 
-	if (fetchRes.status === 429) {
-		if (params.config?.displayErrorToast !== false) {
-			handleSiteErrors(data as ErrorResponse);
-		}
-		throw new LucidError(
-			(data as ErrorResponse).message,
-			data as ErrorResponse,
-		);
+		if (params.displayErrorToast !== false) handleSiteErrors(error);
+		throw new LucidError(error.message, error);
 	}
-
-	if (!fetchRes.ok) {
-		if (params.config?.displayErrorToast !== false) {
-			handleSiteErrors(data as ErrorResponse);
-		}
-		throw new LucidError(
-			(data as ErrorResponse).message,
-			data as ErrorResponse,
-		);
-	}
-
-	return data as ResponseBody;
 };
 
-const request = async <ResponseBody, Data = unknown>(
-	params: RequestParams<Data>,
-): Promise<ResponseBody> => {
-	const fetchURL = getFetchURL(params.url, params.query);
-	const body = prepareRequestBody(params.config?.body);
-	const headers = await prepareHeaders(
-		params.csrf,
-		params.config?.headers,
-		body,
-	);
+/**
+ * Calls a same-origin API. Supply parse to validate and type the response.
+ * Throws LucidError for unsuccessful responses. Error toasts are off by default.
+ *
+ * @example
+ * ```ts
+ * import { request } from "@lucidcms/admin/services";
+ *
+ * await request({
+ *   url: "/lucid/api/v1/my-plugin/settings",
+ *   method: "POST",
+ *   body: {
+ *     enabled: true,
+ *   },
+ * });
+ * ```
+ */
+export function adminRequest<Result>(
+	params: RequestParams & { parse: (value: unknown) => Result },
+): Promise<Result>;
+export function adminRequest(params: RequestParams): Promise<unknown>;
+export async function adminRequest(
+	params: RequestParams & { parse?: (value: unknown) => unknown },
+): Promise<unknown> {
+	const url = new URL(params.url, window.location.origin);
+	if (url.origin !== window.location.origin) {
+		throw new Error("Admin requests must use the current origin.");
+	}
 
-	const fetchRes = await fetch(fetchURL, {
-		method: params.config?.method,
-		credentials: "include",
-		body: body,
-		headers: headers,
-		signal: params.config?.signal,
+	const data = await request({
+		...params,
+		displayErrorToast: params.displayErrorToast ?? false,
 	});
-
-	return handleResponse(params, fetchRes);
-};
-
+	return params.parse ? params.parse(data) : data;
+}
 export default request;

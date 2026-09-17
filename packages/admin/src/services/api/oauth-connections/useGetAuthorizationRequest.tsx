@@ -1,17 +1,16 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { OAuthAuthorizationRequest, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 
 const useGetAuthorizationRequest = (params: { requestId: () => string }) =>
 	useQuery(() => ({
-		queryKey: ["oauthAuthorization.getRequest", params.requestId()],
+		queryKey: [...queryKeys.oauthAuthorization.request(), params.requestId()],
 		queryFn: () =>
 			request<ResponseBody<OAuthAuthorizationRequest>>({
 				url: `/lucid/api/v1/integrations/oauth/authorization/${params.requestId()}`,
-				config: {
-					method: "GET",
-					displayErrorToast: false,
-				},
+				method: "GET",
+				displayErrorToast: false,
 			}),
 		placeholderData: keepPreviousData,
 		get enabled() {

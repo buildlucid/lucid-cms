@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody } from "@types";
 import { createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -21,13 +22,11 @@ const useSetupRequired = (params?: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["auth.setupRequired", queryKey(), params?.key?.()],
+		queryKey: [...queryKeys.auth.setupRequired(), queryKey(), params?.key?.()],
 		queryFn: () =>
 			request<ResponseBody<SetupRequiredResponse>>({
 				url: "/lucid/api/v1/auth/setup-required",
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params?.enabled ? params.enabled() : true;

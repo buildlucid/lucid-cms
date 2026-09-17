@@ -1,3 +1,4 @@
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -14,10 +15,8 @@ export const deleteBatchReq = (params: Params) => {
 	return request<undefined>({
 		url: "/lucid/api/v1/media/batch",
 		csrf: true,
-		config: {
-			method: "DELETE",
-			body: params.body,
-		},
+		method: "DELETE",
+		body: params.body,
 	});
 };
 
@@ -36,9 +35,9 @@ const useDeleteBatch = (props: UseDeleteBatchProps) => {
 			message: T()("toasts.media.batch.deleted.message"),
 		}),
 		invalidates: [
-			"media.getMultiple",
-			"mediaFolders.getMultiple",
-			"mediaFolders.getHierarchy",
+			queryKeys.media.lists(),
+			queryKeys.mediaFolders.list(),
+			queryKeys.mediaFolders.hierarchy(),
 		],
 		onSuccess: props.onSuccess,
 		onError: props.onError,

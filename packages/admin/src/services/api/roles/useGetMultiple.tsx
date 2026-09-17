@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, Role } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -24,14 +25,12 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["roles.getMultiple", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.roles.list(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<Role[]>>({
 				url: "/lucid/api/v1/roles",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		placeholderData: keepPreviousData,
 		get enabled() {

@@ -1,4 +1,5 @@
 import type { Email, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,9 +12,7 @@ export const deleteSingleReq = (params: Params) => {
 	return request<ResponseBody<Email>>({
 		url: `/lucid/api/v1/emails/${params.id}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -31,7 +30,7 @@ const useDeleteSingle = (props: UseDeleteProps) => {
 			title: T()("toasts.email.deleted.title"),
 			message: T()("toasts.email.deleted.message"),
 		}),
-		invalidates: ["email.getMultiple"],
+		invalidates: [queryKeys.email.list()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

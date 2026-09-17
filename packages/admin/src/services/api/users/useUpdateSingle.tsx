@@ -1,4 +1,5 @@
 import type { ResponseBody, User } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,10 +19,8 @@ export const updateSingleReq = (params: Params) => {
 	return request<ResponseBody<User>>({
 		url: `/lucid/api/v1/users/${params.id}`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: params.body,
-		},
+		method: "PATCH",
+		body: params.body,
 	});
 };
 
@@ -39,7 +38,7 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 			title: T()("toasts.users.update.title"),
 			message: T()("toasts.users.update.message"),
 		}),
-		invalidates: ["users.getMultiple", "users.getSingle"],
+		invalidates: [queryKeys.users.list(), queryKeys.users.detail()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

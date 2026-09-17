@@ -30,9 +30,7 @@ export function useDocumentHistoryState() {
 			},
 			pagination: pagination({ defaultPerPage: PER_PAGE }),
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 
 	const [accumulatedRevisions, setAccumulatedRevisions] = createSignal<

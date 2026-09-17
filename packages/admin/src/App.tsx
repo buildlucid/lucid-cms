@@ -9,22 +9,17 @@ const App: Component = () => {
 	const queryClient = new QueryClient({
 		defaultOptions: {
 			queries: {
-				retry: (_, error) => {
-					if (error instanceof LucidError) {
-						switch (error.errorRes.status) {
-							case 401:
-								return false;
-							case 403:
-								return false;
-							case 404:
-								return false;
-							case 429:
-								return false;
-							default:
-								return true;
-						}
-					}
-					return true;
+				retry: (failureCount, error) => {
+					if (failureCount >= 2) return false;
+					if (
+						error instanceof LucidError &&
+						error.errorRes.status >= 400 &&
+						error.errorRes.status < 500
+					)
+						return false;
+					return !(
+						error instanceof DOMException && error.name === "AbortError"
+					);
 				},
 			},
 		},

@@ -33,9 +33,7 @@ const SystemIntegrationsPage: Component = () => {
 				createdAt: sort(),
 			},
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 	const [openCreateIntegrationPanel, setOpenCreateIntegrationPanel] =
 		createSignal(false);

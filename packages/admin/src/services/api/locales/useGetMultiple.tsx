@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { Locale, ResponseBody } from "@types";
 import { type Accessor, createEffect, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
@@ -18,13 +19,11 @@ const useGetAll = (params: QueryHook<QueryParams>) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	const query = useQuery(() => ({
-		queryKey: ["locales.getAll", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.locales.list(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<Locale[]>>({
 				url: "/lucid/api/v1/locales",
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params.enabled ? params.enabled() : true;

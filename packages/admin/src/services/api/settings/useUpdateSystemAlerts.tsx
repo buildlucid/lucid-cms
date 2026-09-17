@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,11 +12,9 @@ export const updateSystemAlertsReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: "/lucid/api/v1/settings/system-alerts",
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: {
-				alertEmail: params.alertEmail,
-			},
+		method: "PATCH",
+		body: {
+			alertEmail: params.alertEmail,
 		},
 	});
 };
@@ -34,7 +33,7 @@ const useUpdateSystemAlerts = (props?: UseUpdateSystemAlertsProps) => {
 			}),
 			message: T()("system.alerts.notifications.updated"),
 		}),
-		invalidates: ["settings.getSettings"],
+		invalidates: [queryKeys.settings.detail()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

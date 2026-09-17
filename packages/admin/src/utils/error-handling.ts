@@ -2,6 +2,18 @@ import type { ErrorResponse } from "@types";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
+/**
+ * An API error. Read errorRes for the status and field errors.
+ *
+ * @example
+ * ```ts
+ * import { LucidError } from "@lucidcms/admin/services";
+ *
+ * if (error instanceof LucidError && error.errorRes.status === 403) {
+ *   // Show an access-denied message.
+ * }
+ * ```
+ */
 export class LucidError extends Error {
 	errorRes: ErrorResponse;
 	constructor(message: string, errorRes: ErrorResponse) {

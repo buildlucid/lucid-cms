@@ -7,8 +7,11 @@ import type {
 	ResponseBody,
 } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
+import { getRequestInterfaceLocale } from "@/translations";
 import type { QueryHook } from "@/types/utils";
-import request from "@/utils/request";
+import helpers from "@/utils/helpers";
+import request, { type RequestParams } from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 type DocumentRefInclude = "refs" | `refs.${RefResource}`;
@@ -34,32 +37,62 @@ interface QueryParams {
 	perPage?: Accessor<number> | number;
 }
 
+export const getMultipleReq = ({
+	collectionKey,
+	versionType,
+	...options
+}: Pick<RequestParams, "signal" | "displayErrorToast" | "query"> & {
+	collectionKey: string | undefined;
+	versionType: string;
+}) =>
+	request<ResponseBody<InternalCollectionDocument[], Refs>>({
+		url: `/lucid/api/v1/documents/${encodeURIComponent(String(collectionKey))}/${encodeURIComponent(versionType)}`,
+		...options,
+	});
+
 const useGetMultiple = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+	const queryParams = createMemo(() => {
+		const paramsValue = serviceHelpers.getQueryParams<QueryParams>(
+			params.queryParams,
+		);
+		return {
+			queryString: paramsValue.queryString,
+			filters: paramsValue.filters,
+			include: paramsValue.include,
+			exclude: paramsValue.exclude,
+			perPage: paramsValue.perPage,
+		};
+	});
 
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["documents.getMultiple", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<InternalCollectionDocument[], Refs>>({
-				url: `/lucid/api/v1/documents/${
-					queryParams().location?.collectionKey
-				}/${queryParams().location?.versionType}`,
+		queryKey: queryKeys.documents.list(
+			helpers.resolveValue(params.queryParams.location.collectionKey),
+			helpers.resolveValue(params.queryParams.location.versionType),
+			queryParams(),
+			getRequestInterfaceLocale(),
+		),
+		queryFn: ({ signal }) =>
+			getMultipleReq({
+				collectionKey: helpers.resolveValue(
+					params.queryParams.location.collectionKey,
+				),
+				versionType: helpers.resolveValue(
+					params.queryParams.location.versionType,
+				),
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				signal,
+				displayErrorToast: false,
 			}),
-		//* keeps the previous page rendered while a filter/sort change refetches,
-		//* so the route does not suspend and drop focus in the filter section
 		placeholderData: keepPreviousData,
-		get enabled() {
-			return params.enabled ? params.enabled() : true;
-		},
+		enabled:
+			helpers.resolveValue(params.queryParams.location.collectionKey) !==
+				undefined &&
+			helpers.resolveValue(params.queryParams.location.versionType) !==
+				undefined,
+		...(params.enabled ? { enabled: params.enabled() } : {}),
+		refetchOnWindowFocus: params.refetchOnWindowFocus,
 	}));
 };
 

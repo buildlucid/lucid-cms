@@ -157,9 +157,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			},
 			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 	const [showingDeleted, setShowingDeleted] = createSignal<0 | 1>(0);
 	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);

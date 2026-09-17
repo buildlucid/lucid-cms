@@ -3,6 +3,7 @@ import type {
 	IntegrationExpiry,
 	ResponseBody,
 } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -19,15 +20,13 @@ export const createSingleReq = (params: Params) => {
 	return request<ResponseBody<IntegrationCreateResponse>>({
 		url: "/lucid/api/v1/account/integrations",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: {
-				name: params.name,
-				description: params.description,
-				enabled: params.enabled,
-				expiry: params.expiry,
-				scopes: params.scopes,
-			},
+		method: "POST",
+		body: {
+			name: params.name,
+			description: params.description,
+			enabled: params.enabled,
+			expiry: params.expiry,
+			scopes: params.scopes,
 		},
 	});
 };
@@ -49,7 +48,7 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 			title: T()("toasts.common.integration.created.title"),
 			message: T()("toasts.common.integration.created.message"),
 		}),
-		invalidates: ["integrations.getAll"],
+		invalidates: [queryKeys.integrations.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

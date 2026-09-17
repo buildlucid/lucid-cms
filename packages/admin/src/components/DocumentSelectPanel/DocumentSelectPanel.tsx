@@ -158,9 +158,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			},
 			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 
 	// ----------------------------------------

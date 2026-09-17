@@ -77,7 +77,7 @@ const ViewEmailTransactionsPanelContent: Component<
 			},
 			pagination: pagination({ defaultPerPage: 10 }),
 		},
-		options: { singleSort: true },
+		singleSort: true,
 	});
 	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
 

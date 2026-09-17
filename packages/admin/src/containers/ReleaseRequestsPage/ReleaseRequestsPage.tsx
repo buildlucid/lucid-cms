@@ -18,6 +18,7 @@ import useQueryState, {
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
@@ -51,9 +52,7 @@ const ReleaseRequestsPage: Component = () => {
 			},
 			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 
 	// ----------------------------------
@@ -224,10 +223,10 @@ const ReleaseRequestsPage: Component = () => {
 									searchParams={searchParams}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
-											queryKey: ["publishOperations.getMultiple"],
+											queryKey: queryKeys.publishOperations.list(),
 										});
 										queryClient.invalidateQueries({
-											queryKey: ["publishOperations.getOverview"],
+											queryKey: queryKeys.publishOperations.overview(),
 										});
 									}}
 									filterSection={{

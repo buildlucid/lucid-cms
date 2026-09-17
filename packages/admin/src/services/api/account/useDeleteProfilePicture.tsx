@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -9,9 +10,7 @@ export const deleteProfilePictureReq = (_params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: "/lucid/api/v1/account/profile-picture",
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -28,10 +27,10 @@ const useDeleteProfilePicture = (props?: UseDeleteProfilePictureProps) => {
 			message: T()("toasts.common.profile.picture.delete.message"),
 		}),
 		invalidates: [
-			"users.getMultiple",
-			"users.getSingle",
-			"documents.getMultiple",
-			"documents.getSingle",
+			queryKeys.account.all(),
+			queryKeys.users.list(),
+			queryKeys.users.detail(),
+			queryKeys.documents.all(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

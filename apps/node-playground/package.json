@@ -56,7 +56,8 @@
 		"typescript": "^6.0.3",
 		"@lucidcms/admin": "*",
 		"solid-js": "^1.9.13",
-		"tailwindcss": "^4.3.1"
+		"tailwindcss": "^4.3.1",
+		"@tanstack/solid-query": "^5.101.1"
 	},
 	"volta": {
 		"node": "24.11.1"

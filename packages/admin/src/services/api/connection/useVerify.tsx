@@ -1,4 +1,5 @@
 import type { ConnectionStatus, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -9,9 +10,7 @@ export const verifyReq = (_params: Params) =>
 	request<ResponseBody<ConnectionStatus>>({
 		url: "/lucid/api/v1/connection/verify",
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 
 const useVerify = () =>
@@ -24,7 +23,7 @@ const useVerify = () =>
 						message: T()("toasts.connection.verified.message"),
 					}
 				: undefined,
-		invalidates: ["connection.getStatus"],
+		invalidates: [queryKeys.connection.status()],
 	});
 
 export default useVerify;

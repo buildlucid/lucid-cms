@@ -1,59 +1,28 @@
-import { createSignal } from "solid-js";
 import { csrfReq } from "@/services/api/auth/useCsrf";
-import T, {
+import {
 	getRequestInterfaceLocale,
 	interfaceLocaleHeader,
 } from "@/translations";
-import { LucidError } from "@/utils/error-handling";
-import request, { getFetchURL, type RequestParams } from "@/utils/request";
 
-const [getRunning, setRunning] = createSignal(false);
-const [refreshTokenPromise, setRefreshTokenPromise] =
-	createSignal<Promise<boolean> | null>(null);
+let refreshPromise: Promise<boolean> | undefined;
 
-const useRefreshToken = async <Response, Data = unknown>(
-	params: RequestParams<Data>,
-): Promise<Response> => {
-	if (getRunning()) {
-		await refreshTokenPromise();
-		return request(params);
-	}
+/** Concurrent requests share one refresh attempt. Request retries are bounded by the caller. */
+export const refreshTokenReq = (): Promise<boolean> => {
+	refreshPromise ??= (async () => {
+		const csrfToken = await csrfReq();
+		const locale = getRequestInterfaceLocale();
 
-	setRunning(true);
-
-	const promise = refreshTokenReq();
-	setRefreshTokenPromise(() => promise);
-
-	const successful = await promise;
-	setRunning(false);
-	setRefreshTokenPromise(null);
-
-	if (!successful) {
-		throw new LucidError(T()("errors.auth.refresh.token.fetch.failed"), {
-			status: 401,
-			name: T()("errors.auth.unauthorized"),
-			message: T()("errors.auth.refresh.token.fetch.failed"),
+		const response = await fetch("/lucid/api/v1/auth/token", {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"X-CSRF-Token": csrfToken ?? "",
+				...(locale ? { [interfaceLocaleHeader]: locale } : {}),
+			},
 		});
-	}
-
-	return request(params);
-};
-
-export const refreshTokenReq = async (): Promise<boolean> => {
-	const fetchURL = getFetchURL("/lucid/api/v1/auth/token");
-	const csrfToken = await csrfReq();
-	const interfaceLocale = getRequestInterfaceLocale();
-
-	const refreshRes = await fetch(fetchURL, {
-		method: "POST",
-		credentials: "include",
-		headers: {
-			"X-CSRF-Token": csrfToken || "",
-			...(interfaceLocale ? { [interfaceLocaleHeader]: interfaceLocale } : {}),
-		},
+		return response.status === 204;
+	})().finally(() => {
+		refreshPromise = undefined;
 	});
-
-	return refreshRes.status === 204;
+	return refreshPromise;
 };
-
-export default useRefreshToken;

@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -14,10 +15,8 @@ export const deleteMultipleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-			body: params.body,
-		},
+		method: "DELETE",
+		body: params.body,
 	});
 };
 
@@ -40,7 +39,7 @@ const useDeleteMultiple = (props: UseDeleteMultipleProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: ["documents.getMultiple"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,9 +12,7 @@ export const resendInvitationReq = (params: Params) => {
 	return request<ResponseBody>({
 		url: `/lucid/api/v1/users/${params.userId}/resend-invitation`,
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 
@@ -29,7 +28,7 @@ const useResendInvitation = (props?: UseResendInvitationProps) => {
 			title: T()("toasts.users.resend.invitation.title"),
 			message: T()("toasts.users.resend.invitation.message"),
 		}),
-		invalidates: ["users.getMultiple"],
+		invalidates: [queryKeys.users.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

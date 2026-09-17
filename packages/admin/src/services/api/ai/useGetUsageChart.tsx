@@ -6,6 +6,7 @@ import type {
 	ResponseBody,
 } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 
@@ -37,16 +38,14 @@ const useGetUsageChart = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["ai.getUsageChart", queryString(), params.key?.()],
+		queryKey: [...queryKeys.ai.usageChart(), queryString(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<AiUsageChart>>({
 				url: "/lucid/api/v1/ai/usage/chart",
 				query: {
 					queryString: queryString(),
 				},
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get refetchOnWindowFocus() {
 			return params.refetchOnWindowFocus ?? false;

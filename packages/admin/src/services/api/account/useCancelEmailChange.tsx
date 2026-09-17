@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -9,9 +10,7 @@ export const cancelEmailChangeReq = (_params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: "/lucid/api/v1/account/email-change",
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -27,7 +26,7 @@ const useCancelEmailChange = (props?: UseCancelEmailChangeProps) => {
 			title: T()("toasts.email.change.cancel.success.title"),
 			message: T()("toasts.email.change.cancel.success.message"),
 		}),
-		invalidates: ["users.getSingle"],
+		invalidates: [queryKeys.account.all(), queryKeys.users.detail()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

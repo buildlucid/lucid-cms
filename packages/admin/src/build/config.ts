@@ -25,6 +25,7 @@ const compilerDependencies = new Set([
 const browserEntrypoints: Record<string, string[]> = {
 	// These packages export Solid source that the Solid plugin transforms directly.
 	"@kobalte/core": [],
+	"@lucidcms/admin": [],
 	"@solidjs/router": [],
 	"@thisbeyond/solid-dnd": [],
 	"solid-toast": [],

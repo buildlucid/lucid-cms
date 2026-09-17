@@ -1,4 +1,5 @@
 import type { ErrorResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -16,9 +17,7 @@ export const duplicateSingleReq = (params: Params) => {
 	>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/duplicate`,
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 
@@ -48,7 +47,7 @@ const useDuplicateSingle = (props: UseDuplicateSingleProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: ["documents.getMultiple", "documents.getSingle"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

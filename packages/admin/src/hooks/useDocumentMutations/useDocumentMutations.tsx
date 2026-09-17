@@ -11,6 +11,7 @@ import type {
 } from "@types";
 import { type Accessor, createEffect, createSignal, on } from "solid-js";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import brickStore from "@/store/brickStore/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
@@ -55,7 +56,7 @@ export function useDocumentMutations(props: {
 				}),
 			);
 			queryClient.invalidateQueries({
-				queryKey: ["collections.getAll"],
+				queryKey: queryKeys.collections.all(),
 			});
 			return;
 		},

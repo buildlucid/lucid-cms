@@ -3,6 +3,7 @@ import type {
 	InternalDocumentField,
 	ResponseBody,
 } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import type { BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import request from "@/utils/request";
@@ -24,10 +25,8 @@ export const createSingleReq = (params: Params) => {
 	>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 
@@ -61,7 +60,7 @@ const useCreateSingle = (props: UseCreateSingleProps) => {
 				}),
 			};
 		},
-		invalidates: ["documents.getMultiple", "documents.getSingle"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

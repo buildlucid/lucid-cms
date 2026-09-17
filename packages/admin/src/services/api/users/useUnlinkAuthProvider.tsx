@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -12,9 +13,7 @@ export const unlinkAuthProviderReq = (params: Params) => {
 	return request<ResponseBody>({
 		url: `/lucid/api/v1/users/${params.userId}/auth-providers/${params.providerKey}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -27,7 +26,7 @@ interface UseUnlinkAuthProviderProps {
 const useUnlinkAuthProvider = (props?: UseUnlinkAuthProviderProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
 		mutationFn: unlinkAuthProviderReq,
-		invalidates: ["users.getSingle"],
+		invalidates: [queryKeys.users.detail()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 		onMutate: props?.onMutate,

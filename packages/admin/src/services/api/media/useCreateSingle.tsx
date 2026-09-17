@@ -4,6 +4,7 @@ import type {
 	MediaImageMeta,
 	ResponseBody,
 } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -47,10 +48,8 @@ export const createSingleReq = (params: Params) => {
 	return request<ResponseBody<Media>>({
 		url: "/lucid/api/v1/media",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params,
-		},
+		method: "POST",
+		body: params,
 	});
 };
 
@@ -64,7 +63,7 @@ const useCreateSingle = (props?: UseCreateSingleProps) => {
 	// Mutation
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody<Media>>({
 		mutationFn: createSingleReq,
-		invalidates: ["media.getMultiple", "mediaFolders.getMultiple"],
+		invalidates: [queryKeys.media.lists(), queryKeys.mediaFolders.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

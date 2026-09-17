@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody, Role } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -20,13 +21,11 @@ const useGetSingle = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["roles.getSingle", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.roles.detail(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<Role>>({
 				url: `/lucid/api/v1/roles/${queryParams().location?.roleId}`,
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params.enabled ? params.enabled() : true;

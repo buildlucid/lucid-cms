@@ -212,6 +212,9 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<FieldSlots
 						slot={fieldSlotKeys.before}
 						config={slotField()}
+						errors={fieldErrors()}
+						scope={props.conditionScopes?.()[0]}
+						groupRef={props.groupRef}
 						data={fieldData()}
 					/>
 					<Switch>
@@ -541,6 +544,9 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<FieldSlots
 						slot={fieldSlotKeys.after}
 						config={slotField()}
+						errors={fieldErrors()}
+						scope={props.conditionScopes?.()[0]}
+						groupRef={props.groupRef}
 						data={fieldData()}
 					/>
 				</div>

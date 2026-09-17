@@ -1,3 +1,4 @@
+import type { QueryKey } from "@tanstack/solid-query";
 import { useMutation, useQueryClient } from "@tanstack/solid-query";
 import type { ErrorResponse } from "@types";
 import type { Accessor } from "solid-js";
@@ -29,7 +30,7 @@ interface MutationWrapperProps<Params, Response> {
 		_error: unknown,
 		_params: Params,
 	) => { title: string; message: string } | undefined;
-	invalidates?: string[];
+	invalidates?: readonly QueryKey[];
 	onSuccess?: (_data: Response, _params: Params) => void;
 	onError?: (_errors: ErrorResponse | undefined, _params: Params) => void;
 	onMutate?: (_params: Params) => void;
@@ -90,40 +91,42 @@ const useMutationWrapper = <Params, Response>({
 
 	const mutation = useMutation(() => ({
 		mutationFn,
-		onSettled: (data, error, params) => {
-			if (data) {
-				if (getSuccessToast) {
-					const successToastData = getSuccessToast(data, params);
-					if (successToastData) {
-						spawnToast({
-							title: successToastData.title,
-							message: successToastData.message,
-							status: "success",
-						});
-					}
-				}
-				setErrors(undefined);
-				if (onSuccess) onSuccess(data, params);
-				for (const query of invalidates) {
-					queryClient.invalidateQueries({
-						queryKey: [query],
+		onSuccess: (data, params) => {
+			if (getSuccessToast) {
+				const successToastData = getSuccessToast(data, params);
+				if (successToastData) {
+					spawnToast({
+						title: successToastData.title,
+						message: successToastData.message,
+						status: "success",
 					});
 				}
-			} else if (error) {
-				if (getErrorToast) {
-					const errorToast = getErrorToast(error, params);
-					if (errorToast) {
-						spawnToast({
-							title: errorToast.title,
-							message: errorToast.message,
-							status: "error",
-						});
-					}
-				}
-				const errors = validateSetError(error);
-				setErrors(errors);
-				onError?.(errors, params);
 			}
+
+			setErrors(undefined);
+			if (onSuccess) onSuccess(data, params);
+
+			for (const query of invalidates) {
+				queryClient.invalidateQueries({
+					queryKey: query,
+				});
+			}
+		},
+		onError: (error, params) => {
+			if (getErrorToast) {
+				const errorToast = getErrorToast(error, params);
+				if (errorToast) {
+					spawnToast({
+						title: errorToast.title,
+						message: errorToast.message,
+						status: "error",
+					});
+				}
+			}
+
+			const errors = validateSetError(error);
+			setErrors(errors);
+			onError?.(errors, params);
 		},
 		onMutate: onMutate,
 	}));

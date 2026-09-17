@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { MultipleMediaFolder, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -22,14 +23,12 @@ const useGetMultiple = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["mediaFolders.getMultiple", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.mediaFolders.list(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<MultipleMediaFolder>>({
 				url: "/lucid/api/v1/media/folders",
 				query: queryParams(),
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		get enabled() {
 			return params.enabled ? params.enabled() : true;

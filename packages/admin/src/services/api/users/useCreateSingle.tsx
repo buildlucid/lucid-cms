@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,10 +19,8 @@ export const createSingleReq = (params: Params) => {
 	return request<ResponseBody>({
 		url: "/lucid/api/v1/users",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 
@@ -39,7 +38,7 @@ const useCreateSingle = (props?: UseUpdateSingleProps) => {
 			title: T()("toasts.users.create.title"),
 			message: T()("toasts.users.create.message"),
 		}),
-		invalidates: ["users.getMultiple"],
+		invalidates: [queryKeys.users.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

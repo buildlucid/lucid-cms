@@ -62,6 +62,7 @@ const loadBuildProject = async (props?: {
 				envSchema: preparedLoaded.envSchema,
 				configPath,
 				projectRoot: preparedLoaded.projectRoot,
+				translationFiles: preparedLoaded.resources.files.translations,
 				access: preparedLoaded.config.access,
 				collections: preparedLoaded.config.collections,
 				localization: preparedLoaded.config.localization,

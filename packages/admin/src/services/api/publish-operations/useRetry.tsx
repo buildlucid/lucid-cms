@@ -1,4 +1,5 @@
 import type { ErrorResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,10 +12,8 @@ export const retryReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: `/lucid/api/v1/publishing/requests/${params.id}/retry`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: {},
-		},
+		method: "POST",
+		body: {},
 	});
 };
 
@@ -33,11 +32,10 @@ const useRetry = (props?: UseRetryProps) => {
 			message: T()("publish.requests.notifications.request.updated"),
 		}),
 		invalidates: [
-			"documents.getMultiple",
-			"documents.getSingle",
-			"publishOperations.getMultiple",
-			"publishOperations.getOverview",
-			"publishOperations.getSingle",
+			queryKeys.documents.all(),
+			queryKeys.publishOperations.list(),
+			queryKeys.publishOperations.overview(),
+			queryKeys.publishOperations.detail(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

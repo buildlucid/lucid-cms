@@ -12,7 +12,7 @@ declare module "virtual:lucid-admin" {
 		path: string;
 		layout: NonNullable<import("./types/route.js").AdminRoute["layout"]>;
 		access: NonNullable<import("./types/route.js").AdminRoute["access"]>;
-		component: import("./types/route.js").AdminRouteComponent;
+		component: import("./types/route.js").RouteComponent;
 		navigation?: import("./types/navigation.js").AdminRouteNavigation;
 	}>;
 	export const brickSlots: Array<{

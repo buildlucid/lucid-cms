@@ -1,6 +1,6 @@
-import type { AdminRouteComponent } from "@lucidcms/admin/types";
+import type { RouteComponent } from "@lucidcms/admin/types";
 
-const Standalone: AdminRouteComponent = () => {
+const Standalone: RouteComponent = () => {
 	// ----------------------------------
 	// Render
 	return (

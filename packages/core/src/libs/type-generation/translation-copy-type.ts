@@ -1,6 +1,7 @@
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 import constants from "../../constants/constants.js";
+import type { ResourceFile } from "../resources/types.js";
 import type { TypeGenerationContribution } from "./types.js";
 
 const translationFilePattern = /^(.+)\.(admin|server)\.json$/;
@@ -58,41 +59,40 @@ declare global {
 };
 
 /**
- * Generates project-local copy key hints from `translations/*.admin.json` and
- * `translations/*.server.json`. Core and plugin keys are intentionally ignored
- * so autocomplete reflects copy owned by the current project.
+ * Generates copy keys from the same resolved project and plugin files as the runtime.
+ * Direct callers may omit files to use the project's default translations directory.
  */
 const generateTranslationCopyTypes = async (props: {
 	projectRoot?: string;
+	files?: ResourceFile[];
 }): Promise<TypeGenerationContribution | undefined> => {
 	const projectRoot = props.projectRoot ?? process.cwd();
 	const translationsDir = path.join(projectRoot, "translations");
 	const generatedTypesDir = path.join(projectRoot, constants.directories.lucid);
 
-	let files: string[];
-	try {
-		files = await readdir(translationsDir);
-	} catch {
-		return undefined;
+	let files = props.files;
+	if (files === undefined) {
+		try {
+			files = (await readdir(translationsDir)).map((name) => ({
+				name,
+				path: path.join(translationsDir, name),
+			}));
+		} catch {
+			return undefined;
+		}
 	}
 
-	const sources = files
-		.sort()
+	const sources = [...new Map(files.map((file) => [file.path, file])).values()]
+		.sort((a, b) => a.path.localeCompare(b.path))
 		.flatMap((file, index): TranslationTypeSource[] => {
-			const match = file.match(translationFilePattern);
-			if (!match) return [];
-
-			const [, _locale, scope] = match;
+			const match = path.basename(file.name).match(translationFilePattern);
+			const scope = match?.[2];
 			if (scope !== "admin" && scope !== "server") return [];
-
 			return [
 				{
 					identifier: `translationSource${index}`,
 					scope,
-					importPath: toImportPath(
-						generatedTypesDir,
-						path.join(translationsDir, file),
-					),
+					importPath: toImportPath(generatedTypesDir, file.path),
 				},
 			];
 		});

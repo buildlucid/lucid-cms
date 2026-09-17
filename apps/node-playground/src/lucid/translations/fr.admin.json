@@ -999,5 +999,7 @@
 	"toasts.release.error.disabled.title": "Version indisponible",
 	"toasts.release.error.disabled.message": "Corrigez les erreurs de sauvegarde avant de publier sur {{environment}}.",
 	"toasts.common.workflow.release.disabled.title": "Version indisponible",
-	"toasts.common.workflow.release.disabled.message": "{{stage}} ne peut pas être publié vers {{environment}}."
+	"toasts.common.workflow.release.disabled.message": "{{stage}} ne peut pas être publié vers {{environment}}.",
+	"playground.admin.title": "Extensions de l’administration",
+	"playground.admin.description": "Composants, requêtes, permissions et traductions partagés."
 }

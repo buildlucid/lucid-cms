@@ -21,10 +21,8 @@ const useCompleteAuthorization = () =>
 			request<ResponseBody<{ redirectUrl: string }>>({
 				url: `/lucid/api/v1/integrations/oauth/authorization/${params.requestId}`,
 				csrf: true,
-				config: {
-					method: "POST",
-					body: params.body,
-				},
+				method: "POST",
+				body: params.body,
 			}),
 		onSuccess: (response) => {
 			window.location.assign(response.data.redirectUrl);

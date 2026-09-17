@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,9 +12,7 @@ export const revokeRefreshTokensReq = (params: Params) => {
 	return request<ResponseBody<{ message: string }>>({
 		url: `/lucid/api/v1/users/${params.id}/revoke-refresh-tokens`,
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 
@@ -33,9 +32,9 @@ const useRevokeRefreshTokens = (props?: UseRevokeRefreshTokensProps) => {
 			message: T()("toasts.users.revoke.sessions.message"),
 		}),
 		invalidates: [
-			"users.getMultiple",
-			"users.getSingle",
-			"userLogins.getMultiple",
+			queryKeys.users.list(),
+			queryKeys.users.detail(),
+			queryKeys.userLogins.list(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

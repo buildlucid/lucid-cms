@@ -1,5 +1,6 @@
 import type { DocumentVersionType, ErrorResponse, ResponseBody } from "@types";
 import type { Accessor } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,10 +19,8 @@ export const promoteSingleReq = (params: Params) => {
 	return request<ResponseBody<null>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.id}/${params.versionId}/promote-version`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 
@@ -46,7 +45,7 @@ const usePromoteSingle = (props: UsePromoteSingleProps) => {
 				versionType: props.getVersionType(),
 			}),
 		}),
-		invalidates: ["documents.getMultiple", "documents.getSingle"],
+		invalidates: [queryKeys.documents.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { Media, ResponseBody } from "@types";
-import { type Accessor, createMemo } from "solid-js";
+import type { Accessor } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
+import { getRequestInterfaceLocale } from "@/translations";
 import type { QueryHook } from "@/types/utils";
-import request from "@/utils/request";
-import serviceHelpers from "@/utils/service-helpers";
+import helpers from "@/utils/helpers";
+import request, { type RequestParams } from "@/utils/request";
 
 interface QueryParams {
 	location: {
@@ -11,26 +13,34 @@ interface QueryParams {
 	};
 }
 
-const useGetSingle = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+export const getSingleReq = ({
+	id,
+	...options
+}: Pick<RequestParams, "signal" | "displayErrorToast"> & {
+	id: number | undefined;
+}) =>
+	request<ResponseBody<Media>>({
+		url: `/lucid/api/v1/media/${id}`,
+		...options,
+	});
 
+const useGetSingle = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["media.getSingle", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<Media>>({
-				url: `/lucid/api/v1/media/${queryParams().location?.id}`,
-				config: {
-					method: "GET",
-				},
+		queryKey: queryKeys.media.detail(
+			helpers.resolveValue(params.queryParams.location.id),
+			getRequestInterfaceLocale(),
+		),
+		queryFn: ({ signal }) =>
+			getSingleReq({
+				id: helpers.resolveValue(params.queryParams.location.id),
+				signal,
+				displayErrorToast: false,
 			}),
-		get enabled() {
-			return params.enabled ? params.enabled() : true;
-		},
+		enabled: helpers.resolveValue(params.queryParams.location.id) !== undefined,
+		...(params.enabled ? { enabled: params.enabled() } : {}),
+		refetchOnWindowFocus: params.refetchOnWindowFocus,
 	}));
 };
 

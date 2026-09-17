@@ -2,9 +2,20 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig([
 	{
+		entry: {
+			hooks: "src/exports/hooks.ts",
+			services: "src/exports/services.ts",
+			utils: "src/exports/utils.ts",
+		},
+		outDir: "dist/browser",
+		format: "esm",
+		dts: { emitDtsOnly: true },
+		clean: true,
+	},
+	{
 		entry: { types: "src/exports/types.ts" },
 		outDir: "dist/types",
-		dts: { only: true },
+		dts: { emitDtsOnly: true },
 		format: "esm",
 		clean: true,
 	},

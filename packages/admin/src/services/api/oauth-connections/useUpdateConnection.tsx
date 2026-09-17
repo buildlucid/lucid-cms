@@ -1,4 +1,5 @@
 import type { OAuthConnection, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 import type { OAuthConnectionOwner } from "./types";
@@ -16,12 +17,10 @@ const useUpdateConnection = (props?: { onSuccess?: () => void }) =>
 			request<ResponseBody<OAuthConnection>>({
 				url: `${getOAuthConnectionsPath(params.owner)}/${params.id}`,
 				csrf: true,
-				config: {
-					method: "PATCH",
-					body: { name: params.name },
-				},
+				method: "PATCH",
+				body: { name: params.name },
 			}),
-		invalidates: ["oauthConnections.getAll"],
+		invalidates: [queryKeys.oauthConnections.list()],
 		onSuccess: props?.onSuccess,
 	});
 

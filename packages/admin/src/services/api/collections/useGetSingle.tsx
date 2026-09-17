@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { Collection, ResponseBody } from "@types";
-import { type Accessor, createMemo } from "solid-js";
+import type { Accessor } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
+import { getRequestInterfaceLocale } from "@/translations";
 import type { QueryHook } from "@/types/utils";
-import request from "@/utils/request";
-import serviceHelpers from "@/utils/service-helpers";
+import helpers from "@/utils/helpers";
+import request, { type RequestParams } from "@/utils/request";
 
 interface QueryParams {
 	location: {
@@ -11,26 +13,37 @@ interface QueryParams {
 	};
 }
 
-const useGetSingle = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+export const getSingleReq = ({
+	collectionKey,
+	...options
+}: Pick<RequestParams, "signal" | "displayErrorToast"> & {
+	collectionKey: string | undefined;
+}) =>
+	request<ResponseBody<Collection>>({
+		url: `/lucid/api/v1/collections/${encodeURIComponent(String(collectionKey))}`,
+		...options,
+	});
 
+const useGetSingle = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["collections.getSingle", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<Collection>>({
-				url: `/lucid/api/v1/collections/${queryParams().location?.collectionKey}`,
-				config: {
-					method: "GET",
-				},
+		queryKey: queryKeys.collections.detail(
+			helpers.resolveValue(params.queryParams.location.collectionKey),
+			getRequestInterfaceLocale(),
+		),
+		queryFn: ({ signal }) =>
+			getSingleReq({
+				collectionKey: helpers.resolveValue(
+					params.queryParams.location.collectionKey,
+				),
+				signal,
+				displayErrorToast: false,
 			}),
-		get enabled() {
-			return params.enabled ? params.enabled() : true;
-		},
+		enabled:
+			helpers.resolveValue(params.queryParams.location.collectionKey) !==
+			undefined,
+		...(params.enabled ? { enabled: params.enabled() } : {}),
 		refetchOnWindowFocus: params.refetchOnWindowFocus,
 	}));
 };

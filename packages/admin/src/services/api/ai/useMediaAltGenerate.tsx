@@ -1,5 +1,6 @@
 import type { AiGeneratedContent } from "@lucidcms/types";
 import type { MediaAltGenerateResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -35,11 +36,9 @@ export const mediaAltGenerateReq = (params: Params) => {
 	return request<ResponseBody<MediaAltGenerateResponse>>({
 		url: "/lucid/api/v1/ai/media-alt",
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-			signal: params.signal,
-		},
+		method: "POST",
+		body: params.body,
+		signal: params.signal,
 	});
 };
 
@@ -49,7 +48,7 @@ const useMediaAltGenerate = () => {
 		ResponseBody<MediaAltGenerateResponse>
 	>({
 		mutationFn: mediaAltGenerateReq,
-		invalidates: ["ai.getUsage", "ai.getUsageChart"],
+		invalidates: [queryKeys.ai.usage(), queryKeys.ai.usageChart()],
 		getSuccessToast: (_data, params) =>
 			params.shouldToast?.() === false
 				? undefined

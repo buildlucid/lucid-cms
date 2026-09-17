@@ -43,6 +43,7 @@ import type {
 	MediaImageGenerationQuality,
 	MediaImageGenerationSize,
 } from "@/services/api/ai/useMediaImageGenerate";
+import { queryKeys } from "@/services/query-keys";
 import aiModalsStore, {
 	type AiImageSource,
 } from "@/store/aiModalsStore/aiModalsStore";
@@ -654,9 +655,12 @@ const MediaImageGenerationModal: Component = () => {
 
 		if (isCompletionResponse(response.data)) {
 			finishPendingGeneration(pending, response.data);
-			for (const query of ["ai.getUsage", "ai.getUsageChart"]) {
+			for (const queryKey of [
+				queryKeys.ai.usage(),
+				queryKeys.ai.usageChart(),
+			]) {
 				queryClient.invalidateQueries({
-					queryKey: [query],
+					queryKey,
 				});
 			}
 			return { type: "complete" as const };

@@ -4,6 +4,7 @@ import type {
 	MediaImageMeta,
 	ResponseBody,
 } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -39,10 +40,8 @@ export const updateProfilePictureReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: `/lucid/api/v1/users/${params.userId}/profile-picture`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 
@@ -59,10 +58,9 @@ const useUpdateProfilePicture = (props?: UseUpdateProfilePictureProps) => {
 			message: T()("toasts.common.profile.picture.update.message"),
 		}),
 		invalidates: [
-			"users.getMultiple",
-			"users.getSingle",
-			"documents.getMultiple",
-			"documents.getSingle",
+			queryKeys.users.list(),
+			queryKeys.users.detail(),
+			queryKeys.documents.all(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

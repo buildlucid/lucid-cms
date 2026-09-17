@@ -15,10 +15,8 @@ export const initiateProviderReq = (params: Params) => {
 	return request<ResponseBody<InitiateAuth>>({
 		url: `/lucid/api/v1/auth/providers/${params.providerKey}/initiate`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 

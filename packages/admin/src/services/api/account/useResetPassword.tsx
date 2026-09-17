@@ -1,5 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -18,12 +19,10 @@ export const resetPasswordReq = async (params: Params) => {
 	>({
 		url: `/lucid/api/v1/account/reset-password/${params.token}`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: {
-				password: params.password,
-				passwordConfirmation: params.passwordConfirmation,
-			},
+		method: "PATCH",
+		body: {
+			password: params.password,
+			passwordConfirmation: params.passwordConfirmation,
 		},
 	});
 };
@@ -49,7 +48,11 @@ const useResetPassword = (props?: UseResetPasswordProps) => {
 			title: T()("toasts.common.password.reset.success.title"),
 			message: T()("toasts.common.password.reset.success.message"),
 		}),
-		invalidates: ["roles.getMultiple", "roles.getSingle"],
+		invalidates: [
+			queryKeys.account.all(),
+			queryKeys.roles.list(),
+			queryKeys.roles.detail(),
+		],
 		onSuccess: () => {
 			navigate("/lucid/login");
 			props?.onSuccess?.();

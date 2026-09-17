@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -16,9 +17,7 @@ export const resendSingleReq = (params: Params) => {
 	>({
 		url: `/lucid/api/v1/emails/${params.id}/resend`,
 		csrf: true,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 
@@ -37,7 +36,7 @@ const useResendSingle = (props: UseResendSingleProps) => {
 		}>
 	>({
 		mutationFn: resendSingleReq,
-		invalidates: ["email.getMultiple", "email.getSingle"],
+		invalidates: [queryKeys.email.list(), queryKeys.email.detail()],
 		onSuccess: () => {
 			spawnToast({
 				title: T()("toasts.email.resent.title"),

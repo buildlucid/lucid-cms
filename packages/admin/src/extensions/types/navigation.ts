@@ -1,6 +1,5 @@
 import type { ResolvedAdminCopy } from "@lucidcms/types";
 
-/** Named icons already available in the admin sidebar. */
 export type AdminNavigationIcon =
 	| "dashboard"
 	| "collection-multiple"
@@ -18,7 +17,7 @@ export type AdminNavigationIcon =
 	| "publishing"
 	| "extensions";
 
-/** Shares group keys with collection navigation. */
+/** Use an existing group key or define a group. */
 export type AdminNavigationGroup =
 	| string
 	| {

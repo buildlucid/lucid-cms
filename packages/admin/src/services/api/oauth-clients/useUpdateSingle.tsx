@@ -1,4 +1,5 @@
 import type { OAuthClient, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -38,19 +39,17 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 			request<ResponseBody<OAuthClient>>({
 				url: `/lucid/api/v1/integrations/oauth-clients/${params.id}`,
 				csrf: true,
-				config: {
-					method: "PATCH",
-					body: params.body,
-				},
+				method: "PATCH",
+				body: params.body,
 			}),
 		getSuccessToast: () => ({
 			title: T()("oauth.clients.updated.title"),
 			message: T()("oauth.clients.updated.message"),
 		}),
 		invalidates: [
-			"oauthClients.getAll",
-			"oauthClients.getSingle",
-			"oauthConnections.getAll",
+			queryKeys.oauthClients.list(),
+			queryKeys.oauthClients.detail(),
+			queryKeys.oauthConnections.list(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

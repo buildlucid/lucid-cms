@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { ResponseBody } from "@types";
 import { createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -20,7 +21,11 @@ const useVerifyResetToken = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["account.verifyResetToken", queryKey(), params.key?.()],
+		queryKey: [
+			...queryKeys.account.verifyResetToken(),
+			queryKey(),
+			params.key?.(),
+		],
 		queryFn: () =>
 			request<
 				ResponseBody<{
@@ -28,9 +33,7 @@ const useVerifyResetToken = (params: QueryHook<QueryParams>) => {
 				}>
 			>({
 				url: `/lucid/api/v1/account/reset-password/${queryParams().location?.token}`,
-				config: {
-					method: "GET",
-				},
+				method: "GET",
 			}),
 		retry: 0,
 		get enabled() {

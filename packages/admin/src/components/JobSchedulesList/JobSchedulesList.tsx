@@ -16,6 +16,7 @@ import useQueryState, {
 } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 
 export const JobSchedulesList: Component = () => {
@@ -37,7 +38,7 @@ export const JobSchedulesList: Component = () => {
 			},
 			pagination: pagination({ defaultPerPage: 10 }),
 		},
-		options: { singleSort: true },
+		singleSort: true,
 	});
 	const rowTarget = useRowTarget<"details" | "runs" | "state", string>({
 		triggers: { details: false, runs: false, state: false },
@@ -66,7 +67,9 @@ export const JobSchedulesList: Component = () => {
 			<QueryRow
 				searchParams={searchParams}
 				onRefresh={() => {
-					queryClient.invalidateQueries({ queryKey: ["jobs.getSchedules"] });
+					queryClient.invalidateQueries({
+						queryKey: queryKeys.jobs.schedules(),
+					});
 				}}
 				filterSection={{
 					subject: T()("routes.system.jobs.schedules.title"),

@@ -6,6 +6,7 @@ export type AdminRoute = {
 	key: string;
 	/** Static path relative to /lucid/e, for example pages/reports. */
 	path: string;
+	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
 	component: AdminModulePath;
 	/** Omit to keep this route out of the sidebar. */
 	navigation?: AdminRouteNavigation;
@@ -23,4 +24,4 @@ export type AdminRoute = {
 	  }
 );
 
-export type AdminRouteComponent = Component;
+export type RouteComponent = Component;

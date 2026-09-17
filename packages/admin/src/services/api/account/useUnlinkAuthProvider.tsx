@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -11,9 +12,7 @@ export const unlinkAccountAuthProviderReq = (params: Params) => {
 	return request<ResponseBody>({
 		url: `/lucid/api/v1/account/auth-providers/${params.providerKey}`,
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 };
 
@@ -26,7 +25,11 @@ interface UseUnlinkAccountAuthProviderProps {
 const useUnlinkAuthProvider = (props?: UseUnlinkAccountAuthProviderProps) => {
 	return serviceHelpers.useMutationWrapper<Params, ResponseBody>({
 		mutationFn: unlinkAccountAuthProviderReq,
-		invalidates: ["users.getSingle", "auth.getProviders"],
+		invalidates: [
+			queryKeys.account.all(),
+			queryKeys.users.detail(),
+			queryKeys.auth.providers(),
+		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 		onMutate: props?.onMutate,

@@ -13,9 +13,7 @@ interface UseRequestDownloadProps {
 const requestDownloadReq = (params: Params) => {
 	return request<ResponseBody<{ url: string }>>({
 		url: `/lucid/api/v1/share/${params.token}/download`,
-		config: {
-			method: "POST",
-		},
+		method: "POST",
 	});
 };
 

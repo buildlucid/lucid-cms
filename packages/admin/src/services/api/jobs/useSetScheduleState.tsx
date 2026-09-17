@@ -1,4 +1,5 @@
 import type { JobScheduleSummary, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -14,9 +15,10 @@ const useSetScheduleState = () =>
 			request<ResponseBody<Params>, Params>({
 				url: "/lucid/api/v1/jobs/schedules/state",
 				csrf: true,
-				config: { method: "PATCH", body: params },
+				method: "PATCH",
+				body: params,
 			}),
-		invalidates: ["jobs.getSchedules"],
+		invalidates: [queryKeys.jobs.schedules()],
 		getSuccessToast: (_response, params) => ({
 			title:
 				params.state === "paused"

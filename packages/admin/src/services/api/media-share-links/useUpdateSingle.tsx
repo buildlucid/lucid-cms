@@ -1,3 +1,4 @@
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -17,10 +18,8 @@ export const updateSingleReq = (params: Params) => {
 	return request<undefined>({
 		url: `/lucid/api/v1/media/${params.mediaId}/share-links/${params.linkId}`,
 		csrf: true,
-		config: {
-			method: "PATCH",
-			body: params.body,
-		},
+		method: "PATCH",
+		body: params.body,
 	});
 };
 
@@ -38,7 +37,7 @@ const useUpdateSingle = (props?: UseUpdateSingleProps) => {
 			title: T()("toasts.media.share.link.update.title"),
 			message: T()("toasts.media.share.link.update.message"),
 		}),
-		invalidates: ["mediaShareLinks.getMultiple"],
+		invalidates: [queryKeys.mediaShareLinks.list()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

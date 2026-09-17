@@ -207,6 +207,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						<BrickSlots
 							slot={brickSlotKeys.beforeFields}
 							config={props.brickConfig}
+							errors={props.fieldErrors}
 							brick={props.brick}
 							collectionKey={props.collectionKey}
 							contentLocale={contentLocale()}
@@ -239,6 +240,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						<BrickSlots
 							slot={brickSlotKeys.afterFields}
 							config={props.brickConfig}
+							errors={props.fieldErrors}
 							brick={props.brick}
 							collectionKey={props.collectionKey}
 							contentLocale={contentLocale()}

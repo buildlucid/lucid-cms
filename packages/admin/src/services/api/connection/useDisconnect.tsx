@@ -1,3 +1,4 @@
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -8,9 +9,7 @@ export const disconnectReq = (_params: Params) =>
 	request<undefined>({
 		url: "/lucid/api/v1/connection",
 		csrf: true,
-		config: {
-			method: "DELETE",
-		},
+		method: "DELETE",
 	});
 
 const useDisconnect = (props?: { onSuccess?: () => void }) =>
@@ -20,7 +19,7 @@ const useDisconnect = (props?: { onSuccess?: () => void }) =>
 			title: T()("toasts.connection.disconnected.title"),
 			message: T()("toasts.connection.disconnected.message"),
 		}),
-		invalidates: ["connection.getStatus"],
+		invalidates: [queryKeys.connection.status()],
 		onSuccess: props?.onSuccess,
 	});
 

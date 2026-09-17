@@ -11,6 +11,14 @@ export type {
 	FieldSlotProps,
 } from "../components/FieldSlots/types.js";
 export type {
+	BrickState,
+	EditorContext,
+	EditorFieldConfig,
+	EditorFieldState,
+	EditorFieldValue,
+	FieldContext,
+} from "../extensions/editor/types.js";
+export type {
 	AdminConfig,
 	AdminModulePath,
 	AdminSlot,
@@ -22,5 +30,10 @@ export type {
 } from "../extensions/types/navigation.js";
 export type {
 	AdminRoute,
-	AdminRouteComponent,
+	RouteComponent,
 } from "../extensions/types/route.js";
+export type {
+	TranslationKey,
+	TranslationRegistry,
+	TranslationValues,
+} from "../hooks/useTranslation/useTranslation.js";

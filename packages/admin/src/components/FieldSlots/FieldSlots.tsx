@@ -1,12 +1,18 @@
 import { fieldSlots } from "virtual:lucid-admin";
 import type { InternalDocumentField } from "@lucidcms/types";
+import type { FieldError } from "@types";
 import { type Component, createMemo, For, Show } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
+import {
+	createFieldState,
+	readFieldValue,
+} from "@/extensions/editor/field-state";
 import { matchesSlot } from "@/extensions/matches-slot";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
-import brickHelpers from "@/utils/brick-helpers";
+import type { FieldConditionScope } from "@/utils/field-condition-helpers";
+import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
 import { fieldSlotKeys } from "./constants";
 import type { FieldSlot } from "./types";
 
@@ -15,6 +21,9 @@ const FieldSlots: Component<{
 	slot: FieldSlot;
 	config?: CollectionLeafFieldConfig;
 	data?: InternalDocumentField;
+	errors?: FieldError[];
+	scope?: FieldConditionScope;
+	groupRef?: string;
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
@@ -48,15 +57,44 @@ const FieldSlots: Component<{
 						>
 							<AdminExtensionBoundary name={entry.key}>
 								<entry.component
-									field={config()}
-									value={brickHelpers.getFieldValue<
-										InternalDocumentField["value"]
-									>({
-										fieldConfig: config(),
-										fieldData: props.data,
+									slot={props.slot}
+									field={createFieldState({
+										config: config(),
+										data: props.data,
+										errors: props.errors,
 										contentLocale: context.contentLocale(),
+										localized: brickStore.get.collectionLocalized,
+										readOnly: brickStore.get.locked,
 									})}
-									contentLocale={context.contentLocale()}
+									context={{
+										collectionKey: context.collectionKey(),
+										documentId: context.documentId(),
+										contentLocale: context.contentLocale(),
+										readOnly: brickStore.get.locked,
+										get brick() {
+											const brick = brickStore.get.bricks[context.brickIndex()];
+											return brick && brick.type !== "collection-fields"
+												? { key: brick.key, ref: brick.ref, kind: brick.type }
+												: undefined;
+										},
+										groupRef: props.groupRef,
+										getValue: (key) => {
+											const config = flattenStructuralScopeConfigs(
+												props.scope?.configFields ?? [],
+											).find((field) => field.key === key);
+
+											return config
+												? readFieldValue(
+														config,
+														props.scope?.fields.find(
+															(field) => field.key === key,
+														),
+														context.contentLocale(),
+														brickStore.get.collectionLocalized,
+													)
+												: undefined;
+										},
+									}}
 								/>
 							</AdminExtensionBoundary>
 						</div>

@@ -26,6 +26,7 @@ import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { createSingleReq } from "@/services/api/media/useCreateSingle";
 import { createUploadSessionReq } from "@/services/api/media/useCreateUploadSession";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import { validateSetError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
@@ -172,10 +173,10 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 	};
 	const invalidateMediaQueries = () => {
 		queryClient.invalidateQueries({
-			queryKey: ["media.getMultiple"],
+			queryKey: queryKeys.media.lists(),
 		});
 		queryClient.invalidateQueries({
-			queryKey: ["mediaFolders.getMultiple"],
+			queryKey: queryKeys.mediaFolders.list(),
 		});
 	};
 	const uploadRow = async (row: UploadItem) => {

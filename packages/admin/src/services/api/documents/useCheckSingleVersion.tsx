@@ -23,10 +23,8 @@ export const checkSingleVersionReq = (params: Params) => {
 	return request<ResponseBody<DocumentVersionCheckResponse>>({
 		url: `/lucid/api/v1/documents/${params.collectionKey}/${params.documentId}/${params.versionId}/check`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 

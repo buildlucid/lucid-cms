@@ -101,5 +101,7 @@
 	"collections.test.fields.title.label": "Title",
 	"collections.test.name": "Test",
 	"collections.test.singularName": "Test",
-	"collections.test.summary": "A test collection for the revisions and draft/published functionality."
+	"collections.test.summary": "A test collection for the revisions and draft/published functionality.",
+	"playground.admin.title": "Admin extension playground",
+	"playground.admin.description": "Shared components, queries, permissions and translations."
 }

@@ -1,4 +1,5 @@
 import type { ErrorResponse, ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -15,10 +16,8 @@ export const rescheduleReq = (params: Params) => {
 	return request<ResponseBody<undefined>>({
 		url: `/lucid/api/v1/publishing/requests/${params.id}/reschedule`,
 		csrf: true,
-		config: {
-			method: "POST",
-			body: params.body,
-		},
+		method: "POST",
+		body: params.body,
 	});
 };
 
@@ -37,11 +36,10 @@ const useReschedule = (props?: UseRescheduleProps) => {
 			message: T()("publish.requests.notifications.request.updated"),
 		}),
 		invalidates: [
-			"documents.getMultiple",
-			"documents.getSingle",
-			"publishOperations.getMultiple",
-			"publishOperations.getOverview",
-			"publishOperations.getSingle",
+			queryKeys.documents.all(),
+			queryKeys.publishOperations.list(),
+			queryKeys.publishOperations.overview(),
+			queryKeys.publishOperations.detail(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

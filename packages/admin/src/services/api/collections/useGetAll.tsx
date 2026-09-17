@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { Collection, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
+import { getRequestInterfaceLocale } from "@/translations";
 import type { QueryHook } from "@/types/utils";
-import request from "@/utils/request";
+import request, { type RequestParams } from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 interface QueryParams {
@@ -13,27 +15,39 @@ interface QueryParams {
 	};
 }
 
+export const getAllReq = (
+	options: Pick<RequestParams, "signal" | "displayErrorToast" | "query"> = {},
+) =>
+	request<ResponseBody<Collection[]>>({
+		url: "/lucid/api/v1/collections",
+		...options,
+	});
+
 const useGetAll = (params: QueryHook<QueryParams>) => {
-	const queryParams = createMemo(() =>
-		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
-	);
-	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
+	const queryParams = createMemo(() => {
+		const paramsValue = serviceHelpers.getQueryParams<QueryParams>(
+			params.queryParams,
+		);
+		return {
+			queryString: paramsValue.queryString,
+			filters: paramsValue.filters,
+			include: paramsValue.include,
+			exclude: paramsValue.exclude,
+			perPage: paramsValue.perPage,
+		};
+	});
 
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: ["collections.getAll", queryKey(), params.key?.()],
-		queryFn: () =>
-			request<ResponseBody<Collection[]>>({
-				url: "/lucid/api/v1/collections",
-				query: queryParams(),
-				config: {
-					method: "GET",
-				},
-			}),
-		get enabled() {
-			return params.enabled ? params.enabled() : true;
-		},
+		queryKey: queryKeys.collections.list(
+			queryParams(),
+			getRequestInterfaceLocale(),
+		),
+		queryFn: ({ signal }) =>
+			getAllReq({ query: queryParams(), signal, displayErrorToast: false }),
+		...(params.enabled ? { enabled: params.enabled() } : {}),
+		refetchOnWindowFocus: params.refetchOnWindowFocus,
 	}));
 };
 

@@ -4,7 +4,7 @@ const MetaTitleLength: FieldSlotComponent = (props) => {
 	// ----------------------------------
 	// Derived state
 	const length = () =>
-		typeof props.value === "string" ? props.value.length : 0;
+		typeof props.field.value === "string" ? props.field.value.length : 0;
 
 	// ----------------------------------
 	// Render

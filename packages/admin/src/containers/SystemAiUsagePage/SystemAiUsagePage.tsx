@@ -20,6 +20,7 @@ import useQueryState, {
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import { queryKeys } from "@/services/query-keys";
 import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
 import { getAiUsageFeatureOptions } from "@/utils/ai-usage";
@@ -50,9 +51,7 @@ const SystemAiUsagePage: Component = () => {
 			},
 			pagination: pagination({ defaultPerPage: 20 }),
 		},
-		options: {
-			singleSort: true,
-		},
+		singleSort: true,
 	});
 
 	// ----------------------------------------
@@ -125,7 +124,7 @@ const SystemAiUsagePage: Component = () => {
 								searchParams={searchParams}
 								onRefresh={() => {
 									queryClient.invalidateQueries({
-										queryKey: ["ai.getUsage"],
+										queryKey: queryKeys.ai.usage(),
 									});
 								}}
 								filterSection={{

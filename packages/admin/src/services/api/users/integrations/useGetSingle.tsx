@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import type { Integration, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -24,7 +25,7 @@ const bindUseGetSingle =
 		// Query
 		return useQuery(() => ({
 			queryKey: [
-				"integrations.getSingle",
+				...queryKeys.integrations.detail(),
 				"user",
 				userId(),
 				queryKey(),
@@ -33,9 +34,7 @@ const bindUseGetSingle =
 			queryFn: () =>
 				request<ResponseBody<Integration>>({
 					url: `/lucid/api/v1/users/${userId()}/integrations/${queryParams().location?.id}`,
-					config: {
-						method: "GET",
-					},
+					method: "GET",
 				}),
 			get enabled() {
 				return params.enabled ? params.enabled() : true;

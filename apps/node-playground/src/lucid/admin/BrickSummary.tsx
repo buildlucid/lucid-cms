@@ -7,7 +7,7 @@ const BrickSummary: BrickSlotComponent = (props) => (
 	>
 		<strong class="text-title">Before fields: {props.brick.key}</strong>
 		<p class="mt-1 text-sm text-subtitle">
-			Content locale: {props.contentLocale}
+			Content locale: {props.context.contentLocale}
 		</p>
 	</aside>
 );

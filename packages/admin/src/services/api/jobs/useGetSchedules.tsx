@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
 import type { JobScheduleSummary, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
+import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -22,12 +23,12 @@ const useGetSchedules = (params: Partial<QueryHook<QueryParams>> = {}) => {
 	const queryKey = createMemo(() => serviceHelpers.getQueryKey(queryParams()));
 
 	return useQuery(() => ({
-		queryKey: ["jobs.getSchedules", queryKey(), params.key?.()],
+		queryKey: [...queryKeys.jobs.schedules(), queryKey(), params.key?.()],
 		queryFn: () =>
 			request<ResponseBody<JobScheduleSummary[]>>({
 				url: "/lucid/api/v1/jobs/schedules",
 				query: queryParams(),
-				config: { method: "GET" },
+				method: "GET",
 			}),
 		placeholderData: keepPreviousData,
 		get enabled() {

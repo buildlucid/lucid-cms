@@ -1,4 +1,5 @@
 import type { ResponseBody } from "@types";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -20,15 +21,16 @@ const useDeleteSingle = (props?: UseDeleteSingleProps) => {
 			request<ResponseBody<null>>({
 				url: `/lucid/api/v1/integrations/oauth-clients/${params.id}`,
 				csrf: true,
-				config: {
-					method: "DELETE",
-				},
+				method: "DELETE",
 			}),
 		getSuccessToast: () => ({
 			title: T()("oauth.clients.deleted.title"),
 			message: T()("oauth.clients.deleted.message"),
 		}),
-		invalidates: ["oauthClients.getAll", "oauthConnections.getAll"],
+		invalidates: [
+			queryKeys.oauthClients.list(),
+			queryKeys.oauthConnections.list(),
+		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});
