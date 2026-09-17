@@ -83,6 +83,13 @@ const routeNavigation = z.strictObject({
 	icon: navigationIcon.optional(),
 });
 
+const route = z.strictObject({
+	key,
+	path: routePath,
+	component: fileReference,
+	navigation: routeNavigation.optional(),
+});
+
 export const adminConfigSchema = z
 	.strictObject({
 		slots: z
@@ -112,12 +119,18 @@ export const adminConfigSchema = z
 			.default([]),
 		routes: z
 			.array(
-				z.strictObject({
-					key,
-					path: routePath,
-					component: fileReference,
-					navigation: routeNavigation.optional(),
-				}),
+				z.discriminatedUnion("layout", [
+					route.extend({
+						layout: z.literal("admin").default("admin"),
+						access: z.literal("authenticated").default("authenticated"),
+					}),
+					route.extend({
+						layout: z.literal("blank"),
+						access: z
+							.enum(["authenticated", "public"])
+							.default("authenticated"),
+					}),
+				]),
 			)
 			.default([]),
 		scripts: z.array(assetReference).default([]),

@@ -3,7 +3,6 @@ import {
 	type Component,
 	createEffect,
 	createMemo,
-	createSignal,
 	type JSXElement,
 	Show,
 	Suspense,
@@ -11,11 +10,9 @@ import {
 import FullPageLoading from "@/components/FullPageLoading/FullPageLoading";
 import { Navigation } from "@/components/Navigation/Navigation";
 import { PageLayout } from "@/components/PageLayout/PageLayout";
-import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore/siteStore";
-import { getReady, initAdminTranslations } from "@/translations";
 
 const MainLayout: Component<{
 	children?: JSXElement;
@@ -23,17 +20,9 @@ const MainLayout: Component<{
 	// ----------------------------------
 	// Hooks
 	const interfaceDirection = useInterfaceDirection();
-	const [translationsInitialized, setTranslationsInitialized] = createSignal(
-		getReady(),
-	);
-	const [forcedPasswordModalOpen, setForcedPasswordModalOpen] =
-		createSignal(false);
 
 	// ----------------------------------
 	// Mutations & Queries
-	const authenticatedUser = api.account.useGetAuthenticatedUser({
-		queryParams: {},
-	});
 	const locales = api.locales.useGetMultiple({
 		queryParams: {},
 	});
@@ -51,42 +40,14 @@ const MainLayout: Component<{
 	// ----------------------------------
 	// Memos
 	const isLoading = createMemo(() => {
-		return (
-			authenticatedUser.isLoading ||
-			locales.isLoading ||
-			connection.isLoading ||
-			settings.isLoading ||
-			(authenticatedUser.isSuccess && translationsInitialized() === false)
-		);
+		return locales.isLoading || connection.isLoading || settings.isLoading;
 	});
 	const isSuccess = createMemo(() => {
-		return (
-			authenticatedUser.isSuccess &&
-			locales.isSuccess &&
-			connection.isSuccess &&
-			settings.isSuccess &&
-			translationsInitialized()
-		);
-	});
-	const requiresPasswordReset = createMemo(() => {
-		return authenticatedUser.data?.data.triggerPasswordReset === true;
+		return locales.isSuccess && connection.isSuccess && settings.isSuccess;
 	});
 
 	// ------------------------------------------------------
 	// Effects
-	createEffect(() => {
-		if (authenticatedUser.isSuccess && translationsInitialized() === false) {
-			void initAdminTranslations().finally(() => {
-				setTranslationsInitialized(true);
-			});
-		}
-	});
-
-	createEffect(() => {
-		if (!authenticatedUser.isSuccess) return;
-		setForcedPasswordModalOpen(requiresPasswordReset());
-	});
-
 	createEffect(() => {
 		if (connection.isSuccess) {
 			siteStore.setConnection(connection.data.data);
@@ -127,17 +88,6 @@ const MainLayout: Component<{
 						<FullPageLoading />
 					</Show>
 				</main>
-				<Show when={isSuccess()}>
-					<UpdatePasswordModal
-						state={{
-							open: forcedPasswordModalOpen(),
-							setOpen: setForcedPasswordModalOpen,
-						}}
-						options={{
-							forced: true,
-						}}
-					/>
-				</Show>
 			</div>
 		</Show>
 	);

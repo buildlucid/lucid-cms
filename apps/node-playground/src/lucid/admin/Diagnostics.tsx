@@ -10,7 +10,7 @@ const Diagnostics: AdminRouteComponent = () => {
 	// Render
 	return (
 		<section
-			class="extension-panel m-6 max-w-3xl rounded-lg border border-border bg-card-base p-6 extension-wide:p-8"
+			class="extension-panel max-w-3xl rounded-lg border border-border bg-card-base p-6 extension-wide:p-8"
 			data-testid="admin-extension-route"
 		>
 			<h1 class="text-xl font-semibold text-title">
@@ -39,6 +39,20 @@ const Diagnostics: AdminRouteComponent = () => {
 			>
 				Open page editor
 			</a>
+			<div class="mt-6 flex gap-4">
+				<a
+					class="text-primary-base underline"
+					href="/lucid/e/standalone-playground"
+				>
+					Standalone route
+				</a>
+				<a
+					class="text-primary-base underline"
+					href="/lucid/e/public-playground"
+				>
+					Public route
+				</a>
+			</div>
 		</section>
 	);
 };

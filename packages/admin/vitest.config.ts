@@ -11,7 +11,13 @@ export default defineConfig({
 		environment: "happy-dom",
 		server: {
 			deps: {
-				inline: [/solid-js/, /@solidjs/],
+				inline: [
+					/solid-js/,
+					/@solidjs/,
+					/@tanstack\/solid-query/,
+					/@kobalte\/core/,
+					/solid-toast/,
+				],
 			},
 		},
 	},
@@ -32,6 +38,7 @@ export default defineConfig({
 		solidPlugin(),
 	],
 	resolve: {
+		dedupe: ["solid-js", "@solidjs/router", "@tanstack/solid-query"],
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
 			"@types": fileURLToPath(

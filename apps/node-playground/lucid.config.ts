@@ -148,6 +148,20 @@ export default defineConfig({
 						icon: "extensions",
 					},
 				},
+				{
+					key: "standalone-playground",
+					path: "standalone-playground",
+					component: "./src/lucid/admin/Standalone.tsx",
+					layout: "blank",
+					navigation: { label: "Standalone playground", group: "content" },
+				},
+				{
+					key: "public-playground",
+					path: "public-playground",
+					component: "./src/lucid/admin/Public.tsx",
+					layout: "blank",
+					access: "public",
+				},
 			],
 			slots: [
 				{

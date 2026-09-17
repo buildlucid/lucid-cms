@@ -21,11 +21,19 @@ export const generateRegistry = async (
 	resolve: ResolveModule,
 ) => {
 	const routes = await Promise.all(
-		(admin.routes ?? []).map(async ({ component, key, path, navigation }) =>
-			componentEntry(
-				{ key, path: `/lucid/e/${path}`, navigation },
-				await resolve(component, `route "${key}"`),
-			),
+		(admin.routes ?? []).map(
+			async ({
+				component,
+				key,
+				path,
+				navigation,
+				layout = "admin",
+				access = "authenticated",
+			}) =>
+				componentEntry(
+					{ key, path: `/lucid/e/${path}`, navigation, layout, access },
+					await resolve(component, `route "${key}"`),
+				),
 		),
 	);
 	const slots = await Promise.all(

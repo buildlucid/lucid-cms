@@ -2,9 +2,12 @@ import { routes as extensionRoutes } from "virtual:lucid-admin";
 import { Route, Router } from "@solidjs/router";
 import { type Component, lazy } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
+import AuthenticatedRoutes from "@/components/AuthenticatedRoutes/AuthenticatedRoutes";
 import AuthRoutes from "@/components/AuthRoutes/AuthRoutes";
+import BlankLayout from "@/components/BlankLayout/BlankLayout";
 import MainLayout from "@/components/MainLayout/MainLayout";
 import OAuthRoutes from "@/components/OAuthRoutes/OAuthRoutes";
+import { PageLayout } from "@/components/PageLayout/PageLayout";
 import PublicRoutes from "@/components/PublicRoutes/PublicRoutes";
 import { Permissions } from "@/constants/permissions";
 import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
@@ -100,196 +103,238 @@ const AppRouter: Component = () => {
 	return (
 		<Router preload>
 			{/* Authenticated */}
-			<Route path="/lucid" component={MainLayout}>
-				<Route path="/" component={DashboardRoute} />
-				<Route path="/components" component={ComponentsRoute} />
-				<Route path="/account" component={AccountRoute} />
-				{extensionRoutes.map((route) => (
+			<Route component={AuthenticatedRoutes}>
+				<Route path="/lucid" component={MainLayout}>
+					<Route path="/" component={DashboardRoute} />
+					<Route path="/components" component={ComponentsRoute} />
+					<Route path="/account" component={AccountRoute} />
+					{extensionRoutes
+						.filter((route) => route.layout === "admin")
+						.map((route) => (
+							<Route
+								path={route.path.slice("/lucid".length)}
+								component={() => (
+									<PageLayout class="p-4 md:p-6">
+										<AdminExtensionBoundary name={route.key}>
+											<route.component />
+										</AdminExtensionBoundary>
+									</PageLayout>
+								)}
+							/>
+						))}
+					{/* Collections */}
 					<Route
-						path={route.path.slice("/lucid".length)}
+						path="/collections/:collectionKey"
+						preload={preloadRoutes(CollectionsDocumentsListRoute)}
+						component={() => <CollectionsDocumentsListRoute />}
+					/>
+					{/* Page builder */}
+					<Route
+						path="/collections/:collectionKey/latest/create"
+						preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
 						component={() => (
-							<AdminExtensionBoundary name={route.key}>
-								<route.component />
-							</AdminExtensionBoundary>
+							<CollectionDocumentPageBuilderRoute
+								mode="create"
+								version="latest"
+							/>
 						)}
 					/>
-				))}
-				{/* Collections */}
-				<Route
-					path="/collections/:collectionKey"
-					preload={preloadRoutes(CollectionsDocumentsListRoute)}
-					component={() => <CollectionsDocumentsListRoute />}
-				/>
-				{/* Page builder */}
-				<Route
-					path="/collections/:collectionKey/latest/create"
-					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
-					component={() => (
-						<CollectionDocumentPageBuilderRoute
-							mode="create"
-							version="latest"
-						/>
-					)}
-				/>
-				<Route
-					path="/collections/:collectionKey/:versionType/:documentId/:versionId?"
-					preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
-					component={() => <CollectionDocumentPageBuilderRoute mode="edit" />}
-				/>
-				<Route
-					path="/collections/:collectionKey/:documentId/history"
-					preload={preloadRoutes(CollectionsDocumentsHistoryRoute)}
-					component={() => <CollectionsDocumentsHistoryRoute />}
-				/>
-				<Route
-					path="/collections/:collectionKey/:documentId/release-requests/:releaseRequestId"
-					preload={preloadRoutes(CollectionsDocumentsReleaseRequestDetailRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.PublishOperationsRead}>
-							<CollectionsDocumentsReleaseRequestDetailRoute />
-						</PermissionGuard>
-					)}
-				/>
-				{/* Media */}
-				<Route
-					path="/media"
-					preload={preloadRoutes(MediaListRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.MediaRead}>
-							<MediaListRoute />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/media/:folderId"
-					preload={preloadRoutes(MediaListRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.MediaRead}>
-							<MediaListRoute />
-						</PermissionGuard>
-					)}
-				/>
-				{/* Users */}
-				<Route
-					path="/users"
-					preload={preloadRoutes(UsersListRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.UsersRead}>
-							<UsersListRoute />
-						</PermissionGuard>
-					)}
-				/>
-				{/* Roles */}
-				<Route
-					path="/roles"
-					preload={preloadRoutes(RolesListRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.RolesRead}>
-							<RolesListRoute />
-						</PermissionGuard>
-					)}
-				/>
-				{/* Emails */}
-				<Route
-					path="/emails"
-					preload={preloadRoutes(EmailListRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.EmailRead}>
-							<EmailListRoute />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/publishing"
-					preload={preloadRoutes(PublishingOverviewRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.PublishOperationsRead}>
-							<PublishingOverviewRoute />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/publishing/requests"
-					preload={preloadRoutes(ReleaseRequestsListRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.PublishOperationsRead}>
-							<ReleaseRequestsListRoute />
-						</PermissionGuard>
-					)}
-				/>
-				{/* System */}
-				<Route
-					path="/system"
-					preload={preloadRoutes(SystemIndexRoute)}
-					component={() => <SystemIndexRoute />}
-				/>
-				<Route
-					path="/system/overview"
-					preload={preloadRoutes(SystemOverviewRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.SettingsRead}>
-							<SystemOverviewRoute />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/system/operations"
-					preload={preloadRoutes(SystemOperationsRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.SettingsRead}>
-							<SystemOperationsRoute />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/system/ai-usage"
-					preload={preloadRoutes(SystemAiUsageRoute)}
-					component={() => (
-						<ConditionGuard
-							condition={() => siteStore.get.hasAnyAiFeatureEnabled()}
-							redirect={() =>
-								userStore.get.hasPermission([Permissions.SettingsRead]).all
-									? "/lucid/system/overview"
-									: "/lucid"
-							}
-						>
-							<PermissionGuard permission={Permissions.SettingsRead}>
-								<SystemAiUsageRoute />
+					<Route
+						path="/collections/:collectionKey/:versionType/:documentId/:versionId?"
+						preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
+						component={() => <CollectionDocumentPageBuilderRoute mode="edit" />}
+					/>
+					<Route
+						path="/collections/:collectionKey/:documentId/history"
+						preload={preloadRoutes(CollectionsDocumentsHistoryRoute)}
+						component={() => <CollectionsDocumentsHistoryRoute />}
+					/>
+					<Route
+						path="/collections/:collectionKey/:documentId/release-requests/:releaseRequestId"
+						preload={preloadRoutes(
+							CollectionsDocumentsReleaseRequestDetailRoute,
+						)}
+						component={() => (
+							<PermissionGuard permission={Permissions.PublishOperationsRead}>
+								<CollectionsDocumentsReleaseRequestDetailRoute />
 							</PermissionGuard>
-						</ConditionGuard>
-					)}
-				/>
-				<Route
-					path="/system/jobs"
-					preload={preloadRoutes(SystemJobsRoute)}
-					component={() => (
-						<PermissionGuard permission={Permissions.JobsRead}>
-							<SystemJobsRoute />
-						</PermissionGuard>
-					)}
-				/>
-				<Route
-					path="/system/integrations"
-					preload={preloadRoutes(SystemIntegrationsRoute)}
-					component={() => (
-						<PermissionSomeGuard
-							permission={[
-								Permissions.IntegrationsRead,
-								Permissions.ConnectionUpdate,
-							]}
-						>
-							<SystemIntegrationsRoute />
-						</PermissionSomeGuard>
-					)}
-				/>
+						)}
+					/>
+					{/* Media */}
+					<Route
+						path="/media"
+						preload={preloadRoutes(MediaListRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.MediaRead}>
+								<MediaListRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/media/:folderId"
+						preload={preloadRoutes(MediaListRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.MediaRead}>
+								<MediaListRoute />
+							</PermissionGuard>
+						)}
+					/>
+					{/* Users */}
+					<Route
+						path="/users"
+						preload={preloadRoutes(UsersListRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.UsersRead}>
+								<UsersListRoute />
+							</PermissionGuard>
+						)}
+					/>
+					{/* Roles */}
+					<Route
+						path="/roles"
+						preload={preloadRoutes(RolesListRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.RolesRead}>
+								<RolesListRoute />
+							</PermissionGuard>
+						)}
+					/>
+					{/* Emails */}
+					<Route
+						path="/emails"
+						preload={preloadRoutes(EmailListRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.EmailRead}>
+								<EmailListRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/publishing"
+						preload={preloadRoutes(PublishingOverviewRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.PublishOperationsRead}>
+								<PublishingOverviewRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/publishing/requests"
+						preload={preloadRoutes(ReleaseRequestsListRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.PublishOperationsRead}>
+								<ReleaseRequestsListRoute />
+							</PermissionGuard>
+						)}
+					/>
+					{/* System */}
+					<Route
+						path="/system"
+						preload={preloadRoutes(SystemIndexRoute)}
+						component={() => <SystemIndexRoute />}
+					/>
+					<Route
+						path="/system/overview"
+						preload={preloadRoutes(SystemOverviewRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.SettingsRead}>
+								<SystemOverviewRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/system/operations"
+						preload={preloadRoutes(SystemOperationsRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.SettingsRead}>
+								<SystemOperationsRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/system/ai-usage"
+						preload={preloadRoutes(SystemAiUsageRoute)}
+						component={() => (
+							<ConditionGuard
+								condition={() => siteStore.get.hasAnyAiFeatureEnabled()}
+								redirect={() =>
+									userStore.get.hasPermission([Permissions.SettingsRead]).all
+										? "/lucid/system/overview"
+										: "/lucid"
+								}
+							>
+								<PermissionGuard permission={Permissions.SettingsRead}>
+									<SystemAiUsageRoute />
+								</PermissionGuard>
+							</ConditionGuard>
+						)}
+					/>
+					<Route
+						path="/system/jobs"
+						preload={preloadRoutes(SystemJobsRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.JobsRead}>
+								<SystemJobsRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/system/integrations"
+						preload={preloadRoutes(SystemIntegrationsRoute)}
+						component={() => (
+							<PermissionSomeGuard
+								permission={[
+									Permissions.IntegrationsRead,
+									Permissions.ConnectionUpdate,
+								]}
+							>
+								<SystemIntegrationsRoute />
+							</PermissionSomeGuard>
+						)}
+					/>
+				</Route>
+				{/* Authenticated OAuth */}
+				<Route path="/lucid" component={OAuthRoutes}>
+					<Route
+						path="/oauth/consent/:requestId"
+						preload={preloadRoutes(OAuthConsentRoute)}
+						component={OAuthConsentRoute}
+					/>
+				</Route>
+				<Route path="/lucid" component={BlankLayout}>
+					{extensionRoutes
+						.filter(
+							(route) =>
+								route.layout === "blank" && route.access === "authenticated",
+						)
+						.map((route) => (
+							<Route
+								path={route.path.slice("/lucid".length)}
+								component={() => (
+									<AdminExtensionBoundary name={route.key}>
+										<route.component />
+									</AdminExtensionBoundary>
+								)}
+							/>
+						))}
+				</Route>
 			</Route>
-			{/* Authenticated OAuth */}
-			<Route path="/lucid" component={OAuthRoutes}>
-				<Route
-					path="/oauth/consent/:requestId"
-					preload={preloadRoutes(OAuthConsentRoute)}
-					component={OAuthConsentRoute}
-				/>
+			{/* Public extensions work both with and without a session. */}
+			<Route path="/lucid" component={BlankLayout}>
+				{extensionRoutes
+					.filter(
+						(route) => route.layout === "blank" && route.access === "public",
+					)
+					.map((route) => (
+						<Route
+							path={route.path.slice("/lucid".length)}
+							component={() => (
+								<AdminExtensionBoundary name={route.key}>
+									<route.component />
+								</AdminExtensionBoundary>
+							)}
+						/>
+					))}
 			</Route>
 			{/* Non authenticated */}
 			<Route path="/lucid" component={AuthRoutes}>

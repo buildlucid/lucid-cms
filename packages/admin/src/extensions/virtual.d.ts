@@ -10,6 +10,8 @@ declare module "virtual:lucid-admin" {
 	export const routes: Array<{
 		key: string;
 		path: string;
+		layout: NonNullable<import("./types/route.js").AdminRoute["layout"]>;
+		access: NonNullable<import("./types/route.js").AdminRoute["access"]>;
 		component: import("./types/route.js").AdminRouteComponent;
 		navigation?: import("./types/navigation.js").AdminRouteNavigation;
 	}>;
