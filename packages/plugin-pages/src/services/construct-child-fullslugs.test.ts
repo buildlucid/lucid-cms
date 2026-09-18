@@ -16,10 +16,8 @@ const baseCollection = {
 	localized: false,
 	segments: [],
 	ui: {
-		fullSlug: false,
 		placement: { at: "end" },
 		widths: {
-			fullSlug: 12,
 			slug: 12,
 			parentPage: 12,
 			segments: 12,

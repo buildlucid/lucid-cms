@@ -2,6 +2,7 @@ import type {
 	BrickSlotMatch,
 	BrickSlotPlacement,
 } from "../../components/BrickSlots/types.js";
+import type { DocumentSlotPlacement } from "../../components/DocumentSlotCell/types.js";
 import type {
 	FieldSlot,
 	FieldSlotMatch,
@@ -17,9 +18,12 @@ export type AdminComponentReference =
 
 export type AdminSlot = {
 	key: string;
+	/** Higher priorities render first or win exclusive slots. Defaults to zero. */
+	priority?: number;
 	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
 	component: AdminComponentReference;
 } & (
+	| DocumentSlotPlacement
 	| (BrickSlotPlacement & { match?: BrickSlotMatch })
 	| { slot: FieldSlot; match?: FieldSlotMatch }
 );

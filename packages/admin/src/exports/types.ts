@@ -6,6 +6,12 @@ export type {
 	BrickSlotProps,
 } from "../components/BrickSlots/types.js";
 export type {
+	DocumentSlot,
+	DocumentSlotComponent,
+	DocumentSlotPlacement,
+	DocumentSlotProps,
+} from "../components/DocumentSlotCell/types.js";
+export type {
 	FieldSlot,
 	FieldSlotComponent,
 	FieldSlotMatch,

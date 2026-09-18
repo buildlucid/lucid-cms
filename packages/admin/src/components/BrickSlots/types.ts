@@ -11,6 +11,7 @@ export type BrickSlot = (typeof brickSlotKeys)[keyof typeof brickSlotKeys];
 export type BrickSlotPlacement =
 	| {
 			slot:
+				| typeof brickSlotKeys.header
 				| typeof brickSlotKeys.beforeFields
 				| typeof brickSlotKeys.afterFields;
 	  }
@@ -31,6 +32,7 @@ export type BrickSlotMatch = {
 /** A read-only view of this brick instance and its unsaved fields. */
 export type BrickSlotProps = {
 	readonly slot: BrickSlot;
+	readonly open: boolean;
 	readonly brick: BrickState;
 	readonly context: EditorContext;
 };

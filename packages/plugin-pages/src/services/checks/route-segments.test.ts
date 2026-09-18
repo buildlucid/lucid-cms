@@ -17,9 +17,8 @@ const config = {
 	localized: false,
 	segments: [{ relation: "product", collection: "product", field: "key" }],
 	ui: {
-		fullSlug: true,
 		placement: { at: "end" },
-		widths: { fullSlug: 6, slug: 6, parentPage: 12, segments: 12 },
+		widths: { slug: 6, parentPage: 12, segments: 12 },
 	},
 	unique: true,
 } satisfies CollectionConfig;
@@ -56,6 +55,7 @@ describe("route segments", () => {
 		});
 		const draft = {
 			i18n: { sources: [] },
+			admin: { slots: [], routes: [], scripts: [], stylesheets: [] },
 			collections: [documentation, product],
 			hooks: [],
 		} as never;

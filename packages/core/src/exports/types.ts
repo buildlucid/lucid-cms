@@ -9,6 +9,10 @@ export type {
 	AdminSlot,
 	BrickSlot,
 	BrickSlotMatch,
+	DocumentSlot,
+	DocumentSlotComponent,
+	DocumentSlotPlacement,
+	DocumentSlotProps,
 	FieldSlot,
 	FieldSlotMatch,
 } from "@lucidcms/admin/types";

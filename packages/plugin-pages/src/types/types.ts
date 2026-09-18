@@ -2,7 +2,7 @@ import type { FieldWidth } from "@lucidcms/core/types";
 
 /** A shared URL prefix or prefixes keyed by content locale. */
 export type CollectionPrefix = string | Record<string, string>;
-export type PagesFieldKey = "fullSlug" | "slug" | "parentPage" | "segments";
+export type PagesFieldKey = "slug" | "parentPage" | "segments";
 
 /** Place generated fields at the start or end of a tab, or before or after an existing field. */
 export type PagesFieldPlacement =
@@ -36,8 +36,6 @@ export type CollectionRouteSegment = {
 
 /** Placement and layout of generated route fields. */
 export interface CollectionUI {
-	/** Show the computed full path to editors. Defaults to false. */
-	fullSlug?: boolean;
 	/** Where to insert generated fields. Defaults to the end. */
 	placement?: PagesFieldPlacement;
 	/** Widths for generated fields on the 12-column editor grid. */
@@ -74,7 +72,6 @@ export interface CollectionConfig {
 	prefix?: CollectionPrefix;
 	segments: CollectionRouteSegment[];
 	ui: {
-		fullSlug: boolean;
 		placement: PagesFieldPlacement;
 		widths: Record<PagesFieldKey, FieldWidth>;
 	};

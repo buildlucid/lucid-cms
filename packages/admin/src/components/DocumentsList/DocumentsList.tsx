@@ -1,3 +1,4 @@
+import { documentSlots } from "virtual:lucid-admin";
 import { useNavigate, useParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
@@ -23,6 +24,7 @@ import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import RestoreDocumentModal from "@/components/RestoreDocumentModal/RestoreDocumentModal";
 import { Table } from "@/components/Table/Table";
+import { resolveSlots } from "@/extensions/slot-policy";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
@@ -83,6 +85,22 @@ export const DocumentsList: Component<{
 	const collectionKey = createMemo(() => params.collectionKey);
 	const contentLocale = createMemo(
 		() => contentLocaleStore.get.contentLocale ?? "",
+	);
+	const customColumns = createMemo(() =>
+		resolveSlots(
+			documentSlots.filter((entry) => entry.slot === "document.columnAddition"),
+			{ collection: collectionKey() },
+		),
+	);
+	const getCustomHeadColumns = createMemo(() =>
+		customColumns().map((entry) => ({
+			key: `extension:${entry.key}`,
+			label: helpers.getLocaleValue({
+				value: entry.column.label,
+				fallback: entry.key,
+			}),
+			sortable: false,
+		})),
 	);
 	const getTableHeadColumns = createMemo(() =>
 		tableHeadColumns(props.state.listing()),
@@ -398,6 +416,7 @@ export const DocumentsList: Component<{
 				searchParams={props.state.searchParams}
 				head={[
 					...getTableHeadColumns(),
+					...getCustomHeadColumns(),
 					...environmentHeadColumns(),
 					...workflowHeadColumn(),
 					{
@@ -484,6 +503,7 @@ export const DocumentsList: Component<{
 					<Index each={documents.data?.data || []}>
 						{(doc, i) => (
 							<DocumentTableRow
+								extensions
 								index={i}
 								document={doc()}
 								refs={documents.data?.refs}

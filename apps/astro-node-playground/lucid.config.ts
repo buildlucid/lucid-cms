@@ -50,9 +50,6 @@ export default defineConfig({
 							en: "en",
 							fr: "fr",
 						},
-						ui: {
-							fullSlug: true,
-						},
 					},
 				],
 			}),

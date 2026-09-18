@@ -17,10 +17,12 @@ import {
 } from "solid-js";
 import AddBrickModal from "@/components/AddBrickModal/AddBrickModal";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
+import BrickSlots from "@/components/BrickSlots/BrickSlots";
 import Button from "@/components/Button/Button";
 import DeleteDebounceButton from "@/components/DeleteDebounceButton/DeleteDebounceButton";
 import DragDrop, { type DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
@@ -126,13 +128,8 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 			</div>
 
 			<AddBrickModal
-				state={{
-					open: getSelectBrickOpen(),
-					setOpen: setSelectBrickOpen,
-				}}
-				data={{
-					brickConfig: props.brickConfig,
-				}}
+				state={{ open: getSelectBrickOpen(), setOpen: setSelectBrickOpen }}
+				data={{ brickConfig: props.brickConfig }}
 			/>
 		</Show>
 	);
@@ -151,6 +148,10 @@ interface BuilderBrickRowProps {
 const DRAG_DROP_KEY = "builder-bricks-zone";
 
 const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
+	// -------------------------------
+	// State & Hooks
+	const localization = useDocumentLocalization();
+
 	// ------------------------------
 	// Memos
 	const config = createMemo(() => {
@@ -221,29 +222,33 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 			aria-invalid={errorCount() > 0}
 		>
 			{/* Header */}
-			{/** biome-ignore lint/a11y/useSemanticElements: explanation */}
+			{/* biome-ignore lint/a11y/useSemanticElements: Drag, delete and slot buttons cannot be nested inside a native button. */}
 			<div
+				role="button"
+				tabIndex={0}
 				id={previewTriggerId()}
 				data-preview-focus-open={brickOpen()}
-				class={classNames(
-					"flex items-center justify-between cursor-pointer px-4 py-3 rounded-md focus:outline-hidden transition-colors duration-200 hover:bg-card-hover/60",
-				)}
+				aria-expanded={brickOpen()}
+				aria-controls={`builder-brick-content-${props.brick.ref}`}
+				aria-label={helpers.getLocaleValue({
+					value: config()?.details.label,
+					fallback: props.brick.key,
+				})}
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
+					if (e.target !== e.currentTarget) return;
 					if (e.key === "Enter" || e.key === " ") {
 						e.preventDefault();
 						toggleDropdown();
 					}
 				}}
-				aria-expanded={brickOpen()}
-				aria-controls={`builder-brick-content-${props.brick.ref}`}
-				role="button"
-				tabIndex="0"
+				class="flex cursor-pointer items-center justify-between gap-3 rounded-md px-4 py-3 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base"
 			>
-				<div class="flex items-center gap-2">
+				<div class="flex min-w-0 flex-1 items-center gap-2">
 					<button
 						type="button"
 						class="text-icon-faded hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						onClick={(e) => e.stopPropagation()}
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
 								ref: props.brick.ref,
@@ -264,14 +269,24 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					>
 						<FaSolidGripLines size={14} />
 					</button>
-					<h3>
+					<h3 class="flex min-h-8 min-w-0 flex-1 items-center">
 						{helpers.getLocaleValue({
 							value: config()?.details.label,
 							fallback: config()?.key,
 						})}
 					</h3>
 				</div>
-				<div class="flex items-center gap-1">
+				<div class="flex items-center gap-2">
+					<BrickSlots
+						header
+						open={brickOpen()}
+						brick={props.brick}
+						config={config()}
+						errors={fieldErrors()}
+						collectionKey={props.collectionKey}
+						documentId={props.documentId}
+						contentLocale={localization.contentLocale() ?? ""}
+					/>
 					<FieldErrorBadge count={errorCount()} class="mr-1" />
 					<DeleteDebounceButton
 						callback={() => {
@@ -279,20 +294,17 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						}}
 						disabled={isDisabled()}
 					/>
-					<Button
-						type="button"
-						theme="secondary-subtle"
-						size="icon-subtle"
-						tabIndex="-1"
+					<span
+						aria-hidden="true"
 						class={classNames(
-							"text-icon-faded hover:text-icon-hover transition-all duration-200",
+							"flex size-7 shrink-0 items-center justify-center text-icon-faded transition-transform duration-200",
 							{
 								"transform rotate-180": brickOpen(),
 							},
 						)}
 					>
 						<FaSolidChevronUp size={14} />
-					</Button>
+					</span>
 				</div>
 			</div>
 			{/* Body */}

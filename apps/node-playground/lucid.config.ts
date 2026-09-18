@@ -257,22 +257,17 @@ export default defineConfig({
 							fr: "fr",
 						},
 						ui: {
-							fullSlug: true,
 							placement: { after: "page_title" },
 						},
 					},
 					{
 						key: "test",
 						localized: true,
-						ui: {
-							fullSlug: true,
-						},
 					},
 					{
 						key: "blog",
 						localized: true,
 						prefix: "/blog",
-						ui: { fullSlug: true },
 					},
 					{
 						key: "route-page",
@@ -285,7 +280,6 @@ export default defineConfig({
 								field: "route_key",
 							},
 						],
-						ui: { fullSlug: true },
 					},
 				],
 			}),

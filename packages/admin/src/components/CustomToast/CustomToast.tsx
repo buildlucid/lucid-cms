@@ -65,19 +65,21 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 				},
 			)}
 		>
-			<div class="relative z-10 flex items-start gap-3 pr-8">
+			<div
+				class={classNames("relative z-10 flex gap-3 pr-8", {
+					"items-start": !!props.message,
+					"items-center": !props.message,
+				})}
+			>
 				<span
 					class={classNames(
-						"mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
+						"flex size-5 shrink-0 items-center justify-center rounded-full border border-border bg-background-base",
 						{
-							"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
-								props.type === "success",
-							"border-error-base/20 bg-error-base/10 text-error-base":
-								props.type === "error",
-							"border-warning-base/20 bg-warning-base/10 text-warning-base":
-								props.type === "warning",
-							"border-info-base/20 bg-info-base/10 text-info-base":
-								props.type === "info",
+							"mt-0.5": !!props.message,
+							"text-primary-base": props.type === "success",
+							"text-error-base": props.type === "error",
+							"text-warning-base": props.type === "warning",
+							"text-info-base": props.type === "info",
 						},
 					)}
 				>

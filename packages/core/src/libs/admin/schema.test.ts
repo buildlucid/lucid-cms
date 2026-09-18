@@ -38,7 +38,7 @@ describe("brick side slots", () => {
 		}
 	});
 
-	it("allows components to share a panel and independent bricks to use different layouts", () => {
+	it("accepts independent panel registrations", () => {
 		expect(
 			adminConfigSchema.safeParse({
 				slots: [
@@ -56,7 +56,7 @@ describe("brick side slots", () => {
 		).toBe(true);
 	});
 
-	it("rejects overlapping registrations with conflicting layouts, including wildcard matches", () => {
+	it("accepts overlapping panels for priority-based selection", () => {
 		for (const change of [
 			{ slot: "brick.left" },
 			{ width: 5 },
@@ -73,9 +73,7 @@ describe("brick side slots", () => {
 					},
 				],
 			});
-			expect(result.success).toBe(false);
-			if (!result.success)
-				expect(result.error.issues[0]?.path).toEqual(["slots", 1]);
+			expect(result.success).toBe(true);
 		}
 	});
 });
@@ -110,5 +108,46 @@ describe("named component references", () => {
 					.success,
 			).toBe(false);
 		}
+	});
+});
+
+describe("document column slots", () => {
+	it("requires headers for additions and a field target for overrides", () => {
+		expect(
+			adminConfigSchema.safeParse({
+				slots: [
+					{
+						key: "column",
+						slot: "document.columnAddition",
+						component: "./column.tsx",
+						column: { label: "Summary" },
+						priority: 2,
+					},
+				],
+			}).success,
+		).toBe(true);
+		for (const slot of [
+			{
+				key: "column",
+				slot: "document.columnAddition",
+				component: "./column.tsx",
+			},
+			{
+				key: "override",
+				slot: "document.columnOverride",
+				component: "./column.tsx",
+				match: { collection: "page" },
+			},
+			{
+				key: "column",
+				slot: "document.columnAddition",
+				component: "./column.tsx",
+				column: { label: "Summary" },
+				priority: Infinity,
+			},
+		])
+			expect(adminConfigSchema.safeParse({ slots: [slot] }).success).toBe(
+				false,
+			);
 	});
 });

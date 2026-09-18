@@ -19,17 +19,14 @@ const createConfig = (
 		key?: string;
 		placement?: PagesFieldPlacement;
 		segments?: CollectionRouteSegment[];
-		fullSlug?: boolean;
 	} = {},
 ): CollectionConfig => ({
 	key: options.key ?? "pages",
 	localized: false,
 	segments: options.segments ?? [],
 	ui: {
-		fullSlug: options.fullSlug ?? true,
 		placement: options.placement ?? { at: "end" },
 		widths: {
-			fullSlug: 6,
 			slug: 6,
 			parentPage: 12,
 			segments: 6,
@@ -130,7 +127,7 @@ test("registers fields in an existing named tab with configured widths", () => {
 	expect(settingsTab.fields.map((field) => field.key)).toEqual(["theme"]);
 	expect(contentTab.fields.map((field) => field.ui?.width)).toEqual([
 		undefined,
-		6,
+		undefined,
 		6,
 		12,
 	]);
@@ -278,7 +275,7 @@ test("registers route segment relations with responsive widths", () => {
 		collection as never,
 		createConfig({
 			key: "docs",
-			fullSlug: false,
+
 			segments: [
 				{ relation: "product", collection: "products", field: "key" },
 				{ relation: "version", collection: "versions", field: "key" },

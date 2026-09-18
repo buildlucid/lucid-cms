@@ -6,6 +6,8 @@ declare module "virtual:lucid-admin" {
 		AdminSlot,
 		BrickSlot,
 		BrickSlotComponent,
+		DocumentSlotComponent,
+		DocumentSlotPlacement,
 		FieldSlot,
 		FieldSlotComponent,
 		RouteComponent,
@@ -36,6 +38,13 @@ declare module "virtual:lucid-admin" {
 			BrickSlotComponent
 		>
 	>;
+	export const documentSlots: Array<
+		SlotRegistration<
+			Extract<AdminSlot, { slot: DocumentSlotPlacement["slot"] }>,
+			DocumentSlotComponent
+		>
+	>;
+
 	export const fieldSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: FieldSlot }>,

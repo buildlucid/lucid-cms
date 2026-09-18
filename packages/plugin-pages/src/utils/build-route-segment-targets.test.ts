@@ -8,9 +8,8 @@ const pageConfig = {
 	localized: true,
 	segments: [{ relation: "category", collection: "categories", field: "slug" }],
 	ui: {
-		fullSlug: true,
 		placement: { at: "end" },
-		widths: { fullSlug: 6, slug: 6, parentPage: 12, segments: 12 },
+		widths: { slug: 6, parentPage: 12, segments: 12 },
 	},
 	unique: true,
 } satisfies CollectionConfig;

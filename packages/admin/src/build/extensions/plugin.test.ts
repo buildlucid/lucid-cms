@@ -66,7 +66,7 @@ test("bundles project and browser package entries without executing them, includ
 		);
 		await writeFile(
 			path.join(root, "main.js"),
-			'import "./main.css"; import { routes, brickSlots, fieldSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.testRegistry = { routes, brickSlots, fieldSlots };',
+			'import "./main.css"; import { routes, brickSlots, fieldSlots, documentSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.testRegistry = { routes, brickSlots, fieldSlots, documentSlots };',
 		);
 		await writeFile(path.join(root, "main.css"), "");
 		const server = await createServer({
@@ -79,6 +79,30 @@ test("bundles project and browser package entries without executing them, includ
 					stylesheetPath: path.join(root, "main.css"),
 					admin: {
 						slots: [
+							{
+								key: "header",
+								slot: "brick.header",
+								component: "test-plugin/panel",
+							},
+							{
+								key: "extra",
+								slot: "document.columnAddition",
+								column: { label: "Summary" },
+								component: {
+									module: "test-plugin/panel",
+									export: "NamedPanel",
+								},
+							},
+							{
+								key: "override",
+								slot: "document.columnOverride",
+								match: { collection: "page", field: "slug" },
+								priority: 10,
+								component: {
+									module: "test-plugin/panel",
+									export: "NamedPanel",
+								},
+							},
 							{
 								key: "named",
 								slot: "field.after",
@@ -262,7 +286,7 @@ test.each([
 		);
 		await writeFile(
 			path.join(adminRoot, "main.js"),
-			'import "./main.css"; import { routes, brickSlots, fieldSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots };',
+			'import "./main.css"; import { routes, brickSlots, fieldSlots, documentSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots, documentSlots };',
 		);
 		await writeFile(path.join(adminRoot, "main.css"), "");
 		const plugin = () =>

@@ -9,10 +9,8 @@ test("should resolve a shared string prefix", async () => {
 			localized: true,
 			segments: [],
 			ui: {
-				fullSlug: false,
 				placement: { at: "end" },
 				widths: {
-					fullSlug: 12,
 					slug: 12,
 					parentPage: 12,
 					segments: 12,
@@ -34,10 +32,8 @@ test("should resolve a locale specific prefix", async () => {
 			localized: true,
 			segments: [],
 			ui: {
-				fullSlug: false,
 				placement: { at: "end" },
 				widths: {
-					fullSlug: 12,
 					slug: 12,
 					parentPage: 12,
 					segments: 12,

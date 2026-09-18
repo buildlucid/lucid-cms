@@ -201,7 +201,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 				id={previewFieldId()}
 				class={classNames("w-full relative", widthClass(), {
 					"mb-0!": !activeTab(),
-					"invisible h-0 opacity-0 mb-0!":
+					hidden:
 						fieldConfig().type !== "tab"
 							? // @ts-expect-error
 								fieldConfig()?.ui?.hidden === true

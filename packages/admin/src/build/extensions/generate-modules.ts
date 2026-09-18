@@ -66,12 +66,17 @@ export const generateRegistry = async (
 
 	const brickSlots = slots.filter(
 		({ slot }) =>
+			slot === brickSlotKeys.header ||
 			slot === brickSlotKeys.beforeFields ||
 			slot === brickSlotKeys.afterFields ||
 			slot === brickSlotKeys.left ||
 			slot === brickSlotKeys.right,
 	);
 
+	const documentSlots = slots.filter(
+		({ slot }) =>
+			slot === "document.columnAddition" || slot === "document.columnOverride",
+	);
 	const fieldSlots = slots.filter(
 		({ slot }) => slot === fieldSlotKeys.before || slot === fieldSlotKeys.after,
 	);
@@ -80,6 +85,7 @@ export const generateRegistry = async (
 		'import { lazy } from "solid-js";',
 		`export const routes = [${routes.join(",\n")}];`,
 		`export const brickSlots = [${brickSlots.map(({ entry }) => entry).join(",\n")}];`,
+		`export const documentSlots = [${documentSlots.map(({ entry }) => entry).join(",\n")}];`,
 		`export const fieldSlots = [${fieldSlots.map(({ entry }) => entry).join(",\n")}];`,
 	].join("\n");
 };

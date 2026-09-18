@@ -1,4 +1,8 @@
-import { brickSlotKeys, fieldSlotKeys } from "@lucidcms/admin/slots";
+import {
+	brickSlotKeys,
+	documentSlotKeys,
+	fieldSlotKeys,
+} from "@lucidcms/admin/slots";
 import type { AdminConfig, AdminNavigationIcon } from "@lucidcms/admin/types";
 import z from "zod";
 import { adminCopyInputSchema } from "../i18n/index.js";
@@ -107,7 +111,9 @@ export const adminConfigSchema = z
 				z.discriminatedUnion("slot", [
 					z.strictObject({
 						key,
+						priority: z.number().optional(),
 						slot: z.enum([
+							brickSlotKeys.header,
 							brickSlotKeys.beforeFields,
 							brickSlotKeys.afterFields,
 						]),
@@ -116,6 +122,7 @@ export const adminConfigSchema = z
 					}),
 					z.strictObject({
 						key,
+						priority: z.number().optional(),
 						slot: z.enum([brickSlotKeys.left, brickSlotKeys.right]),
 						width: z.literal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).optional(),
 						sticky: z.boolean().optional(),
@@ -124,6 +131,7 @@ export const adminConfigSchema = z
 					}),
 					z.strictObject({
 						key,
+						priority: z.number().optional(),
 						slot: z.enum(fieldSlotKeys),
 						match: brickSlotMatch
 							.extend({
@@ -134,6 +142,21 @@ export const adminConfigSchema = z
 							})
 							.optional(),
 						component: componentReference,
+					}),
+					z.strictObject({
+						key,
+						priority: z.number().optional(),
+						slot: z.literal(documentSlotKeys.columnAddition),
+						component: componentReference,
+						match: z.strictObject({ collection: key.optional() }).optional(),
+						column: z.strictObject({ label: adminCopyInputSchema }),
+					}),
+					z.strictObject({
+						key,
+						priority: z.number().optional(),
+						slot: z.literal(documentSlotKeys.columnOverride),
+						component: componentReference,
+						match: z.strictObject({ collection: key.optional(), field: key }),
 					}),
 				]),
 			)
@@ -171,39 +194,6 @@ export const adminConfigSchema = z
 				}
 
 				keys.add(entry.key);
-			}
-		}
-
-		const sideSlots = config.slots.filter(
-			(
-				entry,
-			): entry is Extract<
-				typeof entry,
-				{ slot: typeof brickSlotKeys.left | typeof brickSlotKeys.right }
-			> =>
-				entry.slot === brickSlotKeys.left || entry.slot === brickSlotKeys.right,
-		);
-
-		for (const [index, entry] of sideSlots.entries()) {
-			for (const previous of sideSlots.slice(0, index)) {
-				const overlaps = (["collection", "brick", "kind"] as const).every(
-					(key) =>
-						!entry.match?.[key] ||
-						!previous.match?.[key] ||
-						entry.match[key] === previous.match[key],
-				);
-				if (
-					overlaps &&
-					(entry.slot !== previous.slot ||
-						(entry.width ?? 6) !== (previous.width ?? 6) ||
-						(entry.sticky ?? false) !== (previous.sticky ?? false))
-				) {
-					context.addIssue({
-						code: "custom",
-						path: ["slots", config.slots.indexOf(entry)],
-						message: `Side slots "${previous.key}" and "${entry.key}" can match the same brick. Use the same side, width and sticky setting so they share one panel.`,
-					});
-				}
 			}
 		}
 

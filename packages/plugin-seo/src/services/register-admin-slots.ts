@@ -9,6 +9,15 @@ const registerAdminSlots = (collection: string, brick: string): AdminSlot[] => {
 
 	return [
 		{
+			key: `${key}:summary`,
+			slot: brickSlotKeys.header,
+			match,
+			component: {
+				module: "@lucidcms/plugin-seo/components",
+				export: "SeoSummary",
+			},
+		},
+		{
 			key: `${key}:preview`,
 			slot: brickSlotKeys.right,
 			width: 5,

@@ -86,5 +86,7 @@
 	"plugin.seo.image.altFromMedia": "Using the image’s alt text. Enter text here to override it.",
 	"plugin.seo.image.altFromSocial": "Using the social image alt text. Enter text here to override it.",
 	"plugin.seo.pageGuidance.label": "Page guidance",
-	"plugin.seo.pageGuidance.noindex": "Set to exclude from search (noindex)."
+	"plugin.seo.pageGuidance.noindex": "Set to exclude from search (noindex).",
+	"plugin.seo.summary.label": "SEO basics",
+	"plugin.seo.summary.help": "Checks the title, description and social image, with a small adjustment for text length. This is an editorial guide, not a search ranking score."
 }

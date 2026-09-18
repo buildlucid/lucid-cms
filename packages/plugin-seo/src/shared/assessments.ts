@@ -1,10 +1,8 @@
+const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+
 /** Editorial thresholds only; search engines do not impose these character limits. */
 export const assessText = (value: string, kind: "title" | "description") => {
-	const count = [
-		...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(
-			value,
-		),
-	].length;
+	const count = [...segmenter.segment(value)].length;
 
 	const guide = kind === "title" ? 60 : 160;
 	const status =
@@ -33,4 +31,23 @@ export const resolveSocialText = (values: {
 			description: values.xDescription.trim() || social.description,
 		},
 	};
+};
+
+/** A completion guide for core metadata, not a ranking or content-quality score. */
+export const assessBasics = (values: {
+	title: string;
+	description: string;
+	image: boolean;
+}) => {
+	const title = assessText(values.title, "title");
+	const description = assessText(values.description, "description");
+
+	const textPoints = (status: ReturnType<typeof assessText>["status"]) =>
+		status === "empty" ? 0 : status === "long" ? 25 : 35;
+
+	return (
+		textPoints(title.status) +
+		textPoints(description.status) +
+		(values.image ? 30 : 0)
+	);
 };

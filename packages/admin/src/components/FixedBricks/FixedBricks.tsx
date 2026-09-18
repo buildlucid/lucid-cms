@@ -3,7 +3,9 @@ import classNames from "classnames";
 import { FaSolidChevronUp, FaSolidShield } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For } from "solid-js";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
+import BrickSlots from "@/components/BrickSlots/BrickSlots";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
@@ -72,6 +74,10 @@ interface FixedBrickRowProps {
 
 const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 	// ------------------------------
+	// State & Hooks
+	const localization = useDocumentLocalization();
+
+	// ------------------------------
 	// Memos
 	const config = createMemo(() => {
 		return props.configByKey().get(props.brick.key);
@@ -115,18 +121,29 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 			aria-invalid={errorCount() > 0}
 		>
 			{/* Header */}
-			<button
-				type="button"
+			{/* biome-ignore lint/a11y/useSemanticElements: Header slots can contain buttons, which cannot be nested inside a native button. */}
+			<div
+				role="button"
+				tabIndex={0}
 				id={previewTriggerId()}
 				data-preview-focus-open={brickOpen()}
-				class={classNames(
-					"flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors duration-200 hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base md:px-6 md:py-5",
-				)}
+				class="flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base md:px-6 md:py-5"
 				onClick={toggleDropdown}
+				onKeyDown={(e) => {
+					if (e.target !== e.currentTarget) return;
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						toggleDropdown();
+					}
+				}}
 				aria-expanded={brickOpen()}
 				aria-controls={`fixed-brick-content-${props.brick.key}`}
+				aria-label={helpers.getLocaleValue({
+					value: config()?.details.label,
+					fallback: props.brick.key,
+				})}
 			>
-				<div class="flex items-center gap-2.5">
+				<div class="flex min-h-8 min-w-0 flex-1 items-center gap-2.5 text-left">
 					<FaSolidShield class="text-icon-base text-lg" />
 					<span class="text-base font-medium text-title">
 						{helpers.getLocaleValue({
@@ -135,19 +152,29 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 						})}
 					</span>
 				</div>
-				<span class="flex shrink-0 items-center gap-2">
-					<FieldErrorBadge count={errorCount()} class="mr-1" />
+				<BrickSlots
+					header
+					open={brickOpen()}
+					brick={props.brick}
+					config={config()}
+					errors={fieldErrors()}
+					collectionKey={props.collectionKey}
+					documentId={props.documentId}
+					contentLocale={localization.contentLocale() ?? ""}
+				/>
+				<FieldErrorBadge count={errorCount()} />
+				<span
+					class="flex size-8 shrink-0 items-center justify-center text-icon-faded"
+					aria-hidden="true"
+				>
 					<FaSolidChevronUp
 						size={14}
-						class={classNames(
-							"text-icon-faded transition-transform duration-200",
-							{
-								"rotate-180": brickOpen(),
-							},
-						)}
+						class={classNames("transition-transform duration-200", {
+							"rotate-180": brickOpen(),
+						})}
 					/>
 				</span>
-			</button>
+			</div>
 			{/* Body */}
 			<BrickBody
 				brickConfig={config()}

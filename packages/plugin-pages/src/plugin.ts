@@ -11,6 +11,7 @@ import {
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
 import { pluginOptions, registerFields } from "./services/index.js";
+import registerAdminSlots from "./services/register-admin-slots.js";
 import toolkit from "./toolkit/index.js";
 import type { PluginOptions } from "./types/types.js";
 
@@ -42,6 +43,7 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				}
 
 				registerFields(collectionInstance, collectionConfig);
+				draft.admin.slots.push(...registerAdminSlots(collectionConfig.key));
 				collectionInstance.config.routing = { field: "fullSlug" };
 				configuredCollections.push({ collectionConfig, collectionInstance });
 

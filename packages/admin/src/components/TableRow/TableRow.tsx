@@ -41,7 +41,17 @@ export const TableRow: Component<TrProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
-	const onClickHandler = () => {
+	const onClickHandler = (event: MouseEvent | KeyboardEvent) => {
+		if (
+			event.defaultPrevented ||
+			(event.target instanceof Element &&
+				event.target.closest(
+					"a, button, input, select, textarea, [role=button], [contenteditable=true]",
+				))
+		) {
+			return;
+		}
+
 		if (props.onClick) {
 			props.onClick();
 			return;
@@ -99,7 +109,7 @@ export const TableRow: Component<TrProps> = (props) => {
 			onClick={onClickHandler}
 			onKeyDown={(e) => {
 				if (e.key === "Enter") {
-					onClickHandler();
+					onClickHandler(e);
 				}
 			}}
 			onDragEnter={(e) => {

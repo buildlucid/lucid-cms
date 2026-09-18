@@ -60,7 +60,7 @@
 	--breakpoint-3xl: 1600px;
 	--spacing-15: 15px;
 	--animate-enter: animation-enter 0.2s ease;
-	--animate-leave: animation-leave 0.2s ease;
+	--animate-leave: animation-leave 0.2s ease forwards;
 	--animate-dropdown: animation-dropdown 0.2s ease;
 	--animate-from-left: animation-from-left 0.2s ease;
 	--animate-fade-out: animation-fade-out 0.2s ease;

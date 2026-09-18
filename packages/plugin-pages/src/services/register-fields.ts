@@ -33,14 +33,13 @@ const registerFields = (
 					},
 					localized: config.localized,
 					ui: {
-						hidden: !config.ui.fullSlug,
+						hidden: true,
 						disabled: true,
-						width: config.ui.widths.fullSlug,
 					},
 					ai: {
 						enabled: false,
 					},
-					showInList: config.ui.fullSlug,
+					showInList: false,
 				})
 				.addText(constants.fields.slug.key, {
 					details: {

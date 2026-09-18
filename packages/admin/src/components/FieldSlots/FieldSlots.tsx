@@ -7,7 +7,7 @@ import {
 	createFieldState,
 	readFieldValue,
 } from "@/extensions/editor/field-state";
-import { matchesSlot } from "@/extensions/matches-slot";
+import { resolveSlots } from "@/extensions/slot-policy";
 import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
@@ -41,8 +41,9 @@ const FieldSlots: Component<{
 			kind: brickStore.get.bricks[context.brickIndex()]?.type,
 			field: props.config.key,
 		};
-		return fieldSlots.filter(
-			(entry) => entry.slot === props.slot && matchesSlot(entry.match, target),
+		return resolveSlots(
+			fieldSlots.filter((entry) => entry.slot === props.slot),
+			target,
 		);
 	});
 

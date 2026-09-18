@@ -16,9 +16,17 @@
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"skipLibCheck": true,
-		"types": ["node"],
+		"types": [
+			"node"
+		],
 		"rootDir": "./src",
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js"
 	},
-	"exclude": ["./dist", "./node_modules", "./.turbo"]
+	"exclude": [
+		"./dist",
+		"./node_modules",
+		"./.turbo"
+	]
 }

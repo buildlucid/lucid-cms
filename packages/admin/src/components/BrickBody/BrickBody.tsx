@@ -203,6 +203,8 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						brickRef={brickRef}
 					>
 						<BrickSlots
+							open={props.open}
+							documentId={props.documentId}
 							config={props.brickConfig}
 							errors={props.fieldErrors}
 							brick={props.brick}

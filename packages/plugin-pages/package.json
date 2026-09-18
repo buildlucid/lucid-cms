@@ -10,10 +10,14 @@
 			"types": "./dist/index.d.mts",
 			"import": "./dist/index.mjs"
 		},
-		"./translations": "./translations"
+		"./translations": "./translations",
+		"./components": {
+			"types": "./dist/admin/components.d.mts",
+			"default": "./src/admin/components.ts"
+		}
 	},
 	"scripts": {
-		"build": "tsc && tsdown",
+		"build": "tsc --noEmit && tsdown",
 		"dev": "tsdown --watch",
 		"format": "biome format ./src",
 		"format:fix": "biome format --write ./src",
@@ -24,7 +28,9 @@
 	},
 	"files": [
 		"dist",
-		"translations"
+		"translations",
+		"src/admin",
+		"!src/**/*.test.*"
 	],
 	"author": "Build Lucid Ltd",
 	"repository": {
@@ -46,10 +52,14 @@
 		"@types/node": "^24.13.2",
 		"tsdown": "^0.22.3",
 		"typescript": "^6.0.3",
-		"zod": "^4.4.3"
+		"zod": "^4.4.3",
+		"@lucidcms/admin": "0.18.0-alpha.0",
+		"solid-js": "^1.9.13"
 	},
 	"peerDependencies": {
-		"@lucidcms/core": "^0.18.0-alpha.0"
+		"@lucidcms/core": "^0.18.0-alpha.0",
+		"@lucidcms/admin": "^0.18.0-alpha.0",
+		"solid-js": "^1.9.13"
 	},
 	"dependencies": {
 		"immer": "^11.1.8",

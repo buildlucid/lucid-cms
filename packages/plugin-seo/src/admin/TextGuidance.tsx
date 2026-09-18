@@ -1,6 +1,6 @@
 import { type TranslationKey, useTranslation } from "@lucidcms/admin/hooks";
 import type { FieldSlotComponent } from "@lucidcms/admin/types";
-import { Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import { fields } from "../constants.js";
 import { assessText } from "../shared/assessments.js";
 import type {} from "../shared/translations.js";
@@ -21,11 +21,12 @@ const TextGuidance: FieldSlotComponent = (props) => {
 
 	// ----------------------------------
 	// Memos
-	const assessment = () =>
+	const assessment = createMemo(() =>
 		assessText(
 			typeof props.field.value === "string" ? props.field.value : "",
 			props.field.type === "textarea" ? "description" : "title",
-		);
+		),
+	);
 
 	// ----------------------------------
 	// Render

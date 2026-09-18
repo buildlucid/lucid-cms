@@ -1,10 +1,17 @@
 import { brickSlots } from "virtual:lucid-admin";
 import type { FieldError } from "@types";
-import { type Component, createMemo, For, type JSX, Show } from "solid-js";
+import {
+	type Component,
+	children,
+	createMemo,
+	For,
+	type JSX,
+	Show,
+} from "solid-js";
 import { createFieldStates } from "@/extensions/editor/field-state";
-import { matchesSlot } from "@/extensions/matches-slot";
+import { resolveSlots } from "@/extensions/slot-policy";
 import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
-import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
+
 import type { BrickData } from "@/store/brickStore/brickStore";
 import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionBrickConfig } from "@/types/collection-config";
@@ -14,7 +21,10 @@ import type { BrickSlot } from "./types";
 
 /** Places matching extensions around the native fields, sharing one optional side panel. */
 const BrickSlots: Component<{
-	children: JSX.Element;
+	children?: JSX.Element;
+	open: boolean;
+	header?: boolean;
+	documentId?: number;
 	config?: CollectionBrickConfig;
 	errors?: FieldError[];
 	brick: BrickData;
@@ -23,7 +33,6 @@ const BrickSlots: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
-	const context = useFieldRenderState();
 	const route = useDocumentRoute(() => props.contentLocale);
 
 	// ----------------------------------
@@ -35,7 +44,7 @@ const BrickSlots: Component<{
 			brick: props.brick.key,
 			kind: props.brick.type,
 		};
-		return brickSlots.filter((entry) => matchesSlot(entry.match, target));
+		return resolveSlots(brickSlots, target);
 	});
 	const sidePanel = createMemo(() =>
 		contributions().find(
@@ -75,65 +84,78 @@ const BrickSlots: Component<{
 		<Show when={brick()}>
 			{(brick) => (
 				<For each={contributions().filter((entry) => entry.slot === slot)}>
-					{(entry) => (
-						<div class="col-span-12" data-admin-slot={entry.key}>
+					{(entry) => {
+						const content = children(() => (
 							<AdminExtensionBoundary name={entry.key}>
 								<entry.component
 									slot={slot}
+									open={props.open}
 									brick={brick()}
 									context={{
 										route: route(),
 										collectionKey: props.collectionKey,
-										documentId: context.documentId(),
+										documentId: props.documentId,
 										contentLocale: props.contentLocale,
 										readOnly: brickStore.get.locked,
 									}}
 								/>
 							</AdminExtensionBoundary>
-						</div>
-					)}
+						));
+						return (
+							<Show when={content.toArray().length > 0}>
+								<div
+									class={props.header ? "min-w-0" : "col-span-12"}
+									data-admin-slot={entry.key}
+								>
+									{content()}
+								</div>
+							</Show>
+						);
+					}}
 				</For>
 			)}
 		</Show>
 	);
 
 	return (
-		<div class="@container/brick min-w-0">
-			<div
-				class="grid grid-cols-12 items-start gap-6"
-				style={{
-					"--brick-panel-width": sidePanel()?.width ?? 6,
-					"--brick-fields-width": 12 - (sidePanel()?.width ?? 6),
-				}}
-			>
+		<Show when={!props.header} fallback={renderSlots(brickSlotKeys.header)}>
+			<div class="@container/brick min-w-0">
 				<div
-					class="col-span-12 min-w-0 space-y-4"
-					classList={{
-						"@min-[48rem]/brick:col-span-[var(--brick-fields-width)]":
-							!!sidePanel(),
-						"@min-[48rem]/brick:order-2":
-							sidePanel()?.slot === brickSlotKeys.left,
+					class="grid grid-cols-12 items-start gap-6"
+					style={{
+						"--brick-panel-width": sidePanel()?.width ?? 6,
+						"--brick-fields-width": 12 - (sidePanel()?.width ?? 6),
 					}}
 				>
-					{renderSlots(brickSlotKeys.beforeFields)}
-					{props.children}
-					{renderSlots(brickSlotKeys.afterFields)}
+					<div
+						class="col-span-12 min-w-0 space-y-4"
+						classList={{
+							"@min-[48rem]/brick:col-span-[var(--brick-fields-width)]":
+								!!sidePanel(),
+							"@min-[48rem]/brick:order-2":
+								sidePanel()?.slot === brickSlotKeys.left,
+						}}
+					>
+						{renderSlots(brickSlotKeys.beforeFields)}
+						{props.children}
+						{renderSlots(brickSlotKeys.afterFields)}
+					</div>
+					<Show when={sidePanel()}>
+						{(panel) => (
+							<div
+								class="col-span-12 min-w-0 space-y-4 @min-[48rem]/brick:col-span-(--brick-panel-width)"
+								classList={{
+									"@min-[48rem]/brick:sticky @min-[48rem]/brick:top-[calc(var(--document-header-bar-height,0px)+2rem)]":
+										panel().sticky,
+								}}
+							>
+								{renderSlots(panel().slot)}
+							</div>
+						)}
+					</Show>
 				</div>
-				<Show when={sidePanel()}>
-					{(panel) => (
-						<div
-							class="col-span-12 min-w-0 space-y-4 @min-[48rem]/brick:col-span-(--brick-panel-width)"
-							classList={{
-								"@min-[48rem]/brick:sticky @min-[48rem]/brick:top-[calc(var(--document-header-bar-height,0px)+2rem)]":
-									panel().sticky,
-							}}
-						>
-							{renderSlots(panel().slot)}
-						</div>
-					)}
-				</Show>
 			</div>
-		</div>
+		</Show>
 	);
 };
 

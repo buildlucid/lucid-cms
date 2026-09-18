@@ -3,7 +3,6 @@ import type { PluginOptions, PluginOptionsInternal } from "../types/types.js";
 const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 	return {
 		collections: given.collections.map((c) => {
-			const fullSlug = c.ui?.fullSlug ?? false;
 			const segmentWidth = c.segments && c.segments.length > 1 ? 6 : 12;
 
 			return {
@@ -12,11 +11,9 @@ const pluginOptions = (given: PluginOptions): PluginOptionsInternal => {
 				prefix: c.prefix,
 				segments: c.segments ?? [],
 				ui: {
-					fullSlug,
 					placement: c.ui?.placement ?? { at: "end" },
 					widths: {
-						fullSlug: c.ui?.widths?.fullSlug ?? (fullSlug ? 6 : 12),
-						slug: c.ui?.widths?.slug ?? (fullSlug ? 6 : 12),
+						slug: c.ui?.widths?.slug ?? 12,
 						parentPage: c.ui?.widths?.parentPage ?? 12,
 						segments: c.ui?.widths?.segments ?? segmentWidth,
 					},

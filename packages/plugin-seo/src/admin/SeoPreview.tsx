@@ -41,15 +41,19 @@ const SeoPreview: BrickSlotComponent = (props) => {
 	});
 	const host = () => url()?.hostname || "";
 	const siteName = () => config.brand.name || t("plugin.seo.preview.url");
-	const path = () =>
+	const path = createMemo(() =>
 		(url()?.pathname || props.context.route?.path || "")
 			.split(/[?#]/)[0]
 			?.split("/")
 			.filter(Boolean)
-			.join(" › ");
-	const socialImage = () =>
-		readImageField(props.brick.fields, fields.socialImage);
-	const xImage = () => readImageField(props.brick.fields, fields.xImage);
+			.join(" › "),
+	);
+	const socialImage = createMemo(() =>
+		readImageField(props.brick.fields, fields.socialImage),
+	);
+	const xImage = createMemo(() =>
+		readImageField(props.brick.fields, fields.xImage),
+	);
 
 	// ----------------------------------
 	// Render
