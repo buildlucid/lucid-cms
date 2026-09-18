@@ -8,8 +8,7 @@ import {
 	type JSXElement,
 	Show,
 } from "solid-js";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
@@ -142,8 +141,11 @@ export const Input: Component<{
 				</Show>
 			</div>
 			<FormTooltip copy={props.copy?.tooltip} theme={"basic"} />
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

@@ -3,7 +3,7 @@ import { createMemo, createRoot } from "solid-js";
 import { createStore } from "solid-js/store";
 import { describe, expect, it } from "vitest";
 import type { CollectionFieldConfig } from "@/types/collection-config";
-import { createFieldStates } from "./field-state";
+import { createFieldStates, readDocumentRoute } from "./field-state";
 
 const configs: CollectionFieldConfig[] = [
 	{
@@ -62,7 +62,10 @@ const fields: InternalDocumentField[] = [
 describe("extension editor state", () => {
 	it("tracks unsaved values and the selected content locale", () =>
 		createRoot((dispose) => {
-			const [state, set] = createStore({ fields, locale: "en" });
+			const [state, set] = createStore({
+				fields: structuredClone(fields),
+				locale: "en",
+			});
 			const view = createMemo(() =>
 				createFieldStates({
 					configs,
@@ -129,5 +132,44 @@ describe("extension editor state", () => {
 			readOnly: false,
 		});
 		expect(view[0]?.value).toBe("Shared");
+	});
+});
+
+describe("extension document route", () => {
+	it("tracks unsaved localized routes inside structural fields", () =>
+		createRoot((dispose) => {
+			const [state, set] = createStore({
+				fields: structuredClone(fields),
+				locale: "en",
+			});
+			const route = createMemo(() =>
+				readDocumentRoute({
+					field: "title",
+					configs,
+					fields: state.fields,
+					contentLocale: state.locale,
+					localized: true,
+				}),
+			);
+			expect(route()).toEqual({ field: "title", path: "English" });
+			set("fields", 0, "translations", "en", "/unsaved-route");
+			expect(route()?.path).toBe("/unsaved-route");
+			set("locale", "fr");
+			expect(route()?.path).toBe("Français");
+			set("locale", "de");
+			expect(route()?.path).toBeUndefined();
+			dispose();
+		}));
+
+	it("reads shared routes and leaves unconfigured routes absent", () => {
+		const options = { configs, fields, contentLocale: "fr", localized: false };
+		expect(readDocumentRoute({ ...options, field: "title" })).toEqual({
+			field: "title",
+			path: "Shared",
+		});
+		expect(readDocumentRoute({ ...options, field: undefined })).toBeUndefined();
+		expect(
+			readDocumentRoute({ ...options, field: "missing" })?.path,
+		).toBeUndefined();
 	});
 });

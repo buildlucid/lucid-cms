@@ -1,4 +1,3 @@
-import { brickSlotKeys, fieldSlotKeys } from "@lucidcms/admin/slots";
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
@@ -13,6 +12,7 @@ import { microsoftAuthPlugin } from "@lucidcms/plugin-microsoft-auth";
 import { nodemailerPlugin } from "@lucidcms/plugin-nodemailer";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { redirectsPlugin } from "@lucidcms/plugin-redirects";
+import { seoPlugin } from "@lucidcms/plugin-seo";
 import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
@@ -163,30 +163,11 @@ export default defineConfig({
 					access: "public",
 				},
 			],
-			slots: [
-				{
-					key: "meta-title-length",
-					slot: fieldSlotKeys.after,
-					match: { collection: "page", brick: "seo", field: "label" },
-					component: "./src/lucid/admin/MetaTitleLength.tsx",
-				},
-				{
-					key: "seo-summary",
-					slot: brickSlotKeys.beforeFields,
-					match: { collection: "page", brick: "seo", kind: "fixed" },
-					component: "./src/lucid/admin/BrickSummary.tsx",
-				},
-				{
-					key: "seo-values",
-					slot: brickSlotKeys.afterFields,
-					match: { brick: "seo" },
-					component: "./src/lucid/admin/BrickValues.tsx",
-				},
-			],
 			scripts: ["./src/lucid/admin/startup.ts"],
 			stylesheets: ["./src/lucid/admin/styles.css"],
 		},
 		plugins: [
+			seoPlugin({ collections: [{ key: "page" }, { key: "settings" }] }),
 			workerQueuePlugin(),
 			typesensePlugin({
 				host: env.TYPESENSE_HOST,

@@ -60,6 +60,7 @@ AI features require a subscription with Lucid. This is planned to become publicl
 - [Cloudflare KV](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-cloudflare-kv): registers a Cloudflare KV adapter.
 - [Redirects](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-redirects): adds a manually managed, environment-aware redirects collection for website integrations.
 - [Typesense](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-typesense): indexes collection content with durable jobs, projections and resumable rebuilds.
+- [SEO](https://github.com/buildlucid/lucid-cms/tree/master/packages/plugin-seo): adds SEO fields to your collections, with previews of search results and social media cards.
 
 ## 🧩 Framework And Client Packages
 

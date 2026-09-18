@@ -10,8 +10,7 @@ import {
 	Show,
 } from "solid-js";
 import { BottomPanel } from "@/components/BottomPanel/BottomPanel";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import T from "@/translations";
 import { normalizeFieldErrors } from "@/utils/error-helpers";
@@ -137,10 +136,11 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 					<div ref={setContainer} />
 				</div>
 			</div>
-			<Show when={!seamless()}>
-				<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			</Show>
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={seamless() ? undefined : props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

@@ -1,5 +1,4 @@
 import { CollectionBuilder, copy, z } from "@lucidcms/core";
-import SEOBrick from "../bricks/seo.js";
 
 const SettingsCollection = new CollectionBuilder("settings", {
 	mode: "single",
@@ -11,9 +10,6 @@ const SettingsCollection = new CollectionBuilder("settings", {
 		description: copy("admin:collections.settings.summary"),
 	},
 	revisions: true,
-	bricks: {
-		fixed: [SEOBrick],
-	},
 })
 	.addText("site_title", {
 		details: {

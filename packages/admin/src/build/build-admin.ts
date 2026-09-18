@@ -35,7 +35,11 @@ export const buildAdmin = async (options: AdminBuildOptions) => {
 
 	const key = hasAdminExtensions(options.admin)
 		? undefined
-		: await getAdminBuildKey(adminRoot, options.projectRoot);
+		: await getAdminBuildKey(
+				adminRoot,
+				options.projectRoot,
+				options.clientConfig,
+			);
 	if (!key) {
 		await compile(outDir);
 		return;

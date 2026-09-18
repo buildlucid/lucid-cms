@@ -23,11 +23,10 @@ import ActionDropdown, {
 import ActionIcon, {
 	type ActionIconName,
 } from "@/components/ActionIcon/ActionIcon";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import FocalPointEditorModal, {
 	type FocalPoint,
 } from "@/components/FocalPointEditorModal/FocalPointEditorModal";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import MediaStatusPreview from "@/components/MediaStatusPreview/MediaStatusPreview";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
@@ -382,8 +381,11 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					</div>
 				)}
 			</Show>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

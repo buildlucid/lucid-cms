@@ -281,7 +281,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					},
 				)}
 			>
-				<div class="border-t border-border p-3 md:p-4 grid grid-cols-12 gap-4">
+				<div class="border-t border-border p-3 md:p-4 @container/fields grid grid-cols-12 gap-4">
 					<Index each={childrenMounted() ? configChildrenFields() : []}>
 						{(config) => (
 							<props.renderField

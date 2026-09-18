@@ -12,8 +12,7 @@ import {
 	Switch,
 } from "solid-js";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import T from "@/translations";
 
@@ -214,8 +213,11 @@ export function SelectMultiple<
 				</DropdownContent>
 			</DropdownMenu.Root>
 
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 }

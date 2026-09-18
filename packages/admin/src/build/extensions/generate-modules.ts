@@ -2,6 +2,7 @@ import type { HtmlTagDescriptor } from "vite";
 import { brickSlotKeys } from "../../components/BrickSlots/constants.js";
 import { fieldSlotKeys } from "../../components/FieldSlots/constants.js";
 import type {
+	AdminComponentReference,
 	AdminConfig,
 	AdminModulePath,
 } from "../../extensions/types/config.js";
@@ -11,9 +12,21 @@ type ResolveModule = (
 	label: string,
 ) => Promise<string>;
 
-/** Serializes metadata while leaving the lazy browser import as executable code. */
-const componentEntry = (metadata: object, moduleId: string) =>
-	`{ ...${JSON.stringify(metadata)}, component: lazy(() => import(${JSON.stringify(moduleId)})) }`;
+/** Resolves the module without executing it and adapts named exports for Solid lazy. */
+const componentEntry = async (
+	metadata: object,
+	reference: AdminComponentReference,
+	label: string,
+	resolve: ResolveModule,
+) => {
+	const named = typeof reference === "object" && "module" in reference;
+	const moduleId = await resolve(named ? reference.module : reference, label);
+	const load = `import(${JSON.stringify(moduleId)})`;
+	const loader = named
+		? `${load}.then(module => ({ default: module[${JSON.stringify(reference.export)}] }))`
+		: load;
+	return `{ ...${JSON.stringify(metadata)}, component: lazy(() => ${loader}) }`;
+};
 
 /** Generates the registry without importing any user components on the server. */
 export const generateRegistry = async (
@@ -32,26 +45,37 @@ export const generateRegistry = async (
 			}) =>
 				componentEntry(
 					{ key, path: `/lucid/e/${path}`, navigation, layout, access },
-					await resolve(component, `route "${key}"`),
+					component,
+					`route "${key}"`,
+					resolve,
 				),
 		),
 	);
+
 	const slots = await Promise.all(
-		(admin.slots ?? []).map(async ({ component, key, slot, match = {} }) => ({
-			slot,
-			entry: componentEntry(
-				{ key, slot, match },
-				await resolve(component, `slot "${key}"`),
+		(admin.slots ?? []).map(async ({ component, match = {}, ...metadata }) => ({
+			slot: metadata.slot,
+			entry: await componentEntry(
+				{ ...metadata, match },
+				component,
+				`slot "${metadata.key}"`,
+				resolve,
 			),
 		})),
 	);
+
 	const brickSlots = slots.filter(
 		({ slot }) =>
-			slot === brickSlotKeys.beforeFields || slot === brickSlotKeys.afterFields,
+			slot === brickSlotKeys.beforeFields ||
+			slot === brickSlotKeys.afterFields ||
+			slot === brickSlotKeys.left ||
+			slot === brickSlotKeys.right,
 	);
+
 	const fieldSlots = slots.filter(
 		({ slot }) => slot === fieldSlotKeys.before || slot === fieldSlotKeys.after,
 	);
+
 	return [
 		'import { lazy } from "solid-js";',
 		`export const routes = [${routes.join(",\n")}];`,

@@ -6,7 +6,8 @@ import { useSession } from "../useSession/useSession";
  *
  * @example
  * ```tsx
- * import { Permissions, usePermissions } from "@lucidcms/admin/hooks";
+ * import { usePermissions } from "@lucidcms/admin/hooks";
+ * import { Permissions } from "@lucidcms/admin/utils";
  *
  * const permissions = usePermissions();
  *

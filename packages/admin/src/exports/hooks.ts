@@ -1,4 +1,5 @@
 export { Permissions } from "../constants/permissions.js";
+export { useAdminConfig } from "../hooks/useAdminConfig/useAdminConfig.js";
 export { usePermissions } from "../hooks/usePermissions/usePermissions.js";
 export * from "../hooks/useQueryState/useQueryState.js";
 export { default as useQueryState } from "../hooks/useQueryState/useQueryState.js";

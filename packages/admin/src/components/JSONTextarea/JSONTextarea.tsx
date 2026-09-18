@@ -18,8 +18,7 @@ import {
 	createSignal,
 	type JSXElement,
 } from "solid-js";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
@@ -237,8 +236,11 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 					})}
 				/>
 			</div>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={displayErrors()} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={displayErrors()}
+			/>
 		</div>
 	);
 };

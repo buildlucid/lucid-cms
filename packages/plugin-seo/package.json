@@ -1,0 +1,81 @@
+{
+	"name": "@lucidcms/plugin-seo",
+	"version": "0.1.0",
+	"description": "The official SEO plugin for Lucid CMS",
+	"type": "module",
+	"types": "./dist/server/index.d.mts",
+	"module": "dist/server/index.mjs",
+	"exports": {
+		".": {
+			"types": "./dist/server/index.d.mts",
+			"import": "./dist/server/index.mjs"
+		},
+		"./translations": "./translations",
+		"./components": {
+			"types": "./dist/admin/components.d.mts",
+			"default": "./src/admin/components.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc --noEmit && tsdown",
+		"dev": "tsdown --watch",
+		"format": "biome format ./src",
+		"format:fix": "biome format --write ./src",
+		"lint": "biome lint ./src",
+		"lint:fix": "biome lint --write ./src",
+		"check": "biome check ./src",
+		"check:fix": "biome check --write ./src"
+	},
+	"files": [
+		"dist/server",
+		"dist/admin",
+		"src/admin",
+		"src/shared/assessments.ts",
+		"src/shared/translations.ts",
+		"src/constants.ts",
+		"translations",
+		"!src/**/*.test.*"
+	],
+	"author": "Build Lucid Ltd",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/buildlucid/lucid-cms.git",
+		"directory": "packages/plugin-seo"
+	},
+	"keywords": [
+		"CMS",
+		"Lucid CMS",
+		"SEO",
+		"Plugin"
+	],
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.1",
+		"@lucidcms/admin": "0.18.0-alpha.0",
+		"@lucidcms/core": "0.18.0-alpha.0",
+		"@tanstack/solid-query": "^5.101.1",
+		"@types/node": "^24.13.2",
+		"solid-js": "^1.9.13",
+		"tsdown": "^0.22.3",
+		"typescript": "^6.0.3",
+		"zod": "^4.4.3"
+	},
+	"peerDependencies": {
+		"@lucidcms/admin": "^0.18.0-alpha.0",
+		"@lucidcms/core": "^0.18.0-alpha.0",
+		"@tanstack/solid-query": "^5.101.1",
+		"solid-js": "^1.9.13"
+	},
+	"volta": {
+		"node": "24.11.1"
+	},
+	"engines": {
+		"node": "^24.0.0"
+	},
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"solid-icons": "^1.2.0"
+	}
+}

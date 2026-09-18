@@ -11,7 +11,6 @@ import {
 	Show,
 } from "solid-js";
 import BrickSlots from "@/components/BrickSlots/BrickSlots";
-import { brickSlotKeys } from "@/components/BrickSlots/constants";
 import { DynamicField } from "@/components/DynamicField/DynamicField";
 import { TabField } from "@/components/TabField/TabField";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
@@ -188,7 +187,6 @@ export const BrickBody: Component<BrickProps> = (props) => {
 					"p-6": props.options.padding === "24",
 					"pt-4!": props.options.bleedTop && allTabs().length > 0,
 					"pt-0!": props.options.bleedTop && allTabs().length === 0,
-					"grid grid-cols-12 gap-4": allTabs().length === 0,
 				})}
 			>
 				<Show when={contentMounted()}>
@@ -205,46 +203,45 @@ export const BrickBody: Component<BrickProps> = (props) => {
 						brickRef={brickRef}
 					>
 						<BrickSlots
-							slot={brickSlotKeys.beforeFields}
 							config={props.brickConfig}
 							errors={props.fieldErrors}
 							brick={props.brick}
 							collectionKey={props.collectionKey}
 							contentLocale={contentLocale()}
-						/>
-						{/* Tabs */}
-						<Show when={allTabs().length > 0}>
-							<TabField
-								tabs={allTabs()}
-								setActiveTab={setActiveTab}
-								getActiveTab={getActiveTab}
-								fieldErrors={props.fieldErrors}
-								class={classNames("mb-5 shadow-inner", {
-									"-mt-4": props.options.bleedTop,
-								})}
-							/>
-						</Show>
-						{/* Body */}
-						<Index each={configFields()}>
-							{(config) => (
-								<DynamicField
-									fields={props.brick.fields}
-									fieldsByKey={fieldsByKey}
-									fieldConfig={config()}
-									activeTab={getActiveTab}
-									fieldErrors={props.fieldErrors}
-									conditionScopes={conditionScopes}
-								/>
-							)}
-						</Index>
-						<BrickSlots
-							slot={brickSlotKeys.afterFields}
-							config={props.brickConfig}
-							errors={props.fieldErrors}
-							brick={props.brick}
-							collectionKey={props.collectionKey}
-							contentLocale={contentLocale()}
-						/>
+						>
+							<div
+								classList={{
+									"@container/fields grid grid-cols-12 gap-4":
+										allTabs().length === 0,
+								}}
+							>
+								{/* Tabs */}
+								<Show when={allTabs().length > 0}>
+									<TabField
+										tabs={allTabs()}
+										setActiveTab={setActiveTab}
+										getActiveTab={getActiveTab}
+										fieldErrors={props.fieldErrors}
+										class={classNames("mb-5 shadow-inner", {
+											"-mt-4": props.options.bleedTop,
+										})}
+									/>
+								</Show>
+								{/* Body */}
+								<Index each={configFields()}>
+									{(config) => (
+										<DynamicField
+											fields={props.brick.fields}
+											fieldsByKey={fieldsByKey}
+											fieldConfig={config()}
+											activeTab={getActiveTab}
+											fieldErrors={props.fieldErrors}
+											conditionScopes={conditionScopes}
+										/>
+									)}
+								</Index>
+							</div>
+						</BrickSlots>
 					</FieldRenderStateProvider>
 				</Show>
 			</div>

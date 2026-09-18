@@ -1,4 +1,5 @@
 export type {
+	AdminComponentReference,
 	AdminConfig,
 	AdminModulePath,
 	AdminNavigationGroup,

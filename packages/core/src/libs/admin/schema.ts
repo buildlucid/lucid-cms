@@ -20,12 +20,20 @@ const fileReference = z.union([
 			"Components must use local files or package exports.",
 		),
 ]);
+
 const assetReference = z.union([
 	z.url({ protocol: /^https$/ }),
 	z.instanceof(URL).refine((value) => value.protocol === "https:"),
 	fileReference,
 ]);
+
 const key = z.string().trim().min(1);
+
+const componentReference = z.union([
+	fileReference,
+	z.strictObject({ module: fileReference, export: key }),
+]);
+
 const routePath = z
 	.string()
 	.trim()
@@ -62,11 +70,13 @@ const navigationIcon = z.enum([
 	"publishing",
 	"extensions",
 ]) satisfies z.ZodType<AdminNavigationIcon>;
+
 const navigationGroupKey = z
 	.string()
 	.min(1)
 	.max(50)
 	.regex(/^[a-z0-9-_]+$/);
+
 const routeNavigation = z.strictObject({
 	label: adminCopyInputSchema,
 	group: z
@@ -86,7 +96,7 @@ const routeNavigation = z.strictObject({
 const route = z.strictObject({
 	key,
 	path: routePath,
-	component: fileReference,
+	component: componentReference,
 	navigation: routeNavigation.optional(),
 });
 
@@ -97,9 +107,20 @@ export const adminConfigSchema = z
 				z.discriminatedUnion("slot", [
 					z.strictObject({
 						key,
-						slot: z.enum(brickSlotKeys),
+						slot: z.enum([
+							brickSlotKeys.beforeFields,
+							brickSlotKeys.afterFields,
+						]),
 						match: brickSlotMatch.optional(),
-						component: fileReference,
+						component: componentReference,
+					}),
+					z.strictObject({
+						key,
+						slot: z.enum([brickSlotKeys.left, brickSlotKeys.right]),
+						width: z.literal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).optional(),
+						sticky: z.boolean().optional(),
+						match: brickSlotMatch.optional(),
+						component: componentReference,
 					}),
 					z.strictObject({
 						key,
@@ -112,7 +133,7 @@ export const adminConfigSchema = z
 									.optional(),
 							})
 							.optional(),
-						component: fileReference,
+						component: componentReference,
 					}),
 				]),
 			)
@@ -141,15 +162,51 @@ export const adminConfigSchema = z
 		for (const kind of ["slots", "routes"] as const) {
 			const keys = new Set<string>();
 			for (const [index, entry] of config[kind].entries()) {
-				if (keys.has(entry.key))
+				if (keys.has(entry.key)) {
 					context.addIssue({
 						code: "custom",
 						path: [kind, index, "key"],
 						message: `Duplicate admin ${kind} key "${entry.key}".`,
 					});
+				}
+
 				keys.add(entry.key);
 			}
 		}
+
+		const sideSlots = config.slots.filter(
+			(
+				entry,
+			): entry is Extract<
+				typeof entry,
+				{ slot: typeof brickSlotKeys.left | typeof brickSlotKeys.right }
+			> =>
+				entry.slot === brickSlotKeys.left || entry.slot === brickSlotKeys.right,
+		);
+
+		for (const [index, entry] of sideSlots.entries()) {
+			for (const previous of sideSlots.slice(0, index)) {
+				const overlaps = (["collection", "brick", "kind"] as const).every(
+					(key) =>
+						!entry.match?.[key] ||
+						!previous.match?.[key] ||
+						entry.match[key] === previous.match[key],
+				);
+				if (
+					overlaps &&
+					(entry.slot !== previous.slot ||
+						(entry.width ?? 6) !== (previous.width ?? 6) ||
+						(entry.sticky ?? false) !== (previous.sticky ?? false))
+				) {
+					context.addIssue({
+						code: "custom",
+						path: ["slots", config.slots.indexOf(entry)],
+						message: `Side slots "${previous.key}" and "${entry.key}" can match the same brick. Use the same side, width and sticky setting so they share one panel.`,
+					});
+				}
+			}
+		}
+
 		const paths = new Set<string>();
 		for (const [index, route] of config.routes.entries()) {
 			if (paths.has(route.path))

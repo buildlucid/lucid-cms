@@ -42,7 +42,7 @@ test("bundles project and browser package entries without executing them, includ
 		);
 		await writeFile(
 			path.join(root, "node_modules/test-plugin/Panel.jsx"),
-			"export default () => <div>browser-export-panel</div>",
+			"export default () => <div>browser-export-panel</div>; export const NamedPanel = () => <div>named-export-panel</div>;",
 		);
 		await writeFile(
 			path.join(root, "node_modules/test-plugin/wrong.js"),
@@ -69,6 +69,38 @@ test("bundles project and browser package entries without executing them, includ
 			'import "./main.css"; import { routes, brickSlots, fieldSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.testRegistry = { routes, brickSlots, fieldSlots };',
 		);
 		await writeFile(path.join(root, "main.css"), "");
+		const server = await createServer({
+			configFile: false,
+			root,
+			logLevel: "silent",
+			plugins: [
+				adminExtensionsPlugin({
+					configPath: path.join(root, "lucid.config.js"),
+					stylesheetPath: path.join(root, "main.css"),
+					admin: {
+						slots: [
+							{
+								key: "named",
+								slot: "field.after",
+								component: {
+									module: "test-plugin/panel",
+									export: "NamedPanel",
+								},
+							},
+						],
+					},
+				}),
+				solid(),
+			],
+			optimizeDeps: { noDiscovery: true, include: [] },
+			server: { middlewareMode: true },
+		});
+		try {
+			const registry = await server.transformRequest("\0virtual:lucid-admin");
+			expect(registry?.code).toContain('module["NamedPanel"]');
+		} finally {
+			await server.close();
+		}
 		await build({
 			configFile: false,
 			root,
@@ -84,7 +116,10 @@ test("bundles project and browser package entries without executing them, includ
 								key: "field-panel",
 								slot: "field.after",
 								match: { brick: "seo", field: "title" },
-								component: "test-plugin/panel",
+								component: {
+									module: "test-plugin/panel",
+									export: "NamedPanel",
+								},
 							},
 							{
 								key: "panel",

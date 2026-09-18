@@ -3,8 +3,7 @@ import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { FaSolidCheck } from "solid-icons/fa";
 import { type Component, createSignal } from "solid-js";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 interface CheckboxInputProps {
@@ -81,8 +80,11 @@ export const Checkbox: Component<CheckboxInputProps> = (props) => {
 				</KobalteCheckbox.Root>
 				<FormTooltip copy={props.copy?.tooltip} theme={"inline"} />
 			</div>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

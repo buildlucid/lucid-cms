@@ -2,6 +2,7 @@ export type {
 	BrickSlot,
 	BrickSlotComponent,
 	BrickSlotMatch,
+	BrickSlotPlacement,
 	BrickSlotProps,
 } from "../components/BrickSlots/types.js";
 export type {
@@ -19,6 +20,7 @@ export type {
 	FieldContext,
 } from "../extensions/editor/types.js";
 export type {
+	AdminComponentReference,
 	AdminConfig,
 	AdminModulePath,
 	AdminSlot,
@@ -37,3 +39,4 @@ export type {
 	TranslationRegistry,
 	TranslationValues,
 } from "../hooks/useTranslation/useTranslation.js";
+export type { AdminClientConfig } from "../types/client-config.js";

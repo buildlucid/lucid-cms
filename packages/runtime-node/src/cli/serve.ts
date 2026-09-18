@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { getRequestListener } from "@hono/node-server";
-import { createCliAdmin } from "@lucidcms/core/build";
+import { createAdminClientConfig, createCliAdmin } from "@lucidcms/core/build";
 import { createLucidHost, withResponseCleanup } from "@lucidcms/core/runtime";
 import type { ServeHandler } from "@lucidcms/core/types";
 import getRuntimeContext from "../services/runtime-context.js";
@@ -88,6 +88,7 @@ const serveCommand =
 					projectRoot,
 					configPath,
 					admin: config.admin,
+					clientConfig: createAdminClientConfig(config),
 				});
 			}
 

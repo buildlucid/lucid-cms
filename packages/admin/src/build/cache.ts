@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import type { AdminClientConfig } from "../types/client-config.js";
 
 const lockfiles = [
 	"package-lock.json",
@@ -30,6 +31,7 @@ const findLockfiles = async (root: string) => {
 export const getAdminBuildKey = async (
 	adminRoot: string,
 	projectRoot: string,
+	clientConfig: AdminClientConfig,
 ) => {
 	const locks = [
 		...new Set(
@@ -65,6 +67,7 @@ export const getAdminBuildKey = async (
 		...["package.json", "index.html"].map((name) => path.join(adminRoot, name)),
 	].sort();
 	const hash = createHash("sha256");
+	hash.update(JSON.stringify(clientConfig));
 
 	for (const [index, content] of (
 		await Promise.all(files.map((file) => readFile(file)))

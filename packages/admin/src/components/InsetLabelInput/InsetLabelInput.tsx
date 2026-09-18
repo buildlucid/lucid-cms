@@ -3,8 +3,7 @@ import classnames from "classnames";
 import classNames from "classnames";
 import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
@@ -75,7 +74,7 @@ export const InsetLabelInput: Component<{
 					class={classnames(
 						"focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-transparent pb-2 pt-1 rounded-b-md",
 						{
-							"pr-[32px]": props.type === "password",
+							"pr-8": props.type === "password",
 							"pt-2": props.copy?.label === undefined,
 						},
 					)}
@@ -128,8 +127,11 @@ export const InsetLabelInput: Component<{
 				</Show>
 				<FormTooltip copy={props.copy?.tooltip} theme={"full"} />
 			</div>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

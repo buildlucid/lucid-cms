@@ -9,8 +9,7 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 import T from "@/translations";
@@ -234,10 +233,6 @@ export const Switch: Component<SwitchProps> = (props) => {
 								{switchButton()}
 							</>
 						)}
-						<FieldDescription
-							id={props.id}
-							describedBy={props.copy?.describedBy}
-						/>
 						<FormTooltip copy={props.copy?.tooltip} theme={undefined} />
 					</>
 				}
@@ -262,9 +257,12 @@ export const Switch: Component<SwitchProps> = (props) => {
 							: props.copy?.false || T()("common.false")}
 					</span>
 				</label>
-				<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
 			</Show>
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

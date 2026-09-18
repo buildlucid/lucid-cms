@@ -6,7 +6,7 @@ import type { Plugin } from "vite";
 export const createDevAdminPlugin = (
 	options: Pick<
 		Parameters<typeof createAdminDevServer>[0],
-		"projectRoot" | "configPath" | "admin"
+		"projectRoot" | "configPath" | "admin" | "clientConfig"
 	>,
 ): Plugin => {
 	let admin: Awaited<ReturnType<typeof createAdminDevServer>> | undefined;

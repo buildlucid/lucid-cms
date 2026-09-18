@@ -1,4 +1,5 @@
 export { buildAdmin, createAdminDevServer } from "@lucidcms/admin/build";
+export { default as createAdminClientConfig } from "../libs/admin/create-client-config.js";
 export { default as migrateCommand } from "../libs/cli/commands/migrate.js";
 export { default as createCliAdmin } from "../libs/cli/services/create-cli-admin.js";
 export { default as processBuildArtifacts } from "../libs/cli/services/process-build-artifacts.js";

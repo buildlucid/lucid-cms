@@ -12,8 +12,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import DragDrop, { type DragDropCBT } from "@/components/DragDrop/DragDrop";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import RelationCount from "@/components/RelationCount/RelationCount";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
@@ -263,8 +262,11 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

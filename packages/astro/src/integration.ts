@@ -1,7 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildAdmin, getConfigPath } from "@lucidcms/core/build";
+import {
+	buildAdmin,
+	createAdminClientConfig,
+	getConfigPath,
+} from "@lucidcms/core/build";
 import type { AstroIntegration } from "astro";
 import constants from "./constants.js";
 import { createDevAdminPlugin } from "./integration/admin.js";
@@ -163,6 +167,9 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 									projectRoot,
 									configPath: nextProject.configPath,
 									admin: nextProject.loaded.config.admin,
+									clientConfig: createAdminClientConfig(
+										nextProject.loaded.config,
+									),
 								}),
 								createResourceWatchPlugin(
 									nextProject.configPath,
@@ -253,6 +260,7 @@ const lucidCMS = (options: LucidAstroOptions = {}): AstroIntegration => {
 						projectRoot: project.loaded.projectRoot,
 						outDir,
 						admin: project.loaded.config.admin,
+						clientConfig: createAdminClientConfig(project.loaded.config),
 					});
 					await writeSpaModule(
 						generatedDirectory,

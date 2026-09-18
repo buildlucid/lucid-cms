@@ -2,7 +2,11 @@ import type { FieldError, InternalDocumentField } from "@types";
 import type { CollectionFieldConfig } from "@/types/collection-config";
 import { getFieldError } from "@/utils/get-field-error";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
-import type { EditorFieldConfig, EditorFieldState } from "./types";
+import type {
+	EditorContext,
+	EditorFieldConfig,
+	EditorFieldState,
+} from "./types";
 
 export const readFieldValue = (
 	config: EditorFieldConfig,
@@ -13,6 +17,34 @@ export const readFieldValue = (
 	"localized" in config && config.localized && localized
 		? data?.translations?.[contentLocale]
 		: data?.value;
+
+/** Resolves the configured route from live collection fields, without locale fallback. */
+export const readDocumentRoute = (options: {
+	field: string | undefined;
+	configs: CollectionFieldConfig[];
+	fields: InternalDocumentField[];
+	contentLocale: string;
+	localized: boolean;
+}): EditorContext["route"] => {
+	if (!options.field) return undefined;
+
+	const config = flattenStructuralScopeConfigs(options.configs).find(
+		(config) => config.key === options.field,
+	);
+	const value = config
+		? readFieldValue(
+				config,
+				options.fields.find((field) => field.key === options.field),
+				options.contentLocale,
+				options.localized,
+			)
+		: undefined;
+
+	return {
+		field: options.field,
+		path: typeof value === "string" ? value : undefined,
+	};
+};
 
 /** Reads a field value in the current content locale. */
 export const createFieldState = (options: {

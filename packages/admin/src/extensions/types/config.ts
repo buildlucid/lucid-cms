@@ -1,6 +1,6 @@
 import type {
-	BrickSlot,
 	BrickSlotMatch,
+	BrickSlotPlacement,
 } from "../../components/BrickSlots/types.js";
 import type {
 	FieldSlot,
@@ -10,12 +10,17 @@ import type { AdminRoute } from "./route.js";
 
 /** Project-relative path, exported package subpath, absolute path or file URL. */
 export type AdminModulePath = string | URL;
+/** A default-exported module, or a named export from a component module. */
+export type AdminComponentReference =
+	| AdminModulePath
+	| { module: AdminModulePath; export: string };
+
 export type AdminSlot = {
 	key: string;
 	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
-	component: AdminModulePath;
+	component: AdminComponentReference;
 } & (
-	| { slot: BrickSlot; match?: BrickSlotMatch }
+	| (BrickSlotPlacement & { match?: BrickSlotMatch })
 	| { slot: FieldSlot; match?: FieldSlotMatch }
 );
 

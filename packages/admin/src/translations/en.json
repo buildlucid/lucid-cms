@@ -1589,5 +1589,7 @@
 	"toasts.jobs.schedule.paused.title": "Schedule Paused",
 	"toasts.jobs.schedule.paused.message": "The schedule will not create jobs until it is resumed.",
 	"toasts.jobs.schedule.resumed.title": "Schedule Resumed",
-	"toasts.jobs.schedule.resumed.message": "The schedule will create jobs when it is next due."
+	"toasts.jobs.schedule.resumed.message": "The schedule will create jobs when it is next due.",
+	"common.show_more": "Show more",
+	"common.show_less": "Show less"
 }

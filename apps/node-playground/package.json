@@ -47,7 +47,8 @@
 		"@lucidcms/db-sqlite": "*",
 		"@lucidcms/plugin-worker-queues": "*",
 		"nodemailer": "^9.0.1",
-		"@lucidcms/plugin-typesense": "*"
+		"@lucidcms/plugin-typesense": "*",
+		"@lucidcms/plugin-seo": "*"
 	},
 	"author": "Build Lucid Ltd",
 	"license": "MIT",

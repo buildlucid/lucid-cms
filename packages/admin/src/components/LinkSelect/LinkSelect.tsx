@@ -7,8 +7,7 @@ import {
 } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import Button from "@/components/Button/Button";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import T from "@/translations";
@@ -140,8 +139,11 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 					</Button>
 				</Show>
 			</div>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

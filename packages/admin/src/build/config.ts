@@ -5,6 +5,8 @@ import { type InlineConfig, searchForWorkspaceRoot } from "vite";
 import solid from "vite-plugin-solid";
 import packageJson from "../../package.json" with { type: "json" };
 import type { AdminConfig } from "../extensions/types/config.js";
+import type { AdminClientConfig } from "../types/client-config.js";
+import { adminClientConfigPlugin } from "./client-config.js";
 import {
 	adminExtensionsPlugin,
 	hasAdminExtensions,
@@ -40,6 +42,7 @@ export type AdminConfigOptions = {
 	/** Absolute path returned by the host's config loader. */
 	configPath: string;
 	admin?: AdminConfig;
+	clientConfig: AdminClientConfig;
 };
 
 /** The installed admin package owns its compiler configuration and input paths. */
@@ -47,6 +50,7 @@ export const createAdminConfig = ({
 	projectRoot,
 	configPath,
 	admin,
+	clientConfig,
 }: AdminConfigOptions): InlineConfig => ({
 	configFile: false,
 	// The CLI or Astro host owns terminal clearing; admin HMR only appends updates.
@@ -57,6 +61,7 @@ export const createAdminConfig = ({
 	publicDir: false,
 	cacheDir: path.join(projectRoot, ".lucid/vite/admin"),
 	plugins: [
+		adminClientConfigPlugin(clientConfig),
 		adminExtensionsPlugin({
 			configPath,
 			admin,

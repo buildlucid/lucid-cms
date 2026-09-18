@@ -37,13 +37,13 @@ import type { DynamicFieldProps } from "@/types/custom-fields";
 import { evaluateFieldVisibility } from "@/utils/field-condition-helpers";
 import { getPreviewFieldId } from "@/utils/preview-focus-dom";
 
-/** Maps `ui.width` onto the 12-column grid. Mobile always spans the full row. */
+/** Maps `ui.width` onto the 12-column grid. Narrow field containers span the full row. */
 const fieldWidthClasses: Record<number, string> = {
 	12: "col-span-12",
-	8: "col-span-12 md:col-span-8",
-	6: "col-span-12 md:col-span-6",
-	4: "col-span-12 md:col-span-4",
-	3: "col-span-12 md:col-span-3",
+	8: "col-span-12 @min-[32rem]/fields:col-span-8",
+	6: "col-span-12 @min-[32rem]/fields:col-span-6",
+	4: "col-span-12 @min-[32rem]/fields:col-span-4",
+	3: "col-span-12 @min-[32rem]/fields:col-span-3",
 };
 
 export const DynamicField: Component<DynamicFieldProps> = (props) => {
@@ -220,8 +220,9 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 					<Switch>
 						<Match when={fieldConfig().type === "tab"}>
 							<div
+								inert={!activeTab()}
 								class={classNames(
-									"transition-opacity duration-200 ease-in-out grid grid-cols-12 gap-4",
+									"transition-opacity duration-200 ease-in-out @container/fields grid grid-cols-12 gap-4",
 									{
 										"visible h-full opacity-100": activeTab(),
 										"invisible h-0 overflow-hidden opacity-0": !activeTab(),

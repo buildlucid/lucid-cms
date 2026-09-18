@@ -32,16 +32,22 @@ const fixture = async () => {
 
 test("rebuilds without a dependency lockfile", async () => {
 	const root = await fixture();
-	expect(await getAdminBuildKey(root, root)).toBeUndefined();
+	expect(
+		await getAdminBuildKey(root, root, { brand: { name: "Lucid" } }),
+	).toBeUndefined();
 });
 
 test("invalidates source, compiler, shared helper and lockfile changes, including additions and removals", async () => {
 	const root = await fixture();
 	await writeFile(path.join(root, "package-lock.json"), "first lock");
-	const original = await getAdminBuildKey(root, root);
+	const original = await getAdminBuildKey(root, root, {
+		brand: { name: "Lucid" },
+	});
 	expect(original).toBeTypeOf("string");
 	await utimes(path.join(root, "src/index.tsx"), new Date(0), new Date(0));
-	expect(await getAdminBuildKey(root, root)).toBe(original);
+	expect(await getAdminBuildKey(root, root, { brand: { name: "Lucid" } })).toBe(
+		original,
+	);
 	let previous = original;
 	for (const file of [
 		"src/index.tsx",
@@ -52,10 +58,23 @@ test("invalidates source, compiler, shared helper and lockfile changes, includin
 		"src/new.tsx",
 	]) {
 		await writeFile(path.join(root, file), "changed");
-		const next = await getAdminBuildKey(root, root);
+		const next = await getAdminBuildKey(root, root, {
+			brand: { name: "Lucid" },
+		});
 		expect(next).not.toBe(previous);
 		previous = next;
 	}
 	await rm(path.join(root, "src/new.tsx"));
-	expect(await getAdminBuildKey(root, root)).not.toBe(previous);
+	expect(
+		await getAdminBuildKey(root, root, { brand: { name: "Lucid" } }),
+	).not.toBe(previous);
+});
+
+test("invalidates builds when exposed config changes", async () => {
+	const root = await fixture();
+	await writeFile(path.join(root, "package-lock.json"), "lock");
+	const key = await getAdminBuildKey(root, root, { brand: { name: "First" } });
+	expect(
+		await getAdminBuildKey(root, root, { brand: { name: "Second" } }),
+	).not.toBe(key);
 });

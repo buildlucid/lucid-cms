@@ -3,7 +3,11 @@ import { createServer } from "node:http";
 import { relative } from "node:path";
 import { getRequestListener } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { createCliAdmin, getBuildPaths } from "@lucidcms/core/build";
+import {
+	createAdminClientConfig,
+	createCliAdmin,
+	getBuildPaths,
+} from "@lucidcms/core/build";
 import {
 	createLucidHost,
 	shouldServeAdminShell,
@@ -176,6 +180,7 @@ const serveCommand =
 					projectRoot,
 					configPath,
 					admin: config.admin,
+					clientConfig: createAdminClientConfig(config),
 				});
 			}
 

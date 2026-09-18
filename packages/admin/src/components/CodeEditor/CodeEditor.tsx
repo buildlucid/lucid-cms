@@ -21,8 +21,7 @@ import {
 	Show,
 } from "solid-js";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
@@ -231,7 +230,7 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 					},
 				)}
 			>
-				<div class="flex h-9 items-center justify-start border-b border-border bg-[var(--lucid-code-toolbar)] px-2">
+				<div class="flex h-9 items-center justify-start border-b border-border bg-(--lucid-code-toolbar) px-2">
 					<DropdownMenu.Root
 						open={languageMenuOpen()}
 						onOpenChange={setLanguageMenuOpen}
@@ -293,8 +292,11 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 					})}
 				/>
 			</div>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

@@ -1,13 +1,14 @@
 import { fieldSlots } from "virtual:lucid-admin";
 import type { InternalDocumentField } from "@lucidcms/types";
 import type { FieldError } from "@types";
-import { type Component, createMemo, For, Show } from "solid-js";
+import { type Component, children, createMemo, For, Show } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import {
 	createFieldState,
 	readFieldValue,
 } from "@/extensions/editor/field-state";
 import { matchesSlot } from "@/extensions/matches-slot";
+import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
@@ -28,6 +29,7 @@ const FieldSlots: Component<{
 	// ----------------------------------
 	// State & Hooks
 	const context = useFieldRenderState();
+	const route = useDocumentRoute(context.contentLocale);
 
 	// ----------------------------------
 	// Memos
@@ -50,11 +52,8 @@ const FieldSlots: Component<{
 		<Show when={props.config}>
 			{(config) => (
 				<For each={contributions()}>
-					{(entry) => (
-						<div
-							class={props.slot === fieldSlotKeys.before ? "mb-2" : "mt-2"}
-							data-admin-slot={entry.key}
-						>
+					{(entry) => {
+						const content = children(() => (
 							<AdminExtensionBoundary name={entry.key}>
 								<entry.component
 									slot={props.slot}
@@ -67,6 +66,7 @@ const FieldSlots: Component<{
 										readOnly: brickStore.get.locked,
 									})}
 									context={{
+										route: route(),
 										collectionKey: context.collectionKey(),
 										documentId: context.documentId(),
 										contentLocale: context.contentLocale(),
@@ -97,8 +97,19 @@ const FieldSlots: Component<{
 									}}
 								/>
 							</AdminExtensionBoundary>
-						</div>
-					)}
+						));
+
+						return (
+							<Show when={content.toArray().length > 0}>
+								<div
+									class={props.slot === fieldSlotKeys.before ? "mb-2" : "mt-2"}
+									data-admin-slot={entry.key}
+								>
+									{content()}
+								</div>
+							</Show>
+						);
+					}}
 				</For>
 			)}
 		</Show>

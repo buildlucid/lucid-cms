@@ -8,14 +8,22 @@ import brickHelpers from "@/utils/brick-helpers";
 const AUTO_SAVE_DEBOUNCE_MS = 800;
 
 export function useDocumentAutoSave(props: {
-	updateSingleVersionMutation: ReturnType<
-		typeof api.documents.useUpdateSingleVersion
+	updateSingleVersionMutation: {
+		action: Pick<
+			ReturnType<typeof api.documents.useUpdateSingleVersion>["action"],
+			"isPending" | "mutate"
+		>;
+	};
+	checkSingleVersionMutation: {
+		action: Pick<
+			ReturnType<typeof api.documents.useCheckSingleVersion>["action"],
+			"isPending" | "mutateAsync"
+		>;
+	};
+	document: Accessor<
+		Pick<InternalCollectionDocument, "id" | "versionId"> | undefined
 	>;
-	checkSingleVersionMutation: ReturnType<
-		typeof api.documents.useCheckSingleVersion
-	>;
-	document: Accessor<InternalCollectionDocument | undefined>;
-	collection: Accessor<Collection | undefined>;
+	collection: Accessor<Pick<Collection, "key"> | undefined>;
 	hasDraftSyncPermission: Accessor<boolean | undefined>;
 	autoSaveActive: Accessor<boolean | undefined>;
 }) {
@@ -111,7 +119,7 @@ export function useDocumentAutoSave(props: {
 		});
 		if (!draftCheckIsCurrent) return;
 
-		if (shouldAutoSave) {
+		if (shouldAutoSave && brickStore.getDocumentMutated()) {
 			props.updateSingleVersionMutation.action.mutate({
 				collectionKey: collectionKey,
 				documentId: documentId,
@@ -157,7 +165,7 @@ export function useDocumentAutoSave(props: {
 		// and trigger autosave loops before baseline state exists.
 		if (brickStore.get.initialSnapshot === null) return;
 
-		if (!brickStore.getDocumentMutated()) return;
+		// Reverting to the saved content still needs a check to clear stale errors.
 		if (brickStore.get.autoSaveCounter === 0) {
 			lastAttemptedDraftCounter = 0;
 			return;

@@ -2,7 +2,6 @@ import { CollectionBuilder, copy, z } from "@lucidcms/core";
 import AllFieldsBrick from "../bricks/all-fields.js";
 import BannerBrick from "../bricks/banner.js";
 import IntroBrick from "../bricks/intro.js";
-import SEOBrick from "../bricks/seo.js";
 import TestingBrick from "../bricks/testing.js";
 
 const PageCollection = new CollectionBuilder("page", {
@@ -69,7 +68,6 @@ const PageCollection = new CollectionBuilder("page", {
 		},
 	],
 	bricks: {
-		fixed: [SEOBrick],
 		builder: [BannerBrick, IntroBrick, TestingBrick, AllFieldsBrick],
 	},
 	publishing: {

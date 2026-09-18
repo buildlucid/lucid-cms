@@ -13,8 +13,7 @@ import {
 import Button from "@/components/Button/Button";
 import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
 import DragDrop, { type DragDropCBT } from "@/components/DragDrop/DragDrop";
-import { FieldDescription } from "@/components/FieldDescription/FieldDescription";
-import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
+import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import Pill from "@/components/Pill/Pill";
@@ -487,8 +486,11 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					</Match>
 				</Switch>
 			</div>
-			<FieldDescription id={props.id} describedBy={props.copy?.describedBy} />
-			<FormErrorMessage id={props.id} errors={props.errors} />
+			<FieldFeedback
+				id={props.id}
+				describedBy={props.copy?.describedBy}
+				errors={props.errors}
+			/>
 		</div>
 	);
 };

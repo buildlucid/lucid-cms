@@ -200,7 +200,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 					},
 				)}
 			>
-				<div class="border-t border-border bg-card-base p-3 md:p-4 grid grid-cols-12 gap-4">
+				<div class="border-t border-border bg-card-base p-3 md:p-4 @container/fields grid grid-cols-12 gap-4">
 					<Index each={childrenMounted() ? fieldConfig().fields : []}>
 						{(config) => (
 							<props.renderField

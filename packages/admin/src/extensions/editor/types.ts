@@ -45,6 +45,13 @@ export type EditorFieldState = {
 );
 
 export type EditorContext = {
+	/** The configured collection route in the current locale, including unsaved edits. */
+	readonly route:
+		| {
+				readonly field: string;
+				readonly path: string | undefined;
+		  }
+		| undefined;
 	readonly collectionKey: string | undefined;
 	readonly documentId: number | undefined;
 	readonly contentLocale: string;
