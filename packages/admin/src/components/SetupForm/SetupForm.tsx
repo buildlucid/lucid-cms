@@ -32,7 +32,7 @@ const SetupForm: Component = () => {
 			}}
 			options={{
 				buttonFullWidth: true,
-				buttonSize: "large",
+				buttonSize: "lg",
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {

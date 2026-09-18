@@ -399,8 +399,9 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						</div>
 						<Button
 							type="button"
-							theme="secondary-subtle"
-							size="icon-subtle"
+							variant="secondary-subtle"
+							size="xs"
+							shape="square"
 							onClick={closeModal}
 							disabled={isProcessing()}
 							aria-label={T()("common.close")}
@@ -487,8 +488,9 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 											<Show when={row.status === "queued"}>
 												<Button
 													type="button"
-													theme="danger-subtle"
-													size="icon-subtle"
+													variant="danger-subtle"
+													size="xs"
+													shape="square"
 													onClick={() => removeRow(row.id)}
 													disabled={isProcessing()}
 													aria-label={T()("common.remove")}
@@ -536,8 +538,8 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 					<div class="flex flex-wrap items-center gap-2">
 						<Button
 							type="button"
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							onClick={closeModal}
 							disabled={isProcessing()}
 						>
@@ -545,10 +547,10 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						</Button>
 						<Button
 							type="button"
-							theme={
+							variant={
 								errorCount() > 0 && queuedCount() === 0 ? "danger" : "primary"
 							}
-							size="medium"
+							size="md"
 							onClick={primaryAction}
 							loading={isProcessing()}
 							disabled={primaryDisabled()}

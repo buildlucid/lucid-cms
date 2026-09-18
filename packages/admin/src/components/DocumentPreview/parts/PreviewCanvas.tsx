@@ -344,8 +344,9 @@ export const PreviewCanvas: Component<{
 						<PreviewHelp mode={props.previewMode()} />
 						<Button
 							type="button"
-							theme="secondary-subtle"
-							size="icon-subtle"
+							variant="secondary-subtle"
+							size="xs"
+							shape="square"
 							title={T()("common.refresh")}
 							aria-label={T()("common.refresh")}
 							onClick={props.onRefresh}
@@ -354,8 +355,9 @@ export const PreviewCanvas: Component<{
 						</Button>
 						<Button
 							type="button"
-							theme="secondary-subtle"
-							size="icon-subtle"
+							variant="secondary-subtle"
+							size="xs"
+							shape="square"
 							title={T()("preview.copy.url")}
 							aria-label={T()("preview.copy.url")}
 							loading={props.actionLoading()}
@@ -365,8 +367,9 @@ export const PreviewCanvas: Component<{
 						</Button>
 						<Button
 							type="button"
-							theme="secondary-subtle"
-							size="icon-subtle"
+							variant="secondary-subtle"
+							size="xs"
+							shape="square"
 							title={T()("preview.open")}
 							aria-label={T()("preview.open")}
 							loading={props.actionLoading()}
@@ -399,8 +402,8 @@ export const PreviewCanvas: Component<{
 						</p>
 						<Button
 							type="button"
-							theme="border-outline"
-							size="small"
+							variant="outline"
+							size="sm"
 							class="mt-4"
 							onClick={props.onRetry}
 						>

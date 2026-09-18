@@ -191,8 +191,9 @@ export const PageHeader: Component<{
 						<HeaderPrimaryActions actions={primaryActions()} />
 						<Show when={showLinkAction()}>
 							<Link
-								theme="primary"
-								size="icon"
+								variant="primary"
+								size="sm"
+								shape="square"
 								href={props.actions?.link?.href}
 								target={props.actions?.link?.newTab ? "_blank" : undefined}
 							>
@@ -202,8 +203,9 @@ export const PageHeader: Component<{
 						</Show>
 						<Show when={showDeleteAction()}>
 							<Button
-								theme="danger"
-								size="icon"
+								variant="danger"
+								size="sm"
+								shape="square"
 								type="button"
 								onClick={() => props.actions?.delete?.setOpen(true)}
 							>
@@ -231,8 +233,9 @@ export const PageHeader: Component<{
 							<HeaderPrimaryActions actions={primaryActions()} />
 							<Show when={showLinkAction()}>
 								<Link
-									theme="primary"
-									size="icon"
+									variant="primary"
+									size="sm"
+									shape="square"
 									href={props.actions?.link?.href}
 									target={props.actions?.link?.newTab ? "_blank" : undefined}
 								>
@@ -242,8 +245,9 @@ export const PageHeader: Component<{
 							</Show>
 							<Show when={showDeleteAction()}>
 								<Button
-									theme="danger"
-									size="icon"
+									variant="danger"
+									size="sm"
+									shape="square"
 									type="button"
 									onClick={() => props.actions?.delete?.setOpen(true)}
 								>
@@ -267,8 +271,9 @@ export const PageHeader: Component<{
 						<HeaderPrimaryActions actions={primaryActions()} />
 						<Show when={showLinkAction()}>
 							<Link
-								theme="primary"
-								size="icon"
+								variant="primary"
+								size="sm"
+								shape="square"
 								href={props.actions?.link?.href}
 								target={props.actions?.link?.newTab ? "_blank" : undefined}
 							>
@@ -278,8 +283,9 @@ export const PageHeader: Component<{
 						</Show>
 						<Show when={showDeleteAction()}>
 							<Button
-								theme="danger"
-								size="icon"
+								variant="danger"
+								size="sm"
+								shape="square"
 								type="button"
 								onClick={() => props.actions?.delete?.setOpen(true)}
 							>

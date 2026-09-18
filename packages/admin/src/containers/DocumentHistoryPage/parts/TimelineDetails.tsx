@@ -2,6 +2,7 @@ import { Collapsible } from "@kobalte/core";
 import type {
 	Collection,
 	InternalCollectionDocument,
+	Permission,
 	PublishOperation,
 	UserRef,
 } from "@types";
@@ -78,7 +79,7 @@ const TimelineDetails: Component<{
 	onRestore: () => void;
 	restore: {
 		loading: boolean;
-		permission: boolean;
+		permission: Permission | undefined;
 	};
 	collection: Accessor<Collection | undefined>;
 	document: Accessor<InternalCollectionDocument | undefined>;
@@ -284,12 +285,7 @@ const TimelineDetails: Component<{
 							"sm:grid-cols-2": props.item.type === "revision",
 						})}
 					>
-						<Link
-							theme="border-outline"
-							size="small"
-							href={viewHref()}
-							class="w-full"
-						>
+						<Link variant="outline" size="sm" href={viewHref()} class="w-full">
 							{props.item.type === "latest"
 								? T()("common.edit")
 								: T()("common.view")}
@@ -297,10 +293,11 @@ const TimelineDetails: Component<{
 						<Show when={props.item.type === "revision"}>
 							<Button
 								type="button"
-								theme="secondary"
-								size="small"
+								variant="secondary"
+								size="sm"
 								class="w-full"
 								loading={props.restore.loading}
+								disabled={props.document()?.isDeleted}
 								permission={props.restore.permission}
 								onClick={props.onRestore}
 							>
@@ -538,8 +535,8 @@ const TimelineDetails: Component<{
 					actions: (
 						<>
 							<Button
-								theme="border-outline"
-								size="medium"
+								variant="outline"
+								size="md"
 								type="button"
 								disabled={reschedule.action.isPending}
 								onClick={() => {
@@ -553,8 +550,8 @@ const TimelineDetails: Component<{
 							</Button>
 							<Show when={selectedOperationHasSchedule()}>
 								<Button
-									theme="danger-outline"
-									size="medium"
+									variant="danger-outline"
+									size="md"
 									type="button"
 									loading={reschedule.action.isPending}
 									onClick={removeSchedule}
@@ -563,8 +560,8 @@ const TimelineDetails: Component<{
 								</Button>
 							</Show>
 							<Button
-								theme="primary"
-								size="medium"
+								variant="primary"
+								size="md"
 								type="button"
 								loading={reschedule.action.isPending}
 								onClick={saveSchedule}

@@ -22,8 +22,9 @@ const NodeActions: Component<NodeActionsProps> = (props) => {
 		>
 			<Button
 				type="button"
-				theme="secondary-subtle"
-				size="icon-subtle"
+				variant="secondary-subtle"
+				size="xs"
+				shape="square"
 				class="rounded-full!"
 				onClick={props.onEdit}
 				disabled={props.editDisabled}

@@ -127,8 +127,8 @@ const UpdateOAuthConnectionModal: Component<{
 					<div class="flex min-w-max gap-2">
 						<Button
 							type="button"
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							onClick={close}
 							disabled={updateConnection.action.isPending}
 						>
@@ -136,8 +136,8 @@ const UpdateOAuthConnectionModal: Component<{
 						</Button>
 						<Button
 							type="submit"
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							loading={updateConnection.action.isPending}
 							disabled={!canSubmit()}
 						>

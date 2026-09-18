@@ -32,7 +32,7 @@ const AcceptInvitationForm: Component<AcceptInvitationFormProps> = (props) => {
 			}}
 			options={{
 				buttonFullWidth: true,
-				buttonSize: "large",
+				buttonSize: "lg",
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {

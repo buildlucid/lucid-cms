@@ -261,8 +261,8 @@ const LinkModal: Component<{
 								fallback={
 									<Button
 										type="button"
-										theme="secondary"
-										size="small"
+										variant="secondary"
+										size="sm"
 										onClick={selectDocument}
 									>
 										{T()("common.select")}
@@ -271,8 +271,9 @@ const LinkModal: Component<{
 							>
 								<Button
 									type="button"
-									theme="secondary-subtle"
-									size="icon-subtle"
+									variant="secondary-subtle"
+									size="xs"
+									shape="square"
 									onClick={selectDocument}
 									aria-label={T()("common.edit")}
 								>
@@ -280,8 +281,9 @@ const LinkModal: Component<{
 								</Button>
 								<Button
 									type="button"
-									theme="danger-subtle"
-									size="icon-subtle"
+									variant="danger-subtle"
+									size="xs"
+									shape="square"
 									onClick={() => setDocumentRef(undefined)}
 									aria-label={T()("common.remove")}
 								>
@@ -312,8 +314,8 @@ const LinkModal: Component<{
 					<Show when={props.state.canRemove}>
 						<Button
 							type="button"
-							theme="danger-outline"
-							size="medium"
+							variant="danger-outline"
+							size="md"
 							onClick={props.callbacks.onRemove}
 						>
 							{T()("editor.rich.text.link.remove")}
@@ -323,16 +325,16 @@ const LinkModal: Component<{
 				<div class="flex gap-2.5">
 					<Button
 						type="button"
-						theme="border-outline"
-						size="medium"
+						variant="outline"
+						size="md"
 						onClick={closeModal}
 					>
 						{T()("common.cancel")}
 					</Button>
 					<Button
 						type="button"
-						theme="primary"
-						size="medium"
+						variant="primary"
+						size="md"
 						onClick={updateLink}
 						disabled={
 							kind() === "document"

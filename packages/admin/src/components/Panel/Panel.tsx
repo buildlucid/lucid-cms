@@ -332,8 +332,8 @@ export const Panel: Component<{
 														</div>
 														<div class="flex min-w-max gap-2">
 															<Button
-																size="medium"
-																theme="border-outline"
+																size="md"
+																variant="outline"
 																type="button"
 																onClick={() => props.state.setOpen(false)}
 															>
@@ -342,8 +342,8 @@ export const Panel: Component<{
 															<Show when={props.copy?.submit}>
 																<Button
 																	type="submit"
-																	theme="primary"
-																	size="medium"
+																	variant="primary"
+																	size="md"
 																	loading={props.mutateState?.isLoading}
 																	disabled={props.mutateState?.isDisabled}
 																>
@@ -397,8 +397,8 @@ export const Panel: Component<{
 													</div>
 													<div class="flex min-w-max gap-2">
 														<Button
-															size="medium"
-															theme="border-outline"
+															size="md"
+															variant="outline"
 															type="button"
 															onClick={() => props.state.setOpen(false)}
 														>
@@ -407,8 +407,8 @@ export const Panel: Component<{
 														<Show when={props.copy?.submit}>
 															<Button
 																type="submit"
-																theme="primary"
-																size="medium"
+																variant="primary"
+																size="md"
 																loading={props.mutateState?.isLoading}
 																disabled={props.mutateState?.isDisabled}
 															>

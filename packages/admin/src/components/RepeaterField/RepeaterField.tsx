@@ -215,8 +215,9 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 						>
 							<Button
 								type="button"
-								theme="circle"
-								size="icon-subtle"
+								variant="primary-outline"
+								shape="circle"
+								size="xs"
 								onClick={addGroup}
 								disabled={disabled()}
 								aria-label={T()("actions.add.entry")}

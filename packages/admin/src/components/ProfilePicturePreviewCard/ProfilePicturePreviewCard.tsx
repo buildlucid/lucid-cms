@@ -250,8 +250,9 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						<Show when={props.onEdit}>
 							<Button
 								type="button"
-								theme="secondary-subtle"
-								size="icon-subtle"
+								variant="secondary-subtle"
+								size="xs"
+								shape="square"
 								onClick={() => props.onEdit?.()}
 								aria-label={editLabel()}
 							>
@@ -263,8 +264,9 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						<Show when={props.onClear && media()}>
 							<Button
 								type="button"
-								theme="danger-subtle"
-								size="icon-subtle"
+								variant="danger-subtle"
+								size="xs"
+								shape="square"
 								onClick={() => setClearConfirmationOpen(true)}
 								loading={props.clearLoading}
 								aria-label={T()("common.clear")}

@@ -1040,8 +1040,9 @@ const MediaImageGenerationModal: Component = () => {
 											>
 												<Button
 													type="button"
-													theme="secondary-subtle"
-													size="icon-subtle"
+													variant="secondary-subtle"
+													size="xs"
+													shape="square"
 													title={T()("ai.media.image.generate.source.restore")}
 													aria-label={T()(
 														"ai.media.image.generate.source.restore",
@@ -1053,8 +1054,9 @@ const MediaImageGenerationModal: Component = () => {
 											</Show>
 											<Button
 												type="button"
-												theme="secondary-subtle"
-												size="icon-subtle"
+												variant="secondary-subtle"
+												size="xs"
+												shape="square"
 												title={T()("ai.media.image.generate.source.add")}
 												aria-label={T()("ai.media.image.generate.source.add")}
 												onClick={() => sourceInputRef?.click()}
@@ -1097,8 +1099,9 @@ const MediaImageGenerationModal: Component = () => {
 										<div class="flex items-center gap-1">
 											<Button
 												type="button"
-												theme="secondary-subtle"
-												size="icon-subtle"
+												variant="secondary-subtle"
+												size="xs"
+												shape="square"
 												title={T()("ai.media.image.generate.source.replace")}
 												aria-label={T()(
 													"ai.media.image.generate.source.replace",
@@ -1109,8 +1112,9 @@ const MediaImageGenerationModal: Component = () => {
 											</Button>
 											<Button
 												type="button"
-												theme="danger-subtle"
-												size="icon-subtle"
+												variant="danger-subtle"
+												size="xs"
+												shape="square"
 												title={T()("common.remove")}
 												aria-label={T()("common.remove")}
 												onClick={() => setSource(undefined)}
@@ -1324,8 +1328,8 @@ const MediaImageGenerationModal: Component = () => {
 							<div class="mt-4">
 								<Button
 									type="submit"
-									theme="secondary"
-									size="medium"
+									variant="secondary"
+									size="md"
 									class="w-full min-w-0! gap-2"
 									loading={isLoading()}
 									disabled={!canGenerate()}
@@ -1394,8 +1398,8 @@ const MediaImageGenerationModal: Component = () => {
 															<div class="flex min-w-0 flex-wrap gap-2">
 																<Button
 																	type="button"
-																	theme="secondary"
-																	size="small"
+																	variant="secondary"
+																	size="sm"
 																	class="gap-2"
 																	onClick={() =>
 																		useGenerationAsSource(generation())
@@ -1406,8 +1410,8 @@ const MediaImageGenerationModal: Component = () => {
 																</Button>
 																<Button
 																	type="button"
-																	theme="border-outline"
-																	size="small"
+																	variant="outline"
+																	size="sm"
 																	class="gap-2"
 																	disabled={isLoading()}
 																	onClick={() => retryGeneration(generation())}
@@ -1472,8 +1476,8 @@ const MediaImageGenerationModal: Component = () => {
 															<div class="flex min-w-0 flex-wrap gap-2">
 																<Button
 																	type="button"
-																	theme="border-outline"
-																	size="small"
+																	variant="outline"
+																	size="sm"
 																	class="gap-2"
 																	disabled={isLoading()}
 																	onClick={() =>
@@ -1490,8 +1494,8 @@ const MediaImageGenerationModal: Component = () => {
 																</Button>
 																<Button
 																	type="button"
-																	theme="danger-outline"
-																	size="small"
+																	variant="danger-outline"
+																	size="sm"
 																	class="gap-2"
 																	disabled={isLoading()}
 																	onClick={() =>
@@ -1528,16 +1532,16 @@ const MediaImageGenerationModal: Component = () => {
 							<div class="flex shrink-0 items-center gap-3">
 								<Button
 									type="button"
-									theme="border-outline"
-									size="medium"
+									variant="outline"
+									size="md"
 									onClick={() => close(false)}
 								>
 									{T()("common.cancel")}
 								</Button>
 								<Button
 									type="button"
-									theme="primary"
-									size="medium"
+									variant="primary"
+									size="md"
 									onClick={() => {
 										void accept();
 									}}

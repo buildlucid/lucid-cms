@@ -88,8 +88,8 @@ const AuthProviderRow: Component<{
 			<Show when={linked() && props.onUnlink}>
 				<Button
 					onClick={handleUnlinkClick}
-					theme="danger-outline"
-					size="small"
+					variant="danger-outline"
+					size="sm"
 					type="button"
 					loading={props.isLoading}
 				>
@@ -101,8 +101,8 @@ const AuthProviderRow: Component<{
 			<Show when={!linked() && props.onLink}>
 				<Button
 					onClick={props.onLink}
-					theme="border-outline"
-					size="small"
+					variant="outline"
+					size="sm"
 					type="button"
 					loading={props.isLoading}
 				>

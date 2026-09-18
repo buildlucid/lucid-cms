@@ -25,6 +25,10 @@
 			"types": "./dist/slots/slots.d.mts",
 			"default": "./dist/slots/slots.mjs"
 		},
+		"./components": {
+			"types": "./dist/browser/components.d.mts",
+			"default": "./src/exports/components.ts"
+		},
 		"./hooks": {
 			"types": "./dist/browser/hooks.d.mts",
 			"default": "./src/exports/hooks.ts"

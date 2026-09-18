@@ -86,19 +86,15 @@ const SystemAiUsagePage: Component = () => {
 							</div>
 						</div>
 						<div class="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-							<Link
-								href="/lucid/system/operations"
-								theme="border-outline"
-								size="small"
-							>
+							<Link href="/lucid/system/operations" variant="outline" size="sm">
 								{T()("ai.usage.connection.manage.action")}
 							</Link>
 							<Link
 								href={constants.lucidRemote.pricing}
 								target="_blank"
 								rel="noreferrer"
-								theme="primary"
-								size="small"
+								variant="primary"
+								size="sm"
 							>
 								{T()("ai.usage.connection.pricing.action")}
 								<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />

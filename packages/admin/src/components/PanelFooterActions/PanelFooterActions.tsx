@@ -27,16 +27,16 @@ const PanelFooterActions: Component<PanelFooterActionsProps> = (props) => {
 			<div class="flex flex-wrap items-center gap-2">
 				<Button
 					type="button"
-					theme="border-outline"
-					size="medium"
+					variant="outline"
+					size="md"
 					onClick={props.onClose}
 				>
 					{props.cancelLabel ?? T()("common.close")}
 				</Button>
 				<Button
 					type="button"
-					theme="primary"
-					size="medium"
+					variant="primary"
+					size="md"
 					onClick={props.onConfirm}
 					disabled={props.confirmDisabled}
 				>

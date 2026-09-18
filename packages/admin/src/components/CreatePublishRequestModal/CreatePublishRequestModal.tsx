@@ -240,8 +240,8 @@ const CreatePublishRequestModal: Component<{
 				actions: (
 					<>
 						<Button
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							type="button"
 							disabled={props.loading}
 							onClick={props.callbacks.onCancel}
@@ -249,8 +249,8 @@ const CreatePublishRequestModal: Component<{
 							{T()("common.cancel")}
 						</Button>
 						<Button
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							type="button"
 							loading={props.loading}
 							onClick={() => submitRequest(autoAccept())}

@@ -551,16 +551,16 @@ export const ReleaseRequestSidebar: Component<{
 							<div class="grid grid-cols-2 gap-2">
 								<Button
 									type="button"
-									theme="primary"
-									size="small"
+									variant="primary"
+									size="sm"
 									onClick={() => openDecision("approve")}
 								>
 									{T()("common.approve")}
 								</Button>
 								<Button
 									type="button"
-									theme="danger-outline"
-									size="small"
+									variant="danger-outline"
+									size="sm"
 									onClick={() => openDecision("reject")}
 								>
 									{T()("common.reject")}
@@ -571,8 +571,8 @@ export const ReleaseRequestSidebar: Component<{
 							<Show when={canCancelRequest()}>
 								<Button
 									type="button"
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 									onClick={() => openDecision("cancel")}
 								>
 									{T()("common.cancel")}
@@ -581,8 +581,8 @@ export const ReleaseRequestSidebar: Component<{
 							<Show when={request()?.permissions.reschedule}>
 								<Button
 									type="button"
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 									onClick={openReschedule}
 								>
 									{requestHasSchedule()
@@ -593,8 +593,8 @@ export const ReleaseRequestSidebar: Component<{
 							<Show when={request()?.permissions.retry}>
 								<Button
 									type="button"
-									theme="primary"
-									size="small"
+									variant="primary"
+									size="sm"
 									class={actionCount() === 3 ? "col-span-2 w-full" : undefined}
 									loading={retry.action.isPending}
 									onClick={() => {
@@ -727,8 +727,8 @@ export const ReleaseRequestSidebar: Component<{
 							<Show when={canUpdateReviewers()}>
 								<Button
 									type="button"
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 									onClick={() => setReviewersOpen(true)}
 								>
 									{T()("actions.update.reviewers")}
@@ -866,8 +866,8 @@ export const ReleaseRequestSidebar: Component<{
 					actions: (
 						<>
 							<Button
-								theme="border-outline"
-								size="medium"
+								variant="outline"
+								size="md"
 								type="button"
 								disabled={reschedule.action.isPending}
 								onClick={() => {
@@ -881,8 +881,8 @@ export const ReleaseRequestSidebar: Component<{
 							</Button>
 							<Show when={requestHasSchedule()}>
 								<Button
-									theme="danger-outline"
-									size="medium"
+									variant="danger-outline"
+									size="md"
 									type="button"
 									loading={reschedule.action.isPending}
 									onClick={removeSchedule}
@@ -891,8 +891,8 @@ export const ReleaseRequestSidebar: Component<{
 								</Button>
 							</Show>
 							<Button
-								theme="primary"
-								size="medium"
+								variant="primary"
+								size="md"
 								type="button"
 								loading={reschedule.action.isPending}
 								onClick={saveReschedule}

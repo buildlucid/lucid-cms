@@ -26,8 +26,9 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 	return (
 		<Button
 			type="button"
-			theme="danger-subtle"
-			size="icon-subtle"
+			variant="danger-subtle"
+			size="xs"
+			shape="square"
 			class={classNames(
 				"transition-all duration-200 focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed",
 				{

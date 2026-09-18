@@ -140,17 +140,13 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 							{T()("common.selected")}
 						</p>
 						<div class="ml-2 flex gap-2">
-							<Button
-								theme="border-outline"
-								size="small"
-								onClick={resetHandler}
-							>
+							<Button variant="outline" size="sm" onClick={resetHandler}>
 								{T()("common.reset")}
 							</Button>
 							<Show when={showRestoreAction()}>
 								<Button
-									theme="primary"
-									size="small"
+									variant="primary"
+									size="sm"
 									onClick={() => setRestoreModalOpen(true)}
 								>
 									{T()("common.restore")}
@@ -158,8 +154,8 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 							</Show>
 							<Show when={showDeleteAction()}>
 								<Button
-									theme="danger"
-									size="small"
+									variant="danger"
+									size="sm"
 									onClick={() => setDeleteModalOpen(true)}
 								>
 									{T()("common.delete")}
@@ -167,8 +163,8 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 							</Show>
 							<Show when={showDeletePermanentlyAction()}>
 								<Button
-									theme="danger"
-									size="small"
+									variant="danger"
+									size="sm"
 									onClick={() => setDeletePermanentlyModalOpen(true)}
 								>
 									{T()("common.delete")}

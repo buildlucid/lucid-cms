@@ -592,10 +592,11 @@ const ImageCropEditorModal: Component<{
 										return (
 											<Button
 												type="button"
-												theme="secondary-toggle"
-												size="small"
+												variant={
+													activeRatio() === preset ? "toggle-active" : "toggle"
+												}
+												size="sm"
 												class="h-8 text-xs"
-												active={activeRatio() === preset}
 												disabled={disabled()}
 												onClick={() => applyRatioPreset(preset)}
 											>
@@ -651,21 +652,21 @@ const ImageCropEditorModal: Component<{
 					</div>
 				</div>
 			</div>
-			<ModalFooter>
+			<ModalFooter options={{ border: true }}>
 				<div />
 				<div class="flex items-center justify-end gap-2">
 					<Button
 						type="button"
-						theme="border-outline"
-						size="medium"
+						variant="outline"
+						size="md"
 						onClick={() => props.state.setOpen(false)}
 					>
 						{T()("common.cancel")}
 					</Button>
 					<Button
 						type="button"
-						theme="primary"
-						size="medium"
+						variant="primary"
+						size="md"
 						loading={isApplying()}
 						disabled={!canApply()}
 						onClick={() => {

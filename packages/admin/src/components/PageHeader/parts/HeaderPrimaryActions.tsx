@@ -89,8 +89,9 @@ const HeaderPrimaryActions: Component<{
 			return (
 				<Button
 					type="button"
-					theme={action.secondary ? "border-outline" : "primary"}
-					size="icon"
+					variant={action.secondary ? "outline" : "primary"}
+					size="sm"
+					shape="square"
 					title={action.label}
 					aria-label={action.label}
 					disabled={action.disabled && !action.disabledClickable}
@@ -107,8 +108,9 @@ const HeaderPrimaryActions: Component<{
 
 		return (
 			<Link
-				theme="primary"
-				size="icon"
+				variant="primary"
+				size="sm"
+				shape="square"
 				href={action.href}
 				title={action.label}
 				aria-label={action.label}

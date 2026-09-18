@@ -223,8 +223,8 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 					<div class="mt-3 flex flex-wrap items-center gap-2">
 						<Button
 							type="button"
-							theme="border-outline"
-							size="small"
+							variant="outline"
+							size="sm"
 							onClick={openFileBrowser}
 							disabled={props.disabled}
 						>
@@ -238,8 +238,8 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 								<>
 									<Button
 										type="button"
-										theme="secondary-subtle"
-										size="small"
+										variant="secondary-subtle"
+										size="sm"
 										onClick={imageCrop().callbacks.open}
 										disabled={props.disabled || imageCrop().state.disabled}
 										title={imageCrop().state.tooltip}
@@ -250,8 +250,8 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 									<Show when={imageCrop().state.hasCrop}>
 										<Button
 											type="button"
-											theme="danger-subtle"
-											size="small"
+											variant="danger-subtle"
+											size="sm"
 											onClick={imageCrop().callbacks.remove}
 											disabled={props.disabled || imageCrop().state.disabled}
 										>
@@ -270,8 +270,8 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 						>
 							<Button
 								type="button"
-								theme="danger-subtle"
-								size="small"
+								variant="danger-subtle"
+								size="sm"
 								onClick={removeFile}
 								disabled={props.disabled}
 							>
@@ -288,8 +288,8 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 						>
 							<Button
 								type="button"
-								theme="secondary-subtle"
-								size="small"
+								variant="secondary-subtle"
+								size="sm"
 								onClick={restoreCurrentFile}
 								disabled={props.disabled}
 							>

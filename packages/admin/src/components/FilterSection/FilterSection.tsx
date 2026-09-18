@@ -809,8 +809,8 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 
 									return (
 										<Button
-											theme="border-outline"
-											size="small"
+											variant="outline"
+											size="sm"
 											type="button"
 											disabled={active()}
 											aria-pressed={active()}
@@ -877,8 +877,8 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 				</div>
 				<div class="w-full flex items-center gap-3 mt-4">
 					<Button
-						theme="border-outline"
-						size="small"
+						variant="outline"
+						size="sm"
 						type="button"
 						class="gap-1.5"
 						title={T()("filter.section.add.group")}

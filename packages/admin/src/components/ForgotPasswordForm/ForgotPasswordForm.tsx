@@ -36,7 +36,7 @@ const ForgotPasswordForm: Component<ForgotPasswordFormProps> = (props) => {
 			}}
 			options={{
 				buttonFullWidth: true,
-				buttonSize: "large",
+				buttonSize: "lg",
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {

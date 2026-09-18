@@ -11,7 +11,6 @@ import { Modal } from "@/components/Modal/Modal";
 import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
@@ -38,9 +37,6 @@ const UpdateSystemAlertsModal: Component<UpdateSystemAlertsProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const hasPermission = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsUpdate]).all,
-	);
 	const normalizedCurrent = createMemo(() => props.alertEmail ?? "");
 	const normalizedInput = createMemo(() => alertEmail().trim());
 	const submitIsDisabled = createMemo(
@@ -125,8 +121,8 @@ const UpdateSystemAlertsModal: Component<UpdateSystemAlertsProps> = (props) => {
 					<div class="flex gap-2.5">
 						<Button
 							type="button"
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							disabled={updateSystemAlerts.action.isPending}
 							onClick={closeModal}
 						>
@@ -134,11 +130,11 @@ const UpdateSystemAlertsModal: Component<UpdateSystemAlertsProps> = (props) => {
 						</Button>
 						<Button
 							type="submit"
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							loading={updateSystemAlerts.action.isPending}
 							disabled={submitIsDisabled()}
-							permission={hasPermission()}
+							permission={Permissions.SettingsUpdate}
 						>
 							{T()("common.save")}
 						</Button>

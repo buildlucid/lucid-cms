@@ -378,14 +378,11 @@ export function useDocumentUIState(props: {
 	);
 
 	/**
-	 * Determines if the user has permission to restore documents
+	 * The permission required to restore documents for this collection
 	 */
-	const hasRestorePermission = createMemo(() => {
-		const permission = props.collection()?.permissions.restore;
-		if (!permission) return false;
-
-		return userStore.get.hasPermission([permission]).all;
-	});
+	const restorePermission = createMemo(
+		() => props.collection()?.permissions.restore,
+	);
 
 	// ------------------------------------------
 	// Return
@@ -432,7 +429,7 @@ export function useDocumentUIState(props: {
 		isAutoSaveActive,
 		showRestoreRevisionButton,
 		showPreview,
-		hasRestorePermission,
+		restorePermission,
 		autoSaveUserEnabled,
 	};
 }

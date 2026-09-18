@@ -1,5 +1,5 @@
-import type { OAuthClientCreateResponse } from "@types";
-import { type Component, createSignal, For, Show } from "solid-js";
+import type { OAuthClientCreateResponse, Permission } from "@types";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
@@ -7,10 +7,11 @@ import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModa
 import OAuthClientRow from "@/components/OAuthClientRow/OAuthClientRow";
 import UpsertOAuthClientPanel from "@/components/UpsertOAuthClientPanel/UpsertOAuthClientPanel";
 import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
 export const OAuthClientsList: Component<{
-	canCreate: boolean;
+	createPermission: Permission | undefined;
 	canUpdate: boolean;
 	canDelete: boolean;
 	canRegenerate: boolean;
@@ -25,6 +26,12 @@ export const OAuthClientsList: Component<{
 	const [credentialsOpen, setCredentialsOpen] = createSignal(false);
 	const [credentials, setCredentials] =
 		createSignal<OAuthClientCreateResponse>();
+
+	// ----------------------------------------
+	// Memos
+	const canCreate = createMemo(
+		() => userStore.get.hasPermission([props.createPermission]).all,
+	);
 
 	// ----------------------------------------
 	// Queries
@@ -60,7 +67,7 @@ export const OAuthClientsList: Component<{
 							callback={{
 								createEntry: () => setCreateOpen(true),
 							}}
-							permissions={{ create: props.canCreate }}
+							permissions={{ create: props.createPermission }}
 							options={{
 								inline: true,
 								contained: true,
@@ -81,16 +88,14 @@ export const OAuthClientsList: Component<{
 						</DynamicContent>
 						<Show
 							when={
-								props.canCreate &&
-								clients.isSuccess &&
-								clients.data.data.length > 0
+								canCreate() && clients.isSuccess && clients.data.data.length > 0
 							}
 						>
 							<div class="mt-3 flex justify-start">
 								<Button
 									type="button"
-									theme="primary"
-									size="small"
+									variant="primary"
+									size="sm"
 									onClick={() => setCreateOpen(true)}
 								>
 									{T()("oauth.clients.create.action")}
@@ -125,7 +130,7 @@ export const OAuthClientsList: Component<{
 									callback={{
 										createEntry: () => setCreateOpen(true),
 									}}
-									permissions={{ create: props.canCreate }}
+									permissions={{ create: props.createPermission }}
 									options={{
 										inline: true,
 										contained: false,
@@ -148,16 +153,14 @@ export const OAuthClientsList: Component<{
 						</InfoRow.Content>
 						<Show
 							when={
-								props.canCreate &&
-								clients.isSuccess &&
-								clients.data.data.length > 0
+								canCreate() && clients.isSuccess && clients.data.data.length > 0
 							}
 						>
 							<div class="-mt-1 flex justify-start">
 								<Button
 									type="button"
-									theme="primary"
-									size="small"
+									variant="primary"
+									size="sm"
 									onClick={() => setCreateOpen(true)}
 								>
 									{T()("oauth.clients.create.action")}

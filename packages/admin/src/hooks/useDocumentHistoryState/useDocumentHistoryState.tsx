@@ -310,6 +310,7 @@ export function useDocumentHistoryState() {
 			daysRemaining,
 		};
 	});
+	const restorePermission = createMemo(() => collection()?.permissions.restore);
 	const canRestoreSelectedItem = createMemo(() => {
 		const permission = collection()?.permissions.restore;
 		const item = selectedItem();
@@ -435,6 +436,7 @@ export function useDocumentHistoryState() {
 		selectedCreatedByUser,
 		selectedRetention,
 		canRestoreSelectedItem,
+		restorePermission,
 		handleSelectItem,
 		handleRestoreRevision,
 		confirmRestoreRevision,

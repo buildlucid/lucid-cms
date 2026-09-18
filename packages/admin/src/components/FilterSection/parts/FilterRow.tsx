@@ -173,8 +173,9 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 			</div>
 			<div class="h-10 flex items-center gap-2.5">
 				<Button
-					theme="danger-outline"
-					size="icon"
+					variant="danger-outline"
+					size="sm"
+					shape="square"
 					type="button"
 					class="w-10! h-10! min-w-[40px]!"
 					onClick={props.onRemove}
@@ -184,8 +185,9 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					<FaSolidXmark size={14} />
 				</Button>
 				<Button
-					theme="border-outline"
-					size="icon"
+					variant="outline"
+					size="sm"
+					shape="square"
 					type="button"
 					class="w-10! h-10! min-w-[40px]!"
 					onClick={props.onAddRow}

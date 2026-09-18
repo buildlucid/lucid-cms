@@ -75,8 +75,8 @@ export const MediaSelectionActions: Component<{
 					</p>
 					<div class="ml-2 flex gap-2">
 						<Button
-							theme="border-outline"
-							size="small"
+							variant="outline"
+							size="sm"
 							onClick={() => {
 								props.actions.resetSelectedFolders();
 								props.actions.resetSelectedMedia();
@@ -86,8 +86,8 @@ export const MediaSelectionActions: Component<{
 						</Button>
 						<Show when={showRestoreAction()}>
 							<Button
-								theme="primary"
-								size="small"
+								variant="primary"
+								size="sm"
 								onClick={() => {
 									props.actions.restoreAction?.();
 								}}
@@ -97,8 +97,8 @@ export const MediaSelectionActions: Component<{
 						</Show>
 						<Show when={showDeleteAction()}>
 							<Button
-								theme="danger"
-								size="small"
+								variant="danger"
+								size="sm"
 								onClick={() => {
 									props.actions.deleteAction?.();
 								}}
@@ -108,8 +108,8 @@ export const MediaSelectionActions: Component<{
 						</Show>
 						<Show when={showDeletePermanentlyAction()}>
 							<Button
-								theme="danger"
-								size="small"
+								variant="danger"
+								size="sm"
 								onClick={() => {
 									props.actions.deletePermanentlyAction?.();
 								}}

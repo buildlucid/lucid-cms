@@ -332,8 +332,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 							>
 								<Button
 									type="button"
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 									onClick={openDocuSelectModal}
 									disabled={props.disabled || !canAddMore()}
 									class="capitalize"
@@ -387,8 +387,9 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								<div class="flex items-center gap-0.5 opacity-100 transition-opacity duration-200 md:opacity-0 group-hover:opacity-100">
 									<Button
 										type="button"
-										theme="secondary-subtle"
-										size="icon-subtle"
+										variant="secondary-subtle"
+										size="xs"
+										shape="square"
 										onClick={openDocuSelectModal}
 										disabled={props.disabled}
 										aria-label={T()("common.edit")}
@@ -397,8 +398,9 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									</Button>
 									<Button
 										type="button"
-										theme="danger-subtle"
-										size="icon-subtle"
+										variant="danger-subtle"
+										size="xs"
+										shape="square"
 										onClick={clearSelection}
 										disabled={props.disabled}
 										aria-label={T()("common.clear")}
@@ -423,8 +425,8 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 					<Match when={typeof selectedDocumentValue()?.id !== "number"}>
 						<Button
 							type="button"
-							theme="border-outline"
-							size="small"
+							variant="outline"
+							size="sm"
 							onClick={openDocuSelectModal}
 							disabled={props.disabled || !canAddMore()}
 							class="capitalize"
@@ -540,8 +542,9 @@ const DocumentSortableItem: Component<{
 				<div class="opacity-100 transition-opacity duration-200 md:opacity-0 group-hover:opacity-100">
 					<Button
 						type="button"
-						theme="danger-subtle"
-						size="icon-subtle"
+						variant="danger-subtle"
+						size="xs"
+						shape="square"
 						onClick={() =>
 							props.removeSelectedDocument({
 								id: props.document.value.id,

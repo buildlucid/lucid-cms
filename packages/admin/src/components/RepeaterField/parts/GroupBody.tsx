@@ -256,8 +256,9 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					/>
 					<Button
 						type="button"
-						theme="secondary-subtle"
-						size="icon-subtle"
+						variant="secondary-subtle"
+						size="xs"
+						shape="square"
 						tabIndex="-1"
 						class={classNames(
 							"text-icon-faded hover:text-icon-hover transition-all duration-200",

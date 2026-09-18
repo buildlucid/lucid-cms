@@ -1467,8 +1467,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									<Show when={posterPreview()}>
 										<Button
 											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
+											variant="secondary-subtle"
+											size="xs"
+											shape="square"
 											onClick={previewPosterFile}
 											title={T()("common.preview")}
 											aria-label={T()("common.preview")}
@@ -1477,8 +1478,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										</Button>
 										<Button
 											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
+											variant="secondary-subtle"
+											size="xs"
+											shape="square"
 											onClick={() => setPosterFocalEditorOpen(true)}
 											title={T()("media.focal.point.edit")}
 											aria-label={T()("media.focal.point.edit")}
@@ -1488,8 +1490,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										<Show when={posterCropSource()}>
 											<Button
 												type="button"
-												theme="secondary-subtle"
-												size="icon-subtle"
+												variant="secondary-subtle"
+												size="xs"
+												shape="square"
 												onClick={openPosterCropEditor}
 												title={T()("media.crop.action")}
 												aria-label={T()("media.crop.action")}
@@ -1500,8 +1503,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 										<Show when={posterHasCrop()}>
 											<Button
 												type="button"
-												theme="danger-subtle"
-												size="icon-subtle"
+												variant="danger-subtle"
+												size="xs"
+												shape="square"
 												onClick={PosterFile.removeCrop}
 												title={T()("media.crop.remove")}
 												aria-label={T()("media.crop.remove")}
@@ -1513,8 +1517,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									<Show when={posterSnapshotSource()}>
 										<Button
 											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
+											variant="secondary-subtle"
+											size="xs"
+											shape="square"
 											onClick={(event) => {
 												event.preventDefault();
 												event.stopPropagation();
@@ -1531,8 +1536,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									<Show when={mediaImageGeneration.isFeatureEnabled()}>
 										<Button
 											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
+											variant="secondary-subtle"
+											size="xs"
+											shape="square"
 											onClick={(event) => {
 												event.preventDefault();
 												event.stopPropagation();
@@ -1578,8 +1584,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									</Show>
 									<Button
 										type="button"
-										theme="secondary-subtle"
-										size="icon-subtle"
+										variant="secondary-subtle"
+										size="xs"
+										shape="square"
 										onClick={openPosterFileBrowser}
 										title={T()("common.upload")}
 										aria-label={T()("common.upload")}
@@ -1589,8 +1596,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									<Show when={posterPreview()}>
 										<Button
 											type="button"
-											theme="danger-subtle"
-											size="icon-subtle"
+											variant="danger-subtle"
+											size="xs"
+											shape="square"
 											onClick={clearPosterFile}
 											title={T()("common.remove")}
 											aria-label={T()("common.remove")}
@@ -1603,8 +1611,9 @@ const CreateUpdateMediaPanel: Component<CreateUpdateMediaPanelProps> = (
 									>
 										<Button
 											type="button"
-											theme="secondary-subtle"
-											size="icon-subtle"
+											variant="secondary-subtle"
+											size="xs"
+											shape="square"
 											onClick={undoPosterFile}
 											title={T()("media.file.back.to.current")}
 											aria-label={T()("media.file.back.to.current")}

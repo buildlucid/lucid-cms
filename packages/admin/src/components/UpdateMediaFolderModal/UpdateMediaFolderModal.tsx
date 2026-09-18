@@ -159,8 +159,8 @@ const UpdateMediaFolderModal: Component<{
 					<div class="flex min-w-max gap-2">
 						<Button
 							type="button"
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							onClick={() => props.state.setOpen(false)}
 							disabled={updateFolder.action.isPending}
 						>
@@ -168,8 +168,8 @@ const UpdateMediaFolderModal: Component<{
 						</Button>
 						<Button
 							type="submit"
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							loading={updateFolder.action.isPending}
 							disabled={foldersHierarchy.isLoading}
 						>

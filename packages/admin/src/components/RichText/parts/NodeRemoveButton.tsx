@@ -13,8 +13,9 @@ const NodeRemoveButton: Component<NodeRemoveButtonProps> = (props) => {
 	return (
 		<Button
 			type="button"
-			theme="danger-subtle"
-			size="icon-subtle"
+			variant="danger-subtle"
+			size="xs"
+			shape="square"
 			class="rounded-full!"
 			onClick={(event) => {
 				event.preventDefault();

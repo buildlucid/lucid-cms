@@ -379,8 +379,9 @@ const UpsertOAuthClientPanel: Component<{
 										<div class="flex h-10 items-center gap-2.5">
 											<Button
 												type="button"
-												theme="danger-outline"
-												size="icon"
+												variant="danger-outline"
+												size="sm"
+												shape="square"
 												class="h-10! w-10! min-w-[40px]!"
 												onClick={() => removeRedirectUri(index)}
 												disabled={redirectUris().length === 1}
@@ -391,8 +392,9 @@ const UpsertOAuthClientPanel: Component<{
 											</Button>
 											<Button
 												type="button"
-												theme="border-outline"
-												size="icon"
+												variant="outline"
+												size="sm"
+												shape="square"
 												class="h-10! w-10! min-w-[40px]!"
 												onClick={() => addRedirectUri(index)}
 												disabled={redirectUris().length >= 20}

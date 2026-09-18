@@ -28,12 +28,11 @@ export const Form: Component<{
 	};
 	options?: {
 		buttonFullWidth?: boolean;
-		buttonSize?: "small" | "medium" | "large";
+		buttonSize?: "sm" | "md" | "lg";
 		disableErrorMessage?: boolean;
 		errorPlacement?: "above" | "inline";
 		hideSubmitWhenDisabled?: boolean;
 	};
-	permission?: boolean;
 	onSubmit?: () => void;
 	children: JSXElement;
 	submitRow?: JSXElement;
@@ -87,15 +86,14 @@ export const Form: Component<{
 							<div class="flex items-center gap-2">
 								<Show when={showSubmitButton()}>
 									<Button
-										size={props.options?.buttonSize || "medium"}
+										size={props.options?.buttonSize || "md"}
 										class={classNames({
 											"w-full": props.options?.buttonFullWidth,
 										})}
 										type="submit"
-										theme="primary"
+										variant="primary"
 										loading={props.state.isLoading}
 										disabled={props.state.isDisabled}
-										permission={props.permission}
 									>
 										{props.content.submit}
 									</Button>

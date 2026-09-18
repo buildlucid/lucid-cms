@@ -152,8 +152,8 @@ const CreateMediaFolderModal: Component<{
 					<div class="flex min-w-max gap-2">
 						<Button
 							type="button"
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							onClick={() => props.state.setOpen(false)}
 							disabled={createFolder.action.isPending}
 						>
@@ -161,8 +161,8 @@ const CreateMediaFolderModal: Component<{
 						</Button>
 						<Button
 							type="submit"
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							loading={createFolder.action.isPending}
 							disabled={foldersHierarchy.isLoading}
 						>

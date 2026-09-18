@@ -121,52 +121,32 @@ const ComponentLibraryPage: Component = () => {
 				>
 					<InfoRow.Content title={"Medium Buttons"}>
 						<div class="flex gap-2 flex-wrap">
-							<Button
-								size="medium"
-								theme="primary"
-								type="button"
-								loading={false}
-							>
+							<Button size="md" variant="primary" type="button" loading={false}>
 								Primary
 							</Button>
 							<Button
-								size="medium"
-								theme="secondary"
+								size="md"
+								variant="secondary"
 								type="button"
 								loading={false}
 							>
 								Secondary
 							</Button>
-							<Button
-								size="medium"
-								theme="border-outline"
-								type="button"
-								loading={false}
-							>
+							<Button size="md" variant="outline" type="button" loading={false}>
 								Border Outline
 							</Button>
-							<Button
-								size="medium"
-								theme="danger"
-								type="button"
-								loading={false}
-							>
+							<Button size="md" variant="danger" type="button" loading={false}>
 								Danger
 							</Button>
-							<Button size="medium" theme="basic" type="button" loading={false}>
+							<Button size="md" variant="ghost" type="button" loading={false}>
 								Basic
 							</Button>
-							<Button
-								size="medium"
-								theme="secondary-toggle"
-								type="button"
-								loading={false}
-							>
+							<Button size="md" variant="toggle" type="button" loading={false}>
 								Secondary Toggle
 							</Button>
 							<Button
-								size="medium"
-								theme="danger-outline"
+								size="md"
+								variant="danger-outline"
 								type="button"
 								loading={false}
 							>
@@ -176,25 +156,35 @@ const ComponentLibraryPage: Component = () => {
 					</InfoRow.Content>
 					<InfoRow.Content title={"Icon Buttons"}>
 						<div class="flex gap-2 flex-wrap">
-							<Button type="button" theme="primary" size="icon">
+							<Button type="button" variant="primary" size="sm" shape="square">
 								<FaSolidXmark />
 							</Button>
-							<Button type="button" theme="secondary" size="icon">
+							<Button
+								type="button"
+								variant="secondary"
+								size="sm"
+								shape="square"
+							>
 								<FaSolidXmark />
 							</Button>
-							<Button type="button" theme="border-outline" size="icon">
+							<Button type="button" variant="outline" size="sm" shape="square">
 								<FaSolidXmark />
 							</Button>
-							<Button type="button" theme="danger" size="icon">
+							<Button type="button" variant="danger" size="sm" shape="square">
 								<FaSolidXmark />
 							</Button>
-							<Button type="button" theme="basic" size="icon">
+							<Button type="button" variant="ghost" size="sm" shape="square">
 								<FaSolidXmark />
 							</Button>
-							<Button type="button" theme="secondary-toggle" size="icon">
+							<Button type="button" variant="toggle" size="sm" shape="square">
 								<FaSolidXmark />
 							</Button>
-							<Button type="button" theme="danger-outline" size="icon">
+							<Button
+								type="button"
+								variant="danger-outline"
+								size="sm"
+								shape="square"
+							>
 								<FaSolidXmark />
 							</Button>
 						</div>

@@ -210,8 +210,8 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 					<div class="flex gap-2.5">
 						<Button
 							type="button"
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							disabled={updateMe.action.isPending}
 							onClick={closeModal}
 						>
@@ -219,8 +219,8 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 						</Button>
 						<Button
 							type="submit"
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							loading={updateMe.action.isPending}
 							disabled={submitIsDisabled()}
 						>

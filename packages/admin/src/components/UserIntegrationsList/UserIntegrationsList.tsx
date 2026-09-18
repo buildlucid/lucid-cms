@@ -90,7 +90,6 @@ export const UserIntegrationsList: Component<{
 										}
 									: undefined
 							}
-							permissions={{ create: props.canCreate }}
 							options={{
 								inline: true,
 								contained: props.contained !== false,
@@ -120,8 +119,8 @@ export const UserIntegrationsList: Component<{
 							<div class="mt-3 flex justify-start">
 								<Button
 									type="button"
-									size="small"
-									theme="primary"
+									size="sm"
+									variant="primary"
 									onClick={() => setCreateOpen(true)}
 								>
 									{T()("integrations.create.action")}
@@ -160,7 +159,6 @@ export const UserIntegrationsList: Component<{
 											}
 										: undefined
 								}
-								permissions={{ create: props.canCreate }}
 								options={{
 									inline: true,
 									contained: props.contained !== false,
@@ -190,8 +188,8 @@ export const UserIntegrationsList: Component<{
 								<div class="mt-3 flex justify-start">
 									<Button
 										type="button"
-										size="small"
-										theme="primary"
+										size="sm"
+										variant="primary"
 										onClick={() => setCreateOpen(true)}
 									>
 										{T()("integrations.create.action")}
@@ -233,7 +231,6 @@ export const UserIntegrationsList: Component<{
 													}
 												: undefined
 										}
-										permissions={{ create: props.canCreate }}
 										options={{
 											inline: true,
 											contained: props.contained !== false,
@@ -265,8 +262,8 @@ export const UserIntegrationsList: Component<{
 								<div class="-mt-1 flex justify-start">
 									<Button
 										type="button"
-										size="small"
-										theme="primary"
+										size="sm"
+										variant="primary"
 										onClick={() => setCreateOpen(true)}
 									>
 										{T()("integrations.create.action")}

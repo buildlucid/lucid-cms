@@ -181,8 +181,8 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 							>
 								<Button
 									type="button"
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 									onClick={openUserSelectModal}
 									disabled={props.disabled || !canAddMore()}
 									class="capitalize"
@@ -226,8 +226,9 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 								<div class="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<Button
 										type="button"
-										theme="secondary-subtle"
-										size="icon-subtle"
+										variant="secondary-subtle"
+										size="xs"
+										shape="square"
 										onClick={openUserSelectModal}
 										disabled={props.disabled}
 									>
@@ -236,8 +237,9 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 									</Button>
 									<Button
 										type="button"
-										theme="danger-subtle"
-										size="icon-subtle"
+										variant="danger-subtle"
+										size="xs"
+										shape="square"
 										onClick={clearSelection}
 										disabled={props.disabled}
 									>
@@ -251,8 +253,8 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 					<Match when={selectedUserIds().length === 0}>
 						<Button
 							type="button"
-							theme="border-outline"
-							size="small"
+							variant="outline"
+							size="sm"
 							onClick={openUserSelectModal}
 							disabled={props.disabled || !canAddMore()}
 							class="capitalize"
@@ -334,8 +336,9 @@ const UserSortableItem: Component<{
 			<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 				<Button
 					type="button"
-					theme="danger-subtle"
-					size="icon-subtle"
+					variant="danger-subtle"
+					size="xs"
+					shape="square"
 					onClick={() => props.removeSelectedUser(props.user.id)}
 					disabled={props.disabled}
 					aria-label={T()("common.remove")}

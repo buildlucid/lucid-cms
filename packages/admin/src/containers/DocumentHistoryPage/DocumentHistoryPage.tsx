@@ -107,8 +107,8 @@ const DocumentHistoryPage: Component = () => {
 						<Show when={state.hasMore()}>
 							<div class="mt-6 ml-4">
 								<Button
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 									onClick={state.loadMore}
 									loading={state.isLoading()}
 									class="w-full"
@@ -131,7 +131,7 @@ const DocumentHistoryPage: Component = () => {
 									onRestore={state.handleRestoreRevision}
 									restore={{
 										loading: state.restoreRevision.action.isPending,
-										permission: state.canRestoreSelectedItem(),
+										permission: state.restorePermission(),
 									}}
 									collection={state.collection}
 									document={state.document}

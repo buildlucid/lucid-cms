@@ -75,7 +75,7 @@ const EmailChangeRevertPage: Component = () => {
 					<ThemeLogoIcon class="h-10 mx-auto mb-6" />
 					<h1 class="mb-1">{T()("routes.auth.email.change.reverted.title")}</h1>
 					<p>{T()("routes.auth.email.change.reverted.description")}</p>
-					<Link theme="primary" size="medium" href="/lucid/login" class="mt-8">
+					<Link variant="primary" size="md" href="/lucid/login" class="mt-8">
 						{T()("common.back.to.login")}
 					</Link>
 				</div>
@@ -87,8 +87,8 @@ const EmailChangeRevertPage: Component = () => {
 					<p>{T()("routes.auth.email.change.revert.description")}</p>
 					<div class="mt-8 flex justify-center">
 						<Button
-							theme="danger"
-							size="medium"
+							variant="danger"
+							size="md"
 							type="button"
 							loading={revertEmailChange.action.isPending}
 							onClick={() => {

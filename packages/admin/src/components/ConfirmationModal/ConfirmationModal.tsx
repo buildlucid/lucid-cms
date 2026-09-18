@@ -82,8 +82,8 @@ export const ConfirmationModal: Component<{
 									fallback={
 										<>
 											<Button
-												theme="border-outline"
-												size="medium"
+												variant="outline"
+												size="md"
 												type={"button"}
 												disabled={props.state.isLoading}
 												onClick={props.callbacks.onCancel}
@@ -91,8 +91,8 @@ export const ConfirmationModal: Component<{
 												{T()("common.cancel")}
 											</Button>
 											<Button
-												theme={props.theme || "danger"}
-												size="medium"
+												variant={props.theme || "danger"}
+												size="md"
 												type={"button"}
 												loading={props.state.isLoading}
 												onClick={props.callbacks.onConfirm}

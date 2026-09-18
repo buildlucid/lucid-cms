@@ -44,7 +44,7 @@ const ConfirmActionButton: Component<ConfirmActionButtonProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Button type="button" theme="primary" size="small" onClick={handleClick}>
+		<Button type="button" variant="primary" size="sm" onClick={handleClick}>
 			{awaitingConfirmation()
 				? (props.confirmationText ??
 					T()("common.confirmations.click.to.confirm"))

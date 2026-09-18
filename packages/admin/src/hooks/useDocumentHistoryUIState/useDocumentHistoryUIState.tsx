@@ -144,9 +144,9 @@ export function useDocumentHistoryUIState(props: {
 	const showPreview = createMemo(() => false);
 
 	/**
-	 * Determines if the user has permission to restore documents - always false for history
+	 * The permission required to restore documents - unused for history
 	 */
-	const hasRestorePermission = createMemo(() => false);
+	const restorePermission = createMemo(() => undefined);
 
 	/**
 	 * Determines if the auto save user is enabled - always false for history
@@ -198,7 +198,7 @@ export function useDocumentHistoryUIState(props: {
 		isAutoSaveActive,
 		showRestoreRevisionButton,
 		showPreview,
-		hasRestorePermission,
+		restorePermission,
 		autoSaveUserEnabled,
 	};
 }

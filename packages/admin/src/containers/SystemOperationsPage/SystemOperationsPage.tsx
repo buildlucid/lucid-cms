@@ -12,7 +12,6 @@ import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettin
 import UpdateSystemAlertsModal from "@/components/UpdateSystemAlertsModal/UpdateSystemAlertsModal";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
 const SystemOperationsPage: Component = () => {
@@ -40,18 +39,6 @@ const SystemOperationsPage: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const systemInfo = createMemo(() => settingsData.data?.data?.system);
-	const canClearCache = createMemo(
-		() => userStore.get.hasPermission([Permissions.CacheClear]).all,
-	);
-	const canUpdateSettings = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsUpdate]).all,
-	);
-	const canDeleteAllShareLinks = createMemo(
-		() => userStore.get.hasPermission([Permissions.MediaDelete]).all,
-	);
-	const canClearAllProcessedImages = createMemo(
-		() => userStore.get.hasPermission([Permissions.MediaUpdate]).all,
-	);
 
 	// ----------------------------------------
 	// Render
@@ -95,10 +82,10 @@ const SystemOperationsPage: Component = () => {
 							description={T()("system.alerts.email.description")}
 							actions={
 								<Button
-									size="small"
+									size="sm"
 									type="button"
-									theme="border-outline"
-									permission={canUpdateSettings()}
+									variant="outline"
+									permission={Permissions.SettingsUpdate}
 									onClick={() => setUpdateSystemAlertsOpen(true)}
 								>
 									{T()("system.alerts.edit.action")}
@@ -131,13 +118,13 @@ const SystemOperationsPage: Component = () => {
 							reducedMargin={true}
 							actions={
 								<Button
-									size="medium"
+									size="md"
 									type="button"
-									theme="danger"
+									variant="danger"
 									onClick={() => {
 										setOpenClearAllProcessedImages(true);
 									}}
-									permission={canClearAllProcessedImages()}
+									permission={Permissions.MediaUpdate}
 								>
 									{T()("media.processed.clear.all.action", {
 										count: settingsData.data?.data?.media?.processed.total || 0,
@@ -154,13 +141,13 @@ const SystemOperationsPage: Component = () => {
 							reducedMargin={true}
 							actions={
 								<Button
-									size="medium"
+									size="md"
 									type="button"
-									theme="danger"
+									variant="danger"
 									onClick={() => {
 										setOpenDeleteAllShareLinks(true);
 									}}
-									permission={canDeleteAllShareLinks()}
+									permission={Permissions.MediaDelete}
 								>
 									{T()("media.share.links.system.delete.all.action")}
 								</Button>
@@ -173,13 +160,13 @@ const SystemOperationsPage: Component = () => {
 							reducedMargin={true}
 							actions={
 								<Button
-									size="medium"
+									size="md"
 									type="button"
-									theme="danger"
+									variant="danger"
 									onClick={() => {
 										setOpenClearCache(true);
 									}}
-									permission={canClearCache()}
+									permission={Permissions.CacheClear}
 								>
 									{T()("system.cache.button")}
 								</Button>

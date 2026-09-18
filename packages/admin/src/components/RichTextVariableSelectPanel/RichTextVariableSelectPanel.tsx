@@ -404,8 +404,8 @@ const RichTextVariableSelectPanel: Component<{
 									startSlot={
 										<Button
 											type="button"
-											theme="border-outline"
-											size="medium"
+											variant="outline"
+											size="md"
 											class="gap-2"
 											onClick={() => setStep("target")}
 										>

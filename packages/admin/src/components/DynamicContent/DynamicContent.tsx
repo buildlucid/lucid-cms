@@ -1,5 +1,6 @@
 import noPermission from "@assets/illustrations/no-permission.svg?url";
 import notifySvg from "@assets/illustrations/notify.svg?url";
+import type { Permission } from "@types";
 import classNames from "classnames";
 import { type Component, type JSXElement, Match, Show, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
@@ -35,7 +36,7 @@ export const DynamicContent: Component<{
 		};
 	};
 	permissions?: {
-		create?: boolean;
+		create?: Permission | Permission[];
 	};
 	callback?: {
 		createEntry?: () => void;
@@ -47,7 +48,7 @@ export const DynamicContent: Component<{
 		hideNoEntries?: boolean;
 		contained?: boolean;
 		dividerTop?: boolean;
-		noEntriesButtonTheme?: "primary" | "border-outline";
+		noEntriesButtonTheme?: "primary" | "outline";
 	};
 	children: JSXElement;
 }> = (props) => {
@@ -108,8 +109,8 @@ export const DynamicContent: Component<{
 								>
 									<Button
 										type="submit"
-										theme="primary"
-										size="small"
+										variant="primary"
+										size="sm"
 										onClick={() => {
 											if (props.callback?.resetFilters) {
 												props.callback.resetFilters();

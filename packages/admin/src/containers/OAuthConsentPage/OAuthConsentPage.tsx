@@ -482,8 +482,8 @@ const OAuthConsentPage: Component = () => {
 								<div class="flex shrink-0 items-center justify-start gap-2 lg:justify-end">
 									<Button
 										type="button"
-										theme="border-outline"
-										size="small"
+										variant="outline"
+										size="sm"
 										disabled={complete.action.isPending}
 										onClick={denyAuthorization}
 									>
@@ -491,8 +491,8 @@ const OAuthConsentPage: Component = () => {
 									</Button>
 									<Button
 										type="button"
-										theme="primary"
-										size="small"
+										variant="primary"
+										size="sm"
 										loading={complete.action.isPending}
 										disabled={!canAllow()}
 										onClick={allowAuthorization}

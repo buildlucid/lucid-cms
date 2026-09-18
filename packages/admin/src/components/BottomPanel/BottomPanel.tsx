@@ -337,11 +337,11 @@ export const BottomPanel: Component<{
 														</div>
 														<div class="flex min-w-max gap-2">
 															<Button
-																size="medium"
-																theme={
+																size="md"
+																variant={
 																	props.options?.primaryCloseAction
 																		? "primary"
-																		: "border-outline"
+																		: "outline"
 																}
 																type="button"
 																onClick={() => props.state.setOpen(false)}
@@ -351,8 +351,8 @@ export const BottomPanel: Component<{
 															<Show when={props.copy?.submit}>
 																<Button
 																	type="submit"
-																	theme="primary"
-																	size="medium"
+																	variant="primary"
+																	size="md"
 																	loading={props.mutateState?.isLoading}
 																	disabled={props.mutateState?.isDisabled}
 																>
@@ -407,11 +407,11 @@ export const BottomPanel: Component<{
 													</div>
 													<div class="flex min-w-max gap-2">
 														<Button
-															size="medium"
-															theme={
+															size="md"
+															variant={
 																props.options?.primaryCloseAction
 																	? "primary"
-																	: "border-outline"
+																	: "outline"
 															}
 															type="button"
 															onClick={() => props.state.setOpen(false)}
@@ -421,8 +421,8 @@ export const BottomPanel: Component<{
 														<Show when={props.copy?.submit}>
 															<Button
 																type="submit"
-																theme="primary"
-																size="medium"
+																variant="primary"
+																size="md"
 																loading={props.mutateState?.isLoading}
 																disabled={props.mutateState?.isDisabled}
 															>

@@ -1,3 +1,4 @@
+import type { Permission } from "@types";
 import classNames from "classnames";
 import { type Component, Show } from "solid-js";
 import Button from "@/components/Button/Button";
@@ -13,11 +14,11 @@ export interface NoEntriesBlockProps {
 		action?: () => void;
 	};
 	permissions?: {
-		create?: boolean;
+		create?: Permission | Permission[];
 	};
 	options?: {
 		grow?: boolean;
-		buttonTheme?: "primary" | "border-outline";
+		buttonTheme?: "primary" | "outline";
 	};
 	class?: string;
 }
@@ -44,8 +45,8 @@ const NoEntriesBlock: Component<NoEntriesBlockProps> = (props) => {
 				</p>
 				<Show when={props.callbacks?.action !== undefined}>
 					<Button
-						theme={props.options?.buttonTheme ?? "primary"}
-						size="small"
+						variant={props.options?.buttonTheme ?? "primary"}
+						size="sm"
 						class="mt-4"
 						onClick={props.callbacks?.action}
 						permission={props.permissions?.create}

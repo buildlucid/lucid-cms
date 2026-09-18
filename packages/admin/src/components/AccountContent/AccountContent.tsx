@@ -186,8 +186,8 @@ export const AccountContent: Component = () => {
 					title={T()("account.details.description.title")}
 					actions={
 						<Button
-							theme="border-outline"
-							size="small"
+							variant="outline"
+							size="sm"
 							type="button"
 							onClick={() => setAccountDetailsModalOpen(true)}
 						>
@@ -245,8 +245,8 @@ export const AccountContent: Component = () => {
 						reducedMargin={true}
 						actions={
 							<Button
-								theme="danger"
-								size="small"
+								variant="danger"
+								size="sm"
 								type="button"
 								onClick={() => setPasswordModalOpen(true)}
 							>
@@ -263,8 +263,8 @@ export const AccountContent: Component = () => {
 						reducedMargin={true}
 						actions={
 							<Button
-								theme="danger"
-								size="small"
+								variant="danger"
+								size="sm"
 								type="button"
 								loading={setPasswordResetLoading()}
 								onClick={() => {
@@ -377,8 +377,8 @@ export const AccountContent: Component = () => {
 					description={T()("account.sessions.description")}
 					actions={
 						<Button
-							theme="danger"
-							size="small"
+							variant="danger"
+							size="sm"
 							type="button"
 							onClick={() => {
 								setRevokeSessionsModalOpen(true);

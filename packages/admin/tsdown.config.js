@@ -3,6 +3,7 @@ import { defineConfig } from "tsdown";
 export default defineConfig([
 	{
 		entry: {
+			components: "src/exports/components.ts",
 			hooks: "src/exports/hooks.ts",
 			services: "src/exports/services.ts",
 			utils: "src/exports/utils.ts",

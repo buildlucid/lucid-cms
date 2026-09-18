@@ -237,8 +237,8 @@ const FocalPointEditorModal: Component<{
 			<ModalFooter>
 				<Button
 					type="button"
-					theme="danger-subtle"
-					size="medium"
+					variant="danger-subtle"
+					size="md"
 					class="self-start"
 					onClick={() => setDraft(CENTER_FOCAL_POINT)}
 				>
@@ -247,16 +247,16 @@ const FocalPointEditorModal: Component<{
 				<div class="flex items-center justify-end gap-2">
 					<Button
 						type="button"
-						theme="border-outline"
-						size="medium"
+						variant="outline"
+						size="md"
 						onClick={() => props.state.setOpen(false)}
 					>
 						{T()("common.cancel")}
 					</Button>
 					<Button
 						type="button"
-						theme="primary"
-						size="medium"
+						variant="primary"
+						size="md"
 						onClick={() => {
 							props.onSave(draft());
 							props.state.setOpen(false);

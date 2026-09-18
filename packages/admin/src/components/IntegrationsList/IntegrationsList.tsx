@@ -125,7 +125,7 @@ export const IntegrationsList: Component<{
 						</div>
 					</InfoRow.Content>
 					<OAuthClientsList
-						canCreate={hasCreatePermission()}
+						createPermission={Permissions.IntegrationsCreate}
 						canUpdate={
 							userStore.get.hasPermission([Permissions.IntegrationsUpdate]).all
 						}
@@ -281,7 +281,7 @@ export const IntegrationsList: Component<{
 									},
 								}}
 								permissions={{
-									create: hasCreatePermission(),
+									create: Permissions.IntegrationsCreate,
 								}}
 								options={{
 									inline: true,
@@ -390,8 +390,8 @@ export const IntegrationsList: Component<{
 						<div class="-mt-1 flex justify-start">
 							<Button
 								type="button"
-								size="small"
-								theme="primary"
+								size="sm"
+								variant="primary"
 								onClick={() => props.state.setOpenCreateIntegrationPanel(true)}
 							>
 								{T()("integrations.create.action")}

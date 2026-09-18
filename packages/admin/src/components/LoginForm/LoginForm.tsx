@@ -33,7 +33,7 @@ const LoginForm: Component<LoginFormProps> = (props) => {
 			}}
 			options={{
 				buttonFullWidth: true,
-				buttonSize: "large",
+				buttonSize: "lg",
 				disableErrorMessage: true,
 			}}
 			onSubmit={() => {

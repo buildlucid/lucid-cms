@@ -673,8 +673,8 @@ export const PageBuilderHeader: Component<{
 								{(option) => (
 									<Button
 										type="button"
-										theme="secondary"
-										size="small"
+										variant="secondary"
+										size="sm"
 										aria-disabled={option().disabled === true}
 										class={classNames({
 											"cursor-not-allowed opacity-80":
@@ -692,9 +692,11 @@ export const PageBuilderHeader: Component<{
 							<Show when={props.state.showPreview?.()}>
 								<Button
 									type="button"
-									theme="secondary-toggle"
-									size="icon"
-									active={props.state.previewOpen?.()}
+									variant={
+										props.state.previewOpen?.() ? "toggle-active" : "toggle"
+									}
+									size="sm"
+									shape="square"
 									title={T()("common.preview")}
 									aria-label={T()("common.preview")}
 									aria-pressed={props.state.previewOpen?.()}
@@ -733,15 +735,15 @@ export const PageBuilderHeader: Component<{
 							<Show when={props.state.ui.showRestoreRevisionButton?.()}>
 								<Button
 									type="button"
-									theme="secondary"
-									size="small"
+									variant="secondary"
+									size="sm"
 									onClick={() => {
 										const versionId = props.versionId?.();
 										if (!versionId) return;
 										props.state.ui.setRestoreRevisionVersionId(versionId);
 										props.state.ui.setRestoreRevisionOpen(true);
 									}}
-									permission={props.state.ui.hasRestorePermission?.()}
+									permission={props.state.ui.restorePermission?.()}
 								>
 									{T()("documents.revisions.restore.action")}
 								</Button>

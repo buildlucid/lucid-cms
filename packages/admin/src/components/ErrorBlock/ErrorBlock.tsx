@@ -42,8 +42,8 @@ const ErrorBlock: Component<{
 				</p>
 				<Show when={props.link !== undefined}>
 					<Link
-						theme={"primary"}
-						size="small"
+						variant={"primary"}
+						size="sm"
 						class="mt-4"
 						href={props.link?.href || ""}
 					>

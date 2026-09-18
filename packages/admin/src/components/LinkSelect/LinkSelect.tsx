@@ -105,8 +105,9 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 						<div class="flex items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 							<Button
 								type="button"
-								theme="secondary-subtle"
-								size="icon-subtle"
+								variant="secondary-subtle"
+								size="xs"
+								shape="square"
 								onClick={openLinkModal}
 								disabled={props.disabled}
 							>
@@ -115,8 +116,9 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 							</Button>
 							<Button
 								type="button"
-								theme="danger-subtle"
-								size="icon-subtle"
+								variant="danger-subtle"
+								size="xs"
+								shape="square"
 								onClick={() => props.onChange(null)}
 								disabled={props.disabled}
 							>
@@ -130,8 +132,8 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				<Show when={!hasLink()}>
 					<Button
 						type="button"
-						theme="border-outline"
-						size="small"
+						variant="outline"
+						size="sm"
 						onClick={openLinkModal}
 						disabled={props.disabled}
 					>

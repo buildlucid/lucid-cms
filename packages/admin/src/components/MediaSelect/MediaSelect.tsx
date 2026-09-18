@@ -253,8 +253,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						>
 							<Button
 								type="button"
-								theme="border-outline"
-								size="small"
+								variant="outline"
+								size="sm"
 								onClick={openMediaSelectModal}
 								disabled={props.disabled || !canAddMore()}
 								class="capitalize"
@@ -265,8 +265,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 							</Button>
 							<Button
 								type="button"
-								theme="basic"
-								size="small"
+								variant="ghost"
+								size="sm"
 								onClick={openMediaUploadPanel}
 								disabled={props.disabled || !canAddMore()}
 								class="capitalize"
@@ -362,8 +362,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								<div class="flex items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<Button
 										type="button"
-										theme="secondary-subtle"
-										size="icon-subtle"
+										variant="secondary-subtle"
+										size="xs"
+										shape="square"
 										onClick={openMediaSelectModal}
 										disabled={props.disabled}
 										aria-label={T()("media.select.new", {
@@ -374,8 +375,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									</Button>
 									<Button
 										type="button"
-										theme="danger-subtle"
-										size="icon-subtle"
+										variant="danger-subtle"
+										size="xs"
+										shape="square"
 										onClick={clearSelection}
 										disabled={props.disabled}
 										aria-label={T()("media.remove.action", {
@@ -424,8 +426,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 												<div class="relative hidden h-full items-center justify-center lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2">
 													<Button
 														type="button"
-														theme="circle"
-														size="icon-subtle"
+														variant="primary-outline"
+														shape="circle"
+														size="xs"
 														onClick={openMediaSelectModal}
 														disabled={props.disabled || !canAddMore()}
 														aria-label={T()("media.select.action", {
@@ -448,8 +451,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 							<div class="flex flex-wrap items-center gap-2">
 								<Button
 									type="button"
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 									onClick={openMediaSelectModal}
 									disabled={props.disabled || !canAddMore()}
 									class="capitalize"
@@ -460,8 +463,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								</Button>
 								<Button
 									type="button"
-									theme="basic"
-									size="small"
+									variant="ghost"
+									size="sm"
 									onClick={openMediaUploadPanel}
 									disabled={props.disabled || !canAddMore()}
 									class="capitalize"
@@ -608,8 +611,9 @@ const MediaSortableItem: Component<{
 				<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 					<Button
 						type="button"
-						theme="danger-subtle"
-						size="icon-subtle"
+						variant="danger-subtle"
+						size="xs"
+						shape="square"
 						onClick={() => props.removeSelectedMedia(props.media.id)}
 						disabled={props.disabled}
 						aria-label={T()("common.remove")}

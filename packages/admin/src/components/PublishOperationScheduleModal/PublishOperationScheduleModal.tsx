@@ -146,8 +146,8 @@ const PublishOperationScheduleModal: Component<{
 				actions: (
 					<>
 						<Button
-							theme="border-outline"
-							size="medium"
+							variant="outline"
+							size="md"
 							type="button"
 							disabled={reschedule.action.isPending}
 							onClick={close}
@@ -156,8 +156,8 @@ const PublishOperationScheduleModal: Component<{
 						</Button>
 						<Show when={operationHasSchedule()}>
 							<Button
-								theme="danger-outline"
-								size="medium"
+								variant="danger-outline"
+								size="md"
 								type="button"
 								loading={reschedule.action.isPending}
 								onClick={removeSchedule}
@@ -166,8 +166,8 @@ const PublishOperationScheduleModal: Component<{
 							</Button>
 						</Show>
 						<Button
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							type="button"
 							loading={reschedule.action.isPending}
 							onClick={saveSchedule}

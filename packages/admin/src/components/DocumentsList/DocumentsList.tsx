@@ -403,8 +403,7 @@ export const DocumentsList: Component<{
 				noEntries: noEntriesCopy(),
 			}}
 			permissions={{
-				create: userStore.get.hasPermission([collectionPermissions()?.create])
-					.some,
+				create: collectionPermissions()?.create,
 			}}
 			callback={{
 				createEntry: createEntryCallback(),

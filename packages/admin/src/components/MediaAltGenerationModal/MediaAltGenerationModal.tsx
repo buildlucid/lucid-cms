@@ -305,8 +305,8 @@ const MediaAltGenerationModalContent: Component<{
 					<div class="mt-auto">
 						<Button
 							type="submit"
-							theme="secondary"
-							size="medium"
+							variant="secondary"
+							size="md"
 							class="w-full min-w-0! gap-2"
 							loading={props.isLoading}
 							disabled={
@@ -462,8 +462,8 @@ const MediaAltGenerationModalContent: Component<{
 						<div class="flex shrink-0 items-center gap-3">
 							<Button
 								type="button"
-								theme="border-outline"
-								size="medium"
+								variant="outline"
+								size="md"
 								onClick={() => setOpen(false)}
 							>
 								{T()("common.cancel")}
@@ -471,8 +471,8 @@ const MediaAltGenerationModalContent: Component<{
 							<Show when={hasResponse() || currentSelected()}>
 								<Button
 									type="button"
-									theme="primary"
-									size="medium"
+									variant="primary"
+									size="md"
 									onClick={() => {
 										void props.callbacks.onAccept();
 									}}

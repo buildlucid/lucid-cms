@@ -229,8 +229,8 @@ export const PublishRequests: Component<{
 					actions: (
 						<>
 							<Button
-								theme="border-outline"
-								size="medium"
+								variant="outline"
+								size="md"
 								type="button"
 								disabled={reschedule.action.isPending}
 								onClick={() => {
@@ -244,8 +244,8 @@ export const PublishRequests: Component<{
 							</Button>
 							<Show when={selectedOperationHasSchedule()}>
 								<Button
-									theme="danger-outline"
-									size="medium"
+									variant="danger-outline"
+									size="md"
 									type="button"
 									loading={reschedule.action.isPending}
 									onClick={removeSchedule}
@@ -254,8 +254,8 @@ export const PublishRequests: Component<{
 								</Button>
 							</Show>
 							<Button
-								theme="primary"
-								size="medium"
+								variant="primary"
+								size="md"
 								type="button"
 								loading={reschedule.action.isPending}
 								onClick={saveSchedule}

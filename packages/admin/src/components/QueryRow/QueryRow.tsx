@@ -141,8 +141,9 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 				<div class="flex flex-wrap gap-2.5 items-center md:justify-end">
 					<Show when={showRefreshButton()}>
 						<Button
-							theme="border-outline"
-							size="icon"
+							variant="outline"
+							size="sm"
+							shape="square"
 							type="button"
 							onClick={handleRefresh}
 							disabled={isRefreshing()}

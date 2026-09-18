@@ -33,8 +33,8 @@ const PendingEmailChangeNotice: Component<PendingEmailChangeNoticeProps> = (
 			</div>
 			<Button
 				type="button"
-				theme="border-outline"
-				size="small"
+				variant="outline"
+				size="sm"
 				loading={props.isLoading}
 				onClick={props.onCancel}
 			>

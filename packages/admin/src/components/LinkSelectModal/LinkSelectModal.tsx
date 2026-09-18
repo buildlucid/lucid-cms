@@ -111,16 +111,16 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 				<div class="flex gap-2.5">
 					<Button
 						type="button"
-						theme="border-outline"
-						size="medium"
+						variant="outline"
+						size="md"
 						onClick={closeModal}
 					>
 						{T()("common.cancel")}
 					</Button>
 					<Button
 						type="button"
-						theme="primary"
-						size="medium"
+						variant="primary"
+						size="md"
 						onClick={updateLink}
 					>
 						{T()("common.update")}

@@ -77,7 +77,7 @@ const EmailChangeConfirmPage: Component = () => {
 						{T()("routes.auth.email.change.confirmed.title")}
 					</h1>
 					<p>{T()("routes.auth.email.change.confirmed.description")}</p>
-					<Link theme="primary" size="medium" href="/lucid/login" class="mt-8">
+					<Link variant="primary" size="md" href="/lucid/login" class="mt-8">
 						{T()("common.back.to.login")}
 					</Link>
 				</div>
@@ -89,8 +89,8 @@ const EmailChangeConfirmPage: Component = () => {
 					<p>{T()("routes.auth.email.change.confirm.description")}</p>
 					<div class="mt-8 flex justify-center">
 						<Button
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							type="button"
 							loading={confirmEmailChange.action.isPending}
 							onClick={() => {

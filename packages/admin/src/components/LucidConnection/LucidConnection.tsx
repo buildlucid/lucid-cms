@@ -156,8 +156,8 @@ const LucidConnection: Component = () => {
 									href={constants.lucidRemote.website}
 									target="_blank"
 									rel="noreferrer"
-									theme="border-outline"
-									size="small"
+									variant="outline"
+									size="sm"
 								>
 									{T()("connection.remote.visit.action")}
 									<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
@@ -204,9 +204,9 @@ const LucidConnection: Component = () => {
 							<Show when={!isConnected()}>
 								<Button
 									type="button"
-									size="small"
-									theme="primary"
-									permission={canManage()}
+									size="sm"
+									variant="primary"
+									permission={Permissions.ConnectionUpdate}
 									loading={connect.action.isPending}
 									onClick={() => connect.action.mutate({})}
 								>

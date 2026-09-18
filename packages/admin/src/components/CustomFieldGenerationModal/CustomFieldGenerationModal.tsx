@@ -891,8 +891,8 @@ const CustomFieldGenerationModal: Component = () => {
 						<div class="mt-auto">
 							<Button
 								type="submit"
-								theme="secondary"
-								size="medium"
+								variant="secondary"
+								size="md"
 								class="w-full min-w-0! gap-2"
 								loading={isLoading()}
 								disabled={!canGenerate()}
@@ -1059,16 +1059,16 @@ const CustomFieldGenerationModal: Component = () => {
 							<div class="flex shrink-0 items-center gap-3">
 								<Button
 									type="button"
-									theme="border-outline"
-									size="medium"
+									variant="outline"
+									size="md"
 									onClick={() => close(false)}
 								>
 									{T()("common.cancel")}
 								</Button>
 								<Button
 									type="button"
-									theme="primary"
-									size="medium"
+									variant="primary"
+									size="md"
 									onClick={() => {
 										void apply();
 									}}

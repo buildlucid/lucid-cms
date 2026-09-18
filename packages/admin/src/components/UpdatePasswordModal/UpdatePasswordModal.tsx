@@ -141,8 +141,8 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						<Show when={!forced()}>
 							<Button
 								type="button"
-								theme="border-outline"
-								size="medium"
+								variant="outline"
+								size="md"
 								disabled={updateMe.action.isPending}
 								onClick={() => props.state.setOpen(false)}
 							>
@@ -151,8 +151,8 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						</Show>
 						<Button
 							type="submit"
-							theme="primary"
-							size="medium"
+							variant="primary"
+							size="md"
 							loading={updateMe.action.isPending}
 							disabled={submitDisabled()}
 						>

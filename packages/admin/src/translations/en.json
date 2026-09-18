@@ -881,6 +881,7 @@
 	"toasts.users.revoke.sessions.message": "The user has been signed out on all devices.",
 	"toasts.common.no.permission.title": "No permission",
 	"toasts.common.no.permission.message": "Your don't have permission to perform this action. Contact an admin if you think there is a mistake",
+	"toasts.common.no.permission.message.detailed": "You don't have permission to perform this action. Requires {{permission}}. Contact an admin if you think there is a mistake",
 	"actions.copy.to.clipboard": "Copy to clipboard",
 	"toasts.common.copy.to.clipboard.title": "Copied to clipboard",
 	"toasts.common.delete.processed.images.title": "Processed images deleted",

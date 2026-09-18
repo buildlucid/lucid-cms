@@ -287,8 +287,8 @@ const MediaSharePage: Component = () => {
 									</div>
 								</div>
 								<Button
-									theme="border-outline"
-									size="medium"
+									variant="outline"
+									size="md"
 									loading={requestDownload.action.isPending}
 									onClick={() => {
 										if (!token()) return;
@@ -323,7 +323,7 @@ const MediaSharePage: Component = () => {
 								}}
 								options={{
 									buttonFullWidth: true,
-									buttonSize: "large",
+									buttonSize: "lg",
 								}}
 								onSubmit={() => {
 									if (!token()) return;

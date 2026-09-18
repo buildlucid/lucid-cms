@@ -95,8 +95,8 @@ const DashboardAttention: Component<{
 													fallback={
 														<Button
 															type="button"
-															theme="border-outline"
-															size="small"
+															variant="outline"
+															size="sm"
 															onClick={action().onClick}
 														>
 															{action().label}
