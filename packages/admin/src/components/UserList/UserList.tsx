@@ -23,11 +23,11 @@ import RestoreUsers from "@/components/RestoreUserModal/RestoreUserModal";
 import RevokeRefreshTokensModal from "@/components/RevokeRefreshTokensModal/RevokeRefreshTokensModal";
 import { Table } from "@/components/Table/Table";
 import TriggerPasswordResetModal from "@/components/TriggerPasswordResetModal/TriggerPasswordResetModal";
-import UpdateUserPanel from "@/components/UpdateUserPanel/UpdateUserPanel";
-import UpsertIntegrationPanel from "@/components/UpsertIntegrationPanel/UpsertIntegrationPanel";
+import UpdateUserDrawer from "@/components/UpdateUserDrawer/UpdateUserDrawer";
+import UpsertIntegrationDrawer from "@/components/UpsertIntegrationDrawer/UpsertIntegrationDrawer";
 import UserTableRow from "@/components/UserTableRow/UserTableRow";
-import ViewUserLoginsPanel from "@/components/ViewUserLoginsPanel/ViewUserLoginsPanel";
-import ViewUserPanel from "@/components/ViewUserPanel/ViewUserPanel";
+import ViewUserDrawer from "@/components/ViewUserDrawer/ViewUserDrawer";
+import ViewUserLoginsDrawer from "@/components/ViewUserLoginsDrawer/ViewUserLoginsDrawer";
 import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
@@ -268,7 +268,7 @@ export const UserList: Component<{
 					</Index>
 				)}
 			</Table>
-			<ViewUserPanel
+			<ViewUserDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().view,
@@ -277,7 +277,7 @@ export const UserList: Component<{
 					},
 				}}
 			/>
-			<ViewUserLoginsPanel
+			<ViewUserLoginsDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().viewLogins,
@@ -295,7 +295,7 @@ export const UserList: Component<{
 					},
 				}}
 			/>
-			<UpdateUserPanel
+			<UpdateUserDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().update,
@@ -306,7 +306,7 @@ export const UserList: Component<{
 			/>
 			<Show when={rowTarget.getTargetId()}>
 				{(userId) => (
-					<UpsertIntegrationPanel
+					<UpsertIntegrationDrawer
 						services={api.users.integrations(userId)}
 						state={{
 							open: rowTarget.getTriggers().createIntegration,

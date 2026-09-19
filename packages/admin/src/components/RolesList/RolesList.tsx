@@ -5,8 +5,8 @@ import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import RoleTableRow from "@/components/RoleTableRow/RoleTableRow";
 import { Table } from "@/components/Table/Table";
-import UpsertRolePanel from "@/components/UpsertRolePanel/UpsertRolePanel";
-import ViewRolePanel from "@/components/ViewRolePanel/ViewRolePanel";
+import UpsertRoleDrawer from "@/components/UpsertRoleDrawer/UpsertRoleDrawer";
+import ViewRoleDrawer from "@/components/ViewRoleDrawer/ViewRoleDrawer";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
@@ -132,7 +132,7 @@ export const RolesList: Component<{
 					</Index>
 				)}
 			</Table>
-			<UpsertRolePanel
+			<UpsertRoleDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().update,
@@ -141,7 +141,7 @@ export const RolesList: Component<{
 					},
 				}}
 			/>
-			<ViewRolePanel
+			<ViewRoleDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().view,

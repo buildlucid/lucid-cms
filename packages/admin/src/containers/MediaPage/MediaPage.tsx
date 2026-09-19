@@ -10,7 +10,7 @@ import {
 import Alert from "@/components/Alert/Alert";
 import BulkUploadMediaModal from "@/components/BulkUploadMediaModal/BulkUploadMediaModal";
 import CreateMediaFolderModal from "@/components/CreateMediaFolderModal/CreateMediaFolderModal";
-import CreateUpdateMediaPanel from "@/components/CreateUpdateMediaPanel/CreateUpdateMediaPanel";
+import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { MediaList } from "@/components/MediaList/MediaList";
@@ -481,7 +481,7 @@ const MediaPage: Component = () => {
 						parentFolderId: folderIdFilter,
 					}}
 				/>
-				<CreateUpdateMediaPanel
+				<CreateUpdateMediaDrawer
 					initialFile={getSingleUploadInitialFile}
 					openImageGenerationOnCreate={getOpenImageGenerationOnCreate}
 					state={{

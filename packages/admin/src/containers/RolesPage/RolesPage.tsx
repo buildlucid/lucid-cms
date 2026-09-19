@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader/PageHeader";
 import { PageLayout } from "@/components/PageLayout/PageLayout";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import { RolesList } from "@/components/RolesList/RolesList";
-import UpsertRolePanel from "@/components/UpsertRolePanel/UpsertRolePanel";
+import UpsertRoleDrawer from "@/components/UpsertRoleDrawer/UpsertRoleDrawer";
 import { Permissions } from "@/constants/permissions";
 import useQueryState, {
 	booleanFilter,
@@ -128,7 +128,7 @@ const RolesPage: Component = () => {
 				}}
 			/>
 			{/* Modals */}
-			<UpsertRolePanel
+			<UpsertRoleDrawer
 				state={{
 					open: openCreateRolePanel(),
 					setOpen: setOpenCreateRolePanel,

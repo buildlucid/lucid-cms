@@ -5,7 +5,7 @@ import {
 	createMemo,
 	createSignal,
 } from "solid-js";
-import CreateUserPanel from "@/components/CreateUserPanel/CreateUserPanel";
+import CreateUserDrawer from "@/components/CreateUserDrawer/CreateUserDrawer";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { PageHeader } from "@/components/PageHeader/PageHeader";
@@ -247,7 +247,7 @@ const UsersPage: Component = () => {
 					showingDeleted: showingDeleted,
 				}}
 			/>
-			<CreateUserPanel
+			<CreateUserDrawer
 				state={{
 					open: openCreateUserPanel(),
 					setOpen: setOpenCreateUserPanel,

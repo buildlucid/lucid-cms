@@ -5,10 +5,10 @@ import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import JobScheduleTableRow from "@/components/JobScheduleTableRow/JobScheduleTableRow";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
-import ScheduleDetailsPanel from "@/components/ScheduleDetailsPanel/ScheduleDetailsPanel";
+import ScheduleDetailsDrawer from "@/components/ScheduleDetailsDrawer/ScheduleDetailsDrawer";
 import SetScheduleStateModal from "@/components/SetScheduleStateModal/SetScheduleStateModal";
 import { Table } from "@/components/Table/Table";
-import ViewScheduleRunsPanel from "@/components/ViewScheduleRunsPanel/ViewScheduleRunsPanel";
+import ViewScheduleRunsDrawer from "@/components/ViewScheduleRunsDrawer/ViewScheduleRunsDrawer";
 import useQueryState, {
 	pagination,
 	sort,
@@ -192,14 +192,14 @@ export const JobSchedulesList: Component = () => {
 					)}
 				</Table>
 			</DynamicContent>
-			<ScheduleDetailsPanel
+			<ScheduleDetailsDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().details,
 					setOpen: (open) => rowTarget.setTrigger("details", open),
 				}}
 			/>
-			<ViewScheduleRunsPanel
+			<ViewScheduleRunsDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().runs,

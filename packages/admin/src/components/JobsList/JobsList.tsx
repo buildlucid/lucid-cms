@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/solid-query";
 import { FaSolidCalendar, FaSolidListOl, FaSolidT } from "solid-icons/fa";
 import { type Component, Index } from "solid-js";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
-import JobDetailsPanel from "@/components/JobDetailsPanel/JobDetailsPanel";
+import JobDetailsDrawer from "@/components/JobDetailsDrawer/JobDetailsDrawer";
 import JobTableRow from "@/components/JobTableRow/JobTableRow";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
@@ -320,7 +320,7 @@ export const JobsList: Component = () => {
 						</Index>
 					)}
 				</Table>
-				<JobDetailsPanel
+				<JobDetailsDrawer
 					id={rowTarget.getTargetId}
 					state={{
 						open: rowTarget.getTriggers().details,

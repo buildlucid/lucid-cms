@@ -12,8 +12,8 @@ import {
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import BulkUploadMediaModal from "@/components/BulkUploadMediaModal/BulkUploadMediaModal";
 import CreateMediaFolderModal from "@/components/CreateMediaFolderModal/CreateMediaFolderModal";
-import CreateUpdateMediaPanel from "@/components/CreateUpdateMediaPanel/CreateUpdateMediaPanel";
-import CreateUserPanel from "@/components/CreateUserPanel/CreateUserPanel";
+import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
+import CreateUserDrawer from "@/components/CreateUserDrawer/CreateUserDrawer";
 import DashboardAttention, {
 	type DashboardAttentionItem,
 } from "@/components/DashboardAttention/DashboardAttention";
@@ -344,7 +344,7 @@ export const DashboardContent: Component = () => {
 
 			<MediaAltGenerationModal />
 			<MediaImageGenerationModal />
-			<CreateUpdateMediaPanel
+			<CreateUpdateMediaDrawer
 				state={{
 					open: createMediaPanelOpen(),
 					setOpen: setCreateMediaPanelOpen,
@@ -365,7 +365,7 @@ export const DashboardContent: Component = () => {
 					parentFolderId: () => undefined,
 				}}
 			/>
-			<CreateUserPanel
+			<CreateUserDrawer
 				state={{
 					open: createUserPanelOpen(),
 					setOpen: setCreateUserPanelOpen,

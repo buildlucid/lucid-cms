@@ -5,7 +5,7 @@ import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
 import OAuthClientRow from "@/components/OAuthClientRow/OAuthClientRow";
-import UpsertOAuthClientPanel from "@/components/UpsertOAuthClientPanel/UpsertOAuthClientPanel";
+import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -172,7 +172,7 @@ export const OAuthClientsList: Component<{
 			</Show>
 
 			{/* Panels */}
-			<UpsertOAuthClientPanel
+			<UpsertOAuthClientDrawer
 				state={{ open: createOpen(), setOpen: setCreateOpen }}
 				onCreate={(value) => {
 					setCredentials(value);

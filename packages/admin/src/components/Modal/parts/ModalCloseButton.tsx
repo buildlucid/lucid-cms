@@ -30,7 +30,7 @@ export const ModalCloseButton: Component<ModalCloseButtonProps> = (props) => {
 		<Dialog.CloseButton
 			data-modal-close-button
 			class={classNames(
-				"shrink-0 text-body hover:text-title ring-error-base focus-visible:ring-1 focus:outline-hidden h-8 w-8 min-w-8 rounded-full flex justify-center items-center duration-200 transition-colors",
+				"relative shrink-0 text-body hover:text-title ring-error-base focus-visible:ring-1 focus:outline-hidden h-6 w-6 min-w-6 rounded-full flex justify-center items-center duration-200 transition-colors after:absolute after:-inset-2.5 after:content-['']",
 				props.class,
 			)}
 		>

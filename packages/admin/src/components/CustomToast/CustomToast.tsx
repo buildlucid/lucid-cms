@@ -110,7 +110,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 				</div>
 			</div>
 			<button
-				data-panel-ignore
+				data-drawer-ignore
 				class="absolute right-2.5 top-2.5 z-20 flex size-7 items-center justify-center rounded-md text-icon-faded transition-colors duration-200 hover:bg-background-hover hover:text-icon-base focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
 				onClick={() => toast.dismiss(props.toast.id)}
 				type="button"

@@ -20,7 +20,7 @@ import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import RegenerateAPIKeyModal from "@/components/RegenerateAPIKeyModal/RegenerateAPIKeyModal";
 import { Table } from "@/components/Table/Table";
-import UpsertIntegrationPanel from "@/components/UpsertIntegrationPanel/UpsertIntegrationPanel";
+import UpsertIntegrationDrawer from "@/components/UpsertIntegrationDrawer/UpsertIntegrationDrawer";
 import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
@@ -412,7 +412,7 @@ export const IntegrationsList: Component<{
 					},
 				}}
 			/>
-			<UpsertIntegrationPanel
+			<UpsertIntegrationDrawer
 				services={api.integrations}
 				state={{
 					open: props.state.openCreateIntegrationPanel(),
@@ -425,7 +425,7 @@ export const IntegrationsList: Component<{
 					},
 				}}
 			/>
-			<UpsertIntegrationPanel
+			<UpsertIntegrationDrawer
 				id={rowTarget.getTargetId}
 				services={api.integrations}
 				state={{

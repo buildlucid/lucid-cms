@@ -1,0 +1,310 @@
+import {
+	type Accessor,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	Show,
+} from "solid-js";
+import Button from "@/components/Button/Button";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
+import { Drawer } from "@/components/Drawer/Drawer";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import { Input } from "@/components/Input/Input";
+import { Textarea } from "@/components/Textarea/Textarea";
+import api from "@/services/api";
+import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
+import { getBodyError } from "@/utils/error-helpers";
+import helpers from "@/utils/helpers";
+
+interface UpsertShareLinkPanelProps {
+	mediaId?: Accessor<number | undefined>;
+	linkId?: Accessor<number | undefined>;
+	state: {
+		open: boolean;
+		setOpen: (_state: boolean) => void;
+	};
+	callbacks?: {
+		onCreateSuccess?: (mediaId: number, shareLinkId: number) => void;
+	};
+}
+
+const UpsertShareLinkDrawer: Component<UpsertShareLinkPanelProps> = (props) => {
+	// ------------------------------
+	// State
+	const [getName, setName] = createSignal<string>();
+	const [getDescription, setDescription] = createSignal<string>();
+	const [getPassword, setPassword] = createSignal<string>();
+	const [getExpiresAt, setExpiresAt] = createSignal<string>();
+	const [getRemovePassword, setRemovePassword] = createSignal<boolean>(false);
+
+	// ---------------------------------
+	// Query
+	const shareLink = api.mediaShareLinks.useGetSingle({
+		queryParams: {
+			location: {
+				mediaId: props.mediaId as Accessor<number | undefined>,
+				id: props.linkId as Accessor<number | undefined>,
+			},
+		},
+		key: () => props.state.open,
+		enabled: () => props.state.open && mode() !== "create",
+	});
+
+	// ---------------------------------
+	// Mutations
+	const createShareLink = api.mediaShareLinks.useCreateSingle({
+		onSuccess: (data) => {
+			const mediaId = props.mediaId?.();
+			if (mediaId === undefined) return console.error("No media id provided");
+			props.callbacks?.onCreateSuccess?.(mediaId, data.data.id);
+			props.state.setOpen(false);
+		},
+	});
+	const updateShareLink = api.mediaShareLinks.useUpdateSingle({
+		onSuccess: () => {
+			props.state.setOpen(false);
+		},
+	});
+
+	// ---------------------------------
+	// Effects
+	createEffect(() => {
+		if (shareLink.isSuccess) {
+			setName(shareLink.data?.data.name || "");
+			setDescription(shareLink.data?.data.description || "");
+			setPassword("");
+			setExpiresAt(
+				dateHelpers.toDateInputValue(shareLink.data?.data.expiresAt),
+			);
+		}
+	});
+
+	// ---------------------------------
+	// Memos
+	const mode = createMemo(() => {
+		if (props.linkId === undefined || props.linkId() === undefined)
+			return "create";
+		return "update";
+	});
+	const isLoading = createMemo(() => {
+		if (mode() === "create") return false;
+		return shareLink.isLoading;
+	});
+	const isError = createMemo(() => {
+		if (mode() === "create") return false;
+		return shareLink.isError;
+	});
+	const panelTitle = createMemo(() => {
+		if (mode() === "create")
+			return T()("panels.media.share.links.create.title");
+		return T()("panels.media.share.links.update.title");
+	});
+	const panelDescription = createMemo(() => {
+		if (mode() === "create")
+			return T()("panels.media.share.links.create.description");
+	});
+	const panelSubmit = createMemo(() => {
+		if (mode() === "create") return T()("common.create");
+		return T()("common.update");
+	});
+	const updateData = createMemo(() => {
+		return helpers.updateData(
+			{
+				name: shareLink.data?.data.name,
+				description: shareLink.data?.data.description,
+				expiresAt: shareLink.data?.data.expiresAt,
+			},
+			{
+				name: getName(),
+				description: getDescription(),
+				expiresAt: getExpiresAt(),
+			},
+		);
+	});
+	const submitIsDisabled = createMemo(() => {
+		if (mode() === "create") return false;
+		return !updateData().changed && !getPassword() && !getRemovePassword();
+	});
+	const mutationIsPending = createMemo(() => {
+		return createShareLink.action.isPending || updateShareLink.action.isPending;
+	});
+	const errors = createMemo(() => {
+		if (mode() === "create") return createShareLink.errors();
+		return updateShareLink.errors();
+	});
+
+	// ---------------------------------
+	// Render
+	return (
+		<Drawer.Root
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			loading={isLoading()}
+			error={isError() ? T()("errors.generic.message") : undefined}
+			onReset={() => {
+				setName("");
+				setDescription("");
+				setPassword("");
+				setExpiresAt("");
+				setRemovePassword(false);
+				createShareLink.reset();
+				updateShareLink.reset();
+			}}
+		>
+			<Drawer.Header>
+				<Drawer.Title>{panelTitle()}</Drawer.Title>
+				<Drawer.Description>{panelDescription()}</Drawer.Description>
+			</Drawer.Header>
+			<Drawer.Form
+				onSubmit={() => {
+					if (mode() === "create") {
+						const mediaId = props.mediaId?.();
+						if (mediaId === undefined) return;
+
+						createShareLink.action.mutate({
+							mediaId,
+							body: {
+								name: getName() || undefined,
+								description: getDescription() || undefined,
+								password: getPassword() || undefined,
+								expiresAt: getExpiresAt() || undefined,
+							},
+						});
+					} else {
+						const mediaId = props.mediaId?.();
+						const linkId = props.linkId?.();
+						if (mediaId === undefined || linkId === undefined) return;
+
+						const body: Record<string, unknown> = {
+							...updateData().data,
+						};
+
+						//* handle password logic:
+						// 1. If removePassword is checked, explicitly set to null
+						// 2. Else if a new password is provided, set it
+						// 3. Otherwise, don't include password in the update
+						if (getRemovePassword()) {
+							body.password = null;
+						} else if (getPassword()) {
+							body.password = getPassword();
+						}
+
+						updateShareLink.action.mutate({
+							mediaId,
+							linkId,
+							body,
+						});
+					}
+				}}
+			>
+				<Drawer.Body>
+					<Input
+						id="share-link-name"
+						value={getName() || ""}
+						onChange={setName}
+						name="name"
+						type="text"
+						copy={{
+							label: T()("common.name"),
+						}}
+						errors={getBodyError("name", errors)}
+					/>
+					<Textarea
+						id="share-link-description"
+						value={getDescription() || ""}
+						onChange={setDescription}
+						name="description"
+						copy={{
+							label: T()("common.description"),
+						}}
+						errors={getBodyError("description", errors)}
+					/>
+					<Show
+						when={
+							mode() === "update" &&
+							shareLink.data?.data.hasPassword &&
+							!getPassword()
+						}
+					>
+						<Checkbox
+							id="share-link-remove-password"
+							name="removePassword"
+							value={getRemovePassword()}
+							onChange={(value) => {
+								setRemovePassword(value);
+								if (value) setPassword("");
+							}}
+							copy={{
+								label: T()("media.share.links.password.remove.action"),
+								describedBy: T()("media.share.links.password.remove.help"),
+							}}
+						/>
+					</Show>
+					<Show when={!getRemovePassword()}>
+						<Input
+							id="share-link-password"
+							value={getPassword() || ""}
+							onChange={(value) => {
+								setPassword(value);
+								//* if user starts typing a password, uncheck remove password
+								if (value && getRemovePassword()) {
+									setRemovePassword(false);
+								}
+							}}
+							name="password"
+							type="password"
+							copy={{
+								label: T()("common.password"),
+								describedBy:
+									mode() === "update" && shareLink.data?.data.hasPassword
+										? T()("media.share.links.password.keep.existing.help")
+										: undefined,
+							}}
+							errors={getBodyError("password", errors)}
+						/>
+					</Show>
+					<Input
+						id="share-link-expires-at"
+						value={getExpiresAt() || ""}
+						onChange={setExpiresAt}
+						name="expiresAt"
+						type="date"
+						copy={{
+							label: T()("common.expires.at"),
+							placeholder: T()("common.optional"),
+							describedBy: shareLink.data?.data.hasExpired
+								? T()("media.share.links.expired.description")
+								: undefined,
+						}}
+						errors={getBodyError("expiresAt", errors)}
+					/>
+				</Drawer.Body>
+				<Drawer.Footer>
+					<ErrorMessage theme="basic" message={errors()?.message} />
+					<Drawer.Actions>
+						<Button
+							size="md"
+							variant="outline"
+							onClick={() => props.state.setOpen(false)}
+						>
+							{T()("common.close")}
+						</Button>
+						<Button
+							type="submit"
+							variant="primary"
+							size="md"
+							loading={mutationIsPending()}
+							disabled={submitIsDisabled()}
+						>
+							{panelSubmit()}
+						</Button>
+					</Drawer.Actions>
+				</Drawer.Footer>
+			</Drawer.Form>
+		</Drawer.Root>
+	);
+};
+
+export default UpsertShareLinkDrawer;

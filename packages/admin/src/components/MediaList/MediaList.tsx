@@ -17,7 +17,7 @@ import {
 } from "solid-js";
 import ClearProcessedMedia from "@/components/ClearProcessedImagesModal/ClearProcessedImagesModal";
 import CopyShareLinkURLModal from "@/components/CopyShareLinkURLModal/CopyShareLinkURLModal";
-import CreateUpdateMediaPanel from "@/components/CreateUpdateMediaPanel/CreateUpdateMediaPanel";
+import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import DeleteAllShareLinksModal from "@/components/DeleteAllShareLinksModal/DeleteAllShareLinksModal";
 import DeleteMediaBatchModal from "@/components/DeleteMediaBatchModal/DeleteMediaBatchModal";
 import DeleteMediaBatchPermanentlyModal from "@/components/DeleteMediaBatchPermanentlyModal/DeleteMediaBatchPermanentlyModal";
@@ -42,9 +42,9 @@ import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import RestoreMediaBatchModal from "@/components/RestoreMediaBatchModal/RestoreMediaBatchModal";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
 import UpdateMediaFolderModal from "@/components/UpdateMediaFolderModal/UpdateMediaFolderModal";
-import UpsertShareLinkPanel from "@/components/UpsertShareLinkPanel/UpsertShareLinkPanel";
-import ViewMediaPanel from "@/components/ViewMediaPanel/ViewMediaPanel";
-import ViewShareLinksPanel from "@/components/ViewShareLinksPanel/ViewShareLinksPanel";
+import UpsertShareLinkDrawer from "@/components/UpsertShareLinkDrawer/UpsertShareLinkDrawer";
+import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
+import ViewShareLinksDrawer from "@/components/ViewShareLinksDrawer/ViewShareLinksDrawer";
 import { Permissions } from "@/constants/permissions";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
@@ -482,7 +482,7 @@ export const MediaList: Component<{
 					params: getMoveModalParams(),
 				}}
 			/>
-			<CreateUpdateMediaPanel
+			<CreateUpdateMediaDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().update,
@@ -492,7 +492,7 @@ export const MediaList: Component<{
 					parentFolderId: props.state.parentFolderId,
 				}}
 			/>
-			<ViewMediaPanel
+			<ViewMediaDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().view,
@@ -502,7 +502,7 @@ export const MediaList: Component<{
 					parentFolderId: props.state.parentFolderId,
 				}}
 			/>
-			<UpsertShareLinkPanel
+			<UpsertShareLinkDrawer
 				mediaId={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().createShareLink,
@@ -517,7 +517,7 @@ export const MediaList: Component<{
 					},
 				}}
 			/>
-			<ViewShareLinksPanel
+			<ViewShareLinksDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().viewShareLinks,

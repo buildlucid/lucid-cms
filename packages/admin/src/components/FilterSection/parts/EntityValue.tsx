@@ -15,10 +15,10 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import DocumentSelectPanel from "@/components/DocumentSelectPanel/DocumentSelectPanel";
-import MediaSelectPanel from "@/components/MediaSelectPanel/MediaSelectPanel";
+import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
+import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
-import UserSelectPanel from "@/components/UserSelectPanel/UserSelectPanel";
+import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
 import type { FilterValue } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
@@ -284,7 +284,7 @@ export const EntityValue: Component<{
 			</Show>
 			<Switch>
 				<Match when={props.field.type === "user"}>
-					<UserSelectPanel
+					<UserSelectDrawer
 						state={{
 							open: panelOpen(),
 							setOpen: setPanelOpen,
@@ -301,7 +301,7 @@ export const EntityValue: Component<{
 					/>
 				</Match>
 				<Match when={props.field.type === "media"}>
-					<MediaSelectPanel
+					<MediaSelectDrawer
 						state={{
 							open: panelOpen(),
 							setOpen: setPanelOpen,
@@ -320,7 +320,7 @@ export const EntityValue: Component<{
 					/>
 				</Match>
 				<Match when={props.field.type === "relation"}>
-					<DocumentSelectPanel
+					<DocumentSelectDrawer
 						state={{
 							open: panelOpen(),
 							setOpen: setPanelOpen,

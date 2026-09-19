@@ -2,18 +2,18 @@ import { useNavigate } from "@solidjs/router";
 import type { Collection } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import CreatePublishRequestModal from "@/components/CreatePublishRequestModal/CreatePublishRequestModal";
-import CreateUpdateMediaPanel from "@/components/CreateUpdateMediaPanel/CreateUpdateMediaPanel";
+import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
-import DocumentSelectPanel from "@/components/DocumentSelectPanel/DocumentSelectPanel";
+import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import DuplicateDocumentModal from "@/components/DuplicateDocumentModal/DuplicateDocumentModal";
-import EmbeddedBrickEditPanel from "@/components/EmbeddedBrickEditPanel/EmbeddedBrickEditPanel";
+import EmbeddedBrickEditDrawer from "@/components/EmbeddedBrickEditDrawer/EmbeddedBrickEditDrawer";
 import LinkSelectModal from "@/components/LinkSelectModal/LinkSelectModal";
-import MediaSelectPanel from "@/components/MediaSelectPanel/MediaSelectPanel";
+import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
 import NavigationGuardModal from "@/components/NavigationGuardModal/NavigationGuardModal";
 import ReleaseEnvironmentModal from "@/components/ReleaseEnvironmentModal/ReleaseEnvironmentModal";
 import RestoreRevisionModal from "@/components/RestoreRevisionModal/RestoreRevisionModal";
-import RichTextVariableSelectPanel from "@/components/RichTextVariableSelectPanel/RichTextVariableSelectPanel";
-import UserSelectPanel from "@/components/UserSelectPanel/UserSelectPanel";
+import RichTextVariableSelectDrawer from "@/components/RichTextVariableSelectDrawer/RichTextVariableSelectDrawer";
+import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import type { UseDocumentState } from "@/hooks/useDocumentState/useDocumentState";
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
@@ -127,7 +127,7 @@ export const PageBuilderModals: Component<{
 					<NavigationGuardModal state={navigationGuard()} />
 				)}
 			</Show>
-			<MediaSelectPanel
+			<MediaSelectDrawer
 				state={{
 					open: mediaSelectModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close("mediaSelect"),
@@ -146,7 +146,7 @@ export const PageBuilderModals: Component<{
 						pageBuilderModalsStore.triggerAndClose("mediaSelect", selection),
 				}}
 			/>
-			<DocumentSelectPanel
+			<DocumentSelectDrawer
 				state={{
 					open: documentSelectModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close("documentSelect"),
@@ -162,7 +162,7 @@ export const PageBuilderModals: Component<{
 						pageBuilderModalsStore.triggerAndClose("documentSelect", selection),
 				}}
 			/>
-			<RichTextVariableSelectPanel
+			<RichTextVariableSelectDrawer
 				state={{
 					open: richTextVariableSelectModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close("richTextVariableSelect"),
@@ -184,7 +184,7 @@ export const PageBuilderModals: Component<{
 						),
 				}}
 			/>
-			<EmbeddedBrickEditPanel
+			<EmbeddedBrickEditDrawer
 				state={{
 					open: embeddedBrickEditModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close("embeddedBrickEdit"),
@@ -194,7 +194,7 @@ export const PageBuilderModals: Component<{
 				collection={props.hooks.state.collection()}
 				documentId={props.hooks.state.document()?.id}
 			/>
-			<UserSelectPanel
+			<UserSelectDrawer
 				state={{
 					open: userSelectModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close("userSelect"),
@@ -219,7 +219,7 @@ export const PageBuilderModals: Component<{
 						pageBuilderModalsStore.triggerAndClose("linkSelect", link),
 				}}
 			/>
-			<CreateUpdateMediaPanel
+			<CreateUpdateMediaDrawer
 				state={{
 					open: mediaUploadModal() !== undefined,
 					setOpen: () => pageBuilderModalsStore.close("mediaUpload"),

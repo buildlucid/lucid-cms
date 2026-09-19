@@ -6,7 +6,7 @@ import {
 	useContext,
 	type ValidComponent,
 } from "solid-js";
-import { PanelLayerContext } from "@/components/Panel/PanelLayerContext";
+import { LayerContext } from "@/hooks/useLayer/useLayer";
 
 interface DropdownContentProps {
 	options?: {
@@ -25,14 +25,14 @@ interface DropdownContentProps {
 const DropdownContent: Component<DropdownContentProps> = (props) => {
 	// ----------------------------------------
 	// Hooks
-	const panelLayer = useContext(PanelLayerContext);
+	const panelLayer = useContext(LayerContext);
 
 	// ----------------------------------------
 	// Render
 	return (
 		<DropdownMenu.Portal>
 			<DropdownMenu.Content
-				data-panel-ignore
+				data-drawer-ignore
 				as={props.options?.as}
 				onOpenAutoFocus={props.options?.onOpenAutoFocus}
 				class={classNames(

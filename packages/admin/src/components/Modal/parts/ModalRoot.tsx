@@ -6,7 +6,7 @@ import {
 	type JSXElement,
 	useContext,
 } from "solid-js";
-import { PanelLayerContext } from "@/components/Panel/PanelLayerContext";
+import { LayerContext } from "@/hooks/useLayer/useLayer";
 import { ModalContext } from "../ModalContext";
 
 /** Width of the modal surface. */
@@ -60,7 +60,7 @@ export interface ModalRootProps {
 export const ModalRoot: Component<ModalRootProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	const parentLayer = useContext(PanelLayerContext);
+	const parentLayer = useContext(LayerContext);
 
 	// ----------------------------------------
 	// Memos
@@ -114,11 +114,11 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 								props.class,
 							)}
 						>
-							<PanelLayerContext.Provider value={layer}>
+							<LayerContext.Provider value={layer}>
 								<ModalContext.Provider value={{ dismissible }}>
 									{props.children}
 								</ModalContext.Provider>
-							</PanelLayerContext.Provider>
+							</LayerContext.Provider>
 						</div>
 					</Dialog.Content>
 				</div>

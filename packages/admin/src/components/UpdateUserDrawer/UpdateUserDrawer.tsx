@@ -1,0 +1,447 @@
+import type { User } from "@types";
+import {
+	type Accessor,
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	For,
+	Show,
+} from "solid-js";
+import AuthProviderRow from "@/components/AuthProviderRow/AuthProviderRow";
+import Button from "@/components/Button/Button";
+import CreateUpdateProfilePictureDrawer from "@/components/CreateUpdateProfilePictureDrawer/CreateUpdateProfilePictureDrawer";
+import DetailsList from "@/components/DetailsList/DetailsList";
+import { Drawer } from "@/components/Drawer/Drawer";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
+import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
+import type { SelectMultipleValueT } from "@/components/SelectMultiple/SelectMultiple";
+import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
+import { Switch } from "@/components/Switch/Switch";
+import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
+import { Permissions } from "@/constants/permissions";
+import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
+import T from "@/translations";
+import dateHelpers from "@/utils/date-helpers";
+import { getBodyError } from "@/utils/error-helpers";
+import helpers from "@/utils/helpers";
+
+const UpdateUserDrawer: Component<{
+	id: Accessor<number | undefined>;
+	state: {
+		open: boolean;
+		setOpen: (_state: boolean) => void;
+	};
+}> = (props) => {
+	// ------------------------------
+	// State & Hooks
+	const [getSelectedRoles, setSelectedRoles] = createSignal<
+		SelectMultipleValueT[]
+	>([]);
+	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
+	const [getIsLocked, setIsLocked] = createSignal(false);
+	const [getUnlinkingProviderKey, setUnlinkingProviderKey] =
+		createSignal<string>();
+	const [profilePicturePanelOpen, setProfilePicturePanelOpen] =
+		createSignal(false);
+	const [activeTab, setActiveTab] = createSignal<
+		| "options"
+		| "details"
+		| "auth_providers"
+		| "oauth_connections"
+		| "integrations"
+		| "meta"
+	>("options");
+
+	// ---------------------------------
+	// Queries
+	const roles = api.roles.useGetMultiple({
+		queryParams: {
+			include: {
+				permissions: false,
+			},
+			perPage: -1,
+		},
+		enabled: () => !props.id(),
+	});
+	const user = api.users.useGetSingle({
+		queryParams: {
+			location: {
+				userId: props.id,
+			},
+		},
+		enabled: () => !!props.id(),
+	});
+	const providers = api.auth.useGetProviders({
+		queryParams: {},
+		enabled: () => userStore.get.user?.superAdmin ?? false,
+	});
+
+	// ---------------------------------
+	// Mutations
+	const updateUser = api.users.useUpdateSingle({
+		onSuccess: () => {
+			props.state.setOpen(false);
+		},
+	});
+	const unlinkAuthProvider = api.users.useUnlinkAuthProvider({
+		onMutate: (params) => {
+			setUnlinkingProviderKey(params.providerKey);
+		},
+	});
+	const deleteProfilePicture = api.users.useDeleteProfilePicture();
+
+	// ---------------------------------
+	// Memos
+	const isLoading = createMemo(() => {
+		return user.isLoading || roles.isLoading || providers.isLoading;
+	});
+	const isError = createMemo(() => {
+		return user.isError || roles.isError || providers.isError;
+	});
+	const roleOptions = createMemo(() => {
+		return (
+			roles.data?.data.map((role) => ({
+				value: role.id,
+				label: role.name,
+			})) ?? []
+		);
+	});
+	const linkedProvidersByKey = createMemo(() => {
+		const authProviders = user.data?.data.authProviders ?? [];
+		return authProviders.reduce(
+			(acc, provider) => {
+				acc[provider.providerKey] = provider;
+				return acc;
+			},
+			{} as Record<string, NonNullable<User["authProviders"]>[number]>,
+		);
+	});
+	const updateData = createMemo(() => {
+		return helpers.updateData(
+			{
+				roleIds: user.data?.data.roles?.map((role) => role.id),
+				superAdmin: user.data?.data.superAdmin,
+				isLocked: user.data?.data.isLocked,
+			},
+			{
+				roleIds: getSelectedRoles().map((role) => role.value) as number[],
+				superAdmin: getIsSuperAdmin(),
+				isLocked: getIsLocked(),
+			},
+		);
+	});
+	const userRoles = createMemo(() => {
+		return user.data?.data.roles?.map((role) => role.name).join(", ") || "-";
+	});
+	// ---------------------------------
+	// Handlers
+	const handleSubmit = () => {
+		updateUser.action.mutate({
+			id: props.id() as number,
+			body: updateData().data,
+		});
+	};
+	const handleReset = () => {
+		updateUser.reset();
+		deleteProfilePicture.reset();
+	};
+	const handleClearProfilePicture = () => {
+		const userId = props.id();
+		if (!userId) return;
+
+		deleteProfilePicture.action.mutate({
+			userId,
+		});
+	};
+
+	// ---------------------------------
+	// Effects
+	createEffect(() => {
+		if (user.isSuccess) {
+			setSelectedRoles(
+				user.data?.data.roles?.map((role) => {
+					return {
+						value: role.id,
+						label: role.name,
+					};
+				}) || [],
+			);
+			setIsSuperAdmin(user.data?.data.superAdmin || false);
+			setIsLocked(user.data?.data.isLocked || false);
+		}
+	});
+
+	// ---------------------------------
+	// Render
+	return (
+		<>
+			<Drawer.Root
+				open={props.state.open}
+				onOpenChange={props.state.setOpen}
+				loading={isLoading()}
+				error={isError() ? T()("errors.generic.message") : undefined}
+				onReset={handleReset}
+			>
+				<Drawer.Header>
+					<Drawer.Title>{T()("panels.users.update.title")}</Drawer.Title>
+				</Drawer.Header>
+				<Drawer.Form onSubmit={handleSubmit}>
+					<Drawer.Body>
+						<ProfilePicturePreviewCard
+							user={{
+								username: user.data?.data.username,
+								firstName: user.data?.data.firstName,
+								lastName: user.data?.data.lastName,
+								profilePicture: user.data?.data.profilePicture,
+							}}
+							onEdit={() => setProfilePicturePanelOpen(true)}
+							onClear={
+								user.data?.data.profilePicture && props.id()
+									? handleClearProfilePicture
+									: undefined
+							}
+							clearLoading={deleteProfilePicture.action.isPending}
+						/>
+						<Drawer.Tabs
+							items={[
+								{ value: "options", label: T()("common.options") },
+								{ value: "details", label: T()("common.details") },
+								{
+									value: "auth_providers",
+									label: T()("account.auth.providers.title"),
+									show: userStore.get.user?.superAdmin,
+								},
+								{
+									value: "oauth_connections",
+									label: T()("oauth.connections.manage.title"),
+								},
+								{
+									value: "integrations",
+									label: T()("integrations.manage.title"),
+								},
+								{ value: "meta", label: T()("common.meta") },
+							]}
+							active={activeTab()}
+							onChange={setActiveTab}
+						/>
+						<Show when={activeTab() === "options"}>
+							<SelectMultiple
+								id="roles"
+								values={getSelectedRoles()}
+								onChange={setSelectedRoles}
+								name={"roles"}
+								copy={{
+									label: T()("common.roles"),
+								}}
+								options={roleOptions()}
+								errors={getBodyError("roleIds", updateUser.errors)}
+							/>
+							<Show when={userStore.get.user?.superAdmin}>
+								<Switch
+									id="superAdmin"
+									value={getIsSuperAdmin()}
+									onChange={setIsSuperAdmin}
+									name={"superAdmin"}
+									theme="relaxed"
+									copy={{
+										true: T()("common.yes"),
+										false: T()("common.no"),
+										label: T()("users.super.admin.label"),
+									}}
+									errors={getBodyError("superAdmin", updateUser.errors)}
+									hideOptionalText={true}
+								/>
+								<Switch
+									id="isLocked"
+									value={getIsLocked()}
+									onChange={setIsLocked}
+									name={"isLocked"}
+									theme="relaxed"
+									copy={{
+										true: T()("common.status.locked"),
+										false: T()("common.status.unlocked"),
+										label: T()("users.status.locked.label"),
+									}}
+									errors={getBodyError("isLocked", updateUser.errors)}
+									hideOptionalText={true}
+								/>
+							</Show>
+						</Show>
+						<Show when={activeTab() === "details"}>
+							<DetailsList
+								type="text"
+								items={[
+									{
+										label: T()("common.username"),
+										value: user.data?.data.username || "-",
+									},
+									{
+										label: T()("common.email"),
+										value: user.data?.data.email || "-",
+									},
+									{
+										label: T()("common.first.name"),
+										value: user.data?.data.firstName || "-",
+									},
+									{
+										label: T()("common.last.name"),
+										value: user.data?.data.lastName || "-",
+									},
+									{
+										label: T()("users.type"),
+										value: user.data?.data.superAdmin
+											? T()("users.super.admin.title")
+											: T()("common.standard"),
+										show: user.data?.data.superAdmin !== undefined,
+									},
+									{
+										label: T()("common.roles"),
+										value: userRoles(),
+										show:
+											user.data?.data.roles !== undefined &&
+											user.data?.data.roles.length > 0,
+									},
+									{
+										label: T()("users.status.locked.label"),
+										value: user.data?.data.isLocked
+											? T()("common.yes")
+											: T()("common.no"),
+										show: user.data?.data.isLocked !== undefined,
+									},
+								]}
+							/>
+						</Show>
+						<Show when={activeTab() === "auth_providers"}>
+							<Show when={userStore.get.user?.superAdmin}>
+								<Show
+									when={(providers.data?.data.providers?.length ?? 0) > 0}
+									fallback={
+										<span class="text-sm text-body">
+											{T()("empty.states.results.title")}
+										</span>
+									}
+								>
+									<div class="flex flex-col gap-3">
+										<For each={providers.data?.data.providers || []}>
+											{(provider) => (
+												<AuthProviderRow
+													provider={provider}
+													linkedProvider={linkedProvidersByKey()[provider.key]}
+													isLoading={
+														unlinkAuthProvider.action.isPending &&
+														getUnlinkingProviderKey() === provider.key
+													}
+													onUnlink={() => {
+														const userId = props.id();
+														if (!userId) return;
+
+														unlinkAuthProvider.action.mutate({
+															userId,
+															providerKey: provider.key,
+														});
+													}}
+												/>
+											)}
+										</For>
+									</div>
+								</Show>
+							</Show>
+						</Show>
+						<Show when={activeTab() === "oauth_connections" && props.id()}>
+							{(userId) => (
+								<OAuthConnectionsList
+									owner={{ type: "user", userId: userId() }}
+									canUpdate={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									canRevoke={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									embedded={true}
+								/>
+							)}
+						</Show>
+						<Show when={activeTab() === "integrations" && props.id()}>
+							{(userId) => (
+								<UserIntegrationsList
+									services={api.users.integrations(userId)}
+									canCreate={false}
+									canUpdate={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									canDelete={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									canRegenerate={
+										userStore.get.hasPermission([Permissions.UsersUpdate]).all
+									}
+									embedded={true}
+								/>
+							)}
+						</Show>
+						<Show when={activeTab() === "meta"}>
+							<DetailsList
+								type="text"
+								items={[
+									{
+										label: T()("common.created.at"),
+										value: user.data?.data.createdAt
+											? dateHelpers.formatDate(user.data?.data.createdAt)
+											: "-",
+									},
+									{
+										label: T()("common.updated.at"),
+										value: user.data?.data.updatedAt
+											? dateHelpers.formatDate(user.data?.data.updatedAt)
+											: "-",
+									},
+								]}
+							/>
+						</Show>
+					</Drawer.Body>
+					<Drawer.Footer>
+						<ErrorMessage
+							theme="basic"
+							message={updateUser.errors()?.message}
+						/>
+						<Drawer.Actions>
+							<Button
+								size="md"
+								variant="outline"
+								onClick={() => props.state.setOpen(false)}
+							>
+								{T()("common.close")}
+							</Button>
+							<Button
+								type="submit"
+								variant="primary"
+								size="md"
+								loading={updateUser.action.isPending}
+								disabled={!updateData().changed}
+							>
+								{T()("common.update")}
+							</Button>
+						</Drawer.Actions>
+					</Drawer.Footer>
+				</Drawer.Form>
+			</Drawer.Root>
+			<Show when={props.id()}>
+				{(targetUserId) => (
+					<CreateUpdateProfilePictureDrawer
+						state={{
+							open: profilePicturePanelOpen(),
+							setOpen: setProfilePicturePanelOpen,
+							media: user.data?.data.profilePicture ?? null,
+							userId: targetUserId(),
+						}}
+					/>
+				)}
+			</Show>
+		</>
+	);
+};
+
+export default UpdateUserDrawer;

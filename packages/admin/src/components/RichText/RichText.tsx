@@ -9,7 +9,8 @@ import {
 	type JSXElement,
 	Show,
 } from "solid-js";
-import { BottomPanel } from "@/components/BottomPanel/BottomPanel";
+import Button from "@/components/Button/Button";
+import { Drawer } from "@/components/Drawer/Drawer";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import T from "@/translations";
@@ -226,35 +227,39 @@ export const RichText: Component<RichTextProps> = (props) => {
 					)}
 				</Show>
 			</Show>
-			<BottomPanel
+			<Drawer.Root
+				open={fullscreen()}
+				onOpenChange={setFullscreenState}
+				side="bottom"
+				size="full"
 				zIndex={60}
-				state={{ open: fullscreen(), setOpen: setFullscreenState }}
-				langauge={{
-					contentLocale:
-						props.localised === true && props.translations !== undefined,
-				}}
-				fetchState={{ isLoading: false, isError: false }}
-				copy={{
-					title: props.copy?.label,
-					cancel: T()("common.done"),
-				}}
-				options={{
-					padding: "24",
-					growContent: true,
-					fullHeight: true,
-					primaryCloseAction: true,
-				}}
 			>
-				{(language) => (
-					<FullscreenEditor
-						props={props}
-						contentLocale={
-							language?.contentLocale ?? (() => props.options?.locale)
-						}
-						onClose={() => setFullscreenState(false)}
-					/>
+				{(contentLocale) => (
+					<>
+						<Drawer.Header>
+							<Drawer.Title>{props.copy?.label}</Drawer.Title>
+						</Drawer.Header>
+						<Drawer.Body>
+							<FullscreenEditor
+								props={props}
+								contentLocale={() => contentLocale() ?? props.options?.locale}
+								onClose={() => setFullscreenState(false)}
+							/>
+						</Drawer.Body>
+						<Drawer.Footer>
+							<Drawer.Actions>
+								<Button
+									size="md"
+									variant="outline"
+									onClick={() => setFullscreenState(false)}
+								>
+									{T()("common.done")}
+								</Button>
+							</Drawer.Actions>
+						</Drawer.Footer>
+					</>
 				)}
-			</BottomPanel>
+			</Drawer.Root>
 		</>
 	);
 };

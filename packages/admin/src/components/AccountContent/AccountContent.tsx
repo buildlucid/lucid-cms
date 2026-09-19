@@ -11,7 +11,7 @@ import {
 import { AppearancePreference } from "@/components/AppearancePreference/AppearancePreference";
 import AuthProviderRow from "@/components/AuthProviderRow/AuthProviderRow";
 import Button from "@/components/Button/Button";
-import CreateUpdateProfilePicturePanel from "@/components/CreateUpdateProfilePicturePanel/CreateUpdateProfilePicturePanel";
+import CreateUpdateProfilePictureDrawer from "@/components/CreateUpdateProfilePictureDrawer/CreateUpdateProfilePictureDrawer";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
@@ -499,7 +499,7 @@ export const AccountContent: Component = () => {
 					revokeRefreshTokens.reset();
 				}}
 			/>
-			<CreateUpdateProfilePicturePanel
+			<CreateUpdateProfilePictureDrawer
 				state={{
 					open: profilePicturePanelOpen(),
 					setOpen: setProfilePicturePanelOpen,

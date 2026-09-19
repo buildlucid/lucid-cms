@@ -5,6 +5,7 @@ export {
 	type ButtonVariant,
 	default as Button,
 } from "../components/Button/Button.js";
+export * from "../components/Drawer/Drawer.js";
 export {
 	default as Link,
 	type LinkProps,

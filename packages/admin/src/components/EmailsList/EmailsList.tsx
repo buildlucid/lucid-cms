@@ -13,10 +13,10 @@ import DeleteEmailModal from "@/components/DeleteEmailModal/DeleteEmailModal";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import EmailTableRow from "@/components/EmailTableRow/EmailTableRow";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import PreviewEmailPanel from "@/components/PreviewEmailPanel/PreviewEmailPanel";
+import PreviewEmailDrawer from "@/components/PreviewEmailDrawer/PreviewEmailDrawer";
 import ResendEmailModal from "@/components/ResendEmailModal/ResendEmailModal";
 import { Table } from "@/components/Table/Table";
-import ViewEmailTransactionsPanel from "@/components/ViewEmailTransactionsPanel/ViewEmailTransactionsPanel";
+import ViewEmailTransactionsDrawer from "@/components/ViewEmailTransactionsDrawer/ViewEmailTransactionsDrawer";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
@@ -161,7 +161,7 @@ export const EmailsList: Component<{
 					</Index>
 				)}
 			</Table>
-			<PreviewEmailPanel
+			<PreviewEmailDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().preview,
@@ -170,7 +170,7 @@ export const EmailsList: Component<{
 					},
 				}}
 			/>
-			<ViewEmailTransactionsPanel
+			<ViewEmailTransactionsDrawer
 				id={rowTarget.getTargetId}
 				state={{
 					open: rowTarget.getTriggers().transactions,

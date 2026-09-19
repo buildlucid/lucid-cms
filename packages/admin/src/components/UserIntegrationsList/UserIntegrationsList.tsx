@@ -6,7 +6,7 @@ import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import IntegrationRow from "@/components/IntegrationRow/IntegrationRow";
 import RegenerateAPIKeyModal from "@/components/RegenerateAPIKeyModal/RegenerateAPIKeyModal";
-import UpsertIntegrationPanel from "@/components/UpsertIntegrationPanel/UpsertIntegrationPanel";
+import UpsertIntegrationDrawer from "@/components/UpsertIntegrationDrawer/UpsertIntegrationDrawer";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import type { IntegrationServices } from "@/services/api/integrations";
 import T from "@/translations";
@@ -274,7 +274,7 @@ export const UserIntegrationsList: Component<{
 					)}
 				</Show>
 			</Show>
-			<UpsertIntegrationPanel
+			<UpsertIntegrationDrawer
 				services={props.services}
 				state={{
 					open: createOpen(),
@@ -287,7 +287,7 @@ export const UserIntegrationsList: Component<{
 					},
 				}}
 			/>
-			<UpsertIntegrationPanel
+			<UpsertIntegrationDrawer
 				id={rowTarget.getTargetId}
 				services={props.services}
 				state={{

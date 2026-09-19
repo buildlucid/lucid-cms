@@ -9,8 +9,8 @@ import {
 } from "solid-js";
 import AiDraftReviewPill from "@/components/AiDraftReviewPill/AiDraftReviewPill";
 import AiIconButton from "@/components/AiIconButton/AiIconButton";
-import { PanelLayerContext } from "@/components/Panel/PanelLayerContext";
 import { Permissions } from "@/constants/permissions";
+import { LayerContext } from "@/hooks/useLayer/useLayer";
 import api from "@/services/api";
 import aiModalsStore, {
 	type CustomFieldGenerationTarget,
@@ -253,7 +253,7 @@ const useCustomFieldGeneration = () => {
 	): Component => {
 		const id = getTargetId();
 		const ActionButton: Component = () => {
-			const panelLayer = useContext(PanelLayerContext);
+			const panelLayer = useContext(LayerContext);
 
 			return (
 				<Show when={featureEnabled()}>

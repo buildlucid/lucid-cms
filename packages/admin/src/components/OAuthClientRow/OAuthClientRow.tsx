@@ -5,7 +5,7 @@ import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
 import IconContainer from "@/components/IconContainer/IconContainer";
 import { Modal } from "@/components/Modal/Modal";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
-import UpsertOAuthClientPanel from "@/components/UpsertOAuthClientPanel/UpsertOAuthClientPanel";
+import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";
 import T from "@/translations";
 import getMediaPreviewUrl from "@/utils/media-preview";
@@ -163,7 +163,7 @@ const OAuthClientRow: Component<{
 			</article>
 
 			{/* Panels */}
-			<UpsertOAuthClientPanel
+			<UpsertOAuthClientDrawer
 				id={() => props.client.id}
 				state={{ open: updateOpen(), setOpen: setUpdateOpen }}
 			/>
