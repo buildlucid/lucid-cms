@@ -9,7 +9,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { CheckboxButton } from "@/components/CheckboxButton/CheckboxButton";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
 import { Drawer } from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { Input } from "@/components/Input/Input";
@@ -262,11 +262,8 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 									label: T()("integrations.expiry.1.year"),
 								},
 							]}
-							copy={{
-								label: T()("integrations.expiry.label"),
-							}}
+							label={T()("integrations.expiry.label")}
 							required={mode() === "create"}
-							noClear={mode() === "create"}
 							errors={getBodyError("expiry", errors)}
 						/>
 					</InputGrid>
@@ -275,9 +272,7 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 						name="description"
 						value={getDescription()}
 						onChange={setDescription}
-						copy={{
-							label: T()("common.description"),
-						}}
+						label={T()("common.description")}
 						rows={3}
 						errors={getBodyError("description", errors)}
 					/>
@@ -286,9 +281,7 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 						name="enabled"
 						value={getEnabled()}
 						onChange={(value) => setEnabled(value)}
-						copy={{
-							label: T()("common.status.enabled"),
-						}}
+						label={T()("common.status.enabled")}
 						errors={getBodyError("enabled", errors)}
 					/>
 					<div class="w-full">
@@ -334,20 +327,20 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 										<div class="mt-2 flex flex-wrap gap-2">
 											<For each={group.scopes}>
 												{(scope) => (
-													<CheckboxButton
+													<Checkbox
+														variant="button"
 														id={`scope-${group.key}-${scope.key}`}
 														value={getScopes().includes(scope.key)}
 														onChange={() => toggleScope(scope.key)}
-														copy={{
-															label: helpers.getLocaleValue({
-																value: scope.details.name,
-															}),
-															tooltip:
-																helpers.getLocaleValue({
-																	value: scope.details.description,
-																}) || undefined,
-														}}
-														theme="secondary"
+														label={helpers.getLocaleValue({
+															value: scope.details.name,
+														})}
+														tooltip={
+															helpers.getLocaleValue({
+																value: scope.details.description,
+															}) || undefined
+														}
+														tone="secondary"
 													/>
 												)}
 											</For>

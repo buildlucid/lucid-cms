@@ -119,7 +119,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 			<Drawer.Body class="flex flex-col gap-3">
 				<div
 					class={classNames(
-						"relative border border-border rounded-md overflow-hidden",
+						"relative border border-border rounded-md overflow-hidden mb-3",
 						{
 							"mb-4": attachments().length === 0,
 							"mb-3": attachments().length > 0,

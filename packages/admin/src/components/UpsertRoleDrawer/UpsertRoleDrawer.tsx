@@ -8,7 +8,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { CheckboxButton } from "@/components/CheckboxButton/CheckboxButton";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
 import { Drawer } from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { Input } from "@/components/Input/Input";
@@ -207,9 +207,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 						value={description()}
 						onChange={setDescription}
 						disabled={isReadOnly()}
-						copy={{
-							label: T()("common.description"),
-						}}
+						label={T()("common.description")}
 						errors={getBodyError("description", errors)}
 						rows={4}
 					/>
@@ -295,7 +293,8 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 										<div class="mt-2 flex flex-wrap gap-2">
 											<For each={option.permissions}>
 												{(permission) => (
-													<CheckboxButton
+													<Checkbox
+														variant="button"
 														id={`permission-${option.key}-${permission.key}`}
 														value={selectedPermissions().includes(
 															permission.key,
@@ -310,18 +309,17 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 																return [...prev, permission.key];
 															});
 														}}
-														copy={{
-															label: helpers.getLocaleValue({
-																value: permission.details.name,
-																fallback: permission.key,
-															}),
-															tooltip:
-																helpers.getLocaleValue({
-																	value: permission.details.description,
-																}) || undefined,
-														}}
+														label={helpers.getLocaleValue({
+															value: permission.details.name,
+															fallback: permission.key,
+														})}
+														tooltip={
+															helpers.getLocaleValue({
+																value: permission.details.description,
+															}) || undefined
+														}
 														disabled={isReadOnly()}
-														theme="secondary"
+														tone="secondary"
 													/>
 												)}
 											</For>

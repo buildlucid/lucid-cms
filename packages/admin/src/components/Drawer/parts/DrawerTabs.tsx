@@ -69,8 +69,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 						if (typeof value === "string") props.onChange(value);
 					}}
 					options={visibleItems()}
-					noClear
-					ariaLabel={T()("common.section")}
+					aria-label={T()("common.section")}
 					hasError={activeItem()?.hasError}
 					renderValue={({ option }) => (
 						<span

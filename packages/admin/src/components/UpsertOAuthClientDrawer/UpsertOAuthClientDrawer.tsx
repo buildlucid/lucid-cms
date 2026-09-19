@@ -284,9 +284,8 @@ const UpsertOAuthClientDrawer: Component<{
 						name="enabled"
 						value={enabled()}
 						onChange={setEnabled}
-						copy={{ label: T()("common.status.enabled") }}
+						label={T()("common.status.enabled")}
 						errors={getBodyError("enabled", mutateErrors)}
-						inline={true}
 					/>
 
 					{/* Application */}
@@ -318,9 +317,8 @@ const UpsertOAuthClientDrawer: Component<{
 									label: T()("oauth.clients.auth.confidential"),
 								},
 							]}
-							copy={{ label: T()("oauth.clients.auth.method") }}
+							label={T()("oauth.clients.auth.method")}
 							required={true}
-							noClear={true}
 							disabled={mode() === "update"}
 							errors={getBodyError("authMethod", mutateErrors)}
 						/>

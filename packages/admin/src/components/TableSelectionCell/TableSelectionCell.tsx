@@ -1,4 +1,4 @@
-import { type Component, Match, Switch } from "solid-js";
+import { type Component, createUniqueId, Match, Switch } from "solid-js";
 import { Checkbox } from "@/components/Checkbox/Checkbox";
 import type { TableTheme } from "@/components/Table/Table";
 import { TableCell } from "@/components/TableCell/TableCell";
@@ -14,6 +14,10 @@ interface SelectColProps {
 
 const TableSelectionCell: Component<SelectColProps> = (props) => {
 	// ----------------------------------------
+	// State & Hooks
+	const id = createUniqueId();
+
+	// ----------------------------------------
 	// Render
 	return (
 		<Switch>
@@ -25,7 +29,11 @@ const TableSelectionCell: Component<SelectColProps> = (props) => {
 					}}
 					theme={props.theme}
 				>
-					<Checkbox value={props.value} onChange={props.onChange} copy={{}} />
+					<Checkbox
+						id={`table-select-${id}`}
+						value={props.value}
+						onChange={props.onChange}
+					/>
 				</TableHeaderCell>
 			</Match>
 			<Match when={props.type === "td"}>
@@ -35,7 +43,11 @@ const TableSelectionCell: Component<SelectColProps> = (props) => {
 						padding: props.padding,
 					}}
 				>
-					<Checkbox value={props.value} onChange={props.onChange} copy={{}} />
+					<Checkbox
+						id={`table-select-${id}`}
+						value={props.value}
+						onChange={props.onChange}
+					/>
 				</TableCell>
 			</Match>
 		</Switch>

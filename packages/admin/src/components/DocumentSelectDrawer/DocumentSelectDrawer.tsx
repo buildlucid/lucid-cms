@@ -521,8 +521,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									}
 								}}
 								options={collectionOptions()}
-								noClear={true}
-								small={true}
+								size="sm"
 							/>
 						</div>
 					</Show>

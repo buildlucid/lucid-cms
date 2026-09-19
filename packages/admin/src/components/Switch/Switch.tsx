@@ -1,82 +1,113 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
-	createMemo,
 	createSignal,
+	type JSX,
+	type JSXElement,
 	onMount,
 	Show,
+	splitProps,
 } from "solid-js";
-import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
-import { FormLabel } from "@/components/FormLabel/FormLabel";
+import { Field } from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 import T from "@/translations";
 
-interface SwitchProps {
+export interface SwitchProps extends JSX.AriaAttributes {
 	id: string;
+	name?: string;
 	value: boolean;
 	onChange: (_value: boolean) => void;
-	name?: string;
-	copy: {
-		label?: string;
-		describedBy?: string;
-		true?: string;
-		false?: string;
-		tooltip?: string;
-	};
-	disabled?: boolean;
-	required?: boolean;
+	label?: string;
+	/** Sits under the control, and is read out alongside it. */
+	description?: string;
+	/** Adds a hover card beside the label. */
+	tooltip?: string;
+	/** Shown on the control when it is on. @default "True" */
+	trueLabel?: string;
+	/** Shown on the control when it is off. @default "False" */
+	falseLabel?: string;
 	errors?: ErrorResult | FieldError;
-	localised?: boolean;
-	altLocaleError?: boolean;
-	inline?: boolean;
-	fieldColumnIsMissing?: boolean;
-	theme?: "default" | "relaxed" | "checkbox";
+	required?: boolean;
+	disabled?: boolean;
+	/** Puts the label beside the control rather than above it. */
 	labelLeft?: boolean;
+	/** Before the label text, for an icon or badge. */
+	labelStart?: JSXElement;
+	/** Applied to the field. Target [data-switch-control] for the control. */
+	class?: string;
 }
 
+/**
+ * A two state toggle that names both states on the control, with its
+ * description and any validation errors underneath. Any aria attribute you
+ * pass lands on the control.
+ *
+ * @example
+ * ```tsx
+ * import { Switch } from "@lucidcms/admin/components";
+ *
+ * return (
+ * 	<Switch
+ * 		id="enabled"
+ * 		name="enabled"
+ * 		label="Status"
+ * 		value={enabled()}
+ * 		onChange={setEnabled}
+ * 	/>
+ * );
+ * ```
+ */
 export const Switch: Component<SwitchProps> = (props) => {
 	// ----------------------------------------
 	// State
+	//* everything left over is the caller's aria-*, which belongs on the control
+	const [, ariaProps] = splitProps(props, [
+		"id",
+		"name",
+		"value",
+		"onChange",
+		"label",
+		"description",
+		"tooltip",
+		"trueLabel",
+		"falseLabel",
+		"errors",
+		"required",
+		"disabled",
+		"labelLeft",
+		"labelStart",
+		"class",
+	]);
 	let checkboxRef: HTMLInputElement | undefined;
 	let falseSpanRef: HTMLSpanElement | undefined;
 	let trueSpanRef: HTMLSpanElement | undefined;
 	let overlayRef: HTMLSpanElement | undefined;
-	const [inputFocus, setInputFocus] = createSignal(false);
+	const [_inputFocus, setInputFocus] = createSignal(false);
 	const [overlayStyle, setOverlayStyle] = createSignal({});
 
 	// ----------------------------------------
 	// Memos
-	const theme = createMemo(() => props.theme ?? "default");
 
 	// ----------------------------------------
 	// Functions
+	/** The highlight sits inset from the track by this much on every side. */
+	const OVERLAY_INSET = 4;
 	const updateOverlayPosition = () => {
-		if (theme() === "checkbox") return;
-
-		if (falseSpanRef && trueSpanRef && overlayRef) {
-			const activeSpan = props.value ? trueSpanRef : falseSpanRef;
-			const relaxedTheme = theme() === "relaxed";
-			const gap = relaxedTheme ? 4 : 0;
-			const widthValue = Math.max(
-				activeSpan.offsetWidth - (relaxedTheme ? gap * 2 : 0),
-				0,
-			);
-			const style: Record<string, string> = {
-				width: `${widthValue}px`,
-				transform: `translateX(${props.value ? falseSpanRef.offsetWidth : 0}px)`,
-			};
-			if (relaxedTheme) {
-				style.left = `${gap}px`;
-			}
-			setOverlayStyle(style);
-		}
+		if (!falseSpanRef || !trueSpanRef || !overlayRef) return;
+		const activeSpan = props.value ? trueSpanRef : falseSpanRef;
+		setOverlayStyle({
+			width: `${Math.max(activeSpan.offsetWidth - OVERLAY_INSET * 2, 0)}px`,
+			transform: `translateX(${props.value ? falseSpanRef.offsetWidth : 0}px)`,
+			left: `${OVERLAY_INSET}px`,
+		});
 	};
 	const switchButton = () => (
 		<button
+			{...ariaProps}
 			type="button"
+			data-switch-control
 			class={classnames(
 				"h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-inset focus-visible:ring-1 transition-colors duration-200 group bg-input-base ring-border focus-visible:ring-primary-base",
 				{
@@ -102,7 +133,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 					props.value && "text-subtitle",
 				)}
 			>
-				{props.copy?.false || T()("common.false")}
+				{props.falseLabel || T()("common.false")}
 			</span>
 			<span
 				ref={trueSpanRef}
@@ -112,58 +143,31 @@ export const Switch: Component<SwitchProps> = (props) => {
 					!props.value && "text-subtitle",
 				)}
 			>
-				{props.copy?.true || T()("common.true")}
+				{props.trueLabel || T()("common.true")}
 			</span>
 			<span
 				ref={overlayRef}
-				class={classnames(
-					"absolute transition-all duration-200 rounded-md z-0 bg-secondary-base group-hover:bg-secondary-hover",
-					{
-						"top-0 bottom-0": theme() === "default",
-						"top-1 bottom-1": theme() === "relaxed",
-					},
-				)}
+				class="absolute top-1 bottom-1 transition-all duration-200 rounded-md z-0 bg-secondary-base group-hover:bg-secondary-hover"
 				style={{
 					...overlayStyle(),
 				}}
 			/>
 		</button>
 	);
-	const checkboxControl = () => (
-		<span
-			aria-hidden="true"
-			class={classnames(
-				"grid size-5 min-w-5 place-items-center rounded-md border bg-background-base text-secondary-contrast transition-colors duration-200",
-				{
-					"border-border group-hover:border-body/30": !props.value,
-					"border-secondary-hover bg-secondary-base": props.value,
-					"border-primary-base": inputFocus(),
-					"cursor-not-allowed opacity-50": props.disabled,
-				},
-			)}
-		>
-			<Show when={props.value}>
-				<FaSolidCheck size={10} aria-hidden="true" />
-			</Show>
-		</span>
-	);
 	const fieldLabel = (className?: string) => (
-		<FormLabel
-			id={props.id}
-			label={props.copy?.label}
-			focused={inputFocus()}
-			required={props.required}
-			theme={"basic"}
-			altLocaleError={props.altLocaleError}
-			localised={props.localised}
-			fieldColumnIsMissing={props.fieldColumnIsMissing}
-			class={className}
-			rightSlot={
-				props.copy?.tooltip ? (
-					<FormTooltip copy={props.copy.tooltip} theme="inline" />
-				) : undefined
-			}
-		/>
+		<Show when={props.label !== undefined || props.tooltip !== undefined}>
+			<Field.Label
+				class={className}
+				start={props.labelStart}
+				end={
+					props.tooltip ? (
+						<FormTooltip copy={props.tooltip} theme="inline" />
+					) : undefined
+				}
+			>
+				{props.label}
+			</Field.Label>
+		</Show>
 	);
 
 	// ----------------------------------------
@@ -177,18 +181,15 @@ export const Switch: Component<SwitchProps> = (props) => {
 		updateOverlayPosition();
 	});
 
-	createEffect(() => {
-		theme();
-		updateOverlayPosition();
-	});
-
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classnames("relative", {
-				"w-full": props.inline !== true,
-			})}
+		<Field.Root
+			id={props.id}
+			required={props.required}
+			disabled={props.disabled}
+			errors={props.errors}
+			class={classnames("relative", props.class)}
 		>
 			<input
 				ref={checkboxRef}
@@ -199,65 +200,33 @@ export const Switch: Component<SwitchProps> = (props) => {
 				onChange={(e) => {
 					props.onChange(e.currentTarget.checked);
 				}}
-				onFocus={() => {
-					if (theme() === "checkbox") setInputFocus(true);
-				}}
-				onBlur={() => {
-					if (theme() === "checkbox") setInputFocus(false);
-				}}
-				class={theme() === "checkbox" ? "sr-only" : "hidden"}
+				class="hidden"
 				disabled={props.disabled}
 				aria-describedby={
-					props.copy?.describedBy ? `${props.id}-description` : undefined
+					props.description ? `${props.id}-description` : undefined
 				}
 				aria-invalid={props.errors !== undefined}
 			/>
 			<Show
-				when={theme() === "checkbox"}
+				when={props.labelLeft}
 				fallback={
 					<>
-						(
-						{props.labelLeft ? (
-							<div class="flex items-center justify-between gap-3">
-								{fieldLabel()}
-								{switchButton()}
-							</div>
-						) : (
-							<>
-								{fieldLabel()}
-								{switchButton()}
-							</>
-						)}
-						)
+						{fieldLabel()}
+						{switchButton()}
 					</>
 				}
 			>
-				{fieldLabel()}
-				<label
-					for={props.id}
-					class={classnames(
-						"group inline-flex min-h-10 max-w-full cursor-pointer items-center gap-2.5 rounded-md border border-border bg-input-base px-3 py-2 text-sm text-subtitle transition-colors duration-200 hover:border-body/25 hover:bg-card-hover",
-						{
-							"border-primary-base": inputFocus(),
-							"border-error-base/50 bg-error-base/5":
-								props.errors !== undefined && !inputFocus(),
-							"cursor-not-allowed opacity-60": props.disabled,
-						},
-					)}
-				>
-					{checkboxControl()}
-					<span class="min-w-0 truncate">
-						{props.value
-							? props.copy?.true || T()("common.true")
-							: props.copy?.false || T()("common.false")}
-					</span>
-				</label>
+				<div class="flex items-center justify-between gap-3">
+					{fieldLabel()}
+					{switchButton()}
+				</div>
 			</Show>
-			<FieldFeedback
-				id={props.id}
-				describedBy={props.copy?.describedBy}
-				errors={props.errors}
-			/>
-		</div>
+			<Field.Error />
+			<Show when={props.description}>
+				{(description) => (
+					<Field.Description>{description()}</Field.Description>
+				)}
+			</Show>
+		</Field.Root>
 	);
 };

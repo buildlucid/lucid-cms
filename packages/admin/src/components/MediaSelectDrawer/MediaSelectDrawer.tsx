@@ -9,7 +9,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { CheckboxButton } from "@/components/CheckboxButton/CheckboxButton";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
 import ClearProcessedImagesModal from "@/components/ClearProcessedImagesModal/ClearProcessedImagesModal";
 import { Drawer } from "@/components/Drawer/Drawer";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
@@ -262,17 +262,16 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						]}
 						searchParams={searchParams}
 					/>
-					<CheckboxButton
+					<Checkbox
+						variant="button"
 						id="isDeleted"
 						value={showingDeleted() === 1}
 						onChange={(value) => {
 							setShowingDeleted(value ? 1 : 0);
 						}}
 						name={"isDeleted"}
-						theme="secondary"
-						copy={{
-							label: T()("media.deleted.show"),
-						}}
+						tone="secondary"
+						label={T()("media.deleted.show")}
 					/>
 					<Show when={searchParams.hasFiltersApplied()}>
 						<ResetFilters onReset={searchParams.clearFilters} />

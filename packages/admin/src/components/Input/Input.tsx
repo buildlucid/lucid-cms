@@ -10,8 +10,7 @@ import {
 	Show,
 	splitProps,
 } from "solid-js";
-import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
-import { FormLabel } from "@/components/FormLabel/FormLabel";
+import { Field } from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 /** The text-like input types this component styles. */
@@ -92,7 +91,6 @@ export const Input: Component<InputProps> = (props) => {
 		"labelEnd",
 		"class",
 	]);
-	const [focused, setFocused] = createSignal(false);
 	const [passwordVisible, setPasswordVisible] = createSignal(false);
 
 	// ----------------------------------------
@@ -105,21 +103,18 @@ export const Input: Component<InputProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			data-input
-			class={classnames("group w-full relative", local.class)}
-			onFocusIn={() => setFocused(true)}
-			onFocusOut={() => setFocused(false)}
+		<Field.Root
+			id={local.id}
+			required={rest.required}
+			disabled={rest.disabled}
+			errors={local.errors}
+			class={local.class}
 		>
-			<FormLabel
-				id={local.id}
-				label={local.label}
-				focused={focused()}
-				required={rest.required}
-				theme="basic"
-				startSlot={local.labelStart}
-				rightSlot={local.labelEnd}
-			/>
+			<Show when={local.label !== undefined || local.labelEnd !== undefined}>
+				<Field.Label start={local.labelStart} end={local.labelEnd}>
+					{local.label}
+				</Field.Label>
+			</Show>
 			<div class="relative">
 				<input
 					{...rest}
@@ -157,11 +152,12 @@ export const Input: Component<InputProps> = (props) => {
 				</Show>
 			</div>
 			<FormTooltip copy={local.tooltip} theme="basic" />
-			<FieldFeedback
-				id={local.id}
-				describedBy={local.description}
-				errors={local.errors}
-			/>
-		</div>
+			<Field.Error />
+			<Show when={local.description}>
+				{(description) => (
+					<Field.Description>{description()}</Field.Description>
+				)}
+			</Show>
+		</Field.Root>
 	);
 };

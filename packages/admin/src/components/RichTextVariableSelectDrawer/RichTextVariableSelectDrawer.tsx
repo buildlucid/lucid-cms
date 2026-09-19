@@ -452,9 +452,8 @@ const VariableSourceSelect: Component<{
 				if (value === "document" || value === "user") props.onChange(value);
 			}}
 			options={props.options}
-			ariaLabel={T()("common.type")}
-			noClear
-			small
+			aria-label={T()("common.type")}
+			size="sm"
 		/>
 	</div>
 );

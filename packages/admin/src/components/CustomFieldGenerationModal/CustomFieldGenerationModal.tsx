@@ -860,12 +860,10 @@ const CustomFieldGenerationModal: Component = () => {
 										submit();
 									}
 								}}
-								copy={{
-									label: T()("ai.custom.field.generate.instruction.label"),
-									placeholder: T()(
-										"ai.custom.field.generate.instruction.placeholder",
-									),
-								}}
+								label={T()("ai.custom.field.generate.instruction.label")}
+								placeholder={T()(
+									"ai.custom.field.generate.instruction.placeholder",
+								)}
 								rows={5}
 							/>
 							<Show when={responseError()}>

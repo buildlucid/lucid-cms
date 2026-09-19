@@ -137,6 +137,7 @@ export const MediaFolderCard: Component<{
 			</div>
 			<Show when={hasUpdatePermission()}>
 				<Checkbox
+					id={`media-folder-card-${props.folder.id}`}
 					value={isSelected()}
 					onChange={() => {
 						if (isSelected()) {
@@ -145,8 +146,6 @@ export const MediaFolderCard: Component<{
 							mediaStore.get.addSelectedFolder(props.folder.id);
 						}
 					}}
-					copy={{}}
-					fullWidth={false}
 				/>
 			</Show>
 			<div class="w-full flex flex-col -mt-px">

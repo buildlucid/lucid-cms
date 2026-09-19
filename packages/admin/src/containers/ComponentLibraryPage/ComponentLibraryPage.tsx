@@ -3,7 +3,6 @@ import type { Component } from "solid-js";
 import { createSignal } from "solid-js";
 import Button from "@/components/Button/Button";
 import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { CheckboxButton } from "@/components/CheckboxButton/CheckboxButton";
 import { ColorInput } from "@/components/ColorInput/ColorInput";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
@@ -33,9 +32,9 @@ const ComponentLibraryPage: Component = () => {
 
 	const [switchValue, setSwitchValue] = createSignal(false);
 
-	const [selectValue, setSelectValue] = createSignal<
-		string | number | undefined
-	>("option1");
+	const [selectValue, setSelectValue] = createSignal<string | undefined>(
+		"option1",
+	);
 	const selectOptions = [
 		{ value: "option1", label: "Option 1" },
 		{ value: "option2", label: "Option 2" },
@@ -81,6 +80,7 @@ const ComponentLibraryPage: Component = () => {
 		option1: true,
 		option2: false,
 		option3: true,
+		option4: false,
 	});
 
 	const [richTextValue, setRichTextValue] = createSignal({
@@ -288,10 +288,8 @@ const ComponentLibraryPage: Component = () => {
 							value={textareaValue()}
 							onChange={setTextareaValue}
 							name="textarea"
-							copy={{
-								label: "Textarea",
-								placeholder: "Enter multi-line text...",
-							}}
+							label={"Textarea"}
+							placeholder={"Enter multi-line text..."}
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
@@ -303,11 +301,9 @@ const ComponentLibraryPage: Component = () => {
 							value={switchValue()}
 							onChange={setSwitchValue}
 							name="switch"
-							copy={{
-								label: "Enable Feature",
-								true: "On",
-								false: "Off",
-							}}
+							label={"Enable Feature"}
+							trueLabel={"On"}
+							falseLabel={"Off"}
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
@@ -324,9 +320,8 @@ const ComponentLibraryPage: Component = () => {
 								onChange={setSelectValue}
 								options={selectOptions}
 								name="select"
-								copy={{
-									label: "Regular Size",
-								}}
+								label={"Regular Size"}
+								clearable={true}
 							/>
 							<Select
 								id="select-small"
@@ -334,10 +329,9 @@ const ComponentLibraryPage: Component = () => {
 								onChange={setSelectValue}
 								options={selectOptions}
 								name="select-small"
-								copy={{
-									label: "Small Size",
-								}}
-								small={true}
+								label={"Small Size"}
+								size="sm"
+								clearable={true}
 							/>
 						</div>
 					</InfoRow.Content>
@@ -386,9 +380,7 @@ const ComponentLibraryPage: Component = () => {
 							value={checkboxValue()}
 							onChange={setCheckboxValue}
 							name="checkbox"
-							copy={{
-								label: "Accept terms and conditions",
-							}}
+							label={"Accept terms and conditions"}
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>
@@ -430,7 +422,8 @@ const ComponentLibraryPage: Component = () => {
 				>
 					<InfoRow.Content title={"Checkbox Buttons"}>
 						<div class="flex flex-col gap-2">
-							<CheckboxButton
+							<Checkbox
+								variant="button"
 								id="checkbox-btn-1"
 								value={checkboxButtonValues().option1}
 								onChange={(value) =>
@@ -440,12 +433,11 @@ const ComponentLibraryPage: Component = () => {
 									}))
 								}
 								name="checkbox-btn-1"
-								copy={{
-									label: "Primary Option (selected)",
-								}}
-								theme="primary"
+								label={"Primary Option (selected)"}
+								tone="primary"
 							/>
-							<CheckboxButton
+							<Checkbox
+								variant="button"
 								id="checkbox-btn-2"
 								value={checkboxButtonValues().option2}
 								onChange={(value) =>
@@ -455,12 +447,11 @@ const ComponentLibraryPage: Component = () => {
 									}))
 								}
 								name="checkbox-btn-2"
-								copy={{
-									label: "Primary Option (not selected)",
-								}}
-								theme="primary"
+								label={"Primary Option (not selected)"}
+								tone="primary"
 							/>
-							<CheckboxButton
+							<Checkbox
+								variant="button"
 								id="checkbox-btn-3"
 								value={checkboxButtonValues().option3}
 								onChange={(value) =>
@@ -470,10 +461,21 @@ const ComponentLibraryPage: Component = () => {
 									}))
 								}
 								name="checkbox-btn-3"
-								copy={{
-									label: "Error Option",
-								}}
-								theme="error"
+								label={"Error Option"}
+								tone="danger"
+							/>
+							<Checkbox
+								variant="button"
+								id="checkbox-btn-4"
+								value={checkboxButtonValues().option4}
+								onChange={(value) =>
+									setCheckboxButtonValues((prev) => ({
+										...prev,
+										option4: value,
+									}))
+								}
+								name="checkbox-btn-4"
+								label={"No tone, stays neutral (as used by fields)"}
 							/>
 						</div>
 					</InfoRow.Content>

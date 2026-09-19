@@ -1273,10 +1273,9 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 									}}
 									name="media-folder"
 									options={folderOptions()}
-									copy={{ label: T()("common.folder") }}
+									label={T()("common.folder")}
 									required={false}
 									errors={getBodyError("folderId", mutateErrors())}
-									noClear={true}
 								/>
 								<Switch
 									id="public"
@@ -1285,13 +1284,10 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 										targetAction()?.setPublic(val);
 									}}
 									name="public"
-									theme="relaxed"
-									copy={{
-										label: T()("common.publicly.available"),
-										tooltip: T()("media.visibility.public.description"),
-										true: T()("common.public"),
-										false: T()("common.private"),
-									}}
+									label={T()("common.publicly.available")}
+									tooltip={T()("media.visibility.public.description")}
+									trueLabel={T()("common.public")}
+									falseLabel={T()("common.private")}
 									errors={getBodyError("featured", mutateErrors())}
 								/>
 								<For each={editableLocales()}>
@@ -1329,12 +1325,10 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														});
 													}}
 													name={`alt-${locale.code}`}
-													copy={{
-														label: T()("common.alt"),
-													}}
+													label={T()("common.alt")}
 													errors={getErrorObject(inputError(index())?.alt)}
 													rows={3}
-													labelRightSlot={<MediaAltGenerationButton />}
+													labelEnd={<MediaAltGenerationButton />}
 												/>
 											</Show>
 											<Show when={showDescriptionInput()}>
@@ -1353,9 +1347,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														});
 													}}
 													name={`description-${locale.code}`}
-													copy={{
-														label: T()("common.description"),
-													}}
+													label={T()("common.description")}
 													errors={getErrorObject(descriptionError(index()))}
 												/>
 											</Show>
@@ -1375,9 +1367,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														});
 													}}
 													name={`summary-${locale.code}`}
-													copy={{
-														label: T()("common.summary"),
-													}}
+													label={T()("common.summary")}
 													errors={getErrorObject(summaryError(index()))}
 												/>
 											</Show>
@@ -1668,12 +1658,10 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														});
 													}}
 													name={`poster-alt-${locale.code}`}
-													copy={{
-														label: T()("media.poster.alt"),
-													}}
+													label={T()("media.poster.alt")}
 													errors={getErrorObject(posterAltError(index()))}
 													rows={3}
-													labelRightSlot={<PosterAltGenerationButton />}
+													labelEnd={<PosterAltGenerationButton />}
 												/>
 											</Show>
 										)}

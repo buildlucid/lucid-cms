@@ -18,7 +18,7 @@ import { EntityValue } from "./EntityValue";
 export interface FilterRowProps {
 	id: string;
 	field?: DocumentFilterField;
-	operator?: string;
+	operator?: DocumentFilterOperator;
 	value: FilterValue;
 	fieldOptions: Array<{ value: string; label: string }>;
 	onFieldChange: (key: string) => void;
@@ -82,12 +82,11 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					value={props.field?.key}
 					onChange={(value) => {
 						if (value === undefined || value === props.field?.key) return;
-						props.onFieldChange(String(value));
+						props.onFieldChange(value);
 					}}
 					options={props.fieldOptions}
-					ariaLabel={T()("filter.section.where")}
-					noClear={true}
-					hidePlaceholder={props.field !== undefined}
+					aria-label={T()("filter.section.where")}
+					placeholder={props.field !== undefined ? false : undefined}
 					renderValue={({ option }) => (
 						<span class="truncate" title={option.label}>
 							{option.label}
@@ -107,12 +106,11 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					value={props.operator}
 					onChange={(value) => {
 						if (value === undefined || value === props.operator) return;
-						props.onOperatorChange(value as DocumentFilterOperator);
+						props.onOperatorChange(value);
 					}}
 					options={operatorOptions()}
-					ariaLabel={T()("filter.section.operator")}
+					aria-label={T()("filter.section.operator")}
 					disabled={props.field === undefined}
-					noClear={true}
 				/>
 			</div>
 			<div class="w-[calc(50%-55px)] md:flex-1 min-w-0">
@@ -140,7 +138,8 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 								);
 							}}
 							options={booleanOptions()}
-							ariaLabel={T()("filter.section.value")}
+							aria-label={T()("filter.section.value")}
+							clearable={true}
 						/>
 					</Match>
 					<Match when={props.field?.type === "select"}>
@@ -152,7 +151,8 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 								props.onValueCommit(value === undefined ? "" : String(value));
 							}}
 							options={props.field?.options ?? []}
-							ariaLabel={T()("filter.section.value")}
+							aria-label={T()("filter.section.value")}
+							clearable={true}
 						/>
 					</Match>
 					<Match when={entityPickerField()}>

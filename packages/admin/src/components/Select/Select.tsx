@@ -12,66 +12,138 @@ import {
 	createEffect,
 	createSignal,
 	For,
+	type JSX,
 	type JSXElement,
 	Match,
 	Show,
 	Switch,
+	splitProps,
 } from "solid-js";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
-import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
-import { FormLabel } from "@/components/FormLabel/FormLabel";
+import { Field } from "@/components/Field/Field";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 
 export type ValueT = string | number | undefined;
 export type SelectOptionT = { value: ValueT; label: string };
 
-export interface SelectProps<Option extends SelectOptionT = SelectOptionT> {
+/** The value one of the options carries, or undefined when none is selected. */
+export type SelectValue<Option extends SelectOptionT = SelectOptionT> =
+	| Option["value"]
+	| undefined;
+
+/** Wiring for the search box above the options. */
+export interface SelectSearch {
+	value: string;
+	onChange: (_value: string) => void;
+	/** Shows a spinner in place of the clear button while results load. */
+	isLoading?: boolean;
+	placeholder?: string;
+}
+
+/** Height of the select trigger. */
+export type SelectSize = "sm" | "md";
+
+export interface SelectProps<Option extends SelectOptionT = SelectOptionT>
+	extends JSX.AriaAttributes {
 	id: string;
-	value: ValueT;
-	onChange: (_value: ValueT) => void;
-	options: Option[];
 	name: string;
-	search?: {
-		value: string;
-		onChange: (_value: string) => void;
-		isLoading: boolean;
-	};
-	copy?: {
-		label?: string;
-		describedBy?: string;
-		searchPlaceholder?: string;
-	};
-	onBlur?: () => void;
-	autoFoucs?: boolean;
+	value: SelectValue<Option>;
+	onChange: (_value: SelectValue<Option>) => void;
+	options: Option[];
+	label?: string;
+	/** Sits under the control, and is read out alongside it. */
+	description?: string;
+	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	errors?: ErrorResult | FieldError;
-	localised?: boolean;
-	altLocaleError?: boolean;
-	noClear?: boolean;
+	/** Adds a search box above the options, for a list you load as you type. */
+	search?: SelectSearch;
+	/** Offers an option that clears the selection. */
+	clearable?: boolean;
+	/** Styles the trigger as invalid without showing a message. */
 	hasError?: boolean;
-	small?: boolean;
+	/** @default "md" */
+	size?: SelectSize;
+	/** Keyboard shortcut shown on the trigger. */
 	shortcut?: string;
 	shortcutDisplay?: "full" | "compact";
-	fieldColumnIsMissing?: boolean;
-	hidePlaceholder?: boolean;
-	ariaLabel?: string;
+	/** Shown when nothing is selected. false leaves the trigger empty. */
+	placeholder?: string | false;
+	/** Before the label text, for an icon or badge. */
+	labelStart?: JSXElement;
+	/** After the label, against the right edge. */
+	labelEnd?: JSXElement;
+	/** Applied to the field. Target [data-select-trigger] for the trigger. */
+	class?: string;
 	renderValue?: (_props: { option: Option }) => JSXElement;
 	renderOption?: (_props: { option: Option; selected: boolean }) => JSXElement;
 }
 
+/**
+ * A labelled dropdown, with its description and any validation errors. Give it
+ * a search callback to filter a long list as the user types. Any aria
+ * attribute you pass lands on the trigger.
+ *
+ * @example
+ * ```tsx
+ * import { Select } from "@lucidcms/admin/components";
+ *
+ * return (
+ * 	<Select
+ * 		id="status"
+ * 		name="status"
+ * 		label="Status"
+ * 		value={status()}
+ * 		onChange={setStatus}
+ * 		options={[
+ * 			{ value: "draft", label: "Draft" },
+ * 			{ value: "published", label: "Published" },
+ * 		]}
+ * 	/>
+ * );
+ * ```
+ */
 export function Select<Option extends SelectOptionT = SelectOptionT>(
 	props: SelectProps<Option>,
 ) {
+	//* everything left over is the caller's aria-*, which belongs on the trigger
+	const [, ariaProps] = splitProps(props, [
+		"id",
+		"name",
+		"value",
+		"onChange",
+		"options",
+		"label",
+		"description",
+		"errors",
+		"required",
+		"disabled",
+		"search",
+		"clearable",
+		"hasError",
+		"size",
+		"shortcut",
+		"shortcutDisplay",
+		"placeholder",
+		"labelStart",
+		"labelEnd",
+		"class",
+		"renderValue",
+		"renderOption",
+	]);
 	const [open, setOpen] = createSignal(false);
-	const [inputFocus, setInputFocus] = createSignal(false);
 	const [debouncedValue, setDebouncedValue] = createSignal("");
 	const [selectedLabel, setSelectedLabel] = createSignal("");
 	const [selectedOption, setSelectedOption] = createSignal<Option>();
 
 	// ----------------------------------------
 	// Functions
+	/** Empty when turned off, the caller's wording if given, else the default. */
+	const placeholderText = () =>
+		props.placeholder === false
+			? ""
+			: (props.placeholder ?? T()("common.nothing.selected"));
 	const setSearchQuery = debounce((value: string) => {
 		setDebouncedValue(value);
 	}, 500);
@@ -85,11 +157,11 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 		if (selectedLabel()) {
 			return <span class="truncate">{selectedLabel()}</span>;
 		}
-		if (props.hidePlaceholder) {
+		if (props.placeholder === false) {
 			return <span class="truncate">&nbsp;</span>;
 		}
 
-		return <span class="text-body">{T()("common.nothing.selected")}</span>;
+		return <span class="text-body">{placeholderText()}</span>;
 	};
 
 	// ----------------------------------------
@@ -107,9 +179,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 	createEffect(() => {
 		if (props.value === undefined || props.value === "") {
 			setSelectedOption(undefined);
-			setSelectedLabel(
-				props.hidePlaceholder ? "" : T()("common.nothing.selected"),
-			);
+			setSelectedLabel(placeholderText());
 			return;
 		}
 
@@ -123,15 +193,19 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 		}
 
 		setSelectedOption(undefined);
-		setSelectedLabel(
-			props.hidePlaceholder ? "" : T()("common.nothing.selected"),
-		);
+		setSelectedLabel(placeholderText());
 	});
 
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={"w-full"}>
+		<Field.Root
+			id={props.id}
+			required={props.required}
+			disabled={props.disabled}
+			errors={props.errors}
+			class={props.class}
+		>
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
@@ -139,29 +213,23 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 				flip={true}
 				gutter={5}
 			>
-				<FormLabel
-					id={props.id}
-					label={props.copy?.label}
-					focused={inputFocus()}
-					required={props.required}
-					theme={"basic"}
-					altLocaleError={props.altLocaleError}
-					localised={props.localised}
-					fieldColumnIsMissing={props.fieldColumnIsMissing}
-				/>
+				<Show when={props.label !== undefined || props.labelEnd !== undefined}>
+					<Field.Label start={props.labelStart} end={props.labelEnd}>
+						{props.label}
+					</Field.Label>
+				</Show>
 				<DropdownMenu.Trigger
+					data-select-trigger
 					id={props.id}
-					aria-label={props.ariaLabel}
+					{...ariaProps}
 					class={classNames(
 						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors",
 						{
-							"h-10": !props.small,
-							"h-9": props.small,
+							"h-10": props.size !== "sm",
+							"h-9": props.size === "sm",
 							"border-error-base": props.hasError,
 						},
 					)}
-					onFocus={() => setInputFocus(true)}
-					onBlur={() => setInputFocus(false)}
 					disabled={props.disabled}
 				>
 					<div class="flex min-w-0 flex-1 items-center text-left">
@@ -189,7 +257,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 						</Show>
 						<Show
 							when={
-								props.noClear !== true &&
+								props.clearable === true &&
 								props.value !== undefined &&
 								props.value !== ""
 							}
@@ -235,7 +303,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 									type="text"
 									class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary-base"
 									placeholder={
-										props.copy?.searchPlaceholder || T()("common.search")
+										props.search?.placeholder || T()("common.search")
 									}
 									value={props.search?.value || ""}
 									onKeyDown={(e) => {
@@ -329,11 +397,12 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 					</Switch>
 				</DropdownContent>
 			</DropdownMenu.Root>
-			<FieldFeedback
-				id={props.id}
-				describedBy={props.copy?.describedBy}
-				errors={props.errors}
-			/>
-		</div>
+			<Field.Error />
+			<Show when={props.description}>
+				{(description) => (
+					<Field.Description>{description()}</Field.Description>
+				)}
+			</Show>
+		</Field.Root>
 	);
 }

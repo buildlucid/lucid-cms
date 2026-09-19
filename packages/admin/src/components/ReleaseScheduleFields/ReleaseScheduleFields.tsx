@@ -73,21 +73,16 @@ const ReleaseScheduleFields: Component<{
 				name="release-schedule-timezone"
 				value={props.timezone}
 				onChange={(value) => {
-					if (typeof value === "string") props.setTimezone(value);
+					if (value !== undefined) props.setTimezone(value);
 					props.onChange?.();
 				}}
 				options={timezoneOptions()}
 				search={{
 					value: timezoneSearch(),
 					onChange: setTimezoneSearch,
-					isLoading: false,
 				}}
 				required={true}
-				copy={{
-					label: T()("common.timezone"),
-					searchPlaceholder: T()("common.search"),
-				}}
-				noClear={true}
+				label={T()("common.timezone")}
 			/>
 		</div>
 	);

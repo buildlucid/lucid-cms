@@ -236,8 +236,7 @@ export const Workflow: Component<{
 						value={stage()}
 						onChange={handleStageChange}
 						options={stageOptions()}
-						copy={{ label: T()("common.stage") }}
-						noClear={true}
+						label={T()("common.stage")}
 						disabled={fieldsDisabled()}
 						renderValue={(props) => (
 							<WorkflowStageOption

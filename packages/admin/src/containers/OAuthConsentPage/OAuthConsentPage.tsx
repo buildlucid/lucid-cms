@@ -194,10 +194,7 @@ const OAuthConsentPage: Component = () => {
 									{(logo) => (
 										<>
 											<span class="h-px w-7 bg-border" aria-hidden="true" />
-											<IconContainer
-												theme="default"
-												class="overflow-hidden bg-white!"
-											>
+											<IconContainer class="overflow-hidden bg-white!">
 												<img
 													src={getMediaPreviewUrl(logo(), "thumbnail-small")}
 													alt={T()("oauth.consent.client.logo.alt", {

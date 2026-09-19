@@ -1,6 +1,6 @@
 import { DropdownMenu } from "@kobalte/core";
 import { FaSolidTable } from "solid-icons/fa";
-import { type Component, For } from "solid-js";
+import { type Component, createUniqueId, For } from "solid-js";
 import { Checkbox } from "@/components/Checkbox/Checkbox";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
 import T from "@/translations";
@@ -17,6 +17,10 @@ interface ColumnToggleProps {
 }
 
 export const ColumnToggle: Component<ColumnToggleProps> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const toggleId = createUniqueId();
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -39,11 +43,10 @@ export const ColumnToggle: Component<ColumnToggleProps> = (props) => {
 					{(column) => (
 						<li class="mb-1.5 last-of-type:mb-0 text-body">
 							<Checkbox
+								id={`column-toggle-${toggleId}-${column.index}`}
 								value={column.include}
 								onChange={() => props.callbacks.toggle(column.index)}
-								copy={{
-									label: column.label,
-								}}
+								label={column.label}
 							/>
 						</li>
 					)}

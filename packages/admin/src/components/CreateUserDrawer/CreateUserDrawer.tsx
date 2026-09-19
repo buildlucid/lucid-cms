@@ -170,9 +170,7 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 							value={getIsSuperAdmin()}
 							onChange={(value) => setIsSuperAdmin(value)}
 							name={"superAdmin"}
-							copy={{
-								label: T()("users.super.admin.label"),
-							}}
+							label={T()("users.super.admin.label")}
 							errors={getBodyError("superAdmin", createUser.errors)}
 						/>
 					</Show>

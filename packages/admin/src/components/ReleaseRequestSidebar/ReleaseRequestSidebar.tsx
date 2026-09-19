@@ -805,10 +805,7 @@ export const ReleaseRequestSidebar: Component<{
 									}
 								}}
 								options={releaseTimingOptions()}
-								copy={{
-									label: T()("documents.release.timing"),
-								}}
-								noClear={true}
+								label={T()("documents.release.timing")}
 							/>
 							<Show when={scheduleEnabled()}>
 								<div class="mt-1">

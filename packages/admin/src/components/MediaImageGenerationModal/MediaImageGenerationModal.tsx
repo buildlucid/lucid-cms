@@ -1132,10 +1132,7 @@ const MediaImageGenerationModal: Component = () => {
 									label: T()(option.label),
 								}))}
 								name="ai-media-image-generation-resolution"
-								copy={{
-									label: T()("ai.media.image.generate.resolution.label"),
-								}}
-								noClear
+								label={T()("ai.media.image.generate.resolution.label")}
 								errors={generationFieldError("size")}
 							/>
 							<Input
@@ -1189,8 +1186,7 @@ const MediaImageGenerationModal: Component = () => {
 									},
 								]}
 								name="ai-media-image-generation-quality"
-								copy={{ label: T()("ai.media.image.generate.quality.label") }}
-								noClear
+								label={T()("ai.media.image.generate.quality.label")}
 								errors={generationFieldError("quality")}
 							/>
 							<Select
@@ -1216,8 +1212,7 @@ const MediaImageGenerationModal: Component = () => {
 									},
 								]}
 								name="ai-media-image-generation-format"
-								copy={{ label: T()("ai.media.image.generate.format.label") }}
-								noClear
+								label={T()("ai.media.image.generate.format.label")}
 								errors={generationFieldError("outputFormat")}
 							/>
 						</div>
@@ -1283,12 +1278,10 @@ const MediaImageGenerationModal: Component = () => {
 										submitGenerate();
 									}
 								}}
-								copy={{
-									label: T()("ai.generation.instruction.label"),
-									placeholder: T()(
-										"ai.media.image.generate.instruction.placeholder",
-									),
-								}}
+								label={T()("ai.generation.instruction.label")}
+								placeholder={T()(
+									"ai.media.image.generate.instruction.placeholder",
+								)}
 								rows={8}
 								errors={instructionError()}
 							/>

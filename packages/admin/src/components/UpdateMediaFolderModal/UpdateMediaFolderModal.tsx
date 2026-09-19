@@ -123,8 +123,7 @@ const UpdateMediaFolderModal: Component<{
 						}}
 						name={"parent-folder"}
 						options={folderOptions()}
-						copy={{ label: T()("common.folder") }}
-						noClear={true}
+						label={T()("common.folder")}
 						errors={getBodyError("parentFolderId", updateFolder.errors)}
 					/>
 				</Modal.Body>

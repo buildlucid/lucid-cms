@@ -1,8 +1,11 @@
 import type { FieldError, InternalDocumentField } from "@types";
-import { type Component, createMemo } from "solid-js";
-import { Switch } from "@/components/Switch/Switch";
+import { type Component, createMemo, Show } from "solid-js";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
+import { Field } from "@/components/Field/Field";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
+import T from "@/translations";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -40,50 +43,81 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 	const disabled = createMemo(
 		() => props.state.fieldConfig.ui?.disabled || brickStore.get.locked,
 	);
+	const id = createMemo(() =>
+		brickHelpers.customFieldId({
+			key: props.state.fieldConfig.key,
+			brickIndex: fieldRenderState.brickIndex(),
+			groupRef: props.state.groupRef,
+		}),
+	);
+	const required = createMemo(
+		() => props.state.fieldConfig.validation?.required || false,
+	);
+	const description = createMemo(() =>
+		helpers.getLocaleValue({
+			value: props.state.fieldConfig.details.description,
+		}),
+	);
+	/**
+	 * The field name sits above, so the box names the state it is in. The
+	 * collection can word both states itself, otherwise it reads True or False.
+	 */
+	const stateLabel = createMemo(() => {
+		const copy = helpers.getLocaleValue({
+			value: fieldValue()
+				? props.state.fieldConfig.details.true
+				: props.state.fieldConfig.details.false,
+		});
+		if (copy) return copy;
+		return fieldValue() ? T()("common.true") : T()("common.false");
+	});
 
 	// -------------------------------
 	// Render
 	return (
-		<Switch
-			id={brickHelpers.customFieldId({
-				key: props.state.fieldConfig.key,
-				brickIndex: fieldRenderState.brickIndex(),
-				groupRef: props.state.groupRef,
-			})}
-			value={fieldValue() ?? false}
-			onChange={(value) => {
-				brickStore.get.setFieldValue({
-					brickIndex: fieldRenderState.brickIndex(),
-					fieldConfig: props.state.fieldConfig,
-					key: props.state.fieldConfig.key,
-					ref: props.state.groupRef,
-					repeaterKey: props.state.repeaterKey,
-					value: value,
-					contentLocale: fieldRenderState.contentLocale(),
-				});
-			}}
-			name={props.state.fieldConfig.key}
-			copy={{
-				label: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.label,
-				}),
-				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.description,
-				}),
-				true: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.true,
-				}),
-				false: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.false,
-				}),
-			}}
-			altLocaleError={props.state.altLocaleError}
-			localised={props.state.localised}
+		<Field.Root
+			id={id()}
+			required={required()}
 			disabled={disabled()}
 			errors={props.state.fieldError}
-			required={props.state.fieldConfig.validation?.required || false}
-			theme="checkbox"
-			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-		/>
+		>
+			<Field.Label
+				start={
+					<FieldLabelMarkers
+						altLocaleError={props.state.altLocaleError}
+						localised={props.state.localised}
+						fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+					/>
+				}
+			>
+				{helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.label,
+				})}
+			</Field.Label>
+			<Checkbox
+				id={id()}
+				name={props.state.fieldConfig.key}
+				value={fieldValue() ?? false}
+				onChange={(value) => {
+					brickStore.get.setFieldValue({
+						brickIndex: fieldRenderState.brickIndex(),
+						fieldConfig: props.state.fieldConfig,
+						key: props.state.fieldConfig.key,
+						ref: props.state.groupRef,
+						repeaterKey: props.state.repeaterKey,
+						value: value,
+						contentLocale: fieldRenderState.contentLocale(),
+					});
+				}}
+				label={stateLabel()}
+				variant="button"
+				required={required()}
+				disabled={disabled()}
+			/>
+			<Field.Error />
+			<Show when={description()}>
+				{(value) => <Field.Description>{value()}</Field.Description>}
+			</Show>
+		</Field.Root>
 	);
 };

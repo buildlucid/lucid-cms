@@ -245,12 +245,9 @@ const UpdateUserDrawer: Component<{
 									value={getIsSuperAdmin()}
 									onChange={setIsSuperAdmin}
 									name={"superAdmin"}
-									theme="relaxed"
-									copy={{
-										true: T()("common.yes"),
-										false: T()("common.no"),
-										label: T()("users.super.admin.label"),
-									}}
+									trueLabel={T()("common.yes")}
+									falseLabel={T()("common.no")}
+									label={T()("users.super.admin.label")}
 									errors={getBodyError("superAdmin", updateUser.errors)}
 								/>
 								<Switch
@@ -258,12 +255,9 @@ const UpdateUserDrawer: Component<{
 									value={getIsLocked()}
 									onChange={setIsLocked}
 									name={"isLocked"}
-									theme="relaxed"
-									copy={{
-										true: T()("common.status.locked"),
-										false: T()("common.status.unlocked"),
-										label: T()("users.status.locked.label"),
-									}}
+									trueLabel={T()("common.status.locked")}
+									falseLabel={T()("common.status.unlocked")}
+									label={T()("users.status.locked.label")}
 									errors={getBodyError("isLocked", updateUser.errors)}
 								/>
 							</Show>

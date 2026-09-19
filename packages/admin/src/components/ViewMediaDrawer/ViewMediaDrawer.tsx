@@ -220,10 +220,9 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 								onChange={() => {}}
 								name="media-folder"
 								options={folderOptions()}
-								copy={{ label: T()("common.folder") }}
+								label={T()("common.folder")}
 								required={false}
 								errors={undefined}
-								noClear={true}
 								disabled={true}
 							/>
 							<Switch
@@ -231,14 +230,11 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 								value={media.data?.data.public ?? true}
 								onChange={() => {}}
 								name="public"
-								theme="relaxed"
 								disabled={true}
-								copy={{
-									label: T()("common.publicly.available"),
-									tooltip: T()("media.visibility.public.description"),
-									true: T()("common.public"),
-									false: T()("common.private"),
-								}}
+								label={T()("common.publicly.available")}
+								tooltip={T()("media.visibility.public.description")}
+								trueLabel={T()("common.public")}
+								falseLabel={T()("common.private")}
 							/>
 						</Show>
 						<Show when={activeTab() === "meta" && props.id !== undefined}>

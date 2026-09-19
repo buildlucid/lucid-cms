@@ -352,6 +352,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						{/** biome-ignore lint/a11y/noStaticElementInteractions: <explanation */}
 						<div class="pt-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
 							<Checkbox
+								id={`media-card-${props.media.id}`}
 								value={isSelected()}
 								onChange={() => {
 									if (isSelected()) {
@@ -360,8 +361,6 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 										mediaStore.get.addSelectedMedia(props.media.id);
 									}
 								}}
-								copy={{}}
-								fullWidth={false}
 							/>
 						</div>
 					</Show>

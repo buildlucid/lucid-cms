@@ -473,12 +473,10 @@ const CreateUpdateProfilePictureDrawer: Component<
 													});
 												}}
 												name={`alt-${locale.code}`}
-												copy={{
-													label: T()("common.alt"),
-												}}
+												label={T()("common.alt")}
 												errors={getErrorObject(inputError(index())?.alt)}
 												rows={3}
-												labelRightSlot={<ProfileAltGenerationButton />}
+												labelEnd={<ProfileAltGenerationButton />}
 											/>
 										</Show>
 									</Show>

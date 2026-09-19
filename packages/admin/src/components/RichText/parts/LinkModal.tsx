@@ -297,11 +297,9 @@ const LinkModal: Component<{
 						value={openInNewTab()}
 						onChange={setOpenInNewTab}
 						name="open_in_new_tab"
-						copy={{
-							label: T()("common.open.in.new.tab"),
-							true: T()("common.yes"),
-							false: T()("common.no"),
-						}}
+						label={T()("common.open.in.new.tab")}
+						trueLabel={T()("common.yes")}
+						falseLabel={T()("common.no")}
 						required={false}
 						labelLeft
 					/>

@@ -117,8 +117,7 @@ const CreateMediaFolderModal: Component<{
 						}}
 						name={"parent-folder"}
 						options={folderOptions()}
-						copy={{ label: T()("common.folder") }}
-						noClear={true}
+						label={T()("common.folder")}
 					/>
 				</Modal.Body>
 				<Modal.Footer>

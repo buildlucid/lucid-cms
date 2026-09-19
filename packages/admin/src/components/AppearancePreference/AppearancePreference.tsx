@@ -39,7 +39,6 @@ export const AppearancePreference: Component = () => {
 				if (isThemePreference(value)) themeStore.setThemePreference(value);
 			}}
 			name="cms-appearance"
-			noClear={true}
 		/>
 	);
 };

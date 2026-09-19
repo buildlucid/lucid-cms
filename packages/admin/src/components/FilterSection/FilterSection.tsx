@@ -856,7 +856,10 @@ export const FilterSection: Component<FilterSectionProps> = (props) => {
 								<FilterRow
 									id={`filter-row-${index}`}
 									field={availableFieldForRow(row())}
-									operator={row().operator}
+									//* query state is untyped, so it narrows on the way in
+									operator={
+										row().operator as DocumentFilterOperator | undefined
+									}
 									value={row().value}
 									fieldOptions={fieldOptionsForRow(row())}
 									onFieldChange={(key) => handleFieldChange(row(), key)}

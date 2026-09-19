@@ -262,10 +262,7 @@ export const AiUsageChart: Component = () => {
 					}}
 					name="ai-usage-chart-metric"
 					options={metricOptions()}
-					copy={{
-						label: T()("ai.usage.charts.metric"),
-					}}
-					noClear={true}
+					label={T()("ai.usage.charts.metric")}
 				/>
 				<Select
 					id="ai-usage-chart-feature"
@@ -279,9 +276,8 @@ export const AiUsageChart: Component = () => {
 					}}
 					name="ai-usage-chart-feature"
 					options={featureOptions()}
-					copy={{
-						label: T()("ai.usage.feature"),
-					}}
+					label={T()("ai.usage.feature")}
+					clearable={true}
 				/>
 				<Input
 					id="ai-usage-chart-start-date"

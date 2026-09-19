@@ -1,5 +1,6 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import { Select } from "@/components/Select/Select";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
@@ -78,21 +79,22 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 				});
 			}}
 			name={props.state.fieldConfig.key}
-			copy={{
-				label: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.label,
-				}),
-				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.description,
-				}),
-			}}
-			altLocaleError={props.state.altLocaleError}
-			localised={props.state.localised}
-			noClear={props.state.fieldConfig.validation?.required || false}
+			label={helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.label,
+			})}
+			description={helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.description,
+			})}
 			disabled={disabled()}
 			errors={props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
-			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+			labelStart={
+				<FieldLabelMarkers
+					altLocaleError={props.state.altLocaleError}
+					localised={props.state.localised}
+					fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+				/>
+			}
 		/>
 	);
 };

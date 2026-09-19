@@ -453,7 +453,6 @@ export const AccountContent: Component = () => {
 							if (typeof value === "string") setLocale(value);
 						}}
 						name={"cms-locale"}
-						noClear={true}
 					/>
 				</InfoRow.Content>
 			</InfoRow.Root>

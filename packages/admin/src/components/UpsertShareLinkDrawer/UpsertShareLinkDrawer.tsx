@@ -214,9 +214,7 @@ const UpsertShareLinkDrawer: Component<UpsertShareLinkPanelProps> = (props) => {
 						value={getDescription() || ""}
 						onChange={setDescription}
 						name="description"
-						copy={{
-							label: T()("common.description"),
-						}}
+						label={T()("common.description")}
 						errors={getBodyError("description", errors)}
 					/>
 					<Show
@@ -234,10 +232,8 @@ const UpsertShareLinkDrawer: Component<UpsertShareLinkPanelProps> = (props) => {
 								setRemovePassword(value);
 								if (value) setPassword("");
 							}}
-							copy={{
-								label: T()("media.share.links.password.remove.action"),
-								describedBy: T()("media.share.links.password.remove.help"),
-							}}
+							label={T()("media.share.links.password.remove.action")}
+							description={T()("media.share.links.password.remove.help")}
 						/>
 					</Show>
 					<Show when={!getRemovePassword()}>

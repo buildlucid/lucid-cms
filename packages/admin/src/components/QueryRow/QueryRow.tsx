@@ -9,7 +9,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { CheckboxButton } from "@/components/CheckboxButton/CheckboxButton";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
 import {
 	FilterSection,
 	type FilterSectionProps,
@@ -110,17 +110,16 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 							props.setShowingDeleted !== undefined
 						}
 					>
-						<CheckboxButton
+						<Checkbox
+							variant="button"
 							id="isDeleted"
 							value={props.showingDeleted?.() ?? false}
 							onChange={(value) => {
 								props.setShowingDeleted?.(value);
 							}}
 							name={"isDeleted"}
-							copy={{
-								label: T()("media.deleted.show"),
-							}}
-							theme="error"
+							label={T()("media.deleted.show")}
+							tone="danger"
 						/>
 					</Show>
 					<Show

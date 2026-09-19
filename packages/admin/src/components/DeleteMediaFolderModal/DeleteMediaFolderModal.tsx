@@ -64,10 +64,8 @@ const DeleteMediaFolderModal: Component<DeleteMediaFolderProps> = (props) => {
 						setRecursiveMedia(value);
 					}}
 					name="recursiveMedia"
-					copy={{
-						label: T()("media.folders.delete.recursive.label"),
-						describedBy: T()("media.folders.delete.recursive.description"),
-					}}
+					label={T()("media.folders.delete.recursive.label")}
+					description={T()("media.folders.delete.recursive.description")}
 				/>
 			</div>
 		</Modal.Confirm>

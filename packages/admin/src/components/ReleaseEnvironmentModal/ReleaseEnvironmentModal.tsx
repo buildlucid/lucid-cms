@@ -139,10 +139,7 @@ const ReleaseEnvironmentModal: Component<{
 							}
 						}}
 						options={releaseTimingOptions()}
-						copy={{
-							label: T()("documents.release.timing"),
-						}}
-						noClear={true}
+						label={T()("documents.release.timing")}
 					/>
 					<Show when={scheduleSelected()}>
 						<div class="mt-1">

@@ -146,10 +146,9 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 				<div class="flex items-center gap-3">
 					<Show when={props.isSelectable}>
 						<Checkbox
+							id={`media-basic-card-${props.media.id}`}
 							value={props.selected === true}
 							onChange={() => props.onSelect?.()}
-							copy={{}}
-							fullWidth={false}
 						/>
 					</Show>
 					<h3 class="line-clamp-1 text-sm flex-1">

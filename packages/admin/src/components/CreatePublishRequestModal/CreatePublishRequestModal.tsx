@@ -13,7 +13,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { CheckboxButton } from "@/components/CheckboxButton/CheckboxButton";
+import { Checkbox } from "@/components/Checkbox/Checkbox";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { Modal } from "@/components/Modal/Modal";
@@ -296,10 +296,7 @@ const CreatePublishRequestModal: Component<{
 									}
 								}}
 								options={releaseTimingOptions()}
-								copy={{
-									label: T()("documents.release.timing"),
-								}}
-								noClear={true}
+								label={T()("documents.release.timing")}
 							/>
 							<Show when={scheduleSelected()}>
 								<div class="mt-1">
@@ -323,16 +320,15 @@ const CreatePublishRequestModal: Component<{
 								label={T()("common.approval")}
 								theme="basic"
 							/>
-							<CheckboxButton
+							<Checkbox
+								variant="button"
 								id="publish-request-auto-accept"
 								name="publish-request-auto-accept"
 								value={autoAccept()}
 								onChange={updateAutoAccept}
-								copy={{
-									label: T()("publish.requests.auto.accept.label"),
-									describedBy: T()("publish.requests.auto.accept.description"),
-								}}
-								theme="secondary"
+								label={T()("publish.requests.auto.accept.label")}
+								description={T()("publish.requests.auto.accept.description")}
+								tone="secondary"
 							/>
 						</div>
 					</Show>

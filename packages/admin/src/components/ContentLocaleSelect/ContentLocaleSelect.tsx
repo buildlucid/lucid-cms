@@ -88,9 +88,8 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					}}
 					name={"content-locale"}
 					options={options()}
-					noClear={true}
 					hasError={props.hasError}
-					small={true}
+					size="sm"
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
 					shortcutDisplay={props.showShortcut ? "compact" : undefined}
 				/>
@@ -105,9 +104,8 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					}}
 					name={"content-locale"}
 					options={options()}
-					noClear={true}
 					hasError={props.hasError}
-					small={true}
+					size="sm"
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
 					shortcutDisplay={props.showShortcut ? "compact" : undefined}
 				/>

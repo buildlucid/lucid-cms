@@ -4,7 +4,7 @@ import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMark
 
 interface LabelProps {
 	id: string;
-	label?: string;
+	label?: JSXElement;
 	focused?: boolean;
 	required?: boolean;
 	theme: "full" | "basic";

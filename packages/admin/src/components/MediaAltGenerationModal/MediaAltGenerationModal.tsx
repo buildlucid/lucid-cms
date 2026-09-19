@@ -276,12 +276,8 @@ const MediaAltGenerationModalContent: Component<{
 									generate();
 								}
 							}}
-							copy={{
-								label: T()("ai.media.alt.generate.direction.label"),
-								placeholder: T()(
-									"ai.media.alt.generate.instruction.placeholder",
-								),
-							}}
+							label={T()("ai.media.alt.generate.direction.label")}
+							placeholder={T()("ai.media.alt.generate.instruction.placeholder")}
 							rows={5}
 						/>
 						<Show when={props.error}>
@@ -395,12 +391,6 @@ const MediaAltGenerationModalContent: Component<{
 																	locale.code,
 																	nextValue,
 																);
-															}}
-															onBlur={() => {
-																const draftId = activeDraftId();
-																if (!draftId) return;
-
-																props.callbacks.onSelect(draftId);
 															}}
 															rows={2}
 														/>

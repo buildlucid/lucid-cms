@@ -1,81 +1,106 @@
 import type { ErrorResult, FieldError } from "@types";
-import classnames from "classnames";
-import { type Component, createSignal, type JSXElement } from "solid-js";
-import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
-import { FormLabel } from "@/components/FormLabel/FormLabel";
+import {
+	type Component,
+	type JSX,
+	type JSXElement,
+	Show,
+	splitProps,
+} from "solid-js";
+import { Field } from "@/components/Field/Field";
 
-interface TextareaProps {
+export interface TextareaProps
+	extends Omit<
+		JSX.TextareaHTMLAttributes<HTMLTextAreaElement>,
+		"id" | "name" | "value" | "onChange" | "onInput" | "class"
+	> {
 	id: string;
+	name: string;
 	value: string;
 	onChange: (_value: string) => void;
-	name: string;
-	copy?: {
-		label?: string;
-		placeholder?: string;
-		describedBy?: string;
-	};
-	onBlur?: () => void;
-	autoFoucs?: boolean;
-	onKeyUp?: (_e: KeyboardEvent) => void;
-	required?: boolean;
-	disabled?: boolean;
+	label?: string;
+	/** Sits under the control, and is read out alongside it. */
+	description?: string;
 	errors?: ErrorResult | FieldError;
-	localised?: boolean;
-	altLocaleError?: boolean;
-	rows?: number;
-	fieldColumnIsMissing?: boolean;
-	labelRightSlot?: JSXElement;
+	/** Before the label text, for an icon or badge. */
+	labelStart?: JSXElement;
+	/** After the label, against the right edge. */
+	labelEnd?: JSXElement;
+	/** Applied to the field. Target [data-textarea-control] for the textarea. */
+	class?: string;
 }
 
+/**
+ * A labelled multi line text input, with its description and any validation
+ * errors. Every other textarea attribute, such as placeholder, rows, required
+ * or maxlength, passes through to the element.
+ *
+ * @example
+ * ```tsx
+ * import { Textarea } from "@lucidcms/admin/components";
+ *
+ * return (
+ * 	<Textarea
+ * 		id="summary"
+ * 		name="summary"
+ * 		label="Summary"
+ * 		value={summary()}
+ * 		onChange={setSummary}
+ * 		rows={4}
+ * 	/>
+ * );
+ * ```
+ */
 export const Textarea: Component<TextareaProps> = (props) => {
-	const [inputFocus, setInputFocus] = createSignal(false);
+	// ----------------------------------------
+	// State & Hooks
+	const [local, rest] = splitProps(props, [
+		"id",
+		"name",
+		"value",
+		"onChange",
+		"label",
+		"description",
+		"errors",
+		"labelStart",
+		"labelEnd",
+		"class",
+	]);
 
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={"w-full"}>
-			<FormLabel
-				id={props.id}
-				label={props.copy?.label}
-				focused={inputFocus()}
-				required={props.required}
-				theme={"basic"}
-				altLocaleError={props.altLocaleError}
-				localised={props.localised}
-				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				rightSlot={props.labelRightSlot}
+		<Field.Root
+			id={local.id}
+			required={rest.required}
+			disabled={rest.disabled}
+			errors={local.errors}
+			class={local.class}
+		>
+			<Show when={local.label !== undefined || local.labelEnd !== undefined}>
+				<Field.Label start={local.labelStart} end={local.labelEnd}>
+					{local.label}
+				</Field.Label>
+			</Show>
+			<textarea
+				{...rest}
+				data-textarea-control
+				id={local.id}
+				name={local.name}
+				value={local.value}
+				rows={rest.rows ?? 6}
+				class="focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
+				aria-describedby={
+					local.description ? `${local.id}-description` : undefined
+				}
+				onInput={(event) => local.onChange(event.currentTarget.value)}
+				onKeyDown={(event) => event.stopPropagation()}
 			/>
-			<div class="relative">
-				<textarea
-					class="focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
-					onKeyDown={(e) => {
-						e.stopPropagation();
-					}}
-					id={props.id}
-					name={props.name}
-					value={props.value}
-					onInput={(e) => props.onChange(e.currentTarget.value)}
-					placeholder={props.copy?.placeholder}
-					aria-describedby={
-						props.copy?.describedBy ? `${props.id}-description` : undefined
-					}
-					autofocus={props.autoFoucs}
-					required={props.required}
-					disabled={props.disabled}
-					onFocus={() => setInputFocus(true)}
-					onKeyUp={(e) => props.onKeyUp?.(e)}
-					onBlur={() => {
-						setInputFocus(false);
-						props.onBlur?.();
-					}}
-					rows={props.rows ?? 6}
-				/>
-			</div>
-			<FieldFeedback
-				id={props.id}
-				describedBy={props.copy?.describedBy}
-				errors={props.errors}
-			/>
-		</div>
+			<Field.Error />
+			<Show when={local.description}>
+				{(description) => (
+					<Field.Description>{description()}</Field.Description>
+				)}
+			</Show>
+		</Field.Root>
 	);
 };
