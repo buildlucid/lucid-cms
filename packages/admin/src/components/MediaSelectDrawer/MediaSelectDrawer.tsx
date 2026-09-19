@@ -263,14 +263,13 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						searchParams={searchParams}
 					/>
 					<Checkbox
-						variant="button"
+						variant="button-secondary"
 						id="isDeleted"
 						value={showingDeleted() === 1}
 						onChange={(value) => {
 							setShowingDeleted(value ? 1 : 0);
 						}}
 						name={"isDeleted"}
-						tone="secondary"
 						label={T()("media.deleted.show")}
 					/>
 					<Show when={searchParams.hasFiltersApplied()}>

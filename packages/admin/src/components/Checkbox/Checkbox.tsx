@@ -6,11 +6,17 @@ import { type Component, createSignal, type JSXElement, Show } from "solid-js";
 import { Field } from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
-/** How the control is drawn: a bare tick, or a tick inside a bordered box. */
-export type CheckboxVariant = "default" | "button";
-
-/** Colour the button variant fills with once ticked. */
-export type CheckboxTone = "primary" | "secondary" | "danger";
+/**
+ * How the control is drawn. The button variants put the tick inside a bordered
+ * box that lines up with an input; the ones naming a colour fill with it once
+ * ticked, while plain button stays neutral.
+ */
+export type CheckboxVariant =
+	| "default"
+	| "button"
+	| "button-primary"
+	| "button-secondary"
+	| "button-danger";
 
 export interface CheckboxProps {
 	id: string;
@@ -21,8 +27,6 @@ export interface CheckboxProps {
 	label?: string;
 	/** @default "default" */
 	variant?: CheckboxVariant;
-	/** Fills the button variant once ticked. It stays neutral when omitted. */
-	tone?: CheckboxTone;
 	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
 	/** Sits under the control, and is read out alongside it. */
@@ -62,9 +66,11 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
 
 	// ----------------------------------------
 	// Derived State
-	const boxed = () => props.variant === "button";
-	/** A boxed checkbox only takes on colour once it is ticked and given a tone. */
-	const filled = () => boxed() && props.value && props.tone !== undefined;
+	const boxed = () =>
+		props.variant !== undefined && props.variant !== "default";
+	/** Only the variants naming a colour take one, and only once ticked. */
+	const coloured = () => boxed() && props.variant !== "button";
+	const filled = () => coloured() && props.value;
 
 	// ----------------------------------------
 	// Render
@@ -82,24 +88,24 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
 					class={classnames("group flex items-center gap-2.5", {
 						"relative min-h-10 max-w-full cursor-pointer rounded-md border px-3 py-2 text-sm transition-colors duration-200":
 							boxed(),
-						// unticked, or ticked with no tone: the neutral box an input matches
+						// unticked, or a plain button: the neutral box an input lines up with
 						"bg-input-base text-subtitle": boxed() && !filled(),
 						"border-border":
 							boxed() && !filled() && !focused() && props.errors === undefined,
 						"border-error-base/50 bg-error-base/5":
 							boxed() && !filled() && props.errors !== undefined && !focused(),
 						"border-primary-base": boxed() && focused(),
-						// unticked with a tone, so hovering previews the fill it will take
+						// unticked but coloured, so hovering previews the fill it will take
 						"hover:bg-secondary-hover hover:text-secondary-contrast":
-							boxed() && !filled() && props.tone !== undefined,
+							boxed() && !filled() && coloured(),
 						"hover:border-body/25 hover:bg-card-hover":
-							boxed() && !filled() && props.tone === undefined,
+							boxed() && !filled() && !coloured(),
 						"border-primary-base bg-primary-base text-primary-contrast hover:bg-primary-hover":
-							filled() && props.tone === "primary",
+							filled() && props.variant === "button-primary",
 						"border-secondary-base bg-secondary-base text-secondary-contrast hover:bg-secondary-hover":
-							filled() && props.tone === "secondary",
+							filled() && props.variant === "button-secondary",
 						"border-error-base bg-error-base text-error-contrast hover:bg-error-hover":
-							filled() && props.tone === "danger",
+							filled() && props.variant === "button-danger",
 						"cursor-not-allowed opacity-60": props.disabled,
 					})}
 					required={props.required}

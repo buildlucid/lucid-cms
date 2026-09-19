@@ -423,7 +423,7 @@ const ComponentLibraryPage: Component = () => {
 					<InfoRow.Content title={"Checkbox Buttons"}>
 						<div class="flex flex-col gap-2">
 							<Checkbox
-								variant="button"
+								variant="button-primary"
 								id="checkbox-btn-1"
 								value={checkboxButtonValues().option1}
 								onChange={(value) =>
@@ -434,10 +434,9 @@ const ComponentLibraryPage: Component = () => {
 								}
 								name="checkbox-btn-1"
 								label={"Primary Option (selected)"}
-								tone="primary"
 							/>
 							<Checkbox
-								variant="button"
+								variant="button-primary"
 								id="checkbox-btn-2"
 								value={checkboxButtonValues().option2}
 								onChange={(value) =>
@@ -448,10 +447,9 @@ const ComponentLibraryPage: Component = () => {
 								}
 								name="checkbox-btn-2"
 								label={"Primary Option (not selected)"}
-								tone="primary"
 							/>
 							<Checkbox
-								variant="button"
+								variant="button-danger"
 								id="checkbox-btn-3"
 								value={checkboxButtonValues().option3}
 								onChange={(value) =>
@@ -462,7 +460,6 @@ const ComponentLibraryPage: Component = () => {
 								}
 								name="checkbox-btn-3"
 								label={"Error Option"}
-								tone="danger"
 							/>
 							<Checkbox
 								variant="button"

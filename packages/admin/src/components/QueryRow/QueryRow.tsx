@@ -111,7 +111,7 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 						}
 					>
 						<Checkbox
-							variant="button"
+							variant="button-danger"
 							id="isDeleted"
 							value={props.showingDeleted?.() ?? false}
 							onChange={(value) => {
@@ -119,7 +119,6 @@ export const QueryRow: Component<QueryRowProps> = (props) => {
 							}}
 							name={"isDeleted"}
 							label={T()("media.deleted.show")}
-							tone="danger"
 						/>
 					</Show>
 					<Show

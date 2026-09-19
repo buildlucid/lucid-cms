@@ -294,7 +294,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 											<For each={option.permissions}>
 												{(permission) => (
 													<Checkbox
-														variant="button"
+														variant="button-secondary"
 														id={`permission-${option.key}-${permission.key}`}
 														value={selectedPermissions().includes(
 															permission.key,
@@ -319,7 +319,6 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 															}) || undefined
 														}
 														disabled={isReadOnly()}
-														tone="secondary"
 													/>
 												)}
 											</For>

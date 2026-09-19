@@ -328,7 +328,7 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 											<For each={group.scopes}>
 												{(scope) => (
 													<Checkbox
-														variant="button"
+														variant="button-secondary"
 														id={`scope-${group.key}-${scope.key}`}
 														value={getScopes().includes(scope.key)}
 														onChange={() => toggleScope(scope.key)}
@@ -340,7 +340,6 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 																value: scope.details.description,
 															}) || undefined
 														}
-														tone="secondary"
 													/>
 												)}
 											</For>

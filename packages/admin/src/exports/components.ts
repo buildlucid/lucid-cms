@@ -8,7 +8,6 @@ export {
 export {
 	Checkbox,
 	type CheckboxProps,
-	type CheckboxTone,
 	type CheckboxVariant,
 } from "../components/Checkbox/Checkbox.js";
 export * from "../components/Drawer/Drawer.js";

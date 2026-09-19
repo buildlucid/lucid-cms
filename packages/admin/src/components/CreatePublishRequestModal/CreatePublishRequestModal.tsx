@@ -321,14 +321,13 @@ const CreatePublishRequestModal: Component<{
 								theme="basic"
 							/>
 							<Checkbox
-								variant="button"
+								variant="button-secondary"
 								id="publish-request-auto-accept"
 								name="publish-request-auto-accept"
 								value={autoAccept()}
 								onChange={updateAutoAccept}
 								label={T()("publish.requests.auto.accept.label")}
 								description={T()("publish.requests.auto.accept.description")}
-								tone="secondary"
 							/>
 						</div>
 					</Show>
