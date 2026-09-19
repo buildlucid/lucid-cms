@@ -7,6 +7,7 @@ import {
 	useContext,
 } from "solid-js";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
+import { usePageScrollPin } from "@/hooks/usePageScrollPin/usePageScrollPin";
 import { ModalContext } from "../ModalContext";
 
 /** Width of the modal surface. */
@@ -61,6 +62,7 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const parentLayer = useContext(LayerContext);
+	usePageScrollPin(() => props.open);
 
 	// ----------------------------------------
 	// Memos

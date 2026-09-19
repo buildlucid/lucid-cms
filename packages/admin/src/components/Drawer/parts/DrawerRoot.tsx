@@ -18,6 +18,7 @@ import {
 import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
+import { usePageScrollPin } from "@/hooks/usePageScrollPin/usePageScrollPin";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import {
 	DrawerContext,
@@ -122,6 +123,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	const interfaceDirection = useInterfaceDirection();
 	const parentDrawer = useContext(DrawerNestingContext);
 	const drawerId = Symbol("drawer");
+	usePageScrollPin(() => props.open);
 
 	// ------------------------------
 	// Functions
@@ -198,12 +200,17 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	});
 	onCleanup(() => parentDrawer?.setChildOpen(drawerId, false));
 
+	//* only capture on the closed to open transition - the locale deps below
+	//* re-run this effect, and by then focus has moved inside the drawer
+	let wasOpen = false;
 	createEffect(() => {
 		if (props.open) {
-			setLastFocusedElement(document.activeElement);
+			if (!wasOpen) setLastFocusedElement(document.activeElement);
+			wasOpen = true;
 			setLocale(defaultLocale());
 			return;
 		}
+		wasOpen = false;
 		props.onReset?.();
 	});
 
@@ -277,15 +284,21 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 								event.preventDefault();
 							}
 						}}
+						//* focus restore runs with preventScroll, so closing the drawer
+						//* never scrolls the page behind it back to the top
 						onCloseAutoFocus={() => {
 							let element = lastFocusedElement();
-							if (element instanceof HTMLBodyElement || !element) {
+							if (
+								!(element instanceof HTMLElement) ||
+								element instanceof HTMLBodyElement ||
+								!element.isConnected
+							) {
 								element = document.querySelector(
 									"button:not([tabindex='-1']), a:not([tabindex='-1'])",
 								);
 							}
-							if (element && "focus" in element)
-								(element as HTMLElement).focus();
+							if (element instanceof HTMLElement)
+								element.focus({ preventScroll: true });
 						}}
 					>
 						<Switch>
