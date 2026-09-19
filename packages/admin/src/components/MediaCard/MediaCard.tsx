@@ -361,7 +361,6 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 									}
 								}}
 								copy={{}}
-								noMargin={true}
 								fullWidth={false}
 							/>
 						</div>

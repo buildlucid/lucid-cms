@@ -204,10 +204,8 @@ const ComponentLibraryPage: Component = () => {
 								onChange={setInputText}
 								type="text"
 								name="text-input-basic"
-								copy={{
-									label: "Basic Theme",
-									placeholder: "Enter some text...",
-								}}
+								label={"Basic Theme"}
+								placeholder={"Enter some text..."}
 							/>
 							<InsetLabelInput
 								id="text-input-full"
@@ -230,10 +228,8 @@ const ComponentLibraryPage: Component = () => {
 								onChange={setInputEmail}
 								type="email"
 								name="email-input-basic"
-								copy={{
-									label: "Basic Theme",
-									placeholder: "Enter email address...",
-								}}
+								label={"Basic Theme"}
+								placeholder={"Enter email address..."}
 							/>
 							<InsetLabelInput
 								id="email-input-full"
@@ -256,10 +252,8 @@ const ComponentLibraryPage: Component = () => {
 								onChange={setInputPassword}
 								type="password"
 								name="password-input-basic"
-								copy={{
-									label: "Basic Theme",
-									placeholder: "Enter password...",
-								}}
+								label={"Basic Theme"}
+								placeholder={"Enter password..."}
 							/>
 							<InsetLabelInput
 								id="password-input-full"
@@ -281,10 +275,8 @@ const ComponentLibraryPage: Component = () => {
 							onChange={setInputNumber}
 							type="number"
 							name="number-input-basic"
-							copy={{
-								label: "Basic Theme",
-								placeholder: "Enter a number...",
-							}}
+							label={"Basic Theme"}
+							placeholder={"Enter a number..."}
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>

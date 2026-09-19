@@ -31,11 +31,9 @@ interface SwitchProps {
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
-	noMargin?: boolean;
 	inline?: boolean;
 	fieldColumnIsMissing?: boolean;
 	theme?: "default" | "relaxed" | "checkbox";
-	hideOptionalText?: boolean;
 	labelLeft?: boolean;
 }
 
@@ -159,11 +157,10 @@ export const Switch: Component<SwitchProps> = (props) => {
 			altLocaleError={props.altLocaleError}
 			localised={props.localised}
 			fieldColumnIsMissing={props.fieldColumnIsMissing}
-			hideOptionalText={props.hideOptionalText}
 			class={className}
 			rightSlot={
-				theme() === "checkbox" ? (
-					<FormTooltip copy={props.copy?.tooltip} theme="inline" />
+				props.copy?.tooltip ? (
+					<FormTooltip copy={props.copy.tooltip} theme="inline" />
 				) : undefined
 			}
 		/>
@@ -190,10 +187,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 	return (
 		<div
 			class={classnames("relative", {
-				"mb-3 last:mb-0": props.noMargin !== true,
 				"w-full": props.inline !== true,
-				"mt-2":
-					props.noMargin !== true && props.labelLeft && theme() !== "checkbox",
 			})}
 		>
 			<input
@@ -222,6 +216,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 				when={theme() === "checkbox"}
 				fallback={
 					<>
+						(
 						{props.labelLeft ? (
 							<div class="flex items-center justify-between gap-3">
 								{fieldLabel()}
@@ -233,7 +228,7 @@ export const Switch: Component<SwitchProps> = (props) => {
 								{switchButton()}
 							</>
 						)}
-						<FormTooltip copy={props.copy?.tooltip} theme={undefined} />
+						)
 					</>
 				}
 			>

@@ -105,7 +105,6 @@ export interface SingleFileUploadProps {
 	errors?: ErrorResult;
 	localised?: boolean;
 	altLocaleError?: boolean;
-	noMargin?: boolean;
 	imageGeneration?: SingleFileUploadImageGeneration;
 	imageCrop?: SingleFileUploadImageCrop;
 	pendingChange?: {
@@ -202,11 +201,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 	// ------------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}

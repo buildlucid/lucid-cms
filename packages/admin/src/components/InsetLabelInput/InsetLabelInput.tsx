@@ -1,6 +1,5 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import classNames from "classnames";
 import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
@@ -28,8 +27,6 @@ export const InsetLabelInput: Component<{
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
-	noMargin?: boolean;
-	hideOptionalText?: boolean;
 	fieldColumnIsMissing?: boolean;
 }> = (props) => {
 	const [inputFocus, setInputFocus] = createSignal(false);
@@ -45,11 +42,7 @@ export const InsetLabelInput: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classnames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<div
 				class={classnames(
 					"flex flex-col transition-colors duration-200 ease-in-out relative bg-input-base rounded-md border border-border",
@@ -67,7 +60,6 @@ export const InsetLabelInput: Component<{
 					theme={"full"}
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
-					hideOptionalText={props.hideOptionalText}
 					fieldColumnIsMissing={props.fieldColumnIsMissing}
 				/>
 				<input
@@ -105,13 +97,7 @@ export const InsetLabelInput: Component<{
 				<Show when={props.type === "password"}>
 					<button
 						type="button"
-						class={classNames(
-							"absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors",
-							{
-								"top-10":
-									props.required !== true && props.hideOptionalText !== true,
-							},
-						)}
+						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors"
 						onClick={() => {
 							setPasswordVisible(!passwordVisible());
 						}}

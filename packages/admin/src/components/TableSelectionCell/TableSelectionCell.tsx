@@ -25,12 +25,7 @@ const TableSelectionCell: Component<SelectColProps> = (props) => {
 					}}
 					theme={props.theme}
 				>
-					<Checkbox
-						value={props.value}
-						onChange={props.onChange}
-						copy={{}}
-						noMargin={true}
-					/>
+					<Checkbox value={props.value} onChange={props.onChange} copy={{}} />
 				</TableHeaderCell>
 			</Match>
 			<Match when={props.type === "td"}>
@@ -40,12 +35,7 @@ const TableSelectionCell: Component<SelectColProps> = (props) => {
 						padding: props.padding,
 					}}
 				>
-					<Checkbox
-						value={props.value}
-						onChange={props.onChange}
-						copy={{}}
-						noMargin={true}
-					/>
+					<Checkbox value={props.value} onChange={props.onChange} copy={{}} />
 				</TableCell>
 			</Match>
 		</Switch>

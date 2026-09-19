@@ -68,7 +68,6 @@ const DeleteMediaFolderModal: Component<DeleteMediaFolderProps> = (props) => {
 						label: T()("media.folders.delete.recursive.label"),
 						describedBy: T()("media.folders.delete.recursive.description"),
 					}}
-					noMargin={true}
 				/>
 			</div>
 		</Modal.Confirm>

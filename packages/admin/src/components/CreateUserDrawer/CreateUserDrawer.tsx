@@ -110,16 +110,14 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 					});
 				}}
 			>
-				<Drawer.Body>
+				<Drawer.Body class="flex flex-col gap-3">
 					<Input
 						id="username"
 						value={getUsername()}
 						onChange={setUsername}
 						name={"username"}
 						type="text"
-						copy={{
-							label: T()("common.username"),
-						}}
+						label={T()("common.username")}
 						required={true}
 						errors={getBodyError("username", createUser.errors)}
 					/>
@@ -130,10 +128,7 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 							onChange={setFirstName}
 							name={"firstName"}
 							type="text"
-							copy={{
-								label: T()("common.first.name"),
-							}}
-							noMargin={true}
+							label={T()("common.first.name")}
 							errors={getBodyError("firstName", createUser.errors)}
 						/>
 						<Input
@@ -142,10 +137,7 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 							onChange={setLastName}
 							name={"lastName"}
 							type="text"
-							copy={{
-								label: T()("common.last.name"),
-							}}
-							noMargin={true}
+							label={T()("common.last.name")}
 							errors={getBodyError("lastName", createUser.errors)}
 						/>
 					</InputGrid>
@@ -156,10 +148,7 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 							onChange={setEmail}
 							name={"email"}
 							type="text"
-							copy={{
-								label: T()("common.email"),
-							}}
-							noMargin={true}
+							label={T()("common.email")}
 							required={true}
 							errors={getBodyError("email", createUser.errors)}
 						/>

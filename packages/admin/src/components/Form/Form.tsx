@@ -72,7 +72,7 @@ export const Form: Component<{
 						if (props.onSubmit) props.onSubmit();
 					}}
 				>
-					{props.children}
+					<div class="flex w-full flex-col gap-3">{props.children}</div>
 					<Show when={showSubmitButton() || props.submitRow || errorMessage()}>
 						<div class="mt-4 w-full">
 							<Show when={errorMessage() && !showInlineError()}>

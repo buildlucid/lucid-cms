@@ -85,7 +85,7 @@ export interface DrawerRootProps {
  * 			<Drawer.Title>Edit user</Drawer.Title>
  * 		</Drawer.Header>
  * 		<Drawer.Body>
- * 			<Input id="email" name="email" type="email" value={email()} onChange={setEmail} />
+ * 			<Input id="email" name="email" type="email" label="Email" value={email()} onChange={setEmail} />
  * 		</Drawer.Body>
  * 	</Drawer.Root>
  * );
@@ -105,7 +105,7 @@ export interface DrawerRootProps {
  * 					<Drawer.LocaleSelect />
  * 				</Drawer.Header>
  * 				<Drawer.Body>
- * 					<Input id="alt" name="alt" type="text" value={alt[locale() ?? "en"]} />
+ * 					<Input id="alt" name="alt" type="text" label="Alt text" value={alt[locale() ?? "en"]} onChange={setAlt} />
  * 				</Drawer.Body>
  * 			</>
  * 		)}

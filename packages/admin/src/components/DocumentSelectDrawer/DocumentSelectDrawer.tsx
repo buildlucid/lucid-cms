@@ -521,7 +521,6 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									}
 								}}
 								options={collectionOptions()}
-								noMargin={true}
 								noClear={true}
 								small={true}
 							/>

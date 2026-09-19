@@ -80,7 +80,6 @@ export const RangeField: Component<RangeFieldProps> = (props) => {
 			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			hideOptionalText
 		/>
 	);
 };

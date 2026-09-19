@@ -453,7 +453,6 @@ const VariableSourceSelect: Component<{
 			}}
 			options={props.options}
 			ariaLabel={T()("common.type")}
-			noMargin
 			noClear
 			small
 		/>

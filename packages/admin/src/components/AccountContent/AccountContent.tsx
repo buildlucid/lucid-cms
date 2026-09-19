@@ -183,7 +183,7 @@ export const AccountContent: Component = () => {
 					clearLoading={deleteProfilePicture.action.isPending}
 				/>
 				<InfoRow.Content
-					title={T()("account.details.description.title")}
+					title={T()("account.details.summary.title")}
 					actions={
 						<Button
 							variant="outline"

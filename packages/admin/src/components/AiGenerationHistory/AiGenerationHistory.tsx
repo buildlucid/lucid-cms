@@ -51,9 +51,7 @@ export const AiGenerationHistory: Component<GenerationHistoryProps> = (
 						props.onSelect(value);
 					}}
 					options={selectOptions()}
-					noMargin
 					noClear
-					hideOptionalText
 					ariaLabel={props.ariaLabel ?? T()("common.history")}
 					disabled={props.disabled || props.loading}
 				/>

@@ -143,7 +143,6 @@ export const TextareaField: Component<TextareaFieldProps> = (props) => {
 					<AiGenerationButton />
 				) : undefined
 			}
-			hideOptionalText
 		/>
 	);
 };

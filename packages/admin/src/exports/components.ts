@@ -7,6 +7,11 @@ export {
 } from "../components/Button/Button.js";
 export * from "../components/Drawer/Drawer.js";
 export {
+	Input,
+	type InputProps,
+	type InputType,
+} from "../components/Input/Input.js";
+export {
 	default as Link,
 	type LinkProps,
 	type LinkShape,

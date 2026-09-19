@@ -37,13 +37,11 @@ interface UserSelectProps {
 		describedBy?: string;
 	};
 	disabled?: boolean;
-	noMargin?: boolean;
 	required?: boolean;
 	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 }
 
 const USER_SELECT_DRAG_DROP_KEY = "user-select-zone";
@@ -124,11 +122,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
@@ -137,7 +131,6 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				hideOptionalText={props.hideOptionalText}
 			/>
 			<div class="w-full">
 				<Switch>

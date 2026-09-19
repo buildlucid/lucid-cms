@@ -237,7 +237,7 @@ const CreatePublishRequestModal: Component<{
 				)} ${T()("publish.requests.replacement.warning")}`}</Modal.Description>
 			</Modal.Header>
 			<Modal.Body>
-				<div class="flex flex-col gap-5">
+				<div class="flex flex-col gap-3">
 					<RichText
 						id="publish-request-comment"
 						value={comment()}
@@ -253,7 +253,6 @@ const CreatePublishRequestModal: Component<{
 							placeholder: T()("publish.requests.comment.placeholder"),
 						}}
 						options={reviewCommentRichTextOptions}
-						noMargin={true}
 					/>
 					<Show when={!autoAccept()}>
 						<SelectMultiple
@@ -283,7 +282,6 @@ const CreatePublishRequestModal: Component<{
 									label={props.option.label}
 								/>
 							)}
-							noMargin={true}
 						/>
 					</Show>
 					<Show when={canSchedule()}>
@@ -302,8 +300,6 @@ const CreatePublishRequestModal: Component<{
 									label: T()("documents.release.timing"),
 								}}
 								noClear={true}
-								hideOptionalText={true}
-								noMargin={true}
 							/>
 							<Show when={scheduleSelected()}>
 								<div class="mt-1">
@@ -326,7 +322,6 @@ const CreatePublishRequestModal: Component<{
 								id="publish-request-auto-accept"
 								label={T()("common.approval")}
 								theme="basic"
-								hideOptionalText={true}
 							/>
 							<CheckboxButton
 								id="publish-request-auto-accept"

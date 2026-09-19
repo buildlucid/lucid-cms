@@ -40,8 +40,6 @@ export interface CompactImageUploadProps {
 	progress?: SingleFileUploadProps["progress"];
 	imageCrop?: SingleFileUploadImageCrop;
 	errors?: ErrorResult;
-	noMargin?: boolean;
-	hideOptionalText?: boolean;
 }
 
 const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
@@ -123,17 +121,12 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
 				required={props.required}
 				theme="basic"
-				hideOptionalText={props.hideOptionalText}
 			/>
 			<input
 				ref={inputRef}

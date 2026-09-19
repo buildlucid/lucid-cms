@@ -36,9 +36,7 @@ interface RichTextProps {
 	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
-	noMargin?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 	labelRightSlot?: JSXElement;
 	options?: RichTextOptions;
 	translations?: {
@@ -84,11 +82,7 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classnames("w-full max-w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full max-w-full"}>
 			<Show when={!seamless()}>
 				<div class="relative">
 					<FormLabel
@@ -100,7 +94,6 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 						altLocaleError={props.altLocaleError}
 						localised={props.localised}
 						fieldColumnIsMissing={props.fieldColumnIsMissing}
-						hideOptionalText={props.hideOptionalText}
 						rightSlot={props.labelRightSlot}
 					/>
 				</div>
@@ -193,7 +186,6 @@ const FullscreenEditor: Component<{
 					onFullscreenChange={(open) => {
 						if (!open) fullscreenProps.onClose();
 					}}
-					noMargin={true}
 				/>
 			)}
 		</Show>

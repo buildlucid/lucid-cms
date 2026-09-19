@@ -27,7 +27,6 @@ import {
 	untrack,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import { Drawer } from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
@@ -37,6 +36,7 @@ import { Input } from "@/components/Input/Input";
 import Pill from "@/components/Pill/Pill";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { Select } from "@/components/Select/Select";
+import { Switch } from "@/components/Switch/Switch";
 import { Textarea } from "@/components/Textarea/Textarea";
 import { useCreateMedia } from "@/hooks/useCreateMedia/useCreateMedia";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
@@ -132,7 +132,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 				Boolean(targetAction()?.isLoading()) && targetUploadProgress() > 0,
 			value: targetUploadProgress(),
 		}),
-		noMargin: false,
 		imageGeneration: {
 			enabled: () => showMediaImageGenerationAction(),
 			disabled: () => coreMutateIsLoading(),
@@ -154,7 +153,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 		name: "file",
 		accept: "image/*",
 		errors: () => mutateErrors(),
-		noMargin: false,
 	});
 
 	// ---------------------------------
@@ -1253,7 +1251,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 						<Drawer.LocaleSelect hasError={hasTranslationErrors()} />
 					</Drawer.Header>
 					<Drawer.Form onSubmit={onSubmit}>
-						<Drawer.Body>
+						<Drawer.Body class="flex flex-col gap-3">
 							<MediaFile.Render />
 							<Drawer.Tabs
 								items={visibleTabs().map((tab) => ({
@@ -1278,20 +1276,21 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 									copy={{ label: T()("common.folder") }}
 									required={false}
 									errors={getBodyError("folderId", mutateErrors())}
-									noMargin={false}
 									noClear={true}
-									hideOptionalText={true}
 								/>
-								<Checkbox
+								<Switch
 									id="public"
 									value={targetState()?.public() ?? true}
 									onChange={(val) => {
 										targetAction()?.setPublic(val);
 									}}
 									name="public"
+									theme="relaxed"
 									copy={{
 										label: T()("common.publicly.available"),
 										tooltip: T()("media.visibility.public.description"),
+										true: T()("common.public"),
+										false: T()("common.private"),
 									}}
 									errors={getBodyError("featured", mutateErrors())}
 								/>
@@ -1312,12 +1311,9 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												}}
 												name={`name-${locale.code}`}
 												type="text"
-												copy={{
-													label: T()("common.name"),
-												}}
+												label={T()("common.name")}
 												errors={getErrorObject(inputError(index())?.name)}
-												autoComplete="off"
-												hideOptionalText={true}
+												autocomplete="off"
 											/>
 											<Show when={showAltInput()}>
 												<Textarea
@@ -1338,7 +1334,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													}}
 													errors={getErrorObject(inputError(index())?.alt)}
 													rows={3}
-													hideOptionalText={true}
 													labelRightSlot={<MediaAltGenerationButton />}
 												/>
 											</Show>
@@ -1362,7 +1357,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														label: T()("common.description"),
 													}}
 													errors={getErrorObject(descriptionError(index()))}
-													hideOptionalText={true}
 												/>
 											</Show>
 											<Show when={showSummaryInput()}>
@@ -1385,7 +1379,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														label: T()("common.summary"),
 													}}
 													errors={getErrorObject(summaryError(index()))}
-													hideOptionalText={true}
 												/>
 											</Show>
 										</Show>
@@ -1680,7 +1673,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													}}
 													errors={getErrorObject(posterAltError(index()))}
 													rows={3}
-													hideOptionalText={true}
 													labelRightSlot={<PosterAltGenerationButton />}
 												/>
 											</Show>

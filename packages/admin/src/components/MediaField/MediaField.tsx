@@ -138,7 +138,6 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 			errors={isMultiple() ? props.state.fieldErrors : props.state.fieldError}
 			required={props.state.fieldConfig.validation?.required || false}
 			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			hideOptionalText
 		/>
 	);
 };

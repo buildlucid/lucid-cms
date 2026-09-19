@@ -21,13 +21,11 @@ interface LinkSelectProps {
 		describedBy?: string;
 	};
 	disabled?: boolean;
-	noMargin?: boolean;
 	required?: boolean;
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 }
 
 export const LinkSelect: Component<LinkSelectProps> = (props) => {
@@ -59,11 +57,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
@@ -72,7 +66,6 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				hideOptionalText={props.hideOptionalText}
 			/>
 			<div class="w-full">
 				<Show when={hasLink()}>

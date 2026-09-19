@@ -49,14 +49,12 @@ export interface SelectProps<Option extends SelectOptionT = SelectOptionT> {
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
-	noMargin?: boolean;
 	noClear?: boolean;
 	hasError?: boolean;
 	small?: boolean;
 	shortcut?: string;
 	shortcutDisplay?: "full" | "compact";
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 	hidePlaceholder?: boolean;
 	ariaLabel?: string;
 	renderValue?: (_props: { option: Option }) => JSXElement;
@@ -133,11 +131,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
@@ -154,7 +148,6 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
 					fieldColumnIsMissing={props.fieldColumnIsMissing}
-					hideOptionalText={props.hideOptionalText}
 				/>
 				<DropdownMenu.Trigger
 					id={props.id}

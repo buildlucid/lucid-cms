@@ -42,9 +42,7 @@ interface JSONTextareaProps {
 	errors?: ErrorResult | FieldError;
 	localised?: boolean;
 	altLocaleError?: boolean;
-	noMargin?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 	labelRightSlot?: JSXElement;
 }
 
@@ -200,11 +198,7 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classnames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
@@ -214,7 +208,6 @@ export const JSONTextarea: Component<JSONTextareaProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				hideOptionalText={props.hideOptionalText}
 				rightSlot={props.labelRightSlot}
 			/>
 			<div

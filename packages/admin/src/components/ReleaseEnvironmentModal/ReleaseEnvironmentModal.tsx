@@ -143,8 +143,6 @@ const ReleaseEnvironmentModal: Component<{
 							label: T()("documents.release.timing"),
 						}}
 						noClear={true}
-						hideOptionalText={true}
-						noMargin={true}
 					/>
 					<Show when={scheduleSelected()}>
 						<div class="mt-1">

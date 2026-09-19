@@ -277,21 +277,17 @@ const UpsertOAuthClientDrawer: Component<{
 				</Drawer.Description>
 			</Drawer.Header>
 			<Drawer.Form onSubmit={submit}>
-				<Drawer.Body>
+				<Drawer.Body class="flex flex-col gap-3">
 					{/* Status */}
-					<div class="mb-3">
-						<Switch
-							id="oauth-client-enabled"
-							name="enabled"
-							value={enabled()}
-							onChange={setEnabled}
-							copy={{ label: T()("common.status.enabled") }}
-							errors={getBodyError("enabled", mutateErrors)}
-							hideOptionalText={true}
-							inline={true}
-							noMargin={true}
-						/>
-					</div>
+					<Switch
+						id="oauth-client-enabled"
+						name="enabled"
+						value={enabled()}
+						onChange={setEnabled}
+						copy={{ label: T()("common.status.enabled") }}
+						errors={getBodyError("enabled", mutateErrors)}
+						inline={true}
+					/>
 
 					{/* Application */}
 					<InputGrid columns={2}>
@@ -301,10 +297,9 @@ const UpsertOAuthClientDrawer: Component<{
 							type="text"
 							value={name()}
 							onChange={setName}
-							copy={{ label: T()("common.name") }}
+							label={T()("common.name")}
 							required={true}
 							errors={getBodyError("name", mutateErrors)}
-							noMargin={true}
 						/>
 						<Select
 							id="oauth-client-auth-method"
@@ -328,7 +323,6 @@ const UpsertOAuthClientDrawer: Component<{
 							noClear={true}
 							disabled={mode() === "update"}
 							errors={getBodyError("authMethod", mutateErrors)}
-							noMargin={true}
 						/>
 					</InputGrid>
 					<Input
@@ -337,16 +331,13 @@ const UpsertOAuthClientDrawer: Component<{
 						type="url"
 						value={clientUri()}
 						onChange={setClientUri}
-						copy={{
-							label: T()("oauth.clients.website"),
-							placeholder: "https://example.com",
-						}}
-						hideOptionalText={true}
+						label={T()("oauth.clients.website")}
+						placeholder={"https://example.com"}
 						errors={getBodyError("clientUri", mutateErrors)}
 					/>
 
 					{/* Redirect URIs */}
-					<div class="mb-5">
+					<div>
 						<FormLabel
 							id="oauth-client-redirect-0"
 							label={T()("oauth.clients.redirect.uris")}
@@ -364,12 +355,8 @@ const UpsertOAuthClientDrawer: Component<{
 												type="url"
 												value={uri()}
 												onChange={(value) => updateRedirectUri(index, value)}
-												copy={{
-													placeholder: "https://example.com/oauth/callback",
-												}}
+												placeholder={"https://example.com/oauth/callback"}
 												required={true}
-												hideOptionalText={true}
-												noMargin={true}
 											/>
 										</div>
 										<div class="flex h-10 items-center gap-2.5">
@@ -423,7 +410,6 @@ const UpsertOAuthClientDrawer: Component<{
 							active: uploadLoading(),
 							value: uploadProgress(),
 						}}
-						hideOptionalText={true}
 						imageCrop={LogoFile.getImageCrop()}
 						errors={getBodyError("logo", mutateErrors)}
 					/>

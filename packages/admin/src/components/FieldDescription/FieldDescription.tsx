@@ -53,10 +53,7 @@ export const FieldDescription: Component<DescribedByProps> = (props) => {
 	return (
 		<Show when={props?.describedBy}>
 			<div
-				class={classNames(
-					"text-sm leading-5 mt-1.5 text-unfocused",
-					props.class,
-				)}
+				class={classNames("text-sm leading-5 mt-2 text-unfocused", props.class)}
 			>
 				<div
 					id={id()}

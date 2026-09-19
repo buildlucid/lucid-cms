@@ -113,7 +113,6 @@ const DraftEditor: Component<{
 					type="text"
 					value={typeof props.value === "string" ? props.value : ""}
 					onChange={(nextValue) => props.onChange(props.localeCode, nextValue)}
-					noMargin
 				/>
 			</Match>
 			<Match when={props.fieldType === "textarea"}>
@@ -123,7 +122,6 @@ const DraftEditor: Component<{
 					value={typeof props.value === "string" ? props.value : ""}
 					onChange={(nextValue) => props.onChange(props.localeCode, nextValue)}
 					rows={props.selectedLocaleCount > 1 ? 4 : 10}
-					noMargin
 				/>
 			</Match>
 			<Match when={props.fieldType === "json"}>
@@ -135,7 +133,6 @@ const DraftEditor: Component<{
 						onChange={(nextValue) =>
 							props.onJsonChange(props.localeCode, nextValue)
 						}
-						noMargin
 					/>
 					<Show when={props.jsonValid === false}>
 						<p class="mt-2 text-sm text-error-base">
@@ -170,7 +167,6 @@ const DraftEditor: Component<{
 								value: codeValue()?.value ?? "",
 							})
 						}
-						noMargin
 					/>
 				</Suspense>
 			</Match>
@@ -180,7 +176,6 @@ const DraftEditor: Component<{
 					id={`ai-custom-field-generation-preview-rich-text-${props.localeCode}`}
 					value={props.value as RichTextJSON}
 					onChange={(nextValue) => props.onChange(props.localeCode, nextValue)}
-					noMargin
 					options={{
 						...props.richTextOptions,
 						locale: props.localeCode ?? undefined,
@@ -788,7 +783,6 @@ const CustomFieldGenerationModal: Component = () => {
 									id="ai-custom-field-generation-guidance"
 									label={T()("ai.custom.field.generate.guidance.label")}
 									theme="basic"
-									hideOptionalText
 								/>
 								<div class="flex min-w-0 flex-wrap gap-2">
 									<For each={guidanceOptions()}>
@@ -821,7 +815,6 @@ const CustomFieldGenerationModal: Component = () => {
 									id="ai-custom-field-generation-locales"
 									label={T()("ai.custom.field.generate.locales.label")}
 									theme="basic"
-									hideOptionalText
 									rightSlot={
 										<span class="text-xs text-unfocused">
 											{T()("ai.custom.field.generate.locales.selected", {

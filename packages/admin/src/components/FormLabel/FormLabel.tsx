@@ -1,7 +1,6 @@
 import classnames from "classnames";
-import { FaSolidDatabase, FaSolidGlobe } from "solid-icons/fa";
 import { type Component, type JSXElement, Show } from "solid-js";
-import T from "@/translations";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 
 interface LabelProps {
 	id: string;
@@ -9,12 +8,13 @@ interface LabelProps {
 	focused?: boolean;
 	required?: boolean;
 	theme: "full" | "basic";
-	hideOptionalText?: boolean;
 	class?: string;
 
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
+	/** Before the label text, after any field markers. */
+	startSlot?: JSXElement;
 	rightSlot?: JSXElement;
 }
 
@@ -22,6 +22,7 @@ export const FormLabel: Component<LabelProps> = (props) => {
 	return (
 		<Show when={props?.label !== undefined || props.rightSlot !== undefined}>
 			<div
+				data-field-label
 				class={classnames(
 					"mb-1.5 flex min-w-0 items-center justify-between gap-3 text-sm text-body",
 					props.class,
@@ -40,28 +41,12 @@ export const FormLabel: Component<LabelProps> = (props) => {
 							},
 						)}
 					>
-						<Show when={props.fieldColumnIsMissing}>
-							<span
-								class="text-error-base inline"
-								title={T()("fields.database.missing")}
-							>
-								<FaSolidDatabase size={12} />
-							</span>
-						</Show>
-						<Show when={props.localised}>
-							<span
-								class={classnames("inline", {
-									"text-error-base": props.altLocaleError,
-								})}
-								title={
-									props.altLocaleError
-										? T()("fields.validation.other.locales.errors")
-										: T()("fields.localized.supported")
-								}
-							>
-								<FaSolidGlobe size={12} />
-							</span>
-						</Show>
+						<FieldLabelMarkers
+							localised={props.localised}
+							altLocaleError={props.altLocaleError}
+							fieldColumnIsMissing={props.fieldColumnIsMissing}
+						/>
+						{props.startSlot}
 						{props?.label}
 						<Show when={props.required}>
 							<span class="text-error-base inline text-xs">*</span>
@@ -74,9 +59,6 @@ export const FormLabel: Component<LabelProps> = (props) => {
 
 				<div class="flex shrink-0 items-center gap-2">
 					<Show when={props.rightSlot}>{props.rightSlot}</Show>
-					<Show when={!props.required && !props.hideOptionalText}>
-						<span class="text-unfocused text-xs">{T()("common.optional")}</span>
-					</Show>
 				</div>
 			</div>
 		</Show>

@@ -90,7 +90,7 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 			</Show>
 			<div
 				class={classNames(
-					"w-full bg-card-base p-3 md:p-4 @container/fields grid grid-cols-12 gap-4",
+					"w-full bg-card-base p-3 md:p-4 @container/fields grid grid-cols-12 gap-3",
 					{
 						"border-t border-border": hasHeader(),
 					},

@@ -108,7 +108,7 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 						{T()("account.details.edit.description")}
 					</Modal.Description>
 				</Modal.Header>
-				<Modal.Body>
+				<Modal.Body class="flex flex-col gap-3">
 					{/* Fields */}
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<Input
@@ -117,11 +117,8 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 							type="text"
 							value={firstName() ?? ""}
 							onChange={setFirstName}
-							copy={{
-								label: T()("common.first.name"),
-							}}
+							label={T()("common.first.name")}
 							errors={getBodyError("firstName", updateMe.errors)}
-							noMargin={true}
 						/>
 						<Input
 							id="account-last-name"
@@ -129,41 +126,32 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 							type="text"
 							value={lastName() ?? ""}
 							onChange={setLastName}
-							copy={{
-								label: T()("common.last.name"),
-							}}
+							label={T()("common.last.name")}
 							errors={getBodyError("lastName", updateMe.errors)}
-							noMargin={true}
 						/>
 					</div>
-					<div class="mt-4">
+					<div>
 						<Input
 							id="account-username"
 							name="username"
 							type="text"
 							value={username()}
 							onChange={setUsername}
-							copy={{
-								label: T()("common.username"),
-							}}
+							label={T()("common.username")}
 							required={true}
 							errors={getBodyError("username", updateMe.errors)}
-							noMargin={true}
 						/>
 					</div>
-					<div class="mt-4">
+					<div>
 						<Input
 							id="account-email"
 							name="email"
 							type="email"
 							value={email()}
 							onChange={setEmail}
-							copy={{
-								label: T()("common.email"),
-							}}
+							label={T()("common.email")}
 							required={true}
 							errors={getBodyError("email", updateMe.errors)}
-							noMargin={true}
 						/>
 						<p class="mt-2 text-xs text-body">
 							{T()("account.email.change.edit.description")}
@@ -173,7 +161,7 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 					{/* Pending email change */}
 					<Show when={props.data.pendingEmailChange}>
 						{(pendingEmailChange) => (
-							<div class="mt-4">
+							<div>
 								<PendingEmailChangeNotice
 									email={pendingEmailChange().email}
 									isLoading={props.emailChange.isLoading}
@@ -184,11 +172,7 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 					</Show>
 
 					{/* Error */}
-					<ErrorMessage
-						theme="basic"
-						message={updateMe.errors()?.message}
-						classes="mt-4"
-					/>
+					<ErrorMessage theme="basic" message={updateMe.errors()?.message} />
 				</Modal.Body>
 
 				<Modal.Footer>

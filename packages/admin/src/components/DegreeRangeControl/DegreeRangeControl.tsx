@@ -29,12 +29,7 @@ export const DegreeRangeControl: Component<DegreeRangeControlProps> = (
 	// Render
 	return (
 		<div>
-			<FormLabel
-				id={props.id}
-				label={props.label}
-				theme="basic"
-				hideOptionalText={true}
-			/>
+			<FormLabel id={props.id} label={props.label} theme="basic" />
 			<div class="flex items-center gap-3">
 				<input
 					id={props.id}

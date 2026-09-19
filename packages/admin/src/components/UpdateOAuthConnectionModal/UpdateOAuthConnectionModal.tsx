@@ -100,11 +100,10 @@ const UpdateOAuthConnectionModal: Component<{
 						type="text"
 						value={name()}
 						onChange={setName}
-						copy={{ label: T()("common.name") }}
+						label={T()("common.name")}
 						required={true}
 						maxLength={120}
-						noMargin={true}
-						autoFoucs={true}
+						autofocus={true}
 						errors={getBodyError("name", updateConnection.errors)}
 					/>
 				</Modal.Body>

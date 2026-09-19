@@ -21,7 +21,7 @@ export interface ModalBodyProps {
  *
  * return (
  * 	<Modal.Body>
- * 		<Input id="title" name="title" type="text" value={title()} onChange={setTitle} />
+ * 		<Input id="title" name="title" type="text" label="Title" value={title()} onChange={setTitle} />
  * 	</Modal.Body>
  * );
  * ```

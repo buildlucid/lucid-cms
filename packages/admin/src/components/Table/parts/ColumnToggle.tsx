@@ -44,7 +44,6 @@ export const ColumnToggle: Component<ColumnToggleProps> = (props) => {
 								copy={{
 									label: column.label,
 								}}
-								noMargin={true}
 							/>
 						</li>
 					)}

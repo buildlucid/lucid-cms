@@ -32,7 +32,6 @@ interface RangeProps {
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 }
 
 const clamp = (value: number, min: number, max: number) =>
@@ -115,7 +114,7 @@ export const RangeInput: Component<RangeProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="mb-3 last:mb-0 w-full">
+		<div class="w-full">
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
@@ -125,7 +124,6 @@ export const RangeInput: Component<RangeProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				hideOptionalText={props.hideOptionalText}
 			/>
 			<div class="flex w-full items-center gap-1.5 sm:gap-2">
 				{renderNumericInput(0)}

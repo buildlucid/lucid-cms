@@ -1,5 +1,6 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import { Input } from "@/components/Input/Input";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
@@ -145,27 +146,28 @@ export const InputField: Component<InputFieldProps> = (props) => {
 			}}
 			name={props.state.fieldConfig.key}
 			type={props.type}
-			copy={{
-				label: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.label,
-				}),
-				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.description,
-				}),
-				placeholder: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.placeholder,
-				}),
-			}}
+			label={helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.label,
+			})}
+			description={helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.description,
+			})}
+			placeholder={helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.placeholder,
+			})}
 			errors={props.state.fieldError}
-			altLocaleError={props.state.altLocaleError}
-			localised={props.state.localised}
 			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
-			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-			labelRightSlot={
+			labelEnd={
 				fieldAiConfig()?.enabled === true ? <AiGenerationButton /> : undefined
 			}
-			hideOptionalText
+			labelStart={
+				<FieldLabelMarkers
+					altLocaleError={props.state.altLocaleError}
+					localised={props.state.localised}
+					fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+				/>
+			}
 		/>
 	);
 };

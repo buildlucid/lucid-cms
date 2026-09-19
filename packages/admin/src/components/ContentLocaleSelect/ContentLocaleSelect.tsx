@@ -88,7 +88,6 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					}}
 					name={"content-locale"}
 					options={options()}
-					noMargin={true}
 					noClear={true}
 					hasError={props.hasError}
 					small={true}
@@ -106,7 +105,6 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					}}
 					name={"content-locale"}
 					options={options()}
-					noMargin={true}
 					noClear={true}
 					hasError={props.hasError}
 					small={true}

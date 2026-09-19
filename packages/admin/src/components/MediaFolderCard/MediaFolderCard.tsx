@@ -146,7 +146,6 @@ export const MediaFolderCard: Component<{
 						}
 					}}
 					copy={{}}
-					noMargin={true}
 					fullWidth={false}
 				/>
 			</Show>

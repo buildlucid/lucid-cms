@@ -77,7 +77,7 @@ const UpdateSystemAlertsModal: Component<UpdateSystemAlertsProps> = (props) => {
 						{T()("system.alerts.edit.description")}
 					</Modal.Description>
 				</Modal.Header>
-				<Modal.Body>
+				<Modal.Body class="flex flex-col gap-3">
 					{/* Field */}
 					<Input
 						id="system-alert-email"
@@ -85,20 +85,15 @@ const UpdateSystemAlertsModal: Component<UpdateSystemAlertsProps> = (props) => {
 						type="email"
 						value={alertEmail()}
 						onChange={setAlertEmail}
-						copy={{
-							label: T()("common.alert.email"),
-							placeholder: "alerts@example.com",
-						}}
+						label={T()("common.alert.email")}
+						placeholder={"alerts@example.com"}
 						errors={getBodyError("alertEmail", updateSystemAlerts.errors)}
-						hideOptionalText={true}
-						noMargin={true}
 					/>
 
 					{/* Error */}
 					<ErrorMessage
 						theme="basic"
 						message={updateSystemAlerts.errors()?.message}
-						classes="mt-4"
 					/>
 				</Modal.Body>
 

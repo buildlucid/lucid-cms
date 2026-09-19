@@ -149,7 +149,6 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 							value={props.selected === true}
 							onChange={() => props.onSelect?.()}
 							copy={{}}
-							noMargin={true}
 							fullWidth={false}
 						/>
 					</Show>

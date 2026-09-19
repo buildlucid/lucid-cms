@@ -5,146 +5,162 @@ import {
 	type Component,
 	createMemo,
 	createSignal,
+	type JSX,
 	type JSXElement,
 	Show,
+	splitProps,
 } from "solid-js";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
-export const Input: Component<{
+/** The text-like input types this component styles. */
+export type InputType =
+	| "text"
+	| "color"
+	| "email"
+	| "password"
+	| "number"
+	| "url"
+	| "tel"
+	| "search"
+	| "date"
+	| "datetime-local"
+	| "time";
+
+export interface InputProps
+	extends Omit<
+		JSX.InputHTMLAttributes<HTMLInputElement>,
+		"id" | "name" | "type" | "value" | "onChange" | "onInput" | "class"
+	> {
 	id: string;
+	name: string;
+	type: InputType;
 	value: string;
 	onChange: (_value: string) => void;
-	type: string;
-	name: string;
-	copy?: {
-		label?: string;
-		placeholder?: string;
-		describedBy?: string;
-		tooltip?: string;
-	};
-	onBlur?: () => void;
-	onFocus?: () => void;
-	autoFoucs?: boolean;
-	onKeyUp?: (_e: KeyboardEvent) => void;
-	autoComplete?: string;
-	required?: boolean;
-	minLength?: number;
-	maxLength?: number;
-	min?: number;
-	max?: number;
-	step?: number;
-	disabled?: boolean;
+	label?: string;
+	/** Sits under the control, and is read out alongside it. */
+	description?: string;
+	/** Adds a hover card next to the control. */
+	tooltip?: string;
 	errors?: ErrorResult | FieldError;
-	localised?: boolean;
-	altLocaleError?: boolean;
-	noMargin?: boolean;
-	hideOptionalText?: boolean;
-	fieldColumnIsMissing?: boolean;
-	labelRightSlot?: JSXElement;
-	rightAction?: JSXElement;
+	/** Before the label text, for an icon or badge. */
+	labelStart?: JSXElement;
+	/** After the label, against the right edge. */
+	labelEnd?: JSXElement;
+	/** Applied to the field. Target [data-input-control] for the input itself. */
 	class?: string;
-}> = (props) => {
-	const [inputFocus, setInputFocus] = createSignal(false);
+}
+
+/**
+ * A labelled text input, with its description and any validation errors.
+ * Password inputs get a reveal toggle. Every other input attribute, such as
+ * placeholder, required, min or autocomplete, passes through to the element.
+ *
+ * @example
+ * ```tsx
+ * import { Input } from "@lucidcms/admin/components";
+ *
+ * return (
+ * 	<Input
+ * 		id="email"
+ * 		name="email"
+ * 		type="email"
+ * 		label="Email"
+ * 		value={email()}
+ * 		onChange={setEmail}
+ * 		required
+ * 		errors={getBodyError("email", update.errors)}
+ * 	/>
+ * );
+ * ```
+ */
+export const Input: Component<InputProps> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const [local, rest] = splitProps(props, [
+		"id",
+		"name",
+		"type",
+		"value",
+		"onChange",
+		"label",
+		"description",
+		"tooltip",
+		"errors",
+		"labelStart",
+		"labelEnd",
+		"class",
+	]);
+	const [focused, setFocused] = createSignal(false);
 	const [passwordVisible, setPasswordVisible] = createSignal(false);
 
 	// ----------------------------------------
 	// Memos
 	const inputType = createMemo(() => {
-		if (props.type === "password" && passwordVisible()) return "text";
-		return props.type;
+		if (local.type === "password" && passwordVisible()) return "text";
+		return local.type;
 	});
 
 	// ----------------------------------------
 	// Render
 	return (
 		<div
-			class={classnames(
-				"group w-full relative",
-				{
-					"mb-3 last:mb-0": props.noMargin !== true,
-				},
-				props.class,
-			)}
+			data-input
+			class={classnames("group w-full relative", local.class)}
+			onFocusIn={() => setFocused(true)}
+			onFocusOut={() => setFocused(false)}
 		>
 			<FormLabel
-				id={props.id}
-				label={props.copy?.label}
-				focused={inputFocus()}
-				required={props.required}
-				theme={"basic"}
-				altLocaleError={props.altLocaleError}
-				localised={props.localised}
-				hideOptionalText={props.hideOptionalText}
-				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				rightSlot={props.labelRightSlot}
+				id={local.id}
+				label={local.label}
+				focused={focused()}
+				required={rest.required}
+				theme="basic"
+				startSlot={local.labelStart}
+				rightSlot={local.labelEnd}
 			/>
 			<div class="relative">
 				<input
+					{...rest}
+					data-input-control
+					id={local.id}
+					name={local.name}
+					type={inputType()}
+					value={local.value}
 					class={classnames(
 						"w-full focus:outline-hidden px-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
 						{
-							"pr-8": props.type === "password" || props.rightAction,
+							"pr-8": local.type === "password",
 						},
 					)}
-					onKeyDown={(e) => {
-						e.stopPropagation();
-					}}
-					id={props.id}
-					name={props.name}
-					type={inputType()}
-					value={props.value}
-					onInput={(e) => props.onChange(e.currentTarget.value)}
-					placeholder={props.copy?.placeholder}
 					aria-describedby={
-						props.copy?.describedBy ? `${props.id}-description` : undefined
+						local.description ? `${local.id}-description` : undefined
 					}
-					autocomplete={props.autoComplete}
-					autofocus={props.autoFoucs}
-					required={props.required}
-					minlength={props.minLength}
-					maxlength={props.maxLength}
-					min={props.min}
-					max={props.max}
-					step={props.step}
-					disabled={props.disabled}
-					onFocus={() => {
-						setInputFocus(true);
-						props.onFocus?.();
-					}}
-					onKeyUp={(e) => props.onKeyUp?.(e)}
-					onBlur={() => {
-						setInputFocus(false);
-						props.onBlur?.();
-					}}
+					onInput={(event) => local.onChange(event.currentTarget.value)}
+					onKeyDown={(event) => event.stopPropagation()}
 				/>
-				<Show when={props.rightAction}>{props.rightAction}</Show>
-				<Show when={props.type === "password"}>
+				<Show when={local.type === "password"}>
 					<button
 						type="button"
-						class={
-							"absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors"
-						}
-						onClick={() => {
-							setPasswordVisible(!passwordVisible());
-						}}
+						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors"
+						onClick={() => setPasswordVisible(!passwordVisible())}
 						tabIndex={-1}
 					>
-						<Show when={passwordVisible()}>
+						<Show
+							when={passwordVisible()}
+							fallback={<FaSolidEye size={18} class="text-unfocused" />}
+						>
 							<FaSolidEyeSlash size={18} class="text-unfocused" />
-						</Show>
-						<Show when={!passwordVisible()}>
-							<FaSolidEye size={18} class="text-unfocused" />
 						</Show>
 					</button>
 				</Show>
 			</div>
-			<FormTooltip copy={props.copy?.tooltip} theme={"basic"} />
+			<FormTooltip copy={local.tooltip} theme="basic" />
 			<FieldFeedback
-				id={props.id}
-				describedBy={props.copy?.describedBy}
-				errors={props.errors}
+				id={local.id}
+				describedBy={local.description}
+				errors={local.errors}
 			/>
 		</div>
 	);

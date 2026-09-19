@@ -47,13 +47,11 @@ interface MediaSelectProps {
 		describedBy?: string;
 	};
 	disabled?: boolean;
-	noMargin?: boolean;
 	required?: boolean;
 	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 }
 
 const MEDIA_SELECT_DRAG_DROP_KEY = "media-select-zone";
@@ -221,11 +219,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full"}>
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
@@ -234,7 +228,6 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				hideOptionalText={props.hideOptionalText}
 			/>
 			<div class="w-full">
 				<Switch>

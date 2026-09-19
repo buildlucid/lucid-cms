@@ -87,7 +87,6 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					options={props.fieldOptions}
 					ariaLabel={T()("filter.section.where")}
 					noClear={true}
-					noMargin={true}
 					hidePlaceholder={props.field !== undefined}
 					renderValue={({ option }) => (
 						<span class="truncate" title={option.label}>
@@ -114,7 +113,6 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					ariaLabel={T()("filter.section.operator")}
 					disabled={props.field === undefined}
 					noClear={true}
-					noMargin={true}
 				/>
 			</div>
 			<div class="w-[calc(50%-55px)] md:flex-1 min-w-0">
@@ -143,7 +141,6 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 							}}
 							options={booleanOptions()}
 							ariaLabel={T()("filter.section.value")}
-							noMargin={true}
 						/>
 					</Match>
 					<Match when={props.field?.type === "select"}>
@@ -156,7 +153,6 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 							}}
 							options={props.field?.options ?? []}
 							ariaLabel={T()("filter.section.value")}
-							noMargin={true}
 						/>
 					</Match>
 					<Match when={entityPickerField()}>

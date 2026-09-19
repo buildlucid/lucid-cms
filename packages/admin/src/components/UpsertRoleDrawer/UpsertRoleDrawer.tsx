@@ -187,7 +187,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 							}
 				}
 			>
-				<Drawer.Body>
+				<Drawer.Body class="flex flex-col gap-3">
 					<InputGrid columns={2}>
 						<Input
 							id="name"
@@ -196,12 +196,9 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 							value={name()}
 							onChange={setName}
 							disabled={isReadOnly()}
-							copy={{
-								label: T()("common.name"),
-							}}
+							label={T()("common.name")}
 							required={true}
 							errors={getBodyError("name", errors)}
-							noMargin={true}
 						/>
 					</InputGrid>
 					<Textarea
@@ -216,7 +213,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 						errors={getBodyError("description", errors)}
 						rows={4}
 					/>
-					<div class="w-full mb-5 last:mb-0">
+					<div class="w-full">
 						<div class="mb-1.5">
 							<h3 class="text-sm text-body">{T()("common.permissions")}</h3>
 						</div>

@@ -70,10 +70,7 @@ export const CommitInput: Component<{
 						if (e.key === "Enter") flushCommit();
 					}}
 					disabled={props.disabled}
-					copy={{
-						placeholder: props.placeholder,
-					}}
-					noMargin={true}
+					placeholder={props.placeholder}
 				/>
 			}
 		>

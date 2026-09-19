@@ -94,7 +94,7 @@ const CreateMediaFolderModal: Component<{
 				<Modal.Header>
 					<Modal.Title>{T()("panels.media.folders.create.title")}</Modal.Title>
 				</Modal.Header>
-				<Modal.Body>
+				<Modal.Body class="flex flex-col gap-3">
 					<Input
 						id="title"
 						value={getTitle()}
@@ -102,9 +102,7 @@ const CreateMediaFolderModal: Component<{
 						name={"title"}
 						type="text"
 						required={true}
-						copy={{
-							label: T()("common.title"),
-						}}
+						label={T()("common.title")}
 						errors={getBodyError("title", createFolder.errors)}
 					/>
 					<Select

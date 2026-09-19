@@ -431,7 +431,6 @@ const useSingleFileUpload = (data: UseSingleFileUploadProps) => {
 					errors={
 						data.errors ? getBodyError(data.name, data.errors) : undefined
 					}
-					noMargin={data.noMargin}
 					imageGeneration={imageGeneration()}
 					imageCrop={imageCrop()}
 					pendingChange={pendingChange()}

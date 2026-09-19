@@ -1136,8 +1136,6 @@ const MediaImageGenerationModal: Component = () => {
 									label: T()("ai.media.image.generate.resolution.label"),
 								}}
 								noClear
-								noMargin
-								hideOptionalText
 								errors={generationFieldError("size")}
 							/>
 							<Input
@@ -1150,11 +1148,7 @@ const MediaImageGenerationModal: Component = () => {
 								max={3840}
 								step={16}
 								disabled={!isCustomResolution()}
-								copy={{
-									label: T()("ai.media.image.generate.resolution.width"),
-								}}
-								noMargin
-								hideOptionalText
+								label={T()("ai.media.image.generate.resolution.width")}
 							/>
 							<Input
 								id="ai-media-image-generation-height"
@@ -1166,11 +1160,7 @@ const MediaImageGenerationModal: Component = () => {
 								max={3840}
 								step={16}
 								disabled={!isCustomResolution()}
-								copy={{
-									label: T()("ai.media.image.generate.resolution.height"),
-								}}
-								noMargin
-								hideOptionalText
+								label={T()("ai.media.image.generate.resolution.height")}
 							/>
 						</div>
 						<div class="grid min-w-0 gap-3 sm:grid-cols-2">
@@ -1201,8 +1191,6 @@ const MediaImageGenerationModal: Component = () => {
 								name="ai-media-image-generation-quality"
 								copy={{ label: T()("ai.media.image.generate.quality.label") }}
 								noClear
-								noMargin
-								hideOptionalText
 								errors={generationFieldError("quality")}
 							/>
 							<Select
@@ -1230,8 +1218,6 @@ const MediaImageGenerationModal: Component = () => {
 								name="ai-media-image-generation-format"
 								copy={{ label: T()("ai.media.image.generate.format.label") }}
 								noClear
-								noMargin
-								hideOptionalText
 								errors={generationFieldError("outputFormat")}
 							/>
 						</div>
@@ -1240,7 +1226,6 @@ const MediaImageGenerationModal: Component = () => {
 								id="ai-media-image-generation-guidance"
 								label={T()("ai.generation.guidance.label")}
 								theme="basic"
-								hideOptionalText
 							/>
 							<div class="flex min-w-0 flex-wrap gap-2">
 								<For each={imageGuidanceOptions}>
@@ -1284,7 +1269,7 @@ const MediaImageGenerationModal: Component = () => {
 								</For>
 							</div>
 						</div>
-						<form class="min-w-0" onSubmit={submitGenerate}>
+						<form class="flex min-w-0 flex-col gap-3" onSubmit={submitGenerate}>
 							<Textarea
 								id="ai-media-image-generation-instruction"
 								name="ai-media-image-generation-instruction"
@@ -1305,8 +1290,6 @@ const MediaImageGenerationModal: Component = () => {
 									),
 								}}
 								rows={8}
-								noMargin
-								hideOptionalText
 								errors={instructionError()}
 							/>
 							<Show when={responseError()}>
@@ -1316,7 +1299,7 @@ const MediaImageGenerationModal: Component = () => {
 									</div>
 								)}
 							</Show>
-							<div class="mt-4">
+							<div>
 								<Button
 									type="submit"
 									variant="secondary"

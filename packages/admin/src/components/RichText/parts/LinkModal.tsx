@@ -196,7 +196,7 @@ const LinkModal: Component<{
 			zIndex={modalLayer()}
 		>
 			<Modal.Body>
-				<div class="flex flex-col gap-0">
+				<div class="flex flex-col gap-3">
 					<Show when={externalEnabled() && internalEnabled()}>
 						<AnimatedTabs
 							items={linkKindTabs()}
@@ -217,9 +217,8 @@ const LinkModal: Component<{
 						onChange={setLabel}
 						name="label"
 						type="text"
-						copy={{ label: T()("common.label") }}
+						label={T()("common.label")}
 						required={false}
-						hideOptionalText
 					/>
 
 					<Show when={kind() === "external"}>
@@ -229,9 +228,8 @@ const LinkModal: Component<{
 							onChange={setUrl}
 							name="url"
 							type="text"
-							copy={{ label: T()("common.url") }}
+							label={T()("common.url")}
 							required={false}
-							hideOptionalText
 						/>
 					</Show>
 
@@ -241,7 +239,6 @@ const LinkModal: Component<{
 							label={T()("common.document")}
 							required={false}
 							theme="basic"
-							hideOptionalText
 						/>
 						<div class="mb-3 flex items-center justify-between gap-3 rounded-md border border-border bg-card-base p-3">
 							<div class="min-w-0">
@@ -306,7 +303,6 @@ const LinkModal: Component<{
 							false: T()("common.no"),
 						}}
 						required={false}
-						hideOptionalText
 						labelLeft
 					/>
 				</div>

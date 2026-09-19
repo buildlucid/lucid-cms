@@ -18,7 +18,6 @@ export interface UseSingleFileUploadProps {
 	disabled?: SingleFileUploadProps["disabled"];
 	progress?: Accessor<SingleFileUploadProps["progress"]>;
 	errors?: Accessor<ErrorResponse | undefined>;
-	noMargin?: SingleFileUploadProps["noMargin"];
 	imageGeneration?: {
 		enabled?: Accessor<boolean>;
 		disabled?: Accessor<boolean>;

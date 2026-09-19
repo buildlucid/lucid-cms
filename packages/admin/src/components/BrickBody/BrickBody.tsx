@@ -211,12 +211,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 							collectionKey={props.collectionKey}
 							contentLocale={contentLocale()}
 						>
-							<div
-								classList={{
-									"@container/fields grid grid-cols-12 gap-4":
-										allTabs().length === 0,
-								}}
-							>
+							<div class="@container/fields grid grid-cols-12 gap-3">
 								{/* Tabs */}
 								<Show when={allTabs().length > 0}>
 									<TabField
@@ -224,7 +219,7 @@ export const BrickBody: Component<BrickProps> = (props) => {
 										setActiveTab={setActiveTab}
 										getActiveTab={getActiveTab}
 										fieldErrors={props.fieldErrors}
-										class={classNames("mb-5 shadow-inner", {
+										class={classNames("col-span-12 shadow-inner", {
 											"-mt-4": props.options.bleedTop,
 										})}
 									/>

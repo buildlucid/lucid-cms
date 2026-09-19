@@ -18,7 +18,6 @@ interface CheckboxInputProps {
 	};
 	required?: boolean;
 	errors?: ErrorResult | FieldError;
-	noMargin?: boolean;
 	class?: string;
 	fullWidth?: boolean;
 }
@@ -31,7 +30,6 @@ export const Checkbox: Component<CheckboxInputProps> = (props) => {
 	return (
 		<div
 			class={classnames("relative", props.class, {
-				"mb-3 last:mb-0 mt-4": props.noMargin !== true,
 				"w-full": props.fullWidth !== false,
 			})}
 		>

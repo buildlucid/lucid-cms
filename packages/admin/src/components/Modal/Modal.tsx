@@ -39,7 +39,7 @@ export type { ModalTitleProps } from "./parts/ModalTitle";
  * 			<Modal.Title>Create folder</Modal.Title>
  * 		</Modal.Header>
  * 		<Modal.Body>
- * 			<Input id="title" name="title" type="text" value={title()} onChange={setTitle} />
+ * 			<Input id="title" name="title" type="text" label="Title" value={title()} onChange={setTitle} />
  * 		</Modal.Body>
  * 		<Modal.Footer>
  * 			<Modal.Actions>

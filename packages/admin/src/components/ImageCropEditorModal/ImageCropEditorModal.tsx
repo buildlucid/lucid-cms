@@ -575,7 +575,6 @@ const ImageCropEditorModal: Component<{
 								id="image-crop-aspect-ratio"
 								label={T()("media.crop.ratio.label")}
 								theme="basic"
-								hideOptionalText={true}
 							/>
 							<div class="grid grid-cols-2 gap-2">
 								<For each={RATIO_PRESETS}>

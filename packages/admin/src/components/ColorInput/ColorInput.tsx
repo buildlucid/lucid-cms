@@ -20,7 +20,6 @@ export const ColorInput: Component<{
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 }> = (props) => {
 	// ----------------------------------------
 	// State
@@ -41,7 +40,7 @@ export const ColorInput: Component<{
 	return (
 		<div
 			class={classnames(
-				"mb-3 last:mb-0 flex flex-col transition-colors duration-200 ease-in-out relative w-full",
+				"flex flex-col transition-colors duration-200 ease-in-out relative w-full",
 			)}
 		>
 			<div class="flex-1 min-w-0">
@@ -54,7 +53,6 @@ export const ColorInput: Component<{
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
 					fieldColumnIsMissing={props.fieldColumnIsMissing}
-					hideOptionalText={props.hideOptionalText}
 				/>
 				<div class="relative">
 					{/** biome-ignore lint/a11y/useSemanticElements: explanation */}

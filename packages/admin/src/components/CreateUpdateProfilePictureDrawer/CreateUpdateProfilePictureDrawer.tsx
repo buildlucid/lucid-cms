@@ -63,7 +63,6 @@ const CreateUpdateProfilePictureDrawer: Component<
 			active: uploadLoading(),
 			value: uploadProgress(),
 		}),
-		noMargin: false,
 		imageGeneration: {
 			enabled: () => true,
 			disabled: () => coreMutateIsLoading(),
@@ -423,9 +422,9 @@ const CreateUpdateProfilePictureDrawer: Component<
 						<Drawer.LocaleSelect hasError={hasTranslationErrors()} />
 					</Drawer.Header>
 					<Drawer.Form onSubmit={onSubmit}>
-						<Drawer.Body>
+						<Drawer.Body class="flex flex-col gap-3">
 							<MediaFile.Render />
-							<div class="mt-6 border-b border-border mb-4">
+							<div class="border-b border-border">
 								<div class="flex flex-row flex-wrap items-center gap-4">
 									<button
 										type="button"
@@ -454,12 +453,9 @@ const CreateUpdateProfilePictureDrawer: Component<
 											}}
 											name={`name-${locale.code}`}
 											type="text"
-											copy={{
-												label: T()("common.name"),
-											}}
+											label={T()("common.name")}
 											errors={getErrorObject(inputError(index())?.name)}
-											autoComplete="off"
-											hideOptionalText={true}
+											autocomplete="off"
 										/>
 										<Show when={showAltInput()}>
 											<Textarea
@@ -482,7 +478,6 @@ const CreateUpdateProfilePictureDrawer: Component<
 												}}
 												errors={getErrorObject(inputError(index())?.alt)}
 												rows={3}
-												hideOptionalText={true}
 												labelRightSlot={<ProfileAltGenerationButton />}
 											/>
 										</Show>

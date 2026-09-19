@@ -60,16 +60,14 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 	return (
 		<Modal.Root open={props.state.open} onOpenChange={closeModal}>
 			<Modal.Body>
-				<div class="flex flex-col gap-0">
+				<div class="flex flex-col gap-3">
 					<Input
 						id="label"
 						value={getLabel()}
 						onChange={(value) => setLabel(value)}
 						name={"label"}
 						type="text"
-						copy={{
-							label: T()("common.label"),
-						}}
+						label={T()("common.label")}
 						required={false}
 					/>
 					<Input
@@ -78,9 +76,7 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 						onChange={(value) => setUrl(value)}
 						name={"url"}
 						type="text"
-						copy={{
-							label: T()("common.url"),
-						}}
+						label={T()("common.url")}
 						required={false}
 					/>
 					<Switch
@@ -94,7 +90,6 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 							false: T()("common.no"),
 						}}
 						required={false}
-						hideOptionalText
 						labelLeft
 					/>
 				</div>

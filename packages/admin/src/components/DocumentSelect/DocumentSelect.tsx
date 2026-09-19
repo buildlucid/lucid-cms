@@ -55,13 +55,11 @@ interface DocumentSelectProps {
 		describedBy?: string;
 	};
 	disabled?: boolean;
-	noMargin?: boolean;
 	required?: boolean;
 	errors?: ErrorResult | FieldError | FieldError[];
 	localised?: boolean;
 	altLocaleError?: boolean;
 	fieldColumnIsMissing?: boolean;
-	hideOptionalText?: boolean;
 }
 
 const DOCUMENT_SELECT_DRAG_DROP_KEY = "document-select-zone";
@@ -269,11 +267,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classNames("w-full", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={classNames("w-full", {})}>
 			<FormLabel
 				id={props.id}
 				label={props.copy?.label}
@@ -282,7 +276,6 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 				altLocaleError={props.altLocaleError}
 				localised={props.localised}
 				fieldColumnIsMissing={props.fieldColumnIsMissing}
-				hideOptionalText={props.hideOptionalText}
 			/>
 			<div class="w-full">
 				<Switch>

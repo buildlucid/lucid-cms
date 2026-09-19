@@ -159,7 +159,6 @@ const PublishOperationReviewersModal: Component<{
 						label={props.option.label}
 					/>
 				)}
-				noMargin={true}
 			/>
 		</Modal.Confirm>
 	);

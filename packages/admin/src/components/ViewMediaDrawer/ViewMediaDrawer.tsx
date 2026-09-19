@@ -8,12 +8,12 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import { Drawer } from "@/components/Drawer/Drawer";
 import { Input } from "@/components/Input/Input";
 import ReadonlyMediaPreview from "@/components/ReadonlyMediaPreview/ReadonlyMediaPreview";
 import { Select } from "@/components/Select/Select";
+import { Switch } from "@/components/Switch/Switch";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
@@ -141,7 +141,7 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 						<Drawer.Title>{panelContent().title}</Drawer.Title>
 						<Drawer.LocaleSelect hasError={hasTranslationErrors()} />
 					</Drawer.Header>
-					<Drawer.Body>
+					<Drawer.Body class="flex flex-col gap-3">
 						{/* Preview */}
 						<Show when={media.data?.data} keyed>
 							{(item) => (
@@ -187,11 +187,9 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 											onChange={() => {}}
 											name={`name-${locale.code}`}
 											type="text"
-											copy={{
-												label: T()("common.name"),
-											}}
+											label={T()("common.name")}
 											errors={undefined}
-											autoComplete="off"
+											autocomplete="off"
 											disabled={true}
 										/>
 										<Show when={showAltInput()}>
@@ -208,9 +206,7 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 												onChange={() => {}}
 												name={`alt-${locale.code}`}
 												type="text"
-												copy={{
-													label: T()("common.alt"),
-												}}
+												label={T()("common.alt")}
 												errors={undefined}
 												disabled={true}
 											/>
@@ -227,18 +223,21 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 								copy={{ label: T()("common.folder") }}
 								required={false}
 								errors={undefined}
-								noMargin={false}
 								noClear={true}
 								disabled={true}
 							/>
-							<Checkbox
+							<Switch
 								id="public"
 								value={media.data?.data.public ?? true}
 								onChange={() => {}}
 								name="public"
+								theme="relaxed"
+								disabled={true}
 								copy={{
 									label: T()("common.publicly.available"),
 									tooltip: T()("media.visibility.public.description"),
+									true: T()("common.public"),
+									false: T()("common.private"),
 								}}
 							/>
 						</Show>

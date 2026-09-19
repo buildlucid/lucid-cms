@@ -18,7 +18,7 @@ export interface DrawerBodyProps {
  *
  * return (
  * 	<Drawer.Body>
- * 		<Input id="name" name="name" type="text" value={name()} onChange={setName} />
+ * 		<Input id="name" name="name" type="text" label="Name" value={name()} onChange={setName} />
  * 	</Drawer.Body>
  * );
  * ```

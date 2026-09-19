@@ -225,7 +225,7 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 				<Drawer.Title>{panelTitle()}</Drawer.Title>
 			</Drawer.Header>
 			<Drawer.Form onSubmit={submit}>
-				<Drawer.Body>
+				<Drawer.Body class="flex flex-col gap-3">
 					<InputGrid columns={2}>
 						<Input
 							id="name"
@@ -233,12 +233,9 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 							type="text"
 							value={getName()}
 							onChange={setName}
-							copy={{
-								label: T()("common.name"),
-							}}
+							label={T()("common.name")}
 							required={true}
 							errors={getBodyError("name", errors)}
-							noMargin={true}
 						/>
 						<Select
 							id="expiry"
@@ -271,7 +268,6 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 							required={mode() === "create"}
 							noClear={mode() === "create"}
 							errors={getBodyError("expiry", errors)}
-							noMargin={true}
 						/>
 					</InputGrid>
 					<Textarea
@@ -294,9 +290,8 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 							label: T()("common.status.enabled"),
 						}}
 						errors={getBodyError("enabled", errors)}
-						hideOptionalText={true}
 					/>
-					<div class="w-full mb-5 last:mb-0">
+					<div class="w-full">
 						<div class="mb-1.5">
 							<h3 class="text-sm text-body">{T()("common.scopes")}</h3>
 						</div>

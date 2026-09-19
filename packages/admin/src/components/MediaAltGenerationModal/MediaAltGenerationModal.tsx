@@ -232,7 +232,6 @@ const MediaAltGenerationModalContent: Component<{
 								id="ai-media-alt-generation-locales"
 								label={T()("ai.media.alt.generate.locales.label")}
 								theme="basic"
-								hideOptionalText
 								rightSlot={
 									<span class="text-xs text-unfocused">
 										{T()("ai.media.alt.generate.locales.selected", {
@@ -404,8 +403,6 @@ const MediaAltGenerationModalContent: Component<{
 																props.callbacks.onSelect(draftId);
 															}}
 															rows={2}
-															noMargin
-															hideOptionalText
 														/>
 													</div>
 												</div>

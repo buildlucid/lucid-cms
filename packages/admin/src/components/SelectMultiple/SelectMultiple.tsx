@@ -37,8 +37,6 @@ interface SelectMultipleProps<Value extends SelectMultipleValueT> {
 	errors?: ErrorResult;
 	localised?: boolean;
 	altLocaleError?: boolean;
-	noMargin?: boolean;
-	hideOptionalText?: boolean;
 	triggerClasses?: string;
 	selectedValuesContainerClasses?: string;
 	selectedValueClasses?: string;
@@ -87,11 +85,7 @@ export function SelectMultiple<
 	// ----------------------------------------
 	// Render
 	return (
-		<div
-			class={classnames("w-full relative", {
-				"mb-3 last:mb-0": props.noMargin !== true,
-			})}
-		>
+		<div class={"w-full relative"}>
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
@@ -108,7 +102,6 @@ export function SelectMultiple<
 					theme={"basic"}
 					altLocaleError={props.altLocaleError}
 					localised={props.localised}
-					hideOptionalText={props.hideOptionalText}
 				/>
 				<DropdownMenu.Trigger
 					id={props.id}

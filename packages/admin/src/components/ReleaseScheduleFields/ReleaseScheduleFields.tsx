@@ -54,10 +54,7 @@ const ReleaseScheduleFields: Component<{
 					props.onChange?.();
 				}}
 				required={true}
-				copy={{
-					label: T()("common.date"),
-				}}
-				noMargin={true}
+				label={T()("common.date")}
 			/>
 			<Input
 				id="release-schedule-time"
@@ -69,10 +66,7 @@ const ReleaseScheduleFields: Component<{
 					props.onChange?.();
 				}}
 				required={true}
-				copy={{
-					label: T()("common.time"),
-				}}
-				noMargin={true}
+				label={T()("common.time")}
 			/>
 			<Select
 				id="release-schedule-timezone"
@@ -94,7 +88,6 @@ const ReleaseScheduleFields: Component<{
 					searchPlaceholder: T()("common.search"),
 				}}
 				noClear={true}
-				noMargin={true}
 			/>
 		</div>
 	);

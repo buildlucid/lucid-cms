@@ -495,7 +495,6 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 						<AiGenerationButton />
 					) : undefined
 				}
-				hideOptionalText
 				options={richTextOptions()}
 				translations={
 					props.state.localised

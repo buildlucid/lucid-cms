@@ -116,7 +116,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 			<Drawer.Header>
 				<Drawer.Title>{T()("panels.email.preview.title")}</Drawer.Title>
 			</Drawer.Header>
-			<Drawer.Body>
+			<Drawer.Body class="flex flex-col gap-3">
 				<div
 					class={classNames(
 						"relative border border-border rounded-md overflow-hidden",

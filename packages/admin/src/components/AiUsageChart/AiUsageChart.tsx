@@ -265,9 +265,7 @@ export const AiUsageChart: Component = () => {
 					copy={{
 						label: T()("ai.usage.charts.metric"),
 					}}
-					noMargin={true}
 					noClear={true}
-					hideOptionalText={true}
 				/>
 				<Select
 					id="ai-usage-chart-feature"
@@ -284,8 +282,6 @@ export const AiUsageChart: Component = () => {
 					copy={{
 						label: T()("ai.usage.feature"),
 					}}
-					noMargin={true}
-					hideOptionalText={true}
 				/>
 				<Input
 					id="ai-usage-chart-start-date"
@@ -293,11 +289,7 @@ export const AiUsageChart: Component = () => {
 					onChange={setStartDate}
 					type="date"
 					name="ai-usage-chart-start-date"
-					copy={{
-						label: T()("common.from"),
-					}}
-					noMargin={true}
-					hideOptionalText={true}
+					label={T()("common.from")}
 				/>
 				<Input
 					id="ai-usage-chart-end-date"
@@ -305,11 +297,7 @@ export const AiUsageChart: Component = () => {
 					onChange={setEndDate}
 					type="date"
 					name="ai-usage-chart-end-date"
-					copy={{
-						label: T()("common.to"),
-					}}
-					noMargin={true}
-					hideOptionalText={true}
+					label={T()("common.to")}
 				/>
 			</div>
 			<div class="relative h-72 min-h-72">

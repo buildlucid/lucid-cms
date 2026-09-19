@@ -200,12 +200,11 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 				}
 				id={previewFieldId()}
 				class={classNames("w-full relative", widthClass(), {
-					"mb-0!": !activeTab(),
 					hidden:
-						fieldConfig().type !== "tab"
-							? // @ts-expect-error
-								fieldConfig()?.ui?.hidden === true
-							: false,
+						!activeTab() ||
+						(fieldConfig().type !== "tab" &&
+							// @ts-expect-error
+							fieldConfig()?.ui?.hidden === true),
 				})}
 			>
 				<div class="w-full h-full">
@@ -222,7 +221,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 							<div
 								inert={!activeTab()}
 								class={classNames(
-									"transition-opacity duration-200 ease-in-out @container/fields grid grid-cols-12 gap-4",
+									"transition-opacity duration-200 ease-in-out @container/fields grid grid-cols-12 gap-3",
 									{
 										"visible h-full opacity-100": activeTab(),
 										"invisible h-0 overflow-hidden opacity-0": !activeTab(),

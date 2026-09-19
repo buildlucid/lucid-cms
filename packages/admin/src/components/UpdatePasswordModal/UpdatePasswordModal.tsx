@@ -82,18 +82,15 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							: T()("auth.password.description")}
 					</Modal.Description>
 				</Modal.Header>
-				<Modal.Body>
+				<Modal.Body class="flex flex-col gap-3">
 					<Input
 						id="currentPassword"
 						name="currentPassword"
 						type="password"
 						value={currentPassword()}
 						onChange={setCurrentPassword}
-						copy={{
-							label: T()("common.current.password"),
-						}}
+						label={T()("common.current.password")}
 						errors={getBodyError("currentPassword", updateMe.errors)}
-						hideOptionalText={true}
 					/>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<Input
@@ -102,12 +99,8 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							type="password"
 							value={newPassword()}
 							onChange={setNewPassword}
-							copy={{
-								label: T()("common.new.password"),
-							}}
+							label={T()("common.new.password")}
 							errors={getBodyError("newPassword", updateMe.errors)}
-							hideOptionalText={true}
-							noMargin={true}
 						/>
 						<Input
 							id="passwordConfirmation"
@@ -115,12 +108,8 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 							type="password"
 							value={confirmPassword()}
 							onChange={setConfirmPassword}
-							copy={{
-								label: T()("common.confirm.password"),
-							}}
+							label={T()("common.confirm.password")}
 							errors={getBodyError("passwordConfirmation", updateMe.errors)}
-							hideOptionalText={true}
-							noMargin={true}
 						/>
 					</div>
 					<ErrorMessage

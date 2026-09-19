@@ -170,7 +170,7 @@ export const CodeField: Component<CodeFieldProps> = (props) => {
 	return (
 		<Suspense
 			fallback={
-				<div class="w-full mb-3 last:mb-0">
+				<div class="w-full">
 					<div class="h-36 bg-input-base border border-border rounded-md animate-pulse" />
 				</div>
 			}
@@ -228,7 +228,6 @@ export const CodeField: Component<CodeFieldProps> = (props) => {
 						<AiGenerationButton />
 					) : undefined
 				}
-				hideOptionalText
 			/>
 		</Suspense>
 	);

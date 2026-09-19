@@ -792,7 +792,6 @@ export const ReleaseRequestSidebar: Component<{
 							placeholder: T()("publish.requests.decision.comment.placeholder"),
 						}}
 						options={reviewCommentRichTextOptions}
-						noMargin={true}
 					/>
 					<Show when={decisionAction() === "approve" && schedulingSupported()}>
 						<div class="grid gap-3">
@@ -810,8 +809,6 @@ export const ReleaseRequestSidebar: Component<{
 									label: T()("documents.release.timing"),
 								}}
 								noClear={true}
-								hideOptionalText={true}
-								noMargin={true}
 							/>
 							<Show when={scheduleEnabled()}>
 								<div class="mt-1">

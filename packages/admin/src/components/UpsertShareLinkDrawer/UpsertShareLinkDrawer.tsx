@@ -199,16 +199,14 @@ const UpsertShareLinkDrawer: Component<UpsertShareLinkPanelProps> = (props) => {
 					}
 				}}
 			>
-				<Drawer.Body>
+				<Drawer.Body class="flex flex-col gap-3">
 					<Input
 						id="share-link-name"
 						value={getName() || ""}
 						onChange={setName}
 						name="name"
 						type="text"
-						copy={{
-							label: T()("common.name"),
-						}}
+						label={T()("common.name")}
 						errors={getBodyError("name", errors)}
 					/>
 					<Textarea
@@ -255,13 +253,12 @@ const UpsertShareLinkDrawer: Component<UpsertShareLinkPanelProps> = (props) => {
 							}}
 							name="password"
 							type="password"
-							copy={{
-								label: T()("common.password"),
-								describedBy:
-									mode() === "update" && shareLink.data?.data.hasPassword
-										? T()("media.share.links.password.keep.existing.help")
-										: undefined,
-							}}
+							label={T()("common.password")}
+							description={
+								mode() === "update" && shareLink.data?.data.hasPassword
+									? T()("media.share.links.password.keep.existing.help")
+									: undefined
+							}
 							errors={getBodyError("password", errors)}
 						/>
 					</Show>
@@ -271,13 +268,13 @@ const UpsertShareLinkDrawer: Component<UpsertShareLinkPanelProps> = (props) => {
 						onChange={setExpiresAt}
 						name="expiresAt"
 						type="date"
-						copy={{
-							label: T()("common.expires.at"),
-							placeholder: T()("common.optional"),
-							describedBy: shareLink.data?.data.hasExpired
+						label={T()("common.expires.at")}
+						placeholder={T()("common.optional")}
+						description={
+							shareLink.data?.data.hasExpired
 								? T()("media.share.links.expired.description")
-								: undefined,
-						}}
+								: undefined
+						}
 						errors={getBodyError("expiresAt", errors)}
 					/>
 				</Drawer.Body>

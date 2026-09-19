@@ -239,7 +239,6 @@ export const Workflow: Component<{
 						copy={{ label: T()("common.stage") }}
 						noClear={true}
 						disabled={fieldsDisabled()}
-						hideOptionalText={true}
 						renderValue={(props) => (
 							<WorkflowStageOption
 								label={props.option.label}
@@ -261,7 +260,6 @@ export const Workflow: Component<{
 						options={assigneeOptions()}
 						copy={{ label: T()("documents.workflow.assignees") }}
 						disabled={fieldsDisabled()}
-						hideOptionalText={true}
 						triggerClasses="items-start gap-2 p-2"
 						selectedValuesContainerClasses="gap-0"
 						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"

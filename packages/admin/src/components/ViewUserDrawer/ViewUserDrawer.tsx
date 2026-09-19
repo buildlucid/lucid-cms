@@ -56,7 +56,7 @@ const ViewUserDrawer: Component<{
 			<Drawer.Header>
 				<Drawer.Title>{T()("panels.users.view.title")}</Drawer.Title>
 			</Drawer.Header>
-			<Drawer.Body>
+			<Drawer.Body class="flex flex-col gap-3">
 				<ViewUserPanelContent
 					id={props.id}
 					state={{

@@ -189,7 +189,7 @@ const UpdateUserDrawer: Component<{
 					<Drawer.Title>{T()("panels.users.update.title")}</Drawer.Title>
 				</Drawer.Header>
 				<Drawer.Form onSubmit={handleSubmit}>
-					<Drawer.Body>
+					<Drawer.Body class="flex flex-col gap-3">
 						<ProfilePicturePreviewCard
 							user={{
 								username: user.data?.data.username,
@@ -252,7 +252,6 @@ const UpdateUserDrawer: Component<{
 										label: T()("users.super.admin.label"),
 									}}
 									errors={getBodyError("superAdmin", updateUser.errors)}
-									hideOptionalText={true}
 								/>
 								<Switch
 									id="isLocked"
@@ -266,7 +265,6 @@ const UpdateUserDrawer: Component<{
 										label: T()("users.status.locked.label"),
 									}}
 									errors={getBodyError("isLocked", updateUser.errors)}
-									hideOptionalText={true}
 								/>
 							</Show>
 						</Show>

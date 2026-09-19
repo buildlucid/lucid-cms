@@ -58,7 +58,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 	return (
 		<div
 			data-drawer-tabs
-			class={classNames("mt-6 mb-4 md:border-b md:border-border", props.class)}
+			class={classNames("md:border-b md:border-border", props.class)}
 		>
 			<div class="md:hidden">
 				<Select
@@ -69,9 +69,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 						if (typeof value === "string") props.onChange(value);
 					}}
 					options={visibleItems()}
-					noMargin
 					noClear
-					hideOptionalText
 					ariaLabel={T()("common.section")}
 					hasError={activeItem()?.hasError}
 					renderValue={({ option }) => (
