@@ -1,7 +1,7 @@
 import type { PublishOperation, PublishOperationReviewer } from "@types";
 import type { Accessor, Component } from "solid-js";
 import { createEffect, createMemo, createSignal } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import type { SelectMultipleValueT } from "@/components/SelectMultiple/SelectMultiple";
 import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
 import UserSelectOption from "@/components/UserSelectOption/UserSelectOption";
@@ -117,60 +117,51 @@ const PublishOperationReviewersModal: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: updateReviewers.action.isPending,
-				isError: !!error(),
-			}}
-			copy={{
-				title: T()("actions.update.reviewers"),
-				description: T()("actions.update.reviewers.description"),
-				confirm: T()("actions.update.reviewers"),
-				error: error(),
-			}}
-			callbacks={{
-				onConfirm: submitReviewers,
-				onCancel: close,
-			}}
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("actions.update.reviewers")}
+			description={T()("actions.update.reviewers.description")}
+			confirmLabel={T()("actions.update.reviewers")}
+			confirmVariant="primary"
+			loading={updateReviewers.action.isPending}
+			error={error()}
+			onConfirm={submitReviewers}
+			onCancel={close}
 		>
-			<div class="pb-4 md:pb-6">
-				<SelectMultiple<ReviewerOption>
-					id="publish-operation-reviewers"
-					name="publish-operation-reviewers"
-					values={assignees()}
-					onChange={(values) => {
-						setAssignees(values);
-						setValidationError(undefined);
-					}}
-					options={reviewerOptions()}
-					disabled={reviewers.isFetching || updateReviewers.action.isPending}
-					copy={{
-						label: T()("common.reviewers"),
-						placeholder: T()("selectors.reviewers"),
-					}}
-					triggerClasses="items-start gap-2 p-2"
-					selectedValuesContainerClasses="gap-0"
-					selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
-					renderValue={(props) => (
-						<UserSelectOption
-							user={props.value.user}
-							label={props.value.label}
-							removeValue={props.removeValue}
-						/>
-					)}
-					renderOption={(props) => (
-						<UserSelectOption
-							user={props.option.user}
-							label={props.option.label}
-						/>
-					)}
-					noMargin={true}
-				/>
-			</div>
-		</ConfirmationModal>
+			<SelectMultiple<ReviewerOption>
+				id="publish-operation-reviewers"
+				name="publish-operation-reviewers"
+				values={assignees()}
+				onChange={(values) => {
+					setAssignees(values);
+					setValidationError(undefined);
+				}}
+				options={reviewerOptions()}
+				disabled={reviewers.isFetching || updateReviewers.action.isPending}
+				copy={{
+					label: T()("common.reviewers"),
+					placeholder: T()("selectors.reviewers"),
+				}}
+				triggerClasses="items-start gap-2 p-2"
+				selectedValuesContainerClasses="gap-0"
+				selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
+				renderValue={(props) => (
+					<UserSelectOption
+						user={props.value.user}
+						label={props.value.label}
+						removeValue={props.removeValue}
+					/>
+				)}
+				renderOption={(props) => (
+					<UserSelectOption
+						user={props.option.user}
+						label={props.option.label}
+					/>
+				)}
+				noMargin={true}
+			/>
+		</Modal.Confirm>
 	);
 };
 

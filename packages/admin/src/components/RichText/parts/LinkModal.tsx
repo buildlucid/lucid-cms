@@ -17,7 +17,6 @@ import Button from "@/components/Button/Button";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { Input } from "@/components/Input/Input";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import { PanelLayerContext } from "@/components/Panel/PanelLayerContext";
 import { Switch } from "@/components/Switch/Switch";
 import T from "@/translations";
@@ -191,125 +190,128 @@ const LinkModal: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Modal
-			state={{ open: props.state.open, setOpen: closeModal }}
-			options={{ noPadding: true, nested: true, zIndex: modalLayer() }}
+		<Modal.Root
+			open={props.state.open}
+			onOpenChange={closeModal}
+			zIndex={modalLayer()}
 		>
-			<div class="flex flex-col gap-0 p-4 md:p-6">
-				<Show when={externalEnabled() && internalEnabled()}>
-					<AnimatedTabs
-						items={linkKindTabs()}
-						activeKey={kind()}
-						onSelect={(key) => {
-							if (key === "external" || key === "document") changeKind(key);
-						}}
-						class="mb-4"
-						listClass="w-full gap-1 [&>li]:grow"
-						indicatorClass="shadow-xs"
-						fullWidth
-					/>
-				</Show>
+			<Modal.Body>
+				<div class="flex flex-col gap-0">
+					<Show when={externalEnabled() && internalEnabled()}>
+						<AnimatedTabs
+							items={linkKindTabs()}
+							activeKey={kind()}
+							onSelect={(key) => {
+								if (key === "external" || key === "document") changeKind(key);
+							}}
+							class="mb-4"
+							listClass="w-full gap-1 [&>li]:grow"
+							indicatorClass="shadow-xs"
+							fullWidth
+						/>
+					</Show>
 
-				<Input
-					id="rich_text_link_label"
-					value={label()}
-					onChange={setLabel}
-					name="label"
-					type="text"
-					copy={{ label: T()("common.label") }}
-					required={false}
-					hideOptionalText
-				/>
-
-				<Show when={kind() === "external"}>
 					<Input
-						id="rich_text_link_url"
-						value={url()}
-						onChange={setUrl}
-						name="url"
+						id="rich_text_link_label"
+						value={label()}
+						onChange={setLabel}
+						name="label"
 						type="text"
-						copy={{ label: T()("common.url") }}
+						copy={{ label: T()("common.label") }}
 						required={false}
 						hideOptionalText
 					/>
-				</Show>
 
-				<Show when={kind() === "document"}>
-					<FormLabel
-						id="rich_text_link_document"
-						label={T()("common.document")}
-						required={false}
-						theme="basic"
-						hideOptionalText
-					/>
-					<div class="mb-3 flex items-center justify-between gap-3 rounded-md border border-border bg-card-base p-3">
-						<div class="min-w-0">
-							<p class="truncate text-sm font-medium text-title">
-								{documentRef()
-									? selectedDocumentLabel()
-									: T()("editor.rich.text.link.document.none")}
-							</p>
-							<Show when={selectedDocumentPath()}>
-								<p class="truncate text-xs text-subtitle">
-									{selectedDocumentPath()}
+					<Show when={kind() === "external"}>
+						<Input
+							id="rich_text_link_url"
+							value={url()}
+							onChange={setUrl}
+							name="url"
+							type="text"
+							copy={{ label: T()("common.url") }}
+							required={false}
+							hideOptionalText
+						/>
+					</Show>
+
+					<Show when={kind() === "document"}>
+						<FormLabel
+							id="rich_text_link_document"
+							label={T()("common.document")}
+							required={false}
+							theme="basic"
+							hideOptionalText
+						/>
+						<div class="mb-3 flex items-center justify-between gap-3 rounded-md border border-border bg-card-base p-3">
+							<div class="min-w-0">
+								<p class="truncate text-sm font-medium text-title">
+									{documentRef()
+										? selectedDocumentLabel()
+										: T()("editor.rich.text.link.document.none")}
 								</p>
-							</Show>
-						</div>
-						<div class="flex shrink-0 items-center gap-1">
-							<Show
-								when={documentRef()}
-								fallback={
+								<Show when={selectedDocumentPath()}>
+									<p class="truncate text-xs text-subtitle">
+										{selectedDocumentPath()}
+									</p>
+								</Show>
+							</div>
+							<div class="flex shrink-0 items-center gap-1">
+								<Show
+									when={documentRef()}
+									fallback={
+										<Button
+											type="button"
+											variant="secondary"
+											size="sm"
+											onClick={selectDocument}
+										>
+											{T()("common.select")}
+										</Button>
+									}
+								>
 									<Button
 										type="button"
-										variant="secondary"
-										size="sm"
+										variant="secondary-subtle"
+										size="xs"
+										shape="square"
 										onClick={selectDocument}
+										aria-label={T()("common.edit")}
 									>
-										{T()("common.select")}
+										<FaSolidPen size={12} />
 									</Button>
-								}
-							>
-								<Button
-									type="button"
-									variant="secondary-subtle"
-									size="xs"
-									shape="square"
-									onClick={selectDocument}
-									aria-label={T()("common.edit")}
-								>
-									<FaSolidPen size={12} />
-								</Button>
-								<Button
-									type="button"
-									variant="danger-subtle"
-									size="xs"
-									shape="square"
-									onClick={() => setDocumentRef(undefined)}
-									aria-label={T()("common.remove")}
-								>
-									<FaSolidXmark size={14} />
-								</Button>
-							</Show>
+									<Button
+										type="button"
+										variant="danger-subtle"
+										size="xs"
+										shape="square"
+										onClick={() => setDocumentRef(undefined)}
+										aria-label={T()("common.remove")}
+									>
+										<FaSolidXmark size={14} />
+									</Button>
+								</Show>
+							</div>
 						</div>
-					</div>
-				</Show>
+					</Show>
 
-				<Switch
-					id="rich_text_open_in_new_tab"
-					value={openInNewTab()}
-					onChange={setOpenInNewTab}
-					name="open_in_new_tab"
-					copy={{
-						label: T()("common.open.in.new.tab"),
-						true: T()("common.yes"),
-						false: T()("common.no"),
-					}}
-					required={false}
-					hideOptionalText
-					labelLeft
-				/>
-			</div>
-			<ModalFooter>
+					<Switch
+						id="rich_text_open_in_new_tab"
+						value={openInNewTab()}
+						onChange={setOpenInNewTab}
+						name="open_in_new_tab"
+						copy={{
+							label: T()("common.open.in.new.tab"),
+							true: T()("common.yes"),
+							false: T()("common.no"),
+						}}
+						required={false}
+						hideOptionalText
+						labelLeft
+					/>
+				</div>
+			</Modal.Body>
+			<Modal.Footer>
 				<div>
 					<Show when={props.state.canRemove}>
 						<Button
@@ -322,7 +324,7 @@ const LinkModal: Component<{
 						</Button>
 					</Show>
 				</div>
-				<div class="flex gap-2.5">
+				<Modal.Actions>
 					<Button
 						type="button"
 						variant="outline"
@@ -344,9 +346,9 @@ const LinkModal: Component<{
 					>
 						{T()("common.update")}
 					</Button>
-				</div>
-			</ModalFooter>
-		</Modal>
+				</Modal.Actions>
+			</Modal.Footer>
+		</Modal.Root>
 	);
 };
 

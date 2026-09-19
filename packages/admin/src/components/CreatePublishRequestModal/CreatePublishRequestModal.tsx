@@ -14,8 +14,9 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import { CheckboxButton } from "@/components/CheckboxButton/CheckboxButton";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
+import { Modal } from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
 import { RichText } from "@/components/RichText/RichText";
 import { Select } from "@/components/Select/Select";
@@ -214,165 +215,164 @@ const CreatePublishRequestModal: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: props.loading,
-				isError: !!error(),
-			}}
-			copy={{
-				title: T()("modals.publish.requests.request.title", {
-					environment: props.environmentLabel() ?? "",
-				}),
-				description: `${T()("modals.publish.requests.request.description", {
-					environment: props.environmentLabel() ?? "",
-				})} ${T()("publish.requests.replacement.warning")}`,
-				error: error(),
-				confirm: T()("publish.requests.publish.confirm"),
-			}}
-			callbacks={{
-				onConfirm: () => submitRequest(autoAccept()),
-				onCancel: props.callbacks.onCancel,
-			}}
-			slots={{
-				actions: (
-					<>
-						<Button
-							variant="outline"
-							size="md"
-							type="button"
-							disabled={props.loading}
-							onClick={props.callbacks.onCancel}
-						>
-							{T()("common.cancel")}
-						</Button>
-						<Button
-							variant="primary"
-							size="md"
-							type="button"
-							loading={props.loading}
-							onClick={() => submitRequest(autoAccept())}
-						>
-							{autoAccept()
-								? scheduleSelected()
-									? T()("common.approve.and.schedule")
-									: T()("common.approve.and.release")
-								: scheduleSelected()
-									? T()("publish.requests.schedule.confirm")
-									: T()("publish.requests.publish.confirm")}
-						</Button>
-					</>
-				),
+		<Modal.Root
+			role="alertdialog"
+			open={props.state.open}
+			onOpenChange={(open) => {
+				if (open) props.state.setOpen(true);
+				else props.callbacks.onCancel();
 			}}
 		>
-			<div class="flex flex-col gap-5 pb-4 md:pb-6">
-				<RichText
-					id="publish-request-comment"
-					value={comment()}
-					onChange={(value) => {
-						setComment(value);
-						setValidationError(undefined);
-					}}
-					required={
-						requireComment() || (autoAccept() && requireDecisionComment())
-					}
-					copy={{
-						label: T()("common.comment"),
-						placeholder: T()("publish.requests.comment.placeholder"),
-					}}
-					options={reviewCommentRichTextOptions}
-					noMargin={true}
-				/>
-				<Show when={!autoAccept()}>
-					<SelectMultiple
-						id="publish-request-reviewers"
-						name="publish-request-reviewers"
-						values={assignees()}
-						onChange={setAssignees}
-						options={reviewerOptions()}
-						disabled={reviewers.isFetching}
-						copy={{
-							label: T()("common.reviewers"),
-							placeholder: T()("selectors.reviewers"),
+			<Modal.Header>
+				<Modal.Title>
+					{T()("modals.publish.requests.request.title", {
+						environment: props.environmentLabel() ?? "",
+					})}
+				</Modal.Title>
+				<Modal.Description>{`${T()(
+					"modals.publish.requests.request.description",
+					{
+						environment: props.environmentLabel() ?? "",
+					},
+				)} ${T()("publish.requests.replacement.warning")}`}</Modal.Description>
+			</Modal.Header>
+			<Modal.Body>
+				<div class="flex flex-col gap-5">
+					<RichText
+						id="publish-request-comment"
+						value={comment()}
+						onChange={(value) => {
+							setComment(value);
+							setValidationError(undefined);
 						}}
-						triggerClasses="items-start gap-2 p-2"
-						selectedValuesContainerClasses="gap-0"
-						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
-						renderValue={(props) => (
-							<UserSelectOption
-								user={props.value.user}
-								label={props.value.label}
-								removeValue={props.removeValue}
-							/>
-						)}
-						renderOption={(props) => (
-							<UserSelectOption
-								user={props.option.user}
-								label={props.option.label}
-							/>
-						)}
+						required={
+							requireComment() || (autoAccept() && requireDecisionComment())
+						}
+						copy={{
+							label: T()("common.comment"),
+							placeholder: T()("publish.requests.comment.placeholder"),
+						}}
+						options={reviewCommentRichTextOptions}
 						noMargin={true}
 					/>
-				</Show>
-				<Show when={canSchedule()}>
-					<div class="grid gap-3">
-						<Select
-							id="publish-request-release-timing"
-							name="publish-request-release-timing"
-							value={releaseTiming()}
-							onChange={(value) => {
-								if (value === "now" || value === "scheduled") {
-									updateReleaseTiming(value);
-								}
-							}}
-							options={releaseTimingOptions()}
+					<Show when={!autoAccept()}>
+						<SelectMultiple
+							id="publish-request-reviewers"
+							name="publish-request-reviewers"
+							values={assignees()}
+							onChange={setAssignees}
+							options={reviewerOptions()}
+							disabled={reviewers.isFetching}
 							copy={{
-								label: T()("documents.release.timing"),
+								label: T()("common.reviewers"),
+								placeholder: T()("selectors.reviewers"),
 							}}
-							noClear={true}
-							hideOptionalText={true}
+							triggerClasses="items-start gap-2 p-2"
+							selectedValuesContainerClasses="gap-0"
+							selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
+							renderValue={(props) => (
+								<UserSelectOption
+									user={props.value.user}
+									label={props.value.label}
+									removeValue={props.removeValue}
+								/>
+							)}
+							renderOption={(props) => (
+								<UserSelectOption
+									user={props.option.user}
+									label={props.option.label}
+								/>
+							)}
 							noMargin={true}
 						/>
-						<Show when={scheduleSelected()}>
-							<div class="mt-1">
-								<ReleaseScheduleFields
-									date={scheduleDate()}
-									setDate={setScheduleDate}
-									time={scheduleTime()}
-									setTime={setScheduleTime}
-									timezone={scheduleTimezone()}
-									setTimezone={setScheduleTimezone}
-									onChange={() => setValidationError(undefined)}
-								/>
-							</div>
-						</Show>
-					</div>
-				</Show>
-				<Show when={canAutoAccept()}>
-					<div>
-						<FormLabel
-							id="publish-request-auto-accept"
-							label={T()("common.approval")}
-							theme="basic"
-							hideOptionalText={true}
-						/>
-						<CheckboxButton
-							id="publish-request-auto-accept"
-							name="publish-request-auto-accept"
-							value={autoAccept()}
-							onChange={updateAutoAccept}
-							copy={{
-								label: T()("publish.requests.auto.accept.label"),
-								describedBy: T()("publish.requests.auto.accept.description"),
-							}}
-							theme="secondary"
-						/>
-					</div>
-				</Show>
-			</div>
-		</ConfirmationModal>
+					</Show>
+					<Show when={canSchedule()}>
+						<div class="grid gap-3">
+							<Select
+								id="publish-request-release-timing"
+								name="publish-request-release-timing"
+								value={releaseTiming()}
+								onChange={(value) => {
+									if (value === "now" || value === "scheduled") {
+										updateReleaseTiming(value);
+									}
+								}}
+								options={releaseTimingOptions()}
+								copy={{
+									label: T()("documents.release.timing"),
+								}}
+								noClear={true}
+								hideOptionalText={true}
+								noMargin={true}
+							/>
+							<Show when={scheduleSelected()}>
+								<div class="mt-1">
+									<ReleaseScheduleFields
+										date={scheduleDate()}
+										setDate={setScheduleDate}
+										time={scheduleTime()}
+										setTime={setScheduleTime}
+										timezone={scheduleTimezone()}
+										setTimezone={setScheduleTimezone}
+										onChange={() => setValidationError(undefined)}
+									/>
+								</div>
+							</Show>
+						</div>
+					</Show>
+					<Show when={canAutoAccept()}>
+						<div>
+							<FormLabel
+								id="publish-request-auto-accept"
+								label={T()("common.approval")}
+								theme="basic"
+								hideOptionalText={true}
+							/>
+							<CheckboxButton
+								id="publish-request-auto-accept"
+								name="publish-request-auto-accept"
+								value={autoAccept()}
+								onChange={updateAutoAccept}
+								copy={{
+									label: T()("publish.requests.auto.accept.label"),
+									describedBy: T()("publish.requests.auto.accept.description"),
+								}}
+								theme="secondary"
+							/>
+						</div>
+					</Show>
+				</div>
+			</Modal.Body>
+			<Modal.Footer>
+				<ErrorMessage theme="basic" message={error()} />
+				<Modal.Actions>
+					<Button
+						variant="outline"
+						size="md"
+						type="button"
+						disabled={props.loading}
+						onClick={props.callbacks.onCancel}
+					>
+						{T()("common.cancel")}
+					</Button>
+					<Button
+						variant="primary"
+						size="md"
+						type="button"
+						loading={props.loading}
+						onClick={() => submitRequest(autoAccept())}
+					>
+						{autoAccept()
+							? scheduleSelected()
+								? T()("common.approve.and.schedule")
+								: T()("common.approve.and.release")
+							: scheduleSelected()
+								? T()("publish.requests.schedule.confirm")
+								: T()("publish.requests.publish.confirm")}
+					</Button>
+				</Modal.Actions>
+			</Modal.Footer>
+		</Modal.Root>
 	);
 };
 

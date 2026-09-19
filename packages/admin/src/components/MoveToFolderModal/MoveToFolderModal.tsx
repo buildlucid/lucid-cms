@@ -1,5 +1,5 @@
 import { type Component, createMemo } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -35,9 +35,6 @@ const MoveToFolderModal: Component<{
 	const isLoading = createMemo(
 		() => moveMedia.action.isPending || updateFolder.action.isPending,
 	);
-	const isError = createMemo(
-		() => moveMedia.action.isError || updateFolder.action.isError,
-	);
 	const errorMessage = createMemo(
 		() => moveMedia.errors()?.message || updateFolder.errors()?.message,
 	);
@@ -66,30 +63,27 @@ const MoveToFolderModal: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: isLoading(),
-				isError: isError(),
-			}}
-			copy={{
-				title: isMedia()
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={
+				isMedia()
 					? T()("modals.common.move.media.title")
-					: T()("modals.common.move.folder.title"),
-				description: isMedia()
+					: T()("modals.common.move.folder.title")
+			}
+			description={
+				isMedia()
 					? T()("modals.common.move.media.description")
-					: T()("modals.common.move.folder.description"),
-				error: errorMessage(),
-			}}
-			callbacks={{
-				onConfirm: onConfirm,
-				onCancel: () => {
-					props.state.setOpen(false);
-					moveMedia.reset();
-					updateFolder.reset();
-				},
+					: T()("modals.common.move.folder.description")
+			}
+			confirmVariant="primary"
+			loading={isLoading()}
+			error={errorMessage()}
+			onConfirm={onConfirm}
+			onCancel={() => {
+				props.state.setOpen(false);
+				moveMedia.reset();
+				updateFolder.reset();
 			}}
 		/>
 	);

@@ -1,98 +1,63 @@
-import { Dialog } from "@kobalte/core";
-import classNames from "classnames";
-import type { Component, JSXElement } from "solid-js";
+import { ModalActions } from "./parts/ModalActions";
+import { ModalBody } from "./parts/ModalBody";
+import { ModalCloseButton } from "./parts/ModalCloseButton";
+import { ModalConfirm } from "./parts/ModalConfirm";
+import { ModalDescription } from "./parts/ModalDescription";
+import { ModalFooter } from "./parts/ModalFooter";
+import { ModalHeader } from "./parts/ModalHeader";
+import { ModalRoot } from "./parts/ModalRoot";
+import { ModalTitle } from "./parts/ModalTitle";
 
-interface ModalProps {
-	state: {
-		open: boolean;
-		setOpen: (_open: boolean) => void;
-	};
-	options?: {
-		noBorder?: boolean;
-		noPadding?: boolean;
-		preventDismiss?: boolean;
-		size?: "large";
-		nested?: boolean;
-		/** Content layer. The overlay is placed ten layers below it. */
-		zIndex?: number;
-	};
-	children: JSXElement;
-}
+export type { ModalActionsProps } from "./parts/ModalActions";
+export type {
+	ModalBodyPadding,
+	ModalBodyProps,
+} from "./parts/ModalBody";
+export type { ModalCloseButtonProps } from "./parts/ModalCloseButton";
+export type { ModalConfirmProps } from "./parts/ModalConfirm";
+export type { ModalDescriptionProps } from "./parts/ModalDescription";
+export type { ModalFooterProps } from "./parts/ModalFooter";
+export type { ModalHeaderProps } from "./parts/ModalHeader";
+export type {
+	ModalRole,
+	ModalRootProps,
+	ModalSize,
+} from "./parts/ModalRoot";
+export type { ModalTitleProps } from "./parts/ModalTitle";
 
-export const Modal: Component<ModalProps> = (props) => {
-	// ------------------------------
-	// Functions
-	const preventDismiss = () => props.options?.preventDismiss === true;
-	const handleOpenChange = (open: boolean) => {
-		if (preventDismiss() && !open) return;
-		props.state.setOpen(open);
-	};
-
-	// ------------------------------
-	// Render
-	return (
-		<Dialog.Root open={props.state.open} onOpenChange={handleOpenChange}>
-			<Dialog.Portal>
-				<Dialog.Overlay
-					class={classNames(
-						"fixed inset-0 bg-overlay-base animate-overlay-hide duration-200 transition-colors data-expanded:animate-overlay-show",
-						{
-							"cursor-pointer": !preventDismiss(),
-							"z-40":
-								props.options?.zIndex === undefined &&
-								props.options?.nested !== true,
-							"z-60":
-								props.options?.zIndex === undefined &&
-								props.options?.nested === true,
-						},
-					)}
-					style={{
-						"z-index":
-							props.options?.zIndex !== undefined
-								? props.options.zIndex - 10
-								: undefined,
-					}}
-				/>
-				<div
-					class={classNames("fixed inset-0", {
-						"z-50":
-							props.options?.zIndex === undefined &&
-							props.options?.nested !== true,
-						"z-70":
-							props.options?.zIndex === undefined &&
-							props.options?.nested === true,
-					})}
-					style={{ "z-index": props.options?.zIndex }}
-				>
-					<Dialog.Content
-						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-modal-hide data-expanded:animate-modal-show"
-						onEscapeKeyDown={(event) => {
-							if (preventDismiss()) event.preventDefault();
-						}}
-						onInteractOutside={(event) => {
-							if (preventDismiss()) event.preventDefault();
-						}}
-					>
-						<div
-							class={classNames(
-								"max-w-2xl w-full bg-background-base rounded-xl overflow-hidden m-auto pointer-events-auto",
-								{
-									"border border-border": props.options?.noBorder !== true,
-									"max-w-7xl": props.options?.size === "large",
-								},
-							)}
-						>
-							<div
-								class={classNames({
-									"p-4 md:p-6": !props.options?.noPadding,
-								})}
-							>
-								{props.children}
-							</div>
-						</div>
-					</Dialog.Content>
-				</div>
-			</Dialog.Portal>
-		</Dialog.Root>
-	);
+/**
+ * A dialog built from composable parts, plus Modal.Confirm for the common yes
+ * or no case. Modals opened from a panel or another modal stack automatically.
+ *
+ * @example
+ * ```tsx
+ * import { Button, Modal } from "@lucidcms/admin/components";
+ *
+ * return (
+ * 	<Modal.Root open={open()} onOpenChange={setOpen}>
+ * 		<Modal.Header>
+ * 			<Modal.Title>Create folder</Modal.Title>
+ * 		</Modal.Header>
+ * 		<Modal.Body>
+ * 			<Input id="title" name="title" type="text" value={title()} onChange={setTitle} />
+ * 		</Modal.Body>
+ * 		<Modal.Footer>
+ * 			<Modal.Actions>
+ * 				<Button onClick={create}>Create</Button>
+ * 			</Modal.Actions>
+ * 		</Modal.Footer>
+ * 	</Modal.Root>
+ * );
+ * ```
+ */
+export const Modal = {
+	Root: ModalRoot,
+	Header: ModalHeader,
+	Title: ModalTitle,
+	Description: ModalDescription,
+	CloseButton: ModalCloseButton,
+	Body: ModalBody,
+	Footer: ModalFooter,
+	Actions: ModalActions,
+	Confirm: ModalConfirm,
 };

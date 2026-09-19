@@ -11,8 +11,8 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
+import { Modal } from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
@@ -277,21 +277,14 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 					</div>
 				</div>
 			</div>
-			<ConfirmationModal
-				theme="danger"
-				state={{
-					open: clearConfirmationOpen(),
-					setOpen: setClearConfirmationOpen,
-					isLoading: props.clearLoading,
-				}}
-				copy={{
-					title: T()("account.profile.picture.clear.confirm.title"),
-					description: T()("account.profile.picture.clear.confirm.description"),
-				}}
-				callbacks={{
-					onConfirm: handleClearConfirm,
-					onCancel: handleClearCancel,
-				}}
+			<Modal.Confirm
+				open={clearConfirmationOpen()}
+				onOpenChange={setClearConfirmationOpen}
+				title={T()("account.profile.picture.clear.confirm.title")}
+				description={T()("account.profile.picture.clear.confirm.description")}
+				loading={props.clearLoading}
+				onConfirm={handleClearConfirm}
+				onCancel={handleClearCancel}
 			/>
 		</>
 	);

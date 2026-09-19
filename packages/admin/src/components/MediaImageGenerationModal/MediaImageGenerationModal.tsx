@@ -999,16 +999,7 @@ const MediaImageGenerationModal: Component = () => {
 	// Render
 	return (
 		<Show when={featureEnabled()}>
-			<Modal
-				state={{
-					open: isOpen(),
-					setOpen: close,
-				}}
-				options={{
-					size: "large",
-					noPadding: true,
-				}}
-			>
+			<Modal.Root open={isOpen()} onOpenChange={close} size="lg">
 				<div class="grid min-w-0 w-full items-stretch gap-0 lg:grid-cols-[minmax(27rem,0.72fr)_minmax(0,1fr)]">
 					<div class="flex min-h-130 min-w-0 w-full flex-col gap-4 border-b border-border bg-card-base p-4 md:p-6 lg:border-r lg:border-b-0">
 						<div class="min-w-0">
@@ -1554,7 +1545,7 @@ const MediaImageGenerationModal: Component = () => {
 						</div>
 					</div>
 				</div>
-			</Modal>
+			</Modal.Root>
 		</Show>
 	);
 };

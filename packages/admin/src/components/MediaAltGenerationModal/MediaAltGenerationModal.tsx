@@ -202,16 +202,7 @@ const MediaAltGenerationModalContent: Component<{
 	// -----------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen,
-			}}
-			options={{
-				size: "large",
-				noPadding: true,
-			}}
-		>
+		<Modal.Root open={props.state.open} onOpenChange={setOpen} size="lg">
 			<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
 				<form
 					class="flex min-h-130 min-w-0 flex-col gap-4 border-b border-border bg-card-base p-4 md:border-r md:border-b-0 md:p-6"
@@ -489,7 +480,7 @@ const MediaAltGenerationModalContent: Component<{
 					</div>
 				</div>
 			</div>
-		</Modal>
+		</Modal.Root>
 	);
 };
 

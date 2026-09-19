@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -23,38 +23,31 @@ const RestoreUserModal: Component<RestoreUserProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: restoreUsers.action.isPending,
-				isError: restoreUsers.action.isError,
-			}}
-			copy={{
-				title: T()("modals.common.restore.users.title"),
-				description: T()("modals.common.restore.users.description"),
-				error: restoreUsers.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) {
-						console.log("No user ID supplied!");
-						props.state.setOpen(false);
-						restoreUsers.reset();
-						return;
-					}
-					restoreUsers.action.mutate({
-						body: {
-							ids: [id],
-						},
-					});
-				},
-				onCancel: () => {
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.restore.users.title")}
+			description={T()("modals.common.restore.users.description")}
+			confirmVariant="primary"
+			loading={restoreUsers.action.isPending}
+			error={restoreUsers.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) {
+					console.log("No user ID supplied!");
 					props.state.setOpen(false);
 					restoreUsers.reset();
-				},
+					return;
+				}
+				restoreUsers.action.mutate({
+					body: {
+						ids: [id],
+					},
+				});
+			}}
+			onCancel={() => {
+				props.state.setOpen(false);
+				restoreUsers.reset();
 			}}
 		/>
 	);

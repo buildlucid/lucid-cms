@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore/mediaStore";
 import T from "@/translations";
@@ -26,30 +26,23 @@ const DeleteMediaBatchPermanentlyModal: Component<
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteMediaPermanently.action.isPending,
-				isError: deleteMediaPermanently.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.items.permanently.title")}
+			description={T()("modals.common.delete.items.permanently.description")}
+			loading={deleteMediaPermanently.action.isPending}
+			error={deleteMediaPermanently.errors()?.message}
+			onConfirm={() => {
+				deleteMediaPermanently.action.mutate({
+					body: {
+						ids: mediaStore.get.selectedMedia,
+					},
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.items.permanently.title"),
-				description: T()("modals.common.delete.items.permanently.description"),
-				error: deleteMediaPermanently.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					deleteMediaPermanently.action.mutate({
-						body: {
-							ids: mediaStore.get.selectedMedia,
-						},
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteMediaPermanently.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteMediaPermanently.reset();
 			}}
 		/>
 	);

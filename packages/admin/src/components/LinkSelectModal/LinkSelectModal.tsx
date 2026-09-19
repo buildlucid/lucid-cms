@@ -3,7 +3,6 @@ import { type Component, createEffect, createSignal } from "solid-js";
 import Button from "@/components/Button/Button";
 import { Input } from "@/components/Input/Input";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import { Switch } from "@/components/Switch/Switch";
 import T from "@/translations";
 
@@ -59,56 +58,49 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: closeModal,
-			}}
-			options={{
-				noPadding: true,
-			}}
-		>
-			<div class="flex flex-col gap-0 p-4 md:p-6">
-				<Input
-					id="label"
-					value={getLabel()}
-					onChange={(value) => setLabel(value)}
-					name={"label"}
-					type="text"
-					copy={{
-						label: T()("common.label"),
-					}}
-					required={false}
-				/>
-				<Input
-					id="url"
-					value={getUrl()}
-					onChange={(value) => setUrl(value)}
-					name={"url"}
-					type="text"
-					copy={{
-						label: T()("common.url"),
-					}}
-					required={false}
-				/>
-				<Switch
-					id="open_in_new_tab"
-					value={getOpenInNewTab()}
-					onChange={(value) => setOpenInNewTab(value)}
-					name={"open_in_new_tab"}
-					copy={{
-						label: T()("common.open.in.new.tab"),
-						true: T()("common.yes"),
-						false: T()("common.no"),
-					}}
-					required={false}
-					hideOptionalText
-					labelLeft
-				/>
-			</div>
-			<ModalFooter>
-				<div />
-				<div class="flex gap-2.5">
+		<Modal.Root open={props.state.open} onOpenChange={closeModal}>
+			<Modal.Body>
+				<div class="flex flex-col gap-0">
+					<Input
+						id="label"
+						value={getLabel()}
+						onChange={(value) => setLabel(value)}
+						name={"label"}
+						type="text"
+						copy={{
+							label: T()("common.label"),
+						}}
+						required={false}
+					/>
+					<Input
+						id="url"
+						value={getUrl()}
+						onChange={(value) => setUrl(value)}
+						name={"url"}
+						type="text"
+						copy={{
+							label: T()("common.url"),
+						}}
+						required={false}
+					/>
+					<Switch
+						id="open_in_new_tab"
+						value={getOpenInNewTab()}
+						onChange={(value) => setOpenInNewTab(value)}
+						name={"open_in_new_tab"}
+						copy={{
+							label: T()("common.open.in.new.tab"),
+							true: T()("common.yes"),
+							false: T()("common.no"),
+						}}
+						required={false}
+						hideOptionalText
+						labelLeft
+					/>
+				</div>
+			</Modal.Body>
+			<Modal.Footer>
+				<Modal.Actions>
 					<Button
 						type="button"
 						variant="outline"
@@ -125,9 +117,9 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 					>
 						{T()("common.update")}
 					</Button>
-				</div>
-			</ModalFooter>
-		</Modal>
+				</Modal.Actions>
+			</Modal.Footer>
+		</Modal.Root>
 	);
 };
 

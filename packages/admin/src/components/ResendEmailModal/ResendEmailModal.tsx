@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -23,31 +23,24 @@ const ResendEmailModal: Component<ResendEmailProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: resendEmail.action.isPending,
-				isError: resendEmail.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.resend.email.title")}
+			description={T()("modals.common.resend.email.description")}
+			confirmVariant="primary"
+			loading={resendEmail.action.isPending}
+			error={resendEmail.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				resendEmail.action.mutate({
+					id: id,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.resend.email.title"),
-				description: T()("modals.common.resend.email.description"),
-				error: resendEmail.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					resendEmail.action.mutate({
-						id: id,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					resendEmail.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				resendEmail.reset();
 			}}
 		/>
 	);

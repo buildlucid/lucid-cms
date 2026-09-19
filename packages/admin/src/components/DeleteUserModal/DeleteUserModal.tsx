@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -23,30 +23,23 @@ const DeleteUserModal: Component<DeleteUserProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteUser.action.isPending,
-				isError: deleteUser.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.user.title")}
+			description={T()("modals.common.delete.user.description")}
+			loading={deleteUser.action.isPending}
+			error={deleteUser.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				deleteUser.action.mutate({
+					id: id,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.user.title"),
-				description: T()("modals.common.delete.user.description"),
-				error: deleteUser.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					deleteUser.action.mutate({
-						id: id,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteUser.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteUser.reset();
 			}}
 		/>
 	);

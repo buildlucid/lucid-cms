@@ -2,7 +2,7 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { Collection, PublishOperation } from "@types";
 import type { Accessor, Component } from "solid-js";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
 import { RichText } from "@/components/RichText/RichText";
 import { Select } from "@/components/Select/Select";
@@ -208,26 +208,19 @@ const PublishOperationDecisionModal: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme={props.action() === "reject" ? "danger" : "primary"}
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: decision.action.isPending,
-				isError: !!error(),
-			}}
-			copy={{
-				title: getDecisionTitle(props.action()),
-				description: getDecisionDescription(props.action()),
-				confirm: getDecisionConfirm(props.action()),
-				error: error(),
-			}}
-			callbacks={{
-				onConfirm: submitDecision,
-				onCancel: close,
-			}}
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={getDecisionTitle(props.action())}
+			description={getDecisionDescription(props.action())}
+			confirmLabel={getDecisionConfirm(props.action())}
+			confirmVariant={props.action() === "reject" ? "danger" : "primary"}
+			loading={decision.action.isPending}
+			error={error()}
+			onConfirm={submitDecision}
+			onCancel={close}
 		>
-			<div class="grid gap-4 pb-4 md:pb-6">
+			<div class="grid gap-4">
 				<RichText
 					id="document-publish-request-decision-comment"
 					value={decisionComment()}
@@ -278,7 +271,7 @@ const PublishOperationDecisionModal: Component<{
 					</div>
 				</Show>
 			</div>
-		</ConfirmationModal>
+		</Modal.Confirm>
 	);
 };
 

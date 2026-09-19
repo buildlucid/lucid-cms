@@ -9,7 +9,6 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { Input } from "@/components/Input/Input";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import api from "@/services/api";
 import type { OAuthConnectionOwner } from "@/services/api/oauth-connections";
 import T from "@/translations";
@@ -78,13 +77,7 @@ const UpdateOAuthConnectionModal: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			options={{ noPadding: true }}
-		>
+		<Modal.Root open={props.state.open} onOpenChange={props.state.setOpen}>
 			<form
 				class="w-full"
 				onSubmit={(event) => {
@@ -92,17 +85,15 @@ const UpdateOAuthConnectionModal: Component<{
 					submit();
 				}}
 			>
-				<div class="p-4 md:p-6">
-					<div class="mb-4">
-						<h2 class="text-base font-semibold text-title">
-							{T()("oauth.connections.update.title")}
-						</h2>
-						<p class="mt-1 text-sm">
-							{T()("oauth.connections.update.description", {
-								name: props.connection.clientName,
-							})}
-						</p>
-					</div>
+				<Modal.Header>
+					<Modal.Title>{T()("oauth.connections.update.title")}</Modal.Title>
+					<Modal.Description>
+						{T()("oauth.connections.update.description", {
+							name: props.connection.clientName,
+						})}
+					</Modal.Description>
+				</Modal.Header>
+				<Modal.Body>
 					<Input
 						id={`oauth-connection-name-${props.connection.id}`}
 						name="name"
@@ -116,15 +107,15 @@ const UpdateOAuthConnectionModal: Component<{
 						autoFoucs={true}
 						errors={getBodyError("name", updateConnection.errors)}
 					/>
-				</div>
-				<ModalFooter>
+				</Modal.Body>
+				<Modal.Footer>
 					<div class="min-w-0">
 						<ErrorMessage
 							theme="basic"
 							message={updateConnection.errors()?.message}
 						/>
 					</div>
-					<div class="flex min-w-max gap-2">
+					<Modal.Actions>
 						<Button
 							type="button"
 							variant="outline"
@@ -143,10 +134,10 @@ const UpdateOAuthConnectionModal: Component<{
 						>
 							{T()("common.save")}
 						</Button>
-					</div>
-				</ModalFooter>
+					</Modal.Actions>
+				</Modal.Footer>
 			</form>
-		</Modal>
+		</Modal.Root>
 	);
 };
 

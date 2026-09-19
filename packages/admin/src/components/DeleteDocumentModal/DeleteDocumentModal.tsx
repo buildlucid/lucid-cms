@@ -1,6 +1,6 @@
 import type { Collection } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -41,35 +41,28 @@ const DeleteDocumentModal: Component<DeleteDocumentProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteDocument.action.isPending,
-				isError: deleteDocument.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.document.title", {
+				name: collectionSingularName(),
+			})}
+			description={T()("modals.common.delete.document.description", {
+				name: collectionSingularName().toLowerCase(),
+			})}
+			loading={deleteDocument.action.isPending}
+			error={deleteDocument.errors()?.message}
+			onConfirm={() => {
+				const id = typeof props.id === "function" ? props.id() : props.id;
+				if (!id) return console.error("No id provided");
+				deleteDocument.action.mutate({
+					id: id,
+					collectionKey: props.collection.key,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.document.title", {
-					name: collectionSingularName(),
-				}),
-				description: T()("modals.common.delete.document.description", {
-					name: collectionSingularName().toLowerCase(),
-				}),
-				error: deleteDocument.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = typeof props.id === "function" ? props.id() : props.id;
-					if (!id) return console.error("No id provided");
-					deleteDocument.action.mutate({
-						id: id,
-						collectionKey: props.collection.key,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteDocument.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteDocument.reset();
 			}}
 		/>
 	);

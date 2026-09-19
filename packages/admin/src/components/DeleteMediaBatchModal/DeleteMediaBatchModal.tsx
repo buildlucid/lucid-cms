@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import { createMemo, createSignal, Show } from "solid-js";
 import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore/mediaStore";
 import T from "@/translations";
@@ -35,32 +35,25 @@ const DeleteMediaBatchModal: Component<DeleteMediaBatchProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteMediaBatch.action.isPending,
-				isError: deleteMediaBatch.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.media.batch.title")}
+			description={T()("modals.common.delete.media.batch.description")}
+			loading={deleteMediaBatch.action.isPending}
+			error={deleteMediaBatch.errors()?.message}
+			onConfirm={() => {
+				deleteMediaBatch.action.mutate({
+					body: {
+						folderIds: mediaStore.get.selectedFolders,
+						mediaIds: mediaStore.get.selectedMedia,
+						recursiveMedia: recursiveMedia(),
+					},
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.media.batch.title"),
-				description: T()("modals.common.delete.media.batch.description"),
-				error: deleteMediaBatch.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					deleteMediaBatch.action.mutate({
-						body: {
-							folderIds: mediaStore.get.selectedFolders,
-							mediaIds: mediaStore.get.selectedMedia,
-							recursiveMedia: recursiveMedia(),
-						},
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteMediaBatch.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteMediaBatch.reset();
 			}}
 		>
 			<Show when={!noFolderItemsSelected()}>
@@ -80,7 +73,7 @@ const DeleteMediaBatchModal: Component<DeleteMediaBatchProps> = (props) => {
 					/>
 				</div>
 			</Show>
-		</ConfirmationModal>
+		</Modal.Confirm>
 	);
 };
 

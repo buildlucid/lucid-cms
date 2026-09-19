@@ -1,6 +1,6 @@
 import type { JobScheduleSummary } from "@types";
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -26,43 +26,42 @@ const SetScheduleStateModal: Component<SetScheduleStateProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme={isPausing() ? "danger" : "primary"}
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: setState.action.isPending,
-				isError: setState.action.isError,
-			}}
-			copy={{
-				title: isPausing()
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={
+				isPausing()
 					? T()("modals.jobs.schedule.pause.title")
-					: T()("modals.jobs.schedule.resume.title"),
-				description: isPausing()
+					: T()("modals.jobs.schedule.resume.title")
+			}
+			description={
+				isPausing()
 					? T()("modals.jobs.schedule.pause.description")
-					: T()("modals.jobs.schedule.resume.description"),
-				confirm: isPausing()
+					: T()("modals.jobs.schedule.resume.description")
+			}
+			confirmLabel={
+				isPausing()
 					? T()("modals.jobs.schedule.pause.confirm")
-					: T()("modals.jobs.schedule.resume.confirm"),
-				error: setState.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const schedule = props.schedule();
-					if (!schedule) return;
+					: T()("modals.jobs.schedule.resume.confirm")
+			}
+			confirmVariant={isPausing() ? "danger" : "primary"}
+			loading={setState.action.isPending}
+			error={setState.errors()?.message}
+			onConfirm={() => {
+				const schedule = props.schedule();
+				if (!schedule) return;
 
-					setState.action.mutate(
-						{
-							scheduleKey: schedule.key,
-							state: nextState(),
-						},
-						{ onSuccess: () => props.state.setOpen(false) },
-					);
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					setState.reset();
-				},
+				setState.action.mutate(
+					{
+						scheduleKey: schedule.key,
+						state: nextState(),
+					},
+					{ onSuccess: () => props.state.setOpen(false) },
+				);
+			}}
+			onCancel={() => {
+				props.state.setOpen(false);
+				setState.reset();
 			}}
 		/>
 	);

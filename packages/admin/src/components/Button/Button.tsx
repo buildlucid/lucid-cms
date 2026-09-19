@@ -180,6 +180,7 @@ const Button: Component<ButtonProps> = (props) => {
 	return (
 		<button
 			{...rest}
+			data-button
 			class={classnames(classes(), local.class, {
 				"pointer-events-none": local.loading,
 			})}

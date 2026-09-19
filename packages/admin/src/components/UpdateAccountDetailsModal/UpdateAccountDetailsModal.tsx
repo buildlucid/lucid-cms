@@ -10,7 +10,6 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { Input } from "@/components/Input/Input";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
 import api from "@/services/api";
 import T from "@/translations";
@@ -95,15 +94,7 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 	// ----------------------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			options={{
-				noPadding: true,
-			}}
-		>
+		<Modal.Root open={props.state.open} onOpenChange={props.state.setOpen}>
 			<form
 				class="w-full"
 				onSubmit={(event) => {
@@ -111,17 +102,13 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 					updateMe.action.mutate(updateData().data);
 				}}
 			>
-				<div class="p-4 md:p-6">
-					{/* Header */}
-					<div class="mb-5">
-						<h2 class="text-base font-semibold text-title">
-							{T()("account.details.edit.title")}
-						</h2>
-						<p class="mt-1 text-sm text-body">
-							{T()("account.details.edit.description")}
-						</p>
-					</div>
-
+				<Modal.Header>
+					<Modal.Title>{T()("account.details.edit.title")}</Modal.Title>
+					<Modal.Description>
+						{T()("account.details.edit.description")}
+					</Modal.Description>
+				</Modal.Header>
+				<Modal.Body>
 					{/* Fields */}
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<Input
@@ -202,12 +189,10 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 						message={updateMe.errors()?.message}
 						classes="mt-4"
 					/>
-				</div>
+				</Modal.Body>
 
-				{/* Footer */}
-				<ModalFooter>
-					<div />
-					<div class="flex gap-2.5">
+				<Modal.Footer>
+					<Modal.Actions>
 						<Button
 							type="button"
 							variant="outline"
@@ -226,10 +211,10 @@ const UpdateAccountDetailsModal: Component<UpdateAccountDetailsProps> = (
 						>
 							{T()("common.update")}
 						</Button>
-					</div>
-				</ModalFooter>
+					</Modal.Actions>
+				</Modal.Footer>
 			</form>
-		</Modal>
+		</Modal.Root>
 	);
 };
 

@@ -2,7 +2,8 @@ import type { PublishOperation } from "@types";
 import type { Accessor, Component } from "solid-js";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import { Modal } from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
 import api from "@/services/api";
 import T from "@/translations";
@@ -122,76 +123,68 @@ const PublishOperationScheduleModal: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: reschedule.action.isPending,
-				isError: !!error(),
-			}}
-			copy={{
-				title: operationHasSchedule()
-					? T()("common.reschedule.release")
-					: T()("documents.release.schedule.action"),
-				description: T()("modals.common.schedule.release.description"),
-				confirm: T()("actions.update.schedule"),
-				error: error(),
-			}}
-			callbacks={{
-				onConfirm: saveSchedule,
-				onCancel: close,
-			}}
-			slots={{
-				actions: (
-					<>
-						<Button
-							variant="outline"
-							size="md"
-							type="button"
-							disabled={reschedule.action.isPending}
-							onClick={close}
-						>
-							{T()("common.cancel")}
-						</Button>
-						<Show when={operationHasSchedule()}>
-							<Button
-								variant="danger-outline"
-								size="md"
-								type="button"
-								loading={reschedule.action.isPending}
-								onClick={removeSchedule}
-							>
-								{T()("documents.release.schedule.remove")}
-							</Button>
-						</Show>
-						<Button
-							variant="primary"
-							size="md"
-							type="button"
-							loading={reschedule.action.isPending}
-							onClick={saveSchedule}
-						>
-							{operationHasSchedule()
-								? T()("actions.update.schedule")
-								: T()("documents.release.schedule.action")}
-						</Button>
-					</>
-				),
-			}}
+		<Modal.Root
+			role="alertdialog"
+			open={props.state.open}
+			onOpenChange={(open) => (open ? props.state.setOpen(true) : close())}
 		>
-			<div class="grid gap-3 pb-4 md:pb-6">
-				<ReleaseScheduleFields
-					date={scheduleDate()}
-					setDate={setScheduleDate}
-					time={scheduleTime()}
-					setTime={setScheduleTime}
-					timezone={scheduleTimezone()}
-					setTimezone={setScheduleTimezone}
-					onChange={() => setValidationError(undefined)}
-				/>
-			</div>
-		</ConfirmationModal>
+			<Modal.Header>
+				<Modal.Title>
+					{operationHasSchedule()
+						? T()("common.reschedule.release")
+						: T()("documents.release.schedule.action")}
+				</Modal.Title>
+				<Modal.Description>
+					{T()("modals.common.schedule.release.description")}
+				</Modal.Description>
+			</Modal.Header>
+			<Modal.Body>
+				<div class="grid gap-3">
+					<ReleaseScheduleFields
+						date={scheduleDate()}
+						setDate={setScheduleDate}
+						time={scheduleTime()}
+						setTime={setScheduleTime}
+						timezone={scheduleTimezone()}
+						setTimezone={setScheduleTimezone}
+						onChange={() => setValidationError(undefined)}
+					/>
+				</div>
+			</Modal.Body>
+			<Modal.Footer>
+				<ErrorMessage theme="basic" message={error()} />
+				<Modal.Actions>
+					<Button
+						variant="outline"
+						size="md"
+						disabled={reschedule.action.isPending}
+						onClick={close}
+					>
+						{T()("common.cancel")}
+					</Button>
+					<Show when={operationHasSchedule()}>
+						<Button
+							variant="danger-outline"
+							size="md"
+							loading={reschedule.action.isPending}
+							onClick={removeSchedule}
+						>
+							{T()("documents.release.schedule.remove")}
+						</Button>
+					</Show>
+					<Button
+						variant="primary"
+						size="md"
+						loading={reschedule.action.isPending}
+						onClick={saveSchedule}
+					>
+						{operationHasSchedule()
+							? T()("actions.update.schedule")
+							: T()("documents.release.schedule.action")}
+					</Button>
+				</Modal.Actions>
+			</Modal.Footer>
+		</Modal.Root>
 	);
 };
 

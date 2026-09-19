@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -22,26 +22,19 @@ const ClearCacheModal: Component<ClearCacheProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: clearCache.action.isPending,
-				isError: clearCache.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.system.cache.title")}
+			description={T()("modals.system.cache.description")}
+			loading={clearCache.action.isPending}
+			error={clearCache.errors()?.message}
+			onConfirm={() => {
+				clearCache.action.mutate({});
 			}}
-			copy={{
-				title: T()("modals.system.cache.title"),
-				description: T()("modals.system.cache.description"),
-				error: clearCache.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					clearCache.action.mutate({});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					clearCache.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				clearCache.reset();
 			}}
 		/>
 	);

@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import T from "@/translations";
 
 const RestoreRevisionModal: Component<{
@@ -16,29 +16,22 @@ const RestoreRevisionModal: Component<{
 	};
 }> = (props) => {
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: props.loading,
-				isError: !!props.error,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.restore.revision.title")}
+			description={T()("modals.common.restore.revision.description", {
+				id: props.versionId() ?? "",
+			})}
+			confirmVariant="primary"
+			loading={props.loading}
+			error={props.error}
+			onConfirm={async () => {
+				const versionId = props.versionId();
+				if (versionId === null) return console.error("No versionId provided");
+				await props.callbacks.onConfirm(versionId);
 			}}
-			copy={{
-				title: T()("modals.common.restore.revision.title"),
-				description: T()("modals.common.restore.revision.description", {
-					id: props.versionId() ?? "",
-				}),
-				error: props.error,
-			}}
-			callbacks={{
-				onConfirm: async () => {
-					const versionId = props.versionId();
-					if (versionId === null) return console.error("No versionId provided");
-					await props.callbacks.onConfirm(versionId);
-				},
-				onCancel: props.callbacks.onCancel,
-			}}
+			onCancel={props.callbacks.onCancel}
 		/>
 	);
 };

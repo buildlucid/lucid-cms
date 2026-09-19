@@ -515,7 +515,6 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 				<AddBrickModal
 					state={{ open: brickSelectOpen(), setOpen: setBrickSelectOpen }}
 					data={{ brickConfig: embeddedBrickConfigs() }}
-					options={{ nested: true }}
 					callbacks={{
 						onSelect: (brickConfig) => {
 							const ref = brickStore.get.addEmbeddedBrick({ brickConfig });

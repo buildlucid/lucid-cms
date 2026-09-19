@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -25,34 +25,27 @@ const TriggerPasswordResetModal: Component<TriggerPasswordResetProps> = (
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: updateUser.action.isPending,
-				isError: updateUser.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.users.password.reset.title")}
+			description={T()("modals.users.password.reset.description")}
+			confirmVariant="primary"
+			loading={updateUser.action.isPending}
+			error={updateUser.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				updateUser.action.mutate({
+					id: id,
+					body: {
+						triggerPasswordReset: true,
+					},
+				});
 			}}
-			copy={{
-				title: T()("modals.users.password.reset.title"),
-				description: T()("modals.users.password.reset.description"),
-				error: updateUser.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					updateUser.action.mutate({
-						id: id,
-						body: {
-							triggerPasswordReset: true,
-						},
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					updateUser.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				updateUser.reset();
 			}}
 		/>
 	);

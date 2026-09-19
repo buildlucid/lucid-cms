@@ -22,9 +22,6 @@ interface AddBrickProps {
 	data: {
 		brickConfig: CollectionBrickConfig[];
 	};
-	options?: {
-		nested?: boolean;
-	};
 	callbacks?: {
 		onSelect?: (brickConfig: CollectionBrickConfig) => void;
 	};
@@ -70,16 +67,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			options={{
-				noPadding: true,
-				nested: props.options?.nested,
-			}}
-		>
+		<Modal.Root open={props.state.open} onOpenChange={props.state.setOpen}>
 			{/* Search */}
 			<div class="h-14 w-full relative">
 				<div class="absolute top-0 left-4 h-full flex items-center justify-center pointer-events-none">
@@ -200,7 +188,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 					</div>
 				</div>
 			</div>
-		</Modal>
+		</Modal.Root>
 	);
 };
 

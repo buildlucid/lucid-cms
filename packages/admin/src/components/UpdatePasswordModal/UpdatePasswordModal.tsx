@@ -3,7 +3,6 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { Input } from "@/components/Input/Input";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -55,15 +54,10 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			options={{
-				noPadding: true,
-				preventDismiss: forced(),
-			}}
+		<Modal.Root
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			dismissible={!forced()}
 		>
 			<form
 				class="w-full"
@@ -76,19 +70,19 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 					});
 				}}
 			>
-				<div class="p-4 md:p-6">
-					<div class="mb-4">
-						<h2 class="text-base font-semibold text-title">
-							{forced()
-								? T()("auth.password.reset.required.title")
-								: T()("actions.update.password")}
-						</h2>
-						<p class="mt-1 text-sm text-body">
-							{forced()
-								? T()("auth.password.reset.required.message")
-								: T()("auth.password.description")}
-						</p>
-					</div>
+				<Modal.Header>
+					<Modal.Title>
+						{forced()
+							? T()("auth.password.reset.required.title")
+							: T()("actions.update.password")}
+					</Modal.Title>
+					<Modal.Description>
+						{forced()
+							? T()("auth.password.reset.required.message")
+							: T()("auth.password.description")}
+					</Modal.Description>
+				</Modal.Header>
+				<Modal.Body>
 					<Input
 						id="currentPassword"
 						name="currentPassword"
@@ -134,10 +128,9 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						message={updateMe.errors()?.message}
 						classes="mt-4"
 					/>
-				</div>
-				<ModalFooter>
-					<div />
-					<div class="flex gap-2.5">
+				</Modal.Body>
+				<Modal.Footer>
+					<Modal.Actions>
 						<Show when={!forced()}>
 							<Button
 								type="button"
@@ -158,10 +151,10 @@ const UpdatePasswordModal: Component<UpdatePasswordModalProps> = (props) => {
 						>
 							{T()("common.update")}
 						</Button>
-					</div>
-				</ModalFooter>
+					</Modal.Actions>
+				</Modal.Footer>
 			</form>
-		</Modal>
+		</Modal.Root>
 	);
 };
 

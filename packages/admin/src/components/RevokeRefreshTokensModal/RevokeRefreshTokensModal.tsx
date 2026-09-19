@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -25,31 +25,23 @@ const RevokeRefreshTokensModal: Component<RevokeRefreshTokensProps> = (
 	// ----------------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="danger"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: revokeRefreshTokens.action.isPending,
-				isError: revokeRefreshTokens.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.users.revoke.sessions.title")}
+			description={T()("modals.users.revoke.sessions.description")}
+			loading={revokeRefreshTokens.action.isPending}
+			error={revokeRefreshTokens.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				revokeRefreshTokens.action.mutate({
+					id: id,
+				});
 			}}
-			copy={{
-				title: T()("modals.users.revoke.sessions.title"),
-				description: T()("modals.users.revoke.sessions.description"),
-				error: revokeRefreshTokens.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					revokeRefreshTokens.action.mutate({
-						id: id,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					revokeRefreshTokens.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				revokeRefreshTokens.reset();
 			}}
 		/>
 	);

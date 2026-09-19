@@ -2,8 +2,8 @@ import type { OAuthClient, OAuthClientCreateResponse } from "@types";
 import { FaSolidArrowRightArrowLeft, FaSolidKey } from "solid-icons/fa";
 import { type Component, createSignal, Show } from "solid-js";
 import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
 import IconContainer from "@/components/IconContainer/IconContainer";
+import { Modal } from "@/components/Modal/Modal";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
 import UpsertOAuthClientPanel from "@/components/UpsertOAuthClientPanel/UpsertOAuthClientPanel";
 import api from "@/services/api";
@@ -169,48 +169,33 @@ const OAuthClientRow: Component<{
 			/>
 
 			{/* Modals */}
-			<ConfirmationModal
-				theme="danger"
-				state={{
-					open: deleteOpen(),
-					setOpen: setDeleteOpen,
-					isLoading: deleteClient.action.isPending,
-					isError: deleteClient.action.isError,
-				}}
-				copy={{
-					title: T()("oauth.clients.delete.title"),
-					description: T()("oauth.clients.delete.description", {
-						name: props.client.name,
-					}),
-					error: deleteClient.errors()?.message,
-					confirm: T()("common.delete"),
-				}}
-				callbacks={{
-					onConfirm: () => deleteClient.action.mutate({ id: props.client.id }),
-					onCancel: cancelDelete,
-				}}
+			<Modal.Confirm
+				open={deleteOpen()}
+				onOpenChange={setDeleteOpen}
+				title={T()("oauth.clients.delete.title")}
+				description={T()("oauth.clients.delete.description", {
+					name: props.client.name,
+				})}
+				confirmLabel={T()("common.delete")}
+				loading={deleteClient.action.isPending}
+				error={deleteClient.errors()?.message}
+				onConfirm={() => deleteClient.action.mutate({ id: props.client.id })}
+				onCancel={cancelDelete}
 			/>
-			<ConfirmationModal
-				theme="danger"
-				state={{
-					open: regenerateOpen(),
-					setOpen: setRegenerateOpen,
-					isLoading: regenerateSecret.action.isPending,
-					isError: regenerateSecret.action.isError,
-				}}
-				copy={{
-					title: T()("oauth.clients.secret.regenerate.title"),
-					description: T()("oauth.clients.secret.regenerate.description", {
-						name: props.client.name,
-					}),
-					error: regenerateSecret.errors()?.message,
-					confirm: T()("oauth.clients.secret.regenerate.action"),
-				}}
-				callbacks={{
-					onConfirm: () =>
-						regenerateSecret.action.mutate({ id: props.client.id }),
-					onCancel: cancelRegenerate,
-				}}
+			<Modal.Confirm
+				open={regenerateOpen()}
+				onOpenChange={setRegenerateOpen}
+				title={T()("oauth.clients.secret.regenerate.title")}
+				description={T()("oauth.clients.secret.regenerate.description", {
+					name: props.client.name,
+				})}
+				confirmLabel={T()("oauth.clients.secret.regenerate.action")}
+				loading={regenerateSecret.action.isPending}
+				error={regenerateSecret.errors()?.message}
+				onConfirm={() =>
+					regenerateSecret.action.mutate({ id: props.client.id })
+				}
+				onCancel={cancelRegenerate}
 			/>
 			<OAuthClientCredentialsModal
 				credentials={credentials()}

@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import type { IntegrationServices } from "@/services/api/integrations";
 import T from "@/translations";
 
@@ -28,30 +28,23 @@ const DeleteIntegrationModal: Component<DeleteIntegrationProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteIntegration.action.isPending,
-				isError: deleteIntegration.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.integration.title")}
+			description={T()("modals.common.delete.integration.description")}
+			loading={deleteIntegration.action.isPending}
+			error={deleteIntegration.errors()?.message}
+			onConfirm={() => {
+				const id = typeof props.id === "function" ? props.id() : props.id;
+				if (!id) return console.error("No id provided");
+				deleteIntegration.action.mutate({
+					id: id,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.integration.title"),
-				description: T()("modals.common.delete.integration.description"),
-				error: deleteIntegration.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = typeof props.id === "function" ? props.id() : props.id;
-					if (!id) return console.error("No id provided");
-					deleteIntegration.action.mutate({
-						id: id,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteIntegration.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteIntegration.reset();
 			}}
 		/>
 	);

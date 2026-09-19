@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -25,30 +25,23 @@ const DeleteUserPermanentlyModal: Component<DeleteUserPermanentlyProps> = (
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: permaDelete.action.isPending,
-				isError: permaDelete.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.user.permanently.title")}
+			description={T()("modals.common.delete.user.permanently.description")}
+			loading={permaDelete.action.isPending}
+			error={permaDelete.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				permaDelete.action.mutate({
+					id: id,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.user.permanently.title"),
-				description: T()("modals.common.delete.user.permanently.description"),
-				error: permaDelete.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					permaDelete.action.mutate({
-						id: id,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					permaDelete.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				permaDelete.reset();
 			}}
 		/>
 	);

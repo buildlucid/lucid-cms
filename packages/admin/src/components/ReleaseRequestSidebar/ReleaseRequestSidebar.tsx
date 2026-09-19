@@ -17,12 +17,13 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
 import DateText from "@/components/DateText/DateText";
 import DetailsList, {
 	type DetailsListProps,
 } from "@/components/DetailsList/DetailsList";
 import DocumentSidebarSection from "@/components/DocumentSidebarSection/DocumentSidebarSection";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import { Modal } from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
 import PublishOperationReviewersModal from "@/components/PublishOperationReviewersModal/PublishOperationReviewersModal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
@@ -758,33 +759,26 @@ export const ReleaseRequestSidebar: Component<{
 				</Show>
 			</aside>
 
-			<ConfirmationModal
-				theme={decisionAction() === "reject" ? "danger" : "primary"}
-				state={{
-					open: decisionOpen(),
-					setOpen: setDecisionOpen,
-					isLoading: decision.action.isPending,
-					isError: !!error(),
-				}}
-				copy={{
-					title: getDecisionTitle(decisionAction()),
-					description: getDecisionDescription(decisionAction()),
-					confirm: getDecisionConfirm(decisionAction()),
-					error: error(),
-				}}
-				callbacks={{
-					onConfirm: submitDecision,
-					onCancel: () => {
-						setDecisionOpen(false);
-						setDecisionAction(undefined);
-						setDecisionComment(createEmptyRichTextValue());
-						resetSchedule();
-						setValidationError(undefined);
-						decision.reset();
-					},
+			<Modal.Confirm
+				open={decisionOpen()}
+				onOpenChange={setDecisionOpen}
+				title={getDecisionTitle(decisionAction())}
+				description={getDecisionDescription(decisionAction())}
+				confirmLabel={getDecisionConfirm(decisionAction())}
+				confirmVariant={decisionAction() === "reject" ? "danger" : "primary"}
+				loading={decision.action.isPending}
+				error={error()}
+				onConfirm={submitDecision}
+				onCancel={() => {
+					setDecisionOpen(false);
+					setDecisionAction(undefined);
+					setDecisionComment(createEmptyRichTextValue());
+					resetSchedule();
+					setValidationError(undefined);
+					decision.reset();
 				}}
 			>
-				<div class="grid gap-4 pb-4 md:pb-6">
+				<div class="grid gap-4">
 					<RichText
 						id="document-publish-request-decision-comment"
 						value={decisionComment()}
@@ -835,88 +829,87 @@ export const ReleaseRequestSidebar: Component<{
 						</div>
 					</Show>
 				</div>
-			</ConfirmationModal>
+			</Modal.Confirm>
 
-			<ConfirmationModal
-				theme="primary"
-				state={{
-					open: rescheduleOpen(),
-					setOpen: setRescheduleOpen,
-					isLoading: reschedule.action.isPending,
-					isError: !!error(),
+			<Modal.Root
+				role="alertdialog"
+				open={rescheduleOpen()}
+				onOpenChange={(open) => {
+					if (open) {
+						setRescheduleOpen(true);
+						return;
+					}
+					setRescheduleOpen(false);
+					resetSchedule();
+					setValidationError(undefined);
+					reschedule.reset();
 				}}
-				copy={{
-					title: requestHasSchedule()
-						? T()("common.reschedule.release")
-						: T()("documents.release.schedule.action"),
-					description: T()("modals.common.schedule.release.description"),
-					confirm: T()("actions.update.schedule"),
-					error: error(),
-				}}
-				callbacks={{
-					onConfirm: saveReschedule,
-					onCancel: () => {
-						setRescheduleOpen(false);
-						resetSchedule();
-						setValidationError(undefined);
-						reschedule.reset();
-					},
-				}}
-				slots={{
-					actions: (
-						<>
+			>
+				<Modal.Header>
+					<Modal.Title>
+						{requestHasSchedule()
+							? T()("common.reschedule.release")
+							: T()("documents.release.schedule.action")}
+					</Modal.Title>
+					<Modal.Description>
+						{T()("modals.common.schedule.release.description")}
+					</Modal.Description>
+				</Modal.Header>
+				<Modal.Body>
+					<div class="grid gap-3">
+						<ReleaseScheduleFields
+							date={scheduleDate()}
+							setDate={setScheduleDate}
+							time={scheduleTime()}
+							setTime={setScheduleTime}
+							timezone={scheduleTimezone()}
+							setTimezone={setScheduleTimezone}
+							onChange={() => setValidationError(undefined)}
+						/>
+					</div>
+				</Modal.Body>
+				<Modal.Footer>
+					<ErrorMessage theme="basic" message={error()} />
+					<Modal.Actions>
+						<Button
+							variant="outline"
+							size="md"
+							type="button"
+							disabled={reschedule.action.isPending}
+							onClick={() => {
+								setRescheduleOpen(false);
+								resetSchedule();
+								setValidationError(undefined);
+								reschedule.reset();
+							}}
+						>
+							{T()("common.cancel")}
+						</Button>
+						<Show when={requestHasSchedule()}>
 							<Button
-								variant="outline"
-								size="md"
-								type="button"
-								disabled={reschedule.action.isPending}
-								onClick={() => {
-									setRescheduleOpen(false);
-									resetSchedule();
-									setValidationError(undefined);
-									reschedule.reset();
-								}}
-							>
-								{T()("common.cancel")}
-							</Button>
-							<Show when={requestHasSchedule()}>
-								<Button
-									variant="danger-outline"
-									size="md"
-									type="button"
-									loading={reschedule.action.isPending}
-									onClick={removeSchedule}
-								>
-									{T()("documents.release.schedule.remove")}
-								</Button>
-							</Show>
-							<Button
-								variant="primary"
+								variant="danger-outline"
 								size="md"
 								type="button"
 								loading={reschedule.action.isPending}
-								onClick={saveReschedule}
+								onClick={removeSchedule}
 							>
-								{requestHasSchedule()
-									? T()("actions.update.schedule")
-									: T()("documents.release.schedule.action")}
+								{T()("documents.release.schedule.remove")}
 							</Button>
-						</>
-					),
-				}}
-			>
-				<div class="grid gap-3 pb-4 md:pb-6">
-					<ReleaseScheduleFields
-						date={scheduleDate()}
-						setDate={setScheduleDate}
-						time={scheduleTime()}
-						setTime={setScheduleTime}
-						timezone={scheduleTimezone()}
-						setTimezone={setScheduleTimezone}
-						onChange={() => setValidationError(undefined)}
-					/>
-				</div>
-			</ConfirmationModal>
+						</Show>
+						<Button
+							variant="primary"
+							size="md"
+							type="button"
+							loading={reschedule.action.isPending}
+							onClick={saveReschedule}
+						>
+							{requestHasSchedule()
+								? T()("actions.update.schedule")
+								: T()("documents.release.schedule.action")}
+						</Button>
+					</Modal.Actions>
+				</Modal.Footer>
+			</Modal.Root>
 			<PublishOperationReviewersModal
 				operation={request}
 				state={{

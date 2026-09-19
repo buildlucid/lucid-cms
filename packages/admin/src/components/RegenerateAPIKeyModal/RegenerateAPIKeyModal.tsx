@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import type { IntegrationServices } from "@/services/api/integrations";
 import T from "@/translations";
 
@@ -29,31 +29,24 @@ const RegenerateAPIKeyModal: Component<RegenerateAPIKeyProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: regenerateAPIKey.action.isPending,
-				isError: regenerateAPIKey.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.integrations.api.keys.regenerate.title")}
+			description={T()("modals.integrations.api.keys.regenerate.description")}
+			confirmVariant="primary"
+			loading={regenerateAPIKey.action.isPending}
+			error={regenerateAPIKey.errors()?.message}
+			onConfirm={() => {
+				const id = typeof props.id === "function" ? props.id() : props.id;
+				if (!id) return console.error("No id provided");
+				regenerateAPIKey.action.mutate({
+					id: id,
+				});
 			}}
-			copy={{
-				title: T()("modals.integrations.api.keys.regenerate.title"),
-				description: T()("modals.integrations.api.keys.regenerate.description"),
-				error: regenerateAPIKey.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = typeof props.id === "function" ? props.id() : props.id;
-					if (!id) return console.error("No id provided");
-					regenerateAPIKey.action.mutate({
-						id: id,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					regenerateAPIKey.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				regenerateAPIKey.reset();
 			}}
 		/>
 	);

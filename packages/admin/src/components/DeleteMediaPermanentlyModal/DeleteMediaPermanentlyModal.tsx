@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -25,30 +25,23 @@ const DeleteMediaPermanentlyModal: Component<DeleteMediaPermanentlyProps> = (
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteMediaPermanently.action.isPending,
-				isError: deleteMediaPermanently.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.media.permanently.title")}
+			description={T()("modals.common.delete.media.permanently.description")}
+			loading={deleteMediaPermanently.action.isPending}
+			error={deleteMediaPermanently.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				deleteMediaPermanently.action.mutate({
+					id: id,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.media.permanently.title"),
-				description: T()("modals.common.delete.media.permanently.description"),
-				error: deleteMediaPermanently.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					deleteMediaPermanently.action.mutate({
-						id: id,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteMediaPermanently.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteMediaPermanently.reset();
 			}}
 		/>
 	);

@@ -1,6 +1,6 @@
 import type { Collection } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -40,41 +40,34 @@ const DuplicateDocumentModal: Component<DuplicateDocumentProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: duplicateDocument.action.isPending,
-				isError: duplicateDocument.action.isError,
-			}}
-			copy={{
-				title: T()("modals.documents.duplicate.title", {
-					name: collectionSingularName(),
-				}),
-				description: T()("modals.documents.duplicate.description", {
-					name: collectionSingularName().toLowerCase(),
-				}),
-				confirm: T()("actions.with.collection", {
-					action: T()("common.duplicate"),
-					collectionSingle: collectionSingularName(),
-				}),
-				error: duplicateDocument.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = typeof props.id === "function" ? props.id() : props.id;
-					if (!id) return console.error("No id provided");
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.documents.duplicate.title", {
+				name: collectionSingularName(),
+			})}
+			description={T()("modals.documents.duplicate.description", {
+				name: collectionSingularName().toLowerCase(),
+			})}
+			confirmLabel={T()("actions.with.collection", {
+				action: T()("common.duplicate"),
+				collectionSingle: collectionSingularName(),
+			})}
+			confirmVariant="primary"
+			loading={duplicateDocument.action.isPending}
+			error={duplicateDocument.errors()?.message}
+			onConfirm={() => {
+				const id = typeof props.id === "function" ? props.id() : props.id;
+				if (!id) return console.error("No id provided");
 
-					duplicateDocument.action.mutate({
-						id,
-						collectionKey: props.collection.key,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					duplicateDocument.reset();
-				},
+				duplicateDocument.action.mutate({
+					id,
+					collectionKey: props.collection.key,
+				});
+			}}
+			onCancel={() => {
+				props.state.setOpen(false);
+				duplicateDocument.reset();
 			}}
 		/>
 	);

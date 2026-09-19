@@ -22,7 +22,6 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { createSingleReq } from "@/services/api/media/useCreateSingle";
 import { createUploadSessionReq } from "@/services/api/media/useCreateUploadSession";
@@ -348,15 +347,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: closeModal,
-			}}
-			options={{
-				noPadding: true,
-			}}
-		>
+		<Modal.Root open={props.state.open} onOpenChange={closeModal}>
 			<div class="flex max-h-[calc(100vh-2rem)] flex-col">
 				<input
 					ref={inputRef}
@@ -390,12 +381,10 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 				>
 					<div class="flex items-start justify-between gap-4">
 						<div class="min-w-0">
-							<h2 class="text-base font-semibold text-title">
-								{T()("media.upload.bulk.title")}
-							</h2>
-							<p class="mt-1 text-sm text-body">
+							<Modal.Title>{T()("media.upload.bulk.title")}</Modal.Title>
+							<Modal.Description class="mt-1">
 								{T()("media.upload.bulk.description")}
-							</p>
+							</Modal.Description>
 						</div>
 						<Button
 							type="button"
@@ -527,7 +516,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						</div>
 					</Show>
 				</div>
-				<ModalFooter>
+				<Modal.Footer>
 					<p class="text-sm text-subtitle">
 						{T()("media.upload.bulk.summary", {
 							total: totalCount(),
@@ -535,7 +524,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							failed: errorCount(),
 						})}
 					</p>
-					<div class="flex flex-wrap items-center gap-2">
+					<Modal.Actions class="flex-wrap">
 						<Button
 							type="button"
 							variant="outline"
@@ -557,10 +546,10 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						>
 							{primaryLabel()}
 						</Button>
-					</div>
-				</ModalFooter>
+					</Modal.Actions>
+				</Modal.Footer>
 			</div>
-		</Modal>
+		</Modal.Root>
 	);
 };
 

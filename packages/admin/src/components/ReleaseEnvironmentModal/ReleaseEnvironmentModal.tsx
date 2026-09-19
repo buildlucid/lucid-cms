@@ -7,7 +7,7 @@ import {
 	createSignal,
 	Show,
 } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
 import { Select } from "@/components/Select/Select";
 import T from "@/translations";
@@ -84,56 +84,51 @@ const ReleaseEnvironmentModal: Component<{
 	// ---------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: props.loading,
-				isError: !!error(),
-			}}
-			copy={{
-				title: T()("modals.release.environment.title", {
-					environment: props.environmentLabel() ?? "",
-				}),
-				description: T()("modals.release.environment.description", {
-					environment: props.environmentLabel() ?? "",
-				}),
-				error: error(),
-				confirm: scheduleSelected()
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.release.environment.title", {
+				environment: props.environmentLabel() ?? "",
+			})}
+			description={T()("modals.release.environment.description", {
+				environment: props.environmentLabel() ?? "",
+			})}
+			confirmLabel={
+				scheduleSelected()
 					? T()("documents.release.environment.schedule.confirm")
-					: T()("documents.release.environment.publish.confirm"),
-			}}
-			callbacks={{
-				onConfirm: async () => {
-					const target = props.target();
-					if (!target) return console.error("No release target provided");
-					if (scheduleSelected()) {
-						const scheduledAt = getScheduledAt({
-							date: scheduleDate(),
-							time: scheduleTime(),
-							timezone: scheduleTimezone(),
-						});
-						if (!scheduledAt) {
-							setValidationError(
-								T()("documents.release.schedule.validation.required"),
-							);
-							return;
-						}
-						await props.callbacks.onConfirm(
-							target,
-							scheduledAt,
-							scheduleTimezone(),
+					: T()("documents.release.environment.publish.confirm")
+			}
+			confirmVariant="primary"
+			loading={props.loading}
+			error={error()}
+			onConfirm={async () => {
+				const target = props.target();
+				if (!target) return console.error("No release target provided");
+				if (scheduleSelected()) {
+					const scheduledAt = getScheduledAt({
+						date: scheduleDate(),
+						time: scheduleTime(),
+						timezone: scheduleTimezone(),
+					});
+					if (!scheduledAt) {
+						setValidationError(
+							T()("documents.release.schedule.validation.required"),
 						);
 						return;
 					}
-					await props.callbacks.onConfirm(target);
-				},
-				onCancel: props.callbacks.onCancel,
+					await props.callbacks.onConfirm(
+						target,
+						scheduledAt,
+						scheduleTimezone(),
+					);
+					return;
+				}
+				await props.callbacks.onConfirm(target);
 			}}
+			onCancel={props.callbacks.onCancel}
 		>
 			<Show when={props.scheduling()}>
-				<div class="grid gap-3 pb-4 md:pb-6">
+				<div class="grid gap-3">
 					<Select
 						id="release-environment-timing"
 						name="release-environment-timing"
@@ -166,7 +161,7 @@ const ReleaseEnvironmentModal: Component<{
 					</Show>
 				</div>
 			</Show>
-		</ConfirmationModal>
+		</Modal.Confirm>
 	);
 };
 

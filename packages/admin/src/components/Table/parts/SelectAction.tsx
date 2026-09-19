@@ -8,7 +8,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import T from "@/translations";
 
 interface SelectActionProps {
@@ -175,75 +175,60 @@ export const SelectAction: Component<SelectActionProps> = (props) => {
 				</div>
 			</Show>
 			<Show when={showDeleteAction()}>
-				<ConfirmationModal
-					state={{
-						open: deleteModalOpen(),
-						setOpen: setDeleteModalOpen,
-						isLoading: isDeleting(),
-						isError: false,
-					}}
-					copy={{
-						title:
-							props.copy?.deleteModalTitle ||
-							T()("modals.common.delete.items.title"),
-						description:
-							props.copy?.deleteModalDescription ||
-							T()("modals.common.delete.items.description"),
-					}}
-					callbacks={{
-						onConfirm: deleteHandler,
-						onCancel: () => {
-							setDeleteModalOpen(false);
-						},
+				<Modal.Confirm
+					open={deleteModalOpen()}
+					onOpenChange={setDeleteModalOpen}
+					title={
+						props.copy?.deleteModalTitle ||
+						T()("modals.common.delete.items.title")
+					}
+					description={
+						props.copy?.deleteModalDescription ||
+						T()("modals.common.delete.items.description")
+					}
+					loading={isDeleting()}
+					onConfirm={deleteHandler}
+					onCancel={() => {
+						setDeleteModalOpen(false);
 					}}
 				/>
 			</Show>
 			<Show when={showDeletePermanentlyAction()}>
-				<ConfirmationModal
-					state={{
-						open: deletePermanentlyModalOpen(),
-						setOpen: setDeletePermanentlyModalOpen,
-						isLoading: isDeletingPermanently(),
-						isError: false,
-					}}
-					copy={{
-						title:
-							props.copy?.deletePermanentlyModalTitle ||
-							T()("modals.common.delete.items.permanently.title"),
-						description:
-							props.copy?.deletePermanentlyModalDescription ||
-							T()("modals.common.delete.items.permanently.description"),
-					}}
-					callbacks={{
-						onConfirm: deletePermanentlyHandler,
-						onCancel: () => {
-							setDeletePermanentlyModalOpen(false);
-						},
+				<Modal.Confirm
+					open={deletePermanentlyModalOpen()}
+					onOpenChange={setDeletePermanentlyModalOpen}
+					title={
+						props.copy?.deletePermanentlyModalTitle ||
+						T()("modals.common.delete.items.permanently.title")
+					}
+					description={
+						props.copy?.deletePermanentlyModalDescription ||
+						T()("modals.common.delete.items.permanently.description")
+					}
+					loading={isDeletingPermanently()}
+					onConfirm={deletePermanentlyHandler}
+					onCancel={() => {
+						setDeletePermanentlyModalOpen(false);
 					}}
 				/>
 			</Show>
 			<Show when={showRestoreAction()}>
-				<ConfirmationModal
-					theme="primary"
-					state={{
-						open: restoreModalOpen(),
-						setOpen: setRestoreModalOpen,
-						isLoading: isRestoring(),
-						isError: false,
-					}}
-					copy={{
-						title:
-							props.copy?.restoreModalTitle ||
-							T()("modals.common.restore.items.title"),
-						description:
-							props.copy?.restoreModalDescription ||
-							T()("modals.common.restore.items.description"),
-					}}
-					callbacks={{
-						onConfirm: restoreHandler,
-						onCancel: () => {
-							setRestoreModalOpen(false);
-						},
+				<Modal.Confirm
+					open={restoreModalOpen()}
+					onOpenChange={setRestoreModalOpen}
+					title={
+						props.copy?.restoreModalTitle ||
+						T()("modals.common.restore.items.title")
+					}
+					description={
+						props.copy?.restoreModalDescription ||
+						T()("modals.common.restore.items.description")
+					}
+					confirmVariant="primary"
+					loading={isRestoring()}
+					onConfirm={restoreHandler}
+					onCancel={() => {
+						setRestoreModalOpen(false);
 					}}
 				/>
 			</Show>

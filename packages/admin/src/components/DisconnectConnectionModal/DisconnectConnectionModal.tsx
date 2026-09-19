@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -18,24 +18,17 @@ const DisconnectConnectionModal: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: disconnect.action.isPending,
-				isError: disconnect.action.isError,
-			}}
-			copy={{
-				title: T()("connection.disconnect.title"),
-				description: T()("connection.disconnect.description"),
-				error: disconnect.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => disconnect.action.mutate({}),
-				onCancel: () => {
-					props.state.setOpen(false);
-					disconnect.reset();
-				},
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("connection.disconnect.title")}
+			description={T()("connection.disconnect.description")}
+			loading={disconnect.action.isPending}
+			error={disconnect.errors()?.message}
+			onConfirm={() => disconnect.action.mutate({})}
+			onCancel={() => {
+				props.state.setOpen(false);
+				disconnect.reset();
 			}}
 		/>
 	);

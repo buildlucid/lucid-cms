@@ -755,16 +755,11 @@ const CustomFieldGenerationModal: Component = () => {
 	// Render
 	return (
 		<Show when={featureEnabled()}>
-			<Modal
-				state={{
-					open: isOpen(),
-					setOpen: close,
-				}}
-				options={{
-					size: "large",
-					noPadding: true,
-					zIndex: modal()?.data.zIndex,
-				}}
+			<Modal.Root
+				open={isOpen()}
+				onOpenChange={close}
+				size="lg"
+				zIndex={modal()?.data.zIndex}
 			>
 				<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
 					<form
@@ -1086,7 +1081,7 @@ const CustomFieldGenerationModal: Component = () => {
 						</div>
 					</div>
 				</div>
-			</Modal>
+			</Modal.Root>
 		</Show>
 	);
 };

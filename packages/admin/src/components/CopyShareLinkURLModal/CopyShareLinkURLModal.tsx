@@ -1,6 +1,6 @@
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { AlertModal } from "@/components/AlertModal/AlertModal";
 import CopyInput from "@/components/CopyInput/CopyInput";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -42,18 +42,23 @@ const CopyShareLinkURLModal: Component<{
 	// ------------------------------
 	// Render
 	return (
-		<AlertModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			copy={{
-				title: T()("modals.common.copy.share.link.url.title"),
-				description: T()("modals.common.copy.share.link.url.description"),
-			}}
+		<Modal.Root
+			role="alertdialog"
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
 		>
-			<CopyInput value={url() || ""} />
-		</AlertModal>
+			<Modal.Header>
+				<Modal.Title>
+					{T()("modals.common.copy.share.link.url.title")}
+				</Modal.Title>
+				<Modal.Description>
+					{T()("modals.common.copy.share.link.url.description")}
+				</Modal.Description>
+			</Modal.Header>
+			<Modal.Body>
+				<CopyInput value={url() || ""} />
+			</Modal.Body>
+		</Modal.Root>
 	);
 };
 

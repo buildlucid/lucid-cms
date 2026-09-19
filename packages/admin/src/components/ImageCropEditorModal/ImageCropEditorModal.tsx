@@ -14,7 +14,6 @@ import Button from "@/components/Button/Button";
 import { DegreeRangeControl } from "@/components/DegreeRangeControl/DegreeRangeControl";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 import {
@@ -540,13 +539,10 @@ const ImageCropEditorModal: Component<{
 	// ------------------------------
 	// Render
 	return (
-		<Modal
-			state={props.state}
-			options={{
-				noBorder: true,
-				noPadding: true,
-				size: "large",
-			}}
+		<Modal.Root
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			size="lg"
 		>
 			<div class="relative overflow-hidden bg-input-base rectangle-background">
 				<div class="relative z-10">
@@ -562,16 +558,16 @@ const ImageCropEditorModal: Component<{
 					class="image-cropper-controls z-40 overflow-y-auto bg-background-base p-4"
 				>
 					<div class="mb-4">
-						<h2 class="text-title text-base font-semibold">
+						<Modal.Title>
 							{props.source?.crop
 								? T()("media.crop.edit.title")
 								: T()("media.crop.title")}
-						</h2>
-						<p class="text-body text-sm mt-1">
+						</Modal.Title>
+						<Modal.Description>
 							{props.source?.crop
 								? T()("media.crop.edit.description")
 								: T()("media.crop.description")}
-						</p>
+						</Modal.Description>
 					</div>
 					<div class="space-y-4">
 						<div>
@@ -652,9 +648,8 @@ const ImageCropEditorModal: Component<{
 					</div>
 				</div>
 			</div>
-			<ModalFooter options={{ border: true }}>
-				<div />
-				<div class="flex items-center justify-end gap-2">
+			<Modal.Footer>
+				<Modal.Actions>
 					<Button
 						type="button"
 						variant="outline"
@@ -675,9 +670,9 @@ const ImageCropEditorModal: Component<{
 					>
 						{T()("media.crop.apply")}
 					</Button>
-				</div>
-			</ModalFooter>
-		</Modal>
+				</Modal.Actions>
+			</Modal.Footer>
+		</Modal.Root>
 	);
 };
 

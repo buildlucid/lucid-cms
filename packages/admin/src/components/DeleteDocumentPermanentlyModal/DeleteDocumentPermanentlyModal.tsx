@@ -1,6 +1,6 @@
 import type { Collection } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -42,33 +42,24 @@ const DeleteDocumentPermanentlyModal: Component<
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: permaDelete.action.isPending,
-				isError: permaDelete.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.document.permanently.title")}
+			description={T()("modals.common.delete.document.permanently.description")}
+			loading={permaDelete.action.isPending}
+			error={permaDelete.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				permaDelete.action.mutate({
+					id: id,
+					collectionKey: props.collection.key,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.document.permanently.title"),
-				description: T()(
-					"modals.common.delete.document.permanently.description",
-				),
-				error: permaDelete.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					permaDelete.action.mutate({
-						id: id,
-						collectionKey: props.collection.key,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					permaDelete.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				permaDelete.reset();
 			}}
 		/>
 	);

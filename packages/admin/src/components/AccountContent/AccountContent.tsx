@@ -11,11 +11,11 @@ import {
 import { AppearancePreference } from "@/components/AppearancePreference/AppearancePreference";
 import AuthProviderRow from "@/components/AuthProviderRow/AuthProviderRow";
 import Button from "@/components/Button/Button";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
 import CreateUpdateProfilePicturePanel from "@/components/CreateUpdateProfilePicturePanel/CreateUpdateProfilePicturePanel";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
+import { Modal } from "@/components/Modal/Modal";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
@@ -484,27 +484,19 @@ export const AccountContent: Component = () => {
 					}}
 				/>
 			</Show>
-			<ConfirmationModal
-				theme="danger"
-				state={{
-					open: revokeSessionsModalOpen(),
-					setOpen: setRevokeSessionsModalOpen,
-					isLoading: revokeRefreshTokens.action.isPending,
-					isError: revokeRefreshTokens.action.isError,
+			<Modal.Confirm
+				open={revokeSessionsModalOpen()}
+				onOpenChange={setRevokeSessionsModalOpen}
+				title={T()("modals.account.revoke.sessions.title")}
+				description={T()("modals.account.revoke.sessions.description")}
+				loading={revokeRefreshTokens.action.isPending}
+				error={revokeRefreshTokens.errors()?.message}
+				onConfirm={() => {
+					revokeRefreshTokens.action.mutate({});
 				}}
-				copy={{
-					title: T()("modals.account.revoke.sessions.title"),
-					description: T()("modals.account.revoke.sessions.description"),
-					error: revokeRefreshTokens.errors()?.message,
-				}}
-				callbacks={{
-					onConfirm: () => {
-						revokeRefreshTokens.action.mutate({});
-					},
-					onCancel: () => {
-						setRevokeSessionsModalOpen(false);
-						revokeRefreshTokens.reset();
-					},
+				onCancel={() => {
+					setRevokeSessionsModalOpen(false);
+					revokeRefreshTokens.reset();
 				}}
 			/>
 			<CreateUpdateProfilePicturePanel

@@ -8,7 +8,6 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import T from "@/translations";
 
 export interface FocalPoint {
@@ -167,24 +166,14 @@ const FocalPointEditorModal: Component<{
 	// ------------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			options={{
-				noPadding: true,
-			}}
-		>
-			<div class="space-y-4 p-4 md:p-6">
-				<div>
-					<h2 class="text-title text-base font-semibold">
-						{T()("media.focal.point.label")}
-					</h2>
-					<p class="text-body text-base mt-1">
-						{T()("media.focal.point.description")}
-					</p>
-				</div>
+		<Modal.Root open={props.state.open} onOpenChange={props.state.setOpen}>
+			<Modal.Header>
+				<Modal.Title>{T()("media.focal.point.label")}</Modal.Title>
+				<Modal.Description>
+					{T()("media.focal.point.description")}
+				</Modal.Description>
+			</Modal.Header>
+			<Modal.Body>
 				<div
 					ref={stageRef}
 					class="relative flex h-[52vh] max-h-130 min-h-70 w-full items-center justify-center overflow-hidden rounded-md border border-border rectangle-background touch-none"
@@ -233,8 +222,8 @@ const FocalPointEditorModal: Component<{
 						</div>
 					</div>
 				</div>
-			</div>
-			<ModalFooter>
+			</Modal.Body>
+			<Modal.Footer>
 				<Button
 					type="button"
 					variant="danger-subtle"
@@ -244,7 +233,7 @@ const FocalPointEditorModal: Component<{
 				>
 					{T()("common.reset")}
 				</Button>
-				<div class="flex items-center justify-end gap-2">
+				<Modal.Actions>
 					<Button
 						type="button"
 						variant="outline"
@@ -264,9 +253,9 @@ const FocalPointEditorModal: Component<{
 					>
 						{T()("common.save")}
 					</Button>
-				</div>
-			</ModalFooter>
-		</Modal>
+				</Modal.Actions>
+			</Modal.Footer>
+		</Modal.Root>
 	);
 };
 

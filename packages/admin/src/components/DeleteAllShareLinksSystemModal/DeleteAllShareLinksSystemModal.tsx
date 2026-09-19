@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -24,28 +24,21 @@ const DeleteAllShareLinksSystemModal: Component<
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteAllShareLinksSystem.action.isPending,
-				isError: deleteAllShareLinksSystem.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.all.share.links.system.title")}
+			description={T()(
+				"modals.common.delete.all.share.links.system.description",
+			)}
+			loading={deleteAllShareLinksSystem.action.isPending}
+			error={deleteAllShareLinksSystem.errors()?.message}
+			onConfirm={() => {
+				deleteAllShareLinksSystem.action.mutate(undefined);
 			}}
-			copy={{
-				title: T()("modals.common.delete.all.share.links.system.title"),
-				description: T()(
-					"modals.common.delete.all.share.links.system.description",
-				),
-				error: deleteAllShareLinksSystem.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					deleteAllShareLinksSystem.action.mutate(undefined);
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteAllShareLinksSystem.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteAllShareLinksSystem.reset();
 			}}
 		/>
 	);

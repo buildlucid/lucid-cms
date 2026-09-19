@@ -1,8 +1,8 @@
 import type { OAuthClientCreateResponse } from "@types";
 import type { Component } from "solid-js";
-import { AlertModal } from "@/components/AlertModal/AlertModal";
 import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
 import CopyInput from "@/components/CopyInput/CopyInput";
+import { Modal } from "@/components/Modal/Modal";
 import T from "@/translations";
 
 const OAuthClientCredentialsModal: Component<{
@@ -15,49 +15,55 @@ const OAuthClientCredentialsModal: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<AlertModal
-			state={props.state}
-			copy={{
-				title: T()("oauth.clients.credentials.title"),
-				description: props.credentials?.clientSecret
-					? T()("oauth.clients.credentials.description")
-					: T()("oauth.clients.credentials.public.description"),
-			}}
-			options={{ preventDismiss: true }}
-			footer={
-				<div class="ml-auto">
+		<Modal.Root
+			role="alertdialog"
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			dismissible={false}
+		>
+			<Modal.Header>
+				<Modal.Title>{T()("oauth.clients.credentials.title")}</Modal.Title>
+				<Modal.Description>
+					{props.credentials?.clientSecret
+						? T()("oauth.clients.credentials.description")
+						: T()("oauth.clients.credentials.public.description")}
+				</Modal.Description>
+			</Modal.Header>
+			<Modal.Body>
+				<div class="space-y-4">
+					<div>
+						<p class="mb-1.5 text-xs font-medium text-subtitle">
+							{T()("oauth.consent.client.id")}
+						</p>
+						<CopyInput
+							value={props.credentials?.client.clientId ?? ""}
+							label={T()("oauth.consent.client.id")}
+						/>
+					</div>
+					{props.credentials?.clientSecret ? (
+						<div>
+							<p class="mb-1.5 text-xs font-medium text-subtitle">
+								{T()("oauth.clients.client.secret")}
+							</p>
+							<CopyInput
+								value={props.credentials.clientSecret}
+								label={T()("oauth.clients.client.secret")}
+							/>
+						</div>
+					) : null}
+				</div>
+			</Modal.Body>
+			<Modal.Footer>
+				<Modal.Actions>
 					<ConfirmActionButton
 						onConfirm={() => props.state.setOpen(false)}
 						confirmationText={T()("common.confirmations.click.again.to.close")}
 					>
 						{T()("oauth.clients.credentials.saved.action")}
 					</ConfirmActionButton>
-				</div>
-			}
-		>
-			<div class="space-y-4">
-				<div>
-					<p class="mb-1.5 text-xs font-medium text-subtitle">
-						{T()("oauth.consent.client.id")}
-					</p>
-					<CopyInput
-						value={props.credentials?.client.clientId ?? ""}
-						label={T()("oauth.consent.client.id")}
-					/>
-				</div>
-				{props.credentials?.clientSecret ? (
-					<div>
-						<p class="mb-1.5 text-xs font-medium text-subtitle">
-							{T()("oauth.clients.client.secret")}
-						</p>
-						<CopyInput
-							value={props.credentials.clientSecret}
-							label={T()("oauth.clients.client.secret")}
-						/>
-					</div>
-				) : null}
-			</div>
-		</AlertModal>
+				</Modal.Actions>
+			</Modal.Footer>
+		</Modal.Root>
 	);
 };
 

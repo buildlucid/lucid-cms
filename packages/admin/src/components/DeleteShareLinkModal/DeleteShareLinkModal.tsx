@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -22,32 +22,25 @@ const DeleteShareLinkModal: Component<{
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: deleteShareLink.action.isPending,
-				isError: deleteShareLink.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.delete.share.link.title")}
+			description={T()("modals.common.delete.share.link.description")}
+			loading={deleteShareLink.action.isPending}
+			error={deleteShareLink.errors()?.message}
+			onConfirm={() => {
+				const mediaId = props.mediaId?.();
+				const linkId = props.linkId();
+				if (!mediaId || !linkId) return console.error("No ids provided");
+				deleteShareLink.action.mutate({
+					mediaId: mediaId,
+					linkId: linkId,
+				});
 			}}
-			copy={{
-				title: T()("modals.common.delete.share.link.title"),
-				description: T()("modals.common.delete.share.link.description"),
-				error: deleteShareLink.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const mediaId = props.mediaId?.();
-					const linkId = props.linkId();
-					if (!mediaId || !linkId) return console.error("No ids provided");
-					deleteShareLink.action.mutate({
-						mediaId: mediaId,
-						linkId: linkId,
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					deleteShareLink.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				deleteShareLink.reset();
 			}}
 		/>
 	);

@@ -154,6 +154,7 @@ const Link: Component<LinkProps> = (props) => {
 	return (
 		<A
 			{...rest}
+			data-link
 			class={classnames(classes(), local.class)}
 			href={local.href || ""}
 			onClick={linkOnClick}

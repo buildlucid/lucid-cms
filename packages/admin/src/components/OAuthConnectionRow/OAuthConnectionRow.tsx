@@ -6,9 +6,9 @@ import {
 } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
 import DateText from "@/components/DateText/DateText";
 import IconContainer from "@/components/IconContainer/IconContainer";
+import { Modal } from "@/components/Modal/Modal";
 import UpdateOAuthConnectionModal from "@/components/UpdateOAuthConnectionModal/UpdateOAuthConnectionModal";
 import api from "@/services/api";
 import type { OAuthConnectionOwner } from "@/services/api/oauth-connections";
@@ -163,26 +163,18 @@ const OAuthConnectionRow: Component<{
 				owner={props.owner}
 				state={{ open: updateOpen(), setOpen: setUpdateOpen }}
 			/>
-			<ConfirmationModal
-				theme="danger"
-				state={{
-					open: revokeOpen(),
-					setOpen: setRevokeOpen,
-					isLoading: revokeConnection.action.isPending,
-					isError: revokeConnection.action.isError,
-				}}
-				copy={{
-					title: T()("oauth.connections.revoke.title"),
-					description: T()("oauth.connections.revoke.description", {
-						name: props.connection.name,
-					}),
-					error: revokeConnection.errors()?.message,
-					confirm: T()("oauth.connections.revoke.action"),
-				}}
-				callbacks={{
-					onConfirm: revoke,
-					onCancel: cancelRevoke,
-				}}
+			<Modal.Confirm
+				open={revokeOpen()}
+				onOpenChange={setRevokeOpen}
+				title={T()("oauth.connections.revoke.title")}
+				description={T()("oauth.connections.revoke.description", {
+					name: props.connection.name,
+				})}
+				confirmLabel={T()("oauth.connections.revoke.action")}
+				loading={revokeConnection.action.isPending}
+				error={revokeConnection.errors()?.message}
+				onConfirm={revoke}
+				onCancel={cancelRevoke}
 			/>
 		</>
 	);

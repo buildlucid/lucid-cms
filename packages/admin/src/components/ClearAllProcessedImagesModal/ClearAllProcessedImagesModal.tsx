@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -24,28 +24,19 @@ const ClearAllProcessedImagesModal: Component<ClearAllProcessedImagesProps> = (
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: clearAllProcessedImages.action.isPending,
-				isError: clearAllProcessedImages.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.clear.all.processed.images.title")}
+			description={T()("modals.common.clear.all.processed.images.description")}
+			loading={clearAllProcessedImages.action.isPending}
+			error={clearAllProcessedImages.errors()?.message}
+			onConfirm={() => {
+				clearAllProcessedImages.action.mutate({});
 			}}
-			copy={{
-				title: T()("modals.common.clear.all.processed.images.title"),
-				description: T()(
-					"modals.common.clear.all.processed.images.description",
-				),
-				error: clearAllProcessedImages.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					clearAllProcessedImages.action.mutate({});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					clearAllProcessedImages.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				clearAllProcessedImages.reset();
 			}}
 		/>
 	);

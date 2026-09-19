@@ -9,7 +9,6 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { Input } from "@/components/Input/Input";
 import { Modal } from "@/components/Modal/Modal";
-import { ModalFooter } from "@/components/ModalFooter/ModalFooter";
 import { Select } from "@/components/Select/Select";
 import api from "@/services/api";
 import T from "@/translations";
@@ -82,15 +81,7 @@ const UpdateMediaFolderModal: Component<{
 	// -----------------------------
 	// Render
 	return (
-		<Modal
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-			}}
-			options={{
-				noPadding: true,
-			}}
-		>
+		<Modal.Root open={props.state.open} onOpenChange={props.state.setOpen}>
 			<form
 				class="w-full"
 				onSubmit={(e) => {
@@ -106,12 +97,10 @@ const UpdateMediaFolderModal: Component<{
 					});
 				}}
 			>
-				<div class="p-4 md:p-6">
-					<div class="mb-4">
-						<h2 class="text-base font-semibold text-title">
-							{T()("panels.media.folders.update.title")}
-						</h2>
-					</div>
+				<Modal.Header>
+					<Modal.Title>{T()("panels.media.folders.update.title")}</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
 					<Input
 						id="title"
 						value={getTitle()}
@@ -140,8 +129,8 @@ const UpdateMediaFolderModal: Component<{
 						noClear={true}
 						errors={getBodyError("parentFolderId", updateFolder.errors)}
 					/>
-				</div>
-				<ModalFooter>
+				</Modal.Body>
+				<Modal.Footer>
 					<div class="min-w-0">
 						<ErrorMessage
 							theme="basic"
@@ -156,7 +145,7 @@ const UpdateMediaFolderModal: Component<{
 							}
 						/>
 					</div>
-					<div class="flex min-w-max gap-2">
+					<Modal.Actions>
 						<Button
 							type="button"
 							variant="outline"
@@ -175,10 +164,10 @@ const UpdateMediaFolderModal: Component<{
 						>
 							{T()("common.update")}
 						</Button>
-					</div>
-				</ModalFooter>
+					</Modal.Actions>
+				</Modal.Footer>
 			</form>
-		</Modal>
+		</Modal.Root>
 	);
 };
 

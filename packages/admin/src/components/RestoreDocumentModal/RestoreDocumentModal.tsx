@@ -1,6 +1,6 @@
 import type { Collection } from "@types";
 import type { Accessor, Component } from "solid-js";
-import { ConfirmationModal } from "@/components/ConfirmationModal/ConfirmationModal";
+import { Modal } from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -25,36 +25,29 @@ const RestoreDocumentModal: Component<RestoreDocumentProps> = (props) => {
 	// ------------------------------
 	// Render
 	return (
-		<ConfirmationModal
-			theme="primary"
-			state={{
-				open: props.state.open,
-				setOpen: props.state.setOpen,
-				isLoading: restoreDocuments.action.isPending,
-				isError: restoreDocuments.action.isError,
+		<Modal.Confirm
+			open={props.state.open}
+			onOpenChange={props.state.setOpen}
+			title={T()("modals.common.restore.document.title")}
+			description={T()("modals.common.restore.document.description")}
+			confirmVariant="primary"
+			loading={restoreDocuments.action.isPending}
+			error={restoreDocuments.errors()?.message}
+			onConfirm={() => {
+				const id = props.id();
+				if (!id) return console.error("No id provided");
+				if (!props.collection?.key)
+					return console.error("No collection key provided");
+				restoreDocuments.action.mutate({
+					collectionKey: props.collection?.key,
+					body: {
+						ids: [id],
+					},
+				});
 			}}
-			copy={{
-				title: T()("modals.common.restore.document.title"),
-				description: T()("modals.common.restore.document.description"),
-				error: restoreDocuments.errors()?.message,
-			}}
-			callbacks={{
-				onConfirm: () => {
-					const id = props.id();
-					if (!id) return console.error("No id provided");
-					if (!props.collection?.key)
-						return console.error("No collection key provided");
-					restoreDocuments.action.mutate({
-						collectionKey: props.collection?.key,
-						body: {
-							ids: [id],
-						},
-					});
-				},
-				onCancel: () => {
-					props.state.setOpen(false);
-					restoreDocuments.reset();
-				},
+			onCancel={() => {
+				props.state.setOpen(false);
+				restoreDocuments.reset();
 			}}
 		/>
 	);
