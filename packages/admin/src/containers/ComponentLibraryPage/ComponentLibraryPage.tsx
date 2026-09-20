@@ -1,3 +1,4 @@
+import type { RichTextJSON } from "@lucidcms/rich-text";
 import { FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
 import { type Component, createSignal, For, type JSXElement } from "solid-js";
 import Button, {
@@ -20,6 +21,7 @@ import Link, {
 import { Modal, type ModalSize } from "@/components/Modal/Modal";
 import { PageHeader } from "@/components/PageHeader/PageHeader";
 import { PageLayout } from "@/components/PageLayout/PageLayout";
+import { RichText } from "@/components/RichText/RichText";
 import { Select, type SelectSize } from "@/components/Select/Select";
 import {
 	SelectMultiple,
@@ -130,7 +132,6 @@ const ComponentLibraryPage: Component = () => {
 		"This is a sample textarea.\n\nIt supports multiple lines.",
 	);
 	const [switchValue, setSwitchValue] = createSignal(false);
-	const [switchLabelLeft, setSwitchLabelLeft] = createSignal(true);
 	const [selectValue, setSelectValue] = createSignal<string | undefined>(
 		"option1",
 	);
@@ -147,6 +148,10 @@ const ComponentLibraryPage: Component = () => {
 	const [jsonValue, setJsonValue] = createSignal('{\n\t"featured": true\n}');
 	const [codeValue, setCodeValue] = createSignal("<h1>Hello</h1>");
 	const [codeLanguage, setCodeLanguage] = createSignal("html");
+	const [richTextValue, setRichTextValue] = createSignal<RichTextJSON>({
+		type: "doc",
+		content: [{ type: "paragraph" }],
+	});
 	const [modalOpen, setModalOpen] = createSignal(false);
 	//* the size stays put while the modal animates out, so it cannot resize mid close
 	const [modalSize, setModalSize] = createSignal<ModalSize>("md");
@@ -568,6 +573,56 @@ const ComponentLibraryPage: Component = () => {
 					</InfoRow.Content>
 				</InfoRow.Root>
 
+				{/* ---------------------------------------------- RichText */}
+				<InfoRow.Root
+					title={"RichText"}
+					description={"every control is on unless you turn it off"}
+				>
+					<InfoRow.Content title={"Full toolbar"}>
+						<RichText
+							id="rich-text"
+							name="rich-text"
+							label="Body"
+							placeholder="Start writing..."
+							value={richTextValue()}
+							onChange={setRichTextValue}
+						/>
+					</InfoRow.Content>
+					<InfoRow.Content title={"No controls at all"}>
+						<RichText
+							id="rich-text-bare"
+							name="rich-text-bare"
+							label="Plain text"
+							placeholder="No toolbar, and no selection pill either..."
+							headings={false}
+							bold={false}
+							italic={false}
+							underline={false}
+							strikethrough={false}
+							bulletList={false}
+							orderedList={false}
+							clearFormatting={false}
+							links={false}
+							value={richTextValue()}
+							onChange={setRichTextValue}
+						/>
+					</InfoRow.Content>
+					<InfoRow.Content title={"Trimmed down, as a comment box"}>
+						<RichText
+							id="rich-text-comment"
+							name="rich-text-comment"
+							label="Comment"
+							placeholder="Leave a comment..."
+							description="Headings, underline and strikethrough turned off."
+							headings={false}
+							underline={false}
+							strikethrough={false}
+							value={richTextValue()}
+							onChange={setRichTextValue}
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
 				{/* ---------------------------------------------- Select */}
 				<InfoRow.Root
 					title={"Select"}
@@ -653,10 +708,7 @@ const ComponentLibraryPage: Component = () => {
 				</InfoRow.Root>
 
 				{/* ---------------------------------------------- Switch */}
-				<InfoRow.Root
-					title={"Switch"}
-					description={"trueLabel, falseLabel, labelLeft"}
-				>
+				<InfoRow.Root title={"Switch"} description={"trueLabel, falseLabel"}>
 					<InfoRow.Content title={"Default"}>
 						<Switch
 							id="switch-default"
@@ -675,16 +727,6 @@ const ComponentLibraryPage: Component = () => {
 							falseLabel="Draft"
 							value={switchValue()}
 							onChange={setSwitchValue}
-						/>
-					</InfoRow.Content>
-					<InfoRow.Content title={"labelLeft"}>
-						<Switch
-							id="switch-label-left"
-							name="switch-label-left"
-							label="Send notifications"
-							labelLeft={true}
-							value={switchLabelLeft()}
-							onChange={setSwitchLabelLeft}
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>

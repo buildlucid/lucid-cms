@@ -301,7 +301,6 @@ const LinkModal: Component<{
 						trueLabel={T()("common.yes")}
 						falseLabel={T()("common.no")}
 						required={false}
-						labelLeft
 					/>
 				</div>
 			</Modal.Body>

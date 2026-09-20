@@ -27,8 +27,8 @@ import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { Input } from "@/components/Input/Input";
 import { Modal } from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
-import type { RichTextOptions } from "@/components/RichText/RichText";
-import { RichText } from "@/components/RichText/RichText";
+import { DocumentRichText } from "@/components/RichText/DocumentRichText";
+import type { RichTextOptions } from "@/components/RichText/types";
 import { Textarea } from "@/components/Textarea/Textarea";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import api from "@/services/api";
@@ -174,7 +174,7 @@ const DraftEditor: Component<{
 			</Match>
 			<Match when={props.fieldType === "rich-text"}>
 				{/* Existing references remain visible, but new references must be added in the page builder. */}
-				<RichText
+				<DocumentRichText
 					id={`ai-custom-field-generation-preview-rich-text-${props.localeCode}`}
 					value={props.value as RichTextJSON}
 					onChange={(nextValue) => props.onChange(props.localeCode, nextValue)}

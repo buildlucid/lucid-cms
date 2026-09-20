@@ -16,7 +16,6 @@ import {
 import {
 	createEmptyRichTextValue,
 	getRichTextPlainText,
-	reviewCommentRichTextOptions,
 } from "@/utils/rich-text";
 
 export type PublishOperationDecisionAction = "approve" | "reject" | "cancel";
@@ -222,6 +221,7 @@ const PublishOperationDecisionModal: Component<{
 		>
 			<div class="grid gap-4">
 				<RichText
+					name="document-publish-request-decision-comment"
 					id="document-publish-request-decision-comment"
 					value={decisionComment()}
 					onChange={(value) => {
@@ -229,11 +229,11 @@ const PublishOperationDecisionModal: Component<{
 						setValidationError(undefined);
 					}}
 					required={requireDecisionComment()}
-					copy={{
-						label: T()("common.comment"),
-						placeholder: T()("publish.requests.decision.comment.placeholder"),
-					}}
-					options={reviewCommentRichTextOptions}
+					label={T()("common.comment")}
+					placeholder={T()("publish.requests.decision.comment.placeholder")}
+					headings={false}
+					underline={false}
+					strikethrough={false}
 				/>
 				<Show when={props.action() === "approve" && schedulingSupported()}>
 					<div class="grid gap-3">

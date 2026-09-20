@@ -40,8 +40,13 @@ export interface RichTextEmbeddedBrickReference {
 
 export interface RichTextOptions {
 	headings?: boolean;
+	bold?: boolean;
+	italic?: boolean;
 	underline?: boolean;
 	strikethrough?: boolean;
+	bulletList?: boolean;
+	orderedList?: boolean;
+	clearFormatting?: boolean;
 	links?: {
 		external?: boolean;
 		internal?: boolean | string[];

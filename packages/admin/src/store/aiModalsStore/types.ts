@@ -5,7 +5,7 @@ import type {
 	MediaTranslation,
 } from "@types";
 import type { Accessor } from "solid-js";
-import type { RichTextOptions } from "@/components/RichText/RichText";
+import type { RichTextOptions } from "@/components/RichText/types";
 
 export type AiImageSource = {
 	file?: File | null;

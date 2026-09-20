@@ -120,3 +120,12 @@ export const getRichTextVariableAttrs = (
 		value: getRichTextUserFieldText(selection.user, selection.fieldKey),
 	};
 };
+
+/** Whether the insert controls or the fullscreen toggle have anything to draw. */
+export const hasRichTextInsertControls = (options?: RichTextOptions) =>
+	options?.fullscreen === true ||
+	(options?.referenceControls !== false &&
+		(isRichTextOptionEnabled(options?.media) ||
+			isRichTextOptionEnabled(options?.documents) ||
+			isRichTextVariableOptionEnabled(options?.variables) ||
+			isRichTextOptionEnabled(options?.bricks)));

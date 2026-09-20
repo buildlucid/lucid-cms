@@ -6,12 +6,15 @@ import {
 	createEffect,
 	createMemo,
 	createSignal,
+	type JSXElement,
 	onCleanup,
 	Show,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import { createEditorTransaction } from "solid-tiptap";
 import T from "@/translations";
+import { hasRichTextInsertControls } from "../helpers";
+import { getRichTextToolbarFeatures } from "../toolbar-features";
 import type { RichTextOptions } from "../types";
 import type { HeadingOption } from "./HeadingMenu";
 import InsertControls from "./InsertControls";
@@ -37,6 +40,8 @@ const Toolbar: Component<{
 	options?: RichTextOptions;
 	fullscreen: boolean;
 	onFullscreenChange: (fullscreen: boolean) => void;
+	/** Rendered at the end of the toolbar row, after the built in controls. */
+	end?: JSXElement;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -441,63 +446,73 @@ const Toolbar: Component<{
 		}
 	});
 
+	const hasControls = createMemo(
+		() => getRichTextToolbarFeatures(props.options).size > 0,
+	);
+	const hasInsertControls = createMemo(() =>
+		hasRichTextInsertControls(props.options),
+	);
+
 	// ----------------------------------------
 	// Render
 	return (
 		<>
-			<div
-				class={classNames(
-					"flex flex-wrap items-center gap-1.5 border-b border-border py-1.5",
-					{
-						"px-2": props.options?.appearance !== "seamless",
-					},
-				)}
-			>
-				<ToolbarControls
-					mode="toolbar"
-					disabled={props.disabled}
-					options={props.options}
-					activeHeading={activeHeading()}
-					headingOptions={headingOptions()}
-					onSetHeading={setHeading}
-					isBold={isBold()}
-					isItalic={isItalic()}
-					isUnderline={isUnderline()}
-					isStrike={isStrike()}
-					isOrderedList={isOrderedList()}
-					isBulletList={isBulletList()}
-					isLink={isLink()}
-					onToggleBold={() => props.editor.chain().focus().toggleBold().run()}
-					onToggleItalic={() =>
-						props.editor.chain().focus().toggleItalic().run()
-					}
-					onToggleUnderline={() =>
-						props.editor.chain().focus().toggleUnderline().run()
-					}
-					onToggleStrike={() =>
-						props.editor.chain().focus().toggleStrike().run()
-					}
-					onToggleOrderedList={() =>
-						props.editor.chain().focus().toggleOrderedList().run()
-					}
-					onToggleBulletList={() =>
-						props.editor.chain().focus().toggleBulletList().run()
-					}
-					onOpenLinkModal={openLinkModal}
-					onClearFormatting={() =>
-						props.editor.chain().focus().clearNodes().unsetAllMarks().run()
-					}
-				/>
-				<InsertControls
-					editor={props.editor}
-					disabled={props.disabled}
-					options={props.options}
-					fullscreen={props.fullscreen}
-					onFullscreenChange={props.onFullscreenChange}
-				/>
-			</div>
+			<Show when={hasControls() || hasInsertControls() || props.end}>
+				<div
+					class={classNames(
+						"flex flex-wrap items-center gap-1.5 border-b border-border py-1.5",
+						{
+							"px-2": props.options?.appearance !== "seamless",
+						},
+					)}
+				>
+					<ToolbarControls
+						mode="toolbar"
+						disabled={props.disabled}
+						options={props.options}
+						activeHeading={activeHeading()}
+						headingOptions={headingOptions()}
+						onSetHeading={setHeading}
+						isBold={isBold()}
+						isItalic={isItalic()}
+						isUnderline={isUnderline()}
+						isStrike={isStrike()}
+						isOrderedList={isOrderedList()}
+						isBulletList={isBulletList()}
+						isLink={isLink()}
+						onToggleBold={() => props.editor.chain().focus().toggleBold().run()}
+						onToggleItalic={() =>
+							props.editor.chain().focus().toggleItalic().run()
+						}
+						onToggleUnderline={() =>
+							props.editor.chain().focus().toggleUnderline().run()
+						}
+						onToggleStrike={() =>
+							props.editor.chain().focus().toggleStrike().run()
+						}
+						onToggleOrderedList={() =>
+							props.editor.chain().focus().toggleOrderedList().run()
+						}
+						onToggleBulletList={() =>
+							props.editor.chain().focus().toggleBulletList().run()
+						}
+						onOpenLinkModal={openLinkModal}
+						onClearFormatting={() =>
+							props.editor.chain().focus().clearNodes().unsetAllMarks().run()
+						}
+					/>
+					<InsertControls
+						editor={props.editor}
+						disabled={props.disabled}
+						options={props.options}
+						fullscreen={props.fullscreen}
+						onFullscreenChange={props.onFullscreenChange}
+					/>
+					<Show when={props.end}>{props.end}</Show>
+				</div>
+			</Show>
 
-			<Show when={isDesktop()}>
+			<Show when={isDesktop() && hasControls()}>
 				<Portal>
 					<div
 						data-kb-top-layer

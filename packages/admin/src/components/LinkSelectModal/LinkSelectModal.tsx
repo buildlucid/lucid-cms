@@ -88,7 +88,6 @@ const LinkSelectModal: Component<LinkSelectModalProps> = (props) => {
 						trueLabel={T()("common.yes")}
 						falseLabel={T()("common.no")}
 						required={false}
-						labelLeft
 					/>
 				</div>
 			</Modal.Body>

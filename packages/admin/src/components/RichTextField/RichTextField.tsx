@@ -13,12 +13,12 @@ import type {
 } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import AddBrickModal from "@/components/AddBrickModal/AddBrickModal";
+import { DocumentRichText } from "@/components/RichText/DocumentRichText";
 import {
 	getReadableRichTextUserVariableFields,
 	getReadableRichTextVariableCollectionKeys,
 } from "@/components/RichText/helpers";
-import type { RichTextOptions } from "@/components/RichText/RichText";
-import { RichText } from "@/components/RichText/RichText";
+import type { RichTextOptions } from "@/components/RichText/types";
 import { Permissions } from "@/constants/permissions";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
@@ -463,7 +463,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	// Render
 	return (
 		<>
-			<RichText
+			<DocumentRichText
 				id={brickHelpers.customFieldId({
 					key: props.state.fieldConfig.key,
 					brickIndex: fieldRenderState.brickIndex(),
@@ -516,7 +516,10 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 					data={{ brickConfig: embeddedBrickConfigs() }}
 					callbacks={{
 						onSelect: (brickConfig) => {
-							const ref = brickStore.get.addEmbeddedBrick({ brickConfig });
+							const ref = brickStore.get.addEmbeddedBrick({
+								brickConfig,
+								locales: fieldRenderState.contentLocales(),
+							});
 							onEmbeddedBrickSelected?.(ref);
 							onEmbeddedBrickSelected = undefined;
 						},

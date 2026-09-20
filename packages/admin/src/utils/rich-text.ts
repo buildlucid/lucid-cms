@@ -1,12 +1,6 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import { generateText } from "@lucidcms/rich-text/browser";
 
-export const reviewCommentRichTextOptions = {
-	headings: false,
-	underline: false,
-	strikethrough: false,
-} as const;
-
 export const createEmptyRichTextValue = (): RichTextJSON => ({
 	type: "doc",
 	content: [{ type: "paragraph" }],

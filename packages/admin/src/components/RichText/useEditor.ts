@@ -1,5 +1,5 @@
 import { mergeExtensions, type RichTextJSON } from "@lucidcms/rich-text";
-import type { Editor } from "@tiptap/core";
+import type { Editor, Extensions } from "@tiptap/core";
 import {
 	type Accessor,
 	createEffect,
@@ -52,19 +52,28 @@ const getEditorOptions = (options: () => RichTextOptions | undefined) => {
 	} satisfies RichTextOptions;
 };
 
-/** Builds the enabled Tiptap extension set for an editor instance. */
-const getExtensions = (options?: RichTextOptions) =>
-	mergeExtensions(createRichTextNodeViewExtensions(options)).filter(
-		(extension) => {
-			if (extension.name === "heading" && options?.headings === false)
-				return false;
-			if (extension.name === "underline" && options?.underline === false)
-				return false;
-			if (extension.name === "strike" && options?.strikethrough === false)
-				return false;
-			return true;
-		},
-	);
+/**
+ * Builds the enabled Tiptap extension set for an editor instance. The caller's
+ * extensions are merged last, so they can replace ours by name.
+ */
+const getExtensions = (options?: RichTextOptions, custom?: Extensions) =>
+	mergeExtensions([
+		...createRichTextNodeViewExtensions(options),
+		...(custom ?? []),
+	]).filter((extension) => {
+		//* dropping the extension, not just the button, so the keyboard shortcut
+		//* and pasted markup go with it
+		const disabledBy: Record<string, boolean | undefined> = {
+			heading: options?.headings === false,
+			bold: options?.bold === false,
+			italic: options?.italic === false,
+			underline: options?.underline === false,
+			strike: options?.strikethrough === false,
+			bulletList: options?.bulletList === false,
+			orderedList: options?.orderedList === false,
+		};
+		return disabledBy[extension.name] !== true;
+	});
 
 /** Creates and synchronizes the shared rich-text editor instance. */
 const useEditor = (config: {
@@ -72,6 +81,8 @@ const useEditor = (config: {
 	onChange: (value: RichTextJSON) => void;
 	disabled?: boolean;
 	options?: RichTextOptions;
+	/** Extra Tiptap extensions, read once when the editor is created. */
+	extensions?: Extensions;
 }): {
 	editor: Accessor<Editor | undefined>;
 	focused: Accessor<boolean>;
@@ -100,7 +111,7 @@ const useEditor = (config: {
 
 		return untrack(() => ({
 			element,
-			extensions: getExtensions(options),
+			extensions: getExtensions(options, config.extensions),
 			editorProps: {
 				attributes: {
 					class:

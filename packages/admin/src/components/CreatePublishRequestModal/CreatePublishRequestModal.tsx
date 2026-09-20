@@ -35,7 +35,6 @@ import {
 import {
 	createEmptyRichTextValue,
 	getRichTextPlainText,
-	reviewCommentRichTextOptions,
 } from "@/utils/rich-text";
 
 type ReviewerOption = SelectMultipleOption & {
@@ -239,6 +238,7 @@ const CreatePublishRequestModal: Component<{
 			<Modal.Body>
 				<div class="flex flex-col gap-3">
 					<RichText
+						name="publish-request-comment"
 						id="publish-request-comment"
 						value={comment()}
 						onChange={(value) => {
@@ -248,11 +248,11 @@ const CreatePublishRequestModal: Component<{
 						required={
 							requireComment() || (autoAccept() && requireDecisionComment())
 						}
-						copy={{
-							label: T()("common.comment"),
-							placeholder: T()("publish.requests.comment.placeholder"),
-						}}
-						options={reviewCommentRichTextOptions}
+						label={T()("common.comment")}
+						placeholder={T()("publish.requests.comment.placeholder")}
+						headings={false}
+						underline={false}
+						strikethrough={false}
 					/>
 					<Show when={!autoAccept()}>
 						<SelectMultiple

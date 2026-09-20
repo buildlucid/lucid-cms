@@ -30,6 +30,10 @@ export {
 } from "../components/Link/Link.js";
 export * from "../components/Modal/Modal.js";
 export {
+	RichText,
+	type RichTextProps,
+} from "../components/RichText/RichText.js";
+export {
 	Select,
 	type SelectOption,
 	type SelectProps,

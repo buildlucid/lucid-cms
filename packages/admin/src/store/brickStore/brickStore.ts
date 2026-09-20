@@ -89,7 +89,10 @@ const [get, set] = createStore<{
 	captureInitialSnapshot: (snapshot?: BrickSnapshot[]) => void;
 	createSnapshotFromPayload: (payload: BrickSnapshotPayload) => BrickSnapshot[];
 	addBrick: (props: { brickConfig: CollectionBrickConfig }) => void;
-	addEmbeddedBrick: (props: { brickConfig: CollectionBrickConfig }) => string;
+	addEmbeddedBrick: (props: {
+		brickConfig: CollectionBrickConfig;
+		locales: string[];
+	}) => string;
 	replaceBrickFields: (props: {
 		brickIndex: number;
 		fields: InternalDocumentField[];
@@ -304,9 +307,22 @@ const [get, set] = createStore<{
 		});
 		rebuildBrickFieldIndex(get.bricks.length - 1);
 	},
-	/** Creates a brick owned by a rich-text embedded-brick node. */
+	/**
+	 * Creates a brick owned by a rich-text embedded-brick node. Its fields are
+	 * seeded here rather than on first edit, because nothing renders an embedded
+	 * brick's body until the edit drawer opens, so it would otherwise save with
+	 * no values and preview as a bare brick key.
+	 */
 	addEmbeddedBrick(props) {
 		const ref = nanoid();
+		const fields: InternalDocumentField[] = [];
+		ensureFieldsForConfigs({
+			fields,
+			fieldConfigs: props.brickConfig.fields,
+			locales: props.locales,
+			collectionLocalized: get.collectionLocalized,
+		});
+
 		batch(() => {
 			set(
 				"bricks",
@@ -317,7 +333,7 @@ const [get, set] = createStore<{
 						order: 0,
 						type: "embedded",
 						open: false,
-						fields: [],
+						fields,
 					});
 				}),
 			);

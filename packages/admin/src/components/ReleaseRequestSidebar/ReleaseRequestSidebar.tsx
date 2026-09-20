@@ -48,7 +48,6 @@ import {
 import {
 	createEmptyRichTextValue,
 	getRichTextPlainText,
-	reviewCommentRichTextOptions,
 } from "@/utils/rich-text";
 import ReleaseRequestCommentBlock from "./parts/ReleaseRequestCommentBlock";
 
@@ -780,6 +779,7 @@ export const ReleaseRequestSidebar: Component<{
 			>
 				<div class="grid gap-4">
 					<RichText
+						name="document-publish-request-decision-comment"
 						id="document-publish-request-decision-comment"
 						value={decisionComment()}
 						onChange={(value) => {
@@ -787,11 +787,11 @@ export const ReleaseRequestSidebar: Component<{
 							setValidationError(undefined);
 						}}
 						required={requireDecisionComment()}
-						copy={{
-							label: T()("common.comment"),
-							placeholder: T()("publish.requests.decision.comment.placeholder"),
-						}}
-						options={reviewCommentRichTextOptions}
+						label={T()("common.comment")}
+						placeholder={T()("publish.requests.decision.comment.placeholder")}
+						headings={false}
+						underline={false}
+						strikethrough={false}
 					/>
 					<Show when={decisionAction() === "approve" && schedulingSupported()}>
 						<div class="grid gap-3">
