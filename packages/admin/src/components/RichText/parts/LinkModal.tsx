@@ -269,7 +269,7 @@ const LinkModal: Component<{
 								>
 									<Button
 										type="button"
-										variant="secondary-subtle"
+										variant="background-subtle"
 										size="xs"
 										shape="square"
 										onClick={selectDocument}

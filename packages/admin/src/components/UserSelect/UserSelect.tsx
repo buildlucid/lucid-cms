@@ -219,7 +219,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 								<div class="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<Button
 										type="button"
-										variant="secondary-subtle"
+										variant="background-subtle"
 										size="xs"
 										shape="square"
 										onClick={openUserSelectModal}

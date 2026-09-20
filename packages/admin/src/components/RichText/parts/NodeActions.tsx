@@ -22,7 +22,7 @@ const NodeActions: Component<NodeActionsProps> = (props) => {
 		>
 			<Button
 				type="button"
-				variant="secondary-subtle"
+				variant="background-subtle"
 				size="xs"
 				shape="square"
 				class="rounded-full!"

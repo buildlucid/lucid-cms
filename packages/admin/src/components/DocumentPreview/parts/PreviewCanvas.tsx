@@ -344,7 +344,7 @@ export const PreviewCanvas: Component<{
 						<PreviewHelp mode={props.previewMode()} />
 						<Button
 							type="button"
-							variant="secondary-subtle"
+							variant="background-subtle"
 							size="xs"
 							shape="square"
 							title={T()("common.refresh")}
@@ -355,7 +355,7 @@ export const PreviewCanvas: Component<{
 						</Button>
 						<Button
 							type="button"
-							variant="secondary-subtle"
+							variant="background-subtle"
 							size="xs"
 							shape="square"
 							title={T()("preview.copy.url")}
@@ -367,7 +367,7 @@ export const PreviewCanvas: Component<{
 						</Button>
 						<Button
 							type="button"
-							variant="secondary-subtle"
+							variant="background-subtle"
 							size="xs"
 							shape="square"
 							title={T()("preview.open")}

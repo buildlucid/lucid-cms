@@ -173,7 +173,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					size="sm"
 					shape="square"
 					type="button"
-					class="w-10! h-10! min-w-[40px]!"
+					class="w-10! h-10! min-w-10!"
 					onClick={props.onRemove}
 					title={removeRowTitle()}
 					aria-label={removeRowTitle()}
@@ -185,7 +185,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					size="sm"
 					shape="square"
 					type="button"
-					class="w-10! h-10! min-w-[40px]!"
+					class="w-10! h-10! min-w-10!"
 					onClick={props.onAddRow}
 					disabled={!props.canAddRow}
 					title={addRowTitle()}

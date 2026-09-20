@@ -256,7 +256,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					/>
 					<Button
 						type="button"
-						variant="secondary-subtle"
+						variant="background-subtle"
 						size="xs"
 						shape="square"
 						tabIndex="-1"

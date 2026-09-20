@@ -98,7 +98,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 						<div class="flex items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 							<Button
 								type="button"
-								variant="secondary-subtle"
+								variant="background-subtle"
 								size="xs"
 								shape="square"
 								onClick={openLinkModal}

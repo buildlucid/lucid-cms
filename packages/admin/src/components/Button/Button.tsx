@@ -20,11 +20,9 @@ export type ButtonVariant =
 	| "primary-outline"
 	| "danger"
 	| "danger-outline"
-	| "secondary-subtle"
+	| "background-subtle"
 	| "danger-subtle"
-	| "ghost"
-	| "toggle"
-	| "toggle-active";
+	| "ghost";
 
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
@@ -122,18 +120,10 @@ const Button: Component<ButtonProps> = (props) => {
 				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-subtitle fill-error-contrast hover:text-error-contrast":
 					local.variant === "danger-outline",
 				"text-icon-faded fill-icon-faded hover:text-subtitle hover:fill-subtitle hover:bg-background-base/50 ring-primary-base":
-					local.variant === "secondary-subtle",
+					local.variant === "background-subtle",
 				"text-icon-faded fill-icon-faded hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
 					local.variant === "danger-subtle",
 				"text-subtitle": local.variant === "ghost",
-
-				// Toggles
-				"ring-primary-base":
-					local.variant === "toggle" || local.variant === "toggle-active",
-				"bg-input-base border border-border text-input-contrast fill-body hover:bg-secondary-base hover:text-secondary-contrast hover:fill-secondary-contrast":
-					local.variant === "toggle",
-				"bg-primary-base text-primary-contrast fill-primary-contrast hover:bg-primary-hover border-primary-base border":
-					local.variant === "toggle-active",
 
 				// Shape
 				"rounded-full!": local.shape === "circle",

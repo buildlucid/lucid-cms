@@ -1448,7 +1448,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show when={posterPreview()}>
 												<Button
 													type="button"
-													variant="secondary-subtle"
+													variant="background-subtle"
 													size="xs"
 													shape="square"
 													onClick={previewPosterFile}
@@ -1459,7 +1459,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												</Button>
 												<Button
 													type="button"
-													variant="secondary-subtle"
+													variant="background-subtle"
 													size="xs"
 													shape="square"
 													onClick={() => setPosterFocalEditorOpen(true)}
@@ -1471,7 +1471,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												<Show when={posterCropSource()}>
 													<Button
 														type="button"
-														variant="secondary-subtle"
+														variant="background-subtle"
 														size="xs"
 														shape="square"
 														onClick={openPosterCropEditor}
@@ -1498,7 +1498,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show when={posterSnapshotSource()}>
 												<Button
 													type="button"
-													variant="secondary-subtle"
+													variant="background-subtle"
 													size="xs"
 													shape="square"
 													onClick={(event) => {
@@ -1519,7 +1519,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show when={mediaImageGeneration.isFeatureEnabled()}>
 												<Button
 													type="button"
-													variant="secondary-subtle"
+													variant="background-subtle"
 													size="xs"
 													shape="square"
 													onClick={(event) => {
@@ -1567,7 +1567,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											</Show>
 											<Button
 												type="button"
-												variant="secondary-subtle"
+												variant="background-subtle"
 												size="xs"
 												shape="square"
 												onClick={openPosterFileBrowser}
@@ -1596,7 +1596,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											>
 												<Button
 													type="button"
-													variant="secondary-subtle"
+													variant="background-subtle"
 													size="xs"
 													shape="square"
 													onClick={undoPosterFile}

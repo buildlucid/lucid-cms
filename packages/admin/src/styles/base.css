@@ -72,11 +72,4 @@
 	input[type="time"]::-webkit-calendar-picker-indicator {
 		@apply opacity-60;
 	}
-
-	[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
-	[data-theme="dark"]
-		input[type="datetime-local"]::-webkit-calendar-picker-indicator,
-	[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator {
-		@apply invert;
-	}
 }

@@ -231,7 +231,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 								<>
 									<Button
 										type="button"
-										variant="secondary-subtle"
+										variant="background-subtle"
 										size="sm"
 										onClick={imageCrop().callbacks.open}
 										disabled={props.disabled || imageCrop().state.disabled}
@@ -281,7 +281,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 						>
 							<Button
 								type="button"
-								variant="secondary-subtle"
+								variant="background-subtle"
 								size="sm"
 								onClick={restoreCurrentFile}
 								disabled={props.disabled}

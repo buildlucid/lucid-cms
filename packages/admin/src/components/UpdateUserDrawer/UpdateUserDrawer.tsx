@@ -16,7 +16,7 @@ import { Drawer } from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
-import type { SelectMultipleValueT } from "@/components/SelectMultiple/SelectMultiple";
+import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
 import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
 import { Switch } from "@/components/Switch/Switch";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
@@ -38,7 +38,7 @@ const UpdateUserDrawer: Component<{
 	// ------------------------------
 	// State & Hooks
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
-		SelectMultipleValueT[]
+		SelectMultipleOption[]
 	>([]);
 	const [getIsSuperAdmin, setIsSuperAdmin] = createSignal(false);
 	const [getIsLocked, setIsLocked] = createSignal(false);
@@ -233,9 +233,7 @@ const UpdateUserDrawer: Component<{
 								values={getSelectedRoles()}
 								onChange={setSelectedRoles}
 								name={"roles"}
-								copy={{
-									label: T()("common.roles"),
-								}}
+								label={T()("common.roles")}
 								options={roleOptions()}
 								errors={getBodyError("roleIds", updateUser.errors)}
 							/>

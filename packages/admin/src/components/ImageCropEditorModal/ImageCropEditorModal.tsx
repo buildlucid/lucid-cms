@@ -588,7 +588,7 @@ const ImageCropEditorModal: Component<{
 											<Button
 												type="button"
 												variant={
-													activeRatio() === preset ? "toggle-active" : "toggle"
+													activeRatio() === preset ? "primary" : "outline"
 												}
 												size="sm"
 												class="h-8 text-xs"

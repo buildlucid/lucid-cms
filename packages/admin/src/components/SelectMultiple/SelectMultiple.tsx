@@ -1,71 +1,126 @@
 import { DropdownMenu } from "@kobalte/core";
-import type { ErrorResult } from "@types";
+import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck, FaSolidSort } from "solid-icons/fa";
+import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
 import {
 	createEffect,
 	createSignal,
 	For,
+	type JSX,
 	type JSXElement,
 	Match,
 	Show,
 	Switch,
+	splitProps,
 } from "solid-js";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
-import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
-import { FormLabel } from "@/components/FormLabel/FormLabel";
+import { Field } from "@/components/Field/Field";
 import T from "@/translations";
 
-export type SelectMultipleValueT = {
+/** One entry a caller can pick from. */
+export type SelectMultipleOption = {
 	value: string | number;
 	label: string;
 };
 
-interface SelectMultipleProps<Value extends SelectMultipleValueT> {
+/** How the chosen options sit in the trigger. */
+export type SelectMultipleVariant = "default" | "list";
+
+export interface SelectMultipleProps<
+	Option extends SelectMultipleOption = SelectMultipleOption,
+> extends JSX.AriaAttributes {
 	id: string;
-	values: Value[];
-	onChange: (_value: Value[]) => void;
-	options: Value[];
 	name: string;
-	copy?: {
-		label?: string;
-		placeholder?: string;
-		describedBy?: string;
-	};
+	values: Option[];
+	onChange: (_values: Option[]) => void;
+	options: Option[];
+	label?: string;
+	/** Shown in the trigger while nothing is chosen. */
+	placeholder?: string;
+	/** Sits under the control, and is read out alongside it. */
+	description?: string;
+	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	errors?: ErrorResult;
-	localised?: boolean;
-	altLocaleError?: boolean;
-	triggerClasses?: string;
-	selectedValuesContainerClasses?: string;
-	selectedValueClasses?: string;
+	/** Chips on one line, or a stacked row per choice. @default "default" */
+	variant?: SelectMultipleVariant;
+	/** Before the label text, for an icon or badge. */
+	labelStart?: JSXElement;
+	/** After the label, against the right edge. */
+	labelEnd?: JSXElement;
+	/** Applied to the field. Target [data-select-multiple-trigger] for the trigger. */
+	class?: string;
 	renderValue?: (_props: {
-		value: Value;
+		value: Option;
 		removeValue: () => void;
 	}) => JSXElement;
-	renderOption?: (_props: { option: Value; selected: boolean }) => JSXElement;
+	renderOption?: (_props: { option: Option; selected: boolean }) => JSXElement;
 }
 
+/**
+ * A labelled dropdown that keeps every option the caller picks, with its
+ * description and any validation errors. The list variant stacks each choice
+ * on its own full width row, for when a choice needs more than a chip.
+ *
+ * @example
+ * ```tsx
+ * import { SelectMultiple } from "@lucidcms/admin/components";
+ *
+ * return (
+ * 	<SelectMultiple
+ * 		id="roles"
+ * 		name="roles"
+ * 		label="Roles"
+ * 		values={roles()}
+ * 		onChange={setRoles}
+ * 		options={[
+ * 			{ value: "editor", label: "Editor" },
+ * 			{ value: "admin", label: "Admin" },
+ * 		]}
+ * 	/>
+ * );
+ * ```
+ */
 export function SelectMultiple<
-	Value extends SelectMultipleValueT = SelectMultipleValueT,
->(props: SelectMultipleProps<Value>) {
+	Option extends SelectMultipleOption = SelectMultipleOption,
+>(props: SelectMultipleProps<Option>) {
+	// ----------------------------------------
+	// State & Hooks
+	const [, ariaProps] = splitProps(props, [
+		"id",
+		"name",
+		"values",
+		"onChange",
+		"options",
+		"label",
+		"placeholder",
+		"description",
+		"errors",
+		"required",
+		"disabled",
+		"variant",
+		"labelStart",
+		"labelEnd",
+		"class",
+		"renderValue",
+		"renderOption",
+	]);
 	const [open, setOpen] = createSignal(false);
-	const [inputFocus, setInputFocus] = createSignal(false);
+	const stacked = () => props.variant === "list";
 
 	// ----------------------------------------
 	// Functions
-	const setValues = (value: Value[]) => {
+	const setValues = (values: Option[]) => {
 		if (props.disabled) {
 			return;
 		}
 
-		props.onChange(value);
+		props.onChange(values);
 	};
-	const removeValue = (value: Value) => {
+	const removeValue = (value: Option) => {
 		setValues(props.values.filter((v) => v.value !== value.value));
 	};
-	const toggleValue = (value: Value) => {
+	const toggleValue = (value: Option) => {
 		const exists = props.values.find((v) => v.value === value.value);
 		if (!exists) {
 			setValues([...props.values, value]);
@@ -85,7 +140,18 @@ export function SelectMultiple<
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={"w-full relative"}>
+		<Field.Root
+			id={props.id}
+			required={props.required}
+			disabled={props.disabled}
+			errors={props.errors}
+			class={props.class}
+		>
+			<Show when={props.label !== undefined || props.labelEnd !== undefined}>
+				<Field.Label start={props.labelStart} end={props.labelEnd}>
+					{props.label}
+				</Field.Label>
+			</Show>
 			<DropdownMenu.Root
 				sameWidth={true}
 				open={open()}
@@ -93,59 +159,105 @@ export function SelectMultiple<
 				flip={true}
 				gutter={5}
 			>
-				{/* Label */}
-				<FormLabel
-					id={props.id}
-					label={props.copy?.label}
-					focused={inputFocus()}
-					required={props.required}
-					theme={"basic"}
-					altLocaleError={props.altLocaleError}
-					localised={props.localised}
-				/>
 				<DropdownMenu.Trigger
+					{...ariaProps}
+					data-select-multiple-trigger
 					id={props.id}
-					aria-label={props.copy?.label}
 					class={classnames(
-						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
-						props.triggerClasses,
+						"focus:outline-hidden overflow-hidden text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex min-h-10 rounded-md focus:border-primary-base duration-200 transition-colors",
+						{
+							"items-center px-2": !stacked(),
+							"gap-2 p-2": stacked(),
+							//* rows stack from the top, but a lone placeholder centres in that height
+							"items-start": stacked() && props.values.length > 0,
+							"items-center": stacked() && props.values.length === 0,
+						},
 					)}
-					onFocus={() => setInputFocus(true)}
-					onBlur={() => setInputFocus(false)}
 					disabled={props.disabled}
 				>
-					{/* Selected Items */}
 					<div
-						class={classnames(
-							"flex min-w-0 flex-1 flex-wrap text-left",
-							props.selectedValuesContainerClasses ?? "gap-1",
-						)}
+						class={classnames("flex min-w-0 flex-1 flex-wrap text-left", {
+							"gap-1": !stacked(),
+							"gap-0": stacked(),
+						})}
 					>
 						<For
 							each={props.values}
-							fallback={
-								<span class="text-body">{props.copy?.placeholder}</span>
-							}
+							fallback={<span class="text-body">{props.placeholder}</span>}
 						>
 							{(value) => (
 								<span
+									data-select-multiple-value
 									class={classnames(
-										"duration-200 transition-colors rounded-md px-2 py-0.5 flex min-w-0 max-w-full items-center text-sm focus:outline-hidden",
-										props.selectedValueClasses ??
-											"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast",
+										"group relative flex min-w-0 max-w-full items-center gap-1 text-sm transition-colors duration-200 focus:outline-hidden",
+										{
+											"overflow-hidden rounded-md px-2 py-0.5 bg-secondary-base hover:bg-secondary-hover text-secondary-contrast":
+												!stacked(),
+											"w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-subtitle px-2 py-1.5":
+												stacked(),
+										},
 									)}
 								>
-									{props.renderValue
-										? props.renderValue({
+									<Show
+										when={props.renderValue}
+										fallback={
+											<>
+												<span class="min-w-0 truncate">{value.label}</span>
+												<Show when={!props.disabled}>
+													<span
+														class={classnames(
+															"flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100",
+															{
+																// the chip has no room to spare, so it fades in over the text
+																"absolute inset-y-0 inset-e-0 ps-6 pe-1 bg-linear-to-l from-secondary-hover from-60% to-transparent":
+																	!stacked(),
+																"ml-auto": stacked(),
+															},
+														)}
+													>
+														{/* biome-ignore lint/a11y/useSemanticElements: a remove button cannot be nested inside the trigger button, which the HTML parser pulls apart. */}
+														<span
+															role="button"
+															tabIndex={0}
+															data-select-multiple-remove
+															aria-label={`${T()("common.remove")} ${value.label}`}
+															class="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded text-current hover:bg-error-base hover:text-error-contrast focus:outline-hidden focus-visible:ring-1 ring-error-base"
+															onPointerDown={(event) => event.stopPropagation()}
+															onClick={(event) => {
+																event.stopPropagation();
+																event.preventDefault();
+																removeValue(value);
+															}}
+															onKeyDown={(event) => {
+																if (
+																	event.key !== "Enter" &&
+																	event.key !== " "
+																) {
+																	return;
+																}
+																event.stopPropagation();
+																event.preventDefault();
+																removeValue(value);
+															}}
+														>
+															<FaSolidXmark size={10} />
+														</span>
+													</span>
+												</Show>
+											</>
+										}
+									>
+										{(renderValue) =>
+											renderValue()({
 												value,
 												removeValue: () => removeValue(value),
 											})
-										: value.label}
+										}
+									</Show>
 								</span>
 							)}
 						</For>
 					</div>
-					{/* Icons */}
 					<div class="ml-2 flex shrink-0 self-center items-center">
 						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
@@ -205,12 +317,12 @@ export function SelectMultiple<
 					</Switch>
 				</DropdownContent>
 			</DropdownMenu.Root>
-
-			<FieldFeedback
-				id={props.id}
-				describedBy={props.copy?.describedBy}
-				errors={props.errors}
-			/>
-		</div>
+			<Field.Error />
+			<Show when={props.description}>
+				{(description) => (
+					<Field.Description>{description()}</Field.Description>
+				)}
+			</Show>
+		</Field.Root>
 	);
 }

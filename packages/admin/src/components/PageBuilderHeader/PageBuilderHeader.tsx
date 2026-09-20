@@ -692,9 +692,7 @@ export const PageBuilderHeader: Component<{
 							<Show when={props.state.showPreview?.()}>
 								<Button
 									type="button"
-									variant={
-										props.state.previewOpen?.() ? "toggle-active" : "toggle"
-									}
+									variant={props.state.previewOpen?.() ? "primary" : "outline"}
 									size="sm"
 									shape="square"
 									title={T()("common.preview")}

@@ -257,11 +257,9 @@ export const Workflow: Component<{
 						values={assignees()}
 						onChange={handleAssigneesChange}
 						options={assigneeOptions()}
-						copy={{ label: T()("documents.workflow.assignees") }}
+						label={T()("documents.workflow.assignees")}
 						disabled={fieldsDisabled()}
-						triggerClasses="items-start gap-2 p-2"
-						selectedValuesContainerClasses="gap-0"
-						selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
+						variant="list"
 						renderValue={(props) => (
 							<UserSelectOption
 								user={props.value.user}

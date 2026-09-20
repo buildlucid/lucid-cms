@@ -27,12 +27,18 @@ export {
 export * from "../components/Modal/Modal.js";
 export {
 	Select,
-	type SelectOptionT,
+	type SelectOption,
 	type SelectProps,
 	type SelectSearch,
 	type SelectSize,
 	type SelectValue,
 } from "../components/Select/Select.js";
+export {
+	SelectMultiple,
+	type SelectMultipleOption,
+	type SelectMultipleProps,
+	type SelectMultipleVariant,
+} from "../components/SelectMultiple/SelectMultiple.js";
 export {
 	Switch,
 	type SwitchProps,

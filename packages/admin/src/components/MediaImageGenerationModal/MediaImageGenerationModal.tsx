@@ -1031,7 +1031,7 @@ const MediaImageGenerationModal: Component = () => {
 											>
 												<Button
 													type="button"
-													variant="secondary-subtle"
+													variant="background-subtle"
 													size="xs"
 													shape="square"
 													title={T()("ai.media.image.generate.source.restore")}
@@ -1045,7 +1045,7 @@ const MediaImageGenerationModal: Component = () => {
 											</Show>
 											<Button
 												type="button"
-												variant="secondary-subtle"
+												variant="background-subtle"
 												size="xs"
 												shape="square"
 												title={T()("ai.media.image.generate.source.add")}
@@ -1090,7 +1090,7 @@ const MediaImageGenerationModal: Component = () => {
 										<div class="flex items-center gap-1">
 											<Button
 												type="button"
-												variant="secondary-subtle"
+												variant="background-subtle"
 												size="xs"
 												shape="square"
 												title={T()("ai.media.image.generate.source.replace")}

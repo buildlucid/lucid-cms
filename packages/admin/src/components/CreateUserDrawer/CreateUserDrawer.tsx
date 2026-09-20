@@ -5,7 +5,7 @@ import { Drawer } from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { Input } from "@/components/Input/Input";
 import InputGrid from "@/components/InputGrid/InputGrid";
-import type { SelectMultipleValueT } from "@/components/SelectMultiple/SelectMultiple";
+import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
 import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
@@ -23,7 +23,7 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 	// ------------------------------
 	// State
 	const [getSelectedRoles, setSelectedRoles] = createSignal<
-		SelectMultipleValueT[]
+		SelectMultipleOption[]
 	>([]);
 	const [getUsername, setUsername] = createSignal<string>("");
 	const [getFirstName, setFirstName] = createSignal<string>("");
@@ -158,9 +158,7 @@ const CreateUserDrawer: Component<CreateUserPanelProps> = (props) => {
 						values={getSelectedRoles()}
 						onChange={setSelectedRoles}
 						name={"roleIds"}
-						copy={{
-							label: T()("common.roles"),
-						}}
+						label={T()("common.roles")}
 						options={roleOptions()}
 						errors={getBodyError("roleIds", createUser.errors)}
 					/>

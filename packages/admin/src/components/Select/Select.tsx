@@ -25,10 +25,10 @@ import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 
 export type ValueT = string | number | undefined;
-export type SelectOptionT = { value: ValueT; label: string };
+export type SelectOption = { value: ValueT; label: string };
 
 /** The value one of the options carries, or undefined when none is selected. */
-export type SelectValue<Option extends SelectOptionT = SelectOptionT> =
+export type SelectValue<Option extends SelectOption = SelectOption> =
 	| Option["value"]
 	| undefined;
 
@@ -44,7 +44,7 @@ export interface SelectSearch {
 /** Height of the select trigger. */
 export type SelectSize = "sm" | "md";
 
-export interface SelectProps<Option extends SelectOptionT = SelectOptionT>
+export interface SelectProps<Option extends SelectOption = SelectOption>
 	extends JSX.AriaAttributes {
 	id: string;
 	name: string;
@@ -104,7 +104,7 @@ export interface SelectProps<Option extends SelectOptionT = SelectOptionT>
  * );
  * ```
  */
-export function Select<Option extends SelectOptionT = SelectOptionT>(
+export function Select<Option extends SelectOption = SelectOption>(
 	props: SelectProps<Option>,
 ) {
 	//* everything left over is the caller's aria-*, which belongs on the trigger
@@ -147,6 +147,10 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 	const setSearchQuery = debounce((value: string) => {
 		setDebouncedValue(value);
 	}, 500);
+	const clearSearch = () => {
+		setSearchQuery.clear();
+		setDebouncedValue("");
+	};
 	const renderSelectedValue = () => {
 		const option = selectedOption();
 		if (option && props.renderValue) {
@@ -322,10 +326,8 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 										<div class="absolute right-2 top-0 bottom-0 flex items-center">
 											<button
 												type="button"
-												class="bg-primary-base pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-primary-contrast hover:bg-error-base duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
-												onClick={() => {
-													setDebouncedValue("");
-												}}
+												class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-icon-faded hover:bg-error-base hover:text-error-contrast duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base"
+												onClick={clearSearch}
 												onKeyDown={(e) => {
 													if (
 														e.key === "Backspace" ||
@@ -333,7 +335,7 @@ export function Select<Option extends SelectOptionT = SelectOptionT>(
 														e.key === "Enter" ||
 														e.key === " "
 													) {
-														setDebouncedValue("");
+														clearSearch();
 													}
 												}}
 											>

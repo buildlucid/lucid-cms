@@ -300,7 +300,7 @@ const DocumentsPage: Component = () => {
 									custom={
 										<Show when={canReorderDocuments() && !showingDeleted()}>
 											<Button
-												variant={orderMode() ? "toggle-active" : "toggle"}
+												variant={orderMode() ? "primary" : "outline"}
 												size="sm"
 												type="button"
 												class="gap-2"

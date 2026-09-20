@@ -388,7 +388,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						</div>
 						<Button
 							type="button"
-							variant="secondary-subtle"
+							variant="background-subtle"
 							size="xs"
 							shape="square"
 							onClick={closeModal}

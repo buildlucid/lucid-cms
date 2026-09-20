@@ -250,7 +250,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						<Show when={props.onEdit}>
 							<Button
 								type="button"
-								variant="secondary-subtle"
+								variant="background-subtle"
 								size="xs"
 								shape="square"
 								onClick={() => props.onEdit?.()}

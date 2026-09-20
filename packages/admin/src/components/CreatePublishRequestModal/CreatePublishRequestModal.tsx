@@ -20,7 +20,7 @@ import { Modal } from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
 import { RichText } from "@/components/RichText/RichText";
 import { Select } from "@/components/Select/Select";
-import type { SelectMultipleValueT } from "@/components/SelectMultiple/SelectMultiple";
+import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
 import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
 import UserSelectOption from "@/components/UserSelectOption/UserSelectOption";
 import api from "@/services/api";
@@ -38,7 +38,7 @@ import {
 	reviewCommentRichTextOptions,
 } from "@/utils/rich-text";
 
-type ReviewerOption = SelectMultipleValueT & {
+type ReviewerOption = SelectMultipleOption & {
 	user: PublishOperationReviewer;
 };
 
@@ -262,13 +262,9 @@ const CreatePublishRequestModal: Component<{
 							onChange={setAssignees}
 							options={reviewerOptions()}
 							disabled={reviewers.isFetching}
-							copy={{
-								label: T()("common.reviewers"),
-								placeholder: T()("selectors.reviewers"),
-							}}
-							triggerClasses="items-start gap-2 p-2"
-							selectedValuesContainerClasses="gap-0"
-							selectedValueClasses="group w-full rounded-none first:rounded-t-md last:rounded-b-md border-x border-t last:border-b border-border bg-card-base hover:bg-card-hover text-title px-2 py-1.5"
+							label={T()("common.reviewers")}
+							placeholder={T()("selectors.reviewers")}
+							variant="list"
 							renderValue={(props) => (
 								<UserSelectOption
 									user={props.value.user}
