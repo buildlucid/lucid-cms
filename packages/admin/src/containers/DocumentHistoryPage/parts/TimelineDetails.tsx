@@ -495,7 +495,6 @@ const TimelineDetails: Component<{
 									fallback={<span class="block h-56 rounded-md skeleton" />}
 								>
 									<JSONPreview
-										title={T()("common.document.payload")}
 										json={document() as unknown as Record<string, unknown>}
 									/>
 								</Suspense>

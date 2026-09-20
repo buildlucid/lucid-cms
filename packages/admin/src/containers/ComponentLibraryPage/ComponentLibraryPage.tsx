@@ -6,6 +6,7 @@ import Button, {
 	type ButtonVariant,
 } from "@/components/Button/Button";
 import { Checkbox, type CheckboxVariant } from "@/components/Checkbox/Checkbox";
+import { CodeEditor } from "@/components/CodeEditor/CodeEditor";
 import { Drawer } from "@/components/Drawer/Drawer";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import { Field } from "@/components/Field/Field";
@@ -143,6 +144,9 @@ const ComponentLibraryPage: Component = () => {
 	const [listValues, setListValues] = createSignal<SelectMultipleOption[]>([]);
 	const [checkboxes, setCheckboxes] = createSignal<Record<string, boolean>>({});
 	const [fieldValue, setFieldValue] = createSignal("#6633ee");
+	const [jsonValue, setJsonValue] = createSignal('{\n\t"featured": true\n}');
+	const [codeValue, setCodeValue] = createSignal("<h1>Hello</h1>");
+	const [codeLanguage, setCodeLanguage] = createSignal("html");
 	const [modalOpen, setModalOpen] = createSignal(false);
 	//* the size stays put while the modal animates out, so it cannot resize mid close
 	const [modalSize, setModalSize] = createSignal<ModalSize>("md");
@@ -257,6 +261,38 @@ const ComponentLibraryPage: Component = () => {
 							onChange={(value) =>
 								setCheckboxes((prev) => ({ ...prev, described: value }))
 							}
+						/>
+					</InfoRow.Content>
+				</InfoRow.Root>
+
+				{/* ---------------------------------------------- CodeEditor */}
+				<InfoRow.Root
+					title={"CodeEditor"}
+					description={"language, languages, lint, format"}
+				>
+					<InfoRow.Content title={"Single language, linted and formatted"}>
+						<CodeEditor
+							id="code-json"
+							name="code-json"
+							label="Payload"
+							description="Reformats when it loses focus, and flags syntax errors."
+							language="json"
+							lint
+							format
+							value={jsonValue()}
+							onChange={setJsonValue}
+						/>
+					</InfoRow.Content>
+					<InfoRow.Content title={"With a language switcher"}>
+						<CodeEditor
+							id="code-multi"
+							name="code-multi"
+							label="Snippet"
+							language={codeLanguage()}
+							languages={["html", "css", "javascript", "json", "markdown"]}
+							onLanguageChange={setCodeLanguage}
+							value={codeValue()}
+							onChange={setCodeValue}
 						/>
 					</InfoRow.Content>
 				</InfoRow.Root>

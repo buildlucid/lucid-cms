@@ -2,27 +2,34 @@ import { json } from "@codemirror/lang-json";
 import { Compartment } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
-import { createCodeMirror, createEditorReadonly } from "solid-codemirror";
-import { type Component, createEffect } from "solid-js";
+import {
+	createCodeMirror,
+	createEditorControlledValue,
+	createEditorReadonly,
+} from "solid-codemirror";
+import { type Component, createEffect, createMemo } from "solid-js";
 import themeStore from "@/store/themeStore/themeStore";
 import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
 
 interface JSONPreviewProps {
-	title: string;
 	json: Record<string, unknown>;
 }
 
 const JSONPreview: Component<JSONPreviewProps> = (props) => {
 	// ----------------------------------------
 	// CodeMirror
+	const code = createMemo(() => JSON.stringify(props.json, null, 2));
+
 	const {
 		ref: editorRef,
 		editorView,
 		createExtension,
 	} = createCodeMirror({
-		value: JSON.stringify(props.json, null, 2),
+		value: code(),
 	});
 
+	//* the data these previews show arrives after mount, so it has to track it
+	createEditorControlledValue(editorView, code);
 	createEditorReadonly(editorView, () => true);
 	const themeCompartment = new Compartment();
 

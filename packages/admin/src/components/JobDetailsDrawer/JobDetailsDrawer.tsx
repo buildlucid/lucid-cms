@@ -172,10 +172,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 								<div class="h-40 bg-card-base border border-border rounded-md animate-pulse" />
 							}
 						>
-							<JSONPreview
-								title={T()("jobs.details")}
-								json={job.data?.data.displayData || {}}
-							/>
+							<JSONPreview json={job.data?.data.displayData || {}} />
 						</Suspense>
 					</div>
 				</Show>

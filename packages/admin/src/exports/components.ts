@@ -10,6 +10,10 @@ export {
 	type CheckboxProps,
 	type CheckboxVariant,
 } from "../components/Checkbox/Checkbox.js";
+export {
+	CodeEditor,
+	type CodeEditorProps,
+} from "../components/CodeEditor/CodeEditor.js";
 export * from "../components/Drawer/Drawer.js";
 export * from "../components/Field/Field.js";
 export {

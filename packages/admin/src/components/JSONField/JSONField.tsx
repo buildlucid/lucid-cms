@@ -8,6 +8,7 @@ import {
 	Suspense,
 	untrack,
 } from "solid-js";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
@@ -15,9 +16,9 @@ import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
-const JSONTextarea = lazy(() =>
-	import("@/components/JSONTextarea/JSONTextarea").then((m) => ({
-		default: m.JSONTextarea,
+const CodeEditor = lazy(() =>
+	import("@/components/CodeEditor/CodeEditor").then((m) => ({
+		default: m.CodeEditor,
 	})),
 );
 
@@ -164,7 +165,10 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 				</div>
 			}
 		>
-			<JSONTextarea
+			<CodeEditor
+				language="json"
+				lint
+				format
 				id={brickHelpers.customFieldId({
 					key: props.state.fieldConfig.key,
 					brickIndex: fieldRenderState.brickIndex(),
@@ -189,24 +193,26 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 					}
 				}}
 				name={props.state.fieldConfig.key}
-				copy={{
-					label: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.label,
-					}),
-					describedBy: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.description,
-					}),
-					placeholder: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.placeholder,
-					}),
-				}}
-				altLocaleError={props.state.altLocaleError}
-				localised={props.state.localised}
+				label={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.label,
+				})}
+				description={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.description,
+				})}
+				placeholder={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.placeholder,
+				})}
 				disabled={disabled()}
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}
-				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-				labelRightSlot={
+				labelStart={
+					<FieldLabelMarkers
+						altLocaleError={props.state.altLocaleError}
+						localised={props.state.localised}
+						fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+					/>
+				}
+				labelEnd={
 					props.state.fieldConfig.ai?.enabled === true ? (
 						<AiGenerationButton />
 					) : undefined

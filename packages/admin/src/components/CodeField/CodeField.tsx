@@ -8,6 +8,7 @@ import {
 	Suspense,
 	untrack,
 } from "solid-js";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
@@ -206,24 +207,26 @@ export const CodeField: Component<CodeFieldProps> = (props) => {
 					}
 				}}
 				name={props.state.fieldConfig.key}
-				copy={{
-					label: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.label,
-					}),
-					describedBy: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.description,
-					}),
-					placeholder: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.placeholder,
-					}),
-				}}
-				altLocaleError={props.state.altLocaleError}
-				localised={props.state.localised}
+				label={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.label,
+				})}
+				description={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.description,
+				})}
+				placeholder={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.placeholder,
+				})}
 				disabled={disabled()}
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}
-				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
-				labelRightSlot={
+				labelStart={
+					<FieldLabelMarkers
+						altLocaleError={props.state.altLocaleError}
+						localised={props.state.localised}
+						fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+					/>
+				}
+				labelEnd={
 					props.state.fieldConfig.ai?.enabled === true ? (
 						<AiGenerationButton />
 					) : undefined

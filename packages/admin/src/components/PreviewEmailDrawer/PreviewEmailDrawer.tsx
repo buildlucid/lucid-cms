@@ -254,10 +254,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 								<div class="h-40 bg-card-base border border-border rounded-md animate-pulse" />
 							}
 						>
-							<JSONPreview
-								title={T()("email.templates.data")}
-								json={email.data?.data.data || {}}
-							/>
+							<JSONPreview json={email.data?.data.data || {}} />
 						</Suspense>
 					</div>
 				</Show>

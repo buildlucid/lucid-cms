@@ -25,7 +25,6 @@ import AiGenerationHistory, {
 import Button from "@/components/Button/Button";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import { Input } from "@/components/Input/Input";
-import { JSONTextarea } from "@/components/JSONTextarea/JSONTextarea";
 import { Modal } from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
 import type { RichTextOptions } from "@/components/RichText/RichText";
@@ -126,9 +125,12 @@ const DraftEditor: Component<{
 			</Match>
 			<Match when={props.fieldType === "json"}>
 				<div>
-					<JSONTextarea
+					<CodeEditor
 						id={`ai-custom-field-generation-preview-json-${props.localeCode}`}
 						name={`ai-custom-field-generation-preview-json-${props.localeCode}`}
+						language="json"
+						lint
+						format
 						value={props.jsonText ?? stringifyJsonValue(props.value)}
 						onChange={(nextValue) =>
 							props.onJsonChange(props.localeCode, nextValue)
