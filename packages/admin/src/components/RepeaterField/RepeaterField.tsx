@@ -215,7 +215,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 						>
 							<Button
 								type="button"
-								variant="primary-outline"
+								variant="outline"
 								shape="circle"
 								size="xs"
 								onClick={addGroup}

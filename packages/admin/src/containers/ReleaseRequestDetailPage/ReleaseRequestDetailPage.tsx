@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { type Component, createMemo, Match, Switch } from "solid-js";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import CollectionDocumentPageBuilderRoute from "@/containers/DocumentEditorPage/DocumentEditorPage";
 import api from "@/services/api";
 import T from "@/translations";
@@ -47,12 +47,9 @@ const ReleaseRequestDetailPage: Component = () => {
 				</div>
 			</Match>
 			<Match when={request.isError}>
-				<ErrorBlock
-					content={{
-						title: T()("errors.generic.title"),
-						description:
-							request.error?.message ?? T()("errors.generic.message"),
-					}}
+				<ErrorState
+					title={T()("errors.generic.title")}
+					description={request.error?.message ?? T()("errors.generic.message")}
 				/>
 			</Match>
 			<Match when={releaseRequest()}>

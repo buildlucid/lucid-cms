@@ -15,11 +15,11 @@ import CreateUpdateProfilePictureDrawer from "@/components/CreateUpdateProfilePi
 import DetailsList from "@/components/DetailsList/DetailsList";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import UpdateAccountDetailsModal from "@/components/UpdateAccountDetailsModal/UpdateAccountDetailsModal";
 import UpdatePasswordModal from "@/components/UpdatePasswordModal/UpdatePasswordModal";
 import { UserIntegrationsList } from "@/components/UserIntegrationsList/UserIntegrationsList";
@@ -194,7 +194,7 @@ export const AccountContent: Component = () => {
 							{T()("account.details.edit.action")}
 						</Button>
 					}
-					actionAlignment="center"
+					align="center"
 				>
 					<DetailsList
 						type="text"
@@ -242,7 +242,6 @@ export const AccountContent: Component = () => {
 					<InfoRow.Content
 						title={T()("common.password")}
 						description={T()("account.password.description")}
-						reducedMargin={true}
 						actions={
 							<Button
 								variant="danger"
@@ -253,14 +252,13 @@ export const AccountContent: Component = () => {
 								{T()("actions.reset.password")}
 							</Button>
 						}
-						actionAlignment="center"
+						align="center"
 					/>
 				</Show>
 				<Show when={passwordAuthEnabled() && !userHasPassword()}>
 					<InfoRow.Content
 						title={T()("common.password")}
 						description={T()("account.password.set.description")}
-						reducedMargin={true}
 						actions={
 							<Button
 								variant="danger"
@@ -284,14 +282,13 @@ export const AccountContent: Component = () => {
 								{T()("account.password.reset.send.and.logout")}
 							</Button>
 						}
-						actionAlignment="center"
+						align="center"
 					/>
 				</Show>
 				<Show when={providersList().length > 0}>
 					<InfoRow.Content
 						title={T()("account.auth.providers.title")}
 						description={T()("account.auth.providers.description")}
-						reducedMargin={true}
 					>
 						<div class="flex flex-col gap-3">
 							<For each={providersList()}>
@@ -387,7 +384,7 @@ export const AccountContent: Component = () => {
 							{T()("common.logout.everywhere")}
 						</Button>
 					}
-					actionAlignment="center"
+					align="center"
 				/>
 			</InfoRow.Root>
 
@@ -399,7 +396,6 @@ export const AccountContent: Component = () => {
 				<InfoRow.Content
 					title={T()("oauth.connections.manage.title")}
 					description={T()("oauth.connections.manage.description")}
-					reducedMargin={true}
 				>
 					<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
 						<OAuthConnectionsList
@@ -434,7 +430,6 @@ export const AccountContent: Component = () => {
 				<InfoRow.Content
 					title={T()("settings.interface.cms.appearance.title")}
 					description={T()("settings.interface.cms.appearance.description")}
-					reducedMargin={true}
 				>
 					<AppearancePreference />
 				</InfoRow.Content>

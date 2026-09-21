@@ -227,7 +227,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						<FaSolidGripLines size={14} />
 					</button>
 					<div class="min-w-0 flex items-center gap-2">
-						<Pill theme="outline" class="shrink-0">
+						<Pill variant="outline" class="shrink-0">
 							#{props.groupIndex() + 1}
 						</Pill>
 						<h3 class="text-sm text-subtitle font-medium truncate">

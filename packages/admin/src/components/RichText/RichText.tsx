@@ -10,7 +10,7 @@ import {
 	Show,
 	splitProps,
 } from "solid-js";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 import T from "@/translations";
 import { richTextHasContent } from "./helpers";
 import Toolbar from "./parts/Toolbar";
@@ -76,12 +76,15 @@ export interface RichTextProps extends JSX.AriaAttributes {
  * @example
  * ```tsx
  * import { RichText } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<RichText
  * 		id="comment"
  * 		name="comment"
- * 		label="Comment"
+ * 		label={t("common.comment")}
  * 		headings={false}
  * 		value={comment()}
  * 		onChange={setComment}
@@ -89,7 +92,7 @@ export interface RichTextProps extends JSX.AriaAttributes {
  * );
  * ```
  */
-export const RichText: Component<RichTextProps> = (props) => {
+const RichText: Component<RichTextProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [, ariaProps] = splitProps(props, [
@@ -214,3 +217,5 @@ export const RichText: Component<RichTextProps> = (props) => {
 		</Field.Root>
 	);
 };
+
+export default RichText;

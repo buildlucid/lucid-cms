@@ -1,9 +1,9 @@
 import type { LinkResValue } from "@types";
 import { type Component, createEffect, createSignal } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Input } from "@/components/Input/Input";
-import { Modal } from "@/components/Modal/Modal";
-import { Switch } from "@/components/Switch/Switch";
+import Input from "@/components/Input/Input";
+import Modal from "@/components/Modal/Modal";
+import Switch from "@/components/Switch/Switch";
 import T from "@/translations";
 
 interface LinkSelectModalProps {

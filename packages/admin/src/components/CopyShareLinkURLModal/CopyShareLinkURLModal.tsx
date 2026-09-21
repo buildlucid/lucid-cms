@@ -1,6 +1,6 @@
 import { type Accessor, type Component, createMemo } from "solid-js";
 import CopyInput from "@/components/CopyInput/CopyInput";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 

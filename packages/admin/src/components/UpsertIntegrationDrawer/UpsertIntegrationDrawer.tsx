@@ -9,14 +9,14 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Checkbox from "@/components/Checkbox/Checkbox";
+import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Input } from "@/components/Input/Input";
+import Input from "@/components/Input/Input";
 import InputGrid from "@/components/InputGrid/InputGrid";
-import { Select } from "@/components/Select/Select";
-import { Switch } from "@/components/Switch/Switch";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Select from "@/components/Select/Select";
+import Switch from "@/components/Switch/Switch";
+import Textarea from "@/components/Textarea/Textarea";
 import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants";
 import type { IntegrationServices } from "@/services/api/integrations";
 import T from "@/translations";

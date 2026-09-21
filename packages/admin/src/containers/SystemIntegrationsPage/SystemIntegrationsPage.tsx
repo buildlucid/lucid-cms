@@ -1,6 +1,6 @@
 import { type Component, createSignal } from "solid-js";
 import { IntegrationsList } from "@/components/IntegrationsList/IntegrationsList";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
 import useQueryState, {
 	booleanFilter,
@@ -41,19 +41,18 @@ const SystemIntegrationsPage: Component = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<PageLayout
-			slots={{
-				header: <SystemSettingsHeader />,
-			}}
-		>
-			<IntegrationsList
-				state={{
-					searchParams,
-					openCreateIntegrationPanel: openCreateIntegrationPanel,
-					setOpenCreateIntegrationPanel: setOpenCreateIntegrationPanel,
-				}}
-			/>
-		</PageLayout>
+		<PageLayout.Root>
+			<SystemSettingsHeader />
+			<PageLayout.Body>
+				<IntegrationsList
+					state={{
+						searchParams,
+						openCreateIntegrationPanel: openCreateIntegrationPanel,
+						setOpenCreateIntegrationPanel: setOpenCreateIntegrationPanel,
+					}}
+				/>
+			</PageLayout.Body>
+		</PageLayout.Root>
 	);
 };
 

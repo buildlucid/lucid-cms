@@ -36,8 +36,8 @@ const AiUsageTableRow: Component<AiUsageRowProps> = (props) => {
 						? T()("common.status.success")
 						: T()("common.status.pending")
 				}
-				theme={
-					props.aiUsage.status === "success" ? "primary-opaque" : "outline"
+				variant={
+					props.aiUsage.status === "success" ? "primary-subtle" : "outline"
 				}
 				options={{ include: props.include[0] }}
 			/>

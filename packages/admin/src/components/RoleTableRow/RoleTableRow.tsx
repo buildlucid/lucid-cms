@@ -70,7 +70,7 @@ const RoleTableRow: Component<RoleRowProps> = (props) => {
 						? T()("common.status.locked")
 						: T()("common.status.unlocked")
 				}
-				theme={props.role.locked ? "warning-opaque" : "outline"}
+				variant={props.role.locked ? "warning-subtle" : "outline"}
 				options={{ include: props?.include[1] }}
 			/>
 			<TableDateCell

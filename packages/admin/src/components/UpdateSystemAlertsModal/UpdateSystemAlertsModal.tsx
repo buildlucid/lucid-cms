@@ -6,8 +6,8 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Input } from "@/components/Input/Input";
-import { Modal } from "@/components/Modal/Modal";
+import Input from "@/components/Input/Input";
+import Modal from "@/components/Modal/Modal";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import T from "@/translations";

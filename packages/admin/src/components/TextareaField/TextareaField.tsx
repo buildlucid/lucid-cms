@@ -1,7 +1,7 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Textarea from "@/components/Textarea/Textarea";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";

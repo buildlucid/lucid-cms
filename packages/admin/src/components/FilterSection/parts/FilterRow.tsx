@@ -1,7 +1,7 @@
 import { FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import type { FilterValue } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 import {

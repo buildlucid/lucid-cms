@@ -35,21 +35,24 @@ export type { DrawerTitleProps } from "./parts/DrawerTitle";
  *
  * @example
  * ```tsx
- * import { Button, Drawer } from "@lucidcms/admin/components";
+ * import { Button, Drawer, Input } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Drawer.Root open={open()} onOpenChange={setOpen} loading={role.isLoading}>
  * 		<Drawer.Header>
- * 			<Drawer.Title>Edit role</Drawer.Title>
+ * 			<Drawer.Title>{t("permissions.roles.update")}</Drawer.Title>
  * 		</Drawer.Header>
  * 		<Drawer.Form onSubmit={save}>
  * 			<Drawer.Body>
- * 				<Input id="name" name="name" type="text" label="Name" value={name()} onChange={setName} />
+ * 				<Input id="name" name="name" type="text" label={t("common.name")} value={name()} onChange={setName} />
  * 			</Drawer.Body>
  * 			<Drawer.Footer>
  * 				<Drawer.Actions>
- * 					<Button variant="outline" onClick={() => setOpen(false)}>Close</Button>
- * 					<Button type="submit" loading={save.isPending}>Save</Button>
+ * 					<Button variant="outline" onClick={() => setOpen(false)}>{t("common.close")}</Button>
+ * 					<Button type="submit" loading={save.isPending}>{t("common.save")}</Button>
  * 				</Drawer.Actions>
  * 			</Drawer.Footer>
  * 		</Drawer.Form>
@@ -57,7 +60,7 @@ export type { DrawerTitleProps } from "./parts/DrawerTitle";
  * );
  * ```
  */
-export const Drawer = {
+const Drawer = {
 	Root: DrawerRoot,
 	Header: DrawerHeader,
 	Title: DrawerTitle,
@@ -70,3 +73,5 @@ export const Drawer = {
 	Footer: DrawerFooter,
 	Actions: DrawerActions,
 };
+
+export default Drawer;

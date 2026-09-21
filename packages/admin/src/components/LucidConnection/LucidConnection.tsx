@@ -124,15 +124,15 @@ const LucidConnection: Component = () => {
 				}}
 				options={{ inline: true }}
 			>
-				<InfoRow.Content reducedMargin={true}>
+				<InfoRow.Content>
 					<div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
 						<div class="min-w-0">
 							<Pill
-								theme={
+								variant={
 									isConnected()
-										? "primary-opaque"
+										? "primary-subtle"
 										: connection()?.status === "revoked"
-											? "error-opaque"
+											? "danger-subtle"
 											: "outline"
 								}
 							>
@@ -225,7 +225,7 @@ const LucidConnection: Component = () => {
 				</InfoRow.Content>
 				<Show when={lastVerifiedIso()}>
 					{(verified) => (
-						<InfoRow.Content reducedMargin={true}>
+						<InfoRow.Content>
 							<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 								<Show when={isConnected()}>
 									<div class="min-w-0">

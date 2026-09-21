@@ -217,7 +217,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						? T()("common.status.locked")
 						: T()("common.status.unlocked")
 				}
-				theme={props.user.isLocked ? "warning-opaque" : "outline"}
+				variant={props.user.isLocked ? "warning-subtle" : "outline"}
 				options={{ include: props?.include[3] }}
 			/>
 			<TablePillCell
@@ -228,7 +228,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 							? T()("users.invitations.status.accepted")
 							: T()("common.status.pending")
 				}
-				theme={props.user.invitationAccepted ? "outline" : "warning-opaque"}
+				variant={props.user.invitationAccepted ? "outline" : "warning-subtle"}
 				options={{ include: props?.include[4] }}
 			/>
 			<TablePillCell
@@ -240,7 +240,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 							? T()("auth.password.reset.required.title")
 							: T()("users.password.reset.status.not.required")
 				}
-				theme={"outline"}
+				variant={"outline"}
 			/>
 			<TableDateCell
 				date={props.user.createdAt}

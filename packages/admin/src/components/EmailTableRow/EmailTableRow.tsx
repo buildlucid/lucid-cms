@@ -22,23 +22,23 @@ interface EmailRowProps extends TableRowProps {
 const EmailTableRow: Component<EmailRowProps> = (props) => {
 	// ----------------------------------
 	// Helpers
-	const getPillTheme = (
+	const getPillVariant = (
 		deliveryStatus: EmailDeliveryStatus,
-	): PillProps["theme"] => {
+	): PillProps["variant"] => {
 		if (
 			deliveryStatus === "sent" ||
 			deliveryStatus === "delivered" ||
 			deliveryStatus === "opened" ||
 			deliveryStatus === "clicked"
 		) {
-			return "primary-opaque";
+			return "primary-subtle";
 		}
 		if (
 			deliveryStatus === "failed" ||
 			deliveryStatus === "bounced" ||
 			deliveryStatus === "complained"
 		) {
-			return "error-opaque";
+			return "danger-subtle";
 		}
 		return "outline";
 	};
@@ -109,7 +109,7 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 		>
 			<TablePillCell
 				text={props.email.currentStatus}
-				theme={getPillTheme(props.email.currentStatus)}
+				variant={getPillVariant(props.email.currentStatus)}
 				options={{ include: props?.include[0] }}
 			/>
 			<TableTextCell

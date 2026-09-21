@@ -20,7 +20,7 @@ import {
 	Switch,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import { Form } from "@/components/Form/Form";
 import { InsetLabelInput } from "@/components/InsetLabelInput/InsetLabelInput";
 import Spinner from "@/components/Spinner/Spinner";
@@ -113,21 +113,17 @@ const MediaSharePage: Component = () => {
 				</div>
 			</Match>
 			<Match when={isExpired()}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("media.share.links.expired.title"),
-						description: T()("media.share.links.expired.message"),
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("media.share.links.expired.title")}
+					description={T()("media.share.links.expired.message")}
 				/>
 			</Match>
 			<Match when={shareAccess.isError}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("media.share.route.error.title"),
-						description: T()("media.share.route.error.description"),
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("media.share.route.error.title")}
+					description={T()("media.share.route.error.description")}
 				/>
 			</Match>
 			<Match when={shareAccess.isSuccess && accessData() !== undefined}>

@@ -1,20 +1,37 @@
-import classNames from "classnames";
+import classnames from "classnames";
 import type { Component } from "solid-js";
 import T from "@/translations";
 
-interface SpinnerProps {
-	size: "sm" | "md" | "lg";
+export type SpinnerSize = "sm" | "md" | "lg";
+
+export interface SpinnerProps {
+	/** Diameter of the spinner. @default "md" */
+	size?: SpinnerSize;
+	class?: string;
 }
 
+/**
+ * A spinning loading indicator. It announces itself to screen readers, so it
+ * does not need a visible label beside it.
+ *
+ * @example
+ * ```tsx
+ * import { Spinner } from "@lucidcms/admin/components";
+ *
+ * return <Spinner size="sm" />;
+ * ```
+ */
 const Spinner: Component<SpinnerProps> = (props) => {
+	// ----------------------------------------
+	// Render
 	return (
-		<div>
+		<div class={props.class}>
 			<svg
 				aria-hidden="true"
-				class={classNames("animate-spin text-card-hover fill-primary-base", {
+				class={classnames("animate-spin text-card-hover fill-primary-base", {
 					"w-4 h-4": props.size === "sm",
-					"w-6 h-6": props.size === "md",
-					"w-10 h-10": props.size === "lg",
+					"w-6 h-6": props.size === undefined || props.size === "md",
+					"w-8 h-8": props.size === "lg",
 				})}
 				viewBox="0 0 100 101"
 				fill="none"

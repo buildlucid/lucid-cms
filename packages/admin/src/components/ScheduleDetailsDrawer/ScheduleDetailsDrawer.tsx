@@ -1,7 +1,7 @@
 import { type Accessor, type Component, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import api from "@/services/api";
 import T from "@/translations";

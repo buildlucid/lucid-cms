@@ -1,7 +1,7 @@
 import { DropdownMenu } from "@kobalte/core";
 import { FaSolidTable } from "solid-icons/fa";
 import { type Component, createUniqueId, For } from "solid-js";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
+import Checkbox from "@/components/Checkbox/Checkbox";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
 import T from "@/translations";
 

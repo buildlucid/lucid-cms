@@ -7,7 +7,8 @@ import {
 	Match,
 	Switch,
 } from "solid-js";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
+import Link from "@/components/Link/Link";
 import ResetPasswordForm from "@/components/ResetPasswordForm/ResetPasswordForm";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
@@ -67,16 +68,15 @@ const ResetPasswordPage: Component = () => {
 				</div>
 			</Match>
 			<Match when={isError()}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("auth.tokens.invalid.title"),
-						description: T()("auth.tokens.invalid.description"),
-					}}
-					link={{
-						text: T()("common.back.to.login"),
-						href: "/lucid/login",
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("auth.tokens.invalid.title")}
+					description={T()("auth.tokens.invalid.description")}
+					actions={
+						<Link variant="primary" size="sm" href="/lucid/login">
+							{T()("common.back.to.login")}
+						</Link>
+					}
 				/>
 			</Match>
 			<Match

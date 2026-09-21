@@ -10,8 +10,8 @@ import {
 	Switch,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import T from "@/translations";
 
 export const Form: Component<{
@@ -56,12 +56,10 @@ export const Form: Component<{
 	return (
 		<Switch>
 			<Match when={props.queryState?.isError}>
-				<ErrorBlock
-					content={{
-						image: notifySvg,
-						title: T()("errors.generic.title"),
-						description: T()("errors.generic.message"),
-					}}
+				<ErrorState
+					image={notifySvg}
+					title={T()("errors.generic.title")}
+					description={T()("errors.generic.message")}
 				/>
 			</Match>
 			<Match when={!props.queryState?.isError}>

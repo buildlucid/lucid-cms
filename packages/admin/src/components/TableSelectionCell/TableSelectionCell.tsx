@@ -1,5 +1,5 @@
 import { type Component, createUniqueId, Match, Switch } from "solid-js";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
+import Checkbox from "@/components/Checkbox/Checkbox";
 import type { TableTheme } from "@/components/Table/Table";
 import { TableCell } from "@/components/TableCell/TableCell";
 import { TableHeaderCell } from "@/components/TableHeaderCell/TableHeaderCell";

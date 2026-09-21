@@ -4,9 +4,9 @@ import type { Permission } from "@types";
 import classNames from "classnames";
 import { type Component, type JSXElement, Match, Show, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import EmptyState from "@/components/EmptyState/EmptyState";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import Loading from "@/components/Loading/Loading";
-import NoEntriesBlock from "@/components/NoEntriesBlock/NoEntriesBlock";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
@@ -69,12 +69,10 @@ export const DynamicContent: Component<{
 				<Switch fallback={props.children}>
 					<Match when={props.state?.isError}>
 						<div class="flex-1 flex items-center justify-center">
-							<ErrorBlock
-								content={{
-									image: notifySvg,
-									title: props.copy?.error?.title,
-									description: props.copy?.error?.description,
-								}}
+							<ErrorState
+								image={notifySvg}
+								title={props.copy?.error?.title}
+								description={props.copy?.error?.description}
 							/>
 						</div>
 					</Match>
@@ -83,45 +81,47 @@ export const DynamicContent: Component<{
 					>
 						<div class="flex-1 flex items-center justify-center">
 							<Show when={!props.state?.searchParams?.hasFiltersApplied()}>
-								<NoEntriesBlock
-									copy={{
-										title: props.copy?.noEntries?.title,
-										description: props.copy?.noEntries?.description,
-										button: props.copy?.noEntries?.button,
-									}}
-									callbacks={{
-										action: props.callback?.createEntry,
-									}}
-									permissions={{
-										create: props.permissions?.create,
-									}}
-									options={{
-										buttonTheme: props.options?.noEntriesButtonTheme,
-									}}
+								<EmptyState
+									title={props.copy?.noEntries?.title}
+									description={props.copy?.noEntries?.description}
+									actions={
+										props.callback?.createEntry ? (
+											<Button
+												variant={
+													props.options?.noEntriesButtonTheme ?? "primary"
+												}
+												size="sm"
+												onClick={props.callback.createEntry}
+												permission={props.permissions?.create}
+											>
+												{props.copy?.noEntries?.button ??
+													T()("actions.create.entry")}
+											</Button>
+										) : undefined
+									}
 								/>
 							</Show>
 							<Show when={props.state?.searchParams?.hasFiltersApplied()}>
-								<ErrorBlock
-									content={{
-										title: T()("empty.states.results.title"),
-										description: T()("empty.states.results.description"),
-									}}
-								>
-									<Button
-										type="submit"
-										variant="primary"
-										size="sm"
-										onClick={() => {
-											if (props.callback?.resetFilters) {
-												props.callback.resetFilters();
-											} else {
-												props.state?.searchParams?.resetFilters();
-											}
-										}}
-									>
-										{T()("actions.reset.filters")}
-									</Button>
-								</ErrorBlock>
+								<ErrorState
+									title={T()("empty.states.results.title")}
+									description={T()("empty.states.results.description")}
+									actions={
+										<Button
+											type="submit"
+											variant="primary"
+											size="sm"
+											onClick={() => {
+												if (props.callback?.resetFilters) {
+													props.callback.resetFilters();
+												} else {
+													props.state?.searchParams?.resetFilters();
+												}
+											}}
+										>
+											{T()("actions.reset.filters")}
+										</Button>
+									}
+								/>
 							</Show>
 						</div>
 					</Match>
@@ -131,12 +131,10 @@ export const DynamicContent: Component<{
 						</div>
 					</Match>
 					<Match when={props.state?.hasPermission === false}>
-						<ErrorBlock
-							content={{
-								image: noPermission,
-								title: T()("permissions.denied.title"),
-								description: T()("permissions.denied.description"),
-							}}
+						<ErrorState
+							image={noPermission}
+							title={T()("permissions.denied.title")}
+							description={T()("permissions.denied.description")}
 						/>
 					</Match>
 					<Match when={props.state?.isSuccess}>{props.children}</Match>

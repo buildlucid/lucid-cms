@@ -12,13 +12,14 @@ export type AdminRoute = {
 	navigation?: AdminRouteNavigation;
 } & (
 	| {
-			/** Navigation and the standard content panel. This is the default. */
-			layout?: "admin";
+			/** Renders inside the admin navigation. This is the default. Compose
+			 * the page itself with PageLayout from @lucidcms/admin/components. */
+			shell?: "navigation";
 			access?: "authenticated";
 	  }
 	| {
-			/** Full-page content without navigation, a panel or padding. */
-			layout: "blank";
+			/** Renders on its own, with no navigation around it. */
+			shell: "none";
 			/** Defaults to authenticated. Public routes also work when signed in. */
 			access?: "authenticated" | "public";
 	  }

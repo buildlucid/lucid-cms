@@ -1,9 +1,9 @@
 import type { AiUsageChartMetric } from "@types";
 import type { ChartData, ChartOptions } from "chart.js";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
-import { Input } from "@/components/Input/Input";
+import Input from "@/components/Input/Input";
 import { LineChart } from "@/components/LineChart/LineChart";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import Spinner from "@/components/Spinner/Spinner";
 import api from "@/services/api";
 import themeStore from "@/store/themeStore/themeStore";

@@ -1,6 +1,6 @@
 import type { Locale } from "@types";
 import { type Component, createMemo, Match, Switch } from "solid-js";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import useKeyboardShortcuts, {
 	inModal,
 	shortcutText,

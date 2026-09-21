@@ -16,8 +16,8 @@ import {
 	Show,
 } from "solid-js";
 import DocumentSidebarSection from "@/components/DocumentSidebarSection/DocumentSidebarSection";
-import { Select } from "@/components/Select/Select";
-import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
+import Select from "@/components/Select/Select";
+import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
 import UserSelectOption from "@/components/UserSelectOption/UserSelectOption";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import api from "@/services/api";

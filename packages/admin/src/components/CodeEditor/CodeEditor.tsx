@@ -23,7 +23,7 @@ import {
 	splitProps,
 } from "solid-js";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
 import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
@@ -77,12 +77,15 @@ const isBlank = (value: string) => value.trim() === "";
  * @example
  * ```tsx
  * import { CodeEditor } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<CodeEditor
  * 		id="payload"
  * 		name="payload"
- * 		label="Payload"
+ * 		label={t("common.document.payload")}
  * 		language="json"
  * 		lint
  * 		format
@@ -92,7 +95,7 @@ const isBlank = (value: string) => value.trim() === "";
  * );
  * ```
  */
-export const CodeEditor: Component<CodeEditorProps> = (props) => {
+const CodeEditor: Component<CodeEditorProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [, ariaProps] = splitProps(props, [
@@ -434,3 +437,5 @@ export const CodeEditor: Component<CodeEditorProps> = (props) => {
 		</Field.Root>
 	);
 };
+
+export default CodeEditor;

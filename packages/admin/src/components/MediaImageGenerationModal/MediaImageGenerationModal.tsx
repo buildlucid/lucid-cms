@@ -29,11 +29,11 @@ import AiGenerationHistory, {
 import Button from "@/components/Button/Button";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
-import { Input } from "@/components/Input/Input";
-import { Modal } from "@/components/Modal/Modal";
+import Input from "@/components/Input/Input";
+import Modal from "@/components/Modal/Modal";
 import Pill, { type PillButtonProps } from "@/components/Pill/Pill";
-import { Select } from "@/components/Select/Select";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Select from "@/components/Select/Select";
+import Textarea from "@/components/Textarea/Textarea";
 import { usePollingLoop } from "@/hooks/usePollingLoop/usePollingLoop";
 import api from "@/services/api";
 import { mediaImageCompletionReq } from "@/services/api/ai/useMediaImageCompletion";
@@ -1239,7 +1239,7 @@ const MediaImageGenerationModal: Component = () => {
 													as={(triggerProps: Omit<PillButtonProps, "as">) => (
 														<Pill {...triggerProps} as="button" />
 													)}
-													theme={selected() ? "primary-opaque" : "outline"}
+													variant={selected() ? "primary-subtle" : "outline"}
 													aria-pressed={selected()}
 													disabled={isLoading()}
 													onClick={() =>

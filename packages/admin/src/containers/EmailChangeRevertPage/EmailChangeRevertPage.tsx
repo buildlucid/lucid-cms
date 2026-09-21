@@ -8,7 +8,7 @@ import {
 	Switch,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
@@ -58,16 +58,15 @@ const EmailChangeRevertPage: Component = () => {
 				</div>
 			</Match>
 			<Match when={isInvalid()}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("auth.email.change.token.invalid.title"),
-						description: T()("auth.email.change.token.invalid.description"),
-					}}
-					link={{
-						text: T()("common.back.to.login"),
-						href: "/lucid/login",
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("auth.email.change.token.invalid.title")}
+					description={T()("auth.email.change.token.invalid.description")}
+					actions={
+						<Link variant="primary" size="sm" href="/lucid/login">
+							{T()("common.back.to.login")}
+						</Link>
+					}
 				/>
 			</Match>
 			<Match when={completed()}>

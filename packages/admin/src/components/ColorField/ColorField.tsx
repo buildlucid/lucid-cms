@@ -1,6 +1,7 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
-import { ColorInput } from "@/components/ColorInput/ColorInput";
+import ColorPicker from "@/components/ColorPicker/ColorPicker";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
@@ -45,7 +46,7 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 	// Render
 	return (
 		<div>
-			<ColorInput
+			<ColorPicker
 				id={brickHelpers.customFieldId({
 					key: props.state.fieldConfig.key,
 					brickIndex: fieldRenderState.brickIndex(),
@@ -64,21 +65,23 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 					});
 				}}
 				name={props.state.fieldConfig.key}
-				copy={{
-					label: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.label,
-					}),
-					describedBy: helpers.getLocaleValue({
-						value: props.state.fieldConfig.details.description,
-					}),
-				}}
-				altLocaleError={props.state.altLocaleError}
-				localised={props.state.localised}
+				label={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.label,
+				})}
+				description={helpers.getLocaleValue({
+					value: props.state.fieldConfig.details.description,
+				})}
 				presets={props.state.fieldConfig.presets}
 				disabled={disabled()}
 				errors={props.state.fieldError}
 				required={props.state.fieldConfig.validation?.required || false}
-				fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+				labelStart={
+					<FieldLabelMarkers
+						altLocaleError={props.state.altLocaleError}
+						localised={props.state.localised}
+						fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+					/>
+				}
 			/>
 		</div>
 	);

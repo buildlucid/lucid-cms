@@ -287,7 +287,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 										<div class="flex flex-wrap items-center gap-2">
 											<Show when={primarySelectedMedia()?.isDeleted}>
 												<Pill
-													theme="red"
+													variant="danger"
 													tooltip={T()("common.status.deleted.tooltip")}
 												>
 													{T()("common.status.deleted")}
@@ -295,7 +295,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											</Show>
 											<Show when={!primarySelectedMedia()?.public}>
 												<Pill
-													theme="red"
+													variant="danger"
 													tooltip={T()("media.visibility.private.tooltip")}
 												>
 													{T()("common.private")}
@@ -305,22 +305,22 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									</Show>
 									<div class="flex flex-wrap items-center gap-2 ">
 										<Show when={primarySelectedMedia()?.meta.fileSize}>
-											<Pill theme="outline">
+											<Pill variant="outline">
 												{helpers.bytesToSize(
 													primarySelectedMedia()?.meta.fileSize,
 												)}
 											</Pill>
 										</Show>
 										<Show when={mediaDimensions()}>
-											<Pill theme="outline">{mediaDimensions()}</Pill>
+											<Pill variant="outline">{mediaDimensions()}</Pill>
 										</Show>
 										<Show when={primarySelectedMedia()?.meta.mimeType}>
-											<Pill theme="outline">
+											<Pill variant="outline">
 												{primarySelectedMedia()?.meta.mimeType}
 											</Pill>
 										</Show>
 										<Show when={primarySelectedMedia()?.meta.extension}>
-											<Pill theme="outline">
+											<Pill variant="outline">
 												{primarySelectedMedia()?.meta.extension.toUpperCase()}
 											</Pill>
 										</Show>
@@ -419,7 +419,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 												<div class="relative hidden h-full items-center justify-center lg:flex lg:max-xl:[&:last-child:nth-child(2n+1)]:hidden xl:[&:last-child:nth-child(3n+1)]:hidden xl:[&:last-child:nth-child(3n+2)]:col-span-2">
 													<Button
 														type="button"
-														variant="primary-outline"
+														variant="outline"
 														shape="circle"
 														size="xs"
 														onClick={openMediaSelectModal}
@@ -552,16 +552,16 @@ const MediaSortableItem: Component<{
 				<div class="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 bg-linear-to-b from-black/45 via-black/20 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 					<div class="flex flex-wrap gap-1.5">
 						<Show when={props.media.isDeleted}>
-							<Pill theme="red">{T()("common.status.deleted")}</Pill>
+							<Pill variant="danger">{T()("common.status.deleted")}</Pill>
 						</Show>
 						<Show when={props.dimensions}>
-							<Pill theme="outline">{props.dimensions}</Pill>
+							<Pill variant="outline">{props.dimensions}</Pill>
 						</Show>
 						<Show when={props.media.meta.mimeType}>
-							<Pill theme="outline">{props.media.meta.mimeType}</Pill>
+							<Pill variant="outline">{props.media.meta.mimeType}</Pill>
 						</Show>
 						<Show when={props.media.meta.extension}>
-							<Pill theme="outline">
+							<Pill variant="outline">
 								{props.media.meta.extension.toUpperCase()}
 							</Pill>
 						</Show>

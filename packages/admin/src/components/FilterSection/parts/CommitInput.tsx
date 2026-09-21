@@ -7,7 +7,7 @@ import {
 	Show,
 	untrack,
 } from "solid-js";
-import { Input } from "@/components/Input/Input";
+import Input from "@/components/Input/Input";
 
 /**
  * Text-style input that keeps a local draft while typing and commits it on a

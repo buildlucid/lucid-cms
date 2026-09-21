@@ -1,5 +1,5 @@
 import { type Component, createMemo } from "solid-js";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import themeStore, {
 	type ThemePreference,
 } from "@/store/themeStore/themeStore";

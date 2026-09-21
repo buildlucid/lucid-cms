@@ -1,7 +1,7 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { Field } from "@/components/Field/Field";
+import Checkbox from "@/components/Checkbox/Checkbox";
+import Field from "@/components/Field/Field";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";

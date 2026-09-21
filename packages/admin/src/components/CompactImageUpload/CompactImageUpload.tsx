@@ -297,8 +297,9 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 					<div class="absolute inset-x-0 bottom-0">
 						<ProgressBar
 							progress={props.progress?.value ?? 0}
-							type="target"
-							variant="edge"
+							variant="primary-subtle"
+							size="md"
+							square
 						/>
 					</div>
 				</Show>

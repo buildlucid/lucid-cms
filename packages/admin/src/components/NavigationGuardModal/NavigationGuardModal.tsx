@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import type { NavigationGuardState } from "@/hooks/useNavigationGuard/useNavigationGuard";
 import T from "@/translations";
 

@@ -1,7 +1,7 @@
 import classnames from "classnames";
 import { FaSolidMagicWandSparkles } from "solid-icons/fa";
 import { type Component, createMemo, For, Show } from "solid-js";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import T from "@/translations";
 
 export type AiGenerationHistoryItem = {

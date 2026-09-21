@@ -7,11 +7,13 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import NoEntriesBlock, {
-	type NoEntriesBlockProps,
-} from "@/components/NoEntriesBlock/NoEntriesBlock";
+import Button from "@/components/Button/Button";
+import EmptyState, {
+	type EmptyStateProps,
+} from "@/components/EmptyState/EmptyState";
 import SkeletonCard from "@/components/SkeletonCard/SkeletonCard";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
+import T from "@/translations";
 
 export const Grid: Component<{
 	state?: {
@@ -24,7 +26,9 @@ export const Grid: Component<{
 		topRow?: JSXElement;
 	};
 	copy?: {
-		empty?: NoEntriesBlockProps["copy"];
+		empty?: Pick<EmptyStateProps, "title" | "description"> & {
+			actionLabel?: string;
+		};
 	};
 	callback?: {
 		createEntry?: () => void;
@@ -58,15 +62,17 @@ export const Grid: Component<{
 		>
 			<Switch>
 				<Match when={isEmpty()}>
-					<NoEntriesBlock
-						copy={{
-							title: props.copy?.empty?.title,
-							description: props.copy?.empty?.description,
-							button: props.copy?.empty?.button,
-						}}
-						callbacks={{
-							action: props.callback?.createEntry,
-						}}
+					<EmptyState
+						title={props.copy?.empty?.title}
+						description={props.copy?.empty?.description}
+						actions={
+							props.callback?.createEntry ? (
+								<Button size="sm" onClick={props.callback.createEntry}>
+									{props.copy?.empty?.actionLabel ??
+										T()("actions.create.entry")}
+								</Button>
+							) : undefined
+						}
 					/>
 				</Match>
 				<Match when={!isEmpty()}>

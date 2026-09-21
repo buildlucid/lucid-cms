@@ -206,7 +206,7 @@ const DocumentDynamicColumns: Component<{
 			<Match when={fieldData()?.type === "checkbox"}>
 				<TablePillCell
 					text={fieldValue() === true ? T()("common.yes") : T()("common.no")}
-					theme="primary-opaque"
+					variant="primary-subtle"
 					options={{ include: props.include[props.index] }}
 				/>
 			</Match>

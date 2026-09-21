@@ -4,7 +4,7 @@ import type { MediaFolder } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
+import Checkbox from "@/components/Checkbox/Checkbox";
 import { Permissions } from "@/constants/permissions";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";

@@ -8,12 +8,12 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Checkbox from "@/components/Checkbox/Checkbox";
+import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Input } from "@/components/Input/Input";
+import Input from "@/components/Input/Input";
 import InputGrid from "@/components/InputGrid/InputGrid";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Textarea from "@/components/Textarea/Textarea";
 import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants";
 import api from "@/services/api";
 import T from "@/translations";

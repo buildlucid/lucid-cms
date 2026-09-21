@@ -13,7 +13,7 @@ import {
 import Button from "@/components/Button/Button";
 import { DegreeRangeControl } from "@/components/DegreeRangeControl/DegreeRangeControl";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 import {

@@ -10,7 +10,7 @@ import {
 	Show,
 	splitProps,
 } from "solid-js";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 import T from "@/translations";
 
@@ -45,19 +45,22 @@ export interface SwitchProps extends JSX.AriaAttributes {
  * @example
  * ```tsx
  * import { Switch } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Switch
  * 		id="enabled"
  * 		name="enabled"
- * 		label="Status"
+ * 		label={t("common.status")}
  * 		value={enabled()}
  * 		onChange={setEnabled}
  * 	/>
  * );
  * ```
  */
-export const Switch: Component<SwitchProps> = (props) => {
+const Switch: Component<SwitchProps> = (props) => {
 	// ----------------------------------------
 	// State
 	//* everything left over is the caller's aria-*, which belongs on the control
@@ -203,3 +206,5 @@ export const Switch: Component<SwitchProps> = (props) => {
 		</Field.Root>
 	);
 };
+
+export default Switch;

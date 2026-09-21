@@ -11,7 +11,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import { DocumentSelectContent } from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import {
 	getRichTextUserFieldText,
 	isRichTextUserVariableField,
@@ -20,7 +20,7 @@ import type {
 	RichTextVariableReference,
 	RichTextVariableSelection,
 } from "@/components/RichText/types";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import { UserSelectContent } from "@/components/UserSelectDrawer/UserSelectDrawer";
 import { resolveCollectionContentLocales } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";

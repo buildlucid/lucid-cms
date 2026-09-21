@@ -3,7 +3,7 @@ import { FaSolidArrowRightArrowLeft, FaSolidKey } from "solid-icons/fa";
 import { type Component, createSignal, Show } from "solid-js";
 import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
 import IconContainer from "@/components/IconContainer/IconContainer";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
 import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";

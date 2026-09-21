@@ -4,7 +4,7 @@ import { TableCell } from "@/components/TableCell/TableCell";
 
 interface PillColProps {
 	text?: string | number | null;
-	theme?: PillProps["theme"];
+	variant?: PillProps["variant"];
 	options?: {
 		include?: boolean;
 		padding?: "16" | "24";
@@ -23,7 +23,7 @@ const TablePillCell: Component<PillColProps> = (props) => {
 		>
 			<Switch>
 				<Match when={props.text !== undefined}>
-					<Pill theme={props.theme || "grey"}>{props.text}</Pill>
+					<Pill variant={props.variant || "neutral"}>{props.text}</Pill>
 				</Match>
 				<Match when={props.text === undefined}>{"-"}</Match>
 			</Switch>

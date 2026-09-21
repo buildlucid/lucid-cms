@@ -9,10 +9,10 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Input } from "@/components/Input/Input";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Input from "@/components/Input/Input";
+import Textarea from "@/components/Textarea/Textarea";
 import { useCreateMedia } from "@/hooks/useCreateMedia/useCreateMedia";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
 import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";

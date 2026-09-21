@@ -6,7 +6,7 @@ import {
 	Show,
 	splitProps,
 } from "solid-js";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 
 export interface TextareaProps
 	extends Omit<
@@ -37,12 +37,15 @@ export interface TextareaProps
  * @example
  * ```tsx
  * import { Textarea } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Textarea
  * 		id="summary"
  * 		name="summary"
- * 		label="Summary"
+ * 		label={t("common.summary")}
  * 		value={summary()}
  * 		onChange={setSummary}
  * 		rows={4}
@@ -50,7 +53,7 @@ export interface TextareaProps
  * );
  * ```
  */
-export const Textarea: Component<TextareaProps> = (props) => {
+const Textarea: Component<TextareaProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [local, rest] = splitProps(props, [
@@ -104,3 +107,5 @@ export const Textarea: Component<TextareaProps> = (props) => {
 		</Field.Root>
 	);
 };
+
+export default Textarea;

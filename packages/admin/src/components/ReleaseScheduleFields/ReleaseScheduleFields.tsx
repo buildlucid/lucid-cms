@@ -1,6 +1,6 @@
 import { type Component, createMemo, createSignal } from "solid-js";
-import { Input } from "@/components/Input/Input";
-import { Select } from "@/components/Select/Select";
+import Input from "@/components/Input/Input";
+import Select from "@/components/Select/Select";
 import T from "@/translations";
 import {
 	getDefaultTimezone,

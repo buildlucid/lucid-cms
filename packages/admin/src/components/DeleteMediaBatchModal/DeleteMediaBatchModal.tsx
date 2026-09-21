@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import { createMemo, createSignal, Show } from "solid-js";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { Modal } from "@/components/Modal/Modal";
+import Checkbox from "@/components/Checkbox/Checkbox";
+import Modal from "@/components/Modal/Modal";
 import api from "@/services/api";
 import mediaStore from "@/store/mediaStore/mediaStore";
 import T from "@/translations";

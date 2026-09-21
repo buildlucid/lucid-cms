@@ -22,7 +22,7 @@ import {
 import Button from "@/components/Button/Button";
 import DocumentSelectSingle from "@/components/DocumentSelectSingle/DocumentSelectSingle";
 import DocumentTableRow from "@/components/DocumentTableRow/DocumentTableRow";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
@@ -30,7 +30,7 @@ import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import { ResetFilters } from "@/components/ResetFilters/ResetFilters";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import { Table } from "@/components/Table/Table";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import useQueryState, {

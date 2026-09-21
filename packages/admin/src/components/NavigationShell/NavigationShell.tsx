@@ -9,12 +9,12 @@ import {
 } from "solid-js";
 import FullPageLoading from "@/components/FullPageLoading/FullPageLoading";
 import { Navigation } from "@/components/Navigation/Navigation";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore/siteStore";
 
-const MainLayout: Component<{
+const NavigationShell: Component<{
 	children?: JSXElement;
 }> = (props) => {
 	// ----------------------------------
@@ -77,12 +77,14 @@ const MainLayout: Component<{
 					<Show
 						when={isSuccess()}
 						fallback={
-							<PageLayout>
-								<div />
-							</PageLayout>
+							<PageLayout.Root>
+								<PageLayout.Body>
+									<div />
+								</PageLayout.Body>
+							</PageLayout.Root>
 						}
 					>
-						<Suspense fallback={<PageLayout />}>{props.children}</Suspense>
+						<Suspense fallback={<PageLayout.Root />}>{props.children}</Suspense>
 					</Show>
 					<Show when={isLoading()}>
 						<FullPageLoading />
@@ -93,4 +95,4 @@ const MainLayout: Component<{
 	);
 };
 
-export default MainLayout;
+export default NavigationShell;

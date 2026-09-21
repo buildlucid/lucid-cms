@@ -8,18 +8,18 @@ import type { PillProps } from "@/components/Pill/Pill";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-type PublishOperationPillTheme = Extract<
-	PillProps["theme"],
-	"warning-opaque" | "primary-opaque" | "error-opaque" | "outline"
+type PublishOperationPillVariant = Extract<
+	PillProps["variant"],
+	"warning-subtle" | "primary-subtle" | "danger-subtle" | "outline"
 >;
 
-const getPublishOperationDotClass = (theme: PublishOperationPillTheme) => {
-	switch (theme) {
-		case "warning-opaque":
+const getPublishOperationDotClass = (variant: PublishOperationPillVariant) => {
+	switch (variant) {
+		case "warning-subtle":
 			return "border-warning-base/60 bg-warning-base/40";
-		case "primary-opaque":
+		case "primary-subtle":
 			return "border-primary-muted-border bg-primary-muted-bg";
-		case "error-opaque":
+		case "danger-subtle":
 			return "border-error-base/60 bg-error-base/40";
 		case "outline":
 			return "border-border bg-input-base";
@@ -41,17 +41,17 @@ export const formatPublishOperationUser = (user: PublishOperationUser) => {
 	return helpers.formatUserName(user, "username") || "-";
 };
 
-export const getPublishOperationStatusTheme = (
+export const getPublishOperationStatusVariant = (
 	status: PublishOperationStatus,
-): PublishOperationPillTheme => {
+): PublishOperationPillVariant => {
 	switch (status) {
 		case "pending":
-			return "warning-opaque";
+			return "warning-subtle";
 		case "approved":
-			return "primary-opaque";
+			return "primary-subtle";
 		case "rejected":
 		case "cancelled":
-			return "error-opaque";
+			return "danger-subtle";
 		case "superseded":
 			return "outline";
 	}
@@ -60,7 +60,7 @@ export const getPublishOperationStatusTheme = (
 /** Uses the same status colours as the release-request table. */
 export const getPublishOperationStatusDotClass = (
 	status: PublishOperationStatus,
-) => getPublishOperationDotClass(getPublishOperationStatusTheme(status));
+) => getPublishOperationDotClass(getPublishOperationStatusVariant(status));
 
 export const getPublishOperationStatusLabel = (
 	status: PublishOperationStatus,
@@ -79,19 +79,19 @@ export const getPublishOperationStatusLabel = (
 	}
 };
 
-export const getPublishOperationExecutionStatusTheme = (
+export const getPublishOperationExecutionStatusVariant = (
 	status: PublishOperationExecutionStatus,
-): PublishOperationPillTheme => {
+): PublishOperationPillVariant => {
 	switch (status) {
 		case "awaiting_approval":
 		case "scheduled":
-			return "warning-opaque";
+			return "warning-subtle";
 		case "executing":
 		case "executed":
-			return "primary-opaque";
+			return "primary-subtle";
 		case "failed":
 		case "cancelled":
-			return "error-opaque";
+			return "danger-subtle";
 	}
 };
 
@@ -99,7 +99,9 @@ export const getPublishOperationExecutionStatusTheme = (
 export const getPublishOperationExecutionStatusDotClass = (
 	status: PublishOperationExecutionStatus,
 ) =>
-	getPublishOperationDotClass(getPublishOperationExecutionStatusTheme(status));
+	getPublishOperationDotClass(
+		getPublishOperationExecutionStatusVariant(status),
+	);
 
 export const getPublishOperationExecutionStatusLabel = (
 	status: PublishOperationExecutionStatus,

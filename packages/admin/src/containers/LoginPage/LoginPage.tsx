@@ -10,7 +10,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import LoginForm from "@/components/LoginForm/LoginForm";
 import ProviderButton from "@/components/ProviderButton/ProviderButton";
 import Spinner from "@/components/Spinner/Spinner";
@@ -102,12 +102,10 @@ const LoginPage: Component = () => {
 				</div>
 			</Match>
 			<Match when={isError()}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("errors.generic.title"),
-						description: T()("errors.generic.message"),
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("errors.generic.title")}
+					description={T()("errors.generic.message")}
 				/>
 			</Match>
 			<Match when={isSuccess()}>

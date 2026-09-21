@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { type Component, createMemo, createUniqueId, For } from "solid-js";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import T from "@/translations";
 
 export interface DrawerTabItem<T extends string = string> {

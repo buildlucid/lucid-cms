@@ -9,11 +9,11 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { Drawer } from "@/components/Drawer/Drawer";
-import { Input } from "@/components/Input/Input";
+import Drawer from "@/components/Drawer/Drawer";
+import Input from "@/components/Input/Input";
 import ReadonlyMediaPreview from "@/components/ReadonlyMediaPreview/ReadonlyMediaPreview";
-import { Select } from "@/components/Select/Select";
-import { Switch } from "@/components/Switch/Switch";
+import Select from "@/components/Select/Select";
+import Switch from "@/components/Switch/Switch";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";

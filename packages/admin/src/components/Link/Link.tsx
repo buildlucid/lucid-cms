@@ -16,7 +16,6 @@ export type LinkVariant =
 	| "primary"
 	| "secondary"
 	| "outline"
-	| "primary-outline"
 	| "danger"
 	| "danger-outline";
 
@@ -44,7 +43,9 @@ export interface LinkProps extends Omit<AnchorProps, "href" | "shape"> {
  * @example
  * ```tsx
  * import { Link } from "@lucidcms/admin/components";
- * import { Permissions } from "@lucidcms/admin/hooks";
+ * import { Permissions, useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Link
@@ -54,7 +55,7 @@ export interface LinkProps extends Omit<AnchorProps, "href" | "shape"> {
  * 		permission={Permissions.MediaRead}
  * 		href="/lucid/media"
  * 	>
- * 		Browse media
+ * 		{t("routes.media.title")}
  * 	</Link>
  * );
  * ```
@@ -104,8 +105,6 @@ const Link: Component<LinkProps> = (props) => {
 					local.variant === "secondary",
 				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-subtitle hover:text-secondary-contrast ring-primary-base":
 					local.variant === "outline",
-				"border border-border bg-input-base text-body fill-body ring-primary-base hover:border-primary-muted-border hover:bg-card-hover hover:text-primary-base hover:fill-primary-base":
-					local.variant === "primary-outline",
 				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					local.variant === "danger",
 				"bg-transparent border border-border hover:bg-error-hover ring-primary-base fill-error-contrast hover:text-error-contrast":

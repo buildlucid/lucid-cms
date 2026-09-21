@@ -49,13 +49,13 @@ const JobTableRow: Component<JobRowProps> = (props) => {
 		>
 			<TablePillCell
 				text={props.job.status}
-				theme={
+				variant={
 					props.job.status === "completed"
-						? "primary-opaque"
+						? "primary-subtle"
 						: props.job.status === "failed"
-							? "error-opaque"
+							? "danger-subtle"
 							: props.job.status === "running"
-								? "primary-opaque"
+								? "primary-subtle"
 								: "outline"
 				}
 				options={{
@@ -85,7 +85,7 @@ const JobTableRow: Component<JobRowProps> = (props) => {
 			/>
 			<TablePillCell
 				text={`${props.job.attempts}/${props.job.maxAttempts}`}
-				theme={"outline"}
+				variant={"outline"}
 				options={{
 					include: props?.include[3],
 					padding: props.options?.padding,

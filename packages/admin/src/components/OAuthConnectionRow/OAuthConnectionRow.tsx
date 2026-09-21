@@ -8,7 +8,7 @@ import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
 import DateText from "@/components/DateText/DateText";
 import IconContainer from "@/components/IconContainer/IconContainer";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import UpdateOAuthConnectionModal from "@/components/UpdateOAuthConnectionModal/UpdateOAuthConnectionModal";
 import api from "@/services/api";
 import type { OAuthConnectionOwner } from "@/services/api/oauth-connections";

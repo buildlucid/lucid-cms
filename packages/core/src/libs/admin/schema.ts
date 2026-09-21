@@ -163,13 +163,13 @@ export const adminConfigSchema = z
 			.default([]),
 		routes: z
 			.array(
-				z.discriminatedUnion("layout", [
+				z.discriminatedUnion("shell", [
 					route.extend({
-						layout: z.literal("admin").default("admin"),
+						shell: z.literal("navigation").default("navigation"),
 						access: z.literal("authenticated").default("authenticated"),
 					}),
 					route.extend({
-						layout: z.literal("blank"),
+						shell: z.literal("none"),
 						access: z
 							.enum(["authenticated", "public"])
 							.default("authenticated"),

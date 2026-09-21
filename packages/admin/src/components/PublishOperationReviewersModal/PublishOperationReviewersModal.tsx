@@ -1,9 +1,9 @@
 import type { PublishOperation, PublishOperationReviewer } from "@types";
 import type { Accessor, Component } from "solid-js";
 import { createEffect, createMemo, createSignal } from "solid-js";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
-import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
+import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
 import UserSelectOption from "@/components/UserSelectOption/UserSelectOption";
 import api from "@/services/api";
 import T from "@/translations";

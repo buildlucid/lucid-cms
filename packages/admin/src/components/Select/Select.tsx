@@ -20,7 +20,7 @@ import {
 	splitProps,
 } from "solid-js";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 
@@ -88,23 +88,26 @@ export interface SelectProps<Option extends SelectOption = SelectOption>
  * @example
  * ```tsx
  * import { Select } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Select
  * 		id="status"
  * 		name="status"
- * 		label="Status"
+ * 		label={t("common.status")}
  * 		value={status()}
  * 		onChange={setStatus}
  * 		options={[
- * 			{ value: "draft", label: "Draft" },
- * 			{ value: "published", label: "Published" },
+ * 			{ value: "active", label: t("common.status.active") },
+ * 			{ value: "inactive", label: t("common.status.inactive") },
  * 		]}
  * 	/>
  * );
  * ```
  */
-export function Select<Option extends SelectOption = SelectOption>(
+function Select<Option extends SelectOption = SelectOption>(
 	props: SelectProps<Option>,
 ) {
 	//* everything left over is the caller's aria-*, which belongs on the trigger
@@ -408,3 +411,5 @@ export function Select<Option extends SelectOption = SelectOption>(
 		</Field.Root>
 	);
 }
+
+export default Select;

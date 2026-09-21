@@ -21,7 +21,7 @@ import {
 	untrack,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import { createSingleReq } from "@/services/api/media/useCreateSingle";
 import { createUploadSessionReq } from "@/services/api/media/useCreateUploadSession";
@@ -496,8 +496,9 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 											<div class="absolute right-0 bottom-0 left-0">
 												<ProgressBar
 													progress={row.progress}
-													type="target"
-													variant="edge-thin"
+													variant="primary-subtle"
+													size="sm"
+													square
 												/>
 											</div>
 										</Show>

@@ -12,7 +12,7 @@ import {
 import Button from "@/components/Button/Button";
 import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
@@ -157,20 +157,20 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 								<div class="pointer-events-none absolute top-0 right-0 left-0 z-20 flex flex-wrap items-center gap-2 bg-linear-to-b from-black/70 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 									<div class="flex flex-wrap items-center gap-2">
 										<Show when={profilePicture().meta.fileSize}>
-											<Pill theme="outline">
+											<Pill variant="outline">
 												{helpers.bytesToSize(profilePicture().meta.fileSize)}
 											</Pill>
 										</Show>
 										<Show when={mediaDimensions()}>
-											<Pill theme="outline">{mediaDimensions()}</Pill>
+											<Pill variant="outline">{mediaDimensions()}</Pill>
 										</Show>
 										<Show when={profilePicture().meta.mimeType}>
-											<Pill theme="outline">
+											<Pill variant="outline">
 												{profilePicture().meta.mimeType}
 											</Pill>
 										</Show>
 										<Show when={profilePicture().meta.extension}>
-											<Pill theme="outline">
+											<Pill variant="outline">
 												{profilePicture().meta.extension.toUpperCase()}
 											</Pill>
 										</Show>

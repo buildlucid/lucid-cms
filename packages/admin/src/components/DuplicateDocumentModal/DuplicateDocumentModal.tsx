@@ -1,6 +1,6 @@
 import type { Collection } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";

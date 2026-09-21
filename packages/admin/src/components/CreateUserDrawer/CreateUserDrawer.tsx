@@ -1,12 +1,12 @@
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Checkbox from "@/components/Checkbox/Checkbox";
+import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Input } from "@/components/Input/Input";
+import Input from "@/components/Input/Input";
 import InputGrid from "@/components/InputGrid/InputGrid";
 import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
-import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
+import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";

@@ -2,7 +2,7 @@ import { type Component, createMemo, For, Show } from "solid-js";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import Pill from "@/components/Pill/Pill";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
@@ -10,6 +10,9 @@ import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+
+/** Past this much of the storage limit the usage bar warns. */
+const STORAGE_DANGER_PERCENT = 90;
 
 const SystemOverviewPage: Component = () => {
 	// ----------------------------------
@@ -75,174 +78,173 @@ const SystemOverviewPage: Component = () => {
 	// Render
 
 	return (
-		<PageLayout
-			slots={{
-				header: <SystemSettingsHeader />,
-			}}
-		>
-			<DynamicContent
-				state={{
-					isError: settingsData.isError,
-					isSuccess: settingsData.isSuccess,
-					isLoading: settingsData.isLoading,
-				}}
-				options={{
-					padding: "24",
-				}}
-			>
-				<InfoRow.Root
-					title={T()("media.info.title")}
-					description={T()("media.info.description")}
+		<PageLayout.Root>
+			<SystemSettingsHeader />
+			<PageLayout.Body>
+				<DynamicContent
+					state={{
+						isError: settingsData.isError,
+						isSuccess: settingsData.isSuccess,
+						isLoading: settingsData.isLoading,
+					}}
+					options={{
+						padding: "24",
+					}}
 				>
-					<InfoRow.Content title={storageTitle()} reducedMargin={true}>
-						<ProgressBar
-							progress={percentUsed()}
-							type={isUnlimitedStorage() ? "target" : "usage"}
-							labels={storageBarLabels()}
-						/>
-					</InfoRow.Content>
-					<InfoRow.Content
-						title={T()("media.processed.title")}
-						description={T()("media.processed.settings.message", {
-							limit: settingsData.data?.data?.media?.processed.imageLimit || 0,
-						})}
-						reducedMargin={true}
+					<InfoRow.Root
+						title={T()("media.info.title")}
+						description={T()("media.info.description")}
 					>
-						<DetailsList
-							type="text"
-							theme="contained"
-							items={[
-								{
-									label: T()("common.stored"),
-									value: settingsData.data?.data?.media?.processed.stored
-										? T()("common.yes")
-										: T()("common.no"),
-								},
-								{
-									label: T()("common.limit"),
-									value:
-										settingsData.data?.data?.media?.processed.imageLimit ?? 0,
-								},
-								{
-									label: T()("common.total"),
-									value: settingsData.data?.data?.media?.processed.total ?? 0,
-								},
-							]}
-						/>
-					</InfoRow.Content>
-				</InfoRow.Root>
-
-				<InfoRow.Root
-					title={T()("system.email.info.title")}
-					description={T()("system.email.info.description")}
-				>
-					<InfoRow.Content
-						title={T()("system.email.delivery.title")}
-						reducedMargin={true}
-					>
-						<DetailsList
-							type="text"
-							theme="contained"
-							items={[
-								{
-									label: T()("common.simulated"),
-									value:
-										emailInfo()?.simulated === true
+						<InfoRow.Content title={storageTitle()}>
+							<ProgressBar
+								progress={percentUsed()}
+								variant={
+									isUnlimitedStorage()
+										? "primary"
+										: percentUsed() > STORAGE_DANGER_PERCENT
+											? "danger"
+											: "neutral"
+								}
+								labels={storageBarLabels()}
+							/>
+						</InfoRow.Content>
+						<InfoRow.Content
+							title={T()("media.processed.title")}
+							description={T()("media.processed.settings.message", {
+								limit:
+									settingsData.data?.data?.media?.processed.imageLimit || 0,
+							})}
+						>
+							<DetailsList
+								type="text"
+								theme="contained"
+								items={[
+									{
+										label: T()("common.stored"),
+										value: settingsData.data?.data?.media?.processed.stored
 											? T()("common.yes")
 											: T()("common.no"),
-								},
-								{
-									label: T()("common.from"),
-									value: emailFromValue(),
-								},
-							]}
-						/>
-					</InfoRow.Content>
-					<InfoRow.Content
-						title={T()("common.available.templates")}
-						reducedMargin={true}
+									},
+									{
+										label: T()("common.limit"),
+										value:
+											settingsData.data?.data?.media?.processed.imageLimit ?? 0,
+									},
+									{
+										label: T()("common.total"),
+										value: settingsData.data?.data?.media?.processed.total ?? 0,
+									},
+								]}
+							/>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
+					<InfoRow.Root
+						title={T()("system.email.info.title")}
+						description={T()("system.email.info.description")}
 					>
-						<Show
-							when={emailTemplates().length > 0}
-							fallback={
-								<p class="text-sm text-unfocused">
-									{T()("empty.states.templates")}
-								</p>
-							}
+						<InfoRow.Content title={T()("system.email.delivery.title")}>
+							<DetailsList
+								type="text"
+								theme="contained"
+								items={[
+									{
+										label: T()("common.simulated"),
+										value:
+											emailInfo()?.simulated === true
+												? T()("common.yes")
+												: T()("common.no"),
+									},
+									{
+										label: T()("common.from"),
+										value: emailFromValue(),
+									},
+								]}
+							/>
+						</InfoRow.Content>
+						<InfoRow.Content title={T()("common.available.templates")}>
+							<Show
+								when={emailTemplates().length > 0}
+								fallback={
+									<p class="text-sm text-unfocused">
+										{T()("empty.states.templates")}
+									</p>
+								}
+							>
+								<div class="flex flex-wrap gap-2">
+									<For each={emailTemplates()}>
+										{(template) => <Pill variant="outline">{template}</Pill>}
+									</For>
+								</div>
+							</Show>
+						</InfoRow.Content>
+					</InfoRow.Root>
+					<InfoRow.Root
+						title={T()("system.info.title")}
+						description={T()("system.info.description")}
+					>
+						<InfoRow.Content
+							title={T()("system.adapters.title")}
+							description={T()("system.adapters.description")}
 						>
-							<div class="flex flex-wrap gap-2">
-								<For each={emailTemplates()}>
-									{(template) => <Pill theme="outline">{template}</Pill>}
-								</For>
-							</div>
-						</Show>
-					</InfoRow.Content>
-				</InfoRow.Root>
-				<InfoRow.Root
-					title={T()("system.info.title")}
-					description={T()("system.info.description")}
-				>
-					<InfoRow.Content
-						title={T()("system.adapters.title")}
-						description={T()("system.adapters.description")}
-						reducedMargin={true}
-					>
-						<DetailsList
-							type="text"
-							theme="contained"
-							items={[
-								{
-									label: T()("common.runtime"),
-									value: systemInfo()?.runtime ?? "-",
-								},
-								{
-									label: T()("common.database"),
-									value: systemInfo()?.database ?? "-",
-								},
-								{
-									label: T()("common.kv"),
-									value: systemInfo()?.kv ?? "-",
-								},
-								{
-									label: T()("common.queue"),
-									value: systemInfo()?.queue ?? "-",
-								},
-								{
-									label: T()("common.media"),
-									value: systemInfo()?.mediaStorage ?? "-",
-								},
-								{
-									label: T()("common.email"),
-									value: systemInfo()?.email ?? "-",
-								},
-								{
-									label: T()("common.media.delivery"),
-									value: systemInfo()?.mediaDelivery ?? "-",
-								},
-							]}
-						/>
-					</InfoRow.Content>
-					<InfoRow.Content
-						title={T()("settings.interface.content.locales.title")}
-						description={T()("settings.interface.content.locales.description")}
-						reducedMargin={true}
-					>
-						<DetailsList
-							type="text"
-							theme="contained"
-							items={
-								contentLocales().map((locale) => ({
-									label: locale.name || locale.code,
-									value: `${locale.code} ${
-										locale.isDefault ? `(${T()("common.default")})` : ""
-									} `,
-								})) || []
-							}
-						/>
-					</InfoRow.Content>
-				</InfoRow.Root>
-			</DynamicContent>
-		</PageLayout>
+							<DetailsList
+								type="text"
+								theme="contained"
+								items={[
+									{
+										label: T()("common.runtime"),
+										value: systemInfo()?.runtime ?? "-",
+									},
+									{
+										label: T()("common.database"),
+										value: systemInfo()?.database ?? "-",
+									},
+									{
+										label: T()("common.kv"),
+										value: systemInfo()?.kv ?? "-",
+									},
+									{
+										label: T()("common.queue"),
+										value: systemInfo()?.queue ?? "-",
+									},
+									{
+										label: T()("common.media"),
+										value: systemInfo()?.mediaStorage ?? "-",
+									},
+									{
+										label: T()("common.email"),
+										value: systemInfo()?.email ?? "-",
+									},
+									{
+										label: T()("common.media.delivery"),
+										value: systemInfo()?.mediaDelivery ?? "-",
+									},
+								]}
+							/>
+						</InfoRow.Content>
+						<InfoRow.Content
+							title={T()("settings.interface.content.locales.title")}
+							description={T()(
+								"settings.interface.content.locales.description",
+							)}
+						>
+							<DetailsList
+								type="text"
+								theme="contained"
+								items={
+									contentLocales().map((locale) => ({
+										label: locale.name || locale.code,
+										value: `${locale.code} ${
+											locale.isDefault ? `(${T()("common.default")})` : ""
+										} `,
+									})) || []
+								}
+							/>
+						</InfoRow.Content>
+					</InfoRow.Root>
+				</DynamicContent>
+			</PageLayout.Body>
+		</PageLayout.Root>
 	);
 };
 

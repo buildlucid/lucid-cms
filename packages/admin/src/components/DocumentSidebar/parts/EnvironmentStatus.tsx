@@ -17,13 +17,13 @@ import {
 } from "@/utils/document-environment-status";
 import helpers from "@/utils/helpers";
 
-const statusThemes: Record<
+const statusVariants: Record<
 	DocumentEnvironmentStatus,
-	NonNullable<DetailsListProps["items"][number]["pillTheme"]>
+	NonNullable<DetailsListProps["items"][number]["pillVariant"]>
 > = {
-	"in-sync": "primary-opaque",
-	"out-of-sync": "warning-opaque",
-	unreleased: "error-opaque",
+	"in-sync": "primary-subtle",
+	"out-of-sync": "warning-subtle",
+	unreleased: "danger-subtle",
 };
 
 export const EnvironmentStatus: Component<{
@@ -66,8 +66,8 @@ export const EnvironmentStatus: Component<{
 						fallback: environment.key,
 					}) || environment.key,
 				value: getDocumentEnvironmentStatusLabel(status),
-				pillTheme: statusThemes[status],
-				pillSize: "small",
+				pillVariant: statusVariants[status],
+				pillSize: "xs",
 			};
 		});
 	});

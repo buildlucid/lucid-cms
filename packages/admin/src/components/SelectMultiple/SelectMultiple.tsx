@@ -14,7 +14,7 @@ import {
 	splitProps,
 } from "solid-js";
 import DropdownContent from "@/components/DropdownContent/DropdownContent";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 import T from "@/translations";
 
 /** One entry a caller can pick from. */
@@ -65,12 +65,15 @@ export interface SelectMultipleProps<
  * @example
  * ```tsx
  * import { SelectMultiple } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<SelectMultiple
  * 		id="roles"
  * 		name="roles"
- * 		label="Roles"
+ * 		label={t("common.roles")}
  * 		values={roles()}
  * 		onChange={setRoles}
  * 		options={[
@@ -81,7 +84,7 @@ export interface SelectMultipleProps<
  * );
  * ```
  */
-export function SelectMultiple<
+function SelectMultiple<
 	Option extends SelectMultipleOption = SelectMultipleOption,
 >(props: SelectMultipleProps<Option>) {
 	// ----------------------------------------
@@ -326,3 +329,5 @@ export function SelectMultiple<
 		</Field.Root>
 	);
 }
+
+export default SelectMultiple;

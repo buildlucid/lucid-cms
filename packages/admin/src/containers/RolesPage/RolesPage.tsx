@@ -1,11 +1,14 @@
 import { useQueryClient } from "@tanstack/solid-query";
-import { type Component, createSignal } from "solid-js";
-import { PageHeader } from "@/components/PageHeader/PageHeader";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
+import { type Component, createMemo, createSignal } from "solid-js";
+import CreateMenu, {
+	type CreateMenuAction,
+} from "@/components/CreateMenu/CreateMenu";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import { RolesList } from "@/components/RolesList/RolesList";
 import UpsertRoleDrawer from "@/components/UpsertRoleDrawer/UpsertRoleDrawer";
 import { Permissions } from "@/constants/permissions";
+import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useQueryState, {
 	booleanFilter,
 	sort,
@@ -39,102 +42,108 @@ const RolesPage: Component = () => {
 	const [openCreateRolePanel, setOpenCreateRolePanel] = createSignal(false);
 
 	// ----------------------------------
+	// Memos
+	const canCreate = createMemo(
+		() => userStore.get.hasPermission([Permissions.RolesCreate]).all,
+	);
+	const createActions = createMemo<CreateMenuAction[]>(() =>
+		canCreate()
+			? [
+					{
+						type: "button",
+						label: T()("permissions.roles.create"),
+						onClick: () => setOpenCreateRolePanel(true),
+					},
+				]
+			: [],
+	);
+
+	// ----------------------------------
+	// Hooks
+	useKeyboardShortcuts({
+		newEntry: {
+			permission: () => canCreate(),
+			callback: () => setOpenCreateRolePanel(true),
+		},
+	});
+
+	// ----------------------------------
 	// Render
 	return (
-		<PageLayout
-			slots={{
-				header: (
-					<PageHeader
-						copy={{
-							title: T()("routes.roles.title"),
-							description: T()("routes.roles.description"),
-						}}
-						actions={{
-							create: [
-								{
-									open: openCreateRolePanel(),
-									setOpen: setOpenCreateRolePanel,
-									permission: userStore.get.hasPermission([
-										Permissions.RolesCreate,
-									]).all,
-									label: T()("permissions.roles.create"),
-								},
-							],
-							contentLocale: false,
-						}}
-						slots={{
-							bottom: (
-								<QueryRow
-									searchParams={searchParams}
-									onRefresh={() => {
-										queryClient.invalidateQueries({
-											queryKey: queryKeys.roles.list(),
-										});
-									}}
-									filterSection={{
-										subject: T()("routes.roles.title"),
-										fields: [
-											{
-												label: T()("common.name"),
-												key: "name",
-												type: "text",
-											},
-											{
-												label: T()("common.description"),
-												key: "description",
-												type: "text",
-											},
-											{
-												label: T()("common.status"),
-												key: "locked",
-												type: "checkbox",
-												trueLabel: T()("common.status.locked"),
-												falseLabel: T()("common.status.unlocked"),
-											},
-											{
-												label: T()("common.created.at"),
-												key: "createdAt",
-												type: "datetime",
-											},
-											{
-												label: T()("common.updated.at"),
-												key: "updatedAt",
-												type: "datetime",
-											},
-										],
-									}}
-									sorts={[
-										{
-											label: T()("common.name"),
-											key: "name",
-										},
-										{
-											label: T()("common.created.at"),
-											key: "createdAt",
-										},
-									]}
-									perPage={[]}
-								/>
-							),
-						}}
-					/>
-				),
-			}}
-		>
-			<RolesList
-				state={{
-					searchParams: searchParams,
-					setOpenCreateRolePanel: setOpenCreateRolePanel,
-				}}
-			/>
-			{/* Modals */}
-			<UpsertRoleDrawer
-				state={{
-					open: openCreateRolePanel(),
-					setOpen: setOpenCreateRolePanel,
-				}}
-			/>
-		</PageLayout>
+		<PageLayout.Root>
+			<PageLayout.Header
+				title={T()("routes.roles.title")}
+				description={T()("routes.roles.description")}
+				actions={<CreateMenu actions={createActions()} />}
+			>
+				<QueryRow
+					searchParams={searchParams}
+					onRefresh={() => {
+						queryClient.invalidateQueries({
+							queryKey: queryKeys.roles.list(),
+						});
+					}}
+					filterSection={{
+						subject: T()("routes.roles.title"),
+						fields: [
+							{
+								label: T()("common.name"),
+								key: "name",
+								type: "text",
+							},
+							{
+								label: T()("common.description"),
+								key: "description",
+								type: "text",
+							},
+							{
+								label: T()("common.status"),
+								key: "locked",
+								type: "checkbox",
+								trueLabel: T()("common.status.locked"),
+								falseLabel: T()("common.status.unlocked"),
+							},
+							{
+								label: T()("common.created.at"),
+								key: "createdAt",
+								type: "datetime",
+							},
+							{
+								label: T()("common.updated.at"),
+								key: "updatedAt",
+								type: "datetime",
+							},
+						],
+					}}
+					sorts={[
+						{
+							label: T()("common.name"),
+							key: "name",
+						},
+						{
+							label: T()("common.created.at"),
+							key: "createdAt",
+						},
+					]}
+					perPage={[]}
+				/>
+			</PageLayout.Header>
+			<PageLayout.Body>
+				<RolesList
+					state={{
+						searchParams: searchParams,
+						setOpenCreateRolePanel: setOpenCreateRolePanel,
+					}}
+				/>
+				{/* Modals */}
+				<UpsertRoleDrawer
+					state={{
+						open: openCreateRolePanel(),
+						setOpen: setOpenCreateRolePanel,
+					}}
+				/>
+			</PageLayout.Body>
+		</PageLayout.Root>
 	);
 };
 

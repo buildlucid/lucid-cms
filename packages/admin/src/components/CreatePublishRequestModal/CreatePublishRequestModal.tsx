@@ -13,15 +13,15 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
+import Checkbox from "@/components/Checkbox/Checkbox";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
-import { RichText } from "@/components/RichText/RichText";
-import { Select } from "@/components/Select/Select";
+import RichText from "@/components/RichText/RichText";
+import Select from "@/components/Select/Select";
 import type { SelectMultipleOption } from "@/components/SelectMultiple/SelectMultiple";
-import { SelectMultiple } from "@/components/SelectMultiple/SelectMultiple";
+import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
 import UserSelectOption from "@/components/UserSelectOption/UserSelectOption";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";

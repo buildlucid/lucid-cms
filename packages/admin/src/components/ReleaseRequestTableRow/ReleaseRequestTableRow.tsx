@@ -8,9 +8,9 @@ import T from "@/translations";
 import type { TableRowProps } from "@/types/components";
 import {
 	getPublishOperationExecutionStatusLabel,
-	getPublishOperationExecutionStatusTheme,
+	getPublishOperationExecutionStatusVariant,
 	getPublishOperationStatusLabel,
-	getPublishOperationStatusTheme,
+	getPublishOperationStatusVariant,
 } from "@/utils/publish-operations";
 import PublishOperationUserCol from "./parts/PublishOperationUserCol";
 import ReleaseRequestCommentsCol from "./parts/ReleaseRequestCommentsCol";
@@ -138,14 +138,14 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 			/>
 			<TablePillCell
 				text={getPublishOperationStatusLabel(props.request.status)}
-				theme={getPublishOperationStatusTheme(props.request.status)}
+				variant={getPublishOperationStatusVariant(props.request.status)}
 				options={{ include: props.include[1] }}
 			/>
 			<TablePillCell
 				text={getPublishOperationExecutionStatusLabel(
 					props.request.executionStatus,
 				)}
-				theme={getPublishOperationExecutionStatusTheme(
+				variant={getPublishOperationExecutionStatusVariant(
 					props.request.executionStatus,
 				)}
 				options={{ include: props.include[2] }}

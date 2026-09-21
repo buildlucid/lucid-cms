@@ -16,13 +16,13 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import CompactImageUpload from "@/components/CompactImageUpload/CompactImageUpload";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
-import { Input } from "@/components/Input/Input";
+import Input from "@/components/Input/Input";
 import InputGrid from "@/components/InputGrid/InputGrid";
-import { Select } from "@/components/Select/Select";
-import { Switch } from "@/components/Switch/Switch";
+import Select from "@/components/Select/Select";
+import Switch from "@/components/Switch/Switch";
 import useSingleFileUpload from "@/hooks/useSingleFileUpload/useSingleFileUpload";
 import api from "@/services/api";
 import T from "@/translations";

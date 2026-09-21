@@ -40,11 +40,11 @@ export const generateRegistry = async (
 				key,
 				path,
 				navigation,
-				layout = "admin",
+				shell = "navigation",
 				access = "authenticated",
 			}) =>
 				componentEntry(
-					{ key, path: `/lucid/e/${path}`, navigation, layout, access },
+					{ key, path: `/lucid/e/${path}`, navigation, shell, access },
 					component,
 					`route "${key}"`,
 					resolve,

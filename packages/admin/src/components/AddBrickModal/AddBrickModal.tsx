@@ -9,7 +9,7 @@ import {
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import BrickPreview from "@/components/BrickPreview/BrickPreview";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";

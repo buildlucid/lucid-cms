@@ -6,7 +6,7 @@ import ActionMenubar, {
 	type ActionMenubarItem,
 } from "@/components/ActionMenubar/ActionMenubar";
 import AspectRatio from "@/components/AspectRatio/AspectRatio";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
+import Checkbox from "@/components/Checkbox/Checkbox";
 import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import { mediaStatusBorderClass } from "@/components/MediaStatusPreview/MediaStatusPreview";

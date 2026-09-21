@@ -10,7 +10,7 @@ import {
 	Show,
 	splitProps,
 } from "solid-js";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 /** The text-like input types this component styles. */
@@ -59,13 +59,16 @@ export interface InputProps
  * @example
  * ```tsx
  * import { Input } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Input
  * 		id="email"
  * 		name="email"
  * 		type="email"
- * 		label="Email"
+ * 		label={t("common.email")}
  * 		value={email()}
  * 		onChange={setEmail}
  * 		required
@@ -74,7 +77,7 @@ export interface InputProps
  * );
  * ```
  */
-export const Input: Component<InputProps> = (props) => {
+const Input: Component<InputProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [local, rest] = splitProps(props, [
@@ -161,3 +164,5 @@ export const Input: Component<InputProps> = (props) => {
 		</Field.Root>
 	);
 };
+
+export default Input;

@@ -1,8 +1,8 @@
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Input } from "@/components/Input/Input";
-import { Modal } from "@/components/Modal/Modal";
+import Input from "@/components/Input/Input";
+import Modal from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";

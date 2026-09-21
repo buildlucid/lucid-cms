@@ -7,9 +7,9 @@ import {
 	createSignal,
 	Show,
 } from "solid-js";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
-import { Select } from "@/components/Select/Select";
+import Select from "@/components/Select/Select";
 import T from "@/translations";
 import {
 	getDefaultTimezone,

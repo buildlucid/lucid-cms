@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
 import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
 import CopyInput from "@/components/CopyInput/CopyInput";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import T from "@/translations";
 
 interface CopyAPIKeyProps {

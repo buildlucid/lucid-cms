@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
 import AspectRatio from "@/components/AspectRatio/AspectRatio";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
+import Checkbox from "@/components/Checkbox/Checkbox";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import { mediaStatusBorderClass } from "@/components/MediaStatusPreview/MediaStatusPreview";
 import { Permissions } from "@/constants/permissions";

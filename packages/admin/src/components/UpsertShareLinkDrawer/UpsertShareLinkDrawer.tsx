@@ -7,11 +7,11 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Checkbox } from "@/components/Checkbox/Checkbox";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Checkbox from "@/components/Checkbox/Checkbox";
+import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Input } from "@/components/Input/Input";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Input from "@/components/Input/Input";
+import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";

@@ -4,10 +4,9 @@ import { type Component, lazy } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import AuthenticatedRoutes from "@/components/AuthenticatedRoutes/AuthenticatedRoutes";
 import AuthRoutes from "@/components/AuthRoutes/AuthRoutes";
-import BlankLayout from "@/components/BlankLayout/BlankLayout";
-import MainLayout from "@/components/MainLayout/MainLayout";
+import BareShell from "@/components/BareShell/BareShell";
+import NavigationShell from "@/components/NavigationShell/NavigationShell";
 import OAuthRoutes from "@/components/OAuthRoutes/OAuthRoutes";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
 import PublicRoutes from "@/components/PublicRoutes/PublicRoutes";
 import { Permissions } from "@/constants/permissions";
 import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
@@ -104,21 +103,19 @@ const AppRouter: Component = () => {
 		<Router preload>
 			{/* Authenticated */}
 			<Route component={AuthenticatedRoutes}>
-				<Route path="/lucid" component={MainLayout}>
+				<Route path="/lucid" component={NavigationShell}>
 					<Route path="/" component={DashboardRoute} />
 					<Route path="/components" component={ComponentsRoute} />
 					<Route path="/account" component={AccountRoute} />
 					{extensionRoutes
-						.filter((route) => route.layout === "admin")
+						.filter((route) => route.shell === "navigation")
 						.map((route) => (
 							<Route
 								path={route.path.slice("/lucid".length)}
 								component={() => (
-									<PageLayout class="p-4 md:p-6">
-										<AdminExtensionBoundary name={route.key}>
-											<route.component />
-										</AdminExtensionBoundary>
-									</PageLayout>
+									<AdminExtensionBoundary name={route.key}>
+										<route.component />
+									</AdminExtensionBoundary>
 								)}
 							/>
 						))}
@@ -301,11 +298,11 @@ const AppRouter: Component = () => {
 						component={OAuthConsentRoute}
 					/>
 				</Route>
-				<Route path="/lucid" component={BlankLayout}>
+				<Route path="/lucid" component={BareShell}>
 					{extensionRoutes
 						.filter(
 							(route) =>
-								route.layout === "blank" && route.access === "authenticated",
+								route.shell === "none" && route.access === "authenticated",
 						)
 						.map((route) => (
 							<Route
@@ -320,10 +317,10 @@ const AppRouter: Component = () => {
 				</Route>
 			</Route>
 			{/* Public extensions work both with and without a session. */}
-			<Route path="/lucid" component={BlankLayout}>
+			<Route path="/lucid" component={BareShell}>
 				{extensionRoutes
 					.filter(
-						(route) => route.layout === "blank" && route.access === "public",
+						(route) => route.shell === "none" && route.access === "public",
 					)
 					.map((route) => (
 						<Route

@@ -106,7 +106,6 @@ export const IntegrationsList: Component<{
 					<InfoRow.Content
 						title={T()("oauth.connections.manage.title")}
 						description={T()("oauth.connections.manage.description")}
-						reducedMargin={true}
 					>
 						<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
 							<OAuthConnectionsList

@@ -23,12 +23,12 @@ import DetailsList, {
 } from "@/components/DetailsList/DetailsList";
 import DocumentSidebarSection from "@/components/DocumentSidebarSection/DocumentSidebarSection";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
 import PublishOperationReviewersModal from "@/components/PublishOperationReviewersModal/PublishOperationReviewersModal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
-import { RichText } from "@/components/RichText/RichText";
-import { Select } from "@/components/Select/Select";
+import RichText from "@/components/RichText/RichText";
+import Select from "@/components/Select/Select";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import api from "@/services/api";
 import T from "@/translations";
@@ -491,8 +491,8 @@ export const ReleaseRequestSidebar: Component<{
 						</h2>
 						<Show when={releaseContextChanged()}>
 							<Pill
-								theme="warning-opaque"
-								size="small"
+								variant="warning-subtle"
+								size="xs"
 								tooltip={releaseContextTooltip()}
 								class="shrink-0"
 							>

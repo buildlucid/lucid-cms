@@ -1209,6 +1209,8 @@
 	"empty.states.ai.usage.title": "No AI Usage Found",
 	"empty.states.ai.usage.description": "AI usage records will appear here once AI features are used.",
 	"fields.options.label": "Option {{count}}",
+	"fields.color.picker.open": "Open colour picker",
+	"fields.color.preset": "Colour preset {{value}}",
 	"fields.range.value": "Range value",
 	"fields.range.start.value": "Range start value",
 	"fields.range.end.value": "Range end value",

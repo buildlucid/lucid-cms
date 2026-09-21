@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import Pill from "@/components/Pill/Pill";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import api from "@/services/api";
@@ -188,10 +188,10 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 										</p>
 										<div class="flex shrink-0 items-center justify-center">
 											<Pill
-												theme={
+												variant={
 													schedule.state === "paused"
-														? "warning-opaque"
-														: "primary-opaque"
+														? "warning-subtle"
+														: "primary-subtle"
 												}
 											>
 												{schedule.state === "paused"

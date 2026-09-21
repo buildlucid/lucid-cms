@@ -23,7 +23,8 @@ import DashboardQuickActions, {
 } from "@/components/DashboardQuickActions/DashboardQuickActions";
 import DashboardReleaseOverview from "@/components/DashboardReleaseOverview/DashboardReleaseOverview";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
+import Link from "@/components/Link/Link";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { Permissions } from "@/constants/permissions";
@@ -304,16 +305,15 @@ export const DashboardContent: Component = () => {
 					when={hasAnyPermissions()}
 					fallback={
 						<div class="flex flex-1 items-center justify-center">
-							<ErrorBlock
-								content={{
-									image: noPermission,
-									title: T()("dashboard.no.access.title"),
-									description: T()("dashboard.no.access.description"),
-								}}
-								link={{
-									text: T()("dashboard.no.access.account"),
-									href: "/lucid/account",
-								}}
+							<ErrorState
+								image={noPermission}
+								title={T()("dashboard.no.access.title")}
+								description={T()("dashboard.no.access.description")}
+								actions={
+									<Link variant="primary" size="sm" href="/lucid/account">
+										{T()("dashboard.no.access.account")}
+									</Link>
+								}
 							/>
 						</div>
 					}

@@ -16,11 +16,7 @@ import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
 
-const CodeEditor = lazy(() =>
-	import("@/components/CodeEditor/CodeEditor").then((m) => ({
-		default: m.CodeEditor,
-	})),
-);
+const CodeEditor = lazy(() => import("@/components/CodeEditor/CodeEditor"));
 
 interface JSONFieldProps {
 	state: {

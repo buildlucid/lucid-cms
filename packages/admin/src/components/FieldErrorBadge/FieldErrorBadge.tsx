@@ -22,8 +22,8 @@ export const FieldErrorBadge: Component<FieldErrorBadgeProps> = (props) => {
 	return (
 		<Show when={props.count > 0}>
 			<Pill
-				theme="error-opaque"
-				size="small"
+				variant="danger-subtle"
+				size="xs"
 				class={classNames("shrink-0 gap-1", props.class)}
 				role="img"
 				aria-label={`${props.count} ${label()}`}

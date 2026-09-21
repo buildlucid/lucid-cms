@@ -24,9 +24,9 @@ import AiGenerationHistory, {
 } from "@/components/AiGenerationHistory/AiGenerationHistory";
 import Button from "@/components/Button/Button";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import aiModalsStore, {
 	type MediaAltGenerationTarget,
@@ -250,7 +250,7 @@ const MediaAltGenerationModalContent: Component<{
 										return (
 											<Pill
 												as="button"
-												theme={selected() ? "primary-opaque" : "outline"}
+												variant={selected() ? "primary-subtle" : "outline"}
 												aria-pressed={selected()}
 												disabled={props.isLoading || props.isApplying}
 												onClick={() =>

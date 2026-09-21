@@ -1,6 +1,7 @@
 import type { PreviewScrollState } from "@lucidcms/preview-protocol";
 import { useNavigate, useParams } from "@solidjs/router";
 import type { PublishOperation } from "@types";
+import classnames from "classnames";
 import type { Accessor } from "solid-js";
 import {
 	batch,
@@ -378,26 +379,34 @@ const DocumentEditorPage: Component<{
 							beforeVersionChange: preparePreviewVersionChange,
 						}}
 					/>
-					<Alert
-						style="pill"
-						class={
+					{/* the sidebar offset is this page's, so the alerts stay unaware of it */}
+					<div
+						class={classnames(
+							"fixed bottom-6 left-0 md:left-55 right-0 z-30 flex justify-center gap-4 px-4 pointer-events-none",
 							uiState.getPreviewOpen()
 								? "xl:right-4 xl:translate-x-[-27.5%]"
-								: "xl:right-80"
-						}
-						alerts={[
-							{
-								type: "warning",
-								message: T()("documents.locked.message"),
-								show: uiState.isBuilderLocked(),
-							},
-							{
-								type: "warning",
-								message: T()("collections.migrations.required.message"),
-								show: uiState.collectionNeedsMigrating(),
-							},
-						]}
-					/>
+								: "xl:right-80",
+						)}
+					>
+						<Show when={uiState.isBuilderLocked()}>
+							<Alert
+								variant="warning"
+								appearance="pill"
+								class="pointer-events-auto"
+							>
+								{T()("documents.locked.message")}
+							</Alert>
+						</Show>
+						<Show when={uiState.collectionNeedsMigrating()}>
+							<Alert
+								variant="warning"
+								appearance="pill"
+								class="pointer-events-auto"
+							>
+								{T()("collections.migrations.required.message")}
+							</Alert>
+						</Show>
+					</div>
 					<div class="mt-2 flex min-h-0 grow flex-col overflow-visible">
 						<div class="w-full min-h-0 flex flex-col xl:flex-row grow items-stretch xl:items-start bg-background-base rounded-t-xl border border-border">
 							<div class="w-full min-w-0 grow flex flex-col">

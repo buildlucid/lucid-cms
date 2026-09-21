@@ -15,7 +15,7 @@ export interface DetailsListProps {
 	items: Array<{
 		label: string;
 		value?: string | number | null | JSXElement;
-		pillTheme?: PillProps["theme"];
+		pillVariant?: PillProps["variant"];
 		pillSize?: PillProps["size"];
 		show?: boolean;
 		stacked?: boolean;
@@ -58,7 +58,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 									</span>
 									<Show when={item.value !== undefined}>
 										<Pill
-											theme={item.pillTheme ?? "primary"}
+											variant={item.pillVariant ?? "primary"}
 											size={item.pillSize}
 										>
 											{item.value}

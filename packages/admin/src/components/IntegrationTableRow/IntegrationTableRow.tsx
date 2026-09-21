@@ -90,10 +90,10 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 							? T()("common.status.active")
 							: T()("common.status.inactive")
 				}
-				theme={
+				variant={
 					props.integration.enabled && !isExpired()
-						? "primary-opaque"
-						: "error-opaque"
+						? "primary-subtle"
+						: "danger-subtle"
 				}
 				options={{ include: props.include[0], padding: props.options?.padding }}
 			/>

@@ -9,15 +9,19 @@ import {
 } from "solid-js";
 import Alert from "@/components/Alert/Alert";
 import BulkUploadMediaModal from "@/components/BulkUploadMediaModal/BulkUploadMediaModal";
+import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
 import CreateMediaFolderModal from "@/components/CreateMediaFolderModal/CreateMediaFolderModal";
+import CreateMenu, {
+	type CreateMenuAction,
+} from "@/components/CreateMenu/CreateMenu";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { MediaList } from "@/components/MediaList/MediaList";
-import { PageHeader } from "@/components/PageHeader/PageHeader";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import { Permissions } from "@/constants/permissions";
+import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
 import useQueryState, {
 	booleanFilter,
@@ -28,6 +32,7 @@ import useQueryState, {
 } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
+import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import mediaStore from "@/store/mediaStore/mediaStore";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
@@ -207,6 +212,54 @@ const MediaPage: Component = () => {
 		openBulkUploadWithFiles(files);
 	};
 
+	const createActions = createMemo<CreateMenuAction[]>(() => {
+		if (!canCreateMedia()) return [];
+
+		const actions: CreateMenuAction[] = [
+			{
+				type: "button",
+				label: T()("media.folders.add"),
+				icon: "folder-plus",
+				onClick: () => setOpenCreateMediaFolderModal(true),
+			},
+			{
+				type: "button",
+				label: T()("media.upload.action"),
+				icon: "upload",
+				onClick: () => setCreateMediaPanelOpen(true),
+			},
+		];
+
+		if (aiImageGenerationEnabled()) {
+			actions.push({
+				type: "button",
+				label: T()("ai.media.image.generate.modal.title"),
+				icon: "sparkle",
+				disabled: aiImageGenerationAccess().disabled,
+				disabledToast: aiImageGenerationDisabledToast(),
+				onClick: openCreateMediaPanelWithImageGeneration,
+			});
+		}
+
+		actions.push({
+			type: "button",
+			label: T()("media.upload.bulk.action"),
+			icon: "images",
+			onClick: () => setBulkUploadModalOpen(true),
+		});
+
+		return actions;
+	});
+
+	// ----------------------------------------
+	// Shortcuts
+	useKeyboardShortcuts({
+		newEntry: {
+			permission: () => createActions().length > 0,
+			callback: () => setOpenCreateMediaFolderModal(true),
+		},
+	});
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -230,287 +283,244 @@ const MediaPage: Component = () => {
 					</div>
 				</div>
 			</Show>
-			<PageLayout
-				slots={{
-					topBar: (
-						<Alert
-							style="layout"
-							alerts={[
+			<PageLayout.Root>
+				<Show when={settings.data?.data?.media?.enabled === false}>
+					<Alert variant="warning" appearance="bar">
+						{T()("media.storage.adapter.missing.message")}
+					</Alert>
+				</Show>
+				<PageLayout.Header
+					title={T()("routes.media.title")}
+					description={T()("routes.media.description")}
+					actions={
+						<>
+							<Show when={contentLocaleStore.get.locales.length > 1}>
+								<div class="w-full md:max-w-42">
+									<ContentLocaleSelect showShortcut={true} />
+								</div>
+							</Show>
+							<CreateMenu actions={createActions()} />
+						</>
+					}
+				>
+					<QueryRow
+						searchParams={searchParams}
+						showingDeleted={showingDeleted}
+						setShowingDeleted={setShowingDeleted}
+						onRefresh={() => {
+							queryClient.invalidateQueries({
+								queryKey: queryKeys.media.lists(),
+							});
+							queryClient.invalidateQueries({
+								queryKey: queryKeys.mediaFolders.list(),
+							});
+						}}
+						filterSection={{
+							subject: T()("routes.media.title"),
+							fields: [
 								{
-									type: "warning",
-									message: T()("media.storage.adapter.missing.message"),
-									show: settings.data?.data?.media?.enabled === false,
+									label: T()("common.name"),
+									key: "title",
+									type: "text",
 								},
-							]}
-						/>
-					),
-					header: (
-						<PageHeader
-							copy={{
-								title: T()("routes.media.title"),
-								description: T()("routes.media.description"),
-							}}
-							actions={{
-								create: [
-									{
-										open: getOpenCreateMediaFolderModal(),
-										setOpen: setOpenCreateMediaFolderModal,
-										permission: canCreateMedia(),
-										label: T()("media.folders.add"),
-										icon: "folder-plus",
-										secondary: true,
-									},
-									{
-										open: getOpenCreateMediaPanel(),
-										setOpen: setCreateMediaPanelOpen,
-										permission: canCreateMedia(),
-										label: T()("media.upload.action"),
-										icon: "upload",
-									},
-									{
-										open: getOpenCreateMediaPanel(),
-										setOpen: setCreateMediaPanelOpen,
-										onClick: openCreateMediaPanelWithImageGeneration,
-										permission: canCreateMedia() && aiImageGenerationEnabled(),
-										disabled: aiImageGenerationAccess().disabled,
-										disabledClickable: true,
-										disabledToast: aiImageGenerationDisabledToast(),
-										label: T()("ai.media.image.generate.modal.title"),
-										icon: "sparkle",
-									},
-									{
-										open: getOpenBulkUploadModal(),
-										setOpen: setBulkUploadModalOpen,
-										permission: canCreateMedia(),
-										label: T()("media.upload.bulk.action"),
-										icon: "images",
-									},
-								],
-								contentLocale: true,
-							}}
-							slots={{
-								bottom: (
-									<QueryRow
-										searchParams={searchParams}
-										showingDeleted={showingDeleted}
-										setShowingDeleted={setShowingDeleted}
-										onRefresh={() => {
-											queryClient.invalidateQueries({
-												queryKey: queryKeys.media.lists(),
-											});
-											queryClient.invalidateQueries({
-												queryKey: queryKeys.mediaFolders.list(),
-											});
-										}}
-										filterSection={{
-											subject: T()("routes.media.title"),
-											fields: [
-												{
-													label: T()("common.name"),
-													key: "title",
-													type: "text",
-												},
-												{
-													label: T()("common.visibility"),
-													key: "public",
-													type: "checkbox",
-													trueLabel: T()("common.public"),
-													falseLabel: T()("common.private"),
-												},
-												{
-													label: T()("common.status"),
-													key: "status",
-													type: "select",
-													options: [
-														{
-															label: T()("common.status.ready"),
-															value: "ready",
-														},
-														{
-															label: T()("common.status.processing"),
-															value: "processing",
-														},
-														{
-															label: T()("common.status.failed"),
-															value: "failed",
-														},
-													],
-												},
-												{
-													label: T()("common.mime.type"),
-													key: "mimeType",
-													type: "text",
-												},
-												{
-													label: T()("common.key"),
-													key: "key",
-													type: "text",
-												},
-												{
-													label: T()("common.type"),
-													key: "type",
-													type: "select",
-													options: [
-														{
-															label: T()("media.types.image"),
-															value: "image",
-														},
-														{
-															label: T()("media.types.video"),
-															value: "video",
-														},
-														{
-															label: T()("media.types.audio"),
-															value: "audio",
-														},
-														{
-															label: T()("media.types.document"),
-															value: "document",
-														},
-														{
-															label: T()("media.types.archive"),
-															value: "archive",
-														},
-														{
-															label: T()("media.types.unknown"),
-															value: "unknown",
-														},
-													],
-												},
-												{
-													label: T()("common.file.extension"),
-													key: "extension",
-													type: "text",
-												},
-												{
-													label: T()("common.origin"),
-													key: "origin",
-													type: "select",
-													options: [
-														{ label: T()("common.human"), value: "human" },
-														{
-															label: T()("media.origin.ai.generated"),
-															value: "ai_generated",
-														},
-														{
-															label: T()("media.origin.ai.modified"),
-															value: "ai_modified",
-														},
-													],
-												},
-												{
-													label: T()("common.width"),
-													key: "width",
-													type: "number",
-												},
-												{
-													label: T()("common.height"),
-													key: "height",
-													type: "number",
-												},
-												{
-													label: T()("common.created.at"),
-													key: "createdAt",
-													type: "datetime",
-												},
-												{
-													label: T()("common.updated.at"),
-													key: "updatedAt",
-													type: "datetime",
-												},
-												...(showingDeleted()
-													? [
-															{
-																label: T()("common.deleted.by"),
-																key: "deletedBy",
-																type: "user" as const,
-															},
-														]
-													: []),
-											],
-										}}
-										sorts={[
+								{
+									label: T()("common.visibility"),
+									key: "public",
+									type: "checkbox",
+									trueLabel: T()("common.public"),
+									falseLabel: T()("common.private"),
+								},
+								{
+									label: T()("common.status"),
+									key: "status",
+									type: "select",
+									options: [
+										{
+											label: T()("common.status.ready"),
+											value: "ready",
+										},
+										{
+											label: T()("common.status.processing"),
+											value: "processing",
+										},
+										{
+											label: T()("common.status.failed"),
+											value: "failed",
+										},
+									],
+								},
+								{
+									label: T()("common.mime.type"),
+									key: "mimeType",
+									type: "text",
+								},
+								{
+									label: T()("common.key"),
+									key: "key",
+									type: "text",
+								},
+								{
+									label: T()("common.type"),
+									key: "type",
+									type: "select",
+									options: [
+										{
+											label: T()("media.types.image"),
+											value: "image",
+										},
+										{
+											label: T()("media.types.video"),
+											value: "video",
+										},
+										{
+											label: T()("media.types.audio"),
+											value: "audio",
+										},
+										{
+											label: T()("media.types.document"),
+											value: "document",
+										},
+										{
+											label: T()("media.types.archive"),
+											value: "archive",
+										},
+										{
+											label: T()("media.types.unknown"),
+											value: "unknown",
+										},
+									],
+								},
+								{
+									label: T()("common.file.extension"),
+									key: "extension",
+									type: "text",
+								},
+								{
+									label: T()("common.origin"),
+									key: "origin",
+									type: "select",
+									options: [
+										{ label: T()("common.human"), value: "human" },
+										{
+											label: T()("media.origin.ai.generated"),
+											value: "ai_generated",
+										},
+										{
+											label: T()("media.origin.ai.modified"),
+											value: "ai_modified",
+										},
+									],
+								},
+								{
+									label: T()("common.width"),
+									key: "width",
+									type: "number",
+								},
+								{
+									label: T()("common.height"),
+									key: "height",
+									type: "number",
+								},
+								{
+									label: T()("common.created.at"),
+									key: "createdAt",
+									type: "datetime",
+								},
+								{
+									label: T()("common.updated.at"),
+									key: "updatedAt",
+									type: "datetime",
+								},
+								...(showingDeleted()
+									? [
 											{
-												label: T()("common.title"),
-												key: "title",
+												label: T()("common.deleted.by"),
+												key: "deletedBy",
+												type: "user" as const,
 											},
-											{
-												label: T()("common.file.size"),
-												key: "fileSize",
-											},
-											{
-												label: T()("common.mime.type"),
-												key: "mimeType",
-											},
-											{
-												label: T()("common.file.extension"),
-												key: "extension",
-											},
-											{
-												label: T()("common.width"),
-												key: "width",
-											},
-											{
-												label: T()("common.height"),
-												key: "height",
-											},
-											{
-												label: T()("common.created.at"),
-												key: "createdAt",
-											},
-											{
-												label: T()("common.updated.at"),
-												key: "updatedAt",
-											},
-										]}
-										perPage={[10, 20, 40]}
-									/>
-								),
-							}}
-						/>
-					),
-				}}
-			>
-				<MediaAltGenerationModal />
-				<MediaImageGenerationModal />
-				<MediaList
-					state={{
-						searchParams: searchParams,
-						showingDeleted: showingDeleted,
-						setOpenCreateMediaPanel: setCreateMediaPanelOpen,
-						parentFolderId: folderIdFilter,
-					}}
-				/>
-				<CreateUpdateMediaDrawer
-					initialFile={getSingleUploadInitialFile}
-					openImageGenerationOnCreate={getOpenImageGenerationOnCreate}
-					state={{
-						open: getOpenCreateMediaPanel(),
-						setOpen: setCreateMediaPanelOpen,
-						parentFolderId: folderIdFilter,
-					}}
-					callbacks={{
-						onImageGenerationOpened: () => {
-							setOpenImageGenerationOnCreate(false);
-						},
-					}}
-				/>
-				<BulkUploadMediaModal
-					initialFiles={getBulkUploadInitialFiles}
-					state={{
-						open: getOpenBulkUploadModal(),
-						setOpen: setBulkUploadModalOpen,
-						parentFolderId: folderIdFilter,
-					}}
-				/>
-				<CreateMediaFolderModal
-					state={{
-						open: getOpenCreateMediaFolderModal(),
-						setOpen: setOpenCreateMediaFolderModal,
-						parentFolderId: folderIdFilter,
-					}}
-				/>
-			</PageLayout>
+										]
+									: []),
+							],
+						}}
+						sorts={[
+							{
+								label: T()("common.title"),
+								key: "title",
+							},
+							{
+								label: T()("common.file.size"),
+								key: "fileSize",
+							},
+							{
+								label: T()("common.mime.type"),
+								key: "mimeType",
+							},
+							{
+								label: T()("common.file.extension"),
+								key: "extension",
+							},
+							{
+								label: T()("common.width"),
+								key: "width",
+							},
+							{
+								label: T()("common.height"),
+								key: "height",
+							},
+							{
+								label: T()("common.created.at"),
+								key: "createdAt",
+							},
+							{
+								label: T()("common.updated.at"),
+								key: "updatedAt",
+							},
+						]}
+						perPage={[10, 20, 40]}
+					/>
+				</PageLayout.Header>
+				<PageLayout.Body>
+					<MediaAltGenerationModal />
+					<MediaImageGenerationModal />
+					<MediaList
+						state={{
+							searchParams: searchParams,
+							showingDeleted: showingDeleted,
+							setOpenCreateMediaPanel: setCreateMediaPanelOpen,
+							parentFolderId: folderIdFilter,
+						}}
+					/>
+					<CreateUpdateMediaDrawer
+						initialFile={getSingleUploadInitialFile}
+						openImageGenerationOnCreate={getOpenImageGenerationOnCreate}
+						state={{
+							open: getOpenCreateMediaPanel(),
+							setOpen: setCreateMediaPanelOpen,
+							parentFolderId: folderIdFilter,
+						}}
+						callbacks={{
+							onImageGenerationOpened: () => {
+								setOpenImageGenerationOnCreate(false);
+							},
+						}}
+					/>
+					<BulkUploadMediaModal
+						initialFiles={getBulkUploadInitialFiles}
+						state={{
+							open: getOpenBulkUploadModal(),
+							setOpen: setBulkUploadModalOpen,
+							parentFolderId: folderIdFilter,
+						}}
+					/>
+					<CreateMediaFolderModal
+						state={{
+							open: getOpenCreateMediaFolderModal(),
+							setOpen: setOpenCreateMediaFolderModal,
+							parentFolderId: folderIdFilter,
+						}}
+					/>
+				</PageLayout.Body>
+			</PageLayout.Root>
 		</section>
 	);
 };

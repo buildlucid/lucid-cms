@@ -20,15 +20,13 @@ import Link from "@/components/Link/Link";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
-export type HeaderPrimaryAction =
+export type CreateMenuAction =
 	| {
 			type: "button";
 			label: string;
 			icon?: ActionIconName;
 			onClick: () => void;
-			secondary?: boolean;
 			disabled?: boolean;
-			disabledClickable?: boolean;
 			disabledToast?: {
 				title: string;
 				message?: string;
@@ -43,8 +41,12 @@ export type HeaderPrimaryAction =
 			href: string;
 	  };
 
-const HeaderPrimaryActions: Component<{
-	actions: HeaderPrimaryAction[];
+/**
+ * A page's create control. One thing to create renders a button, more than one
+ * renders a menu behind the same plus trigger.
+ */
+const CreateMenu: Component<{
+	actions: CreateMenuAction[];
 }> = (props) => {
 	// ----------------------------------
 	// Signals
@@ -60,7 +62,7 @@ const HeaderPrimaryActions: Component<{
 
 	// ----------------------------------
 	// Functions
-	const spawnDisabledToast = (action: HeaderPrimaryAction) => {
+	const spawnDisabledToast = (action: CreateMenuAction) => {
 		if (action.type !== "button" || !action.disabledToast) return;
 
 		spawnToast({
@@ -69,7 +71,7 @@ const HeaderPrimaryActions: Component<{
 		});
 	};
 	const handleButtonAction = (
-		action: Extract<HeaderPrimaryAction, { type: "button" }>,
+		action: Extract<CreateMenuAction, { type: "button" }>,
 	) => {
 		if (action.disabled) {
 			spawnDisabledToast(action);
@@ -89,12 +91,12 @@ const HeaderPrimaryActions: Component<{
 			return (
 				<Button
 					type="button"
-					variant={action.secondary ? "outline" : "primary"}
+					variant="primary"
 					size="sm"
 					shape="square"
 					title={action.label}
 					aria-label={action.label}
-					disabled={action.disabled && !action.disabledClickable}
+					//* left clickable so a disabled action can explain itself, as the menu does
 					aria-disabled={action.disabled ? "true" : undefined}
 					onClick={() => handleButtonAction(action)}
 					class={classNames({
@@ -207,4 +209,4 @@ const HeaderPrimaryActions: Component<{
 	);
 };
 
-export default HeaderPrimaryActions;
+export default CreateMenu;

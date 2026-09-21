@@ -17,7 +17,6 @@ export type ButtonVariant =
 	| "primary"
 	| "secondary"
 	| "outline"
-	| "primary-outline"
 	| "danger"
 	| "danger-outline"
 	| "background-subtle"
@@ -50,7 +49,9 @@ export interface ButtonProps
  * @example
  * ```tsx
  * import { Button } from "@lucidcms/admin/components";
- * import { Permissions } from "@lucidcms/admin/hooks";
+ * import { Permissions, useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Button
@@ -61,7 +62,7 @@ export interface ButtonProps
  * 		permission={Permissions.MediaCreate}
  * 		onClick={() => save()}
  * 	>
- * 		Save
+ * 		{t("common.save")}
  * 	</Button>
  * );
  * ```
@@ -113,8 +114,6 @@ const Button: Component<ButtonProps> = (props) => {
 					local.variant === "secondary",
 				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-subtitle hover:text-secondary-contrast ring-primary-base":
 					local.variant === "outline",
-				"border border-border bg-input-base text-body fill-body ring-primary-base hover:border-primary-muted-border hover:bg-card-hover hover:text-primary-base hover:fill-primary-base":
-					local.variant === "primary-outline",
 				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
 					local.variant === "danger",
 				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-subtitle fill-error-contrast hover:text-error-contrast":

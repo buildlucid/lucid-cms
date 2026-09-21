@@ -9,7 +9,7 @@ import {
 import { unwrap } from "solid-js/store";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
 import Button from "@/components/Button/Button";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import brickStore from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";

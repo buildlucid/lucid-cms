@@ -17,11 +17,7 @@ import brickHelpers from "@/utils/brick-helpers";
 import { getCodeDraftValue } from "@/utils/custom-field-generation";
 import helpers from "@/utils/helpers";
 
-const CodeEditor = lazy(() =>
-	import("@/components/CodeEditor/CodeEditor").then((m) => ({
-		default: m.CodeEditor,
-	})),
-);
+const CodeEditor = lazy(() => import("@/components/CodeEditor/CodeEditor"));
 
 interface CodeFieldProps {
 	state: {

@@ -19,14 +19,14 @@ const EmailTransactionTableRow: Component<EmailTransactionRowProps> = (
 ) => {
 	// ----------------------------------
 	// Helpers
-	const getPillTheme = (
+	const getPillVariant = (
 		deliveryStatus: EmailDeliveryStatus,
-	): PillProps["theme"] => {
+	): PillProps["variant"] => {
 		if (deliveryStatus === "sent" || deliveryStatus === "delivered") {
-			return "primary-opaque";
+			return "primary-subtle";
 		}
 		if (deliveryStatus === "failed") {
-			return "error-opaque";
+			return "danger-subtle";
 		}
 		return "outline";
 	};
@@ -44,7 +44,7 @@ const EmailTransactionTableRow: Component<EmailTransactionRowProps> = (
 		>
 			<TablePillCell
 				text={props.transaction.deliveryStatus}
-				theme={getPillTheme(props.transaction.deliveryStatus)}
+				variant={getPillVariant(props.transaction.deliveryStatus)}
 				options={{
 					include: props?.include[0],
 					padding: props.options?.padding,

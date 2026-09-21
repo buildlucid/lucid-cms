@@ -2,10 +2,10 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { Collection, PublishOperation } from "@types";
 import type { Accessor, Component } from "solid-js";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
-import { RichText } from "@/components/RichText/RichText";
-import { Select } from "@/components/Select/Select";
+import RichText from "@/components/RichText/RichText";
+import Select from "@/components/Select/Select";
 import api from "@/services/api";
 import T from "@/translations";
 import {

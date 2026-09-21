@@ -24,12 +24,12 @@ import AiGenerationHistory, {
 } from "@/components/AiGenerationHistory/AiGenerationHistory";
 import Button from "@/components/Button/Button";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
-import { Input } from "@/components/Input/Input";
-import { Modal } from "@/components/Modal/Modal";
+import Input from "@/components/Input/Input";
+import Modal from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
 import { DocumentRichText } from "@/components/RichText/DocumentRichText";
 import type { RichTextOptions } from "@/components/RichText/types";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Textarea from "@/components/Textarea/Textarea";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import api from "@/services/api";
 import aiModalsStore, {
@@ -53,11 +53,7 @@ import safeDeepEqual from "@/utils/safe-deep-equal";
 import spawnToast from "@/utils/spawn-toast";
 import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 
-const CodeEditor = lazy(() =>
-	import("@/components/CodeEditor/CodeEditor").then((module) => ({
-		default: module.CodeEditor,
-	})),
-);
+const CodeEditor = lazy(() => import("@/components/CodeEditor/CodeEditor"));
 
 type GenerateValues = {
 	instruction?: string;
@@ -773,8 +769,8 @@ const CustomFieldGenerationModal: Component = () => {
 										{field()?.label ?? field()?.key ?? T()("common.empty")}
 									</p>
 									<div class="flex min-w-0 flex-wrap gap-2 sm:justify-end">
-										<Pill theme="primary-opaque">{fieldModeLabel()}</Pill>
-										<Pill theme="outline">{fieldTypeLabel()}</Pill>
+										<Pill variant="primary-subtle">{fieldModeLabel()}</Pill>
+										<Pill variant="outline">{fieldTypeLabel()}</Pill>
 									</div>
 								</div>
 							</div>
@@ -796,7 +792,7 @@ const CustomFieldGenerationModal: Component = () => {
 											return (
 												<Pill
 													as="button"
-													theme={selected() ? "primary-opaque" : "outline"}
+													variant={selected() ? "primary-subtle" : "outline"}
 													aria-pressed={selected()}
 													disabled={isLoading()}
 													onClick={() =>
@@ -835,7 +831,7 @@ const CustomFieldGenerationModal: Component = () => {
 											return (
 												<Pill
 													as="button"
-													theme={selected() ? "primary-opaque" : "outline"}
+													variant={selected() ? "primary-subtle" : "outline"}
 													aria-pressed={selected()}
 													disabled={isLoading()}
 													onClick={() => toggleLocale(locale.code)}

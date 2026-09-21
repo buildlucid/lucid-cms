@@ -28,16 +28,16 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import FocalPointEditorModal from "@/components/FocalPointEditorModal/FocalPointEditorModal";
 import ImageCropEditorModal from "@/components/ImageCropEditorModal/ImageCropEditorModal";
-import { Input } from "@/components/Input/Input";
+import Input from "@/components/Input/Input";
 import Pill from "@/components/Pill/Pill";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
-import { Select } from "@/components/Select/Select";
-import { Switch } from "@/components/Switch/Switch";
-import { Textarea } from "@/components/Textarea/Textarea";
+import Select from "@/components/Select/Select";
+import Switch from "@/components/Switch/Switch";
+import Textarea from "@/components/Textarea/Textarea";
 import { useCreateMedia } from "@/hooks/useCreateMedia/useCreateMedia";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
 import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
@@ -1426,18 +1426,18 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												<div class="flex items-center gap-1.5 flex-wrap mt-2">
 													<For each={posterMetaPills()}>
 														{(pill) => (
-															<Pill theme="outline" class="text-[10px]">
+															<Pill variant="outline" class="text-[10px]">
 																{pill}
 															</Pill>
 														)}
 													</For>
 													<Show when={posterPreview()?.isNew}>
-														<Pill theme="primary-opaque" class="text-[10px]">
+														<Pill variant="primary-subtle" class="text-[10px]">
 															{T()("media.poster.pending.upload")}
 														</Pill>
 													</Show>
 													<Show when={PosterFile.getCropRemoved()}>
-														<Pill theme="warning-opaque" class="text-[10px]">
+														<Pill variant="warning-subtle" class="text-[10px]">
 															{T()("media.crop.pending.removed")}
 														</Pill>
 													</Show>
@@ -1638,8 +1638,8 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 										<div class="absolute inset-x-0 bottom-0 z-20">
 											<ProgressBar
 												progress={posterUploadProgress()}
-												type="target"
-												variant="edge"
+												size="md"
+												square
 											/>
 										</div>
 									</Show>

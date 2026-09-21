@@ -1,7 +1,8 @@
 import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useNavigate } from "@solidjs/router";
 import { type Component, createEffect, Match, Switch } from "solid-js";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
+import Link from "@/components/Link/Link";
 import SetupForm from "@/components/SetupForm/SetupForm";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
@@ -37,16 +38,15 @@ const SetupPage: Component = () => {
 				</div>
 			</Match>
 			<Match when={setupRequired.isError}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("errors.generic.title"),
-						description: T()("errors.generic.message"),
-					}}
-					link={{
-						text: T()("common.back.to.login"),
-						href: "/lucid/login",
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("errors.generic.title")}
+					description={T()("errors.generic.message")}
+					actions={
+						<Link variant="primary" size="sm" href="/lucid/login">
+							{T()("common.back.to.login")}
+						</Link>
+					}
 				/>
 			</Match>
 			<Match

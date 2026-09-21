@@ -3,7 +3,7 @@ import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { FaSolidCheck } from "solid-icons/fa";
 import { type Component, createSignal, type JSXElement, Show } from "solid-js";
-import { Field } from "@/components/Field/Field";
+import Field from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 /**
@@ -47,19 +47,22 @@ export interface CheckboxProps {
  * @example
  * ```tsx
  * import { Checkbox } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Checkbox
  * 		id="recursive"
  * 		name="recursive"
- * 		label="Delete nested media"
+ * 		label={t("media.folders.delete.recursive.label")}
  * 		value={recursive()}
  * 		onChange={setRecursive}
  * 	/>
  * );
  * ```
  */
-export const Checkbox: Component<CheckboxProps> = (props) => {
+const Checkbox: Component<CheckboxProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [focused, setFocused] = createSignal(false);
@@ -172,3 +175,5 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
 		</Field.Root>
 	);
 };
+
+export default Checkbox;

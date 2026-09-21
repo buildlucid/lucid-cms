@@ -31,26 +31,29 @@ export type { ModalTitleProps } from "./parts/ModalTitle";
  *
  * @example
  * ```tsx
- * import { Button, Modal } from "@lucidcms/admin/components";
+ * import { Button, Input, Modal } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Modal.Root open={open()} onOpenChange={setOpen}>
  * 		<Modal.Header>
- * 			<Modal.Title>Create folder</Modal.Title>
+ * 			<Modal.Title>{t("media.folders.add")}</Modal.Title>
  * 		</Modal.Header>
  * 		<Modal.Body>
- * 			<Input id="title" name="title" type="text" label="Title" value={title()} onChange={setTitle} />
+ * 			<Input id="title" name="title" type="text" label={t("common.title")} value={title()} onChange={setTitle} />
  * 		</Modal.Body>
  * 		<Modal.Footer>
  * 			<Modal.Actions>
- * 				<Button onClick={create}>Create</Button>
+ * 				<Button onClick={create}>{t("common.create")}</Button>
  * 			</Modal.Actions>
  * 		</Modal.Footer>
  * 	</Modal.Root>
  * );
  * ```
  */
-export const Modal = {
+const Modal = {
 	Root: ModalRoot,
 	Header: ModalHeader,
 	Title: ModalTitle,
@@ -61,3 +64,5 @@ export const Modal = {
 	Actions: ModalActions,
 	Confirm: ModalConfirm,
 };
+
+export default Modal;

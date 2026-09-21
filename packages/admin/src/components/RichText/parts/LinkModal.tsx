@@ -15,9 +15,9 @@ import {
 } from "@/components/AnimatedTabs/AnimatedTabs";
 import Button from "@/components/Button/Button";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
-import { Input } from "@/components/Input/Input";
-import { Modal } from "@/components/Modal/Modal";
-import { Switch } from "@/components/Switch/Switch";
+import Input from "@/components/Input/Input";
+import Modal from "@/components/Modal/Modal";
+import Switch from "@/components/Switch/Switch";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
 import T from "@/translations";
 import type { RichTextOptions } from "../types";

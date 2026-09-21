@@ -27,7 +27,7 @@ declare module "virtual:lucid-admin" {
 	export const routes: Array<{
 		key: string;
 		path: string;
-		layout: NonNullable<AdminRoute["layout"]>;
+		shell: NonNullable<AdminRoute["shell"]>;
 		access: NonNullable<AdminRoute["access"]>;
 		component: RouteComponent;
 		navigation?: AdminRouteNavigation;

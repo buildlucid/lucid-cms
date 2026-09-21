@@ -5,14 +5,17 @@ import {
 	createMemo,
 	createSignal,
 } from "solid-js";
+import CreateMenu, {
+	type CreateMenuAction,
+} from "@/components/CreateMenu/CreateMenu";
 import CreateUserDrawer from "@/components/CreateUserDrawer/CreateUserDrawer";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
-import { PageHeader } from "@/components/PageHeader/PageHeader";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import { UserList } from "@/components/UserList/UserList";
 import { Permissions } from "@/constants/permissions";
+import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useQueryState, {
 	booleanFilter,
 	numberFilter,
@@ -87,173 +90,178 @@ const UsersPage: Component = () => {
 	});
 
 	// ----------------------------------
+	// Memos
+	const canCreate = createMemo(
+		() => userStore.get.hasPermission([Permissions.UsersCreate]).all,
+	);
+	const createActions = createMemo<CreateMenuAction[]>(() =>
+		canCreate()
+			? [
+					{
+						type: "button",
+						label: T()("users.add"),
+						onClick: () => setOpenCreateUserPanel(true),
+					},
+				]
+			: [],
+	);
+
+	// ----------------------------------
+	// Hooks
+	useKeyboardShortcuts({
+		newEntry: {
+			permission: () => canCreate(),
+			callback: () => setOpenCreateUserPanel(true),
+		},
+	});
+
+	// ----------------------------------
 	// Render
 	return (
-		<PageLayout
-			slots={{
-				header: (
-					<PageHeader
-						copy={{
-							title: T()("routes.users.title"),
-							description: T()("routes.users.description"),
-						}}
-						actions={{
-							create: [
-								{
-									open: openCreateUserPanel(),
-									setOpen: setOpenCreateUserPanel,
-									permission: userStore.get.hasPermission([
-										Permissions.UsersCreate,
-									]).all,
-									label: T()("users.add"),
-								},
-							],
-						}}
-						slots={{
-							bottom: (
-								<QueryRow
-									searchParams={searchParams}
-									showingDeleted={showingDeleted}
-									setShowingDeleted={setShowingDeleted}
-									onRefresh={() => {
-										queryClient.invalidateQueries({
-											queryKey: queryKeys.users.list(),
-										});
-									}}
-									filterSection={{
-										subject: T()("routes.users.title"),
-										fields: [
-											{
-												label: T()("common.first.name"),
-												key: "firstName",
-												type: "text",
-											},
-											{
-												label: T()("common.last.name"),
-												key: "lastName",
-												type: "text",
-											},
-											{
-												label: T()("common.email"),
-												key: "email",
-												type: "text",
-											},
-											{
-												label: T()("common.username"),
-												key: "username",
-												type: "text",
-											},
-											{
-												label: T()("users.status.locked.label"),
-												key: "isLocked",
-												type: "checkbox",
-												trueLabel: T()("common.status.locked"),
-												falseLabel: T()("common.status.unlocked"),
-											},
-											{
-												label: T()("common.role"),
-												key: "roleIds",
-												type: "select",
-												options: roleOptions(),
-											},
-											{
-												label: T()("users.invitations.status.label"),
-												key: "invitationAccepted",
-												type: "checkbox",
-												trueLabel: T()("users.invitations.status.accepted"),
-												falseLabel: T()("common.status.pending"),
-											},
-											{
-												label: T()("users.password.reset.status.label"),
-												key: "triggerPasswordReset",
-												type: "checkbox",
-												trueLabel: T()("auth.password.reset.required.title"),
-												falseLabel: T()(
-													"users.password.reset.status.not.required",
-												),
-											},
-											...(userStore.get.user?.superAdmin
-												? [
-														{
-															label: T()("users.super.admin.label"),
-															key: "superAdmin",
-															type: "checkbox" as const,
-															trueLabel: T()("users.super.admin.title"),
-															falseLabel: T()("common.standard"),
-														},
-													]
-												: []),
-											{
-												label: T()("common.created.at"),
-												key: "createdAt",
-												type: "datetime",
-											},
-											{
-												label: T()("common.updated.at"),
-												key: "updatedAt",
-												type: "datetime",
-											},
-											...(showingDeleted()
-												? [
-														{
-															label: T()("common.deleted.by"),
-															key: "deletedBy",
-															type: "user" as const,
-														},
-													]
-												: []),
-										],
-									}}
-									sorts={[
+		<PageLayout.Root>
+			<PageLayout.Header
+				title={T()("routes.users.title")}
+				description={T()("routes.users.description")}
+				actions={<CreateMenu actions={createActions()} />}
+			>
+				<QueryRow
+					searchParams={searchParams}
+					showingDeleted={showingDeleted}
+					setShowingDeleted={setShowingDeleted}
+					onRefresh={() => {
+						queryClient.invalidateQueries({
+							queryKey: queryKeys.users.list(),
+						});
+					}}
+					filterSection={{
+						subject: T()("routes.users.title"),
+						fields: [
+							{
+								label: T()("common.first.name"),
+								key: "firstName",
+								type: "text",
+							},
+							{
+								label: T()("common.last.name"),
+								key: "lastName",
+								type: "text",
+							},
+							{
+								label: T()("common.email"),
+								key: "email",
+								type: "text",
+							},
+							{
+								label: T()("common.username"),
+								key: "username",
+								type: "text",
+							},
+							{
+								label: T()("users.status.locked.label"),
+								key: "isLocked",
+								type: "checkbox",
+								trueLabel: T()("common.status.locked"),
+								falseLabel: T()("common.status.unlocked"),
+							},
+							{
+								label: T()("common.role"),
+								key: "roleIds",
+								type: "select",
+								options: roleOptions(),
+							},
+							{
+								label: T()("users.invitations.status.label"),
+								key: "invitationAccepted",
+								type: "checkbox",
+								trueLabel: T()("users.invitations.status.accepted"),
+								falseLabel: T()("common.status.pending"),
+							},
+							{
+								label: T()("users.password.reset.status.label"),
+								key: "triggerPasswordReset",
+								type: "checkbox",
+								trueLabel: T()("auth.password.reset.required.title"),
+								falseLabel: T()("users.password.reset.status.not.required"),
+							},
+							...(userStore.get.user?.superAdmin
+								? [
 										{
-											label: T()("common.username"),
-											key: "username",
+											label: T()("users.super.admin.label"),
+											key: "superAdmin",
+											type: "checkbox" as const,
+											trueLabel: T()("users.super.admin.title"),
+											falseLabel: T()("common.standard"),
 										},
+									]
+								: []),
+							{
+								label: T()("common.created.at"),
+								key: "createdAt",
+								type: "datetime",
+							},
+							{
+								label: T()("common.updated.at"),
+								key: "updatedAt",
+								type: "datetime",
+							},
+							...(showingDeleted()
+								? [
 										{
-											label: T()("common.first.name"),
-											key: "firstName",
+											label: T()("common.deleted.by"),
+											key: "deletedBy",
+											type: "user" as const,
 										},
-										{
-											label: T()("common.last.name"),
-											key: "lastName",
-										},
-										{
-											label: T()("common.email"),
-											key: "email",
-										},
-										{
-											label: T()("users.status.locked.label"),
-											key: "isLocked",
-										},
-										{
-											label: T()("common.created.at"),
-											key: "createdAt",
-										},
-									]}
-									perPage={[]}
-								/>
-							),
-						}}
-					/>
-				),
-			}}
-		>
-			<MediaAltGenerationModal />
-			<MediaImageGenerationModal />
-			<UserList
-				state={{
-					searchParams: searchParams,
-					setOpenCreateUserPanel: setOpenCreateUserPanel,
-					showingDeleted: showingDeleted,
-				}}
-			/>
-			<CreateUserDrawer
-				state={{
-					open: openCreateUserPanel(),
-					setOpen: setOpenCreateUserPanel,
-				}}
-			/>
-		</PageLayout>
+									]
+								: []),
+						],
+					}}
+					sorts={[
+						{
+							label: T()("common.username"),
+							key: "username",
+						},
+						{
+							label: T()("common.first.name"),
+							key: "firstName",
+						},
+						{
+							label: T()("common.last.name"),
+							key: "lastName",
+						},
+						{
+							label: T()("common.email"),
+							key: "email",
+						},
+						{
+							label: T()("users.status.locked.label"),
+							key: "isLocked",
+						},
+						{
+							label: T()("common.created.at"),
+							key: "createdAt",
+						},
+					]}
+					perPage={[]}
+				/>
+			</PageLayout.Header>
+			<PageLayout.Body>
+				<MediaAltGenerationModal />
+				<MediaImageGenerationModal />
+				<UserList
+					state={{
+						searchParams: searchParams,
+						setOpenCreateUserPanel: setOpenCreateUserPanel,
+						showingDeleted: showingDeleted,
+					}}
+				/>
+				<CreateUserDrawer
+					state={{
+						open: openCreateUserPanel(),
+						setOpen: setOpenCreateUserPanel,
+					}}
+				/>
+			</PageLayout.Body>
+		</PageLayout.Root>
 	);
 };
 

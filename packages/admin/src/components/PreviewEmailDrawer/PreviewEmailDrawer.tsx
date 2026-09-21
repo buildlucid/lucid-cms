@@ -18,7 +18,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import Pill from "@/components/Pill/Pill";
 import api from "@/services/api";
 import T from "@/translations";
@@ -137,7 +137,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 					<Show when={hasInlineAttachments()}>
 						<div class="absolute bottom-3 left-3 z-10 pointer-events-none max-w-[calc(100%-1.5rem)]">
 							<Pill
-								theme="warning-opaque"
+								variant="warning-subtle"
 								class="items-center gap-1.5 max-w-full shadow-sm"
 							>
 								<FaSolidTriangleExclamation size={10} />

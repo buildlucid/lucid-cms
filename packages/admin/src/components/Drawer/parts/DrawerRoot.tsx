@@ -15,7 +15,7 @@ import {
 	untrack,
 	useContext,
 } from "solid-js";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
 import { usePageScrollPin } from "@/hooks/usePageScrollPin/usePageScrollPin";
@@ -307,9 +307,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 							</Match>
 							<Match when={props.error}>
 								<div class="flex items-center h-full justify-center">
-									<ErrorBlock
-										content={{ image: notifyIllustration, title: props.error }}
-									/>
+									<ErrorState image={notifyIllustration} title={props.error} />
 								</div>
 							</Match>
 							<Match when={props.open}>

@@ -1,5 +1,5 @@
 import type { Accessor, Component } from "solid-js";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import type { IntegrationServices } from "@/services/api/integrations";
 import T from "@/translations";
 

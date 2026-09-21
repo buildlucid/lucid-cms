@@ -95,10 +95,10 @@ const JobScheduleTableRow: Component<JobScheduleRowProps> = (props) => {
 						? T()("common.status.paused")
 						: T()("common.status.active")
 				}
-				theme={
+				variant={
 					props.schedule.state === "paused"
-						? "warning-opaque"
-						: "primary-opaque"
+						? "warning-subtle"
+						: "primary-subtle"
 				}
 				options={{
 					include: props.include[0],
@@ -130,7 +130,7 @@ const JobScheduleTableRow: Component<JobScheduleRowProps> = (props) => {
 			/>
 			<TablePillCell
 				text={lastStatus()}
-				theme={lastStatus() === "failed" ? "error-opaque" : "outline"}
+				variant={lastStatus() === "failed" ? "danger-subtle" : "outline"}
 				options={{
 					include: props.include[4],
 					padding: props.options?.padding,

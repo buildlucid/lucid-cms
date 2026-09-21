@@ -230,7 +230,7 @@ const OAuthConsentPage: Component = () => {
 												: T()("oauth.consent.registered.application")}
 										</p>
 									</div>
-									<Pill theme="outline" class="shrink-0">
+									<Pill variant="outline" class="shrink-0">
 										{T()(
 											effectiveScopes().length === 1
 												? "oauth.connections.permission.count"

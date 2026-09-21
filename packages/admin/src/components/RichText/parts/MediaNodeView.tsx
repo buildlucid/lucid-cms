@@ -148,7 +148,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 								<div class="flex flex-wrap items-center gap-1.5">
 									<Show when={reference().isDeleted}>
 										<Pill
-											theme="red"
+											variant="danger"
 											tooltip={T()("common.status.deleted.tooltip")}
 										>
 											{T()("common.status.deleted")}
@@ -156,26 +156,26 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 									</Show>
 									<Show when={!reference().public}>
 										<Pill
-											theme="red"
+											variant="danger"
 											tooltip={T()("media.visibility.private.tooltip")}
 										>
 											{T()("common.private")}
 										</Pill>
 									</Show>
 									<Show when={reference().meta.fileSize}>
-										<Pill theme="outline">
+										<Pill variant="outline">
 											{helpers.bytesToSize(reference().meta.fileSize)}
 										</Pill>
 									</Show>
 									<Show when={dimensions()}>
-										{(value) => <Pill theme="outline">{value()}</Pill>}
+										{(value) => <Pill variant="outline">{value()}</Pill>}
 									</Show>
 									<Show when={reference().meta.mimeType}>
-										{(mimeType) => <Pill theme="outline">{mimeType()}</Pill>}
+										{(mimeType) => <Pill variant="outline">{mimeType()}</Pill>}
 									</Show>
 									<Show when={reference().meta.extension}>
 										{(extension) => (
-											<Pill theme="outline">{extension().toUpperCase()}</Pill>
+											<Pill variant="outline">{extension().toUpperCase()}</Pill>
 										)}
 									</Show>
 								</div>

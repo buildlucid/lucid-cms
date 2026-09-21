@@ -11,9 +11,12 @@ import {
 } from "solid-js";
 import Alert from "@/components/Alert/Alert";
 import Button from "@/components/Button/Button";
+import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
+import CreateMenu, {
+	type CreateMenuAction,
+} from "@/components/CreateMenu/CreateMenu";
 import { DocumentsList } from "@/components/DocumentsList/DocumentsList";
-import { PageHeader } from "@/components/PageHeader/PageHeader";
-import { PageLayout } from "@/components/PageLayout/PageLayout";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import useQueryState, { sort } from "@/hooks/useQueryState/useQueryState";
@@ -226,145 +229,150 @@ const DocumentsPage: Component = () => {
 	});
 
 	// ----------------------------------
+	// Memos
+	const contentLocales = createMemo(() =>
+		collectionData()?.localized ? documentLocalization.locales() : undefined,
+	);
+	const createActions = createMemo<CreateMenuAction[]>(() => {
+		const canCreate = userStore.get.hasPermission([
+			collectionData()?.permissions.create,
+		]).some;
+		if (!canCreate || collectionData()?.locked === true) return [];
+
+		return [
+			{
+				type: "link",
+				label: T()("actions.create.dynamic", {
+					name: collectionSingularName() || "",
+				}),
+				href: getDocumentRoute("create", {
+					collectionKey: collectionKey() || "",
+				}),
+			},
+		];
+	});
+
+	// ----------------------------------
 	// Render
 	return (
-		<PageLayout
-			slots={{
-				topBar: (
-					<Alert
-						style="layout"
-						alerts={[
-							{
-								type: "warning",
-								message: T()("collections.locked.message"),
-								show: collectionData()?.locked === true,
-							},
-						]}
-					/>
-				),
-				header: (
-					<PageHeader
-						copy={{
-							title: collectionName(),
-							description: collectionSummary(),
-						}}
-						actions={{
-							contentLocale: collectionData()?.localized
-								? documentLocalization.locales()
-								: false,
-							createLink: {
-								link: getDocumentRoute("create", {
-									collectionKey: collectionKey() || "",
-								}),
-								permission: userStore.get.hasPermission([
-									collectionData()?.permissions.create,
-								]).some,
-								show: collectionData()?.locked !== true,
-								label: T()("actions.create.dynamic", {
-									name: collectionSingularName() || "",
-								}),
-							},
-						}}
-						slots={{
-							bottom: (
-								<QueryRow
-									searchParams={searchParams}
-									showingDeleted={orderMode() ? undefined : showingDeleted}
-									setShowingDeleted={
-										orderMode()
-											? undefined
-											: (value: boolean) => {
-													setShowingDeleted(value);
-												}
-									}
-									onResetFilters={() => {
-										searchParams.resetFilters();
-										setFilterSectionOpen(false);
-									}}
-									onRefresh={() => {
-										queryClient.invalidateQueries({
-											queryKey: queryKeys.documents.all(),
-										});
-									}}
-									filterSection={
-										orderMode()
-											? undefined
-											: {
-													open: filterSectionOpen(),
-													setOpen: setFilterSectionOpen,
-													subject: collectionName(),
-													preserveSubjectCase: true,
-													fields: getFilterFields(),
-												}
-									}
-									custom={
-										<Show when={canReorderDocuments() && !showingDeleted()}>
-											<Button
-												variant={orderMode() ? "primary" : "outline"}
-												size="sm"
-												type="button"
-												class="gap-2"
-												onClick={() => {
-													if (orderMode()) {
-														exitOrderMode();
-													} else {
-														enterOrderMode();
-													}
-												}}
-											>
-												<FaSolidArrowDownWideShort size={14} />
-												<span>
-													{orderMode()
-														? T()("documents.order.mode.exit")
-														: T()("documents.order.mode.action")}
-												</span>
-											</Button>
-										</Show>
-									}
-									sorts={
-										orderMode()
-											? undefined
-											: [
-													...getCollectionFieldSorts(),
-													...(collectionData()?.orderable === true
-														? [
-																{
-																	label: T()("documents.order.sort.label"),
-																	key: "order",
-																},
-															]
-														: []),
-													{
-														label: T()("common.updated.at"),
-														key: "updatedAt",
-													},
-													{
-														label: T()("common.created.at"),
-														key: "createdAt",
-													},
-												]
-									}
-									perPage={[]}
+		<PageLayout.Root>
+			<Show when={collectionData()?.locked === true}>
+				<Alert variant="warning" appearance="bar">
+					{T()("collections.locked.message")}
+				</Alert>
+			</Show>
+			<PageLayout.Header
+				title={collectionName()}
+				description={collectionSummary()}
+				actions={
+					<>
+						<Show when={(contentLocales()?.length ?? 0) > 1}>
+							<div class="w-full md:max-w-42">
+								<ContentLocaleSelect
+									locales={contentLocales()}
+									showShortcut={true}
 								/>
-							),
-						}}
-					/>
-				),
-			}}
-		>
-			<DocumentsList
-				state={{
-					collection: collectionData(),
-					listing: getCollectionFieldIncludes,
-					relationCollections: relationCollectionData,
-					searchParams: searchParams,
-					isLoading: collection.isFetching,
-					collectionIsSuccess: collectionIsSuccess,
-					showingDeleted: showingDeleted,
-					orderMode: orderMode,
-				}}
-			/>
-		</PageLayout>
+							</div>
+						</Show>
+						<CreateMenu actions={createActions()} />
+					</>
+				}
+			>
+				<QueryRow
+					searchParams={searchParams}
+					showingDeleted={orderMode() ? undefined : showingDeleted}
+					setShowingDeleted={
+						orderMode()
+							? undefined
+							: (value: boolean) => {
+									setShowingDeleted(value);
+								}
+					}
+					onResetFilters={() => {
+						searchParams.resetFilters();
+						setFilterSectionOpen(false);
+					}}
+					onRefresh={() => {
+						queryClient.invalidateQueries({
+							queryKey: queryKeys.documents.all(),
+						});
+					}}
+					filterSection={
+						orderMode()
+							? undefined
+							: {
+									open: filterSectionOpen(),
+									setOpen: setFilterSectionOpen,
+									subject: collectionName(),
+									preserveSubjectCase: true,
+									fields: getFilterFields(),
+								}
+					}
+					custom={
+						<Show when={canReorderDocuments() && !showingDeleted()}>
+							<Button
+								variant={orderMode() ? "primary" : "outline"}
+								size="sm"
+								type="button"
+								class="gap-2"
+								onClick={() => {
+									if (orderMode()) {
+										exitOrderMode();
+									} else {
+										enterOrderMode();
+									}
+								}}
+							>
+								<FaSolidArrowDownWideShort size={14} />
+								<span>
+									{orderMode()
+										? T()("documents.order.mode.exit")
+										: T()("documents.order.mode.action")}
+								</span>
+							</Button>
+						</Show>
+					}
+					sorts={
+						orderMode()
+							? undefined
+							: [
+									...getCollectionFieldSorts(),
+									...(collectionData()?.orderable === true
+										? [
+												{
+													label: T()("documents.order.sort.label"),
+													key: "order",
+												},
+											]
+										: []),
+									{
+										label: T()("common.updated.at"),
+										key: "updatedAt",
+									},
+									{
+										label: T()("common.created.at"),
+										key: "createdAt",
+									},
+								]
+					}
+					perPage={[]}
+				/>
+			</PageLayout.Header>
+			<PageLayout.Body>
+				<DocumentsList
+					state={{
+						collection: collectionData(),
+						listing: getCollectionFieldIncludes,
+						relationCollections: relationCollectionData,
+						searchParams: searchParams,
+						isLoading: collection.isFetching,
+						collectionIsSuccess: collectionIsSuccess,
+						showingDeleted: showingDeleted,
+						orderMode: orderMode,
+					}}
+				/>
+			</PageLayout.Body>
+		</PageLayout.Root>
 	);
 };
 

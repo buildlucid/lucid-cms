@@ -7,7 +7,7 @@ import {
 	Match,
 	Switch,
 } from "solid-js";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
 import ForgotPasswordForm from "@/components/ForgotPasswordForm/ForgotPasswordForm";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
@@ -49,12 +49,10 @@ const ForgotPasswordPage: Component = () => {
 				</div>
 			</Match>
 			<Match when={isError()}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("errors.generic.title"),
-						description: T()("errors.generic.message"),
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("errors.generic.title")}
+					description={T()("errors.generic.message")}
 				/>
 			</Match>
 			<Match

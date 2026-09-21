@@ -13,7 +13,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import { Drawer } from "@/components/Drawer/Drawer";
+import Drawer from "@/components/Drawer/Drawer";
 import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import EmailTransactionTableRow from "@/components/EmailTransactionTableRow/EmailTransactionTableRow";
 import { FilterSection } from "@/components/FilterSection/FilterSection";

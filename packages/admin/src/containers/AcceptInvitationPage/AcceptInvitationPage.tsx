@@ -11,7 +11,8 @@ import {
 	Switch,
 } from "solid-js";
 import AcceptInvitationForm from "@/components/AcceptInvitationForm/AcceptInvitationForm";
-import ErrorBlock from "@/components/ErrorBlock/ErrorBlock";
+import ErrorState from "@/components/ErrorState/ErrorState";
+import Link from "@/components/Link/Link";
 import ProviderButton from "@/components/ProviderButton/ProviderButton";
 import Spinner from "@/components/Spinner/Spinner";
 import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
@@ -113,16 +114,15 @@ const AcceptInvitationPage: Component = () => {
 				</div>
 			</Match>
 			<Match when={isInvalid()}>
-				<ErrorBlock
-					content={{
-						image: notifyIllustration,
-						title: T()("auth.invitations.token.invalid.title"),
-						description: T()("auth.invitations.token.invalid.description"),
-					}}
-					link={{
-						text: T()("common.back.to.login"),
-						href: "/lucid/login",
-					}}
+				<ErrorState
+					image={notifyIllustration}
+					title={T()("auth.invitations.token.invalid.title")}
+					description={T()("auth.invitations.token.invalid.description")}
+					actions={
+						<Link variant="primary" size="sm" href="/lucid/login">
+							{T()("common.back.to.login")}
+						</Link>
+					}
 				/>
 			</Match>
 			<Match when={isReady()}>

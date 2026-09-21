@@ -3,7 +3,7 @@ import type { Accessor, Component } from "solid-js";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
 import api from "@/services/api";
 import T from "@/translations";

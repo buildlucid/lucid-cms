@@ -35,7 +35,7 @@ import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
 import DateText from "@/components/DateText/DateText";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Link from "@/components/Link/Link";
-import { Modal } from "@/components/Modal/Modal";
+import Modal from "@/components/Modal/Modal";
 import Pill, { type PillProps } from "@/components/Pill/Pill";
 import PublishRequestRow from "@/components/PublishRequestRow/PublishRequestRow";
 import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
@@ -56,20 +56,20 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 
 const JSONPreview = lazy(() => import("@/components/JSONPreview/JSONPreview"));
 
-const getRetentionTheme = (
+const getRetentionVariant = (
 	state: RetentionInfo["state"],
-): PillProps["theme"] => {
+): PillProps["variant"] => {
 	switch (state) {
 		case "protected":
-			return "grey";
+			return "neutral";
 		case "retained":
 			return "outline";
 		case "expiring":
-			return "warning-opaque";
+			return "warning-subtle";
 		case "expired":
-			return "error-opaque";
+			return "danger-subtle";
 		case "unknown":
-			return "grey";
+			return "neutral";
 	}
 };
 
@@ -272,7 +272,7 @@ const TimelineDetails: Component<{
 								{title()}
 							</h3>
 						</div>
-						<Pill theme="outline" class="shrink-0">
+						<Pill variant="outline" class="shrink-0">
 							#{props.item.id}
 						</Pill>
 					</div>
@@ -409,7 +409,7 @@ const TimelineDetails: Component<{
 					>
 						<div class="min-w-0">
 							<div class="flex flex-wrap items-center gap-2">
-								<Pill theme={getRetentionTheme(props.retention().state)}>
+								<Pill variant={getRetentionVariant(props.retention().state)}>
 									{props.retention().label}
 								</Pill>
 								<Show when={props.retention().expiresAt}>
@@ -614,7 +614,7 @@ const InspectorSection: Component<{
 					</div>
 					<div class="flex shrink-0 items-center gap-2">
 						<Show when={props.meta !== undefined}>
-							<Pill theme="outline">{props.meta}</Pill>
+							<Pill variant="outline">{props.meta}</Pill>
 						</Show>
 						<FaSolidChevronRight
 							size={12}
@@ -722,32 +722,34 @@ const VersionStatusPills: Component<{
 	<>
 		<Switch>
 			<Match when={props.item.type === "latest"}>
-				<Pill theme="primary-opaque">{T()("common.current.version")}</Pill>
+				<Pill variant="primary-subtle">{T()("common.current.version")}</Pill>
 			</Match>
 			<Match when={props.item.type === "revision"}>
-				<Pill theme="info-opaque">{T()("common.saved.revision")}</Pill>
+				<Pill variant="info-subtle">{T()("common.saved.revision")}</Pill>
 			</Match>
 			<Match when={props.item.type === "snapshot"}>
-				<Pill theme="info-opaque">{T()("common.snapshot")}</Pill>
+				<Pill variant="info-subtle">{T()("common.snapshot")}</Pill>
 			</Match>
 			<Match when={props.item.type === "environment" && props.item.isReleased}>
-				<Pill theme="secondary">{T()("common.status.released")}</Pill>
+				<Pill variant="secondary">{T()("common.status.released")}</Pill>
 			</Match>
 		</Switch>
 		<Show when={props.item.type === "environment"}>
 			<Show
 				when={props.item.inSyncWithPromotedFrom}
 				fallback={
-					<Pill theme="warning-opaque">{T()("common.status.out.of.sync")}</Pill>
+					<Pill variant="warning-subtle">
+						{T()("common.status.out.of.sync")}
+					</Pill>
 				}
 			>
-				<Pill theme="primary-opaque">{T()("common.status.in.sync")}</Pill>
+				<Pill variant="primary-subtle">{T()("common.status.in.sync")}</Pill>
 			</Show>
 		</Show>
 		<Show
 			when={props.item.type === "environment" && props.item.promotedFromLatest}
 		>
-			<Pill theme="outline">{T()("common.from.latest")}</Pill>
+			<Pill variant="outline">{T()("common.from.latest")}</Pill>
 		</Show>
 		<Show
 			when={
@@ -756,7 +758,7 @@ const VersionStatusPills: Component<{
 				props.item.promotedFrom
 			}
 		>
-			<Pill theme="warning-opaque">
+			<Pill variant="warning-subtle">
 				<FaSolidTriangleExclamation size={10} class="mr-1.5" />
 				{T()("common.status.not.latest")}
 			</Pill>

@@ -284,7 +284,7 @@ export const MediaList: Component<{
 		return {
 			title: T()("empty.states.media.title"),
 			description: T()("empty.states.media.description"),
-			button: T()("media.upload.action"),
+			actionLabel: T()("media.upload.action"),
 		};
 	});
 	const createEntryCallback = createMemo(() => {
@@ -303,13 +303,13 @@ export const MediaList: Component<{
 			return {
 				title: T()("empty.states.media.title"),
 				description: T()("empty.states.media.description"),
-				button: T()("media.upload.action"),
+				actionLabel: T()("media.upload.action"),
 			};
 		}
 		return {
 			title: T()("empty.states.media.folder.title"),
 			description: T()("empty.states.media.folder.description"),
-			button: T()("media.upload.action"),
+			actionLabel: T()("media.upload.action"),
 		};
 	});
 	const canRestoreMedia = createMemo(

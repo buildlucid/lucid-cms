@@ -1,6 +1,7 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
-import { RangeInput } from "@/components/RangeInput/RangeInput";
+import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
+import Slider from "@/components/Slider/Slider";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
@@ -43,7 +44,7 @@ export const RangeField: Component<RangeFieldProps> = (props) => {
 	// -------------------------------
 	// Render
 	return (
-		<RangeInput
+		<Slider
 			id={brickHelpers.customFieldId({
 				key: props.state.fieldConfig.key,
 				brickIndex: fieldRenderState.brickIndex(),
@@ -66,20 +67,22 @@ export const RangeField: Component<RangeFieldProps> = (props) => {
 			max={props.state.fieldConfig.max}
 			step={props.state.fieldConfig.step}
 			thumbs={props.state.fieldConfig.thumbs}
-			copy={{
-				label: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.label,
-				}),
-				describedBy: helpers.getLocaleValue({
-					value: props.state.fieldConfig.details.description,
-				}),
-			}}
+			label={helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.label,
+			})}
+			description={helpers.getLocaleValue({
+				value: props.state.fieldConfig.details.description,
+			})}
 			errors={props.state.fieldError}
-			altLocaleError={props.state.altLocaleError}
-			localised={props.state.localised}
 			disabled={disabled()}
 			required={props.state.fieldConfig.validation?.required || false}
-			fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+			labelStart={
+				<FieldLabelMarkers
+					altLocaleError={props.state.altLocaleError}
+					localised={props.state.localised}
+					fieldColumnIsMissing={props.state.fieldColumnIsMissing}
+				/>
+			}
 		/>
 	);
 };

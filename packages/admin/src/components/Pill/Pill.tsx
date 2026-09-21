@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import classnames from "classnames";
 import {
 	type Component,
 	createMemo,
@@ -7,31 +7,40 @@ import {
 	splitProps,
 } from "solid-js";
 
-type PillTheme =
+/**
+ * Solid variants read as a state, the subtle ones as a quiet label. The
+ * workflow palette matches the stage colours a collection can be configured
+ * with, and is drawn from the --lucid-workflow-* theme tokens.
+ */
+export type PillVariant =
 	| "primary"
-	| "primary-opaque"
-	| "grey"
-	| "red"
-	| "yellow"
-	| "green"
-	| "blue"
-	| "info-opaque"
-	| "purple"
-	| "error-opaque"
-	| "warning"
-	| "warning-opaque"
+	| "primary-subtle"
 	| "secondary"
-	| "outline";
+	| "danger"
+	| "danger-subtle"
+	| "warning-subtle"
+	| "info-subtle"
+	| "neutral"
+	| "outline"
+	| "workflow-yellow"
+	| "workflow-green"
+	| "workflow-blue"
+	| "workflow-purple";
+
+export type PillSize = "xs" | "sm";
 
 interface PillBaseProps {
-	theme: PillTheme;
-	size?: "default" | "small";
-	children: JSXElement;
-	class?: string;
+	/** Visual style of the pill. @default "neutral" */
+	variant?: PillVariant;
+	/** Height and text scale of the pill. @default "sm" */
+	size?: PillSize;
+	/** Shown natively on hover. */
 	tooltip?: string;
+	class?: string;
+	children: JSXElement;
 }
 
-type PillSpanProps = PillBaseProps &
+export type PillSpanProps = PillBaseProps &
 	Omit<JSX.HTMLAttributes<HTMLSpanElement>, "class" | "children" | "title"> & {
 		as?: undefined;
 	};
@@ -49,67 +58,84 @@ export type PillButtonProps = PillBaseProps &
 
 export type PillProps = PillSpanProps | PillButtonProps;
 
+/**
+ * A small rounded label for a status or a count. Pass as="button" to make it
+ * clickable, which adds hover and focus styling.
+ *
+ * @example
+ * ```tsx
+ * import { Pill } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
+ *
+ * return <Pill variant="primary-subtle">{t("common.status.active")}</Pill>;
+ * ```
+ */
 const Pill: Component<PillProps> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
 	const [local, rest] = splitProps(props, [
 		"as",
-		"theme",
+		"variant",
 		"size",
-		"children",
-		"class",
 		"tooltip",
+		"class",
+		"children",
 	]);
 
-	// ----------------------------------
+	// ----------------------------------------
 	// Memos
-	const classes = createMemo(() => {
-		return classNames(
+	const variant = createMemo(() => local.variant ?? "neutral");
+	const interactive = createMemo(() => local.as === "button");
+	const classes = createMemo(() =>
+		classnames(
 			"inline-flex items-center justify-center rounded-full font-medium whitespace-nowrap",
-			local.as === "button" &&
+			interactive() &&
 				"transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
 			local.class,
 			{
-				"px-2.5 py-0.5 text-xs leading-4":
-					local.size === undefined || local.size === "default",
-				"px-1.5 py-0 text-[11px] leading-4": local.size === "small",
-				"bg-primary-base text-primary-contrast": local.theme === "primary",
-				"border border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
-					local.theme === "primary-opaque",
-				"bg-input-base text-title": local.theme === "grey",
-				"bg-error-base text-error-contrast": local.theme === "red",
-				"border border-workflow-yellow-border bg-workflow-yellow-bg text-workflow-yellow-text":
-					local.theme === "yellow",
-				"border border-workflow-green-border bg-workflow-green-bg text-workflow-green-text":
-					local.theme === "green",
-				"border border-workflow-blue-border bg-workflow-blue-bg text-workflow-blue-text":
-					local.theme === "blue",
-				"border border-info-base/20 bg-info-base/10 text-info-base":
-					local.theme === "info-opaque",
-				"border border-workflow-purple-border bg-workflow-purple-bg text-workflow-purple-text":
-					local.theme === "purple",
-				"border border-error-base/20 bg-error-base/10 text-error-base":
-					local.theme === "error-opaque",
-				"bg-warning-base text-warning-contrast": local.theme === "warning",
-				"border border-warning-base/20 bg-warning-base/10 text-warning-base":
-					local.theme === "warning-opaque",
-				"bg-secondary-base text-secondary-contrast":
-					local.theme === "secondary",
-				"border border-border bg-input-base text-body":
-					local.theme === "outline",
-				"hover:bg-primary-hover":
-					local.as === "button" && local.theme === "primary",
-				"hover:bg-card-hover hover:text-title":
-					local.as === "button" && ["grey", "outline"].includes(local.theme),
-				"hover:bg-primary-muted-bg/80":
-					local.as === "button" && local.theme === "primary-opaque",
-				"hover:bg-error-hover": local.as === "button" && local.theme === "red",
-				"hover:bg-secondary-hover":
-					local.as === "button" && local.theme === "secondary",
-			},
-		);
-	});
+				// Sizes
+				"px-2.5 py-0.5 text-xs leading-4": local.size !== "xs",
+				"px-1.5 py-0 text-[11px] leading-4": local.size === "xs",
 
-	// ----------------------------------
-	// Return
+				// Variants
+				"bg-primary-base text-primary-contrast": variant() === "primary",
+				"border border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
+					variant() === "primary-subtle",
+				"bg-secondary-base text-secondary-contrast": variant() === "secondary",
+				"bg-error-base text-error-contrast": variant() === "danger",
+				"border border-error-base/20 bg-error-base/10 text-error-base":
+					variant() === "danger-subtle",
+				"border border-warning-base/20 bg-warning-base/10 text-warning-base":
+					variant() === "warning-subtle",
+				"border border-info-base/20 bg-info-base/10 text-info-base":
+					variant() === "info-subtle",
+				"bg-input-base text-subtitle": variant() === "neutral",
+				"border border-border bg-input-base text-body": variant() === "outline",
+				"border border-workflow-yellow-border bg-workflow-yellow-bg text-workflow-yellow-text":
+					variant() === "workflow-yellow",
+				"border border-workflow-green-border bg-workflow-green-bg text-workflow-green-text":
+					variant() === "workflow-green",
+				"border border-workflow-blue-border bg-workflow-blue-bg text-workflow-blue-text":
+					variant() === "workflow-blue",
+				"border border-workflow-purple-border bg-workflow-purple-bg text-workflow-purple-text":
+					variant() === "workflow-purple",
+
+				// Interactive
+				"hover:bg-primary-hover": interactive() && variant() === "primary",
+				"hover:bg-primary-muted-bg/80":
+					interactive() && variant() === "primary-subtle",
+				"hover:bg-secondary-hover": interactive() && variant() === "secondary",
+				"hover:bg-error-hover": interactive() && variant() === "danger",
+				"hover:bg-card-hover hover:text-title":
+					interactive() && ["neutral", "outline"].includes(variant()),
+			},
+		),
+	);
+
+	// ----------------------------------------
+	// Render
 	if (local.as === "button") {
 		const buttonProps = rest as Omit<
 			PillButtonProps,
