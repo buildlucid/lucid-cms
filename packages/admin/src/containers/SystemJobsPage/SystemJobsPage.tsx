@@ -1,5 +1,4 @@
 import type { Component } from "solid-js";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import { JobSchedulesList } from "@/components/JobSchedulesList/JobSchedulesList";
 import { JobsList } from "@/components/JobsList/JobsList";
@@ -14,7 +13,7 @@ const SystemJobsPage: Component = () => {
 		<PageLayout.Root>
 			<SystemSettingsHeader />
 			<PageLayout.Body>
-				<DynamicContent options={{ padding: "24" }}>
+				<div class="flex-1 h-full p-4 md:p-6">
 					<InfoRow.Root
 						title={T()("routes.system.jobs.schedules.title")}
 						description={T()("routes.system.jobs.schedules.description")}
@@ -35,7 +34,7 @@ const SystemJobsPage: Component = () => {
 							</div>
 						</InfoRow.Content>
 					</InfoRow.Root>
-				</DynamicContent>
+				</div>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

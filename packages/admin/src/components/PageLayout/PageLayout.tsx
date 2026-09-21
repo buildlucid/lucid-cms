@@ -17,6 +17,8 @@ export interface PageLayoutHeaderProps {
 }
 
 export interface PageLayoutBodyProps {
+	/** The page's standard content inset. @default "none" */
+	padding?: "none" | "sm" | "md";
 	class?: string;
 	children?: JSXElement;
 }
@@ -110,6 +112,10 @@ const PageLayoutBody: Component<PageLayoutBodyProps> = (props) => {
 		<div
 			class={classnames(
 				"flex grow flex-col justify-between bg-background-base",
+				{
+					"p-4": props.padding === "sm",
+					"p-4 md:p-6": props.padding === "md",
+				},
 				props.class,
 			)}
 		>

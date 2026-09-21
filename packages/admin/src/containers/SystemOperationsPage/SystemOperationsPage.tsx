@@ -4,10 +4,10 @@ import ClearAllProcessedImagesModal from "@/components/ClearAllProcessedImagesMo
 import ClearCacheModal from "@/components/ClearCacheModal/ClearCacheModal";
 import DeleteAllShareLinksSystemModal from "@/components/DeleteAllShareLinksSystemModal/DeleteAllShareLinksSystemModal";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import LucidConnection from "@/components/LucidConnection/LucidConnection";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
 import UpdateSystemAlertsModal from "@/components/UpdateSystemAlertsModal/UpdateSystemAlertsModal";
 import { Permissions } from "@/constants/permissions";
@@ -46,11 +46,7 @@ const SystemOperationsPage: Component = () => {
 		<PageLayout.Root>
 			<SystemSettingsHeader />
 			<PageLayout.Body>
-				<DynamicContent
-					options={{
-						padding: "24",
-					}}
-				>
+				<div class="flex-1 h-full p-4 md:p-6">
 					{/* Lucid Connection */}
 					<InfoRow.Root
 						title={T()("connection.manage.title")}
@@ -60,15 +56,9 @@ const SystemOperationsPage: Component = () => {
 					</InfoRow.Root>
 
 					{/* Settings */}
-					<DynamicContent
-						state={{
-							isError: settingsData.isError,
-							isSuccess: settingsData.isSuccess,
-							isLoading: settingsData.isLoading,
-						}}
-						options={{
-							inline: true,
-						}}
+					<QueryBoundary
+						isLoading={settingsData.isLoading}
+						isError={settingsData.isError}
 					>
 						{/* System Alerts */}
 						<InfoRow.Root
@@ -170,8 +160,8 @@ const SystemOperationsPage: Component = () => {
 								align="center"
 							/>
 						</InfoRow.Root>
-					</DynamicContent>
-				</DynamicContent>
+					</QueryBoundary>
+				</div>
 
 				{/* Modals */}
 				<UpdateSystemAlertsModal

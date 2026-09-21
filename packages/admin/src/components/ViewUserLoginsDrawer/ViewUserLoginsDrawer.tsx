@@ -1,3 +1,4 @@
+import classnames from "classnames";
 import {
 	FaSolidCalendar,
 	FaSolidGlobe,
@@ -14,11 +15,12 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import { Table } from "@/components/Table/Table";
 import UserLoginTableRow from "@/components/UserLoginTableRow/UserLoginTableRow";
@@ -178,33 +180,20 @@ const ViewUserLoginsPanelContent: Component<{
 					searchParams={loginsSearchParams}
 					embedded={true}
 				/>
-				<DynamicContent
-					class="bg-card-base border border-border rounded-md"
-					state={{
-						isError: userLogins.isError,
-						isSuccess: userLogins.isSuccess,
-						isEmpty: userLogins.data?.data.length === 0,
-						searchParams: loginsSearchParams,
-					}}
-					slot={{
-						footer: (
-							<PaginatedFooter
-								state={{
-									searchParams: loginsSearchParams,
-									meta: userLogins.data?.meta,
-								}}
-								options={{
-									embedded: true,
-								}}
-							/>
-						),
-					}}
-					copy={{
-						noEntries: {
-							title: T()("empty.states.user.logins.title"),
-							description: T()("empty.states.user.logins.description"),
-						},
-					}}
+				<QueryBoundary
+					isError={userLogins.isError}
+					isEmpty={userLogins.data?.data.length === 0}
+					queryState={loginsSearchParams}
+					empty={
+						<EmptyState
+							title={T()("empty.states.user.logins.title")}
+							description={T()("empty.states.user.logins.description")}
+						/>
+					}
+					class={classnames(
+						"flex-1 h-full",
+						"bg-card-base border border-border rounded-md",
+					)}
 				>
 					<Table
 						key={"user.logins"}
@@ -264,7 +253,16 @@ const ViewUserLoginsPanelContent: Component<{
 							</Index>
 						)}
 					</Table>
-				</DynamicContent>
+				</QueryBoundary>
+				<PaginatedFooter
+					state={{
+						searchParams: loginsSearchParams,
+						meta: userLogins.data?.meta,
+					}}
+					options={{
+						embedded: true,
+					}}
+				/>
 			</Show>
 		</div>
 	);

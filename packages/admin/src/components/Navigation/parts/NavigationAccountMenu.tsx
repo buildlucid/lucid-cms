@@ -110,7 +110,7 @@ const NavigationAccountMenu: Component<{
 						onSelect={props.onNavigate}
 					>
 						<FaSolidUser class="size-3.5 shrink-0" />
-						<span class="flex-1">{T()("routes.account.title")}</span>
+						<span class="flex-1 h-full">{T()("routes.account.title")}</span>
 					</DropdownMenu.Item>
 					<DropdownMenu.Item
 						as="a"
@@ -120,7 +120,7 @@ const NavigationAccountMenu: Component<{
 						class={itemClasses}
 					>
 						<FaSolidBookOpen class="size-3.5 shrink-0" />
-						<span class="flex-1">{T()("common.documentation")}</span>
+						<span class="flex-1 h-full">{T()("common.documentation")}</span>
 						<FaSolidArrowUpRightFromSquare class="size-2.5 shrink-0" />
 					</DropdownMenu.Item>
 					<DropdownMenu.Separator class="my-1 h-px border-0 bg-border" />
@@ -152,7 +152,7 @@ const NavigationAccountMenu: Component<{
 												value={option.value}
 												class={itemClasses}
 											>
-												<span class="flex-1">{option.label}</span>
+												<span class="flex-1 h-full">{option.label}</span>
 												<DropdownMenu.ItemIndicator>
 													<FaSolidCheck class="size-3 text-primary-base" />
 												</DropdownMenu.ItemIndicator>
@@ -190,7 +190,9 @@ const NavigationAccountMenu: Component<{
 												value={locale.code}
 												class={itemClasses}
 											>
-												<span class="flex-1">{locale.name || locale.code}</span>
+												<span class="flex-1 h-full">
+													{locale.name || locale.code}
+												</span>
 												<DropdownMenu.ItemIndicator>
 													<FaSolidCheck class="size-3 text-primary-base" />
 												</DropdownMenu.ItemIndicator>
@@ -210,7 +212,7 @@ const NavigationAccountMenu: Component<{
 						onSelect={props.onLogout}
 					>
 						<FaSolidRightFromBracket class="size-3.5 shrink-0" />
-						<span class="flex-1">{T()("common.logout")}</span>
+						<span class="flex-1 h-full">{T()("common.logout")}</span>
 						{props.logoutPending ? <Spinner size="sm" /> : null}
 					</DropdownMenu.Item>
 				</div>

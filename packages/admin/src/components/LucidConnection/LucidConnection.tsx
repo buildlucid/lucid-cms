@@ -10,10 +10,10 @@ import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
 import Button from "@/components/Button/Button";
 import DateText from "@/components/DateText/DateText";
 import DisconnectConnectionModal from "@/components/DisconnectConnectionModal/DisconnectConnectionModal";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Link from "@/components/Link/Link";
 import Pill from "@/components/Pill/Pill";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import constants from "@/constants";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -116,14 +116,7 @@ const LucidConnection: Component = () => {
 	// Render
 	return (
 		<>
-			<DynamicContent
-				state={{
-					isError: status.isError,
-					isLoading: status.isLoading,
-					isSuccess: status.isSuccess,
-				}}
-				options={{ inline: true }}
-			>
+			<QueryBoundary isLoading={status.isLoading} isError={status.isError}>
 				<InfoRow.Content>
 					<div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
 						<div class="min-w-0">
@@ -264,7 +257,7 @@ const LucidConnection: Component = () => {
 						</InfoRow.Content>
 					)}
 				</Show>
-			</DynamicContent>
+			</QueryBoundary>
 			<DisconnectConnectionModal
 				state={{ open: disconnectOpen(), setOpen: setDisconnectOpen }}
 			/>

@@ -13,7 +13,6 @@ import AuthProviderRow from "@/components/AuthProviderRow/AuthProviderRow";
 import Button from "@/components/Button/Button";
 import CreateUpdateProfilePictureDrawer from "@/components/CreateUpdateProfilePictureDrawer/CreateUpdateProfilePictureDrawer";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Modal from "@/components/Modal/Modal";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
@@ -158,11 +157,7 @@ export const AccountContent: Component = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<DynamicContent
-			options={{
-				padding: "24",
-			}}
-		>
+		<div class="flex-1 h-full p-4 md:p-6">
 			{/* Profile */}
 			<InfoRow.Root
 				title={T()("account.profile.title")}
@@ -500,6 +495,6 @@ export const AccountContent: Component = () => {
 					media: user()?.profilePicture ?? null,
 				}}
 			/>
-		</DynamicContent>
+		</div>
 	);
 };

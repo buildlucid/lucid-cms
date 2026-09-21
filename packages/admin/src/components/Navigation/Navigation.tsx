@@ -314,7 +314,7 @@ export const Navigation: Component = () => {
 								</div>
 							</div>
 							<NavigationMenuContent
-								class="flex-1"
+								class="flex-1 h-full"
 								onNavigate={() => setMobileMenuOpen(false)}
 								logoutPending={logout.action.isPending}
 								onLogout={() => logout.action.mutate({})}

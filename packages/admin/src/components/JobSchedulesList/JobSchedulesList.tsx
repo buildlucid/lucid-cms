@@ -1,9 +1,11 @@
 import { useQueryClient } from "@tanstack/solid-query";
+import classnames from "classnames";
 import { FaSolidCalendar, FaSolidCircleCheck, FaSolidT } from "solid-icons/fa";
 import { type Component, createMemo, Index } from "solid-js";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import JobScheduleTableRow from "@/components/JobScheduleTableRow/JobScheduleTableRow";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import ScheduleDetailsDrawer from "@/components/ScheduleDetailsDrawer/ScheduleDetailsDrawer";
 import SetScheduleStateModal from "@/components/SetScheduleStateModal/SetScheduleStateModal";
@@ -95,37 +97,21 @@ export const JobSchedulesList: Component = () => {
 				perPage={[5, 10, 20]}
 				options={{ padding: "16" }}
 			/>
-			<DynamicContent
-				class={
+			<QueryBoundary
+				isError={schedules.isError}
+				isEmpty={schedules.data?.data.length === 0}
+				empty={
+					<EmptyState
+						title={T()("empty.states.job.schedules.title")}
+						description={T()("empty.states.job.schedules.description")}
+					/>
+				}
+				class={classnames(
+					"border-t border-border",
 					schedules.isError || schedules.data?.data.length === 0
 						? "-mb-4"
-						: undefined
-				}
-				state={{
-					isError: schedules.isError,
-					isSuccess: schedules.isSuccess,
-					isEmpty: schedules.data?.data.length === 0,
-					searchParams,
-				}}
-				slot={{
-					footer: (
-						<PaginatedFooter
-							state={{ searchParams, meta: schedules.data?.meta }}
-							options={{
-								embedded: true,
-								padding: "16",
-								hideEmptyMessage: true,
-							}}
-						/>
-					),
-				}}
-				copy={{
-					noEntries: {
-						title: T()("empty.states.job.schedules.title"),
-						description: T()("empty.states.job.schedules.description"),
-					},
-				}}
-				options={{ inline: true, dividerTop: true }}
+						: undefined,
+				)}
 			>
 				<Table
 					key="jobs.schedules.list"
@@ -191,7 +177,16 @@ export const JobSchedulesList: Component = () => {
 						</Index>
 					)}
 				</Table>
-			</DynamicContent>
+			</QueryBoundary>
+			<PaginatedFooter
+				state={{ searchParams, meta: schedules.data?.meta }}
+				options={{
+					embedded: true,
+					padding: "16",
+					hideEmptyMessage: true,
+				}}
+			/>
+
 			<ScheduleDetailsDrawer
 				id={rowTarget.getTargetId}
 				state={{

@@ -1,10 +1,10 @@
 import { type Component, createMemo, For, Show } from "solid-js";
 import DetailsList from "@/components/DetailsList/DetailsList";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import Pill from "@/components/Pill/Pill";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
@@ -81,15 +81,10 @@ const SystemOverviewPage: Component = () => {
 		<PageLayout.Root>
 			<SystemSettingsHeader />
 			<PageLayout.Body>
-				<DynamicContent
-					state={{
-						isError: settingsData.isError,
-						isSuccess: settingsData.isSuccess,
-						isLoading: settingsData.isLoading,
-					}}
-					options={{
-						padding: "24",
-					}}
+				<QueryBoundary
+					isLoading={settingsData.isLoading}
+					isError={settingsData.isError}
+					class="flex-1 h-full p-4 md:p-6"
 				>
 					<InfoRow.Root
 						title={T()("media.info.title")}
@@ -242,7 +237,7 @@ const SystemOverviewPage: Component = () => {
 							/>
 						</InfoRow.Content>
 					</InfoRow.Root>
-				</DynamicContent>
+				</QueryBoundary>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

@@ -13,11 +13,13 @@ import {
 	Index,
 	Show,
 } from "solid-js";
+import Button from "@/components/Button/Button";
 import CopyAPIKeyModal from "@/components/CopyAPIKeyModal/CopyAPIKeyModal";
 import DeleteUserModal from "@/components/DeleteUserModal/DeleteUserModal";
 import DeleteUserPermanentlyModal from "@/components/DeleteUserPermanentlyModal/DeleteUserPermanentlyModal";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ResendInvitationModal from "@/components/ResendInvitationModal/ResendInvitationModal";
 import RestoreUsers from "@/components/RestoreUserModal/RestoreUserModal";
 import RevokeRefreshTokensModal from "@/components/RevokeRefreshTokensModal/RevokeRefreshTokensModal";
@@ -136,247 +138,250 @@ export const UserList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<DynamicContent
-			state={{
-				isError: users.isError,
-				isSuccess: users.isSuccess,
-				isEmpty: users.data?.data.length === 0,
-				searchParams: props.state.searchParams,
-			}}
-			slot={{
-				footer: (
-					<PaginatedFooter
-						state={{
-							searchParams: props.state.searchParams,
-							meta: users.data?.meta,
-						}}
-						options={{
-							padding: "24",
-						}}
+		<>
+			<QueryBoundary
+				isError={users.isError}
+				isEmpty={users.data?.data.length === 0}
+				queryState={props.state.searchParams}
+				empty={
+					<EmptyState
+						title={noEntriesCopy()?.title}
+						description={noEntriesCopy()?.description}
+						actions={
+							createEntryCallback() ? (
+								<Button size="sm" onClick={createEntryCallback()}>
+									{noEntriesCopy()?.button ?? T()("actions.create.entry")}
+								</Button>
+							) : undefined
+						}
 					/>
-				),
-			}}
-			copy={{
-				noEntries: noEntriesCopy(),
-			}}
-			callback={{
-				createEntry: createEntryCallback(),
-			}}
-		>
-			<Table
-				key={"users.list"}
-				rows={users.data?.data.length || 0}
-				searchParams={props.state.searchParams}
-				head={[
-					{
-						label: T()("common.user"),
-						key: "user",
-						icon: <FaSolidIdCard />,
-						minWidth: 260,
-					},
-					{
-						label: T()("common.name"),
-						key: "name",
-						icon: <FaSolidIdCard />,
-					},
-					{
-						label: T()("users.type"),
-						key: "superAdmin",
-						icon: <FaSolidUserTie />,
-					},
-					{
-						label: T()("users.status.locked.label"),
-						key: "isLocked",
-						icon: <FaSolidLock />,
-						sortable: true,
-					},
-					{
-						label: T()("users.invitations.status.label"),
-						key: "invitationAccepted",
-						icon: <FaSolidEnvelope />,
-					},
-					{
-						label: T()("users.password.reset.status.label"),
-						key: "triggerPasswordReset",
-						icon: <FaSolidLock />,
-					},
-					{
-						label: T()("common.created.at"),
-						key: "createdAt",
-						icon: <FaSolidCalendar />,
-						sortable: true,
-					},
-				]}
+				}
+				class="flex-1 h-full"
+			>
+				<Table
+					key={"users.list"}
+					rows={users.data?.data.length || 0}
+					searchParams={props.state.searchParams}
+					head={[
+						{
+							label: T()("common.user"),
+							key: "user",
+							icon: <FaSolidIdCard />,
+							minWidth: 260,
+						},
+						{
+							label: T()("common.name"),
+							key: "name",
+							icon: <FaSolidIdCard />,
+						},
+						{
+							label: T()("users.type"),
+							key: "superAdmin",
+							icon: <FaSolidUserTie />,
+						},
+						{
+							label: T()("users.status.locked.label"),
+							key: "isLocked",
+							icon: <FaSolidLock />,
+							sortable: true,
+						},
+						{
+							label: T()("users.invitations.status.label"),
+							key: "invitationAccepted",
+							icon: <FaSolidEnvelope />,
+						},
+						{
+							label: T()("users.password.reset.status.label"),
+							key: "triggerPasswordReset",
+							icon: <FaSolidLock />,
+						},
+						{
+							label: T()("common.created.at"),
+							key: "createdAt",
+							icon: <FaSolidCalendar />,
+							sortable: true,
+						},
+					]}
+					state={{
+						isLoading: isLoading(),
+						isSuccess: users.isSuccess,
+					}}
+					options={{
+						isSelectable: rowsAreSelectable(),
+						allowRestore: props.state.showingDeleted() && canRestoreUsers(),
+						allowDeletePermanently:
+							props.state.showingDeleted() && canDeleteUsersPermanently(),
+					}}
+					callbacks={{
+						deletePermanentlyRows: async (selected) => {
+							const ids: number[] = [];
+							for (const i in selected) {
+								if (selected[i] && users.data?.data[i].id) {
+									ids.push(users.data?.data[i].id);
+								}
+							}
+							await deleteUsersPermanently.action.mutateAsync({
+								body: {
+									ids: ids,
+								},
+							});
+						},
+						restoreRows: async (selected) => {
+							const ids: number[] = [];
+							for (const i in selected) {
+								if (selected[i] && users.data?.data[i].id) {
+									ids.push(users.data?.data[i].id);
+								}
+							}
+							await restoreUsers.action.mutateAsync({
+								body: {
+									ids: ids,
+								},
+							});
+						},
+					}}
+				>
+					{({ include, isSelectable, selected, setSelected }) => (
+						<Index each={users.data?.data || []}>
+							{(user, i) => (
+								<UserTableRow
+									index={i}
+									user={user()}
+									include={include}
+									selected={selected[i]}
+									rowTarget={rowTarget}
+									options={{
+										isSelectable,
+									}}
+									callbacks={{
+										setSelected: setSelected,
+									}}
+									showingDeleted={props.state.showingDeleted}
+									passwordAuthEnabled={!providers.data?.data.disablePassword}
+								/>
+							)}
+						</Index>
+					)}
+				</Table>
+				<ViewUserDrawer
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().view,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("view", state);
+						},
+					}}
+				/>
+				<ViewUserLoginsDrawer
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().viewLogins,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("viewLogins", state);
+						},
+					}}
+				/>
+				<ResendInvitationModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().resendInvitation,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("resendInvitation", state);
+						},
+					}}
+				/>
+				<UpdateUserDrawer
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().update,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("update", state);
+						},
+					}}
+				/>
+				<Show when={rowTarget.getTargetId()}>
+					{(userId) => (
+						<UpsertIntegrationDrawer
+							services={api.users.integrations(userId)}
+							state={{
+								open: rowTarget.getTriggers().createIntegration,
+								setOpen: (open) =>
+									rowTarget.setTrigger("createIntegration", open),
+							}}
+							callbacks={{
+								onCreateSuccess: (key) => {
+									setAPIKey(key);
+									setCopyAPIKeyOpen(true);
+								},
+							}}
+						/>
+					)}
+				</Show>
+				<CopyAPIKeyModal
+					apiKey={apiKey()}
+					state={{
+						open: copyAPIKeyOpen(),
+						setOpen: (open) => {
+							setCopyAPIKeyOpen(open);
+							if (!open) setAPIKey(undefined);
+						},
+					}}
+				/>
+				<DeleteUserModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().delete,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("delete", state);
+						},
+					}}
+				/>
+				<TriggerPasswordResetModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().passwordReset,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("passwordReset", state);
+						},
+					}}
+				/>
+				<RevokeRefreshTokensModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().revokeRefreshTokens,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("revokeRefreshTokens", state);
+						},
+					}}
+				/>
+				<RestoreUsers
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().restore,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("restore", state);
+						},
+					}}
+				/>
+				<DeleteUserPermanentlyModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().deletePermanently,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("deletePermanently", state);
+						},
+					}}
+				/>
+			</QueryBoundary>
+			<PaginatedFooter
 				state={{
-					isLoading: isLoading(),
-					isSuccess: users.isSuccess,
+					searchParams: props.state.searchParams,
+					meta: users.data?.meta,
 				}}
 				options={{
-					isSelectable: rowsAreSelectable(),
-					allowRestore: props.state.showingDeleted() && canRestoreUsers(),
-					allowDeletePermanently:
-						props.state.showingDeleted() && canDeleteUsersPermanently(),
-				}}
-				callbacks={{
-					deletePermanentlyRows: async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && users.data?.data[i].id) {
-								ids.push(users.data?.data[i].id);
-							}
-						}
-						await deleteUsersPermanently.action.mutateAsync({
-							body: {
-								ids: ids,
-							},
-						});
-					},
-					restoreRows: async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && users.data?.data[i].id) {
-								ids.push(users.data?.data[i].id);
-							}
-						}
-						await restoreUsers.action.mutateAsync({
-							body: {
-								ids: ids,
-							},
-						});
-					},
-				}}
-			>
-				{({ include, isSelectable, selected, setSelected }) => (
-					<Index each={users.data?.data || []}>
-						{(user, i) => (
-							<UserTableRow
-								index={i}
-								user={user()}
-								include={include}
-								selected={selected[i]}
-								rowTarget={rowTarget}
-								options={{
-									isSelectable,
-								}}
-								callbacks={{
-									setSelected: setSelected,
-								}}
-								showingDeleted={props.state.showingDeleted}
-								passwordAuthEnabled={!providers.data?.data.disablePassword}
-							/>
-						)}
-					</Index>
-				)}
-			</Table>
-			<ViewUserDrawer
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().view,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("view", state);
-					},
+					padding: "24",
 				}}
 			/>
-			<ViewUserLoginsDrawer
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().viewLogins,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("viewLogins", state);
-					},
-				}}
-			/>
-			<ResendInvitationModal
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().resendInvitation,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("resendInvitation", state);
-					},
-				}}
-			/>
-			<UpdateUserDrawer
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().update,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("update", state);
-					},
-				}}
-			/>
-			<Show when={rowTarget.getTargetId()}>
-				{(userId) => (
-					<UpsertIntegrationDrawer
-						services={api.users.integrations(userId)}
-						state={{
-							open: rowTarget.getTriggers().createIntegration,
-							setOpen: (open) =>
-								rowTarget.setTrigger("createIntegration", open),
-						}}
-						callbacks={{
-							onCreateSuccess: (key) => {
-								setAPIKey(key);
-								setCopyAPIKeyOpen(true);
-							},
-						}}
-					/>
-				)}
-			</Show>
-			<CopyAPIKeyModal
-				apiKey={apiKey()}
-				state={{
-					open: copyAPIKeyOpen(),
-					setOpen: (open) => {
-						setCopyAPIKeyOpen(open);
-						if (!open) setAPIKey(undefined);
-					},
-				}}
-			/>
-			<DeleteUserModal
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().delete,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("delete", state);
-					},
-				}}
-			/>
-			<TriggerPasswordResetModal
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().passwordReset,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("passwordReset", state);
-					},
-				}}
-			/>
-			<RevokeRefreshTokensModal
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().revokeRefreshTokens,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("revokeRefreshTokens", state);
-					},
-				}}
-			/>
-			<RestoreUsers
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().restore,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("restore", state);
-					},
-				}}
-			/>
-			<DeleteUserPermanentlyModal
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().deletePermanently,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("deletePermanently", state);
-					},
-				}}
-			/>
-		</DynamicContent>
+		</>
 	);
 };

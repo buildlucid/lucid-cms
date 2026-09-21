@@ -15,6 +15,7 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import Button from "@/components/Button/Button";
 import ClearProcessedMedia from "@/components/ClearProcessedImagesModal/ClearProcessedImagesModal";
 import CopyShareLinkURLModal from "@/components/CopyShareLinkURLModal/CopyShareLinkURLModal";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
@@ -25,7 +26,7 @@ import DeleteMediaFolderModal from "@/components/DeleteMediaFolderModal/DeleteMe
 import DeleteMediaModal from "@/components/DeleteMediaModal/DeleteMediaModal";
 import DeleteMediaPermanentlyModal from "@/components/DeleteMediaPermanentlyModal/DeleteMediaPermanentlyModal";
 import DownloadMediaModal from "@/components/DownloadMediaModal/DownloadMediaModal";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { Grid } from "@/components/Grid/Grid";
 import ImageCropEditorModal from "@/components/ImageCropEditorModal/ImageCropEditorModal";
 import { MediaBreadcrumbs } from "@/components/MediaBreadcrumbs/MediaBreadcrumbs";
@@ -39,6 +40,7 @@ import MoveToFolderModal, {
 	type MoveToFolderParams,
 } from "@/components/MoveToFolderModal/MoveToFolderModal";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RestoreMediaBatchModal from "@/components/RestoreMediaBatchModal/RestoreMediaBatchModal";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
 import UpdateMediaFolderModal from "@/components/UpdateMediaFolderModal/UpdateMediaFolderModal";
@@ -266,9 +268,6 @@ export const MediaList: Component<{
 	const isError = createMemo(() => {
 		return media.isError || folders.isError;
 	});
-	const isSuccess = createMemo(() => {
-		return media.isSuccess && folders.isSuccess;
-	});
 	const containerEmpty = createMemo(() => {
 		if (props.state.showingDeleted()) return mediaCount() === 0;
 		//* if we're at the top level and there are no folders or media, we're empty
@@ -334,35 +333,24 @@ export const MediaList: Component<{
 	// Render
 	return (
 		<>
-			<DynamicContent
-				state={{
-					isError: isError(),
-					isSuccess: isSuccess(),
-					isEmpty: containerEmpty(),
-					searchParams: props.state.searchParams,
-				}}
-				slot={{
-					footer: (
-						<PaginatedFooter
-							state={{
-								searchParams: props.state.searchParams,
-								meta: media.data?.meta,
-							}}
-							options={{
-								padding: "24",
-							}}
-						/>
-					),
-				}}
-				copy={{
-					noEntries: noEntriesCopy(),
-				}}
-				callback={{
-					createEntry: createEntryCallback(),
-				}}
-				options={{
-					padding: "24",
-				}}
+			<QueryBoundary
+				isError={isError()}
+				isEmpty={containerEmpty()}
+				queryState={props.state.searchParams}
+				empty={
+					<EmptyState
+						title={noEntriesCopy()?.title}
+						description={noEntriesCopy()?.description}
+						actions={
+							createEntryCallback() ? (
+								<Button size="sm" onClick={createEntryCallback()}>
+									{noEntriesCopy()?.actionLabel ?? T()("actions.create.entry")}
+								</Button>
+							) : undefined
+						}
+					/>
+				}
+				class="flex-1 h-full p-4 md:p-6"
 			>
 				<DragDropProvider onDragEnd={onDragEnd} onDragStart={onDragStart}>
 					<DragDropSensors />
@@ -470,7 +458,16 @@ export const MediaList: Component<{
 							props.state.showingDeleted() && canDeleteMedia(),
 					}}
 				/>
-			</DynamicContent>
+			</QueryBoundary>
+			<PaginatedFooter
+				state={{
+					searchParams: props.state.searchParams,
+					meta: media.data?.meta,
+				}}
+				options={{
+					padding: "24",
+				}}
+			/>
 
 			{/* Keep dialog focus scopes mounted across empty/result transitions. */}
 			<MoveToFolderModal

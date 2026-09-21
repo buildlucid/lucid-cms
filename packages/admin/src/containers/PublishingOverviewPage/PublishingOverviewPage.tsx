@@ -9,8 +9,9 @@ import {
 } from "solid-icons/fa";
 import { type Component, createMemo, For } from "solid-js";
 import DashboardMetricTile from "@/components/DashboardMetricTile/DashboardMetricTile";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -153,20 +154,17 @@ const PublishingOverviewPage: Component = () => {
 				description={T()("routes.publishing.overview.description")}
 			/>
 			<PageLayout.Body>
-				<DynamicContent
-					state={{
-						isError: collections.isError || overview.isError,
-						isSuccess: collections.isSuccess && overview.isSuccess,
-						isLoading: collections.isLoading || overview.isLoading,
-						isEmpty: targets().length === 0,
-					}}
-					options={{ padding: "24" }}
-					copy={{
-						noEntries: {
-							title: T()("publishing.overview.empty.title"),
-							description: T()("publishing.overview.empty.description"),
-						},
-					}}
+				<QueryBoundary
+					isLoading={collections.isLoading || overview.isLoading}
+					isError={collections.isError || overview.isError}
+					isEmpty={targets().length === 0}
+					empty={
+						<EmptyState
+							title={T()("publishing.overview.empty.title")}
+							description={T()("publishing.overview.empty.description")}
+						/>
+					}
+					class="flex-1 h-full p-4 md:p-6"
 				>
 					<div class="flex min-w-0 flex-col gap-8">
 						<For each={targets()}>
@@ -301,7 +299,7 @@ const PublishingOverviewPage: Component = () => {
 							</div>
 						</section>
 					</div>
-				</DynamicContent>
+				</QueryBoundary>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

@@ -1,3 +1,4 @@
+import classnames from "classnames";
 import {
 	FaSolidCalendar,
 	FaSolidClock,
@@ -16,11 +17,12 @@ import {
 import Button from "@/components/Button/Button";
 import DeleteShareLinkModal from "@/components/DeleteShareLinkModal/DeleteShareLinkModal";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import ShareLinkTableRow from "@/components/ShareLinkTableRow/ShareLinkTableRow";
 import { Table } from "@/components/Table/Table";
@@ -232,33 +234,20 @@ const ViewShareLinksPanelContent: Component<{
 					searchParams={shareLinksSearchParams}
 					embedded={true}
 				/>
-				<DynamicContent
-					class="bg-card-base border border-border rounded-md"
-					state={{
-						isError: shareLinks.isError,
-						isSuccess: shareLinks.isSuccess,
-						isEmpty: shareLinks.data?.data.length === 0,
-						searchParams: shareLinksSearchParams,
-					}}
-					slot={{
-						footer: (
-							<PaginatedFooter
-								state={{
-									searchParams: shareLinksSearchParams,
-									meta: shareLinks.data?.meta,
-								}}
-								options={{
-									embedded: true,
-								}}
-							/>
-						),
-					}}
-					copy={{
-						noEntries: {
-							title: T()("empty.states.media.share.links.title"),
-							description: T()("empty.states.media.share.links.description"),
-						},
-					}}
+				<QueryBoundary
+					isError={shareLinks.isError}
+					isEmpty={shareLinks.data?.data.length === 0}
+					queryState={shareLinksSearchParams}
+					empty={
+						<EmptyState
+							title={T()("empty.states.media.share.links.title")}
+							description={T()("empty.states.media.share.links.description")}
+						/>
+					}
+					class={classnames(
+						"flex-1 h-full",
+						"bg-card-base border border-border rounded-md",
+					)}
 				>
 					<Table
 						key={"media.shareLinks"}
@@ -336,7 +325,16 @@ const ViewShareLinksPanelContent: Component<{
 							</Index>
 						)}
 					</Table>
-				</DynamicContent>
+				</QueryBoundary>
+				<PaginatedFooter
+					state={{
+						searchParams: shareLinksSearchParams,
+						meta: shareLinks.data?.meta,
+					}}
+					options={{
+						embedded: true,
+					}}
+				/>
 			</Show>
 
 			<UpsertShareLinkDrawer

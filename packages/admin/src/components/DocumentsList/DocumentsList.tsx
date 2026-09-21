@@ -16,12 +16,14 @@ import {
 	FaSolidUserCheck,
 } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
+import Button from "@/components/Button/Button";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
 import DeleteDocumentPermanentlyModal from "@/components/DeleteDocumentPermanentlyModal/DeleteDocumentPermanentlyModal";
 import DocumentTableRow from "@/components/DocumentTableRow/DocumentTableRow";
 import DuplicateDocumentModal from "@/components/DuplicateDocumentModal/DuplicateDocumentModal";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RestoreDocumentModal from "@/components/RestoreDocumentModal/RestoreDocumentModal";
 import { Table } from "@/components/Table/Table";
 import { resolveSlots } from "@/extensions/slot-policy";
@@ -379,390 +381,397 @@ export const DocumentsList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<DynamicContent
-			state={{
-				isError: documents.isError,
-				isSuccess: documents.isSuccess,
-				isEmpty: documents.data?.data.length === 0,
-				searchParams: props.state.searchParams,
-			}}
-			slot={{
-				footer: (
-					<PaginatedFooter
-						state={{
-							searchParams: props.state.searchParams,
-							meta: documents.data?.meta,
-						}}
-						options={{
-							padding: "24",
-						}}
+		<>
+			<QueryBoundary
+				isError={documents.isError}
+				isEmpty={documents.data?.data.length === 0}
+				queryState={props.state.searchParams}
+				empty={
+					<EmptyState
+						title={noEntriesCopy()?.title}
+						description={noEntriesCopy()?.description}
+						actions={
+							createEntryCallback() ? (
+								<Button
+									size="sm"
+									onClick={createEntryCallback()}
+									permission={collectionPermissions()?.create}
+								>
+									{noEntriesCopy()?.button ?? T()("actions.create.entry")}
+								</Button>
+							) : undefined
+						}
 					/>
-				),
+				}
+				class="flex-1 h-full"
+			>
+				<Table
+					key={`documents.list.${props.state.collection?.key}`}
+					rows={documents.data?.data.length || 0}
+					searchParams={props.state.searchParams}
+					head={[
+						...getTableHeadColumns(),
+						...getCustomHeadColumns(),
+						...environmentHeadColumns(),
+						...workflowHeadColumn(),
+						{
+							label: T()("common.created.by"),
+							key: "createdBy",
+							icon: <FaSolidUser />,
+							minWidth: 180,
+						},
+						{
+							label: T()("common.updated.by"),
+							key: "updatedBy",
+							icon: <FaSolidUser />,
+							minWidth: 180,
+						},
+						{
+							label: T()("common.updated.at"),
+							key: "updatedAt",
+							icon: <FaSolidCalendar />,
+							//* lock sorting while editing manual order
+							sortable: !props.state.orderMode(),
+						},
+					]}
+					state={{
+						isLoading: documents.isFetching || props.state.isLoading,
+						isSuccess: documents.isSuccess,
+					}}
+					options={{
+						isSelectable: rowsAreSelectable(),
+						allowRestore: props.state.showingDeleted() && canRestoreDocuments(),
+						allowDelete: !props.state.showingDeleted() && canDeleteDocuments(),
+						allowDeletePermanently:
+							props.state.showingDeleted() && canDeleteDocuments(),
+					}}
+					reorder={{
+						enabled: rowsAreReorderable(),
+						onReorder: reorderRows,
+					}}
+					callbacks={{
+						deleteRows: async (selected) => {
+							const ids: number[] = [];
+							for (const i in selected) {
+								if (selected[i] && documents.data?.data[i].id) {
+									ids.push(documents.data?.data[i].id);
+								}
+							}
+							await deleteMultiple.action.mutateAsync({
+								collectionKey: collectionKey(),
+								body: {
+									ids: ids,
+								},
+							});
+						},
+						restoreRows: async (selected) => {
+							const ids: number[] = [];
+							for (const i in selected) {
+								if (selected[i] && documents.data?.data[i].id) {
+									ids.push(documents.data?.data[i].id);
+								}
+							}
+							await restoreDocuments.action.mutateAsync({
+								collectionKey: collectionKey(),
+								body: {
+									ids: ids,
+								},
+							});
+						},
+						deletePermanentlyRows: async (selected) => {
+							const ids: number[] = [];
+							for (const i in selected) {
+								if (selected[i] && documents.data?.data[i].id) {
+									ids.push(documents.data?.data[i].id);
+								}
+							}
+							await deleteMultiplePermanently.action.mutateAsync({
+								collectionKey: collectionKey(),
+								body: {
+									ids: ids,
+								},
+							});
+						},
+					}}
+				>
+					{({ include, isSelectable, selected, setSelected, rowReorder }) => (
+						<Index each={documents.data?.data || []}>
+							{(doc, i) => (
+								<DocumentTableRow
+									extensions
+									index={i}
+									document={doc()}
+									refs={documents.data?.refs}
+									fieldInclude={props.state.listing()}
+									collection={props.state.collection as Collection}
+									showEnvironmentStatus={environmentHeadColumns().length > 0}
+									collectionsByKey={relationCollectionsByKey()}
+									include={include}
+									contentLocale={contentLocale()}
+									selected={selected[i]}
+									reorder={rowReorder.enabled ? { rowReorder } : undefined}
+									options={{
+										isSelectable,
+									}}
+									callbacks={{
+										setSelected: setSelected,
+									}}
+									actions={[
+										{
+											label: getActionLabel(T()("preview.copy.group")),
+											type: "group",
+											icon: "link",
+											actionExclude: true,
+											permission: collectionPermissions()?.read
+												? userStore.get.hasPermission([
+														collectionPermissions()?.read,
+													]).some
+												: false,
+											hide:
+												props.state.showingDeleted() ||
+												props.state.collection?.capabilities.preview !== true,
+											actions: [
+												{
+													label: getActionLabel(T()("preview.copy.scoped")),
+													type: "button",
+													icon: "lock",
+													onClick: () =>
+														void copyPreviewUrl(doc().id, "scoped"),
+													isLoading: createPreview.action.isPending,
+													permission: collectionPermissions()?.read
+														? userStore.get.hasPermission([
+																collectionPermissions()?.read,
+															]).some
+														: false,
+												},
+												{
+													label: getActionLabel(T()("preview.copy.navigable")),
+													type: "button",
+													icon: "share",
+													onClick: () =>
+														void copyPreviewUrl(doc().id, "perspective"),
+													isLoading: createPreview.action.isPending,
+													permission: collectionPermissions()?.read
+														? userStore.get.hasPermission([
+																collectionPermissions()?.read,
+															]).some
+														: false,
+												},
+											],
+										},
+										{
+											label: getActionLabel(T()("common.edit")),
+											type: "button",
+											icon: "pen",
+											onClick: () => {
+												navigate(
+													getDocumentRoute("edit", {
+														collectionKey: props.state.collection
+															?.key as string,
+														documentId: doc().id,
+													}),
+												);
+											},
+											permission: collectionPermissions()?.update
+												? userStore.get.hasPermission([
+														collectionPermissions()?.update,
+													]).some
+												: false,
+											hide: props.state.showingDeleted(),
+										},
+										{
+											label: getActionLabel(T()("common.preview")),
+											type: "button",
+											icon: "eye",
+											onClick: () => {
+												navigate(
+													getDocumentRoute("edit", {
+														collectionKey: props.state.collection
+															?.key as string,
+														documentId: doc().id,
+													}),
+												);
+											},
+											permission: collectionPermissions()?.read
+												? userStore.get.hasPermission([
+														collectionPermissions()?.read,
+													]).some
+												: false,
+											hide: props.state.showingDeleted() === false,
+										},
+										{
+											label: getActionLabel(T()("common.duplicate")),
+											type: "button",
+											icon: "copy",
+											onClick: () => {
+												rowTarget.setTargetId(doc().id);
+												rowTarget.setTrigger("duplicate", true);
+											},
+											permission: canDuplicateDocuments(),
+											hide:
+												props.state.showingDeleted() ||
+												props.state.collection?.locked === true ||
+												props.state.collection?.mode !== "multiple",
+										},
+										{
+											label: getActionLabel(T()("common.restore")),
+											type: "button",
+											icon: "restore",
+											onClick: () => {
+												rowTarget.setTargetId(doc().id);
+												rowTarget.setTrigger("restore", true);
+											},
+											permission: collectionPermissions()?.restore
+												? userStore.get.hasPermission([
+														collectionPermissions()?.restore,
+													]).all
+												: false,
+											hide: props.state.showingDeleted() === false,
+											theme: "primary",
+										},
+										{
+											label: getActionLabel(T()("common.delete")),
+											type: "button",
+											icon: "trash",
+											onClick: () => {
+												rowTarget.setTargetId(doc().id);
+												rowTarget.setTrigger("delete", true);
+											},
+											permission: collectionPermissions()?.delete
+												? userStore.get.hasPermission([
+														collectionPermissions()?.delete,
+													]).all
+												: false,
+											actionExclude: true,
+											theme: "error",
+											hide: props.state.showingDeleted(),
+										},
+										{
+											label: getActionLabel(T()("actions.delete.permanently")),
+											type: "button",
+											icon: "trash",
+											onClick: () => {
+												rowTarget.setTargetId(doc().id);
+												rowTarget.setTrigger("deletePermanently", true);
+											},
+											permission: collectionPermissions()?.delete
+												? userStore.get.hasPermission([
+														collectionPermissions()?.delete,
+													]).all
+												: false,
+											hide: props.state.showingDeleted?.() === false,
+											theme: "error",
+										},
+									]}
+								/>
+							)}
+						</Index>
+					)}
+				</Table>
+				<DeleteDocumentModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().delete,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("delete", state);
+						},
+					}}
+					collection={props.state.collection as Collection}
+				/>
+				<DuplicateDocumentModal
+					id={rowTarget.getTargetId}
+					state={{
+						open: rowTarget.getTriggers().duplicate,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("duplicate", state);
+						},
+					}}
+					collection={props.state.collection as Collection}
+					callbacks={{
+						onSuccess: (documentId) => {
+							navigate(
+								getDocumentRoute("edit", {
+									collectionKey: collectionKey(),
+									documentId,
+								}),
+							);
+						},
+					}}
+				/>
+				{/* TODO: add support to selec the target environment */}
+				{/* <PromoteToDraft
+			id={rowTarget.getTargetId}
+			publishedVersionId={getPublishedVersionId}
+			collection={props.state.collection as Collection}
+			state={{
+				open: rowTarget.getTriggers().promote,
+				setOpen: (state: boolean) => {
+					rowTarget.setTrigger("promote", state);
+				},
 			}}
-			copy={{
-				noEntries: noEntriesCopy(),
+			callbacks={{
+				onSuccess: () => {
+					navigate(
+						getDocumentRoute("edit", {
+							collectionKey: props.state.collection?.key as string,
+							documentId: getDocumentId(),
+						}),
+					);
+				},
 			}}
-			permissions={{
-				create: collectionPermissions()?.create,
+		/> */}
+				{/* <PublishDocument
+			id={rowTarget.getTargetId}
+			draftVersionId={getDraftVersionId}
+			collection={props.state.collection as Collection}
+			state={{
+				open: rowTarget.getTriggers().publish,
+				setOpen: (state: boolean) => {
+					rowTarget.setTrigger("publish", state);
+				},
 			}}
-			callback={{
-				createEntry: createEntryCallback(),
+			callbacks={{
+				onSuccess: () => {
+					navigate(
+						getDocumentRoute("edit", {
+							collectionKey: props.state.collection?.key as string,
+							documentId: getDocumentId(),
+							version: "latest",
+						}),
+					);
+				},
 			}}
-		>
-			<Table
-				key={`documents.list.${props.state.collection?.key}`}
-				rows={documents.data?.data.length || 0}
-				searchParams={props.state.searchParams}
-				head={[
-					...getTableHeadColumns(),
-					...getCustomHeadColumns(),
-					...environmentHeadColumns(),
-					...workflowHeadColumn(),
-					{
-						label: T()("common.created.by"),
-						key: "createdBy",
-						icon: <FaSolidUser />,
-						minWidth: 180,
-					},
-					{
-						label: T()("common.updated.by"),
-						key: "updatedBy",
-						icon: <FaSolidUser />,
-						minWidth: 180,
-					},
-					{
-						label: T()("common.updated.at"),
-						key: "updatedAt",
-						icon: <FaSolidCalendar />,
-						//* lock sorting while editing manual order
-						sortable: !props.state.orderMode(),
-					},
-				]}
+		/> */}
+				<RestoreDocumentModal
+					id={rowTarget.getTargetId}
+					collection={props.state.collection}
+					state={{
+						open: rowTarget.getTriggers().restore,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("restore", state);
+						},
+					}}
+				/>
+				<DeleteDocumentPermanentlyModal
+					id={rowTarget.getTargetId}
+					collection={props.state.collection as Collection}
+					state={{
+						open: rowTarget.getTriggers().deletePermanently,
+						setOpen: (state: boolean) => {
+							rowTarget.setTrigger("deletePermanently", state);
+						},
+					}}
+				/>
+			</QueryBoundary>
+			<PaginatedFooter
 				state={{
-					isLoading: documents.isFetching || props.state.isLoading,
-					isSuccess: documents.isSuccess,
+					searchParams: props.state.searchParams,
+					meta: documents.data?.meta,
 				}}
 				options={{
-					isSelectable: rowsAreSelectable(),
-					allowRestore: props.state.showingDeleted() && canRestoreDocuments(),
-					allowDelete: !props.state.showingDeleted() && canDeleteDocuments(),
-					allowDeletePermanently:
-						props.state.showingDeleted() && canDeleteDocuments(),
-				}}
-				reorder={{
-					enabled: rowsAreReorderable(),
-					onReorder: reorderRows,
-				}}
-				callbacks={{
-					deleteRows: async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && documents.data?.data[i].id) {
-								ids.push(documents.data?.data[i].id);
-							}
-						}
-						await deleteMultiple.action.mutateAsync({
-							collectionKey: collectionKey(),
-							body: {
-								ids: ids,
-							},
-						});
-					},
-					restoreRows: async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && documents.data?.data[i].id) {
-								ids.push(documents.data?.data[i].id);
-							}
-						}
-						await restoreDocuments.action.mutateAsync({
-							collectionKey: collectionKey(),
-							body: {
-								ids: ids,
-							},
-						});
-					},
-					deletePermanentlyRows: async (selected) => {
-						const ids: number[] = [];
-						for (const i in selected) {
-							if (selected[i] && documents.data?.data[i].id) {
-								ids.push(documents.data?.data[i].id);
-							}
-						}
-						await deleteMultiplePermanently.action.mutateAsync({
-							collectionKey: collectionKey(),
-							body: {
-								ids: ids,
-							},
-						});
-					},
-				}}
-			>
-				{({ include, isSelectable, selected, setSelected, rowReorder }) => (
-					<Index each={documents.data?.data || []}>
-						{(doc, i) => (
-							<DocumentTableRow
-								extensions
-								index={i}
-								document={doc()}
-								refs={documents.data?.refs}
-								fieldInclude={props.state.listing()}
-								collection={props.state.collection as Collection}
-								showEnvironmentStatus={environmentHeadColumns().length > 0}
-								collectionsByKey={relationCollectionsByKey()}
-								include={include}
-								contentLocale={contentLocale()}
-								selected={selected[i]}
-								reorder={rowReorder.enabled ? { rowReorder } : undefined}
-								options={{
-									isSelectable,
-								}}
-								callbacks={{
-									setSelected: setSelected,
-								}}
-								actions={[
-									{
-										label: getActionLabel(T()("preview.copy.group")),
-										type: "group",
-										icon: "link",
-										actionExclude: true,
-										permission: collectionPermissions()?.read
-											? userStore.get.hasPermission([
-													collectionPermissions()?.read,
-												]).some
-											: false,
-										hide:
-											props.state.showingDeleted() ||
-											props.state.collection?.capabilities.preview !== true,
-										actions: [
-											{
-												label: getActionLabel(T()("preview.copy.scoped")),
-												type: "button",
-												icon: "lock",
-												onClick: () => void copyPreviewUrl(doc().id, "scoped"),
-												isLoading: createPreview.action.isPending,
-												permission: collectionPermissions()?.read
-													? userStore.get.hasPermission([
-															collectionPermissions()?.read,
-														]).some
-													: false,
-											},
-											{
-												label: getActionLabel(T()("preview.copy.navigable")),
-												type: "button",
-												icon: "share",
-												onClick: () =>
-													void copyPreviewUrl(doc().id, "perspective"),
-												isLoading: createPreview.action.isPending,
-												permission: collectionPermissions()?.read
-													? userStore.get.hasPermission([
-															collectionPermissions()?.read,
-														]).some
-													: false,
-											},
-										],
-									},
-									{
-										label: getActionLabel(T()("common.edit")),
-										type: "button",
-										icon: "pen",
-										onClick: () => {
-											navigate(
-												getDocumentRoute("edit", {
-													collectionKey: props.state.collection?.key as string,
-													documentId: doc().id,
-												}),
-											);
-										},
-										permission: collectionPermissions()?.update
-											? userStore.get.hasPermission([
-													collectionPermissions()?.update,
-												]).some
-											: false,
-										hide: props.state.showingDeleted(),
-									},
-									{
-										label: getActionLabel(T()("common.preview")),
-										type: "button",
-										icon: "eye",
-										onClick: () => {
-											navigate(
-												getDocumentRoute("edit", {
-													collectionKey: props.state.collection?.key as string,
-													documentId: doc().id,
-												}),
-											);
-										},
-										permission: collectionPermissions()?.read
-											? userStore.get.hasPermission([
-													collectionPermissions()?.read,
-												]).some
-											: false,
-										hide: props.state.showingDeleted() === false,
-									},
-									{
-										label: getActionLabel(T()("common.duplicate")),
-										type: "button",
-										icon: "copy",
-										onClick: () => {
-											rowTarget.setTargetId(doc().id);
-											rowTarget.setTrigger("duplicate", true);
-										},
-										permission: canDuplicateDocuments(),
-										hide:
-											props.state.showingDeleted() ||
-											props.state.collection?.locked === true ||
-											props.state.collection?.mode !== "multiple",
-									},
-									{
-										label: getActionLabel(T()("common.restore")),
-										type: "button",
-										icon: "restore",
-										onClick: () => {
-											rowTarget.setTargetId(doc().id);
-											rowTarget.setTrigger("restore", true);
-										},
-										permission: collectionPermissions()?.restore
-											? userStore.get.hasPermission([
-													collectionPermissions()?.restore,
-												]).all
-											: false,
-										hide: props.state.showingDeleted() === false,
-										theme: "primary",
-									},
-									{
-										label: getActionLabel(T()("common.delete")),
-										type: "button",
-										icon: "trash",
-										onClick: () => {
-											rowTarget.setTargetId(doc().id);
-											rowTarget.setTrigger("delete", true);
-										},
-										permission: collectionPermissions()?.delete
-											? userStore.get.hasPermission([
-													collectionPermissions()?.delete,
-												]).all
-											: false,
-										actionExclude: true,
-										theme: "error",
-										hide: props.state.showingDeleted(),
-									},
-									{
-										label: getActionLabel(T()("actions.delete.permanently")),
-										type: "button",
-										icon: "trash",
-										onClick: () => {
-											rowTarget.setTargetId(doc().id);
-											rowTarget.setTrigger("deletePermanently", true);
-										},
-										permission: collectionPermissions()?.delete
-											? userStore.get.hasPermission([
-													collectionPermissions()?.delete,
-												]).all
-											: false,
-										hide: props.state.showingDeleted?.() === false,
-										theme: "error",
-									},
-								]}
-							/>
-						)}
-					</Index>
-				)}
-			</Table>
-			<DeleteDocumentModal
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().delete,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("delete", state);
-					},
-				}}
-				collection={props.state.collection as Collection}
-			/>
-			<DuplicateDocumentModal
-				id={rowTarget.getTargetId}
-				state={{
-					open: rowTarget.getTriggers().duplicate,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("duplicate", state);
-					},
-				}}
-				collection={props.state.collection as Collection}
-				callbacks={{
-					onSuccess: (documentId) => {
-						navigate(
-							getDocumentRoute("edit", {
-								collectionKey: collectionKey(),
-								documentId,
-							}),
-						);
-					},
+					padding: "24",
 				}}
 			/>
-			{/* TODO: add support to selec the target environment */}
-			{/* <PromoteToDraft
-				id={rowTarget.getTargetId}
-				publishedVersionId={getPublishedVersionId}
-				collection={props.state.collection as Collection}
-				state={{
-					open: rowTarget.getTriggers().promote,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("promote", state);
-					},
-				}}
-				callbacks={{
-					onSuccess: () => {
-						navigate(
-							getDocumentRoute("edit", {
-								collectionKey: props.state.collection?.key as string,
-								documentId: getDocumentId(),
-							}),
-						);
-					},
-				}}
-			/> */}
-			{/* <PublishDocument
-				id={rowTarget.getTargetId}
-				draftVersionId={getDraftVersionId}
-				collection={props.state.collection as Collection}
-				state={{
-					open: rowTarget.getTriggers().publish,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("publish", state);
-					},
-				}}
-				callbacks={{
-					onSuccess: () => {
-						navigate(
-							getDocumentRoute("edit", {
-								collectionKey: props.state.collection?.key as string,
-								documentId: getDocumentId(),
-								version: "latest",
-							}),
-						);
-					},
-				}}
-			/> */}
-			<RestoreDocumentModal
-				id={rowTarget.getTargetId}
-				collection={props.state.collection}
-				state={{
-					open: rowTarget.getTriggers().restore,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("restore", state);
-					},
-				}}
-			/>
-			<DeleteDocumentPermanentlyModal
-				id={rowTarget.getTargetId}
-				collection={props.state.collection as Collection}
-				state={{
-					open: rowTarget.getTriggers().deletePermanently,
-					setOpen: (state: boolean) => {
-						rowTarget.setTrigger("deletePermanently", state);
-					},
-				}}
-			/>
-		</DynamicContent>
+		</>
 	);
 };

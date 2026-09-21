@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/solid-query";
+import classnames from "classnames";
 import { FaSolidCalendar, FaSolidIdCard, FaSolidT } from "solid-icons/fa";
 import {
 	type Accessor,
@@ -11,12 +12,13 @@ import {
 import Button from "@/components/Button/Button";
 import CopyAPIKeyModal from "@/components/CopyAPIKeyModal/CopyAPIKeyModal";
 import DeleteIntegrationModal from "@/components/DeleteIntegrationModal/DeleteIntegrationModal";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import IntegrationTableRow from "@/components/IntegrationTableRow/IntegrationTableRow";
 import { OAuthClientsList } from "@/components/OAuthClientsList/OAuthClientsList";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import RegenerateAPIKeyModal from "@/components/RegenerateAPIKeyModal/RegenerateAPIKeyModal";
 import { Table } from "@/components/Table/Table";
@@ -96,7 +98,7 @@ export const IntegrationsList: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<DynamicContent options={{ padding: "24" }}>
+		<div class="flex-1 h-full p-4 md:p-6">
 			{/* OAuth Access */}
 			<Show when={canReadIntegrations()}>
 				<InfoRow.Root
@@ -240,52 +242,33 @@ export const IntegrationsList: Component<{
 									padding: "16",
 								}}
 							/>
-							<DynamicContent
-								class={
+							<QueryBoundary
+								isError={integrations.isError}
+								isEmpty={integrations.data?.data.length === 0}
+								queryState={props.state.searchParams}
+								empty={
+									<EmptyState
+										title={T()("empty.states.integrations.title")}
+										description={T()("empty.states.integrations.description")}
+										actions={
+											<Button
+												size="sm"
+												permission={Permissions.IntegrationsCreate}
+												onClick={() =>
+													props.state.setOpenCreateIntegrationPanel(true)
+												}
+											>
+												{T()("integrations.create.action")}
+											</Button>
+										}
+									/>
+								}
+								class={classnames(
+									"border-t border-border",
 									integrations.isError || integrations.data?.data.length === 0
 										? "-mb-4"
-										: undefined
-								}
-								state={{
-									isError: integrations.isError,
-									isSuccess: integrations.isSuccess,
-									isEmpty: integrations.data?.data.length === 0,
-									searchParams: props.state.searchParams,
-								}}
-								slot={{
-									footer: (
-										<PaginatedFooter
-											state={{
-												searchParams: props.state.searchParams,
-												meta: integrations.data?.meta,
-											}}
-											options={{
-												embedded: true,
-												padding: "16",
-												hideEmptyMessage: true,
-											}}
-										/>
-									),
-								}}
-								copy={{
-									noEntries: {
-										title: T()("empty.states.integrations.title"),
-										description: T()("empty.states.integrations.description"),
-										button: T()("integrations.create.action"),
-									},
-								}}
-								callback={{
-									createEntry: () => {
-										props.state.setOpenCreateIntegrationPanel(true);
-									},
-								}}
-								permissions={{
-									create: Permissions.IntegrationsCreate,
-								}}
-								options={{
-									inline: true,
-									dividerTop: true,
-								}}
+										: undefined,
+								)}
 							>
 								<Table
 									key={"integrations.list"}
@@ -376,7 +359,18 @@ export const IntegrationsList: Component<{
 										</Index>
 									)}
 								</Table>
-							</DynamicContent>
+							</QueryBoundary>
+							<PaginatedFooter
+								state={{
+									searchParams: props.state.searchParams,
+									meta: integrations.data?.meta,
+								}}
+								options={{
+									embedded: true,
+									padding: "16",
+									hideEmptyMessage: true,
+								}}
+							/>
 						</div>
 					</InfoRow.Content>
 					<Show
@@ -460,6 +454,6 @@ export const IntegrationsList: Component<{
 					},
 				}}
 			/>
-		</DynamicContent>
+		</div>
 	);
 };

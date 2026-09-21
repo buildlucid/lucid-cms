@@ -13,13 +13,14 @@ import {
 	FaSolidUsers,
 } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Index } from "solid-js";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import PublishOperationDecisionModal, {
 	type PublishOperationDecisionAction,
 } from "@/components/PublishOperationDecisionModal/PublishOperationDecisionModal";
 import PublishOperationReviewersModal from "@/components/PublishOperationReviewersModal/PublishOperationReviewersModal";
 import PublishOperationScheduleModal from "@/components/PublishOperationScheduleModal/PublishOperationScheduleModal";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ReleaseRequestTableRow from "@/components/ReleaseRequestTableRow/ReleaseRequestTableRow";
 import { Table } from "@/components/Table/Table";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
@@ -173,36 +174,22 @@ export const ReleaseRequestsList: Component<{
 	// Render
 	return (
 		<>
-			<DynamicContent
-				state={{
-					isError: requests.isError || props.status.collections.isError,
-					isSuccess: requests.isSuccess && props.status.collections.isSuccess,
-					isLoading:
-						requests.isLoading ||
-						props.status.collections.isLoading ||
-						!props.state.searchParams.ready(),
-					isEmpty: rows().length === 0,
-					searchParams: props.state.searchParams,
-				}}
-				slot={{
-					footer: (
-						<PaginatedFooter
-							state={{
-								searchParams: props.state.searchParams,
-								meta: requests.data?.meta,
-							}}
-							options={{
-								padding: "24",
-							}}
-						/>
-					),
-				}}
-				copy={{
-					noEntries: {
-						title: T()("empty.states.publish.requests.title"),
-						description: T()("empty.states.publish.requests.description"),
-					},
-				}}
+			<QueryBoundary
+				isLoading={
+					requests.isLoading ||
+					props.status.collections.isLoading ||
+					!props.state.searchParams.ready()
+				}
+				isError={requests.isError || props.status.collections.isError}
+				isEmpty={rows().length === 0}
+				queryState={props.state.searchParams}
+				empty={
+					<EmptyState
+						title={T()("empty.states.publish.requests.title")}
+						description={T()("empty.states.publish.requests.description")}
+					/>
+				}
+				class="flex-1 h-full"
 			>
 				<Table
 					key={"release-requests.list"}
@@ -299,7 +286,17 @@ export const ReleaseRequestsList: Component<{
 						</Index>
 					)}
 				</Table>
-			</DynamicContent>
+			</QueryBoundary>
+			<PaginatedFooter
+				state={{
+					searchParams: props.state.searchParams,
+					meta: requests.data?.meta,
+				}}
+				options={{
+					padding: "24",
+				}}
+			/>
+
 			<PublishOperationDecisionModal
 				collection={selectedCollection}
 				operation={selectedOperation}

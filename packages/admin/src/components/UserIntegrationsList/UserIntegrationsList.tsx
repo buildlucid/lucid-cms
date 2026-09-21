@@ -1,10 +1,12 @@
+import classnames from "classnames";
 import { type Component, createSignal, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import CopyAPIKeyModal from "@/components/CopyAPIKeyModal/CopyAPIKeyModal";
 import DeleteIntegrationModal from "@/components/DeleteIntegrationModal/DeleteIntegrationModal";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import IntegrationRow from "@/components/IntegrationRow/IntegrationRow";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RegenerateAPIKeyModal from "@/components/RegenerateAPIKeyModal/RegenerateAPIKeyModal";
 import UpsertIntegrationDrawer from "@/components/UpsertIntegrationDrawer/UpsertIntegrationDrawer";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
@@ -66,34 +68,24 @@ export const UserIntegrationsList: Component<{
 						title={T()("user.integrations.manage.title")}
 						description={T()("user.integrations.manage.description")}
 					>
-						<DynamicContent
-							state={{
-								isLoading: integrations.isLoading,
-								isError: integrations.isError,
-								isSuccess: integrations.isSuccess,
-								isEmpty:
-									integrations.isSuccess && integrations.data.data.length === 0,
-							}}
-							copy={{
-								noEntries: {
-									title: T()("empty.states.integrations.title"),
-									description: T()(
-										"empty.states.user.integrations.description",
-									),
-									button: T()("integrations.create.action"),
-								},
-							}}
-							callback={
-								props.canCreate
-									? {
-											createEntry: () => setCreateOpen(true),
-										}
-									: undefined
+						<QueryBoundary
+							isLoading={integrations.isLoading}
+							isError={integrations.isError}
+							isEmpty={
+								integrations.isSuccess && integrations.data.data.length === 0
 							}
-							options={{
-								inline: true,
-								contained: props.contained !== false,
-							}}
+							empty={
+								<EmptyState
+									title={T()("empty.states.integrations.title")}
+									description={T()(
+										"empty.states.user.integrations.description",
+									)}
+								/>
+							}
+							class={classnames({
+								"overflow-hidden rounded-md border border-border bg-card-base":
+									props.contained !== false,
+							})}
 						>
 							<div class="flex flex-col">
 								<For each={integrations.data?.data ?? []}>
@@ -108,7 +100,7 @@ export const UserIntegrationsList: Component<{
 									)}
 								</For>
 							</div>
-						</DynamicContent>
+						</QueryBoundary>
 						<Show
 							when={
 								props.canCreate &&
@@ -134,35 +126,24 @@ export const UserIntegrationsList: Component<{
 					when={props.contentRow}
 					fallback={
 						<>
-							<DynamicContent
-								state={{
-									isLoading: integrations.isLoading,
-									isError: integrations.isError,
-									isSuccess: integrations.isSuccess,
-									isEmpty:
-										integrations.isSuccess &&
-										integrations.data.data.length === 0,
-								}}
-								copy={{
-									noEntries: {
-										title: T()("empty.states.integrations.title"),
-										description: T()(
-											"empty.states.user.integrations.description",
-										),
-										button: T()("integrations.create.action"),
-									},
-								}}
-								callback={
-									props.canCreate
-										? {
-												createEntry: () => setCreateOpen(true),
-											}
-										: undefined
+							<QueryBoundary
+								isLoading={integrations.isLoading}
+								isError={integrations.isError}
+								isEmpty={
+									integrations.isSuccess && integrations.data.data.length === 0
 								}
-								options={{
-									inline: true,
-									contained: props.contained !== false,
-								}}
+								empty={
+									<EmptyState
+										title={T()("empty.states.integrations.title")}
+										description={T()(
+											"empty.states.user.integrations.description",
+										)}
+									/>
+								}
+								class={classnames({
+									"overflow-hidden rounded-md border border-border bg-card-base":
+										props.contained !== false,
+								})}
 							>
 								<div class="flex flex-col">
 									<For each={integrations.data?.data ?? []}>
@@ -177,7 +158,7 @@ export const UserIntegrationsList: Component<{
 										)}
 									</For>
 								</div>
-							</DynamicContent>
+							</QueryBoundary>
 							<Show
 								when={
 									props.canCreate &&
@@ -206,35 +187,25 @@ export const UserIntegrationsList: Component<{
 								description={contentRow().description}
 							>
 								<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
-									<DynamicContent
-										state={{
-											isLoading: integrations.isLoading,
-											isError: integrations.isError,
-											isSuccess: integrations.isSuccess,
-											isEmpty:
-												integrations.isSuccess &&
-												integrations.data.data.length === 0,
-										}}
-										copy={{
-											noEntries: {
-												title: T()("empty.states.integrations.title"),
-												description: T()(
-													"empty.states.user.integrations.description",
-												),
-												button: T()("integrations.create.action"),
-											},
-										}}
-										callback={
-											props.canCreate
-												? {
-														createEntry: () => setCreateOpen(true),
-													}
-												: undefined
+									<QueryBoundary
+										isLoading={integrations.isLoading}
+										isError={integrations.isError}
+										isEmpty={
+											integrations.isSuccess &&
+											integrations.data.data.length === 0
 										}
-										options={{
-											inline: true,
-											contained: props.contained !== false,
-										}}
+										empty={
+											<EmptyState
+												title={T()("empty.states.integrations.title")}
+												description={T()(
+													"empty.states.user.integrations.description",
+												)}
+											/>
+										}
+										class={classnames({
+											"overflow-hidden rounded-md border border-border bg-card-base":
+												props.contained !== false,
+										})}
 									>
 										<div class="flex flex-col">
 											<For each={integrations.data?.data ?? []}>
@@ -249,7 +220,7 @@ export const UserIntegrationsList: Component<{
 												)}
 											</For>
 										</div>
-									</DynamicContent>
+									</QueryBoundary>
 								</div>
 							</InfoRow.Content>
 							<Show

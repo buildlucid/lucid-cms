@@ -1,10 +1,11 @@
 import type { OAuthClientCreateResponse, Permission } from "@types";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
 import OAuthClientRow from "@/components/OAuthClientRow/OAuthClientRow";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
@@ -50,28 +51,26 @@ export const OAuthClientsList: Component<{
 						title={T()("oauth.clients.manage.title")}
 						description={T()("oauth.clients.manage.description")}
 					>
-						<DynamicContent
-							state={{
-								isLoading: clients.isLoading,
-								isError: clients.isError,
-								isSuccess: clients.isSuccess,
-								isEmpty: clients.isSuccess && clients.data.data.length === 0,
-							}}
-							copy={{
-								noEntries: {
-									title: T()("oauth.clients.empty.title"),
-									description: T()("oauth.clients.empty.description"),
-									button: T()("oauth.clients.create.action"),
-								},
-							}}
-							callback={{
-								createEntry: () => setCreateOpen(true),
-							}}
-							permissions={{ create: props.createPermission }}
-							options={{
-								inline: true,
-								contained: true,
-							}}
+						<QueryBoundary
+							isLoading={clients.isLoading}
+							isError={clients.isError}
+							isEmpty={clients.isSuccess && clients.data.data.length === 0}
+							empty={
+								<EmptyState
+									title={T()("oauth.clients.empty.title")}
+									description={T()("oauth.clients.empty.description")}
+									actions={
+										<Button
+											size="sm"
+											onClick={() => setCreateOpen(true)}
+											permission={props.createPermission}
+										>
+											{T()("oauth.clients.create.action")}
+										</Button>
+									}
+								/>
+							}
+							class="overflow-hidden rounded-md border border-border bg-card-base"
 						>
 							<div class="flex flex-col">
 								<For each={clients.data?.data ?? []}>
@@ -85,7 +84,7 @@ export const OAuthClientsList: Component<{
 									)}
 								</For>
 							</div>
-						</DynamicContent>
+						</QueryBoundary>
 						<Show
 							when={
 								canCreate() && clients.isSuccess && clients.data.data.length > 0
@@ -112,29 +111,25 @@ export const OAuthClientsList: Component<{
 							description={contentRow().description}
 						>
 							<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
-								<DynamicContent
-									state={{
-										isLoading: clients.isLoading,
-										isError: clients.isError,
-										isSuccess: clients.isSuccess,
-										isEmpty:
-											clients.isSuccess && clients.data.data.length === 0,
-									}}
-									copy={{
-										noEntries: {
-											title: T()("oauth.clients.empty.title"),
-											description: T()("oauth.clients.empty.description"),
-											button: T()("oauth.clients.create.action"),
-										},
-									}}
-									callback={{
-										createEntry: () => setCreateOpen(true),
-									}}
-									permissions={{ create: props.createPermission }}
-									options={{
-										inline: true,
-										contained: false,
-									}}
+								<QueryBoundary
+									isLoading={clients.isLoading}
+									isError={clients.isError}
+									isEmpty={clients.isSuccess && clients.data.data.length === 0}
+									empty={
+										<EmptyState
+											title={T()("oauth.clients.empty.title")}
+											description={T()("oauth.clients.empty.description")}
+											actions={
+												<Button
+													size="sm"
+													onClick={() => setCreateOpen(true)}
+													permission={props.createPermission}
+												>
+													{T()("oauth.clients.create.action")}
+												</Button>
+											}
+										/>
+									}
 								>
 									<div class="flex flex-col">
 										<For each={clients.data?.data ?? []}>
@@ -148,7 +143,7 @@ export const OAuthClientsList: Component<{
 											)}
 										</For>
 									</div>
-								</DynamicContent>
+								</QueryBoundary>
 							</div>
 						</InfoRow.Content>
 						<Show

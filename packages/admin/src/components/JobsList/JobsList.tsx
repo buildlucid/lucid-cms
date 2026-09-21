@@ -1,10 +1,12 @@
 import { useQueryClient } from "@tanstack/solid-query";
+import classnames from "classnames";
 import { FaSolidCalendar, FaSolidListOl, FaSolidT } from "solid-icons/fa";
 import { type Component, Index } from "solid-js";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import JobDetailsDrawer from "@/components/JobDetailsDrawer/JobDetailsDrawer";
 import JobTableRow from "@/components/JobTableRow/JobTableRow";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QueryRow } from "@/components/QueryRow/QueryRow";
 import { Table } from "@/components/Table/Table";
 import useQueryState, {
@@ -213,41 +215,19 @@ export const JobsList: Component = () => {
 				perPage={[]}
 				options={{ padding: "16" }}
 			/>
-			<DynamicContent
-				class={
-					jobs.isError || jobs.data?.data.length === 0 ? "-mb-4" : undefined
+			<QueryBoundary
+				isError={jobs.isError}
+				isEmpty={jobs.data?.data.length === 0}
+				empty={
+					<EmptyState
+						title={T()("empty.states.jobs.title")}
+						description={T()("empty.states.jobs.description")}
+					/>
 				}
-				state={{
-					isError: jobs.isError,
-					isSuccess: jobs.isSuccess,
-					isEmpty: jobs.data?.data.length === 0,
-					searchParams,
-				}}
-				slot={{
-					footer: (
-						<PaginatedFooter
-							state={{
-								searchParams,
-								meta: jobs.data?.meta,
-							}}
-							options={{
-								embedded: true,
-								padding: "16",
-								hideEmptyMessage: true,
-							}}
-						/>
-					),
-				}}
-				copy={{
-					noEntries: {
-						title: T()("empty.states.jobs.title"),
-						description: T()("empty.states.jobs.description"),
-					},
-				}}
-				options={{
-					inline: true,
-					dividerTop: true,
-				}}
+				class={classnames(
+					"border-t border-border",
+					jobs.isError || jobs.data?.data.length === 0 ? "-mb-4" : undefined,
+				)}
 			>
 				<Table
 					key={"jobs.list"}
@@ -329,7 +309,18 @@ export const JobsList: Component = () => {
 						},
 					}}
 				/>
-			</DynamicContent>
+			</QueryBoundary>
+			<PaginatedFooter
+				state={{
+					searchParams,
+					meta: jobs.data?.meta,
+				}}
+				options={{
+					embedded: true,
+					padding: "16",
+					hideEmptyMessage: true,
+				}}
+			/>
 		</>
 	);
 };

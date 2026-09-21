@@ -23,11 +23,12 @@ import Button from "@/components/Button/Button";
 import DocumentSelectSingle from "@/components/DocumentSelectSingle/DocumentSelectSingle";
 import DocumentTableRow from "@/components/DocumentTableRow/DocumentTableRow";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import { ResetFilters } from "@/components/ResetFilters/ResetFilters";
 import Select from "@/components/Select/Select";
@@ -553,124 +554,118 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 			<Show
 				when={isSingleCollection() && activeCollection()}
 				fallback={
-					<DynamicContent
-						class="bg-card-base border border-border rounded-md"
-						state={{
-							isError: documents.isError || collectionIsError(),
-							isSuccess: documents.isSuccess,
-							searchParams: searchParams,
-							isEmpty: documents.data?.data.length === 0,
-							isLoading: collectionIsLoading(),
-						}}
-						options={{}}
-						slot={{
-							footer: (
-								<PaginatedFooter
-									state={{
-										searchParams: searchParams,
-										meta: documents.data?.meta,
-									}}
-									options={{
-										embedded: true,
-									}}
+					<>
+						<QueryBoundary
+							isLoading={collectionIsLoading()}
+							isError={documents.isError || collectionIsError()}
+							isEmpty={documents.data?.data.length === 0}
+							queryState={searchParams}
+							onResetFilters={searchParams.clearFilters}
+							empty={
+								<EmptyState
+									title={T()("empty.states.documents.title", {
+										collectionMultiple: collectionName(),
+									})}
+									description={T()(
+										"empty.states.documents.select.description",
+										{
+											collectionMultiple: collectionName().toLowerCase(),
+											collectionSingle: collectionSingularName().toLowerCase(),
+										},
+									)}
 								/>
-							),
-						}}
-						copy={{
-							noEntries: {
-								title: T()("empty.states.documents.title", {
-									collectionMultiple: collectionName(),
-								}),
-								description: T()("empty.states.documents.select.description", {
-									collectionMultiple: collectionName().toLowerCase(),
-									collectionSingle: collectionSingularName().toLowerCase(),
-								}),
-								button: T()("actions.create.document", {
-									collectionSingle: collectionSingularName(),
-								}),
-							},
-						}}
-						callback={{
-							resetFilters: searchParams.clearFilters,
-						}}
-					>
-						<Table
-							key={`documents.list.${activeCollection()?.key ?? ""}`}
-							rows={documents.data?.data.length || 0}
-							searchParams={searchParams}
-							head={[
-								{
-									label: "",
-									key: "select",
-								},
-								...getTableHeadColumns(),
-								...workflowHeadColumn(),
-								{
-									label: T()("common.created.by"),
-									key: "createdBy",
-									icon: <FaSolidUser />,
-									minWidth: 180,
-								},
-								{
-									label: T()("common.updated.by"),
-									key: "updatedBy",
-									icon: <FaSolidUser />,
-									minWidth: 180,
-								},
-								{
-									label: T()("common.updated.at"),
-									key: "updated_at",
-									icon: <FaSolidCalendar />,
-								},
-							]}
+							}
+							class={
+								"flex-1 h-full bg-card-base border border-border rounded-md"
+							}
+						>
+							<Table
+								key={`documents.list.${activeCollection()?.key ?? ""}`}
+								rows={documents.data?.data.length || 0}
+								searchParams={searchParams}
+								head={[
+									{
+										label: "",
+										key: "select",
+									},
+									...getTableHeadColumns(),
+									...workflowHeadColumn(),
+									{
+										label: T()("common.created.by"),
+										key: "createdBy",
+										icon: <FaSolidUser />,
+										minWidth: 180,
+									},
+									{
+										label: T()("common.updated.by"),
+										key: "updatedBy",
+										icon: <FaSolidUser />,
+										minWidth: 180,
+									},
+									{
+										label: T()("common.updated.at"),
+										key: "updated_at",
+										icon: <FaSolidCalendar />,
+									},
+								]}
+								state={{
+									isLoading: documents.isFetching,
+									isSuccess: documents.isSuccess,
+								}}
+								options={{
+									isSelectable: false,
+									padding: "16",
+								}}
+								theme="secondary"
+							>
+								{({ include, isSelectable, selected, setSelected }) => (
+									<Index each={documents.data?.data || []}>
+										{(doc, i) => (
+											<DocumentTableRow
+												index={i}
+												document={doc()}
+												refs={documents.data?.refs}
+												fieldInclude={getCollectionFieldIncludes()}
+												collection={activeCollection() as Collection}
+												collectionsByKey={relationCollectionsByKey()}
+												include={include}
+												contentLocale={contentLocale()}
+												selected={selected[i]}
+												options={{
+													isSelectable,
+													padding: "16",
+												}}
+												callbacks={{
+													setSelected: setSelected,
+													onClick: () => toggleSelectedDocument(doc()),
+												}}
+												theme="secondary"
+												current={false}
+												selection={{
+													selected: selectedDocuments().some(
+														(selectedDocument) =>
+															selectedDocument.id === doc().id &&
+															selectedDocument.collectionKey ===
+																doc().collectionKey,
+													),
+													onChange: () => toggleSelectedDocument(doc()),
+												}}
+											/>
+										)}
+									</Index>
+								)}
+							</Table>
+						</QueryBoundary>
+						<PaginatedFooter
 							state={{
-								isLoading: documents.isFetching,
-								isSuccess: documents.isSuccess,
+								searchParams: searchParams,
+								meta: documents.data?.meta,
 							}}
 							options={{
-								isSelectable: false,
-								padding: "16",
+								embedded: true,
 							}}
-							theme="secondary"
-						>
-							{({ include, isSelectable, selected, setSelected }) => (
-								<Index each={documents.data?.data || []}>
-									{(doc, i) => (
-										<DocumentTableRow
-											index={i}
-											document={doc()}
-											refs={documents.data?.refs}
-											fieldInclude={getCollectionFieldIncludes()}
-											collection={activeCollection() as Collection}
-											collectionsByKey={relationCollectionsByKey()}
-											include={include}
-											contentLocale={contentLocale()}
-											selected={selected[i]}
-											options={{
-												isSelectable,
-												padding: "16",
-											}}
-											callbacks={{
-												setSelected: setSelected,
-												onClick: () => toggleSelectedDocument(doc()),
-											}}
-											theme="secondary"
-											current={false}
-											selection={{
-												selected: selectedDocuments().some(
-													(selectedDocument) =>
-														selectedDocument.id === doc().id &&
-														selectedDocument.collectionKey ===
-															doc().collectionKey,
-												),
-												onChange: () => toggleSelectedDocument(doc()),
-											}}
-										/>
-									)}
-								</Index>
-							)}
-						</Table>
-					</DynamicContent>
+						/>
+					</>
 				}
 			>
 				{(activeCollection) => (

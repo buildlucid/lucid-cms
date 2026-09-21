@@ -1,7 +1,9 @@
+import classnames from "classnames";
 import { type Component, For, Show } from "solid-js";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import OAuthConnectionRow from "@/components/OAuthConnectionRow/OAuthConnectionRow";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import api from "@/services/api";
 import type { OAuthConnectionOwner } from "@/services/api/oauth-connections";
 import T from "@/translations";
@@ -22,23 +24,20 @@ export const OAuthConnectionsList: Component<{
 	// ----------------------------------------
 	// Functions
 	const content = () => (
-		<DynamicContent
-			state={{
-				isLoading: connections.isLoading,
-				isError: connections.isError,
-				isSuccess: connections.isSuccess,
-				isEmpty: connections.isSuccess && connections.data.data.length === 0,
-			}}
-			copy={{
-				noEntries: {
-					title: T()("oauth.connections.empty.title"),
-					description: T()("oauth.connections.empty.description"),
-				},
-			}}
-			options={{
-				inline: true,
-				contained: props.contained !== false,
-			}}
+		<QueryBoundary
+			isLoading={connections.isLoading}
+			isError={connections.isError}
+			isEmpty={connections.isSuccess && connections.data.data.length === 0}
+			empty={
+				<EmptyState
+					title={T()("oauth.connections.empty.title")}
+					description={T()("oauth.connections.empty.description")}
+				/>
+			}
+			class={classnames({
+				"overflow-hidden rounded-md border border-border bg-card-base":
+					props.contained !== false,
+			})}
 		>
 			<div class="flex flex-col">
 				<For each={connections.data?.data ?? []}>
@@ -52,7 +51,7 @@ export const OAuthConnectionsList: Component<{
 					)}
 				</For>
 			</div>
-		</DynamicContent>
+		</QueryBoundary>
 	);
 
 	// ----------------------------------------

@@ -1,3 +1,4 @@
+import classnames from "classnames";
 import { FaSolidEnvelope, FaSolidIdCard, FaSolidT } from "solid-icons/fa";
 import {
 	type Component,
@@ -10,11 +11,12 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import { ResetFilters } from "@/components/ResetFilters/ResetFilters";
 import { Table } from "@/components/Table/Table";
@@ -264,36 +266,21 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 				embedded={true}
 			/>
 
-			<DynamicContent
-				class="grow bg-card-base border border-border rounded-md"
-				state={{
-					isError: users.isError,
-					isSuccess: users.isSuccess,
-					isEmpty: users.data?.data.length === 0,
-					searchParams: searchParams,
-				}}
-				slot={{
-					footer: (
-						<PaginatedFooter
-							state={{
-								searchParams: searchParams,
-								meta: users.data?.meta,
-							}}
-							options={{
-								embedded: true,
-							}}
-						/>
-					),
-				}}
-				copy={{
-					noEntries: {
-						title: T()("empty.states.users.title"),
-						description: T()("empty.states.users.description"),
-					},
-				}}
-				callback={{
-					resetFilters: searchParams.clearFilters,
-				}}
+			<QueryBoundary
+				isError={users.isError}
+				isEmpty={users.data?.data.length === 0}
+				queryState={searchParams}
+				onResetFilters={searchParams.clearFilters}
+				empty={
+					<EmptyState
+						title={T()("empty.states.users.title")}
+						description={T()("empty.states.users.description")}
+					/>
+				}
+				class={classnames(
+					"flex-1 h-full",
+					"grow bg-card-base border border-border rounded-md",
+				)}
 			>
 				<Table
 					key={"users.select"}
@@ -393,7 +380,16 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						</Index>
 					)}
 				</Table>
-			</DynamicContent>
+			</QueryBoundary>
+			<PaginatedFooter
+				state={{
+					searchParams: searchParams,
+					meta: users.data?.meta,
+				}}
+				options={{
+					embedded: true,
+				}}
+			/>
 
 			<Drawer.Footer class="-mx-4 md:-mx-6">
 				<div class="flex flex-wrap items-center gap-3">

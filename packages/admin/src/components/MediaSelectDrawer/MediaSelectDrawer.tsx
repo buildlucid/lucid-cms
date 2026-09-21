@@ -12,7 +12,7 @@ import Button from "@/components/Button/Button";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import ClearProcessedImagesModal from "@/components/ClearProcessedImagesModal/ClearProcessedImagesModal";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
 import { Grid } from "@/components/Grid/Grid";
@@ -21,6 +21,7 @@ import MediaBasicCard, {
 } from "@/components/MediaBasicCard/MediaBasicCard";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import { ResetFilters } from "@/components/ResetFilters/ResetFilters";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
@@ -366,39 +367,24 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				embedded={true}
 			/>
 
-			<DynamicContent
-				class={classNames("grow", {
-					"bg-card-base border border-border rounded-md":
-						media.data?.data.length === 0,
-				})}
-				state={{
-					isError: media.isError,
-					isSuccess: media.isSuccess,
-					isEmpty: media.data?.data.length === 0,
-					searchParams: searchParams,
-				}}
-				slot={{
-					footer: (
-						<PaginatedFooter
-							state={{
-								searchParams: searchParams,
-								meta: media.data?.meta,
-							}}
-							options={{
-								embedded: true,
-							}}
-						/>
-					),
-				}}
-				copy={{
-					noEntries: {
-						title: T()("empty.states.media.title"),
-						description: T()("empty.states.media.description"),
-					},
-				}}
-				callback={{
-					resetFilters: searchParams.clearFilters,
-				}}
+			<QueryBoundary
+				isError={media.isError}
+				isEmpty={media.data?.data.length === 0}
+				queryState={searchParams}
+				onResetFilters={searchParams.clearFilters}
+				empty={
+					<EmptyState
+						title={T()("empty.states.media.title")}
+						description={T()("empty.states.media.description")}
+					/>
+				}
+				class={classNames(
+					"flex-1 h-full",
+					classNames("grow", {
+						"bg-card-base border border-border rounded-md":
+							media.data?.data.length === 0,
+					}),
+				)}
 			>
 				<Grid
 					state={{
@@ -426,7 +412,16 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						{() => <MediaBasicCardLoading />}
 					</For>
 				</Grid>
-			</DynamicContent>
+			</QueryBoundary>
+			<PaginatedFooter
+				state={{
+					searchParams: searchParams,
+					meta: media.data?.meta,
+				}}
+				options={{
+					embedded: true,
+				}}
+			/>
 
 			<Drawer.Footer class="-mx-4 md:-mx-6">
 				<div class="flex flex-wrap items-center gap-3">

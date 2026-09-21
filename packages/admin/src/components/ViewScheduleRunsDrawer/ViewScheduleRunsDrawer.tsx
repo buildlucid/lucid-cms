@@ -1,3 +1,4 @@
+import classnames from "classnames";
 import { FaSolidCalendar, FaSolidListOl, FaSolidT } from "solid-icons/fa";
 import {
 	type Accessor,
@@ -9,12 +10,13 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
 import JobTableRow from "@/components/JobTableRow/JobTableRow";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import { Table } from "@/components/Table/Table";
 import useQueryState, {
@@ -160,28 +162,19 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 					searchParams={searchParams}
 					embedded
 				/>
-				<DynamicContent
-					class="rounded-md border border-border bg-card-base"
-					state={{
-						isError: jobs.isError,
-						isSuccess: jobs.isSuccess,
-						isEmpty: jobs.data?.data.length === 0,
-						searchParams,
-					}}
-					slot={{
-						footer: (
-							<PaginatedFooter
-								state={{ searchParams, meta: jobs.data?.meta }}
-								options={{ embedded: true }}
-							/>
-						),
-					}}
-					copy={{
-						noEntries: {
-							title: T()("empty.states.jobs.title"),
-							description: T()("empty.states.jobs.description"),
-						},
-					}}
+				<QueryBoundary
+					isError={jobs.isError}
+					isEmpty={jobs.data?.data.length === 0}
+					empty={
+						<EmptyState
+							title={T()("empty.states.jobs.title")}
+							description={T()("empty.states.jobs.description")}
+						/>
+					}
+					class={classnames(
+						"flex-1 h-full",
+						"rounded-md border border-border bg-card-base",
+					)}
 				>
 					<Table
 						key="jobs.schedule-runs"
@@ -242,7 +235,11 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 							</Index>
 						)}
 					</Table>
-				</DynamicContent>
+				</QueryBoundary>
+				<PaginatedFooter
+					state={{ searchParams, meta: jobs.data?.meta }}
+					options={{ embedded: true }}
+				/>
 			</Show>
 		</div>
 	);

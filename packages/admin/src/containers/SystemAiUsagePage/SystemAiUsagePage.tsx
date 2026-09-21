@@ -7,7 +7,6 @@ import {
 import { type Component, createMemo, Show } from "solid-js";
 import { AiUsageChart } from "@/components/AiUsageChart/AiUsageChart";
 import { AiUsageList } from "@/components/AiUsageList/AiUsageList";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
@@ -67,7 +66,7 @@ const SystemAiUsagePage: Component = () => {
 		<PageLayout.Root>
 			<SystemSettingsHeader />
 			<PageLayout.Body>
-				<DynamicContent options={{ padding: "24" }}>
+				<div class="flex-1 h-full p-4 md:p-6">
 					<Show when={!connectionActive()}>
 						<section class="mb-5 flex flex-col gap-4 rounded-md border border-warning-base/25 bg-warning-base/5 p-4 sm:flex-row sm:items-center sm:justify-between">
 							<div class="flex min-w-0 items-start gap-3">
@@ -222,7 +221,7 @@ const SystemAiUsagePage: Component = () => {
 							</div>
 						</InfoRow.Content>
 					</InfoRow.Root>
-				</DynamicContent>
+				</div>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

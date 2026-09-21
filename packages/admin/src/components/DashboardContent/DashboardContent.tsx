@@ -22,7 +22,6 @@ import DashboardQuickActions, {
 	type DashboardQuickAction,
 } from "@/components/DashboardQuickActions/DashboardQuickActions";
 import DashboardReleaseOverview from "@/components/DashboardReleaseOverview/DashboardReleaseOverview";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
@@ -296,11 +295,7 @@ export const DashboardContent: Component = () => {
 	// Render
 	return (
 		<>
-			<DynamicContent
-				options={{
-					padding: "24",
-				}}
-			>
+			<div class="flex-1 h-full p-4 md:p-6">
 				<Show
 					when={hasAnyPermissions()}
 					fallback={
@@ -340,7 +335,7 @@ export const DashboardContent: Component = () => {
 						</Show>
 					</div>
 				</Show>
-			</DynamicContent>
+			</div>
 
 			<MediaAltGenerationModal />
 			<MediaImageGenerationModal />

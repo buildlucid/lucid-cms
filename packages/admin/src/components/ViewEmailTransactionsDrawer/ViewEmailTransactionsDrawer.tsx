@@ -1,3 +1,4 @@
+import classnames from "classnames";
 import {
 	FaSolidCalendar,
 	FaSolidCommentDots,
@@ -14,12 +15,13 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import EmailTransactionTableRow from "@/components/EmailTransactionTableRow/EmailTransactionTableRow";
+import EmptyState from "@/components/EmptyState/EmptyState";
 import { FilterSection } from "@/components/FilterSection/FilterSection";
 import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
 import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
 import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import { QuerySort } from "@/components/QuerySort/QuerySort";
 import { Table } from "@/components/Table/Table";
 import useQueryState, {
@@ -171,28 +173,19 @@ const ViewEmailTransactionsPanelContent: Component<
 					searchParams={searchParams}
 					embedded
 				/>
-				<DynamicContent
-					class="rounded-md border border-border bg-card-base"
-					state={{
-						isError: transactions.isError,
-						isSuccess: transactions.isSuccess,
-						isEmpty: transactions.data?.data.length === 0,
-						searchParams,
-					}}
-					slot={{
-						footer: (
-							<PaginatedFooter
-								state={{ searchParams, meta: transactions.data?.meta }}
-								options={{ embedded: true }}
-							/>
-						),
-					}}
-					copy={{
-						noEntries: {
-							title: T()("empty.states.email.transactions.title"),
-							description: T()("empty.states.email.transactions.description"),
-						},
-					}}
+				<QueryBoundary
+					isError={transactions.isError}
+					isEmpty={transactions.data?.data.length === 0}
+					empty={
+						<EmptyState
+							title={T()("empty.states.email.transactions.title")}
+							description={T()("empty.states.email.transactions.description")}
+						/>
+					}
+					class={classnames(
+						"flex-1 h-full",
+						"rounded-md border border-border bg-card-base",
+					)}
 				>
 					<Table
 						key="email.transactions"
@@ -250,7 +243,11 @@ const ViewEmailTransactionsPanelContent: Component<
 							</Index>
 						)}
 					</Table>
-				</DynamicContent>
+				</QueryBoundary>
+				<PaginatedFooter
+					state={{ searchParams, meta: transactions.data?.meta }}
+					options={{ embedded: true }}
+				/>
 			</Show>
 		</div>
 	);

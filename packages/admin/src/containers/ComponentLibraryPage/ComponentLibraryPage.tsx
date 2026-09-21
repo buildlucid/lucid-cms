@@ -14,7 +14,6 @@ import Checkbox, { type CheckboxVariant } from "@/components/Checkbox/Checkbox";
 import CodeEditor from "@/components/CodeEditor/CodeEditor";
 import ColorPicker from "@/components/ColorPicker/ColorPicker";
 import Drawer from "@/components/Drawer/Drawer";
-import { DynamicContent } from "@/components/DynamicContent/DynamicContent";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Field from "@/components/Field/Field";
@@ -227,7 +226,7 @@ const ComponentLibraryPage: Component = () => {
 				}
 			/>
 			<PageLayout.Body>
-				<DynamicContent options={{ padding: "24" }}>
+				<div class="flex-1 h-full p-4 md:p-6">
 					{/* ---------------------------------------------- Alert */}
 					<InfoRow.Root title={"Alert"} description={"variant, appearance"}>
 						<InfoRow.Content title={"Variants"}>
@@ -1136,7 +1135,7 @@ const ComponentLibraryPage: Component = () => {
 							/>
 						</InfoRow.Content>
 					</InfoRow.Root>
-				</DynamicContent>
+				</div>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);
