@@ -1,3 +1,4 @@
+import { ProgressBar } from "@lucidcms/admin/components";
 import { type TranslationKey, useTranslation } from "@lucidcms/admin/hooks";
 import type { FieldSlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
@@ -46,21 +47,11 @@ const TextGuidance: FieldSlotComponent = (props) => {
 					{t(`plugin.seo.guidance.${assessment().status}`)}
 				</span>
 			</div>
-			<div
-				class="h-2 overflow-hidden rounded-full bg-unfocused/30"
-				aria-hidden="true"
-			>
-				<div
-					class="h-full rounded-full transition-all"
-					classList={{
-						"bg-primary-base": assessment().status !== "long",
-						"bg-warning-base": assessment().status === "long",
-					}}
-					style={{
-						width: `${Math.min(100, (assessment().count / assessment().guide) * 100)}%`,
-					}}
-				/>
-			</div>
+			<ProgressBar
+				size="md"
+				variant={assessment().status === "long" ? "warning" : "primary"}
+				value={(assessment().count / assessment().guide) * 100}
+			/>
 			<Show when={descriptions[props.field.key]}>
 				{(key) => <p class="text-sm text-unfocused">{t(key())}</p>}
 			</Show>

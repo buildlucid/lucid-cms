@@ -1,6 +1,6 @@
+import { Select } from "@lucidcms/admin/components";
 import { useAdminConfig, useTranslation } from "@lucidcms/admin/hooks";
 import type { BrickSlotComponent } from "@lucidcms/admin/types";
-import { FaSolidChevronDown } from "solid-icons/fa";
 import { createMemo, createSignal, Match, Switch } from "solid-js";
 import { fields } from "../constants.js";
 import { resolveSocialText } from "../shared/assessments.js";
@@ -10,12 +10,15 @@ import PageGuidance from "./PageGuidance.js";
 import SearchPreview from "./SearchPreview.js";
 import SocialPreview from "./SocialPreview.js";
 
+type PreviewView = "search" | "social" | "x";
+type PreviewOption = { value: PreviewView; label: string };
+
 const SeoPreview: BrickSlotComponent = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();
 	const config = useAdminConfig();
-	const [view, setView] = createSignal<"search" | "social" | "x">("search");
+	const [view, setView] = createSignal<PreviewView>("search");
 
 	// ----------------------------------
 	// Memos
@@ -67,27 +70,23 @@ const SeoPreview: BrickSlotComponent = (props) => {
 				<p class="text-sm font-medium text-subtitle">
 					{t("plugin.seo.preview.label")}
 				</p>
-				<div class="relative">
-					<select
-						aria-label={t("plugin.seo.preview.select")}
-						class="cursor-pointer appearance-none rounded-md border border-border bg-input-base py-2 pl-3 pr-8 text-sm text-subtitle outline-primary-base focus-visible:outline-2"
-						value={view()}
-						onChange={(event) => {
-							const value = event.currentTarget.value;
-							if (value === "search" || value === "social" || value === "x")
-								setView(value);
-						}}
-					>
-						<option value="search">{t("plugin.seo.preview.search")}</option>
-						<option value="social">{t("plugin.seo.preview.social")}</option>
-						<option value="x">{t("plugin.seo.preview.x")}</option>
-					</select>
-					<FaSolidChevronDown
-						aria-hidden="true"
-						size={12}
-						class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-subtitle"
-					/>
-				</div>
+				<Select<PreviewOption>
+					id={`${props.brick.ref}-seo-preview`}
+					name="seo-preview"
+					aria-label={t("plugin.seo.preview.select")}
+					size="sm"
+					placeholder={false}
+					class="w-36"
+					value={view()}
+					onChange={(value) => {
+						if (value) setView(value);
+					}}
+					options={[
+						{ value: "search", label: t("plugin.seo.preview.search") },
+						{ value: "social", label: t("plugin.seo.preview.social") },
+						{ value: "x", label: t("plugin.seo.preview.x") },
+					]}
+				/>
 			</div>
 
 			<Switch>

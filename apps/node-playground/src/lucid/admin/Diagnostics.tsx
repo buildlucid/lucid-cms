@@ -1,4 +1,17 @@
-import { PageLayout } from "@lucidcms/admin/components";
+import {
+	Alert,
+	Button,
+	Copy,
+	EmptyState,
+	InfoRow,
+	Link,
+	PageLayout,
+	Pagination,
+	Pill,
+	QueryBoundary,
+	QueryToolbar,
+	Table,
+} from "@lucidcms/admin/components";
 import {
 	Permissions,
 	pagination,
@@ -11,13 +24,11 @@ import {
 } from "@lucidcms/admin/hooks";
 import { queries, queryKeys } from "@lucidcms/admin/services";
 import type { RouteComponent } from "@lucidcms/admin/types";
-import { toast } from "@lucidcms/admin/utils";
+import { copyValue, toast } from "@lucidcms/admin/utils";
 import { useQuery, useQueryClient } from "@tanstack/solid-query";
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, Index, Show } from "solid-js";
 
-const buttonClass =
-	"cursor-pointer rounded-md border border-border bg-card-base px-4 py-2 text-body hover:bg-card-hover disabled:cursor-not-allowed disabled:opacity-50";
-
+/** A starting point for custom admin routes, built only from Lucid's admin exports. */
 const Diagnostics: RouteComponent = () => {
 	// ----------------------------------
 	// State & Hooks
@@ -33,6 +44,9 @@ const Diagnostics: RouteComponent = () => {
 			pagination: pagination({ defaultPerPage: 5 }),
 		},
 	});
+
+	// ----------------------------------
+	// Queries
 	const media = useQuery(() => ({
 		...queries.media.list({ queryString: state.queryString() }),
 		enabled: permissions.can(Permissions.MediaRead),
@@ -45,148 +59,184 @@ const Diagnostics: RouteComponent = () => {
 			<PageLayout.Header
 				title={t("playground.admin.title")}
 				description={t("playground.admin.description")}
-			/>
-			<PageLayout.Body>
-				<section
-					class="extension-panel max-w-4xl space-y-6 p-6 extension-wide:p-8"
-					data-testid="admin-extension-route"
-				>
-					<p class="text-body">
-						Signed in as {session.user()?.username}. Interface copy uses Lucid’s
-						active language.
-					</p>
-					<button
-						type="button"
-						class={buttonClass}
+				actions={
+					<Button
+						size="sm"
 						onClick={() => {
 							setCount(count() + 1);
 							toast({ title: "Playground counter updated", status: "success" });
 						}}
 					>
 						Count: {count()}
-					</button>
-					<Show
-						when={permissions.can(Permissions.MediaRead)}
-						fallback={<p class="text-body">Media access is unavailable.</p>}
+					</Button>
+				}
+			/>
+			<PageLayout.Body padding="md">
+				<div data-testid="admin-extension-route">
+					<InfoRow.Root
+						title="Session"
+						description="Hooks for the signed-in user, permissions and startup scripts."
 					>
-						<header>
-							<h2 class="text-base font-semibold text-title">
-								Shared media query
-							</h2>
-							<p class="mt-2 text-body">
-								Search and sorting persist in the URL. Refresh invalidates
-								Lucid’s shared media cache.
-							</p>
-						</header>
-						<div class="flex flex-wrap items-end gap-3">
-							<label class="flex grow flex-col gap-2 text-body">
-								Search media
-								<input
-									type="search"
-									class="rounded-md border border-border bg-input-base px-3 py-2 text-input-contrast"
-									value={String(state.filters().get("title") ?? "")}
-									onInput={(event) =>
-										state.setFilter("title", event.currentTarget.value)
+						<InfoRow.Content
+							title={`Signed in as ${session.user()?.username ?? "unknown"}`}
+							description="Interface copy uses Lucid’s active language."
+							actions={
+								<Pill
+									variant={
+										permissions.can(Permissions.MediaRead)
+											? "primary-subtle"
+											: "warning-subtle"
 									}
-								/>
-							</label>
-							<button
-								type="button"
-								class={buttonClass}
-								onClick={() =>
-									state.setSort(
-										"updatedAt",
-										state.sorts().get("updatedAt") === "desc" ? "asc" : "desc",
-									)
-								}
-							>
-								{state.sorts().get("updatedAt") === "desc"
-									? "Newest first"
-									: "Oldest first"}
-							</button>
-							<button
-								type="button"
-								class={buttonClass}
-								disabled={media.isFetching}
-								onClick={() =>
-									client.invalidateQueries({ queryKey: queryKeys.media.all() })
-								}
-							>
-								Refresh
-							</button>
-						</div>
-						<Show when={media.isPending}>
-							<p role="status" class="text-body">
-								Loading media...
-							</p>
-						</Show>
-						<Show when={media.isError}>
-							<p role="alert" class="text-error-base">
-								Unable to load media.
-							</p>
-						</Show>
-						<ul class="divide-y divide-border">
-							<For each={media.data?.data}>
-								{(item) => (
-									<li class="py-3 text-body">
-										#{item.id} — {item.key}
-									</li>
-								)}
-							</For>
-						</ul>
-						<Show when={media.isSuccess && media.data.data.length === 0}>
-							<p class="text-body">No matching media.</p>
-						</Show>
-						<nav aria-label="Media pages" class="flex items-center gap-3">
-							<button
-								type="button"
-								class={buttonClass}
-								disabled={state.pagination().page <= 1 || media.isFetching}
-								onClick={() => state.setPage(state.pagination().page - 1)}
-							>
-								Previous
-							</button>
-							<span class="text-body">Page {state.pagination().page}</span>
-							<button
-								type="button"
-								class={buttonClass}
-								disabled={
-									state.pagination().page >=
-										(media.data?.meta?.lastPage ?? 1) || media.isFetching
-								}
-								onClick={() => state.setPage(state.pagination().page + 1)}
-							>
-								Next
-							</button>
-						</nav>
-					</Show>
-					<p class="text-seo-good" data-testid="admin-custom-colour">
-						This colour comes from the playground’s Tailwind theme.
-					</p>
-					<p class="text-sm text-subtitle" data-testid="admin-script-status">
-						Script: {document.documentElement.dataset.adminExample ?? "missing"}
-					</p>
-					<div class="flex flex-wrap gap-4">
-						<a
-							class="text-primary-base underline"
-							href="/lucid/collections/page/latest/create"
+								>
+									{permissions.can(Permissions.MediaRead)
+										? "Media access"
+										: "No media access"}
+								</Pill>
+							}
 						>
-							Open page editor
-						</a>
-						<a
-							class="text-primary-base underline"
-							href="/lucid/e/standalone-playground"
+							<div class="space-y-3">
+								<Show when={session.user()?.email}>
+									{(email) => <Copy.Button value={email()} />}
+								</Show>
+								<p class="text-sm" data-testid="admin-script-status">
+									Script:{" "}
+									{document.documentElement.dataset.adminExample ?? "missing"}
+								</p>
+							</div>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
+					<InfoRow.Root
+						title="Shared media query"
+						description="Search and sorting persist in the URL. Refresh invalidates Lucid’s shared media cache."
+					>
+						<Show
+							when={permissions.can(Permissions.MediaRead)}
+							fallback={
+								<Alert variant="warning">Media access is unavailable.</Alert>
+							}
 						>
-							Standalone route
-						</a>
-						<a
-							class="text-primary-base underline"
-							href="/lucid/e/public-playground"
-						>
-							Public route
-						</a>
-					</div>
-				</section>
+							<InfoRow.Content>
+								<div class="-mx-4 overflow-hidden">
+									<QueryToolbar
+										queryState={state}
+										filterSubject="Media"
+										filterFields={[
+											{ key: "title", label: "Title", type: "text" },
+										]}
+										sorts={[{ key: "updatedAt", label: "Updated at" }]}
+										perPage={[5, 10, 20]}
+										onRefresh={() =>
+											client.invalidateQueries({
+												queryKey: queryKeys.media.all(),
+											})
+										}
+										padding="sm"
+									/>
+									<QueryBoundary
+										error={media.isError}
+										empty={media.data?.data.length === 0}
+										queryState={state}
+										emptyFallback={
+											<EmptyState
+												title="No media yet"
+												description="Upload something in the media library to see it here."
+											/>
+										}
+										// Pagination hides when empty, so let the empty/error state fill the card's padding
+										class={
+											media.isError || media.data?.data.length === 0
+												? "-mb-4 border-t border-border"
+												: "border-t border-border"
+										}
+									>
+										<Table.Root
+											id="playground.media"
+											rowCount={media.data?.data.length ?? 0}
+											loading={media.isFetching}
+											loadingRows={5}
+											queryState={state}
+											columns={[
+												{ key: "id", label: "ID" },
+												{ key: "key", label: "Key" },
+												{ key: "type", label: "Type" },
+												{
+													key: "updatedAt",
+													label: "Updated at",
+													sortable: true,
+												},
+											]}
+											padding="sm"
+											variant="contained"
+										>
+											<Index each={media.data?.data}>
+												{(item, index) => (
+													<Table.Row
+														index={index}
+														actions={[
+															{
+																type: "button",
+																label: "Copy key",
+																icon: "copy",
+																onClick: () => copyValue(item().key),
+															},
+														]}
+													>
+														<Table.Text column="id" text={item().id} />
+														<Table.Text column="key" text={item().key} />
+														<Table.Pill column="type" text={item().type} />
+														<Table.Date
+															column="updatedAt"
+															date={item().updatedAt}
+														/>
+													</Table.Row>
+												)}
+											</Index>
+										</Table.Root>
+									</QueryBoundary>
+									<Pagination
+										queryState={state}
+										meta={media.data?.meta}
+										variant="inline"
+										padding="sm"
+										hideWhenEmpty
+									/>
+								</div>
+							</InfoRow.Content>
+						</Show>
+					</InfoRow.Root>
+
+					<InfoRow.Root
+						title="Other routes"
+						description="Quick links for checking the editor and routes without the admin shell."
+					>
+						<InfoRow.Content>
+							<div class="flex flex-wrap gap-2">
+								<Link
+									href="/lucid/collections/page/latest/create"
+									variant="outline"
+									size="sm"
+								>
+									Open page editor
+								</Link>
+								<Link
+									href="/lucid/e/standalone-playground"
+									variant="outline"
+									size="sm"
+								>
+									Standalone route
+								</Link>
+								<Link
+									href="/lucid/e/public-playground"
+									variant="outline"
+									size="sm"
+								>
+									Public route
+								</Link>
+							</div>
+						</InfoRow.Content>
+					</InfoRow.Root>
+				</div>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

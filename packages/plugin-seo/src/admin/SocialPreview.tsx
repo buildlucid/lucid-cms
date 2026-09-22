@@ -1,4 +1,6 @@
+import { Image } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
+import { mediaUrl } from "@lucidcms/admin/utils";
 import { FaSolidImage } from "solid-icons/fa";
 import { type Component, Show } from "solid-js";
 import type {} from "../shared/translations.js";
@@ -56,11 +58,15 @@ const SocialPreview: Component<SocialPreviewProps> = (props) => {
 					}
 				>
 					{(image) => (
-						<img
-							src={image().url}
-							alt={props.alt.trim() || media.alt()}
-							class="absolute inset-0 h-full w-full object-cover"
-						/>
+						<div class="absolute inset-0">
+							<Image
+								src={mediaUrl(
+									image(),
+									props.compact ? "thumbnail-small" : "thumbnail-medium",
+								)}
+								alt={props.alt.trim() || media.alt()}
+							/>
+						</div>
 					)}
 				</Show>
 			</div>

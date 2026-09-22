@@ -7,6 +7,7 @@ export type ProgressBarVariant =
 	| "secondary"
 	| "danger"
 	| "danger-subtle"
+	| "warning"
 	| "warning-subtle"
 	| "neutral";
 
@@ -79,6 +80,7 @@ export const ProgressBar: Component<ProgressBarProps> = (props) => {
 						"bg-secondary-base": variant() === "secondary",
 						"bg-error-base": variant() === "danger",
 						"bg-error-base/70": variant() === "danger-subtle",
+						"bg-warning-base": variant() === "warning",
 						"bg-warning-base/70": variant() === "warning-subtle",
 						"bg-title": variant() === "neutral",
 					})}

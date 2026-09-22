@@ -183,6 +183,7 @@ const PROGRESS_BAR_VARIANTS = valuesOf<ProgressBarVariant>({
 	secondary: true,
 	danger: true,
 	"danger-subtle": true,
+	warning: true,
 	"warning-subtle": true,
 	neutral: true,
 });

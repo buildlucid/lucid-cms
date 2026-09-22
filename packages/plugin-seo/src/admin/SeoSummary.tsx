@@ -1,3 +1,4 @@
+import { ProgressBar } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
 import type { BrickSlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
@@ -24,12 +25,8 @@ const SeoSummary: BrickSlotComponent = (props) => {
 						undefined,
 				}),
 	);
-	const color = createMemo(() =>
-		score() === 100
-			? "bg-primary-base"
-			: score() >= 50
-				? "bg-warning-base"
-				: "bg-error-base",
+	const variant = createMemo(() =>
+		score() === 100 ? "primary" : score() >= 50 ? "warning" : "danger",
 	);
 
 	// ----------------------------------
@@ -42,21 +39,11 @@ const SeoSummary: BrickSlotComponent = (props) => {
 				data-testid="seo-summary"
 			>
 				<span>{t("plugin.seo.summary.label")}</span>
-				<span
-					class="hidden h-1.5 w-12 overflow-hidden rounded-full bg-border sm:block"
-					aria-hidden="true"
-				>
-					<span
-						class={`block h-full rounded-full ${color()}`}
-						style={{ width: `${score()}%` }}
-					/>
-				</span>
-				<meter
-					class="sr-only"
-					min={0}
-					max={100}
+				<ProgressBar
+					size="sm"
+					variant={variant()}
 					value={score()}
-					aria-label={t("plugin.seo.summary.label")}
+					class="hidden w-12 sm:block"
 				/>
 				<span aria-hidden="true" class="tabular-nums text-subtitle">
 					{score()}/100

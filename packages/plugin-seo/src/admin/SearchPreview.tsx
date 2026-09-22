@@ -47,7 +47,7 @@ const SearchPreview: Component<SearchPreviewProps> = (props) => {
 					{props.title || t("plugin.seo.preview.title")}
 				</p>
 				<p
-					class="mt-1.5 line-clamp-3 break-words text-sm leading-[1.6] text-[#4d5156]"
+					class="mt-1.5 line-clamp-3 break-words text-xs leading-[1.6] text-[#4d5156]"
 					dir="auto"
 				>
 					{props.description || t("plugin.seo.preview.description")}
