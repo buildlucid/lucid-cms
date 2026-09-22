@@ -16,13 +16,11 @@ import Field from "@/components/Field/Field";
 import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 
-/** One entry a caller can pick from. */
 export type SelectMultipleOption = {
 	value: string | number;
 	label: string;
 };
 
-/** How the chosen options sit in the trigger. */
 export type SelectMultipleVariant = "default" | "list";
 
 export interface SelectMultipleProps<
@@ -34,20 +32,16 @@ export interface SelectMultipleProps<
 	onChange: (_values: Option[]) => void;
 	options: Option[];
 	label?: string;
-	/** Shown in the trigger while nothing is chosen. */
 	placeholder?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	/** Chips on one line, or a stacked row per choice. @default "default" */
+	/** Shows selected options as chips, or as a list of rows. @default "default" */
 	variant?: SelectMultipleVariant;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-select-multiple-trigger] for the trigger. */
+	/** Applied to the field. Target `[data-select-multiple-trigger]` for the trigger. */
 	class?: string;
 	renderValue?: (_props: {
 		value: Option;
@@ -57,9 +51,8 @@ export interface SelectMultipleProps<
 }
 
 /**
- * A labelled dropdown that keeps every option the caller picks, with its
- * description and any validation errors. The list variant stacks each choice
- * on its own full width row, for when a choice needs more than a chip.
+ * A dropdown for choosing several options, with a label, description and
+ * validation errors.
  *
  * @example
  * ```tsx
@@ -70,15 +63,12 @@ export interface SelectMultipleProps<
  *
  * return (
  * 	<SelectMultiple
- * 		id="roles"
- * 		name="roles"
- * 		label={t("common.roles")}
- * 		values={roles()}
- * 		onChange={setRoles}
- * 		options={[
- * 			{ value: "editor", label: "Editor" },
- * 			{ value: "admin", label: "Admin" },
- * 		]}
+ * 		id="tags"
+ * 		name="tags"
+ * 		label={t("tags")}
+ * 		values={tags()}
+ * 		onChange={setTags}
+ * 		options={tagOptions()}
  * 	/>
  * );
  * ```
@@ -168,7 +158,6 @@ function SelectMultiple<
 						{
 							"items-center px-2": !stacked(),
 							"gap-2 p-2": stacked(),
-							//* rows stack from the top, but a lone placeholder centres in that height
 							"items-start": stacked() && props.values.length > 0,
 							"items-center": stacked() && props.values.length === 0,
 						},
@@ -208,7 +197,6 @@ function SelectMultiple<
 														class={classnames(
 															"flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100",
 															{
-																// the chip has no room to spare, so it fades in over the text
 																"absolute inset-y-0 inset-e-0 ps-6 pe-1 bg-linear-to-l from-secondary-hover from-60% to-transparent":
 																	!stacked(),
 																"ml-auto": stacked(),
@@ -262,11 +250,7 @@ function SelectMultiple<
 						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
 				</Menu.Trigger>
-				<Menu.Content
-					matchTriggerWidth
-					flush
-					class="max-h-36 overflow-y-auto z-70"
-				>
+				<Menu.Content matchTriggerWidth class="max-h-36 overflow-y-auto z-70">
 					<Switch>
 						<Match when={props.options.length > 0}>
 							<For each={props.options}>
@@ -276,8 +260,7 @@ function SelectMultiple<
 
 									return (
 										<Menu.Item
-											//* picking several at once means staying put between them
-											keepOpen
+											closeOnSelect={false}
 											textValue={option.label}
 											disabled={props.disabled}
 											selected={selected()}

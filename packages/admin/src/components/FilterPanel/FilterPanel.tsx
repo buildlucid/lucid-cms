@@ -27,7 +27,6 @@ import {
 import { FilterRow } from "./parts/FilterRow";
 import {
 	type FilterPreset,
-	type FilterPresets,
 	isFilterPresetActive,
 	isFilterValueEmpty,
 } from "./preset-state";
@@ -64,28 +63,25 @@ export type {
 	FilterFieldType,
 	FilterOperator,
 } from "@/utils/document-filter-fields";
-export type { FilterPreset, FilterPresets } from "./preset-state";
+export type { FilterPreset } from "./preset-state";
 
-/** Space a panel matches from the toolbar it bleeds out of. */
 export type FilterPanelPadding = "sm" | "md";
 
 export interface FilterPanelProps {
 	open: boolean;
 	onOpenChange: (_open: boolean) => void;
-	/** Names the thing being filtered, for the panel's heading. */
+	/** What is being filtered, shown in the heading. */
 	subject: string;
-	/** Keeps the subject's capitalisation instead of lowercasing it. */
+	/** Shows `subject` as given, instead of sentence case. */
 	preserveSubjectCase?: boolean;
-	/** The fields a row can filter on. */
 	fields: FilterField[];
 	queryState: QueryStateResponse;
-	/** Matches the toolbar the panel bleeds out of. @default "md" */
+	/** @default "md" */
 	padding?: FilterPanelPadding;
-	/** Stands the panel apart as its own card instead of bleeding into the
-	 * toolbar above it. */
+	/** Shows the panel as a standalone card, rather than attached to a toolbar. */
 	embedded?: boolean;
-	/** One-click filter combinations, shown above the rows. */
-	presets?: FilterPresets;
+	/** Preset filters, shown as buttons above the filters. */
+	presets?: FilterPreset[];
 	class?: string;
 }
 
@@ -100,31 +96,28 @@ const draftNewGroupId = (draft: DraftRow): number =>
 	draft.newGroupId ?? draft.draftId;
 
 /**
- * The stacked filter rows a list is narrowed with. Rows in a group are ANDed
- * and groups are ORed, and every change is written straight to the query
- * state. QueryToolbar renders one for you; use it directly when you are
- * laying the controls out yourself.
+ * A panel for building filters on a list. Filters within a group all have to
+ * match, and a result can match any group.
  *
  * @example
  * ```tsx
- * import { FilterPanel, FilterToggle } from "@lucidcms/admin/components";
+ * import { FilterPanel } from "@lucidcms/admin/components";
  * import { useTranslation } from "@lucidcms/admin/hooks";
  *
  * const { t } = useTranslation();
- * const [open, setOpen] = createSignal(false);
  *
  * return (
- * 	<>
- * 		<FilterToggle open={open()} onOpenChange={setOpen} queryState={queryState} />
- * 		<FilterPanel
- * 			open={open()}
- * 			onOpenChange={setOpen}
- * 			subject={t("admin:reports.title")}
- * 			fields={[{ key: "name", label: t("common.name"), type: "text" }]}
- * 			queryState={queryState}
- * 			embedded
- * 		/>
- * 	</>
+ * 	<FilterPanel
+ * 		open={filtersOpen()}
+ * 		onOpenChange={setFiltersOpen}
+ * 		subject={t("redirects.title")}
+ * 		fields={[
+ * 			{ key: "from", label: t("redirects.from"), type: "text" },
+ * 			{ key: "createdAt", label: t("common.created.at"), type: "date" },
+ * 		]}
+ * 		queryState={queryState}
+ * 		embedded
+ * 	/>
  * );
  * ```
  */
@@ -762,14 +755,9 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 
 	// ----------------------------------
 	// Effects
-	//* open for active URL-backed filters owned by this section. Default filters
-	//* (for example media-picker constraints) and unrelated route presets should
-	//* not force the section open.
 	createEffect(
 		on(
-			() =>
-				!props.queryState.hasDefaultFiltersApplied() &&
-				hasOwnedCommittedFilters(),
+			() => !props.queryState.filtersAreDefault() && hasOwnedCommittedFilters(),
 			(active) => {
 				if (active) props.onOpenChange(true);
 				else if (rows().length === 0) props.onOpenChange(false);
@@ -841,13 +829,13 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 					props.class,
 				)}
 			>
-				<Show when={(props.presets?.items.length ?? 0) > 0}>
+				<Show when={(props.presets?.length ?? 0) > 0}>
 					<div class="mb-4 border-b border-border pb-4">
 						<h3 class="mb-2 text-sm font-medium text-title">
 							{T()("filter.section.presets")}
 						</h3>
 						<div class="flex flex-wrap gap-2">
-							<For each={props.presets?.items}>
+							<For each={props.presets}>
 								{(preset) => {
 									const active = () => isPresetActive(preset);
 
@@ -866,9 +854,9 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 											onClick={() => applyPreset(preset)}
 										>
 											<span>{preset.label}</span>
-											<Show when={preset.loading || preset.value !== undefined}>
+											<Show when={preset.loading || preset.count !== undefined}>
 												<span class="tabular-nums opacity-65">
-													{preset.loading ? "-" : preset.value}
+													{preset.loading ? "-" : preset.count}
 												</span>
 											</Show>
 										</Button>

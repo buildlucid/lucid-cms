@@ -9,20 +9,8 @@ export interface DrawerHeaderProps {
 }
 
 /**
- * Top region of the drawer. Holds the title, description and any locale
- * select, and adds a close button.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Drawer.Header>
- * 		<Drawer.Title>Edit media</Drawer.Title>
- * 		<Drawer.LocaleSelect />
- * 	</Drawer.Header>
- * );
- * ```
+ * The top of the drawer, for the title and description. Includes a close
+ * button.
  */
 export const DrawerHeader: Component<DrawerHeaderProps> = (props) => {
 	// ------------------------------

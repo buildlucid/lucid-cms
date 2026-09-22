@@ -88,7 +88,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 									props.rowTarget?.setTrigger("restore", true);
 								},
 								permission: hasUpdatePermission(),
-								hide: showRestore() === false,
+								show: showRestore() !== false,
 								variant: "primary",
 								sortOrder: 50,
 							},
@@ -100,11 +100,11 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 									props.rowTarget?.setTargetId(props.media.id);
 									props.rowTarget?.setTrigger("clear", true);
 								},
-								hide:
-									props.media.type !== "image" ||
-									props.media.status !== "ready",
+								show:
+									props.media.type === "image" &&
+									props.media.status === "ready",
 								permission: hasUpdatePermission(),
-								variant: "error",
+								variant: "danger",
 								sortOrder: 70,
 							},
 						]}
@@ -114,7 +114,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 			{/* Image */}
 			<AspectRatio
 				ratio="16:9"
-				innerClass={classNames("overflow-hidden", {
+				contentClass={classNames("overflow-hidden", {
 					"rectangle-background":
 						props.media.type === "image" ||
 						(props.media.type === "video" && props.media.poster),

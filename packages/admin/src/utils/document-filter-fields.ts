@@ -32,27 +32,27 @@ export const FILTERABLE_FIELD_TYPES = [
 export type FilterFieldType = (typeof FILTERABLE_FIELD_TYPES)[number];
 
 export interface FilterField {
-	/** Backend filter path - `_fieldKey`, `brickKey._fieldKey` or `brickKey.repeaterKey._fieldKey` */
+	/** The filter key sent to the API. */
 	key: string;
-	/** `[brick label > ][ancestor container labels > ]field label` */
 	label: string;
 	type: FilterFieldType;
-	/** select field options */
+	/** For `select` fields. */
 	options?: Array<{ value: string; label: string }>;
-	/** datetime fields - whether the field includes time selection */
+	/** Adds a time input, for `datetime` fields. */
 	time?: boolean;
-	/** checkbox fields - custom true/false labels */
+	/** For `checkbox` fields. */
 	trueLabel?: string;
+	/** For `checkbox` fields. */
 	falseLabel?: string;
-	/** relation fields - collection keys the document picker can select from */
+	/** Collections to pick documents from, for `relation` fields. */
 	collections?: string[];
-	/** relation fields normally commit `collectionKey:id`; resource filters that
-	 * target a plain document ID can opt into an ID-only value. */
+	/** Filters by `collectionKey:id`, or by document ID only. @default "collection-id" */
 	relationValue?: "collection-id" | "id";
-	/** media fields - picker constraints from the field's validation */
+	/** Limits the media picker, for `media` fields. */
 	mediaType?: string;
+	/** Limits the media picker, for `media` fields. */
 	mediaExtensions?: string;
-	/** Optional operator subset/order for filters with backend-specific rules. */
+	/** Limits and orders the operators available. */
 	operators?: FilterOperator[];
 }
 

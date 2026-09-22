@@ -280,11 +280,8 @@ const orFilterParamKey = (
 		: `filter[or][${groupIndex}][${key}]`;
 
 /**
- * Builds the search string written to storage (URL or memory). Values equal to
- * the schema defaults are omitted so absence always means default. Explicit
- * operators are preserved in the param key, even when the value is empty or the
- * operator matches the codec default, so committed operator UI state survives a
- * round-trip. Params the hook does not own are preserved.
+ * Builds the search string to store. Default values are left out, explicit
+ * operators are kept, and params the hook does not own are preserved.
  */
 export const stateToStorageSearch = (
 	state: QueryStateModel,
@@ -555,7 +552,7 @@ export const hasFiltersApplied = (
 	return false;
 };
 
-export const hasDefaultFiltersApplied = (
+export const filtersAreDefault = (
 	state: QueryStateModel,
 	schema: QueryStateSchema,
 ): boolean => {

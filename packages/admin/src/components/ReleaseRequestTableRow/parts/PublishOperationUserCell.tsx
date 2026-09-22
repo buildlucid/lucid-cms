@@ -16,7 +16,7 @@ const PublishOperationUserCell: Component<{
 					user={props.user}
 					variant="horizontal"
 					size="xs"
-					nameFormat="simple"
+					nameFormat="name"
 				/>
 			) : (
 				"-"

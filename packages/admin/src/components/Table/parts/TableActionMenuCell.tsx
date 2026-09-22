@@ -15,14 +15,14 @@ const TableActionMenuCell: Component<TableActionMenuCellProps> = (props) => {
 		<Switch>
 			<Match when={props.actions.length > 0}>
 				<TableCell
-					noMinWidth
+					minWidth={false}
 					class="row-actions-td text-right sticky right-0 pointer-events-none"
 				>
 					<ActionMenu actions={props.actions} />
 				</TableCell>
 			</Match>
 			<Match when={props.actions.length === 0}>
-				<TableCell noMinWidth />
+				<TableCell minWidth={false} />
 			</Match>
 		</Switch>
 	);

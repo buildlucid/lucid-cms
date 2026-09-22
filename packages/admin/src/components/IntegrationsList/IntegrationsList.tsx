@@ -239,10 +239,10 @@ export const IntegrationsList: Component<{
 								padding="sm"
 							/>
 							<QueryBoundary
-								isError={integrations.isError}
-								isEmpty={integrations.data?.data.length === 0}
+								error={integrations.isError}
+								empty={integrations.data?.data.length === 0}
 								queryState={props.state.searchParams}
-								empty={
+								emptyFallback={
 									<EmptyState
 										title={T()("empty.states.integrations.title")}
 										description={T()("empty.states.integrations.description")}
@@ -270,7 +270,7 @@ export const IntegrationsList: Component<{
 									id="integrations.list"
 									rowCount={integrations.data?.data.length || 0}
 									queryState={props.state.searchParams}
-									head={[
+									columns={[
 										{
 											label: T()("common.status"),
 											key: "enabled",
@@ -317,7 +317,7 @@ export const IntegrationsList: Component<{
 											icon: <FaSolidCalendar />,
 										},
 									]}
-									isLoading={integrations.isFetching}
+									loading={integrations.isFetching}
 									padding="sm"
 									variant="contained"
 								>

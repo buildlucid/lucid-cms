@@ -12,7 +12,7 @@ import {
 	buildQueryString,
 	clearFiltersState,
 	defaultQueryState,
-	hasDefaultFiltersApplied,
+	filtersAreDefault,
 	hasFiltersApplied,
 	parseSearchIntoState,
 	resetFiltersState,
@@ -451,7 +451,7 @@ describe("reset and default comparison", () => {
 		);
 
 		expect(hasFiltersApplied(cleared, schemaWithDefaults)).toBe(false);
-		expect(hasDefaultFiltersApplied(cleared, schemaWithDefaults)).toBe(false);
+		expect(filtersAreDefault(cleared, schemaWithDefaults)).toBe(false);
 		expect(cleared.filters.type).toEqual({ value: "" });
 		expect(cleared.filters.width).toEqual({ value: undefined });
 		expect(cleared.orFilterGroups).toEqual([]);
@@ -488,16 +488,16 @@ describe("reset and default comparison", () => {
 		expect(hasFiltersApplied(applied, schema)).toBe(true);
 	});
 
-	it("hasDefaultFiltersApplied compares against schema defaults", () => {
+	it("filtersAreDefault compares against schema defaults", () => {
 		const withDefault: QueryStateSchema = {
 			filters: { title: textFilter({ defaultValue: "hello" }) },
 		};
 		const state = defaultQueryState(withDefault);
-		expect(hasDefaultFiltersApplied(state, withDefault)).toBe(true);
+		expect(filtersAreDefault(state, withDefault)).toBe(true);
 		const changed = applyParams(state, withDefault, {
 			filters: { title: "other" },
 		});
-		expect(hasDefaultFiltersApplied(changed, withDefault)).toBe(false);
+		expect(filtersAreDefault(changed, withDefault)).toBe(false);
 	});
 
 	it("resets and compares grouped filter defaults", () => {
@@ -508,19 +508,19 @@ describe("reset and default comparison", () => {
 				orFilterGroups: [[{ key: "width", value: 1200, operator: ">=" }]],
 			},
 		);
-		expect(hasDefaultFiltersApplied(changed, rangeDefaultSchema)).toBe(false);
+		expect(filtersAreDefault(changed, rangeDefaultSchema)).toBe(false);
 
 		const reset = resetFiltersState(changed, rangeDefaultSchema);
 		expect(reset.orFilterGroups).toEqual(
 			rangeDefaultSchema.defaultOrFilterGroups,
 		);
-		expect(hasDefaultFiltersApplied(reset, rangeDefaultSchema)).toBe(true);
+		expect(filtersAreDefault(reset, rangeDefaultSchema)).toBe(true);
 	});
 
-	it("hasDefaultFiltersApplied treats explicit operator state as non-default", () => {
+	it("filtersAreDefault treats explicit operator state as non-default", () => {
 		const state = applyParams(defaultQueryState(schema), schema, {
 			filters: { author: { value: [], operator: "in" } },
 		});
-		expect(hasDefaultFiltersApplied(state, schema)).toBe(false);
+		expect(filtersAreDefault(state, schema)).toBe(false);
 	});
 });

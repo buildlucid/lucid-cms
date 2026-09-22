@@ -29,9 +29,7 @@ export type { DrawerTabItem, DrawerTabsProps } from "./parts/DrawerTabs";
 export type { DrawerTitleProps } from "./parts/DrawerTitle";
 
 /**
- * A panel that slides in from the edge of the screen, built from composable
- * parts. Use it for forms and detail views that sit over the current page.
- * Drawers opened from another drawer stack automatically.
+ * A panel that slides in from the edge of the screen, for forms and details.
  *
  * @example
  * ```tsx
@@ -41,18 +39,17 @@ export type { DrawerTitleProps } from "./parts/DrawerTitle";
  * const { t } = useTranslation();
  *
  * return (
- * 	<Drawer.Root open={open()} onOpenChange={setOpen} loading={role.isLoading}>
+ * 	<Drawer.Root open={open()} onOpenChange={setOpen} loading={redirect.isLoading}>
  * 		<Drawer.Header>
- * 			<Drawer.Title>{t("permissions.roles.update")}</Drawer.Title>
+ * 			<Drawer.Title>{t("redirects.edit.title")}</Drawer.Title>
  * 		</Drawer.Header>
  * 		<Drawer.Form onSubmit={save}>
  * 			<Drawer.Body>
- * 				<Input id="name" name="name" type="text" label={t("common.name")} value={name()} onChange={setName} />
+ * 				<Input id="to" name="to" type="text" label={t("redirects.to")} value={to()} onChange={setTo} />
  * 			</Drawer.Body>
  * 			<Drawer.Footer>
  * 				<Drawer.Actions>
- * 					<Button variant="outline" onClick={() => setOpen(false)}>{t("common.close")}</Button>
- * 					<Button type="submit" loading={save.isPending}>{t("common.save")}</Button>
+ * 					<Button type="submit" loading={update.isPending}>{t("common.save")}</Button>
  * 				</Drawer.Actions>
  * 			</Drawer.Footer>
  * 		</Drawer.Form>

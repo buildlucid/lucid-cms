@@ -3,7 +3,6 @@ import type { Component } from "solid-js";
 import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import JobDetailsCell from "./parts/JobDetailsCell";
 
@@ -30,8 +29,7 @@ const JobTableRow: Component<JobRowProps> = (props) => {
 									props.rowTarget?.setTargetId(props.job.id);
 									props.rowTarget?.setTrigger("details", true);
 								},
-								permission: userStore.get.hasPermission([Permissions.JobsRead])
-									.all,
+								permission: Permissions.JobsRead,
 								sortOrder: 0,
 							},
 						]

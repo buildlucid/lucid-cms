@@ -4,7 +4,6 @@ import type { PillProps } from "@/components/Pill/Pill";
 import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 
 interface EmailRowProps {
@@ -53,7 +52,7 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("preview", true);
 					},
-					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
+					permission: Permissions.EmailRead,
 					sortOrder: 0,
 				},
 				{
@@ -64,14 +63,14 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("resend", true);
 					},
-					permission: userStore.get.hasPermission([Permissions.EmailSend]).all,
+					permission: Permissions.EmailSend,
 					disabled: props.email.resend.enabled !== true,
 					disabledToast: {
 						title: T()("toasts.common.resend.email.unavailable.title"),
 						message: T()("toasts.common.resend.email.unavailable.message"),
 						status: "warning",
 					},
-					actionExclude: true,
+					excludeFromRowClick: true,
 					sortOrder: 50,
 					variant: "primary",
 				},
@@ -83,7 +82,7 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("transactions", true);
 					},
-					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
+					permission: Permissions.EmailRead,
 					sortOrder: 10,
 				},
 				{
@@ -94,11 +93,10 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.email.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					permission: userStore.get.hasPermission([Permissions.EmailDelete])
-						.all,
-					actionExclude: true,
+					permission: Permissions.EmailDelete,
+					excludeFromRowClick: true,
 					sortOrder: 70,
-					variant: "error",
+					variant: "danger",
 				},
 			]}
 		>

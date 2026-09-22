@@ -369,13 +369,13 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			/>
 
 			<QueryBoundary
-				isError={media.isError}
+				error={media.isError}
 				//* keepPreviousData holds the last page during a refetch, so an empty
 				//* one would otherwise cover the skeletons until the new page lands
-				isEmpty={media.data?.data.length === 0 && !media.isFetching}
+				empty={media.data?.data.length === 0 && !media.isFetching}
 				queryState={searchParams}
 				onResetFilters={searchParams.clearFilters}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.media.title")}
 						description={T()("empty.states.media.description")}

@@ -7,17 +7,7 @@ export interface DrawerTitleProps {
 	children: JSXElement;
 }
 
-/**
- * The drawer's heading. Use it instead of your own heading element so screen
- * readers announce the drawer by name.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return <Drawer.Title>Edit role</Drawer.Title>;
- * ```
- */
+/** The drawer's title, announced by screen readers. */
 export const DrawerTitle: Component<DrawerTitleProps> = (props) => {
 	// ------------------------------
 	// Render

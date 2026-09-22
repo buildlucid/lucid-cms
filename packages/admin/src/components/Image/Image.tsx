@@ -6,9 +6,8 @@ export type ImageFit = "cover" | "contain";
 
 export interface ImageProps {
 	src: string;
-	/** Leave it empty for an image that adds nothing to the page's meaning. */
 	alt?: string;
-	/** How the image fills its box. @default "cover" */
+	/** @default "cover" */
 	fit?: ImageFit;
 	/** @default "eager" */
 	loading?: "lazy" | "eager";
@@ -16,19 +15,14 @@ export interface ImageProps {
 }
 
 /**
- * An image that fills its container and leaves a placeholder in its place
- * until it loads. Dragging it is blocked, so it does not interfere with a
- * card's own drag handles.
+ * An image that fills its container, with a placeholder while it loads.
  *
  * @example
  * ```tsx
- * import { AspectRatio, Image } from "@lucidcms/admin/components";
+ * import { Image } from "@lucidcms/admin/components";
+ * import { mediaUrl } from "@lucidcms/admin/utils";
  *
- * return (
- * 	<AspectRatio ratio="16:9">
- * 		<Image src={media.url} alt={media.alt} fit="contain" loading="lazy" />
- * 	</AspectRatio>
- * );
+ * return <Image src={mediaUrl(media, "thumbnail-small")} alt={media.alt} loading="lazy" />;
  * ```
  */
 const Image: Component<ImageProps> = (props) => {

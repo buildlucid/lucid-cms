@@ -23,7 +23,7 @@ const TableUserStackCell: Component<{
 	// ----------------------------------
 	// Functions
 	const displayName = (user: TableUserStackUser) => {
-		return helpers.formatUserName(user, "simple") || T()("common.unknown");
+		return helpers.formatUserName(user, "name") || T()("common.unknown");
 	};
 
 	// ----------------------------------

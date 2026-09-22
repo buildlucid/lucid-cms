@@ -7,7 +7,7 @@ export interface MenuRadioGroupProps {
 	children: JSXElement;
 }
 
-/** Groups radio items so only one of them can be chosen. */
+/** A group of radio items where one can be selected. */
 const MenuRadioGroup: Component<MenuRadioGroupProps> = (props) => {
 	// ----------------------------------------
 	// Render

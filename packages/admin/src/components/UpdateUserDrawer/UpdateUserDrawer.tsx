@@ -224,7 +224,7 @@ const UpdateUserDrawer: Component<{
 								},
 								{ value: "meta", label: T()("common.meta") },
 							]}
-							active={activeTab()}
+							value={activeTab()}
 							onChange={setActiveTab}
 						/>
 						<Show when={activeTab() === "options"}>

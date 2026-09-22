@@ -82,8 +82,8 @@ const SystemOverviewPage: Component = () => {
 			<SystemSettingsHeader />
 			<PageLayout.Body>
 				<QueryBoundary
-					isLoading={settingsData.isLoading}
-					isError={settingsData.isError}
+					loading={settingsData.isLoading}
+					error={settingsData.isError}
 					class="flex-1 h-full p-4 md:p-6"
 				>
 					<InfoRow.Root
@@ -92,7 +92,7 @@ const SystemOverviewPage: Component = () => {
 					>
 						<InfoRow.Content title={storageTitle()}>
 							<ProgressBar
-								progress={percentUsed()}
+								value={percentUsed()}
 								variant={
 									isUnlimitedStorage()
 										? "primary"

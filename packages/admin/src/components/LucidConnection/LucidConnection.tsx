@@ -116,7 +116,7 @@ const LucidConnection: Component = () => {
 	// Render
 	return (
 		<>
-			<QueryBoundary isLoading={status.isLoading} isError={status.isError}>
+			<QueryBoundary loading={status.isLoading} error={status.isError}>
 				<InfoRow.Content>
 					<div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
 						<div class="min-w-0">
@@ -174,7 +174,7 @@ const LucidConnection: Component = () => {
 											icon: "rotate",
 											onClick: () => verify.action.mutate({}),
 											permission: canManage(),
-											isLoading: verify.action.isPending,
+											loading: verify.action.isPending,
 											sortOrder: 10,
 										},
 										{
@@ -183,7 +183,7 @@ const LucidConnection: Component = () => {
 											icon: "link",
 											onClick: () => connect.action.mutate({}),
 											permission: canManage(),
-											isLoading: connect.action.isPending,
+											loading: connect.action.isPending,
 											sortOrder: 30,
 										},
 										{
@@ -193,7 +193,7 @@ const LucidConnection: Component = () => {
 											onClick: () => setDisconnectOpen(true),
 											permission: canManage(),
 											sortOrder: 70,
-											variant: "error",
+											variant: "danger",
 										},
 									]}
 								/>

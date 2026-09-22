@@ -30,9 +30,8 @@ const isBrickPreviewField = (
 	field.type !== "repeater" && brickPreviewFieldTypes.has(field.type);
 
 /**
- * Builds a compact preview from top-level scalar brick fields. Structural
- * containers are transparent, while repeaters and reference-backed values are
- * intentionally excluded so the node remains predictable and inexpensive.
+ * Builds a preview from a brick's top-level fields, excluding repeaters and
+ * references.
  */
 export const getBrickPreviewFields = (props: {
 	config?: CollectionBrickConfig;

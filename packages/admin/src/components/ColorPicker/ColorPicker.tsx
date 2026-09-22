@@ -14,31 +14,27 @@ import T from "@/translations";
 export interface ColorPickerProps extends JSX.AriaAttributes {
 	id: string;
 	name: string;
-	/** Any CSS colour the swatch can render, though the picker writes hex. */
+	/** Any CSS colour. The picker sets hex values. */
 	value: string;
 	onChange: (_value: string) => void;
 	label?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
-	/** Adds a hover card next to the control. */
+	/** Help text shown in a tooltip beside the input. */
 	tooltip?: string;
 	placeholder?: string;
-	/** Swatches shown under the input, for picking a colour in one click. */
+	/** Colours shown as swatches under the input. */
 	presets?: string[];
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-color-picker-control] for the input. */
+	/** Applied to the field. Target `[data-color-picker-control]` for the input. */
 	class?: string;
 }
 
 /**
- * A labelled colour field. The swatch opens the browser's colour picker, the
- * text input takes a value directly, and presets set one in a single click.
+ * A colour input with a picker, and optional preset swatches.
  *
  * @example
  * ```tsx
@@ -49,11 +45,11 @@ export interface ColorPickerProps extends JSX.AriaAttributes {
  *
  * return (
  * 	<ColorPicker
- * 		id="brand"
- * 		name="brand"
- * 		label={t("common.average.colour")}
- * 		value={colour()}
- * 		onChange={setColour}
+ * 		id="accent"
+ * 		name="accent"
+ * 		label={t("accent.colour")}
+ * 		value={accent()}
+ * 		onChange={setAccent}
  * 		presets={["#0f172a", "#2563eb", "#16a34a"]}
  * 	/>
  * );

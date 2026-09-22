@@ -1,7 +1,6 @@
 import classNames from "classnames";
 import type { Component, JSXElement } from "solid-js";
 
-/** Space around the body's content. "none" lets content run edge to edge. */
 export type ModalBodyPadding = "none" | "md";
 
 export interface ModalBodyProps {
@@ -11,21 +10,7 @@ export interface ModalBodyProps {
 	children: JSXElement;
 }
 
-/**
- * Main content region of the modal. Its top padding collapses when it follows
- * a Modal.Header.
- *
- * @example
- * ```tsx
- * import { Modal } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Modal.Body>
- * 		<Input id="title" name="title" type="text" label="Title" value={title()} onChange={setTitle} />
- * 	</Modal.Body>
- * );
- * ```
- */
+/** The modal's main content. */
 export const ModalBody: Component<ModalBodyProps> = (props) => {
 	// ----------------------------------------
 	// Render

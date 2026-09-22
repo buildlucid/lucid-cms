@@ -5,25 +5,22 @@ export type AspectRatioValue = "1:1" | "4:3" | "16:9" | "21:9";
 
 export interface AspectRatioProps {
 	ratio: AspectRatioValue;
-	/** Put on the box the children fill, for overflow and backgrounds. */
-	innerClass?: string;
+	/** Applied to the element that holds the children. */
+	contentClass?: string;
 	class?: string;
-	/** Leave it out to hold the space open on its own. */
 	children?: JSXElement;
 }
 
 /**
- * Holds a fixed shape whatever its width, so images and previews do not shift
- * the layout as they load. The children are stretched to fill it, and it works
- * with none at all as a placeholder.
+ * Keeps its content at a fixed aspect ratio as the width changes.
  *
  * @example
  * ```tsx
- * import { AspectRatio } from "@lucidcms/admin/components";
+ * import { AspectRatio, Image } from "@lucidcms/admin/components";
  *
  * return (
- * 	<AspectRatio ratio="16:9" innerClass="overflow-hidden rounded-md">
- * 		<img src={preview} alt="" class="h-full w-full object-cover" />
+ * 	<AspectRatio ratio="16:9" contentClass="overflow-hidden rounded-md">
+ * 		<Image src={preview.url} alt={preview.alt} />
  * 	</AspectRatio>
  * );
  * ```
@@ -32,7 +29,6 @@ const AspectRatio: Component<AspectRatioProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		//* the pseudo element's padding holds the height open before anything loads
 		<div
 			data-aspect-ratio
 			class={classNames(
@@ -48,7 +44,7 @@ const AspectRatio: Component<AspectRatioProps> = (props) => {
 		>
 			<div
 				data-aspect-ratio-content
-				class={classNames("absolute inset-0", props.innerClass)}
+				class={classNames("absolute inset-0", props.contentClass)}
 			>
 				{props.children}
 			</div>

@@ -3,19 +3,18 @@ import type { Component } from "solid-js";
 import TableCell from "@/components/Table/parts/TableCell";
 
 export interface TableTextCellProps {
-	/** Head key this cell belongs to. It hides when that column is toggled off. */
+	/** The key of the column this cell belongs to. */
 	column?: string;
 	text?: string | number | null;
 	/** Truncates the text after this many lines. */
 	maxLines?: 1 | 2 | 3 | 4;
 	width?: number;
-	minWidth?: number;
-	noMinWidth?: boolean;
-	/** Applied to the cell. */
+	/** Pass `false` to remove the default minimum width. */
+	minWidth?: number | false;
 	class?: string;
 }
 
-/** A cell showing plain text, with a dash when there is nothing to show. */
+/** A table cell showing text. */
 const TableTextCell: Component<TableTextCellProps> = (props) => {
 	// ----------------------------------
 	// Render
@@ -24,7 +23,6 @@ const TableTextCell: Component<TableTextCellProps> = (props) => {
 			column={props.column}
 			width={props.width}
 			minWidth={props.minWidth}
-			noMinWidth={props.noMinWidth}
 			class={props.class}
 		>
 			<span

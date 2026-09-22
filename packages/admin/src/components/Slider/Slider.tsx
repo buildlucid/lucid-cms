@@ -16,39 +16,36 @@ import T from "@/translations";
 export interface SliderProps {
 	id: string;
 	name: string;
-	/** One entry per thumb, low to high. */
+	/** One value per thumb, lowest first. */
 	value: number[];
 	onChange: (_value: number[]) => void;
 	min: number;
 	max: number;
 	step: number;
-	/** Two thumbs select a range rather than a single value. @default 1 */
+	/** Use 2 to select a range. @default 1 */
 	thumbs?: 1 | 2;
 	label?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
-	/** Adds a hover card next to the control. */
+	/** Help text shown in a tooltip beside the slider. */
 	tooltip?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-slider-control] for the track. */
+	/** Applied to the field. Target `[data-slider-control]` for the track. */
 	class?: string;
 }
 
 const clamp = (value: number, min: number, max: number) =>
 	Math.min(Math.max(value, min), max);
 
-/** Beyond this the step markers stop reading as separate points. */
+/** Step markers are hidden above this many steps. */
 const MAX_STEP_MARKERS = 40;
 
 /**
- * A labelled slider with a number input beside each thumb, so a value can be
- * dragged or typed. Two thumbs turn it into a range.
+ * A slider for choosing a number, or a range with two thumbs. Each thumb also
+ * has a number input.
  *
  * @example
  * ```tsx
@@ -62,8 +59,8 @@ const MAX_STEP_MARKERS = 40;
  * 		id="quality"
  * 		name="quality"
  * 		label={t("media.processed.quality")}
- * 		value={quality()}
- * 		onChange={setQuality}
+ * 		value={[quality()]}
+ * 		onChange={([value]) => setQuality(value)}
  * 		min={0}
  * 		max={100}
  * 		step={5}
@@ -85,8 +82,6 @@ const Slider: Component<SliderProps> = (props) => {
 		if (normalized.length === expectedLength()) return normalized;
 		return props.thumbs === 2 ? [props.min, props.max] : [props.min];
 	});
-	//* the field has to hold the longest value the range can reach, so a wide
-	//* range does not clip the number it is showing
 	const valueCharacters = createMemo(() => {
 		const stepDecimals = String(props.step).split(".")[1]?.length ?? 0;
 		const bounds = [props.min, props.max].map(

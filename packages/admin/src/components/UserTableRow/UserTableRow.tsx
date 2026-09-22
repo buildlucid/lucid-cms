@@ -69,7 +69,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("update", true);
 					},
 					permission: canUpdateNotSelf(),
-					hide: props.showingDeleted?.() || currentUser(),
+					show: !props.showingDeleted?.() && !currentUser(),
 					sortOrder: 0,
 				},
 				{
@@ -92,7 +92,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("viewLogins", true);
 					},
 					permission: true,
-					hide: props.showingDeleted?.(),
+					show: !props.showingDeleted?.(),
 					sortOrder: 20,
 				},
 				{
@@ -104,7 +104,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("restore", true);
 					},
 					permission: canUpdateNotSelf(),
-					hide: props.showingDeleted?.() === false,
+					show: props.showingDeleted?.() !== false,
 					variant: "primary",
 					sortOrder: 50,
 				},
@@ -117,11 +117,11 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("passwordReset", true);
 					},
 					permission: canUpdateNotSelf(),
-					actionExclude: true,
-					hide:
-						props.showingDeleted?.() ||
-						!props.passwordAuthEnabled ||
-						currentUser(),
+					excludeFromRowClick: true,
+					show:
+						!props.showingDeleted?.() &&
+						props.passwordAuthEnabled === true &&
+						!currentUser(),
 					variant: "primary",
 					sortOrder: 55,
 				},
@@ -134,9 +134,10 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("resendInvitation", true);
 					},
 					permission: canUpdateNotSelf(),
-					hide:
-						props.showingDeleted?.() || props.user.invitationAccepted !== false,
-					actionExclude: true,
+					show:
+						!props.showingDeleted?.() &&
+						props.user.invitationAccepted === false,
+					excludeFromRowClick: true,
 					variant: "primary",
 					sortOrder: 60,
 				},
@@ -149,8 +150,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("createIntegration", true);
 					},
 					permission: userStore.get.user?.superAdmin === true,
-					hide: props.showingDeleted?.(),
-					actionExclude: true,
+					show: !props.showingDeleted?.(),
+					excludeFromRowClick: true,
 					sortOrder: 30,
 				},
 				{
@@ -162,9 +163,9 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("revokeRefreshTokens", true);
 					},
 					permission: canRevokeRefreshTokens(),
-					actionExclude: true,
-					hide: props.showingDeleted?.() || currentUser(),
-					variant: "error",
+					excludeFromRowClick: true,
+					show: !props.showingDeleted?.() && !currentUser(),
+					variant: "danger",
 					sortOrder: 70,
 				},
 				{
@@ -176,9 +177,9 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("delete", true);
 					},
 					permission: canDeleteNotSelf(),
-					actionExclude: true,
-					hide: props.showingDeleted?.() || currentUser(),
-					variant: "error",
+					excludeFromRowClick: true,
+					show: !props.showingDeleted?.() && !currentUser(),
+					variant: "danger",
 					sortOrder: 80,
 				},
 				{
@@ -190,9 +191,9 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("deletePermanently", true);
 					},
 					permission: canDeleteNotSelf(),
-					hide: props.showingDeleted?.() === false || currentUser(),
-					actionExclude: true,
-					variant: "error",
+					show: props.showingDeleted?.() !== false && !currentUser(),
+					excludeFromRowClick: true,
+					variant: "danger",
 					sortOrder: 90,
 				},
 			]}
@@ -200,7 +201,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 			<UserIdentityCell column="user" user={props.user} username={username()} />
 			<Table.Text
 				column="name"
-				text={helpers.formatUserName(props.user, "simple") || "-"}
+				text={helpers.formatUserName(props.user, "name") || "-"}
 			/>
 			<Table.Text
 				column="superAdmin"

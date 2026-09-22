@@ -11,20 +11,10 @@ export type { TablePillCellProps } from "./parts/TablePillCell";
 export type { TableRootProps } from "./parts/TableRoot";
 export type { TableRowProps } from "./parts/TableRow";
 export type { TableTextCellProps } from "./parts/TableTextCell";
-export type {
-	TableColumn,
-	TablePadding,
-	TableRowReorder,
-	TableVariant,
-} from "./TableContext";
+export type { TableColumn, TablePadding, TableVariant } from "./TableContext";
 
 /**
- * A sortable, selectable data table. Cells name the column they belong to, so
- * the table can hide a column, set its padding and remember the viewer's
- * choices without the rows passing anything down.
- *
- * Wrap it in a QueryBoundary to cover the error and empty cases, and pair it
- * with QueryToolbar and Pagination for filtering, sorting and paging.
+ * A data table with sorting, row actions, row selection and column visibility.
  *
  * @example
  * ```tsx
@@ -35,25 +25,27 @@ export type {
  *
  * return (
  * 	<Table.Root
- * 		id="reports.list"
- * 		rowCount={reports.data?.data.length ?? 0}
- * 		isLoading={reports.isFetching}
+ * 		id="redirects"
+ * 		rowCount={redirects.data?.data.length ?? 0}
+ * 		loading={redirects.isFetching}
  * 		queryState={queryState}
- * 		head={[
- * 			{ key: "name", label: t("common.name"), sortable: true },
+ * 		columns={[
+ * 			{ key: "from", label: t("redirects.from"), sortable: true },
  * 			{ key: "status", label: t("common.status") },
  * 			{ key: "createdAt", label: t("common.created.at"), sortable: true },
  * 		]}
  * 	>
- * 		<Index each={reports.data?.data ?? []}>
- * 			{(report, index) => (
+ * 		<Index each={redirects.data?.data}>
+ * 			{(redirect, index) => (
  * 				<Table.Row
  * 					index={index}
- * 					actions={[{ type: "button", label: t("common.edit"), onClick: () => edit(report().id) }]}
+ * 					actions={[
+ * 						{ type: "button", label: t("common.edit"), icon: "pen", onClick: () => edit(redirect().id) },
+ * 					]}
  * 				>
- * 					<Table.Text column="name" text={report().name} />
- * 					<Table.Pill column="status" text={report().status} variant="primary-subtle" />
- * 					<Table.Date column="createdAt" date={report().createdAt} />
+ * 					<Table.Text column="from" text={redirect().from} />
+ * 					<Table.Pill column="status" text={redirect().status} />
+ * 					<Table.Date column="createdAt" date={redirect().createdAt} />
  * 				</Table.Row>
  * 			)}
  * 		</Index>

@@ -13,7 +13,6 @@ import {
 import Field from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
-/** The text-like input types this component styles. */
 export type InputType =
 	| "text"
 	| "color"
@@ -38,23 +37,19 @@ export interface InputProps
 	value: string;
 	onChange: (_value: string) => void;
 	label?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
-	/** Adds a hover card next to the control. */
+	/** Help text shown in a tooltip beside the input. */
 	tooltip?: string;
 	errors?: ErrorResult | FieldError;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-input-control] for the input itself. */
+	/** Applied to the field. Target `[data-input-control]` for the input. */
 	class?: string;
 }
 
 /**
- * A labelled text input, with its description and any validation errors.
- * Password inputs get a reveal toggle. Every other input attribute, such as
- * placeholder, required, min or autocomplete, passes through to the element.
+ * A text input with a label, description and validation errors. Other input
+ * attributes are passed to the `<input>`.
  *
  * @example
  * ```tsx
@@ -72,7 +67,6 @@ export interface InputProps
  * 		value={email()}
  * 		onChange={setEmail}
  * 		required
- * 		errors={getBodyError("email", update.errors)}
  * 	/>
  * );
  * ```

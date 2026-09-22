@@ -3,18 +3,16 @@ import { type Component, type JSXElement, Show } from "solid-js";
 import { useTableContext } from "@/components/Table/TableContext";
 
 export interface TableCellProps {
-	/** Head key this cell belongs to. It hides when that column is toggled off. */
+	/** The key of the column this cell belongs to. */
 	column?: string;
 	width?: number;
-	minWidth?: number;
-	/** Drops the default minimum width, for narrow icon or action columns. */
-	noMinWidth?: boolean;
-	/** Applied to the cell. */
+	/** Pass `false` to remove the default minimum width. */
+	minWidth?: number | false;
 	class?: string;
 	children?: JSXElement;
 }
 
-/** A body cell. Use it when none of the typed cells fit. */
+/** A table cell for any content. */
 const TableCell: Component<TableCellProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -45,11 +43,9 @@ const TableCell: Component<TableCellProps> = (props) => {
 						"min-h-[56.5px] py-2 text-base text-subtitle flex items-center",
 						{
 							"w-full":
-								props.minWidth !== undefined || props.width !== undefined,
+								typeof props.minWidth === "number" || props.width !== undefined,
 							"w-full min-w-37.5":
-								props.width === undefined &&
-								props.minWidth === undefined &&
-								!props.noMinWidth,
+								props.width === undefined && props.minWidth === undefined,
 						},
 					)}
 				>

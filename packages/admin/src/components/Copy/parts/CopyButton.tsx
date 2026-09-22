@@ -4,13 +4,13 @@ import { type Component, createSignal, onCleanup } from "solid-js";
 import { copyValue } from "../copyValue";
 
 export interface CopyButtonProps {
-	/** What lands on the clipboard. */
 	value: string;
-	/** The text on the button. @default the value */
+	/** Text shown instead of the value. */
 	label?: string;
 	class?: string;
 }
 
+/** Text that copies the value when clicked. */
 export const CopyButton: Component<CopyButtonProps> = (props) => {
 	// ----------------------------------------
 	// State
@@ -20,7 +20,6 @@ export const CopyButton: Component<CopyButtonProps> = (props) => {
 	// ----------------------------------------
 	// Functions
 	const copy = (e: Event) => {
-		//* cards and rows below this treat a click as "open me"
 		e.stopPropagation();
 		copyValue(props.value);
 		setCopied(true);

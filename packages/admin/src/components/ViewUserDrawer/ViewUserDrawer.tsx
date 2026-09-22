@@ -157,7 +157,7 @@ const ViewUserPanelContent: Component<{
 					{ value: "details", label: T()("common.details") },
 					{ value: "meta", label: T()("common.meta") },
 				]}
-				active={activeTab()}
+				value={activeTab()}
 				onChange={setActiveTab}
 			/>
 			<Show when={activeTab() === "details"}>

@@ -6,38 +6,22 @@ import T from "@/translations";
 export interface DrawerTabItem<T extends string = string> {
 	value: T;
 	label: string;
-	/** Marks the tab when one of its fields has failed validation. */
-	hasError?: boolean;
+	/** Shows the invalid style, such as when a field in the tab has errors. */
+	invalid?: boolean;
 	/** @default true */
 	show?: boolean;
 }
 
 export interface DrawerTabsProps<T extends string = string> {
 	items: DrawerTabItem<T>[];
-	active: T;
+	value: T;
 	onChange: (_value: T) => void;
 	class?: string;
 }
 
 /**
- * Splits a drawer's content into sections. Shows a row of tabs on wide
- * screens and a select on narrow ones.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Drawer.Tabs
- * 		items={[
- * 			{ value: "details", label: "Details" },
- * 			{ value: "permissions", label: "Permissions", hasError: hasErrors() },
- * 		]}
- * 		active={tab()}
- * 		onChange={setTab}
- * 	/>
- * );
- * ```
+ * Tabs for switching between sections of the drawer. Shown as a select on small
+ * screens.
  */
 export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 	// ----------------------------------
@@ -50,7 +34,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 		props.items.filter((item) => item.show ?? true),
 	);
 	const activeItem = createMemo(() =>
-		visibleItems().find((item) => item.value === props.active),
+		visibleItems().find((item) => item.value === props.value),
 	);
 
 	// ----------------------------------
@@ -64,17 +48,17 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 				<Select
 					id={`drawer-tabs-${selectId}`}
 					name={`drawer-tabs-${selectId}`}
-					value={props.active}
+					value={props.value}
 					onChange={(value) => {
 						if (typeof value === "string") props.onChange(value);
 					}}
 					options={visibleItems()}
 					aria-label={T()("common.section")}
-					hasError={activeItem()?.hasError}
+					invalid={activeItem()?.invalid}
 					renderValue={({ option }) => (
 						<span
 							class={classNames("truncate", {
-								"text-error-base": option.hasError,
+								"text-error-base": option.invalid,
 							})}
 						>
 							{option.label}
@@ -83,7 +67,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 					renderOption={({ option }) => (
 						<span
 							class={classNames({
-								"text-error-base": option.hasError,
+								"text-error-base": option.invalid,
 							})}
 						>
 							{option.label}
@@ -99,11 +83,11 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 							class={classNames(
 								"border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base transition-colors duration-200",
 								{
-									"border-primary-base text-title": props.active === item.value,
+									"border-primary-base text-title": props.value === item.value,
 									"border-transparent text-body hover:border-primary-base":
-										props.active !== item.value && !item.hasError,
+										props.value !== item.value && !item.invalid,
 									"border-error-base text-error-base":
-										props.active !== item.value && item.hasError,
+										props.value !== item.value && item.invalid,
 								},
 							)}
 							onClick={() => props.onChange(item.value)}

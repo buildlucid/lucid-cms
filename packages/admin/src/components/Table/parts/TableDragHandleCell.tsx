@@ -12,7 +12,7 @@ const TableDragHandleCell: Component<TableDragHandleCellProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<TableCell width={40} noMinWidth>
+		<TableCell width={40} minWidth={false}>
 			<button
 				type="button"
 				draggable={true}

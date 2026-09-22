@@ -59,10 +59,10 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					label: T()("preview.copy.group"),
 					icon: "link",
 					onClick: props.preview.onCopy,
-					hide: !props.preview.available,
+					show: props.preview.available,
 					permission: props.preview.permission,
-					isLoading: props.preview.loading,
-					actionExclude: true,
+					loading: props.preview.loading,
+					excludeFromRowClick: true,
 					sortOrder: 10,
 				},
 				{
@@ -70,9 +70,9 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					label: T()("common.approve"),
 					icon: "check",
 					onClick: () => props.callbacks.openDecision(props.request, "approve"),
-					hide:
-						props.request.status !== "pending" ||
-						props.request.permissions.review !== true,
+					show:
+						props.request.status === "pending" &&
+						props.request.permissions.review === true,
 					variant: "primary",
 					sortOrder: 50,
 				},
@@ -81,10 +81,10 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					label: T()("common.reject"),
 					icon: "ban",
 					onClick: () => props.callbacks.openDecision(props.request, "reject"),
-					hide:
-						props.request.status !== "pending" ||
-						props.request.permissions.review !== true,
-					variant: "error",
+					show:
+						props.request.status === "pending" &&
+						props.request.permissions.review === true,
+					variant: "danger",
 					sortOrder: 70,
 				},
 				{
@@ -94,7 +94,7 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 						: T()("common.schedule"),
 					icon: "calendar",
 					onClick: () => props.callbacks.openSchedule(props.request),
-					hide: props.request.permissions.reschedule !== true,
+					show: props.request.permissions.reschedule === true,
 					sortOrder: 30,
 				},
 				{
@@ -102,7 +102,7 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					label: T()("actions.update.reviewers"),
 					icon: "users",
 					onClick: () => props.callbacks.openReviewers(props.request),
-					hide: props.request.permissions.updateReviewers !== true,
+					show: props.request.permissions.updateReviewers === true,
 					sortOrder: 40,
 				},
 				{
@@ -110,7 +110,7 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					label: T()("common.retry.release"),
 					icon: "rotate",
 					onClick: () => props.callbacks.retry(props.request),
-					hide: props.request.permissions.retry !== true,
+					show: props.request.permissions.retry === true,
 					variant: "primary",
 					sortOrder: 60,
 				},
@@ -119,8 +119,8 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					label: T()("common.cancel"),
 					icon: "ban",
 					onClick: () => props.callbacks.openDecision(props.request, "cancel"),
-					hide: props.request.permissions.cancel !== true,
-					variant: "error",
+					show: props.request.permissions.cancel === true,
+					variant: "danger",
 					sortOrder: 80,
 				},
 			]}

@@ -26,7 +26,7 @@ const TableLoadingRow: Component<TableLoadingRowProps> = (props) => {
 			})}
 		>
 			<Show when={props.hasReorderColumn}>
-				<TableCell width={40} noMinWidth>
+				<TableCell width={40} minWidth={false}>
 					<div class="w-full h-5 skeleton" />
 				</TableCell>
 			</Show>
@@ -42,7 +42,7 @@ const TableLoadingRow: Component<TableLoadingRowProps> = (props) => {
 					</TableCell>
 				)}
 			</For>
-			<TableCell noMinWidth>
+			<TableCell minWidth={false}>
 				<div class="w-full h-5 skeleton" />
 			</TableCell>
 		</tr>

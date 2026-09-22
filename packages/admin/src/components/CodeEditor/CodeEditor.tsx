@@ -36,32 +36,25 @@ export interface CodeEditorProps extends JSX.AriaAttributes {
 	name: string;
 	value: string;
 	onChange: (_value: string) => void;
-	/** Language the content is highlighted as, such as "json" or "html". */
+	/** Such as "json" or "html". */
 	language: string;
-	/** Offers a switcher in the toolbar. Without it there is no toolbar. */
+	/** Languages the user can switch between. */
 	languages?: string[];
 	onLanguageChange?: (_language: string) => void;
-	/**
-	 * Marks syntax errors in the gutter and reports the parse error as a field
-	 * error. JSON only for now.
-	 */
+	/** Highlights syntax errors. JSON only. */
 	lint?: boolean;
-	/** Reformats valid content when the editor loses focus. JSON only for now. */
+	/** Formats the content on blur. JSON only. */
 	format?: boolean;
 	label?: string;
-	/** Shown while the editor is empty. */
 	placeholder?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
 	onBlur?: () => void;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-code-editor-control] for the editor. */
+	/** Applied to the field. Target `[data-code-editor-control]` for the editor. */
 	class?: string;
 }
 
@@ -69,9 +62,8 @@ const CODE_EDITOR_MIN_HEIGHT = "9rem";
 const isBlank = (value: string) => value.trim() === "";
 
 /**
- * A code editor with syntax highlighting, line numbers and an optional
- * language switcher. Give it `lint` to flag syntax errors as you type, and
- * `format` to tidy the content when it loses focus.
+ * A code editor with syntax highlighting, a label, description and validation
+ * errors.
  *
  * @example
  * ```tsx
@@ -82,14 +74,14 @@ const isBlank = (value: string) => value.trim() === "";
  *
  * return (
  * 	<CodeEditor
- * 		id="payload"
- * 		name="payload"
- * 		label={t("common.document.payload")}
+ * 		id="schema"
+ * 		name="schema"
+ * 		label={t("structured.data")}
  * 		language="json"
+ * 		value={schema()}
+ * 		onChange={setSchema}
  * 		lint
  * 		format
- * 		value={payload()}
- * 		onChange={setPayload}
  * 	/>
  * );
  * ```
@@ -127,7 +119,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 	const code = createMemo(() =>
 		typeof props.value === "string" ? props.value : "",
 	);
-	/** A toolbar earns its space only when there is something to switch between. */
+	/** Only shown when there are languages to switch between. */
 	const showToolbar = createMemo(() => (props.languages?.length ?? 0) > 1);
 	const languageOptions = createMemo(() =>
 		(props.languages ?? []).map((language) => ({
@@ -140,7 +132,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 			languageOptions().find((option) => option.value === props.language)
 				?.label ?? getCodeLanguageLabel(props.language),
 	);
-	/** A syntax error outranks a server error: it is why nothing was saved. */
+	/** Syntax errors take priority over server errors. */
 	const displayErrors = createMemo(() => {
 		const local = parseError();
 		if (local) {
@@ -281,7 +273,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 				});
 			});
 	});
-	//* the linter is pulled in on demand, the same way languages are
+	//* load the linter on demand, like languages
 	let lintLoadId = 0;
 	createEffect(() => {
 		const view = editorView();
@@ -378,7 +370,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 								<span class="truncate">{selectedLanguageLabel()}</span>
 								<FaSolidChevronDown size={10} class="text-current" />
 							</Menu.Trigger>
-							<Menu.Content class="z-70" scrollable flush>
+							<Menu.Content class="z-70" scrollable>
 								<For each={languageOptions()}>
 									{(option) => (
 										<Menu.Item

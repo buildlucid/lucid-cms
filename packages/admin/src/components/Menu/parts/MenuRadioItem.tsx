@@ -6,12 +6,11 @@ import { menuItemClasses } from "@/components/Menu/itemClasses";
 export interface MenuRadioItemProps {
 	value: string;
 	disabled?: boolean;
-	/** Applied to the item. */
 	class?: string;
 	children: JSXElement;
 }
 
-/** One choice inside a Menu.RadioGroup, ticked when it is the current value. */
+/** A radio item within `Menu.RadioGroup`. */
 const MenuRadioItem: Component<MenuRadioItemProps> = (props) => {
 	// ----------------------------------------
 	// Render

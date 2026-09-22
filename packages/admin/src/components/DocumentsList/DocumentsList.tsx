@@ -383,10 +383,10 @@ export const DocumentsList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				isError={documents.isError}
-				isEmpty={documents.data?.data.length === 0}
+				error={documents.isError}
+				empty={documents.data?.data.length === 0}
 				queryState={props.state.searchParams}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={noEntriesCopy()?.title}
 						description={noEntriesCopy()?.description}
@@ -409,7 +409,7 @@ export const DocumentsList: Component<{
 					id={`documents.list.${props.state.collection?.key}`}
 					rowCount={documents.data?.data.length || 0}
 					queryState={props.state.searchParams}
-					head={[
+					columns={[
 						...getTableHeadColumns(),
 						...getCustomHeadColumns(),
 						...environmentHeadColumns(),
@@ -434,8 +434,8 @@ export const DocumentsList: Component<{
 							sortable: !props.state.orderMode(),
 						},
 					]}
-					isLoading={documents.isFetching || props.state.isLoading}
-					isSelectable={rowsAreSelectable()}
+					loading={documents.isFetching || props.state.isLoading}
+					selectable={rowsAreSelectable()}
 					allowRestore={props.state.showingDeleted() && canRestoreDocuments()}
 					allowDelete={!props.state.showingDeleted() && canDeleteDocuments()}
 					allowDeletePermanently={
@@ -504,22 +504,22 @@ export const DocumentsList: Component<{
 										label: getActionLabel(T()("preview.copy.group")),
 										type: "group",
 										icon: "link",
-										actionExclude: true,
+										excludeFromRowClick: true,
 										permission: collectionPermissions()?.read
 											? userStore.get.hasPermission([
 													collectionPermissions()?.read,
 												]).some
 											: false,
-										hide:
-											props.state.showingDeleted() ||
-											props.state.collection?.capabilities.preview !== true,
+										show:
+											!props.state.showingDeleted() &&
+											props.state.collection?.capabilities.preview === true,
 										actions: [
 											{
 												label: getActionLabel(T()("preview.copy.scoped")),
 												type: "button",
 												icon: "lock",
 												onClick: () => void copyPreviewUrl(doc().id, "scoped"),
-												isLoading: createPreview.action.isPending,
+												loading: createPreview.action.isPending,
 												permission: collectionPermissions()?.read
 													? userStore.get.hasPermission([
 															collectionPermissions()?.read,
@@ -533,7 +533,7 @@ export const DocumentsList: Component<{
 												icon: "share",
 												onClick: () =>
 													void copyPreviewUrl(doc().id, "perspective"),
-												isLoading: createPreview.action.isPending,
+												loading: createPreview.action.isPending,
 												permission: collectionPermissions()?.read
 													? userStore.get.hasPermission([
 															collectionPermissions()?.read,
@@ -561,7 +561,7 @@ export const DocumentsList: Component<{
 													collectionPermissions()?.update,
 												]).some
 											: false,
-										hide: props.state.showingDeleted(),
+										show: !props.state.showingDeleted(),
 										sortOrder: 0,
 									},
 									{
@@ -581,7 +581,7 @@ export const DocumentsList: Component<{
 													collectionPermissions()?.read,
 												]).some
 											: false,
-										hide: props.state.showingDeleted() === false,
+										show: props.state.showingDeleted() !== false,
 										sortOrder: 10,
 									},
 									{
@@ -593,10 +593,10 @@ export const DocumentsList: Component<{
 											rowTarget.setTrigger("duplicate", true);
 										},
 										permission: canDuplicateDocuments(),
-										hide:
-											props.state.showingDeleted() ||
-											props.state.collection?.locked === true ||
-											props.state.collection?.mode !== "multiple",
+										show:
+											!props.state.showingDeleted() &&
+											props.state.collection?.locked !== true &&
+											props.state.collection?.mode === "multiple",
 										sortOrder: 30,
 									},
 									{
@@ -612,7 +612,7 @@ export const DocumentsList: Component<{
 													collectionPermissions()?.restore,
 												]).all
 											: false,
-										hide: props.state.showingDeleted() === false,
+										show: props.state.showingDeleted() !== false,
 										variant: "primary",
 										sortOrder: 50,
 									},
@@ -629,9 +629,9 @@ export const DocumentsList: Component<{
 													collectionPermissions()?.delete,
 												]).all
 											: false,
-										actionExclude: true,
-										hide: props.state.showingDeleted(),
-										variant: "error",
+										excludeFromRowClick: true,
+										show: !props.state.showingDeleted(),
+										variant: "danger",
 										sortOrder: 70,
 									},
 									{
@@ -647,8 +647,8 @@ export const DocumentsList: Component<{
 													collectionPermissions()?.delete,
 												]).all
 											: false,
-										hide: props.state.showingDeleted?.() === false,
-										variant: "error",
+										show: props.state.showingDeleted?.() !== false,
+										variant: "danger",
 										sortOrder: 80,
 									},
 								]}

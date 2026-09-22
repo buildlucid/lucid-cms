@@ -53,10 +53,10 @@ export const EmailsList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				isError={emails.isError}
-				isEmpty={emails.data?.data.length === 0}
+				error={emails.isError}
+				empty={emails.data?.data.length === 0}
 				queryState={props.state.searchParams}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.emails.title")}
 						description={T()("empty.states.emails.description")}
@@ -68,7 +68,7 @@ export const EmailsList: Component<{
 					id="emails.list.v2"
 					rowCount={emails.data?.data.length || 0}
 					queryState={props.state.searchParams}
-					head={[
+					columns={[
 						{
 							label: T()("common.status"),
 							key: "currentStatus",
@@ -120,7 +120,7 @@ export const EmailsList: Component<{
 							minWidth: 170,
 						},
 					]}
-					isLoading={emails.isFetching}
+					loading={emails.isFetching}
 				>
 					<Index each={emails.data?.data || []}>
 						{(email, i) => (

@@ -82,7 +82,7 @@ const PublishRequestRow: Component<{
 					<div class="mt-1 flex min-w-0 items-center gap-1 text-[11px] text-unfocused">
 						<Show when={isPendingRequest()}>
 							<span class="truncate">
-								{helpers.formatUserName(props.request.requestedBy, "simple") ||
+								{helpers.formatUserName(props.request.requestedBy, "name") ||
 									"-"}
 							</span>
 							<span aria-hidden="true">·</span>

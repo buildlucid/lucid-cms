@@ -1220,7 +1220,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 			error={
 				panelFetchState().isError ? T()("errors.generic.message") : undefined
 			}
-			useDefaultLocale={panelMode() === "create"}
+			initialLocale={panelMode() === "create" ? "default" : "active"}
 			onReset={() => {
 				createMedia.reset();
 				createPosterMedia.reset();
@@ -1246,7 +1246,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 				<>
 					<Drawer.Header>
 						<Drawer.Title>{panelContent().title}</Drawer.Title>
-						<Drawer.LocaleSelect hasError={hasTranslationErrors()} />
+						<Drawer.LocaleSelect invalid={hasTranslationErrors()} />
 					</Drawer.Header>
 					<Drawer.Form onSubmit={onSubmit}>
 						<Drawer.Body class="flex flex-col gap-3">
@@ -1255,9 +1255,9 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 								items={visibleTabs().map((tab) => ({
 									value: tab,
 									label: tabLabel(tab),
-									hasError: tabHasError(tab),
+									invalid: tabHasError(tab),
 								}))}
-								active={activeTab()}
+								value={activeTab()}
 								onChange={setActiveTab}
 							/>
 							<Show when={activeTab() === "details"}>
@@ -1635,7 +1635,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 									<Show when={posterUploadActive()}>
 										<div class="absolute inset-x-0 bottom-0 z-20">
 											<ProgressBar
-												progress={posterUploadProgress()}
+												value={posterUploadProgress()}
 												size="md"
 												square
 											/>

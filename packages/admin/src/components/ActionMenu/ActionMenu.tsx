@@ -10,9 +10,13 @@ import Menu, {
 } from "@/components/Menu/Menu";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
+import {
+	checkPermission,
+	type PermissionRequirement,
+	showNoPermissionToast,
+} from "@/utils/permission-requirement";
 import spawnToast from "@/utils/spawn-toast";
 
-/** What an item does when it is chosen. */
 export type ActionMenuItemType = "button" | "link" | "group";
 
 export interface ActionMenuItem {
@@ -23,35 +27,31 @@ export interface ActionMenuItem {
 	href?: string;
 	target?: "_blank" | "_self";
 	rel?: string;
-	/** Nested items, for type "group". The group hides when they all hide. */
+	/** Nested items, for the `group` type. */
 	actions?: ActionMenuItem[];
-	/** False shows the item but refuses it with a toast. */
-	permission?: boolean;
-	/** Leaves the item out entirely. */
-	hide?: boolean;
-	/** Dims the item and refuses it, optionally with a toast saying why. */
+	/**
+	 * Permission keys the user needs, or a boolean when access is checked
+	 * elsewhere. Without permission, choosing the item shows a toast instead.
+	 */
+	permission?: PermissionRequirement;
+	/** @default true */
+	show?: boolean;
 	disabled?: boolean;
+	/** Shown when a disabled item is chosen. */
 	disabledToast?: {
 		title: string;
 		message?: string;
 		status?: "success" | "error" | "warning" | "info";
 		duration?: number;
 	};
-	isLoading?: boolean;
-	/** Keeps the item out of the row click that runs the first action. */
-	actionExclude?: boolean;
-	/** Colours the item. Reserve "primary" for the one affirmative action. */
+	loading?: boolean;
+	/** Stops a table row click from running this action. */
+	excludeFromRowClick?: boolean;
 	variant?: MenuItemVariant;
-	/**
-	 * Position in the menu, lowest first, ties falling back to the order they
-	 * were given in. The admin's own menus use 0-9 for the main read or edit
-	 * action, 10-29 for other read actions, 30-49 for ordinary changes, 50-69
-	 * for affirmative ones and 70 up for destructive ones.
-	 */
+	/** Items are sorted lowest first. @default 0 */
 	sortOrder?: number;
 }
 
-/** How big the trigger is drawn. */
 export type ActionMenuSize = "sm" | "md";
 
 export interface ActionMenuProps {
@@ -59,7 +59,7 @@ export interface ActionMenuProps {
 	/** @default "sm" */
 	size?: ActionMenuSize;
 	placement?: MenuPlacement;
-	/** Applied to the trigger. */
+	/** Applied to the trigger button. */
 	class?: string;
 }
 
@@ -74,7 +74,7 @@ const getVisibleActions = (actions: ActionMenuItem[]): ActionMenuItem[] =>
 		}))
 		.filter(
 			({ action }) =>
-				action.hide !== true &&
+				action.show !== false &&
 				(action.actions === undefined || action.actions.length > 0),
 		)
 		.sort((a, b) => {
@@ -82,29 +82,33 @@ const getVisibleActions = (actions: ActionMenuItem[]): ActionMenuItem[] =>
 
 			if (orderDiff !== 0) return orderDiff;
 
-			//* ties keep the order they were given in
 			return a.index - b.index;
 		})
 		.map(({ action }) => action);
 
 /**
- * The overflow menu a table row shows against its right edge. Items can be
- * buttons, links or nested groups, and each one can be hidden, disabled, or
- * refused for want of a permission. Build a Menu yourself when you need a
- * trigger or contents of your own.
+ * A menu of actions behind a "more options" button, such as the actions for a
+ * table row.
  *
  * @example
  * ```tsx
  * import { ActionMenu } from "@lucidcms/admin/components";
- * import { useTranslation } from "@lucidcms/admin/hooks";
+ * import { Permissions, useTranslation } from "@lucidcms/admin/hooks";
  *
  * const { t } = useTranslation();
  *
  * return (
  * 	<ActionMenu
  * 		actions={[
- * 			{ type: "button", label: t("common.edit"), icon: "pen", onClick: edit, sortOrder: 0 },
- * 			{ type: "button", label: t("common.delete"), icon: "trash", variant: "error", onClick: remove, sortOrder: 70 },
+ * 			{ type: "button", label: t("common.edit"), icon: "pen", onClick: edit },
+ * 			{
+ * 				type: "button",
+ * 				label: t("common.delete"),
+ * 				icon: "trash",
+ * 				variant: "danger",
+ * 				permission: Permissions.MediaDelete,
+ * 				onClick: remove,
+ * 			},
  * 		]}
  * 	/>
  * );
@@ -118,12 +122,9 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 	// ----------------------------------------
 	// Functions
 	const handleSelect = (action: ActionMenuItem) => {
-		if (action.permission === false) {
-			spawnToast({
-				title: T()("toasts.common.no.permission.title"),
-				message: T()("toasts.common.no.permission.message"),
-				status: "warning",
-			});
+		const access = checkPermission(action.permission);
+		if (!access.permitted) {
+			showNoPermissionToast(access.missing);
 			return;
 		}
 		if (action.disabled === true) {
@@ -181,7 +182,7 @@ const ActionList: Component<{
 					label={action.label}
 					icon={<ActionIcon icon={action.icon} />}
 					variant={action.variant}
-					unavailable={action.permission === false}
+					unavailable={!checkPermission(action.permission).permitted}
 				>
 					<ActionList
 						actions={action.actions ?? []}
@@ -197,12 +198,12 @@ const ActionItem: Component<{
 	action: ActionMenuItem;
 	onSelect: (_action: ActionMenuItem) => void;
 }> = (props) => {
-	//* refused items stay selectable so choosing one can say why
+	//* unavailable items stay selectable so choosing them can show a toast
 	const refused = createMemo(
 		() =>
-			props.action.permission === false ||
+			!checkPermission(props.action.permission).permitted ||
 			props.action.disabled === true ||
-			props.action.isLoading === true,
+			props.action.loading === true,
 	);
 
 	return (
@@ -212,7 +213,7 @@ const ActionItem: Component<{
 			rel={props.action.rel}
 			textValue={props.action.label}
 			icon={<ActionIcon icon={props.action.icon} />}
-			end={props.action.isLoading ? <Spinner size="sm" /> : undefined}
+			end={props.action.loading ? <Spinner size="sm" /> : undefined}
 			variant={props.action.variant}
 			unavailable={refused()}
 			onSelect={() => props.onSelect(props.action)}

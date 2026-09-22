@@ -25,10 +25,10 @@ export const OAuthConnectionsList: Component<{
 	// Functions
 	const content = () => (
 		<QueryBoundary
-			isLoading={connections.isLoading}
-			isError={connections.isError}
-			isEmpty={connections.isSuccess && connections.data.data.length === 0}
-			empty={
+			loading={connections.isLoading}
+			error={connections.isError}
+			empty={connections.isSuccess && connections.data.data.length === 0}
+			emptyFallback={
 				<EmptyState
 					title={T()("oauth.connections.empty.title")}
 					description={T()("oauth.connections.empty.description")}

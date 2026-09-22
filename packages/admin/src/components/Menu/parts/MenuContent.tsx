@@ -6,23 +6,16 @@ import { menuPanelClasses } from "@/components/Menu/panelClasses";
 import { useLayer } from "@/hooks/useLayer/useLayer";
 
 export interface MenuContentProps {
-	/** Widens the menu to match its trigger. */
 	matchTriggerWidth?: boolean;
-	/** Caps the height and scrolls the items inside it. */
+	/** Limits the height and scrolls the items. */
 	scrollable?: boolean;
-	/** Closes the gap between the trigger and the menu. */
-	flush?: boolean;
-	/**
-	 * Draws a hairline between the rows. Turn it off for a list of like
-	 * things, such as a long run of options. @default true
-	 */
+	/** Shows lines between items. @default true */
 	dividers?: boolean;
-	/** Applied to the menu panel. */
 	class?: string;
 	children: JSXElement;
 }
 
-/** The panel the items sit in. */
+/** The menu panel that holds the items. */
 const MenuContent: Component<MenuContentProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -39,17 +32,13 @@ const MenuContent: Component<MenuContentProps> = (props) => {
 					data-drawer-ignore
 					class={classNames(
 						menuPanelClasses(dividers()),
-						{
-							"max-h-60 overflow-y-auto": props.scrollable,
-							"mt-2": !props.flush,
-						},
+						{ "max-h-60 overflow-y-auto": props.scrollable },
 						props.class,
 					)}
 					style={{
 						width: props.matchTriggerWidth
 							? "var(--kb-popper-anchor-width)"
 							: undefined,
-						//* an overlay's own layer keeps whatever it opens above it
 						"z-index": layer ? layer() + 1 : undefined,
 					}}
 				>

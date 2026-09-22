@@ -176,8 +176,7 @@ const DocumentDynamicCell: Component<{
 							column={props.column}
 							date={datetimeValue()}
 							includeTime={field().time !== false}
-							localDateOnly={field().time === false}
-							fullWithTime={field().time !== false}
+							dateOnly={field().time === false}
 						/>
 					)}
 				</Show>

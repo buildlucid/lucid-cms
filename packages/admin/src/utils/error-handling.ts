@@ -3,14 +3,14 @@ import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
 /**
- * An API error. Read errorRes for the status and field errors.
+ * An error from the Lucid API. `errorRes` holds the status and any field errors.
  *
  * @example
  * ```ts
  * import { LucidError } from "@lucidcms/admin/services";
  *
- * if (error instanceof LucidError && error.errorRes.status === 403) {
- *   // Show an access-denied message.
+ * if (error instanceof LucidError && error.errorRes.status === 404) {
+ * 	navigate("/lucid/redirects");
  * }
  * ```
  */

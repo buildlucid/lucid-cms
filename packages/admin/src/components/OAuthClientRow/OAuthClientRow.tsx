@@ -138,7 +138,7 @@ const OAuthClientRow: Component<{
 								label: T()("common.update"),
 								icon: "pen",
 								onClick: () => setUpdateOpen(true),
-								hide: !props.canUpdate,
+								show: props.canUpdate,
 								sortOrder: 0,
 							},
 							{
@@ -146,20 +146,20 @@ const OAuthClientRow: Component<{
 								label: T()("oauth.clients.secret.regenerate.action"),
 								icon: "rotate",
 								onClick: () => setRegenerateOpen(true),
-								hide:
-									!props.canRegenerate ||
-									props.client.authMethod !== "client_secret_basic",
+								show:
+									props.canRegenerate &&
+									props.client.authMethod === "client_secret_basic",
 								sortOrder: 70,
-								variant: "error",
+								variant: "danger",
 							},
 							{
 								type: "button",
 								label: T()("common.delete"),
 								icon: "trash",
 								onClick: () => setDeleteOpen(true),
-								hide: !props.canDelete,
+								show: props.canDelete,
 								sortOrder: 80,
-								variant: "error",
+								variant: "danger",
 							},
 						]}
 					/>

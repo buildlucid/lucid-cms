@@ -96,9 +96,9 @@ export const JobSchedulesList: Component = () => {
 				padding="sm"
 			/>
 			<QueryBoundary
-				isError={schedules.isError}
-				isEmpty={schedules.data?.data.length === 0}
-				empty={
+				error={schedules.isError}
+				empty={schedules.data?.data.length === 0}
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.job.schedules.title")}
 						description={T()("empty.states.job.schedules.description")}
@@ -115,7 +115,7 @@ export const JobSchedulesList: Component = () => {
 					id="jobs.schedules.list"
 					rowCount={schedules.data?.data.length ?? 0}
 					queryState={searchParams}
-					head={[
+					columns={[
 						{
 							label: T()("common.status"),
 							key: "state",
@@ -147,7 +147,7 @@ export const JobSchedulesList: Component = () => {
 							icon: <FaSolidCircleCheck />,
 						},
 					]}
-					isLoading={schedules.isFetching}
+					loading={schedules.isFetching}
 					padding="sm"
 					variant="contained"
 				>

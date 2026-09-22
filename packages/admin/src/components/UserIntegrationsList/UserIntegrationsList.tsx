@@ -69,12 +69,12 @@ export const UserIntegrationsList: Component<{
 						description={T()("user.integrations.manage.description")}
 					>
 						<QueryBoundary
-							isLoading={integrations.isLoading}
-							isError={integrations.isError}
-							isEmpty={
+							loading={integrations.isLoading}
+							error={integrations.isError}
+							empty={
 								integrations.isSuccess && integrations.data.data.length === 0
 							}
-							empty={
+							emptyFallback={
 								<EmptyState
 									title={T()("empty.states.integrations.title")}
 									description={T()(
@@ -127,12 +127,12 @@ export const UserIntegrationsList: Component<{
 					fallback={
 						<>
 							<QueryBoundary
-								isLoading={integrations.isLoading}
-								isError={integrations.isError}
-								isEmpty={
+								loading={integrations.isLoading}
+								error={integrations.isError}
+								empty={
 									integrations.isSuccess && integrations.data.data.length === 0
 								}
-								empty={
+								emptyFallback={
 									<EmptyState
 										title={T()("empty.states.integrations.title")}
 										description={T()(
@@ -188,13 +188,13 @@ export const UserIntegrationsList: Component<{
 							>
 								<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
 									<QueryBoundary
-										isLoading={integrations.isLoading}
-										isError={integrations.isError}
-										isEmpty={
+										loading={integrations.isLoading}
+										error={integrations.isError}
+										empty={
 											integrations.isSuccess &&
 											integrations.data.data.length === 0
 										}
-										empty={
+										emptyFallback={
 											<EmptyState
 												title={T()("empty.states.integrations.title")}
 												description={T()(

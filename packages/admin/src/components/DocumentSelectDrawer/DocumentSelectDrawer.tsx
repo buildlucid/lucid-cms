@@ -556,12 +556,12 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				fallback={
 					<>
 						<QueryBoundary
-							isLoading={collectionIsLoading()}
-							isError={documents.isError || collectionIsError()}
-							isEmpty={documents.data?.data.length === 0}
+							loading={collectionIsLoading()}
+							error={documents.isError || collectionIsError()}
+							empty={documents.data?.data.length === 0}
 							queryState={searchParams}
 							onResetFilters={searchParams.clearFilters}
-							empty={
+							emptyFallback={
 								<EmptyState
 									title={T()("empty.states.documents.title", {
 										collectionMultiple: collectionName(),
@@ -583,7 +583,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 								id={`documents.list.${activeCollection()?.key ?? ""}`}
 								rowCount={documents.data?.data.length || 0}
 								queryState={searchParams}
-								head={[
+								columns={[
 									{
 										label: "",
 										key: "select",
@@ -608,7 +608,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 										icon: <FaSolidCalendar />,
 									},
 								]}
-								isLoading={documents.isFetching}
+								loading={documents.isFetching}
 								padding="sm"
 								variant="secondary"
 							>

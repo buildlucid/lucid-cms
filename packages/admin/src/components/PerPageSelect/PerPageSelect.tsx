@@ -6,7 +6,7 @@ import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
 export interface PerPageSelectProps {
-	/** Page sizes to offer. @default [10, 25, 50] */
+	/** @default [10, 25, 50] */
 	options?: number[];
 	queryState: QueryStateResponse;
 	disabled?: boolean;
@@ -14,14 +14,13 @@ export interface PerPageSelectProps {
 }
 
 /**
- * A menu for how many rows a page shows. Changing the size returns to the
- * first page.
+ * A menu for choosing how many results to show per page.
  *
  * @example
  * ```tsx
  * import { PerPageSelect } from "@lucidcms/admin/components";
  *
- * return <PerPageSelect queryState={queryState} options={[10, 20, 40]} />;
+ * return <PerPageSelect queryState={queryState} options={[20, 50, 100]} />;
  * ```
  */
 const PerPageSelect: Component<PerPageSelectProps> = (props) => {

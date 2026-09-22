@@ -35,16 +35,16 @@ export const DocumentActions: Component<{
 			label: getActionLabel(T()("preview.copy.group")),
 			type: "button",
 			icon: "link",
-			hide: props.preview === undefined || props.preview.scopedOnly !== true,
+			show: props.preview !== undefined && props.preview.scopedOnly === true,
 			permission: props.preview?.permission,
-			isLoading: props.preview?.loading,
+			loading: props.preview?.loading,
 			onClick: () => props.preview?.onCopy("scoped"),
 		},
 		{
 			label: getActionLabel(T()("preview.copy.group")),
 			type: "group",
 			icon: "link",
-			hide: props.preview === undefined || props.preview.scopedOnly,
+			show: props.preview !== undefined && !props.preview.scopedOnly,
 			permission: props.preview?.permission,
 			actions: [
 				{
@@ -52,7 +52,7 @@ export const DocumentActions: Component<{
 					type: "button",
 					icon: "lock",
 					permission: props.preview?.permission,
-					isLoading: props.preview?.loading,
+					loading: props.preview?.loading,
 					onClick: () => props.preview?.onCopy("scoped"),
 				},
 				{
@@ -60,7 +60,7 @@ export const DocumentActions: Component<{
 					type: "button",
 					icon: "share",
 					permission: props.preview?.permission,
-					isLoading: props.preview?.loading,
+					loading: props.preview?.loading,
 					onClick: () => props.preview?.onCopy("perspective"),
 				},
 			],
@@ -69,7 +69,7 @@ export const DocumentActions: Component<{
 			label: getActionLabel(T()("common.duplicate")),
 			type: "button",
 			icon: "copy",
-			hide: props.duplicate === undefined,
+			show: props.duplicate !== undefined,
 			permission: props.duplicate?.permission,
 			disabled: props.duplicate?.disabled,
 			disabledToast: {
@@ -82,9 +82,9 @@ export const DocumentActions: Component<{
 			label: getActionLabel(T()("common.delete")),
 			type: "button",
 			icon: "trash",
-			hide: props.onDelete === undefined,
+			show: props.onDelete !== undefined,
 			permission: props.deletePermission,
-			variant: "error",
+			variant: "danger",
 			onClick: props.onDelete,
 		},
 	];

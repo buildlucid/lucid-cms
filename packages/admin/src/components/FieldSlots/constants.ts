@@ -1,3 +1,4 @@
+/** Slots that plugins can render into before or after a field. */
 export const fieldSlotKeys = {
 	before: "field.before",
 	after: "field.after",

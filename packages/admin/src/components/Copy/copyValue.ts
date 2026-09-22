@@ -1,11 +1,7 @@
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
 
-/**
- * Puts a value on the clipboard and tells the reader it happened. The browser
- * refuses when the page is not trusted or permission is withheld, so the
- * failure is reported rather than left to reject on its own.
- */
+/** Copies a value to the clipboard and shows a toast with the result. */
 export const copyValue = (value: string): void => {
 	navigator.clipboard
 		.writeText(value)

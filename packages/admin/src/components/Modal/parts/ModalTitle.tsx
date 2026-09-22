@@ -7,17 +7,7 @@ export interface ModalTitleProps {
 	children: JSXElement;
 }
 
-/**
- * The modal's heading. Use it instead of your own heading element so screen
- * readers announce the modal by name.
- *
- * @example
- * ```tsx
- * import { Modal } from "@lucidcms/admin/components";
- *
- * return <Modal.Title>Delete user</Modal.Title>;
- * ```
- */
+/** The modal's title, announced by screen readers. */
 export const ModalTitle: Component<ModalTitleProps> = (props) => {
 	// ----------------------------------------
 	// Render

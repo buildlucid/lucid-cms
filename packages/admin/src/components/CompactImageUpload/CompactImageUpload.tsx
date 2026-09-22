@@ -296,7 +296,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 				<Show when={props.progress?.active}>
 					<div class="absolute inset-x-0 bottom-0">
 						<ProgressBar
-							progress={props.progress?.value ?? 0}
+							value={props.progress?.value ?? 0}
 							variant="primary-subtle"
 							size="md"
 							square

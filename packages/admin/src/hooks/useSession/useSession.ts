@@ -5,7 +5,7 @@ import userStore from "@/store/userStore/userStore";
 import { LucidError } from "@/utils/error-handling";
 
 /**
- * Returns the current user and sign-in status without redirecting.
+ * Returns the current user and their sign-in status.
  *
  * @example
  * ```tsx
@@ -13,11 +13,7 @@ import { LucidError } from "@/utils/error-handling";
  *
  * const session = useSession();
  *
- * return (
- *   <p>
- *     {session.status() === "authenticated" ? "Signed in" : "Not signed in"}
- *   </p>
- * );
+ * return <p>{session.user()?.email}</p>;
  * ```
  */
 export const useSession = () => {

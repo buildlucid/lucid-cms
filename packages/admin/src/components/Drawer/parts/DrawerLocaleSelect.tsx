@@ -4,27 +4,13 @@ import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleS
 import { useDrawerContext } from "../DrawerContext";
 
 export interface DrawerLocaleSelectProps {
-	/** Marks the select when another locale has a validation error. */
-	hasError?: boolean;
+	/** Shows the invalid style, such as when another locale has errors. */
+	invalid?: boolean;
 	class?: string;
 }
 
 /**
- * Switches the content locale the drawer is editing. Render it inside
- * Drawer.Header, and read the choice from the function you pass to
- * Drawer.Root. It hides itself when there is only one locale.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Drawer.Header>
- * 		<Drawer.Title>Edit media</Drawer.Title>
- * 		<Drawer.LocaleSelect hasError={hasTranslationErrors()} />
- * 	</Drawer.Header>
- * );
- * ```
+ * Switches the drawer's content locale. Hidden when there is only one locale.
  */
 export const DrawerLocaleSelect: Component<DrawerLocaleSelectProps> = (
 	props,
@@ -46,7 +32,7 @@ export const DrawerLocaleSelect: Component<DrawerLocaleSelectProps> = (
 					locales={locales()}
 					value={locale()}
 					setValue={setLocale}
-					hasError={props.hasError}
+					invalid={props.invalid}
 					showShortcut={true}
 				/>
 			</div>

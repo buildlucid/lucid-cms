@@ -7,10 +7,7 @@ import Field from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 /**
- * How the control is drawn. The button variants put the tick inside a bordered
- * box the height of a small button, so it sits in a toolbar beside one; the
- * ones naming a colour fill with it once ticked, while plain button stays
- * neutral.
+ * The button variants draw the checkbox as a box that lines up with buttons.
  */
 export type CheckboxVariant =
 	| "default"
@@ -24,26 +21,22 @@ export interface CheckboxProps {
 	name?: string;
 	value: boolean;
 	onChange: (_value: boolean) => void;
-	/** Sits beside the tick, and says what ticking the box means. */
 	label?: string;
 	/** @default "default" */
 	variant?: CheckboxVariant;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
-	/** Adds a hover card beside the control. */
+	/** Help text shown in a tooltip beside the checkbox. */
 	tooltip?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	/** Applied to the field. Target [data-checkbox-control] for the tick box. */
+	/** Applied to the field. Target `[data-checkbox-control]` for the box. */
 	class?: string;
 }
 
 /**
- * A tick box with its label beside it, plus any description and validation
- * errors underneath.
+ * A checkbox with a label, description and validation errors.
  *
  * @example
  * ```tsx
@@ -54,11 +47,10 @@ export interface CheckboxProps {
  *
  * return (
  * 	<Checkbox
- * 		id="recursive"
- * 		name="recursive"
- * 		label={t("media.folders.delete.recursive.label")}
- * 		value={recursive()}
- * 		onChange={setRecursive}
+ * 		id="notify"
+ * 		label={t("notify.on.publish")}
+ * 		value={notify()}
+ * 		onChange={setNotify}
  * 	/>
  * );
  * ```
@@ -72,7 +64,6 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 	// Derived State
 	const boxed = () =>
 		props.variant !== undefined && props.variant !== "default";
-	/** Only the variants naming a colour take one, and only once ticked. */
 	const coloured = () => boxed() && props.variant !== "button";
 	const filled = () => coloured() && props.value;
 

@@ -7,11 +7,7 @@ import {
 	splitProps,
 } from "solid-js";
 
-/**
- * Solid variants read as a state, the subtle ones as a quiet label. The
- * workflow palette matches the stage colours a collection can be configured
- * with, and is drawn from the --lucid-workflow-* theme tokens.
- */
+/** The `workflow-*` variants match the colours available to workflow stages. */
 export type PillVariant =
 	| "primary"
 	| "primary-subtle"
@@ -30,11 +26,11 @@ export type PillVariant =
 export type PillSize = "xs" | "sm";
 
 interface PillBaseProps {
-	/** Visual style of the pill. @default "neutral" */
+	/** @default "neutral" */
 	variant?: PillVariant;
-	/** Height and text scale of the pill. @default "sm" */
+	/** @default "sm" */
 	size?: PillSize;
-	/** Shown natively on hover. */
+	/** Shown on hover. */
 	tooltip?: string;
 	class?: string;
 	children: JSXElement;
@@ -59,8 +55,8 @@ export type PillButtonProps = PillBaseProps &
 export type PillProps = PillSpanProps | PillButtonProps;
 
 /**
- * A small rounded label for a status or a count. Pass as="button" to make it
- * clickable, which adds hover and focus styling.
+ * A small label for a status, tag or count. Use `as="button"` to make it
+ * clickable.
  *
  * @example
  * ```tsx

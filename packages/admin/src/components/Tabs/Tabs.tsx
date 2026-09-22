@@ -5,9 +5,8 @@ export type { TabsNavItem, TabsNavProps } from "./parts/TabsNav";
 export type { TabsItem, TabsRootProps } from "./parts/TabsRoot";
 
 /**
- * A row of tabs with an indicator that slides between them. Tabs.Root switches
- * content in place, Tabs.Nav follows the router and marks the tab matching the
- * current URL. Each tab renders as a button, or as a link when it has an href.
+ * A row of tabs. `Tabs.Root` switches between views, and `Tabs.Nav` links
+ * between pages and highlights the current one.
  *
  * @example
  * ```tsx
@@ -15,15 +14,15 @@ export type { TabsItem, TabsRootProps } from "./parts/TabsRoot";
  * import { useTranslation } from "@lucidcms/admin/hooks";
  *
  * const { t } = useTranslation();
- * const [tab, setTab] = createSignal("details");
+ * const [tab, setTab] = createSignal("general");
  *
  * return (
  * 	<Tabs.Root
- * 		activeKey={tab()}
- * 		onSelect={setTab}
+ * 		value={tab()}
+ * 		onChange={setTab}
  * 		items={[
- * 			{ key: "details", label: t("common.details") },
- * 			{ key: "history", label: t("common.history") },
+ * 			{ value: "general", label: t("settings.general") },
+ * 			{ value: "social", label: t("settings.social") },
  * 		]}
  * 	/>
  * );

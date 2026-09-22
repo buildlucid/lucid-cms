@@ -140,10 +140,10 @@ export const UserList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				isError={users.isError}
-				isEmpty={users.data?.data.length === 0}
+				error={users.isError}
+				empty={users.data?.data.length === 0}
 				queryState={props.state.searchParams}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={noEntriesCopy()?.title}
 						description={noEntriesCopy()?.description}
@@ -162,7 +162,7 @@ export const UserList: Component<{
 					id="users.list"
 					rowCount={users.data?.data.length || 0}
 					queryState={props.state.searchParams}
-					head={[
+					columns={[
 						{
 							label: T()("common.user"),
 							key: "user",
@@ -202,8 +202,8 @@ export const UserList: Component<{
 							sortable: true,
 						},
 					]}
-					isLoading={isLoading()}
-					isSelectable={rowsAreSelectable()}
+					loading={isLoading()}
+					selectable={rowsAreSelectable()}
 					allowRestore={props.state.showingDeleted() && canRestoreUsers()}
 					allowDeletePermanently={
 						props.state.showingDeleted() && canDeleteUsersPermanently()

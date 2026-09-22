@@ -4,14 +4,10 @@ import { type Component, type JSX, splitProps } from "solid-js";
 
 export interface MenuTriggerProps
 	extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
-	/** Applied to the trigger. */
 	class?: string;
 }
 
-/**
- * The button that opens the menu. It carries only the focus treatment, so
- * style it like any other button in your page.
- */
+/** The button that opens the menu. */
 const MenuTrigger: Component<MenuTriggerProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks

@@ -6,17 +6,7 @@ export interface FieldErrorProps {
 	class?: string;
 }
 
-/**
- * Lists the validation errors held by Field.Root. Renders nothing when the
- * field is valid.
- *
- * @example
- * ```tsx
- * import { Field } from "@lucidcms/admin/components";
- *
- * return <Field.Error />;
- * ```
- */
+/** Shows the errors passed to Field.Root. Renders nothing without them. */
 export const FieldError: Component<FieldErrorProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks

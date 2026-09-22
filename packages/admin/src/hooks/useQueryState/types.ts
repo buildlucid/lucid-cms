@@ -51,12 +51,11 @@ export interface QueryFilterState extends FilterState {
 	operatorExplicit?: boolean;
 }
 
-/** One filter condition inside a grouped OR branch. */
 export interface OrFilterCondition extends FilterState {
 	key: string;
 }
 
-/** Conditions inside a group are ANDed; groups are ORed. */
+/** All conditions in a group must match. A result can match any group. */
 export type OrFilterGroup = OrFilterCondition[];
 
 export interface QueryStateModel {
@@ -70,9 +69,9 @@ export interface QueryStateModel {
 }
 
 export interface QueryStateOptions {
+	/** Only allows sorting by one key at a time. */
 	singleSort?: boolean;
-	//* ready() stays false until the first setSchema call - for screens whose
-	//* filter schema is only known after data (eg. collection fields) has loaded
+	/** Keeps `ready()` false until `setSchema` is called, for schemas that depend on loaded data. */
 	awaitSchema?: boolean;
 }
 
@@ -87,7 +86,7 @@ export interface QueryStateParams {
 }
 
 export interface QueryStateStorageAdapter {
-	//* reactive accessor for the current search string (no leading "?")
+	//* the current search string, without the leading "?"
 	search: () => string;
 	write: (search: string) => void;
 }

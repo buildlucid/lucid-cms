@@ -52,10 +52,10 @@ export const OAuthClientsList: Component<{
 						description={T()("oauth.clients.manage.description")}
 					>
 						<QueryBoundary
-							isLoading={clients.isLoading}
-							isError={clients.isError}
-							isEmpty={clients.isSuccess && clients.data.data.length === 0}
-							empty={
+							loading={clients.isLoading}
+							error={clients.isError}
+							empty={clients.isSuccess && clients.data.data.length === 0}
+							emptyFallback={
 								<EmptyState
 									title={T()("oauth.clients.empty.title")}
 									description={T()("oauth.clients.empty.description")}
@@ -112,10 +112,10 @@ export const OAuthClientsList: Component<{
 						>
 							<div class="-mx-4 -mb-4 overflow-hidden border-t border-border">
 								<QueryBoundary
-									isLoading={clients.isLoading}
-									isError={clients.isError}
-									isEmpty={clients.isSuccess && clients.data.data.length === 0}
-									empty={
+									loading={clients.isLoading}
+									error={clients.isError}
+									empty={clients.isSuccess && clients.data.data.length === 0}
+									emptyFallback={
 										<EmptyState
 											title={T()("oauth.clients.empty.title")}
 											description={T()("oauth.clients.empty.description")}

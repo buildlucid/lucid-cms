@@ -7,7 +7,6 @@ export interface LoadingStateProps {
 	/** @default "Loading" */
 	title?: string;
 	description?: string;
-	/** Normally a way to cancel or to carry on elsewhere. */
 	actions?: JSXElement;
 	/** @default "md" */
 	size?: SpinnerSize;
@@ -15,10 +14,7 @@ export interface LoadingStateProps {
 }
 
 /**
- * The placeholder shown while content is on its way. It matches EmptyState and
- * ErrorState, so a list keeps its height as it moves between the three. Reach
- * for Spinner on its own when the wait is inside a button or another small
- * control.
+ * A spinner with a message, for when content is loading.
  *
  * @example
  * ```tsx
@@ -27,7 +23,7 @@ export interface LoadingStateProps {
  *
  * const { t } = useTranslation();
  *
- * return <LoadingState description={t("admin:reports.building")} />;
+ * return <LoadingState description={t("reports.building")} />;
  * ```
  */
 const LoadingState: Component<LoadingStateProps> = (props) => {

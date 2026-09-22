@@ -116,7 +116,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 	const userName = createMemo(() => {
 		const user = selectedUser();
 		if (!user) return "";
-		return helpers.formatUserName(user, "username");
+		return helpers.formatUserName(user, "username-and-name");
 	});
 
 	// -------------------------------
@@ -319,7 +319,7 @@ const UserSortableItem: Component<{
 				<UserDisplay user={props.user} variant="icon" size="md" />
 				<div class="min-w-0">
 					<p class="truncate text-sm font-medium text-subtitle">
-						{helpers.formatUserName(props.user, "username") || "-"}
+						{helpers.formatUserName(props.user, "username-and-name") || "-"}
 					</p>
 					<p class="truncate text-xs text-unfocused">
 						{props.user.email || "-"}

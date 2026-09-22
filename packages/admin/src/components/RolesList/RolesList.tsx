@@ -47,10 +47,10 @@ export const RolesList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				isError={roles.isError}
-				isEmpty={roles.data?.data.length === 0}
+				error={roles.isError}
+				empty={roles.data?.data.length === 0}
 				queryState={props.state.searchParams}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.roles.title")}
 						description={T()("empty.states.roles.description")}
@@ -70,7 +70,7 @@ export const RolesList: Component<{
 					id="roles.list"
 					rowCount={roles.data?.data.length || 0}
 					queryState={props.state.searchParams}
-					head={[
+					columns={[
 						{
 							label: T()("common.name"),
 							key: "name",
@@ -94,7 +94,7 @@ export const RolesList: Component<{
 							icon: <FaSolidCalendar />,
 						},
 					]}
-					isLoading={roles.isFetching}
+					loading={roles.isFetching}
 				>
 					<Index each={roles.data?.data || []}>
 						{(role, i) => (

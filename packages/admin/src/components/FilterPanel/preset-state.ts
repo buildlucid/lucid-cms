@@ -7,13 +7,12 @@ import type {
 export interface FilterPreset {
 	key: string;
 	label: string;
-	value?: string | number;
+	/** Shown as a badge, such as the number of matching results. */
+	count?: string | number;
+	/** Shows a placeholder in place of the count. */
 	loading?: boolean;
+	/** The filters the preset applies, by filter key. */
 	filters: Record<string, FilterState>;
-}
-
-export interface FilterPresets {
-	items: FilterPreset[];
 }
 
 export const isFilterValueEmpty = (value: FilterValue): boolean => {

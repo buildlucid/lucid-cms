@@ -174,9 +174,9 @@ const ViewEmailTransactionsPanelContent: Component<
 					embedded
 				/>
 				<QueryBoundary
-					isError={transactions.isError}
-					isEmpty={transactions.data?.data.length === 0}
-					empty={
+					error={transactions.isError}
+					empty={transactions.data?.data.length === 0}
+					emptyFallback={
 						<EmptyState
 							title={T()("empty.states.email.transactions.title")}
 							description={T()("empty.states.email.transactions.description")}
@@ -191,7 +191,7 @@ const ViewEmailTransactionsPanelContent: Component<
 						id="email.transactions"
 						rowCount={transactions.data?.data.length ?? 0}
 						queryState={searchParams}
-						head={[
+						columns={[
 							{
 								label: T()("common.status"),
 								key: "status",
@@ -220,7 +220,7 @@ const ViewEmailTransactionsPanelContent: Component<
 								sortable: true,
 							},
 						]}
-						isLoading={transactions.isFetching}
+						loading={transactions.isFetching}
 						padding="sm"
 						variant="secondary"
 					>

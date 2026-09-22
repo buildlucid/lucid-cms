@@ -495,7 +495,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 										>
 											<div class="absolute right-0 bottom-0 left-0">
 												<ProgressBar
-													progress={row.progress}
+													value={row.progress}
 													variant="primary-subtle"
 													size="sm"
 													square

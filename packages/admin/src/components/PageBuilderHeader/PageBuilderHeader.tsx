@@ -647,7 +647,7 @@ export const PageBuilderHeader: Component<{
 									<div class="flex-1 min-w-0 lg:flex-none lg:w-54">
 										<ContentLocaleSelect
 											locales={documentLocalization.locales()}
-											hasError={props.state.ui.brickTranslationErrors?.()}
+											invalid={props.state.ui.brickTranslationErrors?.()}
 											showShortcut={true}
 										/>
 									</div>

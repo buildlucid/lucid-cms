@@ -10,10 +10,8 @@ import { LayerContext } from "@/hooks/useLayer/useLayer";
 import { usePageScrollPin } from "@/hooks/usePageScrollPin/usePageScrollPin";
 import { ModalContext } from "../ModalContext";
 
-/** Width of the modal surface. */
 export type ModalSize = "sm" | "md" | "lg";
 
-/** Use "alertdialog" for interruptions the user has to answer before moving on. */
 export type ModalRole = "dialog" | "alertdialog";
 
 export interface ModalRootProps {
@@ -21,43 +19,18 @@ export interface ModalRootProps {
 	onOpenChange: (_open: boolean) => void;
 	/** @default "md" */
 	size?: ModalSize;
-	/** Escape and outside clicks close the modal. @default true */
+	/** Lets escape and outside clicks close the modal. @default true */
 	dismissible?: boolean;
-	/** @default "dialog" */
+	/** Use "alertdialog" when the user must respond before continuing. @default "dialog" */
 	role?: ModalRole;
-	/** Base stack layer. Modals opened from a panel or another modal infer this. */
+	/** Set automatically when opened from a drawer or another modal. */
 	zIndex?: number;
-	/** Applied to the modal surface. */
+	/** Applied to the dialog. */
 	class?: string;
 	children: JSXElement;
 }
 
-/**
- * The modal surface and everything around it: the portal, the overlay and the
- * open state. Compose the contents from Modal.Header, Modal.Body and
- * Modal.Footer.
- *
- * @example
- * ```tsx
- * import { Modal } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Modal.Root open={open()} onOpenChange={setOpen}>
- * 		<Modal.Header>
- * 			<Modal.Title>Move media</Modal.Title>
- * 		</Modal.Header>
- * 		<Modal.Body>
- * 			<Select id="folder" value={folder()} onChange={setFolder} options={options()} />
- * 		</Modal.Body>
- * 		<Modal.Footer>
- * 			<Modal.Actions>
- * 				<Button onClick={move}>Move</Button>
- * 			</Modal.Actions>
- * 		</Modal.Footer>
- * 	</Modal.Root>
- * );
- * ```
- */
+/** Holds the modal's parts and its open state. */
 export const ModalRoot: Component<ModalRootProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks

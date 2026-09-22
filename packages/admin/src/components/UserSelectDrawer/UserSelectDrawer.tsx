@@ -264,11 +264,11 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 			/>
 
 			<QueryBoundary
-				isError={users.isError}
-				isEmpty={users.data?.data.length === 0}
+				error={users.isError}
+				empty={users.data?.data.length === 0}
 				queryState={searchParams}
 				onResetFilters={searchParams.clearFilters}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.users.title")}
 						description={T()("empty.states.users.description")}
@@ -283,7 +283,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 					id="users.select"
 					rowCount={users.data?.data.length || 0}
 					queryState={searchParams}
-					head={[
+					columns={[
 						{
 							label: "",
 							key: "select",
@@ -309,7 +309,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 							icon: <FaSolidEnvelope />,
 						},
 					]}
-					isLoading={isLoading()}
+					loading={isLoading()}
 					padding="sm"
 					variant="secondary"
 				>
@@ -332,7 +332,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 										}}
 										variant="horizontal"
 										size="sm"
-										nameFormat="username-only"
+										nameFormat="username"
 									/>
 								</Table.Cell>
 								<Table.Text column="firstName" text={user().firstName} />

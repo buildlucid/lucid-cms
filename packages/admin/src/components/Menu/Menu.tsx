@@ -22,9 +22,8 @@ export type { MenuSubProps } from "./parts/MenuSub";
 export type { MenuTriggerProps } from "./parts/MenuTrigger";
 
 /**
- * A menu that drops from a trigger, with keyboard navigation and focus
- * handling taken care of. Build the trigger and the items yourself; reach for
- * ActionMenu instead when all you need is a row's overflow menu.
+ * A dropdown menu opened from a trigger, with support for links, checkboxes,
+ * radio groups and nested menus.
  *
  * @example
  * ```tsx
@@ -35,16 +34,12 @@ export type { MenuTriggerProps } from "./parts/MenuTrigger";
  *
  * return (
  * 	<Menu.Root placement="bottom-end">
- * 		<Menu.Trigger class="h-9 rounded-md border border-border px-3 text-sm">
- * 			{t("common.actions")}
+ * 		<Menu.Trigger class="rounded-md border border-border px-3 py-1.5 text-sm">
+ * 			{t("common.download")}
  * 		</Menu.Trigger>
  * 		<Menu.Content>
- * 			<Menu.Label>{t("common.actions")}</Menu.Label>
- * 			<Menu.Item onSelect={edit}>{t("common.edit")}</Menu.Item>
- * 			<Menu.Separator />
- * 			<Menu.Item variant="error" onSelect={remove}>
- * 				{t("common.delete")}
- * 			</Menu.Item>
+ * 			<Menu.Item onSelect={() => download("csv")}>CSV</Menu.Item>
+ * 			<Menu.Item onSelect={() => download("json")}>JSON</Menu.Item>
  * 		</Menu.Content>
  * 	</Menu.Root>
  * );

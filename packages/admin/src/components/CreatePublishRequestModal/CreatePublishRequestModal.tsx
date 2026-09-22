@@ -92,8 +92,7 @@ const CreatePublishRequestModal: Component<{
 	const reviewerOptions = createMemo<ReviewerOption[]>(() =>
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
-			label:
-				helpers.formatUserName(reviewer, "simple") || T()("common.unknown"),
+			label: helpers.formatUserName(reviewer, "name") || T()("common.unknown"),
 			user: reviewer,
 		})),
 	);

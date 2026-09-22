@@ -32,7 +32,7 @@ export const TabField: Component<{
 				getStructuralFieldKeys(tab.fields),
 			);
 			return {
-				key: tab.key,
+				value: tab.key,
 				id: getPreviewStructureId({
 					brickIndex: fieldRenderState.brickIndex(),
 					type: "tab",
@@ -59,8 +59,8 @@ export const TabField: Component<{
 	return (
 		<Tabs.Root
 			items={items()}
-			activeKey={props.getActiveTab()}
-			onSelect={props.setActiveTab}
+			value={props.getActiveTab()}
+			onChange={props.setActiveTab}
 			fullWidth={true}
 			class={props.class}
 		/>

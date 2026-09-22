@@ -26,16 +26,10 @@ import {
 	type DrawerNestingState,
 } from "../DrawerContext";
 
-/** Edge the drawer slides in from. */
 export type DrawerSide = "right" | "bottom";
 
-/**
- * How much room the drawer takes. "full" fills the axis it slides along, so a
- * right hand drawer spans the full width and a bottom drawer the full height.
- */
 export type DrawerSize = "md" | "full";
 
-/** Horizontal room the header, body and footer leave around their content. */
 export type DrawerPadding = "sm" | "md";
 
 export interface DrawerRootProps {
@@ -43,84 +37,37 @@ export interface DrawerRootProps {
 	onOpenChange: (_open: boolean) => void;
 	/** @default "right" */
 	side?: DrawerSide;
-	/** @default "md" */
+	/** `full` fills the full width or height, depending on the side. @default "md" */
 	size?: DrawerSize;
-	/** Room the regions leave around their content. @default "md" */
+	/** @default "md" */
 	padding?: DrawerPadding;
-	/** Swaps the contents for a skeleton while data loads. */
+	/** Shows a loading state instead of the content. */
 	loading?: boolean;
-	/** Swaps the contents for an error block. */
+	/** Shows an error state instead of the content. */
 	error?: string;
-	/** Locales the drawer can switch between. Defaults to the content locales. */
+	/** Locales available in `Drawer.LocaleSelect`. Defaults to the content locales. */
 	locales?: Locale[];
-	/** Opens on the collection's default locale rather than the active one. */
-	useDefaultLocale?: boolean;
-	/** Runs when the drawer closes, for resetting form state. */
+	/** Which locale is selected when the drawer opens. @default "active" */
+	initialLocale?: "active" | "default";
+	/** Runs when the drawer closes, such as to reset a form. */
 	onReset?: () => void;
-	/** Base stack layer. Drawers opened from another drawer infer this. */
+	/** Set automatically when opened from another drawer. */
 	zIndex?: number;
-	/** Applied to the drawer surface. */
+	/** Applied to the drawer panel. */
 	class?: string;
-	/**
-	 * Takes a function instead of markup to read the content locale the drawer
-	 * is editing, in any of its regions.
-	 */
+	/** Pass a function to receive the selected content locale. */
 	children:
 		| JSXElement
 		| ((_locale: Accessor<string | undefined>) => JSXElement);
 }
 
-/**
- * A panel that slides in from the edge of the screen, holding a form or a
- * detail view. Compose the contents from Drawer.Header, Drawer.Body and
- * Drawer.Footer. Drawers opened from another drawer stack automatically.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Drawer.Root open={open()} onOpenChange={setOpen} loading={user.isLoading}>
- * 		<Drawer.Header>
- * 			<Drawer.Title>Edit user</Drawer.Title>
- * 		</Drawer.Header>
- * 		<Drawer.Body>
- * 			<Input id="email" name="email" type="email" label="Email" value={email()} onChange={setEmail} />
- * 		</Drawer.Body>
- * 	</Drawer.Root>
- * );
- * ```
- *
- * @example
- * Localised drawers take a function, which hands every region the locale the
- * drawer is editing.
- *
- * ```tsx
- * return (
- * 	<Drawer.Root open={open()} onOpenChange={setOpen}>
- * 		{(locale) => (
- * 			<>
- * 				<Drawer.Header>
- * 					<Drawer.Title>Edit media</Drawer.Title>
- * 					<Drawer.LocaleSelect />
- * 				</Drawer.Header>
- * 				<Drawer.Body>
- * 					<Input id="alt" name="alt" type="text" label="Alt text" value={alt[locale() ?? "en"]} onChange={setAlt} />
- * 				</Drawer.Body>
- * 			</>
- * 		)}
- * 	</Drawer.Root>
- * );
- * ```
- */
+/** Holds the drawer's parts and its open state. */
 export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	// ------------------------------
 	// State & Hooks
 	const [lastFocusedElement, setLastFocusedElement] =
 		createSignal<Element | null>(null);
 	const [locale, setLocale] = createSignal<string | undefined>(undefined);
-	//* the edge each open child came from, so only a child sharing this
-	//* drawer's edge counts as covering it
 	const [openChildren, setOpenChildren] = createSignal<Map<symbol, DrawerSide>>(
 		new Map(),
 	);
@@ -143,11 +90,6 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 		});
 	};
 	const close = () => props.onOpenChange(false);
-	/**
-	 * Resolved inside the providers rather than up here, so the parts can read
-	 * the drawer's context. An arity of one marks a render prop, matching how
-	 * Solid itself resolves children.
-	 */
 	const content = () => {
 		const children = props.children;
 		if (typeof children === "function" && children.length > 0) {
@@ -158,7 +100,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	const defaultLocale = () => {
 		const activeLocale = contentLocaleStore.get.contentLocale;
 		if (
-			!props.useDefaultLocale &&
+			props.initialLocale !== "default" &&
 			locales().some((item) => item.code === activeLocale)
 		) {
 			return activeLocale;
@@ -178,9 +120,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 		() => props.locales ?? contentLocaleStore.get.locales,
 	);
 	const level = createMemo(() => (parentDrawer?.level() ?? -1) + 1);
-	/** Ancestors sharing this drawer's edge, which is what stacks up visually. */
 	const stackLevel = createMemo(() => parentDrawer?.sideDepth()[side()] ?? 0);
-	/** Cap the visual offset so deeply nested drawers stay usable. */
 	const visualLevel = createMemo(() => Math.min(stackLevel(), 6));
 	const sideDepth = createMemo(() => {
 		const parent = parentDrawer?.sideDepth() ?? { right: 0, bottom: 0 };
@@ -192,8 +132,6 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	const zIndex = createMemo(() =>
 		Math.max(props.zIndex ?? 40, (parentDrawer?.zIndex() ?? 38) + 2),
 	);
-	//* a child on the opposite edge sits beside this drawer rather than over
-	//* it, so it gets none of the covered treatment
 	const isCovered = createMemo(() => {
 		for (const childSide of openChildren().values()) {
 			if (childSide === side()) return true;
@@ -223,8 +161,6 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	});
 	onCleanup(() => parentDrawer?.setChildOpen(drawerId, false, side()));
 
-	//* only capture on the closed to open transition - the locale deps below
-	//* re-run this effect, and by then focus has moved inside the drawer
 	let wasOpen = false;
 	createEffect(() => {
 		if (props.open) {
@@ -257,10 +193,6 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 					class={classNames(
 						"fixed inset-0 animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
-							//* a drawer stacked on its own edge shows the one behind it
-							//* through the offset, so a second dim would just muddy it.
-							//* one arriving from another edge is not part of that stack
-							//* and has to push whatever it lands beside into the back.
 							"bg-overlay-base": stackLevel() === 0,
 							"bg-transparent": stackLevel() > 0,
 						},
@@ -311,8 +243,6 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 								event.preventDefault();
 							}
 						}}
-						//* focus restore runs with preventScroll, so closing the drawer
-						//* never scrolls the page behind it back to the top
 						onCloseAutoFocus={() => {
 							let element = lastFocusedElement();
 							if (

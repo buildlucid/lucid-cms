@@ -6,22 +6,7 @@ export interface DrawerActionsProps {
 	children: JSXElement;
 }
 
-/**
- * Right hand button cluster inside Drawer.Footer. It always sits against the
- * right edge, whether or not the footer has content on the left.
- *
- * @example
- * ```tsx
- * import { Button, Drawer } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Drawer.Actions>
- * 		<Button variant="outline" onClick={close}>Close</Button>
- * 		<Button type="submit">Save</Button>
- * 	</Drawer.Actions>
- * );
- * ```
- */
+/** Groups the footer's buttons, aligned to the end. */
 export const DrawerActions: Component<DrawerActionsProps> = (props) => {
 	// ------------------------------
 	// Render

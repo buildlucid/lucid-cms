@@ -5,30 +5,26 @@ import { Dynamic } from "solid-js/web";
 export interface SectionHeadingProps {
 	title: string;
 	description?: string;
-	/** Heading level, for the page's outline. @default 2 */
+	/** @default 2 */
 	level?: 2 | 3 | 4;
-	/** Buttons or links, against the right edge. */
 	actions?: JSXElement;
-	/** Overrides the spacing this heading keeps from the section above it. */
 	class?: string;
 }
 
 /**
- * A heading that separates one section of a page or drawer from the next. It
- * spaces itself from what came before, apart from when it comes first.
+ * A heading for a section of a page, with an optional description and actions.
  *
  * @example
  * ```tsx
- * import { Button, SectionHeading } from "@lucidcms/admin/components";
+ * import { SectionHeading } from "@lucidcms/admin/components";
  * import { useTranslation } from "@lucidcms/admin/hooks";
  *
  * const { t } = useTranslation();
  *
  * return (
  * 	<SectionHeading
- * 		title={t("common.details")}
- * 		description={t("common.content.summary")}
- * 		actions={<Button size="sm">{t("common.edit")}</Button>}
+ * 		title={t("social.title")}
+ * 		description={t("social.description")}
  * 	/>
  * );
  * ```

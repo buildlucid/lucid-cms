@@ -132,14 +132,13 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 			error={
 				panelFetchState().isError ? T()("errors.generic.message") : undefined
 			}
-			useDefaultLocale={false}
 			onReset={() => {}}
 		>
 			{(contentLocale) => (
 				<>
 					<Drawer.Header>
 						<Drawer.Title>{panelContent().title}</Drawer.Title>
-						<Drawer.LocaleSelect hasError={hasTranslationErrors()} />
+						<Drawer.LocaleSelect invalid={hasTranslationErrors()} />
 					</Drawer.Header>
 					<Drawer.Body class="flex flex-col gap-3">
 						{/* Preview */}
@@ -169,7 +168,7 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 										? T()("common.details")
 										: T()("common.meta"),
 							}))}
-							active={activeTab()}
+							value={activeTab()}
 							onChange={setActiveTab}
 						/>
 						<Show when={activeTab() === "details"}>

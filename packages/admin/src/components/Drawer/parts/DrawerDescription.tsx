@@ -3,23 +3,12 @@ import classNames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
 
 export interface DrawerDescriptionProps {
-	/** Shown before the text, for a warning or status marker. */
 	icon?: JSXElement;
 	class?: string;
 	children: JSXElement;
 }
 
-/**
- * A sentence under the title explaining what the drawer does. Screen readers
- * announce it alongside the title.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return <Drawer.Description>This role is managed in config.</Drawer.Description>;
- * ```
- */
+/** The drawer's description, announced by screen readers with the title. */
 export const DrawerDescription: Component<DrawerDescriptionProps> = (props) => {
 	// ------------------------------
 	// Render

@@ -4,27 +4,15 @@ import { useModalContext } from "../ModalContext";
 import { ModalCloseButton } from "./ModalCloseButton";
 
 export interface ModalHeaderProps {
-	/** Sits to the left of the close button. */
+	/** Shown before the close button. */
 	actions?: JSXElement;
 	class?: string;
 	children: JSXElement;
 }
 
 /**
- * Top region of the modal. Holds the title and description, and adds a close
- * button unless the modal is not dismissible.
- *
- * @example
- * ```tsx
- * import { Modal } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Modal.Header>
- * 		<Modal.Title>Move media</Modal.Title>
- * 		<Modal.Description>Pick the folder to move into.</Modal.Description>
- * 	</Modal.Header>
- * );
- * ```
+ * The top of the modal, for the title and description. Includes a close
+ * button when the modal is dismissible.
  */
 export const ModalHeader: Component<ModalHeaderProps> = (props) => {
 	// ----------------------------------------

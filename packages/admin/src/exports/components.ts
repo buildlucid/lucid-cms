@@ -74,7 +74,6 @@ export {
 	type FilterPanelPadding,
 	type FilterPanelProps,
 	type FilterPreset,
-	type FilterPresets,
 } from "../components/FilterPanel/FilterPanel.js";
 export {
 	default as FilterToggle,
@@ -217,7 +216,6 @@ export {
 	type TablePillCellProps,
 	type TableRootProps,
 	type TableRowProps,
-	type TableRowReorder,
 	type TableTextCellProps,
 	type TableVariant,
 } from "../components/Table/Table.js";

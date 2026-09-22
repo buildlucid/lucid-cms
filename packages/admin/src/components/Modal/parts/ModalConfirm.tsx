@@ -23,34 +23,35 @@ export interface ModalConfirmProps {
 	confirmVariant?: ButtonVariant;
 	onConfirm: () => void;
 	onCancel?: () => void;
-	/** Spins the confirm button and blocks both actions. */
+	/** Shows a spinner on the confirm button and disables both buttons. */
 	loading?: boolean;
-	/** Shown in the footer beside the buttons. */
+	/** An error message shown in the footer. */
 	error?: string;
-	/** Sits to the left of the error message, for a secondary control. */
+	/** Content shown at the start of the footer. */
 	footerStart?: JSXElement;
-	/** Extra content between the header and the footer. */
+	/** Content shown between the header and footer. */
 	children?: JSXElement;
 }
 
 /**
- * A yes or no dialog. Reach for Modal.Root and its parts instead when you need
- * more than one action or a layout of your own.
+ * A dialog asking the user to confirm or cancel an action.
  *
  * @example
  * ```tsx
  * import { Modal } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
  *
  * return (
  * 	<Modal.Confirm
  * 		open={open()}
  * 		onOpenChange={setOpen}
- * 		title="Delete user"
- * 		description="This cannot be undone."
- * 		loading={deleteUser.isPending}
- * 		error={deleteUser.errors()?.message}
- * 		onConfirm={() => deleteUser.mutate({ id: id() })}
- * 		onCancel={() => setOpen(false)}
+ * 		title={t("redirects.delete.title")}
+ * 		description={t("redirects.delete.description")}
+ * 		confirmLabel={t("common.delete")}
+ * 		loading={remove.isPending}
+ * 		onConfirm={() => remove.mutate(redirect.id)}
  * 	/>
  * );
  * ```

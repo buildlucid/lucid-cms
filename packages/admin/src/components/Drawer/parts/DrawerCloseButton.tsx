@@ -8,17 +8,7 @@ export interface DrawerCloseButtonProps {
 	class?: string;
 }
 
-/**
- * Icon button that closes the drawer. Drawer.Header renders one already, so
- * reach for this only when building a header of your own.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return <Drawer.CloseButton />;
- * ```
- */
+/** A button that closes the drawer. Already included in `Drawer.Header`. */
 export const DrawerCloseButton: Component<DrawerCloseButtonProps> = (props) => {
 	// ------------------------------
 	// Render

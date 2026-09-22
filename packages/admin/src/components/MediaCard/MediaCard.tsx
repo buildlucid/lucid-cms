@@ -151,7 +151,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "eye",
 			onClick: () => openMediaAction("view"),
 			permission: true,
-			hide: !props.showingDeleted?.(),
+			show: props.showingDeleted?.() === true,
 		},
 		{
 			label: T()("common.edit"),
@@ -159,7 +159,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "pen",
 			onClick: () => openMediaAction("update"),
 			permission: hasUpdatePermission(),
-			hide: props.showingDeleted?.(),
+			show: !props.showingDeleted?.(),
 		},
 		{
 			label: T()("common.restore"),
@@ -167,14 +167,14 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "restore",
 			onClick: () => openMediaAction("restore"),
 			permission: hasUpdatePermission(),
-			hide: props.showingDeleted?.() === false,
+			show: props.showingDeleted?.() !== false,
 			variant: "primary",
 		},
 		{
 			label: T()("media.images.action"),
 			type: "group",
 			icon: "image",
-			hide: props.media.type !== "image" || props.media.status !== "ready",
+			show: props.media.type === "image" && props.media.status === "ready",
 			actions: [
 				{
 					label: T()("media.crop.action"),
@@ -184,7 +184,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						props.onCrop?.(props.media);
 					},
 					permission: hasUpdatePermission(),
-					hide: !showCropAction(),
+					show: showCropAction(),
 				},
 				{
 					label: T()("ai.media.alt.generate.action"),
@@ -198,11 +198,11 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 						props.aiAltAccessState?.disabled === true &&
 						props.aiAltAccessState.reason !== "no-permission",
 					disabledToast: aiAltAccessDisabledToast(),
-					hide:
-						props.aiAltFeatureEnabled === false ||
-						!props.onGenerateAlt ||
-						props.showingDeleted?.() ||
-						!hasUpdatePermission(),
+					show:
+						props.aiAltFeatureEnabled !== false &&
+						props.onGenerateAlt !== undefined &&
+						!props.showingDeleted?.() &&
+						hasUpdatePermission(),
 				},
 				{
 					label: T()("media.processed.clear.action"),
@@ -210,7 +210,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					icon: "broom",
 					onClick: () => openMediaAction("clear"),
 					permission: hasUpdatePermission(),
-					variant: "error",
+					variant: "danger",
 				},
 			],
 		},
@@ -218,7 +218,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			label: T()("media.share.links.action"),
 			type: "group",
 			icon: "link",
-			hide: props.showingDeleted?.() || props.media.status !== "ready",
+			show: !props.showingDeleted?.() && props.media.status === "ready",
 			actions: [
 				{
 					label: T()("media.share.links.create.action"),
@@ -240,7 +240,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					icon: "trash",
 					onClick: () => openMediaAction("deleteAllShareLinks"),
 					permission: hasUpdatePermission(),
-					variant: "error",
+					variant: "danger",
 				},
 			],
 		},
@@ -250,7 +250,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "download",
 			onClick: () => openMediaAction("download"),
 			permission: canReadMedia(),
-			hide: props.showingDeleted?.() || props.media.status !== "ready",
+			show: !props.showingDeleted?.() && props.media.status === "ready",
 		},
 		{
 			label: T()("common.delete"),
@@ -258,8 +258,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "trash",
 			onClick: () => openMediaAction("delete"),
 			permission: hasDeletePermission(),
-			hide: props.showingDeleted?.(),
-			variant: "error",
+			show: !props.showingDeleted?.(),
+			variant: "danger",
 		},
 		{
 			label: T()("actions.delete.permanently"),
@@ -267,8 +267,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "trash",
 			onClick: () => openMediaAction("deletePermanently"),
 			permission: hasDeletePermission(),
-			hide: props.showingDeleted?.() === false,
-			variant: "error",
+			show: props.showingDeleted?.() !== false,
+			variant: "danger",
 		},
 	]);
 
@@ -312,7 +312,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			{/* Image */}
 			<AspectRatio
 				ratio="16:9"
-				innerClass={classNames("overflow-hidden z-0 bg-card-hover", {
+				contentClass={classNames("overflow-hidden z-0 bg-card-hover", {
 					"rectangle-background":
 						props.media.type === "image" ||
 						(props.media.type === "video" && props.media.poster),

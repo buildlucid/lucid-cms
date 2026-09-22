@@ -6,7 +6,7 @@ export interface MenuLabelProps {
 	children: JSXElement;
 }
 
-/** A heading over a run of items. */
+/** A label for a group of items. */
 const MenuLabel: Component<MenuLabelProps> = (props) => {
 	// ----------------------------------------
 	// Render

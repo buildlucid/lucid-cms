@@ -7,24 +7,7 @@ export interface DrawerFooterProps {
 	children: JSXElement;
 }
 
-/**
- * Bottom bar of the drawer. Children sit on the left, so put status or error
- * messages here and wrap buttons in Drawer.Actions to push them right.
- *
- * @example
- * ```tsx
- * import { Button, Drawer } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Drawer.Footer>
- * 		<ErrorMessage theme="basic" message={save.errors()?.message} />
- * 		<Drawer.Actions>
- * 			<Button type="submit" loading={save.isPending}>Save</Button>
- * 		</Drawer.Actions>
- * 	</Drawer.Footer>
- * );
- * ```
- */
+/** The bottom of the drawer, for messages and `Drawer.Actions`. */
 export const DrawerFooter: Component<DrawerFooterProps> = (props) => {
 	// ------------------------------
 	// State & Hooks

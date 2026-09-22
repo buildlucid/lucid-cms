@@ -1,31 +1,27 @@
 import type { MediaFile } from "@types";
 
-/**
- * The presets the admin ships with. A project can configure others, so any
- * string is accepted.
- */
+/** The built in presets. Any configured preset name is also accepted. */
 export type MediaPreset =
 	| "thumbnail-small"
 	| "thumbnail-medium"
 	| "thumbnail-large";
 
 /**
- * Builds the URL for a piece of media at the given preset, falling back to the
- * original when the delivery adapter cannot resize on request.
+ * Returns a media URL resized to a preset, or the original URL when the media
+ * adapter cannot resize.
  *
  * @example
  * ```tsx
  * import { mediaUrl } from "@lucidcms/admin/utils";
  *
- * return <img src={mediaUrl(media, "thumbnail-small")} alt={media.alt} />;
+ * return <img src={mediaUrl(media, "thumbnail-small")} alt={media.alt ?? ""} />;
  * ```
  */
 const mediaUrl = (
 	media: Pick<MediaFile, "url"> & {
 		delivery?: MediaFile["delivery"];
 	},
-	//* the union keeps the built-ins suggested without shutting out a
-	//* project's own presets
+	//* keeps autocomplete for built in presets while allowing any string
 	preset: MediaPreset | (string & {}),
 ) => {
 	if (media.delivery?.supportsPresetQuery !== true) return media.url;

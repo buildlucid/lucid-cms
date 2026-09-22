@@ -170,47 +170,20 @@ const formatUserName = (
 		  }
 		| null
 		| undefined,
-	pref?: "username" | "username-only" | "simple",
+	format: "username" | "name" | "username-and-name" = "username-and-name",
 ): string => {
 	if (!user) return "";
 
 	const username = user.username ?? user.email ?? "";
 	if (!username) return "";
 
-	if (pref === "username-only") {
-		return username;
-	}
+	if (format === "username") return username;
 
-	if (pref === "simple") {
-		if (user.firstName && user.lastName) {
-			return `${user.firstName} ${user.lastName}`;
-		}
+	const name = [user.firstName, user.lastName].filter(Boolean).join(" ");
 
-		return user.firstName || username;
-	}
+	if (format === "name") return name || username;
 
-	// username (firstname lastname)
-	if (pref === "username") {
-		if (user.firstName && user.lastName) {
-			return `${username} (${user.firstName} ${user.lastName})`;
-		}
-
-		if (user.firstName) {
-			return `${username} (${user.firstName})`;
-		}
-
-		return username;
-	}
-
-	// firstname lastname - (username)
-	if (user.firstName && user.lastName) {
-		return `${user.firstName} ${user.lastName} - (${username})`;
-	}
-	if (user.firstName) {
-		return `${user.firstName} - (${username})`;
-	}
-
-	return username;
+	return name ? `${username} (${name})` : username;
 };
 
 // ---------------------------------------------

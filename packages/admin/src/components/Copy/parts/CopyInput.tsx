@@ -5,13 +5,13 @@ import T from "@/translations";
 import { copyValue } from "../copyValue";
 
 export interface CopyInputProps {
-	/** Shown in the field and put on the clipboard. */
 	value: string;
-	/** Names the field for screen readers. */
+	/** Accessible label for the input. */
 	label?: string;
 	class?: string;
 }
 
+/** A read-only input with a copy button. */
 export const CopyInput: Component<CopyInputProps> = (props) => {
 	// ----------------------------------------
 	// State

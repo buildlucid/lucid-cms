@@ -3,16 +3,15 @@ import Pill, { type PillProps } from "@/components/Pill/Pill";
 import TableCell from "@/components/Table/parts/TableCell";
 
 export interface TablePillCellProps {
-	/** Head key this cell belongs to. It hides when that column is toggled off. */
+	/** The key of the column this cell belongs to. */
 	column?: string;
 	text?: string | number | null;
 	/** @default "neutral" */
 	variant?: PillProps["variant"];
-	/** Applied to the cell. */
 	class?: string;
 }
 
-/** A cell showing a status or label as a pill. */
+/** A table cell showing a pill. */
 const TablePillCell: Component<TablePillCellProps> = (props) => {
 	// ----------------------------------
 	// Render

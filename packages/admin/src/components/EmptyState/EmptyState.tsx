@@ -6,14 +6,12 @@ export interface EmptyStateProps {
 	/** @default "No entries found" */
 	title?: string;
 	description?: string;
-	/** A way to put the first entry there, normally a Button. */
 	actions?: JSXElement;
 	class?: string;
 }
 
 /**
- * The message shown in place of a list that has nothing in it, with an
- * optional action for putting the first entry there.
+ * A message for when there is nothing to show, with optional actions.
  *
  * @example
  * ```tsx
@@ -24,13 +22,9 @@ export interface EmptyStateProps {
  *
  * return (
  * 	<EmptyState
- * 		title={t("empty.states.entries.title")}
- * 		description={t("empty.states.entries.description")}
- * 		actions={
- * 			<Button size="sm" onClick={create}>
- * 				{t("common.create")}
- * 			</Button>
- * 		}
+ * 		title={t("redirects.empty.title")}
+ * 		description={t("redirects.empty.description")}
+ * 		actions={<Button size="sm" onClick={openCreate}>{t("common.create")}</Button>}
  * 	/>
  * );
  * ```

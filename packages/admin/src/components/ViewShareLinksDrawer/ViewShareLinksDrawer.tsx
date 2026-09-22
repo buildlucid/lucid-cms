@@ -235,10 +235,10 @@ const ViewShareLinksPanelContent: Component<{
 					embedded={true}
 				/>
 				<QueryBoundary
-					isError={shareLinks.isError}
-					isEmpty={shareLinks.data?.data.length === 0}
+					error={shareLinks.isError}
+					empty={shareLinks.data?.data.length === 0}
 					queryState={shareLinksSearchParams}
-					empty={
+					emptyFallback={
 						<EmptyState
 							title={T()("empty.states.media.share.links.title")}
 							description={T()("empty.states.media.share.links.description")}
@@ -253,7 +253,7 @@ const ViewShareLinksPanelContent: Component<{
 						id="media.shareLinks"
 						rowCount={shareLinks.data?.data.length || 0}
 						queryState={shareLinksSearchParams}
-						head={[
+						columns={[
 							{
 								label: T()("common.url"),
 								key: "url",
@@ -288,7 +288,7 @@ const ViewShareLinksPanelContent: Component<{
 								sortable: true,
 							},
 						]}
-						isLoading={shareLinks.isFetching}
+						loading={shareLinks.isFetching}
 						padding="sm"
 						variant="secondary"
 					>

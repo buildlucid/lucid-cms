@@ -1,10 +1,6 @@
 import classnames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
 
-/**
- * Colours the filled part of the bar. The track stays neutral throughout, and
- * the subtle variants soften the fill rather than the track.
- */
 export type ProgressBarVariant =
 	| "primary"
 	| "primary-subtle"
@@ -17,15 +13,15 @@ export type ProgressBarVariant =
 export type ProgressBarSize = "sm" | "md" | "lg";
 
 export interface ProgressBarProps {
-	/** How far along the bar is, as a percentage from 0 to 100. */
-	progress: number;
-	/** Colour of the filled part. @default "primary" */
+	/** A percentage from 0 to 100. */
+	value: number;
+	/** @default "primary" */
 	variant?: ProgressBarVariant;
-	/** Height of the bar. @default "lg" */
+	/** @default "lg" */
 	size?: ProgressBarSize;
-	/** Square corners, for a bar sitting flush against a container edge. */
+	/** Removes the rounded corners. */
 	square?: boolean;
-	/** Captions under the bar, against each end. */
+	/** Text shown under each end of the bar. */
 	labels?: {
 		start?: string;
 		end?: string;
@@ -34,9 +30,7 @@ export interface ProgressBarProps {
 }
 
 /**
- * A horizontal progress bar, for an upload, a task or how full a quota is.
- * Switch the variant yourself to react to the value, such as turning a quota
- * bar red as it fills.
+ * A horizontal bar showing progress as a percentage.
  *
  * @example
  * ```tsx
@@ -47,9 +41,8 @@ export interface ProgressBarProps {
  *
  * return (
  * 	<ProgressBar
- * 		progress={used()}
- * 		variant={used() > 90 ? "danger" : "neutral"}
- * 		labels={{ start: t("media.storage.remaining.title", { storage }) }}
+ * 		value={uploaded()}
+ * 		labels={{ start: t("common.uploading"), end: `${uploaded()}%` }}
  * 	/>
  * );
  * ```
@@ -57,7 +50,7 @@ export interface ProgressBarProps {
 export const ProgressBar: Component<ProgressBarProps> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const progress = createMemo(() => Math.min(Math.max(props.progress, 0), 100));
+	const progress = createMemo(() => Math.min(Math.max(props.value, 0), 100));
 	const variant = createMemo(() => props.variant ?? "primary");
 
 	// ----------------------------------------

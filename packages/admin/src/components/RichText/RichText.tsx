@@ -23,9 +23,7 @@ export interface RichTextProps extends JSX.AriaAttributes {
 	value: RichTextJSON | null | undefined;
 	onChange: (_value: RichTextJSON) => void;
 	label?: string;
-	/** Shown while the editor is empty. */
 	placeholder?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
@@ -44,34 +42,23 @@ export interface RichTextProps extends JSX.AriaAttributes {
 	bulletList?: boolean;
 	/** @default true */
 	orderedList?: boolean;
-	/** Offers the clear formatting control. @default true */
+	/** @default true */
 	clearFormatting?: boolean;
-	/** Offers the link control. @default true */
+	/** @default true */
 	links?: boolean;
-	/**
-	 * Extra Tiptap extensions, merged over the ones Lucid ships so you can add
-	 * your own nodes or replace ours by name. Read once, when the editor is
-	 * created.
-	 */
+	/** Tiptap extensions to add, or to replace built in ones with the same name. Read once on mount. */
 	extensions?: Extensions;
-	/**
-	 * Rendered at the end of the toolbar, after the built in controls. Pair it
-	 * with `extensions` to give a node of your own a button.
-	 */
+	/** Content added to the end of the toolbar. */
 	toolbarEnd?: JSXElement;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-rich-text-control] for the editor. */
+	/** Applied to the field. Target `[data-rich-text-control]` for the editor. */
 	class?: string;
 }
 
 /**
- * A rich text editor for prose, with a formatting toolbar and links. Every
- * control is on unless you turn it off, and turning them all off drops the
- * toolbar and the selection pill with them. Pass `extensions` to add your own
- * Tiptap nodes alongside the ones Lucid ships.
+ * A rich text editor with a formatting toolbar. Each formatting option can be
+ * turned off, and `extensions` adds your own Tiptap extensions.
  *
  * @example
  * ```tsx
@@ -82,12 +69,12 @@ export interface RichTextProps extends JSX.AriaAttributes {
  *
  * return (
  * 	<RichText
- * 		id="comment"
- * 		name="comment"
- * 		label={t("common.comment")}
+ * 		id="notes"
+ * 		name="notes"
+ * 		label={t("notes")}
+ * 		value={notes()}
+ * 		onChange={setNotes}
  * 		headings={false}
- * 		value={comment()}
- * 		onChange={setComment}
  * 	/>
  * );
  * ```
@@ -122,11 +109,6 @@ const RichText: Component<RichTextProps> = (props) => {
 		"class",
 	]);
 
-	/**
-	 * The shared editor still speaks in options, but only the formatting half of
-	 * them is worth exposing. Everything to do with resolving CMS references
-	 * belongs to DocumentRichText.
-	 */
 	const options = createMemo<RichTextOptions>(() => ({
 		headings: props.headings,
 		bold: props.bold,

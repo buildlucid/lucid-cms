@@ -9,7 +9,7 @@ import type {
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
 
-//* coerce numeric strings to numbers so array/number filters round-trip from the URL
+//* so number and array values read back from the URL as numbers
 const coerceNumeric = (raw: string): string | number => {
 	if (raw.trim() === "") return raw;
 	const asNumber = Number(raw);
@@ -23,9 +23,11 @@ const isBlank = (value: FilterValue): boolean => {
 };
 
 /**
+ * A text filter for a `useQueryState` schema.
+ *
  * @example
  * ```ts
- * textFilter({ defaultOperator: "like" });
+ * textFilter({ defaultOperator: "contains" });
  * ```
  */
 export const textFilter = (config?: {
@@ -60,9 +62,11 @@ export const textFilter = (config?: {
 };
 
 /**
+ * A number filter for a `useQueryState` schema.
+ *
  * @example
  * ```ts
- * numberFilter({ defaultValue: 10 });
+ * numberFilter({ defaultOperator: ">=" });
  * ```
  */
 export const numberFilter = (config?: {
@@ -98,6 +102,8 @@ export const numberFilter = (config?: {
 };
 
 /**
+ * A true or false filter for a `useQueryState` schema.
+ *
  * @example
  * ```ts
  * booleanFilter({ defaultValue: true });
@@ -136,6 +142,8 @@ export const booleanFilter = (config?: {
 };
 
 /**
+ * A filter that holds several values, for a `useQueryState` schema.
+ *
  * @example
  * ```ts
  * arrayFilter({ defaultValue: ["draft", "published"] });
@@ -179,9 +187,11 @@ export const arrayFilter = (config?: {
 };
 
 /**
+ * A sort key for a `useQueryState` schema.
+ *
  * @example
  * ```ts
- * sort({ defaultValue: "asc" });
+ * sort({ defaultValue: "desc" });
  * ```
  */
 export const sort = (config?: { defaultValue?: SortDirection }): SortCodec => ({
@@ -190,9 +200,11 @@ export const sort = (config?: { defaultValue?: SortDirection }): SortCodec => ({
 });
 
 /**
+ * Pagination defaults for a `useQueryState` schema.
+ *
  * @example
  * ```ts
- * pagination({ defaultPerPage: 20 });
+ * pagination({ defaultPerPage: 25 });
  * ```
  */
 export const pagination = (config?: {

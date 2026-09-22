@@ -96,7 +96,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 						},
 						permission: props.canDelete,
 						sortOrder: 80,
-						variant: "error",
+						variant: "danger",
 					},
 					{
 						type: "button",
@@ -108,7 +108,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 						},
 						permission: props.canRegenerate,
 						sortOrder: 70,
-						variant: "error",
+						variant: "danger",
 					},
 				]}
 			/>

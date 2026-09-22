@@ -280,8 +280,8 @@ const DocumentsPage: Component = () => {
 			>
 				<QueryToolbar
 					queryState={searchParams}
-					showingDeleted={orderMode() ? undefined : showingDeleted()}
-					onShowingDeletedChange={
+					showDeleted={orderMode() ? undefined : showingDeleted()}
+					onShowDeletedChange={
 						orderMode()
 							? undefined
 							: (value: boolean) => {

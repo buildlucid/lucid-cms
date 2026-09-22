@@ -155,10 +155,10 @@ const PublishingOverviewPage: Component = () => {
 			/>
 			<PageLayout.Body>
 				<QueryBoundary
-					isLoading={collections.isLoading || overview.isLoading}
-					isError={collections.isError || overview.isError}
-					isEmpty={targets().length === 0}
-					empty={
+					loading={collections.isLoading || overview.isLoading}
+					error={collections.isError || overview.isError}
+					empty={targets().length === 0}
+					emptyFallback={
 						<EmptyState
 							title={T()("publishing.overview.empty.title")}
 							description={T()("publishing.overview.empty.description")}

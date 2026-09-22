@@ -214,9 +214,9 @@ export const JobsList: Component = () => {
 				padding="sm"
 			/>
 			<QueryBoundary
-				isError={jobs.isError}
-				isEmpty={jobs.data?.data.length === 0}
-				empty={
+				error={jobs.isError}
+				empty={jobs.data?.data.length === 0}
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.jobs.title")}
 						description={T()("empty.states.jobs.description")}
@@ -231,7 +231,7 @@ export const JobsList: Component = () => {
 					id="jobs.list"
 					rowCount={jobs.data?.data.length || 0}
 					queryState={searchParams}
-					head={[
+					columns={[
 						{
 							label: T()("common.status"),
 							key: "status",
@@ -266,7 +266,7 @@ export const JobsList: Component = () => {
 							icon: <FaSolidCalendar />,
 						},
 					]}
-					isLoading={jobs.isFetching}
+					loading={jobs.isFetching}
 					padding="sm"
 					variant="contained"
 				>

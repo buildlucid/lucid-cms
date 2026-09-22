@@ -316,7 +316,7 @@ describe("createQueryState - memory mode", () => {
 				new URLSearchParams(adapter.search()).get("filter[author:in]"),
 			).toBe("");
 			expect(query.hasFiltersApplied()).toBe(false);
-			expect(query.hasDefaultFiltersApplied()).toBe(false);
+			expect(query.filtersAreDefault()).toBe(false);
 			dispose();
 		});
 	});
@@ -585,7 +585,7 @@ describe("createQueryState - reset", () => {
 			expect(query.hasFiltersApplied()).toBe(true);
 
 			query.resetFilters();
-			expect(query.hasDefaultFiltersApplied()).toBe(true);
+			expect(query.filtersAreDefault()).toBe(true);
 			expect(query.filters().get("title")).toBe("");
 			expect(query.filters().get("author")).toEqual([]);
 			expect(query.orFilterGroups()).toEqual([]);

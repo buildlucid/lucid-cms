@@ -11,7 +11,7 @@ import Button from "@/components/Button/Button";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import FilterPanel, {
 	type FilterField,
-	type FilterPresets,
+	type FilterPreset,
 } from "@/components/FilterPanel/FilterPanel";
 import FilterToggle from "@/components/FilterToggle/FilterToggle";
 import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
@@ -22,69 +22,59 @@ import ResetFilters from "@/components/ResetFilters/ResetFilters";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
-/** Space a toolbar leaves at its edges. */
 export type QueryToolbarPadding = "sm" | "md";
 
 export interface QueryToolbarProps {
-	/** The state every control in the toolbar reads and writes. */
 	queryState: QueryStateResponse;
-	/** Adds a filter button, and the panel it opens beneath the toolbar. */
+	/** Adds a filter button and panel. */
 	filterFields?: FilterField[];
-	/** Names the thing being filtered, for the panel's heading. */
+	/** What is being filtered, shown in the filter panel's heading. */
 	filterSubject?: string;
-	/** Keeps the subject's capitalisation instead of lowercasing it. */
+	/** Shows `filterSubject` as given, instead of sentence case. */
 	preserveFilterSubjectCase?: boolean;
-	/** One-click filter combinations, shown above the rows. */
-	filterPresets?: FilterPresets;
-	/** Takes the panel's open state over. It manages its own otherwise. */
+	filterPresets?: FilterPreset[];
+	/** Controls whether the filter panel is open. */
 	filtersOpen?: boolean;
 	onFiltersOpenChange?: (_open: boolean) => void;
-	/** Adds a sort menu over these keys. */
+	/** Adds a sort menu. */
 	sorts?: QuerySortProps["sorts"];
-	/** Adds a page-size menu. Pass sizes of your own, or true for the defaults. */
+	/** Adds a page size menu. Pass `true` for the default sizes. */
 	perPage?: boolean | number[];
-	/** Adds a refresh button that calls this. */
+	/** Adds a refresh button. */
 	onRefresh?: () => void;
-	/** Replaces what the reset link does. It clears the filters by default. */
+	/** Replaces the default filter reset. */
 	onResetFilters?: () => void;
-	/** Adds a "show deleted" checkbox. Needs `onShowingDeletedChange`. */
-	showingDeleted?: boolean;
-	onShowingDeletedChange?: (_value: boolean) => void;
-	/** Space the toolbar leaves at its edges. @default "md" */
+	/** Adds a "show deleted" checkbox. Requires `onShowDeletedChange`. */
+	showDeleted?: boolean;
+	onShowDeletedChange?: (_value: boolean) => void;
+	/** @default "md" */
 	padding?: QueryToolbarPadding;
-	/**
-	 * Pads the top to match. Leave it off when a page header sits directly
-	 * above, which is how the admin's own lists use it. @default false
-	 */
+	/** Adds padding above the toolbar. */
 	paddingTop?: boolean;
 	class?: string;
-	/** Controls of your own, after the sort menu. */
+	/** Extra controls, shown after the sort menu. */
 	children?: JSXElement;
 }
 
 /**
- * The row of filter, sort and page-size controls that sits above a list, and
- * the filter panel it opens. Drive a Table or Grid from the same query state.
+ * Filter, sort and page size controls for a list.
  *
  * @example
  * ```tsx
- * import { QueryToolbar, Table } from "@lucidcms/admin/components";
- * import { useQueryState, useTranslation } from "@lucidcms/admin/hooks";
+ * import { QueryToolbar } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
  *
  * const { t } = useTranslation();
- * const queryState = useQueryState();
  *
  * return (
- * 	<>
- * 		<QueryToolbar
- * 			queryState={queryState}
- * 			filterSubject={t("admin:reports.title")}
- * 			filterFields={[{ key: "name", label: t("common.name"), type: "text" }]}
- * 			sorts={[{ key: "createdAt", label: t("common.created.at") }]}
- * 			perPage
- * 		/>
- * 		<Table.Root {...tableProps} />
- * 	</>
+ * 	<QueryToolbar
+ * 		queryState={queryState}
+ * 		filterSubject={t("redirects.title")}
+ * 		filterFields={[{ key: "from", label: t("redirects.from"), type: "text" }]}
+ * 		sorts={[{ key: "createdAt", label: t("common.created.at") }]}
+ * 		perPage
+ * 		onRefresh={() => redirects.refetch()}
+ * 	/>
  * );
  * ```
  */
@@ -158,16 +148,16 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 					{props.children}
 					<Show
 						when={
-							props.showingDeleted !== undefined &&
-							props.onShowingDeletedChange !== undefined
+							props.showDeleted !== undefined &&
+							props.onShowDeletedChange !== undefined
 						}
 					>
 						<Checkbox
 							variant="button-danger"
 							id="isDeleted"
-							value={props.showingDeleted ?? false}
+							value={props.showDeleted ?? false}
 							onChange={(value) => {
-								props.onShowingDeletedChange?.(value);
+								props.onShowDeletedChange?.(value);
 							}}
 							name={"isDeleted"}
 							label={T()("actions.show.deleted")}
@@ -177,7 +167,7 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 						when={
 							(filterFields() !== undefined ||
 								props.onResetFilters !== undefined) &&
-							!props.queryState.hasDefaultFiltersApplied()
+							!props.queryState.filtersAreDefault()
 						}
 					>
 						<ResetFilters

@@ -163,9 +163,9 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 					embedded
 				/>
 				<QueryBoundary
-					isError={jobs.isError}
-					isEmpty={jobs.data?.data.length === 0}
-					empty={
+					error={jobs.isError}
+					empty={jobs.data?.data.length === 0}
+					emptyFallback={
 						<EmptyState
 							title={T()("empty.states.jobs.title")}
 							description={T()("empty.states.jobs.description")}
@@ -180,7 +180,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 						id="jobs.schedule-runs"
 						rowCount={jobs.data?.data.length ?? 0}
 						queryState={searchParams}
-						head={[
+						columns={[
 							{
 								label: T()("common.status"),
 								key: "status",
@@ -215,7 +215,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 								icon: <FaSolidCalendar />,
 							},
 						]}
-						isLoading={jobs.isFetching}
+						loading={jobs.isFetching}
 						padding="sm"
 						variant="secondary"
 					>

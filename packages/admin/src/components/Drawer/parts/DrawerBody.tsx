@@ -7,22 +7,7 @@ export interface DrawerBodyProps {
 	children: JSXElement;
 }
 
-/**
- * Main content region of the drawer. It fills the space left between the
- * header and the footer, and its padding follows the padding set on
- * Drawer.Root.
- *
- * @example
- * ```tsx
- * import { Drawer } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Drawer.Body>
- * 		<Input id="name" name="name" type="text" label="Name" value={name()} onChange={setName} />
- * 	</Drawer.Body>
- * );
- * ```
- */
+/** The drawer's main content. */
 export const DrawerBody: Component<DrawerBodyProps> = (props) => {
 	// ------------------------------
 	// State & Hooks

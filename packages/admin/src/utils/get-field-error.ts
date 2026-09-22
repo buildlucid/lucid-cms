@@ -2,13 +2,14 @@ import { translateAdminCopy } from "@/translations";
 import { LucidError } from "./error-handling";
 
 /**
- * Returns a field error message, or undefined when there is none.
+ * Returns the translated error message from an API error, optionally for a
+ * single field.
  *
  * @example
  * ```ts
  * import { getFieldError } from "@lucidcms/admin/utils";
  *
- * const titleError = getFieldError(error, "title");
+ * const fromError = () => getFieldError(save.error, "from");
  * ```
  */
 export const getFieldError = (

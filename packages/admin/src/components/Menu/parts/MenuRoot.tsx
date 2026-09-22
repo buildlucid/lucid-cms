@@ -1,7 +1,6 @@
 import { DropdownMenu as KobalteMenu } from "@kobalte/core";
 import type { Component, JSXElement } from "solid-js";
 
-/** Where the menu opens relative to its trigger. */
 export type MenuPlacement =
 	| "top"
 	| "top-start"
@@ -11,17 +10,17 @@ export type MenuPlacement =
 	| "bottom-end";
 
 export interface MenuRootProps {
-	/** Takes the open state over. The menu manages its own otherwise. */
+	/** Controls the open state. */
 	open?: boolean;
 	onOpenChange?: (_open: boolean) => void;
 	/** @default "bottom-start" */
 	placement?: MenuPlacement;
-	/** Space between the trigger and the menu, in pixels. */
+	/** Space between the trigger and the menu, in pixels. @default 8 */
 	gutter?: number;
 	children: JSXElement;
 }
 
-/** Holds a trigger and the menu it opens. */
+/** Holds the menu's trigger and content. */
 const MenuRoot: Component<MenuRootProps> = (props) => {
 	// ----------------------------------------
 	// State
@@ -29,8 +28,6 @@ const MenuRoot: Component<MenuRootProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
-	//* a trigger that is mid-transition can measure as zero, which would park
-	//* the menu in the top corner - the last real measurement stands in
 	const getAnchorRect = (anchor?: HTMLElement) => {
 		const rect = anchor?.getBoundingClientRect();
 
@@ -53,7 +50,7 @@ const MenuRoot: Component<MenuRootProps> = (props) => {
 			open={props.open}
 			onOpenChange={props.onOpenChange}
 			placement={props.placement}
-			gutter={props.gutter}
+			gutter={props.gutter ?? 8}
 			getAnchorRect={getAnchorRect}
 		>
 			{props.children}

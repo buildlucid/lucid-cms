@@ -35,10 +35,10 @@ export const AiUsageList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				isError={aiUsage.isError}
-				isEmpty={aiUsage.data?.data.length === 0}
+				error={aiUsage.isError}
+				empty={aiUsage.data?.data.length === 0}
 				queryState={props.state.searchParams}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.ai.usage.title")}
 						description={T()("empty.states.ai.usage.description")}
@@ -55,7 +55,7 @@ export const AiUsageList: Component<{
 					id="ai-usage.list"
 					rowCount={aiUsage.data?.data.length || 0}
 					queryState={props.state.searchParams}
-					head={[
+					columns={[
 						{
 							label: T()("common.status"),
 							key: "status",
@@ -101,7 +101,7 @@ export const AiUsageList: Component<{
 							minWidth: 170,
 						},
 					]}
-					isLoading={aiUsage.isFetching}
+					loading={aiUsage.isFetching}
 					padding="sm"
 					variant="contained"
 				>

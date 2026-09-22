@@ -10,7 +10,7 @@ import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 interface ContentLocaleSelectProps {
 	value?: string | undefined;
 	setValue?: (_value: string | undefined) => void;
-	hasError?: boolean;
+	invalid?: boolean;
 	showShortcut?: boolean;
 	locales?: Locale[];
 }
@@ -88,7 +88,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					}}
 					name={"content-locale"}
 					options={options()}
-					hasError={props.hasError}
+					invalid={props.invalid}
 					size="sm"
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
 					shortcutDisplay={props.showShortcut ? "compact" : undefined}
@@ -104,7 +104,7 @@ const ContentLocaleSelect: Component<ContentLocaleSelectProps> = (props) => {
 					}}
 					name={"content-locale"}
 					options={options()}
-					hasError={props.hasError}
+					invalid={props.invalid}
 					size="sm"
 					shortcut={props.showShortcut ? shortcutText.changeLocale : undefined}
 					shortcutDisplay={props.showShortcut ? "compact" : undefined}

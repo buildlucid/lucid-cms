@@ -9,11 +9,7 @@ import {
 } from "solid-js";
 import Input from "@/components/Input/Input";
 
-/**
- * Text-style input that keeps a local draft while typing and commits it on a
- * debounce (plus immediately on blur/Enter), so filtering feels live without
- * a request per keystroke or focus loss from re-renders.
- */
+/** An input that commits its value after a short delay, or on blur or Enter. */
 export const CommitInput: Component<{
 	id: string;
 	name: string;

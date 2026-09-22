@@ -437,27 +437,27 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 			{
 				label: T()("media.file.pending.reset"),
 				icon: "restore" as const,
-				hide: props.pendingChange === undefined,
+				show: props.pendingChange !== undefined,
 				onClick: () => props.pendingChange?.reset(),
 			},
 			{
 				label: T()("media.crop.action"),
 				icon: "crop" as const,
-				hide: !isReady() || props.actions.imageCrop === undefined,
+				show: isReady() && props.actions.imageCrop !== undefined,
 				disabled: props.actions.imageCrop?.state.disabled,
 				onClick: () => props.actions.imageCrop?.callbacks.open(),
 			},
 			{
 				label: T()("media.crop.remove"),
 				icon: "trash" as const,
-				hide: !isReady() || props.actions.imageCrop?.state.hasCrop !== true,
+				show: isReady() && props.actions.imageCrop?.state.hasCrop === true,
 				disabled: props.actions.imageCrop?.state.disabled,
 				onClick: () => props.actions.imageCrop?.callbacks.remove(),
 			},
 			{
 				label: T()("ai.media.image.generate.action"),
 				icon: "sparkle" as const,
-				hide: !isReady() || props.actions.imageGeneration === undefined,
+				show: isReady() && props.actions.imageGeneration !== undefined,
 				disabled:
 					props.actions.imageGeneration?.state.disabled === true &&
 					props.actions.imageGeneration.state.disabledClickable !== true,
@@ -469,7 +469,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				icon: "upload" as const,
 				onClick: () => props.actions.uploadFile(),
 			},
-		].filter((action) => action.hide !== true);
+		].filter((action) => action.show !== false);
 	});
 	const overflowActions = createMemo<ActionMenuProps["actions"]>(() => {
 		return [
@@ -477,7 +477,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				label: T()("common.preview"),
 				type: "button" as const,
 				icon: "eye" as const,
-				hide: !isReady() || props.actions.downloadFile === undefined,
+				show: isReady() && props.actions.downloadFile !== undefined,
 				onClick: () => props.actions.downloadFile?.(),
 				sortOrder: 0,
 			},
@@ -485,7 +485,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				label: T()("media.focal.point.label"),
 				type: "button" as const,
 				icon: "bullseye" as const,
-				hide: !showFocalPoint(),
+				show: showFocalPoint(),
 				onClick: () => setFocalEditorOpen(true),
 				sortOrder: 30,
 			},
@@ -493,9 +493,9 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				label: T()("common.remove"),
 				type: "button" as const,
 				icon: "trash" as const,
-				hide: props.actions.clearFile === undefined,
+				show: props.actions.clearFile !== undefined,
 				onClick: () => props.actions.clearFile?.(),
-				variant: "error" as const,
+				variant: "danger" as const,
 				sortOrder: 70,
 			},
 		];
@@ -623,7 +623,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 			<Show when={props.progress?.active}>
 				<div class="absolute inset-x-0 bottom-0 z-20">
 					<ProgressBar
-						progress={props.progress?.value ?? 0}
+						value={props.progress?.value ?? 0}
 						variant="primary-subtle"
 						size="md"
 						square

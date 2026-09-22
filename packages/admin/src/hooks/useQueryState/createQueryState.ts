@@ -13,7 +13,7 @@ import {
 	clearFilterState,
 	clearFiltersState,
 	codecForKey,
-	hasDefaultFiltersApplied,
+	filtersAreDefault,
 	hasFiltersApplied,
 	parseSearchIntoState,
 	resetFiltersState,
@@ -52,9 +52,8 @@ const toPublicFilterState = (
 });
 
 /**
- * The storage-agnostic query state primitive. Canonical state is a single
- * typed model; the adapter decides whether it is mirrored to the URL or kept
- * in memory. Use useQueryState (index.ts) from components.
+ * The query state primitive behind `useQueryState`, with a pluggable storage
+ * adapter.
  */
 const createQueryState = (config: CreateQueryStateConfig) => {
 	const options = config.options;
@@ -71,8 +70,7 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 	);
 	const [getReady, setReady] = createSignal(options?.awaitSchema !== true);
 
-	//* tracks the last search string this hook wrote (or hydrated from) so its
-	//* own storage writes are not mistaken for external navigation
+	//* so the hook's own writes are not mistaken for navigation
 	let lastSyncedSearch = initialSearch;
 
 	const commit = (next: QueryStateModel) => {
@@ -153,12 +151,14 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 	const hasFiltersAppliedMemo = createMemo(() =>
 		hasFiltersApplied(getState(), getSchema()),
 	);
-	const hasDefaultFiltersAppliedMemo = createMemo(() =>
-		hasDefaultFiltersApplied(getState(), getSchema()),
+	const filtersAreDefaultMemo = createMemo(() =>
+		filtersAreDefault(getState(), getSchema()),
 	);
 
 	return {
+		/** Filter values by key. */
 		filters,
+		/** Filter values and operators by key. */
 		filterStates,
 		orFilterGroups,
 		getFilter: (key: string) => {
@@ -167,13 +167,17 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 		},
 		sorts,
 		pagination: paginationAccessor,
+		/** The state as an API query string. */
 		queryString,
+		/** False until `setSchema` is called, when `awaitSchema` is set. */
 		ready: getReady,
 
+		/** Updates filters, sorts and pagination in one go. */
 		setParams,
 		setFilter: (key: string, value: FilterValue | FilterState) => {
 			setParams({ filters: { [key]: value } });
 		},
+		/** Replaces all filters and returns to the first page. */
 		replaceFilters: (filters: NonNullable<QueryStateParams["filters"]>) => {
 			const state = untrack(getState);
 			const schema = untrack(getSchema);
@@ -221,9 +225,11 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 		clearFilter: (key: string) => {
 			commit(clearFilterState(untrack(getState), untrack(getSchema), key));
 		},
+		/** Clears all filters, keeping any the schema gives a default value. */
 		clearFilters: () => {
 			commit(clearFiltersState(untrack(getState), untrack(getSchema)));
 		},
+		/** Sets all filters back to the schema defaults. */
 		resetFilters: () => {
 			commit(resetFiltersState(untrack(getState), untrack(getSchema)));
 		},
@@ -247,15 +253,17 @@ const createQueryState = (config: CreateQueryStateConfig) => {
 			commit({
 				...state,
 				pagination: {
-					//* changing the page size restarts from the first page
 					page: schema.pagination?.defaultPage ?? DEFAULT_PAGE,
 					perPage,
 				},
 			});
 		},
 
+		/** True when any filter has a value. */
 		hasFiltersApplied: hasFiltersAppliedMemo,
-		hasDefaultFiltersApplied: hasDefaultFiltersAppliedMemo,
+		/** True when the filters match the schema defaults. */
+		filtersAreDefault: filtersAreDefaultMemo,
+		/** Adds to the schema, such as once a collection's fields have loaded. */
 		setSchema,
 	};
 };

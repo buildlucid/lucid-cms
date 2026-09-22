@@ -42,8 +42,8 @@ const ShareLinkTableRow: Component<ShareLinkRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.link.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					actionExclude: true,
-					variant: "error",
+					excludeFromRowClick: true,
+					variant: "danger",
 					sortOrder: 70,
 				},
 			]}

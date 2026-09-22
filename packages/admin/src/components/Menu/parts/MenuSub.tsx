@@ -11,22 +11,20 @@ import { menuPanelClasses } from "@/components/Menu/panelClasses";
 import { useLayer } from "@/hooks/useLayer/useLayer";
 
 export interface MenuSubProps {
-	/** The row that opens the nested menu. */
 	label: string;
-	/** Before the label. */
 	icon?: JSXElement;
-	/** Against the right edge, for the value the nested menu is set to. */
+	/** Content shown at the end of the trigger, such as the current value. */
 	end?: JSXElement;
 	variant?: MenuItemVariant;
 	disabled?: boolean;
-	/** Dims the row without stopping it opening. */
+	/** Looks disabled but can still be opened. */
 	unavailable?: boolean;
-	/** Applied to the row that opens it. */
+	/** Applied to the trigger. */
 	class?: string;
 	children: JSXElement;
 }
 
-/** A row that opens a nested menu beside it. */
+/** A nested menu, opened from an item in the parent menu. */
 const MenuSub: Component<MenuSubProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks

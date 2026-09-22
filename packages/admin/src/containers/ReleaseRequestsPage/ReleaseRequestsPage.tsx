@@ -5,7 +5,7 @@ import type {
 	PublishOperationStatus,
 } from "@types";
 import { type Component, createEffect, createMemo } from "solid-js";
-import type { FilterPresets } from "@/components/FilterPanel/preset-state";
+import type { FilterPreset } from "@/components/FilterPanel/preset-state";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { ReleaseRequestsList } from "@/components/ReleaseRequestsList/ReleaseRequestsList";
@@ -137,14 +137,14 @@ const ReleaseRequestsPage: Component = () => {
 			label: key,
 		}));
 	});
-	const releaseRequestPresets = createMemo<FilterPresets>(() => {
+	const releaseRequestPresets = createMemo<FilterPreset[]>(() => {
 		const data: PublishOperationOverview | undefined = overview.data?.data;
 		const loading = overview.isFetching;
-		const items: FilterPresets["items"] = [
+		const items: FilterPreset[] = [
 			{
 				key: "pending",
 				label: T()("common.pending.review"),
-				value: data?.pending,
+				count: data?.pending,
 				loading,
 				filters: {
 					status: {
@@ -156,14 +156,14 @@ const ReleaseRequestsPage: Component = () => {
 			{
 				key: "assigned",
 				label: T()("common.assigned.to.me"),
-				value: data?.assignedToMe,
+				count: data?.assignedToMe,
 				loading,
 				filters: { assignedToMe: { value: true, operator: "=" } },
 			},
 			{
 				key: "approved",
 				label: T()("common.status.approved"),
-				value: data?.approved,
+				count: data?.approved,
 				loading,
 				filters: {
 					status: {
@@ -175,7 +175,7 @@ const ReleaseRequestsPage: Component = () => {
 			{
 				key: "rejected",
 				label: T()("common.status.rejected"),
-				value: data?.rejected,
+				count: data?.rejected,
 				loading,
 				filters: {
 					status: {
@@ -186,9 +186,7 @@ const ReleaseRequestsPage: Component = () => {
 			},
 		];
 
-		return {
-			items,
-		};
+		return items;
 	});
 	// ----------------------------------
 	// Effects

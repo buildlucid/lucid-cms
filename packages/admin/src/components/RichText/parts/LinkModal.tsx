@@ -76,11 +76,11 @@ const LinkModal: Component<{
 	);
 	const linkKindTabs = createMemo<TabsItem[]>(() => [
 		{
-			key: "external",
+			value: "external",
 			label: T()("editor.rich.text.link.external"),
 		},
 		{
-			key: "document",
+			value: "document",
 			label: T()("editor.rich.text.link.document"),
 		},
 	]);
@@ -195,9 +195,10 @@ const LinkModal: Component<{
 					<Show when={externalEnabled() && internalEnabled()}>
 						<Tabs.Root
 							items={linkKindTabs()}
-							activeKey={kind()}
-							onSelect={(key) => {
-								if (key === "external" || key === "document") changeKind(key);
+							value={kind()}
+							onChange={(value) => {
+								if (value === "external" || value === "document")
+									changeKind(value);
 							}}
 							stretch={true}
 							class="mb-4"

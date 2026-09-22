@@ -1,5 +1,4 @@
 import { A, type AnchorProps } from "@solidjs/router";
-import type { Permission } from "@types";
 import classnames from "classnames";
 import {
 	type Component,
@@ -8,9 +7,11 @@ import {
 	mergeProps,
 	splitProps,
 } from "solid-js";
-import userStore from "@/store/userStore/userStore";
-import T from "@/translations";
-import spawnToast from "@/utils/spawn-toast";
+import {
+	checkPermission,
+	type PermissionRequirement,
+	showNoPermissionToast,
+} from "@/utils/permission-requirement";
 
 export type LinkVariant =
 	| "primary"
@@ -24,21 +25,23 @@ export type LinkSize = "xs" | "sm" | "md" | "lg";
 export type LinkShape = "standard" | "square" | "circle";
 
 export interface LinkProps extends Omit<AnchorProps, "href" | "shape"> {
-	/** Visual style of the link. @default "primary" */
+	/** @default "primary" */
 	variant?: LinkVariant;
-	/** Height and text scale of the link. @default "md" */
+	/** @default "md" */
 	size?: LinkSize;
-	/** Standard links size to their content, square and circle links are equal width and height. @default "standard" */
+	/** `square` and `circle` have equal width and height, for icon links. @default "standard" */
 	shape?: LinkShape;
-	/** Permission(s) the current user must hold. When any are missing, clicks are swallowed and a no permission toast naming them is shown. Undefined means no permission is required. */
-	permission?: Permission | Permission[];
+	/**
+	 * Permission keys the user needs, or a boolean when access is checked
+	 * elsewhere. Without permission, clicking shows a toast instead.
+	 */
+	permission?: PermissionRequirement;
 	href?: string;
 	children: JSX.Element;
 }
 
 /**
- * A router anchor styled to match {@link Button}, sharing its variant, size,
- * shape and permission props.
+ * A link styled as a button, with optional permission handling.
  *
  * @example
  * ```tsx
@@ -48,13 +51,7 @@ export interface LinkProps extends Omit<AnchorProps, "href" | "shape"> {
  * const { t } = useTranslation();
  *
  * return (
- * 	<Link
- * 		variant="primary"
- * 		size="md"
- * 		shape="standard"
- * 		permission={Permissions.MediaRead}
- * 		href="/lucid/media"
- * 	>
+ * 	<Link href="/lucid/media" permission={Permissions.MediaRead}>
  * 		{t("routes.media.title")}
  * 	</Link>
  * );
@@ -84,14 +81,7 @@ const Link: Component<LinkProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const missingPermissions = createMemo(() => {
-		if (local.permission === undefined) return [];
-		const required = Array.isArray(local.permission)
-			? local.permission
-			: [local.permission];
-		return required.filter((p) => !userStore.get.hasPermission([p]).all);
-	});
-	const hasPermission = createMemo(() => missingPermissions().length === 0);
+	const access = createMemo(() => checkPermission(local.permission));
 	const classes = createMemo(() => {
 		const square = local.shape !== "standard";
 
@@ -123,7 +113,7 @@ const Link: Component<LinkProps> = (props) => {
 				"w-10 h-10 p-0 min-w-[40px]!": local.size === "md" && square,
 				"w-12 h-12 p-0 min-w-[48px]!": local.size === "lg" && square,
 
-				"opacity-80 cursor-not-allowed": !hasPermission(),
+				"opacity-80 cursor-not-allowed": !access().permitted,
 			},
 		);
 	});
@@ -131,14 +121,8 @@ const Link: Component<LinkProps> = (props) => {
 	// ----------------------------------------
 	// Functions
 	const linkOnClick: JSX.EventHandler<HTMLAnchorElement, MouseEvent> = (e) => {
-		if (!hasPermission()) {
-			spawnToast({
-				title: T()("toasts.common.no.permission.title"),
-				message: T()("toasts.common.no.permission.message.detailed", {
-					permission: missingPermissions().join(", "),
-				}),
-				status: "warning",
-			});
+		if (!access().permitted) {
+			showNoPermissionToast(access().missing);
 			e.preventDefault();
 			e.stopPropagation();
 			return;

@@ -57,8 +57,8 @@ const SystemOperationsPage: Component = () => {
 
 					{/* Settings */}
 					<QueryBoundary
-						isLoading={settingsData.isLoading}
-						isError={settingsData.isError}
+						loading={settingsData.isLoading}
+						error={settingsData.isError}
 					>
 						{/* System Alerts */}
 						<InfoRow.Root

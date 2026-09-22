@@ -2,19 +2,21 @@ import type { Permission } from "@types";
 import { useSession } from "../useSession/useSession";
 
 /**
- * Checks the current user's permissions. API endpoints must still enforce access.
+ * Checks the current user's permissions. Use it to adjust the interface, as
+ * the API still enforces access.
  *
  * @example
  * ```tsx
- * import { usePermissions } from "@lucidcms/admin/hooks";
- * import { Permissions } from "@lucidcms/admin/utils";
+ * import { Button } from "@lucidcms/admin/components";
+ * import { Permissions, usePermissions, useTranslation } from "@lucidcms/admin/hooks";
  *
+ * const { t } = useTranslation();
  * const permissions = usePermissions();
  *
  * return (
- *   <button disabled={!permissions.can(Permissions.MediaCreate)}>
- *     Upload
- *   </button>
+ * 	<Show when={permissions.can(Permissions.MediaCreate)}>
+ * 		<Button onClick={openUpload}>{t("common.upload")}</Button>
+ * 	</Show>
  * );
  * ```
  */

@@ -14,48 +14,31 @@ import {
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
-/** How the control sits in the page around it. */
 export type PaginationVariant = "footer" | "inline";
 
-/** Space a pagination control leaves around itself. */
 export type PaginationPadding = "none" | "sm" | "md";
 
 export interface PaginationProps {
-	/** The meta block a list endpoint returns. */
+	/** The `meta` from a list response. */
 	meta?: ResponseBody<unknown>["meta"];
-	/** Where the current page is read from and written back to. */
 	queryState: QueryStateResponse;
-	/**
-	 * "footer" closes a page off with a divider above and space all round.
-	 * "inline" sits inside a card that already has its own edges.
-	 * @default "footer"
-	 */
+	/** `inline` is for use inside a card. @default "footer" */
 	variant?: PaginationVariant;
-	/** Space around the control. @default "none" */
+	/** @default "none" */
 	padding?: PaginationPadding;
-	/** Renders nothing at all when there is nothing to page through. */
+	/** Renders nothing when there are no results. */
 	hideWhenEmpty?: boolean;
 	class?: string;
 }
 
 /**
- * The page summary and page picker for a list. Pair it with a Table or Grid
- * driven by the same query state.
+ * Page controls and a results summary for a list.
  *
  * @example
  * ```tsx
- * import { Pagination, Table } from "@lucidcms/admin/components";
+ * import { Pagination } from "@lucidcms/admin/components";
  *
- * return (
- * 	<>
- * 		<Table.Root {...tableProps} />
- * 		<Pagination
- * 			meta={reports.data?.meta}
- * 			queryState={queryState}
- * 			padding="md"
- * 		/>
- * 	</>
- * );
+ * return <Pagination meta={redirects.data?.meta} queryState={queryState} padding="md" />;
  * ```
  */
 const Pagination: Component<PaginationProps> = (props) => {

@@ -34,7 +34,7 @@ const SystemSettingsHeader: Component = () => {
 		>
 			<Tabs.Nav
 				class="hidden px-4 pb-4 md:px-6 lg:block"
-				tabs={[
+				items={[
 					{
 						label: T()("common.overview"),
 						href: "/lucid/system/overview",

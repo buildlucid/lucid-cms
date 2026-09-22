@@ -1,3 +1,4 @@
+/** Slots that plugins can render into on each brick. */
 export const brickSlotKeys = {
 	header: "brick.header",
 	left: "brick.left",

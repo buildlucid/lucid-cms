@@ -1,4 +1,3 @@
-import type { Permission } from "@types";
 import classnames from "classnames";
 import {
 	type Component,
@@ -9,9 +8,11 @@ import {
 	splitProps,
 } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
-import userStore from "@/store/userStore/userStore";
-import T from "@/translations";
-import spawnToast from "@/utils/spawn-toast";
+import {
+	checkPermission,
+	type PermissionRequirement,
+	showNoPermissionToast,
+} from "@/utils/permission-requirement";
 
 export type ButtonVariant =
 	| "primary"
@@ -29,22 +30,24 @@ export type ButtonShape = "standard" | "square" | "circle";
 
 export interface ButtonProps
 	extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
-	/** Visual style of the button. @default "primary" */
+	/** @default "primary" */
 	variant?: ButtonVariant;
-	/** Height and text scale of the button. @default "md" */
+	/** @default "md" */
 	size?: ButtonSize;
-	/** Standard buttons size to their content, square and circle buttons are equal width and height. @default "standard" */
+	/** `square` and `circle` have equal width and height, for icon buttons. @default "standard" */
 	shape?: ButtonShape;
-	/** Overlays a spinner and blocks interaction. */
+	/** Shows a spinner and disables the button. */
 	loading?: boolean;
-	/** Permission(s) the current user must hold. When any are missing, clicks are swallowed and a no permission toast naming them is shown. Undefined means no permission is required. */
-	permission?: Permission | Permission[];
+	/**
+	 * Permission keys the user needs, or a boolean when access is checked
+	 * elsewhere. Without permission, clicking shows a toast instead.
+	 */
+	permission?: PermissionRequirement;
 	children: JSX.Element;
 }
 
 /**
- * A button with variant, size and shape styling, plus optional loading and
- * permission handling.
+ * A button, with optional loading and permission states.
  *
  * @example
  * ```tsx
@@ -55,12 +58,9 @@ export interface ButtonProps
  *
  * return (
  * 	<Button
- * 		variant="primary"
- * 		size="md"
- * 		shape="standard"
  * 		loading={save.isPending}
- * 		permission={Permissions.MediaCreate}
- * 		onClick={() => save()}
+ * 		permission={Permissions.MediaUpdate}
+ * 		onClick={() => save.mutate()}
  * 	>
  * 		{t("common.save")}
  * 	</Button>
@@ -93,14 +93,7 @@ const Button: Component<ButtonProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const missingPermissions = createMemo(() => {
-		if (local.permission === undefined) return [];
-		const required = Array.isArray(local.permission)
-			? local.permission
-			: [local.permission];
-		return required.filter((p) => !userStore.get.hasPermission([p]).all);
-	});
-	const hasPermission = createMemo(() => missingPermissions().length === 0);
+	const access = createMemo(() => checkPermission(local.permission));
 	const classes = createMemo(() => {
 		const square = local.shape !== "standard";
 
@@ -137,7 +130,7 @@ const Button: Component<ButtonProps> = (props) => {
 				"w-10 h-10 p-0 min-w-[40px]!": local.size === "md" && square,
 				"w-12 h-12 p-0 min-w-[48px]!": local.size === "lg" && square,
 
-				"opacity-80 cursor-not-allowed": !hasPermission(),
+				"opacity-80 cursor-not-allowed": !access().permitted,
 			},
 		);
 	});
@@ -147,14 +140,8 @@ const Button: Component<ButtonProps> = (props) => {
 	const buttonOnClick: JSX.EventHandler<HTMLButtonElement, MouseEvent> = (
 		e,
 	) => {
-		if (!hasPermission()) {
-			spawnToast({
-				title: T()("toasts.common.no.permission.title"),
-				message: T()("toasts.common.no.permission.message.detailed", {
-					permission: missingPermissions().join(", "),
-				}),
-				status: "warning",
-			});
+		if (!access().permitted) {
+			showNoPermissionToast(access().missing);
 			e.preventDefault();
 			e.stopPropagation();
 			return;

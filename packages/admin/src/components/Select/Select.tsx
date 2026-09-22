@@ -26,21 +26,17 @@ import T from "@/translations";
 export type ValueT = string | number | undefined;
 export type SelectOption = { value: ValueT; label: string };
 
-/** The value one of the options carries, or undefined when none is selected. */
 export type SelectValue<Option extends SelectOption = SelectOption> =
 	| Option["value"]
 	| undefined;
 
-/** Wiring for the search box above the options. */
 export interface SelectSearch {
 	value: string;
 	onChange: (_value: string) => void;
-	/** Shows a spinner in place of the clear button while results load. */
-	isLoading?: boolean;
+	loading?: boolean;
 	placeholder?: string;
 }
 
-/** Height of the select trigger. */
 export type SelectSize = "sm" | "md";
 
 export interface SelectProps<Option extends SelectOption = SelectOption>
@@ -51,38 +47,34 @@ export interface SelectProps<Option extends SelectOption = SelectOption>
 	onChange: (_value: SelectValue<Option>) => void;
 	options: Option[];
 	label?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	/** Adds a search box above the options, for a list you load as you type. */
+	/** Adds a search input above the options. */
 	search?: SelectSearch;
-	/** Offers an option that clears the selection. */
+	/** Adds an option that clears the selection. */
 	clearable?: boolean;
-	/** Styles the trigger as invalid without showing a message. */
-	hasError?: boolean;
+	/** Shows the invalid style without an error message. */
+	invalid?: boolean;
 	/** @default "md" */
 	size?: SelectSize;
 	/** Keyboard shortcut shown on the trigger. */
 	shortcut?: string;
 	shortcutDisplay?: "full" | "compact";
-	/** Shown when nothing is selected. false leaves the trigger empty. */
+	/** Pass `false` to show nothing when no option is selected. */
 	placeholder?: string | false;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-select-trigger] for the trigger. */
+	/** Applied to the field. Target `[data-select-trigger]` for the trigger. */
 	class?: string;
 	renderValue?: (_props: { option: Option }) => JSXElement;
 	renderOption?: (_props: { option: Option; selected: boolean }) => JSXElement;
 }
 
 /**
- * A labelled dropdown, with its description and any validation errors. Give it
- * a search callback to filter a long list as the user types. Any aria
- * attribute you pass lands on the trigger.
+ * A dropdown for choosing one option, with a label, description and validation
+ * errors.
  *
  * @example
  * ```tsx
@@ -109,7 +101,7 @@ export interface SelectProps<Option extends SelectOption = SelectOption>
 function Select<Option extends SelectOption = SelectOption>(
 	props: SelectProps<Option>,
 ) {
-	//* everything left over is the caller's aria-*, which belongs on the trigger
+	//* the rest is aria-*, which goes on the trigger
 	const [, ariaProps] = splitProps(props, [
 		"id",
 		"name",
@@ -123,7 +115,7 @@ function Select<Option extends SelectOption = SelectOption>(
 		"disabled",
 		"search",
 		"clearable",
-		"hasError",
+		"invalid",
 		"size",
 		"shortcut",
 		"shortcutDisplay",
@@ -141,7 +133,6 @@ function Select<Option extends SelectOption = SelectOption>(
 
 	// ----------------------------------------
 	// Functions
-	/** Empty when turned off, the caller's wording if given, else the default. */
 	const placeholderText = () =>
 		props.placeholder === false
 			? ""
@@ -231,7 +222,7 @@ function Select<Option extends SelectOption = SelectOption>(
 						{
 							"h-10": props.size !== "sm",
 							"h-9": props.size === "sm",
-							"border-error-base": props.hasError,
+							"border-error-base": props.invalid,
 						},
 					)}
 					disabled={props.disabled}
@@ -285,7 +276,7 @@ function Select<Option extends SelectOption = SelectOption>(
 						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
 				</Menu.Trigger>
-				<Menu.Content matchTriggerWidth scrollable flush class="z-70">
+				<Menu.Content matchTriggerWidth scrollable class="z-70">
 					<Show when={props.search !== undefined}>
 						{/** biome-ignore lint/a11y/noStaticElementInteractions: explanation */}
 						<div
@@ -309,7 +300,7 @@ function Select<Option extends SelectOption = SelectOption>(
 								/>
 
 								<Switch>
-									<Match when={props.search?.isLoading}>
+									<Match when={props.search?.loading}>
 										<div class="absolute right-2 top-0 bottom-0 flex items-center">
 											<Spinner size="sm" />
 										</div>

@@ -16,32 +16,30 @@ export type DetailsListItemType = "text" | "pill";
 export interface DetailsListItem {
 	label: string;
 	value?: string | number | null | JSXElement;
-	/** How the value reads. @default "text" */
+	/** @default "text" */
 	type?: DetailsListItemType;
 	/** @default "primary" */
 	pillVariant?: PillVariant;
 	pillSize?: PillSize;
-	/** Leaves the row out of the list entirely. @default true */
+	/** @default true */
 	show?: boolean;
-	/** Keeps the value under the label on wide screens too. @default false */
+	/** Shows the value under the label at every screen size. */
 	stacked?: boolean;
-	/** Lets a long value break across lines. @default false */
+	/** Lets long values wrap onto more lines. */
 	wrap?: boolean;
 }
 
 export interface DetailsListProps {
 	items: DetailsListItem[];
-	/** "plain" drops the card, for a list that already sits in one. @default "card" */
+	/** @default "card" */
 	variant?: DetailsListVariant;
-	/** The card's inset. Ignored by the plain variant. @default "md" */
+	/** Ignored by the `plain` variant. @default "md" */
 	padding?: DetailsListPadding;
 	class?: string;
 }
 
 /**
- * A list of labels and their values, for the details panel beside a record.
- * Each row reads as text, or as a Pill for a status. Reach for InfoRow when a
- * row needs its own controls rather than a value.
+ * A list of labels and values. Values can be shown as text or as a pill.
  *
  * @example
  * ```tsx
@@ -52,10 +50,9 @@ export interface DetailsListProps {
  *
  * return (
  * 	<DetailsList
- * 		padding="sm"
  * 		items={[
- * 			{ label: t("common.created.at"), value: entry.createdAt },
- * 			{ label: t("common.status"), type: "pill", value: entry.status },
+ * 			{ label: t("common.name"), value: redirect.name },
+ * 			{ label: t("common.status"), value: redirect.status, type: "pill" },
  * 		]}
  * 	/>
  * );

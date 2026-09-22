@@ -7,11 +7,11 @@ import mediaUrl from "@/utils/media-url";
 
 export type UserDisplayVariant = "icon" | "horizontal" | "stacked";
 export type UserDisplaySize = "xs" | "sm" | "md" | "lg";
-export type UserNameFormat = "username" | "username-only" | "simple";
+export type UserNameFormat = "username" | "name" | "username-and-name";
 
 export interface UserDisplayUser {
 	username?: string | null;
-	/** Stands in for the username when there is not one yet. */
+	/** Shown when there is no username. */
 	email?: string | null;
 	firstName?: string | null;
 	lastName?: string | null;
@@ -20,29 +20,23 @@ export interface UserDisplayUser {
 
 export interface UserDisplayProps {
 	user: UserDisplayUser;
-	/**
-	 * "icon" is the avatar on its own, "horizontal" puts a name beside it and
-	 * "stacked" sits the username over the full name.
-	 * @default "horizontal"
-	 */
+	/** @default "horizontal" */
 	variant?: UserDisplayVariant;
-	/** Sizes the avatar, and the text on the "stacked" variant. @default "md" */
+	/** @default "md" */
 	size?: UserDisplaySize;
-	/** How the name beside the avatar reads. @default "username" */
+	/** Used by the `horizontal` variant. @default "username-and-name" */
 	nameFormat?: UserNameFormat;
 	class?: string;
 }
 
 /**
- * A user's avatar, with their name beside it or under it. It falls back to
- * their initials when they have no picture, and to their email when they have
- * no username. Nothing renders for a user with neither.
+ * A user's profile picture or initials, with their name.
  *
  * @example
  * ```tsx
  * import { UserDisplay } from "@lucidcms/admin/components";
  *
- * return <UserDisplay user={entry.author} variant="horizontal" size="xs" nameFormat="simple" />;
+ * return <UserDisplay user={redirect.createdBy} size="sm" nameFormat="name" />;
  * ```
  */
 const UserDisplay: Component<UserDisplayProps> = (props) => {
@@ -53,7 +47,6 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 	);
 	const size = createMemo<UserDisplaySize>(() => props.size ?? "md");
 	const hasUser = createMemo(() => !!(props.user.username || props.user.email));
-	//* the email stands in so a freshly invited user still reads as somebody
 	const username = createMemo(
 		() => props.user.username ?? props.user.email ?? T()("common.unknown"),
 	);

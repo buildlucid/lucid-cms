@@ -5,25 +5,21 @@ import {
 	useContext,
 } from "solid-js";
 
-/** How a table blends with the surface behind it. */
 export type TableVariant = "primary" | "secondary" | "contained";
 
-/** Space a table leaves at its left and right edges. */
 export type TablePadding = "sm" | "md";
 
 export interface TableColumn {
-	/** Matches the `column` a cell declares, and the sort key in query state. */
+	/** Matches the cells' `column` prop, and is used as the sort key. */
 	key: string;
 	label: string;
-	/** Sits before the label in the header. */
 	icon?: JSXElement;
-	/** Turns the header into a sort button. Needs `queryState` on the root. */
+	/** Requires `queryState` on `Table.Root`. */
 	sortable?: boolean;
 	width?: number;
 	minWidth?: number;
 }
 
-/** Drag state the root owns and rows read while a reorder is in progress. */
 export interface TableRowReorder {
 	enabled: boolean;
 	draggingIndex: number | null;
@@ -38,7 +34,6 @@ export interface TableContextValue {
 	padding: Accessor<TablePadding>;
 	variant: Accessor<TableVariant | undefined>;
 	isSelectable: Accessor<boolean>;
-	/** False when the viewer has hidden the column through the column toggle. */
 	isColumnVisible: (_key: string | undefined) => boolean;
 	isRowSelected: (_index: number) => boolean;
 	toggleRowSelected: (_index: number) => void;
@@ -47,7 +42,7 @@ export interface TableContextValue {
 
 export const TableContext = createContext<TableContextValue>();
 
-/** Reads the state shared by Table.Root with its rows and cells. */
+/** Reads the state Table.Root shares with its rows and cells. */
 export const useTableContext = (): TableContextValue => {
 	const context = useContext(TableContext);
 	if (!context) {

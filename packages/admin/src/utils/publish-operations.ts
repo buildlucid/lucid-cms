@@ -38,7 +38,7 @@ export const hasPublishOperationContextChanged = (
 ) => operation.isOutdated || hasPublishOperationRequirementDrift(operation);
 
 export const formatPublishOperationUser = (user: PublishOperationUser) => {
-	return helpers.formatUserName(user, "username") || "-";
+	return helpers.formatUserName(user, "username-and-name") || "-";
 };
 
 export const getPublishOperationStatusVariant = (

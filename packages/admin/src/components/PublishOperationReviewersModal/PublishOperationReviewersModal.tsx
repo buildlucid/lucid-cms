@@ -51,8 +51,7 @@ const PublishOperationReviewersModal: Component<{
 	const reviewerOptions = createMemo<ReviewerOption[]>(() =>
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
-			label:
-				helpers.formatUserName(reviewer, "simple") || T()("common.unknown"),
+			label: helpers.formatUserName(reviewer, "name") || T()("common.unknown"),
 			user: reviewer,
 		})),
 	);
@@ -99,7 +98,7 @@ const PublishOperationReviewersModal: Component<{
 			operation.assignees.map((assignee) => ({
 				value: assignee.user.id,
 				label:
-					helpers.formatUserName(assignee.user, "simple") ||
+					helpers.formatUserName(assignee.user, "name") ||
 					T()("common.unknown"),
 				user: {
 					id: assignee.user.id,

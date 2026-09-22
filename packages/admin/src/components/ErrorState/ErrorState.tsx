@@ -3,36 +3,30 @@ import { type Component, type JSXElement, Show } from "solid-js";
 import T from "@/translations";
 
 export interface ErrorStateProps {
-	/** An illustration's src, or an element to render in its place. */
+	/** An image URL, or an element to show instead. */
 	image?: string | JSXElement;
 	/** @default "Something went wrong" */
 	title?: string;
 	description?: string;
-	/** A way out of the error, normally a Link back to safety. */
 	actions?: JSXElement;
 	class?: string;
 }
 
 /**
- * The message shown in place of content that could not be loaded, or that the
- * reader is not allowed to see.
+ * A message for when something goes wrong, with optional actions.
  *
  * @example
  * ```tsx
- * import { ErrorState, Link } from "@lucidcms/admin/components";
+ * import { Button, ErrorState } from "@lucidcms/admin/components";
  * import { useTranslation } from "@lucidcms/admin/hooks";
+ * import { getFieldError } from "@lucidcms/admin/utils";
  *
  * const { t } = useTranslation();
  *
  * return (
  * 	<ErrorState
- * 		title={t("errors.generic.title")}
- * 		description={t("errors.generic.message")}
- * 		actions={
- * 			<Link variant="primary" size="sm" href="/lucid">
- * 				{t("common.dashboard")}
- * 			</Link>
- * 		}
+ * 		description={getFieldError(report.error)}
+ * 		actions={<Button size="sm" onClick={() => report.refetch()}>{t("common.try.again")}</Button>}
  * 	/>
  * );
  * ```

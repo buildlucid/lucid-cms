@@ -1,7 +1,7 @@
 import type { QueryBuilderProps } from "@/utils/query-builder";
 
 /**
- * Shared cache keys for CMS queries and invalidation.
+ * Query keys for Lucid data, for invalidating and updating cached queries.
  *
  * @example
  * ```ts
@@ -10,9 +10,7 @@ import type { QueryBuilderProps } from "@/utils/query-builder";
  *
  * const client = useQueryClient();
  *
- * await client.invalidateQueries({
- *   queryKey: queryKeys.documents.collection("pages"),
- * });
+ * await client.invalidateQueries({ queryKey: queryKeys.media.all() });
  * ```
  */
 export const queryKeys = {

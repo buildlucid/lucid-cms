@@ -7,16 +7,15 @@ export interface MenuCheckboxItemProps {
 	checked: boolean;
 	onChange: (_checked: boolean) => void;
 	disabled?: boolean;
-	/** Closes the menu after ticking. It stays open by default. */
+	/** @default false */
 	closeOnSelect?: boolean;
-	/** What a screen reader reads when the children are not plain text. */
+	/** Text used for typeahead when the children are not plain text. */
 	textValue?: string;
-	/** Applied to the item. */
 	class?: string;
 	children: JSXElement;
 }
 
-/** A menu row that toggles, for a list of things to show or hide. */
+/** A menu item with a checkbox. */
 const MenuCheckboxItem: Component<MenuCheckboxItemProps> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -27,7 +26,6 @@ const MenuCheckboxItem: Component<MenuCheckboxItemProps> = (props) => {
 			checked={props.checked}
 			onChange={props.onChange}
 			disabled={props.disabled}
-			//* ticking one of a list usually means ticking another next
 			closeOnSelect={props.closeOnSelect === true}
 			textValue={props.textValue}
 			onClick={(event) => event.stopPropagation()}

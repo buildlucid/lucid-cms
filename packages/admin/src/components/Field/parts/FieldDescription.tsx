@@ -9,22 +9,10 @@ import { useFieldContext } from "../FieldContext";
 
 export interface FieldDescriptionProps {
 	class?: string;
-	/** Plain text, so it can be compared against the error and read out. */
 	children: string;
 }
 
-/**
- * Explains the field under its control, and is read out with it. It hides
- * itself when an error already says the same thing, staying available to
- * screen readers.
- *
- * @example
- * ```tsx
- * import { Field } from "@lucidcms/admin/components";
- *
- * return <Field.Description>Used across the public site.</Field.Description>;
- * ```
- */
+/** Help text for the field, linked to the control for screen readers. */
 export const FieldDescription: Component<FieldDescriptionProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -32,7 +20,6 @@ export const FieldDescription: Component<FieldDescriptionProps> = (props) => {
 
 	// ----------------------------------------
 	// Derived State
-	/** Avoids showing the same sentence twice as both help and error. */
 	const repeatedByError = () => {
 		const description = props.children?.trim();
 		if (!description) return false;

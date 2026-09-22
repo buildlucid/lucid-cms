@@ -7,27 +7,25 @@ import {
 } from "solid-icons/fa";
 import { type Component, type JSXElement, Match, Switch } from "solid-js";
 
-/** Info is blue, success is the primary colour, and the rest name themselves. */
 export type AlertVariant = "info" | "success" | "warning" | "error";
 
 /**
- * Block sits in the flow as a card, bar spans the full width with a bottom
- * border, and pill is a compact rounded strip for floating over content.
+ * `block` is a card, `bar` spans the full width, and `pill` is a compact
+ * floating strip.
  */
 export type AlertAppearance = "block" | "bar" | "pill";
 
 export interface AlertProps {
-	/** What the message is telling the reader. @default "info" */
+	/** @default "info" */
 	variant?: AlertVariant;
-	/** How the alert sits in its container. @default "block" */
+	/** @default "block" */
 	appearance?: AlertAppearance;
 	class?: string;
 	children: JSXElement;
 }
 
 /**
- * A single message with an icon, for something the reader needs to know about
- * the page they are on. Render it conditionally yourself.
+ * A message with an icon, for information, success, warnings or errors.
  *
  * @example
  * ```tsx
@@ -36,11 +34,7 @@ export interface AlertProps {
  *
  * const { t } = useTranslation();
  *
- * return (
- * 	<Show when={locked()}>
- * 		<Alert variant="warning">{t("documents.locked.message")}</Alert>
- * 	</Show>
- * );
+ * return <Alert variant="warning">{t("sitemap.out.of.date")}</Alert>;
  * ```
  */
 const Alert: Component<AlertProps> = (props) => {
@@ -48,7 +42,6 @@ const Alert: Component<AlertProps> = (props) => {
 	// Functions
 	const variant = () => props.variant ?? "info";
 	const appearance = () => props.appearance ?? "block";
-	//* block tints only the icon, the others colour the whole strip
 	const filled = () => appearance() !== "block";
 
 	// ----------------------------------------

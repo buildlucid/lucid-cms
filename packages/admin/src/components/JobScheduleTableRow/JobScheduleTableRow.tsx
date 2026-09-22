@@ -3,7 +3,6 @@ import type { Component } from "solid-js";
 import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import JobScheduleDetailsCell from "./parts/JobScheduleDetailsCell";
 
@@ -36,7 +35,7 @@ const JobScheduleTableRow: Component<JobScheduleRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.schedule.key);
 						props.rowTarget.setTrigger("details", true);
 					},
-					permission: userStore.get.hasPermission([Permissions.JobsRead]).all,
+					permission: Permissions.JobsRead,
 					sortOrder: 0,
 				},
 				{
@@ -47,15 +46,15 @@ const JobScheduleTableRow: Component<JobScheduleRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.schedule.key);
 						props.rowTarget.setTrigger("runs", true);
 					},
-					permission: userStore.get.hasPermission([Permissions.JobsRead]).all,
+					permission: Permissions.JobsRead,
 					sortOrder: 10,
 				},
 				{
 					label: T()("jobs.schedules.run.now"),
 					type: "button",
 					icon: "rotate",
-					actionExclude: true,
-					permission: userStore.get.hasPermission([Permissions.JobsRun]).all,
+					excludeFromRowClick: true,
+					permission: Permissions.JobsRun,
 					disabled: props.triggerPending,
 					onClick: props.onTrigger,
 					variant: "primary",
@@ -68,9 +67,9 @@ const JobScheduleTableRow: Component<JobScheduleRowProps> = (props) => {
 							: T()("jobs.schedules.pause"),
 					type: "button",
 					icon: props.schedule.state === "paused" ? "check" : "ban",
-					actionExclude: true,
-					permission: userStore.get.hasPermission([Permissions.JobsUpdate]).all,
-					variant: props.schedule.state === "paused" ? "primary" : "error",
+					excludeFromRowClick: true,
+					permission: Permissions.JobsUpdate,
+					variant: props.schedule.state === "paused" ? "primary" : "danger",
 					onClick: () => {
 						props.rowTarget.setTargetId(props.schedule.key);
 						props.rowTarget.setTrigger("state", true);

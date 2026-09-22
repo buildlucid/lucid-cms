@@ -7,17 +7,7 @@ export interface ModalDescriptionProps {
 	children: JSXElement;
 }
 
-/**
- * A sentence under the title explaining what the modal does. Screen readers
- * announce it alongside the title.
- *
- * @example
- * ```tsx
- * import { Modal } from "@lucidcms/admin/components";
- *
- * return <Modal.Description>This cannot be undone.</Modal.Description>;
- * ```
- */
+/** The modal's description, announced by screen readers with the title. */
 export const ModalDescription: Component<ModalDescriptionProps> = (props) => {
 	// ----------------------------------------
 	// Render

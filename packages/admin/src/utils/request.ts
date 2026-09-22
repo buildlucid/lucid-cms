@@ -11,11 +11,14 @@ import queryBuilder, { type QueryBuilderProps } from "@/utils/query-builder";
 export interface RequestParams<Data = unknown> {
 	url: string;
 	method?: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
+	/** Filters, sorts and pagination, added to the URL's query string. */
 	query?: QueryBuilderProps;
 	body?: Data | FormData;
 	headers?: Record<string, string>;
 	signal?: AbortSignal;
+	/** Sends a CSRF token. @default true for methods other than GET */
 	csrf?: boolean;
+	/** Shows a toast when the request fails. */
 	displayErrorToast?: boolean;
 }
 
@@ -58,7 +61,7 @@ const parseError = (data: unknown, response: Response): ErrorResponse => {
 	};
 };
 
-/** Internal typed transport for the CMS API. Public callers provide a response parser. */
+/** Sends a typed request to the Lucid API. */
 const request = async <ResponseBody = unknown, Data = unknown>(
 	params: RequestParams<Data>,
 ): Promise<ResponseBody> => {
@@ -140,19 +143,17 @@ const request = async <ResponseBody = unknown, Data = unknown>(
 };
 
 /**
- * Calls a same-origin API. Supply parse to validate and type the response.
- * Throws LucidError for unsuccessful responses. Error toasts are off by default.
+ * Sends a request to the Lucid API. Pass `parse` to validate and type the
+ * response. Throws a `LucidError` when the request fails.
  *
  * @example
  * ```ts
  * import { request } from "@lucidcms/admin/services";
  *
  * await request({
- *   url: "/lucid/api/v1/my-plugin/settings",
- *   method: "POST",
- *   body: {
- *     enabled: true,
- *   },
+ * 	url: "/lucid/api/v1/redirects",
+ * 	method: "POST",
+ * 	body: { from: "/old", to: "/new" },
  * });
  * ```
  */

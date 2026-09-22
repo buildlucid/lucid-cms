@@ -5,9 +5,8 @@ export type { CopyButtonProps } from "./parts/CopyButton";
 export type { CopyInputProps } from "./parts/CopyInput";
 
 /**
- * Two ways to hand a value to the clipboard. Copy.Button is a line of text
- * that copies when clicked, Copy.Input a read-only field for a secret or a
- * URL the reader is meant to take away with them.
+ * Copies a value to the clipboard. `Copy.Button` shows the value as text, and
+ * `Copy.Input` shows it in a read-only input.
  *
  * @example
  * ```tsx
@@ -16,12 +15,7 @@ export type { CopyInputProps } from "./parts/CopyInput";
  *
  * const { t } = useTranslation();
  *
- * return (
- * 	<>
- * 		<Copy.Button value={media.url} label={media.key} class="text-xs" />
- * 		<Copy.Input value={apiKey} label={t("common.api.key")} />
- * 	</>
- * );
+ * return <Copy.Input value={apiKey()} label={t("common.api.key")} />;
  * ```
  */
 const Copy = {

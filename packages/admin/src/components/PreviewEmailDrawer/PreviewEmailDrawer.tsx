@@ -201,7 +201,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 						{ value: "details", label: T()("common.details") },
 						{ value: "data", label: T()("common.data") },
 					]}
-					active={activeTab()}
+					value={activeTab()}
 					onChange={setActiveTab}
 				/>
 				<Show when={activeTab() === "details"}>

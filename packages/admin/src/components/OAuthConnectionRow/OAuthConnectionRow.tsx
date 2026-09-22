@@ -130,7 +130,7 @@ const OAuthConnectionRow: Component<{
 								label: T()("oauth.connections.update.action"),
 								icon: "pen",
 								onClick: () => setUpdateOpen(true),
-								hide: !props.canUpdate,
+								show: props.canUpdate,
 								sortOrder: 0,
 							},
 							{
@@ -138,9 +138,9 @@ const OAuthConnectionRow: Component<{
 								label: T()("oauth.connections.revoke.action"),
 								icon: "trash",
 								onClick: () => setRevokeOpen(true),
-								hide: !props.canRevoke,
+								show: props.canRevoke,
 								sortOrder: 70,
-								variant: "error",
+								variant: "danger",
 							},
 						]}
 					/>

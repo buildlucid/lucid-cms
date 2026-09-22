@@ -20,27 +20,24 @@ export interface SwitchProps extends JSX.AriaAttributes {
 	value: boolean;
 	onChange: (_value: boolean) => void;
 	label?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
-	/** Adds a hover card beside the label. */
+	/** Help text shown in a tooltip beside the label. */
 	tooltip?: string;
-	/** Shown on the control when it is on. @default "True" */
+	/** @default "True" */
 	trueLabel?: string;
-	/** Shown on the control when it is off. @default "False" */
+	/** @default "False" */
 	falseLabel?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
 	disabled?: boolean;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** Applied to the field. Target [data-switch-control] for the control. */
+	/** Applied to the field. Target `[data-switch-control]` for the switch. */
 	class?: string;
 }
 
 /**
- * A two state toggle that names both states on the control, with its
- * description and any validation errors underneath. Any aria attribute you
- * pass lands on the control.
+ * A switch for turning a setting on or off, with a label, description and
+ * validation errors.
  *
  * @example
  * ```tsx
@@ -53,9 +50,11 @@ export interface SwitchProps extends JSX.AriaAttributes {
  * 	<Switch
  * 		id="enabled"
  * 		name="enabled"
- * 		label={t("common.status")}
+ * 		label={t("common.status.enabled")}
  * 		value={enabled()}
  * 		onChange={setEnabled}
+ * 		trueLabel={t("common.yes")}
+ * 		falseLabel={t("common.no")}
  * 	/>
  * );
  * ```
@@ -63,7 +62,6 @@ export interface SwitchProps extends JSX.AriaAttributes {
 const Switch: Component<SwitchProps> = (props) => {
 	// ----------------------------------------
 	// State
-	//* everything left over is the caller's aria-*, which belongs on the control
 	const [, ariaProps] = splitProps(props, [
 		"id",
 		"name",
@@ -88,11 +86,7 @@ const Switch: Component<SwitchProps> = (props) => {
 	const [overlayStyle, setOverlayStyle] = createSignal({});
 
 	// ----------------------------------------
-	// Memos
-
-	// ----------------------------------------
 	// Functions
-	/** The highlight sits inset from the track by this much on every side. */
 	const OVERLAY_INSET = 4;
 	const updateOverlayPosition = () => {
 		if (!falseSpanRef || !trueSpanRef || !overlayRef) return;

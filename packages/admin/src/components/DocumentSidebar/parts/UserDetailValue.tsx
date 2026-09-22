@@ -20,7 +20,7 @@ const UserDetailValue: Component<{
 					user={user()}
 					variant="horizontal"
 					size="xs"
-					nameFormat="simple"
+					nameFormat="name"
 				/>
 			)}
 		</Show>

@@ -14,7 +14,6 @@ interface SortItemProps {
 }
 
 export interface QuerySortProps {
-	/** The keys the menu can sort by, and how each one is labelled. */
 	sorts: Array<SortItemProps["sort"]>;
 	queryState: QueryStateResponse;
 	disabled?: boolean;
@@ -30,8 +29,7 @@ const SortItem: Component<SortItemProps> = (props) => {
 	// Render
 	return (
 		<Menu.Item
-			//* sorting by several keys at once means staying put between choices
-			keepOpen
+			closeOnSelect={false}
 			textValue={props.sort.label}
 			onSelect={() => {
 				let sortValue: "asc" | "desc" | undefined;
@@ -77,9 +75,7 @@ const SortItem: Component<SortItemProps> = (props) => {
 };
 
 /**
- * A menu that cycles each key through ascending, descending and off. Sortable
- * table headers do the same thing for a single column; this covers keys that
- * have no column of their own.
+ * A menu for sorting a list by one or more keys.
  *
  * @example
  * ```tsx
@@ -91,7 +87,10 @@ const SortItem: Component<SortItemProps> = (props) => {
  * return (
  * 	<QuerySort
  * 		queryState={queryState}
- * 		sorts={[{ key: "createdAt", label: t("common.created.at") }]}
+ * 		sorts={[
+ * 			{ key: "createdAt", label: t("common.created.at") },
+ * 			{ key: "updatedAt", label: t("common.updated.at") },
+ * 		]}
  * 	/>
  * );
  * ```

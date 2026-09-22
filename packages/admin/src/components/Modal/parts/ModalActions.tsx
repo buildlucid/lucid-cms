@@ -6,22 +6,7 @@ export interface ModalActionsProps {
 	children: JSXElement;
 }
 
-/**
- * Right hand button cluster inside Modal.Footer. It always sits against the
- * right edge, whether or not the footer has content on the left.
- *
- * @example
- * ```tsx
- * import { Button, Modal } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Modal.Actions>
- * 		<Button variant="outline" onClick={cancel}>Cancel</Button>
- * 		<Button variant="danger" onClick={remove}>Delete</Button>
- * 	</Modal.Actions>
- * );
- * ```
- */
+/** Groups the footer's buttons, aligned to the end. */
 export const ModalActions: Component<ModalActionsProps> = (props) => {
 	// ----------------------------------------
 	// Render

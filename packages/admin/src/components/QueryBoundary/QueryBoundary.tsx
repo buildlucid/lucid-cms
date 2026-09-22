@@ -9,51 +9,35 @@ import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
 export interface QueryBoundaryProps {
-	isLoading?: boolean;
-	isError?: boolean;
-	isEmpty?: boolean;
-	/**
-	 * Swaps the empty state for a no results one, with a way to clear the
-	 * filters, whenever the query has filters applied.
-	 */
+	loading?: boolean;
+	error?: boolean;
+	empty?: boolean;
+	/** When filters are applied, shows a "no results" state with a reset button. */
 	queryState?: QueryStateResponse;
-	/** Clears the filters from the no results state. @default queryState.resetFilters */
+	/** Replaces the default filter reset. */
 	onResetFilters?: () => void;
-	/** Replaces the default spinner. */
-	loading?: JSXElement;
-	/** Replaces the default error state. */
-	error?: JSXElement;
-	/** Replaces the default empty state. */
-	empty?: JSXElement;
+	loadingFallback?: JSXElement;
+	errorFallback?: JSXElement;
+	emptyFallback?: JSXElement;
 	class?: string;
 	children: JSXElement;
 }
 
 /**
- * Shows a spinner, an error, an empty state or the content, based on where a
- * query has got to. Pass a state of your own to replace any of the defaults.
+ * Shows a loading, error or empty state in place of its children.
  *
  * @example
  * ```tsx
- * import { Button, EmptyState, QueryBoundary } from "@lucidcms/admin/components";
- * import { useTranslation } from "@lucidcms/admin/hooks";
- *
- * const { t } = useTranslation();
+ * import { QueryBoundary } from "@lucidcms/admin/components";
  *
  * return (
  * 	<QueryBoundary
- * 		isLoading={reports.isLoading}
- * 		isError={reports.isError}
- * 		isEmpty={reports.data?.data.length === 0}
+ * 		loading={redirects.isLoading}
+ * 		error={redirects.isError}
+ * 		empty={redirects.data?.data.length === 0}
  * 		queryState={queryState}
- * 		empty={
- * 			<EmptyState
- * 				title={t("empty.states.entries.title")}
- * 				actions={<Button size="sm" onClick={run}>{t("common.create")}</Button>}
- * 			/>
- * 		}
  * 	>
- * 		<ReportTable />
+ * 		<RedirectsTable redirects={redirects.data?.data} />
  * 	</QueryBoundary>
  * );
  * ```
@@ -61,7 +45,6 @@ export interface QueryBoundaryProps {
 const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
 	// ----------------------------------------
 	// Functions
-	//* filters that match nothing are a different problem to having no entries
 	const filtered = () => props.queryState?.hasFiltersApplied() === true;
 	const centred = (children: JSXElement) => (
 		<div class="flex flex-1 items-center justify-center">{children}</div>
@@ -72,13 +55,13 @@ const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
 	return (
 		<div data-query-boundary class={classnames("flex flex-col", props.class)}>
 			<Switch fallback={props.children}>
-				<Match when={props.isLoading}>
-					{centred(props.loading ?? <LoadingState />)}
+				<Match when={props.loading}>
+					{centred(props.loadingFallback ?? <LoadingState />)}
 				</Match>
-				<Match when={props.isError}>
-					{centred(props.error ?? <ErrorState image={notifySvg} />)}
+				<Match when={props.error}>
+					{centred(props.errorFallback ?? <ErrorState image={notifySvg} />)}
 				</Match>
-				<Match when={props.isEmpty && filtered()}>
+				<Match when={props.empty && filtered()}>
 					{centred(
 						<ErrorState
 							title={T()("empty.states.results.title")}
@@ -100,8 +83,8 @@ const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
 						/>,
 					)}
 				</Match>
-				<Match when={props.isEmpty}>
-					{centred(props.empty ?? <EmptyState />)}
+				<Match when={props.empty}>
+					{centred(props.emptyFallback ?? <EmptyState />)}
 				</Match>
 			</Switch>
 		</div>

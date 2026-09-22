@@ -9,9 +9,8 @@ export type { FieldLabelProps } from "./parts/FieldLabel";
 export type { FieldRootProps } from "./parts/FieldRoot";
 
 /**
- * The label, description and error scaffolding the admin puts around every
- * control. Use it to give a control of your own the same treatment as the
- * built in ones.
+ * Adds a label, description and validation errors to a form control of your
+ * own, matching the built in inputs.
  *
  * @example
  * ```tsx
@@ -21,10 +20,10 @@ export type { FieldRootProps } from "./parts/FieldRoot";
  * const { t } = useTranslation();
  *
  * return (
- * 	<Field.Root id="brand-colour" required errors={errors()}>
- * 		<Field.Label>{t("common.average.colour")}</Field.Label>
- * 		<input id="brand-colour" type="color" value={colour()} onInput={onInput} />
- * 		<Field.Description>{t("common.description")}</Field.Description>
+ * 	<Field.Root id="rating" required>
+ * 		<Field.Label>{t("rating")}</Field.Label>
+ * 		<StarRating id="rating" value={rating()} onChange={setRating} />
+ * 		<Field.Description>{t("rating.description")}</Field.Description>
  * 		<Field.Error />
  * 	</Field.Root>
  * );

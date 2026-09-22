@@ -11,17 +11,16 @@ export interface InfoRowRootProps {
 export interface InfoRowContentProps {
 	title?: string;
 	description?: string;
-	/** Sit against the title, or centred against the whole row. @default "top" */
+	/** Vertical alignment of the actions. @default "top" */
 	align?: "top" | "center";
-	/** Buttons or links, against the right edge of the header. */
 	actions?: JSXElement;
 	class?: string;
 	children?: JSXElement;
 }
 
 /**
- * A titled row of a settings page: the heading sits in a column on the left,
- * and one or more content cards on the right.
+ * A settings section, with a title and description on the left and content
+ * cards on the right.
  *
  * @example
  * ```tsx
@@ -31,10 +30,11 @@ export interface InfoRowContentProps {
  * const { t } = useTranslation();
  *
  * return (
- * 	<InfoRow.Root title={t("media.info.title")} description={t("media.info.description")}>
- * 		<InfoRow.Content title={t("common.details")} actions={<Button size="sm">{t("common.edit")}</Button>}>
- * 			{t("common.storage.used")}
- * 		</InfoRow.Content>
+ * 	<InfoRow.Root title={t("cache.title")} description={t("cache.description")}>
+ * 		<InfoRow.Content
+ * 			title={t("cache.clear.title")}
+ * 			actions={<Button size="sm" onClick={clearCache}>{t("common.clear")}</Button>}
+ * 		/>
  * 	</InfoRow.Root>
  * );
  * ```
@@ -58,13 +58,11 @@ const InfoRowRoot: Component<InfoRowRootProps> = (props) => {
 					<p class="text-sm">{props.description}</p>
 				</Show>
 			</div>
-			{/* the row owns the gap between its cards, so the cards carry no margin */}
 			<div class="md:col-span-2 lg:col-span-3 space-y-2">{props.children}</div>
 		</div>
 	);
 };
 
-/** A card within an InfoRow.Root, optionally with its own heading and actions. */
 const InfoRowContent: Component<InfoRowContentProps> = (props) => {
 	// ----------------------------------------
 	// Render

@@ -2,13 +2,9 @@ import type { Locale } from "@types";
 import { type Accessor, createContext, useContext } from "solid-js";
 
 export interface DrawerNestingState {
-	/** Ancestor drawers, whichever edge they came from. Drives the stack order. */
+	/** Number of parent drawers. */
 	level: Accessor<number>;
-	/**
-	 * Drawers on the stack for each edge, this one included. A drawer only
-	 * stacks behind the ones sharing its edge, so a bottom drawer opened from
-	 * a side drawer starts a stack of its own.
-	 */
+	/** Number of open drawers on each side, including this one. */
 	sideDepth: Accessor<Record<"right" | "bottom", number>>;
 	zIndex: Accessor<number>;
 	setChildOpen: (
@@ -22,21 +18,17 @@ export interface DrawerNestingState {
 export const DrawerNestingContext = createContext<DrawerNestingState>();
 
 export interface DrawerContextValue {
-	/** Edge the drawer slides from. */
 	side: Accessor<"right" | "bottom">;
-	/** Horizontal room the header, body and footer leave around their content. */
 	padding: Accessor<"sm" | "md">;
-	/** Content locale the drawer is editing, when it shows a locale select. */
 	locale: Accessor<string | undefined>;
 	setLocale: (_value: string | undefined) => void;
-	/** Locales the drawer can switch between. */
 	locales: Accessor<Locale[]>;
 	close: () => void;
 }
 
 export const DrawerContext = createContext<DrawerContextValue>();
 
-/** Reads the state shared by Drawer.Root with its parts. */
+/** Reads the state Drawer.Root shares with its parts. */
 export const useDrawerContext = (): DrawerContextValue => {
 	const context = useContext(DrawerContext);
 	if (!context) {
@@ -46,16 +38,27 @@ export const useDrawerContext = (): DrawerContextValue => {
 };
 
 /**
- * The content locale the surrounding drawer is editing. Use it when a drawer's
- * fields are localised.
+ * Returns the content locale selected in the drawer, and the locales it can
+ * switch between.
  *
  * @example
  * ```tsx
- * import { useDrawerLocale } from "@lucidcms/admin/components";
+ * import { Input, useDrawerLocale } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
  *
+ * const { t } = useTranslation();
  * const { locale } = useDrawerLocale();
  *
- * return <Input id="title" name="title" type="text" value={values[locale() ?? "en"]} />;
+ * return (
+ * 	<Input
+ * 		id="alt"
+ * 		name="alt"
+ * 		type="text"
+ * 		label={t("common.alt")}
+ * 		value={alt()[locale() ?? ""] ?? ""}
+ * 		onChange={(value) => setAlt({ ...alt(), [locale() ?? ""]: value })}
+ * 	/>
+ * );
  * ```
  */
 export const useDrawerLocale = () => {

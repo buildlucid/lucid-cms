@@ -4,18 +4,23 @@ import CustomToast from "@/components/CustomToast/CustomToast";
 interface SpawnToastProps {
 	title: string;
 	message?: string;
+	/** @default "info" */
 	status?: "success" | "error" | "warning" | "info";
+	/** In milliseconds. */
 	duration?: number;
 }
 
 /**
- * Shows a notification. Status defaults to info; duration is in milliseconds.
+ * Shows a toast notification.
  *
  * @example
  * ```ts
+ * import { useTranslation } from "@lucidcms/admin/hooks";
  * import { toast } from "@lucidcms/admin/utils";
  *
- * toast({ title: "Settings saved", status: "success" });
+ * const { t } = useTranslation();
+ *
+ * toast({ title: t("redirects.saved"), status: "success" });
  * ```
  */
 const spawnToast = (props: SpawnToastProps) => {

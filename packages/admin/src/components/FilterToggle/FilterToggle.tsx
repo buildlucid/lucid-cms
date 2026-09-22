@@ -7,32 +7,27 @@ import T from "@/translations";
 export interface FilterToggleProps {
 	open: boolean;
 	onOpenChange: (_open: boolean) => void;
-	/** Highlights the button while filters are applied. */
+	/** Used to highlight the button when filters are applied. */
 	queryState: QueryStateResponse;
-	/** Overrides when the button reads as active. */
+	/** Overrides the highlighted state. */
 	active?: boolean;
 	disabled?: boolean;
 	class?: string;
 }
 
 /**
- * The button that opens a FilterPanel. It highlights itself while the list is
- * filtered, so people can see the results are narrowed.
+ * A button that opens and closes a filter panel. It is highlighted when
+ * filters are applied.
  *
  * @example
  * ```tsx
  * import { FilterToggle } from "@lucidcms/admin/components";
  *
- * const [open, setOpen] = createSignal(false);
- *
- * return (
- * 	<FilterToggle open={open()} onOpenChange={setOpen} queryState={queryState} />
- * );
+ * return <FilterToggle open={filtersOpen()} onOpenChange={setFiltersOpen} queryState={queryState} />;
  * ```
  */
 const FilterToggle: Component<FilterToggleProps> = (props) => {
-	const active = () =>
-		props.active ?? !props.queryState.hasDefaultFiltersApplied();
+	const active = () => props.active ?? !props.queryState.filtersAreDefault();
 
 	// -----------------------------
 	// Render

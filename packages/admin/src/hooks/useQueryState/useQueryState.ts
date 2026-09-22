@@ -7,10 +7,7 @@ import type {
 	QueryStateStorageAdapter,
 } from "./types";
 
-//* reads/writes browser search params - back/forward rehydrates state via the
-//* reactive location.search, while params the hook does not own are preserved.
-//* writes navigate with the full search string rather than setSearchParams,
-//* which silently drops empty-string params (used for operator-only filters)
+//* navigates with the full search string, as setSearchParams drops empty params
 const createUrlStorageAdapter = (): QueryStateStorageAdapter => {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -30,26 +27,32 @@ const createUrlStorageAdapter = (): QueryStateStorageAdapter => {
 };
 
 export interface UseQueryStateConfig extends QueryStateOptions {
+	/** Where the state is stored. @default "url" */
 	mode?: "url" | "memory";
 	schema?: QueryStateSchema;
 }
 
 /**
- * Keeps filters, sorting and pagination in the URL. Use mode: "memory" for local state.
+ * Manages filters, sorting and pagination for a list, stored in the URL by
+ * default.
  *
  * @example
- * ```ts
- * import { textFilter, useQueryState } from "@lucidcms/admin/hooks";
+ * ```tsx
+ * import { useQuery } from "@tanstack/solid-query";
+ * import { sort, textFilter, useQueryState } from "@lucidcms/admin/hooks";
+ * import { request } from "@lucidcms/admin/services";
  *
- * const state = useQueryState({
- *   schema: {
- *     filters: {
- *       title: textFilter(),
- *     },
- *   },
+ * const queryState = useQueryState({
+ * 	schema: {
+ * 		filters: { from: textFilter({ defaultOperator: "contains" }) },
+ * 		sorts: { createdAt: sort({ defaultValue: "desc" }) },
+ * 	},
  * });
  *
- * state.setFilter("title", "Home");
+ * const redirects = useQuery(() => ({
+ * 	queryKey: ["redirects", queryState.queryString()],
+ * 	queryFn: () => request({ url: `/lucid/api/v1/redirects?${queryState.queryString()}` }),
+ * }));
  * ```
  */
 const useQueryState = (

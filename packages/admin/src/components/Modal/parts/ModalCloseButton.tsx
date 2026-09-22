@@ -7,22 +7,7 @@ export interface ModalCloseButtonProps {
 	class?: string;
 }
 
-/**
- * Icon button that closes the modal. Modal.Header renders one already, so reach
- * for this only when building a header of your own.
- *
- * @example
- * ```tsx
- * import { Modal } from "@lucidcms/admin/components";
- *
- * return (
- * 	<div class="flex items-center justify-between">
- * 		<Modal.Title>Crop image</Modal.Title>
- * 		<Modal.CloseButton />
- * 	</div>
- * );
- * ```
- */
+/** A button that closes the modal. Already included in `Modal.Header`. */
 export const ModalCloseButton: Component<ModalCloseButtonProps> = (props) => {
 	// ----------------------------------------
 	// Render

@@ -6,22 +6,23 @@ import TableActionMenuCell from "@/components/Table/parts/TableActionMenuCell";
 import TableDragHandleCell from "@/components/Table/parts/TableDragHandleCell";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import { useTableContext } from "@/components/Table/TableContext";
+import { checkPermission } from "@/utils/permission-requirement";
 
 export interface TableRowProps {
-	/** Position in the table, counting from zero. Drives selection and reordering. */
+	/** The row's position, starting from 0. */
 	index: number;
-	/** Shown in the row's menu. The first permitted one also runs on row click. */
+	/** Shown in the row's action menu. Clicking the row runs the first available one. */
 	actions?: ActionMenuProps["actions"];
-	/** Replaces the default click behaviour of running the first action. */
+	/** Runs instead of the first action when the row is clicked. */
 	onClick?: () => void;
-	/** Highlights the row as the one being viewed. */
+	/** Highlights the row. */
 	current?: boolean;
 	viewTransitionName?: string;
 	class?: string;
 	children: JSXElement;
 }
 
-/** One body row. Put cells inside it. */
+/** A table row. */
 const TableRow: Component<TableRowProps> = (props) => {
 	// ----------------------------------------
 	// State / Hooks
@@ -33,9 +34,12 @@ const TableRow: Component<TableRowProps> = (props) => {
 	const firstPermittedAction = createMemo(() => {
 		if (props.actions) {
 			return props.actions
-				.filter((a) => a.actionExclude !== true)
+				.filter((a) => a.excludeFromRowClick !== true)
 				.find((action) => {
-					return action.permission !== false && action.disabled !== true;
+					return (
+						checkPermission(action.permission).permitted &&
+						action.disabled !== true
+					);
 				});
 		}
 	});

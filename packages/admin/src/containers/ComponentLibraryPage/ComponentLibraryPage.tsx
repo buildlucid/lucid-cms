@@ -244,7 +244,7 @@ const demoActions: ActionMenuItem[] = [
 		type: "button",
 		label: "Delete",
 		icon: "trash",
-		variant: "error",
+		variant: "danger",
 		sortOrder: 70,
 	},
 ];
@@ -429,7 +429,7 @@ const ComponentLibraryPage: Component = () => {
 											</code>
 											<AspectRatio
 												ratio={ratio}
-												innerClass="rounded-md border border-border bg-card-base"
+												contentClass="rounded-md border border-border bg-card-base"
 											/>
 										</div>
 									)}
@@ -616,7 +616,7 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- DateText */}
 					<InfoRow.Root
 						title={"DateText"}
-						description={"date, includeTime, localDateOnly"}
+						description={"date, includeTime, dateOnly"}
 					>
 						<InfoRow.Content title={"Formats"}>
 							<div class="flex flex-col gap-2">
@@ -629,8 +629,8 @@ const ComponentLibraryPage: Component = () => {
 										includeTime={true}
 									/>
 								</Row>
-								<Row label="localDateOnly (date only)">
-									<DateText date="2025-06-23" localDateOnly={true} />
+								<Row label="dateOnly">
+									<DateText date="2025-06-23" dateOnly={true} />
 								</Row>
 								<Row label="date only, without the flag">
 									<DateText date="2025-06-23" />
@@ -920,7 +920,7 @@ const ComponentLibraryPage: Component = () => {
 									<code class="text-xs text-unfocused">fit="cover"</code>
 									<AspectRatio
 										ratio="1:1"
-										innerClass="overflow-hidden rounded-md border border-border"
+										contentClass="overflow-hidden rounded-md border border-border"
 									>
 										<Image src={notifySvg} alt="" fit="cover" />
 									</AspectRatio>
@@ -929,7 +929,7 @@ const ComponentLibraryPage: Component = () => {
 									<code class="text-xs text-unfocused">fit="contain"</code>
 									<AspectRatio
 										ratio="1:1"
-										innerClass="overflow-hidden rounded-md border border-border"
+										contentClass="overflow-hidden rounded-md border border-border"
 									>
 										<Image src={notifySvg} alt="" fit="contain" />
 									</AspectRatio>
@@ -1057,7 +1057,7 @@ const ComponentLibraryPage: Component = () => {
 									<Menu.Item disabled={true}>Publish</Menu.Item>
 									<Menu.Item unavailable={true}>Restore</Menu.Item>
 									<Menu.Separator />
-									<Menu.Item variant="error" icon={<FaSolidTrash />}>
+									<Menu.Item variant="danger" icon={<FaSolidTrash />}>
 										Delete
 									</Menu.Item>
 								</Menu.Content>
@@ -1316,11 +1316,7 @@ const ComponentLibraryPage: Component = () => {
 									{(variant) => (
 										<div>
 											<code class="text-xs text-unfocused">{`variant="${variant}"`}</code>
-											<ProgressBar
-												class="mt-1"
-												variant={variant}
-												progress={95}
-											/>
+											<ProgressBar class="mt-1" variant={variant} value={95} />
 										</div>
 									)}
 								</For>
@@ -1332,7 +1328,7 @@ const ComponentLibraryPage: Component = () => {
 									{(size) => (
 										<div>
 											<code class="text-xs text-unfocused">{`size="${size}"`}</code>
-											<ProgressBar class="mt-1" size={size} progress={60} />
+											<ProgressBar class="mt-1" size={size} value={60} />
 										</div>
 									)}
 								</For>
@@ -1343,7 +1339,7 @@ const ComponentLibraryPage: Component = () => {
 								<div class="bg-card-base p-4 text-sm">
 									Sits flush against the edge of a card.
 								</div>
-								<ProgressBar progress={40} size="md" square />
+								<ProgressBar value={40} size="md" square />
 							</div>
 						</InfoRow.Content>
 						<InfoRow.Content title={"Reacting to the value"}>
@@ -1362,7 +1358,7 @@ const ComponentLibraryPage: Component = () => {
 							/>
 							<ProgressBar
 								class="mt-3"
-								progress={sliderValue()[0] ?? 0}
+								value={sliderValue()[0] ?? 0}
 								variant={(sliderValue()[0] ?? 0) > 90 ? "danger" : "neutral"}
 								labels={{ start: `${sliderValue()[0] ?? 0}% used` }}
 							/>
@@ -1372,20 +1368,20 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- QueryBoundary */}
 					<InfoRow.Root
 						title={"QueryBoundary"}
-						description={"isLoading, isError, isEmpty"}
+						description={"loading, error, empty"}
 					>
 						<InfoRow.Content title={"Loading"}>
-							<QueryBoundary isLoading={true}>
+							<QueryBoundary loading={true}>
 								<span />
 							</QueryBoundary>
 						</InfoRow.Content>
 						<InfoRow.Content title={"Error"}>
-							<QueryBoundary isError={true}>
+							<QueryBoundary error={true}>
 								<span />
 							</QueryBoundary>
 						</InfoRow.Content>
 						<InfoRow.Content title={"Empty"}>
-							<QueryBoundary isEmpty={true}>
+							<QueryBoundary empty={true}>
 								<span />
 							</QueryBoundary>
 						</InfoRow.Content>
@@ -1673,14 +1669,14 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- Table */}
 					<InfoRow.Root
 						title={"Table"}
-						description={"head, rows, cells, selection, loading"}
+						description={"columns, rows, cells, selection, loading"}
 					>
 						<InfoRow.Content title={"Rows and cells"}>
 							<Table.Root
 								id="components.table.demo"
 								rowCount={demoRows.length}
 								queryState={queryState}
-								head={[
+								columns={[
 									{ key: "name", label: "Name", sortable: true },
 									{ key: "status", label: "Status" },
 									{ key: "createdAt", label: "Created at", sortable: true },
@@ -1709,10 +1705,10 @@ const ComponentLibraryPage: Component = () => {
 							<Table.Root
 								id="components.table.selectable"
 								rowCount={demoRows.length}
-								isSelectable={true}
+								selectable={true}
 								allowDelete={true}
 								onDeleteRows={async () => {}}
-								head={[
+								columns={[
 									{ key: "name", label: "Name" },
 									{ key: "status", label: "Status" },
 								]}
@@ -1731,9 +1727,9 @@ const ComponentLibraryPage: Component = () => {
 							<Table.Root
 								id="components.table.loading"
 								rowCount={0}
-								isLoading={true}
+								loading={true}
 								loadingRows={3}
-								head={[
+								columns={[
 									{ key: "name", label: "Name" },
 									{ key: "status", label: "Status" },
 								]}
@@ -1750,33 +1746,33 @@ const ComponentLibraryPage: Component = () => {
 					>
 						<InfoRow.Content title={"Default"}>
 							<Tabs.Root
-								activeKey={tabKey()}
-								onSelect={setTabKey}
+								value={tabKey()}
+								onChange={setTabKey}
 								items={[
-									{ key: "details", label: "Details" },
-									{ key: "history", label: "History" },
-									{ key: "settings", label: "Settings" },
+									{ value: "details", label: "Details" },
+									{ value: "history", label: "History" },
+									{ value: "settings", label: "Settings" },
 								]}
 							/>
 						</InfoRow.Content>
 						<InfoRow.Content title={"Stretched"}>
 							<Tabs.Root
 								stretch={true}
-								activeKey={tabKey()}
-								onSelect={setTabKey}
+								value={tabKey()}
+								onChange={setTabKey}
 								items={[
-									{ key: "details", label: "Details" },
-									{ key: "history", label: "History" },
+									{ value: "details", label: "Details" },
+									{ value: "history", label: "History" },
 								]}
 							/>
 						</InfoRow.Content>
 						<InfoRow.Content title={"Disabled item"}>
 							<Tabs.Root
-								activeKey={tabKey()}
-								onSelect={setTabKey}
+								value={tabKey()}
+								onChange={setTabKey}
 								items={[
-									{ key: "details", label: "Details" },
-									{ key: "history", label: "History", disabled: true },
+									{ value: "details", label: "Details" },
+									{ value: "history", label: "History", disabled: true },
 								]}
 							/>
 						</InfoRow.Content>
@@ -1839,14 +1835,14 @@ const ComponentLibraryPage: Component = () => {
 						</InfoRow.Content>
 						<InfoRow.Content title={"Name formats"}>
 							<div class="flex flex-col gap-2">
+								<Row label='nameFormat="username-and-name"'>
+									<UserDisplay user={demoUser} nameFormat="username-and-name" />
+								</Row>
 								<Row label='nameFormat="username"'>
 									<UserDisplay user={demoUser} nameFormat="username" />
 								</Row>
-								<Row label='nameFormat="username-only"'>
-									<UserDisplay user={demoUser} nameFormat="username-only" />
-								</Row>
-								<Row label='nameFormat="simple"'>
-									<UserDisplay user={demoUser} nameFormat="simple" />
+								<Row label='nameFormat="name"'>
+									<UserDisplay user={demoUser} nameFormat="name" />
 								</Row>
 								<Row label="email fallback">
 									<UserDisplay user={{ email: "ada@example.com" }} />

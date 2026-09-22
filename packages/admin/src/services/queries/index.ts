@@ -27,19 +27,14 @@ import type {
 } from "./types";
 
 /**
- * Query options for CMS data. Pass a function to useQuery when parameters are reactive.
+ * Query options for reading Lucid data with TanStack Query.
  *
  * @example
  * ```ts
  * import { useQuery } from "@tanstack/solid-query";
  * import { queries } from "@lucidcms/admin/services";
  *
- * const media = useQuery(() =>
- *   queries.media.list({
- *     page: 1,
- *     perPage: 20,
- *   }),
- * );
+ * const media = useQuery(() => queries.media.list({ perPage: 20 }));
  * ```
  */
 export const queries = {

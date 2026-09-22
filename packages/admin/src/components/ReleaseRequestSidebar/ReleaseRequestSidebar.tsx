@@ -107,7 +107,7 @@ const PublishOperationUserDetailValue: Component<{
 				user={user()}
 				variant="horizontal"
 				size="xs"
-				nameFormat="simple"
+				nameFormat="name"
 			/>
 		)}
 	</Show>
@@ -706,7 +706,7 @@ export const ReleaseRequestSidebar: Component<{
 													size="xs"
 												/>
 												<span class="min-w-0 truncate">
-													{helpers.formatUserName(assignee.user, "simple") ||
+													{helpers.formatUserName(assignee.user, "name") ||
 														formatPublishOperationUser(assignee.user)}
 												</span>
 											</div>

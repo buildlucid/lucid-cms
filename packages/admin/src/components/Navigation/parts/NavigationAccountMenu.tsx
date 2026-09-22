@@ -83,7 +83,7 @@ const NavigationAccountMenu: Component<{
 				/>
 			</Menu.Trigger>
 
-			<Menu.Content matchTriggerWidth flush class="min-w-52 shadow-lg">
+			<Menu.Content matchTriggerWidth class="min-w-52 shadow-lg">
 				<Menu.Item
 					href="/lucid/account"
 					icon={<FaSolidUser class="size-3.5 shrink-0" />}

@@ -43,12 +43,7 @@ type PickedRef =
 	| { type: "media"; ref: MediaRelationRef }
 	| { type: "relation"; ref: DocumentRef };
 
-/**
- * Single-select entity value editor for user/media/relation filter fields.
- * Opens the matching selection panel and commits the picked entity's ID -
- * relations commit `collectionKey:id` so collection scoping survives refresh.
- * Filtering against multiple entities is done via additional OR rows.
- */
+/** Picks a single user, media item or document as a filter value. */
 export const EntityValue: Component<{
 	id: string;
 	field: FilterField;
@@ -155,7 +150,7 @@ export const EntityValue: Component<{
 			});
 		}
 		const user = activeUserRef();
-		if (user) return helpers.formatUserName(user, "simple") || `#${parts.id}`;
+		if (user) return helpers.formatUserName(user, "name") || `#${parts.id}`;
 		const media = activeMediaRef();
 		if (media) return mediaLabel(media, contentLocale()) || `#${parts.id}`;
 		return `#${parts.id}`;

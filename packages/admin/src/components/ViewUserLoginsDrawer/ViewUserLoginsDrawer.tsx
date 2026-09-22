@@ -181,10 +181,10 @@ const ViewUserLoginsPanelContent: Component<{
 					embedded={true}
 				/>
 				<QueryBoundary
-					isError={userLogins.isError}
-					isEmpty={userLogins.data?.data.length === 0}
+					error={userLogins.isError}
+					empty={userLogins.data?.data.length === 0}
 					queryState={loginsSearchParams}
-					empty={
+					emptyFallback={
 						<EmptyState
 							title={T()("empty.states.user.logins.title")}
 							description={T()("empty.states.user.logins.description")}
@@ -199,7 +199,7 @@ const ViewUserLoginsPanelContent: Component<{
 						id="user.logins"
 						rowCount={userLogins.data?.data.length || 0}
 						queryState={loginsSearchParams}
-						head={[
+						columns={[
 							{
 								label: T()("common.auth.method"),
 								key: "authMethod",
@@ -222,7 +222,7 @@ const ViewUserLoginsPanelContent: Component<{
 								sortable: true,
 							},
 						]}
-						isLoading={userLogins.isFetching}
+						loading={userLogins.isFetching}
 						padding="sm"
 						variant="secondary"
 					>

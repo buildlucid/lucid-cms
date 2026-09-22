@@ -9,7 +9,7 @@ import {
 import { FieldContext } from "../FieldContext";
 
 export interface FieldRootProps {
-	/** Ties the label, description and errors to the control. */
+	/** Must match the control's id. */
 	id: string;
 	required?: boolean;
 	disabled?: boolean;
@@ -18,25 +18,7 @@ export interface FieldRootProps {
 	children: JSXElement;
 }
 
-/**
- * Wraps a control with the label, description and errors the admin uses on
- * every field. Reach for it when you are building a control we do not ship;
- * for a text input, select or switch, use those components directly.
- *
- * @example
- * ```tsx
- * import { Field } from "@lucidcms/admin/components";
- *
- * return (
- * 	<Field.Root id="brand-colour" required errors={errors()}>
- * 		<Field.Label>Brand colour</Field.Label>
- * 		<input id="brand-colour" type="color" value={colour()} onInput={onInput} />
- * 		<Field.Description>Used across the public site.</Field.Description>
- * 		<Field.Error />
- * 	</Field.Root>
- * );
- * ```
- */
+/** Wraps the control and its parts, and holds the field's shared state. */
 export const FieldRoot: Component<FieldRootProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks

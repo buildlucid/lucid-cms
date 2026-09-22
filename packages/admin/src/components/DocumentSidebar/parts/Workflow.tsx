@@ -98,7 +98,7 @@ export const Workflow: Component<{
 		() =>
 			assigneeQuery.data?.data.map((user) => ({
 				value: user.id,
-				label: helpers.formatUserName(user, "simple") || T()("common.unknown"),
+				label: helpers.formatUserName(user, "name") || T()("common.unknown"),
 				user,
 			})) ?? [],
 	);
@@ -127,8 +127,7 @@ export const Workflow: Component<{
 					};
 				return {
 					value: assignee.userId,
-					label:
-						helpers.formatUserName(user, "simple") || `#${assignee.userId}`,
+					label: helpers.formatUserName(user, "name") || `#${assignee.userId}`,
 					user,
 				};
 			}) ?? [],

@@ -26,8 +26,8 @@ export type {
 export type { ModalTitleProps } from "./parts/ModalTitle";
 
 /**
- * A dialog built from composable parts, plus Modal.Confirm for the common yes
- * or no case. Modals opened from a panel or another modal stack automatically.
+ * A dialog that opens over the page. Use `Modal.Confirm` for a simple confirm
+ * or cancel dialog.
  *
  * @example
  * ```tsx
@@ -39,13 +39,14 @@ export type { ModalTitleProps } from "./parts/ModalTitle";
  * return (
  * 	<Modal.Root open={open()} onOpenChange={setOpen}>
  * 		<Modal.Header>
- * 			<Modal.Title>{t("media.folders.add")}</Modal.Title>
+ * 			<Modal.Title>{t("redirects.create.title")}</Modal.Title>
  * 		</Modal.Header>
  * 		<Modal.Body>
- * 			<Input id="title" name="title" type="text" label={t("common.title")} value={title()} onChange={setTitle} />
+ * 			<Input id="from" name="from" type="text" label={t("redirects.from")} value={from()} onChange={setFrom} />
  * 		</Modal.Body>
  * 		<Modal.Footer>
  * 			<Modal.Actions>
+ * 				<Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel")}</Button>
  * 				<Button onClick={create}>{t("common.create")}</Button>
  * 			</Modal.Actions>
  * 		</Modal.Footer>

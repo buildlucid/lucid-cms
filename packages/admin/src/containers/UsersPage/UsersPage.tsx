@@ -126,8 +126,8 @@ const UsersPage: Component = () => {
 			>
 				<QueryToolbar
 					queryState={searchParams}
-					showingDeleted={showingDeleted()}
-					onShowingDeletedChange={setShowingDeleted}
+					showDeleted={showingDeleted()}
+					onShowDeletedChange={setShowingDeleted}
 					onRefresh={() => {
 						queryClient.invalidateQueries({
 							queryKey: queryKeys.users.list(),

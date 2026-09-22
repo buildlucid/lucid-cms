@@ -5,14 +5,13 @@ import T from "@/translations";
 export type SpinnerSize = "sm" | "md" | "lg";
 
 export interface SpinnerProps {
-	/** Diameter of the spinner. @default "md" */
+	/** @default "md" */
 	size?: SpinnerSize;
 	class?: string;
 }
 
 /**
- * A spinning loading indicator. It announces itself to screen readers, so it
- * does not need a visible label beside it.
+ * A loading spinner.
  *
  * @example
  * ```tsx

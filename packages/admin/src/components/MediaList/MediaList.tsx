@@ -339,12 +339,12 @@ export const MediaList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				isError={isError()}
+				error={isError()}
 				//* nothing has arrived yet on a first load, which would otherwise read
 				//* as empty and hide the skeletons behind the empty state
-				isEmpty={containerEmpty() && !isFetching()}
+				empty={containerEmpty() && !isFetching()}
 				queryState={props.state.searchParams}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={noEntriesCopy()?.title}
 						description={noEntriesCopy()?.description}

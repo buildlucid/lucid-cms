@@ -113,8 +113,7 @@ export const MediaFolderCard: Component<{
 								props.rowTarget.setTargetId(props.folder.id);
 								props.rowTarget.setTrigger("updateFolder", true);
 							},
-							permission: userStore.get.hasPermission([Permissions.MediaUpdate])
-								.all,
+							permission: Permissions.MediaUpdate,
 							sortOrder: 0,
 						},
 						{
@@ -127,7 +126,7 @@ export const MediaFolderCard: Component<{
 							},
 							permission: hasDeletePermission(),
 							sortOrder: 70,
-							variant: "error",
+							variant: "danger",
 						},
 					]}
 					placement={interfaceDirection.isRTL() ? "bottom-start" : "bottom-end"}

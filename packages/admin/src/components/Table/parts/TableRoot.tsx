@@ -26,49 +26,46 @@ import useUserPreference from "@/hooks/useUserPreference/useUserPreference";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 
 export interface TableRootProps {
-	/** Identifies the table so column visibility and scroll position are remembered. */
+	/** Unique ID used to remember hidden columns and scroll position. */
 	id: string;
-	/** How many rows the children render. Sizes row selection. */
 	rowCount: number;
-	head: TableColumn[];
-	/** Supplies the sorting a sortable header reads and writes. */
+	columns: TableColumn[];
+	/** Required for sortable columns. */
 	queryState?: QueryStateResponse;
-	/** Replaces the rows with skeletons. */
-	isLoading?: boolean;
-	/** Skeleton rows shown while loading. @default 10 */
+	loading?: boolean;
+	/** Number of placeholder rows shown while loading. @default 10 */
 	loadingRows?: number;
 	caption?: string;
-	/** Adds a checkbox column and the selection action bar. */
-	isSelectable?: boolean;
-	/** Space the table leaves at its left and right edges. @default "md" */
+	/** Adds checkboxes for selecting rows. */
+	selectable?: boolean;
+	/** @default "md" */
 	padding?: TablePadding;
-	/** How the table blends with the surface behind it. */
+	/** @default "primary" */
 	variant?: TableVariant;
-	/** Offers restore in the selection action bar. Needs `onRestoreRows`. */
+	/** Shows a restore action for selected rows. Requires `onRestoreRows`. */
 	allowRestore?: boolean;
-	/** Offers delete in the selection action bar. Needs `onDeleteRows`. */
+	/** Shows a delete action for selected rows. Requires `onDeleteRows`. */
 	allowDelete?: boolean;
-	/** Offers permanent delete in the selection bar. Needs `onDeletePermanentlyRows`. */
+	/** Shows a permanent delete action for selected rows. Requires `onDeletePermanentlyRows`. */
 	allowDeletePermanently?: boolean;
-	/** Receives one boolean per row, in row order. */
+	/** Receives the selection state of each row, in row order. */
 	onDeleteRows?: (_selected: boolean[]) => Promise<void>;
 	onRestoreRows?: (_selected: boolean[]) => Promise<void>;
 	onDeletePermanentlyRows?: (_selected: boolean[]) => Promise<void>;
-	/** Gives every row a drag handle. Needs `onReorder`. */
+	/** Adds drag handles for reordering rows. Requires `onReorder`. */
 	reorderable?: boolean;
-	/** Called with the row that moved and the row it landed on. */
 	onReorder?: (
 		_dragIndex: number,
 		_targetIndex: number,
 	) => void | Promise<void>;
-	/** Applied to the table's scroll container. */
+	/** Applied to the scroll container. */
 	class?: string;
 	children: JSXElement;
 }
 
 const tableScrollPositions = new Map<string, number>();
 
-/** The table itself, and the state its rows and cells read. */
+/** The table, which holds its columns, rows and shared state. */
 const TableRoot: Component<TableRootProps> = (props) => {
 	let overflowRef: HTMLDivElement | undefined;
 
@@ -85,7 +82,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 	});
 	const include = createMemo(() => {
 		const hidden = new Set(hiddenColumns());
-		return props.head.map((column) => !hidden.has(column.key));
+		return props.columns.map((column) => !hidden.has(column.key));
 	});
 
 	// ----------------------------------------
@@ -96,7 +93,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 			return;
 		}
 
-		const columnKey = props.head[index]?.key;
+		const columnKey = props.columns[index]?.key;
 		if (!columnKey) return;
 
 		const nextHidden = new Set(hiddenColumns());
@@ -133,7 +130,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 	// ----------------------------------------
 	// Callbacks
 	const onSelectChange = () => {
-		if (props.isLoading) return;
+		if (props.loading) return;
 
 		if (allSelected()) {
 			setSelected((prev) => {
@@ -197,7 +194,6 @@ const TableRoot: Component<TableRootProps> = (props) => {
 		updateRows();
 	};
 
-	//* stable handlers limit reorder updates to rows reading drag state
 	const rowReorder: TableRowReorder = {
 		get enabled() {
 			return rowReorderEnabled();
@@ -216,7 +212,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const isSelectable = createMemo(() => props.isSelectable ?? false);
+	const isSelectable = createMemo(() => props.selectable ?? false);
 	const padding = createMemo<TablePadding>(() => props.padding ?? "md");
 	const allSelected = createMemo(() => {
 		if (!selected()) return false;
@@ -227,7 +223,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 		return selected().filter((s) => s).length;
 	});
 	const includeRows = createMemo(() => {
-		return props.head.map((h, i) => {
+		return props.columns.map((h, i) => {
 			return {
 				index: i,
 				label: h.label,
@@ -235,7 +231,6 @@ const TableRoot: Component<TableRootProps> = (props) => {
 			};
 		});
 	});
-	//* cells find their column by key, so head order can change freely
 	const hiddenColumnKeys = createMemo(() => new Set(hiddenColumns()));
 
 	const context: TableContextValue = {
@@ -273,11 +268,10 @@ const TableRoot: Component<TableRootProps> = (props) => {
 	createEffect(() => {
 		props.id;
 		props.rowCount;
-		props.isLoading;
+		props.loading;
 
 		restoreScrollPosition();
 	});
-	//* index-based selections are cleared when selection is unavailable
 	createEffect(() => {
 		if (isSelectable()) return;
 		setSelected((prev) =>
@@ -324,7 +318,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 									onChange={onSelectChange}
 								/>
 							</Show>
-							<Index each={props.head}>
+							<Index each={props.columns}>
 								{(head) => (
 									<TableHeaderCell
 										column={head().key}
@@ -347,7 +341,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 					</thead>
 					<tbody>
 						<Show
-							when={!props.isLoading}
+							when={!props.loading}
 							fallback={
 								<Index
 									each={Array.from({
@@ -356,7 +350,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 								>
 									{() => (
 										<TableLoadingRow
-											columns={props.head.map((head) => head.key)}
+											columns={props.columns.map((head) => head.key)}
 											hasReorderColumn={rowReorderEnabled()}
 										/>
 									)}

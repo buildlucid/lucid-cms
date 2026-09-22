@@ -3,7 +3,6 @@ import { type Component, createMemo } from "solid-js";
 import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import IntegrationLastUsedCell from "./parts/IntegrationLastUsedCell";
 
@@ -38,9 +37,7 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.integration.id);
 						props.rowTarget.setTrigger("update", true);
 					},
-					permission: userStore.get.hasPermission([
-						Permissions.IntegrationsUpdate,
-					]).all,
+					permission: Permissions.IntegrationsUpdate,
 					sortOrder: 0,
 				},
 				{
@@ -51,11 +48,9 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.integration.id);
 						props.rowTarget.setTrigger("regenerateAPIKey", true);
 					},
-					permission: userStore.get.hasPermission([
-						Permissions.IntegrationsRegenerate,
-					]).all,
-					actionExclude: true,
-					variant: "error",
+					permission: Permissions.IntegrationsRegenerate,
+					excludeFromRowClick: true,
+					variant: "danger",
 					sortOrder: 70,
 				},
 				{
@@ -66,11 +61,9 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.integration.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					permission: userStore.get.hasPermission([
-						Permissions.IntegrationsDelete,
-					]).all,
-					actionExclude: true,
-					variant: "error",
+					permission: Permissions.IntegrationsDelete,
+					excludeFromRowClick: true,
+					variant: "danger",
 					sortOrder: 80,
 				},
 			]}

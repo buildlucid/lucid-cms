@@ -175,15 +175,15 @@ export const ReleaseRequestsList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				isLoading={
+				loading={
 					requests.isLoading ||
 					props.status.collections.isLoading ||
 					!props.state.searchParams.ready()
 				}
-				isError={requests.isError || props.status.collections.isError}
-				isEmpty={rows().length === 0}
+				error={requests.isError || props.status.collections.isError}
+				empty={rows().length === 0}
 				queryState={props.state.searchParams}
-				empty={
+				emptyFallback={
 					<EmptyState
 						title={T()("empty.states.publish.requests.title")}
 						description={T()("empty.states.publish.requests.description")}
@@ -195,7 +195,7 @@ export const ReleaseRequestsList: Component<{
 					id="release-requests.list"
 					rowCount={rows().length}
 					queryState={props.state.searchParams}
-					head={[
+					columns={[
 						{
 							label: T()("documents.release.request"),
 							key: "request",
@@ -241,7 +241,7 @@ export const ReleaseRequestsList: Component<{
 							sortable: true,
 						},
 					]}
-					isLoading={requests.isFetching}
+					loading={requests.isFetching}
 				>
 					<Index each={rows()}>
 						{(request, i) => (

@@ -19,15 +19,13 @@ import {
 } from "../tabsClasses";
 
 export interface TabsItem {
-	/** Identifies the tab. Pass it to activeKey and read it back from onSelect. */
-	key: string;
+	value: string;
 	label: JSXElement;
-	/** Renders the tab as a router link rather than a button. */
+	/** Renders the tab as a link. */
 	href?: string;
-	/** Put on the tab's element, for anchors and scripted focus. */
 	id?: string;
 	onClick?: () => void;
-	/** Leaves the tab out of the bar entirely. @default true */
+	/** @default true */
 	show?: boolean;
 	disabled?: boolean;
 	class?: string;
@@ -35,16 +33,16 @@ export interface TabsItem {
 
 export interface TabsRootProps {
 	items: TabsItem[];
-	/** Falls back to the first tab when it does not match one. */
-	activeKey?: string;
-	onSelect?: (key: string) => void;
-	/** Fills the width of the parent. @default false */
+	/** Defaults to the first tab. */
+	value?: string;
+	onChange?: (_value: string) => void;
 	fullWidth?: boolean;
-	/** Shares the width evenly between the tabs. Implies fullWidth. @default false */
+	/** Makes each tab the same width. Implies `fullWidth`. */
 	stretch?: boolean;
 	class?: string;
 }
 
+/** Tabs for switching between views. */
 export const TabsRoot: Component<TabsRootProps> = (props) => {
 	// ----------------------------------------
 	// State
@@ -68,20 +66,19 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 	const stretch = createMemo(() => props.stretch === true);
 	const fill = createMemo(() => props.fullWidth === true || stretch());
 	const items = createMemo(() => props.items.filter((i) => i.show !== false));
-	//* links go somewhere rather than revealing a panel, so they are not tabs:
-	//* announcing them as such promises a tabpanel that does not exist
+	//* links navigate rather than show a panel, so they skip the tab roles
 	const isNavigation = createMemo(() => items().some((item) => item.href));
 	const activeKey = createMemo(() => {
-		const requestedKey = props.activeKey;
-		if (requestedKey && items().some((item) => item.key === requestedKey)) {
+		const requestedKey = props.value;
+		if (requestedKey && items().some((item) => item.value === requestedKey)) {
 			return requestedKey;
 		}
-		return items()[0]?.key;
+		return items()[0]?.value;
 	});
 	const targetKey = createMemo(() => hoveredKey() ?? activeKey());
 	const itemSignature = createMemo(() =>
 		items()
-			.map((item) => item.key)
+			.map((item) => item.value)
 			.join("|"),
 	);
 
@@ -119,8 +116,7 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 			updateIndicator(key);
 		});
 	};
-	//* fonts and late layout move the tabs after the first paint, so the
-	//* indicator is measured again a few times before it settles
+	//* measure again after fonts and late layout shift the tabs
 	const scheduleIndicatorRetries = () => {
 		clearScheduledIndicatorUpdates();
 		scheduleIndicatorUpdate();
@@ -151,7 +147,7 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 	};
 	const handleSelect = (item: TabsItem) => {
 		if (item.disabled) return;
-		props.onSelect?.(item.key);
+		props.onChange?.(item.value);
 		item.onClick?.();
 	};
 
@@ -202,35 +198,35 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 				data-tabs-list
 				class={tabsListClasses(stretch())}
 				onMouseLeave={handleLeave}
-				//* links go somewhere rather than revealing a panel, so the list
-				//* keeps its own role instead of promising a tabpanel
 				role={isNavigation() ? undefined : "tablist"}
 			>
 				<For each={items()}>
 					{(item) => {
 						const itemClass = () =>
-							tabsItemClasses(stretch(), targetKey() === item.key, item.class);
+							tabsItemClasses(
+								stretch(),
+								targetKey() === item.value,
+								item.class,
+							);
 
 						return (
-							//* a listitem cannot sit inside a tablist, so it steps aside
-							//* and leaves the button as the tablist's direct tab
 							<li role={isNavigation() ? undefined : "presentation"}>
 								<Show
 									when={item.href}
 									fallback={
 										<button
-											ref={(element) => setItemRef(item.key, element)}
+											ref={(element) => setItemRef(item.value, element)}
 											id={item.id}
 											data-tabs-item
 											type="button"
 											class={itemClass()}
 											disabled={item.disabled}
 											onClick={() => handleSelect(item)}
-											onMouseEnter={() => handleEnter(item.key)}
-											onFocus={() => handleEnter(item.key)}
+											onMouseEnter={() => handleEnter(item.value)}
+											onFocus={() => handleEnter(item.value)}
 											onBlur={handleLeave}
 											role="tab"
-											aria-selected={activeKey() === item.key}
+											aria-selected={activeKey() === item.value}
 										>
 											{item.label}
 										</button>
@@ -238,18 +234,18 @@ export const TabsRoot: Component<TabsRootProps> = (props) => {
 								>
 									{(href) => (
 										<A
-											ref={(element) => setItemRef(item.key, element)}
+											ref={(element) => setItemRef(item.value, element)}
 											id={item.id}
 											data-tabs-item
 											class={itemClass()}
 											href={href()}
 											onClick={() => handleSelect(item)}
-											onMouseEnter={() => handleEnter(item.key)}
-											onFocus={() => handleEnter(item.key)}
+											onMouseEnter={() => handleEnter(item.value)}
+											onFocus={() => handleEnter(item.value)}
 											onBlur={handleLeave}
 											end
 											aria-current={
-												activeKey() === item.key ? "page" : undefined
+												activeKey() === item.value ? "page" : undefined
 											}
 										>
 											{item.label}

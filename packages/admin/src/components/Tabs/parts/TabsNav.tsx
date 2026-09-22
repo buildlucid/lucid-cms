@@ -5,25 +5,21 @@ import { type TabsItem, TabsRoot } from "./TabsRoot";
 export interface TabsNavItem {
 	label: string;
 	href: string;
-	/** Leaves the tab out of the bar entirely. Use it for permissions. @default true */
+	/** @default true */
 	show?: boolean;
 	disabled?: boolean;
 	class?: string;
 }
 
 export interface TabsNavProps {
-	tabs: TabsNavItem[];
+	items: TabsNavItem[];
 	class?: string;
 }
 
-//* hrefs are written with the admin's mount point, the router reports without
+//* hrefs include the admin's mount path, but the router's pathname does not
 const normalisePath = (path: string) => path.replace(/^\/lucid(?=\/|$)/, "");
 
-/**
- * Page tabs that follow the router, marking whichever one matches the current
- * URL as active. Reach for Tabs.Root when the tabs switch content in place
- * rather than navigating.
- */
+/** Tabs that link between pages, highlighting the current one. */
 export const TabsNav: Component<TabsNavProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -32,8 +28,8 @@ export const TabsNav: Component<TabsNavProps> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const items = createMemo<TabsItem[]>(() =>
-		props.tabs.map((tab) => ({
-			key: tab.href,
+		props.items.map((tab) => ({
+			value: tab.href,
 			label: tab.label,
 			href: tab.href,
 			show: tab.show,
@@ -45,14 +41,14 @@ export const TabsNav: Component<TabsNavProps> = (props) => {
 		const currentPath = normalisePath(location.pathname);
 		return items().find(
 			(item) => item.href && normalisePath(item.href) === currentPath,
-		)?.key;
+		)?.value;
 	});
 
 	// ----------------------------------------
 	// Render
 	return (
 		<nav data-tabs-nav class={props.class}>
-			<TabsRoot items={items()} activeKey={activeKey()} />
+			<TabsRoot items={items()} value={activeKey()} />
 		</nav>
 	);
 };

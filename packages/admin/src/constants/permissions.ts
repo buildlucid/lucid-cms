@@ -1,3 +1,6 @@
+/**
+ * Permission keys, for use with `usePermissions` and the `permission` props.
+ */
 export const Permissions = {
 	UsersRead: "users:read",
 	UsersCreate: "users:create",

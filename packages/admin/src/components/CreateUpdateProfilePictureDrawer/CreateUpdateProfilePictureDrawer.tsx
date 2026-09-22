@@ -403,7 +403,7 @@ const CreateUpdateProfilePictureDrawer: Component<
 		<Drawer.Root
 			open={props.state.open}
 			onOpenChange={props.state.setOpen}
-			useDefaultLocale={panelMode() === "create"}
+			initialLocale={panelMode() === "create" ? "default" : "active"}
 			onReset={() => {
 				createMedia.reset();
 				MediaFile.reset();
@@ -419,7 +419,7 @@ const CreateUpdateProfilePictureDrawer: Component<
 								? T()("account.profile.picture.set")
 								: T()("account.profile.picture.update")}
 						</Drawer.Title>
-						<Drawer.LocaleSelect hasError={hasTranslationErrors()} />
+						<Drawer.LocaleSelect invalid={hasTranslationErrors()} />
 					</Drawer.Header>
 					<Drawer.Form onSubmit={onSubmit}>
 						<Drawer.Body class="flex flex-col gap-3">

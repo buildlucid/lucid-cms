@@ -1,3 +1,4 @@
+/** Slots that plugins can use to add or replace document table columns. */
 export const documentSlotKeys = {
 	columnAddition: "document.columnAddition",
 	columnOverride: "document.columnOverride",

@@ -1,4 +1,5 @@
 import type { ErrorResult, FieldError } from "@types";
+import classnames from "classnames";
 import {
 	type Component,
 	type JSX,
@@ -18,21 +19,19 @@ export interface TextareaProps
 	value: string;
 	onChange: (_value: string) => void;
 	label?: string;
-	/** Sits under the control, and is read out alongside it. */
 	description?: string;
 	errors?: ErrorResult | FieldError;
-	/** Before the label text, for an icon or badge. */
 	labelStart?: JSXElement;
-	/** After the label, against the right edge. */
 	labelEnd?: JSXElement;
-	/** Applied to the field. Target [data-textarea-control] for the textarea. */
+	/** Lets the user resize the textarea vertically. */
+	resize?: boolean;
+	/** Applied to the field. Target `[data-textarea-control]` for the textarea. */
 	class?: string;
 }
 
 /**
- * A labelled multi line text input, with its description and any validation
- * errors. Every other textarea attribute, such as placeholder, rows, required
- * or maxlength, passes through to the element.
+ * A multi-line text input with a label, description and validation errors.
+ * Other textarea attributes are passed to the `<textarea>`.
  *
  * @example
  * ```tsx
@@ -66,6 +65,7 @@ const Textarea: Component<TextareaProps> = (props) => {
 		"errors",
 		"labelStart",
 		"labelEnd",
+		"resize",
 		"class",
 	]);
 
@@ -91,7 +91,10 @@ const Textarea: Component<TextareaProps> = (props) => {
 				name={local.name}
 				value={local.value}
 				rows={rest.rows ?? 6}
-				class="focus:outline-hidden text-sm text-subtitle font-medium resize-none w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors"
+				class={classnames(
+					"focus:outline-hidden text-sm text-subtitle font-medium w-full block disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border rounded-md p-2 focus:border-primary-base duration-200 transition-colors",
+					local.resize ? "resize-y" : "resize-none",
+				)}
 				aria-describedby={
 					local.description ? `${local.id}-description` : undefined
 				}

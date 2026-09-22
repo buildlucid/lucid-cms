@@ -9,7 +9,7 @@ export type TranslationKey =
 export type TranslationValues = Record<string, string | number | undefined>;
 
 /**
- * Translates messages in the current interface language.
+ * Translates text into the user's interface language.
  *
  * @example
  * ```tsx
@@ -17,7 +17,7 @@ export type TranslationValues = Record<string, string | number | undefined>;
  *
  * const { t } = useTranslation();
  *
- * return <button>{t("common.save")}</button>;
+ * return <p>{t("redirects.count", { count: total() })}</p>;
  * ```
  */
 export const useTranslation = () => ({
@@ -27,6 +27,6 @@ export const useTranslation = () => ({
 	direction: getDirection,
 });
 
-/** Plugins can augment LucidCMS.CopyTranslationKeys from their own JSON source. */
+/** Registers a plugin's translation keys, so `t` accepts them. */
 export type TranslationRegistry<Messages extends Record<string, string>> =
 	Record<`admin:${Extract<keyof Messages, string>}`, true>;

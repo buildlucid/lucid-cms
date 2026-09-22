@@ -9,24 +9,21 @@ export interface PageLayoutRootProps {
 export interface PageLayoutHeaderProps {
 	title?: string;
 	description?: string;
-	/** Buttons or links, against the right edge on desktop. */
 	actions?: JSXElement;
-	/** A row under the title, for tabs or a filter bar. */
+	/** Shown under the title, such as tabs or a toolbar. */
 	children?: JSXElement;
 	class?: string;
 }
 
 export interface PageLayoutBodyProps {
-	/** The page's standard content inset. @default "none" */
+	/** @default "none" */
 	padding?: "none" | "sm" | "md";
 	class?: string;
 	children?: JSXElement;
 }
 
 /**
- * The frame a page sits in. It stacks whatever you put in it, so anything
- * before the header becomes a top bar and anything after the body is pinned
- * beneath it.
+ * The layout for a page, with a header and a body.
  *
  * @example
  * ```tsx
@@ -38,12 +35,12 @@ export interface PageLayoutBodyProps {
  * return (
  * 	<PageLayout.Root>
  * 		<PageLayout.Header
- * 			title={t("admin:reports.title")}
- * 			description={t("admin:reports.description")}
- * 			actions={<Button size="sm" onClick={run}>{t("admin:reports.run")}</Button>}
+ * 			title={t("redirects.title")}
+ * 			description={t("redirects.description")}
+ * 			actions={<Button size="sm" onClick={openCreate}>{t("common.create")}</Button>}
  * 		/>
- * 		<PageLayout.Body class="p-4 md:p-6">
- * 			<ReportList />
+ * 		<PageLayout.Body padding="md">
+ * 			<RedirectsTable />
  * 		</PageLayout.Body>
  * 	</PageLayout.Root>
  * );
@@ -66,7 +63,7 @@ const PageLayoutRoot: Component<PageLayoutRootProps> = (props) => {
 	);
 };
 
-/** The page's title row. Children render as a second row beneath it. */
+/** The page's title, description and actions. */
 const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -82,7 +79,6 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 				class={classnames(
 					"flex flex-col md:flex-row md:justify-between items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-6 pb-4",
 					{
-						//* the second row supplies the bottom spacing when there is one
 						"md:pb-6": !props.children,
 					},
 				)}
@@ -106,7 +102,7 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 	);
 };
 
-/** The part of the page that grows to fill the height left over. */
+/** The page's content. Fills the remaining height. */
 const PageLayoutBody: Component<PageLayoutBodyProps> = (props) => {
 	// ----------------------------------------
 	// Render

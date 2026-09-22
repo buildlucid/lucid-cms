@@ -44,7 +44,7 @@ const AiUsageTableRow: Component<AiUsageRowProps> = (props) => {
 						user={props.aiUsage.user}
 						variant="horizontal"
 						size="xs"
-						nameFormat="simple"
+						nameFormat="name"
 					/>
 				) : (
 					<span class="text-sm text-body">{T()("common.none")}</span>
