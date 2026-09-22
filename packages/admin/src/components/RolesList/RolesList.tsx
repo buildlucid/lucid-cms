@@ -3,10 +3,10 @@ import { type Component, Index } from "solid-js";
 import Button from "@/components/Button/Button";
 import DeleteRoleModal from "@/components/DeleteRoleModal/DeleteRoleModal";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RoleTableRow from "@/components/RoleTableRow/RoleTableRow";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import UpsertRoleDrawer from "@/components/UpsertRoleDrawer/UpsertRoleDrawer";
 import ViewRoleDrawer from "@/components/ViewRoleDrawer/ViewRoleDrawer";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
@@ -66,10 +66,10 @@ export const RolesList: Component<{
 				}
 				class="flex-1 h-full"
 			>
-				<Table
-					key={"roles.list"}
-					rows={roles.data?.data.length || 0}
-					searchParams={props.state.searchParams}
+				<Table.Root
+					id="roles.list"
+					rowCount={roles.data?.data.length || 0}
+					queryState={props.state.searchParams}
 					head={[
 						{
 							label: T()("common.name"),
@@ -94,34 +94,14 @@ export const RolesList: Component<{
 							icon: <FaSolidCalendar />,
 						},
 					]}
-					state={{
-						isLoading: roles.isFetching,
-						isSuccess: roles.isSuccess,
-					}}
-					options={{
-						isSelectable: false,
-					}}
+					isLoading={roles.isFetching}
 				>
-					{({ include, isSelectable, selected, setSelected }) => (
-						<Index each={roles.data?.data || []}>
-							{(role, i) => (
-								<RoleTableRow
-									index={i}
-									role={role()}
-									include={include}
-									selected={selected[i]}
-									rowTarget={rowTarget}
-									options={{
-										isSelectable,
-									}}
-									callbacks={{
-										setSelected: setSelected,
-									}}
-								/>
-							)}
-						</Index>
-					)}
-				</Table>
+					<Index each={roles.data?.data || []}>
+						{(role, i) => (
+							<RoleTableRow index={i} role={role()} rowTarget={rowTarget} />
+						)}
+					</Index>
+				</Table.Root>
 				<UpsertRoleDrawer
 					id={rowTarget.getTargetId}
 					state={{
@@ -150,14 +130,10 @@ export const RolesList: Component<{
 					}}
 				/>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: props.state.searchParams,
-					meta: roles.data?.meta,
-				}}
-				options={{
-					padding: "24",
-				}}
+			<Pagination
+				queryState={props.state.searchParams}
+				meta={roles.data?.meta}
+				padding="md"
 			/>
 		</>
 	);

@@ -1,4 +1,3 @@
-import { DropdownMenu } from "@kobalte/core";
 import { debounce } from "@solid-primitives/scheduled";
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
@@ -19,8 +18,8 @@ import {
 	Switch,
 	splitProps,
 } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
 import Field from "@/components/Field/Field";
+import Menu from "@/components/Menu/Menu";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 
@@ -213,11 +212,9 @@ function Select<Option extends SelectOption = SelectOption>(
 			errors={props.errors}
 			class={props.class}
 		>
-			<DropdownMenu.Root
-				sameWidth={true}
+			<Menu.Root
 				open={open()}
 				onOpenChange={(open) => setOpen(!props.disabled && open)}
-				flip={true}
 				gutter={5}
 			>
 				<Show when={props.label !== undefined || props.labelEnd !== undefined}>
@@ -225,7 +222,7 @@ function Select<Option extends SelectOption = SelectOption>(
 						{props.label}
 					</Field.Label>
 				</Show>
-				<DropdownMenu.Trigger
+				<Menu.Trigger
 					data-select-trigger
 					id={props.id}
 					{...ariaProps}
@@ -287,16 +284,8 @@ function Select<Option extends SelectOption = SelectOption>(
 						</Show>
 						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
-				</DropdownMenu.Trigger>
-				<DropdownContent
-					options={{
-						anchorWidth: true,
-						rounded: true,
-						class: "z-70 p-1.5!",
-						maxHeight: "md",
-						noMargin: true,
-					}}
-				>
+				</Menu.Trigger>
+				<Menu.Content matchTriggerWidth scrollable flush class="z-70">
 					<Show when={props.search !== undefined}>
 						{/** biome-ignore lint/a11y/noStaticElementInteractions: explanation */}
 						<div
@@ -353,41 +342,36 @@ function Select<Option extends SelectOption = SelectOption>(
 					</Show>
 					<Switch>
 						<Match when={props.options.length > 0}>
-							<ul class="flex flex-col">
-								<For each={props.options}>
-									{(option) => (
-										<DropdownMenu.Item
-											as="li"
-											textValue={option.label}
-											disabled={props.disabled}
-											class="flex items-center justify-between gap-2 text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
-											onSelect={() => {
-												if (props.disabled) {
-													return;
-												}
+							<For each={props.options}>
+								{(option) => (
+									<Menu.Item
+										textValue={option.label}
+										disabled={props.disabled}
+										selected={props.value === option.value}
+										onSelect={() => {
+											if (props.disabled) {
+												return;
+											}
 
-												props.onChange(option.value);
-												setDebouncedValue("");
-												setOpen(false);
-											}}
-										>
-											{props.renderOption ? (
-												props.renderOption({
+											props.onChange(option.value);
+											setDebouncedValue("");
+											setOpen(false);
+										}}
+										end={
+											props.value === option.value ? (
+												<FaSolidCheck size={14} class="shrink-0 text-current" />
+											) : undefined
+										}
+									>
+										{props.renderOption
+											? props.renderOption({
 													option,
 													selected: props.value === option.value,
 												})
-											) : (
-												<span class="min-w-0 flex-1 truncate">
-													{option.label}
-												</span>
-											)}
-											<Show when={props.value === option.value}>
-												<FaSolidCheck size={14} class="shrink-0 text-current" />
-											</Show>
-										</DropdownMenu.Item>
-									)}
-								</For>
-							</ul>
+											: option.label}
+									</Menu.Item>
+								)}
+							</For>
 						</Match>
 						<Match when={props.options.length === 0 && props.search?.value}>
 							<span class="text-body w-full block px-2 py-1 text-sm">
@@ -400,8 +384,8 @@ function Select<Option extends SelectOption = SelectOption>(
 							</span>
 						</Match>
 					</Switch>
-				</DropdownContent>
-			</DropdownMenu.Root>
+				</Menu.Content>
+			</Menu.Root>
 			<Field.Error />
 			<Show when={props.description}>
 				{(description) => (

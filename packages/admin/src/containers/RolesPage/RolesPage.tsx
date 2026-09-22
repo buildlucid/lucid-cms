@@ -4,7 +4,7 @@ import CreateMenu, {
 	type CreateMenuAction,
 } from "@/components/CreateMenu/CreateMenu";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { RolesList } from "@/components/RolesList/RolesList";
 import UpsertRoleDrawer from "@/components/UpsertRoleDrawer/UpsertRoleDrawer";
 import { Permissions } from "@/constants/permissions";
@@ -76,45 +76,43 @@ const RolesPage: Component = () => {
 				description={T()("routes.roles.description")}
 				actions={<CreateMenu actions={createActions()} />}
 			>
-				<QueryRow
-					searchParams={searchParams}
+				<QueryToolbar
+					queryState={searchParams}
 					onRefresh={() => {
 						queryClient.invalidateQueries({
 							queryKey: queryKeys.roles.list(),
 						});
 					}}
-					filterSection={{
-						subject: T()("routes.roles.title"),
-						fields: [
-							{
-								label: T()("common.name"),
-								key: "name",
-								type: "text",
-							},
-							{
-								label: T()("common.description"),
-								key: "description",
-								type: "text",
-							},
-							{
-								label: T()("common.status"),
-								key: "locked",
-								type: "checkbox",
-								trueLabel: T()("common.status.locked"),
-								falseLabel: T()("common.status.unlocked"),
-							},
-							{
-								label: T()("common.created.at"),
-								key: "createdAt",
-								type: "datetime",
-							},
-							{
-								label: T()("common.updated.at"),
-								key: "updatedAt",
-								type: "datetime",
-							},
-						],
-					}}
+					filterSubject={T()("routes.roles.title")}
+					filterFields={[
+						{
+							label: T()("common.name"),
+							key: "name",
+							type: "text",
+						},
+						{
+							label: T()("common.description"),
+							key: "description",
+							type: "text",
+						},
+						{
+							label: T()("common.status"),
+							key: "locked",
+							type: "checkbox",
+							trueLabel: T()("common.status.locked"),
+							falseLabel: T()("common.status.unlocked"),
+						},
+						{
+							label: T()("common.created.at"),
+							key: "createdAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.updated.at"),
+							key: "updatedAt",
+							type: "datetime",
+						},
+					]}
 					sorts={[
 						{
 							label: T()("common.name"),
@@ -125,7 +123,7 @@ const RolesPage: Component = () => {
 							key: "createdAt",
 						},
 					]}
-					perPage={[]}
+					perPage
 				/>
 			</PageLayout.Header>
 			<PageLayout.Body>

@@ -1,7 +1,7 @@
 import type { OAuthClientCreateResponse } from "@types";
 import type { Component } from "solid-js";
 import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
-import CopyInput from "@/components/CopyInput/CopyInput";
+import Copy from "@/components/Copy/Copy";
 import Modal from "@/components/Modal/Modal";
 import T from "@/translations";
 
@@ -35,7 +35,7 @@ const OAuthClientCredentialsModal: Component<{
 						<p class="mb-1.5 text-xs font-medium text-subtitle">
 							{T()("oauth.consent.client.id")}
 						</p>
-						<CopyInput
+						<Copy.Input
 							value={props.credentials?.client.clientId ?? ""}
 							label={T()("oauth.consent.client.id")}
 						/>
@@ -45,7 +45,7 @@ const OAuthClientCredentialsModal: Component<{
 							<p class="mb-1.5 text-xs font-medium text-subtitle">
 								{T()("oauth.clients.client.secret")}
 							</p>
-							<CopyInput
+							<Copy.Input
 								value={props.credentials.clientSecret}
 								label={T()("oauth.clients.client.secret")}
 							/>

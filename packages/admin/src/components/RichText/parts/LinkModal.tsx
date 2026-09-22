@@ -9,15 +9,12 @@ import {
 	Show,
 	useContext,
 } from "solid-js";
-import {
-	type AnimatedTabItem,
-	AnimatedTabs,
-} from "@/components/AnimatedTabs/AnimatedTabs";
 import Button from "@/components/Button/Button";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import Input from "@/components/Input/Input";
 import Modal from "@/components/Modal/Modal";
 import Switch from "@/components/Switch/Switch";
+import Tabs, { type TabsItem } from "@/components/Tabs/Tabs";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
 import T from "@/translations";
 import type { RichTextOptions } from "../types";
@@ -77,16 +74,14 @@ const LinkModal: Component<{
 	const internalEnabled = createMemo(
 		() => internalLinkCollectionKeys().length > 0,
 	);
-	const linkKindTabs = createMemo<AnimatedTabItem[]>(() => [
+	const linkKindTabs = createMemo<TabsItem[]>(() => [
 		{
 			key: "external",
 			label: T()("editor.rich.text.link.external"),
-			class: "w-full justify-center px-2.5 py-1.5",
 		},
 		{
 			key: "document",
 			label: T()("editor.rich.text.link.document"),
-			class: "w-full justify-center px-2.5 py-1.5",
 		},
 	]);
 	const selectedDocumentLabel = createMemo(() => {
@@ -198,16 +193,14 @@ const LinkModal: Component<{
 			<Modal.Body>
 				<div class="flex flex-col gap-3">
 					<Show when={externalEnabled() && internalEnabled()}>
-						<AnimatedTabs
+						<Tabs.Root
 							items={linkKindTabs()}
 							activeKey={kind()}
 							onSelect={(key) => {
 								if (key === "external" || key === "document") changeKind(key);
 							}}
+							stretch={true}
 							class="mb-4"
-							listClass="w-full gap-1 [&>li]:grow"
-							indicatorClass="shadow-xs"
-							fullWidth
 						/>
 					</Show>
 

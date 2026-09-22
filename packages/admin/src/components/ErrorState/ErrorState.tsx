@@ -41,7 +41,10 @@ const ErrorState: Component<ErrorStateProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={classnames("flex items-center justify-center", props.class)}>
+		<div
+			data-error-state
+			class={classnames("flex items-center justify-center", props.class)}
+		>
 			<div class="w-full max-w-xl px-4 py-8 text-center flex flex-col items-center md:px-6 md:py-10">
 				<Show when={props.image}>
 					{(image) => (

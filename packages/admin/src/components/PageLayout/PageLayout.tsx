@@ -55,6 +55,7 @@ const PageLayoutRoot: Component<PageLayoutRootProps> = (props) => {
 	return (
 		//* the 15px leaves room for the shell's bottom padding
 		<div
+			data-page-layout-root
 			class={classnames(
 				"flex flex-col min-h-[calc(100vh-15px)] border-t border-x border-border rounded-t-xl overflow-x-hidden",
 				props.class,
@@ -71,6 +72,7 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 	// Render
 	return (
 		<div
+			data-page-layout-header
 			class={classnames(
 				"bg-background-base border-b border-border",
 				props.class,
@@ -110,6 +112,7 @@ const PageLayoutBody: Component<PageLayoutBodyProps> = (props) => {
 	// Render
 	return (
 		<div
+			data-page-layout-body
 			class={classnames(
 				"flex grow flex-col justify-between bg-background-base",
 				{

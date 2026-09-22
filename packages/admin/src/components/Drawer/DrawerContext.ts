@@ -2,9 +2,20 @@ import type { Locale } from "@types";
 import { type Accessor, createContext, useContext } from "solid-js";
 
 export interface DrawerNestingState {
+	/** Ancestor drawers, whichever edge they came from. Drives the stack order. */
 	level: Accessor<number>;
+	/**
+	 * Drawers on the stack for each edge, this one included. A drawer only
+	 * stacks behind the ones sharing its edge, so a bottom drawer opened from
+	 * a side drawer starts a stack of its own.
+	 */
+	sideDepth: Accessor<Record<"right" | "bottom", number>>;
 	zIndex: Accessor<number>;
-	setChildOpen: (_id: symbol, _open: boolean) => void;
+	setChildOpen: (
+		_id: symbol,
+		_open: boolean,
+		_side: "right" | "bottom",
+	) => void;
 }
 
 /** Lets a drawer find the drawer it was opened from. */

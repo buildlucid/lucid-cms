@@ -63,7 +63,7 @@ export const ProgressBar: Component<ProgressBarProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={props.class}>
+		<div data-progress-bar class={props.class}>
 			<div
 				class={classnames("w-full overflow-hidden bg-input-base", {
 					"h-1": props.size === "sm",

@@ -19,9 +19,7 @@ import {
 } from "solid-js";
 import Image from "@/components/Image/Image";
 import MediaStatusPreview from "@/components/MediaStatusPreview/MediaStatusPreview";
-import getMediaPreviewUrl, {
-	type AdminImagePreset,
-} from "@/utils/media-preview";
+import mediaUrl, { type MediaPreset } from "@/utils/media-url";
 
 interface MediaPreviewProps {
 	media: Pick<Media, "status" | "type" | "url"> & {
@@ -32,7 +30,7 @@ interface MediaPreviewProps {
 	richPreview?: boolean;
 	alt: string | null;
 	imageFit?: "cover" | "contain";
-	preset?: AdminImagePreset;
+	preset?: MediaPreset;
 }
 
 const MediaPreview: Component<MediaPreviewProps> = (props) => {
@@ -86,9 +84,9 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 				<Switch>
 					<Match when={props.media.type === "image"}>
 						<Image
-							classes={"rounded-t-md backface-hidden z-10 relative"}
+							class="rounded-t-md backface-hidden z-10 relative"
 							fit={props.imageFit}
-							src={getMediaPreviewUrl(props.media, preset())}
+							src={mediaUrl(props.media, preset())}
 							alt={props.alt || ""}
 							loading="lazy"
 						/>
@@ -132,9 +130,9 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 									{(poster) => (
 										<div class="relative h-full w-full flex items-center justify-center">
 											<Image
-												classes={"z-10 relative backface-hidden"}
+												class="z-10 relative backface-hidden"
 												fit={props.imageFit}
-												src={getMediaPreviewUrl(poster(), preset())}
+												src={mediaUrl(poster(), preset())}
 												alt={props.alt || ""}
 												loading="lazy"
 											/>

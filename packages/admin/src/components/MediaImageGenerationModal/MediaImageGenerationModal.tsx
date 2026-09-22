@@ -1355,8 +1355,7 @@ const MediaImageGenerationModal: Component = () => {
 															</Show>
 															<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
 																<DetailsList
-																	type="text"
-																	theme="contained"
+																	variant="plain"
 																	items={completedGenerationDetails(
 																		generation(),
 																	)}
@@ -1433,8 +1432,7 @@ const MediaImageGenerationModal: Component = () => {
 													</Show>
 													<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
 														<DetailsList
-															type="text"
-															theme="contained"
+															variant="plain"
 															items={pendingGenerationDetails(pending())}
 														/>
 													</div>

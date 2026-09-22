@@ -1,7 +1,7 @@
 import type { Media } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
-import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import AspectRatio from "@/components/AspectRatio/AspectRatio";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
@@ -77,7 +77,7 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 		>
 			<Show when={props.rowTarget !== undefined}>
 				<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
-					<ActionDropdown
+					<ActionMenu
 						actions={[
 							{
 								label: T()("common.restore"),
@@ -89,7 +89,8 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 								},
 								permission: hasUpdatePermission(),
 								hide: showRestore() === false,
-								theme: "primary",
+								variant: "primary",
+								sortOrder: 50,
 							},
 							{
 								label: T()("media.processed.clear.action"),
@@ -103,12 +104,10 @@ const MediaBasicCard: Component<MediaBasicCardProps> = (props) => {
 									props.media.type !== "image" ||
 									props.media.status !== "ready",
 								permission: hasUpdatePermission(),
-								theme: "error",
+								variant: "error",
+								sortOrder: 70,
 							},
 						]}
-						options={{
-							border: true,
-						}}
 					/>
 				</div>
 			</Show>

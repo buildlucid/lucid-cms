@@ -11,14 +11,14 @@ import {
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { FilterSection } from "@/components/FilterSection/FilterSection";
-import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import FilterToggle from "@/components/FilterToggle/FilterToggle";
 import JobTableRow from "@/components/JobTableRow/JobTableRow";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import Pagination from "@/components/Pagination/Pagination";
+import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QuerySort } from "@/components/QuerySort/QuerySort";
-import { Table } from "@/components/Table/Table";
+import QuerySort from "@/components/QuerySort/QuerySort";
+import Table from "@/components/Table/Table";
 import useQueryState, {
 	pagination,
 	sort,
@@ -90,7 +90,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 		},
 		singleSort: true,
 	});
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -115,24 +115,24 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 			<Show when={props.id() !== undefined}>
 				<div class="mb-4 flex flex-wrap items-center justify-between gap-2.5">
 					<div class="flex gap-2.5">
-						<FilterSectionToggle
+						<FilterToggle
 							open={filterSectionOpen()}
-							onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-							searchParams={searchParams}
+							onOpenChange={setFilterPanelOpen}
+							queryState={searchParams}
 						/>
 						<QuerySort
 							sorts={[
 								{ label: T()("common.created.at"), key: "createdAt" },
 								{ label: T()("common.attempts"), key: "attempts" },
 							]}
-							searchParams={searchParams}
+							queryState={searchParams}
 						/>
 					</div>
-					<PerPageSelect options={[5, 10, 20]} searchParams={searchParams} />
+					<PerPageSelect options={[5, 10, 20]} queryState={searchParams} />
 				</div>
-				<FilterSection
+				<FilterPanel
 					open={filterSectionOpen()}
-					setOpen={setFilterSectionOpen}
+					onOpenChange={setFilterPanelOpen}
 					subject={T()("panels.jobs.schedules.runs.title")}
 					fields={[
 						{
@@ -159,7 +159,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 							type: "datetime",
 						},
 					]}
-					searchParams={searchParams}
+					queryState={searchParams}
 					embedded
 				/>
 				<QueryBoundary
@@ -176,10 +176,10 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 						"rounded-md border border-border bg-card-base",
 					)}
 				>
-					<Table
-						key="jobs.schedule-runs"
-						rows={jobs.data?.data.length ?? 0}
-						searchParams={searchParams}
+					<Table.Root
+						id="jobs.schedule-runs"
+						rowCount={jobs.data?.data.length ?? 0}
+						queryState={searchParams}
 						head={[
 							{
 								label: T()("common.status"),
@@ -215,30 +215,19 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 								icon: <FaSolidCalendar />,
 							},
 						]}
-						state={{ isLoading: jobs.isFetching, isSuccess: jobs.isSuccess }}
-						options={{ isSelectable: false, padding: "16" }}
-						theme="secondary"
+						isLoading={jobs.isFetching}
+						padding="sm"
+						variant="secondary"
 					>
-						{({ include, isSelectable, selected, setSelected }) => (
-							<Index each={jobs.data?.data ?? []}>
-								{(job, index) => (
-									<JobTableRow
-										index={index}
-										job={job()}
-										include={include}
-										selected={selected[index]}
-										options={{ isSelectable, padding: "16" }}
-										callbacks={{ setSelected }}
-										theme="secondary"
-									/>
-								)}
-							</Index>
-						)}
-					</Table>
+						<Index each={jobs.data?.data ?? []}>
+							{(job, index) => <JobTableRow index={index} job={job()} />}
+						</Index>
+					</Table.Root>
 				</QueryBoundary>
-				<PaginatedFooter
-					state={{ searchParams, meta: jobs.data?.meta }}
-					options={{ embedded: true }}
+				<Pagination
+					queryState={searchParams}
+					meta={jobs.data?.meta}
+					variant="inline"
 				/>
 			</Show>
 		</div>

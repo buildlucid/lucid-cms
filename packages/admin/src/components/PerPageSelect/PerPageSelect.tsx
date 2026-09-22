@@ -1,81 +1,71 @@
-import { DropdownMenu } from "@kobalte/core";
 import classNames from "classnames";
 import { FaSolidSort } from "solid-icons/fa";
 import { type Component, createMemo, For } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
+import Menu from "@/components/Menu/Menu";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
-export interface PerPageProps {
-	options?: Array<number>;
-	searchParams: QueryStateResponse;
+export interface PerPageSelectProps {
+	/** Page sizes to offer. @default [10, 25, 50] */
+	options?: number[];
+	queryState: QueryStateResponse;
 	disabled?: boolean;
+	class?: string;
 }
 
-export const PerPageSelect: Component<PerPageProps> = (props) => {
+/**
+ * A menu for how many rows a page shows. Changing the size returns to the
+ * first page.
+ *
+ * @example
+ * ```tsx
+ * import { PerPageSelect } from "@lucidcms/admin/components";
+ *
+ * return <PerPageSelect queryState={queryState} options={[10, 20, 40]} />;
+ * ```
+ */
+const PerPageSelect: Component<PerPageSelectProps> = (props) => {
 	// ----------------------------------
 	// Memos
-	const options = createMemo(() => {
-		return props.options || [10, 25, 50];
-	});
-
-	const currentPerPage = createMemo(() => {
-		return props.searchParams.pagination().perPage;
-	});
+	const options = createMemo(() => props.options || [10, 25, 50]);
+	const currentPerPage = createMemo(
+		() => props.queryState.pagination().perPage,
+	);
 
 	// ----------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger
+		<Menu.Root>
+			<Menu.Trigger
+				data-per-page-select
 				disabled={props.disabled}
-				class="dropdown-trigger flex h-9 items-center gap-2 rounded-md border border-border bg-input-base px-2 text-sm text-input-contrast fill-card-contrast hover:bg-secondary-hover hover:text-secondary-contrast disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-input-base disabled:hover:text-unfocused"
+				class={classNames(
+					"flex h-9 items-center gap-2 rounded-md border border-border bg-input-base px-2 text-sm text-input-contrast fill-card-contrast hover:bg-secondary-hover hover:text-secondary-contrast disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-input-base disabled:hover:text-unfocused",
+					props.class,
+				)}
 			>
 				<span>
 					{T()("common.per.page", {
 						count: currentPerPage(),
 					})}
 				</span>
-				<DropdownMenu.Icon>
-					<FaSolidSort />
-				</DropdownMenu.Icon>
-			</DropdownMenu.Trigger>
-			<DropdownContent
-				options={{
-					as: "ul",
-					rounded: true,
-					class: "w-[180px] z-60 p-1.5!",
-				}}
-			>
+				<FaSolidSort />
+			</Menu.Trigger>
+			<Menu.Content>
 				<For each={options()}>
-					{(perpage) => (
-						<li class="w-full">
-							<button
-								tabIndex={0}
-								class={classNames(
-									"w-full flex items-center justify-between group focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base px-2 py-1 rounded-md",
-									{
-										"bg-dropdown-hover text-dropdown-contrast":
-											currentPerPage() === perpage,
-									},
-								)}
-								onClick={() => {
-									props.searchParams.setParams({
-										pagination: {
-											perPage: perpage,
-										},
-									});
-								}}
-								type="button"
-							>
-								<label for={`${perpage}`} class="text-body text-sm">
-									<span class="line-clamp-1 text-left">{perpage}</span>
-								</label>
-							</button>
-						</li>
+					{(perPage) => (
+						<Menu.Item
+							selected={currentPerPage() === perPage}
+							onSelect={() => props.queryState.setPerPage(perPage)}
+							textValue={String(perPage)}
+						>
+							{perPage}
+						</Menu.Item>
 					)}
 				</For>
-			</DropdownContent>
-		</DropdownMenu.Root>
+			</Menu.Content>
+		</Menu.Root>
 	);
 };
+
+export default PerPageSelect;

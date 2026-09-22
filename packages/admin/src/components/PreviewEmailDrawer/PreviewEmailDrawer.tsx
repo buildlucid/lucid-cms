@@ -206,7 +206,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 				/>
 				<Show when={activeTab() === "details"}>
 					<DetailsList
-						type="text"
+						class="mb-6 last:mb-0"
 						items={[
 							{
 								label: T()("common.subject"),

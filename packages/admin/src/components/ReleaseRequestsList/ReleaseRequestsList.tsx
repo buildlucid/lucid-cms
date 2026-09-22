@@ -14,7 +14,7 @@ import {
 } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Index } from "solid-js";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import PublishOperationDecisionModal, {
 	type PublishOperationDecisionAction,
 } from "@/components/PublishOperationDecisionModal/PublishOperationDecisionModal";
@@ -22,7 +22,7 @@ import PublishOperationReviewersModal from "@/components/PublishOperationReviewe
 import PublishOperationScheduleModal from "@/components/PublishOperationScheduleModal/PublishOperationScheduleModal";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ReleaseRequestTableRow from "@/components/ReleaseRequestTableRow/ReleaseRequestTableRow";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
@@ -191,10 +191,10 @@ export const ReleaseRequestsList: Component<{
 				}
 				class="flex-1 h-full"
 			>
-				<Table
-					key={"release-requests.list"}
-					rows={rows().length}
-					searchParams={props.state.searchParams}
+				<Table.Root
+					id="release-requests.list"
+					rowCount={rows().length}
+					queryState={props.state.searchParams}
 					head={[
 						{
 							label: T()("documents.release.request"),
@@ -241,60 +241,42 @@ export const ReleaseRequestsList: Component<{
 							sortable: true,
 						},
 					]}
-					state={{
-						isLoading: requests.isFetching,
-						isSuccess: requests.isSuccess,
-					}}
-					options={{
-						isSelectable: false,
-					}}
+					isLoading={requests.isFetching}
 				>
-					{({ include, isSelectable, selected, setSelected }) => (
-						<Index each={rows()}>
-							{(request, i) => (
-								<ReleaseRequestTableRow
-									index={i}
-									request={request()}
-									collectionLabel={
-										props.data.collectionLabels.get(request().collectionKey) ??
-										request().collectionKey
-									}
-									include={include}
-									selected={selected[i]}
-									options={{
-										isSelectable,
-									}}
-									preview={{
-										available: previewAvailable(request()),
-										permission: previewPermission(request()),
-										loading: createPreview.action.isPending,
-										onCopy: () => void copyPreviewUrl(request()),
-									}}
-									callbacks={{
-										setSelected,
-										openDecision,
-										openSchedule,
-										openReviewers,
-										retry: (operation) => {
-											void retry.action.mutateAsync({
-												id: operation.id,
-											});
-										},
-									}}
-								/>
-							)}
-						</Index>
-					)}
-				</Table>
+					<Index each={rows()}>
+						{(request, i) => (
+							<ReleaseRequestTableRow
+								index={i}
+								request={request()}
+								collectionLabel={
+									props.data.collectionLabels.get(request().collectionKey) ??
+									request().collectionKey
+								}
+								preview={{
+									available: previewAvailable(request()),
+									permission: previewPermission(request()),
+									loading: createPreview.action.isPending,
+									onCopy: () => void copyPreviewUrl(request()),
+								}}
+								callbacks={{
+									openDecision,
+									openSchedule,
+									openReviewers,
+									retry: (operation) => {
+										void retry.action.mutateAsync({
+											id: operation.id,
+										});
+									},
+								}}
+							/>
+						)}
+					</Index>
+				</Table.Root>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: props.state.searchParams,
-					meta: requests.data?.meta,
-				}}
-				options={{
-					padding: "24",
-				}}
+			<Pagination
+				queryState={props.state.searchParams}
+				meta={requests.data?.meta}
+				padding="md"
 			/>
 
 			<PublishOperationDecisionModal

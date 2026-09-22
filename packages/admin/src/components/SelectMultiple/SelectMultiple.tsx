@@ -1,4 +1,3 @@
-import { DropdownMenu } from "@kobalte/core";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
@@ -13,8 +12,8 @@ import {
 	Switch,
 	splitProps,
 } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
 import Field from "@/components/Field/Field";
+import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 
 /** One entry a caller can pick from. */
@@ -155,14 +154,12 @@ function SelectMultiple<
 					{props.label}
 				</Field.Label>
 			</Show>
-			<DropdownMenu.Root
-				sameWidth={true}
+			<Menu.Root
 				open={open()}
 				onOpenChange={(open) => setOpen(!props.disabled && open)}
-				flip={true}
 				gutter={5}
 			>
-				<DropdownMenu.Trigger
+				<Menu.Trigger
 					{...ariaProps}
 					data-select-multiple-trigger
 					id={props.id}
@@ -264,53 +261,46 @@ function SelectMultiple<
 					<div class="ml-2 flex shrink-0 self-center items-center">
 						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
-				</DropdownMenu.Trigger>
-				<DropdownContent
-					options={{
-						anchorWidth: true,
-						rounded: true,
-						class: "max-h-36 overflow-y-auto z-70 p-1.5!",
-						noMargin: true,
-					}}
+				</Menu.Trigger>
+				<Menu.Content
+					matchTriggerWidth
+					flush
+					class="max-h-36 overflow-y-auto z-70"
 				>
 					<Switch>
 						<Match when={props.options.length > 0}>
-							<ul class="flex flex-col">
-								<For each={props.options}>
-									{(option) => {
-										const selected = () =>
-											props.values.some((v) => v.value === option.value);
+							<For each={props.options}>
+								{(option) => {
+									const selected = () =>
+										props.values.some((v) => v.value === option.value);
 
-										return (
-											<DropdownMenu.Item
-												disabled={props.disabled}
-												class="flex items-center justify-between gap-2 text-sm text-subtitle hover:bg-card-hover hover:text-card-contrast px-2 py-1 rounded-md cursor-pointer focus:outline-hidden focus:bg-card-hover focus:text-card-contrast"
-												onSelect={() => {
-													toggleValue(option);
-												}}
-												closeOnSelect={false}
-											>
-												{props.renderOption ? (
-													props.renderOption({
-														option,
-														selected: selected(),
-													})
-												) : (
-													<span class="min-w-0 flex-1 truncate">
-														{option.label}
-													</span>
-												)}
-												<Show when={selected()}>
+									return (
+										<Menu.Item
+											//* picking several at once means staying put between them
+											keepOpen
+											textValue={option.label}
+											disabled={props.disabled}
+											selected={selected()}
+											onSelect={() => toggleValue(option)}
+											end={
+												selected() ? (
 													<FaSolidCheck
 														size={14}
 														class="shrink-0 fill-current"
 													/>
-												</Show>
-											</DropdownMenu.Item>
-										);
-									}}
-								</For>
-							</ul>
+												) : undefined
+											}
+										>
+											{props.renderOption
+												? props.renderOption({
+														option,
+														selected: selected(),
+													})
+												: option.label}
+										</Menu.Item>
+									);
+								}}
+							</For>
 						</Match>
 						<Match when={props.options.length === 0}>
 							<span class="text-body w-full block px-2 py-1 text-sm">
@@ -318,8 +308,8 @@ function SelectMultiple<
 							</span>
 						</Match>
 					</Switch>
-				</DropdownContent>
-			</DropdownMenu.Root>
+				</Menu.Content>
+			</Menu.Root>
 			<Field.Error />
 			<Show when={props.description}>
 				{(description) => (

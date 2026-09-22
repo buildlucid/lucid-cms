@@ -17,7 +17,7 @@ import CreateMenu, {
 } from "@/components/CreateMenu/CreateMenu";
 import { DocumentsList } from "@/components/DocumentsList/DocumentsList";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import useQueryState, { sort } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
@@ -27,7 +27,7 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import {
 	buildDocumentFilterSchema,
-	documentFilterSectionFields,
+	documentFilterPanelFields,
 } from "@/utils/document-filter-fields";
 import {
 	collectionFieldIncludes,
@@ -57,7 +57,7 @@ const DocumentsPage: Component = () => {
 	});
 	const [showingDeleted, setShowingDeleted] = createSignal(false);
 	const [orderMode, setOrderMode] = createSignal(false);
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -104,7 +104,7 @@ const DocumentsPage: Component = () => {
 		collectionFieldIncludes(collectionData()),
 	);
 	const getFilterFields = createMemo(() =>
-		documentFilterSectionFields(collectionData()),
+		documentFilterPanelFields(collectionData()),
 	);
 	const getCollectionFieldSorts = createMemo(() =>
 		collectionFieldSorts(collectionData()),
@@ -167,7 +167,7 @@ const DocumentsPage: Component = () => {
 			collectionKey,
 			() => {
 				setOrderMode(false);
-				setFilterSectionOpen(false);
+				setFilterPanelOpen(false);
 			},
 			{ defer: true },
 		),
@@ -278,10 +278,10 @@ const DocumentsPage: Component = () => {
 					</>
 				}
 			>
-				<QueryRow
-					searchParams={searchParams}
-					showingDeleted={orderMode() ? undefined : showingDeleted}
-					setShowingDeleted={
+				<QueryToolbar
+					queryState={searchParams}
+					showingDeleted={orderMode() ? undefined : showingDeleted()}
+					onShowingDeletedChange={
 						orderMode()
 							? undefined
 							: (value: boolean) => {
@@ -290,48 +290,18 @@ const DocumentsPage: Component = () => {
 					}
 					onResetFilters={() => {
 						searchParams.resetFilters();
-						setFilterSectionOpen(false);
+						setFilterPanelOpen(false);
 					}}
 					onRefresh={() => {
 						queryClient.invalidateQueries({
 							queryKey: queryKeys.documents.all(),
 						});
 					}}
-					filterSection={
-						orderMode()
-							? undefined
-							: {
-									open: filterSectionOpen(),
-									setOpen: setFilterSectionOpen,
-									subject: collectionName(),
-									preserveSubjectCase: true,
-									fields: getFilterFields(),
-								}
-					}
-					custom={
-						<Show when={canReorderDocuments() && !showingDeleted()}>
-							<Button
-								variant={orderMode() ? "primary" : "outline"}
-								size="sm"
-								type="button"
-								class="gap-2"
-								onClick={() => {
-									if (orderMode()) {
-										exitOrderMode();
-									} else {
-										enterOrderMode();
-									}
-								}}
-							>
-								<FaSolidArrowDownWideShort size={14} />
-								<span>
-									{orderMode()
-										? T()("documents.order.mode.exit")
-										: T()("documents.order.mode.action")}
-								</span>
-							</Button>
-						</Show>
-					}
+					filtersOpen={filterSectionOpen()}
+					onFiltersOpenChange={setFilterPanelOpen}
+					filterSubject={collectionName()}
+					preserveFilterSubjectCase
+					filterFields={orderMode() ? undefined : getFilterFields()}
 					sorts={
 						orderMode()
 							? undefined
@@ -355,8 +325,31 @@ const DocumentsPage: Component = () => {
 									},
 								]
 					}
-					perPage={[]}
-				/>
+					perPage
+				>
+					<Show when={canReorderDocuments() && !showingDeleted()}>
+						<Button
+							variant={orderMode() ? "primary" : "outline"}
+							size="sm"
+							type="button"
+							class="gap-2"
+							onClick={() => {
+								if (orderMode()) {
+									exitOrderMode();
+								} else {
+									enterOrderMode();
+								}
+							}}
+						>
+							<FaSolidArrowDownWideShort size={14} />
+							<span>
+								{orderMode()
+									? T()("documents.order.mode.exit")
+									: T()("documents.order.mode.action")}
+							</span>
+						</Button>
+					</Show>
+				</QueryToolbar>
 			</PageLayout.Header>
 			<PageLayout.Body>
 				<DocumentsList

@@ -1,20 +1,16 @@
 import type { User } from "@types";
 import { type Accessor, type Component, createMemo } from "solid-js";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
+import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import type { TableRowProps } from "@/types/components";
 import helpers from "@/utils/helpers";
-import UserIdentityCol from "./parts/UserIdentityCol";
+import UserIdentityCell from "./parts/UserIdentityCell";
 
-interface UserRowProps extends TableRowProps {
+interface UserRowProps {
+	index: number;
 	user: User;
-	include: boolean[];
 	rowTarget: ReturnType<
 		typeof useRowTarget<
 			| "view"
@@ -61,9 +57,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
+		<Table.Row
 			index={props.index}
-			selected={props.selected}
 			actions={[
 				{
 					label: T()("common.edit"),
@@ -75,6 +70,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					},
 					permission: canUpdateNotSelf(),
 					hide: props.showingDeleted?.() || currentUser(),
+					sortOrder: 0,
 				},
 				{
 					label: T()("common.details"),
@@ -85,6 +81,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.rowTarget.setTrigger("view", true);
 					},
 					permission: true,
+					sortOrder: 10,
 				},
 				{
 					label: T()("common.logins"),
@@ -96,6 +93,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					},
 					permission: true,
 					hide: props.showingDeleted?.(),
+					sortOrder: 20,
 				},
 				{
 					label: T()("common.restore"),
@@ -107,7 +105,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					},
 					permission: canUpdateNotSelf(),
 					hide: props.showingDeleted?.() === false,
-					theme: "primary",
+					variant: "primary",
+					sortOrder: 50,
 				},
 				{
 					label: T()("actions.reset.password"),
@@ -123,7 +122,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 						props.showingDeleted?.() ||
 						!props.passwordAuthEnabled ||
 						currentUser(),
-					theme: "primary",
+					variant: "primary",
+					sortOrder: 55,
 				},
 				{
 					label: T()("users.invitations.resend.action"),
@@ -137,7 +137,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					hide:
 						props.showingDeleted?.() || props.user.invitationAccepted !== false,
 					actionExclude: true,
-					theme: "primary",
+					variant: "primary",
+					sortOrder: 60,
 				},
 				{
 					label: T()("integrations.create.action"),
@@ -150,6 +151,7 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					permission: userStore.get.user?.superAdmin === true,
 					hide: props.showingDeleted?.(),
 					actionExclude: true,
+					sortOrder: 30,
 				},
 				{
 					label: T()("users.sessions.revoke.action"),
@@ -162,7 +164,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					permission: canRevokeRefreshTokens(),
 					actionExclude: true,
 					hide: props.showingDeleted?.() || currentUser(),
-					theme: "error",
+					variant: "error",
+					sortOrder: 70,
 				},
 				{
 					label: T()("common.delete"),
@@ -175,7 +178,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					permission: canDeleteNotSelf(),
 					actionExclude: true,
 					hide: props.showingDeleted?.() || currentUser(),
-					theme: "error",
+					variant: "error",
+					sortOrder: 80,
 				},
 				{
 					label: T()("actions.delete.permanently"),
@@ -187,40 +191,36 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 					},
 					permission: canDeleteNotSelf(),
 					hide: props.showingDeleted?.() === false || currentUser(),
-					theme: "error",
 					actionExclude: true,
+					variant: "error",
+					sortOrder: 90,
 				},
 			]}
-			options={props.options}
-			callbacks={props.callbacks}
 		>
-			<UserIdentityCol
-				user={props.user}
-				username={username()}
-				options={{ include: props?.include[0] }}
-			/>
-			<TableTextCell
+			<UserIdentityCell column="user" user={props.user} username={username()} />
+			<Table.Text
+				column="name"
 				text={helpers.formatUserName(props.user, "simple") || "-"}
-				options={{ include: props?.include[1] }}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="superAdmin"
 				text={
 					props.user.superAdmin
 						? T()("users.super.admin.title")
 						: T()("common.standard")
 				}
-				options={{ include: props?.include[2] }}
 			/>
-			<TablePillCell
+			<Table.Pill
+				column="isLocked"
 				text={
 					props.user.isLocked
 						? T()("common.status.locked")
 						: T()("common.status.unlocked")
 				}
 				variant={props.user.isLocked ? "warning-subtle" : "outline"}
-				options={{ include: props?.include[3] }}
 			/>
-			<TablePillCell
+			<Table.Pill
+				column="invitationAccepted"
 				text={
 					props.user.invitationAccepted == null
 						? undefined
@@ -229,10 +229,9 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 							: T()("common.status.pending")
 				}
 				variant={props.user.invitationAccepted ? "outline" : "warning-subtle"}
-				options={{ include: props?.include[4] }}
 			/>
-			<TablePillCell
-				options={{ include: props?.include[5] }}
+			<Table.Pill
+				column="triggerPasswordReset"
 				text={
 					props.user.triggerPasswordReset == null
 						? undefined
@@ -242,11 +241,8 @@ const UserTableRow: Component<UserRowProps> = (props) => {
 				}
 				variant={"outline"}
 			/>
-			<TableDateCell
-				date={props.user.createdAt}
-				options={{ include: props?.include[6] }}
-			/>
-		</TableRow>
+			<Table.Date column="createdAt" date={props.user.createdAt} />
+		</Table.Row>
 	);
 };
 

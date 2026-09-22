@@ -38,6 +38,7 @@ const SectionHeading: Component<SectionHeadingProps> = (props) => {
 	// Render
 	return (
 		<div
+			data-section-heading
 			class={classnames(
 				"flex justify-between mt-6 mb-4 first:mt-0",
 				props.class,

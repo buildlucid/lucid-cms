@@ -12,18 +12,15 @@ import {
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { FilterSection } from "@/components/FilterSection/FilterSection";
-import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import FilterToggle from "@/components/FilterToggle/FilterToggle";
+import Pagination from "@/components/Pagination/Pagination";
+import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QuerySort } from "@/components/QuerySort/QuerySort";
-import { ResetFilters } from "@/components/ResetFilters/ResetFilters";
-import { Table } from "@/components/Table/Table";
-import { TableCell } from "@/components/TableCell/TableCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableSelectionCell from "@/components/TableSelectionCell/TableSelectionCell";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
+import QuerySort from "@/components/QuerySort/QuerySort";
+import ResetFilters from "@/components/ResetFilters/ResetFilters";
+import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
+import Table from "@/components/Table/Table";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import useQueryState, {
 	booleanFilter,
@@ -95,7 +92,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 	//* URL-hydrated ids without refs still pre-select their rows
 	const [selectedIds, setSelectedIds] = createSignal<number[]>([]);
 	const [selectedUsers, setSelectedUsers] = createSignal<UserRelationRef[]>([]);
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 	const isMultiple = createMemo(() => props.multiple === true);
 	const selectedUserIds = createMemo(() => selectedIds());
 	const searchParams = useQueryState({
@@ -180,10 +177,10 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap items-center">
-					<FilterSectionToggle
+					<FilterToggle
 						open={filterSectionOpen()}
-						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-						searchParams={searchParams}
+						onOpenChange={setFilterPanelOpen}
+						queryState={searchParams}
 						active={searchParams.hasFiltersApplied()}
 					/>
 					<QuerySort
@@ -213,19 +210,19 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 								key: "createdAt",
 							},
 						]}
-						searchParams={searchParams}
+						queryState={searchParams}
 					/>
 					{props.topbarSlot}
 					<Show when={searchParams.hasFiltersApplied()}>
 						<ResetFilters onReset={searchParams.clearFilters} />
 					</Show>
 				</div>
-				<PerPageSelect options={[10, 20, 40]} searchParams={searchParams} />
+				<PerPageSelect options={[10, 20, 40]} queryState={searchParams} />
 			</div>
 
-			<FilterSection
+			<FilterPanel
 				open={filterSectionOpen()}
-				setOpen={setFilterSectionOpen}
+				onOpenChange={setFilterPanelOpen}
 				subject={T()("common.user")}
 				fields={[
 					{
@@ -262,7 +259,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						falseLabel: T()("common.status.unlocked"),
 					},
 				]}
-				searchParams={searchParams}
+				queryState={searchParams}
 				embedded={true}
 			/>
 
@@ -282,10 +279,10 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 					"grow bg-card-base border border-border rounded-md",
 				)}
 			>
-				<Table
-					key={"users.select"}
-					rows={users.data?.data.length || 0}
-					searchParams={searchParams}
+				<Table.Root
+					id="users.select"
+					rowCount={users.data?.data.length || 0}
+					queryState={searchParams}
 					head={[
 						{
 							label: "",
@@ -312,83 +309,44 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 							icon: <FaSolidEnvelope />,
 						},
 					]}
-					state={{
-						isLoading: isLoading(),
-						isSuccess: users.isSuccess,
-					}}
-					options={{
-						isSelectable: false,
-						padding: "16",
-					}}
-					theme="secondary"
+					isLoading={isLoading()}
+					padding="sm"
+					variant="secondary"
 				>
-					{({ include, isSelectable, selected, setSelected }) => (
-						<Index each={users.data?.data || []}>
-							{(user, i) => (
-								<TableRow
-									index={i}
-									selected={selected[i]}
-									options={{
-										isSelectable,
-										padding: "16",
-									}}
-									callbacks={{
-										setSelected,
-									}}
-									onClick={() => toggleSelectedUser(user())}
-									theme="secondary"
-								>
-									<TableSelectionCell
-										type="td"
-										value={selectedUserIds().includes(user().id)}
-										onChange={() => toggleSelectedUser(user())}
-										theme="secondary"
-										padding="16"
-									/>
-									<TableCell
-										options={{
-											include: include[1],
-											padding: "16",
+					<Index each={users.data?.data || []}>
+						{(user, i) => (
+							<Table.Row index={i} onClick={() => toggleSelectedUser(user())}>
+								<TableSelectionCell
+									column="select"
+									type="td"
+									value={selectedUserIds().includes(user().id)}
+									onChange={() => toggleSelectedUser(user())}
+								/>
+								<Table.Cell column="username">
+									<UserDisplay
+										user={{
+											username: user().username,
+											firstName: user().firstName,
+											lastName: user().lastName,
+											profilePicture: user().profilePicture,
 										}}
-									>
-										<UserDisplay
-											user={{
-												username: user().username,
-												firstName: user().firstName,
-												lastName: user().lastName,
-												profilePicture: user().profilePicture,
-											}}
-											mode="short"
-											size="small"
-											nameFormat="username-only"
-										/>
-									</TableCell>
-									<TableTextCell
-										text={user().firstName}
-										options={{ include: include[2] }}
+										variant="horizontal"
+										size="sm"
+										nameFormat="username-only"
 									/>
-									<TableTextCell
-										text={user().lastName}
-										options={{ include: include[3] }}
-									/>
-									<TableTextCell
-										text={user().email}
-										options={{ include: include[4] }}
-									/>
-								</TableRow>
-							)}
-						</Index>
-					)}
-				</Table>
+								</Table.Cell>
+								<Table.Text column="firstName" text={user().firstName} />
+								<Table.Text column="lastName" text={user().lastName} />
+								<Table.Text column="email" text={user().email} />
+							</Table.Row>
+						)}
+					</Index>
+				</Table.Root>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: searchParams,
-					meta: users.data?.meta,
-				}}
-				options={{
-					embedded: true,
-				}}
+			<Pagination
+				queryState={searchParams}
+				meta={users.data?.meta}
+				variant="inline"
 			/>
 
 			<Drawer.Footer class="-mx-4 md:-mx-6">

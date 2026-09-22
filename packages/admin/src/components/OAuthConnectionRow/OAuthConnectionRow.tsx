@@ -5,7 +5,7 @@ import {
 	FaSolidShieldHalved,
 } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
-import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import DateText from "@/components/DateText/DateText";
 import IconContainer from "@/components/IconContainer/IconContainer";
 import Modal from "@/components/Modal/Modal";
@@ -123,7 +123,7 @@ const OAuthConnectionRow: Component<{
 							</div>
 						</div>
 					</div>
-					<ActionDropdown
+					<ActionMenu
 						actions={[
 							{
 								type: "button",
@@ -131,6 +131,7 @@ const OAuthConnectionRow: Component<{
 								icon: "pen",
 								onClick: () => setUpdateOpen(true),
 								hide: !props.canUpdate,
+								sortOrder: 0,
 							},
 							{
 								type: "button",
@@ -138,9 +139,10 @@ const OAuthConnectionRow: Component<{
 								icon: "trash",
 								onClick: () => setRevokeOpen(true),
 								hide: !props.canRevoke,
+								sortOrder: 70,
+								variant: "error",
 							},
 						]}
-						options={{ raised: true }}
 					/>
 				</div>
 				<Show when={detailsOpen()}>

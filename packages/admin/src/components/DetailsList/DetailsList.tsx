@@ -7,79 +7,116 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import Pill, { type PillProps } from "@/components/Pill/Pill";
+import Pill, { type PillSize, type PillVariant } from "@/components/Pill/Pill";
 
-export interface DetailsListProps {
-	type: "text" | "pill";
-	padding?: 12 | 16;
-	items: Array<{
-		label: string;
-		value?: string | number | null | JSXElement;
-		pillVariant?: PillProps["variant"];
-		pillSize?: PillProps["size"];
-		show?: boolean;
-		stacked?: boolean;
-		wrap?: boolean;
-	}>;
-	theme?: "contained";
+export type DetailsListVariant = "card" | "plain";
+export type DetailsListPadding = "sm" | "md";
+export type DetailsListItemType = "text" | "pill";
+
+export interface DetailsListItem {
+	label: string;
+	value?: string | number | null | JSXElement;
+	/** How the value reads. @default "text" */
+	type?: DetailsListItemType;
+	/** @default "primary" */
+	pillVariant?: PillVariant;
+	pillSize?: PillSize;
+	/** Leaves the row out of the list entirely. @default true */
+	show?: boolean;
+	/** Keeps the value under the label on wide screens too. @default false */
+	stacked?: boolean;
+	/** Lets a long value break across lines. @default false */
+	wrap?: boolean;
 }
 
+export interface DetailsListProps {
+	items: DetailsListItem[];
+	/** "plain" drops the card, for a list that already sits in one. @default "card" */
+	variant?: DetailsListVariant;
+	/** The card's inset. Ignored by the plain variant. @default "md" */
+	padding?: DetailsListPadding;
+	class?: string;
+}
+
+/**
+ * A list of labels and their values, for the details panel beside a record.
+ * Each row reads as text, or as a Pill for a status. Reach for InfoRow when a
+ * row needs its own controls rather than a value.
+ *
+ * @example
+ * ```tsx
+ * import { DetailsList } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
+ *
+ * return (
+ * 	<DetailsList
+ * 		padding="sm"
+ * 		items={[
+ * 			{ label: t("common.created.at"), value: entry.createdAt },
+ * 			{ label: t("common.status"), type: "pill", value: entry.status },
+ * 		]}
+ * 	/>
+ * );
+ * ```
+ */
 const DetailsList: Component<DetailsListProps> = (props) => {
-	// ----------------------------------
+	// ----------------------------------------
 	// Render
 	return (
 		<ul
-			class={classNames("w-full", {
-				"bg-card-base": props.theme !== "contained",
-				"mb-6 last:mb-0 border border-border rounded-md":
-					props.theme !== "contained",
-				"p-3": props.padding === 12,
-				"p-4": props.theme !== "contained" && props.padding !== 12,
-			})}
+			data-details-list
+			class={classNames(
+				"w-full",
+				{
+					"rounded-md border border-border bg-card-base":
+						props.variant !== "plain",
+					"p-3": props.variant !== "plain" && props.padding === "sm",
+					"px-4 py-3": props.variant !== "plain" && props.padding !== "sm",
+				},
+				props.class,
+			)}
 		>
 			<For each={props.items}>
 				{(item) => (
 					<Show when={item.show !== false}>
 						<li
+							data-details-list-item
 							class={classNames(
-								"flex mb-2 last:mb-0 gap-x-2 gap-y-1 border-b border-border pb-2 last:pb-0 last:border-b-0",
+								"mb-2 flex gap-x-2 gap-y-1 border-b border-border pb-2 last:mb-0 last:border-b-0 last:pb-0",
 								{
 									"flex-col items-start lg:justify-between":
-										props.type === "text",
-									"justify-between items-center": props.type === "pill",
+										item.type !== "pill",
+									"items-center justify-between": item.type === "pill",
 									"lg:flex-row lg:items-center": !item.stacked,
 								},
 							)}
 						>
-							<Switch>
-								<Match when={props.type === "pill"}>
-									<span class="font-medium text-subtitle text-sm">
-										{item.label}
-									</span>
-									<Show when={item.value !== undefined}>
+							<span class="text-sm font-medium text-subtitle">
+								{item.label}
+							</span>
+							<Show when={item.value !== undefined}>
+								<Switch>
+									<Match when={item.type === "pill"}>
 										<Pill
 											variant={item.pillVariant ?? "primary"}
 											size={item.pillSize}
 										>
 											{item.value}
 										</Pill>
-									</Show>
-								</Match>
-								<Match when={props.type === "text"}>
-									<span class="font-medium text-subtitle text-sm">
-										{item.label}
-									</span>
-									<Show when={item.value !== undefined}>
+									</Match>
+									<Match when={item.type !== "pill"}>
 										<span
-											class={classNames("font-medium text-unfocused text-sm", {
-												"min-w-0 break-all text-left lg:text-right": item.wrap,
+											class={classNames("text-sm font-medium text-unfocused", {
+												"min-w-0 text-left break-all lg:text-right": item.wrap,
 											})}
 										>
 											{item.value}
 										</span>
-									</Show>
-								</Match>
-							</Switch>
+									</Match>
+								</Switch>
+							</Show>
 						</li>
 					</Show>
 				)}

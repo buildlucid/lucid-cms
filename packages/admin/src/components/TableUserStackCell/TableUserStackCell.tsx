@@ -1,11 +1,11 @@
 import type { ProfilePicture } from "@types";
 import { type Component, For, Show } from "solid-js";
-import { TableCell } from "@/components/TableCell/TableCell";
+import TableCell from "@/components/Table/parts/TableCell";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-export type UserStackColUser = {
+export type TableUserStackUser = {
 	id?: number | null;
 	email?: string | null;
 	username?: string | null;
@@ -15,30 +15,21 @@ export type UserStackColUser = {
 };
 
 const TableUserStackCell: Component<{
-	users: UserStackColUser[];
-	options?: {
-		include?: boolean;
-		padding?: "16" | "24";
-		minWidth?: number;
-	};
+	users: TableUserStackUser[];
+	column?: string;
+	minWidth?: number;
 	maxVisible?: number;
 }> = (props) => {
 	// ----------------------------------
 	// Functions
-	const displayName = (user: UserStackColUser) => {
-		return helpers.formatUserName(user, "simple") || T()("media.types.unknown");
+	const displayName = (user: TableUserStackUser) => {
+		return helpers.formatUserName(user, "simple") || T()("common.unknown");
 	};
 
 	// ----------------------------------
 	// Render
 	return (
-		<TableCell
-			options={{
-				include: props.options?.include,
-				padding: props.options?.padding,
-				minWidth: props.options?.minWidth,
-			}}
-		>
+		<TableCell column={props.column} minWidth={props.minWidth}>
 			<Show
 				when={props.users.length > 0}
 				fallback={<span class="text-sm text-body">{T()("common.none")}</span>}
@@ -48,19 +39,7 @@ const TableUserStackCell: Component<{
 						<For each={props.users.slice(0, props.maxVisible ?? 4)}>
 							{(user) => (
 								<span class="rounded-full ring-2 ring-card-base">
-									<UserDisplay
-										user={{
-											username:
-												user.username ??
-												user.email ??
-												T()("media.types.unknown"),
-											firstName: user.firstName,
-											lastName: user.lastName,
-											profilePicture: user.profilePicture,
-										}}
-										mode="icon"
-										size="x-small"
-									/>
+									<UserDisplay user={user} variant="icon" size="xs" />
 								</span>
 							)}
 						</For>

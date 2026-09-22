@@ -1,20 +1,16 @@
-import { DropdownMenu } from "@kobalte/core";
-import { A } from "@solidjs/router";
 import type { User } from "@types";
 import classNames from "classnames";
 import {
 	FaSolidArrowUpRightFromSquare,
 	FaSolidBookOpen,
-	FaSolidCheck,
 	FaSolidChevronDown,
-	FaSolidChevronRight,
 	FaSolidCircleHalfStroke,
 	FaSolidLanguage,
 	FaSolidRightFromBracket,
 	FaSolidUser,
 } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, For } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
+import Menu from "@/components/Menu/Menu";
 import Spinner from "@/components/Spinner/Spinner";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import constants from "@/constants";
@@ -32,11 +28,6 @@ const NavigationAccountMenu: Component<{
 	// -------------------------------
 	// State & Hooks
 	const [isOpen, setIsOpen] = createSignal(false);
-	const itemClasses =
-		"group flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm fill-dropdown-contrast outline-none transition-colors hover:bg-dropdown-hover hover:text-dropdown-contrast focus-visible:bg-dropdown-hover focus-visible:text-dropdown-contrast data-[highlighted]:bg-dropdown-hover data-[highlighted]:text-dropdown-contrast";
-	const submenuClasses =
-		"z-60 ml-1 w-48 rounded-md border border-border bg-dropdown-base p-1.5 shadow-md outline-none animate-dropdown";
-
 	// -------------------------------
 	// Memos
 	const themeOptions = createMemo<
@@ -69,19 +60,18 @@ const NavigationAccountMenu: Component<{
 	// -------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root
+		<Menu.Root
 			placement="top-start"
 			gutter={8}
-			sameWidth={true}
 			open={isOpen()}
 			onOpenChange={setIsOpen}
 		>
-			<DropdownMenu.Trigger
+			<Menu.Trigger
 				class="group flex w-full items-center gap-2.5 rounded-xl border border-border bg-input-base px-3 py-2 text-left outline-none transition-[background-color,border-color] duration-150 hover:bg-secondary-hover focus-visible:border-primary-base focus-visible:ring-2 focus-visible:ring-primary-muted-border data-expanded:bg-secondary-hover dark:hover:bg-card-base dark:data-expanded:bg-card-base"
 				aria-label={T()("routes.account.title")}
 			>
 				<div class="min-w-0 flex-1 overflow-hidden">
-					<UserDisplay user={props.user} mode="long" compact={true} />
+					<UserDisplay user={props.user} variant="stacked" size="sm" />
 				</div>
 				<FaSolidChevronDown
 					class={classNames(
@@ -91,133 +81,78 @@ const NavigationAccountMenu: Component<{
 						},
 					)}
 				/>
-			</DropdownMenu.Trigger>
+			</Menu.Trigger>
 
-			<DropdownContent
-				options={{
-					anchorWidth: true,
-					class: "z-60 min-w-52 p-1.5! shadow-lg",
-					noMargin: true,
-					rounded: true,
-					raised: true,
-				}}
-			>
-				<div class="flex flex-col">
-					<DropdownMenu.Item
-						as={A}
-						href="/lucid/account"
-						class={itemClasses}
-						onSelect={props.onNavigate}
+			<Menu.Content matchTriggerWidth flush class="min-w-52 shadow-lg">
+				<Menu.Item
+					href="/lucid/account"
+					icon={<FaSolidUser class="size-3.5 shrink-0" />}
+					onSelect={props.onNavigate}
+				>
+					{T()("routes.account.title")}
+				</Menu.Item>
+				<Menu.Item
+					href={constants.documentationUrl}
+					target="_blank"
+					rel="noreferrer"
+					icon={<FaSolidBookOpen class="size-3.5 shrink-0" />}
+					end={<FaSolidArrowUpRightFromSquare class="size-2.5 shrink-0" />}
+				>
+					{T()("common.documentation")}
+				</Menu.Item>
+				<Menu.Sub
+					label={T()("settings.interface.cms.appearance.title")}
+					icon={<FaSolidCircleHalfStroke class="size-3.5 shrink-0" />}
+					end={
+						<span class="max-w-16 truncate text-xs text-unfocused">
+							{selectedThemeLabel()}
+						</span>
+					}
+				>
+					<Menu.RadioGroup
+						value={themeStore.preference()}
+						onChange={(value) =>
+							themeStore.setThemePreference(value as ThemePreference)
+						}
 					>
-						<FaSolidUser class="size-3.5 shrink-0" />
-						<span class="flex-1 h-full">{T()("routes.account.title")}</span>
-					</DropdownMenu.Item>
-					<DropdownMenu.Item
-						as="a"
-						href={constants.documentationUrl}
-						target="_blank"
-						rel="noreferrer"
-						class={itemClasses}
-					>
-						<FaSolidBookOpen class="size-3.5 shrink-0" />
-						<span class="flex-1 h-full">{T()("common.documentation")}</span>
-						<FaSolidArrowUpRightFromSquare class="size-2.5 shrink-0" />
-					</DropdownMenu.Item>
-					<DropdownMenu.Separator class="my-1 h-px border-0 bg-border" />
-					<DropdownMenu.Sub>
-						<DropdownMenu.SubTrigger
-							class={itemClasses}
-							textValue={T()("settings.interface.cms.appearance.title")}
-						>
-							<FaSolidCircleHalfStroke class="size-3.5 shrink-0" />
-							<span class="min-w-0 flex-1">
-								{T()("settings.interface.cms.appearance.title")}
-							</span>
-							<span class="max-w-16 truncate text-xs text-unfocused">
-								{selectedThemeLabel()}
-							</span>
-							<FaSolidChevronRight class="size-2.5 shrink-0" />
-						</DropdownMenu.SubTrigger>
-						<DropdownMenu.Portal>
-							<DropdownMenu.SubContent class={submenuClasses}>
-								<DropdownMenu.RadioGroup
-									value={themeStore.preference()}
-									onChange={(value) =>
-										themeStore.setThemePreference(value as ThemePreference)
-									}
-								>
-									<For each={themeOptions()}>
-										{(option) => (
-											<DropdownMenu.RadioItem
-												value={option.value}
-												class={itemClasses}
-											>
-												<span class="flex-1 h-full">{option.label}</span>
-												<DropdownMenu.ItemIndicator>
-													<FaSolidCheck class="size-3 text-primary-base" />
-												</DropdownMenu.ItemIndicator>
-											</DropdownMenu.RadioItem>
-										)}
-									</For>
-								</DropdownMenu.RadioGroup>
-							</DropdownMenu.SubContent>
-						</DropdownMenu.Portal>
-					</DropdownMenu.Sub>
-
-					<DropdownMenu.Sub>
-						<DropdownMenu.SubTrigger
-							class={itemClasses}
-							textValue={T()("settings.interface.cms.locale.title")}
-						>
-							<FaSolidLanguage class="size-3.5 shrink-0" />
-							<span class="min-w-0 flex-1">
-								{T()("settings.interface.cms.locale.title")}
-							</span>
-							<span class="max-w-16 truncate text-xs text-unfocused">
-								{selectedLocaleLabel()}
-							</span>
-							<FaSolidChevronRight class="size-2.5 shrink-0" />
-						</DropdownMenu.SubTrigger>
-						<DropdownMenu.Portal>
-							<DropdownMenu.SubContent class={submenuClasses}>
-								<DropdownMenu.RadioGroup
-									value={getLocale()}
-									onChange={setLocale}
-								>
-									<For each={localesConfig}>
-										{(locale) => (
-											<DropdownMenu.RadioItem
-												value={locale.code}
-												class={itemClasses}
-											>
-												<span class="flex-1 h-full">
-													{locale.name || locale.code}
-												</span>
-												<DropdownMenu.ItemIndicator>
-													<FaSolidCheck class="size-3 text-primary-base" />
-												</DropdownMenu.ItemIndicator>
-											</DropdownMenu.RadioItem>
-										)}
-									</For>
-								</DropdownMenu.RadioGroup>
-							</DropdownMenu.SubContent>
-						</DropdownMenu.Portal>
-					</DropdownMenu.Sub>
-
-					<DropdownMenu.Separator class="my-1 h-px border-0 bg-border" />
-
-					<DropdownMenu.Item
-						class={itemClasses}
-						disabled={props.logoutPending}
-						onSelect={props.onLogout}
-					>
-						<FaSolidRightFromBracket class="size-3.5 shrink-0" />
-						<span class="flex-1 h-full">{T()("common.logout")}</span>
-						{props.logoutPending ? <Spinner size="sm" /> : null}
-					</DropdownMenu.Item>
-				</div>
-			</DropdownContent>
-		</DropdownMenu.Root>
+						<For each={themeOptions()}>
+							{(option) => (
+								<Menu.RadioItem value={option.value}>
+									{option.label}
+								</Menu.RadioItem>
+							)}
+						</For>
+					</Menu.RadioGroup>
+				</Menu.Sub>
+				<Menu.Sub
+					label={T()("settings.interface.cms.locale.title")}
+					icon={<FaSolidLanguage class="size-3.5 shrink-0" />}
+					end={
+						<span class="max-w-16 truncate text-xs text-unfocused">
+							{selectedLocaleLabel()}
+						</span>
+					}
+				>
+					<Menu.RadioGroup value={getLocale()} onChange={setLocale}>
+						<For each={localesConfig}>
+							{(locale) => (
+								<Menu.RadioItem value={locale.code}>
+									{locale.name || locale.code}
+								</Menu.RadioItem>
+							)}
+						</For>
+					</Menu.RadioGroup>
+				</Menu.Sub>
+				<Menu.Item
+					icon={<FaSolidRightFromBracket class="size-3.5 shrink-0" />}
+					end={props.logoutPending ? <Spinner size="sm" /> : undefined}
+					disabled={props.logoutPending}
+					onSelect={props.onLogout}
+				>
+					{T()("common.logout")}
+				</Menu.Item>
+			</Menu.Content>
+		</Menu.Root>
 	);
 };
 

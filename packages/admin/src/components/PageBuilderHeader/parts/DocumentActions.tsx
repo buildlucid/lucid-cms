@@ -1,8 +1,8 @@
 import type { PreviewMode } from "@types";
 import type { Component } from "solid-js";
-import ActionMenubar, {
-	type ActionMenubarItem,
-} from "@/components/ActionMenubar/ActionMenubar";
+import ActionMenu, {
+	type ActionMenuItem,
+} from "@/components/ActionMenu/ActionMenu";
 import T from "@/translations";
 
 export const DocumentActions: Component<{
@@ -30,7 +30,7 @@ export const DocumentActions: Component<{
 		});
 	};
 
-	const actions = (): ActionMenubarItem[] => [
+	const actions = (): ActionMenuItem[] => [
 		{
 			label: getActionLabel(T()("preview.copy.group")),
 			type: "button",
@@ -84,15 +84,10 @@ export const DocumentActions: Component<{
 			icon: "trash",
 			hide: props.onDelete === undefined,
 			permission: props.deletePermission,
-			theme: "error",
+			variant: "error",
 			onClick: props.onDelete,
 		},
 	];
 
-	return (
-		<ActionMenubar
-			actions={actions()}
-			options={{ placement: "bottom-end", triggerSize: "medium" }}
-		/>
-	);
+	return <ActionMenu actions={actions()} placement="bottom-end" size="md" />;
 };

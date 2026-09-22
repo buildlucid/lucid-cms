@@ -1,19 +1,15 @@
 import type { Email, EmailDeliveryStatus } from "@types";
 import type { Component } from "solid-js";
 import type { PillProps } from "@/components/Pill/Pill";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
+import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import type { TableRowProps } from "@/types/components";
 
-interface EmailRowProps extends TableRowProps {
+interface EmailRowProps {
+	index: number;
 	email: Email;
-	include: boolean[];
 	rowTarget: ReturnType<
 		typeof useRowTarget<"preview" | "resend" | "delete" | "transactions">
 	>;
@@ -46,11 +42,8 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
+		<Table.Row
 			index={props.index}
-			selected={props.selected}
-			options={props.options}
-			callbacks={props.callbacks}
 			actions={[
 				{
 					label: T()("common.preview"),
@@ -79,7 +72,8 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 						status: "warning",
 					},
 					actionExclude: true,
-					sortOrder: 1,
+					sortOrder: 50,
+					variant: "primary",
 				},
 				{
 					label: T()("common.transactions"),
@@ -90,7 +84,7 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 						props.rowTarget.setTrigger("transactions", true);
 					},
 					permission: userStore.get.hasPermission([Permissions.EmailRead]).all,
-					sortOrder: 2,
+					sortOrder: 10,
 				},
 				{
 					label: T()("common.delete"),
@@ -103,64 +97,53 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 					permission: userStore.get.hasPermission([Permissions.EmailDelete])
 						.all,
 					actionExclude: true,
-					sortOrder: 3,
+					sortOrder: 70,
+					variant: "error",
 				},
 			]}
 		>
-			<TablePillCell
+			<Table.Pill
+				column="currentStatus"
 				text={props.email.currentStatus}
 				variant={getPillVariant(props.email.currentStatus)}
-				options={{ include: props?.include[0] }}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="subject"
 				text={props.email.mailDetails.subject}
-				options={{
-					include: props?.include[1],
-					minWidth: 320,
-					maxLines: 1,
-				}}
+				minWidth={320}
+				maxLines={1}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="toAddress"
 				text={props.email.mailDetails.to}
-				options={{
-					include: props?.include[2],
-					minWidth: 240,
-					maxLines: 1,
-				}}
+				minWidth={240}
+				maxLines={1}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="template"
 				text={props.email.mailDetails.template}
-				options={{
-					include: props?.include[3],
-					minWidth: 180,
-					maxLines: 1,
-				}}
+				minWidth={180}
+				maxLines={1}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="type"
 				text={props.email.type}
-				options={{
-					include: props?.include[4],
-					minWidth: 120,
-					classes: "capitalize",
-				}}
+				minWidth={120}
+				class="capitalize"
 			/>
-			<TableTextCell
+			<Table.Text
+				column="priority"
 				text={props.email.mailDetails.priority}
-				options={{
-					include: props?.include[5],
-					minWidth: 120,
-					classes: "capitalize",
-				}}
+				minWidth={120}
+				class="capitalize"
 			/>
-			<TableTextCell
+			<Table.Text
+				column="attemptCount"
 				text={props.email.attemptCount || 0}
-				options={{ include: props?.include[6], minWidth: 140 }}
+				minWidth={140}
 			/>
-			<TableDateCell
-				date={props.email.lastAttemptedAt}
-				options={{ include: props?.include[7] }}
-			/>
-		</TableRow>
+			<Table.Date column="lastAttemptedAt" date={props.email.lastAttemptedAt} />
+		</Table.Row>
 	);
 };
 

@@ -1,7 +1,6 @@
 import type { Refs } from "@types";
 import { type Component, createMemo, Show } from "solid-js";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
-import T from "@/translations";
 import { findDocumentUserRef } from "@/utils/document-ref-helpers";
 
 const UserDetailValue: Component<{
@@ -18,15 +17,9 @@ const UserDetailValue: Component<{
 		<Show when={user()} fallback={props.userId ? `#${props.userId}` : "-"}>
 			{(user) => (
 				<UserDisplay
-					user={{
-						username:
-							user().username ?? user().email ?? T()("media.types.unknown"),
-						firstName: user().firstName,
-						lastName: user().lastName,
-						profilePicture: user().profilePicture,
-					}}
-					mode="short"
-					size="x-small"
+					user={user()}
+					variant="horizontal"
+					size="xs"
 					nameFormat="simple"
 				/>
 			)}

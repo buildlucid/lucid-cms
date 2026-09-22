@@ -2,7 +2,7 @@ import type { Integration } from "@types";
 import classNames from "classnames";
 import { FaSolidKey } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
-import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import IconContainer from "@/components/IconContainer/IconContainer";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import T from "@/translations";
@@ -73,7 +73,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 					</div>
 				</div>
 			</div>
-			<ActionDropdown
+			<ActionMenu
 				actions={[
 					{
 						type: "button",
@@ -84,6 +84,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 							props.rowTarget.setTrigger("update", true);
 						},
 						permission: props.canUpdate,
+						sortOrder: 0,
 					},
 					{
 						type: "button",
@@ -94,6 +95,8 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 							props.rowTarget.setTrigger("delete", true);
 						},
 						permission: props.canDelete,
+						sortOrder: 80,
+						variant: "error",
 					},
 					{
 						type: "button",
@@ -104,9 +107,10 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 							props.rowTarget.setTrigger("regenerateAPIKey", true);
 						},
 						permission: props.canRegenerate,
+						sortOrder: 70,
+						variant: "error",
 					},
 				]}
-				options={{ raised: true }}
 			/>
 		</article>
 	);

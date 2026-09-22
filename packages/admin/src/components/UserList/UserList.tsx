@@ -18,12 +18,12 @@ import CopyAPIKeyModal from "@/components/CopyAPIKeyModal/CopyAPIKeyModal";
 import DeleteUserModal from "@/components/DeleteUserModal/DeleteUserModal";
 import DeleteUserPermanentlyModal from "@/components/DeleteUserPermanentlyModal/DeleteUserPermanentlyModal";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ResendInvitationModal from "@/components/ResendInvitationModal/ResendInvitationModal";
 import RestoreUsers from "@/components/RestoreUserModal/RestoreUserModal";
 import RevokeRefreshTokensModal from "@/components/RevokeRefreshTokensModal/RevokeRefreshTokensModal";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import TriggerPasswordResetModal from "@/components/TriggerPasswordResetModal/TriggerPasswordResetModal";
 import UpdateUserDrawer from "@/components/UpdateUserDrawer/UpdateUserDrawer";
 import UpsertIntegrationDrawer from "@/components/UpsertIntegrationDrawer/UpsertIntegrationDrawer";
@@ -158,10 +158,10 @@ export const UserList: Component<{
 				}
 				class="flex-1 h-full"
 			>
-				<Table
-					key={"users.list"}
-					rows={users.data?.data.length || 0}
-					searchParams={props.state.searchParams}
+				<Table.Root
+					id="users.list"
+					rowCount={users.data?.data.length || 0}
+					queryState={props.state.searchParams}
 					head={[
 						{
 							label: T()("common.user"),
@@ -202,67 +202,51 @@ export const UserList: Component<{
 							sortable: true,
 						},
 					]}
-					state={{
-						isLoading: isLoading(),
-						isSuccess: users.isSuccess,
-					}}
-					options={{
-						isSelectable: rowsAreSelectable(),
-						allowRestore: props.state.showingDeleted() && canRestoreUsers(),
-						allowDeletePermanently:
-							props.state.showingDeleted() && canDeleteUsersPermanently(),
-					}}
-					callbacks={{
-						deletePermanentlyRows: async (selected) => {
-							const ids: number[] = [];
-							for (const i in selected) {
-								if (selected[i] && users.data?.data[i].id) {
-									ids.push(users.data?.data[i].id);
-								}
+					isLoading={isLoading()}
+					isSelectable={rowsAreSelectable()}
+					allowRestore={props.state.showingDeleted() && canRestoreUsers()}
+					allowDeletePermanently={
+						props.state.showingDeleted() && canDeleteUsersPermanently()
+					}
+					onDeletePermanentlyRows={async (selected) => {
+						const ids: number[] = [];
+						for (const i in selected) {
+							if (selected[i] && users.data?.data[i].id) {
+								ids.push(users.data?.data[i].id);
 							}
-							await deleteUsersPermanently.action.mutateAsync({
-								body: {
-									ids: ids,
-								},
-							});
-						},
-						restoreRows: async (selected) => {
-							const ids: number[] = [];
-							for (const i in selected) {
-								if (selected[i] && users.data?.data[i].id) {
-									ids.push(users.data?.data[i].id);
-								}
+						}
+						await deleteUsersPermanently.action.mutateAsync({
+							body: {
+								ids: ids,
+							},
+						});
+					}}
+					onRestoreRows={async (selected) => {
+						const ids: number[] = [];
+						for (const i in selected) {
+							if (selected[i] && users.data?.data[i].id) {
+								ids.push(users.data?.data[i].id);
 							}
-							await restoreUsers.action.mutateAsync({
-								body: {
-									ids: ids,
-								},
-							});
-						},
+						}
+						await restoreUsers.action.mutateAsync({
+							body: {
+								ids: ids,
+							},
+						});
 					}}
 				>
-					{({ include, isSelectable, selected, setSelected }) => (
-						<Index each={users.data?.data || []}>
-							{(user, i) => (
-								<UserTableRow
-									index={i}
-									user={user()}
-									include={include}
-									selected={selected[i]}
-									rowTarget={rowTarget}
-									options={{
-										isSelectable,
-									}}
-									callbacks={{
-										setSelected: setSelected,
-									}}
-									showingDeleted={props.state.showingDeleted}
-									passwordAuthEnabled={!providers.data?.data.disablePassword}
-								/>
-							)}
-						</Index>
-					)}
-				</Table>
+					<Index each={users.data?.data || []}>
+						{(user, i) => (
+							<UserTableRow
+								index={i}
+								user={user()}
+								rowTarget={rowTarget}
+								showingDeleted={props.state.showingDeleted}
+								passwordAuthEnabled={!providers.data?.data.disablePassword}
+							/>
+						)}
+					</Index>
+				</Table.Root>
 				<ViewUserDrawer
 					id={rowTarget.getTargetId}
 					state={{
@@ -373,14 +357,10 @@ export const UserList: Component<{
 					}}
 				/>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: props.state.searchParams,
-					meta: users.data?.meta,
-				}}
-				options={{
-					padding: "24",
-				}}
+			<Pagination
+				queryState={props.state.searchParams}
+				meta={users.data?.meta}
+				padding="md"
 			/>
 		</>
 	);

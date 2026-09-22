@@ -6,6 +6,7 @@ import {
 	createMemo,
 	createSignal,
 	For,
+	Index,
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
@@ -13,17 +14,17 @@ import Checkbox from "@/components/Checkbox/Checkbox";
 import ClearProcessedImagesModal from "@/components/ClearProcessedImagesModal/ClearProcessedImagesModal";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { FilterSection } from "@/components/FilterSection/FilterSection";
-import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
-import { Grid } from "@/components/Grid/Grid";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import FilterToggle from "@/components/FilterToggle/FilterToggle";
+import Grid from "@/components/Grid/Grid";
 import MediaBasicCard, {
 	MediaBasicCardLoading,
 } from "@/components/MediaBasicCard/MediaBasicCard";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import Pagination from "@/components/Pagination/Pagination";
+import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QuerySort } from "@/components/QuerySort/QuerySort";
-import { ResetFilters } from "@/components/ResetFilters/ResetFilters";
+import QuerySort from "@/components/QuerySort/QuerySort";
+import ResetFilters from "@/components/ResetFilters/ResetFilters";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
 import useQueryState, {
 	pagination,
@@ -151,7 +152,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 		singleSort: true,
 	});
 	const [showingDeleted, setShowingDeleted] = createSignal<0 | 1>(0);
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 	//* ids drive selection - refs only exist for media picked this session, so
 	//* URL-hydrated ids without refs still pre-select their cards
 	const [selectedIds, setSelectedIds] = createSignal<number[]>([]);
@@ -220,10 +221,10 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 		<div class="flex h-full flex-col">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap items-center">
-					<FilterSectionToggle
+					<FilterToggle
 						open={filterSectionOpen()}
-						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-						searchParams={searchParams}
+						onOpenChange={setFilterPanelOpen}
+						queryState={searchParams}
 						active={searchParams.hasFiltersApplied()}
 					/>
 					<QuerySort
@@ -261,7 +262,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 								key: "updatedAt",
 							},
 						]}
-						searchParams={searchParams}
+						queryState={searchParams}
 					/>
 					<Checkbox
 						variant="button-secondary"
@@ -271,18 +272,18 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 							setShowingDeleted(value ? 1 : 0);
 						}}
 						name={"isDeleted"}
-						label={T()("media.deleted.show")}
+						label={T()("actions.show.deleted")}
 					/>
 					<Show when={searchParams.hasFiltersApplied()}>
 						<ResetFilters onReset={searchParams.clearFilters} />
 					</Show>
 				</div>
-				<PerPageSelect options={[10, 20, 40]} searchParams={searchParams} />
+				<PerPageSelect options={[10, 20, 40]} queryState={searchParams} />
 			</div>
 
-			<FilterSection
+			<FilterPanel
 				open={filterSectionOpen()}
-				setOpen={setFilterSectionOpen}
+				onOpenChange={setFilterPanelOpen}
 				subject={T()("common.media")}
 				fields={[
 					{
@@ -363,13 +364,15 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						],
 					},
 				]}
-				searchParams={searchParams}
+				queryState={searchParams}
 				embedded={true}
 			/>
 
 			<QueryBoundary
 				isError={media.isError}
-				isEmpty={media.data?.data.length === 0}
+				//* keepPreviousData holds the last page during a refetch, so an empty
+				//* one would otherwise cover the skeletons until the new page lands
+				isEmpty={media.data?.data.length === 0 && !media.isFetching}
 				queryState={searchParams}
 				onResetFilters={searchParams.clearFilters}
 				empty={
@@ -386,41 +389,37 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 					}),
 				)}
 			>
-				<Grid
-					state={{
-						isLoading: media.isLoading,
-						totalItems: media.data?.data.length || 0,
-						searchParams: searchParams,
-					}}
-				>
-					<For each={media.data?.data || []}>
-						{(mediaItem) => (
-							<MediaBasicCard
-								media={mediaItem}
-								current={selectedMediaIds().includes(mediaItem.id)}
-								selected={selectedMediaIds().includes(mediaItem.id)}
-								isSelectable={true}
-								contentLocale={contentLocale()}
-								rowTarget={rowTarget}
-								showingDeleted={isShowingDeleted}
-								onClick={() => toggleSelectedMedia(mediaItem)}
-								onSelect={() => toggleSelectedMedia(mediaItem)}
-							/>
-						)}
-					</For>
-					<For each={Array.from({ length: media.isLoading ? 8 : 0 })}>
-						{() => <MediaBasicCardLoading />}
-					</For>
+				<Grid>
+					<Show
+						when={media.isFetching}
+						fallback={
+							<For each={media.data?.data || []}>
+								{(mediaItem) => (
+									<MediaBasicCard
+										media={mediaItem}
+										current={selectedMediaIds().includes(mediaItem.id)}
+										selected={selectedMediaIds().includes(mediaItem.id)}
+										isSelectable={true}
+										contentLocale={contentLocale()}
+										rowTarget={rowTarget}
+										showingDeleted={isShowingDeleted}
+										onClick={() => toggleSelectedMedia(mediaItem)}
+										onSelect={() => toggleSelectedMedia(mediaItem)}
+									/>
+								)}
+							</For>
+						}
+					>
+						<Index each={Array.from({ length: 8 })}>
+							{() => <MediaBasicCardLoading />}
+						</Index>
+					</Show>
 				</Grid>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: searchParams,
-					meta: media.data?.meta,
-				}}
-				options={{
-					embedded: true,
-				}}
+			<Pagination
+				queryState={searchParams}
+				meta={media.data?.meta}
+				variant="inline"
 			/>
 
 			<Drawer.Footer class="-mx-4 md:-mx-6">

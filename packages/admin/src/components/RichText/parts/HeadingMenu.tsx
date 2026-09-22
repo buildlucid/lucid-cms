@@ -1,8 +1,7 @@
-import { DropdownMenu } from "@kobalte/core";
 import classNames from "classnames";
 import { FaSolidChevronDown } from "solid-icons/fa";
 import { type Component, createMemo, For } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
+import Menu from "@/components/Menu/Menu";
 
 export interface HeadingOption {
 	value: number;
@@ -30,14 +29,14 @@ const HeadingMenu: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root
+		<Menu.Root
 			open={isPillMenu() ? props.open : undefined}
 			onOpenChange={(open) => {
 				if (!isPillMenu()) return;
 				props.onOpenChange?.(open);
 			}}
 		>
-			<DropdownMenu.Trigger
+			<Menu.Trigger
 				class={classNames(
 					"inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs transition-colors duration-150 outline-none focus-visible:ring-1 focus:ring-primary-base disabled:cursor-not-allowed disabled:opacity-50",
 					{
@@ -52,38 +51,21 @@ const HeadingMenu: Component<{
 				title={activeLabel()}
 			>
 				<span class="font-medium">Aa</span>
-				<DropdownMenu.Icon>
-					<FaSolidChevronDown size={10} />
-				</DropdownMenu.Icon>
-			</DropdownMenu.Trigger>
-			<DropdownContent
-				options={{
-					rounded: true,
-					class: "w-40 p-1.5! z-60",
-				}}
-			>
-				<ul class="flex flex-col gap-y-0.5">
-					<For each={props.options}>
-						{(option) => (
-							<li>
-								<DropdownMenu.Item
-									class={classNames(
-										"px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors hover:bg-dropdown-hover hover:text-dropdown-contrast",
-										{
-											"bg-dropdown-hover text-dropdown-contrast":
-												props.activeHeading === option.value,
-										},
-									)}
-									onSelect={() => props.onSetHeading(option.value)}
-								>
-									{option.label}
-								</DropdownMenu.Item>
-							</li>
-						)}
-					</For>
-				</ul>
-			</DropdownContent>
-		</DropdownMenu.Root>
+				<FaSolidChevronDown size={10} />
+			</Menu.Trigger>
+			<Menu.Content>
+				<For each={props.options}>
+					{(option) => (
+						<Menu.Item
+							selected={props.activeHeading === option.value}
+							onSelect={() => props.onSetHeading(option.value)}
+						>
+							{option.label}
+						</Menu.Item>
+					)}
+				</For>
+			</Menu.Content>
+		</Menu.Root>
 	);
 };
 

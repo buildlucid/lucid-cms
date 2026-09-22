@@ -1,33 +1,30 @@
 import type { PublishOperation } from "@types";
 import type { Component } from "solid-js";
 import type { PublishOperationDecisionAction } from "@/components/PublishOperationDecisionModal/PublishOperationDecisionModal";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
+import Table from "@/components/Table/Table";
 import T from "@/translations";
-import type { TableRowProps } from "@/types/components";
 import {
 	getPublishOperationExecutionStatusLabel,
 	getPublishOperationExecutionStatusVariant,
 	getPublishOperationStatusLabel,
 	getPublishOperationStatusVariant,
 } from "@/utils/publish-operations";
-import PublishOperationUserCol from "./parts/PublishOperationUserCol";
-import ReleaseRequestCommentsCol from "./parts/ReleaseRequestCommentsCol";
-import ReleaseRequestReviewersCol from "./parts/ReleaseRequestReviewersCol";
-import ReleaseRequestTitleCol from "./parts/ReleaseRequestTitleCol";
+import PublishOperationUserCell from "./parts/PublishOperationUserCell";
+import ReleaseRequestCommentsCell from "./parts/ReleaseRequestCommentsCell";
+import ReleaseRequestReviewersCell from "./parts/ReleaseRequestReviewersCell";
+import ReleaseRequestTitleCell from "./parts/ReleaseRequestTitleCell";
 
-interface ReleaseRequestRowProps extends TableRowProps {
+interface ReleaseRequestRowProps {
+	index: number;
 	request: PublishOperation;
 	collectionLabel: string;
-	include: boolean[];
 	preview: {
 		available: boolean;
 		permission: boolean;
 		loading: boolean;
 		onCopy: () => void;
 	};
-	callbacks: TableRowProps["callbacks"] & {
+	callbacks: {
 		openDecision: (
 			_operation: PublishOperation,
 			_action: PublishOperationDecisionAction,
@@ -47,11 +44,8 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
+		<Table.Row
 			index={props.index}
-			selected={props.selected}
-			options={props.options}
-			callbacks={props.callbacks}
 			actions={[
 				{
 					label: T()("common.open.request"),
@@ -69,7 +63,7 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					permission: props.preview.permission,
 					isLoading: props.preview.loading,
 					actionExclude: true,
-					sortOrder: 20,
+					sortOrder: 10,
 				},
 				{
 					type: "button",
@@ -79,8 +73,8 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					hide:
 						props.request.status !== "pending" ||
 						props.request.permissions.review !== true,
-					theme: "primary",
-					sortOrder: 10,
+					variant: "primary",
+					sortOrder: 50,
 				},
 				{
 					type: "button",
@@ -90,8 +84,8 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					hide:
 						props.request.status !== "pending" ||
 						props.request.permissions.review !== true,
-					theme: "error",
-					sortOrder: 55,
+					variant: "error",
+					sortOrder: 70,
 				},
 				{
 					type: "button",
@@ -117,8 +111,8 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					icon: "rotate",
 					onClick: () => props.callbacks.retry(props.request),
 					hide: props.request.permissions.retry !== true,
-					theme: "primary",
-					sortOrder: 50,
+					variant: "primary",
+					sortOrder: 60,
 				},
 				{
 					type: "button",
@@ -126,53 +120,54 @@ const ReleaseRequestTableRow: Component<ReleaseRequestRowProps> = (props) => {
 					icon: "ban",
 					onClick: () => props.callbacks.openDecision(props.request, "cancel"),
 					hide: props.request.permissions.cancel !== true,
-					theme: "error",
-					sortOrder: 60,
+					variant: "error",
+					sortOrder: 80,
 				},
 			]}
 		>
-			<ReleaseRequestTitleCol
+			<ReleaseRequestTitleCell
+				column="request"
 				request={props.request}
 				collectionLabel={props.collectionLabel}
-				options={{ include: props.include[0] }}
 			/>
-			<TablePillCell
+			<Table.Pill
+				column="status"
 				text={getPublishOperationStatusLabel(props.request.status)}
 				variant={getPublishOperationStatusVariant(props.request.status)}
-				options={{ include: props.include[1] }}
 			/>
-			<TablePillCell
+			<Table.Pill
+				column="executionStatus"
 				text={getPublishOperationExecutionStatusLabel(
 					props.request.executionStatus,
 				)}
 				variant={getPublishOperationExecutionStatusVariant(
 					props.request.executionStatus,
 				)}
-				options={{ include: props.include[2] }}
 			/>
-			<PublishOperationUserCol
+			<PublishOperationUserCell
+				column="requestedBy"
 				user={props.request.requestedBy}
-				options={{ include: props.include[3] }}
 			/>
-			<ReleaseRequestReviewersCol
+			<ReleaseRequestReviewersCell
+				column="reviewers"
 				assignees={props.request.assignees}
-				options={{ include: props.include[4] }}
 			/>
-			<ReleaseRequestCommentsCol
+			<ReleaseRequestCommentsCell
+				column="comments"
 				request={props.request}
-				options={{ include: props.include[5], minWidth: 280 }}
+				minWidth={280}
 			/>
-			<TableDateCell
+			<Table.Date
+				column="createdAt"
 				date={props.request.createdAt}
 				includeTime={true}
-				options={{ include: props.include[6] }}
 			/>
-			<TableDateCell
+			<Table.Date
+				column="scheduledAt"
 				date={props.request.scheduledAt}
 				includeTime={true}
-				options={{ include: props.include[7] }}
 			/>
-		</TableRow>
+		</Table.Row>
 	);
 };
 

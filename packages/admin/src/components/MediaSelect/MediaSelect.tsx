@@ -11,7 +11,7 @@ import {
 	Switch,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
+import Copy from "@/components/Copy/Copy";
 import DragDrop, { type DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
@@ -343,9 +343,8 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											{mediaTitle() || T()("empty.states.translation")}
 										</p>
 										<div class=" border-t-0flex items-center gap-2 min-w-0">
-											<ClickToCopy
-												type="simple"
-												text={primarySelectedMedia()?.key || ""}
+											<Copy.Button
+												label={primarySelectedMedia()?.key || ""}
 												value={primarySelectedMedia()?.url || ""}
 												class="text-xs text-unfocused max-w-full"
 											/>
@@ -592,9 +591,8 @@ const MediaSortableItem: Component<{
 						{props.title}
 					</p>
 					<div class="mt-1">
-						<ClickToCopy
-							type="simple"
-							text={props.media.key}
+						<Copy.Button
+							label={props.media.key}
 							value={props.media.url}
 							class="text-xs text-unfocused max-w-full"
 						/>

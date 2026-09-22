@@ -15,6 +15,16 @@
 		@apply duration-200 transition-colors outline-primary-base focus:outline-1;
 	}
 
+	.no-number-spinner {
+		appearance: textfield;
+	}
+
+	.no-number-spinner::-webkit-inner-spin-button,
+	.no-number-spinner::-webkit-outer-spin-button {
+		appearance: none;
+		margin: 0;
+	}
+
 	.skeleton {
 		@apply bg-input-base rounded-md animate-pulse;
 	}

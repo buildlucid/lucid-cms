@@ -262,7 +262,7 @@ const UpdateUserDrawer: Component<{
 						</Show>
 						<Show when={activeTab() === "details"}>
 							<DetailsList
-								type="text"
+								class="mb-6 last:mb-0"
 								items={[
 									{
 										label: T()("common.username"),
@@ -374,7 +374,7 @@ const UpdateUserDrawer: Component<{
 						</Show>
 						<Show when={activeTab() === "meta"}>
 							<DetailsList
-								type="text"
+								class="mb-6 last:mb-0"
 								items={[
 									{
 										label: T()("common.created.at"),

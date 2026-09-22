@@ -1,6 +1,6 @@
 import type { Component } from "solid-js";
 import ConfirmActionButton from "@/components/ConfirmActionButton/ConfirmActionButton";
-import CopyInput from "@/components/CopyInput/CopyInput";
+import Copy from "@/components/Copy/Copy";
 import Modal from "@/components/Modal/Modal";
 import T from "@/translations";
 
@@ -32,7 +32,7 @@ const CopyAPIKeyModal: Component<CopyAPIKeyProps> = (props) => {
 				<p class="mb-1.5 text-xs font-medium text-subtitle">
 					{T()("common.api.key")}
 				</p>
-				<CopyInput value={props.apiKey || ""} label={T()("common.api.key")} />
+				<Copy.Input value={props.apiKey || ""} label={T()("common.api.key")} />
 			</Modal.Body>
 			<Modal.Footer>
 				<Modal.Actions>

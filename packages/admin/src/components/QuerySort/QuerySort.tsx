@@ -1,8 +1,7 @@
-import { DropdownMenu } from "@kobalte/core";
 import classNames from "classnames";
 import { FaSolidCaretUp, FaSolidMinus, FaSolidSort } from "solid-icons/fa";
 import { type Component, createMemo, For, Match, Switch } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
+import Menu from "@/components/Menu/Menu";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
@@ -11,138 +10,115 @@ interface SortItemProps {
 		label: string;
 		key: string;
 	};
-	searchParams: QueryStateResponse;
+	queryState: QueryStateResponse;
 }
 
-export interface SortProps {
+export interface QuerySortProps {
+	/** The keys the menu can sort by, and how each one is labelled. */
 	sorts: Array<SortItemProps["sort"]>;
-	searchParams: QueryStateResponse;
+	queryState: QueryStateResponse;
 	disabled?: boolean;
+	class?: string;
 }
 
 const SortItem: Component<SortItemProps> = (props) => {
 	// ----------------------------------
 	// Memos
-	const sort = createMemo(() => {
-		const sorts = props.searchParams.sorts();
-		const sort = sorts.get(props.sort.key);
-		return sort;
-	});
+	const sort = createMemo(() => props.queryState.sorts().get(props.sort.key));
 
 	// ----------------------------------
 	// Render
 	return (
-		<li class="mb-2 last-of-type:mb-0">
-			<button
-				tabIndex={0}
-				class="w-full flex items-center justify-between group focus:outline-hidden focus-visible:ring-1 focus:ring-primary-base"
-				onClick={() => {
-					let sortValue: "asc" | "desc" | undefined;
-					if (sort() === undefined) {
-						sortValue = "asc";
-					} else if (sort() === "asc") {
-						sortValue = "desc";
-					} else if (sort() === "desc") {
-						sortValue = undefined;
-					}
+		<Menu.Item
+			//* sorting by several keys at once means staying put between choices
+			keepOpen
+			textValue={props.sort.label}
+			onSelect={() => {
+				let sortValue: "asc" | "desc" | undefined;
+				if (sort() === undefined) {
+					sortValue = "asc";
+				} else if (sort() === "asc") {
+					sortValue = "desc";
+				} else if (sort() === "desc") {
+					sortValue = undefined;
+				}
 
-					props.searchParams.setParams({
-						sorts: {
-							[props.sort.key]: sortValue,
-						},
-					});
-				}}
-				type="button"
-			>
-				<label
-					for={`${props.sort.key}`}
-					class="text-body flex items-center justify-between text-sm mr-2"
-				>
-					<span class="line-clamp-1 text-left">{props.sort.label}</span>
-				</label>
+				props.queryState.setSort(props.sort.key, sortValue);
+			}}
+			end={
 				<div
 					class={classNames(
 						"w-5 h-5 min-w-5 rounded-md flex items-center justify-center transition-colors duration-200",
 						{
-							"bg-secondary-base group-hover:bg-secondary-hover":
-								sort() === "desc" || sort() === "asc",
-							"bg-dropdown-hover group-hover:bg-input-base":
-								sort() === undefined,
+							"bg-secondary-base": sort() !== undefined,
+							"bg-dropdown-hover": sort() === undefined,
 						},
 					)}
 				>
 					<Switch>
-						<Match when={sort() === "desc" || sort() === "asc"}>
+						<Match when={sort() !== undefined}>
 							<FaSolidCaretUp
+								aria-hidden="true"
 								class={classNames("w-3 h-3 text-secondary-contrast", {
 									"transform rotate-180": sort() === "desc",
 								})}
 							/>
 						</Match>
 						<Match when={sort() === undefined}>
-							<FaSolidMinus class="w-3 h-3 text-title" />
+							<FaSolidMinus aria-hidden="true" class="w-3 h-3 text-title" />
 						</Match>
 					</Switch>
 				</div>
-			</button>
-		</li>
+			}
+		>
+			{props.sort.label}
+		</Menu.Item>
 	);
 };
 
-export const QuerySort: Component<SortProps> = (props) => {
-	// ----------------------------------
-	// State
-	let lastAnchorRect:
-		| {
-				x?: number;
-				y?: number;
-				width?: number;
-				height?: number;
-		  }
-		| undefined;
-
-	// ----------------------------------
-	// Functions
-	const getAnchorRect = (anchor?: HTMLElement) => {
-		const rect = anchor?.getBoundingClientRect();
-
-		if (rect && rect.width > 0 && rect.height > 0) {
-			lastAnchorRect = {
-				x: rect.x,
-				y: rect.y,
-				width: rect.width,
-				height: rect.height,
-			};
-			return lastAnchorRect;
-		}
-
-		return lastAnchorRect;
-	};
-
+/**
+ * A menu that cycles each key through ascending, descending and off. Sortable
+ * table headers do the same thing for a single column; this covers keys that
+ * have no column of their own.
+ *
+ * @example
+ * ```tsx
+ * import { QuerySort } from "@lucidcms/admin/components";
+ * import { useTranslation } from "@lucidcms/admin/hooks";
+ *
+ * const { t } = useTranslation();
+ *
+ * return (
+ * 	<QuerySort
+ * 		queryState={queryState}
+ * 		sorts={[{ key: "createdAt", label: t("common.created.at") }]}
+ * 	/>
+ * );
+ * ```
+ */
+const QuerySort: Component<QuerySortProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root getAnchorRect={getAnchorRect}>
-			<DropdownMenu.Trigger
+		<Menu.Root>
+			<Menu.Trigger
+				data-query-sort
 				disabled={props.disabled}
-				class="dropdown-trigger flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary-base pr-3 pl-2 text-sm text-secondary-contrast fill-secondary-contrast hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-secondary-base"
+				class={classNames(
+					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary-base pr-3 pl-2 text-sm text-secondary-contrast fill-secondary-contrast hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-secondary-base",
+					props.class,
+				)}
 			>
-				<DropdownMenu.Icon>
-					<FaSolidSort />
-				</DropdownMenu.Icon>
+				<FaSolidSort />
 				<span>{T()("common.sort")}</span>
-			</DropdownMenu.Trigger>
-			<DropdownContent
-				options={{
-					as: "ul",
-					rounded: true,
-					class: "w-[180px] z-60",
-				}}
-			>
+			</Menu.Trigger>
+			<Menu.Content>
 				<For each={props.sorts}>
-					{(sort) => <SortItem sort={sort} searchParams={props.searchParams} />}
+					{(sort) => <SortItem sort={sort} queryState={props.queryState} />}
 				</For>
-			</DropdownContent>
-		</DropdownMenu.Root>
+			</Menu.Content>
+		</Menu.Root>
 	);
 };
+
+export default QuerySort;

@@ -4,7 +4,7 @@ import { type Component, type JSXElement, Match, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import ErrorState from "@/components/ErrorState/ErrorState";
-import Loading from "@/components/Loading/Loading";
+import LoadingState from "@/components/LoadingState/LoadingState";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
@@ -45,7 +45,7 @@ export interface QueryBoundaryProps {
  * 		isLoading={reports.isLoading}
  * 		isError={reports.isError}
  * 		isEmpty={reports.data?.data.length === 0}
- * 		queryState={searchParams}
+ * 		queryState={queryState}
  * 		empty={
  * 			<EmptyState
  * 				title={t("empty.states.entries.title")}
@@ -58,7 +58,7 @@ export interface QueryBoundaryProps {
  * );
  * ```
  */
-export const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
+const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
 	// ----------------------------------------
 	// Functions
 	//* filters that match nothing are a different problem to having no entries
@@ -70,10 +70,10 @@ export const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={classnames("flex flex-col", props.class)}>
+		<div data-query-boundary class={classnames("flex flex-col", props.class)}>
 			<Switch fallback={props.children}>
 				<Match when={props.isLoading}>
-					{centred(props.loading ?? <Loading />)}
+					{centred(props.loading ?? <LoadingState />)}
 				</Match>
 				<Match when={props.isError}>
 					{centred(props.error ?? <ErrorState image={notifySvg} />)}

@@ -12,11 +12,11 @@ import { type Component, Index } from "solid-js";
 import DeleteEmailModal from "@/components/DeleteEmailModal/DeleteEmailModal";
 import EmailTableRow from "@/components/EmailTableRow/EmailTableRow";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import PreviewEmailDrawer from "@/components/PreviewEmailDrawer/PreviewEmailDrawer";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ResendEmailModal from "@/components/ResendEmailModal/ResendEmailModal";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import ViewEmailTransactionsDrawer from "@/components/ViewEmailTransactionsDrawer/ViewEmailTransactionsDrawer";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
@@ -64,10 +64,10 @@ export const EmailsList: Component<{
 				}
 				class="flex-1 h-full"
 			>
-				<Table
-					key={"emails.list.v2"}
-					rows={emails.data?.data.length || 0}
-					searchParams={props.state.searchParams}
+				<Table.Root
+					id="emails.list.v2"
+					rowCount={emails.data?.data.length || 0}
+					queryState={props.state.searchParams}
 					head={[
 						{
 							label: T()("common.status"),
@@ -120,34 +120,14 @@ export const EmailsList: Component<{
 							minWidth: 170,
 						},
 					]}
-					state={{
-						isLoading: emails.isFetching,
-						isSuccess: emails.isSuccess,
-					}}
-					options={{
-						isSelectable: false,
-					}}
+					isLoading={emails.isFetching}
 				>
-					{({ include, isSelectable, selected, setSelected }) => (
-						<Index each={emails.data?.data || []}>
-							{(email, i) => (
-								<EmailTableRow
-									index={i}
-									email={email()}
-									include={include}
-									selected={selected[i]}
-									rowTarget={rowTarget}
-									options={{
-										isSelectable,
-									}}
-									callbacks={{
-										setSelected: setSelected,
-									}}
-								/>
-							)}
-						</Index>
-					)}
-				</Table>
+					<Index each={emails.data?.data || []}>
+						{(email, i) => (
+							<EmailTableRow index={i} email={email()} rowTarget={rowTarget} />
+						)}
+					</Index>
+				</Table.Root>
 				<PreviewEmailDrawer
 					id={rowTarget.getTargetId}
 					state={{
@@ -185,14 +165,10 @@ export const EmailsList: Component<{
 					}}
 				/>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: props.state.searchParams,
-					meta: emails.data?.meta,
-				}}
-				options={{
-					padding: "24",
-				}}
+			<Pagination
+				queryState={props.state.searchParams}
+				meta={emails.data?.meta}
+				padding="md"
 			/>
 		</>
 	);

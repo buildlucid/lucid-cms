@@ -29,14 +29,14 @@ export const FILTERABLE_FIELD_TYPES = [
 	"media",
 ] as const;
 
-export type DocumentFilterFieldType = (typeof FILTERABLE_FIELD_TYPES)[number];
+export type FilterFieldType = (typeof FILTERABLE_FIELD_TYPES)[number];
 
-export interface DocumentFilterField {
+export interface FilterField {
 	/** Backend filter path - `_fieldKey`, `brickKey._fieldKey` or `brickKey.repeaterKey._fieldKey` */
 	key: string;
 	/** `[brick label > ][ancestor container labels > ]field label` */
 	label: string;
-	type: DocumentFilterFieldType;
+	type: FilterFieldType;
 	/** select field options */
 	options?: Array<{ value: string; label: string }>;
 	/** datetime fields - whether the field includes time selection */
@@ -53,10 +53,10 @@ export interface DocumentFilterField {
 	mediaType?: string;
 	mediaExtensions?: string;
 	/** Optional operator subset/order for filters with backend-specific rules. */
-	operators?: DocumentFilterOperator[];
+	operators?: FilterOperator[];
 }
 
-export type DocumentFilterOperator =
+export type FilterOperator =
 	| "="
 	| "!="
 	| ">"
@@ -73,9 +73,7 @@ export type DocumentFilterOperator =
 const STRUCTURAL_FIELD_TYPES = new Set(["tab", "section", "collapsible"]);
 
 /** Requires both core filterability and a value editor in this section. */
-const isSupportedFieldType = (
-	type: string,
-): type is DocumentFilterFieldType => {
+const isSupportedFieldType = (type: string): type is FilterFieldType => {
 	return (
 		isFieldTypeFilterable(type) &&
 		(FILTERABLE_FIELD_TYPES as readonly string[]).includes(type)
@@ -95,10 +93,10 @@ const toFilterField = (
 	field: CollectionFieldConfig,
 	key: string,
 	label: string,
-): DocumentFilterField | undefined => {
+): FilterField | undefined => {
 	if (!isSupportedFieldType(field.type)) return undefined;
 
-	const filterField: DocumentFilterField = {
+	const filterField: FilterField = {
 		key,
 		label,
 		type: field.type,
@@ -173,7 +171,7 @@ const buildFilterKey = (context: CollectContext, fieldKey: string): string => {
 const collectFilterFields = (
 	fields: CollectionFieldConfig[] | undefined,
 	context: CollectContext,
-	result: DocumentFilterField[],
+	result: FilterField[],
 ) => {
 	if (!fields) return;
 	for (const field of fields) {
@@ -239,8 +237,8 @@ const brickLabel = (brick: CollectionBrickConfig): string => {
  */
 export const documentFilterFields = (
 	collection?: Collection,
-): DocumentFilterField[] => {
-	const result: DocumentFilterField[] = [];
+): FilterField[] => {
+	const result: FilterField[] = [];
 
 	collectFilterFields(collection?.fields, {}, result);
 
@@ -266,9 +264,9 @@ export const documentFilterFields = (
 };
 
 /** Collection fields plus management metadata used by document listings. */
-export const documentFilterSectionFields = (
+export const documentFilterPanelFields = (
 	collection?: Collection,
-): DocumentFilterField[] => {
+): FilterField[] => {
 	const result = documentFilterFields(collection);
 
 	result.unshift({
@@ -357,10 +355,7 @@ export const documentFilterSectionFields = (
 	return result;
 };
 
-const OPERATORS_BY_FIELD_TYPE: Record<
-	DocumentFilterFieldType,
-	DocumentFilterOperator[]
-> = {
+const OPERATORS_BY_FIELD_TYPE: Record<FilterFieldType, FilterOperator[]> = {
 	text: [
 		"=",
 		"!=",
@@ -392,7 +387,7 @@ const OPERATORS_BY_FIELD_TYPE: Record<
 	media: ["=", "!="],
 };
 
-const OPERATOR_LABEL_KEYS: Record<DocumentFilterOperator, string> = {
+const OPERATOR_LABEL_KEYS: Record<FilterOperator, string> = {
 	"=": "filter.operators.equals",
 	"!=": "filter.operators.not.equals",
 	contains: "filter.operators.contains",
@@ -409,12 +404,12 @@ const OPERATOR_LABEL_KEYS: Record<DocumentFilterOperator, string> = {
 
 /** Backend operator tokens supported by the given field type. */
 export const operatorsForFieldType = (
-	type: DocumentFilterFieldType,
-): DocumentFilterOperator[] => {
+	type: FilterFieldType,
+): FilterOperator[] => {
 	return OPERATORS_BY_FIELD_TYPE[type];
 };
 
-export const operatorLabel = (operator: DocumentFilterOperator): string => {
+export const operatorLabel = (operator: FilterOperator): string => {
 	return T()(OPERATOR_LABEL_KEYS[operator]);
 };
 
@@ -424,7 +419,7 @@ export const ENTITY_PICKER_FIELD_TYPES = ["user", "relation", "media"] as const;
 export type EntityPickerFieldType = (typeof ENTITY_PICKER_FIELD_TYPES)[number];
 
 export const isEntityPickerFieldType = (
-	type: DocumentFilterFieldType,
+	type: FilterFieldType,
 ): type is EntityPickerFieldType =>
 	(ENTITY_PICKER_FIELD_TYPES as readonly string[]).includes(type);
 
@@ -441,7 +436,7 @@ export type FilterTextInputType =
  * values are text since they also accept the `collectionKey:id` form.
  */
 export const filterValueInputType = (
-	field: DocumentFilterField | undefined,
+	field: FilterField | undefined,
 ): FilterTextInputType => {
 	switch (field?.type) {
 		case "number":
@@ -491,7 +486,7 @@ export const parseRelationFilterValue = (
 };
 
 /** Filter codec used for a field type's committed query-state values. */
-export const codecForFilterFieldType = (type: DocumentFilterFieldType) => {
+export const codecForFilterFieldType = (type: FilterFieldType) => {
 	switch (type) {
 		case "checkbox":
 			return booleanFilter();
@@ -508,7 +503,7 @@ export const codecForFilterFieldType = (type: DocumentFilterFieldType) => {
 
 /** Builds the useQueryState filter schema for the generated where options. */
 export const buildDocumentFilterSchema = (
-	fields: DocumentFilterField[],
+	fields: FilterField[],
 ): QueryFilterSchema => {
 	const schema: QueryFilterSchema = {};
 	for (const field of fields) {

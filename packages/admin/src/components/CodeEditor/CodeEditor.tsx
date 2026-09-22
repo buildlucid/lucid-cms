@@ -1,7 +1,6 @@
 import { indentWithTab } from "@codemirror/commands";
 import { Compartment, Prec } from "@codemirror/state";
 import { EditorView, keymap, placeholder } from "@codemirror/view";
-import { DropdownMenu } from "@kobalte/core";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
 import { basicSetup } from "codemirror";
@@ -22,8 +21,8 @@ import {
 	Show,
 	splitProps,
 } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
 import Field from "@/components/Field/Field";
+import Menu from "@/components/Menu/Menu";
 import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
 import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
@@ -361,13 +360,13 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 			>
 				<Show when={showToolbar()}>
 					<div class="flex h-9 items-center justify-start border-b border-border bg-(--lucid-code-toolbar) px-2">
-						<DropdownMenu.Root
+						<Menu.Root
 							open={languageMenuOpen()}
 							onOpenChange={setLanguageMenuOpen}
 							gutter={5}
 							placement="bottom-start"
 						>
-							<DropdownMenu.Trigger
+							<Menu.Trigger
 								data-code-editor-language
 								id={`${props.id}-language`}
 								aria-label={T()("fields.code.language.aria.label")}
@@ -377,45 +376,26 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 								disabled={props.disabled}
 							>
 								<span class="truncate">{selectedLanguageLabel()}</span>
-								<DropdownMenu.Icon>
-									<FaSolidChevronDown size={10} class="text-current" />
-								</DropdownMenu.Icon>
-							</DropdownMenu.Trigger>
-							<DropdownContent
-								options={{
-									rounded: true,
-									class: "w-44 p-1.5! z-70",
-									maxHeight: "md",
-									noMargin: true,
-								}}
-							>
-								<ul class="flex flex-col gap-y-0.5">
-									<For each={languageOptions()}>
-										{(option) => (
-											<li>
-												<DropdownMenu.Item
-													class={classnames(
-														"flex cursor-pointer items-center justify-between gap-2 rounded-md px-2 py-1 text-sm text-subtitle outline-none transition-colors hover:bg-dropdown-hover hover:text-dropdown-contrast focus-visible:ring-1 focus:ring-primary-base",
-														{
-															"bg-dropdown-hover text-dropdown-contrast":
-																props.language === option.value,
-														},
-													)}
-													onSelect={() =>
-														props.onLanguageChange?.(option.value)
-													}
-												>
-													<span class="truncate">{option.label}</span>
-													<Show when={props.language === option.value}>
-														<FaSolidCheck size={12} class="shrink-0" />
-													</Show>
-												</DropdownMenu.Item>
-											</li>
-										)}
-									</For>
-								</ul>
-							</DropdownContent>
-						</DropdownMenu.Root>
+								<FaSolidChevronDown size={10} class="text-current" />
+							</Menu.Trigger>
+							<Menu.Content class="z-70" scrollable flush>
+								<For each={languageOptions()}>
+									{(option) => (
+										<Menu.Item
+											selected={props.language === option.value}
+											onSelect={() => props.onLanguageChange?.(option.value)}
+											end={
+												props.language === option.value ? (
+													<FaSolidCheck size={12} class="shrink-0" />
+												) : undefined
+											}
+										>
+											{option.label}
+										</Menu.Item>
+									)}
+								</For>
+							</Menu.Content>
+						</Menu.Root>
 					</div>
 				</Show>
 				<div

@@ -5,9 +5,9 @@ import type {
 	PublishOperationStatus,
 } from "@types";
 import { type Component, createEffect, createMemo } from "solid-js";
-import type { FilterSectionPresets } from "@/components/FilterSection/preset-state";
+import type { FilterPresets } from "@/components/FilterPanel/preset-state";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { ReleaseRequestsList } from "@/components/ReleaseRequestsList/ReleaseRequestsList";
 import useQueryState, {
 	booleanFilter,
@@ -137,10 +137,10 @@ const ReleaseRequestsPage: Component = () => {
 			label: key,
 		}));
 	});
-	const releaseRequestPresets = createMemo<FilterSectionPresets>(() => {
+	const releaseRequestPresets = createMemo<FilterPresets>(() => {
 		const data: PublishOperationOverview | undefined = overview.data?.data;
 		const loading = overview.isFetching;
-		const items: FilterSectionPresets["items"] = [
+		const items: FilterPresets["items"] = [
 			{
 				key: "pending",
 				label: T()("common.pending.review"),
@@ -213,8 +213,8 @@ const ReleaseRequestsPage: Component = () => {
 				title={T()("routes.publish.requests.title")}
 				description={T()("routes.publish.requests.description")}
 			>
-				<QueryRow
-					searchParams={searchParams}
+				<QueryToolbar
+					queryState={searchParams}
 					onRefresh={() => {
 						queryClient.invalidateQueries({
 							queryKey: queryKeys.publishOperations.list(),
@@ -223,139 +223,134 @@ const ReleaseRequestsPage: Component = () => {
 							queryKey: queryKeys.publishOperations.overview(),
 						});
 					}}
-					filterSection={{
-						subject: T()("routes.publish.requests.title"),
-						presets: releaseRequestPresets(),
-						fields: [
-							{
-								label: T()("common.collection"),
-								key: "collectionKey",
-								type: "select",
-								options: collectionOptions(),
-							},
-							{
-								label: T()("common.target"),
-								key: "target",
-								type: "select",
-								options: targetOptions(),
-							},
-							{
-								label: T()("common.document"),
-								key: "documentId",
-								type: "relation",
-								collections: documentFilterCollections(),
-								relationValue: "id",
-							},
-							{
-								label: T()("common.status"),
-								key: "status",
-								type: "select",
-								options: [
-									{
-										label: T()("common.status.pending"),
-										value: "pending" satisfies PublishOperationStatus,
-									},
-									{
-										label: T()("common.status.approved"),
-										value: "approved" satisfies PublishOperationStatus,
-									},
-									{
-										label: T()("common.status.rejected"),
-										value: "rejected" satisfies PublishOperationStatus,
-									},
-									{
-										label: T()("common.status.cancelled"),
-										value: "cancelled" satisfies PublishOperationStatus,
-									},
-									{
-										label: T()("common.status.superseded"),
-										value: "superseded" satisfies PublishOperationStatus,
-									},
-								],
-							},
-							{
-								label: T()("common.execution.status"),
-								key: "executionStatus",
-								type: "select",
-								options: [
-									{
-										label: T()("common.status.awaiting.approval"),
-										value:
-											"awaiting_approval" satisfies PublishOperationExecutionStatus,
-									},
-									{
-										label: T()("common.status.scheduled"),
-										value:
-											"scheduled" satisfies PublishOperationExecutionStatus,
-									},
-									{
-										label: T()("common.status.executing"),
-										value:
-											"executing" satisfies PublishOperationExecutionStatus,
-									},
-									{
-										label: T()("common.status.executed"),
-										value: "executed" satisfies PublishOperationExecutionStatus,
-									},
-									{
-										label: T()("common.status.failed"),
-										value: "failed" satisfies PublishOperationExecutionStatus,
-									},
-									{
-										label: T()("common.status.cancelled"),
-										value:
-											"cancelled" satisfies PublishOperationExecutionStatus,
-									},
-								],
-							},
-							{
-								label: T()("common.requested.by"),
-								key: "requestedBy",
-								type: "user",
-							},
-							{
-								label: T()("common.reviewers"),
-								key: "reviewers",
-								type: "user",
-								operators: ["="],
-							},
-							{
-								label: T()("common.assigned.to.me"),
-								key: "assignedToMe",
-								type: "checkbox",
-							},
-							{
-								label: T()("common.requested.by.me"),
-								key: "requestedByMe",
-								type: "checkbox",
-							},
-							{
-								label: T()("common.requested.at"),
-								key: "createdAt",
-								type: "datetime",
-							},
-							{
-								label: T()("common.updated.at"),
-								key: "updatedAt",
-								type: "datetime",
-							},
-							{
-								label: T()("common.scheduled.for"),
-								key: "scheduledAt",
-								type: "datetime",
-							},
-							{
-								label: T()("common.executed.at"),
-								key: "executedAt",
-								type: "datetime",
-							},
-							{
-								label: T()("common.failed.at"),
-								key: "failedAt",
-								type: "datetime",
-							},
-						],
-					}}
+					filterSubject={T()("routes.publish.requests.title")}
+					filterPresets={releaseRequestPresets()}
+					filterFields={[
+						{
+							label: T()("common.collection"),
+							key: "collectionKey",
+							type: "select",
+							options: collectionOptions(),
+						},
+						{
+							label: T()("common.target"),
+							key: "target",
+							type: "select",
+							options: targetOptions(),
+						},
+						{
+							label: T()("common.document"),
+							key: "documentId",
+							type: "relation",
+							collections: documentFilterCollections(),
+							relationValue: "id",
+						},
+						{
+							label: T()("common.status"),
+							key: "status",
+							type: "select",
+							options: [
+								{
+									label: T()("common.status.pending"),
+									value: "pending" satisfies PublishOperationStatus,
+								},
+								{
+									label: T()("common.status.approved"),
+									value: "approved" satisfies PublishOperationStatus,
+								},
+								{
+									label: T()("common.status.rejected"),
+									value: "rejected" satisfies PublishOperationStatus,
+								},
+								{
+									label: T()("common.status.cancelled"),
+									value: "cancelled" satisfies PublishOperationStatus,
+								},
+								{
+									label: T()("common.status.superseded"),
+									value: "superseded" satisfies PublishOperationStatus,
+								},
+							],
+						},
+						{
+							label: T()("common.execution.status"),
+							key: "executionStatus",
+							type: "select",
+							options: [
+								{
+									label: T()("common.status.awaiting.approval"),
+									value:
+										"awaiting_approval" satisfies PublishOperationExecutionStatus,
+								},
+								{
+									label: T()("common.status.scheduled"),
+									value: "scheduled" satisfies PublishOperationExecutionStatus,
+								},
+								{
+									label: T()("common.status.executing"),
+									value: "executing" satisfies PublishOperationExecutionStatus,
+								},
+								{
+									label: T()("common.status.executed"),
+									value: "executed" satisfies PublishOperationExecutionStatus,
+								},
+								{
+									label: T()("common.status.failed"),
+									value: "failed" satisfies PublishOperationExecutionStatus,
+								},
+								{
+									label: T()("common.status.cancelled"),
+									value: "cancelled" satisfies PublishOperationExecutionStatus,
+								},
+							],
+						},
+						{
+							label: T()("common.requested.by"),
+							key: "requestedBy",
+							type: "user",
+						},
+						{
+							label: T()("common.reviewers"),
+							key: "reviewers",
+							type: "user",
+							operators: ["="],
+						},
+						{
+							label: T()("common.assigned.to.me"),
+							key: "assignedToMe",
+							type: "checkbox",
+						},
+						{
+							label: T()("common.requested.by.me"),
+							key: "requestedByMe",
+							type: "checkbox",
+						},
+						{
+							label: T()("common.requested.at"),
+							key: "createdAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.updated.at"),
+							key: "updatedAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.scheduled.for"),
+							key: "scheduledAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.executed.at"),
+							key: "executedAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.failed.at"),
+							key: "failedAt",
+							type: "datetime",
+						},
+					]}
 					sorts={[
 						{
 							label: T()("common.requested.at"),

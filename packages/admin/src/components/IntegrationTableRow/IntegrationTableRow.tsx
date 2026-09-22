@@ -1,21 +1,15 @@
 import type { Integration } from "@types";
 import { type Component, createMemo } from "solid-js";
-import type { TableTheme } from "@/components/Table/Table";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
+import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import type { TableRowProps } from "@/types/components";
-import IntegrationLastUsedCol from "./parts/IntegrationLastUsedCol";
+import IntegrationLastUsedCell from "./parts/IntegrationLastUsedCell";
 
-interface IntegrationTableRowProps extends TableRowProps {
+interface IntegrationTableRowProps {
+	index: number;
 	integration: Integration;
-	include: boolean[];
-	theme?: TableTheme;
 	rowTarget: ReturnType<
 		typeof useRowTarget<"delete" | "update" | "regenerateAPIKey">
 	>;
@@ -33,12 +27,8 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<TableRow
+		<Table.Row
 			index={props.index}
-			selected={props.selected}
-			options={props.options}
-			callbacks={props.callbacks}
-			theme={props.theme}
 			actions={[
 				{
 					label: T()("common.update"),
@@ -51,6 +41,7 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 					permission: userStore.get.hasPermission([
 						Permissions.IntegrationsUpdate,
 					]).all,
+					sortOrder: 0,
 				},
 				{
 					label: T()("integrations.api.keys.regenerate.action"),
@@ -63,8 +54,9 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 					permission: userStore.get.hasPermission([
 						Permissions.IntegrationsRegenerate,
 					]).all,
-					theme: "error",
 					actionExclude: true,
+					variant: "error",
+					sortOrder: 70,
 				},
 				{
 					label: T()("common.delete"),
@@ -77,12 +69,14 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 					permission: userStore.get.hasPermission([
 						Permissions.IntegrationsDelete,
 					]).all,
-					theme: "error",
 					actionExclude: true,
+					variant: "error",
+					sortOrder: 80,
 				},
 			]}
 		>
-			<TablePillCell
+			<Table.Pill
+				column="enabled"
 				text={
 					isExpired()
 						? T()("common.status.expired")
@@ -95,49 +89,22 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 						? "primary-subtle"
 						: "danger-subtle"
 				}
-				options={{ include: props.include[0], padding: props.options?.padding }}
 			/>
-			<TableTextCell
-				text={props.integration.name}
-				options={{
-					include: props.include[1],
-					maxLines: 1,
-					padding: props.options?.padding,
-				}}
-			/>
-			<TableTextCell
-				text={props.integration.key}
-				options={{
-					include: props.include[2],
-					maxLines: 1,
-					padding: props.options?.padding,
-				}}
-			/>
-			<TableTextCell
+			<Table.Text column="name" text={props.integration.name} maxLines={1} />
+			<Table.Text column="key" text={props.integration.key} maxLines={1} />
+			<Table.Text
+				column="description"
 				text={props.integration.description}
-				options={{
-					include: props.include[3],
-					maxLines: 2,
-					padding: props.options?.padding,
-				}}
+				maxLines={2}
 			/>
-			<IntegrationLastUsedCol
+			<IntegrationLastUsedCell
+				column="lastUsed"
 				integration={props.integration}
-				options={{ include: props.include[4], padding: props.options?.padding }}
 			/>
-			<TableDateCell
-				date={props.integration.expiresAt}
-				options={{ include: props.include[5], padding: props.options?.padding }}
-			/>
-			<TableDateCell
-				date={props.integration.createdAt}
-				options={{ include: props.include[6], padding: props.options?.padding }}
-			/>
-			<TableDateCell
-				date={props.integration.updatedAt}
-				options={{ include: props.include[7], padding: props.options?.padding }}
-			/>
-		</TableRow>
+			<Table.Date column="expiresAt" date={props.integration.expiresAt} />
+			<Table.Date column="createdAt" date={props.integration.createdAt} />
+			<Table.Date column="updatedAt" date={props.integration.updatedAt} />
+		</Table.Row>
 	);
 };
 

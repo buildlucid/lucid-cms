@@ -52,8 +52,7 @@ const PublishOperationReviewersModal: Component<{
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
 			label:
-				helpers.formatUserName(reviewer, "simple") ||
-				T()("media.types.unknown"),
+				helpers.formatUserName(reviewer, "simple") || T()("common.unknown"),
 			user: reviewer,
 		})),
 	);
@@ -101,7 +100,7 @@ const PublishOperationReviewersModal: Component<{
 				value: assignee.user.id,
 				label:
 					helpers.formatUserName(assignee.user, "simple") ||
-					T()("media.types.unknown"),
+					T()("common.unknown"),
 				user: {
 					id: assignee.user.id,
 					email: assignee.user.email ?? "",

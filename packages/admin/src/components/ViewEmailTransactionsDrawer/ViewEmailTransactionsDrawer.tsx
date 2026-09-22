@@ -17,13 +17,13 @@ import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import EmailTransactionTableRow from "@/components/EmailTransactionTableRow/EmailTransactionTableRow";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { FilterSection } from "@/components/FilterSection/FilterSection";
-import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import FilterToggle from "@/components/FilterToggle/FilterToggle";
+import Pagination from "@/components/Pagination/Pagination";
+import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QuerySort } from "@/components/QuerySort/QuerySort";
-import { Table } from "@/components/Table/Table";
+import QuerySort from "@/components/QuerySort/QuerySort";
+import Table from "@/components/Table/Table";
 import useQueryState, {
 	pagination,
 	sort,
@@ -97,7 +97,7 @@ const ViewEmailTransactionsPanelContent: Component<
 		},
 		singleSort: true,
 	});
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -122,24 +122,24 @@ const ViewEmailTransactionsPanelContent: Component<
 			<Show when={props.id() !== undefined}>
 				<div class="mb-4 flex flex-wrap items-center justify-between gap-2.5">
 					<div class="flex gap-2.5">
-						<FilterSectionToggle
+						<FilterToggle
 							open={filterSectionOpen()}
-							onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-							searchParams={searchParams}
+							onOpenChange={setFilterPanelOpen}
+							queryState={searchParams}
 						/>
 						<QuerySort
 							sorts={[
 								{ label: T()("common.created.at"), key: "createdAt" },
 								{ label: T()("common.updated.at"), key: "updatedAt" },
 							]}
-							searchParams={searchParams}
+							queryState={searchParams}
 						/>
 					</div>
-					<PerPageSelect options={[5, 10, 20]} searchParams={searchParams} />
+					<PerPageSelect options={[5, 10, 20]} queryState={searchParams} />
 				</div>
-				<FilterSection
+				<FilterPanel
 					open={filterSectionOpen()}
-					setOpen={setFilterSectionOpen}
+					onOpenChange={setFilterPanelOpen}
 					subject={T()("panels.email.transactions.title")}
 					fields={[
 						{
@@ -170,7 +170,7 @@ const ViewEmailTransactionsPanelContent: Component<
 							type: "datetime",
 						},
 					]}
-					searchParams={searchParams}
+					queryState={searchParams}
 					embedded
 				/>
 				<QueryBoundary
@@ -187,10 +187,10 @@ const ViewEmailTransactionsPanelContent: Component<
 						"rounded-md border border-border bg-card-base",
 					)}
 				>
-					<Table
-						key="email.transactions"
-						rows={transactions.data?.data.length ?? 0}
-						searchParams={searchParams}
+					<Table.Root
+						id="email.transactions"
+						rowCount={transactions.data?.data.length ?? 0}
+						queryState={searchParams}
 						head={[
 							{
 								label: T()("common.status"),
@@ -220,33 +220,24 @@ const ViewEmailTransactionsPanelContent: Component<
 								sortable: true,
 							},
 						]}
-						state={{
-							isLoading: transactions.isFetching,
-							isSuccess: transactions.isSuccess,
-						}}
-						options={{ isSelectable: false, padding: "16" }}
-						theme="secondary"
+						isLoading={transactions.isFetching}
+						padding="sm"
+						variant="secondary"
 					>
-						{({ include, isSelectable, selected, setSelected }) => (
-							<Index each={transactions.data?.data ?? []}>
-								{(transaction, index) => (
-									<EmailTransactionTableRow
-										index={index}
-										transaction={transaction()}
-										include={include}
-										selected={selected[index]}
-										options={{ isSelectable, padding: "16" }}
-										callbacks={{ setSelected }}
-										theme="secondary"
-									/>
-								)}
-							</Index>
-						)}
-					</Table>
+						<Index each={transactions.data?.data ?? []}>
+							{(transaction, index) => (
+								<EmailTransactionTableRow
+									index={index}
+									transaction={transaction()}
+								/>
+							)}
+						</Index>
+					</Table.Root>
 				</QueryBoundary>
-				<PaginatedFooter
-					state={{ searchParams, meta: transactions.data?.meta }}
-					options={{ embedded: true }}
+				<Pagination
+					queryState={searchParams}
+					meta={transactions.data?.meta}
+					variant="inline"
 				/>
 			</Show>
 		</div>

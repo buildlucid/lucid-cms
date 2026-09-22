@@ -17,11 +17,11 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import IntegrationTableRow from "@/components/IntegrationTableRow/IntegrationTableRow";
 import { OAuthClientsList } from "@/components/OAuthClientsList/OAuthClientsList";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import RegenerateAPIKeyModal from "@/components/RegenerateAPIKeyModal/RegenerateAPIKeyModal";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import UpsertIntegrationDrawer from "@/components/UpsertIntegrationDrawer/UpsertIntegrationDrawer";
 import { Permissions } from "@/constants/permissions";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
@@ -153,72 +153,70 @@ export const IntegrationsList: Component<{
 				>
 					<InfoRow.Content>
 						<div class="-mx-4 overflow-hidden">
-							<QueryRow
-								searchParams={props.state.searchParams}
+							<QueryToolbar
+								queryState={props.state.searchParams}
 								onRefresh={() => {
 									queryClient.invalidateQueries({
 										queryKey: queryKeys.integrations.list(),
 									});
 								}}
-								filterSection={{
-									subject: T()("integrations.manage.title"),
-									fields: [
-										{
-											label: T()("common.name"),
-											key: "name",
-											type: "text",
-										},
-										{
-											label: T()("common.key"),
-											key: "key",
-											type: "text",
-										},
-										{
-											label: T()("common.description"),
-											key: "description",
-											type: "text",
-										},
-										{
-											label: T()("common.status.active"),
-											key: "enabled",
-											type: "checkbox",
-											trueLabel: T()("common.status.active"),
-											falseLabel: T()("common.status.inactive"),
-										},
-										{
-											label: T()("common.scopes"),
-											key: "scope",
-											type: "select",
-											options: scopeOptions(),
-											operators: ["="],
-										},
-										{
-											label: T()("common.last.used.at"),
-											key: "lastUsedAt",
-											type: "datetime",
-										},
-										{
-											label: T()("common.expires.at"),
-											key: "expiresAt",
-											type: "datetime",
-										},
-										{
-											label: T()("integrations.last.used.ip"),
-											key: "lastUsedIp",
-											type: "text",
-										},
-										{
-											label: T()("common.created.at"),
-											key: "createdAt",
-											type: "datetime",
-										},
-										{
-											label: T()("common.updated.at"),
-											key: "updatedAt",
-											type: "datetime",
-										},
-									],
-								}}
+								filterSubject={T()("integrations.manage.title")}
+								filterFields={[
+									{
+										label: T()("common.name"),
+										key: "name",
+										type: "text",
+									},
+									{
+										label: T()("common.key"),
+										key: "key",
+										type: "text",
+									},
+									{
+										label: T()("common.description"),
+										key: "description",
+										type: "text",
+									},
+									{
+										label: T()("common.status.active"),
+										key: "enabled",
+										type: "checkbox",
+										trueLabel: T()("common.status.active"),
+										falseLabel: T()("common.status.inactive"),
+									},
+									{
+										label: T()("common.scopes"),
+										key: "scope",
+										type: "select",
+										options: scopeOptions(),
+										operators: ["="],
+									},
+									{
+										label: T()("common.last.used.at"),
+										key: "lastUsedAt",
+										type: "datetime",
+									},
+									{
+										label: T()("common.expires.at"),
+										key: "expiresAt",
+										type: "datetime",
+									},
+									{
+										label: T()("integrations.last.used.ip"),
+										key: "lastUsedIp",
+										type: "text",
+									},
+									{
+										label: T()("common.created.at"),
+										key: "createdAt",
+										type: "datetime",
+									},
+									{
+										label: T()("common.updated.at"),
+										key: "updatedAt",
+										type: "datetime",
+									},
+								]}
 								sorts={[
 									{
 										label: T()("common.name"),
@@ -237,10 +235,8 @@ export const IntegrationsList: Component<{
 										key: "createdAt",
 									},
 								]}
-								perPage={[]}
-								options={{
-									padding: "16",
-								}}
+								perPage
+								padding="sm"
 							/>
 							<QueryBoundary
 								isError={integrations.isError}
@@ -270,10 +266,10 @@ export const IntegrationsList: Component<{
 										: undefined,
 								)}
 							>
-								<Table
-									key={"integrations.list"}
-									rows={integrations.data?.data.length || 0}
-									searchParams={props.state.searchParams}
+								<Table.Root
+									id="integrations.list"
+									rowCount={integrations.data?.data.length || 0}
+									queryState={props.state.searchParams}
 									head={[
 										{
 											label: T()("common.status"),
@@ -321,55 +317,27 @@ export const IntegrationsList: Component<{
 											icon: <FaSolidCalendar />,
 										},
 									]}
-									state={{
-										isLoading: integrations.isFetching,
-										isSuccess: integrations.isSuccess,
-									}}
-									options={{
-										isSelectable: false,
-										padding: "16",
-									}}
-									theme="contained"
+									isLoading={integrations.isFetching}
+									padding="sm"
+									variant="contained"
 								>
-									{({
-										include,
-										isSelectable,
-										selected,
-										setSelected,
-										theme,
-									}) => (
-										<Index each={integrations.data?.data || []}>
-											{(integration, i) => (
-												<IntegrationTableRow
-													index={i}
-													integration={integration()}
-													include={include}
-													selected={selected[i]}
-													rowTarget={rowTarget}
-													options={{
-														isSelectable,
-														padding: "16",
-													}}
-													callbacks={{
-														setSelected: setSelected,
-													}}
-													theme={theme}
-												/>
-											)}
-										</Index>
-									)}
-								</Table>
+									<Index each={integrations.data?.data || []}>
+										{(integration, i) => (
+											<IntegrationTableRow
+												index={i}
+												integration={integration()}
+												rowTarget={rowTarget}
+											/>
+										)}
+									</Index>
+								</Table.Root>
 							</QueryBoundary>
-							<PaginatedFooter
-								state={{
-									searchParams: props.state.searchParams,
-									meta: integrations.data?.meta,
-								}}
-								options={{
-									embedded: true,
-									padding: "16",
-									hideEmptyMessage: true,
-								}}
+							<Pagination
+								queryState={props.state.searchParams}
+								meta={integrations.data?.meta}
+								variant="inline"
+								padding="sm"
+								hideWhenEmpty
 							/>
 						</div>
 					</InfoRow.Content>

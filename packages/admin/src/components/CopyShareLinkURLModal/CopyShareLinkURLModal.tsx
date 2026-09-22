@@ -1,5 +1,5 @@
 import { type Accessor, type Component, createMemo } from "solid-js";
-import CopyInput from "@/components/CopyInput/CopyInput";
+import Copy from "@/components/Copy/Copy";
 import Modal from "@/components/Modal/Modal";
 import api from "@/services/api";
 import T from "@/translations";
@@ -56,7 +56,7 @@ const CopyShareLinkURLModal: Component<{
 				</Modal.Description>
 			</Modal.Header>
 			<Modal.Body>
-				<CopyInput value={url() || ""} />
+				<Copy.Input value={url() || ""} />
 			</Modal.Body>
 		</Modal.Root>
 	);

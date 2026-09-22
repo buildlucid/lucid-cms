@@ -19,7 +19,7 @@ import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaA
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { MediaList } from "@/components/MediaList/MediaList";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { Permissions } from "@/constants/permissions";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useMediaImageGeneration from "@/hooks/useMediaImageGeneration/useMediaImageGeneration";
@@ -303,10 +303,10 @@ const MediaPage: Component = () => {
 						</>
 					}
 				>
-					<QueryRow
-						searchParams={searchParams}
-						showingDeleted={showingDeleted}
-						setShowingDeleted={setShowingDeleted}
+					<QueryToolbar
+						queryState={searchParams}
+						showingDeleted={showingDeleted()}
+						onShowingDeletedChange={setShowingDeleted}
 						onRefresh={() => {
 							queryClient.invalidateQueries({
 								queryKey: queryKeys.media.lists(),
@@ -315,133 +315,131 @@ const MediaPage: Component = () => {
 								queryKey: queryKeys.mediaFolders.list(),
 							});
 						}}
-						filterSection={{
-							subject: T()("routes.media.title"),
-							fields: [
-								{
-									label: T()("common.name"),
-									key: "title",
-									type: "text",
-								},
-								{
-									label: T()("common.visibility"),
-									key: "public",
-									type: "checkbox",
-									trueLabel: T()("common.public"),
-									falseLabel: T()("common.private"),
-								},
-								{
-									label: T()("common.status"),
-									key: "status",
-									type: "select",
-									options: [
+						filterSubject={T()("routes.media.title")}
+						filterFields={[
+							{
+								label: T()("common.name"),
+								key: "title",
+								type: "text",
+							},
+							{
+								label: T()("common.visibility"),
+								key: "public",
+								type: "checkbox",
+								trueLabel: T()("common.public"),
+								falseLabel: T()("common.private"),
+							},
+							{
+								label: T()("common.status"),
+								key: "status",
+								type: "select",
+								options: [
+									{
+										label: T()("common.status.ready"),
+										value: "ready",
+									},
+									{
+										label: T()("common.status.processing"),
+										value: "processing",
+									},
+									{
+										label: T()("common.status.failed"),
+										value: "failed",
+									},
+								],
+							},
+							{
+								label: T()("common.mime.type"),
+								key: "mimeType",
+								type: "text",
+							},
+							{
+								label: T()("common.key"),
+								key: "key",
+								type: "text",
+							},
+							{
+								label: T()("common.type"),
+								key: "type",
+								type: "select",
+								options: [
+									{
+										label: T()("media.types.image"),
+										value: "image",
+									},
+									{
+										label: T()("media.types.video"),
+										value: "video",
+									},
+									{
+										label: T()("media.types.audio"),
+										value: "audio",
+									},
+									{
+										label: T()("media.types.document"),
+										value: "document",
+									},
+									{
+										label: T()("media.types.archive"),
+										value: "archive",
+									},
+									{
+										label: T()("media.types.unknown"),
+										value: "unknown",
+									},
+								],
+							},
+							{
+								label: T()("common.file.extension"),
+								key: "extension",
+								type: "text",
+							},
+							{
+								label: T()("common.origin"),
+								key: "origin",
+								type: "select",
+								options: [
+									{ label: T()("common.human"), value: "human" },
+									{
+										label: T()("media.origin.ai.generated"),
+										value: "ai_generated",
+									},
+									{
+										label: T()("media.origin.ai.modified"),
+										value: "ai_modified",
+									},
+								],
+							},
+							{
+								label: T()("common.width"),
+								key: "width",
+								type: "number",
+							},
+							{
+								label: T()("common.height"),
+								key: "height",
+								type: "number",
+							},
+							{
+								label: T()("common.created.at"),
+								key: "createdAt",
+								type: "datetime",
+							},
+							{
+								label: T()("common.updated.at"),
+								key: "updatedAt",
+								type: "datetime",
+							},
+							...(showingDeleted()
+								? [
 										{
-											label: T()("common.status.ready"),
-											value: "ready",
+											label: T()("common.deleted.by"),
+											key: "deletedBy",
+											type: "user" as const,
 										},
-										{
-											label: T()("common.status.processing"),
-											value: "processing",
-										},
-										{
-											label: T()("common.status.failed"),
-											value: "failed",
-										},
-									],
-								},
-								{
-									label: T()("common.mime.type"),
-									key: "mimeType",
-									type: "text",
-								},
-								{
-									label: T()("common.key"),
-									key: "key",
-									type: "text",
-								},
-								{
-									label: T()("common.type"),
-									key: "type",
-									type: "select",
-									options: [
-										{
-											label: T()("media.types.image"),
-											value: "image",
-										},
-										{
-											label: T()("media.types.video"),
-											value: "video",
-										},
-										{
-											label: T()("media.types.audio"),
-											value: "audio",
-										},
-										{
-											label: T()("media.types.document"),
-											value: "document",
-										},
-										{
-											label: T()("media.types.archive"),
-											value: "archive",
-										},
-										{
-											label: T()("media.types.unknown"),
-											value: "unknown",
-										},
-									],
-								},
-								{
-									label: T()("common.file.extension"),
-									key: "extension",
-									type: "text",
-								},
-								{
-									label: T()("common.origin"),
-									key: "origin",
-									type: "select",
-									options: [
-										{ label: T()("common.human"), value: "human" },
-										{
-											label: T()("media.origin.ai.generated"),
-											value: "ai_generated",
-										},
-										{
-											label: T()("media.origin.ai.modified"),
-											value: "ai_modified",
-										},
-									],
-								},
-								{
-									label: T()("common.width"),
-									key: "width",
-									type: "number",
-								},
-								{
-									label: T()("common.height"),
-									key: "height",
-									type: "number",
-								},
-								{
-									label: T()("common.created.at"),
-									key: "createdAt",
-									type: "datetime",
-								},
-								{
-									label: T()("common.updated.at"),
-									key: "updatedAt",
-									type: "datetime",
-								},
-								...(showingDeleted()
-									? [
-											{
-												label: T()("common.deleted.by"),
-												key: "deletedBy",
-												type: "user" as const,
-											},
-										]
-									: []),
-							],
-						}}
+									]
+								: []),
+						]}
 						sorts={[
 							{
 								label: T()("common.title"),

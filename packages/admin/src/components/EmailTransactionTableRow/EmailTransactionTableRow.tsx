@@ -1,17 +1,11 @@
 import type { EmailDeliveryStatus, EmailTransaction } from "@types";
 import type { Component } from "solid-js";
 import type { PillProps } from "@/components/Pill/Pill";
-import type { TableTheme } from "@/components/Table/Table";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
-import type { TableRowProps } from "@/types/components";
+import Table from "@/components/Table/Table";
 
-interface EmailTransactionRowProps extends TableRowProps {
+interface EmailTransactionRowProps {
+	index: number;
 	transaction: EmailTransaction;
-	include: boolean[];
-	theme?: TableTheme;
 }
 
 const EmailTransactionTableRow: Component<EmailTransactionRowProps> = (
@@ -34,52 +28,24 @@ const EmailTransactionTableRow: Component<EmailTransactionRowProps> = (
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
-			index={props.index}
-			selected={props.selected}
-			actions={[]}
-			options={props.options}
-			callbacks={props.callbacks}
-			theme={props.theme}
-		>
-			<TablePillCell
+		<Table.Row index={props.index}>
+			<Table.Pill
+				column="status"
 				text={props.transaction.deliveryStatus}
 				variant={getPillVariant(props.transaction.deliveryStatus)}
-				options={{
-					include: props?.include[0],
-					padding: props.options?.padding,
-				}}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="identifier"
 				text={props.transaction.strategyIdentifier}
-				options={{
-					include: props?.include[1],
-					padding: props.options?.padding,
-				}}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="message"
 				text={props.transaction.message}
-				options={{
-					include: props?.include[2],
-					maxLines: 2,
-					padding: props.options?.padding,
-				}}
+				maxLines={2}
 			/>
-			<TableDateCell
-				date={props.transaction.createdAt}
-				options={{
-					include: props?.include[3],
-					padding: props.options?.padding,
-				}}
-			/>
-			<TableDateCell
-				date={props.transaction.updatedAt}
-				options={{
-					include: props?.include[4],
-					padding: props.options?.padding,
-				}}
-			/>
-		</TableRow>
+			<Table.Date column="createdAt" date={props.transaction.createdAt} />
+			<Table.Date column="updatedAt" date={props.transaction.updatedAt} />
+		</Table.Row>
 	);
 };
 

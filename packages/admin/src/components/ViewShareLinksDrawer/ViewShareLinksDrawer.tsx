@@ -18,14 +18,14 @@ import Button from "@/components/Button/Button";
 import DeleteShareLinkModal from "@/components/DeleteShareLinkModal/DeleteShareLinkModal";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { FilterSection } from "@/components/FilterSection/FilterSection";
-import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import FilterToggle from "@/components/FilterToggle/FilterToggle";
+import Pagination from "@/components/Pagination/Pagination";
+import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QuerySort } from "@/components/QuerySort/QuerySort";
+import QuerySort from "@/components/QuerySort/QuerySort";
 import ShareLinkTableRow from "@/components/ShareLinkTableRow/ShareLinkTableRow";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import UpsertShareLinkDrawer from "@/components/UpsertShareLinkDrawer/UpsertShareLinkDrawer";
 import { Permissions } from "@/constants/permissions";
 import useQueryState, {
@@ -118,7 +118,7 @@ const ViewShareLinksPanelContent: Component<{
 		},
 		singleSort: true,
 	});
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 
 	const rowTarget = useRowTarget<"delete" | "update">({
 		triggers: {
@@ -162,10 +162,10 @@ const ViewShareLinksPanelContent: Component<{
 			<Show when={props.id !== undefined}>
 				<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 					<div class="flex gap-2.5">
-						<FilterSectionToggle
+						<FilterToggle
 							open={filterSectionOpen()}
-							onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-							searchParams={shareLinksSearchParams}
+							onOpenChange={setFilterPanelOpen}
+							queryState={shareLinksSearchParams}
 						/>
 						<QuerySort
 							sorts={[
@@ -182,17 +182,17 @@ const ViewShareLinksPanelContent: Component<{
 									key: "createdAt",
 								},
 							]}
-							searchParams={shareLinksSearchParams}
+							queryState={shareLinksSearchParams}
 						/>
 					</div>
 					<PerPageSelect
 						options={[5, 10, 20]}
-						searchParams={shareLinksSearchParams}
+						queryState={shareLinksSearchParams}
 					/>
 				</div>
-				<FilterSection
+				<FilterPanel
 					open={filterSectionOpen()}
-					setOpen={setFilterSectionOpen}
+					onOpenChange={setFilterPanelOpen}
 					subject={T()("panels.media.share.links.view.title")}
 					fields={[
 						{
@@ -231,7 +231,7 @@ const ViewShareLinksPanelContent: Component<{
 							type: "datetime",
 						},
 					]}
-					searchParams={shareLinksSearchParams}
+					queryState={shareLinksSearchParams}
 					embedded={true}
 				/>
 				<QueryBoundary
@@ -249,10 +249,10 @@ const ViewShareLinksPanelContent: Component<{
 						"bg-card-base border border-border rounded-md",
 					)}
 				>
-					<Table
-						key={"media.shareLinks"}
-						rows={shareLinks.data?.data.length || 0}
-						searchParams={shareLinksSearchParams}
+					<Table.Root
+						id="media.shareLinks"
+						rowCount={shareLinks.data?.data.length || 0}
+						queryState={shareLinksSearchParams}
 						head={[
 							{
 								label: T()("common.url"),
@@ -288,52 +288,29 @@ const ViewShareLinksPanelContent: Component<{
 								sortable: true,
 							},
 						]}
-						state={{
-							isLoading: shareLinks.isFetching,
-							isSuccess: shareLinks.isSuccess,
-						}}
-						options={{
-							isSelectable: false,
-							padding: "16",
-						}}
-						theme="secondary"
+						isLoading={shareLinks.isFetching}
+						padding="sm"
+						variant="secondary"
 					>
-						{({ include, isSelectable, selected, setSelected }) => (
-							<Index each={shareLinks.data?.data || []}>
-								{(link, i) => (
-									<ShareLinkTableRow
-										link={link()}
-										include={include}
-										selected={selected[i]}
-										options={{
-											isSelectable,
-											padding: "16",
-											raisedActions: true,
-										}}
-										callbacks={{
-											setSelected: setSelected,
-										}}
-										rowTarget={rowTarget}
-										theme="secondary"
-										index={i}
-										permissions={{
-											update: canUpdateShareLinks(),
-											delete: canDeleteShareLinks(),
-										}}
-									/>
-								)}
-							</Index>
-						)}
-					</Table>
+						<Index each={shareLinks.data?.data || []}>
+							{(link, i) => (
+								<ShareLinkTableRow
+									index={i}
+									link={link()}
+									rowTarget={rowTarget}
+									permissions={{
+										update: canUpdateShareLinks(),
+										delete: canDeleteShareLinks(),
+									}}
+								/>
+							)}
+						</Index>
+					</Table.Root>
 				</QueryBoundary>
-				<PaginatedFooter
-					state={{
-						searchParams: shareLinksSearchParams,
-						meta: shareLinks.data?.meta,
-					}}
-					options={{
-						embedded: true,
-					}}
+				<Pagination
+					queryState={shareLinksSearchParams}
+					meta={shareLinks.data?.meta}
+					variant="inline"
 				/>
 			</Show>
 

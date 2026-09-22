@@ -162,7 +162,7 @@ const ViewUserPanelContent: Component<{
 			/>
 			<Show when={activeTab() === "details"}>
 				<DetailsList
-					type="text"
+					class="mb-6 last:mb-0"
 					items={[
 						{
 							label: T()("common.username"),
@@ -205,12 +205,12 @@ const ViewUserPanelContent: Component<{
 				/>
 				<Show when={authProviderItems().length > 0}>
 					<SectionHeading title={T()("account.auth.providers.title")} />
-					<DetailsList type="text" items={authProviderItems()} />
+					<DetailsList class="mb-6 last:mb-0" items={authProviderItems()} />
 				</Show>
 			</Show>
 			<Show when={activeTab() === "meta"}>
 				<DetailsList
-					type="text"
+					class="mb-6 last:mb-0"
 					items={[
 						{
 							label: T()("common.created.at"),

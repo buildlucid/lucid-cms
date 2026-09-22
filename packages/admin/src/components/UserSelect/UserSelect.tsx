@@ -204,7 +204,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 								<div class="flex min-w-0 flex-1 items-center gap-2.5">
 									<Show when={selectedUser()}>
 										{(user) => (
-											<UserDisplay user={user()} mode="icon" size="medium" />
+											<UserDisplay user={user()} variant="icon" size="md" />
 										)}
 									</Show>
 									<div class="min-w-0">
@@ -316,7 +316,7 @@ const UserSortableItem: Component<{
 			onDragOver={(e) => props.dragDrop.onDragOver(e)}
 		>
 			<div class="flex min-w-0 items-center gap-2.5">
-				<UserDisplay user={props.user} mode="icon" size="medium" />
+				<UserDisplay user={props.user} variant="icon" size="md" />
 				<div class="min-w-0">
 					<p class="truncate text-sm font-medium text-subtitle">
 						{helpers.formatUserName(props.user, "username") || "-"}

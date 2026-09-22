@@ -1,9 +1,8 @@
-import { DropdownMenu } from "@kobalte/core";
 import { useLocation, useNavigate } from "@solidjs/router";
 import classNames from "classnames";
 import { FaSolidClockRotateLeft, FaSolidLink } from "solid-icons/fa";
-import { type Accessor, type Component, createMemo, For } from "solid-js";
-import DropdownContent from "@/components/DropdownContent/DropdownContent";
+import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
+import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 
 export interface ViewSelectorOption {
@@ -100,8 +99,8 @@ export const ViewSelector: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger class="group flex items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
+		<Menu.Root>
+			<Menu.Trigger class="group flex items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
 				<span
 					class={classNames("size-3 rounded-full border block", {
 						"bg-primary-muted-bg border-primary-muted-border":
@@ -123,111 +122,81 @@ export const ViewSelector: Component<{
 				<span class="group-hover:text-body transition-colors duration-200 inline-block capitalize">
 					{currentOptionLabel()}
 				</span>
-			</DropdownMenu.Trigger>
-			<DropdownContent
-				options={{
-					as: "div",
-					rounded: true,
-					class: "w-[260px] z-60 p-1.5!",
-				}}
-			>
-				<ul class="flex flex-col gap-y-0.5">
-					<For each={environments()}>
-						{(item) => (
-							<li>
-								<DropdownMenu.Item
-									class={classNames(
-										"flex items-center justify-between hover:bg-dropdown-hover hover:text-dropdown-contrast px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
-										{
-											"bg-dropdown-hover text-dropdown-contrast":
-												currentOption()?.location === item.location,
-											"hover:bg-dropdown-base! hover:text-body!": item.disabled,
-										},
-									)}
-									disabled={item.disabled}
-									onSelect={async () => {
-										if (item.location && !item.disabled) {
-											await props.onBeforeVersionChange?.();
-											navigate(item.location);
-										}
-									}}
-								>
-									<span
-										class={classNames("line-clamp-1 mr-2 capitalize", {
-											"opacity-50": item.disabled,
-										})}
-									>
-										{optionLabel(item)}
-									</span>
-									<span
-										class={classNames("w-2.5 h-2.5 rounded-full border", {
-											"bg-primary-muted-bg border-primary-muted-border":
-												(item.type === "latest" &&
-													!props.isDocumentMutated?.()) ||
-												(item.type === "environment" &&
-													item.status?.isPublished === true &&
-													item.status?.upToDate === true),
-											"bg-warning-base/40 border-warning-base/60":
-												(item.type === "latest" &&
-													props.isDocumentMutated?.()) ||
-												(item.type === "environment" &&
-													item.status?.isPublished === true &&
-													item.status?.upToDate === false),
-											"bg-error-base/40 border-error-base/60":
-												item.type === "environment" &&
-												item.status?.isPublished === false,
-										})}
-										title={
-											item.type === "latest"
-												? props.isDocumentMutated?.()
-													? T()("common.unsaved")
-													: undefined
-												: item.type === "environment"
-													? item.status?.isPublished === false
-														? T()("common.status.unreleased")
-														: item.status?.upToDate
-															? T()("documents.release.status.up.to.date")
-															: T()("documents.release.status.out.of.date")
-													: undefined
-										}
-									/>
-								</DropdownMenu.Item>
-							</li>
-						)}
-					</For>
-					<For each={linkOptions()}>
-						{(item, index) => (
-							<li
-								class={classNames({
-									"border-t border-border pt-1 mt-0.5": index() === 0,
-								})}
-							>
-								<DropdownMenu.Item
-									class={classNames(
-										"flex items-center justify-between hover:bg-dropdown-hover hover:text-dropdown-contrast px-2 py-1 text-sm rounded-md cursor-pointer outline-none focus-visible:ring-1 focus:ring-primary-base transition-colors",
-										{
-											"bg-dropdown-hover text-dropdown-contrast":
-												currentOption()?.location === item.location,
-											"opacity-50 cursor-not-allowed": item.disabled,
-										},
-									)}
-									disabled={item.disabled}
-									onSelect={() => {
-										if (item.location && !item.disabled) {
-											navigate(item.location);
-										}
-									}}
-								>
-									<span class="line-clamp-1 flex items-center gap-2 capitalize">
-										{optionLabel(item)}
-									</span>
-									{optionIcon(item)}
-								</DropdownMenu.Item>
-							</li>
-						)}
-					</For>
-				</ul>
-			</DropdownContent>
-		</DropdownMenu.Root>
+			</Menu.Trigger>
+			<Menu.Content class="w-[260px]">
+				<For each={environments()}>
+					{(item) => (
+						<Menu.Item
+							textValue={optionLabel(item)}
+							class="capitalize"
+							selected={currentOption()?.location === item.location}
+							unavailable={item.disabled}
+							onSelect={async () => {
+								if (item.location && !item.disabled) {
+									await props.onBeforeVersionChange?.();
+									navigate(item.location);
+								}
+							}}
+							end={
+								<span
+									class={classNames("w-2.5 h-2.5 rounded-full border", {
+										"bg-primary-muted-bg border-primary-muted-border":
+											(item.type === "latest" &&
+												!props.isDocumentMutated?.()) ||
+											(item.type === "environment" &&
+												item.status?.isPublished === true &&
+												item.status?.upToDate === true),
+										"bg-warning-base/40 border-warning-base/60":
+											(item.type === "latest" && props.isDocumentMutated?.()) ||
+											(item.type === "environment" &&
+												item.status?.isPublished === true &&
+												item.status?.upToDate === false),
+										"bg-error-base/40 border-error-base/60":
+											item.type === "environment" &&
+											item.status?.isPublished === false,
+									})}
+									title={
+										item.type === "latest"
+											? props.isDocumentMutated?.()
+												? T()("common.unsaved")
+												: undefined
+											: item.type === "environment"
+												? item.status?.isPublished === false
+													? T()("common.status.unreleased")
+													: item.status?.upToDate
+														? T()("documents.release.status.up.to.date")
+														: T()("documents.release.status.out.of.date")
+												: undefined
+									}
+								/>
+							}
+						>
+							{optionLabel(item)}
+						</Menu.Item>
+					)}
+				</For>
+				<Show when={linkOptions().length > 0}>
+					<Menu.Separator />
+				</Show>
+				<For each={linkOptions()}>
+					{(item) => (
+						<Menu.Item
+							textValue={optionLabel(item)}
+							class="capitalize"
+							selected={currentOption()?.location === item.location}
+							disabled={item.disabled}
+							onSelect={() => {
+								if (item.location && !item.disabled) {
+									navigate(item.location);
+								}
+							}}
+							end={optionIcon(item)}
+						>
+							{optionLabel(item)}
+						</Menu.Item>
+					)}
+				</For>
+			</Menu.Content>
+		</Menu.Root>
 	);
 };

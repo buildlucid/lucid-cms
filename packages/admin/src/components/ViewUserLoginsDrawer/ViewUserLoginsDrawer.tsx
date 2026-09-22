@@ -16,13 +16,13 @@ import {
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { FilterSection } from "@/components/FilterSection/FilterSection";
-import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import FilterToggle from "@/components/FilterToggle/FilterToggle";
+import Pagination from "@/components/Pagination/Pagination";
+import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QuerySort } from "@/components/QuerySort/QuerySort";
-import { Table } from "@/components/Table/Table";
+import QuerySort from "@/components/QuerySort/QuerySort";
+import Table from "@/components/Table/Table";
 import UserLoginTableRow from "@/components/UserLoginTableRow/UserLoginTableRow";
 import useQueryState, {
 	pagination,
@@ -102,7 +102,7 @@ const ViewUserLoginsPanelContent: Component<{
 		},
 		singleSort: true,
 	});
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 
 	// ---------------------------------
 	// Memos
@@ -131,10 +131,10 @@ const ViewUserLoginsPanelContent: Component<{
 			<Show when={props.id !== undefined}>
 				<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 					<div class="flex gap-2.5">
-						<FilterSectionToggle
+						<FilterToggle
 							open={filterSectionOpen()}
-							onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-							searchParams={loginsSearchParams}
+							onOpenChange={setFilterPanelOpen}
+							queryState={loginsSearchParams}
 						/>
 						<QuerySort
 							sorts={[
@@ -143,17 +143,17 @@ const ViewUserLoginsPanelContent: Component<{
 									key: "createdAt",
 								},
 							]}
-							searchParams={loginsSearchParams}
+							queryState={loginsSearchParams}
 						/>
 					</div>
 					<PerPageSelect
 						options={[5, 10, 20]}
-						searchParams={loginsSearchParams}
+						queryState={loginsSearchParams}
 					/>
 				</div>
-				<FilterSection
+				<FilterPanel
 					open={filterSectionOpen()}
-					setOpen={setFilterSectionOpen}
+					onOpenChange={setFilterPanelOpen}
 					subject={T()("panels.users.logins.title")}
 					fields={[
 						{
@@ -177,7 +177,7 @@ const ViewUserLoginsPanelContent: Component<{
 							type: "datetime",
 						},
 					]}
-					searchParams={loginsSearchParams}
+					queryState={loginsSearchParams}
 					embedded={true}
 				/>
 				<QueryBoundary
@@ -195,10 +195,10 @@ const ViewUserLoginsPanelContent: Component<{
 						"bg-card-base border border-border rounded-md",
 					)}
 				>
-					<Table
-						key={"user.logins"}
-						rows={userLogins.data?.data.length || 0}
-						searchParams={loginsSearchParams}
+					<Table.Root
+						id="user.logins"
+						rowCount={userLogins.data?.data.length || 0}
+						queryState={loginsSearchParams}
 						head={[
 							{
 								label: T()("common.auth.method"),
@@ -222,46 +222,19 @@ const ViewUserLoginsPanelContent: Component<{
 								sortable: true,
 							},
 						]}
-						state={{
-							isLoading: userLogins.isFetching,
-							isSuccess: userLogins.isSuccess,
-						}}
-						options={{
-							isSelectable: false,
-							padding: "16",
-						}}
-						theme="secondary"
+						isLoading={userLogins.isFetching}
+						padding="sm"
+						variant="secondary"
 					>
-						{({ include, isSelectable, selected, setSelected }) => (
-							<Index each={userLogins.data?.data || []}>
-								{(login, i) => (
-									<UserLoginTableRow
-										index={i}
-										login={login()}
-										include={include}
-										selected={selected[i]}
-										options={{
-											isSelectable,
-											padding: "16",
-										}}
-										callbacks={{
-											setSelected: setSelected,
-										}}
-										theme="secondary"
-									/>
-								)}
-							</Index>
-						)}
-					</Table>
+						<Index each={userLogins.data?.data || []}>
+							{(login, i) => <UserLoginTableRow index={i} login={login()} />}
+						</Index>
+					</Table.Root>
 				</QueryBoundary>
-				<PaginatedFooter
-					state={{
-						searchParams: loginsSearchParams,
-						meta: userLogins.data?.meta,
-					}}
-					options={{
-						embedded: true,
-					}}
+				<Pagination
+					queryState={loginsSearchParams}
+					meta={userLogins.data?.meta}
+					variant="inline"
 				/>
 			</Show>
 		</div>

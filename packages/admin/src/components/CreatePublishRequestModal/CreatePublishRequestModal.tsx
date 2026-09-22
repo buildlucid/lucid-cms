@@ -93,8 +93,7 @@ const CreatePublishRequestModal: Component<{
 		(reviewers.data?.data ?? []).map((reviewer) => ({
 			value: reviewer.id,
 			label:
-				helpers.formatUserName(reviewer, "simple") ||
-				T()("media.types.unknown"),
+				helpers.formatUserName(reviewer, "simple") || T()("common.unknown"),
 			user: reviewer,
 		})),
 	);

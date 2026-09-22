@@ -5,10 +5,10 @@ import { type Component, Index } from "solid-js";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import JobDetailsDrawer from "@/components/JobDetailsDrawer/JobDetailsDrawer";
 import JobTableRow from "@/components/JobTableRow/JobTableRow";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
-import { Table } from "@/components/Table/Table";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
+import Table from "@/components/Table/Table";
 import useQueryState, {
 	numberFilter,
 	sort,
@@ -83,8 +83,8 @@ export const JobsList: Component = () => {
 	// Render
 	return (
 		<>
-			<QueryRow
-				searchParams={searchParams}
+			<QueryToolbar
+				queryState={searchParams}
 				onRefresh={() => {
 					queryClient.invalidateQueries({
 						queryKey: queryKeys.jobs.list(),
@@ -93,117 +93,115 @@ export const JobsList: Component = () => {
 						queryKey: queryKeys.jobs.schedules(),
 					});
 				}}
-				filterSection={{
-					subject: T()("routes.system.jobs.title"),
-					fields: [
-						{ label: T()("jobs.id"), key: "jobId", type: "text" },
-						{ label: T()("jobs.name"), key: "jobName", type: "text" },
-						{
-							label: T()("jobs.version"),
-							key: "jobVersion",
-							type: "number",
-						},
-						{
-							label: T()("jobs.trigger.type"),
-							key: "triggerType",
-							type: "select",
-							options: [
-								{ label: T()("jobs.trigger.enqueue"), value: "enqueue" },
-								{ label: T()("common.schedule"), value: "schedule" },
-							],
-						},
-						{
-							label: T()("jobs.schedule.key"),
-							key: "scheduleKey",
-							type: "text",
-						},
-						{
-							label: T()("common.status"),
-							key: "status",
-							type: "select",
-							options: [
-								{ label: T()("common.status.queued"), value: "queued" },
-								{ label: T()("common.status.running"), value: "running" },
-								{
-									label: T()("common.status.completed"),
-									value: "completed",
-								},
-								{ label: T()("common.status.failed"), value: "failed" },
-								{
-									label: T()("common.status.cancelled"),
-									value: "cancelled",
-								},
-							],
-						},
-						{
-							label: T()("queue.adapter"),
-							key: "queueAdapterKey",
-							type: "text",
-						},
-						{
-							label: T()("jobs.dispatch.status"),
-							key: "dispatchStatus",
-							type: "select",
-							options: [
-								{ label: T()("common.status.pending"), value: "pending" },
-								{
-									label: T()("common.status.dispatched"),
-									value: "dispatched",
-								},
-							],
-						},
-						{
-							label: T()("common.attempts"),
-							key: "attempts",
-							type: "number",
-						},
-						{
-							label: T()("common.max.attempts"),
-							key: "maxAttempts",
-							type: "number",
-						},
-						{
-							label: T()("common.error.message"),
-							key: "errorMessage",
-							type: "text",
-						},
-						{
-							label: T()("common.created.by"),
-							key: "createdByUserId",
-							type: "user",
-						},
-						{
-							label: T()("common.created.at"),
-							key: "createdAt",
-							type: "datetime",
-						},
-						{
-							label: T()("common.available.at"),
-							key: "availableAt",
-							type: "datetime",
-						},
-						{
-							label: T()("common.started.at"),
-							key: "startedAt",
-							type: "datetime",
-						},
-						{
-							label: T()("common.completed.at"),
-							key: "completedAt",
-							type: "datetime",
-						},
-						{
-							label: T()("common.failed.at"),
-							key: "failedAt",
-							type: "datetime",
-						},
-						{
-							label: T()("common.cancelled.at"),
-							key: "cancelledAt",
-							type: "datetime",
-						},
-					],
-				}}
+				filterSubject={T()("routes.system.jobs.title")}
+				filterFields={[
+					{ label: T()("jobs.id"), key: "jobId", type: "text" },
+					{ label: T()("jobs.name"), key: "jobName", type: "text" },
+					{
+						label: T()("jobs.version"),
+						key: "jobVersion",
+						type: "number",
+					},
+					{
+						label: T()("jobs.trigger.type"),
+						key: "triggerType",
+						type: "select",
+						options: [
+							{ label: T()("jobs.trigger.enqueue"), value: "enqueue" },
+							{ label: T()("common.schedule"), value: "schedule" },
+						],
+					},
+					{
+						label: T()("jobs.schedule.key"),
+						key: "scheduleKey",
+						type: "text",
+					},
+					{
+						label: T()("common.status"),
+						key: "status",
+						type: "select",
+						options: [
+							{ label: T()("common.status.queued"), value: "queued" },
+							{ label: T()("common.status.running"), value: "running" },
+							{
+								label: T()("common.status.completed"),
+								value: "completed",
+							},
+							{ label: T()("common.status.failed"), value: "failed" },
+							{
+								label: T()("common.status.cancelled"),
+								value: "cancelled",
+							},
+						],
+					},
+					{
+						label: T()("queue.adapter"),
+						key: "queueAdapterKey",
+						type: "text",
+					},
+					{
+						label: T()("jobs.dispatch.status"),
+						key: "dispatchStatus",
+						type: "select",
+						options: [
+							{ label: T()("common.status.pending"), value: "pending" },
+							{
+								label: T()("common.status.dispatched"),
+								value: "dispatched",
+							},
+						],
+					},
+					{
+						label: T()("common.attempts"),
+						key: "attempts",
+						type: "number",
+					},
+					{
+						label: T()("common.max.attempts"),
+						key: "maxAttempts",
+						type: "number",
+					},
+					{
+						label: T()("common.error.message"),
+						key: "errorMessage",
+						type: "text",
+					},
+					{
+						label: T()("common.created.by"),
+						key: "createdByUserId",
+						type: "user",
+					},
+					{
+						label: T()("common.created.at"),
+						key: "createdAt",
+						type: "datetime",
+					},
+					{
+						label: T()("common.available.at"),
+						key: "availableAt",
+						type: "datetime",
+					},
+					{
+						label: T()("common.started.at"),
+						key: "startedAt",
+						type: "datetime",
+					},
+					{
+						label: T()("common.completed.at"),
+						key: "completedAt",
+						type: "datetime",
+					},
+					{
+						label: T()("common.failed.at"),
+						key: "failedAt",
+						type: "datetime",
+					},
+					{
+						label: T()("common.cancelled.at"),
+						key: "cancelledAt",
+						type: "datetime",
+					},
+				]}
 				sorts={[
 					{ label: T()("common.created.at"), key: "createdAt" },
 					{ label: T()("common.available.at"), key: "availableAt" },
@@ -212,8 +210,8 @@ export const JobsList: Component = () => {
 					{ label: T()("common.failed.at"), key: "failedAt" },
 					{ label: T()("common.attempts"), key: "attempts" },
 				]}
-				perPage={[]}
-				options={{ padding: "16" }}
+				perPage
+				padding="sm"
 			/>
 			<QueryBoundary
 				isError={jobs.isError}
@@ -229,10 +227,10 @@ export const JobsList: Component = () => {
 					jobs.isError || jobs.data?.data.length === 0 ? "-mb-4" : undefined,
 				)}
 			>
-				<Table
-					key={"jobs.list"}
-					rows={jobs.data?.data.length || 0}
-					searchParams={searchParams}
+				<Table.Root
+					id="jobs.list"
+					rowCount={jobs.data?.data.length || 0}
+					queryState={searchParams}
 					head={[
 						{
 							label: T()("common.status"),
@@ -268,38 +266,16 @@ export const JobsList: Component = () => {
 							icon: <FaSolidCalendar />,
 						},
 					]}
-					state={{
-						isLoading: jobs.isFetching,
-						isSuccess: jobs.isSuccess,
-					}}
-					options={{
-						isSelectable: false,
-						padding: "16",
-					}}
-					theme="contained"
+					isLoading={jobs.isFetching}
+					padding="sm"
+					variant="contained"
 				>
-					{({ include, isSelectable, selected, setSelected, theme }) => (
-						<Index each={jobs.data?.data || []}>
-							{(job, i) => (
-								<JobTableRow
-									index={i}
-									job={job()}
-									include={include}
-									selected={selected[i]}
-									rowTarget={rowTarget}
-									options={{
-										isSelectable,
-										padding: "16",
-									}}
-									callbacks={{
-										setSelected: setSelected,
-									}}
-									theme={theme}
-								/>
-							)}
-						</Index>
-					)}
-				</Table>
+					<Index each={jobs.data?.data || []}>
+						{(job, i) => (
+							<JobTableRow index={i} job={job()} rowTarget={rowTarget} />
+						)}
+					</Index>
+				</Table.Root>
 				<JobDetailsDrawer
 					id={rowTarget.getTargetId}
 					state={{
@@ -310,16 +286,12 @@ export const JobsList: Component = () => {
 					}}
 				/>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams,
-					meta: jobs.data?.meta,
-				}}
-				options={{
-					embedded: true,
-					padding: "16",
-					hideEmptyMessage: true,
-				}}
+			<Pagination
+				queryState={searchParams}
+				meta={jobs.data?.meta}
+				variant="inline"
+				padding="sm"
+				hideWhenEmpty
 			/>
 		</>
 	);

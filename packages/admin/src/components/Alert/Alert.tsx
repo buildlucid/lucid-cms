@@ -55,6 +55,7 @@ const Alert: Component<AlertProps> = (props) => {
 	// Render
 	return (
 		<div
+			data-alert
 			class={classnames(
 				"flex items-center border-border",
 				{

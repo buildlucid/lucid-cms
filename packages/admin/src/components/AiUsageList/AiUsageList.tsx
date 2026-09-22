@@ -9,9 +9,9 @@ import {
 import { type Component, Index } from "solid-js";
 import AiUsageTableRow from "@/components/AiUsageTableRow/AiUsageTableRow";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
@@ -51,10 +51,10 @@ export const AiUsageList: Component<{
 						: undefined,
 				)}
 			>
-				<Table
-					key={"ai-usage.list.v3"}
-					rows={aiUsage.data?.data.length || 0}
-					searchParams={props.state.searchParams}
+				<Table.Root
+					id="ai-usage.list"
+					rowCount={aiUsage.data?.data.length || 0}
+					queryState={props.state.searchParams}
 					head={[
 						{
 							label: T()("common.status"),
@@ -101,48 +101,21 @@ export const AiUsageList: Component<{
 							minWidth: 170,
 						},
 					]}
-					state={{
-						isLoading: aiUsage.isFetching,
-						isSuccess: aiUsage.isSuccess,
-					}}
-					options={{
-						isSelectable: false,
-						padding: "16",
-					}}
-					theme="contained"
+					isLoading={aiUsage.isFetching}
+					padding="sm"
+					variant="contained"
 				>
-					{({ include, isSelectable, selected, setSelected, theme }) => (
-						<Index each={aiUsage.data?.data || []}>
-							{(usage, i) => (
-								<AiUsageTableRow
-									index={i}
-									aiUsage={usage()}
-									include={include}
-									selected={selected[i]}
-									options={{
-										isSelectable,
-										padding: "16",
-									}}
-									callbacks={{
-										setSelected: setSelected,
-									}}
-									theme={theme}
-								/>
-							)}
-						</Index>
-					)}
-				</Table>
+					<Index each={aiUsage.data?.data || []}>
+						{(usage, i) => <AiUsageTableRow index={i} aiUsage={usage()} />}
+					</Index>
+				</Table.Root>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: props.state.searchParams,
-					meta: aiUsage.data?.meta,
-				}}
-				options={{
-					embedded: true,
-					padding: "16",
-					hideEmptyMessage: true,
-				}}
+			<Pagination
+				queryState={props.state.searchParams}
+				meta={aiUsage.data?.meta}
+				variant="inline"
+				padding="sm"
+				hideWhenEmpty
 			/>
 		</>
 	);

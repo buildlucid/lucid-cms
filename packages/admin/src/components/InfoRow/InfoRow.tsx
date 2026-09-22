@@ -44,6 +44,7 @@ const InfoRowRoot: Component<InfoRowRootProps> = (props) => {
 	// Render
 	return (
 		<div
+			data-info-row-root
 			class={classnames(
 				"w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-10 mb-5 last:mb-0",
 				props.class,
@@ -69,6 +70,7 @@ const InfoRowContent: Component<InfoRowContentProps> = (props) => {
 	// Render
 	return (
 		<div
+			data-info-row-content
 			class={classnames(
 				"rounded-md border border-border bg-card-base p-4",
 				props.class,

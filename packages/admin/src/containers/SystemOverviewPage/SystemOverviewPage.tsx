@@ -111,8 +111,7 @@ const SystemOverviewPage: Component = () => {
 							})}
 						>
 							<DetailsList
-								type="text"
-								theme="contained"
+								variant="plain"
 								items={[
 									{
 										label: T()("common.stored"),
@@ -140,8 +139,7 @@ const SystemOverviewPage: Component = () => {
 					>
 						<InfoRow.Content title={T()("system.email.delivery.title")}>
 							<DetailsList
-								type="text"
-								theme="contained"
+								variant="plain"
 								items={[
 									{
 										label: T()("common.simulated"),
@@ -183,8 +181,7 @@ const SystemOverviewPage: Component = () => {
 							description={T()("system.adapters.description")}
 						>
 							<DetailsList
-								type="text"
-								theme="contained"
+								variant="plain"
 								items={[
 									{
 										label: T()("common.runtime"),
@@ -224,8 +221,7 @@ const SystemOverviewPage: Component = () => {
 							)}
 						>
 							<DetailsList
-								type="text"
-								theme="contained"
+								variant="plain"
 								items={
 									contentLocales().map((locale) => ({
 										label: locale.name || locale.code,

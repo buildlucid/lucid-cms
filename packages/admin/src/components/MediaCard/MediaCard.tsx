@@ -2,12 +2,12 @@ import { createDraggable } from "@thisbeyond/solid-dnd";
 import type { Media } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
-import ActionMenubar, {
-	type ActionMenubarItem,
-} from "@/components/ActionMenubar/ActionMenubar";
+import ActionMenu, {
+	type ActionMenuItem,
+} from "@/components/ActionMenu/ActionMenu";
 import AspectRatio from "@/components/AspectRatio/AspectRatio";
 import Checkbox from "@/components/Checkbox/Checkbox";
-import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
+import Copy from "@/components/Copy/Copy";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import { mediaStatusBorderClass } from "@/components/MediaStatusPreview/MediaStatusPreview";
 import { Permissions } from "@/constants/permissions";
@@ -144,7 +144,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			props.onCrop !== undefined
 		);
 	});
-	const actionMenuActions = createMemo<ActionMenubarItem[]>(() => [
+	const actionMenuActions = createMemo<ActionMenuItem[]>(() => [
 		{
 			label: T()("common.preview"),
 			type: "button",
@@ -168,7 +168,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onClick: () => openMediaAction("restore"),
 			permission: hasUpdatePermission(),
 			hide: props.showingDeleted?.() === false,
-			theme: "primary",
+			variant: "primary",
 		},
 		{
 			label: T()("media.images.action"),
@@ -210,7 +210,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					icon: "broom",
 					onClick: () => openMediaAction("clear"),
 					permission: hasUpdatePermission(),
-					theme: "error",
+					variant: "error",
 				},
 			],
 		},
@@ -240,7 +240,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					icon: "trash",
 					onClick: () => openMediaAction("deleteAllShareLinks"),
 					permission: hasUpdatePermission(),
-					theme: "error",
+					variant: "error",
 				},
 			],
 		},
@@ -259,7 +259,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onClick: () => openMediaAction("delete"),
 			permission: hasDeletePermission(),
 			hide: props.showingDeleted?.(),
-			theme: "error",
+			variant: "error",
 		},
 		{
 			label: T()("actions.delete.permanently"),
@@ -268,7 +268,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onClick: () => openMediaAction("deletePermanently"),
 			permission: hasDeletePermission(),
 			hide: props.showingDeleted?.() === false,
-			theme: "error",
+			variant: "error",
 		},
 	]);
 
@@ -307,13 +307,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			onKeyPress={() => {}}
 		>
 			<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
-				<ActionMenubar
-					actions={actionMenuActions()}
-					options={{
-						border: true,
-						placement: "bottom-start",
-					}}
-				/>
+				<ActionMenu actions={actionMenuActions()} placement="bottom-start" />
 			</div>
 			{/* Image */}
 			<AspectRatio
@@ -366,9 +360,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					</Show>
 					<div class="min-w-0 flex-1">
 						<h3 class="mb-0.5 line-clamp-1 text-sm">{displayTitle() || "-"}</h3>
-						<ClickToCopy
-							type="simple"
-							text={props.media.key}
+						<Copy.Button
+							label={props.media.key}
 							value={props.media.url}
 							class="text-xs"
 						/>

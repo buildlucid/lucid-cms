@@ -1,18 +1,14 @@
 import type { Role } from "@types";
 import type { Component } from "solid-js";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
+import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import type { TableRowProps } from "@/types/components";
 
-interface RoleRowProps extends TableRowProps {
+interface RoleRowProps {
+	index: number;
 	role: Role;
-	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"view" | "update" | "delete">>;
 }
 
@@ -27,9 +23,8 @@ const RoleTableRow: Component<RoleRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
+		<Table.Row
 			index={props.index}
-			selected={props.selected}
 			actions={
 				props.role.locked
 					? [
@@ -42,6 +37,7 @@ const RoleTableRow: Component<RoleRowProps> = (props) => {
 									props.rowTarget.setTrigger("view", true);
 								},
 								permission: canRead(),
+								sortOrder: 0,
 							},
 						]
 					: [
@@ -54,34 +50,24 @@ const RoleTableRow: Component<RoleRowProps> = (props) => {
 									props.rowTarget.setTrigger("update", true);
 								},
 								permission: canUpdate(),
+								sortOrder: 0,
 							},
 						]
 			}
-			options={props.options}
-			callbacks={props.callbacks}
 		>
-			<TableTextCell
-				text={props.role.name}
-				options={{ include: props?.include[0] }}
-			/>
-			<TablePillCell
+			<Table.Text column="name" text={props.role.name} />
+			<Table.Pill
+				column="locked"
 				text={
 					props.role.locked
 						? T()("common.status.locked")
 						: T()("common.status.unlocked")
 				}
 				variant={props.role.locked ? "warning-subtle" : "outline"}
-				options={{ include: props?.include[1] }}
 			/>
-			<TableDateCell
-				date={props.role.createdAt}
-				options={{ include: props?.include[2] }}
-			/>
-			<TableDateCell
-				date={props.role.updatedAt}
-				options={{ include: props?.include[3] }}
-			/>
-		</TableRow>
+			<Table.Date column="createdAt" date={props.role.createdAt} />
+			<Table.Date column="updatedAt" date={props.role.updatedAt} />
+		</Table.Row>
 	);
 };
 

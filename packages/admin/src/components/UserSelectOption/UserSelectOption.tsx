@@ -29,13 +29,13 @@ const UserSelectOption: Component<{
 							props.user.username ??
 							props.user.email ??
 							props.label ??
-							T()("media.types.unknown"),
+							T()("common.unknown"),
 						firstName: props.user.firstName,
 						lastName: props.user.lastName,
 						profilePicture: props.user.profilePicture,
 					}}
-					mode="icon"
-					size="x-small"
+					variant="icon"
+					size="xs"
 				/>
 				<span class="truncate">{props.label}</span>
 			</span>

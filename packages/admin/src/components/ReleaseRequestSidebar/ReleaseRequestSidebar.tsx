@@ -104,15 +104,9 @@ const PublishOperationUserDetailValue: Component<{
 	<Show when={props.user} fallback="-">
 		{(user) => (
 			<UserDisplay
-				user={{
-					username:
-						user().username ?? user().email ?? T()("media.types.unknown"),
-					firstName: user().firstName,
-					lastName: user().lastName,
-					profilePicture: user().profilePicture,
-				}}
-				mode="short"
-				size="x-small"
+				user={user()}
+				variant="horizontal"
+				size="xs"
 				nameFormat="simple"
 			/>
 		)}
@@ -617,7 +611,11 @@ export const ReleaseRequestSidebar: Component<{
 					icon={<FaSolidCircleInfo size={12} />}
 					preferenceKey="releaseRequest.sidebar.details"
 				>
-					<DetailsList type="text" padding={12} items={requestDetails()} />
+					<DetailsList
+						class="mb-6 last:mb-0"
+						padding="sm"
+						items={requestDetails()}
+					/>
 				</DocumentSidebarSection>
 
 				<Show
@@ -703,17 +701,9 @@ export const ReleaseRequestSidebar: Component<{
 										{(assignee) => (
 											<div class="flex min-w-0 items-center gap-2 border-b border-border px-3 py-2 text-sm text-title last:border-b-0">
 												<UserDisplay
-													user={{
-														username:
-															assignee.user.username ??
-															assignee.user.email ??
-															T()("media.types.unknown"),
-														firstName: assignee.user.firstName,
-														lastName: assignee.user.lastName,
-														profilePicture: assignee.user.profilePicture,
-													}}
-													mode="icon"
-													size="x-small"
+													user={assignee.user}
+													variant="icon"
+													size="xs"
 												/>
 												<span class="min-w-0 truncate">
 													{helpers.formatUserName(assignee.user, "simple") ||

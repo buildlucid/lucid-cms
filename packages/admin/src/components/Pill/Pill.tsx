@@ -145,6 +145,7 @@ const Pill: Component<PillProps> = (props) => {
 		return (
 			<button
 				{...buttonProps}
+				data-pill
 				type={buttonProps.type ?? "button"}
 				class={classes()}
 				title={local.tooltip}
@@ -157,7 +158,7 @@ const Pill: Component<PillProps> = (props) => {
 	const spanProps = rest as Omit<PillSpanProps, keyof PillBaseProps | "as">;
 
 	return (
-		<span {...spanProps} class={classes()} title={local.tooltip}>
+		<span {...spanProps} data-pill class={classes()} title={local.tooltip}>
 			{local.children}
 		</span>
 	);

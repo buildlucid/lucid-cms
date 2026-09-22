@@ -31,7 +31,7 @@ import {
 	Switch,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
+import Copy from "@/components/Copy/Copy";
 import DateText from "@/components/DateText/DateText";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Link from "@/components/Link/Link";
@@ -352,9 +352,8 @@ const TimelineDetails: Component<{
 										fallback={<span class="text-body">-</span>}
 									>
 										{(contentId) => (
-											<ClickToCopy
-												type="simple"
-												text={contentId()}
+											<Copy.Button
+												label={contentId()}
 												value={contentId()}
 												class="text-xs"
 											/>
@@ -682,15 +681,9 @@ const AuthorDisplay: Component<{
 	>
 		{(user) => (
 			<UserDisplay
-				user={{
-					username:
-						user().username ?? user().email ?? T()("media.types.unknown"),
-					firstName: user().firstName,
-					lastName: user().lastName,
-					profilePicture: user().profilePicture,
-				}}
-				mode="short"
-				size="x-small"
+				user={user()}
+				variant="horizontal"
+				size="xs"
 				nameFormat="simple"
 			/>
 		)}

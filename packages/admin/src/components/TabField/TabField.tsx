@@ -1,11 +1,8 @@
 import type { FieldError } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo } from "solid-js";
-import {
-	type AnimatedTabItem,
-	AnimatedTabs,
-} from "@/components/AnimatedTabs/AnimatedTabs";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
+import Tabs, { type TabsItem } from "@/components/Tabs/Tabs";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
@@ -28,7 +25,7 @@ export const TabField: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const items = createMemo<AnimatedTabItem[]>(() =>
+	const items = createMemo<TabsItem[]>(() =>
 		props.tabs.map((tab) => {
 			const errorCount = countFieldErrorsForKeys(
 				props.fieldErrors,
@@ -48,8 +45,7 @@ export const TabField: Component<{
 						<FieldErrorBadge count={errorCount} compact />
 					</>
 				),
-				previewFocusOpen: props.getActiveTab() === tab.key,
-				class: classNames("gap-1.5 px-2.5 py-1.5", {
+				class: classNames({
 					"border border-transparent": errorCount === 0,
 					"border border-error-base/50 bg-error-base/5 focus-visible:ring-error-base!":
 						errorCount > 0,
@@ -61,14 +57,12 @@ export const TabField: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<AnimatedTabs
+		<Tabs.Root
 			items={items()}
 			activeKey={props.getActiveTab()}
 			onSelect={props.setActiveTab}
-			class={props.class}
-			listClass="gap-1"
-			indicatorClass="shadow-xs"
 			fullWidth={true}
+			class={props.class}
 		/>
 	);
 };

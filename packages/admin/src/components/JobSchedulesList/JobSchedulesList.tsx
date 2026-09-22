@@ -4,12 +4,12 @@ import { FaSolidCalendar, FaSolidCircleCheck, FaSolidT } from "solid-icons/fa";
 import { type Component, createMemo, Index } from "solid-js";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import JobScheduleTableRow from "@/components/JobScheduleTableRow/JobScheduleTableRow";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import ScheduleDetailsDrawer from "@/components/ScheduleDetailsDrawer/ScheduleDetailsDrawer";
 import SetScheduleStateModal from "@/components/SetScheduleStateModal/SetScheduleStateModal";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import ViewScheduleRunsDrawer from "@/components/ViewScheduleRunsDrawer/ViewScheduleRunsDrawer";
 import useQueryState, {
 	pagination,
@@ -66,36 +66,34 @@ export const JobSchedulesList: Component = () => {
 	// Render
 	return (
 		<>
-			<QueryRow
-				searchParams={searchParams}
+			<QueryToolbar
+				queryState={searchParams}
 				onRefresh={() => {
 					queryClient.invalidateQueries({
 						queryKey: queryKeys.jobs.schedules(),
 					});
 				}}
-				filterSection={{
-					subject: T()("routes.system.jobs.schedules.title"),
-					fields: [
-						{ label: T()("common.schedule"), key: "name", type: "text" },
-						{ label: T()("jobs.name"), key: "jobName", type: "text" },
-						{
-							label: T()("common.status"),
-							key: "state",
-							type: "select",
-							options: [
-								{ label: T()("common.status.active"), value: "active" },
-								{ label: T()("common.status.paused"), value: "paused" },
-							],
-						},
-					],
-				}}
+				filterSubject={T()("routes.system.jobs.schedules.title")}
+				filterFields={[
+					{ label: T()("common.schedule"), key: "name", type: "text" },
+					{ label: T()("jobs.name"), key: "jobName", type: "text" },
+					{
+						label: T()("common.status"),
+						key: "state",
+						type: "select",
+						options: [
+							{ label: T()("common.status.active"), value: "active" },
+							{ label: T()("common.status.paused"), value: "paused" },
+						],
+					},
+				]}
 				sorts={[
 					{ label: T()("common.schedule"), key: "name" },
 					{ label: T()("jobs.name"), key: "jobName" },
 					{ label: T()("jobs.schedules.next.run"), key: "nextRunAt" },
 				]}
 				perPage={[5, 10, 20]}
-				options={{ padding: "16" }}
+				padding="sm"
 			/>
 			<QueryBoundary
 				isError={schedules.isError}
@@ -113,10 +111,10 @@ export const JobSchedulesList: Component = () => {
 						: undefined,
 				)}
 			>
-				<Table
-					key="jobs.schedules.list"
-					rows={schedules.data?.data.length ?? 0}
-					searchParams={searchParams}
+				<Table.Root
+					id="jobs.schedules.list"
+					rowCount={schedules.data?.data.length ?? 0}
+					queryState={searchParams}
 					head={[
 						{
 							label: T()("common.status"),
@@ -149,42 +147,31 @@ export const JobSchedulesList: Component = () => {
 							icon: <FaSolidCircleCheck />,
 						},
 					]}
-					state={{
-						isLoading: schedules.isFetching,
-						isSuccess: schedules.isSuccess,
-					}}
-					options={{ isSelectable: false, padding: "16" }}
-					theme="contained"
+					isLoading={schedules.isFetching}
+					padding="sm"
+					variant="contained"
 				>
-					{({ include, isSelectable, selected, setSelected, theme }) => (
-						<Index each={schedules.data?.data ?? []}>
-							{(schedule, index) => (
-								<JobScheduleTableRow
-									index={index}
-									schedule={schedule()}
-									include={include}
-									selected={selected[index]}
-									rowTarget={rowTarget}
-									options={{ isSelectable, padding: "16" }}
-									callbacks={{ setSelected }}
-									theme={theme}
-									triggerPending={trigger.action.isPending}
-									onTrigger={() =>
-										trigger.action.mutate({ scheduleKey: schedule().key })
-									}
-								/>
-							)}
-						</Index>
-					)}
-				</Table>
+					<Index each={schedules.data?.data ?? []}>
+						{(schedule, index) => (
+							<JobScheduleTableRow
+								index={index}
+								schedule={schedule()}
+								rowTarget={rowTarget}
+								triggerPending={trigger.action.isPending}
+								onTrigger={() =>
+									trigger.action.mutate({ scheduleKey: schedule().key })
+								}
+							/>
+						)}
+					</Index>
+				</Table.Root>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{ searchParams, meta: schedules.data?.meta }}
-				options={{
-					embedded: true,
-					padding: "16",
-					hideEmptyMessage: true,
-				}}
+			<Pagination
+				queryState={searchParams}
+				meta={schedules.data?.meta}
+				variant="inline"
+				padding="sm"
+				hideWhenEmpty
 			/>
 
 			<ScheduleDetailsDrawer

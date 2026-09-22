@@ -1,46 +1,38 @@
 import { documentSlots } from "virtual:lucid-admin";
 import type { Collection, InternalCollectionDocument, Refs } from "@types";
 import { type Component, createMemo, For, Show } from "solid-js";
-import type { ActionDropdownProps } from "@/components/ActionDropdown/ActionDropdown";
+import type { ActionMenuProps } from "@/components/ActionMenu/ActionMenu";
 import DocumentSlotCell from "@/components/DocumentSlotCell/DocumentSlotCell";
-import type { TableRowReorder, TableTheme } from "@/components/Table/Table";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableSelectionCell from "@/components/TableSelectionCell/TableSelectionCell";
+import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
+import Table from "@/components/Table/Table";
 import { createFieldState } from "@/extensions/editor/field-state";
 import { resolveSlots } from "@/extensions/slot-policy";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
-import type { TableRowProps } from "@/types/components";
-import DocumentAuthorCol from "./parts/DocumentAuthorCol";
-import DocumentDynamicColumns from "./parts/DocumentDynamicColumns";
-import DocumentEnvironmentStatusCol from "./parts/DocumentEnvironmentStatusCol";
-import WorkflowAssigneeCol from "./parts/WorkflowAssigneeCol";
-import WorkflowStageCol from "./parts/WorkflowStageCol";
+import DocumentAuthorCell from "./parts/DocumentAuthorCell";
+import DocumentDynamicCell from "./parts/DocumentDynamicCell";
+import DocumentEnvironmentStatusCell from "./parts/DocumentEnvironmentStatusCell";
+import WorkflowAssigneeCell from "./parts/WorkflowAssigneeCell";
+import WorkflowStageCell from "./parts/WorkflowStageCell";
 
-interface DocumentRowProps extends TableRowProps {
+interface DocumentRowProps {
+	index: number;
 	document: InternalCollectionDocument;
 	refs?: Refs;
 	collection: Collection;
 	collectionsByKey?: Map<string, Collection>;
 	fieldInclude: CollectionLeafFieldConfig[];
 	extensions?: boolean;
-	include: boolean[];
-	actions?: ActionDropdownProps["actions"];
+	actions?: ActionMenuProps["actions"];
 	contentLocale?: string;
 	showEnvironmentStatus?: boolean;
-	callbacks?: {
-		setSelected?: (i: number) => void;
-		onClick?: () => void;
-	};
+	onClick?: () => void;
+	/** Opt-in leading checkbox the host drives itself, under the "select" column. */
 	selection?: {
 		selected: boolean;
 		onChange: () => void;
 	};
 	current?: boolean;
-	theme?: TableTheme;
-	reorder?: {
-		rowReorder: TableRowReorder;
-	};
+	reorderable?: boolean;
 }
 
 const DocumentTableRow: Component<DocumentRowProps> = (props) => {
@@ -62,34 +54,17 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 		contentLocale: props.contentLocale ?? "",
 		refs: props.refs,
 	});
-	const fieldColumnCount = () => props.fieldInclude.length + additions().length;
-	const includeOffset = () => (props.selection ? 1 : 0);
-	const environmentOffset = () =>
-		props.showEnvironmentStatus
-			? props.collection.publishing.targets.length
-			: 0;
-	const workflowOffset = () => (props.collection.publishing.workflow ? 2 : 0);
-	const authorStartIndex = () =>
-		includeOffset() +
-		environmentOffset() +
-		fieldColumnCount() +
-		workflowOffset();
 
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
+		<Table.Row
 			index={props.index}
-			selected={props.selected}
-			options={props.options}
-			callbacks={props.callbacks}
 			actions={props.actions}
-			onClick={props.callbacks?.onClick}
+			onClick={props.onClick}
 			current={props.current}
-			theme={props.theme}
-			reorder={props.reorder}
 			viewTransitionName={
-				props.reorder?.rowReorder.enabled
+				props.reorderable
 					? `document-table-row-${props.document.collectionKey}-${props.document.id}`
 					: undefined
 			}
@@ -97,16 +72,15 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 			<Show when={props.selection}>
 				{(selection) => (
 					<TableSelectionCell
+						column="select"
 						type="td"
 						value={selection().selected}
 						onChange={selection().onChange}
-						theme={props.theme}
-						padding={props.options?.padding}
 					/>
 				)}
 			</Show>
 			<For each={props.fieldInclude}>
-				{(field, i) => {
+				{(field) => {
 					const override = createMemo(() =>
 						props.extensions
 							? resolveSlots(
@@ -121,12 +95,11 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 						<Show
 							when={override()}
 							fallback={
-								<DocumentDynamicColumns
+								<DocumentDynamicCell
+									column={field.key}
 									field={field}
 									document={props.document}
 									refs={props.refs}
-									include={props.include}
-									index={includeOffset() + i()}
 									collectionLocalized={props.collection.localized !== false}
 									collectionsByKey={props.collectionsByKey}
 								/>
@@ -134,8 +107,8 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 						>
 							{(entry) => (
 								<DocumentSlotCell
+									column={field.key}
 									entry={entry()}
-									include={props.include[includeOffset() + i()] ?? true}
 									data={{
 										...data(),
 										slot: "document.columnOverride",
@@ -156,71 +129,51 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 				}}
 			</For>
 			<For each={additions()}>
-				{(entry, index) => (
+				{(entry) => (
 					<DocumentSlotCell
+						column={`extension:${entry.key}`}
 						entry={entry}
-						include={
-							props.include[
-								includeOffset() + props.fieldInclude.length + index()
-							] ?? true
-						}
 						data={{ ...data(), slot: "document.columnAddition" }}
 					/>
 				)}
 			</For>
 			<Show when={props.showEnvironmentStatus}>
 				<For each={props.collection.publishing.targets}>
-					{(environment, i) => (
-						<DocumentEnvironmentStatusCol
+					{(environment) => (
+						<DocumentEnvironmentStatusCell
+							column={`envStatus.${environment.key}`}
 							document={props.document}
 							environmentKey={environment.key}
-							include={props.include}
-							index={includeOffset() + fieldColumnCount() + i()}
-							padding={props.options?.padding}
 						/>
 					)}
 				</For>
 			</Show>
 			<Show when={props.collection.publishing.workflow}>
-				<WorkflowStageCol
+				<WorkflowStageCell
+					column="workflowStage"
 					document={props.document}
 					collection={props.collection}
-					include={props.include}
-					index={includeOffset() + environmentOffset() + fieldColumnCount()}
 				/>
-				<WorkflowAssigneeCol
+				<WorkflowAssigneeCell
+					column="workflowAssignee"
 					document={props.document}
 					refs={props.refs}
-					include={props.include}
-					index={includeOffset() + environmentOffset() + fieldColumnCount() + 1}
 				/>
 			</Show>
-			<DocumentAuthorCol
+			<DocumentAuthorCell
+				column="createdBy"
 				userId={props.document.createdBy}
 				refs={props.refs}
-				options={{
-					include: props.include[authorStartIndex()],
-					padding: props.options?.padding,
-					minWidth: 180,
-				}}
+				minWidth={180}
 			/>
-			<DocumentAuthorCol
+			<DocumentAuthorCell
+				column="updatedBy"
 				userId={props.document.updatedBy}
 				refs={props.refs}
-				options={{
-					include: props.include[authorStartIndex() + 1],
-					padding: props.options?.padding,
-					minWidth: 180,
-				}}
+				minWidth={180}
 			/>
-			<TableDateCell
-				date={props.document.updatedAt}
-				options={{
-					include: props?.include[authorStartIndex() + 2],
-					padding: props.options?.padding,
-				}}
-			/>
-		</TableRow>
+			<Table.Date column="updatedAt" date={props.document.updatedAt} />
+		</Table.Row>
 	);
 };
 

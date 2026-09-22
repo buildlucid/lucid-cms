@@ -40,6 +40,7 @@ const EmptyState: Component<EmptyStateProps> = (props) => {
 	// Render
 	return (
 		<div
+			data-empty-state
 			class={classnames(
 				"flex items-center justify-center px-4 py-8 md:px-6 md:py-10",
 				props.class,

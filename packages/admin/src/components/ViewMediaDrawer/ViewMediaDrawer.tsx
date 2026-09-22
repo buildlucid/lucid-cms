@@ -239,7 +239,7 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 						</Show>
 						<Show when={activeTab() === "meta" && props.id !== undefined}>
 							<DetailsList
-								type="text"
+								class="mb-6 last:mb-0"
 								items={[
 									{
 										label: T()("common.file.size"),

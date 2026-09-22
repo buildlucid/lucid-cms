@@ -24,7 +24,7 @@ import ThemeLogoIcon from "@/components/ThemeLogoIcon/ThemeLogoIcon";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
 import { LucidError } from "@/utils/error-handling";
-import getMediaPreviewUrl from "@/utils/media-preview";
+import mediaUrl from "@/utils/media-url";
 
 const OAuthConsentPage: Component = () => {
 	// ----------------------------------------
@@ -196,7 +196,7 @@ const OAuthConsentPage: Component = () => {
 											<span class="h-px w-7 bg-border" aria-hidden="true" />
 											<IconContainer class="overflow-hidden bg-white!">
 												<img
-													src={getMediaPreviewUrl(logo(), "thumbnail-small")}
+													src={mediaUrl(logo(), "thumbnail-small")}
 													alt={T()("oauth.consent.client.logo.alt", {
 														name: authorization().clientName,
 													})}

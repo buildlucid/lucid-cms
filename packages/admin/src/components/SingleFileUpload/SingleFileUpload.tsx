@@ -17,12 +17,12 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import ActionDropdown, {
-	type ActionDropdownProps,
-} from "@/components/ActionDropdown/ActionDropdown";
 import ActionIcon, {
 	type ActionIconName,
 } from "@/components/ActionIcon/ActionIcon";
+import ActionMenu, {
+	type ActionMenuProps,
+} from "@/components/ActionMenu/ActionMenu";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import FocalPointEditorModal, {
 	type FocalPoint,
@@ -471,7 +471,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 			},
 		].filter((action) => action.hide !== true);
 	});
-	const overflowActions = createMemo<ActionDropdownProps["actions"]>(() => {
+	const overflowActions = createMemo<ActionMenuProps["actions"]>(() => {
 		return [
 			{
 				label: T()("common.preview"),
@@ -479,6 +479,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				icon: "eye" as const,
 				hide: !isReady() || props.actions.downloadFile === undefined,
 				onClick: () => props.actions.downloadFile?.(),
+				sortOrder: 0,
 			},
 			{
 				label: T()("media.focal.point.label"),
@@ -486,14 +487,16 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 				icon: "bullseye" as const,
 				hide: !showFocalPoint(),
 				onClick: () => setFocalEditorOpen(true),
+				sortOrder: 30,
 			},
 			{
 				label: T()("common.remove"),
 				type: "button" as const,
 				icon: "trash" as const,
 				hide: props.actions.clearFile === undefined,
-				theme: "error" as const,
 				onClick: () => props.actions.clearFile?.(),
+				variant: "error" as const,
+				sortOrder: 70,
 			},
 		];
 	});
@@ -543,14 +546,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 			</Show>
 			<div class="absolute right-3 top-3 z-30 flex max-w-[calc(100%-24px)] flex-wrap items-center justify-end gap-1">
 				<div class="order-2">
-					<ActionDropdown
-						actions={overflowActions()}
-						options={{
-							border: true,
-							placement: "bottom-end",
-							raised: true,
-						}}
-					/>
+					<ActionMenu actions={overflowActions()} placement="bottom-end" />
 				</div>
 				<div class="order-1 flex flex-wrap items-center justify-end gap-1 opacity-100 transition-opacity duration-200 md:pointer-events-none md:opacity-0 md:group-focus-within:pointer-events-auto md:group-focus-within:opacity-100 md:group-hover:pointer-events-auto md:group-hover:opacity-100">
 					<For each={quickActions()}>

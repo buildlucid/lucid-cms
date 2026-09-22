@@ -135,7 +135,11 @@ export const revealPreviewField = async (
 			waitMs,
 		});
 		if (!trigger) return null;
-		if (trigger.dataset.previewFocusOpen !== "true") trigger.click();
+		//* collapsibles say so themselves, a tab is open when it is selected
+		const isOpen =
+			trigger.dataset.previewFocusOpen === "true" ||
+			trigger.getAttribute("aria-selected") === "true";
+		if (!isOpen) trigger.click();
 	}
 
 	const field = await waitForElement({

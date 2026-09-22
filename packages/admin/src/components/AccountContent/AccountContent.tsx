@@ -192,8 +192,7 @@ export const AccountContent: Component = () => {
 					align="center"
 				>
 					<DetailsList
-						type="text"
-						theme="contained"
+						variant="plain"
 						items={[
 							{
 								label: T()("common.first.name"),

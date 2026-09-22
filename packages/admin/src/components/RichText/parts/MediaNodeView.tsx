@@ -13,7 +13,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
+import Copy from "@/components/Copy/Copy";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
 import { resolveFieldErrorMessage } from "@/utils/error-helpers";
@@ -247,9 +247,8 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 										{title()}
 									</p>
 									<div class="flex min-w-0 items-center gap-2 mt-1">
-										<ClickToCopy
-											type="simple"
-											text={reference().key}
+										<Copy.Button
+											label={reference().key}
 											value={reference().url}
 											class="max-w-full text-xs text-unfocused"
 										/>

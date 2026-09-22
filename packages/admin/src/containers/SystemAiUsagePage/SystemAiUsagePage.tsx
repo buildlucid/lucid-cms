@@ -10,7 +10,7 @@ import { AiUsageList } from "@/components/AiUsageList/AiUsageList";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
 import constants from "@/constants";
 import useQueryState, {
@@ -117,83 +117,81 @@ const SystemAiUsagePage: Component = () => {
 					>
 						<InfoRow.Content>
 							<div class="-mx-4 overflow-hidden">
-								<QueryRow
-									searchParams={searchParams}
+								<QueryToolbar
+									queryState={searchParams}
 									onRefresh={() => {
 										queryClient.invalidateQueries({
 											queryKey: queryKeys.ai.usage(),
 										});
 									}}
-									filterSection={{
-										subject: T()("ai.usage.records.title"),
-										fields: [
-											{
-												label: T()("ai.usage.feature"),
-												key: "featureKey",
-												type: "select",
-												options: featureOptions(),
-											},
-											{
-												label: T()("common.status"),
-												key: "status",
-												type: "select",
-												options: [
-													{
-														label: T()("common.status.pending"),
-														value: "pending" satisfies AiUsageStatus,
-													},
-													{
-														label: T()("common.status.success"),
-														value: "success" satisfies AiUsageStatus,
-													},
-													{
-														label: T()("common.status.failed"),
-														value: "failed" satisfies AiUsageStatus,
-													},
-												],
-											},
-											{
-												label: T()("ai.usage.model"),
-												key: "model",
-												type: "text",
-											},
-											{
-												label: T()("common.user"),
-												key: "userId",
-												type: "user",
-											},
-											{
-												label: T()("common.request.id"),
-												key: "requestId",
-												type: "text",
-											},
-											{
-												label: T()("ai.usage.provider.request.id"),
-												key: "providerRequestId",
-												type: "text",
-											},
-											{
-												label: T()("ai.usage.feature.version"),
-												key: "featureVersion",
-												type: "text",
-											},
-											{
-												label: T()("ai.usage.target.type"),
-												key: "targetType",
-												type: "text",
-											},
-											{
-												label: T()("ai.usage.elapsed"),
-												key: "durationMs",
-												type: "number",
-											},
-											{
-												label: T()("ai.usage.initiated"),
-												key: "createdAt",
-												type: "datetime",
-											},
-										],
-									}}
+									filterSubject={T()("ai.usage.records.title")}
+									filterFields={[
+										{
+											label: T()("ai.usage.feature"),
+											key: "featureKey",
+											type: "select",
+											options: featureOptions(),
+										},
+										{
+											label: T()("common.status"),
+											key: "status",
+											type: "select",
+											options: [
+												{
+													label: T()("common.status.pending"),
+													value: "pending" satisfies AiUsageStatus,
+												},
+												{
+													label: T()("common.status.success"),
+													value: "success" satisfies AiUsageStatus,
+												},
+												{
+													label: T()("common.status.failed"),
+													value: "failed" satisfies AiUsageStatus,
+												},
+											],
+										},
+										{
+											label: T()("ai.usage.model"),
+											key: "model",
+											type: "text",
+										},
+										{
+											label: T()("common.user"),
+											key: "userId",
+											type: "user",
+										},
+										{
+											label: T()("common.request.id"),
+											key: "requestId",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.provider.request.id"),
+											key: "providerRequestId",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.feature.version"),
+											key: "featureVersion",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.target.type"),
+											key: "targetType",
+											type: "text",
+										},
+										{
+											label: T()("ai.usage.elapsed"),
+											key: "durationMs",
+											type: "number",
+										},
+										{
+											label: T()("ai.usage.initiated"),
+											key: "createdAt",
+											type: "datetime",
+										},
+									]}
 									sorts={[
 										{
 											label: T()("ai.usage.initiated"),
@@ -209,9 +207,7 @@ const SystemAiUsagePage: Component = () => {
 										},
 									]}
 									perPage={[10, 20, 40]}
-									options={{
-										padding: "16",
-									}}
+									padding="sm"
 								/>
 								<AiUsageList
 									state={{

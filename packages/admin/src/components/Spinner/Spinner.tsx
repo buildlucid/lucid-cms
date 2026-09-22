@@ -25,7 +25,7 @@ const Spinner: Component<SpinnerProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={props.class}>
+		<div data-spinner class={props.class}>
 			<svg
 				aria-hidden="true"
 				class={classnames("animate-spin text-card-hover fill-primary-base", {

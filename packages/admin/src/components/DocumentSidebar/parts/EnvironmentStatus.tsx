@@ -66,6 +66,7 @@ export const EnvironmentStatus: Component<{
 						fallback: environment.key,
 					}) || environment.key,
 				value: getDocumentEnvironmentStatusLabel(status),
+				type: "pill" as const,
 				pillVariant: statusVariants[status],
 				pillSize: "xs",
 			};
@@ -81,7 +82,11 @@ export const EnvironmentStatus: Component<{
 				icon={<FaSolidCloudArrowUp size={12} />}
 				preferenceKey="pageBuilder.sidebar.environmentStatus"
 			>
-				<DetailsList type="pill" padding={12} items={statusItems()} />
+				<DetailsList
+					class="mb-6 last:mb-0"
+					padding="sm"
+					items={statusItems()}
+				/>
 			</DocumentSidebarSection>
 		</Show>
 	);

@@ -1,19 +1,14 @@
 import type { MediaShareLink } from "@types";
 import type { Component } from "solid-js";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
+import Table from "@/components/Table/Table";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import T from "@/translations";
-import type { TableRowProps } from "@/types/components";
-import CopyRow from "./parts/CopyRow";
+import CopyCell from "./parts/CopyCell";
 
-interface ShareLinkRowProps extends TableRowProps {
+interface ShareLinkRowProps {
+	index: number;
 	link: MediaShareLink;
-	include: boolean[];
 	rowTarget: ReturnType<typeof useRowTarget<"delete" | "update">>;
-	theme?: "primary" | "secondary";
 	permissions: {
 		update: boolean;
 		delete: boolean;
@@ -24,11 +19,8 @@ const ShareLinkTableRow: Component<ShareLinkRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
+		<Table.Row
 			index={props.index}
-			selected={props.selected}
-			options={props.options}
-			callbacks={props.callbacks}
 			actions={[
 				{
 					label: T()("common.update"),
@@ -39,6 +31,7 @@ const ShareLinkTableRow: Component<ShareLinkRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.link.id);
 						props.rowTarget.setTrigger("update", true);
 					},
+					sortOrder: 0,
 				},
 				{
 					label: T()("common.delete"),
@@ -49,40 +42,27 @@ const ShareLinkTableRow: Component<ShareLinkRowProps> = (props) => {
 						props.rowTarget.setTargetId(props.link.id);
 						props.rowTarget.setTrigger("delete", true);
 					},
-					theme: "error",
 					actionExclude: true,
+					variant: "error",
+					sortOrder: 70,
 				},
 			]}
-			theme={props.theme}
 		>
-			<CopyRow
-				text={props.link.url}
-				value={props.link.url}
-				options={{ include: props?.include[0] }}
-			/>
-			<TableTextCell
-				text={props.link.name || "-"}
-				options={{ include: props?.include[1] }}
-			/>
-			<TablePillCell
+			<CopyCell column="url" text={props.link.url} value={props.link.url} />
+			<Table.Text column="name" text={props.link.name || "-"} />
+			<Table.Pill
+				column="hasPassword"
 				text={props.link.hasPassword ? T()("common.yes") : T()("common.no")}
 				variant={props.link.hasPassword ? "primary-subtle" : "outline"}
-				options={{ include: props?.include[2] }}
 			/>
-			<TableDateCell
-				date={props.link.expiresAt}
-				options={{ include: props?.include[3] }}
-			/>
-			<TablePillCell
+			<Table.Date column="expiresAt" date={props.link.expiresAt} />
+			<Table.Pill
+				column="hasExpired"
 				text={props.link.hasExpired ? T()("common.yes") : T()("common.no")}
 				variant={props.link.hasExpired ? "danger-subtle" : "outline"}
-				options={{ include: props?.include[3] }}
 			/>
-			<TableDateCell
-				date={props.link.createdAt}
-				options={{ include: props?.include[4] }}
-			/>
-		</TableRow>
+			<Table.Date column="createdAt" date={props.link.createdAt} />
+		</Table.Row>
 	);
 };
 

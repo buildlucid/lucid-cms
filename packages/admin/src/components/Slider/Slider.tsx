@@ -85,6 +85,17 @@ const Slider: Component<SliderProps> = (props) => {
 		if (normalized.length === expectedLength()) return normalized;
 		return props.thumbs === 2 ? [props.min, props.max] : [props.min];
 	});
+	//* the field has to hold the longest value the range can reach, so a wide
+	//* range does not clip the number it is showing
+	const valueCharacters = createMemo(() => {
+		const stepDecimals = String(props.step).split(".")[1]?.length ?? 0;
+		const bounds = [props.min, props.max].map(
+			(bound) =>
+				Math.trunc(bound).toString().length +
+				(stepDecimals > 0 ? stepDecimals + 1 : 0),
+		);
+		return Math.max(...bounds, 2);
+	});
 	const stepPositions = createMemo(() => {
 		const distance = props.max - props.min;
 		if (distance <= 0 || props.step <= 0) return [];
@@ -130,7 +141,8 @@ const Slider: Component<SliderProps> = (props) => {
 			aria-describedby={
 				props.description ? `${props.id}-description` : undefined
 			}
-			class="h-8 w-12 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1 text-center text-sm font-medium tabular-nums text-title outline-hidden transition-colors duration-150 hover:border-border/50 hover:bg-input-base/30 focus:border-primary-base/60 focus:bg-input-base/40 focus:ring-1 focus:ring-primary-base/15 disabled:cursor-not-allowed disabled:opacity-60"
+			class="no-number-spinner h-8 min-w-12 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1 text-center text-sm font-medium tabular-nums text-title outline-hidden transition-colors duration-150 hover:border-border/50 hover:bg-input-base/30 focus:border-primary-base/60 focus:bg-input-base/40 focus:ring-1 focus:ring-primary-base/15 disabled:cursor-not-allowed disabled:opacity-60"
+			style={{ width: `calc(${valueCharacters()}ch + 1rem)` }}
 			onChange={(event) => {
 				updateValue(index, Number(event.currentTarget.value));
 			}}

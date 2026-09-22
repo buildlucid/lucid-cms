@@ -56,7 +56,7 @@ import {
 	isSupportedCropMimeType,
 	resolveStoredImageCropSource,
 } from "@/utils/image-crop";
-import getMediaPreviewUrl from "@/utils/media-preview";
+import mediaUrl from "@/utils/media-url";
 import {
 	getTranslation,
 	recordToTranslations,
@@ -249,14 +249,12 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 					? (currentFile?.originalPreviewUrl ??
 						currentFile?.originalUrl ??
 						source.source.url)
-					: (currentFile?.url ??
-						getMediaPreviewUrl(poster, "thumbnail-medium")),
+					: (currentFile?.url ?? mediaUrl(poster, "thumbnail-medium")),
 				focalPointUrl: cropRemoved
 					? (currentFile?.originalFocalPointUrl ??
 						currentFile?.originalUrl ??
 						source.source.url)
-					: (currentFile?.focalPointUrl ??
-						getMediaPreviewUrl(poster, "thumbnail-large")),
+					: (currentFile?.focalPointUrl ?? mediaUrl(poster, "thumbnail-large")),
 				isNew: false,
 			};
 		}
@@ -1105,11 +1103,11 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 					name: mediaData.fileName ?? mediaData.key,
 					url:
 						mediaData.type === "image"
-							? getMediaPreviewUrl(mediaData, "thumbnail-medium")
+							? mediaUrl(mediaData, "thumbnail-medium")
 							: mediaData.url,
 					focalPointUrl:
 						mediaData.type === "image"
-							? getMediaPreviewUrl(mediaData, "thumbnail-large")
+							? mediaUrl(mediaData, "thumbnail-large")
 							: mediaData.url,
 					originalUrl: imageSource?.source.url ?? mediaData.url,
 					type: mediaData.type || undefined,
@@ -1132,10 +1130,10 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 						null,
 					crop: imageSource?.crop,
 					originalPreviewUrl: imageSource?.crop
-						? getMediaPreviewUrl(imageSource.source, "thumbnail-medium")
+						? mediaUrl(imageSource.source, "thumbnail-medium")
 						: undefined,
 					originalFocalPointUrl: imageSource?.crop
-						? getMediaPreviewUrl(imageSource.source, "thumbnail-large")
+						? mediaUrl(imageSource.source, "thumbnail-large")
 						: undefined,
 				});
 				PosterFile.reset();
@@ -1144,14 +1142,14 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 					PosterFile.setCurrentFile({
 						status: poster.status,
 						name: poster.fileName ?? T()("media.poster.label"),
-						url: getMediaPreviewUrl(poster, "thumbnail-medium"),
-						focalPointUrl: getMediaPreviewUrl(poster, "thumbnail-large"),
+						url: mediaUrl(poster, "thumbnail-medium"),
+						focalPointUrl: mediaUrl(poster, "thumbnail-large"),
 						originalUrl: posterSource.source.url,
 						originalPreviewUrl: posterSource.crop
-							? getMediaPreviewUrl(posterSource.source, "thumbnail-medium")
+							? mediaUrl(posterSource.source, "thumbnail-medium")
 							: undefined,
 						originalFocalPointUrl: posterSource.crop
-							? getMediaPreviewUrl(posterSource.source, "thumbnail-large")
+							? mediaUrl(posterSource.source, "thumbnail-large")
 							: undefined,
 						type: "image",
 						mimeType: posterSource.source.meta.mimeType,
@@ -1670,7 +1668,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 							</Show>
 							<Show when={activeTab() === "meta" && props.id !== undefined}>
 								<DetailsList
-									type="text"
+									class="mb-6 last:mb-0"
 									items={[
 										{
 											label: T()("common.file.size"),

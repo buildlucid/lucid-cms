@@ -1,36 +1,24 @@
 import type { AiUsage } from "@types";
 import type { Component } from "solid-js";
-import type { TableTheme } from "@/components/Table/Table";
-import { TableCell } from "@/components/TableCell/TableCell";
-import TableDateCell from "@/components/TableDateCell/TableDateCell";
-import TablePillCell from "@/components/TablePillCell/TablePillCell";
-import { TableRow } from "@/components/TableRow/TableRow";
-import TableTextCell from "@/components/TableTextCell/TableTextCell";
+import Table from "@/components/Table/Table";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import T from "@/translations";
-import type { TableRowProps } from "@/types/components";
 import formatAiCost from "@/utils/format-ai-cost";
 import formatDuration from "@/utils/format-duration";
-import AiUsageUsageCol from "./parts/AiUsageUsageCol";
+import AiUsageUsageCell from "./parts/AiUsageUsageCell";
 
-interface AiUsageRowProps extends TableRowProps {
+interface AiUsageRowProps {
+	index: number;
 	aiUsage: AiUsage;
-	include: boolean[];
-	theme?: TableTheme;
 }
 
 const AiUsageTableRow: Component<AiUsageRowProps> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<TableRow
-			index={props.index}
-			selected={props.selected}
-			options={props.options}
-			callbacks={props.callbacks}
-			theme={props.theme}
-		>
-			<TablePillCell
+		<Table.Row index={props.index}>
+			<Table.Pill
+				column="status"
 				text={
 					props.aiUsage.status === "success"
 						? T()("common.status.success")
@@ -39,42 +27,39 @@ const AiUsageTableRow: Component<AiUsageRowProps> = (props) => {
 				variant={
 					props.aiUsage.status === "success" ? "primary-subtle" : "outline"
 				}
-				options={{ include: props.include[0] }}
 			/>
-			<TableTextCell
+			<Table.Text
+				column="feature"
 				text={props.aiUsage.feature.label || props.aiUsage.feature.key}
-				options={{ include: props.include[1], maxLines: 1 }}
+				maxLines={1}
 			/>
-			<AiUsageUsageCol
-				aiUsage={props.aiUsage}
-				options={{ include: props.include[2] }}
-			/>
-			<TableTextCell
+			<AiUsageUsageCell column="usage" aiUsage={props.aiUsage} />
+			<Table.Text
+				column="cost"
 				text={formatAiCost(props.aiUsage.cost ?? undefined)}
-				options={{ include: props.include[3] }}
 			/>
-			<TableCell options={{ include: props.include[4] }}>
+			<Table.Cell column="user">
 				{props.aiUsage.user ? (
 					<UserDisplay
 						user={props.aiUsage.user}
-						mode="short"
-						size="x-small"
+						variant="horizontal"
+						size="xs"
 						nameFormat="simple"
 					/>
 				) : (
 					<span class="text-sm text-body">{T()("common.none")}</span>
 				)}
-			</TableCell>
-			<TableTextCell
+			</Table.Cell>
+			<Table.Text
+				column="durationMs"
 				text={formatDuration(props.aiUsage.durationMs)}
-				options={{ include: props.include[5] }}
 			/>
-			<TableDateCell
+			<Table.Date
+				column="createdAt"
 				date={props.aiUsage.createdAt}
 				includeTime={true}
-				options={{ include: props.include[6] }}
 			/>
-		</TableRow>
+		</Table.Row>
 	);
 };
 

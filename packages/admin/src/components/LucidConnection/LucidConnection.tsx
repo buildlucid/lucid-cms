@@ -6,7 +6,7 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
-import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import Button from "@/components/Button/Button";
 import DateText from "@/components/DateText/DateText";
 import DisconnectConnectionModal from "@/components/DisconnectConnectionModal/DisconnectConnectionModal";
@@ -157,7 +157,7 @@ const LucidConnection: Component = () => {
 								</Link>
 							</Show>
 							<Show when={isConnected()}>
-								<ActionDropdown
+								<ActionMenu
 									actions={[
 										{
 											type: "link",
@@ -166,6 +166,7 @@ const LucidConnection: Component = () => {
 											href: constants.lucidRemote.website,
 											target: "_blank",
 											rel: "noreferrer",
+											sortOrder: 0,
 										},
 										{
 											type: "button",
@@ -174,6 +175,7 @@ const LucidConnection: Component = () => {
 											onClick: () => verify.action.mutate({}),
 											permission: canManage(),
 											isLoading: verify.action.isPending,
+											sortOrder: 10,
 										},
 										{
 											type: "button",
@@ -182,6 +184,7 @@ const LucidConnection: Component = () => {
 											onClick: () => connect.action.mutate({}),
 											permission: canManage(),
 											isLoading: connect.action.isPending,
+											sortOrder: 30,
 										},
 										{
 											type: "button",
@@ -189,9 +192,10 @@ const LucidConnection: Component = () => {
 											icon: "ban",
 											onClick: () => setDisconnectOpen(true),
 											permission: canManage(),
+											sortOrder: 70,
+											variant: "error",
 										},
 									]}
-									options={{ raised: true }}
 								/>
 							</Show>
 							<Show when={!isConnected()}>

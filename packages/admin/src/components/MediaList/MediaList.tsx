@@ -12,6 +12,7 @@ import {
 	createMemo,
 	createSignal,
 	For,
+	Index,
 	onCleanup,
 	Show,
 } from "solid-js";
@@ -27,7 +28,7 @@ import DeleteMediaModal from "@/components/DeleteMediaModal/DeleteMediaModal";
 import DeleteMediaPermanentlyModal from "@/components/DeleteMediaPermanentlyModal/DeleteMediaPermanentlyModal";
 import DownloadMediaModal from "@/components/DownloadMediaModal/DownloadMediaModal";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { Grid } from "@/components/Grid/Grid";
+import Grid from "@/components/Grid/Grid";
 import ImageCropEditorModal from "@/components/ImageCropEditorModal/ImageCropEditorModal";
 import { MediaBreadcrumbs } from "@/components/MediaBreadcrumbs/MediaBreadcrumbs";
 import MediaCard, { MediaCardLoading } from "@/components/MediaCard/MediaCard";
@@ -39,7 +40,7 @@ import { MediaSelectionActions } from "@/components/MediaSelectionActions/MediaS
 import MoveToFolderModal, {
 	type MoveToFolderParams,
 } from "@/components/MoveToFolderModal/MoveToFolderModal";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
+import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RestoreMediaBatchModal from "@/components/RestoreMediaBatchModal/RestoreMediaBatchModal";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
@@ -64,6 +65,9 @@ import {
 } from "@/utils/image-crop";
 import { getImageMeta as getFileImageMeta } from "@/utils/media-meta";
 import { recordToTranslations } from "@/utils/translation-helpers";
+
+/** Skeletons shown while the grid loads, enough to fill a couple of rows. */
+const LOADING_CARDS = 8;
 
 export const MediaList: Component<{
 	state: {
@@ -268,6 +272,7 @@ export const MediaList: Component<{
 	const isError = createMemo(() => {
 		return media.isError || folders.isError;
 	});
+	const isFetching = createMemo(() => media.isFetching || folders.isFetching);
 	const containerEmpty = createMemo(() => {
 		if (props.state.showingDeleted()) return mediaCount() === 0;
 		//* if we're at the top level and there are no folders or media, we're empty
@@ -335,7 +340,9 @@ export const MediaList: Component<{
 		<>
 			<QueryBoundary
 				isError={isError()}
-				isEmpty={containerEmpty()}
+				//* nothing has arrived yet on a first load, which would otherwise read
+				//* as empty and hide the skeletons behind the empty state
+				isEmpty={containerEmpty() && !isFetching()}
 				queryState={props.state.searchParams}
 				empty={
 					<EmptyState
@@ -363,16 +370,6 @@ export const MediaList: Component<{
 							}}
 						/>
 						<Grid
-							state={{
-								isLoading: folders.isLoading,
-								totalItems: foldersCount(),
-							}}
-							options={{
-								disableEmpty: true,
-							}}
-							slots={{
-								loadingCard: <MediaFolderCardLoading />,
-							}}
 							class={classNames(
 								"border-b border-border pb-4 md:pb-6 mb-4 md:mb-6",
 								{
@@ -380,54 +377,73 @@ export const MediaList: Component<{
 								},
 							)}
 						>
-							<For each={folders.data?.data.folders}>
-								{(folder) => (
-									<MediaFolderCard
-										folder={folder}
-										isDragging={isDragging}
-										rowTarget={rowTarget}
-									/>
-								)}
-							</For>
+							<Show
+								when={folders.isFetching}
+								fallback={
+									<For each={folders.data?.data.folders}>
+										{(folder) => (
+											<MediaFolderCard
+												folder={folder}
+												isDragging={isDragging}
+												rowTarget={rowTarget}
+											/>
+										)}
+									</For>
+								}
+							>
+								<Index each={Array.from({ length: LOADING_CARDS })}>
+									{() => <MediaFolderCardLoading />}
+								</Index>
+							</Show>
 						</Grid>
 					</Show>
 
 					{/* Media */}
-					<Grid
-						state={{
-							isLoading: media.isLoading,
-							totalItems: mediaCount(),
-							searchParams: props.state.searchParams,
-						}}
-						slots={{
-							loadingCard: <MediaCardLoading />,
-						}}
-						copy={{
-							empty: mediaGridNoEntriesCopy(),
-						}}
-						callback={{
-							createEntry: createEntryCallback(),
-						}}
-						options={{
-							growWhenEmpty: true,
-						}}
-					>
-						<For each={media.data?.data}>
-							{(item) => (
-								<MediaCard
-									media={item}
-									rowTarget={rowTarget}
-									contentLocale={contentLocale()}
-									showingDeleted={props.state.showingDeleted}
-									isDragging={isDragging}
-									onGenerateAlt={openAltGeneration}
-									onCrop={openQuickCrop}
-									aiAltAccessState={mediaAltGeneration.accessState()}
-									aiAltFeatureEnabled={mediaAltGeneration.isFeatureEnabled()}
+					<Show
+						when={media.isFetching || mediaCount() > 0}
+						fallback={
+							<div class="flex flex-1 items-center justify-center">
+								<EmptyState
+									title={mediaGridNoEntriesCopy().title}
+									description={mediaGridNoEntriesCopy().description}
+									actions={
+										createEntryCallback() ? (
+											<Button size="sm" onClick={createEntryCallback()}>
+												{mediaGridNoEntriesCopy().actionLabel}
+											</Button>
+										) : undefined
+									}
 								/>
-							)}
-						</For>
-					</Grid>
+							</div>
+						}
+					>
+						<Grid>
+							<Show
+								when={media.isFetching}
+								fallback={
+									<For each={media.data?.data}>
+										{(item) => (
+											<MediaCard
+												media={item}
+												rowTarget={rowTarget}
+												contentLocale={contentLocale()}
+												showingDeleted={props.state.showingDeleted}
+												isDragging={isDragging}
+												onGenerateAlt={openAltGeneration}
+												onCrop={openQuickCrop}
+												aiAltAccessState={mediaAltGeneration.accessState()}
+												aiAltFeatureEnabled={mediaAltGeneration.isFeatureEnabled()}
+											/>
+										)}
+									</For>
+								}
+							>
+								<Index each={Array.from({ length: LOADING_CARDS })}>
+									{() => <MediaCardLoading />}
+								</Index>
+							</Show>
+						</Grid>
+					</Show>
 				</DragDropProvider>
 
 				<MediaSelectionActions
@@ -459,14 +475,10 @@ export const MediaList: Component<{
 					}}
 				/>
 			</QueryBoundary>
-			<PaginatedFooter
-				state={{
-					searchParams: props.state.searchParams,
-					meta: media.data?.meta,
-				}}
-				options={{
-					padding: "24",
-				}}
+			<Pagination
+				queryState={props.state.searchParams}
+				meta={media.data?.meta}
+				padding="md"
 			/>
 
 			{/* Keep dialog focus scopes mounted across empty/result transitions. */}

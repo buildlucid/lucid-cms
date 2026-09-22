@@ -119,7 +119,11 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	const [lastFocusedElement, setLastFocusedElement] =
 		createSignal<Element | null>(null);
 	const [locale, setLocale] = createSignal<string | undefined>(undefined);
-	const [openChildren, setOpenChildren] = createSignal<Set<symbol>>(new Set());
+	//* the edge each open child came from, so only a child sharing this
+	//* drawer's edge counts as covering it
+	const [openChildren, setOpenChildren] = createSignal<Map<symbol, DrawerSide>>(
+		new Map(),
+	);
 	const interfaceDirection = useInterfaceDirection();
 	const parentDrawer = useContext(DrawerNestingContext);
 	const drawerId = Symbol("drawer");
@@ -127,11 +131,13 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 
 	// ------------------------------
 	// Functions
-	const setChildOpen = (id: symbol, open: boolean) => {
+	const setChildOpen = (id: symbol, open: boolean, childSide: DrawerSide) => {
 		setOpenChildren((current) => {
-			if (current.has(id) === open) return current;
-			const next = new Set(current);
-			if (open) next.add(id);
+			if (open ? current.get(id) === childSide : !current.has(id)) {
+				return current;
+			}
+			const next = new Map(current);
+			if (open) next.set(id, childSide);
 			else next.delete(id);
 			return next;
 		});
@@ -172,16 +178,32 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 		() => props.locales ?? contentLocaleStore.get.locales,
 	);
 	const level = createMemo(() => (parentDrawer?.level() ?? -1) + 1);
+	/** Ancestors sharing this drawer's edge, which is what stacks up visually. */
+	const stackLevel = createMemo(() => parentDrawer?.sideDepth()[side()] ?? 0);
 	/** Cap the visual offset so deeply nested drawers stay usable. */
-	const visualLevel = createMemo(() => Math.min(Math.max(level(), 0), 6));
+	const visualLevel = createMemo(() => Math.min(stackLevel(), 6));
+	const sideDepth = createMemo(() => {
+		const parent = parentDrawer?.sideDepth() ?? { right: 0, bottom: 0 };
+		return {
+			right: parent.right + (side() === "right" ? 1 : 0),
+			bottom: parent.bottom + (side() === "bottom" ? 1 : 0),
+		};
+	});
 	const zIndex = createMemo(() =>
 		Math.max(props.zIndex ?? 40, (parentDrawer?.zIndex() ?? 38) + 2),
 	);
-	const isCovered = createMemo(() => openChildren().size > 0);
+	//* a child on the opposite edge sits beside this drawer rather than over
+	//* it, so it gets none of the covered treatment
+	const isCovered = createMemo(() => {
+		for (const childSide of openChildren().values()) {
+			if (childSide === side()) return true;
+		}
+		return false;
+	});
 	const coveredTransform = createMemo(() => {
 		if (side() === "bottom") {
 			if (!isCovered()) return "rotate(0deg)";
-			return `rotate(${level() % 2 === 0 ? -0.1 : 0.1}deg)`;
+			return `rotate(${stackLevel() % 2 === 0 ? -0.1 : 0.1}deg)`;
 		}
 		if (!isCovered()) return "translateX(0)";
 		return `translateX(${interfaceDirection.isLTR() ? "-24px" : "24px"})`;
@@ -189,6 +211,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 
 	const nestingState: DrawerNestingState = {
 		level,
+		sideDepth,
 		zIndex,
 		setChildOpen,
 	};
@@ -196,9 +219,9 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	// ------------------------------
 	// Effects
 	createEffect(() => {
-		parentDrawer?.setChildOpen(drawerId, props.open);
+		parentDrawer?.setChildOpen(drawerId, props.open, side());
 	});
-	onCleanup(() => parentDrawer?.setChildOpen(drawerId, false));
+	onCleanup(() => parentDrawer?.setChildOpen(drawerId, false, side()));
 
 	//* only capture on the closed to open transition - the locale deps below
 	//* re-run this effect, and by then focus has moved inside the drawer
@@ -234,8 +257,12 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 					class={classNames(
 						"fixed inset-0 animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
-							"bg-overlay-base": level() === 0,
-							"bg-transparent": level() > 0,
+							//* a drawer stacked on its own edge shows the one behind it
+							//* through the offset, so a second dim would just muddy it.
+							//* one arriving from another edge is not part of that stack
+							//* and has to push whatever it lands beside into the back.
+							"bg-overlay-base": stackLevel() === 0,
+							"bg-transparent": stackLevel() > 0,
 						},
 					)}
 					style={{ "z-index": zIndex() }}

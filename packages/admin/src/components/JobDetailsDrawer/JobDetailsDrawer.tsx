@@ -76,7 +76,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 			<Drawer.Body>
 				<SectionHeading title={T()("common.details")} />
 				<DetailsList
-					type="text"
+					class="mb-6 last:mb-0"
 					items={[
 						{
 							label: T()("jobs.id"),

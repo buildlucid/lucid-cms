@@ -10,7 +10,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import ClickToCopy from "@/components/ClickToCopy/ClickToCopy";
+import Copy from "@/components/Copy/Copy";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import Modal from "@/components/Modal/Modal";
 import Pill from "@/components/Pill/Pill";
@@ -236,9 +236,8 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						>
 							{(profilePicture) => (
 								<div class="mt-1">
-									<ClickToCopy
-										type="simple"
-										text={profilePicture().key}
+									<Copy.Button
+										label={profilePicture().key}
 										value={profilePicture().url}
 										class="text-xs text-unfocused max-w-full"
 									/>

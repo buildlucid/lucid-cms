@@ -12,7 +12,7 @@ import CreateUserDrawer from "@/components/CreateUserDrawer/CreateUserDrawer";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import { QueryRow } from "@/components/QueryRow/QueryRow";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import { UserList } from "@/components/UserList/UserList";
 import { Permissions } from "@/constants/permissions";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
@@ -124,97 +124,95 @@ const UsersPage: Component = () => {
 				description={T()("routes.users.description")}
 				actions={<CreateMenu actions={createActions()} />}
 			>
-				<QueryRow
-					searchParams={searchParams}
-					showingDeleted={showingDeleted}
-					setShowingDeleted={setShowingDeleted}
+				<QueryToolbar
+					queryState={searchParams}
+					showingDeleted={showingDeleted()}
+					onShowingDeletedChange={setShowingDeleted}
 					onRefresh={() => {
 						queryClient.invalidateQueries({
 							queryKey: queryKeys.users.list(),
 						});
 					}}
-					filterSection={{
-						subject: T()("routes.users.title"),
-						fields: [
-							{
-								label: T()("common.first.name"),
-								key: "firstName",
-								type: "text",
-							},
-							{
-								label: T()("common.last.name"),
-								key: "lastName",
-								type: "text",
-							},
-							{
-								label: T()("common.email"),
-								key: "email",
-								type: "text",
-							},
-							{
-								label: T()("common.username"),
-								key: "username",
-								type: "text",
-							},
-							{
-								label: T()("users.status.locked.label"),
-								key: "isLocked",
-								type: "checkbox",
-								trueLabel: T()("common.status.locked"),
-								falseLabel: T()("common.status.unlocked"),
-							},
-							{
-								label: T()("common.role"),
-								key: "roleIds",
-								type: "select",
-								options: roleOptions(),
-							},
-							{
-								label: T()("users.invitations.status.label"),
-								key: "invitationAccepted",
-								type: "checkbox",
-								trueLabel: T()("users.invitations.status.accepted"),
-								falseLabel: T()("common.status.pending"),
-							},
-							{
-								label: T()("users.password.reset.status.label"),
-								key: "triggerPasswordReset",
-								type: "checkbox",
-								trueLabel: T()("auth.password.reset.required.title"),
-								falseLabel: T()("users.password.reset.status.not.required"),
-							},
-							...(userStore.get.user?.superAdmin
-								? [
-										{
-											label: T()("users.super.admin.label"),
-											key: "superAdmin",
-											type: "checkbox" as const,
-											trueLabel: T()("users.super.admin.title"),
-											falseLabel: T()("common.standard"),
-										},
-									]
-								: []),
-							{
-								label: T()("common.created.at"),
-								key: "createdAt",
-								type: "datetime",
-							},
-							{
-								label: T()("common.updated.at"),
-								key: "updatedAt",
-								type: "datetime",
-							},
-							...(showingDeleted()
-								? [
-										{
-											label: T()("common.deleted.by"),
-											key: "deletedBy",
-											type: "user" as const,
-										},
-									]
-								: []),
-						],
-					}}
+					filterSubject={T()("routes.users.title")}
+					filterFields={[
+						{
+							label: T()("common.first.name"),
+							key: "firstName",
+							type: "text",
+						},
+						{
+							label: T()("common.last.name"),
+							key: "lastName",
+							type: "text",
+						},
+						{
+							label: T()("common.email"),
+							key: "email",
+							type: "text",
+						},
+						{
+							label: T()("common.username"),
+							key: "username",
+							type: "text",
+						},
+						{
+							label: T()("users.status.locked.label"),
+							key: "isLocked",
+							type: "checkbox",
+							trueLabel: T()("common.status.locked"),
+							falseLabel: T()("common.status.unlocked"),
+						},
+						{
+							label: T()("common.role"),
+							key: "roleIds",
+							type: "select",
+							options: roleOptions(),
+						},
+						{
+							label: T()("users.invitations.status.label"),
+							key: "invitationAccepted",
+							type: "checkbox",
+							trueLabel: T()("users.invitations.status.accepted"),
+							falseLabel: T()("common.status.pending"),
+						},
+						{
+							label: T()("users.password.reset.status.label"),
+							key: "triggerPasswordReset",
+							type: "checkbox",
+							trueLabel: T()("auth.password.reset.required.title"),
+							falseLabel: T()("users.password.reset.status.not.required"),
+						},
+						...(userStore.get.user?.superAdmin
+							? [
+									{
+										label: T()("users.super.admin.label"),
+										key: "superAdmin",
+										type: "checkbox" as const,
+										trueLabel: T()("users.super.admin.title"),
+										falseLabel: T()("common.standard"),
+									},
+								]
+							: []),
+						{
+							label: T()("common.created.at"),
+							key: "createdAt",
+							type: "datetime",
+						},
+						{
+							label: T()("common.updated.at"),
+							key: "updatedAt",
+							type: "datetime",
+						},
+						...(showingDeleted()
+							? [
+									{
+										label: T()("common.deleted.by"),
+										key: "deletedBy",
+										type: "user" as const,
+									},
+								]
+							: []),
+					]}
 					sorts={[
 						{
 							label: T()("common.username"),
@@ -241,7 +239,7 @@ const UsersPage: Component = () => {
 							key: "createdAt",
 						},
 					]}
-					perPage={[]}
+					perPage
 				/>
 			</PageLayout.Header>
 			<PageLayout.Body>

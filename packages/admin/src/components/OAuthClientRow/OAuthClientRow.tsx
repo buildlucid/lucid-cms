@@ -1,14 +1,14 @@
 import type { OAuthClient, OAuthClientCreateResponse } from "@types";
 import { FaSolidArrowRightArrowLeft, FaSolidKey } from "solid-icons/fa";
 import { type Component, createSignal, Show } from "solid-js";
-import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import IconContainer from "@/components/IconContainer/IconContainer";
 import Modal from "@/components/Modal/Modal";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
 import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";
 import T from "@/translations";
-import getMediaPreviewUrl from "@/utils/media-preview";
+import mediaUrl from "@/utils/media-url";
 
 const OAuthClientRow: Component<{
 	client: OAuthClient;
@@ -72,7 +72,7 @@ const OAuthClientRow: Component<{
 							>
 								{(logo) => (
 									<img
-										src={getMediaPreviewUrl(logo(), "thumbnail-small")}
+										src={mediaUrl(logo(), "thumbnail-small")}
 										alt=""
 										class="relative z-10 size-full object-contain"
 									/>
@@ -131,7 +131,7 @@ const OAuthClientRow: Component<{
 							</p>
 						</div>
 					</div>
-					<ActionDropdown
+					<ActionMenu
 						actions={[
 							{
 								type: "button",
@@ -139,6 +139,7 @@ const OAuthClientRow: Component<{
 								icon: "pen",
 								onClick: () => setUpdateOpen(true),
 								hide: !props.canUpdate,
+								sortOrder: 0,
 							},
 							{
 								type: "button",
@@ -148,6 +149,8 @@ const OAuthClientRow: Component<{
 								hide:
 									!props.canRegenerate ||
 									props.client.authMethod !== "client_secret_basic",
+								sortOrder: 70,
+								variant: "error",
 							},
 							{
 								type: "button",
@@ -155,9 +158,10 @@ const OAuthClientRow: Component<{
 								icon: "trash",
 								onClick: () => setDeleteOpen(true),
 								hide: !props.canDelete,
+								sortOrder: 80,
+								variant: "error",
 							},
 						]}
-						options={{ raised: true }}
 					/>
 				</div>
 			</article>

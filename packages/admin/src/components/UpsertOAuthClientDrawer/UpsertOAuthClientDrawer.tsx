@@ -27,7 +27,7 @@ import useSingleFileUpload from "@/hooks/useSingleFileUpload/useSingleFileUpload
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
-import getMediaPreviewUrl from "@/utils/media-preview";
+import mediaUrl from "@/utils/media-url";
 import { uploadMediaFile } from "@/utils/upload-session";
 
 const UpsertOAuthClientDrawer: Component<{
@@ -135,7 +135,7 @@ const UpsertOAuthClientDrawer: Component<{
 				value.logo
 					? {
 							name: value.logo.fileName ?? value.logo.key,
-							url: getMediaPreviewUrl(value.logo, "thumbnail-medium"),
+							url: mediaUrl(value.logo, "thumbnail-medium"),
 							originalUrl: value.logo.url,
 							type: value.logo.type,
 							mimeType: value.logo.meta.mimeType,

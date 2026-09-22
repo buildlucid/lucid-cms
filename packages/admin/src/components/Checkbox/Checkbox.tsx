@@ -8,8 +8,9 @@ import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 /**
  * How the control is drawn. The button variants put the tick inside a bordered
- * box that lines up with an input; the ones naming a colour fill with it once
- * ticked, while plain button stays neutral.
+ * box the height of a small button, so it sits in a toolbar beside one; the
+ * ones naming a colour fill with it once ticked, while plain button stays
+ * neutral.
  */
 export type CheckboxVariant =
 	| "default"
@@ -89,7 +90,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 				<KobalteCheckbox.Root
 					data-checkbox
 					class={classnames("group flex items-center gap-2.5", {
-						"relative min-h-10 max-w-full cursor-pointer rounded-md border px-3 py-2 text-sm transition-colors duration-200":
+						"relative min-h-9 max-w-full cursor-pointer rounded-md border px-3 py-1.5 text-sm transition-colors duration-200":
 							boxed(),
 						// unticked, or a plain button: the neutral box an input lines up with
 						"bg-input-base text-subtitle": boxed() && !filled(),

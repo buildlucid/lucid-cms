@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
 	buildDocumentFilterSchema,
 	documentFilterFields,
-	documentFilterSectionFields,
+	documentFilterPanelFields,
 	filterValueInputType,
 	formatRelationFilterValue,
 	isEntityPickerFieldType,
@@ -332,7 +332,7 @@ describe("documentFilterFields", () => {
 	});
 });
 
-describe("documentFilterSectionFields", () => {
+describe("documentFilterPanelFields", () => {
 	it("adds one fixed-value status filter for each environment", () => {
 		const collection = {
 			...buildCollection([]),
@@ -347,7 +347,7 @@ describe("documentFilterSectionFields", () => {
 			},
 		} as Collection;
 
-		expect(documentFilterSectionFields(collection)).toEqual(
+		expect(documentFilterPanelFields(collection)).toEqual(
 			expect.arrayContaining([
 				{
 					key: "envStatus.production",
@@ -386,7 +386,7 @@ describe("documentFilterSectionFields", () => {
 			},
 		} as Collection;
 
-		expect(documentFilterSectionFields(collection)).toEqual(
+		expect(documentFilterPanelFields(collection)).toEqual(
 			expect.arrayContaining([
 				{ key: "id", label: "Document ID", type: "number" },
 				{ key: "_title", label: "Title", type: "text" },

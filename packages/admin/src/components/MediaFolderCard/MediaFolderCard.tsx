@@ -3,7 +3,7 @@ import { createDraggable, createDroppable } from "@thisbeyond/solid-dnd";
 import type { MediaFolder } from "@types";
 import classNames from "classnames";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
-import ActionDropdown from "@/components/ActionDropdown/ActionDropdown";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import { Permissions } from "@/constants/permissions";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
@@ -103,7 +103,7 @@ export const MediaFolderCard: Component<{
 					},
 				)}
 			>
-				<ActionDropdown
+				<ActionMenu
 					actions={[
 						{
 							label: T()("common.edit"),
@@ -115,6 +115,7 @@ export const MediaFolderCard: Component<{
 							},
 							permission: userStore.get.hasPermission([Permissions.MediaUpdate])
 								.all,
+							sortOrder: 0,
 						},
 						{
 							label: T()("common.delete"),
@@ -125,14 +126,11 @@ export const MediaFolderCard: Component<{
 								props.rowTarget.setTrigger("deleteFolder", true);
 							},
 							permission: hasDeletePermission(),
+							sortOrder: 70,
+							variant: "error",
 						},
 					]}
-					options={{
-						border: true,
-						placement: interfaceDirection.isRTL()
-							? "bottom-start"
-							: "bottom-end",
-					}}
+					placement={interfaceDirection.isRTL() ? "bottom-start" : "bottom-end"}
 				/>
 			</div>
 			<Show when={hasUpdatePermission()}>

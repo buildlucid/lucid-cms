@@ -24,15 +24,15 @@ import DocumentSelectSingle from "@/components/DocumentSelectSingle/DocumentSele
 import DocumentTableRow from "@/components/DocumentTableRow/DocumentTableRow";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
-import { FilterSection } from "@/components/FilterSection/FilterSection";
-import { FilterSectionToggle } from "@/components/FilterSectionToggle/FilterSectionToggle";
-import { PaginatedFooter } from "@/components/PaginatedFooter/PaginatedFooter";
-import { PerPageSelect } from "@/components/PerPageSelect/PerPageSelect";
+import FilterPanel from "@/components/FilterPanel/FilterPanel";
+import FilterToggle from "@/components/FilterToggle/FilterToggle";
+import Pagination from "@/components/Pagination/Pagination";
+import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import { QuerySort } from "@/components/QuerySort/QuerySort";
-import { ResetFilters } from "@/components/ResetFilters/ResetFilters";
+import QuerySort from "@/components/QuerySort/QuerySort";
+import ResetFilters from "@/components/ResetFilters/ResetFilters";
 import Select from "@/components/Select/Select";
-import { Table } from "@/components/Table/Table";
+import Table from "@/components/Table/Table";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import useQueryState, {
 	numberFilter,
@@ -44,7 +44,7 @@ import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import {
 	buildDocumentFilterSchema,
-	documentFilterSectionFields,
+	documentFilterPanelFields,
 } from "@/utils/document-filter-fields";
 import {
 	collectionFieldIncludes,
@@ -133,7 +133,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		[],
 	);
 	const [activeCollectionKey, setActiveCollectionKey] = createSignal<string>();
-	const [filterSectionOpen, setFilterSectionOpen] = createSignal(false);
+	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 	const pageBuilderState = usePageBuilderState();
 	//* collection key the filter schema was last built for - documents only
 	//* query once this matches, so stale filters never hit a new collection
@@ -282,7 +282,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	// ----------------------------------------
 	// Memos
 	const getFilterFields = createMemo(() =>
-		documentFilterSectionFields(activeCollection()),
+		documentFilterPanelFields(activeCollection()),
 	);
 	const relationCollectionData = createMemo(() => {
 		const map = new Map(
@@ -439,7 +439,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 					perPage: searchParams.pagination().perPage,
 				},
 			});
-			setFilterSectionOpen(false);
+			setFilterPanelOpen(false);
 			//* opens the documents query gate last - filters are clean by now
 			setFilterSchemaContextKey(filterSchemaContext());
 		}
@@ -497,16 +497,16 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		<div class="flex flex-col h-full">
 			<div class="mb-4 flex gap-2.5 flex-wrap items-center justify-between">
 				<div class="flex gap-2.5 flex-wrap items-center">
-					<FilterSectionToggle
+					<FilterToggle
 						open={!isSingleCollection() && filterSectionOpen()}
-						onToggle={() => setFilterSectionOpen(!filterSectionOpen())}
-						searchParams={searchParams}
+						onOpenChange={setFilterPanelOpen}
+						queryState={searchParams}
 						active={!isSingleCollection() && searchParams.hasFiltersApplied()}
 						disabled={isSingleCollection() || getFilterFields().length === 0}
 					/>
 					<QuerySort
 						sorts={documentSortOptions()}
-						searchParams={searchParams}
+						queryState={searchParams}
 						disabled={isSingleCollection()}
 					/>
 					{props.topbarSlot}
@@ -534,19 +534,19 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				</div>
 				<PerPageSelect
 					options={[10, 20, 40]}
-					searchParams={searchParams}
+					queryState={searchParams}
 					disabled={isSingleCollection()}
 				/>
 			</div>
 
 			<Show when={!isSingleCollection()}>
-				<FilterSection
+				<FilterPanel
 					open={filterSectionOpen()}
-					setOpen={setFilterSectionOpen}
+					onOpenChange={setFilterPanelOpen}
 					subject={collectionName()}
 					preserveSubjectCase={true}
 					fields={getFilterFields()}
-					searchParams={searchParams}
+					queryState={searchParams}
 					embedded={true}
 				/>
 			</Show>
@@ -579,10 +579,10 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 								"flex-1 h-full bg-card-base border border-border rounded-md"
 							}
 						>
-							<Table
-								key={`documents.list.${activeCollection()?.key ?? ""}`}
-								rows={documents.data?.data.length || 0}
-								searchParams={searchParams}
+							<Table.Root
+								id={`documents.list.${activeCollection()?.key ?? ""}`}
+								rowCount={documents.data?.data.length || 0}
+								queryState={searchParams}
 								head={[
 									{
 										label: "",
@@ -604,66 +604,44 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									},
 									{
 										label: T()("common.updated.at"),
-										key: "updated_at",
+										key: "updatedAt",
 										icon: <FaSolidCalendar />,
 									},
 								]}
-								state={{
-									isLoading: documents.isFetching,
-									isSuccess: documents.isSuccess,
-								}}
-								options={{
-									isSelectable: false,
-									padding: "16",
-								}}
-								theme="secondary"
+								isLoading={documents.isFetching}
+								padding="sm"
+								variant="secondary"
 							>
-								{({ include, isSelectable, selected, setSelected }) => (
-									<Index each={documents.data?.data || []}>
-										{(doc, i) => (
-											<DocumentTableRow
-												index={i}
-												document={doc()}
-												refs={documents.data?.refs}
-												fieldInclude={getCollectionFieldIncludes()}
-												collection={activeCollection() as Collection}
-												collectionsByKey={relationCollectionsByKey()}
-												include={include}
-												contentLocale={contentLocale()}
-												selected={selected[i]}
-												options={{
-													isSelectable,
-													padding: "16",
-												}}
-												callbacks={{
-													setSelected: setSelected,
-													onClick: () => toggleSelectedDocument(doc()),
-												}}
-												theme="secondary"
-												current={false}
-												selection={{
-													selected: selectedDocuments().some(
-														(selectedDocument) =>
-															selectedDocument.id === doc().id &&
-															selectedDocument.collectionKey ===
-																doc().collectionKey,
-													),
-													onChange: () => toggleSelectedDocument(doc()),
-												}}
-											/>
-										)}
-									</Index>
-								)}
-							</Table>
+								<Index each={documents.data?.data || []}>
+									{(doc, i) => (
+										<DocumentTableRow
+											index={i}
+											document={doc()}
+											refs={documents.data?.refs}
+											fieldInclude={getCollectionFieldIncludes()}
+											collection={activeCollection() as Collection}
+											collectionsByKey={relationCollectionsByKey()}
+											contentLocale={contentLocale()}
+											onClick={() => toggleSelectedDocument(doc())}
+											current={false}
+											selection={{
+												selected: selectedDocuments().some(
+													(selectedDocument) =>
+														selectedDocument.id === doc().id &&
+														selectedDocument.collectionKey ===
+															doc().collectionKey,
+												),
+												onChange: () => toggleSelectedDocument(doc()),
+											}}
+										/>
+									)}
+								</Index>
+							</Table.Root>
 						</QueryBoundary>
-						<PaginatedFooter
-							state={{
-								searchParams: searchParams,
-								meta: documents.data?.meta,
-							}}
-							options={{
-								embedded: true,
-							}}
+						<Pagination
+							queryState={searchParams}
+							meta={documents.data?.meta}
+							variant="inline"
 						/>
 					</>
 				}

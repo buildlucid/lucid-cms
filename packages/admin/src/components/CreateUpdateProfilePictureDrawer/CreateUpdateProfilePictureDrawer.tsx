@@ -23,7 +23,7 @@ import T from "@/translations";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
 import helpers from "@/utils/helpers";
 import { resolveStoredImageCropSource } from "@/utils/image-crop";
-import getMediaPreviewUrl from "@/utils/media-preview";
+import mediaUrl from "@/utils/media-url";
 import {
 	getTranslation,
 	recordToTranslations,
@@ -350,14 +350,14 @@ const CreateUpdateProfilePictureDrawer: Component<
 			const source = resolveStoredImageCropSource(file);
 			MediaFile.setCurrentFile({
 				name: file.fileName ?? file.key,
-				url: getMediaPreviewUrl(file, "thumbnail-medium"),
-				focalPointUrl: getMediaPreviewUrl(file, "thumbnail-large"),
+				url: mediaUrl(file, "thumbnail-medium"),
+				focalPointUrl: mediaUrl(file, "thumbnail-large"),
 				originalUrl: source.source.url,
 				originalPreviewUrl: source.crop
-					? getMediaPreviewUrl(source.source, "thumbnail-medium")
+					? mediaUrl(source.source, "thumbnail-medium")
 					: undefined,
 				originalFocalPointUrl: source.crop
-					? getMediaPreviewUrl(source.source, "thumbnail-large")
+					? mediaUrl(source.source, "thumbnail-large")
 					: undefined,
 				type: profilePicture.type,
 				mimeType: source.source.meta.mimeType,
