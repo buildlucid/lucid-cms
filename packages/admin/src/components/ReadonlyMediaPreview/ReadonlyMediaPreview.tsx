@@ -55,8 +55,8 @@ const ReadonlyMediaPreview: Component<{
 				fallback={
 					<Switch
 						fallback={
-							<div class="w-full h-full relative z-10 bg-input-base flex flex-col justify-center items-center">
-								<FaSolidFile class="w-10 h-10 mx-auto text-unfocused" />
+							<div class="w-full h-full relative z-10 bg-input flex flex-col justify-center items-center">
+								<FaSolidFile class="w-10 h-10 mx-auto text-muted" />
 							</div>
 						}
 					>
@@ -75,7 +75,7 @@ const ReadonlyMediaPreview: Component<{
 							</div>
 						</Match>
 						<Match when={props.media.type === "video"}>
-							<div class="w-full h-full relative z-10 bg-input-base rectangle-background">
+							<div class="w-full h-full relative z-10 bg-input rectangle-background">
 								<Show when={renderNativeMedia()}>
 									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
 									<video
@@ -93,7 +93,7 @@ const ReadonlyMediaPreview: Component<{
 							</div>
 						</Match>
 						<Match when={props.media.type === "audio"}>
-							<div class="w-full h-full relative z-10 bg-input-base flex justify-center items-center">
+							<div class="w-full h-full relative z-10 bg-input flex justify-center items-center">
 								<Show when={renderNativeMedia()}>
 									{/* biome-ignore lint/a11y/useMediaCaption: explanation */}
 									<audio

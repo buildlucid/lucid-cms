@@ -145,9 +145,9 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 			{/** biome-ignore lint/a11y/noStaticElementInteractions: drag and drop supplements the labelled file input and buttons */}
 			<div
 				class={classNames(
-					"relative flex flex-col gap-3 overflow-hidden rounded-md border border-border bg-input-base/35 p-3 transition-colors sm:flex-row sm:items-center",
+					"relative flex flex-col gap-3 overflow-hidden rounded-md border border-border bg-input/35 p-3 transition-colors sm:flex-row sm:items-center",
 					{
-						"border-primary-base bg-primary-muted-bg/20": dragOver(),
+						"border-primary bg-primary-low": dragOver(),
 						"opacity-60": props.disabled,
 					},
 				)}
@@ -170,11 +170,11 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 				<button
 					type="button"
 					class={classNames(
-						"grid size-24 shrink-0 place-items-center overflow-hidden rounded-lg border bg-background-base focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base",
+						"grid size-24 shrink-0 place-items-center overflow-hidden rounded-lg border bg-background focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
 						{
 							"border-border": state() !== "empty",
 							"rectangle-background": state() !== "empty",
-							"border-dashed border-border hover:border-primary-base":
+							"border-dashed border-border hover:border-primary":
 								state() === "empty",
 						},
 					)}
@@ -189,7 +189,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 					<Show
 						when={previewUrl()}
 						fallback={
-							<span class="flex flex-col items-center gap-1.5 text-icon-faded">
+							<span class="flex flex-col items-center gap-1.5 text-muted">
 								<FaSolidImage class="size-5" />
 								<FaSolidArrowUpFromBracket class="size-3" />
 							</span>
@@ -231,7 +231,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 								<>
 									<Button
 										type="button"
-										variant="background-subtle"
+										variant="ghost"
 										size="sm"
 										onClick={imageCrop().callbacks.open}
 										disabled={props.disabled || imageCrop().state.disabled}
@@ -243,7 +243,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 									<Show when={imageCrop().state.hasCrop}>
 										<Button
 											type="button"
-											variant="danger-subtle"
+											variant="danger-ghost"
 											size="sm"
 											onClick={imageCrop().callbacks.remove}
 											disabled={props.disabled || imageCrop().state.disabled}
@@ -263,7 +263,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 						>
 							<Button
 								type="button"
-								variant="danger-subtle"
+								variant="danger-ghost"
 								size="sm"
 								onClick={removeFile}
 								disabled={props.disabled}
@@ -281,7 +281,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 						>
 							<Button
 								type="button"
-								variant="background-subtle"
+								variant="ghost"
 								size="sm"
 								onClick={restoreCurrentFile}
 								disabled={props.disabled}

@@ -20,9 +20,8 @@ export type ButtonVariant =
 	| "outline"
 	| "danger"
 	| "danger-outline"
-	| "background-subtle"
-	| "danger-subtle"
-	| "ghost";
+	| "ghost"
+	| "danger-ghost";
 
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
@@ -101,21 +100,20 @@ const Button: Component<ButtonProps> = (props) => {
 			"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80",
 			{
 				// Variants
-				"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast ring-primary-base":
+				"bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground ring-primary":
 					local.variant === "primary",
-				"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base":
+				"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary":
 					local.variant === "secondary",
-				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-subtitle hover:text-secondary-contrast ring-primary-base":
+				"bg-input border border-border hover:border-transparent hover:bg-secondary-hover fill-subtitle text-subtitle hover:text-secondary-foreground ring-primary":
 					local.variant === "outline",
-				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
+				"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary fill-danger-foreground":
 					local.variant === "danger",
-				"bg-input-base border border-border hover:bg-error-hover ring-primary-base fill-input-contrast text-subtitle fill-error-contrast hover:text-error-contrast":
+				"bg-input border border-border hover:bg-danger-hover ring-primary fill-subtitle text-subtitle fill-danger-foreground hover:text-danger-foreground":
 					local.variant === "danger-outline",
-				"text-icon-faded fill-icon-faded hover:text-subtitle hover:fill-subtitle hover:bg-background-base/50 ring-primary-base":
-					local.variant === "background-subtle",
-				"text-icon-faded fill-icon-faded hover:text-error-base hover:fill-error-base hover:bg-error-base/10 ring-primary-base":
-					local.variant === "danger-subtle",
-				"text-subtitle": local.variant === "ghost",
+				"text-muted fill-muted hover:text-subtitle hover:fill-subtitle hover:bg-background/50 ring-primary":
+					local.variant === "ghost",
+				"text-muted fill-muted hover:text-danger-low-foreground hover:fill-danger-low-foreground hover:bg-danger-low ring-primary":
+					local.variant === "danger-ghost",
 
 				// Shape
 				"rounded-full!": local.shape === "circle",
@@ -165,7 +163,7 @@ const Button: Component<ButtonProps> = (props) => {
 			aria-busy={local.loading ? "true" : undefined}
 		>
 			<Show when={local.loading}>
-				<div class="flex items-center justify-center absolute inset-0 z-10 rounded-md bg-card-base/50">
+				<div class="flex items-center justify-center absolute inset-0 z-10 rounded-md bg-card/50">
 					<Spinner size="sm" />
 				</div>
 			</Show>

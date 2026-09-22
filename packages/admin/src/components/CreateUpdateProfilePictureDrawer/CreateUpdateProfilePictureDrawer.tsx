@@ -428,7 +428,7 @@ const CreateUpdateProfilePictureDrawer: Component<
 								<div class="flex flex-row flex-wrap items-center gap-4">
 									<button
 										type="button"
-										class="border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base transition-colors duration-200 border-primary-base text-title"
+										class="border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary transition-colors duration-200 border-primary text-title"
 									>
 										{T()("common.details")}
 									</button>

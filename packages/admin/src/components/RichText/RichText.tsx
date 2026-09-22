@@ -163,7 +163,7 @@ const RichText: Component<RichTextProps> = (props) => {
 			<div
 				data-rich-text
 				class={classnames(
-					"relative overflow-hidden rounded-md border border-border bg-input-base transition-colors duration-200 focus-within:border-primary-base",
+					"relative overflow-hidden rounded-md border border-border bg-input transition-colors duration-200 focus-within:border-primary",
 					{
 						"cursor-not-allowed opacity-80 pointer-events-none": props.disabled,
 					},
@@ -183,7 +183,7 @@ const RichText: Component<RichTextProps> = (props) => {
 				</Show>
 				<div class="relative">
 					<Show when={showPlaceholder()}>
-						<div class="pointer-events-none absolute top-3 left-3 z-10 text-sm text-unfocused">
+						<div class="pointer-events-none absolute top-3 left-3 z-10 text-sm text-muted">
 							{props.placeholder || T()("editor.rich.text.placeholder")}
 						</div>
 					</Show>

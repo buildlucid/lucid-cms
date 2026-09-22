@@ -1,6 +1,17 @@
 import type { WorkflowStageColor } from "@types";
-import classNames from "classnames";
 import type { Component } from "solid-js";
+import StatusIndicator, {
+	type StatusIndicatorVariant,
+} from "@/components/StatusIndicator/StatusIndicator";
+
+const stageVariants: Record<WorkflowStageColor, StatusIndicatorVariant> = {
+	grey: "neutral-subtle",
+	red: "danger-subtle",
+	yellow: "yellow-subtle",
+	green: "green-subtle",
+	blue: "blue-subtle",
+	purple: "purple-subtle",
+};
 
 const WorkflowStageOption: Component<{
 	label: string;
@@ -10,21 +21,7 @@ const WorkflowStageOption: Component<{
 	// Render
 	return (
 		<span class="flex min-w-0 items-center gap-2">
-			<span
-				class={classNames("h-2.5 w-2.5 shrink-0 rounded-full border", {
-					"bg-input-base border-border": props.color === "grey",
-					"bg-error-base border-error-base": props.color === "red",
-					"bg-workflow-yellow-bg border-workflow-yellow-border":
-						props.color === "yellow",
-					"bg-workflow-green-bg border-workflow-green-border":
-						props.color === "green",
-					"bg-workflow-blue-bg border-workflow-blue-border":
-						props.color === "blue",
-					"bg-workflow-purple-bg border-workflow-purple-border":
-						props.color === "purple",
-				})}
-				aria-hidden="true"
-			/>
+			<StatusIndicator variant={stageVariants[props.color]} />
 			<span class="truncate">{props.label}</span>
 		</span>
 	);

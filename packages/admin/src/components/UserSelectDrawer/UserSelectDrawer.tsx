@@ -276,7 +276,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 				}
 				class={classnames(
 					"flex-1 h-full",
-					"grow bg-card-base border border-border rounded-md",
+					"grow bg-card border border-border rounded-md",
 				)}
 			>
 				<Table.Root

@@ -134,14 +134,14 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 		<>
 			<div
 				class={classNames(
-					"group w-full overflow-hidden rounded-md border border-border bg-input-base",
+					"group w-full overflow-hidden rounded-md border border-border bg-input",
 					props.classes,
 				)}
 			>
 				<button
 					type="button"
 					class={classNames(
-						"rectangle-background relative flex w-full items-center justify-center border-b border-border p-4 focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base",
+						"rectangle-background relative flex w-full items-center justify-center border-b border-border p-4 focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary",
 						{
 							"h-52": props.previewHeight !== "large",
 							"h-72": props.previewHeight === "large",
@@ -184,7 +184,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						fallback={
 							<div
 								class={classNames(
-									"z-10 flex h-full aspect-square max-w-full items-center justify-center rounded-md border border-border bg-input-base font-bold text-unfocused",
+									"z-10 flex h-full aspect-square max-w-full items-center justify-center rounded-md border border-border bg-input font-bold text-muted",
 									{
 										"text-5xl": props.previewHeight === "large",
 										"text-4xl": props.previewHeight !== "large",
@@ -194,7 +194,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 								<Show
 									when={initials()}
 									fallback={
-										<span class="px-3 text-center text-sm font-medium text-unfocused">
+										<span class="px-3 text-center text-sm font-medium text-muted">
 											{T()("account.profile.picture.none")}
 										</span>
 									}
@@ -229,7 +229,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						<Show
 							when={media()}
 							fallback={
-								<p class="mt-1 text-xs text-unfocused">
+								<p class="mt-1 text-xs text-muted">
 									{T()("account.profile.picture.none")}
 								</p>
 							}
@@ -239,7 +239,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 									<Copy.Button
 										label={profilePicture().key}
 										value={profilePicture().url}
-										class="text-xs text-unfocused max-w-full"
+										class="text-xs text-muted max-w-full"
 									/>
 								</div>
 							)}
@@ -249,7 +249,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						<Show when={props.onEdit}>
 							<Button
 								type="button"
-								variant="background-subtle"
+								variant="ghost"
 								size="xs"
 								shape="square"
 								onClick={() => props.onEdit?.()}
@@ -263,7 +263,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 						<Show when={props.onClear && media()}>
 							<Button
 								type="button"
-								variant="danger-subtle"
+								variant="danger-ghost"
 								size="xs"
 								shape="square"
 								onClick={() => setClearConfirmationOpen(true)}

@@ -13,7 +13,7 @@ const NodeRemoveButton: Component<NodeRemoveButtonProps> = (props) => {
 	return (
 		<Button
 			type="button"
-			variant="danger-subtle"
+			variant="danger-ghost"
 			size="xs"
 			shape="square"
 			class="rounded-full!"

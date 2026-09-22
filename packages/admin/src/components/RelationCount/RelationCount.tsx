@@ -38,7 +38,7 @@ const RelationCount: Component<{
 	return (
 		<span
 			class={classNames(props.class, {
-				"text-error-base": isInvalidMin() || isAtMax(),
+				"text-danger": isInvalidMin() || isAtMax(),
 			})}
 		>
 			{props.count}/{max() ?? INFINITY_SYMBOL}

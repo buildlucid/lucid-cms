@@ -26,7 +26,7 @@ const EmailTableRow: Component<EmailRowProps> = (props) => {
 			deliveryStatus === "opened" ||
 			deliveryStatus === "clicked"
 		) {
-			return "primary-subtle";
+			return "success-subtle";
 		}
 		if (
 			deliveryStatus === "failed" ||

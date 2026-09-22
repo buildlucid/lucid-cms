@@ -112,7 +112,7 @@ const CreateMenu: Component<{
 			<Match when={visibleActions().length > 1}>
 				<Menu.Root>
 					<Menu.Trigger
-						class="w-9 h-9 bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast border border-transparent outline-none ring-0 focus-visible:ring-1 focus:ring-primary-base rounded-md flex justify-center items-center transition-colors"
+						class="w-9 h-9 bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground border border-transparent outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors"
 						onClick={(e) => e.stopPropagation()}
 						title={T()("common.create")}
 						aria-label={T()("common.create")}

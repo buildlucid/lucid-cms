@@ -16,7 +16,7 @@ const UserIdentityCell: Component<UserIdentityCellProps> = (props) => {
 	return (
 		<Table.Cell column={props.column} minWidth={260}>
 			<div class="flex min-w-0 items-center gap-2.5">
-				<span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-input-base text-[9px] font-bold text-title">
+				<span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-input text-[9px] font-bold text-title">
 					<Show
 						when={props.user.profilePicture}
 						fallback={helpers.formatUserInitials({

@@ -148,9 +148,9 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"w-full overflow-hidden rounded-md border border-border bg-card-base",
+				"w-full overflow-hidden rounded-md border border-border bg-card",
 				{
-					"border-error-base/50": errorCount() > 0,
+					"border-danger-low-border": errorCount() > 0,
 				},
 			)}
 			aria-invalid={errorCount() > 0}
@@ -158,9 +158,9 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 			<button
 				type="button"
 				class={classNames(
-					"w-full cursor-pointer bg-input-base px-3 py-2.5 text-left transition-colors duration-200 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base flex justify-between items-center gap-3",
+					"w-full cursor-pointer bg-input px-3 py-2.5 text-left transition-colors duration-200 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary flex justify-between items-center gap-3",
 					{
-						"bg-linear-to-r from-error-base/10 to-input-base": errorCount() > 0,
+						"bg-linear-to-r from-danger-low to-input": errorCount() > 0,
 					},
 				)}
 				onClick={toggleOpen}
@@ -174,7 +174,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 						{label()}
 					</span>
 					<Show when={summary()}>
-						<span class="block text-sm text-unfocused mt-0.5">{summary()}</span>
+						<span class="block text-sm text-muted mt-0.5">{summary()}</span>
 					</Show>
 				</span>
 				<span class="flex shrink-0 items-center gap-2">
@@ -182,7 +182,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 					<FaSolidChevronDown
 						size={12}
 						class={classNames(
-							"shrink-0 text-icon-faded transition-transform duration-200",
+							"shrink-0 text-muted transition-transform duration-200",
 							{
 								"rotate-180": getOpen(),
 							},
@@ -193,14 +193,14 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 			<div
 				id={`${triggerId()}-content`}
 				class={classNames(
-					"bg-card-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
+					"bg-card transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
 					{
 						"scale-y-100 h-auto opacity-100 visible": getOpen(),
 						"scale-y-0 h-0 opacity-0 invisible": !getOpen(),
 					},
 				)}
 			>
-				<div class="border-t border-border bg-card-base p-3 md:p-4 @container/fields grid grid-cols-12 gap-3">
+				<div class="border-t border-border bg-card p-3 md:p-4 @container/fields grid grid-cols-12 gap-3">
 					<Index each={childrenMounted() ? fieldConfig().fields : []}>
 						{(config) => (
 							<props.renderField

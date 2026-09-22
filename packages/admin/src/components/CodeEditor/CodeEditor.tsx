@@ -343,9 +343,9 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 			<div
 				data-code-editor
 				class={classnames(
-					"code-editor-shell overflow-hidden rounded-md border border-border bg-input-base transition-colors duration-200",
+					"code-editor-shell overflow-hidden rounded-md border border-border bg-input transition-colors duration-200",
 					{
-						"border-primary-base": inputFocus() || languageMenuOpen(),
+						"border-primary": inputFocus() || languageMenuOpen(),
 						"opacity-80 cursor-not-allowed": props.disabled,
 					},
 				)}
@@ -362,7 +362,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 								data-code-editor-language
 								id={`${props.id}-language`}
 								aria-label={T()("fields.code.language.aria.label")}
-								class="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md px-2 text-sm font-medium text-subtitle transition-colors duration-150 outline-none hover:bg-background-hover hover:text-title focus-visible:ring-1 focus:ring-primary-base disabled:cursor-not-allowed disabled:opacity-50"
+								class="inline-flex h-7 max-w-full items-center gap-1.5 rounded-md px-2 text-sm font-medium text-subtitle transition-colors duration-150 outline-none hover:bg-background-hover hover:text-title focus-visible:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
 								onFocus={() => setInputFocus(true)}
 								onBlur={() => setInputFocus(false)}
 								disabled={props.disabled}

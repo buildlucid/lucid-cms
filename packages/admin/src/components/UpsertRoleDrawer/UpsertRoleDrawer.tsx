@@ -234,7 +234,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 							/>
 							<For each={permissions?.data?.data}>
 								{(option) => (
-									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
+									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card">
 										<div class="flex justify-between items-start gap-3">
 											<h4 class="text-sm font-medium text-body">
 												{helpers.getLocaleValue({
@@ -245,7 +245,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 											<Show when={!isReadOnly()}>
 												<button
 													type="button"
-													class="text-xs text-unfocused hover:text-body transition-colors"
+													class="text-xs text-muted hover:text-body transition-colors"
 													onClick={() => {
 														const groupIsSelected = option.permissions.every(
 															(permission) =>
@@ -284,7 +284,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 											</Show>
 										</div>
 										<Show when={option.details.description}>
-											<p class="text-xs text-unfocused mt-1">
+											<p class="text-xs text-muted mt-1">
 												{helpers.getLocaleValue({
 													value: option.details.description,
 												})}

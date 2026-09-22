@@ -11,8 +11,8 @@ const IndexingGuidance: FieldSlotComponent = (props) => {
 	// Render
 	return (
 		<p
-			class="text-sm text-unfocused"
-			classList={{ "text-warning-base": props.field.value === "noindex" }}
+			class="text-sm text-muted"
+			classList={{ "text-warning": props.field.value === "noindex" }}
 		>
 			{t(
 				props.field.value === "noindex"

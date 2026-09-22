@@ -178,8 +178,8 @@ const PublishingOverviewPage: Component = () => {
 											})}
 										</p>
 									</div>
-									<div class="overflow-hidden rounded-md border border-border bg-card-base">
-										<div class="grid grid-cols-1 bg-card-base sm:grid-cols-2 xl:grid-cols-5">
+									<div class="overflow-hidden rounded-md border border-border bg-card">
+										<div class="grid grid-cols-1 bg-card sm:grid-cols-2 xl:grid-cols-5">
 											<DashboardMetricTile
 												icon={<FaSolidArrowTrendUp size={14} />}
 												label={T()("publishing.overview.behind")}
@@ -251,7 +251,7 @@ const PublishingOverviewPage: Component = () => {
 									{T()("publishing.overview.collections.description")}
 								</p>
 							</div>
-							<div class="overflow-hidden rounded-md border border-border bg-card-base divide-y divide-border">
+							<div class="overflow-hidden rounded-md border border-border bg-card divide-y divide-border">
 								<For each={collectionRows()}>
 									{(row) => (
 										<article class="grid gap-4 px-4 py-4 md:grid-cols-[minmax(180px,1fr)_repeat(3,minmax(100px,auto))] md:items-center">
@@ -273,18 +273,18 @@ const PublishingOverviewPage: Component = () => {
 											</div>
 											<A
 												href={statusHref(row, "out-of-sync")}
-												class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary-base"
+												class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary"
 											>
 												<span class="block text-xs text-body">
 													{T()("publishing.overview.behind")}
 												</span>
-												<span class="mt-1 block text-sm font-semibold text-warning-base hover:underline">
+												<span class="mt-1 block text-sm font-semibold text-warning hover:underline">
 													{row.outOfSync}
 												</span>
 											</A>
 											<A
 												href={statusHref(row, "unreleased")}
-												class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary-base"
+												class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary"
 											>
 												<span class="block text-xs text-body">
 													{T()("common.status.unreleased")}

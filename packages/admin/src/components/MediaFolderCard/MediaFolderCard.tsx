@@ -16,7 +16,7 @@ export const MediaFolderCardLoading: Component = () => {
 	// ----------------------------------
 	// Return
 	return (
-		<li class={"bg-background-base border-border border rounded-md"}>
+		<li class={"bg-background border-border border rounded-md"}>
 			<div class="p-4">
 				<span class="skeleton block h-5 w-1/2 mb-2" />
 				<span class="skeleton block h-5 w-full" />
@@ -82,7 +82,7 @@ export const MediaFolderCard: Component<{
 			use:droppable
 			use:draggable
 			class={classNames(
-				"group flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card-base hover:bg-row-hover relative transition-colors duration-200",
+				"group flex items-start gap-3 rounded-md cursor-pointer border border-border p-3 bg-card hover:bg-background-hover relative transition-colors duration-200",
 				{
 					"bg-card-hover": droppable.isActiveDroppable,
 				},

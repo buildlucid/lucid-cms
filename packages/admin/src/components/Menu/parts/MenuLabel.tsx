@@ -14,7 +14,7 @@ const MenuLabel: Component<MenuLabelProps> = (props) => {
 		<div
 			data-menu-label
 			class={classNames(
-				"px-2 pt-1.5 pb-1 text-xs font-medium text-unfocused",
+				"px-2 pt-1.5 pb-1 text-xs font-medium text-muted",
 				props.class,
 			)}
 		>

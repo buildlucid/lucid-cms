@@ -67,8 +67,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 			class={classNames(
 				"w-full",
 				{
-					"rounded-md border border-border bg-card-base":
-						props.variant !== "plain",
+					"rounded-md border border-border bg-card": props.variant !== "plain",
 					"p-3": props.variant !== "plain" && props.padding === "sm",
 					"px-4 py-3": props.variant !== "plain" && props.padding !== "sm",
 				},
@@ -105,7 +104,7 @@ const DetailsList: Component<DetailsListProps> = (props) => {
 									</Match>
 									<Match when={item.type !== "pill"}>
 										<span
-											class={classNames("text-sm font-medium text-unfocused", {
+											class={classNames("text-sm font-medium text-muted", {
 												"min-w-0 text-left break-all lg:text-right": item.wrap,
 											})}
 										>

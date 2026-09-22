@@ -334,7 +334,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									{T()("documents.select.action")}
 								</Button>
 								<Show when={selectedDocumentItems().length > 0}>
-									<p class="text-sm text-unfocused">
+									<p class="text-sm text-muted">
 										<RelationCount
 											count={selectedDocumentItems().length}
 											min={props.minItems}
@@ -380,7 +380,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 								<div class="flex items-center gap-0.5 opacity-100 transition-opacity duration-200 md:opacity-0 group-hover:opacity-100">
 									<Button
 										type="button"
-										variant="background-subtle"
+										variant="ghost"
 										size="xs"
 										shape="square"
 										onClick={openDocuSelectModal}
@@ -391,7 +391,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 									</Button>
 									<Button
 										type="button"
-										variant="danger-subtle"
+										variant="danger-ghost"
 										size="xs"
 										shape="square"
 										onClick={clearSelection}
@@ -452,9 +452,9 @@ const MissingDocumentRefNotice: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="rounded-md border border-warning-base/30 bg-warning-base/10 px-3 py-2.5">
+		<div class="rounded-md border border-warning-low-border bg-warning-low px-3 py-2.5">
 			<div class="flex items-start gap-2.5">
-				<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-warning-base/15 text-warning-base">
+				<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-warning-low-border bg-warning-low text-warning-low-foreground">
 					<FaSolidTriangleExclamation size={9} />
 				</div>
 				<div class="min-w-0 flex-1">
@@ -517,11 +517,11 @@ const DocumentSortableItem: Component<{
 					props.document.value.id,
 			}}
 			class={classNames(
-				"group ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
+				"group ring-inset ring-primary transition-colors duration-200 transform-gpu",
 				{
-					"ring-1 ring-inset ring-error-base": props.hasError,
+					"ring-1 ring-inset ring-danger": props.hasError,
 					"opacity-60": props.dragDrop.getDragging()?.ref === props.dragId,
-					"ring-1 ring-primary-base":
+					"ring-1 ring-primary":
 						props.dragDrop.getDraggingTarget()?.ref === props.dragId &&
 						props.dragDrop.getDragging()?.ref !== props.dragId &&
 						!props.hasError,
@@ -535,7 +535,7 @@ const DocumentSortableItem: Component<{
 				<div class="opacity-100 transition-opacity duration-200 md:opacity-0 group-hover:opacity-100">
 					<Button
 						type="button"
-						variant="danger-subtle"
+						variant="danger-ghost"
 						size="xs"
 						shape="square"
 						onClick={() =>

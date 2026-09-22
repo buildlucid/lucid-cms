@@ -545,7 +545,7 @@ export const PageBuilderHeader: Component<{
 	// Render
 	return (
 		<>
-			<div class="w-full -mt-4 px-4 md:px-6 pt-4 mt:pt-6 bg-background-base border-x max-md:border-t border-border max-md:rounded-t-xl max-md:mt-px">
+			<div class="w-full -mt-4 px-4 md:px-6 pt-4 mt:pt-6 bg-background border-x max-md:border-t border-border max-md:rounded-t-xl max-md:mt-px">
 				<div class="flex md:items-center md:justify-between gap-3 w-full text-sm">
 					<div class="flex-1 min-w-0">
 						<LayoutBreadcrumbs
@@ -575,7 +575,7 @@ export const PageBuilderHeader: Component<{
 									class={classNames(
 										"flex items-center justify-center w-6 h-6 rounded transition-colors",
 										{
-											"text-primary-base hover:text-primary-hover":
+											"text-primary hover:text-primary-hover":
 												props.state.autoSaveUserEnabled?.(),
 											"text-body/40 hover:text-body":
 												!props.state.autoSaveUserEnabled?.(),
@@ -597,7 +597,7 @@ export const PageBuilderHeader: Component<{
 			<div
 				ref={stickyBarRef}
 				style={{ "view-transition-name": "document-builder-header" }}
-				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background-base border-x border-b border-border rounded-b-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-2.5"
+				class="sticky top-0 z-30 w-full px-4 md:px-6 py-4 md:py-6 bg-background border-x border-b border-border rounded-b-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-2.5"
 			>
 				<div class="flex items-center gap-2.5 w-full lg:w-auto">
 					<div class="flex flex-col gap-1">
@@ -700,7 +700,7 @@ export const PageBuilderHeader: Component<{
 									aria-pressed={props.state.previewOpen?.()}
 									class={
 										props.state.previewOpen?.()
-											? "border-secondary-base! bg-secondary-base! text-secondary-contrast! fill-secondary-contrast! hover:bg-secondary-hover!"
+											? "border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground! hover:bg-secondary-hover!"
 											: undefined
 									}
 									onClick={() => props.actions.togglePreview?.()}

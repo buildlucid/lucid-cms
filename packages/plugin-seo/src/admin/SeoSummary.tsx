@@ -26,7 +26,7 @@ const SeoSummary: BrickSlotComponent = (props) => {
 				}),
 	);
 	const variant = createMemo(() =>
-		score() === 100 ? "primary" : score() >= 50 ? "warning" : "danger",
+		score() === 100 ? "success" : score() >= 50 ? "warning" : "danger",
 	);
 
 	// ----------------------------------

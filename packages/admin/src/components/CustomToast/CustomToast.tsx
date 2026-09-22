@@ -58,7 +58,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"relative w-[min(400px,calc(100vw-2rem))] overflow-hidden rounded-md border border-border bg-card-base p-3.5 shadow-md",
+				"relative w-[min(400px,calc(100vw-2rem))] overflow-hidden rounded-md border border-border bg-card p-3.5 shadow-md",
 				{
 					"animate-enter": props.toast.visible,
 					"animate-leave": !props.toast.visible,
@@ -73,13 +73,13 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 			>
 				<span
 					class={classNames(
-						"flex size-5 shrink-0 items-center justify-center rounded-full border border-border bg-background-base",
+						"flex size-5 shrink-0 items-center justify-center rounded-full border border-border bg-background",
 						{
 							"mt-0.5": !!props.message,
-							"text-primary-base": props.type === "success",
-							"text-error-base": props.type === "error",
-							"text-warning-base": props.type === "warning",
-							"text-info-base": props.type === "info",
+							"text-success": props.type === "success",
+							"text-danger": props.type === "error",
+							"text-warning": props.type === "warning",
+							"text-info": props.type === "info",
 						},
 					)}
 				>
@@ -111,7 +111,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 			</div>
 			<button
 				data-drawer-ignore
-				class="absolute right-2.5 top-2.5 z-20 flex size-7 items-center justify-center rounded-md text-icon-faded transition-colors duration-200 hover:bg-background-hover hover:text-icon-base focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
+				class="absolute right-2.5 top-2.5 z-20 flex size-7 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-background-hover hover:text-icon focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 				onClick={() => toast.dismiss(props.toast.id)}
 				type="button"
 				aria-label={T()("common.close")}
@@ -121,10 +121,10 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 			{/* Duration bar */}
 			<span
 				class={classNames("absolute bottom-0 left-0 z-20 h-0.5 opacity-80", {
-					"bg-primary-base": props.type === "success",
-					"bg-error-base": props.type === "error",
-					"bg-warning-base": props.type === "warning",
-					"bg-info-base": props.type === "info",
+					"bg-success": props.type === "success",
+					"bg-danger": props.type === "error",
+					"bg-warning": props.type === "warning",
+					"bg-info": props.type === "info",
 				})}
 				style={{ width: `${life()}%` }}
 			/>

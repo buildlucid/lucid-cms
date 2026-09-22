@@ -36,10 +36,10 @@ const DocumentReferencePreviewCard: Component<
 		<div
 			{...rootProps}
 			class={classNames(
-				"overflow-hidden rounded-lg border bg-input-base",
+				"overflow-hidden rounded-lg border bg-input",
 				{
 					"border-border": !local.invalid,
-					"border-error-base/50": local.invalid,
+					"border-danger-low-border": local.invalid,
 				},
 				local.class,
 			)}
@@ -83,7 +83,7 @@ const DocumentReferencePreviewCard: Component<
 								}}
 								title={`${field.label}: ${field.value}`}
 							>
-								<p class="truncate text-[11px] font-medium text-unfocused mb-0!">
+								<p class="truncate text-[11px] font-medium text-muted mb-0!">
 									{field.label}
 								</p>
 								<p class="mt-0.5 truncate text-xs text-subtitle mb-0!">

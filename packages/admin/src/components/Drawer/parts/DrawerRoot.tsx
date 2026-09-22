@@ -193,7 +193,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 					class={classNames(
 						"fixed inset-0 animate-overlay-hide cursor-pointer duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
-							"bg-overlay-base": stackLevel() === 0,
+							"bg-overlay": stackLevel() === 0,
 							"bg-transparent": stackLevel() > 0,
 						},
 					)}
@@ -223,7 +223,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 					<Dialog.Content
 						data-drawer-content
 						class={classNames(
-							"w-full relative flex flex-col scrollbar border border-border bg-background-base outline-hidden overflow-y-auto",
+							"w-full relative flex flex-col scrollbar border border-border bg-background outline-hidden overflow-y-auto",
 							{
 								"rounded-xl": side() === "right",
 								"max-w-200": side() === "right" && props.size !== "full",

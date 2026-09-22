@@ -384,7 +384,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				class={classNames(
 					"flex-1 h-full",
 					classNames("grow", {
-						"bg-card-base border border-border rounded-md":
+						"bg-card border border-border rounded-md":
 							media.data?.data.length === 0,
 					}),
 				)}

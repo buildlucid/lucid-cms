@@ -40,7 +40,7 @@ export const FormErrorMessage: Component<ErrorMessageProps> = (props) => {
 							<a class="flex min-w-0 items-start text-sm" href={`#${props.id}`}>
 								<FaSolidTriangleExclamation
 									size={12}
-									class="text-error-base mt-1.25 mr-2 shrink-0"
+									class="text-danger mt-1.25 mr-2 shrink-0"
 								/>
 								<span class="min-w-0 wrap-break-words">
 									<Show when={typeof error.itemIndex === "number"}>
@@ -57,7 +57,7 @@ export const FormErrorMessage: Component<ErrorMessageProps> = (props) => {
 				<a class="mt-2 flex min-w-0 items-start text-sm" href={`#${props.id}`}>
 					<FaSolidTriangleExclamation
 						size={12}
-						class="text-error-base mt-1.25 mr-2 shrink-0"
+						class="text-danger mt-1.25 mr-2 shrink-0"
 					/>
 					<span class="min-w-0 wrap-break-words">{genericMessage()}</span>
 				</a>

@@ -19,17 +19,14 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 	return (
 		<>
 			<Show when={props.fieldColumnIsMissing}>
-				<span
-					class="text-error-base inline"
-					title={T()("fields.database.missing")}
-				>
+				<span class="text-danger inline" title={T()("fields.database.missing")}>
 					<FaSolidDatabase size={12} />
 				</span>
 			</Show>
 			<Show when={props.localised}>
 				<span
 					class={classnames("inline", {
-						"text-error-base": props.altLocaleError,
+						"text-danger": props.altLocaleError,
 					})}
 					title={
 						props.altLocaleError

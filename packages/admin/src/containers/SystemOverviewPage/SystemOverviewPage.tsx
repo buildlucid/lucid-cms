@@ -94,11 +94,10 @@ const SystemOverviewPage: Component = () => {
 							<ProgressBar
 								value={percentUsed()}
 								variant={
-									isUnlimitedStorage()
-										? "primary"
-										: percentUsed() > STORAGE_DANGER_PERCENT
-											? "danger"
-											: "neutral"
+									percentUsed() > STORAGE_DANGER_PERCENT &&
+									!isUnlimitedStorage()
+										? "danger"
+										: "primary"
 								}
 								labels={storageBarLabels()}
 							/>
@@ -159,7 +158,7 @@ const SystemOverviewPage: Component = () => {
 							<Show
 								when={emailTemplates().length > 0}
 								fallback={
-									<p class="text-sm text-unfocused">
+									<p class="text-sm text-muted">
 										{T()("empty.states.templates")}
 									</p>
 								}

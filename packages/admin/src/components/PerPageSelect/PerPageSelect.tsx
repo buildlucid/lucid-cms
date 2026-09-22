@@ -39,7 +39,7 @@ const PerPageSelect: Component<PerPageSelectProps> = (props) => {
 				data-per-page-select
 				disabled={props.disabled}
 				class={classNames(
-					"flex h-9 items-center gap-2 rounded-md border border-border bg-input-base px-2 text-sm text-input-contrast fill-card-contrast hover:bg-secondary-hover hover:text-secondary-contrast disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-input-base disabled:hover:text-unfocused",
+					"flex h-9 items-center gap-2 rounded-md border border-border bg-input px-2 text-sm text-subtitle fill-body hover:bg-secondary-hover hover:text-secondary-foreground disabled:cursor-not-allowed disabled:text-muted disabled:fill-muted disabled:hover:bg-input disabled:hover:text-muted",
 					props.class,
 				)}
 			>

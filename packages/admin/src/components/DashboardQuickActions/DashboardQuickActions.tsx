@@ -33,7 +33,7 @@ const DashboardQuickActions: Component<{
 		<>
 			<span
 				class={
-					"flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background-base text-icon-base"
+					"flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background text-icon"
 				}
 			>
 				{action.icon}
@@ -60,14 +60,14 @@ const DashboardQuickActions: Component<{
 			<Show
 				when={visibleActions().length > 0}
 				fallback={
-					<div class="rounded-md border border-border bg-card-base p-4">
+					<div class="rounded-md border border-border bg-card p-4">
 						<p class="text-sm text-body">
 							{T()("dashboard.quick.actions.empty")}
 						</p>
 					</div>
 				}
 			>
-				<div class="overflow-hidden rounded-md border border-border bg-card-base">
+				<div class="overflow-hidden rounded-md border border-border bg-card">
 					<div class="grid auto-rows-fr grid-cols-1 md:grid-cols-2">
 						<For each={visibleActions()}>
 							{(action) => (
@@ -77,7 +77,7 @@ const DashboardQuickActions: Component<{
 										<button
 											type="button"
 											class={
-												"group flex h-full min-h-16 w-full items-start gap-3 border-b border-border bg-card-base px-3 py-3 text-left transition-colors duration-200 last:border-b-0 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base md:odd:border-r md:nth-last-1:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
+												"group flex h-full min-h-16 w-full items-start gap-3 border-b border-border bg-card px-3 py-3 text-left transition-colors duration-200 last:border-b-0 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary md:odd:border-r md:nth-last-1:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
 											}
 											onClick={action.onClick}
 										>
@@ -89,7 +89,7 @@ const DashboardQuickActions: Component<{
 										<A
 											href={href()}
 											class={
-												"group flex h-full min-h-16 w-full items-start gap-3 border-b border-border bg-card-base px-3 py-3 text-left transition-colors duration-200 last:border-b-0 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base md:odd:border-r md:nth-last-1:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
+												"group flex h-full min-h-16 w-full items-start gap-3 border-b border-border bg-card px-3 py-3 text-left transition-colors duration-200 last:border-b-0 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary md:odd:border-r md:nth-last-1:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
 											}
 										>
 											{content(action)}

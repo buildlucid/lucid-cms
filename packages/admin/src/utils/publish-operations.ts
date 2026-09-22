@@ -5,24 +5,33 @@ import type {
 	PublishOperationUser,
 } from "@types";
 import type { PillProps } from "@/components/Pill/Pill";
+import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
 type PublishOperationPillVariant = Extract<
 	PillProps["variant"],
-	"warning-subtle" | "primary-subtle" | "danger-subtle" | "outline"
+	| "warning-subtle"
+	| "primary-subtle"
+	| "success-subtle"
+	| "danger-subtle"
+	| "outline"
 >;
 
-const getPublishOperationDotClass = (variant: PublishOperationPillVariant) => {
+const getPublishOperationIndicatorVariant = (
+	variant: PublishOperationPillVariant,
+): StatusIndicatorVariant => {
 	switch (variant) {
 		case "warning-subtle":
-			return "border-warning-base/60 bg-warning-base/40";
+			return "warning-subtle";
 		case "primary-subtle":
-			return "border-primary-muted-border bg-primary-muted-bg";
+			return "primary-subtle";
+		case "success-subtle":
+			return "success-subtle";
 		case "danger-subtle":
-			return "border-error-base/60 bg-error-base/40";
+			return "danger-subtle";
 		case "outline":
-			return "border-border bg-input-base";
+			return "neutral-subtle";
 	}
 };
 
@@ -48,7 +57,7 @@ export const getPublishOperationStatusVariant = (
 		case "pending":
 			return "warning-subtle";
 		case "approved":
-			return "primary-subtle";
+			return "success-subtle";
 		case "rejected":
 		case "cancelled":
 			return "danger-subtle";
@@ -58,9 +67,10 @@ export const getPublishOperationStatusVariant = (
 };
 
 /** Uses the same status colours as the release-request table. */
-export const getPublishOperationStatusDotClass = (
+export const getPublishOperationStatusIndicatorVariant = (
 	status: PublishOperationStatus,
-) => getPublishOperationDotClass(getPublishOperationStatusVariant(status));
+) =>
+	getPublishOperationIndicatorVariant(getPublishOperationStatusVariant(status));
 
 export const getPublishOperationStatusLabel = (
 	status: PublishOperationStatus,
@@ -87,8 +97,9 @@ export const getPublishOperationExecutionStatusVariant = (
 		case "scheduled":
 			return "warning-subtle";
 		case "executing":
-		case "executed":
 			return "primary-subtle";
+		case "executed":
+			return "success-subtle";
 		case "failed":
 		case "cancelled":
 			return "danger-subtle";
@@ -96,10 +107,10 @@ export const getPublishOperationExecutionStatusVariant = (
 };
 
 /** Uses the same execution-state colours as the release-request table. */
-export const getPublishOperationExecutionStatusDotClass = (
+export const getPublishOperationExecutionStatusIndicatorVariant = (
 	status: PublishOperationExecutionStatus,
 ) =>
-	getPublishOperationDotClass(
+	getPublishOperationIndicatorVariant(
 		getPublishOperationExecutionStatusVariant(status),
 	);
 

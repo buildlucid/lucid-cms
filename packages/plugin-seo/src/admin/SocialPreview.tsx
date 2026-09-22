@@ -30,7 +30,7 @@ const SocialPreview: Component<SocialPreviewProps> = (props) => {
 	// Render
 	return (
 		<div
-			class="overflow-hidden rounded-md border border-border bg-background-base"
+			class="overflow-hidden rounded-md border border-border bg-background"
 			classList={{ flex: props.compact }}
 		>
 			<div

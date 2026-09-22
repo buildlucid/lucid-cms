@@ -38,9 +38,9 @@ const HeadingMenu: Component<{
 		>
 			<Menu.Trigger
 				class={classNames(
-					"inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs transition-colors duration-150 outline-none focus-visible:ring-1 focus:ring-primary-base disabled:cursor-not-allowed disabled:opacity-50",
+					"inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs transition-colors duration-150 outline-none focus-visible:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50",
 					{
-						"bg-primary-muted-bg text-primary-muted-contrast border-primary-muted-border":
+						"bg-primary-low text-primary-low-foreground border-primary-low-border":
 							props.mode === "toolbar" || props.activeHeading > 0,
 						"text-body hover:bg-background-hover hover:text-title border-transparent":
 							props.mode === "pill" && props.activeHeading === 0,

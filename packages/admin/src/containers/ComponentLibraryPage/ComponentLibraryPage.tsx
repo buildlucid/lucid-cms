@@ -78,6 +78,10 @@ import SelectMultiple, {
 } from "@/components/SelectMultiple/SelectMultiple";
 import Slider from "@/components/Slider/Slider";
 import Spinner, { type SpinnerSize } from "@/components/Spinner/Spinner";
+import StatusIndicator, {
+	type StatusIndicatorSize,
+	type StatusIndicatorVariant,
+} from "@/components/StatusIndicator/StatusIndicator";
 import Switch from "@/components/Switch/Switch";
 import Table from "@/components/Table/Table";
 import Tabs from "@/components/Tabs/Tabs";
@@ -105,9 +109,8 @@ const BUTTON_VARIANTS = valuesOf<ButtonVariant>({
 	outline: true,
 	danger: true,
 	"danger-outline": true,
-	"background-subtle": true,
-	"danger-subtle": true,
 	ghost: true,
+	"danger-ghost": true,
 });
 const BUTTON_SIZES = valuesOf<ButtonSize>({
 	xs: true,
@@ -154,7 +157,7 @@ const ALERT_VARIANTS = valuesOf<AlertVariant>({
 	info: true,
 	success: true,
 	warning: true,
-	error: true,
+	danger: true,
 });
 const ALERT_APPEARANCES = valuesOf<AlertAppearance>({
 	block: true,
@@ -165,27 +168,36 @@ const PILL_VARIANTS = valuesOf<PillVariant>({
 	primary: true,
 	"primary-subtle": true,
 	secondary: true,
+	success: true,
+	"success-subtle": true,
 	danger: true,
 	"danger-subtle": true,
+	warning: true,
 	"warning-subtle": true,
+	info: true,
 	"info-subtle": true,
 	neutral: true,
 	outline: true,
-	"workflow-yellow": true,
-	"workflow-green": true,
-	"workflow-blue": true,
-	"workflow-purple": true,
+	yellow: true,
+	"yellow-subtle": true,
+	green: true,
+	"green-subtle": true,
+	blue: true,
+	"blue-subtle": true,
+	purple: true,
+	"purple-subtle": true,
 });
 const PILL_SIZES = valuesOf<PillSize>({ xs: true, sm: true });
 const PROGRESS_BAR_VARIANTS = valuesOf<ProgressBarVariant>({
 	primary: true,
 	"primary-subtle": true,
 	secondary: true,
+	success: true,
+	"success-subtle": true,
 	danger: true,
 	"danger-subtle": true,
 	warning: true,
 	"warning-subtle": true,
-	neutral: true,
 });
 const PROGRESS_BAR_SIZES = valuesOf<ProgressBarSize>({
 	sm: true,
@@ -193,6 +205,33 @@ const PROGRESS_BAR_SIZES = valuesOf<ProgressBarSize>({
 	lg: true,
 });
 const SPINNER_SIZES = valuesOf<SpinnerSize>({ sm: true, md: true, lg: true });
+const STATUS_INDICATOR_VARIANTS = valuesOf<StatusIndicatorVariant>({
+	primary: true,
+	"primary-subtle": true,
+	success: true,
+	"success-subtle": true,
+	danger: true,
+	"danger-subtle": true,
+	warning: true,
+	"warning-subtle": true,
+	info: true,
+	"info-subtle": true,
+	neutral: true,
+	"neutral-subtle": true,
+	yellow: true,
+	"yellow-subtle": true,
+	green: true,
+	"green-subtle": true,
+	blue: true,
+	"blue-subtle": true,
+	purple: true,
+	"purple-subtle": true,
+});
+const STATUS_INDICATOR_SIZES = valuesOf<StatusIndicatorSize>({
+	xs: true,
+	sm: true,
+	md: true,
+});
 const ACTION_MENU_SIZES = valuesOf<ActionMenuSize>({ sm: true, md: true });
 const ASPECT_RATIOS = valuesOf<AspectRatioValue>({
 	"1:1": true,
@@ -286,7 +325,7 @@ const multipleOptions: SelectMultipleOption[] = [
 /** A stacked row of examples with the value each one is showing. */
 const Row: Component<{ label: string; children: JSXElement }> = (props) => (
 	<div class="flex flex-wrap items-center gap-2">
-		<code class="w-44 shrink-0 text-xs text-unfocused">{props.label}</code>
+		<code class="w-44 shrink-0 text-xs text-muted">{props.label}</code>
 		{props.children}
 	</div>
 );
@@ -425,12 +464,12 @@ const ComponentLibraryPage: Component = () => {
 								<For each={ASPECT_RATIOS}>
 									{(ratio) => (
 										<div class="max-w-64">
-											<code class="text-xs text-unfocused">
+											<code class="text-xs text-muted">
 												{`ratio="${ratio}"`}
 											</code>
 											<AspectRatio
 												ratio={ratio}
-												contentClass="rounded-md border border-border bg-card-base"
+												contentClass="rounded-md border border-border bg-card"
 											/>
 										</div>
 									)}
@@ -657,7 +696,7 @@ const ComponentLibraryPage: Component = () => {
 										label: "Status",
 										type: "pill",
 										value: "Published",
-										pillVariant: "primary-subtle",
+										pillVariant: "success-subtle",
 										pillSize: "xs",
 									},
 								]}
@@ -675,7 +714,7 @@ const ComponentLibraryPage: Component = () => {
 						<InfoRow.Content
 							title={"Plain, for a card the caller already drew"}
 						>
-							<div class="rounded-md border border-border bg-card-base px-4 py-3">
+							<div class="rounded-md border border-border bg-card px-4 py-3">
 								<p class="mb-2 text-sm font-semibold text-title">Deployment</p>
 								<DetailsList
 									variant="plain"
@@ -832,7 +871,7 @@ const ComponentLibraryPage: Component = () => {
 									type="color"
 									value={fieldValue()}
 									onInput={(event) => setFieldValue(event.currentTarget.value)}
-									class="h-10 w-full rounded-md border border-border bg-input-base"
+									class="h-10 w-full rounded-md border border-border bg-input"
 								/>
 								<Field.Error />
 								<Field.Description>
@@ -894,13 +933,13 @@ const ComponentLibraryPage: Component = () => {
 								<For each={GRID_COLUMNS}>
 									{(columns) => (
 										<div>
-											<code class="text-xs text-unfocused">
+											<code class="text-xs text-muted">
 												{`columns={${columns}}`}
 											</code>
 											<Grid columns={columns}>
 												<Index each={Array.from({ length: columns })}>
 													{(_, index) => (
-														<li class="rounded-md border border-border bg-card-base p-4 text-sm">
+														<li class="rounded-md border border-border bg-card p-4 text-sm">
 															{`Card ${index + 1}`}
 														</li>
 													)}
@@ -918,7 +957,7 @@ const ComponentLibraryPage: Component = () => {
 						<InfoRow.Content title={"Fit"}>
 							<div class="flex gap-3">
 								<div class="w-40">
-									<code class="text-xs text-unfocused">fit="cover"</code>
+									<code class="text-xs text-muted">fit="cover"</code>
 									<AspectRatio
 										ratio="1:1"
 										contentClass="overflow-hidden rounded-md border border-border"
@@ -927,7 +966,7 @@ const ComponentLibraryPage: Component = () => {
 									</AspectRatio>
 								</div>
 								<div class="w-40">
-									<code class="text-xs text-unfocused">fit="contain"</code>
+									<code class="text-xs text-muted">fit="contain"</code>
 									<AspectRatio
 										ratio="1:1"
 										contentClass="overflow-hidden rounded-md border border-border"
@@ -1046,7 +1085,7 @@ const ComponentLibraryPage: Component = () => {
 					>
 						<InfoRow.Content title={"Items"}>
 							<Menu.Root>
-								<Menu.Trigger class="rounded-md border border-border bg-card-base px-3 py-1.5 text-sm">
+								<Menu.Trigger class="rounded-md border border-border bg-card px-3 py-1.5 text-sm">
 									Open menu
 								</Menu.Trigger>
 								<Menu.Content>
@@ -1066,7 +1105,7 @@ const ComponentLibraryPage: Component = () => {
 						</InfoRow.Content>
 						<InfoRow.Content title={"Checkboxes, radios and submenus"}>
 							<Menu.Root>
-								<Menu.Trigger class="rounded-md border border-border bg-card-base px-3 py-1.5 text-sm">
+								<Menu.Trigger class="rounded-md border border-border bg-card px-3 py-1.5 text-sm">
 									View options
 								</Menu.Trigger>
 								<Menu.Content dividers={false}>
@@ -1243,7 +1282,7 @@ const ComponentLibraryPage: Component = () => {
 								<For each={PAGINATION_VARIANTS}>
 									{(variant) => (
 										<div>
-											<code class="text-xs text-unfocused">
+											<code class="text-xs text-muted">
 												{`variant="${variant}"`}
 											</code>
 											<Pagination
@@ -1316,7 +1355,7 @@ const ComponentLibraryPage: Component = () => {
 								<For each={PROGRESS_BAR_VARIANTS}>
 									{(variant) => (
 										<div>
-											<code class="text-xs text-unfocused">{`variant="${variant}"`}</code>
+											<code class="text-xs text-muted">{`variant="${variant}"`}</code>
 											<ProgressBar class="mt-1" variant={variant} value={95} />
 										</div>
 									)}
@@ -1328,7 +1367,7 @@ const ComponentLibraryPage: Component = () => {
 								<For each={PROGRESS_BAR_SIZES}>
 									{(size) => (
 										<div>
-											<code class="text-xs text-unfocused">{`size="${size}"`}</code>
+											<code class="text-xs text-muted">{`size="${size}"`}</code>
 											<ProgressBar class="mt-1" size={size} value={60} />
 										</div>
 									)}
@@ -1337,7 +1376,7 @@ const ComponentLibraryPage: Component = () => {
 						</InfoRow.Content>
 						<InfoRow.Content title={"Square corners"}>
 							<div class="overflow-hidden rounded-md border border-border">
-								<div class="bg-card-base p-4 text-sm">
+								<div class="bg-card p-4 text-sm">
 									Sits flush against the edge of a card.
 								</div>
 								<ProgressBar value={40} size="md" square />
@@ -1360,7 +1399,7 @@ const ComponentLibraryPage: Component = () => {
 							<ProgressBar
 								class="mt-3"
 								value={sliderValue()[0] ?? 0}
-								variant={(sliderValue()[0] ?? 0) > 90 ? "danger" : "neutral"}
+								variant={(sliderValue()[0] ?? 0) > 90 ? "danger" : "primary"}
 								labels={{ start: `${sliderValue()[0] ?? 0}% used` }}
 							/>
 						</InfoRow.Content>
@@ -1413,7 +1452,7 @@ const ComponentLibraryPage: Component = () => {
 						description={"filterFields, sorts, perPage, padding"}
 					>
 						<InfoRow.Content title={"Full toolbar"}>
-							<div class="rounded-md border border-border bg-card-base">
+							<div class="rounded-md border border-border bg-card">
 								<QueryToolbar
 									queryState={queryState}
 									filterSubject="Pages"
@@ -1425,7 +1464,7 @@ const ComponentLibraryPage: Component = () => {
 							</div>
 						</InfoRow.Content>
 						<InfoRow.Content title={"Small padding, sort only"}>
-							<div class="rounded-md border border-border bg-card-base">
+							<div class="rounded-md border border-border bg-card">
 								<QueryToolbar
 									queryState={queryState}
 									padding="sm"
@@ -1643,6 +1682,35 @@ const ComponentLibraryPage: Component = () => {
 						</InfoRow.Content>
 					</InfoRow.Root>
 
+					{/* ---------------------------------------------- StatusIndicator */}
+					<InfoRow.Root
+						title={"StatusIndicator"}
+						description={"variant, size, label"}
+					>
+						<InfoRow.Content title={"Variants"}>
+							<div class="flex flex-wrap items-center gap-4">
+								<For each={STATUS_INDICATOR_VARIANTS}>
+									{(variant) => (
+										<Row label={`variant="${variant}"`}>
+											<StatusIndicator variant={variant} />
+										</Row>
+									)}
+								</For>
+							</div>
+						</InfoRow.Content>
+						<InfoRow.Content title={"Sizes"}>
+							<div class="flex flex-wrap items-center gap-4">
+								<For each={STATUS_INDICATOR_SIZES}>
+									{(size) => (
+										<Row label={`size="${size}"`}>
+											<StatusIndicator variant="success-subtle" size={size} />
+										</Row>
+									)}
+								</For>
+							</div>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
 					{/* ---------------------------------------------- Switch */}
 					<InfoRow.Root title={"Switch"} description={"trueLabel, falseLabel"}>
 						<InfoRow.Content title={"Default"}>
@@ -1692,7 +1760,7 @@ const ComponentLibraryPage: Component = () => {
 												text={row().status}
 												variant={
 													row().status === "Published"
-														? "primary-subtle"
+														? "success-subtle"
 														: "neutral"
 												}
 											/>

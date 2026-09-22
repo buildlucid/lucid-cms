@@ -130,13 +130,13 @@ export const AutoSaveStatusPill: Component<{
 						class={classNames(
 							"inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-medium shadow-sm backdrop-blur-sm transition-[opacity,transform,background-color,border-color,color] duration-300",
 							{
-								"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast opacity-100":
+								"border-primary-low-border bg-primary-low text-primary-low-foreground opacity-100":
 									showAutoSaveSavingState(),
-								"border-border bg-success-base/10 text-success-base opacity-100":
+								"border-success-low-border bg-success-low text-success-low-foreground opacity-100":
 									showAutoSaveSavedState(),
-								"border-border bg-background-base/90 text-body opacity-85":
+								"border-border bg-background/90 text-body opacity-85":
 									showDebounceRing(),
-								"border-border bg-background-base/85 text-body opacity-45":
+								"border-border bg-background/85 text-body opacity-45":
 									!showDebounceRing() &&
 									!showAutoSaveSavingState() &&
 									!showAutoSaveSavedState(),

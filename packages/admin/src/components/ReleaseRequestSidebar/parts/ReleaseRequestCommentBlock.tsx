@@ -8,7 +8,7 @@ const ReleaseRequestCommentBlock: Component<{
 }> = (props) => (
 	<Show when={props.value}>
 		{(value) => (
-			<div class="rounded-md border border-border bg-card-base p-3">
+			<div class="rounded-md border border-border bg-card p-3">
 				<p class="text-xs font-medium text-body">{props.label}</p>
 				<RichTextContent value={value()} class="mt-2 text-sm" />
 			</div>

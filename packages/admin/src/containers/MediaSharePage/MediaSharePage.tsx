@@ -132,7 +132,7 @@ const MediaSharePage: Component = () => {
 						when={accessData()?.passwordRequired}
 						fallback={
 							<div class="w-full max-w-lg mx-auto space-y-3">
-								<div class="rounded-md border border-border bg-card-base overflow-hidden">
+								<div class="rounded-md border border-border bg-card overflow-hidden">
 									<div class="w-full max-w-full flex items-center justify-center rectangle-background">
 										<div class="relative z-10 w-full max-w-full flex items-center justify-center">
 											<Switch>
@@ -168,7 +168,7 @@ const MediaSharePage: Component = () => {
 																/>
 															}
 														>
-															<div class="w-full h-full relative bg-input-base overflow-hidden">
+															<div class="w-full h-full relative bg-input overflow-hidden">
 																<img
 																	src={posterShareUrl()}
 																	alt={grantedAccess()?.name || ""}
@@ -180,7 +180,7 @@ const MediaSharePage: Component = () => {
 																	onClick={() => {
 																		setShowVideoPreview(true);
 																	}}
-																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white fill-white transition-colors hover:bg-black/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-base"
+																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white fill-white transition-colors hover:bg-black/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
 																>
 																	<span class="w-14 h-14 rounded-full bg-black/60 border border-white/25 flex items-center justify-center">
 																		<FaSolidPlay class="ml-1 w-5 h-5" />
@@ -206,7 +206,7 @@ const MediaSharePage: Component = () => {
 													</div>
 												</Match>
 												<Match when={true}>
-													<div class="flex flex-col gap-2 items-center justify-center text-icon-faded p-4">
+													<div class="flex flex-col gap-2 items-center justify-center text-muted p-4">
 														<Switch>
 															<Match
 																when={grantedAccess()?.media.type === "archive"}
@@ -243,7 +243,7 @@ const MediaSharePage: Component = () => {
 										</div>
 									</div>
 								</div>
-								<div class="rounded-md border border-border bg-card-base p-4 space-y-4">
+								<div class="rounded-md border border-border bg-card p-4 space-y-4">
 									<div>
 										<h2 class="text-base truncate">
 											{grantedAccess()?.name || T()("common.untitled")}

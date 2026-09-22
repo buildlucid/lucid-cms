@@ -2,7 +2,7 @@ import classNames from "classnames";
 
 export const tabsRootClasses = (fill: boolean, custom?: string) =>
 	classNames(
-		"relative flex items-center rounded-md border border-border bg-card-base p-1",
+		"relative flex items-center rounded-md border border-border bg-card p-1",
 		{
 			"w-full": fill,
 			"max-w-max": !fill,
@@ -23,7 +23,7 @@ export const tabsIndicatorClasses = (ready: boolean, hovered: boolean) =>
 		"transition-none": !ready,
 		"transition-[transform,width,height,background-color] duration-200 ease-out will-change-transform":
 			ready,
-		"bg-secondary-base dark:bg-input-base": !hovered,
+		"bg-secondary dark:bg-input": !hovered,
 		"bg-secondary-hover dark:bg-card-hover": hovered,
 	});
 
@@ -33,10 +33,10 @@ export const tabsItemClasses = (
 	custom?: string,
 ) =>
 	classNames(
-		"relative z-10 flex h-8 items-center gap-1.5 rounded px-3 text-sm font-medium whitespace-nowrap ring-inset transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
+		"relative z-10 flex h-8 items-center gap-1.5 rounded px-3 text-sm font-medium whitespace-nowrap ring-inset transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
 		{
 			"w-full justify-center": stretch,
-			"text-secondary-contrast dark:text-title": active,
+			"text-secondary-foreground dark:text-title": active,
 			"text-body hover:text-title": !active,
 		},
 		custom,

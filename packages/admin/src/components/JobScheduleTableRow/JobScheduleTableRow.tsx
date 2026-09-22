@@ -88,7 +88,7 @@ const JobScheduleTableRow: Component<JobScheduleRowProps> = (props) => {
 				variant={
 					props.schedule.state === "paused"
 						? "warning-subtle"
-						: "primary-subtle"
+						: "success-subtle"
 				}
 			/>
 			<JobScheduleDetailsCell column="name" schedule={props.schedule} />

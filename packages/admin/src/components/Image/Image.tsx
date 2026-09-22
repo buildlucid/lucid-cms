@@ -49,7 +49,7 @@ const Image: Component<ImageProps> = (props) => {
 			/>
 			<KImage.Fallback
 				data-image-fallback
-				class={classNames("block h-full w-full bg-input-base", props.class)}
+				class={classNames("block h-full w-full bg-input", props.class)}
 			/>
 		</KImage.Root>
 	);

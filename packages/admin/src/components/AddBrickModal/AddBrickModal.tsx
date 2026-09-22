@@ -71,10 +71,10 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 			{/* Search */}
 			<div class="h-14 w-full relative">
 				<div class="absolute top-0 left-4 h-full flex items-center justify-center pointer-events-none">
-					<FaSolidMagnifyingGlass class="w-4 text-unfocused" />
+					<FaSolidMagnifyingGlass class="w-4 text-muted" />
 				</div>
 				<input
-					class="h-full bg-background-base w-full border-b border-border px-10 focus:outline-hidden text-title placeholder:text-unfocused"
+					class="h-full bg-background w-full border-b border-border px-10 focus:outline-hidden text-title placeholder:text-muted"
 					placeholder="search"
 					value={getSearchQuery()}
 					onInput={(e) => setSearchQuery(e.currentTarget.value)}
@@ -87,7 +87,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 						}}
 						type="button"
 					>
-						<FaSolidXmark class="w-4 text-error-base" />
+						<FaSolidXmark class="w-4 text-danger" />
 					</button>
 				</Show>
 			</div>
@@ -103,9 +103,8 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 										class={classNames(
 											"flex items-center font-medium w-full p-2.5 rounded-md transition-colors duration-200 hover:text-title text-sm",
 											{
-												"bg-card-base":
-													brickConfig.key === getHighlightedBrick(),
-												"bg-background-base":
+												"bg-card": brickConfig.key === getHighlightedBrick(),
+												"bg-background":
 													brickConfig.key !== getHighlightedBrick(),
 											},
 										)}
@@ -148,7 +147,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 				</div>
 				{/* Preview */}
 				<div class="w-[60%] p-4 h-full pl-0">
-					<div class="border border-border bg-card-base h-full rounded-md flex items-center justify-center relative">
+					<div class="border border-border bg-card h-full rounded-md flex items-center justify-center relative">
 						<div class="w-[80%]">
 							<Show
 								when={highlightedBrick()?.thumbnail}

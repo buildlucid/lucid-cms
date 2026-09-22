@@ -19,7 +19,7 @@ const JobScheduleDetailsCell: Component<JobScheduleDetailsCellProps> = (
 					{props.schedule.name}
 				</span>
 				<span
-					class="truncate text-xs text-unfocused"
+					class="truncate text-xs text-muted"
 					title={`${props.schedule.cron} · ${props.schedule.timezone}`}
 				>
 					{props.schedule.cron} · {props.schedule.timezone}

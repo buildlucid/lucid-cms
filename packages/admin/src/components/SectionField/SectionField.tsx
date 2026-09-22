@@ -60,9 +60,9 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 	return (
 		<div
 			class={classNames(
-				"w-full overflow-hidden rounded-md border border-border bg-card-base",
+				"w-full overflow-hidden rounded-md border border-border bg-card",
 				{
-					"border-error-base/50": errorCount() > 0,
+					"border-danger-low-border": errorCount() > 0,
 				},
 			)}
 			aria-invalid={errorCount() > 0}
@@ -70,10 +70,9 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 			<Show when={hasHeader()}>
 				<div
 					class={classNames(
-						"flex items-start justify-between gap-3 bg-input-base px-3 py-2.5",
+						"flex items-start justify-between gap-3 bg-input px-3 py-2.5",
 						{
-							"bg-linear-to-r from-error-base/10 to-input-base":
-								errorCount() > 0,
+							"bg-linear-to-r from-danger-low to-input": errorCount() > 0,
 						},
 					)}
 				>
@@ -82,7 +81,7 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 							<h3 class="text-sm font-medium text-subtitle">{label()}</h3>
 						</Show>
 						<Show when={summary()}>
-							<p class="text-sm text-unfocused mt-0.5">{summary()}</p>
+							<p class="text-sm text-muted mt-0.5">{summary()}</p>
 						</Show>
 					</div>
 					<FieldErrorBadge count={errorCount()} />
@@ -90,7 +89,7 @@ export const SectionField: Component<SectionFieldProps> = (props) => {
 			</Show>
 			<div
 				class={classNames(
-					"w-full bg-card-base p-3 md:p-4 @container/fields grid grid-cols-12 gap-3",
+					"w-full bg-card p-3 md:p-4 @container/fields grid grid-cols-12 gap-3",
 					{
 						"border-t border-border": hasHeader(),
 					},

@@ -79,7 +79,7 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 				}
 				variant={
 					props.integration.enabled && !isExpired()
-						? "primary-subtle"
+						? "success-subtle"
 						: "danger-subtle"
 				}
 			/>

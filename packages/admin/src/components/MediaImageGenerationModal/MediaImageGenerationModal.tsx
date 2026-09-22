@@ -1001,7 +1001,7 @@ const MediaImageGenerationModal: Component = () => {
 		<Show when={featureEnabled()}>
 			<Modal.Root open={isOpen()} onOpenChange={close} size="lg">
 				<div class="grid min-w-0 w-full items-stretch gap-0 lg:grid-cols-[minmax(27rem,0.72fr)_minmax(0,1fr)]">
-					<div class="flex min-h-130 min-w-0 w-full flex-col gap-4 border-b border-border bg-card-base p-4 md:p-6 lg:border-r lg:border-b-0">
+					<div class="flex min-h-130 min-w-0 w-full flex-col gap-4 border-b border-border bg-card p-4 md:p-6 lg:border-r lg:border-b-0">
 						<div class="min-w-0">
 							<div class="mb-1.5 flex items-center justify-between gap-2">
 								<span class="text-sm text-body">
@@ -1018,7 +1018,7 @@ const MediaImageGenerationModal: Component = () => {
 							<Show
 								when={source()}
 								fallback={
-									<div class="grid min-h-20.5 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-dashed border-border bg-background-base p-2">
+									<div class="grid min-h-20.5 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-dashed border-border bg-background p-2">
 										<p class="min-w-0 ml-2 truncate text-sm text-body">
 											{T()("ai.media.image.generate.source.empty")}
 										</p>
@@ -1031,7 +1031,7 @@ const MediaImageGenerationModal: Component = () => {
 											>
 												<Button
 													type="button"
-													variant="background-subtle"
+													variant="ghost"
 													size="xs"
 													shape="square"
 													title={T()("ai.media.image.generate.source.restore")}
@@ -1045,7 +1045,7 @@ const MediaImageGenerationModal: Component = () => {
 											</Show>
 											<Button
 												type="button"
-												variant="background-subtle"
+												variant="ghost"
 												size="xs"
 												shape="square"
 												title={T()("ai.media.image.generate.source.add")}
@@ -1059,13 +1059,13 @@ const MediaImageGenerationModal: Component = () => {
 								}
 							>
 								{(source) => (
-									<div class="grid min-w-0 grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border bg-input-base p-2">
-										<div class="rectangle-background flex h-16 min-w-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-background-base">
+									<div class="grid min-w-0 grid-cols-[80px_minmax(0,1fr)_auto] items-center gap-3 rounded-md border border-border bg-input p-2">
+										<div class="rectangle-background flex h-16 min-w-0 items-center justify-center overflow-hidden rounded-sm border border-border bg-background">
 											<Show
 												when={sourcePreviewUrl()}
 												fallback={
 													<FaSolidImage
-														class="relative z-10 h-5 w-5 text-icon-faded"
+														class="relative z-10 h-5 w-5 text-muted"
 														aria-hidden="true"
 													/>
 												}
@@ -1090,7 +1090,7 @@ const MediaImageGenerationModal: Component = () => {
 										<div class="flex items-center gap-1">
 											<Button
 												type="button"
-												variant="background-subtle"
+												variant="ghost"
 												size="xs"
 												shape="square"
 												title={T()("ai.media.image.generate.source.replace")}
@@ -1103,7 +1103,7 @@ const MediaImageGenerationModal: Component = () => {
 											</Button>
 											<Button
 												type="button"
-												variant="danger-subtle"
+												variant="danger-ghost"
 												size="xs"
 												shape="square"
 												title={T()("common.remove")}
@@ -1249,11 +1249,11 @@ const MediaImageGenerationModal: Component = () => {
 													{optionLabel()}
 												</HoverCard.Trigger>
 												<HoverCard.Portal>
-													<HoverCard.Content class="z-70 bg-card-base w-80 mt-2 rounded-md border border-border p-3 shadow-xs">
+													<HoverCard.Content class="z-70 bg-card w-80 mt-2 rounded-md border border-border p-3 shadow-xs">
 														<p class="mb-1 text-sm font-semibold text-title">
 															{optionLabel()}
 														</p>
-														<p class="text-sm text-card-contrast">
+														<p class="text-sm text-body">
 															{optionInstruction()}
 														</p>
 													</HoverCard.Content>
@@ -1287,8 +1287,8 @@ const MediaImageGenerationModal: Component = () => {
 							/>
 							<Show when={responseError()}>
 								{(error) => (
-									<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
-										<p class="text-sm text-error-base">{error()}</p>
+									<div class="mt-3 min-w-0 rounded-md border border-danger-low-border bg-danger-low p-3">
+										<p class="text-sm text-danger-low-foreground">{error()}</p>
 									</div>
 								)}
 							</Show>
@@ -1336,7 +1336,7 @@ const MediaImageGenerationModal: Component = () => {
 											<Show when={selectedGeneration()}>
 												{(generation) => (
 													<div class="min-w-0 space-y-3">
-														<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
+														<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card">
 															<img
 																src={generation().output.url}
 																alt=""
@@ -1346,14 +1346,14 @@ const MediaImageGenerationModal: Component = () => {
 														<div class="space-y-3">
 															<Show when={generationSummary(generation())}>
 																{(summary) => (
-																	<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+																	<div class="min-w-0 rounded-lg border border-border bg-background p-3">
 																		<p class="line-clamp-3 text-sm leading-5 text-body">
 																			{summary()}
 																		</p>
 																	</div>
 																)}
 															</Show>
-															<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+															<div class="min-w-0 rounded-lg border border-border bg-background p-3">
 																<DetailsList
 																	variant="plain"
 																	items={completedGenerationDetails(
@@ -1399,11 +1399,11 @@ const MediaImageGenerationModal: Component = () => {
 									>
 										{(pending) => (
 											<div class="min-w-0 space-y-3">
-												<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card-base">
+												<div class="rectangle-background relative flex min-h-72 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-card">
 													<span class="skeleton absolute inset-0 z-10 opacity-80" />
 													<div class="relative z-20 flex min-w-0 max-w-xs flex-col items-center gap-2 px-4 text-center">
 														<span
-															class="ai-action-button__surface flex h-8 min-w-8 items-center justify-center rounded-md border border-border text-primary-base"
+															class="ai-action-button__surface flex h-8 min-w-8 items-center justify-center rounded-md border border-border text-primary"
 															data-loading={isLoading()}
 														>
 															<FaSolidMagicWandSparkles
@@ -1412,7 +1412,7 @@ const MediaImageGenerationModal: Component = () => {
 															/>
 														</span>
 														<div class="min-w-0 max-w-60">
-															<p class="text-xs font-medium text-unfocused">
+															<p class="text-xs font-medium text-muted">
 																{T()(
 																	"ai.media.image.generate.response.inflight.title",
 																)}
@@ -1423,14 +1423,14 @@ const MediaImageGenerationModal: Component = () => {
 												<div class="space-y-3">
 													<Show when={generationSummary(pending())}>
 														{(summary) => (
-															<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+															<div class="min-w-0 rounded-lg border border-border bg-background p-3">
 																<p class="line-clamp-3 text-sm leading-5 text-body">
 																	{summary()}
 																</p>
 															</div>
 														)}
 													</Show>
-													<div class="min-w-0 rounded-lg border border-border bg-background-base p-3">
+													<div class="min-w-0 rounded-lg border border-border bg-background p-3">
 														<DetailsList
 															variant="plain"
 															items={pendingGenerationDetails(pending())}
@@ -1482,7 +1482,7 @@ const MediaImageGenerationModal: Component = () => {
 								</div>
 							</div>
 						</div>
-						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
+						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
 							<div class="min-w-0 flex-1">
 								<Show when={sessionCost()}>
 									{(cost) => (

@@ -6,195 +6,163 @@ import type { ResolvedTheme } from "@/store/themeStore/themeStore";
 
 export const EDITOR_MAX_HEIGHT = "24rem";
 
-type CodeMirrorPalette = {
-	activeLine: string;
-	activeLineGutter: string;
-	background: string;
-	border: string;
+/** Editor UI colours follow the admin theme tokens, so overrides and dark mode apply automatically. */
+const ui = {
+	activeLine: "color-mix(in oklab, var(--lucid-title) 4%, transparent)",
+	activeLineGutter: "color-mix(in oklab, var(--lucid-title) 6%, transparent)",
+	background: "var(--lucid-input)",
+	border: "var(--lucid-border)",
+	danger: "var(--lucid-danger)",
+	dangerLow: "var(--lucid-danger-low)",
+	foreground: "var(--lucid-subtitle)",
+	gutter: "var(--lucid-code-toolbar)",
+	muted: "var(--lucid-muted)",
+	primary: "var(--lucid-primary)",
+	primaryLow: "var(--lucid-primary-low)",
+	primaryLowForeground: "var(--lucid-primary-low-foreground)",
+	primaryMedium: "var(--lucid-primary-medium)",
+	tooltip: "var(--lucid-popover)",
+};
+
+/** Syntax colours are a code colour scheme rather than theme tokens, so they stay per mode. */
+type SyntaxPalette = {
 	comment: string;
-	error: string;
-	foreground: string;
 	function: string;
-	gutter: string;
-	gutterMuted: string;
-	gutterText: string;
 	keyword: string;
 	markup: string;
 	number: string;
 	operator: string;
-	primary: string;
-	primary10: string;
-	primary15: string;
-	primary20: string;
-	primary25: string;
-	primary35: string;
 	punctuation: string;
 	special: string;
-	tooltip: string;
 	type: string;
 };
 
-const palettes: Record<ResolvedTheme, CodeMirrorPalette> = {
+const syntaxPalettes: Record<ResolvedTheme, SyntaxPalette> = {
 	light: {
-		activeLine: "rgba(24, 24, 27, 0.035)",
-		activeLineGutter: "rgba(24, 24, 27, 0.06)",
-		background: "#FAFAFA",
-		border: "rgba(24, 24, 27, 0.12)",
 		comment: "#6B7280",
-		error: "#D92D20",
-		foreground: "#3F3F46",
 		function: "#1D4ED8",
-		gutter: "#F4F4F5",
-		gutterMuted: "#71717A",
-		gutterText: "#6B7280",
 		keyword: "#7E22CE",
 		markup: "#B42318",
 		number: "#0369A1",
 		operator: "#52525B",
-		primary: "oklch(63.964% 0.14408 135.726)",
-		primary10: "oklch(63.964% 0.14408 135.726 / 0.1)",
-		primary15: "oklch(63.964% 0.14408 135.726 / 0.15)",
-		primary20: "oklch(63.964% 0.14408 135.726 / 0.2)",
-		primary25: "oklch(63.964% 0.14408 135.726 / 0.25)",
-		primary35: "oklch(63.964% 0.14408 135.726 / 0.35)",
 		punctuation: "#71717A",
 		special: "#9A3412",
-		tooltip: "#FFFFFF",
 		type: "#A16207",
 	},
 	dark: {
-		activeLine: "rgba(255, 255, 255, 0.03)",
-		activeLineGutter: "rgba(255, 255, 255, 0.05)",
-		background: "#181818",
-		border: "rgba(255, 255, 255, 0.1)",
 		comment: "#6E6E6E",
-		error: "#F75555",
-		foreground: "#C9C9C9",
 		function: "#82B4FF",
-		gutter: "#141414",
-		gutterMuted: "#888888",
-		gutterText: "#555555",
 		keyword: "#B18CFF",
 		markup: "#F98A8A",
 		number: "#7EC8E3",
 		operator: "#8A8A8A",
-		primary: "oklch(88.842% 0.20897 135.866)",
-		primary10: "oklch(88.842% 0.20897 135.866 / 0.1)",
-		primary15: "oklch(88.842% 0.20897 135.866 / 0.15)",
-		primary20: "oklch(88.842% 0.20897 135.866 / 0.2)",
-		primary25: "oklch(88.842% 0.20897 135.866 / 0.25)",
-		primary35: "oklch(88.842% 0.20897 135.866 / 0.35)",
 		punctuation: "#888888",
 		special: "#FF9E64",
-		tooltip: "#171717",
 		type: "#FFC777",
 	},
 };
 
-const createEditorTheme = (palette: CodeMirrorPalette, theme: ResolvedTheme) =>
+const createEditorTheme = (theme: ResolvedTheme) =>
 	EditorView.theme(
 		{
 			"&": {
-				backgroundColor: palette.background,
-				border: `1px solid ${palette.border}`,
+				backgroundColor: ui.background,
+				border: `1px solid ${ui.border}`,
 				borderRadius: "6px",
-				color: palette.foreground,
+				color: ui.foreground,
 				fontSize: "13px",
 				maxHeight: EDITOR_MAX_HEIGHT,
 				transition: "border-color 200ms, background-color 200ms",
 			},
 			"&.cm-focused": {
-				borderColor: palette.primary,
+				borderColor: ui.primary,
 				outline: "none",
 			},
-			"&.cm-json-invalid": { borderColor: palette.error },
-			"&.cm-json-invalid.cm-focused": { borderColor: palette.error },
-			".cm-activeLine": { backgroundColor: palette.activeLine },
+			"&.cm-json-invalid": { borderColor: ui.danger },
+			"&.cm-json-invalid.cm-focused": { borderColor: ui.danger },
+			".cm-activeLine": { backgroundColor: ui.activeLine },
 			".cm-activeLineGutter": {
-				backgroundColor: palette.activeLineGutter,
-				color: palette.gutterMuted,
+				backgroundColor: ui.activeLineGutter,
+				color: ui.muted,
 			},
 			".cm-content": {
-				caretColor: palette.primary,
+				caretColor: ui.primary,
 				fontFamily:
 					'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
 				padding: "8px 0",
 			},
-			".cm-cursor, .cm-dropCursor": { borderLeftColor: palette.primary },
-			".cm-diagnostic-error": { borderLeftColor: palette.error },
+			".cm-cursor, .cm-dropCursor": { borderLeftColor: ui.primary },
+			".cm-diagnostic-error": { borderLeftColor: ui.danger },
 			".cm-foldPlaceholder": {
-				backgroundColor: palette.border,
+				backgroundColor: ui.border,
 				border: "none",
-				color: palette.gutterMuted,
+				color: ui.muted,
 			},
 			".cm-gutters": {
-				backgroundColor: palette.gutter,
+				backgroundColor: ui.gutter,
 				border: "none",
 				borderRadius: "6px 0 0 6px",
-				color: palette.gutterText,
+				color: ui.muted,
 			},
 			".cm-lint-marker-error": { content: "none" },
 			".cm-lintRange-error": {
 				backgroundImage: "none",
-				textDecoration: `underline wavy ${palette.error}`,
+				textDecoration: `underline wavy ${ui.danger}`,
 			},
 			".cm-matchingBracket": {
-				backgroundColor: palette.primary25,
-				color: `${palette.primary} !important`,
+				backgroundColor: ui.primaryLow,
+				color: `${ui.primaryLowForeground} !important`,
 			},
 			".cm-nonmatchingBracket": {
-				backgroundColor:
-					theme === "dark"
-						? "rgba(247, 85, 85, 0.25)"
-						: "rgba(217, 45, 32, 0.15)",
-				color: `${palette.error} !important`,
+				backgroundColor: ui.dangerLow,
+				color: `${ui.danger} !important`,
 			},
 			".cm-panels": {
-				backgroundColor: palette.gutter,
-				color: palette.foreground,
+				backgroundColor: ui.gutter,
+				color: ui.foreground,
 			},
 			".cm-panels.cm-panels-bottom": {
-				borderTop: `1px solid ${palette.border}`,
+				borderTop: `1px solid ${ui.border}`,
 			},
 			".cm-panels.cm-panels-top": {
-				borderBottom: `1px solid ${palette.border}`,
+				borderBottom: `1px solid ${ui.border}`,
 			},
 			".cm-placeholder": {
-				color: palette.gutterText,
+				color: ui.muted,
 				fontStyle: "italic",
 			},
 			".cm-scroller": { overflow: "auto" },
-			".cm-searchMatch": { backgroundColor: palette.primary20 },
+			".cm-searchMatch": { backgroundColor: ui.primaryLow },
 			".cm-searchMatch.cm-searchMatch-selected": {
-				backgroundColor: palette.primary35,
+				backgroundColor: ui.primaryMedium,
 			},
 			".cm-selectionBackground": {
-				backgroundColor: `${palette.primary15} !important`,
+				backgroundColor: `${ui.primaryLow} !important`,
 			},
 			".cm-content ::selection": {
-				backgroundColor: `${palette.primary15} !important`,
-				color: `${palette.foreground} !important`,
+				backgroundColor: `${ui.primaryLow} !important`,
+				color: `${ui.foreground} !important`,
 			},
-			".cm-selectionMatch": { backgroundColor: palette.primary10 },
+			".cm-selectionMatch": { backgroundColor: ui.primaryLow },
 			".cm-tooltip": {
-				backgroundColor: palette.tooltip,
-				border: `1px solid ${palette.border}`,
+				backgroundColor: ui.tooltip,
+				border: `1px solid ${ui.border}`,
 				borderRadius: "6px",
-				color: palette.foreground,
+				color: ui.foreground,
 			},
 			".cm-tooltip-autocomplete": {
 				"& > ul > li[aria-selected]": {
-					backgroundColor: palette.primary15,
+					backgroundColor: ui.primaryLow,
 				},
 			},
 		},
 		{ dark: theme === "dark" },
 	);
 
-const createHighlighting = (palette: CodeMirrorPalette) =>
+const createHighlighting = (palette: SyntaxPalette) =>
 	syntaxHighlighting(
 		HighlightStyle.define([
-			{ tag: tags.string, color: palette.primary },
+			{ tag: tags.string, color: ui.primary },
 			{
 				tag: [tags.special(tags.string), tags.regexp],
 				color: palette.special,
@@ -215,10 +183,10 @@ const createHighlighting = (palette: CodeMirrorPalette) =>
 				color: palette.keyword,
 			},
 			{ tag: tags.operator, color: palette.operator },
-			{ tag: tags.propertyName, color: palette.foreground },
+			{ tag: tags.propertyName, color: ui.foreground },
 			{ tag: tags.definition(tags.propertyName), color: palette.number },
-			{ tag: tags.variableName, color: palette.foreground },
-			{ tag: tags.definition(tags.variableName), color: palette.foreground },
+			{ tag: tags.variableName, color: ui.foreground },
+			{ tag: tags.definition(tags.variableName), color: ui.foreground },
 			{
 				tag: [
 					tags.function(tags.variableName),
@@ -233,9 +201,9 @@ const createHighlighting = (palette: CodeMirrorPalette) =>
 			{ tag: [tags.labelName, tags.macroName], color: palette.type },
 			{ tag: tags.tagName, color: palette.markup },
 			{ tag: tags.attributeName, color: palette.type },
-			{ tag: tags.attributeValue, color: palette.primary },
+			{ tag: tags.attributeValue, color: ui.primary },
 			{ tag: tags.angleBracket, color: palette.punctuation },
-			{ tag: tags.heading, color: palette.foreground, fontWeight: "bold" },
+			{ tag: tags.heading, color: ui.foreground, fontWeight: "bold" },
 			{ tag: tags.emphasis, fontStyle: "italic" },
 			{ tag: tags.strong, fontWeight: "bold" },
 			{ tag: tags.strikethrough, textDecoration: "line-through" },
@@ -245,7 +213,7 @@ const createHighlighting = (palette: CodeMirrorPalette) =>
 				textDecoration: "underline",
 			},
 			{ tag: tags.url, color: palette.number },
-			{ tag: tags.monospace, color: palette.primary },
+			{ tag: tags.monospace, color: ui.primary },
 			{ tag: tags.contentSeparator, color: palette.punctuation },
 			{
 				tag: [tags.comment, tags.lineComment, tags.blockComment],
@@ -260,11 +228,10 @@ const createHighlighting = (palette: CodeMirrorPalette) =>
 			{ tag: tags.punctuation, color: palette.punctuation },
 			{ tag: tags.brace, color: palette.punctuation },
 			{ tag: tags.squareBracket, color: palette.punctuation },
-			{ tag: tags.invalid, color: palette.error },
+			{ tag: tags.invalid, color: ui.danger },
 		]),
 	);
 
 export const getCodeMirrorTheme = (theme: ResolvedTheme): Extension[] => {
-	const palette = palettes[theme];
-	return [createEditorTheme(palette, theme), createHighlighting(palette)];
+	return [createEditorTheme(theme), createHighlighting(syntaxPalettes[theme])];
 };

@@ -24,7 +24,7 @@ const MenuRadioItem: Component<MenuRadioItemProps> = (props) => {
 		>
 			<span class="flex-1">{props.children}</span>
 			<KobalteMenu.ItemIndicator>
-				<FaSolidCheck class="size-3 text-primary-base" />
+				<FaSolidCheck class="size-3 text-primary" />
 			</KobalteMenu.ItemIndicator>
 		</KobalteMenu.RadioItem>
 	);

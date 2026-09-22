@@ -13,13 +13,13 @@ export const PreviewHelp: Component<{ mode: PreviewMode }> = (props) => {
 				as="button"
 				type="button"
 				aria-label={T()("preview.help.label")}
-				class="flex h-7 w-7 min-w-7 cursor-help items-center justify-center rounded-md fill-icon-faded text-icon-faded transition-colors hover:bg-background-base/50 hover:fill-subtitle hover:text-subtitle focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-base"
+				class="flex h-7 w-7 min-w-7 cursor-help items-center justify-center rounded-md fill-muted text-muted transition-colors hover:bg-background/50 hover:fill-subtitle hover:text-subtitle focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
 			>
 				<FaSolidCircleInfo size={12} />
 			</Tooltip.Trigger>
 			<Tooltip.Portal>
-				<Tooltip.Content class="z-50 w-80 max-w-[calc(100vw-1rem)] rounded-lg border border-border bg-card-base p-3 text-left shadow-lg">
-					<Tooltip.Arrow class="text-card-base" size={16} />
+				<Tooltip.Content class="z-50 w-80 max-w-[calc(100vw-1rem)] rounded-lg border border-border bg-card p-3 text-left shadow-lg">
+					<Tooltip.Arrow class="text-card" size={16} />
 					<div class="space-y-2.5 text-sm leading-relaxed text-body">
 						<p class="text-sm">{T()("preview.help.fields")}</p>
 						<Show when={props.mode === "scoped"}>

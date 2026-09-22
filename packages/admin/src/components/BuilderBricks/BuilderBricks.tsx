@@ -70,7 +70,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 			<div class="p-6 h-full">
 				<div class="flex justify-between mb-4">
 					<div class="flex items-center gap-2.5">
-						<FaSolidLayerGroup class="text-icon-base text-xl" />
+						<FaSolidLayerGroup class="text-icon text-xl" />
 						<h2>{T()("builder.area.label")}</h2>
 					</div>
 					<Button
@@ -196,9 +196,9 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				"view-transition-name": `brick-item-${props.brick.ref}`,
 			}}
 			class={classNames(
-				"drag-item w-full bg-card-base border border-border rounded-md mb-4 last:mb-0 ring-inset ring-primary-base",
+				"drag-item w-full bg-card border border-border rounded-md mb-4 last:mb-0 ring-inset ring-primary",
 				{
-					"border-error-base/50 bg-linear-to-b from-error-base/10 to-card-base to-30%":
+					"border-danger-low-border bg-linear-to-b from-danger-low to-card to-30%":
 						errorCount() > 0,
 					"opacity-60": props.dragDrop.getDragging()?.ref === props.brick.ref,
 					"ring-1 ring-inset":
@@ -242,12 +242,12 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						toggleDropdown();
 					}
 				}}
-				class="flex cursor-pointer items-center justify-between gap-3 rounded-md px-4 py-3 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base"
+				class="flex cursor-pointer items-center justify-between gap-3 rounded-md px-4 py-3 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
 			>
 				<div class="flex min-w-0 flex-1 items-center gap-2">
 					<button
 						type="button"
-						class="text-icon-faded hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-muted hover:text-primary-hover transition-colors duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={(e) => e.stopPropagation()}
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
@@ -297,7 +297,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 					<span
 						aria-hidden="true"
 						class={classNames(
-							"flex size-7 shrink-0 items-center justify-center text-icon-faded transition-transform duration-200",
+							"flex size-7 shrink-0 items-center justify-center text-muted transition-transform duration-200",
 							{
 								"transform rotate-180": brickOpen(),
 							},

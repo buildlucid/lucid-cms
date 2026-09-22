@@ -5,7 +5,7 @@ interface IconContainerProps {
 	children: JSXElement;
 	class?: string;
 	size?: "small" | "medium";
-	theme?: "default" | "primary" | "error";
+	theme?: "default" | "primary" | "danger";
 }
 
 const IconContainer: Component<IconContainerProps> = (props) => {
@@ -19,12 +19,12 @@ const IconContainer: Component<IconContainerProps> = (props) => {
 				{
 					"size-8": props.size === "small",
 					"size-9": props.size === undefined || props.size === "medium",
-					"border-border bg-input-base text-body":
+					"border-border bg-input text-body":
 						props.theme === undefined || props.theme === "default",
-					"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
+					"border-primary-low-border bg-primary-low text-primary-low-foreground":
 						props.theme === "primary",
-					"border-error-base/20 bg-error-base/10 text-error-base":
-						props.theme === "error",
+					"border-danger-low-border bg-danger-low text-danger-low-foreground":
+						props.theme === "danger",
 				},
 			)}
 		>

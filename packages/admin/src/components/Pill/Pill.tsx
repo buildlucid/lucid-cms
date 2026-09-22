@@ -7,26 +7,38 @@ import {
 	splitProps,
 } from "solid-js";
 
-/** The `workflow-*` variants match the colours available to workflow stages. */
+/** The `yellow`, `green`, `blue` and `purple` variants match the workflow stage colours. */
 export type PillVariant =
 	| "primary"
 	| "primary-subtle"
 	| "secondary"
+	| "success"
+	| "success-subtle"
 	| "danger"
 	| "danger-subtle"
+	| "warning"
 	| "warning-subtle"
+	| "info"
 	| "info-subtle"
 	| "neutral"
 	| "outline"
-	| "workflow-yellow"
-	| "workflow-green"
-	| "workflow-blue"
-	| "workflow-purple";
+	| "yellow"
+	| "yellow-subtle"
+	| "green"
+	| "green-subtle"
+	| "blue"
+	| "blue-subtle"
+	| "purple"
+	| "purple-subtle";
 
 export type PillSize = "xs" | "sm";
 
 interface PillBaseProps {
-	/** @default "neutral" */
+	/**
+	 * Colour variants use the solid colour. `-subtle` variants use a light tint
+	 * with a matching border and text.
+	 * @default "neutral"
+	 */
 	variant?: PillVariant;
 	/** @default "sm" */
 	size?: PillSize;
@@ -65,7 +77,7 @@ export type PillProps = PillSpanProps | PillButtonProps;
  *
  * const { t } = useTranslation();
  *
- * return <Pill variant="primary-subtle">{t("common.status.active")}</Pill>;
+ * return <Pill variant="success-subtle">{t("common.status.active")}</Pill>;
  * ```
  */
 const Pill: Component<PillProps> = (props) => {
@@ -88,7 +100,7 @@ const Pill: Component<PillProps> = (props) => {
 		classnames(
 			"inline-flex items-center justify-center rounded-full font-medium whitespace-nowrap",
 			interactive() &&
-				"transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
+				"transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
 			local.class,
 			{
 				// Sizes
@@ -96,34 +108,42 @@ const Pill: Component<PillProps> = (props) => {
 				"px-1.5 py-0 text-[11px] leading-4": local.size === "xs",
 
 				// Variants
-				"bg-primary-base text-primary-contrast": variant() === "primary",
-				"border border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
+				"bg-primary text-primary-foreground": variant() === "primary",
+				"border border-primary-low-border bg-primary-low text-primary-low-foreground":
 					variant() === "primary-subtle",
-				"bg-secondary-base text-secondary-contrast": variant() === "secondary",
-				"bg-error-base text-error-contrast": variant() === "danger",
-				"border border-error-base/20 bg-error-base/10 text-error-base":
+				"bg-secondary text-secondary-foreground": variant() === "secondary",
+				"bg-success text-success-foreground": variant() === "success",
+				"border border-success-low-border bg-success-low text-success-low-foreground":
+					variant() === "success-subtle",
+				"bg-danger text-danger-foreground": variant() === "danger",
+				"border border-danger-low-border bg-danger-low text-danger-low-foreground":
 					variant() === "danger-subtle",
-				"border border-warning-base/20 bg-warning-base/10 text-warning-base":
+				"bg-warning text-warning-foreground": variant() === "warning",
+				"border border-warning-low-border bg-warning-low text-warning-low-foreground":
 					variant() === "warning-subtle",
-				"border border-info-base/20 bg-info-base/10 text-info-base":
+				"bg-info text-info-foreground": variant() === "info",
+				"border border-info-low-border bg-info-low text-info-low-foreground":
 					variant() === "info-subtle",
-				"bg-input-base text-subtitle": variant() === "neutral",
-				"border border-border bg-input-base text-body": variant() === "outline",
-				"border border-workflow-yellow-border bg-workflow-yellow-bg text-workflow-yellow-text":
-					variant() === "workflow-yellow",
-				"border border-workflow-green-border bg-workflow-green-bg text-workflow-green-text":
-					variant() === "workflow-green",
-				"border border-workflow-blue-border bg-workflow-blue-bg text-workflow-blue-text":
-					variant() === "workflow-blue",
-				"border border-workflow-purple-border bg-workflow-purple-bg text-workflow-purple-text":
-					variant() === "workflow-purple",
+				"bg-input text-subtitle": variant() === "neutral",
+				"border border-border bg-input text-body": variant() === "outline",
+				"bg-yellow text-yellow-foreground": variant() === "yellow",
+				"border border-yellow-low-border bg-yellow-low text-yellow-low-foreground":
+					variant() === "yellow-subtle",
+				"bg-green text-green-foreground": variant() === "green",
+				"border border-green-low-border bg-green-low text-green-low-foreground":
+					variant() === "green-subtle",
+				"bg-blue text-blue-foreground": variant() === "blue",
+				"border border-blue-low-border bg-blue-low text-blue-low-foreground":
+					variant() === "blue-subtle",
+				"bg-purple text-purple-foreground": variant() === "purple",
+				"border border-purple-low-border bg-purple-low text-purple-low-foreground":
+					variant() === "purple-subtle",
 
 				// Interactive
 				"hover:bg-primary-hover": interactive() && variant() === "primary",
-				"hover:bg-primary-muted-bg/80":
-					interactive() && variant() === "primary-subtle",
+				"hover:border-primary": interactive() && variant() === "primary-subtle",
 				"hover:bg-secondary-hover": interactive() && variant() === "secondary",
-				"hover:bg-error-hover": interactive() && variant() === "danger",
+				"hover:bg-danger-hover": interactive() && variant() === "danger",
 				"hover:bg-card-hover hover:text-title":
 					interactive() && ["neutral", "outline"].includes(variant()),
 			},

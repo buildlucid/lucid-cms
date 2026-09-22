@@ -11,11 +11,11 @@ const UnavailableGrants: Component<{
 	// Render
 	return (
 		<Show when={props.keys.length > 0}>
-			<div class="mb-3 p-3 rounded-md border border-border bg-card-base">
+			<div class="mb-3 p-3 rounded-md border border-border bg-card">
 				<h4 class="text-sm font-medium text-body">
 					{T()("access.unavailable.title")}
 				</h4>
-				<p class="text-xs text-unfocused mt-1">
+				<p class="text-xs text-muted mt-1">
 					{T()("access.unavailable.description")}
 				</p>
 				<ul class="mt-2 space-y-2">
@@ -25,7 +25,7 @@ const UnavailableGrants: Component<{
 								<span>{key}</span>
 								<button
 									type="button"
-									class="text-xs text-unfocused hover:text-body disabled:opacity-50"
+									class="text-xs text-muted hover:text-body disabled:opacity-50"
 									disabled={props.disabled}
 									onClick={() => props.onRemove(key)}
 								>

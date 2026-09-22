@@ -106,7 +106,7 @@ export const NavigationLink: Component<IconLinkFullProps> = (props) => {
 							data-navigation-exact={props.exact ? "true" : undefined}
 							data-navigation-force-active={props.active ? "true" : undefined}
 							link
-							class="h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-navigation-hover transition-colors duration-200 ease-in-out"
+							class="h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar fill-title hover:bg-background-hover transition-colors duration-200 ease-in-out"
 							classList={{
 								"animate-pulse": props.loading,
 								"pointer-events-none": props.loading,
@@ -121,9 +121,9 @@ export const NavigationLink: Component<IconLinkFullProps> = (props) => {
 							type="button"
 							tabIndex={0}
 							class={classNames(
-								"h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar-base fill-title hover:bg-navigation-hover transition-colors duration-200 ease-in-out",
+								"h-8 w-full text-title flex items-center gap-2 px-2 rounded-md bg-sidebar fill-title hover:bg-background-hover transition-colors duration-200 ease-in-out",
 								{
-									"bg-navigation-active text-secondary-contrast fill-secondary-contrast":
+									"bg-secondary text-secondary-foreground fill-secondary-foreground":
 										props.active,
 									"animate-pulse pointer-events-none": props.loading,
 								},

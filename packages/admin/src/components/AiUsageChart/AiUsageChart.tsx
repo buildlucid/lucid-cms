@@ -81,7 +81,7 @@ export const AiUsageChart: Component = () => {
 
 		const requests = readThemeVariable("--lucid-chart-requests", "#79A7FF");
 		const totalTokens = readThemeVariable(
-			"--lucid-primary-base",
+			"--lucid-primary",
 			"oklch(88.842% 0.20897 135.866)",
 		);
 		const cost = readThemeVariable("--lucid-chart-cost", "#F8C45A");
@@ -304,12 +304,12 @@ export const AiUsageChart: Component = () => {
 					ariaLabel={T()("ai.usage.charts.title")}
 				/>
 				<Show when={usageChart.isFetching && !usageChart.data}>
-					<div class="absolute inset-0 flex items-center justify-center bg-card-base">
+					<div class="absolute inset-0 flex items-center justify-center bg-card">
 						<Spinner size="sm" />
 					</div>
 				</Show>
 				<Show when={usageChart.isError && !usageChart.data}>
-					<div class="absolute inset-0 flex items-center justify-center bg-card-base">
+					<div class="absolute inset-0 flex items-center justify-center bg-card">
 						<p class="text-sm text-body">{T()("ai.usage.charts.error")}</p>
 					</div>
 				</Show>

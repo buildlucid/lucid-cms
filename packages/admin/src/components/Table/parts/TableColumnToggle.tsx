@@ -17,7 +17,7 @@ const TableColumnToggle: Component<TableColumnToggleProps> = (props) => {
 	// Render
 	return (
 		<Menu.Root placement="bottom-end">
-			<Menu.Trigger class="w-7 h-7 bg-background-base outline-none ring-0 focus-visible:ring-1 focus:ring-primary-base rounded-md flex justify-center items-center hover:bg-background-hover">
+			<Menu.Trigger class="w-7 h-7 bg-background outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center hover:bg-background-hover">
 				<span class="sr-only">{T()("tables.columns.visibility.toggle")}</span>
 				<FaSolidTable class="text-body" size={14} />
 			</Menu.Trigger>

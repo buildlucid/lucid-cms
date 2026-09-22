@@ -16,7 +16,7 @@ export const FormTooltip: Component<TooltipProps> = (props) => {
 			<HoverCard.Root>
 				<HoverCard.Trigger
 					class={classnames(
-						"h-5 w-5 cursor-help border border-border hover:bg-card-base  bg-input-base rounded-full fill-input-contrast flex items-center justify-center duration-200 transition-colors",
+						"h-5 w-5 cursor-help border border-border hover:bg-card  bg-input rounded-full fill-subtitle flex items-center justify-center duration-200 transition-colors",
 						{
 							"absolute top-1/2 -translate-y-1/2 right-2":
 								props.theme === "full",
@@ -27,8 +27,8 @@ export const FormTooltip: Component<TooltipProps> = (props) => {
 					<FaSolidInfo size={8} />
 				</HoverCard.Trigger>
 				<HoverCard.Portal>
-					<HoverCard.Content class="z-50 bg-card-base w-80 mt-2 rounded-md p-3 border border-border shadow-xs">
-						<p class="text-sm text-card-contrast">{props.copy}</p>
+					<HoverCard.Content class="z-50 bg-card w-80 mt-2 rounded-md p-3 border border-border shadow-xs">
+						<p class="text-sm text-body">{props.copy}</p>
 					</HoverCard.Content>
 				</HoverCard.Portal>
 			</HoverCard.Root>

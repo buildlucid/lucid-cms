@@ -289,8 +289,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 				class={classNames(
 					"w-full overflow-x-auto scrollbar",
 					{
-						"border-y border-border bg-card-base":
-							props.variant === "contained",
+						"border-y border-border bg-card": props.variant === "contained",
 					},
 					props.class,
 				)}
@@ -302,7 +301,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 			>
 				<table class="w-full table h-auto border-collapse">
 					<Show when={props.caption}>
-						<div class="caption-bottom border-t-primary-base border-t-2 border-b border-b-border bg-input-base text-title py-2 text-sm">
+						<div class="caption-bottom border-t-primary border-t-2 border-b border-b-border bg-input text-title py-2 text-sm">
 							{props.caption}
 						</div>
 					</Show>

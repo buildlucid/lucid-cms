@@ -102,10 +102,10 @@ const DocumentNodeView: Component<DocumentNodeViewProps> = (props) => {
 		<div
 			contentEditable={false}
 			class={classNames(
-				"group my-3 flex w-full select-none items-center gap-3 rounded-xl border bg-card-base p-3 text-left transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary-muted-border [&.ProseMirror-selectednode]:border-primary-base [&.ProseMirror-selectednode]:ring-2 [&.ProseMirror-selectednode]:ring-primary-base/20",
+				"group my-3 flex w-full select-none items-center gap-3 rounded-xl border bg-card p-3 text-left transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary-low-border [&.ProseMirror-selectednode]:border-primary [&.ProseMirror-selectednode]:ring-2 [&.ProseMirror-selectednode]:ring-primary-low-border",
 				{
 					"border-border": available() && !hasErrors(),
-					"border-error-base/50 bg-linear-to-b from-error-base/10 to-card-base to-30%":
+					"border-danger-low-border bg-linear-to-b from-danger-low to-card to-30%":
 						!available() || hasErrors(),
 				},
 			)}
@@ -118,7 +118,7 @@ const DocumentNodeView: Component<DocumentNodeViewProps> = (props) => {
 				fields={available() ? previewFields() : []}
 				notice={
 					!available() || hasErrors() ? (
-						<span class="text-xs font-medium text-error-base">
+						<span class="text-xs font-medium text-danger">
 							{errorMessage() ?? T()("editor.rich.text.document.unavailable")}
 						</span>
 					) : undefined

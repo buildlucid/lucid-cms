@@ -13,6 +13,6 @@ const DIVIDER_CLASSES = [
 
 export const menuPanelClasses = (dividers: boolean) =>
 	classNames(
-		"z-60 min-w-56 bg-dropdown-base border border-border rounded-md p-1.5 shadow-md animate-dropdown focus:outline-hidden scrollbar",
+		"z-60 min-w-56 bg-popover border border-border rounded-md p-1.5 shadow-md animate-dropdown focus:outline-hidden scrollbar",
 		dividers && DIVIDER_CLASSES,
 	);

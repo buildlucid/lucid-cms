@@ -1,56 +1,193 @@
+/*
+ * Colour strengths: `X` is solid, `X-medium` is a 40% tint for small marks
+ * such as status dots and progress fills, and `X-low` is a 12% tint for
+ * surfaces such as pills and notices. Tints are opaque mixes with the card
+ * colour, so only `X` needs setting per theme. Component `*-subtle` variants
+ * choose `medium` or `low` depending on the component.
+ */
 @theme static {
-	--lucid-primary-base: oklch(63.964% 0.14408 135.726);
+	--lucid-primary: oklch(63.964% 0.14408 135.726);
 	--lucid-primary-hover: oklch(59.807% 0.13355 135.909);
-	--lucid-primary-contrast: oklch(100% 0 0);
-	--lucid-primary-muted-bg: oklch(92.184% 0.04924 134.056);
-	--lucid-primary-muted-border: oklch(63.964% 0.14408 135.726);
-	--lucid-primary-muted-contrast: oklch(43.734% 0.09872 137.524);
-	--lucid-secondary-base: oklch(92% 0 0);
+	--lucid-primary-foreground: oklch(100% 0 0);
+	--lucid-primary-medium: color-mix(
+		in oklab,
+		var(--lucid-primary) 40%,
+		var(--lucid-card)
+	);
+	--lucid-primary-low: color-mix(
+		in oklab,
+		var(--lucid-primary) 12%,
+		var(--lucid-card)
+	);
+	--lucid-primary-low-border: color-mix(
+		in oklab,
+		var(--lucid-primary) 30%,
+		var(--lucid-card)
+	);
+	--lucid-primary-low-foreground: oklch(43.734% 0.09872 137.524);
+	--lucid-secondary: oklch(92% 0 0);
 	--lucid-secondary-hover: oklch(89% 0 0);
-	--lucid-secondary-contrast: oklch(21.033% 0.00586 285.885);
-	--lucid-sidebar-base: oklch(94.45% 0.00413 121.563);
-	--lucid-navigation-hover: oklch(92.305% 0.00545 117.929);
-	--lucid-navigation-active: oklch(90.27% 0.00868 128.568);
-	--lucid-background-base: oklch(98.21% 0 0);
+	--lucid-secondary-foreground: oklch(21.033% 0.00586 285.885);
+	--lucid-success: var(--lucid-primary);
+	--lucid-success-foreground: var(--lucid-primary-foreground);
+	--lucid-success-medium: color-mix(
+		in oklab,
+		var(--lucid-success) 40%,
+		var(--lucid-card)
+	);
+	--lucid-success-low: color-mix(
+		in oklab,
+		var(--lucid-success) 12%,
+		var(--lucid-card)
+	);
+	--lucid-success-low-border: color-mix(
+		in oklab,
+		var(--lucid-success) 30%,
+		var(--lucid-card)
+	);
+	--lucid-success-low-foreground: var(--lucid-primary-low-foreground);
+	--lucid-danger: oklch(57.583% 0.20883 29.482);
+	--lucid-danger-hover: oklch(50.034% 0.18205 29.513);
+	--lucid-danger-foreground: oklch(100% 0 0);
+	--lucid-danger-medium: color-mix(
+		in oklab,
+		var(--lucid-danger) 40%,
+		var(--lucid-card)
+	);
+	--lucid-danger-low: color-mix(
+		in oklab,
+		var(--lucid-danger) 12%,
+		var(--lucid-card)
+	);
+	--lucid-danger-low-border: color-mix(
+		in oklab,
+		var(--lucid-danger) 30%,
+		var(--lucid-card)
+	);
+	--lucid-danger-low-foreground: var(--lucid-danger);
+	--lucid-warning: oklch(55.419% 0.11691 75.008);
+	--lucid-warning-foreground: oklch(100% 0 0);
+	--lucid-warning-medium: color-mix(
+		in oklab,
+		var(--lucid-warning) 40%,
+		var(--lucid-card)
+	);
+	--lucid-warning-low: color-mix(
+		in oklab,
+		var(--lucid-warning) 12%,
+		var(--lucid-card)
+	);
+	--lucid-warning-low-border: color-mix(
+		in oklab,
+		var(--lucid-warning) 30%,
+		var(--lucid-card)
+	);
+	--lucid-warning-low-foreground: var(--lucid-warning);
+	--lucid-info: oklch(48.82% 0.21717 264.376);
+	--lucid-info-foreground: oklch(100% 0 0);
+	--lucid-info-medium: color-mix(
+		in oklab,
+		var(--lucid-info) 40%,
+		var(--lucid-card)
+	);
+	--lucid-info-low: color-mix(
+		in oklab,
+		var(--lucid-info) 12%,
+		var(--lucid-card)
+	);
+	--lucid-info-low-border: color-mix(
+		in oklab,
+		var(--lucid-info) 30%,
+		var(--lucid-card)
+	);
+	--lucid-info-low-foreground: var(--lucid-info);
+	--lucid-yellow: oklch(68.064% 0.14228 75.834);
+	--lucid-yellow-foreground: oklch(21.033% 0.00586 285.885);
+	--lucid-yellow-medium: color-mix(
+		in oklab,
+		var(--lucid-yellow) 40%,
+		var(--lucid-card)
+	);
+	--lucid-yellow-low: color-mix(
+		in oklab,
+		var(--lucid-yellow) 12%,
+		var(--lucid-card)
+	);
+	--lucid-yellow-low-border: color-mix(
+		in oklab,
+		var(--lucid-yellow) 30%,
+		var(--lucid-card)
+	);
+	--lucid-yellow-low-foreground: oklch(47.619% 0.10337 61.907);
+	--lucid-green: oklch(62.705% 0.16991 149.214);
+	--lucid-green-foreground: oklch(21.033% 0.00586 285.885);
+	--lucid-green-medium: color-mix(
+		in oklab,
+		var(--lucid-green) 40%,
+		var(--lucid-card)
+	);
+	--lucid-green-low: color-mix(
+		in oklab,
+		var(--lucid-green) 12%,
+		var(--lucid-card)
+	);
+	--lucid-green-low-border: color-mix(
+		in oklab,
+		var(--lucid-green) 30%,
+		var(--lucid-card)
+	);
+	--lucid-green-low-foreground: oklch(44.792% 0.10832 151.328);
+	--lucid-blue: oklch(54.615% 0.21521 262.881);
+	--lucid-blue-foreground: oklch(100% 0 0);
+	--lucid-blue-medium: color-mix(
+		in oklab,
+		var(--lucid-blue) 40%,
+		var(--lucid-card)
+	);
+	--lucid-blue-low: color-mix(
+		in oklab,
+		var(--lucid-blue) 12%,
+		var(--lucid-card)
+	);
+	--lucid-blue-low-border: color-mix(
+		in oklab,
+		var(--lucid-blue) 30%,
+		var(--lucid-card)
+	);
+	--lucid-blue-low-foreground: oklch(48.82% 0.21717 264.376);
+	--lucid-purple: oklch(55.754% 0.25249 302.321);
+	--lucid-purple-foreground: oklch(100% 0 0);
+	--lucid-purple-medium: color-mix(
+		in oklab,
+		var(--lucid-purple) 40%,
+		var(--lucid-card)
+	);
+	--lucid-purple-low: color-mix(
+		in oklab,
+		var(--lucid-purple) 12%,
+		var(--lucid-card)
+	);
+	--lucid-purple-low-border: color-mix(
+		in oklab,
+		var(--lucid-purple) 30%,
+		var(--lucid-card)
+	);
+	--lucid-purple-low-foreground: oklch(49.552% 0.23687 301.924);
+	--lucid-sidebar: oklch(94.45% 0.00413 121.563);
+	--lucid-background: oklch(98.21% 0 0);
 	--lucid-background-hover: oklch(93.306% 0.00346 247.86);
-	--lucid-row-hover: oklch(93.544% 0.00414 121.564);
-	--lucid-card-base: oklch(100% 0 0);
+	--lucid-card: oklch(100% 0 0);
 	--lucid-card-hover: oklch(95.767% 0.00172 247.84);
-	--lucid-card-contrast: oklch(44.186% 0.01462 285.786);
-	--lucid-dropdown-base: oklch(100% 0 0);
-	--lucid-dropdown-hover: oklch(95.767% 0.00172 247.84);
-	--lucid-dropdown-contrast: oklch(27.394% 0.00548 286.033);
-	--lucid-input-base: oklch(96.66% 0.00265 106.449);
-	--lucid-input-contrast: oklch(37.032% 0.01188 285.805);
-	--lucid-icon-base: oklch(37.032% 0.01188 285.805);
-	--lucid-icon-hover: oklch(21.033% 0.00586 285.885);
-	--lucid-icon-faded: oklch(55.102% 0.02336 264.364);
-	--lucid-error-base: oklch(57.583% 0.20883 29.482);
-	--lucid-error-hover: oklch(50.034% 0.18205 29.513);
-	--lucid-error-contrast: oklch(100% 0 0);
-	--lucid-warning-base: oklch(55.419% 0.11691 75.008);
-	--lucid-warning-contrast: oklch(100% 0 0);
-	--lucid-workflow-yellow-bg: oklch(68.064% 0.14228 75.834 / 0.1);
-	--lucid-workflow-yellow-border: oklch(68.064% 0.14228 75.834 / 0.28);
-	--lucid-workflow-yellow-text: oklch(47.619% 0.10337 61.907);
-	--lucid-workflow-green-bg: oklch(62.705% 0.16991 149.214 / 0.1);
-	--lucid-workflow-green-border: oklch(62.705% 0.16991 149.214 / 0.28);
-	--lucid-workflow-green-text: oklch(44.792% 0.10832 151.328);
-	--lucid-workflow-blue-bg: oklch(54.615% 0.21521 262.881 / 0.1);
-	--lucid-workflow-blue-border: oklch(54.615% 0.21521 262.881 / 0.25);
-	--lucid-workflow-blue-text: oklch(48.82% 0.21717 264.376);
-	--lucid-workflow-purple-bg: oklch(55.754% 0.25249 302.321 / 0.1);
-	--lucid-workflow-purple-border: oklch(55.754% 0.25249 302.321 / 0.25);
-	--lucid-workflow-purple-text: oklch(49.552% 0.23687 301.924);
-	--lucid-info-faded: oklch(55.439% 0.04072 257.417);
-	--lucid-info-base: oklch(48.82% 0.21717 264.376);
-	--lucid-info-contrast: oklch(100% 0 0);
+	--lucid-popover: oklch(100% 0 0);
+	--lucid-input: oklch(96.66% 0.00265 106.449);
+	--lucid-overlay: oklch(17.304% 0 0 / 0.68);
 	--lucid-border: oklch(21.033% 0.00586 285.885 / 0.16);
-	--lucid-overlay-base: oklch(17.304% 0 0 / 0.68);
 	--lucid-title: oklch(21.033% 0.00586 285.885);
 	--lucid-subtitle: oklch(37.032% 0.01188 285.805);
 	--lucid-body: oklch(44.186% 0.01462 285.786);
-	--lucid-unfocused: oklch(55.102% 0.02336 264.364);
+	--lucid-muted: oklch(55.102% 0.02336 264.364);
+	--lucid-icon: oklch(37.032% 0.01188 285.805);
+	--lucid-icon-hover: oklch(21.033% 0.00586 285.885);
 	--lucid-scrollbar-thumb: oklch(71.366% 0.01918 261.325);
 	--lucid-scrollbar-track: oklch(94.45% 0.00413 121.563);
 	--lucid-skeleton-start: oklch(89.793% 0.00554 274.959 / 0.88);

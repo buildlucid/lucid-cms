@@ -19,7 +19,7 @@ const AiIconButton: Component<{
 		<button
 			type="button"
 			class={classnames(
-				"ai-action-button group relative flex items-center justify-center rounded-md text-icon-faded fill-icon-faded transition-colors duration-200 hover:text-primary-muted-contrast hover:fill-primary-muted-contrast focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60",
+				"ai-action-button group relative flex items-center justify-center rounded-md text-muted fill-muted transition-colors duration-200 hover:text-primary-low-foreground hover:fill-primary-low-foreground focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
 				{
 					"h-7 w-7": props.variant !== "subtle",
 					"h-5 w-5 before:absolute before:-inset-1 before:rounded-md before:content-['']":
@@ -39,10 +39,9 @@ const AiIconButton: Component<{
 				class={classnames(
 					"ai-action-button__surface pointer-events-none flex items-center justify-center rounded-md border transition-colors duration-200",
 					{
-						"h-7 w-7 border-border bg-input-base group-hover:border-primary-muted-border group-hover:bg-primary-muted-bg":
+						"h-7 w-7 border-border bg-input group-hover:border-primary-low-border group-hover:bg-primary-low":
 							props.variant !== "subtle",
-						"h-5 w-5 border-transparent bg-card-base":
-							props.variant === "subtle",
+						"h-5 w-5 border-transparent bg-card": props.variant === "subtle",
 					},
 				)}
 				data-loading={props.loading ? "true" : undefined}

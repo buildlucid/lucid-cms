@@ -119,7 +119,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 				<div class="fixed bottom-4 md:bottom-6 left-0 md:left-[220px] right-0 flex justify-center items-center z-40 pointer-events-none px-4">
 					<div
 						class={classNames(
-							"pointer-events-auto bg-card-base p-2 border border-border rounded-md w-full justify-between flex items-center",
+							"pointer-events-auto bg-card p-2 border border-border rounded-md w-full justify-between flex items-center",
 							isWidePill() ? "max-w-[460px]" : "max-w-[400px]",
 						)}
 					>

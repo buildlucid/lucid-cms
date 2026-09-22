@@ -31,7 +31,7 @@ const ReleaseRequestCommentsCell: Component<{
 							<span class="flex size-4 shrink-0 items-center justify-center">
 								<FaSolidComment
 									size={11}
-									class="text-icon-base"
+									class="text-icon"
 									title={T()("publish.requests.detail.request.comment")}
 								/>
 							</span>
@@ -48,7 +48,7 @@ const ReleaseRequestCommentsCell: Component<{
 							<span class="flex size-4 shrink-0 items-center justify-center">
 								<FaSolidCircleCheck
 									size={11}
-									class="text-icon-base"
+									class="text-icon"
 									title={T()("common.decision.comment")}
 								/>
 							</span>

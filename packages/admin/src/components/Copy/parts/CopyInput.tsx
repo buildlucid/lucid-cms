@@ -39,7 +39,7 @@ export const CopyInput: Component<CopyInputProps> = (props) => {
 		<div
 			data-copy-input
 			class={classNames(
-				"relative flex w-full items-stretch overflow-hidden rounded-md border border-border bg-input-base",
+				"relative flex w-full items-stretch overflow-hidden rounded-md border border-border bg-input",
 				props.class,
 			)}
 		>
@@ -54,10 +54,10 @@ export const CopyInput: Component<CopyInputProps> = (props) => {
 				type="button"
 				onClick={copy}
 				class={classNames(
-					"absolute top-1/2 left-2.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md bg-container-4 transition-colors duration-200 hover:bg-container-5 focus:ring-0 focus-visible:ring-1",
+					"absolute top-1/2 left-2.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md bg-input transition-colors duration-200 focus:ring-0 focus-visible:ring-1",
 					{
 						"text-body hover:text-title": !copied(),
-						"text-primary-base hover:text-primary-hover!": copied(),
+						"text-success hover:text-success!": copied(),
 					},
 				)}
 				aria-label={T()("actions.copy.to.clipboard")}

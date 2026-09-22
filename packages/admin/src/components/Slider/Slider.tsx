@@ -136,7 +136,7 @@ const Slider: Component<SliderProps> = (props) => {
 			aria-describedby={
 				props.description ? `${props.id}-description` : undefined
 			}
-			class="no-number-spinner h-8 min-w-12 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1 text-center text-sm font-medium tabular-nums text-title outline-hidden transition-colors duration-150 hover:border-border/50 hover:bg-input-base/30 focus:border-primary-base/60 focus:bg-input-base/40 focus:ring-1 focus:ring-primary-base/15 disabled:cursor-not-allowed disabled:opacity-60"
+			class="no-number-spinner h-8 min-w-12 shrink-0 appearance-none rounded-sm border border-transparent bg-transparent px-1 text-center text-sm font-medium tabular-nums text-title outline-hidden transition-colors duration-150 hover:border-border/50 hover:bg-input/30 focus:border-primary focus:bg-input/40 focus:ring-1 focus:ring-primary-low disabled:cursor-not-allowed disabled:opacity-60"
 			style={{ width: `calc(${valueCharacters()}ch + 1rem)` }}
 			onChange={(event) => {
 				updateValue(index, Number(event.currentTarget.value));
@@ -176,14 +176,14 @@ const Slider: Component<SliderProps> = (props) => {
 					<KobalteSlider.Track
 						data-slider-control
 						class={classnames(
-							"relative h-2.5 w-full rounded-full border border-border bg-input-base shadow-inner",
+							"relative h-2.5 w-full rounded-full border border-border bg-input shadow-inner",
 							{
 								"cursor-not-allowed opacity-60": props.disabled,
 								"cursor-pointer": !props.disabled,
 							},
 						)}
 					>
-						<KobalteSlider.Fill class="absolute inset-y-0 rounded-full bg-primary-muted-bg ring-1 ring-inset ring-primary-muted-border" />
+						<KobalteSlider.Fill class="absolute inset-y-0 rounded-full bg-primary-medium ring-1 ring-inset ring-primary" />
 						<div
 							aria-hidden="true"
 							class="pointer-events-none absolute inset-0 z-10"
@@ -191,7 +191,7 @@ const Slider: Component<SliderProps> = (props) => {
 							<For each={stepPositions()}>
 								{(position) => (
 									<span
-										class="absolute top-1/2 size-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-unfocused opacity-40"
+										class="absolute top-1/2 size-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted opacity-40"
 										style={{ left: `${position}%` }}
 									/>
 								)}
@@ -204,7 +204,7 @@ const Slider: Component<SliderProps> = (props) => {
 									aria-describedby={
 										props.description ? `${props.id}-description` : undefined
 									}
-									class="top-1/2 z-20 -mt-2.5 size-5 rounded-full border-2 border-primary-base bg-background-base shadow-md outline-hidden transition-shadow duration-150 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary-base/30"
+									class="top-1/2 z-20 -mt-2.5 size-5 rounded-full border-2 border-primary bg-background shadow-md outline-hidden transition-shadow duration-150 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary-low-border"
 								/>
 							)}
 						</Index>

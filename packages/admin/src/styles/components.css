@@ -1,6 +1,6 @@
 @layer base {
 	.navigation-link-active {
-		@apply bg-navigation-active! text-secondary-contrast! fill-secondary-contrast!;
+		@apply bg-secondary! text-secondary-foreground! fill-secondary-foreground!;
 	}
 
 	.scrollbar {
@@ -12,7 +12,7 @@
 		filter: drop-shadow(-5px 0px 5px oklch(0% 0 0 / 0.1));
 	}
 	.dropdown-trigger {
-		@apply duration-200 transition-colors outline-primary-base focus:outline-1;
+		@apply duration-200 transition-colors outline-primary focus:outline-1;
 	}
 
 	.no-number-spinner {
@@ -26,7 +26,7 @@
 	}
 
 	.skeleton {
-		@apply bg-input-base rounded-md animate-pulse;
+		@apply bg-input rounded-md animate-pulse;
 	}
 
 	.skeleton-shimmer {
@@ -51,7 +51,7 @@
 		background:
 			radial-gradient(
 				900px 600px at 5% 0%,
-				color-mix(in srgb, var(--lucid-primary-base) 7%, transparent),
+				color-mix(in srgb, var(--lucid-primary) 7%, transparent),
 				transparent 60%
 			),
 			radial-gradient(
@@ -130,14 +130,14 @@
 		border-radius: 9999px;
 		background: linear-gradient(
 			to right,
-			var(--lucid-primary-base) 0 var(--degree-range-progress),
-			var(--lucid-input-base) var(--degree-range-progress) 100%
+			var(--lucid-primary) 0 var(--degree-range-progress),
+			var(--lucid-input) var(--degree-range-progress) 100%
 		);
 		outline: none;
 	}
 
 	.degree-range-input:focus-visible {
-		box-shadow: 0 0 0 2px var(--lucid-primary-muted-border);
+		box-shadow: 0 0 0 2px var(--lucid-primary-low-border);
 	}
 
 	.degree-range-input::-webkit-slider-runnable-track {
@@ -151,9 +151,9 @@
 		width: 1.125rem;
 		height: 1.125rem;
 		margin-top: -0.3125rem;
-		border: 2px solid var(--lucid-background-base);
+		border: 2px solid var(--lucid-background);
 		border-radius: 9999px;
-		background: var(--lucid-primary-base);
+		background: var(--lucid-primary);
 		box-shadow: 0 1px 3px var(--lucid-border);
 	}
 
@@ -171,9 +171,9 @@
 	.degree-range-input::-moz-range-thumb {
 		width: 1.125rem;
 		height: 1.125rem;
-		border: 2px solid var(--lucid-background-base);
+		border: 2px solid var(--lucid-background);
 		border-radius: 9999px;
-		background: var(--lucid-primary-base);
+		background: var(--lucid-primary);
 		box-shadow: 0 1px 3px var(--lucid-border);
 	}
 
@@ -252,11 +252,11 @@
 	}
 
 	.rich-text-content ul {
-		@apply list-disc pl-5 mb-2 last:mb-0 text-sm leading-5 tracking-normal text-subtitle marker:text-unfocused;
+		@apply list-disc pl-5 mb-2 last:mb-0 text-sm leading-5 tracking-normal text-subtitle marker:text-muted;
 	}
 
 	.rich-text-content ol {
-		@apply list-decimal pl-5 mb-2 last:mb-0 text-sm leading-5 tracking-normal text-subtitle marker:text-unfocused;
+		@apply list-decimal pl-5 mb-2 last:mb-0 text-sm leading-5 tracking-normal text-subtitle marker:text-muted;
 	}
 
 	.rich-text-content li {
@@ -288,7 +288,7 @@
 	}
 
 	.rich-text-content a {
-		@apply text-sm leading-5 tracking-normal text-primary-base underline underline-offset-2 decoration-primary-base/60;
+		@apply text-sm leading-5 tracking-normal text-primary underline underline-offset-2 decoration-primary/60;
 	}
 
 	.rich-text-content a:hover {
@@ -316,38 +316,36 @@
 	.ai-action-button__surface[data-quick-action-active="true"] {
 		border-color: transparent;
 		background:
-			linear-gradient(var(--lucid-input-base), var(--lucid-input-base))
-			padding-box,
+			linear-gradient(var(--lucid-input), var(--lucid-input)) padding-box,
 			conic-gradient(
 				from var(--ai-border-angle),
 				transparent 0deg,
 				transparent 245deg,
 				var(--lucid-ai-blue) 285deg,
-				var(--lucid-primary-base) 360deg
+				var(--lucid-primary) 360deg
 			)
 			border-box;
 		animation: ai-border-spin 900ms linear infinite;
 	}
 
 	.ai-action-button__surface[data-quick-action-active="true"] {
-		color: var(--lucid-primary-base);
-		fill: var(--lucid-primary-base);
+		color: var(--lucid-primary);
+		fill: var(--lucid-primary);
 		box-shadow:
-			0 0 0 1px color-mix(in srgb, var(--lucid-primary-base) 18%, transparent),
-			0 0 16px color-mix(in srgb, var(--lucid-primary-base) 22%, transparent);
+			0 0 0 1px color-mix(in srgb, var(--lucid-primary) 18%, transparent),
+			0 0 16px color-mix(in srgb, var(--lucid-primary) 22%, transparent);
 	}
 
 	.ai-action-button__surface[data-variant="subtle"][data-loading="true"],
 	.ai-action-button__surface[data-variant="subtle"][data-quick-action-active="true"] {
 		background:
-			linear-gradient(var(--lucid-card-base), var(--lucid-card-base))
-			padding-box,
+			linear-gradient(var(--lucid-card), var(--lucid-card)) padding-box,
 			conic-gradient(
 				from var(--ai-border-angle),
 				transparent 0deg,
 				transparent 245deg,
 				var(--lucid-ai-blue) 285deg,
-				var(--lucid-primary-base) 360deg
+				var(--lucid-primary) 360deg
 			)
 			border-box;
 	}
@@ -360,9 +358,9 @@
 		height: 0.5rem;
 		margin-inline-start: 0.25rem;
 		border-radius: 9999px;
-		background: var(--lucid-primary-base);
+		background: var(--lucid-primary);
 		box-shadow: 0 0 0 1px
-			color-mix(in srgb, var(--lucid-primary-base) 18%, transparent);
+			color-mix(in srgb, var(--lucid-primary) 18%, transparent);
 		animation: preview-field-target-pulse 1.5s ease-out;
 		vertical-align: middle;
 	}
@@ -380,7 +378,7 @@
 			animation: none;
 			opacity: 1;
 			box-shadow: 0 0 0 2px
-				color-mix(in srgb, var(--lucid-primary-base) 22%, transparent);
+				color-mix(in srgb, var(--lucid-primary) 22%, transparent);
 		}
 	}
 }

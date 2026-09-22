@@ -51,12 +51,12 @@ const AuthProviderRow: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-input-base p-2">
+		<div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-input p-2">
 			<div class="flex items-center gap-2">
 				<Show
 					when={props.provider.icon}
 					fallback={
-						<FaSolidCircleUser class="size-10 rounded-full bg-card-base p-2 text-title" />
+						<FaSolidCircleUser class="size-10 rounded-full bg-card p-2 text-title" />
 					}
 				>
 					<img

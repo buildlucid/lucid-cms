@@ -246,7 +246,7 @@ const ViewShareLinksPanelContent: Component<{
 					}
 					class={classnames(
 						"flex-1 h-full",
-						"bg-card-base border border-border rounded-md",
+						"bg-card border border-border rounded-md",
 					)}
 				>
 					<Table.Root

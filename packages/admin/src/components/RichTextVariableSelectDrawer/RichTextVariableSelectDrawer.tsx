@@ -342,9 +342,9 @@ const RichTextVariableSelectDrawer: Component<{
 											<For each={variableFieldOptions(contentLocale() ?? "")}>
 												{(field) => (
 													<label
-														class="relative flex min-h-16 cursor-pointer items-start gap-3 rounded-md border border-border bg-card-base p-3 text-left transition-colors hover:border-primary-muted-border hover:bg-card-hover"
+														class="relative flex min-h-16 cursor-pointer items-start gap-3 rounded-md border border-border bg-card p-3 text-left transition-colors hover:border-primary-low-border hover:bg-card-hover"
 														classList={{
-															"border-primary-base ring-1 ring-primary-base/20":
+															"border-primary ring-1 ring-primary-low-border":
 																selectedFieldKey() === field.key,
 														}}
 													>
@@ -356,17 +356,17 @@ const RichTextVariableSelectDrawer: Component<{
 															onChange={() => setSelectedFieldKey(field.key)}
 															class="peer sr-only"
 														/>
-														<span class="pointer-events-none absolute inset-0 rounded-md peer-focus-visible:outline-2 peer-focus-visible:outline-primary-base/30" />
+														<span class="pointer-events-none absolute inset-0 rounded-md peer-focus-visible:outline-2 peer-focus-visible:outline-primary-low-border" />
 														<span
-															class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-border bg-input-base"
+															class="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-border bg-input"
 															classList={{
-																"border-primary-base":
+																"border-primary":
 																	selectedFieldKey() === field.key,
 															}}
 															aria-hidden="true"
 														>
 															<Show when={selectedFieldKey() === field.key}>
-																<span class="size-2 rounded-full bg-primary-base" />
+																<span class="size-2 rounded-full bg-primary" />
 															</Show>
 														</span>
 														<span class="min-w-0 grow">

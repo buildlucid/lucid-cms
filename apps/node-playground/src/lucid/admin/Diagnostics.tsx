@@ -84,7 +84,7 @@ const Diagnostics: RouteComponent = () => {
 								<Pill
 									variant={
 										permissions.can(Permissions.MediaRead)
-											? "primary-subtle"
+											? "success-subtle"
 											: "warning-subtle"
 									}
 								>

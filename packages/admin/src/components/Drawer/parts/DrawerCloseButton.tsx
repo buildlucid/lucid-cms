@@ -16,7 +16,7 @@ export const DrawerCloseButton: Component<DrawerCloseButtonProps> = (props) => {
 		<Dialog.CloseButton
 			data-drawer-close-button
 			class={classNames(
-				"relative flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus-visible:ring-1 ring-primary-base bg-background-base justify-center after:absolute after:-inset-2.5 after:content-['']",
+				"relative flex items-center text-body hover:text-title w-6 h-6 min-w-6 rounded-full focus:outline-hidden focus-visible:ring-1 ring-primary bg-background justify-center after:absolute after:-inset-2.5 after:content-['']",
 				props.class,
 			)}
 		>

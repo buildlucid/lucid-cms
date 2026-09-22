@@ -35,7 +35,7 @@ export const OAuthConnectionsList: Component<{
 				/>
 			}
 			class={classnames({
-				"overflow-hidden rounded-md border border-border bg-card-base":
+				"overflow-hidden rounded-md border border-border bg-card":
 					props.contained !== false,
 			})}
 		>

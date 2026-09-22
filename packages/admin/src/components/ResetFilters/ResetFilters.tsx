@@ -14,7 +14,7 @@ const ResetFilters: Component<ResetFiltersProps> = (props) => (
 		type="button"
 		data-reset-filters
 		class={classNames(
-			"z-20 relative text-sm flex items-center gap-1.5 hover:text-error-hover duration-200 transition-colors group",
+			"z-20 relative text-sm flex items-center gap-1.5 hover:text-danger-hover duration-200 transition-colors group",
 			"md:ml-2",
 			props.class,
 		)}
@@ -24,7 +24,7 @@ const ResetFilters: Component<ResetFiltersProps> = (props) => (
 			props.onReset();
 		}}
 	>
-		<FaSolidXmark class="text-error-base group-hover:text-error-hover" />
+		<FaSolidXmark class="text-danger group-hover:text-danger-hover" />
 		<span>{T()("actions.reset.filters")}</span>
 	</button>
 );

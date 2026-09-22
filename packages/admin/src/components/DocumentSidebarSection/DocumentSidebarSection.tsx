@@ -28,7 +28,7 @@ const DocumentSidebarSection: Component<{
 	return (
 		<Collapsible.Root open={open()} onOpenChange={setOpen}>
 			<section>
-				<Collapsible.Trigger class="group flex w-full items-center gap-1.5 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary-base">
+				<Collapsible.Trigger class="group flex w-full items-center gap-1.5 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary">
 					<span class="flex size-3 shrink-0 items-center justify-center text-body">
 						{props.icon}
 					</span>

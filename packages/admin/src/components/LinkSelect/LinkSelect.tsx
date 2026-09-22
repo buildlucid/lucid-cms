@@ -69,7 +69,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 			/>
 			<div class="w-full">
 				<Show when={hasLink()}>
-					<div class="group w-full flex items-center justify-between gap-3 bg-input-base border border-border rounded-md px-3 py-2 group">
+					<div class="group w-full flex items-center justify-between gap-3 bg-input border border-border rounded-md px-3 py-2 group">
 						<div class="flex flex-col gap-0.5">
 							<Show when={linkLabel()}>
 								<span class="text-sm font-medium text-subtitle truncate leading-tight">
@@ -98,7 +98,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 						<div class="flex items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 							<Button
 								type="button"
-								variant="background-subtle"
+								variant="ghost"
 								size="xs"
 								shape="square"
 								onClick={openLinkModal}
@@ -109,7 +109,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 							</Button>
 							<Button
 								type="button"
-								variant="danger-subtle"
+								variant="danger-ghost"
 								size="xs"
 								shape="square"
 								onClick={() => props.onChange(null)}

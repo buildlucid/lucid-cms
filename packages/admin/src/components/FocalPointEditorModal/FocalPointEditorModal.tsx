@@ -198,14 +198,14 @@ const FocalPointEditorModal: Component<{
 						<div
 							class={classNames(
 								"pointer-events-none absolute z-20 h-px w-full -translate-y-1/2",
-								"bg-secondary-base/45",
+								"bg-secondary/45",
 							)}
 							style={{ top: pinStyle().top }}
 						/>
 						<div
 							class={classNames(
 								"pointer-events-none absolute z-20 h-full w-px -translate-x-1/2",
-								"bg-secondary-base/45",
+								"bg-secondary/45",
 							)}
 							style={{ left: pinStyle().left }}
 						/>
@@ -226,7 +226,7 @@ const FocalPointEditorModal: Component<{
 			<Modal.Footer>
 				<Button
 					type="button"
-					variant="danger-subtle"
+					variant="danger-ghost"
 					size="md"
 					class="self-start"
 					onClick={() => setDraft(CENTER_FOCAL_POINT)}

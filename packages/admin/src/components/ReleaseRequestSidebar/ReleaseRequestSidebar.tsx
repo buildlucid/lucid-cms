@@ -473,7 +473,7 @@ export const ReleaseRequestSidebar: Component<{
 	// Render
 	return (
 		<>
-			<aside class="w-full shrink-0 bg-card-base p-4 md:p-5 flex-col flex gap-5 rounded-t-xl border-t border-border xl:sticky xl:top-(--document-header-bar-height) xl:h-[calc(100vh-var(--document-header-bar-height))] xl:w-82.5 xl:self-start xl:overflow-y-auto xl:rounded-tl-none xl:border-t-0 xl:border-l">
+			<aside class="w-full shrink-0 bg-card p-4 md:p-5 flex-col flex gap-5 rounded-t-xl border-t border-border xl:sticky xl:top-(--document-header-bar-height) xl:h-[calc(100vh-var(--document-header-bar-height))] xl:w-82.5 xl:self-start xl:overflow-y-auto xl:rounded-tl-none xl:border-t-0 xl:border-l">
 				<div class="flex flex-col gap-3">
 					<div class="flex items-center justify-between gap-3">
 						<h2 class="min-w-0 text-sm font-semibold text-title">
@@ -529,7 +529,7 @@ export const ReleaseRequestSidebar: Component<{
 				</div>
 
 				<Show when={changedReleaseRequirementLabels().length > 0}>
-					<div class="rounded-md border border-warning-base/30 bg-warning-base/10 p-3 text-warning-base">
+					<div class="rounded-md border border-warning-low-border bg-warning-low p-3 text-warning-low-foreground">
 						<p class="text-xs leading-5">
 							{T()("publish.requests.requirements.changed", {
 								requirements: changedReleaseRequirementLabels().join(", "),
@@ -631,7 +631,7 @@ export const ReleaseRequestSidebar: Component<{
 						icon={<FaSolidClock size={12} />}
 						preferenceKey="releaseRequest.sidebar.execution"
 					>
-						<div class="overflow-hidden rounded-md border border-border bg-card-base">
+						<div class="overflow-hidden rounded-md border border-border bg-card">
 							<For each={executionEvents()}>
 								{(event) => (
 									<div class="border-b border-border px-3 py-2.5 last:border-b-0">
@@ -660,12 +660,12 @@ export const ReleaseRequestSidebar: Component<{
 							<Show when={request()?.executionErrorMessage}>
 								{(message) => (
 									<div
-										class={classNames("bg-error-base/5 px-3 py-2.5", {
-											"border-t border-error-base/20":
+										class={classNames("bg-danger-low px-3 py-2.5", {
+											"border-t border-danger-low-border":
 												executionEvents().length > 0,
 										})}
 									>
-										<p class="text-xs font-medium text-error-base">
+										<p class="text-xs font-medium text-danger-low-foreground">
 											{T()("common.execution.error")}
 										</p>
 										<p class="mt-0.5 whitespace-pre-wrap wrap-break-words text-xs leading-5 text-body">
@@ -688,7 +688,7 @@ export const ReleaseRequestSidebar: Component<{
 						meta={request()?.assignees.length}
 					>
 						<div class="grid gap-2">
-							<div class="overflow-hidden rounded-md border border-border bg-card-base">
+							<div class="overflow-hidden rounded-md border border-border bg-card">
 								<Show
 									when={(request()?.assignees.length ?? 0) > 0}
 									fallback={

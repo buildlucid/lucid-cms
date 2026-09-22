@@ -5,6 +5,7 @@ import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import IconContainer from "@/components/IconContainer/IconContainer";
 import Modal from "@/components/Modal/Modal";
 import OAuthClientCredentialsModal from "@/components/OAuthClientCredentialsModal/OAuthClientCredentialsModal";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import UpsertOAuthClientDrawer from "@/components/UpsertOAuthClientDrawer/UpsertOAuthClientDrawer";
 import api from "@/services/api";
 import T from "@/translations";
@@ -68,7 +69,7 @@ const OAuthClientRow: Component<{
 						>
 							<Show
 								when={props.client.logo}
-								fallback={<FaSolidKey class="size-3.5 text-primary-base" />}
+								fallback={<FaSolidKey class="size-3.5 text-primary" />}
 							>
 								{(logo) => (
 									<img
@@ -87,17 +88,13 @@ const OAuthClientRow: Component<{
 								<span
 									class={
 										props.client.enabled
-											? "inline-flex items-center gap-1.5 text-xs font-medium text-primary-base"
-											: "inline-flex items-center gap-1.5 text-xs font-medium text-unfocused"
+											? "inline-flex items-center gap-1.5 text-xs font-medium text-success"
+											: "inline-flex items-center gap-1.5 text-xs font-medium text-muted"
 									}
 								>
-									<span
-										class={
-											props.client.enabled
-												? "size-1.5 rounded-full bg-primary-base"
-												: "size-1.5 rounded-full bg-icon-faded"
-										}
-										aria-hidden="true"
+									<StatusIndicator
+										variant={props.client.enabled ? "success" : "neutral"}
+										size="xs"
 									/>
 									{props.client.enabled
 										? T()("common.status.active")
@@ -110,11 +107,11 @@ const OAuthClientRow: Component<{
 										? T()("oauth.clients.auth.confidential.short")
 										: T()("oauth.clients.auth.public.short")}
 								</span>
-								<span class="text-unfocused" aria-hidden="true">
+								<span class="text-muted" aria-hidden="true">
 									·
 								</span>
 								<span class="flex items-center gap-1.5">
-									<FaSolidArrowRightArrowLeft class="size-2.5 text-icon-faded" />
+									<FaSolidArrowRightArrowLeft class="size-2.5 text-muted" />
 									{T()(
 										props.client.redirectUris.length === 1
 											? "oauth.clients.redirect.count"
@@ -124,7 +121,7 @@ const OAuthClientRow: Component<{
 								</span>
 							</div>
 							<p
-								class="mt-1.5 max-w-xl truncate font-mono text-[11px] text-unfocused"
+								class="mt-1.5 max-w-xl truncate font-mono text-[11px] text-muted"
 								title={props.client.clientId}
 							>
 								{props.client.clientId}

@@ -54,17 +54,17 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 				class={classNames(
 					"text-left relative gap-2.5 px-4 bg-clip-padding border-b border-border duration-200 transition-colors whitespace-nowrap",
 					{
-						"hover:bg-card-base":
+						"hover:bg-card":
 							props.sortable &&
 							(table.variant() === "primary" || table.variant() === undefined),
 						"hover:bg-card-hover":
 							props.sortable &&
 							(table.variant() === "secondary" ||
 								table.variant() === "contained"),
-						"bg-background-base":
+						"bg-background":
 							table.variant() === "primary" || table.variant() === undefined,
-						"bg-card-base": table.variant() === "secondary",
-						"bg-input-base": table.variant() === "contained",
+						"bg-card": table.variant() === "secondary",
+						"bg-input": table.variant() === "contained",
 						"first:pl-4 md:first:pl-6 last:pr-4 md:last:pr-6":
 							table.padding() === "md",
 					},
@@ -113,7 +113,7 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 										<Match when={sort() === "desc" || sort() === "asc"}>
 											<FaSolidCaretUp
 												aria-hidden="true"
-												class={classNames("w-3 h-3 text-icon-base", {
+												class={classNames("w-3 h-3 text-icon", {
 													"transform rotate-180": sort() === "desc",
 												})}
 											/>
@@ -121,7 +121,7 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 										<Match when={sort() === undefined}>
 											<FaSolidMinus
 												aria-hidden="true"
-												class="w-3 h-3 text-icon-base ml-2"
+												class="w-3 h-3 text-icon ml-2"
 											/>
 										</Match>
 									</Switch>

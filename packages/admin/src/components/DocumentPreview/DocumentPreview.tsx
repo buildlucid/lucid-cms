@@ -227,7 +227,7 @@ export const DocumentPreview: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<section class="h-full min-h-0 min-w-0 overflow-hidden rounded-t-xl border-t border-border bg-card-base xl:rounded-tl-none xl:border-l xl:border-t-0">
+		<section class="h-full min-h-0 min-w-0 overflow-hidden rounded-t-xl border-t border-border bg-card xl:rounded-tl-none xl:border-l xl:border-t-0">
 			<PreviewCanvas
 				frameSrc={frameSrc}
 				resolverState={resolverState}

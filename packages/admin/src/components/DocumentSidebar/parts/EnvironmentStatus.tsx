@@ -21,7 +21,7 @@ const statusVariants: Record<
 	DocumentEnvironmentStatus,
 	NonNullable<DetailsListProps["items"][number]["pillVariant"]>
 > = {
-	"in-sync": "primary-subtle",
+	"in-sync": "success-subtle",
 	"out-of-sync": "warning-subtle",
 	unreleased: "danger-subtle",
 };

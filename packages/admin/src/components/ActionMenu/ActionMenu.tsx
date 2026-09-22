@@ -149,7 +149,7 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 					data-action-menu
 					onClick={(event) => event.stopPropagation()}
 					class={classNames(
-						"pointer-events-auto bg-input-base border border-border outline-none ring-0 focus-visible:ring-1 focus:ring-primary-base rounded-md flex justify-center items-center hover:bg-background-hover",
+						"pointer-events-auto bg-input border border-border outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center hover:bg-background-hover",
 						{
 							"min-w-7 w-7 h-7": props.size !== "md",
 							"min-w-9 w-9 h-9": props.size === "md",

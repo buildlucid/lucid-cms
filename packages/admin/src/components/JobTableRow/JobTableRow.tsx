@@ -41,7 +41,7 @@ const JobTableRow: Component<JobRowProps> = (props) => {
 				text={props.job.status}
 				variant={
 					props.job.status === "completed"
-						? "primary-subtle"
+						? "success-subtle"
 						: props.job.status === "failed"
 							? "danger-subtle"
 							: props.job.status === "running"

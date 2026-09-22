@@ -9,14 +9,14 @@ import Table from "@/components/Table/Table";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-/** Stage colours come from collection config, pills name theirs semantically. */
+/** Maps stage colours from collection config to pill variants. */
 const stageVariants: Record<WorkflowStageColor, PillVariant> = {
 	grey: "neutral",
 	red: "danger",
-	yellow: "workflow-yellow",
-	green: "workflow-green",
-	blue: "workflow-blue",
-	purple: "workflow-purple",
+	yellow: "yellow-subtle",
+	green: "green-subtle",
+	blue: "blue-subtle",
+	purple: "purple-subtle",
 };
 
 const WorkflowStageCell: Component<{

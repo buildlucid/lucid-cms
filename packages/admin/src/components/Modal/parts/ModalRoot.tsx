@@ -59,7 +59,7 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 				<Dialog.Overlay
 					data-modal-overlay
 					class={classNames(
-						"fixed inset-0 bg-overlay-base animate-overlay-hide duration-200 transition-colors data-expanded:animate-overlay-show",
+						"fixed inset-0 bg-overlay animate-overlay-hide duration-200 transition-colors data-expanded:animate-overlay-show",
 						{
 							"cursor-pointer": dismissible(),
 						},
@@ -80,7 +80,7 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 						<div
 							data-modal-content
 							class={classNames(
-								"w-full bg-background-base border border-border rounded-xl overflow-hidden m-auto pointer-events-auto",
+								"w-full bg-background border border-border rounded-xl overflow-hidden m-auto pointer-events-auto",
 								{
 									"max-w-md": props.size === "sm",
 									"max-w-2xl": props.size === undefined || props.size === "md",

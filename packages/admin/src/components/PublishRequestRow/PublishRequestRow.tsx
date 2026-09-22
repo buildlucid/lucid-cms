@@ -1,6 +1,5 @@
 import { A } from "@solidjs/router";
 import type { Collection, PublishOperation } from "@types";
-import classNames from "classnames";
 import {
 	FaSolidArrowUpRightFromSquare,
 	FaSolidCalendar,
@@ -9,20 +8,21 @@ import {
 } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import DateText from "@/components/DateText/DateText";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
 import { formatTargetName } from "@/utils/document-sidebar";
 import helpers from "@/utils/helpers";
 import {
-	getPublishOperationExecutionStatusDotClass,
+	getPublishOperationExecutionStatusIndicatorVariant,
 	getPublishOperationExecutionStatusLabel,
-	getPublishOperationStatusDotClass,
+	getPublishOperationStatusIndicatorVariant,
 } from "@/utils/publish-operations";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 const iconActionClasses =
-	"inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-input-base/60 text-icon-base transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base";
+	"inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-input/60 text-icon transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary";
 const disabledActionClasses =
-	"inline-flex size-8 shrink-0 cursor-not-allowed items-center justify-center rounded-md border border-border bg-input-base/30 text-icon-faded opacity-60";
+	"inline-flex size-8 shrink-0 cursor-not-allowed items-center justify-center rounded-md border border-border bg-input/30 text-muted opacity-60";
 
 const PublishRequestRow: Component<{
 	collection: Accessor<Collection | undefined>;
@@ -37,10 +37,10 @@ const PublishRequestRow: Component<{
 			? T()("common.status.pending")
 			: getPublishOperationExecutionStatusLabel(props.request.executionStatus),
 	);
-	const statusDotClass = createMemo(() =>
+	const statusVariant = createMemo(() =>
 		isPendingRequest()
-			? getPublishOperationStatusDotClass(props.request.status)
-			: getPublishOperationExecutionStatusDotClass(
+			? getPublishOperationStatusIndicatorVariant(props.request.status)
+			: getPublishOperationExecutionStatusIndicatorVariant(
 					props.request.executionStatus,
 				),
 	);
@@ -59,27 +59,20 @@ const PublishRequestRow: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<article class="group border-b border-border bg-card-base transition-colors last:border-b-0 hover:bg-card-hover/60">
+		<article class="group border-b border-border bg-card transition-colors last:border-b-0 hover:bg-card-hover/60">
 			<div class="flex items-center gap-3 px-3 py-2.5">
 				<div class="min-w-0 flex-1">
 					<div class="flex min-w-0 items-center gap-2">
-						<span
-							class={classNames(
-								"size-2.5 shrink-0 rounded-full border",
-								statusDotClass(),
-							)}
-							title={statusLabel()}
-						/>
+						<StatusIndicator variant={statusVariant()} label={statusLabel()} />
 						<h4 class="truncate text-sm font-medium text-title">
 							{formatTargetName({
 								collection: props.collection(),
 								target: props.request.target,
 							})}
-							<span class="sr-only">, {statusLabel()}</span>
 						</h4>
 					</div>
 
-					<div class="mt-1 flex min-w-0 items-center gap-1 text-[11px] text-unfocused">
+					<div class="mt-1 flex min-w-0 items-center gap-1 text-[11px] text-muted">
 						<Show when={isPendingRequest()}>
 							<span class="truncate">
 								{helpers.formatUserName(props.request.requestedBy, "name") ||
@@ -90,7 +83,7 @@ const PublishRequestRow: Component<{
 						<DateText
 							date={metadataDate()}
 							includeTime={!isPendingRequest()}
-							class="text-[11px] text-unfocused"
+							class="text-[11px] text-muted"
 						/>
 						<Show when={!isPendingRequest() && props.request.scheduledTimezone}>
 							<span aria-hidden="true">·</span>

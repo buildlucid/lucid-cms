@@ -1,9 +1,9 @@
 import type { Integration } from "@types";
-import classNames from "classnames";
 import { FaSolidKey } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import IconContainer from "@/components/IconContainer/IconContainer";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
@@ -43,7 +43,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 		<article class="flex items-start justify-between gap-3 border-b border-border p-4 last:border-b-0">
 			<div class="flex min-w-0 items-start gap-3">
 				<IconContainer>
-					<FaSolidKey class="size-3.5 text-primary-base" />
+					<FaSolidKey class="size-3.5 text-primary" />
 				</IconContainer>
 				<div class="min-w-0">
 					<h3 class="truncate text-sm font-semibold text-title">
@@ -54,16 +54,18 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 							{props.integration.description}
 						</p>
 					</Show>
-					<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-unfocused">
+					<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
 						<code class="font-mono text-xs text-body">
 							{props.integration.key}
 						</code>
 						<span class="inline-flex items-center gap-1.5">
-							<span
-								class={classNames("size-1.5 rounded-full", {
-									"bg-primary-base": props.integration.enabled && !isExpired(),
-									"bg-error-base": !props.integration.enabled || isExpired(),
-								})}
+							<StatusIndicator
+								variant={
+									props.integration.enabled && !isExpired()
+										? "success"
+										: "danger"
+								}
+								size="xs"
 							/>
 							{status()}
 						</span>

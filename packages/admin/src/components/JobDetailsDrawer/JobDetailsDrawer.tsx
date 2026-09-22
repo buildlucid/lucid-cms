@@ -157,7 +157,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 						job.data?.data.status === "failed" && job.data?.data.errorMessage
 					}
 				>
-					<div class="mb-4 p-4 bg-error-base/10 border border-error-base/20 rounded-md -mt-2.5">
+					<div class="mb-4 p-4 bg-danger-low border border-danger-low-border rounded-md -mt-2.5">
 						<h3 class="text-sm font-medium text-title mb-1">
 							{T()("common.failed.with.message")}
 						</h3>
@@ -169,7 +169,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 					<div class="mb-4">
 						<Suspense
 							fallback={
-								<div class="h-40 bg-card-base border border-border rounded-md animate-pulse" />
+								<div class="h-40 bg-card border border-border rounded-md animate-pulse" />
 							}
 						>
 							<JSONPreview json={job.data?.data.displayData || {}} />
@@ -181,7 +181,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 					<div class="mb-4 flex flex-col gap-2">
 						<For each={schedules.data?.data ?? []}>
 							{(schedule) => (
-								<div class="rounded-md border border-border bg-card-base p-3">
+								<div class="rounded-md border border-border bg-card p-3">
 									<div class="flex items-center justify-between gap-3">
 										<p class="truncate text-sm font-medium text-title">
 											{schedule.name}
@@ -191,7 +191,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 												variant={
 													schedule.state === "paused"
 														? "warning-subtle"
-														: "primary-subtle"
+														: "success-subtle"
 												}
 											>
 												{schedule.state === "paused"
@@ -200,7 +200,7 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 											</Pill>
 										</div>
 									</div>
-									<p class="mt-1 truncate text-xs text-unfocused">
+									<p class="mt-1 truncate text-xs text-muted">
 										{schedule.cron} · {schedule.timezone}
 									</p>
 								</div>

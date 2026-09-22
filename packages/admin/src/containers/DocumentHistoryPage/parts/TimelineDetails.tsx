@@ -264,7 +264,7 @@ const TimelineDetails: Component<{
 	return (
 		<>
 			<aside class="mt-4 lg:mt-6 mx-4 md:mx-6 lg:mx-0 lg:mr-6 mb-6 md:mb-8 pb-6 lg:pb-8 space-y-4">
-				<section class="rounded-md border border-border bg-card-base p-4 md:p-5">
+				<section class="rounded-md border border-border bg-card p-4 md:p-5">
 					<div class="flex items-start justify-between gap-4">
 						<div class="min-w-0">
 							<p class="text-xs font-medium uppercase text-body">{eyebrow()}</p>
@@ -456,14 +456,14 @@ const TimelineDetails: Component<{
 								</div>
 							</Match>
 							<Match when={releaseOperations().length === 0}>
-								<div class="rounded-md border border-border bg-input-base/50 p-3">
+								<div class="rounded-md border border-border bg-input/50 p-3">
 									<p class="text-sm text-body">
 										{T()("empty.states.release.activity")}
 									</p>
 								</div>
 							</Match>
 							<Match when={true}>
-								<div class="overflow-hidden rounded-md border border-border bg-card-base">
+								<div class="overflow-hidden rounded-md border border-border bg-card">
 									<For each={releaseOperations()}>
 										{(operation) => (
 											<PublishRequestRow
@@ -603,10 +603,10 @@ const InspectorSection: Component<{
 	// Render
 	return (
 		<Collapsible.Root open={open()} onOpenChange={setOpen}>
-			<section class="rounded-md border border-border bg-card-base p-4">
-				<Collapsible.Trigger class="group flex w-full items-center justify-between gap-3 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary-base">
+			<section class="rounded-md border border-border bg-card p-4">
+				<Collapsible.Trigger class="group flex w-full items-center justify-between gap-3 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary">
 					<div class="flex min-w-0 items-center gap-2 text-title">
-						<span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-input-base text-body">
+						<span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-input text-body">
 							{props.icon}
 						</span>
 						<h4 class="truncate text-sm font-semibold">{props.title}</h4>
@@ -636,7 +636,7 @@ const Metric: Component<{
 	label: string;
 	value: number;
 }> = (props) => (
-	<div class="min-w-0 rounded-md border border-border bg-input-base/50 px-3 py-2">
+	<div class="min-w-0 rounded-md border border-border bg-input/50 px-3 py-2">
 		<p class="text-base font-semibold text-title">{props.value}</p>
 		<p class="mt-0.5 truncate text-xs text-body">{props.label}</p>
 	</div>
@@ -659,9 +659,7 @@ const DetailRow: Component<{
 			)}
 		>
 			<span class="text-sm font-medium text-subtitle">{props.label}</span>
-			<span class="min-w-0 text-sm font-medium text-unfocused">
-				{props.value}
-			</span>
+			<span class="min-w-0 text-sm font-medium text-muted">{props.value}</span>
 		</div>
 	</Show>
 );
@@ -736,7 +734,7 @@ const VersionStatusPills: Component<{
 					</Pill>
 				}
 			>
-				<Pill variant="primary-subtle">{T()("common.status.in.sync")}</Pill>
+				<Pill variant="success-subtle">{T()("common.status.in.sync")}</Pill>
 			</Show>
 		</Show>
 		<Show

@@ -822,10 +822,10 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 				data-filter-panel
 				class={classNames(
 					props.embedded
-						? "mb-4 px-4 py-4 bg-card-base border border-border rounded-md"
+						? "mb-4 px-4 py-4 bg-card border border-border rounded-md"
 						: props.padding === "sm"
-							? "-mx-4 -mb-4 mt-1.5 md:mt-3.5 px-4 py-4 bg-card-base border-t border-border"
-							: "-mx-4 md:-mx-6 -mb-4 md:-mb-6 mt-1.5 md:mt-3.5 px-4 md:px-6 py-4 bg-card-base border-t border-border",
+							? "-mx-4 -mb-4 mt-1.5 md:mt-3.5 px-4 py-4 bg-card border-t border-border"
+							: "-mx-4 md:-mx-6 -mb-4 md:-mb-6 mt-1.5 md:mt-3.5 px-4 md:px-6 py-4 bg-card border-t border-border",
 					props.class,
 				)}
 			>
@@ -848,7 +848,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 											aria-pressed={active()}
 											class={
 												active()
-													? "gap-1.5 border-secondary-base! bg-secondary-base! text-secondary-contrast! fill-secondary-contrast! opacity-100! cursor-default!"
+													? "gap-1.5 border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground! opacity-100! cursor-default!"
 													: "gap-1.5"
 											}
 											onClick={() => applyPreset(preset)}
@@ -879,7 +879,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 						{(row, index) => (
 							<>
 								<Show when={index > 0}>
-									<span class="text-xs font-medium text-icon-faded">
+									<span class="text-xs font-medium text-muted">
 										{conjunctionLabel(
 											row().groupTag === rows()[index - 1]?.groupTag,
 										)}

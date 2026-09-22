@@ -34,7 +34,7 @@ const BrickPreview: Component<BrickPreviewProps> = (props) => {
 					class="w-full h-full object-cover"
 				/>
 				<Image.Fallback class="w-full h-full">
-					<div class="w-full h-full flex items-center justify-center text-icon-faded">
+					<div class="w-full h-full flex items-center justify-center text-muted">
 						<FaSolidImage size={22} />
 					</div>
 				</Image.Fallback>

@@ -518,7 +518,7 @@ const Toolbar: Component<{
 						data-kb-top-layer
 						ref={pillRef}
 						class={classNames(
-							"fixed z-60 flex items-center gap-1 rounded-xl border border-border bg-card-base px-1.5 py-1 shadow-md backdrop-blur-sm transition-opacity duration-150",
+							"fixed z-60 flex items-center gap-1 rounded-xl border border-border bg-card px-1.5 py-1 shadow-md backdrop-blur-sm transition-opacity duration-150",
 							{
 								"opacity-100 pointer-events-auto": pillVisible(),
 								"opacity-0 pointer-events-none": !pillVisible(),

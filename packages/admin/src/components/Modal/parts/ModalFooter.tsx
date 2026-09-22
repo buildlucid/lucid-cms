@@ -14,7 +14,7 @@ export const ModalFooter: Component<ModalFooterProps> = (props) => {
 		<div
 			data-modal-footer
 			class={classNames(
-				"flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card-base px-4 md:px-6 py-4 md:py-6",
+				"flex flex-wrap items-center justify-between gap-2 border-t border-border bg-card px-4 md:px-6 py-4 md:py-6",
 				props.class,
 			)}
 		>

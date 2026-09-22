@@ -302,14 +302,14 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 							/>
 							<For each={availableScopes.data?.data}>
 								{(group) => (
-									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card-base">
+									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card">
 										<div class="flex justify-between items-start gap-3">
 											<h4 class="text-sm font-medium text-body">
 												{helpers.getLocaleValue({ value: group.details.name })}
 											</h4>
 											<button
 												type="button"
-												class="text-xs text-unfocused hover:text-body transition-colors"
+												class="text-xs text-muted hover:text-body transition-colors"
 												onClick={() => toggleGroup(group)}
 											>
 												{groupIsSelected(group)
@@ -318,7 +318,7 @@ const UpsertIntegrationDrawer: Component<UpsertIntegrationPanelProps> = (
 											</button>
 										</div>
 										<Show when={group.details.description}>
-											<p class="text-xs text-unfocused mt-1">
+											<p class="text-xs text-muted mt-1">
 												{helpers.getLocaleValue({
 													value: group.details.description,
 												})}

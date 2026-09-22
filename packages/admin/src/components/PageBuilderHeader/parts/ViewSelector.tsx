@@ -1,8 +1,10 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import classNames from "classnames";
 import { FaSolidClockRotateLeft, FaSolidLink } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import Menu from "@/components/Menu/Menu";
+import StatusIndicator, {
+	type StatusIndicatorVariant,
+} from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
 
 export interface ViewSelectorOption {
@@ -90,6 +92,29 @@ export const ViewSelector: Component<{
 		return `${action} ${optionLabel(option)}`;
 	});
 
+	const optionStatusVariant = (
+		option: ViewSelectorOption,
+	): StatusIndicatorVariant => {
+		if (option.type === "latest") {
+			return props.isDocumentMutated?.() ? "warning-subtle" : "success-subtle";
+		}
+		if (option.type === "environment") {
+			if (option.status?.isPublished === false) return "danger-subtle";
+			if (option.status?.upToDate === true) return "success-subtle";
+			if (option.status?.upToDate === false) return "warning-subtle";
+		}
+		return "neutral-subtle";
+	};
+	const currentStatusVariant = createMemo((): StatusIndicatorVariant => {
+		const option = currentOption();
+		if (option?.type === "link") return "info-subtle";
+		if (option === undefined) {
+			return props.currentViewLabel?.() !== undefined
+				? "info-subtle"
+				: "neutral-subtle";
+		}
+		return optionStatusVariant(option);
+	});
 	const optionIcon = (option: ViewSelectorOption) => {
 		if (option.icon === "history") return <FaSolidClockRotateLeft size={14} />;
 
@@ -101,24 +126,7 @@ export const ViewSelector: Component<{
 	return (
 		<Menu.Root>
 			<Menu.Trigger class="group flex items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
-				<span
-					class={classNames("size-3 rounded-full border block", {
-						"bg-primary-muted-bg border-primary-muted-border":
-							(currentOption()?.type === "latest" &&
-								!props.isDocumentMutated?.()) ||
-							(currentOption()?.type === "environment" &&
-								currentOption()?.status?.upToDate === true),
-						"bg-warning-base/40 border-warning-base/60":
-							(currentOption()?.type === "latest" &&
-								props.isDocumentMutated?.()) ||
-							(currentOption()?.type === "environment" &&
-								currentOption()?.status?.upToDate === false),
-						"bg-info-base/40 border-info-base/60":
-							currentOption()?.type === "link" ||
-							(currentOption() === undefined &&
-								props.currentViewLabel?.() !== undefined),
-					})}
-				/>
+				<StatusIndicator variant={currentStatusVariant()} size="md" />
 				<span class="group-hover:text-body transition-colors duration-200 inline-block capitalize">
 					{currentOptionLabel()}
 				</span>
@@ -138,24 +146,9 @@ export const ViewSelector: Component<{
 								}
 							}}
 							end={
-								<span
-									class={classNames("w-2.5 h-2.5 rounded-full border", {
-										"bg-primary-muted-bg border-primary-muted-border":
-											(item.type === "latest" &&
-												!props.isDocumentMutated?.()) ||
-											(item.type === "environment" &&
-												item.status?.isPublished === true &&
-												item.status?.upToDate === true),
-										"bg-warning-base/40 border-warning-base/60":
-											(item.type === "latest" && props.isDocumentMutated?.()) ||
-											(item.type === "environment" &&
-												item.status?.isPublished === true &&
-												item.status?.upToDate === false),
-										"bg-error-base/40 border-error-base/60":
-											item.type === "environment" &&
-											item.status?.isPublished === false,
-									})}
-									title={
+								<StatusIndicator
+									variant={optionStatusVariant(item)}
+									label={
 										item.type === "latest"
 											? props.isDocumentMutated?.()
 												? T()("common.unsaved")

@@ -168,7 +168,7 @@ export const CodeField: Component<CodeFieldProps> = (props) => {
 		<Suspense
 			fallback={
 				<div class="w-full">
-					<div class="h-36 bg-input-base border border-border rounded-md animate-pulse" />
+					<div class="h-36 bg-input border border-border rounded-md animate-pulse" />
 				</div>
 			}
 		>

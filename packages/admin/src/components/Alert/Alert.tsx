@@ -7,7 +7,7 @@ import {
 } from "solid-icons/fa";
 import { type Component, type JSXElement, Match, Switch } from "solid-js";
 
-export type AlertVariant = "info" | "success" | "warning" | "error";
+export type AlertVariant = "info" | "success" | "warning" | "danger";
 
 /**
  * `block` is a card, `bar` spans the full width, and `pill` is a compact
@@ -52,17 +52,17 @@ const Alert: Component<AlertProps> = (props) => {
 			class={classnames(
 				"flex items-center border-border",
 				{
-					"w-full bg-background-base border rounded-md p-4":
+					"w-full bg-background border rounded-md p-4":
 						appearance() === "block",
 					"w-full border-b px-4 py-4 md:px-6": appearance() === "bar",
 					"rounded-full px-4 py-2 shadow-lg": appearance() === "pill",
-					"bg-info-base text-info-contrast": filled() && variant() === "info",
-					"bg-primary-base text-primary-contrast":
+					"bg-info text-info-foreground": filled() && variant() === "info",
+					"bg-success text-success-foreground":
 						filled() && variant() === "success",
-					"bg-warning-base text-warning-contrast":
+					"bg-warning text-warning-foreground":
 						filled() && variant() === "warning",
-					"bg-error-base text-error-contrast":
-						filled() && variant() === "error",
+					"bg-danger text-danger-foreground":
+						filled() && variant() === "danger",
 				},
 				props.class,
 			)}
@@ -71,21 +71,20 @@ const Alert: Component<AlertProps> = (props) => {
 				class={classnames(
 					"size-5 flex items-center justify-center rounded-full min-w-5 mr-2",
 					{
-						"bg-info-base text-info-contrast":
-							!filled() && variant() === "info",
-						"bg-primary-base text-primary-contrast":
+						"bg-info text-info-foreground": !filled() && variant() === "info",
+						"bg-success text-success-foreground":
 							!filled() && variant() === "success",
-						"bg-warning-base text-warning-contrast":
+						"bg-warning text-warning-foreground":
 							!filled() && variant() === "warning",
-						"bg-error-base text-error-contrast":
-							!filled() && variant() === "error",
-						"bg-info-contrast text-info-base": filled() && variant() === "info",
-						"bg-primary-contrast text-primary-base":
+						"bg-danger text-danger-foreground":
+							!filled() && variant() === "danger",
+						"bg-info-foreground text-info": filled() && variant() === "info",
+						"bg-success-foreground text-success":
 							filled() && variant() === "success",
-						"bg-warning-contrast text-warning-base":
+						"bg-warning-foreground text-warning":
 							filled() && variant() === "warning",
-						"bg-error-contrast text-error-base":
-							filled() && variant() === "error",
+						"bg-danger-foreground text-danger":
+							filled() && variant() === "danger",
 					},
 				)}
 			>
@@ -93,7 +92,7 @@ const Alert: Component<AlertProps> = (props) => {
 					<Match when={variant() === "success"}>
 						<FaSolidCheck size={8} />
 					</Match>
-					<Match when={variant() === "error"}>
+					<Match when={variant() === "danger"}>
 						<FaSolidExclamation size={8} />
 					</Match>
 					<Match when={variant() === "warning"}>

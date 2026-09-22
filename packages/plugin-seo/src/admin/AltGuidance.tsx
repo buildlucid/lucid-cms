@@ -50,7 +50,7 @@ const AltGuidance: FieldSlotComponent = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<p class="text-sm text-unfocused" data-testid="seo-alt-guidance">
+		<p class="text-sm text-muted" data-testid="seo-alt-guidance">
 			{t(message())}
 		</p>
 	);

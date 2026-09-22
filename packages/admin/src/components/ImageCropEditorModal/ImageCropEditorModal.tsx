@@ -544,18 +544,18 @@ const ImageCropEditorModal: Component<{
 			onOpenChange={props.state.setOpen}
 			size="lg"
 		>
-			<div class="relative overflow-hidden bg-input-base rectangle-background">
+			<div class="relative overflow-hidden bg-input rectangle-background">
 				<div class="relative z-10">
 					<div ref={stageRef} class="image-cropper-stage" />
 					<Show when={isPreparing()}>
-						<div class="absolute inset-0 z-30 flex items-center justify-center bg-background-base/70">
+						<div class="absolute inset-0 z-30 flex items-center justify-center bg-background/70">
 							<Spinner size="md" />
 						</div>
 					</Show>
 				</div>
 				<div
 					ref={controlsRef}
-					class="image-cropper-controls z-40 overflow-y-auto bg-background-base p-4"
+					class="image-cropper-controls z-40 overflow-y-auto bg-background p-4"
 				>
 					<div class="mb-4">
 						<Modal.Title>
@@ -637,7 +637,7 @@ const ImageCropEditorModal: Component<{
 							{(error) => (
 								<p
 									class={classNames(
-										"rounded-md border border-error-base/30 bg-error-base/10 p-3 text-sm text-error-base",
+										"rounded-md border border-danger-low-border bg-danger-low p-3 text-sm text-danger-low-foreground",
 									)}
 								>
 									{error()}

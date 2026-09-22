@@ -575,9 +575,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									)}
 								/>
 							}
-							class={
-								"flex-1 h-full bg-card-base border border-border rounded-md"
-							}
+							class={"flex-1 h-full bg-card border border-border rounded-md"}
 						>
 							<Table.Root
 								id={`documents.list.${activeCollection()?.key ?? ""}`}

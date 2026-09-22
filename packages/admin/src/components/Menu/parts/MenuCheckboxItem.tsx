@@ -31,7 +31,7 @@ const MenuCheckboxItem: Component<MenuCheckboxItemProps> = (props) => {
 			onClick={(event) => event.stopPropagation()}
 			class={menuItemClasses(props)}
 		>
-			<span class="flex size-4 shrink-0 items-center justify-center rounded border border-border bg-input-base">
+			<span class="flex size-4 shrink-0 items-center justify-center rounded border border-border bg-input">
 				<KobalteMenu.ItemIndicator>
 					<FaSolidCheck size={9} class="text-title" />
 				</KobalteMenu.ItemIndicator>

@@ -67,7 +67,7 @@ const NavigationAccountMenu: Component<{
 			onOpenChange={setIsOpen}
 		>
 			<Menu.Trigger
-				class="group flex w-full items-center gap-2.5 rounded-xl border border-border bg-input-base px-3 py-2 text-left outline-none transition-[background-color,border-color] duration-150 hover:bg-secondary-hover focus-visible:border-primary-base focus-visible:ring-2 focus-visible:ring-primary-muted-border data-expanded:bg-secondary-hover dark:hover:bg-card-base dark:data-expanded:bg-card-base"
+				class="group flex w-full items-center gap-2.5 rounded-xl border border-border bg-input px-3 py-2 text-left outline-none transition-[background-color,border-color] duration-150 hover:bg-secondary-hover focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-low-border data-expanded:bg-secondary-hover dark:hover:bg-card dark:data-expanded:bg-card"
 				aria-label={T()("routes.account.title")}
 			>
 				<div class="min-w-0 flex-1 overflow-hidden">
@@ -75,7 +75,7 @@ const NavigationAccountMenu: Component<{
 				</div>
 				<FaSolidChevronDown
 					class={classNames(
-						"mr-1 size-3 shrink-0 text-icon-faded transition-transform duration-200 group-hover:text-icon-base",
+						"mr-1 size-3 shrink-0 text-muted transition-transform duration-200 group-hover:text-icon",
 						{
 							"rotate-180": isOpen(),
 						},
@@ -104,7 +104,7 @@ const NavigationAccountMenu: Component<{
 					label={T()("settings.interface.cms.appearance.title")}
 					icon={<FaSolidCircleHalfStroke class="size-3.5 shrink-0" />}
 					end={
-						<span class="max-w-16 truncate text-xs text-unfocused">
+						<span class="max-w-16 truncate text-xs text-muted">
 							{selectedThemeLabel()}
 						</span>
 					}
@@ -128,7 +128,7 @@ const NavigationAccountMenu: Component<{
 					label={T()("settings.interface.cms.locale.title")}
 					icon={<FaSolidLanguage class="size-3.5 shrink-0" />}
 					end={
-						<span class="max-w-16 truncate text-xs text-unfocused">
+						<span class="max-w-16 truncate text-xs text-muted">
 							{selectedLocaleLabel()}
 						</span>
 					}

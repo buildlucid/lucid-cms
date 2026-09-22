@@ -183,7 +183,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 									{T()("users.select.action")}
 								</Button>
 								<Show when={selectedUsers().length > 0}>
-									<p class="text-sm text-unfocused">
+									<p class="text-sm text-muted">
 										<RelationCount
 											count={selectedUserIds().length}
 											min={props.minItems}
@@ -199,7 +199,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 						</div>
 					</Match>
 					<Match when={!isMultiple() && selectedUser()}>
-						<div class="group w-full border border-border rounded-md bg-input-base px-3 py-2">
+						<div class="group w-full border border-border rounded-md bg-input px-3 py-2">
 							<div class="flex items-center justify-between gap-3">
 								<div class="flex min-w-0 flex-1 items-center gap-2.5">
 									<Show when={selectedUser()}>
@@ -211,7 +211,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										<span class="text-sm font-medium text-subtitle truncate block">
 											{userName() || "-"}
 										</span>
-										<p class="text-xs text-unfocused truncate">
+										<p class="text-xs text-muted truncate">
 											{selectedUser()?.email || "-"}
 										</p>
 									</div>
@@ -219,7 +219,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 								<div class="flex shrink-0 items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<Button
 										type="button"
-										variant="background-subtle"
+										variant="ghost"
 										size="xs"
 										shape="square"
 										onClick={openUserSelectModal}
@@ -230,7 +230,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 									</Button>
 									<Button
 										type="button"
-										variant="danger-subtle"
+										variant="danger-ghost"
 										size="xs"
 										shape="square"
 										onClick={clearSelection}
@@ -282,13 +282,13 @@ const UserSortableItem: Component<{
 				"view-transition-name": `user-select-item-${props.user.id}`,
 			}}
 			class={classNames(
-				"group flex items-center justify-between gap-3 rounded-md border bg-input-base px-3 py-2 ring-inset ring-primary-base transition-colors duration-200 transform-gpu",
+				"group flex items-center justify-between gap-3 rounded-md border bg-input px-3 py-2 ring-inset ring-primary transition-colors duration-200 transform-gpu",
 				{
 					"border-border": !props.hasError,
-					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
+					"border-danger ring-1 ring-inset ring-danger": props.hasError,
 					"opacity-60":
 						props.dragDrop.getDragging()?.ref === `${props.user.id}`,
-					"ring-1 ring-primary-base":
+					"ring-1 ring-primary":
 						props.dragDrop.getDraggingTarget()?.ref === `${props.user.id}` &&
 						props.dragDrop.getDragging()?.ref !== `${props.user.id}` &&
 						!props.hasError,
@@ -321,15 +321,13 @@ const UserSortableItem: Component<{
 					<p class="truncate text-sm font-medium text-subtitle">
 						{helpers.formatUserName(props.user, "username-and-name") || "-"}
 					</p>
-					<p class="truncate text-xs text-unfocused">
-						{props.user.email || "-"}
-					</p>
+					<p class="truncate text-xs text-muted">{props.user.email || "-"}</p>
 				</div>
 			</div>
 			<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 				<Button
 					type="button"
-					variant="danger-subtle"
+					variant="danger-ghost"
 					size="xs"
 					shape="square"
 					onClick={() => props.removeSelectedUser(props.user.id)}

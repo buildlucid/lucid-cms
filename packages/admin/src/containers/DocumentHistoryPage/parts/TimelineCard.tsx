@@ -115,7 +115,7 @@ const TimelineCard: Component<{
 			<Show when={props.item.type === "environment"}>
 				<span
 					class={classNames(
-						"absolute -left-4 -top-2.5 border-l border-dashed border-secondary-base/40",
+						"absolute -left-4 -top-2.5 border-l border-dashed border-secondary/40",
 						{
 							"bottom-0": !props.isLastSibling,
 							"bottom-1/2": props.isLastSibling,
@@ -128,9 +128,8 @@ const TimelineCard: Component<{
 					class={classNames(
 						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors duration-200",
 						{
-							"border-primary-muted-border bg-primary-muted-bg":
-								props.isSelected,
-							"border-secondary-base/60 bg-background-base": !props.isSelected,
+							"border-primary-low-border bg-primary-low": props.isSelected,
+							"border-secondary/60 bg-background": !props.isSelected,
 						},
 					)}
 				/>
@@ -138,8 +137,8 @@ const TimelineCard: Component<{
 					class={classNames(
 						"absolute -left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full transition-colors duration-200",
 						{
-							"bg-primary-base": props.isSelected,
-							"bg-secondary-base": !props.isSelected,
+							"bg-primary": props.isSelected,
+							"bg-secondary": !props.isSelected,
 						},
 					)}
 				/>
@@ -147,7 +146,7 @@ const TimelineCard: Component<{
 					type="button"
 					max-w-72
 					class={classNames(
-						"group relative flex w-full text-left overflow-hidden rounded-md border border-border p-3 md:p-4 transition-colors duration-200 outline-none bg-card-base focus-visible:ring-1 focus-visible:ring-primary-base",
+						"group relative flex w-full text-left overflow-hidden rounded-md border border-border p-3 md:p-4 transition-colors duration-200 outline-none bg-card focus-visible:ring-1 focus-visible:ring-primary",
 						{
 							"hover:bg-card-hover": !isUnreleasedEnvironment(),
 							"opacity-70 cursor-not-allowed": isUnreleasedEnvironment(),
@@ -162,14 +161,14 @@ const TimelineCard: Component<{
 						class={classNames(
 							"absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r",
 							{
-								"from-primary-muted-bg to-primary-muted-bg":
+								"from-success-low-border to-success-low":
 									props.item.type === "latest" ||
 									isEnvironmentInSyncWithPromoted(),
-								"from-warning-base/60 to-warning-base/20":
+								"from-warning-low-border to-warning-low":
 									props.item.type === "environment" &&
 									!isUnreleasedEnvironment() &&
 									!isEnvironmentInSyncWithPromoted(),
-								"from-error-base/60 to-error-base/20":
+								"from-danger-low-border to-danger-low":
 									isUnreleasedEnvironment(),
 							},
 						)}

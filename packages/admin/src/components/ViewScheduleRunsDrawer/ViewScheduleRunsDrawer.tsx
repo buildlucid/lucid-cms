@@ -173,7 +173,7 @@ const ViewScheduleRunsPanelContent: Component<ViewScheduleRunsPanelProps> = (
 					}
 					class={classnames(
 						"flex-1 h-full",
-						"rounded-md border border-border bg-card-base",
+						"rounded-md border border-border bg-card",
 					)}
 				>
 					<Table.Root

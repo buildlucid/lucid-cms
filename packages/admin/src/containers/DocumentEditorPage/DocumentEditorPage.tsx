@@ -323,10 +323,10 @@ const DocumentEditorPage: Component<{
 					docState.collectionsQuery.isLoading
 				}
 			>
-				<div class="-mt-4 relative bg-background-base rounded-b-xl border border-border h-36">
+				<div class="-mt-4 relative bg-background rounded-b-xl border border-border h-36">
 					<span class="absolute inset-4 bg-background-hover z-5 skeleton" />
 				</div>
-				<div class="mt-2 bg-background-base rounded-t-xl border border-border grow overflow-hidden relative">
+				<div class="mt-2 bg-background rounded-t-xl border border-border grow overflow-hidden relative">
 					<div class="absolute top-4 left-4 bottom-4 right-4 flex flex-col z-10">
 						<span class="h-62 w-full skeleton block mb-4" />
 						<span class="h-full w-full skeleton block" />
@@ -408,7 +408,7 @@ const DocumentEditorPage: Component<{
 						</Show>
 					</div>
 					<div class="mt-2 flex min-h-0 grow flex-col overflow-visible">
-						<div class="w-full min-h-0 flex flex-col xl:flex-row grow items-stretch xl:items-start bg-background-base rounded-t-xl border border-border">
+						<div class="w-full min-h-0 flex flex-col xl:flex-row grow items-stretch xl:items-start bg-background rounded-t-xl border border-border">
 							<div class="w-full min-w-0 grow flex flex-col">
 								<CollectionPseudoBrick
 									fields={collectionFields()}

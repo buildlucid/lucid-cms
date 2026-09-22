@@ -115,7 +115,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 		<li
 			class={classNames("w-full", {
 				"border-b border-border": props.hasDivider || !brickOpen(),
-				"bg-linear-to-b from-error-base/10 to-transparent to-30%":
+				"bg-linear-to-b from-danger-low to-transparent to-30%":
 					errorCount() > 0,
 			})}
 			aria-invalid={errorCount() > 0}
@@ -127,7 +127,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				tabIndex={0}
 				id={previewTriggerId()}
 				data-preview-focus-open={brickOpen()}
-				class="flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base md:px-6 md:py-5"
+				class="flex cursor-pointer items-center gap-3 px-4 py-4 transition-colors hover:bg-card-hover/60 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary md:px-6 md:py-5"
 				onClick={toggleDropdown}
 				onKeyDown={(e) => {
 					if (e.target !== e.currentTarget) return;
@@ -144,7 +144,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				})}
 			>
 				<div class="flex min-h-8 min-w-0 flex-1 items-center gap-2.5 text-left">
-					<FaSolidShield class="text-icon-base text-lg" />
+					<FaSolidShield class="text-icon text-lg" />
 					<span class="text-base font-medium text-title">
 						{helpers.getLocaleValue({
 							value: config()?.details.label,
@@ -164,7 +164,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				/>
 				<FieldErrorBadge count={errorCount()} />
 				<span
-					class="flex size-8 shrink-0 items-center justify-center text-icon-faded"
+					class="flex size-8 shrink-0 items-center justify-center text-muted"
 					aria-hidden="true"
 				>
 					<FaSolidChevronUp

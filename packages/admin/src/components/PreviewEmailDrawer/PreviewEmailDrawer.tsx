@@ -152,8 +152,8 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 					<div class="grid grid-cols-1 gap-2 mb-4">
 						<For each={attachments()}>
 							{(attachment) => (
-								<div class="min-w-0 bg-card-base border border-border rounded-md p-3 flex gap-3">
-									<div class="size-9 min-w-9 rounded-md bg-input-base flex items-center justify-center text-icon-base">
+								<div class="min-w-0 bg-card border border-border rounded-md p-3 flex gap-3">
+									<div class="size-9 min-w-9 rounded-md bg-input flex items-center justify-center text-icon">
 										<Show
 											when={attachment.disposition === "inline"}
 											fallback={<FaSolidFile size={14} />}
@@ -164,14 +164,14 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 									<div class="min-w-0 flex-1">
 										<p class="text-sm font-medium text-title truncate">
 											{attachment.filename}
-											<span class="text-unfocused font-normal">
+											<span class="text-muted font-normal">
 												{" "}
 												· {attachment.disposition}
 											</span>
 										</p>
 										<div class="mt-1 flex items-center gap-2 min-w-0">
 											<a
-												class="min-w-0 text-xs text-unfocused hover:text-primary-base hover:underline inline-flex items-center gap-1"
+												class="min-w-0 text-xs text-muted hover:text-primary hover:underline inline-flex items-center gap-1"
 												href={attachment.url}
 												target="_blank"
 												rel="noreferrer noopener"
@@ -185,7 +185,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 													attachment.contentId
 												}
 											>
-												<span class="shrink-0 text-xs text-unfocused">
+												<span class="shrink-0 text-xs text-muted">
 													CID: {attachment.contentId}
 												</span>
 											</Show>
@@ -251,7 +251,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 					<div>
 						<Suspense
 							fallback={
-								<div class="h-40 bg-card-base border border-border rounded-md animate-pulse" />
+								<div class="h-40 bg-card border border-border rounded-md animate-pulse" />
 							}
 						>
 							<JSONPreview json={email.data?.data.data || {}} />

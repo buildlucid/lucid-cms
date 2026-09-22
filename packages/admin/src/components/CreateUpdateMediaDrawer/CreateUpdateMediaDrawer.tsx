@@ -1390,14 +1390,12 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 										}
 									}}
 								/>
-								<div class="w-full rounded-md border border-border bg-input-base mb-3 overflow-hidden relative">
+								<div class="w-full rounded-md border border-border bg-input mb-3 overflow-hidden relative">
 									<div class="grid grid-cols-[112px_1fr_auto] items-center gap-3 p-3">
-										<div class="h-20 rounded-sm border border-border rectangle-background overflow-hidden flex items-center justify-center bg-background-base">
+										<div class="h-20 rounded-sm border border-border rectangle-background overflow-hidden flex items-center justify-center bg-background">
 											<Show
 												when={posterPreview()}
-												fallback={
-													<FaSolidImage class="w-6 h-6 text-icon-faded" />
-												}
+												fallback={<FaSolidImage class="w-6 h-6 text-muted" />}
 											>
 												{(preview) => (
 													<img
@@ -1416,7 +1414,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show
 												when={posterMetaPills().length > 0}
 												fallback={
-													<p class="text-xs text-unfocused mt-1">
+													<p class="text-xs text-muted mt-1">
 														{posterEmptyDescription()}
 													</p>
 												}
@@ -1446,7 +1444,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show when={posterPreview()}>
 												<Button
 													type="button"
-													variant="background-subtle"
+													variant="ghost"
 													size="xs"
 													shape="square"
 													onClick={previewPosterFile}
@@ -1457,7 +1455,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												</Button>
 												<Button
 													type="button"
-													variant="background-subtle"
+													variant="ghost"
 													size="xs"
 													shape="square"
 													onClick={() => setPosterFocalEditorOpen(true)}
@@ -1469,7 +1467,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												<Show when={posterCropSource()}>
 													<Button
 														type="button"
-														variant="background-subtle"
+														variant="ghost"
 														size="xs"
 														shape="square"
 														onClick={openPosterCropEditor}
@@ -1482,7 +1480,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												<Show when={posterHasCrop()}>
 													<Button
 														type="button"
-														variant="danger-subtle"
+														variant="danger-ghost"
 														size="xs"
 														shape="square"
 														onClick={PosterFile.removeCrop}
@@ -1496,7 +1494,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show when={posterSnapshotSource()}>
 												<Button
 													type="button"
-													variant="background-subtle"
+													variant="ghost"
 													size="xs"
 													shape="square"
 													onClick={(event) => {
@@ -1517,7 +1515,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show when={mediaImageGeneration.isFeatureEnabled()}>
 												<Button
 													type="button"
-													variant="background-subtle"
+													variant="ghost"
 													size="xs"
 													shape="square"
 													onClick={(event) => {
@@ -1565,7 +1563,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											</Show>
 											<Button
 												type="button"
-												variant="background-subtle"
+												variant="ghost"
 												size="xs"
 												shape="square"
 												onClick={openPosterFileBrowser}
@@ -1577,7 +1575,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											<Show when={posterPreview()}>
 												<Button
 													type="button"
-													variant="danger-subtle"
+													variant="danger-ghost"
 													size="xs"
 													shape="square"
 													onClick={clearPosterFile}
@@ -1594,7 +1592,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											>
 												<Button
 													type="button"
-													variant="background-subtle"
+													variant="ghost"
 													size="xs"
 													shape="square"
 													onClick={undoPosterFile}

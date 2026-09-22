@@ -1,6 +1,6 @@
 import type { PublishOperation } from "@types";
-import classNames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
 import {
@@ -30,14 +30,11 @@ const ReleaseRequestTitleCell: Component<{
 		<Table.Cell column={props.column}>
 			<div class="min-w-0">
 				<div class="flex min-w-0 items-center gap-2">
-					<span
-						class={classNames("size-2.5 shrink-0 rounded-full border", {
-							"border-primary-muted-border bg-primary-muted-bg":
-								!releaseContextChanged(),
-							"border-warning-base/60 bg-warning-base/40":
-								releaseContextChanged(),
-						})}
-						title={
+					<StatusIndicator
+						variant={
+							releaseContextChanged() ? "warning-subtle" : "success-subtle"
+						}
+						label={
 							releaseContextChanged()
 								? releaseContextTooltip()
 								: T()("common.status.in.sync")

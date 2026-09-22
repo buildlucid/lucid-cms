@@ -70,7 +70,7 @@ const InfoRowContent: Component<InfoRowContentProps> = (props) => {
 		<div
 			data-info-row-content
 			class={classnames(
-				"rounded-md border border-border bg-card-base p-4",
+				"rounded-md border border-border bg-card p-4",
 				props.class,
 			)}
 		>

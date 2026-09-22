@@ -38,8 +38,8 @@ const DashboardAttention: Component<{
 			<Show
 				when={props.items.length > 0}
 				fallback={
-					<div class="flex items-start gap-3 rounded-md border border-workflow-green-border bg-workflow-green-bg px-3 py-3">
-						<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-workflow-green-border text-workflow-green-text">
+					<div class="flex items-start gap-3 rounded-md border border-success-low-border bg-success-low px-3 py-3">
+						<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-success-low-border text-success-low-foreground">
 							<FaSolidCircleCheck size={14} />
 						</span>
 						<div>
@@ -53,25 +53,25 @@ const DashboardAttention: Component<{
 					</div>
 				}
 			>
-				<div class="overflow-hidden rounded-md border border-border bg-card-base">
+				<div class="overflow-hidden rounded-md border border-border bg-card">
 					<For each={props.items}>
 						{(item) => (
 							<article
 								class={
-									"flex min-w-0 items-start gap-3 border-b border-border bg-card-base px-3 py-3 last:border-b-0"
+									"flex min-w-0 items-start gap-3 border-b border-border bg-card px-3 py-3 last:border-b-0"
 								}
 							>
 								<span
 									class={classNames(
 										"flex h-8 w-8 shrink-0 items-center justify-center rounded-md border",
 										{
-											"border-info-base/20 bg-info-base/10 text-info-base":
+											"border-info-low-border bg-info-low text-info-low-foreground":
 												item.tone === "info",
-											"border-workflow-green-border bg-workflow-green-bg text-workflow-green-text":
+											"border-success-low-border bg-success-low text-success-low-foreground":
 												item.tone === "success",
-											"border-warning-base/20 bg-warning-base/10 text-warning-base":
+											"border-warning-low-border bg-warning-low text-warning-low-foreground":
 												item.tone === "warning",
-											"border-error-base/20 bg-error-base/10 text-error-base":
+											"border-danger-low-border bg-danger-low text-danger-low-foreground":
 												item.tone === "danger",
 										},
 									)}
@@ -106,7 +106,7 @@ const DashboardAttention: Component<{
 													{(href) => (
 														<A
 															href={href()}
-															class="flex h-8 items-center justify-center rounded-md border border-border bg-input-base px-2 text-center text-sm text-subtitle transition-colors duration-200 hover:border-transparent hover:bg-secondary-hover hover:text-secondary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
+															class="flex h-8 items-center justify-center rounded-md border border-border bg-input px-2 text-center text-sm text-subtitle transition-colors duration-200 hover:border-transparent hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 														>
 															{action().label}
 														</A>

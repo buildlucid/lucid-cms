@@ -56,7 +56,7 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 				<Show
 					when={!props.isError && props.document && !props.isExcluded}
 					fallback={
-						<div class="flex min-h-36 items-center justify-center rounded-lg border border-border bg-input-base p-6 text-center">
+						<div class="flex min-h-36 items-center justify-center rounded-lg border border-border bg-input p-6 text-center">
 							<p class="max-w-lg text-sm text-subtitle">
 								{props.isError
 									? T()("errors.generic.message")
@@ -67,7 +67,7 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 						</div>
 					}
 				>
-					<label class="relative block cursor-pointer overflow-hidden rounded-lg border border-border bg-input-base transition-colors hover:border-primary-muted-border hover:bg-row-hover">
+					<label class="relative block cursor-pointer overflow-hidden rounded-lg border border-border bg-input transition-colors hover:border-primary-low-border hover:bg-background-hover">
 						<input
 							type="checkbox"
 							checked={props.selected}
@@ -75,12 +75,12 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 							class="peer sr-only"
 							aria-label={documentTitle()}
 						/>
-						<span class="pointer-events-none absolute inset-0 rounded-lg peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-2 peer-focus-visible:outline-primary-base/30" />
+						<span class="pointer-events-none absolute inset-0 rounded-lg peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-2 peer-focus-visible:outline-primary-low-border" />
 						<div class="flex items-start gap-3 px-3 py-2.5">
 							<span
-								class="flex h-5 w-5 min-w-5 items-center justify-center rounded-md border border-border bg-input-base text-secondary-contrast transition-colors duration-200"
+								class="flex h-5 w-5 min-w-5 items-center justify-center rounded-md border border-border bg-input text-secondary-foreground transition-colors duration-200"
 								classList={{
-									"border-secondary-hover bg-secondary-base": props.selected,
+									"border-secondary-hover bg-secondary": props.selected,
 								}}
 								aria-hidden="true"
 							>
@@ -110,7 +110,7 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 											}}
 											title={`${field.label}: ${field.value}`}
 										>
-											<p class="truncate text-[11px] font-medium text-unfocused mb-0!">
+											<p class="truncate text-[11px] font-medium text-muted mb-0!">
 												{field.label}
 											</p>
 											<p class="mt-0.5 truncate text-xs text-subtitle mb-0!">

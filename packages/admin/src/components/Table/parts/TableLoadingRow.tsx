@@ -19,9 +19,9 @@ const TableLoadingRow: Component<TableLoadingRowProps> = (props) => {
 	return (
 		<tr
 			class={classNames({
-				"bg-background-base":
+				"bg-background":
 					table.variant() === "primary" || table.variant() === undefined,
-				"bg-card-base":
+				"bg-card":
 					table.variant() === "secondary" || table.variant() === "contained",
 			})}
 		>

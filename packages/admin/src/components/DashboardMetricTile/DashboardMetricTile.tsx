@@ -21,17 +21,16 @@ const DashboardMetricTile: Component<{
 				class={classNames(
 					"flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-colors duration-200",
 					{
-						"border-border bg-background-base text-icon-base":
-							props.tone === "grey",
-						"border-workflow-blue-border bg-workflow-blue-bg text-workflow-blue-text":
+						"border-border bg-background text-icon": props.tone === "grey",
+						"border-blue-low-border bg-blue-low text-blue-low-foreground":
 							props.tone === "blue",
-						"border-workflow-green-border bg-workflow-green-bg text-workflow-green-text":
+						"border-green-low-border bg-green-low text-green-low-foreground":
 							props.tone === "green",
-						"border-workflow-purple-border bg-workflow-purple-bg text-workflow-purple-text":
+						"border-purple-low-border bg-purple-low text-purple-low-foreground":
 							props.tone === "purple",
-						"border-error-base/20 bg-error-base/10 text-error-base":
+						"border-danger-low-border bg-danger-low text-danger-low-foreground":
 							props.tone === "red",
-						"border-warning-base/20 bg-warning-base/10 text-warning-base":
+						"border-warning-low-border bg-warning-low text-warning-low-foreground":
 							props.tone === "yellow",
 					},
 				)}
@@ -65,7 +64,7 @@ const DashboardMetricTile: Component<{
 			fallback={
 				<article
 					class={classNames(
-						"group flex h-full items-start gap-3 bg-card-base px-3 py-3 text-left transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base",
+						"group flex h-full items-start gap-3 bg-card px-3 py-3 text-left transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary",
 						{
 							"hover:bg-card-hover": props.href,
 						},
@@ -80,7 +79,7 @@ const DashboardMetricTile: Component<{
 				<A
 					href={href()}
 					class={classNames(
-						"group flex h-full items-start gap-3 bg-card-base px-3 py-3 text-left transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base",
+						"group flex h-full items-start gap-3 bg-card px-3 py-3 text-left transition-colors duration-200 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary",
 						{
 							"hover:bg-card-hover": props.href,
 						},

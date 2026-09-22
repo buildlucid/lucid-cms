@@ -48,7 +48,7 @@ export const MediaCardLoading: Component = () => {
 	// ----------------------------------
 	// Return
 	return (
-		<li class={"bg-background-base border-border border rounded-md"}>
+		<li class={"bg-background border-border border rounded-md"}>
 			<AspectRatio ratio="16:9">
 				<span class="skeleton block w-full h-full rounded-b-none" />
 			</AspectRatio>
@@ -279,7 +279,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			// @ts-expect-error
 			use:draggable
 			class={classNames(
-				"bg-card-base hover:bg-row-hover border rounded-md group overflow-hidden relative transition-colors duration-200",
+				"bg-card hover:bg-background-hover border rounded-md group overflow-hidden relative transition-colors duration-200",
 				mediaStatusBorderClass(props.media.status),
 				{
 					"cursor-pointer": hasUpdatePermission() || props.showingDeleted?.(),

@@ -15,9 +15,9 @@ const PendingEmailChangeNotice: Component<PendingEmailChangeNoticeProps> = (
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="flex flex-col gap-3 rounded-md border border-warning-base/25 bg-warning-base/5 p-3 sm:flex-row sm:items-center sm:justify-between">
+		<div class="flex flex-col gap-3 rounded-md border border-warning-low-border bg-warning-low p-3 sm:flex-row sm:items-center sm:justify-between">
 			<div class="flex min-w-0 items-start gap-2.5">
-				<span class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-warning-base/10 text-warning-base">
+				<span class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-warning-low-border bg-warning-low text-warning-low-foreground">
 					<FaSolidTriangleExclamation size={10} />
 				</span>
 				<div class="min-w-0">

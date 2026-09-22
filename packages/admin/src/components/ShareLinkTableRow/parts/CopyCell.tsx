@@ -30,7 +30,7 @@ const CopyCell: Component<CopyCellProps> = (props) => {
 			<button
 				type="button"
 				onClick={copyToClipboard}
-				class="flex items-center gap-2 ring-offset-4 ring-offset-card-base rounded-sm line-clamp-1"
+				class="flex items-center gap-2 ring-offset-4 ring-offset-card rounded-sm line-clamp-1"
 			>
 				<FaSolidCopy />
 				<span class="text-sm">{props.text || "-"}</span>

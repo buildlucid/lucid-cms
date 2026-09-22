@@ -84,22 +84,22 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 						"relative min-h-9 max-w-full cursor-pointer rounded-md border px-3 py-1.5 text-sm transition-colors duration-200":
 							boxed(),
 						// unticked, or a plain button: the neutral box an input lines up with
-						"bg-input-base text-subtitle": boxed() && !filled(),
+						"bg-input text-subtitle": boxed() && !filled(),
 						"border-border":
 							boxed() && !filled() && !focused() && props.errors === undefined,
-						"border-error-base/50 bg-error-base/5":
+						"border-danger-low-border bg-danger-low":
 							boxed() && !filled() && props.errors !== undefined && !focused(),
-						"border-primary-base": boxed() && focused(),
+						"border-primary": boxed() && focused(),
 						// unticked but coloured, so hovering previews the fill it will take
-						"hover:bg-secondary-hover hover:text-secondary-contrast":
+						"hover:bg-secondary-hover hover:text-secondary-foreground":
 							boxed() && !filled() && coloured(),
 						"hover:border-body/25 hover:bg-card-hover":
 							boxed() && !filled() && !coloured(),
-						"border-primary-base bg-primary-base text-primary-contrast hover:bg-primary-hover":
+						"border-primary bg-primary text-primary-foreground hover:bg-primary-hover":
 							filled() && props.variant === "button-primary",
-						"border-secondary-base bg-secondary-base text-secondary-contrast hover:bg-secondary-hover":
+						"border-secondary bg-secondary text-secondary-foreground hover:bg-secondary-hover":
 							filled() && props.variant === "button-secondary",
-						"border-error-base bg-error-base text-error-contrast hover:bg-error-hover":
+						"border-danger bg-danger text-danger-foreground hover:bg-danger-hover":
 							filled() && props.variant === "button-danger",
 						"cursor-not-allowed opacity-60": props.disabled,
 					})}
@@ -122,11 +122,11 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 							{
 								//* stretches the hit area over the whole box, so any part of it toggles
 								"after:absolute after:inset-0 after:content-['']": boxed(),
-								"cursor-pointer border-border bg-input-base text-secondary-contrast hover:border-secondary-base data-checked:border-secondary-hover data-checked:bg-secondary-base data-checked:fill-secondary-contrast":
+								"cursor-pointer border-border bg-input text-secondary-foreground hover:border-secondary data-checked:border-secondary-hover data-checked:bg-secondary data-checked:fill-secondary-foreground":
 									!filled(),
-								"border-primary-base": !filled() && focused(),
+								"border-primary": !filled() && focused(),
 								// on a filled box the tick has to invert to stay visible
-								"border-card-base bg-card-base text-card-contrast": filled(),
+								"border-card bg-card text-body": filled(),
 							},
 						)}
 					>

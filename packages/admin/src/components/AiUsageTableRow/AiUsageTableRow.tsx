@@ -25,7 +25,7 @@ const AiUsageTableRow: Component<AiUsageRowProps> = (props) => {
 						: T()("common.status.pending")
 				}
 				variant={
-					props.aiUsage.status === "success" ? "primary-subtle" : "outline"
+					props.aiUsage.status === "success" ? "success-subtle" : "outline"
 				}
 			/>
 			<Table.Text

@@ -53,7 +53,7 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 	const hasProfilePicture = createMemo(() => !!props.user.profilePicture?.url);
 	const avatarClasses = createMemo(() =>
 		classNames(
-			"flex items-center justify-center overflow-hidden rounded-full bg-input-base font-bold text-title",
+			"flex items-center justify-center overflow-hidden rounded-full bg-input font-bold text-title",
 			{
 				"border border-border": !hasProfilePicture(),
 				"h-16 w-16 min-w-16 text-sm": variant() === "icon" && size() === "lg",

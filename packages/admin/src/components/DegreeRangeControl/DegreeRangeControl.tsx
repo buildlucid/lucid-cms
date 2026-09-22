@@ -46,7 +46,7 @@ export const DegreeRangeControl: Component<DegreeRangeControlProps> = (
 						props.onChange(Number(event.currentTarget.value));
 					}}
 				/>
-				<div class="flex h-8 w-20 shrink-0 items-center rounded-md border border-border bg-input-base px-2 text-sm text-title">
+				<div class="flex h-8 w-20 shrink-0 items-center rounded-md border border-border bg-input px-2 text-sm text-title">
 					<input
 						type="number"
 						min={props.min}
@@ -60,7 +60,7 @@ export const DegreeRangeControl: Component<DegreeRangeControlProps> = (
 							props.onChange(Number(event.currentTarget.value));
 						}}
 					/>
-					<span class="ml-1 text-xs text-unfocused">deg</span>
+					<span class="ml-1 text-xs text-muted">deg</span>
 				</div>
 			</div>
 		</div>

@@ -48,8 +48,8 @@ const SortItem: Component<SortItemProps> = (props) => {
 					class={classNames(
 						"w-5 h-5 min-w-5 rounded-md flex items-center justify-center transition-colors duration-200",
 						{
-							"bg-secondary-base": sort() !== undefined,
-							"bg-dropdown-hover": sort() === undefined,
+							"bg-secondary": sort() !== undefined,
+							"bg-card-hover": sort() === undefined,
 						},
 					)}
 				>
@@ -57,7 +57,7 @@ const SortItem: Component<SortItemProps> = (props) => {
 						<Match when={sort() !== undefined}>
 							<FaSolidCaretUp
 								aria-hidden="true"
-								class={classNames("w-3 h-3 text-secondary-contrast", {
+								class={classNames("w-3 h-3 text-secondary-foreground", {
 									"transform rotate-180": sort() === "desc",
 								})}
 							/>
@@ -104,7 +104,7 @@ const QuerySort: Component<QuerySortProps> = (props) => {
 				data-query-sort
 				disabled={props.disabled}
 				class={classNames(
-					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary-base pr-3 pl-2 text-sm text-secondary-contrast fill-secondary-contrast hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused disabled:hover:bg-secondary-base",
+					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary pr-3 pl-2 text-sm text-secondary-foreground fill-secondary-foreground hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-muted disabled:fill-muted disabled:hover:bg-secondary",
 					props.class,
 				)}
 			>

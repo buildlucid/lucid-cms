@@ -26,15 +26,15 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 	return (
 		<Button
 			type="button"
-			variant="danger-subtle"
+			variant="danger-ghost"
 			size="xs"
 			shape="square"
 			class={classNames(
-				"transition-all duration-200 focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed",
+				"transition-all duration-200 focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed",
 				{
-					"text-icon-faded fill-icon-faded hover:text-error-base hover:fill-error-base":
+					"text-muted fill-muted hover:text-danger hover:fill-danger":
 						getConfirmRemove() === 0,
-					"text-error-hover fill-error-hover animate-pulse":
+					"text-danger-hover fill-danger-hover animate-pulse":
 						getConfirmRemove() === 1,
 				},
 			)}

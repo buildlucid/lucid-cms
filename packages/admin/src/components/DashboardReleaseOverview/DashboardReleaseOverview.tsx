@@ -23,8 +23,8 @@ const DashboardReleaseOverview: Component<{
 					{T()("dashboard.release.requests.description")}
 				</p>
 			</div>
-			<div class="overflow-hidden rounded-md border border-border bg-card-base">
-				<div class="grid grid-cols-1 bg-card-base md:grid-cols-2 2xl:grid-cols-4">
+			<div class="overflow-hidden rounded-md border border-border bg-card">
+				<div class="grid grid-cols-1 bg-card md:grid-cols-2 2xl:grid-cols-4">
 					<DashboardMetricTile
 						icon={<FaSolidUserCheck size={14} />}
 						label={T()("common.assigned.to.me")}

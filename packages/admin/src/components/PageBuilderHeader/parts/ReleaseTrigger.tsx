@@ -4,6 +4,7 @@ import { FaSolidChevronDown } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import Spinner from "@/components/Spinner/Spinner";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import T from "@/translations";
 import spawnToast from "@/utils/spawn-toast";
@@ -103,7 +104,7 @@ export const ReleaseTrigger: Component<{
 				disabled={props.saveDisabled}
 				class={classNames(
 					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
-					"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base",
+					"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary",
 					"px-4 h-9 text-sm",
 					{
 						"rounded-md": !hasOptions(),
@@ -123,7 +124,7 @@ export const ReleaseTrigger: Component<{
 					<Menu.Trigger
 						class={classNames(
 							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
-							"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base",
+							"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary",
 							"px-2 w-9 h-9 text-sm",
 							{
 								"rounded-r-md": interfaceDirection.isLTR(),
@@ -160,18 +161,19 @@ export const ReleaseTrigger: Component<{
 										props.onSelect(option);
 									}}
 									end={
-										<span
-											class={classNames("w-2.5 h-2.5 rounded-full border", {
-												"bg-primary-muted-bg border-primary-muted-border":
-													option.status?.isReleased === true &&
-													option.status?.upToDate === true,
-												"bg-warning-base/40 border-warning-base/60":
-													option.status?.isReleased === true &&
-													option.status?.upToDate === false,
-												"bg-error-base/40 border-error-base/60":
-													option.status?.isReleased === false,
-											})}
-											title={
+										<StatusIndicator
+											variant={
+												option.status?.isReleased === false
+													? "danger-subtle"
+													: option.status?.isReleased === true &&
+															option.status?.upToDate === true
+														? "success-subtle"
+														: option.status?.isReleased === true &&
+																option.status?.upToDate === false
+															? "warning-subtle"
+															: "neutral-subtle"
+											}
+											label={
 												option.status?.isReleased === true &&
 												option.status?.upToDate === true
 													? T()("documents.release.status.up.to.date")

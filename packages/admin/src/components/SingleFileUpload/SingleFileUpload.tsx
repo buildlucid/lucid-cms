@@ -233,7 +233,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					"w-full border-border border h-80 rounded-md relative overflow-hidden",
 					{
 						"border-dashed border-2": showState() === "no-file",
-						"border-primary-base": getDragOver(),
+						"border-primary": getDragOver(),
 					},
 				)}
 				onDragOver={(e) => {
@@ -275,14 +275,14 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 						<div class="w-full h-full flex justify-center items-center flex-col p-4 md:p-6">
 							<FaSolidArrowUpFromBracket
 								size="18"
-								class="mx-auto text-unfocused mb-2"
+								class="mx-auto text-muted mb-2"
 							/>
 							<p class="text-center text-sm font-medium text-subtitle">
 								{T()("media.upload.drop.or")}{" "}
 								<button
 									type="button"
 									onClick={openFileBrowser}
-									class="text-primary-base font-medium"
+									class="text-primary font-medium"
 								>
 									{T()("media.upload.drop.here")}
 								</button>
@@ -298,7 +298,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 									<button
 										type="button"
 										onClick={undoToCurrentFile}
-										class="text-unfocused fill-unfocused font-medium text-sm flex items-center mt-2"
+										class="text-muted fill-muted font-medium text-sm flex items-center mt-2"
 									>
 										<FaSolidArrowRotateLeft class="mr-2 text-sm" />
 										<Switch fallback={"keep current file"}>
@@ -344,7 +344,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 						<button
 							type="button"
 							class={classNames(
-								"inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input-base px-3 text-sm font-medium text-input-contrast transition-colors duration-200 hover:bg-secondary-hover hover:text-secondary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-70",
+								"inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-border bg-input px-3 text-sm font-medium text-subtitle transition-colors duration-200 hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-70",
 								{
 									"cursor-not-allowed opacity-70":
 										imageGeneration().state.disabled,
@@ -561,10 +561,10 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						fallback={
 							<div
 								class={classNames(
-									"w-full h-full relative z-10 bg-input-base flex flex-col justify-center items-center",
+									"w-full h-full relative z-10 bg-input flex flex-col justify-center items-center",
 								)}
 							>
-								<FaSolidFile class="w-10 h-10 mx-auto text-unfocused mb-5" />
+								<FaSolidFile class="w-10 h-10 mx-auto text-muted mb-5" />
 								<Show when={props.data.name}>
 									<p class="text-center text-sm font-medium text-subtitle">
 										{props.data.name}
@@ -589,7 +589,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						<Match when={props.data.type === "video"}>
 							<div
 								class={classNames(
-									"w-full h-full relative z-10 bg-input-base rectangle-background",
+									"w-full h-full relative z-10 bg-input rectangle-background",
 								)}
 							>
 								<Show when={renderNativeMedia()}>
@@ -606,7 +606,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 						<Match when={props.data.type === "audio"}>
 							<div
 								class={classNames(
-									"w-full h-full relative z-10 bg-input-base flex justify-center items-center",
+									"w-full h-full relative z-10 bg-input flex justify-center items-center",
 								)}
 							>
 								<Show when={renderNativeMedia()}>
@@ -653,7 +653,7 @@ const PreviewActionButton: Component<{
 			title={props.action.label}
 			aria-label={props.action.label}
 			aria-busy={props.action.loading ? "true" : undefined}
-			class="pointer-events-auto inline-flex h-7 max-w-32 items-center gap-1.5 rounded-md border border-border bg-input-base px-2 text-xs font-medium text-subtitle shadow-sm transition-colors duration-200 hover:bg-background-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
+			class="pointer-events-auto inline-flex h-7 max-w-32 items-center gap-1.5 rounded-md border border-border bg-input px-2 text-xs font-medium text-subtitle shadow-sm transition-colors duration-200 hover:bg-background-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
 			onClick={(event) => {
 				event.preventDefault();
 				event.stopPropagation();

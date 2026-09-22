@@ -194,7 +194,7 @@
 			opacity: 0.55;
 			transform: scale(0.78);
 			box-shadow: 0 0 0 0
-				color-mix(in srgb, var(--lucid-primary-base) 28%, transparent);
+				color-mix(in srgb, var(--lucid-primary) 28%, transparent);
 		}
 		50% {
 			opacity: 1;

@@ -234,7 +234,7 @@ const LinkModal: Component<{
 							required={false}
 							theme="basic"
 						/>
-						<div class="mb-3 flex items-center justify-between gap-3 rounded-md border border-border bg-card-base p-3">
+						<div class="mb-3 flex items-center justify-between gap-3 rounded-md border border-border bg-card p-3">
 							<div class="min-w-0">
 								<p class="truncate text-sm font-medium text-title">
 									{documentRef()
@@ -263,7 +263,7 @@ const LinkModal: Component<{
 								>
 									<Button
 										type="button"
-										variant="background-subtle"
+										variant="ghost"
 										size="xs"
 										shape="square"
 										onClick={selectDocument}
@@ -273,7 +273,7 @@ const LinkModal: Component<{
 									</Button>
 									<Button
 										type="button"
-										variant="danger-subtle"
+										variant="danger-ghost"
 										size="xs"
 										shape="square"
 										onClick={() => setDocumentRef(undefined)}

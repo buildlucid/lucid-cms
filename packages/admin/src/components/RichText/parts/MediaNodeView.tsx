@@ -105,10 +105,10 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 		<div
 			contentEditable={false}
 			class={classNames(
-				"group relative my-3 flex w-full select-none items-center gap-3 rounded-xl border bg-card-base p-3 transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary-muted-border [&.ProseMirror-selectednode]:border-primary-base [&.ProseMirror-selectednode]:ring-2 [&.ProseMirror-selectednode]:ring-primary-base/20",
+				"group relative my-3 flex w-full select-none items-center gap-3 rounded-xl border bg-card p-3 transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary-low-border [&.ProseMirror-selectednode]:border-primary [&.ProseMirror-selectednode]:ring-2 [&.ProseMirror-selectednode]:ring-primary-low-border",
 				{
 					"border-border": available() && !hasErrors(),
-					"border-error-base/50 bg-linear-to-b from-error-base/10 to-card-base to-30%":
+					"border-danger-low-border bg-linear-to-b from-danger-low to-card to-30%":
 						!available() || hasErrors(),
 				},
 			)}
@@ -117,13 +117,13 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 			<Show
 				when={available() && props.reference ? props.reference : undefined}
 				fallback={
-					<div class="min-w-0 grow overflow-hidden rounded-lg border border-border bg-input-base px-4 py-3">
+					<div class="min-w-0 grow overflow-hidden rounded-lg border border-border bg-input px-4 py-3">
 						<p class="truncate text-sm font-medium text-title mb-0!">
 							{T()("editor.rich.text.media.fallback", {
 								id: typeof props.mediaId === "number" ? props.mediaId : "?",
 							})}
 						</p>
-						<p class="mt-0.5 text-xs font-medium text-error-base mb-0!">
+						<p class="mt-0.5 text-xs font-medium text-danger mb-0!">
 							{errorMessage() ?? T()("editor.rich.text.media.unavailable")}
 						</p>
 					</div>
@@ -133,7 +133,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 					<div class="min-w-0 grow overflow-hidden rounded-xl border border-border">
 						<div
 							class={classNames(
-								"relative isolate flex min-h-24 w-full items-center justify-center bg-card-base p-4",
+								"relative isolate flex min-h-24 w-full items-center justify-center bg-card p-4",
 								{
 									"rectangle-background":
 										reference().type === "image" ||
@@ -187,10 +187,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 								<Switch
 									fallback={
 										<div class="relative z-10 flex flex-col items-center gap-2 text-subtitle">
-											<FaSolidFile
-												size={40}
-												class="text-icon-base opacity-40"
-											/>
+											<FaSolidFile size={40} class="text-icon opacity-40" />
 											<span class="text-sm font-medium capitalize">
 												{reference().type}
 											</span>
@@ -200,13 +197,13 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 									<Match when={reference().type === "archive"}>
 										<FaSolidFileZipper
 											size={40}
-											class="relative z-10 text-icon-base opacity-40"
+											class="relative z-10 text-icon opacity-40"
 										/>
 									</Match>
 									<Match when={reference().type === "document"}>
 										<FaSolidFileLines
 											size={40}
-											class="relative z-10 text-icon-base opacity-40"
+											class="relative z-10 text-icon opacity-40"
 										/>
 									</Match>
 									<Match when={reference().type === "image"}>
@@ -238,7 +235,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 							</div>
 						</div>
 						<div
-							class="flex items-center justify-between gap-3 border-t border-border bg-input-base p-3"
+							class="flex items-center justify-between gap-3 border-t border-border bg-input p-3"
 							data-lucid-rich-text-media-info=""
 						>
 							<div class="flex min-w-0 items-start gap-2">
@@ -250,7 +247,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 										<Copy.Button
 											label={reference().key}
 											value={reference().url}
-											class="max-w-full text-xs text-unfocused"
+											class="max-w-full text-xs text-muted"
 										/>
 									</div>
 								</div>
@@ -258,8 +255,8 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 						</div>
 						<Show when={errorMessage()}>
 							{(message) => (
-								<div class="flex items-center gap-3 border-error-base/20 border-t bg-error-base/10 px-3 py-2">
-									<span class="min-w-0 grow text-left text-xs font-medium text-error-base">
+								<div class="flex items-center gap-3 border-danger-low-border border-t bg-danger-low px-3 py-2">
+									<span class="min-w-0 grow text-left text-xs font-medium text-danger-low-foreground">
 										{message()}
 									</span>
 								</div>

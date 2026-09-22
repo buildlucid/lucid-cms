@@ -285,14 +285,14 @@ export const PreviewCanvas: Component<{
 	// ----------------------------------
 	// Render
 	return (
-		<div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-card-base">
-			<div class="flex h-12 shrink-0 items-center justify-between gap-3 overflow-x-auto border-b border-border bg-background-base px-3">
+		<div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-card">
+			<div class="flex h-12 shrink-0 items-center justify-between gap-3 overflow-x-auto border-b border-border bg-background px-3">
 				<div class="flex shrink-0 items-center gap-2">
 					<div class="relative">
 						<select
 							value={selectedWidthValue()}
 							aria-label={T()("preview.width.mode")}
-							class="h-8 min-w-30 appearance-none rounded-md border border-border bg-input-base py-0 pr-7 pl-2 text-sm font-medium text-subtitle outline-none transition-colors focus:border-primary-base"
+							class="h-8 min-w-30 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium text-subtitle outline-none transition-colors focus:border-primary"
 							onChange={(event) => selectWidth(event.currentTarget.value)}
 						>
 							<option value="fit">{T()("preview.width.fit")}</option>
@@ -314,7 +314,7 @@ export const PreviewCanvas: Component<{
 						min={MIN_PREVIEW_WIDTH}
 						max={MAX_PREVIEW_WIDTH}
 						aria-label={T()("preview.width.input")}
-						class="h-8 w-18 appearance-none rounded-md border border-border bg-input-base px-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary-base"
+						class="h-8 w-18 appearance-none rounded-md border border-border bg-input px-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
 						onInput={(event) => setWidth(event.currentTarget.value, false)}
 						onChange={(event) => setWidth(event.currentTarget.value, true)}
 						onKeyDown={(event) => {
@@ -325,7 +325,7 @@ export const PreviewCanvas: Component<{
 						<select
 							value={String(props.zoom())}
 							aria-label={T()("preview.zoom")}
-							class="h-8 w-19 appearance-none rounded-md border border-border bg-input-base py-0 pr-7 pl-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary-base"
+							class="h-8 w-19 appearance-none rounded-md border border-border bg-input py-0 pr-7 pl-2 text-sm font-medium tabular-nums text-subtitle outline-none transition-colors focus:border-primary"
 							onChange={(event) => selectZoom(event.currentTarget.value)}
 						>
 							{zoomOptions.map((zoom) => (
@@ -344,7 +344,7 @@ export const PreviewCanvas: Component<{
 						<PreviewHelp mode={props.previewMode()} />
 						<Button
 							type="button"
-							variant="background-subtle"
+							variant="ghost"
 							size="xs"
 							shape="square"
 							title={T()("common.refresh")}
@@ -355,7 +355,7 @@ export const PreviewCanvas: Component<{
 						</Button>
 						<Button
 							type="button"
-							variant="background-subtle"
+							variant="ghost"
 							size="xs"
 							shape="square"
 							title={T()("preview.copy.url")}
@@ -367,7 +367,7 @@ export const PreviewCanvas: Component<{
 						</Button>
 						<Button
 							type="button"
-							variant="background-subtle"
+							variant="ghost"
 							size="xs"
 							shape="square"
 							title={T()("preview.open")}
@@ -382,7 +382,7 @@ export const PreviewCanvas: Component<{
 			</div>
 			<div
 				ref={setCanvasRef}
-				class="relative min-h-0 min-w-0 grow overflow-hidden bg-card-base dotted-background"
+				class="relative min-h-0 min-w-0 grow overflow-hidden bg-card dotted-background"
 			>
 				<Show when={props.resolverState() === "unavailable"}>
 					<div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 p-6 text-center">
@@ -420,12 +420,12 @@ export const PreviewCanvas: Component<{
 						<button
 							type="button"
 							aria-label={T()("preview.resize.viewport.left")}
-							class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-base"
+							class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
 							onPointerDown={(event) => startViewportResize("left", event)}
 						>
 							<span class="flex items-center gap-0.5" aria-hidden="true">
-								<span class="h-7 w-px rounded-full bg-unfocused/80" />
-								<span class="h-7 w-px rounded-full bg-unfocused/80" />
+								<span class="h-7 w-px rounded-full bg-muted/80" />
+								<span class="h-7 w-px rounded-full bg-muted/80" />
 							</span>
 						</button>
 						<div
@@ -458,12 +458,12 @@ export const PreviewCanvas: Component<{
 						<button
 							type="button"
 							aria-label={T()("preview.resize.viewport.right")}
-							class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary-base"
+							class="group relative z-30 flex h-full w-2.5 shrink-0 cursor-ew-resize items-center justify-center bg-(--lucid-preview-resizer) transition-colors hover:bg-(--lucid-preview-resizer-hover) focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
 							onPointerDown={(event) => startViewportResize("right", event)}
 						>
 							<span class="flex items-center gap-0.5" aria-hidden="true">
-								<span class="h-7 w-px rounded-full bg-unfocused/80" />
-								<span class="h-7 w-px rounded-full bg-unfocused/80" />
+								<span class="h-7 w-px rounded-full bg-muted/80" />
+								<span class="h-7 w-px rounded-full bg-muted/80" />
 							</span>
 						</button>
 					</div>
@@ -476,7 +476,7 @@ export const PreviewCanvas: Component<{
 					}
 				>
 					<div
-						class="absolute inset-0 z-20 bg-card-base"
+						class="absolute inset-0 z-20 bg-card"
 						role="status"
 						aria-live="polite"
 					>

@@ -104,7 +104,7 @@ const ScheduleDetailsDrawer: Component<ScheduleDetailsPanelProps> = (props) => {
 						]}
 					/>
 					<Show when={schedule()?.lastRun?.errorMessage}>
-						<div class="mb-4 rounded-md border border-error-base/20 bg-error-base/10 p-4 text-sm text-body">
+						<div class="mb-4 rounded-md border border-danger-low-border bg-danger-low p-4 text-sm text-body">
 							{schedule()?.lastRun?.errorMessage}
 						</div>
 					</Show>

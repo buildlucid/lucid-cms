@@ -17,7 +17,7 @@ const EmailTransactionTableRow: Component<EmailTransactionRowProps> = (
 		deliveryStatus: EmailDeliveryStatus,
 	): PillProps["variant"] => {
 		if (deliveryStatus === "sent" || deliveryStatus === "delivered") {
-			return "primary-subtle";
+			return "success-subtle";
 		}
 		if (deliveryStatus === "failed") {
 			return "danger-subtle";

@@ -15,11 +15,11 @@ const ToolbarButton: Component<{
 		<button
 			type="button"
 			class={classnames("flex items-center justify-center", {
-				"h-7 min-w-7 px-1.5 rounded-md text-xs transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-1 focus-visible:ring-primary-base border":
+				"h-7 min-w-7 px-1.5 rounded-md text-xs transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-1 focus-visible:ring-primary border":
 					props.mode === "pill",
 				"p-1.5 rounded transition-colors duration-150 border disabled:opacity-50 disabled:cursor-not-allowed":
 					props.mode === "default",
-				"bg-primary-muted-bg text-primary-muted-contrast border-primary-muted-border":
+				"bg-primary-low text-primary-low-foreground border-primary-low-border":
 					props.isActive,
 				"text-body hover:bg-background-hover hover:text-title border-transparent":
 					!props.isActive,

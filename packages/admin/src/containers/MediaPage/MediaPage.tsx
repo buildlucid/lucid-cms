@@ -272,8 +272,8 @@ const MediaPage: Component = () => {
 			onDrop={onDrop}
 		>
 			<Show when={routeFileDragActive()}>
-				<div class="pointer-events-none fixed inset-0 z-60 flex items-center justify-center bg-overlay-base p-6 backdrop-blur-xs">
-					<div class="flex min-h-72 w-full max-w-xl flex-col items-center justify-center rounded-md border-2 border-dashed border-primary-base bg-card-base p-8 text-center shadow-lg">
+				<div class="pointer-events-none fixed inset-0 z-60 flex items-center justify-center bg-overlay p-6 backdrop-blur-xs">
+					<div class="flex min-h-72 w-full max-w-xl flex-col items-center justify-center rounded-md border-2 border-dashed border-primary bg-card p-8 text-center shadow-lg">
 						<p class="text-base font-semibold text-title">
 							{T()("media.upload.drop.title")}
 						</p>

@@ -182,10 +182,10 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				id={previewTriggerId()}
 				data-preview-focus-open={groupOpen()}
 				class={classNames(
-					"w-full bg-card-base hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary-base cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
+					"w-full bg-card hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 ring-inset ring-primary cursor-pointer px-3 py-3 flex justify-between items-center transition-colors duration-200",
 					{
-						"bg-error-base/5": errorCount() > 0,
-						"ring-1 ring-inset ring-primary-base":
+						"bg-danger-low": errorCount() > 0,
+						"ring-1 ring-inset ring-primary":
 							props.dragDrop.getDraggingTarget()?.ref === ref(),
 					},
 				)}
@@ -205,7 +205,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 				<div class="flex items-center min-w-0 gap-2">
 					<button
 						type="button"
-						class="text-icon-faded hover:text-primary-hover transition-colors duration-200 cursor-grab active:cursor-grabbing focus:outline-hidden focus-visible:ring-1 ring-primary-base disabled:hover:text-icon-base! disabled:opacity-50 disabled:cursor-not-allowed"
+						class="text-muted hover:text-primary-hover transition-colors duration-200 cursor-grab active:cursor-grabbing focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed"
 						onDragStart={(e) =>
 							props.dragDrop.onDragStart(e, {
 								ref: ref(),
@@ -256,12 +256,12 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 					/>
 					<Button
 						type="button"
-						variant="background-subtle"
+						variant="ghost"
 						size="xs"
 						shape="square"
 						tabIndex="-1"
 						class={classNames(
-							"text-icon-faded hover:text-icon-hover transition-all duration-200",
+							"text-muted hover:text-icon-hover transition-all duration-200",
 							{
 								"transform rotate-180": groupOpen(),
 							},
@@ -275,7 +275,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 			<div
 				id={`accordion-content-${ref()}`}
 				class={classNames(
-					"bg-background-base transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
+					"bg-background transform-gpu origin-top overflow-hidden w-full duration-200 transition-all",
 					{
 						"scale-y-100 h-auto opacity-100 visible": groupOpen(),
 						"scale-y-0 h-0 opacity-0 invisible": !groupOpen(),

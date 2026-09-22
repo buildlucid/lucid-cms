@@ -63,7 +63,7 @@ const DashboardContentShortcuts: Component<{
 			<Show
 				when={!props.error}
 				fallback={
-					<div class="rounded-md border border-border bg-card-base px-3 py-3">
+					<div class="rounded-md border border-border bg-card px-3 py-3">
 						<p class="text-sm text-body">
 							{T()("errors.collections.load.failed")}
 						</p>
@@ -73,7 +73,7 @@ const DashboardContentShortcuts: Component<{
 				<Show
 					when={!props.loading}
 					fallback={
-						<div class="overflow-hidden rounded-md border border-border bg-card-base">
+						<div class="overflow-hidden rounded-md border border-border bg-card">
 							<ul class="grid grid-cols-1 md:grid-cols-2">
 								<For each={[1, 2, 3, 4]}>
 									{() => (
@@ -82,7 +82,7 @@ const DashboardContentShortcuts: Component<{
 												"h-full border-b border-border last:border-b-0 md:odd:border-r md:last:border-r-0 md:nth-last-1:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
 											}
 										>
-											<div class="h-full bg-card-base px-3 py-3">
+											<div class="h-full bg-card px-3 py-3">
 												<span class="skeleton block h-4 w-1/2" />
 												<span class="skeleton mt-2 block h-4 w-full" />
 											</div>
@@ -96,15 +96,15 @@ const DashboardContentShortcuts: Component<{
 					<Show
 						when={visibleCollections().length > 0}
 						fallback={
-							<div class="rounded-md border border-border bg-card-base px-3 py-3">
+							<div class="rounded-md border border-border bg-card px-3 py-3">
 								<p class="text-sm text-body">
 									{T()("dashboard.content.empty")}
 								</p>
 							</div>
 						}
 					>
-						<div class="overflow-hidden rounded-md border border-border bg-card-base">
-							<ul class="grid auto-rows-fr grid-cols-1 bg-card-base md:grid-cols-2">
+						<div class="overflow-hidden rounded-md border border-border bg-card">
+							<ul class="grid auto-rows-fr grid-cols-1 bg-card md:grid-cols-2">
 								<For each={visibleCollections()}>
 									{(collection) => (
 										<li
@@ -114,9 +114,9 @@ const DashboardContentShortcuts: Component<{
 										>
 											<A
 												href={collectionLink(collection)}
-												class="group flex h-full items-start gap-3 bg-card-base px-3 py-3 transition-colors duration-200 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-base"
+												class="group flex h-full items-start gap-3 bg-card px-3 py-3 transition-colors duration-200 hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
 											>
-												<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background-base text-secondary-base">
+												<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background text-secondary">
 													<Show
 														when={collection.mode === "single"}
 														fallback={<FaSolidBoxesStacked size={14} />}

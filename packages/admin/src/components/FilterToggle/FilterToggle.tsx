@@ -36,11 +36,11 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 			type="button"
 			data-filter-toggle
 			class={classNames(
-				"gap-2 pl-2 pr-3 h-9 text-sm border border-transparent rounded-md flex items-center outline-primary-base focus:outline-1 disabled:cursor-not-allowed disabled:text-unfocused disabled:fill-unfocused duration-200 transition-colors",
+				"gap-2 pl-2 pr-3 h-9 text-sm border border-transparent rounded-md flex items-center outline-primary focus:outline-1 disabled:cursor-not-allowed disabled:text-muted disabled:fill-muted duration-200 transition-colors",
 				{
-					"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast":
+					"bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground":
 						props.open || active(),
-					"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast":
+					"bg-secondary hover:bg-secondary-hover text-secondary-foreground":
 						!props.open && !active(),
 				},
 				props.class,

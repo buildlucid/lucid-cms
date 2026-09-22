@@ -5,18 +5,22 @@ export type ProgressBarVariant =
 	| "primary"
 	| "primary-subtle"
 	| "secondary"
+	| "success"
+	| "success-subtle"
 	| "danger"
 	| "danger-subtle"
 	| "warning"
-	| "warning-subtle"
-	| "neutral";
+	| "warning-subtle";
 
 export type ProgressBarSize = "sm" | "md" | "lg";
 
 export interface ProgressBarProps {
 	/** A percentage from 0 to 100. */
 	value: number;
-	/** @default "primary" */
+	/**
+	 * Colour variants use the solid colour. `-subtle` variants use a softer fill.
+	 * @default "primary"
+	 */
 	variant?: ProgressBarVariant;
 	/** @default "lg" */
 	size?: ProgressBarSize;
@@ -59,7 +63,7 @@ export const ProgressBar: Component<ProgressBarProps> = (props) => {
 	return (
 		<div data-progress-bar class={props.class}>
 			<div
-				class={classnames("w-full overflow-hidden bg-input-base", {
+				class={classnames("w-full overflow-hidden bg-input", {
 					"h-1": props.size === "sm",
 					"h-2": props.size === "md",
 					"h-3": props.size !== "sm" && props.size !== "md",
@@ -75,14 +79,15 @@ export const ProgressBar: Component<ProgressBarProps> = (props) => {
 				<div
 					class={classnames("h-full duration-200 transition-all", {
 						"rounded-md": !props.square,
-						"bg-primary-base": variant() === "primary",
-						"bg-primary-base/70": variant() === "primary-subtle",
-						"bg-secondary-base": variant() === "secondary",
-						"bg-error-base": variant() === "danger",
-						"bg-error-base/70": variant() === "danger-subtle",
-						"bg-warning-base": variant() === "warning",
-						"bg-warning-base/70": variant() === "warning-subtle",
-						"bg-title": variant() === "neutral",
+						"bg-primary": variant() === "primary",
+						"bg-primary-medium": variant() === "primary-subtle",
+						"bg-secondary": variant() === "secondary",
+						"bg-success": variant() === "success",
+						"bg-success-medium": variant() === "success-subtle",
+						"bg-danger": variant() === "danger",
+						"bg-danger-medium": variant() === "danger-subtle",
+						"bg-warning": variant() === "warning",
+						"bg-warning-medium": variant() === "warning-subtle",
 					})}
 					style={{
 						width: `${progress()}%`,

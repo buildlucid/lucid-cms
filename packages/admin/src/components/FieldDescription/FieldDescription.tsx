@@ -52,9 +52,7 @@ export const FieldDescription: Component<DescribedByProps> = (props) => {
 	// Render
 	return (
 		<Show when={props?.describedBy}>
-			<div
-				class={classNames("text-sm leading-5 mt-2 text-unfocused", props.class)}
-			>
+			<div class={classNames("text-sm leading-5 mt-2 text-muted", props.class)}>
 				<div
 					id={id()}
 					class="overflow-hidden"
@@ -65,7 +63,7 @@ export const FieldDescription: Component<DescribedByProps> = (props) => {
 				<Show when={expandable()}>
 					<button
 						type="button"
-						class="mt-1 rounded-sm text-sm text-subtitle underline decoration-unfocused/50 underline-offset-4 hover:text-primary-base"
+						class="mt-1 rounded-sm text-sm text-subtitle underline decoration-muted/50 underline-offset-4 hover:text-primary"
 						aria-expanded={expanded()}
 						aria-controls={id()}
 						onClick={() => setExpanded((value) => !value)}

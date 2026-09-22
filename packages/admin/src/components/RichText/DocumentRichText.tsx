@@ -102,7 +102,7 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 				class={classnames(
 					"relative overflow-hidden transition-colors duration-200",
 					{
-						"rounded-md border border-border bg-input-base focus-within:border-primary-base":
+						"rounded-md border border-border bg-input focus-within:border-primary":
 							!seamless(),
 						"bg-transparent": seamless(),
 						"border-border border-b": seamless() && hasErrors(),
@@ -123,7 +123,7 @@ const EditorField: Component<EditorFieldProps> = (props) => {
 				</Show>
 				<div class="relative">
 					<Show when={showPlaceholder()}>
-						<div class="pointer-events-none absolute top-3 left-0 z-10 text-sm text-unfocused">
+						<div class="pointer-events-none absolute top-3 left-0 z-10 text-sm text-muted">
 							{props.copy?.placeholder || T()("editor.rich.text.placeholder")}
 						</div>
 					</Show>

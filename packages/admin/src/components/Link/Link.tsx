@@ -89,15 +89,15 @@ const Link: Component<LinkProps> = (props) => {
 			"flex items-center justify-center text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
 			{
 				// Variants
-				"bg-primary-base hover:bg-primary-hover text-primary-contrast fill-primary-contrast ring-primary-base":
+				"bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground ring-primary":
 					local.variant === "primary",
-				"bg-secondary-base hover:bg-secondary-hover text-secondary-contrast fill-secondary-contrast ring-primary-base":
+				"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary":
 					local.variant === "secondary",
-				"bg-input-base border border-border hover:border-transparent hover:bg-secondary-hover fill-input-contrast text-subtitle hover:text-secondary-contrast ring-primary-base":
+				"bg-input border border-border hover:border-transparent hover:bg-secondary-hover fill-subtitle text-subtitle hover:text-secondary-foreground ring-primary":
 					local.variant === "outline",
-				"bg-error-base hover:bg-error-hover text-error-contrast ring-primary-base fill-error-contrast":
+				"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary fill-danger-foreground":
 					local.variant === "danger",
-				"bg-transparent border border-border hover:bg-error-hover ring-primary-base fill-error-contrast hover:text-error-contrast":
+				"bg-transparent border border-border hover:bg-danger-hover ring-primary fill-danger-foreground hover:text-danger-foreground":
 					local.variant === "danger-outline",
 
 				// Shape

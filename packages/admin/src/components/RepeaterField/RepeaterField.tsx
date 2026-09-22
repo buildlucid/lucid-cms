@@ -110,18 +110,17 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 		>
 			<div
 				class={classNames(
-					"w-full overflow-hidden rounded-md border border-border bg-card-base",
+					"w-full overflow-hidden rounded-md border border-border bg-card",
 					{
-						"border-error-base/50": errorCount() > 0,
+						"border-danger-low-border": errorCount() > 0,
 					},
 				)}
 			>
 				<div
 					class={classNames(
-						"w-full flex items-center justify-between gap-3 bg-input-base px-3 py-2.5",
+						"w-full flex items-center justify-between gap-3 bg-input px-3 py-2.5",
 						{
-							"bg-linear-to-r from-error-base/10 to-input-base":
-								errorCount() > 0,
+							"bg-linear-to-r from-danger-low to-input": errorCount() > 0,
 						},
 					)}
 				>
@@ -163,7 +162,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 							}}
 						>
 							{({ dragDrop }) => (
-								<div class="w-full border-t border-border bg-card-base divide-y divide-border">
+								<div class="w-full border-t border-border bg-card divide-y divide-border">
 									<For each={groupRefs()}>
 										{(groupRef, i) => (
 											<GroupBody
@@ -188,9 +187,9 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 									<button
 										type="button"
 										class={classNames(
-											"w-full bg-input-base hover:bg-secondary-hover transition-colors duration-200 px-3 py-2.5 flex items-center justify-center gap-2 text-sm text-body hover:text-secondary-contrast ring-inset",
+											"w-full bg-input hover:bg-secondary-hover transition-colors duration-200 px-3 py-2.5 flex items-center justify-center gap-2 text-sm text-body hover:text-secondary-foreground ring-inset",
 											{
-												"cursor-not-allowed opacity-50 hover:bg-card-base":
+												"cursor-not-allowed opacity-50 hover:bg-card":
 													disabled(),
 											},
 										)}
@@ -207,7 +206,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 					<Match when={groups().length === 0}>
 						<div
 							class={classNames(
-								"w-full min-h-24 border-t border-dashed border-border bg-card-base p-4 dotted-background flex items-center justify-center text-center",
+								"w-full min-h-24 border-t border-dashed border-border bg-card p-4 dotted-background flex items-center justify-center text-center",
 								{
 									"opacity-50": disabled(),
 								},

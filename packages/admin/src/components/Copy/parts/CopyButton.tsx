@@ -45,7 +45,7 @@ export const CopyButton: Component<CopyButtonProps> = (props) => {
 				{
 					"text-body fill-body hover:text-primary-hover hover:fill-primary-hover":
 						!copied(),
-					"text-primary-base fill-primary-base": copied(),
+					"text-success fill-success": copied(),
 				},
 				props.class,
 			)}

@@ -70,7 +70,7 @@ export const OAuthClientsList: Component<{
 									}
 								/>
 							}
-							class="overflow-hidden rounded-md border border-border bg-card-base"
+							class="overflow-hidden rounded-md border border-border bg-card"
 						>
 							<div class="flex flex-col">
 								<For each={clients.data?.data ?? []}>

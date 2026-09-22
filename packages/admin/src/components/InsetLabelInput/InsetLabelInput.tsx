@@ -45,10 +45,10 @@ export const InsetLabelInput: Component<{
 		<div class={"w-full"}>
 			<div
 				class={classnames(
-					"flex flex-col transition-colors duration-200 ease-in-out relative bg-input-base rounded-md border border-border",
+					"flex flex-col transition-colors duration-200 ease-in-out relative bg-input rounded-md border border-border",
 					{
-						"border-primary-base": inputFocus(),
-						"border-error-base": props.errors?.message !== undefined,
+						"border-primary": inputFocus(),
+						"border-danger": props.errors?.message !== undefined,
 					},
 				)}
 			>
@@ -97,17 +97,17 @@ export const InsetLabelInput: Component<{
 				<Show when={props.type === "password"}>
 					<button
 						type="button"
-						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary-base duration-200 transition-colors"
+						class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-hover hover:text-primary duration-200 transition-colors"
 						onClick={() => {
 							setPasswordVisible(!passwordVisible());
 						}}
 						tabIndex={-1}
 					>
 						<Show when={passwordVisible()}>
-							<FaSolidEyeSlash size={18} class="text-unfocused" />
+							<FaSolidEyeSlash size={18} class="text-muted" />
 						</Show>
 						<Show when={!passwordVisible()}>
-							<FaSolidEye size={18} class="text-unfocused" />
+							<FaSolidEye size={18} class="text-muted" />
 						</Show>
 					</button>
 				</Show>

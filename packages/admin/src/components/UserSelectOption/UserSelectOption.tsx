@@ -44,7 +44,7 @@ const UserSelectOption: Component<{
 					<button
 						type="button"
 						aria-label={T()("common.remove")}
-						class="ml-auto flex size-5 shrink-0 items-center justify-center rounded text-body opacity-0 transition-all group-hover:opacity-100 hover:bg-error-base hover:text-error-contrast focus:opacity-100 focus:outline-hidden focus-visible:ring-1 ring-error-base"
+						class="ml-auto flex size-5 shrink-0 items-center justify-center rounded text-body opacity-0 transition-all group-hover:opacity-100 hover:bg-danger hover:text-danger-foreground focus:opacity-100 focus:outline-hidden focus-visible:ring-1 ring-danger"
 						onPointerDown={(event) => {
 							event.preventDefault();
 							event.stopPropagation();

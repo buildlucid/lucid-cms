@@ -95,7 +95,7 @@ const ColorPicker: Component<ColorPickerProps> = (props) => {
 			<div class="relative">
 				<button
 					type="button"
-					class="absolute left-2 top-1/2 size-6 -translate-y-1/2 cursor-pointer rounded border border-border focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-80"
+					class="absolute left-2 top-1/2 size-6 -translate-y-1/2 cursor-pointer rounded border border-border focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-80"
 					style={{ "background-color": props.value || undefined }}
 					disabled={props.disabled}
 					title={T()("fields.color.picker.open")}
@@ -123,7 +123,7 @@ const ColorPicker: Component<ColorPickerProps> = (props) => {
 					placeholder={props.placeholder}
 					required={props.required}
 					disabled={props.disabled}
-					class="w-full focus:outline-hidden pl-10 pr-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input-base border border-border h-10 rounded-md focus:border-primary-base duration-200 transition-colors"
+					class="w-full focus:outline-hidden pl-10 pr-2 text-sm text-subtitle disabled:cursor-not-allowed disabled:opacity-80 bg-input border border-border h-10 rounded-md focus:border-primary duration-200 transition-colors"
 					aria-describedby={
 						props.description ? `${props.id}-description` : undefined
 					}
@@ -139,7 +139,7 @@ const ColorPicker: Component<ColorPickerProps> = (props) => {
 								<li class="shrink-0">
 									<button
 										type="button"
-										class="block size-7 rounded-md border border-border focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-80"
+										class="block size-7 rounded-md border border-border focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-80"
 										style={{ "background-color": preset }}
 										disabled={props.disabled}
 										title={preset}

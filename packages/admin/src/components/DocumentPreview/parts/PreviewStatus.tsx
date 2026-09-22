@@ -1,5 +1,6 @@
 import type { PreviewMode } from "@types";
 import { type Component, createMemo } from "solid-js";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
 
 export const PreviewStatus: Component<{ mode: PreviewMode }> = (props) => {
@@ -25,15 +26,11 @@ export const PreviewStatus: Component<{ mode: PreviewMode }> = (props) => {
 			data-preview-mode={props.mode}
 			aria-label={status().description}
 			title={status().description}
-			class="inline-flex h-7 shrink-0 items-center gap-1.5 px-1 text-xs font-medium whitespace-nowrap text-unfocused"
+			class="inline-flex h-7 shrink-0 items-center gap-1.5 px-1 text-xs font-medium whitespace-nowrap text-muted"
 		>
-			<span
-				aria-hidden="true"
-				classList={{
-					"h-1.5 w-1.5 rounded-full": true,
-					"bg-warning-base": props.mode === "scoped",
-					"bg-primary-base": props.mode === "perspective",
-				}}
+			<StatusIndicator
+				variant={props.mode === "scoped" ? "warning" : "primary"}
+				size="xs"
 			/>
 			{status().label}
 		</span>

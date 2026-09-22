@@ -58,7 +58,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 					renderValue={({ option }) => (
 						<span
 							class={classNames("truncate", {
-								"text-error-base": option.invalid,
+								"text-danger": option.invalid,
 							})}
 						>
 							{option.label}
@@ -67,7 +67,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 					renderOption={({ option }) => (
 						<span
 							class={classNames({
-								"text-error-base": option.invalid,
+								"text-danger": option.invalid,
 							})}
 						>
 							{option.label}
@@ -81,12 +81,12 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 						<button
 							type="button"
 							class={classNames(
-								"border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary-base transition-colors duration-200",
+								"border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary transition-colors duration-200",
 								{
-									"border-primary-base text-title": props.value === item.value,
-									"border-transparent text-body hover:border-primary-base":
+									"border-primary text-title": props.value === item.value,
+									"border-transparent text-body hover:border-primary":
 										props.value !== item.value && !item.invalid,
-									"border-error-base text-error-base":
+									"border-danger text-danger":
 										props.value !== item.value && item.invalid,
 								},
 							)}

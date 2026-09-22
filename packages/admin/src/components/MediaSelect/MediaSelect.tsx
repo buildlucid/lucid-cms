@@ -234,7 +234,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 					<Match when={selectedMediaIds().length === 0}>
 						<Show when={isMultiple()}>
 							<div class="min-h-42 flex items-center justify-center dotted-background border-dashed border-border rounded-md border">
-								<p class="text-sm text-unfocused">
+								<p class="text-sm text-muted">
 									{T()("common.nothing.selected")}
 								</p>
 							</div>
@@ -269,9 +269,9 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 						</div>
 					</Match>
 					<Match when={!isMultiple() && primarySelectedMedia()}>
-						<div class="w-full  border border-border rounded-md bg-input-base overflow-hidden group">
+						<div class="w-full  border border-border rounded-md bg-input overflow-hidden group">
 							<div
-								class={classNames("relative z-0 bg-card-base p-4", {
+								class={classNames("relative z-0 bg-card p-4", {
 									"rectangle-background":
 										primarySelectedMedia()?.type === "image" ||
 										primarySelectedMedia()?.type === "video",
@@ -336,7 +336,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									/>
 								</div>
 							</div>
-							<div class="flex items-center justify-between gap-3 p-3 border-border bg-input-base border-t-0">
+							<div class="flex items-center justify-between gap-3 p-3 border-border bg-input border-t-0">
 								<div class="flex items-start gap-2 min-w-0">
 									<div class="min-w-0">
 										<p class="text-sm text-subtitle font-medium line-clamp-1">
@@ -346,7 +346,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											<Copy.Button
 												label={primarySelectedMedia()?.key || ""}
 												value={primarySelectedMedia()?.url || ""}
-												class="text-xs text-unfocused max-w-full"
+												class="text-xs text-muted max-w-full"
 											/>
 										</div>
 									</div>
@@ -354,7 +354,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								<div class="flex items-center gap-0.5 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 									<Button
 										type="button"
-										variant="background-subtle"
+										variant="ghost"
 										size="xs"
 										shape="square"
 										onClick={openMediaSelectModal}
@@ -367,7 +367,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 									</Button>
 									<Button
 										type="button"
-										variant="danger-subtle"
+										variant="danger-ghost"
 										size="xs"
 										shape="square"
 										onClick={clearSelection}
@@ -465,7 +465,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 								</Button>
 							</div>
 							<Show when={selectedMediaIds().length > 0}>
-								<p class="text-sm text-unfocused">
+								<p class="text-sm text-muted">
 									<RelationCount
 										count={selectedMediaIds().length}
 										min={props.minItems}
@@ -509,13 +509,13 @@ const MediaSortableItem: Component<{
 				"view-transition-name": `media-select-item-${props.media.id}`,
 			}}
 			class={classNames(
-				"group overflow-hidden rounded-md border bg-card-base ring-inset transition-colors duration-200 transform-gpu",
+				"group overflow-hidden rounded-md border bg-card ring-inset transition-colors duration-200 transform-gpu",
 				{
 					"border-border": !props.hasError,
-					"border-error-base ring-1 ring-inset ring-error-base": props.hasError,
+					"border-danger ring-1 ring-inset ring-danger": props.hasError,
 					"opacity-60":
 						props.dragDrop.getDragging()?.ref === `${props.media.id}`,
-					"ring-1 ring-primary-base":
+					"ring-1 ring-primary":
 						props.dragDrop.getDraggingTarget()?.ref === `${props.media.id}` &&
 						props.dragDrop.getDragging()?.ref !== `${props.media.id}` &&
 						!props.hasError,
@@ -594,7 +594,7 @@ const MediaSortableItem: Component<{
 						<Copy.Button
 							label={props.media.key}
 							value={props.media.url}
-							class="text-xs text-unfocused max-w-full"
+							class="text-xs text-muted max-w-full"
 						/>
 					</div>
 				</div>
@@ -602,7 +602,7 @@ const MediaSortableItem: Component<{
 				<div class="opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 					<Button
 						type="button"
-						variant="danger-subtle"
+						variant="danger-ghost"
 						size="xs"
 						shape="square"
 						onClick={() => props.removeSelectedMedia(props.media.id)}

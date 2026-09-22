@@ -98,17 +98,17 @@ const TableRow: Component<TableRowProps> = (props) => {
 				{
 					"cursor-pointer":
 						firstPermittedAction() !== undefined || props.onClick,
-					"outline outline-primary-muted-border -outline-offset-1 [&>td]:bg-primary-muted-bg [&>td]:after:border-primary-muted-border":
+					"outline outline-primary-low-border -outline-offset-1 [&>td]:bg-primary-low [&>td]:after:border-primary-low-border":
 						props.current,
-					"bg-background-base hover:bg-row-hover":
+					"bg-background hover:bg-background-hover":
 						(table.variant() === "primary" || table.variant() === undefined) &&
 						!props.current,
-					"bg-card-base hover:bg-row-hover":
+					"bg-card hover:bg-background-hover":
 						(table.variant() === "secondary" ||
 							table.variant() === "contained") &&
 						!props.current,
 					"opacity-60": isDragging(),
-					"outline outline-primary-base -outline-offset-1 [&>td]:bg-primary-muted-bg [&>td]:after:border-primary-base [&>td]:after:border-b-2":
+					"outline outline-primary -outline-offset-1 [&>td]:bg-primary-low [&>td]:after:border-primary [&>td]:after:border-b-2":
 						isDropTarget(),
 				},
 				props.class,

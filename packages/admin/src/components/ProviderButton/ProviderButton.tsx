@@ -13,12 +13,12 @@ const ProviderButton: Component<{
 	return (
 		<button
 			type="button"
-			class="px-6 py-3 h-12 text-base flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 border border-border hover:border-transparent text-body fill-title bg-input-base hover:bg-secondary-hover hover:text-secondary-contrast hover:fill-secondary-contrast w-full group"
+			class="px-6 py-3 h-12 text-base flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80 border border-border hover:border-transparent text-body fill-title bg-input hover:bg-secondary-hover hover:text-secondary-foreground hover:fill-secondary-foreground w-full group"
 			onClick={props.onClick}
 			disabled={props.disabled || props.isLoading}
 		>
 			<Show when={props.isLoading}>
-				<div class="flex items-center justify-center absolute inset-0 z-10 rounded-md bg-card-base/50">
+				<div class="flex items-center justify-center absolute inset-0 z-10 rounded-md bg-card/50">
 					<Spinner size="sm" />
 				</div>
 			</Show>

@@ -49,7 +49,7 @@ export const FormLabel: Component<LabelProps> = (props) => {
 						{props.startSlot}
 						{props?.label}
 						<Show when={props.required}>
-							<span class="text-error-base inline text-xs">*</span>
+							<span class="text-danger inline text-xs">*</span>
 						</Show>
 					</label>
 				</Show>

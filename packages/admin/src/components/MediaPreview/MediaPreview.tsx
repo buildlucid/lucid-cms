@@ -93,7 +93,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 					</Match>
 					<Match when={props.media.type === "archive"}>
 						<div class="w-full h-full flex justify-center items-center">
-							<FaSolidFileZipper size={40} class="text-icon-base opacity-40" />
+							<FaSolidFileZipper size={40} class="text-icon opacity-40" />
 						</div>
 					</Match>
 					<Match when={props.media.type === "audio"}>
@@ -115,10 +115,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 									</Show>
 								</Match>
 								<Match when={!props.richPreview}>
-									<FaSolidFileAudio
-										size={40}
-										class="text-icon-base opacity-40"
-									/>
+									<FaSolidFileAudio size={40} class="text-icon opacity-40" />
 								</Match>
 							</Switch>
 						</div>
@@ -169,22 +166,19 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 									</Show>
 								</Match>
 								<Match when={!props.richPreview}>
-									<FaSolidFileVideo
-										size={40}
-										class="text-icon-base opacity-40"
-									/>
+									<FaSolidFileVideo size={40} class="text-icon opacity-40" />
 								</Match>
 							</Switch>
 						</div>
 					</Match>
 					<Match when={props.media.type === "document"}>
 						<div class="w-full h-full flex justify-center items-center group-hover:scale-110 transition duration-100">
-							<FaSolidFileLines size={40} class="text-icon-base opacity-40" />
+							<FaSolidFileLines size={40} class="text-icon opacity-40" />
 						</div>
 					</Match>
 					<Match when={props.media.type === "unknown"}>
 						<div class="w-full h-full flex justify-center items-center group-hover:scale-110 transition duration-100">
-							<FaSolidFile size={40} class="text-icon-base opacity-40" />
+							<FaSolidFile size={40} class="text-icon opacity-40" />
 						</div>
 					</Match>
 				</Switch>

@@ -11,14 +11,14 @@ const AiDraftReviewPill: Component<{
 	// -------------------------------------
 	// Render
 	return (
-		<div class="absolute top-0 right-full z-20 mr-1 flex h-5 items-center overflow-hidden rounded-md border border-primary-muted-border bg-primary-muted-bg/95 text-primary-muted-contrast shadow-md backdrop-blur-sm">
-			<span class="border-r border-primary-muted-border px-1.5 text-xs font-medium leading-none whitespace-nowrap">
+		<div class="absolute top-0 right-full z-20 mr-1 flex h-5 items-center overflow-hidden rounded-md border border-primary-low-border bg-primary-low text-primary-low-foreground shadow-md backdrop-blur-sm">
+			<span class="border-r border-primary-low-border px-1.5 text-xs font-medium leading-none whitespace-nowrap">
 				{props.label}
 			</span>
 			<div class="flex items-center">
 				<button
 					type="button"
-					class="flex h-5 min-w-5 items-center justify-center text-primary-base fill-primary-base transition-colors duration-200 hover:bg-primary-base hover:text-primary-contrast hover:fill-primary-contrast focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base disabled:cursor-not-allowed disabled:opacity-60"
+					class="flex h-5 min-w-5 items-center justify-center text-primary-low-foreground fill-primary-low-foreground transition-colors duration-200 hover:bg-primary hover:text-primary-foreground hover:fill-primary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
 					title={T()("common.accept")}
 					aria-label={T()("common.accept")}
 					disabled={props.disabled}
@@ -32,7 +32,7 @@ const AiDraftReviewPill: Component<{
 				</button>
 				<button
 					type="button"
-					class="flex h-5 min-w-5 items-center justify-center text-unfocused fill-unfocused transition-colors duration-200 hover:bg-error-base/15 hover:text-error-base hover:fill-error-base focus:outline-hidden focus-visible:ring-1 focus-visible:ring-error-base disabled:cursor-not-allowed disabled:opacity-60"
+					class="flex h-5 min-w-5 items-center justify-center text-muted fill-muted transition-colors duration-200 hover:bg-danger-low hover:text-danger hover:fill-danger focus:outline-hidden focus-visible:ring-1 focus-visible:ring-danger disabled:cursor-not-allowed disabled:opacity-60"
 					title={T()("common.reject")}
 					aria-label={T()("common.reject")}
 					disabled={props.disabled}

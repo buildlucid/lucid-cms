@@ -11,7 +11,7 @@ const Public: RouteComponent = () => {
 	// ----------------------------------
 	// Render
 	return (
-		<main class="flex min-h-screen flex-col items-center justify-center bg-background-base p-8">
+		<main class="flex min-h-screen flex-col items-center justify-center bg-background p-8">
 			<Pill variant="outline" data-testid="public-session-status">
 				Session: {session.status()}
 			</Pill>

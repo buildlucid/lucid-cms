@@ -74,7 +74,7 @@ test("compiles project and installed plugin themes together and watches their so
 		const helperPath = path.join(sourceRoot, "parts/Helper.js");
 		await writeFile(
 			helperPath,
-			'export const classes = "p-[37px] md:p-[39px] text-project-accent project-panel bg-card-base dark:text-primary-base";',
+			'export const classes = "p-[37px] md:p-[39px] text-project-accent project-panel bg-card dark:text-primary";',
 		);
 		await writeFile(
 			path.join(root, "unrelated.js"),
@@ -82,7 +82,7 @@ test("compiles project and installed plugin themes together and watches their so
 		);
 		await writeFile(
 			path.join(sourceRoot, "panel.module.css"),
-			'@reference "./styles.css"; .panel { @apply bg-card-base text-project-accent; }',
+			'@reference "./styles.css"; .panel { @apply bg-card text-project-accent; }',
 		);
 		await writeFile(
 			path.join(root, "main.js"),
@@ -125,7 +125,7 @@ test("compiles project and installed plugin themes together and watches their so
 			".text-project-accent",
 			".text-plugin-accent",
 			"outline-width: 7px",
-			"var(--lucid-card-base)",
+			"var(--lucid-card)",
 			'[data-theme="dark"]',
 		])
 			expect(css).toContain(expected);

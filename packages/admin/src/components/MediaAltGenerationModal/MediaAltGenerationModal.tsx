@@ -205,10 +205,10 @@ const MediaAltGenerationModalContent: Component<{
 		<Modal.Root open={props.state.open} onOpenChange={setOpen} size="lg">
 			<div class="grid min-w-0 w-full items-stretch gap-0 md:grid-cols-[minmax(24rem,0.5fr)_minmax(0,1fr)]">
 				<form
-					class="flex min-h-130 min-w-0 flex-col gap-4 border-b border-border bg-card-base p-4 md:border-r md:border-b-0 md:p-6"
+					class="flex min-h-130 min-w-0 flex-col gap-4 border-b border-border bg-card p-4 md:border-r md:border-b-0 md:p-6"
 					onSubmit={generate}
 				>
-					<div class="rectangle-background relative flex min-h-64 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-border bg-background-base">
+					<div class="rectangle-background relative flex min-h-64 min-w-0 flex-1 items-center justify-center overflow-hidden rounded-md border border-border bg-background">
 						<Show
 							when={props.imageUrl}
 							fallback={
@@ -233,7 +233,7 @@ const MediaAltGenerationModalContent: Component<{
 								label={T()("ai.media.alt.generate.locales.label")}
 								theme="basic"
 								rightSlot={
-									<span class="text-xs text-unfocused">
+									<span class="text-xs text-muted">
 										{T()("ai.media.alt.generate.locales.selected", {
 											count: props.selectedLocales.length,
 										})}
@@ -282,8 +282,8 @@ const MediaAltGenerationModalContent: Component<{
 						/>
 						<Show when={props.error}>
 							{(error) => (
-								<div class="mt-3 min-w-0 rounded-md border border-error-base/30 bg-error-base/10 p-3">
-									<p class="text-sm text-error-base">{error()}</p>
+								<div class="mt-3 min-w-0 rounded-md border border-danger-low-border bg-danger-low p-3">
+									<p class="text-sm text-danger-low-foreground">{error()}</p>
 								</div>
 							)}
 						</Show>
@@ -342,7 +342,7 @@ const MediaAltGenerationModalContent: Component<{
 											);
 
 											return (
-												<div class="min-w-0 overflow-hidden rounded-lg border border-border bg-background-base">
+												<div class="min-w-0 overflow-hidden rounded-lg border border-border bg-background">
 													<div class="flex min-w-0 items-center justify-between gap-3 border-b border-border px-3 py-2.5">
 														<label
 															for={fieldId()}
@@ -353,7 +353,7 @@ const MediaAltGenerationModalContent: Component<{
 														<Show when={canRevert()}>
 															<button
 																type="button"
-																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-icon-faded transition-colors duration-200 hover:bg-input-base hover:text-title focus-visible:ring-1 focus-visible:ring-primary-base"
+																class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:bg-input hover:text-title focus-visible:ring-1 focus-visible:ring-primary"
 																title={T()(
 																	"ai.media.alt.generate.response.revert",
 																)}
@@ -403,10 +403,10 @@ const MediaAltGenerationModalContent: Component<{
 							</div>
 						</div>
 						<Show when={props.isLoading}>
-							<div class="absolute inset-0 z-20 flex items-center justify-center bg-background-base/70 p-6 backdrop-blur-sm">
+							<div class="absolute inset-0 z-20 flex items-center justify-center bg-background/70 p-6 backdrop-blur-sm">
 								<div class="flex min-w-0 max-w-xs flex-col items-center gap-3 text-center">
 									<span
-										class="ai-action-button__surface flex h-11 min-w-11 items-center justify-center rounded-md border border-border text-primary-base"
+										class="ai-action-button__surface flex h-11 min-w-11 items-center justify-center rounded-md border border-border text-primary"
 										data-loading="true"
 									>
 										<FaSolidMagicWandSparkles size={16} aria-hidden="true" />
@@ -425,7 +425,7 @@ const MediaAltGenerationModalContent: Component<{
 							</div>
 						</Show>
 					</div>
-					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card-base/95 p-6 backdrop-blur-sm md:-mx-6">
+					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
 						<div class="min-w-0 flex-1">
 							<Show when={sessionCost()}>
 								{(cost) => (

@@ -151,7 +151,7 @@ const Switch: Component<SwitchProps> = (props) => {
 				{...ariaProps}
 				type="button"
 				data-switch-control
-				class="h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-inset focus-visible:ring-1 transition-colors duration-200 group bg-input-base ring-border focus-visible:ring-primary-base"
+				class="h-9 disabled:cursor-not-allowed disabled:opacity-50 rounded-md flex relative focus:outline-hidden ring-1 ring-inset focus-visible:ring-1 transition-colors duration-200 group bg-input ring-border focus-visible:ring-primary"
 				onClick={() => {
 					checkboxRef?.click();
 				}}
@@ -167,7 +167,7 @@ const Switch: Component<SwitchProps> = (props) => {
 					ref={falseSpanRef}
 					class={classnames(
 						"flex-1 py-1 px-3 h-full flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
-						!props.value && "text-secondary-contrast",
+						!props.value && "text-secondary-foreground",
 						props.value && "text-subtitle",
 					)}
 				>
@@ -177,7 +177,7 @@ const Switch: Component<SwitchProps> = (props) => {
 					ref={trueSpanRef}
 					class={classnames(
 						"flex-1 px-3 h-full py-1 flex items-center justify-center text-center z-10 relative duration-200 transition-colors text-sm",
-						props.value && "text-secondary-contrast",
+						props.value && "text-secondary-foreground",
 						!props.value && "text-subtitle",
 					)}
 				>
@@ -185,7 +185,7 @@ const Switch: Component<SwitchProps> = (props) => {
 				</span>
 				<span
 					ref={overlayRef}
-					class="absolute top-1 bottom-1 transition-all duration-200 rounded-md z-0 bg-secondary-base group-hover:bg-secondary-hover"
+					class="absolute top-1 bottom-1 transition-all duration-200 rounded-md z-0 bg-secondary group-hover:bg-secondary-hover"
 					style={{
 						...overlayStyle(),
 					}}

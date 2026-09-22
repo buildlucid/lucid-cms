@@ -38,7 +38,7 @@ const TableUserStackCell: Component<{
 					<div class="flex shrink-0 -space-x-2">
 						<For each={props.users.slice(0, props.maxVisible ?? 4)}>
 							{(user) => (
-								<span class="rounded-full ring-2 ring-card-base">
+								<span class="rounded-full ring-2 ring-card">
 									<UserDisplay user={user} variant="icon" size="xs" />
 								</span>
 							)}

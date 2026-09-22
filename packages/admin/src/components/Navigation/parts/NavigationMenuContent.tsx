@@ -194,7 +194,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 									<span class="skeleton block h-8 w-full mb-1" />
 								</Match>
 								<Match when={props.collectionsIsError}>
-									<div class="bg-background-base rounded-md p-2">
+									<div class="bg-background rounded-md p-2">
 										<p class="text-xs text-center">
 											{T()("errors.collections.load.failed")}
 										</p>
@@ -294,7 +294,7 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 					)}
 				</Show>
 				<div class="mt-3 flex justify-center">
-					<small class="px-2 py-1 text-center text-[10px] leading-none text-unfocused">
+					<small class="px-2 py-1 text-center text-[10px] leading-none text-muted">
 						v{packageJson.version}
 					</small>
 				</div>

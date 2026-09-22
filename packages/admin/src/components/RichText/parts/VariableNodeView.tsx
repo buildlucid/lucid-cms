@@ -91,9 +91,9 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 			class={classNames(
 				"m-0.5 inline-flex select-none items-center gap-1 rounded-full border py-0.5 pr-1 pl-2 align-baseline text-sm",
 				{
-					"border-primary-muted-border bg-primary-muted-bg text-primary-muted-contrast":
+					"border-primary-low-border bg-primary-low text-primary-low-foreground":
 						props.available && !hasErrors(),
-					"border-error-base/30 bg-error-base/10 text-error-base":
+					"border-danger-low-border bg-danger-low text-danger-low-foreground":
 						!props.available || hasErrors(),
 				},
 			)}

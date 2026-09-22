@@ -70,10 +70,7 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 	return (
 		<div
 			data-page-layout-header
-			class={classnames(
-				"bg-background-base border-b border-border",
-				props.class,
-			)}
+			class={classnames("bg-background border-b border-border", props.class)}
 		>
 			<div
 				class={classnames(
@@ -110,7 +107,7 @@ const PageLayoutBody: Component<PageLayoutBodyProps> = (props) => {
 		<div
 			data-page-layout-body
 			class={classnames(
-				"flex grow flex-col justify-between bg-background-base",
+				"flex grow flex-col justify-between bg-background",
 				{
 					"p-4": props.padding === "sm",
 					"p-4 md:p-6": props.padding === "md",

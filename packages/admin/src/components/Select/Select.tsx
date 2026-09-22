@@ -218,11 +218,11 @@ function Select<Option extends SelectOption = SelectOption>(
 					id={props.id}
 					{...ariaProps}
 					class={classNames(
-						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input-base border border-border flex items-center rounded-md focus:border-primary-base duration-200 transition-colors",
+						"focus:outline-hidden overflow-hidden px-2 text-sm text-subtitle font-medium w-full justify-between disabled:cursor-not-allowed disabled:opacity-80 focus:ring-0 bg-input border border-border flex items-center rounded-md focus:border-primary duration-200 transition-colors",
 						{
 							"h-10": props.size !== "sm",
 							"h-9": props.size === "sm",
-							"border-error-base": props.invalid,
+							"border-danger": props.invalid,
 						},
 					)}
 					disabled={props.disabled}
@@ -235,7 +235,7 @@ function Select<Option extends SelectOption = SelectOption>(
 									props.shortcutDisplay === "full")
 							}
 						>
-							<span class="text-xs bg-background-base px-2 py-1 rounded-md mr-1 border border-border">
+							<span class="text-xs bg-background px-2 py-1 rounded-md mr-1 border border-border">
 								{props.shortcut}
 							</span>
 						</Show>
@@ -244,7 +244,7 @@ function Select<Option extends SelectOption = SelectOption>(
 					<div class="ml-2 flex shrink-0 items-center gap-1">
 						<Show when={props.shortcut && props.shortcutDisplay === "compact"}>
 							<span
-								class="bg-background-base hidden px-1.5 py-1 rounded-md border border-border text-body md:inline-flex items-center justify-center"
+								class="bg-background hidden px-1.5 py-1 rounded-md border border-border text-body md:inline-flex items-center justify-center"
 								title={props.shortcut}
 							>
 								<FaSolidKeyboard size={12} aria-hidden="true" />
@@ -260,7 +260,7 @@ function Select<Option extends SelectOption = SelectOption>(
 							<button
 								type="button"
 								disabled={props.disabled}
-								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-icon-faded hover:bg-error-base hover:text-error-contrast duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base focus:fill-error-base"
+								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-muted hover:bg-danger hover:text-danger-foreground duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-danger focus:fill-danger"
 								onClick={(e) => {
 									e.stopPropagation();
 									if (props.disabled) {
@@ -288,7 +288,7 @@ function Select<Option extends SelectOption = SelectOption>(
 							<div class="relative">
 								<input
 									type="text"
-									class="bg-input-base px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary-base"
+									class="bg-input px-2 rounded-md w-full border border-border text-sm text-subtitle font-medium h-10 focus:outline-hidden focus:border-primary"
 									placeholder={
 										props.search?.placeholder || T()("common.search")
 									}
@@ -309,7 +309,7 @@ function Select<Option extends SelectOption = SelectOption>(
 										<div class="absolute right-2 top-0 bottom-0 flex items-center">
 											<button
 												type="button"
-												class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-icon-faded hover:bg-error-base hover:text-error-contrast duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-error-base"
+												class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full mr-1 text-muted hover:bg-danger hover:text-danger-foreground duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-danger"
 												onClick={clearSearch}
 												onKeyDown={(e) => {
 													if (

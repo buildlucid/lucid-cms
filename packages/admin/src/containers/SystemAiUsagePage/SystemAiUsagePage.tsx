@@ -68,9 +68,9 @@ const SystemAiUsagePage: Component = () => {
 			<PageLayout.Body>
 				<div class="flex-1 h-full p-4 md:p-6">
 					<Show when={!connectionActive()}>
-						<section class="mb-5 flex flex-col gap-4 rounded-md border border-warning-base/25 bg-warning-base/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+						<section class="mb-5 flex flex-col gap-4 rounded-md border border-warning-low-border bg-warning-low p-4 sm:flex-row sm:items-center sm:justify-between">
 							<div class="flex min-w-0 items-start gap-3">
-								<span class="grid size-8 shrink-0 place-items-center rounded-full bg-warning-base/10 text-warning-base">
+								<span class="grid size-8 shrink-0 place-items-center rounded-full border border-warning-low-border bg-warning-low text-warning-low-foreground">
 									<FaSolidTriangleExclamation class="size-3.5" />
 								</span>
 								<div class="min-w-0">

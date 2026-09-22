@@ -20,7 +20,7 @@ const PageGuidance: Component<{ noindex: boolean }> = (props) => {
 					{t("plugin.seo.pageGuidance.label")}
 				</p>
 				<ul>
-					<li class="flex items-start gap-2 text-sm text-unfocused">
+					<li class="flex items-start gap-2 text-sm text-muted">
 						<FaSolidEyeSlash
 							aria-hidden="true"
 							size={14}

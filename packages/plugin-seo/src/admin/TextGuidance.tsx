@@ -33,7 +33,7 @@ const TextGuidance: FieldSlotComponent = (props) => {
 	// Render
 	return (
 		<div
-			class="space-y-1.5 text-sm text-unfocused"
+			class="space-y-1.5 text-sm text-muted"
 			title={t("plugin.seo.guidance.note")}
 			data-testid="seo-text-guidance"
 		>
@@ -41,19 +41,17 @@ const TextGuidance: FieldSlotComponent = (props) => {
 				<span>
 					{t("plugin.seo.guidance.count", { count: assessment().count })}
 				</span>
-				<span
-					classList={{ "text-warning-base": assessment().status === "long" }}
-				>
+				<span classList={{ "text-warning": assessment().status === "long" }}>
 					{t(`plugin.seo.guidance.${assessment().status}`)}
 				</span>
 			</div>
 			<ProgressBar
 				size="md"
-				variant={assessment().status === "long" ? "warning" : "primary"}
+				variant={assessment().status === "long" ? "warning" : "success"}
 				value={(assessment().count / assessment().guide) * 100}
 			/>
 			<Show when={descriptions[props.field.key]}>
-				{(key) => <p class="text-sm text-unfocused">{t(key())}</p>}
+				{(key) => <p class="text-sm text-muted">{t(key())}</p>}
 			</Show>
 		</div>
 	);

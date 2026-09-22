@@ -204,6 +204,12 @@ export {
 	type SpinnerSize,
 } from "../components/Spinner/Spinner.js";
 export {
+	default as StatusIndicator,
+	type StatusIndicatorProps,
+	type StatusIndicatorSize,
+	type StatusIndicatorVariant,
+} from "../components/StatusIndicator/StatusIndicator.js";
+export {
 	default as Switch,
 	type SwitchProps,
 } from "../components/Switch/Switch.js";

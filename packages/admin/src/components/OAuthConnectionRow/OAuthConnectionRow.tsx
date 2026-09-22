@@ -80,7 +80,7 @@ const OAuthConnectionRow: Component<{
 				<div class="flex min-w-0 items-start justify-between gap-3">
 					<div class="flex min-w-0 items-start gap-3">
 						<IconContainer>
-							<FaSolidGlobe class="size-3.5 text-primary-base" />
+							<FaSolidGlobe class="size-3.5 text-primary" />
 						</IconContainer>
 						<div class="min-w-0">
 							<h3 class="truncate text-sm font-semibold text-title">
@@ -89,11 +89,11 @@ const OAuthConnectionRow: Component<{
 							<p class="mt-0.5 truncate text-xs">
 								<Show when={hasCustomName()}>
 									<span>{props.connection.clientName}</span>
-									<span class="mx-1.5 text-unfocused">·</span>
+									<span class="mx-1.5 text-muted">·</span>
 								</Show>
 								<span>{clientHostname()}</span>
 							</p>
-							<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-unfocused">
+							<div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
 								<button
 									type="button"
 									class="inline-flex items-center gap-1 rounded text-xs text-body hover:text-title"

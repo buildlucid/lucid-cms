@@ -56,7 +56,7 @@ const DeleteMediaFolderModal: Component<DeleteMediaFolderProps> = (props) => {
 				setRecursiveMedia(false);
 			}}
 		>
-			<div class="bg-card-base p-4 rounded-md border border-border mb-4 md:mb-6">
+			<div class="bg-card p-4 rounded-md border border-border mb-4 md:mb-6">
 				<Checkbox
 					id="recursiveMedia"
 					value={recursiveMedia()}

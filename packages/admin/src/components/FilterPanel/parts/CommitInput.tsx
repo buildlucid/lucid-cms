@@ -102,7 +102,7 @@ export const CommitInput: Component<{
 					aria-hidden="true"
 				/>
 				<input
-					class="focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title pl-10 pr-3 py-2 bg-input-base border border-border h-10 w-full rounded-md focus:border-primary-base duration-200 transition-colors placeholder:text-unfocused"
+					class="focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-80 text-sm text-title pl-10 pr-3 py-2 bg-input border border-border h-10 w-full rounded-md focus:border-primary duration-200 transition-colors placeholder:text-muted"
 					id={props.id}
 					name={props.name}
 					type="text"

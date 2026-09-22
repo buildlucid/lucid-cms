@@ -21,7 +21,7 @@ export const DrawerDescription: Component<DrawerDescriptionProps> = (props) => {
 			)}
 		>
 			<Show when={props.icon}>
-				<span class="mt-1.5 text-warning-base">{props.icon}</span>
+				<span class="mt-1.5 text-warning">{props.icon}</span>
 			</Show>
 			<span>{props.children}</span>
 		</Dialog.Description>

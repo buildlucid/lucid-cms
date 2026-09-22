@@ -32,12 +32,12 @@ const PublishOperationSection: Component<{
 					</div>
 				</Match>
 				<Match when={props.rows.length === 0}>
-					<div class="rounded-md border border-border bg-card-base p-3">
+					<div class="rounded-md border border-border bg-card p-3">
 						<p class="text-sm text-body">{props.emptyCopy}</p>
 					</div>
 				</Match>
 				<Match when={true}>
-					<div class="overflow-hidden rounded-md border border-border bg-card-base">
+					<div class="overflow-hidden rounded-md border border-border bg-card">
 						<For each={props.rows}>
 							{(request) => (
 								<PublishRequestRow

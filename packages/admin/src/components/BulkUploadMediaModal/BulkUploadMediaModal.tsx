@@ -316,10 +316,10 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 	};
 	const rowStatusClasses = (status: UploadStatus) =>
 		classNames("text-xs font-medium", {
-			"text-unfocused": status === "queued",
-			"text-primary-base": status === "uploading" || status === "creating",
-			"text-success-base": status === "success",
-			"text-error-base": status === "error",
+			"text-muted": status === "queued",
+			"text-primary": status === "uploading" || status === "creating",
+			"text-success": status === "success",
+			"text-danger": status === "error",
 		});
 
 	// ----------------------------------
@@ -366,7 +366,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 					class={classNames(
 						"max-h-[60vh] overflow-y-auto p-4 md:p-6 transition-colors",
 						{
-							"bg-primary-base/5": dragOver(),
+							"bg-primary-low": dragOver(),
 						},
 					)}
 					onDragOver={(event) => {
@@ -388,7 +388,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						</div>
 						<Button
 							type="button"
-							variant="background-subtle"
+							variant="ghost"
 							size="xs"
 							shape="square"
 							onClick={closeModal}
@@ -402,15 +402,12 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 						when={rows().length > 0}
 						fallback={
 							<div class="mt-4 flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-6 text-center">
-								<FaSolidArrowUpFromBracket
-									size={18}
-									class="mb-2 text-unfocused"
-								/>
+								<FaSolidArrowUpFromBracket size={18} class="mb-2 text-muted" />
 								<p class="text-sm font-medium text-subtitle">
 									{T()("media.upload.bulk.drop.title")}{" "}
 									<button
 										type="button"
-										class="font-medium text-primary-base"
+										class="font-medium text-primary"
 										onClick={openFileBrowser}
 									>
 										{T()("media.upload.drop.here")}
@@ -428,15 +425,15 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 									<div
 										ref={(el) => rowRefs.set(row.id, el)}
 										class={classNames(
-											"relative overflow-hidden rounded-md border border-border bg-card-base p-3 transition-colors",
+											"relative overflow-hidden rounded-md border border-border bg-card p-3 transition-colors",
 											{
-												"border-primary-base": row.status === "uploading",
-												"border-error-base/60": row.status === "error",
+												"border-primary": row.status === "uploading",
+												"border-danger": row.status === "error",
 											},
 										)}
 									>
 										<div class="grid grid-cols-[2rem_1fr_auto] items-center gap-3">
-											<div class="flex h-8 w-8 items-center justify-center rounded-md bg-input-base text-icon-base">
+											<div class="flex h-8 w-8 items-center justify-center rounded-md bg-input text-icon">
 												<Show
 													when={row.status === "success"}
 													fallback={
@@ -468,7 +465,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 												</div>
 												<Show when={row.error}>
 													{(error) => (
-														<p class="mt-2 text-xs text-error-base">
+														<p class="mt-2 text-xs text-danger">
 															{error().message}
 														</p>
 													)}
@@ -477,7 +474,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 											<Show when={row.status === "queued"}>
 												<Button
 													type="button"
-													variant="danger-subtle"
+													variant="danger-ghost"
 													size="xs"
 													shape="square"
 													onClick={() => removeRow(row.id)}
@@ -507,7 +504,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							</For>
 							<button
 								type="button"
-								class="mt-2 flex min-h-14 items-center justify-center rounded-md border border-dashed border-border px-4 text-sm font-medium text-body transition-colors hover:border-primary-base hover:bg-primary-base/5 focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary-base"
+								class="mt-2 flex min-h-14 items-center justify-center rounded-md border border-dashed border-border px-4 text-sm font-medium text-body transition-colors hover:border-primary hover:bg-primary-low focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 								onClick={openFileBrowser}
 								disabled={isProcessing()}
 							>

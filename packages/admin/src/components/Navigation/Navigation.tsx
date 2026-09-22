@@ -192,14 +192,14 @@ export const Navigation: Component = () => {
 	return (
 		<>
 			<header class="md:hidden z-32 px-4">
-				<div class="px-2 py-4 bg-sidebar-base flex items-center justify-between gap-2">
+				<div class="px-2 py-4 bg-sidebar flex items-center justify-between gap-2">
 					<A href="/lucid" class="flex items-center min-w-0">
 						<NavigationLogo />
 					</A>
 					<div class="flex items-center gap-4">
 						<button
 							type="button"
-							class="h-9 rounded-lg text-icon-base hover:text-icon-hover flex items-center justify-center transition-colors"
+							class="h-9 rounded-lg text-icon hover:text-icon-hover flex items-center justify-center transition-colors"
 							onClick={() => setMobileMenuOpen((open) => !open)}
 							aria-label={mobileMenuOpen() ? T()("common.close") : "Open menu"}
 							title={mobileMenuOpen() ? T()("common.close") : "Open menu"}
@@ -222,7 +222,7 @@ export const Navigation: Component = () => {
 			</header>
 
 			{/* Desktop Navigation */}
-			<div class="hidden md:flex bg-sidebar-base max-h-screen sticky top-0 z-10">
+			<div class="hidden md:flex bg-sidebar max-h-screen sticky top-0 z-10">
 				<div class="w-55 h-full flex flex-col overflow-y-auto scrollbar">
 					<div class="pt-6 px-4">
 						<div class="flex items-center pl-2">
@@ -271,7 +271,7 @@ export const Navigation: Component = () => {
 					<button
 						type="button"
 						class={classNames(
-							"absolute inset-0 bg-black/55 backdrop-blur-[2px] transition-opacity duration-200",
+							"absolute inset-0 bg-overlay backdrop-blur-[2px] transition-opacity duration-200",
 							{
 								"opacity-100": mobileMenuOpen(),
 								"opacity-0": !mobileMenuOpen(),
@@ -284,7 +284,7 @@ export const Navigation: Component = () => {
 					{/* Mobile Navigation Content */}
 					<div
 						class={classNames(
-							"relative h-full w-full max-w-[320px] border-border bg-sidebar-base shadow-[0_20px_70px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out",
+							"relative h-full w-full max-w-[320px] border-border bg-sidebar shadow-[0_20px_70px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out",
 							{
 								"translate-x-0": mobileMenuOpen(),
 								"border-r -translate-x-full":

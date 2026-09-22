@@ -123,7 +123,7 @@ const LucidConnection: Component = () => {
 							<Pill
 								variant={
 									isConnected()
-										? "primary-subtle"
+										? "success-subtle"
 										: connection()?.status === "revoked"
 											? "danger-subtle"
 											: "outline"
@@ -214,7 +214,7 @@ const LucidConnection: Component = () => {
 					</div>
 					<Show when={connection()?.errorKey}>
 						<div class="mt-4 border-t border-border pt-3">
-							<p class="text-xs text-error-base">
+							<p class="text-xs text-danger">
 								{errorMessage(connection()?.errorKey)}
 							</p>
 						</div>
