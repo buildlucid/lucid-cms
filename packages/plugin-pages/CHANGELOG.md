@@ -1,6 +1,6 @@
 # @lucidcms/plugin-pages
 
-## v0.8.0 (unreleased)
+## v0.8.0
 
 - Added relation-derived route segments and automatic collection routing through `fullSlug`.
 - Added generated route-segment relation fields and propagation when referenced segment values change.
@@ -12,6 +12,8 @@
 - Moved translation registration to plugin `sources`.
 - Fixed routes and page hierarchies when locales are added after content is created.
 - Fixed page paths retaining route segments from deleted documents.
+- Bumped `@lucidcms/admin` to `0.19.0-alpha.0`.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v0.7.0
 

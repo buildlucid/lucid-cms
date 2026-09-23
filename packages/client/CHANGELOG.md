@@ -1,11 +1,12 @@
 # @lucidcms/client
 
-## v0.5.0 (unreleased)
+## v0.5.0
 
 - Document responses now expose shared refs at the response level, and `asDocument` and `asDocuments` now accept one object containing the document data and refs.
 - Reworked the toolbar for SPAs and server-rendered sites, with automatic authentication and preview handling, route updates and a Toolkit adapter.
 - Preview resolution now accepts tokens in the request body and returns only their mode and expiry.
 - Document helpers now restrict locale arguments and translation records to each generated collection's supported locales.
+- Bumped `@lucidcms/types` to `0.6.0`.
 
 ## v0.4.0
 

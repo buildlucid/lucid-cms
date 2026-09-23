@@ -1,11 +1,12 @@
 # @lucidcms/plugin-s3
 
-## v2.3.0 (unreleased)
+## v2.3.0
 
 - Migrated to the media storage adapter contract with explicit ready status and protocol-based multipart upload sessions.
 - Added a direct `s3StorageAdapter` export for config-first usage.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Moved translation registration to plugin `sources`.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v2.2.5
 

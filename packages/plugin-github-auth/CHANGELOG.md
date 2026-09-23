@@ -1,8 +1,9 @@
 # @lucidcms/plugin-github-auth
 
-## v1.0.6 (unreleased)
+## v1.0.6
 
 - Moved public asset registration to plugin `sources`.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v1.0.5
 

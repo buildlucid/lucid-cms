@@ -1,11 +1,12 @@
 # @lucidcms/plugin-sharp
 
-## v1.4.0 (unreleased)
+## v1.4.0
 
 - Migrated Sharp image transformation to the media delivery adapter contract.
 - Added a direct `sharpMediaDeliveryAdapter` export for config-first usage.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Moved translation registration to plugin `sources`.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v1.3.0
 

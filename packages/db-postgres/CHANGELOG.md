@@ -1,8 +1,9 @@
 # @lucidcms/db-postgres
 
-## v1.2.2 (unreleased)
+## v1.2.2
 
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v1.2.1
 

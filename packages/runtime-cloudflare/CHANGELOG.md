@@ -1,12 +1,13 @@
 # @lucidcms/runtime-cloudflare
 
-## v1.3.1 (unreleased)
+## v1.3.1
 
 - Stopped removing Wrangler and Miniflare process listeners outside their supported disposal lifecycles, preventing shared `signal-exit` state from becoming inconsistent.
 - Split runtime media support checks into storage and delivery adapter capabilities.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Added build support for discovered resources and plugin sources.
 - Added live admin updates on the local Cloudflare development server and support for programmatic SPA builds.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v1.3.0
 

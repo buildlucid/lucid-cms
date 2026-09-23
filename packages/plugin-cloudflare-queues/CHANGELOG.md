@@ -1,11 +1,12 @@
 # @lucidcms/plugin-cloudflare-queues
 
-## v1.2.0 (unreleased)
+## v1.2.0
 
 - Updated Cloudflare Queue messages to carry durable job IDs while core owns payloads, retries, cancellation and job state.
 - Removed the top-level `maxRetries` and `baseDelaySeconds` options. Retry policy now belongs to each `defineJob` definition, while Cloudflare delivery retries remain under `consumer.maxRetries`.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Moved translation registration to plugin `sources`.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v1.1.1
 

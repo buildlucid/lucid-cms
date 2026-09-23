@@ -1,8 +1,9 @@
 # @lucidcms/rich-text
 
-## v1.2.0 (unreleased)
+## v1.2.0
 
 - Document node renderers now resolve related documents from the response-level refs object.
+- Bumped `@lucidcms/types` to `0.6.0`.
 
 ## v1.1.1
 

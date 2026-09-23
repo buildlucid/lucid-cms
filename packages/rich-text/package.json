@@ -1,6 +1,6 @@
 {
 	"name": "@lucidcms/rich-text",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"private": false,
 	"description": "Shared Tiptap extensions and rich text conversion utilities for Lucid CMS.",
 	"type": "module",
@@ -52,7 +52,7 @@
 		"typescript": "^6.0.3"
 	},
 	"dependencies": {
-		"@lucidcms/types": "^0.5.0",
+		"@lucidcms/types": "^0.6.0",
 		"@tiptap/core": "^3.27.1",
 		"@tiptap/extension-link": "^3.27.1",
 		"@tiptap/html": "^3.27.1",

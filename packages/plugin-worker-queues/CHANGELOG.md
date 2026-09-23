@@ -1,12 +1,13 @@
 # @lucidcms/plugin-worker-queues
 
-## v1.2.0 (unreleased)
+## v1.2.0
 
 - Updated the worker queue to drain durable jobs through one shared concurrency limit, with immediate wake-ups and core-managed retries, leases and cancellation.
 - Added media storage and delivery adapter lifecycle support to queue consumers.
 - Moved queue consumer adapter setup and cleanup onto Lucid's shared adapter lifecycle.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
 - Moved translation registration to plugin `sources`.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v1.1.1
 

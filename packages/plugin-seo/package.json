@@ -50,8 +50,8 @@
 	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.1",
-		"@lucidcms/admin": "0.18.0-alpha.0",
-		"@lucidcms/core": "0.18.0-alpha.0",
+		"@lucidcms/admin": "0.19.0-alpha.0",
+		"@lucidcms/core": "0.19.0-alpha.0",
 		"@tanstack/solid-query": "^5.101.1",
 		"@types/node": "^24.13.2",
 		"solid-js": "^1.9.13",
@@ -60,8 +60,8 @@
 		"zod": "^4.4.3"
 	},
 	"peerDependencies": {
-		"@lucidcms/admin": "^0.18.0-alpha.0",
-		"@lucidcms/core": "^0.18.0-alpha.0",
+		"@lucidcms/admin": "^0.19.0-alpha.0",
+		"@lucidcms/core": "^0.19.0-alpha.0",
 		"@tanstack/solid-query": "^5.101.1",
 		"solid-js": "^1.9.13"
 	},

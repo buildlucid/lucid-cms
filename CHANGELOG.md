@@ -1,6 +1,6 @@
 # @lucidcms/core
 
-## v0.19.0-alpha.0 (unreleased)
+## v0.19.0-alpha.0
 
 ### Features:
 
@@ -13,17 +13,17 @@
 - Added a publishing overview for tracking release status across collections and environments. ([f8c96ef](https://github.com/buildlucid/lucid-cms/commit/f8c96eff815a444307f47c6cb0648fe55d97a162))
 - Added `preview: true` and same-origin default preview URLs for routed collections. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - Preview tokens can now be resolved without integration credentials. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
-- Added support for relation fields targeting single collections, including singleton document selection in the admin.
-- Added collection-level content locale subsets and default locale overrides, with matching admin controls, API responses, validation, persistence and generated types.
-- Added durable jobs and recurring schedules, with retries, cancellation, queue adapters and admin monitoring.
-- Added `defineToolkit` so plugins can register type-safe toolkit services.
-- Added `defineContentApiRoute` for custom content endpoints with authentication and scope options.
-- Added custom permissions and integration scopes through `lucid.config.access`, with labels, groups, user permission checks and generated type hints for middleware and routes.
-- Added toolkit services for uploading and managing media files.
-- Added toolkit input validation, on-demand service loading and a dedicated toolkit entry point.
-- Added typed document toolkit services for creating, updating, patching and deleting documents, with editable reads, conflict checks and collection schema access.
-- The admin SPA is now built programmatically from `@lucidcms/admin`, with live updates during development, cached builds and clearer server restart logs.
-- Added admin extensions for custom routes, slots, scripts and stylesheets through `config.admin`, with `defineAdminRoute`, `defineAdminSlot` and public components, hooks and services from `@lucidcms/admin`.
+- Added support for relation fields targeting single collections, including singleton document selection in the admin. ([bda5e4c](https://github.com/buildlucid/lucid-cms/commit/bda5e4ce4496da22f04adb4799d54bd75ca27255))
+- Added collection-level content locale subsets and default locale overrides, with matching admin controls, API responses, validation, persistence and generated types. ([35dd4c3](https://github.com/buildlucid/lucid-cms/commit/35dd4c3b4053c0c259b519795df0e5761a35be36))
+- Added durable jobs and recurring schedules, with retries, cancellation, queue adapters and admin monitoring. ([58f5653](https://github.com/buildlucid/lucid-cms/commit/58f565372a1aa64efdc9c95d1827e09d08a44a71))
+- Added `defineToolkit` so plugins can register type-safe toolkit services. ([0782e55](https://github.com/buildlucid/lucid-cms/commit/0782e55f91a3c6754797dc754032666f99d09893))
+- Added `defineContentApiRoute` for custom content endpoints with authentication and scope options. ([0782e55](https://github.com/buildlucid/lucid-cms/commit/0782e55f91a3c6754797dc754032666f99d09893))
+- Added custom permissions and integration scopes through `lucid.config.access`, with labels, groups, user permission checks and generated type hints for middleware and routes. ([6edc70f](https://github.com/buildlucid/lucid-cms/commit/6edc70f520b7bffead784fd05fe81cb32536313b))
+- Added toolkit services for uploading and managing media files. ([86668ff](https://github.com/buildlucid/lucid-cms/commit/86668ff5207d336442713db0cda01929b68a85d0))
+- Added toolkit input validation, on-demand service loading and a dedicated toolkit entry point. ([5846dea](https://github.com/buildlucid/lucid-cms/commit/5846dea088bc80121fae7752814bc3d84342df44))
+- Added typed document toolkit services for creating, updating, patching and deleting documents, with editable reads, conflict checks and collection schema access. ([c1e8dd9](https://github.com/buildlucid/lucid-cms/commit/c1e8dd9ac319cf31821d703b6d34b4da5d3d56ed))
+- The admin SPA is now built programmatically from `@lucidcms/admin`, with live updates during development, cached builds and clearer server restart logs. ([9ee7347](https://github.com/buildlucid/lucid-cms/commit/9ee7347cb875e9c5b9cac99887d54eb62a218cd2))
+- Added admin extensions for custom routes, slots, scripts and stylesheets through `config.admin`, with `defineAdminRoute`, `defineAdminSlot` and public components, hooks and services from `@lucidcms/admin`. ([b98295c](https://github.com/buildlucid/lucid-cms/commit/b98295c93be9a5336d77605d8b0c40694fb263e0))
 
 ### Breaking Changes:
 
@@ -32,22 +32,22 @@
 - Renamed the media URL processing APIs to `resolveUrl`. Image transformations now use configured presets and supported formats. ([6c2619a](https://github.com/buildlucid/lucid-cms/commit/6c2619a319b069dd2c263cd09a6de7c3a1678534))
 - Collection preview objects now require an explicit `enabled` flag, so URL and breakpoint settings can remain configured while previews are disabled. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
 - The content preview endpoint now accepts tokens in a POST request body and returns only their mode and expiry. ([1fd1b89](https://github.com/buildlucid/lucid-cms/commit/1fd1b8931459e16f3f95b60c20e4faf828079c9f))
-- Document responses now return referenced documents, media and users in a top-level `refs` object.
-- Reorganised the public `@lucidcms/core` exports around the package root and the `/extension` and `/types` entry points.
-- Removed the `@lucidcms/core/toolkit` entry point. Import `createToolkit` from `@lucidcms/core` and toolkit types from `@lucidcms/core/types`.
-- Media text values now return a string when unassigned, or a locale record when translated.
-- Role names and descriptions are now plain strings.
-- Hook handlers now receive one object containing context, toolkit, data and metadata.
-- Job handlers now receive `{ context, input, execution, toolkit }`. Job descriptions receive `{ input }`, and permanent failure handlers receive `{ context, failure, toolkit }`.
-- Migration `up`/`down` callbacks and seed handlers now receive `{ context, toolkit }`, with the toolkit bound to the active database context.
-- Database adapters must define `limits.maxQueryParameters`.
+- Document responses now return referenced documents, media and users in a top-level `refs` object. ([ba14393](https://github.com/buildlucid/lucid-cms/commit/ba14393b39cc5834fdf14ed762cc818eaf7629b1))
+- Reorganised the public `@lucidcms/core` exports around the package root and the `/extension` and `/types` entry points. ([a131c25](https://github.com/buildlucid/lucid-cms/commit/a131c25d4681ce2ca58e4b26f2e0795a690d97c6))
+- Removed the `@lucidcms/core/toolkit` entry point. Import `createToolkit` from `@lucidcms/core` and toolkit types from `@lucidcms/core/types`. ([5908439](https://github.com/buildlucid/lucid-cms/commit/5908439f3df7132e842c711e74bf2f561b7dc9d3))
+- Media text values now return a string when unassigned, or a locale record when translated. ([beef1ba](https://github.com/buildlucid/lucid-cms/commit/beef1ba6d86b1a2721e7650a3dd27e6dddbb3309))
+- Role names and descriptions are now plain strings. ([beef1ba](https://github.com/buildlucid/lucid-cms/commit/beef1ba6d86b1a2721e7650a3dd27e6dddbb3309))
+- Hook handlers now receive one object containing context, toolkit, data and metadata. ([a6b3c59](https://github.com/buildlucid/lucid-cms/commit/a6b3c59a224e96dc746e1e961a88f31ced9f8239))
+- Job handlers now receive `{ context, input, execution, toolkit }`. Job descriptions receive `{ input }`, and permanent failure handlers receive `{ context, failure, toolkit }`. ([a70078f](https://github.com/buildlucid/lucid-cms/commit/a70078f24a08907a33396030283a2fc9f6272431))
+- Migration `up`/`down` callbacks and seed handlers now receive `{ context, toolkit }`, with the toolkit bound to the active database context. ([a70078f](https://github.com/buildlucid/lucid-cms/commit/a70078f24a08907a33396030283a2fc9f6272431))
+- Database adapters must define `limits.maxQueryParameters`. ([a70078f](https://github.com/buildlucid/lucid-cms/commit/a70078f24a08907a33396030283a2fc9f6272431))
 
 ### Bug Fixes:
 
 - Fixed custom field reference validation accepting soft-deleted entries. ([83425cd](https://github.com/buildlucid/lucid-cms/commit/83425cd414f37171c529734f10ccf525675e73e3))
-- Fixed content document endpoints not running document `afterFetch` hooks.
-- Fixed configured queue, email, KV and media storage adapters silently falling back to built-in adapters when setup failed.
-- Content now stays unassigned when no locales are configured and uses the current default locale when one is added.
+- Fixed content document endpoints not running document `afterFetch` hooks. ([155d3b9](https://github.com/buildlucid/lucid-cms/commit/155d3b923728d27d495c93e9ed053eccff8868d7))
+- Fixed configured queue, email, KV and media storage adapters silently falling back to built-in adapters when setup failed. ([a31dc73](https://github.com/buildlucid/lucid-cms/commit/a31dc73de9346ae05343fdcd0f1338ce02fe1508))
+- Content now stays unassigned when no locales are configured and uses the current default locale when one is added. ([beef1ba](https://github.com/buildlucid/lucid-cms/commit/beef1ba6d86b1a2721e7650a3dd27e6dddbb3309))
 
 ## v0.18.0-alpha.0
 

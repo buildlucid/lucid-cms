@@ -1,6 +1,6 @@
 # @lucidcms/types
 
-## v0.6.0 (unreleased)
+## v0.6.0
 
 - Reworked queue resource types for durable, versioned jobs, including dispatch, cancellation and lease metadata.
 - Added shared reference types and moved document refs to the top-level response object.

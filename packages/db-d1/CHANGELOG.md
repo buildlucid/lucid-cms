@@ -1,8 +1,9 @@
 # @lucidcms/db-d1
 
-## v0.3.2 (unreleased)
+## v0.3.2
 
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v0.3.1
 

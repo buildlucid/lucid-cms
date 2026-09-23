@@ -1,6 +1,6 @@
 # @lucidcms/astro
 
-## v0.3.2 (unreleased)
+## v0.3.2
 
 - Fixed Astro dev servers hanging after `Ctrl+C` with Cloudflare runtimes by explicitly awaiting Lucid and Vite teardown for `SIGINT` and `SIGTERM`.
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
@@ -8,6 +8,7 @@
 - Added support for discovered resources and plugin sources in dev and builds.
 - Added live admin updates during development and programmatic SPA builds during `astro build`, with separate Vite settings for the admin.
 - Stopped Astro's waiting message from interrupting migration prompts.
+- Bumped `@lucidcms/core` to `0.19.0-alpha.0`.
 
 ## v0.3.1
 
