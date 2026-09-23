@@ -11,6 +11,6 @@
 		"types": ["@cloudflare/workers-types"],
 		"outDir": "dist"
 	},
-	"include": ["lucid.config.ts", "src/**/*"],
+	"include": ["lucid.config.ts", "src/**/*", "lucid/**/*"],
 	"exclude": ["node_modules"]
 }

@@ -148,8 +148,8 @@ type ExplicitTableDefinitionInput<Row extends object> = [Row] extends [never]
 
 /**
  * Describes a table so Lucid can format and validate its queries consistently
- * across database adapters. Default export the definition from your tables
- * directory, or add it to `config.tables`. This does not create the table.
+ * across database adapters. Add it to `config.tables`. This does not create
+ * the table.
  *
  * @example
  * type EventRow = {

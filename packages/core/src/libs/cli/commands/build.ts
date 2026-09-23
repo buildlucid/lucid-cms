@@ -184,7 +184,6 @@ const buildCommand = async (options?: {
 		currentStage = "runtime_build";
 		progress.update("Building server…");
 		const runtimeBuildRes = await adapterCLI.build({
-			resources: configRes.resources,
 			config: configRes.config,
 			translationStore,
 			definition: configRes.definition,

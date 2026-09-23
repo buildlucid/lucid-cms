@@ -3,7 +3,7 @@ import { createJiti } from "jiti";
 import constants from "../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { LucidError } from "../../utils/errors/index.js";
-import { migrationSchema } from "../resources/module-schemas.js";
+import { migrationSchema } from "../config/definition-schemas.js";
 import type { ResourceFile } from "../resources/types.js";
 import type { ExternalMigration, MigrationDefinition } from "./types.js";
 

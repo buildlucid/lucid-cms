@@ -279,6 +279,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 				<div class="flex items-center gap-2">
 					<BrickSlots
 						header
+						headerClass="mr-1"
 						open={brickOpen()}
 						brick={props.brick}
 						config={config()}

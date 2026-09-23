@@ -19,7 +19,6 @@
 - Added `defineToolkit` so plugins can register type-safe toolkit services.
 - Added `defineContentApiRoute` for custom content endpoints with authentication and scope options.
 - Added custom permissions and integration scopes through `lucid.config.access`, with labels, groups, user permission checks and generated type hints for middleware and routes.
-- Added automatic loading of resources from configurable folders, including subfolders and plugin resources.
 - Added toolkit services for uploading and managing media files.
 - Added toolkit input validation, on-demand service loading and a dedicated toolkit entry point.
 - Added typed document toolkit services for creating, updating, patching and deleting documents, with editable reads, conflict checks and collection schema access.

@@ -55,7 +55,7 @@ const FieldSlots: Component<{
 				<For each={contributions()}>
 					{(entry) => {
 						const content = children(() => (
-							<AdminExtensionBoundary name={entry.key}>
+							<AdminExtensionBoundary name={entry.key} placement="content">
 								<entry.component
 									slot={props.slot}
 									field={createFieldState({

@@ -4,6 +4,7 @@ import { filesystemPlugin } from "@lucidcms/plugin-filesystem";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { sqliteKVPlugin } from "@lucidcms/plugin-sqlite-kv";
 import { node } from "@lucidcms/runtime-node";
+import BlogCollection from "./src/lucid/collections/blogs.js";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const env = z.object({
@@ -23,6 +24,7 @@ export default defineConfig({
 			refreshToken: env.REFRESH_TOKEN_SECRET,
 			accessToken: env.ACCESS_TOKEN_SECRET,
 		},
+		collections: [BlogCollection, PageCollection],
 		localization: {
 			locales: [
 				{

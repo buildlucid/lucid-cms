@@ -4,6 +4,7 @@ import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
+import BlogCollection from "./src/lucid/collections/blogs.js";
 import PageCollection from "./src/lucid/collections/pages.js";
 
 export const env = z.object({
@@ -33,6 +34,7 @@ export default defineConfig({
 			refreshToken: env.REFRESH_TOKEN_SECRET,
 			accessToken: env.ACCESS_TOKEN_SECRET,
 		},
+		collections: [BlogCollection, PageCollection],
 		localization: {
 			locales: [
 				{

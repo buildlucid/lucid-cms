@@ -1,11 +1,11 @@
-import { defaultDiscovery } from "../libs/resources/defaults.js";
+import { defaultDirectories } from "../libs/resources/defaults.js";
 import type { ResolvedLucidConfig } from "../types/config.js";
 import constants from "./constants.js";
 
 export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	tables: [],
 	access: [],
-	discovery: defaultDiscovery,
+	directories: defaultDirectories,
 	sources: {},
 	telemetry: true,
 	logger: {

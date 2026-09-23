@@ -1,5 +1,6 @@
 {
 	"admin.extension.failed": "Could not load admin component: {{name}}",
+	"admin.extension.unavailable": "Unavailable",
 	"access.unavailable.title": "Unavailable access",
 	"access.unavailable.description": "These saved grants are currently unavailable. You can keep them or remove them.",
 	"common.status.in.sync": "In sync",

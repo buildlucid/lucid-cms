@@ -14,7 +14,7 @@ const DocumentSlotCell: Component<{
 	return (
 		<Table.Cell column={props.column}>
 			<div class="w-full min-w-0 text-sm" data-admin-slot={props.entry.key}>
-				<AdminExtensionBoundary name={props.entry.key}>
+				<AdminExtensionBoundary name={props.entry.key} placement="cell">
 					<props.entry.component {...props.data} />
 				</AdminExtensionBoundary>
 			</div>

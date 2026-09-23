@@ -22,18 +22,18 @@ import type {
 import { accessGroupSchema } from "../permission/access-config.js";
 import { PluginDefinitionSchema } from "../plugins/schema.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
-import { defaultDiscovery } from "../resources/defaults.js";
+import { defaultDirectories } from "../resources/defaults.js";
+import {
+	ResourceDirectoriesSchema,
+	ResourceSourcesSchema,
+} from "../resources/schema.js";
 import {
 	hookSchema,
 	migrationSchema,
 	routeSchema,
 	seedSchema,
 	tableSchema,
-} from "../resources/module-schemas.js";
-import {
-	ResourceDiscoverySchema,
-	ResourceSourcesSchema,
-} from "../resources/schema.js";
+} from "./definition-schemas.js";
 
 const HttpExtensionRegisterSchema = z.custom<HttpExtensionRegister>(
 	(data) => typeof data === "function",
@@ -150,8 +150,8 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 	),
 	tables: z.array(tableSchema),
 	access: z.array(accessGroupSchema).default([]),
-	discovery: ResourceDiscoverySchema.transform((value) => ({
-		...defaultDiscovery,
+	directories: ResourceDirectoriesSchema.transform((value) => ({
+		...defaultDirectories,
 		...value,
 	})),
 	sources: ResourceSourcesSchema,

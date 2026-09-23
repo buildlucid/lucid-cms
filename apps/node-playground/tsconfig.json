@@ -10,6 +10,6 @@
 		"skipLibCheck": true,
 		"outDir": "dist"
 	},
-	"include": ["src/**/*", "migrations/**/*", "seeds/**/*", "lucid.config.ts"],
-	"exclude": ["node_modules", "src/lucid/admin"]
+	"include": ["src/**/*", "lucid/**/*", "lucid.config.ts"],
+	"exclude": ["node_modules", "src/admin"]
 }

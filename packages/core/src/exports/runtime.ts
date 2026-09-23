@@ -10,7 +10,6 @@ import { LucidError } from "../utils/errors/index.js";
 import createServiceContext from "../utils/services/create-service-context.js";
 
 export { initializeLogger } from "../libs/logger/index.js";
-export { registerResourceModules } from "../libs/resources/register-modules.js";
 export {
 	createAdminShellResponse,
 	isAdminPath,

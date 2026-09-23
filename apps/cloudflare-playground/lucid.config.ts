@@ -6,7 +6,7 @@ import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 import { cloudflareR2Plugin } from "@lucidcms/plugin-cloudflare-r2";
 import { pagesPlugin } from "@lucidcms/plugin-pages";
 import { cloudflare } from "@lucidcms/runtime-cloudflare";
-import PageCollection from "./src/lucid/collections/pages.js";
+import PageCollection from "./src/collections/pages.js";
 
 export const env = z.object({
 	ENCRYPTION_SECRET: z.string(),
@@ -25,6 +25,7 @@ export default defineConfig({
 			refreshToken: env.REFRESH_TOKEN_SECRET,
 			accessToken: env.ACCESS_TOKEN_SECRET,
 		},
+		collections: [PageCollection],
 		plugins: [
 			pagesPlugin({
 				collections: [

@@ -113,7 +113,7 @@ const AppRouter: Component = () => {
 							<Route
 								path={route.path.slice("/lucid".length)}
 								component={() => (
-									<AdminExtensionBoundary name={route.key}>
+									<AdminExtensionBoundary name={route.key} placement="page">
 										<route.component />
 									</AdminExtensionBoundary>
 								)}
@@ -308,7 +308,7 @@ const AppRouter: Component = () => {
 							<Route
 								path={route.path.slice("/lucid".length)}
 								component={() => (
-									<AdminExtensionBoundary name={route.key}>
+									<AdminExtensionBoundary name={route.key} placement="page">
 										<route.component />
 									</AdminExtensionBoundary>
 								)}
@@ -326,7 +326,7 @@ const AppRouter: Component = () => {
 						<Route
 							path={route.path.slice("/lucid".length)}
 							component={() => (
-								<AdminExtensionBoundary name={route.key}>
+								<AdminExtensionBoundary name={route.key} placement="page">
 									<route.component />
 								</AdminExtensionBoundary>
 							)}

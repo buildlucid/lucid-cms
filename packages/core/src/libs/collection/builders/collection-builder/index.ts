@@ -36,7 +36,7 @@ export const isCollectionBuilder = (
 	typeof value.moveFields === "function";
 
 /**
- * Defines a document collection and its fields. Register it in config or default export it from the collections directory.
+ * Defines a document collection and its fields. Add it to `config.collections`.
  *
  * @example
  * ```ts

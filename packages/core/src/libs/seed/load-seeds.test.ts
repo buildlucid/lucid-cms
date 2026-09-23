@@ -23,7 +23,7 @@ test("loads project, package and namespaced inline seed sources", async () => {
 		"seeds",
 	);
 	const packageSeeds = path.join(packageRoot, "seeds");
-	const projectSeeds = path.join(projectRoot, "src/lucid/seeds");
+	const projectSeeds = path.join(projectRoot, "lucid/seeds");
 
 	await Promise.all([
 		mkdir(packageSeeds, { recursive: true }),
@@ -54,7 +54,7 @@ test("loads project, package and namespaced inline seed sources", async () => {
 		projectRoot,
 	);
 	const seeds = await loadSeeds({
-		files: prepared.resources.files.seeds,
+		files: prepared.files.seeds,
 		definitions: [{ name: "pages:example", seed: async () => {} }],
 	});
 

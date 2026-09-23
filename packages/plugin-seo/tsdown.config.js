@@ -13,7 +13,7 @@ export default defineConfig([
 		deps: { onlyBundle: false },
 	},
 	{
-		entry: ["src/admin/components.ts"],
+		entry: { components: "src/admin/components/index.ts" },
 		outDir: "dist/admin",
 		format: "esm",
 		dts: { emitDtsOnly: true },

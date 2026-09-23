@@ -17,7 +17,22 @@ import { sharpPlugin } from "@lucidcms/plugin-sharp";
 import { typesensePlugin } from "@lucidcms/plugin-typesense";
 import { workerQueuePlugin } from "@lucidcms/plugin-worker-queues";
 import { node } from "@lucidcms/runtime-node";
+import diagnosticsRoute from "./src/admin/containers/DiagnosticsRoute/config.js";
+import publicRoute from "./src/admin/containers/PublicRoute/config.js";
+import standaloneRoute from "./src/admin/containers/StandaloneRoute/config.js";
+import BlogCollection from "./src/collections/blogs.js";
+import MainMenuCollection from "./src/collections/main-menu.js";
+import PageCollection from "./src/collections/pages.js";
+import RouteGroupCollection from "./src/collections/route-groups.js";
+import RoutePageCollection from "./src/collections/route-pages.js";
+import SettingsCollection from "./src/collections/settings.js";
+import SimpleCollection from "./src/collections/simple.js";
+import TestCollection from "./src/collections/test.js";
 import transporter from "./src/email-transporter.js";
+import searchRoute from "./src/routes/search.js";
+import searchMediaRoute from "./src/routes/search-media.js";
+import sendTestEmailRoute from "./src/routes/send-test-email.js";
+import testOrganisationsTable from "./src/tables/test-organisations.js";
 
 export const env = z.object({
 	DATABASE_URL: z.string(),
@@ -111,7 +126,19 @@ export default defineConfig({
 			],
 			defaultLocale: "en",
 		},
+		collections: [
+			BlogCollection,
+			MainMenuCollection,
+			PageCollection,
+			RouteGroupCollection,
+			RoutePageCollection,
+			SettingsCollection,
+			SimpleCollection,
+			TestCollection,
+		],
+		tables: [testOrganisationsTable],
 		http: {
+			routes: [searchMediaRoute, searchRoute, sendTestEmailRoute],
 			openAPI: {
 				enabled: true,
 			},
@@ -137,34 +164,9 @@ export default defineConfig({
 		// 	}
 		// },
 		admin: {
-			routes: [
-				{
-					key: "playground",
-					path: "playground",
-					component: "./src/lucid/admin/Diagnostics.tsx",
-					navigation: {
-						label: "Admin playground",
-						group: "content",
-						icon: "extensions",
-					},
-				},
-				{
-					key: "standalone-playground",
-					path: "standalone-playground",
-					component: "./src/lucid/admin/Standalone.tsx",
-					shell: "none",
-					navigation: { label: "Standalone playground", group: "content" },
-				},
-				{
-					key: "public-playground",
-					path: "public-playground",
-					component: "./src/lucid/admin/Public.tsx",
-					shell: "none",
-					access: "public",
-				},
-			],
-			scripts: ["./src/lucid/admin/startup.ts"],
-			stylesheets: ["./src/lucid/admin/styles.css"],
+			routes: [diagnosticsRoute, standaloneRoute, publicRoute],
+			scripts: ["./src/admin/startup.ts"],
+			stylesheets: ["./src/admin/styles.css"],
 		},
 		plugins: [
 			seoPlugin({ collections: [{ key: "page" }, { key: "settings" }] }),

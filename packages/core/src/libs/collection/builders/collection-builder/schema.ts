@@ -1,7 +1,7 @@
 import z from "zod";
 import constants from "../../../../constants/constants.js";
+import { hookSchema } from "../../../config/definition-schemas.js";
 import { adminCopyInputSchema } from "../../../i18n/index.js";
-import { hookSchema } from "../../../resources/module-schemas.js";
 
 const environmentKeySchema = z
 	.string()

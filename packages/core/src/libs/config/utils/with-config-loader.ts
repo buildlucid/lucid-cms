@@ -4,19 +4,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti, type Jiti } from "jiti";
 
-const nativeLoads = new WeakMap<
-	Jiti,
-	{ roots: Set<string>; files: Set<string> }
->();
-
-/** Includes shared resource locations in the current native-module reload scope. */
-export const addConfigSource = (loader: Jiti, source: string) => {
-	nativeLoads.get(loader)?.roots.add(source);
-};
+const nativeLoads = new WeakMap<Jiti, Set<string>>();
 
 /** Returns native imports observed during the current config load. */
 export const getNativeConfigFiles = (loader: Jiti) =>
-	nativeLoads.get(loader)?.files ?? [];
+	nativeLoads.get(loader) ?? [];
 
 /** Shares module instances during one config load without retaining stale project imports between loads. */
 const withConfigLoader = async <T>(
@@ -30,8 +22,8 @@ const withConfigLoader = async <T>(
 		interopDefault: true,
 	});
 	const previous = new Set(Object.keys(loader.cache));
-	const state = { roots: new Set([projectRoot]), files: new Set<string>() };
-	nativeLoads.set(loader, state);
+	const files = new Set<string>();
+	nativeLoads.set(loader, files);
 	const revision = randomUUID();
 	// Jiti delegates .mjs and ESM .js to Node, whose cache is separate from require.cache.
 	const hooks = registerHooks({
@@ -52,18 +44,13 @@ const withConfigLoader = async <T>(
 				context.parentURL?.startsWith("file:") &&
 				new URL(context.parentURL).searchParams.get("lucid-reload") ===
 					revision;
-			const inSource =
-				parentIsLocal ||
-				[...state.roots].some((root) => {
-					const relative = path.relative(root, filename);
-					return (
-						relative !== ".." &&
-						!relative.startsWith(`..${path.sep}`) &&
-						!path.isAbsolute(relative)
-					);
-				});
-			if (!inSource) return resolved;
-			state.files.add(filename);
+			const relative = path.relative(projectRoot, filename);
+			const inProject =
+				relative !== ".." &&
+				!relative.startsWith(`..${path.sep}`) &&
+				!path.isAbsolute(relative);
+			if (!parentIsLocal && !inProject) return resolved;
+			files.add(filename);
 			url.searchParams.set("lucid-reload", revision);
 			return { ...resolved, url: url.href };
 		},

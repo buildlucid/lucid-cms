@@ -10,7 +10,6 @@ import migrateNewCommand from "./commands/migrate-new.js";
 import migrateResetCommand from "./commands/migrate-reset.js";
 import migrateRollbackCommand from "./commands/migrate-rollback.js";
 import migrateStatusCommand from "./commands/migrate-status.js";
-import resourcesListCommand from "./commands/resources-list.js";
 import seedCommand, { seedListCommand } from "./commands/seed.js";
 import seedNewCommand from "./commands/seed-new.js";
 import serveCommand from "./commands/serve.js";
@@ -55,12 +54,6 @@ program
 	.description("Generate Lucid type files")
 	.option("--remote", remoteOptionDescription)
 	.action(typegenCommand);
-
-program
-	.command("resources:list")
-	.description("List discovered resource files and additional sources")
-	.option("--json", "Print resource paths as JSON")
-	.action(resourcesListCommand);
 
 program
 	.command("migrate")

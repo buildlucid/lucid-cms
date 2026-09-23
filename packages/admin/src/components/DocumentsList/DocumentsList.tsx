@@ -12,6 +12,7 @@ import {
 	FaSolidBarsProgress,
 	FaSolidCalendar,
 	FaSolidCloudArrowUp,
+	FaSolidPuzzlePiece,
 	FaSolidUser,
 	FaSolidUserCheck,
 } from "solid-icons/fa";
@@ -101,6 +102,7 @@ export const DocumentsList: Component<{
 				value: entry.column.label,
 				fallback: entry.key,
 			}),
+			icon: <FaSolidPuzzlePiece />,
 			sortable: false,
 		})),
 	);

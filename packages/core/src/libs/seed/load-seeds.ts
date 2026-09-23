@@ -2,7 +2,7 @@ import path from "node:path";
 import { createJiti } from "jiti";
 import constants from "../../constants/constants.js";
 import { LucidError } from "../../utils/errors/index.js";
-import { seedSchema } from "../resources/module-schemas.js";
+import { seedSchema } from "../config/definition-schemas.js";
 import type { ResourceFile } from "../resources/types.js";
 import type { Seed, SeedDefinition } from "./types.js";
 

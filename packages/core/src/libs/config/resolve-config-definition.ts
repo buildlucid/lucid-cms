@@ -111,8 +111,8 @@ const resolveRuntimeAdapter = async (
  */
 export const resolveConfigDefinition = async (props: {
 	definition: unknown;
-	/** Build and CLI loaders can resolve project files before plugins consume the config. */
-	prepareConfig?: (config: LucidConfig) => Promise<LucidConfig>;
+	/** Build and CLI loaders can collect project files before plugins consume the config. */
+	onRawConfig?: (config: LucidConfig) => Promise<void>;
 	envSchema?: z.ZodType;
 	meta?: LucidConfigDefinitionMeta;
 	env?: Record<string, unknown>;
@@ -225,7 +225,7 @@ export const resolveConfigDefinition = async (props: {
 			}
 		}
 
-		if (props.prepareConfig) rawConfig = await props.prepareConfig(rawConfig);
+		await props.onRawConfig?.(rawConfig);
 
 		const db = await resolveDatabaseAdapter(wrappedDefinition.db, env);
 

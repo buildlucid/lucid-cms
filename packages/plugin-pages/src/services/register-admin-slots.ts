@@ -1,26 +1,9 @@
-import { documentSlotKeys, fieldSlotKeys } from "@lucidcms/admin/slots";
 import type { AdminSlot } from "@lucidcms/admin/types";
-import { PLUGIN_KEY } from "../constants.js";
+import fullSlugConfig from "../admin/components/FullSlug/config.js";
+import slugCellConfig from "../admin/components/SlugCell/config.js";
 
-/** Presents computed paths alongside the slug instead of as a separate field. */
 const registerAdminSlots = (collection: string): AdminSlot[] => [
-	{
-		key: `${PLUGIN_KEY}:${collection}:path`,
-		slot: fieldSlotKeys.after,
-		match: { collection, kind: "collection-fields", field: "slug" },
-		component: {
-			module: "@lucidcms/plugin-pages/components",
-			export: "FullSlug",
-		},
-	},
-	{
-		key: `${PLUGIN_KEY}:${collection}:slug-column`,
-		slot: documentSlotKeys.columnOverride,
-		match: { collection, field: "slug" },
-		component: {
-			module: "@lucidcms/plugin-pages/components",
-			export: "SlugCell",
-		},
-	},
+	fullSlugConfig(collection),
+	slugCellConfig(collection),
 ];
 export default registerAdminSlots;

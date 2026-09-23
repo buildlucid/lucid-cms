@@ -9,8 +9,8 @@ test("asks Astro to reload when a new resource is added and removes its listener
 	const plugin = createResourceWatchPlugin(
 		"/project/lucid.config.ts",
 		new Set([
-			"/project/src/lucid/routes",
-			"/project/src/lucid/routes/known.ts",
+			"/project/lucid/templates",
+			"/project/lucid/templates/known.mustache",
 		]),
 	);
 	if (
@@ -19,13 +19,13 @@ test("asks Astro to reload when a new resource is added and removes its listener
 	)
 		throw new Error("Missing watcher lifecycle hooks");
 	plugin.configureServer.call({} as never, { watcher } as never);
-	watcher.emit("add", "/project/src/lucid/routes/nested/new.ts");
+	watcher.emit("add", "/project/lucid/templates/nested/new.mustache");
 	expect(changes).toHaveBeenCalledWith("/project/lucid.config.ts");
 	changes.mockClear();
-	watcher.emit("add", "/project/src/lucid/routes/known.ts");
-	watcher.emit("add", "/project/src/lucid/routes-other/unrelated.ts");
+	watcher.emit("add", "/project/lucid/templates/known.mustache");
+	watcher.emit("add", "/project/lucid/templates-other/unrelated.mustache");
 	expect(changes).not.toHaveBeenCalled();
 	plugin.closeBundle.call({} as never);
-	watcher.emit("add", "/project/src/lucid/routes/another.ts");
+	watcher.emit("add", "/project/lucid/templates/another.mustache");
 	expect(changes).not.toHaveBeenCalled();
 });

@@ -5,8 +5,7 @@ import type {
 } from "./types.js";
 
 /**
- * Defines an HTTP route at its declared path. Default export it from your
- * routes directory, or add it to `config.http.routes`.
+ * Defines an HTTP route at its declared path. Add it to `config.http.routes`.
  * Route handlers receive the Hono context, Lucid service context and validated
  * input, along with a toolkit bound to the service context. The optional schema
  * and OpenAPI metadata describe the public contract.

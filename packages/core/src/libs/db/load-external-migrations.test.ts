@@ -44,7 +44,7 @@ test("loads package sources from the project node_modules tree", async () => {
 		projectRoot,
 	);
 	const migrations = await loadExternalMigrations({
-		files: prepared.resources.files.migrations,
+		files: prepared.files.migrations,
 	});
 
 	expect(Object.keys(migrations)).toEqual(["1751400000000-example"]);

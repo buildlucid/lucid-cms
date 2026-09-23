@@ -58,7 +58,7 @@ test("loads translation sources from paths and URLs in runtime precedence order"
 
 	const prepared = await prepareResources(
 		{
-			discovery: { translations: "./translations" },
+			directories: { translations: "./translations" },
 			sources: {
 				translations: [pathToFileURL(pluginSource), "./user-translations"],
 			},
@@ -66,7 +66,7 @@ test("loads translation sources from paths and URLs in runtime precedence order"
 		projectRoot,
 	);
 	const bundles = await loadTranslationSources({
-		files: prepared.resources.files.translations,
+		files: prepared.files.translations,
 	});
 
 	expect(bundles.en.server["test.order"]).toBe("Project");
@@ -96,11 +96,14 @@ test("loads a single translation file source", async () => {
 
 test("loads translation sources from package subpath specifiers", async () => {
 	const prepared = await prepareResources(
-		{ sources: { translations: ["@lucidcms/plugin-pages/translations"] } },
+		{
+			directories: { public: false },
+			sources: { translations: ["@lucidcms/plugin-pages/translations"] },
+		},
 		process.cwd(),
 	);
 	const bundles = await loadTranslationSources({
-		files: prepared.resources.files.translations,
+		files: prepared.files.translations,
 	});
 
 	expect(bundles.en.admin["plugin.pages.fields.slug.label"]).toBe("Slug");
@@ -140,7 +143,7 @@ test("loads package sources from the project node_modules tree", async () => {
 		projectRoot,
 	);
 	const bundles = await loadTranslationSources({
-		files: prepared.resources.files.translations,
+		files: prepared.files.translations,
 	});
 
 	expect(bundles.en.server["test.project-package"]).toBe("Project package");

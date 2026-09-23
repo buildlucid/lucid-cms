@@ -35,7 +35,7 @@ import type {
 	QueueAdapterInstance,
 } from "../libs/queue/types.js";
 import type {
-	ResourceDiscovery,
+	ResourceDirectories,
 	ResourceSources,
 } from "../libs/resources/types.js";
 import type { SeedDefinition } from "../libs/seed/types.js";
@@ -242,9 +242,9 @@ export type SecretConfig = {
 export interface LucidConfig {
 	/** Custom permission and integration scope groups. */
 	access?: AccessGroup[];
-	/** Directories to discover relative to lucid.config. Defaults to src/lucid/<resource>, except public uses ./public. Set false to disable a lookup. */
-	discovery?: ResourceDiscovery;
-	/** Additional resource files, directories, package exports or file URLs. These remain enabled when project discovery is disabled. */
+	/** Resource directories relative to lucid.config. Defaults to ./lucid/<resource>, except public uses ./public. Set false to disable one. */
+	directories?: ResourceDirectories;
+	/** Additional resource files, directories, package exports or file URLs. These remain enabled when a project directory is disabled. */
 	sources?: ResourceSources;
 	/**
 	 * Describes custom tables that already exist in the database, allowing
@@ -534,7 +534,7 @@ export interface LucidConfig {
 	 */
 	hooks?: Array<AllHooks>;
 	/**
-	 * CollectionBuilder instances to register alongside discovered collections.
+	 * CollectionBuilder instances to register.
 	 */
 	collections?: CollectionBuilder[];
 	/** Browser components and assets. Modules are imported only by the admin build. */
@@ -578,7 +578,7 @@ export interface ResolvedLucidConfig {
 		level: LogLevel;
 		transport?: LogTransport;
 	};
-	discovery: Required<ResourceDiscovery>;
+	directories: Required<ResourceDirectories>;
 	sources: ResourceSources;
 	db: DatabaseAdapter;
 	tables: TableDefinition[];

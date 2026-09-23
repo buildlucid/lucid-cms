@@ -429,8 +429,7 @@ export type {
 	QueueDeliveryMessage,
 } from "../libs/queue/types.js";
 export type {
-	PreparedResources,
-	ResourceDiscovery,
+	ResourceDirectories,
 	ResourceKind,
 	ResourceSource,
 	ResourceSources,

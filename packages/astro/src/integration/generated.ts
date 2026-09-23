@@ -177,7 +177,6 @@ export const writeGeneratedModules = async (props: {
 }) => {
 	await ensureDirectory(props.directory);
 	const configArtifacts = await prepareConfigArtifacts({
-		resources: props.project.loaded.resources,
 		configPath: props.project.configPath,
 		outputPath: props.directory,
 	});

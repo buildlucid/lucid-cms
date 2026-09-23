@@ -13,7 +13,7 @@
 		"./translations": "./translations",
 		"./components": {
 			"types": "./dist/admin/components.d.mts",
-			"default": "./src/admin/components.ts"
+			"default": "./src/admin/components/index.ts"
 		}
 	},
 	"scripts": {

@@ -7,7 +7,6 @@ import type DatabaseAdapter from "../db/adapter-base.js";
 import type { DatabaseAdapterFactory } from "../db/adapter-factory.js";
 import type { RenderedTemplates } from "../email/types.js";
 import type { TranslationStore } from "../i18n/types.js";
-import type { PreparedResources } from "../resources/types.js";
 import type RuntimeAdapterSchema from "./schema.js";
 
 export type RuntimeBuildArtifactFile = {
@@ -86,8 +85,6 @@ export type RuntimeBuildArtifacts = {
 };
 
 export type BuildHandler = (props: {
-	/** Resolved resource inputs to include when compiling the project config. */
-	resources: PreparedResources;
 	config: ResolvedLucidConfig;
 	translationStore: TranslationStore;
 	definition: LucidConfigDefinition;

@@ -1,5 +1,6 @@
 import { brickSlots } from "virtual:lucid-admin";
 import type { FieldError } from "@types";
+import classNames from "classnames";
 import {
 	type Component,
 	children,
@@ -24,6 +25,8 @@ const BrickSlots: Component<{
 	children?: JSX.Element;
 	open: boolean;
 	header?: boolean;
+	/** Extra classes for each header slot, for aligning with the header's own actions. */
+	headerClass?: string;
 	documentId?: number;
 	config?: CollectionBrickConfig;
 	errors?: FieldError[];
@@ -86,7 +89,10 @@ const BrickSlots: Component<{
 				<For each={contributions().filter((entry) => entry.slot === slot)}>
 					{(entry) => {
 						const content = children(() => (
-							<AdminExtensionBoundary name={entry.key}>
+							<AdminExtensionBoundary
+								name={entry.key}
+								placement={props.header ? "header" : "content"}
+							>
 								<entry.component
 									slot={slot}
 									open={props.open}
@@ -104,7 +110,11 @@ const BrickSlots: Component<{
 						return (
 							<Show when={content.toArray().length > 0}>
 								<div
-									class={props.header ? "min-w-0" : "col-span-12"}
+									class={
+										props.header
+											? classNames("min-w-0", props.headerClass)
+											: "col-span-12"
+									}
 									data-admin-slot={entry.key}
 								>
 									{content()}
@@ -121,7 +131,7 @@ const BrickSlots: Component<{
 		<Show when={!props.header} fallback={renderSlots(brickSlotKeys.header)}>
 			<div class="@container/brick min-w-0">
 				<div
-					class="grid grid-cols-12 items-start gap-6"
+					class="grid grid-cols-12 items-start gap-x-6 gap-y-3"
 					style={{
 						"--brick-panel-width": sidePanel()?.width ?? 6,
 						"--brick-fields-width": 12 - (sidePanel()?.width ?? 6),

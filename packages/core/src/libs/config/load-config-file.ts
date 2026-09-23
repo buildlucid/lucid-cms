@@ -95,10 +95,8 @@ export const loadConfigFile = async (props?: {
 
 		let resources = emptyPreparedResources();
 		const resolved = await resolveConfigDefinition({
-			prepareConfig: async (config) => {
-				const prepared = await prepareResources(config, projectRoot, jiti);
-				resources = prepared.resources;
-				return prepared.config;
+			onRawConfig: async (config) => {
+				resources = await prepareResources(config, projectRoot);
 			},
 			definition: configModule.default,
 			envSchema:
@@ -118,9 +116,7 @@ export const loadConfigFile = async (props?: {
 
 		return {
 			configPath,
-			configDependencies: [
-				...new Set([...configDependencies, ...resources.dependencies]),
-			],
+			configDependencies,
 			resources,
 			projectRoot,
 			runtimeContext: resolved.runtimeContext,
