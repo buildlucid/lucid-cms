@@ -370,7 +370,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 								<span class="truncate">{selectedLanguageLabel()}</span>
 								<FaSolidChevronDown size={10} class="text-current" />
 							</Menu.Trigger>
-							<Menu.Content class="z-70" scrollable>
+							<Menu.Content class="z-70" compact>
 								<For each={languageOptions()}>
 									{(option) => (
 										<Menu.Item

@@ -52,7 +52,10 @@ const MenuSub: Component<MenuSubProps> = (props) => {
 				<KobalteMenu.SubContent
 					data-menu-sub-content
 					data-drawer-ignore
-					class={classNames("ml-1", menuPanelClasses(menu.dividers()))}
+					class={classNames(
+						"ml-1",
+						menuPanelClasses({ dividers: menu.dividers() }),
+					)}
 					style={{ "z-index": layer ? layer() + 1 : undefined }}
 				>
 					{props.children}

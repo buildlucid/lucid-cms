@@ -276,7 +276,7 @@ function Select<Option extends SelectOption = SelectOption>(
 						<FaSolidSort size={14} class="text-subtitle ml-1" />
 					</div>
 				</Menu.Trigger>
-				<Menu.Content matchTriggerWidth scrollable class="z-70">
+				<Menu.Content matchTriggerWidth compact class="z-70">
 					<Show when={props.search !== undefined}>
 						{/** biome-ignore lint/a11y/noStaticElementInteractions: explanation */}
 						<div

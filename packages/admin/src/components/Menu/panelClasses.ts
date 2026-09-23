@@ -11,8 +11,17 @@ const DIVIDER_CLASSES = [
 	"[&>[data-menu-row]+[data-menu-row]]:before:bg-border",
 ].join(" ");
 
-export const menuPanelClasses = (dividers: boolean) =>
+export interface MenuPanelAppearance {
+	dividers: boolean;
+	/** Caps the height at 15rem as well as the available space. */
+	compact?: boolean;
+}
+
+export const menuPanelClasses = (props: MenuPanelAppearance) =>
 	classNames(
-		"z-60 min-w-56 bg-popover border border-border rounded-md p-1.5 shadow-md animate-dropdown focus:outline-hidden scrollbar",
-		dividers && DIVIDER_CLASSES,
+		"z-60 min-w-56 max-w-(--kb-popper-content-available-width) overflow-y-auto bg-popover border border-border rounded-md p-1.5 shadow-md animate-dropdown focus:outline-hidden scrollbar",
+		props.compact
+			? "max-h-[min(15rem,var(--kb-popper-content-available-height))]"
+			: "max-h-(--kb-popper-content-available-height)",
+		props.dividers && DIVIDER_CLASSES,
 	);

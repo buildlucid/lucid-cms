@@ -7,8 +7,10 @@ import { useLayer } from "@/hooks/useLayer/useLayer";
 
 export interface MenuContentProps {
 	matchTriggerWidth?: boolean;
-	/** Limits the height and scrolls the items. */
-	scrollable?: boolean;
+	/**
+	 * Caps the height at 15rem for long lists.
+	 */
+	compact?: boolean;
 	/** Shows lines between items. @default true */
 	dividers?: boolean;
 	class?: string;
@@ -31,8 +33,10 @@ const MenuContent: Component<MenuContentProps> = (props) => {
 					data-menu-content
 					data-drawer-ignore
 					class={classNames(
-						menuPanelClasses(dividers()),
-						{ "max-h-60 overflow-y-auto": props.scrollable },
+						menuPanelClasses({
+							dividers: dividers(),
+							compact: props.compact,
+						}),
 						props.class,
 					)}
 					style={{
