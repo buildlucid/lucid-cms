@@ -1,6 +1,8 @@
 import type { HtmlTagDescriptor } from "vite";
-import { brickSlotKeys } from "../../components/BrickSlots/constants.js";
-import { fieldSlotKeys } from "../../components/FieldSlots/constants.js";
+import {
+	type SlotSurface,
+	slotDefinitions,
+} from "../../extensions/slot-policy.js";
 import type {
 	AdminComponentReference,
 	AdminConfig,
@@ -23,7 +25,11 @@ const componentEntry = async (
 	const moduleId = await resolve(named ? reference.module : reference, label);
 	const load = `import(${JSON.stringify(moduleId)})`;
 	const loader = named
-		? `${load}.then(module => ({ default: module[${JSON.stringify(reference.export)}] }))`
+		? `${load}.then(module => {
+	const component = module[${JSON.stringify(reference.export)}];
+	if (!component) throw new Error(${JSON.stringify(`Admin ${label}: "${String(reference.module)}" has no export "${reference.export}".`)});
+	return { default: component };
+})`
 		: load;
 	return `{ ...${JSON.stringify(metadata)}, component: lazy(() => ${loader}) }`;
 };
@@ -37,56 +43,43 @@ export const generateRegistry = async (
 		(admin.routes ?? []).map(
 			async ({
 				component,
-				key,
 				path,
-				navigation,
 				shell = "navigation",
 				access = "authenticated",
+				...metadata
 			}) =>
 				componentEntry(
-					{ key, path: `/lucid/e/${path}`, navigation, shell, access },
+					{ ...metadata, path: `/lucid/e/${path}`, shell, access },
 					component,
-					`route "${key}"`,
+					`route "${metadata.key}"`,
 					resolve,
 				),
 		),
 	);
 
-	const slots = await Promise.all(
-		(admin.slots ?? []).map(async ({ component, match = {}, ...metadata }) => ({
-			slot: metadata.slot,
-			entry: await componentEntry(
+	const slots: Record<SlotSurface, string[]> = {
+		brick: [],
+		field: [],
+		documentList: [],
+	};
+	for (const { component, match = {}, ...metadata } of admin.slots ?? []) {
+		slots[slotDefinitions[metadata.slot].surface].push(
+			await componentEntry(
 				{ ...metadata, match },
 				component,
 				`slot "${metadata.key}"`,
 				resolve,
 			),
-		})),
-	);
-
-	const brickSlots = slots.filter(
-		({ slot }) =>
-			slot === brickSlotKeys.header ||
-			slot === brickSlotKeys.beforeFields ||
-			slot === brickSlotKeys.afterFields ||
-			slot === brickSlotKeys.left ||
-			slot === brickSlotKeys.right,
-	);
-
-	const documentSlots = slots.filter(
-		({ slot }) =>
-			slot === "document.columnAddition" || slot === "document.columnOverride",
-	);
-	const fieldSlots = slots.filter(
-		({ slot }) => slot === fieldSlotKeys.before || slot === fieldSlotKeys.after,
-	);
+		);
+	}
 
 	return [
 		'import { lazy } from "solid-js";',
 		`export const routes = [${routes.join(",\n")}];`,
-		`export const brickSlots = [${brickSlots.map(({ entry }) => entry).join(",\n")}];`,
-		`export const documentSlots = [${documentSlots.map(({ entry }) => entry).join(",\n")}];`,
-		`export const fieldSlots = [${fieldSlots.map(({ entry }) => entry).join(",\n")}];`,
+		...Object.entries(slots).map(
+			([surface, entries]) =>
+				`export const ${surface}Slots = [${entries.join(",\n")}];`,
+		),
 	].join("\n");
 };
 

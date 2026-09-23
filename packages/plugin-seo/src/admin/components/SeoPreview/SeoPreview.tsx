@@ -9,11 +9,12 @@ import { readImageField, readText } from "../../utils/field-values.js";
 import PageGuidance from "../PageGuidance/PageGuidance.js";
 import SearchPreview from "../SearchPreview/SearchPreview.js";
 import SocialPreview from "../SocialPreview/SocialPreview.js";
+import type { SeoPreviewOptions } from "./config.js";
 
 type PreviewView = "search" | "social" | "x";
 type PreviewOption = { value: PreviewView; label: string };
 
-const SeoPreview: BrickSlotComponent = (props) => {
+const SeoPreview: BrickSlotComponent<SeoPreviewOptions> = (props) => {
 	// ----------------------------------
 	// State & Hooks
 	const { t } = useTranslation();
@@ -37,6 +38,7 @@ const SeoPreview: BrickSlotComponent = (props) => {
 		try {
 			return new URL(
 				text(fields.canonicalUrl) || props.context.route?.path || "",
+				props.options.siteUrl,
 			);
 		} catch {
 			return undefined;

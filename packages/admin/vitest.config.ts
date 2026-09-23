@@ -58,6 +58,12 @@ export default defineConfig({
 					import.meta.url,
 				),
 			),
+			"@match-permissions": fileURLToPath(
+				new URL(
+					"../core/src/libs/permission/match-permissions.ts",
+					import.meta.url,
+				),
+			),
 			"@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
 		},
 	},

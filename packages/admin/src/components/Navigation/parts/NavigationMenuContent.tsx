@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import CollectionNavLink from "@/components/CollectionNavLink/CollectionNavLink";
 import { NavigationLink } from "@/components/NavigationLink/NavigationLink";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import {
@@ -81,7 +82,12 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 				!props.collectionsIsError
 					? orderedCollections()
 					: [],
-			routes: extensionRoutes,
+			routes: extensionRoutes.filter(
+				(route) =>
+					route.access === "public" ||
+					!route.permission ||
+					userStore.get.meetsRequirement(route.permission),
+			),
 			extensionsLabel: T()("common.extensions"),
 		}),
 	);

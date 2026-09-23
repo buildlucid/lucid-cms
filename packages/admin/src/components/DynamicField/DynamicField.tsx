@@ -13,7 +13,6 @@ import { CheckboxField } from "@/components/CheckboxField/CheckboxField";
 import { CodeField } from "@/components/CodeField/CodeField";
 import { CollapsibleField } from "@/components/CollapsibleField/CollapsibleField";
 import { ColorField } from "@/components/ColorField/ColorField";
-import { fieldSlotKeys } from "@/components/FieldSlots/constants";
 import FieldSlots from "@/components/FieldSlots/FieldSlots";
 import { InputField } from "@/components/InputField/InputField";
 import { JSONField } from "@/components/JSONField/JSONField";
@@ -209,7 +208,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			>
 				<div class="w-full h-full">
 					<FieldSlots
-						slot={fieldSlotKeys.before}
+						slot="field.before"
 						config={slotField()}
 						errors={fieldErrors()}
 						scope={props.conditionScopes?.()[0]}
@@ -542,7 +541,7 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 						</Match>
 					</Switch>
 					<FieldSlots
-						slot={fieldSlotKeys.after}
+						slot="field.after"
 						config={slotField()}
 						errors={fieldErrors()}
 						scope={props.conditionScopes?.()[0]}

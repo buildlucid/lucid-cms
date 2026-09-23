@@ -1,22 +1,20 @@
 /** Slots that plugins can render into on each brick. */
-export const brickSlotKeys = {
-	header: "brick.header",
-	left: "brick.left",
-	right: "brick.right",
-	beforeFields: "brick.beforeFields",
-	afterFields: "brick.afterFields",
-} as const;
-
 export const brickSlotPolicies = {
-	[brickSlotKeys.header]: { multiple: true, group: brickSlotKeys.header },
-	[brickSlotKeys.left]: { multiple: false, group: "brick.side" },
-	[brickSlotKeys.right]: { multiple: false, group: "brick.side" },
-	[brickSlotKeys.beforeFields]: {
+	"brick.header": {
+		surface: "brick",
 		multiple: true,
-		group: brickSlotKeys.beforeFields,
+		group: "brick.header",
 	},
-	[brickSlotKeys.afterFields]: {
+	"brick.start": { surface: "brick", multiple: false, group: "brick.side" },
+	"brick.end": { surface: "brick", multiple: false, group: "brick.side" },
+	"brick.beforeFields": {
+		surface: "brick",
 		multiple: true,
-		group: brickSlotKeys.afterFields,
+		group: "brick.beforeFields",
+	},
+	"brick.afterFields": {
+		surface: "brick",
+		multiple: true,
+		group: "brick.afterFields",
 	},
 } as const;

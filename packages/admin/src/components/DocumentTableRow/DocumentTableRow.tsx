@@ -1,4 +1,4 @@
-import { documentSlots } from "virtual:lucid-admin";
+import { documentListSlots } from "virtual:lucid-admin";
 import type { Collection, InternalCollectionDocument, Refs } from "@types";
 import { type Component, createMemo, For, Show } from "solid-js";
 import type { ActionMenuProps } from "@/components/ActionMenu/ActionMenu";
@@ -41,8 +41,8 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 	const additions = createMemo(() =>
 		props.extensions
 			? resolveSlots(
-					documentSlots.filter(
-						(entry) => entry.slot === "document.columnAddition",
+					documentListSlots.filter(
+						(entry) => entry.slot === "documentList.column",
 					),
 					{ collection: props.collection.key },
 				)
@@ -84,8 +84,8 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 					const override = createMemo(() =>
 						props.extensions
 							? resolveSlots(
-									documentSlots.filter(
-										(entry) => entry.slot === "document.columnOverride",
+									documentListSlots.filter(
+										(entry) => entry.slot === "field.cell",
 									),
 									{ collection: props.collection.key, field: field.key },
 								)[0]
@@ -111,7 +111,8 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 									entry={entry()}
 									data={{
 										...data(),
-										slot: "document.columnOverride",
+										options: entry().options,
+										slot: "field.cell",
 										field: createFieldState({
 											config: field,
 											data: props.document.fields?.find(
@@ -133,7 +134,11 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 					<DocumentSlotCell
 						column={`extension:${entry.key}`}
 						entry={entry}
-						data={{ ...data(), slot: "document.columnAddition" }}
+						data={{
+							...data(),
+							options: entry.options,
+							slot: "documentList.column",
+						}}
 					/>
 				)}
 			</For>

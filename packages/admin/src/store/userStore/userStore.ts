@@ -1,4 +1,5 @@
-import type { Permission, User } from "@types";
+import { matchPermissions } from "@match-permissions";
+import type { Permission, PermissionRequirement, User } from "@types";
 import { createStore } from "solid-js/store";
 
 type UserStoreT = {
@@ -9,6 +10,7 @@ type UserStoreT = {
 		all: boolean;
 		some: boolean;
 	};
+	meetsRequirement: (_requirement: PermissionRequirement) => boolean;
 };
 
 const [get, set] = createStore<UserStoreT>({
@@ -32,6 +34,10 @@ const [get, set] = createStore<UserStoreT>({
 		const some = filteredPerm.some((p) => userPerms.includes(p));
 
 		return { all, some };
+	},
+	meetsRequirement(requirement) {
+		if (this.user?.superAdmin) return true;
+		return matchPermissions(this.user?.permissions ?? [], requirement);
 	},
 });
 

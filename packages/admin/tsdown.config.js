@@ -30,8 +30,8 @@ export default defineConfig([
 		clean: true,
 	},
 	{
-		entry: { slots: "src/exports/slots.ts" },
-		outDir: "dist/slots",
+		entry: { config: "src/exports/config.ts" },
+		outDir: "dist/config",
 		format: "esm",
 		dts: true,
 		clean: true,
@@ -41,6 +41,7 @@ export default defineConfig([
 			conditions:
 				"../core/src/libs/collection/custom-fields/conditions/index.ts",
 			capabilities: "../core/src/libs/collection/custom-fields/capabilities.ts",
+			"match-permissions": "../core/src/libs/permission/match-permissions.ts",
 			preview: "../preview-protocol/src/index.ts",
 		},
 		outDir: "dist/shared",

@@ -1,16 +1,13 @@
-/** Slots that plugins can use to add or replace document table columns. */
-export const documentSlotKeys = {
-	columnAddition: "document.columnAddition",
-	columnOverride: "document.columnOverride",
-} as const;
-
-export const documentSlotPolicies = {
-	[documentSlotKeys.columnAddition]: {
+/** Slots that plugins can use to add document list columns or replace field cells. */
+export const documentListSlotPolicies = {
+	"documentList.column": {
+		surface: "documentList",
 		multiple: true,
-		group: documentSlotKeys.columnAddition,
+		group: "documentList.column",
 	},
-	[documentSlotKeys.columnOverride]: {
+	"field.cell": {
+		surface: "documentList",
 		multiple: false,
-		group: documentSlotKeys.columnOverride,
+		group: "field.cell",
 	},
 } as const;

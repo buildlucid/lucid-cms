@@ -14,7 +14,6 @@ import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
-import { fieldSlotKeys } from "./constants";
 import type { FieldSlot } from "./types";
 
 /** Uses the current field instance, including its repeater group and content locale. */
@@ -58,6 +57,7 @@ const FieldSlots: Component<{
 							<AdminExtensionBoundary name={entry.key} placement="content">
 								<entry.component
 									slot={props.slot}
+									options={entry.options}
 									field={createFieldState({
 										config: config(),
 										data: props.data,
@@ -103,7 +103,7 @@ const FieldSlots: Component<{
 						return (
 							<Show when={content.toArray().length > 0}>
 								<div
-									class={props.slot === fieldSlotKeys.before ? "mb-2" : "mt-2"}
+									class={props.slot === "field.before" ? "mb-2" : "mt-2"}
 									data-admin-slot={entry.key}
 								>
 									{content()}

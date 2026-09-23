@@ -1,4 +1,3 @@
-import { fieldSlotKeys } from "@lucidcms/admin/slots";
 import { defineAdminSlot } from "@lucidcms/core";
 import { COMPONENTS_MODULE, PLUGIN_KEY } from "../../../constants.js";
 
@@ -6,7 +5,7 @@ import { COMPONENTS_MODULE, PLUGIN_KEY } from "../../../constants.js";
 const fullSlugConfig = (collection: string) =>
 	defineAdminSlot({
 		key: `${PLUGIN_KEY}:${collection}:path`,
-		slot: fieldSlotKeys.after,
+		slot: "field.after",
 		match: { collection, kind: "collection-fields", field: "slug" },
 		component: { module: COMPONENTS_MODULE, export: "FullSlug" },
 	});

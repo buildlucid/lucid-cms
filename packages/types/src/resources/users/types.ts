@@ -43,6 +43,12 @@ export type Permission =
 	| CorePermission
 	| Extract<keyof CustomPermissions, string>;
 
+/** One permission, every permission in a list, or `some` of several options. */
+export type PermissionRequirement =
+	| Permission
+	| readonly Permission[]
+	| { readonly some: readonly (Permission | readonly Permission[])[] };
+
 export type PermissionDetails = {
 	name: ResolvedAdminCopy;
 	description?: ResolvedAdminCopy | null;

@@ -3,10 +3,10 @@ import { findSlotConflicts, resolveSlots } from "./slot-policy";
 import type { AdminSlot } from "./types/config";
 
 const slots = [
-	{ key: "default", slot: "brick.left", component: "default.ts" },
+	{ key: "default", slot: "brick.start", component: "default.ts" },
 	{
 		key: "seo",
-		slot: "brick.right",
+		slot: "brick.end",
 		component: "seo.ts",
 		match: { brick: "seo" },
 		priority: 1,
@@ -27,13 +27,13 @@ test("last registration wins tied overrides, without reordering additive ties", 
 	const entries = [
 		{
 			key: "first",
-			slot: "document.columnOverride",
+			slot: "field.cell",
 			component: "one.ts",
 			match: { field: "slug" },
 		},
 		{
 			key: "second",
-			slot: "document.columnOverride",
+			slot: "field.cell",
 			component: "two.ts",
 			match: { collection: "page", field: "slug" },
 			priority: 0,
@@ -49,7 +49,7 @@ test("last registration wins tied overrides, without reordering additive ties", 
 		[],
 	);
 	expect(findSlotConflicts(entries)).toEqual([
-		{ previous: "first", winner: "second", group: "document.columnOverride" },
+		{ previous: "first", winner: "second", group: "field.cell" },
 	]);
 	expect(findSlotConflicts(slots)).toEqual([]);
 	const headers = [

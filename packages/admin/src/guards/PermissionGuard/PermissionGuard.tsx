@@ -1,22 +1,18 @@
 import { Navigate } from "@solidjs/router";
-import type { Permission } from "@types";
+import type { PermissionRequirement } from "@types";
 import { type Component, createMemo, type JSXElement } from "solid-js";
 import userStore from "@/store/userStore/userStore";
 
 interface PermissionGuardProps {
-	permission: Permission | Permission[];
+	permission: PermissionRequirement;
 	fallback?: JSXElement;
 	children: JSXElement;
 }
 
 const PermissionGuard: Component<PermissionGuardProps> = (props) => {
-	const hasPermission = createMemo(() => {
-		const requirements = Array.isArray(props.permission)
-			? props.permission
-			: [props.permission];
-
-		return userStore.get.hasPermission(requirements).all;
-	});
+	const hasPermission = createMemo(() =>
+		userStore.get.meetsRequirement(props.permission),
+	);
 
 	if (hasPermission()) return props.children;
 

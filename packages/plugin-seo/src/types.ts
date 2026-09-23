@@ -8,4 +8,6 @@ export interface SeoPluginOptions {
 		/** Fixed brick key. Defaults to "seo". */
 		brickKey?: string;
 	}>;
+	/** Public site URL, used for the preview domain when a document has no canonical URL. */
+	siteUrl?: string;
 }

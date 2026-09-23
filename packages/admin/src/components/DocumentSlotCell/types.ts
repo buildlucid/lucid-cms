@@ -6,33 +6,38 @@ import type {
 } from "@lucidcms/types";
 import type { Component } from "solid-js";
 import type { EditorFieldState } from "../../extensions/editor/types.js";
-import type { documentSlotKeys } from "./constants.js";
+import type { AdminOptions } from "../../extensions/types/config.js";
+import type { documentListSlotPolicies } from "./constants.js";
 
-export type DocumentSlot =
-	(typeof documentSlotKeys)[keyof typeof documentSlotKeys];
+export type DocumentListSlot = keyof typeof documentListSlotPolicies;
 
-export type DocumentSlotPlacement =
+export type DocumentListSlotPlacement =
 	| {
-			slot: typeof documentSlotKeys.columnAddition;
+			/** Adds a column to the document list. */
+			slot: "documentList.column";
 			match?: { collection?: string };
 			column: { label: string | ResolvedAdminCopy };
 	  }
 	| {
-			slot: typeof documentSlotKeys.columnOverride;
+			/** Replaces a field's cell in the document list. */
+			slot: "field.cell";
 			match: { collection?: string; field: string };
 	  };
 
 /** Listing data only: extensions do not fetch full documents for every row. */
-export type DocumentSlotProps = {
+export type DocumentListSlotProps<
+	TOptions extends AdminOptions | undefined = undefined,
+> = {
 	readonly document: Readonly<InternalCollectionDocument>;
 	readonly collection: Readonly<Collection>;
 	readonly contentLocale: string;
 	readonly refs: Readonly<Refs> | undefined;
+	readonly options: TOptions;
 } & (
-	| { readonly slot: typeof documentSlotKeys.columnAddition }
-	| {
-			readonly slot: typeof documentSlotKeys.columnOverride;
-			readonly field: EditorFieldState;
-	  }
+	| { readonly slot: "documentList.column" }
+	| { readonly slot: "field.cell"; readonly field: EditorFieldState }
 );
-export type DocumentSlotComponent = Component<DocumentSlotProps>;
+
+export type DocumentListSlotComponent<
+	TOptions extends AdminOptions | undefined = undefined,
+> = Component<DocumentListSlotProps<TOptions>>;

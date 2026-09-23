@@ -21,7 +21,11 @@ const plugin: LucidPlugin<SeoPluginOptions> = (options) =>
 				collection.config.bricks ??= {};
 				collection.config.bricks.fixed ??= [];
 				collection.config.bricks.fixed.push(brick);
-				draft.admin.slots.push(...registerAdminSlots(collection.key, brickKey));
+				draft.admin.slots.push(
+					...registerAdminSlots(collection.key, brickKey, {
+						siteUrl: options.siteUrl,
+					}),
+				);
 			}
 		},
 	});

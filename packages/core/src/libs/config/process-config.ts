@@ -10,6 +10,7 @@ import { getJobRegistry } from "../jobs/registry.js";
 import { initializeLogger } from "../logger/index.js";
 import { getCapabilityRegistry } from "../permission/capabilities.js";
 import type { ConfigTransform } from "../runtime/types.js";
+import checkAdminRoutes from "./checks/check-admin-routes.js";
 import checkAdminSlots from "./checks/check-admin-slots.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
@@ -87,6 +88,7 @@ const processConfig = async (
 		configRes = ConfigSchema.parse(configRes);
 
 		checkAdminSlots(configRes.admin);
+		checkAdminRoutes(configRes);
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);

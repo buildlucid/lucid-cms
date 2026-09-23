@@ -3,20 +3,17 @@ import type {
 	BrickState,
 	EditorContext,
 } from "../../extensions/editor/types.js";
-import type { brickSlotKeys } from "./constants.js";
+import type { AdminOptions } from "../../extensions/types/config.js";
+import type { brickSlotPolicies } from "./constants.js";
 
-export type BrickSlot = (typeof brickSlotKeys)[keyof typeof brickSlotKeys];
+export type BrickSlot = keyof typeof brickSlotPolicies;
 
 /** Side panels share a 12-column grid with the standard brick content. */
 export type BrickSlotPlacement =
+	| { slot: "brick.header" | "brick.beforeFields" | "brick.afterFields" }
 	| {
-			slot:
-				| typeof brickSlotKeys.header
-				| typeof brickSlotKeys.beforeFields
-				| typeof brickSlotKeys.afterFields;
-	  }
-	| {
-			slot: typeof brickSlotKeys.left | typeof brickSlotKeys.right;
+			/** Start and end follow the interface direction. */
+			slot: "brick.start" | "brick.end";
 			/** Columns occupied by the panel. Defaults to 6; fields use the remainder. */
 			width?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 			/** Keep the panel below the editor toolbar while scrolling. Disabled when stacked. */
@@ -30,11 +27,16 @@ export type BrickSlotMatch = {
 };
 
 /** A read-only view of this brick instance and its unsaved fields. */
-export type BrickSlotProps = {
+export type BrickSlotProps<
+	TOptions extends AdminOptions | undefined = undefined,
+> = {
 	readonly slot: BrickSlot;
 	readonly open: boolean;
 	readonly brick: BrickState;
 	readonly context: EditorContext;
+	readonly options: TOptions;
 };
 
-export type BrickSlotComponent = Component<BrickSlotProps>;
+export type BrickSlotComponent<
+	TOptions extends AdminOptions | undefined = undefined,
+> = Component<BrickSlotProps<TOptions>>;

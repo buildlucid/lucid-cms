@@ -1,4 +1,4 @@
-import { findSlotConflicts } from "@lucidcms/admin/slots";
+import { findSlotConflicts } from "@lucidcms/admin/config";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import logger from "../../logger/index.js";
 

@@ -17,7 +17,10 @@
 		"skipLibCheck": true,
 		"paths": {
 			"@lucidcms/admin/types": ["src/exports/types.ts"],
-			"@lucidcms/admin/slots": ["src/exports/slots.ts"],
+			"@lucidcms/admin/config": ["src/exports/config.ts"],
+			"@match-permissions": [
+				"../core/src/libs/permission/match-permissions.ts"
+			],
 			"@/*": ["src/*"],
 			"@types": ["../core/src/exports/types.ts"],
 			"@field-conditions": [

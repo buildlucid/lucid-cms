@@ -17,7 +17,6 @@ import type { BrickData } from "@/store/brickStore/brickStore";
 import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import AdminExtensionBoundary from "../AdminExtensionBoundary/AdminExtensionBoundary";
-import { brickSlotKeys } from "./constants";
 import type { BrickSlot } from "./types";
 
 /** Places matching extensions around the native fields, sharing one optional side panel. */
@@ -55,9 +54,8 @@ const BrickSlots: Component<{
 				entry,
 			): entry is Extract<
 				typeof entry,
-				{ slot: typeof brickSlotKeys.left | typeof brickSlotKeys.right }
-			> =>
-				entry.slot === brickSlotKeys.left || entry.slot === brickSlotKeys.right,
+				{ slot: "brick.start" | "brick.end" }
+			> => entry.slot === "brick.start" || entry.slot === "brick.end",
 		),
 	);
 	const brick = createMemo(() => {
@@ -95,6 +93,7 @@ const BrickSlots: Component<{
 							>
 								<entry.component
 									slot={slot}
+									options={entry.options}
 									open={props.open}
 									brick={brick()}
 									context={{
@@ -128,7 +127,7 @@ const BrickSlots: Component<{
 	);
 
 	return (
-		<Show when={!props.header} fallback={renderSlots(brickSlotKeys.header)}>
+		<Show when={!props.header} fallback={renderSlots("brick.header")}>
 			<div class="@container/brick min-w-0">
 				<div
 					class="grid grid-cols-12 items-start gap-x-6 gap-y-3"
@@ -142,13 +141,12 @@ const BrickSlots: Component<{
 						classList={{
 							"@min-[48rem]/brick:col-span-[var(--brick-fields-width)]":
 								!!sidePanel(),
-							"@min-[48rem]/brick:order-2":
-								sidePanel()?.slot === brickSlotKeys.left,
+							"@min-[48rem]/brick:order-2": sidePanel()?.slot === "brick.start",
 						}}
 					>
-						{renderSlots(brickSlotKeys.beforeFields)}
+						{renderSlots("brick.beforeFields")}
 						{props.children}
-						{renderSlots(brickSlotKeys.afterFields)}
+						{renderSlots("brick.afterFields")}
 					</div>
 					<Show when={sidePanel()}>
 						{(panel) => (

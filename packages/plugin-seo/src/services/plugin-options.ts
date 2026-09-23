@@ -4,6 +4,7 @@ import { PLUGIN_KEY } from "../constants.js";
 import type { SeoPluginOptions } from "../types.js";
 
 const optionsSchema = z.strictObject({
+	siteUrl: z.url({ protocol: /^https?$/ }).optional(),
 	collections: z
 		.array(
 			z.strictObject({

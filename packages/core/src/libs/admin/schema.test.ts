@@ -4,12 +4,12 @@ import { adminConfigSchema } from "./schema.js";
 const panel = {
 	key: "preview",
 	component: "./Preview.tsx",
-	slot: "brick.right",
+	slot: "brick.end",
 };
 
 describe("brick side slots", () => {
 	it("accepts either side with a default or explicit column width", () => {
-		for (const slot of ["brick.left", "brick.right"]) {
+		for (const slot of ["brick.start", "brick.end"]) {
 			for (const width of [undefined, 1, 5, 6, 11]) {
 				const config = adminConfigSchema.parse({
 					slots: [{ ...panel, slot, width, sticky: true }],
@@ -47,7 +47,7 @@ describe("brick side slots", () => {
 					{
 						...panel,
 						key: "other",
-						slot: "brick.left",
+						slot: "brick.start",
 						width: 4,
 						match: { brick: "related" },
 					},
@@ -58,7 +58,7 @@ describe("brick side slots", () => {
 
 	it("accepts overlapping panels for priority-based selection", () => {
 		for (const change of [
-			{ slot: "brick.left" },
+			{ slot: "brick.start" },
 			{ width: 5 },
 			{ sticky: true },
 		]) {
@@ -111,14 +111,14 @@ describe("named component references", () => {
 	});
 });
 
-describe("document column slots", () => {
+describe("document list slots", () => {
 	it("requires headers for additions and a field target for overrides", () => {
 		expect(
 			adminConfigSchema.safeParse({
 				slots: [
 					{
 						key: "column",
-						slot: "document.columnAddition",
+						slot: "documentList.column",
 						component: "./column.tsx",
 						column: { label: "Summary" },
 						priority: 2,
@@ -129,18 +129,18 @@ describe("document column slots", () => {
 		for (const slot of [
 			{
 				key: "column",
-				slot: "document.columnAddition",
+				slot: "documentList.column",
 				component: "./column.tsx",
 			},
 			{
 				key: "override",
-				slot: "document.columnOverride",
+				slot: "field.cell",
 				component: "./column.tsx",
 				match: { collection: "page" },
 			},
 			{
 				key: "column",
-				slot: "document.columnAddition",
+				slot: "documentList.column",
 				component: "./column.tsx",
 				column: { label: "Summary" },
 				priority: Infinity,
@@ -149,5 +149,62 @@ describe("document column slots", () => {
 			expect(adminConfigSchema.safeParse({ slots: [slot] }).success).toBe(
 				false,
 			);
+	});
+});
+
+describe("component options", () => {
+	it("accepts JSON and rejects values that cannot be serialised", () => {
+		expect(
+			adminConfigSchema.safeParse({
+				slots: [
+					{ ...panel, options: { siteUrl: undefined, limits: [1, null] } },
+				],
+			}).success,
+		).toBe(true);
+		for (const value of [() => {}, new Date(), { nested: undefined }]) {
+			expect(
+				adminConfigSchema.safeParse({
+					slots: [{ ...panel, options: { value } }],
+				}).success,
+			).toBe(false);
+		}
+	});
+});
+
+describe("route permissions", () => {
+	const route = { key: "reports", path: "reports", component: "./Page.tsx" };
+
+	it("accepts one key, a list or some options on signed-in routes", () => {
+		for (const permission of [
+			"media:read",
+			["media:read", "users:read"],
+			{ some: ["media:read", ["users:read", "roles:read"]] },
+		]) {
+			expect(
+				adminConfigSchema.safeParse({ routes: [{ ...route, permission }] })
+					.success,
+			).toBe(true);
+		}
+	});
+
+	it("rejects empty requirements and public routes with permissions", () => {
+		for (const permission of [[], { some: [] }, ""]) {
+			expect(
+				adminConfigSchema.safeParse({ routes: [{ ...route, permission }] })
+					.success,
+			).toBe(false);
+		}
+		expect(
+			adminConfigSchema.safeParse({
+				routes: [
+					{
+						...route,
+						shell: "none",
+						access: "public",
+						permission: "media:read",
+					},
+				],
+			}).success,
+		).toBe(false);
 	});
 });

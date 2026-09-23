@@ -21,9 +21,9 @@
 		"./types": {
 			"types": "./dist/types/types.d.mts"
 		},
-		"./slots": {
-			"types": "./dist/slots/slots.d.mts",
-			"default": "./dist/slots/slots.mjs"
+		"./config": {
+			"types": "./dist/config/config.d.mts",
+			"default": "./dist/config/config.mjs"
 		},
 		"./components": {
 			"types": "./dist/browser/components.d.mts",

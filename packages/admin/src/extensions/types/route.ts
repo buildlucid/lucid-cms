@@ -1,5 +1,6 @@
+import type { PermissionRequirement } from "@lucidcms/types";
 import type { Component } from "solid-js";
-import type { AdminComponentReference } from "./config.js";
+import type { AdminComponentReference, AdminOptions } from "./config.js";
 import type { AdminRouteNavigation } from "./navigation.js";
 
 export type AdminRoute = {
@@ -8,6 +9,7 @@ export type AdminRoute = {
 	path: string;
 	/** Component module. Its directory and subdirectories are scanned for Tailwind classes. */
 	component: AdminComponentReference;
+	options?: AdminOptions;
 	/** Omit to keep this route out of the sidebar. */
 	navigation?: AdminRouteNavigation;
 } & (
@@ -16,13 +18,23 @@ export type AdminRoute = {
 			 * the page itself with PageLayout from @lucidcms/admin/components. */
 			shell?: "navigation";
 			access?: "authenticated";
+			/** Hides the link and blocks the route for users without access. */
+			permission?: PermissionRequirement;
 	  }
 	| {
 			/** Renders on its own, with no navigation around it. */
 			shell: "none";
-			/** Defaults to authenticated. Public routes also work when signed in. */
-			access?: "authenticated" | "public";
+			access?: "authenticated";
+			/** Hides the link and blocks the route for users without access. */
+			permission?: PermissionRequirement;
+	  }
+	| {
+			shell: "none";
+			/** Public routes also work when signed in. */
+			access: "public";
 	  }
 );
 
-export type RouteComponent = Component;
+export type RouteComponent<
+	TOptions extends AdminOptions | undefined = undefined,
+> = Component<{ readonly options: TOptions }>;

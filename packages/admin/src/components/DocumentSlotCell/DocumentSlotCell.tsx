@@ -1,13 +1,17 @@
 import type { Component } from "solid-js";
+import type { AdminOptions } from "@/extensions/types/config";
 import AdminExtensionBoundary from "../AdminExtensionBoundary/AdminExtensionBoundary";
 import Table from "../Table/Table";
-import type { DocumentSlotComponent, DocumentSlotProps } from "./types";
+import type { DocumentListSlotComponent, DocumentListSlotProps } from "./types";
 
 /** The admin owns table structure; extensions render only cell contents. */
 const DocumentSlotCell: Component<{
 	column?: string;
-	entry: { key: string; component: DocumentSlotComponent };
-	data: DocumentSlotProps;
+	entry: {
+		key: string;
+		component: DocumentListSlotComponent<AdminOptions | undefined>;
+	};
+	data: DocumentListSlotProps<AdminOptions | undefined>;
 }> = (props) => {
 	// ----------------------------------
 	// Render

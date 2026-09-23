@@ -1,13 +1,17 @@
 import { brickSlotPolicies } from "../components/BrickSlots/constants.js";
-import { documentSlotPolicies } from "../components/DocumentSlotCell/constants.js";
+import { documentListSlotPolicies } from "../components/DocumentSlotCell/constants.js";
 import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
 
-/** Component-owned policies shared by config diagnostics and slot selection. */
+/** Component-owned policies shared by config diagnostics, compilation and slot selection. */
 export const slotDefinitions = {
 	...brickSlotPolicies,
-	...documentSlotPolicies,
+	...documentListSlotPolicies,
 	...fieldSlotPolicies,
 } as const;
+
+/** The admin area that renders a slot. */
+export type SlotSurface =
+	(typeof slotDefinitions)[keyof typeof slotDefinitions]["surface"];
 
 type Match = {
 	collection?: string;

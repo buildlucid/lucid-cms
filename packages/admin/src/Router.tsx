@@ -98,6 +98,24 @@ const preloadRoutes =
 		void Promise.all(routes.map((route) => route.preload()));
 	};
 
+const extensionRoute = (route: (typeof extensionRoutes)[number]) => (
+	<Route
+		path={route.path.slice("/lucid".length)}
+		component={() => {
+			const page = (
+				<AdminExtensionBoundary name={route.key} placement="page">
+					<route.component options={route.options} />
+				</AdminExtensionBoundary>
+			);
+			return route.access === "public" || !route.permission ? (
+				page
+			) : (
+				<PermissionGuard permission={route.permission}>{page}</PermissionGuard>
+			);
+		}}
+	/>
+);
+
 const AppRouter: Component = () => {
 	return (
 		<Router preload>
@@ -109,16 +127,7 @@ const AppRouter: Component = () => {
 					<Route path="/account" component={AccountRoute} />
 					{extensionRoutes
 						.filter((route) => route.shell === "navigation")
-						.map((route) => (
-							<Route
-								path={route.path.slice("/lucid".length)}
-								component={() => (
-									<AdminExtensionBoundary name={route.key} placement="page">
-										<route.component />
-									</AdminExtensionBoundary>
-								)}
-							/>
-						))}
+						.map(extensionRoute)}
 					{/* Collections */}
 					<Route
 						path="/collections/:collectionKey"
@@ -304,16 +313,7 @@ const AppRouter: Component = () => {
 							(route) =>
 								route.shell === "none" && route.access === "authenticated",
 						)
-						.map((route) => (
-							<Route
-								path={route.path.slice("/lucid".length)}
-								component={() => (
-									<AdminExtensionBoundary name={route.key} placement="page">
-										<route.component />
-									</AdminExtensionBoundary>
-								)}
-							/>
-						))}
+						.map(extensionRoute)}
 				</Route>
 			</Route>
 			{/* Public extensions work both with and without a session. */}
@@ -322,16 +322,7 @@ const AppRouter: Component = () => {
 					.filter(
 						(route) => route.shell === "none" && route.access === "public",
 					)
-					.map((route) => (
-						<Route
-							path={route.path.slice("/lucid".length)}
-							component={() => (
-								<AdminExtensionBoundary name={route.key} placement="page">
-									<route.component />
-								</AdminExtensionBoundary>
-							)}
-						/>
-					))}
+					.map(extensionRoute)}
 			</Route>
 			{/* Non authenticated */}
 			<Route path="/lucid" component={AuthRoutes}>

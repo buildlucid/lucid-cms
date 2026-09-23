@@ -6,10 +6,10 @@ export type {
 	BrickSlotProps,
 } from "../components/BrickSlots/types.js";
 export type {
-	DocumentSlot,
-	DocumentSlotComponent,
-	DocumentSlotPlacement,
-	DocumentSlotProps,
+	DocumentListSlot,
+	DocumentListSlotComponent,
+	DocumentListSlotPlacement,
+	DocumentListSlotProps,
 } from "../components/DocumentSlotCell/types.js";
 export type {
 	FieldSlot,
@@ -29,6 +29,8 @@ export type {
 	AdminComponentReference,
 	AdminConfig,
 	AdminModulePath,
+	AdminOptions,
+	AdminOptionValue,
 	AdminSlot,
 } from "../extensions/types/config.js";
 export type {

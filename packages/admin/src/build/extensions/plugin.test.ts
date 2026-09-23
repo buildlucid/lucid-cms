@@ -66,7 +66,7 @@ test("bundles project and browser package entries without executing them, includ
 		);
 		await writeFile(
 			path.join(root, "main.js"),
-			'import "./main.css"; import { routes, brickSlots, fieldSlots, documentSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.testRegistry = { routes, brickSlots, fieldSlots, documentSlots };',
+			'import "./main.css"; import { routes, brickSlots, fieldSlots, documentListSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.testRegistry = { routes, brickSlots, fieldSlots, documentListSlots };',
 		);
 		await writeFile(path.join(root, "main.css"), "");
 		const server = await createServer({
@@ -86,7 +86,7 @@ test("bundles project and browser package entries without executing them, includ
 							},
 							{
 								key: "extra",
-								slot: "document.columnAddition",
+								slot: "documentList.column",
 								column: { label: "Summary" },
 								component: {
 									module: "test-plugin/panel",
@@ -95,7 +95,7 @@ test("bundles project and browser package entries without executing them, includ
 							},
 							{
 								key: "override",
-								slot: "document.columnOverride",
+								slot: "field.cell",
 								match: { collection: "page", field: "slug" },
 								priority: 10,
 								component: {
@@ -286,7 +286,7 @@ test.each([
 		);
 		await writeFile(
 			path.join(adminRoot, "main.js"),
-			'import "./main.css"; import { routes, brickSlots, fieldSlots, documentSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots, documentSlots };',
+			'import "./main.css"; import { routes, brickSlots, fieldSlots, documentListSlots } from "virtual:lucid-admin"; import "virtual:lucid-admin-assets"; window.registry = { routes, brickSlots, fieldSlots, documentListSlots };',
 		);
 		await writeFile(path.join(adminRoot, "main.css"), "");
 		const plugin = () =>

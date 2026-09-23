@@ -1,13 +1,13 @@
 /** Compiled route and slot registrations emitted by adminExtensionsPlugin. */
 declare module "virtual:lucid-admin" {
 	import type {
+		AdminOptions,
 		AdminRoute,
-		AdminRouteNavigation,
 		AdminSlot,
 		BrickSlot,
 		BrickSlotComponent,
-		DocumentSlotComponent,
-		DocumentSlotPlacement,
+		DocumentListSlot,
+		DocumentListSlotComponent,
 		FieldSlot,
 		FieldSlotComponent,
 		RouteComponent,
@@ -24,31 +24,35 @@ declare module "virtual:lucid-admin" {
 			}
 		: never;
 
-	export const routes: Array<{
-		key: string;
-		path: string;
-		shell: NonNullable<AdminRoute["shell"]>;
-		access: NonNullable<AdminRoute["access"]>;
-		component: RouteComponent;
-		navigation?: AdminRouteNavigation;
-	}>;
+	/** Compilation fills in the default shell and access. */
+	type RouteRegistration<Route extends AdminRoute> = Route extends AdminRoute
+		? Omit<Route, "component"> & {
+				shell: NonNullable<Route["shell"]>;
+				access: NonNullable<Route["access"]>;
+				component: RouteComponent<AdminOptions | undefined>;
+			}
+		: never;
+
+	export const routes: Array<RouteRegistration<AdminRoute>>;
+
 	export const brickSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: BrickSlot }>,
-			BrickSlotComponent
+			BrickSlotComponent<AdminOptions | undefined>
 		>
 	>;
-	export const documentSlots: Array<
+
+	export const documentListSlots: Array<
 		SlotRegistration<
-			Extract<AdminSlot, { slot: DocumentSlotPlacement["slot"] }>,
-			DocumentSlotComponent
+			Extract<AdminSlot, { slot: DocumentListSlot }>,
+			DocumentListSlotComponent<AdminOptions | undefined>
 		>
 	>;
 
 	export const fieldSlots: Array<
 		SlotRegistration<
 			Extract<AdminSlot, { slot: FieldSlot }>,
-			FieldSlotComponent
+			FieldSlotComponent<AdminOptions | undefined>
 		>
 	>;
 }

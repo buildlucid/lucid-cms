@@ -1,8 +1,7 @@
-import type { DocumentSlotComponent } from "@lucidcms/admin/types";
-import { documentSlotKeys } from "@lucidcms/admin/utils";
+import type { DocumentListSlotComponent } from "@lucidcms/admin/types";
 import { createMemo, Show } from "solid-js";
 
-const SlugCell: DocumentSlotComponent = (props) => {
+const SlugCell: DocumentListSlotComponent = (props) => {
 	// ----------------------------------
 	// Memos
 	const path = createMemo(() => {
@@ -10,8 +9,7 @@ const SlugCell: DocumentSlotComponent = (props) => {
 		return typeof value === "string" ? value : value?.[props.contentLocale];
 	});
 	const slug = createMemo(() =>
-		props.slot === documentSlotKeys.columnOverride &&
-		typeof props.field.value === "string"
+		props.slot === "field.cell" && typeof props.field.value === "string"
 			? props.field.value
 			: "",
 	);

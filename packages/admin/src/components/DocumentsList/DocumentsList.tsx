@@ -1,4 +1,4 @@
-import { documentSlots } from "virtual:lucid-admin";
+import { documentListSlots } from "virtual:lucid-admin";
 import { useNavigate, useParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
@@ -91,7 +91,7 @@ export const DocumentsList: Component<{
 	);
 	const customColumns = createMemo(() =>
 		resolveSlots(
-			documentSlots.filter((entry) => entry.slot === "document.columnAddition"),
+			documentListSlots.filter((entry) => entry.slot === "documentList.column"),
 			{ collection: collectionKey() },
 		),
 	);

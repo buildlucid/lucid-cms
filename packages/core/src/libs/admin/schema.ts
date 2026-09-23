@@ -1,11 +1,7 @@
-import {
-	brickSlotKeys,
-	documentSlotKeys,
-	fieldSlotKeys,
-} from "@lucidcms/admin/slots";
 import type { AdminConfig, AdminNavigationIcon } from "@lucidcms/admin/types";
 import z from "zod";
 import { adminCopyInputSchema } from "../i18n/index.js";
+import type { Permission } from "../permission/types.js";
 
 const fileReference = z.union([
 	z
@@ -36,6 +32,24 @@ const key = z.string().trim().min(1);
 const componentReference = z.union([
 	fileReference,
 	z.strictObject({ module: fileReference, export: key }),
+]);
+
+const options = z.record(z.string(), z.json().optional()).optional();
+
+// Registration is checked against the resolved access config in checkAdminRoutes.
+const permission = z.custom<Permission>(
+	(value) => typeof value === "string" && value.trim().length > 0,
+	"Use a permission key.",
+);
+
+const permissionList = z.array(permission).min(1);
+
+const permissionRequirement = z.union([
+	permission,
+	permissionList,
+	z.strictObject({
+		some: z.array(z.union([permission, permissionList])).min(1),
+	}),
 ]);
 
 const routePath = z
@@ -101,6 +115,7 @@ const route = z.strictObject({
 	key,
 	path: routePath,
 	component: componentReference,
+	options,
 	navigation: routeNavigation.optional(),
 });
 
@@ -113,26 +128,28 @@ export const adminConfigSchema = z
 						key,
 						priority: z.number().optional(),
 						slot: z.enum([
-							brickSlotKeys.header,
-							brickSlotKeys.beforeFields,
-							brickSlotKeys.afterFields,
+							"brick.header",
+							"brick.beforeFields",
+							"brick.afterFields",
 						]),
 						match: brickSlotMatch.optional(),
 						component: componentReference,
+						options,
 					}),
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
-						slot: z.enum([brickSlotKeys.left, brickSlotKeys.right]),
+						slot: z.enum(["brick.start", "brick.end"]),
 						width: z.literal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).optional(),
 						sticky: z.boolean().optional(),
 						match: brickSlotMatch.optional(),
 						component: componentReference,
+						options,
 					}),
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
-						slot: z.enum(fieldSlotKeys),
+						slot: z.enum(["field.before", "field.after"]),
 						match: brickSlotMatch
 							.extend({
 								field: key.optional(),
@@ -142,20 +159,23 @@ export const adminConfigSchema = z
 							})
 							.optional(),
 						component: componentReference,
+						options,
 					}),
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
-						slot: z.literal(documentSlotKeys.columnAddition),
+						slot: z.literal("documentList.column"),
 						component: componentReference,
+						options,
 						match: z.strictObject({ collection: key.optional() }).optional(),
 						column: z.strictObject({ label: adminCopyInputSchema }),
 					}),
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
-						slot: z.literal(documentSlotKeys.columnOverride),
+						slot: z.literal("field.cell"),
 						component: componentReference,
+						options,
 						match: z.strictObject({ collection: key.optional(), field: key }),
 					}),
 				]),
@@ -167,12 +187,14 @@ export const adminConfigSchema = z
 					route.extend({
 						shell: z.literal("navigation").default("navigation"),
 						access: z.literal("authenticated").default("authenticated"),
+						permission: permissionRequirement.optional(),
 					}),
 					route.extend({
 						shell: z.literal("none"),
 						access: z
 							.enum(["authenticated", "public"])
 							.default("authenticated"),
+						permission: permissionRequirement.optional(),
 					}),
 				]),
 			)
@@ -206,5 +228,13 @@ export const adminConfigSchema = z
 					message: `Duplicate admin route path "${route.path}".`,
 				});
 			paths.add(route.path);
+
+			if (route.access === "public" && route.permission !== undefined) {
+				context.addIssue({
+					code: "custom",
+					path: ["routes", index, "permission"],
+					message: "Public admin routes cannot require permissions.",
+				});
+			}
 		}
 	}) satisfies z.ZodType<Required<AdminConfig>>;
