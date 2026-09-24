@@ -747,5 +747,11 @@
 	"core.routes.document.workflow.update.error.message": "An error occurred while updating the document workflow.",
 	"core.routes.document.workflow.assignees.error.name": "Document Workflow Assignees Error",
 	"core.routes.document.workflow.assignees.error.message": "An error occurred while fetching document workflow assignees.",
-	"core.jobs.schedule.state.failed": "The job schedule state could not be updated."
+	"core.jobs.schedule.state.failed": "The job schedule state could not be updated.",
+	"core.mcp.result.too.large": "This result is too large. Request a smaller page, fewer fields or fewer bricks, then try again.",
+	"core.tools.content.locale.unknown": "This content locale is not available.",
+	"core.tools.media.preview.not.ready": "This media is still processing and cannot be previewed yet.",
+	"core.tools.media.preview.unsupported": "This media has no image that can be previewed.",
+	"core.tools.media.preview.too.large": "No preview small enough to return is available for this media.",
+	"core.tools.media.preview.cancelled": "The preview request was cancelled."
 }

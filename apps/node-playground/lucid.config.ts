@@ -87,8 +87,10 @@ export default defineConfig({
 			refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
 			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
-		mcp: true,
-		tools: { definitions: [echoTool, addTool] },
+		ai: {
+			mcp: true,
+			tools: { definitions: [echoTool, addTool] },
+		},
 		localization: {
 			locales: [
 				{

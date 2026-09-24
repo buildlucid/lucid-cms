@@ -81,7 +81,7 @@ const formatSingle = (props: {
 
 	if (includeSet.has("mcp") && canReadSystem) {
 		response.mcp = {
-			enabled: props.config.mcp.enabled,
+			enabled: props.config.ai.enabled && props.config.ai.mcp.enabled,
 			tools: Array.from(getToolRegistry(props.config).values(), (tool) => ({
 				name: tool.name,
 				description: tool.description,

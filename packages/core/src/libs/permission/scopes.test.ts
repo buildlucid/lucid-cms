@@ -6,13 +6,21 @@ describe("external scopes", () => {
 	test("makes account access available only to user principals", () => {
 		expect(
 			getValidExternalScopes(
-				{ collections: [], access: [], mcp: { enabled: false } },
+				{
+					collections: [],
+					access: [],
+					ai: { enabled: true, mcp: { enabled: false } },
+				},
 				{ principalType: "user" },
 			),
 		).toContain(ExternalScopes.AccountRead);
 		expect(
 			getValidExternalScopes(
-				{ collections: [], access: [], mcp: { enabled: false } },
+				{
+					collections: [],
+					access: [],
+					ai: { enabled: true, mcp: { enabled: false } },
+				},
 				{ principalType: "system" },
 			),
 		).not.toContain(ExternalScopes.AccountRead);
@@ -20,7 +28,7 @@ describe("external scopes", () => {
 			getValidExternalScopes({
 				collections: [],
 				access: [],
-				mcp: { enabled: false },
+				ai: { enabled: true, mcp: { enabled: false } },
 			}),
 		).toContain(ExternalScopes.AccountRead);
 	});
@@ -28,7 +36,11 @@ describe("external scopes", () => {
 	test("rejects account access for system integrations", () => {
 		expect(
 			getInvalidExternalScopes(
-				{ collections: [], access: [], mcp: { enabled: false } },
+				{
+					collections: [],
+					access: [],
+					ai: { enabled: true, mcp: { enabled: false } },
+				},
 				[ExternalScopes.AccountRead],
 				{
 					principalType: "system",
@@ -37,7 +49,11 @@ describe("external scopes", () => {
 		).toEqual([ExternalScopes.AccountRead]);
 		expect(
 			getInvalidExternalScopes(
-				{ collections: [], access: [], mcp: { enabled: false } },
+				{
+					collections: [],
+					access: [],
+					ai: { enabled: true, mcp: { enabled: false } },
+				},
 				[ExternalScopes.AccountRead],
 				{
 					principalType: "user",
@@ -51,14 +67,14 @@ describe("external scopes", () => {
 			getValidExternalScopes({
 				collections: [],
 				access: [],
-				mcp: { enabled: true },
+				ai: { enabled: true, mcp: { enabled: true } },
 			}),
 		).toContain(ExternalScopes.McpAccess);
 		expect(
 			getValidExternalScopes({
 				collections: [],
 				access: [],
-				mcp: { enabled: false },
+				ai: { enabled: true, mcp: { enabled: false } },
 			}),
 		).not.toContain(ExternalScopes.McpAccess);
 	});

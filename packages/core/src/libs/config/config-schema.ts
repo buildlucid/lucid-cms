@@ -84,6 +84,29 @@ const ToolDefinitionSchema = z.custom<ToolDefinition>(isToolDefinition, {
 	message: "Expected a tool definition created with defineTool",
 });
 
+const AiConfigSchema = z.strictObject({
+	enabled: z.boolean().default(true),
+	features: z
+		.strictObject({
+			imageGeneration: z.boolean().default(true),
+			altGeneration: z.boolean().default(true),
+			customFieldGeneration: z.boolean().default(true),
+		})
+		.prefault({}),
+	mcp: z
+		.union([
+			z.boolean().transform((enabled) => ({ enabled })),
+			z.strictObject({ enabled: z.boolean() }),
+		])
+		.default({ enabled: false }),
+	tools: z
+		.strictObject({
+			definitions: z.array(ToolDefinitionSchema).default([]),
+			disabled: z.array(z.string()).default([]),
+		})
+		.prefault({}),
+});
+
 const KVAdapterSchema = z.custom<
 	KVAdapter | KVAdapterInstance | Promise<KVAdapterInstance>
 >(
@@ -206,14 +229,12 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 		}),
 		providers: z.array(AuthProviderSchema),
 	}),
-	ai: z.strictObject({
-		enabled: z.boolean(),
-		features: z.strictObject({
-			imageGeneration: z.boolean(),
-			altGeneration: z.boolean(),
-			customFieldGeneration: z.boolean(),
-		}),
-	}),
+	ai: z
+		.preprocess(
+			(value) => (typeof value === "boolean" ? { enabled: value } : value),
+			AiConfigSchema,
+		)
+		.prefault({}),
 	localization: z.strictObject({
 		locales: z.array(
 			z.strictObject({
@@ -315,14 +336,6 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			completedDays: z.number().int().nonnegative(),
 			failedDays: z.number().int().nonnegative(),
 		}),
-	}),
-	mcp: z.union([
-		z.boolean().transform((enabled) => ({ enabled })),
-		z.strictObject({ enabled: z.boolean().default(false) }),
-	]),
-	tools: z.strictObject({
-		definitions: z.array(ToolDefinitionSchema),
-		disabled: z.array(z.string()),
 	}),
 	kv: z
 		.strictObject({

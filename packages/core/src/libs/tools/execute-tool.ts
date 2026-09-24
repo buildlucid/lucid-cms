@@ -27,9 +27,17 @@ export const executeTool = async (args: {
 	}
 
 	try {
-		return await tool[toolDefinitionInternal].run({
+		const preparation = await tool[toolDefinitionInternal].prepareInput(
+			args.input,
+		);
+
+		if (preparation.type === "invalid-input") return preparation;
+		if (preparation.data.scopes.some((scope) => !scopes.has(scope))) {
+			return { type: "forbidden" };
+		}
+
+		return await preparation.data.run({
 			context: args.context,
-			input: args.input,
 			execution: args.execution,
 		});
 	} catch (error) {

@@ -5,7 +5,10 @@ import { getExternalCapability } from "../../permission/capabilities.js";
 /** Checks tool names, schemas, scopes and operator disable entries at config time. */
 const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 	const names = new Set<string>();
-	for (const tool of config.tools.definitions) {
+	for (const tool of config.ai.tools.definitions) {
+		if (tool.target !== "mcp") {
+			throw new Error(`Tool "${tool.name}" has an unsupported target.`);
+		}
 		if (tool.name.length > 128 || !/^[a-z][a-z0-9._-]*$/.test(tool.name)) {
 			throw new Error(`Invalid tool name "${tool.name}".`);
 		}
@@ -19,7 +22,10 @@ const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 			throw new Error(`Tool "${tool.name}" needs a description.`);
 		}
 
-		for (const scope of tool.scopes) {
+		for (const scope of [
+			...tool.scopes,
+			...(tool.advertisedScopes?.(config) ?? []),
+		]) {
 			if (!getExternalCapability(config, scope)) {
 				throw new Error(`Tool "${tool.name}" uses unknown scope "${scope}".`);
 			}
@@ -36,7 +42,7 @@ const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 	}
 
 	const disabled = new Set<string>();
-	for (const name of config.tools.disabled) {
+	for (const name of config.ai.tools.disabled) {
 		if (disabled.has(name)) {
 			throw new Error(`Tool "${name}" is disabled more than once.`);
 		}

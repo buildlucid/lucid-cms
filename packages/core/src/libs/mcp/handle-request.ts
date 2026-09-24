@@ -8,13 +8,16 @@ import {
 	type ExternalScope,
 	ExternalScopes,
 } from "../permission/external-scopes.js";
-import { getToolRegistry } from "../tools/registry.js";
+import { getToolRegistry, toolDefinitionInternal } from "../tools/registry.js";
 import type { ToolAuthority } from "../tools/types.js";
 import { createToolHandler } from "./create-tool-handler.js";
 
 const toolCallSchema = z.object({
 	method: z.literal("tools/call"),
-	params: z.object({ name: z.string() }),
+	params: z.object({
+		name: z.string(),
+		arguments: z.unknown().optional(),
+	}),
 });
 
 /** Bounds the HTTP body, checks tool scopes and delegates MCP to the SDK. */
@@ -54,8 +57,18 @@ export const handleMcpRequest = async (args: {
 				toolCall.data.params.name,
 			);
 
-			if (tool && tool.scopes.length > 0) {
-				requireScopes([ExternalScopes.McpAccess, ...tool.scopes]);
+			if (tool) {
+				// Parses the raw arguments here only to challenge for input-dependent scopes.
+				const preparation = await tool[toolDefinitionInternal].prepareInput(
+					toolCall.data.params.arguments ?? {},
+				);
+				const requiredScopes = [
+					...tool.scopes,
+					...(preparation.type === "ready" ? preparation.data.scopes : []),
+				];
+				if (requiredScopes.length > 0) {
+					requireScopes([ExternalScopes.McpAccess, ...requiredScopes]);
+				}
 			}
 		}
 	}

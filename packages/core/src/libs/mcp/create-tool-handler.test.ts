@@ -16,20 +16,33 @@ const testConfig = getTestConfig();
 afterAll(testConfig.destroy);
 
 const echo = defineTool({
+	target: "mcp",
 	name: "test_echo",
 	description: "Echoes text",
 	input: z.object({ message: z.string() }),
 	output: z.object({ message: z.string() }),
 	scopes: [],
-	handler: async ({ input }) => ({ error: undefined, data: input }),
+	handler: async ({ input }) => ({
+		error: undefined,
+		data: {
+			output: input,
+		},
+	}),
 });
+
 const restricted = defineTool({
+	target: "mcp",
 	name: "test_restricted",
 	description: "Restricted dummy",
 	input: z.object({}),
 	output: z.object({ ok: z.boolean() }),
 	scopes: [ExternalScopes.LocalesRead],
-	handler: async () => ({ error: undefined, data: { ok: true } }),
+	handler: async () => ({
+		error: undefined,
+		data: {
+			output: { ok: true },
+		},
+	}),
 });
 
 const post = (method: string, params: Record<string, unknown>, modern = true) =>
@@ -71,8 +84,10 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 	const base = await testConfig.getConfig();
 	const config = {
 		...base,
-		mcp: { enabled: true },
-		tools: { definitions: [restricted, echo], disabled: [] },
+		ai: {
+			...base.ai,
+			tools: { definitions: [restricted, echo], disabled: [] },
+		},
 	};
 	const context = createServiceContext({
 		config,
@@ -104,8 +119,9 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 		}),
 	);
 	expect(call.status).toBe(200);
-	expect((await call.json()).result.structuredContent).toEqual({
-		message: "hello",
+	expect((await call.json()).result).toMatchObject({
+		content: [{ type: "text", text: JSON.stringify({ message: "hello" }) }],
+		structuredContent: { message: "hello" },
 	});
 
 	const legacyList = await handler.fetch(post("tools/list", {}, false));
@@ -119,7 +135,10 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 			...context,
 			config: {
 				...config,
-				tools: { ...config.tools, disabled: ["test_echo"] },
+				ai: {
+					...config.ai,
+					tools: { ...config.ai.tools, disabled: ["test_echo"] },
+				},
 			},
 		},
 		authority: { principal: { type: "system" }, scopes: [] },
@@ -137,17 +156,26 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 
 test("tool input is parsed once, so transforms reach the handler intact", async () => {
 	const measure = defineTool({
+		target: "mcp",
 		name: "test_measure",
 		description: "Measures text",
 		input: z.object({ length: z.string().transform((text) => text.length) }),
 		output: z.object({ length: z.number() }),
 		scopes: [],
-		handler: async ({ input }) => ({ error: undefined, data: input }),
+		handler: async ({ input }) => ({
+			error: undefined,
+			data: {
+				output: input,
+			},
+		}),
 	});
 	const base = await testConfig.getConfig();
 	const handler = createToolHandler({
 		context: createServiceContext({
-			config: { ...base, tools: { definitions: [measure], disabled: [] } },
+			config: {
+				...base,
+				ai: { ...base.ai, tools: { definitions: [measure], disabled: [] } },
+			},
 			database: await testConfig.getDatabase(),
 			translationStore: createTranslationStore({
 				defaultLocale: "en",
@@ -164,4 +192,41 @@ test("tool input is parsed once, so transforms reach the handler intact", async 
 		}),
 	);
 	expect((await call.json()).result.structuredContent).toEqual({ length: 5 });
+});
+
+test("oversized text results ask the client for a smaller request", async () => {
+	const large = defineTool({
+		target: "mcp",
+		name: "test_large",
+		description: "Returns too much text",
+		input: z.object({}),
+		output: z.object({ text: z.string() }),
+		scopes: [],
+		handler: async () => ({
+			error: undefined,
+			data: { output: { text: "x".repeat(64 * 1024) } },
+		}),
+	});
+	const base = await testConfig.getConfig();
+	const handler = createToolHandler({
+		context: createServiceContext({
+			config: {
+				...base,
+				ai: { ...base.ai, tools: { definitions: [large], disabled: [] } },
+			},
+			database: await testConfig.getDatabase(),
+			translationStore: createTranslationStore({
+				defaultLocale: "en",
+				bundles: {},
+			}),
+		}),
+		authority: { principal: { type: "system" }, scopes: [] },
+	});
+
+	const call = await handler.fetch(
+		post("tools/call", { name: "test_large", arguments: {} }),
+	);
+	const { result } = await call.json();
+	expect(result.isError).toBe(true);
+	expect(result.structuredContent).toBeUndefined();
 });

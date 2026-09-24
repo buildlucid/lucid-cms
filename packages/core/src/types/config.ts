@@ -209,7 +209,7 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
-/** Choose which AI tools are available when `ai.enabled` is true. */
+/** Choose which AI features are available when `ai.enabled` is true. */
 export type AiFeatureConfig = {
 	/** Allow image generation. Defaults to true. */
 	imageGeneration?: boolean;
@@ -313,18 +313,28 @@ export interface LucidConfig {
 		providers?: AuthProvider[];
 	};
 	/**
-	 * AI feature availability.
+	 * AI feature availability. Pass a boolean to toggle every AI feature at once.
 	 */
-	ai?: {
-		/**
-		 * Allow AI tools in the admin and API. Defaults to true.
-		 */
-		enabled?: boolean;
-		/**
-		 * Per-feature AI availability. Omitted features default to enabled.
-		 */
-		features?: AiFeatureConfig;
-	};
+	ai?:
+		| boolean
+		| {
+				/**
+				 * Allow AI features, including MCP, in the admin and API. Defaults to true.
+				 */
+				enabled?: boolean;
+				/**
+				 * Per-feature AI availability. Omitted features default to enabled.
+				 */
+				features?: AiFeatureConfig;
+				/** Expose registered tools over MCP at `/lucid/mcp`. Defaults to false. */
+				mcp?: boolean | { enabled: boolean };
+				/** Tool definitions registered by core, plugins and the project. */
+				tools?: {
+					definitions?: ToolDefinition[];
+					/** Tool names to hide and reject at execution. */
+					disabled?: string[];
+				};
+		  };
 	/**
 	 * Content localization settings.
 	 */
@@ -496,14 +506,6 @@ export interface LucidConfig {
 			failedDays?: number;
 		};
 	};
-	/** Expose registered tools over MCP. Disabled by default. */
-	mcp?: boolean | { enabled?: boolean };
-	/** Tool definitions registered by core, plugins and the project. */
-	tools?: {
-		definitions?: ToolDefinition[];
-		/** Tool names to hide and reject at execution. */
-		disabled?: string[];
-	};
 	/**
 	 * Configure the purge behavior for retained deleted data.
 	 */
@@ -634,6 +636,11 @@ export interface ResolvedLucidConfig {
 	ai: {
 		enabled: boolean;
 		features: Required<AiFeatureConfig>;
+		mcp: { enabled: boolean };
+		tools: {
+			definitions: ToolDefinition[];
+			disabled: string[];
+		};
 	};
 	localization: LocalizationConfig;
 	i18n: Required<I18nConfig>;
@@ -685,11 +692,6 @@ export interface ResolvedLucidConfig {
 			completedDays: number;
 			failedDays: number;
 		};
-	};
-	mcp: { enabled: boolean };
-	tools: {
-		definitions: ToolDefinition[];
-		disabled: string[];
 	};
 	retention: {
 		defaultPurgeAfterDays: number;

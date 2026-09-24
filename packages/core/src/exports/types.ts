@@ -555,6 +555,7 @@ export type {
 	ToolDefinition,
 	ToolExecution,
 	ToolHandler,
+	ToolResult,
 } from "../libs/tools/types.js";
 export type {
 	AiFeatureConfig,

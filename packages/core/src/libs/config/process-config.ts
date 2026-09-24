@@ -67,7 +67,7 @@ const processConfig = async (
 	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
 	const toolDefinitions = [
 		...coreToolDefinitions,
-		...configRes.tools.definitions,
+		...configRes.ai.tools.definitions,
 	];
 
 	configRes = produce(configRes, (draft) => {
@@ -87,9 +87,12 @@ const processConfig = async (
 			...configRes.jobs,
 			definitions: jobDefinitions,
 		},
-		tools: {
-			...configRes.tools,
-			definitions: toolDefinitions,
+		ai: {
+			...configRes.ai,
+			tools: {
+				...configRes.ai.tools,
+				definitions: toolDefinitions,
+			},
 		},
 	};
 

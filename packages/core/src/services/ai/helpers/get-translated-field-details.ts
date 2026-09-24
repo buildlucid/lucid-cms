@@ -1,3 +1,4 @@
+import { normalizeCopy } from "../../../libs/i18n/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
 type FieldDetails = {
@@ -14,8 +15,8 @@ const getTranslatedFieldDetails = (
 	const translate = context.translate.forLocale(
 		context.config.i18n.defaultLocale,
 	);
-	const label = translate(targetField.details.label);
-	const description = translate(targetField.details.description);
+	const label = translate(normalizeCopy(targetField.details.label));
+	const description = translate(normalizeCopy(targetField.details.description));
 	if (!label && !description) return undefined;
 	return {
 		...(label ? { label } : {}),

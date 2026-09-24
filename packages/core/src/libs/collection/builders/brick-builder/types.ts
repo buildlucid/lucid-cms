@@ -13,6 +13,7 @@ export interface BrickOptions {
 	/** Image URL shown in the brick picker. */
 	thumbnail?: string;
 }
+
 export interface BrickConfig {
 	key: string;
 	details: {

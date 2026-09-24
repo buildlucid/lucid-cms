@@ -13,13 +13,16 @@ const defineTool = <
 	options: DefineToolOptions<Name, Input, Output>,
 ): ToolDefinition<Name> => ({
 	type: "tool-definition",
+	target: options.target,
 	name: options.name,
 	description: options.description,
 	input: options.input,
 	output: options.output,
 	scopes: options.scopes,
+	annotations: options.annotations,
+	advertisedScopes: options.advertisedScopes,
 	[toolDefinitionInternal]: {
-		run: async ({ context, input, execution }) => {
+		prepareInput: async (input) => {
 			const parsedInput = await options.input.safeParseAsync(input);
 			if (!parsedInput.success) {
 				return {
@@ -32,43 +35,60 @@ const defineTool = <
 				};
 			}
 
-			const result = await options.handler({
-				context,
-				input: parsedInput.data,
-				execution,
-			});
-			if (result.error) {
-				if (!result.error.status || result.error.status >= 500) {
-					logger.error({
-						event: "tools.execution.failed",
-						message: `Tool ${options.name} returned an error`,
-						error: result.error,
-					});
-				}
+			return {
+				type: "ready",
+				data: {
+					scopes: options.requiredScopes?.(parsedInput.data) ?? [],
+					run: async ({ context, execution }) => {
+						const result = await options.handler({
+							context,
+							input: parsedInput.data,
+							execution,
+						});
+						if (result.error) {
+							const clientError =
+								result.error.status !== undefined && result.error.status < 500;
+							if (!clientError) {
+								logger.error({
+									event: "tools.execution.failed",
+									message: `Tool ${options.name} returned an error`,
+									error: result.error,
+								});
+							}
 
-				return {
-					type: "failed",
-					message:
-						result.error.status && result.error.status < 500
-							? (context.translate(result.error.message) ?? "Tool failed")
-							: "Tool failed",
-				};
-			}
+							return {
+								type: "failed",
+								message:
+									(clientError && context.translate(result.error.message)) ||
+									"Tool failed",
+							};
+						}
 
-			const parsedOutput = await options.output.safeParseAsync(result.data);
-			if (!parsedOutput.success || !isJsonObject(parsedOutput.data)) {
-				logger.error({
-					event: "tools.output.invalid",
-					message: `Tool ${options.name} returned invalid output`,
-					error: parsedOutput.success
-						? new Error("Output is not lossless JSON")
-						: parsedOutput.error,
-				});
+						const output = await options.output.safeParseAsync(
+							result.data.output,
+						);
+						if (!output.success || !isJsonObject(output.data)) {
+							logger.error({
+								event: "tools.output.invalid",
+								message: `Tool ${options.name} returned invalid output`,
+								error: output.success
+									? new Error("Output is not lossless JSON")
+									: output.error,
+							});
 
-				return { type: "failed", message: "Tool returned invalid output" };
-			}
+							return {
+								type: "failed",
+								message: "Tool returned invalid output",
+							};
+						}
 
-			return { type: "success", data: parsedOutput.data };
+						return {
+							type: "success",
+							data: { output: output.data, content: result.data.content },
+						};
+					},
+				},
+			};
 		},
 	},
 });

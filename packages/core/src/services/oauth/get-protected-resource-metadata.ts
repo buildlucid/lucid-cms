@@ -10,7 +10,10 @@ const getProtectedResourceMetadata: ServiceFn<
 	[{ resource: OAuthResource }],
 	OAuthProtectedResourceMetadataResponse
 > = async (context, input) => {
-	if (input.resource === "mcp" && !context.config.mcp.enabled) {
+	if (
+		input.resource === "mcp" &&
+		!(context.config.ai.enabled && context.config.ai.mcp.enabled)
+	) {
 		return {
 			error: { type: "basic", status: 404 },
 			data: undefined,
@@ -23,9 +26,10 @@ const getProtectedResourceMetadata: ServiceFn<
 		input.resource === "mcp"
 			? new Set<string>([
 					ExternalScopes.McpAccess,
-					...[...getToolRegistry(context.config).values()].flatMap(
-						(tool) => tool.scopes,
-					),
+					...[...getToolRegistry(context.config).values()].flatMap((tool) => [
+						...tool.scopes,
+						...(tool.advertisedScopes?.(context.config) ?? []),
+					]),
 				])
 			: undefined;
 

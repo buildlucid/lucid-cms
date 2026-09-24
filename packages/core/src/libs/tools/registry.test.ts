@@ -12,42 +12,71 @@ const adapter = {
 } as unknown as DatabaseAdapter;
 
 const echo = defineTool({
+	target: "mcp",
 	name: "test_echo",
 	description: "Echoes text",
 	input: z.object({ message: z.string() }),
 	output: z.object({ message: z.string() }),
 	scopes: [],
-	handler: async ({ input }) => ({ error: undefined, data: input }),
+	handler: async ({ input }) => ({
+		error: undefined,
+		data: {
+			output: input,
+		},
+	}),
 });
 const pluginTool = defineTool({
+	target: "mcp",
 	name: "plugin_dummy",
 	description: "Returns a dummy value",
 	input: z.object({}),
 	output: z.object({ ok: z.boolean() }),
 	scopes: [],
-	handler: async () => ({ error: undefined, data: { ok: true } }),
+	handler: async () => ({
+		error: undefined,
+		data: {
+			output: { ok: true },
+		},
+	}),
 });
 
 test("normalizes shorthand and applies plugin registration before disabling tools", async () => {
 	const config = await processConfig(
 		{
 			secrets: "a".repeat(64),
-			mcp: true,
-			tools: { definitions: [echo], disabled: ["plugin_dummy"] },
+			ai: {
+				mcp: true,
+				tools: { definitions: [echo], disabled: ["plugin_dummy"] },
+			},
 			plugins: [
 				{
 					key: "test-plugin",
 					lucid: "*",
 					configure: (draft) => {
-						draft.tools.definitions.push(pluginTool);
+						draft.ai.tools.definitions.push(pluginTool);
 					},
 				},
 			],
 		},
 		{ resolvedDb: adapter, skipValidation: true },
 	);
-	expect(config.mcp).toEqual({ enabled: true });
-	expect([...getToolRegistry(config).keys()]).toEqual(["test_echo"]);
+	expect(config.ai.mcp).toEqual({ enabled: true });
+	const names = [...getToolRegistry(config).keys()];
+	expect(names).toContain("test_echo");
+	expect(names).not.toContain("plugin_dummy");
+});
+
+test("ai boolean shorthand keeps the remaining AI defaults", async () => {
+	const config = await processConfig(
+		{ secrets: "a".repeat(64), ai: false },
+		{ resolvedDb: adapter, skipValidation: true },
+	);
+	expect(config.ai).toMatchObject({
+		enabled: false,
+		features: { imageGeneration: true },
+		mcp: { enabled: false },
+		tools: { disabled: [] },
+	});
 });
 
 test("rejects duplicate tools and unknown disable entries", async () => {
@@ -56,7 +85,7 @@ test("rejects duplicate tools and unknown disable entries", async () => {
 		processConfig(
 			{
 				secrets: "a".repeat(64),
-				tools: { definitions: [echo, echo] },
+				ai: { tools: { definitions: [echo, echo] } },
 			},
 			options,
 		),
@@ -65,7 +94,7 @@ test("rejects duplicate tools and unknown disable entries", async () => {
 		processConfig(
 			{
 				secrets: "a".repeat(64),
-				tools: { disabled: ["typo"] },
+				ai: { tools: { disabled: ["typo"] } },
 			},
 			options,
 		),

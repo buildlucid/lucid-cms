@@ -36,14 +36,6 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 		simulate: false,
 		resendWindowDays: 7,
 	},
-	ai: {
-		enabled: true,
-		features: {
-			imageGeneration: true,
-			altGeneration: true,
-			customFieldGeneration: true,
-		},
-	},
 	localization: { locales: [], defaultLocale: null },
 	i18n: {
 		locales: [
@@ -100,8 +92,6 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 			failedDays: 30,
 		},
 	},
-	mcp: { enabled: false },
-	tools: { definitions: [], disabled: [] },
 	hooks: [],
 	collections: [],
 	plugins: [],

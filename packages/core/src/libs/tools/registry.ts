@@ -24,8 +24,8 @@ export const getToolRegistry = (
 	const existing = registries.get(config);
 	if (existing) return existing;
 
-	const disabled = new Set(config.tools.disabled);
-	const definitions = config.tools.definitions
+	const disabled = new Set(config.ai.tools.disabled);
+	const definitions = config.ai.tools.definitions
 		.filter((definition) => !disabled.has(definition.name))
 		.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 

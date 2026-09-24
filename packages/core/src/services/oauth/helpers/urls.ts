@@ -57,6 +57,8 @@ export const isSupportedOAuthResource = (
 
 	return (
 		resource === resources.content.resource ||
-		(context.config.mcp.enabled && resource === resources.mcp.resource)
+		(context.config.ai.enabled &&
+			context.config.ai.mcp.enabled &&
+			resource === resources.mcp.resource)
 	);
 };
