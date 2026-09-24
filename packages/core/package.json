@@ -84,6 +84,7 @@
 		"@lucidcms/admin": "0.19.0-alpha.0",
 		"@lucidcms/rich-text": "1.2.0",
 		"@lucidcms/types": "^0.6.0",
+		"@modelcontextprotocol/server": "^2.1.0",
 		"@noble/hashes": "^2.2.0",
 		"@scalar/hono-api-reference": "^0.11.5",
 		"boxen": "^8.0.1",

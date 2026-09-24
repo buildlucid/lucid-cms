@@ -66,7 +66,7 @@ const OAuthConsentPage: Component = () => {
 		const authorization = request.data?.data;
 		if (!authorization) return [];
 		return principalType() === "system"
-			? authorization.scopes
+			? authorization.systemScopes
 			: authorization.userScopes;
 	});
 	const effectiveScopeSet = createMemo(
@@ -83,12 +83,12 @@ const OAuthConsentPage: Component = () => {
 				}))
 				.filter((group) => group.scopes.length > 0) ?? [],
 	);
-	const unavailableUserScopes = createMemo(() => {
+	const unavailableScopes = createMemo(() => {
 		const authorization = request.data?.data;
-		if (!authorization || principalType() !== "user") return [];
+		if (!authorization) return [];
 
-		const userScopes = new Set<string>(authorization.userScopes);
-		return authorization.scopes.filter((scope) => !userScopes.has(scope));
+		const grantedScopes = new Set<string>(effectiveScopes());
+		return authorization.scopes.filter((scope) => !grantedScopes.has(scope));
 	});
 	const canAllow = createMemo(
 		() =>
@@ -374,7 +374,7 @@ const OAuthConsentPage: Component = () => {
 										})}
 									</p>
 								</div>
-								<Show when={unavailableUserScopes().length > 0}>
+								<Show when={unavailableScopes().length > 0}>
 									<div class="mb-2.5 rounded-md border border-warning-low-border bg-warning-low px-3 py-2">
 										<div class="flex items-start gap-2">
 											<FaSolidTriangleExclamation class="mt-0.75 size-2.5 shrink-0 text-warning-low-foreground" />
@@ -389,11 +389,11 @@ const OAuthConsentPage: Component = () => {
 											>
 												<span class="text-[10px] leading-4">
 													{T()(
-														unavailableUserScopes().length === 1
+														unavailableScopes().length === 1
 															? "oauth.consent.scopes.reduced"
 															: "oauth.consent.scopes.reduced.multiple",
 														{
-															count: unavailableUserScopes().length,
+															count: unavailableScopes().length,
 														},
 													)}
 												</span>
@@ -410,7 +410,7 @@ const OAuthConsentPage: Component = () => {
 												id="unavailable-oauth-scopes"
 												class="mt-1 ml-4.5 flex flex-wrap gap-x-1.5 gap-y-0 rounded-md border border-border bg-background px-2 py-1"
 											>
-												<For each={unavailableUserScopes()}>
+												<For each={unavailableScopes()}>
 													{(scope) => (
 														<li class="font-mono! text-[9px]! leading-3! tracking-normal! text-body">
 															<code class="font-mono text-[9px] leading-3 text-body">

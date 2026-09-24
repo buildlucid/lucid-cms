@@ -5,12 +5,12 @@ import { oauthAccessTokenClaimsSchema } from "../../schemas/oauth.js";
 import type { LucidOAuthExternalAuth } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getOAuthSigningKey } from "./helpers/security.js";
-import { getOAuthUrls } from "./helpers/urls.js";
+import { getOAuthUrls, type OAuthResource } from "./helpers/urls.js";
 import resolveGrantAuthority from "./resolve-grant-authority.js";
 
 /** Verifies an OAuth access token and resolves its effective authority. */
 const verifyAccessToken: ServiceFn<
-	[{ accessToken: string }],
+	[{ accessToken: string; resource?: OAuthResource }],
 	LucidOAuthExternalAuth
 > = async (context, input) => {
 	let payload: Awaited<ReturnType<typeof verify>>;
@@ -44,7 +44,10 @@ const verifyAccessToken: ServiceFn<
 	}
 	const claims = parsedClaims.data;
 	const urls = getOAuthUrls(context);
-	if (claims.iss !== urls.issuer || claims.aud !== urls.resource) {
+	if (
+		claims.iss !== urls.issuer ||
+		claims.aud !== urls.resources[input.resource ?? "content"].resource
+	) {
 		return {
 			error: {
 				type: "authorisation",

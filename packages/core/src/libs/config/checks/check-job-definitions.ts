@@ -1,6 +1,6 @@
 import { CronExpressionParser } from "cron-parser";
+import { isJsonObject } from "../../../utils/helpers/is-json-object.js";
 import { translate } from "../../i18n/index.js";
-import { isJobPayload } from "../../jobs/payload.js";
 import {
 	getJobDefinitionKey,
 	getJobDefinitionRuntime,
@@ -99,7 +99,7 @@ const checkJobDefinitions = async (
 					}),
 				);
 			}
-			if (schedule.input !== null && !isJobPayload(schedule.input)) {
+			if (schedule.input !== null && !isJsonObject(schedule.input)) {
 				throw new Error(
 					translate("server:core.config.job.schedule.json.invalid", {
 						data: { schedule: scheduleKey },

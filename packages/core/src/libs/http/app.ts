@@ -2,7 +2,6 @@ import type { PublicErrorData } from "@lucidcms/types";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { contextStorage } from "hono/context-storage";
-import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import type { StatusCode } from "hono/utils/http-status";
@@ -26,6 +25,7 @@ import type { TranslationStore } from "../i18n/types.js";
 import logger, { destroyLogger } from "../logger/index.js";
 import type { LucidAdapterInstances } from "../runtime/create-lucid-adapters.js";
 import type { AdapterRuntimeContext } from "../runtime/types.js";
+import createCorsMiddleware from "./middleware/cors.js";
 import logRoute from "./middleware/log-route.js";
 import routes from "./routes/index.js";
 import type { HttpExtension } from "./types.js";
@@ -82,12 +82,6 @@ const createApp = async (props: {
 	const configuredHost = props.config.host?.trim()
 		? normalizeHost(props.config.host)
 		: undefined;
-	const allowedCorsOrigins = [
-		"http://localhost:3000",
-		...(configuredHost ? [configuredHost] : []),
-		...(props.config.http.security.cors?.origin || []),
-	];
-
 	app
 		.use(
 			requestId({
@@ -108,25 +102,7 @@ const createApp = async (props: {
 
 	app
 		.use(logRoute)
-		.use(
-			cors({
-				origin: (origin, c) => {
-					if (c.req.path === "/lucid/oauth/authorize") return null;
-					return allowedCorsOrigins.includes(origin) ? origin : null;
-				},
-				allowMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-				allowHeaders: [
-					"Content-Type",
-					"Authorization",
-					"X-API-Key",
-					"Content-Length",
-					...Object.values(constants.headers),
-					...(props.config.http.security.cors?.allowHeaders || []),
-				],
-				exposeHeaders: [constants.headers.requestId],
-				credentials: true,
-			}),
-		)
+		.use(createCorsMiddleware(props.config))
 		.use(
 			secureHeaders(
 				props.config.http.security.headers ?? {

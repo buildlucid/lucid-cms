@@ -189,6 +189,32 @@ const localesCapabilityGroup: CapabilityGroup = {
 	],
 };
 
+const mcpCapabilityGroup: CapabilityGroup = {
+	key: "mcp",
+	details: {
+		name: copy("admin:integrations.scopes.mcp.label", {
+			defaultMessage: "MCP",
+		}),
+	},
+	core: true,
+	capabilities: [
+		{
+			key: ExternalScopes.McpAccess,
+			details: {
+				name: copy("admin:integrations.scopes.mcp.access", {
+					defaultMessage: "Access MCP Tools",
+				}),
+			},
+			core: true,
+			external: {
+				scope: ExternalScopes.McpAccess,
+				userPermission: null,
+			},
+			availableToIntegrations: true,
+		},
+	],
+};
+
 const accountCapabilityGroup: CapabilityGroup = {
 	key: "account",
 	details: {
@@ -223,7 +249,10 @@ const accountCapabilityGroup: CapabilityGroup = {
 	],
 };
 
-export type AccessConfig = Pick<ResolvedLucidConfig, "collections" | "access">;
+export type AccessConfig = Pick<
+	ResolvedLucidConfig,
+	"collections" | "access" | "mcp"
+>;
 
 const resolveDetails = (details: AccessPermission): PermissionDetails => ({
 	name: normalizeCopy(details.name),
@@ -244,6 +273,7 @@ export const getCapabilityRegistry = (
 		...getStaticCapabilityGroups(),
 		...getCollectionCapabilityGroups(config.collections),
 		localesCapabilityGroup,
+		...(config.mcp.enabled ? [mcpCapabilityGroup] : []),
 	];
 	const groupKeys = new Set(groups.map((group) => group.key));
 	const permissions = new Map(

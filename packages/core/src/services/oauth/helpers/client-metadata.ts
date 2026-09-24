@@ -78,6 +78,41 @@ export const isSafeRedirectUri = (value: string) => {
 	return url.protocol === "http:" && isLoopbackHostname(url.hostname);
 };
 
+/** Native clients may choose a temporary port for a registered loopback callback. */
+export const matchesOAuthRedirectUri = (
+	registered: string,
+	requested: string,
+) => {
+	if (registered === requested) return true;
+	if (!isSafeRedirectUri(registered) || !isSafeRedirectUri(requested)) {
+		return false;
+	}
+
+	const registeredUrl = new URL(registered);
+	if (
+		registeredUrl.protocol !== "http:" ||
+		!isLoopbackHostname(registeredUrl.hostname)
+	) {
+		return false;
+	}
+
+	// Compare the original URIs so URL parsing cannot normalize the path or query.
+	const withoutPort = (uri: string) => {
+		const authorityStart = uri.indexOf("://") + 3;
+		const suffixOffset = uri.slice(authorityStart).search(/[/?#]/);
+		const authorityEnd =
+			suffixOffset === -1 ? uri.length : authorityStart + suffixOffset;
+
+		return (
+			uri.slice(0, authorityStart) +
+			uri.slice(authorityStart, authorityEnd).replace(/:\d+$/, "") +
+			uri.slice(authorityEnd)
+		);
+	};
+
+	return withoutPort(registered) === withoutPort(requested);
+};
+
 const fetchClientMetadataDocument = async (
 	url: URL,
 ): ServiceResponse<ClientMetadataDocument> => {

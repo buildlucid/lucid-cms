@@ -21,6 +21,7 @@ const SystemOverviewPage: Component = () => {
 		queryParams: {
 			include: {
 				email: true,
+				mcp: true,
 				media: true,
 				system: true,
 			},
@@ -68,11 +69,13 @@ const SystemOverviewPage: Component = () => {
 	const contentLocales = createMemo(() => contentLocaleStore.get.locales);
 	const systemInfo = createMemo(() => settingsData.data?.data?.system);
 	const emailInfo = createMemo(() => settingsData.data?.data?.email);
+	const mcpInfo = createMemo(() => settingsData.data?.data?.mcp);
 	const emailFromValue = createMemo(() => {
 		const from = emailInfo()?.from;
 		return from ? `${from.name} <${from.email}>` : "-";
 	});
 	const emailTemplates = createMemo(() => emailInfo()?.templates ?? []);
+	const mcpTools = createMemo(() => mcpInfo()?.tools ?? []);
 
 	// ----------------------------------------
 	// Render
@@ -171,6 +174,36 @@ const SystemOverviewPage: Component = () => {
 							</Show>
 						</InfoRow.Content>
 					</InfoRow.Root>
+					<Show when={mcpInfo()?.enabled}>
+						<InfoRow.Root
+							title={T()("system.mcp.info.title")}
+							description={T()("system.mcp.info.description")}
+						>
+							<InfoRow.Content
+								title={T()("system.mcp.tools.title")}
+								description={T()("system.mcp.tools.description")}
+							>
+								<Show
+									when={mcpTools().length > 0}
+									fallback={
+										<p class="text-sm text-muted">
+											{T()("system.mcp.tools.empty")}
+										</p>
+									}
+								>
+									<div class="flex flex-wrap gap-2">
+										<For each={mcpTools()}>
+											{(tool) => (
+												<Pill variant="outline" tooltip={tool.description}>
+													{tool.name}
+												</Pill>
+											)}
+										</For>
+									</div>
+								</Show>
+							</InfoRow.Content>
+						</InfoRow.Root>
+					</Show>
 					<InfoRow.Root
 						title={T()("system.info.title")}
 						description={T()("system.info.description")}

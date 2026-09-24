@@ -1,22 +1,31 @@
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
+export type OAuthResource = "content" | "mcp";
+
 /**
  * Builds the canonical URLs advertised by the Lucid OAuth server.
  */
 export const getOAuthUrls = (context: ServiceContext) => {
 	const origin = new URL(getBaseUrl(context)).origin;
-	const issuer = `${origin}/lucid`;
-	const resource = `${origin}/lucid/api/v1/content`;
+
+	const resource = (path: string) => ({
+		resource: `${origin}${path}`,
+		metadata: `${origin}/.well-known/oauth-protected-resource${path}`,
+	});
+
+	const resources = {
+		content: resource("/lucid/api/v1/content"),
+		mcp: resource("/lucid/mcp"),
+	} satisfies Record<OAuthResource, ReturnType<typeof resource>>;
 
 	return {
-		issuer,
-		resource,
+		issuer: `${origin}/lucid`,
+		resources,
 		authorizationEndpoint: `${origin}/lucid/oauth/authorize`,
 		tokenEndpoint: `${origin}/lucid/oauth/token`,
 		revocationEndpoint: `${origin}/lucid/oauth/revoke`,
 		authorizationServerMetadata: `${origin}/.well-known/oauth-authorization-server/lucid`,
-		protectedResourceMetadata: `${origin}/.well-known/oauth-protected-resource/lucid/api/v1/content`,
 		consentPage: `${origin}/lucid/oauth/consent`,
 	};
 };
@@ -43,4 +52,11 @@ export const getOAuthAuthorizationErrorUrl = (
 export const isSupportedOAuthResource = (
 	context: ServiceContext,
 	resource: string,
-) => resource === getOAuthUrls(context).resource;
+) => {
+	const { resources } = getOAuthUrls(context);
+
+	return (
+		resource === resources.content.resource ||
+		(context.config.mcp.enabled && resource === resources.mcp.resource)
+	);
+};

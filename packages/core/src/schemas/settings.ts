@@ -52,6 +52,30 @@ const settingsResponseSchema = z.object({
 				.nullable(),
 		})
 		.optional(),
+	mcp: z
+		.object({
+			enabled: z.boolean().meta({
+				description: "Whether the MCP endpoint is enabled",
+				example: true,
+			}),
+			tools: z
+				.array(
+					z.object({
+						name: z.string().meta({
+							description: "The registered MCP tool name",
+							example: "reports_content",
+						}),
+						description: z.string().meta({
+							description: "What the tool does",
+							example: "Summarise content activity for a date range.",
+						}),
+					}),
+				)
+				.meta({
+					description: "Configured MCP tools that have not been disabled",
+				}),
+		})
+		.optional(),
 	media: z
 		.object({
 			enabled: z.boolean().meta({
@@ -135,11 +159,13 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					include: queryString.schema.include("email,media,system,ai"),
+					include: queryString.schema.include("email,media,system,ai,mcp"),
 				})
 				.meta(queryString.meta),
 			formatted: z.object({
-				include: z.array(z.enum(["email", "media", "system", "ai"])).optional(),
+				include: z
+					.array(z.enum(["email", "media", "system", "ai", "mcp"]))
+					.optional(),
 			}),
 		},
 		params: undefined,

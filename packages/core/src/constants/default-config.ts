@@ -100,6 +100,8 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 			failedDays: 30,
 		},
 	},
+	mcp: { enabled: false },
+	tools: { definitions: [], disabled: [] },
 	hooks: [],
 	collections: [],
 	plugins: [],

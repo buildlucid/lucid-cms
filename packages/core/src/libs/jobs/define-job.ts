@@ -1,8 +1,8 @@
+import { isJsonObject } from "../../utils/helpers/is-json-object.js";
 import serviceWrapper from "../../utils/services/service-wrapper.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
-import { isJobPayload } from "./payload.js";
 import { jobDefinitionInternal } from "./registry.js";
 import type {
 	DefineJobOptions,
@@ -96,7 +96,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 				},
 			};
 		}
-		if (result.data !== null && !isJobPayload(result.data)) {
+		if (result.data !== null && !isJsonObject(result.data)) {
 			return {
 				success: false as const,
 				error: {
@@ -148,7 +148,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 
 					try {
 						const description = options.describe({ input: parsed.data });
-						if (!isJobPayload(description)) {
+						if (!isJsonObject(description)) {
 							return {
 								success: false,
 								error: {

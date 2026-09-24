@@ -16,7 +16,8 @@ export type CoreExternalScope =
 	| "media:update"
 	| "media:delete"
 	| "media:resolve-url"
-	| "locales:read";
+	| "locales:read"
+	| "mcp:access";
 
 /** Project scopes added by Lucid type generation or a plugin. */
 // biome-ignore lint/suspicious/noEmptyInterface: generated types and plugins augment this interface
@@ -116,6 +117,7 @@ export interface OAuthAuthorizationRequest {
 	clientLogo: OAuthClientLogo | null;
 	scopes: ExternalScope[];
 	userScopes: ExternalScope[];
+	systemScopes: ExternalScope[];
 	scopeGroups: ExternalScopeGroup[];
 	canConnectAsSystem: boolean;
 }

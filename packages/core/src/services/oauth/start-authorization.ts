@@ -3,6 +3,7 @@ import { getValidExternalScopes } from "../../libs/permission/scopes.js";
 import { OAuthAuthorizationRequestsRepository } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { matchesOAuthRedirectUri } from "./helpers/client-metadata.js";
 import {
 	getAllowedOAuthLoopbackHostname,
 	resolveOAuthAuthorizationClient,
@@ -37,7 +38,11 @@ const startAuthorization: ServiceFn<
 	});
 	if (clientRes.error) return clientRes;
 
-	if (!clientRes.data.redirectUris.includes(input.redirectUri)) {
+	if (
+		!clientRes.data.redirectUris.some((registered) =>
+			matchesOAuthRedirectUri(registered, input.redirectUri),
+		)
+	) {
 		return {
 			error: {
 				type: "basic",

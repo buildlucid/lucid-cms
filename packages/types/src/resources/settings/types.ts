@@ -1,4 +1,4 @@
-export type SettingsInclude = "email" | "media" | "system" | "ai";
+export type SettingsInclude = "email" | "media" | "system" | "ai" | "mcp";
 
 export interface Settings {
 	ai?: {
@@ -29,6 +29,13 @@ export interface Settings {
 			imageLimit: number;
 			total: number | null;
 		};
+	};
+	mcp?: {
+		enabled: boolean;
+		tools: {
+			name: string;
+			description: string;
+		}[];
 	};
 	system?: {
 		runtime: string;

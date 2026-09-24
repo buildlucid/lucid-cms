@@ -91,6 +91,7 @@ export const oauthAuthorizationRequestResponseSchema = z.object({
 	clientLogo: mediaImagePreviewResponseSchema.nullable(),
 	scopes: z.array(z.string()),
 	userScopes: z.array(z.string()),
+	systemScopes: z.array(z.string()),
 	scopeGroups: z.array(
 		z.object({
 			key: z.string(),

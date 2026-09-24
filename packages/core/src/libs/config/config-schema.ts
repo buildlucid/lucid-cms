@@ -27,6 +27,8 @@ import {
 	ResourceDirectoriesSchema,
 	ResourceSourcesSchema,
 } from "../resources/schema.js";
+import { isToolDefinition } from "../tools/registry.js";
+import type { ToolDefinition } from "../tools/types.js";
 import {
 	hookSchema,
 	migrationSchema,
@@ -76,6 +78,10 @@ const QueueAdapterSchema = z.custom<
 
 const JobDefinitionSchema = z.custom<AnyJobDefinition>(isJobDefinition, {
 	message: "Expected a job definition created with defineJob",
+});
+
+const ToolDefinitionSchema = z.custom<ToolDefinition>(isToolDefinition, {
+	message: "Expected a tool definition created with defineTool",
 });
 
 const KVAdapterSchema = z.custom<
@@ -309,6 +315,14 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			completedDays: z.number().int().nonnegative(),
 			failedDays: z.number().int().nonnegative(),
 		}),
+	}),
+	mcp: z.union([
+		z.boolean().transform((enabled) => ({ enabled })),
+		z.strictObject({ enabled: z.boolean().default(false) }),
+	]),
+	tools: z.strictObject({
+		definitions: z.array(ToolDefinitionSchema),
+		disabled: z.array(z.string()),
 	}),
 	kv: z
 		.strictObject({

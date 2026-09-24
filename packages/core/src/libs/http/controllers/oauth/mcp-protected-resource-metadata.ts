@@ -14,11 +14,11 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const protectedResourceMetadataController = factory.createHandlers(
+const mcpProtectedResourceMetadataController = factory.createHandlers(
 	describeRoute({
-		description: "Returns metadata for the Lucid external API resource.",
+		description: "Returns OAuth metadata for the Lucid MCP endpoint.",
 		tags: ["oauth"],
-		summary: "Get OAuth Protected Resource Metadata",
+		summary: "Get MCP OAuth Protected Resource Metadata",
 		responses: {
 			200: {
 				description: "OAuth protected resource metadata.",
@@ -42,19 +42,16 @@ const protectedResourceMetadataController = factory.createHandlers(
 	}),
 	async (c: LucidHonoContext) => {
 		const context = createServiceContext(c);
+
 		const result = await serviceWrapper(
 			oauthServices.getProtectedResourceMetadata,
-			{
-				transaction: false,
-				defaultError: { type: "basic" },
-			},
-		)(context);
+			{ transaction: false, defaultError: { type: "basic" } },
+		)(context, { resource: "mcp" });
 		if (result.error) {
 			c.header("Cache-Control", "no-store");
 			c.header("Pragma", "no-cache");
 			c.header("Referrer-Policy", "no-referrer");
 			c.status((result.error.status ?? 500) as StatusCode);
-
 			return c.json(
 				oauthFormatter.formatError(result.error, context.translate),
 			);
@@ -65,4 +62,4 @@ const protectedResourceMetadataController = factory.createHandlers(
 	},
 );
 
-export default protectedResourceMetadataController;
+export default mcpProtectedResourceMetadataController;

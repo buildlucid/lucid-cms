@@ -1,6 +1,5 @@
 import constants from "../../constants/constants.js";
 import type { OAuthPrincipalType } from "../../libs/db/tables/index.js";
-import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import { getValidExternalScopes } from "../../libs/permission/scopes.js";
 import type { Permission } from "../../libs/permission/types.js";
 import {
@@ -10,6 +9,7 @@ import {
 	OAuthGrantsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import { getGrantableOAuthScopes } from "./helpers/grant-scopes.js";
 import {
 	createOAuthOpaqueToken,
 	hashOAuthAuthorizationCode,
@@ -83,11 +83,7 @@ const completeAuthorization: ServiceFn<
 	}
 
 	const requestedScopes = requestRes.data.scopes.split(" ").filter(Boolean);
-	const validScopes = new Set<string>(
-		getValidExternalScopes(context.config, {
-			principalType: input.principalType,
-		}),
-	);
+	const validScopes = new Set<string>(getValidExternalScopes(context.config));
 	if (requestedScopes.some((scope) => !validScopes.has(scope))) {
 		return {
 			error: {
@@ -98,25 +94,12 @@ const completeAuthorization: ServiceFn<
 			data: undefined,
 		};
 	}
-	const scopes =
-		input.principalType === "system"
-			? requestedScopes
-			: requestedScopes.filter((scope) => {
-					const capability = getExternalCapability(
-						context.config,
-						scope,
-						"user",
-					);
-					if (!capability) return false;
-					if (capability.userPermission === null || input.actor.superAdmin) {
-						return true;
-					}
-					return (
-						input.actor.permissions?.some(
-							(permission) => permission === capability.userPermission,
-						) === true
-					);
-				});
+	const scopes = getGrantableOAuthScopes(
+		context.config,
+		requestedScopes,
+		input.principalType,
+		input.actor,
+	);
 	if (scopes.length === 0) {
 		return {
 			error: {

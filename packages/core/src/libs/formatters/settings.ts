@@ -3,6 +3,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
+import { getToolRegistry } from "../tools/registry.js";
 
 interface SettingsPropsT {
 	mediaStorageUsed: number;
@@ -77,6 +78,16 @@ const formatSingle = (props: {
 		user: props.authUser,
 		requiredPermissions: [Permissions.SettingsRead],
 	});
+
+	if (includeSet.has("mcp") && canReadSystem) {
+		response.mcp = {
+			enabled: props.config.mcp.enabled,
+			tools: Array.from(getToolRegistry(props.config).values(), (tool) => ({
+				name: tool.name,
+				description: tool.description,
+			})),
+		};
+	}
 
 	if (includeSet.has("system") && canReadSystem) {
 		response.system = {

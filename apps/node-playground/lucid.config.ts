@@ -33,6 +33,7 @@ import searchRoute from "./src/routes/search.js";
 import searchMediaRoute from "./src/routes/search-media.js";
 import sendTestEmailRoute from "./src/routes/send-test-email.js";
 import testOrganisationsTable from "./src/tables/test-organisations.js";
+import { addTool, echoTool } from "./src/tools.js";
 
 export const env = z.object({
 	DATABASE_URL: z.string(),
@@ -86,6 +87,8 @@ export default defineConfig({
 			refreshToken: env.LUCID_REFRESH_TOKEN_SECRET,
 			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
+		mcp: true,
+		tools: { definitions: [echoTool, addTool] },
 		localization: {
 			locales: [
 				{

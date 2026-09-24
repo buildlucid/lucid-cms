@@ -1,7 +1,10 @@
 import { createMiddleware } from "hono/factory";
 import type { ExternalPrincipalType } from "../../../libs/permission/external-scopes.js";
 import { integrationServices, oauthServices } from "../../../services/index.js";
-import { getOAuthUrls } from "../../../services/oauth/helpers/urls.js";
+import {
+	getOAuthUrls,
+	type OAuthResource,
+} from "../../../services/oauth/helpers/urls.js";
 import type {
 	LucidExternalAuth,
 	LucidHonoContext,
@@ -11,6 +14,7 @@ import { integrationApiKeyPrefix } from "../../../utils/integrations/encode-api-
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import { copy } from "../../i18n/index.js";
+import { ExternalScopes } from "../../permission/external-scopes.js";
 import createServiceContext from "../utils/create-service-context.js";
 
 /** Adds the OAuth resource challenge to an unauthorized response. */
@@ -18,19 +22,21 @@ const setOAuthBearerChallenge = (
 	c: LucidHonoContext,
 	context: ServiceContext,
 	error?: "invalid_token",
+	resource: OAuthResource = "content",
 ) => {
 	c.header(
 		"WWW-Authenticate",
 		[
-			`Bearer resource_metadata="${getOAuthUrls(context).protectedResourceMetadata}"`,
+			`Bearer resource_metadata="${getOAuthUrls(context).resources[resource].metadata}"`,
 			error ? `error="${error}"` : undefined,
+			resource === "mcp" ? `scope="${ExternalScopes.McpAccess}"` : undefined,
 		]
 			.filter(Boolean)
 			.join(", "),
 	);
 };
 
-type ExternalAuthenticationOptions =
+type ExternalAuthenticationOptions = (
 	| {
 			optional?: false;
 			principalType?: ExternalPrincipalType;
@@ -38,10 +44,11 @@ type ExternalAuthenticationOptions =
 	| {
 			optional: true;
 			principalType?: never;
-	  };
+	  }
+) & { resource?: OAuthResource };
 
 /**
- * Authenticates content API requests with an integration API key or OAuth access
+ * Authenticates external requests with an integration API key or OAuth access
  * token, then exposes the resolved principal and scopes to downstream handlers.
  * Optional routes accept missing credentials but still reject invalid ones.
  */
@@ -58,9 +65,10 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 		const userAgent = c.req.header("user-agent") || null;
 
 		const context = createServiceContext(c);
+		const resource = options?.resource ?? "content";
 
 		if ((!authorization && !apiKeyHeader) || (authorization && apiKeyHeader)) {
-			setOAuthBearerChallenge(c, context);
+			setOAuthBearerChallenge(c, context, undefined, resource);
 			throw new LucidAPIError({
 				type: "authorisation",
 				message: copy("server:core.integrations.api.key.missing"),
@@ -77,7 +85,7 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 			const parts = authorization?.trim().split(/\s+/) ?? [];
 			const [scheme, credential] = parts;
 			if (parts.length !== 2 || !scheme || !credential) {
-				setOAuthBearerChallenge(c, context);
+				setOAuthBearerChallenge(c, context, undefined, resource);
 				throw new LucidAPIError({
 					type: "authorisation",
 					message: copy("server:core.integrations.api.key.invalid"),
@@ -130,14 +138,14 @@ const externalAuthentication = (options?: ExternalAuthenticationOptions) =>
 						status: 401,
 					},
 				},
-			)(context, { accessToken: oauthCredential });
+			)(context, { accessToken: oauthCredential, resource });
 			if (verifyAccessToken.error) {
-				setOAuthBearerChallenge(c, context, "invalid_token");
+				setOAuthBearerChallenge(c, context, "invalid_token", resource);
 				throw new LucidAPIError(verifyAccessToken.error);
 			}
 			externalAuth = verifyAccessToken.data;
 		} else {
-			setOAuthBearerChallenge(c, context);
+			setOAuthBearerChallenge(c, context, undefined, resource);
 			throw new LucidAPIError({
 				type: "authorisation",
 				message: copy("server:core.integrations.api.key.invalid"),

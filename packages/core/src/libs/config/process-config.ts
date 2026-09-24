@@ -24,9 +24,11 @@ import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
+import checkToolDefinitions from "./checks/check-tool-definitions.js";
 import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
 import ConfigSchema from "./config-schema.js";
 import coreJobDefinitions from "./core-job-definitions.js";
+import coreToolDefinitions from "./core-tool-definitions.js";
 import resolveConfig from "./resolve-config.js";
 
 /**
@@ -63,6 +65,10 @@ const processConfig = async (
 	});
 
 	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
+	const toolDefinitions = [
+		...coreToolDefinitions,
+		...configRes.tools.definitions,
+	];
 
 	configRes = produce(configRes, (draft) => {
 		draft.localization.locales = draft.localization.locales.map((locale) => ({
@@ -81,6 +87,10 @@ const processConfig = async (
 			...configRes.jobs,
 			definitions: jobDefinitions,
 		},
+		tools: {
+			...configRes.tools,
+			definitions: toolDefinitions,
+		},
 	};
 
 	if (!options?.skipValidation) {
@@ -97,6 +107,7 @@ const processConfig = async (
 		checkToolkitDefinitions(configRes.plugins);
 
 		getCapabilityRegistry(configRes);
+		checkToolDefinitions(configRes);
 
 		// custom content routes
 		checkContentRoutes(configRes);

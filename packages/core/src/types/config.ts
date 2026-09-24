@@ -39,6 +39,7 @@ import type {
 	ResourceSources,
 } from "../libs/resources/types.js";
 import type { SeedDefinition } from "../libs/seed/types.js";
+import type { ToolDefinition } from "../libs/tools/types.js";
 
 /** Content languages available to editors. Omit localization to keep content unassigned. */
 export type LocalizationConfig = {
@@ -495,6 +496,14 @@ export interface LucidConfig {
 			failedDays?: number;
 		};
 	};
+	/** Expose registered tools over MCP. Disabled by default. */
+	mcp?: boolean | { enabled?: boolean };
+	/** Tool definitions registered by core, plugins and the project. */
+	tools?: {
+		definitions?: ToolDefinition[];
+		/** Tool names to hide and reject at execution. */
+		disabled?: string[];
+	};
 	/**
 	 * Configure the purge behavior for retained deleted data.
 	 */
@@ -676,6 +685,11 @@ export interface ResolvedLucidConfig {
 			completedDays: number;
 			failedDays: number;
 		};
+	};
+	mcp: { enabled: boolean };
+	tools: {
+		definitions: ToolDefinition[];
+		disabled: string[];
 	};
 	retention: {
 		defaultPurgeAfterDays: number;

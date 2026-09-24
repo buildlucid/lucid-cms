@@ -550,6 +550,13 @@ export type {
 	ToolkitServices,
 } from "../libs/toolkit/types.js";
 export type {
+	DefineToolOptions,
+	ToolAuthority,
+	ToolDefinition,
+	ToolExecution,
+	ToolHandler,
+} from "../libs/tools/types.js";
+export type {
 	AiFeatureConfig,
 	HttpConfig,
 	HttpSecurityConfig,
