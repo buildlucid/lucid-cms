@@ -1,3 +1,7 @@
+import { agentConversationsTable } from "./agent-conversations.js";
+import { agentMessagesTable } from "./agent-messages.js";
+import { agentRoutinesTable } from "./agent-routines.js";
+import { agentRunsTable } from "./agent-runs.js";
 import { aiGenerationsTable } from "./ai-generations.js";
 import { alertRecipientsTable } from "./alert-recipients.js";
 import { alertsTable } from "./alerts.js";
@@ -49,6 +53,10 @@ import { userRolesTable } from "./user-roles.js";
 import { userTokensTable } from "./user-tokens.js";
 import { usersTable } from "./users.js";
 
+export * from "./agent-conversations.js";
+export * from "./agent-messages.js";
+export * from "./agent-routines.js";
+export * from "./agent-runs.js";
 export * from "./ai-generations.js";
 export * from "./alert-recipients.js";
 export * from "./alerts.js";
@@ -103,6 +111,10 @@ export * from "./users.js";
 
 export const coreTableDefinitions = [
 	aiGenerationsTable,
+	agentConversationsTable,
+	agentMessagesTable,
+	agentRoutinesTable,
+	agentRunsTable,
 	alertRecipientsTable,
 	alertsTable,
 	authStatesTable,

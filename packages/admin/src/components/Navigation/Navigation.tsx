@@ -71,6 +71,12 @@ export const Navigation: Component = () => {
 	const canReadAiUsage = createMemo(
 		() => canReadSystemOverview() && siteStore.get.hasAnyAiFeatureEnabled(),
 	);
+	const canUseAgent = createMemo(
+		() =>
+			siteStore.get.ai.enabled &&
+			siteStore.get.ai.agent.enabled &&
+			userStore.get.hasPermission([Permissions.AiAgentUse]).all,
+	);
 	const showAccessAndPermissions = createMemo(
 		() => canReadUsers() || canReadRoles(),
 	);
@@ -243,6 +249,7 @@ export const Navigation: Component = () => {
 						canReadRoles={canReadRoles()}
 						canReadJobs={canReadJobs()}
 						canReadAiUsage={canReadAiUsage()}
+						canUseAgent={canUseAgent()}
 						canManageConnection={canManageConnection()}
 						canReadIntegrations={canReadIntegrations()}
 						canReadSystemOverview={canReadSystemOverview()}
@@ -328,6 +335,7 @@ export const Navigation: Component = () => {
 								canReadRoles={canReadRoles()}
 								canReadJobs={canReadJobs()}
 								canReadAiUsage={canReadAiUsage()}
+								canUseAgent={canUseAgent()}
 								canManageConnection={canManageConnection()}
 								canReadIntegrations={canReadIntegrations()}
 								canReadSystemOverview={canReadSystemOverview()}

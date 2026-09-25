@@ -105,6 +105,12 @@ const AiConfigSchema = z.strictObject({
 			z.strictObject({ enabled: z.boolean() }),
 		])
 		.default({ enabled: false }),
+	agent: z
+		.union([
+			z.boolean().transform((enabled) => ({ enabled })),
+			z.strictObject({ enabled: z.boolean() }),
+		])
+		.default({ enabled: true }),
 	tools: z
 		.strictObject({
 			definitions: z.array(ToolDefinitionSchema).default([]),

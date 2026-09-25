@@ -33,6 +33,8 @@ export const aiGenerationsTable = defineTable("lucid_ai_generations", () => ({
 			schema: z.number().nullable(),
 			type: "integer",
 		},
+		agent_conversation_id: { schema: z.uuid().nullable(), type: "text" },
+		agent_run_id: { schema: z.uuid().nullable(), type: "text" },
 		target_type: {
 			schema: z.string(),
 			type: "text",
@@ -116,6 +118,8 @@ export interface LucidAiGenerations {
 	feature_version: string;
 	user_id: number | null;
 	lucid_remote_connection_id: number | null;
+	agent_conversation_id: string | null;
+	agent_run_id: string | null;
 	target_type: string;
 	target: JSONColumnType<
 		Record<string, unknown>,

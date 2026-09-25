@@ -14,6 +14,19 @@ import type { QueryBuilderProps } from "@/utils/query-builder";
  * ```
  */
 export const queryKeys = {
+	agent: {
+		all: () => ["lucid", "agent"] as const,
+		conversations: () => ["lucid", "agent", "conversations"] as const,
+		conversation: (id: string | undefined) =>
+			["lucid", "agent", "conversations", id] as const,
+		messages: (id: string | undefined) =>
+			["lucid", "agent", "conversations", id, "messages"] as const,
+		routines: () => ["lucid", "agent", "routines"] as const,
+		routine: (id: string | undefined) =>
+			["lucid", "agent", "routines", id] as const,
+		routineRuns: (id: string | undefined) =>
+			["lucid", "agent", "routines", id, "runs"] as const,
+	},
 	account: {
 		verifyEmailChangeConfirm: () =>
 			["lucid", "account", "verifyEmailChangeConfirm"] as const,

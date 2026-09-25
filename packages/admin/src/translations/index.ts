@@ -88,6 +88,8 @@ i18next.init({
 	fallbackLng: FALLBACK_LOCALE,
 	keySeparator: false,
 	nsSeparator: false,
+	//* Solid escapes rendered text, so escaping here would show entities like &#x2F;
+	interpolation: { escapeValue: false },
 });
 
 let latestLoadId = 0;

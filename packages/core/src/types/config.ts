@@ -211,7 +211,7 @@ export type HttpConfig = {
 };
 
 /** Where tools and skills are exposed. */
-export type AiTarget = "mcp";
+export type AiTarget = "mcp" | "agent";
 
 /** Choose which AI features are available when `ai.enabled` is true. */
 export type AiFeatureConfig = {
@@ -332,6 +332,8 @@ export interface LucidConfig {
 				features?: AiFeatureConfig;
 				/** Expose registered tools over MCP at `/lucid/mcp`. Defaults to false. */
 				mcp?: boolean | { enabled: boolean };
+				/** Enable agent chat and routines. Requires a connected Lucid AI account. Defaults to true. */
+				agent?: boolean | { enabled: boolean };
 				/** Tool definitions registered by core, plugins and the project. */
 				tools?: {
 					definitions?: ToolDefinition[];
@@ -647,6 +649,7 @@ export interface ResolvedLucidConfig {
 		enabled: boolean;
 		features: Required<AiFeatureConfig>;
 		mcp: { enabled: boolean };
+		agent: { enabled: boolean };
 		tools: {
 			definitions: ToolDefinition[];
 			disabled: string[];

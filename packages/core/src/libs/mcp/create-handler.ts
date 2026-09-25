@@ -12,9 +12,9 @@ import { copy } from "../i18n/index.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import { filterExternalScopes } from "../permission/scopes.js";
 import { getSkillRegistry } from "../skills/registry.js";
-import { executeTool } from "../tools/execute-tool.js";
+import { executeMcpTool } from "../tools/execute-tool.js";
 import { getToolRegistry } from "../tools/registry.js";
-import type { ToolAuthority, ToolResult } from "../tools/types.js";
+import type { McpToolAuthority, McpToolResult } from "../tools/types.js";
 import { toPortableJsonSchema } from "./portable-json-schema.js";
 import { registerSkills } from "./register-skills.js";
 
@@ -43,7 +43,7 @@ const advertiseSchema = (schema: z.ZodObject): StandardSchemaWithJSON => {
 /** Builds the MCP result, defaulting to the output as JSON text. */
 const toCallToolResult = (
 	context: ServiceContext,
-	result: ToolResult<Record<string, JsonValue>>,
+	result: McpToolResult<Record<string, JsonValue>>,
 ): CallToolResult => {
 	const content = result.content ?? [
 		{ type: "text", text: JSON.stringify(result.output) },
@@ -74,7 +74,7 @@ const toCallToolResult = (
 /** Serves the tools and skills the caller can use over both MCP protocol generations. */
 export const createHandler = (args: {
 	context: ServiceContext;
-	authority: ToolAuthority;
+	authority: McpToolAuthority;
 }) => {
 	const { context, authority } = args;
 	const effectiveScopes = new Set(
@@ -97,8 +97,8 @@ export const createHandler = (args: {
 			},
 		);
 
-		for (const tool of getToolRegistry(context.config).values()) {
-			if (!tool.targets.includes("mcp") || !canUse(tool)) continue;
+		for (const tool of getToolRegistry(context.config, "mcp").values()) {
+			if (!canUse(tool)) continue;
 
 			server.registerTool(
 				tool.name,
@@ -109,7 +109,7 @@ export const createHandler = (args: {
 					annotations: tool.annotations,
 				},
 				async (input, request) => {
-					const result = await executeTool({
+					const result = await executeMcpTool({
 						context,
 						name: tool.name,
 						input,

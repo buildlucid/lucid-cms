@@ -1,4 +1,5 @@
 import account from "./account";
+import agent from "./agent";
 import ai from "./ai";
 import auth from "./auth";
 import collections from "./collections";
@@ -25,6 +26,7 @@ import users from "./users";
 const exportObject = {
 	auth,
 	account,
+	agent,
 	ai,
 	users,
 	userLogins,

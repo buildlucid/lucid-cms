@@ -26,10 +26,12 @@ const getProtectedResourceMetadata: ServiceFn<
 		input.resource === "mcp"
 			? new Set<string>([
 					ExternalScopes.McpAccess,
-					...[...getToolRegistry(context.config).values()].flatMap((tool) => [
-						...tool.scopes,
-						...(tool.advertisedScopes?.(context.config) ?? []),
-					]),
+					...[...getToolRegistry(context.config, "mcp").values()].flatMap(
+						(tool) => [
+							...tool.scopes,
+							...(tool.advertisedScopes?.(context.config) ?? []),
+						],
+					),
 				])
 			: undefined;
 

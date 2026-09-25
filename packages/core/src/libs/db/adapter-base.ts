@@ -26,6 +26,7 @@ import Migration00000010 from "./migrations/00000010-alerts.js";
 import Migration00000011 from "./migrations/00000011-lucid-remote-connections.js";
 import Migration00000012 from "./migrations/00000012-ai-generations.js";
 import Migration00000013 from "./migrations/00000013-preview-sessions.js";
+import Migration00000014 from "./migrations/00000014-agent.js";
 import type {
 	DatabaseConfig,
 	DatabaseConnection,
@@ -67,6 +68,7 @@ export default abstract class DatabaseAdapter {
 		"00000011-lucid-remote-connections",
 		"00000012-ai-generations",
 		"00000013-preview-sessions",
+		"00000014-agent",
 	];
 	/**
 	 * Creates an initialized live connection for the supplied runtime environment.
@@ -416,6 +418,7 @@ export default abstract class DatabaseAdapter {
 			"00000011-lucid-remote-connections": Migration00000011(this),
 			"00000012-ai-generations": Migration00000012(this),
 			"00000013-preview-sessions": Migration00000013(this),
+			"00000014-agent": Migration00000014(this),
 		};
 
 		return migrations;

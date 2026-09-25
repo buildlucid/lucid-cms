@@ -1,6 +1,7 @@
 import useConnect from "./useConnect";
 import useDisconnect from "./useDisconnect";
 import useGetStatus from "./useGetStatus";
+import useReset from "./useReset";
 import useVerify from "./useVerify";
 
 export default {
@@ -8,4 +9,5 @@ export default {
 	useDisconnect,
 	useGetStatus,
 	useVerify,
+	useReset,
 };

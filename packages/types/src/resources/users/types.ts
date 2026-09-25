@@ -25,6 +25,7 @@ export type CorePermission =
 	| "ai:custom-field-value"
 	| "ai:image-generate"
 	| "ai:alt-generate"
+	| "ai:agent"
 	| "integrations:read"
 	| "integrations:create"
 	| "integrations:update"

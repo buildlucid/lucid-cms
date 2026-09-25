@@ -1,4 +1,9 @@
 export type {
+	AgentWidgetComponent,
+	AgentWidgetMatch,
+	AgentWidgetProps,
+} from "../components/AgentWidget/types.js";
+export type {
 	BrickSlot,
 	BrickSlotComponent,
 	BrickSlotMatch,

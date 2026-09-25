@@ -61,3 +61,40 @@ test("last registration wins tied overrides, without reordering additive ties", 
 		"two",
 	]);
 });
+
+test("widget slots match both key and version and allow explicit overrides", () => {
+	const entries = [
+		{
+			key: "note-v1",
+			slot: "agent.widget",
+			match: { widget: "note", version: 1 },
+			component: "v1.tsx",
+		},
+		{
+			key: "note-v2",
+			slot: "agent.widget",
+			match: { widget: "note", version: 2 },
+			component: "v2.tsx",
+		},
+		{
+			key: "note-override",
+			slot: "agent.widget",
+			match: { widget: "note", version: 1 },
+			component: "custom.tsx",
+			priority: 1,
+		},
+	] satisfies AdminSlot[];
+	expect(
+		resolveSlots(entries, { widget: "note", version: 1 }).map(
+			(entry) => entry.key,
+		),
+	).toEqual(["note-override"]);
+	expect(
+		resolveSlots(entries, { widget: "note", version: 2 }).map(
+			(entry) => entry.key,
+		),
+	).toEqual(["note-v2"]);
+	expect(resolveSlots(entries, { widget: "note", version: 3 })).toEqual([]);
+	expect(resolveSlots(entries, { widget: "other", version: 1 })).toEqual([]);
+	expect(findSlotConflicts(entries)).toEqual([]);
+});

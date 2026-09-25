@@ -22,6 +22,27 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 		super(db, aiGenerationsTable);
 	}
 
+	/** Aggregate equal decimal amounts without converting credit strings to floats. */
+	async agentUsageByRuns(runIds: string[]) {
+		if (!runIds.length) return { error: undefined, data: [] };
+
+		const query = this.db
+			.selectFrom("lucid_ai_generations")
+			.select([
+				"agent_run_id",
+				"credits_charged",
+				sql<number>`count(*)`.as("model_calls"),
+			])
+			.where("agent_run_id", "in", runIds)
+			.where("status", "=", "success")
+			.groupBy(["agent_run_id", "credits_charged"]);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "agentUsageByRuns",
+		});
+
+		return exec.response;
+	}
 	/**
 	 * Inserts a completed generation once using the remote request identity.
 	 * Concurrent duplicate responses are ignored by the database constraint.
@@ -67,7 +88,83 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			selectAll: props.returnAll,
 		});
 	}
+	/** A terminal agent usage record can replace a pending record only once. */
+	async upsertAgentUsage(props: {
+		data: Partial<Insert<LucidAiGenerations>> & {
+			request_id: string;
+			status: "success" | "failed";
+		};
+	}) {
+		const query = this.db
+			.insertInto("lucid_ai_generations")
+			.values(this.asInsertData(props.data))
+			.onConflict((conflict) =>
+				conflict
+					.column("request_id")
+					.doUpdateSet({
+						provider_request_id: props.data.provider_request_id ?? null,
+						usage: props.data.usage ?? null,
+						model: props.data.model ?? null,
+						credits_charged: props.data.credits_charged ?? null,
+						duration_ms: props.data.duration_ms ?? null,
+						status: props.data.status,
+						error_message: props.data.error_message ?? null,
+					})
+					.where("lucid_ai_generations.status", "=", "pending"),
+			);
 
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "upsertAgentUsage",
+		});
+
+		return exec.response;
+	}
+	/** Find pending requests for scheduled scans or a specific failed stream. */
+	async pendingAgentUsage(props: {
+		connectionId: number;
+		before?: string;
+		requestId?: string;
+		limit: number;
+	}) {
+		let query = this.db
+			.selectFrom("lucid_ai_generations")
+			.select([
+				"request_id",
+				"agent_run_id",
+				"agent_conversation_id",
+				"user_id",
+				"lucid_remote_connection_id",
+				"created_at",
+			])
+			.where("feature_key", "=", "agent.chat")
+			.where("feature_version", "=", "v1")
+			.where("status", "=", "pending")
+			.where("lucid_remote_connection_id", "=", props.connectionId);
+
+		if (props.before) query = query.where("created_at", "<", props.before);
+		if (props.requestId) {
+			query = query.where("request_id", "=", props.requestId);
+		}
+
+		query = query.orderBy("created_at", "asc").limit(props.limit);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "pendingAgentUsage",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			mode: "multiple",
+			select: [
+				"request_id",
+				"agent_run_id",
+				"agent_conversation_id",
+				"user_id",
+				"lucid_remote_connection_id",
+				"created_at",
+			],
+		});
+	}
 	async selectSingleByRequestId<
 		K extends keyof Select<LucidAiGenerations>,
 		V extends boolean = false,
@@ -102,7 +199,6 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			select: props.select,
 		});
 	}
-
 	async selectUsageChartRows<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -145,7 +241,6 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			select: ["created_at", "feature_key", "usage", "credits_charged"],
 		});
 	}
-
 	async selectUsageMultiple<V extends boolean = false>(
 		props: QueryProps<
 			V,

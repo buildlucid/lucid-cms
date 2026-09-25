@@ -65,6 +65,10 @@ export const formatAiUsageFeatureLabel = (props: {
 	const fallback = props.featureKey;
 
 	switch (props.featureKey) {
+		case "agent.chat":
+			return props.translate("server:core.ai.usage.features.agent.chat", {
+				defaultMessage: "Agent Chat",
+			});
 		case "custom-field.input.generate":
 			return props.translate(
 				"server:core.ai.usage.features.custom.field.input.generate",

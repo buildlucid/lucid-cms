@@ -4,6 +4,10 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import type { Toolkit } from "../toolkit/types.js";
 import type DatabaseAdapter from "./adapter-base.js";
 import type {
+	LucidAgentConversations,
+	LucidAgentMessages,
+	LucidAgentRoutines,
+	LucidAgentRuns,
 	LucidAiGenerations,
 	LucidAlertRecipients,
 	LucidAlerts,
@@ -296,5 +300,9 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_job_scheduler: LucidJobScheduler;
 	lucid_job_schedule_overrides: LucidJobScheduleOverrides;
 	lucid_ai_generations: LucidAiGenerations;
+	lucid_agent_conversations: LucidAgentConversations;
+	lucid_agent_messages: LucidAgentMessages;
+	lucid_agent_routines: LucidAgentRoutines;
+	lucid_agent_runs: LucidAgentRuns;
 	lucid_auth_states: LucidAuthStates;
 }

@@ -36,6 +36,7 @@ const formatSingle = (props: {
 	if (includeSet.has("ai")) {
 		response.ai = {
 			enabled: props.config.ai.enabled,
+			agent: { enabled: props.config.ai.agent.enabled },
 			features: {
 				imageGeneration: props.config.ai.features.imageGeneration,
 				altGeneration: props.config.ai.features.altGeneration,
@@ -82,10 +83,13 @@ const formatSingle = (props: {
 	if (includeSet.has("mcp") && canReadSystem) {
 		response.mcp = {
 			enabled: props.config.ai.enabled && props.config.ai.mcp.enabled,
-			tools: Array.from(getToolRegistry(props.config).values(), (tool) => ({
-				name: tool.name,
-				description: tool.description,
-			})),
+			tools: Array.from(
+				getToolRegistry(props.config, "mcp").values(),
+				(tool) => ({
+					name: tool.name,
+					description: tool.description,
+				}),
+			),
 		};
 	}
 

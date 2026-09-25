@@ -5,6 +5,7 @@ import { queryString } from "./helpers/querystring.js";
 const settingsResponseSchema = z.object({
 	ai: z
 		.object({
+			agent: z.object({ enabled: z.boolean() }).strict(),
 			enabled: z.boolean().meta({
 				description: "Whether AI features are enabled in the Lucid CMS config",
 				example: true,

@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import accountRoutes from "./account.routes.js";
+import agentRoutes from "./agent.routes.js";
 import aiRoutes from "./ai.routes.js";
 import authRoutes from "./auth.routes.js";
 import collectionRoutes from "./collections.routes.js";
@@ -23,6 +24,7 @@ import userRoutes from "./users.routes.js";
 const routes = new Hono<LucidHonoGeneric>()
 	.route("/auth", authRoutes)
 	.route("/ai", aiRoutes)
+	.route("/agent", agentRoutes)
 	.route("/account", accountRoutes)
 	.route("/integrations", integrationRoutes)
 	.route("/collections", collectionRoutes)

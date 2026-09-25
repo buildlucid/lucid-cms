@@ -1,3 +1,5 @@
+import { executeAgentRunJob } from "../../services/agent/jobs/execute-run.js";
+import { agentTickJob } from "../../services/agent/jobs/tick.js";
 import { deleteCollectionJob } from "../../services/collections/jobs/delete-single.js";
 import { verifyConnectionsJob } from "../../services/connection/jobs/verify-connections.js";
 import { dispatchScheduledPublishOperationsJob } from "../../services/document-publish-operations/jobs/dispatch-scheduled.js";
@@ -34,6 +36,8 @@ const coreJobDefinitions = [
 	dispatchScheduledPublishOperationsJob,
 	deleteExpiredDataJob,
 	verifyConnectionsJob,
+	agentTickJob,
+	executeAgentRunJob,
 ] as const satisfies readonly AnyJobDefinition[];
 
 export default coreJobDefinitions;

@@ -14,6 +14,7 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import Link from "@/components/Link/Link";
 import Pill from "@/components/Pill/Pill";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import ResetConnectionModal from "@/components/ResetConnectionModal/ResetConnectionModal";
 import constants from "@/constants";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
@@ -62,6 +63,7 @@ const LucidConnection: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const [disconnectOpen, setDisconnectOpen] = createSignal(false);
+	const [resetOpen, setResetOpen] = createSignal(false);
 
 	// ----------------------------------------
 	// Queries
@@ -156,7 +158,7 @@ const LucidConnection: Component = () => {
 									<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
 								</Link>
 							</Show>
-							<Show when={isConnected()}>
+							<Show when={canManage()}>
 								<ActionMenu
 									actions={[
 										{
@@ -173,7 +175,7 @@ const LucidConnection: Component = () => {
 											label: T()("connection.verify.action"),
 											icon: "rotate",
 											onClick: () => verify.action.mutate({}),
-											permission: canManage(),
+											permission: canManage() && isConnected(),
 											loading: verify.action.isPending,
 											sortOrder: 10,
 										},
@@ -182,7 +184,7 @@ const LucidConnection: Component = () => {
 											label: T()("connection.reconnect.action"),
 											icon: "link",
 											onClick: () => connect.action.mutate({}),
-											permission: canManage(),
+											permission: canManage() && isConnected(),
 											loading: connect.action.isPending,
 											sortOrder: 30,
 										},
@@ -191,8 +193,17 @@ const LucidConnection: Component = () => {
 											label: T()("connection.disconnect.action"),
 											icon: "ban",
 											onClick: () => setDisconnectOpen(true),
-											permission: canManage(),
+											permission: canManage() && isConnected(),
 											sortOrder: 70,
+											variant: "danger",
+										},
+										{
+											type: "button",
+											label: T()("connection.reset.action"),
+											icon: "rotate",
+											onClick: () => setResetOpen(true),
+											permission: canManage(),
+											sortOrder: 80,
 											variant: "danger",
 										},
 									]}
@@ -262,6 +273,9 @@ const LucidConnection: Component = () => {
 					)}
 				</Show>
 			</QueryBoundary>
+			<ResetConnectionModal
+				state={{ open: resetOpen(), setOpen: setResetOpen }}
+			/>
 			<DisconnectConnectionModal
 				state={{ open: disconnectOpen(), setOpen: setDisconnectOpen }}
 			/>

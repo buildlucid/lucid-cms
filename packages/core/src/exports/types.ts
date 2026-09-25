@@ -554,12 +554,20 @@ export type {
 	ToolkitServices,
 } from "../libs/toolkit/types.js";
 export type {
+	AgentToolAuthority,
+	AgentToolDefinition,
+	AgentToolExecution,
+	AgentToolHandler,
+	AgentToolResult,
+	DefineAgentToolOptions,
+	DefineMcpToolOptions,
 	DefineToolOptions,
-	ToolAuthority,
+	McpToolAuthority,
+	McpToolDefinition,
+	McpToolExecution,
+	McpToolHandler,
+	McpToolResult,
 	ToolDefinition,
-	ToolExecution,
-	ToolHandler,
-	ToolResult,
 } from "../libs/tools/types.js";
 export type {
 	AiFeatureConfig,
@@ -634,6 +642,18 @@ export type {
 } from "../types/query-params.js";
 export type {
 	Account,
+	AgentApprovalAnswer,
+	AgentConversation,
+	AgentMessage,
+	AgentMessagePart,
+	AgentQuestionKind,
+	AgentRoutine,
+	AgentRun,
+	AgentRunOutcome,
+	AgentRunStatus,
+	AgentStreamEvent,
+	AgentToolStatus,
+	AgentUsage,
 	AiGenerateCost,
 	AiGenerateMode,
 	AiGenerateUsage,

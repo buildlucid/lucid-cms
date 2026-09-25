@@ -16,9 +16,11 @@ import CollectionBuilder from "../collection/builders/collection-builder/index.j
 import planCollectionMigrations from "../collection/plan-collection-migrations.js";
 import coreToolDefinitions from "../config/core-tool-definitions.js";
 import { createTranslationStore } from "../i18n/index.js";
+import { getCollectionPermission } from "../permission/collection-permissions.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
 import createToolkit from "../toolkit/create-toolkit.js";
-import type { ToolAuthority } from "../tools/types.js";
+import { executeAgentTool } from "../tools/execute-tool.js";
+import type { McpToolAuthority } from "../tools/types.js";
 import { createHandler } from "./create-handler.js";
 
 const fixture = getTestConfig();
@@ -54,7 +56,7 @@ const restricted = new CollectionBuilder("mcp_restricted", {
 let context: ServiceContext;
 let aboutId: number;
 let contactId: number;
-const authority: ToolAuthority = {
+const authority: McpToolAuthority = {
 	principal: { type: "system" },
 	scopes: [
 		ExternalScopes.McpAccess,
@@ -348,4 +350,51 @@ test("MCP document filters preserve content API operators and nested OR groups",
 	expect(parsed.data.map((item) => item.id).sort((a, b) => a - b)).toEqual(
 		[aboutId, contactId].sort((a, b) => a - b),
 	);
+});
+
+test("agent content tools share the read services but enforce collection permissions", async () => {
+	const execution = {
+		authority: {
+			userId: 1,
+			superAdmin: false,
+			permissions: [getCollectionPermission(pages.key, "read")],
+		},
+		signal: AbortSignal.timeout(5000),
+		operationId: "test:read",
+	};
+	const listed = await executeAgentTool({
+		context,
+		name: "collections_list",
+		input: {},
+		execution,
+	});
+	expect(listed.type).toBe("success");
+	expect(JSON.stringify(listed)).toContain(pages.key);
+	expect(JSON.stringify(listed)).not.toContain(restricted.key);
+	const document = await executeAgentTool({
+		context,
+		name: "documents_get",
+		input: { collectionKey: pages.key, id: aboutId },
+		execution,
+	});
+	expect(document).toMatchObject({
+		type: "success",
+		data: { output: { data: { id: aboutId, collectionKey: pages.key } } },
+	});
+	expect(
+		await executeAgentTool({
+			context,
+			name: "documents_get",
+			input: { collectionKey: restricted.key, id: aboutId },
+			execution,
+		}),
+	).toEqual({ type: "forbidden" });
+	expect(
+		await executeAgentTool({
+			context,
+			name: "collections_describe",
+			input: { collectionKey: restricted.key },
+			execution,
+		}),
+	).toEqual({ type: "forbidden" });
 });

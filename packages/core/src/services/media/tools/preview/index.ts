@@ -164,7 +164,7 @@ const inlineImage = async (args: {
 	});
 	if (streamed.error) return streamed;
 	const buffer = await readBounded(streamed.data.body, args.signal);
-	if (!buffer)
+	if (!buffer) {
 		return {
 			error: {
 				type: "basic",
@@ -173,6 +173,8 @@ const inlineImage = async (args: {
 			},
 			data: undefined,
 		};
+	}
+
 	return {
 		error: undefined,
 		data: { buffer, mimeType: args.source.meta.mimeType },

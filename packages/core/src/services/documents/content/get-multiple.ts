@@ -11,7 +11,6 @@ import formatter, {
 } from "../../../libs/formatters/index.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { ExternalScopes } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetMultipleQueryParams } from "../../../schemas/documents.js";
 import {
@@ -38,7 +37,7 @@ type ContentDocumentsGetMultipleInput<TCollectionKey extends string = string> =
 	{
 		collectionKey: TCollectionKey;
 		query: ContentGetMultipleQueryParams;
-		externalScopes?: string[];
+		allowedCollectionKeys?: string[];
 	} & ContentDocumentVersionInput<TCollectionKey>;
 
 type ContentDocumentsGetMultipleResult<TCollectionKey extends string = string> =
@@ -106,18 +105,6 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 	if (collectionRes.error) return collectionRes;
 	if (collectionsRes.error) return collectionsRes;
 
-	//* work out allowed collection keys based on integration scopes
-	let allowedCollectionKeys: string[] | undefined;
-	if (data.externalScopes) {
-		allowedCollectionKeys = collectionsRes.data
-			.filter((collection) =>
-				data.externalScopes?.includes(
-					ExternalScopes.DocumentRead(collection.key),
-				),
-			)
-			.map((collection) => collection.key);
-	}
-
 	const Document = new DocumentsRepository(context.db);
 
 	const bricksTableSchemaRes = await getBricksTableSchema(
@@ -159,7 +146,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 		filterOr: query.filterOr,
 		relationVersionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
-		allowedCollectionKeys,
+		allowedCollectionKeys: data.allowedCollectionKeys,
 	});
 	if (relationFiltersRes.error) return relationFiltersRes;
 	const { documentFilters, brickFilters } = groupDocumentFilters(
@@ -228,7 +215,7 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 			documents: documentRows,
 			includeMeta: include.meta,
 		}),
-		allowedDocumentCollectionKeys: allowedCollectionKeys,
+		allowedDocumentCollectionKeys: data.allowedCollectionKeys,
 		host: baseUrl,
 		flattenRelationRefFields: true,
 	});

@@ -73,6 +73,7 @@ const brickSlotMatch = z.strictObject({
 
 const navigationIcon = z.enum([
 	"dashboard",
+	"agent",
 	"collection-multiple",
 	"collection-single",
 	"media",
@@ -124,6 +125,17 @@ export const adminConfigSchema = z
 		slots: z
 			.array(
 				z.discriminatedUnion("slot", [
+					z.strictObject({
+						key,
+						priority: z.number().optional(),
+						slot: z.literal("agent.widget"),
+						component: componentReference,
+						options,
+						match: z.strictObject({
+							widget: key,
+							version: z.number().int().positive(),
+						}),
+					}),
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
@@ -206,6 +218,7 @@ export const adminConfigSchema = z
 	.superRefine((config, context) => {
 		for (const kind of ["slots", "routes"] as const) {
 			const keys = new Set<string>();
+
 			for (const [index, entry] of config[kind].entries()) {
 				if (keys.has(entry.key)) {
 					context.addIssue({
@@ -220,13 +233,16 @@ export const adminConfigSchema = z
 		}
 
 		const paths = new Set<string>();
+
 		for (const [index, route] of config.routes.entries()) {
-			if (paths.has(route.path))
+			if (paths.has(route.path)) {
 				context.addIssue({
 					code: "custom",
 					path: ["routes", index, "path"],
 					message: `Duplicate admin route path "${route.path}".`,
 				});
+			}
+
 			paths.add(route.path);
 
 			if (route.access === "public" && route.permission !== undefined) {

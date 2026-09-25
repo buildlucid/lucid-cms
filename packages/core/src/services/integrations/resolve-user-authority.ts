@@ -1,11 +1,8 @@
-import formatter, {
-	userPermissionsFormatter,
-} from "../../libs/formatters/index.js";
 import { getExternalCapability } from "../../libs/permission/capabilities.js";
 import type { ExternalScope } from "../../libs/permission/external-scopes.js";
 import { filterExternalScopes } from "../../libs/permission/scopes.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveUserAccess from "../users/resolve-access.js";
 
 /**
  * Resolves the effective external scopes currently available to a user.
@@ -25,35 +22,11 @@ const resolveUserAuthority: ServiceFn<
 		scopes: ExternalScope[];
 	}
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db);
-	const userRes = await Users.selectAccessTokenUser({
-		where: [
-			{ key: "id", operator: "=", value: data.userId },
-			{
-				key: "is_deleted",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-			{
-				key: "is_locked",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				type: "authorisation",
-				status: 401,
-			},
-		},
-	});
-	if (userRes.error) return userRes;
+	const user = await resolveUserAccess(context, { userId: data.userId });
+	if (user.error) return user;
 
-	const superAdmin = formatter.formatBoolean(userRes.data.super_admin ?? false);
-	const { permissions } = userPermissionsFormatter.formatMultiple({
-		roles: userRes.data.roles ?? [],
-	});
+	const { superAdmin, permissions } = user.data;
+
 	const effectiveScopes = filterExternalScopes(
 		context.config,
 		data.scopes,

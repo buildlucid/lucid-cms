@@ -24,6 +24,7 @@ export const Permissions = {
 	AiCustomFieldValue: "ai:custom-field-value",
 	AiImageGenerate: "ai:image-generate",
 	AiAltGenerate: "ai:alt-generate",
+	AiAgentUse: "ai:agent",
 	IntegrationsRead: "integrations:read",
 	IntegrationsCreate: "integrations:create",
 	IntegrationsUpdate: "integrations:update",

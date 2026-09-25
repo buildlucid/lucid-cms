@@ -21,6 +21,7 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import callback from "./callback.js";
 import connect from "./connect.js";
 import disconnect from "./disconnect.js";
+import reset from "./reset.js";
 import {
 	getConnectionGrant,
 	getConnectionRegistration,
@@ -338,6 +339,38 @@ describe.sequential("Lucid remote connection", () => {
 			request_id: "request-1",
 			lucid_remote_connection_id: null,
 		});
+	});
+
+	test("reset forgets stale credentials locally and registers again on connect", async () => {
+		const fetchMock = installOAuthFetch();
+		const context = makeContext();
+		expect((await connect(context, { browserBinding })).error).toBeUndefined();
+		const before = await resolveEffectiveConnection(context);
+		if (!before.data) throw new Error("Missing connection");
+		await persistConnectionGrantState(context, before.data.id, grant(), {
+			status: "connected",
+		});
+		fetchMock.mockClear();
+		expect((await reset(context)).error).toBeUndefined();
+		expect(fetchMock).not.toHaveBeenCalled();
+		const after = await resolveEffectiveConnection(context);
+		expect(after.data).toMatchObject({
+			id: before.data.id,
+			status: "disconnected",
+			registration_encrypted: null,
+			grant_encrypted: null,
+			pending_encrypted: null,
+			pending_state_hash: null,
+			pending_expires_at: null,
+			display: null,
+			error_key: null,
+		});
+		expect((await connect(context, { browserBinding })).error).toBeUndefined();
+		expect(
+			fetchMock.mock.calls.some(([url]) =>
+				String(url).endsWith("/v1/oauth/register"),
+			),
+		).toBe(true);
 	});
 
 	test("disconnect clears the grant but keeps reusable registration", async () => {

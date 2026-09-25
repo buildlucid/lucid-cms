@@ -16,6 +16,10 @@ export const formatAiUsageNumber = (value?: number | null) => {
 
 export const getAiUsageFeatureOptions = () => [
 	{
+		value: "agent.chat",
+		label: T()("ai.usage.features.agent.chat"),
+	},
+	{
 		value: "custom-field.input.generate",
 		label: T()("ai.usage.features.custom.field.input.generate"),
 	},

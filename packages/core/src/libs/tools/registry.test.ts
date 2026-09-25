@@ -1,7 +1,9 @@
 import { expect, test, vi } from "vitest";
 import z from "zod";
+import checkToolDefinitions from "../config/checks/check-tool-definitions.js";
 import processConfig from "../config/process-config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
+import defineSkill from "../skills/define-skill.js";
 import defineTool from "./define-tool.js";
 import { getToolRegistry } from "./registry.js";
 
@@ -61,7 +63,7 @@ test("normalizes shorthand and applies plugin registration before disabling tool
 		{ resolvedDb: adapter, skipValidation: true },
 	);
 	expect(config.ai.mcp).toEqual({ enabled: true });
-	const names = [...getToolRegistry(config).keys()];
+	const names = [...getToolRegistry(config, "mcp").keys()];
 	expect(names).toContain("test_echo");
 	expect(names).not.toContain("plugin_dummy");
 });
@@ -99,4 +101,93 @@ test("rejects duplicate tools and unknown disable entries", async () => {
 			options,
 		),
 	).rejects.toThrow('Disabled tool "typo" is not registered.');
+});
+
+const agentEcho = defineTool({
+	target: "agent",
+	name: "test_echo",
+	description: "Agent echo",
+	input: z.object({}),
+	output: z.object({}),
+	permissions: [],
+	readOnly: true,
+	handler: async () => ({ error: undefined, data: { output: {} } }),
+});
+
+test("separate targets can reuse a name and disabling it disables both", async () => {
+	const config = await processConfig(
+		{
+			secrets: "a".repeat(64),
+			ai: { tools: { definitions: [echo, agentEcho] } },
+		},
+		{ resolvedDb: adapter },
+	);
+	expect(getToolRegistry(config, "agent").get("test_echo")).toEqual(agentEcho);
+	expect(getToolRegistry(config, "mcp").get("test_echo")).toEqual(echo);
+
+	const disabled = {
+		...config,
+		ai: {
+			...config.ai,
+			tools: { ...config.ai.tools, disabled: ["test_echo"] },
+		},
+	};
+	expect(getToolRegistry(disabled, "agent").has("test_echo")).toBe(false);
+	expect(getToolRegistry(disabled, "mcp").has("test_echo")).toBe(false);
+});
+
+test("the provider limit includes ask, finish and the optional skill loader", async () => {
+	const base = await processConfig(
+		{ secrets: "a".repeat(64) },
+		{ resolvedDb: adapter },
+	);
+	const tools = Array.from({ length: 62 }, (_, i) => ({
+		...agentEcho,
+		name: `test_${i}`,
+	}));
+	const skill = defineSkill({
+		target: "agent",
+		name: "test-skill",
+		description: "Test",
+		instructions: "Test",
+		scopes: [],
+	});
+	const config = {
+		...base,
+		ai: {
+			...base.ai,
+			tools: { definitions: tools, disabled: [] },
+			skills: { definitions: [skill], disabled: [] },
+		},
+	};
+
+	expect(() => checkToolDefinitions(config)).toThrow("61 custom agent tools");
+	expect(() =>
+		checkToolDefinitions({
+			...config,
+			ai: { ...config.ai, tools: { ...config.ai.tools, disabled: ["test_0"] } },
+		}),
+	).not.toThrow();
+	expect(() =>
+		checkToolDefinitions({
+			...config,
+			ai: {
+				...config.ai,
+				skills: { ...config.ai.skills, disabled: ["test-skill"] },
+			},
+		}),
+	).not.toThrow();
+	expect(() =>
+		checkToolDefinitions({
+			...config,
+			ai: {
+				...config.ai,
+				skills: { definitions: [], disabled: [] },
+				tools: {
+					definitions: [...tools, { ...agentEcho, name: "one_too_many" }],
+					disabled: [],
+				},
+			},
+		}),
+	).toThrow("62 custom agent tools");
 });

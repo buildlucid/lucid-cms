@@ -1,11 +1,7 @@
-import { type Component, createMemo, createSignal } from "solid-js";
+import type { Component } from "solid-js";
 import Input from "@/components/Input/Input";
-import Select from "@/components/Select/Select";
+import TimezoneSelect from "@/components/TimezoneSelect/TimezoneSelect";
 import T from "@/translations";
-import {
-	getDefaultTimezone,
-	getSupportedTimezones,
-} from "@/utils/release-schedule";
 
 const ReleaseScheduleFields: Component<{
 	date: string;
@@ -16,30 +12,6 @@ const ReleaseScheduleFields: Component<{
 	setTimezone: (_timezone: string) => void;
 	onChange?: () => void;
 }> = (props) => {
-	// ----------------------------------
-	// State
-	const [timezoneSearch, setTimezoneSearch] = createSignal("");
-
-	// ----------------------------------
-	// Memos
-	const timezoneOptions = createMemo(() => {
-		const search = timezoneSearch().trim().toLowerCase();
-		const values = Array.from(
-			new Set([
-				props.timezone,
-				getDefaultTimezone(),
-				...getSupportedTimezones(),
-			]),
-		).filter(Boolean);
-
-		return values
-			.filter((timezone) => timezone.toLowerCase().includes(search))
-			.map((timezone) => ({
-				value: timezone,
-				label: timezone,
-			}));
-	});
-
 	// ----------------------------------
 	// Render
 	return (
@@ -68,21 +40,13 @@ const ReleaseScheduleFields: Component<{
 				required={true}
 				label={T()("common.time")}
 			/>
-			<Select
+			<TimezoneSelect
 				id="release-schedule-timezone"
-				name="release-schedule-timezone"
 				value={props.timezone}
-				onChange={(value) => {
-					if (value !== undefined) props.setTimezone(value);
+				onChange={(timezone) => {
+					props.setTimezone(timezone);
 					props.onChange?.();
 				}}
-				options={timezoneOptions()}
-				search={{
-					value: timezoneSearch(),
-					onChange: setTimezoneSearch,
-				}}
-				required={true}
-				label={T()("common.timezone")}
 			/>
 		</div>
 	);

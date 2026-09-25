@@ -16,6 +16,7 @@ import {
 	FaSolidSquareArrowUpRight,
 	FaSolidUserLock,
 	FaSolidUsers,
+	FaSolidWandMagicSparkles,
 } from "solid-icons/fa";
 import {
 	type Component,
@@ -34,6 +35,7 @@ import {
 
 const icons = {
 	dashboard: FaSolidHouse,
+	agent: FaSolidWandMagicSparkles,
 	"collection-multiple": FaSolidBoxesStacked,
 	"collection-single": FaSolidBox,
 	media: FaSolidPhotoFilm,

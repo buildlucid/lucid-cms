@@ -61,10 +61,14 @@ const parseError = (data: unknown, response: Response): ErrorResponse => {
 	};
 };
 
-/** Sends a typed request to the Lucid API. */
-const request = async <ResponseBody = unknown, Data = unknown>(
+/**
+ * Sends a request with the admin session, locale and CSRF token, retrying once
+ * after refreshing an expired session or token. Resolves with the successful
+ * response and throws a `LucidError` otherwise.
+ */
+export const sendRequest = async <Data = unknown>(
 	params: RequestParams<Data>,
-): Promise<ResponseBody> => {
+): Promise<Response> => {
 	const method = params.method ?? "GET";
 	const csrf = params.csrf ?? method !== "GET";
 	const body =
@@ -102,19 +106,13 @@ const request = async <ResponseBody = unknown, Data = unknown>(
 			headers,
 			signal: params.signal,
 		});
+		if (response.ok) return response;
 
-		const text = response.status === 204 ? "" : await response.text();
+		const text = await response.text();
 		let data: unknown;
-
 		try {
 			data = text ? JSON.parse(text) : undefined;
-		} catch {
-			if (response.ok) {
-				throw new Error("The API returned an invalid JSON response.");
-			}
-		}
-
-		if (response.ok) return data as ResponseBody;
+		} catch {}
 
 		const error = parseError(data, response);
 		if (
@@ -139,6 +137,19 @@ const request = async <ResponseBody = unknown, Data = unknown>(
 
 		if (params.displayErrorToast !== false) handleSiteErrors(error);
 		throw new LucidError(error.message, error);
+	}
+};
+
+/** Sends a typed request to the Lucid API. */
+const request = async <ResponseBody = unknown, Data = unknown>(
+	params: RequestParams<Data>,
+): Promise<ResponseBody> => {
+	const response = await sendRequest(params);
+	const text = response.status === 204 ? "" : await response.text();
+	try {
+		return (text ? JSON.parse(text) : undefined) as ResponseBody;
+	} catch {
+		throw new Error("The API returned an invalid JSON response.");
 	}
 };
 

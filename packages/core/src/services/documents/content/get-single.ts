@@ -8,7 +8,6 @@ import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import { documentsFormatter } from "../../../libs/formatters/index.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { ExternalScopes } from "../../../libs/permission/external-scopes.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ContentGetSingleQueryParams } from "../../../schemas/documents.js";
 import {
@@ -34,7 +33,7 @@ import type { ContentDocumentVersionInput } from "./types.js";
 type ContentDocumentsGetSingleInput<TCollectionKey extends string = string> = {
 	collectionKey: TCollectionKey;
 	query: ContentGetSingleQueryParams;
-	externalScopes?: string[];
+	allowedCollectionKeys?: string[];
 } & ContentDocumentVersionInput<TCollectionKey>;
 
 type ContentDocumentsGetSingleService = <TCollectionKey extends string>(
@@ -92,20 +91,6 @@ const getSingle: ContentDocumentsGetSingleService = async <
 	});
 	if (collectionRes.error) return collectionRes;
 
-	//* work out allowed collection keys based on integration scopes
-	let allowedCollectionKeys: string[] | undefined;
-	if (data.externalScopes) {
-		const collectionsRes = await collections.getAll(context, {});
-		if (collectionsRes.error) return collectionsRes;
-		allowedCollectionKeys = collectionsRes.data
-			.filter((collection) =>
-				data.externalScopes?.includes(
-					ExternalScopes.DocumentRead(collection.key),
-				),
-			)
-			.map((collection) => collection.key);
-	}
-
 	const bricksTableSchemaRes = await getBricksTableSchema(
 		context,
 		data.collectionKey,
@@ -147,7 +132,7 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		filterOr: query.filterOr,
 		relationVersionType: relationVersionTypeRes.data.versionType,
 		resolveVersionType: relationVersionTypeRes.data.resolveVersionType,
-		allowedCollectionKeys,
+		allowedCollectionKeys: data.allowedCollectionKeys,
 	});
 	if (relationFiltersRes.error) return relationFiltersRes;
 	const { documentFilters, brickFilters } = groupDocumentFilters(
@@ -202,7 +187,7 @@ const getSingle: ContentDocumentsGetSingleService = async <
 		includeBricks: include.bricks,
 		refResources: include.refs,
 		flattenRelationRefFields: true,
-		allowedDocumentCollectionKeys: allowedCollectionKeys,
+		allowedDocumentCollectionKeys: data.allowedCollectionKeys,
 		refTargets: collectDocumentRefTargets({
 			documents: [documentRes.data],
 			includeMeta: include.meta,

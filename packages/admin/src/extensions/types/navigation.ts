@@ -2,6 +2,7 @@ import type { ResolvedAdminCopy } from "@lucidcms/types";
 
 export type AdminNavigationIcon =
 	| "dashboard"
+	| "agent"
 	| "collection-multiple"
 	| "collection-single"
 	| "media"

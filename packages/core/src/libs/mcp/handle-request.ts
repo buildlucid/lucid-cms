@@ -9,7 +9,7 @@ import {
 	ExternalScopes,
 } from "../permission/external-scopes.js";
 import { getToolRegistry, toolDefinitionInternal } from "../tools/registry.js";
-import type { ToolAuthority } from "../tools/types.js";
+import type { McpToolAuthority } from "../tools/types.js";
 import { createHandler } from "./create-handler.js";
 
 const toolCallSchema = z.object({
@@ -24,7 +24,7 @@ const toolCallSchema = z.object({
 export const handleMcpRequest = async (args: {
 	request: Request;
 	context: ServiceContext;
-	authority: ToolAuthority;
+	authority: McpToolAuthority;
 	requireScopes: (scopes: readonly ExternalScope[]) => void;
 }): Promise<Response> => {
 	const { request, context, authority, requireScopes } = args;
@@ -53,7 +53,7 @@ export const handleMcpRequest = async (args: {
 			(!request.headers.get("Mcp-Name") ||
 				request.headers.get("Mcp-Name") === toolCall.data.params.name)
 		) {
-			const tool = getToolRegistry(context.config).get(
+			const tool = getToolRegistry(context.config, "mcp").get(
 				toolCall.data.params.name,
 			);
 
@@ -64,7 +64,9 @@ export const handleMcpRequest = async (args: {
 				);
 				const requiredScopes = [
 					...tool.scopes,
-					...(preparation.type === "ready" ? preparation.data.scopes : []),
+					...(preparation.type === "ready"
+						? preparation.data.requirements
+						: []),
 				];
 				if (requiredScopes.length > 0) {
 					requireScopes([ExternalScopes.McpAccess, ...requiredScopes]);

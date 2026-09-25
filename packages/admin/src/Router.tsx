@@ -46,6 +46,16 @@ const ShareRoute = lazy(
 const DashboardRoute = lazy(
 	() => import("@/containers/DashboardPage/DashboardPage"),
 );
+const AgentRoute = lazy(() => import("@/containers/AgentPage/AgentPage"));
+const AgentConversationRoute = lazy(
+	() => import("@/containers/AgentConversationPage/AgentConversationPage"),
+);
+const AgentRoutinesRoute = lazy(
+	() => import("@/containers/AgentRoutinesPage/AgentRoutinesPage"),
+);
+const AgentRoutineRoute = lazy(
+	() => import("@/containers/AgentRoutinePage/AgentRoutinePage"),
+);
 const MediaListRoute = lazy(() => import("@/containers/MediaPage/MediaPage"));
 const UsersListRoute = lazy(() => import("@/containers/UsersPage/UsersPage"));
 const RolesListRoute = lazy(() => import("@/containers/RolesPage/RolesPage"));
@@ -123,6 +133,43 @@ const AppRouter: Component = () => {
 			<Route component={AuthenticatedRoutes}>
 				<Route path="/lucid" component={NavigationShell}>
 					<Route path="/" component={DashboardRoute} />
+					{/* Agent */}
+					<Route
+						path="/agent"
+						preload={preloadRoutes(AgentRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.AiAgentUse}>
+								<AgentRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/agent/chats/:conversationId"
+						preload={preloadRoutes(AgentConversationRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.AiAgentUse}>
+								<AgentConversationRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/agent/routines"
+						preload={preloadRoutes(AgentRoutinesRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.AiAgentUse}>
+								<AgentRoutinesRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/agent/routines/:routineId"
+						preload={preloadRoutes(AgentRoutineRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.AiAgentUse}>
+								<AgentRoutineRoute />
+							</PermissionGuard>
+						)}
+					/>
 					<Route path="/components" component={ComponentsRoute} />
 					<Route path="/account" component={AccountRoute} />
 					{extensionRoutes

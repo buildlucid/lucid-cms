@@ -33,7 +33,14 @@ import searchRoute from "./src/routes/search.js";
 import searchMediaRoute from "./src/routes/search-media.js";
 import sendTestEmailRoute from "./src/routes/send-test-email.js";
 import testOrganisationsTable from "./src/tables/test-organisations.js";
-import { addTool, echoTool } from "./src/tools.js";
+import {
+	addAgentTool,
+	addTool,
+	demoAgentSkill,
+	echoAgentTool,
+	echoTool,
+	saveNoteTool,
+} from "./src/tools.js";
 
 export const env = z.object({
 	DATABASE_URL: z.string(),
@@ -89,7 +96,16 @@ export default defineConfig({
 		},
 		ai: {
 			mcp: true,
-			tools: { definitions: [echoTool, addTool] },
+			tools: {
+				definitions: [
+					echoTool,
+					echoAgentTool,
+					addTool,
+					addAgentTool,
+					saveNoteTool,
+				],
+			},
+			skills: { definitions: [demoAgentSkill] },
 		},
 		localization: {
 			locales: [
@@ -169,6 +185,14 @@ export default defineConfig({
 		// 	}
 		// },
 		admin: {
+			slots: [
+				{
+					key: "playground-note",
+					slot: "agent.widget",
+					match: { widget: "playground-note", version: 1 },
+					component: "./src/admin/widgets/PlaygroundNote.tsx",
+				},
+			],
 			routes: [diagnosticsRoute, standaloneRoute, publicRoute],
 			scripts: ["./src/admin/startup.ts"],
 			stylesheets: ["./src/admin/styles.css"],

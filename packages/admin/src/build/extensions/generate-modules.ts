@@ -58,6 +58,7 @@ export const generateRegistry = async (
 	);
 
 	const slots: Record<SlotSurface, string[]> = {
+		agentWidget: [],
 		brick: [],
 		field: [],
 		documentList: [],
@@ -111,7 +112,9 @@ export const generateAssets = async (
 			} else {
 				const id = await resolve(reference, kind);
 				if (kind === "stylesheets") stylesheets.push(id);
-				else imports.push(`import ${JSON.stringify(id)};`);
+				else {
+					imports.push(`import ${JSON.stringify(id)};`);
+				}
 			}
 		}
 	}

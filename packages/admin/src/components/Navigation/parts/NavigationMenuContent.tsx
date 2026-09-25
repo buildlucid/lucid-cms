@@ -29,6 +29,7 @@ export type NavigationMenuContentProps = {
 	canReadRoles: boolean;
 	canReadJobs: boolean;
 	canReadAiUsage: boolean;
+	canUseAgent: boolean;
 	canManageConnection: boolean;
 	canReadIntegrations: boolean;
 	canReadSystemOverview: boolean;
@@ -133,7 +134,13 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						title={T()("email.activity")}
 						permission={props.canReadEmails}
 					/>
-
+					<NavigationLink
+						type="link"
+						href="/lucid/agent"
+						icon="agent"
+						title={T()("routes.agent.title")}
+						permission={props.canUseAgent}
+					/>
 					{/* Publishing */}
 					<Show when={showPublishingSection()}>
 						<div class="w-full mt-4 mb-2">

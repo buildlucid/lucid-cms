@@ -3,6 +3,7 @@ export type SettingsInclude = "email" | "media" | "system" | "ai" | "mcp";
 export interface Settings {
 	ai?: {
 		enabled: boolean;
+		agent: { enabled: boolean };
 		features: {
 			imageGeneration: boolean;
 			altGeneration: boolean;

@@ -16,6 +16,7 @@ type LucidRemoteRequestProps = {
 	body?: unknown;
 	origin?: string;
 	retries?: number;
+	signal?: AbortSignal;
 };
 
 type LucidRemoteClient = {
@@ -140,7 +141,7 @@ const getErrorCopy = (errorKey?: string) => {
 	}
 };
 
-const createRemoteError = (
+export const createRemoteError = (
 	response: Response,
 	json: unknown,
 ): { error: LucidErrorData; data: undefined } => {
@@ -223,6 +224,7 @@ const createLucidRemoteClient = (props: {
 					headers,
 					body,
 					redirect: "error",
+					signal: requestProps.signal,
 				});
 
 				if (response.status >= 500 && attempt < retries) {

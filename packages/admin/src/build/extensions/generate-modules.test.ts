@@ -18,6 +18,12 @@ test("loads named exports and names the module when an export is missing", async
 			{
 				slots: [
 					{
+						key: "note",
+						slot: "agent.widget",
+						match: { widget: "note", version: 1 },
+						component: { module: "./panel.js", export: "Panel" },
+					},
+					{
 						key: "found",
 						slot: "field.after",
 						component: { module: "./panel.js", export: "Panel" },
@@ -40,8 +46,17 @@ test("loads named exports and names the module when an export is missing", async
 				"const lazy = (load) => load;",
 			),
 		);
-		const { fieldSlots } = await import(pathToFileURL(registry).href);
+		const { fieldSlots, agentWidgetSlots } = await import(
+			pathToFileURL(registry).href
+		);
 
+		expect(agentWidgetSlots[0]).toMatchObject({
+			slot: "agent.widget",
+			match: { widget: "note", version: 1 },
+		});
+		await expect(agentWidgetSlots[0].component()).resolves.toEqual({
+			default: "panel",
+		});
 		await expect(fieldSlots[0].component()).resolves.toEqual({
 			default: "panel",
 		});

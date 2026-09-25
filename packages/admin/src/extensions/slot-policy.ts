@@ -1,9 +1,11 @@
+import { agentWidgetSlotPolicies } from "../components/AgentWidget/constants.js";
 import { brickSlotPolicies } from "../components/BrickSlots/constants.js";
 import { documentListSlotPolicies } from "../components/DocumentSlotCell/constants.js";
 import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
 
 /** Component-owned policies shared by config diagnostics, compilation and slot selection. */
 export const slotDefinitions = {
+	...agentWidgetSlotPolicies,
 	...brickSlotPolicies,
 	...documentListSlotPolicies,
 	...fieldSlotPolicies,
@@ -14,6 +16,8 @@ export type SlotSurface =
 	(typeof slotDefinitions)[keyof typeof slotDefinitions]["surface"];
 
 type Match = {
+	widget?: string;
+	version?: number;
 	collection?: string;
 	brick?: string;
 	kind?: string;
@@ -25,7 +29,14 @@ type Entry = {
 	priority?: number;
 	match?: Match;
 };
-const matchKeys = ["collection", "brick", "kind", "field"] as const;
+const matchKeys = [
+	"collection",
+	"brick",
+	"kind",
+	"field",
+	"widget",
+	"version",
+] as const;
 
 /** Higher priorities render first; registration order breaks ties for single winners. */
 export const resolveSlots = <T extends Entry>(

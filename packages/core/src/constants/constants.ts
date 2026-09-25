@@ -216,6 +216,39 @@ export default Object.freeze({
 		statusRecheckIntervalSeconds: 3600,
 		remoteRequestTimeoutMs: 10_000,
 	},
+	agent: {
+		defaultTitle: "New chat",
+		titleLength: 80,
+		runStatuses: {
+			active: ["queued", "running", "waiting", "interrupted"],
+			/** Active runs that are not waiting on a person. */
+			working: ["queued", "running", "interrupted"],
+			terminal: ["completed", "failed", "cancelled"],
+		},
+		limits: {
+			chatTurns: 16,
+			routineTurns: 40,
+			routineNudges: 2,
+			recoveries: 3,
+			historyMessages: 30,
+			transcriptMessages: 256,
+			transcriptChars: 128_000,
+			instructionChars: 32_000,
+			callsPerTurn: 16,
+			partsChars: 262_144,
+			toolOutputChars: 64_000,
+			/** Provider request limit, including the runner's built-in tools. */
+			maxTools: 64,
+		},
+		/** A slice is one uninterrupted stretch of execution before it hands off to the queue. */
+		sliceMs: 240_000,
+		leaseMs: 60_000,
+		heartbeatMs: 15_000,
+		replySaveIntervalMs: 1_000,
+		watchIntervalMs: 1_000,
+		staleQueuedMs: 120_000,
+		batchSize: 50,
+	} as const,
 	oauth: {
 		accessTokenExpirationSeconds: 300,
 		authorizationCodeExpirationSeconds: 300,

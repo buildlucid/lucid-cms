@@ -4,10 +4,11 @@ import { getExternalCapability } from "../../permission/capabilities.js";
 /** Checks skill names, content, scopes and operator disable entries at config time. */
 const checkSkillDefinitions = (config: ResolvedLucidConfig) => {
 	const names = new Set<string>();
+
 	for (const skill of config.ai.skills.definitions) {
 		if (
 			skill.targets.length === 0 ||
-			skill.targets.some((target) => target !== "mcp")
+			skill.targets.some((target) => target !== "mcp" && target !== "agent")
 		) {
 			throw new Error(`Skill "${skill.name}" has an unsupported target.`);
 		}
@@ -26,6 +27,7 @@ const checkSkillDefinitions = (config: ResolvedLucidConfig) => {
 		}
 
 		names.add(skill.name);
+
 		if (!skill.description.trim() || skill.description.length > 1024) {
 			throw new Error(
 				`Skill "${skill.name}" needs a description of up to 1024 characters.`,
@@ -43,6 +45,7 @@ const checkSkillDefinitions = (config: ResolvedLucidConfig) => {
 	}
 
 	const disabled = new Set<string>();
+
 	for (const name of config.ai.skills.disabled) {
 		if (disabled.has(name)) {
 			throw new Error(`Skill "${name}" is disabled more than once.`);

@@ -12,6 +12,7 @@ import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../../i18n/index.js";
 import cacheKeys from "../../../../kv/cache-keys.js";
 import { ExternalScopes } from "../../../../permission/external-scopes.js";
+import { getScopedCollectionKeys } from "../../../../permission/readable-collections.js";
 import cache from "../../../middleware/cache.js";
 import externalAuthentication from "../../../middleware/external-authenticate.js";
 import externalScopes from "../../../middleware/external-scopes.js";
@@ -99,7 +100,10 @@ const getSingleController = factory.createHandlers(
 			versionType: version,
 			preview,
 			query: formattedQuery,
-			externalScopes: c.get("externalAuth").scopes,
+			allowedCollectionKeys: getScopedCollectionKeys(
+				context.config,
+				c.get("externalAuth").scopes,
+			),
 		});
 		if (document.error) throw new LucidAPIError(document.error);
 
