@@ -9,24 +9,36 @@ import packageJson from "../../../package.json" with { type: "json" };
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
+import type { ExternalScope } from "../permission/external-scopes.js";
 import { filterExternalScopes } from "../permission/scopes.js";
+import { getSkillRegistry } from "../skills/registry.js";
 import { executeTool } from "../tools/execute-tool.js";
 import { getToolRegistry } from "../tools/registry.js";
 import type { ToolAuthority, ToolResult } from "../tools/types.js";
+import { toPortableJsonSchema } from "./portable-json-schema.js";
+import { registerSkills } from "./register-skills.js";
 
 /** Keeps text results small enough for a model's context. Images are bounded by their tools. */
 const MAX_TEXT_RESULT_BYTES = 64 * 1024;
 
 /**
- * Advertises a tool schema to MCP clients without letting the SDK parse values.
- * Tools validate their own input and output, so every transport parses once.
+ * Advertises a portable tool schema to MCP clients without letting the SDK parse
+ * values. Tools validate their own input and output, so every transport parses once.
  */
-const advertiseSchema = (schema: z.ZodObject): StandardSchemaWithJSON => ({
-	"~standard": {
-		...schema["~standard"],
-		validate: (value) => ({ value }),
-	},
-});
+const advertiseSchema = (schema: z.ZodObject): StandardSchemaWithJSON => {
+	const { jsonSchema } = schema["~standard"];
+
+	return {
+		"~standard": {
+			...schema["~standard"],
+			validate: (value) => ({ value }),
+			jsonSchema: {
+				input: (options) => toPortableJsonSchema(jsonSchema.input(options)),
+				output: (options) => toPortableJsonSchema(jsonSchema.output(options)),
+			},
+		},
+	};
+};
 
 /** Builds the MCP result, defaulting to the output as JSON text. */
 const toCallToolResult = (
@@ -59,8 +71,8 @@ const toCallToolResult = (
 	return { content, structuredContent: result.output };
 };
 
-/** Adapts the shared tool registry to both MCP protocol generations. */
-export const createToolHandler = (args: {
+/** Serves the tools and skills the caller can use over both MCP protocol generations. */
+export const createHandler = (args: {
 	context: ServiceContext;
 	authority: ToolAuthority;
 }) => {
@@ -72,6 +84,8 @@ export const createToolHandler = (args: {
 			authority.principal.type,
 		),
 	);
+	const canUse = (item: { scopes: readonly ExternalScope[] }) =>
+		item.scopes.every((scope) => effectiveScopes.has(scope));
 
 	return createMcpHandler(() => {
 		const server = new McpServer(
@@ -84,7 +98,7 @@ export const createToolHandler = (args: {
 		);
 
 		for (const tool of getToolRegistry(context.config).values()) {
-			if (tool.scopes.some((scope) => !effectiveScopes.has(scope))) continue;
+			if (!tool.targets.includes("mcp") || !canUse(tool)) continue;
 
 			server.registerTool(
 				tool.name,
@@ -122,6 +136,14 @@ export const createToolHandler = (args: {
 				},
 			);
 		}
+
+		registerSkills(
+			server,
+			Array.from(getSkillRegistry(context.config).values()).filter(
+				(skill) => skill.targets.includes("mcp") && canUse(skill),
+			),
+		);
+
 		return server;
 	});
 };

@@ -36,6 +36,7 @@ export { ExternalScopes } from "../libs/permission/external-scopes.js";
 export { default as definePlugin } from "../libs/plugins/define-plugin.js";
 export { default as defineConfig } from "../libs/runtime/define-config.js";
 export { default as defineSeed } from "../libs/seed/define-seed.js";
+export { default as defineSkill } from "../libs/skills/define-skill.js";
 export { default as defineTool } from "../libs/tools/define-tool.js";
 export { LucidAPIError, LucidError } from "../utils/errors/index.js";
 export { default as serviceWrapper } from "../utils/services/service-wrapper.js";

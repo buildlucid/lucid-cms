@@ -5,7 +5,11 @@ import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
-import { documentRouteSchema } from "../../helpers/project-document.js";
+import {
+	documentBrickSchema,
+	documentRefsSchema,
+	documentRouteSchema,
+} from "../../helpers/project-document.js";
 
 export const inputSchema = z.object({
 	collectionKey: z.string().min(1),
@@ -46,7 +50,7 @@ export const outputSchema = z.object({
 					description: "Selected label fields or requested fieldKeys.",
 				}),
 				bricks: z
-					.unknown()
+					.array(documentBrickSchema)
 					.optional()
 					.meta({ description: "Bricks when query.include requests them." }),
 				links: z
@@ -64,8 +68,7 @@ export const outputSchema = z.object({
 				description:
 					"Selected content language, independent of interface language.",
 			}),
-			refs: z
-				.unknown()
+			refs: documentRefsSchema
 				.optional()
 				.meta({ description: "Scoped references requested by query.include." }),
 		})

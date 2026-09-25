@@ -39,6 +39,7 @@ import type {
 	ResourceSources,
 } from "../libs/resources/types.js";
 import type { SeedDefinition } from "../libs/seed/types.js";
+import type { SkillDefinition } from "../libs/skills/types.js";
 import type { ToolDefinition } from "../libs/tools/types.js";
 
 /** Content languages available to editors. Omit localization to keep content unassigned. */
@@ -209,6 +210,9 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
+/** Where tools and skills are exposed. */
+export type AiTarget = "mcp";
+
 /** Choose which AI features are available when `ai.enabled` is true. */
 export type AiFeatureConfig = {
 	/** Allow image generation. Defaults to true. */
@@ -332,6 +336,12 @@ export interface LucidConfig {
 				tools?: {
 					definitions?: ToolDefinition[];
 					/** Tool names to hide and reject at execution. */
+					disabled?: string[];
+				};
+				/** Skill definitions registered by plugins and the project. */
+				skills?: {
+					definitions?: SkillDefinition[];
+					/** Skill names to hide. */
 					disabled?: string[];
 				};
 		  };
@@ -639,6 +649,10 @@ export interface ResolvedLucidConfig {
 		mcp: { enabled: boolean };
 		tools: {
 			definitions: ToolDefinition[];
+			disabled: string[];
+		};
+		skills: {
+			definitions: SkillDefinition[];
 			disabled: string[];
 		};
 	};

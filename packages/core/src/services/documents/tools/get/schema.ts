@@ -5,7 +5,12 @@ import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
-import { documentRouteSchema } from "../../helpers/project-document.js";
+import {
+	documentBrickSchema,
+	documentMetaSchema,
+	documentRefsSchema,
+	documentRouteSchema,
+} from "../../helpers/project-document.js";
 
 export const inputSchema = z.object({
 	collectionKey: z.string().min(1),
@@ -45,19 +50,9 @@ export const outputSchema = z.object({
 				.record(z.string(), z.unknown())
 				.meta({ description: "Selected content field values." }),
 			bricks: z
-				.array(
-					z.object({
-						id: z.number(),
-						ref: z.string(),
-						key: z.string(),
-						type: z.enum(["builder", "fixed", "embedded"]),
-						order: z.number(),
-						fields: z.record(z.string(), z.unknown()),
-					}),
-				)
+				.array(documentBrickSchema)
 				.meta({ description: "Selected page of content bricks." }),
-			meta: z
-				.unknown()
+			meta: documentMetaSchema
 				.optional()
 				.meta({ description: "Content version metadata when requested." }),
 			links: z
@@ -76,8 +71,7 @@ export const outputSchema = z.object({
 			brickPagination: paginationSchema.meta({
 				description: "Pagination for the data.bricks array.",
 			}),
-			refs: z
-				.unknown()
+			refs: documentRefsSchema
 				.optional()
 				.meta({ description: "Scoped references requested by query.include." }),
 		})

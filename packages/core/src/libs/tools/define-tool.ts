@@ -13,7 +13,8 @@ const defineTool = <
 	options: DefineToolOptions<Name, Input, Output>,
 ): ToolDefinition<Name> => ({
 	type: "tool-definition",
-	target: options.target,
+	targets:
+		typeof options.target === "string" ? [options.target] : options.target,
 	name: options.name,
 	description: options.description,
 	input: options.input,

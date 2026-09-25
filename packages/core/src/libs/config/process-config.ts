@@ -24,6 +24,7 @@ import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
 import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
+import checkSkillDefinitions from "./checks/check-skill-definitions.js";
 import checkToolDefinitions from "./checks/check-tool-definitions.js";
 import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
 import ConfigSchema from "./config-schema.js";
@@ -111,6 +112,7 @@ const processConfig = async (
 
 		getCapabilityRegistry(configRes);
 		checkToolDefinitions(configRes);
+		checkSkillDefinitions(configRes);
 
 		// custom content routes
 		checkContentRoutes(configRes);

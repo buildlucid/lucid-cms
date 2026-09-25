@@ -24,6 +24,32 @@ export const documentRouteSchema = z
 	.nullable()
 	.meta({ description: "Resolved public path and label, when routed." });
 
+/** A content brick returned by document tools after locale projection. */
+export const documentBrickSchema = z.object({
+	id: z.number(),
+	ref: z.string(),
+	key: z.string(),
+	type: z.enum(["builder", "fixed", "embedded"]),
+	order: z.number(),
+	fields: z.record(z.string(), z.unknown()),
+});
+
+/** Version and audit metadata returned when `query.include` requests it. */
+export const documentMetaSchema = z.object({
+	versionId: z.number().nullable(),
+	versions: z.record(z.string(), z.looseObject({}).nullable()),
+	createdAt: z.string().nullable(),
+	updatedAt: z.string().nullable(),
+	createdBy: z.number().nullable(),
+	updatedBy: z.number().nullable(),
+});
+
+/** Referenced documents, media and users grouped by resource. */
+export const documentRefsSchema = z.partialRecord(
+	z.enum(["documents", "media", "users"]),
+	z.array(z.unknown()),
+);
+
 /** Keeps only the requested top-level fields, or every field when none are requested. */
 export const selectFields = (
 	fields: Record<string, unknown>,

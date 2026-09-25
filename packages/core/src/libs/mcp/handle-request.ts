@@ -10,7 +10,7 @@ import {
 } from "../permission/external-scopes.js";
 import { getToolRegistry, toolDefinitionInternal } from "../tools/registry.js";
 import type { ToolAuthority } from "../tools/types.js";
-import { createToolHandler } from "./create-tool-handler.js";
+import { createHandler } from "./create-handler.js";
 
 const toolCallSchema = z.object({
 	method: z.literal("tools/call"),
@@ -73,7 +73,7 @@ export const handleMcpRequest = async (args: {
 		}
 	}
 
-	return createToolHandler({ context, authority }).fetch(request, {
+	return createHandler({ context, authority }).fetch(request, {
 		parsedBody,
 	});
 };

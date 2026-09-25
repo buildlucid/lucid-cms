@@ -27,6 +27,8 @@ import {
 	ResourceDirectoriesSchema,
 	ResourceSourcesSchema,
 } from "../resources/schema.js";
+import { isSkillDefinition } from "../skills/registry.js";
+import type { SkillDefinition } from "../skills/types.js";
 import { isToolDefinition } from "../tools/registry.js";
 import type { ToolDefinition } from "../tools/types.js";
 import {
@@ -84,6 +86,10 @@ const ToolDefinitionSchema = z.custom<ToolDefinition>(isToolDefinition, {
 	message: "Expected a tool definition created with defineTool",
 });
 
+const SkillDefinitionSchema = z.custom<SkillDefinition>(isSkillDefinition, {
+	message: "Expected a skill definition created with defineSkill",
+});
+
 const AiConfigSchema = z.strictObject({
 	enabled: z.boolean().default(true),
 	features: z
@@ -102,6 +108,12 @@ const AiConfigSchema = z.strictObject({
 	tools: z
 		.strictObject({
 			definitions: z.array(ToolDefinitionSchema).default([]),
+			disabled: z.array(z.string()).default([]),
+		})
+		.prefault({}),
+	skills: z
+		.strictObject({
+			definitions: z.array(SkillDefinitionSchema).default([]),
 			disabled: z.array(z.string()).default([]),
 		})
 		.prefault({}),

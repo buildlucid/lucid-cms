@@ -485,6 +485,10 @@ export type {
 	Seed,
 	SeedDefinition,
 } from "../libs/seed/types.js";
+export type {
+	DefineSkillOptions,
+	SkillDefinition,
+} from "../libs/skills/types.js";
 export type { ToolkitDocumentsNotifyChangeInput } from "../libs/toolkit/documents/notify-change/index.js";
 export type * from "../libs/toolkit/documents/types.js";
 export type { ToolkitMediaNotifyChangeInput } from "../libs/toolkit/media/notify-change/index.js";
@@ -559,6 +563,7 @@ export type {
 } from "../libs/tools/types.js";
 export type {
 	AiFeatureConfig,
+	AiTarget,
 	HttpConfig,
 	HttpSecurityConfig,
 	I18nConfig,

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
 	CLIENT_CAPABILITIES_META_KEY,
 	CLIENT_INFO_META_KEY,
@@ -9,8 +10,9 @@ import createServiceContext from "../../utils/services/create-service-context.js
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { createTranslationStore } from "../i18n/index.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
+import defineSkill from "../skills/define-skill.js";
 import defineTool from "../tools/define-tool.js";
-import { createToolHandler } from "./create-tool-handler.js";
+import { createHandler } from "./create-handler.js";
 
 const testConfig = getTestConfig();
 afterAll(testConfig.destroy);
@@ -55,8 +57,8 @@ const post = (method: string, params: Record<string, unknown>, modern = true) =>
 				? {
 						"mcp-protocol-version": "2026-07-28",
 						"mcp-method": method,
-						...(method === "tools/call" && typeof params.name === "string"
-							? { "mcp-name": params.name }
+						...(typeof (params.name ?? params.uri) === "string"
+							? { "mcp-name": String(params.name ?? params.uri) }
 							: {}),
 					}
 				: {}),
@@ -97,7 +99,7 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 			bundles: {},
 		}),
 	});
-	const handler = createToolHandler({
+	const handler = createHandler({
 		context,
 		authority: {
 			principal: { type: "system" },
@@ -130,7 +132,7 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 	expect(legacyBody).toContain("test_echo");
 	expect(legacyBody).not.toContain("test_restricted");
 
-	const disabled = createToolHandler({
+	const disabled = createHandler({
 		context: {
 			...context,
 			config: {
@@ -170,7 +172,7 @@ test("tool input is parsed once, so transforms reach the handler intact", async 
 		}),
 	});
 	const base = await testConfig.getConfig();
-	const handler = createToolHandler({
+	const handler = createHandler({
 		context: createServiceContext({
 			config: {
 				...base,
@@ -208,7 +210,7 @@ test("oversized text results ask the client for a smaller request", async () => 
 		}),
 	});
 	const base = await testConfig.getConfig();
-	const handler = createToolHandler({
+	const handler = createHandler({
 		context: createServiceContext({
 			config: {
 				...base,
@@ -229,4 +231,79 @@ test("oversized text results ask the client for a smaller request", async () => 
 	const { result } = await call.json();
 	expect(result.isError).toBe(true);
 	expect(result.structuredContent).toBeUndefined();
+});
+
+test("serves skills the caller can use with digests that match SKILL.md", async () => {
+	const seo = defineSkill({
+		target: "mcp",
+		name: "test-seo",
+		description: "Use when writing content.",
+		instructions: `
+			# SEO
+
+			Keep titles short.
+		`,
+		scopes: [],
+	});
+	const locales = defineSkill({
+		target: "mcp",
+		name: "test-locales",
+		description: "Use when translating content.",
+		instructions: "Translate every locale.",
+		scopes: [ExternalScopes.LocalesRead],
+	});
+	const base = await testConfig.getConfig();
+	const handler = createHandler({
+		context: createServiceContext({
+			config: {
+				...base,
+				ai: {
+					...base.ai,
+					skills: { definitions: [seo, locales], disabled: [] },
+				},
+			},
+			database: await testConfig.getDatabase(),
+			translationStore: createTranslationStore({
+				defaultLocale: "en",
+				bundles: {},
+			}),
+		}),
+		authority: { principal: { type: "system" }, scopes: [] },
+	});
+
+	const list = await (await handler.fetch(post("skills/list", {}))).json();
+	expect(list.result.skills).toHaveLength(1);
+	const [entry] = list.result.skills;
+	expect(entry).toMatchObject({
+		uri: "skill://test-seo/SKILL.md",
+		frontmatter: { name: "test-seo", description: "Use when writing content." },
+	});
+
+	const read = await (
+		await handler.fetch(post("resources/read", { uri: entry.uri }))
+	).json();
+	const { text } = read.result.contents[0];
+	expect(text).toBe(
+		'---\nname: test-seo\ndescription: "Use when writing content."\n---\n\n# SEO\n\nKeep titles short.\n',
+	);
+	const bytes = new TextEncoder().encode(text);
+	expect(entry.resources).toEqual([
+		{
+			uri: entry.uri,
+			digest: `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
+			size: bytes.byteLength,
+		},
+	]);
+
+	const get = await (
+		await handler.fetch(post("skills/get", { uri: entry.uri }))
+	).json();
+	expect(get.result.skill).toEqual(entry);
+
+	const hidden = await (
+		await handler.fetch(
+			post("skills/get", { uri: "skill://test-locales/SKILL.md" }),
+		)
+	).json();
+	expect(hidden.error.code).toBe(-32602);
 });

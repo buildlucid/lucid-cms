@@ -3,7 +3,7 @@ import type {
 	ToolAnnotations,
 } from "@modelcontextprotocol/server";
 import type { z } from "zod";
-import type { ResolvedLucidConfig } from "../../types/config.js";
+import type { AiTarget, ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidExternalAuth } from "../../types/hono.js";
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type {
@@ -53,7 +53,7 @@ export type DefineToolOptions<
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
 > = {
-	target: "mcp";
+	target: AiTarget | readonly AiTarget[];
 	/** Stable, unique tool name. Prefix plugin tools to avoid collisions. */
 	name: Name;
 	description: string;
@@ -85,7 +85,7 @@ export type ToolRunResult =
 /** An opaque tool definition created with `defineTool`. */
 export type ToolDefinition<Name extends string = string> = {
 	readonly type: "tool-definition";
-	readonly target: "mcp";
+	readonly targets: readonly AiTarget[];
 	readonly name: Name;
 	readonly description: string;
 	readonly input: z.ZodObject;

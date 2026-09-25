@@ -19,7 +19,7 @@ import { createTranslationStore } from "../i18n/index.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import type { ToolAuthority } from "../tools/types.js";
-import { createToolHandler } from "./create-tool-handler.js";
+import { createHandler } from "./create-handler.js";
 
 const fixture = getTestConfig();
 const generationContext = vi.fn(() => [
@@ -98,7 +98,7 @@ const resultSchema = z.object({
 });
 
 const call = async (name: string, input: Record<string, unknown>) => {
-	const handler = createToolHandler({ context, authority });
+	const handler = createHandler({ context, authority });
 	const response = await handler.fetch(
 		post("tools/call", { name, arguments: input }),
 	);
@@ -176,7 +176,7 @@ beforeAll(async () => {
 afterAll(() => fixture.destroy());
 
 test("MCP advertises usable schemas for the enabled read-only tools", async () => {
-	const response = await createToolHandler({ context, authority }).fetch(
+	const response = await createHandler({ context, authority }).fetch(
 		post("tools/list", {}),
 	);
 	expect(response.status).toBe(200);

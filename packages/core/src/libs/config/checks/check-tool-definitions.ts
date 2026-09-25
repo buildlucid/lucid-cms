@@ -6,7 +6,10 @@ import { getExternalCapability } from "../../permission/capabilities.js";
 const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 	const names = new Set<string>();
 	for (const tool of config.ai.tools.definitions) {
-		if (tool.target !== "mcp") {
+		if (
+			tool.targets.length === 0 ||
+			tool.targets.some((target) => target !== "mcp")
+		) {
 			throw new Error(`Tool "${tool.name}" has an unsupported target.`);
 		}
 		if (tool.name.length > 128 || !/^[a-z][a-z0-9._-]*$/.test(tool.name)) {
