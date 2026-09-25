@@ -1,5 +1,11 @@
 # @lucidcms/core
 
+## v0.20.0-alpha.0 (unrelease)
+
+### Features:
+
+- Added an MCP server at `/lucid/mcp` with built-in content tools, plus `defineTool` and `defineSkill` for registering scoped tools and skills through `ai.tools` and `ai.skills`.
+
 ## v0.19.0-alpha.0
 
 ### Features:
