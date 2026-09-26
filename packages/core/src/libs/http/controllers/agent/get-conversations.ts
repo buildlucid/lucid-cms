@@ -17,7 +17,8 @@ const factory = createFactory();
 
 const getConversationsController = factory.createHandlers(
 	describeRoute({
-		description: "Returns the current user's agent conversations.",
+		description:
+			"Returns the user's own conversations, and conversations started by code routines on agents they manage.",
 		tags: ["agent"],
 		summary: "Get Agent Conversations",
 		responses: openAPI.responses({

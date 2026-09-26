@@ -7,108 +7,125 @@ import {
 } from "../../agent/built-in-tools.js";
 import { getExternalCapability } from "../../permission/capabilities.js";
 import { getValidPermissions } from "../../permission/registry.js";
+import { getCoreAgentTools, getCoreMcpTools } from "../../tools/core-tools.js";
+import { isToolDefinition } from "../../tools/registry.js";
+import type { ToolDefinition } from "../../tools/types.js";
 
-/** Checks tool names, schemas, access requirements and operator disable entries at config time. */
-const checkToolDefinitions = (config: ResolvedLucidConfig) => {
-	const names = new Set<string>();
-	const registrations = new Set<string>();
-	const permissions = new Set(getValidPermissions(config));
-	const activeAgentTools = config.ai.tools.definitions.filter(
-		(tool) =>
-			tool.target === "agent" && !config.ai.tools.disabled.includes(tool.name),
-	);
-
-	const runnerTools = getRunnerTools({
-		mode: "routine",
-		hasHistory: true,
-		hasSkills: config.ai.skills.definitions.some(
-			(skill) =>
-				skill.targets.includes("agent") &&
-				!config.ai.skills.disabled.includes(skill.name),
-		),
-	});
-	const maxCustomTools = constants.agent.limits.maxTools - runnerTools.length;
-
-	if (activeAgentTools.length > maxCustomTools) {
-		throw new Error(
-			`At most ${maxCustomTools} custom agent tools can be enabled at once (${runnerTools.length} runner tools also count toward the ${constants.agent.limits.maxTools}-tool limit).`,
-		);
+/** Checks a tool's name, schemas and access requirements. */
+const checkTool = (
+	config: ResolvedLucidConfig,
+	tool: ToolDefinition,
+	permissions: ReadonlySet<string>,
+) => {
+	if (tool.name.length > 128 || !/^[a-z][a-z0-9._-]*$/.test(tool.name)) {
+		throw new Error(`Invalid tool name "${tool.name}".`);
+	}
+	if (!tool.description.trim()) {
+		throw new Error(`Tool "${tool.name}" needs a description.`);
 	}
 
-	for (const tool of config.ai.tools.definitions) {
-		if (tool.target !== "mcp" && tool.target !== "agent") {
-			throw new Error('Tools must target "agent" or "mcp".');
+	if (tool.target === "mcp") {
+		for (const scope of [
+			...tool.scopes,
+			...(tool.advertisedScopes?.(config) ?? []),
+		]) {
+			if (!getExternalCapability(config, scope)) {
+				throw new Error(`Tool "${tool.name}" uses unknown scope "${scope}".`);
+			}
 		}
-		if (tool.name.length > 128 || !/^[a-z][a-z0-9._-]*$/.test(tool.name)) {
-			throw new Error(`Invalid tool name "${tool.name}".`);
-		}
-
+	} else {
 		if (
-			tool.target === "agent" &&
-			(tool.name.length > 64 ||
-				!/^[a-z][a-z0-9_-]*$/.test(tool.name) ||
-				tool.description.length > 2000)
+			tool.name.length > 64 ||
+			!/^[a-z][a-z0-9_-]*$/.test(tool.name) ||
+			tool.description.length > 2000
 		) {
 			throw new Error(
 				`Agent tool "${tool.name}" needs a provider-compatible name (up to 64 characters) and description (up to 2000 characters).`,
 			);
 		}
-		if (tool.target === "agent" && builtInToolNames.has(tool.name)) {
+
+		if (builtInToolNames.has(tool.name)) {
 			throw new Error(`Agent tool name "${tool.name}" is reserved.`);
 		}
-		if (registrations.has(`${tool.target}:${tool.name}`)) {
-			throw new Error(`Tool "${tool.name}" is registered more than once.`);
+
+		for (const permission of tool.permissions) {
+			if (!permissions.has(permission)) {
+				throw new Error(
+					`Tool "${tool.name}" uses unknown permission "${permission}".`,
+				);
+			}
+		}
+	}
+
+	try {
+		z.toJSONSchema(tool.input, { io: "input" });
+		z.toJSONSchema(tool.output, { io: "output" });
+	} catch (error) {
+		throw new Error(`Tool "${tool.name}" has an unsupported schema.`, {
+			cause: error,
+		});
+	}
+};
+
+/** Checks that a placement only holds tools for its target, with unique names. */
+const checkPlacement = (
+	label: string,
+	target: ToolDefinition["target"],
+	tools: readonly unknown[],
+) => {
+	const names = new Set<string>();
+
+	for (const tool of tools) {
+		if (!isToolDefinition(tool) || tool.target !== target) {
+			throw new Error(
+				`${label} tools must be created with defineTool and target "${target}".`,
+			);
+		}
+
+		if (names.has(tool.name)) {
+			throw new Error(`${label} registers tool "${tool.name}" more than once.`);
 		}
 
 		names.add(tool.name);
-		registrations.add(`${tool.target}:${tool.name}`);
+	}
+};
 
-		if (!tool.description.trim()) {
-			throw new Error(`Tool "${tool.name}" needs a description.`);
+/** Checks MCP and agent tools at config time. A tool shared by several agents is checked once. */
+const checkToolDefinitions = (config: ResolvedLucidConfig) => {
+	const permissions = new Set(getValidPermissions(config));
+	const checked = new Set<ToolDefinition>();
+
+	const mcpTools = [...getCoreMcpTools(), ...config.ai.mcp.tools];
+	checkPlacement("MCP", "mcp", mcpTools);
+	for (const tool of mcpTools) checked.add(tool);
+
+	for (const agent of config.ai.agents) {
+		const label = `Agent "${agent.key}"`;
+		const coreAgentTools = getCoreAgentTools();
+		const tools = [...coreAgentTools, ...agent.tools];
+		checkPlacement(label, "agent", tools);
+
+		const runnerTools = getRunnerTools({
+			mode: "routine",
+			canAsk: true,
+			hasHistory: true,
+			hasSkills: agent.skills.length > 0,
+		});
+		const maxTools =
+			constants.agent.limits.maxTools -
+			runnerTools.length -
+			coreAgentTools.length;
+
+		if (agent.tools.length > maxTools) {
+			throw new Error(
+				`${label} can have at most ${maxTools} additional tools (${coreAgentTools.length} content tools and ${runnerTools.length} runner tools also count toward the ${constants.agent.limits.maxTools}-tool limit).`,
+			);
 		}
 
-		if (tool.target === "mcp") {
-			for (const scope of [
-				...tool.scopes,
-				...(tool.advertisedScopes?.(config) ?? []),
-			]) {
-				if (!getExternalCapability(config, scope)) {
-					throw new Error(`Tool "${tool.name}" uses unknown scope "${scope}".`);
-				}
-			}
-		} else {
-			for (const permission of tool.permissions) {
-				if (!permissions.has(permission)) {
-					throw new Error(
-						`Tool "${tool.name}" uses unknown permission "${permission}".`,
-					);
-				}
-			}
-		}
-
-		try {
-			z.toJSONSchema(tool.input, { io: "input" });
-			z.toJSONSchema(tool.output, { io: "output" });
-		} catch (error) {
-			throw new Error(`Tool "${tool.name}" has an unsupported schema.`, {
-				cause: error,
-			});
-		}
+		for (const tool of tools) checked.add(tool);
 	}
 
-	const disabled = new Set<string>();
-
-	for (const name of config.ai.tools.disabled) {
-		if (disabled.has(name)) {
-			throw new Error(`Tool "${name}" is disabled more than once.`);
-		}
-
-		disabled.add(name);
-
-		if (!names.has(name)) {
-			throw new Error(`Disabled tool "${name}" is not registered.`);
-		}
-	}
+	for (const tool of checked) checkTool(config, tool, permissions);
 };
 
 export default checkToolDefinitions;

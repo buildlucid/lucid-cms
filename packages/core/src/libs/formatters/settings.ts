@@ -1,9 +1,10 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
+import { getAgents } from "../agent/registry.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
-import { getToolRegistry } from "../tools/registry.js";
+import { getMcpToolRegistry } from "../tools/registry.js";
 
 interface SettingsPropsT {
 	mediaStorageUsed: number;
@@ -36,7 +37,11 @@ const formatSingle = (props: {
 	if (includeSet.has("ai")) {
 		response.ai = {
 			enabled: props.config.ai.enabled,
-			agent: { enabled: props.config.ai.agent.enabled },
+			agents: getAgents(props.config).map((agent) => ({
+				key: agent.key,
+				name: agent.name,
+				description: agent.description,
+			})),
 			features: {
 				imageGeneration: props.config.ai.features.imageGeneration,
 				altGeneration: props.config.ai.features.altGeneration,
@@ -83,13 +88,10 @@ const formatSingle = (props: {
 	if (includeSet.has("mcp") && canReadSystem) {
 		response.mcp = {
 			enabled: props.config.ai.enabled && props.config.ai.mcp.enabled,
-			tools: Array.from(
-				getToolRegistry(props.config, "mcp").values(),
-				(tool) => ({
-					name: tool.name,
-					description: tool.description,
-				}),
-			),
+			tools: Array.from(getMcpToolRegistry(props.config).values(), (tool) => ({
+				name: tool.name,
+				description: tool.description,
+			})),
 		};
 	}
 

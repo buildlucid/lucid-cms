@@ -8,7 +8,7 @@ import defineTool from "../../../../libs/tools/define-tool.js";
 import findDocuments from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const findDocumentsTool = defineTool({
+export const findDocumentsMcpTool = defineTool({
 	target: "mcp",
 	name: "documents_find",
 	description:

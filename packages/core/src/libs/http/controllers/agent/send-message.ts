@@ -9,6 +9,7 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 import streamEvents from "./helpers/stream-events.js";
 
@@ -17,7 +18,7 @@ const factory = createFactory();
 const sendMessageController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Sends a message and streams the agent's response as server-sent events.",
+			"Sends or queues user input. Idle requests accepting SSE stream the new run; pending input returns 202.",
 		tags: ["agent"],
 		summary: "Send Agent Message",
 		requestBody: openAPI.requestBody(controllerSchemas.sendMessage.body),
@@ -33,21 +34,34 @@ const sendMessageController = factory.createHandlers(
 	validate("json", controllerSchemas.sendMessage.body),
 	async (c) => {
 		const context = createServiceContext(c);
+		const body = c.req.valid("json");
+		const param = c.req.valid("param");
 
-		const run = await serviceWrapper(agentServices.startRun, {
+		const streaming =
+			c.req.header("accept")?.includes("text/event-stream") === true;
+
+		const run = await serviceWrapper(agentServices.submitInput, {
 			transaction: false,
 		})(context, {
-			conversationId: c.req.valid("param").id,
+			conversationId: param.id,
 			userId: c.get("auth").id,
-			...c.req.valid("json"),
+			dispatch: !streaming,
+			text: body.text,
+			delivery: body.delivery,
+			requestId: body.requestId,
 		});
 		if (run.error) throw new LucidAPIError(run.error);
+
+		const runId = run.data.runId;
+		if (!streaming || !runId) {
+			return c.json(formatAPIResponse(c, { data: run.data }), 202);
+		}
 
 		return streamEvents(c, (stream) =>
 			serviceWrapper(agentServices.executeRun, {
 				transaction: false,
 				logError: true,
-			})(context, { runId: run.data.runId, ...stream }),
+			})(context, { runId, ...stream }),
 		);
 	},
 );

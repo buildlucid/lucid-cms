@@ -9,7 +9,7 @@ const useGetRoutines = () =>
 		queryFn: () =>
 			request<ResponseBody<AgentRoutine[]>>({
 				url: "/lucid/api/v1/agent/routines",
-				query: { perPage: -1, sort: { title: "asc" } },
+				query: { perPage: -1, sort: { name: "asc" } },
 			}),
 		placeholderData: keepPreviousData,
 	}));

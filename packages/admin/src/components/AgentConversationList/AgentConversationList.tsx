@@ -1,13 +1,14 @@
 import { A } from "@solidjs/router";
 import type { AgentConversation } from "@types";
 import { FaSolidClock } from "solid-icons/fa";
-import { type Component, createSignal, For, Show } from "solid-js";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import DateText from "@/components/DateText/DateText";
 import DeleteAgentConversationModal from "@/components/DeleteAgentConversationModal/DeleteAgentConversationModal";
 import RenameAgentConversationModal from "@/components/RenameAgentConversationModal/RenameAgentConversationModal";
 import T from "@/translations";
+import { getAgentAccess, getAgentName } from "@/utils/agent-access";
 
 //* a finished chat needs no badge, but a routine run's outcome is worth seeing
 const visibleRun = (conversation: AgentConversation) => {
@@ -27,6 +28,10 @@ const AgentConversationList: Component<{
 	const [selected, setSelected] = createSignal<AgentConversation>();
 	const [renameOpen, setRenameOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
+
+	// ----------------------------------------
+	// Memos
+	const showAgent = createMemo(() => getAgentAccess().all.length > 1);
 
 	// ----------------------------------------
 	// Render
@@ -51,11 +56,16 @@ const AgentConversationList: Component<{
 										{conversation.title}
 									</span>
 								</span>
-								<DateText
-									date={conversation.updatedAt}
-									includeTime={true}
-									class="mt-0.5 block text-xs text-muted"
-								/>
+								<span class="mt-0.5 flex gap-1 text-xs text-muted">
+									<Show when={showAgent()}>
+										<span>{getAgentName(conversation.agentKey)} ·</span>
+									</Show>
+									<DateText
+										date={conversation.updatedAt}
+										includeTime={true}
+										class="text-xs"
+									/>
+								</span>
 							</A>
 							<Show when={visibleRun(conversation)}>
 								{(run) => (

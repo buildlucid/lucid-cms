@@ -182,7 +182,7 @@ const inlineImage = async (args: {
 };
 
 /** Returns a public media link or a bounded inline image preview. */
-export const previewMediaTool = defineTool({
+export const previewMediaMcpTool = defineTool({
 	target: "mcp",
 	name: "media_preview",
 	description:

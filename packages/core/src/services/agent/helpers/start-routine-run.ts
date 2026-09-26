@@ -5,20 +5,21 @@ import formatter from "../../../libs/formatters/index.js";
 import { AgentRunsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
-import createConversation from "../create-conversation.js";
 import startRun from "../start-run.js";
 import enqueueRun from "./enqueue-run.js";
+import insertConversation from "./insert-conversation.js";
 
 /**
  * Starts a routine run in a new conversation, carrying over the previous run's
- * summary. Returns null when the routine still has an unfinished run.
+ * summary. The run acts for the routine's user, or for the system when it is
+ * defined in code. Returns null when the routine still has an unfinished run.
  */
 const startRoutineRun: ServiceFn<
 	[
 		{
 			routine: Pick<
 				Select<LucidAgentRoutines>,
-				"id" | "title" | "instructions" | "user_id"
+				"id" | "agent_key" | "name" | "instructions" | "user_id"
 			>;
 		},
 	],
@@ -38,9 +39,10 @@ const startRoutineRun: ServiceFn<
 		: undefined;
 
 	return withTransaction(context, async (context) => {
-		const conversation = await createConversation(context, {
+		const conversation = await insertConversation(context, {
+			agentKey: routine.agent_key,
 			userId: routine.user_id,
-			title: routine.title,
+			title: routine.name,
 			routineId: routine.id,
 		});
 		if (conversation.error) return conversation;

@@ -12,8 +12,9 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 	private nextPosition(conversationId: string) {
 		return sql<number>`(select coalesce(max(position), 0) + 1 from lucid_agent_messages where conversation_id = ${conversationId})`;
 	}
-	/** Writes the assistant message a run is producing. Only the current running worker can insert or update it. */
+	/** Writes a run's message. Only its current worker can insert or update it. */
 	async upsertForRun(props: {
+		role?: "user" | "assistant";
 		id: string;
 		conversationId: string;
 		runId: string;
@@ -42,7 +43,7 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 								eb.val(props.id).as("id"),
 								eb.val(props.conversationId).as("conversation_id"),
 								eb.val(props.runId).as("run_id"),
-								eb.val("assistant").as("role"),
+								eb.val(props.role ?? "assistant").as("role"),
 								sql<AgentMessagePart[]>`${JSON.stringify(props.parts)}`.as(
 									"parts",
 								),
@@ -142,13 +143,12 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 		);
 		return result.response;
 	}
-	/** A run's assistant messages changed at or after a time, in order. */
+	/** A run's messages changed at or after a time, in order. */
 	async selectChangedForRun(props: { runId: string; since?: string }) {
 		let query = this.db
 			.selectFrom("lucid_agent_messages")
 			.selectAll()
 			.where("run_id", "=", props.runId)
-			.where("role", "=", "assistant")
 			.orderBy("position", "asc");
 
 		if (props.since !== undefined) {

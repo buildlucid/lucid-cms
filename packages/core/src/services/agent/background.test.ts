@@ -8,6 +8,8 @@ import {
 	vi,
 } from "vitest";
 import constants from "../../constants/constants.js";
+import defineAgent from "../../libs/agent/define-agent.js";
+import defineRoutine from "../../libs/agent/define-routine.js";
 import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import {
@@ -18,16 +20,15 @@ import {
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import syncAgentRoutines from "../sync/sync-agent-routines.js";
 import createRoutine from "./create-routine.js";
 import dispatchDueRoutines from "./dispatch-due-routines.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import recoverRuns from "./recover-runs.js";
 
-vi.mock("./helpers/check-agent-access.js", () => ({
-	default: vi.fn(async (_context, input) => ({
-		error: undefined,
-		data: { userId: input.userId, permissions: [], superAdmin: false },
-	})),
+vi.mock("./helpers/check-agent-access.js", async (importOriginal) => ({
+	...(await importOriginal<typeof import("./helpers/check-agent-access.js")>()),
+	default: vi.fn(async () => ({ error: undefined, data: {} })),
 }));
 vi.mock("./helpers/enqueue-run.js", () => ({
 	default: vi.fn(async () => ({ error: undefined, data: undefined })),
@@ -42,6 +43,19 @@ vi.mock("../connection/token-manager.js", () => ({
 const testConfig = getTestConfig();
 let context: ServiceContext;
 let userId: number;
+const auditRoutine = defineRoutine({
+	key: "audit",
+	name: "Weekly audit",
+	instructions: "Audit the site.",
+	schedule: { cron: "0 9 * * 1" },
+});
+const testAgent = defineAgent({
+	key: "test",
+	name: "Test Agent",
+	description: "Runs tests.",
+	tools: [],
+	routines: [auditRoutine],
+});
 
 beforeAll(async () => {
 	await testConfig.migrate();
@@ -52,7 +66,7 @@ beforeAll(async () => {
 		await Migration00000014(config.db).up(database.client);
 	}
 	context = createServiceContext({
-		config,
+		config: { ...config, ai: { ...config.ai, agents: [testAgent] } },
 		database,
 		translationStore: createTranslationStore({
 			defaultLocale: "en",
@@ -76,8 +90,9 @@ beforeEach(() => vi.mocked(enqueueRun).mockClear());
 
 const dueRoutine = async () => {
 	const routine = await createRoutine(context, {
+		agentKey: testAgent.key,
 		userId,
-		title: "Daily review",
+		name: "Daily review",
 		instructions: "Review today's changes.",
 		cron: "0 9 * * *",
 		timezone: "UTC",
@@ -118,8 +133,12 @@ describe("routine dispatch", () => {
 		});
 		const conversation = await new AgentConversationsRepository(
 			context.db,
-		).selectSingleForUser({ id: run?.conversation_id ?? "", userId });
-		expect(conversation.data?.routine_id).toBe(routine.id);
+		).selectSingleWithLatestRun({ id: run?.conversation_id ?? "" });
+		expect(conversation.data).toMatchObject({
+			agent_key: testAgent.key,
+			routine_id: routine.id,
+			user_id: userId,
+		});
 		expect(
 			new Date(String(await nextRunAt(routine.id))).getTime(),
 		).toBeGreaterThan(Date.now());
@@ -172,6 +191,81 @@ describe("routine dispatch", () => {
 		expect(second?.checkpoint?.extraContext).toContain(
 			"Found two broken links.",
 		);
+	});
+});
+
+describe("code routines", () => {
+	const codeRoutine = async () =>
+		(
+			await new AgentRoutinesRepository(context.db).selectSingle({
+				select: ["id", "name", "enabled", "user_id", "source", "next_run_at"],
+				where: [
+					{ key: "agent_key", operator: "=", value: testAgent.key },
+					{ key: "key", operator: "=", value: auditRoutine.key },
+				],
+			})
+		).data;
+
+	test("sync creates, updates and removes them while keeping a pause", async () => {
+		expect((await syncAgentRoutines(context)).error).toBeUndefined();
+		const created = await codeRoutine();
+		expect(created).toMatchObject({
+			name: "Weekly audit",
+			source: "code",
+			user_id: null,
+		});
+		expect(created?.next_run_at).not.toBeNull();
+
+		await new AgentRoutinesRepository(context.db).updateSingle({
+			where: [{ key: "id", operator: "=", value: created?.id ?? "" }],
+			data: { enabled: false },
+		});
+		const renamed = {
+			...testAgent,
+			routines: [{ ...auditRoutine, name: "Monday audit" }],
+		};
+		await syncAgentRoutines({
+			...context,
+			config: {
+				...context.config,
+				ai: { ...context.config.ai, agents: [renamed] },
+			},
+		});
+		const updated = await codeRoutine();
+		expect(updated).toMatchObject({ id: created?.id, name: "Monday audit" });
+		expect(Boolean(updated?.enabled)).toBe(false);
+
+		await syncAgentRoutines({
+			...context,
+			config: { ...context.config, ai: { ...context.config.ai, agents: [] } },
+		});
+		expect(await codeRoutine()).toBeUndefined();
+	});
+
+	test("run as the system in a chat shared with the agent's managers", async () => {
+		await syncAgentRoutines(context);
+		const routine = await codeRoutine();
+		await new AgentRoutinesRepository(context.db).updateSingle({
+			where: [{ key: "id", operator: "=", value: routine?.id ?? "" }],
+			data: { next_run_at: new Date(Date.now() - 60_000).toISOString() },
+		});
+
+		expect(await dispatchDueRoutines(context)).toMatchObject({ data: 1 });
+		const [run] = await new AgentRunsRepository(context.db)
+			.selectMultiple({
+				select: ["id", "user_id", "conversation_id"],
+				where: [{ key: "routine_id", operator: "=", value: routine?.id ?? "" }],
+			})
+			.then((result) => result.data ?? []);
+		expect(run?.user_id).toBeNull();
+		expect(enqueueRun).toHaveBeenCalledWith(expect.anything(), {
+			runId: run?.id,
+			userId: null,
+		});
+		const conversation = await new AgentConversationsRepository(
+			context.db,
+		).selectSingleWithLatestRun({ id: run?.conversation_id ?? "" });
+		expect(conversation.data?.user_id).toBeNull();
 	});
 });
 

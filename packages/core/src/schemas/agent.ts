@@ -1,7 +1,50 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
-import type { AgentApprovalAnswer } from "../types/response.js";
+import type {
+	AgentApprovalAnswer,
+	AgentDelivery,
+	AgentInput,
+	AgentInputAction,
+	AgentRoutineSource,
+} from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
+
+/** Pending and claimed input is still to be delivered; the rest is kept as a receipt. */
+export const agentInputStatusSchema = z.enum([
+	"pending",
+	"claimed",
+	"consumed",
+	"cancelled",
+]);
+
+export const agentDeliverySchema = z.discriminatedUnion("kind", [
+	z.object({ kind: z.literal("queue") }).strict(),
+	z.object({ kind: z.literal("steer"), targetRunId: z.uuid() }).strict(),
+]) satisfies z.ZodType<AgentDelivery>;
+
+export const agentInputSchema = z.object({
+	id: z.uuid(),
+	text: z.string(),
+	status: z.enum(["pending", "claimed"]),
+	delivery: agentDeliverySchema,
+}) satisfies z.ZodType<AgentInput>;
+
+export const agentInputActionSchema = z.discriminatedUnion("kind", [
+	z.object({ kind: z.literal("cancel"), id: z.uuid() }),
+	z.object({
+		kind: z.literal("steer"),
+		id: z.uuid(),
+		targetRunId: z.uuid(),
+	}),
+	z.object({ kind: z.literal("resume") }),
+	z.object({ kind: z.literal("clear") }),
+]) satisfies z.ZodType<AgentInputAction>;
+
+/** Code routines are synced from config; database routines are created by users. */
+export const agentRoutineSourceSchema = z.enum([
+	"code",
+	"database",
+]) satisfies z.ZodType<AgentRoutineSource>;
 
 export const agentRunStatusSchema = z.enum([
 	"queued",
@@ -32,7 +75,7 @@ export const agentMessagePartSchema = z.discriminatedUnion("type", [
 			name: z.string(),
 			input: z.record(z.string(), z.unknown()),
 			output: z.unknown().optional(),
-			status: z.enum(["pending", "running", "complete", "failed"]),
+			status: z.enum(["pending", "running", "complete", "failed", "skipped"]),
 		})
 		.strict(),
 	z
@@ -43,6 +86,7 @@ export const agentMessagePartSchema = z.discriminatedUnion("type", [
 			question: z.string(),
 			options: z.array(z.string()).optional(),
 			answer: z.string().optional(),
+			dismissed: z.boolean().optional(),
 		})
 		.strict(),
 	z
@@ -69,6 +113,8 @@ const agentUsageSchema = z.object({
 });
 
 const agentConversationResponseSchema = z.object({
+	queuePaused: z.boolean(),
+	inputs: z.array(agentInputSchema).optional(),
 	context: agentContextSchema
 		.extend({
 			percent: z.number().int().min(0).max(100),
@@ -79,8 +125,9 @@ const agentConversationResponseSchema = z.object({
 		.array(z.object({ id: z.uuid(), createdAt: z.string().nullable() }))
 		.optional(),
 	id: z.uuid(),
+	agentKey: z.string(),
 	title: z.string(),
-	userId: z.number(),
+	userId: z.number().nullable(),
 	routineId: z.uuid().nullable(),
 	latestRun: z
 		.object({
@@ -120,7 +167,10 @@ const agentRunResponseSchema = z.object({
 
 const agentRoutineResponseSchema = z.object({
 	id: z.uuid(),
-	title: z.string(),
+	agentKey: z.string(),
+	key: z.string().nullable(),
+	source: agentRoutineSourceSchema,
+	name: z.string(),
 	instructions: z.string(),
 	cron: z.string(),
 	timezone: z.string(),
@@ -142,7 +192,7 @@ const agentRoutineResponseSchema = z.object({
 const idParams = z.object({ id: z.uuid() });
 const noQuery = { string: undefined, formatted: undefined };
 const routineBody = z.object({
-	title: z.string().trim().min(1).max(255),
+	name: z.string().trim().min(1).max(255),
 	instructions: z.string().trim().min(1).max(20_000),
 	cron: z.string().trim().min(1),
 	timezone: z.string().trim().min(1),
@@ -156,6 +206,7 @@ export const controllerSchemas = {
 			string: z
 				.object({
 					"filter[title]": queryString.schema.filter(false),
+					"filter[agentKey]": queryString.schema.filter(false),
 					"filter[routineId]": queryString.schema.filter(false),
 					"filter[status]": queryString.schema.filter(true, {
 						example: "waiting",
@@ -169,6 +220,7 @@ export const controllerSchemas = {
 				filter: z
 					.object({
 						title: queryFormatted.schema.filters.single.optional(),
+						agentKey: queryFormatted.schema.filters.single.optional(),
 						routineId: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
 					})
@@ -190,7 +242,10 @@ export const controllerSchemas = {
 		response: z.array(agentConversationResponseSchema),
 	} satisfies ControllerSchema,
 	createConversation: {
-		body: z.object({ title: z.string().trim().min(1).max(255).optional() }),
+		body: z.object({
+			agentKey: z.string().min(1),
+			title: z.string().trim().min(1).max(255).optional(),
+		}),
 		query: noQuery,
 		params: undefined,
 		response: agentConversationResponseSchema,
@@ -230,8 +285,15 @@ export const controllerSchemas = {
 	sendMessage: {
 		body: z.object({
 			text: z.string().trim().min(1).max(20_000),
+			delivery: agentDeliverySchema.default({ kind: "queue" }),
 			requestId: z.uuid(),
 		}),
+		query: noQuery,
+		params: idParams,
+		response: undefined,
+	} satisfies ControllerSchema,
+	updateInput: {
+		body: agentInputActionSchema,
 		query: noQuery,
 		params: idParams,
 		response: undefined,
@@ -268,21 +330,25 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
-					"filter[title]": queryString.schema.filter(false),
-					sort: queryString.schema.sort("title,createdAt,updatedAt"),
+					"filter[name]": queryString.schema.filter(false),
+					"filter[agentKey]": queryString.schema.filter(false),
+					sort: queryString.schema.sort("name,createdAt,updatedAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
 				})
 				.meta(queryString.meta),
 			formatted: z.object({
 				filter: z
-					.object({ title: queryFormatted.schema.filters.single.optional() })
+					.object({
+						name: queryFormatted.schema.filters.single.optional(),
+						agentKey: queryFormatted.schema.filters.single.optional(),
+					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,
 				sort: z
 					.array(
 						z.object({
-							key: z.enum(["title", "createdAt", "updatedAt"]),
+							key: z.enum(["name", "createdAt", "updatedAt"]),
 							direction: z.enum(["asc", "desc"]),
 						}),
 					)
@@ -295,7 +361,7 @@ export const controllerSchemas = {
 		response: z.array(agentRoutineResponseSchema),
 	} satisfies ControllerSchema,
 	createRoutine: {
-		body: routineBody,
+		body: routineBody.extend({ agentKey: z.string().min(1) }),
 		query: noQuery,
 		params: undefined,
 		response: agentRoutineResponseSchema,

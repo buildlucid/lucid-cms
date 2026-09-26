@@ -51,8 +51,7 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 			...base,
 			ai: {
 				...base.ai,
-				mcp: { enabled: true },
-				tools: { definitions: [tool], disabled: [] },
+				mcp: { enabled: true, tools: [tool], skills: [] },
 			},
 		},
 		database: await fixture.getDatabase(),

@@ -1,17 +1,19 @@
 import formatter from "../../libs/formatters/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type { AgentRoutine } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutine from "./get-routine.js";
-import getOwnedRoutine from "./helpers/get-owned-routine.js";
+import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import nextRoutineOccurrence from "./helpers/next-routine-occurrence.js";
 
+/** Updates a routine. Routines defined in code can only be paused or resumed. */
 const updateRoutine: ServiceFn<
 	[
 		{
 			id: string;
 			userId: number;
-			title?: string;
+			name?: string;
 			instructions?: string;
 			cron?: string;
 			timezone?: string;
@@ -20,8 +22,24 @@ const updateRoutine: ServiceFn<
 	],
 	AgentRoutine
 > = async (context, input) => {
-	const routine = await getOwnedRoutine(context, input);
+	const routine = await getAccessibleRoutine(context, input);
 	if (routine.error) return routine;
+
+	if (
+		routine.data.source === "code" &&
+		[input.name, input.instructions, input.cron, input.timezone].some(
+			(value) => value !== undefined,
+		)
+	) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:agent.routine.code.locked"),
+			},
+		};
+	}
 
 	const cron = input.cron ?? routine.data.cron;
 	const timezone = input.timezone ?? routine.data.timezone;
@@ -41,7 +59,7 @@ const updateRoutine: ServiceFn<
 	const updated = await AgentRoutines.updateSingle({
 		where: [{ key: "id", operator: "=", value: input.id }],
 		data: {
-			title: input.title,
+			name: input.name,
 			instructions: input.instructions,
 			cron,
 			timezone,

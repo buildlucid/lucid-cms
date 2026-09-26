@@ -1,4 +1,5 @@
 import { createScheduled, throttle } from "@solid-primitives/scheduled";
+import classnames from "classnames";
 import DOMPurify from "dompurify";
 import { Marked } from "marked";
 import { type Component, createMemo } from "solid-js";
@@ -29,6 +30,7 @@ const allowedTags = [
 	"th",
 	"td",
 ];
+const blockTags = "p, li, pre, blockquote, h1, h2, h3, h4, tr, br";
 
 const render = (text: string) =>
 	DOMPurify.sanitize(markdown.parse(text, { async: false }), {
@@ -36,8 +38,21 @@ const render = (text: string) =>
 		ALLOWED_ATTR: ["href", "title", "start"],
 	});
 
-/** Renders model text as sanitised markdown. Only registered widgets can render interactive content. */
-const AgentMarkdown: Component<{ text: string }> = (props) => {
+/** Markdown as one line of plain text, for previews such as queued messages. */
+export const markdownPreview = (text: string) => {
+	const body = new DOMParser().parseFromString(render(text), "text/html").body;
+	//* blocks run together in textContent, so each one ends with a space
+	for (const block of body.querySelectorAll(blockTags)) block.append(" ");
+	return (body.textContent ?? "").replace(/\s+/g, " ").trim();
+};
+
+/**
+ * Renders message text as sanitised markdown. Only registered widgets can render
+ * interactive content. The bubble tone keeps code visible on a user message.
+ */
+const AgentMarkdown: Component<{ text: string; tone?: "reply" | "bubble" }> = (
+	props,
+) => {
 	// ----------------------------------------
 	// State & Hooks
 	const scheduled = createScheduled((update) => throttle(update, 100));
@@ -54,7 +69,10 @@ const AgentMarkdown: Component<{ text: string }> = (props) => {
 	// Render
 	return (
 		<div
-			class="break-words text-sm leading-7 text-title [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_code]:rounded [&_code]:bg-input [&_code]:px-1 [&_code]:text-xs [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-semibold [&_li]:my-0.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-3 [&_pre]:my-3 [&_pre]:overflow-x-auto [&_pre]:rounded-md [&_pre]:bg-input [&_pre]:p-3 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_table]:my-3 [&_table]:block [&_table]:overflow-x-auto [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_ul]:list-disc [&_ul]:pl-5"
+			class={classnames("agent-markdown", {
+				"agent-markdown-bubble agent-markdown-tight leading-6":
+					props.tone === "bubble",
+			})}
 			innerHTML={html()}
 		/>
 	);

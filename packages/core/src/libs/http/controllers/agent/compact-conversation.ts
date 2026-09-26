@@ -34,14 +34,14 @@ const compactConversationController = factory.createHandlers(
 	validate("json", controllerSchemas.compactConversation.body),
 	async (c) => {
 		const context = createServiceContext(c);
+		const body = c.req.valid("json");
 
-		const run = await serviceWrapper(agentServices.startRun, {
+		const run = await serviceWrapper(agentServices.compactConversation, {
 			transaction: false,
 		})(context, {
 			conversationId: c.req.valid("param").id,
 			userId: c.get("auth").id,
-			purpose: "compact",
-			...c.req.valid("json"),
+			requestId: body.requestId,
 		});
 		if (run.error) throw new LucidAPIError(run.error);
 

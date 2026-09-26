@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest";
+import defineAgent from "../agent/define-agent.js";
 import processConfig from "../config/process-config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import defineSkill from "./define-skill.js";
-import { getSkillRegistry } from "./registry.js";
 
 const adapter = {
 	connect: vi.fn(),
@@ -12,45 +12,40 @@ const adapter = {
 
 const skill = (name: string) =>
 	defineSkill({
-		target: "mcp",
 		name,
 		description: "Use when testing.",
 		instructions: "Follow the test.",
 		scopes: [],
 	});
+const agent = (key: string, skills: ReturnType<typeof skill>[]) =>
+	defineAgent({ key, name: "Test", description: "Test", tools: [], skills });
 
-test("applies plugin registration before disabling skills", async () => {
+test("a skill can be shared by MCP and several agents", async () => {
+	const shared = skill("test-shared");
 	const config = await processConfig(
 		{
 			secrets: "a".repeat(64),
 			ai: {
-				skills: {
-					definitions: [skill("test-project")],
-					disabled: ["test-plugin"],
-				},
+				mcp: { skills: [shared] },
+				agents: [agent("one", [shared]), agent("two", [shared])],
 			},
-			plugins: [
-				{
-					key: "test-plugin",
-					lucid: "*",
-					configure: (draft) => {
-						draft.ai.skills.definitions.push(skill("test-plugin"));
-					},
-				},
-			],
 		},
 		{ resolvedDb: adapter },
 	);
-	expect([...getSkillRegistry(config).keys()]).toEqual(["test-project"]);
+	expect(config.ai.mcp.skills).toEqual([shared]);
+	expect(config.ai.agents.map((agent) => agent.skills)).toEqual([
+		[shared],
+		[shared],
+	]);
 });
 
-test("rejects names clients cannot verify and unknown disable entries", async () => {
+test("rejects names clients cannot verify and duplicates within a placement", async () => {
 	const options = { resolvedDb: adapter };
 	await expect(
 		processConfig(
 			{
 				secrets: "a".repeat(64),
-				ai: { skills: { definitions: [skill("test_seo")] } },
+				ai: { mcp: { skills: [skill("test_seo")] } },
 			},
 			options,
 		),
@@ -59,9 +54,11 @@ test("rejects names clients cannot verify and unknown disable entries", async ()
 		processConfig(
 			{
 				secrets: "a".repeat(64),
-				ai: { skills: { disabled: ["typo"] } },
+				ai: {
+					agents: [agent("test", [skill("test-seo"), skill("test-seo")])],
+				},
 			},
 			options,
 		),
-	).rejects.toThrow('Disabled skill "typo" is not registered.');
+	).rejects.toThrow('Agent "test" registers skill "test-seo" more than once.');
 });

@@ -16,6 +16,7 @@ import respondRun from "../../../controllers/agent/respond-run.js";
 import runRoutine from "../../../controllers/agent/run-routine.js";
 import sendMessage from "../../../controllers/agent/send-message.js";
 import updateConversation from "../../../controllers/agent/update-conversation.js";
+import updateInput from "../../../controllers/agent/update-input.js";
 import updateRoutine from "../../../controllers/agent/update-routine.js";
 import watchRun from "../../../controllers/agent/watch-run.js";
 
@@ -27,6 +28,7 @@ const agentRoutes = new Hono<LucidHonoGeneric>()
 	.delete("/conversations/:id", ...deleteConversation)
 	.get("/conversations/:id/messages", ...getMessages)
 	.post("/conversations/:id/messages", ...sendMessage)
+	.patch("/conversations/:id/inputs", ...updateInput)
 	.post("/conversations/:id/compact", ...compactConversation)
 	.post("/runs/:id/respond", ...respondRun)
 	.post("/runs/:id/cancel", ...cancelRun)

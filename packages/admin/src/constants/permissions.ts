@@ -24,7 +24,6 @@ export const Permissions = {
 	AiCustomFieldValue: "ai:custom-field-value",
 	AiImageGenerate: "ai:image-generate",
 	AiAltGenerate: "ai:alt-generate",
-	AiAgentUse: "ai:agent",
 	IntegrationsRead: "integrations:read",
 	IntegrationsCreate: "integrations:create",
 	IntegrationsUpdate: "integrations:update",
@@ -37,7 +36,8 @@ export const Permissions = {
 } as const;
 
 export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
+export type DocumentPermission =
+	`documents:${string}:${"read" | "create" | "update" | "delete" | "restore" | "publish" | "review"}`;
+export type AgentPermission = `agents:${string}:${"use" | "manage"}`;
 
-export type Permission =
-	| CorePermission
-	| `documents:${string}:${"read" | "create" | "update" | "delete" | "restore" | "publish" | "review"}`;
+export type Permission = CorePermission | DocumentPermission | AgentPermission;

@@ -5,6 +5,8 @@ import {
 	agentRunOutcomeSchema,
 } from "../../schemas/agent.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
+import type { SkillDefinition } from "../skills/types.js";
+import type { AgentToolDefinition } from "../tools/types.js";
 
 export const toolCallSchema = z.object({
 	id: z.string(),
@@ -48,6 +50,8 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 /** Everything needed to resume a run exactly where it stopped. */
 export const checkpointSchema = z.object({
 	version: z.literal(1),
+	/** Input receipts survive compaction and a crash before acknowledgement. */
+	inputIds: z.array(z.uuid()).optional(),
 	messages: z.array(
 		modelMessageSchema.and(z.object({ sourceId: z.uuid().optional() })),
 	),
@@ -95,6 +99,8 @@ export const checkpointSchema = z.object({
 			question: z.string(),
 			options: z.array(z.string()).optional(),
 			answer: z.string().optional(),
+			/** An approved write runs with this person's permissions. */
+			answeredBy: z.number().int().optional(),
 		})
 		.optional(),
 	inFlightWrite: z.string().optional(),
@@ -111,3 +117,53 @@ export type Checkpoint = z.infer<typeof checkpointSchema>;
 export type ConversationContext = z.infer<typeof agentContextSchema>;
 /** Chat runs answer a person; routine runs work unattended until they finish. */
 export type RunMode = "chat" | "routine";
+
+export type DefineRoutineOptions<Key extends string> = {
+	/** Stable key, unique within the agent, using lowercase letters, numbers and single hyphens. */
+	key: Key;
+	name: string;
+	/** What each run should do. Common indentation is removed, so template literals can be indented. */
+	instructions: string;
+	schedule: {
+		/** Five-field cron expression with minute precision. */
+		cron: string;
+		/** IANA timezone used to evaluate the expression. Defaults to UTC. */
+		timezone?: string;
+	};
+};
+
+/** A routine created with `defineRoutine`. It runs unattended and can use every tool on its agent. */
+export type RoutineDefinition<Key extends string = string> = {
+	readonly type: "routine-definition";
+	readonly key: Key;
+	readonly name: string;
+	readonly instructions: string;
+	readonly schedule: { readonly cron: string; readonly timezone: string };
+};
+
+export type DefineAgentOptions<Key extends string> = {
+	/** Stable, unique key using lowercase letters, numbers and single hyphens. Changing it detaches saved chats and routines. */
+	key: Key;
+	name: string;
+	/** Helps people choose the agent. */
+	description: string;
+	/** Added to the agent's system prompt. Common indentation is removed. */
+	instructions?: string;
+	/** Additional tools the agent can call. Lucid's content tools are always available. */
+	tools?: readonly AgentToolDefinition[];
+	skills?: readonly SkillDefinition[];
+	/** Scheduled routines that run as the system. People with the agent's manage permission can review them. */
+	routines?: readonly RoutineDefinition[];
+};
+
+/** An agent created with `defineAgent`. Each agent registers its own use and manage permissions. */
+export type AgentDefinition<Key extends string = string> = {
+	readonly type: "agent-definition";
+	readonly key: Key;
+	readonly name: string;
+	readonly description: string;
+	readonly instructions: string;
+	readonly tools: readonly AgentToolDefinition[];
+	readonly skills: readonly SkillDefinition[];
+	readonly routines: readonly RoutineDefinition[];
+};

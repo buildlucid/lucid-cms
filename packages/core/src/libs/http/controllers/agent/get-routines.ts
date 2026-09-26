@@ -17,7 +17,8 @@ const factory = createFactory();
 
 const getRoutinesController = factory.createHandlers(
 	describeRoute({
-		description: "Returns the current user's agent routines.",
+		description:
+			"Returns the user's own routines, and routines defined in code on agents they manage.",
 		tags: ["agent"],
 		summary: "Get Agent Routines",
 		responses: openAPI.responses({

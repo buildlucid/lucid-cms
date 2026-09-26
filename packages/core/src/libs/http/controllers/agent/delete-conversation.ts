@@ -30,11 +30,12 @@ const deleteConversationController = factory.createHandlers(
 	validate("param", controllerSchemas.deleteConversation.params),
 	async (c) => {
 		const context = createServiceContext(c);
+		const param = c.req.valid("param");
 
 		const deleted = await serviceWrapper(agentServices.deleteConversation, {
 			transaction: true,
 		})(context, {
-			id: c.req.valid("param").id,
+			id: param.id,
 			userId: c.get("auth").id,
 		});
 		if (deleted.error) throw new LucidAPIError(deleted.error);

@@ -20,6 +20,8 @@ import { node } from "@lucidcms/runtime-node";
 import diagnosticsRoute from "./src/admin/containers/DiagnosticsRoute/config.js";
 import publicRoute from "./src/admin/containers/PublicRoute/config.js";
 import standaloneRoute from "./src/admin/containers/StandaloneRoute/config.js";
+import { assistantAgent } from "./src/agents/assistant.js";
+import { seoAgent } from "./src/agents/seo.js";
 import BlogCollection from "./src/collections/blogs.js";
 import MainMenuCollection from "./src/collections/main-menu.js";
 import PageCollection from "./src/collections/pages.js";
@@ -33,14 +35,8 @@ import searchRoute from "./src/routes/search.js";
 import searchMediaRoute from "./src/routes/search-media.js";
 import sendTestEmailRoute from "./src/routes/send-test-email.js";
 import testOrganisationsTable from "./src/tables/test-organisations.js";
-import {
-	addAgentTool,
-	addTool,
-	demoAgentSkill,
-	echoAgentTool,
-	echoTool,
-	saveNoteTool,
-} from "./src/tools.js";
+import { addTool } from "./src/tools/add.js";
+import { echoTool } from "./src/tools/echo.js";
 
 export const env = z.object({
 	DATABASE_URL: z.string(),
@@ -95,17 +91,8 @@ export default defineConfig({
 			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
 		ai: {
-			mcp: true,
-			tools: {
-				definitions: [
-					echoTool,
-					echoAgentTool,
-					addTool,
-					addAgentTool,
-					saveNoteTool,
-				],
-			},
-			skills: { definitions: [demoAgentSkill] },
+			mcp: { tools: [echoTool, addTool] },
+			agents: [assistantAgent, seoAgent],
 		},
 		localization: {
 			locales: [

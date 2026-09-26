@@ -1,6 +1,6 @@
 import { ExternalScopes } from "../../libs/permission/external-scopes.js";
 import { getValidExternalScopes } from "../../libs/permission/scopes.js";
-import { getToolRegistry } from "../../libs/tools/registry.js";
+import { getMcpToolRegistry } from "../../libs/tools/registry.js";
 import type { OAuthProtectedResourceMetadataResponse } from "../../schemas/oauth.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getOAuthUrls, type OAuthResource } from "./helpers/urls.js";
@@ -26,7 +26,7 @@ const getProtectedResourceMetadata: ServiceFn<
 		input.resource === "mcp"
 			? new Set<string>([
 					ExternalScopes.McpAccess,
-					...[...getToolRegistry(context.config, "mcp").values()].flatMap(
+					...[...getMcpToolRegistry(context.config).values()].flatMap(
 						(tool) => [
 							...tool.scopes,
 							...(tool.advertisedScopes?.(context.config) ?? []),

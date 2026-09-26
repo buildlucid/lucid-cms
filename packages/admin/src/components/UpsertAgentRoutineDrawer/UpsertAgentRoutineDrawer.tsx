@@ -6,16 +6,19 @@ import {
 	createMemo,
 	createSignal,
 	on,
+	Show,
 	untrack,
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Input from "@/components/Input/Input";
+import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
 import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 import {
 	defaultSchedule,
 	parseSchedule,
@@ -26,7 +29,7 @@ import { getBodyError } from "@/utils/error-helpers";
 import { getDefaultTimezone } from "@/utils/release-schedule";
 import AgentScheduleField from "./parts/AgentScheduleField";
 
-/** Creates a routine, or edits one when `routine` is set. */
+/** Creates a routine for an agent the user can use, or edits one when `routine` is set. */
 const UpsertAgentRoutineDrawer: Component<{
 	routine?: Accessor<AgentRoutine | undefined>;
 	state: {
@@ -36,7 +39,8 @@ const UpsertAgentRoutineDrawer: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// State
-	const [title, setTitle] = createSignal("");
+	const [agentKey, setAgentKey] = createSignal<string>();
+	const [name, setName] = createSignal("");
 	const [instructions, setInstructions] = createSignal("");
 	const [schedule, setSchedule] = createSignal<Schedule>(defaultSchedule);
 	const [timezone, setTimezone] = createSignal(getDefaultTimezone());
@@ -51,6 +55,7 @@ const UpsertAgentRoutineDrawer: Component<{
 	// ----------------------------------------
 	// Memos
 	const existing = createMemo(() => props.routine?.());
+	const agents = createMemo(() => getAgentAccess().use);
 	const mutation = createMemo(() =>
 		existing() ? updateRoutine : createRoutine,
 	);
@@ -64,7 +69,8 @@ const UpsertAgentRoutineDrawer: Component<{
 			(open) => {
 				if (!open) return;
 				const routine = untrack(existing);
-				setTitle(routine?.title ?? "");
+				setAgentKey(untrack(agents)[0]?.key);
+				setName(routine?.name ?? "");
 				setInstructions(routine?.instructions ?? "");
 				setSchedule(routine ? parseSchedule(routine.cron) : defaultSchedule);
 				setTimezone(routine?.timezone ?? getDefaultTimezone());
@@ -97,29 +103,45 @@ const UpsertAgentRoutineDrawer: Component<{
 			<Drawer.Form
 				onSubmit={() => {
 					const body = {
-						title: title(),
+						name: name(),
 						instructions: instructions(),
 						cron: toCron(schedule()),
 						timezone: timezone(),
 						enabled: enabled(),
 					};
 					const routine = existing();
+					const key = agentKey();
 					if (routine) updateRoutine.action.mutate({ id: routine.id, body });
-					else {
-						createRoutine.action.mutate(body);
-					}
+					else if (key) createRoutine.action.mutate({ ...body, agentKey: key });
 				}}
 			>
 				<Drawer.Body class="flex flex-col gap-4">
+					<Show when={!existing() && agents().length > 1}>
+						<Select
+							id="agent-routine-agent"
+							name="agentKey"
+							value={agentKey()}
+							onChange={(value) => {
+								if (value) setAgentKey(String(value));
+							}}
+							options={agents().map((agent) => ({
+								value: agent.key,
+								label: agent.name,
+							}))}
+							required={true}
+							label={T()("agent.select.label")}
+							errors={getBodyError("agentKey", errors)}
+						/>
+					</Show>
 					<Input
-						id="agent-routine-title"
-						name="title"
+						id="agent-routine-name"
+						name="name"
 						type="text"
-						value={title()}
-						onChange={setTitle}
+						value={name()}
+						onChange={setName}
 						required={true}
-						label={T()("common.title")}
-						errors={getBodyError("title", errors)}
+						label={T()("common.name")}
+						errors={getBodyError("name", errors)}
 					/>
 					<Textarea
 						id="agent-routine-instructions"
@@ -158,7 +180,7 @@ const UpsertAgentRoutineDrawer: Component<{
 						<Button
 							type="submit"
 							loading={mutation().action.isPending}
-							disabled={!title().trim() || !instructions().trim()}
+							disabled={!name().trim() || !instructions().trim()}
 						>
 							{existing() ? T()("common.update") : T()("common.create")}
 						</Button>

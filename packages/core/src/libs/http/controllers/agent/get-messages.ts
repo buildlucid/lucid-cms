@@ -34,13 +34,16 @@ const getMessagesController = factory.createHandlers(
 	validate("query", controllerSchemas.getMessages.query.string),
 	async (c) => {
 		const context = createServiceContext(c);
+		const param = c.req.valid("param");
+		const query = c.req.valid("query");
 
 		const messages = await serviceWrapper(agentServices.getMessages, {
 			transaction: false,
 		})(context, {
-			conversationId: c.req.valid("param").id,
+			conversationId: param.id,
 			userId: c.get("auth").id,
-			...c.req.valid("query"),
+			limit: query.limit,
+			before: query.before,
 		});
 		if (messages.error) throw new LucidAPIError(messages.error);
 

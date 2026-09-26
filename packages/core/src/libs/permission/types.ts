@@ -16,7 +16,16 @@ export type CollectionPermission<
 	TAction extends CollectionPermissionAction = CollectionPermissionAction,
 > = `documents:${string}:${TAction}`;
 
-export type CorePermission = StaticPermission | CollectionPermission;
+export type AgentPermissionAction = "use" | "manage";
+
+export type AgentPermission<
+	TAction extends AgentPermissionAction = AgentPermissionAction,
+> = `agents:${string}:${TAction}`;
+
+export type CorePermission =
+	| StaticPermission
+	| CollectionPermission
+	| AgentPermission;
 
 /** Project permissions added by Lucid type generation or a plugin. */
 // biome-ignore lint/suspicious/noEmptyInterface: generated types and plugins augment this interface

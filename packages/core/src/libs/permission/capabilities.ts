@@ -1,9 +1,14 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
+import type { AgentDefinition } from "../agent/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { copy, normalizeCopy, translate } from "../i18n/index.js";
-import type { ResolvedAdminCopy } from "../i18n/types.js";
+import type { AdminCopyDescriptor, ResolvedAdminCopy } from "../i18n/types.js";
 import type { AccessPermission } from "./access-config.js";
+import {
+	agentPermissionActions,
+	getAgentPermission,
+} from "./agent-permissions.js";
 import {
 	collectionPermissionActions,
 	getCollectionPermission,
@@ -167,6 +172,36 @@ const getCollectionCapabilityGroups = (
 	}));
 };
 
+const agentPermissionDetails = {
+	use: {
+		name: copy("admin:permissions.agents.use"),
+		description: copy("admin:permissions.agents.use.description"),
+	},
+	manage: {
+		name: copy("admin:permissions.agents.manage"),
+		description: copy("admin:permissions.agents.manage.description"),
+	},
+} as const;
+
+const getAgentCapabilityGroups = (
+	agents: readonly AgentDefinition[],
+): CapabilityGroup[] =>
+	agents.map((agent) => ({
+		key: `agents:${agent.key}`,
+		details: { name: normalizeCopy<AdminCopyDescriptor>(agent.name) },
+		core: true,
+		capabilities: agentPermissionActions.map((action): CapabilityDefinition => {
+			const permission = getAgentPermission(agent.key, action);
+
+			return {
+				key: permission,
+				details: agentPermissionDetails[action],
+				core: true,
+				permission,
+			};
+		}),
+	}));
+
 const localesCapabilityGroup: CapabilityGroup = {
 	key: "locales",
 	details: {
@@ -249,7 +284,9 @@ export type AccessConfig = Pick<
 	ResolvedLucidConfig,
 	"collections" | "access"
 > & {
-	ai: Pick<ResolvedLucidConfig["ai"], "enabled" | "mcp">;
+	ai: Pick<ResolvedLucidConfig["ai"], "enabled" | "agents"> & {
+		mcp: Pick<ResolvedLucidConfig["ai"]["mcp"], "enabled">;
+	};
 };
 
 const resolveDetails = (details: AccessPermission): PermissionDetails => ({
@@ -270,6 +307,7 @@ export const getCapabilityRegistry = (
 		accountCapabilityGroup,
 		...getStaticCapabilityGroups(),
 		...getCollectionCapabilityGroups(config.collections),
+		...getAgentCapabilityGroups(config.ai.agents),
 		localesCapabilityGroup,
 		...(config.ai.enabled && config.ai.mcp.enabled ? [mcpCapabilityGroup] : []),
 	];
@@ -294,6 +332,7 @@ export const getCapabilityRegistry = (
 		[...permissions.keys(), ...scopes].map((key) => key.split(":")[0]),
 	);
 	reservedNamespaces.add("documents");
+	reservedNamespaces.add("agents");
 	reservedNamespaces.add("lucid");
 	const checkKey = (
 		key: string,

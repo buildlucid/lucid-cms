@@ -1,4 +1,5 @@
 export { default as cancelRun } from "./cancel-run.js";
+export { default as compactConversation } from "./compact-conversation.js";
 export { default as createConversation } from "./create-conversation.js";
 export { default as createRoutine } from "./create-routine.js";
 export { default as deleteConversation } from "./delete-conversation.js";
@@ -11,7 +12,8 @@ export { default as getRoutine } from "./get-routine.js";
 export { default as getRoutineRuns } from "./get-routine-runs.js";
 export { default as getRoutines } from "./get-routines.js";
 export { default as runRoutine } from "./run-routine.js";
-export { default as startRun } from "./start-run.js";
+export { default as submitInput } from "./submit-input.js";
 export { default as updateConversation } from "./update-conversation.js";
+export { default as updateInput } from "./update-input.js";
 export { default as updateRoutine } from "./update-routine.js";
 export { default as watchRun } from "./watch-run.js";

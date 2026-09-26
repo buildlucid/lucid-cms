@@ -1,6 +1,8 @@
 import z from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import { adminConfigSchema } from "../admin/schema.js";
+import { isAgentDefinition } from "../agent/registry.js";
+import type { AgentDefinition } from "../agent/types.js";
 import { AuthProviderSchema } from "../auth-providers/schema.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { isCollectionBuilder } from "../collection/builders/collection-builder/index.js";
@@ -30,7 +32,7 @@ import {
 import { isSkillDefinition } from "../skills/registry.js";
 import type { SkillDefinition } from "../skills/types.js";
 import { isToolDefinition } from "../tools/registry.js";
-import type { ToolDefinition } from "../tools/types.js";
+import type { McpToolDefinition } from "../tools/types.js";
 import {
 	hookSchema,
 	migrationSchema,
@@ -82,12 +84,20 @@ const JobDefinitionSchema = z.custom<AnyJobDefinition>(isJobDefinition, {
 	message: "Expected a job definition created with defineJob",
 });
 
-const ToolDefinitionSchema = z.custom<ToolDefinition>(isToolDefinition, {
-	message: "Expected a tool definition created with defineTool",
-});
+const McpToolDefinitionSchema = z.custom<McpToolDefinition>(
+	(value) => isToolDefinition(value) && value.target === "mcp",
+	{
+		message:
+			'Expected a tool definition created with defineTool and target "mcp"',
+	},
+);
 
 const SkillDefinitionSchema = z.custom<SkillDefinition>(isSkillDefinition, {
 	message: "Expected a skill definition created with defineSkill",
+});
+
+const AgentDefinitionSchema = z.custom<AgentDefinition>(isAgentDefinition, {
+	message: "Expected an agent definition created with defineAgent",
 });
 
 const AiConfigSchema = z.strictObject({
@@ -100,29 +110,13 @@ const AiConfigSchema = z.strictObject({
 		})
 		.prefault({}),
 	mcp: z
-		.union([
-			z.boolean().transform((enabled) => ({ enabled })),
-			z.strictObject({ enabled: z.boolean() }),
-		])
-		.default({ enabled: false }),
-	agent: z
-		.union([
-			z.boolean().transform((enabled) => ({ enabled })),
-			z.strictObject({ enabled: z.boolean() }),
-		])
-		.default({ enabled: true }),
-	tools: z
 		.strictObject({
-			definitions: z.array(ToolDefinitionSchema).default([]),
-			disabled: z.array(z.string()).default([]),
+			enabled: z.boolean().default(true),
+			tools: z.array(McpToolDefinitionSchema).default([]),
+			skills: z.array(SkillDefinitionSchema).default([]),
 		})
-		.prefault({}),
-	skills: z
-		.strictObject({
-			definitions: z.array(SkillDefinitionSchema).default([]),
-			disabled: z.array(z.string()).default([]),
-		})
-		.prefault({}),
+		.default({ enabled: false, tools: [], skills: [] }),
+	agents: z.array(AgentDefinitionSchema).default([]),
 });
 
 const KVAdapterSchema = z.custom<

@@ -11,9 +11,8 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import { copy } from "../i18n/index.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import { filterExternalScopes } from "../permission/scopes.js";
-import { getSkillRegistry } from "../skills/registry.js";
 import { executeMcpTool } from "../tools/execute-tool.js";
-import { getToolRegistry } from "../tools/registry.js";
+import { getMcpToolRegistry } from "../tools/registry.js";
 import type { McpToolAuthority, McpToolResult } from "../tools/types.js";
 import { toPortableJsonSchema } from "./portable-json-schema.js";
 import { registerSkills } from "./register-skills.js";
@@ -97,7 +96,7 @@ export const createHandler = (args: {
 			},
 		);
 
-		for (const tool of getToolRegistry(context.config, "mcp").values()) {
+		for (const tool of getMcpToolRegistry(context.config).values()) {
 			if (!canUse(tool)) continue;
 
 			server.registerTool(
@@ -137,12 +136,7 @@ export const createHandler = (args: {
 			);
 		}
 
-		registerSkills(
-			server,
-			Array.from(getSkillRegistry(context.config).values()).filter(
-				(skill) => skill.targets.includes("mcp") && canUse(skill),
-			),
-		);
+		registerSkills(server, context.config.ai.mcp.skills.filter(canUse));
 
 		return server;
 	});

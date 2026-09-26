@@ -49,14 +49,7 @@ beforeAll(async () => {
 			...config,
 			ai: {
 				...config.ai,
-				tools: {
-					definitions: [
-						agentTool,
-						mcpTool,
-						{ ...agentTool, name: "agent_only" },
-					],
-					disabled: [],
-				},
+				mcp: { enabled: true, tools: [mcpTool], skills: [] },
 			},
 		},
 		database: await testConfig.getDatabase(),
@@ -68,10 +61,11 @@ beforeAll(async () => {
 });
 afterAll(testConfig.destroy);
 
+const user = { type: "user", userId: 1 } as const;
 const runAgent = (authority: AgentToolAuthority) =>
 	executeAgentTool({
 		context,
-		name: "shared_name",
+		tool: agentTool,
 		input: {},
 		execution: {
 			authority,
@@ -83,14 +77,14 @@ const runAgent = (authority: AgentToolAuthority) =>
 test("agent execution checks both static and input-dependent permissions", async () => {
 	expect(
 		await runAgent({
-			userId: 1,
+			principal: user,
 			permissions: [Permissions.MediaUpdate],
 			superAdmin: false,
 		}),
 	).toEqual({ type: "forbidden" });
 	expect(
 		await runAgent({
-			userId: 1,
+			principal: user,
 			permissions: [Permissions.MediaRead],
 			superAdmin: false,
 		}),
@@ -98,7 +92,7 @@ test("agent execution checks both static and input-dependent permissions", async
 	expect(agentHandler).not.toHaveBeenCalled();
 	expect(
 		await runAgent({
-			userId: 1,
+			principal: user,
 			permissions: [Permissions.MediaRead, Permissions.MediaUpdate],
 			superAdmin: false,
 		}),
@@ -109,14 +103,14 @@ test("agent execution checks both static and input-dependent permissions", async
 		}),
 	);
 	expect(
-		await runAgent({ userId: 1, permissions: [], superAdmin: true }),
+		await runAgent({ principal: user, permissions: [], superAdmin: true }),
 	).toMatchObject({ type: "success" });
 	expect(
-		await runAgent({ userId: 1, permissions: [], superAdmin: false }),
+		await runAgent({ principal: user, permissions: [], superAdmin: false }),
 	).toEqual({ type: "forbidden" });
 });
 
-test("MCP resolves only MCP definitions and requires scopes even for the same name", async () => {
+test("MCP resolves only its own tools and requires their scopes", async () => {
 	const execution = {
 		authority: {
 			principal: { type: "system" as const },
@@ -133,7 +127,7 @@ test("MCP resolves only MCP definitions and requires scopes even for the same na
 		}),
 	).toMatchObject({ type: "success", data: { output: { source: "mcp" } } });
 	expect(
-		await executeMcpTool({ context, name: "agent_only", input: {}, execution }),
+		await executeMcpTool({ context, name: "missing", input: {}, execution }),
 	).toEqual({ type: "not-found" });
 	expect(
 		await executeMcpTool({

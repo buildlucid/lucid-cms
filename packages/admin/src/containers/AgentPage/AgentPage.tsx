@@ -8,16 +8,19 @@ import Button from "@/components/Button/Button";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import Input from "@/components/Input/Input";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import Select from "@/components/Select/Select";
 import api from "@/services/api";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 
 const pageSize = 10;
 
-/** Starts a new chat and lists recent ones, with chats waiting on the user first. */
+/** Starts a new chat with a chosen agent and lists recent ones, with chats waiting on the user first. */
 const AgentPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const navigate = useNavigate();
+	const [agentKey, setAgentKey] = createSignal<string>();
 	const [search, setSearch] = createSignal("");
 	const [title, setTitle] = createSignal<string>();
 	const [perPage, setPerPage] = createSignal(pageSize);
@@ -38,6 +41,10 @@ const AgentPage: Component = () => {
 
 	// ----------------------------------------
 	// Memos
+	const agents = createMemo(() => getAgentAccess().use);
+	const agent = createMemo(
+		() => agents().find((agent) => agent.key === agentKey()) ?? agents()[0],
+	);
 	const conversations = createMemo(() => recent.data?.data ?? []);
 	const hasMore = createMemo(
 		() => (recent.data?.meta.total ?? 0) > conversations().length,
@@ -46,10 +53,20 @@ const AgentPage: Component = () => {
 	// ----------------------------------------
 	// Functions
 	const start = async (text: string) => {
-		const conversation = await createConversation.action.mutateAsync({});
-		navigate(`/lucid/agent/chats/${conversation.data.id}`, {
-			state: { message: text },
-		});
+		const selected = agent();
+		if (!selected) return false;
+		try {
+			const conversation = await createConversation.action.mutateAsync({
+				agentKey: selected.key,
+			});
+			navigate(`/lucid/agent/chats/${conversation.data.id}`, {
+				state: { message: text },
+			});
+			return true;
+		} catch {
+			//* the mutation reports the error; the text goes back in the box
+			return false;
+		}
 	};
 
 	// ----------------------------------------
@@ -59,19 +76,43 @@ const AgentPage: Component = () => {
 			<AgentHeader />
 			<PageLayout.Body padding="md">
 				<div class="mx-auto flex w-full max-w-3xl flex-col gap-12 py-6 md:py-14">
-					<section class="flex flex-col items-center gap-6">
-						<h2 class="text-center text-2xl font-medium text-title">
-							{T()("agent.home.title")}
-						</h2>
-						<AgentComposer
-							size="lg"
-							autofocus={true}
-							class="w-full"
-							placeholder={T()("agent.composer.placeholder")}
-							busy={createConversation.action.isPending}
-							onSubmit={start}
-						/>
-					</section>
+					<Show when={agent()}>
+						{(current) => (
+							<section class="flex flex-col items-center gap-6">
+								<div class="flex flex-col items-center gap-2 text-center">
+									<h2 class="text-2xl font-medium text-title">
+										{T()("agent.home.title")}
+									</h2>
+									<p class="text-sm text-body">{current().description}</p>
+								</div>
+								<Show when={agents().length > 1}>
+									<Select
+										id="agent-select"
+										name="agent"
+										value={current().key}
+										onChange={(value) => {
+											if (value) setAgentKey(String(value));
+										}}
+										options={agents().map((agent) => ({
+											value: agent.key,
+											label: agent.name,
+										}))}
+										label={T()("agent.select.label")}
+										class="w-56"
+									/>
+								</Show>
+								<AgentComposer
+									size="lg"
+									autofocus={true}
+									class="w-full"
+									placeholder={T()("agent.composer.placeholder")}
+									draftKey="new"
+									busy={createConversation.action.isPending}
+									onSubmit={start}
+								/>
+							</section>
+						)}
+					</Show>
 
 					<Show when={waiting.data?.data.length}>
 						<section class="flex flex-col gap-3">

@@ -1,3 +1,4 @@
+import { submitInput, updateInput } from "./input";
 import streamRun from "./stream-run";
 import useCancelRun from "./useCancelRun";
 import useCreateConversation from "./useCreateConversation";
@@ -15,6 +16,8 @@ import useUpdateConversation from "./useUpdateConversation";
 import useUpdateRoutine from "./useUpdateRoutine";
 
 const exportObject = {
+	submitInput,
+	updateInput,
 	streamRun,
 	useCancelRun,
 	useCreateConversation,

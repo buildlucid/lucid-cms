@@ -28,11 +28,12 @@ const cancelRunController = factory.createHandlers(
 	validate("param", controllerSchemas.cancelRun.params),
 	async (c) => {
 		const context = createServiceContext(c);
+		const param = c.req.valid("param");
 
 		const cancelled = await serviceWrapper(agentServices.cancelRun, {
 			transaction: true,
 		})(context, {
-			runId: c.req.valid("param").id,
+			runId: param.id,
 			userId: c.get("auth").id,
 		});
 		if (cancelled.error) throw new LucidAPIError(cancelled.error);

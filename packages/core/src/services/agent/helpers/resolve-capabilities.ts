@@ -1,10 +1,9 @@
 import z from "zod";
 import { getRunnerTools } from "../../../libs/agent/built-in-tools.js";
 import buildInstructions from "../../../libs/agent/instructions.js";
-import type { RunMode } from "../../../libs/agent/types.js";
+import type { AgentDefinition, RunMode } from "../../../libs/agent/types.js";
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
-import { getSkillRegistry } from "../../../libs/skills/registry.js";
-import { getToolRegistry } from "../../../libs/tools/registry.js";
+import { getCoreAgentTools } from "../../../libs/tools/core-tools.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
@@ -19,34 +18,42 @@ const toInputSchema = (input: z.ZodObject) => {
 	return schema;
 };
 
-/** Only advertises capabilities this user can access. Resolved before each model turn. */
+/** Only advertises the agent's capabilities its principal can access. Resolved before each model turn. */
 const resolveCapabilities = (
 	context: ServiceContext,
-	props: { authority: AgentToolAuthority; mode: RunMode; hasHistory: boolean },
+	props: {
+		agent: AgentDefinition;
+		authority: AgentToolAuthority;
+		mode: RunMode;
+		hasHistory: boolean;
+	},
 ) => {
-	const tools = [...getToolRegistry(context.config, "agent").values()].filter(
+	const { agent, authority } = props;
+	const tools = [...getCoreAgentTools(), ...agent.tools].filter(
 		(tool) =>
-			props.authority.superAdmin ||
+			authority.superAdmin ||
 			tool.permissions.every((permission) =>
-				props.authority.permissions.includes(permission),
+				authority.permissions.includes(permission),
 			),
 	);
-	// Skills still use their existing scope contract; resolve it from current user permissions.
-	const skills = [...getSkillRegistry(context.config).values()].filter(
-		(skill) =>
-			skill.targets.includes("agent") &&
-			skill.scopes.every((scope) => {
-				const capability = getExternalCapability(context.config, scope, "user");
-				return (
-					capability &&
-					(capability.userPermission === null ||
-						props.authority.superAdmin ||
-						props.authority.permissions.includes(capability.userPermission))
-				);
-			}),
+
+	// Skills still use their existing scope contract; resolve it from current permissions.
+	const skills = agent.skills.filter((skill) =>
+		skill.scopes.every((scope) => {
+			const capability = getExternalCapability(context.config, scope, "user");
+			return (
+				capability &&
+				(capability.userPermission === null ||
+					authority.superAdmin ||
+					authority.permissions.includes(capability.userPermission))
+			);
+		}),
 	);
+
+	const canAsk = authority.principal.type === "user";
 	const runnerTools = getRunnerTools({
 		mode: props.mode,
+		canAsk,
 		hasSkills: skills.length > 0,
 		hasHistory: props.hasHistory,
 	});
@@ -60,7 +67,9 @@ const resolveCapabilities = (
 			inputSchema: toInputSchema(tool.input),
 		})),
 		instructions: buildInstructions({
+			agent,
 			mode: props.mode,
+			canAsk,
 			skills,
 			hasHistory: props.hasHistory,
 		}),

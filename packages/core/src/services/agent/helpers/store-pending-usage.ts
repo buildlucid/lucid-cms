@@ -9,7 +9,7 @@ const storePendingUsage: ServiceFn<
 			purpose?: "compact";
 			runId: string;
 			conversationId: string;
-			userId: number;
+			userId: number | null;
 			connectionId: number;
 		},
 	],

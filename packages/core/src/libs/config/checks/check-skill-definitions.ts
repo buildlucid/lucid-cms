@@ -1,62 +1,60 @@
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import { getExternalCapability } from "../../permission/capabilities.js";
+import { isSkillDefinition } from "../../skills/registry.js";
+import type { SkillDefinition } from "../../skills/types.js";
 
-/** Checks skill names, content, scopes and operator disable entries at config time. */
-const checkSkillDefinitions = (config: ResolvedLucidConfig) => {
+/** Checks a skill's name, content and scopes. */
+const checkSkill = (config: ResolvedLucidConfig, skill: SkillDefinition) => {
+	// Agent Skills naming rules, which MCP clients verify.
+	if (skill.name.length > 64 || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(skill.name)) {
+		throw new Error(
+			`Invalid skill name "${skill.name}". Use lowercase letters, numbers and single hyphens.`,
+		);
+	}
+	if (!skill.description.trim() || skill.description.length > 1024) {
+		throw new Error(
+			`Skill "${skill.name}" needs a description of up to 1024 characters.`,
+		);
+	}
+	if (!skill.instructions) {
+		throw new Error(`Skill "${skill.name}" needs instructions.`);
+	}
+
+	for (const scope of skill.scopes) {
+		if (!getExternalCapability(config, scope)) {
+			throw new Error(`Skill "${skill.name}" uses unknown scope "${scope}".`);
+		}
+	}
+};
+
+/** Checks that a placement only holds skills, with unique names. */
+const checkPlacement = (label: string, skills: readonly unknown[]) => {
 	const names = new Set<string>();
 
-	for (const skill of config.ai.skills.definitions) {
-		if (
-			skill.targets.length === 0 ||
-			skill.targets.some((target) => target !== "mcp" && target !== "agent")
-		) {
-			throw new Error(`Skill "${skill.name}" has an unsupported target.`);
+	for (const skill of skills) {
+		if (!isSkillDefinition(skill)) {
+			throw new Error(`${label} skills must be created with defineSkill.`);
 		}
-		// Agent Skills naming rules, which MCP clients verify.
-		if (
-			skill.name.length > 64 ||
-			!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(skill.name)
-		) {
-			throw new Error(
-				`Invalid skill name "${skill.name}". Use lowercase letters, numbers and single hyphens.`,
-			);
-		}
-
 		if (names.has(skill.name)) {
-			throw new Error(`Skill "${skill.name}" is registered more than once.`);
-		}
-
-		names.add(skill.name);
-
-		if (!skill.description.trim() || skill.description.length > 1024) {
 			throw new Error(
-				`Skill "${skill.name}" needs a description of up to 1024 characters.`,
+				`${label} registers skill "${skill.name}" more than once.`,
 			);
 		}
-		if (!skill.instructions) {
-			throw new Error(`Skill "${skill.name}" needs instructions.`);
-		}
+		names.add(skill.name);
+	}
+};
 
-		for (const scope of skill.scopes) {
-			if (!getExternalCapability(config, scope)) {
-				throw new Error(`Skill "${skill.name}" uses unknown scope "${scope}".`);
-			}
-		}
+/** Checks MCP and agent skills at config time. A skill shared by several agents is checked once. */
+const checkSkillDefinitions = (config: ResolvedLucidConfig) => {
+	const checked = new Set<SkillDefinition>(config.ai.mcp.skills);
+	checkPlacement("MCP", config.ai.mcp.skills);
+
+	for (const agent of config.ai.agents) {
+		checkPlacement(`Agent "${agent.key}"`, agent.skills);
+		for (const skill of agent.skills) checked.add(skill);
 	}
 
-	const disabled = new Set<string>();
-
-	for (const name of config.ai.skills.disabled) {
-		if (disabled.has(name)) {
-			throw new Error(`Skill "${name}" is disabled more than once.`);
-		}
-
-		disabled.add(name);
-
-		if (!names.has(name)) {
-			throw new Error(`Disabled skill "${name}" is not registered.`);
-		}
-	}
+	for (const skill of checked) checkSkill(config, skill);
 };
 
 export default checkSkillDefinitions;

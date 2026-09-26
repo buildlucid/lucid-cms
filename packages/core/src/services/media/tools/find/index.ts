@@ -4,7 +4,7 @@ import defineTool from "../../../../libs/tools/define-tool.js";
 import findMedia from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const findMediaTool = defineTool({
+export const findMediaMcpTool = defineTool({
 	target: "mcp",
 	name: "media_find",
 	description:

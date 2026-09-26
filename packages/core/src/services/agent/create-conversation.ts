@@ -1,38 +1,21 @@
-import { randomUUID } from "node:crypto";
-import constants from "../../constants/constants.js";
-import { agentFormatter } from "../../libs/formatters/index.js";
-import { AgentConversationsRepository } from "../../libs/repositories/index.js";
 import type { AgentConversation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkAgentAccess from "./helpers/check-agent-access.js";
+import insertConversation from "./helpers/insert-conversation.js";
 
+/** Creates an empty chat with an agent the user can use. */
 const createConversation: ServiceFn<
-	[{ userId: number; title?: string; routineId?: string }],
+	[{ agentKey: string; userId: number; title?: string }],
 	AgentConversation
 > = async (context, input) => {
-	const now = new Date().toISOString();
-	const AgentConversations = new AgentConversationsRepository(context.db);
-
-	const created = await AgentConversations.createSingle({
-		data: {
-			id: randomUUID(),
-			title: input.title ?? constants.agent.defaultTitle,
-			user_id: input.userId,
-			routine_id: input.routineId ?? null,
-			active_run_id: null,
-			created_at: now,
-			updated_at: now,
-		},
-		returnAll: true,
-		validation: { enabled: true },
+	const access = await checkAgentAccess(context, {
+		userId: input.userId,
+		agentKey: input.agentKey,
+		level: "use",
 	});
-	if (created.error) return created;
+	if (access.error) return access;
 
-	return {
-		error: undefined,
-		data: agentFormatter.formatConversation({
-			conversation: created.data,
-		}),
-	};
+	return insertConversation(context, input);
 };
 
 export default createConversation;

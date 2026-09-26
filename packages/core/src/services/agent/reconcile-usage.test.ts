@@ -7,7 +7,7 @@ import createServiceContext from "../../utils/services/create-service-context.js
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { formatDbTimestamp } from "../ai/helpers/date-helpers.js";
-import createConversation from "./create-conversation.js";
+import insertConversation from "./helpers/insert-conversation.js";
 import storePendingUsage from "./helpers/store-pending-usage.js";
 import storeUsage from "./helpers/store-usage.js";
 import reconcileUsage from "./reconcile-usage.js";
@@ -15,12 +15,6 @@ import startRun from "./start-run.js";
 
 const request = vi.fn();
 let connectionId = 0;
-vi.mock("./helpers/check-agent-access.js", () => ({
-	default: async (_context: unknown, input: { userId: number }) => ({
-		error: undefined,
-		data: { userId: input.userId, permissions: [], superAdmin: false },
-	}),
-}));
 vi.mock("../connection/token-manager.js", () => ({
 	default: async () => ({
 		error: undefined,
@@ -69,11 +63,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			ai: {
-				...config.ai,
-				enabled: true,
-				agent: { ...config.ai.agent, enabled: true },
-			},
+			ai: { ...config.ai, enabled: true },
 		},
 		database,
 		translationStore: createTranslationStore({
@@ -103,7 +93,10 @@ beforeAll(async () => {
 afterAll(() => testConfig.destroy());
 
 const pending = async (old = true) => {
-	const conversation = await createConversation(context, { userId });
+	const conversation = await insertConversation(context, {
+		agentKey: "test",
+		userId,
+	});
 	if (conversation.error) throw new Error(JSON.stringify(conversation.error));
 	const run = await startRun(context, {
 		userId,

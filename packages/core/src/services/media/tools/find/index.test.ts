@@ -5,7 +5,7 @@ import type { Media } from "../../../../types/response.js";
 import createServiceContext from "../../../../utils/services/create-service-context.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import getMultiple from "../../get-multiple.js";
-import { findMediaTool } from "./index.js";
+import { findMediaMcpTool } from "./index.js";
 
 vi.mock("../../get-multiple.js");
 
@@ -77,7 +77,7 @@ test("uses media filters and returns localized, bounded search details", async (
 		data: { data: [image], count: 21 },
 	});
 	const context = await makeContext();
-	const prepared = await findMediaTool[toolDefinitionInternal].prepareInput({
+	const prepared = await findMediaMcpTool[toolDefinitionInternal].prepareInput({
 		query: { filter: { title: { value: "Cascade", operator: "contains" } } },
 		contentLocale: "fr",
 	});

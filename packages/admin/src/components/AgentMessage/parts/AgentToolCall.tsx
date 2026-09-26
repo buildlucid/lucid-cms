@@ -29,6 +29,8 @@ const AgentToolCall: Component<{ part: ToolPart }> = (props) => {
 				return T()("agent.tool.pending", { name });
 			case "running":
 				return T()("agent.tool.running", { name });
+			case "skipped":
+				return T()("agent.tool.skipped", { name });
 			case "failed":
 				return T()("agent.tool.failed", { name });
 			case "complete":
@@ -57,7 +59,12 @@ const AgentToolCall: Component<{ part: ToolPart }> = (props) => {
 						<Match when={props.part.status === "complete"}>
 							<FaSolidCheck />
 						</Match>
-						<Match when={props.part.status === "failed"}>
+						<Match
+							when={
+								props.part.status === "failed" ||
+								props.part.status === "skipped"
+							}
+						>
 							<FaSolidXmark />
 						</Match>
 					</Switch>

@@ -381,4 +381,74 @@
 				color-mix(in srgb, var(--lucid-primary) 22%, transparent);
 		}
 	}
+
+	/* Agent Markdown: replies, user messages and the chat box share one look */
+
+	.agent-markdown {
+		@apply wrap-break-word text-sm leading-7 text-title;
+	}
+
+	.agent-markdown a {
+		@apply text-primary underline;
+	}
+
+	.agent-markdown blockquote {
+		@apply border-l-2 border-border pl-3;
+	}
+
+	.agent-markdown code {
+		@apply rounded bg-input px-1 text-xs;
+	}
+
+	.agent-markdown :is(h1, h2, h3) {
+		@apply font-semibold;
+	}
+
+	.agent-markdown li {
+		@apply my-0.5;
+	}
+
+	.agent-markdown ol {
+		@apply list-decimal pl-5;
+	}
+
+	.agent-markdown ul {
+		@apply list-disc pl-5;
+	}
+
+	.agent-markdown p + p {
+		@apply mt-3;
+	}
+
+	.agent-markdown pre {
+		@apply my-3 overflow-x-auto rounded-md bg-input p-3;
+	}
+
+	.agent-markdown pre code {
+		@apply bg-transparent p-0;
+	}
+
+	.agent-markdown table {
+		@apply my-3 block overflow-x-auto;
+	}
+
+	.agent-markdown :is(td, th) {
+		@apply border border-border px-2 py-1;
+	}
+
+	/* inside a user message bubble, which is already the input colour */
+	.agent-markdown.agent-markdown-bubble :is(code, pre) {
+		@apply bg-card;
+	}
+
+	/* what people write reads as lines, so paragraphs sit closer together */
+	.agent-markdown.agent-markdown-tight p + p {
+		@apply mt-1;
+	}
+
+	/* the chat box's TipTap placeholder */
+	.agent-markdown .is-editor-empty:first-child::before {
+		@apply pointer-events-none float-left h-0 text-muted;
+		content: attr(data-placeholder);
+	}
 }

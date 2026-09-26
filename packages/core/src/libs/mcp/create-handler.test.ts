@@ -88,7 +88,7 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 		...base,
 		ai: {
 			...base.ai,
-			tools: { definitions: [restricted, echo], disabled: [] },
+			mcp: { enabled: true, tools: [restricted, echo], skills: [] },
 		},
 	};
 	const context = createServiceContext({
@@ -112,7 +112,13 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 	const listed = await modernList.json();
 	expect(
 		listed.result.tools.map((tool: { name: string }) => tool.name),
-	).toEqual(["test_echo"]);
+	).toEqual([
+		"collections_describe",
+		"collections_list",
+		"documents_find",
+		"documents_get",
+		"test_echo",
+	]);
 
 	const call = await handler.fetch(
 		post("tools/call", {
@@ -131,29 +137,6 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 	const legacyBody = await legacyList.text();
 	expect(legacyBody).toContain("test_echo");
 	expect(legacyBody).not.toContain("test_restricted");
-
-	const disabled = createHandler({
-		context: {
-			...context,
-			config: {
-				...config,
-				ai: {
-					...config.ai,
-					tools: { ...config.ai.tools, disabled: ["test_echo"] },
-				},
-			},
-		},
-		authority: { principal: { type: "system" }, scopes: [] },
-	});
-	const disabledList = await disabled.fetch(post("tools/list", {}));
-	expect((await disabledList.json()).result.tools).toEqual([]);
-	const disabledCall = await disabled.fetch(
-		post("tools/call", {
-			name: "test_echo",
-			arguments: { message: "hello" },
-		}),
-	);
-	expect((await disabledCall.json()).error).toBeDefined();
 });
 
 test("tool input is parsed once, so transforms reach the handler intact", async () => {
@@ -176,7 +159,10 @@ test("tool input is parsed once, so transforms reach the handler intact", async 
 		context: createServiceContext({
 			config: {
 				...base,
-				ai: { ...base.ai, tools: { definitions: [measure], disabled: [] } },
+				ai: {
+					...base.ai,
+					mcp: { enabled: true, tools: [measure], skills: [] },
+				},
 			},
 			database: await testConfig.getDatabase(),
 			translationStore: createTranslationStore({
@@ -214,7 +200,10 @@ test("oversized text results ask the client for a smaller request", async () => 
 		context: createServiceContext({
 			config: {
 				...base,
-				ai: { ...base.ai, tools: { definitions: [large], disabled: [] } },
+				ai: {
+					...base.ai,
+					mcp: { enabled: true, tools: [large], skills: [] },
+				},
 			},
 			database: await testConfig.getDatabase(),
 			translationStore: createTranslationStore({
@@ -235,7 +224,6 @@ test("oversized text results ask the client for a smaller request", async () => 
 
 test("serves skills the caller can use with digests that match SKILL.md", async () => {
 	const seo = defineSkill({
-		target: "mcp",
 		name: "test-seo",
 		description: "Use when writing content.",
 		instructions: `
@@ -246,7 +234,6 @@ test("serves skills the caller can use with digests that match SKILL.md", async 
 		scopes: [],
 	});
 	const locales = defineSkill({
-		target: "mcp",
 		name: "test-locales",
 		description: "Use when translating content.",
 		instructions: "Translate every locale.",
@@ -259,7 +246,7 @@ test("serves skills the caller can use with digests that match SKILL.md", async 
 				...base,
 				ai: {
 					...base.ai,
-					skills: { definitions: [seo, locales], disabled: [] },
+					mcp: { enabled: true, tools: [], skills: [seo, locales] },
 				},
 			},
 			database: await testConfig.getDatabase(),

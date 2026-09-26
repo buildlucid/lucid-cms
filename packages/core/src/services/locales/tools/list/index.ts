@@ -3,7 +3,7 @@ import defineTool from "../../../../libs/tools/define-tool.js";
 import listLocales from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const listLocalesTool = defineTool({
+export const listLocalesMcpTool = defineTool({
 	target: "mcp",
 	name: "locales_list",
 	description:

@@ -1,13 +1,9 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
-import type {
-	AgentToolDefinition,
-	McpToolDefinition,
-	ToolDefinition,
-} from "./types.js";
+import { getCoreMcpTools } from "./core-tools.js";
+import { toolDefinitionInternal } from "./tool-definition-internal.js";
+import type { McpToolDefinition, ToolDefinition } from "./types.js";
 
-export const toolDefinitionInternal = Symbol(
-	"@lucidcms/core/tool-definition-internal",
-);
+export { toolDefinitionInternal } from "./tool-definition-internal.js";
 
 export const isToolDefinition = (value: unknown): value is ToolDefinition =>
 	typeof value === "object" &&
@@ -18,45 +14,22 @@ export const isToolDefinition = (value: unknown): value is ToolDefinition =>
 
 const registries = new WeakMap<
 	ResolvedLucidConfig,
-	{
-		agent: ReadonlyMap<string, AgentToolDefinition>;
-		mcp: ReadonlyMap<string, McpToolDefinition>;
-	}
+	ReadonlyMap<string, McpToolDefinition>
 >();
 
-export function getToolRegistry(
+/** Returns the MCP tools, in name order. */
+export const getMcpToolRegistry = (
 	config: ResolvedLucidConfig,
-	target: "agent",
-): ReadonlyMap<string, AgentToolDefinition>;
-export function getToolRegistry(
-	config: ResolvedLucidConfig,
-	target: "mcp",
-): ReadonlyMap<string, McpToolDefinition>;
-/** Returns active definitions for one target, in name order. */
-export function getToolRegistry(
-	config: ResolvedLucidConfig,
-	target: "agent" | "mcp",
-) {
+): ReadonlyMap<string, McpToolDefinition> => {
 	const existing = registries.get(config);
-	if (existing) return existing[target];
+	if (existing) return existing;
 
-	const disabled = new Set(config.ai.tools.disabled);
-	const definitions = config.ai.tools.definitions
-		.filter((definition) => !disabled.has(definition.name))
-		.sort((a, b) => a.name.localeCompare(b.name));
-	const registry = {
-		agent: new Map(
-			definitions
-				.filter((definition) => definition.target === "agent")
-				.map((definition) => [definition.name, definition]),
-		),
-		mcp: new Map(
-			definitions
-				.filter((definition) => definition.target === "mcp")
-				.map((definition) => [definition.name, definition]),
-		),
-	};
+	const registry = new Map(
+		[...getCoreMcpTools(), ...config.ai.mcp.tools]
+			.sort((a, b) => a.name.localeCompare(b.name))
+			.map((definition) => [definition.name, definition]),
+	);
 	registries.set(config, registry);
 
-	return registry[target];
-}
+	return registry;
+};

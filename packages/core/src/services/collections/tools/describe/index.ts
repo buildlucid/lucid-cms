@@ -8,7 +8,7 @@ import defineTool from "../../../../libs/tools/define-tool.js";
 import describeCollection from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const describeCollectionTool = defineTool({
+export const describeCollectionMcpTool = defineTool({
 	target: "mcp",
 	name: "collections_describe",
 	description:

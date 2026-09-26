@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { type Insertable, sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { AgentRunOutcome } from "../../types/response.js";
 import type { Checkpoint } from "../agent/types.js";
@@ -6,6 +6,7 @@ import type { LucidDatabase } from "../db/client/index.js";
 import {
 	type AgentRunStatus,
 	agentRunsTable,
+	type LucidAgentRuns,
 } from "../db/tables/agent-runs.js";
 import StaticRepository from "./parents/static-repository.js";
 
@@ -14,6 +15,59 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		super(db, agentRunsTable);
 	}
 
+	/** Concurrent retries may create the same run; preserve the first checkpoint. */
+	async createOnce(data: Insertable<LucidAgentRuns>) {
+		const result = await this.executeQuery(
+			() =>
+				this.db
+					.insertInto("lucid_agent_runs")
+					.values(data)
+					.onConflict((conflict) =>
+						conflict
+							.column("id")
+							.doUpdateSet({ id: data.id })
+							.where(
+								"lucid_agent_runs.conversation_id",
+								"=",
+								data.conversation_id,
+							),
+					)
+					.returning("id")
+					.executeTakeFirst(),
+			{ method: "createOnce" },
+		);
+
+		return result.response;
+	}
+	/** A run with its conversation's agent and owner, which decide the access it needs. */
+	async selectForExecution(runId: string) {
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.selectFrom("lucid_agent_runs")
+					.innerJoin(
+						"lucid_agent_conversations",
+						"lucid_agent_conversations.id",
+						"lucid_agent_runs.conversation_id",
+					)
+					.select([
+						"lucid_agent_runs.id",
+						"lucid_agent_runs.conversation_id",
+						"lucid_agent_runs.routine_id",
+						"lucid_agent_runs.user_id",
+						"lucid_agent_runs.status",
+						"lucid_agent_runs.checkpoint",
+						"lucid_agent_runs.execution_version",
+						"lucid_agent_conversations.agent_key",
+						"lucid_agent_conversations.user_id as conversation_user_id",
+					])
+					.where("lucid_agent_runs.id", "=", runId)
+					.executeTakeFirst(),
+			{ method: "selectForExecution" },
+		);
+
+		return exec.response;
+	}
 	async selectMultipleForRoutine(props: {
 		routineId: string;
 		page: number;

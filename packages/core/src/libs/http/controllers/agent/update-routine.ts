@@ -17,7 +17,8 @@ const factory = createFactory();
 
 const updateRoutineController = factory.createHandlers(
 	describeRoute({
-		description: "Updates an agent routine.",
+		description:
+			"Updates an agent routine. Routines defined in code can only be paused or resumed.",
 		tags: ["agent"],
 		summary: "Update Agent Routine",
 		responses: openAPI.responses({
@@ -36,13 +37,19 @@ const updateRoutineController = factory.createHandlers(
 	validate("json", controllerSchemas.updateRoutine.body),
 	async (c) => {
 		const context = createServiceContext(c);
+		const body = c.req.valid("json");
+		const param = c.req.valid("param");
 
 		const routine = await serviceWrapper(agentServices.updateRoutine, {
 			transaction: false,
 		})(context, {
-			id: c.req.valid("param").id,
+			id: param.id,
 			userId: c.get("auth").id,
-			...c.req.valid("json"),
+			name: body.name,
+			instructions: body.instructions,
+			cron: body.cron,
+			timezone: body.timezone,
+			enabled: body.enabled,
 		});
 		if (routine.error) throw new LucidAPIError(routine.error);
 

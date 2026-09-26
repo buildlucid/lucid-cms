@@ -2,6 +2,7 @@ import type {
 	AgentCompaction,
 	AgentContext,
 	AgentConversation,
+	AgentInput,
 	AgentMessage,
 	AgentRoutine,
 	AgentRun,
@@ -13,6 +14,7 @@ import { contextLimits } from "../agent/context.js";
 import type { ConversationContext } from "../agent/types.js";
 import type { LucidAgentCompactions } from "../db/tables/agent-compactions.js";
 import type { LucidAgentConversations } from "../db/tables/agent-conversations.js";
+import type { LucidAgentInputs } from "../db/tables/agent-inputs.js";
 import type { LucidAgentMessages } from "../db/tables/agent-messages.js";
 import type { LucidAgentRoutines } from "../db/tables/agent-routines.js";
 import type { LucidAgentRuns } from "../db/tables/agent-runs.js";
@@ -71,6 +73,7 @@ const formatConversation = (props: {
 	compactions?: Pick<Select<LucidAgentCompactions>, "id" | "created_at">[];
 }): AgentConversation => ({
 	id: props.conversation.id,
+	queuePaused: Boolean(props.conversation.queue_paused),
 	context: formatContext({
 		context: props.conversation.context,
 		active: props.conversation.active_run_id !== null,
@@ -85,6 +88,7 @@ const formatConversation = (props: {
 				),
 			}
 		: {}),
+	agentKey: props.conversation.agent_key,
 	title: props.conversation.title,
 	userId: props.conversation.user_id,
 	routineId: props.conversation.routine_id,
@@ -99,6 +103,18 @@ const formatConversation = (props: {
 			: null,
 	createdAt: formatter.formatDate(props.conversation.created_at),
 	updatedAt: formatter.formatDate(props.conversation.updated_at),
+});
+
+/** Only undelivered input is shown, so anything not yet claimed is pending. */
+const formatInput = (props: {
+	input: Select<LucidAgentInputs>;
+}): AgentInput => ({
+	id: props.input.id,
+	text: props.input.text,
+	status: props.input.status === "claimed" ? "claimed" : "pending",
+	delivery: props.input.target_run_id
+		? { kind: "steer", targetRunId: props.input.target_run_id }
+		: { kind: "queue" },
 });
 
 const formatMessage = (props: {
@@ -132,7 +148,10 @@ const formatRoutine = (props: {
 	lastRun?: LastRunPropT;
 }): AgentRoutine => ({
 	id: props.routine.id,
-	title: props.routine.title,
+	agentKey: props.routine.agent_key,
+	key: props.routine.key,
+	source: props.routine.source,
+	name: props.routine.name,
 	instructions: props.routine.instructions,
 	cron: props.routine.cron,
 	timezone: props.routine.timezone,
@@ -154,6 +173,7 @@ const formatRoutine = (props: {
 export default {
 	formatContext,
 	formatConversation,
+	formatInput,
 	formatMessage,
 	formatRun,
 	formatRoutine,

@@ -1,4 +1,5 @@
 import type { AdminConfig } from "@lucidcms/admin/types";
+import type { AgentDefinition } from "../libs/agent/types.js";
 import type { AuthProvider } from "../libs/auth-providers/types.js";
 import type CollectionBuilder from "../libs/collection/builders/collection-builder/index.js";
 import type DatabaseAdapter from "../libs/db/adapter-base.js";
@@ -40,7 +41,7 @@ import type {
 } from "../libs/resources/types.js";
 import type { SeedDefinition } from "../libs/seed/types.js";
 import type { SkillDefinition } from "../libs/skills/types.js";
-import type { ToolDefinition } from "../libs/tools/types.js";
+import type { McpToolDefinition } from "../libs/tools/types.js";
 
 /** Content languages available to editors. Omit localization to keep content unassigned. */
 export type LocalizationConfig = {
@@ -210,9 +211,6 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
-/** Where tools and skills are exposed. */
-export type AiTarget = "mcp" | "agent";
-
 /** Choose which AI features are available when `ai.enabled` is true. */
 export type AiFeatureConfig = {
 	/** Allow image generation. Defaults to true. */
@@ -330,22 +328,16 @@ export interface LucidConfig {
 				 * Per-feature AI availability. Omitted features default to enabled.
 				 */
 				features?: AiFeatureConfig;
-				/** Expose registered tools over MCP at `/lucid/mcp`. Defaults to false. */
-				mcp?: boolean | { enabled: boolean };
-				/** Enable agent chat and routines. Requires a connected Lucid AI account. Defaults to true. */
-				agent?: boolean | { enabled: boolean };
-				/** Tool definitions registered by core, plugins and the project. */
-				tools?: {
-					definitions?: ToolDefinition[];
-					/** Tool names to hide and reject at execution. */
-					disabled?: string[];
+				/** Serve tools and skills over MCP at `/lucid/mcp`. Disabled unless configured. */
+				mcp?: {
+					/** Defaults to true once `mcp` is configured. */
+					enabled?: boolean;
+					/** Additional MCP tools. Lucid's content tools are always available. */
+					tools?: McpToolDefinition[];
+					skills?: SkillDefinition[];
 				};
-				/** Skill definitions registered by plugins and the project. */
-				skills?: {
-					definitions?: SkillDefinition[];
-					/** Skill names to hide. */
-					disabled?: string[];
-				};
+				/** Agents available in the admin, created with `defineAgent`. Requires a connected Lucid AI account. */
+				agents?: AgentDefinition[];
 		  };
 	/**
 	 * Content localization settings.
@@ -648,16 +640,12 @@ export interface ResolvedLucidConfig {
 	ai: {
 		enabled: boolean;
 		features: Required<AiFeatureConfig>;
-		mcp: { enabled: boolean };
-		agent: { enabled: boolean };
-		tools: {
-			definitions: ToolDefinition[];
-			disabled: string[];
+		mcp: {
+			enabled: boolean;
+			tools: McpToolDefinition[];
+			skills: SkillDefinition[];
 		};
-		skills: {
-			definitions: SkillDefinition[];
-			disabled: string[];
-		};
+		agents: AgentDefinition[];
 	};
 	localization: LocalizationConfig;
 	i18n: Required<I18nConfig>;

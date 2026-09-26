@@ -1,8 +1,6 @@
-import type { AiTarget } from "../../types/config.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 
 export type DefineSkillOptions<Name extends string> = {
-	target: AiTarget | readonly AiTarget[];
 	/** Stable, unique skill name using lowercase letters, numbers and single hyphens. */
 	name: Name;
 	/** What the skill does and when to use it. Clients show this before loading the instructions. */
@@ -13,10 +11,9 @@ export type DefineSkillOptions<Name extends string> = {
 	scopes: readonly ExternalScope[];
 };
 
-/** A skill definition created with `defineSkill`. */
+/** A skill definition created with `defineSkill`. Register it with `ai.mcp.skills` or an agent's `skills`. */
 export type SkillDefinition<Name extends string = string> = {
 	readonly type: "skill-definition";
-	readonly targets: readonly AiTarget[];
 	readonly name: Name;
 	readonly description: string;
 	readonly instructions: string;

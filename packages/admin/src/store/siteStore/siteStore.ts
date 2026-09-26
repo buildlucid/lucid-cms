@@ -20,7 +20,7 @@ const defaultAiSettings = (): AiSettings => ({
 		altGeneration: true,
 		customFieldGeneration: true,
 	},
-	agent: { enabled: true },
+	agents: [],
 });
 
 const [get, set] = createStore<SiteStoreT>({
@@ -36,7 +36,8 @@ const [get, set] = createStore<SiteStoreT>({
 	hasAnyAiFeatureEnabled() {
 		return (
 			this.ai.enabled &&
-			(this.ai.agent.enabled || Object.values(this.ai.features).some(Boolean))
+			(this.ai.agents.length > 0 ||
+				Object.values(this.ai.features).some(Boolean))
 		);
 	},
 });

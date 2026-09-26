@@ -45,7 +45,12 @@ const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 		if (claim.error) return claim;
 		if (!claim.data || connection.error) continue;
 
-		const access = await checkAgentAccess(context, { userId: routine.user_id });
+		//* code routines act as the system, so only their agent needs to exist
+		const access = await checkAgentAccess(context, {
+			userId: routine.user_id,
+			agentKey: routine.agent_key,
+			level: "use",
+		});
 		if (access.error) continue;
 
 		const run = await startRoutineRun(context, { routine });

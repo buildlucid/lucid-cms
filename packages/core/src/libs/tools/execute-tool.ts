@@ -2,8 +2,9 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import { getValidPermissions } from "../permission/registry.js";
 import { filterExternalScopes } from "../permission/scopes.js";
-import { getToolRegistry, toolDefinitionInternal } from "./registry.js";
+import { getMcpToolRegistry, toolDefinitionInternal } from "./registry.js";
 import type {
+	AgentToolDefinition,
 	AgentToolExecution,
 	McpToolExecution,
 	ToolPreparationResult,
@@ -11,7 +12,6 @@ import type {
 
 type ExecutionArgs<Execution> = {
 	context: ServiceContext;
-	name: string;
 	input: unknown;
 	execution: Execution;
 };
@@ -61,8 +61,10 @@ const execute = async <Execution, Result, Requirement>(
 	}
 };
 
-export const executeMcpTool = (args: ExecutionArgs<McpToolExecution>) => {
-	const tool = getToolRegistry(args.context.config, "mcp").get(args.name);
+export const executeMcpTool = (
+	args: ExecutionArgs<McpToolExecution> & { name: string },
+) => {
+	const tool = getMcpToolRegistry(args.context.config).get(args.name);
 	const scopes = new Set(
 		filterExternalScopes(
 			args.context.config,
@@ -76,12 +78,14 @@ export const executeMcpTool = (args: ExecutionArgs<McpToolExecution>) => {
 	);
 };
 
-export const executeAgentTool = (args: ExecutionArgs<AgentToolExecution>) => {
-	const tool = getToolRegistry(args.context.config, "agent").get(args.name);
+/** Agent tools are resolved from the run's agent, since names are only unique within one agent. */
+export const executeAgentTool = (
+	args: ExecutionArgs<AgentToolExecution> & { tool: AgentToolDefinition },
+) => {
 	const permissions = new Set(getValidPermissions(args.context.config));
 	const authority = args.execution.authority;
 
-	return execute(args, tool, tool?.permissions ?? [], (required) =>
+	return execute(args, args.tool, args.tool.permissions, (required) =>
 		required.every(
 			(permission) =>
 				permissions.has(permission) &&

@@ -9,8 +9,11 @@ import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkAgentAccess from "./check-agent-access.js";
+import checkAgentAccess, {
+	getConversationLevel,
+} from "./check-agent-access.js";
 import compactContext from "./compact-context.js";
+import consumeSteering from "./consume-steering.js";
 import executeToolStep from "./execute-tool-step.js";
 import loadHistory from "./load-history.js";
 import resolveCapabilities from "./resolve-capabilities.js";
@@ -29,9 +32,11 @@ const driveRun: ServiceFn<
 	const turnLimit = mode === "routine" ? limits.routineTurns : limits.chatTurns;
 	const deadline = Date.now() + constants.agent.sliceMs;
 
-	// Access is resolved once per slice. Write tools recheck it before they run.
+	// Access is resolved once per slice. Write tools recheck it for their approver.
 	const access = await checkAgentAccess(context, {
 		userId: run.user_id,
+		agentKey: run.agent_key,
+		level: getConversationLevel(run.conversation_user_id),
 		requireConnection: true,
 	});
 	if (access.error) {
@@ -44,7 +49,7 @@ const driveRun: ServiceFn<
 	//* resolved before each model turn, since trimmed context adds the history tool
 	const resolve = () =>
 		resolveCapabilities(context, {
-			authority: access.data,
+			...access.data,
 			mode,
 			hasHistory: checkpoint.trimmed === true,
 		});
@@ -57,7 +62,7 @@ const driveRun: ServiceFn<
 		);
 	}
 
-	while (true) {
+	runLoop: while (true) {
 		if (session.signal.aborted || Date.now() > deadline) {
 			return session.handOff();
 		}
@@ -69,6 +74,11 @@ const driveRun: ServiceFn<
 				? { error: undefined, data: false }
 				: await loadHistory(context, { run, checkpoint, capabilities });
 			if (history.error) return history;
+
+			//* steering is taken before each model request and before each tool
+			const steered = await consumeSteering(context, { checkpoint, session });
+			if (steered.error) return steered;
+			if (steered.data) continue;
 
 			const manual =
 				checkpoint.purpose === "compact" &&
@@ -104,10 +114,9 @@ const driveRun: ServiceFn<
 						continue;
 					}
 
+					const AiGenerations = new AiGenerationsRepository(context.db);
 					const usage = checkpoint.compaction
-						? await new AiGenerationsRepository(
-								context.db,
-							).selectSingleByRequestId({
+						? await AiGenerations.selectSingleByRequestId({
 								requestId: checkpoint.compaction.requestId,
 								select: ["status"],
 							})
@@ -203,6 +212,10 @@ const driveRun: ServiceFn<
 		while (checkpoint.cursor < checkpoint.calls.length) {
 			if (session.signal.aborted) return session.handOff();
 
+			const steered = await consumeSteering(context, { checkpoint, session });
+			if (steered.error) return steered;
+			if (steered.data) continue runLoop;
+
 			const call = checkpoint.calls[checkpoint.cursor];
 
 			if (!call) break;
@@ -214,7 +227,7 @@ const driveRun: ServiceFn<
 				checkpoint,
 				session,
 				capabilities,
-				authority: access.data,
+				authority: access.data.authority,
 			});
 			if (step.error) return step;
 			if (step.data === "access-revoked") {

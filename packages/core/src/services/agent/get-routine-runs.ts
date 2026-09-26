@@ -6,14 +6,14 @@ import {
 import type { GetRoutineRunsQueryParams } from "../../schemas/agent.js";
 import type { AgentRun, AgentUsage } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getOwnedRoutine from "./helpers/get-owned-routine.js";
+import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import sumCredits from "./helpers/sum-credits.js";
 
 const getRoutineRuns: ServiceFn<
 	[{ id: string; userId: number; query: GetRoutineRunsQueryParams }],
 	{ data: AgentRun[]; count: number }
 > = async (context, input) => {
-	const routine = await getOwnedRoutine(context, input);
+	const routine = await getAccessibleRoutine(context, input);
 	if (routine.error) return routine;
 
 	const AgentRuns = new AgentRunsRepository(context.db);

@@ -1,7 +1,8 @@
-import type { AgentMessage, AgentStreamEvent } from "@types";
+import type { AgentMessage, AgentRunStatus, AgentStreamEvent } from "@types";
 import { describe, expect, it } from "vitest";
 import {
 	applyStreamEvent,
+	awaitsDelivery,
 	findPendingQuestion,
 	placeCompactions,
 } from "./agent-chat";
@@ -139,5 +140,95 @@ describe("placeCompactions", () => {
 
 		expect([...placed.before]).toEqual(["b"]);
 		expect(placed.trailing).toBe(true);
+	});
+});
+
+it("a skipped tool dismisses its approval and steering receipts deduplicate on reconnect", () => {
+	const before = apply([
+		{ type: "start", runId: "run", messageId: "assistant" },
+		{
+			type: "question",
+			runId: "run",
+			messageId: "assistant",
+			id: "write",
+			kind: "approval",
+			question: "Approve?",
+		},
+	]);
+	const skipped = apply(
+		[
+			{
+				type: "tool",
+				messageId: "assistant",
+				id: "write",
+				name: "write",
+				input: {},
+				status: "skipped",
+				output: { skipped: true },
+			},
+		],
+		before,
+	);
+	expect(findPendingQuestion(skipped, "run")).toBeUndefined();
+	const event: AgentStreamEvent = {
+		type: "message",
+		message: {
+			id: "correction",
+			conversationId,
+			runId: "run",
+			position: 2,
+			role: "user",
+			parts: [{ type: "text", text: "Explain instead" }],
+			createdAt: "2026-09-26T00:00:00.000Z",
+		},
+	};
+	expect(apply([event, event], skipped).map((message) => message.id)).toEqual([
+		"assistant",
+		"correction",
+	]);
+});
+
+describe("awaitsDelivery", () => {
+	const queued = { id: "input", text: "Next", status: "pending" as const };
+	const run = (status: AgentRunStatus) => ({
+		id: "run",
+		status,
+		outcome: null,
+		errorMessage: null,
+	});
+
+	it("checks back only while the server owes the chat a new run", () => {
+		const inputs = [{ ...queued, delivery: { kind: "queue" as const } }];
+		expect(
+			awaitsDelivery({
+				inputs,
+				queuePaused: false,
+				latestRun: run("completed"),
+			}),
+		).toBe(true);
+		//* a stream follows a working run, and a paused queue waits for the user
+		expect(
+			awaitsDelivery({ inputs, queuePaused: false, latestRun: run("running") }),
+		).toBe(false);
+		expect(
+			awaitsDelivery({
+				inputs,
+				queuePaused: true,
+				latestRun: run("completed"),
+			}),
+		).toBe(false);
+		//* a waiting run only continues when it is steered
+		expect(
+			awaitsDelivery({ inputs, queuePaused: false, latestRun: run("waiting") }),
+		).toBe(false);
+		expect(
+			awaitsDelivery({
+				inputs: [
+					{ ...queued, delivery: { kind: "steer", targetRunId: "run" } },
+				],
+				queuePaused: false,
+				latestRun: run("waiting"),
+			}),
+		).toBe(true);
 	});
 });

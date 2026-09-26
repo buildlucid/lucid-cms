@@ -22,11 +22,12 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
 import api from "@/services/api";
 import T from "@/translations";
+import { getAgentName } from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 
 const pageSize = 10;
 
-/** A routine's instructions and schedule, with each run it has made. */
+/** A routine's instructions and schedule, with each run it has made. Routines defined in code can only be paused or run. */
 const AgentRoutinePage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
@@ -61,7 +62,7 @@ const AgentRoutinePage: Component = () => {
 	return (
 		<PageLayout.Root>
 			<PageLayout.Header
-				title={routine()?.title}
+				title={routine()?.name}
 				description={
 					routine()
 						? `${describeSchedule(routine()?.cron ?? "")} · ${routine()?.timezone}`
@@ -78,13 +79,15 @@ const AgentRoutinePage: Component = () => {
 								>
 									{T()("agent.routine.run.now")}
 								</Button>
-								<Button
-									size="sm"
-									variant="outline"
-									onClick={() => setEditOpen(true)}
-								>
-									{T()("common.edit")}
-								</Button>
+								<Show when={current().source === "database"}>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => setEditOpen(true)}
+									>
+										{T()("common.edit")}
+									</Button>
+								</Show>
 								<ActionMenu
 									actions={[
 										{
@@ -104,6 +107,7 @@ const AgentRoutinePage: Component = () => {
 											type: "button",
 											icon: "trash",
 											variant: "danger",
+											show: current().source === "database",
 											onClick: () => setDeleteOpen(true),
 										},
 									]}
@@ -141,6 +145,10 @@ const AgentRoutinePage: Component = () => {
 									<DetailsList
 										items={[
 											{
+												label: T()("agent.select.label"),
+												value: getAgentName(current().agentKey),
+											},
+											{
 												label: T()("common.status"),
 												type: "pill",
 												value: current().enabled
@@ -160,6 +168,13 @@ const AgentRoutinePage: Component = () => {
 												) : (
 													"-"
 												),
+											},
+											{
+												label: T()("agent.routine.source"),
+												value:
+													current().source === "code"
+														? T()("agent.routine.code")
+														: T()("agent.routine.database"),
 											},
 											{
 												label: T()("common.created.at"),

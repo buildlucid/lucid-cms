@@ -1,11 +1,14 @@
 import { expect, test, vi } from "vitest";
 import z from "zod";
+import defineAgent from "../agent/define-agent.js";
 import checkToolDefinitions from "../config/checks/check-tool-definitions.js";
 import processConfig from "../config/process-config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import defineSkill from "../skills/define-skill.js";
+import { getCoreAgentTools, getCoreMcpTools } from "./core-tools.js";
 import defineTool from "./define-tool.js";
-import { getToolRegistry } from "./registry.js";
+import { getMcpToolRegistry } from "./registry.js";
+import type { AgentToolDefinition } from "./types.js";
 
 const adapter = {
 	connect: vi.fn(),
@@ -41,68 +44,6 @@ const pluginTool = defineTool({
 		},
 	}),
 });
-
-test("normalizes shorthand and applies plugin registration before disabling tools", async () => {
-	const config = await processConfig(
-		{
-			secrets: "a".repeat(64),
-			ai: {
-				mcp: true,
-				tools: { definitions: [echo], disabled: ["plugin_dummy"] },
-			},
-			plugins: [
-				{
-					key: "test-plugin",
-					lucid: "*",
-					configure: (draft) => {
-						draft.ai.tools.definitions.push(pluginTool);
-					},
-				},
-			],
-		},
-		{ resolvedDb: adapter, skipValidation: true },
-	);
-	expect(config.ai.mcp).toEqual({ enabled: true });
-	const names = [...getToolRegistry(config, "mcp").keys()];
-	expect(names).toContain("test_echo");
-	expect(names).not.toContain("plugin_dummy");
-});
-
-test("ai boolean shorthand keeps the remaining AI defaults", async () => {
-	const config = await processConfig(
-		{ secrets: "a".repeat(64), ai: false },
-		{ resolvedDb: adapter, skipValidation: true },
-	);
-	expect(config.ai).toMatchObject({
-		enabled: false,
-		features: { imageGeneration: true },
-		mcp: { enabled: false },
-		tools: { disabled: [] },
-	});
-});
-
-test("rejects duplicate tools and unknown disable entries", async () => {
-	const options = { resolvedDb: adapter };
-	await expect(
-		processConfig(
-			{
-				secrets: "a".repeat(64),
-				ai: { tools: { definitions: [echo, echo] } },
-			},
-			options,
-		),
-	).rejects.toThrow('Tool "test_echo" is registered more than once.');
-	await expect(
-		processConfig(
-			{
-				secrets: "a".repeat(64),
-				ai: { tools: { disabled: ["typo"] } },
-			},
-			options,
-		),
-	).rejects.toThrow('Disabled tool "typo" is not registered.');
-});
-
 const agentEcho = defineTool({
 	target: "agent",
 	name: "test_echo",
@@ -113,81 +54,144 @@ const agentEcho = defineTool({
 	readOnly: true,
 	handler: async () => ({ error: undefined, data: { output: {} } }),
 });
+const agent = (key: string, tools: AgentToolDefinition[] = [agentEcho]) =>
+	defineAgent({ key, name: "Test", description: "Test", tools });
 
-test("separate targets can reuse a name and disabling it disables both", async () => {
+test("plugins can add MCP tools and agents while configuring", async () => {
 	const config = await processConfig(
 		{
 			secrets: "a".repeat(64),
-			ai: { tools: { definitions: [echo, agentEcho] } },
+			ai: { mcp: { tools: [echo] } },
+			plugins: [
+				{
+					key: "test-plugin",
+					lucid: "*",
+					configure: (draft) => {
+						draft.ai.mcp.tools.push(pluginTool);
+						draft.ai.agents.push(agent("plugin"));
+					},
+				},
+			],
 		},
-		{ resolvedDb: adapter },
+		{ resolvedDb: adapter, skipValidation: true },
 	);
-	expect(getToolRegistry(config, "agent").get("test_echo")).toEqual(agentEcho);
-	expect(getToolRegistry(config, "mcp").get("test_echo")).toEqual(echo);
-
-	const disabled = {
-		...config,
-		ai: {
-			...config.ai,
-			tools: { ...config.ai.tools, disabled: ["test_echo"] },
-		},
-	};
-	expect(getToolRegistry(disabled, "agent").has("test_echo")).toBe(false);
-	expect(getToolRegistry(disabled, "mcp").has("test_echo")).toBe(false);
+	expect(config.ai.mcp.enabled).toBe(true);
+	expect([...getMcpToolRegistry(config).keys()]).toEqual(
+		[
+			...getCoreMcpTools().map((tool) => tool.name),
+			"plugin_dummy",
+			"test_echo",
+		].sort(),
+	);
+	expect(config.ai.agents.map((agent) => agent.key)).toEqual(["plugin"]);
 });
 
-test("the provider limit includes ask, history, finish and the optional skill loader", async () => {
+test("ai boolean shorthand keeps the remaining AI defaults", async () => {
+	const config = await processConfig(
+		{ secrets: "a".repeat(64), ai: false },
+		{ resolvedDb: adapter, skipValidation: true },
+	);
+	expect(config.ai).toMatchObject({
+		enabled: false,
+		features: { imageGeneration: true },
+		mcp: { enabled: false, tools: [], skills: [] },
+		agents: [],
+	});
+});
+
+test("names are unique within a placement, which only holds its own target", async () => {
+	const options = { resolvedDb: adapter };
+	await expect(
+		processConfig(
+			{ secrets: "a".repeat(64), ai: { mcp: { tools: [echo, echo] } } },
+			options,
+		),
+	).rejects.toThrow('MCP registers tool "test_echo" more than once.');
+	await expect(
+		processConfig(
+			{
+				secrets: "a".repeat(64),
+				ai: {
+					agents: [
+						// @ts-expect-error agents only accept agent tools
+						defineAgent({ ...agent("test"), tools: [echo] }),
+					],
+				},
+			},
+			options,
+		),
+	).rejects.toThrow(
+		'Agent "test" tools must be created with defineTool and target "agent".',
+	);
+
+	const config = await processConfig(
+		{
+			secrets: "a".repeat(64),
+			ai: { mcp: { tools: [echo] }, agents: [agent("one"), agent("two")] },
+		},
+		options,
+	);
+	expect(getMcpToolRegistry(config).get("test_echo")).toEqual(echo);
+	expect(config.ai.agents[1]?.tools).toEqual([agentEcho]);
+});
+
+test("content tool names are reserved in each placement", async () => {
+	const options = { resolvedDb: adapter };
+	await expect(
+		processConfig(
+			{
+				secrets: "a".repeat(64),
+				ai: { mcp: { tools: [...getCoreMcpTools().slice(0, 1)] } },
+			},
+			options,
+		),
+	).rejects.toThrow('MCP registers tool "collections_list" more than once.');
+	await expect(
+		processConfig(
+			{
+				secrets: "a".repeat(64),
+				ai: { agents: [agent("test", [...getCoreAgentTools().slice(0, 1)])] },
+			},
+			options,
+		),
+	).rejects.toThrow(
+		'Agent "test" registers tool "collections_list" more than once.',
+	);
+});
+
+test("each agent's provider limit includes content and runner tools", async () => {
 	const base = await processConfig(
 		{ secrets: "a".repeat(64) },
 		{ resolvedDb: adapter },
 	);
-	const tools = Array.from({ length: 61 }, (_, i) => ({
+	const tools = Array.from({ length: 55 }, (_, i) => ({
 		...agentEcho,
 		name: `test_${i}`,
 	}));
 	const skill = defineSkill({
-		target: "agent",
 		name: "test-skill",
 		description: "Test",
 		instructions: "Test",
 		scopes: [],
 	});
-	const config = {
+	const withAgent = (definition: ReturnType<typeof agent>) => ({
 		...base,
-		ai: {
-			...base.ai,
-			tools: { definitions: tools, disabled: [] },
-			skills: { definitions: [skill], disabled: [] },
-		},
-	};
+		ai: { ...base.ai, agents: [definition] },
+	});
 
-	expect(() => checkToolDefinitions(config)).toThrow("60 custom agent tools");
 	expect(() =>
-		checkToolDefinitions({
-			...config,
-			ai: { ...config.ai, tools: { ...config.ai.tools, disabled: ["test_0"] } },
-		}),
+		checkToolDefinitions(
+			withAgent(defineAgent({ ...agent("test", tools), skills: [skill] })),
+		),
+	).toThrow('Agent "test" can have at most 54 additional tools');
+	expect(() =>
+		checkToolDefinitions(withAgent(agent("test", tools))),
 	).not.toThrow();
 	expect(() =>
-		checkToolDefinitions({
-			...config,
-			ai: {
-				...config.ai,
-				skills: { ...config.ai.skills, disabled: ["test-skill"] },
-			},
-		}),
-	).not.toThrow();
-	expect(() =>
-		checkToolDefinitions({
-			...config,
-			ai: {
-				...config.ai,
-				skills: { definitions: [], disabled: [] },
-				tools: {
-					definitions: [...tools, { ...agentEcho, name: "one_too_many" }],
-					disabled: [],
-				},
-			},
-		}),
-	).toThrow("61 custom agent tools");
+		checkToolDefinitions(
+			withAgent(
+				agent("test", [...tools, { ...agentEcho, name: "one_too_many" }]),
+			),
+		),
+	).toThrow('Agent "test" can have at most 55 additional tools');
 });

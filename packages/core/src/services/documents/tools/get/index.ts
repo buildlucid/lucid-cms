@@ -8,7 +8,7 @@ import defineTool from "../../../../libs/tools/define-tool.js";
 import getDocument from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const getDocumentTool = defineTool({
+export const getDocumentMcpTool = defineTool({
 	target: "mcp",
 	name: "documents_get",
 	description: "Read one document and its selected content fields and bricks.",

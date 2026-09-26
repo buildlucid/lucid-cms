@@ -2,14 +2,14 @@ import { agentFormatter } from "../../libs/formatters/index.js";
 import { AgentMessagesRepository } from "../../libs/repositories/index.js";
 import type { AgentMessage } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getOwnedConversation from "./helpers/get-owned-conversation.js";
+import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 
 /** Returns a page of messages in display order, ending before the given position. */
 const getMessages: ServiceFn<
 	[{ conversationId: string; userId: number; before?: number; limit: number }],
 	AgentMessage[]
 > = async (context, input) => {
-	const conversation = await getOwnedConversation(context, {
+	const conversation = await getAccessibleConversation(context, {
 		id: input.conversationId,
 		userId: input.userId,
 	});

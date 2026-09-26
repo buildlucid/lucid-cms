@@ -1,5 +1,6 @@
 import type {
 	AgentCompaction,
+	AgentConversation,
 	AgentMessage,
 	AgentMessagePart,
 	AgentRunStatus,
@@ -38,7 +39,9 @@ export const applyStreamEvent = (
 	if (
 		event.type === "finish" ||
 		event.type === "error" ||
-		event.type === "context"
+		event.type === "context" ||
+		event.type === "inputs" ||
+		event.type === "next"
 	) {
 		return messages;
 	}
@@ -87,7 +90,16 @@ export const applyStreamEvent = (
 			const { runId: __, ...question } = part;
 			return { ...message, parts: upsertPart(message.parts, question) };
 		}
-		return { ...message, parts: upsertPart(message.parts, part) };
+		return {
+			...message,
+			parts: upsertPart(message.parts, part).map((existing) =>
+				part.status === "skipped" &&
+				existing.type === "question" &&
+				existing.id === part.id
+					? { ...existing, dismissed: true }
+					: existing,
+			),
+		};
 	});
 };
 
@@ -115,7 +127,10 @@ export const findPendingQuestion = (
 	for (const message of messages.toReversed()) {
 		if (message.runId !== runId) continue;
 		const question = message.parts.findLast(
-			(part) => part.type === "question" && part.answer === undefined,
+			(part) =>
+				part.type === "question" &&
+				part.answer === undefined &&
+				!part.dismissed,
 		);
 		if (question?.type === "question") return { runId, ...question };
 	}
@@ -144,4 +159,22 @@ export const placeCompactions = (
 		else trailing = true;
 	}
 	return { before, trailing };
+};
+
+/**
+ * Queued input is waiting on the server to start its run: nothing is streaming
+ * it, and no person needs to act first. The chat checks back until it starts.
+ */
+export const awaitsDelivery = (
+	conversation: Pick<AgentConversation, "inputs" | "queuePaused" | "latestRun">,
+) => {
+	if (!conversation.inputs?.length || conversation.queuePaused) return false;
+	const status = conversation.latestRun?.status;
+	if (isRunWorking(status)) return false;
+
+	//* a waiting run only continues for a steer; a plain follow-up waits for the answer
+	return (
+		status !== "waiting" ||
+		conversation.inputs.some((input) => input.delivery.kind === "steer")
+	);
 };

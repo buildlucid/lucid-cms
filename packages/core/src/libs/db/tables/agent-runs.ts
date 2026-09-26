@@ -17,7 +17,7 @@ export const agentRunsTable = defineTable("lucid_agent_runs", () => ({
 		id: { schema: z.uuid(), type: "text" },
 		conversation_id: { schema: z.uuid(), type: "text" },
 		routine_id: { schema: z.uuid().nullable(), type: "text" },
-		user_id: { schema: z.number(), type: "integer" },
+		user_id: { schema: z.number().nullable(), type: "integer" },
 		status: { schema: agentRunStatusSchema, type: "text" },
 		outcome: { schema: agentRunOutcomeSchema.nullable(), type: "text" },
 		summary: { schema: z.string().nullable(), type: "text" },
@@ -51,7 +51,8 @@ export interface LucidAgentRuns {
 	id: string;
 	conversation_id: string;
 	routine_id: string | null;
-	user_id: number;
+	/** Who the run acts for. Null when it acts as the system. */
+	user_id: number | null;
 	status: AgentRunStatus;
 	outcome: z.infer<typeof agentRunOutcomeSchema> | null;
 	summary: string | null;

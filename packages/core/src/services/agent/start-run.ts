@@ -10,18 +10,18 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
-import getOwnedConversation from "./helpers/get-owned-conversation.js";
 import titleFromMessage from "./helpers/title-from-message.js";
 
 /**
  * Records a user message and creates the queued run that answers it. The request
- * id becomes the run id, so resubmitting the same request is safe.
+ * id becomes the run id, so resubmitting the same request is safe. Callers check
+ * access first; the run acts for `userId`, or for the system when it is null.
  */
 const startRun: ServiceFn<
 	[
 		{
 			conversationId: string;
-			userId: number;
+			userId: number | null;
 			requestId: string;
 			routineId?: string;
 			/** Extra model context that is not shown as part of the message. */
@@ -33,13 +33,24 @@ const startRun: ServiceFn<
 	],
 	{ runId: string }
 > = async (context, input) => {
-	const conversation = await getOwnedConversation(context, {
-		id: input.conversationId,
-		userId: input.userId,
+	const AgentConversations = new AgentConversationsRepository(context.db);
+
+	const conversation = await AgentConversations.selectSingle({
+		select: ["context"],
+		where: [{ key: "id", operator: "=", value: input.conversationId }],
 	});
 	if (conversation.error) return conversation;
-
-	const AgentConversations = new AgentConversationsRepository(context.db);
+	if (!conversation.data) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 404,
+				message: copy("server:agent.conversation.not.found"),
+			},
+		};
+	}
+	const current = conversation.data.context;
 
 	const repaired = await AgentConversations.releaseFinishedClaims({
 		conversationId: input.conversationId,
@@ -86,31 +97,11 @@ const startRun: ServiceFn<
 			return { error: undefined, data: { runId: existing.data.id } };
 		}
 
-		// A new message replaces a paused or stopped run, but never a live one.
-		const activeRunId = conversation.data.active_run_id;
-
-		if (activeRunId && !input.purpose) {
-			const replaced = await runs.transition({
-				runId: activeRunId,
-				from: ["waiting", "interrupted"],
-				status: "cancelled",
-				now,
-			});
-			if (replaced.error) return replaced;
-			if (replaced.data) {
-				const released = await conversations.releaseRun({
-					conversationId: input.conversationId,
-					runId: activeRunId,
-					updatedAt: now,
-				});
-				if (released.error) return released;
-			}
-		}
-
 		const claim = await conversations.claimRun({
 			conversationId: input.conversationId,
 			runId: input.requestId,
 			updatedAt: now,
+			allowPaused: input.purpose === "compact",
 		});
 		if (claim.error) return claim;
 		if (!claim.data) {
@@ -143,39 +134,46 @@ const startRun: ServiceFn<
 			}
 		}
 
-		const current = conversation.data.context;
-		const run = await runs.createSingle({
-			data: {
-				id: input.requestId,
-				conversation_id: input.conversationId,
-				routine_id: input.routineId ?? null,
-				user_id: input.userId,
-				status: "queued",
-				checkpoint: {
-					version: 1,
-					messages: latest.data ? [summaryMessage(latest.data.summary)] : [],
-					//* the run loads history, including this message, after the latest summary
-					historyAfter: latest.data?.through_position ?? 0,
-					extraContext: input.context,
-					purpose: input.purpose,
-					model: current
-						? { id: current.model, tokenLimit: current.tokenLimit }
-						: undefined,
-					trimmed: latest.data ? true : undefined,
-					turns: 0,
-					nudges: 0,
-					requestId: randomUUID(),
-					messageId: randomUUID(),
-					parts: [],
-					calls: [],
-					cursor: 0,
-					phase: "model",
-				},
-				created_at: now,
-				updated_at: now,
+		const run = await runs.createOnce({
+			id: input.requestId,
+			conversation_id: input.conversationId,
+			routine_id: input.routineId ?? null,
+			user_id: input.userId,
+			status: "queued",
+			checkpoint: {
+				version: 1,
+				messages: latest.data ? [summaryMessage(latest.data.summary)] : [],
+				//* the run loads history, including this message, after the latest summary
+				historyAfter: latest.data?.through_position ?? 0,
+				extraContext: input.context,
+				purpose: input.purpose,
+				model: current
+					? { id: current.model, tokenLimit: current.tokenLimit }
+					: undefined,
+				trimmed: latest.data ? true : undefined,
+				turns: 0,
+				nudges: 0,
+				requestId: randomUUID(),
+				messageId: randomUUID(),
+				parts: [],
+				calls: [],
+				cursor: 0,
+				phase: "model",
 			},
+			created_at: now,
+			updated_at: now,
 		});
 		if (run.error) return run;
+		if (!run.data) {
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 409,
+					message: copy("server:agent.request.already.used"),
+				},
+			};
+		}
 
 		if (!input.purpose) {
 			const appended = await messages.appendOnce(message);

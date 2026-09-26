@@ -7,7 +7,12 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 		await db.schema
 			.createTable("lucid_agent_routines")
 			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
-			.addColumn("title", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("agent_key", adapter.getDataType("text"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("key", adapter.getDataType("text"))
+			.addColumn("source", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("name", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("instructions", adapter.getDataType("text"), (col) =>
 				col.notNull(),
 			)
@@ -19,7 +24,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 				col.notNull().defaultTo(adapter.getDefault("boolean", "true")),
 			)
 			.addColumn("user_id", adapter.getDataType("integer"), (col) =>
-				col.notNull().references("lucid_users.id").onDelete("cascade"),
+				col.references("lucid_users.id").onDelete("cascade"),
 			)
 			.addColumn("next_run_at", adapter.getDataType("timestamp"))
 			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
@@ -57,16 +62,29 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.execute();
 
 		await db.schema
+			.createIndex("uniq_agent_routines_key")
+			.unique()
+			.on("lucid_agent_routines")
+			.columns(["agent_key", "key"])
+			.execute();
+
+		await db.schema
 			.createTable("lucid_agent_conversations")
 			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			.addColumn("agent_key", adapter.getDataType("text"), (col) =>
+				col.notNull(),
+			)
 			.addColumn("title", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("user_id", adapter.getDataType("integer"), (col) =>
-				col.notNull().references("lucid_users.id").onDelete("cascade"),
+				col.references("lucid_users.id").onDelete("cascade"),
 			)
 			.addColumn("routine_id", adapter.getDataType("text"), (col) =>
 				col.references("lucid_agent_routines.id").onDelete("set null"),
 			)
 			.addColumn("active_run_id", adapter.getDataType("text"))
+			.addColumn("queue_paused", adapter.getDataType("boolean"), (col) =>
+				col.notNull().defaultTo(adapter.getDefault("boolean", "false")),
+			)
 			.addColumn("context", adapter.getDataType("json"))
 			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 				col
@@ -97,6 +115,12 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.execute();
 
 		await db.schema
+			.createIndex("idx_agent_conversations_agent_user")
+			.on("lucid_agent_conversations")
+			.columns(["agent_key", "user_id"])
+			.execute();
+
+		await db.schema
 			.createIndex("idx_agent_conversations_routine")
 			.on("lucid_agent_conversations")
 			.column("routine_id")
@@ -107,6 +131,43 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.on("lucid_agent_conversations")
 			.column("active_run_id")
 			.where("active_run_id", "is not", null)
+			.execute();
+
+		await db.schema
+			.createTable("lucid_agent_inputs")
+			.addColumn("sequence", adapter.getDataType("primary"), (col) =>
+				adapter.primaryKeyColumnBuilder(col),
+			)
+			.addColumn("id", adapter.getDataType("text"), (col) =>
+				col.notNull().unique(),
+			)
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col
+					.notNull()
+					.references("lucid_agent_conversations.id")
+					.onDelete("cascade"),
+			)
+			.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+				col.notNull().references("lucid_users.id").onDelete("cascade"),
+			)
+			.addColumn("text", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("target_run_id", adapter.getDataType("text"))
+			.addColumn("status", adapter.getDataType("text"), (col) =>
+				col.notNull().defaultTo("pending"),
+			)
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col.notNull(),
+			)
+			.execute();
+		await db.schema
+			.createIndex("idx_agent_inputs_pending")
+			.on("lucid_agent_inputs")
+			.columns(["conversation_id", "status", "sequence"])
+			.execute();
+		await db.schema
+			.createIndex("idx_agent_inputs_target")
+			.on("lucid_agent_inputs")
+			.column("target_run_id")
 			.execute();
 
 		await db.schema
@@ -122,7 +183,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 				col.references("lucid_agent_routines.id").onDelete("set null"),
 			)
 			.addColumn("user_id", adapter.getDataType("integer"), (col) =>
-				col.notNull().references("lucid_users.id").onDelete("cascade"),
+				col.references("lucid_users.id").onDelete("cascade"),
 			)
 			.addColumn("status", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("outcome", adapter.getDataType("text"))

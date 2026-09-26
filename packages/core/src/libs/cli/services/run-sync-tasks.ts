@@ -60,16 +60,19 @@ const runSyncTasks = async (options: {
 	};
 
 	try {
-		const [localesResult, collectionsResult, rolesResult] = await Promise.all([
-			syncServices.syncLocales(context),
-			syncServices.syncCollections(context),
-			syncServices.syncRoles(context),
-		]);
+		const [localesResult, collectionsResult, rolesResult, routinesResult] =
+			await Promise.all([
+				syncServices.syncLocales(context),
+				syncServices.syncCollections(context),
+				syncServices.syncRoles(context),
+				syncServices.syncAgentRoutines(context),
+			]);
 
 		for (const [label, result] of [
 			["locale", localesResult],
 			["collection", collectionsResult],
 			["roles", rolesResult],
+			["agent routine", routinesResult],
 		] as const) {
 			if (!result.error) continue;
 			cliLogger.error(

@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/agent.js";
-import getOwnedRun from "../../../../services/agent/helpers/get-owned-run.js";
+import getAccessibleRun from "../../../../services/agent/helpers/get-accessible-run.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -29,9 +29,10 @@ const watchRunController = factory.createHandlers(
 	validate("param", controllerSchemas.watchRun.params),
 	async (c) => {
 		const context = createServiceContext(c);
+		const param = c.req.valid("param");
 
-		const run = await getOwnedRun(context, {
-			runId: c.req.valid("param").id,
+		const run = await getAccessibleRun(context, {
+			runId: param.id,
 			userId: c.get("auth").id,
 		});
 		if (run.error) throw new LucidAPIError(run.error);

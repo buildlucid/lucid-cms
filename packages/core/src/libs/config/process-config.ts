@@ -12,6 +12,7 @@ import { getCapabilityRegistry } from "../permission/capabilities.js";
 import type { ConfigTransform } from "../runtime/types.js";
 import checkAdminRoutes from "./checks/check-admin-routes.js";
 import checkAdminSlots from "./checks/check-admin-slots.js";
+import checkAgentDefinitions from "./checks/check-agent-definitions.js";
 import checkCollectionEnvironmentVersionMap from "./checks/check-collection-environment-version-map.js";
 import checkCollectionLocalization from "./checks/check-collection-localization.js";
 import checkCollectionRouting from "./checks/check-collection-routing.js";
@@ -29,7 +30,6 @@ import checkToolDefinitions from "./checks/check-tool-definitions.js";
 import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
 import ConfigSchema from "./config-schema.js";
 import coreJobDefinitions from "./core-job-definitions.js";
-import coreToolDefinitions from "./core-tool-definitions.js";
 import resolveConfig from "./resolve-config.js";
 
 /**
@@ -66,10 +66,6 @@ const processConfig = async (
 	});
 
 	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
-	const toolDefinitions = [
-		...coreToolDefinitions,
-		...configRes.ai.tools.definitions,
-	];
 
 	configRes = produce(configRes, (draft) => {
 		draft.localization.locales = draft.localization.locales.map((locale) => ({
@@ -88,13 +84,6 @@ const processConfig = async (
 			...configRes.jobs,
 			definitions: jobDefinitions,
 		},
-		ai: {
-			...configRes.ai,
-			tools: {
-				...configRes.ai.tools,
-				definitions: toolDefinitions,
-			},
-		},
 	};
 
 	if (!options?.skipValidation) {
@@ -110,6 +99,7 @@ const processConfig = async (
 		// plugin toolkit definitions
 		checkToolkitDefinitions(configRes.plugins);
 
+		checkAgentDefinitions(configRes);
 		getCapabilityRegistry(configRes);
 		checkToolDefinitions(configRes);
 		checkSkillDefinitions(configRes);

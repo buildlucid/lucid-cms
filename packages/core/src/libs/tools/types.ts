@@ -12,13 +12,13 @@ import type {
 } from "../../utils/services/types.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import type { Permission } from "../permission/types.js";
-import { toolDefinitionInternal } from "./registry.js";
+import { toolDefinitionInternal } from "./tool-definition-internal.js";
 
 export type McpToolAuthority = Pick<LucidExternalAuth, "principal" | "scopes">;
 
-/** Current permissions of the user who started the chat or owns the routine. */
+/** Who an agent run acts for, with their current permissions. Routines defined in code act as the system. */
 export type AgentToolAuthority = {
-	userId: number;
+	principal: { type: "user"; userId: number } | { type: "system" };
 	permissions: readonly string[];
 	superAdmin: boolean;
 };
@@ -181,7 +181,7 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly readOnly: boolean;
 };
 
-/** An opaque tool definition created with defineTool. */
+/** An opaque tool definition created with defineTool. Register it with `ai.mcp.tools` or an agent's `tools`. */
 export type ToolDefinition<Name extends string = string> =
 	| AgentToolDefinition<Name>
 	| McpToolDefinition<Name>;

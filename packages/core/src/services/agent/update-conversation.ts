@@ -2,13 +2,13 @@ import { AgentConversationsRepository } from "../../libs/repositories/index.js";
 import type { AgentConversation } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getConversation from "./get-conversation.js";
-import getOwnedConversation from "./helpers/get-owned-conversation.js";
+import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 
 const updateConversation: ServiceFn<
 	[{ id: string; userId: number; title: string }],
 	AgentConversation
 > = async (context, input) => {
-	const conversation = await getOwnedConversation(context, input);
+	const conversation = await getAccessibleConversation(context, input);
 	if (conversation.error) return conversation;
 
 	const AgentConversations = new AgentConversationsRepository(context.db);

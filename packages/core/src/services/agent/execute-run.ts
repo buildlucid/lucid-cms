@@ -1,12 +1,50 @@
 import constants from "../../constants/constants.js";
 import { checkpointSchema } from "../../libs/agent/types.js";
 import { copy } from "../../libs/i18n/index.js";
-import { AgentRunsRepository } from "../../libs/repositories/index.js";
+import logger from "../../libs/logger/index.js";
+import {
+	AgentInputsRepository,
+	AgentRunsRepository,
+} from "../../libs/repositories/index.js";
 import { agentApprovalAnswerSchema } from "../../schemas/agent.js";
 import type { AgentRunStatus, AgentStreamEvent } from "../../types/response.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
+import advanceInputs from "./advance-inputs.js";
+import getInputsEvent from "./get-inputs-event.js";
 import driveRun from "./helpers/drive-run.js";
 import openRunSession from "./helpers/run-session.js";
+
+/**
+ * Starts the next queued message once a run lets go of the conversation, and
+ * tells an open chat so it follows the new run straight away.
+ */
+const continueQueue = async (
+	context: ServiceContext,
+	props: {
+		conversationId: string;
+		emit?: (event: AgentStreamEvent) => Promise<void>;
+	},
+) => {
+	const advanced = await advanceInputs(context, {
+		conversationId: props.conversationId,
+	});
+	if (advanced.error) {
+		logger.error({
+			message: `Agent input for conversation ${props.conversationId} could not advance: ${context.translate(advanced.error.message)}`,
+			scope: constants.logScopes.ai,
+		});
+		return;
+	}
+	if (!props.emit) return;
+
+	if (advanced.data.runId) {
+		await props.emit({ type: "next", runId: advanced.data.runId });
+	}
+	const queue = await getInputsEvent(context, {
+		conversationId: props.conversationId,
+	});
+	if (queue.data) await props.emit(queue.data);
+};
 
 /**
  * Drives a run for one slice: until it finishes, pauses for a person, or runs out
@@ -19,7 +57,7 @@ const executeRun: ServiceFn<
 			runId: string;
 			signal?: AbortSignal;
 			emit?: (event: AgentStreamEvent) => Promise<void>;
-			answer?: { questionId: string; answer: string };
+			answer?: { questionId: string; answer: string; userId: number };
 		},
 	],
 	{ status: AgentRunStatus }
@@ -27,18 +65,7 @@ const executeRun: ServiceFn<
 	const emit = input.emit ?? (async () => {});
 	const AgentRuns = new AgentRunsRepository(context.db);
 
-	const selected = await AgentRuns.selectSingle({
-		select: [
-			"id",
-			"conversation_id",
-			"routine_id",
-			"user_id",
-			"status",
-			"checkpoint",
-			"execution_version",
-		],
-		where: [{ key: "id", operator: "=", value: input.runId }],
-	});
+	const selected = await AgentRuns.selectForExecution(input.runId);
 	if (selected.error) return selected;
 
 	const run = selected.data;
@@ -75,7 +102,15 @@ const executeRun: ServiceFn<
 
 	const checkpoint = parsed.data;
 
-	if (checkpoint.pending) {
+	//* a steer replaces the answer a waiting run needs, and dismisses its question
+	const Inputs = new AgentInputsRepository(context.db);
+	const pendingInputs = await Inputs.selectDeliverable(run.conversation_id);
+	if (pendingInputs.error) return pendingInputs;
+
+	const steering = pendingInputs.data.some(
+		(item) => item.target_run_id === run.id,
+	);
+	if (checkpoint.pending && !steering) {
 		if (input.answer?.questionId !== checkpoint.pending.id) {
 			return {
 				data: undefined,
@@ -102,7 +137,8 @@ const executeRun: ServiceFn<
 		}
 
 		checkpoint.pending.answer = input.answer.answer;
-	} else if (input.answer) {
+		checkpoint.pending.answeredBy = input.answer.userId;
+	} else if (input.answer && !checkpoint.pending) {
 		return {
 			data: undefined,
 			error: {
@@ -132,6 +168,11 @@ const executeRun: ServiceFn<
 		);
 	} finally {
 		session.data.close();
+		//* only a watching chat needs telling; background workers skip the extra reads
+		await continueQueue(context, {
+			conversationId: run.conversation_id,
+			emit: input.emit,
+		});
 	}
 };
 

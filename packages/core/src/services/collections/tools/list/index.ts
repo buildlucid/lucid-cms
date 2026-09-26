@@ -6,7 +6,7 @@ import defineTool from "../../../../libs/tools/define-tool.js";
 import listCollections from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const listCollectionsTool = defineTool({
+export const listCollectionsMcpTool = defineTool({
 	target: "mcp",
 	name: "collections_list",
 	description:

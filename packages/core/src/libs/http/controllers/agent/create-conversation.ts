@@ -17,7 +17,8 @@ const factory = createFactory();
 
 const createConversationController = factory.createHandlers(
 	describeRoute({
-		description: "Creates an empty agent conversation.",
+		description:
+			"Creates an empty conversation with an agent the user can use.",
 		tags: ["agent"],
 		summary: "Create Agent Conversation",
 		responses: openAPI.responses({
@@ -32,13 +33,15 @@ const createConversationController = factory.createHandlers(
 	validate("json", controllerSchemas.createConversation.body),
 	async (c) => {
 		const context = createServiceContext(c);
+		const body = c.req.valid("json");
 
 		const conversation = await serviceWrapper(
 			agentServices.createConversation,
 			{ transaction: false },
 		)(context, {
 			userId: c.get("auth").id,
-			title: c.req.valid("json").title,
+			agentKey: body.agentKey,
+			title: body.title,
 		});
 		if (conversation.error) throw new LucidAPIError(conversation.error);
 

@@ -13,7 +13,9 @@ import {
 	agentMessagePartSchema,
 } from "../../../schemas/agent.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import checkAgentAccess from "./check-agent-access.js";
+import checkAgentAccess, {
+	getConversationLevel,
+} from "./check-agent-access.js";
 import type resolveCapabilities from "./resolve-capabilities.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 
@@ -124,6 +126,13 @@ const runToolCall = async (
 		case builtInTools.ask.name: {
 			const input = builtInTools.ask.input.safeParse(call.input);
 
+			if (run.user_id === null) {
+				return {
+					kind: "result",
+					output: { error: context.translate("server:agent.tool.unavailable") },
+					failed: true,
+				};
+			}
 			if (!input.success) {
 				return {
 					kind: "result",
@@ -215,10 +224,18 @@ const runToolCall = async (
 
 	let authority = props.authority;
 
+	//* an approved write acts for the person who approved it, with their current permissions
 	if (writes) {
-		const access = await checkAgentAccess(context, { userId: run.user_id });
+		const approver = checkpoint.pending?.answeredBy;
+		if (approver === undefined) return { kind: "revoked" };
+
+		const access = await checkAgentAccess(context, {
+			userId: approver,
+			agentKey: run.agent_key,
+			level: getConversationLevel(run.conversation_user_id),
+		});
 		if (access.error) return { kind: "revoked" };
-		authority = access.data;
+		authority = access.data.authority;
 
 		checkpoint.inFlightWrite = call.id;
 
@@ -243,7 +260,7 @@ const runToolCall = async (
 
 	const executed = await executeAgentTool({
 		context,
-		name: call.name,
+		tool,
 		input: call.input,
 		execution: {
 			authority,

@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/agent.js";
-import getOwnedRun from "../../../../services/agent/helpers/get-owned-run.js";
+import getAccessibleRun from "../../../../services/agent/helpers/get-accessible-run.js";
 import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
@@ -18,7 +18,7 @@ const factory = createFactory();
 const respondRunController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Answers a run's pending question or approval and streams the rest of its response.",
+			"Answers a run's pending question or approval and streams the rest of its response. An approved write uses the approver's permissions.",
 		tags: ["agent"],
 		summary: "Respond To Agent Run",
 		requestBody: openAPI.requestBody(controllerSchemas.respondRun.body),
@@ -34,8 +34,9 @@ const respondRunController = factory.createHandlers(
 	validate("json", controllerSchemas.respondRun.body),
 	async (c) => {
 		const context = createServiceContext(c);
+		const body = c.req.valid("json");
 
-		const run = await getOwnedRun(context, {
+		const run = await getAccessibleRun(context, {
 			runId: c.req.valid("param").id,
 			userId: c.get("auth").id,
 		});
@@ -47,7 +48,11 @@ const respondRunController = factory.createHandlers(
 				logError: true,
 			})(context, {
 				runId: run.data.id,
-				answer: c.req.valid("json"),
+				answer: {
+					questionId: body.questionId,
+					answer: body.answer,
+					userId: c.get("auth").id,
+				},
 				...stream,
 			}),
 		);

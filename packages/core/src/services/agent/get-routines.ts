@@ -6,29 +6,21 @@ import {
 import type { GetMultipleRoutinesQueryParams } from "../../schemas/agent.js";
 import type { AgentRoutine } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveAgentAccess from "./helpers/resolve-agent-access.js";
 
 const getRoutines: ServiceFn<
 	[{ userId: number; query: GetMultipleRoutinesQueryParams }],
 	{ data: AgentRoutine[]; count: number }
 > = async (context, input) => {
+	const access = await resolveAgentAccess(context, { userId: input.userId });
+	if (access.error) return access;
+
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
 
-	const routines = await AgentRoutines.selectMultipleFiltered({
-		select: [
-			"id",
-			"title",
-			"instructions",
-			"cron",
-			"timezone",
-			"enabled",
-			"user_id",
-			"next_run_at",
-			"created_at",
-			"updated_at",
-		],
-		where: [{ key: "user_id", operator: "=", value: input.userId }],
+	const routines = await AgentRoutines.selectMultipleFilteredForAccess({
+		userId: input.userId,
+		agentKeys: access.data,
 		queryParams: input.query,
-		validation: { enabled: true },
 	});
 	if (routines.error) return routines;
 

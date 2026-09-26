@@ -48,7 +48,7 @@ const SystemAiUsagePage: Component = () => {
 				cost: sort(),
 				durationMs: sort(),
 			},
-			pagination: pagination({ defaultPerPage: 20 }),
+			pagination: pagination({ defaultPerPage: 10 }),
 		},
 		singleSort: true,
 	});

@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import prepareToolInput from "./prepare-input.js";
-import { toolDefinitionInternal } from "./registry.js";
+import { toolDefinitionInternal } from "./tool-definition-internal.js";
 import type {
 	AgentToolDefinition,
 	DefineAgentToolOptions,

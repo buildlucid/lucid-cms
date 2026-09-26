@@ -6,6 +6,7 @@ import type DatabaseAdapter from "./adapter-base.js";
 import type {
 	LucidAgentCompactions,
 	LucidAgentConversations,
+	LucidAgentInputs,
 	LucidAgentMessages,
 	LucidAgentRoutines,
 	LucidAgentRuns,
@@ -303,6 +304,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_ai_generations: LucidAiGenerations;
 	lucid_agent_conversations: LucidAgentConversations;
 	lucid_agent_compactions: LucidAgentCompactions;
+	lucid_agent_inputs: LucidAgentInputs;
 	lucid_agent_messages: LucidAgentMessages;
 	lucid_agent_routines: LucidAgentRoutines;
 	lucid_agent_runs: LucidAgentRuns;

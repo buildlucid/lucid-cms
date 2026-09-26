@@ -13,6 +13,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import {
 	AgentCompactionsRepository,
 	AgentConversationsRepository,
+	AgentInputsRepository,
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../../libs/repositories/index.js";
@@ -31,8 +32,11 @@ export type SessionRun = {
 	id: string;
 	conversation_id: string;
 	routine_id: string | null;
-	user_id: number;
+	/** Who the run acts for. Null when it acts as the system. */
+	user_id: number | null;
 	execution_version: number;
+	agent_key: string;
+	conversation_user_id: number | null;
 };
 
 export type RunSession = NonNullable<
@@ -57,6 +61,7 @@ const openRunSession = async (
 ) => {
 	const { run, checkpoint } = props;
 	const runs = new AgentRunsRepository(context.db);
+	const Inputs = new AgentInputsRepository(context.db);
 	const token = randomUUID();
 
 	const claim = await runs.claimExecution({
@@ -166,6 +171,27 @@ const openRunSession = async (
 		error: undefined,
 		data: {
 			signal,
+			claimSteering: () => Inputs.claimSteering(run.id, token),
+			appendInput: async (input: {
+				id: string;
+				text: string;
+				createdAt: string;
+			}): ServiceResponse<undefined> => {
+				const AgentMessages = new AgentMessagesRepository(context.db);
+				const stored = await AgentMessages.upsertForRun({
+					id: input.id,
+					conversationId: run.conversation_id,
+					runId: run.id,
+					token,
+					role: "user",
+					parts: [{ type: "text", text: input.text }],
+					now: input.createdAt,
+				});
+				if (stored.error) return stored;
+				if (!stored.data) return superseded();
+
+				return { error: undefined, data: undefined };
+			},
 			emit,
 			/** Persists the assistant message being written, without the rest of the checkpoint. */
 			saveReply: () => saveReply(),
@@ -182,10 +208,24 @@ const openRunSession = async (
 				status: Exclude<AgentRunStatus, "queued" | "running">,
 				errorMessage?: string,
 			): ServiceResponse<{ status: AgentRunStatus }> => {
+				if (status === "failed" || status === "cancelled") {
+					const AgentConversations = new AgentConversationsRepository(
+						context.db,
+					);
+					const paused = await AgentConversations.pauseQueue({
+						conversationId: run.conversation_id,
+						runId: run.id,
+						token,
+					});
+					if (paused.error) return paused;
+					if (!paused.data) return superseded();
+				}
+
 				const saved = await write(status, {
 					errorMessage: errorMessage ?? null,
 				});
 				if (saved.error) return saved;
+
 				if (constants.agent.runStatuses.terminal.some((s) => s === status)) {
 					const AgentConversations = new AgentConversationsRepository(
 						context.db,

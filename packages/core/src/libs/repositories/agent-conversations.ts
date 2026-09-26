@@ -35,48 +35,112 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 				),
 			);
 	}
-	/** Lists a user's conversations with their latest run. */
-	async selectMultipleFilteredForUser(props: {
+	/** Lists a user's own chats for agents they use, and code routine chats for agents they manage. */
+	async selectMultipleFilteredForAccess(props: {
 		userId: number;
+		agentKeys: { use: string[]; manage: string[] };
 		queryParams: Partial<QueryParams>;
 	}) {
-		const exec = await this.executeQuery(
-			async () => {
-				const { main, count } = queryBuilder.main(
-					{
-						main: this.selectWithLatestRun()
-							.select([
-								"lucid_agent_conversations.id",
-								"lucid_agent_conversations.title",
-								"lucid_agent_conversations.user_id",
-								"lucid_agent_conversations.routine_id",
-								"lucid_agent_conversations.active_run_id",
-								"lucid_agent_conversations.context",
-								"lucid_agent_conversations.created_at",
-								"lucid_agent_conversations.updated_at",
-								"lucid_agent_runs.id as latest_run_id",
-								"lucid_agent_runs.status as latest_run_status",
-								"lucid_agent_runs.outcome as latest_run_outcome",
-								"lucid_agent_runs.error_message as latest_run_error",
-							])
-							.where("lucid_agent_conversations.user_id", "=", props.userId),
-						count: this.selectWithLatestRun()
-							.select((eb) => eb.fn.countAll<number>().as("count"))
-							.where("lucid_agent_conversations.user_id", "=", props.userId),
-					},
-					{
-						queryParams: props.queryParams,
-						database: this.dbAdapter.config,
-						meta: this.config.queryConfig,
-					},
-				);
+		const { main, count } = queryBuilder.main(
+			{
+				main: this.selectWithLatestRun()
+					.select([
+						"lucid_agent_conversations.id",
+						"lucid_agent_conversations.agent_key",
+						"lucid_agent_conversations.title",
+						"lucid_agent_conversations.user_id",
+						"lucid_agent_conversations.routine_id",
+						"lucid_agent_conversations.active_run_id",
+						"lucid_agent_conversations.queue_paused",
+						"lucid_agent_conversations.context",
+						"lucid_agent_conversations.created_at",
+						"lucid_agent_conversations.updated_at",
+						"lucid_agent_runs.id as latest_run_id",
+						"lucid_agent_runs.status as latest_run_status",
+						"lucid_agent_runs.outcome as latest_run_outcome",
+						"lucid_agent_runs.error_message as latest_run_error",
+					])
+					.where((eb) =>
+						eb.or([
+							...(props.agentKeys.use.length
+								? [
+										eb.and([
+											eb(
+												"lucid_agent_conversations.user_id",
+												"=",
+												props.userId,
+											),
+											eb(
+												"lucid_agent_conversations.agent_key",
+												"in",
+												props.agentKeys.use,
+											),
+										]),
+									]
+								: []),
+							...(props.agentKeys.manage.length
+								? [
+										eb.and([
+											eb("lucid_agent_conversations.user_id", "is", null),
+											eb(
+												"lucid_agent_conversations.agent_key",
+												"in",
+												props.agentKeys.manage,
+											),
+										]),
+									]
+								: []),
+						]),
+					),
+				count: this.selectWithLatestRun()
+					.select((eb) => eb.fn.countAll<number>().as("count"))
+					.where((eb) =>
+						eb.or([
+							...(props.agentKeys.use.length
+								? [
+										eb.and([
+											eb(
+												"lucid_agent_conversations.user_id",
+												"=",
+												props.userId,
+											),
+											eb(
+												"lucid_agent_conversations.agent_key",
+												"in",
+												props.agentKeys.use,
+											),
+										]),
+									]
+								: []),
+							...(props.agentKeys.manage.length
+								? [
+										eb.and([
+											eb("lucid_agent_conversations.user_id", "is", null),
+											eb(
+												"lucid_agent_conversations.agent_key",
+												"in",
+												props.agentKeys.manage,
+											),
+										]),
+									]
+								: []),
+						]),
+					),
+			},
+			{
+				queryParams: props.queryParams,
+				database: this.dbAdapter.config,
+				meta: this.config.queryConfig,
+			},
+		);
 
-				return Promise.all([
+		const exec = await this.executeQuery(
+			() =>
+				Promise.all([
 					main.execute(),
 					count?.executeTakeFirst() as Promise<{ count: number } | undefined>,
-				]);
-			},
-			{ method: "selectMultipleFilteredForUser" },
+				]),
+			{ method: "selectMultipleFilteredForAccess" },
 		);
 		if (exec.response.error) return exec.response;
 
@@ -85,10 +149,12 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 			mode: "multiple-count",
 			select: [
 				"id",
+				"agent_key",
 				"title",
 				"user_id",
 				"routine_id",
 				"active_run_id",
+				"queue_paused",
 				"context",
 				"created_at",
 				"updated_at",
@@ -99,16 +165,18 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 			],
 		});
 	}
-	async selectSingleForUser(props: { id: string; userId: number }) {
+	async selectSingleWithLatestRun(props: { id: string }) {
 		const exec = await this.executeQuery(
 			() =>
 				this.selectWithLatestRun()
 					.select([
 						"lucid_agent_conversations.id",
+						"lucid_agent_conversations.agent_key",
 						"lucid_agent_conversations.title",
 						"lucid_agent_conversations.user_id",
 						"lucid_agent_conversations.routine_id",
 						"lucid_agent_conversations.active_run_id",
+						"lucid_agent_conversations.queue_paused",
 						"lucid_agent_conversations.context",
 						"lucid_agent_conversations.created_at",
 						"lucid_agent_conversations.updated_at",
@@ -118,15 +186,15 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 						"lucid_agent_runs.error_message as latest_run_error",
 					])
 					.where("lucid_agent_conversations.id", "=", props.id)
-					.where("lucid_agent_conversations.user_id", "=", props.userId)
 					.executeTakeFirst(),
-			{ method: "selectSingleForUser" },
+			{ method: "selectSingleWithLatestRun" },
 		);
 
 		return exec.response;
 	}
 	/** Claims an idle conversation; retrying the same run id can finish a partial write. */
 	async claimRun(props: {
+		allowPaused?: boolean;
 		conversationId: string;
 		runId: string;
 		updatedAt: string;
@@ -137,6 +205,9 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 					.updateTable("lucid_agent_conversations")
 					.set({ active_run_id: props.runId, updated_at: props.updatedAt })
 					.where("id", "=", props.conversationId)
+					.$if(props.allowPaused !== true, (q) =>
+						q.where("queue_paused", "=", false),
+					)
 					.where((eb) =>
 						eb.or([
 							eb("active_run_id", "is", null),
@@ -191,6 +262,39 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 
 		return { error: undefined, data: undefined };
 	}
+	/** Pauses automatic follow-ups; worker calls are fenced by their execution token. */
+	async pauseQueue(props: {
+		conversationId: string;
+		runId: string;
+		token?: string;
+	}) {
+		const result = await this.executeQuery(
+			() =>
+				this.db
+					.updateTable("lucid_agent_conversations")
+					.set({ queue_paused: true })
+					.where("id", "=", props.conversationId)
+					.where("active_run_id", "=", props.runId)
+					.$if(props.token !== undefined, (query) =>
+						query.where((eb) =>
+							eb.exists(
+								eb
+									.selectFrom("lucid_agent_runs")
+									.select("id")
+									.where("id", "=", props.runId)
+									.where("execution_token", "=", props.token ?? null)
+									.where("status", "=", "running"),
+							),
+						),
+					)
+					.returning("id")
+					.executeTakeFirst(),
+			{ method: "pauseQueue" },
+		);
+		if (result.response.error) return result.response;
+
+		return { error: undefined, data: result.response.data !== undefined };
+	}
 	/**
 	 * Repairs claims left behind when a crash separates a run's write from its
 	 * conversation's. Claims without a run row are only released once they are stale.
@@ -202,7 +306,24 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 	}) {
 		let query = this.db
 			.updateTable("lucid_agent_conversations")
-			.set({ active_run_id: null, updated_at: props.now })
+			.set((eb) => ({
+				active_run_id: null,
+				updated_at: props.now,
+				queue_paused: eb.or([
+					eb("queue_paused", "=", true),
+					eb.exists(
+						eb
+							.selectFrom("lucid_agent_runs")
+							.select("id")
+							.whereRef(
+								"lucid_agent_runs.id",
+								"=",
+								"lucid_agent_conversations.active_run_id",
+							)
+							.where("status", "in", ["failed", "cancelled"]),
+					),
+				]),
+			}))
 			.where("active_run_id", "is not", null)
 			.where((eb) => {
 				const run = eb

@@ -8,7 +8,7 @@ import createServiceContext from "../../../../utils/services/create-service-cont
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import checkHasMediaStorage from "../../checks/check-has-media-storage.js";
 import getSingle from "../../get-single.js";
-import { previewMediaTool } from "./index.js";
+import { previewMediaMcpTool } from "./index.js";
 
 vi.mock("../../get-single.js");
 vi.mock("../../checks/check-has-media-storage.js");
@@ -93,7 +93,9 @@ const run = async (
 				mediaDelivery: { ...baseContext.mediaDelivery, processImage },
 			}
 		: baseContext;
-	const prepared = await previewMediaTool[toolDefinitionInternal].prepareInput({
+	const prepared = await previewMediaMcpTool[
+		toolDefinitionInternal
+	].prepareInput({
 		id: 1,
 		inline,
 	});

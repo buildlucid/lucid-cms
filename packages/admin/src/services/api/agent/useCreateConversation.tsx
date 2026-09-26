@@ -7,7 +7,7 @@ const useCreateConversation = (props?: {
 	onSuccess?: (response: ResponseBody<AgentConversation>) => void;
 }) =>
 	serviceHelpers.useMutationWrapper<
-		{ title?: string },
+		{ agentKey: string; title?: string },
 		ResponseBody<AgentConversation>
 	>({
 		mutationFn: (body) =>

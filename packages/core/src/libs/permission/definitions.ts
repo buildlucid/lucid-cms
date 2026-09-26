@@ -37,7 +37,6 @@ export const Permissions = {
 	AiCustomFieldValue: "ai:custom-field-value",
 	AiImageGenerate: "ai:image-generate",
 	AiAltGenerate: "ai:alt-generate",
-	AiAgentUse: "ai:agent",
 
 	// Integration permissions
 	IntegrationRead: "integrations:read",
@@ -204,15 +203,6 @@ export const PermissionGroups = Object.freeze({
 		},
 		core: true,
 		permissions: [
-			{
-				key: Permissions.AiAgentUse,
-				details: {
-					name: copy("admin:permissions.agent.use", {
-						defaultMessage: "Use Agent",
-					}),
-				},
-				core: true,
-			},
 			{
 				key: Permissions.AiCustomFieldValue,
 				details: {

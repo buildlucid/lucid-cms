@@ -25,9 +25,13 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 		<Show
 			when={props.message.role === "assistant"}
 			fallback={
-				<div class="ml-auto max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-input px-4 py-2.5 text-sm leading-6 text-title">
+				<div class="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-input px-4 py-2.5">
 					<For each={props.message.parts}>
-						{(part) => (part.type === "text" ? part.text : null)}
+						{(part) =>
+							part.type === "text" ? (
+								<AgentMarkdown text={part.text} tone="bubble" />
+							) : null
+						}
 					</For>
 				</div>
 			}

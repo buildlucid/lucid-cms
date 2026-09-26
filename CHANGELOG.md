@@ -4,7 +4,7 @@
 
 ### Features:
 
-- Added an MCP server at `/lucid/mcp` with built-in content tools, plus `defineTool` and `defineSkill` for registering scoped tools and skills through `ai.tools` and `ai.skills`.
+- Added an MCP server at `/lucid/mcp`, with `defineTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
 
 ## v0.19.0-alpha.0
 

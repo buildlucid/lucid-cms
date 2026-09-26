@@ -31,11 +31,12 @@ const getRoutineController = factory.createHandlers(
 	validate("param", controllerSchemas.getRoutine.params),
 	async (c) => {
 		const context = createServiceContext(c);
+		const param = c.req.valid("param");
 
 		const routine = await serviceWrapper(agentServices.getRoutine, {
 			transaction: false,
 		})(context, {
-			id: c.req.valid("param").id,
+			id: param.id,
 			userId: c.get("auth").id,
 		});
 		if (routine.error) throw new LucidAPIError(routine.error);

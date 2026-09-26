@@ -50,6 +50,12 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 				});
 				if (moved.error || !moved.data) return moved;
 
+				const paused = await AgentConversations.pauseQueue({
+					conversationId: run.conversation_id,
+					runId: run.id,
+				});
+				if (paused.error) return paused;
+
 				return AgentConversations.releaseRun({
 					conversationId: run.conversation_id,
 					runId: run.id,

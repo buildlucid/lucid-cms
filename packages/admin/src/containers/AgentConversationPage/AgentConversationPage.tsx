@@ -1,10 +1,13 @@
 import { useLocation, useNavigate, useParams } from "@solidjs/router";
+import type { AgentInput } from "@types";
 import {
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	For,
 	Match,
+	on,
 	onCleanup,
 	onMount,
 	Show,
@@ -12,7 +15,10 @@ import {
 } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import AgentCompactionDivider from "@/components/AgentCompactionDivider/AgentCompactionDivider";
-import AgentComposer from "@/components/AgentComposer/AgentComposer";
+import AgentComposer, {
+	type AgentComposerHandle,
+} from "@/components/AgentComposer/AgentComposer";
+import AgentComposerStack from "@/components/AgentComposerStack/AgentComposerStack";
 import AgentContextRing from "@/components/AgentContextRing/AgentContextRing";
 import AgentMessage from "@/components/AgentMessage/AgentMessage";
 import Alert from "@/components/Alert/Alert";
@@ -26,6 +32,7 @@ import RenameAgentConversationModal from "@/components/RenameAgentConversationMo
 import Spinner from "@/components/Spinner/Spinner";
 import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
 import T from "@/translations";
+import { getAgentName } from "@/utils/agent-access";
 import { placeCompactions } from "@/utils/agent-chat";
 
 //* how close to the bottom the page must be to follow new output
@@ -42,17 +49,35 @@ const AgentConversationPage: Component = () => {
 	const [renameOpen, setRenameOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
 	let following = true;
+	let composer: AgentComposerHandle | undefined;
 
 	// ----------------------------------------
 	// Memos
 	const conversation = createMemo(() => chat.conversation.data?.data);
 	const latestRun = createMemo(() => conversation()?.latestRun);
-	const approvalPending = createMemo(
-		() => chat.pendingQuestion()?.kind === "approval",
-	);
+	const description = createMemo(() => {
+		const current = conversation();
+		if (!current) return undefined;
+		const agent = getAgentName(current.agentKey);
+		return current.routineId ? `${agent} · ${T()("agent.routine.run")}` : agent;
+	});
 	const compactions = createMemo(() =>
 		placeCompactions(chat.messages, chat.compactions()),
 	);
+	const placeholder = createMemo(() => {
+		switch (chat.pendingQuestion()?.kind) {
+			case "question":
+				return T()("agent.composer.placeholder.answer");
+			case "approval":
+				return T()("agent.composer.placeholder.redirect");
+			default:
+				return T()(
+					chat.working()
+						? "agent.composer.placeholder.busy"
+						: "agent.composer.placeholder",
+				);
+		}
+	});
 	const runError = createMemo(() => {
 		const run = latestRun();
 		return !chat.streaming() && run?.status === "failed"
@@ -62,12 +87,29 @@ const AgentConversationPage: Component = () => {
 
 	// ----------------------------------------
 	// Functions
-	const submit = (text: string) => {
+	/** Answers a waiting question; typed text for an approval redirects the run instead of approving it. */
+	const submit = (text: string, mode: "send" | "steer") => {
+		const question = chat.pendingQuestion();
+		if (question?.kind === "question") return chat.respond(question, text);
+		return chat.send(text, question ? "steer" : mode);
+	};
+	const answer = (text: string) => {
 		const question = chat.pendingQuestion();
 		if (question) void chat.respond(question, text);
-		else {
-			void chat.send(text);
+	};
+	/** Editing takes a queued message back into the chat box. */
+	const edit = async (input: AgentInput) => {
+		if (await chat.updateInput({ kind: "cancel", id: input.id })) {
+			composer?.insert(input.text);
 		}
+	};
+	const editLast = () => {
+		const last = chat.inputs.findLast(
+			(input) => input.status === "pending" && input.delivery.kind === "queue",
+		);
+		if (!last) return false;
+		void edit(last);
+		return true;
 	};
 	//* a marker before the first loaded message may belong to an earlier page
 	const compactedBefore = (id: string, index: number) =>
@@ -93,6 +135,16 @@ const AgentConversationPage: Component = () => {
 		window.addEventListener("scroll", onScroll, { passive: true });
 		onCleanup(() => window.removeEventListener("scroll", onScroll));
 	});
+	//* a new question needs an answer, so the chat box is ready for it
+	createEffect(
+		on(
+			() => chat.pendingQuestion()?.id,
+			(id) => {
+				if (id) composer?.focus();
+			},
+			{ defer: true },
+		),
+	);
 	//* keeps the latest output in view while replies and widgets render
 	const follow = new ResizeObserver(() => {
 		if (following) scrollToEnd();
@@ -105,9 +157,7 @@ const AgentConversationPage: Component = () => {
 		<PageLayout.Root>
 			<PageLayout.Header
 				title={conversation()?.title}
-				description={
-					conversation()?.routineId ? T()("agent.routine.run") : undefined
-				}
+				description={description()}
 				actions={
 					<>
 						<Link variant="outline" size="sm" href="/lucid/agent">
@@ -175,7 +225,7 @@ const AgentConversationPage: Component = () => {
 											<AgentMessage
 												message={message}
 												pendingQuestionId={chat.pendingQuestion()?.id}
-												onAnswer={submit}
+												onAnswer={answer}
 											/>
 										</>
 									)}
@@ -209,19 +259,46 @@ const AgentConversationPage: Component = () => {
 							</div>
 							<div class="sticky bottom-0 bg-linear-to-t from-background from-70% to-transparent pt-6 pb-4 md:pb-6">
 								<AgentComposer
+									ref={(handle) => {
+										composer = handle;
+									}}
 									autofocus={true}
-									placeholder={
-										approvalPending()
-											? T()("agent.composer.approval")
-											: chat.pendingQuestion()
-												? T()("agent.composer.reply")
-												: T()("agent.composer.placeholder")
+									draftKey={params.conversationId}
+									placeholder={placeholder()}
+									queueable={true}
+									busy={chat.working()}
+									onStop={
+										chat.working() || chat.pendingQuestion()
+											? () => void chat.stop()
+											: undefined
 									}
-									disabled={approvalPending()}
-									busy={chat.working() && !chat.pendingQuestion()}
-									onStop={() => void chat.stop()}
 									onSubmit={submit}
-									accessory={
+									onEditLast={editLast}
+									top={
+										<AgentComposerStack
+											inputs={chat.inputs}
+											paused={chat.queuePaused()}
+											question={chat.pendingQuestion()}
+											canSteer={chat.activeRunId() !== undefined}
+											onSteer={(input) => {
+												const targetRunId = chat.activeRunId();
+												if (targetRunId) {
+													void chat.updateInput({
+														kind: "steer",
+														id: input.id,
+														targetRunId,
+													});
+												}
+											}}
+											onEdit={(input) => void edit(input)}
+											onCancel={(input) =>
+												void chat.updateInput({ kind: "cancel", id: input.id })
+											}
+											onResume={() => void chat.updateInput({ kind: "resume" })}
+											onClear={() => void chat.updateInput({ kind: "clear" })}
+										/>
+									}
+									end={
 										<Show when={chat.context()}>
 											{(context) => (
 												<AgentContextRing

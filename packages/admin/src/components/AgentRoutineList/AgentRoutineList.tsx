@@ -1,6 +1,6 @@
 import { A, useNavigate } from "@solidjs/router";
 import type { AgentRoutine } from "@types";
-import { type Component, createSignal, For, Show } from "solid-js";
+import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import DateText from "@/components/DateText/DateText";
@@ -9,9 +9,10 @@ import Pill from "@/components/Pill/Pill";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
 import api from "@/services/api";
 import T from "@/translations";
+import { getAgentAccess, getAgentName } from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 
-/** Routines as rows with their schedule, last run and actions. */
+/** Routines as rows with their schedule, last run and actions. Routines defined in code can only be paused or run. */
 const AgentRoutineList: Component<{ routines: AgentRoutine[] }> = (props) => {
 	// ----------------------------------------
 	// State & Mutations
@@ -26,6 +27,10 @@ const AgentRoutineList: Component<{ routines: AgentRoutine[] }> = (props) => {
 	});
 
 	// ----------------------------------------
+	// Memos
+	const showAgent = createMemo(() => getAgentAccess().all.length > 1);
+
+	// ----------------------------------------
 	// Render
 	return (
 		<>
@@ -37,10 +42,20 @@ const AgentRoutineList: Component<{ routines: AgentRoutine[] }> = (props) => {
 								href={`/lucid/agent/routines/${routine.id}`}
 								class="min-w-0 grow after:absolute after:inset-0 focus:outline-hidden focus-visible:after:ring-1 focus-visible:after:ring-inset focus-visible:after:ring-primary"
 							>
-								<span class="block truncate text-sm font-medium text-title">
-									{routine.title}
+								<span class="flex items-center gap-2">
+									<span class="truncate text-sm font-medium text-title">
+										{routine.name}
+									</span>
+									<Show when={routine.source === "code"}>
+										<Pill size="xs" variant="neutral">
+											{T()("agent.routine.code")}
+										</Pill>
+									</Show>
 								</span>
 								<span class="mt-0.5 block truncate text-xs text-muted">
+									<Show when={showAgent()}>
+										{getAgentName(routine.agentKey)} ·{" "}
+									</Show>
 									{describeSchedule(routine.cron)} · {routine.timezone}
 								</span>
 							</A>
@@ -96,6 +111,7 @@ const AgentRoutineList: Component<{ routines: AgentRoutine[] }> = (props) => {
 											label: T()("common.edit"),
 											type: "button",
 											icon: "pen",
+											show: routine.source === "database",
 											onClick: () => {
 												setSelected(routine);
 												setEditOpen(true);
@@ -106,6 +122,7 @@ const AgentRoutineList: Component<{ routines: AgentRoutine[] }> = (props) => {
 											type: "button",
 											icon: "trash",
 											variant: "danger",
+											show: routine.source === "database",
 											onClick: () => {
 												setSelected(routine);
 												setDeleteOpen(true);

@@ -13,6 +13,7 @@ import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
 import PermissionGuard from "@/guards/PermissionGuard/PermissionGuard";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
+import { getAgentAccess } from "@/utils/agent-access";
 import PermissionSomeGuard from "./guards/PermissionSomeGuard/PermissionSomeGuard";
 
 type LazyRoute = {
@@ -138,36 +139,48 @@ const AppRouter: Component = () => {
 						path="/agent"
 						preload={preloadRoutes(AgentRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.AiAgentUse}>
+							<ConditionGuard
+								condition={() => getAgentAccess().all.length > 0}
+								redirect="/lucid"
+							>
 								<AgentRoute />
-							</PermissionGuard>
+							</ConditionGuard>
 						)}
 					/>
 					<Route
 						path="/agent/chats/:conversationId"
 						preload={preloadRoutes(AgentConversationRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.AiAgentUse}>
+							<ConditionGuard
+								condition={() => getAgentAccess().all.length > 0}
+								redirect="/lucid"
+							>
 								<AgentConversationRoute />
-							</PermissionGuard>
+							</ConditionGuard>
 						)}
 					/>
 					<Route
 						path="/agent/routines"
 						preload={preloadRoutes(AgentRoutinesRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.AiAgentUse}>
+							<ConditionGuard
+								condition={() => getAgentAccess().all.length > 0}
+								redirect="/lucid"
+							>
 								<AgentRoutinesRoute />
-							</PermissionGuard>
+							</ConditionGuard>
 						)}
 					/>
 					<Route
 						path="/agent/routines/:routineId"
 						preload={preloadRoutes(AgentRoutineRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.AiAgentUse}>
+							<ConditionGuard
+								condition={() => getAgentAccess().all.length > 0}
+								redirect="/lucid"
+							>
 								<AgentRoutineRoute />
-							</PermissionGuard>
+							</ConditionGuard>
 						)}
 					/>
 					<Route path="/components" component={ComponentsRoute} />

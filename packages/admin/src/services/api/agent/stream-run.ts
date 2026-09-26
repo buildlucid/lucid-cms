@@ -10,7 +10,9 @@ const eventTypes = new Set<AgentStreamEvent["type"]>([
 	"question",
 	"widget",
 	"message",
+	"inputs",
 	"finish",
+	"next",
 	"error",
 ]);
 
@@ -33,6 +35,7 @@ const streamRun = async (props: {
 	/** Sent as a POST. Without one, the stream is watched with a GET. */
 	body?: Record<string, unknown>;
 	signal: AbortSignal;
+	onAccepted?: () => void;
 	onEvent: (event: AgentStreamEvent) => void;
 }) => {
 	const response = await sendRequest({
@@ -42,6 +45,8 @@ const streamRun = async (props: {
 		headers: { Accept: "text/event-stream" },
 		signal: props.signal,
 	});
+	props.onAccepted?.();
+	if (response.status === 202) return;
 	if (!response.body) throw new Error("The agent returned no stream.");
 
 	const events = response.body

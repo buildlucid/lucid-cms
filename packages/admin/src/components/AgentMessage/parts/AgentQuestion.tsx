@@ -8,7 +8,7 @@ type QuestionPart = Extract<AgentMessagePart, { type: "question" }>;
 
 /**
  * A question or approval the agent paused on. While it is pending, options can
- * be chosen directly; free-text answers go through the composer.
+ * be chosen here; written answers go through the chat box.
  */
 const AgentQuestion: Component<{
 	part: QuestionPart;
@@ -36,6 +36,7 @@ const AgentQuestion: Component<{
 		}));
 	});
 	const answerText = createMemo(() => {
+		if (props.part.dismissed) return T()("agent.question.dismissed");
 		const answer = props.part.answer;
 		if (answer === undefined) return undefined;
 		if (!approval()) return T()("agent.question.answered", { answer });

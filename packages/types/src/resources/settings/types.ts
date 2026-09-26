@@ -1,9 +1,11 @@
+import type { Agent } from "../agent/types.js";
+
 export type SettingsInclude = "email" | "media" | "system" | "ai" | "mcp";
 
 export interface Settings {
 	ai?: {
 		enabled: boolean;
-		agent: { enabled: boolean };
+		agents: Agent[];
 		features: {
 			imageGeneration: boolean;
 			altGeneration: boolean;

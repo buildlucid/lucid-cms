@@ -47,11 +47,13 @@ export const builtInToolNames: ReadonlySet<string> = new Set(
 /** Shared by config validation and runtime so provider limits include every runner tool. */
 export const getRunnerTools = (props: {
 	mode: RunMode;
+	/** Runs acting as the system have no one to answer them. */
+	canAsk: boolean;
 	hasSkills: boolean;
 	/** Only offered once some context is summarised or truncated. */
 	hasHistory: boolean;
 }) => [
-	builtInTools.ask,
+	...(props.canAsk ? [builtInTools.ask] : []),
 	...(props.hasHistory ? [builtInTools.history] : []),
 	...(props.hasSkills ? [builtInTools.skill] : []),
 	...(props.mode === "routine" ? [builtInTools.finish] : []),

@@ -15,7 +15,8 @@ const factory = createFactory();
 
 const deleteRoutineController = factory.createHandlers(
 	describeRoute({
-		description: "Deletes an agent routine. Its past runs remain as chats.",
+		description:
+			"Deletes a routine created in the admin. Its past runs remain as chats.",
 		tags: ["agent"],
 		summary: "Delete Agent Routine",
 		responses: openAPI.responses({ noProperties: true }),
@@ -30,11 +31,12 @@ const deleteRoutineController = factory.createHandlers(
 	validate("param", controllerSchemas.deleteRoutine.params),
 	async (c) => {
 		const context = createServiceContext(c);
+		const param = c.req.valid("param");
 
 		const deleted = await serviceWrapper(agentServices.deleteRoutine, {
 			transaction: true,
 		})(context, {
-			id: c.req.valid("param").id,
+			id: param.id,
 			userId: c.get("auth").id,
 		});
 		if (deleted.error) throw new LucidAPIError(deleted.error);

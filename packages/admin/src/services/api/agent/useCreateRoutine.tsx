@@ -6,11 +6,14 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export type RoutineBody = Pick<
 	AgentRoutine,
-	"title" | "instructions" | "cron" | "timezone" | "enabled"
+	"name" | "instructions" | "cron" | "timezone" | "enabled"
 >;
 
 const useCreateRoutine = (props?: { onSuccess?: () => void }) =>
-	serviceHelpers.useMutationWrapper<RoutineBody, ResponseBody<AgentRoutine>>({
+	serviceHelpers.useMutationWrapper<
+		RoutineBody & Pick<AgentRoutine, "agentKey">,
+		ResponseBody<AgentRoutine>
+	>({
 		mutationFn: (body) =>
 			request<ResponseBody<AgentRoutine>>({
 				url: "/lucid/api/v1/agent/routines",

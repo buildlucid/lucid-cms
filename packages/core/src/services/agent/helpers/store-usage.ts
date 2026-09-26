@@ -9,7 +9,7 @@ const storeUsage: ServiceFn<
 			purpose?: "compact";
 			runId: string;
 			conversationId: string;
-			userId: number;
+			userId: number | null;
 			connectionId: number;
 			usage: Extract<ModelEvent, { type: "finish" }>["usage"];
 			durationMs: number | null;

@@ -1,4 +1,11 @@
-import { type Component, createSignal, Match, Switch } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import AgentHeader from "@/components/AgentHeader/AgentHeader";
 import AgentRoutineList from "@/components/AgentRoutineList/AgentRoutineList";
 import Button from "@/components/Button/Button";
@@ -8,8 +15,9 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
 import api from "@/services/api";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 
-/** Lists the user's routines and creates new ones. */
+/** Lists the user's routines, and routines defined in code for agents they manage, and creates new ones. */
 const AgentRoutinesPage: Component = () => {
 	// ----------------------------------------
 	// State & Queries
@@ -17,11 +25,17 @@ const AgentRoutinesPage: Component = () => {
 	const routines = api.agent.useGetRoutines();
 
 	// ----------------------------------------
+	// Memos
+	const canCreate = createMemo(() => getAgentAccess().use.length > 0);
+
+	// ----------------------------------------
 	// Render
 	const createButton = () => (
-		<Button size="sm" onClick={() => setCreateOpen(true)}>
-			{T()("agent.routine.create")}
-		</Button>
+		<Show when={canCreate()}>
+			<Button size="sm" onClick={() => setCreateOpen(true)}>
+				{T()("agent.routine.create")}
+			</Button>
+		</Show>
 	);
 
 	return (

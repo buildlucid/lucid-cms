@@ -36,14 +36,16 @@ const updateConversationController = factory.createHandlers(
 	validate("json", controllerSchemas.updateConversation.body),
 	async (c) => {
 		const context = createServiceContext(c);
+		const body = c.req.valid("json");
+		const param = c.req.valid("param");
 
 		const conversation = await serviceWrapper(
 			agentServices.updateConversation,
 			{ transaction: false },
 		)(context, {
-			id: c.req.valid("param").id,
+			id: param.id,
 			userId: c.get("auth").id,
-			title: c.req.valid("json").title,
+			title: body.title,
 		});
 		if (conversation.error) throw new LucidAPIError(conversation.error);
 

@@ -8,7 +8,10 @@ import {
 	type ExternalScope,
 	ExternalScopes,
 } from "../permission/external-scopes.js";
-import { getToolRegistry, toolDefinitionInternal } from "../tools/registry.js";
+import {
+	getMcpToolRegistry,
+	toolDefinitionInternal,
+} from "../tools/registry.js";
 import type { McpToolAuthority } from "../tools/types.js";
 import { createHandler } from "./create-handler.js";
 
@@ -53,7 +56,7 @@ export const handleMcpRequest = async (args: {
 			(!request.headers.get("Mcp-Name") ||
 				request.headers.get("Mcp-Name") === toolCall.data.params.name)
 		) {
-			const tool = getToolRegistry(context.config, "mcp").get(
+			const tool = getMcpToolRegistry(context.config).get(
 				toolCall.data.params.name,
 			);
 

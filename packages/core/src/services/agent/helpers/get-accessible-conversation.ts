@@ -7,9 +7,12 @@ import type {
 	AgentRunStatus,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import checkAgentAccess, {
+	getConversationLevel,
+} from "./check-agent-access.js";
 
-/** Conversations are private to the user who created them. */
-const getOwnedConversation: ServiceFn<
+/** Chats are private to their user. Chats started by code routines are shared with the agent's managers. */
+const getAccessibleConversation: ServiceFn<
 	[{ id: string; userId: number }],
 	Select<LucidAgentConversations> & {
 		latest_run_id: string | null;
@@ -20,9 +23,12 @@ const getOwnedConversation: ServiceFn<
 > = async (context, input) => {
 	const AgentConversations = new AgentConversationsRepository(context.db);
 
-	const result = await AgentConversations.selectSingleForUser(input);
+	const result = await AgentConversations.selectSingleWithLatestRun(input);
 	if (result.error) return result;
-	if (!result.data) {
+	if (
+		!result.data ||
+		(result.data.user_id !== null && result.data.user_id !== input.userId)
+	) {
 		return {
 			data: undefined,
 			error: {
@@ -33,7 +39,14 @@ const getOwnedConversation: ServiceFn<
 		};
 	}
 
+	const access = await checkAgentAccess(context, {
+		userId: input.userId,
+		agentKey: result.data.agent_key,
+		level: getConversationLevel(result.data.user_id),
+	});
+	if (access.error) return access;
+
 	return { error: undefined, data: result.data };
 };
 
-export default getOwnedConversation;
+export default getAccessibleConversation;

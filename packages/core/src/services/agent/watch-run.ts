@@ -7,6 +7,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { AgentStreamEvent } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import getInputs from "./get-inputs.js";
 
 const wait = (ms: number, signal: AbortSignal) =>
 	new Promise<void>((resolve) => {
@@ -42,6 +43,7 @@ const watchRun: ServiceFn<
 	const sent = new Map<string, string>();
 	let since: string | undefined;
 	let lastContext: string | undefined;
+	let lastInputs: string | undefined;
 
 	while (!input.signal.aborted && Date.now() < deadline) {
 		// Status is read first so the final reply is always sent before finish.
@@ -71,7 +73,7 @@ const watchRun: ServiceFn<
 		}
 
 		const conversation = await AgentConversations.selectSingle({
-			select: ["context", "active_run_id"],
+			select: ["context", "active_run_id", "queue_paused"],
 			where: [{ key: "id", operator: "=", value: run.data.conversation_id }],
 		});
 		if (conversation.error) return conversation;
@@ -85,9 +87,28 @@ const watchRun: ServiceFn<
 			await input.emit({ type: "context", runId: input.runId, context: usage });
 		}
 
+		const inputs = await getInputs(context, {
+			conversationId: run.data.conversation_id,
+		});
+		if (inputs.error) return inputs;
+
+		const queue = {
+			type: "inputs" as const,
+			inputs: inputs.data,
+			queuePaused: Boolean(conversation.data?.queue_paused),
+		};
+		if (JSON.stringify(queue) !== lastInputs) {
+			lastInputs = JSON.stringify(queue);
+			await input.emit(queue);
+		}
+
 		const status = run.data.status;
 		if (!constants.agent.runStatuses.working.some((s) => s === status)) {
 			await input.emit({ type: "finish", runId: input.runId, status });
+			const next = conversation.data?.active_run_id;
+			if (next && next !== input.runId) {
+				await input.emit({ type: "next", runId: next });
+			}
 			break;
 		}
 

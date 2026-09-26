@@ -54,7 +54,6 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 
 	for (const row of pending.data ?? []) {
 		if (
-			row.user_id === null ||
 			row.agent_run_id === null ||
 			row.agent_conversation_id === null ||
 			row.lucid_remote_connection_id === null

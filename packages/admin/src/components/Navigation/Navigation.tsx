@@ -17,6 +17,7 @@ import api from "@/services/api";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { getAgentAccess } from "@/utils/agent-access";
 import {
 	isNavigationLinkActive,
 	setNavigationLinkActiveState,
@@ -71,12 +72,7 @@ export const Navigation: Component = () => {
 	const canReadAiUsage = createMemo(
 		() => canReadSystemOverview() && siteStore.get.hasAnyAiFeatureEnabled(),
 	);
-	const canUseAgent = createMemo(
-		() =>
-			siteStore.get.ai.enabled &&
-			siteStore.get.ai.agent.enabled &&
-			userStore.get.hasPermission([Permissions.AiAgentUse]).all,
-	);
+	const canUseAgent = createMemo(() => getAgentAccess().all.length > 0);
 	const showAccessAndPermissions = createMemo(
 		() => canReadUsers() || canReadRoles(),
 	);

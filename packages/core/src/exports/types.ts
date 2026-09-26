@@ -19,6 +19,12 @@ export type {
 	FieldSlotMatch,
 } from "@lucidcms/admin/types";
 export type {
+	AgentDefinition,
+	DefineAgentOptions,
+	DefineRoutineOptions,
+	RoutineDefinition,
+} from "../libs/agent/types.js";
+export type {
 	AuthAdapter,
 	AuthAdapterCallbackResult,
 	AuthAdapterGetAuthUrlParams,
@@ -571,7 +577,6 @@ export type {
 } from "../libs/tools/types.js";
 export type {
 	AiFeatureConfig,
-	AiTarget,
 	HttpConfig,
 	HttpSecurityConfig,
 	I18nConfig,
@@ -642,14 +647,19 @@ export type {
 } from "../types/query-params.js";
 export type {
 	Account,
+	Agent,
 	AgentApprovalAnswer,
 	AgentCompaction,
 	AgentContext,
 	AgentConversation,
+	AgentDelivery,
+	AgentInput,
+	AgentInputAction,
 	AgentMessage,
 	AgentMessagePart,
 	AgentQuestionKind,
 	AgentRoutine,
+	AgentRoutineSource,
 	AgentRun,
 	AgentRunOutcome,
 	AgentRunStatus,

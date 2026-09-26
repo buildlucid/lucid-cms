@@ -9,7 +9,7 @@ describe("external scopes", () => {
 				{
 					collections: [],
 					access: [],
-					ai: { enabled: true, mcp: { enabled: false } },
+					ai: { enabled: true, mcp: { enabled: false }, agents: [] },
 				},
 				{ principalType: "user" },
 			),
@@ -19,7 +19,7 @@ describe("external scopes", () => {
 				{
 					collections: [],
 					access: [],
-					ai: { enabled: true, mcp: { enabled: false } },
+					ai: { enabled: true, mcp: { enabled: false }, agents: [] },
 				},
 				{ principalType: "system" },
 			),
@@ -28,7 +28,7 @@ describe("external scopes", () => {
 			getValidExternalScopes({
 				collections: [],
 				access: [],
-				ai: { enabled: true, mcp: { enabled: false } },
+				ai: { enabled: true, mcp: { enabled: false }, agents: [] },
 			}),
 		).toContain(ExternalScopes.AccountRead);
 	});
@@ -39,7 +39,7 @@ describe("external scopes", () => {
 				{
 					collections: [],
 					access: [],
-					ai: { enabled: true, mcp: { enabled: false } },
+					ai: { enabled: true, mcp: { enabled: false }, agents: [] },
 				},
 				[ExternalScopes.AccountRead],
 				{
@@ -52,7 +52,7 @@ describe("external scopes", () => {
 				{
 					collections: [],
 					access: [],
-					ai: { enabled: true, mcp: { enabled: false } },
+					ai: { enabled: true, mcp: { enabled: false }, agents: [] },
 				},
 				[ExternalScopes.AccountRead],
 				{
@@ -67,14 +67,14 @@ describe("external scopes", () => {
 			getValidExternalScopes({
 				collections: [],
 				access: [],
-				ai: { enabled: true, mcp: { enabled: true } },
+				ai: { enabled: true, mcp: { enabled: true }, agents: [] },
 			}),
 		).toContain(ExternalScopes.McpAccess);
 		expect(
 			getValidExternalScopes({
 				collections: [],
 				access: [],
-				ai: { enabled: true, mcp: { enabled: false } },
+				ai: { enabled: true, mcp: { enabled: false }, agents: [] },
 			}),
 		).not.toContain(ExternalScopes.McpAccess);
 	});
