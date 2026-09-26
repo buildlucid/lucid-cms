@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
 import type { QueryParams } from "../../types/query-params.js";
+import type { ConversationContext } from "../agent/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
 import { agentConversationsTable } from "../db/tables/agent-conversations.js";
@@ -50,6 +51,7 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 								"lucid_agent_conversations.user_id",
 								"lucid_agent_conversations.routine_id",
 								"lucid_agent_conversations.active_run_id",
+								"lucid_agent_conversations.context",
 								"lucid_agent_conversations.created_at",
 								"lucid_agent_conversations.updated_at",
 								"lucid_agent_runs.id as latest_run_id",
@@ -87,6 +89,7 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 				"user_id",
 				"routine_id",
 				"active_run_id",
+				"context",
 				"created_at",
 				"updated_at",
 				"latest_run_id",
@@ -106,6 +109,7 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 						"lucid_agent_conversations.user_id",
 						"lucid_agent_conversations.routine_id",
 						"lucid_agent_conversations.active_run_id",
+						"lucid_agent_conversations.context",
 						"lucid_agent_conversations.created_at",
 						"lucid_agent_conversations.updated_at",
 						"lucid_agent_runs.id as latest_run_id",
@@ -146,6 +150,26 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
+	}
+	/** Only the conversation's active run writes its context. */
+	async updateContext(props: {
+		conversationId: string;
+		runId: string;
+		context: ConversationContext;
+	}) {
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.updateTable("lucid_agent_conversations")
+					.set({ context: props.context })
+					.where("id", "=", props.conversationId)
+					.where("active_run_id", "=", props.runId)
+					.execute(),
+			{ method: "updateContext" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: undefined };
 	}
 	/** A stale runner cannot release a newer run's claim. */
 	async releaseRun(props: {

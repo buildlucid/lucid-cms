@@ -20,6 +20,10 @@ export const getAiUsageFeatureOptions = () => [
 		label: T()("ai.usage.features.agent.chat"),
 	},
 	{
+		value: "agent.compact",
+		label: T()("ai.usage.features.agent.compact"),
+	},
+	{
 		value: "custom-field.input.generate",
 		label: T()("ai.usage.features.custom.field.input.generate"),
 	},

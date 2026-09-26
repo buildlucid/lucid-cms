@@ -19,10 +19,10 @@ const toInputSchema = (input: z.ZodObject) => {
 	return schema;
 };
 
-/** Only advertises capabilities this user can access. Resolved once per slice of a run. */
+/** Only advertises capabilities this user can access. Resolved before each model turn. */
 const resolveCapabilities = (
 	context: ServiceContext,
-	props: { authority: AgentToolAuthority; mode: RunMode },
+	props: { authority: AgentToolAuthority; mode: RunMode; hasHistory: boolean },
 ) => {
 	const tools = [...getToolRegistry(context.config, "agent").values()].filter(
 		(tool) =>
@@ -48,6 +48,7 @@ const resolveCapabilities = (
 	const runnerTools = getRunnerTools({
 		mode: props.mode,
 		hasSkills: skills.length > 0,
+		hasHistory: props.hasHistory,
 	});
 
 	return {
@@ -58,7 +59,11 @@ const resolveCapabilities = (
 			description: tool.description,
 			inputSchema: toInputSchema(tool.input),
 		})),
-		instructions: buildInstructions({ mode: props.mode, skills }),
+		instructions: buildInstructions({
+			mode: props.mode,
+			skills,
+			hasHistory: props.hasHistory,
+		}),
 	};
 };
 

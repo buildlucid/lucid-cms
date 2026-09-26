@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
+import { modelMessages } from "../../../libs/agent/context.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -14,6 +15,8 @@ import textFromParts from "./text-from-parts.js";
 type TurnResult =
 	| { kind: "continue" }
 	| { kind: "aborted" }
+	/** The model could not read the whole request, so compact and try again. */
+	| { kind: "overflow" }
 	| { kind: "stop"; status: "failed" | "interrupted"; message: string };
 
 /** Streams one billed model turn into the checkpoint and records its usage. */
@@ -58,7 +61,9 @@ const runModelTurn: ServiceFn<
 	let savedAt = started;
 
 	const onEvent = async (event: ModelEvent) => {
-		if (event.type === "text-delta") {
+		if (event.type === "start") {
+			checkpoint.model = { id: event.model, tokenLimit: event.inputTokenLimit };
+		} else if (event.type === "text-delta") {
 			const last = checkpoint.parts.at(-1);
 
 			if (last?.type === "text") {
@@ -100,10 +105,11 @@ const runModelTurn: ServiceFn<
 		}
 	};
 
+	const sent = checkpoint.messages.length;
 	const response = await streamModelTurn(context, {
 		requestId: checkpoint.requestId,
 		instructions: capabilities.instructions,
-		messages: checkpoint.messages,
+		messages: modelMessages(checkpoint.messages),
 		tools: capabilities.definitions,
 		signal: AbortSignal.any([session.signal, stop.signal]),
 		onRequest: (connectionId) =>
@@ -131,6 +137,23 @@ const runModelTurn: ServiceFn<
 		}
 
 		await reconcileUsage(context, { requestId: checkpoint.requestId });
+		if (response.error.key === "agent_context_exceeded") {
+			if (checkpoint.overflow === "retrying") {
+				return {
+					error: undefined,
+					data: {
+						kind: "stop",
+						status: "failed",
+						message: context.translate("server:agent.conversation.too.large"),
+					},
+				};
+			}
+
+			//* nothing was charged, and the retry needs its own request
+			checkpoint.overflow = "compacting";
+			checkpoint.requestId = randomUUID();
+			return { error: undefined, data: { kind: "overflow" } };
+		}
 		const AiGenerations = new AiGenerationsRepository(context.db);
 
 		const usage = await AiGenerations.selectSingleByRequestId({
@@ -174,15 +197,22 @@ const runModelTurn: ServiceFn<
 	}
 
 	checkpoint.messages.push({
+		sourceId: checkpoint.messageId,
 		role: "assistant",
 		content: textFromParts(checkpoint.parts),
 		...(checkpoint.calls.length ? { toolCalls: checkpoint.calls } : {}),
 	});
+	checkpoint.measured = {
+		tokens: response.data.usage.tokens.input.total,
+		messages: sent,
+	};
+	checkpoint.overflow = undefined;
 	checkpoint.turns++;
 	checkpoint.phase = "tools";
 
 	const saved = await session.save();
 	if (saved.error) return saved;
+	await session.saveContext(capabilities, "ready");
 
 	return { error: undefined, data: { kind: "continue" } };
 };

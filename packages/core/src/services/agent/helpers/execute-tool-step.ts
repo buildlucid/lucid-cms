@@ -1,4 +1,6 @@
 import constants from "../../../constants/constants.js";
+import builtInTools from "../../../libs/agent/built-in-tools.js";
+import { contextLimits } from "../../../libs/agent/context.js";
 import type {
 	Checkpoint,
 	RunMode,
@@ -72,11 +74,24 @@ const executeToolStep: ServiceFn<
 			part.output = output;
 		}
 	}
+	//* the full result is saved with the message, so context only needs a preview of a long one
+	const serialised = JSON.stringify(output ?? null);
+	const truncated = serialised.length > contextLimits.messageChars;
+	if (truncated) checkpoint.trimmed = true;
 	checkpoint.messages.push({
+		sourceId: checkpoint.messageId,
 		role: "tool",
 		toolCallId: call.id,
 		name: call.name,
-		output,
+		output: truncated
+			? {
+					preview: serialised.slice(0, contextLimits.messageChars),
+					truncated: true,
+					historyMessageId: checkpoint.messageId,
+					toolCallId: call.id,
+					note: `Use ${builtInTools.history.name} to retrieve the saved result.`,
+				}
+			: output,
 	});
 	checkpoint.pending = undefined;
 	checkpoint.cursor++;

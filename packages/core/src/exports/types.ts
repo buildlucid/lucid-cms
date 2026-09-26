@@ -643,6 +643,8 @@ export type {
 export type {
 	Account,
 	AgentApprovalAnswer,
+	AgentCompaction,
+	AgentContext,
 	AgentConversation,
 	AgentMessage,
 	AgentMessagePart,

@@ -127,14 +127,21 @@ test("rejects a truncated response instead of treating it as completion", async 
 	expect(result.data).toBeUndefined();
 });
 
-test("marks a durable model failure as terminal", async () => {
+test.each([
+	["Provider failed", "agent_model_failed"],
+	["cms_ai_compaction_incomplete", "agent_compaction_failed"],
+	["cms_ai_context_exceeded", "agent_context_exceeded"],
+])("classifies a durable failure: %s", async (message, key) => {
 	vi.stubGlobal(
 		"fetch",
 		vi.fn(
 			async () =>
-				new Response('data: {"type":"error","message":"Provider failed"}\n\n', {
-					headers: { "Content-Type": "text/event-stream" },
-				}),
+				new Response(
+					`data: ${JSON.stringify({ type: "error", message })}\n\n`,
+					{
+						headers: { "Content-Type": "text/event-stream" },
+					},
+				),
 		),
 	);
 	const result = await streamModelTurn(context, {
@@ -145,7 +152,7 @@ test("marks a durable model failure as terminal", async () => {
 		signal: new AbortController().signal,
 		emit: async () => {},
 	});
-	expect(result.error?.key).toBe("agent_model_failed");
+	expect(result.error?.key).toBe(key);
 });
 
 test("finishes on the terminal event without waiting for the connection to close", async () => {

@@ -1,6 +1,7 @@
 import constants from "../../constants/constants.js";
 import formatter, { agentFormatter } from "../../libs/formatters/index.js";
 import {
+	AgentConversationsRepository,
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
@@ -36,14 +37,16 @@ const watchRun: ServiceFn<
 > = async (context, input) => {
 	const AgentRuns = new AgentRunsRepository(context.db);
 	const AgentMessages = new AgentMessagesRepository(context.db);
+	const AgentConversations = new AgentConversationsRepository(context.db);
 	const deadline = Date.now() + constants.agent.sliceMs;
 	const sent = new Map<string, string>();
 	let since: string | undefined;
+	let lastContext: string | undefined;
 
 	while (!input.signal.aborted && Date.now() < deadline) {
 		// Status is read first so the final reply is always sent before finish.
 		const run = await AgentRuns.selectSingle({
-			select: ["status"],
+			select: ["status", "conversation_id"],
 			where: [{ key: "id", operator: "=", value: input.runId }],
 		});
 		if (run.error) return run;
@@ -65,6 +68,21 @@ const watchRun: ServiceFn<
 				type: "message",
 				message: agentFormatter.formatMessage({ message }),
 			});
+		}
+
+		const conversation = await AgentConversations.selectSingle({
+			select: ["context", "active_run_id"],
+			where: [{ key: "id", operator: "=", value: run.data.conversation_id }],
+		});
+		if (conversation.error) return conversation;
+
+		const usage = agentFormatter.formatContext({
+			context: conversation.data?.context ?? null,
+			active: conversation.data?.active_run_id === input.runId,
+		});
+		if (usage && JSON.stringify(usage) !== lastContext) {
+			lastContext = JSON.stringify(usage);
+			await input.emit({ type: "context", runId: input.runId, context: usage });
 		}
 
 		const status = run.data.status;

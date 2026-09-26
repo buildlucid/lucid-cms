@@ -1,4 +1,5 @@
 import type {
+	AgentCompaction,
 	AgentMessage,
 	AgentMessagePart,
 	AgentRunStatus,
@@ -34,7 +35,13 @@ export const applyStreamEvent = (
 	event: AgentStreamEvent,
 	conversationId: string,
 ): AgentMessage[] => {
-	if (event.type === "finish" || event.type === "error") return messages;
+	if (
+		event.type === "finish" ||
+		event.type === "error" ||
+		event.type === "context"
+	) {
+		return messages;
+	}
 
 	if (event.type === "message") {
 		const exists = messages.some(({ id }) => id === event.message.id);
@@ -118,3 +125,23 @@ export const findPendingQuestion = (
 /** Whether a run is still being worked on by the agent, in this tab or in the background. */
 export const isRunWorking = (status: AgentRunStatus | undefined) =>
 	status === "queued" || status === "running" || status === "interrupted";
+
+/**
+ * Where to mark compactions: before the first message created after each one.
+ * `trailing` marks a compaction newer than every message, such as one just run.
+ */
+export const placeCompactions = (
+	messages: AgentMessage[],
+	compactions: AgentCompaction[],
+) => {
+	const before = new Set<string>();
+	let trailing = false;
+	for (const compaction of compactions) {
+		const next = messages.find(
+			(message) => (message.createdAt ?? "") > (compaction.createdAt ?? ""),
+		);
+		if (next) before.add(next.id);
+		else trailing = true;
+	}
+	return { before, trailing };
+};

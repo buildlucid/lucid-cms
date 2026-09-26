@@ -49,7 +49,29 @@ export interface AgentUsage {
 	modelCalls: number;
 }
 
+/** How much of its model's input limit a conversation's next request uses. Separate from billed usage. */
+export interface AgentContext {
+	/** The model that last served the conversation. */
+	model: string;
+	tokens: number;
+	tokenLimit: number;
+	percent: number;
+	status: "ready" | "compacting";
+	/** Context is nearly full, so people may compact before it happens automatically. */
+	compactable: boolean;
+}
+
+/** A point where older context was summarised. The messages themselves are kept. */
+export interface AgentCompaction {
+	id: string;
+	createdAt: string | null;
+}
+
 export interface AgentConversation {
+	/** Unknown until the conversation's first model request. */
+	context: AgentContext | null;
+	/** Only included when fetching a single conversation. */
+	compactions?: AgentCompaction[];
 	id: string;
 	title: string;
 	userId: number;
@@ -104,6 +126,7 @@ export interface AgentRoutine {
 
 /** Server-sent events streamed while a run executes. */
 export type AgentStreamEvent =
+	| { type: "context"; runId: string; context: AgentContext }
 	| { type: "start"; runId: string; messageId: string }
 	| { type: "text-delta"; messageId: string; text: string }
 	| ({ messageId: string } & Extract<AgentMessagePart, { type: "tool" }>)

@@ -1,8 +1,17 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
-import type { Checkpoint } from "../../../libs/agent/types.js";
+import {
+	type ContextCapabilities,
+	conversationContext,
+} from "../../../libs/agent/context.js";
+import type {
+	Checkpoint,
+	ConversationContext,
+} from "../../../libs/agent/types.js";
+import { agentFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
+	AgentCompactionsRepository,
 	AgentConversationsRepository,
 	AgentMessagesRepository,
 	AgentRunsRepository,
@@ -194,6 +203,47 @@ const openRunSession = async (
 				await emit({ type: "finish", runId: run.id, status });
 
 				return { error: undefined, data: { status } };
+			},
+			/** Stores the conversation's context for its chat view and streams it. Display state only, so a failed write never stops the run. */
+			saveContext: async (
+				capabilities: ContextCapabilities,
+				status: ConversationContext["status"],
+			) => {
+				const value = conversationContext(checkpoint, capabilities, status);
+				if (!value) return;
+
+				const AgentConversations = new AgentConversationsRepository(context.db);
+				await AgentConversations.updateContext({
+					conversationId: run.conversation_id,
+					runId: run.id,
+					context: value,
+				});
+
+				const formatted = agentFormatter.formatContext({
+					context: value,
+					active: true,
+				});
+				if (formatted) {
+					await emit({ type: "context", runId: run.id, context: formatted });
+				}
+			},
+			/** Save the result before the checkpoint so either write can be retried without losing context. */
+			storeCompaction: async (record: {
+				id: string;
+				summary: string;
+				throughPosition: number;
+			}): ServiceResponse<undefined> => {
+				const compactions = new AgentCompactionsRepository(context.db);
+				const stored = await compactions.storeForRun({
+					...record,
+					conversationId: run.conversation_id,
+					runId: run.id,
+					token,
+				});
+				if (stored.error) return stored;
+				if (!stored.data) return superseded();
+
+				return write("running");
 			},
 			/** Returns the run to the queue so a background worker continues it. */
 			handOff: async (): ServiceResponse<{ status: AgentRunStatus }> => {

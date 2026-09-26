@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import cancelRun from "../../../controllers/agent/cancel-run.js";
+import compactConversation from "../../../controllers/agent/compact-conversation.js";
 import createConversation from "../../../controllers/agent/create-conversation.js";
 import createRoutine from "../../../controllers/agent/create-routine.js";
 import deleteConversation from "../../../controllers/agent/delete-conversation.js";
@@ -26,6 +27,7 @@ const agentRoutes = new Hono<LucidHonoGeneric>()
 	.delete("/conversations/:id", ...deleteConversation)
 	.get("/conversations/:id/messages", ...getMessages)
 	.post("/conversations/:id/messages", ...sendMessage)
+	.post("/conversations/:id/compact", ...compactConversation)
 	.post("/runs/:id/respond", ...respondRun)
 	.post("/runs/:id/cancel", ...cancelRun)
 	.get("/runs/:id/events", ...watchRun)

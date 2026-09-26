@@ -1,6 +1,10 @@
 import type { AgentMessage, AgentStreamEvent } from "@types";
 import { describe, expect, it } from "vitest";
-import { applyStreamEvent, findPendingQuestion } from "./agent-chat";
+import {
+	applyStreamEvent,
+	findPendingQuestion,
+	placeCompactions,
+} from "./agent-chat";
 
 const conversationId = "conversation";
 const apply = (events: AgentStreamEvent[], messages: AgentMessage[] = []) =>
@@ -108,5 +112,32 @@ describe("findPendingQuestion", () => {
 			kind: "approval",
 		});
 		expect(findPendingQuestion(messages, "other")).toBeUndefined();
+	});
+});
+
+describe("placeCompactions", () => {
+	it("marks each compaction before the next message, or after the last", () => {
+		const message = (id: string, createdAt: string): AgentMessage => ({
+			id,
+			conversationId,
+			runId: null,
+			position: 1,
+			role: "user",
+			parts: [],
+			createdAt,
+		});
+		const placed = placeCompactions(
+			[
+				message("a", "2026-01-01T10:00:00.000Z"),
+				message("b", "2026-01-01T11:00:00.000Z"),
+			],
+			[
+				{ id: "c1", createdAt: "2026-01-01T10:30:00.000Z" },
+				{ id: "c2", createdAt: "2026-01-01T12:00:00.000Z" },
+			],
+		);
+
+		expect([...placed.before]).toEqual(["b"]);
+		expect(placed.trailing).toBe(true);
 	});
 });

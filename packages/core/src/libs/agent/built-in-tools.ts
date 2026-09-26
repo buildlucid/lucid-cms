@@ -4,6 +4,16 @@ import type { RunMode } from "./types.js";
 
 /** Tools the runner handles itself. Their names are reserved for agent tools. */
 const builtInTools = {
+	history: {
+		name: "lucid_read_history",
+		description:
+			"Recover exact earlier messages or tool results from this conversation, including history that was summarised or truncated. List positions first, then read a message in bounded character pages. Historical tool results may be stale; read current CMS data before editing.",
+		input: z.object({
+			messageId: z.uuid().optional(),
+			after: z.number().int().nonnegative().default(0),
+			offset: z.number().int().nonnegative().default(0),
+		}),
+	},
 	ask: {
 		name: "lucid_ask_user",
 		description:
@@ -38,8 +48,11 @@ export const builtInToolNames: ReadonlySet<string> = new Set(
 export const getRunnerTools = (props: {
 	mode: RunMode;
 	hasSkills: boolean;
+	/** Only offered once some context is summarised or truncated. */
+	hasHistory: boolean;
 }) => [
 	builtInTools.ask,
+	...(props.hasHistory ? [builtInTools.history] : []),
 	...(props.hasSkills ? [builtInTools.skill] : []),
 	...(props.mode === "routine" ? [builtInTools.finish] : []),
 ];

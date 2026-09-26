@@ -1,4 +1,7 @@
 {
+	"agent.compaction.failed": "Could not compact this conversation. Your history is safe. Retry to continue.",
+	"agent.history.invalid": "Invalid history request.",
+	"agent.history.unavailable": "This history is not available.",
 	"core.fields.storage.value.unsupported": "Unsupported stored value for field {{key}}.",
 	"core.documents.authoring.actor.access.denied": "This user cannot access the collection.",
 	"core.documents.authoring.actor.permission.denied": "This user cannot perform that action on the collection.",
@@ -335,6 +338,7 @@
 	"core.routes.ai.usage.chart.fetch.error.message": "An error occurred while fetching AI usage chart data.",
 	"core.ai.usage.chart.invalid.date.range": "Select a valid AI usage chart date range.",
 	"core.ai.usage.features.custom.field.input.generate": "Field Generation",
+	"core.ai.usage.features.agent.compact": "Conversation Compaction",
 	"core.ai.usage.features.media.alt.generate": "Alt Text",
 	"core.ai.usage.features.media.image.generate": "Image Generation",
 	"core.ai.generation.request.not.found": "The AI generation request does not exist.",

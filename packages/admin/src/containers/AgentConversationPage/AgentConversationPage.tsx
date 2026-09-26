@@ -11,7 +11,9 @@ import {
 	Switch,
 } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
+import AgentCompactionDivider from "@/components/AgentCompactionDivider/AgentCompactionDivider";
 import AgentComposer from "@/components/AgentComposer/AgentComposer";
+import AgentContextRing from "@/components/AgentContextRing/AgentContextRing";
 import AgentMessage from "@/components/AgentMessage/AgentMessage";
 import Alert from "@/components/Alert/Alert";
 import Button from "@/components/Button/Button";
@@ -24,6 +26,7 @@ import RenameAgentConversationModal from "@/components/RenameAgentConversationMo
 import Spinner from "@/components/Spinner/Spinner";
 import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
 import T from "@/translations";
+import { placeCompactions } from "@/utils/agent-chat";
 
 //* how close to the bottom the page must be to follow new output
 const followThreshold = 160;
@@ -47,6 +50,9 @@ const AgentConversationPage: Component = () => {
 	const approvalPending = createMemo(
 		() => chat.pendingQuestion()?.kind === "approval",
 	);
+	const compactions = createMemo(() =>
+		placeCompactions(chat.messages, chat.compactions()),
+	);
 	const runError = createMemo(() => {
 		const run = latestRun();
 		return !chat.streaming() && run?.status === "failed"
@@ -63,6 +69,9 @@ const AgentConversationPage: Component = () => {
 			void chat.send(text);
 		}
 	};
+	//* a marker before the first loaded message may belong to an earlier page
+	const compactedBefore = (id: string, index: number) =>
+		compactions().before.has(id) && !(index === 0 && chat.history.hasNextPage);
 	const scrollToEnd = () =>
 		window.scrollTo({ top: document.documentElement.scrollHeight });
 
@@ -158,14 +167,22 @@ const AgentConversationPage: Component = () => {
 									</Button>
 								</Show>
 								<For each={chat.messages}>
-									{(message) => (
-										<AgentMessage
-											message={message}
-											pendingQuestionId={chat.pendingQuestion()?.id}
-											onAnswer={submit}
-										/>
+									{(message, index) => (
+										<>
+											<Show when={compactedBefore(message.id, index())}>
+												<AgentCompactionDivider />
+											</Show>
+											<AgentMessage
+												message={message}
+												pendingQuestionId={chat.pendingQuestion()?.id}
+												onAnswer={submit}
+											/>
+										</>
 									)}
 								</For>
+								<Show when={compactions().trailing}>
+									<AgentCompactionDivider />
+								</Show>
 								<Show when={chat.working() && !chat.pendingQuestion()}>
 									<p
 										role="status"
@@ -174,7 +191,9 @@ const AgentConversationPage: Component = () => {
 										<Spinner size="sm" />
 										{latestRun()?.status === "interrupted" && !chat.streaming()
 											? T()("agent.chat.retrying")
-											: T()("agent.chat.working")}
+											: chat.context()?.status === "compacting"
+												? T()("agent.context.compacting")
+												: T()("agent.chat.working")}
 									</p>
 								</Show>
 								<Show
@@ -202,6 +221,19 @@ const AgentConversationPage: Component = () => {
 									busy={chat.working() && !chat.pendingQuestion()}
 									onStop={() => void chat.stop()}
 									onSubmit={submit}
+									accessory={
+										<Show when={chat.context()}>
+											{(context) => (
+												<AgentContextRing
+													context={context()}
+													busy={
+														chat.working() || Boolean(chat.pendingQuestion())
+													}
+													onCompact={() => void chat.compact()}
+												/>
+											)}
+										</Show>
+									}
 								/>
 							</div>
 						</div>

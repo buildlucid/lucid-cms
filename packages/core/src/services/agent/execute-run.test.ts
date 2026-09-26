@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
 	afterAll,
+	afterEach,
 	beforeAll,
 	beforeEach,
 	describe,
@@ -9,7 +10,7 @@ import {
 	vi,
 } from "vitest";
 import z from "zod";
-import type { ModelUsage } from "../../libs/agent/types.js";
+import type { Checkpoint, ModelUsage } from "../../libs/agent/types.js";
 import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import {
@@ -25,6 +26,7 @@ import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import createConversation from "./create-conversation.js";
 import createRoutine from "./create-routine.js";
 import executeRun from "./execute-run.js";
+import getConversation from "./get-conversation.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import streamModelTurn from "./helpers/stream-model-turn.js";
 import sumCredits from "./helpers/sum-credits.js";
@@ -94,6 +96,11 @@ const usage: ModelUsage = {
 };
 const model = vi.mocked(streamModelTurn);
 
+//* the input limit the mocked API reports; compaction tests lower it to reach their thresholds
+let inputTokenLimit = 128_000;
+const start = () =>
+	({ type: "start", model: "test-model", inputTokenLimit }) as const;
+
 beforeAll(async () => {
 	await testConfig.migrate();
 	const config = await testConfig.getConfig();
@@ -136,7 +143,9 @@ beforeAll(async () => {
 	).id;
 });
 afterAll(() => testConfig.destroy());
+afterEach(() => vi.restoreAllMocks());
 beforeEach(() => {
+	inputTokenLimit = 128_000;
 	model.mockReset();
 	remoteRequest.mockReset();
 	writeHandler.mockClear();
@@ -166,6 +175,7 @@ const prepare = async (props?: { routineId?: string }) => {
 };
 const reply = (text: string) =>
 	model.mockImplementationOnce(async (_ctx, input) => {
+		await input.emit(start());
 		await input.emit({ type: "text-delta", text });
 		return { error: undefined, data: { usage, connectionId } };
 	});
@@ -175,6 +185,7 @@ const callTool = (call: {
 	input: Record<string, unknown>;
 }) =>
 	model.mockImplementationOnce(async (_ctx, input) => {
+		await input.emit(start());
 		await input.emit({ type: "tool-call", ...call });
 		return { error: undefined, data: { usage, connectionId } };
 	});
@@ -504,6 +515,11 @@ describe("agent runner", () => {
 					parts: [{ type: "text", text: "Background reply." }],
 				}),
 			},
+			{
+				type: "context",
+				runId: prepared.runId,
+				context: expect.objectContaining({ status: "ready" }),
+			},
 			{ type: "finish", runId: prepared.runId, status: "completed" },
 		]);
 	});
@@ -513,5 +529,489 @@ describe("agent runner", () => {
 		expect(sumCredits("999999999999999999", "0.000001", 3)).toBe(
 			"999999999999999999.000003",
 		);
+	});
+});
+
+describe("conversation compaction", () => {
+	//* longer than the tail kept verbatim at this limit, so there is always something to summarise
+	const longReply = `Draft saved. No publishing was requested. ${"Detail. ".repeat(300)}`;
+	const summaryOf = (checkpoint?: Checkpoint | null) =>
+		JSON.stringify(checkpoint?.messages[0]).includes(
+			"Earlier conversation summary",
+		);
+	const compactAfterReply = async () => {
+		const prepared = await prepare();
+		reply(longReply);
+		await executeRun(context, { runId: prepared.runId });
+		const requestId = randomUUID();
+		const compact = await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId,
+			purpose: "compact",
+		});
+		expect(compact.error).toBeUndefined();
+		return { ...prepared, compactId: requestId };
+	};
+	beforeEach(() => {
+		inputTokenLimit = 4_000;
+	});
+
+	test("manual compaction keeps history and continues from only the newest summary", async () => {
+		const prepared = await compactAfterReply();
+		reply(
+			"Current goal: draft content. Constraint: never publish without approval.",
+		);
+		const events: AgentStreamEvent[] = [];
+		expect(
+			await executeRun(context, {
+				runId: prepared.compactId,
+				emit: async (event) => {
+					events.push(event);
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		const [chat, compaction] = model.mock.calls.map(([, input]) => input);
+		//* the summary request repeats the chat's prefix, so the prompt cache applies
+		expect(compaction).toMatchObject({
+			purpose: "compact",
+			instructions: chat?.instructions,
+			tools: chat?.tools,
+		});
+		expect(compaction?.messages.slice(0, chat?.messages.length)).toEqual(
+			chat?.messages,
+		);
+		expect(
+			events.some(
+				(event) =>
+					event.type === "context" && event.context.status === "compacting",
+			),
+		).toBe(true);
+		const records = await context.db.kysely
+			.selectFrom("lucid_agent_compactions")
+			.selectAll()
+			.where("conversation_id", "=", prepared.conversationId)
+			.execute();
+		expect(records).toHaveLength(1);
+		expect(await partsOf(prepared.conversationId)).toHaveLength(2);
+
+		const next = randomUUID();
+		await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: next,
+			text: "Continue in French",
+		});
+		reply(`Continuing with the French draft. ${"Détail. ".repeat(300)}`);
+		await executeRun(context, { runId: next });
+		const continued = model.mock.calls[2]?.[1];
+		expect(continued?.messages[0]).toMatchObject({
+			content: expect.stringContaining("never publish without approval"),
+		});
+		expect(continued?.messages).not.toContainEqual({
+			role: "user",
+			content: "Hello",
+		});
+		expect(continued?.messages.at(-1)).toEqual({
+			role: "user",
+			content: "Continue in French",
+		});
+		//* history is only offered once context has been summarised
+		const toolNames = (index: number) =>
+			model.mock.calls[index]?.[1].tools.map((tool) => tool.name);
+		expect(toolNames(0)).not.toContain("lucid_read_history");
+		expect(toolNames(2)).toContain("lucid_read_history");
+		const charged = await context.db.kysely
+			.selectFrom("lucid_ai_generations")
+			.select(["feature_key"])
+			.where("agent_run_id", "=", prepared.compactId)
+			.execute();
+		expect(charged).toEqual([{ feature_key: "agent.compact" }]);
+
+		const second = randomUUID();
+		await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: second,
+			purpose: "compact",
+		});
+		reply("Updated goal: continue drafting in French, without publishing.");
+		await executeRun(context, { runId: second });
+		expect(model.mock.calls[3]?.[1].messages[0]).toMatchObject({
+			content: expect.stringContaining("never publish without approval"),
+		});
+		const afterSecond = randomUUID();
+		await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: afterSecond,
+			text: "Carry on",
+		});
+		reply("Ready.");
+		await executeRun(context, { runId: afterSecond });
+		const latestContext = model.mock.calls[4]?.[1].messages;
+		expect(latestContext?.[0]).toMatchObject({
+			content: expect.stringContaining("Updated goal:"),
+		});
+		expect(JSON.stringify(latestContext)).not.toContain(
+			"Current goal: draft content",
+		);
+		const conversation = await getConversation(context, {
+			id: prepared.conversationId,
+			userId,
+		});
+		expect(conversation.data?.compactions).toHaveLength(2);
+		expect(conversation.data?.context).toMatchObject({
+			model: "test-model",
+			tokenLimit: 4_000,
+			status: "ready",
+		});
+	});
+
+	test.each([
+		true,
+		false,
+	])("recovers when saving the checkpoint fails after the summary (transactions: %s)", async (transactions) => {
+		if (!transactions) {
+			const supports = context.config.db.supports.bind(context.config.db);
+			vi.spyOn(context.config.db, "supports").mockImplementation((feature) =>
+				feature === "transaction" ? false : supports(feature),
+			);
+		}
+		const prepared = await compactAfterReply();
+		const update = AgentRunsRepository.prototype.updateWithToken;
+		let interrupted = false;
+		vi.spyOn(
+			AgentRunsRepository.prototype,
+			"updateWithToken",
+		).mockImplementation(function (this: AgentRunsRepository, props) {
+			if (
+				!interrupted &&
+				props.runId === prepared.compactId &&
+				!props.checkpoint.compaction &&
+				summaryOf(props.checkpoint)
+			) {
+				interrupted = true;
+				throw new Error("Checkpoint write interrupted");
+			}
+			return update.call(this, props);
+		});
+		reply("Goal: continue drafting.");
+		expect(
+			await executeRun(context, { runId: prepared.compactId }),
+		).toMatchObject({
+			data: { status: "interrupted" },
+		});
+		const saved = await selectRun(prepared.compactId);
+		expect(saved?.checkpoint?.compaction).toBeDefined();
+		expect(saved?.checkpoint?.messages[0]).toMatchObject({ content: "Hello" });
+		reply("Goal: continue drafting.");
+		expect(
+			await executeRun(context, { runId: prepared.compactId }),
+		).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(model.mock.calls[2]?.[1].requestId).toBe(
+			model.mock.calls[1]?.[1].requestId,
+		);
+		const records = await context.db.kysely
+			.selectFrom("lucid_agent_compactions")
+			.select("id")
+			.where("run_id", "=", prepared.compactId)
+			.execute();
+		expect(records).toHaveLength(1);
+	});
+
+	test("history retrieval is scoped to the conversation and returns bounded pages", async () => {
+		const other = await prepare();
+		const prepared = await prepare();
+		const messages = new AgentMessagesRepository(context.db);
+		const messageId = randomUUID();
+		await messages.appendOnce({
+			id: messageId,
+			conversationId: prepared.conversationId,
+			runId: prepared.runId,
+			parts: [{ type: "text", text: "saved ".repeat(2000) }],
+			createdAt: new Date().toISOString(),
+		});
+		callTool({
+			id: "foreign",
+			name: "lucid_read_history",
+			input: { messageId: other.requestId },
+		});
+		callTool({ id: "first", name: "lucid_read_history", input: { messageId } });
+		callTool({
+			id: "rest",
+			name: "lucid_read_history",
+			input: { messageId, offset: 8000 },
+		});
+		reply("Read the saved details.");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		const parts = await partsOf(prepared.conversationId);
+		expect(parts).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "foreign",
+				status: "failed",
+			}),
+		);
+		expect(parts).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "first",
+				output: expect.objectContaining({ nextOffset: 8000 }),
+			}),
+		);
+		expect(parts).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "rest",
+				output: expect.objectContaining({ nextOffset: null }),
+			}),
+		);
+	});
+
+	test("an interrupted compaction reuses its request and preserves the original context", async () => {
+		const prepared = await compactAfterReply();
+		model.mockImplementationOnce(async () => ({
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:agent.connection.failed"),
+			},
+			data: undefined,
+		}));
+		remoteRequest.mockResolvedValue({
+			error: undefined,
+			data: {
+				json: { data: { requestId: randomUUID(), status: "processing" } },
+			},
+		});
+		await executeRun(context, { runId: prepared.compactId });
+		const interrupted = await selectRun(prepared.compactId);
+		expect(interrupted?.status).toBe("interrupted");
+		expect(interrupted?.checkpoint?.messages[0]).toMatchObject({
+			content: "Hello",
+		});
+		const remoteId = model.mock.calls[1]?.[1].requestId;
+		reply("Goal: continue drafting.");
+		await executeRun(context, { runId: prepared.compactId });
+		expect(model.mock.calls[2]?.[1].requestId).toBe(remoteId);
+		expect(
+			await context.db.kysely
+				.selectFrom("lucid_agent_compactions")
+				.select("id")
+				.where("run_id", "=", prepared.compactId)
+				.execute(),
+		).toHaveLength(1);
+	});
+
+	test("rejects an incomplete summary and preserves its billed usage and original context", async () => {
+		const prepared = await compactAfterReply();
+		model.mockImplementationOnce(async (_context, input) => {
+			await input.onRequest?.(connectionId);
+			await input.emit({ type: "text-delta", text: "Incomplete handoff" });
+			remoteRequest.mockResolvedValue({
+				error: undefined,
+				data: {
+					json: {
+						data: { requestId: input.requestId, status: "failed", usage },
+					},
+				},
+			});
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 502,
+					key: "agent_compaction_failed",
+					message: copy("server:agent.compaction.failed"),
+				},
+			};
+		});
+		expect(
+			await executeRun(context, { runId: prepared.compactId }),
+		).toMatchObject({
+			data: { status: "failed" },
+		});
+		expect(
+			(await selectRun(prepared.compactId))?.checkpoint?.messages[0],
+		).toMatchObject({ content: "Hello" });
+		const records = await context.db.kysely
+			.selectFrom("lucid_agent_compactions")
+			.select("id")
+			.where("run_id", "=", prepared.compactId)
+			.execute();
+		expect(records).toHaveLength(0);
+		const charged = await context.db.kysely
+			.selectFrom("lucid_ai_generations")
+			.select(["feature_key", "credits_charged"])
+			.where("agent_run_id", "=", prepared.compactId)
+			.execute();
+		expect(charged).toEqual([
+			{ feature_key: "agent.compact", credits_charged: "0.0001" },
+		]);
+	});
+
+	test("carries on without compacting when an automatic compaction fails but the request still fits", async () => {
+		const prepared = await prepare();
+		reply(longReply);
+		await executeRun(context, { runId: prepared.runId });
+		const next = randomUUID();
+		await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: next,
+			text: "Check the history",
+		});
+		//* the provider counts this request close to the limit, so compaction is due before the next turn
+		model.mockImplementationOnce(async (_ctx, input) => {
+			await input.emit(start());
+			await input.emit({
+				type: "tool-call",
+				id: "missing",
+				name: "lucid_read_history",
+				input: { messageId: randomUUID() },
+			});
+			return {
+				error: undefined,
+				data: {
+					usage: {
+						...usage,
+						tokens: {
+							...usage.tokens,
+							input: { ...usage.tokens.input, total: 3_700 },
+						},
+					},
+					connectionId,
+				},
+			};
+		});
+		model.mockImplementationOnce(async () => ({
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:agent.connection.failed"),
+			},
+			data: undefined,
+		}));
+		remoteRequest.mockResolvedValue({
+			error: undefined,
+			data: {
+				json: { data: { requestId: randomUUID(), status: "failed" } },
+			},
+		});
+		reply("Done.");
+
+		expect(await executeRun(context, { runId: next })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(model.mock.calls.slice(1).map(([, input]) => input.purpose)).toEqual(
+			[undefined, "compact", undefined],
+		);
+		expect((await selectRun(next))?.checkpoint?.compactionFailed).toBe(true);
+	});
+
+	test("compacts and retries with a new request when the model cannot read the whole request", async () => {
+		const prepared = await prepare();
+		reply(longReply);
+		await executeRun(context, { runId: prepared.runId });
+		const next = randomUUID();
+		await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: next,
+			text: "Next",
+		});
+		model.mockImplementationOnce(async (_ctx, input) => {
+			await input.emit(start());
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 502,
+					key: "agent_context_exceeded",
+					message: copy("server:agent.model.failed"),
+				},
+			};
+		});
+		remoteRequest.mockResolvedValue({
+			error: undefined,
+			data: {
+				json: { data: { requestId: randomUUID(), status: "failed" } },
+			},
+		});
+		reply("Goal: answer the next request.");
+		reply("Done.");
+
+		expect(await executeRun(context, { runId: next })).toMatchObject({
+			data: { status: "completed" },
+		});
+		const [rejected, compaction, retried] = model.mock.calls
+			.slice(1)
+			.map(([, input]) => input);
+		expect(compaction?.purpose).toBe("compact");
+		expect(retried?.requestId).not.toBe(rejected?.requestId);
+		expect(
+			summaryOf(await selectRun(next).then((run) => run?.checkpoint)),
+		).toBe(true);
+		expect(retried?.messages.at(-1)).toEqual({ role: "user", content: "Next" });
+	});
+
+	test("loads old conversations in batches and compacts before answering", async () => {
+		const prepared = await prepare();
+		reply("Initial reply.");
+		await executeRun(context, { runId: prepared.runId });
+		const messages = new AgentMessagesRepository(context.db);
+		for (let i = 0; i < 65; i++) {
+			await messages.appendOnce({
+				id: randomUUID(),
+				conversationId: prepared.conversationId,
+				runId: prepared.runId,
+				parts: [
+					{
+						type: "text",
+						text: `Saved requirement ${i}. ${"detail ".repeat(120)}`,
+					},
+				],
+				createdAt: new Date().toISOString(),
+			});
+		}
+		model.mockImplementation(async (_context, input) => {
+			await input.emit(start());
+			await input.emit({
+				type: "text-delta",
+				text:
+					input.purpose === "compact"
+						? "Keep all saved requirements; retrieve history for their exact values."
+						: "Ready to continue.",
+			});
+			return { error: undefined, data: { usage, connectionId } };
+		});
+		const next = randomUUID();
+		await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: next,
+			text: "Continue now",
+		});
+		expect(await executeRun(context, { runId: next })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(
+			model.mock.calls.filter(([, input]) => input.purpose === "compact")
+				.length,
+		).toBeGreaterThan(1);
+		expect(model.mock.calls.at(-1)?.[1].messages.at(-1)).toEqual({
+			role: "user",
+			content: "Continue now",
+		});
+		const supplied = JSON.stringify(
+			model.mock.calls.map(([, input]) => input.messages),
+		);
+		for (let i = 0; i < 65; i++)
+			expect(supplied).toContain(`Saved requirement ${i}.`);
 	});
 });

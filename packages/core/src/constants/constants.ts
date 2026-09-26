@@ -230,9 +230,8 @@ export default Object.freeze({
 			routineTurns: 40,
 			routineNudges: 2,
 			recoveries: 3,
-			historyMessages: 30,
-			transcriptMessages: 256,
-			transcriptChars: 128_000,
+			/** The API's message limit for one model request. */
+			transcriptMessages: 1_024,
 			instructionChars: 32_000,
 			callsPerTurn: 16,
 			partsChars: 262_144,

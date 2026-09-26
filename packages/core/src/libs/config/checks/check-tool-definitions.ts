@@ -20,6 +20,7 @@ const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 
 	const runnerTools = getRunnerTools({
 		mode: "routine",
+		hasHistory: true,
 		hasSkills: config.ai.skills.definitions.some(
 			(skill) =>
 				skill.targets.includes("agent") &&

@@ -6,6 +6,7 @@ const storePendingUsage: ServiceFn<
 	[
 		{
 			requestId: string;
+			purpose?: "compact";
 			runId: string;
 			conversationId: string;
 			userId: number;
@@ -20,7 +21,7 @@ const storePendingUsage: ServiceFn<
 		data: {
 			request_id: input.requestId,
 			provider_request_id: null,
-			feature_key: "agent.chat",
+			feature_key: input.purpose ? "agent.compact" : "agent.chat",
 			feature_version: "v1",
 			user_id: input.userId,
 			lucid_remote_connection_id: input.connectionId,

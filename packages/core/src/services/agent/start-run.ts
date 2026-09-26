@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../constants/constants.js";
-import type { Checkpoint } from "../../libs/agent/types.js";
+import { summaryMessage } from "../../libs/agent/context.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
+	AgentCompactionsRepository,
 	AgentConversationsRepository,
 	AgentMessagesRepository,
 	AgentRunsRepository,
@@ -21,12 +22,14 @@ const startRun: ServiceFn<
 		{
 			conversationId: string;
 			userId: number;
-			text: string;
 			requestId: string;
 			routineId?: string;
 			/** Extra model context that is not shown as part of the message. */
 			context?: string;
-		},
+		} & (
+			| { purpose: "compact"; text?: never }
+			| { purpose?: never; text: string }
+		),
 	],
 	{ runId: string }
 > = async (context, input) => {
@@ -54,7 +57,7 @@ const startRun: ServiceFn<
 			id: input.requestId,
 			conversationId: input.conversationId,
 			runId: input.requestId,
-			parts: [{ type: "text" as const, text: input.text }],
+			parts: [{ type: "text" as const, text: input.text ?? "" }],
 			createdAt: now,
 		};
 
@@ -75,8 +78,10 @@ const startRun: ServiceFn<
 				};
 			}
 
-			const restored = await messages.appendOnce(message);
-			if (restored.error) return restored;
+			if (!input.purpose) {
+				const restored = await messages.appendOnce(message);
+				if (restored.error) return restored;
+			}
 
 			return { error: undefined, data: { runId: existing.data.id } };
 		}
@@ -84,7 +89,7 @@ const startRun: ServiceFn<
 		// A new message replaces a paused or stopped run, but never a live one.
 		const activeRunId = conversation.data.active_run_id;
 
-		if (activeRunId) {
+		if (activeRunId && !input.purpose) {
 			const replaced = await runs.transition({
 				runId: activeRunId,
 				from: ["waiting", "interrupted"],
@@ -119,34 +124,26 @@ const startRun: ServiceFn<
 			};
 		}
 
-		const history = await messages.selectLatest({
-			conversationId: input.conversationId,
-			limit: constants.agent.limits.historyMessages,
-		});
-		if (history.error) return history;
-		// Earlier turns contribute their visible text; each run keeps its own tool transcript.
-		const transcript: Checkpoint["messages"] = history.data
-			.reverse()
-			.flatMap((message) => {
-				const content = message.parts
-					.flatMap((part) => (part.type === "text" ? [part.text] : []))
-					.join("\n");
+		const compactions = new AgentCompactionsRepository(context.db);
+		const latest = await compactions.selectLatest(input.conversationId);
+		if (latest.error) return latest;
 
-				return content ? [{ role: message.role, content }] : [];
+		if (!input.routineId && !input.purpose) {
+			const previous = await messages.selectLatest({
+				conversationId: input.conversationId,
+				limit: 1,
 			});
-		transcript.push({
-			role: "user",
-			content: input.context ? `${input.text}\n\n${input.context}` : input.text,
-		});
-
-		if (!history.data.length && !input.routineId) {
-			const titled = await conversations.updateSingle({
-				where: [{ key: "id", operator: "=", value: input.conversationId }],
-				data: { title: titleFromMessage(input.text) },
-			});
-			if (titled.error) return titled;
+			if (previous.error) return previous;
+			if (!previous.data.length) {
+				const titled = await conversations.updateSingle({
+					where: [{ key: "id", operator: "=", value: input.conversationId }],
+					data: { title: titleFromMessage(input.text) },
+				});
+				if (titled.error) return titled;
+			}
 		}
 
+		const current = conversation.data.context;
 		const run = await runs.createSingle({
 			data: {
 				id: input.requestId,
@@ -156,7 +153,15 @@ const startRun: ServiceFn<
 				status: "queued",
 				checkpoint: {
 					version: 1,
-					messages: transcript,
+					messages: latest.data ? [summaryMessage(latest.data.summary)] : [],
+					//* the run loads history, including this message, after the latest summary
+					historyAfter: latest.data?.through_position ?? 0,
+					extraContext: input.context,
+					purpose: input.purpose,
+					model: current
+						? { id: current.model, tokenLimit: current.tokenLimit }
+						: undefined,
+					trimmed: latest.data ? true : undefined,
 					turns: 0,
 					nudges: 0,
 					requestId: randomUUID(),
@@ -172,8 +177,10 @@ const startRun: ServiceFn<
 		});
 		if (run.error) return run;
 
-		const appended = await messages.appendOnce(message);
-		if (appended.error) return appended;
+		if (!input.purpose) {
+			const appended = await messages.appendOnce(message);
+			if (appended.error) return appended;
+		}
 
 		return { error: undefined, data: { runId: input.requestId } };
 	});

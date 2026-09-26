@@ -122,6 +122,26 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 
 		return exec.response;
 	}
+	/** Reads history in bounded pages, including messages no longer in model context. */
+	async selectAfter(props: {
+		conversationId: string;
+		after: number;
+		limit: number;
+	}) {
+		const result = await this.executeQuery(
+			() =>
+				this.db
+					.selectFrom("lucid_agent_messages")
+					.selectAll()
+					.where("conversation_id", "=", props.conversationId)
+					.where("position", ">", props.after)
+					.orderBy("position", "asc")
+					.limit(props.limit)
+					.execute(),
+			{ method: "selectAfter" },
+		);
+		return result.response;
+	}
 	/** A run's assistant messages changed at or after a time, in order. */
 	async selectChangedForRun(props: { runId: string; since?: string }) {
 		let query = this.db

@@ -1,4 +1,6 @@
 import type {
+	AgentCompaction,
+	AgentContext,
 	AgentConversation,
 	AgentMessage,
 	AgentRoutine,
@@ -7,6 +9,9 @@ import type {
 	AgentRunStatus,
 	AgentUsage,
 } from "../../types/response.js";
+import { contextLimits } from "../agent/context.js";
+import type { ConversationContext } from "../agent/types.js";
+import type { LucidAgentCompactions } from "../db/tables/agent-compactions.js";
 import type { LucidAgentConversations } from "../db/tables/agent-conversations.js";
 import type { LucidAgentMessages } from "../db/tables/agent-messages.js";
 import type { LucidAgentRoutines } from "../db/tables/agent-routines.js";
@@ -40,10 +45,46 @@ type LastRunPropT = Pick<
 
 const emptyUsage: AgentUsage = { creditsCharged: "0", modelCalls: 0 };
 
+/** A conversation is only compacting while a run is active, since a stopped run can leave the status behind. */
+const formatContext = (props: {
+	context: ConversationContext | null;
+	active: boolean;
+}): AgentContext | null => {
+	if (!props.context) return null;
+
+	const percent = Math.min(
+		100,
+		Math.ceil((props.context.tokens / props.context.tokenLimit) * 100),
+	);
+	const status = props.active ? props.context.status : "ready";
+
+	return {
+		...props.context,
+		status,
+		percent,
+		compactable: status === "ready" && percent >= contextLimits.suggestAt * 100,
+	};
+};
+
 const formatConversation = (props: {
 	conversation: ConversationPropT;
+	compactions?: Pick<Select<LucidAgentCompactions>, "id" | "created_at">[];
 }): AgentConversation => ({
 	id: props.conversation.id,
+	context: formatContext({
+		context: props.conversation.context,
+		active: props.conversation.active_run_id !== null,
+	}),
+	...(props.compactions
+		? {
+				compactions: props.compactions.map(
+					(compaction): AgentCompaction => ({
+						id: compaction.id,
+						createdAt: formatter.formatDate(compaction.created_at),
+					}),
+				),
+			}
+		: {}),
 	title: props.conversation.title,
 	userId: props.conversation.user_id,
 	routineId: props.conversation.routine_id,
@@ -111,6 +152,7 @@ const formatRoutine = (props: {
 });
 
 export default {
+	formatContext,
 	formatConversation,
 	formatMessage,
 	formatRun,

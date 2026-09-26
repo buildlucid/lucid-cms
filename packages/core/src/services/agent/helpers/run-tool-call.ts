@@ -1,9 +1,11 @@
 import builtInTools from "../../../libs/agent/built-in-tools.js";
+import { contextLimits } from "../../../libs/agent/context.js";
 import type {
 	Checkpoint,
 	RunMode,
 	ToolCall,
 } from "../../../libs/agent/types.js";
+import { AgentMessagesRepository } from "../../../libs/repositories/index.js";
 import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import {
@@ -37,6 +39,88 @@ const runToolCall = async (
 	const { run, mode, call, checkpoint, session, capabilities } = props;
 	const answer = checkpoint.pending?.answer;
 	switch (call.name) {
+		case builtInTools.history.name: {
+			const input = builtInTools.history.input.safeParse(call.input);
+			if (!input.success)
+				return {
+					kind: "result",
+					output: { error: context.translate("server:agent.history.invalid") },
+					failed: true,
+				};
+			const messages = new AgentMessagesRepository(context.db);
+			if (input.data.messageId) {
+				const message = await messages.selectSingle({
+					select: ["id", "position", "role", "parts"],
+					where: [
+						{ key: "id", operator: "=", value: input.data.messageId },
+						{
+							key: "conversation_id",
+							operator: "=",
+							value: run.conversation_id,
+						},
+					],
+				});
+				if (message.error || !message.data) {
+					return {
+						kind: "result",
+						output: {
+							error: context.translate("server:agent.history.unavailable"),
+						},
+						failed: true,
+					};
+				}
+
+				const text = JSON.stringify(message.data.parts);
+				const end = input.data.offset + contextLimits.historyPageChars;
+
+				return {
+					kind: "result",
+					failed: false,
+					output: {
+						id: message.data.id,
+						position: message.data.position,
+						role: message.data.role,
+						content: text.slice(input.data.offset, end),
+						nextOffset: end < text.length ? end : null,
+					},
+				};
+			}
+
+			const history = await messages.selectAfter({
+				conversationId: run.conversation_id,
+				after: input.data.after,
+				limit: contextLimits.historyListSize,
+			});
+			if (history.error) {
+				return {
+					kind: "result",
+					failed: true,
+					output: {
+						error: context.translate("server:agent.history.unavailable"),
+					},
+				};
+			}
+
+			return {
+				kind: "result",
+				failed: false,
+				output: {
+					messages: history.data.map((message) => ({
+						id: message.id,
+						position: message.position,
+						role: message.role,
+						preview: JSON.stringify(message.parts).slice(
+							0,
+							contextLimits.historyPreviewChars,
+						),
+					})),
+					nextAfter:
+						history.data.length === contextLimits.historyListSize
+							? history.data.at(-1)?.position
+							: null,
+				},
+			};
+		}
 		case builtInTools.ask.name: {
 			const input = builtInTools.ask.input.safeParse(call.input);
 

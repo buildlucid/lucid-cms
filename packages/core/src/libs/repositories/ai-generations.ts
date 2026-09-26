@@ -130,13 +130,14 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			.selectFrom("lucid_ai_generations")
 			.select([
 				"request_id",
+				"feature_key",
 				"agent_run_id",
 				"agent_conversation_id",
 				"user_id",
 				"lucid_remote_connection_id",
 				"created_at",
 			])
-			.where("feature_key", "=", "agent.chat")
+			.where("feature_key", "in", ["agent.chat", "agent.compact"])
 			.where("feature_version", "=", "v1")
 			.where("status", "=", "pending")
 			.where("lucid_remote_connection_id", "=", props.connectionId);
@@ -157,6 +158,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			mode: "multiple",
 			select: [
 				"request_id",
+				"feature_key",
 				"agent_run_id",
 				"agent_conversation_id",
 				"user_id",

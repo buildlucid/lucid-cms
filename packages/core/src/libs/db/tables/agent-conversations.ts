@@ -1,8 +1,11 @@
+import type { JSONColumnType } from "kysely";
 import z from "zod";
 import {
+	agentContextSchema,
 	agentRunOutcomeSchema,
 	agentRunStatusSchema,
 } from "../../../schemas/agent.js";
+import type { ConversationContext } from "../../agent/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable, TimestampRequired } from "../types.js";
 
@@ -15,6 +18,7 @@ export const agentConversationsTable = defineTable(
 			user_id: { schema: z.number(), type: "integer" },
 			routine_id: { schema: z.uuid().nullable(), type: "text" },
 			active_run_id: { schema: z.uuid().nullable(), type: "text" },
+			context: { schema: agentContextSchema.nullable(), type: "json" },
 			created_at: {
 				schema: z.union([z.string(), z.date()]),
 				type: "timestamp",
@@ -54,6 +58,12 @@ export interface LucidAgentConversations {
 	user_id: number;
 	routine_id: string | null;
 	active_run_id: string | null;
+	/** The latest measured context, written by the conversation's active run. */
+	context: JSONColumnType<
+		ConversationContext | null,
+		ConversationContext | null | undefined,
+		ConversationContext | null
+	>;
 	created_at: TimestampImmutable;
 	updated_at: TimestampRequired;
 }

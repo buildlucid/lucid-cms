@@ -136,12 +136,12 @@ test("separate targets can reuse a name and disabling it disables both", async (
 	expect(getToolRegistry(disabled, "mcp").has("test_echo")).toBe(false);
 });
 
-test("the provider limit includes ask, finish and the optional skill loader", async () => {
+test("the provider limit includes ask, history, finish and the optional skill loader", async () => {
 	const base = await processConfig(
 		{ secrets: "a".repeat(64) },
 		{ resolvedDb: adapter },
 	);
-	const tools = Array.from({ length: 62 }, (_, i) => ({
+	const tools = Array.from({ length: 61 }, (_, i) => ({
 		...agentEcho,
 		name: `test_${i}`,
 	}));
@@ -161,7 +161,7 @@ test("the provider limit includes ask, finish and the optional skill loader", as
 		},
 	};
 
-	expect(() => checkToolDefinitions(config)).toThrow("61 custom agent tools");
+	expect(() => checkToolDefinitions(config)).toThrow("60 custom agent tools");
 	expect(() =>
 		checkToolDefinitions({
 			...config,
@@ -189,5 +189,5 @@ test("the provider limit includes ask, finish and the optional skill loader", as
 				},
 			},
 		}),
-	).toThrow("62 custom agent tools");
+	).toThrow("61 custom agent tools");
 });

@@ -18,11 +18,18 @@ import type {
 import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../../connection/token-manager.js";
 
+/** Remote failures the runner handles differently from an ordinary model failure. */
+const remoteErrorKeys: Partial<Record<string, string>> = {
+	cms_ai_compaction_incomplete: "agent_compaction_failed",
+	cms_ai_context_exceeded: "agent_context_exceeded",
+};
+
 /** One billed model turn. CMS tools never execute on the remote service. */
 const streamModelTurn: ServiceFn<
 	[
 		{
 			requestId: string;
+			purpose?: "compact";
 			instructions: string;
 			messages: ModelMessage[];
 			tools: {
@@ -67,6 +74,7 @@ const streamModelTurn: ServiceFn<
 				},
 				body: JSON.stringify({
 					requestId: input.requestId,
+					...(input.purpose ? { purpose: input.purpose } : {}),
 					instructions: input.instructions,
 					messages: input.messages,
 					tools: input.tools,
@@ -137,7 +145,7 @@ const streamModelTurn: ServiceFn<
 							type: "basic",
 							status: 502,
 							message: copy("server:agent.model.failed"),
-							key: "agent_model_failed",
+							key: remoteErrorKeys[event.message] ?? "agent_model_failed",
 							cause: new Error(event.message),
 						},
 					};

@@ -1,3 +1,4 @@
+import { agentCompactionsTable } from "./agent-compactions.js";
 import { agentConversationsTable } from "./agent-conversations.js";
 import { agentMessagesTable } from "./agent-messages.js";
 import { agentRoutinesTable } from "./agent-routines.js";
@@ -53,6 +54,7 @@ import { userRolesTable } from "./user-roles.js";
 import { userTokensTable } from "./user-tokens.js";
 import { usersTable } from "./users.js";
 
+export * from "./agent-compactions.js";
 export * from "./agent-conversations.js";
 export * from "./agent-messages.js";
 export * from "./agent-routines.js";
@@ -111,6 +113,7 @@ export * from "./users.js";
 
 export const coreTableDefinitions = [
 	aiGenerationsTable,
+	agentCompactionsTable,
 	agentConversationsTable,
 	agentMessagesTable,
 	agentRoutinesTable,

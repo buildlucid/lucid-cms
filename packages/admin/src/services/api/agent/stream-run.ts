@@ -3,6 +3,7 @@ import { EventSourceParserStream } from "eventsource-parser/stream";
 import { sendRequest } from "@/utils/request";
 
 const eventTypes = new Set<AgentStreamEvent["type"]>([
+	"context",
 	"start",
 	"text-delta",
 	"tool",

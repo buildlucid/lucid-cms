@@ -1,10 +1,18 @@
 import constants from "../../../constants/constants.js";
 import builtInTools from "../../../libs/agent/built-in-tools.js";
+import {
+	contextTokens,
+	needsCompaction,
+	tokenLimit,
+} from "../../../libs/agent/context.js";
 import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
+import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess from "./check-agent-access.js";
+import compactContext from "./compact-context.js";
 import executeToolStep from "./execute-tool-step.js";
+import loadHistory from "./load-history.js";
 import resolveCapabilities from "./resolve-capabilities.js";
 import runModelTurn from "./run-model-turn.js";
 import type { RunSession, SessionRun } from "./run-session.js";
@@ -33,10 +41,15 @@ const driveRun: ServiceFn<
 				context.translate("server:agent.access.unavailable"),
 		);
 	}
-	const capabilities = resolveCapabilities(context, {
-		authority: access.data,
-		mode,
-	});
+	//* resolved before each model turn, since trimmed context adds the history tool
+	const resolve = () =>
+		resolveCapabilities(context, {
+			authority: access.data,
+			mode,
+			hasHistory: checkpoint.trimmed === true,
+		});
+
+	let capabilities = resolve();
 	if (checkpoint.inFlightWrite) {
 		return session.finish(
 			"failed",
@@ -50,6 +63,86 @@ const driveRun: ServiceFn<
 		}
 
 		if (checkpoint.phase === "model") {
+			capabilities = resolve();
+
+			const history = checkpoint.compaction
+				? { error: undefined, data: false }
+				: await loadHistory(context, { run, checkpoint, capabilities });
+			if (history.error) return history;
+
+			const manual =
+				checkpoint.purpose === "compact" &&
+				checkpoint.historyAfter === undefined;
+
+			//* compaction is required to keep going, rather than just due
+			const required = history.data || checkpoint.overflow === "compacting";
+			if (
+				checkpoint.compaction ||
+				manual ||
+				required ||
+				(!checkpoint.compactionFailed &&
+					needsCompaction(checkpoint, capabilities))
+			) {
+				const compacted = await compactContext(context, {
+					run,
+					checkpoint,
+					session,
+					capabilities,
+				});
+				if (compacted.error) {
+					if (session.signal.aborted) return session.handOff();
+
+					// Automatic compaction is best effort while the request still fits.
+					if (
+						!manual &&
+						!required &&
+						contextTokens(checkpoint, capabilities) <= tokenLimit(checkpoint)
+					) {
+						checkpoint.compaction = undefined;
+						checkpoint.compactionFailed = true;
+						await session.saveContext(capabilities, "ready");
+						continue;
+					}
+
+					const usage = checkpoint.compaction
+						? await new AiGenerationsRepository(
+								context.db,
+							).selectSingleByRequestId({
+								requestId: checkpoint.compaction.requestId,
+								select: ["status"],
+							})
+						: undefined;
+
+					const permanent =
+						compacted.error.key === "agent_compaction_failed" ||
+						compacted.error.key === "agent_context_exceeded" ||
+						(compacted.error.key === "agent_model_failed" &&
+							usage?.data?.status === "failed") ||
+						(compacted.error.status !== undefined &&
+							compacted.error.status < 500 &&
+							compacted.error.status !== 409);
+
+					return session.finish(
+						permanent ? "failed" : "interrupted",
+						context.translate("server:agent.compaction.failed"),
+					);
+				}
+
+				if (manual) return session.finish("completed");
+
+				if (compacted.data) {
+					if (checkpoint.overflow) checkpoint.overflow = "retrying";
+					continue;
+				}
+
+				if (required) {
+					return session.finish(
+						"failed",
+						context.translate("server:agent.conversation.too.large"),
+					);
+				}
+			}
+			if (checkpoint.historyAfter !== undefined) continue;
 			if (checkpoint.turns >= turnLimit) {
 				return session.finish(
 					"failed",
@@ -58,9 +151,10 @@ const driveRun: ServiceFn<
 					}),
 				);
 			}
+
 			if (
+				contextTokens(checkpoint, capabilities) > tokenLimit(checkpoint) ||
 				checkpoint.messages.length > limits.transcriptMessages ||
-				JSON.stringify(checkpoint.messages).length > limits.transcriptChars ||
 				capabilities.instructions.length > limits.instructionChars
 			) {
 				return session.finish(
@@ -77,6 +171,7 @@ const driveRun: ServiceFn<
 			});
 			if (turn.error) return turn;
 			if (turn.data.kind === "aborted") return session.handOff();
+			if (turn.data.kind === "overflow") continue;
 			if (turn.data.kind === "stop") {
 				return session.finish(turn.data.status, turn.data.message);
 			}

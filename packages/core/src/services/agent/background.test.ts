@@ -168,10 +168,10 @@ describe("routine dispatch", () => {
 		const second = (await routineRuns(routine.id)).find(
 			(run) => run.id !== first?.id,
 		);
-		expect(second?.checkpoint?.messages.at(-1)).toMatchObject({
-			role: "user",
-			content: expect.stringContaining("Found two broken links."),
-		});
+		//* added once the run has loaded the routine's history
+		expect(second?.checkpoint?.extraContext).toContain(
+			"Found two broken links.",
+		);
 	});
 });
 

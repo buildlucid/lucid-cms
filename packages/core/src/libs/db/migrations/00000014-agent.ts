@@ -67,6 +67,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 				col.references("lucid_agent_routines.id").onDelete("set null"),
 			)
 			.addColumn("active_run_id", adapter.getDataType("text"))
+			.addColumn("context", adapter.getDataType("json"))
 			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 				col
 					.notNull()
@@ -258,6 +259,33 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.createIndex("idx_ai_generations_agent_run")
 			.on("lucid_ai_generations")
 			.column("agent_run_id")
+			.execute();
+
+		await db.schema
+			.createTable("lucid_agent_compactions")
+			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col
+					.notNull()
+					.references("lucid_agent_conversations.id")
+					.onDelete("cascade"),
+			)
+			.addColumn("run_id", adapter.getDataType("text"), (col) =>
+				col.notNull().references("lucid_agent_runs.id").onDelete("cascade"),
+			)
+			.addColumn("through_position", adapter.getDataType("integer"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("summary", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col.notNull(),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("idx_agent_compactions_conversation_position")
+			.on("lucid_agent_compactions")
+			.columns(["conversation_id", "through_position"])
 			.execute();
 	},
 	async down(_db: Kysely<unknown>) {},

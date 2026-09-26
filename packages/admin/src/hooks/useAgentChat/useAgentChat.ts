@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/solid-query";
-import type { AgentMessage } from "@types";
+import type { AgentContext, AgentMessage } from "@types";
 import {
 	type Accessor,
 	createEffect,
@@ -32,6 +32,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	const [live, setLive] = createSignal<AgentMessage[]>();
 	const [liveRunId, setLiveRunId] = createSignal<string>();
 	const [error, setError] = createSignal<string>();
+	const [liveContext, setLiveContext] = createSignal<AgentContext>();
 	//* reconciled so streamed updates patch rendered messages instead of remounting them
 	const [messages, setMessages] = createStore<AgentMessage[]>([]);
 	let controller: AbortController | undefined;
@@ -76,6 +77,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		const id = conversationId();
 		if (!id || streaming()) return;
 		const current = new AbortController();
+		let started = false;
 		controller = current;
 		setError(undefined);
 		setLive(options.prepare?.(saved()) ?? saved());
@@ -87,7 +89,22 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 				signal: current.signal,
 				onEvent: (event) => {
 					if (event.type === "error") return setError(event.message);
-					if (event.type === "start" && !liveRunId()) {
+					if (event.type === "context") {
+						//* a finished compaction adds a marker to the conversation
+						if (
+							untrack(liveContext)?.status === "compacting" &&
+							event.context.status === "ready"
+						) {
+							void queryClient.invalidateQueries({
+								queryKey: queryKeys.agent.conversation(id),
+							});
+						}
+						setLiveRunId(event.runId);
+						setLiveContext(event.context);
+						return;
+					}
+					if (event.type === "start" && !started) {
+						started = true;
 						setLiveRunId(event.runId);
 						//* the first message names the chat
 						void queryClient.invalidateQueries({
@@ -109,6 +126,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 				controller = undefined;
 				setLive(undefined);
 				setLiveRunId(undefined);
+				setLiveContext(undefined);
 			}
 		}
 	};
@@ -143,6 +161,12 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// Return
 	return {
 		conversation,
+		context: createMemo(() => liveContext() ?? conversation.data?.data.context),
+		compactions: createMemo(() => conversation.data?.data.compactions ?? []),
+		compact: () =>
+			stream(`/lucid/api/v1/agent/conversations/${conversationId()}/compact`, {
+				body: { requestId: crypto.randomUUID() },
+			}),
 		history,
 		messages,
 		pendingQuestion,

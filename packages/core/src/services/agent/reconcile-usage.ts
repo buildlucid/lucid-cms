@@ -94,6 +94,7 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 		if (usage) {
 			const stored = await storeUsage(context, {
 				requestId: row.request_id,
+				purpose: row.feature_key === "agent.compact" ? "compact" : undefined,
 				runId: row.agent_run_id,
 				conversationId: row.agent_conversation_id,
 				userId: row.user_id,
@@ -117,7 +118,7 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 			data: {
 				request_id: row.request_id,
 				provider_request_id: null,
-				feature_key: "agent.chat",
+				feature_key: row.feature_key,
 				feature_version: "v1",
 				user_id: row.user_id,
 				lucid_remote_connection_id: row.lucid_remote_connection_id,

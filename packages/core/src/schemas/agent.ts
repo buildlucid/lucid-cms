@@ -55,12 +55,29 @@ export const agentMessagePartSchema = z.discriminatedUnion("type", [
 		.strict(),
 ]);
 
+/** A conversation's context as last measured, stored on the conversation. */
+export const agentContextSchema = z.object({
+	model: z.string(),
+	tokens: z.number().int().nonnegative(),
+	tokenLimit: z.number().int().positive(),
+	status: z.enum(["ready", "compacting"]),
+});
+
 const agentUsageSchema = z.object({
 	creditsCharged: z.string(),
 	modelCalls: z.number(),
 });
 
 const agentConversationResponseSchema = z.object({
+	context: agentContextSchema
+		.extend({
+			percent: z.number().int().min(0).max(100),
+			compactable: z.boolean(),
+		})
+		.nullable(),
+	compactions: z
+		.array(z.object({ id: z.uuid(), createdAt: z.string().nullable() }))
+		.optional(),
 	id: z.uuid(),
 	title: z.string(),
 	userId: z.number(),
@@ -215,6 +232,12 @@ export const controllerSchemas = {
 			text: z.string().trim().min(1).max(20_000),
 			requestId: z.uuid(),
 		}),
+		query: noQuery,
+		params: idParams,
+		response: undefined,
+	} satisfies ControllerSchema,
+	compactConversation: {
+		body: z.object({ requestId: z.uuid() }),
 		query: noQuery,
 		params: idParams,
 		response: undefined,

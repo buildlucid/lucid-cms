@@ -1,6 +1,12 @@
 import classnames from "classnames";
 import { FaSolidArrowUp, FaSolidStop } from "solid-icons/fa";
-import { type Component, createSignal, onMount, Show } from "solid-js";
+import {
+	type Component,
+	createSignal,
+	type JSX,
+	onMount,
+	Show,
+} from "solid-js";
 import Button from "@/components/Button/Button";
 import T from "@/translations";
 
@@ -11,6 +17,8 @@ export interface AgentComposerProps {
 	onStop?: () => void;
 	busy?: boolean;
 	disabled?: boolean;
+	/** Shown beside the send button, such as the context ring. */
+	accessory?: JSX.Element;
 	autofocus?: boolean;
 	/** @default "md" */
 	size?: "md" | "lg";
@@ -87,32 +95,33 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				<p class="hidden pl-1 text-xs text-muted sm:block">
 					{T()("agent.composer.hint")}
 				</p>
-				<Show
-					when={props.busy && props.onStop}
-					fallback={
+				<div class="ml-auto flex items-center gap-1.5">
+					{props.accessory}
+					<Show
+						when={props.busy && props.onStop}
+						fallback={
+							<Button
+								type="submit"
+								shape="circle"
+								size="sm"
+								disabled={!draft().trim() || props.busy || props.disabled}
+								aria-label={T()("agent.composer.send")}
+							>
+								<FaSolidArrowUp />
+							</Button>
+						}
+					>
 						<Button
-							type="submit"
 							shape="circle"
 							size="sm"
-							class="ml-auto"
-							disabled={!draft().trim() || props.busy || props.disabled}
-							aria-label={T()("agent.composer.send")}
+							variant="secondary"
+							onClick={() => props.onStop?.()}
+							aria-label={T()("agent.composer.stop")}
 						>
-							<FaSolidArrowUp />
+							<FaSolidStop />
 						</Button>
-					}
-				>
-					<Button
-						shape="circle"
-						size="sm"
-						variant="secondary"
-						class="ml-auto"
-						onClick={() => props.onStop?.()}
-						aria-label={T()("agent.composer.stop")}
-					>
-						<FaSolidStop />
-					</Button>
-				</Show>
+					</Show>
+				</div>
 			</div>
 		</form>
 	);
