@@ -104,18 +104,16 @@ const AgentScheduleField: Component<{
 						label={T()("agent.schedule.day")}
 					/>
 				</Show>
-				<TimezoneSelect
-					id="agent-routine-timezone"
-					value={props.timezone}
-					onChange={props.setTimezone}
-				/>
 			</div>
-			<p class="text-sm text-body">
-				{T()("agent.schedule.summary", {
+			<TimezoneSelect
+				id="agent-routine-timezone"
+				value={props.timezone}
+				onChange={props.setTimezone}
+				description={T()("agent.schedule.summary", {
 					schedule: describeSchedule(toCron(props.schedule)),
 					timezone: props.timezone,
 				})}
-			</p>
+			/>
 		</fieldset>
 	);
 };

@@ -1,8 +1,10 @@
 import { type Insertable, sql } from "kysely";
 import constants from "../../constants/constants.js";
+import type { QueryParams } from "../../types/query-params.js";
 import type { AgentRunOutcome } from "../../types/response.js";
 import type { Checkpoint } from "../agent/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
+import queryBuilder from "../db/query-builder/index.js";
 import {
 	type AgentRunStatus,
 	agentRunsTable,
@@ -70,37 +72,44 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 	}
 	async selectMultipleForRoutine(props: {
 		routineId: string;
-		page: number;
-		perPage: number;
+		queryParams: Partial<QueryParams>;
 	}) {
+		const { main, count } = queryBuilder.main(
+			{
+				main: this.db
+					.selectFrom("lucid_agent_runs")
+					.select([
+						"id",
+						"conversation_id",
+						"routine_id",
+						"status",
+						"outcome",
+						"summary",
+						"error_message",
+						"created_at",
+						"started_at",
+						"finished_at",
+					])
+					.where("routine_id", "=", props.routineId)
+					.orderBy("created_at", "desc")
+					.orderBy("id", "desc"),
+				count: this.db
+					.selectFrom("lucid_agent_runs")
+					.select((eb) => eb.fn.countAll<number>().as("count"))
+					.where("routine_id", "=", props.routineId),
+			},
+			{
+				queryParams: props.queryParams,
+				database: this.dbAdapter.config,
+				meta: this.config.queryConfig,
+			},
+		);
+
 		const exec = await this.executeQuery(
 			() =>
 				Promise.all([
-					this.db
-						.selectFrom("lucid_agent_runs")
-						.select([
-							"id",
-							"conversation_id",
-							"routine_id",
-							"status",
-							"outcome",
-							"summary",
-							"error_message",
-							"created_at",
-							"started_at",
-							"finished_at",
-						])
-						.where("routine_id", "=", props.routineId)
-						.orderBy("created_at", "desc")
-						.orderBy("id", "desc")
-						.limit(props.perPage)
-						.offset((props.page - 1) * props.perPage)
-						.execute(),
-					this.db
-						.selectFrom("lucid_agent_runs")
-						.select((eb) => eb.fn.countAll<number>().as("count"))
-						.where("routine_id", "=", props.routineId)
-						.executeTakeFirst(),
+					main.execute(),
+					count?.executeTakeFirst() as Promise<{ count: number } | undefined>,
 				]),
 			{ method: "selectMultipleForRoutine" },
 		);

@@ -44,6 +44,10 @@ export const agentRunsTable = defineTable("lucid_agent_runs", () => ({
 			type: "integer",
 		},
 	},
+	query: {
+		filters: { status: "status" },
+		sorts: { createdAt: "created_at" },
+	},
 }));
 
 export type AgentRunStatus = z.infer<typeof agentRunStatusSchema>;

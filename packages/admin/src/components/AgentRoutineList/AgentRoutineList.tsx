@@ -1,25 +1,42 @@
-import { A, useNavigate } from "@solidjs/router";
-import type { AgentRoutine } from "@types";
-import { type Component, createMemo, createSignal, For, Show } from "solid-js";
-import ActionMenu from "@/components/ActionMenu/ActionMenu";
-import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
-import DateText from "@/components/DateText/DateText";
+import { useNavigate } from "@solidjs/router";
+import {
+	FaSolidCalendar,
+	FaSolidCircleCheck,
+	FaSolidClock,
+	FaSolidRobot,
+	FaSolidT,
+} from "solid-icons/fa";
+import { type Component, createMemo, createSignal, Index } from "solid-js";
+import AgentRoutineTableRow from "@/components/AgentRoutineTableRow/AgentRoutineTableRow";
 import DeleteAgentRoutineModal from "@/components/DeleteAgentRoutineModal/DeleteAgentRoutineModal";
-import Pill from "@/components/Pill/Pill";
+import EmptyState from "@/components/EmptyState/EmptyState";
+import Pagination from "@/components/Pagination/Pagination";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import Table from "@/components/Table/Table";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
+import ViewAgentRoutineRunsDrawer from "@/components/ViewAgentRoutineRunsDrawer/ViewAgentRoutineRunsDrawer";
+import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
-import { getAgentAccess, getAgentName } from "@/utils/agent-access";
-import { describeSchedule } from "@/utils/agent-schedule";
 
-/** Routines as rows with their schedule, last run and actions. Routines defined in code can only be paused or run. */
-const AgentRoutineList: Component<{ routines: AgentRoutine[] }> = (props) => {
+const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
+	props,
+) => {
 	// ----------------------------------------
-	// State & Mutations
+	// State & Hooks
 	const navigate = useNavigate();
-	const [selected, setSelected] = createSignal<AgentRoutine>();
+	//* kept after a drawer closes, so its content stays put while it animates out
+	const [selectedId, setSelectedId] = createSignal<string>();
 	const [editOpen, setEditOpen] = createSignal(false);
+	const [runsOpen, setRunsOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
+
+	// ----------------------------------------
+	// Queries & Mutations
+	const routines = api.agent.useGetRoutines({
+		queryParams: { queryString: props.searchParams.queryString },
+		enabled: () => props.searchParams.ready(),
+	});
 	const updateRoutine = api.agent.useUpdateRoutine();
 	const runRoutine = api.agent.useRunRoutine({
 		onSuccess: (response) =>
@@ -28,119 +45,116 @@ const AgentRoutineList: Component<{ routines: AgentRoutine[] }> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const showAgent = createMemo(() => getAgentAccess().all.length > 1);
+	//* read from the list, so the drawer shows the latest copy after an update
+	const selected = createMemo(() =>
+		routines.data?.data.find((routine) => routine.id === selectedId()),
+	);
+
+	// ----------------------------------------
+	// Functions
+	const open = (id: string, setOpen: (_open: boolean) => void) => {
+		setSelectedId(id);
+		setOpen(true);
+	};
 
 	// ----------------------------------------
 	// Render
 	return (
 		<>
-			<ul class="overflow-hidden rounded-md border border-border bg-card">
-				<For each={props.routines}>
-					{(routine) => (
-						<li class="relative flex items-center gap-4 border-b border-border px-4 py-3.5 transition-colors last:border-b-0 hover:bg-card-hover">
-							<A
-								href={`/lucid/agent/routines/${routine.id}`}
-								class="min-w-0 grow after:absolute after:inset-0 focus:outline-hidden focus-visible:after:ring-1 focus-visible:after:ring-inset focus-visible:after:ring-primary"
-							>
-								<span class="flex items-center gap-2">
-									<span class="truncate text-sm font-medium text-title">
-										{routine.name}
-									</span>
-									<Show when={routine.source === "code"}>
-										<Pill size="xs" variant="neutral">
-											{T()("agent.routine.code")}
-										</Pill>
-									</Show>
-								</span>
-								<span class="mt-0.5 block truncate text-xs text-muted">
-									<Show when={showAgent()}>
-										{getAgentName(routine.agentKey)} ·{" "}
-									</Show>
-									{describeSchedule(routine.cron)} · {routine.timezone}
-								</span>
-							</A>
-							<div class="hidden shrink-0 flex-col items-end gap-1 text-xs text-muted sm:flex">
-								<Show
-									when={routine.enabled}
-									fallback={
-										<Pill size="xs" variant="neutral">
-											{T()("agent.routine.paused")}
-										</Pill>
-									}
-								>
-									<span>
-										{T()("agent.routine.next")}{" "}
-										<DateText date={routine.nextRunAt} includeTime={true} />
-									</span>
-								</Show>
-							</div>
-							<Show when={routine.lastRun}>
-								{(run) => (
-									<AgentRunStatus
-										status={run().status}
-										outcome={run().outcome}
-									/>
-								)}
-							</Show>
-							<div class="relative z-10">
-								<ActionMenu
-									actions={[
-										{
-											label: T()("agent.routine.run.now"),
-											type: "button",
-											icon: "sparkle",
-											loading:
-												runRoutine.action.isPending &&
-												runRoutine.action.variables?.id === routine.id,
-											onClick: () =>
-												runRoutine.action.mutate({ id: routine.id }),
-										},
-										{
-											label: routine.enabled
-												? T()("agent.routine.pause")
-												: T()("agent.routine.resume"),
-											type: "button",
-											icon: "clock",
-											onClick: () =>
-												updateRoutine.action.mutate({
-													id: routine.id,
-													body: { enabled: !routine.enabled },
-												}),
-										},
-										{
-											label: T()("common.edit"),
-											type: "button",
-											icon: "pen",
-											show: routine.source === "database",
-											onClick: () => {
-												setSelected(routine);
-												setEditOpen(true);
-											},
-										},
-										{
-											label: T()("common.delete"),
-											type: "button",
-											icon: "trash",
-											variant: "danger",
-											show: routine.source === "database",
-											onClick: () => {
-												setSelected(routine);
-												setDeleteOpen(true);
-											},
-										},
-									]}
-								/>
-							</div>
-						</li>
-					)}
-				</For>
-			</ul>
+			<QueryBoundary
+				error={routines.isError}
+				empty={routines.data?.data.length === 0}
+				queryState={props.searchParams}
+				emptyFallback={
+					<EmptyState
+						title={T()("agent.routines.empty.title")}
+						description={T()("agent.routines.empty.description")}
+					/>
+				}
+				class="h-full flex-1"
+			>
+				<Table.Root
+					id="agent.routines.list"
+					rowCount={routines.data?.data.length ?? 0}
+					queryState={props.searchParams}
+					loading={routines.isFetching}
+					columns={[
+						{
+							label: T()("common.name"),
+							key: "name",
+							icon: <FaSolidT />,
+							sortable: true,
+							minWidth: 260,
+						},
+						{
+							label: T()("common.status"),
+							key: "enabled",
+							icon: <FaSolidCircleCheck />,
+						},
+						{
+							label: T()("agent.select.label"),
+							key: "agentKey",
+							icon: <FaSolidRobot />,
+							minWidth: 160,
+						},
+						{
+							label: T()("common.schedule"),
+							key: "schedule",
+							icon: <FaSolidClock />,
+							minWidth: 240,
+						},
+						{
+							label: T()("agent.routine.next.run"),
+							key: "nextRunAt",
+							icon: <FaSolidCalendar />,
+						},
+						{
+							label: T()("agent.routine.last.run"),
+							key: "lastRun",
+							icon: <FaSolidCircleCheck />,
+							minWidth: 140,
+						},
+					]}
+				>
+					<Index each={routines.data?.data ?? []}>
+						{(routine, index) => (
+							<AgentRoutineTableRow
+								index={index}
+								routine={routine()}
+								runPending={
+									runRoutine.action.isPending &&
+									runRoutine.action.variables?.id === routine().id
+								}
+								onOpen={() => open(routine().id, setEditOpen)}
+								onRuns={() => open(routine().id, setRunsOpen)}
+								onDelete={() => open(routine().id, setDeleteOpen)}
+								onRun={() => runRoutine.action.mutate({ id: routine().id })}
+								onToggle={() =>
+									updateRoutine.action.mutate({
+										id: routine().id,
+										body: { enabled: !routine().enabled },
+									})
+								}
+							/>
+						)}
+					</Index>
+				</Table.Root>
+			</QueryBoundary>
+			<Pagination
+				queryState={props.searchParams}
+				meta={routines.data?.meta}
+				padding="md"
+			/>
 			<UpsertAgentRoutineDrawer
 				routine={selected}
 				state={{ open: editOpen(), setOpen: setEditOpen }}
 			/>
+			<ViewAgentRoutineRunsDrawer
+				id={selectedId}
+				state={{ open: runsOpen(), setOpen: setRunsOpen }}
+			/>
 			<DeleteAgentRoutineModal
-				id={() => selected()?.id}
+				id={selectedId}
 				state={{ open: deleteOpen(), setOpen: setDeleteOpen }}
 			/>
 		</>

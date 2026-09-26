@@ -57,9 +57,6 @@ const AgentConversationRoute = lazy(
 const AgentRoutinesRoute = lazy(
 	() => import("@/containers/AgentRoutinesPage/AgentRoutinesPage"),
 );
-const AgentRoutineRoute = lazy(
-	() => import("@/containers/AgentRoutinePage/AgentRoutinePage"),
-);
 const MediaListRoute = lazy(() => import("@/containers/MediaPage/MediaPage"));
 const UsersListRoute = lazy(() => import("@/containers/UsersPage/UsersPage"));
 const RolesListRoute = lazy(() => import("@/containers/RolesPage/RolesPage"));
@@ -157,11 +154,6 @@ const AppRouter: Component = () => {
 						path="/agent/routines"
 						preload={preloadRoutes(AgentRoutinesRoute)}
 						component={agentGuard(AgentRoutinesRoute)}
-					/>
-					<Route
-						path="/agent/routines/:routineId"
-						preload={preloadRoutes(AgentRoutineRoute)}
-						component={agentGuard(AgentRoutineRoute)}
 					/>
 					<Route path="/components" component={ComponentsRoute} />
 					<Route path="/account" component={AccountRoute} />

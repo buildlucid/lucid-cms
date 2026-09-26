@@ -1,7 +1,7 @@
 import { useLocation, useNavigate, useParams } from "@solidjs/router";
 import type { AgentInput } from "@types";
 import classnames from "classnames";
-import { FaSolidArrowDown } from "solid-icons/fa";
+import { FaSolidArrowDown, FaSolidRepeat } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -33,13 +33,21 @@ import Link from "@/components/Link/Link";
 import LoadingState from "@/components/LoadingState/LoadingState";
 import RenameAgentConversationModal from "@/components/RenameAgentConversationModal/RenameAgentConversationModal";
 import Spinner from "@/components/Spinner/Spinner";
+import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
+import ViewAgentRoutineRunsDrawer from "@/components/ViewAgentRoutineRunsDrawer/ViewAgentRoutineRunsDrawer";
 import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
 import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
 import api from "@/services/api";
 import T from "@/translations";
 import { isAgentDisconnected } from "@/utils/agent-access";
-import { isCompactPart, isToolRow, placeCompactions } from "@/utils/agent-chat";
+import {
+	isCompactPart,
+	isToolRow,
+	messageText,
+	placeCompactions,
+} from "@/utils/agent-chat";
 import AgentChatHeader from "./parts/AgentChatHeader";
+import AgentRoutineCard from "./parts/AgentRoutineCard";
 
 /**
  * A single chat with the agent: a header, then messages that scroll on their
@@ -68,12 +76,24 @@ const AgentConversationPage: Component = () => {
 	const [renameOpen, setRenameOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
 	const [selectedToolId, setSelectedToolId] = createSignal<string>();
+	const [routineOpen, setRoutineOpen] = createSignal(false);
+	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
+	const [runsOpen, setRunsOpen] = createSignal(false);
 	let composer: AgentComposerHandle | undefined;
 
 	// ----------------------------------------
 	// Memos
 	const conversation = createMemo(() => chat.data());
 	const latestRun = createMemo(() => conversation()?.latestRun);
+	const routineQuery = api.agent.useGetRoutine({
+		id: () => conversation()?.routineId ?? undefined,
+	});
+	const routine = createMemo(() =>
+		routineQuery.isSuccess ? routineQuery.data.data : undefined,
+	);
+	const routineCard = createMemo(() =>
+		routineCardOpen() ? routine() : undefined,
+	);
 	const compactions = createMemo(() =>
 		placeCompactions(chat.messages, chat.compactions()),
 	);
@@ -127,11 +147,18 @@ const AgentConversationPage: Component = () => {
 	/**
 	 * Whether a message starts with a compact row straight after one that ended
 	 * with one. Rounds of tool calls arrive as separate messages, so this lets
-	 * them read as one block.
+	 * them read as one block. A message with text ends in its timestamp and copy
+	 * row instead, so the next one keeps the full gap.
 	 */
-	const continuesRows = (index: number) =>
-		isCompactPart(chat.messages[index]?.parts[0]) &&
-		isCompactPart(chat.messages[index - 1]?.parts.at(-1));
+	const continuesRows = (index: number) => {
+		const previous = chat.messages[index - 1];
+		return (
+			previous !== undefined &&
+			!messageText(previous) &&
+			isCompactPart(previous.parts.at(-1)) &&
+			isCompactPart(chat.messages[index]?.parts[0])
+		);
+	};
 	//* a marker before the first loaded message may belong to an earlier page
 	const compactedBefore = (id: string, index: number) =>
 		compactions().before.has(id) && !(index === 0 && chat.history.hasNextPage);
@@ -177,6 +204,7 @@ const AgentConversationPage: Component = () => {
 			() => params.conversationId,
 			() => {
 				setSelectedToolId(undefined);
+				setRunsOpen(false);
 				scroll.scrollToEnd();
 			},
 			{ defer: true },
@@ -191,25 +219,41 @@ const AgentConversationPage: Component = () => {
 			<AgentChatHeader
 				conversation={conversation()}
 				actions={
-					<ActionMenu
-						size="md"
-						variant="ghost"
-						actions={[
-							{
-								label: T()("common.rename"),
-								type: "button",
-								icon: "pen",
-								onClick: () => setRenameOpen(true),
-							},
-							{
-								label: T()("common.delete"),
-								type: "button",
-								icon: "trash",
-								variant: "danger",
-								onClick: () => setDeleteOpen(true),
-							},
-						]}
-					/>
+					<>
+						<Show when={routine()}>
+							<div class="hidden lg:flex">
+								<Button
+									size="xs"
+									shape="square"
+									variant={routineCardOpen() ? "outline" : "ghost"}
+									aria-pressed={routineCardOpen()}
+									aria-label={T()("agent.routine.card.toggle")}
+									title={T()("agent.routine.card.toggle")}
+									onClick={() => setRoutineCardOpen((open) => !open)}
+								>
+									<FaSolidRepeat size={11} />
+								</Button>
+							</div>
+						</Show>
+						<ActionMenu
+							variant="ghost"
+							actions={[
+								{
+									label: T()("common.rename"),
+									type: "button",
+									icon: "pen",
+									onClick: () => setRenameOpen(true),
+								},
+								{
+									label: T()("common.delete"),
+									type: "button",
+									icon: "trash",
+									variant: "danger",
+									onClick: () => setDeleteOpen(true),
+								},
+							]}
+						/>
+					</>
 				}
 			/>
 			<Show when={isAgentDisconnected()}>
@@ -218,11 +262,10 @@ const AgentConversationPage: Component = () => {
 				</Alert>
 			</Show>
 			<div class="relative flex min-h-0 grow">
-				{/* makes room beside the tool panel on wide screens, so the chat and panel sit side by side */}
 				<section
 					class={classnames(
 						"flex min-w-0 grow flex-col transition-[margin] duration-300 ease-out",
-						{ "lg:mr-96": selectedTool() },
+						{ "lg:mr-96": routineCard() || selectedTool() },
 					)}
 				>
 					<Switch>
@@ -413,19 +456,46 @@ const AgentConversationPage: Component = () => {
 						</div>
 					</Show>
 				</section>
-				<Show when={selectedTool()}>
-					{(tool) => (
-						<AgentToolPanel
-							part={tool()}
-							onClose={() => setSelectedToolId(undefined)}
-							class="absolute top-4 right-4 z-20 hidden max-h-[calc(100%-2rem)] w-88 lg:flex"
-						/>
-					)}
+				<Show when={routineCard() || selectedTool()}>
+					<div class="absolute top-0 right-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-y-auto p-4 scrollbar lg:flex">
+						<Show when={routineCard()}>
+							{(current) => (
+								<Show when={conversation()}>
+									{(chatConversation) => (
+										<AgentRoutineCard
+											routine={current()}
+											conversation={chatConversation()}
+											onRuns={() => setRunsOpen(true)}
+											onOpen={() => setRoutineOpen(true)}
+											onClose={() => setRoutineCardOpen(false)}
+										/>
+									)}
+								</Show>
+							)}
+						</Show>
+						<Show when={selectedTool()}>
+							{(tool) => (
+								<AgentToolPanel
+									part={tool()}
+									onClose={() => setSelectedToolId(undefined)}
+									class="flex shrink-0"
+								/>
+							)}
+						</Show>
+					</div>
 				</Show>
 			</div>
 			<RenameAgentConversationModal
 				conversation={conversation}
 				state={{ open: renameOpen(), setOpen: setRenameOpen }}
+			/>
+			<UpsertAgentRoutineDrawer
+				routine={routine}
+				state={{ open: routineOpen(), setOpen: setRoutineOpen }}
+			/>
+			<ViewAgentRoutineRunsDrawer
+				id={() => routine()?.id}
+				state={{ open: runsOpen(), setOpen: setRunsOpen }}
 			/>
 			<DeleteAgentConversationModal
 				id={() => params.conversationId}

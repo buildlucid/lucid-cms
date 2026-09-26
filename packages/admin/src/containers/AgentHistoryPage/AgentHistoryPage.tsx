@@ -14,16 +14,7 @@ import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
-
-//* the latest run's status, grouped as the status pills show them
-const statuses = [
-	{ value: "waiting", label: "agent.status.waiting" },
-	{ value: "queued,running", label: "agent.status.working" },
-	{ value: "interrupted", label: "agent.status.retrying" },
-	{ value: "completed", label: "agent.status.done" },
-	{ value: "failed", label: "agent.status.failed" },
-	{ value: "cancelled", label: "agent.status.stopped" },
-] as const;
+import { runStatusFilters } from "@/utils/agent-chat";
 
 /** Every chat the user can see, as a table they can filter and sort. */
 const AgentHistoryPage: Component = () => {
@@ -67,7 +58,7 @@ const AgentHistoryPage: Component = () => {
 				label: T()("common.status"),
 				key: "status",
 				type: "select",
-				options: statuses.map((status) => ({
+				options: runStatusFilters.map((status) => ({
 					value: status.value,
 					label: T()(status.label),
 				})),

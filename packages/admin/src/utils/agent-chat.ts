@@ -24,6 +24,12 @@ export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 export const isCompactPart = (part: AgentMessagePart | undefined) =>
 	part !== undefined && (isToolRow(part) || part.type === "question");
 
+export const messageText = (message: Pick<AgentMessage, "parts">) =>
+	message.parts
+		.flatMap((part) => (part.type === "text" ? [part.text] : []))
+		.join("\n\n")
+		.trim();
+
 /** Replaces a tool or question part with the same id, or appends it. */
 const upsertPart = (
 	parts: AgentMessagePart[],
@@ -153,6 +159,16 @@ export const findPendingQuestion = (
 	}
 	return undefined;
 };
+
+/** Run statuses to filter by, grouped as the status pills show them. Values are comma separated where a pill covers more than one. */
+export const runStatusFilters = [
+	{ value: "waiting", label: "agent.status.waiting" },
+	{ value: "queued,running", label: "agent.status.working" },
+	{ value: "interrupted", label: "agent.status.retrying" },
+	{ value: "completed", label: "agent.status.done" },
+	{ value: "failed", label: "agent.status.failed" },
+	{ value: "cancelled", label: "agent.status.stopped" },
+] as const;
 
 /** Whether a run is still being worked on by the agent, in this tab or in the background. */
 export const isRunWorking = (status: AgentRunStatus | undefined) =>

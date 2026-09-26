@@ -9,15 +9,11 @@ const DeleteAgentRoutineModal: Component<{
 		open: boolean;
 		setOpen: (_open: boolean) => void;
 	};
-	onDeleted?: () => void;
 }> = (props) => {
 	// ----------------------------------------
 	// Mutations
 	const deleteRoutine = api.agent.useDeleteRoutine({
-		onSuccess: () => {
-			props.state.setOpen(false);
-			props.onDeleted?.();
-		},
+		onSuccess: () => props.state.setOpen(false),
 	});
 
 	// ----------------------------------------

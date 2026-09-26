@@ -27,9 +27,10 @@ import {
 } from "@/utils/agent-schedule";
 import { getBodyError } from "@/utils/error-helpers";
 import { getDefaultTimezone } from "@/utils/release-schedule";
+import AgentRoutineDetails from "./parts/AgentRoutineDetails";
 import AgentScheduleField from "./parts/AgentScheduleField";
 
-/** Creates a routine for an agent the user can use, or edits one when `routine` is set. */
+/** Creates a routine, or edits one when `routine` is set. Code routines are read only. */
 const UpsertAgentRoutineDrawer: Component<{
 	routine?: Accessor<AgentRoutine | undefined>;
 	state: {
@@ -55,6 +56,7 @@ const UpsertAgentRoutineDrawer: Component<{
 	// ----------------------------------------
 	// Memos
 	const existing = createMemo(() => props.routine?.());
+	const locked = createMemo(() => existing()?.source === "code");
 	const agents = createMemo(() => getAgentAccess().use);
 	const mutation = createMemo(() =>
 		existing() ? updateRoutine : createRoutine,
@@ -92,12 +94,16 @@ const UpsertAgentRoutineDrawer: Component<{
 		>
 			<Drawer.Header>
 				<Drawer.Title>
-					{existing()
-						? T()("panels.agent.routine.update.title")
-						: T()("panels.agent.routine.create.title")}
+					{locked()
+						? T()("panels.agent.routine.view.title")
+						: existing()
+							? T()("panels.agent.routine.update.title")
+							: T()("panels.agent.routine.create.title")}
 				</Drawer.Title>
 				<Drawer.Description>
-					{T()("panels.agent.routine.description")}
+					{locked()
+						? T()("panels.agent.routine.code.description")
+						: T()("panels.agent.routine.description")}
 				</Drawer.Description>
 			</Drawer.Header>
 			<Drawer.Form
@@ -111,55 +117,69 @@ const UpsertAgentRoutineDrawer: Component<{
 					};
 					const routine = existing();
 					const key = agentKey();
-					if (routine) updateRoutine.action.mutate({ id: routine.id, body });
-					else if (key) createRoutine.action.mutate({ ...body, agentKey: key });
+					if (routine) {
+						updateRoutine.action.mutate({
+							id: routine.id,
+							body: locked() ? { enabled: body.enabled } : body,
+						});
+					} else if (key)
+						createRoutine.action.mutate({ ...body, agentKey: key });
 				}}
 			>
 				<Drawer.Body class="flex flex-col gap-4">
-					<Show when={!existing() && agents().length > 1}>
-						<Select
-							id="agent-routine-agent"
-							name="agentKey"
-							value={agentKey()}
-							onChange={(value) => {
-								if (value) setAgentKey(String(value));
-							}}
-							options={agents().map((agent) => ({
-								value: agent.key,
-								label: agent.name,
-							}))}
+					<Show
+						when={!locked()}
+						fallback={
+							<Show when={existing()}>
+								{(routine) => <AgentRoutineDetails routine={routine()} />}
+							</Show>
+						}
+					>
+						<Show when={!existing() && agents().length > 1}>
+							<Select
+								id="agent-routine-agent"
+								name="agentKey"
+								value={agentKey()}
+								onChange={(value) => {
+									if (value) setAgentKey(String(value));
+								}}
+								options={agents().map((agent) => ({
+									value: agent.key,
+									label: agent.name,
+								}))}
+								required={true}
+								label={T()("agent.select.label")}
+								errors={getBodyError("agentKey", errors)}
+							/>
+						</Show>
+						<Input
+							id="agent-routine-name"
+							name="name"
+							type="text"
+							value={name()}
+							onChange={setName}
 							required={true}
-							label={T()("agent.select.label")}
-							errors={getBodyError("agentKey", errors)}
+							label={T()("common.name")}
+							errors={getBodyError("name", errors)}
+						/>
+						<Textarea
+							id="agent-routine-instructions"
+							name="instructions"
+							value={instructions()}
+							onChange={setInstructions}
+							rows={8}
+							required={true}
+							label={T()("agent.routine.instructions")}
+							description={T()("agent.routine.instructions.description")}
+							errors={getBodyError("instructions", errors)}
+						/>
+						<AgentScheduleField
+							schedule={schedule()}
+							setSchedule={setSchedule}
+							timezone={timezone()}
+							setTimezone={setTimezone}
 						/>
 					</Show>
-					<Input
-						id="agent-routine-name"
-						name="name"
-						type="text"
-						value={name()}
-						onChange={setName}
-						required={true}
-						label={T()("common.name")}
-						errors={getBodyError("name", errors)}
-					/>
-					<Textarea
-						id="agent-routine-instructions"
-						name="instructions"
-						value={instructions()}
-						onChange={setInstructions}
-						rows={8}
-						required={true}
-						label={T()("agent.routine.instructions")}
-						description={T()("agent.routine.instructions.description")}
-						errors={getBodyError("instructions", errors)}
-					/>
-					<AgentScheduleField
-						schedule={schedule()}
-						setSchedule={setSchedule}
-						timezone={timezone()}
-						setTimezone={setTimezone}
-					/>
 					<Switch
 						id="agent-routine-enabled"
 						name="enabled"
@@ -180,7 +200,7 @@ const UpsertAgentRoutineDrawer: Component<{
 						<Button
 							type="submit"
 							loading={mutation().action.isPending}
-							disabled={!name().trim() || !instructions().trim()}
+							disabled={!locked() && (!name().trim() || !instructions().trim())}
 						>
 							{existing() ? T()("common.update") : T()("common.create")}
 						</Button>

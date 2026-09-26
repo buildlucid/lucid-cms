@@ -53,7 +53,11 @@ const AgentConversationTableRow: Component<{
 					fallback={<span class="text-sm text-muted">-</span>}
 				>
 					{(run) => (
-						<AgentRunStatus status={run().status} outcome={run().outcome} />
+						<AgentRunStatus
+							status={run().status}
+							outcome={run().outcome}
+							size="sm"
+						/>
 					)}
 				</Show>
 			</Table.Cell>

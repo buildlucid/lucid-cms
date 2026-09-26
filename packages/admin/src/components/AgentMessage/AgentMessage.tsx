@@ -17,7 +17,7 @@ import {
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import { copyValue } from "@/components/Copy/copyValue";
 import T from "@/translations";
-import { finishTool, isToolRow } from "@/utils/agent-chat";
+import { finishTool, isToolRow, messageText } from "@/utils/agent-chat";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
 import AgentQuestion from "./parts/AgentQuestion";
@@ -54,12 +54,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// ----------------------------------------
 	// Memos
 	const user = createMemo(() => props.message.role === "user");
-	const text = createMemo(() =>
-		props.message.parts
-			.flatMap((part) => (part.type === "text" ? [part.text] : []))
-			.join("\n\n")
-			.trim(),
-	);
+	const text = createMemo(() => messageText(props.message));
 
 	// ----------------------------------------
 	// Functions
@@ -101,7 +96,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="group/message relative flex flex-col">
+		<div class="flex flex-col">
 			<Show
 				when={!user()}
 				fallback={
@@ -176,12 +171,11 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 					</For>
 				</div>
 			</Show>
-			{/* sits in the gap below the message, so showing it never moves the chat */}
 			<Show when={text()}>
 				<div
 					class={classnames(
-						"absolute top-full mt-0.5 flex items-center gap-1 text-xs text-muted opacity-0 transition-opacity group-hover/message:opacity-100 focus-within:opacity-100",
-						user() ? "right-0" : "left-0",
+						"mt-1.5 flex items-center gap-1 text-xs text-muted",
+						user() ? "self-end" : "-ml-1 self-start",
 					)}
 				>
 					<Show when={props.message.createdAt}>

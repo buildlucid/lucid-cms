@@ -1,69 +1,114 @@
-import {
-	type Component,
-	createMemo,
-	createSignal,
-	Match,
-	Show,
-	Switch,
-} from "solid-js";
+import { useQueryClient } from "@tanstack/solid-query";
+import { type Component, createMemo, createSignal } from "solid-js";
 import AgentHeader from "@/components/AgentHeader/AgentHeader";
 import AgentRoutineList from "@/components/AgentRoutineList/AgentRoutineList";
-import Button from "@/components/Button/Button";
-import EmptyState from "@/components/EmptyState/EmptyState";
-import LoadingState from "@/components/LoadingState/LoadingState";
+import CreateMenu, {
+	type CreateMenuAction,
+} from "@/components/CreateMenu/CreateMenu";
+import type { FilterField } from "@/components/FilterPanel/FilterPanel";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
-import api from "@/services/api";
+import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
+import useQueryState, {
+	sort,
+	textFilter,
+} from "@/hooks/useQueryState/useQueryState";
+import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 
-/** Lists the user's routines, and routines defined in code for agents they manage, and creates new ones. */
 const AgentRoutinesPage: Component = () => {
 	// ----------------------------------------
-	// State & Queries
+	// State & Hooks
+	const queryClient = useQueryClient();
 	const [createOpen, setCreateOpen] = createSignal(false);
-	const routines = api.agent.useGetRoutines();
+	const searchParams = useQueryState({
+		mode: "url",
+		schema: {
+			filters: {
+				name: textFilter(),
+				agentKey: textFilter(),
+			},
+			sorts: {
+				name: sort({ defaultValue: "asc" }),
+				createdAt: sort(),
+				updatedAt: sort(),
+			},
+		},
+		singleSort: true,
+	});
 
 	// ----------------------------------------
 	// Memos
 	const canCreate = createMemo(() => getAgentAccess().use.length > 0);
+	const createActions = createMemo<CreateMenuAction[]>(() =>
+		canCreate()
+			? [
+					{
+						type: "button",
+						label: T()("agent.routine.create"),
+						onClick: () => setCreateOpen(true),
+					},
+				]
+			: [],
+	);
+	const filterFields = createMemo(() => {
+		const agents = getAgentAccess().all;
+		const fields: FilterField[] = [
+			{ label: T()("common.name"), key: "name", type: "text" },
+		];
+		if (agents.length > 1) {
+			fields.push({
+				label: T()("agent.select.label"),
+				key: "agentKey",
+				type: "select",
+				options: agents.map((agent) => ({
+					value: agent.key,
+					label: agent.name,
+				})),
+			});
+		}
+		return fields;
+	});
+
+	// ----------------------------------------
+	// Hooks
+	useKeyboardShortcuts({
+		newEntry: {
+			permission: () => canCreate(),
+			callback: () => setCreateOpen(true),
+		},
+	});
 
 	// ----------------------------------------
 	// Render
-	const createButton = () => (
-		<Show when={canCreate()}>
-			<Button size="sm" onClick={() => setCreateOpen(true)}>
-				{T()("agent.routine.create")}
-			</Button>
-		</Show>
-	);
-
 	return (
 		<PageLayout.Root>
 			<AgentHeader
 				title={T()("routes.agent.routines")}
 				description={T()("routes.agent.routines.description")}
-				actions={createButton()}
-			/>
-			<PageLayout.Body padding="md">
-				<div class="mx-auto flex w-full max-w-4xl flex-col gap-4">
-					<Switch>
-						<Match when={routines.isLoading}>
-							<LoadingState />
-						</Match>
-						<Match when={routines.data?.data.length}>
-							<AgentRoutineList routines={routines.data?.data ?? []} />
-						</Match>
-						<Match when={true}>
-							<EmptyState
-								class="rounded-md border border-dashed border-border"
-								title={T()("agent.routines.empty.title")}
-								description={T()("agent.routines.empty.description")}
-								actions={createButton()}
-							/>
-						</Match>
-					</Switch>
-				</div>
+				actions={<CreateMenu actions={createActions()} />}
+			>
+				<QueryToolbar
+					queryState={searchParams}
+					onRefresh={() =>
+						queryClient.invalidateQueries({
+							queryKey: queryKeys.agent.routines(),
+						})
+					}
+					filterSubject={T()("routes.agent.routines")}
+					filterFields={filterFields()}
+					sorts={[
+						{ label: T()("common.name"), key: "name" },
+						{ label: T()("common.created.at"), key: "createdAt" },
+						{ label: T()("common.updated.at"), key: "updatedAt" },
+					]}
+					perPage
+				/>
+			</AgentHeader>
+			<PageLayout.Body>
+				<AgentRoutineList searchParams={searchParams} />
 			</PageLayout.Body>
 			<UpsertAgentRoutineDrawer
 				state={{ open: createOpen(), setOpen: setCreateOpen }}

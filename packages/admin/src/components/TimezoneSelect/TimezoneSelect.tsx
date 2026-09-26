@@ -12,6 +12,7 @@ const TimezoneSelect: Component<{
 	value: string;
 	onChange: (_timezone: string) => void;
 	label?: string;
+	description?: string;
 }> = (props) => {
 	// ----------------------------------------
 	// State
@@ -44,6 +45,7 @@ const TimezoneSelect: Component<{
 			search={{ value: search(), onChange: setSearch }}
 			required={true}
 			label={props.label ?? T()("common.timezone")}
+			description={props.description}
 		/>
 	);
 };

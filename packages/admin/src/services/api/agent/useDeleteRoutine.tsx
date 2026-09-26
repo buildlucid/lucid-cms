@@ -19,7 +19,7 @@ const useDeleteRoutine = (props?: { onSuccess?: () => void }) => {
 		}),
 		invalidates: [queryKeys.agent.routines(), queryKeys.agent.conversations()],
 		onSuccess: (_response, params) => {
-			//* drop it before the list refetches so it is not requested again
+			//* drop its cached runs, which can no longer be requested
 			queryClient.removeQueries({
 				queryKey: queryKeys.agent.routine(params.id),
 			});

@@ -1,12 +1,13 @@
 import type { AgentRunOutcome, AgentRunStatus as Status } from "@types";
 import { type Component, createMemo } from "solid-js";
-import Pill, { type PillVariant } from "@/components/Pill/Pill";
+import Pill, { type PillSize, type PillVariant } from "@/components/Pill/Pill";
 import T from "@/translations";
 
 /** A run's state in plain words. Finished routine runs show their outcome. */
 const AgentRunStatus: Component<{
 	status: Status;
 	outcome?: AgentRunOutcome | null;
+	size?: PillSize;
 	class?: string;
 }> = (props) => {
 	// ----------------------------------------
@@ -50,7 +51,11 @@ const AgentRunStatus: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Pill size="xs" variant={display().variant} class={props.class}>
+		<Pill
+			size={props.size ?? "xs"}
+			variant={display().variant}
+			class={props.class}
+		>
 			{display().label}
 		</Pill>
 	);

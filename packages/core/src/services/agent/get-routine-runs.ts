@@ -20,8 +20,7 @@ const getRoutineRuns: ServiceFn<
 
 	const runs = await AgentRuns.selectMultipleForRoutine({
 		routineId: input.id,
-		page: input.query.page,
-		perPage: input.query.perPage,
+		queryParams: input.query,
 	});
 	if (runs.error) return runs;
 

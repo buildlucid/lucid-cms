@@ -1,6 +1,7 @@
 import type { AgentConversation } from "@types";
 import { type Component, type JSXElement, Show } from "solid-js";
 import Pill from "@/components/Pill/Pill";
+import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 
 /** The top of the chat column: the agent, the chat's title and its actions. It stays put while the messages scroll. */
@@ -21,6 +22,15 @@ const AgentChatHeader: Component<{
 						<Pill size="sm" variant="neutral" class="shrink-0">
 							{getAgentName(conversation().agentKey)}
 						</Pill>
+						<Show when={conversation().routineId}>
+							<Pill
+								size="sm"
+								variant="primary-subtle"
+								class="shrink-0 lg:hidden"
+							>
+								{T()("agent.routine.run")}
+							</Pill>
+						</Show>
 						<h1 class="min-w-0 truncate text-base font-medium text-title">
 							{conversation().title}
 						</h1>

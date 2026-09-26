@@ -397,11 +397,28 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
+					"filter[status]": queryString.schema.filter(true, {
+						example: "completed",
+					}),
+					sort: queryString.schema.sort("createdAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
 				})
 				.meta(queryString.meta),
 			formatted: z.object({
+				filter: z
+					.object({
+						status: queryFormatted.schema.filters.union.optional(),
+					})
+					.optional(),
+				sort: z
+					.array(
+						z.object({
+							key: z.enum(["createdAt"]),
+							direction: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
 				page: queryFormatted.schema.page,
 				perPage: queryFormatted.schema.perPage,
 			}),

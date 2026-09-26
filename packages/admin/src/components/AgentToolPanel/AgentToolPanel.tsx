@@ -7,12 +7,7 @@ import Pill, { type PillVariant } from "@/components/Pill/Pill";
 import T from "@/translations";
 import type { AgentToolPart } from "@/utils/agent-chat";
 
-/**
- * A floating panel inside the chat with a tool call's name, status, input and
- * output. It updates while the tool is still running, grows with its content
- * and scrolls once it reaches the height of the chat. The caller sets its
- * display, such as `hidden lg:flex` to keep it off small screens.
- */
+/** Shows a tool call's input and output as they arrive. */
 const AgentToolPanel: Component<{
 	part: AgentToolPart;
 	onClose: () => void;
@@ -50,7 +45,7 @@ const AgentToolPanel: Component<{
 		<aside
 			aria-label={toolLabel(props.part)}
 			class={classnames(
-				"flex-col gap-5 overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-lg scrollbar animate-slide-from-right-in md:p-5",
+				"flex-col gap-5 rounded-xl border border-border bg-card p-4 shadow-lg animate-slide-from-right-in md:p-5",
 				props.class,
 			)}
 		>

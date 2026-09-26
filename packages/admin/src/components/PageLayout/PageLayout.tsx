@@ -80,16 +80,16 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 					},
 				)}
 			>
-				<div class="w-full min-w-0">
+				<div class="w-full min-w-0 md:grow">
 					<Show when={props.title}>
 						<h1 class="text-base">{props.title}</h1>
 					</Show>
 					<Show when={props.description}>
-						<p class="mt-1 text-sm">{props.description}</p>
+						<p class="mt-1 max-w-3xl text-sm">{props.description}</p>
 					</Show>
 				</div>
 				<Show when={props.actions}>
-					<div class="flex w-full items-center justify-end gap-2.5">
+					<div class="flex w-full items-center justify-end gap-2.5 md:w-auto md:shrink-0">
 						{props.actions}
 					</div>
 				</Show>
