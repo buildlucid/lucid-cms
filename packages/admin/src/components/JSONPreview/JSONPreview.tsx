@@ -12,7 +12,7 @@ import themeStore from "@/store/themeStore/themeStore";
 import { getCodeMirrorTheme } from "@/utils/codemirror-theme";
 
 interface JSONPreviewProps {
-	json: Record<string, unknown>;
+	json: unknown;
 }
 
 const JSONPreview: Component<JSONPreviewProps> = (props) => {

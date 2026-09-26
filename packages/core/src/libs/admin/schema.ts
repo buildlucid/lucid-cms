@@ -74,6 +74,9 @@ const brickSlotMatch = z.strictObject({
 const navigationIcon = z.enum([
 	"dashboard",
 	"agent",
+	"chat",
+	"history",
+	"routines",
 	"collection-multiple",
 	"collection-single",
 	"media",

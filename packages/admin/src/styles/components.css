@@ -385,55 +385,110 @@
 	/* Agent Markdown: replies, user messages and the chat box share one look */
 
 	.agent-markdown {
-		@apply wrap-break-word text-sm leading-7 text-title;
+		@apply wrap-break-word text-[0.9375rem] leading-7 text-body;
+	}
+
+	/* base styles size and colour these elements directly, so they take the message's instead */
+	.agent-markdown :where(p, li, a) {
+		font-size: inherit;
+		font-weight: inherit;
+		line-height: inherit;
+		letter-spacing: inherit;
+		color: inherit;
+	}
+
+	/* blocks are spaced by the gap before them, and the first and last sit flush */
+	.agent-markdown :where(p, ul, ol, pre, blockquote, table, hr) {
+		@apply my-4;
+	}
+
+	.agent-markdown > :first-child {
+		@apply mt-0;
+	}
+
+	.agent-markdown > :last-child {
+		@apply mb-0;
+	}
+
+	.agent-markdown :where(h1, h2, h3, h4) {
+		@apply font-semibold leading-snug tracking-normal text-title;
+	}
+
+	.agent-markdown h1 {
+		@apply mt-8 mb-3 text-xl;
+	}
+
+	.agent-markdown h2 {
+		@apply mt-7 mb-3 text-lg;
+	}
+
+	.agent-markdown h3 {
+		@apply mt-6 mb-2 text-base;
+	}
+
+	.agent-markdown h4 {
+		@apply mt-5 mb-2 text-[0.9375rem];
+	}
+
+	.agent-markdown :where(strong, b) {
+		@apply font-semibold text-title;
 	}
 
 	.agent-markdown a {
-		@apply text-primary underline;
-	}
-
-	.agent-markdown blockquote {
-		@apply border-l-2 border-border pl-3;
-	}
-
-	.agent-markdown code {
-		@apply rounded bg-input px-1 text-xs;
-	}
-
-	.agent-markdown :is(h1, h2, h3) {
-		@apply font-semibold;
-	}
-
-	.agent-markdown li {
-		@apply my-0.5;
-	}
-
-	.agent-markdown ol {
-		@apply list-decimal pl-5;
+		@apply text-primary underline underline-offset-2 hover:text-primary-hover;
 	}
 
 	.agent-markdown ul {
-		@apply list-disc pl-5;
+		@apply list-disc pl-6;
 	}
 
-	.agent-markdown p + p {
-		@apply mt-3;
+	.agent-markdown ol {
+		@apply list-decimal pl-6;
+	}
+
+	.agent-markdown li {
+		@apply my-1.5 pl-1;
+	}
+
+	.agent-markdown li::marker {
+		@apply text-muted;
+	}
+
+	/* loose lists wrap items in paragraphs; nested lists sit close to their item */
+	.agent-markdown li > :where(p, ul, ol) {
+		@apply my-1.5;
+	}
+
+	.agent-markdown blockquote {
+		@apply border-l-2 border-border pl-4 text-body;
+	}
+
+	.agent-markdown hr {
+		@apply my-6 border-border;
+	}
+
+	.agent-markdown code {
+		@apply rounded bg-input px-1.5 py-0.5 font-mono text-[0.8125rem];
 	}
 
 	.agent-markdown pre {
-		@apply my-3 overflow-x-auto rounded-md bg-input p-3;
+		@apply overflow-x-auto rounded-lg bg-input px-4 py-3 text-[0.8125rem] leading-6;
 	}
 
 	.agent-markdown pre code {
-		@apply bg-transparent p-0;
+		@apply bg-transparent p-0 text-inherit;
 	}
 
 	.agent-markdown table {
-		@apply my-3 block overflow-x-auto;
+		@apply block w-max max-w-full overflow-x-auto border-collapse text-sm;
 	}
 
 	.agent-markdown :is(td, th) {
-		@apply border border-border px-2 py-1;
+		@apply border border-border px-3 py-1.5 text-left align-top;
+	}
+
+	.agent-markdown th {
+		@apply bg-card font-medium;
 	}
 
 	/* inside a user message bubble, which is already the input colour */
@@ -441,9 +496,9 @@
 		@apply bg-card;
 	}
 
-	/* what people write reads as lines, so paragraphs sit closer together */
-	.agent-markdown.agent-markdown-tight p + p {
-		@apply mt-1;
+	/* the chat box reads as lines being written, so paragraphs sit closer together */
+	.agent-markdown.agent-markdown-tight :where(p, ul, ol, pre, blockquote) {
+		@apply my-1;
 	}
 
 	/* the chat box's TipTap placeholder */

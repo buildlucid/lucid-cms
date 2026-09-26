@@ -69,7 +69,7 @@ const AgentContextRing: Component<AgentContextRingProps> = (props) => {
 			gutter={8}
 		>
 			<Popover.Trigger
-				class="flex size-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-card-hover focus-visible:outline-2 focus-visible:outline-primary"
+				class="flex size-7 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
 				aria-label={T()("agent.context.label", {
 					percent: props.context.percent,
 				})}

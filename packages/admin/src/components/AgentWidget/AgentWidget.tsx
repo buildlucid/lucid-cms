@@ -26,7 +26,7 @@ const AgentWidget: Component<
 			keyed
 			when={contribution()}
 			fallback={
-				<p class="rounded-md border border-border bg-card px-3 py-2 text-xs text-muted">
+				<p class="border-l-2 border-border py-0.5 pl-3 text-xs text-muted">
 					{T()("agent.widget.unavailable", { key: props.key })}
 				</p>
 			}

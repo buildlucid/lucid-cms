@@ -40,7 +40,11 @@ const AgentRoutinesPage: Component = () => {
 
 	return (
 		<PageLayout.Root>
-			<AgentHeader actions={createButton()} />
+			<AgentHeader
+				title={T()("routes.agent.routines")}
+				description={T()("routes.agent.routines.description")}
+				actions={createButton()}
+			/>
 			<PageLayout.Body padding="md">
 				<div class="mx-auto flex w-full max-w-4xl flex-col gap-4">
 					<Switch>

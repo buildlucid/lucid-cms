@@ -18,3 +18,9 @@ export const getAgentAccess = () => {
 /** An agent's display name, falling back to its key once it is removed from config. */
 export const getAgentName = (key: string) =>
 	siteStore.get.ai.agents.find((agent) => agent.key === key)?.name ?? key;
+
+/** The agent cannot run until the CMS is connected to Lucid. Saved chats still load. */
+export const isAgentDisconnected = () => {
+	const connection = siteStore.get.connection;
+	return connection !== null && connection.status !== "connected";
+};

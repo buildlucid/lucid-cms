@@ -4,6 +4,7 @@ export {
 	type ActionMenuItemType,
 	type ActionMenuProps,
 	type ActionMenuSize,
+	type ActionMenuVariant,
 	default as ActionMenu,
 } from "../components/ActionMenu/ActionMenu.js";
 export {

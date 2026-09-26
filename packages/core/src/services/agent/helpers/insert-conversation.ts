@@ -9,6 +9,8 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 const insertConversation: ServiceFn<
 	[
 		{
+			/** Chosen by the caller, such as the admin opening a chat before it is saved. */
+			id?: string;
 			agentKey: string;
 			userId: number | null;
 			title?: string;
@@ -22,7 +24,7 @@ const insertConversation: ServiceFn<
 
 	const created = await AgentConversations.createSingle({
 		data: {
-			id: randomUUID(),
+			id: input.id ?? randomUUID(),
 			agent_key: input.agentKey,
 			title: input.title ?? constants.agent.defaultTitle,
 			user_id: input.userId,

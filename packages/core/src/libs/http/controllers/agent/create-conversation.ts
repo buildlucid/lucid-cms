@@ -39,6 +39,7 @@ const createConversationController = factory.createHandlers(
 			agentServices.createConversation,
 			{ transaction: false },
 		)(context, {
+			id: body.id,
 			userId: c.get("auth").id,
 			agentKey: body.agentKey,
 			title: body.title,

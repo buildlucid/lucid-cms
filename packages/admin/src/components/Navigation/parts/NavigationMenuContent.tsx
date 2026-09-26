@@ -1,5 +1,6 @@
 import { routes as extensionRoutes } from "virtual:lucid-admin";
 import packageJson from "@lucidcms/admin/package.json" with { type: "json" };
+import { useLocation } from "@solidjs/router";
 import type { Collection, User } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
@@ -8,6 +9,7 @@ import { NavigationLink } from "@/components/NavigationLink/NavigationLink";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { isNavigationLinkActive } from "@/utils/navigation";
 import {
 	getNavigationGroups,
 	type NavigationGroup,
@@ -44,6 +46,10 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 	props,
 ) => {
 	// ----------------------------------
+	// State & Hooks
+	const location = useLocation();
+
+	// ----------------------------------
 	// Functions
 	const handleNavigate = () => {
 		props.onNavigate?.();
@@ -58,6 +64,10 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 			props.canManageConnection ||
 			props.canReadJobs ||
 			props.canReadAiUsage,
+	);
+	//* an open chat belongs to Chat, not History
+	const chatActive = createMemo(() =>
+		isNavigationLinkActive(location.pathname, "/lucid/agent/chats"),
 	);
 	const showPublishingSection = createMemo(
 		() => props.canReadPublishingOverview || props.canReadPublishRequests,
@@ -134,13 +144,32 @@ export const NavigationMenuContent: Component<NavigationMenuContentProps> = (
 						title={T()("email.activity")}
 						permission={props.canReadEmails}
 					/>
-					<NavigationLink
-						type="link"
-						href="/lucid/agent"
-						icon="agent"
-						title={T()("routes.agent.title")}
-						permission={props.canUseAgent}
-					/>
+					{/* Agent */}
+					<Show when={props.canUseAgent}>
+						<div class="w-full mt-4 mb-2">
+							<span class="text-xs">{T()("routes.agent.title")}</span>
+						</div>
+						<NavigationLink
+							type="link"
+							href="/lucid/agent"
+							exact={true}
+							active={chatActive()}
+							icon="chat"
+							title={T()("routes.agent.chat")}
+						/>
+						<NavigationLink
+							type="link"
+							href="/lucid/agent/history"
+							icon="history"
+							title={T()("routes.agent.history")}
+						/>
+						<NavigationLink
+							type="link"
+							href="/lucid/agent/routines"
+							icon="routines"
+							title={T()("routes.agent.routines")}
+						/>
+					</Show>
 					{/* Publishing */}
 					<Show when={showPublishingSection()}>
 						<div class="w-full mt-4 mb-2">

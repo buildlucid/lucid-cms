@@ -5,7 +5,7 @@ import insertConversation from "./helpers/insert-conversation.js";
 
 /** Creates an empty chat with an agent the user can use. */
 const createConversation: ServiceFn<
-	[{ agentKey: string; userId: number; title?: string }],
+	[{ id?: string; agentKey: string; userId: number; title?: string }],
 	AgentConversation
 > = async (context, input) => {
 	const access = await checkAgentAccess(context, {

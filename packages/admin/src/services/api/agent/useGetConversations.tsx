@@ -8,6 +8,8 @@ import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 interface QueryParams {
+	/** Filters, sorts and pagination from a list's query state. */
+	queryString?: Accessor<string>;
 	filters?: {
 		title?: Accessor<string | undefined>;
 		status?: Accessor<string | undefined> | string;
@@ -28,7 +30,10 @@ const useGetConversations = (params: QueryHook<QueryParams>) => {
 		queryFn: () =>
 			request<ResponseBody<AgentConversation[]>>({
 				url: "/lucid/api/v1/agent/conversations",
-				query: { ...queryParams(), sort: { updatedAt: "desc" } },
+				//* a query string brings its own sort
+				query: queryParams().queryString
+					? queryParams()
+					: { ...queryParams(), sort: { updatedAt: "desc" } },
 			}),
 		placeholderData: keepPreviousData,
 		refetchInterval: (query) =>

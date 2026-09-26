@@ -7,6 +7,23 @@ import type {
 	AgentStreamEvent,
 } from "@types";
 
+export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
+
+//* built-in tools that render as their own cards rather than tool rows
+export const askTool = "lucid_ask_user";
+export const finishTool = "lucid_finish_run";
+
+/** Tool calls shown as rows in the chat and listed in its sidebar. */
+export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
+	part.type === "tool" && part.name !== askTool && part.name !== finishTool;
+
+/**
+ * Parts shown as single compact rows: tool calls and questions. Rows in a run,
+ * even across messages, sit close together so they read as one block.
+ */
+export const isCompactPart = (part: AgentMessagePart | undefined) =>
+	part !== undefined && (isToolRow(part) || part.type === "question");
+
 /** Replaces a tool or question part with the same id, or appends it. */
 const upsertPart = (
 	parts: AgentMessagePart[],

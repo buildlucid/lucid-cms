@@ -1,38 +1,27 @@
-import { type Component, createMemo, type JSXElement, Show } from "solid-js";
+import { type Component, type JSXElement, Show } from "solid-js";
 import Alert from "@/components/Alert/Alert";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import Tabs from "@/components/Tabs/Tabs";
-import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
+import { isAgentDisconnected } from "@/utils/agent-access";
 
-/** The agent pages' header, tabs, and a notice when the agent cannot run. */
-const AgentHeader: Component<{ actions?: JSXElement }> = (props) => {
-	// ----------------------------------------
-	// Memos
-	const disconnected = createMemo(() => {
-		const connection = siteStore.get.connection;
-		return connection !== null && connection.status !== "connected";
-	});
-
+/** The header for agent list pages, with a notice when the agent cannot run. */
+const AgentHeader: Component<{
+	title: string;
+	description: string;
+	actions?: JSXElement;
+	/** Shown under the title, such as a query toolbar. */
+	children?: JSXElement;
+}> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
 		<PageLayout.Header
-			title={T()("routes.agent.title")}
-			description={T()("routes.agent.description")}
+			title={props.title}
+			description={props.description}
 			actions={props.actions}
 		>
-			<Tabs.Nav
-				class="px-4 pb-4 md:px-6"
-				items={[
-					{ label: T()("routes.agent.chats"), href: "/lucid/agent" },
-					{
-						label: T()("routes.agent.routines"),
-						href: "/lucid/agent/routines",
-					},
-				]}
-			/>
-			<Show when={disconnected()}>
+			{props.children}
+			<Show when={isAgentDisconnected()}>
 				<Alert variant="warning" appearance="bar">
 					{T()("agent.connection.required")}
 				</Alert>

@@ -54,10 +54,14 @@ export interface ActionMenuItem {
 
 export type ActionMenuSize = "sm" | "md";
 
+export type ActionMenuVariant = "outline" | "ghost";
+
 export interface ActionMenuProps {
 	actions: ActionMenuItem[];
 	/** @default "sm" */
 	size?: ActionMenuSize;
+	/** `ghost` drops the trigger's background and border, like the ghost button. @default "outline" */
+	variant?: ActionMenuVariant;
 	placement?: MenuPlacement;
 	/** Applied to the trigger button. */
 	class?: string;
@@ -149,8 +153,12 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 					data-action-menu
 					onClick={(event) => event.stopPropagation()}
 					class={classNames(
-						"pointer-events-auto bg-input border border-border outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center hover:bg-background-hover",
+						"pointer-events-auto outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors",
 						{
+							"bg-input border border-border hover:bg-background-hover":
+								props.variant !== "ghost",
+							"text-muted hover:text-subtitle hover:bg-background/50":
+								props.variant === "ghost",
 							"min-w-7 w-7 h-7": props.size !== "md",
 							"min-w-9 w-9 h-9": props.size === "md",
 						},
@@ -158,7 +166,11 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 					)}
 				>
 					<span class="sr-only">{T()("common.actions.options.show")}</span>
-					<FaSolidEllipsisVertical class="text-subtitle pointer-events-none" />
+					<FaSolidEllipsisVertical
+						class={classNames("pointer-events-none", {
+							"text-subtitle": props.variant !== "ghost",
+						})}
+					/>
 				</Menu.Trigger>
 				<Menu.Content>
 					<ActionList actions={visibleActions()} onSelect={handleSelect} />

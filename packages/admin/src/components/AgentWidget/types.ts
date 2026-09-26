@@ -6,7 +6,11 @@ export type AgentWidgetMatch = {
 	version: number;
 };
 
-/** Data returned by a tool, rendered by its matching admin slot. */
+/**
+ * Data returned by a tool, rendered by its matching admin slot. Widgets sit in
+ * the flow of the agent's reply, so keep them light: a thin `border-border`
+ * outline or none, no filled card, and the admin's text colours.
+ */
 export type AgentWidgetProps<
 	TOptions extends AdminOptions | undefined = undefined,
 > = {

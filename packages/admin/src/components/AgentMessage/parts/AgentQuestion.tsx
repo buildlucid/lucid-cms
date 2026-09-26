@@ -1,95 +1,97 @@
 import type { AgentApprovalAnswer, AgentMessagePart } from "@types";
-import { FaSolidCircleQuestion, FaSolidShieldHalved } from "solid-icons/fa";
-import { type Component, createMemo, For, Show } from "solid-js";
-import Button from "@/components/Button/Button";
+import classnames from "classnames";
+import {
+	FaSolidChevronRight,
+	FaSolidCircleQuestion,
+	FaSolidShieldHalved,
+} from "solid-icons/fa";
+import { type Component, createMemo, createSignal, Show } from "solid-js";
 import T from "@/translations";
 
 type QuestionPart = Extract<AgentMessagePart, { type: "question" }>;
 
 /**
- * A question or approval the agent paused on. While it is pending, options can
- * be chosen here; written answers go through the chat box.
+ * A question or approval the agent paused on, as a compact row in the chat.
+ * Opening it shows the question and its answer. While it is pending it is
+ * answered from the question box that replaces the chat box.
  */
 const AgentQuestion: Component<{
 	part: QuestionPart;
 	pending: boolean;
-	onAnswer?: (answer: string) => void;
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const [open, setOpen] = createSignal(false);
+
 	// ----------------------------------------
 	// Memos
 	const approval = createMemo(() => props.part.kind === "approval");
-	const options = createMemo(() => {
-		if (!approval()) {
-			return (props.part.options ?? []).map((value) => ({
-				value,
-				label: value,
-				primary: true,
-			}));
-		}
-		const answers: { value: AgentApprovalAnswer; label: string }[] = [
-			{ value: "approve", label: T()("agent.question.approve") },
-			{ value: "deny", label: T()("agent.question.deny") },
-		];
-		return answers.map((answer) => ({
-			...answer,
-			primary: answer.value === "approve",
-		}));
+	const outcome = createMemo(() => {
+		if (props.pending) return T()("agent.question.pending");
+		if (props.part.dismissed) return T()("agent.question.dismissed.short");
+		const answer = props.part.answer;
+		if (answer === undefined || !approval()) return undefined;
+		return answer === ("approve" satisfies AgentApprovalAnswer)
+			? T()("agent.question.approved.short")
+			: T()("agent.question.denied.short");
 	});
 	const answerText = createMemo(() => {
 		if (props.part.dismissed) return T()("agent.question.dismissed");
 		const answer = props.part.answer;
-		if (answer === undefined) return undefined;
-		if (!approval()) return T()("agent.question.answered", { answer });
-		return answer === ("approve" satisfies AgentApprovalAnswer)
-			? T()("agent.question.approved")
-			: T()("agent.question.denied");
+		if (answer === undefined || approval()) return undefined;
+		return T()("agent.question.answered", { answer });
 	});
 
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="rounded-md border border-primary-low-border bg-primary-low p-4">
-			<div class="flex items-start gap-3">
-				<span class="mt-0.5 text-primary">
-					<Show when={approval()} fallback={<FaSolidCircleQuestion />}>
-						<FaSolidShieldHalved />
+		<div data-compact-row class="flex flex-col items-start">
+			<button
+				type="button"
+				class="group -ml-2 flex max-w-full items-center gap-2 rounded-md px-2 py-1 text-left text-xs text-muted transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+				aria-expanded={open()}
+				onClick={() => setOpen((value) => !value)}
+			>
+				<span class="flex size-3.5 shrink-0 items-center justify-center">
+					<Show
+						when={approval()}
+						fallback={<FaSolidCircleQuestion size={10} />}
+					>
+						<FaSolidShieldHalved size={10} />
 					</Show>
 				</span>
-				<div class="min-w-0 grow">
-					<p class="text-xs font-medium uppercase tracking-wide text-subtitle">
-						{approval()
-							? T()("agent.question.approval")
-							: T()("agent.question.title")}
-					</p>
-					<p class="mt-1 whitespace-pre-wrap break-words text-sm text-title">
+				<span class="min-w-0 truncate">
+					{T()(
+						approval()
+							? "agent.question.asked.approval"
+							: "agent.question.asked",
+					)}
+					<Show when={outcome()}>
+						{(text) => (
+							<span class={classnames({ "text-primary": props.pending })}>
+								{" · "}
+								{text()}
+							</span>
+						)}
+					</Show>
+				</span>
+				<FaSolidChevronRight
+					size={8}
+					class={classnames("shrink-0 transition-transform", {
+						"rotate-90": open(),
+					})}
+				/>
+			</button>
+			<Show when={open()}>
+				<div class="mt-1 mb-1 ml-1.5 border-l border-border pl-4">
+					<p class="whitespace-pre-wrap wrap-break-word text-xs text-subtitle">
 						{props.part.question}
 					</p>
-					<Show
-						when={props.pending}
-						fallback={
-							<Show when={answerText()}>
-								<p class="mt-2 text-sm text-body">{answerText()}</p>
-							</Show>
-						}
-					>
-						<Show when={options().length}>
-							<div class="mt-3 flex flex-wrap gap-2">
-								<For each={options()}>
-									{(option) => (
-										<Button
-											size="sm"
-											variant={option.primary ? "primary" : "outline"}
-											onClick={() => props.onAnswer?.(option.value)}
-										>
-											{option.label}
-										</Button>
-									)}
-								</For>
-							</div>
-						</Show>
+					<Show when={answerText()}>
+						<p class="mt-1 text-xs text-body">{answerText()}</p>
 					</Show>
 				</div>
-			</div>
+			</Show>
 		</div>
 	);
 };

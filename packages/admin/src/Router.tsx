@@ -9,11 +9,11 @@ import NavigationShell from "@/components/NavigationShell/NavigationShell";
 import OAuthRoutes from "@/components/OAuthRoutes/OAuthRoutes";
 import PublicRoutes from "@/components/PublicRoutes/PublicRoutes";
 import { Permissions } from "@/constants/permissions";
+import agentGuard from "@/guards/AgentGuard/AgentGuard";
 import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
 import PermissionGuard from "@/guards/PermissionGuard/PermissionGuard";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
-import { getAgentAccess } from "@/utils/agent-access";
 import PermissionSomeGuard from "./guards/PermissionSomeGuard/PermissionSomeGuard";
 
 type LazyRoute = {
@@ -48,6 +48,9 @@ const DashboardRoute = lazy(
 	() => import("@/containers/DashboardPage/DashboardPage"),
 );
 const AgentRoute = lazy(() => import("@/containers/AgentPage/AgentPage"));
+const AgentHistoryRoute = lazy(
+	() => import("@/containers/AgentHistoryPage/AgentHistoryPage"),
+);
 const AgentConversationRoute = lazy(
 	() => import("@/containers/AgentConversationPage/AgentConversationPage"),
 );
@@ -138,50 +141,27 @@ const AppRouter: Component = () => {
 					<Route
 						path="/agent"
 						preload={preloadRoutes(AgentRoute)}
-						component={() => (
-							<ConditionGuard
-								condition={() => getAgentAccess().all.length > 0}
-								redirect="/lucid"
-							>
-								<AgentRoute />
-							</ConditionGuard>
-						)}
+						component={agentGuard(AgentRoute)}
+					/>
+					<Route
+						path="/agent/history"
+						preload={preloadRoutes(AgentHistoryRoute)}
+						component={agentGuard(AgentHistoryRoute)}
 					/>
 					<Route
 						path="/agent/chats/:conversationId"
 						preload={preloadRoutes(AgentConversationRoute)}
-						component={() => (
-							<ConditionGuard
-								condition={() => getAgentAccess().all.length > 0}
-								redirect="/lucid"
-							>
-								<AgentConversationRoute />
-							</ConditionGuard>
-						)}
+						component={agentGuard(AgentConversationRoute)}
 					/>
 					<Route
 						path="/agent/routines"
 						preload={preloadRoutes(AgentRoutinesRoute)}
-						component={() => (
-							<ConditionGuard
-								condition={() => getAgentAccess().all.length > 0}
-								redirect="/lucid"
-							>
-								<AgentRoutinesRoute />
-							</ConditionGuard>
-						)}
+						component={agentGuard(AgentRoutinesRoute)}
 					/>
 					<Route
 						path="/agent/routines/:routineId"
 						preload={preloadRoutes(AgentRoutineRoute)}
-						component={() => (
-							<ConditionGuard
-								condition={() => getAgentAccess().all.length > 0}
-								redirect="/lucid"
-							>
-								<AgentRoutineRoute />
-							</ConditionGuard>
-						)}
+						component={agentGuard(AgentRoutineRoute)}
 					/>
 					<Route path="/components" component={ComponentsRoute} />
 					<Route path="/account" component={AccountRoute} />

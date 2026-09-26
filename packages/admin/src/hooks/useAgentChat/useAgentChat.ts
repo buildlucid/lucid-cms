@@ -60,7 +60,11 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		id: conversationId,
 		poll: (data) => !untrack(streaming) && awaitsDelivery(data),
 	});
-	const latestRun = createMemo(() => conversation.data?.data.latestRun);
+	//* data is only read once loaded, as reading it earlier suspends the page and holds up navigation to it
+	const data = createMemo(() =>
+		conversation.isSuccess ? conversation.data?.data : undefined,
+	);
+	const latestRun = createMemo(() => data()?.latestRun);
 	const background = createMemo(
 		() => !streaming() && isRunWorking(latestRun()?.status),
 	);
@@ -70,7 +74,9 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// ----------------------------------------
 	// Memos
 	const saved = createMemo(() =>
-		(history.data?.pages ?? []).toReversed().flatMap((page) => page.data),
+		(history.isSuccess ? history.data.pages : [])
+			.toReversed()
+			.flatMap((page) => page.data),
 	);
 	const pendingQuestion = createMemo(() =>
 		latestRun()?.status === "waiting" && !streaming()
@@ -236,10 +242,19 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 
 	// ----------------------------------------
 	// Effects
-	createEffect(() =>
-		setInputs(reconcile(conversation.data?.data.inputs ?? [], { key: "id" })),
-	);
-	createEffect(() => setMessages(reconcile(live() ?? saved(), { key: "id" })));
+	createEffect(() => setInputs(reconcile(data()?.inputs ?? [], { key: "id" })));
+	//* older pages loaded mid-reply go above the live messages
+	createEffect(() => {
+		const current = live();
+		const first = current?.[0]?.position;
+		const earlier =
+			first === undefined
+				? []
+				: saved().filter((message) => message.position < first);
+		setMessages(
+			reconcile([...earlier, ...(current ?? saved())], { key: "id" }),
+		);
+	});
 	createEffect(
 		on(
 			conversationId,
@@ -281,8 +296,10 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// Return
 	return {
 		conversation,
-		context: createMemo(() => liveContext() ?? conversation.data?.data.context),
-		compactions: createMemo(() => conversation.data?.data.compactions ?? []),
+		/** The loaded conversation, or undefined until it loads. */
+		data,
+		context: createMemo(() => liveContext() ?? data()?.context),
+		compactions: createMemo(() => data()?.compactions ?? []),
 		compact: () =>
 			stream(`/lucid/api/v1/agent/conversations/${conversationId()}/compact`, {
 				body: { requestId: crypto.randomUUID() },
@@ -296,7 +313,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		/** True while the agent is replying here or in the background. */
 		working: createMemo(() => streaming() || background()),
 		inputs,
-		queuePaused: createMemo(() => conversation.data?.data.queuePaused ?? false),
+		queuePaused: createMemo(() => data()?.queuePaused ?? false),
 		/** Sends a message. While the agent is busy it queues, or steers the current run. */
 		send: async (text: string, mode: "send" | "steer" = "send") => {
 			const id = conversationId();
@@ -318,8 +335,8 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 				streaming() ||
 				background() ||
 				pendingQuestion() !== undefined ||
-				conversation.data?.data.queuePaused ||
-				(conversation.data?.data.inputs?.length ?? 0) > 0;
+				data()?.queuePaused ||
+				(data()?.inputs?.length ?? 0) > 0;
 			const accepted = queued
 				? await submit(id, pending)
 				: await stream(`/lucid/api/v1/agent/conversations/${id}/messages`, {

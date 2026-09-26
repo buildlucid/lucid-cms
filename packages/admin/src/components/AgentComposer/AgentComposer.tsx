@@ -1,7 +1,12 @@
 import { debounce } from "@solid-primitives/scheduled";
 import { Editor } from "@tiptap/core";
 import classnames from "classnames";
-import { FaSolidArrowUp, FaSolidStop } from "solid-icons/fa";
+import {
+	FaSolidArrowUp,
+	FaSolidPaperclip,
+	FaSolidPlus,
+	FaSolidStop,
+} from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -13,6 +18,7 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
+import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 import { composerExtensions, isBlank } from "./editor";
 
@@ -40,9 +46,7 @@ export interface AgentComposerProps {
 	autofocus?: boolean;
 	/** Keeps an unsent draft for the browser session. */
 	draftKey?: string;
-	/** Attached to the top edge, such as queued messages. */
-	top?: JSX.Element;
-	/** Toolbar slots along the bottom edge. */
+	/** Toolbar slots along the bottom edge. `start` comes before the add menu, as it can change what the menu offers. */
 	start?: JSX.Element;
 	end?: JSX.Element;
 	/** @default "md" */
@@ -52,6 +56,10 @@ export interface AgentComposerProps {
 }
 
 const draftPrefix = "lucid:agent-draft:";
+
+/** Matches a small outline button, for menu triggers in the toolbar. */
+export const composerTriggerClasses =
+	"flex h-7 items-center justify-center gap-1.5 rounded-md border border-border bg-input text-xs text-subtitle fill-subtitle transition-colors hover:border-transparent hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary";
 
 //* storage can be unavailable, such as in a private window
 const readDraft = (key?: string) => {
@@ -139,12 +147,12 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			}),
 			content: readDraft(props.draftKey),
 			contentType: "markdown",
-			autofocus: props.autofocus ? "end" : false,
+			autofocus: false,
 			editable: !props.disabled,
 			editorProps: {
 				attributes: {
 					class: classnames(
-						"agent-markdown agent-markdown-tight px-4 pt-3.5 pb-2 leading-6 outline-hidden",
+						"agent-markdown agent-markdown-tight px-4 pt-3.5 pb-2.5 outline-hidden",
 						props.size === "lg" ? "min-h-18" : "min-h-6",
 					),
 					"aria-label": T()("agent.composer.label"),
@@ -172,6 +180,11 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			},
 			focus: () => instance.commands.focus("end"),
 		});
+		//* a route can mount before it is shown, so focusing waits a frame for the box to be on screen
+		if (props.autofocus) {
+			const frame = requestAnimationFrame(() => instance.commands.focus("end"));
+			onCleanup(() => cancelAnimationFrame(frame));
+		}
 	});
 	createEffect(
 		on(
@@ -220,51 +233,61 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={classnames("flex flex-col", props.class)}>
-			{props.top}
+		<div class={props.class}>
 			<form
-				class="relative rounded-2xl border border-border bg-card shadow-sm transition-colors focus-within:border-primary-low-border"
+				class="relative rounded-2xl border border-border bg-card shadow-sm transition-colors focus-within:border-primary"
 				onSubmit={(event) => {
 					event.preventDefault();
 					void submit("send");
 				}}
 			>
+				<div ref={container} class="max-h-[min(40vh,20rem)] overflow-y-auto" />
+				{/* long messages fade out behind the toolbar rather than stopping at a hard edge */}
 				<div
-					ref={container}
-					class="max-h-[min(40vh,20rem)] overflow-y-auto text-sm"
+					aria-hidden="true"
+					class="pointer-events-none relative -mt-2.5 h-2.5 bg-linear-to-t from-card to-transparent"
 				/>
 				<div class="flex items-center gap-2 px-3 pb-3">
-					<Show
-						when={props.start}
-						fallback={
-							<p class="hidden pl-1 text-xs text-muted sm:block">
-								{T()(
-									props.queueable && props.busy
-										? "agent.composer.hint.busy"
-										: "agent.composer.hint",
-								)}
-							</p>
-						}
-					>
-						{props.start}
+					{props.start}
+					<Menu.Root placement="top-start">
+						<Menu.Trigger
+							class={classnames(composerTriggerClasses, "w-7")}
+							aria-label={T()("agent.composer.add")}
+							title={T()("agent.composer.add")}
+						>
+							<FaSolidPlus size={11} />
+						</Menu.Trigger>
+						<Menu.Content>
+							{/* placeholder until skills and uploads can be added to a message */}
+							<Menu.Item icon={<FaSolidPaperclip size={12} />} disabled={true}>
+								{T()("agent.composer.add.files")}
+							</Menu.Item>
+						</Menu.Content>
+					</Menu.Root>
+					<Show when={props.queueable && props.busy}>
+						<p class="hidden truncate pl-1 text-xs text-muted sm:block">
+							{T()("agent.composer.hint.busy")}
+						</p>
 					</Show>
 					<div class="ml-auto flex items-center gap-1.5">
 						{props.end}
 						<Show when={props.onStop}>
 							<Button
 								shape="circle"
-								size="sm"
+								size="xs"
 								variant="secondary"
+								class="focus-visible:ring-inset"
 								onClick={() => props.onStop?.()}
 								aria-label={T()("agent.composer.stop")}
 							>
-								<FaSolidStop />
+								<FaSolidStop size={10} />
 							</Button>
 						</Show>
 						<Button
 							type="submit"
 							shape="circle"
-							size="sm"
+							size="xs"
+							class="focus-visible:ring-inset"
 							disabled={
 								blank() ||
 								submitting() ||
@@ -275,7 +298,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 								props.busy ? "agent.composer.queue" : "agent.composer.send",
 							)}
 						>
-							<FaSolidArrowUp />
+							<FaSolidArrowUp size={11} />
 						</Button>
 					</div>
 				</div>

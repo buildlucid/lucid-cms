@@ -1,13 +1,10 @@
-import type { AgentInput, AgentQuestionKind } from "@types";
-import classnames from "classnames";
+import type { AgentInput } from "@types";
 import {
 	FaSolidBolt,
-	FaSolidCircleQuestion,
 	FaSolidClock,
 	FaSolidPause,
 	FaSolidPen,
 	FaSolidPlay,
-	FaSolidShieldHalved,
 	FaSolidTrash,
 	FaSolidXmark,
 } from "solid-icons/fa";
@@ -27,12 +24,11 @@ import T from "@/translations";
 export interface AgentComposerStackProps {
 	inputs: AgentInput[];
 	paused: boolean;
-	/** The question the run is waiting on. It is answered from the chat box. */
-	question?: { kind: AgentQuestionKind; question: string };
 	/** Steering needs a run to redirect. */
 	canSteer: boolean;
 	onSteer: (input: AgentInput) => void;
-	onEdit: (input: AgentInput) => void;
+	/** Leave out to hide the edit action. */
+	onEdit?: (input: AgentInput) => void;
 	onCancel: (input: AgentInput) => void;
 	onResume: () => void;
 	onClear: () => void;
@@ -64,18 +60,12 @@ const Row: Component<{
 	icon: JSX.Element;
 	text: string;
 	title?: string;
-	tone?: "default" | "highlight";
 	children?: JSX.Element;
 }> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<li
-			class={classnames("flex min-h-9 items-center gap-2 px-3 py-1 text-xs", {
-				"bg-background text-body": props.tone !== "highlight",
-				"bg-primary-low text-title": props.tone === "highlight",
-			})}
-		>
+		<li class="flex min-h-9 items-center gap-2 bg-background px-3 py-1 text-xs text-body">
 			<span class="flex size-4 shrink-0 items-center justify-center text-muted">
 				{props.icon}
 			</span>
@@ -130,12 +120,16 @@ const InputRow: Component<
 						<FaSolidBolt size={11} />
 					</RowAction>
 				</Show>
-				<RowAction
-					label={T()("agent.queue.edit")}
-					onClick={() => props.onEdit(props.input)}
-				>
-					<FaSolidPen size={11} />
-				</RowAction>
+				<Show when={props.onEdit}>
+					{(onEdit) => (
+						<RowAction
+							label={T()("agent.queue.edit")}
+							onClick={() => onEdit()(props.input)}
+						>
+							<FaSolidPen size={11} />
+						</RowAction>
+					)}
+				</Show>
 				<RowAction
 					label={T()("agent.queue.remove")}
 					onClick={() => props.onCancel(props.input)}
@@ -148,48 +142,21 @@ const InputRow: Component<
 };
 
 /**
- * Rows attached to the top of the chat box: the question being answered, a
- * paused queue and queued messages, stacked as one piece.
+ * Rows attached to the top of the chat box or question box: a paused queue and
+ * queued messages, stacked as one piece. A paused queue only shows while it
+ * holds messages.
  */
 const AgentComposerStack: Component<AgentComposerStackProps> = (props) => {
 	// ----------------------------------------
-	// Memos
-	//* a paused queue only shows while it holds messages
-	const visible = createMemo(
-		() => props.question !== undefined || props.inputs.length > 0,
-	);
-
-	// ----------------------------------------
 	// Render
 	return (
-		<Show when={visible()}>
+		<Show when={props.inputs.length > 0}>
 			<ul
 				class="mx-3 max-h-48 divide-y divide-border overflow-y-auto rounded-t-xl border border-b-0 border-border"
 				aria-label={T()("agent.queue.label")}
 				aria-live="polite"
 			>
-				<Show when={props.question}>
-					{(question) => (
-						<Row
-							tone="highlight"
-							icon={
-								<Show
-									when={question().kind === "approval"}
-									fallback={<FaSolidCircleQuestion size={12} />}
-								>
-									<FaSolidShieldHalved size={12} />
-								</Show>
-							}
-							text={T()(
-								question().kind === "approval"
-									? "agent.queue.approval"
-									: "agent.queue.question",
-								{ question: question().question },
-							)}
-						/>
-					)}
-				</Show>
-				<Show when={props.paused && props.inputs.length}>
+				<Show when={props.paused}>
 					<Row
 						icon={<FaSolidPause size={10} />}
 						text={T()("agent.queue.paused")}

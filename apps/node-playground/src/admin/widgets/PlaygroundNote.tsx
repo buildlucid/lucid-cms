@@ -5,7 +5,7 @@ const PlaygroundNote = (props: AgentWidgetProps) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="rounded-md border border-border bg-card p-4">
+		<div class="rounded-lg border border-border px-4 py-3">
 			<p class="text-sm font-medium text-title">{String(props.data.title)}</p>
 			<p class="mt-1 text-sm text-body">{String(props.data.body)}</p>
 		</div>

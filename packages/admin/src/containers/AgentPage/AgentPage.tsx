@@ -1,43 +1,34 @@
-import { debounce } from "@solid-primitives/scheduled";
-import { useNavigate } from "@solidjs/router";
-import { type Component, createMemo, createSignal, Show } from "solid-js";
-import AgentComposer from "@/components/AgentComposer/AgentComposer";
-import AgentConversationList from "@/components/AgentConversationList/AgentConversationList";
-import AgentHeader from "@/components/AgentHeader/AgentHeader";
-import Button from "@/components/Button/Button";
-import EmptyState from "@/components/EmptyState/EmptyState";
-import Input from "@/components/Input/Input";
+import { useLocation, useNavigate } from "@solidjs/router";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	onMount,
+	Show,
+} from "solid-js";
+import AgentComposer, {
+	type AgentComposerHandle,
+} from "@/components/AgentComposer/AgentComposer";
+import Alert from "@/components/Alert/Alert";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import Select from "@/components/Select/Select";
-import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getAgentAccess } from "@/utils/agent-access";
+import { getAgentAccess, isAgentDisconnected } from "@/utils/agent-access";
+import AgentPicker from "./parts/AgentPicker";
 
-const pageSize = 10;
-
-/** Starts a new chat with a chosen agent and lists recent ones, with chats waiting on the user first. */
+/**
+ * The agent's home: a greeting and a chat box that starts a new chat. Sending
+ * opens the chat straight away and the chat page saves it, so there is no wait
+ * here.
+ */
 const AgentPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
+	//* a chat that could not be saved sends its message back here
+	const location = useLocation<{ message?: string }>();
 	const navigate = useNavigate();
+	const returned = location.state?.message;
 	const [agentKey, setAgentKey] = createSignal<string>();
-	const [search, setSearch] = createSignal("");
-	const [title, setTitle] = createSignal<string>();
-	const [perPage, setPerPage] = createSignal(pageSize);
-	const searchTitle = debounce((value: string) => {
-		setTitle(value.trim() || undefined);
-		setPerPage(pageSize);
-	}, 300);
-
-	// ----------------------------------------
-	// Queries & Mutations
-	const recent = api.agent.useGetConversations({
-		queryParams: { filters: { title }, perPage },
-	});
-	const waiting = api.agent.useGetConversations({
-		queryParams: { filters: { status: "waiting" }, perPage: 5 },
-	});
-	const createConversation = api.agent.useCreateConversation();
 
 	// ----------------------------------------
 	// Memos
@@ -45,138 +36,73 @@ const AgentPage: Component = () => {
 	const agent = createMemo(
 		() => agents().find((agent) => agent.key === agentKey()) ?? agents()[0],
 	);
-	const conversations = createMemo(() => recent.data?.data ?? []);
-	const hasMore = createMemo(
-		() => (recent.data?.meta.total ?? 0) > conversations().length,
-	);
+	const name = createMemo(() => {
+		const user = userStore.get.user;
+		return user?.firstName || user?.username;
+	});
 
 	// ----------------------------------------
 	// Functions
-	const start = async (text: string) => {
+	const start = (text: string) => {
 		const selected = agent();
 		if (!selected) return false;
-		try {
-			const conversation = await createConversation.action.mutateAsync({
-				agentKey: selected.key,
-			});
-			navigate(`/lucid/agent/chats/${conversation.data.id}`, {
-				state: { message: text },
-			});
-			return true;
-		} catch {
-			//* the mutation reports the error; the text goes back in the box
-			return false;
-		}
+		navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
+			state: { message: text, agentKey: selected.key },
+		});
+		return true;
 	};
+
+	// ----------------------------------------
+	// Effects
+	onMount(() => {
+		//* loaded ahead, so opening a chat does not wait on its code
+		void import("@/containers/AgentConversationPage/AgentConversationPage");
+		if (returned) navigate(location.pathname, { replace: true, state: {} });
+	});
 
 	// ----------------------------------------
 	// Render
 	return (
 		<PageLayout.Root>
-			<AgentHeader />
-			<PageLayout.Body padding="md">
-				<div class="mx-auto flex w-full max-w-3xl flex-col gap-12 py-6 md:py-14">
-					<Show when={agent()}>
-						{(current) => (
-							<section class="flex flex-col items-center gap-6">
-								<div class="flex flex-col items-center gap-2 text-center">
-									<h2 class="text-2xl font-medium text-title">
-										{T()("agent.home.title")}
-									</h2>
-									<p class="text-sm text-body">{current().description}</p>
-								</div>
-								<Show when={agents().length > 1}>
-									<Select
-										id="agent-select"
-										name="agent"
-										value={current().key}
-										onChange={(value) => {
-											if (value) setAgentKey(String(value));
-										}}
-										options={agents().map((agent) => ({
-											value: agent.key,
-											label: agent.name,
-										}))}
-										label={T()("agent.select.label")}
-										class="w-56"
-									/>
-								</Show>
-								<AgentComposer
-									size="lg"
-									autofocus={true}
-									class="w-full"
-									placeholder={T()("agent.composer.placeholder")}
-									draftKey="new"
-									busy={createConversation.action.isPending}
-									onSubmit={start}
-								/>
-							</section>
-						)}
-					</Show>
-
-					<Show when={waiting.data?.data.length}>
-						<section class="flex flex-col gap-3">
-							<h3 class="text-sm font-medium text-title">
-								{T()("agent.home.waiting")}
-							</h3>
-							<AgentConversationList conversations={waiting.data?.data ?? []} />
-						</section>
-					</Show>
-
-					<section class="flex flex-col gap-3">
-						<div class="flex items-end justify-between gap-4">
-							<h3 class="text-sm font-medium text-title">
-								{T()("agent.home.recent")}
-							</h3>
-							<Input
-								id="agent-chat-search"
-								name="search"
-								type="search"
-								value={search()}
-								onChange={(value) => {
-									setSearch(value);
-									searchTitle(value);
+			<Show when={isAgentDisconnected()}>
+				<Alert variant="warning" appearance="bar">
+					{T()("agent.connection.required")}
+				</Alert>
+			</Show>
+			<PageLayout.Body padding="md" class="blur-background justify-center">
+				<Show when={agent()}>
+					{(current) => (
+						<section class="mx-auto flex w-full max-w-3xl flex-col gap-8 pb-[10vh]">
+							<div class="flex flex-col items-center gap-1.5 text-center">
+								<h2 class="text-2xl font-medium text-title">
+									{name()
+										? T()("agent.home.greeting", { name: name() })
+										: T()("agent.home.greeting.anonymous")}
+								</h2>
+								<p class="text-base text-body">{T()("agent.home.title")}</p>
+							</div>
+							<AgentComposer
+								ref={(handle: AgentComposerHandle) => {
+									if (returned) handle.insert(returned);
 								}}
-								placeholder={T()("agent.home.search")}
-								aria-label={T()("agent.home.search")}
-								class="w-56"
+								size="lg"
+								autofocus={true}
+								placeholder={T()("agent.composer.placeholder")}
+								draftKey="new"
+								onSubmit={start}
+								start={
+									<Show when={agents().length > 1}>
+										<AgentPicker
+											agents={agents()}
+											selected={current()}
+											onSelect={(agent) => setAgentKey(agent.key)}
+										/>
+									</Show>
+								}
 							/>
-						</div>
-						<Show
-							when={conversations().length}
-							fallback={
-								<Show when={!recent.isLoading}>
-									<EmptyState
-										class="rounded-md border border-dashed border-border"
-										title={
-											title()
-												? T()("agent.home.search.empty")
-												: T()("agent.home.empty.title")
-										}
-										description={
-											title()
-												? T()("agent.home.search.empty.description")
-												: T()("agent.home.empty.description")
-										}
-									/>
-								</Show>
-							}
-						>
-							<AgentConversationList conversations={conversations()} />
-						</Show>
-						<Show when={hasMore()}>
-							<Button
-								variant="ghost"
-								size="sm"
-								class="self-center"
-								loading={recent.isFetching}
-								onClick={() => setPerPage((count) => count + pageSize)}
-							>
-								{T()("common.show_more")}
-							</Button>
-						</Show>
-					</section>
-				</div>
+						</section>
+					)}
+				</Show>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

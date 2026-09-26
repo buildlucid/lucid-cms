@@ -243,6 +243,8 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createConversation: {
 		body: z.object({
+			/** Lets the admin open the chat before it is saved. */
+			id: z.uuid().optional(),
 			agentKey: z.string().min(1),
 			title: z.string().trim().min(1).max(255).optional(),
 		}),

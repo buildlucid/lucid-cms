@@ -50,9 +50,12 @@ export const markdownPreview = (text: string) => {
  * Renders message text as sanitised markdown. Only registered widgets can render
  * interactive content. The bubble tone keeps code visible on a user message.
  */
-const AgentMarkdown: Component<{ text: string; tone?: "reply" | "bubble" }> = (
-	props,
-) => {
+const AgentMarkdown: Component<{
+	text: string;
+	tone?: "reply" | "bubble";
+	/** Overrides the default text size and colour, such as for a smaller preview. */
+	class?: string;
+}> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const scheduled = createScheduled((update) => throttle(update, 100));
@@ -69,9 +72,8 @@ const AgentMarkdown: Component<{ text: string; tone?: "reply" | "bubble" }> = (
 	// Render
 	return (
 		<div
-			class={classnames("agent-markdown", {
-				"agent-markdown-bubble agent-markdown-tight leading-6":
-					props.tone === "bubble",
+			class={classnames("agent-markdown", props.class, {
+				"agent-markdown-bubble": props.tone === "bubble",
 			})}
 			innerHTML={html()}
 		/>

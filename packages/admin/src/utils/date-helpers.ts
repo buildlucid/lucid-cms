@@ -75,6 +75,21 @@ const formatFullDate = (
 	});
 };
 
+/** A compact timestamp: the time for today, otherwise the day, month and time. */
+const formatTimestamp = (date?: string | null) => {
+	if (!date) return undefined;
+	const value = new Date(date);
+	if (Number.isNaN(value.getTime())) return date;
+
+	const today = value.toDateString() === new Date().toDateString();
+	return value.toLocaleString(
+		browserLocale(),
+		today
+			? { hour: "numeric", minute: "2-digit" }
+			: { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" },
+	);
+};
+
 const toDateInputValue = (utcDate?: string | null) => {
 	if (!utcDate) return "";
 
@@ -89,6 +104,7 @@ const toDateInputValue = (utcDate?: string | null) => {
 const dateHelpers = {
 	formatDate,
 	formatFullDate,
+	formatTimestamp,
 	toDateInputValue,
 };
 

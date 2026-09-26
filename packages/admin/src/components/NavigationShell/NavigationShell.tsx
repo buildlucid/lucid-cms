@@ -3,6 +3,7 @@ import {
 	type Component,
 	createEffect,
 	createMemo,
+	createSignal,
 	type JSXElement,
 	Show,
 	Suspense,
@@ -42,6 +43,8 @@ const NavigationShell: Component<{
 	const isLoading = createMemo(() => {
 		return locales.isLoading || connection.isLoading || settings.isLoading;
 	});
+	//* pages render once the stores are filled, so guards such as the agent's see real values
+	const [synced, setSynced] = createSignal(false);
 	const isSuccess = createMemo(() => {
 		return locales.isSuccess && connection.isSuccess && settings.isSuccess;
 	});
@@ -56,6 +59,8 @@ const NavigationShell: Component<{
 		if (settings.isSuccess) {
 			siteStore.setAi(settings.data.data.ai);
 		}
+
+		if (connection.isSuccess && settings.isSuccess) setSynced(true);
 	});
 
 	// ------------------------------------------------------
@@ -75,7 +80,7 @@ const NavigationShell: Component<{
 					aria-busy={isLoading()}
 				>
 					<Show
-						when={isSuccess()}
+						when={isSuccess() && synced()}
 						fallback={
 							<PageLayout.Root>
 								<PageLayout.Body>
