@@ -67,7 +67,7 @@ const NavigationAccountMenu: Component<{
 			onOpenChange={setIsOpen}
 		>
 			<Menu.Trigger
-				class="group flex w-full items-center gap-2.5 rounded-xl border border-border bg-input px-3 py-2 text-left outline-none transition-[background-color,border-color] duration-150 hover:bg-secondary-hover focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-low-border data-expanded:bg-secondary-hover dark:hover:bg-card dark:data-expanded:bg-card"
+				class="group flex w-full items-center gap-2.5 rounded-xl border border-border bg-input px-3 py-2 text-start outline-none transition-[background-color,border-color] duration-150 hover:bg-secondary-hover focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-low-border data-expanded:bg-secondary-hover dark:hover:bg-card dark:data-expanded:bg-card"
 				aria-label={T()("routes.account.title")}
 			>
 				<div class="min-w-0 flex-1 overflow-hidden">

@@ -82,6 +82,7 @@ const navigationIcon = z.enum([
 	"media",
 	"users",
 	"overview",
+	"usage",
 	"roles",
 	"email",
 	"logout",

@@ -1,7 +1,7 @@
 import classNames from "classnames";
-import { FaSolidCopy } from "solid-icons/fa";
-import { type Component, createSignal, onCleanup } from "solid-js";
-import { copyValue } from "../copyValue";
+import { FaSolidCheck, FaSolidCopy } from "solid-icons/fa";
+import { type Component, Show } from "solid-js";
+import { createCopy } from "../copyValue";
 
 export interface CopyButtonProps {
 	value: string;
@@ -14,24 +14,7 @@ export interface CopyButtonProps {
 export const CopyButton: Component<CopyButtonProps> = (props) => {
 	// ----------------------------------------
 	// State
-	const [copied, setCopied] = createSignal(false);
-	let resetTimeout: ReturnType<typeof setTimeout> | undefined;
-
-	// ----------------------------------------
-	// Functions
-	const copy = (e: Event) => {
-		e.stopPropagation();
-		copyValue(props.value);
-		setCopied(true);
-		if (resetTimeout) clearTimeout(resetTimeout);
-		resetTimeout = setTimeout(() => setCopied(false), 2000);
-	};
-
-	// ----------------------------------------
-	// Effects
-	onCleanup(() => {
-		if (resetTimeout) clearTimeout(resetTimeout);
-	});
+	const [copied, copy] = createCopy(() => props.value);
 
 	// ----------------------------------------
 	// Render
@@ -39,7 +22,10 @@ export const CopyButton: Component<CopyButtonProps> = (props) => {
 		<button
 			data-copy-button
 			type="button"
-			onClick={copy}
+			onClick={(e) => {
+				e.stopPropagation();
+				void copy();
+			}}
 			class={classNames(
 				"flex max-w-full cursor-copy items-center whitespace-nowrap text-sm transition-colors duration-200",
 				{
@@ -50,7 +36,12 @@ export const CopyButton: Component<CopyButtonProps> = (props) => {
 				props.class,
 			)}
 		>
-			<FaSolidCopy class="mr-2 shrink-0" size={14} />
+			<Show
+				when={copied()}
+				fallback={<FaSolidCopy class="mr-2 shrink-0" size={14} />}
+			>
+				<FaSolidCheck class="mr-2 shrink-0" size={14} />
+			</Show>
 			<span class="overflow-hidden text-sm text-ellipsis">
 				{props.label ?? props.value}
 			</span>

@@ -18,7 +18,8 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 	// Memos
 	//* the routine's model is the catalogue default when a routine is given
 	const model = createMemo(() => {
-		const catalog = models.data?.data;
+		//* read only once loaded, as reading data while pending suspends the whole page
+		const catalog = models.isSuccess ? models.data.data : undefined;
 		const modelId =
 			props.routine.modelSelection?.modelId ?? catalog?.default.modelId;
 		return (

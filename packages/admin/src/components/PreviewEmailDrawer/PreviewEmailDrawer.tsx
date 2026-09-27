@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import DOMPurify from "dompurify";
 import {
 	FaSolidFile,
@@ -117,15 +116,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 				<Drawer.Title>{T()("panels.email.preview.title")}</Drawer.Title>
 			</Drawer.Header>
 			<Drawer.Body class="flex flex-col gap-3">
-				<div
-					class={classNames(
-						"relative border border-border rounded-md overflow-hidden mb-3",
-						{
-							"mb-4": attachments().length === 0,
-							"mb-3": attachments().length > 0,
-						},
-					)}
-				>
+				<div class="relative border border-border rounded-md overflow-hidden">
 					<iframe
 						class="w-full h-96 bg-white"
 						srcdoc={previewHtml()}
@@ -149,7 +140,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 					</Show>
 				</div>
 				<Show when={attachments().length > 0}>
-					<div class="grid grid-cols-1 gap-2 mb-4">
+					<div class="grid grid-cols-1 gap-2">
 						<For each={attachments()}>
 							{(attachment) => (
 								<div class="min-w-0 bg-card border border-border rounded-md p-3 flex gap-3">

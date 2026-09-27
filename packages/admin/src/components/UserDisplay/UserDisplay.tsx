@@ -68,11 +68,11 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 				"h-5 w-5 min-w-5 text-[7px]":
 					(variant() === "icon" && size() === "xs") ||
 					(variant() === "stacked" && size() === "xs"),
-				"mr-2 h-5 w-5 min-w-5 text-[7px]":
+				"me-2 h-5 w-5 min-w-5 text-[7px]":
 					variant() === "horizontal" && size() === "xs",
-				"mr-2 h-7 w-7 min-w-7 text-[8px]":
+				"me-2 h-7 w-7 min-w-7 text-[8px]":
 					variant() === "horizontal" && size() === "sm",
-				"mr-2.5 h-8 w-8 min-w-8 text-[10px]":
+				"me-2.5 h-8 w-8 min-w-8 text-[10px]":
 					variant() === "horizontal" && (size() === "md" || size() === "lg"),
 			},
 		),
@@ -119,7 +119,7 @@ const UserDisplay: Component<UserDisplayProps> = (props) => {
 						</span>
 					</Match>
 					<Match when={variant() === "stacked"}>
-						<div data-user-display-name class="ml-2 flex min-w-0 flex-col">
+						<div data-user-display-name class="ms-2 flex min-w-0 flex-col">
 							<p
 								class={classNames("truncate text-title", {
 									"text-xs leading-tight": size() === "sm" || size() === "xs",

@@ -1,8 +1,8 @@
 import classNames from "classnames";
-import { FaSolidCopy } from "solid-icons/fa";
-import { type Component, createSignal, onCleanup } from "solid-js";
+import { FaSolidCheck, FaSolidCopy } from "solid-icons/fa";
+import { type Component, Show } from "solid-js";
 import T from "@/translations";
-import { copyValue } from "../copyValue";
+import { createCopy } from "../copyValue";
 
 export interface CopyInputProps {
 	value: string;
@@ -15,23 +15,7 @@ export interface CopyInputProps {
 export const CopyInput: Component<CopyInputProps> = (props) => {
 	// ----------------------------------------
 	// State
-	const [copied, setCopied] = createSignal(false);
-	let resetTimeout: ReturnType<typeof setTimeout> | undefined;
-
-	// ----------------------------------------
-	// Functions
-	const copy = () => {
-		copyValue(props.value);
-		setCopied(true);
-		if (resetTimeout) clearTimeout(resetTimeout);
-		resetTimeout = setTimeout(() => setCopied(false), 2000);
-	};
-
-	// ----------------------------------------
-	// Effects
-	onCleanup(() => {
-		if (resetTimeout) clearTimeout(resetTimeout);
-	});
+	const [copied, copy] = createCopy(() => props.value);
 
 	// ----------------------------------------
 	// Render
@@ -52,7 +36,7 @@ export const CopyInput: Component<CopyInputProps> = (props) => {
 			/>
 			<button
 				type="button"
-				onClick={copy}
+				onClick={() => void copy()}
 				class={classNames(
 					"absolute top-1/2 left-2.5 flex h-6 w-6 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md bg-input transition-colors duration-200 focus:ring-0 focus-visible:ring-1",
 					{
@@ -62,7 +46,9 @@ export const CopyInput: Component<CopyInputProps> = (props) => {
 				)}
 				aria-label={T()("actions.copy.to.clipboard")}
 			>
-				<FaSolidCopy class="fill-current" />
+				<Show when={copied()} fallback={<FaSolidCopy class="fill-current" />}>
+					<FaSolidCheck class="fill-current" />
+				</Show>
 			</button>
 		</div>
 	);

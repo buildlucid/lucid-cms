@@ -104,6 +104,11 @@ const AgentConversationPage: Component = () => {
 	const conversation = createMemo(() => chat.data());
 	const unavailable = createMemo(() => getAgentUnavailableReason());
 	const latestRun = createMemo(() => conversation()?.latestRun);
+	//* shares the model picker's query; chat waits for it as it needs the same Lucid connection
+	const models = api.agent.useGetModels({
+		agentKey: () => conversation()?.agentKey,
+		routineId: () => conversation()?.routineId ?? undefined,
+	});
 	const routineQuery = api.agent.useGetRoutine({
 		id: () => conversation()?.routineId ?? undefined,
 	});
@@ -143,7 +148,13 @@ const AgentConversationPage: Component = () => {
 	// Functions
 	const send = (text: string, mode: "send" | "steer") => {
 		//* a run reads the chat's settings when it starts, so wait for a change to save
-		if (unavailable() || updateConversation.action.isPending) return false;
+		if (
+			unavailable() ||
+			!models.isSuccess ||
+			updateConversation.action.isPending
+		) {
+			return false;
+		}
 		scroll.scrollToEnd("smooth");
 		return chat.send(text, chat.waiting() ? "steer" : mode);
 	};
@@ -316,7 +327,7 @@ const AgentConversationPage: Component = () => {
 					<section
 						class={classnames(
 							"flex min-w-0 grow flex-col transition-[margin] duration-300 ease-out",
-							{ "lg:mr-96": routineCard() || selectedId() },
+							{ "lg:me-96": routineCard() || selectedId() },
 						)}
 					>
 						<Switch>
@@ -467,12 +478,15 @@ const AgentConversationPage: Component = () => {
 												}}
 												autofocus={true}
 												draftKey={params.conversationId}
+												disabled={!models.isSuccess}
 												placeholder={T()(
-													chat.pendingInteraction()
-														? "agent.composer.placeholder.instructions"
-														: chat.working()
-															? "agent.composer.placeholder.busy"
-															: "agent.composer.placeholder",
+													models.isError
+														? "agent.composer.placeholder.unreachable"
+														: chat.pendingInteraction()
+															? "agent.composer.placeholder.instructions"
+															: chat.working()
+																? "agent.composer.placeholder.busy"
+																: "agent.composer.placeholder",
 												)}
 												header={
 													<Show when={chat.pendingInteraction()}>
@@ -579,7 +593,7 @@ const AgentConversationPage: Component = () => {
 					<Show when={routineCard() || selectedId()}>
 						<div
 							ref={setSidebar}
-							class="absolute top-0 right-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-y-auto p-4 scrollbar lg:flex"
+							class="absolute top-0 end-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-y-auto p-4 scrollbar lg:flex"
 						>
 							<Show when={routineCard()}>
 								{(current) => (

@@ -348,7 +348,7 @@ export const IntegrationsList: Component<{
 							integrations.data.data.length > 0
 						}
 					>
-						<div class="-mt-1 flex justify-start">
+						<div class="mt-2 flex justify-start">
 							<Button
 								type="button"
 								size="sm"

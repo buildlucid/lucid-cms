@@ -30,7 +30,7 @@ const AgentRunFinish: Component<{ part: AgentToolPart }> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="border-l-2 border-border py-0.5 pl-3">
+		<div class="border-s-2 border-border py-0.5 ps-3">
 			<div class="flex items-center gap-2">
 				<p class="flex items-center gap-1.5 text-xs text-muted">
 					<FaSolidFlagCheckered size={10} />

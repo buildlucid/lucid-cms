@@ -94,7 +94,11 @@ export const composerExtensions = (props: {
 		trailingNode: false,
 		link: { openOnClick: false, autolink: true, defaultProtocol: "https" },
 	}),
-	Placeholder.configure({ placeholder: () => props.placeholder() }),
+	//* shown while disabled too, as it explains why the chat cannot be used
+	Placeholder.configure({
+		placeholder: () => props.placeholder(),
+		showOnlyWhenEditable: false,
+	}),
 	CharacterCount.configure({ limit: maxMessageLength }),
 	Markdown,
 	pasteMarkdown,

@@ -22,7 +22,10 @@ const AgentRoutineModelField: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const catalog = createMemo(() => query.data?.data);
+	//* read only once loaded, as reading data while pending suspends the whole page
+	const catalog = createMemo(() =>
+		query.isSuccess ? query.data.data : undefined,
+	);
 	const unavailable = createMemo(
 		() => getAgentUnavailableReason() !== undefined,
 	);

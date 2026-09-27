@@ -47,7 +47,7 @@ const AgentErrorNotice: Component<{ message: string }> = (props) => {
 								size="sm"
 							>
 								{T()("connection.remote.visit.action")}
-								<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
+								<FaSolidArrowUpRightFromSquare class="ms-1.5 size-2.5" />
 							</Link>
 						</Show>
 					</div>

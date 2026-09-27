@@ -11,13 +11,8 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
-import { Permissions } from "@/constants/permissions";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
-import api from "@/services/api";
-import siteStore from "@/store/siteStore/siteStore";
-import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getAgentAccess } from "@/utils/agent-access";
 import {
 	isNavigationLinkActive,
 	setNavigationLinkActiveState,
@@ -33,109 +28,15 @@ const NavigationLogo: Component = () => (
 
 export const Navigation: Component = () => {
 	// ----------------------------------------
-	// Hooks
+	// State & Hooks
 	const location = useLocation();
 	const interfaceDirection = useInterfaceDirection();
+	const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
 
 	// ----------------------------------------
-	// Mutations
-	const logout = api.auth.useLogout();
-	const user = createMemo(() => userStore.get.user);
-	const [mobileMenuOpen, setMobileMenuOpen] = createSignal(false);
-	const canReadMedia = createMemo(
-		() => userStore.get.hasPermission([Permissions.MediaRead]).all,
-	);
-	const canReadEmails = createMemo(
-		() => userStore.get.hasPermission([Permissions.EmailRead]).all,
-	);
-	const canReadUsers = createMemo(
-		() => userStore.get.hasPermission([Permissions.UsersRead]).all,
-	);
-	const canReadRoles = createMemo(
-		() => userStore.get.hasPermission([Permissions.RolesRead]).all,
-	);
-	const canReadJobs = createMemo(
-		() => userStore.get.hasPermission([Permissions.JobsRead]).all,
-	);
-	const canReadPublishOperations = createMemo(
-		() => userStore.get.hasPermission([Permissions.PublishOperationsRead]).all,
-	);
-	const canManageConnection = createMemo(
-		() => userStore.get.hasPermission([Permissions.ConnectionUpdate]).all,
-	);
-	const canReadIntegrations = createMemo(
-		() => userStore.get.hasPermission([Permissions.IntegrationsRead]).all,
-	);
-	const canReadSystemOverview = createMemo(
-		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
-	);
-	const canReadAiUsage = createMemo(
-		() => canReadSystemOverview() && siteStore.get.hasAnyAiFeatureEnabled(),
-	);
-	const canUseAgent = createMemo(() => getAgentAccess().all.length > 0);
-	const showAccessAndPermissions = createMemo(
-		() => canReadUsers() || canReadRoles(),
-	);
-
-	// ----------------------------------
-	// Queries
-	const collections = api.collections.useGetAll({
-		queryParams: {},
-	});
-	// ----------------------------------
 	// Memos
-	const collectionsIsLoading = createMemo(() => {
-		return collections.isLoading;
-	});
-	const collectionsIsError = createMemo(() => {
-		return collections.isError;
-	});
-	const multiCollections = createMemo(() => {
-		return (
-			collections.data?.data.filter(
-				(collection) => collection.mode === "multiple",
-			) || []
-		);
-	});
-	const singleCollections = createMemo(() => {
-		return (
-			collections.data?.data.filter(
-				(collection) =>
-					collection.mode === "single" &&
-					userStore.get.hasPermission([
-						collection.permissions.read,
-						collection.documentId
-							? collection.permissions.update
-							: collection.permissions.create,
-					]).all,
-			) || []
-		);
-	});
-	const showCollections = createMemo(() => {
-		return (
-			collectionsIsLoading() ||
-			collectionsIsError() ||
-			multiCollections().length > 0 ||
-			singleCollections().length > 0
-		);
-	});
-	const showPublishRequests = createMemo(
-		() =>
-			canReadPublishOperations() &&
-			(collections.data?.data ?? []).some(
-				(collection) =>
-					(collection.publishing.review?.requiredFor?.length ?? 0) > 0 &&
-					userStore.get.hasPermission([collection.permissions.review]).all,
-			),
-	);
-	const showPublishingOverview = createMemo(
-		() =>
-			canReadPublishOperations() &&
-			(collections.data?.data ?? []).some(
-				(collection) =>
-					collection.publishing.targets.length > 0 &&
-					userStore.get.hasPermission([collection.permissions.read]).all,
-			),
+	const menuButtonLabel = createMemo(() =>
+		mobileMenuOpen() ? T()("common.close") : T()("navigation.menu.open"),
 	);
 
 	// ----------------------------------
@@ -198,65 +99,31 @@ export const Navigation: Component = () => {
 					<A href="/lucid" class="flex items-center min-w-0">
 						<NavigationLogo />
 					</A>
-					<div class="flex items-center gap-4">
-						<button
-							type="button"
-							class="h-9 rounded-lg text-icon hover:text-icon-hover flex items-center justify-center transition-colors"
-							onClick={() => setMobileMenuOpen((open) => !open)}
-							aria-label={mobileMenuOpen() ? T()("common.close") : "Open menu"}
-							title={mobileMenuOpen() ? T()("common.close") : "Open menu"}
+					<button
+						type="button"
+						class="size-9 rounded-lg text-icon hover:text-icon-hover flex items-center justify-center transition-colors outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						onClick={() => setMobileMenuOpen((open) => !open)}
+						aria-label={menuButtonLabel()}
+						aria-expanded={mobileMenuOpen()}
+						title={menuButtonLabel()}
+					>
+						<Show
+							when={mobileMenuOpen()}
+							fallback={<FaSolidGripLines class="size-4" />}
 						>
-							<Show
-								when={mobileMenuOpen()}
-								fallback={
-									<span class="h-4 flex items-center justify-center">
-										<FaSolidGripLines class="size-4" />
-									</span>
-								}
-							>
-								<span class="h-4 flex items-center justify-center">
-									<FaSolidXmark class="size-4" />
-								</span>
-							</Show>
-						</button>
-					</div>
+							<FaSolidXmark class="size-4" />
+						</Show>
+					</button>
 				</div>
 			</header>
 
 			{/* Desktop Navigation */}
-			<div class="hidden md:flex bg-sidebar max-h-screen sticky top-0 z-10">
-				<div class="w-55 h-full flex flex-col overflow-y-auto scrollbar">
-					<div class="pt-6 px-4">
-						<div class="flex items-center pl-2">
-							<NavigationLogo />
-						</div>
-					</div>
-					<NavigationMenuContent
-						class="w-55 flex-1"
-						logoutPending={logout.action.isPending}
-						onLogout={() => logout.action.mutate({})}
-						user={user() || undefined}
-						canReadDocuments={showCollections()}
-						canReadPublishingOverview={showPublishingOverview()}
-						canReadPublishRequests={showPublishRequests()}
-						canReadMedia={canReadMedia()}
-						canReadEmails={canReadEmails()}
-						canReadUsers={canReadUsers()}
-						canReadRoles={canReadRoles()}
-						canReadJobs={canReadJobs()}
-						canReadAiUsage={canReadAiUsage()}
-						canUseAgent={canUseAgent()}
-						canManageConnection={canManageConnection()}
-						canReadIntegrations={canReadIntegrations()}
-						canReadSystemOverview={canReadSystemOverview()}
-						showAccessAndPermissions={showAccessAndPermissions()}
-						collectionsIsLoading={collectionsIsLoading()}
-						collectionsIsError={collectionsIsError()}
-						multiCollections={multiCollections()}
-						singleCollections={singleCollections()}
-					/>
+			<aside class="hidden md:flex w-sidebar flex-col bg-sidebar max-h-screen sticky top-0 z-10">
+				<div class="pt-6 pb-3 px-6 flex items-center">
+					<NavigationLogo />
 				</div>
-			</div>
+				<NavigationMenuContent />
+			</aside>
 
 			{/* Mobile Navigation */}
 			<div
@@ -287,7 +154,7 @@ export const Navigation: Component = () => {
 					{/* Mobile Navigation Content */}
 					<div
 						class={classNames(
-							"relative h-full w-full max-w-[320px] border-border bg-sidebar shadow-[0_20px_70px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out",
+							"relative h-full w-full max-w-[320px] flex flex-col border-border bg-sidebar shadow-[0_20px_70px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-out",
 							{
 								"translate-x-0": mobileMenuOpen(),
 								"border-r -translate-x-full":
@@ -300,48 +167,20 @@ export const Navigation: Component = () => {
 							},
 						)}
 					>
-						<div class="h-full flex flex-col overflow-y-auto scrollbar">
-							<div class="px-6 pt-4">
-								<div class="flex items-center justify-between">
-									<div class="flex items-center gap-2">
-										<NavigationLogo />
-									</div>
-									<button
-										type="button"
-										class="h-9 w-9 rounded-lg text-title/80 hover:text-title flex items-center justify-center transition-colors"
-										aria-label={T()("common.close")}
-										onClick={() => setMobileMenuOpen(false)}
-									>
-										<FaSolidXmark class="size-3.5" />
-									</button>
-								</div>
-							</div>
-							<NavigationMenuContent
-								class="flex-1 h-full"
-								onNavigate={() => setMobileMenuOpen(false)}
-								logoutPending={logout.action.isPending}
-								onLogout={() => logout.action.mutate({})}
-								user={user() || undefined}
-								canReadDocuments={showCollections()}
-								canReadPublishingOverview={showPublishingOverview()}
-								canReadPublishRequests={showPublishRequests()}
-								canReadMedia={canReadMedia()}
-								canReadEmails={canReadEmails()}
-								canReadUsers={canReadUsers()}
-								canReadRoles={canReadRoles()}
-								canReadJobs={canReadJobs()}
-								canReadAiUsage={canReadAiUsage()}
-								canUseAgent={canUseAgent()}
-								canManageConnection={canManageConnection()}
-								canReadIntegrations={canReadIntegrations()}
-								canReadSystemOverview={canReadSystemOverview()}
-								showAccessAndPermissions={showAccessAndPermissions()}
-								collectionsIsLoading={collectionsIsLoading()}
-								collectionsIsError={collectionsIsError()}
-								multiCollections={multiCollections()}
-								singleCollections={singleCollections()}
-							/>
+						<div class="px-6 pt-4 pb-3 flex items-center justify-between">
+							<NavigationLogo />
+							<button
+								type="button"
+								class="size-9 rounded-lg text-title/80 hover:text-title flex items-center justify-center transition-colors outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								aria-label={T()("common.close")}
+								onClick={() => setMobileMenuOpen(false)}
+							>
+								<FaSolidXmark class="size-3.5" />
+							</button>
 						</div>
+						<NavigationMenuContent
+							onNavigate={() => setMobileMenuOpen(false)}
+						/>
 					</div>
 				</div>
 			</div>

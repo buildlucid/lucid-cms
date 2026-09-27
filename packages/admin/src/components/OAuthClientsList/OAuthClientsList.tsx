@@ -151,7 +151,7 @@ export const OAuthClientsList: Component<{
 								canCreate() && clients.isSuccess && clients.data.data.length > 0
 							}
 						>
-							<div class="-mt-1 flex justify-start">
+							<div class="mt-2 flex justify-start">
 								<Button
 									type="button"
 									variant="primary"

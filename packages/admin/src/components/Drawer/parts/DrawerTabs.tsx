@@ -42,7 +42,7 @@ export const DrawerTabs: Component<DrawerTabsProps> = (props) => {
 	return (
 		<div
 			data-drawer-tabs
-			class={classNames("md:border-b md:border-border", props.class)}
+			class={classNames("mt-3 md:border-b md:border-border", props.class)}
 		>
 			<div class="md:hidden">
 				<Select

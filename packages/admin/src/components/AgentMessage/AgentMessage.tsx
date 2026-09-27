@@ -11,7 +11,6 @@ import {
 	createSignal,
 	For,
 	Match,
-	onCleanup,
 	Show,
 	Switch,
 } from "solid-js";
@@ -19,7 +18,7 @@ import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
 import { layoutOf } from "@/components/AgentWidget/slots";
 import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
-import { copyValue } from "@/components/Copy/copyValue";
+import { createCopy } from "@/components/Copy/copyValue";
 import T from "@/translations";
 import { finishTool, isToolRow, messageText } from "@/utils/agent-chat";
 import dateHelpers from "@/utils/date-helpers";
@@ -55,8 +54,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// State & Hooks
 	//* runs of tool calls that are open, by the id of their first call
 	const [expanded, setExpanded] = createSignal<ReadonlySet<string>>(new Set());
-	const [copied, setCopied] = createSignal(false);
-	let copiedTimer: ReturnType<typeof setTimeout> | undefined;
+	const [copied, copy] = createCopy(() => messageText(props.message));
 
 	// ----------------------------------------
 	// Memos
@@ -87,12 +85,6 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 		if (!isToolRow(part) || leadOf(index) === index) return true;
 		return expanded().has(leadId(index) ?? "");
 	};
-	const copy = () => {
-		copyValue(text());
-		setCopied(true);
-		clearTimeout(copiedTimer);
-		copiedTimer = setTimeout(() => setCopied(false), 2000);
-	};
 	const toggle = (id: string | undefined) => {
 		if (!id) return;
 		setExpanded((open) => {
@@ -103,17 +95,13 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	};
 
 	// ----------------------------------------
-	// Effects
-	onCleanup(() => clearTimeout(copiedTimer));
-
-	// ----------------------------------------
 	// Render
 	return (
 		<div class="flex flex-col">
 			<Show
 				when={!user()}
 				fallback={
-					<div class="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-input px-4 py-2.5">
+					<div class="ms-auto max-w-[85%] rounded-2xl rounded-ee-md bg-input px-4 py-2.5">
 						<For each={props.message.parts}>
 							{(part) =>
 								part.type === "text" ? (
@@ -186,7 +174,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 				<div
 					class={classnames(
 						"mt-1.5 flex items-center gap-1 text-xs text-muted",
-						user() ? "self-end" : "-ml-1 self-start",
+						user() ? "self-end" : "-ms-1 self-start",
 					)}
 				>
 					<Show when={props.message.createdAt}>
@@ -205,7 +193,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 						class="flex size-6 items-center justify-center rounded-md transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 						aria-label={T()("agent.message.copy")}
 						title={T()("agent.message.copy")}
-						onClick={copy}
+						onClick={() => void copy()}
 					>
 						<Show when={copied()} fallback={<FaSolidCopy size={11} />}>
 							<FaSolidCheck size={11} class="text-success" />

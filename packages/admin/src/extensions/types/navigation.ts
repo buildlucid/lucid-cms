@@ -11,6 +11,7 @@ export type AdminNavigationIcon =
 	| "media"
 	| "users"
 	| "overview"
+	| "usage"
 	| "roles"
 	| "email"
 	| "logout"

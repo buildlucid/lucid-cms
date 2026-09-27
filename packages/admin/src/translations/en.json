@@ -1073,7 +1073,7 @@
 	"oauth.consent.scopes.reduced.multiple": "{{count}} requested scopes are excluded from this connection. Review them below.",
 	"oauth.consent.scopes.none": "This identity cannot grant any of the requested capabilities.",
 	"oauth.consent.security.notice": "Only continue if you trust {{hostname}}. Lucid never shares your password with this application.",
-	"oauth.consent.allow.action": "Allow connection",
+	"oauth.consent.allow.action": "Allow Connection",
 	"oauth.consent.error.title": "This connection request is no longer available",
 	"oauth.consent.error.description": "It may have expired, already been completed, or been replaced by a newer request.",
 	"oauth.consent.error.scopes.title": "This application requested unavailable access",
@@ -1453,7 +1453,6 @@
 	"ai.usage.connection.warning.title": "Connect Lucid to enable AI services",
 	"ai.usage.connection.warning.description": "You can still review usage, but generation features require an active Lucid connection.",
 	"ai.usage.connection.manage.action": "Manage Connection",
-	"ai.usage.connection.pricing.action": "View AI Plans",
 	"ai.usage.features.custom.field.input.generate": "Field Generation",
 	"ai.usage.features.agent.chat": "Agent Chat",
 	"ai.usage.features.agent.compact": "Conversation Compaction",
@@ -1652,6 +1651,7 @@
 	"agent.home.empty.description": "Ask the agent something to start your first chat.",
 	"agent.composer.placeholder": "Ask the agent anything…",
 	"agent.composer.placeholder.busy": "Add a follow-up…",
+	"agent.composer.placeholder.unreachable": "Lucid could not be reached. Select Model to try again.",
 	"agent.composer.placeholder.answer": "Answer the agent…",
 	"agent.composer.label": "Message the agent",
 	"agent.composer.hint.busy": "Enter to queue · ⌘/Ctrl + Enter to steer",
@@ -1818,7 +1818,7 @@
 	"agent.models.unavailable": "Models could not be loaded.",
 	"agent.models.unavailable.connection": "Connect this CMS to Lucid to choose a model. The saved model is kept.",
 	"agent.models.removed": "This model is no longer offered, so the next reply uses the default.",
-	"agent.models.retry": "Try again",
+	"agent.models.retry.hint": "Models could not be loaded. Select to try again.",
 	"agent.unavailable.no-connection.title": "Connect To Lucid To Use The Agent",
 	"agent.unavailable.no-connection.message": "Your chats and routines are still here. Connect this CMS to Lucid to send messages and run routines.",
 	"agent.unavailable.connection-revoked.title": "The Lucid Connection Was Revoked",
@@ -1831,5 +1831,7 @@
 	"agent.interaction.waiting": "Waiting for your response…",
 	"agent.routine.section.task.title": "Model & instructions",
 	"agent.routine.section.task.description": "Choose the model each run uses and describe what it should do.",
-	"agent.routine.section.schedule.description": "Choose when the routine runs, or pause it."
+	"agent.routine.section.schedule.description": "Choose when the routine runs, or pause it.",
+	"navigation.menu.open": "Open menu",
+	"navigation.section.current": "Contains the current page"
 }

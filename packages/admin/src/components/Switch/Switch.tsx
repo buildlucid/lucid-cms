@@ -12,6 +12,7 @@ import {
 } from "solid-js";
 import Field from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
+import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import T from "@/translations";
 
 export interface SwitchProps extends JSX.AriaAttributes {
@@ -84,6 +85,7 @@ const Switch: Component<SwitchProps> = (props) => {
 	let overlayRef: HTMLSpanElement | undefined;
 	const [_inputFocus, setInputFocus] = createSignal(false);
 	const [overlayStyle, setOverlayStyle] = createSignal({});
+	const interfaceDirection = useInterfaceDirection();
 
 	// ----------------------------------------
 	// Functions
@@ -91,9 +93,10 @@ const Switch: Component<SwitchProps> = (props) => {
 	const updateOverlayPosition = () => {
 		if (!falseSpanRef || !trueSpanRef || !overlayRef) return;
 		const activeSpan = props.value ? trueSpanRef : falseSpanRef;
+		//* measured from the active option, as the options swap sides in RTL
 		setOverlayStyle({
 			width: `${Math.max(activeSpan.offsetWidth - OVERLAY_INSET * 2, 0)}px`,
-			transform: `translateX(${props.value ? falseSpanRef.offsetWidth : 0}px)`,
+			transform: `translateX(${activeSpan.offsetLeft}px)`,
 			left: `${OVERLAY_INSET}px`,
 		});
 	};
@@ -106,6 +109,7 @@ const Switch: Component<SwitchProps> = (props) => {
 
 	createEffect(() => {
 		props.value;
+		interfaceDirection.isRTL();
 		updateOverlayPosition();
 	});
 

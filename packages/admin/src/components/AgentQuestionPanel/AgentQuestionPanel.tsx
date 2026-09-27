@@ -142,7 +142,7 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 									type="button"
 									disabled={submitting()}
 									class={classnames(
-										"flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-left transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60",
+										"flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-start transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60",
 										{ "bg-card-hover": active() === index() },
 									)}
 									aria-current={active() === index() || undefined}
@@ -158,7 +158,7 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 									</span>
 									<FaSolidArrowRight
 										size={12}
-										class={classnames("mr-1 shrink-0 text-muted", {
+										class={classnames("me-1 shrink-0 text-muted", {
 											invisible: active() !== index(),
 										})}
 									/>

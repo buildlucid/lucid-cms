@@ -75,7 +75,7 @@ const AgentToolCall: Component<{
 			<button
 				type="button"
 				class={classnames(
-					"group -ml-2 flex min-w-0 items-center gap-2 rounded-md px-2 py-1 text-left text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+					"group -ms-2 flex min-w-0 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
 					props.selected
 						? "bg-card text-title"
 						: "text-muted hover:bg-card hover:text-body",

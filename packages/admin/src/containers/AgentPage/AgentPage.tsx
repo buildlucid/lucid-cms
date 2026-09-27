@@ -14,6 +14,7 @@ import AgentComposer, {
 import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
 import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import {
@@ -56,6 +57,8 @@ const AgentPage: Component = () => {
 	const agent = createMemo(
 		() => agents().find((agent) => agent.key === agentKey()) ?? agents()[0],
 	);
+	//* shares the model picker's query; chat waits for it as it needs the same Lucid connection
+	const models = api.agent.useGetModels({ agentKey: () => agent()?.key });
 	const name = createMemo(() => {
 		const user = userStore.get.user;
 		return user?.firstName || user?.username;
@@ -65,7 +68,7 @@ const AgentPage: Component = () => {
 	// Functions
 	const start = (text: string) => {
 		const selected = agent();
-		if (!selected || unavailable()) return false;
+		if (!selected || unavailable() || !models.isSuccess) return false;
 		navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
 			state: {
 				message: text,
@@ -108,7 +111,12 @@ const AgentPage: Component = () => {
 									}}
 									size="lg"
 									autofocus={true}
-									placeholder={T()("agent.composer.placeholder")}
+									disabled={!models.isSuccess}
+									placeholder={T()(
+										models.isError
+											? "agent.composer.placeholder.unreachable"
+											: "agent.composer.placeholder",
+									)}
 									draftKey="new"
 									onSubmit={start}
 									controls={

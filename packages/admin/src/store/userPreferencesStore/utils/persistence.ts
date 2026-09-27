@@ -45,6 +45,8 @@ export type UserPreferenceState = {
 	preferences: {
 		autoSaveEnabled?: boolean;
 		collections: Record<string, CollectionPreferenceState>;
+		/** Open state of navigation groups, keyed by group key. Unset means open. */
+		navigationGroups: Record<string, boolean>;
 		sections: Partial<Record<SectionPreferenceKey, boolean>>;
 		tables: Record<string, string[]>;
 	};
@@ -69,6 +71,7 @@ export type BuilderPreferenceScope = {
 export const createEmptyPreferenceState = (): UserPreferenceState => ({
 	preferences: {
 		collections: {},
+		navigationGroups: {},
 		sections: {},
 		tables: {},
 	},
@@ -161,6 +164,16 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 					continue;
 				}
 				normalized.preferences.sections[key as SectionPreferenceKey] = open;
+			}
+		}
+
+		if (isObjectRecord(preferences.navigationGroups)) {
+			for (const [groupKey, open] of Object.entries(
+				preferences.navigationGroups,
+			)) {
+				if (typeof open === "boolean") {
+					normalized.preferences.navigationGroups[groupKey] = open;
+				}
 			}
 		}
 

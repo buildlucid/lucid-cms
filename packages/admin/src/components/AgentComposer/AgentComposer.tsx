@@ -272,14 +272,14 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 						</Menu.Content>
 					</Menu.Root>
 					{props.controls}
-					<div class="ml-auto flex items-center gap-0.5">
+					<div class="ms-auto flex items-center gap-0.5">
 						{props.end}
 						<Show when={props.onStop}>
 							<Button
 								shape="circle"
 								size="xs"
 								variant="secondary"
-								class="focus-visible:ring-inset mr-1"
+								class="focus-visible:ring-inset me-1"
 								onClick={() => props.onStop?.()}
 								aria-label={T()("agent.composer.stop")}
 								title={T()("agent.composer.stop")}

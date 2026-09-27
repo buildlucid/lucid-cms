@@ -1,9 +1,6 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import type { AiUsageStatus } from "@types";
-import {
-	FaSolidArrowUpRightFromSquare,
-	FaSolidTriangleExclamation,
-} from "solid-icons/fa";
+import { FaSolidTriangleExclamation } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import { AiUsageChart } from "@/components/AiUsageChart/AiUsageChart";
 import { AiUsageList } from "@/components/AiUsageList/AiUsageList";
@@ -12,7 +9,6 @@ import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
-import constants from "@/constants";
 import useQueryState, {
 	numberFilter,
 	pagination,
@@ -89,16 +85,6 @@ const SystemAiUsagePage: Component = () => {
 									size="sm"
 								>
 									{T()("ai.usage.connection.manage.action")}
-								</Link>
-								<Link
-									href={constants.lucidRemote.pricing}
-									target="_blank"
-									rel="noreferrer"
-									variant="primary"
-									size="sm"
-								>
-									{T()("ai.usage.connection.pricing.action")}
-									<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
 								</Link>
 							</div>
 						</section>

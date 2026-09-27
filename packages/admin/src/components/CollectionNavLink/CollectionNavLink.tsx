@@ -1,37 +1,32 @@
 import type { Collection } from "@types";
-import { type Component, createMemo } from "solid-js";
+import type { Component } from "solid-js";
 import { NavigationLink } from "@/components/NavigationLink/NavigationLink";
 import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
-interface CollectionNavLinkProps {
+export const getCollectionNavigationHref = (collection: Collection) => {
+	if (collection.mode === "multiple") {
+		return `/lucid/collections/${collection.key}`;
+	}
+
+	return collection.documentId
+		? getDocumentRoute("edit", {
+				collectionKey: collection.key,
+				documentId: collection.documentId,
+			})
+		: getDocumentRoute("create", {
+				collectionKey: collection.key,
+			});
+};
+
+const CollectionNavLink: Component<{
 	collection: Collection;
-}
-
-const CollectionNavLink: Component<CollectionNavLinkProps> = (props) => {
-	// ----------------------------------
-	// Memos
-	const href = createMemo(() => {
-		if (props.collection.mode === "multiple") {
-			return `/lucid/collections/${props.collection.key}`;
-		}
-
-		return props.collection.documentId
-			? getDocumentRoute("edit", {
-					collectionKey: props.collection.key,
-					documentId: props.collection.documentId,
-				})
-			: getDocumentRoute("create", {
-					collectionKey: props.collection.key,
-				});
-	});
-
+}> = (props) => {
 	// ----------------------------------
 	// Render
 	return (
 		<NavigationLink
-			type="link"
-			href={href()}
+			href={getCollectionNavigationHref(props.collection)}
 			icon={
 				props.collection.mode === "multiple"
 					? "collection-multiple"

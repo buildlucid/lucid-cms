@@ -173,6 +173,10 @@ export const createUserPreferencesStore = (
 			return state.preferences.tables[tableKey];
 		},
 
+		getNavigationGroupOpen(groupKey: string) {
+			return state.preferences.navigationGroups[groupKey];
+		},
+
 		/** Returns the saved open state for a named section. */
 		getSectionOpen(section: SectionPreferenceKey) {
 			return state.preferences.sections[section];
@@ -269,6 +273,13 @@ export const createUserPreferencesStore = (
 			}
 			updatePreferences((preferenceState) => {
 				preferenceState.preferences.tables[tableKey] = hiddenColumns;
+			});
+		},
+
+		setNavigationGroupOpen(groupKey: string, open: boolean) {
+			if (state.preferences.navigationGroups[groupKey] === open) return;
+			updatePreferences((preferenceState) => {
+				preferenceState.preferences.navigationGroups[groupKey] = open;
 			});
 		},
 

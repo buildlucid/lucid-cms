@@ -31,7 +31,7 @@ const AgentInteractionBar: Component<{
 			<div id={props.id} class="min-w-0 grow text-sm leading-6 text-subtitle">
 				{props.title}
 			</div>
-			<div class="-my-0.5 -mr-1.5 flex shrink-0 items-center gap-1">
+			<div class="-my-0.5 -me-1.5 flex shrink-0 items-center gap-1">
 				<Show when={props.details}>
 					{(details) => (
 						<Button

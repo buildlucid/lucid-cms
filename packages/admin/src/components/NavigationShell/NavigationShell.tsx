@@ -71,7 +71,7 @@ const NavigationShell: Component<{
 				<Navigation />
 				<main
 					class={classNames(
-						"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-236px)]",
+						"relative flex flex-col md:mt-4 px-4 md:px-0 w-full min-w-0 md:min-w-[calc(100vw-var(--spacing-sidebar)-(--spacing(4)))]",
 						{
 							"md:pr-4": interfaceDirection.isLTR(),
 							"md:pl-4": interfaceDirection.isRTL(),

@@ -97,7 +97,7 @@ const AgentTranscriptRow: Component<AgentTranscriptRowProps> = (props) => {
 			<Show
 				when={expandable()}
 				fallback={
-					<div class="-ml-2 flex max-w-full items-center gap-2 px-2 py-1 text-left text-xs text-muted">
+					<div class="-ms-2 flex max-w-full items-center gap-2 px-2 py-1 text-start text-xs text-muted">
 						{heading()}
 					</div>
 				}
@@ -105,7 +105,7 @@ const AgentTranscriptRow: Component<AgentTranscriptRowProps> = (props) => {
 				<button
 					type="button"
 					class={classnames(
-						"group -ml-2 flex max-w-full items-center gap-2 rounded-md px-2 py-1 text-left text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+						"group -ms-2 flex max-w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
 						selected()
 							? "bg-card text-title"
 							: "text-muted hover:bg-card hover:text-body",
@@ -132,7 +132,7 @@ const AgentTranscriptRow: Component<AgentTranscriptRowProps> = (props) => {
 						<div
 							id={id}
 							hidden={!open()}
-							class="mt-1 mb-1 ml-1.5 min-w-0 self-stretch border-l border-border pl-4"
+							class="mt-1 mb-1 ms-1.5 min-w-0 self-stretch border-s border-border ps-4"
 						>
 							<Show when={open()}>
 								{props.renderPanel?.() ?? props.children}

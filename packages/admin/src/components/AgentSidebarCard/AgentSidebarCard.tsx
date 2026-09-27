@@ -28,7 +28,7 @@ const AgentSidebarCard: ParentComponent<{
 				</h3>
 				<button
 					type="button"
-					class="-mt-0.5 -mr-1 flex size-6 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+					class="-mt-0.5 -me-1 flex size-6 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 					aria-label={T()("common.close")}
 					title={T()("common.close")}
 					onClick={() => props.onClose()}

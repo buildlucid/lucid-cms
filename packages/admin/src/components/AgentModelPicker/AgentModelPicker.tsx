@@ -1,19 +1,21 @@
 import { Slider as KobalteSlider, Popover } from "@kobalte/core";
 import type { AiModelSelection } from "@types";
 import classnames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { FaSolidChevronDown, FaSolidRotate } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
 	For,
+	Match,
 	on,
 	Show,
+	Switch,
 } from "solid-js";
 import { composerTriggerClasses } from "@/components/AgentComposer/AgentComposer";
-import Button from "@/components/Button/Button";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
+import Spinner from "@/components/Spinner/Spinner";
 import api from "@/services/api";
 import T from "@/translations";
 import { effortFor, selectModel } from "@/utils/agent-models";
@@ -35,6 +37,7 @@ const AgentModelPicker: Component<{
 		routineId: () => props.routineId,
 	});
 
+	const [open, setOpen] = createSignal(false);
 	//* choices made while open are kept here and saved on close, so the chat's model changes once
 	const [draft, setDraft] = createSignal<AiModelSelection>();
 	//* shown on the trigger until the saved value arrives, so it does not flick back while saving
@@ -42,7 +45,10 @@ const AgentModelPicker: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const catalog = createMemo(() => query.data?.data);
+	//* read only once loaded, as reading data while pending suspends the whole page
+	const catalog = createMemo(() =>
+		query.isSuccess ? query.data.data : undefined,
+	);
 	const saved = createMemo(() =>
 		resolve(committed() ?? props.value ?? catalog()?.default),
 	);
@@ -50,6 +56,8 @@ const AgentModelPicker: Component<{
 		const current = draft();
 		return current ? resolve(current) : saved();
 	});
+	//* only the first load, so background refreshes do not show a spinner
+	const loading = createMemo(() => query.isFetching && !query.isSuccess);
 	const efforts = createMemo(() => shown().model?.reasoningEfforts ?? []);
 	const effortIndex = createMemo(() => {
 		const current = shown().effort;
@@ -99,22 +107,29 @@ const AgentModelPicker: Component<{
 		<Popover.Root
 			placement="top-end"
 			gutter={8}
-			onOpenChange={(open) => {
-				if (!open) commit();
+			open={open()}
+			onOpenChange={(next) => {
+				//* with nothing to choose from, the trigger retries instead of opening
+				if (next && query.isError) {
+					void query.refetch();
+					return;
+				}
+				setOpen(next);
+				if (!next) commit();
 			}}
 		>
 			<Popover.Trigger
 				class={classnames(
 					composerTriggerClasses,
-					"mr-1 min-w-0 max-w-56 px-2 disabled:opacity-50",
+					"me-1 min-w-0 max-w-56 px-2 disabled:opacity-50",
 				)}
 				aria-label={T()("agent.models.label")}
 				title={
-					query.isError
-						? T()("agent.models.unavailable")
+					query.isError && !loading()
+						? T()("agent.models.retry.hint")
 						: T()("agent.models.label")
 				}
-				disabled={props.disabled || query.isPending}
+				disabled={props.disabled || query.isPending || loading()}
 			>
 				<span class="truncate">
 					{saved().model?.name ?? T()("agent.models.label")}
@@ -127,7 +142,14 @@ const AgentModelPicker: Component<{
 						</span>
 					)}
 				</Show>
-				<FaSolidChevronDown size={9} class="shrink-0" />
+				<Switch fallback={<FaSolidChevronDown size={9} class="shrink-0" />}>
+					<Match when={loading()}>
+						<Spinner size="sm" class="shrink-0 [&_svg]:size-3" />
+					</Match>
+					<Match when={query.isError}>
+						<FaSolidRotate size={9} class="shrink-0" />
+					</Match>
+				</Switch>
 			</Popover.Trigger>
 			<Popover.Portal>
 				<Popover.Content
@@ -139,19 +161,6 @@ const AgentModelPicker: Component<{
 						(event.currentTarget as HTMLElement | null)?.focus();
 					}}
 				>
-					<Show when={query.isError}>
-						<div class="flex shrink-0 items-center justify-between gap-3 p-3 text-sm text-body">
-							{T()("agent.models.unavailable")}
-							<Button
-								type="button"
-								size="sm"
-								variant="outline"
-								onClick={() => void query.refetch()}
-							>
-								{T()("agent.models.retry")}
-							</Button>
-						</div>
-					</Show>
 					<Show when={catalog()}>
 						{(current) => (
 							<div class="min-h-0 overflow-y-auto p-1.5 scrollbar">
@@ -168,7 +177,7 @@ const AgentModelPicker: Component<{
 										{(option) => (
 											<div
 												class={classnames(
-													"flex items-center gap-2 rounded-md pr-1.5 transition-colors has-focus-visible:ring-1 has-focus-visible:ring-inset has-focus-visible:ring-primary",
+													"flex items-center gap-2 rounded-md pe-1.5 transition-colors has-focus-visible:ring-1 has-focus-visible:ring-inset has-focus-visible:ring-primary",
 													option.id === shown().model?.id
 														? "bg-input text-title"
 														: "text-body hover:bg-card-hover hover:text-subtitle",
