@@ -109,7 +109,9 @@ const runModelTurn: ServiceFn<
 	const sent = checkpoint.messages.length;
 	const response = await streamModelTurn(context, {
 		requestId: checkpoint.requestId,
+		sessionId: run.conversation_id,
 		instructions: capabilities.instructions,
+		selection: checkpoint.selection,
 		messages: modelMessages(checkpoint.messages),
 		tools: capabilities.definitions,
 		signal: AbortSignal.any([session.signal, stop.signal]),
@@ -201,6 +203,7 @@ const runModelTurn: ServiceFn<
 		sourceId: checkpoint.messageId,
 		role: "assistant",
 		content: textFromParts(checkpoint.parts),
+		reasoningDetails: response.data.reasoningDetails,
 		...(checkpoint.calls.length ? { toolCalls: checkpoint.calls } : {}),
 	});
 	checkpoint.measured = {

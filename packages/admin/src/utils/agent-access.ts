@@ -1,6 +1,7 @@
-import type { Agent } from "@types";
+import type { Agent, AgentRoutine } from "@types";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
+import T from "@/translations";
 
 /** The agents the current user can use or manage. Reactive when read inside a memo or effect. */
 export const getAgentAccess = () => {
@@ -19,8 +20,30 @@ export const getAgentAccess = () => {
 export const getAgentName = (key: string) =>
 	siteStore.get.ai.agents.find((agent) => agent.key === key)?.name ?? key;
 
-/** The agent cannot run until the CMS is connected to Lucid. Saved chats still load. */
-export const isAgentDisconnected = () => {
+export type AgentUnavailableReason = "no-connection" | "connection-revoked";
+
+/**
+ * Why agents cannot run right now, or undefined when they can. Only running is
+ * blocked: chats and routines can still be viewed, edited and deleted.
+ */
+export const getAgentUnavailableReason = ():
+	| AgentUnavailableReason
+	| undefined => {
 	const connection = siteStore.get.connection;
-	return connection !== null && connection.status !== "connected";
+	if (!connection || connection.status === "disconnected") {
+		return "no-connection";
+	}
+	if (connection.status === "revoked") return "connection-revoked";
+	return undefined;
+};
+
+/**
+ * Whether a routine is paused, and why when it is only paused for the connection.
+ * Display only: its `enabled` setting is kept, so it resumes once agents can run.
+ */
+export const getRoutinePause = (routine: Pick<AgentRoutine, "enabled">) => {
+	if (!routine.enabled) return { paused: true, reason: undefined };
+	return getAgentUnavailableReason()
+		? { paused: true, reason: T()("agent.routine.status.unavailable") }
+		: { paused: false, reason: undefined };
 };

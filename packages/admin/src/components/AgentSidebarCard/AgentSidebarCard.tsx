@@ -18,7 +18,7 @@ const AgentSidebarCard: ParentComponent<{
 		<aside
 			aria-labelledby={id}
 			class={classnames(
-				"flex flex-col gap-5 rounded-xl border border-border bg-card p-4 shadow-lg animate-slide-from-right-in md:p-5",
+				"flex flex-col gap-5 rounded-xl border border-border bg-card p-4 animate-slide-from-right-in md:p-5",
 				props.class,
 			)}
 		>

@@ -10,6 +10,7 @@ import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { createRemoteError } from "../../../libs/lucid-remote/client.js";
 import { getLucidRemoteConfigFromEnv } from "../../../libs/lucid-remote/origin.js";
+import type { AiModelSelection } from "../../../types/response.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type {
 	ServiceFn,
@@ -29,6 +30,10 @@ const streamModelTurn: ServiceFn<
 	[
 		{
 			requestId: string;
+			/** The conversation, so the Lucid service can group usage per chat. */
+			sessionId: string;
+			/** Resolved when the run starts, so it is only missing if that step was skipped. */
+			selection: AiModelSelection | undefined;
 			purpose?: "compact";
 			instructions: string;
 			messages: ModelMessage[];
@@ -45,8 +50,23 @@ const streamModelTurn: ServiceFn<
 	{
 		usage: Extract<ModelEvent, { type: "finish" }>["usage"];
 		connectionId: number;
+		reasoningDetails?: Extract<
+			ModelEvent,
+			{ type: "finish" }
+		>["reasoningDetails"];
 	}
 > = async (context, input) => {
+	if (!input.selection) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 500,
+				message: copy("server:agent.models.unavailable"),
+			},
+		};
+	}
+
 	const token = await getAccessToken(context, {});
 	if (token.error) return token;
 	if (input.onRequest) {
@@ -74,6 +94,8 @@ const streamModelTurn: ServiceFn<
 				},
 				body: JSON.stringify({
 					requestId: input.requestId,
+					sessionId: input.sessionId,
+					selection: input.selection,
 					...(input.purpose ? { purpose: input.purpose } : {}),
 					instructions: input.instructions,
 					messages: input.messages,
@@ -189,6 +211,7 @@ const streamModelTurn: ServiceFn<
 			error: undefined,
 			data: {
 				usage: finish.usage,
+				reasoningDetails: finish.reasoningDetails,
 				connectionId: token.data.lucidRemoteConnectionId,
 			},
 		};

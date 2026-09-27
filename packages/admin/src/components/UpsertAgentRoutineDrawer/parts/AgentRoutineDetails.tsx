@@ -1,11 +1,31 @@
 import type { AgentRoutine } from "@types";
-import type { Component } from "solid-js";
+import { type Component, createMemo } from "solid-js";
 import DetailsList from "@/components/DetailsList/DetailsList";
+import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 
 const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const models = api.agent.useGetModels({
+		agentKey: () => props.routine.agentKey,
+		routineId: () => props.routine.id,
+	});
+
+	// ----------------------------------------
+	// Memos
+	//* the routine's model is the catalogue default when a routine is given
+	const model = createMemo(() => {
+		const catalog = models.data?.data;
+		const modelId =
+			props.routine.modelSelection?.modelId ?? catalog?.default.modelId;
+		return (
+			catalog?.models.find((model) => model.id === modelId)?.name ?? modelId
+		);
+	});
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -16,6 +36,10 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 					{
 						label: T()("agent.select.label"),
 						value: getAgentName(props.routine.agentKey),
+					},
+					{
+						label: T()("agent.models.label"),
+						value: model() ?? T()("agent.models.default.plain"),
 					},
 					{
 						label: T()("common.schedule"),

@@ -39,7 +39,17 @@ const group: AccessGroup = {
 const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 	collections: [],
 	access: groups.map((value) => accessGroupSchema.parse(value)),
-	ai: { enabled: true, mcp: { enabled: false }, agents: [] },
+	ai: {
+		enabled: true,
+		features: {
+			imageGeneration: true,
+			altGeneration: true,
+			customFieldGeneration: true,
+			agents: true,
+			mcp: false,
+		},
+		agents: [],
+	},
 });
 
 describe("custom access", () => {

@@ -47,6 +47,7 @@ const updateConversationController = factory.createHandlers(
 			userId: c.get("auth").id,
 			title: body.title,
 			approvalMode: body.approvalMode,
+			modelSelection: body.modelSelection,
 		});
 		if (conversation.error) throw new LucidAPIError(conversation.error);
 

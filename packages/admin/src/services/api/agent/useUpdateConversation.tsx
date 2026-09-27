@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/solid-query";
 import type {
 	AgentApprovalMode,
 	AgentConversation,
+	AiModelSelection,
 	ResponseBody,
 } from "@types";
 import { queryKeys } from "@/services/query-keys";
@@ -11,7 +12,11 @@ import serviceHelpers from "@/utils/service-helpers";
 
 type Params = {
 	id: string;
-	body: { title?: string; approvalMode?: AgentApprovalMode };
+	body: {
+		title?: string;
+		approvalMode?: AgentApprovalMode;
+		modelSelection?: AiModelSelection;
+	};
 };
 
 const useUpdateConversation = (props?: { onSuccess?: () => void }) => {

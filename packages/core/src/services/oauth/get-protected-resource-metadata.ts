@@ -1,3 +1,4 @@
+import { isAiFeatureEnabled } from "../../libs/config/ai-features.js";
 import { ExternalScopes } from "../../libs/permission/external-scopes.js";
 import { getValidExternalScopes } from "../../libs/permission/scopes.js";
 import { getMcpToolRegistry } from "../../libs/tools/registry.js";
@@ -10,10 +11,7 @@ const getProtectedResourceMetadata: ServiceFn<
 	[{ resource: OAuthResource }],
 	OAuthProtectedResourceMetadataResponse
 > = async (context, input) => {
-	if (
-		input.resource === "mcp" &&
-		!(context.config.ai.enabled && context.config.ai.mcp.enabled)
-	) {
+	if (input.resource === "mcp" && !isAiFeatureEnabled(context.config, "mcp")) {
 		return {
 			error: { type: "basic", status: 404 },
 			data: undefined,

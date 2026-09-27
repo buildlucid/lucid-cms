@@ -8,6 +8,7 @@ export interface TablePillCellProps {
 	text?: string | number | null;
 	/** @default "neutral" */
 	variant?: PillProps["variant"];
+	tooltip?: string;
 	class?: string;
 }
 
@@ -19,7 +20,9 @@ const TablePillCell: Component<TablePillCellProps> = (props) => {
 		<TableCell column={props.column} class={props.class}>
 			<Switch>
 				<Match when={props.text !== undefined}>
-					<Pill variant={props.variant || "neutral"}>{props.text}</Pill>
+					<Pill variant={props.variant || "neutral"} tooltip={props.tooltip}>
+						{props.text}
+					</Pill>
 				</Match>
 				<Match when={props.text === undefined}>{"-"}</Match>
 			</Switch>

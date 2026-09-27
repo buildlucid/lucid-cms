@@ -45,6 +45,7 @@ const createRoutineController = factory.createHandlers(
 			timezone: body.timezone,
 			enabled: body.enabled,
 			tools: body.tools,
+			modelSelection: body.modelSelection,
 		});
 		if (routine.error) throw new LucidAPIError(routine.error);
 

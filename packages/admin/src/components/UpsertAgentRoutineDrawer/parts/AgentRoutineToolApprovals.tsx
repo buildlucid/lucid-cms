@@ -2,6 +2,7 @@ import type { Agent, AgentRoutine } from "@types";
 import { FaSolidArrowRotateLeft } from "solid-icons/fa";
 import { type Component, createMemo, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
+import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import Select from "@/components/Select/Select";
 import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants";
 import T, { translateAdminCopy } from "@/translations";
@@ -51,34 +52,32 @@ const AgentRoutineToolApprovals: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<section id="agent-routine-tool-approvals" class="w-full">
-			<div class="mb-2 flex items-start justify-between gap-3">
-				<div>
-					<h3 class="text-base font-medium text-title">
-						{T()("agent.routine.approvals.title")}
-					</h3>
-					<p class="mt-1 text-sm text-muted">
-						{T()("agent.routine.approvals.description")}
-						<Show when={hasInteractive()}>
-							{` ${T()("agent.routine.approvals.interactive")}`}
-						</Show>
-					</p>
-				</div>
-				<Show when={!props.disabled && Object.keys(props.value).length > 0}>
-					<Button
-						type="button"
-						variant="ghost"
-						size="xs"
-						shape="square"
-						class="shrink-0"
-						title={T()("agent.routine.approvals.reset")}
-						aria-label={T()("agent.routine.approvals.reset")}
-						onClick={() => props.onChange({})}
-					>
-						<FaSolidArrowRotateLeft size={12} />
-					</Button>
-				</Show>
-			</div>
+		<section id="agent-routine-tool-approvals" class="mt-2 w-full">
+			<SectionHeading
+				level={3}
+				title={T()("agent.routine.approvals.title")}
+				description={`${T()("agent.routine.approvals.description")}${
+					hasInteractive()
+						? ` ${T()("agent.routine.approvals.interactive")}`
+						: ""
+				}`}
+				actions={
+					<Show when={!props.disabled && Object.keys(props.value).length > 0}>
+						<Button
+							type="button"
+							variant="ghost"
+							size="xs"
+							shape="square"
+							class="shrink-0"
+							title={T()("agent.routine.approvals.reset")}
+							aria-label={T()("agent.routine.approvals.reset")}
+							onClick={() => props.onChange({})}
+						>
+							<FaSolidArrowRotateLeft size={12} />
+						</Button>
+					</Show>
+				}
+			/>
 			<UnavailableGrants
 				keys={unavailable()}
 				title={T()("agent.routine.approvals.unavailable.title")}
@@ -90,10 +89,11 @@ const AgentRoutineToolApprovals: Component<{
 				<ul class="divide-y divide-border">
 					<For each={props.tools}>
 						{(tool) => (
-							<li class="flex items-center justify-between gap-3 px-3 py-2">
+							<li class="group flex items-center justify-between gap-3 px-3 py-2">
 								<label
 									for={`routine-tool-${tool.name}`}
-									class="min-w-0 truncate text-sm text-body"
+									//* matches FormLabel, which turns primary while its field is focused
+									class="min-w-0 truncate text-sm text-body transition-colors duration-200 ease-in-out group-focus-within:text-primary-hover"
 								>
 									{translateAdminCopy(tool.title)}
 								</label>

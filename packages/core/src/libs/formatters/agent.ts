@@ -74,6 +74,7 @@ const formatConversation = (props: {
 }): AgentConversation => ({
 	id: props.conversation.id,
 	approvalMode: props.conversation.approval_mode,
+	modelSelection: props.conversation.model_selection,
 	queuePaused: Boolean(props.conversation.queue_paused),
 	context: formatContext({
 		context: props.conversation.context,
@@ -155,6 +156,7 @@ const formatRoutine = (props: {
 	source: props.routine.source,
 	name: props.routine.name,
 	instructions: props.routine.instructions,
+	modelSelection: props.routine.model_selection,
 	tools: props.tools,
 	cron: props.routine.cron,
 	timezone: props.routine.timezone,

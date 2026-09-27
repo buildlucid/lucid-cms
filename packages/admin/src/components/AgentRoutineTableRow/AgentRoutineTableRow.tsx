@@ -1,9 +1,13 @@
 import type { AgentRoutine } from "@types";
-import { type Component, Show } from "solid-js";
+import { type Component, createMemo, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
-import { getAgentName } from "@/utils/agent-access";
+import {
+	getAgentName,
+	getAgentUnavailableReason,
+	getRoutinePause,
+} from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 
 const AgentRoutineTableRow: Component<{
@@ -16,6 +20,10 @@ const AgentRoutineTableRow: Component<{
 	onToggle: () => void;
 	onDelete: () => void;
 }> = (props) => {
+	// ----------------------------------------
+	// Memos
+	const pause = createMemo(() => getRoutinePause(props.routine));
+
 	// ----------------------------------------
 	// Render
 	return (
@@ -42,7 +50,8 @@ const AgentRoutineTableRow: Component<{
 					type: "button",
 					icon: "rotate",
 					variant: "primary",
-					disabled: props.runPending,
+					disabled:
+						props.runPending || getAgentUnavailableReason() !== undefined,
 					onClick: props.onRun,
 					excludeFromRowClick: true,
 				},
@@ -76,11 +85,12 @@ const AgentRoutineTableRow: Component<{
 			<Table.Pill
 				column="enabled"
 				text={
-					props.routine.enabled
-						? T()("agent.routine.active")
-						: T()("agent.routine.paused")
+					pause().paused
+						? T()("agent.routine.paused")
+						: T()("agent.routine.active")
 				}
-				variant={props.routine.enabled ? "success-subtle" : "warning-subtle"}
+				variant={pause().paused ? "warning-subtle" : "success-subtle"}
+				tooltip={pause().reason}
 			/>
 			<Table.Pill
 				column="source"
@@ -101,7 +111,7 @@ const AgentRoutineTableRow: Component<{
 			/>
 			<Table.Date
 				column="nextRunAt"
-				date={props.routine.enabled ? props.routine.nextRunAt : null}
+				date={pause().paused ? null : props.routine.nextRunAt}
 				includeTime={true}
 			/>
 			<Table.Cell column="lastRun" minWidth={140}>

@@ -16,6 +16,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("instructions", adapter.getDataType("text"), (col) =>
 				col.notNull(),
 			)
+			.addColumn("model_selection", adapter.getDataType("json"))
 			.addColumn("cron", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("timezone", adapter.getDataType("text"), (col) =>
 				col.notNull(),
@@ -88,6 +89,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("approval_mode", adapter.getDataType("text"), (col) =>
 				col.notNull().defaultTo("tool-defaults"),
 			)
+			.addColumn("model_selection", adapter.getDataType("json"))
 			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
 			.addColumn("agent_key", adapter.getDataType("text"), (col) =>
 				col.notNull(),

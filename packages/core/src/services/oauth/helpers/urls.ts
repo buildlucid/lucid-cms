@@ -1,3 +1,4 @@
+import { isAiFeatureEnabled } from "../../../libs/config/ai-features.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
@@ -57,8 +58,7 @@ export const isSupportedOAuthResource = (
 
 	return (
 		resource === resources.content.resource ||
-		(context.config.ai.enabled &&
-			context.config.ai.mcp.enabled &&
+		(isAiFeatureEnabled(context.config, "mcp") &&
 			resource === resources.mcp.resource)
 	);
 };

@@ -1,5 +1,9 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import {
+	aiModelCatalogSchema,
+	aiModelSelectionSchema,
+} from "../libs/agent/model-selection.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type {
 	AgentDelivery,
@@ -150,6 +154,7 @@ const agentUsageSchema = z.object({
 
 const agentConversationResponseSchema = z.object({
 	approvalMode: agentApprovalModeSchema,
+	modelSelection: aiModelSelectionSchema.nullable(),
 	queuePaused: z.boolean(),
 	inputs: z.array(agentInputSchema).optional(),
 	context: agentContextSchema
@@ -215,6 +220,7 @@ const agentRoutineResponseSchema = z.object({
 	source: agentRoutineSourceSchema,
 	name: z.string(),
 	instructions: z.string(),
+	modelSelection: aiModelSelectionSchema.nullable(),
 	tools: routineToolsSchema,
 	cron: z.string(),
 	timezone: z.string(),
@@ -239,12 +245,23 @@ const routineBody = z.object({
 	tools: routineToolsSchema.optional(),
 	name: z.string().trim().min(1).max(255),
 	instructions: z.string().trim().min(1).max(20_000),
+	/** Null uses the agent's default model. */
+	modelSelection: aiModelSelectionSchema.nullable().optional(),
 	cron: z.string().trim().min(1),
 	timezone: z.string().trim().min(1),
 	enabled: z.boolean(),
 });
 
 export const controllerSchemas = {
+	getModels: {
+		body: undefined,
+		params: z.object({ agentKey: z.string().min(1) }),
+		query: {
+			string: z.object({ routineId: z.uuid().optional() }),
+			formatted: undefined,
+		},
+		response: aiModelCatalogSchema,
+	} satisfies ControllerSchema,
 	getMultipleConversations: {
 		body: undefined,
 		query: {
@@ -289,6 +306,7 @@ export const controllerSchemas = {
 	createConversation: {
 		body: z.object({
 			approvalMode: agentApprovalModeSchema.optional(),
+			modelSelection: aiModelSelectionSchema.optional(),
 			/** Lets the admin open the chat before it is saved. */
 			id: z.uuid().optional(),
 			agentKey: z.string().min(1),
@@ -308,6 +326,7 @@ export const controllerSchemas = {
 		body: z.object({
 			title: z.string().trim().min(1).max(255).optional(),
 			approvalMode: agentApprovalModeSchema.optional(),
+			modelSelection: aiModelSelectionSchema.optional(),
 		}),
 		query: noQuery,
 		params: idParams,

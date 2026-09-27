@@ -1,4 +1,3 @@
-import { FaSolidArrowUpRightFromSquare } from "solid-icons/fa";
 import {
 	type Component,
 	createMemo,
@@ -11,7 +10,6 @@ import Button from "@/components/Button/Button";
 import DateText from "@/components/DateText/DateText";
 import DisconnectConnectionModal from "@/components/DisconnectConnectionModal/DisconnectConnectionModal";
 import InfoRow from "@/components/InfoRow/InfoRow";
-import Link from "@/components/Link/Link";
 import Pill from "@/components/Pill/Pill";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import ResetConnectionModal from "@/components/ResetConnectionModal/ResetConnectionModal";
@@ -118,7 +116,12 @@ const LucidConnection: Component = () => {
 	// Render
 	return (
 		<>
-			<QueryBoundary loading={status.isLoading} error={status.isError}>
+			{/* matches the gap between rows in an InfoRow, which this wrapper would otherwise hide */}
+			<QueryBoundary
+				loading={status.isLoading}
+				error={status.isError}
+				class="gap-2"
+			>
 				<InfoRow.Content>
 					<div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
 						<div class="min-w-0">
@@ -147,69 +150,6 @@ const LucidConnection: Component = () => {
 						</div>
 						<div class="flex shrink-0 items-center gap-2">
 							<Show when={!isConnected()}>
-								<Link
-									href={constants.lucidRemote.website}
-									target="_blank"
-									rel="noreferrer"
-									variant="outline"
-									size="sm"
-								>
-									{T()("connection.remote.visit.action")}
-									<FaSolidArrowUpRightFromSquare class="ml-1.5 size-2.5" />
-								</Link>
-							</Show>
-							<Show when={canManage()}>
-								<ActionMenu
-									actions={[
-										{
-											type: "link",
-											label: T()("connection.remote.visit.action"),
-											icon: "link",
-											href: constants.lucidRemote.website,
-											target: "_blank",
-											rel: "noreferrer",
-											sortOrder: 0,
-										},
-										{
-											type: "button",
-											label: T()("connection.verify.action"),
-											icon: "rotate",
-											onClick: () => verify.action.mutate({}),
-											permission: canManage() && isConnected(),
-											loading: verify.action.isPending,
-											sortOrder: 10,
-										},
-										{
-											type: "button",
-											label: T()("connection.reconnect.action"),
-											icon: "link",
-											onClick: () => connect.action.mutate({}),
-											permission: canManage() && isConnected(),
-											loading: connect.action.isPending,
-											sortOrder: 30,
-										},
-										{
-											type: "button",
-											label: T()("connection.disconnect.action"),
-											icon: "ban",
-											onClick: () => setDisconnectOpen(true),
-											permission: canManage() && isConnected(),
-											sortOrder: 70,
-											variant: "danger",
-										},
-										{
-											type: "button",
-											label: T()("connection.reset.action"),
-											icon: "rotate",
-											onClick: () => setResetOpen(true),
-											permission: canManage(),
-											sortOrder: 80,
-											variant: "danger",
-										},
-									]}
-								/>
-							</Show>
-							<Show when={!isConnected()}>
 								<Button
 									type="button"
 									size="sm"
@@ -221,6 +161,56 @@ const LucidConnection: Component = () => {
 									{T()("connection.connect.action")}
 								</Button>
 							</Show>
+							<ActionMenu
+								size="md"
+								actions={[
+									{
+										type: "link",
+										label: T()("connection.remote.visit.action"),
+										icon: "link",
+										href: constants.lucidRemote.website,
+										target: "_blank",
+										rel: "noreferrer",
+										sortOrder: 0,
+									},
+									{
+										type: "button",
+										label: T()("connection.verify.action"),
+										icon: "rotate",
+										onClick: () => verify.action.mutate({}),
+										permission: canManage() && isConnected(),
+										loading: verify.action.isPending,
+										sortOrder: 10,
+									},
+									{
+										type: "button",
+										label: T()("connection.reconnect.action"),
+										icon: "link",
+										onClick: () => connect.action.mutate({}),
+										permission: canManage() && isConnected(),
+										loading: connect.action.isPending,
+										sortOrder: 30,
+									},
+									{
+										type: "button",
+										label: T()("connection.disconnect.action"),
+										icon: "ban",
+										onClick: () => setDisconnectOpen(true),
+										permission: canManage() && isConnected(),
+										sortOrder: 70,
+										variant: "danger",
+									},
+									{
+										type: "button",
+										label: T()("connection.reset.action"),
+										icon: "rotate",
+										onClick: () => setResetOpen(true),
+										permission: canManage(),
+										sortOrder: 80,
+										variant: "danger",
+									},
+								]}
+							/>
 						</div>
 					</div>
 					<Show when={connection()?.errorKey}>

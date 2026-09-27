@@ -10,6 +10,8 @@ export interface Settings {
 			imageGeneration: boolean;
 			altGeneration: boolean;
 			customFieldGeneration: boolean;
+			agents: boolean;
+			mcp: boolean;
 		};
 	};
 	email?: {

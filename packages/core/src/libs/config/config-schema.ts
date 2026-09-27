@@ -106,15 +106,16 @@ const AiConfigSchema = z.strictObject({
 			imageGeneration: z.boolean().default(true),
 			altGeneration: z.boolean().default(true),
 			customFieldGeneration: z.boolean().default(true),
+			agents: z.boolean().default(true),
+			mcp: z.boolean().default(false),
 		})
 		.prefault({}),
 	mcp: z
 		.strictObject({
-			enabled: z.boolean().default(true),
 			tools: z.array(McpToolDefinitionSchema).default([]),
 			skills: z.array(SkillDefinitionSchema).default([]),
 		})
-		.default({ enabled: false, tools: [], skills: [] }),
+		.prefault({}),
 	agents: z.array(AgentDefinitionSchema).default([]),
 });
 

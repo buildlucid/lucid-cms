@@ -35,6 +35,7 @@ import storeGeneration from "../storage/store-generation.js";
 const customFieldInputGenerate: ServiceFn<
 	[
 		{
+			sessionId?: string;
 			instruction?: string;
 			guidance?: string;
 			value: unknown;
@@ -232,6 +233,7 @@ const customFieldInputGenerate: ServiceFn<
 			key: "custom-field.input.generate",
 			version: "v1",
 		},
+		sessionId: props.sessionId,
 		input,
 		outputSchema: targetField.jsonSchema,
 		context: {

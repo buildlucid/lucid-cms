@@ -37,7 +37,7 @@ const startRun: ServiceFn<
 	const AgentConversations = new AgentConversationsRepository(context.db);
 
 	const conversation = await AgentConversations.selectSingle({
-		select: ["context", "approval_mode", "routine_id"],
+		select: ["approval_mode", "routine_id", "model_selection"],
 		where: [{ key: "id", operator: "=", value: input.conversationId }],
 	});
 	if (conversation.error) return conversation;
@@ -51,9 +51,11 @@ const startRun: ServiceFn<
 			},
 		};
 	}
-	const current = conversation.data.context;
-	const { approval_mode: approvalMode, routine_id: routineId } =
-		conversation.data;
+	const {
+		approval_mode: approvalMode,
+		routine_id: routineId,
+		model_selection: modelSelection,
+	} = conversation.data;
 
 	const repaired = await AgentConversations.releaseFinishedClaims({
 		conversationId: input.conversationId,
@@ -159,9 +161,7 @@ const startRun: ServiceFn<
 				historyAfter: latest.data?.through_position ?? 0,
 				extraContext: input.context,
 				purpose: input.purpose,
-				model: current
-					? { id: current.model, tokenLimit: current.tokenLimit }
-					: undefined,
+				selection: modelSelection ?? undefined,
 				trimmed: latest.data ? true : undefined,
 				turns: 0,
 				nudges: 0,

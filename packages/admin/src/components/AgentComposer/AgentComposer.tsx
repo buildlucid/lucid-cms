@@ -59,9 +59,8 @@ export interface AgentComposerProps {
 
 const draftPrefix = "lucid:agent-draft:";
 
-/** Matches a small outline button, for menu triggers in the toolbar. */
 export const composerTriggerClasses =
-	"flex h-7 items-center justify-center gap-1.5 rounded-md border border-border bg-input text-xs text-subtitle fill-subtitle transition-colors hover:border-transparent hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary";
+	"flex h-7 items-center justify-center gap-1.5 rounded-md text-xs text-subtitle fill-subtitle transition-colors hover:bg-card-hover hover:text-title hover:fill-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary";
 
 //* storage can be unavailable, such as in a private window
 const readDraft = (key?: string) => {
@@ -255,7 +254,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 					aria-hidden="true"
 					class="pointer-events-none relative -mt-2.5 h-2.5 bg-linear-to-t from-card to-transparent"
 				/>
-				<div class="flex items-center gap-2 px-3 pb-3">
+				<div class="flex items-center gap-0.5 px-3 pb-3">
 					{props.start}
 					<Menu.Root placement="top-start">
 						<Menu.Trigger
@@ -273,21 +272,17 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 						</Menu.Content>
 					</Menu.Root>
 					{props.controls}
-					<Show when={props.queueable && props.busy}>
-						<p class="hidden truncate pl-1 text-xs text-muted sm:block">
-							{T()("agent.composer.hint.busy")}
-						</p>
-					</Show>
-					<div class="ml-auto flex items-center gap-1.5">
+					<div class="ml-auto flex items-center gap-0.5">
 						{props.end}
 						<Show when={props.onStop}>
 							<Button
 								shape="circle"
 								size="xs"
 								variant="secondary"
-								class="focus-visible:ring-inset"
+								class="focus-visible:ring-inset mr-1"
 								onClick={() => props.onStop?.()}
 								aria-label={T()("agent.composer.stop")}
+								title={T()("agent.composer.stop")}
 							>
 								<FaSolidStop size={10} />
 							</Button>
@@ -305,6 +300,11 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 							}
 							aria-label={T()(
 								props.busy ? "agent.composer.queue" : "agent.composer.send",
+							)}
+							title={T()(
+								props.busy && props.queueable
+									? "agent.composer.hint.busy"
+									: "agent.composer.send",
 							)}
 						>
 							<FaSolidArrowUp size={11} />

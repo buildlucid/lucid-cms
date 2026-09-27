@@ -1,3 +1,4 @@
+import { isAiFeatureEnabled } from "../../../libs/config/ai-features.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -9,10 +10,7 @@ const checkFeatureEnabled: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	if (
-		context.config.ai.enabled === false ||
-		context.config.ai.features[data.feature] === false
-	) {
+	if (!isAiFeatureEnabled(context.config, data.feature)) {
 		return {
 			error: {
 				type: "basic",

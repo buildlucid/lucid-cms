@@ -374,6 +374,8 @@ export const controllerSchemas = {
 	customFieldInput: {
 		body: z
 			.object({
+				/** Groups attempts made together, such as regenerating until the result fits. */
+				sessionId: z.uuid().optional(),
 				instruction: z.string().trim().min(1).max(8_000).optional(),
 				guidance: z.string().trim().min(1).optional(),
 				value: z.unknown(),
@@ -412,6 +414,8 @@ export const controllerSchemas = {
 	mediaAlt: {
 		body: z
 			.object({
+				/** Groups attempts made together, such as regenerating until the result fits. */
+				sessionId: z.uuid().optional(),
 				instruction: z.string().trim().min(1).max(8_000).optional(),
 				previousResponses: z
 					.array(
@@ -469,6 +473,8 @@ export const controllerSchemas = {
 	mediaImageGenerate: {
 		body: z
 			.object({
+				/** Groups attempts made together, such as regenerating until the result fits. */
+				sessionId: z.uuid().optional(),
 				instruction: z.string().trim().min(1).max(8_000).optional(),
 				guidance: z.string().trim().min(1).optional(),
 				previousInstructions: z

@@ -273,3 +273,9 @@ test("keeps a fresh missing request pending because creation may still be racing
 	});
 	expect(stored.data?.status).toBe("pending");
 });
+
+vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => ({
+	default: (
+		await import("../../utils/test-helpers/agent-models.js")
+	).mockAgentModels(),
+}));

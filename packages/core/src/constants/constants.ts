@@ -255,6 +255,7 @@ export default Object.freeze({
 		watchIntervalMs: 1_000,
 		staleQueuedMs: 120_000,
 		batchSize: 50,
+		modelCatalogTtlSeconds: 300,
 	} as const,
 	oauth: {
 		accessTokenExpirationSeconds: 300,

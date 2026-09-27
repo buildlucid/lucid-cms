@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import defineAgent from "../agent/define-agent.js";
 import defineRoutine from "../agent/define-routine.js";
+import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import checkAgentDefinitions from "./checks/check-agent-definitions.js";
 import ConfigSchema from "./config-schema.js";
@@ -21,14 +22,33 @@ const agent = defineAgent({
 const check = (agents: AgentDefinition[]) => () =>
 	checkAgentDefinitions({ ai: { agents } });
 
-test("MCP stays off until configured, and agents default to none", () => {
+test("MCP stays off until its feature is switched on, and agents default to none", () => {
 	const config = ConfigSchema.pick({ ai: true });
 	expect(config.parse({}).ai).toMatchObject({
-		mcp: { enabled: false, tools: [], skills: [] },
+		features: { agents: true, mcp: false },
+		mcp: { tools: [], skills: [] },
 		agents: [],
 	});
-	expect(config.parse({ ai: { mcp: {} } }).ai.mcp.enabled).toBe(true);
+	expect(config.parse({ ai: { mcp: {} } }).ai.features.mcp).toBe(false);
 	expect(config.parse({ ai: false }).ai.enabled).toBe(false);
+});
+
+test("only enabled agents are used, and only while their feature is on", () => {
+	const off = defineAgent({
+		key: "off",
+		name: "Off",
+		description: "Switched off.",
+		enabled: false,
+	});
+	const resolve = (features: { agents?: boolean }, enabled = true) =>
+		getAgents(
+			ConfigSchema.pick({ ai: true }).parse({
+				ai: { enabled, features, agents: [agent, off] },
+			}),
+		).map((item) => item.key);
+	expect(resolve({})).toEqual(["seo"]);
+	expect(resolve({ agents: false })).toEqual([]);
+	expect(resolve({}, false)).toEqual([]);
 });
 
 test("routines normalise their schedule and default to UTC", () => {

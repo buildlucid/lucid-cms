@@ -1,5 +1,6 @@
 import type { AgentInteractionAction, AgentWidgetPart } from "@types";
 import classnames from "classnames";
+import { FaSolidCode } from "solid-icons/fa";
 import {
 	type Component,
 	createMemo,
@@ -33,6 +34,7 @@ const AgentWidget: Component<{
 	// State & Hooks
 	const [submitting, setSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string>();
+	const [showInput, setShowInput] = createSignal(false);
 	const [draft, setDraft] = createSignal<{
 		id: string;
 		response: Record<string, unknown>;
@@ -51,6 +53,7 @@ const AgentWidget: Component<{
 	const active = createMemo(() => !!pending() && !!props.onRespond);
 	const approvalOnly = createMemo(() => props.widget.key === approvalWidget);
 	const approval = createMemo(() => pending()?.approval);
+	const collapsed = createMemo(() => approvalOnly() && !showInput());
 	const ready = createMemo(
 		() => approvalOnly() || draft()?.id === pending()?.id,
 	);
@@ -150,60 +153,111 @@ const AgentWidget: Component<{
 									title={state().title}
 									onRedirect={props.onRedirect}
 									onStop={props.onStop}
+									details={
+										approvalOnly()
+											? {
+													open: showInput(),
+													onToggle: () => setShowInput((open) => !open),
+												}
+											: undefined
+									}
 								/>
 							)}
 						</Show>
-						<div classList={{ "p-3": props.view === "composer" }}>
-							<Show
-								when={!approvalOnly()}
-								fallback={<JSONPreview json={approval()?.input ?? {}} />}
+						<Show when={!collapsed()}>
+							<div
+								classList={{
+									"p-3": props.view === "composer",
+									"mb-3": props.view === "inline",
+								}}
 							>
 								<Show
-									when={contribution()}
-									keyed
-									fallback={
-										<p class="text-xs text-muted">
-											{T()("agent.widget.unavailable", {
-												key: props.widget.key,
-											})}
-										</p>
-									}
+									when={!approvalOnly()}
+									fallback={<JSONPreview json={approval()?.input ?? {}} />}
 								>
-									{(entry) => {
-										const Renderer = entry.component;
-										return (
-											<AdminExtensionBoundary
-												name={props.widget.key}
-												placement="content"
-											>
-												<fieldset disabled={submitting()} class="min-w-0">
-													<Renderer
-														slot="agent.widget"
-														key={props.widget.key}
-														version={props.widget.version}
-														data={props.widget.data}
-														options={entry.options}
-														view={props.view}
-														interaction={interaction()}
-													/>
-												</fieldset>
-											</AdminExtensionBoundary>
-										);
-									}}
+									<Show
+										when={contribution()}
+										keyed
+										fallback={
+											<p class="text-xs text-muted">
+												{T()("agent.widget.unavailable", {
+													key: props.widget.key,
+												})}
+											</p>
+										}
+									>
+										{(entry) => {
+											const Renderer = entry.component;
+											return (
+												<AdminExtensionBoundary
+													name={props.widget.key}
+													placement="content"
+												>
+													<fieldset disabled={submitting()} class="min-w-0">
+														<Renderer
+															slot="agent.widget"
+															key={props.widget.key}
+															version={props.widget.version}
+															data={props.widget.data}
+															options={entry.options}
+															view={props.view}
+															interaction={interaction()}
+														/>
+													</fieldset>
+												</AdminExtensionBoundary>
+											);
+										}}
+									</Show>
 								</Show>
-							</Show>
-						</div>
+							</div>
+						</Show>
 						<Show when={active()}>
 							<div
 								class={classnames(
-									"flex flex-wrap items-center justify-end gap-2 border-t border-border",
-									props.view === "composer" ? "px-3 py-3" : "mt-3 pt-3",
+									"flex flex-wrap items-center justify-end gap-2",
+									props.view === "composer"
+										? {
+												"px-3 py-3": true,
+												"border-t border-border": !collapsed(),
+											}
+										: { "border-t border-border pt-3": !collapsed() },
 								)}
 							>
+								<Show when={props.view === "composer"}>
+									<p class="min-w-0 grow text-xs text-muted">
+										{T()(
+											approval()
+												? "agent.approval.waiting"
+												: "agent.interaction.waiting",
+										)}
+									</p>
+								</Show>
 								<Show when={props.view === "inline"}>
 									<p class="min-w-0 grow text-xs text-muted">
 										{pending()?.title}
 									</p>
+									<Show when={approvalOnly()}>
+										<Button
+											type="button"
+											variant="ghost"
+											size="xs"
+											shape="circle"
+											aria-pressed={showInput()}
+											aria-label={T()(
+												showInput()
+													? "agent.interaction.details.hide"
+													: "agent.interaction.details.show",
+											)}
+											title={T()(
+												showInput()
+													? "agent.interaction.details.hide"
+													: "agent.interaction.details.show",
+											)}
+											onClick={() => setShowInput((open) => !open)}
+										>
+											<FaSolidCode size={11} />
+										</Button>
+									</Show>
 								</Show>
 								<Button
 									type="button"

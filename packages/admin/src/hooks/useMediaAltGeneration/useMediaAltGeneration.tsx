@@ -147,6 +147,7 @@ const useMediaAltGeneration = () => {
 			const response = await generateAlt.action.mutateAsync({
 				shouldToast: () => false,
 				body: {
+					sessionId: crypto.randomUUID(),
 					image: {
 						data: preparedImage.data,
 						mimeType: preparedImage.mimeType,

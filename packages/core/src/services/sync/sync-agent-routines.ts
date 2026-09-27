@@ -23,6 +23,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			"key",
 			"name",
 			"instructions",
+			"model_selection",
 			"cron",
 			"timezone",
 			"enabled",
@@ -65,6 +66,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 					source: "code",
 					name: routine.name,
 					instructions: routine.instructions,
+					model_selection: routine.model ?? null,
 					cron: routine.schedule.cron,
 					timezone: routine.schedule.timezone,
 					enabled: true,
@@ -104,7 +106,8 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			!rescheduled &&
 			!toolsChanged &&
 			current.name === routine.name &&
-			current.instructions === routine.instructions
+			current.instructions === routine.instructions &&
+			isDeepStrictEqual(current.model_selection, routine.model ?? null)
 		) {
 			continue;
 		}
@@ -114,6 +117,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			data: {
 				name: routine.name,
 				instructions: routine.instructions,
+				model_selection: routine.model ?? null,
 				cron: routine.schedule.cron,
 				timezone: routine.schedule.timezone,
 				...(rescheduled && current.enabled ? { next_run_at: next.data } : {}),

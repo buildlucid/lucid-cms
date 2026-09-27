@@ -122,7 +122,8 @@ beforeAll(async () => {
 			collections: [pages, restricted],
 			ai: {
 				...config.ai,
-				mcp: { enabled: true, tools: [], skills: [] },
+				features: { ...config.ai.features, mcp: true },
+				mcp: { tools: [], skills: [] },
 			},
 			localization: {
 				defaultLocale: "en",

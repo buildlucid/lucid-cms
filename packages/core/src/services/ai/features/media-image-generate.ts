@@ -29,6 +29,7 @@ const imageGuidanceInstructions = {
 const mediaImageGenerate: ServiceFn<
 	[
 		{
+			sessionId?: string;
 			instruction?: string;
 			guidance?: string;
 			image?: Extract<
@@ -127,6 +128,7 @@ const mediaImageGenerate: ServiceFn<
 			key: "media.image.generate",
 			version: "v1",
 		},
+		sessionId: props.sessionId,
 		input,
 		context: {
 			previousInstructions:

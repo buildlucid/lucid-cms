@@ -211,7 +211,6 @@ export type HttpConfig = {
 	extensions?: HttpExtension[];
 };
 
-/** Choose which AI features are available when `ai.enabled` is true. */
 export type AiFeatureConfig = {
 	/** Allow image generation. Defaults to true. */
 	imageGeneration?: boolean;
@@ -219,6 +218,10 @@ export type AiFeatureConfig = {
 	altGeneration?: boolean;
 	/** Allow field value generation. Defaults to true. */
 	customFieldGeneration?: boolean;
+	/** Allow the agents in `ai.agents`. Defaults to true. */
+	agents?: boolean;
+	/** Serve tools and skills over MCP at `/lucid/mcp`. Defaults to false. */
+	mcp?: boolean;
 };
 
 /** Separate secrets for encryption and signing. Keep these stable between deployments. */
@@ -321,17 +324,15 @@ export interface LucidConfig {
 		| boolean
 		| {
 				/**
-				 * Allow AI features, including MCP, in the admin and API. Defaults to true.
+				 * Allow AI features, including agents and MCP, in the admin and API. Defaults to true.
 				 */
 				enabled?: boolean;
 				/**
-				 * Per-feature AI availability. Omitted features default to enabled.
+				 * Turns each AI feature on or off. MCP is off unless `mcp` is true; the rest default to on.
 				 */
 				features?: AiFeatureConfig;
-				/** Serve tools and skills over MCP at `/lucid/mcp`. Disabled unless configured. */
+				/** Tools and skills served over MCP when `features.mcp` is true. */
 				mcp?: {
-					/** Defaults to true once `mcp` is configured. */
-					enabled?: boolean;
 					/** Additional MCP tools. Lucid's content tools are always available. */
 					tools?: McpToolDefinition[];
 					skills?: SkillDefinition[];
@@ -641,7 +642,6 @@ export interface ResolvedLucidConfig {
 		enabled: boolean;
 		features: Required<AiFeatureConfig>;
 		mcp: {
-			enabled: boolean;
 			tools: McpToolDefinition[];
 			skills: SkillDefinition[];
 		};

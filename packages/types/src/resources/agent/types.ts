@@ -1,3 +1,4 @@
+import type { AiModelSelection } from "../ai/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { Permission } from "../users/types.js";
 
@@ -135,6 +136,8 @@ export interface AgentCompaction {
 
 export interface AgentConversation {
 	approvalMode: AgentApprovalMode;
+	/** The model for the next run. Null uses the routine or agent default. */
+	modelSelection: AiModelSelection | null;
 	/** Queued messages wait until the user resumes, after a run was stopped or failed. */
 	queuePaused: boolean;
 	/** Only included when fetching a single conversation. */
@@ -190,6 +193,8 @@ export interface AgentRoutine {
 	source: AgentRoutineSource;
 	name: string;
 	instructions: string;
+	/** Null uses the agent's default model. */
+	modelSelection: AiModelSelection | null;
 	/** Per-tool settings by tool name. Missing tools and settings use the tool's defaults. */
 	tools: Record<string, AgentRoutineToolSettings>;
 	cron: string;

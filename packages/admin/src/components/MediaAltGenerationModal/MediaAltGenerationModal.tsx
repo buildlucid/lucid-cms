@@ -488,6 +488,8 @@ const MediaAltGenerationModal: Component = () => {
 	const [previewUrl, setPreviewUrl] = createSignal<string>();
 	const [clientError, setClientError] = createSignal<string>();
 	let generationId = 0;
+	//* groups every attempt until the modal is cleared, so Lucid can see how many it took
+	let sessionId = crypto.randomUUID();
 	let abortController: AbortController | undefined;
 
 	// -----------------------------
@@ -564,6 +566,7 @@ const MediaAltGenerationModal: Component = () => {
 		abortController = undefined;
 	};
 	const clear = () => {
+		sessionId = crypto.randomUUID();
 		setCurrentAltDraft(new Map());
 		setGenerations([]);
 		setSelectedGenerationId(undefined);
@@ -611,6 +614,7 @@ const MediaAltGenerationModal: Component = () => {
 				signal: abortController.signal,
 				shouldToast: () => aiModalsStore.isOpen("mediaAltGeneration"),
 				body: {
+					sessionId,
 					instruction: values.instruction,
 					previousResponses: generations().map((generation) => ({
 						instruction: generation.instruction,

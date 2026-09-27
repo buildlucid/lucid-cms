@@ -2,7 +2,7 @@ import type { RoutineTools } from "../../libs/agent/types.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
-import type { AgentRoutine } from "../../types/response.js";
+import type { AgentRoutine, AiModelSelection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutine from "./get-routine.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
@@ -18,6 +18,7 @@ const updateRoutine: ServiceFn<
 			userId: number;
 			name?: string;
 			tools?: RoutineTools;
+			modelSelection?: AiModelSelection | null;
 			instructions?: string;
 			cron?: string;
 			timezone?: string;
@@ -37,6 +38,7 @@ const updateRoutine: ServiceFn<
 			input.cron,
 			input.timezone,
 			input.tools,
+			input.modelSelection,
 		].some((value) => value !== undefined)
 	) {
 		return {
@@ -78,6 +80,7 @@ const updateRoutine: ServiceFn<
 		data: {
 			name: input.name,
 			instructions: input.instructions,
+			model_selection: input.modelSelection,
 			cron,
 			timezone,
 			enabled,

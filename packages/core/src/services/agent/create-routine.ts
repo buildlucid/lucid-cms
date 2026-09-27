@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { RoutineTools } from "../../libs/agent/types.js";
 import { agentFormatter } from "../../libs/formatters/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
-import type { AgentRoutine } from "../../types/response.js";
+import type { AgentRoutine, AiModelSelection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkAgentAccess from "./helpers/check-agent-access.js";
 import nextRoutineOccurrence from "./helpers/next-routine-occurrence.js";
@@ -17,6 +17,7 @@ const createRoutine: ServiceFn<
 			userId: number;
 			name: string;
 			tools?: RoutineTools;
+			modelSelection?: AiModelSelection | null;
 			instructions: string;
 			cron: string;
 			timezone: string;
@@ -54,6 +55,7 @@ const createRoutine: ServiceFn<
 			source: "database",
 			name: input.name,
 			instructions: input.instructions,
+			model_selection: input.modelSelection ?? null,
 			cron: input.cron,
 			timezone: input.timezone,
 			enabled: input.enabled,

@@ -1,5 +1,8 @@
+import type { JSONColumnType } from "kysely";
 import z from "zod";
 import { agentRoutineSourceSchema } from "../../../schemas/agent.js";
+import type { AiModelSelection } from "../../../types/response.js";
+import { aiModelSelectionSchema } from "../../agent/model-selection.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
@@ -16,6 +19,10 @@ export const agentRoutinesTable = defineTable("lucid_agent_routines", () => ({
 		source: { schema: agentRoutineSourceSchema, type: "text" },
 		name: { schema: z.string(), type: "text" },
 		instructions: { schema: z.string(), type: "text" },
+		model_selection: {
+			schema: aiModelSelectionSchema.nullable(),
+			type: "json",
+		},
 		cron: { schema: z.string(), type: "text" },
 		timezone: { schema: z.string(), type: "text" },
 		enabled: {
@@ -46,6 +53,12 @@ export interface LucidAgentRoutines {
 	source: z.infer<typeof agentRoutineSourceSchema>;
 	name: string;
 	instructions: string;
+	/** Null uses the agent's default model. */
+	model_selection: JSONColumnType<
+		AiModelSelection | null,
+		AiModelSelection | null | undefined,
+		AiModelSelection | null
+	>;
 	cron: string;
 	timezone: string;
 	enabled: BooleanInt;

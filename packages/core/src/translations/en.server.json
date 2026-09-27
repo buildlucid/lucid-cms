@@ -378,6 +378,8 @@
 	"core.ai.remote.generation.request.invalid.message": "Start a new generation and try again.",
 	"core.ai.remote.provider.failed.name": "AI generation failed",
 	"core.ai.remote.provider.failed.message": "Lucid AI could not complete the request. Try again in a moment.",
+	"core.ai.remote.model.unavailable.name": "Model unavailable",
+	"core.ai.remote.model.unavailable.message": "This model is no longer available. Choose another model and try again.",
 	"core.routes.verify.email.change.confirm.error.name": "Email Change Confirmation Error",
 	"core.routes.verify.email.change.confirm.error.message": "An error occurred while verifying the email change confirmation token.",
 	"core.routes.confirm.email.change.error.name": "Email Change Confirmation Error",
@@ -810,5 +812,8 @@
 	"agent.tool.denied": "The user denied this action. Do not retry it unless they ask.",
 	"agent.tool.dismissed": "The user dismissed this request without responding.",
 	"agent.routine.tools.invalid": "Tool settings must name tools this routine can use.",
-	"agent.routine.approval.locked": "Manage tool approvals in the routine settings."
+	"agent.routine.approval.locked": "Manage tool approvals in the routine settings.",
+	"agent.models.unavailable": "Could not load the available models. Try again.",
+	"agent.models.empty": "No models match this agent’s model settings. Update the configured models.",
+	"agent.models.invalid": "This model is not available for this agent. Choose another model."
 }

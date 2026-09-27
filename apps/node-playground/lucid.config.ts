@@ -93,6 +93,7 @@ export default defineConfig({
 		ai: {
 			mcp: { tools: [echoTool, addTool] },
 			agents: [assistantAgent, seoAgent],
+			features: { mcp: true },
 		},
 		localization: {
 			locales: [

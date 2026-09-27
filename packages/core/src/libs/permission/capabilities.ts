@@ -1,7 +1,9 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import LucidError from "../../utils/errors/lucid-error.js";
+import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
+import { isAiFeatureEnabled } from "../config/ai-features.js";
 import { copy, normalizeCopy, translate } from "../i18n/index.js";
 import type { AdminCopyDescriptor, ResolvedAdminCopy } from "../i18n/types.js";
 import type { AccessPermission } from "./access-config.js";
@@ -284,9 +286,7 @@ export type AccessConfig = Pick<
 	ResolvedLucidConfig,
 	"collections" | "access"
 > & {
-	ai: Pick<ResolvedLucidConfig["ai"], "enabled" | "agents"> & {
-		mcp: Pick<ResolvedLucidConfig["ai"]["mcp"], "enabled">;
-	};
+	ai: Pick<ResolvedLucidConfig["ai"], "enabled" | "features" | "agents">;
 };
 
 const resolveDetails = (details: AccessPermission): PermissionDetails => ({
@@ -307,9 +307,9 @@ export const getCapabilityRegistry = (
 		accountCapabilityGroup,
 		...getStaticCapabilityGroups(),
 		...getCollectionCapabilityGroups(config.collections),
-		...getAgentCapabilityGroups(config.ai.agents),
+		...getAgentCapabilityGroups(getAgents(config)),
 		localesCapabilityGroup,
-		...(config.ai.enabled && config.ai.mcp.enabled ? [mcpCapabilityGroup] : []),
+		...(isAiFeatureEnabled(config, "mcp") ? [mcpCapabilityGroup] : []),
 	];
 	const groupKeys = new Set(groups.map((group) => group.key));
 	const permissions = new Map(

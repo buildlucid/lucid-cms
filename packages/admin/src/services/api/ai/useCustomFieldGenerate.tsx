@@ -9,6 +9,8 @@ interface Params {
 	signal?: AbortSignal;
 	shouldToast?: () => boolean;
 	body: {
+		/** Groups this attempt with others made in the same modal. */
+		sessionId?: string;
 		instruction?: string;
 		guidance?: string;
 		value: unknown;

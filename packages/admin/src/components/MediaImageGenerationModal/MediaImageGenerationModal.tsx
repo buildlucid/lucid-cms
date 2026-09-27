@@ -128,6 +128,8 @@ const MediaImageGenerationModal: Component = () => {
 	let responseColumnRef: HTMLDivElement | undefined;
 	let sourceInputRef: HTMLInputElement | undefined;
 	let generationId = 0;
+	//* groups every attempt until the modal is cleared, so Lucid can see how many it took
+	let sessionId = crypto.randomUUID();
 	let abortController: AbortController | undefined;
 
 	const completionPoller = usePollingLoop<PendingMediaImageGeneration>({
@@ -529,6 +531,7 @@ const MediaImageGenerationModal: Component = () => {
 		setPollingRequestId(undefined);
 	};
 	const clear = () => {
+		sessionId = crypto.randomUUID();
 		setGenerations([]);
 		setWorkingGeneration(undefined);
 		setPendingGeneration(undefined);
@@ -779,6 +782,7 @@ const MediaImageGenerationModal: Component = () => {
 				shouldToast: () => false,
 				idempotencyKey: currentIdempotencyKey,
 				body: {
+					sessionId,
 					instruction: values.instruction,
 					guidance: values.guidance,
 					previousInstructions:

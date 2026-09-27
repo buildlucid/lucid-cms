@@ -2,6 +2,7 @@ import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import { getAgents } from "../agent/registry.js";
+import { isAiFeatureEnabled } from "../config/ai-features.js";
 import { getAgentPermission } from "../permission/agent-permissions.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
@@ -64,6 +65,8 @@ const formatSingle = (props: {
 				imageGeneration: props.config.ai.features.imageGeneration,
 				altGeneration: props.config.ai.features.altGeneration,
 				customFieldGeneration: props.config.ai.features.customFieldGeneration,
+				agents: props.config.ai.features.agents,
+				mcp: props.config.ai.features.mcp,
 			},
 		};
 	}
@@ -105,7 +108,7 @@ const formatSingle = (props: {
 
 	if (includeSet.has("mcp") && canReadSystem) {
 		response.mcp = {
-			enabled: props.config.ai.enabled && props.config.ai.mcp.enabled,
+			enabled: isAiFeatureEnabled(props.config, "mcp"),
 			tools: Array.from(getMcpToolRegistry(props.config).values(), (tool) => ({
 				name: tool.name,
 				description: tool.description,

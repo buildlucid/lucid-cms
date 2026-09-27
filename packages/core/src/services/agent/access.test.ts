@@ -1,4 +1,4 @@
-import { afterAll, expect, test } from "vitest";
+import { afterAll, expect, test, vi } from "vitest";
 import defineAgent from "../../libs/agent/define-agent.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import { getAgentPermission } from "../../libs/permission/agent-permissions.js";
@@ -99,3 +99,16 @@ test("chats are private, and code routine chats are shared with the agent's mana
 		).toBeGreaterThanOrEqual(403);
 	}
 });
+
+vi.mock("../connection/token-manager.js", () => ({
+	default: async () => ({
+		error: undefined,
+		data: { accessToken: "test-token", lucidRemoteConnectionId: 1 },
+	}),
+}));
+
+vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => ({
+	default: (
+		await import("../../utils/test-helpers/agent-models.js")
+	).mockAgentModels(),
+}));

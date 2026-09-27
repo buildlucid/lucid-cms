@@ -1,6 +1,11 @@
+import z from "zod";
 import { routineToolsSchema } from "../../../schemas/agent.js";
 import nextRoutineOccurrence from "../../../services/agent/helpers/next-routine-occurrence.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
+import {
+	aiModelConfigSchema,
+	aiModelSelectionSchema,
+} from "../../agent/model-selection.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
 import { getCoreAgentTools } from "../../tools/core-tools.js";
 
@@ -29,6 +34,13 @@ const checkAgentDefinitions = (config: {
 			throw new Error(`Agent "${agent.key}" needs a name and description.`);
 		}
 
+		const models = aiModelConfigSchema.optional().safeParse(agent.models);
+		if (!models.success) {
+			throw new Error(
+				`Agent "${agent.key}" has invalid models: ${z.prettifyError(models.error)}`,
+			);
+		}
+
 		const routineKeys = new Set<string>();
 
 		for (const routine of agent.routines) {
@@ -39,6 +51,24 @@ const checkAgentDefinitions = (config: {
 			}
 
 			const label = `${agent.key}:${routine.key}`;
+			const model = aiModelSelectionSchema.optional().safeParse(routine.model);
+			if (!model.success) {
+				throw new Error(
+					`Routine "${label}" has an invalid model: ${z.prettifyError(model.error)}`,
+				);
+			}
+
+			const available = agent.models?.available;
+			if (
+				routine.model &&
+				available &&
+				!available.includes(routine.model.modelId)
+			) {
+				throw new Error(
+					`Routine "${label}" uses model "${routine.model.modelId}", which is not in its agent's available models.`,
+				);
+			}
+
 			const routineTools = routineToolsSchema.safeParse(routine.tools);
 			const tools = [...getCoreAgentTools(), ...agent.tools];
 			if (

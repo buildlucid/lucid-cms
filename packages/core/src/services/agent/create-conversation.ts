@@ -1,6 +1,7 @@
 import type {
 	AgentApprovalMode,
 	AgentConversation,
+	AiModelSelection,
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkAgentAccess from "./helpers/check-agent-access.js";
@@ -15,6 +16,7 @@ const createConversation: ServiceFn<
 			userId: number;
 			title?: string;
 			approvalMode?: AgentApprovalMode;
+			modelSelection?: AiModelSelection;
 		},
 	],
 	AgentConversation

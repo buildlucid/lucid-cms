@@ -20,6 +20,7 @@ const getAccessibleRoutine: ServiceFn<
 			"source",
 			"name",
 			"instructions",
+			"model_selection",
 			"cron",
 			"timezone",
 			"enabled",

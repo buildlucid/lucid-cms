@@ -83,8 +83,10 @@ const compactContext: ServiceFn<
 	//* same instructions, tools and leading messages as the chat, so the provider's prompt cache applies
 	const result = await streamModelTurn(context, {
 		requestId: pending.requestId,
+		sessionId: run.conversation_id,
 		purpose: "compact",
 		instructions: capabilities.instructions,
+		selection: checkpoint.selection,
 		messages: modelMessages(checkpoint.messages.slice(0, pending.count)),
 		tools: capabilities.definitions,
 		signal: session.signal,

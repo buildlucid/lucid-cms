@@ -8,6 +8,7 @@ export { default as executeRun } from "./execute-run.js";
 export { default as getConversation } from "./get-conversation.js";
 export { default as getConversations } from "./get-conversations.js";
 export { default as getMessages } from "./get-messages.js";
+export { default as getModels } from "./get-models.js";
 export { default as getRoutine } from "./get-routine.js";
 export { default as getRoutineRuns } from "./get-routine-runs.js";
 export { default as getRoutines } from "./get-routines.js";

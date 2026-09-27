@@ -6,7 +6,13 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export type RoutineBody = Pick<
 	AgentRoutine,
-	"name" | "instructions" | "cron" | "timezone" | "enabled" | "tools"
+	| "name"
+	| "instructions"
+	| "modelSelection"
+	| "cron"
+	| "timezone"
+	| "enabled"
+	| "tools"
 >;
 
 const useCreateRoutine = (props?: { onSuccess?: () => void }) =>

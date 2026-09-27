@@ -6,6 +6,8 @@ import {
 	agentRunOutcomeSchema,
 	agentRunStatusSchema,
 } from "../../../schemas/agent.js";
+import type { AiModelSelection } from "../../../types/response.js";
+import { aiModelSelectionSchema } from "../../agent/model-selection.js";
 import type { ConversationContext } from "../../agent/types.js";
 import { defineTable } from "../client/table/definition.js";
 import type {
@@ -20,6 +22,10 @@ export const agentConversationsTable = defineTable(
 		columns: {
 			id: { schema: z.uuid(), type: "text" },
 			approval_mode: { schema: agentApprovalModeSchema, type: "text" },
+			model_selection: {
+				schema: aiModelSelectionSchema.nullable(),
+				type: "json",
+			},
 			agent_key: { schema: z.string(), type: "text" },
 			title: { schema: z.string(), type: "text" },
 			user_id: { schema: z.number().nullable(), type: "integer" },
@@ -68,6 +74,12 @@ export interface LucidAgentConversations {
 	id: string;
 	agent_key: string;
 	approval_mode: Generated<z.infer<typeof agentApprovalModeSchema>>;
+	/** The chat's choice for its next run. Null uses the routine or agent default. */
+	model_selection: JSONColumnType<
+		AiModelSelection | null,
+		AiModelSelection | null | undefined,
+		AiModelSelection | null
+	>;
 	title: string;
 	/** Private to this user. Null for chats started by routines defined in code. */
 	user_id: number | null;

@@ -21,6 +21,7 @@ import storeGeneration from "../storage/store-generation.js";
 const mediaAltGenerate: ServiceFn<
 	[
 		{
+			sessionId?: string;
 			instruction?: string;
 			previousResponses?: {
 				instruction?: string;
@@ -82,6 +83,7 @@ const mediaAltGenerate: ServiceFn<
 			key: "media.alt.generate",
 			version: "v1",
 		},
+		sessionId: props.sessionId,
 		input,
 		context: {
 			locale: props.locale,

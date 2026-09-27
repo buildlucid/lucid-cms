@@ -1,6 +1,7 @@
 import type {
 	AgentApprovalMode,
 	AgentConversation,
+	AiModelSelection,
 	ResponseBody,
 } from "@types";
 import { queryKeys } from "@/services/query-keys";
@@ -16,6 +17,7 @@ const useCreateConversation = (props?: {
 			agentKey: string;
 			title?: string;
 			approvalMode?: AgentApprovalMode;
+			modelSelection?: AiModelSelection;
 		},
 		ResponseBody<AgentConversation>
 	>({

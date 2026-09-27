@@ -1,10 +1,11 @@
 import type { AgentConversation, AgentRoutine } from "@types";
 import { FaSolidRepeat, FaSolidXmark } from "solid-icons/fa";
-import { type Component, type JSXElement, Show } from "solid-js";
+import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Button from "@/components/Button/Button";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
+import { getRoutinePause } from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 import dateHelpers from "@/utils/date-helpers";
 
@@ -16,11 +17,15 @@ const AgentRoutineCard: Component<{
 	onClose: () => void;
 }> = (props) => {
 	// ----------------------------------------
+	// Memos
+	const pause = createMemo(() => getRoutinePause(props.routine));
+
+	// ----------------------------------------
 	// Render
 	return (
 		<aside
 			aria-labelledby="agent-routine-card-title"
-			class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-lg animate-fade-in md:p-5"
+			class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 animate-fade-in md:p-5"
 		>
 			<div class="flex items-center gap-3">
 				<span class="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary-low-border bg-primary-low text-primary">
@@ -69,9 +74,9 @@ const AgentRoutineCard: Component<{
 				</Detail>
 				<Detail label={T()("agent.routine.next.run")}>
 					<Show
-						when={props.routine.enabled && props.routine.nextRunAt}
+						when={!pause().paused && props.routine.nextRunAt}
 						fallback={
-							<Pill size="xs" variant="warning-subtle">
+							<Pill size="xs" variant="warning-subtle" tooltip={pause().reason}>
 								{T()("agent.routine.paused")}
 							</Pill>
 						}

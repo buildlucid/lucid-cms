@@ -37,6 +37,7 @@ export type SessionRun = {
 	execution_version: number;
 	agent_key: string;
 	conversation_user_id: number | null;
+	conversation_routine_id: string | null;
 };
 
 export type RunSession = NonNullable<

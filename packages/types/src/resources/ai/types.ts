@@ -150,3 +150,35 @@ export type AiUsageChart = {
 		}>;
 	}>;
 };
+
+/** Reasoning efforts agents can use. Each model lists the ones it supports; models without reasoning list none. */
+export type AiReasoningEffort = "minimal" | "low" | "medium" | "high" | "xhigh";
+
+/** A model choice. Leave out the effort to use the model's default. */
+export type AiModelSelection = {
+	/** A model ID from the Lucid service, such as `"openai/gpt-6-luna"`. */
+	modelId: string;
+	reasoningEffort?: AiReasoningEffort | null;
+};
+
+export type AiModel = {
+	id: string;
+	name: string;
+	description: string;
+	/** Input budget Lucid uses to decide when to compact conversation history. */
+	inputTokenLimit: number;
+	reasoningEfforts: AiReasoningEffort[];
+	defaultReasoningEffort: AiReasoningEffort | null;
+};
+
+export type AiModelCatalog = {
+	default: Required<AiModelSelection>;
+	models: AiModel[];
+};
+
+export type AiModelConfig = {
+	/** Used when nothing more specific is chosen. Falls back to an available default when it is not offered. */
+	default?: AiModelSelection;
+	/** Model IDs to offer. Leave out to offer every model the Lucid service provides. */
+	available?: readonly string[];
+};

@@ -19,6 +19,8 @@ const defaultAiSettings = (): AiSettings => ({
 		imageGeneration: true,
 		altGeneration: true,
 		customFieldGeneration: true,
+		agents: true,
+		mcp: false,
 	},
 	agents: [],
 });
@@ -33,11 +35,15 @@ const [get, set] = createStore<SiteStoreT>({
 	isAiFeatureEnabled(feature) {
 		return this.ai.enabled && this.ai.features[feature];
 	},
+	//* only features billed through Lucid count, so MCP alone does not show AI usage
 	hasAnyAiFeatureEnabled() {
+		const { features } = this.ai;
 		return (
 			this.ai.enabled &&
 			(this.ai.agents.length > 0 ||
-				Object.values(this.ai.features).some(Boolean))
+				features.imageGeneration ||
+				features.altGeneration ||
+				features.customFieldGeneration)
 		);
 	},
 });

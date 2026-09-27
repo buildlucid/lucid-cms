@@ -153,6 +153,7 @@ const useCustomFieldGeneration = () => {
 			const response = await generateField.action.mutateAsync({
 				shouldToast: () => false,
 				body: {
+					sessionId: crypto.randomUUID(),
 					value: targetLocaleCodes.includes(null)
 						? originalValues.get(null)
 						: Object.fromEntries(originalValues),

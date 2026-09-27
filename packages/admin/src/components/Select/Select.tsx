@@ -278,9 +278,10 @@ function Select<Option extends SelectOption = SelectOption>(
 				</Menu.Trigger>
 				<Menu.Content matchTriggerWidth compact class="z-70">
 					<Show when={props.search !== undefined}>
+						{/* sticks flush to the panel edge and above the rows, so options never scroll into view around or over it */}
 						{/** biome-ignore lint/a11y/noStaticElementInteractions: explanation */}
 						<div
-							class="mb-1.5 sticky top-0"
+							class="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover p-1.5"
 							onKeyDown={(e) => {
 								e.stopPropagation();
 							}}

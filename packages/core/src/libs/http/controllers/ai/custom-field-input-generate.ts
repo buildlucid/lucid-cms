@@ -51,6 +51,7 @@ const customFieldInputGenerateController = factory.createHandlers(
 				},
 			},
 		)(context, {
+			sessionId: body.sessionId,
 			instruction: body.instruction,
 			guidance: body.guidance,
 			value: body.value,

@@ -11,6 +11,10 @@ import type { AgentDefinition, DefineAgentOptions } from "./types.js";
  * 	name: "SEO Agent",
  * 	description: "Reviews and improves page metadata.",
  * 	tools: [customAgentTool],
+ * 	models: {
+ * 		default: { modelId: "openai/gpt-6-sol", reasoningEffort: "low" },
+ * 		available: ["openai/gpt-6-luna", "openai/gpt-6-sol"],
+ * 	},
  * });
  */
 const defineAgent = <const Key extends string>(
@@ -18,11 +22,13 @@ const defineAgent = <const Key extends string>(
 ): AgentDefinition<Key> => ({
 	type: "agent-definition",
 	key: options.key,
+	enabled: options.enabled ?? true,
 	name: options.name,
 	description: options.description,
 	instructions: options.instructions ? dedent(options.instructions) : "",
 	tools: options.tools ?? [],
 	skills: options.skills ?? [],
+	models: options.models,
 	routines: options.routines ?? [],
 });
 

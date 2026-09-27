@@ -4,6 +4,7 @@ import type { ModelEvent } from "../../../libs/agent/types.js";
 import { createTranslationStore } from "../../../libs/i18n/index.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import { agentModelCatalog } from "../../../utils/test-helpers/agent-models.js";
 import getTestConfig from "../../../utils/test-helpers/get-test-config.js";
 import streamModelTurn from "./stream-model-turn.js";
 
@@ -71,10 +72,11 @@ test("forwards fragmented SSE text before the response completes", async () => {
 	});
 	const pending = vi.fn(async () => ({ error: undefined, data: undefined }));
 	const fetch = vi.fn(
-		async () =>
+		async (_url: URL, _init: RequestInit) =>
 			new Response(body, { headers: { "Content-Type": "text/event-stream" } }),
 	);
 	vi.stubGlobal("fetch", fetch);
+	const sessionId = randomUUID();
 	const events: ModelEvent[] = [];
 	let received: () => void = () => {};
 	const first = new Promise<void>((resolve) => {
@@ -82,6 +84,8 @@ test("forwards fragmented SSE text before the response completes", async () => {
 	});
 	const result = streamModelTurn(context, {
 		requestId,
+		sessionId,
+		selection: agentModelCatalog.default,
 		messages: [{ role: "user", content: "Hi" }],
 		instructions: "Test",
 		tools: [],
@@ -95,6 +99,10 @@ test("forwards fragmented SSE text before the response completes", async () => {
 	await first;
 	expect(events).toEqual([{ type: "text-delta", text: "First paragraph." }]);
 	expect(pending).toHaveBeenCalledWith(1);
+	expect(JSON.parse(String(fetch.mock.calls[0]?.[1].body))).toMatchObject({
+		sessionId,
+		selection: agentModelCatalog.default,
+	});
 	expect(fetch.mock.invocationCallOrder[0]).toBeGreaterThan(
 		pending.mock.invocationCallOrder[0] ?? 0,
 	);
@@ -117,6 +125,8 @@ test("rejects a truncated response instead of treating it as completion", async 
 	);
 	const result = await streamModelTurn(context, {
 		requestId: randomUUID(),
+		sessionId: randomUUID(),
+		selection: agentModelCatalog.default,
 		messages: [],
 		instructions: "Test",
 		tools: [],
@@ -146,6 +156,8 @@ test.each([
 	);
 	const result = await streamModelTurn(context, {
 		requestId: randomUUID(),
+		sessionId: randomUUID(),
+		selection: agentModelCatalog.default,
 		messages: [],
 		instructions: "Test",
 		tools: [],
@@ -179,6 +191,8 @@ test("finishes on the terminal event without waiting for the connection to close
 	);
 	const result = await streamModelTurn(context, {
 		requestId,
+		sessionId: randomUUID(),
+		selection: agentModelCatalog.default,
 		messages: [],
 		instructions: "Test",
 		tools: [],

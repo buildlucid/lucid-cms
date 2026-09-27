@@ -58,6 +58,8 @@ type CmsAiGenerateBaseRequest<
 	TContext,
 > = {
 	feature: TFeature;
+	/** Groups attempts made together, so Lucid can see how many it took. */
+	sessionId?: string;
 	input: TInput[];
 	context: TContext;
 };
@@ -184,6 +186,7 @@ export type MediaImageGenerateV1Request = {
 		key: "media.image.generate";
 		version: "v1";
 	};
+	sessionId?: string;
 	input: (
 		| CmsAiGenerateRequestInputText<"user-instruction" | "guidance">
 		| CmsAiGenerateRequestInputImage<

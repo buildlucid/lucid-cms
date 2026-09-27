@@ -3,6 +3,7 @@ import type {
 	AgentApprovalMode,
 	AgentInput,
 	AgentInteractionAction,
+	AiModelSelection,
 } from "@types";
 import classnames from "classnames";
 import { FaSolidArrowDown, FaSolidRepeat } from "solid-icons/fa";
@@ -30,11 +31,12 @@ import AgentContextRing from "@/components/AgentContextRing/AgentContextRing";
 import AgentErrorNotice from "@/components/AgentErrorNotice/AgentErrorNotice";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentMessage from "@/components/AgentMessage/AgentMessage";
+import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
 import AgentToolPanel from "@/components/AgentToolPanel/AgentToolPanel";
 import { AgentTranscriptContext } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
+import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import { layoutOf } from "@/components/AgentWidget/slots";
-import Alert from "@/components/Alert/Alert";
 import Button from "@/components/Button/Button";
 import DeleteAgentConversationModal from "@/components/DeleteAgentConversationModal/DeleteAgentConversationModal";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
@@ -49,7 +51,7 @@ import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
 import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
 import api from "@/services/api";
 import T from "@/translations";
-import { isAgentDisconnected } from "@/utils/agent-access";
+import { getAgentUnavailableReason } from "@/utils/agent-access";
 import { isToolRow, messageText, placeCompactions } from "@/utils/agent-chat";
 import AgentChatHeader from "./parts/AgentChatHeader";
 import AgentRoutineCard from "./parts/AgentRoutineCard";
@@ -69,6 +71,7 @@ const AgentConversationPage: Component = () => {
 		message?: string;
 		agentKey?: string;
 		approvalMode?: AgentApprovalMode;
+		modelSelection?: AiModelSelection;
 	}>();
 	const navigate = useNavigate();
 	const [creating, setCreating] = createSignal(
@@ -99,6 +102,7 @@ const AgentConversationPage: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const conversation = createMemo(() => chat.data());
+	const unavailable = createMemo(() => getAgentUnavailableReason());
 	const latestRun = createMemo(() => conversation()?.latestRun);
 	const routineQuery = api.agent.useGetRoutine({
 		id: () => conversation()?.routineId ?? undefined,
@@ -138,6 +142,8 @@ const AgentConversationPage: Component = () => {
 	// ----------------------------------------
 	// Functions
 	const send = (text: string, mode: "send" | "steer") => {
+		//* a run reads the chat's settings when it starts, so wait for a change to save
+		if (unavailable() || updateConversation.action.isPending) return false;
 		scroll.scrollToEnd("smooth");
 		return chat.send(text, chat.waiting() ? "steer" : mode);
 	};
@@ -146,6 +152,8 @@ const AgentConversationPage: Component = () => {
 		response: Record<string, unknown>,
 		action: AgentInteractionAction = "submit",
 	) => {
+		const reason = unavailable();
+		if (reason) return { error: T()(`agent.unavailable.${reason}.title`) };
 		const pending = chat.pendingInteraction();
 		if (!pending || pending.id !== interactionId) {
 			return { error: T()("agent.interaction.unavailable") };
@@ -210,7 +218,8 @@ const AgentConversationPage: Component = () => {
 	 * cannot be saved, the message goes back to the agent home.
 	 */
 	onMount(async () => {
-		const { message, agentKey, approvalMode } = location.state ?? {};
+		const { message, agentKey, approvalMode, modelSelection } =
+			location.state ?? {};
 		if (!message) return;
 		navigate(location.pathname, { replace: true, state: {} });
 		if (agentKey) {
@@ -219,11 +228,12 @@ const AgentConversationPage: Component = () => {
 					id: params.conversationId,
 					agentKey,
 					approvalMode,
+					modelSelection,
 				});
 			} catch {
 				navigate("/lucid/agent", {
 					replace: true,
-					state: { message, approvalMode },
+					state: { message, approvalMode, modelSelection },
 				});
 				return;
 			}
@@ -302,11 +312,6 @@ const AgentConversationPage: Component = () => {
 						</>
 					}
 				/>
-				<Show when={isAgentDisconnected()}>
-					<Alert variant="warning" appearance="bar">
-						{T()("agent.connection.required")}
-					</Alert>
-				</Show>
 				<div class="relative flex min-h-0 grow">
 					<section
 						class={classnames(
@@ -454,102 +459,119 @@ const AgentConversationPage: Component = () => {
 										theme="basic"
 										message={updateConversation.errors()?.message}
 									/>
-									<Show when={!activeWidget()}>
-										<AgentComposer
-											ref={(handle) => {
-												composer = handle;
-											}}
-											autofocus={true}
-											draftKey={params.conversationId}
-											placeholder={T()(
-												chat.pendingInteraction()
-													? "agent.composer.placeholder.instructions"
-													: chat.working()
-														? "agent.composer.placeholder.busy"
-														: "agent.composer.placeholder",
-											)}
-											header={
-												<Show when={chat.pendingInteraction()}>
-													{(pending) => (
-														<AgentInteractionBar
-															title={pending().widget.interaction?.title}
-															redirecting={true}
-															onRedirect={
-																pending().widget.interaction?.placement ===
-																"composer"
-																	? () => setRedirecting(undefined)
+									<AgentUnavailableNotice>
+										<Show when={!activeWidget()}>
+											<AgentComposer
+												ref={(handle) => {
+													composer = handle;
+												}}
+												autofocus={true}
+												draftKey={params.conversationId}
+												placeholder={T()(
+													chat.pendingInteraction()
+														? "agent.composer.placeholder.instructions"
+														: chat.working()
+															? "agent.composer.placeholder.busy"
+															: "agent.composer.placeholder",
+												)}
+												header={
+													<Show when={chat.pendingInteraction()}>
+														{(pending) => (
+															<AgentInteractionBar
+																title={pending().widget.interaction?.title}
+																redirecting={true}
+																onRedirect={
+																	pending().widget.interaction?.placement ===
+																	"composer"
+																		? () => setRedirecting(undefined)
+																		: undefined
+																}
+																onStop={() => void chat.stop()}
+															/>
+														)}
+													</Show>
+												}
+												queueable={true}
+												busy={chat.working()}
+												onStop={
+													chat.working() ? () => void chat.stop() : undefined
+												}
+												controls={
+													<Show when={conversation()}>
+														<AgentApprovalPicker
+															routine={
+																conversation()?.routineId
+																	? {
+																			disabled: !routine(),
+																			onEdit: () => {
+																				setFocusApprovals(true);
+																				setRoutineOpen(true);
+																			},
+																		}
 																	: undefined
 															}
-															onStop={() => void chat.stop()}
+															value={
+																conversation()?.approvalMode ?? "tool-defaults"
+															}
+															onChange={(approvalMode) =>
+																updateConversation.action.mutate({
+																	id: params.conversationId,
+																	body: { approvalMode },
+																})
+															}
 														/>
-													)}
-												</Show>
-											}
-											queueable={true}
-											busy={chat.working()}
-											onStop={
-												chat.working() ? () => void chat.stop() : undefined
-											}
-											disabled={updateConversation.action.isPending}
-											controls={
-												<Show when={conversation()}>
-													<AgentApprovalPicker
-														routine={
-															conversation()?.routineId
-																? {
-																		disabled: !routine(),
-																		onEdit: () => {
-																			setFocusApprovals(true);
-																			setRoutineOpen(true);
-																		},
+													</Show>
+												}
+												onSubmit={send}
+												onEditLast={editLast}
+												end={
+													<>
+														<Show when={chat.context()}>
+															{(context) => (
+																<AgentContextRing
+																	context={context()}
+																	busy={chat.working()}
+																	onCompact={() => void chat.compact()}
+																/>
+															)}
+														</Show>
+														<Show when={conversation()}>
+															{(current) => (
+																<AgentModelPicker
+																	agentKey={current().agentKey}
+																	routineId={current().routineId ?? undefined}
+																	value={current().modelSelection}
+																	onChange={(modelSelection) =>
+																		updateConversation.action.mutateAsync({
+																			id: params.conversationId,
+																			body: { modelSelection },
+																		})
 																	}
-																: undefined
-														}
-														value={
-															conversation()?.approvalMode ?? "tool-defaults"
-														}
-														disabled={updateConversation.action.isPending}
-														onChange={(approvalMode) =>
-															updateConversation.action.mutate({
-																id: params.conversationId,
-																body: { approvalMode },
-															})
-														}
+																/>
+															)}
+														</Show>
+													</>
+												}
+											/>
+										</Show>
+										{/* kept while instructions are sent instead, so the form keeps its values */}
+										<Show when={composerWidget()}>
+											{(pending) => (
+												<div
+													class="max-h-[60vh] overflow-y-auto"
+													classList={{ hidden: !activeWidget() }}
+												>
+													<AgentWidget
+														widget={pending().widget}
+														view="composer"
+														onRespond={respond}
+														onRedirect={() => setRedirecting(pending().id)}
+														onStop={() => void chat.stop()}
 													/>
-												</Show>
-											}
-											onSubmit={send}
-											onEditLast={editLast}
-											end={
-												<Show when={chat.context()}>
-													{(context) => (
-														<AgentContextRing
-															context={context()}
-															busy={chat.working()}
-															onCompact={() => void chat.compact()}
-														/>
-													)}
-												</Show>
-											}
-										/>
-									</Show>
-									{/* kept while instructions are sent instead, so the form keeps its values */}
-									<Show when={composerWidget()}>
-										{(pending) => (
-											<div
-												class="max-h-[60vh] overflow-y-auto"
-												classList={{ hidden: !activeWidget() }}
-											>
-												<AgentWidget
-													widget={pending().widget}
-													view="composer"
-													onRespond={respond}
-													onRedirect={() => setRedirecting(pending().id)}
-													onStop={() => void chat.stop()}
-												/>
-											</div>
-										)}
-									</Show>
+												</div>
+											)}
+										</Show>
+									</AgentUnavailableNotice>
 								</div>
 							</div>
 						</Show>

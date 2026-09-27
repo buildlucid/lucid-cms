@@ -31,7 +31,7 @@ const AgentChatHeader: Component<{
 								{T()("agent.routine.run")}
 							</Pill>
 						</Show>
-						<h1 class="min-w-0 truncate text-base font-medium text-title">
+						<h1 class="min-w-0 truncate text-sm font-medium text-title">
 							{conversation().title}
 						</h1>
 					</div>

@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import type { AgentApprovalMode } from "@types";
+import type { AgentApprovalMode, AiModelSelection } from "@types";
 import {
 	type Component,
 	createMemo,
@@ -11,11 +11,15 @@ import AgentApprovalPicker from "@/components/AgentApprovalPicker/AgentApprovalP
 import AgentComposer, {
 	type AgentComposerHandle,
 } from "@/components/AgentComposer/AgentComposer";
-import Alert from "@/components/Alert/Alert";
+import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
+import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getAgentAccess, isAgentDisconnected } from "@/utils/agent-access";
+import {
+	getAgentAccess,
+	getAgentUnavailableReason,
+} from "@/utils/agent-access";
 import AgentPicker from "./parts/AgentPicker";
 
 /**
@@ -30,9 +34,14 @@ const AgentPage: Component = () => {
 	const location = useLocation<{
 		message?: string;
 		approvalMode?: AgentApprovalMode;
+		modelSelection?: AiModelSelection;
 	}>();
 	const navigate = useNavigate();
 	const returned = location.state?.message;
+	const [modelSelection, setModelSelection] =
+		createSignal<AiModelSelection | null>(
+			location.state?.modelSelection ?? null,
+		);
 	const [agentKey, setAgentKey] = createSignal<string>();
 	const [approvalMode, setApprovalMode] = createSignal<AgentApprovalMode>(
 		location.state?.approvalMode ?? "tool-defaults",
@@ -41,6 +50,9 @@ const AgentPage: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const agents = createMemo(() => getAgentAccess().use);
+	const unavailable = createMemo(
+		() => getAgentUnavailableReason() !== undefined,
+	);
 	const agent = createMemo(
 		() => agents().find((agent) => agent.key === agentKey()) ?? agents()[0],
 	);
@@ -53,12 +65,13 @@ const AgentPage: Component = () => {
 	// Functions
 	const start = (text: string) => {
 		const selected = agent();
-		if (!selected) return false;
+		if (!selected || unavailable()) return false;
 		navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
 			state: {
 				message: text,
 				agentKey: selected.key,
 				approvalMode: approvalMode(),
+				modelSelection: modelSelection() ?? undefined,
 			},
 		});
 		return true;
@@ -76,11 +89,6 @@ const AgentPage: Component = () => {
 	// Render
 	return (
 		<PageLayout.Root>
-			<Show when={isAgentDisconnected()}>
-				<Alert variant="warning" appearance="bar">
-					{T()("agent.connection.required")}
-				</Alert>
-			</Show>
 			<PageLayout.Body padding="md" class="blur-background justify-center">
 				<Show when={agent()}>
 					{(current) => (
@@ -93,31 +101,43 @@ const AgentPage: Component = () => {
 								</h2>
 								<p class="text-base text-body">{T()("agent.home.title")}</p>
 							</div>
-							<AgentComposer
-								ref={(handle: AgentComposerHandle) => {
-									if (returned) handle.insert(returned);
-								}}
-								size="lg"
-								autofocus={true}
-								placeholder={T()("agent.composer.placeholder")}
-								draftKey="new"
-								onSubmit={start}
-								controls={
-									<AgentApprovalPicker
-										value={approvalMode()}
-										onChange={setApprovalMode}
-									/>
-								}
-								start={
-									<Show when={agents().length > 1}>
-										<AgentPicker
-											agents={agents()}
-											selected={current()}
-											onSelect={(agent) => setAgentKey(agent.key)}
+							<AgentUnavailableNotice>
+								<AgentComposer
+									ref={(handle: AgentComposerHandle) => {
+										if (returned) handle.insert(returned);
+									}}
+									size="lg"
+									autofocus={true}
+									placeholder={T()("agent.composer.placeholder")}
+									draftKey="new"
+									onSubmit={start}
+									controls={
+										<AgentApprovalPicker
+											value={approvalMode()}
+											onChange={setApprovalMode}
 										/>
-									</Show>
-								}
-							/>
+									}
+									start={
+										<Show when={agents().length > 1}>
+											<AgentPicker
+												agents={agents()}
+												selected={current()}
+												onSelect={(agent) => {
+													setAgentKey(agent.key);
+													setModelSelection(null);
+												}}
+											/>
+										</Show>
+									}
+									end={
+										<AgentModelPicker
+											agentKey={current().key}
+											value={modelSelection()}
+											onChange={setModelSelection}
+										/>
+									}
+								/>
+							</AgentUnavailableNotice>
 						</section>
 					)}
 				</Show>

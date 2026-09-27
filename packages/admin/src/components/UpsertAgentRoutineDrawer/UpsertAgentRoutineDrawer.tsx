@@ -1,4 +1,4 @@
-import type { AgentRoutine } from "@types";
+import type { AgentRoutine, AiModelSelection } from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -13,6 +13,7 @@ import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Input from "@/components/Input/Input";
+import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
 import Textarea from "@/components/Textarea/Textarea";
@@ -29,6 +30,7 @@ import {
 import { getBodyError } from "@/utils/error-helpers";
 import { getDefaultTimezone } from "@/utils/release-schedule";
 import AgentRoutineDetails from "./parts/AgentRoutineDetails";
+import AgentRoutineModelField from "./parts/AgentRoutineModelField";
 import AgentRoutineToolApprovals from "./parts/AgentRoutineToolApprovals";
 import AgentScheduleField from "./parts/AgentScheduleField";
 
@@ -46,6 +48,8 @@ const UpsertAgentRoutineDrawer: Component<{
 	const [agentKey, setAgentKey] = createSignal<string>();
 	const [name, setName] = createSignal("");
 	const [instructions, setInstructions] = createSignal("");
+	const [modelSelection, setModelSelection] =
+		createSignal<AiModelSelection | null>(null);
 	const [schedule, setSchedule] = createSignal<Schedule>(defaultSchedule);
 	const [timezone, setTimezone] = createSignal(getDefaultTimezone());
 	const [enabled, setEnabled] = createSignal(true);
@@ -92,6 +96,7 @@ const UpsertAgentRoutineDrawer: Component<{
 				setRoutineTools(routine?.tools ?? {});
 				setName(routine?.name ?? "");
 				setInstructions(routine?.instructions ?? "");
+				setModelSelection(routine?.modelSelection ?? null);
 				setSchedule(routine ? parseSchedule(routine.cron) : defaultSchedule);
 				setTimezone(routine?.timezone ?? getDefaultTimezone());
 				setEnabled(routine?.enabled ?? true);
@@ -135,6 +140,7 @@ const UpsertAgentRoutineDrawer: Component<{
 					const body = {
 						name: name(),
 						instructions: instructions(),
+						modelSelection: modelSelection(),
 						cron: toCron(schedule()),
 						timezone: timezone(),
 						enabled: enabled(),
@@ -169,6 +175,7 @@ const UpsertAgentRoutineDrawer: Component<{
 									if (value) {
 										setAgentKey(String(value));
 										setRoutineTools({});
+										setModelSelection(null);
 									}
 								}}
 								options={agents().map((agent) => ({
@@ -190,34 +197,61 @@ const UpsertAgentRoutineDrawer: Component<{
 							label={T()("common.name")}
 							errors={getBodyError("name", errors)}
 						/>
-						<Textarea
-							id="agent-routine-instructions"
-							name="instructions"
-							value={instructions()}
-							onChange={setInstructions}
-							rows={8}
-							required={true}
-							label={T()("agent.routine.instructions")}
-							description={T()("agent.routine.instructions.description")}
-							errors={getBodyError("instructions", errors)}
-						/>
-						<AgentScheduleField
-							schedule={schedule()}
-							setSchedule={setSchedule}
-							timezone={timezone()}
-							setTimezone={setTimezone}
-						/>
+						<section class="mt-2">
+							<SectionHeading
+								level={3}
+								title={T()("agent.routine.section.task.title")}
+								description={T()("agent.routine.section.task.description")}
+							/>
+							<div class="flex flex-col gap-4">
+								<AgentRoutineModelField
+									agentKey={props.state.open ? agentKey() : undefined}
+									value={modelSelection()}
+									onChange={setModelSelection}
+									errors={getBodyError("modelSelection", errors)}
+								/>
+								<Textarea
+									id="agent-routine-instructions"
+									name="instructions"
+									value={instructions()}
+									onChange={setInstructions}
+									rows={8}
+									required={true}
+									label={T()("agent.routine.instructions")}
+									description={T()("agent.routine.instructions.description")}
+									errors={getBodyError("instructions", errors)}
+								/>
+							</div>
+						</section>
 					</Show>
-					<Switch
-						id="agent-routine-enabled"
-						name="enabled"
-						value={enabled()}
-						onChange={setEnabled}
-						trueLabel={T()("common.yes")}
-						falseLabel={T()("common.no")}
-						label={T()("agent.routine.enabled")}
-						description={T()("agent.routine.enabled.description")}
-					/>
+					{/* code routines can still be paused, so the switch sits outside the locked fields */}
+					<section class="mt-2">
+						<SectionHeading
+							level={3}
+							title={T()("common.schedule")}
+							description={T()("agent.routine.section.schedule.description")}
+						/>
+						<div class="flex flex-col gap-4">
+							<Show when={!locked()}>
+								<AgentScheduleField
+									schedule={schedule()}
+									setSchedule={setSchedule}
+									timezone={timezone()}
+									setTimezone={setTimezone}
+								/>
+							</Show>
+							<Switch
+								id="agent-routine-enabled"
+								name="enabled"
+								value={enabled()}
+								onChange={setEnabled}
+								trueLabel={T()("common.yes")}
+								falseLabel={T()("common.no")}
+								label={T()("agent.routine.enabled")}
+								description={T()("agent.routine.enabled.description")}
+							/>
+						</div>
+					</section>
 					<AgentRoutineToolApprovals
 						tools={agentTools()}
 						value={routineTools()}

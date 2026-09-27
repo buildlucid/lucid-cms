@@ -129,6 +129,11 @@ const getErrorCopy = (errorKey?: string) => {
 					"server:core.ai.remote.generation.request.invalid.message",
 				),
 			};
+		case "cms_ai_model_unavailable":
+			return {
+				name: copy("server:core.ai.remote.model.unavailable.name"),
+				message: copy("server:core.ai.remote.model.unavailable.message"),
+			};
 		case "ai_provider_request_failed":
 		case "ai_provider_invalid_response":
 		case "ai_provider_output_truncated":

@@ -7,9 +7,11 @@ import {
 	agentRunOutcomeSchema,
 	routineToolsSchema,
 } from "../../schemas/agent.js";
+import type { AiModelConfig, AiModelSelection } from "../../types/response.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
 import type { SkillDefinition } from "../skills/types.js";
 import type { AgentToolDefinition } from "../tools/types.js";
+import { aiModelSelectionSchema } from "./model-selection.js";
 
 export const toolCallSchema = z.object({
 	id: z.string(),
@@ -24,6 +26,7 @@ export const modelMessageSchema = z.discriminatedUnion("role", [
 		role: z.literal("assistant"),
 		content: z.string().optional(),
 		toolCalls: z.array(toolCallSchema).optional(),
+		reasoningDetails: z.array(z.record(z.string(), z.json())).optional(),
 	}),
 	z.object({
 		role: z.literal("tool"),
@@ -46,6 +49,7 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 		type: z.literal("finish"),
 		requestId: z.string(),
 		usage: cmsAiUsageSchema,
+		reasoningDetails: z.array(z.record(z.string(), z.json())).optional(),
 	}),
 	z.object({ type: z.literal("error"), message: z.string() }),
 ]);
@@ -53,6 +57,8 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 /** Everything needed to resume a run exactly where it stopped. */
 export const checkpointSchema = z.object({
 	version: z.literal(1),
+	/** The model and effort for this run, resolved once when it starts. */
+	selection: aiModelSelectionSchema.optional(),
 	/** Captured when the run starts, so changing chat settings never changes a pending decision. */
 	approvalMode: agentApprovalModeSchema,
 	/** Routine tool settings captured when this run starts. */
@@ -136,6 +142,8 @@ export type DefineRoutineOptions<Key extends string> = {
 	name: string;
 	/** What each run should do. Common indentation is removed, so template literals can be indented. */
 	instructions: string;
+	/** The model each run uses, eg. `{ modelId: "openai/gpt-6-luna", reasoningEffort: "low" }`. Defaults to the agent's model. */
+	model?: AiModelSelection;
 	/** Per-tool settings by tool name, eg. `{ save_note: { requiresApproval: true } }`. Omitted tools and settings keep the tool's defaults. */
 	tools?: Readonly<RoutineTools>;
 	schedule: {
@@ -152,6 +160,7 @@ export type RoutineDefinition<Key extends string = string> = {
 	readonly key: Key;
 	readonly name: string;
 	readonly instructions: string;
+	readonly model?: AiModelSelection;
 	readonly tools: Readonly<RoutineTools>;
 	readonly schedule: { readonly cron: string; readonly timezone: string };
 };
@@ -159,6 +168,8 @@ export type RoutineDefinition<Key extends string = string> = {
 export type DefineAgentOptions<Key extends string> = {
 	/** Stable, unique key using lowercase letters, numbers and single hyphens. Changing it detaches saved chats and routines. */
 	key: Key;
+	/** Set to false to turn the agent off without removing it. Its chats and routines are kept. Defaults to true. */
+	enabled?: boolean;
 	name: string;
 	/** Helps people choose the agent. */
 	description: string;
@@ -167,6 +178,8 @@ export type DefineAgentOptions<Key extends string> = {
 	/** Additional tools the agent can call. Lucid's content tools are always available. */
 	tools?: readonly AgentToolDefinition[];
 	skills?: readonly SkillDefinition[];
+	/** The default model and the models people can choose. Leave out to offer every model the Lucid service provides. */
+	models?: AiModelConfig;
 	/** Scheduled routines that run as the system. People with the agent's manage permission can review them. */
 	routines?: readonly RoutineDefinition[];
 };
@@ -175,10 +188,12 @@ export type DefineAgentOptions<Key extends string> = {
 export type AgentDefinition<Key extends string = string> = {
 	readonly type: "agent-definition";
 	readonly key: Key;
+	readonly enabled: boolean;
 	readonly name: string;
 	readonly description: string;
 	readonly instructions: string;
 	readonly tools: readonly AgentToolDefinition[];
 	readonly skills: readonly SkillDefinition[];
+	readonly models?: AiModelConfig;
 	readonly routines: readonly RoutineDefinition[];
 };

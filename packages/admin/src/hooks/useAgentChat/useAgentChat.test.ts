@@ -42,6 +42,7 @@ const conversation: AgentConversation = {
 	},
 	queuePaused: false,
 	approvalMode: "tool-defaults",
+	modelSelection: null,
 	inputs: [],
 	context: null,
 	createdAt: null,

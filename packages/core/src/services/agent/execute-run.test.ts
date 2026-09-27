@@ -1267,7 +1267,7 @@ describe("conversation compaction", () => {
 	//* longer than the tail kept verbatim at this limit, so there is always something to summarise
 	const longReply = `Draft saved. No publishing was requested. ${"Detail. ".repeat(300)}`;
 	const summaryOf = (checkpoint?: Checkpoint | null) =>
-		JSON.stringify(checkpoint?.messages[0]).includes(
+		(JSON.stringify(checkpoint?.messages[0]) ?? "").includes(
 			"Earlier conversation summary",
 		);
 	const compactAfterReply = async () => {
@@ -1454,6 +1454,7 @@ describe("conversation compaction", () => {
 	});
 
 	test("history retrieval is scoped to the conversation and returns bounded pages", async () => {
+		inputTokenLimit = 16_000;
 		const other = await prepare();
 		const prepared = await prepare();
 		const messages = new AgentMessagesRepository(context.db);
@@ -2304,5 +2305,66 @@ describe("runs acting as the system", () => {
 				})
 			).data,
 		).toEqual({ user_id: userId });
+	});
+});
+
+vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => {
+	const { agentModelCatalog, mockAgentModels } = await import(
+		"../../utils/test-helpers/agent-models.js"
+	);
+	return {
+		default: mockAgentModels(() => ({
+			...agentModelCatalog,
+			models: agentModelCatalog.models.map((model) =>
+				model.id === "test-model" ? { ...model, inputTokenLimit } : model,
+			),
+		})),
+	};
+});
+
+describe("saved model choices", () => {
+	test("a change applies to the next run while a started run keeps its model", async () => {
+		const prepared = await prepare();
+		const changed = await updateConversation(context, {
+			id: prepared.conversationId,
+			userId,
+			modelSelection: { modelId: "small-model" },
+		});
+		expect(changed.data?.modelSelection).toEqual({
+			modelId: "small-model",
+			reasoningEffort: null,
+		});
+		reply("Hello from the original model.");
+		await executeRun(context, { runId: prepared.runId });
+		expect(model.mock.calls[0]?.[1].selection).toEqual({
+			modelId: "test-model",
+			reasoningEffort: "low",
+		});
+
+		const next = await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: randomUUID(),
+			text: "Continue.",
+		});
+		expect(next.error).toBeUndefined();
+		const saved = await new AgentRunsRepository(context.db).selectSingle({
+			select: ["checkpoint"],
+			where: [{ key: "id", operator: "=", value: next.data?.runId ?? "" }],
+		});
+		expect(saved.data?.checkpoint?.selection).toEqual({
+			modelId: "small-model",
+			reasoningEffort: null,
+		});
+	});
+
+	test("rejects a model the agent does not offer", async () => {
+		const prepared = await prepare();
+		const rejected = await updateConversation(context, {
+			id: prepared.conversationId,
+			userId,
+			modelSelection: { modelId: "retired-model" },
+		});
+		expect(rejected.error?.status).toBe(400);
 	});
 });

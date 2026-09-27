@@ -53,6 +53,7 @@ const mediaImageGenerateController = factory.createHandlers(
 				message: copy("server:core.routes.ai.generate.error.message"),
 			},
 		})(context, {
+			sessionId: body.sessionId,
 			instruction: body.instruction,
 			guidance: body.guidance,
 			previousInstructions: body.previousInstructions,

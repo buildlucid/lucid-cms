@@ -315,3 +315,9 @@ describe("run recovery", () => {
 		expect((await routineRuns(routine.id))[0]?.status).toBe("failed");
 	});
 });
+
+vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => ({
+	default: (
+		await import("../../utils/test-helpers/agent-models.js")
+	).mockAgentModels(),
+}));

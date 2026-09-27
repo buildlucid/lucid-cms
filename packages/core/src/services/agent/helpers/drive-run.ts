@@ -17,6 +17,7 @@ import consumeSteering from "./consume-steering.js";
 import executeToolStep from "./execute-tool-step.js";
 import loadHistory from "./load-history.js";
 import resolveCapabilities from "./resolve-capabilities.js";
+import resolveModel from "./resolve-model.js";
 import runModelTurn from "./run-model-turn.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import startNextTurn from "./start-next-turn.js";
@@ -46,6 +47,31 @@ const driveRun: ServiceFn<
 				context.translate("server:agent.access.unavailable"),
 		);
 	}
+
+	if (!checkpoint.selection || !checkpoint.model) {
+		const model = await resolveModel(context, {
+			agentKey: run.agent_key,
+			routineId: run.conversation_routine_id,
+			selection: checkpoint.selection,
+		});
+		if (model.error) {
+			return session.finish(
+				"interrupted",
+				context.translate(model.error.message),
+			);
+		}
+
+		checkpoint.selection = model.data.selection;
+		checkpoint.model = {
+			id: model.data.model.id,
+			tokenLimit: model.data.model.inputTokenLimit,
+		};
+		checkpoint.measured = undefined;
+
+		const saved = await session.save();
+		if (saved.error) return saved;
+	}
+
 	//* resolved before each model turn, since trimmed context adds the history tool
 	const resolve = () =>
 		resolveCapabilities(context, {

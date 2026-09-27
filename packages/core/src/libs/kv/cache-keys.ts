@@ -7,6 +7,9 @@ const cacheKeys = {
 	collection: {
 		schema: (collectionKey: string) => `collection:schema:${collectionKey}`,
 	},
+	ai: {
+		agentModels: "ai:agent-models",
+	},
 	/**
 	 * Generate cache keys for rate limiting (used by rate limiter middleware)
 	 */

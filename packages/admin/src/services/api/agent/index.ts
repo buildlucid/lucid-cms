@@ -8,6 +8,7 @@ import useDeleteRoutine from "./useDeleteRoutine";
 import useGetConversation from "./useGetConversation";
 import useGetConversations from "./useGetConversations";
 import useGetMessages from "./useGetMessages";
+import useGetModels from "./useGetModels";
 import useGetRoutine from "./useGetRoutine";
 import useGetRoutineRuns from "./useGetRoutineRuns";
 import useGetRoutines from "./useGetRoutines";
@@ -27,6 +28,7 @@ const exportObject = {
 	useGetConversation,
 	useGetConversations,
 	useGetMessages,
+	useGetModels,
 	useGetRoutine,
 	useGetRoutineRuns,
 	useGetRoutines,

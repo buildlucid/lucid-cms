@@ -74,6 +74,7 @@ test("system approvals require live manage permission and user approvals stay pr
 		execution_version: 0,
 		agent_key: agent.key,
 		conversation_user_id: null,
+		conversation_routine_id: null,
 	};
 	const answer = () =>
 		validateInteractionResponse(context, {

@@ -62,6 +62,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 						"lucid_agent_runs.execution_version",
 						"lucid_agent_conversations.agent_key",
 						"lucid_agent_conversations.user_id as conversation_user_id",
+						"lucid_agent_conversations.routine_id as conversation_routine_id",
 					])
 					.where("lucid_agent_runs.id", "=", runId)
 					.executeTakeFirst(),

@@ -206,6 +206,8 @@ const CustomFieldGenerationModal: Component = () => {
 		createSignal<CustomFieldInputGenerateResponse["usage"]["cost"]>();
 	const [clientError, setClientError] = createSignal<string>();
 	const documentLocalization = useDocumentLocalization();
+	//* groups every attempt until the modal is cleared, so Lucid can see how many it took
+	let sessionId = crypto.randomUUID();
 	let abortController: AbortController | undefined;
 
 	// -----------------------------
@@ -523,6 +525,7 @@ const CustomFieldGenerationModal: Component = () => {
 	};
 	const clear = () => {
 		resetSession();
+		sessionId = crypto.randomUUID();
 		setSelectedLocales([]);
 		setHistoryItems([]);
 		setActiveHistoryItemId(CURRENT_HISTORY_ITEM_ID);
@@ -570,6 +573,7 @@ const CustomFieldGenerationModal: Component = () => {
 				signal: abortController.signal,
 				shouldToast: () => aiModalsStore.isOpen("customFieldGeneration"),
 				body: {
+					sessionId,
 					instruction: values.instruction,
 					guidance: values.guidance,
 					value: createGenerationValue({

@@ -5,6 +5,7 @@ import { AgentConversationsRepository } from "../../../libs/repositories/index.j
 import type {
 	AgentApprovalMode,
 	AgentConversation,
+	AiModelSelection,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -19,6 +20,7 @@ const insertConversation: ServiceFn<
 			id?: string;
 			agentKey: string;
 			approvalMode?: AgentApprovalMode;
+			modelSelection?: AiModelSelection;
 			userId: number | null;
 			title?: string;
 			routineId?: string;
@@ -34,6 +36,8 @@ const insertConversation: ServiceFn<
 			id: input.id ?? randomUUID(),
 			agent_key: input.agentKey,
 			approval_mode: input.routineId ? "tool-defaults" : input.approvalMode,
+			//* resolved when each run starts, so saving a chat never waits on the Lucid service
+			model_selection: input.modelSelection ?? null,
 			title: input.title ?? constants.agent.defaultTitle,
 			user_id: input.userId,
 			routine_id: input.routineId ?? null,

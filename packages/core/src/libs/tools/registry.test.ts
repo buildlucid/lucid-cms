@@ -59,7 +59,7 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 	const config = await processConfig(
 		{
 			secrets: "a".repeat(64),
-			ai: { mcp: { tools: [echo] } },
+			ai: { features: { mcp: true }, mcp: { tools: [echo] } },
 			plugins: [
 				{
 					key: "test-plugin",
@@ -73,7 +73,7 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 		},
 		{ resolvedDb: adapter, skipValidation: true },
 	);
-	expect(config.ai.mcp.enabled).toBe(true);
+	expect(config.ai.features.mcp).toBe(true);
 	expect([...getMcpToolRegistry(config).keys()]).toEqual(
 		[
 			...getCoreMcpTools().map((tool) => tool.name),
@@ -92,7 +92,7 @@ test("ai boolean shorthand keeps the remaining AI defaults", async () => {
 	expect(config.ai).toMatchObject({
 		enabled: false,
 		features: { imageGeneration: true },
-		mcp: { enabled: false, tools: [], skills: [] },
+		mcp: { tools: [], skills: [] },
 		agents: [],
 	});
 });
