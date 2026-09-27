@@ -9,6 +9,11 @@ import {
 import type { EmailStorageConfig } from "./types.js";
 
 const encryptionKey = testingConstants.key;
+const encrypted = {
+	__lucid_email_encrypted: true,
+	version: 1,
+	value: expect.any(String),
+};
 const unwrap = <T>(response: Awaited<ServiceResponse<T>>) => {
 	expect(response.error).toBeUndefined();
 	return response.data as T;
@@ -43,8 +48,14 @@ describe("email storage data", () => {
 			}),
 		);
 
-		expect(JSON.stringify(stored)).not.toContain("secret");
-		expect(JSON.stringify(stored)).not.toContain("nested");
+		expect(stored).toMatchObject({
+			string: encrypted,
+			object: encrypted,
+			array: encrypted,
+			nil: encrypted,
+			bool: encrypted,
+			num: encrypted,
+		});
 
 		expect(
 			unwrap(
@@ -130,10 +141,13 @@ describe("email storage data", () => {
 			}),
 		);
 
-		expect(JSON.stringify(stored)).not.toContain("123-45-6789");
-		expect(JSON.stringify(stored)).not.toContain("alpha");
-		expect(JSON.stringify(stored)).not.toContain("one");
-		expect(JSON.stringify(stored)).not.toContain("two");
+		expect(stored).toMatchObject({
+			payload: { ssn: encrypted },
+			payload2: [encrypted, "beta"],
+			payload4: {
+				array: [{ token: encrypted }, { token: encrypted }],
+			},
+		});
 
 		expect(
 			unwrap(
