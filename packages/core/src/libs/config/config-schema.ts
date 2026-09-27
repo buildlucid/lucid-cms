@@ -116,7 +116,14 @@ const AiConfigSchema = z.strictObject({
 			skills: z.array(SkillDefinitionSchema).default([]),
 		})
 		.prefault({}),
-	agents: z.array(AgentDefinitionSchema).default([]),
+	agents: z
+		.preprocess(
+			(value) => (Array.isArray(value) ? { definitions: value } : value),
+			z.strictObject({
+				definitions: z.array(AgentDefinitionSchema).default([]),
+			}),
+		)
+		.prefault({}),
 });
 
 const KVAdapterSchema = z.custom<

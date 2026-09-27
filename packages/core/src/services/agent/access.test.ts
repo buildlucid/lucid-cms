@@ -20,7 +20,10 @@ test("chats are private, and code routine chats are shared with the agent's mana
 	const context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: [agent("seo"), agent("copy")] },
+			ai: {
+				...config.ai,
+				agents: { definitions: [agent("seo"), agent("copy")] },
+			},
 		},
 		database: await testConfig.getDatabase(),
 		translationStore: createTranslationStore({

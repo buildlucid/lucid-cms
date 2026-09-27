@@ -223,7 +223,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: [testAgent] },
+			ai: { ...config.ai, agents: { definitions: [testAgent] } },
 		},
 		database,
 		translationStore: createTranslationStore({

@@ -20,7 +20,10 @@ test("agent access follows live roles per agent, revocation and account locks", 
 		tools: [],
 	});
 	const context = createServiceContext({
-		config: { ...config, ai: { ...config.ai, agents: [agent] } },
+		config: {
+			...config,
+			ai: { ...config.ai, agents: { definitions: [agent] } },
+		},
 		database: await testConfig.getDatabase(),
 		translationStore: createTranslationStore({
 			defaultLocale: "en",

@@ -39,7 +39,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 	);
 	if (storedTools.error) return storedTools;
 
-	const defined = context.config.ai.agents.flatMap((agent) =>
+	const defined = context.config.ai.agents.definitions.flatMap((agent) =>
 		agent.routines.map((routine) => ({ agentKey: agent.key, routine })),
 	);
 	const now = new Date().toISOString();

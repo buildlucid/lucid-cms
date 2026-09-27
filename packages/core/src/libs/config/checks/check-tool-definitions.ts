@@ -124,7 +124,7 @@ const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 	checkPlacement("MCP", "mcp", mcpTools);
 	for (const tool of mcpTools) checked.add(tool);
 
-	for (const agent of config.ai.agents) {
+	for (const agent of config.ai.agents.definitions) {
 		const label = `Agent "${agent.key}"`;
 		const coreAgentTools = getCoreAgentTools();
 		const tools = [...coreAgentTools, ...agent.tools];

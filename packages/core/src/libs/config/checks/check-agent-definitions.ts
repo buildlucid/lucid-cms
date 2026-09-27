@@ -18,7 +18,7 @@ const checkAgentDefinitions = (config: {
 }) => {
 	const keys = new Set<string>();
 
-	for (const agent of config.ai.agents) {
+	for (const agent of config.ai.agents.definitions) {
 		if (agent.key.length > 64 || !keyPattern.test(agent.key)) {
 			throw new Error(
 				`Invalid agent key "${agent.key}". Use lowercase letters, numbers and single hyphens.`,

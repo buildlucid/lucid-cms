@@ -67,7 +67,10 @@ beforeAll(async () => {
 		await Migration00000014(config.db).up(database.client);
 	}
 	context = createServiceContext({
-		config: { ...config, ai: { ...config.ai, agents: [testAgent] } },
+		config: {
+			...config,
+			ai: { ...config.ai, agents: { definitions: [testAgent] } },
+		},
 		database,
 		translationStore: createTranslationStore({
 			defaultLocale: "en",
@@ -235,7 +238,10 @@ describe("code routines", () => {
 			...context,
 			config: {
 				...context.config,
-				ai: { ...context.config.ai, agents: [renamed] },
+				ai: {
+					...context.config.ai,
+					agents: { definitions: [renamed] },
+				},
 			},
 		});
 		const updated = await codeRoutine();
@@ -250,7 +256,10 @@ describe("code routines", () => {
 
 		await syncAgentRoutines({
 			...context,
-			config: { ...context.config, ai: { ...context.config.ai, agents: [] } },
+			config: {
+				...context.config,
+				ai: { ...context.config.ai, agents: { definitions: [] } },
+			},
 		});
 		expect(await codeRoutine()).toBeUndefined();
 		expect((await getRoutineTools(context, [id])).data?.[id]).toEqual({});

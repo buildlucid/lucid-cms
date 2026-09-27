@@ -11,7 +11,7 @@ const aiConfig = (mcp: boolean) => ({
 		agents: true,
 		mcp,
 	},
-	agents: [],
+	agents: { definitions: [] },
 });
 
 describe("external scopes", () => {

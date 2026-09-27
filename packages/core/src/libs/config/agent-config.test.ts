@@ -20,17 +20,29 @@ const agent = defineAgent({
 	routines: [routine],
 });
 const check = (agents: AgentDefinition[]) => () =>
-	checkAgentDefinitions({ ai: { agents } });
+	checkAgentDefinitions({ ai: { agents: { definitions: agents } } });
 
 test("MCP stays off until its feature is switched on, and agents default to none", () => {
 	const config = ConfigSchema.pick({ ai: true });
 	expect(config.parse({}).ai).toMatchObject({
 		features: { agents: true, mcp: false },
 		mcp: { tools: [], skills: [] },
-		agents: [],
+		agents: { definitions: [] },
 	});
 	expect(config.parse({ ai: { mcp: {} } }).ai.features.mcp).toBe(false);
 	expect(config.parse({ ai: false }).ai.enabled).toBe(false);
+});
+
+test("agent arrays and objects resolve to the same config", () => {
+	const schema = ConfigSchema.pick({ ai: true });
+	const shorthand = schema.parse({ ai: { agents: [agent] } });
+	const object = schema.parse({ ai: { agents: { definitions: [agent] } } });
+
+	expect(shorthand.ai.agents).toEqual({ definitions: [agent] });
+	expect(object.ai.agents).toEqual(shorthand.ai.agents);
+	expect(schema.parse({ ai: { agents: {} } }).ai.agents).toEqual({
+		definitions: [],
+	});
 });
 
 test("only enabled agents are used, and only while their feature is on", () => {

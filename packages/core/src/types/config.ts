@@ -338,7 +338,7 @@ export interface LucidConfig {
 					skills?: SkillDefinition[];
 				};
 				/** Agents available in the admin, created with `defineAgent`. Requires a connected Lucid AI account. */
-				agents?: AgentDefinition[];
+				agents?: AgentDefinition[] | { definitions?: AgentDefinition[] };
 		  };
 	/**
 	 * Content localization settings.
@@ -645,7 +645,7 @@ export interface ResolvedLucidConfig {
 			tools: McpToolDefinition[];
 			skills: SkillDefinition[];
 		};
-		agents: AgentDefinition[];
+		agents: { definitions: AgentDefinition[] };
 	};
 	localization: LocalizationConfig;
 	i18n: Required<I18nConfig>;

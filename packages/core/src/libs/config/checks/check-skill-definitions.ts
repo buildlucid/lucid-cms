@@ -49,7 +49,7 @@ const checkSkillDefinitions = (config: ResolvedLucidConfig) => {
 	const checked = new Set<SkillDefinition>(config.ai.mcp.skills);
 	checkPlacement("MCP", config.ai.mcp.skills);
 
-	for (const agent of config.ai.agents) {
+	for (const agent of config.ai.agents.definitions) {
 		checkPlacement(`Agent "${agent.key}"`, agent.skills);
 		for (const skill of agent.skills) checked.add(skill);
 	}

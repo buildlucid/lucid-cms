@@ -59,14 +59,18 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 	const config = await processConfig(
 		{
 			secrets: "a".repeat(64),
-			ai: { features: { mcp: true }, mcp: { tools: [echo] } },
+			ai: {
+				features: { mcp: true },
+				mcp: { tools: [echo] },
+				agents: { definitions: [agent("configured")] },
+			},
 			plugins: [
 				{
 					key: "test-plugin",
 					lucid: "*",
 					configure: (draft) => {
 						draft.ai.mcp.tools.push(pluginTool);
-						draft.ai.agents.push(agent("plugin"));
+						draft.ai.agents.definitions.push(agent("plugin"));
 					},
 				},
 			],
@@ -81,7 +85,10 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 			"test_echo",
 		].sort(),
 	);
-	expect(config.ai.agents.map((agent) => agent.key)).toEqual(["plugin"]);
+	expect(config.ai.agents.definitions.map((agent) => agent.key)).toEqual([
+		"configured",
+		"plugin",
+	]);
 });
 
 test("ai boolean shorthand keeps the remaining AI defaults", async () => {
@@ -93,7 +100,7 @@ test("ai boolean shorthand keeps the remaining AI defaults", async () => {
 		enabled: false,
 		features: { imageGeneration: true },
 		mcp: { tools: [], skills: [] },
-		agents: [],
+		agents: { definitions: [] },
 	});
 });
 
@@ -128,7 +135,7 @@ test("names are unique within a placement, which only holds its own target", asy
 		options,
 	);
 	expect(getMcpToolRegistry(config).get("test_echo")).toEqual(echo);
-	expect(config.ai.agents[1]?.tools).toEqual([agentEcho]);
+	expect(config.ai.agents.definitions[1]?.tools).toEqual([agentEcho]);
 });
 
 test("content tool names are reserved in each placement", async () => {
@@ -172,7 +179,7 @@ test("each agent's provider limit includes content and runner tools", async () =
 	});
 	const withAgent = (definition: ReturnType<typeof agent>) => ({
 		...base,
-		ai: { ...base.ai, agents: [definition] },
+		ai: { ...base.ai, agents: { definitions: [definition] } },
 	});
 
 	expect(() =>
@@ -217,7 +224,10 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets", 
 	const check = (key: string) => () =>
 		checkToolDefinitions({
 			...base,
-			ai: { ...base.ai, agents: [agent("test", [picker(key)])] },
+			ai: {
+				...base.ai,
+				agents: { definitions: [agent("test", [picker(key)])] },
+			},
 		});
 
 	expect(check("lucid-question")).toThrow(

@@ -48,7 +48,7 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 			agents: true,
 			mcp: false,
 		},
-		agents: [],
+		agents: { definitions: [] },
 	},
 });
 

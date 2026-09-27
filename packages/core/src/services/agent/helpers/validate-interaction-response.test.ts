@@ -24,7 +24,10 @@ test("system approvals require live manage permission and user approvals stay pr
 		tools: [],
 	});
 	const context = createServiceContext({
-		config: { ...config, ai: { ...config.ai, agents: [agent] } },
+		config: {
+			...config,
+			ai: { ...config.ai, agents: { definitions: [agent] } },
+		},
 		database: await testConfig.getDatabase(),
 		translationStore: createTranslationStore({
 			config: { defaultLocale: "en", locales: ["en"] },
