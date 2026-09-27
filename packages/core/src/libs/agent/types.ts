@@ -5,6 +5,7 @@ import {
 	agentInteractiveWidgetSchema,
 	agentMessagePartSchema,
 	agentRunOutcomeSchema,
+	routineToolsSchema,
 } from "../../schemas/agent.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
 import type { SkillDefinition } from "../skills/types.js";
@@ -54,6 +55,8 @@ export const checkpointSchema = z.object({
 	version: z.literal(1),
 	/** Captured when the run starts, so changing chat settings never changes a pending decision. */
 	approvalMode: agentApprovalModeSchema,
+	/** Routine tool settings captured when this run starts. */
+	routineTools: routineToolsSchema.optional(),
 	/** Input receipts survive compaction and a crash before acknowledgement. */
 	inputIds: z.array(z.uuid()).optional(),
 	messages: z.array(
@@ -125,6 +128,7 @@ export type Checkpoint = z.infer<typeof checkpointSchema>;
 export type ConversationContext = z.infer<typeof agentContextSchema>;
 /** Chat runs answer a person; routine runs work unattended until they finish. */
 export type RunMode = "chat" | "routine";
+export type RoutineTools = z.infer<typeof routineToolsSchema>;
 
 export type DefineRoutineOptions<Key extends string> = {
 	/** Stable key, unique within the agent, using lowercase letters, numbers and single hyphens. */
@@ -132,6 +136,8 @@ export type DefineRoutineOptions<Key extends string> = {
 	name: string;
 	/** What each run should do. Common indentation is removed, so template literals can be indented. */
 	instructions: string;
+	/** Per-tool settings by tool name, eg. `{ save_note: { requiresApproval: true } }`. Omitted tools and settings keep the tool's defaults. */
+	tools?: Readonly<RoutineTools>;
 	schedule: {
 		/** Five-field cron expression with minute precision. */
 		cron: string;
@@ -146,6 +152,7 @@ export type RoutineDefinition<Key extends string = string> = {
 	readonly key: Key;
 	readonly name: string;
 	readonly instructions: string;
+	readonly tools: Readonly<RoutineTools>;
 	readonly schedule: { readonly cron: string; readonly timezone: string };
 };
 

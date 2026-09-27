@@ -1,10 +1,13 @@
 import { randomUUID } from "node:crypto";
+import type { RoutineTools } from "../../libs/agent/types.js";
 import { agentFormatter } from "../../libs/formatters/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type { AgentRoutine } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkAgentAccess from "./helpers/check-agent-access.js";
 import nextRoutineOccurrence from "./helpers/next-routine-occurrence.js";
+import saveRoutineTools from "./helpers/save-routine-tools.js";
+import validateRoutineTools from "./helpers/validate-routine-tools.js";
 
 /** Creates a routine that is private to the user and runs with their permissions. */
 const createRoutine: ServiceFn<
@@ -13,6 +16,7 @@ const createRoutine: ServiceFn<
 			agentKey: string;
 			userId: number;
 			name: string;
+			tools?: RoutineTools;
 			instructions: string;
 			cron: string;
 			timezone: string;
@@ -31,9 +35,17 @@ const createRoutine: ServiceFn<
 	const next = nextRoutineOccurrence(input);
 	if (next.error) return next;
 
-	const now = new Date().toISOString();
+	const tools = input.tools ?? {};
+	const validation = await validateRoutineTools(context, {
+		agentKey: input.agentKey,
+		userId: input.userId,
+		tools,
+	});
+	if (validation.error) return validation;
+
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
 
+	const now = new Date().toISOString();
 	const created = await AgentRoutines.createSingle({
 		data: {
 			id: randomUUID(),
@@ -55,9 +67,15 @@ const createRoutine: ServiceFn<
 	});
 	if (created.error) return created;
 
+	const saved = await saveRoutineTools(context, {
+		routineId: created.data.id,
+		tools,
+	});
+	if (saved.error) return saved;
+
 	return {
 		error: undefined,
-		data: agentFormatter.formatRoutine({ routine: created.data }),
+		data: agentFormatter.formatRoutine({ routine: created.data, tools }),
 	};
 };
 

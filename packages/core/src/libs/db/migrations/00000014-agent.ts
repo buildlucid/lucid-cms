@@ -69,6 +69,21 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.execute();
 
 		await db.schema
+			.createTable("lucid_agent_routine_tools")
+			.addColumn("routine_id", adapter.getDataType("text"), (col) =>
+				col.notNull().references("lucid_agent_routines.id").onDelete("cascade"),
+			)
+			.addColumn("tool_name", adapter.getDataType("text"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("requires_approval", adapter.getDataType("boolean"))
+			.addPrimaryKeyConstraint("pk_agent_routine_tools", [
+				"routine_id",
+				"tool_name",
+			])
+			.execute();
+
+		await db.schema
 			.createTable("lucid_agent_conversations")
 			.addColumn("approval_mode", adapter.getDataType("text"), (col) =>
 				col.notNull().defaultTo("tool-defaults"),

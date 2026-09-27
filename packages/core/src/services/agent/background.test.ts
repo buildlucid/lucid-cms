@@ -24,6 +24,7 @@ import syncAgentRoutines from "../sync/sync-agent-routines.js";
 import createRoutine from "./create-routine.js";
 import dispatchDueRoutines from "./dispatch-due-routines.js";
 import enqueueRun from "./helpers/enqueue-run.js";
+import getRoutineTools from "./helpers/get-routine-tools.js";
 import recoverRuns from "./recover-runs.js";
 
 vi.mock("./helpers/check-agent-access.js", async (importOriginal) => ({
@@ -222,7 +223,13 @@ describe("code routines", () => {
 		});
 		const renamed = {
 			...testAgent,
-			routines: [{ ...auditRoutine, name: "Monday audit" }],
+			routines: [
+				{
+					...auditRoutine,
+					name: "Monday audit",
+					tools: { collections_list: { requiresApproval: true } },
+				},
+			],
 		};
 		await syncAgentRoutines({
 			...context,
@@ -234,12 +241,19 @@ describe("code routines", () => {
 		const updated = await codeRoutine();
 		expect(updated).toMatchObject({ id: created?.id, name: "Monday audit" });
 		expect(Boolean(updated?.enabled)).toBe(false);
+		const id = created?.id ?? "";
+		expect((await getRoutineTools(context, [id])).data?.[id]).toEqual({
+			collections_list: { requiresApproval: true },
+		});
+		await syncAgentRoutines(context);
+		expect((await getRoutineTools(context, [id])).data?.[id]).toEqual({});
 
 		await syncAgentRoutines({
 			...context,
 			config: { ...context.config, ai: { ...context.config.ai, agents: [] } },
 		});
 		expect(await codeRoutine()).toBeUndefined();
+		expect((await getRoutineTools(context, [id])).data?.[id]).toEqual({});
 	});
 
 	test("run as the system in a chat shared with the agent's managers", async () => {

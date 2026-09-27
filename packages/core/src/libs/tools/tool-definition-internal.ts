@@ -6,10 +6,13 @@ export const toolDefinitionInternal = Symbol(
 	"@lucidcms/core/tool-definition-internal",
 );
 
-export const toolDefinitionBase = <const Name extends string>(options: {
+export const toolDefinitionBase = <
+	const Name extends string,
+	Description,
+>(options: {
 	name: Name;
 	title?: AdminCopyInput;
-	description: string;
+	description: Description;
 	input: z.ZodObject;
 	output: z.ZodObject;
 }) => ({

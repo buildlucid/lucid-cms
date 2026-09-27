@@ -29,15 +29,12 @@ const resolveCapabilities = (
 	},
 ) => {
 	const { agent, authority } = props;
-	//* runs acting as the system have no one to answer them, so they get no interactive tools
-	const canAsk = authority.principal.type === "user";
 	const tools = [...getCoreAgentTools(), ...agent.tools].filter(
 		(tool) =>
-			(canAsk || !tool.interaction) &&
-			(authority.superAdmin ||
-				tool.permissions.every((permission) =>
-					authority.permissions.includes(permission),
-				)),
+			authority.superAdmin ||
+			tool.permissions.every((permission) =>
+				authority.permissions.includes(permission),
+			),
 	);
 
 	// Skills still use their existing scope contract; resolve it from current permissions.
@@ -55,7 +52,6 @@ const resolveCapabilities = (
 
 	const runnerTools = getRunnerTools({
 		mode: props.mode,
-		canAsk,
 		hasSkills: skills.length > 0,
 		hasHistory: props.hasHistory,
 	});
@@ -68,13 +64,15 @@ const resolveCapabilities = (
 		),
 		definitions: [...tools, ...runnerTools].map((tool) => ({
 			name: tool.name,
-			description: tool.description,
+			description:
+				typeof tool.description === "function"
+					? tool.description({ mode: props.mode })
+					: tool.description,
 			inputSchema: toInputSchema(tool.input),
 		})),
 		instructions: buildInstructions({
 			agent,
 			mode: props.mode,
-			canAsk,
 			skills,
 			hasHistory: props.hasHistory,
 		}),

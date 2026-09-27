@@ -806,7 +806,9 @@
 	"core.tools.widget.invalid": "Tool returned invalid widget data",
 	"agent.interaction.invalid": "Check your selection and try again.",
 	"agent.interaction.unavailable": "This interaction is no longer available. Send new instructions to continue.",
-	"agent.interaction.forbidden": "Only the person the agent is working for can respond.",
+	"agent.interaction.forbidden": "Only the run owner or an agent manager for a system run can respond.",
 	"agent.tool.denied": "The user denied this action. Do not retry it unless they ask.",
-	"agent.tool.dismissed": "The user dismissed this request without responding."
+	"agent.tool.dismissed": "The user dismissed this request without responding.",
+	"agent.routine.tools.invalid": "Tool settings must name tools this routine can use.",
+	"agent.routine.approval.locked": "Manage tool approvals in the routine settings."
 }

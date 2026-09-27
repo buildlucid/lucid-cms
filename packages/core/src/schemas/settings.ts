@@ -1,11 +1,27 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import { queryString } from "./helpers/querystring.js";
 
 const settingsResponseSchema = z.object({
 	ai: z
 		.object({
-			agent: z.object({ enabled: z.boolean() }).strict(),
+			agents: z.array(
+				z.object({
+					key: z.string(),
+					name: z.string(),
+					description: z.string(),
+					tools: z.array(
+						z.object({
+							name: z.string(),
+							title: resolvedAdminCopySchema,
+							requiresApproval: z.boolean(),
+							interactive: z.boolean(),
+							permissions: z.array(z.string()),
+						}),
+					),
+				}),
+			),
 			enabled: z.boolean().meta({
 				description: "Whether AI features are enabled in the Lucid CMS config",
 				example: true,

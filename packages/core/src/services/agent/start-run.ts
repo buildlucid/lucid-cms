@@ -10,6 +10,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import getRoutineTools from "./helpers/get-routine-tools.js";
 import titleFromMessage from "./helpers/title-from-message.js";
 
 /**
@@ -36,7 +37,7 @@ const startRun: ServiceFn<
 	const AgentConversations = new AgentConversationsRepository(context.db);
 
 	const conversation = await AgentConversations.selectSingle({
-		select: ["context", "approval_mode"],
+		select: ["context", "approval_mode", "routine_id"],
 		where: [{ key: "id", operator: "=", value: input.conversationId }],
 	});
 	if (conversation.error) return conversation;
@@ -51,10 +52,8 @@ const startRun: ServiceFn<
 		};
 	}
 	const current = conversation.data.context;
-	//* scheduled routine runs have no one to approve them; anything a person sends uses the chat's mode
-	const approvalMode = input.routineId
-		? "automatic"
-		: conversation.data.approval_mode;
+	const { approval_mode: approvalMode, routine_id: routineId } =
+		conversation.data;
 
 	const repaired = await AgentConversations.releaseFinishedClaims({
 		conversationId: input.conversationId,
@@ -138,6 +137,13 @@ const startRun: ServiceFn<
 			}
 		}
 
+		//* every run in a routine chat, including replies from people, uses the routine's tool settings
+		const routineTools = await getRoutineTools(
+			context,
+			routineId ? [routineId] : [],
+		);
+		if (routineTools.error) return routineTools;
+
 		const run = await runs.createOnce({
 			id: input.requestId,
 			conversation_id: input.conversationId,
@@ -147,6 +153,7 @@ const startRun: ServiceFn<
 			checkpoint: {
 				version: 1,
 				approvalMode,
+				routineTools: routineId ? routineTools.data[routineId] : undefined,
 				messages: latest.data ? [summaryMessage(latest.data.summary)] : [],
 				//* the run loads history, including this message, after the latest summary
 				historyAfter: latest.data?.through_position ?? 0,

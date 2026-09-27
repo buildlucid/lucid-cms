@@ -6,6 +6,7 @@ import {
 import type { GetMultipleRoutinesQueryParams } from "../../schemas/agent.js";
 import type { AgentRoutine } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import getRoutineTools from "./helpers/get-routine-tools.js";
 import resolveAgentAccess from "./helpers/resolve-agent-access.js";
 
 const getRoutines: ServiceFn<
@@ -31,12 +32,19 @@ const getRoutines: ServiceFn<
 	);
 	if (lastRuns.error) return lastRuns;
 
+	const tools = await getRoutineTools(
+		context,
+		routines.data[0].map((routine) => routine.id),
+	);
+	if (tools.error) return tools;
+
 	return {
 		error: undefined,
 		data: {
 			data: routines.data[0].map((routine) =>
 				agentFormatter.formatRoutine({
 					routine,
+					tools: tools.data[routine.id] ?? {},
 					lastRun: lastRuns.data.find((run) => run.routine_id === routine.id),
 				}),
 			),

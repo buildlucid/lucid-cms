@@ -17,6 +17,7 @@ import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
 import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import {
@@ -28,11 +29,13 @@ import {
 import { getBodyError } from "@/utils/error-helpers";
 import { getDefaultTimezone } from "@/utils/release-schedule";
 import AgentRoutineDetails from "./parts/AgentRoutineDetails";
+import AgentRoutineToolApprovals from "./parts/AgentRoutineToolApprovals";
 import AgentScheduleField from "./parts/AgentScheduleField";
 
 /** Creates a routine, or edits one when `routine` is set. Code routines are read only. */
 const UpsertAgentRoutineDrawer: Component<{
 	routine?: Accessor<AgentRoutine | undefined>;
+	focusApprovals?: boolean;
 	state: {
 		open: boolean;
 		setOpen: (_open: boolean) => void;
@@ -46,6 +49,9 @@ const UpsertAgentRoutineDrawer: Component<{
 	const [schedule, setSchedule] = createSignal<Schedule>(defaultSchedule);
 	const [timezone, setTimezone] = createSignal(getDefaultTimezone());
 	const [enabled, setEnabled] = createSignal(true);
+	const [routineTools, setRoutineTools] = createSignal<AgentRoutine["tools"]>(
+		{},
+	);
 
 	// ----------------------------------------
 	// Mutations
@@ -62,6 +68,17 @@ const UpsertAgentRoutineDrawer: Component<{
 		existing() ? updateRoutine : createRoutine,
 	);
 	const errors = createMemo(() => mutation().errors());
+	const agentTools = createMemo(() => {
+		const agent = getAgentAccess().all.find(
+			(agent) => agent.key === (existing()?.agentKey ?? agentKey()),
+		);
+		return (agent?.tools ?? []).filter(
+			(tool) =>
+				locked() ||
+				tool.permissions.length === 0 ||
+				userStore.get.hasPermission(tool.permissions).all,
+		);
+	});
 
 	// ----------------------------------------
 	// Effects
@@ -71,12 +88,19 @@ const UpsertAgentRoutineDrawer: Component<{
 			(open) => {
 				if (!open) return;
 				const routine = untrack(existing);
-				setAgentKey(untrack(agents)[0]?.key);
+				setAgentKey(routine?.agentKey ?? untrack(agents)[0]?.key);
+				setRoutineTools(routine?.tools ?? {});
 				setName(routine?.name ?? "");
 				setInstructions(routine?.instructions ?? "");
 				setSchedule(routine ? parseSchedule(routine.cron) : defaultSchedule);
 				setTimezone(routine?.timezone ?? getDefaultTimezone());
 				setEnabled(routine?.enabled ?? true);
+				if (props.focusApprovals)
+					requestAnimationFrame(() =>
+						document
+							.getElementById("agent-routine-tool-approvals")
+							?.scrollIntoView({ block: "start" }),
+					);
 			},
 		),
 	);
@@ -114,6 +138,7 @@ const UpsertAgentRoutineDrawer: Component<{
 						cron: toCron(schedule()),
 						timezone: timezone(),
 						enabled: enabled(),
+						tools: routineTools(),
 					};
 					const routine = existing();
 					const key = agentKey();
@@ -141,7 +166,10 @@ const UpsertAgentRoutineDrawer: Component<{
 								name="agentKey"
 								value={agentKey()}
 								onChange={(value) => {
-									if (value) setAgentKey(String(value));
+									if (value) {
+										setAgentKey(String(value));
+										setRoutineTools({});
+									}
 								}}
 								options={agents().map((agent) => ({
 									value: agent.key,
@@ -189,6 +217,12 @@ const UpsertAgentRoutineDrawer: Component<{
 						falseLabel={T()("common.no")}
 						label={T()("agent.routine.enabled")}
 						description={T()("agent.routine.enabled.description")}
+					/>
+					<AgentRoutineToolApprovals
+						tools={agentTools()}
+						value={routineTools()}
+						onChange={setRoutineTools}
+						disabled={locked()}
 					/>
 				</Drawer.Body>
 				<Drawer.Footer>

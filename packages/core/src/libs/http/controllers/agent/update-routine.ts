@@ -41,7 +41,7 @@ const updateRoutineController = factory.createHandlers(
 		const param = c.req.valid("param");
 
 		const routine = await serviceWrapper(agentServices.updateRoutine, {
-			transaction: false,
+			transaction: true,
 		})(context, {
 			id: param.id,
 			userId: c.get("auth").id,
@@ -50,6 +50,7 @@ const updateRoutineController = factory.createHandlers(
 			cron: body.cron,
 			timezone: body.timezone,
 			enabled: body.enabled,
+			tools: body.tools,
 		});
 		if (routine.error) throw new LucidAPIError(routine.error);
 

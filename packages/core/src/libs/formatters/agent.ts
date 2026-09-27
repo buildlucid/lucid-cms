@@ -11,7 +11,7 @@ import type {
 	AgentUsage,
 } from "../../types/response.js";
 import { contextLimits } from "../agent/context.js";
-import type { ConversationContext } from "../agent/types.js";
+import type { ConversationContext, RoutineTools } from "../agent/types.js";
 import type { LucidAgentCompactions } from "../db/tables/agent-compactions.js";
 import type { LucidAgentConversations } from "../db/tables/agent-conversations.js";
 import type { LucidAgentInputs } from "../db/tables/agent-inputs.js";
@@ -146,6 +146,7 @@ const formatRun = (props: { run: RunPropT; usage?: AgentUsage }): AgentRun => ({
 
 const formatRoutine = (props: {
 	routine: Select<LucidAgentRoutines>;
+	tools: RoutineTools;
 	lastRun?: LastRunPropT;
 }): AgentRoutine => ({
 	id: props.routine.id,
@@ -154,6 +155,7 @@ const formatRoutine = (props: {
 	source: props.routine.source,
 	name: props.routine.name,
 	instructions: props.routine.instructions,
+	tools: props.tools,
 	cron: props.routine.cron,
 	timezone: props.routine.timezone,
 	enabled: formatter.formatBoolean(props.routine.enabled),

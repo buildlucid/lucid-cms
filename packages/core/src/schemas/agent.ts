@@ -84,6 +84,7 @@ export const agentInteractionSchema = agentInteractionRequestSchema
 	.extend({
 		id: z.string().min(1),
 		toolCallId: z.string().min(1),
+		answeredByUserId: z.number().optional(),
 		approval: z
 			.object({
 				toolName: z.string(),
@@ -201,6 +202,12 @@ const agentRunResponseSchema = z.object({
 	finishedAt: z.string().nullable(),
 });
 
+/** Per-tool settings for a routine, keyed by tool name. Missing settings use the tool's defaults. */
+export const routineToolsSchema = z.record(
+	z.string().min(1).max(128),
+	z.object({ requiresApproval: z.boolean().optional() }).strict(),
+);
+
 const agentRoutineResponseSchema = z.object({
 	id: z.uuid(),
 	agentKey: z.string(),
@@ -208,6 +215,7 @@ const agentRoutineResponseSchema = z.object({
 	source: agentRoutineSourceSchema,
 	name: z.string(),
 	instructions: z.string(),
+	tools: routineToolsSchema,
 	cron: z.string(),
 	timezone: z.string(),
 	enabled: z.boolean(),
@@ -228,6 +236,7 @@ const agentRoutineResponseSchema = z.object({
 const idParams = z.object({ id: z.uuid() });
 const noQuery = { string: undefined, formatted: undefined };
 const routineBody = z.object({
+	tools: routineToolsSchema.optional(),
 	name: z.string().trim().min(1).max(255),
 	instructions: z.string().trim().min(1).max(20_000),
 	cron: z.string().trim().min(1),

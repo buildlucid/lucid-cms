@@ -3,6 +3,7 @@ import { AgentRunsRepository } from "../../libs/repositories/index.js";
 import type { AgentRoutine } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
+import getRoutineTools from "./helpers/get-routine-tools.js";
 
 const getRoutine: ServiceFn<
 	[{ id: string; userId: number }],
@@ -16,10 +17,14 @@ const getRoutine: ServiceFn<
 	const lastRuns = await AgentRuns.selectLatestForRoutines([input.id]);
 	if (lastRuns.error) return lastRuns;
 
+	const tools = await getRoutineTools(context, [input.id]);
+	if (tools.error) return tools;
+
 	return {
 		error: undefined,
 		data: agentFormatter.formatRoutine({
 			routine: routine.data,
+			tools: tools.data[input.id] ?? {},
 			lastRun: lastRuns.data[0],
 		}),
 	};

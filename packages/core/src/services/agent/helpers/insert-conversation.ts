@@ -8,7 +8,10 @@ import type {
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/** Inserts a chat with an agent. A null user makes a chat for a code routine, shared with the agent's managers. */
+/**
+ * Inserts a chat with an agent. A null user makes a chat for a code routine, shared with the agent's managers.
+ * Routine chats always use tool defaults, so the routine's tool settings decide approvals.
+ */
 const insertConversation: ServiceFn<
 	[
 		{
@@ -30,7 +33,7 @@ const insertConversation: ServiceFn<
 		data: {
 			id: input.id ?? randomUUID(),
 			agent_key: input.agentKey,
-			approval_mode: input.approvalMode,
+			approval_mode: input.routineId ? "tool-defaults" : input.approvalMode,
 			title: input.title ?? constants.agent.defaultTitle,
 			user_id: input.userId,
 			routine_id: input.routineId ?? null,

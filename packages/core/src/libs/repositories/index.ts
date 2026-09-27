@@ -2,6 +2,7 @@ export { default as AgentCompactionsRepository } from "./agent-compactions.js";
 export { default as AgentConversationsRepository } from "./agent-conversations.js";
 export { default as AgentInputsRepository } from "./agent-inputs.js";
 export { default as AgentMessagesRepository } from "./agent-messages.js";
+export { default as AgentRoutineToolsRepository } from "./agent-routine-tools.js";
 export { default as AgentRoutinesRepository } from "./agent-routines.js";
 export { default as AgentRunsRepository } from "./agent-runs.js";
 export type { AiUsageChartRowPropT } from "./ai-generations.js";

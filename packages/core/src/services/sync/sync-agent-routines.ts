@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import constants from "../../constants/constants.js";
 import logger from "../../libs/logger/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import getRoutineTools from "../agent/helpers/get-routine-tools.js";
 import nextRoutineOccurrence from "../agent/helpers/next-routine-occurrence.js";
+import saveRoutineTools from "../agent/helpers/save-routine-tools.js";
 
 /**
  * Syncs routines defined in code with the database. New routines start enabled,
@@ -29,6 +32,12 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 	});
 	if (existing.error) return existing;
 
+	const storedTools = await getRoutineTools(
+		context,
+		existing.data.map((routine) => routine.id),
+	);
+	if (storedTools.error) return storedTools;
+
 	const defined = context.config.ai.agents.flatMap((agent) =>
 		agent.routines.map((routine) => ({ agentKey: agent.key, routine })),
 	);
@@ -47,9 +56,10 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 				scope: constants.logScopes.sync,
 			});
 
+			const id = randomUUID();
 			const created = await AgentRoutines.createSingle({
 				data: {
-					id: randomUUID(),
+					id,
 					agent_key: agentKey,
 					key: routine.key,
 					source: "code",
@@ -65,7 +75,26 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 				},
 			});
 			if (created.error) return created;
+
+			const saved = await saveRoutineTools(context, {
+				routineId: id,
+				tools: routine.tools,
+			});
+			if (saved.error) return saved;
+
 			continue;
+		}
+
+		const toolsChanged = !isDeepStrictEqual(
+			storedTools.data[current.id] ?? {},
+			routine.tools,
+		);
+		if (toolsChanged) {
+			const saved = await saveRoutineTools(context, {
+				routineId: current.id,
+				tools: routine.tools,
+			});
+			if (saved.error) return saved;
 		}
 
 		const rescheduled =
@@ -73,6 +102,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			current.timezone !== routine.schedule.timezone;
 		if (
 			!rescheduled &&
+			!toolsChanged &&
 			current.name === routine.name &&
 			current.instructions === routine.instructions
 		) {

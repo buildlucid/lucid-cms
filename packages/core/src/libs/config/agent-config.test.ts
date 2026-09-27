@@ -53,3 +53,32 @@ test("agent and routine keys are unique and schedules must be valid", () => {
 		]),
 	).toThrow('Routine "seo:weekly-audit" has an invalid schedule.');
 });
+
+test("routine tools accept core tools and reject unknown names", () => {
+	expect(
+		check([
+			{
+				...agent,
+				routines: [
+					{
+						...routine,
+						tools: { collections_list: { requiresApproval: true } },
+					},
+				],
+			},
+		]),
+	).not.toThrow();
+	expect(
+		check([
+			{
+				...agent,
+				routines: [
+					{
+						...routine,
+						tools: { unknown_tool: { requiresApproval: false } },
+					},
+				],
+			},
+		]),
+	).toThrow("must name tools");
+});

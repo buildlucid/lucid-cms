@@ -9,6 +9,7 @@ import type {
 	LucidAgentInputs,
 	LucidAgentMessages,
 	LucidAgentRoutines,
+	LucidAgentRoutineTools,
 	LucidAgentRuns,
 	LucidAiGenerations,
 	LucidAlertRecipients,
@@ -307,6 +308,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_agent_inputs: LucidAgentInputs;
 	lucid_agent_messages: LucidAgentMessages;
 	lucid_agent_routines: LucidAgentRoutines;
+	lucid_agent_routine_tools: LucidAgentRoutineTools;
 	lucid_agent_runs: LucidAgentRuns;
 	lucid_auth_states: LucidAuthStates;
 }

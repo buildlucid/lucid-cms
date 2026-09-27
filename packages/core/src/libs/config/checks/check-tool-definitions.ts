@@ -20,7 +20,18 @@ const checkTool = (
 	if (tool.name.length > 128 || !/^[a-z][a-z0-9._-]*$/.test(tool.name)) {
 		throw new Error(`Invalid tool name "${tool.name}".`);
 	}
-	if (!tool.description.trim()) {
+	const descriptions =
+		typeof tool.description === "function"
+			? [
+					tool.description({ mode: "chat" }),
+					tool.description({ mode: "routine" }),
+				]
+			: [tool.description];
+	if (
+		descriptions.some(
+			(description) => typeof description !== "string" || !description.trim(),
+		)
+	) {
 		throw new Error(`Tool "${tool.name}" needs a description.`);
 	}
 
@@ -37,7 +48,7 @@ const checkTool = (
 		if (
 			tool.name.length > 64 ||
 			!/^[a-z][a-z0-9_-]*$/.test(tool.name) ||
-			tool.description.length > 2000
+			descriptions.some((description) => description.length > 2000)
 		) {
 			throw new Error(
 				`Agent tool "${tool.name}" needs a provider-compatible name (up to 64 characters) and description (up to 2000 characters).`,
@@ -121,7 +132,6 @@ const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 
 		const runnerTools = getRunnerTools({
 			mode: "routine",
-			canAsk: true,
 			hasHistory: true,
 			hasSkills: agent.skills.length > 0,
 		});

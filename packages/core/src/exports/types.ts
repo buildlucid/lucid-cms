@@ -562,6 +562,8 @@ export type {
 export type {
 	AgentToolAuthority,
 	AgentToolDefinition,
+	AgentToolDescription,
+	AgentToolDescriptionProps,
 	AgentToolExecution,
 	AgentToolHandler,
 	AgentToolInteraction,

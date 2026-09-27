@@ -2,8 +2,8 @@ import dedent from "../../utils/helpers/dedent.js";
 import type { DefineRoutineOptions, RoutineDefinition } from "./types.js";
 
 /**
- * Defines a scheduled routine for an agent. Routines defined in code run as the
- * system and can only be paused or run early from the admin.
+ * Defines a scheduled routine that runs as the system. Edit its settings in
+ * code; agent managers can pause, start and review its runs in the admin.
  */
 const defineRoutine = <const Key extends string>(
 	options: DefineRoutineOptions<Key>,
@@ -12,6 +12,13 @@ const defineRoutine = <const Key extends string>(
 	key: options.key,
 	name: options.name,
 	instructions: dedent(options.instructions),
+	//* unset settings are dropped so sync compares code and stored settings exactly
+	tools: Object.fromEntries(
+		Object.entries(options.tools ?? {}).map(([name, { requiresApproval }]) => [
+			name,
+			requiresApproval === undefined ? {} : { requiresApproval },
+		]),
+	),
 	schedule: {
 		cron: options.schedule.cron.trim().split(/\s+/).join(" "),
 		timezone: (options.schedule.timezone ?? "UTC").trim(),

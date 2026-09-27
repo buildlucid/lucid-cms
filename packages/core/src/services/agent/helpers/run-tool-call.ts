@@ -147,13 +147,6 @@ const runToolCall = async (
 		case builtInTools.ask.name: {
 			const input = builtInTools.ask.input.safeParse(call.input);
 
-			if (run.user_id === null) {
-				return {
-					kind: "result",
-					output: { error: context.translate("server:agent.tool.unavailable") },
-					failed: true,
-				};
-			}
 			if (!input.success) {
 				return {
 					kind: "result",
@@ -230,7 +223,9 @@ const runToolCall = async (
 	const requiresApproval =
 		checkpoint.approvalMode === "confirm-changes"
 			? writes
-			: checkpoint.approvalMode === "tool-defaults" && tool.requiresApproval;
+			: checkpoint.approvalMode === "tool-defaults" &&
+				(checkpoint.routineTools?.[tool.name]?.requiresApproval ??
+					tool.requiresApproval);
 	const approval = requiresApproval
 		? { toolName: tool.name, input: call.input }
 		: undefined;

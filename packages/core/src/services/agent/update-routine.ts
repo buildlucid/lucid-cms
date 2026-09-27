@@ -1,3 +1,4 @@
+import type { RoutineTools } from "../../libs/agent/types.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
@@ -6,6 +7,8 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutine from "./get-routine.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import nextRoutineOccurrence from "./helpers/next-routine-occurrence.js";
+import saveRoutineTools from "./helpers/save-routine-tools.js";
+import validateRoutineTools from "./helpers/validate-routine-tools.js";
 
 /** Updates a routine. Routines defined in code can only be paused or resumed. */
 const updateRoutine: ServiceFn<
@@ -14,6 +17,7 @@ const updateRoutine: ServiceFn<
 			id: string;
 			userId: number;
 			name?: string;
+			tools?: RoutineTools;
 			instructions?: string;
 			cron?: string;
 			timezone?: string;
@@ -27,9 +31,13 @@ const updateRoutine: ServiceFn<
 
 	if (
 		routine.data.source === "code" &&
-		[input.name, input.instructions, input.cron, input.timezone].some(
-			(value) => value !== undefined,
-		)
+		[
+			input.name,
+			input.instructions,
+			input.cron,
+			input.timezone,
+			input.tools,
+		].some((value) => value !== undefined)
 	) {
 		return {
 			data: undefined,
@@ -39,6 +47,15 @@ const updateRoutine: ServiceFn<
 				message: copy("server:agent.routine.code.locked"),
 			},
 		};
+	}
+
+	if (input.tools !== undefined) {
+		const validation = await validateRoutineTools(context, {
+			agentKey: routine.data.agent_key,
+			userId: input.userId,
+			tools: input.tools,
+		});
+		if (validation.error) return validation;
 	}
 
 	const cron = input.cron ?? routine.data.cron;
@@ -69,6 +86,14 @@ const updateRoutine: ServiceFn<
 		},
 	});
 	if (updated.error) return updated;
+
+	if (input.tools !== undefined) {
+		const saved = await saveRoutineTools(context, {
+			routineId: input.id,
+			tools: input.tools,
+		});
+		if (saved.error) return saved;
+	}
 
 	return getRoutine(context, input);
 };

@@ -20,7 +20,7 @@ import type {
 /**
  * Defines a tool for agents. Register it with an agent's `tools`. It runs with
  * the run's authority, and an `interaction` pauses the run for one structured
- * response from the person it acts for.
+ * response from the run owner or an agent manager for system runs.
  */
 function defineAgentTool<
 	const Name extends string,

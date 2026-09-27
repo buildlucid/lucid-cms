@@ -1,6 +1,8 @@
+import { routineToolsSchema } from "../../../schemas/agent.js";
 import nextRoutineOccurrence from "../../../services/agent/helpers/next-routine-occurrence.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
+import { getCoreAgentTools } from "../../tools/core-tools.js";
 
 //* keys appear in permission names, so they share the skill naming rules
 const keyPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -37,6 +39,18 @@ const checkAgentDefinitions = (config: {
 			}
 
 			const label = `${agent.key}:${routine.key}`;
+			const routineTools = routineToolsSchema.safeParse(routine.tools);
+			const tools = [...getCoreAgentTools(), ...agent.tools];
+			if (
+				!routineTools.success ||
+				Object.keys(routineTools.data).some(
+					(name) => !tools.some((tool) => tool.name === name),
+				)
+			) {
+				throw new Error(
+					`Routine "${label}" tools must name tools available to its agent and only set "requiresApproval" to a boolean.`,
+				);
+			}
 
 			if (routine.key.length > 64 || !keyPattern.test(routine.key)) {
 				throw new Error(

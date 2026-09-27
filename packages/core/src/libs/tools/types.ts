@@ -10,6 +10,7 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import type { RunMode } from "../agent/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import type { Permission } from "../permission/types.js";
@@ -73,16 +74,23 @@ export type McpToolHandler<Input, Output> = ToolHandler<
 	McpToolExecution
 >;
 
+export type AgentToolDescriptionProps = { mode: RunMode };
+
+export type AgentToolDescription =
+	| string
+	| ((props: AgentToolDescriptionProps) => string);
+
 type ToolOptions<
 	Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
+	Description = string,
 > = {
 	/** Unique among MCP tools, or within an agent. Prefix plugin tools to avoid collisions. */
 	name: Name;
 	/** A plain-language name shown to people, eg. "Save note". Agent tools default to the name with spaces. */
 	title?: AdminCopyInput;
-	description: string;
+	description: Description;
 	input: Input;
 	output: Output;
 };
@@ -111,13 +119,13 @@ export type DefineAgentToolOptions<
 	Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
-> = ToolOptions<Name, Input, Output> & {
+> = ToolOptions<Name, Input, Output, AgentToolDescription> & {
 	/** Pass [] for tools available to every user with agent access. */
 	permissions: readonly Permission[];
 	requiredPermissions?: (input: z.output<Input>) => readonly Permission[];
 	/** Whether the handler only reads data. Defaults to false. Writes are checkpointed before execution for safe recovery. */
 	readOnly?: boolean;
-	/** Ask before executing in tool-defaults mode. Defaults to false. */
+	/** Ask before executing in tool-defaults mode. Routines can override this. Defaults to false. */
 	requiresApproval?: boolean;
 	handler: AgentToolHandler<z.output<Input>, z.output<Output>>;
 };
@@ -184,10 +192,16 @@ export type ToolPreparationResult<Execution, Result, Requirement> =
 	  }
 	| { type: "invalid-input"; message: string };
 
-type Definition<Name extends string, Execution, Result, Requirement> = {
+type Definition<
+	Name extends string,
+	Execution,
+	Result,
+	Requirement,
+	Description = string,
+> = {
 	readonly type: "tool-definition";
 	readonly name: Name;
-	readonly description: string;
+	readonly description: Description;
 	readonly input: z.ZodObject;
 	readonly output: z.ZodObject;
 	readonly [toolDefinitionInternal]: {
@@ -216,7 +230,8 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	Name,
 	AgentToolExecution,
 	AgentToolResult<Record<string, JsonValue>>,
-	Permission
+	Permission,
+	AgentToolDescription
 > & {
 	readonly target: "agent";
 	readonly title: ResolvedAdminCopy;

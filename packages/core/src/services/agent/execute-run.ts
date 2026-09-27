@@ -143,7 +143,7 @@ const executeRun: ServiceFn<
 		});
 		if (answer.error) return answer;
 
-		answerInteraction(checkpoint, answer.data);
+		answerInteraction(checkpoint, answer.data, input.answer.userId);
 	} else if (input.answer) {
 		return {
 			data: undefined,

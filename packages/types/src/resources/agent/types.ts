@@ -1,14 +1,28 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
+import type { Permission } from "../users/types.js";
 
 /** An agent registered in config. */
 export interface Agent {
 	key: string;
 	name: string;
 	description: string;
+	/** Tools available to this agent. Empty when the user can neither use nor manage it. */
+	tools: {
+		name: string;
+		title: ResolvedAdminCopy;
+		requiresApproval: boolean;
+		interactive: boolean;
+		permissions: Permission[];
+	}[];
 }
 
 /** Routines defined in code are synced from config; the rest are created in the admin. */
 export type AgentRoutineSource = "code" | "database";
+
+/** A routine's settings for one tool. Missing settings use the tool's defaults. */
+export type AgentRoutineToolSettings = {
+	requiresApproval?: boolean;
+};
 
 /** Where input sent while the agent is busy goes: after the current run, or into it as a correction. */
 export type AgentDelivery =
@@ -63,6 +77,7 @@ export type AgentInteractionAction = "submit" | "cancel";
 export type AgentInteraction = {
 	id: string;
 	toolCallId: string;
+	answeredByUserId?: number;
 	title: string;
 	placement: "inline" | "composer";
 	/** Present when submission also authorises this invocation. */
@@ -175,6 +190,8 @@ export interface AgentRoutine {
 	source: AgentRoutineSource;
 	name: string;
 	instructions: string;
+	/** Per-tool settings by tool name. Missing tools and settings use the tool's defaults. */
+	tools: Record<string, AgentRoutineToolSettings>;
 	cron: string;
 	timezone: string;
 	enabled: boolean;

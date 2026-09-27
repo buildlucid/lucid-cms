@@ -16,9 +16,8 @@ import resolveCapabilities from "./resolve-capabilities.js";
 import type { SessionRun } from "./run-session.js";
 
 /**
- * Only the person a run acts for can answer it, so a response never borrows
- * someone else's permissions. Responses are checked against the saved
- * interaction and the tool's current schemas before the run is claimed.
+ * Users answer their own runs; agent managers answer system runs. Execution
+ * keeps the original authority. Responses use the saved interaction and current schemas.
  */
 const validateInteractionResponse: ServiceFn<
 	[
@@ -34,7 +33,7 @@ const validateInteractionResponse: ServiceFn<
 	InteractionAnswer
 > = async (context, props) => {
 	const { pending, run, checkpoint } = props;
-	if (run.user_id !== props.userId) {
+	if (run.user_id !== null && run.user_id !== props.userId) {
 		return {
 			data: undefined,
 			error: {
@@ -79,9 +78,16 @@ const validateInteractionResponse: ServiceFn<
 		};
 	}
 
+	const executionAccess = await checkAgentAccess(context, {
+		userId: run.user_id,
+		agentKey: run.agent_key,
+		level: getConversationLevel(run.conversation_user_id),
+	});
+	if (executionAccess.error) return executionAccess;
+
 	const call = checkpoint.calls[checkpoint.cursor];
 	const tool = resolveCapabilities(context, {
-		...access.data,
+		...executionAccess.data,
 		mode: run.routine_id ? "routine" : "chat",
 		hasHistory: checkpoint.trimmed === true,
 	}).tools.find((tool) => tool.name === call?.name);

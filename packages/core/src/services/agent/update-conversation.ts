@@ -1,3 +1,4 @@
+import { copy } from "../../libs/i18n/index.js";
 import { AgentConversationsRepository } from "../../libs/repositories/index.js";
 import type {
 	AgentApprovalMode,
@@ -20,6 +21,21 @@ const updateConversation: ServiceFn<
 > = async (context, input) => {
 	const conversation = await getAccessibleConversation(context, input);
 	if (conversation.error) return conversation;
+
+	if (
+		conversation.data.routine_id &&
+		input.approvalMode !== undefined &&
+		input.approvalMode !== "tool-defaults"
+	) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:agent.routine.approval.locked"),
+			},
+		};
+	}
 
 	const AgentConversations = new AgentConversationsRepository(context.db);
 

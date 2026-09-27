@@ -4,6 +4,8 @@ import T from "@/translations";
 /** Shows saved grants that can no longer be selected. */
 const UnavailableGrants: Component<{
 	keys: string[];
+	title?: string;
+	description?: string;
 	onRemove: (key: string) => void;
 	disabled?: boolean;
 }> = (props) => {
@@ -13,10 +15,10 @@ const UnavailableGrants: Component<{
 		<Show when={props.keys.length > 0}>
 			<div class="mb-3 p-3 rounded-md border border-border bg-card">
 				<h4 class="text-sm font-medium text-body">
-					{T()("access.unavailable.title")}
+					{props.title ?? T()("access.unavailable.title")}
 				</h4>
 				<p class="text-xs text-muted mt-1">
-					{T()("access.unavailable.description")}
+					{props.description ?? T()("access.unavailable.description")}
 				</p>
 				<ul class="mt-2 space-y-2">
 					<For each={props.keys}>

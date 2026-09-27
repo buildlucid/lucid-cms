@@ -36,14 +36,18 @@ import createRoutine from "./create-routine.js";
 import executeRun from "./execute-run.js";
 import getConversation from "./get-conversation.js";
 import getInputs from "./get-inputs.js";
+import getRoutine from "./get-routine.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import insertConversation from "./helpers/insert-conversation.js";
+import resolveCapabilities from "./helpers/resolve-capabilities.js";
 import streamModelTurn from "./helpers/stream-model-turn.js";
 import sumCredits from "./helpers/sum-credits.js";
 import recoverInputs from "./recover-inputs.js";
 import startRun from "./start-run.js";
 import submitInput from "./submit-input.js";
+import updateConversation from "./update-conversation.js";
 import updateInput from "./update-input.js";
+import updateRoutine from "./update-routine.js";
 import watchRun from "./watch-run.js";
 
 const remoteRequest = vi.fn();
@@ -109,7 +113,7 @@ const readHandler = vi.fn(async () => ({
 }));
 const readTool = defineAgentTool({
 	name: "test_read",
-	description: "Test read",
+	description: ({ mode }) => `Read in ${mode} mode`,
 	input: z.object({}),
 	output: z.object({ done: z.boolean() }),
 	permissions: [],
@@ -322,6 +326,181 @@ const selectRun = async (runId: string) => {
 
 describe("agent runner", () => {
 	test.each([
+		"chat",
+		"routine",
+	] as const)("tool descriptions receive %s context", (mode) => {
+		const capabilities = resolveCapabilities(context, {
+			agent: testAgent,
+			authority: {
+				principal: { type: "user", userId },
+				permissions: [],
+				superAdmin: false,
+			},
+			mode,
+			hasHistory: false,
+		});
+		expect(
+			capabilities.definitions.find((tool) => tool.name === readTool.name)
+				?.description,
+		).toBe(`Read in ${mode} mode`);
+	});
+
+	test.each([
+		{ tool: approvalTool, override: undefined, waits: true },
+		{ tool: approvalTool, override: false, waits: false },
+		{ tool: writeTool, override: true, waits: true },
+		{ tool: writeTool, override: undefined, waits: false },
+	])("routine approval for $tool.name with override $override", async ({
+		tool,
+		override,
+		waits,
+	}) => {
+		const routine = await createRoutine(context, {
+			agentKey: testAgent.key,
+			userId,
+			name: "Approval policy",
+			instructions: "Write a note",
+			cron: "0 9 * * 1",
+			timezone: "UTC",
+			enabled: false,
+			tools:
+				override === undefined
+					? {}
+					: { [tool.name]: { requiresApproval: override } },
+		});
+		if (routine.error) throw routine.error;
+		expect(
+			(await getRoutine(context, { id: routine.data.id, userId })).data?.tools,
+		).toEqual(
+			override === undefined
+				? {}
+				: { [tool.name]: { requiresApproval: override } },
+		);
+		const prepared = await prepare({
+			routineId: routine.data.id,
+			approvalMode: "automatic",
+		});
+		callTool({ id: "routine-policy", name: tool.name, input: {} });
+		callTool({
+			id: "finish",
+			name: "lucid_finish_run",
+			input: { outcome: "done", summary: "Written" },
+		});
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: waits ? "waiting" : "completed" },
+		});
+		if (waits) {
+			expect(writeHandler).not.toHaveBeenCalled();
+			expect(
+				await executeRun(context, {
+					runId: prepared.runId,
+					answer: {
+						interactionId: await interactionId(prepared.conversationId),
+						action: "submit",
+						response: {},
+						userId,
+					},
+				}),
+			).toMatchObject({ data: { status: "completed" } });
+		}
+		expect(writeHandler).toHaveBeenCalledOnce();
+	});
+
+	test("routine settings apply to follow-ups and edits leave a pending approval intact", async () => {
+		const routine = await createRoutine(context, {
+			agentKey: testAgent.key,
+			userId,
+			name: "Snapshot policy",
+			instructions: "Write",
+			cron: "0 9 * * 1",
+			timezone: "UTC",
+			enabled: false,
+			tools: { [writeTool.name]: { requiresApproval: true } },
+		});
+		if (routine.error) throw routine.error;
+		const prepared = await prepare({ routineId: routine.data.id });
+		callTool({ id: "snapshot", name: writeTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		expect(
+			(
+				await updateRoutine(context, {
+					id: routine.data.id,
+					userId,
+					tools: {},
+				})
+			).error,
+		).toBeUndefined();
+		expect((await selectRun(prepared.runId))?.checkpoint?.routineTools).toEqual(
+			{ [writeTool.name]: { requiresApproval: true } },
+		);
+		expect(
+			(
+				await updateConversation(context, {
+					id: prepared.conversationId,
+					userId,
+					approvalMode: "automatic",
+				})
+			).error?.status,
+		).toBe(400);
+		callTool({
+			id: "finish",
+			name: "lucid_finish_run",
+			input: { outcome: "done", summary: "Denied" },
+		});
+		await executeRun(context, {
+			runId: prepared.runId,
+			answer: {
+				interactionId: await interactionId(prepared.conversationId),
+				action: "cancel",
+				response: {},
+				userId,
+			},
+		});
+		expect(writeHandler).not.toHaveBeenCalled();
+		const followup = await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			text: "Try again",
+			requestId: randomUUID(),
+		});
+		if (followup.error) throw followup.error;
+		expect((await selectRun(followup.data.runId))?.checkpoint).toMatchObject({
+			approvalMode: "tool-defaults",
+			routineTools: {},
+		});
+		callTool({ id: "followup", name: writeTool.name, input: {} });
+		reply("Done");
+		expect(
+			await executeRun(context, { runId: followup.data.runId }),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(writeHandler).toHaveBeenCalledOnce();
+	});
+
+	test("routine overrides cannot bypass an interactive tool's request", async () => {
+		const routine = await createRoutine(context, {
+			agentKey: testAgent.key,
+			userId,
+			name: "Interactive policy",
+			instructions: "Select",
+			cron: "0 9 * * 1",
+			timezone: "UTC",
+			enabled: false,
+			tools: { [selectionTool.name]: { requiresApproval: false } },
+		});
+		if (routine.error) throw routine.error;
+		const prepared = await prepare({ routineId: routine.data.id });
+		callTool({ id: "interactive-policy", name: selectionTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		expect(
+			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget.key,
+		).toBe(selectionTool.interaction?.key);
+	});
+
+	test.each([
 		{ mode: "tool-defaults", tool: writeTool, waits: false },
 		{ mode: "tool-defaults", tool: approvalTool, waits: true },
 		{ mode: "automatic", tool: approvalTool, waits: false },
@@ -420,40 +599,6 @@ describe("agent runner", () => {
 		).toMatchObject({ error: { status: 403 } });
 		expect(writeHandler).not.toHaveBeenCalled();
 		expect((await selectRun(prepared.runId))?.status).toBe("waiting");
-	});
-
-	test("scheduled routine runs are automatic while follow-ups use the chat's approval mode", async () => {
-		const routine = await createRoutine(context, {
-			agentKey: testAgent.key,
-			userId,
-			name: "Follow-up approvals",
-			instructions: "Check content.",
-			cron: "0 9 * * 1",
-			timezone: "UTC",
-			enabled: false,
-		});
-		if (routine.error) throw routine.error;
-		const prepared = await prepare({
-			routineId: routine.data.id,
-			approvalMode: "confirm-changes",
-		});
-		expect((await selectRun(prepared.runId))?.checkpoint?.approvalMode).toBe(
-			"automatic",
-		);
-		await new AgentRunsRepository(context.db).updateSingle({
-			where: [{ key: "id", operator: "=", value: prepared.runId }],
-			data: { status: "completed" },
-		});
-		const followUp = await startRun(context, {
-			conversationId: prepared.conversationId,
-			userId,
-			text: "Now fix it",
-			requestId: randomUUID(),
-		});
-		if (followUp.error) throw followUp.error;
-		expect(
-			(await selectRun(followUp.data.runId))?.checkpoint?.approvalMode,
-		).toBe("confirm-changes");
 	});
 
 	test("an interactive write collects validated input and approval in one submission", async () => {
@@ -788,6 +933,7 @@ describe("agent runner", () => {
 				agentKey: testAgent.key,
 				userId,
 				name: "Automatic write",
+				tools: { [approvalTool.name]: { requiresApproval: false } },
 				instructions: "Write a note.",
 				cron: "0 9 * * 1",
 				timezone: "UTC",
@@ -2068,6 +2214,42 @@ describe("runs acting as the system", () => {
 		return { runId: run.data.runId, conversationId: conversation.data.id };
 	};
 
+	test("a manager approves a system write without lending it their identity", async () => {
+		const prepared = await prepareSystem();
+		callTool({ id: "system-approval", name: approvalTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		reply("Written");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: {},
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(writeHandler).toHaveBeenCalledWith(
+			expect.objectContaining({
+				execution: expect.objectContaining({
+					authority: expect.objectContaining({ principal: { type: "system" } }),
+				}),
+			}),
+		);
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "widget",
+				interaction: expect.objectContaining({
+					status: "answered",
+					answeredByUserId: userId,
+				}),
+			}),
+		);
+	});
+
 	test("writes retain the system authority", async () => {
 		const prepared = await prepareSystem();
 		callTool({ id: "system-write", name: writeTool.name, input: {} });
@@ -2084,7 +2266,7 @@ describe("runs acting as the system", () => {
 		);
 	});
 
-	test("interactive tools are not offered, since no one can answer", async () => {
+	test("interactive tools are offered for agent managers to answer", async () => {
 		const prepared = await prepareSystem();
 		reply("Done");
 		await executeRun(context, { runId: prepared.runId });
@@ -2092,8 +2274,8 @@ describe("runs acting as the system", () => {
 			.at(-1)?.[1]
 			.tools.map((tool: { name: string }) => tool.name);
 		expect(offered).toContain(writeTool.name);
-		expect(offered).not.toContain(selectionTool.name);
-		expect(offered).not.toContain("lucid_ask_user");
+		expect(offered).toContain(selectionTool.name);
+		expect(offered).toContain("lucid_ask_user");
 	});
 
 	test("a steer from someone else becomes a follow-up that acts for them", async () => {

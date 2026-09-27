@@ -1794,5 +1794,16 @@
 	"agent.approval.approve": "Approve",
 	"agent.approval.deny": "Deny",
 	"agent.approval.approved": "Approved",
-	"agent.approval.denied": "Denied"
+	"agent.approval.denied": "Denied",
+	"agent.routine.approvals.title": "Tool approvals",
+	"agent.routine.approvals.description": "Choose whether each tool asks for approval before it runs. Default follows the tool's own setting. Changes apply to new runs.",
+	"agent.routine.approvals.option.default.ask": "Default (ask first)",
+	"agent.routine.approvals.option.default.run": "Default (don't ask)",
+	"agent.routine.approvals.option.ask": "Ask first",
+	"agent.routine.approvals.option.run": "Don't ask",
+	"agent.routine.approvals.reset": "Reset to defaults",
+	"agent.routine.approvals.interactive": "Tools that ask for input still pause for a response.",
+	"agent.routine.approvals.open": "Manage routine tool approvals",
+	"agent.routine.approvals.unavailable.title": "Unavailable tools",
+	"agent.routine.approvals.unavailable.description": "This routine can no longer use these tools. Remove them to save."
 }

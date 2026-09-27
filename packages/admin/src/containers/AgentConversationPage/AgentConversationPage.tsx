@@ -91,6 +91,7 @@ const AgentConversationPage: Component = () => {
 	//* the composer interaction set aside to send instructions instead
 	const [redirecting, setRedirecting] = createSignal<string>();
 	const [routineOpen, setRoutineOpen] = createSignal(false);
+	const [focusApprovals, setFocusApprovals] = createSignal(false);
 	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
 	const [runsOpen, setRunsOpen] = createSignal(false);
 	let composer: AgentComposerHandle | undefined;
@@ -493,6 +494,17 @@ const AgentConversationPage: Component = () => {
 											controls={
 												<Show when={conversation()}>
 													<AgentApprovalPicker
+														routine={
+															conversation()?.routineId
+																? {
+																		disabled: !routine(),
+																		onEdit: () => {
+																			setFocusApprovals(true);
+																			setRoutineOpen(true);
+																		},
+																	}
+																: undefined
+														}
 														value={
 															conversation()?.approvalMode ?? "tool-defaults"
 														}
@@ -555,7 +567,10 @@ const AgentConversationPage: Component = () => {
 												routine={current()}
 												conversation={chatConversation()}
 												onRuns={() => setRunsOpen(true)}
-												onOpen={() => setRoutineOpen(true)}
+												onOpen={() => {
+													setFocusApprovals(false);
+													setRoutineOpen(true);
+												}}
 												onClose={() => setRoutineCardOpen(false)}
 											/>
 										)}
@@ -579,6 +594,7 @@ const AgentConversationPage: Component = () => {
 					state={{ open: renameOpen(), setOpen: setRenameOpen }}
 				/>
 				<UpsertAgentRoutineDrawer
+					focusApprovals={focusApprovals()}
 					routine={routine}
 					state={{ open: routineOpen(), setOpen: setRoutineOpen }}
 				/>

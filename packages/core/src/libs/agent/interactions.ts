@@ -38,10 +38,12 @@ export const createInteraction = (props: {
 export const answerInteraction = (
 	checkpoint: Checkpoint,
 	answer: InteractionAnswer,
+	userId: number,
 ) => {
 	if (!checkpoint.pending) return;
 	const { widget } = checkpoint.pending;
 	checkpoint.pending.answer = answer;
+	widget.interaction.answeredByUserId = userId;
 	widget.interaction =
 		answer.action === "cancel"
 			? { ...widget.interaction, status: "cancelled" }
