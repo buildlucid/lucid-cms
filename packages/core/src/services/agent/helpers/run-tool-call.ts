@@ -168,6 +168,18 @@ const runToolCall = async (
 				}),
 			};
 		}
+		case builtInTools.progress.name: {
+			const input = builtInTools.progress.input.safeParse(call.input);
+			if (mode !== "chat" || !input.success) {
+				return {
+					kind: "result",
+					output: { error: context.translate("server:agent.progress.invalid") },
+					failed: true,
+				};
+			}
+
+			return { kind: "result", output: { shared: true }, failed: false };
+		}
 		case builtInTools.skill.name: {
 			const input = builtInTools.skill.input.safeParse(call.input);
 			const skill = capabilities.skills.find(

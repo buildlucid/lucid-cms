@@ -2,6 +2,7 @@
 	"agent.compaction.failed": "Could not compact this conversation. Your history is safe. Retry to continue.",
 	"agent.history.invalid": "Invalid history request.",
 	"agent.history.unavailable": "This history is not available.",
+	"agent.progress.invalid": "Only chat runs can share a message of up to 2000 characters.",
 	"core.fields.storage.value.unsupported": "Unsupported stored value for field {{key}}.",
 	"core.documents.authoring.actor.access.denied": "This user cannot access the collection.",
 	"core.documents.authoring.actor.permission.denied": "This user cannot perform that action on the collection.",

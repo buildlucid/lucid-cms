@@ -343,6 +343,11 @@ describe("agent runner", () => {
 			capabilities.definitions.find((tool) => tool.name === readTool.name)
 				?.description,
 		).toBe(`Read in ${mode} mode`);
+		expect(
+			capabilities.definitions.some(
+				(tool) => tool.name === "lucid_share_progress",
+			),
+		).toBe(mode === "chat");
 	});
 
 	test.each([
@@ -684,6 +689,73 @@ describe("agent runner", () => {
 		const costs = await AiGenerations.agentUsageByRuns([prepared.runId]);
 		expect(costs.data).toMatchObject([
 			{ model_calls: 1, credits_charged: "0.0001" },
+		]);
+	});
+
+	test("shares multiple progress updates and continues the same chat run", async () => {
+		const prepared = await prepare();
+		callTool({
+			id: "progress-1",
+			name: "lucid_share_progress",
+			input: { message: "I found the relevant pages." },
+		});
+		callTool({
+			id: "progress-2",
+			name: "lucid_share_progress",
+			input: { message: "I checked their current status." },
+		});
+		reply("Here is the result.");
+
+		const events: AgentStreamEvent[] = [];
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				emit: async (event) => {
+					events.push(event);
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(model).toHaveBeenCalledTimes(3);
+		expect(events.filter((event) => event.type === "start")).toHaveLength(3);
+		expect(
+			events.filter(
+				(event) => event.type === "tool" && event.status === "complete",
+			),
+		).toMatchObject([
+			{
+				name: "lucid_share_progress",
+				input: { message: "I found the relevant pages." },
+			},
+			{
+				name: "lucid_share_progress",
+				input: { message: "I checked their current status." },
+			},
+		]);
+
+		const messages = new AgentMessagesRepository(context.db);
+		const saved = await messages.selectLatest({
+			conversationId: prepared.conversationId,
+			limit: 10,
+		});
+		expect(
+			saved.data?.toReversed().map((message) => message.parts),
+		).toMatchObject([
+			[{ type: "text", text: "Hello" }],
+			[
+				{
+					type: "tool",
+					input: { message: "I found the relevant pages." },
+					status: "complete",
+				},
+			],
+			[
+				{
+					type: "tool",
+					input: { message: "I checked their current status." },
+					status: "complete",
+				},
+			],
+			[{ type: "text", text: "Here is the result." }],
 		]);
 	});
 
@@ -1289,6 +1361,7 @@ describe("conversation compaction", () => {
 	});
 
 	test("manual compaction keeps history and continues from only the newest summary", async () => {
+		inputTokenLimit = 5_000;
 		const prepared = await compactAfterReply();
 		reply(
 			"Current goal: draft content. Constraint: never publish without approval.",
@@ -1394,7 +1467,7 @@ describe("conversation compaction", () => {
 		expect(conversation.data?.compactions).toHaveLength(2);
 		expect(conversation.data?.context).toMatchObject({
 			model: "test-model",
-			tokenLimit: 4_000,
+			tokenLimit: 5_000,
 			status: "ready",
 		});
 	});

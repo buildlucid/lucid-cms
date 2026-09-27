@@ -12,6 +12,7 @@
 	"core.tools.media_find.title": "Find media",
 	"core.tools.lucid_read_history.title": "Read chat history",
 	"core.tools.lucid_ask_user.title": "Ask a question",
+	"core.tools.lucid_share_progress.title": "Share progress",
 	"core.tools.lucid_load_skill.title": "Load skill",
 	"core.tools.lucid_finish_run.title": "Finish run"
 }

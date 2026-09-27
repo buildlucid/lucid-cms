@@ -20,7 +20,12 @@ import { layoutOf } from "@/components/AgentWidget/slots";
 import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
 import { createCopy } from "@/components/Copy/copyValue";
 import T from "@/translations";
-import { finishTool, isToolRow, messageText } from "@/utils/agent-chat";
+import {
+	finishTool,
+	isToolRow,
+	messageText,
+	progressTool,
+} from "@/utils/agent-chat";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
 import AgentRunFinish from "./parts/AgentRunFinish";
@@ -120,6 +125,19 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 									<Switch>
 										<Match when={part.type === "text" && part}>
 											{(text) => <AgentMarkdown text={text().text} />}
+										</Match>
+										<Match
+											when={
+												part.type === "tool" &&
+												part.name === progressTool &&
+												part
+											}
+										>
+											{(tool) => (
+												<AgentMarkdown
+													text={messageText({ parts: [tool()] })}
+												/>
+											)}
 										</Match>
 										<Match
 											when={

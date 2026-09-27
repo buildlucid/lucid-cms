@@ -26,6 +26,20 @@ const builtInTools = {
 			options: z.array(z.string().max(200)).max(10).optional(),
 		}),
 	},
+	progress: {
+		name: "lucid_share_progress",
+		title: copy("admin:core.tools.lucid_share_progress.title"),
+		description:
+			"Send a normal assistant message without ending this chat run. Use before or between other tool calls when a multi-step task has a useful finding or decision to share. Continue working afterward.",
+		input: z.object({
+			message: z
+				.string()
+				.max(2000)
+				.trim()
+				.min(1)
+				.describe("The message to show in the chat."),
+		}),
+	},
 	skill: {
 		name: "lucid_load_skill",
 		title: copy("admin:core.tools.lucid_load_skill.title"),
@@ -57,6 +71,7 @@ export const getRunnerTools = (props: {
 	hasHistory: boolean;
 }) => [
 	builtInTools.ask,
+	...(props.mode === "chat" ? [builtInTools.progress] : []),
 	...(props.hasHistory ? [builtInTools.history] : []),
 	...(props.hasSkills ? [builtInTools.skill] : []),
 	...(props.mode === "routine" ? [builtInTools.finish] : []),

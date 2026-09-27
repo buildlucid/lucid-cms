@@ -13,12 +13,16 @@ export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
 
 export const askTool = "lucid_ask_user";
 export const finishTool = "lucid_finish_run";
+export const progressTool = "lucid_share_progress";
 export const questionWidget = "lucid-question";
 export const approvalWidget = "lucid-tool-approval";
 
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
-	part.type === "tool" && part.name !== askTool && part.name !== finishTool;
+	part.type === "tool" &&
+	part.name !== askTool &&
+	part.name !== finishTool &&
+	part.name !== progressTool;
 
 export const toolTitle = (part: Pick<AgentToolPart, "name" | "title">) =>
 	helpers.getLocaleValue({
@@ -36,23 +40,43 @@ export const partLayout = (
 	hasRow: (widget: AgentWidgetPart) => boolean,
 ): "row" | "block" | "hidden" => {
 	switch (part.type) {
-		case "text":
+		case "text": {
 			return "block";
-		case "tool":
+		}
+		case "tool": {
 			if (part.name === askTool) return "hidden";
+			if (part.name === progressTool) {
+				return part.status === "complete" ? "block" : "hidden";
+			}
+
 			return part.name === finishTool ? "block" : "row";
-		case "widget":
+		}
+		case "widget": {
 			if (!part.interaction) return hasRow(part) ? "row" : "block";
+
 			return part.interaction.placement === "inline" &&
 				part.interaction.status === "pending"
 				? "block"
 				: "row";
+		}
 	}
 };
 
 export const messageText = (message: Pick<AgentMessage, "parts">) =>
 	message.parts
-		.flatMap((part) => (part.type === "text" ? [part.text] : []))
+		.flatMap((part) => {
+			if (part.type === "text") return [part.text];
+			if (
+				part.type === "tool" &&
+				part.name === progressTool &&
+				part.status === "complete" &&
+				typeof part.input.message === "string"
+			) {
+				return [part.input.message];
+			}
+
+			return [];
+		})
 		.join("\n\n")
 		.trim();
 
@@ -64,6 +88,7 @@ const upsertPart = (
 	const index = parts.findIndex(
 		(existing) => existing.type === part.type && existing.id === part.id,
 	);
+
 	return index < 0
 		? [...parts, part]
 		: parts.map((existing, position) =>
@@ -76,6 +101,7 @@ const appendText = (
 	text: string,
 ): AgentMessagePart[] => {
 	const last = parts.at(-1);
+
 	return last?.type === "text"
 		? [...parts.slice(0, -1), { type: "text", text: last.text + text }]
 		: [...parts, { type: "text", text }];
@@ -99,6 +125,7 @@ export const applyStreamEvent = (
 
 	if (event.type === "message") {
 		const exists = messages.some(({ id }) => id === event.message.id);
+
 		return exists
 			? messages.map((message) =>
 					message.id === event.message.id ? event.message : message,
@@ -114,6 +141,7 @@ export const applyStreamEvent = (
 				message.id === event.messageId ? { ...message, parts: [] } : message,
 			);
 		}
+
 		return [
 			...messages,
 			{
@@ -177,6 +205,7 @@ export const findPendingInteraction = (
 	runId: string | undefined,
 ) => {
 	if (!runId) return undefined;
+
 	for (const message of messages.toReversed()) {
 		if (message.runId !== runId) continue;
 
@@ -186,6 +215,7 @@ export const findPendingInteraction = (
 			}
 		}
 	}
+
 	return undefined;
 };
 
@@ -213,6 +243,7 @@ export const placeCompactions = (
 ) => {
 	const before = new Set<string>();
 	let trailing = false;
+
 	for (const compaction of compactions) {
 		const next = messages.find(
 			(message) => (message.createdAt ?? "") > (compaction.createdAt ?? ""),
@@ -220,6 +251,7 @@ export const placeCompactions = (
 		if (next) before.add(next.id);
 		else trailing = true;
 	}
+
 	return { before, trailing };
 };
 

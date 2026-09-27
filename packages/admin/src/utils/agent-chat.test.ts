@@ -9,6 +9,8 @@ import {
 	applyStreamEvent,
 	awaitsDelivery,
 	findPendingInteraction,
+	isToolRow,
+	messageText,
 	partLayout,
 	placeCompactions,
 } from "./agent-chat";
@@ -134,6 +136,22 @@ describe("partLayout", () => {
 				noRows,
 			),
 		).toBe("hidden");
+	});
+
+	it("shows a completed progress call as text, outside the tool rows", () => {
+		const progress = {
+			type: "tool",
+			id: "p1",
+			name: "lucid_share_progress",
+			input: { message: "I checked the pages." },
+			status: "complete",
+		} as const;
+		expect(partLayout({ ...progress, status: "pending" }, noRows)).toBe(
+			"hidden",
+		);
+		expect(partLayout(progress, noRows)).toBe("block");
+		expect(isToolRow(progress)).toBe(false);
+		expect(messageText({ parts: [progress] })).toBe("I checked the pages.");
 	});
 
 	it("shows a pending inline interaction as a form, and any other as a row", () => {

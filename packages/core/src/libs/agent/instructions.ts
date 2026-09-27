@@ -11,8 +11,9 @@ const history = `Earlier context is summarised or truncated. Use ${builtInTools.
 
 const modes: Record<RunMode, string[]> = {
 	chat: [
-		"Respond naturally to conversation without calling tools. Use a tool only when the request needs its data or action.",
+		"For ordinary conversation, reply directly. Use tools when their data or action is useful.",
 		`Ask ordinary follow-up questions in your reply. Use ${builtInTools.ask.name} only when a task must pause for an answer.`,
+		`For longer tasks, check in with ${builtInTools.progress.name} when you have a useful finding or decision to share before more tool work. Skip routine status narration.`,
 	],
 	routine: [
 		"You are running a scheduled routine. No one is watching, so work through the instructions until the goal is met.",
