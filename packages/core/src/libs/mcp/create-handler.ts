@@ -102,6 +102,7 @@ export const createHandler = (args: {
 			server.registerTool(
 				tool.name,
 				{
+					title: context.translate(tool.title),
 					description: tool.description,
 					inputSchema: advertiseSchema(tool.input),
 					outputSchema: advertiseSchema(tool.output),

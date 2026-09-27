@@ -1,11 +1,5 @@
-import type { AgentApprovalAnswer, AgentMessagePart } from "@types";
 import classnames from "classnames";
-import {
-	FaSolidArrowRight,
-	FaSolidArrowUp,
-	FaSolidPen,
-	FaSolidXmark,
-} from "solid-icons/fa";
+import { FaSolidArrowRight, FaSolidArrowUp, FaSolidPen } from "solid-icons/fa";
 import {
 	type Component,
 	createMemo,
@@ -14,19 +8,19 @@ import {
 	For,
 	onMount,
 } from "solid-js";
+import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentMarkdown from "@/components/AgentMessage/parts/AgentMarkdown";
 import Button from "@/components/Button/Button";
 import T from "@/translations";
 
-type QuestionPart = Extract<AgentMessagePart, { type: "question" }>;
-
 export interface AgentQuestionPanelProps {
-	question: Pick<QuestionPart, "kind" | "question" | "options">;
-	/** An option was picked, or the approval was approved or denied. */
+	question: {
+		question: string;
+		options?: string[];
+	};
 	onAnswer: (answer: string) => Promise<boolean>;
-	/** Typed text: the answer to a question, or instructions to follow instead of an approval. */
 	onSubmit: (text: string) => Promise<boolean>;
-	onStop: () => void;
+	onStop?: () => void;
 	class?: string;
 }
 
@@ -48,24 +42,11 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	const approval = createMemo(() => props.question.kind === "approval");
-	//* an approval's choices are approve and deny
-	const choices = createMemo(() => {
-		if (!approval()) {
-			return (props.question.options ?? []).map((value) => ({
-				value,
-				label: value,
-			}));
-		}
-		const answers: { value: AgentApprovalAnswer; label: string }[] = [
-			{ value: "approve", label: T()("agent.question.approve") },
-			{ value: "deny", label: T()("agent.question.deny") },
-		];
-		return answers;
-	});
+	const choices = createMemo(() =>
+		(props.question.options ?? []).map((value) => ({ value, label: value })),
+	);
 	const blank = createMemo(() => text().trim().length === 0);
 	const placeholder = createMemo(() => {
-		if (approval()) return T()("agent.question.redirect");
 		return choices().length
 			? T()("agent.question.other")
 			: T()("agent.composer.placeholder.answer");
@@ -138,23 +119,16 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 			)}
 		>
 			{/* the question sits in a tinted strip across the top, apart from the ways to answer it */}
-			<div class="flex items-start gap-3 border-b border-primary-low-border bg-primary-low px-4 py-3">
-				<div id={`${id}-question`} class="min-w-0 grow">
+			<AgentInteractionBar
+				id={`${id}-question`}
+				title={
 					<AgentMarkdown
 						text={props.question.question}
 						class="text-sm leading-6 text-subtitle"
 					/>
-				</div>
-				<button
-					type="button"
-					class="-my-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
-					aria-label={T()("agent.question.stop")}
-					title={T()("agent.question.stop")}
-					onClick={() => props.onStop()}
-				>
-					<FaSolidXmark size={13} />
-				</button>
-			</div>
+				}
+				onStop={props.onStop}
+			/>
 
 			<div class="px-2 pt-2 pb-2">
 				<ul

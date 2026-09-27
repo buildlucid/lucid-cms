@@ -1,6 +1,8 @@
 import z from "zod";
 import {
+	agentApprovalModeSchema,
 	type agentContextSchema,
+	agentInteractiveWidgetSchema,
 	agentMessagePartSchema,
 	agentRunOutcomeSchema,
 } from "../../schemas/agent.js";
@@ -50,6 +52,8 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 /** Everything needed to resume a run exactly where it stopped. */
 export const checkpointSchema = z.object({
 	version: z.literal(1),
+	/** Captured when the run starts, so changing chat settings never changes a pending decision. */
+	approvalMode: agentApprovalModeSchema,
 	/** Input receipts survive compaction and a crash before acknowledgement. */
 	inputIds: z.array(z.uuid()).optional(),
 	messages: z.array(
@@ -92,15 +96,19 @@ export const checkpointSchema = z.object({
 	calls: z.array(toolCallSchema),
 	cursor: z.number().int().nonnegative(),
 	phase: z.enum(["model", "tools"]),
+	/** The interaction the run is waiting on, and the person's answer once given. */
 	pending: z
 		.object({
-			id: z.string(),
-			kind: z.enum(["question", "approval"]),
-			question: z.string(),
-			options: z.array(z.string()).optional(),
-			answer: z.string().optional(),
-			/** An approved write runs with this person's permissions. */
-			answeredBy: z.number().int().optional(),
+			widget: agentInteractiveWidgetSchema,
+			answer: z
+				.discriminatedUnion("action", [
+					z.object({
+						action: z.literal("submit"),
+						response: z.record(z.string(), z.unknown()),
+					}),
+					z.object({ action: z.literal("cancel") }),
+				])
+				.optional(),
 		})
 		.optional(),
 	inFlightWrite: z.string().optional(),

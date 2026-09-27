@@ -3,6 +3,7 @@ import {
 	FaSolidCalendar,
 	FaSolidCircleCheck,
 	FaSolidClock,
+	FaSolidCode,
 	FaSolidRobot,
 	FaSolidT,
 } from "solid-icons/fa";
@@ -90,6 +91,11 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 							label: T()("common.status"),
 							key: "enabled",
 							icon: <FaSolidCircleCheck />,
+						},
+						{
+							label: T()("agent.routine.source"),
+							key: "source",
+							icon: <FaSolidCode />,
 						},
 						{
 							label: T()("agent.select.label"),

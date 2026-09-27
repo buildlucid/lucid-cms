@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import { answerInteraction } from "../../libs/agent/interactions.js";
 import { checkpointSchema } from "../../libs/agent/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
@@ -6,13 +7,17 @@ import {
 	AgentInputsRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
-import { agentApprovalAnswerSchema } from "../../schemas/agent.js";
-import type { AgentRunStatus, AgentStreamEvent } from "../../types/response.js";
+import type {
+	AgentInteractionAction,
+	AgentRunStatus,
+	AgentStreamEvent,
+} from "../../types/response.js";
 import type { ServiceContext, ServiceFn } from "../../utils/services/types.js";
 import advanceInputs from "./advance-inputs.js";
 import getInputsEvent from "./get-inputs-event.js";
 import driveRun from "./helpers/drive-run.js";
 import openRunSession from "./helpers/run-session.js";
+import validateInteractionResponse from "./helpers/validate-interaction-response.js";
 
 /**
  * Starts the next queued message once a run lets go of the conversation, and
@@ -57,7 +62,12 @@ const executeRun: ServiceFn<
 			runId: string;
 			signal?: AbortSignal;
 			emit?: (event: AgentStreamEvent) => Promise<void>;
-			answer?: { questionId: string; answer: string; userId: number };
+			answer?: {
+				interactionId: string;
+				response: Record<string, unknown>;
+				action: AgentInteractionAction;
+				userId: number;
+			};
 		},
 	],
 	{ status: AgentRunStatus }
@@ -110,8 +120,9 @@ const executeRun: ServiceFn<
 	const steering = pendingInputs.data.some(
 		(item) => item.target_run_id === run.id,
 	);
-	if (checkpoint.pending && !steering) {
-		if (input.answer?.questionId !== checkpoint.pending.id) {
+	const { pending } = checkpoint;
+	if (pending && !pending.answer && !steering) {
+		if (input.answer?.interactionId !== pending.widget.interaction.id) {
 			return {
 				data: undefined,
 				error: {
@@ -122,23 +133,18 @@ const executeRun: ServiceFn<
 			};
 		}
 
-		if (
-			checkpoint.pending.kind === "approval" &&
-			!agentApprovalAnswerSchema.safeParse(input.answer.answer).success
-		) {
-			return {
-				data: undefined,
-				error: {
-					type: "basic",
-					status: 400,
-					message: copy("server:agent.run.approval.invalid"),
-				},
-			};
-		}
+		const answer = await validateInteractionResponse(context, {
+			run,
+			checkpoint,
+			pending,
+			response: input.answer.response,
+			action: input.answer.action,
+			userId: input.answer.userId,
+		});
+		if (answer.error) return answer;
 
-		checkpoint.pending.answer = input.answer.answer;
-		checkpoint.pending.answeredBy = input.answer.userId;
-	} else if (input.answer && !checkpoint.pending) {
+		answerInteraction(checkpoint, answer.data);
+	} else if (input.answer) {
 		return {
 			data: undefined,
 			error: {
@@ -158,6 +164,17 @@ const executeRun: ServiceFn<
 	if (session.error) return session;
 
 	try {
+		//* the answer is saved and shown before the tool runs, so a retry never asks again
+		if (input.answer && checkpoint.pending) {
+			const saved = await session.data.save();
+			if (saved.error) return saved;
+
+			await emit({
+				messageId: checkpoint.messageId,
+				...checkpoint.pending.widget,
+			});
+		}
+
 		return await driveRun(context, { run, checkpoint, session: session.data });
 	} catch {
 		await session.data.save();

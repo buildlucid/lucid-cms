@@ -1,9 +1,15 @@
-import type { AgentMessage, AgentRunStatus, AgentStreamEvent } from "@types";
+import type {
+	AgentInteraction,
+	AgentMessage,
+	AgentRunStatus,
+	AgentStreamEvent,
+} from "@types";
 import { describe, expect, it } from "vitest";
 import {
 	applyStreamEvent,
 	awaitsDelivery,
-	findPendingQuestion,
+	findPendingInteraction,
+	partLayout,
 	placeCompactions,
 } from "./agent-chat";
 
@@ -25,6 +31,7 @@ describe("applyStreamEvent", () => {
 				messageId: "m1",
 				id: "t1",
 				name: "echo",
+				title: { type: "lucid.literal", value: "Echo" },
 				input: {},
 				status: "pending",
 			},
@@ -46,6 +53,7 @@ describe("applyStreamEvent", () => {
 				type: "tool",
 				id: "t1",
 				name: "echo",
+				title: { type: "lucid.literal", value: "Echo" },
 				input: {},
 				status: "complete",
 				output: { ok: true },
@@ -93,26 +101,93 @@ describe("applyStreamEvent", () => {
 	});
 });
 
-describe("findPendingQuestion", () => {
+describe("partLayout", () => {
+	const interaction = (
+		placement: AgentInteraction["placement"],
+		status: "pending" | "answered",
+	) =>
+		({
+			id: "i1",
+			toolCallId: "t1",
+			title: "Choose",
+			placement,
+			...(status === "answered" ? { status, response: {} } : { status }),
+		}) satisfies AgentInteraction;
+	const widget = {
+		type: "widget",
+		key: "picker",
+		version: 1,
+		data: {},
+	} as const;
+	const noRows = () => false;
+
+	it("hides a question's tool call, so rows either side of it still join up", () => {
+		expect(
+			partLayout(
+				{
+					type: "tool",
+					id: "t1",
+					name: "lucid_ask_user",
+					input: {},
+					status: "complete",
+				},
+				noRows,
+			),
+		).toBe("hidden");
+	});
+
+	it("shows a pending inline interaction as a form, and any other as a row", () => {
+		expect(
+			partLayout(
+				{ ...widget, interaction: interaction("inline", "pending") },
+				noRows,
+			),
+		).toBe("block");
+		expect(
+			partLayout(
+				{ ...widget, interaction: interaction("inline", "answered") },
+				noRows,
+			),
+		).toBe("row");
+		expect(
+			partLayout(
+				{ ...widget, interaction: interaction("composer", "pending") },
+				noRows,
+			),
+		).toBe("row");
+	});
+
+	it("shows a result widget as a row only when one is registered", () => {
+		expect(partLayout(widget, noRows)).toBe("block");
+		expect(partLayout(widget, () => true)).toBe("row");
+	});
+});
+
+describe("findPendingInteraction", () => {
 	it("finds the unanswered question of the waiting run", () => {
 		const messages = apply([
 			{ type: "start", runId: "run", messageId: "m1" },
 			{
-				type: "question",
+				type: "widget",
 				messageId: "m1",
-				runId: "run",
-				id: "q1",
-				kind: "approval",
-				question: "Publish?",
+				key: "lucid-approval",
+				version: 1,
+				data: { question: "Publish?" },
+				interaction: {
+					id: "q1",
+					toolCallId: "write",
+					title: "Publish?",
+					placement: "composer",
+					status: "pending",
+				},
 			},
 		]);
 
-		expect(findPendingQuestion(messages, "run")).toMatchObject({
+		expect(findPendingInteraction(messages, "run")).toMatchObject({
 			runId: "run",
 			id: "q1",
-			kind: "approval",
 		});
-		expect(findPendingQuestion(messages, "other")).toBeUndefined();
+		expect(findPendingInteraction(messages, "other")).toBeUndefined();
 	});
 });
 
@@ -147,12 +222,18 @@ it("a skipped tool dismisses its approval and steering receipts deduplicate on r
 	const before = apply([
 		{ type: "start", runId: "run", messageId: "assistant" },
 		{
-			type: "question",
-			runId: "run",
+			type: "widget",
 			messageId: "assistant",
-			id: "write",
-			kind: "approval",
-			question: "Approve?",
+			key: "lucid-approval",
+			version: 1,
+			data: { question: "Approve?" },
+			interaction: {
+				id: "approval",
+				toolCallId: "write",
+				title: "Approve?",
+				placement: "composer",
+				status: "pending",
+			},
 		},
 	]);
 	const skipped = apply(
@@ -169,7 +250,7 @@ it("a skipped tool dismisses its approval and steering receipts deduplicate on r
 		],
 		before,
 	);
-	expect(findPendingQuestion(skipped, "run")).toBeUndefined();
+	expect(findPendingInteraction(skipped, "run")).toBeUndefined();
 	const event: AgentStreamEvent = {
 		type: "message",
 		message: {

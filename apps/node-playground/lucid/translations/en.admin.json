@@ -103,5 +103,9 @@
 	"collections.test.singularName": "Test",
 	"collections.test.summary": "A test collection for the revisions and draft/published functionality.",
 	"playground.admin.title": "Admin extension playground",
-	"playground.admin.description": "Shared components, queries, permissions and translations."
+	"playground.admin.description": "Shared components, queries, permissions and translations.",
+	"playground.picker.label": "Page document",
+	"playground.picker.search": "Filter documents",
+	"playground.note.title": "Title",
+	"playground.note.body": "Note"
 }

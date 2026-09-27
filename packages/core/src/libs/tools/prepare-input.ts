@@ -1,38 +1,83 @@
 import type { z } from "zod";
+import constants from "../../constants/constants.js";
 import {
 	isJsonObject,
 	type JsonValue,
 } from "../../utils/helpers/is-json-object.js";
+import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
+import createToolkit from "../toolkit/create-toolkit.js";
 import type {
 	AgentToolResult,
 	McpToolResult,
 	ToolHandler,
 	ToolPreparationResult,
+	ToolRunResult,
 } from "./types.js";
 
-/** Validates both sides of the handler while retaining the target's execution and result types. */
+type ResultCheck<Result, Checked> = (
+	result: Result,
+	context: ServiceContext,
+) => Promise<ToolRunResult<Checked>>;
+
+export const checkToolResult =
+	(tool: { name: string; output: z.ZodObject }) =>
+	async <Result extends AgentToolResult<unknown> | McpToolResult<unknown>>(
+		result: Result,
+		context: ServiceContext,
+	): Promise<ToolRunResult<Result & { output: Record<string, JsonValue> }>> => {
+		const output = await tool.output.safeParseAsync(result.output);
+		if (!output.success || !isJsonObject(output.data)) {
+			logger.error({
+				event: "tools.output.invalid",
+				message: `Tool ${tool.name} returned invalid output`,
+				error: output.success
+					? new Error("Output is not lossless JSON")
+					: output.error,
+			});
+
+			return {
+				type: "failed",
+				message: context.translate("server:core.tools.output.invalid"),
+			};
+		}
+
+		if (
+			result.widgets?.some(
+				(widget) =>
+					!widget.key ||
+					widget.key.startsWith(constants.agent.widgets.reservedPrefix) ||
+					!Number.isInteger(widget.version) ||
+					widget.version < 1 ||
+					!isJsonObject(widget.data),
+			)
+		) {
+			return {
+				type: "failed",
+				message: context.translate("server:core.tools.widget.invalid"),
+			};
+		}
+
+		return { type: "success", data: { ...result, output: output.data } };
+	};
+
+/** Validates input, then runs the handler and checks its result, retaining the target's execution and result types. */
 const prepareToolInput = async <
 	Input extends z.ZodObject,
 	Execution,
-	Result extends AgentToolResult<unknown> | McpToolResult<unknown>,
+	Result,
+	Checked,
 	Requirement,
 >(
 	options: {
 		name: string;
 		input: Input;
-		output: z.ZodObject;
 		requirements?: (input: z.output<Input>) => readonly Requirement[];
 		handler: ToolHandler<z.output<Input>, Result, Execution>;
+		checkResult: ResultCheck<Result, Checked>;
 	},
 	input: unknown,
-): Promise<
-	ToolPreparationResult<
-		Execution,
-		Result & { output: Record<string, JsonValue> },
-		Requirement
-	>
-> => {
+): Promise<ToolPreparationResult<Execution, Checked, Requirement>> => {
 	const parsedInput = await options.input.safeParseAsync(input);
 	if (!parsedInput.success) {
 		return {
@@ -52,6 +97,7 @@ const prepareToolInput = async <
 					context,
 					input: parsedInput.data,
 					execution,
+					toolkit: createToolkit(context),
 				});
 				if (result.error) {
 					const clientError =
@@ -73,44 +119,7 @@ const prepareToolInput = async <
 					};
 				}
 
-				const output = await options.output.safeParseAsync(result.data.output);
-				if (!output.success || !isJsonObject(output.data)) {
-					logger.error({
-						event: "tools.output.invalid",
-						message: `Tool ${options.name} returned invalid output`,
-						error: output.success
-							? new Error("Output is not lossless JSON")
-							: output.error,
-					});
-
-					return {
-						type: "failed",
-						message: context.translate("server:core.tools.output.invalid"),
-					};
-				}
-
-				if (
-					result.data.widgets?.some(
-						(widget) =>
-							!widget.key ||
-							!Number.isInteger(widget.version) ||
-							widget.version < 1 ||
-							!isJsonObject(widget.data),
-					)
-				) {
-					return {
-						type: "failed",
-						message: context.translate("server:core.tools.widget.invalid"),
-					};
-				}
-
-				return {
-					type: "success",
-					data: {
-						...result.data,
-						output: output.data,
-					},
-				};
+				return options.checkResult(result.data, context);
 			},
 		},
 	};

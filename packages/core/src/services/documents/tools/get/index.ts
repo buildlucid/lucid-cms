@@ -1,16 +1,18 @@
+import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import {
 	getPermittedCollectionKeys,
 	getScopedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineTool from "../../../../libs/tools/define-tool.js";
+import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import getDocument from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const getDocumentMcpTool = defineTool({
-	target: "mcp",
+export const getDocumentMcpTool = defineMcpTool({
 	name: "documents_get",
+	title: copy("admin:core.tools.documents_get.title"),
 	description: "Read one document and its selected content fields and bricks.",
 	input: inputSchema,
 	output: outputSchema,
@@ -33,9 +35,9 @@ export const getDocumentMcpTool = defineTool({
 		}),
 });
 
-export const getDocumentAgentTool = defineTool({
-	target: "agent",
+export const getDocumentAgentTool = defineAgentTool({
 	name: "documents_get",
+	title: copy("admin:core.tools.documents_get.title"),
 	description: "Read one document and its selected content fields and bricks.",
 	input: inputSchema,
 	output: outputSchema,

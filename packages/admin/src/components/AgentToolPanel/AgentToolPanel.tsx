@@ -1,13 +1,11 @@
-import classnames from "classnames";
-import { FaSolidXmark } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import { toolLabel } from "@/components/AgentMessage/parts/AgentToolCall";
+import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import Pill, { type PillVariant } from "@/components/Pill/Pill";
 import T from "@/translations";
 import type { AgentToolPart } from "@/utils/agent-chat";
 
-/** Shows a tool call's input and output as they arrive. */
 const AgentToolPanel: Component<{
 	part: AgentToolPart;
 	onClose: () => void;
@@ -42,36 +40,18 @@ const AgentToolPanel: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<aside
-			aria-label={toolLabel(props.part)}
-			class={classnames(
-				"flex-col gap-5 rounded-xl border border-border bg-card p-4 shadow-lg animate-slide-from-right-in md:p-5",
-				props.class,
-			)}
+		<AgentSidebarCard
+			title={toolLabel(props.part)}
+			onClose={props.onClose}
+			class={props.class}
 		>
-			<div class="flex flex-col gap-2">
-				<div class="flex items-start justify-between gap-2">
-					<h3 class="wrap-break-words text-sm font-medium text-title">
-						{toolLabel(props.part)}
-					</h3>
-					<button
-						type="button"
-						class="-mt-0.5 -mr-1 flex size-6 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:text-icon-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
-						aria-label={T()("common.close")}
-						title={T()("common.close")}
-						onClick={() => props.onClose()}
-					>
-						<FaSolidXmark size={12} />
-					</button>
-				</div>
-				<div class="flex flex-wrap items-center gap-2">
-					<Pill size="xs" variant={status().variant}>
-						{status().label}
-					</Pill>
-					<code class="rounded bg-input px-1.5 py-0.5 text-[11px] text-body">
-						{props.part.name}
-					</code>
-				</div>
+			<div class="-mt-3 flex flex-wrap items-center gap-2">
+				<Pill size="xs" variant={status().variant}>
+					{status().label}
+				</Pill>
+				<code class="rounded bg-input px-1.5 py-0.5 text-[11px] text-body">
+					{props.part.name}
+				</code>
 			</div>
 			<section class="flex flex-col gap-2">
 				<h4 class="text-xs font-medium text-subtitle">
@@ -99,7 +79,7 @@ const AgentToolPanel: Component<{
 					<JSONPreview json={props.part.output} />
 				</Show>
 			</section>
-		</aside>
+		</AgentSidebarCard>
 	);
 };
 

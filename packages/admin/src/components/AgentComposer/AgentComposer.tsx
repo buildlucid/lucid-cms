@@ -48,6 +48,8 @@ export interface AgentComposerProps {
 	draftKey?: string;
 	/** Toolbar slots along the bottom edge. `start` comes before the add menu, as it can change what the menu offers. */
 	start?: JSX.Element;
+	controls?: JSX.Element;
+	header?: JSX.Element;
 	end?: JSX.Element;
 	/** @default "md" */
 	size?: "md" | "lg";
@@ -235,12 +237,18 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	return (
 		<div class={props.class}>
 			<form
-				class="relative rounded-2xl border border-border bg-card shadow-sm transition-colors focus-within:border-primary"
+				class={classnames(
+					"relative rounded-2xl border bg-card shadow-sm transition-colors focus-within:border-primary",
+					props.header ? "border-primary-low-border" : "border-border",
+				)}
 				onSubmit={(event) => {
 					event.preventDefault();
 					void submit("send");
 				}}
 			>
+				<Show when={props.header}>
+					<div class="overflow-hidden rounded-t-2xl">{props.header}</div>
+				</Show>
 				<div ref={container} class="max-h-[min(40vh,20rem)] overflow-y-auto" />
 				{/* long messages fade out behind the toolbar rather than stopping at a hard edge */}
 				<div
@@ -264,6 +272,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 							</Menu.Item>
 						</Menu.Content>
 					</Menu.Root>
+					{props.controls}
 					<Show when={props.queueable && props.busy}>
 						<p class="hidden truncate pl-1 text-xs text-muted sm:block">
 							{T()("agent.composer.hint.busy")}

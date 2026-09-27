@@ -131,7 +131,7 @@ export const adminConfigSchema = z
 					z.strictObject({
 						key,
 						priority: z.number().optional(),
-						slot: z.literal("agent.widget"),
+						slot: z.enum(["agent.widget", "agent.transcriptRow"]),
 						component: componentReference,
 						options,
 						match: z.strictObject({

@@ -36,7 +36,7 @@ const startRun: ServiceFn<
 	const AgentConversations = new AgentConversationsRepository(context.db);
 
 	const conversation = await AgentConversations.selectSingle({
-		select: ["context"],
+		select: ["context", "approval_mode"],
 		where: [{ key: "id", operator: "=", value: input.conversationId }],
 	});
 	if (conversation.error) return conversation;
@@ -51,6 +51,10 @@ const startRun: ServiceFn<
 		};
 	}
 	const current = conversation.data.context;
+	//* scheduled routine runs have no one to approve them; anything a person sends uses the chat's mode
+	const approvalMode = input.routineId
+		? "automatic"
+		: conversation.data.approval_mode;
 
 	const repaired = await AgentConversations.releaseFinishedClaims({
 		conversationId: input.conversationId,
@@ -142,6 +146,7 @@ const startRun: ServiceFn<
 			status: "queued",
 			checkpoint: {
 				version: 1,
+				approvalMode,
 				messages: latest.data ? [summaryMessage(latest.data.summary)] : [],
 				//* the run loads history, including this message, after the latest summary
 				historyAfter: latest.data?.through_position ?? 0,

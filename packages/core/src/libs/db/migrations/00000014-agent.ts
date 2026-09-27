@@ -70,6 +70,9 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 
 		await db.schema
 			.createTable("lucid_agent_conversations")
+			.addColumn("approval_mode", adapter.getDataType("text"), (col) =>
+				col.notNull().defaultTo("tool-defaults"),
+			)
 			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
 			.addColumn("agent_key", adapter.getDataType("text"), (col) =>
 				col.notNull(),

@@ -1,4 +1,5 @@
 import type {
+	AgentInteractionAction,
 	AgentMessage as AgentMessageData,
 	AgentMessagePart,
 } from "@types";
@@ -15,19 +16,25 @@ import {
 	Switch,
 } from "solid-js";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
+import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
+import { layoutOf } from "@/components/AgentWidget/slots";
+import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
 import { copyValue } from "@/components/Copy/copyValue";
 import T from "@/translations";
 import { finishTool, isToolRow, messageText } from "@/utils/agent-chat";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
-import AgentQuestion from "./parts/AgentQuestion";
 import AgentRunFinish from "./parts/AgentRunFinish";
 import AgentToolCall from "./parts/AgentToolCall";
 
 export interface AgentMessageProps {
 	message: AgentMessageData;
-	/** The id of the question the run is waiting on. */
-	pendingQuestionId?: string;
+	pendingInteractionId?: string;
+	onRespond?: (
+		interactionId: string,
+		response: Record<string, unknown>,
+		action?: AgentInteractionAction,
+	) => Promise<AgentWidgetSubmitResult>;
 	/** The tool call shown in the sidebar. */
 	selectedToolId?: string;
 	onSelectTool?: (id: string) => void;
@@ -40,7 +47,7 @@ const isToolAt = (parts: AgentMessagePart[], index: number) => {
 
 /**
  * One message in a conversation: the user's text, or the agent's reply with its
- * tools, questions and widgets. Hovering a message with text shows when it was
+ * tools and widgets. Hovering a message with text shows when it was
  * sent and a copy button below it.
  */
 const AgentMessage: Component<AgentMessageProps> = (props) => {
@@ -73,6 +80,12 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	const leadId = (index: number) => {
 		const lead = props.message.parts[leadOf(index)];
 		return lead?.type === "tool" ? lead.id : undefined;
+	};
+	const visible = (index: number) => {
+		const part = props.message.parts[index];
+		if (!part || layoutOf(part) === "hidden") return false;
+		if (!isToolRow(part) || leadOf(index) === index) return true;
+		return expanded().has(leadId(index) ?? "");
 	};
 	const copy = () => {
 		copyValue(text());
@@ -111,62 +124,60 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 					</div>
 				}
 			>
-				{/* runs of compact rows sit close together; other parts keep the full gap */}
-				<div class="flex w-full flex-col gap-6 [&>[data-compact-row]+[data-compact-row]]:-mt-5">
+				<div class="flex w-full flex-col gap-6 [&>[data-layout=row]+[data-layout=row]]:-mt-5">
 					<For each={props.message.parts}>
 						{(part, index) => (
-							<Switch>
-								<Match when={part.type === "text" && part}>
-									{(text) => <AgentMarkdown text={text().text} />}
-								</Match>
-								<Match
-									when={
-										part.type === "tool" && part.name === finishTool && part
-									}
-								>
-									{(tool) => <AgentRunFinish part={tool()} />}
-								</Match>
-								<Match when={isToolRow(part) && part}>
-									{(tool) => (
-										<Show
+							<Show when={visible(index())}>
+								<div data-layout={layoutOf(part)} class="flex flex-col">
+									<Switch>
+										<Match when={part.type === "text" && part}>
+											{(text) => <AgentMarkdown text={text().text} />}
+										</Match>
+										<Match
 											when={
-												leadOf(index()) === index() ||
-												expanded().has(leadId(index()) ?? "")
+												part.type === "tool" && part.name === finishTool && part
 											}
 										>
-											<AgentToolCall
-												part={tool()}
-												selected={props.selectedToolId === tool().id}
-												onSelect={props.onSelectTool}
-												more={
-													leadOf(index()) === index()
-														? followers(index())
-														: undefined
-												}
-												expanded={expanded().has(tool().id)}
-												onToggle={() => toggle(tool().id)}
-											/>
-										</Show>
-									)}
-								</Match>
-								<Match when={part.type === "question" && part}>
-									{(question) => (
-										<AgentQuestion
-											part={question()}
-											pending={props.pendingQuestionId === question().id}
-										/>
-									)}
-								</Match>
-								<Match when={part.type === "widget" && part}>
-									{(widget) => (
-										<AgentWidget
-											key={widget().key}
-											version={widget().version}
-											data={widget().data}
-										/>
-									)}
-								</Match>
-							</Switch>
+											{(tool) => <AgentRunFinish part={tool()} />}
+										</Match>
+										<Match when={isToolRow(part) && part}>
+											{(tool) => (
+												<AgentToolCall
+													part={tool()}
+													selected={props.selectedToolId === tool().id}
+													onSelect={props.onSelectTool}
+													more={
+														leadOf(index()) === index()
+															? followers(index())
+															: undefined
+													}
+													expanded={expanded().has(tool().id)}
+													onToggle={() => toggle(tool().id)}
+												/>
+											)}
+										</Match>
+										<Match when={part.type === "widget" && part}>
+											{(widget) => (
+												<Show
+													when={layoutOf(widget()) === "block"}
+													fallback={<AgentWidgetRow widget={widget()} />}
+												>
+													<AgentWidget
+														widget={widget()}
+														view="inline"
+														onRespond={
+															widget().interaction?.id ===
+															props.pendingInteractionId
+																? props.onRespond
+																: undefined
+														}
+													/>
+												</Show>
+											)}
+										</Match>
+									</Switch>
+								</div>
+							</Show>
 						)}
 					</For>
 				</div>

@@ -32,7 +32,7 @@ const driveRun: ServiceFn<
 	const turnLimit = mode === "routine" ? limits.routineTurns : limits.chatTurns;
 	const deadline = Date.now() + constants.agent.sliceMs;
 
-	// Access is resolved once per slice. Write tools recheck it for their approver.
+	// Access is resolved once per slice. Tool execution also checks its required permissions.
 	const access = await checkAgentAccess(context, {
 		userId: run.user_id,
 		agentKey: run.agent_key,
@@ -230,12 +230,6 @@ const driveRun: ServiceFn<
 				authority: access.data.authority,
 			});
 			if (step.error) return step;
-			if (step.data === "access-revoked") {
-				return session.finish(
-					"failed",
-					context.translate("server:agent.permission.unavailable"),
-				);
-			}
 			if (step.data === "waiting") return session.finish("waiting");
 		}
 

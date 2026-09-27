@@ -87,8 +87,7 @@ const JobDefinitionSchema = z.custom<AnyJobDefinition>(isJobDefinition, {
 const McpToolDefinitionSchema = z.custom<McpToolDefinition>(
 	(value) => isToolDefinition(value) && value.target === "mcp",
 	{
-		message:
-			'Expected a tool definition created with defineTool and target "mcp"',
+		message: "Expected an MCP tool definition created with defineMcpTool",
 	},
 );
 

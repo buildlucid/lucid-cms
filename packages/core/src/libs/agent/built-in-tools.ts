@@ -1,11 +1,13 @@
 import z from "zod";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
+import { copy } from "../i18n/index.js";
 import type { RunMode } from "./types.js";
 
 /** Tools the runner handles itself. Their names are reserved for agent tools. */
 const builtInTools = {
 	history: {
 		name: "lucid_read_history",
+		title: copy("admin:core.tools.lucid_read_history.title"),
 		description:
 			"Recover exact earlier messages or tool results from this conversation, including history that was summarised or truncated. List positions first, then read a message in bounded character pages. Historical tool results may be stale; read current CMS data before editing.",
 		input: z.object({
@@ -16,6 +18,7 @@ const builtInTools = {
 	},
 	ask: {
 		name: "lucid_ask_user",
+		title: copy("admin:core.tools.lucid_ask_user.title"),
 		description:
 			"Pause this run and ask a person a question. Use only when the task cannot continue without their information or decision.",
 		input: z.object({
@@ -25,12 +28,14 @@ const builtInTools = {
 	},
 	skill: {
 		name: "lucid_load_skill",
+		title: copy("admin:core.tools.lucid_load_skill.title"),
 		description:
 			"Load the instructions for an available skill before performing its task.",
 		input: z.object({ name: z.string() }),
 	},
 	finish: {
 		name: "lucid_finish_run",
+		title: copy("admin:core.tools.lucid_finish_run.title"),
 		description:
 			"Finish this routine run once its goal is met. Summarise what you did and found for the next run and the people reviewing it.",
 		input: z.object({

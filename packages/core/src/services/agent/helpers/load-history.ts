@@ -43,14 +43,15 @@ const loadHistory: ServiceFn<
 	let tokens = contextTokens(checkpoint, capabilities);
 
 	for (const saved of history.data) {
-		const { message, truncated } = historyMessage(saved);
-		const size = estimateTokens(message);
+		//* a saved message loads whole, so a call is never separated from its result
+		const { messages, truncated } = historyMessage(saved);
+		const size = estimateTokens(messages);
 		//* the first message always loads, so compaction has something to summarise
 		if (tokens + size > budget && checkpoint.messages.length > 1) {
 			return { error: undefined, data: true };
 		}
 
-		checkpoint.messages.push(message);
+		checkpoint.messages.push(...messages);
 		checkpoint.historyAfter = saved.position;
 		if (truncated) checkpoint.trimmed = true;
 		tokens += size;

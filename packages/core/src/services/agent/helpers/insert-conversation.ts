@@ -2,7 +2,10 @@ import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
-import type { AgentConversation } from "../../../types/response.js";
+import type {
+	AgentApprovalMode,
+	AgentConversation,
+} from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /** Inserts a chat with an agent. A null user makes a chat for a code routine, shared with the agent's managers. */
@@ -12,6 +15,7 @@ const insertConversation: ServiceFn<
 			/** Chosen by the caller, such as the admin opening a chat before it is saved. */
 			id?: string;
 			agentKey: string;
+			approvalMode?: AgentApprovalMode;
 			userId: number | null;
 			title?: string;
 			routineId?: string;
@@ -26,6 +30,7 @@ const insertConversation: ServiceFn<
 		data: {
 			id: input.id ?? randomUUID(),
 			agent_key: input.agentKey,
+			approval_mode: input.approvalMode,
 			title: input.title ?? constants.agent.defaultTitle,
 			user_id: input.userId,
 			routine_id: input.routineId ?? null,

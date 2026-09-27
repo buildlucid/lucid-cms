@@ -10,8 +10,10 @@ import type {
 	ServiceContext,
 	ServiceResponse,
 } from "../../utils/services/types.js";
+import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import type { Permission } from "../permission/types.js";
+import type { Toolkit } from "../toolkit/types.js";
 import { toolDefinitionInternal } from "./tool-definition-internal.js";
 
 export type McpToolAuthority = Pick<LucidExternalAuth, "principal" | "scopes">;
@@ -32,6 +34,11 @@ export type AgentToolExecution = {
 	signal: AbortSignal;
 	/** Stable per tool call. Use for idempotent writes. */
 	operationId: string;
+	/** Saved input supplied by the runner after an interaction. */
+	interaction?: {
+		data: Record<string, unknown>;
+		response: Record<string, unknown>;
+	};
 };
 
 export type McpToolResult<Output> = {
@@ -51,6 +58,8 @@ export type ToolHandler<Input, Result, Execution> = (args: {
 	context: ServiceContext;
 	input: Input;
 	execution: Execution;
+	/** Trusted server helpers. They do not check the caller's permissions or scopes. */
+	toolkit: Toolkit;
 }) => ServiceResponse<Result>;
 
 export type AgentToolHandler<Input, Output> = ToolHandler<
@@ -69,8 +78,10 @@ type ToolOptions<
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
 > = {
-	/** Unique within this target. Prefix plugin tools to avoid collisions. */
+	/** Unique among MCP tools, or within an agent. Prefix plugin tools to avoid collisions. */
 	name: Name;
+	/** A plain-language name shown to people, eg. "Save note". Agent tools default to the name with spaces. */
+	title?: AdminCopyInput;
 	description: string;
 	input: Input;
 	output: Output;
@@ -91,10 +102,6 @@ export type DefineMcpToolOptions<
 	Output extends z.ZodObject,
 > = ToolOptions<Name, Input, Output> &
 	ToolScopeOptions<z.output<Input>> & {
-		target: "mcp";
-		permissions?: never;
-		requiredPermissions?: never;
-		readOnly?: never;
 		scopes: readonly ExternalScope[];
 		annotations?: ToolAnnotations;
 		handler: McpToolHandler<z.output<Input>, z.output<Output>>;
@@ -105,26 +112,59 @@ export type DefineAgentToolOptions<
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
 > = ToolOptions<Name, Input, Output> & {
-	target: "agent";
-	scopes?: never;
-	requiredScopes?: never;
-	advertisedScopes?: never;
-	annotations?: never;
 	/** Pass [] for tools available to every user with agent access. */
 	permissions: readonly Permission[];
 	requiredPermissions?: (input: z.output<Input>) => readonly Permission[];
-	/** Writes require approval in chat and pause unattended routines. Defaults to false. */
+	/** Whether the handler only reads data. Defaults to false. Writes are checkpointed before execution for safe recovery. */
 	readOnly?: boolean;
+	/** Ask before executing in tool-defaults mode. Defaults to false. */
+	requiresApproval?: boolean;
 	handler: AgentToolHandler<z.output<Input>, z.output<Output>>;
 };
 
-export type DefineToolOptions<
+/** Read-only preparation either completes the call or asks for one structured response. */
+export type AgentToolInteraction<Data> = {
+	interaction: {
+		title: string;
+		placement: "inline" | "composer";
+		data: Data;
+	};
+};
+
+export type DefineInteractiveAgentToolOptions<
 	Name extends string,
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
-> =
-	| DefineMcpToolOptions<Name, Input, Output>
-	| DefineAgentToolOptions<Name, Input, Output>;
+	Data extends z.ZodObject,
+	Response extends z.ZodObject,
+> = Omit<DefineAgentToolOptions<Name, Input, Output>, "handler"> & {
+	interaction: {
+		/** Matches an `agent.widget` admin slot. Keys starting with `lucid-` are reserved. */
+		key: string;
+		/** Bump when the data or response shape changes, so saved interactions stop matching. */
+		version: number;
+		data: Data;
+		/** Derive allowed responses from the saved data, rather than trusting the browser. */
+		response: (data: z.output<Data>) => Response;
+		/** Read-only and safe to retry. Return an interaction to ask the person, or a result to finish without asking. */
+		prepare: ToolHandler<
+			z.output<Input>,
+			AgentToolInteraction<z.input<Data>> | AgentToolResult<z.output<Output>>,
+			AgentToolExecution
+		>;
+	};
+	/** Runs once the person submits, with the saved data and their response. */
+	handler: (
+		args: Parameters<AgentToolHandler<z.output<Input>, z.output<Output>>>[0] & {
+			data: z.output<Data>;
+			response: z.output<Response>;
+		},
+	) => ServiceResponse<AgentToolResult<z.output<Output>>>;
+};
+
+export type AgentToolPreparation =
+	| AgentToolResult<Record<string, JsonValue>>
+	| AgentToolInteraction<Record<string, JsonValue>>;
 
 export type ToolRunResult<Result> =
 	| { type: "success"; data: Result }
@@ -164,6 +204,8 @@ export type McpToolDefinition<Name extends string = string> = Definition<
 	ExternalScope
 > & {
 	readonly target: "mcp";
+	/** Sent to MCP clients only when set; they fall back to the name. */
+	readonly title?: ResolvedAdminCopy;
 	readonly scopes: readonly ExternalScope[];
 	readonly annotations?: ToolAnnotations;
 	readonly advertisedScopes?: (
@@ -177,11 +219,32 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	Permission
 > & {
 	readonly target: "agent";
+	readonly title: ResolvedAdminCopy;
 	readonly permissions: readonly Permission[];
 	readonly readOnly: boolean;
+	readonly requiresApproval: boolean;
+	readonly interaction?: { readonly key: string; readonly version: number };
+	readonly [toolDefinitionInternal]: {
+		readonly interaction?: {
+			readonly prepareInput: (
+				input: unknown,
+			) => Promise<
+				ToolPreparationResult<
+					AgentToolExecution,
+					AgentToolPreparation,
+					Permission
+				>
+			>;
+			/** Checks a response against the saved data, returning it ready to save. */
+			readonly parseResponse: (
+				data: unknown,
+				response: unknown,
+			) => ServiceResponse<Record<string, JsonValue>>;
+		};
+	};
 };
 
-/** An opaque tool definition created with defineTool. Register it with `ai.mcp.tools` or an agent's `tools`. */
+/** An opaque tool created with `defineMcpTool` for `ai.mcp.tools`, or `defineAgentTool` for an agent's `tools`. */
 export type ToolDefinition<Name extends string = string> =
 	| AgentToolDefinition<Name>
 	| McpToolDefinition<Name>;

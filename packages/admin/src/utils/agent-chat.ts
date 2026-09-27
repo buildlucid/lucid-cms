@@ -5,24 +5,50 @@ import type {
 	AgentMessagePart,
 	AgentRunStatus,
 	AgentStreamEvent,
+	AgentWidgetPart,
 } from "@types";
+import helpers from "@/utils/helpers";
 
 export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
 
-//* built-in tools that render as their own cards rather than tool rows
 export const askTool = "lucid_ask_user";
 export const finishTool = "lucid_finish_run";
+export const questionWidget = "lucid-question";
+export const approvalWidget = "lucid-tool-approval";
 
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 	part.type === "tool" && part.name !== askTool && part.name !== finishTool;
 
+export const toolTitle = (part: Pick<AgentToolPart, "name" | "title">) =>
+	helpers.getLocaleValue({
+		value: part.title,
+		fallback: part.name.replaceAll("_", " "),
+	});
+
 /**
- * Parts shown as single compact rows: tool calls and questions. Rows in a run,
- * even across messages, sit close together so they read as one block.
+ * How a part shows in the transcript. Runs of rows sit close together, even
+ * across messages, so they read as one block. A pending inline interaction is a
+ * form; once answered it becomes a row, like one shown in the chat box.
  */
-export const isCompactPart = (part: AgentMessagePart | undefined) =>
-	part !== undefined && (isToolRow(part) || part.type === "question");
+export const partLayout = (
+	part: AgentMessagePart,
+	hasRow: (widget: AgentWidgetPart) => boolean,
+): "row" | "block" | "hidden" => {
+	switch (part.type) {
+		case "text":
+			return "block";
+		case "tool":
+			if (part.name === askTool) return "hidden";
+			return part.name === finishTool ? "block" : "row";
+		case "widget":
+			if (!part.interaction) return hasRow(part) ? "row" : "block";
+			return part.interaction.placement === "inline" &&
+				part.interaction.status === "pending"
+				? "block"
+				: "row";
+	}
+};
 
 export const messageText = (message: Pick<AgentMessage, "parts">) =>
 	message.parts
@@ -30,17 +56,19 @@ export const messageText = (message: Pick<AgentMessage, "parts">) =>
 		.join("\n\n")
 		.trim();
 
-/** Replaces a tool or question part with the same id, or appends it. */
+/** Updates a tool part with the same id, or appends it. Later events can leave out fields set when the call started, such as its title. */
 const upsertPart = (
 	parts: AgentMessagePart[],
-	part: Extract<AgentMessagePart, { type: "tool" | "question" }>,
+	part: AgentToolPart,
 ): AgentMessagePart[] => {
 	const index = parts.findIndex(
 		(existing) => existing.type === part.type && existing.id === part.id,
 	);
 	return index < 0
 		? [...parts, part]
-		: parts.map((existing, position) => (position === index ? part : existing));
+		: parts.map((existing, position) =>
+				position === index ? { ...existing, ...part } : existing,
+			);
 };
 
 const appendText = (
@@ -107,55 +135,56 @@ export const applyStreamEvent = (
 		}
 		const { messageId: _, ...part } = event;
 		if (part.type === "widget") {
-			return { ...message, parts: [...message.parts, part] };
+			const id = part.interaction?.id;
+			const exists =
+				id &&
+				message.parts.some(
+					(existing) =>
+						existing.type === "widget" && existing.interaction?.id === id,
+				);
+			return {
+				...message,
+				parts: exists
+					? message.parts.map((existing) =>
+							existing.type === "widget" && existing.interaction?.id === id
+								? part
+								: existing,
+						)
+					: [...message.parts, part],
+			};
 		}
-		if (part.type === "question") {
-			const { runId: __, ...question } = part;
-			return { ...message, parts: upsertPart(message.parts, question) };
-		}
+
 		return {
 			...message,
 			parts: upsertPart(message.parts, part).map((existing) =>
 				part.status === "skipped" &&
-				existing.type === "question" &&
-				existing.id === part.id
-					? { ...existing, dismissed: true }
+				existing.type === "widget" &&
+				existing.interaction?.toolCallId === part.id &&
+				existing.interaction.status === "pending"
+					? {
+							...existing,
+							interaction: { ...existing.interaction, status: "dismissed" },
+						}
 					: existing,
 			),
 		};
 	});
 };
 
-/** Records an answer against its question so the card updates before the run continues. */
-export const answerQuestion = (
-	messages: AgentMessage[],
-	questionId: string,
-	answer: string,
-): AgentMessage[] =>
-	messages.map((message) => ({
-		...message,
-		parts: message.parts.map((part) =>
-			part.type === "question" && part.id === questionId
-				? { ...part, answer }
-				: part,
-		),
-	}));
-
-/** The unanswered question a waiting run is paused on, if any. */
-export const findPendingQuestion = (
+/** The active interaction is recovered from saved messages after a reload. */
+export const findPendingInteraction = (
 	messages: AgentMessage[],
 	runId: string | undefined,
 ) => {
 	if (!runId) return undefined;
 	for (const message of messages.toReversed()) {
 		if (message.runId !== runId) continue;
-		const question = message.parts.findLast(
-			(part) =>
-				part.type === "question" &&
-				part.answer === undefined &&
-				!part.dismissed,
-		);
-		if (question?.type === "question") return { runId, ...question };
+
+		for (const part of message.parts.toReversed()) {
+			if (part.type === "widget" && part.interaction?.status === "pending") {
+				return { runId, widget: part, id: part.interaction.id };
+			}
+		}
 	}
 	return undefined;
 };

@@ -1,5 +1,10 @@
 export type {
+	AgentSlot,
+	AgentSlotPlacement,
+	AgentTranscriptRowSlotComponent,
+	AgentTranscriptRowSlotProps,
 	AgentWidgetComponent,
+	AgentWidgetInteraction,
 	AgentWidgetMatch,
 	AgentWidgetProps,
 } from "../components/AgentWidget/types.js";

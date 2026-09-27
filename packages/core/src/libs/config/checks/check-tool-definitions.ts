@@ -48,6 +48,20 @@ const checkTool = (
 			throw new Error(`Agent tool name "${tool.name}" is reserved.`);
 		}
 
+		if (
+			tool.interaction &&
+			(!tool.interaction.key ||
+				tool.interaction.key.startsWith(
+					constants.agent.widgets.reservedPrefix,
+				) ||
+				!Number.isInteger(tool.interaction.version) ||
+				tool.interaction.version < 1)
+		) {
+			throw new Error(
+				`Agent tool "${tool.name}" needs an interaction key that does not start with "${constants.agent.widgets.reservedPrefix}" and a positive whole-number version.`,
+			);
+		}
+
 		for (const permission of tool.permissions) {
 			if (!permissions.has(permission)) {
 				throw new Error(
@@ -78,7 +92,7 @@ const checkPlacement = (
 	for (const tool of tools) {
 		if (!isToolDefinition(tool) || tool.target !== target) {
 			throw new Error(
-				`${label} tools must be created with defineTool and target "${target}".`,
+				`${label} tools must be created with ${target === "mcp" ? "defineMcpTool" : "defineAgentTool"}.`,
 			);
 		}
 

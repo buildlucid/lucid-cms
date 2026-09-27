@@ -7,7 +7,6 @@ const eventTypes = new Set<AgentStreamEvent["type"]>([
 	"start",
 	"text-delta",
 	"tool",
-	"question",
 	"widget",
 	"message",
 	"inputs",

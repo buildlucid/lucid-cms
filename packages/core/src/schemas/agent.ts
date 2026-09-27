@@ -1,10 +1,11 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type {
-	AgentApprovalAnswer,
 	AgentDelivery,
 	AgentInput,
 	AgentInputAction,
+	AgentInteractionAction,
 	AgentRoutineSource,
 } from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
@@ -55,16 +56,66 @@ export const agentRunStatusSchema = z.enum([
 	"failed",
 	"cancelled",
 ]);
-export const agentApprovalAnswerSchema = z.enum([
-	"approve",
-	"deny",
-]) satisfies z.ZodType<AgentApprovalAnswer>;
+
+export const agentApprovalModeSchema = z.enum([
+	"confirm-changes",
+	"tool-defaults",
+	"automatic",
+]);
+
+export const agentInteractionActionSchema = z.enum([
+	"submit",
+	"cancel",
+]) satisfies z.ZodType<AgentInteractionAction>;
 
 export const agentRunOutcomeSchema = z.enum([
 	"done",
 	"nothing_to_report",
 	"needs_review",
 ]);
+
+/** How a tool asks for input: the prompt and where its widget is shown. */
+export const agentInteractionRequestSchema = z.object({
+	title: z.string().min(1).max(2000),
+	placement: z.enum(["inline", "composer"]),
+});
+
+export const agentInteractionSchema = agentInteractionRequestSchema
+	.extend({
+		id: z.string().min(1),
+		toolCallId: z.string().min(1),
+		approval: z
+			.object({
+				toolName: z.string(),
+				input: z.record(z.string(), z.unknown()),
+			})
+			.optional(),
+	})
+	.and(
+		z.discriminatedUnion("status", [
+			z.object({ status: z.literal("pending") }),
+			z.object({
+				status: z.literal("answered"),
+				response: z.record(z.string(), z.unknown()),
+			}),
+			z.object({ status: z.literal("dismissed") }),
+			z.object({ status: z.literal("cancelled") }),
+		]),
+	);
+
+export const agentWidgetSchema = z
+	.object({
+		type: z.literal("widget"),
+		key: z.string().min(1),
+		version: z.number().int().positive(),
+		data: z.record(z.string(), z.unknown()),
+		interaction: agentInteractionSchema.optional(),
+	})
+	.strict();
+
+export const agentInteractiveWidgetSchema = agentWidgetSchema.extend({
+	interaction: agentInteractionSchema,
+});
 
 export const agentMessagePartSchema = z.discriminatedUnion("type", [
 	z.object({ type: z.literal("text"), text: z.string() }).strict(),
@@ -73,30 +124,14 @@ export const agentMessagePartSchema = z.discriminatedUnion("type", [
 			type: z.literal("tool"),
 			id: z.string(),
 			name: z.string(),
+			/** The tool's plain-language name, saved when it was called. */
+			title: resolvedAdminCopySchema.optional(),
 			input: z.record(z.string(), z.unknown()),
 			output: z.unknown().optional(),
 			status: z.enum(["pending", "running", "complete", "failed", "skipped"]),
 		})
 		.strict(),
-	z
-		.object({
-			type: z.literal("question"),
-			id: z.string(),
-			kind: z.enum(["question", "approval"]),
-			question: z.string(),
-			options: z.array(z.string()).optional(),
-			answer: z.string().optional(),
-			dismissed: z.boolean().optional(),
-		})
-		.strict(),
-	z
-		.object({
-			type: z.literal("widget"),
-			key: z.string(),
-			version: z.number().int().positive(),
-			data: z.record(z.string(), z.unknown()),
-		})
-		.strict(),
+	agentWidgetSchema,
 ]);
 
 /** A conversation's context as last measured, stored on the conversation. */
@@ -113,6 +148,7 @@ const agentUsageSchema = z.object({
 });
 
 const agentConversationResponseSchema = z.object({
+	approvalMode: agentApprovalModeSchema,
 	queuePaused: z.boolean(),
 	inputs: z.array(agentInputSchema).optional(),
 	context: agentContextSchema
@@ -243,6 +279,7 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createConversation: {
 		body: z.object({
+			approvalMode: agentApprovalModeSchema.optional(),
 			/** Lets the admin open the chat before it is saved. */
 			id: z.uuid().optional(),
 			agentKey: z.string().min(1),
@@ -259,7 +296,10 @@ export const controllerSchemas = {
 		response: agentConversationResponseSchema,
 	} satisfies ControllerSchema,
 	updateConversation: {
-		body: z.object({ title: z.string().trim().min(1).max(255) }),
+		body: z.object({
+			title: z.string().trim().min(1).max(255).optional(),
+			approvalMode: agentApprovalModeSchema.optional(),
+		}),
 		query: noQuery,
 		params: idParams,
 		response: agentConversationResponseSchema,
@@ -308,8 +348,11 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	respondRun: {
 		body: z.object({
-			questionId: z.string().min(1),
-			answer: z.string().trim().min(1).max(20_000),
+			interactionId: z.string().min(1),
+			action: agentInteractionActionSchema,
+			response: z
+				.record(z.string(), z.unknown())
+				.refine((value) => JSON.stringify(value).length <= 20_000),
 		}),
 		query: noQuery,
 		params: idParams,

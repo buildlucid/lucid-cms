@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
+import type { AgentApprovalMode } from "@types";
 import {
 	type Component,
 	createMemo,
@@ -6,6 +7,7 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
+import AgentApprovalPicker from "@/components/AgentApprovalPicker/AgentApprovalPicker";
 import AgentComposer, {
 	type AgentComposerHandle,
 } from "@/components/AgentComposer/AgentComposer";
@@ -25,10 +27,16 @@ const AgentPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	//* a chat that could not be saved sends its message back here
-	const location = useLocation<{ message?: string }>();
+	const location = useLocation<{
+		message?: string;
+		approvalMode?: AgentApprovalMode;
+	}>();
 	const navigate = useNavigate();
 	const returned = location.state?.message;
 	const [agentKey, setAgentKey] = createSignal<string>();
+	const [approvalMode, setApprovalMode] = createSignal<AgentApprovalMode>(
+		location.state?.approvalMode ?? "tool-defaults",
+	);
 
 	// ----------------------------------------
 	// Memos
@@ -47,7 +55,11 @@ const AgentPage: Component = () => {
 		const selected = agent();
 		if (!selected) return false;
 		navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
-			state: { message: text, agentKey: selected.key },
+			state: {
+				message: text,
+				agentKey: selected.key,
+				approvalMode: approvalMode(),
+			},
 		});
 		return true;
 	};
@@ -90,6 +102,12 @@ const AgentPage: Component = () => {
 								placeholder={T()("agent.composer.placeholder")}
 								draftKey="new"
 								onSubmit={start}
+								controls={
+									<AgentApprovalPicker
+										value={approvalMode()}
+										onChange={setApprovalMode}
+									/>
+								}
 								start={
 									<Show when={agents().length > 1}>
 										<AgentPicker

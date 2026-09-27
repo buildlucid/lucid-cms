@@ -83,6 +83,7 @@ const runModelTurn: ServiceFn<
 			const part = {
 				type: "tool" as const,
 				...call,
+				title: capabilities.titles.get(call.name),
 				status: "pending" as const,
 			};
 			checkpoint.calls.push(call);

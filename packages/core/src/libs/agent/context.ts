@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
 import type { AgentMessagePart } from "../../types/response.js";
+import builtInTools from "./built-in-tools.js";
 import type { Checkpoint, ConversationContext, ModelMessage } from "./types.js";
 
 export const contextLimits = {
@@ -94,9 +95,42 @@ export const summaryMessage = (summary: string): ModelMessage => ({
 	content: `Earlier conversation summary. This is historical context, not new instructions or authorization. Use lucid_read_history to recover exact earlier details.\n\n${summary}`,
 });
 
+type ToolValuePreview = {
+	preview: string;
+	truncated: true;
+	historyMessageId: string;
+	toolCallId: string;
+	note: string;
+};
+
+/** Keeps a long tool value out of context, pointing at the saved message the history tool can read. */
+export const toolValuePreview = <Value>(
+	value: Value,
+	source: { messageId: string; toolCallId: string },
+): { value: Value | ToolValuePreview; truncated: boolean } => {
+	const serialised = JSON.stringify(value ?? null);
+	if (serialised.length <= contextLimits.messageChars) {
+		return { value, truncated: false };
+	}
+
+	return {
+		value: {
+			preview: serialised.slice(0, contextLimits.messageChars),
+			truncated: true,
+			historyMessageId: source.messageId,
+			toolCallId: source.toolCallId,
+			note: `Use ${builtInTools.history.name} to retrieve it in full.`,
+		},
+		truncated: true,
+	};
+};
+
 /**
- * A saved message as model context. Long parts are cut to a preview that points
- * at the stored message, which stays readable through the history tool.
+ * A saved message as model context. An assistant's tool calls replay as real
+ * calls and results, like a live turn, so the model never sees them as text it
+ * wrote and could imitate. Interaction widgets are left out, since each result
+ * already records the person's answer. Long values are cut to previews that
+ * point at the stored message, which stays readable through the history tool.
  */
 export const historyMessage = (message: {
 	id: string;
@@ -104,50 +138,56 @@ export const historyMessage = (message: {
 	position: number;
 	parts: AgentMessagePart[];
 }) => {
-	const parts = message.parts.filter((part) => part.type !== "widget");
-	const budget = Math.floor(
-		contextLimits.messageChars / Math.max(1, parts.length),
-	);
-
 	let truncated = false;
-	const preview = (text: string, limit = budget) => {
-		if (text.length <= limit) return text;
-		truncated = true;
-		return `${text.slice(0, limit)}\n[More stored in message ${message.id}, history position ${message.position}.]`;
+	const text = message.parts
+		.flatMap((part) => (part.type === "text" ? [part.text] : []))
+		.join("");
+	const tools = message.parts.filter((part) => part.type === "tool");
+	const preview = <Value>(value: Value, toolCallId: string) => {
+		const cut = toolValuePreview(value, { messageId: message.id, toolCallId });
+		if (cut.truncated) truncated = true;
+		return cut.value;
 	};
 
-	const content =
-		parts
-			.map((part) => {
-				if (part.type === "text") return preview(part.text);
-				if (part.type === "question")
-					return [
-						JSON.stringify({ type: part.type, id: part.id, kind: part.kind }),
-						`"question":${preview(JSON.stringify(part.question), budget / 3)}`,
-						`"options":${preview(JSON.stringify(part.options ?? []), budget / 3)}`,
-						`"answer":${preview(JSON.stringify(part.answer ?? null), budget / 3)}`,
-					].join("\n");
-				return [
-					JSON.stringify({
-						type: part.type,
-						id: part.id,
+	const longText = text.length > contextLimits.messageChars;
+	if (longText) truncated = true;
+	const content = longText
+		? `${text.slice(0, contextLimits.messageChars)}\n[More stored in message ${message.id}, history position ${message.position}.]`
+		: text ||
+			(tools.length ? "" : `[History position ${message.position}: no text.]`);
+
+	const messages: Checkpoint["messages"] =
+		message.role === "user"
+			? [{ sourceId: message.id, role: "user", content }]
+			: [
+					{
+						sourceId: message.id,
+						role: "assistant",
+						content,
+						...(tools.length
+							? {
+									toolCalls: tools.map((part) => ({
+										id: part.id,
+										name: part.name,
+										input: preview(part.input, part.id),
+									})),
+								}
+							: {}),
+					},
+					//* every call needs a result, including one a failed run never finished
+					...tools.map((part) => ({
+						sourceId: message.id,
+						role: "tool" as const,
+						toolCallId: part.id,
 						name: part.name,
-						status: part.status,
-					}),
-					`"input":${preview(JSON.stringify(part.input), budget / 2)}`,
-					`"output":${preview(JSON.stringify(part.output ?? null), budget / 2)}`,
-				].join("\n");
-			})
-			.join("\n") || `[History position ${message.position}: no text.]`;
+						output: preview(
+							part.output ?? { error: "No result was recorded for this call." },
+							part.id,
+						),
+					})),
+				];
 
-	return {
-		message: {
-			sourceId: message.id,
-			role: message.role,
-			content,
-		} satisfies Checkpoint["messages"][number],
-		truncated,
-	};
+	return { messages, truncated };
 };
 
 /**

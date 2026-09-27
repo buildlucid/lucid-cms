@@ -8,6 +8,10 @@ export {
 	default as ActionMenu,
 } from "../components/ActionMenu/ActionMenu.js";
 export {
+	type AgentTranscriptRowProps,
+	default as AgentTranscriptRow,
+} from "../components/AgentTranscriptRow/AgentTranscriptRow.js";
+export {
 	type AlertAppearance,
 	type AlertProps,
 	type AlertVariant,

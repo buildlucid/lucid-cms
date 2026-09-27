@@ -6,8 +6,14 @@ import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { createTranslationStore } from "../i18n/index.js";
 import { Permissions } from "../permission/definitions.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
-import defineTool from "./define-tool.js";
-import { executeAgentTool, executeMcpTool } from "./execute-tool.js";
+import defineAgentTool from "./define-agent-tool.js";
+import defineMcpTool from "./define-mcp-tool.js";
+import {
+	executeAgentTool,
+	executeMcpTool,
+	prepareAgentTool,
+} from "./execute-tool.js";
+import { toolDefinitionInternal } from "./registry.js";
 import type { AgentToolAuthority } from "./types.js";
 
 const testConfig = getTestConfig();
@@ -22,8 +28,7 @@ const mcpHandler = vi.fn(async () => ({
 }));
 const schema = z.object({});
 const output = z.object({ source: z.string() });
-const agentTool = defineTool({
-	target: "agent",
+const agentTool = defineAgentTool({
 	name: "shared_name",
 	description: "Agent write",
 	input: schema,
@@ -32,8 +37,7 @@ const agentTool = defineTool({
 	requiredPermissions: () => [Permissions.MediaUpdate],
 	handler: agentHandler,
 });
-const mcpTool = defineTool({
-	target: "mcp",
+const mcpTool = defineMcpTool({
 	name: "shared_name",
 	description: "MCP read",
 	input: schema,
@@ -100,6 +104,7 @@ test("agent execution checks both static and input-dependent permissions", async
 	expect(agentHandler).toHaveBeenLastCalledWith(
 		expect.objectContaining({
 			execution: expect.objectContaining({ operationId: "run:call" }),
+			toolkit: expect.objectContaining({ documents: expect.any(Object) }),
 		}),
 	);
 	expect(
@@ -141,4 +146,70 @@ test("MCP resolves only its own tools and requires their scopes", async () => {
 		}),
 	).toEqual({ type: "forbidden" });
 	expect(mcpHandler).toHaveBeenCalledTimes(1);
+});
+
+test("interaction schemas preserve raw JSON across validation and apply transforms once in the handler", async () => {
+	const tool = defineAgentTool({
+		name: "transform_picker",
+		description: "Transform test",
+		input: z.object({}),
+		output: z.object({ count: z.number() }),
+		permissions: [],
+		readOnly: true,
+		interaction: {
+			key: "picker",
+			version: 1,
+			data: z.object({ count: z.number().transform((count) => count + 1) }),
+			response: (data) =>
+				z.object({
+					count: z.number().transform((count) => count + data.count),
+				}),
+			prepare: async () => ({
+				error: undefined,
+				data: {
+					interaction: {
+						title: "Choose",
+						placement: "inline",
+						data: { count: 1 },
+					},
+				},
+			}),
+		},
+		handler: async ({ response }) => ({
+			error: undefined,
+			data: { output: response },
+		}),
+	});
+	const execution = {
+		authority: { principal: user, permissions: [], superAdmin: false },
+		signal: AbortSignal.timeout(1000),
+		operationId: "transform",
+	};
+	const prepared = await prepareAgentTool({
+		context,
+		tool,
+		input: {},
+		execution,
+	});
+	expect(prepared).toMatchObject({
+		type: "success",
+		data: { interaction: { data: { count: 1 } } },
+	});
+	const accepted = await tool[
+		toolDefinitionInternal
+	].interaction?.parseResponse({ count: 1 }, { count: 10 });
+	expect(accepted).toEqual({ error: undefined, data: { count: 10 } });
+	const result = await executeAgentTool({
+		context,
+		tool,
+		input: {},
+		execution: {
+			...execution,
+			interaction: { data: { count: 1 }, response: { count: 10 } },
+		},
+	});
+	expect(result).toMatchObject({
+		type: "success",
+		data: { output: { count: 12 } },
+	});
 });

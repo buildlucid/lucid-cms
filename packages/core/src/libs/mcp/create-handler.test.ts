@@ -11,14 +11,13 @@ import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { createTranslationStore } from "../i18n/index.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
 import defineSkill from "../skills/define-skill.js";
-import defineTool from "../tools/define-tool.js";
+import defineMcpTool from "../tools/define-mcp-tool.js";
 import { createHandler } from "./create-handler.js";
 
 const testConfig = getTestConfig();
 afterAll(testConfig.destroy);
 
-const echo = defineTool({
-	target: "mcp",
+const echo = defineMcpTool({
 	name: "test_echo",
 	description: "Echoes text",
 	input: z.object({ message: z.string() }),
@@ -32,8 +31,7 @@ const echo = defineTool({
 	}),
 });
 
-const restricted = defineTool({
-	target: "mcp",
+const restricted = defineMcpTool({
 	name: "test_restricted",
 	description: "Restricted dummy",
 	input: z.object({}),
@@ -119,6 +117,15 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 		"documents_get",
 		"test_echo",
 	]);
+	//* only titled tools send one, so clients fall back to the name otherwise
+	const titles = new Map(
+		listed.result.tools.map((tool: { name: string; title?: string }) => [
+			tool.name,
+			tool.title,
+		]),
+	);
+	expect(titles.get("collections_list")).toBe("List collections");
+	expect(titles.get("test_echo")).toBeUndefined();
 
 	const call = await handler.fetch(
 		post("tools/call", {
@@ -140,8 +147,7 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 });
 
 test("tool input is parsed once, so transforms reach the handler intact", async () => {
-	const measure = defineTool({
-		target: "mcp",
+	const measure = defineMcpTool({
 		name: "test_measure",
 		description: "Measures text",
 		input: z.object({ length: z.string().transform((text) => text.length) }),
@@ -183,8 +189,7 @@ test("tool input is parsed once, so transforms reach the handler intact", async 
 });
 
 test("oversized text results ask the client for a smaller request", async () => {
-	const large = defineTool({
-		target: "mcp",
+	const large = defineMcpTool({
 		name: "test_large",
 		description: "Returns too much text",
 		input: z.object({}),

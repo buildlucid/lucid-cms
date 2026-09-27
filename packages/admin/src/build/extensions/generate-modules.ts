@@ -58,7 +58,7 @@ export const generateRegistry = async (
 	);
 
 	const slots: Record<SlotSurface, string[]> = {
-		agentWidget: [],
+		agent: [],
 		brick: [],
 		field: [],
 		documentList: [],

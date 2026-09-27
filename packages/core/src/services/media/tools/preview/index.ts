@@ -6,7 +6,7 @@ import {
 } from "../../../../libs/media-storage/normalize-body.js";
 import type { MediaStorageAdapterStreamBody } from "../../../../libs/media-storage/types.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
-import defineTool from "../../../../libs/tools/define-tool.js";
+import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import type { Media } from "../../../../types/response.js";
 import type {
 	ServiceContext,
@@ -182,9 +182,9 @@ const inlineImage = async (args: {
 };
 
 /** Returns a public media link or a bounded inline image preview. */
-export const previewMediaMcpTool = defineTool({
-	target: "mcp",
+export const previewMediaMcpTool = defineMcpTool({
 	name: "media_preview",
+	title: copy("admin:core.tools.media_preview.title"),
 	description:
 		"Preview an image or a video's poster. Public external media returns a link; local and private media returns an inline image up to 1024px and 1MiB. Set inline to force image bytes.",
 	input: inputSchema,

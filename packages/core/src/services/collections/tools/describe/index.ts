@@ -1,16 +1,18 @@
+import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import {
 	getPermittedCollectionKeys,
 	getScopedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineTool from "../../../../libs/tools/define-tool.js";
+import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import describeCollection from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const describeCollectionMcpTool = defineTool({
-	target: "mcp",
+export const describeCollectionMcpTool = defineMcpTool({
 	name: "collections_describe",
+	title: copy("admin:core.tools.collections_describe.title"),
 	description:
 		"Describe a collection's route, content locales, version targets, fields and bricks. Use page and perPage for remaining entries.",
 	input: inputSchema,
@@ -34,9 +36,9 @@ export const describeCollectionMcpTool = defineTool({
 		}),
 });
 
-export const describeCollectionAgentTool = defineTool({
-	target: "agent",
+export const describeCollectionAgentTool = defineAgentTool({
 	name: "collections_describe",
+	title: copy("admin:core.tools.collections_describe.title"),
 	description:
 		"Describe a collection's route, content locales, version targets, fields and bricks. Use page and perPage for remaining entries.",
 	input: inputSchema,

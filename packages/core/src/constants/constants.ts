@@ -219,6 +219,12 @@ export default Object.freeze({
 	agent: {
 		defaultTitle: "New chat",
 		titleLength: 80,
+		/** Widgets the runner creates itself. Tool widget keys cannot start with `reservedPrefix`. */
+		widgets: {
+			question: "lucid-question",
+			approval: "lucid-tool-approval",
+			reservedPrefix: "lucid-",
+		},
 		runStatuses: {
 			active: ["queued", "running", "waiting", "interrupted"],
 			/** Active runs that are not waiting on a person. */
@@ -236,6 +242,8 @@ export default Object.freeze({
 			callsPerTurn: 16,
 			partsChars: 262_144,
 			toolOutputChars: 64_000,
+			/** Serialised size of the data a tool saves for its interaction widget. */
+			interactionDataChars: 100_000,
 			/** Provider request limit, including the runner's built-in tools. */
 			maxTools: 64,
 		},

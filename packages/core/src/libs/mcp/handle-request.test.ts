@@ -16,7 +16,7 @@ import {
 	type ExternalScope,
 	ExternalScopes,
 } from "../permission/external-scopes.js";
-import defineTool from "../tools/define-tool.js";
+import defineMcpTool from "../tools/define-mcp-tool.js";
 import { handleMcpRequest } from "./handle-request.js";
 
 const fixture = getTestConfig();
@@ -29,8 +29,7 @@ test("HTTP preflight challenges missing input-dependent scopes before running th
 			output: { ok: true },
 		},
 	}));
-	const tool = defineTool({
-		target: "mcp",
+	const tool = defineMcpTool({
 		name: "test_dynamic",
 		description: "Checks input-dependent scope authorization",
 		input: z.object({ resource: z.string().trim() }),

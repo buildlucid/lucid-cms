@@ -2,5 +2,16 @@
 	"core.ai.guidance.improve.label": "Improve",
 	"core.ai.guidance.expand.label": "Expand",
 	"core.ai.guidance.shorten.label": "Shorten",
-	"core.permissions.update.jobs": "Update Job Schedules"
+	"core.permissions.update.jobs": "Update Job Schedules",
+	"core.tools.documents_find.title": "Find documents",
+	"core.tools.collections_describe.title": "Describe collection",
+	"core.tools.media_preview.title": "Preview media",
+	"core.tools.locales_list.title": "List locales",
+	"core.tools.documents_get.title": "Get document",
+	"core.tools.collections_list.title": "List collections",
+	"core.tools.media_find.title": "Find media",
+	"core.tools.lucid_read_history.title": "Read chat history",
+	"core.tools.lucid_ask_user.title": "Ask a question",
+	"core.tools.lucid_load_skill.title": "Load skill",
+	"core.tools.lucid_finish_run.title": "Finish run"
 }

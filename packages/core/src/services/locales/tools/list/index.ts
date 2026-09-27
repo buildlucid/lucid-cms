@@ -1,11 +1,13 @@
+import { copy } from "../../../../libs/i18n/index.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
-import defineTool from "../../../../libs/tools/define-tool.js";
+import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import listLocales from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const listLocalesMcpTool = defineTool({
-	target: "mcp",
+export const listLocalesMcpTool = defineMcpTool({
 	name: "locales_list",
+	title: copy("admin:core.tools.locales_list.title"),
 	description:
 		"List available content languages and CMS interface languages, including each default locale. Use page and perPage for more locales.",
 	input: inputSchema,
@@ -15,9 +17,9 @@ export const listLocalesMcpTool = defineTool({
 	handler: ({ context, input }) => listLocales(context, { input }),
 });
 
-export const listLocalesAgentTool = defineTool({
-	target: "agent",
+export const listLocalesAgentTool = defineAgentTool({
 	name: "locales_list",
+	title: copy("admin:core.tools.locales_list.title"),
 	description:
 		"List available content languages and CMS interface languages, including each default locale. Use page and perPage for more locales.",
 	input: inputSchema,

@@ -6,7 +6,8 @@ import processConfig from "../config/process-config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
 import defineSkill from "../skills/define-skill.js";
 import { getCoreAgentTools, getCoreMcpTools } from "./core-tools.js";
-import defineTool from "./define-tool.js";
+import defineAgentTool from "./define-agent-tool.js";
+import defineMcpTool from "./define-mcp-tool.js";
 import { getMcpToolRegistry } from "./registry.js";
 import type { AgentToolDefinition } from "./types.js";
 
@@ -16,8 +17,7 @@ const adapter = {
 	dropAllTables: vi.fn(),
 } as unknown as DatabaseAdapter;
 
-const echo = defineTool({
-	target: "mcp",
+const echo = defineMcpTool({
 	name: "test_echo",
 	description: "Echoes text",
 	input: z.object({ message: z.string() }),
@@ -30,8 +30,7 @@ const echo = defineTool({
 		},
 	}),
 });
-const pluginTool = defineTool({
-	target: "mcp",
+const pluginTool = defineMcpTool({
 	name: "plugin_dummy",
 	description: "Returns a dummy value",
 	input: z.object({}),
@@ -44,8 +43,7 @@ const pluginTool = defineTool({
 		},
 	}),
 });
-const agentEcho = defineTool({
-	target: "agent",
+const agentEcho = defineAgentTool({
 	name: "test_echo",
 	description: "Agent echo",
 	input: z.object({}),
@@ -120,9 +118,7 @@ test("names are unique within a placement, which only holds its own target", asy
 			},
 			options,
 		),
-	).rejects.toThrow(
-		'Agent "test" tools must be created with defineTool and target "agent".',
-	);
+	).rejects.toThrow('Agent "test" tools must be created with defineAgentTool.');
 
 	const config = await processConfig(
 		{
@@ -194,4 +190,38 @@ test("each agent's provider limit includes content and runner tools", async () =
 			),
 		),
 	).toThrow('Agent "test" can have at most 55 additional tools');
+});
+
+test("interaction keys cannot use the prefix reserved for Lucid's own widgets", async () => {
+	const base = await processConfig(
+		{ secrets: "a".repeat(64) },
+		{ resolvedDb: adapter },
+	);
+	const picker = (key: string) =>
+		defineAgentTool({
+			name: "test_picker",
+			description: "Picks",
+			input: z.object({}),
+			output: z.object({}),
+			permissions: [],
+			readOnly: true,
+			interaction: {
+				key,
+				version: 1,
+				data: z.object({}),
+				response: () => z.object({}),
+				prepare: async () => ({ error: undefined, data: { output: {} } }),
+			},
+			handler: async () => ({ error: undefined, data: { output: {} } }),
+		});
+	const check = (key: string) => () =>
+		checkToolDefinitions({
+			...base,
+			ai: { ...base.ai, agents: [agent("test", [picker(key)])] },
+		});
+
+	expect(check("lucid-question")).toThrow(
+		'Agent tool "test_picker" needs an interaction key',
+	);
+	expect(check("test-picker")).not.toThrow();
 });

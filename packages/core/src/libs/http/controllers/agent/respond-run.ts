@@ -18,7 +18,7 @@ const factory = createFactory();
 const respondRunController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Answers a run's pending question or approval and streams the rest of its response. An approved write uses the approver's permissions.",
+			"Submits or cancels a run's pending input request and streams the rest of its response.",
 		tags: ["agent"],
 		summary: "Respond To Agent Run",
 		requestBody: openAPI.requestBody(controllerSchemas.respondRun.body),
@@ -49,8 +49,9 @@ const respondRunController = factory.createHandlers(
 			})(context, {
 				runId: run.data.id,
 				answer: {
-					questionId: body.questionId,
-					answer: body.answer,
+					interactionId: body.interactionId,
+					response: body.response,
+					action: body.action,
 					userId: c.get("auth").id,
 				},
 				...stream,

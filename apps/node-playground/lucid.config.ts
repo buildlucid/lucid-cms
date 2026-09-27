@@ -174,6 +174,24 @@ export default defineConfig({
 		admin: {
 			slots: [
 				{
+					key: "playground-document-picker",
+					slot: "agent.widget",
+					match: { widget: "playground-document-picker", version: 1 },
+					component: "./src/admin/widgets/DocumentPicker.tsx",
+				},
+				{
+					key: "playground-note-editor",
+					slot: "agent.widget",
+					match: { widget: "playground-note-editor", version: 1 },
+					component: "./src/admin/widgets/NoteEditor.tsx",
+				},
+				{
+					key: "playground-note-editor-row",
+					slot: "agent.transcriptRow",
+					match: { widget: "playground-note-editor", version: 1 },
+					component: "./src/admin/widgets/NoteEditorRow.tsx",
+				},
+				{
 					key: "playground-note",
 					slot: "agent.widget",
 					match: { widget: "playground-note", version: 1 },

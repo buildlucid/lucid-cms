@@ -1,6 +1,7 @@
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
 import {
+	agentApprovalModeSchema,
 	agentContextSchema,
 	agentRunOutcomeSchema,
 	agentRunStatusSchema,
@@ -18,6 +19,7 @@ export const agentConversationsTable = defineTable(
 	() => ({
 		columns: {
 			id: { schema: z.uuid(), type: "text" },
+			approval_mode: { schema: agentApprovalModeSchema, type: "text" },
 			agent_key: { schema: z.string(), type: "text" },
 			title: { schema: z.string(), type: "text" },
 			user_id: { schema: z.number().nullable(), type: "integer" },
@@ -65,6 +67,7 @@ export const agentConversationsTable = defineTable(
 export interface LucidAgentConversations {
 	id: string;
 	agent_key: string;
+	approval_mode: Generated<z.infer<typeof agentApprovalModeSchema>>;
 	title: string;
 	/** Private to this user. Null for chats started by routines defined in code. */
 	user_id: number | null;

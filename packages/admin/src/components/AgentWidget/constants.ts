@@ -1,8 +1,12 @@
-/** A single renderer handles each widget key and version. */
 export const agentWidgetSlotPolicies = {
 	"agent.widget": {
-		surface: "agentWidget",
+		surface: "agent",
 		multiple: false,
 		group: "agent.widget",
+	},
+	"agent.transcriptRow": {
+		surface: "agent",
+		multiple: false,
+		group: "agent.transcriptRow",
 	},
 } as const;

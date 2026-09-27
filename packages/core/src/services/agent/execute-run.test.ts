@@ -15,13 +15,18 @@ import type { Checkpoint, ModelUsage } from "../../libs/agent/types.js";
 import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import {
+	AgentConversationsRepository,
 	AgentInputsRepository,
 	AgentMessagesRepository,
 	AgentRunsRepository,
 	AiGenerationsRepository,
 } from "../../libs/repositories/index.js";
-import defineTool from "../../libs/tools/define-tool.js";
-import type { AgentStreamEvent } from "../../types/response.js";
+import defineAgentTool from "../../libs/tools/define-agent-tool.js";
+import type {
+	AgentApprovalMode,
+	AgentStreamEvent,
+} from "../../types/response.js";
+import LucidError from "../../utils/errors/lucid-error.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
@@ -81,8 +86,7 @@ const writeHandler = vi.fn(async () => ({
 	error: undefined,
 	data: { output: { done: true } },
 }));
-const writeTool = defineTool({
-	target: "agent",
+const writeTool = defineAgentTool({
 	name: "test_write",
 	description: "Test write",
 	input: z.object({ content: z.string().optional() }),
@@ -90,12 +94,20 @@ const writeTool = defineTool({
 	permissions: [],
 	handler: writeHandler,
 });
+const restrictedWriteTool = defineAgentTool({
+	name: "test_restricted_write",
+	description: "Requires permission even without confirmation",
+	input: z.object({}),
+	output: z.object({ done: z.boolean() }),
+	permissions: [],
+	requiredPermissions: () => ["users:create"],
+	handler: writeHandler,
+});
 const readHandler = vi.fn(async () => ({
 	error: undefined,
 	data: { output: { done: true } },
 }));
-const readTool = defineTool({
-	target: "agent",
+const readTool = defineAgentTool({
 	name: "test_read",
 	description: "Test read",
 	input: z.object({}),
@@ -104,11 +116,67 @@ const readTool = defineTool({
 	readOnly: true,
 	handler: readHandler,
 });
+const prepareSelection = vi.fn(async () => ({
+	error: undefined,
+	data: {
+		interaction: {
+			title: "Choose a document",
+			placement: "inline" as const,
+			data: { ids: [1, 2] },
+		},
+	},
+}));
+const selectedHandler = vi.fn(async (response: { id: number }) => ({
+	error: undefined,
+	data: { output: response },
+}));
+const selectionOptions = {
+	description: "Select a document",
+	input: z.object({}),
+	output: z.object({ id: z.number() }),
+	permissions: [],
+	interaction: {
+		key: "test-picker",
+		version: 1,
+		data: z.object({ ids: z.array(z.number()) }),
+		response: (data: { ids: number[] }) =>
+			z.object({ id: z.number().refine((id) => data.ids.includes(id)) }),
+		prepare: prepareSelection,
+	},
+	handler: async ({ response }: { response: { id: number } }) =>
+		selectedHandler(response),
+};
+const selectionTool = defineAgentTool({
+	...selectionOptions,
+	name: "test_select",
+	readOnly: true,
+});
+const selectionWriteTool = defineAgentTool({
+	...selectionOptions,
+	name: "test_select_write",
+});
+const approvalTool = defineAgentTool({
+	name: "test_approval",
+	title: "save API note",
+	description: "A tool that opts in to approval",
+	permissions: [],
+	requiresApproval: true,
+	input: z.object({}),
+	output: z.object({ done: z.boolean() }),
+	handler: writeHandler,
+});
 const testAgent = defineAgent({
 	key: "test",
 	name: "Test Agent",
 	description: "Runs tests.",
-	tools: [writeTool, readTool],
+	tools: [
+		writeTool,
+		approvalTool,
+		readTool,
+		selectionTool,
+		selectionWriteTool,
+		restrictedWriteTool,
+	],
 });
 const usage: ModelUsage = {
 	model: "test-model",
@@ -189,9 +257,13 @@ beforeEach(() => {
 	vi.mocked(enqueueRun).mockClear();
 });
 
-const prepare = async (props?: { routineId?: string }) => {
+const prepare = async (props?: {
+	routineId?: string;
+	approvalMode?: AgentApprovalMode;
+}) => {
 	const conversation = await insertConversation(context, {
 		agentKey: testAgent.key,
+		approvalMode: props?.approvalMode,
 		userId,
 		routineId: props?.routineId,
 	});
@@ -232,6 +304,13 @@ const partsOf = async (conversationId: string) => {
 	const result = await Messages.selectLatest({ conversationId, limit: 20 });
 	return result.data?.flatMap((message) => message.parts);
 };
+const interactionId = async (conversationId: string) => {
+	const part = (await partsOf(conversationId))?.findLast(
+		(part) => part.type === "widget" && part.interaction?.status === "pending",
+	);
+	expect(part?.type).toBe("widget");
+	return part?.type === "widget" ? (part.interaction?.id ?? "") : "";
+};
 const selectRun = async (runId: string) => {
 	const Runs = new AgentRunsRepository(context.db);
 	const result = await Runs.selectSingle({
@@ -242,6 +321,182 @@ const selectRun = async (runId: string) => {
 };
 
 describe("agent runner", () => {
+	test.each([
+		{ mode: "tool-defaults", tool: writeTool, waits: false },
+		{ mode: "tool-defaults", tool: approvalTool, waits: true },
+		{ mode: "automatic", tool: approvalTool, waits: false },
+		{ mode: "confirm-changes", tool: writeTool, waits: true },
+		{ mode: "confirm-changes", tool: readTool, waits: false },
+	] as const)("$mode applies to $tool.name", async ({ mode, tool, waits }) => {
+		const prepared = await prepare({ approvalMode: mode });
+		callTool({ id: "policy", name: tool.name, input: {} });
+		reply("Done");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: waits ? "waiting" : "completed" },
+		});
+		if (!waits) return;
+		expect(writeHandler).not.toHaveBeenCalled();
+		expect(
+			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget.interaction
+				.title,
+		).toBe(context.translate(tool.title));
+		const id = await interactionId(prepared.conversationId);
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: { interactionId: id, action: "submit", response: {}, userId },
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(writeHandler).toHaveBeenCalledOnce();
+	});
+
+	test("denial skips execution and a chat policy change only affects later runs", async () => {
+		const prepared = await prepare({ approvalMode: "confirm-changes" });
+		await new AgentConversationsRepository(context.db).updateSingle({
+			where: [{ key: "id", operator: "=", value: prepared.conversationId }],
+			data: { approval_mode: "automatic" },
+		});
+		callTool({ id: "denied", name: writeTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		reply("Cancelled");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "cancel",
+					response: {},
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(writeHandler).not.toHaveBeenCalled();
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "denied",
+				output: { error: context.translate("server:agent.tool.denied") },
+			}),
+		);
+		const next = await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			text: "Continue",
+			requestId: randomUUID(),
+		});
+		if (next.error) throw next.error;
+		expect((await selectRun(next.data.runId))?.checkpoint?.approvalMode).toBe(
+			"automatic",
+		);
+	});
+
+	test("only the person the run acts for can respond", async () => {
+		const prepared = await prepare({ approvalMode: "tool-defaults" });
+		callTool({ id: "approval", name: approvalTool.name, input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		const otherUserId = (
+			await context.db.kysely
+				.insertInto("lucid_users")
+				.values({
+					email: "other-responder@example.test",
+					username: "other-responder",
+					secret: "test",
+				})
+				.returning("id")
+				.executeTakeFirstOrThrow()
+		).id;
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: {},
+					userId: otherUserId,
+				},
+			}),
+		).toMatchObject({ error: { status: 403 } });
+		expect(writeHandler).not.toHaveBeenCalled();
+		expect((await selectRun(prepared.runId))?.status).toBe("waiting");
+	});
+
+	test("scheduled routine runs are automatic while follow-ups use the chat's approval mode", async () => {
+		const routine = await createRoutine(context, {
+			agentKey: testAgent.key,
+			userId,
+			name: "Follow-up approvals",
+			instructions: "Check content.",
+			cron: "0 9 * * 1",
+			timezone: "UTC",
+			enabled: false,
+		});
+		if (routine.error) throw routine.error;
+		const prepared = await prepare({
+			routineId: routine.data.id,
+			approvalMode: "confirm-changes",
+		});
+		expect((await selectRun(prepared.runId))?.checkpoint?.approvalMode).toBe(
+			"automatic",
+		);
+		await new AgentRunsRepository(context.db).updateSingle({
+			where: [{ key: "id", operator: "=", value: prepared.runId }],
+			data: { status: "completed" },
+		});
+		const followUp = await startRun(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			text: "Now fix it",
+			requestId: randomUUID(),
+		});
+		if (followUp.error) throw followUp.error;
+		expect(
+			(await selectRun(followUp.data.runId))?.checkpoint?.approvalMode,
+		).toBe("confirm-changes");
+	});
+
+	test("an interactive write collects validated input and approval in one submission", async () => {
+		prepareSelection.mockClear();
+		selectedHandler.mockClear();
+		const prepared = await prepare({ approvalMode: "confirm-changes" });
+		callTool({ id: "combined", name: selectionWriteTool.name, input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		const pending = (await selectRun(prepared.runId))?.checkpoint?.pending;
+		expect(pending?.widget.interaction.approval?.toolName).toBe(
+			selectionWriteTool.name,
+		);
+		const id = await interactionId(prepared.conversationId);
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: id,
+					action: "submit",
+					response: { id: 99 },
+					userId,
+				},
+			}),
+		).toMatchObject({ error: { status: 400 } });
+		expect(selectedHandler).not.toHaveBeenCalled();
+		reply("Saved");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: id,
+					action: "submit",
+					response: { id: 1 },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(prepareSelection).toHaveBeenCalledOnce();
+		expect(selectedHandler).toHaveBeenCalledOnce();
+	});
+
 	test("streams text, persists it and bills one call across a repeated submission", async () => {
 		const prepared = await prepare();
 		reply("Done.");
@@ -287,6 +542,196 @@ describe("agent runner", () => {
 		]);
 	});
 
+	test("a saved inline interaction rejects invalid choices and resumes without repeating preparation", async () => {
+		prepareSelection.mockClear();
+		selectedHandler.mockClear();
+		const prepared = await prepare();
+		callTool({ id: "choose", name: "test_select", input: {} });
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		const id = await interactionId(prepared.conversationId);
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					action: "submit",
+					interactionId: id,
+					response: { id: 99 },
+					userId,
+				},
+			}),
+		).toMatchObject({ error: { status: 400 } });
+		expect(selectedHandler).not.toHaveBeenCalled();
+		expect((await selectRun(prepared.runId))?.status).toBe("waiting");
+		reply("Selected");
+		const events: AgentStreamEvent[] = [];
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					action: "submit",
+					interactionId: id,
+					response: { id: 2 },
+					userId,
+				},
+				emit: async (event) => {
+					events.push(event);
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(prepareSelection).toHaveBeenCalledTimes(1);
+		expect(selectedHandler).toHaveBeenCalledWith({ id: 2 });
+		expect(events).toContainEqual(
+			expect.objectContaining({
+				type: "widget",
+				interaction: expect.objectContaining({
+					id,
+					status: "answered",
+					response: { id: 2 },
+				}),
+			}),
+		);
+		expect(model.mock.calls.at(-1)?.[1].messages).toContainEqual(
+			expect.objectContaining({
+				role: "tool",
+				toolCallId: "choose",
+				output: { id: 2 },
+			}),
+		);
+		await executeRun(context, {
+			runId: prepared.runId,
+			answer: {
+				action: "submit",
+				interactionId: id,
+				response: { id: 2 },
+				userId,
+			},
+		});
+		expect(selectedHandler).toHaveBeenCalledTimes(1);
+	});
+
+	test("a write tool collects its input and executes on submission", async () => {
+		prepareSelection.mockClear();
+		selectedHandler.mockClear();
+		const prepared = await prepare();
+		callTool({ id: "choose-write", name: "test_select_write", input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		const id = await interactionId(prepared.conversationId);
+		expect(selectedHandler).not.toHaveBeenCalled();
+
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: id,
+					action: "submit",
+					response: { id: 99 },
+					userId,
+				},
+			}),
+		).toMatchObject({ error: { status: 400 } });
+		expect(selectedHandler).not.toHaveBeenCalled();
+		reply("Saved");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: id,
+					action: "submit",
+					response: { id: 1 },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(prepareSelection).toHaveBeenCalledTimes(1);
+		expect(selectedHandler).toHaveBeenCalledOnce();
+		expect(selectedHandler).toHaveBeenCalledWith({ id: 1 });
+		expect(
+			(await partsOf(prepared.conversationId))?.filter(
+				(part) => part.type === "widget",
+			),
+		).toHaveLength(1);
+	});
+
+	test.each([
+		"test_select",
+		"test_select_write",
+	])("cancelling %s does not require valid form input or execute its handler", async (name) => {
+		selectedHandler.mockClear();
+		const prepared = await prepare();
+		callTool({ id: "cancelled", name, input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		const id = await interactionId(prepared.conversationId);
+		reply("Cancelled");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: { interactionId: id, action: "cancel", response: {}, userId },
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(selectedHandler).not.toHaveBeenCalled();
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "widget",
+				interaction: expect.objectContaining({ id, status: "cancelled" }),
+			}),
+		);
+	});
+
+	test("an accepted response survives interruption before the handler starts", async () => {
+		prepareSelection.mockClear();
+		selectedHandler.mockClear();
+		const prepared = await prepare();
+		callTool({ id: "choose", name: "test_select", input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		const abort = new AbortController();
+		await executeRun(context, {
+			runId: prepared.runId,
+			signal: abort.signal,
+			answer: {
+				interactionId: await interactionId(prepared.conversationId),
+				action: "submit",
+				response: { id: 1 },
+				userId,
+			},
+			emit: async (event) => {
+				if (event.type === "widget" && event.interaction?.status === "answered")
+					abort.abort();
+			},
+		});
+		expect(selectedHandler).not.toHaveBeenCalled();
+		reply("Selected after recovery");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(selectedHandler).toHaveBeenCalledWith({ id: 1 });
+		expect(prepareSelection).toHaveBeenCalledTimes(1);
+	});
+
+	test("concurrent submissions resolve an interaction once", async () => {
+		prepareSelection.mockClear();
+		selectedHandler.mockClear();
+		const prepared = await prepare();
+		callTool({ id: "choose", name: "test_select", input: {} });
+		await executeRun(context, { runId: prepared.runId });
+		const answer = {
+			interactionId: await interactionId(prepared.conversationId),
+			action: "submit" as const,
+			response: { id: 2 },
+			userId,
+		};
+		reply("Selected once");
+		const results = await Promise.all([
+			executeRun(context, { runId: prepared.runId, answer }),
+			executeRun(context, { runId: prepared.runId, answer }),
+		]);
+		expect(
+			results.filter((result) => result.data?.status === "completed"),
+		).toHaveLength(1);
+		expect(selectedHandler).toHaveBeenCalledOnce();
+	});
+
 	test("pauses for a question and continues with the answer", async () => {
 		const prepared = await prepare();
 		callTool({
@@ -304,10 +749,10 @@ describe("agent runner", () => {
 			}),
 		).toMatchObject({ data: { status: "waiting" } });
 		expect(events).toContainEqual(
-			expect.objectContaining({ type: "question", id: "q1", kind: "question" }),
+			expect.objectContaining({ type: "widget", key: "lucid-question" }),
 		);
 		expect(await partsOf(prepared.conversationId)).toContainEqual(
-			expect.objectContaining({ type: "question", id: "q1" }),
+			expect.objectContaining({ type: "widget", key: "lucid-question" }),
 		);
 		expect(
 			(await executeRun(context, { runId: prepared.runId })).error?.status,
@@ -317,7 +762,12 @@ describe("agent runner", () => {
 		expect(
 			await executeRun(context, {
 				runId: prepared.runId,
-				answer: { questionId: "q1", answer: "Blue", userId },
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: { answer: "Blue" },
+					userId,
+				},
 			}),
 		).toMatchObject({ data: { status: "completed" } });
 		expect(model.mock.calls[1]?.[1].messages).toContainEqual({
@@ -328,41 +778,109 @@ describe("agent runner", () => {
 		});
 	});
 
-	test("requires approval before a write and does not repeat it on replay", async () => {
-		const prepared = await prepare();
-		const input = { content: `${"a".repeat(16_000)} end of approved input` };
-		callTool({ id: "w1", name: "test_write", input });
-		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: "waiting" },
+	test.each([
+		"chat",
+		"routine",
+	])("a write runs once as its user in a %s without requesting input", async (mode) => {
+		let routineId: string | undefined;
+		if (mode === "routine") {
+			const routine = await createRoutine(context, {
+				agentKey: testAgent.key,
+				userId,
+				name: "Automatic write",
+				instructions: "Write a note.",
+				cron: "0 9 * * 1",
+				timezone: "UTC",
+				enabled: false,
+			});
+			if (routine.error) throw routine.error;
+			routineId = routine.data.id;
+		}
+		const prepared = await prepare({
+			routineId,
+			approvalMode: mode === "routine" ? "confirm-changes" : "automatic",
 		});
+		callTool({
+			id: "automatic",
+			name: mode === "routine" ? approvalTool.name : writeTool.name,
+			input: {},
+		});
+		if (mode === "routine")
+			callTool({
+				id: "finish",
+				name: "lucid_finish_run",
+				input: { outcome: "done", summary: "Written" },
+			});
+		else reply("Written");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		await executeRun(context, { runId: prepared.runId });
+		expect(writeHandler).toHaveBeenCalledOnce();
+		expect(writeHandler).toHaveBeenCalledWith(
+			expect.objectContaining({
+				execution: expect.objectContaining({
+					authority: expect.objectContaining({
+						principal: { type: "user", userId },
+					}),
+					operationId: `${prepared.runId}:automatic`,
+				}),
+			}),
+		);
+		expect(
+			(await partsOf(prepared.conversationId))?.some(
+				(part) => part.type === "widget",
+			),
+		).toBe(false);
+	});
+
+	test("writes enforce input-dependent permissions", async () => {
+		const prepared = await prepare();
+		callTool({
+			id: "restricted",
+			name: restrictedWriteTool.name,
+			input: {},
+		});
+		reply("Not permitted");
+		await executeRun(context, { runId: prepared.runId });
+		expect(writeHandler).not.toHaveBeenCalled();
 		expect(await partsOf(prepared.conversationId)).toContainEqual(
 			expect.objectContaining({
-				type: "question",
-				id: "w1",
-				kind: "approval",
-				question: expect.stringContaining(JSON.stringify(input)),
+				type: "tool",
+				id: "restricted",
+				status: "failed",
 			}),
 		);
-		expect(writeHandler).not.toHaveBeenCalled();
-		expect(
-			await executeRun(context, {
-				runId: prepared.runId,
-				answer: { questionId: "w1", answer: "Sure", userId },
-			}),
-		).toMatchObject({ error: { status: 400 } });
+	});
 
-		reply("Written.");
-		expect(
-			await executeRun(context, {
-				runId: prepared.runId,
-				answer: { questionId: "w1", answer: "approve", userId },
-			}),
-		).toMatchObject({ data: { status: "completed" } });
-		await executeRun(context, { runId: prepared.runId });
-		expect(writeHandler).toHaveBeenCalledTimes(1);
-		expect(writeHandler).toHaveBeenCalledWith(
-			expect.objectContaining({ input }),
+	test("an uncertain write is never executed again on recovery", async () => {
+		const prepared = await prepare();
+		const update = AgentRunsRepository.prototype.updateWithToken;
+		const fail = vi
+			.spyOn(AgentRunsRepository.prototype, "updateWithToken")
+			.mockImplementation(function (this: AgentRunsRepository, props) {
+				if (writeHandler.mock.calls.length && !props.checkpoint.inFlightWrite)
+					throw new LucidError({ message: "Lost write outcome" });
+				return update.call(this, props);
+			});
+		callTool({ id: "uncertain", name: writeTool.name, input: {} });
+		await expect(
+			executeRun(context, { runId: prepared.runId }),
+		).rejects.toThrow("Lost write outcome");
+		fail.mockRestore();
+		await new AgentRunsRepository(context.db).transition({
+			runId: prepared.runId,
+			from: ["running"],
+			status: "interrupted",
+			now: new Date().toISOString(),
+		});
+		expect((await selectRun(prepared.runId))?.checkpoint?.inFlightWrite).toBe(
+			"uncertain",
 		);
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "failed" },
+		});
+		expect(writeHandler).toHaveBeenCalledOnce();
 	});
 
 	test("starting another run leaves active and interrupted runs intact", async () => {
@@ -1350,31 +1868,6 @@ describe("queued and steering inputs", () => {
 		);
 	});
 
-	test("steering dismisses a pending approval without granting it", async () => {
-		const prepared = await prepare();
-		callTool({ id: "approval", name: "test_write", input: {} });
-		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: "waiting" },
-		});
-		await submit(prepared.conversationId, "Explain instead", prepared.runId);
-		expect(enqueueRun).toHaveBeenCalledWith(context, {
-			runId: prepared.runId,
-			userId,
-		});
-		reply("Explained");
-		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: "completed" },
-		});
-		expect(writeHandler).not.toHaveBeenCalled();
-		expect(await partsOf(prepared.conversationId)).toContainEqual(
-			expect.objectContaining({
-				type: "question",
-				id: "approval",
-				dismissed: true,
-			}),
-		);
-	});
-
 	test("a stale steer becomes a follow-up instead of steering the next run", async () => {
 		const prepared = await prepare();
 		reply("Done");
@@ -1575,30 +2068,32 @@ describe("runs acting as the system", () => {
 		return { runId: run.data.runId, conversationId: conversation.data.id };
 	};
 
-	test("cannot ask questions, and an approved write acts for its approver", async () => {
+	test("writes retain the system authority", async () => {
 		const prepared = await prepareSystem();
-		callTool({ id: "w1", name: "test_write", input: {} });
+		callTool({ id: "system-write", name: writeTool.name, input: {} });
+		reply("Written");
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
-			data: { status: "waiting" },
-		});
-		expect(
-			model.mock.calls[0]?.[1].tools.map((tool) => tool.name),
-		).not.toContain("lucid_ask_user");
-
-		reply("Written.");
-		await executeRun(context, {
-			runId: prepared.runId,
-			answer: { questionId: "w1", answer: "approve", userId },
+			data: { status: "completed" },
 		});
 		expect(writeHandler).toHaveBeenCalledWith(
 			expect.objectContaining({
 				execution: expect.objectContaining({
-					authority: expect.objectContaining({
-						principal: { type: "user", userId },
-					}),
+					authority: expect.objectContaining({ principal: { type: "system" } }),
 				}),
 			}),
 		);
+	});
+
+	test("interactive tools are not offered, since no one can answer", async () => {
+		const prepared = await prepareSystem();
+		reply("Done");
+		await executeRun(context, { runId: prepared.runId });
+		const offered = model.mock.calls
+			.at(-1)?.[1]
+			.tools.map((tool: { name: string }) => tool.name);
+		expect(offered).toContain(writeTool.name);
+		expect(offered).not.toContain(selectionTool.name);
+		expect(offered).not.toContain("lucid_ask_user");
 	});
 
 	test("a steer from someone else becomes a follow-up that acts for them", async () => {

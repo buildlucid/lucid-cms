@@ -1,4 +1,8 @@
-import type { AgentConversation, ResponseBody } from "@types";
+import type {
+	AgentApprovalMode,
+	AgentConversation,
+	ResponseBody,
+} from "@types";
 import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
@@ -7,7 +11,12 @@ const useCreateConversation = (props?: {
 	onSuccess?: (response: ResponseBody<AgentConversation>) => void;
 }) =>
 	serviceHelpers.useMutationWrapper<
-		{ id?: string; agentKey: string; title?: string },
+		{
+			id?: string;
+			agentKey: string;
+			title?: string;
+			approvalMode?: AgentApprovalMode;
+		},
 		ResponseBody<AgentConversation>
 	>({
 		mutationFn: (body) =>

@@ -9,27 +9,18 @@ import {
 import { type Component, Match, Show, Switch } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
-import type { AgentToolPart } from "@/utils/agent-chat";
+import { type AgentToolPart, toolTitle } from "@/utils/agent-chat";
 
-/** What a tool call did, in plain words, such as "Used collections list". */
+/** A tool call's plain-language name, with its status unless it completed, such as "Save note · Failed". */
 export const toolLabel = (part: AgentToolPart) => {
 	const skill = part.input.name;
 	if (part.name === "lucid_load_skill" && typeof skill === "string") {
 		return T()("agent.tool.skill", { name: skill });
 	}
-	const name = part.name.replaceAll("_", " ");
-	switch (part.status) {
-		case "pending":
-			return T()("agent.tool.pending", { name });
-		case "running":
-			return T()("agent.tool.running", { name });
-		case "skipped":
-			return T()("agent.tool.skipped", { name });
-		case "failed":
-			return T()("agent.tool.failed", { name });
-		case "complete":
-			return T()("agent.tool.complete", { name });
-	}
+	const title = toolTitle(part);
+	return part.status === "complete"
+		? title
+		: `${title} · ${T()(`agent.tool.status.${part.status}`)}`;
 };
 
 /** A tool call's status as a small icon. */
@@ -80,7 +71,7 @@ const AgentToolCall: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<div data-compact-row class="flex max-w-full items-center gap-1 self-start">
+		<div class="flex max-w-full items-center gap-1 self-start">
 			<button
 				type="button"
 				class={classnames(

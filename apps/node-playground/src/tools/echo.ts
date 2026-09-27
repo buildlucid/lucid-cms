@@ -1,10 +1,10 @@
-import { defineTool, z } from "@lucidcms/core";
+import { defineAgentTool, defineMcpTool, z } from "@lucidcms/core";
 
 const echoInput = z.object({ message: z.string().max(200) });
 
-export const echoTool = defineTool({
-	target: "mcp",
+export const echoTool = defineMcpTool({
 	name: "playground_echo",
+	title: "Echo",
 	description: "Returns a short message unchanged.",
 	input: echoInput,
 	output: z.object({ message: z.string() }),
@@ -16,9 +16,9 @@ export const echoTool = defineTool({
 	annotations: { readOnlyHint: true },
 });
 
-export const echoAgentTool = defineTool({
-	target: "agent",
+export const echoAgentTool = defineAgentTool({
 	name: "playground_echo",
+	title: "Echo",
 	description: "Returns a short message unchanged.",
 	input: echoInput,
 	output: z.object({ message: z.string() }),

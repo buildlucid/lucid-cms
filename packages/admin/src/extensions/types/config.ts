@@ -1,4 +1,4 @@
-import type { AgentWidgetMatch } from "../../components/AgentWidget/types.js";
+import type { AgentSlotPlacement } from "../../components/AgentWidget/types.js";
 import type {
 	BrickSlotMatch,
 	BrickSlotPlacement,
@@ -38,7 +38,7 @@ export type AdminSlot = {
 	component: AdminComponentReference;
 	options?: AdminOptions;
 } & (
-	| { slot: "agent.widget"; match: AgentWidgetMatch }
+	| AgentSlotPlacement
 	| DocumentListSlotPlacement
 	| (BrickSlotPlacement & { match?: BrickSlotMatch })
 	| { slot: FieldSlot; match?: FieldSlotMatch }

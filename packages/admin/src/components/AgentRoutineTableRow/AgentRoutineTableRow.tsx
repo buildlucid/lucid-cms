@@ -1,7 +1,6 @@
 import type { AgentRoutine } from "@types";
 import { type Component, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
-import Pill from "@/components/Pill/Pill";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
@@ -68,18 +67,12 @@ const AgentRoutineTableRow: Component<{
 				},
 			]}
 		>
-			<Table.Cell column="name" minWidth={260}>
-				<span class="flex min-w-0 items-center gap-2">
-					<span class="truncate text-sm" title={props.routine.name}>
-						{props.routine.name}
-					</span>
-					<Show when={props.routine.source === "code"}>
-						<Pill variant="neutral" class="shrink-0">
-							{T()("agent.routine.code")}
-						</Pill>
-					</Show>
-				</span>
-			</Table.Cell>
+			<Table.Text
+				column="name"
+				text={props.routine.name}
+				minWidth={260}
+				maxLines={1}
+			/>
 			<Table.Pill
 				column="enabled"
 				text={
@@ -88,6 +81,11 @@ const AgentRoutineTableRow: Component<{
 						: T()("agent.routine.paused")
 				}
 				variant={props.routine.enabled ? "success-subtle" : "warning-subtle"}
+			/>
+			<Table.Pill
+				column="source"
+				text={T()(`agent.routine.source.${props.routine.source}`)}
+				variant="neutral"
 			/>
 			<Table.Text
 				column="agentKey"

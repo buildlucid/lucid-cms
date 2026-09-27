@@ -5,6 +5,7 @@ import type {
 	AgentDelivery,
 	AgentInput,
 	AgentInputAction,
+	AgentInteractionAction,
 	AgentMessage,
 	ResponseBody,
 } from "@types";
@@ -22,10 +23,9 @@ import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import {
-	answerQuestion,
 	applyStreamEvent,
 	awaitsDelivery,
-	findPendingQuestion,
+	findPendingInteraction,
 	isRunWorking,
 } from "@/utils/agent-chat";
 
@@ -41,6 +41,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// State & Hooks
 	const queryClient = useQueryClient();
 	const [live, setLive] = createSignal<AgentMessage[]>();
+	const [responding, setResponding] = createSignal(false);
 	const [liveRunId, setLiveRunId] = createSignal<string>();
 	const [error, setError] = createSignal<string>();
 	const [liveContext, setLiveContext] = createSignal<AgentContext>();
@@ -78,9 +79,9 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			.toReversed()
 			.flatMap((page) => page.data),
 	);
-	const pendingQuestion = createMemo(() =>
-		latestRun()?.status === "waiting" && !streaming()
-			? findPendingQuestion(saved(), latestRun()?.id)
+	const pendingInteraction = createMemo(() =>
+		latestRun()?.status === "waiting" && (!streaming() || responding())
+			? findPendingInteraction(live() ?? saved(), latestRun()?.id)
 			: undefined,
 	);
 	const activeRunId = createMemo(
@@ -126,6 +127,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		options: {
 			body?: Record<string, unknown>;
 			prepare?: (messages: AgentMessage[]) => AgentMessage[];
+			interactionId?: string;
 		} = {},
 	) => {
 		const id = conversationId();
@@ -143,8 +145,19 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 					url,
 					body: options.body,
 					signal: current.signal,
-					onAccepted: () => accepted.resolve(true),
+					onAccepted: () => {
+						if (!options.interactionId) accepted.resolve(true);
+					},
 					onEvent: (event) => {
+						if (
+							event.type === "widget" &&
+							event.interaction?.id === options.interactionId &&
+							(event.interaction?.status === "answered" ||
+								event.interaction?.status === "cancelled")
+						) {
+							accepted.resolve(true);
+						}
+
 						switch (event.type) {
 							case "error":
 								setError(event.message);
@@ -306,12 +319,13 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			}),
 		history,
 		messages,
-		pendingQuestion,
+		pendingInteraction,
 		activeRunId,
 		error,
 		streaming,
 		/** True while the agent is replying here or in the background. */
 		working: createMemo(() => streaming() || background()),
+		waiting: createMemo(() => latestRun()?.status === "waiting"),
 		inputs,
 		queuePaused: createMemo(() => data()?.queuePaused ?? false),
 		/** Sends a message. While the agent is busy it queues, or steers the current run. */
@@ -334,7 +348,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			const queued =
 				streaming() ||
 				background() ||
-				pendingQuestion() !== undefined ||
+				pendingInteraction() !== undefined ||
 				data()?.queuePaused ||
 				(data()?.inputs?.length ?? 0) > 0;
 			const accepted = queued
@@ -357,11 +371,28 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			if (accepted && retrySubmission === pending) retrySubmission = undefined;
 			return accepted;
 		},
-		respond: (question: { runId: string; id: string }, answer: string) =>
-			stream(`/lucid/api/v1/agent/runs/${question.runId}/respond`, {
-				body: { questionId: question.id, answer },
-				prepare: (messages) => answerQuestion(messages, question.id, answer),
-			}),
+		respond: async (
+			interaction: { runId: string; id: string },
+			response: Record<string, unknown>,
+			action: AgentInteractionAction = "submit",
+		) => {
+			if (streaming()) return { error: T()("agent.interaction.submitting") };
+			setResponding(true);
+			try {
+				const accepted = await stream(
+					`/lucid/api/v1/agent/runs/${interaction.runId}/respond`,
+					{
+						body: { interactionId: interaction.id, response, action },
+						interactionId: interaction.id,
+					},
+				);
+				return accepted
+					? { error: undefined }
+					: { error: error() ?? T()("agent.errors.stream") };
+			} finally {
+				setResponding(false);
+			}
+		},
 		/** Changes pending input. The row changes straight away and is corrected if the server refuses. */
 		updateInput: async (action: AgentInputAction) => {
 			const id = conversationId();

@@ -46,15 +46,15 @@ test("loads named exports and names the module when an export is missing", async
 				"const lazy = (load) => load;",
 			),
 		);
-		const { fieldSlots, agentWidgetSlots } = await import(
+		const { fieldSlots, agentSlots } = await import(
 			pathToFileURL(registry).href
 		);
 
-		expect(agentWidgetSlots[0]).toMatchObject({
+		expect(agentSlots[0]).toMatchObject({
 			slot: "agent.widget",
 			match: { widget: "note", version: 1 },
 		});
-		await expect(agentWidgetSlots[0].component()).resolves.toEqual({
+		await expect(agentSlots[0].component()).resolves.toEqual({
 			default: "panel",
 		});
 		await expect(fieldSlots[0].component()).resolves.toEqual({

@@ -1,31 +1,36 @@
+import constants from "../../../constants/constants.js";
 import builtInTools from "../../../libs/agent/built-in-tools.js";
 import { contextLimits } from "../../../libs/agent/context.js";
+import { createInteraction } from "../../../libs/agent/interactions.js";
 import type {
 	Checkpoint,
 	RunMode,
 	ToolCall,
 } from "../../../libs/agent/types.js";
 import { AgentMessagesRepository } from "../../../libs/repositories/index.js";
-import { executeAgentTool } from "../../../libs/tools/execute-tool.js";
-import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import {
-	agentApprovalAnswerSchema,
-	agentMessagePartSchema,
-} from "../../../schemas/agent.js";
+	executeAgentTool,
+	prepareAgentTool,
+} from "../../../libs/tools/execute-tool.js";
+import type {
+	AgentToolAuthority,
+	AgentToolResult,
+} from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import checkAgentAccess, {
-	getConversationLevel,
-} from "./check-agent-access.js";
 import type resolveCapabilities from "./resolve-capabilities.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 
-type ToolResult = { kind: "result"; output: unknown; failed: boolean };
+type ToolResult = {
+	kind: "result";
+	output: unknown;
+	failed: boolean;
+	widgets?: AgentToolResult<unknown>["widgets"];
+};
 type ToolOutcome =
 	| ToolResult
-	| { kind: "pending"; pending: NonNullable<Checkpoint["pending"]> }
-	| { kind: "revoked" };
+	| { kind: "pending"; pending: NonNullable<Checkpoint["pending"]> };
 
-/** Handles one tool invocation, including built-ins and approval before writes. */
+/** Handles one tool invocation, pausing for input or the run's approval policy. */
 const runToolCall = async (
 	context: ServiceContext,
 	props: {
@@ -39,7 +44,23 @@ const runToolCall = async (
 	},
 ): Promise<ToolOutcome> => {
 	const { run, mode, call, checkpoint, session, capabilities } = props;
-	const answer = checkpoint.pending?.answer;
+	const { pending } = checkpoint;
+	const answer = pending?.answer;
+	//* the model needs to know a refusal was deliberate, so it does not simply try again
+	if (answer?.action === "cancel") {
+		return {
+			kind: "result",
+			failed: true,
+			output: {
+				error: context.translate(
+					pending?.widget.interaction.approval
+						? "server:agent.tool.denied"
+						: "server:agent.tool.dismissed",
+				),
+			},
+		};
+	}
+
 	switch (call.name) {
 		case builtInTools.history.name: {
 			const input = builtInTools.history.input.safeParse(call.input);
@@ -140,13 +161,18 @@ const runToolCall = async (
 					failed: true,
 				};
 			}
-			if (answer !== undefined) {
-				return { kind: "result", output: { answer }, failed: false };
+			if (answer) {
+				return { kind: "result", output: answer.response, failed: false };
 			}
 
 			return {
 				kind: "pending",
-				pending: { id: call.id, kind: "question", ...input.data },
+				pending: createInteraction({
+					callId: call.id,
+					key: constants.agent.widgets.question,
+					title: input.data.question,
+					data: input.data,
+				}),
 			};
 		}
 		case builtInTools.skill.name: {
@@ -201,42 +227,77 @@ const runToolCall = async (
 	}
 
 	const writes = !tool.readOnly;
+	const requiresApproval =
+		checkpoint.approvalMode === "confirm-changes"
+			? writes
+			: checkpoint.approvalMode === "tool-defaults" && tool.requiresApproval;
+	const approval = requiresApproval
+		? { toolName: tool.name, input: call.input }
+		: undefined;
+	const execution = {
+		authority: props.authority,
+		signal: session.signal,
+		operationId: `${run.id}:${call.id}`,
+		interaction:
+			tool.interaction && pending && answer
+				? { data: pending.widget.data, response: answer.response }
+				: undefined,
+	};
 
-	if (writes && answer === undefined) {
+	//* an interactive tool asks once; when approval is required, its submission also approves the call
+	if (tool.interaction && !answer) {
+		const prepared = await prepareAgentTool({
+			context,
+			tool,
+			input: call.input,
+			execution,
+		});
+		if (prepared.type !== "success") {
+			return {
+				kind: "result",
+				output: {
+					error:
+						"message" in prepared
+							? prepared.message
+							: context.translate("server:agent.tool.unavailable"),
+				},
+				failed: true,
+			};
+		}
+		if ("output" in prepared.data) {
+			return {
+				kind: "result",
+				output: prepared.data.output,
+				widgets: prepared.data.widgets,
+				failed: false,
+			};
+		}
+
 		return {
 			kind: "pending",
-			pending: {
-				id: call.id,
-				kind: "approval",
-				question: context.translate("server:agent.tool.approval.question", {
-					data: { name: call.name, input: JSON.stringify(call.input) },
-				}),
-			},
+			pending: createInteraction({
+				callId: call.id,
+				key: tool.interaction.key,
+				version: tool.interaction.version,
+				approval,
+				...prepared.data.interaction,
+			}),
 		};
 	}
-	if (writes && answer !== agentApprovalAnswerSchema.enum.approve) {
+	if (requiresApproval && !answer) {
 		return {
-			kind: "result",
-			output: { error: context.translate("server:agent.tool.denied") },
-			failed: true,
+			kind: "pending",
+			pending: createInteraction({
+				callId: call.id,
+				key: constants.agent.widgets.approval,
+				title: context.translate(tool.title),
+				data: {},
+				approval,
+			}),
 		};
 	}
-
-	let authority = props.authority;
-
-	//* an approved write acts for the person who approved it, with their current permissions
+	//* Every write is recorded before execution, including unattended writes.
 	if (writes) {
-		const approver = checkpoint.pending?.answeredBy;
-		if (approver === undefined) return { kind: "revoked" };
-
-		const access = await checkAgentAccess(context, {
-			userId: approver,
-			agentKey: run.agent_key,
-			level: getConversationLevel(run.conversation_user_id),
-		});
-		if (access.error) return { kind: "revoked" };
-		authority = access.data.authority;
-
 		checkpoint.inFlightWrite = call.id;
 
 		const saved = await session.save();
@@ -262,11 +323,7 @@ const runToolCall = async (
 		context,
 		tool,
 		input: call.input,
-		execution: {
-			authority,
-			signal: session.signal,
-			operationId: `${run.id}:${call.id}`,
-		},
+		execution,
 	});
 	checkpoint.inFlightWrite = undefined;
 
@@ -283,19 +340,12 @@ const runToolCall = async (
 		};
 	}
 
-	for (const widget of executed.data.widgets ?? []) {
-		const part = agentMessagePartSchema.safeParse({
-			type: "widget",
-			...widget,
-		});
-
-		if (!part.success || part.data.type !== "widget") continue;
-
-		checkpoint.parts.push(part.data);
-		await session.emit({ messageId: checkpoint.messageId, ...part.data });
-	}
-
-	return { kind: "result", output: executed.data.output, failed: false };
+	return {
+		kind: "result",
+		output: executed.data.output,
+		widgets: executed.data.widgets,
+		failed: false,
+	};
 };
 
 export default runToolCall;

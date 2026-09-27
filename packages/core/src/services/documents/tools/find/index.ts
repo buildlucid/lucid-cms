@@ -1,16 +1,18 @@
+import { copy } from "../../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../../libs/permission/collection-permissions.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import {
 	getPermittedCollectionKeys,
 	getScopedCollectionKeys,
 } from "../../../../libs/permission/readable-collections.js";
-import defineTool from "../../../../libs/tools/define-tool.js";
+import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import findDocuments from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const findDocumentsMcpTool = defineTool({
-	target: "mcp",
+export const findDocumentsMcpTool = defineMcpTool({
 	name: "documents_find",
+	title: copy("admin:core.tools.documents_find.title"),
 	description:
 		"Find documents in a collection by content filters. Supports nested custom-field, brick and repeater filters.",
 	input: inputSchema,
@@ -34,9 +36,9 @@ export const findDocumentsMcpTool = defineTool({
 		}),
 });
 
-export const findDocumentsAgentTool = defineTool({
-	target: "agent",
+export const findDocumentsAgentTool = defineAgentTool({
 	name: "documents_find",
+	title: copy("admin:core.tools.documents_find.title"),
 	description:
 		"Find documents in a collection by content filters. Supports nested custom-field, brick and repeater filters.",
 	input: inputSchema,

@@ -1,3 +1,5 @@
+import type { ResolvedAdminCopy } from "../locales/types.js";
+
 /** An agent registered in config. */
 export interface Agent {
 	key: string;
@@ -49,11 +51,35 @@ export type AgentToolStatus =
 	| "failed"
 	| "skipped";
 
-/** Approvals gate write tools; questions ask for information. */
-export type AgentQuestionKind = "question" | "approval";
+/** Determines when agent tools pause for approval. Permission checks always apply. */
+export type AgentApprovalMode =
+	| "confirm-changes"
+	| "tool-defaults"
+	| "automatic";
 
-/** The answer to an approval question. */
-export type AgentApprovalAnswer = "approve" | "deny";
+/** Submit or cancel a tool's input request. */
+export type AgentInteractionAction = "submit" | "cancel";
+
+export type AgentInteraction = {
+	id: string;
+	toolCallId: string;
+	title: string;
+	placement: "inline" | "composer";
+	/** Present when submission also authorises this invocation. */
+	approval?: { toolName: string; input: Record<string, unknown> };
+} & (
+	| { status: "pending" }
+	| { status: "answered"; response: Record<string, unknown> }
+	| { status: "dismissed" | "cancelled" }
+);
+
+export type AgentWidgetPart = {
+	type: "widget";
+	key: string;
+	version: number;
+	data: Record<string, unknown>;
+	interaction?: AgentInteraction;
+};
 
 export type AgentMessagePart =
 	| { type: "text"; text: string }
@@ -61,25 +87,13 @@ export type AgentMessagePart =
 			type: "tool";
 			id: string;
 			name: string;
+			/** The tool's plain-language name, saved when it was called. */
+			title?: ResolvedAdminCopy;
 			input: Record<string, unknown>;
 			output?: unknown;
 			status: AgentToolStatus;
 	  }
-	| {
-			type: "question";
-			id: string;
-			kind: AgentQuestionKind;
-			question: string;
-			options?: string[];
-			answer?: string;
-			dismissed?: boolean;
-	  }
-	| {
-			type: "widget";
-			key: string;
-			version: number;
-			data: Record<string, unknown>;
-	  };
+	| AgentWidgetPart;
 
 export interface AgentUsage {
 	creditsCharged: string;
@@ -105,6 +119,7 @@ export interface AgentCompaction {
 }
 
 export interface AgentConversation {
+	approvalMode: AgentApprovalMode;
 	/** Queued messages wait until the user resumes, after a run was stopped or failed. */
 	queuePaused: boolean;
 	/** Only included when fetching a single conversation. */
@@ -178,10 +193,6 @@ export type AgentStreamEvent =
 	| { type: "start"; runId: string; messageId: string }
 	| { type: "text-delta"; messageId: string; text: string }
 	| ({ messageId: string } & Extract<AgentMessagePart, { type: "tool" }>)
-	| ({ messageId: string; runId: string } & Extract<
-			AgentMessagePart,
-			{ type: "question" }
-	  >)
 	| ({ messageId: string } & Extract<AgentMessagePart, { type: "widget" }>)
 	/** A saved reply, sent when watching a run that is executing elsewhere. */
 	| { type: "message"; message: AgentMessage }

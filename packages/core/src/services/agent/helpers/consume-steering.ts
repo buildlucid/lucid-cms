@@ -56,8 +56,12 @@ const consumeSteering: ServiceFn<
 					part.status = "skipped";
 					part.output = output;
 				}
-				if (part.type === "question" && part.id === call.id) {
-					part.dismissed = true;
+				if (
+					part.type === "widget" &&
+					part.interaction?.toolCallId === call.id &&
+					part.interaction.status === "pending"
+				) {
+					part.interaction = { ...part.interaction, status: "dismissed" };
 				}
 			}
 

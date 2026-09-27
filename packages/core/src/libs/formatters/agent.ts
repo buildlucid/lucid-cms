@@ -73,6 +73,7 @@ const formatConversation = (props: {
 	compactions?: Pick<Select<LucidAgentCompactions>, "id" | "created_at">[];
 }): AgentConversation => ({
 	id: props.conversation.id,
+	approvalMode: props.conversation.approval_mode,
 	queuePaused: Boolean(props.conversation.queue_paused),
 	context: formatContext({
 		context: props.conversation.context,

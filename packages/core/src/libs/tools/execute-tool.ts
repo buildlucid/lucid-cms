@@ -22,23 +22,19 @@ const execute = async <Execution, Result, Requirement>(
 	tool:
 		| {
 				name: string;
-				[toolDefinitionInternal]: {
-					prepareInput: (
-						input: unknown,
-					) => Promise<ToolPreparationResult<Execution, Result, Requirement>>;
-				};
+				requirements: readonly Requirement[];
+				prepareInput: (
+					input: unknown,
+				) => Promise<ToolPreparationResult<Execution, Result, Requirement>>;
 		  }
 		| undefined,
-	requirements: readonly Requirement[],
 	allowed: (requirements: readonly Requirement[]) => boolean,
 ) => {
 	if (!tool) return { type: "not-found" as const };
-	if (!allowed(requirements)) return { type: "forbidden" as const };
+	if (!allowed(tool.requirements)) return { type: "forbidden" as const };
 
 	try {
-		const preparation = await tool[toolDefinitionInternal].prepareInput(
-			args.input,
-		);
+		const preparation = await tool.prepareInput(args.input);
 		if (preparation.type === "invalid-input") return preparation;
 		if (!allowed(preparation.data.requirements)) {
 			return { type: "forbidden" as const };
@@ -73,23 +69,57 @@ export const executeMcpTool = (
 		),
 	);
 
-	return execute(args, tool, tool?.scopes ?? [], (required) =>
-		required.every((scope) => scopes.has(scope)),
+	return execute(
+		args,
+		tool && {
+			name: tool.name,
+			requirements: tool.scopes,
+			prepareInput: tool[toolDefinitionInternal].prepareInput,
+		},
+		(required) => required.every((scope) => scopes.has(scope)),
 	);
+};
+
+/** Agent tools act with the run's authority, limited to permissions that exist in config. */
+const agentPermissionCheck = (args: ExecutionArgs<AgentToolExecution>) => {
+	const permissions = new Set(getValidPermissions(args.context.config));
+	const authority = args.execution.authority;
+
+	return (required: readonly string[]) =>
+		required.every(
+			(permission) =>
+				permissions.has(permission) &&
+				(authority.superAdmin || authority.permissions.includes(permission)),
+		);
 };
 
 /** Agent tools are resolved from the run's agent, since names are only unique within one agent. */
 export const executeAgentTool = (
 	args: ExecutionArgs<AgentToolExecution> & { tool: AgentToolDefinition },
-) => {
-	const permissions = new Set(getValidPermissions(args.context.config));
-	const authority = args.execution.authority;
+) =>
+	execute(
+		args,
+		{
+			name: args.tool.name,
+			requirements: args.tool.permissions,
+			prepareInput: args.tool[toolDefinitionInternal].prepareInput,
+		},
+		agentPermissionCheck(args),
+	);
 
-	return execute(args, args.tool, args.tool.permissions, (required) =>
-		required.every(
-			(permission) =>
-				permissions.has(permission) &&
-				(authority.superAdmin || authority.permissions.includes(permission)),
-		),
+/** Runs an interactive tool's read-only preparation with the same input and permission checks as its handler. */
+export const prepareAgentTool = (
+	args: ExecutionArgs<AgentToolExecution> & { tool: AgentToolDefinition },
+) => {
+	const interaction = args.tool[toolDefinitionInternal].interaction;
+
+	return execute(
+		args,
+		interaction && {
+			name: args.tool.name,
+			requirements: args.tool.permissions,
+			prepareInput: interaction.prepareInput,
+		},
+		agentPermissionCheck(args),
 	);
 };

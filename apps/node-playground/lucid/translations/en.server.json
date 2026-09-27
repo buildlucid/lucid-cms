@@ -1,3 +1,6 @@
 {
-	"search.unavailable": "Search is temporarily unavailable."
+	"search.unavailable": "Search is temporarily unavailable.",
+	"playground.document-picker.title": "Choose a page document",
+	"playground.document-picker.label": "Page document #{{id}}",
+	"playground.note-editor.title": "Review your note"
 }

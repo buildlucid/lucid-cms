@@ -74,10 +74,83 @@ test("counts the last measured request plus messages added since", () => {
 	).toBeGreaterThan(10_000);
 });
 
-test("historical tool outcomes and answers survive between user turns", () => {
-	const { message, truncated } = historyMessage({
+test("replays saved tool calls as calls and results, never as text the assistant wrote", () => {
+	const { messages, truncated } = historyMessage({
 		id: randomUUID(),
 		position: 12,
+		role: "assistant",
+		parts: [
+			{ type: "text", text: "Checking." },
+			{
+				type: "tool",
+				id: "publish",
+				name: "publish",
+				input: { id: 7 },
+				status: "failed",
+				output: { error: "The user denied this action." },
+			},
+			{
+				type: "tool",
+				id: "ask",
+				name: "lucid_ask_user",
+				input: { question: "Which colour?" },
+				status: "complete",
+				output: { answer: "Blue" },
+			},
+			{
+				type: "widget",
+				key: "lucid-question",
+				version: 1,
+				data: { question: "Which colour?" },
+				interaction: {
+					id: "question",
+					toolCallId: "ask",
+					title: "Which colour?",
+					placement: "composer",
+					status: "answered",
+					response: { answer: "Blue" },
+				},
+			},
+		],
+	});
+
+	expect(truncated).toBe(false);
+	expect(modelMessages(messages)).toEqual([
+		{
+			role: "assistant",
+			content: "Checking.",
+			toolCalls: [
+				{ id: "publish", name: "publish", input: { id: 7 } },
+				{
+					id: "ask",
+					name: "lucid_ask_user",
+					input: { question: "Which colour?" },
+				},
+			],
+		},
+		{
+			role: "tool",
+			toolCallId: "publish",
+			name: "publish",
+			output: { error: "The user denied this action." },
+		},
+		{
+			role: "tool",
+			toolCallId: "ask",
+			name: "lucid_ask_user",
+			output: { answer: "Blue" },
+		},
+	]);
+	//* the replayed turn stays whole, so compaction never separates a call from its result
+	expect(compactionCut(messages.slice(0, 2), unlimited)).toBe(0);
+	expect(compactionCut(messages, unlimited)).toBe(3);
+});
+
+test("an unfinished call still gets a result, and long values become history previews", () => {
+	const id = randomUUID();
+	const { messages, truncated } = historyMessage({
+		id,
+		position: 3,
 		role: "assistant",
 		parts: [
 			{
@@ -85,35 +158,32 @@ test("historical tool outcomes and answers survive between user turns", () => {
 				id: "large",
 				name: "read",
 				input: { body: "x".repeat(30_000) },
-				status: "failed",
-				output: { error: "Permission denied" },
-			},
-			{
-				type: "question",
-				kind: "approval",
-				id: "call",
-				question: "Publish?",
-				answer: "deny",
+				status: "complete",
+				output: { body: "y".repeat(30_000) },
 			},
 			{
 				type: "tool",
-				id: "call",
-				name: "publish",
-				input: { id: 7 },
-				status: "failed",
-				output: { error: "Denied" },
+				id: "interrupted",
+				name: "write",
+				input: {},
+				status: "running",
 			},
 		],
 	});
+	const preview = {
+		truncated: true,
+		historyMessageId: id,
+		toolCallId: "large",
+	};
+
 	expect(truncated).toBe(true);
-	expect(message).toMatchObject({
-		role: "assistant",
-		content: expect.stringContaining('"answer":"deny"'),
-	});
-	expect(message).toMatchObject({
-		content: expect.stringContaining('"status":"failed"'),
-	});
-	expect(message).toMatchObject({
-		content: expect.stringContaining("Permission denied"),
-	});
+	expect(messages).toMatchObject([
+		{ role: "assistant", toolCalls: [{ input: preview }, { input: {} }] },
+		{ role: "tool", toolCallId: "large", output: preview },
+		{
+			role: "tool",
+			toolCallId: "interrupted",
+			output: { error: "No result was recorded for this call." },
+		},
+	]);
 });

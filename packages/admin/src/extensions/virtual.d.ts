@@ -4,7 +4,10 @@ declare module "virtual:lucid-admin" {
 		AdminOptions,
 		AdminRoute,
 		AdminSlot,
+		AgentTranscriptRowSlotComponent,
+		AgentTranscriptRowSlotProps,
 		AgentWidgetComponent,
+		AgentWidgetProps,
 		BrickSlot,
 		BrickSlotComponent,
 		DocumentListSlot,
@@ -36,11 +39,16 @@ declare module "virtual:lucid-admin" {
 
 	export const routes: Array<RouteRegistration<AdminRoute>>;
 
-	export const agentWidgetSlots: Array<
-		SlotRegistration<
-			Extract<AdminSlot, { slot: "agent.widget" }>,
-			AgentWidgetComponent<AdminOptions | undefined>
-		>
+	/** Each agent slot has its own component props, so entries narrow by `slot`. */
+	export const agentSlots: Array<
+		| SlotRegistration<
+				Extract<AdminSlot, { slot: AgentWidgetProps["slot"] }>,
+				AgentWidgetComponent<AdminOptions | undefined>
+		  >
+		| SlotRegistration<
+				Extract<AdminSlot, { slot: AgentTranscriptRowSlotProps["slot"] }>,
+				AgentTranscriptRowSlotComponent<AdminOptions | undefined>
+		  >
 	>;
 
 	export const brickSlots: Array<

@@ -1,6 +1,5 @@
 import z from "zod";
 import defineAgent from "../agent/define-agent.js";
-import defineTool from "./define-tool.js";
 
 const input = z.object({ count: z.number() });
 const output = z.object({ ok: z.boolean() });
@@ -10,11 +9,11 @@ const handler = async () => ({
 	data: { output: { ok: true } },
 });
 
-defineTool({
+defineAgentTool({
 	...base,
-	target: "agent",
 	permissions: [],
-	handler: async ({ input, execution }) => {
+	handler: async ({ input, execution, toolkit }) => {
+		toolkit.documents.getMultiple;
 		const count: number = input.count;
 		const operationId: string = execution.operationId;
 		// @ts-expect-error Agent authority has permissions, not external scopes.
@@ -35,9 +34,8 @@ defineTool({
 	},
 });
 
-defineTool({
+defineMcpTool({
 	...base,
-	target: "mcp",
 	scopes: [],
 	handler: async ({ execution }) => {
 		// @ts-expect-error MCP execution has no agent operation id.
@@ -51,15 +49,12 @@ defineTool({
 	},
 });
 
-// @ts-expect-error A definition has exactly one target.
-defineTool({ ...base, target: ["agent", "mcp"], scopes: [], handler });
-// @ts-expect-error Agent definitions use permissions.
-defineTool({ ...base, target: "agent", permissions: [], scopes: [], handler });
-// @ts-expect-error MCP definitions use scopes.
-defineTool({ ...base, target: "mcp", scopes: [], permissions: [], handler });
-defineTool({
+// @ts-expect-error Agent tools use permissions, not scopes.
+defineAgentTool({ ...base, permissions: [], scopes: [], handler });
+// @ts-expect-error MCP tools use scopes, not permissions.
+defineMcpTool({ ...base, scopes: [], permissions: [], handler });
+defineAgentTool({
 	...base,
-	target: "agent",
 	permissions: [],
 	// @ts-expect-error Agent handlers cannot return MCP content blocks.
 	handler: async () => ({
@@ -70,9 +65,8 @@ defineTool({
 		},
 	}),
 });
-defineTool({
+defineMcpTool({
 	...base,
-	target: "mcp",
 	scopes: [],
 	// @ts-expect-error MCP handlers cannot return widgets.
 	handler: async () => ({
@@ -84,11 +78,54 @@ defineTool({
 	}),
 });
 
-const mcpTool = defineTool({ ...base, target: "mcp", scopes: [], handler });
+const mcpTool = defineMcpTool({ ...base, scopes: [], handler });
 defineAgent({
 	key: "test",
 	name: "Test",
 	description: "Test",
 	// @ts-expect-error Agents only accept agent tools.
 	tools: [mcpTool],
+});
+
+// Interaction schemas infer preparation data, response choices, and the final handler input.
+defineAgentTool({
+	...base,
+	permissions: [],
+	readOnly: true,
+	interaction: {
+		key: "picker",
+		version: 1,
+		data: z.object({ ids: z.array(z.number()) }),
+		response: (data) =>
+			z.object({ id: z.number().refine((id) => data.ids.includes(id)) }),
+		prepare: async ({ input }) => ({
+			error: undefined,
+			data: {
+				interaction: {
+					title: "Choose",
+					placement: "inline",
+					data: { ids: [input.count] },
+				},
+			},
+		}),
+	},
+	handler: async ({ input, response, data }) => {
+		const id: number = response.id;
+		const count: number = input.count;
+		const choices: number[] = data.ids;
+		// @ts-expect-error Response types come from the schema.
+		response.id satisfies string;
+		return {
+			error: undefined,
+			data: { output: { ok: choices.includes(id) && count > 0 } },
+		};
+	},
+});
+
+defineMcpTool({
+	...base,
+	scopes: [],
+	// @ts-expect-error Approval policy is specific to agent tools.
+	requiresApproval: true,
+	handler,
 });
