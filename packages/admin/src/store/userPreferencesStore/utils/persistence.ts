@@ -43,6 +43,7 @@ export type CollectionPreferenceState = {
 
 export type UserPreferenceState = {
 	preferences: {
+		agentKey?: string;
 		autoSaveEnabled?: boolean;
 		collections: Record<string, CollectionPreferenceState>;
 		/** Open state of navigation groups, keyed by group key. Unset means open. */
@@ -156,6 +157,10 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 	if (isObjectRecord(preferences)) {
 		if (typeof preferences.autoSaveEnabled === "boolean") {
 			normalized.preferences.autoSaveEnabled = preferences.autoSaveEnabled;
+		}
+
+		if (typeof preferences.agentKey === "string") {
+			normalized.preferences.agentKey = preferences.agentKey;
 		}
 
 		if (isObjectRecord(preferences.sections)) {

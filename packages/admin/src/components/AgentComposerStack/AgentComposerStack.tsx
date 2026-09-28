@@ -99,7 +99,7 @@ const InputRow: Component<
 			icon={
 				<Switch fallback={<FaSolidClock size={11} />}>
 					<Match when={props.input.status === "claimed" || steering()}>
-						<Spinner size="sm" />
+						<Spinner size="sm" variant="subtle" />
 					</Match>
 				</Switch>
 			}

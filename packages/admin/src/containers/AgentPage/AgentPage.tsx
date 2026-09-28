@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import type { AgentApprovalMode, AiModelSelection } from "@types";
+import type { Agent, AgentApprovalMode, AiModelSelection } from "@types";
+import classnames from "classnames";
 import {
 	type Component,
 	createMemo,
@@ -16,25 +17,30 @@ import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
 import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
 import api from "@/services/api";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import T, { translateAdminCopy } from "@/translations";
 import {
 	getAgentAccess,
 	getAgentUnavailableReason,
 } from "@/utils/agent-access";
+import { startViewTransition } from "@/utils/view-transition";
 import AgentPicker from "./parts/AgentPicker";
 import AgentSuggestionButton from "./parts/AgentSuggestionButton";
+import AgentWaitingChats from "./parts/AgentWaitingChats";
+
+const grownHeight = 96;
 
 /**
- * The agent's home: a greeting and a chat box that starts a new chat. Sending
- * opens the chat straight away and the chat page saves it, so there is no wait
- * here.
+ * The agent's home: a greeting, a chat box that starts a new chat, suggestions
+ * and the chats waiting on the reader. Sending opens the chat straight away and
+ * the chat page saves it, so there is no wait here.
  */
 const AgentPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
-	//* a chat that could not be saved sends its message back here
 	const location = useLocation<{
 		message?: string;
 		approvalMode?: AgentApprovalMode;
@@ -46,11 +52,11 @@ const AgentPage: Component = () => {
 		createSignal<AiModelSelection | null>(
 			location.state?.modelSelection ?? null,
 		);
-	const [agentKey, setAgentKey] = createSignal<string>();
 	const [approvalMode, setApprovalMode] = createSignal<AgentApprovalMode>(
 		location.state?.approvalMode ?? "tool-defaults",
 	);
-	const [composerBlank, setComposerBlank] = createSignal(false);
+	const [composerBlank, setComposerBlank] = createSignal(true);
+	const painted = useFirstPaint();
 	const definitions = api.agent.useGetDefinitions();
 
 	// ----------------------------------------
@@ -66,10 +72,31 @@ const AgentPage: Component = () => {
 		() => getAgentUnavailableReason() !== undefined,
 	);
 	const agent = createMemo(
-		() => agents().find((agent) => agent.key === agentKey()) ?? agents()[0],
+		() =>
+			agents().find(
+				(agent) => agent.key === userPreferencesStore.getAgentKey(),
+			) ?? agents()[0],
 	);
-	//* shares the model picker's query; chat waits for it as it needs the same Lucid connection
+	const hasSuggestions = createMemo(
+		() => (agent()?.suggestions.length ?? 0) > 0,
+	);
+	const showSuggestions = createMemo(() => hasSuggestions() && composerBlank());
+	//* the last agent's suggestions stay while their space closes, rather than vanishing first
+	const shownSuggestions = createMemo<Agent["suggestions"]>(
+		(previous) => (hasSuggestions() ? (agent()?.suggestions ?? []) : previous),
+		[],
+	);
 	const models = api.agent.useGetModels({ agentKey: () => agent()?.key });
+	const waitingAgentKey = createMemo(() =>
+		agents().length > 1 ? agent()?.key : undefined,
+	);
+	const waiting = api.agent.useGetConversations({
+		queryParams: {
+			filters: { status: "waiting", agentKey: waitingAgentKey },
+			perPage: 3,
+		},
+		enabled: () => definitions.isSuccess,
+	});
 	const name = createMemo(() => {
 		const user = userStore.get.user;
 		return user?.firstName || user?.username;
@@ -88,21 +115,24 @@ const AgentPage: Component = () => {
 			return false;
 		}
 
-		navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
-			state: {
-				message: text,
-				agentKey: selected.key,
-				approvalMode: approvalMode(),
-				modelSelection: modelSelection() ?? undefined,
-			},
-		});
+		startViewTransition(
+			() =>
+				navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
+					state: {
+						message: text,
+						agentKey: selected.key,
+						approvalMode: approvalMode(),
+						modelSelection: modelSelection() ?? undefined,
+					},
+				}),
+			{ ready: "[data-agent-chat] .agent-composer-morph" },
+		);
 		return true;
 	};
 
 	// ----------------------------------------
 	// Effects
 	onMount(() => {
-		//* loaded ahead, so opening a chat does not wait on its code
 		void import("@/containers/AgentConversationPage/AgentConversationPage");
 		if (returned) navigate(location.pathname, { replace: true, state: {} });
 	});
@@ -111,7 +141,7 @@ const AgentPage: Component = () => {
 	// Render
 	return (
 		<PageLayout.Root>
-			<PageLayout.Body padding="md" class="blur-background justify-center">
+			<PageLayout.Body padding="md" class="blur-background">
 				<QueryBoundary
 					class="w-full"
 					loading={definitions.isLoading}
@@ -120,7 +150,7 @@ const AgentPage: Component = () => {
 				>
 					<Show when={agent()}>
 						{(current) => (
-							<section class="mx-auto flex w-full max-w-3xl flex-col gap-8 pb-[10vh]">
+							<section class="mx-auto flex w-full max-w-3xl flex-col gap-8 pt-[18vh] pb-10">
 								<div class="flex flex-col items-center gap-1.5 text-center">
 									<h2 class="text-2xl font-medium text-title">
 										{name()
@@ -130,12 +160,14 @@ const AgentPage: Component = () => {
 									<p class="text-base text-body">{T()("agent.home.title")}</p>
 								</div>
 								<AgentUnavailableNotice>
-									<div class="flex flex-col gap-6">
+									<div class="flex flex-col">
 										<AgentComposer
 											ref={(handle: AgentComposerHandle) => {
 												if (returned) handle.insert(returned);
 											}}
+											class="agent-composer-morph"
 											size="lg"
+											grow={showSuggestions() ? 0 : grownHeight}
 											autofocus={true}
 											onBlankChange={setComposerBlank}
 											disabled={!models.isSuccess}
@@ -158,7 +190,7 @@ const AgentPage: Component = () => {
 														agents={agents()}
 														selected={current()}
 														onSelect={(agent) => {
-															setAgentKey(agent.key);
+															userPreferencesStore.setAgentKey(agent.key);
 															setModelSelection(null);
 														}}
 													/>
@@ -172,35 +204,48 @@ const AgentPage: Component = () => {
 												/>
 											}
 										/>
-										<Show when={current().suggestions.length > 0}>
-											{/* kept in place while typing, so the centred composer does not jump */}
-											<div
-												class="flex flex-col gap-2.5 transition-opacity duration-200"
-												classList={{
-													"invisible opacity-0": !composerBlank(),
-												}}
-												aria-hidden={!composerBlank()}
-											>
-												<p class="px-1 text-xs text-muted">
-													{T()("agent.home.suggestions")}
-												</p>
-												<ul class="grid gap-2.5 sm:grid-cols-2">
-													<For each={current().suggestions}>
-														{(suggestion) => (
-															<AgentSuggestionButton
-																suggestion={suggestion}
-																disabled={!models.isSuccess}
-																onSelect={() => {
-																	void start(
-																		translateAdminCopy(suggestion.message),
-																	);
-																}}
-															/>
-														)}
-													</For>
-												</ul>
+										<div
+											class={classnames("grid", {
+												"transition-[grid-template-rows,opacity] duration-300 ease-emphasized motion-reduce:transition-none":
+													painted(),
+												"grid-rows-[1fr]": showSuggestions(),
+												"grid-rows-[0fr] opacity-0": !showSuggestions(),
+											})}
+											inert={!showSuggestions()}
+										>
+											<div class="min-h-0 overflow-hidden">
+												<div class="flex flex-col gap-2.5 pt-6">
+													<p class="px-1 text-xs text-muted">
+														{T()("agent.home.suggestions")}
+													</p>
+													<ul class="grid gap-2.5 sm:grid-cols-2">
+														<For each={shownSuggestions()}>
+															{(suggestion) => (
+																<AgentSuggestionButton
+																	suggestion={suggestion}
+																	disabled={!models.isSuccess}
+																	onSelect={() => {
+																		void start(
+																			translateAdminCopy(suggestion.message),
+																		);
+																	}}
+																/>
+															)}
+														</For>
+													</ul>
+												</div>
 											</div>
-										</Show>
+										</div>
+										<AgentWaitingChats
+											class="pt-6"
+											agentKey={waitingAgentKey()}
+											conversations={waiting.data?.data ?? []}
+											total={
+												waiting.data?.meta.total ??
+												waiting.data?.data.length ??
+												0
+											}
+										/>
 									</div>
 								</AgentUnavailableNotice>
 							</section>

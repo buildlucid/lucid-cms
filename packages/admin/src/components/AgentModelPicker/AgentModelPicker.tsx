@@ -45,7 +45,6 @@ const AgentModelPicker: Component<{
 
 	// ----------------------------------------
 	// Memos
-	//* read only once loaded, as reading data while pending suspends the whole page
 	const catalog = createMemo(() =>
 		query.isSuccess ? query.data.data : undefined,
 	);

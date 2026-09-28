@@ -6,7 +6,11 @@ import type {
 	AiModelSelection,
 } from "@types";
 import classnames from "classnames";
-import { FaSolidArrowDown, FaSolidRepeat } from "solid-icons/fa";
+import {
+	FaSolidArrowDown,
+	FaSolidEllipsis,
+	FaSolidRepeat,
+} from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -52,8 +56,9 @@ import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
-import { isToolRow, messageText, placeCompactions } from "@/utils/agent-chat";
+import { isToolRow, placeCompactions } from "@/utils/agent-chat";
 import AgentChatHeader from "./parts/AgentChatHeader";
+import AgentChatTimeline from "./parts/AgentChatTimeline";
 import AgentRoutineCard from "./parts/AgentRoutineCard";
 
 /**
@@ -137,6 +142,23 @@ const AgentConversationPage: Component = () => {
 		const pending = composerWidget();
 		return pending?.id !== redirecting() ? pending : undefined;
 	});
+	/**
+	 * What the end of the transcript shows while the agent works without waiting
+	 * on the reader. Its last row shimmers, streaming text needs nothing, and
+	 * otherwise a status line holds the place of the reply to come.
+	 */
+	const activity = createMemo(() => {
+		if (!chat.working() || chat.pendingInteraction()) return undefined;
+		if (latestRun()?.status === "interrupted" && !chat.streaming()) {
+			return "retrying";
+		}
+		if (chat.context()?.status === "compacting") return "compacting";
+		const last = chat.messages.at(-1);
+		const part = last?.parts.findLast((item) => layoutOf(item) !== "hidden");
+		if (last?.role === "user" || !part) return "thinking";
+		if (layoutOf(part) === "row") return "row";
+		return part.type === "text" ? undefined : "thinking";
+	});
 	const runError = createMemo(() => {
 		const run = latestRun();
 		return !chat.streaming() && run?.status === "failed"
@@ -202,21 +224,21 @@ const AgentConversationPage: Component = () => {
 		(chat.messages[index]?.parts ?? [])
 			.map(layoutOf)
 			.filter((layout) => layout !== "hidden");
+	const endsInRow = (index: number) => shownLayouts(index).at(-1) === "row";
 	/**
 	 * Whether a message starts with a row straight after one that ended with
 	 * one. Each model turn is its own message, so this lets rows read as one
-	 * block. A message with text ends in its timestamp and copy row instead, so
-	 * the next one keeps the full gap.
+	 * block.
 	 */
-	const continuesRows = (index: number) => {
-		const previous = chat.messages[index - 1];
-		return (
-			previous !== undefined &&
-			!messageText(previous) &&
-			shownLayouts(index - 1).at(-1) === "row" &&
-			shownLayouts(index)[0] === "row"
+	const continuesRows = (index: number) =>
+		endsInRow(index - 1) && shownLayouts(index)[0] === "row";
+	const statusFollowsRow = () =>
+		endsInRow(
+			chat.messages.findLastIndex(
+				(message, index) =>
+					message.role === "user" || shownLayouts(index).length > 0,
+			),
 		);
-	};
 	//* a marker before the first loaded message may belong to an earlier page
 	const compactedBefore = (id: string, index: number) =>
 		compactions().before.has(id) && !(index === 0 && chat.history.hasNextPage);
@@ -282,7 +304,10 @@ const AgentConversationPage: Component = () => {
 		<AgentTranscriptContext.Provider
 			value={{ selected: selectedId, select: setSelectedId, sidebar }}
 		>
-			<div class="flex h-[calc(100dvh-4.25rem)] flex-col overflow-hidden rounded-t-xl border-x border-t border-border bg-background md:h-[calc(100dvh-1rem)]">
+			<div
+				data-agent-chat
+				class="flex h-[calc(100dvh-4.25rem)] flex-col overflow-hidden rounded-t-xl border-x border-t border-border bg-background md:h-[calc(100dvh-1rem)]"
+			>
 				<AgentChatHeader
 					conversation={conversation()}
 					actions={
@@ -346,7 +371,7 @@ const AgentConversationPage: Component = () => {
 								<LoadingState class="grow" />
 							</Match>
 							<Match when={true}>
-								<div class="relative flex min-h-0 grow flex-col">
+								<div class="@container relative flex min-h-0 grow flex-col">
 									<div
 										ref={scroll.setViewport}
 										class="min-h-0 grow overflow-y-auto scrollbar [overflow-anchor:none]"
@@ -363,9 +388,13 @@ const AgentConversationPage: Component = () => {
 															<AgentCompactionDivider />
 														</Show>
 														<div
-															data-chat-message
+															data-chat-message={message.id}
+															data-chat-role={message.role}
 															class={classnames("flex flex-col", {
 																"-mt-5": continuesRows(index()),
+																hidden:
+																	message.role !== "user" &&
+																	shownLayouts(index()).length === 0,
 															})}
 														>
 															<AgentMessage
@@ -376,6 +405,14 @@ const AgentConversationPage: Component = () => {
 																onRespond={respond}
 																selectedToolId={selectedId()}
 																onSelectTool={selectTool}
+																live={
+																	chat.streaming() &&
+																	index() === chat.messages.length - 1
+																}
+																working={
+																	activity() === "row" &&
+																	index() === chat.messages.length - 1
+																}
 															/>
 														</div>
 													</>
@@ -384,19 +421,34 @@ const AgentConversationPage: Component = () => {
 											<Show when={compactions().trailing}>
 												<AgentCompactionDivider />
 											</Show>
-											<Show when={chat.working() && !chat.pendingInteraction()}>
-												<p
-													role="status"
-													class="flex items-center gap-2 text-sm text-muted"
-												>
-													<Spinner size="sm" />
-													{latestRun()?.status === "interrupted" &&
-													!chat.streaming()
-														? T()("agent.chat.retrying")
-														: chat.context()?.status === "compacting"
-															? T()("agent.context.compacting")
-															: T()("agent.chat.working")}
-												</p>
+											{/* laid out like a transcript row, as the agent's next step is often one; a shimmering row already shows the agent at work, so then it is only read out */}
+											<Show when={activity()}>
+												{(current) => (
+													<div
+														role="status"
+														class={classnames(
+															"agent-shimmer flex w-fit max-w-full items-center gap-2 py-1 text-xs text-muted",
+															{
+																"sr-only": current() === "row",
+																"-mt-5": statusFollowsRow(),
+															},
+														)}
+													>
+														<span
+															class="flex size-3.5 shrink-0 items-center justify-center"
+															aria-hidden="true"
+														>
+															<FaSolidEllipsis size={10} />
+														</span>
+														{T()(
+															current() === "retrying"
+																? "agent.chat.retrying"
+																: current() === "compacting"
+																	? "agent.context.compacting"
+																	: "agent.chat.thinking",
+														)}
+													</div>
+												)}
 											</Show>
 											<Show
 												when={
@@ -417,9 +469,14 @@ const AgentConversationPage: Component = () => {
 										aria-hidden="true"
 										class="pointer-events-none absolute inset-x-0 -bottom-2.5 h-10.5 bg-linear-to-t from-background to-transparent"
 									/>
+									<AgentChatTimeline
+										messages={chat.messages}
+										viewport={scroll.viewport()}
+										onSelect={scroll.scrollToMessage}
+									/>
 									<Show when={scroll.loadingEarlier()}>
 										<div class="pointer-events-none absolute inset-x-0 top-3 flex justify-center">
-											<Spinner size="sm" />
+											<Spinner size="sm" variant="subtle" />
 										</div>
 									</Show>
 									<Show when={!scroll.following()}>
@@ -476,6 +533,7 @@ const AgentConversationPage: Component = () => {
 												ref={(handle) => {
 													composer = handle;
 												}}
+												class="agent-composer-morph"
 												autofocus={true}
 												draftKey={params.conversationId}
 												disabled={!models.isSuccess}
@@ -572,7 +630,7 @@ const AgentConversationPage: Component = () => {
 										<Show when={composerWidget()}>
 											{(pending) => (
 												<div
-													class="max-h-[60vh] overflow-y-auto"
+													class="max-h-[60vh] overflow-y-auto motion-safe:animate-rise-in"
 													classList={{ hidden: !activeWidget() }}
 												>
 													<AgentWidget
@@ -593,7 +651,7 @@ const AgentConversationPage: Component = () => {
 					<Show when={routineCard() || selectedId()}>
 						<div
 							ref={setSidebar}
-							class="absolute top-0 end-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-y-auto p-4 scrollbar lg:flex"
+							class="absolute top-0 inset-e-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-y-auto p-4 scrollbar lg:flex"
 						>
 							<Show when={routineCard()}>
 								{(current) => (

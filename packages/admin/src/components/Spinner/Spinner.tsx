@@ -7,6 +7,8 @@ export type SpinnerSize = "sm" | "md" | "lg";
 export interface SpinnerProps {
 	/** @default "md" */
 	size?: SpinnerSize;
+	/** @default "primary" */
+	variant?: "primary" | "subtle";
 	class?: string;
 }
 
@@ -17,7 +19,7 @@ export interface SpinnerProps {
  * ```tsx
  * import { Spinner } from "@lucidcms/admin/components";
  *
- * return <Spinner size="sm" />;
+ * return <Spinner size="sm" variant="subtle" />;
  * ```
  */
 const Spinner: Component<SpinnerProps> = (props) => {
@@ -27,7 +29,9 @@ const Spinner: Component<SpinnerProps> = (props) => {
 		<div data-spinner class={props.class}>
 			<svg
 				aria-hidden="true"
-				class={classnames("animate-spin text-card-hover fill-primary", {
+				class={classnames("animate-spin", {
+					"text-card-hover fill-primary": props.variant !== "subtle",
+					"text-border fill-muted": props.variant === "subtle",
 					"w-4 h-4": props.size === "sm",
 					"w-6 h-6": props.size === undefined || props.size === "md",
 					"w-8 h-8": props.size === "lg",

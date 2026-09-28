@@ -18,6 +18,15 @@ const createMemoryStorage = (): Storage => {
 	};
 };
 
+describe("agent preference", () => {
+	it("persists the chosen agent across store instances", () => {
+		const storage = createMemoryStorage();
+		createUserPreferencesStore({ storage }).setAgentKey("seo");
+
+		expect(createUserPreferencesStore({ storage }).getAgentKey()).toBe("seo");
+	});
+});
+
 describe("navigation group preferences", () => {
 	it("persists open state across store instances", () => {
 		const storage = createMemoryStorage();

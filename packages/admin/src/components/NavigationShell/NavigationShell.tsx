@@ -6,7 +6,6 @@ import {
 	createSignal,
 	type JSXElement,
 	Show,
-	Suspense,
 } from "solid-js";
 import FullPageLoading from "@/components/FullPageLoading/FullPageLoading";
 import { Navigation } from "@/components/Navigation/Navigation";
@@ -14,6 +13,7 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import api from "@/services/api";
 import siteStore from "@/store/siteStore/siteStore";
+import { LazyPageFallback } from "@/utils/lazy-page";
 
 const NavigationShell: Component<{
 	children?: JSXElement;
@@ -89,7 +89,10 @@ const NavigationShell: Component<{
 							</PageLayout.Root>
 						}
 					>
-						<Suspense fallback={<PageLayout.Root />}>{props.children}</Suspense>
+						{/* an empty frame while a page's code loads, without a Suspense boundary, which would also hide the page, dropping focus, whenever a query it read refetched */}
+						<LazyPageFallback.Provider value={() => <PageLayout.Root />}>
+							{props.children}
+						</LazyPageFallback.Provider>
 					</Show>
 					<Show when={isLoading()}>
 						<FullPageLoading />

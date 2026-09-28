@@ -81,12 +81,14 @@
 	--breakpoint-3xl: 1600px;
 	--spacing-15: 15px;
 	--spacing-sidebar: 13.75rem;
+	--ease-emphasized: cubic-bezier(0.32, 0.72, 0, 1);
 	--animate-enter: animation-enter 0.2s ease;
 	--animate-leave: animation-leave 0.2s ease forwards;
 	--animate-dropdown: animation-dropdown 0.2s ease;
 	--animate-from-left: animation-from-left 0.2s ease;
 	--animate-fade-out: animation-fade-out 0.2s ease;
 	--animate-fade-in: animation-fade-in 0.2s ease;
+	--animate-rise-in: animation-rise-in 220ms ease-out;
 	--animate-slide-from-right-in: animate-slide-from-right-in 200ms ease;
 	--animate-slide-from-right-out: animate-slide-from-right-out 200ms ease 100ms
 		forwards;

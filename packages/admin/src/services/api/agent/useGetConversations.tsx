@@ -13,6 +13,7 @@ interface QueryParams {
 	filters?: {
 		title?: Accessor<string | undefined>;
 		status?: Accessor<string | undefined> | string;
+		agentKey?: Accessor<string | undefined>;
 	};
 	perPage?: Accessor<number> | number;
 }

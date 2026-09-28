@@ -12,6 +12,18 @@ const endThreshold = 32;
 const earlierMargin = "600px";
 //* frames to wait for older messages to render before giving up on keeping the position
 const settleFrames = 10;
+const intentWindow = 600;
+const clampWindow = 50;
+const messageOffset = 24;
+const scrollKeys = new Set([
+	"ArrowUp",
+	"ArrowDown",
+	"PageUp",
+	"PageDown",
+	"Home",
+	"End",
+	" ",
+]);
 
 export interface UseChatScrollOptions {
 	/** Whether older messages can be loaded above. */
@@ -22,13 +34,14 @@ export interface UseChatScrollOptions {
 /**
  * Scrolling for a chat that grows at the bottom and pages in history at the top.
  * While the reader is at the end, new output keeps them there; scrolling up
- * stops that until they return to the end. Nearing the top loads older messages
+ * stops that until they return to the end. The browser clamping the position
+ * while content re-renders never does. Nearing the top loads older messages
  * without moving what is on screen.
  *
  * Attach `setViewport` to the scrolling element, `setContent` to the element
  * inside it that grows, and `setSentinel` to an element at the top of the content.
- * Messages must carry a `data-chat-message` attribute so the position can be
- * kept while older ones load.
+ * Messages must carry their id in a `data-chat-message` attribute, so the
+ * position can be kept while older ones load and a message can be scrolled to.
  */
 export const useChatScroll = (options: UseChatScrollOptions) => {
 	// ----------------------------------------
@@ -42,29 +55,77 @@ export const useChatScroll = (options: UseChatScrollOptions) => {
 	//* a load that rendered nothing waits for the reader to leave the top before trying again
 	const [stalled, setStalled] = createSignal(false);
 	let lastTop = 0;
+	let intentAt = 0;
+	let dragging = false;
+	let changedAt = 0;
 
 	// ----------------------------------------
 	// Functions
 	const distanceFromEnd = (element: HTMLElement) =>
 		element.scrollHeight - element.clientHeight - element.scrollTop;
+	//* the first one laid out, as one with nothing to show yet is hidden and has no position
 	const firstMessage = () =>
-		content()?.querySelector<HTMLElement>("[data-chat-message]") ?? undefined;
+		Array.from(
+			content()?.querySelectorAll<HTMLElement>("[data-chat-message]") ?? [],
+		).find((message) => message.offsetParent !== null);
 
+	const reading = () => dragging || performance.now() - intentAt < intentWindow;
+	const onIntent = () => {
+		intentAt = performance.now();
+	};
 	/** Jumps to the latest output and follows it again. */
 	const scrollToEnd = (behavior: ScrollBehavior = "instant") => {
 		setFollowing(true);
 		const element = viewport();
 		element?.scrollTo({ top: element.scrollHeight, behavior });
 	};
+	const scrollToMessage = (id: string) => {
+		const element = viewport();
+		const target = content()?.querySelector<HTMLElement>(
+			`[data-chat-message="${CSS.escape(id)}"]`,
+		);
+		if (!element || !target) return;
+		setFollowing(false);
+		//* the jump is the reader's, so its first steps near the end don't follow again
+		onIntent();
+		element.scrollTo({
+			top:
+				element.scrollTop +
+				target.getBoundingClientRect().top -
+				element.getBoundingClientRect().top -
+				messageOffset,
+			behavior: "smooth",
+		});
+	};
+	const onKeyDown = (event: KeyboardEvent) => {
+		const target = event.target;
+		const typing =
+			target instanceof HTMLElement &&
+			(target.isContentEditable ||
+				target.closest("input, textarea, select") !== null);
+		if (event.key === "Tab" || (scrollKeys.has(event.key) && !typing)) {
+			onIntent();
+		}
+	};
+	const onPointerDown = (event: PointerEvent) => {
+		if (event.target === event.currentTarget) dragging = true;
+	};
+	const onPointerUp = () => {
+		dragging = false;
+	};
 	const onScroll = () => {
 		const element = viewport();
 		if (!element) return;
 		const top = element.scrollTop;
 		const distance = distanceFromEnd(element);
-		//* only scrolling up leaves the end; shrinking content can lower scrollTop without the reader moving
-		if (distance <= endThreshold) setFollowing(true);
-		else if (top < lastTop) setFollowing(false);
-		lastTop = top;
+		const up = top < lastTop;
+		if (up && reading()) setFollowing(false);
+		else if (distance <= endThreshold) setFollowing(true);
+		else if (up && performance.now() - changedAt < clampWindow) {
+			//* content that shrank and grew back within a frame clamps the position without resizing, so return to the end
+			if (following()) element.scrollTop = element.scrollHeight;
+		} else if (up) setFollowing(false);
+		lastTop = element.scrollTop;
 	};
 	/**
 	 * Loads older messages and keeps the first message where it was. They render
@@ -110,9 +171,19 @@ export const useChatScroll = (options: UseChatScrollOptions) => {
 			if (following()) element.scrollTop = element.scrollHeight;
 		});
 		element.addEventListener("scroll", onScroll, { passive: true });
+		element.addEventListener("wheel", onIntent, { passive: true });
+		element.addEventListener("touchmove", onIntent, { passive: true });
+		window.addEventListener("keydown", onKeyDown);
+		element.addEventListener("pointerdown", onPointerDown);
+		window.addEventListener("pointerup", onPointerUp);
 		onCleanup(() => {
 			cancelAnimationFrame(frame);
 			element.removeEventListener("scroll", onScroll);
+			element.removeEventListener("wheel", onIntent);
+			element.removeEventListener("touchmove", onIntent);
+			window.removeEventListener("keydown", onKeyDown);
+			element.removeEventListener("pointerdown", onPointerDown);
+			window.removeEventListener("pointerup", onPointerUp);
 		});
 	});
 	//* new output, a finished widget or a smaller viewport keeps the end in view while following
@@ -123,9 +194,20 @@ export const useChatScroll = (options: UseChatScrollOptions) => {
 		const observer = new ResizeObserver(() => {
 			if (following()) scroller.scrollTop = scroller.scrollHeight;
 		});
+		const changes = new MutationObserver(() => {
+			changedAt = performance.now();
+		});
 		observer.observe(element);
 		observer.observe(scroller);
-		onCleanup(() => observer.disconnect());
+		changes.observe(element, {
+			childList: true,
+			subtree: true,
+			characterData: true,
+		});
+		onCleanup(() => {
+			observer.disconnect();
+			changes.disconnect();
+		});
 	});
 	createEffect(() => {
 		const element = sentinel();
@@ -155,6 +237,7 @@ export const useChatScroll = (options: UseChatScrollOptions) => {
 	// ----------------------------------------
 	// Return
 	return {
+		viewport,
 		setViewport,
 		setContent,
 		setSentinel,
@@ -162,6 +245,7 @@ export const useChatScroll = (options: UseChatScrollOptions) => {
 		following,
 		loadingEarlier,
 		scrollToEnd,
+		scrollToMessage,
 	};
 };
 

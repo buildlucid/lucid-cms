@@ -38,7 +38,7 @@ export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
 					<FaSolidClock size={10} />
 				</Match>
 				<Match when={props.part.status === "running"}>
-					<Spinner size="sm" />
+					<Spinner size="sm" variant="subtle" />
 				</Match>
 				<Match when={props.part.status === "complete"}>
 					<FaSolidWrench size={10} />

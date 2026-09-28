@@ -142,6 +142,10 @@ export const createUserPreferencesStore = (
 			});
 		},
 
+		getAgentKey() {
+			return state.preferences.agentKey;
+		},
+
 		/** Returns the saved auto-save preference. */
 		getAutoSaveEnabled() {
 			return state.preferences.autoSaveEnabled;
@@ -196,6 +200,13 @@ export const createUserPreferencesStore = (
 			} catch {
 				// Keep the current in-memory preferences when storage is unavailable.
 			}
+		},
+
+		setAgentKey(agentKey: string) {
+			if (state.preferences.agentKey === agentKey) return;
+			updatePreferences((preferenceState) => {
+				preferenceState.preferences.agentKey = agentKey;
+			});
 		},
 
 		/** Saves whether document auto-save is enabled. */

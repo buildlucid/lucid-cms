@@ -1,6 +1,6 @@
 import { routes as extensionRoutes } from "virtual:lucid-admin";
 import { Route, Router } from "@solidjs/router";
-import { type Component, lazy } from "solid-js";
+import type { Component } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import AuthenticatedRoutes from "@/components/AuthenticatedRoutes/AuthenticatedRoutes";
 import AuthRoutes from "@/components/AuthRoutes/AuthRoutes";
@@ -14,6 +14,7 @@ import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
 import PermissionGuard from "@/guards/PermissionGuard/PermissionGuard";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
+import lazyPage from "@/utils/lazy-page";
 import PermissionSomeGuard from "./guards/PermissionSomeGuard/PermissionSomeGuard";
 
 type LazyRoute = {
@@ -21,84 +22,94 @@ type LazyRoute = {
 };
 
 // Routes
-const ComponentsRoute = lazy(
+const ComponentsRoute = lazyPage(
 	() => import("@/containers/ComponentLibraryPage/ComponentLibraryPage"),
 );
-const LoginRoute = lazy(() => import("@/containers/LoginPage/LoginPage"));
-const SetupRoute = lazy(() => import("@/containers/SetupPage/SetupPage"));
-const ForgotPasswordRoute = lazy(
+const LoginRoute = lazyPage(() => import("@/containers/LoginPage/LoginPage"));
+const SetupRoute = lazyPage(() => import("@/containers/SetupPage/SetupPage"));
+const ForgotPasswordRoute = lazyPage(
 	() => import("@/containers/ForgotPasswordPage/ForgotPasswordPage"),
 );
-const ResetPasswordRoute = lazy(
+const ResetPasswordRoute = lazyPage(
 	() => import("@/containers/ResetPasswordPage/ResetPasswordPage"),
 );
-const AcceptInvitationRoute = lazy(
+const AcceptInvitationRoute = lazyPage(
 	() => import("@/containers/AcceptInvitationPage/AcceptInvitationPage"),
 );
-const EmailChangeConfirmRoute = lazy(
+const EmailChangeConfirmRoute = lazyPage(
 	() => import("@/containers/EmailChangeConfirmPage/EmailChangeConfirmPage"),
 );
-const EmailChangeRevertRoute = lazy(
+const EmailChangeRevertRoute = lazyPage(
 	() => import("@/containers/EmailChangeRevertPage/EmailChangeRevertPage"),
 );
-const ShareRoute = lazy(
+const ShareRoute = lazyPage(
 	() => import("@/containers/MediaSharePage/MediaSharePage"),
 );
-const DashboardRoute = lazy(
+const DashboardRoute = lazyPage(
 	() => import("@/containers/DashboardPage/DashboardPage"),
 );
-const AgentRoute = lazy(() => import("@/containers/AgentPage/AgentPage"));
-const AgentHistoryRoute = lazy(
+const AgentRoute = lazyPage(() => import("@/containers/AgentPage/AgentPage"));
+const AgentHistoryRoute = lazyPage(
 	() => import("@/containers/AgentHistoryPage/AgentHistoryPage"),
 );
-const AgentConversationRoute = lazy(
+const AgentConversationRoute = lazyPage(
 	() => import("@/containers/AgentConversationPage/AgentConversationPage"),
 );
-const AgentRoutinesRoute = lazy(
+const AgentRoutinesRoute = lazyPage(
 	() => import("@/containers/AgentRoutinesPage/AgentRoutinesPage"),
 );
-const MediaListRoute = lazy(() => import("@/containers/MediaPage/MediaPage"));
-const UsersListRoute = lazy(() => import("@/containers/UsersPage/UsersPage"));
-const RolesListRoute = lazy(() => import("@/containers/RolesPage/RolesPage"));
-const SystemIndexRoute = lazy(
+const MediaListRoute = lazyPage(
+	() => import("@/containers/MediaPage/MediaPage"),
+);
+const UsersListRoute = lazyPage(
+	() => import("@/containers/UsersPage/UsersPage"),
+);
+const RolesListRoute = lazyPage(
+	() => import("@/containers/RolesPage/RolesPage"),
+);
+const SystemIndexRoute = lazyPage(
 	() => import("@/containers/SystemRedirectPage/SystemRedirectPage"),
 );
-const SystemOverviewRoute = lazy(
+const SystemOverviewRoute = lazyPage(
 	() => import("@/containers/SystemOverviewPage/SystemOverviewPage"),
 );
-const SystemOperationsRoute = lazy(
+const SystemOperationsRoute = lazyPage(
 	() => import("@/containers/SystemOperationsPage/SystemOperationsPage"),
 );
-const SystemAiUsageRoute = lazy(
+const SystemAiUsageRoute = lazyPage(
 	() => import("@/containers/SystemAiUsagePage/SystemAiUsagePage"),
 );
-const SystemIntegrationsRoute = lazy(
+const SystemIntegrationsRoute = lazyPage(
 	() => import("@/containers/SystemIntegrationsPage/SystemIntegrationsPage"),
 );
-const SystemJobsRoute = lazy(
+const SystemJobsRoute = lazyPage(
 	() => import("@/containers/SystemJobsPage/SystemJobsPage"),
 );
-const EmailListRoute = lazy(() => import("@/containers/EmailsPage/EmailsPage"));
-const ReleaseRequestsListRoute = lazy(
+const EmailListRoute = lazyPage(
+	() => import("@/containers/EmailsPage/EmailsPage"),
+);
+const ReleaseRequestsListRoute = lazyPage(
 	() => import("@/containers/ReleaseRequestsPage/ReleaseRequestsPage"),
 );
-const PublishingOverviewRoute = lazy(
+const PublishingOverviewRoute = lazyPage(
 	() => import("@/containers/PublishingOverviewPage/PublishingOverviewPage"),
 );
-const AccountRoute = lazy(() => import("@/containers/AccountPage/AccountPage"));
-const OAuthConsentRoute = lazy(
+const AccountRoute = lazyPage(
+	() => import("@/containers/AccountPage/AccountPage"),
+);
+const OAuthConsentRoute = lazyPage(
 	() => import("@/containers/OAuthConsentPage/OAuthConsentPage"),
 );
-const CollectionsDocumentsListRoute = lazy(
+const CollectionsDocumentsListRoute = lazyPage(
 	() => import("@/containers/DocumentsPage/DocumentsPage"),
 );
-const CollectionDocumentPageBuilderRoute = lazy(
+const CollectionDocumentPageBuilderRoute = lazyPage(
 	() => import("@/containers/DocumentEditorPage/DocumentEditorPage"),
 );
-const CollectionsDocumentsHistoryRoute = lazy(
+const CollectionsDocumentsHistoryRoute = lazyPage(
 	() => import("@/containers/DocumentHistoryPage/DocumentHistoryPage"),
 );
-const CollectionsDocumentsReleaseRequestDetailRoute = lazy(
+const CollectionsDocumentsReleaseRequestDetailRoute = lazyPage(
 	() =>
 		import("@/containers/ReleaseRequestDetailPage/ReleaseRequestDetailPage"),
 );

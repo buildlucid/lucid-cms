@@ -19,6 +19,7 @@ import {
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Menu from "@/components/Menu/Menu";
+import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
 import T from "@/translations";
 import { composerExtensions, isBlank } from "./editor";
 
@@ -55,9 +56,13 @@ export interface AgentComposerProps {
 	end?: JSX.Element;
 	/** @default "md" */
 	size?: "md" | "lg";
+	/** Pixels added to the editor's resting height, animated as it changes. */
+	grow?: number;
 	class?: string;
 	ref?: (handle: AgentComposerHandle) => void;
 }
+
+const editorHeight = { md: "1.5rem", lg: "4.5rem" } as const;
 
 const draftPrefix = "lucid:agent-draft:";
 
@@ -93,6 +98,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	// State & Hooks
 	const [editor, setEditor] = createSignal<Editor>();
 	const [blank, setBlank] = createSignal(true);
+	const painted = useFirstPaint();
 	let container: HTMLDivElement | undefined;
 	const [submitting, setSubmitting] = createSignal(false);
 
@@ -160,10 +166,9 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			editable: !props.disabled,
 			editorProps: {
 				attributes: {
-					class: classnames(
-						"agent-markdown agent-markdown-tight px-4 pt-3.5 pb-2.5 outline-hidden",
-						props.size === "lg" ? "min-h-18" : "min-h-6",
-					),
+					class:
+						"agent-markdown agent-markdown-tight grow px-4 pt-3.5 pb-2.5 outline-hidden",
+					style: `min-height: ${editorHeight[props.size ?? "md"]}`,
 					"aria-label": T()("agent.composer.label"),
 					"aria-multiline": "true",
 					role: "textbox",
@@ -256,7 +261,23 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				<Show when={props.header}>
 					<div class="overflow-hidden rounded-t-2xl">{props.header}</div>
 				</Show>
-				<div ref={container} class="max-h-[min(40vh,20rem)] overflow-y-auto" />
+				<div
+					ref={container}
+					class={classnames(
+						"flex max-h-[min(40vh,20rem)] flex-col overflow-y-auto",
+						{
+							"transition-[min-height] duration-300 ease-emphasized motion-reduce:transition-none":
+								props.grow !== undefined && painted(),
+						},
+					)}
+					style={
+						props.grow !== undefined
+							? {
+									"min-height": `calc(${editorHeight[props.size ?? "md"]} + ${props.grow}px)`,
+								}
+							: undefined
+					}
+				/>
 				{/* long messages fade out behind the toolbar rather than stopping at a hard edge */}
 				<div
 					aria-hidden="true"

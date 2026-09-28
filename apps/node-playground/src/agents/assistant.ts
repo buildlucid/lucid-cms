@@ -30,6 +30,18 @@ export const assistantAgent = defineAgent({
 			description: "See how this agent uses its tools.",
 			message: "What is 18 + 24? Use the add tool to check your answer.",
 		},
+		{
+			title: "Review page titles",
+			description: "Find titles that could be clearer.",
+			message:
+				"Review page titles and suggest the three most useful improvements. Do not make changes.",
+		},
+		{
+			title: "Spot metadata gaps",
+			description: "Find missing descriptions and slugs.",
+			message:
+				"Find pages with missing or weak SEO metadata. List concrete fixes, but do not make changes.",
+		},
 	],
 	skills: [demoAgentSkill],
 });

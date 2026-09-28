@@ -336,11 +336,11 @@ export const NavigationMenuContent: Component<{
 				{/* Fades links into the pinned logo and account areas as they scroll */}
 				<div
 					aria-hidden="true"
-					class="pointer-events-none absolute inset-x-0 top-0 h-4 bg-linear-to-b from-sidebar to-transparent"
+					class="pointer-events-none absolute inset-x-0 -top-px h-4 bg-linear-to-b from-sidebar to-transparent"
 				/>
 				<div
 					aria-hidden="true"
-					class="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-linear-to-t from-sidebar to-transparent"
+					class="pointer-events-none absolute inset-x-0 -bottom-px h-6 bg-linear-to-t from-sidebar to-transparent"
 				/>
 			</div>
 

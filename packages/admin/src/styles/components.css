@@ -41,9 +41,26 @@
 		animation: shimmer 3s ease-in-out infinite;
 	}
 
+	.agent-shimmer {
+		mask-image: linear-gradient(
+			90deg,
+			rgb(0 0 0 / 0.45) 40%,
+			rgb(0 0 0) 50%,
+			rgb(0 0 0 / 0.45) 60%
+		);
+		mask-size: 250% 100%;
+		animation: agent-shimmer 2s ease-in-out infinite;
+	}
+
 	@media (prefers-reduced-motion: reduce) {
-		.skeleton-shimmer {
+		.skeleton-shimmer,
+		.agent-shimmer,
+		.agent-markdown .agent-fade {
 			animation: none;
+		}
+
+		.agent-shimmer {
+			mask-image: none;
 		}
 	}
 
@@ -312,6 +329,34 @@
 		animation-duration: 200ms;
 	}
 
+	.agent-composer-morph {
+		view-transition-name: agent-composer;
+	}
+
+	::view-transition-group(agent-composer) {
+		z-index: 100;
+		animation-duration: 350ms;
+		animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	::view-transition-old(agent-composer),
+	::view-transition-new(agent-composer) {
+		height: 100%;
+		object-fit: none;
+		object-position: bottom;
+	}
+
+	::view-transition-old(agent-composer) {
+		animation-duration: 140ms;
+		animation-timing-function: ease-in;
+	}
+
+	::view-transition-new(agent-composer) {
+		animation-delay: 40ms;
+		animation-duration: 200ms;
+		animation-timing-function: ease-out;
+	}
+
 	.ai-action-button__surface[data-loading="true"],
 	.ai-action-button:hover
 		.ai-action-button__surface[data-quick-action-on-hover="true"],
@@ -401,8 +446,20 @@
 	}
 
 	/* blocks are spaced by the gap before them, and the first and last sit flush */
-	.agent-markdown :where(p, ul, ol, pre, blockquote, table, hr) {
+	.agent-markdown :where(p, ul, ol, pre, blockquote, table, hr, .agent-code) {
 		@apply my-4;
+	}
+
+	.agent-markdown .agent-code {
+		@apply relative;
+	}
+
+	.agent-markdown .agent-code > pre {
+		@apply my-0;
+	}
+
+	.agent-markdown .agent-fade {
+		animation: animation-fade-in 400ms ease-out both;
 	}
 
 	.agent-markdown > :first-child {
@@ -500,7 +557,8 @@
 	}
 
 	/* the chat box reads as lines being written, so paragraphs sit closer together */
-	.agent-markdown.agent-markdown-tight :where(p, ul, ol, pre, blockquote) {
+	.agent-markdown.agent-markdown-tight
+	:where(p, ul, ol, pre, blockquote, .agent-code) {
 		@apply my-1;
 	}
 

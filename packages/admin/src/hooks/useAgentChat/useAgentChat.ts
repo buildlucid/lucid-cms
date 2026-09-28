@@ -65,7 +65,6 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			return shouldPollTitle(data) ? 4_000 : false;
 		},
 	});
-	//* data is only read once loaded, as reading it earlier suspends the page and holds up navigation to it
 	const data = createMemo(() =>
 		conversation.isSuccess ? conversation.data?.data : undefined,
 	);
