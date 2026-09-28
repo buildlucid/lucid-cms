@@ -85,11 +85,7 @@ const IntegrationTableRow: Component<IntegrationTableRowProps> = (props) => {
 			/>
 			<Table.Text column="name" text={props.integration.name} maxLines={1} />
 			<Table.Text column="key" text={props.integration.key} maxLines={1} />
-			<Table.Text
-				column="description"
-				text={props.integration.description}
-				maxLines={2}
-			/>
+			<Table.Text column="description" text={props.integration.description} />
 			<IntegrationLastUsedCell
 				column="lastUsed"
 				integration={props.integration}

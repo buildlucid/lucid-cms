@@ -48,6 +48,8 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 						"lucid_agent_conversations.id",
 						"lucid_agent_conversations.agent_key",
 						"lucid_agent_conversations.title",
+						"lucid_agent_conversations.title_status",
+						"lucid_agent_conversations.title_generation_requested_at",
 						"lucid_agent_conversations.user_id",
 						"lucid_agent_conversations.routine_id",
 						"lucid_agent_conversations.active_run_id",
@@ -153,6 +155,8 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 				"id",
 				"agent_key",
 				"title",
+				"title_status",
+				"title_generation_requested_at",
 				"user_id",
 				"routine_id",
 				"active_run_id",
@@ -176,6 +180,8 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 						"lucid_agent_conversations.id",
 						"lucid_agent_conversations.agent_key",
 						"lucid_agent_conversations.title",
+						"lucid_agent_conversations.title_status",
+						"lucid_agent_conversations.title_generation_requested_at",
 						"lucid_agent_conversations.user_id",
 						"lucid_agent_conversations.routine_id",
 						"lucid_agent_conversations.active_run_id",
@@ -196,6 +202,100 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		);
 
 		return exec.response;
+	}
+	/** Reserves one automatic title attempt while the title is still provisional. */
+	async beginTitleGeneration(props: {
+		conversationId: string;
+		requestedAt: string;
+	}) {
+		const staleBefore = new Date(
+			new Date(props.requestedAt).getTime() - 60 * 60 * 1_000,
+		).toISOString();
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.updateTable("lucid_agent_conversations")
+					.set({
+						title_generation_requested_at: props.requestedAt,
+					})
+					.where("id", "=", props.conversationId)
+					.where("title_status", "=", "provisional")
+					.where((eb) =>
+						eb.or([
+							eb("title_generation_requested_at", "is", null),
+							eb("title_generation_requested_at", "<", staleBefore),
+						]),
+					)
+					.returning("id")
+					.executeTakeFirst(),
+			{ method: "beginTitleGeneration" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
+	async updateProvisionalTitle(props: {
+		conversationId: string;
+		title: string;
+	}) {
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.updateTable("lucid_agent_conversations")
+					.set({ title: props.title })
+					.where("id", "=", props.conversationId)
+					.where("title_status", "=", "provisional")
+					.execute(),
+			{ method: "updateProvisionalTitle" },
+		);
+		if (exec.response.error) return exec.response;
+		return { error: undefined, data: undefined };
+	}
+	/** Only the current automatic attempt may replace the provisional title. */
+	async completeGeneratedTitle(props: {
+		conversationId: string;
+		requestedAt: string;
+		title: string;
+	}) {
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.updateTable("lucid_agent_conversations")
+					.set({
+						title: props.title,
+						title_status: "generated",
+						updated_at: new Date().toISOString(),
+					})
+					.where("id", "=", props.conversationId)
+					.where("title_status", "=", "provisional")
+					.where("title_generation_requested_at", "=", props.requestedAt)
+					.returning("id")
+					.executeTakeFirst(),
+			{ method: "completeGeneratedTitle" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: exec.response.data !== undefined };
+	}
+	/** Ends an unsuccessful title attempt so a later routine run may retry. */
+	async clearTitleGenerationRequest(props: {
+		conversationId: string;
+		requestedAt: string;
+	}) {
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.updateTable("lucid_agent_conversations")
+					.set({ title_generation_requested_at: null })
+					.where("id", "=", props.conversationId)
+					.where("title_status", "=", "provisional")
+					.where("title_generation_requested_at", "=", props.requestedAt)
+					.execute(),
+			{ method: "clearTitleGenerationRequest" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: undefined };
 	}
 	/** Claims an idle conversation; retrying the same run id can finish a partial write. */
 	async claimRun(props: {

@@ -5,6 +5,7 @@ import useCreateConversation from "./useCreateConversation";
 import useCreateRoutine from "./useCreateRoutine";
 import useDeleteConversation from "./useDeleteConversation";
 import useDeleteRoutine from "./useDeleteRoutine";
+import useGenerateConversationTitle from "./useGenerateConversationTitle";
 import useGetConversation from "./useGetConversation";
 import useGetConversations from "./useGetConversations";
 import useGetMessages from "./useGetMessages";
@@ -26,6 +27,7 @@ const exportObject = {
 	useDeleteConversation,
 	useDeleteRoutine,
 	useGetConversation,
+	useGenerateConversationTitle,
 	useGetConversations,
 	useGetMessages,
 	useGetModels,

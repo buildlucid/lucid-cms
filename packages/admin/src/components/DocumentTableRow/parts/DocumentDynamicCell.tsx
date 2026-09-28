@@ -165,9 +165,7 @@ const DocumentDynamicCell: Component<{
 				{(text) => <Table.Text column={props.column} text={text()} />}
 			</Match>
 			<Match when={fieldData()?.type === "textarea" ? textValue() : undefined}>
-				{(text) => (
-					<Table.Text column={props.column} text={text()} maxLines={2} />
-				)}
+				{(text) => <Table.Text column={props.column} text={text()} />}
 			</Match>
 			<Match when={fieldData()?.type === "datetime"}>
 				<Show when={datetimeField()}>
@@ -203,12 +201,7 @@ const DocumentDynamicCell: Component<{
 			</Match>
 			<Match when={fieldData()?.type === "relation" ? relationLabels() : null}>
 				{(text) => (
-					<Table.Text
-						column={props.column}
-						text={text()}
-						maxLines={2}
-						minWidth={220}
-					/>
+					<Table.Text column={props.column} text={text()} minWidth={220} />
 				)}
 			</Match>
 			<Match when={fieldData()?.type === "color" ? textValue() : undefined}>

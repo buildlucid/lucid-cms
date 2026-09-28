@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
 	afterAll,
 	beforeAll,
@@ -12,6 +13,7 @@ import defineAgent from "../../libs/agent/define-agent.js";
 import defineRoutine from "../../libs/agent/define-routine.js";
 import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
+import * as jobQueue from "../../libs/jobs/enqueue.js";
 import {
 	AgentConversationsRepository,
 	AgentRoutinesRepository,
@@ -25,7 +27,10 @@ import createRoutine from "./create-routine.js";
 import dispatchDueRoutines from "./dispatch-due-routines.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
+import insertConversation from "./helpers/insert-conversation.js";
 import recoverRuns from "./recover-runs.js";
+import startRun from "./start-run.js";
+import updateConversation from "./update-conversation.js";
 
 vi.mock("./helpers/check-agent-access.js", async (importOriginal) => ({
 	...(await importOriginal<typeof import("./helpers/check-agent-access.js")>()),
@@ -91,6 +96,85 @@ beforeAll(async () => {
 });
 afterAll(() => testConfig.destroy());
 beforeEach(() => vi.mocked(enqueueRun).mockClear());
+
+test("a manual rename wins when automatic title generation finishes later", async () => {
+	const created = await insertConversation(context, {
+		agentKey: testAgent.key,
+		userId,
+	});
+	expect(created.error).toBeUndefined();
+	if (created.error) return;
+
+	const conversations = new AgentConversationsRepository(context.db);
+	const requestedAt = new Date().toISOString();
+	expect(
+		await conversations.beginTitleGeneration({
+			conversationId: created.data.id,
+			requestedAt,
+		}),
+	).toMatchObject({ data: true });
+
+	const renamed = await updateConversation(context, {
+		id: created.data.id,
+		userId,
+		title: "My own title",
+	});
+	expect(renamed).toMatchObject({
+		data: { title: "My own title", titleStatus: "user_set" },
+	});
+	expect(
+		await conversations.completeGeneratedTitle({
+			conversationId: created.data.id,
+			requestedAt,
+			title: "Late AI title",
+		}),
+	).toMatchObject({ data: false });
+	const final = await conversations.selectSingle({
+		select: ["title", "title_status"],
+		where: [{ key: "id", operator: "=", value: created.data.id }],
+	});
+	expect(final.data).toEqual({
+		title: "My own title",
+		title_status: "user_set",
+	});
+});
+
+test("a title queue failure leaves the first message and provisional title intact", async () => {
+	const created = await insertConversation(context, {
+		agentKey: testAgent.key,
+		userId,
+	});
+	expect(created.error).toBeUndefined();
+	if (created.error) return;
+
+	const queue = vi.spyOn(jobQueue, "enqueueJob").mockResolvedValue({
+		error: { message: "Title queue unavailable" },
+		data: undefined,
+	});
+	try {
+		const started = await startRun(context, {
+			conversationId: created.data.id,
+			userId,
+			requestId: randomUUID(),
+			text: "Explain cache validation",
+		});
+		expect(started.error).toBeUndefined();
+
+		const saved = await new AgentConversationsRepository(
+			context.db,
+		).selectSingle({
+			select: ["title", "title_status", "title_generation_requested_at"],
+			where: [{ key: "id", operator: "=", value: created.data.id }],
+		});
+		expect(saved.data).toMatchObject({
+			title: "Explain cache validation",
+			title_status: "provisional",
+			title_generation_requested_at: null,
+		});
+	} finally {
+		queue.mockRestore();
+	}
+});
 
 const dueRoutine = async () => {
 	const routine = await createRoutine(context, {

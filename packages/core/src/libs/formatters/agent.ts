@@ -92,6 +92,10 @@ const formatConversation = (props: {
 		: {}),
 	agentKey: props.conversation.agent_key,
 	title: props.conversation.title,
+	titleStatus: props.conversation.title_status,
+	titleGenerationRequestedAt: formatter.formatDate(
+		props.conversation.title_generation_requested_at,
+	),
 	userId: props.conversation.user_id,
 	routineId: props.conversation.routine_id,
 	latestRun:

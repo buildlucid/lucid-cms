@@ -5,6 +5,7 @@ import {
 	agentContextSchema,
 	agentRunOutcomeSchema,
 	agentRunStatusSchema,
+	agentTitleStatusSchema,
 } from "../../../schemas/agent.js";
 import type { AiModelSelection } from "../../../types/response.js";
 import { aiModelSelectionSchema } from "../../agent/model-selection.js";
@@ -13,6 +14,7 @@ import { defineTable } from "../client/table/definition.js";
 import type {
 	BooleanInt,
 	TimestampImmutable,
+	TimestampMutable,
 	TimestampRequired,
 } from "../types.js";
 
@@ -28,6 +30,11 @@ export const agentConversationsTable = defineTable(
 			},
 			agent_key: { schema: z.string(), type: "text" },
 			title: { schema: z.string(), type: "text" },
+			title_status: { schema: agentTitleStatusSchema, type: "text" },
+			title_generation_requested_at: {
+				schema: z.union([z.string(), z.date()]).nullable(),
+				type: "timestamp",
+			},
 			user_id: { schema: z.number().nullable(), type: "integer" },
 			routine_id: { schema: z.uuid().nullable(), type: "text" },
 			queue_paused: {
@@ -81,6 +88,8 @@ export interface LucidAgentConversations {
 		AiModelSelection | null
 	>;
 	title: string;
+	title_status: Generated<z.infer<typeof agentTitleStatusSchema>>;
+	title_generation_requested_at: TimestampMutable;
 	/** Private to this user. Null for chats started by routines defined in code. */
 	user_id: number | null;
 	routine_id: string | null;

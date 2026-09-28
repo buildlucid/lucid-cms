@@ -11,6 +11,7 @@ import type {
 	AgentInputAction,
 	AgentInteractionAction,
 	AgentRoutineSource,
+	AgentTitleStatus,
 } from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
@@ -66,6 +67,12 @@ export const agentApprovalModeSchema = z.enum([
 	"tool-defaults",
 	"automatic",
 ]);
+
+export const agentTitleStatusSchema = z.enum([
+	"provisional",
+	"generated",
+	"user_set",
+]) satisfies z.ZodType<AgentTitleStatus>;
 
 export const agentInteractionActionSchema = z.enum([
 	"submit",
@@ -169,6 +176,8 @@ const agentConversationResponseSchema = z.object({
 	id: z.uuid(),
 	agentKey: z.string(),
 	title: z.string(),
+	titleStatus: agentTitleStatusSchema,
+	titleGenerationRequestedAt: z.string().nullable(),
 	userId: z.number().nullable(),
 	routineId: z.uuid().nullable(),
 	latestRun: z
@@ -331,6 +340,12 @@ export const controllerSchemas = {
 		query: noQuery,
 		params: idParams,
 		response: agentConversationResponseSchema,
+	} satisfies ControllerSchema,
+	generateConversationTitle: {
+		body: undefined,
+		query: noQuery,
+		params: idParams,
+		response: z.object({ title: z.string() }),
 	} satisfies ControllerSchema,
 	deleteConversation: {
 		body: undefined,

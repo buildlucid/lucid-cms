@@ -313,10 +313,14 @@
 	}
 
 	.ai-action-button__surface[data-loading="true"],
+	.ai-action-button:hover
+		.ai-action-button__surface[data-quick-action-on-hover="true"],
+	.ai-action-button:focus-visible
+		.ai-action-button__surface[data-quick-action-on-hover="true"],
 	.ai-action-button__surface[data-quick-action-active="true"] {
 		border-color: transparent;
 		background:
-			linear-gradient(var(--lucid-input), var(--lucid-input)) padding-box,
+			linear-gradient(var(--lucid-card), var(--lucid-card)) padding-box,
 			conic-gradient(
 				from var(--ai-border-angle),
 				transparent 0deg,
@@ -328,7 +332,11 @@
 		animation: ai-border-spin 900ms linear infinite;
 	}
 
-	.ai-action-button__surface[data-quick-action-active="true"] {
+	.ai-action-button__surface[data-quick-action-active="true"],
+	.ai-action-button:hover
+		.ai-action-button__surface[data-quick-action-on-hover="true"],
+	.ai-action-button:focus-visible
+		.ai-action-button__surface[data-quick-action-on-hover="true"] {
 		color: var(--lucid-primary);
 		fill: var(--lucid-primary);
 		box-shadow:
@@ -336,18 +344,13 @@
 			0 0 16px color-mix(in srgb, var(--lucid-primary) 22%, transparent);
 	}
 
-	.ai-action-button__surface[data-variant="subtle"][data-loading="true"],
-	.ai-action-button__surface[data-variant="subtle"][data-quick-action-active="true"] {
-		background:
-			linear-gradient(var(--lucid-card), var(--lucid-card)) padding-box,
-			conic-gradient(
-				from var(--ai-border-angle),
-				transparent 0deg,
-				transparent 245deg,
-				var(--lucid-ai-blue) 285deg,
-				var(--lucid-primary) 360deg
-			)
-			border-box;
+	@media (prefers-reduced-motion: reduce) {
+		.ai-action-button:hover
+			.ai-action-button__surface[data-quick-action-on-hover="true"],
+		.ai-action-button:focus-visible
+			.ai-action-button__surface[data-quick-action-on-hover="true"] {
+			animation: none;
+		}
 	}
 
 	.preview-field-target-highlight::after {

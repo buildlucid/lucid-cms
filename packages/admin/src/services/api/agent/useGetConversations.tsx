@@ -3,7 +3,7 @@ import type { AgentConversation, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
-import { isRunWorking } from "@/utils/agent-chat";
+import { isRunWorking, shouldPollTitle } from "@/utils/agent-chat";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
@@ -37,8 +37,10 @@ const useGetConversations = (params: QueryHook<QueryParams>) => {
 			}),
 		placeholderData: keepPreviousData,
 		refetchInterval: (query) =>
-			query.state.data?.data.some((conversation) =>
-				isRunWorking(conversation.latestRun?.status),
+			query.state.data?.data.some(
+				(conversation) =>
+					isRunWorking(conversation.latestRun?.status) ||
+					shouldPollTitle(conversation),
 			)
 				? 5000
 				: false,

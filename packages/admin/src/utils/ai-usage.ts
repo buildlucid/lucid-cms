@@ -24,6 +24,10 @@ export const getAiUsageFeatureOptions = () => [
 		label: T()("ai.usage.features.agent.compact"),
 	},
 	{
+		value: "agent.title.generate",
+		label: T()("ai.usage.features.agent.title.generate"),
+	},
+	{
 		value: "custom-field.input.generate",
 		label: T()("ai.usage.features.custom.field.input.generate"),
 	},
@@ -36,6 +40,15 @@ export const getAiUsageFeatureOptions = () => [
 		label: T()("ai.usage.features.media.image.generate"),
 	},
 ];
+
+export const getAiUsageFeatureLabel = (feature: {
+	key: string;
+	label?: string | null;
+}) =>
+	getAiUsageFeatureOptions().find((option) => option.value === feature.key)
+		?.label ??
+	feature.label ??
+	feature.key;
 
 export const getAiUsageChartMetricOptions = () => [
 	{

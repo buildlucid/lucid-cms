@@ -9,7 +9,7 @@ const AiIconButton: Component<{
 	disabledClickable?: boolean;
 	loading?: boolean;
 	quickActionActive?: boolean;
-	variant?: "default" | "subtle";
+	quickActionOnHover?: boolean;
 	onClick: JSX.EventHandler<HTMLButtonElement, MouseEvent>;
 	class?: string;
 }> = (props) => {
@@ -19,11 +19,8 @@ const AiIconButton: Component<{
 		<button
 			type="button"
 			class={classnames(
-				"ai-action-button group relative flex items-center justify-center rounded-md text-muted fill-muted transition-colors duration-200 hover:text-primary-low-foreground hover:fill-primary-low-foreground focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60",
+				"ai-action-button group relative flex h-5 w-5 items-center justify-center rounded-md text-muted fill-muted transition-colors duration-200 hover:text-primary-low-foreground hover:fill-primary-low-foreground focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 before:absolute before:-inset-1 before:rounded-md before:content-['']",
 				{
-					"h-7 w-7": props.variant !== "subtle",
-					"h-5 w-5 before:absolute before:-inset-1 before:rounded-md before:content-['']":
-						props.variant === "subtle",
 					"cursor-not-allowed opacity-60": props.disabled,
 				},
 				props.class,
@@ -36,22 +33,14 @@ const AiIconButton: Component<{
 			onClick={props.onClick}
 		>
 			<span
-				class={classnames(
-					"ai-action-button__surface pointer-events-none flex items-center justify-center rounded-md border transition-colors duration-200",
-					{
-						"h-7 w-7 border-border bg-input group-hover:border-primary-low-border group-hover:bg-primary-low":
-							props.variant !== "subtle",
-						"h-5 w-5 border-transparent bg-card": props.variant === "subtle",
-					},
-				)}
+				class="ai-action-button__surface pointer-events-none flex h-5 w-5 items-center justify-center rounded-md border border-transparent bg-card transition-colors duration-200"
 				data-loading={props.loading ? "true" : undefined}
 				data-quick-action-active={props.quickActionActive ? "true" : undefined}
-				data-variant={props.variant ?? "default"}
+				data-quick-action-on-hover={
+					props.quickActionOnHover ? "true" : undefined
+				}
 			>
-				<FaSolidMagicWandSparkles
-					size={props.variant === "subtle" ? 11 : 13}
-					aria-hidden="true"
-				/>
+				<FaSolidMagicWandSparkles size={11} aria-hidden="true" />
 			</span>
 		</button>
 	);

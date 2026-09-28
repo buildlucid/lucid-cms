@@ -772,6 +772,8 @@
 	"agent.routine.code.locked": "Routines defined in code can only be paused, resumed or run.",
 	"agent.input.steer.denied": "Only the person a run acts for can correct it. Send your message as a follow-up instead.",
 	"agent.conversation.not.found": "Conversation not found.",
+	"agent.title.context.empty": "This chat does not have enough text to generate a title.",
+	"agent.title.generate.failed": "The chat title could not be generated.",
 	"agent.routine.schedule.invalid": "Invalid cron expression or timezone.",
 	"agent.access.denied": "You do not have permission to use this agent.",
 	"agent.run.cannot.continue": "This run cannot be continued.",

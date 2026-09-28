@@ -6,11 +6,11 @@ import request from "@/utils/request";
 
 /**
  * Gets a conversation and the status of its latest run. Streams keep it current,
- * so it only polls while `poll` says it is waiting on the server.
+ * so it only polls while `poll` asks for an interval.
  */
 const useGetConversation = (params: {
 	id: Accessor<string | undefined>;
-	poll?: (conversation: AgentConversation) => boolean;
+	poll?: (conversation: AgentConversation) => number | false;
 }) =>
 	useQuery(() => ({
 		queryKey: queryKeys.agent.conversation(params.id()),
@@ -20,7 +20,7 @@ const useGetConversation = (params: {
 			}),
 		refetchInterval: (query) => {
 			const conversation = query.state.data?.data;
-			return conversation && params.poll?.(conversation) ? 1_000 : false;
+			return conversation ? (params.poll?.(conversation) ?? false) : false;
 		},
 		enabled: params.id() !== undefined,
 	}));

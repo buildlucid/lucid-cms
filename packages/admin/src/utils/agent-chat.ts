@@ -17,6 +17,18 @@ export const progressTool = "lucid_share_progress";
 export const questionWidget = "lucid-question";
 export const approvalWidget = "lucid-tool-approval";
 
+export const shouldPollTitle = (
+	conversation: Pick<
+		AgentConversation,
+		"titleStatus" | "titleGenerationRequestedAt"
+	>,
+) => {
+	const requestedAt = conversation.titleGenerationRequestedAt;
+	if (conversation.titleStatus !== "provisional" || !requestedAt) return false;
+	const age = Date.now() - new Date(requestedAt).getTime();
+	return age >= 0 && age < 60_000;
+};
+
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 	part.type === "tool" &&

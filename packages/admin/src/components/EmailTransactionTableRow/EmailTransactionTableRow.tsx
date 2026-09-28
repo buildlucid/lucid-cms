@@ -38,11 +38,7 @@ const EmailTransactionTableRow: Component<EmailTransactionRowProps> = (
 				column="identifier"
 				text={props.transaction.strategyIdentifier}
 			/>
-			<Table.Text
-				column="message"
-				text={props.transaction.message}
-				maxLines={2}
-			/>
+			<Table.Text column="message" text={props.transaction.message} />
 			<Table.Date column="createdAt" date={props.transaction.createdAt} />
 			<Table.Date column="updatedAt" date={props.transaction.updatedAt} />
 		</Table.Row>

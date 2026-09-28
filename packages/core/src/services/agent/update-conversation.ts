@@ -77,6 +77,7 @@ const updateConversation: ServiceFn<
 		where: [{ key: "id", operator: "=", value: input.id }],
 		data: {
 			title: input.title,
+			title_status: input.title !== undefined ? "user_set" : undefined,
 			approval_mode: input.approvalMode,
 			model_selection: model?.data.selection,
 			context: nextContext,

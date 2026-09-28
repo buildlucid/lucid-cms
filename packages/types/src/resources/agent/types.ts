@@ -59,6 +59,8 @@ export type AgentRunStatus =
 /** How a routine run described its result when it finished. */
 export type AgentRunOutcome = "done" | "nothing_to_report" | "needs_review";
 
+export type AgentTitleStatus = "provisional" | "generated" | "user_set";
+
 export type AgentToolStatus =
 	| "pending"
 	| "running"
@@ -149,6 +151,8 @@ export interface AgentConversation {
 	id: string;
 	agentKey: string;
 	title: string;
+	titleStatus: AgentTitleStatus;
+	titleGenerationRequestedAt: string | null;
 	/** Null for chats started by routines defined in code. */
 	userId: number | null;
 	routineId: string | null;

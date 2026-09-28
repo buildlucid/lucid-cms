@@ -213,7 +213,14 @@ export type MediaImageGenerateV1Request = {
 	};
 };
 
+export type AgentTitleGenerateV1Request = CmsAiGenerateBaseRequest<
+	{ key: "agent.title.generate"; version: "v1" },
+	CmsAiGenerateRequestInputText<"conversation">,
+	Record<string, never>
+>;
+
 export type CmsAiGenerateRequest =
+	| AgentTitleGenerateV1Request
 	| CustomFieldInputV1Request
 	| MediaAltGenerateV1Request
 	| MediaImageGenerateV1Request;

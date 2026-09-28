@@ -32,6 +32,8 @@ const conversation: AgentConversation = {
 	id: "conversation",
 	agentKey: "test",
 	title: "Test",
+	titleStatus: "generated",
+	titleGenerationRequestedAt: null,
 	userId: 1,
 	routineId: null,
 	latestRun: {

@@ -4,7 +4,7 @@ import type {
 	AgentRunStatus,
 	AgentStreamEvent,
 } from "@types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
 	applyStreamEvent,
 	awaitsDelivery,
@@ -13,6 +13,7 @@ import {
 	messageText,
 	partLayout,
 	placeCompactions,
+	shouldPollTitle,
 } from "./agent-chat";
 
 const conversationId = "conversation";
@@ -21,6 +22,32 @@ const apply = (events: AgentStreamEvent[], messages: AgentMessage[] = []) =>
 		(current, event) => applyStreamEvent(current, event, conversationId),
 		messages,
 	);
+
+it("polls only for a recent, pending automatic title", () => {
+	const now = Date.now();
+	const clock = vi.spyOn(Date, "now").mockReturnValue(now);
+	try {
+		const pending = {
+			titleStatus: "provisional" as const,
+			titleGenerationRequestedAt: new Date(now - 59_000).toISOString(),
+		};
+		expect(shouldPollTitle(pending)).toBe(true);
+		expect(
+			shouldPollTitle({
+				...pending,
+				titleGenerationRequestedAt: new Date(now - 60_000).toISOString(),
+			}),
+		).toBe(false);
+		expect(shouldPollTitle({ ...pending, titleStatus: "user_set" })).toBe(
+			false,
+		);
+		expect(
+			shouldPollTitle({ ...pending, titleGenerationRequestedAt: null }),
+		).toBe(false);
+	} finally {
+		clock.mockRestore();
+	}
+});
 
 describe("applyStreamEvent", () => {
 	it("builds a reply from streamed text, tools and widgets", () => {

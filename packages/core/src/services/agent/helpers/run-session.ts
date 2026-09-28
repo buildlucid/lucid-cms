@@ -27,6 +27,7 @@ import type {
 } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import enqueueRun from "./enqueue-run.js";
+import enqueueTitle from "./enqueue-title.js";
 
 export type SessionRun = {
 	id: string;
@@ -222,23 +223,46 @@ const openRunSession = async (
 					if (!paused.data) return superseded();
 				}
 
-				const saved = await write(status, {
-					errorMessage: errorMessage ?? null,
-				});
-				if (saved.error) return saved;
-
-				if (constants.agent.runStatuses.terminal.some((s) => s === status)) {
-					const AgentConversations = new AgentConversationsRepository(
-						context.db,
+				const finishRun = async (writeContext = context) => {
+					const saved = await write(
+						status,
+						{
+							errorMessage: errorMessage ?? null,
+						},
+						writeContext,
 					);
+					if (saved.error) return saved;
 
-					const released = await AgentConversations.releaseRun({
-						conversationId: run.conversation_id,
-						runId: run.id,
-						updatedAt: new Date().toISOString(),
-					});
-					if (released.error) return released;
-				}
+					if (constants.agent.runStatuses.terminal.some((s) => s === status)) {
+						const conversations = new AgentConversationsRepository(
+							writeContext.db,
+						);
+						const released = await conversations.releaseRun({
+							conversationId: run.conversation_id,
+							runId: run.id,
+							updatedAt: new Date().toISOString(),
+						});
+						if (released.error) return released;
+					}
+
+					if (status === "completed" && run.conversation_routine_id) {
+						await enqueueTitle(writeContext, {
+							conversationId: run.conversation_id,
+							userId: run.conversation_user_id,
+							scope: "conversation",
+							runId: run.id,
+						});
+					}
+
+					return { error: undefined, data: undefined };
+				};
+
+				const finished =
+					status === "completed" && run.conversation_routine_id
+						? await withTransaction(context, finishRun)
+						: await finishRun();
+				if (finished.error) return finished;
+
 				if (errorMessage) await emit({ type: "error", message: errorMessage });
 
 				await emit({ type: "finish", runId: run.id, status });

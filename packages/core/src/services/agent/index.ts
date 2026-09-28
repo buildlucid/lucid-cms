@@ -5,6 +5,7 @@ export { default as createRoutine } from "./create-routine.js";
 export { default as deleteConversation } from "./delete-conversation.js";
 export { default as deleteRoutine } from "./delete-routine.js";
 export { default as executeRun } from "./execute-run.js";
+export { default as generateConversationTitle } from "./generate-conversation-title.js";
 export { default as getConversation } from "./get-conversation.js";
 export { default as getConversations } from "./get-conversations.js";
 export { default as getMessages } from "./get-messages.js";

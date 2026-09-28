@@ -3,6 +3,7 @@ import type { Component } from "solid-js";
 import Table from "@/components/Table/Table";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import T from "@/translations";
+import { getAiUsageFeatureLabel } from "@/utils/ai-usage";
 import formatAiCost from "@/utils/format-ai-cost";
 import formatDuration from "@/utils/format-duration";
 import AiUsageUsageCell from "./parts/AiUsageUsageCell";
@@ -30,7 +31,7 @@ const AiUsageTableRow: Component<AiUsageRowProps> = (props) => {
 			/>
 			<Table.Text
 				column="feature"
-				text={props.aiUsage.feature.label || props.aiUsage.feature.key}
+				text={getAiUsageFeatureLabel(props.aiUsage.feature)}
 				maxLines={1}
 			/>
 			<AiUsageUsageCell column="usage" aiUsage={props.aiUsage} />

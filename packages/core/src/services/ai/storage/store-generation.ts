@@ -8,7 +8,8 @@ const storeGeneration: ServiceFn<
 	[
 		{
 			lucidRemoteConnectionId: number;
-			userId: number;
+			userId: number | null;
+			agentConversationId?: string;
 			response: CmsAiGenerateCompletedData;
 			targetType: string;
 			target: Record<string, unknown>;
@@ -28,6 +29,7 @@ const storeGeneration: ServiceFn<
 			feature_key: props.response.feature.key,
 			feature_version: props.response.feature.version,
 			user_id: props.userId,
+			agent_conversation_id: props.agentConversationId ?? null,
 			lucid_remote_connection_id: props.lucidRemoteConnectionId,
 			target_type: props.targetType,
 			target: props.target,

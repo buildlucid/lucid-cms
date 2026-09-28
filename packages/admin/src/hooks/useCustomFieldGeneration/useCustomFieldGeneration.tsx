@@ -2,8 +2,6 @@ import {
 	type Component,
 	createMemo,
 	createSignal,
-	onCleanup,
-	onMount,
 	Show,
 	useContext,
 } from "solid-js";
@@ -11,6 +9,7 @@ import AiDraftReviewPill from "@/components/AiDraftReviewPill/AiDraftReviewPill"
 import AiIconButton from "@/components/AiIconButton/AiIconButton";
 import { Permissions } from "@/constants/permissions";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
+import useSuperKeyHeld from "@/hooks/useSuperKeyHeld/useSuperKeyHeld";
 import api from "@/services/api";
 import aiModalsStore, {
 	type CustomFieldGenerationTarget,
@@ -35,14 +34,6 @@ const getTargetId = () => {
 	return `custom-field-generation-${targetId}`;
 };
 
-const isSuperKeyEvent = (event: KeyboardEvent) =>
-	event.key === "Meta" ||
-	event.key === "OS" ||
-	event.code === "MetaLeft" ||
-	event.code === "MetaRight" ||
-	event.code === "OSLeft" ||
-	event.code === "OSRight";
-
 type PendingDirectGeneration = {
 	targetId: string;
 	localeCodes: Array<string | null>;
@@ -55,7 +46,7 @@ const useCustomFieldGeneration = () => {
 	const [directTargetId, setDirectTargetId] = createSignal<string>();
 	const [pendingDirectGeneration, setPendingDirectGeneration] =
 		createSignal<PendingDirectGeneration>();
-	const [superKeyHeld, setSuperKeyHeld] = createSignal(false);
+	const superKeyHeld = useSuperKeyHeld();
 
 	// -----------------------------
 	// Mutations
@@ -266,7 +257,6 @@ const useCustomFieldGeneration = () => {
 							disabledClickable={accessState().disabled}
 							loading={isTargetLoading(id)}
 							quickActionActive={superKeyHeld() && !targetIsDisabled(target)}
-							variant="subtle"
 							onClick={(event) => {
 								event.preventDefault();
 								event.stopPropagation();
@@ -295,30 +285,6 @@ const useCustomFieldGeneration = () => {
 
 		return ActionButton;
 	};
-
-	// -----------------------------
-	// Effects
-	onMount(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.metaKey || isSuperKeyEvent(event)) setSuperKeyHeld(true);
-		};
-		const handleKeyUp = (event: KeyboardEvent) => {
-			if (isSuperKeyEvent(event) || !event.metaKey) setSuperKeyHeld(false);
-		};
-		const resetSuperKey = () => setSuperKeyHeld(false);
-
-		window.addEventListener("keydown", handleKeyDown);
-		window.addEventListener("keyup", handleKeyUp);
-		window.addEventListener("blur", resetSuperKey);
-		document.addEventListener("visibilitychange", resetSuperKey);
-
-		onCleanup(() => {
-			window.removeEventListener("keydown", handleKeyDown);
-			window.removeEventListener("keyup", handleKeyUp);
-			window.removeEventListener("blur", resetSuperKey);
-			document.removeEventListener("visibilitychange", resetSuperKey);
-		});
-	});
 
 	// -----------------------------
 	// Return

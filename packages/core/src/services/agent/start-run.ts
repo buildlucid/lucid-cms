@@ -10,6 +10,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import enqueueTitle from "./helpers/enqueue-title.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import titleFromMessage from "./helpers/title-from-message.js";
 
@@ -124,6 +125,7 @@ const startRun: ServiceFn<
 		const latest = await compactions.selectLatest(input.conversationId);
 		if (latest.error) return latest;
 
+		let firstMessage = false;
 		if (!input.routineId && !input.purpose) {
 			const previous = await messages.selectLatest({
 				conversationId: input.conversationId,
@@ -131,11 +133,7 @@ const startRun: ServiceFn<
 			});
 			if (previous.error) return previous;
 			if (!previous.data.length) {
-				const titled = await conversations.updateSingle({
-					where: [{ key: "id", operator: "=", value: input.conversationId }],
-					data: { title: titleFromMessage(input.text) },
-				});
-				if (titled.error) return titled;
+				firstMessage = true;
 			}
 		}
 
@@ -190,6 +188,19 @@ const startRun: ServiceFn<
 		if (!input.purpose) {
 			const appended = await messages.appendOnce(message);
 			if (appended.error) return appended;
+		}
+		if (firstMessage) {
+			const titled = await conversations.updateProvisionalTitle({
+				conversationId: input.conversationId,
+				title: titleFromMessage(input.text ?? ""),
+			});
+			if (titled.error) return titled;
+
+			await enqueueTitle(context, {
+				conversationId: input.conversationId,
+				userId: input.userId,
+				scope: "first-message",
+			});
 		}
 
 		return { error: undefined, data: { runId: input.requestId } };

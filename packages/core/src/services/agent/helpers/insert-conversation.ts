@@ -39,6 +39,8 @@ const insertConversation: ServiceFn<
 			//* resolved when each run starts, so saving a chat never waits on the Lucid service
 			model_selection: input.modelSelection ?? null,
 			title: input.title ?? constants.agent.defaultTitle,
+			title_status:
+				input.title && !input.routineId ? "user_set" : "provisional",
 			user_id: input.userId,
 			routine_id: input.routineId ?? null,
 			active_run_id: null,

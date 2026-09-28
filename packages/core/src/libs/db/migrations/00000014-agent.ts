@@ -95,6 +95,13 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 				col.notNull(),
 			)
 			.addColumn("title", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("title_status", adapter.getDataType("text"), (col) =>
+				col.notNull().defaultTo("provisional"),
+			)
+			.addColumn(
+				"title_generation_requested_at",
+				adapter.getDataType("timestamp"),
+			)
 			.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 				col.references("lucid_users.id").onDelete("cascade"),
 			)

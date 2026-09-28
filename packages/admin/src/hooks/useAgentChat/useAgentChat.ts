@@ -27,6 +27,7 @@ import {
 	awaitsDelivery,
 	findPendingInteraction,
 	isRunWorking,
+	shouldPollTitle,
 } from "@/utils/agent-chat";
 
 /**
@@ -59,7 +60,10 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// Queries & Mutations
 	const conversation = api.agent.useGetConversation({
 		id: conversationId,
-		poll: (data) => !untrack(streaming) && awaitsDelivery(data),
+		poll: (data) => {
+			if (!untrack(streaming) && awaitsDelivery(data)) return 1_000;
+			return shouldPollTitle(data) ? 4_000 : false;
+		},
 	});
 	//* data is only read once loaded, as reading it earlier suspends the page and holds up navigation to it
 	const data = createMemo(() =>

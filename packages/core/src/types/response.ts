@@ -18,6 +18,7 @@ export type {
 	AgentRunOutcome,
 	AgentRunStatus,
 	AgentStreamEvent,
+	AgentTitleStatus,
 	AgentToolStatus,
 	AgentUsage,
 	AgentWidgetPart,

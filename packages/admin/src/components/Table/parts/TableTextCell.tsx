@@ -6,7 +6,10 @@ export interface TableTextCellProps {
 	/** The key of the column this cell belongs to. */
 	column?: string;
 	text?: string | number | null;
-	/** Truncates the text after this many lines. */
+	/**
+	 * Truncates the text after this many lines. The full text shows on hover.
+	 * @default 2
+	 */
 	maxLines?: 1 | 2 | 3 | 4;
 	width?: number;
 	/** Pass `false` to remove the default minimum width. */
@@ -16,6 +19,10 @@ export interface TableTextCellProps {
 
 /** A table cell showing text. */
 const TableTextCell: Component<TableTextCellProps> = (props) => {
+	// ----------------------------------
+	// Memos
+	const maxLines = () => props.maxLines ?? 2;
+
 	// ----------------------------------
 	// Render
 	return (
@@ -27,10 +34,10 @@ const TableTextCell: Component<TableTextCellProps> = (props) => {
 		>
 			<span
 				class={classNames("text-sm", {
-					"line-clamp-1": props.maxLines === 1,
-					"line-clamp-2": props.maxLines === 2,
-					"line-clamp-3": props.maxLines === 3,
-					"line-clamp-4": props.maxLines === 4,
+					"line-clamp-1": maxLines() === 1,
+					"line-clamp-2": maxLines() === 2,
+					"line-clamp-3": maxLines() === 3,
+					"line-clamp-4": maxLines() === 4,
 				})}
 				title={String(props.text ?? "-")}
 			>
