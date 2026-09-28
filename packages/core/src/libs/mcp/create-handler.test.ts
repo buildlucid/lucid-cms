@@ -12,6 +12,7 @@ import { createTranslationStore } from "../i18n/index.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
 import defineSkill from "../skills/define-skill.js";
 import defineMcpTool from "../tools/define-mcp-tool.js";
+import { mcpTools } from "../tools/lucid-tools.js";
 import { createHandler } from "./create-handler.js";
 
 const testConfig = getTestConfig();
@@ -87,7 +88,7 @@ test("SDK serves the active tool catalogue and calls in both protocol eras", asy
 		ai: {
 			...base.ai,
 			features: { ...base.ai.features, mcp: true },
-			mcp: { tools: [restricted, echo], skills: [] },
+			mcp: { tools: [...mcpTools.content(), restricted, echo], skills: [] },
 		},
 	};
 	const context = createServiceContext({

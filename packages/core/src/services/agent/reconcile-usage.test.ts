@@ -92,7 +92,7 @@ beforeAll(async () => {
 });
 afterAll(() => testConfig.destroy());
 
-const pending = async (old = true) => {
+const pending = async (old = true, featureKey = "agent.chat") => {
 	const conversation = await insertConversation(context, {
 		agentKey: "test",
 		userId,
@@ -106,6 +106,7 @@ const pending = async (old = true) => {
 	});
 	if (run.error) throw new Error(JSON.stringify(run.error));
 	const input = {
+		featureKey,
 		requestId: randomUUID(),
 		runId: run.data.runId,
 		conversationId: conversation.data.id,
@@ -279,3 +280,49 @@ vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => ({
 		await import("../../utils/test-helpers/agent-models.js")
 	).mockAgentModels(),
 }));
+
+test("recovers web usage after a lost response without counting a model call", async () => {
+	const input = await pending(true, "web.search");
+	const webUsage = {
+		kind: "web",
+		operation: "search",
+		provider: "parallel",
+		requests: 1,
+		model: null,
+		tokens: null,
+		providerRequestId: "search_1",
+		cost: { creditsCharged: "12" },
+	};
+	request.mockResolvedValue({
+		error: undefined,
+		data: {
+			json: {
+				data: {
+					requestId: input.requestId,
+					status: "complete",
+					usage: webUsage,
+				},
+			},
+		},
+	});
+	expect(
+		(await reconcileUsage(context, { requestId: input.requestId })).data,
+	).toBe(1);
+	const repository = new AiGenerationsRepository(context.db);
+	const row = await repository.selectSingleByRequestId({
+		requestId: input.requestId,
+		select: ["usage", "model", "status", "credits_charged"],
+	});
+	expect(row.data).toMatchObject({
+		model: null,
+		status: "success",
+		credits_charged: "12",
+		usage: webUsage,
+	});
+	expect((await repository.agentUsageByRuns([input.runId])).data).toMatchObject(
+		[{ calls: 1, model_calls: 0, credits_charged: "12" }],
+	);
+	expect(
+		(await reconcileUsage(context, { requestId: input.requestId })).data,
+	).toBe(0);
+});

@@ -182,105 +182,111 @@ const inlineImage = async (args: {
 };
 
 /** Returns a public media link or a bounded inline image preview. */
-export const previewMediaMcpTool = defineMcpTool({
-	name: "media_preview",
-	title: copy("admin:core.tools.media_preview.title"),
-	description:
-		"Preview an image or a video's poster. Public external media returns a link; local and private media returns an inline image up to 1024px and 1MiB. Set inline to force image bytes.",
-	input: inputSchema,
-	output: outputSchema,
-	scopes: [ExternalScopes.MediaRead],
-	annotations: { readOnlyHint: true },
-	handler: async ({ context, input, execution }) => {
-		const mediaRes = await getSingle(context, { id: input.id });
-		if (mediaRes.error) return mediaRes;
-		if (mediaRes.data.isDeleted) {
-			return {
-				error: {
-					type: "basic",
-					status: 404,
-					message: copy("server:core.media.not.found.message"),
-				},
-				data: undefined,
-			};
-		}
-		if (mediaRes.data.status !== "ready") {
-			return {
-				error: {
-					type: "basic",
-					status: 409,
-					message: copy("server:core.tools.media.preview.not.ready"),
-				},
-				data: undefined,
-			};
-		}
+export const previewMediaMcpTool = () =>
+	defineMcpTool({
+		name: "media_preview",
+		title: copy("admin:core.tools.media_preview.title"),
+		description:
+			"Preview an image or a video's poster. Public external media returns a link; local and private media returns an inline image up to 1024px and 1MiB. Set inline to force image bytes.",
+		input: inputSchema,
+		output: outputSchema,
+		scopes: [ExternalScopes.MediaRead],
+		annotations: { readOnlyHint: true },
+		handler: async ({ context, input, execution }) => {
+			const mediaRes = await getSingle(context, { id: input.id });
+			if (mediaRes.error) return mediaRes;
+			if (mediaRes.data.isDeleted) {
+				return {
+					error: {
+						type: "basic",
+						status: 404,
+						message: copy("server:core.media.not.found.message"),
+					},
+					data: undefined,
+				};
+			}
+			if (mediaRes.data.status !== "ready") {
+				return {
+					error: {
+						type: "basic",
+						status: 409,
+						message: copy("server:core.tools.media.preview.not.ready"),
+					},
+					data: undefined,
+				};
+			}
 
-		const source = previewSource(mediaRes.data);
-		const videoThumbnail =
-			mediaRes.data.type === "video" ? mediaRes.data.thumbnail : null;
-		const link = videoThumbnail?.url || source?.url;
-		const mimeType = videoThumbnail?.mimeType ?? source?.meta.mimeType;
-		if (
-			mediaRes.data.public &&
-			link &&
-			mimeType &&
-			!input.inline &&
-			isPublicDeliveryUrl(link)
-		) {
+			const source = previewSource(mediaRes.data);
+			const videoThumbnail =
+				mediaRes.data.type === "video" ? mediaRes.data.thumbnail : null;
+			const link = videoThumbnail?.url || source?.url;
+			const mimeType = videoThumbnail?.mimeType ?? source?.meta.mimeType;
+			if (
+				mediaRes.data.public &&
+				link &&
+				mimeType &&
+				!input.inline &&
+				isPublicDeliveryUrl(link)
+			) {
+				return {
+					error: undefined,
+					data: {
+						output: {
+							data: {
+								kind: "link" as const,
+								id: input.id,
+								url: link,
+								mimeType,
+							},
+						},
+						content: [
+							{
+								type: "resource_link",
+								uri: link,
+								name: source?.fileName ?? `media-${input.id}`,
+								mimeType,
+							},
+						],
+					},
+				};
+			}
+
+			if (!source) {
+				return {
+					error: {
+						type: "basic",
+						status: 415,
+						message: copy("server:core.tools.media.preview.unsupported"),
+					},
+					data: undefined,
+				};
+			}
+			const imageRes = await inlineImage({
+				context,
+				source,
+				signal: execution.signal,
+			});
+			if (imageRes.error) return imageRes;
+
 			return {
 				error: undefined,
 				data: {
 					output: {
-						data: { kind: "link" as const, id: input.id, url: link, mimeType },
+						data: {
+							kind: "inline" as const,
+							id: input.id,
+							mimeType: imageRes.data.mimeType,
+							byteLength: imageRes.data.buffer.byteLength,
+						},
 					},
 					content: [
 						{
-							type: "resource_link",
-							uri: link,
-							name: source?.fileName ?? `media-${input.id}`,
-							mimeType,
+							type: "image",
+							data: imageRes.data.buffer.toString("base64"),
+							mimeType: imageRes.data.mimeType,
 						},
 					],
 				},
 			};
-		}
-
-		if (!source) {
-			return {
-				error: {
-					type: "basic",
-					status: 415,
-					message: copy("server:core.tools.media.preview.unsupported"),
-				},
-				data: undefined,
-			};
-		}
-		const imageRes = await inlineImage({
-			context,
-			source,
-			signal: execution.signal,
-		});
-		if (imageRes.error) return imageRes;
-
-		return {
-			error: undefined,
-			data: {
-				output: {
-					data: {
-						kind: "inline" as const,
-						id: input.id,
-						mimeType: imageRes.data.mimeType,
-						byteLength: imageRes.data.buffer.byteLength,
-					},
-				},
-				content: [
-					{
-						type: "image",
-						data: imageRes.data.buffer.toString("base64"),
-						mimeType: imageRes.data.mimeType,
-					},
-				],
-			},
-		};
-	},
-});
+		},
+	});

@@ -12,6 +12,7 @@ import type { LucidRemoteRequestData } from "./types.js";
 
 type LucidRemoteRequestProps = {
 	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+	accessToken?: string;
 	headers?: HeadersInit;
 	body?: unknown;
 	origin?: string;
@@ -134,6 +135,27 @@ const getErrorCopy = (errorKey?: string) => {
 				name: copy("server:core.ai.remote.model.unavailable.name"),
 				message: copy("server:core.ai.remote.model.unavailable.message"),
 			};
+		case "web_provider_unavailable":
+			return {
+				name: copy("server:core.ai.remote.web.unavailable.name"),
+				message: copy("server:core.ai.remote.web.unavailable.message"),
+			};
+		case "web_provider_failed":
+		case "web_provider_invalid_response":
+			return {
+				name: copy("server:core.ai.remote.web.failed.name"),
+				message: copy("server:core.ai.remote.web.failed.message"),
+			};
+		case "web_page_unavailable":
+			return {
+				name: copy("server:core.ai.remote.web.page.unavailable.name"),
+				message: copy("server:core.ai.remote.web.page.unavailable.message"),
+			};
+		case "web_source_not_allowed":
+			return {
+				name: copy("server:core.ai.remote.web.source.not.allowed.name"),
+				message: copy("server:core.ai.remote.web.source.not.allowed.message"),
+			};
 		case "ai_provider_request_failed":
 		case "ai_provider_invalid_response":
 		case "ai_provider_output_truncated":
@@ -198,6 +220,10 @@ const createLucidRemoteClient = (props: {
 		const retries = requestProps.retries ?? 0;
 		const url = new URL(path, props.apiDomain).toString();
 		const headers = new Headers(requestProps.headers);
+
+		if (requestProps.accessToken) {
+			headers.set("Authorization", `Bearer ${requestProps.accessToken}`);
+		}
 
 		if (!headers.has("Accept")) {
 			headers.set("Accept", "application/json");

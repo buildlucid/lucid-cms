@@ -84,10 +84,7 @@ export type AgentToolStatus =
 	| "skipped";
 
 /** Determines when agent tools pause for approval. Permission checks always apply. */
-export type AgentApprovalMode =
-	| "confirm-changes"
-	| "tool-defaults"
-	| "automatic";
+export type AgentApprovalMode = "confirm-all" | "tool-defaults" | "automatic";
 
 /** Submit or cancel a tool's input request. */
 export type AgentInteractionAction = "submit" | "cancel";
@@ -131,6 +128,38 @@ export type AgentMessagePart =
 export interface AgentUsage {
 	creditsCharged: string;
 	modelCalls: number;
+}
+
+export interface AgentWebSource {
+	url: string;
+	title: string;
+	/** `YYYY-MM-DD`, when the source reports one. */
+	publishedAt: string | null;
+}
+
+export interface AgentWebSearchOutput {
+	results: Array<AgentWebSource & { excerpts: string[] }>;
+}
+
+export interface AgentWebFetchOutput extends AgentWebSource {
+	content: string;
+	/** Full page text from the start, or excerpts chosen for an objective. */
+	contentType: "page" | "excerpts";
+	truncated: boolean;
+}
+
+/** A source used in a conversation, once per page however often it appeared. */
+export interface AgentConversationSource {
+	url: string;
+	title: string;
+	/** Whether the agent read the page, rather than only seeing it in search results. */
+	read: boolean;
+}
+
+export interface AgentConversationDetails {
+	usage: AgentUsage & { webCalls: number };
+	/** Pages the agent read first, then those only found, each in first-seen order. */
+	sources: AgentConversationSource[];
 }
 
 /** How much of its model's input limit a conversation's next request uses. Separate from billed usage. */

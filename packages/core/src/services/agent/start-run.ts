@@ -161,7 +161,6 @@ const startRun: ServiceFn<
 				purpose: input.purpose,
 				selection: modelSelection ?? undefined,
 				trimmed: latest.data ? true : undefined,
-				turns: 0,
 				nudges: 0,
 				requestId: randomUUID(),
 				messageId: randomUUID(),

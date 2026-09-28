@@ -43,6 +43,7 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 		type: z.literal("start"),
 		model: z.string(),
 		inputTokenLimit: z.number().int().positive(),
+		toolLimit: z.number().int().positive(),
 	}),
 	z.object({ type: z.literal("text-delta"), text: z.string() }),
 	toolCallSchema.extend({ type: z.literal("tool-call") }),
@@ -76,7 +77,11 @@ export const checkpointSchema = z.object({
 	purpose: z.literal("compact").optional(),
 	/** The model serving this run and its input limit, as the API last reported. */
 	model: z
-		.object({ id: z.string(), tokenLimit: z.number().int().positive() })
+		.object({
+			id: z.string(),
+			tokenLimit: z.number().int().positive(),
+			toolLimit: z.number().int().positive(),
+		})
 		.optional(),
 	/** Input tokens the provider counted for the last request, and how many messages it held. */
 	measured: z
@@ -98,7 +103,6 @@ export const checkpointSchema = z.object({
 			throughPosition: z.number().int().positive(),
 		})
 		.optional(),
-	turns: z.number().int().nonnegative(),
 	nudges: z.number().int().nonnegative(),
 	requestId: z.uuid(),
 	messageId: z.uuid(),
@@ -176,8 +180,8 @@ export type DefineAgentOptions<Key extends string> = {
 	description: string;
 	/** Added to the agent's system prompt. Common indentation is removed. */
 	instructions?: string;
-	/** Additional tools the agent can call. Lucid's content tools are always available. */
-	tools?: readonly AgentToolDefinition[];
+	/** The tools the agent can call, such as `agentTools.content()` or your own `defineAgentTool` tools. Bundles are flattened. */
+	tools?: readonly (AgentToolDefinition | readonly AgentToolDefinition[])[];
 	skills?: readonly SkillDefinition[];
 	/** The default model and the models people can choose. Leave out to offer every model the Lucid service provides. */
 	models?: AiModelConfig;

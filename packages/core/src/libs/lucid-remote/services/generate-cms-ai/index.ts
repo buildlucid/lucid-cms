@@ -14,15 +14,11 @@ const generateCmsAi: ServiceFn<
 	LucidRemoteRequestData<CmsAiGenerateData>
 > = async (context, props) => {
 	const client = getLucidRemoteClient(context);
-	const headers = new Headers();
-
-	headers.append("Authorization", `Bearer ${props.accessToken}`);
-	headers.append("idempotency-key", props.idempotencyKey ?? "");
-
 	const result = await client.request<unknown>(lucidRemotePaths.generateCmsAi, {
 		retries: 0,
 		method: "POST",
-		headers,
+		accessToken: props.accessToken,
+		headers: { "idempotency-key": props.idempotencyKey ?? "" },
 		body: props.request,
 	});
 	if (result.error) return result;

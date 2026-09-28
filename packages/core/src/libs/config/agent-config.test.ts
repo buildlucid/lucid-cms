@@ -4,6 +4,7 @@ import defineRoutine from "../agent/define-routine.js";
 import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
 import { copy } from "../i18n/copy.js";
+import { agentTools } from "../tools/lucid-tools.js";
 import checkAgentDefinitions from "./checks/check-agent-definitions.js";
 import ConfigSchema from "./config-schema.js";
 
@@ -17,11 +18,15 @@ const agent = defineAgent({
 	key: "seo",
 	name: "SEO Agent",
 	description: "Reviews metadata.",
-	tools: [],
+	tools: [agentTools.content()],
 	routines: [routine],
 });
 const check = (agents: AgentDefinition[]) => () =>
-	checkAgentDefinitions({ ai: { agents: { definitions: agents } } });
+	checkAgentDefinitions(
+		ConfigSchema.pick({ ai: true }).parse({
+			ai: { agents: { definitions: agents } },
+		}),
+	);
 
 test("MCP stays off until its feature is switched on, and agents default to none", () => {
 	const config = ConfigSchema.pick({ ai: true });
@@ -125,7 +130,7 @@ test("agent and routine keys are unique and schedules must be valid", () => {
 	).toThrow('Routine "seo:weekly-audit" has an invalid schedule.');
 });
 
-test("routine tools accept core tools and reject unknown names", () => {
+test("routine tools accept the agent's tools and reject unknown names", () => {
 	expect(
 		check([
 			{

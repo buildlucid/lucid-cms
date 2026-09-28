@@ -1,6 +1,7 @@
 import z from "zod";
 import { getLucidRemoteClient } from "../../libs/lucid-remote/client.js";
-import { cmsAiUsageSchema } from "../../libs/lucid-remote/schema/ai.js";
+import { lucidRemotePaths } from "../../libs/lucid-remote/constants.js";
+import { cmsAgentUsageSchema } from "../../libs/lucid-remote/schema/ai.js";
 import { AiGenerationsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import {
@@ -15,7 +16,7 @@ const remoteStatusSchema = z.object({
 	data: z.object({
 		requestId: z.string(),
 		status: z.enum(["processing", "complete", "failed", "cancelled"]),
-		usage: cmsAiUsageSchema.optional(),
+		usage: cmsAgentUsageSchema.optional(),
 	}),
 });
 
@@ -62,10 +63,10 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 		}
 
 		const response = await client.request<unknown>(
-			`/v1/cms/ai/agent/${encodeURIComponent(row.request_id)}`,
+			`${lucidRemotePaths.agent}/${encodeURIComponent(row.request_id)}`,
 			{
 				method: "GET",
-				headers: { Authorization: `Bearer ${token.data.accessToken}` },
+				accessToken: token.data.accessToken,
 				retries: 0,
 				signal: AbortSignal.timeout(10_000),
 			},
@@ -93,7 +94,7 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 		if (usage) {
 			const stored = await storeUsage(context, {
 				requestId: row.request_id,
-				purpose: row.feature_key === "agent.compact" ? "compact" : undefined,
+				featureKey: row.feature_key,
 				runId: row.agent_run_id,
 				conversationId: row.agent_conversation_id,
 				userId: row.user_id,

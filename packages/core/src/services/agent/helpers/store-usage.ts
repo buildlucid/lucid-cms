@@ -1,4 +1,5 @@
-import type { ModelEvent } from "../../../libs/agent/types.js";
+import type z from "zod";
+import type { cmsAgentUsageSchema } from "../../../libs/lucid-remote/schema/ai.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -6,12 +7,12 @@ const storeUsage: ServiceFn<
 	[
 		{
 			requestId: string;
-			purpose?: "compact";
+			featureKey: string;
 			runId: string;
 			conversationId: string;
 			userId: number | null;
 			connectionId: number;
-			usage: Extract<ModelEvent, { type: "finish" }>["usage"];
+			usage: z.infer<typeof cmsAgentUsageSchema>;
 			durationMs: number | null;
 		},
 	],
@@ -23,7 +24,7 @@ const storeUsage: ServiceFn<
 		data: {
 			request_id: input.requestId,
 			provider_request_id: input.usage.providerRequestId ?? null,
-			feature_key: input.purpose ? "agent.compact" : "agent.chat",
+			feature_key: input.featureKey,
 			feature_version: "v1",
 			user_id: input.userId,
 			lucid_remote_connection_id: input.connectionId,

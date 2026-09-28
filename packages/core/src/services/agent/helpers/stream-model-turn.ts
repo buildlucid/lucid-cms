@@ -9,6 +9,7 @@ import {
 import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { createRemoteError } from "../../../libs/lucid-remote/client.js";
+import { lucidRemotePaths } from "../../../libs/lucid-remote/constants.js";
 import { getLucidRemoteConfigFromEnv } from "../../../libs/lucid-remote/origin.js";
 import type { AiModelSelection } from "../../../types/response.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
@@ -77,7 +78,7 @@ const streamModelTurn: ServiceFn<
 	try {
 		const response = await fetch(
 			new URL(
-				"/v1/cms/ai/agent",
+				lucidRemotePaths.agent,
 				getLucidRemoteConfigFromEnv(context.env).issuer,
 			),
 			{

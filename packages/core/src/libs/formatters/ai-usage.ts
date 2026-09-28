@@ -65,6 +65,10 @@ export const formatAiUsageFeatureLabel = (props: {
 	const fallback = props.featureKey;
 
 	switch (props.featureKey) {
+		case "web.search":
+			return props.translate("server:core.ai.usage.features.web.search");
+		case "web.fetch":
+			return props.translate("server:core.ai.usage.features.web.fetch");
 		case "agent.compact":
 			return props.translate("server:core.ai.usage.features.agent.compact", {
 				defaultMessage: "Conversation Compaction",

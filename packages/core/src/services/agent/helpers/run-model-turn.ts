@@ -4,13 +4,11 @@ import { modelMessages } from "../../../libs/agent/context.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import reconcileUsage from "../reconcile-usage.js";
 import type resolveCapabilities from "./resolve-capabilities.js";
 import type { RunSession, SessionRun } from "./run-session.js";
-import storePendingUsage from "./store-pending-usage.js";
-import storeUsage from "./store-usage.js";
 import streamModelTurn from "./stream-model-turn.js";
 import textFromParts from "./text-from-parts.js";
+import trackPaidRequest from "./track-paid-request.js";
 
 type TurnResult =
 	| { kind: "continue" }
@@ -52,17 +50,21 @@ const runModelTurn: ServiceFn<
 	let partsSize = 0;
 	let saveError: Awaited<ReturnType<RunSession["save"]>>["error"];
 	const usageRecord = {
+		featureKey: "agent.chat",
 		requestId: checkpoint.requestId,
 		runId: run.id,
 		conversationId: run.conversation_id,
 		userId: run.user_id,
 	};
-	const started = Date.now();
-	let savedAt = started;
+	let savedAt = Date.now();
 
 	const onEvent = async (event: ModelEvent) => {
 		if (event.type === "start") {
-			checkpoint.model = { id: event.model, tokenLimit: event.inputTokenLimit };
+			checkpoint.model = {
+				id: event.model,
+				tokenLimit: event.inputTokenLimit,
+				toolLimit: event.toolLimit,
+			};
 		} else if (event.type === "text-delta") {
 			const last = checkpoint.parts.at(-1);
 
@@ -91,10 +93,7 @@ const runModelTurn: ServiceFn<
 			partsSize += JSON.stringify(part).length;
 			await session.emit({ messageId: checkpoint.messageId, ...part });
 		}
-		if (
-			checkpoint.calls.length > limits.callsPerTurn ||
-			partsSize > limits.partsChars
-		) {
+		if (partsSize > limits.partsChars) {
 			tooLarge = true;
 			stop.abort();
 		}
@@ -107,17 +106,21 @@ const runModelTurn: ServiceFn<
 	};
 
 	const sent = checkpoint.messages.length;
-	const response = await streamModelTurn(context, {
-		requestId: checkpoint.requestId,
-		sessionId: run.conversation_id,
-		instructions: capabilities.instructions,
-		selection: checkpoint.selection,
-		messages: modelMessages(checkpoint.messages),
-		tools: capabilities.definitions,
-		signal: AbortSignal.any([session.signal, stop.signal]),
-		onRequest: (connectionId) =>
-			storePendingUsage(context, { ...usageRecord, connectionId }),
-		emit: onEvent,
+	const response = await trackPaidRequest(context, {
+		record: usageRecord,
+		signal: session.signal,
+		send: (start) =>
+			streamModelTurn(context, {
+				requestId: checkpoint.requestId,
+				sessionId: run.conversation_id,
+				instructions: capabilities.instructions,
+				selection: checkpoint.selection,
+				messages: modelMessages(checkpoint.messages),
+				tools: capabilities.definitions,
+				signal: AbortSignal.any([session.signal, stop.signal]),
+				onRequest: start,
+				emit: onEvent,
+			}),
 	});
 
 	if (response.error) {
@@ -139,7 +142,6 @@ const runModelTurn: ServiceFn<
 			};
 		}
 
-		await reconcileUsage(context, { requestId: checkpoint.requestId });
 		if (response.error.key === "agent_context_exceeded") {
 			if (checkpoint.overflow === "retrying") {
 				return {
@@ -182,23 +184,6 @@ const runModelTurn: ServiceFn<
 		};
 	}
 
-	const stored = await storeUsage(context, {
-		...usageRecord,
-		connectionId: response.data.connectionId,
-		usage: response.data.usage,
-		durationMs: Date.now() - started,
-	});
-	if (stored.error) {
-		return {
-			error: undefined,
-			data: {
-				kind: "stop",
-				status: "interrupted",
-				message: context.translate("server:agent.usage.store.failed"),
-			},
-		};
-	}
-
 	checkpoint.messages.push({
 		sourceId: checkpoint.messageId,
 		role: "assistant",
@@ -211,7 +196,6 @@ const runModelTurn: ServiceFn<
 		messages: sent,
 	};
 	checkpoint.overflow = undefined;
-	checkpoint.turns++;
 	checkpoint.phase = "tools";
 
 	const saved = await session.save();

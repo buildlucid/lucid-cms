@@ -15,10 +15,6 @@ const getCmsAiRequest: ServiceFn<
 	LucidRemoteRequestData<CmsAiGenerateData>
 > = async (context, props) => {
 	const client = getLucidRemoteClient(context);
-	const headers = new Headers();
-
-	headers.append("Authorization", `Bearer ${props.accessToken}`);
-
 	const result = await client.request<unknown>(
 		`${lucidRemotePaths.getCmsAiRequest}/${encodeURIComponent(
 			props.requestId,
@@ -26,7 +22,7 @@ const getCmsAiRequest: ServiceFn<
 		{
 			retries: 0,
 			method: "GET",
-			headers,
+			accessToken: props.accessToken,
 		},
 	);
 	if (result.error) return result;

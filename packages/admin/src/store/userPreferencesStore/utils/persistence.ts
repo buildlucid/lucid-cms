@@ -19,6 +19,7 @@ export const SECTION_PREFERENCE_KEYS = [
 	"releaseRequest.sidebar.details",
 	"releaseRequest.sidebar.execution",
 	"releaseRequest.sidebar.reviewers",
+	"agent.chat.details",
 ] as const;
 
 export type SectionPreferenceKey = (typeof SECTION_PREFERENCE_KEYS)[number];

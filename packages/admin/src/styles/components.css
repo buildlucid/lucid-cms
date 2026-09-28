@@ -495,7 +495,7 @@
 	}
 
 	.agent-markdown a {
-		@apply text-primary underline underline-offset-2 hover:text-primary-hover;
+		@apply text-body underline underline-offset-2 transition-colors hover:text-title;
 	}
 
 	.agent-markdown ul {
@@ -560,6 +560,43 @@
 	.agent-markdown.agent-markdown-tight
 	:where(p, ul, ol, pre, blockquote, .agent-code) {
 		@apply my-1;
+	}
+
+	.agent-markdown.agent-markdown-sm {
+		@apply text-xs leading-5;
+	}
+
+	.agent-markdown.agent-markdown-sm
+		:where(p, ul, ol, pre, blockquote, table, hr, .agent-code) {
+		@apply my-2;
+	}
+
+	.agent-markdown.agent-markdown-sm :where(h1, h2, h3, h4) {
+		@apply mt-3 mb-1 text-xs;
+	}
+
+	.agent-markdown.agent-markdown-sm :where(ul, ol) {
+		@apply pl-4;
+	}
+
+	.agent-markdown.agent-markdown-sm li {
+		@apply my-0.5;
+	}
+
+	.agent-markdown.agent-markdown-sm :where(code, pre) {
+		@apply text-[0.6875rem];
+	}
+
+	.agent-markdown.agent-markdown-sm pre {
+		@apply px-3 py-2 leading-5;
+	}
+
+	.agent-markdown.agent-markdown-sm table {
+		@apply text-xs;
+	}
+
+	.agent-markdown.agent-markdown-sm :is(td, th) {
+		@apply px-2 py-1;
 	}
 
 	/* the chat box's TipTap placeholder */

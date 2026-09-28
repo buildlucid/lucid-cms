@@ -3,25 +3,59 @@ import {
 	FaSolidBan,
 	FaSolidChevronRight,
 	FaSolidClock,
+	FaSolidGlobe,
+	FaSolidMagnifyingGlass,
 	FaSolidWrench,
 	FaSolidXmark,
 } from "solid-icons/fa";
 import { type Component, Match, Show, Switch } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
-import { type AgentToolPart, toolTitle } from "@/utils/agent-chat";
+import {
+	type AgentToolPart,
+	skillTool,
+	toolTitle,
+	webFetchTool,
+	webSearchTool,
+	webSiteName,
+} from "@/utils/agent-chat";
 
-/** A tool call's plain-language name, with its status unless it completed, such as "Save note · Failed". */
-export const toolLabel = (part: AgentToolPart) => {
-	const skill = part.input.name;
-	if (part.name === "lucid_load_skill" && typeof skill === "string") {
-		return T()("agent.tool.skill", { name: skill });
+/**
+ * What a tool call did. Built-in tools read better named after their input,
+ * such as `Searched "lucid cms"` or "Read example.com"; others use their title.
+ */
+const describeTool = (part: AgentToolPart) => {
+	const { name, query, url } = part.input;
+	const done = part.status === "complete";
+
+	switch (part.name) {
+		case skillTool: {
+			if (typeof name === "string") return T()("agent.tool.skill", { name });
+			break;
+		}
+		case webSearchTool: {
+			if (typeof query === "string")
+				return T()(done ? "agent.tool.web.searched" : "agent.tool.web.search", {
+					query,
+				});
+			break;
+		}
+		case webFetchTool: {
+			if (typeof url === "string")
+				return T()(done ? "agent.tool.web.fetched" : "agent.tool.web.fetch", {
+					site: webSiteName(url),
+				});
+			break;
+		}
 	}
-	const title = toolTitle(part);
-	return part.status === "complete"
-		? title
-		: `${title} · ${T()(`agent.tool.status.${part.status}`)}`;
+
+	return toolTitle(part);
 };
+
+export const toolLabel = (part: AgentToolPart) =>
+	part.status === "complete"
+		? describeTool(part)
+		: `${describeTool(part)} · ${T()(`agent.tool.status.${part.status}`)}`;
 
 /** A tool call's status as a small icon. */
 export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
@@ -41,7 +75,14 @@ export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
 					<Spinner size="sm" variant="subtle" />
 				</Match>
 				<Match when={props.part.status === "complete"}>
-					<FaSolidWrench size={10} />
+					<Switch fallback={<FaSolidWrench size={10} />}>
+						<Match when={props.part.name === webSearchTool}>
+							<FaSolidMagnifyingGlass size={10} />
+						</Match>
+						<Match when={props.part.name === webFetchTool}>
+							<FaSolidGlobe size={10} />
+						</Match>
+					</Switch>
 				</Match>
 				<Match when={props.part.status === "failed"}>
 					<FaSolidXmark size={11} />

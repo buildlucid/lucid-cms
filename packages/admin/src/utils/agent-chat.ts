@@ -5,9 +5,12 @@ import type {
 	AgentMessagePart,
 	AgentRunStatus,
 	AgentStreamEvent,
+	AgentWebFetchOutput,
+	AgentWebSearchOutput,
 	AgentWidgetPart,
 } from "@types";
 import helpers from "@/utils/helpers";
+import { isObjectRecord } from "@/utils/type-guards";
 
 export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
 
@@ -16,6 +19,33 @@ export const finishTool = "lucid_finish_run";
 export const progressTool = "lucid_share_progress";
 export const questionWidget = "lucid-question";
 export const approvalWidget = "lucid-tool-approval";
+export const skillTool = "lucid_load_skill";
+export const webSearchTool = "web_search";
+export const webFetchTool = "web_fetch";
+
+export const webSiteName = (url: string) => {
+	try {
+		return new URL(url).hostname.replace(/^www\./, "");
+	} catch {
+		return url;
+	}
+};
+
+export const isWebSearchOutput = (
+	value: unknown,
+): value is AgentWebSearchOutput =>
+	isObjectRecord(value) &&
+	Array.isArray(value.results) &&
+	value.results.every(
+		(result) => isObjectRecord(result) && typeof result.url === "string",
+	);
+
+export const isWebFetchOutput = (
+	value: unknown,
+): value is AgentWebFetchOutput =>
+	isObjectRecord(value) &&
+	typeof value.url === "string" &&
+	typeof value.content === "string";
 
 export const shouldPollTitle = (
 	conversation: Pick<

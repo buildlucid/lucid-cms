@@ -11,7 +11,7 @@ import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 
 const modes = [
-	"confirm-changes",
+	"confirm-all",
 	"tool-defaults",
 	"automatic",
 ] as const satisfies readonly AgentApprovalMode[];

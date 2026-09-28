@@ -25,9 +25,11 @@ import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import syncAgentRoutines from "../sync/sync-agent-routines.js";
 import createRoutine from "./create-routine.js";
 import dispatchDueRoutines from "./dispatch-due-routines.js";
+import generateConversationTitle from "./generate-conversation-title.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import insertConversation from "./helpers/insert-conversation.js";
+import { generateAgentTitleJob } from "./jobs/generate-title.js";
 import recoverRuns from "./recover-runs.js";
 import startRun from "./start-run.js";
 import updateConversation from "./update-conversation.js";
@@ -172,6 +174,38 @@ test("a title queue failure leaves the first message and provisional title intac
 			title_generation_requested_at: null,
 		});
 	} finally {
+		queue.mockRestore();
+	}
+});
+
+test("turning off chat rename keeps the provisional title and refuses generated ones", async () => {
+	context.config.ai.features.chatRename = false;
+	const queue = vi.spyOn(jobQueue, "enqueueJob");
+	try {
+		const created = await insertConversation(context, {
+			agentKey: testAgent.key,
+			userId,
+		});
+		if (created.error) throw new Error(JSON.stringify(created.error));
+		const started = await startRun(context, {
+			conversationId: created.data.id,
+			userId,
+			requestId: randomUUID(),
+			text: "Plan the launch page",
+		});
+		expect(started.error).toBeUndefined();
+		expect(queue).not.toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ job: generateAgentTitleJob }),
+		);
+
+		const generated = await generateConversationTitle(context, {
+			id: created.data.id,
+			userId,
+		});
+		expect(generated.error?.status).toBe(403);
+	} finally {
+		context.config.ai.features.chatRename = true;
 		queue.mockRestore();
 	}
 });

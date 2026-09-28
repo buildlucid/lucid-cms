@@ -3,7 +3,7 @@ import {
 	copy,
 	defineRoute,
 	LucidAPIError,
-	rateLimiterMiddleware as rateLimiter,
+	middleware,
 	serviceWrapper,
 } from "@lucidcms/core";
 import { stream } from "hono/streaming";
@@ -29,7 +29,7 @@ const routes = (pluginOptions: PluginOptions) => [
 		path: STORAGE_DOWNLOAD_ROUTE,
 		schema: controllerSchemas.storageDownload,
 		middleware: [
-			rateLimiter({
+			middleware.rateLimiter({
 				mode: "ip",
 				scope: "cloudflare-r2-storage-download",
 				limit: STORAGE_RATE_LIMIT,
@@ -112,7 +112,7 @@ const routes = (pluginOptions: PluginOptions) => [
 		path: STORAGE_UPLOAD_ROUTE,
 		schema: controllerSchemas.storageUpload,
 		middleware: [
-			rateLimiter({
+			middleware.rateLimiter({
 				mode: "ip",
 				scope: "cloudflare-r2-storage-upload",
 				limit: STORAGE_RATE_LIMIT,

@@ -16,6 +16,7 @@ import Input from "@/components/Input/Input";
 import Modal from "@/components/Modal/Modal";
 import useSuperKeyHeld from "@/hooks/useSuperKeyHeld/useSuperKeyHeld";
 import api from "@/services/api";
+import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
 
@@ -51,8 +52,14 @@ const RenameAgentConversationModal: Component<{
 
 	// ----------------------------------------
 	// Memos
+	const generateEnabled = createMemo(() =>
+		siteStore.get.isAiFeatureEnabled("chatRename"),
+	);
 	const canGenerate = createMemo(
-		() => Boolean(props.conversation()?.id) && originalTitle() === undefined,
+		() =>
+			generateEnabled() &&
+			Boolean(props.conversation()?.id) &&
+			originalTitle() === undefined,
 	);
 
 	// ----------------------------------------
@@ -98,38 +105,42 @@ const RenameAgentConversationModal: Component<{
 						required={true}
 						label={T()("common.title")}
 						labelEnd={
-							<div class="relative">
-								<AiIconButton
-									label={T()("modals.agent.conversation.rename.generate")}
-									tooltip={T()(
-										"modals.agent.conversation.rename.generate.tooltip",
-									)}
-									loading={generate.action.isPending}
-									quickActionActive={superKeyHeld() && canGenerate()}
-									quickActionOnHover={canGenerate()}
-									disabled={!canGenerate()}
-									onClick={() => {
-										const id = props.conversation()?.id;
-										if (id) {
-											generate.action.mutate({
-												id,
-												openingId,
-												originalTitle: title(),
-											});
-										}
-									}}
-								/>
-								<Show when={originalTitle() !== undefined}>
-									<AiDraftReviewPill
-										label={T()("modals.agent.conversation.rename.review.label")}
-										onAccept={() => setOriginalTitle(undefined)}
-										onReject={() => {
-											setTitle(originalTitle() ?? "");
-											setOriginalTitle(undefined);
+							<Show when={generateEnabled()}>
+								<div class="relative">
+									<AiIconButton
+										label={T()("modals.agent.conversation.rename.generate")}
+										tooltip={T()(
+											"modals.agent.conversation.rename.generate.tooltip",
+										)}
+										loading={generate.action.isPending}
+										quickActionActive={superKeyHeld() && canGenerate()}
+										quickActionOnHover={canGenerate()}
+										disabled={!canGenerate()}
+										onClick={() => {
+											const id = props.conversation()?.id;
+											if (id) {
+												generate.action.mutate({
+													id,
+													openingId,
+													originalTitle: title(),
+												});
+											}
 										}}
 									/>
-								</Show>
-							</div>
+									<Show when={originalTitle() !== undefined}>
+										<AiDraftReviewPill
+											label={T()(
+												"modals.agent.conversation.rename.review.label",
+											)}
+											onAccept={() => setOriginalTitle(undefined)}
+											onReject={() => {
+												setTitle(originalTitle() ?? "");
+												setOriginalTitle(undefined);
+											}}
+										/>
+									</Show>
+								</div>
+							</Show>
 						}
 						disabled={generate.action.isPending}
 						errors={getBodyError("title", update.errors)}

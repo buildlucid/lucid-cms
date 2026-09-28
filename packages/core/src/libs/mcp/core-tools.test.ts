@@ -5,9 +5,6 @@ import {
 } from "@modelcontextprotocol/server";
 import { afterAll, assert, beforeAll, expect, test, vi } from "vitest";
 import z from "zod";
-import { describeCollectionAgentTool } from "../../services/collections/tools/describe/index.js";
-import { listCollectionsAgentTool } from "../../services/collections/tools/list/index.js";
-import { getDocumentAgentTool } from "../../services/documents/tools/get/index.js";
 import syncCollections from "../../services/sync/sync-collections.js";
 import syncLocales from "../../services/sync/sync-locales.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
@@ -22,6 +19,7 @@ import { getCollectionPermission } from "../permission/collection-permissions.js
 import { ExternalScopes } from "../permission/external-scopes.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import { executeAgentTool } from "../tools/execute-tool.js";
+import { agentTools, mcpTools } from "../tools/lucid-tools.js";
 import type { McpToolAuthority } from "../tools/types.js";
 import { createHandler } from "./create-handler.js";
 
@@ -123,7 +121,7 @@ beforeAll(async () => {
 			ai: {
 				...config.ai,
 				features: { ...config.ai.features, mcp: true },
-				mcp: { tools: [], skills: [] },
+				mcp: { tools: mcpTools.content(), skills: [] },
 			},
 			localization: {
 				defaultLocale: "en",
@@ -364,10 +362,11 @@ test("agent content tools share the read services but enforce collection permiss
 		},
 		signal: AbortSignal.timeout(5000),
 		operationId: "test:read",
+		run: { id: "run", conversationId: "conversation", userId: 1 },
 	};
 	const listed = await executeAgentTool({
 		context,
-		tool: listCollectionsAgentTool,
+		tool: agentTools.listCollections(),
 		input: {},
 		execution,
 	});
@@ -376,7 +375,7 @@ test("agent content tools share the read services but enforce collection permiss
 	expect(JSON.stringify(listed)).not.toContain(restricted.key);
 	const document = await executeAgentTool({
 		context,
-		tool: getDocumentAgentTool,
+		tool: agentTools.getDocument(),
 		input: { collectionKey: pages.key, id: aboutId },
 		execution,
 	});
@@ -387,7 +386,7 @@ test("agent content tools share the read services but enforce collection permiss
 	expect(
 		await executeAgentTool({
 			context,
-			tool: getDocumentAgentTool,
+			tool: agentTools.getDocument(),
 			input: { collectionKey: restricted.key, id: aboutId },
 			execution,
 		}),
@@ -395,7 +394,7 @@ test("agent content tools share the read services but enforce collection permiss
 	expect(
 		await executeAgentTool({
 			context,
-			tool: describeCollectionAgentTool,
+			tool: agentTools.describeCollection(),
 			input: { collectionKey: restricted.key },
 			execution,
 		}),

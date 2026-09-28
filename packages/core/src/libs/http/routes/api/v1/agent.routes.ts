@@ -8,6 +8,7 @@ import deleteConversation from "../../../controllers/agent/delete-conversation.j
 import deleteRoutine from "../../../controllers/agent/delete-routine.js";
 import generateConversationTitle from "../../../controllers/agent/generate-conversation-title.js";
 import getConversation from "../../../controllers/agent/get-conversation.js";
+import getConversationDetails from "../../../controllers/agent/get-conversation-details.js";
 import getConversations from "../../../controllers/agent/get-conversations.js";
 import getDefinitions from "../../../controllers/agent/get-definitions.js";
 import getMessages from "../../../controllers/agent/get-messages.js";
@@ -32,6 +33,7 @@ const agentRoutes = new Hono<LucidHonoGeneric>()
 	.patch("/conversations/:id", ...updateConversation)
 	.post("/conversations/:id/title/generate", ...generateConversationTitle)
 	.delete("/conversations/:id", ...deleteConversation)
+	.get("/conversations/:id/details", ...getConversationDetails)
 	.get("/conversations/:id/messages", ...getMessages)
 	.post("/conversations/:id/messages", ...sendMessage)
 	.patch("/conversations/:id/inputs", ...updateInput)

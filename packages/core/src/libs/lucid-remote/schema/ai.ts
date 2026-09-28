@@ -116,3 +116,20 @@ export const parseCmsAiRemoteData = (
 	}
 	return data;
 };
+
+/** Web usage is read leniently, so the website can add fields without breaking deployed CMS versions. */
+export const cmsWebUsageSchema = z.object({
+	kind: z.literal("web"),
+	operation: z.enum(["search", "fetch"]),
+	provider: z.string().min(1),
+	requests: z.number().int().positive(),
+	model: z.null(),
+	tokens: z.null(),
+	providerRequestId: z.string().min(1),
+	cost: z.object({ creditsCharged: aiCreditsChargedSchema }),
+});
+
+export const cmsAgentUsageSchema = z.union([
+	cmsAiUsageSchema,
+	cmsWebUsageSchema,
+]);

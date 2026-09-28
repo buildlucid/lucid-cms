@@ -167,6 +167,8 @@ export type AiModel = {
 	description: string;
 	/** Input budget Lucid uses to decide when to compact conversation history. */
 	inputTokenLimit: number;
+	/** The most tools one request to this model can offer, including Lucid's own. */
+	toolLimit: number;
 	reasoningEfforts: AiReasoningEffort[];
 	defaultReasoningEffort: AiReasoningEffort | null;
 };

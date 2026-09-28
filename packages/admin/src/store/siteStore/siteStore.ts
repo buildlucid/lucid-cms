@@ -19,6 +19,7 @@ const defaultAiSettings = (): AiSettings => ({
 		imageGeneration: true,
 		altGeneration: true,
 		customFieldGeneration: true,
+		chatRename: true,
 		agents: true,
 		mcp: false,
 	},

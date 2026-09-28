@@ -3,7 +3,7 @@ import {
 	copy,
 	defineRoute,
 	LucidAPIError,
-	rateLimiterMiddleware as rateLimiter,
+	middleware,
 	serviceWrapper,
 } from "@lucidcms/core";
 import { buildDownloadContentDisposition } from "@lucidcms/core/extension";
@@ -23,7 +23,7 @@ const routes = () => [
 		path: FILE_SYSTEM_DOWNLOAD_ROUTE,
 		schema: controllerSchemas.download,
 		middleware: [
-			rateLimiter({
+			middleware.rateLimiter({
 				mode: "ip",
 				scope: "filesystem-download",
 				limit: FILE_SYSTEM_RATE_LIMIT,
@@ -94,7 +94,7 @@ const routes = () => [
 		path: FILE_SYSTEM_UPLOAD_ROUTE,
 		schema: controllerSchemas.upload,
 		middleware: [
-			rateLimiter({
+			middleware.rateLimiter({
 				mode: "ip",
 				scope: "filesystem-upload",
 				limit: FILE_SYSTEM_RATE_LIMIT,

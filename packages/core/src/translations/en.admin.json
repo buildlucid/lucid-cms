@@ -14,5 +14,7 @@
 	"core.tools.lucid_ask_user.title": "Ask a question",
 	"core.tools.lucid_share_progress.title": "Share progress",
 	"core.tools.lucid_load_skill.title": "Load skill",
-	"core.tools.lucid_finish_run.title": "Finish run"
+	"core.tools.lucid_finish_run.title": "Finish run",
+	"core.tools.web_search.title": "Search the web",
+	"core.tools.web_fetch.title": "Read a webpage"
 }

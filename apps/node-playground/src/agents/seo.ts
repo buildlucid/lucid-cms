@@ -1,9 +1,10 @@
-import { defineAgent, defineRoutine } from "@lucidcms/core";
+import { agentTools, defineAgent, defineRoutine } from "@lucidcms/core";
 
 export const seoAgent = defineAgent({
 	key: "seo",
 	name: "SEO Agent",
 	description: "Reviews page metadata and suggests improvements.",
+	tools: [agentTools.content({ collections: ["page"] }), agentTools.web()],
 	instructions: `
 		Focus on page titles, descriptions and slugs. Suggest concrete changes,
 		and explain why each one helps.

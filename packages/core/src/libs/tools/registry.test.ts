@@ -4,10 +4,9 @@ import defineAgent from "../agent/define-agent.js";
 import checkToolDefinitions from "../config/checks/check-tool-definitions.js";
 import processConfig from "../config/process-config.js";
 import type DatabaseAdapter from "../db/adapter-base.js";
-import defineSkill from "../skills/define-skill.js";
-import { getCoreAgentTools, getCoreMcpTools } from "./core-tools.js";
 import defineAgentTool from "./define-agent-tool.js";
 import defineMcpTool from "./define-mcp-tool.js";
+import { agentTools, mcpTools } from "./lucid-tools.js";
 import { getMcpToolRegistry } from "./registry.js";
 import type { AgentToolDefinition } from "./types.js";
 
@@ -78,13 +77,10 @@ test("plugins can add MCP tools and agents while configuring", async () => {
 		{ resolvedDb: adapter, skipValidation: true },
 	);
 	expect(config.ai.features.mcp).toBe(true);
-	expect([...getMcpToolRegistry(config).keys()]).toEqual(
-		[
-			...getCoreMcpTools().map((tool) => tool.name),
-			"plugin_dummy",
-			"test_echo",
-		].sort(),
-	);
+	expect([...getMcpToolRegistry(config).keys()]).toEqual([
+		"plugin_dummy",
+		"test_echo",
+	]);
 	expect(config.ai.agents.definitions.map((agent) => agent.key)).toEqual([
 		"configured",
 		"plugin",
@@ -138,13 +134,17 @@ test("names are unique within a placement, which only holds its own target", asy
 	expect(config.ai.agents.definitions[1]?.tools).toEqual([agentEcho]);
 });
 
-test("content tool names are reserved in each placement", async () => {
+test("a tool name can only be registered once in each placement", async () => {
 	const options = { resolvedDb: adapter };
 	await expect(
 		processConfig(
 			{
 				secrets: "a".repeat(64),
-				ai: { mcp: { tools: [...getCoreMcpTools().slice(0, 1)] } },
+				ai: {
+					mcp: {
+						tools: [mcpTools.listCollections(), mcpTools.listCollections()],
+					},
+				},
 			},
 			options,
 		),
@@ -153,50 +153,20 @@ test("content tool names are reserved in each placement", async () => {
 		processConfig(
 			{
 				secrets: "a".repeat(64),
-				ai: { agents: [agent("test", [...getCoreAgentTools().slice(0, 1)])] },
+				ai: {
+					agents: [
+						agent("test", [
+							agentTools.listCollections(),
+							agentTools.listCollections(),
+						]),
+					],
+				},
 			},
 			options,
 		),
 	).rejects.toThrow(
 		'Agent "test" registers tool "collections_list" more than once.',
 	);
-});
-
-test("each agent's provider limit includes content and runner tools", async () => {
-	const base = await processConfig(
-		{ secrets: "a".repeat(64) },
-		{ resolvedDb: adapter },
-	);
-	const tools = Array.from({ length: 55 }, (_, i) => ({
-		...agentEcho,
-		name: `test_${i}`,
-	}));
-	const skill = defineSkill({
-		name: "test-skill",
-		description: "Test",
-		instructions: "Test",
-		scopes: [],
-	});
-	const withAgent = (definition: ReturnType<typeof agent>) => ({
-		...base,
-		ai: { ...base.ai, agents: { definitions: [definition] } },
-	});
-
-	expect(() =>
-		checkToolDefinitions(
-			withAgent(defineAgent({ ...agent("test", tools), skills: [skill] })),
-		),
-	).toThrow('Agent "test" can have at most 54 additional tools');
-	expect(() =>
-		checkToolDefinitions(withAgent(agent("test", tools))),
-	).not.toThrow();
-	expect(() =>
-		checkToolDefinitions(
-			withAgent(
-				agent("test", [...tools, { ...agentEcho, name: "one_too_many" }]),
-			),
-		),
-	).toThrow('Agent "test" can have at most 55 additional tools');
 });
 
 test("interaction keys cannot use the prefix reserved for Lucid's own widgets", async () => {

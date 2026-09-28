@@ -212,6 +212,8 @@ export type HttpConfig = {
 };
 
 export type AiFeatureConfig = {
+	/** Allow AI-generated chat titles, both automatic and from the rename dialog. Defaults to true. */
+	chatRename?: boolean;
 	/** Allow image generation. Defaults to true. */
 	imageGeneration?: boolean;
 	/** Allow media alt text generation. Defaults to true. */
@@ -333,8 +335,8 @@ export interface LucidConfig {
 				features?: AiFeatureConfig;
 				/** Tools and skills served over MCP when `features.mcp` is true. */
 				mcp?: {
-					/** Additional MCP tools. Lucid's content tools are always available. */
-					tools?: McpToolDefinition[];
+					/** The tools MCP clients can call, such as `mcpTools.content()` or your own `defineMcpTool` tools. Bundles are flattened. */
+					tools?: (McpToolDefinition | readonly McpToolDefinition[])[];
 					skills?: SkillDefinition[];
 				};
 				/** Agents available in the admin, created with `defineAgent`. Requires a connected Lucid AI account. */

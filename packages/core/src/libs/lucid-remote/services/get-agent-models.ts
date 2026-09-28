@@ -17,6 +17,7 @@ const responseSchema = z.object({
 				name: z.string().min(1),
 				description: z.string().default(""),
 				inputTokenLimit: z.number().int().positive(),
+				toolLimit: z.number().int().positive(),
 				reasoningEfforts: z.array(z.string()),
 				defaultReasoningEffort: effort,
 			}),
@@ -39,7 +40,7 @@ const getAgentModels: ServiceFn<
 		{
 			method: "GET",
 			retries: 0,
-			headers: new Headers({ Authorization: `Bearer ${input.accessToken}` }),
+			accessToken: input.accessToken,
 		},
 	);
 	if (result.error) return result;

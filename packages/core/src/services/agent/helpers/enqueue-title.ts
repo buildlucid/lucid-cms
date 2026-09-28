@@ -1,4 +1,5 @@
 import constants from "../../../constants/constants.js";
+import { isAiFeatureEnabled } from "../../../libs/config/ai-features.js";
 import { enqueueJob } from "../../../libs/jobs/enqueue.js";
 import logger from "../../../libs/logger/index.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
@@ -6,7 +7,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import { generateAgentTitleJob } from "../jobs/generate-title.js";
 
-/** Starts a durable title job only while a chat still has its provisional title. */
+/** Starts a durable title job only while a chat still has its provisional title, and while AI chat titles are on. */
 const enqueueTitle: ServiceFn<
 	[
 		{
@@ -18,6 +19,10 @@ const enqueueTitle: ServiceFn<
 	],
 	undefined
 > = async (context, input) => {
+	if (!isAiFeatureEnabled(context.config, "chatRename")) {
+		return { error: undefined, data: undefined };
+	}
+
 	const requestedAt = new Date().toISOString();
 	try {
 		const queued = await withTransaction(

@@ -1,4 +1,5 @@
 import type { ServiceFn } from "../../utils/services/types.js";
+import checkFeatureEnabled from "../ai/checks/check-feature-enabled.js";
 import generateTitle from "./helpers/generate-title.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 
@@ -7,6 +8,9 @@ const generateConversationTitle: ServiceFn<
 	[{ id: string; userId: number }],
 	{ title: string }
 > = async (context, input) => {
+	const enabled = await checkFeatureEnabled(context, { feature: "chatRename" });
+	if (enabled.error) return enabled;
+
 	const conversation = await getAccessibleConversation(context, input);
 	if (conversation.error) return conversation;
 

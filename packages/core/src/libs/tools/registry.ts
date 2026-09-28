@@ -1,5 +1,4 @@
 import type { ResolvedLucidConfig } from "../../types/config.js";
-import { getCoreMcpTools } from "./core-tools.js";
 import { toolDefinitionInternal } from "./tool-definition-internal.js";
 import type { McpToolDefinition, ToolDefinition } from "./types.js";
 
@@ -25,8 +24,8 @@ export const getMcpToolRegistry = (
 	if (existing) return existing;
 
 	const registry = new Map(
-		[...getCoreMcpTools(), ...config.ai.mcp.tools]
-			.sort((a, b) => a.name.localeCompare(b.name))
+		config.ai.mcp.tools
+			.toSorted((a, b) => a.name.localeCompare(b.name))
 			.map((definition) => [definition.name, definition]),
 	);
 	registries.set(config, registry);

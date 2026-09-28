@@ -1,7 +1,7 @@
 // import { cloudflareQueuesPlugin } from "@lucidcms/plugin-cloudflare-queues";
 // import { redisPlugin } from "@lucidcms/plugin-redis";
 // import { cloudflareKVPlugin } from "@lucidcms/plugin-cloudflare-kv";
-import { defineConfig, z } from "@lucidcms/core";
+import { defineConfig, mcpTools, z } from "@lucidcms/core";
 // import { resendPlugin } from "@lucidcms/plugin-resend";
 // import { s3Plugin } from "@lucidcms/plugin-s3";
 import { sqlite } from "@lucidcms/db-sqlite";
@@ -91,7 +91,7 @@ export default defineConfig({
 			accessToken: env.LUCID_ACCESS_TOKEN_SECRET,
 		},
 		ai: {
-			mcp: { tools: [echoTool, addTool] },
+			mcp: { tools: [mcpTools.content(), echoTool, addTool] },
 			agents: [assistantAgent, seoAgent],
 			features: { mcp: true },
 		},

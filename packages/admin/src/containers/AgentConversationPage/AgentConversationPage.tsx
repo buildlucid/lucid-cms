@@ -6,11 +6,7 @@ import type {
 	AiModelSelection,
 } from "@types";
 import classnames from "classnames";
-import {
-	FaSolidArrowDown,
-	FaSolidEllipsis,
-	FaSolidRepeat,
-} from "solid-icons/fa";
+import { FaSolidArrowDown, FaSolidEllipsis } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -24,7 +20,6 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import AgentApprovalPicker from "@/components/AgentApprovalPicker/AgentApprovalPicker";
 import AgentCompactionDivider from "@/components/AgentCompactionDivider/AgentCompactionDivider";
 import AgentComposer, {
@@ -36,7 +31,6 @@ import AgentErrorNotice from "@/components/AgentErrorNotice/AgentErrorNotice";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
 import AgentMessage from "@/components/AgentMessage/AgentMessage";
 import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
-import AgentToolPanel from "@/components/AgentToolPanel/AgentToolPanel";
 import { AgentTranscriptContext } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
 import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
@@ -54,18 +48,22 @@ import ViewAgentRoutineRunsDrawer from "@/components/ViewAgentRoutineRunsDrawer/
 import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
 import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
 import api from "@/services/api";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import { isToolRow, placeCompactions } from "@/utils/agent-chat";
+import AgentChatActions from "./parts/AgentChatActions";
 import AgentChatHeader from "./parts/AgentChatHeader";
+import AgentChatSidebar from "./parts/AgentChatSidebar";
 import AgentChatTimeline from "./parts/AgentChatTimeline";
-import AgentRoutineCard from "./parts/AgentRoutineCard";
 
 /**
  * A single chat with the agent: a header, then messages that scroll on their
  * own with the chat box, or a question box while the agent waits on an answer,
  * fixed below them. A tool call opens in a floating panel beside the chat,
  * which closes with its close button, Escape, or by selecting the call again.
+ * The chat's details card sits above it, toggled from the header and
+ * remembered between chats.
  */
 const AgentConversationPage: Component = () => {
 	// ----------------------------------------
@@ -122,6 +120,12 @@ const AgentConversationPage: Component = () => {
 	);
 	const routineCard = createMemo(() =>
 		routineCardOpen() ? routine() : undefined,
+	);
+	const detailsOpen = createMemo(
+		() => userPreferencesStore.getSectionOpen("agent.chat.details") ?? false,
+	);
+	const sidebarOpen = createMemo(
+		() => routineCard() !== undefined || detailsOpen() || !!selectedId(),
 	);
 	const compactions = createMemo(() =>
 		placeCompactions(chat.messages, chat.compactions()),
@@ -216,6 +220,8 @@ const AgentConversationPage: Component = () => {
 		void edit(last);
 		return true;
 	};
+	const setDetailsOpen = (open: boolean) =>
+		userPreferencesStore.setSectionOpen("agent.chat.details", open);
 	/** Opens a tool call in the panel, or closes it when it is already open. */
 	const selectTool = (id: string) =>
 		setSelectedId((current) => (current === id ? undefined : id));
@@ -311,48 +317,29 @@ const AgentConversationPage: Component = () => {
 				<AgentChatHeader
 					conversation={conversation()}
 					actions={
-						<>
-							<Show when={routine()}>
-								<div class="hidden lg:flex">
-									<Button
-										size="xs"
-										shape="square"
-										variant={routineCardOpen() ? "outline" : "ghost"}
-										aria-pressed={routineCardOpen()}
-										aria-label={T()("agent.routine.card.toggle")}
-										title={T()("agent.routine.card.toggle")}
-										onClick={() => setRoutineCardOpen((open) => !open)}
-									>
-										<FaSolidRepeat size={11} />
-									</Button>
-								</div>
-							</Show>
-							<ActionMenu
-								variant="ghost"
-								actions={[
-									{
-										label: T()("common.rename"),
-										type: "button",
-										icon: "pen",
-										onClick: () => setRenameOpen(true),
-									},
-									{
-										label: T()("common.delete"),
-										type: "button",
-										icon: "trash",
-										variant: "danger",
-										onClick: () => setDeleteOpen(true),
-									},
-								]}
-							/>
-						</>
+						<AgentChatActions
+							routineCard={
+								routine()
+									? {
+											open: routineCardOpen(),
+											onToggle: () => setRoutineCardOpen((open) => !open),
+										}
+									: undefined
+							}
+							details={{
+								open: detailsOpen(),
+								onToggle: () => setDetailsOpen(!detailsOpen()),
+							}}
+							onRename={() => setRenameOpen(true)}
+							onDelete={() => setDeleteOpen(true)}
+						/>
 					}
 				/>
 				<div class="relative flex min-h-0 grow">
 					<section
 						class={classnames(
 							"flex min-w-0 grow flex-col transition-[margin] duration-300 ease-out",
-							{ "lg:me-96": routineCard() || selectedId() },
+							{ "lg:me-96": sidebarOpen() },
 						)}
 					>
 						<Switch>
@@ -648,39 +635,24 @@ const AgentConversationPage: Component = () => {
 							</div>
 						</Show>
 					</section>
-					<Show when={routineCard() || selectedId()}>
-						<div
-							ref={setSidebar}
-							class="absolute top-0 inset-e-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-y-auto p-4 scrollbar lg:flex"
-						>
-							<Show when={routineCard()}>
-								{(current) => (
-									<Show when={conversation()}>
-										{(chatConversation) => (
-											<AgentRoutineCard
-												routine={current()}
-												conversation={chatConversation()}
-												onRuns={() => setRunsOpen(true)}
-												onOpen={() => {
-													setFocusApprovals(false);
-													setRoutineOpen(true);
-												}}
-												onClose={() => setRoutineCardOpen(false)}
-											/>
-										)}
-									</Show>
-								)}
-							</Show>
-							<Show when={selectedTool()}>
-								{(tool) => (
-									<AgentToolPanel
-										part={tool()}
-										onClose={() => setSelectedId(undefined)}
-										class="flex shrink-0"
-									/>
-								)}
-							</Show>
-						</div>
+					<Show when={sidebarOpen() && conversation()}>
+						{(current) => (
+							<AgentChatSidebar
+								ref={setSidebar}
+								conversation={current()}
+								routine={routineCard()}
+								detailsOpen={detailsOpen()}
+								selectedTool={selectedTool()}
+								onRoutineRuns={() => setRunsOpen(true)}
+								onRoutineOpen={() => {
+									setFocusApprovals(false);
+									setRoutineOpen(true);
+								}}
+								onRoutineClose={() => setRoutineCardOpen(false)}
+								onDetailsClose={() => setDetailsOpen(false)}
+								onToolClose={() => setSelectedId(undefined)}
+							/>
+						)}
 					</Show>
 				</div>
 				<RenameAgentConversationModal

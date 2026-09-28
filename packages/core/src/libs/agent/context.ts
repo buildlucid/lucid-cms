@@ -1,6 +1,5 @@
-import constants from "../../constants/constants.js";
 import type { AgentMessagePart } from "../../types/response.js";
-import builtInTools from "./built-in-tools.js";
+import runnerTools from "./runner-tools.js";
 import type { Checkpoint, ConversationContext, ModelMessage } from "./types.js";
 
 export const contextLimits = {
@@ -60,15 +59,13 @@ export const contextTokens = (
 	);
 };
 
-/** Context compacts before a request that would come close to the model's or the API's limits. */
+/** Context compacts before a request that would come close to the model's input limit. */
 export const needsCompaction = (
 	checkpoint: Checkpoint,
 	capabilities: ContextCapabilities,
 ) =>
 	contextTokens(checkpoint, capabilities) >=
-		tokenLimit(checkpoint) * contextLimits.compactAt ||
-	checkpoint.messages.length >=
-		constants.agent.limits.transcriptMessages * contextLimits.compactAt;
+	tokenLimit(checkpoint) * contextLimits.compactAt;
 
 /** The snapshot stored on the conversation. Unknown until the API names the model. */
 export const conversationContext = (
@@ -119,7 +116,7 @@ export const toolValuePreview = <Value>(
 			truncated: true,
 			historyMessageId: source.messageId,
 			toolCallId: source.toolCallId,
-			note: `Use ${builtInTools.history.name} to retrieve it in full.`,
+			note: `Use ${runnerTools.history.name} to retrieve it in full.`,
 		},
 		truncated: true,
 	};

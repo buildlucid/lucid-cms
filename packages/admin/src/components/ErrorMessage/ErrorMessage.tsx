@@ -6,6 +6,8 @@ import { type Component, Show } from "solid-js";
 interface ErrorMessageProps {
 	message?: string;
 	theme: "basic" | "background" | "container" | "inline";
+	/** Shows the warning icon on the inline theme. Defaults to true. */
+	icon?: boolean;
 	classes?: string;
 }
 
@@ -28,7 +30,7 @@ const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 					props.classes,
 				)}
 			>
-				<Show when={props.theme === "inline"}>
+				<Show when={props.theme === "inline" && props.icon !== false}>
 					<FaSolidTriangleExclamation
 						size={14}
 						class="shrink-0 text-danger-low-foreground"

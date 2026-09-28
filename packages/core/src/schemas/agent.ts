@@ -63,7 +63,7 @@ export const agentRunStatusSchema = z.enum([
 ]);
 
 export const agentApprovalModeSchema = z.enum([
-	"confirm-changes",
+	"confirm-all",
 	"tool-defaults",
 	"automatic",
 ]);
@@ -157,6 +157,17 @@ export const agentContextSchema = z.object({
 const agentUsageSchema = z.object({
 	creditsCharged: z.string(),
 	modelCalls: z.number(),
+});
+
+const agentConversationDetailsResponseSchema = z.object({
+	usage: agentUsageSchema.extend({ webCalls: z.number() }),
+	sources: z.array(
+		z.object({
+			url: z.string(),
+			title: z.string(),
+			read: z.boolean(),
+		}),
+	),
 });
 
 const agentConversationResponseSchema = z.object({
@@ -363,6 +374,12 @@ export const controllerSchemas = {
 		query: noQuery,
 		params: idParams,
 		response: agentConversationResponseSchema,
+	} satisfies ControllerSchema,
+	getConversationDetails: {
+		body: undefined,
+		query: noQuery,
+		params: idParams,
+		response: agentConversationDetailsResponseSchema,
 	} satisfies ControllerSchema,
 	updateConversation: {
 		body: z.object({

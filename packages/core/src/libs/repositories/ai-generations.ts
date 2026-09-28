@@ -31,7 +31,8 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			.select([
 				"agent_run_id",
 				"credits_charged",
-				sql<number>`count(*)`.as("model_calls"),
+				sql<number>`count(*)`.as("calls"),
+				sql<number>`count(model)`.as("model_calls"),
 			])
 			.where("agent_run_id", "in", runIds)
 			.where("status", "=", "success")
@@ -39,6 +40,28 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "agentUsageByRuns",
+		});
+
+		return exec.response;
+	}
+	/** A conversation's successful usage, grouped by charged amount so credits sum exactly. */
+	async agentUsageByConversation(conversationId: string) {
+		const query = this.db
+			.selectFrom("lucid_ai_generations")
+			.select([
+				"credits_charged",
+				sql<number>`count(*)`.as("calls"),
+				sql<number>`count(model)`.as("model_calls"),
+				sql<number>`sum(case when feature_key in ('web.search', 'web.fetch') then 1 else 0 end)`.as(
+					"web_calls",
+				),
+			])
+			.where("agent_conversation_id", "=", conversationId)
+			.where("status", "=", "success")
+			.groupBy("credits_charged");
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "agentUsageByConversation",
 		});
 
 		return exec.response;
@@ -137,7 +160,12 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				"lucid_remote_connection_id",
 				"created_at",
 			])
-			.where("feature_key", "in", ["agent.chat", "agent.compact"])
+			.where("feature_key", "in", [
+				"agent.chat",
+				"agent.compact",
+				"web.search",
+				"web.fetch",
+			])
 			.where("feature_version", "=", "v1")
 			.where("status", "=", "pending")
 			.where("lucid_remote_connection_id", "=", props.connectionId);

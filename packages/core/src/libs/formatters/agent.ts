@@ -27,7 +27,6 @@ import type { Select } from "../db/types.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { getAgentPermission } from "../permission/agent-permissions.js";
 import hasAccess from "../permission/has-access.js";
-import { getCoreAgentTools } from "../tools/core-tools.js";
 import formatter from "./helpers.js";
 
 const formatDefinitions = (props: {
@@ -68,7 +67,7 @@ const formatDefinitions = (props: {
 					: [],
 				tools:
 					canUse || canManage
-						? [...getCoreAgentTools(), ...agent.tools].map((tool) => ({
+						? agent.tools.map((tool) => ({
 								name: tool.name,
 								title: withDefaultMessage(tool.title),
 								requiresApproval: tool.requiresApproval,

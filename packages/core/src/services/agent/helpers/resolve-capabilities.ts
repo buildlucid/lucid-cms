@@ -1,9 +1,8 @@
 import z from "zod";
-import { getRunnerTools } from "../../../libs/agent/built-in-tools.js";
 import buildInstructions from "../../../libs/agent/instructions.js";
+import { getRunnerTools } from "../../../libs/agent/runner-tools.js";
 import type { AgentDefinition, RunMode } from "../../../libs/agent/types.js";
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
-import { getCoreAgentTools } from "../../../libs/tools/core-tools.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
@@ -29,7 +28,7 @@ const resolveCapabilities = (
 	},
 ) => {
 	const { agent, authority } = props;
-	const tools = [...getCoreAgentTools(), ...agent.tools].filter(
+	const tools = agent.tools.filter(
 		(tool) =>
 			authority.superAdmin ||
 			tool.permissions.every((permission) =>

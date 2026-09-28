@@ -77,7 +77,9 @@ test("uses media filters and returns localized, bounded search details", async (
 		data: { data: [image], count: 21 },
 	});
 	const context = await makeContext();
-	const prepared = await findMediaMcpTool[toolDefinitionInternal].prepareInput({
+	const prepared = await findMediaMcpTool()[
+		toolDefinitionInternal
+	].prepareInput({
 		query: { filter: { title: { value: "Cascade", operator: "contains" } } },
 		contentLocale: "fr",
 	});

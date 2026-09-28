@@ -93,7 +93,7 @@ const run = async (
 				mediaDelivery: { ...baseContext.mediaDelivery, processImage },
 			}
 		: baseContext;
-	const prepared = await previewMediaMcpTool[
+	const prepared = await previewMediaMcpTool()[
 		toolDefinitionInternal
 	].prepareInput({
 		id: 1,

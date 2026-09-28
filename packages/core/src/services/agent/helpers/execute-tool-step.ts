@@ -1,4 +1,3 @@
-import constants from "../../../constants/constants.js";
 import { toolValuePreview } from "../../../libs/agent/context.js";
 import type {
 	Checkpoint,
@@ -48,16 +47,7 @@ const executeToolStep: ServiceFn<
 		return { error: undefined, data: "waiting" };
 	}
 
-	const { output, failed } =
-		JSON.stringify(outcome.output ?? null).length >
-		constants.agent.limits.toolOutputChars
-			? {
-					output: {
-						error: context.translate("server:agent.tool.output.too.large"),
-					},
-					failed: true,
-				}
-			: outcome;
+	const { output, failed } = outcome;
 
 	const status = failed ? "failed" : "complete";
 

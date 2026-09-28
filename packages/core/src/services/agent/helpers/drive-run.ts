@@ -1,10 +1,10 @@
 import constants from "../../../constants/constants.js";
-import builtInTools from "../../../libs/agent/built-in-tools.js";
 import {
 	contextTokens,
 	needsCompaction,
 	tokenLimit,
 } from "../../../libs/agent/context.js";
+import runnerTools from "../../../libs/agent/runner-tools.js";
 import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { AgentRunStatus } from "../../../types/response.js";
@@ -30,7 +30,6 @@ const driveRun: ServiceFn<
 > = async (context, { run, checkpoint, session }) => {
 	const { limits } = constants.agent;
 	const mode: RunMode = run.routine_id ? "routine" : "chat";
-	const turnLimit = mode === "routine" ? limits.routineTurns : limits.chatTurns;
 	const deadline = Date.now() + constants.agent.sliceMs;
 
 	// Access is resolved once per slice. Tool execution also checks its required permissions.
@@ -65,6 +64,7 @@ const driveRun: ServiceFn<
 		checkpoint.model = {
 			id: model.data.model.id,
 			tokenLimit: model.data.model.inputTokenLimit,
+			toolLimit: model.data.model.toolLimit,
 		};
 		checkpoint.measured = undefined;
 
@@ -178,23 +178,27 @@ const driveRun: ServiceFn<
 				}
 			}
 			if (checkpoint.historyAfter !== undefined) continue;
-			if (checkpoint.turns >= turnLimit) {
-				return session.finish(
-					"failed",
-					context.translate("server:agent.run.turn.limit", {
-						data: { limit: turnLimit },
-					}),
-				);
-			}
 
-			if (
-				contextTokens(checkpoint, capabilities) > tokenLimit(checkpoint) ||
-				checkpoint.messages.length > limits.transcriptMessages ||
-				capabilities.instructions.length > limits.instructionChars
-			) {
+			if (contextTokens(checkpoint, capabilities) > tokenLimit(checkpoint)) {
 				return session.finish(
 					"failed",
 					context.translate("server:agent.conversation.too.large"),
+				);
+			}
+
+			//* the provider caps how many tools one request can offer
+			if (
+				checkpoint.model &&
+				capabilities.definitions.length > checkpoint.model.toolLimit
+			) {
+				return session.finish(
+					"failed",
+					context.translate("server:agent.tools.too.many", {
+						data: {
+							count: capabilities.definitions.length,
+							limit: checkpoint.model.toolLimit,
+						},
+					}),
 				);
 			}
 
@@ -228,7 +232,7 @@ const driveRun: ServiceFn<
 				checkpoint.nudges++;
 				checkpoint.messages.push({
 					role: "user",
-					content: `Continue working on the routine. If the goal is met, call ${builtInTools.finish.name} with a summary.`,
+					content: `Continue working on the routine. If the goal is met, call ${runnerTools.finish.name} with a summary.`,
 				});
 				startNextTurn(checkpoint);
 				continue;

@@ -8,7 +8,6 @@ import {
 } from "../../agent/model-selection.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
 import { resolvedAdminCopySchema } from "../../i18n/copy.js";
-import { getCoreAgentTools } from "../../tools/core-tools.js";
 
 //* keys appear in permission names, so they share the skill naming rules
 const keyPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -102,7 +101,7 @@ const checkAgentDefinitions = (config: {
 			}
 
 			const routineTools = routineToolsSchema.safeParse(routine.tools);
-			const tools = [...getCoreAgentTools(), ...agent.tools];
+			const tools = agent.tools;
 			if (
 				!routineTools.success ||
 				Object.keys(routineTools.data).some(

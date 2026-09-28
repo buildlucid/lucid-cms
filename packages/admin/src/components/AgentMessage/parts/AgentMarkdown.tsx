@@ -52,8 +52,18 @@ interface Chunk {
 	at: number;
 }
 
+//* its own instance, so the link hook below never changes sanitising elsewhere in the admin
+const purify = DOMPurify();
+
+//* links in agent text point away from the admin, so they open in a new tab without a referrer
+purify.addHook("afterSanitizeAttributes", (node) => {
+	if (node.tagName !== "A") return;
+	node.setAttribute("target", "_blank");
+	node.setAttribute("rel", "noopener noreferrer");
+});
+
 const render = (text: string) =>
-	DOMPurify.sanitize(markdown.parse(text, { async: false }), {
+	purify.sanitize(markdown.parse(text, { async: false }), {
 		ALLOWED_TAGS: allowedTags,
 		ALLOWED_ATTR: ["href", "title", "start"],
 	});
@@ -162,6 +172,7 @@ const CopyCode: Component<{ block: HTMLElement }> = (props) => {
 const AgentMarkdown: Component<{
 	text: string;
 	tone?: "reply" | "bubble";
+	size?: "sm";
 	/**
 	 * Fades in the text it first renders, for text that mounts mid-stream. Text
 	 * that grows after the first render always fades in. Read once, on mount.
@@ -215,6 +226,7 @@ const AgentMarkdown: Component<{
 				ref={element}
 				class={classnames("agent-markdown", props.class, {
 					"agent-markdown-bubble": props.tone === "bubble",
+					"agent-markdown-sm": props.size === "sm",
 				})}
 				innerHTML={html()}
 			/>

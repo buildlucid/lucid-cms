@@ -46,6 +46,7 @@ const formatSingle = (props: {
 				imageGeneration: props.config.ai.features.imageGeneration,
 				altGeneration: props.config.ai.features.altGeneration,
 				customFieldGeneration: props.config.ai.features.customFieldGeneration,
+				chatRename: props.config.ai.features.chatRename,
 				agents: props.config.ai.features.agents,
 				mcp: props.config.ai.features.mcp,
 			},

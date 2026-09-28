@@ -22,6 +22,7 @@ import {
 	AiGenerationsRepository,
 } from "../../libs/repositories/index.js";
 import defineAgentTool from "../../libs/tools/define-agent-tool.js";
+import { agentTools } from "../../libs/tools/lucid-tools.js";
 import type {
 	AgentApprovalMode,
 	AgentStreamEvent,
@@ -30,11 +31,13 @@ import LucidError from "../../utils/errors/lucid-error.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import runWebResearch from "../web/helpers/run-web-research.js";
 import advanceInputs from "./advance-inputs.js";
 import cancelRun from "./cancel-run.js";
 import createRoutine from "./create-routine.js";
 import executeRun from "./execute-run.js";
 import getConversation from "./get-conversation.js";
+import getConversationDetails from "./get-conversation-details.js";
 import getInputs from "./get-inputs.js";
 import getRoutine from "./get-routine.js";
 import enqueueRun from "./helpers/enqueue-run.js";
@@ -56,7 +59,7 @@ vi.mock("./helpers/check-agent-access.js", async (importOriginal) => ({
 	default: vi.fn(async (_context, input) => ({
 		error: undefined,
 		data: {
-			agent: testAgent,
+			agent: input.agentKey === webAgent.key ? webAgent : testAgent,
 			authority: {
 				principal:
 					input.userId === null
@@ -174,6 +177,7 @@ const testAgent = defineAgent({
 	name: "Test Agent",
 	description: "Runs tests.",
 	tools: [
+		agentTools.content(),
 		writeTool,
 		approvalTool,
 		readTool,
@@ -181,6 +185,13 @@ const testAgent = defineAgent({
 		selectionWriteTool,
 		restrictedWriteTool,
 	],
+});
+//* its own agent, so web tool descriptions leave the compaction tests' token budgets alone
+const webAgent = defineAgent({
+	key: "test-web",
+	name: "Web Agent",
+	description: "Researches the web in tests.",
+	tools: [agentTools.web()],
 });
 const usage: ModelUsage = {
 	model: "test-model",
@@ -207,10 +218,11 @@ const usage: ModelUsage = {
 };
 const model = vi.mocked(streamModelTurn);
 
-//* the input limit the mocked API reports; compaction tests lower it to reach their thresholds
+//* the limits the mocked API reports; tests lower them to reach their thresholds
 let inputTokenLimit = 128_000;
+let toolLimit = 128;
 const start = () =>
-	({ type: "start", model: "test-model", inputTokenLimit }) as const;
+	({ type: "start", model: "test-model", inputTokenLimit, toolLimit }) as const;
 
 beforeAll(async () => {
 	await testConfig.migrate();
@@ -223,7 +235,7 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: { definitions: [testAgent] } },
+			ai: { ...config.ai, agents: { definitions: [testAgent, webAgent] } },
 		},
 		database,
 		translationStore: createTranslationStore({
@@ -254,6 +266,7 @@ afterAll(() => testConfig.destroy());
 afterEach(() => vi.restoreAllMocks());
 beforeEach(() => {
 	inputTokenLimit = 128_000;
+	toolLimit = 128;
 	model.mockReset();
 	remoteRequest.mockReset();
 	writeHandler.mockClear();
@@ -264,9 +277,11 @@ beforeEach(() => {
 const prepare = async (props?: {
 	routineId?: string;
 	approvalMode?: AgentApprovalMode;
+	text?: string;
+	agentKey?: string;
 }) => {
 	const conversation = await insertConversation(context, {
-		agentKey: testAgent.key,
+		agentKey: props?.agentKey ?? testAgent.key,
 		approvalMode: props?.approvalMode,
 		userId,
 		routineId: props?.routineId,
@@ -276,7 +291,7 @@ const prepare = async (props?: {
 	const run = await startRun(context, {
 		userId,
 		conversationId: conversation.data.id,
-		text: "Hello",
+		text: props?.text ?? "Hello",
 		requestId,
 		routineId: props?.routineId,
 	});
@@ -509,9 +524,10 @@ describe("agent runner", () => {
 		{ mode: "tool-defaults", tool: writeTool, waits: false },
 		{ mode: "tool-defaults", tool: approvalTool, waits: true },
 		{ mode: "automatic", tool: approvalTool, waits: false },
-		{ mode: "confirm-changes", tool: writeTool, waits: true },
-		{ mode: "confirm-changes", tool: readTool, waits: false },
+		{ mode: "confirm-all", tool: writeTool, waits: true },
+		{ mode: "confirm-all", tool: readTool, waits: true },
 	] as const)("$mode applies to $tool.name", async ({ mode, tool, waits }) => {
+		const handler = tool === readTool ? readHandler : writeHandler;
 		const prepared = await prepare({ approvalMode: mode });
 		callTool({ id: "policy", name: tool.name, input: {} });
 		reply("Done");
@@ -519,7 +535,7 @@ describe("agent runner", () => {
 			data: { status: waits ? "waiting" : "completed" },
 		});
 		if (!waits) return;
-		expect(writeHandler).not.toHaveBeenCalled();
+		expect(handler).not.toHaveBeenCalled();
 		expect(
 			(await selectRun(prepared.runId))?.checkpoint?.pending?.widget.interaction
 				.title,
@@ -531,11 +547,11 @@ describe("agent runner", () => {
 				answer: { interactionId: id, action: "submit", response: {}, userId },
 			}),
 		).toMatchObject({ data: { status: "completed" } });
-		expect(writeHandler).toHaveBeenCalledOnce();
+		expect(handler).toHaveBeenCalledOnce();
 	});
 
 	test("denial skips execution and a chat policy change only affects later runs", async () => {
-		const prepared = await prepare({ approvalMode: "confirm-changes" });
+		const prepared = await prepare({ approvalMode: "confirm-all" });
 		await new AgentConversationsRepository(context.db).updateSingle({
 			where: [{ key: "id", operator: "=", value: prepared.conversationId }],
 			data: { approval_mode: "automatic" },
@@ -609,7 +625,7 @@ describe("agent runner", () => {
 	test("an interactive write collects validated input and approval in one submission", async () => {
 		prepareSelection.mockClear();
 		selectedHandler.mockClear();
-		const prepared = await prepare({ approvalMode: "confirm-changes" });
+		const prepared = await prepare({ approvalMode: "confirm-all" });
 		callTool({ id: "combined", name: selectionWriteTool.name, input: {} });
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "waiting" },
@@ -1016,7 +1032,7 @@ describe("agent runner", () => {
 		}
 		const prepared = await prepare({
 			routineId,
-			approvalMode: mode === "routine" ? "confirm-changes" : "automatic",
+			approvalMode: mode === "routine" ? "confirm-all" : "automatic",
 		});
 		callTool({
 			id: "automatic",
@@ -2389,7 +2405,9 @@ vi.mock("../../libs/lucid-remote/services/get-agent-models.js", async () => {
 		default: mockAgentModels(() => ({
 			...agentModelCatalog,
 			models: agentModelCatalog.models.map((model) =>
-				model.id === "test-model" ? { ...model, inputTokenLimit } : model,
+				model.id === "test-model"
+					? { ...model, inputTokenLimit, toolLimit }
+					: model,
 			),
 		})),
 	};
@@ -2440,4 +2458,281 @@ describe("saved model choices", () => {
 		});
 		expect(rejected.error?.status).toBe(400);
 	});
+});
+
+test("web tools use normal transcript rows and persist non-model usage", async () => {
+	const prepared = await prepare({ agentKey: webAgent.key });
+	const feature = { key: "web.search", version: "v1" };
+	const output = {
+		results: [
+			{
+				url: "https://example.com/docs",
+				title: "Docs",
+				publishedAt: null,
+				excerpts: ["Public documentation"],
+			},
+		],
+	};
+	remoteRequest.mockResolvedValue({
+		error: undefined,
+		data: {
+			json: {
+				data: {
+					requestId: randomUUID(),
+					mode: "sync",
+					feature,
+					output,
+					usage: {
+						kind: "web",
+						operation: "search",
+						provider: "parallel",
+						requests: 1,
+						model: null,
+						tokens: null,
+						providerRequestId: "search_1",
+						cost: { creditsCharged: "12" },
+					},
+				},
+			},
+		},
+	});
+	callTool({
+		id: "search-call",
+		name: "web_search",
+		input: { query: "Example docs" },
+	});
+	reply("Found the docs.");
+	const events: AgentStreamEvent[] = [];
+	const result = await executeRun(context, {
+		runId: prepared.runId,
+		emit: async (event) => {
+			events.push(event);
+		},
+	});
+	expect(result.error).toBeUndefined();
+	const webCalls = remoteRequest.mock.calls.filter(
+		([, options]) => options.body?.feature?.key === "web.search",
+	);
+	expect(webCalls).toHaveLength(1);
+	expect(webCalls[0]?.[1]).toMatchObject({
+		retries: 0,
+		body: { feature, context: { query: "Example docs" } },
+	});
+	expect(events).toContainEqual(
+		expect.objectContaining({
+			type: "tool",
+			name: "web_search",
+			status: "running",
+		}),
+	);
+	expect(await partsOf(prepared.conversationId)).toContainEqual(
+		expect.objectContaining({
+			type: "tool",
+			name: "web_search",
+			status: "complete",
+			output,
+		}),
+	);
+	const usage = await new AiGenerationsRepository(context.db).agentUsageByRuns([
+		prepared.runId,
+	]);
+	expect(usage.data).toContainEqual(
+		expect.objectContaining({
+			calls: 1,
+			model_calls: 0,
+			credits_charged: "12",
+		}),
+	);
+});
+
+test("every attempt at one web call reuses its key, so a resumed run never pays twice", async () => {
+	const prepared = await prepare({ agentKey: webAgent.key });
+	remoteRequest.mockResolvedValue(webResponse("search", { results: [] }));
+	const attempt = (callId: string) =>
+		runWebResearch(context, {
+			execution: {
+				authority: {
+					principal: { type: "user", userId },
+					permissions: [],
+					superAdmin: false,
+				},
+				signal: new AbortController().signal,
+				operationId: `${prepared.runId}:${callId}`,
+				run: {
+					id: prepared.runId,
+					conversationId: prepared.conversationId,
+					userId,
+				},
+			},
+			request: {
+				feature: { key: "web.search", version: "v1" },
+				sessionId: prepared.conversationId,
+				input: [],
+				context: { query: "Public docs", maxResults: 5 },
+			},
+		});
+	for (const callId of ["search", "search", "other"]) await attempt(callId);
+
+	const keys = webCalls().map(
+		([, options]) => options.headers["idempotency-key"],
+	);
+	expect(keys[0]).toBe(keys[1]);
+	expect(keys[2]).not.toBe(keys[0]);
+	const billed = await new AiGenerationsRepository(context.db).agentUsageByRuns(
+		[prepared.runId],
+	);
+	expect(billed.data).toContainEqual(
+		expect.objectContaining({ calls: 2, model_calls: 0 }),
+	);
+});
+
+/** A completed web response from the website, as the remote client returns it. */
+const webResponse = (
+	operation: "search" | "fetch",
+	output: Record<string, unknown>,
+) => ({
+	error: undefined,
+	data: {
+		json: {
+			data: {
+				requestId: randomUUID(),
+				mode: "sync",
+				feature: { key: `web.${operation}`, version: "v1" },
+				output,
+				usage: {
+					kind: "web",
+					operation,
+					provider: "parallel",
+					requests: 1,
+					model: null,
+					tokens: null,
+					providerRequestId: `${operation}_${randomUUID()}`,
+					cost: { creditsCharged: "12" },
+				},
+			},
+		},
+	},
+});
+const webCalls = () =>
+	remoteRequest.mock.calls.filter(([, options]) =>
+		options.body?.feature?.key.startsWith("web."),
+	);
+
+test("confirm actions asks before web research and runs it once approved", async () => {
+	const prepared = await prepare({
+		agentKey: webAgent.key,
+		approvalMode: "confirm-all",
+	});
+	remoteRequest.mockResolvedValue(webResponse("search", { results: [] }));
+	callTool({
+		id: "approved-search",
+		name: "web_search",
+		input: { query: "Example docs" },
+	});
+	expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+		data: { status: "waiting" },
+	});
+	expect(webCalls()).toHaveLength(0);
+	reply("Nothing found.");
+	expect(
+		await executeRun(context, {
+			runId: prepared.runId,
+			answer: {
+				interactionId: await interactionId(prepared.conversationId),
+				action: "submit",
+				response: {},
+				userId,
+			},
+		}),
+	).toMatchObject({ data: { status: "completed" } });
+	expect(webCalls()).toHaveLength(1);
+});
+
+test("reads only pages whose URL already appeared in the chat", async () => {
+	const prepared = await prepare({
+		agentKey: webAgent.key,
+		approvalMode: "automatic",
+		text: "Summarise example.com/about for me.",
+	});
+	const page = {
+		url: "https://example.com/docs",
+		title: "Docs",
+		publishedAt: null,
+		content: "Public documentation",
+		contentType: "page",
+		truncated: false,
+	};
+	remoteRequest.mockImplementation(async (_path, options) =>
+		options.body?.feature?.key === "web.search"
+			? webResponse("search", {
+					results: [{ ...page, excerpts: ["Public documentation"] }],
+				})
+			: webResponse("fetch", { ...page, url: options.body?.context?.url }),
+	);
+	callTool({
+		id: "search",
+		name: "web_search",
+		input: { query: "Example docs" },
+	});
+	callTool({
+		id: "from-message",
+		name: "web_fetch",
+		input: { url: "https://www.example.com/about/" },
+	});
+	callTool({
+		id: "from-result",
+		name: "web_fetch",
+		input: { url: "https://example.com/docs" },
+	});
+	callTool({
+		id: "with-data",
+		name: "web_fetch",
+		input: { url: "https://example.com/about?token=secret" },
+	});
+	reply("Done.");
+	expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+		data: { status: "completed" },
+	});
+	expect(
+		webCalls()
+			.filter(([, options]) => options.body.feature.key === "web.fetch")
+			.map(([, options]) => options.body.context),
+	).toEqual([
+		expect.objectContaining({
+			url: "https://www.example.com/about/",
+			maxChars: 20_000,
+		}),
+		expect.objectContaining({ url: "https://example.com/docs" }),
+	]);
+	expect(await partsOf(prepared.conversationId)).toContainEqual(
+		expect.objectContaining({
+			id: "with-data",
+			status: "failed",
+			output: { error: context.translate("server:agent.web.url.unseen") },
+		}),
+	);
+
+	const details = await getConversationDetails(context, {
+		id: prepared.conversationId,
+		userId,
+	});
+	expect(details.data).toMatchObject({
+		usage: { modelCalls: 5, webCalls: 3 },
+		sources: [
+			{
+				url: "https://example.com/docs",
+				read: true,
+			},
+			{ url: "https://www.example.com/about/", read: true },
+		],
+	});
+});
+
+test("a run stops before calling a model that accepts fewer tools than the agent offers", async () => {
+	toolLimit = 2;
+	const prepared = await prepare();
+	expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+		data: { status: "failed" },
+	});
+	expect(model).not.toHaveBeenCalled();
 });

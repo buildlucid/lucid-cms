@@ -1,13 +1,9 @@
 import { z } from "zod";
 import constants from "../../../constants/constants.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
-import {
-	builtInToolNames,
-	getRunnerTools,
-} from "../../agent/built-in-tools.js";
+import { runnerToolNames } from "../../agent/runner-tools.js";
 import { getExternalCapability } from "../../permission/capabilities.js";
 import { getValidPermissions } from "../../permission/registry.js";
-import { getCoreAgentTools, getCoreMcpTools } from "../../tools/core-tools.js";
 import { isToolDefinition } from "../../tools/registry.js";
 import type { ToolDefinition } from "../../tools/types.js";
 
@@ -55,7 +51,7 @@ const checkTool = (
 			);
 		}
 
-		if (builtInToolNames.has(tool.name)) {
+		if (runnerToolNames.has(tool.name)) {
 			throw new Error(`Agent tool name "${tool.name}" is reserved.`);
 		}
 
@@ -120,31 +116,14 @@ const checkToolDefinitions = (config: ResolvedLucidConfig) => {
 	const permissions = new Set(getValidPermissions(config));
 	const checked = new Set<ToolDefinition>();
 
-	const mcpTools = [...getCoreMcpTools(), ...config.ai.mcp.tools];
+	const mcpTools = config.ai.mcp.tools;
 	checkPlacement("MCP", "mcp", mcpTools);
 	for (const tool of mcpTools) checked.add(tool);
 
 	for (const agent of config.ai.agents.definitions) {
 		const label = `Agent "${agent.key}"`;
-		const coreAgentTools = getCoreAgentTools();
-		const tools = [...coreAgentTools, ...agent.tools];
+		const tools = agent.tools;
 		checkPlacement(label, "agent", tools);
-
-		const runnerTools = getRunnerTools({
-			mode: "routine",
-			hasHistory: true,
-			hasSkills: agent.skills.length > 0,
-		});
-		const maxTools =
-			constants.agent.limits.maxTools -
-			runnerTools.length -
-			coreAgentTools.length;
-
-		if (agent.tools.length > maxTools) {
-			throw new Error(
-				`${label} can have at most ${maxTools} additional tools (${coreAgentTools.length} content tools and ${runnerTools.length} runner tools also count toward the ${constants.agent.limits.maxTools}-tool limit).`,
-			);
-		}
 
 		for (const tool of tools) checked.add(tool);
 	}

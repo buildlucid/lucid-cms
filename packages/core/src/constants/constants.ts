@@ -232,20 +232,12 @@ export default Object.freeze({
 			terminal: ["completed", "failed", "cancelled"],
 		},
 		limits: {
-			chatTurns: 16,
-			routineTurns: 40,
 			routineNudges: 2,
 			recoveries: 3,
-			/** The API's message limit for one model request. */
-			transcriptMessages: 1_024,
-			instructionChars: 32_000,
-			callsPerTurn: 16,
+			/** Serialised size of the model's output in one turn. */
 			partsChars: 262_144,
-			toolOutputChars: 64_000,
 			/** Serialised size of the data a tool saves for its interaction widget. */
 			interactionDataChars: 100_000,
-			/** Provider request limit, including the runner's built-in tools. */
-			maxTools: 64,
 		},
 		/** A slice is one uninterrupted stretch of execution before it hands off to the queue. */
 		sliceMs: 240_000,

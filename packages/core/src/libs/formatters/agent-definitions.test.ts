@@ -4,6 +4,7 @@ import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import defineAgent from "../agent/define-agent.js";
 import { copy } from "../i18n/copy.js";
 import { getAgentPermission } from "../permission/agent-permissions.js";
+import { agentTools } from "../tools/lucid-tools.js";
 import agentFormatter from "./agent.js";
 
 const testConfig = getTestConfig();
@@ -26,6 +27,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 		key: "reviewer",
 		name: "Reviewer",
 		description: "Reviews content.",
+		tools: [agentTools.content()],
 		suggestions: [
 			{
 				title: copy("admin:review.title"),

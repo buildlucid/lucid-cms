@@ -48,6 +48,7 @@ export const aiModelCatalogSchema = z.object({
 			name: z.string(),
 			description: z.string(),
 			inputTokenLimit: z.number().int().positive(),
+			toolLimit: z.number().int().positive(),
 			reasoningEfforts: z.array(aiReasoningEffortSchema),
 			defaultReasoningEffort: aiReasoningEffortSchema.nullable(),
 		}),

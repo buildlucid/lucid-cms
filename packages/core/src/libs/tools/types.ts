@@ -35,6 +35,8 @@ export type AgentToolExecution = {
 	signal: AbortSignal;
 	/** Stable per tool call. Use for idempotent writes. */
 	operationId: string;
+	/** The agent run making the call, eg. to attribute usage or read its conversation. */
+	run: { id: string; conversationId: string; userId: number | null };
 	/** Saved input supplied by the runner after an interaction. */
 	interaction?: {
 		data: Record<string, unknown>;

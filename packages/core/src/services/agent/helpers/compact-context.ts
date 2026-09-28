@@ -11,12 +11,10 @@ import type { Checkpoint } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { AgentMessagesRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import reconcileUsage from "../reconcile-usage.js";
 import type resolveCapabilities from "./resolve-capabilities.js";
 import type { RunSession, SessionRun } from "./run-session.js";
-import storePendingUsage from "./store-pending-usage.js";
-import storeUsage from "./store-usage.js";
 import streamModelTurn from "./stream-model-turn.js";
+import trackPaidRequest from "./track-paid-request.js";
 
 /**
  * Summarises older context into one message and keeps recent messages verbatim.
@@ -72,50 +70,40 @@ const compactContext: ServiceFn<
 
 	const record = {
 		requestId: pending.requestId,
-		purpose: "compact" as const,
+		featureKey: "agent.compact",
 		runId: run.id,
 		conversationId: run.conversation_id,
 		userId: run.user_id,
 	};
 	let summary = "";
-	const started = Date.now();
 
 	//* same instructions, tools and leading messages as the chat, so the provider's prompt cache applies
-	const result = await streamModelTurn(context, {
-		requestId: pending.requestId,
-		sessionId: run.conversation_id,
-		purpose: "compact",
-		instructions: capabilities.instructions,
-		selection: checkpoint.selection,
-		messages: modelMessages(checkpoint.messages.slice(0, pending.count)),
-		tools: capabilities.definitions,
+	const result = await trackPaidRequest(context, {
+		record,
 		signal: session.signal,
-		onRequest: (connectionId) =>
-			storePendingUsage(context, { ...record, connectionId }),
-		emit: async (event) => {
-			if (event.type === "start")
-				checkpoint.model = {
-					id: event.model,
-					tokenLimit: event.inputTokenLimit,
-				};
-			if (event.type === "text-delta") summary += event.text;
-		},
+		send: (start) =>
+			streamModelTurn(context, {
+				requestId: pending.requestId,
+				sessionId: run.conversation_id,
+				purpose: "compact",
+				instructions: capabilities.instructions,
+				selection: checkpoint.selection,
+				messages: modelMessages(checkpoint.messages.slice(0, pending.count)),
+				tools: capabilities.definitions,
+				signal: session.signal,
+				onRequest: start,
+				emit: async (event) => {
+					if (event.type === "start")
+						checkpoint.model = {
+							id: event.model,
+							tokenLimit: event.inputTokenLimit,
+							toolLimit: event.toolLimit,
+						};
+					if (event.type === "text-delta") summary += event.text;
+				},
+			}),
 	});
-	if (result.error) {
-		if (!session.signal.aborted) {
-			await reconcileUsage(context, { requestId: pending.requestId });
-		}
-
-		return result;
-	}
-
-	const usage = await storeUsage(context, {
-		...record,
-		connectionId: result.data.connectionId,
-		usage: result.data.usage,
-		durationMs: Date.now() - started,
-	});
-	if (usage.error) return usage;
+	if (result.error) return result;
 	if (!summary.trim()) {
 		return {
 			data: undefined,

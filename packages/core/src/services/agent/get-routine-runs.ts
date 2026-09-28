@@ -42,7 +42,7 @@ const getRoutineRuns: ServiceFn<
 			creditsCharged: sumCredits(
 				total?.creditsCharged ?? "0",
 				row.credits_charged ?? "0",
-				calls,
+				Number(row.calls),
 			),
 			modelCalls: (total?.modelCalls ?? 0) + calls,
 		});
