@@ -2,11 +2,20 @@ import type { AiModelSelection } from "../ai/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { Permission } from "../users/types.js";
 
-/** An agent registered in config. */
+/** An agent name used in navigation and saved chat labels. */
+export type AgentSummary = { key: string; name: string };
+
+/** Agent details available to the current admin user. */
 export interface Agent {
 	key: string;
 	name: string;
 	description: string;
+	/** Messages offered when starting a chat. Empty without the agent's use permission. */
+	suggestions: {
+		title: ResolvedAdminCopy;
+		description: ResolvedAdminCopy;
+		message: ResolvedAdminCopy;
+	}[];
 	/** Tools available to this agent. Empty when the user can neither use nor manage it. */
 	tools: {
 		name: string;
@@ -15,6 +24,12 @@ export interface Agent {
 		interactive: boolean;
 		permissions: Permission[];
 	}[];
+}
+
+/** Configured agents and whether agent chat is enabled. */
+export interface AgentCatalog {
+	enabled: boolean;
+	agents: Agent[];
 }
 
 /** Routines defined in code are synced from config; the rest are created in the admin. */

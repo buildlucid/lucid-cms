@@ -9,6 +9,7 @@ import deleteRoutine from "../../../controllers/agent/delete-routine.js";
 import generateConversationTitle from "../../../controllers/agent/generate-conversation-title.js";
 import getConversation from "../../../controllers/agent/get-conversation.js";
 import getConversations from "../../../controllers/agent/get-conversations.js";
+import getDefinitions from "../../../controllers/agent/get-definitions.js";
 import getMessages from "../../../controllers/agent/get-messages.js";
 import getModels from "../../../controllers/agent/get-models.js";
 import getRoutine from "../../../controllers/agent/get-routine.js";
@@ -23,6 +24,7 @@ import updateRoutine from "../../../controllers/agent/update-routine.js";
 import watchRun from "../../../controllers/agent/watch-run.js";
 
 const agentRoutes = new Hono<LucidHonoGeneric>()
+	.get("/definitions", ...getDefinitions)
 	.get("/models/:agentKey", ...getModels)
 	.get("/conversations", ...getConversations)
 	.post("/conversations", ...createConversation)

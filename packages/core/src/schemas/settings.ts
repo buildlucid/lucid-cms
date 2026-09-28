@@ -1,6 +1,5 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
-import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import { queryString } from "./helpers/querystring.js";
 
 const settingsResponseSchema = z.object({
@@ -10,16 +9,6 @@ const settingsResponseSchema = z.object({
 				z.object({
 					key: z.string(),
 					name: z.string(),
-					description: z.string(),
-					tools: z.array(
-						z.object({
-							name: z.string(),
-							title: resolvedAdminCopySchema,
-							requiresApproval: z.boolean(),
-							interactive: z.boolean(),
-							permissions: z.array(z.string()),
-						}),
-					),
 				}),
 			),
 			enabled: z.boolean().meta({

@@ -1648,6 +1648,8 @@
 	"agent.question.stop": "Stop the agent instead of answering",
 	"agent.question.choices": "Choices",
 	"agent.home.title": "What would you like me to do today?",
+	"agent.home.suggestions": "Choose a suggestion to start a chat",
+	"agent.definitions.load.error": "Could not load agent details. Try again.",
 	"agent.home.empty.title": "No chats yet",
 	"agent.home.empty.description": "Ask the agent something to start your first chat.",
 	"agent.composer.placeholder": "Ask the agent anything…",

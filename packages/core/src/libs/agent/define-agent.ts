@@ -1,4 +1,5 @@
 import dedent from "../../utils/helpers/dedent.js";
+import { normalizeCopy } from "../i18n/copy.js";
 import type { AgentDefinition, DefineAgentOptions } from "./types.js";
 
 /**
@@ -29,6 +30,15 @@ const defineAgent = <const Key extends string>(
 	tools: options.tools ?? [],
 	skills: options.skills ?? [],
 	models: options.models,
+	suggestions: (options.suggestions ?? []).map((suggestion) => ({
+		title: normalizeCopy(suggestion.title),
+		description: normalizeCopy(suggestion.description),
+		message: normalizeCopy(
+			typeof suggestion.message === "string"
+				? dedent(suggestion.message)
+				: suggestion.message,
+		),
+	})),
 	routines: options.routines ?? [],
 });
 

@@ -3,10 +3,8 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import { getAgents } from "../agent/registry.js";
 import { isAiFeatureEnabled } from "../config/ai-features.js";
-import { getAgentPermission } from "../permission/agent-permissions.js";
 import { Permissions } from "../permission/definitions.js";
 import hasAccess from "../permission/has-access.js";
-import { getCoreAgentTools } from "../tools/core-tools.js";
 import { getMcpToolRegistry } from "../tools/registry.js";
 
 interface SettingsPropsT {
@@ -43,23 +41,6 @@ const formatSingle = (props: {
 			agents: getAgents(props.config).map((agent) => ({
 				key: agent.key,
 				name: agent.name,
-				description: agent.description,
-				//* names are shared so saved chats keep their labels, tools only with access
-				tools: hasAccess({
-					user: props.authUser,
-					optionalPermissions: [
-						getAgentPermission(agent.key, "use"),
-						getAgentPermission(agent.key, "manage"),
-					],
-				})
-					? [...getCoreAgentTools(), ...agent.tools].map((tool) => ({
-							name: tool.name,
-							title: tool.title,
-							requiresApproval: tool.requiresApproval,
-							interactive: Boolean(tool.interaction),
-							permissions: [...tool.permissions],
-						}))
-					: [],
 			})),
 			features: {
 				imageGeneration: props.config.ai.features.imageGeneration,

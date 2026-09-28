@@ -7,10 +7,18 @@ import {
 	aiModelSelectionSchema,
 } from "../../agent/model-selection.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
+import { resolvedAdminCopySchema } from "../../i18n/copy.js";
 import { getCoreAgentTools } from "../../tools/core-tools.js";
 
 //* keys appear in permission names, so they share the skill naming rules
 const keyPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const suggestionSchema = z
+	.object({
+		title: resolvedAdminCopySchema,
+		description: resolvedAdminCopySchema,
+		message: resolvedAdminCopySchema,
+	})
+	.strict();
 
 /** Checks agent and routine keys, details and schedules at config time. */
 const checkAgentDefinitions = (config: {
@@ -32,6 +40,30 @@ const checkAgentDefinitions = (config: {
 
 		if (!agent.name.trim() || !agent.description.trim()) {
 			throw new Error(`Agent "${agent.key}" needs a name and description.`);
+		}
+
+		const suggestions = z.array(suggestionSchema).safeParse(agent.suggestions);
+		if (!suggestions.success) {
+			throw new Error(
+				`Agent "${agent.key}" has invalid suggestions: ${z.prettifyError(suggestions.error)}`,
+			);
+		}
+
+		for (const [index, suggestion] of suggestions.data.entries()) {
+			for (const [field, copy] of Object.entries(suggestion)) {
+				const value =
+					copy.type === "lucid.literal" ? copy.value : copy.defaultMessage;
+				if (value !== undefined && !value.trim()) {
+					throw new Error(
+						`Agent "${agent.key}" suggestion ${index + 1} needs a ${field}.`,
+					);
+				}
+				if (field === "message" && value && value.length > 20_000) {
+					throw new Error(
+						`Agent "${agent.key}" suggestion ${index + 1} message must be at most 20000 characters.`,
+					);
+				}
+			}
 		}
 
 		const models = aiModelConfigSchema.optional().safeParse(agent.models);

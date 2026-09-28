@@ -16,6 +16,7 @@ import type { QueryBuilderProps } from "@/utils/query-builder";
 export const queryKeys = {
 	agent: {
 		all: () => ["lucid", "agent"] as const,
+		definitions: () => ["lucid", "agent", "definitions"] as const,
 		models: (agentKey: string | undefined, routineId?: string) =>
 			["lucid", "agent", "models", agentKey, routineId] as const,
 		conversations: () => ["lucid", "agent", "conversations"] as const,

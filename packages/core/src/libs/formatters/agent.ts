@@ -1,4 +1,7 @@
+import type { ResolvedLucidConfig } from "../../types/config.js";
+import type { LucidAuth } from "../../types/hono.js";
 import type {
+	AgentCatalog,
 	AgentCompaction,
 	AgentContext,
 	AgentConversation,
@@ -11,7 +14,9 @@ import type {
 	AgentUsage,
 } from "../../types/response.js";
 import { contextLimits } from "../agent/context.js";
+import { getAgents } from "../agent/registry.js";
 import type { ConversationContext, RoutineTools } from "../agent/types.js";
+import { isAiFeatureEnabled } from "../config/ai-features.js";
 import type { LucidAgentCompactions } from "../db/tables/agent-compactions.js";
 import type { LucidAgentConversations } from "../db/tables/agent-conversations.js";
 import type { LucidAgentInputs } from "../db/tables/agent-inputs.js";
@@ -19,7 +24,62 @@ import type { LucidAgentMessages } from "../db/tables/agent-messages.js";
 import type { LucidAgentRoutines } from "../db/tables/agent-routines.js";
 import type { LucidAgentRuns } from "../db/tables/agent-runs.js";
 import type { Select } from "../db/types.js";
+import type { ResolvedAdminCopy } from "../i18n/types.js";
+import { getAgentPermission } from "../permission/agent-permissions.js";
+import hasAccess from "../permission/has-access.js";
+import { getCoreAgentTools } from "../tools/core-tools.js";
 import formatter from "./helpers.js";
+
+const formatDefinitions = (props: {
+	config: ResolvedLucidConfig;
+	authUser: LucidAuth;
+	adminTranslations: Record<string, string>;
+}): AgentCatalog => {
+	const withDefaultMessage = (copy: ResolvedAdminCopy): ResolvedAdminCopy => {
+		if (copy.type === "lucid.literal" || copy.defaultMessage !== undefined) {
+			return copy;
+		}
+		const defaultMessage = props.adminTranslations[copy.key];
+		return defaultMessage === undefined ? copy : { ...copy, defaultMessage };
+	};
+
+	return {
+		enabled: isAiFeatureEnabled(props.config, "agents"),
+		agents: getAgents(props.config).map((agent) => {
+			const canUse = hasAccess({
+				user: props.authUser,
+				requiredPermissions: [getAgentPermission(agent.key, "use")],
+			});
+			const canManage = hasAccess({
+				user: props.authUser,
+				requiredPermissions: [getAgentPermission(agent.key, "manage")],
+			});
+
+			return {
+				key: agent.key,
+				name: agent.name,
+				description: agent.description,
+				suggestions: canUse
+					? agent.suggestions.map((suggestion) => ({
+							title: withDefaultMessage(suggestion.title),
+							description: withDefaultMessage(suggestion.description),
+							message: withDefaultMessage(suggestion.message),
+						}))
+					: [],
+				tools:
+					canUse || canManage
+						? [...getCoreAgentTools(), ...agent.tools].map((tool) => ({
+								name: tool.name,
+								title: withDefaultMessage(tool.title),
+								requiresApproval: tool.requiresApproval,
+								interactive: Boolean(tool.interaction),
+								permissions: [...tool.permissions],
+							}))
+						: [],
+			};
+		}),
+	};
+};
 
 type ConversationPropT = Select<LucidAgentConversations> & {
 	latest_run_id?: string | null;
@@ -180,6 +240,7 @@ const formatRoutine = (props: {
 });
 
 export default {
+	formatDefinitions,
 	formatContext,
 	formatConversation,
 	formatInput,

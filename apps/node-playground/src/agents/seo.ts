@@ -8,6 +8,20 @@ export const seoAgent = defineAgent({
 		Focus on page titles, descriptions and slugs. Suggest concrete changes,
 		and explain why each one helps.
 	`,
+	suggestions: [
+		{
+			title: "Review page titles",
+			description: "Find titles that could be clearer.",
+			message:
+				"Review page titles and suggest the three most useful improvements. Do not make changes.",
+		},
+		{
+			title: "Spot metadata gaps",
+			description: "Find missing descriptions and slugs.",
+			message:
+				"Find pages with missing or weak SEO metadata. List concrete fixes, but do not make changes.",
+		},
+	],
 	routines: [
 		defineRoutine({
 			key: "weekly-audit",

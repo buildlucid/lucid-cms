@@ -8,6 +8,7 @@ import {
 	routineToolsSchema,
 } from "../../schemas/agent.js";
 import type { AiModelConfig, AiModelSelection } from "../../types/response.js";
+import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
 import type { SkillDefinition } from "../skills/types.js";
 import type { AgentToolDefinition } from "../tools/types.js";
@@ -180,6 +181,12 @@ export type DefineAgentOptions<Key extends string> = {
 	skills?: readonly SkillDefinition[];
 	/** The default model and the models people can choose. Leave out to offer every model the Lucid service provides. */
 	models?: AiModelConfig;
+	/** Messages people can select to start a chat. Plain message strings have their common indentation removed. */
+	suggestions?: readonly {
+		title: AdminCopyInput;
+		description: AdminCopyInput;
+		message: AdminCopyInput;
+	}[];
 	/** Scheduled routines that run as the system. People with the agent's manage permission can review them. */
 	routines?: readonly RoutineDefinition[];
 };
@@ -195,5 +202,10 @@ export type AgentDefinition<Key extends string = string> = {
 	readonly tools: readonly AgentToolDefinition[];
 	readonly skills: readonly SkillDefinition[];
 	readonly models?: AiModelConfig;
+	readonly suggestions: readonly {
+		readonly title: ResolvedAdminCopy;
+		readonly description: ResolvedAdminCopy;
+		readonly message: ResolvedAdminCopy;
+	}[];
 	readonly routines: readonly RoutineDefinition[];
 };

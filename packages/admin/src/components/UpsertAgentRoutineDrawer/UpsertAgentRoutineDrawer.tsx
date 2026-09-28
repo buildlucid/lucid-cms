@@ -62,6 +62,9 @@ const UpsertAgentRoutineDrawer: Component<{
 	const close = () => props.state.setOpen(false);
 	const createRoutine = api.agent.useCreateRoutine({ onSuccess: close });
 	const updateRoutine = api.agent.useUpdateRoutine({ onSuccess: close });
+	const definitions = api.agent.useGetDefinitions({
+		enabled: () => props.state.open,
+	});
 
 	// ----------------------------------------
 	// Memos
@@ -73,7 +76,7 @@ const UpsertAgentRoutineDrawer: Component<{
 	);
 	const errors = createMemo(() => mutation().errors());
 	const agentTools = createMemo(() => {
-		const agent = getAgentAccess().all.find(
+		const agent = definitions.data?.data.agents.find(
 			(agent) => agent.key === (existing()?.agentKey ?? agentKey()),
 		);
 		return (agent?.tools ?? []).filter(
@@ -116,6 +119,10 @@ const UpsertAgentRoutineDrawer: Component<{
 		<Drawer.Root
 			open={props.state.open}
 			onOpenChange={props.state.setOpen}
+			loading={definitions.isPending}
+			error={
+				definitions.isError ? T()("agent.definitions.load.error") : undefined
+			}
 			onReset={() => {
 				createRoutine.reset();
 				updateRoutine.reset();

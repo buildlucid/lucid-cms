@@ -44,6 +44,8 @@ export interface AgentComposerProps {
 	queueable?: boolean;
 	disabled?: boolean;
 	autofocus?: boolean;
+	/** Reports whether the composer is empty, including a restored draft. */
+	onBlankChange?: (blank: boolean) => void;
 	/** Keeps an unsent draft for the browser session. */
 	draftKey?: string;
 	/** Toolbar slots along the bottom edge. `start` comes before the add menu, as it can change what the menu offers. */
@@ -93,6 +95,14 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	const [blank, setBlank] = createSignal(true);
 	let container: HTMLDivElement | undefined;
 	const [submitting, setSubmitting] = createSignal(false);
+
+	// ----------------------------------------
+	// Functions
+	const updateBlank = (instance: Editor) => {
+		const value = isBlank(instance);
+		setBlank(value);
+		props.onBlankChange?.(value);
+	};
 	//* the key is taken when the save is scheduled, so switching chats never mixes drafts
 	const saveDraft = debounce(
 		(key: string | undefined, instance: Editor) =>
@@ -100,8 +110,6 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 		300,
 	);
 
-	// ----------------------------------------
-	// Functions
 	const submit = async (mode: "send" | "steer") => {
 		const instance = editor();
 		if (!instance || submitting() || props.disabled || isBlank(instance)) {
@@ -162,12 +170,12 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				},
 			},
 			onUpdate: ({ editor: updated }) => {
-				setBlank(isBlank(updated));
+				updateBlank(updated);
 				saveDraft(props.draftKey, updated);
 			},
 		});
 		setEditor(instance);
-		setBlank(isBlank(instance));
+		updateBlank(instance);
 		props.ref?.({
 			insert: (markdown) => {
 				const joined = isBlank(instance)
@@ -198,7 +206,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				instance.commands.setContent(readDraft(key), {
 					contentType: "markdown",
 				});
-				setBlank(isBlank(instance));
+				updateBlank(instance);
 			},
 			{ defer: true },
 		),

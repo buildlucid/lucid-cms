@@ -202,6 +202,33 @@ const agentMessageResponseSchema = z.object({
 	createdAt: z.string().nullable(),
 });
 
+const agentCatalogResponseSchema = z.object({
+	enabled: z.boolean(),
+	agents: z.array(
+		z.object({
+			key: z.string(),
+			name: z.string(),
+			description: z.string(),
+			suggestions: z.array(
+				z.object({
+					title: resolvedAdminCopySchema,
+					description: resolvedAdminCopySchema,
+					message: resolvedAdminCopySchema,
+				}),
+			),
+			tools: z.array(
+				z.object({
+					name: z.string(),
+					title: resolvedAdminCopySchema,
+					requiresApproval: z.boolean(),
+					interactive: z.boolean(),
+					permissions: z.array(z.string()),
+				}),
+			),
+		}),
+	),
+});
+
 const agentRunResponseSchema = z.object({
 	id: z.uuid(),
 	conversationId: z.uuid(),
@@ -262,6 +289,12 @@ const routineBody = z.object({
 });
 
 export const controllerSchemas = {
+	getDefinitions: {
+		body: undefined,
+		params: undefined,
+		query: noQuery,
+		response: agentCatalogResponseSchema,
+	} satisfies ControllerSchema,
 	getModels: {
 		body: undefined,
 		params: z.object({ agentKey: z.string().min(1) }),

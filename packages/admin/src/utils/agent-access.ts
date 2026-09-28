@@ -1,4 +1,4 @@
-import type { Agent, AgentRoutine } from "@types";
+import type { AgentRoutine, AgentSummary } from "@types";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -6,7 +6,7 @@ import T from "@/translations";
 /** The agents the current user can use or manage. Reactive when read inside a memo or effect. */
 export const getAgentAccess = () => {
 	const agents = siteStore.get.ai.enabled ? siteStore.get.ai.agents : [];
-	const can = (agent: Agent, level: "use" | "manage") =>
+	const can = (agent: AgentSummary, level: "use" | "manage") =>
 		userStore.get.hasPermission([`agents:${agent.key}:${level}`]).all;
 
 	return {

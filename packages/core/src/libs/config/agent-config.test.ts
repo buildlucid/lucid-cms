@@ -3,6 +3,7 @@ import defineAgent from "../agent/define-agent.js";
 import defineRoutine from "../agent/define-routine.js";
 import { getAgents } from "../agent/registry.js";
 import type { AgentDefinition } from "../agent/types.js";
+import { copy } from "../i18n/copy.js";
 import checkAgentDefinitions from "./checks/check-agent-definitions.js";
 import ConfigSchema from "./config-schema.js";
 
@@ -65,6 +66,44 @@ test("only enabled agents are used, and only while their feature is on", () => {
 
 test("routines normalise their schedule and default to UTC", () => {
 	expect(routine.schedule).toEqual({ cron: "0 9 * * 1", timezone: "UTC" });
+});
+
+test("suggestions normalise admin copy and reject empty messages", () => {
+	const suggested = defineAgent({
+		key: "suggested",
+		name: "Suggested",
+		description: "Helps editors.",
+		suggestions: [
+			{
+				title: copy("admin:agent.suggestion.title"),
+				description: "Find content to improve",
+				message: "\n    Review the latest pages.\n    Suggest improvements.\n",
+			},
+		],
+	});
+
+	expect(check([suggested])).not.toThrow();
+	expect(suggested.suggestions[0]).toMatchObject({
+		title: { type: "lucid.copy", scope: "admin" },
+		description: { type: "lucid.literal", value: "Find content to improve" },
+		message: {
+			type: "lucid.literal",
+			value: "Review the latest pages.\nSuggest improvements.",
+		},
+	});
+	expect(
+		check([
+			{
+				...suggested,
+				suggestions: [
+					{
+						...suggested.suggestions[0],
+						message: copy.literal(" "),
+					},
+				],
+			},
+		]),
+	).toThrow('Agent "suggested" suggestion 1 needs a message.');
 });
 
 test("agent and routine keys are unique and schedules must be valid", () => {

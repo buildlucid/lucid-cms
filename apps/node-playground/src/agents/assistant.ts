@@ -18,5 +18,18 @@ export const assistantAgent = defineAgent({
 		selectDocumentTool,
 		reviewNoteTool,
 	],
+	suggestions: [
+		{
+			title: "Find content to review",
+			description: "Get a quick tour of what's in this CMS.",
+			message:
+				"Give me a concise overview of the content in this CMS. Highlight anything that may need review, without making changes.",
+		},
+		{
+			title: "Try a quick calculation",
+			description: "See how this agent uses its tools.",
+			message: "What is 18 + 24? Use the add tool to check your answer.",
+		},
+	],
 	skills: [demoAgentSkill],
 });
