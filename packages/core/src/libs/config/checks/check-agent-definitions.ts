@@ -1,11 +1,11 @@
 import z from "zod";
 import { routineToolsSchema } from "../../../schemas/agent.js";
-import nextRoutineOccurrence from "../../../services/agent/helpers/next-routine-occurrence.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import {
 	aiModelConfigSchema,
 	aiModelSelectionSchema,
 } from "../../agent/model-selection.js";
+import nextRoutineOccurrence from "../../agent/next-routine-occurrence.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
 import { resolvedAdminCopySchema } from "../../i18n/copy.js";
 

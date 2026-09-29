@@ -1,12 +1,12 @@
-import { referenceKey } from "../../../libs/agent/references.js";
-import type { AgentReference } from "../../../types/response.js";
-import type { ServiceFn } from "../../../utils/services/types.js";
-import getAccessibleConversation from "../helpers/get-accessible-conversation.js";
-import describe from "./describe.js";
-import list from "./list.js";
+import { referenceKey } from "../../libs/agent/references.js";
+import type { AgentReference } from "../../types/response.js";
+import type { ServiceFn } from "../../utils/services/types.js";
+import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
+import describe from "./references/describe.js";
+import list from "./references/list.js";
 
 /** Fetches current display details for the resources linked to a chat that the user can read. */
-const getDetails: ServiceFn<
+const getReferences: ServiceFn<
 	[{ id: string; userId: number }],
 	AgentReference[]
 > = async (context, input) => {
@@ -31,4 +31,4 @@ const getDetails: ServiceFn<
 	};
 };
 
-export default getDetails;
+export default getReferences;

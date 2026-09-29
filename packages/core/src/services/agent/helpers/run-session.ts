@@ -5,6 +5,7 @@ import {
 	conversationContext,
 } from "../../../libs/agent/context.js";
 import { inputMessageParts } from "../../../libs/agent/input.js";
+import { isTerminalRunStatus } from "../../../libs/agent/run-status.js";
 import type {
 	Checkpoint,
 	ConversationContext,
@@ -52,6 +53,14 @@ export type RunSession = NonNullable<
 const leaseExpiry = () =>
 	new Date(Date.now() + constants.agent.leaseMs).toISOString();
 
+//* another worker, or a cancellation, took the run
+const supersededError = () =>
+	({
+		type: "basic",
+		status: 409,
+		message: copy("server:agent.run.superseded"),
+	}) as const;
+
 /**
  * Claims a run for this worker and owns it until it stops. Every write is fenced
  * by the execution token, so a stale or cancelled worker cannot overwrite newer state.
@@ -78,16 +87,7 @@ const openRunSession = async (
 		leaseExpiresAt: leaseExpiry(),
 	});
 	if (claim.error) return claim;
-	if (!claim.data) {
-		return {
-			data: undefined,
-			error: {
-				type: "basic" as const,
-				status: 409,
-				message: copy("server:agent.run.superseded"),
-			},
-		};
-	}
+	if (!claim.data) return { data: undefined, error: supersededError() };
 
 	const lease = new AbortController();
 	const signal = AbortSignal.any(
@@ -118,14 +118,7 @@ const openRunSession = async (
 
 	const superseded = () => {
 		loseLease();
-		return {
-			data: undefined,
-			error: {
-				type: "basic" as const,
-				status: 409,
-				message: copy("server:agent.run.superseded"),
-			},
-		};
+		return { data: undefined, error: supersededError() };
 	};
 
 	const write = async (
@@ -254,7 +247,7 @@ const openRunSession = async (
 					);
 					if (saved.error) return saved;
 
-					if (constants.agent.runStatuses.terminal.some((s) => s === status)) {
+					if (isTerminalRunStatus(status)) {
 						const conversations = new AgentConversationsRepository(
 							writeContext.db,
 						);
@@ -334,37 +327,12 @@ const openRunSession = async (
 			/** Returns the run to the queue so a background worker continues it. */
 			handOff: async (): ServiceResponse<{ status: AgentRunStatus }> => {
 				if (lease.signal.aborted) {
-					return {
-						data: undefined,
-						error: {
-							type: "basic" as const,
-							status: 409,
-							message: copy("server:agent.run.superseded"),
-						},
-					};
+					return { data: undefined, error: supersededError() };
 				}
 
 				const queued = await withTransaction(context, async (context) => {
-					const AgentRuns = new AgentRunsRepository(context.db);
-
-					const updated = await AgentRuns.updateWithToken({
-						runId: run.id,
-						token,
-						checkpoint,
-						status: "queued",
-						now: new Date().toISOString(),
-					});
+					const updated = await write("queued", undefined, context);
 					if (updated.error) return updated;
-					if (!updated.data) {
-						return {
-							data: undefined,
-							error: {
-								type: "basic" as const,
-								status: 409,
-								message: copy("server:agent.run.superseded"),
-							},
-						};
-					}
 
 					return enqueueRun(context, { runId: run.id, userId: run.user_id });
 				});

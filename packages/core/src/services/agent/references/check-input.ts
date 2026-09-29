@@ -1,8 +1,11 @@
-import { referenceKey } from "../../../libs/agent/references.js";
+import {
+	referenceKey,
+	referenceNotFoundError,
+	referenceReadPermission,
+} from "../../../libs/agent/references.js";
 import { getAgent } from "../../../libs/agent/registry.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
-import { Permissions } from "../../../libs/permission/definitions.js";
+import hasPermission from "../../../libs/permission/has-permission.js";
 import type { AgentReferenceInput } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveUserAccess from "../../users/resolve-access.js";
@@ -28,14 +31,10 @@ const checkInput: ServiceFn<
 			reference.type === "media"
 				? agent?.attachments.media
 				: agent?.attachments.documents;
-		const permission =
-			reference.type === "media"
-				? Permissions.MediaRead
-				: getCollectionPermission(reference.collectionKey, "read");
 
 		if (
 			!attachable ||
-			(!access.data.superAdmin && !access.data.permissions.includes(permission))
+			!hasPermission(access.data, referenceReadPermission(reference))
 		) {
 			return {
 				data: undefined,
@@ -48,17 +47,7 @@ const checkInput: ServiceFn<
 		}
 
 		if (!details.data.has(referenceKey(reference))) {
-			return {
-				data: undefined,
-				error: {
-					type: "basic",
-					status: 404,
-					message:
-						reference.type === "media"
-							? copy("server:core.media.not.found.message")
-							: copy("server:core.documents.not.found.message"),
-				},
-			};
+			return { data: undefined, error: referenceNotFoundError(reference) };
 		}
 	}
 

@@ -15,7 +15,7 @@ import AgentQuestionPanel from "@/components/AgentQuestionPanel/AgentQuestionPan
 import Button from "@/components/Button/Button";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import T from "@/translations";
-import { approvalWidget, questionWidget } from "@/utils/agent-chat";
+import { approvalWidget, questionWidget } from "@/utils/agent-tools";
 import { resolveAgentSlot } from "./slots";
 import type { AgentWidgetInteraction, AgentWidgetSubmitResult } from "./types";
 

@@ -1,13 +1,24 @@
 import z from "zod";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
 import { agentReferenceInputSchema } from "../../schemas/agent-references.js";
+import type { AgentRunnerToolName } from "../../types/response.js";
 import { copy } from "../i18n/index.js";
+import type { ResolvedAdminCopy } from "../i18n/types.js";
 import type { RunMode } from "./types.js";
 
 export type RunnerToolContext = {
 	mode: RunMode;
 	hasSkills: boolean;
 	hasHistory: boolean;
+};
+
+type RunnerToolDefinition = {
+	name: AgentRunnerToolName;
+	title: ResolvedAdminCopy;
+	description: string;
+	input: z.ZodObject;
+	/** Whether the tool is offered for a model turn. */
+	available: (context: RunnerToolContext) => boolean;
 };
 
 /**
@@ -67,7 +78,7 @@ const runnerTools = {
 				.min(1)
 				.describe("The message to show in the chat."),
 		}),
-		available: ({ mode }: RunnerToolContext) => mode === "chat",
+		available: ({ mode }) => mode === "chat",
 	},
 	history: {
 		name: "lucid_read_history",
@@ -79,7 +90,7 @@ const runnerTools = {
 			after: z.number().int().nonnegative().default(0),
 			offset: z.number().int().nonnegative().default(0),
 		}),
-		available: ({ hasHistory }: RunnerToolContext) => hasHistory,
+		available: ({ hasHistory }) => hasHistory,
 	},
 	skill: {
 		name: "lucid_load_skill",
@@ -87,7 +98,7 @@ const runnerTools = {
 		description:
 			"Load the instructions for an available skill before performing its task.",
 		input: z.object({ name: z.string() }),
-		available: ({ hasSkills }: RunnerToolContext) => hasSkills,
+		available: ({ hasSkills }) => hasSkills,
 	},
 	finish: {
 		name: "lucid_finish_run",
@@ -98,12 +109,9 @@ const runnerTools = {
 			outcome: agentRunOutcomeSchema,
 			summary: z.string().min(1).max(4000),
 		}),
-		available: ({ mode }: RunnerToolContext) => mode === "routine",
+		available: ({ mode }) => mode === "routine",
 	},
-} as const;
-
-export type RunnerToolName =
-	(typeof runnerTools)[keyof typeof runnerTools]["name"];
+} as const satisfies Record<string, RunnerToolDefinition>;
 
 export const runnerToolNames: ReadonlySet<string> = new Set(
 	Object.values(runnerTools).map((tool) => tool.name),

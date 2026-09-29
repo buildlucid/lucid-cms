@@ -1,8 +1,13 @@
 import type { Context } from "hono";
 import { streamSSE } from "hono/streaming";
+import { agentServices } from "../../../../../services/index.js";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
 import type { AgentStreamEvent } from "../../../../../types/response.js";
-import type { ServiceResponse } from "../../../../../utils/services/types.js";
+import serviceWrapper from "../../../../../utils/services/service-wrapper.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../../../../utils/services/types.js";
 import createServiceContext from "../../../utils/create-service-context.js";
 
 /**
@@ -49,5 +54,21 @@ const streamEvents = (
 		}
 	});
 };
+
+/** Executes a run here and streams its events. A disconnect hands the run to a background worker. */
+export const streamRun = (
+	c: Context<LucidHonoGeneric>,
+	context: ServiceContext,
+	input: Omit<
+		Parameters<typeof agentServices.executeRun>[1],
+		"signal" | "emit"
+	>,
+) =>
+	streamEvents(c, (stream) =>
+		serviceWrapper(agentServices.executeRun, {
+			transaction: false,
+			logError: true,
+		})(context, { ...input, ...stream }),
+	);
 
 export default streamEvents;

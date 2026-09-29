@@ -1,23 +1,16 @@
-import { debounce } from "@solid-primitives/scheduled";
 import { A } from "@solidjs/router";
 import type { AgentReference } from "@types";
-import classnames from "classnames";
-import { FaSolidXmark } from "solid-icons/fa";
 import {
 	type Component,
 	createMemo,
 	createSignal,
 	For,
 	Match,
-	onCleanup,
 	Show,
 	Switch,
 } from "solid-js";
 import AgentReferenceThumb from "@/components/AgentReferenceFiles/parts/AgentReferenceThumb";
-import {
-	referenceRemoveClasses,
-	referenceRemoveIdleClasses,
-} from "@/components/AgentReferenceFiles/remove-classes";
+import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
 import T, { translateAdminCopy } from "@/translations";
@@ -28,67 +21,6 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 const mediaColumns = 4;
 const shownMedia = mediaColumns * 2;
 const shownDocuments = 4;
-
-/**
- * Revealed on hover or focus, so the list stays quiet until someone reaches for
- * it. Styled like the danger outline button. The first click primes it and the
- * second removes, like brick deletion.
- */
-const RemoveButton: Component<{
-	label: string;
-	class: string;
-	onRemove: () => void;
-}> = (props) => {
-	// ----------------------------------------
-	// State & Hooks
-	const [primed, setPrimed] = createSignal(false);
-
-	// ----------------------------------------
-	// Memos
-	const label = createMemo(() =>
-		T()(
-			primed() ? "agent.references.unlink.confirm" : "agent.references.unlink",
-			{ label: props.label },
-		),
-	);
-
-	// ----------------------------------------
-	// Functions
-	const unprime = debounce(() => setPrimed(false), 4000);
-
-	// ----------------------------------------
-	// Effects
-	onCleanup(() => unprime.clear());
-
-	// ----------------------------------------
-	// Render
-	return (
-		<button
-			type="button"
-			class={classnames(
-				referenceRemoveClasses,
-				primed()
-					? "border-danger bg-danger-hover text-danger-foreground fill-danger-foreground opacity-100"
-					: referenceRemoveIdleClasses,
-				props.class,
-			)}
-			aria-label={label()}
-			title={label()}
-			onClick={() => {
-				if (primed()) {
-					unprime.clear();
-					setPrimed(false);
-					props.onRemove();
-					return;
-				}
-				setPrimed(true);
-				unprime();
-			}}
-		>
-			<FaSolidXmark size={9} />
-		</button>
-	);
-};
 
 /** Lists the resources linked to a chat by messages and tools: media as a thumbnail grid, documents as rows. */
 const AgentChatReferences: Component<{
@@ -110,7 +42,9 @@ const AgentChatReferences: Component<{
 	// Memos
 	const items = createMemo(() => references.data?.data ?? []);
 	const media = createMemo(() =>
-		items().filter((reference) => reference.type === "media"),
+		items().flatMap((reference) =>
+			reference.type === "media" ? [reference] : [],
+		),
 	);
 	const visibleMedia = createMemo(() =>
 		showAll() ? media() : media().slice(0, shownMedia),
@@ -161,6 +95,10 @@ const AgentChatReferences: Component<{
 						reference.source.toolName,
 				})
 			: T()("agent.references.source.message");
+	const unlinkLabels = (label: string) => ({
+		label: T()("agent.references.unlink", { label }),
+		confirmLabel: T()("agent.references.unlink.confirm", { label }),
+	});
 	const remove = (reference: AgentReference) =>
 		deleteReference.action.mutate({
 			conversationId: props.conversationId,
@@ -220,16 +158,13 @@ const AgentChatReferences: Component<{
 											type="button"
 											class="block aspect-square w-full overflow-hidden rounded-md border border-border transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-primary"
 											title={`${reference.label} · ${sourceLabel(reference)}`}
-											onClick={() => {
-												if (reference.type === "media")
-													setMediaId(reference.mediaId);
-											}}
+											onClick={() => setMediaId(reference.mediaId)}
 										>
 											<AgentReferenceThumb reference={reference} />
 											<span class="sr-only">{reference.label}</span>
 										</button>
-										<RemoveButton
-											label={reference.label}
+										<AgentReferenceRemoveButton
+											{...unlinkLabels(reference.label)}
 											class="end-1 top-1"
 											onRemove={() => remove(reference)}
 										/>
@@ -283,8 +218,8 @@ const AgentChatReferences: Component<{
 												</span>
 											</span>
 										</A>
-										<RemoveButton
-											label={document.label}
+										<AgentReferenceRemoveButton
+											{...unlinkLabels(document.label)}
 											class="end-0 top-1/2 -translate-y-1/2"
 											onRemove={() => remove(document)}
 										/>

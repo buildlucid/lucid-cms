@@ -1,3 +1,4 @@
+import { settleToolCall } from "../../../libs/agent/context.js";
 import { messageText } from "../../../libs/agent/input.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
@@ -44,19 +45,9 @@ const consumeSteering: ServiceFn<
 		};
 
 		for (const call of checkpoint.calls.slice(checkpoint.cursor)) {
-			checkpoint.messages.push({
-				sourceId: checkpoint.messageId,
-				role: "tool",
-				toolCallId: call.id,
-				name: call.name,
-				output,
-			});
+			settleToolCall(checkpoint, call, { status: "skipped", output });
 
 			for (const part of checkpoint.parts) {
-				if (part.type === "tool" && part.id === call.id) {
-					part.status = "skipped";
-					part.output = output;
-				}
 				if (
 					part.type === "widget" &&
 					part.interaction?.toolCallId === call.id &&

@@ -3,7 +3,6 @@ import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
 	AgentInputsRepository,
-	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
 import type {
 	AgentDelivery,
@@ -12,6 +11,7 @@ import type {
 import type { ServiceFn } from "../../utils/services/types.js";
 import advanceInputs from "./advance-inputs.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
+import runActsFor from "./helpers/run-acts-for.js";
 import checkReferenceInput from "./references/check-input.js";
 
 /**
@@ -51,7 +51,6 @@ const submitInput: ServiceFn<
 
 	const Inputs = new AgentInputsRepository(context.db);
 	const Conversations = new AgentConversationsRepository(context.db);
-	const Runs = new AgentRunsRepository(context.db);
 
 	//* a stale target is queued rather than injected into another run
 	let targetRunId: string | null = null;
@@ -59,14 +58,12 @@ const submitInput: ServiceFn<
 		input.delivery.kind === "steer" &&
 		owned.data.active_run_id === input.delivery.targetRunId
 	) {
-		const target = await Runs.selectSingle({
-			select: ["user_id"],
-			where: [{ key: "id", operator: "=", value: input.delivery.targetRunId }],
+		const actsFor = await runActsFor(context, {
+			runId: input.delivery.targetRunId,
+			userId: input.userId,
 		});
-		if (target.error) return target;
-		if (target.data?.user_id === input.userId) {
-			targetRunId = input.delivery.targetRunId;
-		}
+		if (actsFor.error) return actsFor;
+		if (actsFor.data) targetRunId = input.delivery.targetRunId;
 	}
 
 	const submitted = await Inputs.submit({
@@ -103,9 +100,8 @@ const submitInput: ServiceFn<
 	}
 
 	if (owned.data.queue_paused) {
-		const resumed = await Conversations.updateSingle({
-			where: [{ key: "id", operator: "=", value: input.conversationId }],
-			data: { queue_paused: false },
+		const resumed = await Conversations.resumeQueue({
+			conversationId: input.conversationId,
 		});
 		if (resumed.error) return resumed;
 	}

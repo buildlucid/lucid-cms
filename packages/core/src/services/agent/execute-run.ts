@@ -1,5 +1,6 @@
 import constants from "../../constants/constants.js";
 import { answerInteraction } from "../../libs/agent/interactions.js";
+import { isTerminalRunStatus } from "../../libs/agent/run-status.js";
 import { checkpointSchema } from "../../libs/agent/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
@@ -91,7 +92,7 @@ const executeRun: ServiceFn<
 		};
 	}
 
-	if (constants.agent.runStatuses.terminal.some((s) => s === run.status)) {
+	if (isTerminalRunStatus(run.status)) {
 		await emit({ type: "finish", runId: run.id, status: run.status });
 
 		return { error: undefined, data: { status: run.status } };

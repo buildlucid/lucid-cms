@@ -10,7 +10,7 @@ import AgentToolDetails from "@/components/AgentToolDetails/AgentToolDetails";
 import AgentTranscriptRow from "@/components/AgentTranscriptRow/AgentTranscriptRow";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
-import { approvalWidget, questionWidget } from "@/utils/agent-chat";
+import { approvalWidget, questionWidget } from "@/utils/agent-tools";
 import { resolveAgentSlot } from "./slots";
 
 const interactionStatus = (interaction: AgentInteraction, key: string) => {

@@ -1,7 +1,7 @@
 import type { AgentConversation, AgentRoutine } from "@types";
 import { type Component, Show } from "solid-js";
 import AgentToolPanel from "@/components/AgentToolPanel/AgentToolPanel";
-import type { AgentToolPart } from "@/utils/agent-chat";
+import type { AgentToolPart } from "@/utils/agent-tools";
 import AgentChatDetailsCard from "./AgentChatDetailsCard";
 import AgentRoutineCard from "./AgentRoutineCard";
 

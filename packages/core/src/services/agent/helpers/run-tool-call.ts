@@ -15,7 +15,12 @@ import {
 	type RunnerToolCall,
 	runnerToolHandlers,
 } from "./runner-tools/index.js";
-import { type ToolOutcome, toolFailure } from "./tool-outcome.js";
+import {
+	type ToolOutcome,
+	type ToolResult,
+	toolFailure,
+	toolResult,
+} from "./tool-outcome.js";
 
 /**
  * Whether the run's approval policy asks before an agent tool runs. Tool
@@ -34,6 +39,19 @@ const needsApproval = (checkpoint: Checkpoint, tool: AgentToolDefinition) => {
 			return false;
 	}
 };
+
+type FailedRun = Exclude<
+	Awaited<ReturnType<typeof executeAgentTool>>,
+	{ type: "success" }
+>;
+
+/** A failed tool run keeps its message for the model. A missing or forbidden tool reads as unavailable. */
+const failedRun = (context: ServiceContext, result: FailedRun): ToolResult =>
+	toolFailure(
+		"message" in result
+			? result.message
+			: context.translate("server:agent.tool.unavailable"),
+	);
 
 /**
  * Handles one tool invocation. Runner tools run straight away. Agent tools
@@ -96,20 +114,9 @@ const runToolCall = async (
 			input: call.input,
 			execution,
 		});
-		if (prepared.type !== "success") {
-			return toolFailure(
-				"message" in prepared
-					? prepared.message
-					: context.translate("server:agent.tool.unavailable"),
-			);
-		}
+		if (prepared.type !== "success") return failedRun(context, prepared);
 		if ("output" in prepared.data) {
-			return {
-				kind: "result",
-				output: prepared.data.output,
-				widgets: prepared.data.widgets,
-				failed: false,
-			};
+			return toolResult(prepared.data.output, prepared.data.widgets);
 		}
 
 		return {
@@ -162,20 +169,9 @@ const runToolCall = async (
 	});
 	checkpoint.inFlightWrite = undefined;
 
-	if (executed.type !== "success") {
-		return toolFailure(
-			"message" in executed
-				? executed.message
-				: context.translate("server:agent.tool.unavailable"),
-		);
-	}
+	if (executed.type !== "success") return failedRun(context, executed);
 
-	return {
-		kind: "result",
-		output: executed.data.output,
-		widgets: executed.data.widgets,
-		failed: false,
-	};
+	return toolResult(executed.data.output, executed.data.widgets);
 };
 
 export default runToolCall;

@@ -2,12 +2,20 @@ import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
 	AgentInputsRepository,
-	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
 import type { AgentInputAction } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import advanceInputs from "./advance-inputs.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
+import runActsFor from "./helpers/run-acts-for.js";
+
+//* the input moved on, such as its run starting, since the person saw it
+const inputChanged = () =>
+	({
+		type: "basic",
+		status: 409,
+		message: copy("server:agent.input.changed"),
+	}) as const;
 
 /** Cancels or steers pending input, or resumes or clears a paused queue. */
 const updateInput: ServiceFn<
@@ -22,7 +30,6 @@ const updateInput: ServiceFn<
 
 	const Inputs = new AgentInputsRepository(context.db);
 	const Conversations = new AgentConversationsRepository(context.db);
-	const Runs = new AgentRunsRepository(context.db);
 
 	const { action } = input;
 	switch (action.kind) {
@@ -32,38 +39,21 @@ const updateInput: ServiceFn<
 				id: action.id,
 			});
 			if (cancelled.error) return cancelled;
-			if (!cancelled.data) {
-				return {
-					data: undefined,
-					error: {
-						type: "basic",
-						status: 409,
-						message: copy("server:agent.input.changed"),
-					},
-				};
-			}
+			if (!cancelled.data) return { data: undefined, error: inputChanged() };
 
 			break;
 		}
 		case "steer": {
 			if (owned.data.active_run_id !== action.targetRunId) {
-				return {
-					data: undefined,
-					error: {
-						type: "basic",
-						status: 409,
-						message: copy("server:agent.input.changed"),
-					},
-				};
+				return { data: undefined, error: inputChanged() };
 			}
 
-			//* a run only takes corrections from the person it acts for
-			const target = await Runs.selectSingle({
-				select: ["user_id"],
-				where: [{ key: "id", operator: "=", value: action.targetRunId }],
+			const actsFor = await runActsFor(context, {
+				runId: action.targetRunId,
+				userId: input.userId,
 			});
-			if (target.error) return target;
-			if (target.data?.user_id !== input.userId) {
+			if (actsFor.error) return actsFor;
+			if (!actsFor.data) {
 				return {
 					data: undefined,
 					error: {
@@ -81,37 +71,21 @@ const updateInput: ServiceFn<
 				runId: action.targetRunId,
 			});
 			if (steered.error) return steered;
-			if (!steered.data) {
-				return {
-					data: undefined,
-					error: {
-						type: "basic",
-						status: 409,
-						message: copy("server:agent.input.changed"),
-					},
-				};
+			if (!steered.data) return { data: undefined, error: inputChanged() };
+
+			break;
+		}
+		case "clear":
+		case "resume": {
+			if (action.kind === "clear") {
+				const cleared = await Inputs.cancel({
+					conversationId: input.conversationId,
+				});
+				if (cleared.error) return cleared;
 			}
 
-			break;
-		}
-		case "clear": {
-			const cleared = await Inputs.cancel({
+			const resumed = await Conversations.resumeQueue({
 				conversationId: input.conversationId,
-			});
-			if (cleared.error) return cleared;
-
-			const resumed = await Conversations.updateSingle({
-				where: [{ key: "id", operator: "=", value: input.conversationId }],
-				data: { queue_paused: false },
-			});
-			if (resumed.error) return resumed;
-
-			break;
-		}
-		case "resume": {
-			const resumed = await Conversations.updateSingle({
-				where: [{ key: "id", operator: "=", value: input.conversationId }],
-				data: { queue_paused: false },
 			});
 			if (resumed.error) return resumed;
 

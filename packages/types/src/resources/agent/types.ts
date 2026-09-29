@@ -113,6 +113,26 @@ export type AgentInputAction =
 	| { kind: "resume" }
 	| { kind: "clear" };
 
+/** Tools the agent runner handles itself. Their names are reserved, so agent tools cannot use them. */
+export type AgentRunnerToolName =
+	| "lucid_list_references"
+	| "lucid_register_references"
+	| "lucid_remove_reference"
+	| "lucid_ask_user"
+	| "lucid_share_progress"
+	| "lucid_read_history"
+	| "lucid_load_skill"
+	| "lucid_finish_run";
+
+/** Lucid's own agent tools that the admin shows in their own way. */
+export type AgentLucidToolName =
+	| "web_search"
+	| "web_fetch"
+	| "resources_analyze";
+
+/** Widgets the runner creates itself: a question from the agent, and a tool waiting for approval. */
+export type AgentRunnerWidgetKey = "lucid-question" | "lucid-tool-approval";
+
 /** The lifecycle state of an agent run. */
 export type AgentRunStatus =
 	| "queued"

@@ -1,5 +1,5 @@
 import { submitInput, updateInput } from "./input";
-import streamRun from "./stream-run";
+import streamRun, { runStreamUrls } from "./stream-run";
 import useCancelRun from "./useCancelRun";
 import useCreateConversation from "./useCreateConversation";
 import useCreateRoutine from "./useCreateRoutine";
@@ -25,6 +25,7 @@ const exportObject = {
 	submitInput,
 	updateInput,
 	streamRun,
+	runStreamUrls,
 	useCancelRun,
 	useCreateConversation,
 	useCreateRoutine,

@@ -11,7 +11,7 @@ import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
 import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
-import streamEvents from "./helpers/stream-events.js";
+import { streamRun } from "./helpers/stream-events.js";
 
 const factory = createFactory();
 
@@ -58,12 +58,7 @@ const sendMessageController = factory.createHandlers(
 			return c.json(formatAPIResponse(c, { data: run.data }), 202);
 		}
 
-		return streamEvents(c, (stream) =>
-			serviceWrapper(agentServices.executeRun, {
-				transaction: false,
-				logError: true,
-			})(context, { runId, ...stream }),
-		);
+		return streamRun(c, context, { runId });
 	},
 );
 

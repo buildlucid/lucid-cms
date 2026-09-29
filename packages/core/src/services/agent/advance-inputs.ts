@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import { isTerminalRunStatus } from "../../libs/agent/run-status.js";
 import { checkpointSchema } from "../../libs/agent/types.js";
 import type { LucidAgentInputs } from "../../libs/db/tables/agent-inputs.js";
 import type { Select } from "../../libs/db/types.js";
@@ -65,12 +66,7 @@ const settleSteer: ServiceFn<
 		],
 	});
 	if (run.error) return run;
-	if (
-		run.data &&
-		!constants.agent.runStatuses.terminal.some(
-			(status) => status === run.data?.status,
-		)
-	) {
+	if (run.data && !isTerminalRunStatus(run.data.status)) {
 		return { error: undefined, data: undefined };
 	}
 

@@ -1,5 +1,5 @@
 import { CronExpressionParser } from "cron-parser";
-import { copy } from "../../../libs/i18n/index.js";
+import { copy } from "../i18n/index.js";
 
 /** Parses schedule input at the API boundary and returns the next UTC occurrence. */
 const nextRoutineOccurrence = (input: {

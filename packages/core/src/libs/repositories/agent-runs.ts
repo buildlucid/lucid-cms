@@ -2,6 +2,7 @@ import { type Insertable, sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { QueryParams } from "../../types/query-params.js";
 import type { AgentRunOutcome } from "../../types/response.js";
+import { isTerminalRunStatus } from "../agent/run-status.js";
 import type { Checkpoint } from "../agent/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
@@ -234,9 +235,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		recovered?: boolean;
 		now: string;
 	}) {
-		const terminal = constants.agent.runStatuses.terminal.some(
-			(status) => status === props.status,
-		);
+		const terminal = isTerminalRunStatus(props.status);
 
 		const exec = await this.executeQuery(
 			() =>
@@ -339,9 +338,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		finish?: { outcome: AgentRunOutcome; summary: string };
 		now: string;
 	}) {
-		const terminal = constants.agent.runStatuses.terminal.some(
-			(status) => status === props.status,
-		);
+		const terminal = isTerminalRunStatus(props.status);
 		const released = props.status !== "running";
 
 		const exec = await this.executeQuery(

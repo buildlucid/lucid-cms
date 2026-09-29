@@ -1,16 +1,14 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
-import { modelMessages } from "../../../libs/agent/context.js";
+import { modelMessages, reportedModel } from "../../../libs/agent/context.js";
+import { textFromParts } from "../../../libs/agent/input.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
-import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type resolveRunSetup from "./resolve-run-setup.js";
+import isPermanentFailure from "./is-permanent-failure.js";
+import type { RunSetup } from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import streamModelTurn from "./stream-model-turn.js";
-import textFromParts from "./text-from-parts.js";
-import trackPaidRequest, {
-	type PaidRequestRecord,
-} from "./track-paid-request.js";
+import trackPaidRequest, { runnerRequestRecord } from "./track-paid-request.js";
 
 type TurnResult =
 	| { kind: "continue" }
@@ -26,7 +24,7 @@ const runModelTurn: ServiceFn<
 			run: SessionRun;
 			checkpoint: Checkpoint;
 			session: RunSession;
-			setup: ReturnType<typeof resolveRunSetup>;
+			setup: RunSetup;
 		},
 	],
 	TurnResult
@@ -51,22 +49,11 @@ const runModelTurn: ServiceFn<
 	//* approximate serialised size, tracked incrementally rather than re-stringifying every delta
 	let partsSize = 0;
 	let saveError: Awaited<ReturnType<RunSession["save"]>>["error"];
-	const usageRecord: PaidRequestRecord = {
-		featureKey: "agent.chat",
-		requestId: checkpoint.requestId,
-		runId: run.id,
-		conversationId: run.conversation_id,
-		userId: run.user_id,
-	};
 	let savedAt = Date.now();
 
 	const onEvent = async (event: ModelEvent) => {
 		if (event.type === "start") {
-			checkpoint.model = {
-				id: event.model,
-				tokenLimit: event.inputTokenLimit,
-				toolLimit: event.toolLimit,
-			};
+			checkpoint.model = reportedModel(event);
 		} else if (event.type === "text-delta") {
 			const last = checkpoint.parts.at(-1);
 
@@ -109,7 +96,10 @@ const runModelTurn: ServiceFn<
 
 	const sent = checkpoint.messages.length;
 	const response = await trackPaidRequest(context, {
-		record: usageRecord,
+		record: runnerRequestRecord(run, {
+			requestId: checkpoint.requestId,
+			featureKey: "agent.chat",
+		}),
 		signal: session.signal,
 		send: (start) =>
 			streamModelTurn(context, {
@@ -161,18 +151,10 @@ const runModelTurn: ServiceFn<
 			checkpoint.requestId = randomUUID();
 			return { error: undefined, data: { kind: "overflow" } };
 		}
-		const AiGenerations = new AiGenerationsRepository(context.db);
-
-		const usage = await AiGenerations.selectSingleByRequestId({
+		const permanent = await isPermanentFailure(context, {
+			error: response.error,
 			requestId: checkpoint.requestId,
-			select: ["status"],
 		});
-		const permanent =
-			(response.error.key === "agent_model_failed" &&
-				usage.data?.status === "failed") ||
-			(response.error.status !== undefined &&
-				response.error.status < 500 &&
-				response.error.status !== 409);
 
 		return {
 			error: undefined,

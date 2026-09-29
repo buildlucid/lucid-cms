@@ -6,15 +6,21 @@ import {
 } from "../libs/agent/model-selection.js";
 import { resolvedAdminCopySchema } from "../libs/i18n/index.js";
 import type {
+	AgentApprovalMode,
 	AgentDelivery,
 	AgentInput,
 	AgentInputAction,
 	AgentInteractionAction,
+	AgentMessagePart,
 	AgentRoutineSource,
+	AgentRunOutcome,
+	AgentRunStatus,
 	AgentTitleStatus,
+	AgentToolStatus,
 } from "../types/response.js";
 import {
 	agentReferenceInputSchema,
+	agentReferenceSchema,
 	agentReferenceSnapshotSchema,
 } from "./agent-references.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
@@ -65,13 +71,13 @@ export const agentRunStatusSchema = z.enum([
 	"completed",
 	"failed",
 	"cancelled",
-]);
+]) satisfies z.ZodType<AgentRunStatus>;
 
 export const agentApprovalModeSchema = z.enum([
 	"confirm-all",
 	"tool-defaults",
 	"automatic",
-]);
+]) satisfies z.ZodType<AgentApprovalMode>;
 
 export const agentTitleStatusSchema = z.enum([
 	"provisional",
@@ -88,7 +94,7 @@ export const agentRunOutcomeSchema = z.enum([
 	"done",
 	"nothing_to_report",
 	"needs_review",
-]);
+]) satisfies z.ZodType<AgentRunOutcome>;
 
 /** How a tool asks for input: the prompt and where its widget is shown. */
 export const agentInteractionRequestSchema = z.object({
@@ -151,11 +157,17 @@ export const agentMessagePartSchema = z.discriminatedUnion("type", [
 			title: resolvedAdminCopySchema.optional(),
 			input: z.record(z.string(), z.unknown()),
 			output: z.unknown().optional(),
-			status: z.enum(["pending", "running", "complete", "failed", "skipped"]),
+			status: z.enum([
+				"pending",
+				"running",
+				"complete",
+				"failed",
+				"skipped",
+			]) satisfies z.ZodType<AgentToolStatus>,
 		})
 		.strict(),
 	agentWidgetSchema,
-]);
+]) satisfies z.ZodType<AgentMessagePart>;
 
 /** A conversation's context as last measured, stored on the conversation. */
 export const agentContextSchema = z.object({
@@ -396,6 +408,18 @@ export const controllerSchemas = {
 		query: noQuery,
 		params: idParams,
 		response: agentConversationDetailsResponseSchema,
+	} satisfies ControllerSchema,
+	getReferences: {
+		body: undefined,
+		query: noQuery,
+		params: idParams,
+		response: z.array(agentReferenceSchema),
+	} satisfies ControllerSchema,
+	deleteReference: {
+		body: undefined,
+		query: noQuery,
+		params: z.object({ id: z.uuid(), referenceId: z.uuid() }),
+		response: undefined,
 	} satisfies ControllerSchema,
 	updateConversation: {
 		body: z.object({

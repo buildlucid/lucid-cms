@@ -8,8 +8,7 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import { formatDbTimestamp } from "../ai/helpers/date-helpers.js";
 import insertConversation from "./helpers/insert-conversation.js";
-import storePendingUsage from "./helpers/store-pending-usage.js";
-import storeUsage from "./helpers/store-usage.js";
+import storeUsage, { storePendingUsage } from "./helpers/store-usage.js";
 import reconcileUsage from "./reconcile-usage.js";
 import startRun from "./start-run.js";
 

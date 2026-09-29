@@ -61,6 +61,12 @@ export const checkToolResult =
 		return { type: "success", data: { ...result, output: output.data } };
 	};
 
+/** Describes invalid tool input so the caller, often a model, can correct it. */
+export const describeInputIssues = (error: z.ZodError) =>
+	error.issues
+		.map((issue) => `${issue.path.join(".") || "input"}: ${issue.message}`)
+		.join("; ");
+
 /** Validates input, then runs the handler and checks its result, retaining the target's execution and result types. */
 const prepareToolInput = async <
 	Input extends z.ZodObject,
@@ -82,9 +88,7 @@ const prepareToolInput = async <
 	if (!parsedInput.success) {
 		return {
 			type: "invalid-input",
-			message: parsedInput.error.issues
-				.map((issue) => `${issue.path.join(".") || "input"}: ${issue.message}`)
-				.join("; "),
+			message: describeInputIssues(parsedInput.error),
 		};
 	}
 

@@ -50,13 +50,3 @@ export const agentReferenceSchema = z.discriminatedUnion("type", [
 		version: z.string().optional(),
 	}),
 ]);
-
-export const controllerSchemas = {
-	getReferences: {
-		params: z.object({ id: z.uuid() }),
-		response: z.array(agentReferenceSchema),
-	},
-	deleteReference: {
-		params: z.object({ id: z.uuid(), referenceId: z.uuid() }),
-	},
-};

@@ -1,5 +1,6 @@
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
+import hasPermission from "../permission/has-permission.js";
 import { getValidPermissions } from "../permission/registry.js";
 import { filterExternalScopes } from "../permission/scopes.js";
 import { getMcpToolRegistry, toolDefinitionInternal } from "./registry.js";
@@ -88,8 +89,7 @@ const agentPermissionCheck = (args: ExecutionArgs<AgentToolExecution>) => {
 	return (required: readonly string[]) =>
 		required.every(
 			(permission) =>
-				permissions.has(permission) &&
-				(authority.superAdmin || authority.permissions.includes(permission)),
+				permissions.has(permission) && hasPermission(authority, permission),
 		);
 };
 

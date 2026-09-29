@@ -1,5 +1,5 @@
-import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
-import { Permissions } from "../../../libs/permission/definitions.js";
+import { referenceReadPermission } from "../../../libs/agent/references.js";
+import hasPermission from "../../../libs/permission/has-permission.js";
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
@@ -34,10 +34,9 @@ const list: ServiceFn<
 			? undefined
 			: await resolveUserAccess(context, { userId: input.userId });
 	if (access?.error) return access;
-	const canRead = (permission: string) =>
-		!access ||
-		access.data.superAdmin ||
-		access.data.permissions.includes(permission);
+	//* a system run reads every linked resource
+	const canRead = (reference: AgentReferenceInput) =>
+		!access || hasPermission(access.data, referenceReadPermission(reference));
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
 
@@ -75,31 +74,24 @@ const list: ServiceFn<
 	if (media.error) return media;
 	if (documents.error) return documents;
 
-	const result: AgentReferenceLink[] = [];
-	if (canRead(Permissions.MediaRead)) {
-		for (const row of media.data) {
-			result.push({
-				id: row.id,
-				type: "media",
-				mediaId: row.media_id,
-				source: linkSource(row),
-			});
-		}
-	}
-
-	for (const row of documents.data) {
-		if (!canRead(getCollectionPermission(row.collection_key, "read"))) continue;
-		result.push({
+	const links: AgentReferenceLink[] = [
+		...media.data.map((row) => ({
 			id: row.id,
-			type: "document",
+			type: "media" as const,
+			mediaId: row.media_id,
+			source: linkSource(row),
+		})),
+		...documents.data.map((row) => ({
+			id: row.id,
+			type: "document" as const,
 			collectionKey: row.collection_key,
 			documentId: row.document_id,
 			...(row.version_id === null ? {} : { versionId: row.version_id }),
 			source: linkSource(row),
-		});
-	}
+		})),
+	];
 
-	return { error: undefined, data: result };
+	return { error: undefined, data: links.filter(canRead) };
 };
 
 export default list;

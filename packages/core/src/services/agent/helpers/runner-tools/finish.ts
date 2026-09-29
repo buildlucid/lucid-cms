@@ -1,22 +1,19 @@
-import runnerTools from "../../../../libs/agent/runner-tools.js";
-import { toolFailure } from "../tool-outcome.js";
-import type { RunnerToolHandler } from "./types.js";
+import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { toolFailure, toolResult } from "../tool-outcome.js";
+import type { RunnerToolInputHandler } from "./types.js";
 
 /** Records a routine run's outcome. The runner ends the run once this call's result is saved. */
-const finish: RunnerToolHandler = async (
+const finish: RunnerToolInputHandler<typeof runnerTools.finish> = async (
 	context,
-	{ call, mode, checkpoint },
+	{ input, mode, checkpoint },
 ) => {
-	const input = runnerTools.finish.input.safeParse(call.input);
-	if (mode !== "routine" || !input.success) {
-		return toolFailure(
-			context.translate("server:agent.routine.finish.invalid"),
-		);
+	if (mode !== "routine") {
+		return toolFailure(context.translate("server:agent.tool.unavailable"));
 	}
 
-	checkpoint.finish = input.data;
+	checkpoint.finish = input;
 
-	return { kind: "result", output: { finished: true }, failed: false };
+	return toolResult({ finished: true });
 };
 
 export default finish;

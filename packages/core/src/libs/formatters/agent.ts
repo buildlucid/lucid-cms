@@ -14,6 +14,7 @@ import type {
 	AgentUsage,
 } from "../../types/response.js";
 import {
+	getAvailableTools,
 	getCapabilityProviders,
 	summariseCapabilities,
 } from "../agent/capabilities.js";
@@ -30,8 +31,7 @@ import type { LucidAgentRuns } from "../db/tables/agent-runs.js";
 import type { Select } from "../db/types.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { getAgentPermission } from "../permission/agent-permissions.js";
-import hasAccess from "../permission/has-access.js";
-import type { Permission } from "../permission/types.js";
+import hasPermission from "../permission/has-permission.js";
 import formatter from "./helpers.js";
 
 const formatDefinitions = (props: {
@@ -47,19 +47,19 @@ const formatDefinitions = (props: {
 		return defaultMessage === undefined ? copy : { ...copy, defaultMessage };
 	};
 
+	const grant = {
+		superAdmin: props.authUser.superAdmin,
+		permissions: props.authUser.permissions ?? [],
+	};
+
 	return {
 		enabled: isAiFeatureEnabled(props.config, "agents"),
 		agents: getAgents(props.config).map((agent) => {
-			const canUse = hasAccess({
-				user: props.authUser,
-				requiredPermissions: [getAgentPermission(agent.key, "use")],
-			});
-			const canManage = hasAccess({
-				user: props.authUser,
-				requiredPermissions: [getAgentPermission(agent.key, "manage")],
-			});
-			const can = (permission: Permission) =>
-				hasAccess({ user: props.authUser, requiredPermissions: [permission] });
+			const canUse = hasPermission(grant, getAgentPermission(agent.key, "use"));
+			const canManage = hasPermission(
+				grant,
+				getAgentPermission(agent.key, "manage"),
+			);
 
 			return {
 				key: agent.key,
@@ -68,8 +68,8 @@ const formatDefinitions = (props: {
 				attachments: agent.attachments,
 				capabilities: summariseCapabilities(
 					getCapabilityProviders({
-						tools: agent.tools.filter((tool) => tool.permissions.every(can)),
-						can,
+						tools: getAvailableTools(agent, grant),
+						grant,
 					}),
 				),
 				suggestions: canUse

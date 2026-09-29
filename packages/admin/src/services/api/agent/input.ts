@@ -4,6 +4,7 @@ import type {
 	AgentReferenceInput,
 } from "@types";
 import request from "@/utils/request";
+import { runStreamUrls } from "./stream-run";
 
 /** Input commands never replace the stream carrying the current reply. */
 export const submitInput = (props: {
@@ -14,7 +15,8 @@ export const submitInput = (props: {
 	delivery: AgentDelivery;
 }) =>
 	request({
-		url: `/lucid/api/v1/agent/conversations/${props.conversationId}/messages`,
+		//* the endpoint streams when asked to; this call only queues
+		url: runStreamUrls.send(props.conversationId),
 		method: "POST",
 		body: {
 			text: props.text,

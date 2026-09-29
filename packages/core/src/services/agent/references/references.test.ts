@@ -1,9 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import defineAgent from "../../../libs/agent/define-agent.js";
-import runnerTools, {
-	type RunnerToolName,
-} from "../../../libs/agent/runner-tools.js";
+import runnerTools from "../../../libs/agent/runner-tools.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import getCurrentCollectionMigrationId from "../../../libs/collection/migration/get-current-collection-migration-id.js";
@@ -23,7 +21,10 @@ import {
 	UsersRepository,
 } from "../../../libs/repositories/index.js";
 import { agentReferenceSchema } from "../../../schemas/agent-references.js";
-import type { AgentReferenceInput } from "../../../types/response.js";
+import type {
+	AgentReferenceInput,
+	AgentRunnerToolName,
+} from "../../../types/response.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
@@ -35,13 +36,13 @@ import createDocumentBricks from "../../documents-bricks/create-multiple.js";
 import { deleteExpiredRevisionsJob } from "../../documents-versions/jobs/delete-expired-revisions.js";
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
+import deleteReference from "../delete-reference.js";
+import getReferences from "../get-references.js";
 import insertConversation from "../helpers/insert-conversation.js";
 import resolveRunSetup from "../helpers/resolve-run-setup.js";
 import { runnerToolHandlers } from "../helpers/runner-tools/index.js";
-import getReferences from "./get-details.js";
 import list from "./list.js";
 import register from "./register.js";
-import remove from "./remove.js";
 
 const fixture = getTestConfig();
 const collection = new CollectionBuilder("agent_reference_test", {
@@ -670,7 +671,7 @@ test("unlinking removes one reference for the chat's owner only", async () => {
 
 	expect(
 		(
-			await remove(context, {
+			await deleteReference(context, {
 				conversationId,
 				referenceId: media.id,
 				userId: otherId,
@@ -681,7 +682,7 @@ test("unlinking removes one reference for the chat's owner only", async () => {
 
 	expect(
 		(
-			await remove(context, {
+			await deleteReference(context, {
 				conversationId,
 				referenceId: media.id,
 				userId: ownerId,
@@ -694,7 +695,7 @@ test("unlinking removes one reference for the chat's owner only", async () => {
 
 const callReferenceTool = async (
 	conversationId: string,
-	name: RunnerToolName,
+	name: AgentRunnerToolName,
 	input: Record<string, unknown>,
 	userId: number | null = null,
 ) => {

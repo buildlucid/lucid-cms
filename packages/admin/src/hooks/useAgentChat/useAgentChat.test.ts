@@ -11,9 +11,14 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@tanstack/solid-query", () => ({
 	useQueryClient: () => ({ invalidateQueries: mocks.refresh }),
 }));
-vi.mock("@/services/api", () => ({
+vi.mock("@/services/api", async () => ({
 	default: {
 		agent: {
+			runStreamUrls: (
+				await vi.importActual<typeof import("@/services/api/agent/stream-run")>(
+					"@/services/api/agent/stream-run",
+				)
+			).runStreamUrls,
 			useGetConversation: () => ({
 				isSuccess: true,
 				data: { data: conversation },

@@ -1,4 +1,4 @@
-import { toolValuePreview } from "../../../libs/agent/context.js";
+import { settleToolCall } from "../../../libs/agent/context.js";
 import type {
 	Checkpoint,
 	RunMode,
@@ -7,7 +7,7 @@ import type {
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { AgentWidgetPart } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type resolveRunSetup from "./resolve-run-setup.js";
+import type { RunSetup } from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import runToolCall from "./run-tool-call.js";
 
@@ -22,7 +22,7 @@ const executeToolStep: ServiceFn<
 			call: ToolCall;
 			checkpoint: Checkpoint;
 			session: RunSession;
-			setup: ReturnType<typeof resolveRunSetup>;
+			setup: RunSetup;
 			authority: AgentToolAuthority;
 		},
 	],
@@ -51,26 +51,7 @@ const executeToolStep: ServiceFn<
 
 	const status = failed ? "failed" : "complete";
 
-	for (const part of checkpoint.parts) {
-		if (part.type === "tool" && part.id === call.id) {
-			part.status = status;
-			part.output = output;
-		}
-	}
-	//* the full result is saved with the message, so context only needs a preview of a long one
-	const result = toolValuePreview(output, {
-		messageId: checkpoint.messageId,
-		toolCallId: call.id,
-	});
-	if (result.truncated) checkpoint.trimmed = true;
-
-	checkpoint.messages.push({
-		sourceId: checkpoint.messageId,
-		role: "tool",
-		toolCallId: call.id,
-		name: call.name,
-		output: result.value,
-	});
+	settleToolCall(checkpoint, call, { status, output });
 	checkpoint.pending = undefined;
 	checkpoint.cursor++;
 

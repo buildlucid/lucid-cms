@@ -46,11 +46,13 @@ const attachmentTag = (reference: AgentReferenceSnapshot) => {
 		.join(" ")} />`;
 };
 
+/** Joins visible model text without including tool output or widget data. */
+export const textFromParts = (parts: AgentMessagePart[]) =>
+	parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
+
 /** A message as the model sees it: its text, then the resources attached to it. Contents are never fetched. */
 export const messageText = (parts: AgentMessagePart[]) => {
-	const text = parts
-		.flatMap((part) => (part.type === "text" ? [part.text] : []))
-		.join("");
+	const text = textFromParts(parts);
 
 	const references = parts.flatMap((part) =>
 		part.type === "reference" ? [part.reference] : [],

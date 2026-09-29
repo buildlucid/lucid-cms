@@ -1,6 +1,6 @@
 import { FaSolidLink } from "solid-icons/fa";
 import { type Component, type JSXElement, Show } from "solid-js";
-import { webSiteName } from "@/utils/agent-chat";
+import { webSiteName } from "@/utils/agent-tools";
 
 /** Only web links open, so a saved value can never run script. */
 const isWebLink = (url: string) => /^https?:\/\//i.test(url);

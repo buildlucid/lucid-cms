@@ -1,15 +1,11 @@
-import classnames from "classnames";
-import { FaSolidEye, FaSolidEyeSlash, FaSolidXmark } from "solid-icons/fa";
+import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
+import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
 	agentReferenceTilt,
 } from "@/utils/agent-references";
-import {
-	referenceRemoveClasses,
-	referenceRemoveIdleClasses,
-} from "../remove-classes";
 import AgentReferenceThumb from "./AgentReferenceThumb";
 
 /** One attached resource as a small, slightly tilted file card. */
@@ -67,20 +63,13 @@ const AgentReferenceFile: Component<{
 			</span>
 			<Show when={props.onRemove}>
 				{(remove) => (
-					<button
-						type="button"
-						class={classnames(
-							referenceRemoveClasses,
-							referenceRemoveIdleClasses,
-							"start-1.5 top-1.5",
-						)}
-						aria-label={T()("agent.references.remove", {
+					<AgentReferenceRemoveButton
+						label={T()("agent.references.remove", {
 							label: props.reference.label,
 						})}
-						onClick={() => remove()()}
-					>
-						<FaSolidXmark size={9} />
-					</button>
+						class="start-1.5 top-1.5"
+						onRemove={() => remove()()}
+					/>
 				)}
 			</Show>
 		</div>

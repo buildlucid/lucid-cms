@@ -10,7 +10,7 @@ import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
-import streamEvents from "./helpers/stream-events.js";
+import { streamRun } from "./helpers/stream-events.js";
 
 const factory = createFactory();
 
@@ -44,12 +44,7 @@ const retryConversationController = factory.createHandlers(
 		});
 		if (run.error) throw new LucidAPIError(run.error);
 
-		return streamEvents(c, (stream) =>
-			serviceWrapper(agentServices.executeRun, {
-				transaction: false,
-				logError: true,
-			})(context, { runId: run.data.runId, ...stream }),
-		);
+		return streamRun(c, context, { runId: run.data.runId });
 	},
 );
 

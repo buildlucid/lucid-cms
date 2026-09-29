@@ -1,7 +1,19 @@
 import type { AgentCapabilities } from "../../types/response.js";
 import { Permissions } from "../permission/definitions.js";
-import type { Permission } from "../permission/types.js";
+import hasPermission, {
+	type PermissionGrant,
+} from "../permission/has-permission.js";
 import type { AgentToolDefinition } from "../tools/types.js";
+import type { AgentDefinition } from "./types.js";
+
+/** The agent's tools the principal holds every permission for. Execution checks permissions again. */
+export const getAvailableTools = (
+	agent: Pick<AgentDefinition, "tools">,
+	grant: PermissionGrant,
+) =>
+	agent.tools.filter((tool) =>
+		tool.permissions.every((permission) => hasPermission(grant, permission)),
+	);
 
 /**
  * The tools that provide each capability, from their `capabilities`
@@ -10,9 +22,9 @@ import type { AgentToolDefinition } from "../tools/types.js";
  */
 export const getCapabilityProviders = (props: {
 	tools: readonly AgentToolDefinition[];
-	can: (permission: Permission) => boolean;
+	grant: PermissionGrant;
 }) => ({
-	media: props.can(Permissions.MediaRead)
+	media: hasPermission(props.grant, Permissions.MediaRead)
 		? props.tools.flatMap((tool) =>
 				tool.capabilities?.media
 					? [{ tool: tool.name, mimeTypes: tool.capabilities.media.mimeTypes }]

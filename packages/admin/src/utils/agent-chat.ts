@@ -5,48 +5,14 @@ import type {
 	AgentMessagePart,
 	AgentRunStatus,
 	AgentStreamEvent,
-	AgentWebFetchOutput,
-	AgentWebSearchOutput,
 	AgentWidgetPart,
 } from "@types";
-import helpers from "@/utils/helpers";
-import { isObjectRecord } from "@/utils/type-guards";
-
-export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
-
-export const askTool = "lucid_ask_user";
-export const finishTool = "lucid_finish_run";
-export const progressTool = "lucid_share_progress";
-export const questionWidget = "lucid-question";
-export const approvalWidget = "lucid-tool-approval";
-export const skillTool = "lucid_load_skill";
-export const webSearchTool = "web_search";
-export const webFetchTool = "web_fetch";
-export const analyzeResourceTool = "resources_analyze";
-
-export const webSiteName = (url: string) => {
-	try {
-		return new URL(url).hostname.replace(/^www\./, "");
-	} catch {
-		return url;
-	}
-};
-
-export const isWebSearchOutput = (
-	value: unknown,
-): value is AgentWebSearchOutput =>
-	isObjectRecord(value) &&
-	Array.isArray(value.results) &&
-	value.results.every(
-		(result) => isObjectRecord(result) && typeof result.url === "string",
-	);
-
-export const isWebFetchOutput = (
-	value: unknown,
-): value is AgentWebFetchOutput =>
-	isObjectRecord(value) &&
-	typeof value.url === "string" &&
-	typeof value.content === "string";
+import {
+	type AgentToolPart,
+	askTool,
+	finishTool,
+	progressTool,
+} from "@/utils/agent-tools";
 
 export const shouldPollTitle = (
 	conversation: Pick<
@@ -59,19 +25,6 @@ export const shouldPollTitle = (
 	const age = Date.now() - new Date(requestedAt).getTime();
 	return age >= 0 && age < 60_000;
 };
-
-/** Tool calls shown as rows in the chat and listed in its sidebar. */
-export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
-	part.type === "tool" &&
-	part.name !== askTool &&
-	part.name !== finishTool &&
-	part.name !== progressTool;
-
-export const toolTitle = (part: Pick<AgentToolPart, "name" | "title">) =>
-	helpers.getLocaleValue({
-		value: part.title,
-		fallback: part.name.replaceAll("_", " "),
-	});
 
 /**
  * How a part shows in the transcript. Runs of rows sit close together, even

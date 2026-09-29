@@ -6,6 +6,7 @@ import {
 	summariseCapabilities,
 } from "./capabilities.js";
 
+const noPermissions = { superAdmin: false, permissions: [] };
 const tools = [
 	...agentTools.web(),
 	agentTools.analyzeResource(),
@@ -17,7 +18,7 @@ test("combines tool capabilities into what an agent can do", () => {
 		summariseCapabilities(
 			getCapabilityProviders({
 				tools,
-				can: (permission) => permission === Permissions.MediaRead,
+				grant: { superAdmin: false, permissions: [Permissions.MediaRead] },
 			}),
 		),
 	).toEqual({
@@ -32,8 +33,13 @@ test("combines tool capabilities into what an agent can do", () => {
 test("media needs permission to read media, and web needs a web tool", () => {
 	expect(
 		summariseCapabilities(
-			getCapabilityProviders({ tools: agentTools.content(), can: () => false }),
+			getCapabilityProviders({
+				tools: agentTools.content(),
+				grant: noPermissions,
+			}),
 		),
 	).toEqual({ media: null, webSearch: false, webRead: false });
-	expect(getCapabilityProviders({ tools, can: () => false }).media).toEqual([]);
+	expect(getCapabilityProviders({ tools, grant: noPermissions }).media).toEqual(
+		[],
+	);
 });

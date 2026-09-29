@@ -1655,7 +1655,6 @@
 	"agent.history.routine": "Routine",
 	"agent.history.type.chat": "Chat",
 	"agent.composer.add": "Add to message",
-	"agent.composer.add.files": "Upload files",
 	"agent.chat.latest": "Jump to latest",
 	"agent.question.pending": "Waiting for you",
 	"agent.question.other": "Or type a different answer…",

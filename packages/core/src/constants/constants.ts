@@ -1,3 +1,4 @@
+import type { AgentRunnerWidgetKey } from "../types/response.js";
 import emailConstants from "./emails.js";
 
 export default Object.freeze({
@@ -221,8 +222,8 @@ export default Object.freeze({
 		titleLength: 80,
 		/** Widgets the runner creates itself. Tool widget keys cannot start with `reservedPrefix`. */
 		widgets: {
-			question: "lucid-question",
-			approval: "lucid-tool-approval",
+			question: "lucid-question" satisfies AgentRunnerWidgetKey,
+			approval: "lucid-tool-approval" satisfies AgentRunnerWidgetKey,
 			reservedPrefix: "lucid-",
 		},
 		runStatuses: {

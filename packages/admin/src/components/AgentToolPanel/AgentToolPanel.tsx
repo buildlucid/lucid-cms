@@ -11,11 +11,20 @@ import {
 	analyzeResourceTool,
 	isWebFetchOutput,
 	isWebSearchOutput,
+	toolOutputText,
 	webFetchTool,
 	webSearchTool,
-} from "@/utils/agent-chat";
+} from "@/utils/agent-tools";
 import WebFetchView from "./parts/WebFetchView";
 import WebSearchView from "./parts/WebSearchView";
+
+const statusVariants = {
+	pending: "neutral",
+	running: "info-subtle",
+	complete: "success-subtle",
+	failed: "danger-subtle",
+	skipped: "neutral",
+} satisfies Record<AgentToolPart["status"], PillVariant>;
 
 /**
  * A tool call in the chat's sidebar. Web research shows the pages it found or
@@ -29,49 +38,16 @@ const AgentToolPanel: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const status = createMemo((): { label: string; variant: PillVariant } => {
-		switch (props.part.status) {
-			case "pending":
-				return { label: T()("agent.tool.status.pending"), variant: "neutral" };
-			case "running":
-				return {
-					label: T()("agent.tool.status.running"),
-					variant: "info-subtle",
-				};
-			case "complete":
-				return {
-					label: T()("agent.tool.status.complete"),
-					variant: "success-subtle",
-				};
-			case "failed":
-				return {
-					label: T()("agent.tool.status.failed"),
-					variant: "danger-subtle",
-				};
-			case "skipped":
-				return { label: T()("agent.tool.status.skipped"), variant: "neutral" };
-		}
-	});
-	const error = createMemo(() => {
-		const output = props.part.output;
-		return props.part.status === "failed" &&
-			typeof output === "object" &&
-			output !== null &&
-			"error" in output &&
-			typeof output.error === "string"
-			? output.error
-			: undefined;
-	});
-	const analysis = createMemo(() => {
-		const output = props.part.output;
-		return props.part.name === analyzeResourceTool &&
-			typeof output === "object" &&
-			output !== null &&
-			"analysis" in output &&
-			typeof output.analysis === "string"
-			? output.analysis
-			: undefined;
-	});
+	const error = createMemo(() =>
+		props.part.status === "failed"
+			? toolOutputText(props.part.output, "error")
+			: undefined,
+	);
+	const analysis = createMemo(() =>
+		props.part.name === analyzeResourceTool
+			? toolOutputText(props.part.output, "analysis")
+			: undefined,
+	);
 	const isWeb = createMemo(
 		() => props.part.name === webSearchTool || props.part.name === webFetchTool,
 	);
@@ -97,8 +73,8 @@ const AgentToolPanel: Component<{
 		>
 			<Show when={!isWeb()}>
 				<div class="-mt-3 flex flex-wrap items-center gap-2">
-					<Pill size="xs" variant={status().variant}>
-						{status().label}
+					<Pill size="xs" variant={statusVariants[props.part.status]}>
+						{T()(`agent.tool.status.${props.part.status}`)}
 					</Pill>
 					<code class="rounded bg-input px-1.5 py-0.5 text-[11px] text-body">
 						{props.part.name}

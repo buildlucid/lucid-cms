@@ -1,22 +1,18 @@
-import runnerTools from "../../../../libs/agent/runner-tools.js";
-import { toolFailure } from "../tool-outcome.js";
-import type { RunnerToolHandler } from "./types.js";
+import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { toolFailure, toolResult } from "../tool-outcome.js";
+import type { RunnerToolInputHandler } from "./types.js";
 
-const skill: RunnerToolHandler = async (context, { call, setup }) => {
-	const input = runnerTools.skill.input.safeParse(call.input);
-
-	const found = setup.skills.find(
-		(skill) => input.success && skill.name === input.data.name,
-	);
+/** Returns an available skill's instructions. */
+const skill: RunnerToolInputHandler<typeof runnerTools.skill> = async (
+	context,
+	{ input, setup },
+) => {
+	const found = setup.skills.find((skill) => skill.name === input.name);
 	if (!found) {
 		return toolFailure(context.translate("server:agent.skill.unavailable"));
 	}
 
-	return {
-		kind: "result",
-		output: { name: found.name, instructions: found.instructions },
-		failed: false,
-	};
+	return toolResult({ name: found.name, instructions: found.instructions });
 };
 
 export default skill;

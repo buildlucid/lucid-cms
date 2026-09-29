@@ -35,6 +35,14 @@ import {
 	agentReferenceInput,
 } from "@/utils/agent-references";
 
+/** Input the server has not yet accepted, kept so a retry reuses its request ID. */
+type PendingSubmission = {
+	text: string;
+	references: AgentReferenceInput[];
+	delivery: AgentDelivery;
+	requestId: string;
+};
+
 /**
  * Loads a conversation and streams the agent's replies over its saved history.
  * Leaving mid-reply lets the run finish in the background; while it does, the
@@ -55,14 +63,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	const [inputs, setInputs] = createStore<AgentInput[]>([]);
 	const [messages, setMessages] = createStore<AgentMessage[]>([]);
 	//* a failed submission keeps its request id, so resending it cannot create a duplicate
-	let retrySubmission:
-		| {
-				text: string;
-				references: AgentReferenceInput[];
-				delivery: AgentDelivery;
-				requestId: string;
-		  }
-		| undefined;
+	let retrySubmission: PendingSubmission | undefined;
 	let controller: AbortController | undefined;
 	const streaming = createMemo(() => live() !== undefined);
 
@@ -117,6 +118,10 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			queryKey: queryKeys.agent.conversation(id),
 			exact: true,
 		});
+	const refreshReferences = (id: string) =>
+		queryClient.invalidateQueries({
+			queryKey: queryKeys.agent.references(id),
+		});
 	/** Applies a change to the cached conversation, so the chat updates before the server confirms it. */
 	const patchConversation = (
 		id: string,
@@ -134,9 +139,9 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		return false;
 	};
 
-	/** Opens a run stream. Resolves once the server accepts it; the reply keeps streaming after. */
+	/** Opens a run stream at a URL for this conversation. Resolves once the server accepts it; the reply keeps streaming after. */
 	const stream = (
-		url: string,
+		url: (conversationId: string) => string,
 		options: {
 			body?: Record<string, unknown>;
 			prepare?: (messages: AgentMessage[]) => AgentMessage[];
@@ -155,7 +160,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		void (async () => {
 			try {
 				await api.agent.streamRun({
-					url,
+					url: url(id),
 					body: options.body,
 					signal: current.signal,
 					onAccepted: () => {
@@ -187,9 +192,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 								setLiveContext(event.context);
 								return;
 							case "inputs":
-								void queryClient.invalidateQueries({
-									queryKey: queryKeys.agent.references(id),
-								});
+								void refreshReferences(id);
 								patchConversation(id, (data) => ({
 									...data,
 									inputs: event.inputs,
@@ -214,9 +217,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 								setLiveRunId(event.runId);
 								//* the first message names the chat and delivers its references
 								void refreshConversation(id);
-								void queryClient.invalidateQueries({
-									queryKey: queryKeys.agent.references(id),
-								});
+								void refreshReferences(id);
 								break;
 						}
 						if (
@@ -228,9 +229,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 										(part.type === "tool" && part.status === "complete"),
 								))
 						) {
-							void queryClient.invalidateQueries({
-								queryKey: queryKeys.agent.references(id),
-							});
+							void refreshReferences(id);
 						}
 						setLive((messages) => applyStreamEvent(messages ?? [], event, id));
 					},
@@ -253,15 +252,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	};
 
 	/** Queues input on the server. The row appears straight away and is removed if the server refuses it. */
-	const submit = async (
-		id: string,
-		pending: {
-			text: string;
-			references: AgentReferenceInput[];
-			delivery: AgentDelivery;
-			requestId: string;
-		},
-	) => {
+	const submit = async (id: string, pending: PendingSubmission) => {
 		setError(undefined);
 		patchConversation(id, (data) => ({
 			...data,
@@ -324,7 +315,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 				//* a failed watch waits for the next message rather than retrying in a loop
 				const run = latestRun();
 				if (!watch || !run || untrack(error)) return;
-				void stream(`/lucid/api/v1/agent/runs/${run.id}/events`);
+				void stream(() => api.agent.runStreamUrls.watch(run.id));
 			},
 		),
 	);
@@ -352,12 +343,12 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		context: createMemo(() => liveContext() ?? data()?.context),
 		compactions: createMemo(() => data()?.compactions ?? []),
 		compact: () =>
-			stream(`/lucid/api/v1/agent/conversations/${conversationId()}/compact`, {
+			stream(api.agent.runStreamUrls.compact, {
 				body: { requestId: crypto.randomUUID() },
 			}),
 		/** Answers again after the latest run failed, without sending a new message. */
 		retry: () =>
-			stream(`/lucid/api/v1/agent/conversations/${conversationId()}/retry`, {
+			stream(api.agent.runStreamUrls.retry, {
 				body: { requestId: crypto.randomUUID() },
 			}),
 		history,
@@ -403,7 +394,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 				(data()?.inputs?.length ?? 0) > 0;
 			const accepted = queued
 				? await submit(id, pending)
-				: await stream(`/lucid/api/v1/agent/conversations/${id}/messages`, {
+				: await stream(api.agent.runStreamUrls.send, {
 						body: pending,
 						prepare: (messages) => [
 							...messages,
@@ -436,7 +427,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			setResponding(true);
 			try {
 				const accepted = await stream(
-					`/lucid/api/v1/agent/runs/${interaction.runId}/respond`,
+					() => api.agent.runStreamUrls.respond(interaction.runId),
 					{
 						body: { interactionId: interaction.id, response, action },
 						interactionId: interaction.id,
@@ -492,5 +483,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		},
 	};
 };
+
+export type AgentChat = ReturnType<typeof useAgentChat>;
 
 export default useAgentChat;

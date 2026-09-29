@@ -400,6 +400,21 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 
 		return { error: undefined, data: result.response.data !== undefined };
 	}
+	/** Lets queued input start again after a pause. */
+	async resumeQueue(props: { conversationId: string }) {
+		const exec = await this.executeQuery(
+			() =>
+				this.db
+					.updateTable("lucid_agent_conversations")
+					.set({ queue_paused: false })
+					.where("id", "=", props.conversationId)
+					.execute(),
+			{ method: "resumeQueue" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return { error: undefined, data: undefined };
+	}
 	/**
 	 * Repairs claims left behind when a crash separates a run's write from its
 	 * conversation's. Claims without a run row are only released once they are stale.

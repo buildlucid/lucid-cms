@@ -2,6 +2,9 @@ import { getAgent } from "../../../libs/agent/registry.js";
 import type { AgentDefinition } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getAgentPermission } from "../../../libs/permission/agent-permissions.js";
+import hasPermission, {
+	type PermissionGrant,
+} from "../../../libs/permission/has-permission.js";
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -21,12 +24,10 @@ export const getConversationLevel = (
 ): AgentPermissionAction => (ownerId === null ? "manage" : "use");
 
 export const hasAgentPermission = (
-	user: { superAdmin: boolean; permissions: string[] },
+	grant: PermissionGrant,
 	agentKey: string,
 	level: AgentPermissionAction,
-) =>
-	user.superAdmin ||
-	user.permissions.includes(getAgentPermission(agentKey, level));
+) => hasPermission(grant, getAgentPermission(agentKey, level));
 
 /**
  * Resolves who a run acts for on one agent. A user needs the agent's permission

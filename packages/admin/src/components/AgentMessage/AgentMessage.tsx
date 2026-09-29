@@ -21,16 +21,12 @@ import { layoutOf } from "@/components/AgentWidget/slots";
 import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
 import { createCopy } from "@/components/Copy/copyValue";
 import T from "@/translations";
-import {
-	finishTool,
-	isToolRow,
-	messageText,
-	progressTool,
-} from "@/utils/agent-chat";
+import { messageText } from "@/utils/agent-chat";
 import {
 	type AgentReferenceItem,
 	agentReferenceKey,
 } from "@/utils/agent-references";
+import { finishTool, isToolRow, progressTool } from "@/utils/agent-tools";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
 import AgentRunFinish from "./parts/AgentRunFinish";

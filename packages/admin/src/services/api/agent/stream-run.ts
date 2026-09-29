@@ -1,28 +1,39 @@
 import type { AgentStreamEvent } from "@types";
 import { EventSourceParserStream } from "eventsource-parser/stream";
 import { sendRequest } from "@/utils/request";
+import { isObjectRecord } from "@/utils/type-guards";
 
-const eventTypes = new Set<AgentStreamEvent["type"]>([
-	"context",
-	"start",
-	"text-delta",
-	"tool",
-	"widget",
-	"message",
-	"inputs",
-	"finish",
-	"next",
-	"error",
-]);
+//* every event type is listed, so a new server event fails to compile until it is handled here
+const eventTypes = {
+	context: true,
+	start: true,
+	"text-delta": true,
+	tool: true,
+	widget: true,
+	message: true,
+	inputs: true,
+	finish: true,
+	next: true,
+	error: true,
+} satisfies Record<AgentStreamEvent["type"], true>;
 
-const parseEvent = (data: string) => {
-	const event: unknown = JSON.parse(data);
-	return typeof event === "object" &&
-		event !== null &&
-		"type" in event &&
-		eventTypes.has(event.type as AgentStreamEvent["type"])
-		? (event as AgentStreamEvent)
-		: undefined;
+const isEvent = (value: unknown): value is AgentStreamEvent =>
+	isObjectRecord(value) &&
+	typeof value.type === "string" &&
+	Object.hasOwn(eventTypes, value.type);
+
+const base = "/lucid/api/v1/agent";
+
+/** The endpoints that stream a run's events, by what opens the stream. */
+export const runStreamUrls = {
+	send: (conversationId: string) =>
+		`${base}/conversations/${conversationId}/messages`,
+	compact: (conversationId: string) =>
+		`${base}/conversations/${conversationId}/compact`,
+	retry: (conversationId: string) =>
+		`${base}/conversations/${conversationId}/retry`,
+	respond: (runId: string) => `${base}/runs/${runId}/respond`,
+	watch: (runId: string) => `${base}/runs/${runId}/events`,
 };
 
 /**
@@ -52,8 +63,8 @@ const streamRun = async (props: {
 		.pipeThrough(new TextDecoderStream())
 		.pipeThrough(new EventSourceParserStream());
 	for await (const message of events) {
-		const event = parseEvent(message.data);
-		if (event) props.onEvent(event);
+		const event: unknown = JSON.parse(message.data);
+		if (isEvent(event)) props.onEvent(event);
 	}
 };
 

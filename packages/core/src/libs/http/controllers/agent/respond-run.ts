@@ -2,16 +2,14 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/agent.js";
 import getAccessibleRun from "../../../../services/agent/helpers/get-accessible-run.js";
-import { agentServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
-import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
 import createServiceContext from "../../utils/create-service-context.js";
-import streamEvents from "./helpers/stream-events.js";
+import { streamRun } from "./helpers/stream-events.js";
 
 const factory = createFactory();
 
@@ -42,21 +40,15 @@ const respondRunController = factory.createHandlers(
 		});
 		if (run.error) throw new LucidAPIError(run.error);
 
-		return streamEvents(c, (stream) =>
-			serviceWrapper(agentServices.executeRun, {
-				transaction: false,
-				logError: true,
-			})(context, {
-				runId: run.data.id,
-				answer: {
-					interactionId: body.interactionId,
-					response: body.response,
-					action: body.action,
-					userId: c.get("auth").id,
-				},
-				...stream,
-			}),
-		);
+		return streamRun(c, context, {
+			runId: run.data.id,
+			answer: {
+				interactionId: body.interactionId,
+				response: body.response,
+				action: body.action,
+				userId: c.get("auth").id,
+			},
+		});
 	},
 );
 

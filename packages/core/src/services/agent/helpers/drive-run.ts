@@ -1,12 +1,8 @@
 import constants from "../../../constants/constants.js";
-import {
-	contextTokens,
-	needsCompaction,
-	tokenLimit,
-} from "../../../libs/agent/context.js";
+import { contextTokens, tokenLimit } from "../../../libs/agent/context.js";
+import { textFromParts } from "../../../libs/agent/input.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
-import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess, {
@@ -21,7 +17,6 @@ import resolveRunSetup from "./resolve-run-setup.js";
 import runModelTurn from "./run-model-turn.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import startNextTurn from "./start-next-turn.js";
-import textFromParts from "./text-from-parts.js";
 
 /** Runs model turns and tools until execution finishes, pauses or yields to the queue. */
 const driveRun: ServiceFn<
@@ -80,13 +75,14 @@ const driveRun: ServiceFn<
 			hasHistory: checkpoint.trimmed === true,
 		});
 
-	let setup = resolve();
 	if (checkpoint.inFlightWrite) {
 		return session.finish(
 			"failed",
 			context.translate("server:agent.run.write.interrupted"),
 		);
 	}
+
+	let setup = resolve();
 
 	runLoop: while (true) {
 		if (session.signal.aborted || Date.now() > deadline) {
@@ -106,75 +102,17 @@ const driveRun: ServiceFn<
 			if (steered.error) return steered;
 			if (steered.data) continue;
 
-			const manual =
-				checkpoint.purpose === "compact" &&
-				checkpoint.historyAfter === undefined;
-
-			//* compaction is required to keep going, rather than just due
-			const required = history.data || checkpoint.overflow === "compacting";
-			if (
-				checkpoint.compaction ||
-				manual ||
-				required ||
-				(!checkpoint.compactionFailed && needsCompaction(checkpoint, setup))
-			) {
-				const compacted = await compactContext(context, {
-					run,
-					checkpoint,
-					session,
-					setup,
-				});
-				if (compacted.error) {
-					if (session.signal.aborted) return session.handOff();
-
-					// Automatic compaction is best effort while the request still fits.
-					if (
-						!manual &&
-						!required &&
-						contextTokens(checkpoint, setup) <= tokenLimit(checkpoint)
-					) {
-						checkpoint.compaction = undefined;
-						checkpoint.compactionFailed = true;
-						await session.saveContext(setup, "ready");
-						continue;
-					}
-
-					const AiGenerations = new AiGenerationsRepository(context.db);
-					const usage = checkpoint.compaction
-						? await AiGenerations.selectSingleByRequestId({
-								requestId: checkpoint.compaction.requestId,
-								select: ["status"],
-							})
-						: undefined;
-
-					const permanent =
-						compacted.error.key === "agent_compaction_failed" ||
-						compacted.error.key === "agent_context_exceeded" ||
-						(compacted.error.key === "agent_model_failed" &&
-							usage?.data?.status === "failed") ||
-						(compacted.error.status !== undefined &&
-							compacted.error.status < 500 &&
-							compacted.error.status !== 409);
-
-					return session.finish(
-						permanent ? "failed" : "interrupted",
-						context.translate("server:agent.compaction.failed"),
-					);
-				}
-
-				if (manual) return session.finish("completed");
-
-				if (compacted.data) {
-					if (checkpoint.overflow) checkpoint.overflow = "retrying";
-					continue;
-				}
-
-				if (required) {
-					return session.finish(
-						"failed",
-						context.translate("server:agent.conversation.too.large"),
-					);
-				}
+			const compaction = await compactContext(context, {
+				run,
+				checkpoint,
+				session,
+				setup,
+				historyFull: history.data,
+			});
+			if (compaction.kind === "aborted") return session.handOff();
+			if (compaction.kind === "continue") continue;
+			if (compaction.kind === "stop") {
+				return session.finish(compaction.status, compaction.message);
 			}
 			if (checkpoint.historyAfter !== undefined) continue;
 

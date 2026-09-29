@@ -3,7 +3,7 @@ import { FaSolidFlagCheckered } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import T from "@/translations";
-import type { AgentToolPart } from "@/utils/agent-chat";
+import type { AgentToolPart } from "@/utils/agent-tools";
 
 const outcomes = new Set<AgentRunOutcome>([
 	"done",

@@ -1,10 +1,10 @@
 import { getAgents } from "../../../libs/agent/registry.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
+import { hasAgentPermission } from "./check-agent-access.js";
 
 /** The keys of the agents a user can use or manage, from their live permissions. Fails when there are none. */
 const resolveAgentAccess: ServiceFn<
@@ -28,11 +28,7 @@ const resolveAgentAccess: ServiceFn<
 
 	const keys = (level: AgentPermissionAction) =>
 		agents
-			.filter(
-				(agent) =>
-					user.data.superAdmin ||
-					user.data.permissions.includes(getAgentPermission(agent.key, level)),
-			)
+			.filter((agent) => hasAgentPermission(user.data, agent.key, level))
 			.map((agent) => agent.key);
 
 	const access = { use: keys("use"), manage: keys("manage") };

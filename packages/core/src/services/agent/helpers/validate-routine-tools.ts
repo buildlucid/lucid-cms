@@ -1,8 +1,8 @@
+import { getAvailableTools } from "../../../libs/agent/capabilities.js";
 import type { RoutineTools } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess from "./check-agent-access.js";
-import resolveRunSetup from "./resolve-run-setup.js";
 
 const validateRoutineTools: ServiceFn<
 	[{ agentKey: string; userId: number; tools: Readonly<RoutineTools> }],
@@ -18,11 +18,7 @@ const validateRoutineTools: ServiceFn<
 	});
 	if (access.error) return access;
 
-	const { tools } = resolveRunSetup(context, {
-		...access.data,
-		mode: "routine",
-		hasHistory: false,
-	});
+	const tools = getAvailableTools(access.data.agent, access.data.authority);
 	if (names.some((name) => !tools.some((tool) => tool.name === name))) {
 		return {
 			data: undefined,

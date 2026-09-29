@@ -4,6 +4,8 @@ import constants from "../../../constants/constants.js";
 import {
 	type ModelEvent,
 	type ModelMessage,
+	type ModelToolDefinition,
+	type ModelUsage,
 	modelEventSchema,
 } from "../../../libs/agent/types.js";
 import formatter from "../../../libs/formatters/index.js";
@@ -19,6 +21,8 @@ import type {
 } from "../../../utils/services/types.js";
 import handleProtectedResourceUnauthorized from "../../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../../connection/token-manager.js";
+
+type FinishEvent = Extract<ModelEvent, { type: "finish" }>;
 
 /** Remote failures the runner handles differently from an ordinary model failure. */
 const remoteErrorKeys: Partial<Record<string, string>> = {
@@ -38,23 +42,16 @@ const streamModelTurn: ServiceFn<
 			purpose?: "compact";
 			instructions: string;
 			messages: ModelMessage[];
-			tools: {
-				name: string;
-				description: string;
-				inputSchema: Record<string, unknown>;
-			}[];
+			tools: ModelToolDefinition[];
 			signal: AbortSignal;
 			onRequest?: (connectionId: number) => ServiceResponse<undefined>;
 			emit: (event: ModelEvent) => Promise<void>;
 		},
 	],
 	{
-		usage: Extract<ModelEvent, { type: "finish" }>["usage"];
+		usage: ModelUsage;
 		connectionId: number;
-		reasoningDetails?: Extract<
-			ModelEvent,
-			{ type: "finish" }
-		>["reasoningDetails"];
+		reasoningDetails?: FinishEvent["reasoningDetails"];
 	}
 > = async (context, input) => {
 	if (!input.selection) {
@@ -137,7 +134,7 @@ const streamModelTurn: ServiceFn<
 				}),
 			)
 			.getReader();
-		let finish: Extract<ModelEvent, { type: "finish" }> | undefined;
+		let finish: FinishEvent | undefined;
 
 		try {
 			while (true) {

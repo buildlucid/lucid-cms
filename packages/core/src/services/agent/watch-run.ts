@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import { isWorkingRunStatus } from "../../libs/agent/run-status.js";
 import formatter, { agentFormatter } from "../../libs/formatters/index.js";
 import {
 	AgentConversationsRepository,
@@ -103,7 +104,7 @@ const watchRun: ServiceFn<
 		}
 
 		const status = run.data.status;
-		if (!constants.agent.runStatuses.working.some((s) => s === status)) {
+		if (!isWorkingRunStatus(status)) {
 			await input.emit({ type: "finish", runId: input.runId, status });
 			const next = conversation.data?.active_run_id;
 			if (next && next !== input.runId) {

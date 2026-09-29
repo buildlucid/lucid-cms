@@ -1,10 +1,17 @@
 import z from "zod";
-import { getCapabilityProviders } from "../../../libs/agent/capabilities.js";
+import {
+	getAvailableTools,
+	getCapabilityProviders,
+} from "../../../libs/agent/capabilities.js";
 import buildInstructions from "../../../libs/agent/instructions.js";
 import { getRunnerTools } from "../../../libs/agent/runner-tools.js";
-import type { AgentDefinition, RunMode } from "../../../libs/agent/types.js";
+import type {
+	AgentDefinition,
+	ModelToolDefinition,
+	RunMode,
+} from "../../../libs/agent/types.js";
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
-import type { Permission } from "../../../libs/permission/types.js";
+import hasPermission from "../../../libs/permission/has-permission.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
@@ -30,9 +37,7 @@ const resolveRunSetup = (
 	},
 ) => {
 	const { agent, authority } = props;
-	const can = (permission: Permission) =>
-		authority.superAdmin || authority.permissions.includes(permission);
-	const tools = agent.tools.filter((tool) => tool.permissions.every(can));
+	const tools = getAvailableTools(agent, authority);
 
 	// Skills still use their existing scope contract; resolve it from current permissions.
 	const skills = agent.skills.filter((skill) =>
@@ -41,8 +46,7 @@ const resolveRunSetup = (
 			return (
 				capability &&
 				(capability.userPermission === null ||
-					authority.superAdmin ||
-					authority.permissions.includes(capability.userPermission))
+					hasPermission(authority, capability.userPermission))
 			);
 		}),
 	);
@@ -59,22 +63,26 @@ const resolveRunSetup = (
 		titles: new Map(
 			[...tools, ...runnerTools].map((tool) => [tool.name, tool.title]),
 		),
-		definitions: [...tools, ...runnerTools].map((tool) => ({
-			name: tool.name,
-			description:
-				typeof tool.description === "function"
-					? tool.description({ mode: props.mode })
-					: tool.description,
-			inputSchema: toInputSchema(tool.input),
-		})),
+		definitions: [...tools, ...runnerTools].map(
+			(tool): ModelToolDefinition => ({
+				name: tool.name,
+				description:
+					typeof tool.description === "function"
+						? tool.description({ mode: props.mode })
+						: tool.description,
+				inputSchema: toInputSchema(tool.input),
+			}),
+		),
 		instructions: buildInstructions({
 			agent,
 			mode: props.mode,
 			skills,
-			media: getCapabilityProviders({ tools, can }).media,
+			media: getCapabilityProviders({ tools, grant: authority }).media,
 			hasHistory: props.hasHistory,
 		}),
 	};
 };
+
+export type RunSetup = ReturnType<typeof resolveRunSetup>;
 
 export default resolveRunSetup;

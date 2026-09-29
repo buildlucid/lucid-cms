@@ -18,7 +18,7 @@ import {
 	webFetchTool,
 	webSearchTool,
 	webSiteName,
-} from "@/utils/agent-chat";
+} from "@/utils/agent-tools";
 
 /**
  * What a tool call did. Built-in tools read better named after their input,

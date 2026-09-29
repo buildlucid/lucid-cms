@@ -10,7 +10,7 @@ import {
 } from "../ai/helpers/date-helpers.js";
 import handleProtectedResourceUnauthorized from "../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../connection/token-manager.js";
-import storeUsage from "./helpers/store-usage.js";
+import storeUsage, { storeFailedUsage } from "./helpers/store-usage.js";
 
 const remoteStatusSchema = z.object({
 	data: z.object({
@@ -89,16 +89,19 @@ const reconcileUsage: ServiceFn<
 			continue;
 		}
 
+		const request = {
+			requestId: row.request_id,
+			featureKey: row.feature_key,
+			runId: row.agent_run_id,
+			conversationId: row.session_id,
+			userId: row.user_id,
+			connectionId: row.lucid_remote_connection_id,
+		};
 		const usage = status?.success ? status.data.data.usage : undefined;
 
 		if (usage) {
 			const stored = await storeUsage(context, {
-				requestId: row.request_id,
-				featureKey: row.feature_key,
-				runId: row.agent_run_id,
-				conversationId: row.session_id,
-				userId: row.user_id,
-				connectionId: row.lucid_remote_connection_id,
+				...request,
 				usage,
 				durationMs: null,
 			});
@@ -114,25 +117,15 @@ const reconcileUsage: ServiceFn<
 				status.data.data.status === "cancelled");
 		if (response.error?.status !== 404 && !uncharged) continue;
 
-		const failed = await repository.upsertAgentUsage({
-			data: {
-				request_id: row.request_id,
-				feature_key: row.feature_key,
-				feature_version: "v1",
-				user_id: row.user_id,
-				lucid_remote_connection_id: row.lucid_remote_connection_id,
-				agent_run_id: row.agent_run_id,
-				session_type: "agent",
-				session_id: row.session_id,
-				status: "failed",
-				error_message:
-					input?.errorMessage ??
-					context.translate(
-						response.error
-							? "server:agent.usage.missing"
-							: "server:agent.usage.uncharged",
-					),
-			},
+		const failed = await storeFailedUsage(context, {
+			...request,
+			errorMessage:
+				input?.errorMessage ??
+				context.translate(
+					response.error
+						? "server:agent.usage.missing"
+						: "server:agent.usage.uncharged",
+				),
 		});
 		if (failed.error) return failed;
 

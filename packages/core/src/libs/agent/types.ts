@@ -131,6 +131,13 @@ export const checkpointSchema = z.object({
 		.optional(),
 });
 
+/** A tool as it is offered to the remote model. */
+export type ModelToolDefinition = {
+	name: string;
+	description: string;
+	inputSchema: Record<string, unknown>;
+};
+
 export type ToolCall = z.infer<typeof toolCallSchema>;
 export type ModelMessage = z.infer<typeof modelMessageSchema>;
 export type ModelEvent = z.infer<typeof modelEventSchema>;

@@ -1,18 +1,16 @@
 import { useLocation, useNavigate, useParams } from "@solidjs/router";
 import type {
 	AgentApprovalMode,
-	AgentInput,
 	AgentInteractionAction,
 	AiModelSelection,
 } from "@types";
 import classnames from "classnames";
-import { FaSolidArrowDown, FaSolidEllipsis } from "solid-icons/fa";
+import { FaSolidArrowDown } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
 	createMemo,
 	createSignal,
-	For,
 	Match,
 	on,
 	onCleanup,
@@ -20,24 +18,10 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
-import AgentApprovalPicker from "@/components/AgentApprovalPicker/AgentApprovalPicker";
-import AgentCompactionDivider from "@/components/AgentCompactionDivider/AgentCompactionDivider";
-import AgentComposer, {
-	type AgentComposerHandle,
-} from "@/components/AgentComposer/AgentComposer";
-import AgentComposerStack from "@/components/AgentComposerStack/AgentComposerStack";
-import AgentContextRing from "@/components/AgentContextRing/AgentContextRing";
-import AgentErrorNotice from "@/components/AgentErrorNotice/AgentErrorNotice";
-import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
-import AgentMessage from "@/components/AgentMessage/AgentMessage";
-import AgentModelPicker from "@/components/AgentModelPicker/AgentModelPicker";
+import type { AgentComposerHandle } from "@/components/AgentComposer/AgentComposer";
 import { AgentTranscriptContext } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
-import AgentUnavailableNotice from "@/components/AgentUnavailableNotice/AgentUnavailableNotice";
-import AgentWidget from "@/components/AgentWidget/AgentWidget";
-import { layoutOf } from "@/components/AgentWidget/slots";
 import Button from "@/components/Button/Button";
 import DeleteAgentConversationModal from "@/components/DeleteAgentConversationModal/DeleteAgentConversationModal";
-import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import LoadingState from "@/components/LoadingState/LoadingState";
@@ -51,15 +35,17 @@ import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
-import { isToolRow, placeCompactions } from "@/utils/agent-chat";
 import {
 	type AgentReferenceItem,
 	agentReferenceKey,
 } from "@/utils/agent-references";
+import { isToolRow } from "@/utils/agent-tools";
 import AgentChatActions from "./parts/AgentChatActions";
+import AgentChatComposer from "./parts/AgentChatComposer";
 import AgentChatHeader from "./parts/AgentChatHeader";
 import AgentChatSidebar from "./parts/AgentChatSidebar";
 import AgentChatTimeline from "./parts/AgentChatTimeline";
+import AgentChatTranscript from "./parts/AgentChatTranscript";
 
 /**
  * A single chat with the agent: a header, then messages that scroll on their
@@ -90,7 +76,6 @@ const AgentConversationPage: Component = () => {
 	);
 	const definitions = api.agent.useGetDefinitions();
 	const createConversation = api.agent.useCreateConversation();
-	const updateConversation = api.agent.useUpdateConversation();
 	const scroll = useChatScroll({
 		hasEarlier: () => chat.history.hasNextPage,
 		loadEarlier: () => chat.history.fetchNextPage(),
@@ -100,8 +85,6 @@ const AgentConversationPage: Component = () => {
 	//* one item is open in the sidebar at a time: a tool call or a transcript row's panel
 	const [selectedId, setSelectedId] = createSignal<string>();
 	const [sidebar, setSidebar] = createSignal<HTMLElement>();
-	//* the composer interaction set aside to send instructions instead
-	const [redirecting, setRedirecting] = createSignal<string>();
 	const [routineOpen, setRoutineOpen] = createSignal(false);
 	const [focusApprovals, setFocusApprovals] = createSignal(false);
 	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
@@ -130,12 +113,6 @@ const AgentConversationPage: Component = () => {
 		),
 	);
 	const unavailable = createMemo(() => getAgentUnavailableReason());
-	const latestRun = createMemo(() => conversation()?.latestRun);
-	//* shares the model picker's query; chat waits for it as it needs the same Lucid connection
-	const models = api.agent.useGetModels({
-		agentKey: () => conversation()?.agentKey,
-		routineId: () => conversation()?.routineId ?? undefined,
-	});
 	const routineQuery = api.agent.useGetRoutine({
 		id: () => conversation()?.routineId ?? undefined,
 	});
@@ -151,67 +128,15 @@ const AgentConversationPage: Component = () => {
 	const sidebarOpen = createMemo(
 		() => routineCard() !== undefined || detailsOpen() || !!selectedId(),
 	);
-	const compactions = createMemo(() =>
-		placeCompactions(chat.messages, chat.compactions()),
-	);
 	const tools = createMemo(() =>
 		chat.messages.flatMap((message) => message.parts.filter(isToolRow)),
 	);
 	const selectedTool = createMemo(() =>
 		tools().find((tool) => tool.id === selectedId()),
 	);
-	const composerWidget = createMemo(() => {
-		const pending = chat.pendingInteraction();
-		return pending?.widget.interaction?.placement === "composer"
-			? pending
-			: undefined;
-	});
-	const activeWidget = createMemo(() => {
-		const pending = composerWidget();
-		return pending?.id !== redirecting() ? pending : undefined;
-	});
-	/**
-	 * What the end of the transcript shows while the agent works without waiting
-	 * on the reader. Its last row shimmers, streaming text needs nothing, and
-	 * otherwise a status line holds the place of the reply to come.
-	 */
-	const activity = createMemo(() => {
-		if (!chat.working() || chat.pendingInteraction()) return undefined;
-		if (latestRun()?.status === "interrupted" && !chat.streaming()) {
-			return "retrying";
-		}
-		if (chat.context()?.status === "compacting") return "compacting";
-		const last = chat.messages.at(-1);
-		const part = last?.parts.findLast((item) => layoutOf(item) !== "hidden");
-		if (last?.role === "user" || !part) return "thinking";
-		if (layoutOf(part) === "row") return "row";
-		return part.type === "text" ? undefined : "thinking";
-	});
-	const runError = createMemo(() => {
-		const run = latestRun();
-		return !chat.streaming() && run?.status === "failed"
-			? run.errorMessage
-			: undefined;
-	});
 
 	// ----------------------------------------
 	// Functions
-	const send = (
-		text: string,
-		mode: "send" | "steer",
-		references: AgentReferenceItem[],
-	) => {
-		//* a run reads the chat's settings when it starts, so wait for a change to save
-		if (
-			unavailable() ||
-			!models.isSuccess ||
-			updateConversation.action.isPending
-		) {
-			return false;
-		}
-		scroll.scrollToEnd("smooth");
-		return chat.send(text, chat.waiting() ? "steer" : mode, references);
-	};
 	const respond = async (
 		interactionId: string,
 		response: Record<string, unknown>,
@@ -234,48 +159,11 @@ const AgentConversationPage: Component = () => {
 
 		return result;
 	};
-	/** Editing takes a queued message back into the chat box. */
-	const edit = async (input: AgentInput) => {
-		if (await chat.updateInput({ kind: "cancel", id: input.id })) {
-			composer?.insert(input.text, input.references);
-		}
-	};
-	const editLast = () => {
-		const last = chat.inputs.findLast(
-			(input) => input.status === "pending" && input.delivery.kind === "queue",
-		);
-		if (!last) return false;
-		void edit(last);
-		return true;
-	};
 	const setDetailsOpen = (open: boolean) =>
 		userPreferencesStore.setSectionOpen("agent.chat.details", open);
 	/** Opens a tool call in the panel, or closes it when it is already open. */
 	const selectTool = (id: string) =>
 		setSelectedId((current) => (current === id ? undefined : id));
-
-	const shownLayouts = (index: number) =>
-		(chat.messages[index]?.parts ?? [])
-			.map(layoutOf)
-			.filter((layout) => layout !== "hidden");
-	const endsInRow = (index: number) => shownLayouts(index).at(-1) === "row";
-	/**
-	 * Whether a message starts with a row straight after one that ended with
-	 * one. Each model turn is its own message, so this lets rows read as one
-	 * block.
-	 */
-	const continuesRows = (index: number) =>
-		endsInRow(index - 1) && shownLayouts(index)[0] === "row";
-	const statusFollowsRow = () =>
-		endsInRow(
-			chat.messages.findLastIndex(
-				(message, index) =>
-					message.role === "user" || shownLayouts(index).length > 0,
-			),
-		);
-	//* a marker before the first loaded message may belong to an earlier page
-	const compactedBefore = (id: string, index: number) =>
-		compactions().before.has(id) && !(index === 0 && chat.history.hasNextPage);
 
 	// ----------------------------------------
 	// Effects
@@ -326,7 +214,6 @@ const AgentConversationPage: Component = () => {
 			() => params.conversationId,
 			() => {
 				setSelectedId(undefined);
-				setRedirecting(undefined);
 				setRunsOpen(false);
 				scroll.scrollToEnd();
 			},
@@ -401,100 +288,14 @@ const AgentConversationPage: Component = () => {
 												attached() ? "pb-32" : "pb-10",
 											)}
 										>
-											<For each={chat.messages}>
-												{(message, index) => (
-													<>
-														<Show when={compactedBefore(message.id, index())}>
-															<AgentCompactionDivider />
-														</Show>
-														<div
-															data-chat-message={message.id}
-															data-chat-role={message.role}
-															class={classnames("flex flex-col", {
-																"-mt-5": continuesRows(index()),
-																hidden:
-																	message.role !== "user" &&
-																	shownLayouts(index()).length === 0,
-															})}
-														>
-															<AgentMessage
-																message={message}
-																referenceDetails={referenceDetails()}
-																pendingInteractionId={
-																	chat.pendingInteraction()?.id
-																}
-																onRespond={respond}
-																selectedToolId={selectedId()}
-																onSelectTool={selectTool}
-																live={
-																	chat.streaming() &&
-																	index() === chat.messages.length - 1
-																}
-																working={
-																	activity() === "row" &&
-																	index() === chat.messages.length - 1
-																}
-															/>
-														</div>
-													</>
-												)}
-											</For>
-											<Show when={compactions().trailing}>
-												<AgentCompactionDivider />
-											</Show>
-											{/* laid out like a transcript row, as the agent's next step is often one; a shimmering row already shows the agent at work, so then it is only read out */}
-											<Show when={activity()}>
-												{(current) => (
-													<div
-														role="status"
-														class={classnames(
-															"agent-shimmer flex w-fit max-w-full items-center gap-2 py-1 text-xs text-muted",
-															{
-																"sr-only": current() === "row",
-																"-mt-5": statusFollowsRow(),
-															},
-														)}
-													>
-														<span
-															class="flex size-3.5 shrink-0 items-center justify-center"
-															aria-hidden="true"
-														>
-															<FaSolidEllipsis size={10} />
-														</span>
-														{T()(
-															current() === "retrying"
-																? "agent.chat.retrying"
-																: current() === "compacting"
-																	? "agent.context.compacting"
-																	: "agent.chat.thinking",
-														)}
-													</div>
-												)}
-											</Show>
-											<Show
-												when={
-													!chat.streaming() &&
-													latestRun()?.status === "cancelled"
-												}
-											>
-												<p class="text-sm text-muted">
-													{T()("agent.chat.stopped")}
-												</p>
-											</Show>
-											<Show when={chat.error() ?? runError()}>
-												{(message) => (
-													<AgentErrorNotice
-														message={message()}
-														onRetry={
-															latestRun()?.status === "failed" &&
-															!chat.working() &&
-															!unavailable()
-																? () => void chat.retry()
-																: undefined
-														}
-													/>
-												)}
-											</Show>
+											<AgentChatTranscript
+												chat={chat}
+												referenceDetails={referenceDetails()}
+												selectedToolId={selectedId()}
+												onSelectTool={selectTool}
+												onRespond={respond}
+												canRetry={!unavailable()}
+											/>
 										</div>
 									</div>
 									{/* with files attached it reaches halfway up behind them, so text fades out beneath the cards */}
@@ -541,155 +342,23 @@ const AgentConversationPage: Component = () => {
 						<Show when={!chat.conversation.isError}>
 							<div class="relative mx-auto w-full max-w-3xl shrink-0 px-4 pb-4 md:px-6 md:pb-6">
 								<div class="-mx-2.5">
-									<AgentComposerStack
-										inputs={chat.inputs}
-										paused={chat.queuePaused()}
-										canSteer={chat.activeRunId() !== undefined}
-										onSteer={(input) => {
-											const targetRunId = chat.activeRunId();
-											if (targetRunId) {
-												void chat.updateInput({
-													kind: "steer",
-													id: input.id,
-													targetRunId,
-												});
-											}
+									<AgentChatComposer
+										chat={chat}
+										conversationId={params.conversationId}
+										agent={agent()}
+										routine={routine()}
+										referenceDetails={referenceDetails()}
+										ref={(handle) => {
+											composer = handle;
 										}}
-										onEdit={
-											activeWidget() ? undefined : (input) => void edit(input)
-										}
-										onCancel={(input) =>
-											void chat.updateInput({ kind: "cancel", id: input.id })
-										}
-										onResume={() => void chat.updateInput({ kind: "resume" })}
-										onClear={() => void chat.updateInput({ kind: "clear" })}
+										onAttachedChange={setAttached}
+										onRespond={respond}
+										onSend={() => scroll.scrollToEnd("smooth")}
+										onEditRoutineApprovals={() => {
+											setFocusApprovals(true);
+											setRoutineOpen(true);
+										}}
 									/>
-									<ErrorMessage
-										theme="basic"
-										message={updateConversation.errors()?.message}
-									/>
-									<AgentUnavailableNotice>
-										<Show when={!activeWidget()}>
-											<AgentComposer
-												ref={(handle) => {
-													composer = handle;
-												}}
-												class="agent-composer-morph"
-												autofocus={true}
-												draftKey={params.conversationId}
-												floatAttachments={true}
-												onAttachedChange={setAttached}
-												referenceDetails={referenceDetails()}
-												attachments={agent()?.attachments}
-												capabilities={agent()?.capabilities}
-												disabled={!models.isSuccess}
-												placeholder={T()(
-													models.isError
-														? "agent.composer.placeholder.unreachable"
-														: chat.pendingInteraction()
-															? "agent.composer.placeholder.instructions"
-															: chat.working()
-																? "agent.composer.placeholder.busy"
-																: "agent.composer.placeholder",
-												)}
-												header={
-													<Show when={chat.pendingInteraction()}>
-														{(pending) => (
-															<AgentInteractionBar
-																title={pending().widget.interaction?.title}
-																redirecting={true}
-																onRedirect={
-																	pending().widget.interaction?.placement ===
-																	"composer"
-																		? () => setRedirecting(undefined)
-																		: undefined
-																}
-																onStop={() => void chat.stop()}
-															/>
-														)}
-													</Show>
-												}
-												queueable={true}
-												busy={chat.working()}
-												onStop={
-													chat.working() ? () => void chat.stop() : undefined
-												}
-												controls={
-													<Show when={conversation()}>
-														<AgentApprovalPicker
-															routine={
-																conversation()?.routineId
-																	? {
-																			disabled: !routine(),
-																			onEdit: () => {
-																				setFocusApprovals(true);
-																				setRoutineOpen(true);
-																			},
-																		}
-																	: undefined
-															}
-															value={
-																conversation()?.approvalMode ?? "tool-defaults"
-															}
-															onChange={(approvalMode) =>
-																updateConversation.action.mutate({
-																	id: params.conversationId,
-																	body: { approvalMode },
-																})
-															}
-														/>
-													</Show>
-												}
-												onSubmit={send}
-												onEditLast={editLast}
-												end={
-													<>
-														<Show when={chat.context()}>
-															{(context) => (
-																<AgentContextRing
-																	context={context()}
-																	busy={chat.working()}
-																	onCompact={() => void chat.compact()}
-																/>
-															)}
-														</Show>
-														<Show when={conversation()}>
-															{(current) => (
-																<AgentModelPicker
-																	agentKey={current().agentKey}
-																	routineId={current().routineId ?? undefined}
-																	value={current().modelSelection}
-																	onChange={(modelSelection) =>
-																		updateConversation.action.mutateAsync({
-																			id: params.conversationId,
-																			body: { modelSelection },
-																		})
-																	}
-																/>
-															)}
-														</Show>
-													</>
-												}
-											/>
-										</Show>
-										{/* kept while instructions are sent instead, so the form keeps its values */}
-										<Show when={composerWidget()}>
-											{(pending) => (
-												<div
-													class="max-h-[60vh] overflow-y-auto motion-safe:animate-rise-in"
-													classList={{ hidden: !activeWidget() }}
-												>
-													<AgentWidget
-														widget={pending().widget}
-														view="composer"
-														onRespond={respond}
-														onRedirect={() => setRedirecting(pending().id)}
-														onStop={() => void chat.stop()}
-													/>
-												</div>
-											)}
-										</Show>
-									</AgentUnavailableNotice>
 								</div>
 							</div>
 						</Show>

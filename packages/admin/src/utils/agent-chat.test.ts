@@ -9,12 +9,12 @@ import {
 	applyStreamEvent,
 	awaitsDelivery,
 	findPendingInteraction,
-	isToolRow,
 	messageText,
 	partLayout,
 	placeCompactions,
 	shouldPollTitle,
 } from "./agent-chat";
+import { isToolRow } from "./agent-tools";
 
 const conversationId = "conversation";
 const apply = (events: AgentStreamEvent[], messages: AgentMessage[] = []) =>

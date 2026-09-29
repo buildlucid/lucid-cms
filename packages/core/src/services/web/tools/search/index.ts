@@ -1,5 +1,6 @@
 import { copy } from "../../../../libs/i18n/index.js";
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
+import type { AgentLucidToolName } from "../../../../types/response.js";
 import {
 	resolveWebToolOptions,
 	type WebToolOptions,
@@ -7,7 +8,7 @@ import {
 import searchWeb from "./handler.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
-export const webSearchToolName = "web_search";
+export const webSearchToolName = "web_search" satisfies AgentLucidToolName;
 
 export const webSearchAgentTool = (options: WebToolOptions = {}) => {
 	const { allowedDomains } = resolveWebToolOptions(options);

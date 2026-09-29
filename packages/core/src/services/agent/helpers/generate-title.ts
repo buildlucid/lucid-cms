@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../../../constants/constants.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { AgentTitleGenerateV1Request } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { generateCmsAi } from "../../../libs/lucid-remote/services/index.js";
@@ -14,19 +15,28 @@ import getAccessToken from "../../connection/token-manager.js";
 
 const titleSchema = z.object({ title: z.string().trim().min(1) });
 
+const { titleLength } = constants.agent;
+
 const normalizeTitle = (value: string) => {
 	const title = value
 		.replace(/\s+/gu, " ")
 		.replace(/^["'“”]+|["'“”]+$/gu, "")
 		.replace(/[.!?]+$/u, "")
 		.trim();
-	if (title.length <= 80) return title;
+	if (title.length <= titleLength) return title;
 	const shortened = title
-		.slice(0, 80)
+		.slice(0, titleLength)
 		.replace(/\s+\S*$/u, "")
 		.trim();
-	return shortened || title.slice(0, 80);
+	return shortened || title.slice(0, titleLength);
 };
+
+const generationFailed = () =>
+	({
+		type: "basic",
+		status: 502,
+		message: copy("server:agent.title.generate.failed"),
+	}) as const;
 
 /** Generates a title from saved chat text, with the first message as the focus for new chats. */
 const generateTitle: ServiceFn<
@@ -129,38 +139,12 @@ const generateTitle: ServiceFn<
 
 	const result = generated.data.json.data;
 	if (!isCmsAiGenerateCompletedData(result)) {
-		return {
-			data: undefined,
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy("server:agent.title.generate.failed"),
-			},
-		};
+		return { data: undefined, error: generationFailed() };
 	}
 
 	const parsed = titleSchema.safeParse(result.output);
-	if (!parsed.success) {
-		return {
-			data: undefined,
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy("server:agent.title.generate.failed"),
-			},
-		};
-	}
-	const title = normalizeTitle(parsed.data.title);
-	if (!title) {
-		return {
-			data: undefined,
-			error: {
-				type: "basic",
-				status: 502,
-				message: copy("server:agent.title.generate.failed"),
-			},
-		};
-	}
+	const title = parsed.success ? normalizeTitle(parsed.data.title) : "";
+	if (!title) return { data: undefined, error: generationFailed() };
 
 	const stored = await storeGeneration(context, {
 		lucidRemoteConnectionId: token.data.lucidRemoteConnectionId,

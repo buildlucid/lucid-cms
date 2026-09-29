@@ -2,6 +2,7 @@ import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { AgentToolAuthority } from "../tools/types.js";
 import { getCollectionPermission } from "./collection-permissions.js";
 import { ExternalScopes } from "./external-scopes.js";
+import hasPermission from "./has-permission.js";
 
 export type CollectionToolOptions = {
 	/** Limits the tool to these collection keys. People's permissions and connection scopes still apply. */
@@ -33,11 +34,7 @@ export const getPermittedCollectionKeys = (
 	only?: readonly string[],
 ) =>
 	limitCollections(config.collections, only)
-		.filter(
-			(collection) =>
-				authority.superAdmin ||
-				authority.permissions.includes(
-					getCollectionPermission(collection.key, "read"),
-				),
+		.filter((collection) =>
+			hasPermission(authority, getCollectionPermission(collection.key, "read")),
 		)
 		.map((collection) => collection.key);

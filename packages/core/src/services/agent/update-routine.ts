@@ -1,3 +1,4 @@
+import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
 import type { RoutineTools } from "../../libs/agent/types.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
@@ -6,7 +7,6 @@ import type { AgentRoutine, AiModelSelection } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutine from "./get-routine.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
-import nextRoutineOccurrence from "./helpers/next-routine-occurrence.js";
 import saveRoutineTools from "./helpers/save-routine-tools.js";
 import validateRoutineTools from "./helpers/validate-routine-tools.js";
 

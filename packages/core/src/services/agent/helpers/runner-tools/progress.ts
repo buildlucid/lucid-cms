@@ -1,15 +1,14 @@
-import runnerTools from "../../../../libs/agent/runner-tools.js";
-import { toolFailure } from "../tool-outcome.js";
-import type { RunnerToolHandler } from "./types.js";
+import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { toolFailure, toolResult } from "../tool-outcome.js";
+import type { RunnerToolInputHandler } from "./types.js";
 
 /** The transcript shows the message from the call itself, so this only confirms it. */
-const progress: RunnerToolHandler = async (context, { call, mode }) => {
-	const input = runnerTools.progress.input.safeParse(call.input);
-	if (mode !== "chat" || !input.success) {
-		return toolFailure(context.translate("server:agent.progress.invalid"));
-	}
-
-	return { kind: "result", output: { shared: true }, failed: false };
-};
+const progress: RunnerToolInputHandler<typeof runnerTools.progress> = async (
+	context,
+	{ mode },
+) =>
+	mode === "chat"
+		? toolResult({ shared: true })
+		: toolFailure(context.translate("server:agent.tool.unavailable"));
 
 export default progress;
