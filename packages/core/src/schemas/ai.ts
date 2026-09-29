@@ -5,6 +5,12 @@ import {
 	cmsAiGenerateCompletedDataSchema,
 } from "../libs/lucid-remote/schema/ai.js";
 import { generatedContentSchema } from "../libs/lucid-remote/schema/generated-content.js";
+import type {
+	AiCredits,
+	AiUsageRecord,
+	AiUsageSession,
+	AiUsageSessionType,
+} from "../types/response.js";
 import { brickInputSchema } from "./collection-bricks.js";
 import { fieldInputSchema } from "./collection-fields.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
@@ -158,7 +164,113 @@ const aiUsageChartDateSchema = z
 	.regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const aiUsageChartDimensionSchema = z.enum(["day"]);
-const aiUsageChartMetricSchema = z.enum(["requests", "totalTokens", "cost"]);
+const aiUsageChartMetricSchema = z.enum(["requests", "totalTokens", "credits"]);
+
+export const aiUsageSessionTypeSchema = z.enum([
+	"agent",
+	"media-image",
+	"media-alt",
+	"custom-field",
+]) satisfies z.ZodType<AiUsageSessionType>;
+
+const aiUsageTokensResponseSchema = z
+	.object({
+		input: z.number().int().nonnegative(),
+		output: z.number().int().nonnegative(),
+		total: z.number().int().nonnegative(),
+	})
+	.strict();
+
+const aiUsageSessionResponseSchema = z
+	.object({
+		type: aiUsageSessionTypeSchema,
+		id: z.string(),
+		conversation: z
+			.object({
+				id: z.string(),
+				title: z.string(),
+			})
+			.strict()
+			.nullable(),
+		user: z
+			.object({
+				id: z.number(),
+				username: z.string(),
+				email: z.email(),
+				firstName: z.string().nullable(),
+				lastName: z.string().nullable(),
+				profilePicture: mediaImagePreviewResponseSchema.nullable(),
+			})
+			.strict()
+			.nullable(),
+		credits: z.number().int().nonnegative(),
+		tokens: aiUsageTokensResponseSchema,
+		requests: z
+			.object({
+				total: z.number().int().nonnegative(),
+				webSearches: z.number().int().nonnegative(),
+				webFetches: z.number().int().nonnegative(),
+				failed: z.number().int().nonnegative(),
+				pending: z.number().int().nonnegative(),
+			})
+			.strict(),
+		startedAt: z.string().nullable(),
+		lastActivityAt: z.string().nullable(),
+	})
+	.strict() satisfies z.ZodType<AiUsageSession>;
+
+const aiUsageRecordResponseSchema = z
+	.object({
+		id: z.number(),
+		requestId: z.string(),
+		providerRequestId: z.string().nullable(),
+		feature: z
+			.object({
+				key: z.string(),
+				version: z.string(),
+			})
+			.strict(),
+		status: z.enum(["failed", "pending", "success"]),
+		runId: z.string().nullable(),
+		usage: z
+			.discriminatedUnion("kind", [
+				z
+					.object({
+						kind: z.literal("model"),
+						model: z.string(),
+						tokens: aiUsageTokensResponseSchema,
+					})
+					.strict(),
+				z
+					.object({
+						kind: z.literal("web"),
+						operation: z.enum(["search", "fetch"]),
+						requests: z.number().int().positive(),
+					})
+					.strict(),
+			])
+			.nullable(),
+		credits: z.number().int().nonnegative().nullable(),
+		durationMs: z.number().nullable(),
+		errorMessage: z.string().nullable(),
+		createdAt: z.string().nullable(),
+	})
+	.strict() satisfies z.ZodType<AiUsageRecord>;
+
+const aiUsageSessionParamsSchema = z
+	.object({
+		type: aiUsageSessionTypeSchema,
+		id: z.string().trim().min(1).max(128),
+	})
+	.strict();
+
+const aiCreditsBalanceSchema = z
+	.object({
+		used: z.number().nonnegative(),
+		remaining: z.number().nonnegative(),
+		resetsAt: z.string(),
+	})
+	.strict();
 
 export const controllerSchemas = {
 	getUsageChart: {
@@ -199,7 +311,7 @@ export const controllerSchemas = {
 						.optional()
 						.meta({
 							description:
-								"Comma-separated usage metrics to aggregate. Supported values are requests, totalTokens, and cost.",
+								"Comma-separated usage metrics to aggregate. Supported values are requests, totalTokens, and credits.",
 							example: "requests,totalTokens",
 						}),
 					startDate: aiUsageChartDateSchema.optional().meta({
@@ -213,6 +325,10 @@ export const controllerSchemas = {
 					"filter[featureKey]": queryString.schema.filter(false, {
 						example: "media.image.generate",
 					}),
+					"filter[userId]": z.coerce.number().int().positive().optional().meta({
+						description: "Only counts usage by this user.",
+						example: 1,
+					}),
 				})
 				.meta(queryString.meta),
 			formatted: undefined,
@@ -224,13 +340,6 @@ export const controllerSchemas = {
 				metrics: z.array(aiUsageChartMetricSchema),
 				startDate: aiUsageChartDateSchema,
 				endDate: aiUsageChartDateSchema,
-				feature: z
-					.object({
-						key: z.string(),
-						label: z.string(),
-					})
-					.strict()
-					.nullable(),
 				series: z.array(
 					z
 						.object({
@@ -246,45 +355,33 @@ export const controllerSchemas = {
 						})
 						.strict(),
 				),
+				totals: z
+					.object({
+						credits: z.number().nonnegative(),
+						totalTokens: z.number().nonnegative(),
+						requests: z.number().int().nonnegative(),
+						sessions: z.number().int().nonnegative(),
+					})
+					.strict(),
 			})
 			.strict(),
 	} satisfies ControllerSchema,
-	getUsage: {
+	getUsageSessions: {
 		body: undefined,
 		query: {
 			string: z
 				.object({
-					"filter[requestId]": queryString.schema.filter(false, {
-						example: "req_123",
-					}),
-					"filter[providerRequestId]": queryString.schema.filter(false, {
-						example: "provider_req_123",
-					}),
-					"filter[featureKey]": queryString.schema.filter(false, {
-						example: "media.image.generate",
-					}),
-					"filter[status]": queryString.schema.filter(true, {
-						example: "success",
-					}),
-					"filter[model]": queryString.schema.filter(false, {
-						example: "gpt-image-1",
+					"filter[sessionType]": queryString.schema.filter(true, {
+						example: "agent",
 					}),
 					"filter[userId]": queryString.schema.filter(true, {
 						example: "1",
 					}),
-					"filter[featureVersion]": queryString.schema.filter(false, {
-						example: "1",
+					"filter[requestId]": queryString.schema.filter(false, {
+						description: "Finds the session a request belongs to.",
+						example: "3f2b8c1e-5d4a-4f7b-9c2e-1a6d8e0b4f3c",
 					}),
-					"filter[targetType]": queryString.schema.filter(false, {
-						example: "media",
-					}),
-					"filter[durationMs]": queryString.schema.filter(false, {
-						example: "1000",
-					}),
-					"filter[createdAt]": queryString.schema.filter(false, {
-						example: "2026-01-01T00:00:00Z",
-					}),
-					sort: queryString.schema.sort("createdAt,cost,durationMs"),
+					sort: queryString.schema.sort("lastActivityAt,credits,totalTokens"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
 				})
@@ -292,23 +389,16 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
-						requestId: queryFormatted.schema.filters.single.optional(),
-						providerRequestId: queryFormatted.schema.filters.single.optional(),
-						featureKey: queryFormatted.schema.filters.single.optional(),
-						featureVersion: queryFormatted.schema.filters.single.optional(),
-						status: queryFormatted.schema.filters.union.optional(),
-						model: queryFormatted.schema.filters.single.optional(),
+						sessionType: queryFormatted.schema.filters.union.optional(),
 						userId: queryFormatted.schema.filters.union.optional(),
-						targetType: queryFormatted.schema.filters.single.optional(),
-						durationMs: queryFormatted.schema.filters.single.optional(),
-						createdAt: queryFormatted.schema.filters.single.optional(),
+						requestId: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				filterOr: queryFormatted.schema.filterOr,
 				sort: z
 					.array(
 						z.object({
-							key: z.enum(["createdAt", "cost", "durationMs"]),
+							key: z.enum(["lastActivityAt", "credits", "totalTokens"]),
 							direction: z.enum(["asc", "desc"]),
 						}),
 					)
@@ -318,58 +408,62 @@ export const controllerSchemas = {
 			}),
 		},
 		params: undefined,
-		response: z.array(
-			z
+		response: z.array(aiUsageSessionResponseSchema),
+	} satisfies ControllerSchema,
+	getUsageSession: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: aiUsageSessionParamsSchema,
+		response: aiUsageSessionResponseSchema,
+	} satisfies ControllerSchema,
+	getUsageSessionRecords: {
+		body: undefined,
+		query: {
+			string: z
 				.object({
-					id: z.number(),
-					requestId: z.string(),
-					providerRequestId: z.string().nullable(),
-					feature: z
-						.object({
-							key: z.string(),
-							label: z.string(),
-							version: z.string(),
-						})
-						.strict(),
-					status: z.enum(["failed", "pending", "success"]),
-					model: z.string().nullable(),
-					createdAt: z.string().nullable(),
-					durationMs: z.number().nullable(),
-					errorMessage: z.string().nullable(),
-					tokens: z
-						.object({
-							input: z.number().int().nonnegative(),
-							output: z.number().int().nonnegative(),
-							total: z.number().int().nonnegative(),
-						})
-						.strict()
-						.nullable(),
-					cost: z
-						.object({
-							creditsCharged: z.string().regex(/^(0|[1-9]\d*)(\.\d+)?$/),
-						})
-						.strict()
-						.nullable(),
-					target: z
-						.object({
-							type: z.string(),
-							data: z.record(z.string(), z.unknown()),
-						})
-						.strict(),
-					user: z
-						.object({
-							id: z.number(),
-							username: z.string(),
-							email: z.email(),
-							firstName: z.string().nullable(),
-							lastName: z.string().nullable(),
-							profilePicture: mediaImagePreviewResponseSchema.nullable(),
-						})
-						.strict()
-						.nullable(),
+					sort: queryString.schema.sort("createdAt"),
+					page: queryString.schema.page,
+					perPage: queryString.schema.perPage,
 				})
-				.strict(),
-		),
+				.meta(queryString.meta),
+			formatted: z.object({
+				sort: z
+					.array(
+						z.object({
+							key: z.enum(["createdAt"]),
+							direction: z.enum(["asc", "desc"]),
+						}),
+					)
+					.optional(),
+				page: queryFormatted.schema.page,
+				perPage: queryFormatted.schema.perPage,
+			}),
+		},
+		params: aiUsageSessionParamsSchema,
+		response: z.array(aiUsageRecordResponseSchema),
+	} satisfies ControllerSchema,
+	getCredits: {
+		body: undefined,
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: undefined,
+		response: z
+			.object({
+				available: z.number().nonnegative(),
+				allowance: aiCreditsBalanceSchema
+					.extend({ total: z.number().nonnegative() })
+					.nullable(),
+				additional: z.object({ remaining: z.number().nonnegative() }).strict(),
+				connectionCap: aiCreditsBalanceSchema
+					.extend({ limit: z.number().nonnegative() })
+					.nullable(),
+			})
+			.strict() satisfies z.ZodType<AiCredits>,
 	} satisfies ControllerSchema,
 	customFieldInput: {
 		body: z
@@ -546,6 +640,9 @@ export type MediaImageCompletionParams = z.infer<
 export type GetUsageChartQueryParams = z.infer<
 	typeof controllerSchemas.getUsageChart.query.string
 >;
-export type GetUsageQueryParams = z.infer<
-	typeof controllerSchemas.getUsage.query.formatted
+export type GetUsageSessionsQueryParams = z.infer<
+	typeof controllerSchemas.getUsageSessions.query.formatted
+>;
+export type GetUsageSessionRecordsQueryParams = z.infer<
+	typeof controllerSchemas.getUsageSessionRecords.query.formatted
 >;

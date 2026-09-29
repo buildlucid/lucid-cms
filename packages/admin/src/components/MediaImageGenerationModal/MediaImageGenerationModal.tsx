@@ -52,7 +52,6 @@ import T from "@/translations";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
 import { getBodyError, getErrorObject } from "@/utils/error-helpers";
-import formatAiCost, { sumAiCredits } from "@/utils/format-ai-cost";
 import helpers from "@/utils/helpers";
 import spawnToast from "@/utils/spawn-toast";
 import {
@@ -233,7 +232,7 @@ const MediaImageGenerationModal: Component = () => {
 		const items = generations().map((generation, index) => ({
 			id: generation.id,
 			label: generationLabel(index),
-			meta: formatAiCost(generation.cost) ?? generationMeta(generation),
+			meta: generationMeta(generation),
 		}));
 		const working = workingGeneration();
 		if (working) {
@@ -260,14 +259,6 @@ const MediaImageGenerationModal: Component = () => {
 					: T()("ai.media.image.generate.response.inflight.title"),
 			},
 		];
-	});
-	const sessionCost = createMemo(() => {
-		const firstGeneration = generations()[0];
-		if (!firstGeneration) return undefined;
-
-		return formatAiCost(
-			sumAiCredits(generations().map((generation) => generation.cost)),
-		);
 	});
 
 	// -----------------------------
@@ -407,7 +398,6 @@ const MediaImageGenerationModal: Component = () => {
 	function completedGenerationDetails(
 		generation: MediaImageGenerationCandidate,
 	) {
-		const cost = formatAiCost(generation.cost);
 		return [
 			{
 				label: T()("ai.media.image.generate.source.label"),
@@ -429,11 +419,6 @@ const MediaImageGenerationModal: Component = () => {
 			{
 				label: T()("ai.media.image.generate.response.size"),
 				value: helpers.bytesToSize(generation.output.byteSize),
-			},
-			{
-				label: T()("ai.media.image.generate.cost.label"),
-				value: cost,
-				show: cost !== undefined,
 			},
 		];
 	}
@@ -602,7 +587,6 @@ const MediaImageGenerationModal: Component = () => {
 			size: pending.size,
 			quality: pending.quality,
 			outputFormat: pending.outputFormat,
-			cost: response.usage.cost,
 			output: response.output,
 		};
 	}
@@ -658,10 +642,7 @@ const MediaImageGenerationModal: Component = () => {
 
 		if (isCompletionResponse(response.data)) {
 			finishPendingGeneration(pending, response.data);
-			for (const queryKey of [
-				queryKeys.ai.usage(),
-				queryKeys.ai.usageChart(),
-			]) {
+			for (const queryKey of [queryKeys.ai.usage(), queryKeys.ai.credits()]) {
 				queryClient.invalidateQueries({
 					queryKey,
 				});
@@ -1486,18 +1467,7 @@ const MediaImageGenerationModal: Component = () => {
 								</div>
 							</div>
 						</div>
-						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
-							<div class="min-w-0 flex-1">
-								<Show when={sessionCost()}>
-									{(cost) => (
-										<p class="text-xs text-body">
-											{T()("ai.media.image.generate.cost.total", {
-												cost: cost(),
-											})}
-										</p>
-									)}
-								</Show>
-							</div>
+						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
 							<div class="flex shrink-0 items-center gap-3">
 								<Button
 									type="button"

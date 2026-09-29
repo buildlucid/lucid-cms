@@ -175,7 +175,7 @@ const mediaImageGenerate: ServiceFn<
 				key: "media.image.generate",
 				version: "v1",
 			},
-			targetType: "media-image",
+			session: { type: "media-image", id: props.sessionId },
 			target,
 		});
 		if (storeRes.error) return storeRes;
@@ -209,7 +209,7 @@ const mediaImageGenerate: ServiceFn<
 		lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 		userId: props.userId,
 		response: responseData,
-		targetType: "media-image",
+		session: { type: "media-image", id: props.sessionId },
 		requestStartedAt,
 		target,
 	});

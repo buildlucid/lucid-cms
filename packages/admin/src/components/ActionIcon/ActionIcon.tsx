@@ -4,6 +4,7 @@ import {
 	FaSolidBroom,
 	FaSolidBullseye,
 	FaSolidCalendar,
+	FaSolidChartSimple,
 	FaSolidCheck,
 	FaSolidCircleInfo,
 	FaSolidClockRotateLeft,
@@ -38,6 +39,7 @@ export type ActionIconName =
 	| "broom"
 	| "bullseye"
 	| "calendar"
+	| "chart"
 	| "check"
 	| "clock"
 	| "copy"
@@ -84,6 +86,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <FaSolidBullseye class={iconClasses()} size={iconSize()} />;
 			case "calendar":
 				return <FaSolidCalendar class={iconClasses()} size={iconSize()} />;
+			case "chart":
+				return <FaSolidChartSimple class={iconClasses()} size={iconSize()} />;
 			case "check":
 				return <FaSolidCheck class={iconClasses()} size={iconSize()} />;
 			case "clock":

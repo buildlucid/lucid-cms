@@ -1,4 +1,3 @@
-import { formatAiUsageFeatureLabel } from "../../../libs/formatters/ai-usage.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { GetUsageChartQueryParams } from "../../../schemas/ai.js";
@@ -34,6 +33,7 @@ const getUsageChart: ServiceFn<
 		startDate: formatDbTimestamp(query.start),
 		endDate: formatDbTimestamp(query.endExclusive),
 		featureKey: query.featureKey,
+		userId: query.userId,
 		validation: {
 			enabled: true,
 		},
@@ -54,16 +54,8 @@ const getUsageChart: ServiceFn<
 			metrics: query.metrics,
 			startDate: getDateKey(query.start),
 			endDate: getDateKey(query.end),
-			feature: query.featureKey
-				? {
-						key: query.featureKey,
-						label: formatAiUsageFeatureLabel({
-							featureKey: query.featureKey,
-							translate: context.translate,
-						}),
-					}
-				: null,
 			series: chart.series,
+			totals: chart.totals,
 		},
 	};
 };

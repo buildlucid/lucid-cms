@@ -312,16 +312,15 @@ describe.sequential("Lucid remote connection", () => {
 		expect(connection.data).toBeDefined();
 		if (!connection.data) return;
 
-		const created = await new AiGenerationsRepository(
-			lucidDatabase,
-		).createSingle({
+		const AiGenerations = new AiGenerationsRepository(lucidDatabase);
+		const created = await AiGenerations.createSingle({
 			data: {
 				request_id: "request-1",
 				feature_key: "media.alt.generate",
 				feature_version: "v1",
 				lucid_remote_connection_id: connection.data.id,
-				target_type: "media-alt",
-				target: {},
+				session_type: "media-alt",
+				session_id: "request-1",
 				status: "success",
 			},
 		});

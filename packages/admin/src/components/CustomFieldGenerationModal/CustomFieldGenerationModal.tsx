@@ -1,5 +1,4 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
-import type { CustomFieldInputGenerateResponse } from "@types";
 import {
 	FaSolidLanguage,
 	FaSolidMagicWandSparkles,
@@ -48,7 +47,6 @@ import {
 	stringifyJsonValue,
 } from "@/utils/custom-field-generation";
 import { LucidError } from "@/utils/error-handling";
-import formatAiCost from "@/utils/format-ai-cost";
 import safeDeepEqual from "@/utils/safe-deep-equal";
 import spawnToast from "@/utils/spawn-toast";
 import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
@@ -69,7 +67,6 @@ type GenerationHistoryItem = {
 	jsonText: Map<string | null, string>;
 	jsonValid: Map<string | null, boolean>;
 	generatedLocales: Array<string | null>;
-	cost?: CustomFieldInputGenerateResponse["usage"]["cost"];
 };
 
 const DraftEditor: Component<{
@@ -202,8 +199,6 @@ const CustomFieldGenerationModal: Component = () => {
 		CURRENT_HISTORY_ITEM_ID,
 	);
 	const [generationSequence, setGenerationSequence] = createSignal(0);
-	const [lastCost, setLastCost] =
-		createSignal<CustomFieldInputGenerateResponse["usage"]["cost"]>();
 	const [clientError, setClientError] = createSignal<string>();
 	const documentLocalization = useDocumentLocalization();
 	//* groups every attempt until the modal is cleared, so Lucid can see how many it took
@@ -284,12 +279,6 @@ const CustomFieldGenerationModal: Component = () => {
 			!isLoading() &&
 			!aiModalsStore.get.isApplying,
 	);
-	const costLabel = createMemo(() => {
-		const cost = lastCost();
-		if (!cost) return undefined;
-
-		return formatAiCost(cost);
-	});
 	const activeLocale = createMemo(() =>
 		selectedLocales().length ? (selectedLocales()[0] ?? null) : defaultLocale(),
 	);
@@ -430,9 +419,6 @@ const CustomFieldGenerationModal: Component = () => {
 			return T()("ai.custom.field.generate.response.status.current");
 		}
 
-		const cost = formatAiCost(item.cost);
-		if (cost) return cost;
-
 		return T()("ai.custom.field.generate.quick.review.label");
 	};
 	const generationHistoryItems = createMemo<AiGenerationHistoryItem[]>(() =>
@@ -518,7 +504,6 @@ const CustomFieldGenerationModal: Component = () => {
 		setInstruction("");
 		setGuidance(undefined);
 		setClientError(undefined);
-		setLastCost(undefined);
 		generateField.reset();
 		aiModalsStore.setLoading(false);
 		aiModalsStore.setApplying(false);
@@ -627,11 +612,9 @@ const CustomFieldGenerationModal: Component = () => {
 					jsonText: nextJsonText,
 					jsonValid: nextJsonValid,
 					generatedLocales: responseLocales,
-					cost: response.data.usage.cost,
 				},
 			]);
 			setActiveHistoryItemId(nextGenerationId);
-			setLastCost(response.data.usage.cost);
 		} catch (error) {
 			if (
 				(error instanceof DOMException && error.name === "AbortError") ||
@@ -1032,18 +1015,7 @@ const CustomFieldGenerationModal: Component = () => {
 								</div>
 							</Show>
 						</div>
-						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
-							<div class="min-w-0 flex-1">
-								<Show when={costLabel()}>
-									{(cost) => (
-										<p class="text-xs text-body">
-											{T()("ai.media.image.generate.cost.total", {
-												cost: cost(),
-											})}
-										</p>
-									)}
-								</Show>
-							</div>
+						<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
 							<div class="flex shrink-0 items-center gap-3">
 								<Button
 									type="button"

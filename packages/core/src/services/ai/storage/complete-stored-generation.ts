@@ -34,11 +34,14 @@ const completeStoredGeneration: ServiceFn<
 
 	const updateRes = await AiGenerations.updateSingle({
 		data: {
-			provider_request_id: props.response.usage.providerRequestId ?? null,
 			output: props.response.output as Record<string, unknown>,
+			provider_request_id: props.response.usage.providerRequestId ?? null,
 			usage: props.response.usage,
 			model: props.response.usage.model,
-			credits_charged: props.response.usage.cost.creditsCharged,
+			credits: Number(props.response.usage.cost.creditsCharged),
+			input_tokens: props.response.usage.tokens.input.total,
+			output_tokens: props.response.usage.tokens.output.total,
+			total_tokens: props.response.usage.tokens.total,
 			duration_ms: durationMs,
 			status: "success",
 			error_message: null,

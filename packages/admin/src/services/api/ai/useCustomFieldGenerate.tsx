@@ -43,7 +43,7 @@ const useCustomFieldGenerate = () => {
 		ResponseBody<CustomFieldInputGenerateResponse>
 	>({
 		mutationFn: customFieldGenerateReq,
-		invalidates: [queryKeys.ai.usage(), queryKeys.ai.usageChart()],
+		invalidates: [queryKeys.ai.usage(), queryKeys.ai.credits()],
 		getSuccessToast: (_data, params) =>
 			params.shouldToast?.() === false
 				? undefined

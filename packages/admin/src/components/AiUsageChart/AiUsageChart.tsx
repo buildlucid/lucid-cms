@@ -1,15 +1,24 @@
 import type { AiUsageChartMetric } from "@types";
 import type { ChartData, ChartOptions } from "chart.js";
+import { FaSolidXmark } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
+import AiUsageStats, {
+	type AiUsageStat,
+} from "@/components/AiUsageStats/AiUsageStats";
+import { FormLabel } from "@/components/FormLabel/FormLabel";
 import Input from "@/components/Input/Input";
 import { LineChart } from "@/components/LineChart/LineChart";
 import Select from "@/components/Select/Select";
 import Spinner from "@/components/Spinner/Spinner";
+import UserDisplay from "@/components/UserDisplay/UserDisplay";
+import UserSelectDrawer from "@/components/UserSelectDrawer/UserSelectDrawer";
 import api from "@/services/api";
 import themeStore from "@/store/themeStore/themeStore";
 import T from "@/translations";
 import {
+	formatAiCredits,
 	formatAiUsageChartValue,
+	formatAiUsageNumber,
 	getAiUsageChartMetricLabel,
 	getAiUsageChartMetricOptions,
 	getAiUsageFeatureOptions,
@@ -17,12 +26,14 @@ import {
 	isAiUsageChartMetric,
 } from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
+import helpers from "@/utils/helpers";
+import type { UserRelationRef } from "@/utils/relation-field-helpers";
 
-const defaultMetric: AiUsageChartMetric = "totalTokens";
+const defaultMetric: AiUsageChartMetric = "credits";
 const allFeaturesValue = "__all-features";
 
 const getMetricAxis = (metric: AiUsageChartMetric) =>
-	metric === "cost" ? "cost" : "count";
+	metric === "credits" ? "credits" : "count";
 
 const readThemeVariable = (name: string, fallback: string) => {
 	if (typeof document === "undefined") return fallback;
@@ -40,6 +51,8 @@ export const AiUsageChart: Component = () => {
 	const [featureKey, setFeatureKey] = createSignal<string>(allFeaturesValue);
 	const [startDate, setStartDate] = createSignal(defaultDates.startDate);
 	const [endDate, setEndDate] = createSignal(defaultDates.endDate);
+	const [user, setUser] = createSignal<UserRelationRef>();
+	const [userPickerOpen, setUserPickerOpen] = createSignal(false);
 
 	// ----------------------------------
 	// Memos
@@ -64,17 +77,22 @@ export const AiUsageChart: Component = () => {
 			startDate,
 			endDate,
 			featureKey: selectedFeatureKey,
+			userId: () => user()?.id,
 		},
 		enabled: () =>
 			startDate().length > 0 && endDate().length > 0 && metric().length > 0,
 	});
 
+	const selectedUsers = createMemo(() => {
+		const selected = user();
+		return selected ? [selected] : [];
+	});
 	const chartSeries = createMemo(() => usageChart.data?.data.series ?? []);
-	const hasCostMetric = createMemo(() =>
-		chartSeries().some((series) => series.metric === "cost"),
+	const hasCreditsMetric = createMemo(() =>
+		chartSeries().some((series) => series.metric === "credits"),
 	);
 	const hasCountMetric = createMemo(() =>
-		chartSeries().some((series) => series.metric !== "cost"),
+		chartSeries().some((series) => series.metric !== "credits"),
 	);
 	const chartPalette = createMemo(() => {
 		themeStore.resolved();
@@ -84,7 +102,7 @@ export const AiUsageChart: Component = () => {
 			"--lucid-primary",
 			"oklch(88.842% 0.20897 135.866)",
 		);
-		const cost = readThemeVariable("--lucid-chart-cost", "#F8C45A");
+		const credits = readThemeVariable("--lucid-chart-cost", "#F8C45A");
 
 		return {
 			border: readThemeVariable("--lucid-border", "rgba(255, 255, 255, 0.1)"),
@@ -110,13 +128,13 @@ export const AiUsageChart: Component = () => {
 					borderColor: totalTokens,
 					pointBackgroundColor: totalTokens,
 				},
-				cost: {
+				credits: {
 					backgroundColor: readThemeVariable(
 						"--lucid-chart-cost-fill",
 						"rgba(248, 196, 90, 0.12)",
 					),
-					borderColor: cost,
-					pointBackgroundColor: cost,
+					borderColor: credits,
+					pointBackgroundColor: credits,
 				},
 			} satisfies Record<
 				AiUsageChartMetric,
@@ -131,6 +149,35 @@ export const AiUsageChart: Component = () => {
 			title: readThemeVariable("--lucid-title", "#F1F1F1"),
 			tooltip: readThemeVariable("--lucid-chart-tooltip", "#121212"),
 		};
+	});
+	const stats = createMemo<AiUsageStat[]>(() => {
+		const totals = usageChart.data?.data.totals;
+		const accent = (statMetric: AiUsageChartMetric) =>
+			statMetric === metric()
+				? chartPalette().metrics[statMetric].borderColor
+				: undefined;
+
+		return [
+			{
+				label: T()("ai.usage.credits"),
+				value: formatAiCredits(totals?.credits),
+				accent: accent("credits"),
+			},
+			{
+				label: T()("ai.usage.metrics.totalTokens"),
+				value: formatAiUsageNumber(totals?.totalTokens),
+				accent: accent("totalTokens"),
+			},
+			{
+				label: T()("ai.usage.requests"),
+				value: formatAiUsageNumber(totals?.requests),
+				accent: accent("requests"),
+			},
+			{
+				label: T()("ai.usage.sessions"),
+				value: formatAiUsageNumber(totals?.sessions),
+			},
+		];
 	});
 	const chartData = createMemo<ChartData<"line">>(() => {
 		const firstSeries = chartSeries()[0];
@@ -227,8 +274,8 @@ export const AiUsageChart: Component = () => {
 						}) ?? "0",
 				},
 			},
-			cost: {
-				display: hasCostMetric(),
+			credits: {
+				display: hasCreditsMetric(),
 				beginAtZero: true,
 				position: hasCountMetric() ? "right" : "left",
 				grid: {
@@ -239,7 +286,7 @@ export const AiUsageChart: Component = () => {
 					color: chartPalette().body,
 					callback: (value) =>
 						formatAiUsageChartValue({
-							metric: "cost",
+							metric: "credits",
 							value: Number(value),
 						}) ?? "0",
 				},
@@ -251,7 +298,7 @@ export const AiUsageChart: Component = () => {
 	// Render
 	return (
 		<div class="flex flex-col gap-4">
-			<div class="grid grid-cols-1 gap-3 md:grid-cols-4">
+			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
 				<Select
 					id="ai-usage-chart-metric"
 					value={metric()}
@@ -279,6 +326,70 @@ export const AiUsageChart: Component = () => {
 					label={T()("ai.usage.feature")}
 					clearable={true}
 				/>
+				<div>
+					<FormLabel
+						id="ai-usage-chart-user"
+						label={T()("common.user")}
+						theme="basic"
+					/>
+					<div class="relative">
+						<button
+							type="button"
+							id="ai-usage-chart-user"
+							class="flex h-10 w-full items-center gap-2 rounded-md border border-border bg-input py-2 pl-3 pr-8 text-left text-sm transition-colors duration-200 focus:border-primary focus:outline-hidden"
+							onClick={() => setUserPickerOpen(true)}
+							aria-haspopup="dialog"
+							aria-expanded={userPickerOpen()}
+						>
+							<Show when={user()}>
+								{(selected) => (
+									<UserDisplay user={selected()} variant="icon" size="xs" />
+								)}
+							</Show>
+							<Show
+								when={user()}
+								fallback={
+									<span class="truncate text-muted">
+										{T()("ai.usage.charts.users.all")}
+									</span>
+								}
+							>
+								{(selected) => (
+									<span class="truncate text-title">
+										{helpers.formatUserName(selected(), "name")}
+									</span>
+								)}
+							</Show>
+						</button>
+						<Show when={user()}>
+							<button
+								type="button"
+								class="absolute right-2 top-1/2 -translate-y-1/2 text-subtitle transition-colors duration-200 hover:text-danger"
+								onClick={() => setUser(undefined)}
+								aria-label={T()("common.clear")}
+								title={T()("common.clear")}
+							>
+								<FaSolidXmark size={14} />
+							</button>
+						</Show>
+					</div>
+					<UserSelectDrawer
+						state={{
+							open: userPickerOpen(),
+							setOpen: setUserPickerOpen,
+							multiple: false,
+							selected: selectedUsers().map((selected) => selected.id),
+							selectedRefs: selectedUsers(),
+						}}
+						callbacks={{
+							onSelect: (selection) => {
+								setUser(
+									selection.refs.find((ref) => ref.id === selection.value[0]),
+								);
+							},
+						}}
+					/>
+				</div>
 				<Input
 					id="ai-usage-chart-start-date"
 					value={startDate()}
@@ -314,6 +425,7 @@ export const AiUsageChart: Component = () => {
 					</div>
 				</Show>
 			</div>
+			<AiUsageStats stats={stats()} />
 		</div>
 	);
 };

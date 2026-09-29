@@ -1,172 +1,130 @@
-import type { AiUsage } from "../../types/response.js";
-import { getNumber, getObject } from "../../utils/helpers/index.js";
-import type { Translator } from "../i18n/types.js";
+import type {
+	AiUsageMeasure,
+	AiUsageRecord,
+	AiUsageSession,
+	AiUsageSessionType,
+	UserRef,
+} from "../../types/response.js";
+import type { LucidAiGenerations } from "../db/tables/index.js";
+import type { Select } from "../db/types.js";
+import { cmsWebUsageSchema } from "../lucid-remote/schema/ai.js";
 import formatter from "./helpers.js";
-import mediaFormatter, {
-	type MediaFormatterOptions,
-	type MediaPosterPropsT,
-} from "./media.js";
 
-export interface AiUsagePropT {
-	id: number;
-	request_id: string;
-	provider_request_id: string | null;
-	feature_key: string;
-	feature_version: string;
+/** Aggregates arrive as numbers or strings depending on the database. */
+type Aggregate = number | string | null;
+
+export interface AiUsageSessionPropT {
+	session_type: AiUsageSessionType;
+	session_id: string;
 	user_id: number | null;
-	target_type: string;
-	target: Record<string, unknown>;
-	usage: Record<string, unknown> | null;
-	model: string | null;
-	credits_charged: string | null;
-	duration_ms: number | null;
-	status: "failed" | "pending" | "success";
-	error_message: string | null;
-	created_at: Date | string | null;
-	email: string | null;
-	username: string | null;
-	first_name: string | null;
-	last_name: string | null;
-	profile_picture?: MediaPosterPropsT[];
+	credits: Aggregate;
+	input_tokens: Aggregate;
+	output_tokens: Aggregate;
+	total_tokens: Aggregate;
+	requests: Aggregate;
+	web_searches: Aggregate;
+	web_fetches: Aggregate;
+	failed: Aggregate;
+	pending: Aggregate;
+	started_at: Date | string | null;
+	last_activity_at: Date | string | null;
 }
 
-const formatTokens = (
-	usage: Record<string, unknown> | null,
-): AiUsage["tokens"] => {
-	const usageObject = getObject(usage);
-	const tokens = getObject(usageObject?.tokens);
-	const input = getObject(tokens?.input);
-	const output = getObject(tokens?.output);
+export type AiUsageRecordPropT = Pick<
+	Select<LucidAiGenerations>,
+	| "id"
+	| "request_id"
+	| "provider_request_id"
+	| "feature_key"
+	| "feature_version"
+	| "status"
+	| "agent_run_id"
+	| "usage"
+	| "model"
+	| "credits"
+	| "input_tokens"
+	| "output_tokens"
+	| "total_tokens"
+	| "duration_ms"
+	| "error_message"
+	| "created_at"
+>;
 
-	const inputTotal = getNumber(input?.total);
-	const outputTotal = getNumber(output?.total);
-	const total = getNumber(tokens?.total);
+const toNumber = (value: Aggregate) => Number(value ?? 0);
 
-	if (inputTotal === null || outputTotal === null || total === null) {
-		return null;
+const formatMeasure = (record: AiUsageRecordPropT): AiUsageMeasure | null => {
+	if (
+		record.model !== null &&
+		record.input_tokens !== null &&
+		record.output_tokens !== null &&
+		record.total_tokens !== null
+	) {
+		return {
+			kind: "model",
+			model: record.model,
+			tokens: {
+				input: record.input_tokens,
+				output: record.output_tokens,
+				total: record.total_tokens,
+			},
+		};
 	}
 
+	const web = cmsWebUsageSchema.safeParse(record.usage);
+	if (!web.success) return null;
+
 	return {
-		input: inputTotal,
-		output: outputTotal,
-		total,
+		kind: "web",
+		operation: web.data.operation,
+		requests: web.data.requests,
 	};
 };
 
-const formatDurationMs = (usage: AiUsagePropT) => {
-	if (usage.duration_ms === 0) return null;
-	return usage.duration_ms;
-};
+const formatRecord = (record: AiUsageRecordPropT): AiUsageRecord => ({
+	id: record.id,
+	requestId: record.request_id,
+	providerRequestId: record.provider_request_id,
+	feature: {
+		key: record.feature_key,
+		version: record.feature_version,
+	},
+	status: record.status,
+	runId: record.agent_run_id,
+	usage: formatMeasure(record),
+	credits: record.credits,
+	//* zero means the request finished before it could be timed
+	durationMs: record.duration_ms || null,
+	errorMessage: record.error_message,
+	createdAt: formatter.formatDate(record.created_at),
+});
 
-export const formatAiUsageFeatureLabel = (props: {
-	featureKey: string;
-	translate: Translator;
-}) => {
-	const fallback = props.featureKey;
-
-	switch (props.featureKey) {
-		case "web.search":
-			return props.translate("server:core.ai.usage.features.web.search");
-		case "web.fetch":
-			return props.translate("server:core.ai.usage.features.web.fetch");
-		case "agent.compact":
-			return props.translate("server:core.ai.usage.features.agent.compact", {
-				defaultMessage: "Conversation Compaction",
-			});
-		case "agent.chat":
-			return props.translate("server:core.ai.usage.features.agent.chat", {
-				defaultMessage: "Agent Chat",
-			});
-		case "custom-field.input.generate":
-			return props.translate(
-				"server:core.ai.usage.features.custom.field.input.generate",
-				{
-					defaultMessage: "Field Generation",
-				},
-			);
-		case "media.alt.generate":
-			return props.translate(
-				"server:core.ai.usage.features.media.alt.generate",
-				{
-					defaultMessage: "Alt Text",
-				},
-			);
-		case "media.image.generate":
-			return props.translate(
-				"server:core.ai.usage.features.media.image.generate",
-				{
-					defaultMessage: "Image Generation",
-				},
-			);
-		default:
-			return fallback;
-	}
-};
-
-const formatMultiple = (props: {
-	aiUsage: AiUsagePropT[];
-	mediaOptions: MediaFormatterOptions;
-	translate: Translator;
-}): AiUsage[] => {
-	return props.aiUsage.map((usage) =>
-		formatSingle({
-			aiUsage: usage,
-			mediaOptions: props.mediaOptions,
-			translate: props.translate,
-		}),
-	);
-};
-
-const formatSingle = (props: {
-	aiUsage: AiUsagePropT;
-	mediaOptions: MediaFormatterOptions;
-	translate: Translator;
-}): AiUsage => {
-	const user =
-		props.aiUsage.user_id && props.aiUsage.email && props.aiUsage.username
-			? {
-					id: props.aiUsage.user_id,
-					username: props.aiUsage.username,
-					email: props.aiUsage.email,
-					firstName: props.aiUsage.first_name,
-					lastName: props.aiUsage.last_name,
-					profilePicture: mediaFormatter.formatMediaImagePreview({
-						poster: props.aiUsage.profile_picture?.[0],
-						options: props.mediaOptions,
-					}),
-				}
-			: null;
-
-	return {
-		id: props.aiUsage.id,
-		requestId: props.aiUsage.request_id,
-		providerRequestId: props.aiUsage.provider_request_id,
-		feature: {
-			key: props.aiUsage.feature_key,
-			label: formatAiUsageFeatureLabel({
-				featureKey: props.aiUsage.feature_key,
-				translate: props.translate,
-			}),
-			version: props.aiUsage.feature_version,
-		},
-		status: props.aiUsage.status,
-		model: props.aiUsage.model,
-		createdAt: formatter.formatDate(props.aiUsage.created_at),
-		durationMs: formatDurationMs(props.aiUsage),
-		errorMessage: props.aiUsage.error_message,
-		tokens: formatTokens(props.aiUsage.usage),
-		cost: props.aiUsage.credits_charged
-			? { creditsCharged: props.aiUsage.credits_charged }
-			: null,
-		target: {
-			type: props.aiUsage.target_type,
-			data: getObject(props.aiUsage.target) ?? {},
-		},
-		user,
-	};
-};
+const formatSession = (props: {
+	session: AiUsageSessionPropT;
+	user: UserRef;
+	conversation: AiUsageSession["conversation"];
+}): AiUsageSession => ({
+	type: props.session.session_type,
+	id: props.session.session_id,
+	conversation: props.conversation,
+	user: props.user,
+	credits: toNumber(props.session.credits),
+	tokens: {
+		input: toNumber(props.session.input_tokens),
+		output: toNumber(props.session.output_tokens),
+		total: toNumber(props.session.total_tokens),
+	},
+	requests: {
+		total: toNumber(props.session.requests),
+		webSearches: toNumber(props.session.web_searches),
+		webFetches: toNumber(props.session.web_fetches),
+		failed: toNumber(props.session.failed),
+		pending: toNumber(props.session.pending),
+	},
+	startedAt: formatter.formatDate(props.session.started_at),
+	lastActivityAt: formatter.formatDate(props.session.last_activity_at),
+});
 
 export default {
-	formatMultiple,
-	formatSingle,
+	formatRecord,
+	formatSession,
 };

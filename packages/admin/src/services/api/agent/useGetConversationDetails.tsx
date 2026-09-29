@@ -5,7 +5,7 @@ import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 
 /**
- * Gets a conversation's usage and web sources. Its key sits under the
+ * Gets the web sources a conversation used. Its key sits under the
  * conversation list, so refreshing chats after a run refreshes it too.
  */
 const useGetConversationDetails = (params: {

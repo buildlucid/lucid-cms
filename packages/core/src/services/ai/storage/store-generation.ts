@@ -1,6 +1,7 @@
 import type { AiGenerationStatus } from "../../../libs/db/tables/index.js";
 import type { CmsAiGenerateCompletedData } from "../../../libs/lucid-remote/services/generate-cms-ai/type.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
+import type { AiUsageSessionType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getRequestDurationMs from "../helpers/get-request-duration-ms.js";
 
@@ -9,10 +10,11 @@ const storeGeneration: ServiceFn<
 		{
 			lucidRemoteConnectionId: number;
 			userId: number | null;
-			agentConversationId?: string;
+			/** Without an id, the request is its own session. */
+			session: { type: AiUsageSessionType; id?: string };
 			response: CmsAiGenerateCompletedData;
-			targetType: string;
-			target: Record<string, unknown>;
+			/** What the generation was for, kept for inspecting a record. */
+			target?: Record<string, unknown>;
 			requestStartedAt: number;
 			status?: AiGenerationStatus;
 			errorMessage?: string | null;
@@ -25,18 +27,21 @@ const storeGeneration: ServiceFn<
 	const createRes = await AiGenerations.createIfRequestAbsent({
 		data: {
 			request_id: props.response.requestId,
-			provider_request_id: props.response.usage.providerRequestId ?? null,
 			feature_key: props.response.feature.key,
 			feature_version: props.response.feature.version,
 			user_id: props.userId,
-			agent_conversation_id: props.agentConversationId ?? null,
 			lucid_remote_connection_id: props.lucidRemoteConnectionId,
-			target_type: props.targetType,
-			target: props.target,
+			session_type: props.session.type,
+			session_id: props.session.id ?? props.response.requestId,
+			target: props.target ?? null,
 			output: props.response.output as Record<string, unknown>,
+			provider_request_id: props.response.usage.providerRequestId ?? null,
 			usage: props.response.usage,
 			model: props.response.usage.model,
-			credits_charged: props.response.usage.cost.creditsCharged,
+			credits: Number(props.response.usage.cost.creditsCharged),
+			input_tokens: props.response.usage.tokens.input.total,
+			output_tokens: props.response.usage.tokens.output.total,
+			total_tokens: props.response.usage.tokens.total,
 			duration_ms: getRequestDurationMs(props.requestStartedAt),
 			status: props.status ?? "success",
 			error_message: props.errorMessage ?? null,

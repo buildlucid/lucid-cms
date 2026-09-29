@@ -17,30 +17,35 @@ import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const getUsageController = factory.createHandlers(
+const getUsageSessionRecordsController = factory.createHandlers(
 	describeRoute({
-		description: "Returns stored AI usage records.",
+		description: "Returns a page of the requests in one AI usage session.",
 		tags: ["ai"],
-		summary: "Get AI Usage",
+		summary: "Get AI Usage Session Records",
 		responses: openAPI.responses({
-			dataSchema: z.toJSONSchema(controllerSchemas.getUsage.response),
+			dataSchema: z.toJSONSchema(
+				controllerSchemas.getUsageSessionRecords.response,
+			),
 			paginated: true,
 		}),
 		parameters: openAPI.parameters({
-			query: controllerSchemas.getUsage.query.string,
+			params: controllerSchemas.getUsageSessionRecords.params,
+			query: controllerSchemas.getUsageSessionRecords.query.string,
 		}),
 	}),
 	authenticate(),
 	permissions([Permissions.SettingsRead]),
-	validate("query", controllerSchemas.getUsage.query.string),
+	validate("param", controllerSchemas.getUsageSessionRecords.params),
+	validate("query", controllerSchemas.getUsageSessionRecords.query.string),
 	async (c) => {
-		const formattedQuery = await buildFormattedQuery(
-			c,
-			controllerSchemas.getUsage.query.formatted,
-		);
 		const context = createServiceContext(c);
+		const params = c.req.valid("param");
+		const query = await buildFormattedQuery(
+			c,
+			controllerSchemas.getUsageSessionRecords.query.formatted,
+		);
 
-		const aiUsage = await serviceWrapper(aiServices.getUsage, {
+		const records = await serviceWrapper(aiServices.getUsageSessionRecords, {
 			transaction: false,
 			defaultError: {
 				type: "basic",
@@ -48,22 +53,24 @@ const getUsageController = factory.createHandlers(
 				message: copy("server:core.routes.ai.usage.fetch.error.message"),
 			},
 		})(context, {
-			query: formattedQuery,
+			type: params.type,
+			id: params.id,
+			query,
 		});
-		if (aiUsage.error) throw new LucidAPIError(aiUsage.error);
+		if (records.error) throw new LucidAPIError(records.error);
 
 		c.status(200);
 		return c.json(
 			formatAPIResponse(c, {
-				data: aiUsage.data.data,
+				data: records.data.data,
 				pagination: {
-					count: aiUsage.data.count,
-					page: formattedQuery.page,
-					perPage: formattedQuery.perPage,
+					count: records.data.count,
+					page: query.page,
+					perPage: query.perPage,
 				},
 			}),
 		);
 	},
 );
 
-export default getUsageController;
+export default getUsageSessionRecordsController;

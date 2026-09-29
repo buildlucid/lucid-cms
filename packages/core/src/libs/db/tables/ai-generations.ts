@@ -1,5 +1,7 @@
 import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
+import { aiUsageSessionTypeSchema } from "../../../schemas/ai.js";
+import type { AiUsageSessionType } from "../../../types/response.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable } from "../types.js";
 
@@ -33,14 +35,17 @@ export const aiGenerationsTable = defineTable("lucid_ai_generations", () => ({
 			schema: z.number().nullable(),
 			type: "integer",
 		},
-		agent_conversation_id: { schema: z.uuid().nullable(), type: "text" },
 		agent_run_id: { schema: z.uuid().nullable(), type: "text" },
-		target_type: {
+		session_type: {
+			schema: aiUsageSessionTypeSchema,
+			type: "text",
+		},
+		session_id: {
 			schema: z.string(),
 			type: "text",
 		},
 		target: {
-			schema: z.record(z.string(), z.unknown()),
+			schema: z.record(z.string(), z.unknown()).nullable(),
 			type: "json",
 		},
 		output: {
@@ -55,9 +60,21 @@ export const aiGenerationsTable = defineTable("lucid_ai_generations", () => ({
 			schema: z.string().nullable(),
 			type: "text",
 		},
-		credits_charged: {
-			schema: z.string().nullable(),
-			type: "text",
+		credits: {
+			schema: z.number().nullable(),
+			type: "integer",
+		},
+		input_tokens: {
+			schema: z.number().nullable(),
+			type: "integer",
+		},
+		output_tokens: {
+			schema: z.number().nullable(),
+			type: "integer",
+		},
+		total_tokens: {
+			schema: z.number().nullable(),
+			type: "integer",
 		},
 		duration_ms: {
 			schema: z.number().nullable(),
@@ -76,34 +93,16 @@ export const aiGenerationsTable = defineTable("lucid_ai_generations", () => ({
 			type: "timestamp",
 		},
 	},
-	results: {
-		profile_picture: {},
-		crop: {},
-		translations: {},
-	},
 	query: {
 		filters: {
-			requestId: "lucid_ai_generations.request_id",
-			providerRequestId: "lucid_ai_generations.provider_request_id",
-			featureKey: "lucid_ai_generations.feature_key",
-			featureVersion: "lucid_ai_generations.feature_version",
-			status: "lucid_ai_generations.status",
-			model: "lucid_ai_generations.model",
+			sessionType: "lucid_ai_generations.session_type",
 			userId: "lucid_ai_generations.user_id",
-			targetType: "lucid_ai_generations.target_type",
-			durationMs: "lucid_ai_generations.duration_ms",
-			createdAt: "lucid_ai_generations.created_at",
 		},
+		//* session sorts order by the aggregates selected in `selectSessions`
 		sorts: {
-			createdAt: "lucid_ai_generations.created_at",
-			cost: "lucid_ai_generations.credits_charged",
-			durationMs: "lucid_ai_generations.duration_ms",
-		},
-		operators: {
-			requestId: "contains",
-			providerRequestId: "contains",
-			model: "contains",
-			targetType: "contains",
+			lastActivityAt: "last_activity_at",
+			credits: "credits",
+			totalTokens: "total_tokens",
 		},
 	} as const,
 }));
@@ -118,13 +117,13 @@ export interface LucidAiGenerations {
 	feature_version: string;
 	user_id: number | null;
 	lucid_remote_connection_id: number | null;
-	agent_conversation_id: string | null;
 	agent_run_id: string | null;
-	target_type: string;
+	session_type: AiUsageSessionType;
+	session_id: string;
 	target: JSONColumnType<
-		Record<string, unknown>,
-		Record<string, unknown>,
-		Record<string, unknown>
+		Record<string, unknown> | null,
+		Record<string, unknown> | null,
+		Record<string, unknown> | null
 	>;
 	output: JSONColumnType<
 		Record<string, unknown> | null,
@@ -137,7 +136,10 @@ export interface LucidAiGenerations {
 		Record<string, unknown> | null
 	>;
 	model: string | null;
-	credits_charged: string | null;
+	credits: number | null;
+	input_tokens: number | null;
+	output_tokens: number | null;
+	total_tokens: number | null;
 	duration_ms: number | null;
 	status: AiGenerationStatus;
 	error_message: string | null;

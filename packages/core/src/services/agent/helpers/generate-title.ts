@@ -163,10 +163,8 @@ const generateTitle: ServiceFn<
 	const stored = await storeGeneration(context, {
 		lucidRemoteConnectionId: token.data.lucidRemoteConnectionId,
 		userId: input.userId,
-		agentConversationId: input.conversationId,
+		session: { type: "agent", id: input.conversationId },
 		response: result,
-		targetType: "agent-title",
-		target: { conversationId: input.conversationId },
 		requestStartedAt,
 	});
 	if (stored.error) return stored;

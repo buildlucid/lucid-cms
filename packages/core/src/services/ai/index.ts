@@ -3,5 +3,8 @@ export { default as customFieldInputGenerate } from "./features/custom-field-inp
 export { default as mediaAltGenerate } from "./features/media-alt-generate.js";
 export { default as mediaImageCompletion } from "./features/media-image-completion.js";
 export { default as mediaImageGenerate } from "./features/media-image-generate.js";
-export { default as getUsage } from "./usage/get-usage.js";
+export { default as getCredits } from "./usage/get-credits.js";
+export { default as getUsageSession } from "./usage/get-session.js";
+export { default as getUsageSessionRecords } from "./usage/get-session-records.js";
+export { default as getUsageSessions } from "./usage/get-sessions.js";
 export { default as getUsageChart } from "./usage/get-usage-chart.js";

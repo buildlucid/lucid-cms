@@ -29,16 +29,20 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 					(col) =>
 						col.references("lucid_remote_connections.id").onDelete("set null"),
 				)
-				.addColumn("target_type", adapter.getDataType("text"), (col) =>
+				.addColumn("session_type", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("target", adapter.getDataType("json"), (col) =>
+				.addColumn("session_id", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
+				.addColumn("target", adapter.getDataType("json"))
 				.addColumn("output", adapter.getDataType("json"))
 				.addColumn("usage", adapter.getDataType("json"))
 				.addColumn("model", adapter.getDataType("text"))
-				.addColumn("credits_charged", adapter.getDataType("text"))
+				.addColumn("credits", adapter.getDataType("integer"))
+				.addColumn("input_tokens", adapter.getDataType("integer"))
+				.addColumn("output_tokens", adapter.getDataType("integer"))
+				.addColumn("total_tokens", adapter.getDataType("integer"))
 				.addColumn("duration_ms", adapter.getDataType("integer"))
 				.addColumn("status", adapter.getDataType("text"), (col) =>
 					col.notNull().defaultTo("pending"),
@@ -58,6 +62,18 @@ const Migration00000012: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_ai_generations_feature")
 				.on("lucid_ai_generations")
 				.columns(["feature_key", "created_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_ai_generations_session")
+				.on("lucid_ai_generations")
+				.columns(["session_type", "session_id"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_ai_generations_created_at")
+				.on("lucid_ai_generations")
+				.column("created_at")
 				.execute();
 
 			await db.schema

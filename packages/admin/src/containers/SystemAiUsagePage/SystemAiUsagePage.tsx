@@ -1,9 +1,11 @@
+import { useSearchParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
-import type { AiUsageStatus } from "@types";
 import { FaSolidTriangleExclamation } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
+import AiCreditsSummary from "@/components/AiCreditsSummary/AiCreditsSummary";
 import { AiUsageChart } from "@/components/AiUsageChart/AiUsageChart";
-import { AiUsageList } from "@/components/AiUsageList/AiUsageList";
+import AiUsageSessionDrawer from "@/components/AiUsageSessionDrawer/AiUsageSessionDrawer";
+import { AiUsageSessionList } from "@/components/AiUsageSessionList/AiUsageSessionList";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
@@ -18,31 +20,30 @@ import useQueryState, {
 import { queryKeys } from "@/services/query-keys";
 import siteStore from "@/store/siteStore/siteStore";
 import T from "@/translations";
-import { getAiUsageFeatureOptions } from "@/utils/ai-usage";
+import {
+	aiUsageSessionParam,
+	getAiUsageSessionTypeOptions,
+	parseAiUsageSessionParam,
+} from "@/utils/ai-usage";
 
 const SystemAiUsagePage: Component = () => {
 	// ----------------------------------
 	// Hooks & State
 	const queryClient = useQueryClient();
+	//* the open session lives in the URL, so other pages can link to it
+	const [urlParams, setUrlParams] = useSearchParams<{ session?: string }>();
 	const searchParams = useQueryState({
 		mode: "memory",
 		schema: {
 			filters: {
-				requestId: textFilter(),
-				providerRequestId: textFilter(),
-				featureKey: textFilter(),
-				featureVersion: textFilter(),
-				status: textFilter(),
-				model: textFilter(),
+				sessionType: textFilter(),
 				userId: numberFilter(),
-				targetType: textFilter(),
-				durationMs: numberFilter(),
-				createdAt: textFilter(),
+				requestId: textFilter(),
 			},
 			sorts: {
-				createdAt: sort({ defaultValue: "desc" }),
-				cost: sort(),
-				durationMs: sort(),
+				lastActivityAt: sort({ defaultValue: "desc" }),
+				credits: sort(),
+				totalTokens: sort(),
 			},
 			pagination: pagination({ defaultPerPage: 10 }),
 		},
@@ -51,9 +52,12 @@ const SystemAiUsagePage: Component = () => {
 
 	// ----------------------------------------
 	// Memos
-	const featureOptions = createMemo(() => getAiUsageFeatureOptions());
+	const sessionTypeOptions = createMemo(() => getAiUsageSessionTypeOptions());
 	const connectionActive = createMemo(
 		() => siteStore.get.connection?.status === "connected",
+	);
+	const openSession = createMemo(() =>
+		parseAiUsageSessionParam(urlParams.session),
 	);
 
 	// ----------------------------------
@@ -89,6 +93,14 @@ const SystemAiUsagePage: Component = () => {
 							</div>
 						</section>
 					</Show>
+					<Show when={connectionActive()}>
+						<InfoRow.Root
+							title={T()("ai.credits.title")}
+							description={T()("ai.credits.description")}
+						>
+							<AiCreditsSummary />
+						</InfoRow.Root>
+					</Show>
 					<InfoRow.Root
 						title={T()("ai.usage.charts.title")}
 						description={T()("ai.usage.charts.description")}
@@ -98,8 +110,8 @@ const SystemAiUsagePage: Component = () => {
 						</InfoRow.Content>
 					</InfoRow.Root>
 					<InfoRow.Root
-						title={T()("ai.usage.records.title")}
-						description={T()("ai.usage.records.description")}
+						title={T()("ai.usage.sessions.title")}
+						description={T()("ai.usage.sessions.description")}
 					>
 						<InfoRow.Content>
 							<div class="-mx-4 overflow-hidden">
@@ -109,38 +121,17 @@ const SystemAiUsagePage: Component = () => {
 										queryClient.invalidateQueries({
 											queryKey: queryKeys.ai.usage(),
 										});
+										queryClient.invalidateQueries({
+											queryKey: queryKeys.ai.credits(),
+										});
 									}}
-									filterSubject={T()("ai.usage.records.title")}
+									filterSubject={T()("ai.usage.sessions.title")}
 									filterFields={[
 										{
-											label: T()("ai.usage.feature"),
-											key: "featureKey",
+											label: T()("ai.usage.session.type"),
+											key: "sessionType",
 											type: "select",
-											options: featureOptions(),
-										},
-										{
-											label: T()("common.status"),
-											key: "status",
-											type: "select",
-											options: [
-												{
-													label: T()("common.status.pending"),
-													value: "pending" satisfies AiUsageStatus,
-												},
-												{
-													label: T()("common.status.success"),
-													value: "success" satisfies AiUsageStatus,
-												},
-												{
-													label: T()("common.status.failed"),
-													value: "failed" satisfies AiUsageStatus,
-												},
-											],
-										},
-										{
-											label: T()("ai.usage.model"),
-											key: "model",
-											type: "text",
+											options: sessionTypeOptions(),
 										},
 										{
 											label: T()("common.user"),
@@ -152,57 +143,44 @@ const SystemAiUsagePage: Component = () => {
 											key: "requestId",
 											type: "text",
 										},
-										{
-											label: T()("ai.usage.provider.request.id"),
-											key: "providerRequestId",
-											type: "text",
-										},
-										{
-											label: T()("ai.usage.feature.version"),
-											key: "featureVersion",
-											type: "text",
-										},
-										{
-											label: T()("ai.usage.target.type"),
-											key: "targetType",
-											type: "text",
-										},
-										{
-											label: T()("ai.usage.elapsed"),
-											key: "durationMs",
-											type: "number",
-										},
-										{
-											label: T()("ai.usage.initiated"),
-											key: "createdAt",
-											type: "datetime",
-										},
 									]}
 									sorts={[
 										{
-											label: T()("ai.usage.initiated"),
-											key: "createdAt",
+											label: T()("ai.usage.last.activity"),
+											key: "lastActivityAt",
 										},
 										{
-											label: T()("ai.usage.cost"),
-											key: "cost",
+											label: T()("ai.usage.credits"),
+											key: "credits",
 										},
 										{
-											label: T()("ai.usage.elapsed"),
-											key: "durationMs",
+											label: T()("ai.usage.metrics.totalTokens"),
+											key: "totalTokens",
 										},
 									]}
 									perPage={[10, 20, 40]}
 									padding="sm"
 								/>
-								<AiUsageList
+								<AiUsageSessionList
 									state={{
 										searchParams: searchParams,
 									}}
+									onOpen={(session) =>
+										setUrlParams({ session: aiUsageSessionParam(session) })
+									}
 								/>
 							</div>
 						</InfoRow.Content>
 					</InfoRow.Root>
+					<AiUsageSessionDrawer
+						session={openSession}
+						state={{
+							open: openSession() !== undefined,
+							setOpen: (open) => {
+								if (!open) setUrlParams({ session: undefined });
+							},
+						}}
+					/>
 				</div>
 			</PageLayout.Body>
 		</PageLayout.Root>

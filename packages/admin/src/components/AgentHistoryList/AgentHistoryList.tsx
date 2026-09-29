@@ -11,6 +11,7 @@ import { type Component, createSignal, Index } from "solid-js";
 import AgentConversationTableRow from "@/components/AgentConversationTableRow/AgentConversationTableRow";
 import DeleteAgentConversationModal from "@/components/DeleteAgentConversationModal/DeleteAgentConversationModal";
 import EmptyState from "@/components/EmptyState/EmptyState";
+import Link from "@/components/Link/Link";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RenameAgentConversationModal from "@/components/RenameAgentConversationModal/RenameAgentConversationModal";
@@ -48,6 +49,11 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 					<EmptyState
 						title={T()("agent.home.empty.title")}
 						description={T()("agent.home.empty.description")}
+						actions={
+							<Link href="/lucid/agent" size="sm">
+								{T()("agent.history.empty.action")}
+							</Link>
+						}
 					/>
 				}
 				class="flex-1 h-full"

@@ -17,7 +17,7 @@ const factory = createFactory();
 const getConversationDetailsController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Returns a conversation's usage and the web sources its agent found or read.",
+			"Returns the web sources a conversation's agent found or read.",
 		tags: ["agent"],
 		summary: "Get Agent Conversation Details",
 		responses: openAPI.responses({

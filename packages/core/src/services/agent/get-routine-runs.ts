@@ -7,7 +7,6 @@ import type { GetRoutineRunsQueryParams } from "../../schemas/agent.js";
 import type { AgentRun, AgentUsage } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
-import sumCredits from "./helpers/sum-credits.js";
 
 const getRoutineRuns: ServiceFn<
 	[{ id: string; userId: number; query: GetRoutineRunsQueryParams }],
@@ -26,27 +25,20 @@ const getRoutineRuns: ServiceFn<
 
 	const AiGenerations = new AiGenerationsRepository(context.db);
 
-	const usage = await AiGenerations.agentUsageByRuns(
+	const usage = await AiGenerations.usageByRuns(
 		runs.data[0].map((run) => run.id),
 	);
 	if (usage.error) return usage;
 
-	const totals = new Map<string, AgentUsage>();
-
-	for (const row of usage.data) {
-		if (!row.agent_run_id) continue;
-
-		const total = totals.get(row.agent_run_id);
-		const calls = Number(row.model_calls);
-		totals.set(row.agent_run_id, {
-			creditsCharged: sumCredits(
-				total?.creditsCharged ?? "0",
-				row.credits_charged ?? "0",
-				Number(row.calls),
-			),
-			modelCalls: (total?.modelCalls ?? 0) + calls,
-		});
-	}
+	const totals = new Map<string | null, AgentUsage>(
+		usage.data.map((row) => [
+			row.agent_run_id,
+			{
+				credits: Number(row.credits ?? 0),
+				modelCalls: Number(row.model_calls),
+			},
+		]),
+	);
 
 	return {
 		error: undefined,

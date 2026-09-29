@@ -331,13 +331,6 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 
 		await db.schema
 			.alterTable("lucid_ai_generations")
-			.addColumn("agent_conversation_id", adapter.getDataType("text"), (col) =>
-				col.references("lucid_agent_conversations.id").onDelete("set null"),
-			)
-			.execute();
-
-		await db.schema
-			.alterTable("lucid_ai_generations")
 			.addColumn("agent_run_id", adapter.getDataType("text"), (col) =>
 				col.references("lucid_agent_runs.id").onDelete("set null"),
 			)

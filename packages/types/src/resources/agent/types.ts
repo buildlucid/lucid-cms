@@ -126,7 +126,7 @@ export type AgentMessagePart =
 	| AgentWidgetPart;
 
 export interface AgentUsage {
-	creditsCharged: string;
+	credits: number;
 	modelCalls: number;
 }
 
@@ -157,7 +157,6 @@ export interface AgentConversationSource {
 }
 
 export interface AgentConversationDetails {
-	usage: AgentUsage & { webCalls: number };
 	/** Pages the agent read first, then those only found, each in first-seen order. */
 	sources: AgentConversationSource[];
 }

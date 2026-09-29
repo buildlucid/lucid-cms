@@ -1,9 +1,10 @@
 import z from "zod";
 
+/** Lucid charges whole credits, so they can be stored and summed as integers. */
 export const aiCreditsChargedSchema = z
 	.string()
-	.max(64)
-	.regex(/^(0|[1-9]\d*)(\.\d+)?$/);
+	.max(15)
+	.regex(/^(0|[1-9]\d*)$/);
 
 export const cmsAiUsageSchema = z
 	.object({

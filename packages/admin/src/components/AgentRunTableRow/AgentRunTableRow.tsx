@@ -3,6 +3,11 @@ import type { Component } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
+import {
+	aiUsageSessionHref,
+	canViewAiUsage,
+	formatAiCredits,
+} from "@/utils/ai-usage";
 
 const AgentRunTableRow: Component<{
 	index: number;
@@ -19,6 +24,16 @@ const AgentRunTableRow: Component<{
 					type: "link",
 					icon: "eye",
 					href: `/lucid/agent/chats/${props.run.conversationId}`,
+				},
+				{
+					label: T()("ai.usage.view"),
+					type: "link",
+					icon: "chart",
+					href: aiUsageSessionHref({
+						type: "agent",
+						id: props.run.conversationId,
+					}),
+					show: canViewAiUsage(),
 				},
 			]}
 		>
@@ -41,7 +56,7 @@ const AgentRunTableRow: Component<{
 			/>
 			<Table.Text
 				column="credits"
-				text={props.run.usage.creditsCharged}
+				text={formatAiCredits(props.run.usage.credits)}
 				minWidth={100}
 			/>
 			<Table.Date

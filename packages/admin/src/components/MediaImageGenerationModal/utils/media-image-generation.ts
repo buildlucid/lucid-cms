@@ -142,7 +142,6 @@ export type MediaImageGenerationCandidate = {
 	size: MediaImageGenerationSize;
 	quality: MediaImageGenerationQuality;
 	outputFormat: MediaImageGenerationOutputFormat;
-	cost: MediaImageGenerateCompletionResponse["usage"]["cost"];
 	output: MediaImageGenerateCompletionResponse["output"];
 };
 

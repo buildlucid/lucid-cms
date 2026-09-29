@@ -104,7 +104,7 @@ type LastRunPropT = Pick<
 	"id" | "conversation_id" | "status" | "outcome" | "created_at"
 >;
 
-const emptyUsage: AgentUsage = { creditsCharged: "0", modelCalls: 0 };
+const emptyUsage: AgentUsage = { credits: 0, modelCalls: 0 };
 
 /** A conversation is only compacting while a run is active, since a stopped run can leave the status behind. */
 const formatContext = (props: {

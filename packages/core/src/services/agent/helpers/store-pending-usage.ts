@@ -20,22 +20,14 @@ const storePendingUsage: ServiceFn<
 	const result = await AiGenerations.createIfRequestAbsent({
 		data: {
 			request_id: input.requestId,
-			provider_request_id: null,
 			feature_key: input.featureKey,
 			feature_version: "v1",
 			user_id: input.userId,
 			lucid_remote_connection_id: input.connectionId,
-			agent_conversation_id: input.conversationId,
 			agent_run_id: input.runId,
-			target_type: "agent-run",
-			target: { conversationId: input.conversationId, runId: input.runId },
-			output: null,
-			usage: null,
-			model: null,
-			credits_charged: null,
-			duration_ms: null,
+			session_type: "agent",
+			session_id: input.conversationId,
 			status: "pending",
-			error_message: null,
 		},
 	});
 	if (result.error) return result;

@@ -1,73 +1,289 @@
 import { sql } from "kysely";
-import z from "zod";
-import type { GetUsageQueryParams } from "../../schemas/ai.js";
+import type { QueryParams } from "../../types/query-params.js";
+import type { AiUsageSessionType } from "../../types/response.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
 import { aiGenerationsTable } from "../db/tables/ai-generations.js";
 import type { LucidAiGenerations } from "../db/tables/index.js";
 import type { Insert, Select } from "../db/types.js";
-import { activeMediaCropSelect } from "./helpers/media-selects.js";
 import StaticRepository from "./parents/static-repository.js";
 import type { QueryProps } from "./types.js";
-
-export interface AiUsageChartRowPropT {
-	created_at: Date | string;
-	feature_key: string;
-	usage: Record<string, unknown> | null;
-	credits_charged: string | null;
-}
 
 export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_generations"> {
 	constructor(db: LucidDatabase) {
 		super(db, aiGenerationsTable);
 	}
 
-	/** Aggregate equal decimal amounts without converting credit strings to floats. */
-	async agentUsageByRuns(runIds: string[]) {
+	/** Postgres returns sums and counts as strings. */
+	private selectSessionTotals() {
+		return this.db
+			.selectFrom("lucid_ai_generations")
+			.select((eb) => [
+				"lucid_ai_generations.session_type",
+				"lucid_ai_generations.session_id",
+				eb.fn.max("lucid_ai_generations.user_id").as("user_id"),
+				sql<number | string | null>`sum(lucid_ai_generations.credits)`.as(
+					"credits",
+				),
+				sql<number | string | null>`sum(lucid_ai_generations.input_tokens)`.as(
+					"input_tokens",
+				),
+				sql<number | string | null>`sum(lucid_ai_generations.output_tokens)`.as(
+					"output_tokens",
+				),
+				sql<number | string | null>`sum(lucid_ai_generations.total_tokens)`.as(
+					"total_tokens",
+				),
+				sql<number | string>`count(*)`.as("requests"),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.feature_key = 'web.search' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
+					"web_searches",
+				),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.feature_key = 'web.fetch' and lucid_ai_generations.status = 'success' then 1 else 0 end)`.as(
+					"web_fetches",
+				),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.status = 'failed' then 1 else 0 end)`.as(
+					"failed",
+				),
+				sql<
+					number | string
+				>`sum(case when lucid_ai_generations.status = 'pending' then 1 else 0 end)`.as(
+					"pending",
+				),
+				eb.fn.min("lucid_ai_generations.created_at").as("started_at"),
+				eb.fn.max("lucid_ai_generations.created_at").as("last_activity_at"),
+			])
+			.groupBy([
+				"lucid_ai_generations.session_type",
+				"lucid_ai_generations.session_id",
+			]);
+	}
+	async usageByRuns(runIds: string[]) {
 		if (!runIds.length) return { error: undefined, data: [] };
 
 		const query = this.db
 			.selectFrom("lucid_ai_generations")
 			.select([
 				"agent_run_id",
-				"credits_charged",
-				sql<number>`count(*)`.as("calls"),
-				sql<number>`count(model)`.as("model_calls"),
+				sql<number | string | null>`sum(credits)`.as("credits"),
+				sql<number | string>`count(model)`.as("model_calls"),
 			])
 			.where("agent_run_id", "in", runIds)
-			.where("status", "=", "success")
-			.groupBy(["agent_run_id", "credits_charged"]);
+			.groupBy("agent_run_id");
 
 		const exec = await this.executeQuery(() => query.execute(), {
-			method: "agentUsageByRuns",
-		});
-
-		return exec.response;
-	}
-	/** A conversation's successful usage, grouped by charged amount so credits sum exactly. */
-	async agentUsageByConversation(conversationId: string) {
-		const query = this.db
-			.selectFrom("lucid_ai_generations")
-			.select([
-				"credits_charged",
-				sql<number>`count(*)`.as("calls"),
-				sql<number>`count(model)`.as("model_calls"),
-				sql<number>`sum(case when feature_key in ('web.search', 'web.fetch') then 1 else 0 end)`.as(
-					"web_calls",
-				),
-			])
-			.where("agent_conversation_id", "=", conversationId)
-			.where("status", "=", "success")
-			.groupBy("credits_charged");
-
-		const exec = await this.executeQuery(() => query.execute(), {
-			method: "agentUsageByConversation",
+			method: "usageByRuns",
 		});
 
 		return exec.response;
 	}
 	/**
-	 * Inserts a completed generation once using the remote request identity.
+	 * A page of sessions with their totals. Filters match the session's
+	 * requests, and `requestId` finds the session a request belongs to.
+	 */
+	async selectSessions(props: { queryParams: Partial<QueryParams> }) {
+		const { main, count } = queryBuilder.main(
+			{
+				main: this.selectSessionTotals(),
+				count: this.db
+					.selectFrom("lucid_ai_generations")
+					.select(
+						sql`count(distinct lucid_ai_generations.session_type || ':' || lucid_ai_generations.session_id)`.as(
+							"count",
+						),
+					),
+			},
+			{
+				queryParams: props.queryParams,
+				database: this.dbAdapter.config,
+				meta: {
+					...this.config.queryConfig,
+					customFilters: {
+						requestId: ({ eb, filter }) =>
+							eb(
+								"lucid_ai_generations.session_id",
+								"in",
+								eb
+									.selectFrom("lucid_ai_generations as matched")
+									.select("matched.session_id")
+									.where("matched.request_id", "=", String(filter.value)),
+							),
+					},
+				},
+			},
+		);
+		const sorted = props.queryParams.sort?.length
+			? main
+			: main.orderBy("last_activity_at", "desc");
+
+		const exec = await this.executeQuery(
+			() =>
+				Promise.all([
+					sorted.execute(),
+					count?.executeTakeFirst() as Promise<
+						{ count: string | number } | undefined
+					>,
+				]),
+			{ method: "selectSessions" },
+		);
+
+		return exec.response;
+	}
+	async selectSession(props: { type: AiUsageSessionType; id: string }) {
+		const query = this.selectSessionTotals()
+			.where("lucid_ai_generations.session_type", "=", props.type)
+			.where("lucid_ai_generations.session_id", "=", props.id);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectSession",
+		});
+
+		return exec.response;
+	}
+	async selectSessionRecords<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				type: AiUsageSessionType;
+				id: string;
+				queryParams: Partial<QueryParams>;
+			}
+		>,
+	) {
+		const { main, count } = queryBuilder.main(
+			{
+				main: this.db
+					.selectFrom("lucid_ai_generations")
+					.select([
+						"id",
+						"request_id",
+						"provider_request_id",
+						"feature_key",
+						"feature_version",
+						"status",
+						"agent_run_id",
+						"usage",
+						"model",
+						"credits",
+						"input_tokens",
+						"output_tokens",
+						"total_tokens",
+						"duration_ms",
+						"error_message",
+						"created_at",
+					])
+					.where("session_type", "=", props.type)
+					.where("session_id", "=", props.id),
+				count: this.db
+					.selectFrom("lucid_ai_generations")
+					.select(sql`count(*)`.as("count"))
+					.where("session_type", "=", props.type)
+					.where("session_id", "=", props.id),
+			},
+			{
+				queryParams: props.queryParams,
+				database: this.dbAdapter.config,
+				meta: {
+					tableKeys: {
+						sorts: { createdAt: "lucid_ai_generations.created_at" },
+					},
+				},
+			},
+		);
+		const sorted = props.queryParams.sort?.length
+			? main
+			: main.orderBy("created_at", "desc").orderBy("id", "desc");
+
+		const exec = await this.executeQuery(
+			() =>
+				Promise.all([
+					sorted.execute(),
+					count?.executeTakeFirst() as Promise<
+						{ count: string | number } | undefined
+					>,
+				]),
+			{ method: "selectSessionRecords" },
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple-count",
+			select: [
+				"id",
+				"request_id",
+				"provider_request_id",
+				"feature_key",
+				"feature_version",
+				"status",
+				"agent_run_id",
+				"usage",
+				"model",
+				"credits",
+				"input_tokens",
+				"output_tokens",
+				"total_tokens",
+				"duration_ms",
+				"error_message",
+				"created_at",
+			],
+		});
+	}
+	async selectUsageChartRows<V extends boolean = false>(
+		props: QueryProps<
+			V,
+			{
+				startDate: string;
+				endDate: string;
+				featureKey?: string;
+				userId?: number;
+			}
+		>,
+	) {
+		let query = this.db
+			.selectFrom("lucid_ai_generations")
+			.select([
+				"created_at",
+				"session_type",
+				"session_id",
+				"credits",
+				"total_tokens",
+			])
+			.where("created_at", ">=", props.startDate)
+			.where("created_at", "<", props.endDate)
+			.where("credits", "is not", null);
+
+		if (props.featureKey) {
+			query = query.where("feature_key", "=", props.featureKey);
+		}
+		if (props.userId !== undefined) {
+			query = query.where("user_id", "=", props.userId);
+		}
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectUsageChartRows",
+		});
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, {
+			...props.validation,
+			mode: "multiple",
+			select: [
+				"created_at",
+				"session_type",
+				"session_id",
+				"credits",
+				"total_tokens",
+			],
+		});
+	}
+	/**
+	 * Inserts a generation once using the remote request identity.
 	 * Concurrent duplicate responses are ignored by the database constraint.
 	 */
 	async createIfRequestAbsent<
@@ -128,7 +344,10 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 						provider_request_id: props.data.provider_request_id ?? null,
 						usage: props.data.usage ?? null,
 						model: props.data.model ?? null,
-						credits_charged: props.data.credits_charged ?? null,
+						credits: props.data.credits ?? null,
+						input_tokens: props.data.input_tokens ?? null,
+						output_tokens: props.data.output_tokens ?? null,
+						total_tokens: props.data.total_tokens ?? null,
 						duration_ms: props.data.duration_ms ?? null,
 						status: props.data.status,
 						error_message: props.data.error_message ?? null,
@@ -155,11 +374,12 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				"request_id",
 				"feature_key",
 				"agent_run_id",
-				"agent_conversation_id",
+				"session_id",
 				"user_id",
 				"lucid_remote_connection_id",
 				"created_at",
 			])
+			.where("session_type", "=", "agent")
 			.where("feature_key", "in", [
 				"agent.chat",
 				"agent.compact",
@@ -188,7 +408,7 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 				"request_id",
 				"feature_key",
 				"agent_run_id",
-				"agent_conversation_id",
+				"session_id",
 				"user_id",
 				"lucid_remote_connection_id",
 				"created_at",
@@ -227,214 +447,6 @@ export default class AiGenerationsRepository extends StaticRepository<"lucid_ai_
 			...props.validation,
 			mode: "single",
 			select: props.select,
-		});
-	}
-	async selectUsageChartRows<V extends boolean = false>(
-		props: QueryProps<
-			V,
-			{
-				startDate: string;
-				endDate: string;
-				featureKey?: string;
-			}
-		>,
-	) {
-		const exec = await this.executeQuery(
-			async () => {
-				let query = this.db
-					.selectFrom("lucid_ai_generations")
-					.select(["created_at", "feature_key", "usage", "credits_charged"])
-					.where("created_at", ">=", props.startDate)
-					.where("created_at", "<", props.endDate);
-
-				if (props.featureKey) {
-					query = query.where("feature_key", "=", props.featureKey);
-				}
-
-				return await query.execute();
-			},
-			{
-				method: "selectUsageChartRows",
-			},
-		);
-		if (exec.response.error) return exec.response;
-
-		return this.validateResponse(exec, {
-			...props.validation,
-			mode: "multiple",
-			schema: this.config.schema.pick({
-				created_at: true,
-				feature_key: true,
-				usage: true,
-				credits_charged: true,
-			}),
-			select: ["created_at", "feature_key", "usage", "credits_charged"],
-		});
-	}
-	async selectUsageMultiple<V extends boolean = false>(
-		props: QueryProps<
-			V,
-			{
-				queryParams: GetUsageQueryParams;
-			}
-		>,
-	) {
-		const exec = await this.executeQuery(
-			async () => {
-				const mainQuery = this.db
-					.selectFrom("lucid_ai_generations")
-					.leftJoin(
-						"lucid_users",
-						"lucid_users.id",
-						"lucid_ai_generations.user_id",
-					)
-					.select((eb) => [
-						"lucid_ai_generations.id",
-						"lucid_ai_generations.request_id",
-						"lucid_ai_generations.provider_request_id",
-						"lucid_ai_generations.feature_key",
-						"lucid_ai_generations.feature_version",
-						"lucid_ai_generations.user_id",
-						"lucid_ai_generations.target_type",
-						"lucid_ai_generations.target",
-						"lucid_ai_generations.usage",
-						"lucid_ai_generations.model",
-						"lucid_ai_generations.credits_charged",
-						"lucid_ai_generations.duration_ms",
-						"lucid_ai_generations.status",
-						"lucid_ai_generations.error_message",
-						"lucid_ai_generations.created_at",
-						"lucid_users.email",
-						"lucid_users.username",
-						"lucid_users.first_name",
-						"lucid_users.last_name",
-						this.database.fn
-							.jsonArrayFrom(
-								eb
-									.selectFrom("lucid_media")
-									.select((mediaEb) => [
-										"lucid_media.id",
-										"lucid_media.key",
-										"lucid_media.status",
-										"lucid_media.storage_adapter_key",
-										"lucid_media.storage_adapter_reference",
-										"lucid_media.storage_adapter_data",
-										"lucid_media.public",
-										"lucid_media.origin",
-										"lucid_media.type",
-										"lucid_media.mime_type",
-										"lucid_media.file_extension",
-										"lucid_media.file_name",
-										"lucid_media.file_size",
-										"lucid_media.width",
-										"lucid_media.height",
-										"lucid_media.duration",
-										"lucid_media.focal_x",
-										"lucid_media.focal_y",
-										"lucid_media.blur_hash",
-										"lucid_media.average_color",
-										"lucid_media.base64",
-										"lucid_media.is_dark",
-										"lucid_media.is_light",
-										activeMediaCropSelect(this.database, "lucid_media.id"),
-										this.database.fn
-											.jsonArrayFrom(
-												mediaEb
-													.selectFrom("lucid_media_translations")
-													.select([
-														"lucid_media_translations.title",
-														"lucid_media_translations.alt",
-														"lucid_media_translations.description",
-														"lucid_media_translations.summary",
-														"lucid_media_translations.locale_code",
-													])
-													.whereRef(
-														"lucid_media_translations.media_id",
-														"=",
-														"lucid_media.id",
-													),
-											)
-											.as("translations"),
-									])
-									.whereRef(
-										"lucid_media.id",
-										"=",
-										"lucid_users.profile_picture_media_id",
-									)
-									.where(
-										"lucid_media.is_deleted",
-										"=",
-										this.dbAdapter.getDefault("boolean", "false"),
-									),
-							)
-							.as("profile_picture"),
-					]);
-
-				const countQuery = this.db
-					.selectFrom("lucid_ai_generations")
-					.leftJoin(
-						"lucid_users",
-						"lucid_users.id",
-						"lucid_ai_generations.user_id",
-					)
-					.select(sql`count(*)`.as("count"));
-				const { main, count } = queryBuilder.main(
-					{
-						main: mainQuery,
-						count: countQuery,
-					},
-					{
-						queryParams: props.queryParams,
-						database: this.dbAdapter.config,
-						meta: this.config.queryConfig,
-					},
-				);
-
-				const [mainResult, countResult] = await Promise.all([
-					main.execute(),
-					count?.executeTakeFirst() as Promise<{ count: string } | undefined>,
-				]);
-
-				return [mainResult, countResult] as const;
-			},
-			{
-				method: "selectUsageMultiple",
-			},
-		);
-		if (exec.response.error) return exec.response;
-
-		return this.validateResponse(exec, {
-			...props.validation,
-			mode: "multiple-count",
-			schema: this.config.schema.extend({
-				email: z.string().nullable(),
-				username: z.string().nullable(),
-				first_name: z.string().nullable(),
-				last_name: z.string().nullable(),
-				profile_picture: z.array(z.unknown()).optional(),
-			}),
-			select: [
-				"id",
-				"request_id",
-				"provider_request_id",
-				"feature_key",
-				"feature_version",
-				"user_id",
-				"target_type",
-				"target",
-				"usage",
-				"model",
-				"credits_charged",
-				"duration_ms",
-				"status",
-				"error_message",
-				"created_at",
-				"email",
-				"username",
-				"first_name",
-				"last_name",
-				"profile_picture",
-			],
 		});
 	}
 }

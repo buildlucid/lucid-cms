@@ -114,7 +114,7 @@ const mediaAltGenerate: ServiceFn<
 			userId: props.userId,
 			requestId: responseData.requestId,
 			feature: responseData.feature,
-			targetType: "media-alt",
+			session: { type: "media-alt", id: props.sessionId },
 			target: {
 				mediaId: props.media.id ?? null,
 				locale: props.locale,
@@ -159,7 +159,7 @@ const mediaAltGenerate: ServiceFn<
 			lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 			userId: props.userId,
 			response: responseData,
-			targetType: "media-alt",
+			session: { type: "media-alt", id: props.sessionId },
 			requestStartedAt,
 			status: "failed",
 			errorMessage: context.translate(
@@ -191,7 +191,7 @@ const mediaAltGenerate: ServiceFn<
 		lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 		userId: props.userId,
 		response: responseData,
-		targetType: "media-alt",
+		session: { type: "media-alt", id: props.sessionId },
 		requestStartedAt,
 		target: {
 			mediaId: props.media.id ?? null,

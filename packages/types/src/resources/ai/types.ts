@@ -11,7 +11,7 @@ export type AiGenerateCost = {
 export type AiGenerateMode = "sync" | "async";
 export type AiUsageStatus = "failed" | "pending" | "success";
 export type AiUsageChartDimension = "day";
-export type AiUsageChartMetric = "requests" | "totalTokens" | "cost";
+export type AiUsageChartMetric = "requests" | "totalTokens" | "credits";
 
 export type AiGenerateUsage = {
 	model: string;
@@ -106,31 +106,71 @@ export type MediaImageGenerateCompletionPollResponse =
 	| MediaImageGenerateResponse
 	| MediaImageGenerateCompletionResponse;
 
-export type AiUsage = {
+/** What a usage session was for. Agent sessions are chats, including routine runs. */
+export type AiUsageSessionType =
+	| "agent"
+	| "media-image"
+	| "media-alt"
+	| "custom-field";
+
+export type AiUsageTokens = {
+	input: number;
+	output: number;
+	total: number;
+};
+
+export type AiUsageMeasure =
+	| {
+			kind: "model";
+			model: string;
+			tokens: AiUsageTokens;
+	  }
+	| {
+			kind: "web";
+			operation: "search" | "fetch";
+			requests: number;
+	  };
+
+export type AiUsageRecord = {
 	id: number;
 	requestId: string;
 	providerRequestId: string | null;
 	feature: {
 		key: string;
-		label: string;
 		version: string;
 	};
 	status: AiUsageStatus;
-	model: string | null;
-	createdAt: string | null;
+	/** The agent run the request belongs to, while that run exists. */
+	runId: string | null;
+	/** Null until Lucid reports usage, and for failures that were not charged. */
+	usage: AiUsageMeasure | null;
+	credits: number | null;
 	durationMs: number | null;
 	errorMessage: string | null;
-	tokens: {
-		input: number;
-		output: number;
-		total: number;
+	createdAt: string | null;
+};
+
+/** Requests made together, such as one agent chat or one image generation modal. */
+export type AiUsageSession = {
+	type: AiUsageSessionType;
+	id: string;
+	/** The chat an agent session belongs to, when the viewer can open it. */
+	conversation: {
+		id: string;
+		title: string;
 	} | null;
-	cost: AiGenerateCost | null;
-	target: {
-		type: string;
-		data: Record<string, unknown>;
-	};
 	user: UserRef;
+	credits: number;
+	tokens: AiUsageTokens;
+	requests: {
+		total: number;
+		webSearches: number;
+		webFetches: number;
+		failed: number;
+		pending: number;
+	};
+	startedAt: string | null;
+	lastActivityAt: string | null;
 };
 
 export type AiUsageChart = {
@@ -138,10 +178,6 @@ export type AiUsageChart = {
 	metrics: AiUsageChartMetric[];
 	startDate: string;
 	endDate: string;
-	feature: {
-		key: string;
-		label: string;
-	} | null;
 	series: Array<{
 		metric: AiUsageChartMetric;
 		points: Array<{
@@ -149,6 +185,35 @@ export type AiUsageChart = {
 			value: number;
 		}>;
 	}>;
+	totals: {
+		credits: number;
+		totalTokens: number;
+		requests: number;
+		sessions: number;
+	};
+};
+
+export type AiCredits = {
+	/** What can be spent now, including any monthly cap on the connection. */
+	available: number;
+	/** The subscription allowance for the current period. Null without an active subscription. */
+	allowance: {
+		total: number;
+		used: number;
+		remaining: number;
+		resetsAt: string;
+	} | null;
+	/** Purchased and granted credits. These do not reset. */
+	additional: {
+		remaining: number;
+	};
+	/** The monthly spend cap on this connection. Null when uncapped. */
+	connectionCap: {
+		limit: number;
+		used: number;
+		remaining: number;
+		resetsAt: string;
+	} | null;
 };
 
 /** Reasoning efforts agents can use. Each model lists the ones it supports; models without reasoning list none. */

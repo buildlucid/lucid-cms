@@ -1,13 +1,19 @@
 import useCustomFieldGenerate from "./useCustomFieldGenerate";
-import useGetUsage from "./useGetUsage";
+import useGetCredits from "./useGetCredits";
 import useGetUsageChart from "./useGetUsageChart";
+import useGetUsageSession from "./useGetUsageSession";
+import useGetUsageSessionRecords from "./useGetUsageSessionRecords";
+import useGetUsageSessions from "./useGetUsageSessions";
 import useMediaAltGenerate from "./useMediaAltGenerate";
 import useMediaImageGenerate from "./useMediaImageGenerate";
 
 const exportObject = {
 	useCustomFieldGenerate,
-	useGetUsage,
+	useGetCredits,
 	useGetUsageChart,
+	useGetUsageSession,
+	useGetUsageSessionRecords,
+	useGetUsageSessions,
 	useMediaAltGenerate,
 	useMediaImageGenerate,
 };

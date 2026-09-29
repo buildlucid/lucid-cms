@@ -49,7 +49,7 @@ const usage = {
 		},
 		total: 2,
 	},
-	cost: { creditsCharged: "0.0001" },
+	cost: { creditsCharged: "1" },
 };
 
 beforeAll(async () => {
@@ -142,15 +142,14 @@ test("reconciles a paid turn once and leaves its first usage immutable", async (
 		durationMs: 1,
 	});
 	expect(retry.error).toBeUndefined();
-	const stored = await new AiGenerationsRepository(
-		context.db,
-	).selectSingleByRequestId({
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
 		requestId: input.requestId,
-		select: ["status", "credits_charged", "duration_ms"],
+		select: ["status", "credits", "duration_ms"],
 	});
 	expect(stored.data).toMatchObject({
 		status: "success",
-		credits_charged: "0.0001",
+		credits: 1,
 		duration_ms: null,
 	});
 });
@@ -171,15 +170,14 @@ test("closes an old missing request without a charge", async () => {
 			})
 		).error,
 	).toBeUndefined();
-	const stored = await new AiGenerationsRepository(
-		context.db,
-	).selectSingleByRequestId({
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
 		requestId: input.requestId,
-		select: ["status", "credits_charged"],
+		select: ["status", "credits"],
 	});
 	expect(stored.data).toMatchObject({
 		status: "failed",
-		credits_charged: null,
+		credits: null,
 	});
 });
 
@@ -196,15 +194,14 @@ test("settles a fresh billed failure even while the remote request is processing
 	expect(
 		(await reconcileUsage(context, { requestId: input.requestId })).data,
 	).toBe(1);
-	const stored = await new AiGenerationsRepository(
-		context.db,
-	).selectSingleByRequestId({
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
 		requestId: input.requestId,
-		select: ["status", "credits_charged"],
+		select: ["status", "credits"],
 	});
 	expect(stored.data).toMatchObject({
 		status: "success",
-		credits_charged: "0.0001",
+		credits: 1,
 	});
 });
 
@@ -220,15 +217,14 @@ test.each([
 	expect(
 		(await reconcileUsage(context, { requestId: input.requestId })).data,
 	).toBe(1);
-	const stored = await new AiGenerationsRepository(
-		context.db,
-	).selectSingleByRequestId({
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
 		requestId: input.requestId,
-		select: ["status", "credits_charged"],
+		select: ["status", "credits"],
 	});
 	expect(stored.data).toMatchObject({
 		status: "failed",
-		credits_charged: null,
+		credits: null,
 	});
 });
 
@@ -245,15 +241,14 @@ test.each([
 	expect(
 		(await reconcileUsage(context, { requestId: input.requestId })).data,
 	).toBe(0);
-	const stored = await new AiGenerationsRepository(
-		context.db,
-	).selectSingleByRequestId({
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
 		requestId: input.requestId,
-		select: ["status", "credits_charged"],
+		select: ["status", "credits"],
 	});
 	expect(stored.data).toMatchObject({
 		status: "pending",
-		credits_charged: null,
+		credits: null,
 	});
 });
 
@@ -266,9 +261,8 @@ test("keeps a fresh missing request pending because creation may still be racing
 	expect(
 		(await reconcileUsage(context, { requestId: input.requestId })).data,
 	).toBe(0);
-	const stored = await new AiGenerationsRepository(
-		context.db,
-	).selectSingleByRequestId({
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
 		requestId: input.requestId,
 		select: ["status"],
 	});
@@ -311,17 +305,17 @@ test("recovers web usage after a lost response without counting a model call", a
 	const repository = new AiGenerationsRepository(context.db);
 	const row = await repository.selectSingleByRequestId({
 		requestId: input.requestId,
-		select: ["usage", "model", "status", "credits_charged"],
+		select: ["usage", "model", "status", "credits"],
 	});
 	expect(row.data).toMatchObject({
 		model: null,
 		status: "success",
-		credits_charged: "12",
+		credits: 12,
 		usage: webUsage,
 	});
-	expect((await repository.agentUsageByRuns([input.runId])).data).toMatchObject(
-		[{ calls: 1, model_calls: 0, credits_charged: "12" }],
-	);
+	expect((await repository.usageByRuns([input.runId])).data).toMatchObject([
+		{ model_calls: 0, credits: 12 },
+	]);
 	expect(
 		(await reconcileUsage(context, { requestId: input.requestId })).data,
 	).toBe(0);

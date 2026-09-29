@@ -291,7 +291,7 @@ const customFieldInputGenerate: ServiceFn<
 			userId: props.userId,
 			requestId: responseData.requestId,
 			feature: responseData.feature,
-			targetType: "custom-field",
+			session: { type: "custom-field", id: props.sessionId },
 			target: {
 				collectionKey: props.target.collectionKey,
 				brickKey: props.target.brickKey,
@@ -350,7 +350,7 @@ const customFieldInputGenerate: ServiceFn<
 		lucidRemoteConnectionId: accessTokenRes.data.lucidRemoteConnectionId,
 		userId: props.userId,
 		response: responseForStorage,
-		targetType: "custom-field",
+		session: { type: "custom-field", id: props.sessionId },
 		requestStartedAt,
 		status: formattedOutputRes.error === undefined ? "success" : "failed",
 		errorMessage: formattingErrorMessage,

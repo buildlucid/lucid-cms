@@ -49,7 +49,7 @@ const usage = {
 		},
 		total: 2,
 	},
-	cost: { creditsCharged: "0.0001" },
+	cost: { creditsCharged: "1" },
 };
 const encode = new TextEncoder();
 

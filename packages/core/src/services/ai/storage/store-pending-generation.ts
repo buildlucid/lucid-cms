@@ -1,4 +1,5 @@
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
+import type { AiUsageSessionType } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 const storePendingGeneration: ServiceFn<
@@ -6,51 +7,31 @@ const storePendingGeneration: ServiceFn<
 		{
 			lucidRemoteConnectionId: number;
 			userId: number;
+			session: { type: AiUsageSessionType; id?: string };
 			requestId: string;
 			feature: {
 				key: string;
 				version: string;
 			};
-			targetType: string;
-			target: Record<string, unknown>;
+			target?: Record<string, unknown>;
 		},
 	],
 	undefined
 > = async (context, props) => {
 	const AiGenerations = new AiGenerationsRepository(context.db);
 
-	const existingRes = await AiGenerations.selectSingleByRequestId({
-		requestId: props.requestId,
-		select: ["id"],
-	});
-	if (existingRes.error) return existingRes;
-
-	if (existingRes.data) {
-		return {
-			error: undefined,
-			data: undefined,
-		};
-	}
-
-	const createRes = await AiGenerations.createSingle({
+	const createRes = await AiGenerations.createIfRequestAbsent({
 		data: {
 			request_id: props.requestId,
-			provider_request_id: null,
 			feature_key: props.feature.key,
 			feature_version: props.feature.version,
 			user_id: props.userId,
 			lucid_remote_connection_id: props.lucidRemoteConnectionId,
-			target_type: props.targetType,
-			target: props.target,
-			output: null,
-			usage: null,
-			model: null,
-			credits_charged: null,
-			duration_ms: null,
+			session_type: props.session.type,
+			session_id: props.session.id ?? props.requestId,
+			target: props.target ?? null,
 			status: "pending",
-			error_message: null,
 		},
-		returning: ["id"],
 	});
 	if (createRes.error) return createRes;
 

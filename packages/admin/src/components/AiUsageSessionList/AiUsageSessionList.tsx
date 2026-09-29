@@ -1,13 +1,15 @@
+import type { AiUsageSession } from "@types";
 import classnames from "classnames";
 import {
 	FaSolidCalendar,
 	FaSolidChartSimple,
+	FaSolidCoins,
 	FaSolidListOl,
 	FaSolidT,
 	FaSolidUser,
 } from "solid-icons/fa";
 import { type Component, Index } from "solid-js";
-import AiUsageTableRow from "@/components/AiUsageTableRow/AiUsageTableRow";
+import AiUsageSessionTableRow from "@/components/AiUsageSessionTableRow/AiUsageSessionTableRow";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
@@ -16,14 +18,15 @@ import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 
-export const AiUsageList: Component<{
+export const AiUsageSessionList: Component<{
 	state: {
 		searchParams: QueryStateResponse;
 	};
+	onOpen: (session: AiUsageSession) => void;
 }> = (props) => {
 	// ----------------------------------
 	// Queries
-	const aiUsage = api.ai.useGetUsage({
+	const sessions = api.ai.useGetUsageSessions({
 		queryParams: {
 			queryString: props.state.searchParams.queryString,
 		},
@@ -35,8 +38,8 @@ export const AiUsageList: Component<{
 	return (
 		<>
 			<QueryBoundary
-				error={aiUsage.isError}
-				empty={aiUsage.data?.data.length === 0}
+				error={sessions.isError}
+				empty={sessions.data?.data.length === 0}
 				queryState={props.state.searchParams}
 				emptyFallback={
 					<EmptyState
@@ -46,40 +49,21 @@ export const AiUsageList: Component<{
 				}
 				class={classnames(
 					"border-t border-border",
-					aiUsage.isError || aiUsage.data?.data.length === 0
+					sessions.isError || sessions.data?.data.length === 0
 						? "-mb-4"
 						: undefined,
 				)}
 			>
 				<Table.Root
-					id="ai-usage.list"
-					rowCount={aiUsage.data?.data.length || 0}
+					id="ai-usage.sessions"
+					rowCount={sessions.data?.data.length || 0}
 					queryState={props.state.searchParams}
 					columns={[
 						{
-							label: T()("common.status"),
-							key: "status",
+							label: T()("ai.usage.session"),
+							key: "session",
 							icon: <FaSolidT />,
-							width: 112,
-							minWidth: 96,
-						},
-						{
-							label: T()("ai.usage.feature"),
-							key: "feature",
-							icon: <FaSolidT />,
-							minWidth: 220,
-						},
-						{
-							label: T()("ai.usage.usage"),
-							key: "usage",
-							icon: <FaSolidChartSimple />,
 							minWidth: 240,
-						},
-						{
-							label: T()("ai.usage.cost"),
-							key: "cost",
-							icon: <FaSolidListOl />,
-							sortable: true,
 						},
 						{
 							label: T()("common.user"),
@@ -87,32 +71,48 @@ export const AiUsageList: Component<{
 							icon: <FaSolidUser />,
 						},
 						{
-							label: T()("ai.usage.elapsed"),
-							key: "durationMs",
-							icon: <FaSolidListOl />,
+							label: T()("ai.usage.credits"),
+							key: "credits",
+							icon: <FaSolidCoins />,
 							sortable: true,
-							minWidth: 130,
 						},
 						{
-							label: T()("ai.usage.initiated"),
-							key: "createdAt",
+							label: T()("ai.usage.usage"),
+							key: "usage",
+							icon: <FaSolidChartSimple />,
+							minWidth: 220,
+						},
+						{
+							label: T()("ai.usage.requests"),
+							key: "requests",
+							icon: <FaSolidListOl />,
+						},
+						{
+							label: T()("ai.usage.last.activity"),
+							key: "lastActivityAt",
 							icon: <FaSolidCalendar />,
 							sortable: true,
 							minWidth: 170,
 						},
 					]}
-					loading={aiUsage.isFetching}
+					loading={sessions.isFetching}
 					padding="sm"
 					variant="contained"
 				>
-					<Index each={aiUsage.data?.data || []}>
-						{(usage, i) => <AiUsageTableRow index={i} aiUsage={usage()} />}
+					<Index each={sessions.data?.data || []}>
+						{(session, i) => (
+							<AiUsageSessionTableRow
+								index={i}
+								session={session()}
+								onOpen={props.onOpen}
+							/>
+						)}
 					</Index>
 				</Table.Root>
 			</QueryBoundary>
 			<Pagination
 				queryState={props.state.searchParams}
-				meta={aiUsage.data?.meta}
+				meta={sessions.data?.meta}
 				variant="inline"
 				padding="sm"
 				hideWhenEmpty

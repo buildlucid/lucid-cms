@@ -50,7 +50,7 @@ const useMediaAltGenerate = () => {
 		ResponseBody<MediaAltGenerateResponse>
 	>({
 		mutationFn: mediaAltGenerateReq,
-		invalidates: [queryKeys.ai.usage(), queryKeys.ai.usageChart()],
+		invalidates: [queryKeys.ai.usage(), queryKeys.ai.credits()],
 		getSuccessToast: (_data, params) =>
 			params.shouldToast?.() === false
 				? undefined

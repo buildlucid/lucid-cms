@@ -44,7 +44,6 @@ import enqueueRun from "./helpers/enqueue-run.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import resolveCapabilities from "./helpers/resolve-capabilities.js";
 import streamModelTurn from "./helpers/stream-model-turn.js";
-import sumCredits from "./helpers/sum-credits.js";
 import recoverInputs from "./recover-inputs.js";
 import startRun from "./start-run.js";
 import submitInput from "./submit-input.js";
@@ -214,7 +213,7 @@ const usage: ModelUsage = {
 		},
 		total: 2,
 	},
-	cost: { creditsCharged: "0.0001" },
+	cost: { creditsCharged: "1" },
 };
 const model = vi.mocked(streamModelTurn);
 
@@ -702,10 +701,8 @@ describe("agent runner", () => {
 			text: "Done.",
 		});
 		const AiGenerations = new AiGenerationsRepository(context.db);
-		const costs = await AiGenerations.agentUsageByRuns([prepared.runId]);
-		expect(costs.data).toMatchObject([
-			{ model_calls: 1, credits_charged: "0.0001" },
-		]);
+		const costs = await AiGenerations.usageByRuns([prepared.runId]);
+		expect(costs.data).toMatchObject([{ model_calls: 1, credits: 1 }]);
 	});
 
 	test("shares multiple progress updates and continues the same chat run", async () => {
@@ -1298,10 +1295,10 @@ describe("agent runner", () => {
 		const AiGenerations = new AiGenerationsRepository(context.db);
 		const record = await AiGenerations.selectSingleByRequestId({
 			requestId: model.mock.calls[0]?.[1].requestId ?? "",
-			select: ["status", "credits_charged"],
+			select: ["status", "credits"],
 		});
 		expect(record.data?.status).toBe(expectedUsageStatus);
-		expect(record.data?.credits_charged).toBe(remoteUsage ? "0.0001" : null);
+		expect(record.data?.credits).toBe(remoteUsage ? 1 : null);
 	});
 
 	test("watching a run sends its saved reply, then finishes", async () => {
@@ -1341,13 +1338,6 @@ describe("agent runner", () => {
 			{ type: "inputs", inputs: [], queuePaused: false },
 			{ type: "finish", runId: prepared.runId, status: "completed" },
 		]);
-	});
-
-	test("adds decimal credits without floating point rounding", () => {
-		expect(sumCredits("0.1", "0.2")).toBe("0.3");
-		expect(sumCredits("999999999999999999", "0.000001", 3)).toBe(
-			"999999999999999999.000003",
-		);
 	});
 });
 
@@ -1668,12 +1658,10 @@ describe("conversation compaction", () => {
 		expect(records).toHaveLength(0);
 		const charged = await context.db.kysely
 			.selectFrom("lucid_ai_generations")
-			.select(["feature_key", "credits_charged"])
+			.select(["feature_key", "credits"])
 			.where("agent_run_id", "=", prepared.compactId)
 			.execute();
-		expect(charged).toEqual([
-			{ feature_key: "agent.compact", credits_charged: "0.0001" },
-		]);
+		expect(charged).toEqual([{ feature_key: "agent.compact", credits: 1 }]);
 	});
 
 	test("carries on without compacting when an automatic compaction fails but the request still fits", async () => {
@@ -2533,16 +2521,10 @@ test("web tools use normal transcript rows and persist non-model usage", async (
 			output,
 		}),
 	);
-	const usage = await new AiGenerationsRepository(context.db).agentUsageByRuns([
-		prepared.runId,
-	]);
-	expect(usage.data).toContainEqual(
-		expect.objectContaining({
-			calls: 1,
-			model_calls: 0,
-			credits_charged: "12",
-		}),
-	);
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const usage = await AiGenerations.usageByRuns([prepared.runId]);
+	//* two model calls at 1 credit and one web search at 12
+	expect(usage.data).toMatchObject([{ model_calls: 2, credits: 14 }]);
 });
 
 test("every attempt at one web call reuses its key, so a resumed run never pays twice", async () => {
@@ -2578,11 +2560,10 @@ test("every attempt at one web call reuses its key, so a resumed run never pays 
 	);
 	expect(keys[0]).toBe(keys[1]);
 	expect(keys[2]).not.toBe(keys[0]);
-	const billed = await new AiGenerationsRepository(context.db).agentUsageByRuns(
-		[prepared.runId],
-	);
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const billed = await AiGenerations.usageByRuns([prepared.runId]);
 	expect(billed.data).toContainEqual(
-		expect.objectContaining({ calls: 2, model_calls: 0 }),
+		expect.objectContaining({ model_calls: 0, credits: 24 }),
 	);
 });
 
@@ -2716,8 +2697,16 @@ test("reads only pages whose URL already appeared in the chat", async () => {
 		id: prepared.conversationId,
 		userId,
 	});
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const session = await AiGenerations.selectSession({
+		type: "agent",
+		id: prepared.conversationId,
+	});
+	expect(session.data).toMatchObject({ requests: 8, failed: 0, pending: 0 });
+	expect(
+		Number(session.data?.web_searches) + Number(session.data?.web_fetches),
+	).toBe(3);
 	expect(details.data).toMatchObject({
-		usage: { modelCalls: 5, webCalls: 3 },
 		sources: [
 			{
 				url: "https://example.com/docs",

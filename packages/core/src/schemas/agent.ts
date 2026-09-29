@@ -155,12 +155,11 @@ export const agentContextSchema = z.object({
 });
 
 const agentUsageSchema = z.object({
-	creditsCharged: z.string(),
+	credits: z.number(),
 	modelCalls: z.number(),
 });
 
 const agentConversationDetailsResponseSchema = z.object({
-	usage: agentUsageSchema.extend({ webCalls: z.number() }),
 	sources: z.array(
 		z.object({
 			url: z.string(),

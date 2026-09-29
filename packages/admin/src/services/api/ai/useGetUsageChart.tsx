@@ -16,6 +16,7 @@ interface QueryParams {
 	startDate: Accessor<string>;
 	endDate: Accessor<string>;
 	featureKey: Accessor<string | undefined>;
+	userId: Accessor<number | undefined>;
 }
 
 const useGetUsageChart = (params: QueryHook<QueryParams>) => {
@@ -30,6 +31,11 @@ const useGetUsageChart = (params: QueryHook<QueryParams>) => {
 		const featureKey = params.queryParams.featureKey();
 		if (featureKey) {
 			query.set("filter[featureKey]", featureKey);
+		}
+
+		const userId = params.queryParams.userId();
+		if (userId !== undefined) {
+			query.set("filter[userId]", String(userId));
 		}
 
 		return query.toString();

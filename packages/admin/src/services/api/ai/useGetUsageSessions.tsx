@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
-import type { AiUsage, ResponseBody } from "@types";
+import type { AiUsageSession, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import type { QueryHook } from "@/types/utils";
@@ -8,16 +8,9 @@ import serviceHelpers from "@/utils/service-helpers";
 
 interface QueryParams {
 	queryString?: Accessor<string>;
-	filters?: {
-		featureKey?: Accessor<string>;
-		status?: Accessor<string[]>;
-		model?: Accessor<string>;
-		userId?: Accessor<Array<string | number>>;
-	};
-	perPage?: number;
 }
 
-const useGetUsage = (params: QueryHook<QueryParams>) => {
+const useGetUsageSessions = (params: QueryHook<QueryParams>) => {
 	const queryParams = createMemo(() =>
 		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
 	);
@@ -26,10 +19,10 @@ const useGetUsage = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: [...queryKeys.ai.usage(), queryKey(), params.key?.()],
+		queryKey: [...queryKeys.ai.usageSessions(), queryKey(), params.key?.()],
 		queryFn: () =>
-			request<ResponseBody<AiUsage[]>>({
-				url: "/lucid/api/v1/ai/usage",
+			request<ResponseBody<AiUsageSession[]>>({
+				url: "/lucid/api/v1/ai/usage/sessions",
 				query: queryParams(),
 				method: "GET",
 			}),
@@ -40,4 +33,4 @@ const useGetUsage = (params: QueryHook<QueryParams>) => {
 	}));
 };
 
-export default useGetUsage;
+export default useGetUsageSessions;

@@ -116,7 +116,13 @@ export const queryKeys = {
 	ai: {
 		all: () => ["lucid", "ai"] as const,
 		usage: () => ["lucid", "ai", "usage"] as const,
-		usageChart: () => ["lucid", "ai", "usageChart"] as const,
+		usageSessions: () => ["lucid", "ai", "usage", "sessions"] as const,
+		usageSession: (type: string | undefined, id: string | undefined) =>
+			["lucid", "ai", "usage", "sessions", type, id] as const,
+		usageSessionRecords: (type: string | undefined, id: string | undefined) =>
+			["lucid", "ai", "usage", "sessions", type, id, "records"] as const,
+		usageChart: () => ["lucid", "ai", "usage", "chart"] as const,
+		credits: () => ["lucid", "ai", "credits"] as const,
 	},
 	auth: {
 		all: () => ["lucid", "auth"] as const,

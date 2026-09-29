@@ -4,6 +4,7 @@ import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
+import { aiUsageSessionHref, canViewAiUsage } from "@/utils/ai-usage";
 
 /** One conversation in the history table. Clicking the row opens the chat. */
 const AgentConversationTableRow: Component<{
@@ -23,6 +24,16 @@ const AgentConversationTableRow: Component<{
 					type: "link",
 					icon: "eye",
 					href: `/lucid/agent/chats/${props.conversation.id}`,
+				},
+				{
+					label: T()("ai.usage.view"),
+					type: "link",
+					icon: "chart",
+					href: aiUsageSessionHref({
+						type: "agent",
+						id: props.conversation.id,
+					}),
+					show: canViewAiUsage(),
 				},
 				{
 					label: T()("common.rename"),

@@ -1,3 +1,4 @@
+import { A } from "@solidjs/router";
 import type { AgentConversation } from "@types";
 import {
 	type Component,
@@ -12,6 +13,7 @@ import WebSourceRow from "@/components/AgentToolPanel/parts/WebSourceRow";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
+import { aiUsageSessionHref, canViewAiUsage } from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
 import AgentCardDetail from "./AgentCardDetail";
 import AgentCardHeader from "./AgentCardHeader";
@@ -35,6 +37,7 @@ const AgentChatDetailsCard: Component<{
 		details.isSuccess ? details.data.data : undefined,
 	);
 	const sources = createMemo(() => data()?.sources ?? []);
+	const canViewUsage = createMemo(canViewAiUsage);
 	const visibleSources = createMemo(() =>
 		showAll() ? sources() : sources().slice(0, shownSources),
 	);
@@ -65,21 +68,19 @@ const AgentChatDetailsCard: Component<{
 				<AgentCardDetail label={T()("agent.chat.details.updated")}>
 					<Timestamp value={props.conversation.updatedAt} />
 				</AgentCardDetail>
-				<AgentCardDetail label={T()("agent.chat.details.credits")}>
-					<Show when={data()} fallback={<UsagePlaceholder />}>
-						{(current) => current().usage.creditsCharged}
-					</Show>
-				</AgentCardDetail>
-				<AgentCardDetail label={T()("agent.chat.details.calls")}>
-					<Show when={data()} fallback={<UsagePlaceholder />}>
-						{(current) =>
-							T()("agent.chat.details.calls.value", {
-								model: current().usage.modelCalls,
-								web: current().usage.webCalls,
-							})
-						}
-					</Show>
-				</AgentCardDetail>
+				<Show when={canViewUsage()}>
+					<AgentCardDetail label={T()("agent.chat.details.usage")}>
+						<A
+							href={aiUsageSessionHref({
+								type: "agent",
+								id: props.conversation.id,
+							})}
+							class="rounded text-xs text-body underline-offset-2 transition-colors hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+						>
+							{T()("agent.chat.details.usage.view")}
+						</A>
+					</AgentCardDetail>
+				</Show>
 			</dl>
 			<section
 				aria-labelledby="agent-chat-sources-title"
@@ -146,10 +147,6 @@ const Timestamp: Component<{ value: string | null }> = (props) => (
 	>
 		{dateHelpers.formatTimestamp(props.value)}
 	</time>
-);
-
-const UsagePlaceholder: Component = () => (
-	<span class="skeleton block h-3.5 w-12" />
 );
 
 export default AgentChatDetailsCard;

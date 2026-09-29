@@ -5,12 +5,12 @@ import type {
 } from "../../../types/response.js";
 import { addDays, getDateKey, parseDateKey } from "./date-helpers.js";
 
-const defaultMetric: AiUsageChartMetric = "totalTokens";
+const defaultMetric: AiUsageChartMetric = "credits";
 const defaultDimension: AiUsageChartDimension = "day";
 const supportedMetrics: AiUsageChartMetric[] = [
 	"requests",
 	"totalTokens",
-	"cost",
+	"credits",
 ];
 
 const isSupportedMetric = (value: string): value is AiUsageChartMetric =>
@@ -42,6 +42,7 @@ const normalizeUsageChartQuery = (query: GetUsageChartQueryParams) => {
 		end,
 		endExclusive: addDays(end, 1),
 		featureKey: query["filter[featureKey]"]?.trim() || undefined,
+		userId: query["filter[userId]"],
 	};
 };
 

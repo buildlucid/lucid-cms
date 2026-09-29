@@ -1,9 +1,5 @@
 import type { AiGeneratedContent } from "@lucidcms/types";
-import type {
-	Locale,
-	MediaAltGenerateResponse,
-	MediaTranslation,
-} from "@types";
+import type { Locale, MediaTranslation } from "@types";
 import {
 	FaSolidArrowRotateLeft,
 	FaSolidMagicWandSparkles,
@@ -39,7 +35,6 @@ import {
 } from "@/utils/ai-generated-content";
 import { prepareAiImage } from "@/utils/ai-image";
 import { LucidError } from "@/utils/error-handling";
-import formatAiCost, { sumAiCredits } from "@/utils/format-ai-cost";
 import spawnToast from "@/utils/spawn-toast";
 import { getDefaultTranslationLocale } from "@/utils/translation-helpers";
 
@@ -55,7 +50,6 @@ export type MediaAltGenerationCandidate = {
 	instruction?: string;
 	output: Map<string | null, string>;
 	originalOutput: Map<string | null, string>;
-	cost: MediaAltGenerateResponse["usage"]["cost"];
 };
 
 const MediaAltGenerationModalContent: Component<{
@@ -128,14 +122,6 @@ const MediaAltGenerationModalContent: Component<{
 		),
 	);
 	const hasResponse = createMemo(() => props.generations.length > 0);
-	const sessionCost = createMemo(() => {
-		const firstGeneration = props.generations[0];
-		if (!firstGeneration) return undefined;
-
-		return formatAiCost(
-			sumAiCredits(props.generations.map((generation) => generation.cost)),
-		);
-	});
 	const isEdited = (
 		generation: MediaAltGenerationCandidate,
 		localeCode: string | null,
@@ -167,12 +153,10 @@ const MediaAltGenerationModalContent: Component<{
 		...props.generations.map((generation, index) => ({
 			id: generation.id,
 			label: generationLabel(index),
-			meta:
-				formatAiCost(generation.cost) ??
-				T()("ai.media.alt.generate.response.locale.count", {
-					count: outputLocaleCount(generation.output),
-					total: outputLocales().length,
-				}),
+			meta: T()("ai.media.alt.generate.response.locale.count", {
+				count: outputLocaleCount(generation.output),
+				total: outputLocales().length,
+			}),
 		})),
 	]);
 	// -----------------------------
@@ -425,18 +409,7 @@ const MediaAltGenerationModalContent: Component<{
 							</div>
 						</Show>
 					</div>
-					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
-						<div class="min-w-0 flex-1">
-							<Show when={sessionCost()}>
-								{(cost) => (
-									<p class="text-xs text-body">
-										{T()("ai.media.image.generate.cost.total", {
-											cost: cost(),
-										})}
-									</p>
-								)}
-							</Show>
-						</div>
+					<div class="relative z-10 -mx-4 flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-border bg-card/95 p-6 backdrop-blur-sm md:-mx-6">
 						<div class="flex shrink-0 items-center gap-3">
 							<Button
 								type="button"
@@ -659,7 +632,6 @@ const MediaAltGenerationModal: Component = () => {
 					originalOutput: new Map(
 						generatedContentEntries(response.data.output),
 					),
-					cost: response.data.usage.cost,
 				},
 			]);
 			setSelectedGenerationId(id);

@@ -54,11 +54,7 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 	let settled = 0;
 
 	for (const row of pending.data ?? []) {
-		if (
-			row.agent_run_id === null ||
-			row.agent_conversation_id === null ||
-			row.lucid_remote_connection_id === null
-		) {
+		if (row.agent_run_id === null || row.lucid_remote_connection_id === null) {
 			continue;
 		}
 
@@ -96,7 +92,7 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 				requestId: row.request_id,
 				featureKey: row.feature_key,
 				runId: row.agent_run_id,
-				conversationId: row.agent_conversation_id,
+				conversationId: row.session_id,
 				userId: row.user_id,
 				connectionId: row.lucid_remote_connection_id,
 				usage,
@@ -117,23 +113,13 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 		const failed = await repository.upsertAgentUsage({
 			data: {
 				request_id: row.request_id,
-				provider_request_id: null,
 				feature_key: row.feature_key,
 				feature_version: "v1",
 				user_id: row.user_id,
 				lucid_remote_connection_id: row.lucid_remote_connection_id,
-				agent_conversation_id: row.agent_conversation_id,
 				agent_run_id: row.agent_run_id,
-				target_type: "agent-run",
-				target: {
-					conversationId: row.agent_conversation_id,
-					runId: row.agent_run_id,
-				},
-				output: null,
-				usage: null,
-				model: null,
-				credits_charged: null,
-				duration_ms: null,
+				session_type: "agent",
+				session_id: row.session_id,
 				status: "failed",
 				error_message: context.translate("server:agent.usage.missing"),
 			},

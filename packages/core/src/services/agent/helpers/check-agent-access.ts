@@ -20,6 +20,14 @@ export const getConversationLevel = (
 	ownerId: number | null,
 ): AgentPermissionAction => (ownerId === null ? "manage" : "use");
 
+export const hasAgentPermission = (
+	user: { superAdmin: boolean; permissions: string[] },
+	agentKey: string,
+	level: AgentPermissionAction,
+) =>
+	user.superAdmin ||
+	user.permissions.includes(getAgentPermission(agentKey, level));
+
 /**
  * Resolves who a run acts for on one agent. A user needs the agent's permission
  * for the level and a null user acts as the system. Execution also requires a
@@ -53,12 +61,7 @@ const checkAgentAccess: ServiceFn<
 	if (input.userId !== null) {
 		const user = await resolveUserAccess(context, { userId: input.userId });
 		if (user.error) return user;
-		if (
-			!user.data.superAdmin &&
-			!user.data.permissions.includes(
-				getAgentPermission(agent.key, input.level),
-			)
-		) {
+		if (!hasAgentPermission(user.data, agent.key, input.level)) {
 			return {
 				data: undefined,
 				error: {
