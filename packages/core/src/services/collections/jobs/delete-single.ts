@@ -1,5 +1,4 @@
 import z from "zod";
-import nullifyRelationReferences from "../../../libs/collection/custom-fields/fields/relation/nullify-references.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
@@ -31,11 +30,6 @@ const deleteCollection: JobHandler<z.infer<typeof input>> = async ({
 		},
 	});
 	if (deleteRes.error) return deleteRes;
-
-	const nullified = await nullifyRelationReferences(context, {
-		collectionKey: input.collectionKey,
-	});
-	if (nullified.error) return nullified;
 
 	const notified = await notifyCollection(context, input);
 	if (notified.error) return notified;

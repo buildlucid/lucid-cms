@@ -4,7 +4,10 @@ import getCurrentCollectionMigrationId from "../../../libs/collection/migration/
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { DocumentBeforeUpsertHookOrigin } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { DocumentsRepository } from "../../../libs/repositories/index.js";
+import {
+	DocumentIdentitiesRepository,
+	DocumentsRepository,
+} from "../../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
 import type { LucidUser } from "../../../types/hono.js";
@@ -152,6 +155,24 @@ const saveDocument: ServiceFn<
 					},
 				);
 	if (upsertDocRes.error) return upsertDocRes;
+
+	if (data.documentId === undefined) {
+		const DocumentIdentities = new DocumentIdentitiesRepository(context.db);
+		const identity = await DocumentIdentities.createSingle({
+			data: {
+				collection_key: data.collectionKey,
+				document_id: upsertDocRes.data.id,
+			},
+		});
+		if (identity.error) {
+			await cleanupFailedCreate(context, {
+				collectionKey: data.collectionKey,
+				documentId: upsertDocRes.data.id,
+				tableName: tableNamesRes.data.document,
+			});
+			return identity;
+		}
+	}
 
 	// ----------------------------------------------
 	// Create and manage document versions

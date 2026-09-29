@@ -14,10 +14,12 @@ import { authStatesTable } from "./auth-states.js";
 import { collectionMigrationsTable } from "./collection-migrations.js";
 import { collectionsTable } from "./collections.js";
 import { documentBricksTable } from "./document-bricks.js";
+import { documentIdentitiesTable } from "./document-identities.js";
 import { documentPublishOperationAssigneesTable } from "./document-publish-operation-assignees.js";
 import { documentPublishOperationEventsTable } from "./document-publish-operation-events.js";
 import { documentPublishOperationsTable } from "./document-publish-operations.js";
 import { documentReferencesTable } from "./document-references.js";
+import { documentVersionIdentitiesTable } from "./document-version-identities.js";
 import { documentVersionsTable } from "./document-versions.js";
 import { documentWorkflowAssigneesTable } from "./document-workflow-assignees.js";
 import { documentWorkflowsTable } from "./document-workflows.js";
@@ -74,11 +76,13 @@ export * from "./auth-states.js";
 export * from "./collection-migrations.js";
 export * from "./collections.js";
 export * from "./document-bricks.js";
+export * from "./document-identities.js";
 export * from "./document-publish-operation-assignees.js";
 export * from "./document-publish-operation-events.js";
 export * from "./document-publish-operations.js";
 export * from "./document-references.js";
 export * from "./document-table-name.js";
+export * from "./document-version-identities.js";
 export * from "./document-versions.js";
 export * from "./document-workflow-assignees.js";
 export * from "./document-workflows.js";
@@ -136,10 +140,12 @@ export const coreTableDefinitions = [
 	collectionMigrationsTable,
 	collectionsTable,
 	documentBricksTable,
+	documentIdentitiesTable,
 	documentPublishOperationAssigneesTable,
 	documentPublishOperationEventsTable,
 	documentPublishOperationsTable,
 	documentVersionsTable,
+	documentVersionIdentitiesTable,
 	documentWorkflowAssigneesTable,
 	documentWorkflowsTable,
 	documentsTable,

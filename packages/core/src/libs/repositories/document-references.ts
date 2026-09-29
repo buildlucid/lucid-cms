@@ -4,7 +4,6 @@ import { documentReferencesTable } from "../db/tables/document-references.js";
 import type {
 	LucidBrickTableName,
 	LucidDocumentReferences,
-	LucidVersionTableName,
 } from "../db/tables/index.js";
 import StaticRepository from "./parents/static-repository.js";
 
@@ -61,41 +60,6 @@ export default class DocumentReferencesRepository extends StaticRepository<"luci
 
 		const result = await this.executeQuery(() => query.executeTakeFirst(), {
 			method: "deleteByVersion",
-		});
-		return result.response;
-	}
-	/** Dynamic version tables cannot own foreign keys from the shared reference table.
-	 * Call after version cascades, including failure compensation. */
-	async pruneVersions(props: {
-		collectionKey: string;
-		versionTable: LucidVersionTableName;
-		documentId?: number;
-	}) {
-		let query = this.db
-			.deleteFrom("lucid_document_references")
-			.where("collection_key", "=", props.collectionKey);
-
-		if (props.documentId !== undefined) {
-			query = query.where("document_id", "=", props.documentId);
-		}
-
-		query = query.where((eb) =>
-			eb.not(
-				eb.exists(
-					eb
-						.selectFrom(props.versionTable)
-						.select("id")
-						.whereRef(
-							`${props.versionTable}.id`,
-							"=",
-							"lucid_document_references.version_id",
-						),
-				),
-			),
-		);
-
-		const result = await this.executeQuery(() => query.executeTakeFirst(), {
-			method: "pruneVersions",
 		});
 		return result.response;
 	}

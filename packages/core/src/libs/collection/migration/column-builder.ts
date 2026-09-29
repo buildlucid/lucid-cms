@@ -15,7 +15,7 @@ import type {
  */
 export const addColumn = <
 	T extends
-		| CreateTableBuilder<string, never>
+		| CreateTableBuilder<string, string>
 		| AlterTableColumnAlteringBuilder
 		| AlterTableBuilder,
 >(

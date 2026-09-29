@@ -466,6 +466,11 @@ const createFieldTables = (props: {
 				) satisfies CollectionSchemaColumn[];
 
 				relationTableRes.data.schema.columns.push(...relationFieldColumns);
+				relationTableRes.data.schema.foreignKeys =
+					fieldSchemaRes.data.foreignKeys?.map((foreignKey) => ({
+						...foreignKey,
+						columns: foreignKey.columns.map(prefixGeneratedColName),
+					}));
 				relationTableRes.data.schema.indexes = [
 					...(relationTableRes.data.schema.indexes ?? []),
 					...fieldInstance.getIndexDefinitions({

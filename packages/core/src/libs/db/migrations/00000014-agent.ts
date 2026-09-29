@@ -202,7 +202,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 					.onDelete("cascade"),
 			)
 			.addColumn("collection_key", adapter.getDataType("text"), (col) =>
-				col.notNull().references("lucid_collections.key").onDelete("cascade"),
+				col.notNull(),
 			)
 			.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 				col.notNull(),
@@ -212,6 +212,20 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("tool_name", adapter.getDataType("text"))
 			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 				col.notNull(),
+			)
+			.addForeignKeyConstraint(
+				"fk_agent_document_references_document",
+				["collection_key", "document_id"],
+				"lucid_document_identities",
+				["collection_key", "document_id"],
+				(constraint) => constraint.onDelete("cascade"),
+			)
+			.addForeignKeyConstraint(
+				"fk_agent_document_reference_version",
+				["collection_key", "document_id", "version_id"],
+				"lucid_document_version_identities",
+				["collection_key", "document_id", "version_id"],
+				(constraint) => constraint.onDelete("cascade"),
 			)
 			.execute();
 

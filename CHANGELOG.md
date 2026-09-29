@@ -1,10 +1,14 @@
 # @lucidcms/core
 
-## v0.20.0-alpha.0 (unrelease)
+## v0.20.0-alpha.0 (unreleased)
 
 ### Features:
 
 - Added an MCP server at `/lucid/mcp`, with `defineMcpTool` and `defineSkill` for registering scoped tools and skills through `ai.mcp`.
+
+### Breaking Changes:
+
+- Document and version links now use shared identity tables with automatic cleanup on deletion.
 
 ## v0.19.0-alpha.0
 

@@ -172,15 +172,20 @@ describe("Schema inference", async () => {
 		expect(
 			relationTable?.columns.some((column) => column.name === "parent_id_ref"),
 		).toBe(false);
-		expect(
-			relationTable?.columns.find((column) => column.name === "_document_id")
-				?.foreignKey,
-		).toBeUndefined();
+		expect(relationTable?.foreignKeys).toEqual([
+			{
+				columns: ["_collection_key", "_document_id"],
+				table: "lucid_document_identities",
+				references: ["collection_key", "document_id"],
+				onDelete: "cascade",
+			},
+		]);
 	});
 
 	test("keeps relation tables top-level when fields are nested in repeater groups", () => {
 		pagesCollection
 			.addRepeater("authors")
+			.addRelation("related", { collection: "pages" })
 			.addMedia("avatar")
 			.addRepeater("socials")
 			.addUser("owner")
@@ -190,6 +195,18 @@ describe("Schema inference", async () => {
 		const res = inferSchema(pagesCollection, db);
 		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
 
+		expect(
+			res.data?.tables.find(
+				(table) => table.key.fieldPath?.at(-1) === "related",
+			)?.foreignKeys,
+		).toEqual([
+			{
+				columns: ["_collection_key", "_document_id"],
+				table: "lucid_document_identities",
+				references: ["collection_key", "document_id"],
+				onDelete: "cascade",
+			},
+		]);
 		expect(tableNames).toContain("lucid_document__pages__fld__med__avatar");
 		expect(tableNames).toContain("lucid_document__pages__fld__usr__owner");
 		expect(tableNames).not.toContain(
@@ -217,6 +234,7 @@ describe("Schema inference", async () => {
 				fixed: [
 					new BrickBuilder("content")
 						.addRepeater("authors")
+						.addRelation("related", { collection: "pages" })
 						.addMedia("avatar")
 						.endRepeater(),
 				],
@@ -226,6 +244,18 @@ describe("Schema inference", async () => {
 		const res = inferSchema(brickScopedCollection, db);
 		const tableNames = res.data?.tables.map((table) => table.name) ?? [];
 
+		expect(
+			res.data?.tables.find(
+				(table) => table.key.fieldPath?.at(-1) === "related",
+			)?.foreignKeys,
+		).toEqual([
+			{
+				columns: ["_collection_key", "_document_id"],
+				table: "lucid_document_identities",
+				references: ["collection_key", "document_id"],
+				onDelete: "cascade",
+			},
+		]);
 		expect(tableNames).toContain("lucid_document__pages__content__med__avatar");
 		expect(tableNames).not.toContain(
 			"lucid_document__pages__content__rep__authors__med__avatar",

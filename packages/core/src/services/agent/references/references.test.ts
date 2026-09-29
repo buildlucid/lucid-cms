@@ -14,6 +14,7 @@ import { Permissions } from "../../../libs/permission/definitions.js";
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
+	DocumentIdentitiesRepository,
 	DocumentsRepository,
 	DocumentVersionsRepository,
 	MediaRepository,
@@ -133,25 +134,28 @@ const createDocument = async () => {
 		{ tableName: names.data.document },
 	);
 	assert(document.data, JSON.stringify(document.error));
+	expect(
+		(
+			await new DocumentIdentitiesRepository(context.db).createSingle({
+				data: { collection_key: collection.key, document_id: document.data.id },
+			})
+		).error,
+	).toBeUndefined();
 	const versions: number[] = [];
 	for (const type of ["latest", "revision"]) {
 		const version = await new DocumentVersionsRepository(
 			context.db,
-		).createSingle(
+		).createVersion(
 			{
-				data: {
-					collection_key: collection.key,
-					collection_migration_id: migration.data,
-					document_id: document.data.id,
-					type,
-					content_id: randomUUID(),
-					created_at:
-						type === "revision"
-							? "2000-01-01T00:00:00.000Z"
-							: new Date().toISOString(),
-				},
-				returning: ["id"],
-				validation: { enabled: true },
+				collection_key: collection.key,
+				collection_migration_id: migration.data,
+				document_id: document.data.id,
+				type,
+				content_id: randomUUID(),
+				created_at:
+					type === "revision"
+						? "2000-01-01T00:00:00.000Z"
+						: new Date().toISOString(),
 			},
 			{ tableName: names.data.version },
 		);
@@ -359,6 +363,34 @@ test("revision retention removes expired pinned links while preserving live and 
 	expect(
 		(await link(conversationId, documentReferences(document))).error,
 	).toBeUndefined();
+	await context.db.kysely
+		.insertInto("lucid_preview_sessions")
+		.values({
+			token_hash: randomUUID(),
+			entry_collection_key: collection.key,
+			entry_document_id: document.id,
+			entry_version_type: "revision",
+			entry_version_id: document.revisionId,
+			mode: "scoped",
+			expires_at: "2099-01-01T00:00:00.000Z",
+		})
+		.execute();
+	await context.db.kysely
+		.insertInto("lucid_document_references")
+		.values({
+			generation: randomUUID(),
+			collection_key: collection.key,
+			document_id: document.id,
+			version_id: document.revisionId,
+			source_table: "test",
+			source_column: "body",
+			locale: "",
+			kind: "embedded",
+			target_resource: "media",
+			target_table: "lucid_media",
+			target_id: 999,
+		})
+		.execute();
 	const result = await getJobDefinitionRuntime(
 		deleteExpiredRevisionsJob,
 	).execute(
@@ -380,6 +412,30 @@ test("revision retention removes expired pinned links while preserving live and 
 		]),
 	);
 	expect(await documentLinks(conversationId)).toHaveLength(2);
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_document_version_identities")
+			.select("version_id")
+			.where("collection_key", "=", collection.key)
+			.where("version_id", "=", document.revisionId)
+			.execute(),
+	).toEqual([]);
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_preview_sessions")
+			.select("id")
+			.where("entry_collection_key", "=", collection.key)
+			.where("entry_version_id", "=", document.revisionId)
+			.execute(),
+	).toEqual([]);
+	expect(
+		await context.db.kysely
+			.selectFrom("lucid_document_references")
+			.select("version_id")
+			.where("collection_key", "=", collection.key)
+			.where("version_id", "=", document.revisionId)
+			.execute(),
+	).toEqual([]);
 });
 
 test("delivery skips deleted resources while ordinary registration stays strict", async () => {

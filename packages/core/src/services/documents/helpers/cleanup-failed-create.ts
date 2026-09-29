@@ -1,8 +1,7 @@
 import type { LucidDocumentTableName } from "../../../libs/db/tables/index.js";
 import logger from "../../../libs/logger/index.js";
-import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import deleteDocumentWorkflows from "../../document-workflows/delete-for-documents.js";
+import deleteDocumentRecords from "./delete-document-records.js";
 
 const cleanupFailedCreate: ServiceFn<
 	[
@@ -21,42 +20,18 @@ const cleanupFailedCreate: ServiceFn<
 		};
 	}
 
-	const Documents = new DocumentsRepository(context.db);
-	const [deleteWorkflowRes, deleteDocumentRes] = await Promise.all([
-		deleteDocumentWorkflows(context, {
-			collectionKey: data.collectionKey,
-			documentIds: [data.documentId],
-		}),
-		Documents.deleteSingle(
-			{
-				where: [
-					{
-						key: "id",
-						operator: "=",
-						value: data.documentId,
-					},
-				],
-			},
-			{
-				tableName: data.tableName,
-			},
-		),
-	]);
-
-	if (deleteWorkflowRes.error || deleteDocumentRes.error) {
+	const deleted = await deleteDocumentRecords(context, {
+		collectionKey: data.collectionKey,
+		documentIds: [data.documentId],
+		tableName: data.tableName,
+	});
+	if (deleted.error) {
 		logger.error({
 			message: "Failed to clean up document after creation error",
-			data: {
-				collectionKey: data.collectionKey,
-				documentId: data.documentId,
-				workflowCleanupFailed: deleteWorkflowRes.error !== undefined,
-				documentCleanupFailed: deleteDocumentRes.error !== undefined,
-			},
+			data: { collectionKey: data.collectionKey, documentId: data.documentId },
 		});
+		return deleted;
 	}
-
-	if (deleteWorkflowRes.error) return deleteWorkflowRes;
-	if (deleteDocumentRes.error) return deleteDocumentRes;
 
 	return {
 		error: undefined,

@@ -21,12 +21,14 @@ import type {
 	LucidBrickTableName,
 	LucidCollectionMigrations,
 	LucidCollections,
+	LucidDocumentIdentities,
 	LucidDocumentPublishOperationAssignees,
 	LucidDocumentPublishOperationEvents,
 	LucidDocumentPublishOperations,
 	LucidDocumentReferences,
 	LucidDocumentTable,
 	LucidDocumentTableName,
+	LucidDocumentVersionIdentities,
 	LucidDocumentWorkflowAssignees,
 	LucidDocumentWorkflows,
 	LucidEmailAttachments,
@@ -239,10 +241,20 @@ export interface InferredIndex {
 	unique?: boolean;
 }
 
+/** A table-level foreign key whose columns reference the target in matching order. */
+export interface InferredForeignKey {
+	columns: string[];
+	table: string;
+	references: string[];
+	onDelete?: OnDelete;
+	onUpdate?: OnUpdate;
+}
+
 export interface InferredTable {
 	name: string;
 	columns: InferredColumn[];
 	indexes?: InferredIndex[];
+	foreignKeys?: InferredForeignKey[];
 }
 
 // ------------------------------------------------------------------------------
@@ -279,6 +291,8 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_document_publish_operation_assignees: LucidDocumentPublishOperationAssignees;
 	lucid_document_publish_operation_events: LucidDocumentPublishOperationEvents;
 	lucid_document_references: LucidDocumentReferences;
+	lucid_document_version_identities: LucidDocumentVersionIdentities;
+	lucid_document_identities: LucidDocumentIdentities;
 	lucid_document_workflows: LucidDocumentWorkflows;
 	lucid_document_workflow_assignees: LucidDocumentWorkflowAssignees;
 	lucid_preview_sessions: LucidPreviewSessions;

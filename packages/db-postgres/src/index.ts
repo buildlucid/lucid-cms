@@ -8,6 +8,7 @@ import type {
 	DatabaseLimits,
 	EnvironmentVariables,
 	InferredColumn,
+	InferredForeignKey,
 	InferredIndex,
 	InferredTable,
 	KyselyDB,
@@ -125,6 +126,9 @@ export class PostgresAdapter extends DatabaseAdapter {
 				dflt_value: string | null;
 				pk: boolean;
 				fk_table?: string;
+				fk_id?: string;
+				fk_seq?: number;
+				fk_count?: number | string;
 				fk_column?: string;
 				fk_on_update?: OnUpdate;
 				fk_on_delete?: OnDelete;
@@ -170,6 +174,9 @@ export class PostgresAdapter extends DatabaseAdapter {
 	                SELECT
 	                    kcu.table_name,
 	                    kcu.column_name,
+	                    kcu.constraint_name AS constraint_id,
+	                    kcu.ordinal_position - 1 AS seq,
+	                    count(*) OVER (PARTITION BY kcu.constraint_schema, kcu.table_name, kcu.constraint_name) AS column_count,
 	                    ccu.table_name AS referenced_table,
 	                    ccu.column_name AS referenced_column,
 	                    rc.update_rule AS on_update,
@@ -177,13 +184,19 @@ export class PostgresAdapter extends DatabaseAdapter {
 	                FROM information_schema.key_column_usage kcu
 	                JOIN information_schema.referential_constraints rc
 	                    ON kcu.constraint_name = rc.constraint_name
-	                JOIN information_schema.constraint_column_usage ccu
+	                        AND kcu.constraint_schema = rc.constraint_schema
+	                JOIN information_schema.key_column_usage ccu
 	                    ON rc.unique_constraint_name = ccu.constraint_name
+	                        AND rc.unique_constraint_schema = ccu.constraint_schema
+	                        AND kcu.position_in_unique_constraint = ccu.ordinal_position
 	                WHERE kcu.table_name LIKE 'lucid_%'
 	            )
 	            SELECT
 	                tc.*,
 	                fk.referenced_table AS fk_table,
+	                fk.constraint_id AS fk_id,
+	                fk.seq AS fk_seq,
+	                fk.column_count AS fk_count,
 	                fk.referenced_column AS fk_column,
 	                fk.on_update AS fk_on_update,
 	                fk.on_delete AS fk_on_delete
@@ -229,6 +242,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 		]);
 
 		const tableMap = new Map<string, InferredTable>();
+		const foreignKeyMap = new Map<string, InferredForeignKey>();
 
 		for (const row of res.rows) {
 			let table = tableMap.get(row.table_name);
@@ -251,7 +265,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 				primary: row.pk,
 				unique: row.is_unique,
 				foreignKey:
-					row.fk_table && row.fk_column
+					row.fk_table && row.fk_column && Number(row.fk_count) === 1
 						? {
 								table: row.fk_table,
 								column: row.fk_column,
@@ -260,6 +274,30 @@ export class PostgresAdapter extends DatabaseAdapter {
 							}
 						: undefined,
 			} satisfies InferredColumn);
+
+			if (
+				row.fk_table &&
+				row.fk_column &&
+				row.fk_id !== undefined &&
+				row.fk_seq !== undefined &&
+				Number(row.fk_count) > 1
+			) {
+				const key = `${row.table_name}.${row.fk_id}`;
+				let foreignKey = foreignKeyMap.get(key);
+				if (!foreignKey) {
+					foreignKey = {
+						columns: [],
+						table: row.fk_table,
+						references: [],
+						onUpdate: formatOnUpdate(row.fk_on_update),
+						onDelete: formatOnDelete(row.fk_on_delete),
+					};
+					foreignKeyMap.set(key, foreignKey);
+					table.foreignKeys = [...(table.foreignKeys ?? []), foreignKey];
+				}
+				foreignKey.columns[row.fk_seq] = row.name;
+				foreignKey.references[row.fk_seq] = row.fk_column;
+			}
 		}
 
 		const indexMap = new Map<string, InferredIndex>();

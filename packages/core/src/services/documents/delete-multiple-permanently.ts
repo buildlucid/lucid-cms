@@ -4,15 +4,14 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import withTransaction from "../../utils/services/with-transaction.js";
-import deleteAgentReferences from "../agent/references/delete-for-documents.js";
 import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
-import deleteWorkflowsForDocuments from "../document-workflows/delete-for-documents.js";
-import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
+import removeTarget from "../document-references/remove-target.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
+import deleteDocumentRecords from "./helpers/delete-document-records.js";
+import emitDocumentChange from "./helpers/emit-change.js";
 import executeDeleteHook from "./helpers/execute-delete-hook.js";
 import invalidateContentDocumentCache from "./helpers/invalidate-content-cache.js";
-import nullifyDocumentReferences from "./nullify-document-references.js";
 
 const deleteMultiplePermanently: ServiceFn<
 	[
@@ -112,42 +111,11 @@ const deleteMultiplePermanently: ServiceFn<
 			});
 			if (hookBeforeRes.error) return hookBeforeRes;
 
-			const nullifyPromises = data.ids.map((id) =>
-				nullifyDocumentReferences(context, {
-					collectionKey: collectionRes.data.key,
-					documentId: id,
-				}),
-			);
-
-			const [
-				deleteDocumentsRes,
-				deletePreviewsRes,
-				cancelRequestsRes,
-				workflowDeleteRes,
-				agentReferencesRes,
-				...nullifyResults
-			] = await Promise.all([
-				Documents.deleteMultiple(
-					{
-						where: [
-							{
-								key: "id",
-								operator: "in",
-								value: data.ids,
-							},
-						],
-						returning: ["id"],
-						validation: {
-							enabled: true,
-						},
-					},
-					{
-						tableName: tableNamesRes.data.document,
-					},
-				),
-				deletePreviewSessionsForDocuments(context, {
+			const [deleteDocumentsRes, cancelRequestsRes] = await Promise.all([
+				deleteDocumentRecords(context, {
 					collectionKey: data.collectionKey,
 					documentIds: data.ids,
+					tableName: tableNamesRes.data.document,
 				}),
 				cancelPublishOperationsForDocuments(context, {
 					collectionKey: data.collectionKey,
@@ -156,24 +124,9 @@ const deleteMultiplePermanently: ServiceFn<
 						"server:core.documents.permanently.deleted.publish.request.comment",
 					),
 				}),
-				deleteWorkflowsForDocuments(context, {
-					collectionKey: data.collectionKey,
-					documentIds: data.ids,
-				}),
-				deleteAgentReferences(context, {
-					collectionKey: data.collectionKey,
-					documentIds: data.ids,
-				}),
-				...nullifyPromises,
 			]);
 			if (deleteDocumentsRes.error) return deleteDocumentsRes;
-			if (deletePreviewsRes.error) return deletePreviewsRes;
 			if (cancelRequestsRes.error) return cancelRequestsRes;
-			if (workflowDeleteRes.error) return workflowDeleteRes;
-			if (agentReferencesRes.error) return agentReferencesRes;
-
-			const nullifyError = nullifyResults.find((result) => result.error);
-			if (nullifyError) return nullifyError;
 
 			const hookAfterRes = await executeDeleteHook(context, {
 				event: "afterDelete",
@@ -187,6 +140,21 @@ const deleteMultiplePermanently: ServiceFn<
 			if (hookAfterRes.error) return hookAfterRes;
 
 			await invalidateContentDocumentCache(context, data.collectionKey);
+
+			const changed = await emitDocumentChange(context, {
+				change: { type: "deleted", permanent: true },
+				collectionKey: data.collectionKey,
+				ids: data.ids,
+			});
+			if (changed.error) return changed;
+
+			const removedReferences = await removeTarget(context, {
+				resource: "documents",
+				table: tableNamesRes.data.document,
+				collectionKey: data.collectionKey,
+				ids: data.ids,
+			});
+			if (removedReferences.error) return removedReferences;
 
 			return {
 				error: undefined,

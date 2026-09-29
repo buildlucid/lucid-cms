@@ -122,26 +122,16 @@ const cloneVersion: ServiceFn<
 		};
 	}
 
-	const newVersionRes = await Versions.createSingle(
+	const newVersionRes = await Versions.createVersion(
 		{
-			data: {
-				document_id: data.documentId,
-				collection_key: data.collectionKey,
-				collection_migration_id: migrationIdRes.data,
-				type: data.toVersionType,
-				promoted_from: data.fromVersionId,
-				content_id: versionRes.data.content_id,
-				created_by: data.userId,
-				updated_by: data.userId,
-			},
-			returning: ["id"],
-			validation: {
-				enabled: true,
-				defaultError: {
-					status: 400,
-					message: copy("server:core.documents.create.failed"),
-				},
-			},
+			document_id: data.documentId,
+			collection_key: data.collectionKey,
+			collection_migration_id: migrationIdRes.data,
+			type: data.toVersionType,
+			promoted_from: data.fromVersionId,
+			content_id: versionRes.data.content_id,
+			created_by: data.userId,
+			updated_by: data.userId,
 		},
 		{
 			tableName: tableNameRes.data.version,

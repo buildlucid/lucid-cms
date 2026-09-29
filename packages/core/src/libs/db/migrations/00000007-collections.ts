@@ -30,6 +30,50 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.execute();
 
+			// Shared features reference this identity instead of a collection-specific table.
+			await db.schema
+				.createTable("lucid_document_identities")
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
+					col.notNull().references("lucid_collections.key").onDelete("cascade"),
+				)
+				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addPrimaryKeyConstraint("pk_document_identities", [
+					"collection_key",
+					"document_id",
+				])
+				.execute();
+
+			await db.schema
+				.createTable("lucid_document_version_identities")
+				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("version_id", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addPrimaryKeyConstraint("pk_document_version_identities", [
+					"collection_key",
+					"version_id",
+				])
+				.addUniqueConstraint("uniq_document_version_identity_owner", [
+					"collection_key",
+					"document_id",
+					"version_id",
+				])
+				.addForeignKeyConstraint(
+					"fk_document_version_identity_document",
+					["collection_key", "document_id"],
+					"lucid_document_identities",
+					["collection_key", "document_id"],
+					(constraint) => constraint.onDelete("cascade"),
+				)
+				.execute();
+
 			// Reverse lookups retain embedded identities when their target is deleted.
 			await db.schema
 				.createTable("lucid_document_references")
@@ -37,7 +81,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull(),
 				)
 				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
-					col.notNull().references("lucid_collections.key").onDelete("cascade"),
+					col.notNull(),
 				)
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
@@ -63,6 +107,13 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("target_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
+				)
+				.addForeignKeyConstraint(
+					"fk_document_reference_owner",
+					["collection_key", "document_id", "version_id"],
+					"lucid_document_version_identities",
+					["collection_key", "document_id", "version_id"],
+					(constraint) => constraint.onDelete("cascade"),
 				)
 				.execute();
 
@@ -314,7 +365,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
-					col.notNull().references("lucid_collections.key").onDelete("cascade"),
+					col.notNull(),
 				)
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
@@ -343,6 +394,13 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 							adapter.getDefault("timestamp", "now"),
 						),
 					),
+				)
+				.addForeignKeyConstraint(
+					"fk_document_workflows_document",
+					["collection_key", "document_id"],
+					"lucid_document_identities",
+					["collection_key", "document_id"],
+					(constraint) => constraint.onDelete("cascade"),
 				)
 				.execute();
 

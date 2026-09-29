@@ -4,11 +4,7 @@ import getCurrentCollectionMigrationId from "../../libs/collection/migration/get
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
-import {
-	AgentDocumentReferencesRepository,
-	DocumentReferencesRepository,
-	DocumentVersionsRepository,
-} from "../../libs/repositories/index.js";
+import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
@@ -93,21 +89,15 @@ const createSingle: ServiceFn<
 	}
 
 	// Create new latest version
-	const newVersionRes = await DocumentVersions.createSingle(
+	const newVersionRes = await DocumentVersions.createVersion(
 		{
-			data: {
-				collection_key: data.collection.key,
-				collection_migration_id: migrationIdRes.data,
-				document_id: data.documentId,
-				type: versionType,
-				content_id: randomUUID(),
-				created_by: data.userId,
-				updated_by: data.userId,
-			},
-			returning: ["id"],
-			validation: {
-				enabled: true,
-			},
+			collection_key: data.collection.key,
+			collection_migration_id: migrationIdRes.data,
+			document_id: data.documentId,
+			type: versionType,
+			content_id: randomUUID(),
+			created_by: data.userId,
+			updated_by: data.userId,
 		},
 		{
 			tableName: tableNamesRes.data.version,
@@ -235,8 +225,10 @@ const createSingle: ServiceFn<
 		previousLatestId !== undefined &&
 		!data.collection.getData.revisions.enabled
 	) {
-		const finalizePreviousRes = await DocumentVersions.deleteSingle(
+		const finalizePreviousRes = await DocumentVersions.deleteVersions(
 			{
+				collectionKey: data.collection.key,
+				documentId: data.documentId,
 				where: [
 					{
 						key: "id",
@@ -262,25 +254,6 @@ const createSingle: ServiceFn<
 			return finalizePreviousRes;
 		}
 	}
-
-	const DocumentReferences = new DocumentReferencesRepository(context.db);
-	const AgentDocumentReferences = new AgentDocumentReferencesRepository(
-		context.db,
-	);
-	const [pruned, agentReferences] = await Promise.all([
-		DocumentReferences.pruneVersions({
-			collectionKey: data.collection.key,
-			versionTable: tableNamesRes.data.version,
-			documentId: data.documentId,
-		}),
-		AgentDocumentReferences.pruneVersions({
-			collectionKey: data.collection.key,
-			versionTable: tableNamesRes.data.version,
-			documentId: data.documentId,
-		}),
-	]);
-	if (pruned.error) return pruned;
-	if (agentReferences.error) return agentReferences;
 
 	return {
 		error: undefined,

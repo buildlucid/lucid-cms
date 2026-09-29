@@ -3,7 +3,6 @@ import {
 	agentDocumentReferencesTable,
 	type LucidAgentDocumentReferences,
 } from "../db/tables/agent-document-references.js";
-import type { LucidVersionTableName } from "../db/tables/document-versions.js";
 import StaticRepository from "./parents/static-repository.js";
 
 export default class AgentDocumentReferencesRepository extends StaticRepository<"lucid_agent_document_references"> {
@@ -64,40 +63,6 @@ export default class AgentDocumentReferencesRepository extends StaticRepository<
 			{ method: "register" },
 		);
 
-		return result.response;
-	}
-	/** Removes links to versions that were permanently removed. Unpinned links remain. */
-	async pruneVersions(props: {
-		collectionKey: string;
-		versionTable: LucidVersionTableName;
-		documentId?: number;
-	}) {
-		let query = this.db
-			.deleteFrom("lucid_agent_document_references")
-			.where("collection_key", "=", props.collectionKey)
-			.where("version_id", "is not", null);
-		if (props.documentId !== undefined) {
-			query = query.where("document_id", "=", props.documentId);
-		}
-
-		query = query.where((eb) =>
-			eb.not(
-				eb.exists(
-					eb
-						.selectFrom(props.versionTable)
-						.select("id")
-						.whereRef(
-							`${props.versionTable}.id`,
-							"=",
-							"lucid_agent_document_references.version_id",
-						),
-				),
-			),
-		);
-
-		const result = await this.executeQuery(() => query.execute(), {
-			method: "pruneVersions",
-		});
 		return result.response;
 	}
 }

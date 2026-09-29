@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { type Insertable, sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { GetMultipleRevisionsQueryParams } from "../../schemas/documents.js";
 import type { BrickTypes } from "../collection/builders/brick-builder/types.js";
@@ -7,7 +7,9 @@ import type {
 	CollectionSchemaTable,
 } from "../collection/schema/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
-import queryBuilder from "../db/query-builder/index.js";
+import queryBuilder, {
+	type QueryBuilderWhere,
+} from "../db/query-builder/index.js";
 import { documentVersionsTable } from "../db/tables/document-versions.js";
 import type {
 	DocumentVersionType,
@@ -42,6 +44,101 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	}
 	private readonly documentFieldsUnionAlias = "document_fields";
 
+	/** Creates the physical version and its shared identity before any content can reference it. Callers own the transaction. */
+	async createVersion(
+		data: Insertable<LucidVersionTable>,
+		{ tableName }: DynamicConfig<LucidVersionTableName>,
+	) {
+		const result = await this.executeQuery(
+			async () => {
+				const version = await this.db
+					.insertInto(tableName)
+					.values(data)
+					.returning(["id", "collection_key", "document_id"])
+					.executeTakeFirstOrThrow();
+
+				try {
+					await this.db
+						.insertInto("lucid_document_version_identities")
+						.values({
+							collection_key: version.collection_key,
+							document_id: version.document_id,
+							version_id: version.id,
+						})
+						.execute();
+				} catch (error) {
+					if (!this.database.isTransaction) {
+						await this.db
+							.deleteFrom(tableName)
+							.where("id", "=", version.id)
+							.execute();
+					}
+					throw error;
+				}
+				return version;
+			},
+			{ method: "createVersion", tableName },
+		);
+
+		return result.response;
+	}
+	/** Deletes physical versions and their identities; dependent links cascade. Callers own the transaction. */
+	async deleteVersions(
+		props: {
+			collectionKey: string;
+			documentId: number;
+			where: QueryBuilderWhere<LucidVersionTableName>;
+		},
+		{ tableName }: DynamicConfig<LucidVersionTableName>,
+	) {
+		const query = queryBuilder.delete(
+			this.db.deleteFrom(tableName).where("document_id", "=", props.documentId),
+			props.where,
+		);
+
+		const result = await this.executeQuery(
+			async () => {
+				await query.execute();
+				await this.deleteMissingIdentities(
+					props.collectionKey,
+					tableName,
+					props.documentId,
+				);
+			},
+			{ method: "deleteVersions", tableName },
+		);
+
+		return result.response;
+	}
+	/** Reconcile against physical rows so retries also remove identities left by a failed nontransactional deletion. */
+	private async deleteMissingIdentities(
+		collectionKey: string,
+		tableName: LucidVersionTableName,
+		documentId?: number,
+	) {
+		let query = this.db
+			.deleteFrom("lucid_document_version_identities")
+			.where("collection_key", "=", collectionKey);
+		if (documentId !== undefined) {
+			query = query.where("document_id", "=", documentId);
+		}
+
+		await query
+			.where(({ not, exists, selectFrom }) =>
+				not(
+					exists(
+						selectFrom(tableName)
+							.select("id")
+							.whereRef(
+								`${tableName}.id`,
+								"=",
+								"lucid_document_version_identities.version_id",
+							),
+					),
+				),
+			)
+			.execute();
+	}
 	/**
 	 * Takes a group of document IDs and their tables, document-field table schema and fetches all document-field rows for that version
 	 */
@@ -410,37 +507,40 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	 * A revision is considered expired if:
 	 * 1. It is older than the cutoff date
 	 * 2. It is not referenced by any non-revision version's promoted_from field
+	 * Also removes orphan identities left by a failed nontransactional attempt,
+	 * even when no physical revision candidates remain.
 	 */
 	async deleteExpiredRevisions(
 		props: {
+			collectionKey: string;
 			cutoffDate: string;
 			documentIds: number[];
 		},
 		dynamicConfig: DynamicConfig<LucidVersionTableName>,
 	) {
-		if (!props.documentIds.length) return { error: undefined, data: undefined };
-
 		const { table } = this.db.dynamic;
 		const versionTable = dynamicConfig.tableName;
 
 		const queryFn = async () => {
-			await this.db
-				.deleteFrom(versionTable)
-				.where(`${versionTable}.type`, "=", "revision")
-				.where(`${versionTable}.document_id`, "in", props.documentIds)
-				.where(`${versionTable}.created_at`, "<", props.cutoffDate)
-				.where(({ not, exists, selectFrom }) =>
-					not(
-						exists(
-							selectFrom(table(versionTable).as("promoted"))
-								.select(sql.lit(1).as("one"))
-								.whereRef("promoted.promoted_from", "=", `${versionTable}.id`)
-								.where("promoted.type", "!=", "revision"),
+			if (props.documentIds.length)
+				await this.db
+					.deleteFrom(versionTable)
+					.where(`${versionTable}.type`, "=", "revision")
+					.where(`${versionTable}.document_id`, "in", props.documentIds)
+					.where(`${versionTable}.created_at`, "<", props.cutoffDate)
+					.where(({ not, exists, selectFrom }) =>
+						not(
+							exists(
+								selectFrom(table(versionTable).as("promoted"))
+									.select(sql.lit(1).as("one"))
+									.whereRef("promoted.promoted_from", "=", `${versionTable}.id`)
+									.where("promoted.type", "!=", "revision"),
+							),
 						),
-					),
-				)
-				.execute();
+					)
+					.execute();
 
+			await this.deleteMissingIdentities(props.collectionKey, versionTable);
 			return undefined;
 		};
 

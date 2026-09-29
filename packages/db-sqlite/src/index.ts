@@ -8,6 +8,7 @@ import type {
 	DatabaseLimits,
 	EnvironmentVariables,
 	InferredColumn,
+	InferredForeignKey,
 	InferredIndex,
 	InferredTable,
 	KyselyDB,
@@ -111,6 +112,9 @@ export class SQLiteAdapter extends DatabaseAdapter {
 				dflt_value: string | null;
 				pk: number;
 				fk_table?: string;
+				fk_id?: number;
+				fk_seq?: number;
+				fk_count?: number;
 				fk_column?: string;
 				fk_on_update?: OnUpdate;
 				fk_on_delete?: OnDelete;
@@ -134,6 +138,9 @@ export class SQLiteAdapter extends DatabaseAdapter {
 	                    SELECT
 	                        tables.table_name,
 	                        fk.'from' as column_name,
+	                        fk.id as constraint_id,
+	                        fk.seq as seq,
+	                        count(*) OVER (PARTITION BY tables.table_name, fk.id) as column_count,
 	                        fk.'table' as referenced_table,
 	                        fk.'to' as referenced_column,
 	                        fk.'on_update' as on_update,
@@ -155,6 +162,9 @@ export class SQLiteAdapter extends DatabaseAdapter {
 	                SELECT
 	                    t.*,
 	                    fk.referenced_table as fk_table,
+	                    fk.constraint_id as fk_id,
+	                    fk.seq as fk_seq,
+	                    fk.column_count as fk_count,
 	                    fk.referenced_column as fk_column,
 	                    fk.on_update as fk_on_update,
 	                    fk.on_delete as fk_on_delete,
@@ -204,6 +214,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 		]);
 
 		const tableMap = new Map<string, InferredTable>();
+		const foreignKeyMap = new Map<string, InferredForeignKey>();
 
 		for (const row of res.rows) {
 			let table = tableMap.get(row.table_name);
@@ -223,7 +234,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 				primary: Boolean(row.pk),
 				unique: Boolean(row.is_unique),
 				foreignKey:
-					row.fk_table && row.fk_column
+					row.fk_table && row.fk_column && Number(row.fk_count) === 1
 						? {
 								table: row.fk_table,
 								column: row.fk_column,
@@ -232,6 +243,30 @@ export class SQLiteAdapter extends DatabaseAdapter {
 							}
 						: undefined,
 			} satisfies InferredColumn);
+
+			if (
+				row.fk_table &&
+				row.fk_column &&
+				row.fk_id !== undefined &&
+				row.fk_seq !== undefined &&
+				Number(row.fk_count) > 1
+			) {
+				const key = `${row.table_name}.${row.fk_id}`;
+				let foreignKey = foreignKeyMap.get(key);
+				if (!foreignKey) {
+					foreignKey = {
+						columns: [],
+						table: row.fk_table,
+						references: [],
+						onUpdate: formatOnUpdate(row.fk_on_update),
+						onDelete: formatOnDelete(row.fk_on_delete),
+					};
+					foreignKeyMap.set(key, foreignKey);
+					table.foreignKeys = [...(table.foreignKeys ?? []), foreignKey];
+				}
+				foreignKey.columns[row.fk_seq] = row.name;
+				foreignKey.references[row.fk_seq] = row.fk_column;
+			}
 		}
 
 		const indexMap = new Map<string, InferredIndex>();

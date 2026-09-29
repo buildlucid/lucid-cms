@@ -3,11 +3,7 @@ import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
-import {
-	AgentDocumentReferencesRepository,
-	DocumentReferencesRepository,
-	DocumentVersionsRepository,
-} from "../../../libs/repositories/index.js";
+import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
 
@@ -65,6 +61,7 @@ const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async ({
 
 		const deleteRes = await DocumentVersions.deleteExpiredRevisions(
 			{
+				collectionKey: input.collectionKey,
 				cutoffDate: cutoffDate.toISOString(),
 				documentIds,
 			},
@@ -73,23 +70,6 @@ const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async ({
 			},
 		);
 		if (deleteRes.error) return deleteRes;
-
-		const DocumentReferences = new DocumentReferencesRepository(context.db);
-		const AgentDocumentReferences = new AgentDocumentReferencesRepository(
-			context.db,
-		);
-		const [pruned, agentReferences] = await Promise.all([
-			DocumentReferences.pruneVersions({
-				collectionKey: input.collectionKey,
-				versionTable: tableNamesRes.data.version,
-			}),
-			AgentDocumentReferences.pruneVersions({
-				collectionKey: input.collectionKey,
-				versionTable: tableNamesRes.data.version,
-			}),
-		]);
-		if (pruned.error) return pruned;
-		if (agentReferences.error) return agentReferences;
 
 		return {
 			error: undefined,

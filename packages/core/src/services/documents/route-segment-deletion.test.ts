@@ -18,6 +18,7 @@ import planCollectionMigrations from "../../libs/collection/plan-collection-migr
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import {
+	DocumentIdentitiesRepository,
 	DocumentsRepository,
 	DocumentVersionsRepository,
 	UsersRepository,
@@ -138,21 +139,27 @@ describe("route-segment soft deletion", () => {
 			{ tableName: names.data.document },
 		);
 		assert(document.data);
+		expect(
+			(
+				await new DocumentIdentitiesRepository(context.db).createSingle({
+					data: {
+						collection_key: collection.key,
+						document_id: document.data.id,
+					},
+				})
+			).error,
+		).toBeUndefined();
 		const version = await new DocumentVersionsRepository(
 			context.db,
-		).createSingle(
+		).createVersion(
 			{
-				data: {
-					collection_key: collection.key,
-					collection_migration_id: migration.data,
-					document_id: document.data.id,
-					type: "latest",
-					content_id: `segment-${collection.key}-${document.data.id}`,
-					created_by: userId,
-					updated_by: userId,
-				},
-				returning: ["id"],
-				validation: { enabled: true },
+				collection_key: collection.key,
+				collection_migration_id: migration.data,
+				document_id: document.data.id,
+				type: "latest",
+				content_id: `segment-${collection.key}-${document.data.id}`,
+				created_by: userId,
+				updated_by: userId,
 			},
 			{ tableName: names.data.version },
 		);

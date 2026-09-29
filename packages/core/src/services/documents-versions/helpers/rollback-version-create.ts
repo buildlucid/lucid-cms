@@ -1,10 +1,6 @@
 import type { LucidVersionTableName } from "../../../libs/db/tables/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
-import {
-	AgentDocumentReferencesRepository,
-	DocumentReferencesRepository,
-} from "../../../libs/repositories/index.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
@@ -33,8 +29,10 @@ const rollbackVersionCreate: ServiceFn<
 	let rollbackError: LucidErrorData | undefined;
 
 	if (data.newVersionId === undefined) {
-		const deleteNewVersionRes = await data.versions.deleteSingle(
+		const deleteNewVersionRes = await data.versions.deleteVersions(
 			{
+				collectionKey: data.collectionKey,
+				documentId: data.documentId,
 				where: [
 					{
 						key: "document_id",
@@ -69,6 +67,8 @@ const rollbackVersionCreate: ServiceFn<
 				data: {
 					type: "latest",
 				},
+				returning: ["id"],
+				validation: { enabled: true },
 			},
 			{
 				tableName: data.tableName,
@@ -79,8 +79,10 @@ const rollbackVersionCreate: ServiceFn<
 	}
 
 	if (data.newVersionId !== undefined && !latestRestoreFailed) {
-		const deleteNewVersionRes = await data.versions.deleteSingle(
+		const deleteNewVersionRes = await data.versions.deleteVersions(
 			{
+				collectionKey: data.collectionKey,
+				documentId: data.documentId,
 				where: [
 					{
 						key: "id",
@@ -110,25 +112,6 @@ const rollbackVersionCreate: ServiceFn<
 			},
 		});
 	}
-
-	const DocumentReferences = new DocumentReferencesRepository(context.db);
-	const AgentDocumentReferences = new AgentDocumentReferencesRepository(
-		context.db,
-	);
-	const [pruned, agentReferences] = await Promise.all([
-		DocumentReferences.pruneVersions({
-			collectionKey: data.collectionKey,
-			versionTable: data.tableName,
-			documentId: data.documentId,
-		}),
-		AgentDocumentReferences.pruneVersions({
-			collectionKey: data.collectionKey,
-			versionTable: data.tableName,
-			documentId: data.documentId,
-		}),
-	]);
-	if (pruned.error) return pruned;
-	if (agentReferences.error) return agentReferences;
 
 	if (rollbackError) {
 		return {

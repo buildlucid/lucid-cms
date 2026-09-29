@@ -1,7 +1,7 @@
 import type { ColumnDataType } from "kysely";
 import type constants from "../../../constants/constants.js";
 import type { FieldTypes } from "../../../exports/types.js";
-import type { OnDelete, OnUpdate } from "../../db/types.js";
+import type { InferredForeignKey, OnDelete, OnUpdate } from "../../db/types.js";
 
 export type CoreTableType =
 	| "document"
@@ -60,6 +60,7 @@ export type CollectionSchemaTable<TableName = string> = {
 	};
 	columns: Array<CollectionSchemaColumn>;
 	indexes?: Array<CollectionSchemaIndex>;
+	foreignKeys?: InferredForeignKey[];
 };
 export type CollectionSchema = {
 	key: string;

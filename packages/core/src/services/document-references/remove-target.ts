@@ -3,7 +3,7 @@ import { DocumentReferencesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import notifyDependants from "./notify-dependants.js";
 
-/** After target deletion, notify owners before removing native relationships.
+/** After target deletion, notify owners before clearing direct reverse-reference entries.
  * Embedded identities remain because the author still has those nodes. */
 const removeTarget: ServiceFn<
 	[

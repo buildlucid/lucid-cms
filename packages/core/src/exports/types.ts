@@ -185,6 +185,7 @@ export type {
 	DatabaseMigrationStatus,
 	ExternalMigration,
 	InferredColumn,
+	InferredForeignKey,
 	InferredIndex,
 	InferredTable,
 	KyselyDB,

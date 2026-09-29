@@ -9,9 +9,7 @@ import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
-	AgentDocumentReferencesRepository,
 	DocumentBricksRepository,
-	DocumentReferencesRepository,
 	DocumentsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
@@ -227,79 +225,81 @@ const promoteVersion: ServiceFn<
 				collectionRes.data.getData.revisions.enabled &&
 				data.createRevision !== false;
 
-			const [, upsertDocumentRes, createVersionRes] = await Promise.all([
-				shouldCreateRevision
-					? Versions.updateSingle(
-							{
-								where: [
-									{
-										key: "document_id",
-										operator: "=",
-										value: data.documentId,
+			const [previousVersionRes, upsertDocumentRes, createVersionRes] =
+				await Promise.all([
+					shouldCreateRevision
+						? Versions.updateSingle(
+								{
+									where: [
+										{
+											key: "document_id",
+											operator: "=",
+											value: data.documentId,
+										},
+										{
+											key: "type",
+											operator: "=",
+											value: data.toVersionType,
+										},
+									],
+									data: {
+										type: "revision",
+										collection_migration_id: migrationIdRes.data,
+										promoted_from: data.fromVersionId,
+										created_by: data.userId,
 									},
-									{
-										key: "type",
-										operator: "=",
-										value: data.toVersionType,
-									},
-								],
-								data: {
-									type: "revision",
-									collection_migration_id: migrationIdRes.data,
-									promoted_from: data.fromVersionId,
-									created_by: data.userId,
+								},
+								{
+									tableName: tableNameRes.data.version,
+								},
+							)
+						: Versions.deleteVersions(
+								{
+									collectionKey: data.collectionKey,
+									documentId: data.documentId,
+									where: [
+										{
+											key: "document_id",
+											operator: "=",
+											value: data.documentId,
+										},
+										{
+											key: "type",
+											operator: "=",
+											value: data.toVersionType,
+										},
+									],
+								},
+								{
+									tableName: tableNameRes.data.version,
+								},
+							),
+					Documents.upsertSingle(
+						{
+							data: {
+								id: data.documentId,
+								collection_key: data.collectionKey,
+								collection_migration_id: migrationIdRes.data,
+								created_by: data.userId,
+								updated_by: data.userId,
+								is_deleted: false,
+								updated_at: new Date().toISOString(),
+							},
+							returning: ["id"],
+							validation: {
+								enabled: true,
+								defaultError: {
+									status: 400,
+									message: copy("server:core.documents.create.failed"),
 								},
 							},
-							{
-								tableName: tableNameRes.data.version,
-							},
-						)
-					: Versions.deleteSingle(
-							{
-								where: [
-									{
-										key: "document_id",
-										operator: "=",
-										value: data.documentId,
-									},
-									{
-										key: "type",
-										operator: "=",
-										value: data.toVersionType,
-									},
-								],
-							},
-							{
-								tableName: tableNameRes.data.version,
-							},
-						),
-				Documents.upsertSingle(
-					{
-						data: {
-							id: data.documentId,
-							collection_key: data.collectionKey,
-							collection_migration_id: migrationIdRes.data,
-							created_by: data.userId,
-							updated_by: data.userId,
-							is_deleted: false,
-							updated_at: new Date().toISOString(),
 						},
-						returning: ["id"],
-						validation: {
-							enabled: true,
-							defaultError: {
-								status: 400,
-								message: copy("server:core.documents.create.failed"),
-							},
+						{
+							tableName: tableNameRes.data.document,
 						},
-					},
-					{
-						tableName: tableNameRes.data.document,
-					},
-				),
-				Versions.createSingle(
-					{
-						data: {
+					),
+					Versions.createVersion(
+						{
 							document_id: data.documentId,
 							collection_key: data.collectionKey,
 							collection_migration_id: migrationIdRes.data,
@@ -309,20 +309,12 @@ const promoteVersion: ServiceFn<
 							created_by: data.userId,
 							updated_by: data.userId,
 						},
-						returning: ["id"],
-						validation: {
-							enabled: true,
-							defaultError: {
-								status: 400,
-								message: copy("server:core.documents.create.failed"),
-							},
+						{
+							tableName: tableNameRes.data.version,
 						},
-					},
-					{
-						tableName: tableNameRes.data.version,
-					},
-				),
-			]);
+					),
+				]);
+			if (previousVersionRes.error) return previousVersionRes;
 			if (upsertDocumentRes.error) return upsertDocumentRes;
 			if (createVersionRes.error) return createVersionRes;
 
@@ -357,25 +349,6 @@ const promoteVersion: ServiceFn<
 				collection: collectionRes.data,
 			});
 			if (insertRes.error) return insertRes;
-
-			const DocumentReferences = new DocumentReferencesRepository(context.db);
-			const AgentDocumentReferences = new AgentDocumentReferencesRepository(
-				context.db,
-			);
-			const [pruned, agentReferences] = await Promise.all([
-				DocumentReferences.pruneVersions({
-					collectionKey: data.collectionKey,
-					versionTable: tableNameRes.data.version,
-					documentId: data.documentId,
-				}),
-				AgentDocumentReferences.pruneVersions({
-					collectionKey: data.collectionKey,
-					versionTable: tableNameRes.data.version,
-					documentId: data.documentId,
-				}),
-			]);
-			if (pruned.error) return pruned;
-			if (agentReferences.error) return agentReferences;
 
 			// -------------------------------------------------------------------------------
 			// Execute hook

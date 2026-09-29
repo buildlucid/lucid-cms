@@ -19,6 +19,7 @@ import documentFieldsFormatter from "../../libs/formatters/document-fields.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import {
 	DocumentBricksRepository,
+	DocumentIdentitiesRepository,
 	DocumentsRepository,
 	DocumentVersionsRepository,
 	MediaRepository,
@@ -123,23 +124,29 @@ describe("unassigned content locales", () => {
 			{ tableName: names.data.document },
 		);
 		assert(document.data, JSON.stringify(document.error));
+		expect(
+			(
+				await new DocumentIdentitiesRepository(context.db).createSingle({
+					data: {
+						collection_key: collection.key,
+						document_id: document.data.id,
+					},
+				})
+			).error,
+		).toBeUndefined();
 		const versionIds: number[] = [];
 		for (const type of ["latest", "published", "revision"]) {
 			const version = await new DocumentVersionsRepository(
 				context.db,
-			).createSingle(
+			).createVersion(
 				{
-					data: {
-						collection_key: collection.key,
-						collection_migration_id: migration.data,
-						document_id: document.data.id,
-						type,
-						content_id: `content-${type}`,
-						created_by: userId,
-						updated_by: userId,
-					},
-					returning: ["id"],
-					validation: { enabled: true },
+					collection_key: collection.key,
+					collection_migration_id: migration.data,
+					document_id: document.data.id,
+					type,
+					content_id: `content-${type}`,
+					created_by: userId,
+					updated_by: userId,
 				},
 				{ tableName: names.data.version },
 			);
@@ -432,21 +439,24 @@ describe("unassigned content locales", () => {
 				{ tableName: tables.document },
 			);
 			assert(doc.data);
+			expect(
+				(
+					await new DocumentIdentitiesRepository(context.db).createSingle({
+						data: { collection_key: collection.key, document_id: doc.data.id },
+					})
+				).error,
+			).toBeUndefined();
 			const version = await new DocumentVersionsRepository(
 				context.db,
-			).createSingle(
+			).createVersion(
 				{
-					data: {
-						collection_key: collection.key,
-						collection_migration_id: migration.data,
-						document_id: doc.data.id,
-						type: "latest",
-						content_id: slug,
-						created_by: userId,
-						updated_by: userId,
-					},
-					returning: ["id"],
-					validation: { enabled: true },
+					collection_key: collection.key,
+					collection_migration_id: migration.data,
+					document_id: doc.data.id,
+					type: "latest",
+					content_id: slug,
+					created_by: userId,
+					updated_by: userId,
 				},
 				{ tableName: tables.version },
 			);

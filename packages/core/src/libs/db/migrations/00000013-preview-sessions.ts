@@ -14,7 +14,7 @@ const Migration00000013: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.unique().notNull(),
 				)
 				.addColumn("entry_collection_key", adapter.getDataType("text"), (col) =>
-					col.notNull().references("lucid_collections.key").onDelete("cascade"),
+					col.notNull(),
 				)
 				.addColumn("entry_document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
@@ -43,6 +43,20 @@ const Migration00000013: MigrationFn = (adapter: DatabaseAdapter) => {
 							),
 						)
 						.notNull(),
+				)
+				.addForeignKeyConstraint(
+					"fk_preview_sessions_document",
+					["entry_collection_key", "entry_document_id"],
+					"lucid_document_identities",
+					["collection_key", "document_id"],
+					(constraint) => constraint.onDelete("cascade"),
+				)
+				.addForeignKeyConstraint(
+					"fk_preview_session_version",
+					["entry_collection_key", "entry_document_id", "entry_version_id"],
+					"lucid_document_version_identities",
+					["collection_key", "document_id", "version_id"],
+					(constraint) => constraint.onDelete("cascade"),
 				)
 				.execute();
 

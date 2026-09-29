@@ -1,5 +1,9 @@
 # @lucidcms/db-postgres
 
+## v1.2.3 (unreleased)
+
+- Database schema checks now correctly recognise foreign keys that use multiple columns.
+
 ## v1.2.2
 
 - Updated imports to use the reorganised `@lucidcms/core` entry points.

@@ -1,5 +1,9 @@
 # @lucidcms/db-d1
 
+## v0.3.3 (unreleased)
+
+- Database schema checks and table resets now correctly recognise foreign keys that use multiple columns.
+
 ## v0.3.2
 
 - Updated imports to use the reorganised `@lucidcms/core` entry points.
