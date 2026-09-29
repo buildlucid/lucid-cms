@@ -63,14 +63,14 @@ test("counts the last measured request plus messages added since", () => {
 		messages: [{ role: "user" as const, content: "Hello" }, reply],
 		measured: { tokens: 5_000, messages: 1 },
 	} as Checkpoint;
-	const capabilities = { instructions: "y".repeat(40_000), definitions: [] };
+	const setup = { instructions: "y".repeat(40_000), definitions: [] };
 
-	expect(contextTokens(checkpoint, capabilities)).toBe(
+	expect(contextTokens(checkpoint, setup)).toBe(
 		5_000 + estimateTokens([reply]),
 	);
 	//* without a measurement, instructions and tools are estimated too
 	expect(
-		contextTokens({ ...checkpoint, measured: undefined }, capabilities),
+		contextTokens({ ...checkpoint, measured: undefined }, setup),
 	).toBeGreaterThan(10_000);
 });
 
@@ -186,4 +186,46 @@ test("an unfinished call still gets a result, and long values become history pre
 			output: { error: "No result was recorded for this call." },
 		},
 	]);
+});
+
+test("replays attachments with their names and types, keeping labels as quoted data", () => {
+	const { messages } = historyMessage({
+		id: randomUUID(),
+		position: 1,
+		role: "user",
+		parts: [
+			{ type: "text", text: "Investigate this" },
+			{
+				type: "reference",
+				reference: {
+					type: "media",
+					mediaId: 12,
+					label: 'Letter "March" <draft>',
+					mimeType: "application/pdf",
+				},
+			},
+			{
+				type: "reference",
+				reference: {
+					type: "document",
+					collectionKey: "pages",
+					documentId: 7,
+					versionId: 3,
+					label: "About us",
+				},
+			},
+		],
+	});
+	expect(messages[0]).toMatchObject({ role: "user" });
+	expect(messages[0]).toHaveProperty(
+		"content",
+		[
+			"Investigate this",
+			"",
+			"<attachments>",
+			'<attachment type="media" media_id="12" name="Letter &quot;March&quot; &lt;draft>" mime_type="application/pdf" />',
+			'<attachment type="document" collection_key="pages" document_id="7" version_id="3" name="About us" />',
+			"</attachments>",
+		].join("\n"),
+	);
 });

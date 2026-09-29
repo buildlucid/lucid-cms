@@ -1,6 +1,53 @@
 import type { AiModelSelection } from "../ai/types.js";
+import type { DocumentVersionType } from "../documents/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { Permission } from "../users/types.js";
+
+/** A media item or document linked to a chat. */
+export type AgentReferenceInput =
+	| { type: "media"; mediaId: number }
+	| {
+			type: "document";
+			collectionKey: string;
+			documentId: number;
+			versionId?: number;
+	  };
+
+/** A reference with the details saved when it was attached, so a message keeps what was sent. */
+export type AgentReferenceSnapshot = AgentReferenceInput & {
+	label: string;
+	mimeType?: string;
+};
+
+/** How a resource was linked to a chat. */
+export type AgentReferenceSource =
+	| { type: "message" }
+	| { type: "tool"; toolName: string };
+
+/** A linked resource with its current display details. */
+export type AgentReference = {
+	id: string;
+	label: string;
+	mimeType?: string;
+	previewUrl?: string;
+	source: AgentReferenceSource;
+} & (
+	| Extract<AgentReferenceInput, { type: "media" }>
+	| (Extract<AgentReferenceInput, { type: "document" }> & {
+			/** The resolved document version. */
+			version?: DocumentVersionType;
+	  })
+);
+
+/** What an agent can do for the current user, combined from the tools they can use. */
+export type AgentCapabilities = {
+	/** MIME types of attached media the agent can open. Null when it cannot open any. */
+	media: { mimeTypes: string[] } | null;
+	/** Whether the agent can search the public web. */
+	webSearch: boolean;
+	/** Whether the agent can read public webpages. */
+	webRead: boolean;
+};
 
 /** An agent name used in navigation and saved chat labels. */
 export type AgentSummary = { key: string; name: string };
@@ -10,6 +57,10 @@ export interface Agent {
 	key: string;
 	name: string;
 	description: string;
+	/** Resource types the chat composer offers to attach. Tools can always link resources. */
+	attachments: { media: boolean; documents: boolean };
+	/** What the agent can do for the current user, such as open attached files or search the web. */
+	capabilities: AgentCapabilities;
 	/** Messages offered when starting a chat. Empty without the agent's use permission. */
 	suggestions: {
 		title: ResolvedAdminCopy;
@@ -49,6 +100,7 @@ export type AgentDelivery =
 export interface AgentInput {
 	id: string;
 	text: string;
+	references: AgentReferenceInput[];
 	/** `claimed` input is being delivered and can no longer change. */
 	status: "pending" | "claimed";
 	delivery: AgentDelivery;
@@ -113,6 +165,7 @@ export type AgentWidgetPart = {
 
 export type AgentMessagePart =
 	| { type: "text"; text: string }
+	| { type: "reference"; reference: AgentReferenceSnapshot }
 	| {
 			type: "tool";
 			id: string;

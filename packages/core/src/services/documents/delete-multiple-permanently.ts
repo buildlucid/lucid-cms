@@ -4,6 +4,7 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import deleteAgentReferences from "../agent/references/delete-for-documents.js";
 import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import deleteWorkflowsForDocuments from "../document-workflows/delete-for-documents.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
@@ -123,6 +124,7 @@ const deleteMultiplePermanently: ServiceFn<
 				deletePreviewsRes,
 				cancelRequestsRes,
 				workflowDeleteRes,
+				agentReferencesRes,
 				...nullifyResults
 			] = await Promise.all([
 				Documents.deleteMultiple(
@@ -158,12 +160,17 @@ const deleteMultiplePermanently: ServiceFn<
 					collectionKey: data.collectionKey,
 					documentIds: data.ids,
 				}),
+				deleteAgentReferences(context, {
+					collectionKey: data.collectionKey,
+					documentIds: data.ids,
+				}),
 				...nullifyPromises,
 			]);
 			if (deleteDocumentsRes.error) return deleteDocumentsRes;
 			if (deletePreviewsRes.error) return deletePreviewsRes;
 			if (cancelRequestsRes.error) return cancelRequestsRes;
 			if (workflowDeleteRes.error) return workflowDeleteRes;
+			if (agentReferencesRes.error) return agentReferencesRes;
 
 			const nullifyError = nullifyResults.find((result) => result.error);
 			if (nullifyError) return nullifyError;

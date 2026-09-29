@@ -88,7 +88,18 @@ const InputRow: Component<
 > = (props) => {
 	// ----------------------------------------
 	// Memos
-	const preview = createMemo(() => markdownPreview(props.input.text));
+	const preview = createMemo(() =>
+		[
+			markdownPreview(props.input.text),
+			props.input.references.length
+				? T()("agent.references.count", {
+						count: props.input.references.length,
+					})
+				: "",
+		]
+			.filter(Boolean)
+			.join(" · "),
+	);
 	const steering = createMemo(() => props.input.delivery.kind === "steer");
 
 	// ----------------------------------------

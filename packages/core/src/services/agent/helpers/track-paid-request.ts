@@ -1,6 +1,7 @@
 import type z from "zod";
 import { copy } from "../../../libs/i18n/index.js";
 import type { cmsAgentUsageSchema } from "../../../libs/lucid-remote/schema/ai.js";
+import type { AiUsageFeatureKey } from "../../../types/response.js";
 import type {
 	ServiceContext,
 	ServiceResponse,
@@ -11,7 +12,7 @@ import storeUsage from "./store-usage.js";
 
 export type PaidRequestRecord = {
 	requestId: string;
-	featureKey: string;
+	featureKey: AiUsageFeatureKey;
 	runId: string;
 	conversationId: string;
 	userId: number | null;
@@ -45,7 +46,12 @@ const trackPaidRequest = async <
 	);
 	if (response.error) {
 		if (!props.signal.aborted) {
-			await reconcileUsage(context, { requestId: props.record.requestId });
+			await reconcileUsage(context, {
+				requestId: props.record.requestId,
+				errorMessage: response.error.message
+					? context.translate(response.error.message)
+					: undefined,
+			});
 		}
 		return response;
 	}

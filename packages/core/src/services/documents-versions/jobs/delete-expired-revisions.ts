@@ -4,9 +4,12 @@ import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-s
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
 import {
+	AgentDocumentReferencesRepository,
 	DocumentReferencesRepository,
 	DocumentVersionsRepository,
 } from "../../../libs/repositories/index.js";
+import withTransaction from "../../../utils/services/with-transaction.js";
+import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
 
 const input = z.object({
 	collectionKey: z.string().min(1),
@@ -16,41 +19,83 @@ const input = z.object({
 const deleteExpiredRevisions: JobHandler<z.infer<typeof input>> = async ({
 	context,
 	input,
-}) => {
-	const collectionRes = await collections.getSingle(context, {
-		key: input.collectionKey,
+}) =>
+	withTransaction(context, async (context) => {
+		const collectionRes = await collections.getSingle(context, {
+			key: input.collectionKey,
+		});
+		if (collectionRes.error) return collectionRes;
+
+		const tableNamesRes = await getTableNames(context, input.collectionKey);
+		if (tableNamesRes.error) return tableNamesRes;
+
+		const DocumentVersions = new DocumentVersionsRepository(context.db);
+		const cutoffDate = new Date();
+		cutoffDate.setDate(cutoffDate.getDate() - input.retentionDays);
+
+		const candidates = await DocumentVersions.selectMultiple(
+			{
+				select: ["document_id"],
+				where: [
+					{ key: "type", operator: "=", value: "revision" },
+					{ key: "created_at", operator: "<", value: cutoffDate.toISOString() },
+				],
+				validation: { enabled: true },
+			},
+			{ tableName: tableNamesRes.data.version },
+		);
+		if (candidates.error) return candidates;
+
+		await using claims = new AsyncDisposableStack();
+		const documentIds: number[] = [];
+		for (const id of [
+			...new Set(candidates.data.map((version) => version.document_id)),
+		].sort((first, second) => first - second)) {
+			const acquired = await acquireDocumentWrites(context, {
+				collectionKey: input.collectionKey,
+				ids: [id],
+			});
+			if (acquired.error) {
+				if (acquired.error.status === 404) continue;
+				return acquired;
+			}
+			claims.use(acquired.data);
+			documentIds.push(id);
+		}
+
+		const deleteRes = await DocumentVersions.deleteExpiredRevisions(
+			{
+				cutoffDate: cutoffDate.toISOString(),
+				documentIds,
+			},
+			{
+				tableName: tableNamesRes.data.version,
+			},
+		);
+		if (deleteRes.error) return deleteRes;
+
+		const DocumentReferences = new DocumentReferencesRepository(context.db);
+		const AgentDocumentReferences = new AgentDocumentReferencesRepository(
+			context.db,
+		);
+		const [pruned, agentReferences] = await Promise.all([
+			DocumentReferences.pruneVersions({
+				collectionKey: input.collectionKey,
+				versionTable: tableNamesRes.data.version,
+			}),
+			AgentDocumentReferences.pruneVersions({
+				collectionKey: input.collectionKey,
+				versionTable: tableNamesRes.data.version,
+			}),
+		]);
+		if (pruned.error) return pruned;
+		if (agentReferences.error) return agentReferences;
+
+		return {
+			error: undefined,
+			data: undefined,
+		};
 	});
-	if (collectionRes.error) return collectionRes;
-
-	const tableNamesRes = await getTableNames(context, input.collectionKey);
-	if (tableNamesRes.error) return tableNamesRes;
-
-	const DocumentVersions = new DocumentVersionsRepository(context.db);
-	const cutoffDate = new Date();
-	cutoffDate.setDate(cutoffDate.getDate() - input.retentionDays);
-
-	const deleteRes = await DocumentVersions.deleteExpiredRevisions(
-		{
-			cutoffDate: cutoffDate.toISOString(),
-		},
-		{
-			tableName: tableNamesRes.data.version,
-		},
-	);
-	if (deleteRes.error) return deleteRes;
-
-	const DocumentReferences = new DocumentReferencesRepository(context.db);
-	const pruned = await DocumentReferences.pruneVersions({
-		collectionKey: input.collectionKey,
-		versionTable: tableNamesRes.data.version,
-	});
-	if (pruned.error) return pruned;
-
-	return {
-		error: undefined,
-		data: undefined,
-	};
-};
 
 /**
  * Deletes expired revisions for a specific collection.

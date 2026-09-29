@@ -11,7 +11,7 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { PublishOperation } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getDocumentLabel from "./helpers/get-document-label.js";
+import getDocumentLabel from "../documents/helpers/get-document-label.js";
 import {
 	getReleaseRequirementStatuses,
 	getReleaseRequirementTargets,
@@ -139,7 +139,8 @@ const getSingle: ServiceFn<
 		bricks: Bricks,
 		collection: collectionRes.data,
 		tables: tableNamesRes.data,
-		operation: operationRes.data,
+		documentId: operationRes.data.document_id,
+		versionId: operationRes.data.source_version_id,
 	});
 	if (documentLabelRes.error) return documentLabelRes;
 

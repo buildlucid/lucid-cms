@@ -21,6 +21,7 @@ export const webFetchAgentTool = (options: WebToolOptions = {}) => {
 		output: outputSchema,
 		permissions: [],
 		readOnly: true,
+		capabilities: { webRead: true },
 		handler: ({ context, input, execution }) =>
 			fetchWeb(context, { input, execution, allowedDomains }),
 	});

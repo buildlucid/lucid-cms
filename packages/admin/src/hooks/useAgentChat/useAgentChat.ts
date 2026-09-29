@@ -7,6 +7,7 @@ import type {
 	AgentInputAction,
 	AgentInteractionAction,
 	AgentMessage,
+	AgentReferenceInput,
 	ResponseBody,
 } from "@types";
 import {
@@ -29,6 +30,10 @@ import {
 	isRunWorking,
 	shouldPollTitle,
 } from "@/utils/agent-chat";
+import {
+	type AgentReferenceItem,
+	agentReferenceInput,
+} from "@/utils/agent-references";
 
 /**
  * Loads a conversation and streams the agent's replies over its saved history.
@@ -51,7 +56,12 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	const [messages, setMessages] = createStore<AgentMessage[]>([]);
 	//* a failed submission keeps its request id, so resending it cannot create a duplicate
 	let retrySubmission:
-		| { text: string; delivery: AgentDelivery; requestId: string }
+		| {
+				text: string;
+				references: AgentReferenceInput[];
+				delivery: AgentDelivery;
+				requestId: string;
+		  }
 		| undefined;
 	let controller: AbortController | undefined;
 	const streaming = createMemo(() => live() !== undefined);
@@ -177,6 +187,9 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 								setLiveContext(event.context);
 								return;
 							case "inputs":
+								void queryClient.invalidateQueries({
+									queryKey: queryKeys.agent.references(id),
+								});
 								patchConversation(id, (data) => ({
 									...data,
 									inputs: event.inputs,
@@ -199,9 +212,25 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 								if (started) break;
 								started = true;
 								setLiveRunId(event.runId);
-								//* the first message names the chat
+								//* the first message names the chat and delivers its references
 								void refreshConversation(id);
+								void queryClient.invalidateQueries({
+									queryKey: queryKeys.agent.references(id),
+								});
 								break;
+						}
+						if (
+							(event.type === "tool" && event.status === "complete") ||
+							(event.type === "message" &&
+								event.message.parts.some(
+									(part) =>
+										part.type === "reference" ||
+										(part.type === "tool" && part.status === "complete"),
+								))
+						) {
+							void queryClient.invalidateQueries({
+								queryKey: queryKeys.agent.references(id),
+							});
 						}
 						setLive((messages) => applyStreamEvent(messages ?? [], event, id));
 					},
@@ -226,7 +255,12 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	/** Queues input on the server. The row appears straight away and is removed if the server refuses it. */
 	const submit = async (
 		id: string,
-		pending: { text: string; delivery: AgentDelivery; requestId: string },
+		pending: {
+			text: string;
+			references: AgentReferenceInput[];
+			delivery: AgentDelivery;
+			requestId: string;
+		},
 	) => {
 		setError(undefined);
 		patchConversation(id, (data) => ({
@@ -238,6 +272,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 				{
 					id: pending.requestId,
 					text: pending.text,
+					references: pending.references,
 					status: "pending",
 					delivery: pending.delivery,
 				},
@@ -320,6 +355,11 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			stream(`/lucid/api/v1/agent/conversations/${conversationId()}/compact`, {
 				body: { requestId: crypto.randomUUID() },
 			}),
+		/** Answers again after the latest run failed, without sending a new message. */
+		retry: () =>
+			stream(`/lucid/api/v1/agent/conversations/${conversationId()}/retry`, {
+				body: { requestId: crypto.randomUUID() },
+			}),
 		history,
 		messages,
 		pendingInteraction,
@@ -332,7 +372,12 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		inputs,
 		queuePaused: createMemo(() => data()?.queuePaused ?? false),
 		/** Sends a message. While the agent is busy it queues, or steers the current run. */
-		send: async (text: string, mode: "send" | "steer" = "send") => {
+		send: async (
+			text: string,
+			mode: "send" | "steer" = "send",
+			attachments: AgentReferenceItem[] = [],
+		) => {
+			const references = attachments.map(agentReferenceInput);
 			const id = conversationId();
 			if (!id) return false;
 			const targetRunId = activeRunId();
@@ -342,9 +387,11 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 					: { kind: "queue" };
 			const pending =
 				retrySubmission?.text === text &&
+				JSON.stringify(retrySubmission.references) ===
+					JSON.stringify(references) &&
 				JSON.stringify(retrySubmission.delivery) === JSON.stringify(delivery)
 					? retrySubmission
-					: { text, delivery, requestId: crypto.randomUUID() };
+					: { text, references, delivery, requestId: crypto.randomUUID() };
 			retrySubmission = pending;
 
 			//* anything the server may still be delivering goes through the queue, to keep order
@@ -366,7 +413,13 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 								runId: pending.requestId,
 								role: "user",
 								position: (messages.at(-1)?.position ?? 0) + 1,
-								parts: [{ type: "text", text }],
+								parts: [
+									...(text ? [{ type: "text" as const, text }] : []),
+									...attachments.map((reference) => ({
+										type: "reference" as const,
+										reference,
+									})),
+								],
 								createdAt: new Date().toISOString(),
 							},
 						],

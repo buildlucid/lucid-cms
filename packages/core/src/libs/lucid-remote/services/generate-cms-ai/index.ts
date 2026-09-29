@@ -20,6 +20,7 @@ const generateCmsAi: ServiceFn<
 		accessToken: props.accessToken,
 		headers: { "idempotency-key": props.idempotencyKey ?? "" },
 		body: props.request,
+		signal: props.signal,
 	});
 	if (result.error) return result;
 

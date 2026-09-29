@@ -24,11 +24,15 @@ const batchSize = 50;
 const minimumAgeMs = 2 * 60_000;
 const missingRequestAgeMs = 20 * 60_000;
 
-/** Recover a failed stream immediately or scan older requests after disconnects. */
-const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
-	context,
-	input,
-) => {
+/**
+ * Recover a failed stream immediately or scan older requests after disconnects.
+ * `errorMessage` is the failure the caller saw, kept when the request settles
+ * as uncharged so usage shows why it failed.
+ */
+const reconcileUsage: ServiceFn<
+	[{ requestId?: string; errorMessage?: string }?],
+	number
+> = async (context, input) => {
 	const token = await getAccessToken(context, {});
 	if (token.error) {
 		if (token.error.key === "connection_not_connected") {
@@ -121,7 +125,13 @@ const reconcileUsage: ServiceFn<[{ requestId?: string }?], number> = async (
 				session_type: "agent",
 				session_id: row.session_id,
 				status: "failed",
-				error_message: context.translate("server:agent.usage.missing"),
+				error_message:
+					input?.errorMessage ??
+					context.translate(
+						response.error
+							? "server:agent.usage.missing"
+							: "server:agent.usage.uncharged",
+					),
 			},
 		});
 		if (failed.error) return failed;

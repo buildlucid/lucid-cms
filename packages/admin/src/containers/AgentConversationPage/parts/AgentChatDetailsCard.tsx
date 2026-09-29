@@ -17,6 +17,7 @@ import { aiUsageSessionHref, canViewAiUsage } from "@/utils/ai-usage";
 import dateHelpers from "@/utils/date-helpers";
 import AgentCardDetail from "./AgentCardDetail";
 import AgentCardHeader from "./AgentCardHeader";
+import AgentChatReferences from "./AgentChatReferences";
 
 const shownSources = 3;
 
@@ -82,9 +83,13 @@ const AgentChatDetailsCard: Component<{
 					</AgentCardDetail>
 				</Show>
 			</dl>
+			<AgentChatReferences
+				conversationId={props.conversation.id}
+				agentKey={props.conversation.agentKey}
+			/>
 			<section
 				aria-labelledby="agent-chat-sources-title"
-				class="flex flex-col gap-1.5 border-t border-border pt-4"
+				class="flex flex-col gap-2 border-t border-border pt-4"
 			>
 				<h4
 					id="agent-chat-sources-title"
@@ -110,7 +115,7 @@ const AgentChatDetailsCard: Component<{
 						</p>
 					</Match>
 					<Match when={true}>
-						<ul class="flex flex-col">
+						<ul class="flex flex-col gap-0.5">
 							<For each={visibleSources()}>
 								{(source) => (
 									<li>

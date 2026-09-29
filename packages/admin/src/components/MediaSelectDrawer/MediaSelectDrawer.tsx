@@ -51,6 +51,8 @@ interface MediaSelectPanelProps {
 		width?: MediaDimensionValidation;
 		height?: MediaDimensionValidation;
 		multiple?: boolean;
+		/** Restricts selection to public files. Defaults to true. */
+		publicOnly?: boolean;
 		selected?: number[];
 		selectedRefs?: MediaRelationRef[];
 	};
@@ -84,6 +86,7 @@ const MediaSelectDrawer: Component<MediaSelectPanelProps> = (props) => {
 					width={props.state.width}
 					height={props.state.height}
 					multiple={props.state.multiple}
+					publicOnly={props.state.publicOnly}
 					selected={props.state.selected}
 					selectedRefs={props.state.selectedRefs}
 					onClose={() => props.state.setOpen(false)}
@@ -104,6 +107,7 @@ interface SelectMediaContentProps {
 	width?: MediaDimensionValidation;
 	height?: MediaDimensionValidation;
 	multiple?: boolean;
+	publicOnly?: boolean;
 	selected?: number[];
 	selectedRefs?: MediaRelationRef[];
 	onClose: () => void;
@@ -174,7 +178,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 			queryString: searchParams.queryString,
 			filters: {
 				isDeleted: showingDeleted,
-				public: 1,
+				public: props.publicOnly === false ? undefined : 1,
 				status: "ready",
 			},
 		},

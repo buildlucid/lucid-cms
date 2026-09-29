@@ -65,6 +65,16 @@ const checkAgentDefinitions = (config: {
 			}
 		}
 
+		const attachments = z
+			.object({ media: z.boolean(), documents: z.boolean() })
+			.strict()
+			.safeParse(agent.attachments);
+		if (!attachments.success) {
+			throw new Error(
+				`Agent "${agent.key}" has invalid attachments: ${z.prettifyError(attachments.error)}`,
+			);
+		}
+
 		const models = aiModelConfigSchema.optional().safeParse(agent.models);
 		if (!models.success) {
 			throw new Error(

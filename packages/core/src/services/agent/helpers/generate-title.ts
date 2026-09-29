@@ -109,6 +109,8 @@ const generateTitle: ServiceFn<
 	const requestStartedAt = Date.now();
 	const request: AgentTitleGenerateV1Request = {
 		feature: { key: "agent.title.generate", version: "v1" },
+		//* groups the title with the chat's other usage on the Lucid side too
+		sessionId: input.conversationId,
 		input: [{ type: "text", role: "conversation", value: source }],
 		context: {},
 	};

@@ -1,8 +1,10 @@
 import z from "zod";
+import { getCapabilityProviders } from "../../../libs/agent/capabilities.js";
 import buildInstructions from "../../../libs/agent/instructions.js";
 import { getRunnerTools } from "../../../libs/agent/runner-tools.js";
 import type { AgentDefinition, RunMode } from "../../../libs/agent/types.js";
 import { getExternalCapability } from "../../../libs/permission/capabilities.js";
+import type { Permission } from "../../../libs/permission/types.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
@@ -17,8 +19,8 @@ const toInputSchema = (input: z.ZodObject) => {
 	return schema;
 };
 
-/** Only advertises the agent's capabilities its principal can access. Resolved before each model turn. */
-const resolveCapabilities = (
+/** A run's tools, skills and instructions, limited to what its principal can access. Resolved before each model turn. */
+const resolveRunSetup = (
 	context: ServiceContext,
 	props: {
 		agent: AgentDefinition;
@@ -28,13 +30,9 @@ const resolveCapabilities = (
 	},
 ) => {
 	const { agent, authority } = props;
-	const tools = agent.tools.filter(
-		(tool) =>
-			authority.superAdmin ||
-			tool.permissions.every((permission) =>
-				authority.permissions.includes(permission),
-			),
-	);
+	const can = (permission: Permission) =>
+		authority.superAdmin || authority.permissions.includes(permission);
+	const tools = agent.tools.filter((tool) => tool.permissions.every(can));
 
 	// Skills still use their existing scope contract; resolve it from current permissions.
 	const skills = agent.skills.filter((skill) =>
@@ -73,9 +71,10 @@ const resolveCapabilities = (
 			agent,
 			mode: props.mode,
 			skills,
+			media: getCapabilityProviders({ tools, can }).media,
 			hasHistory: props.hasHistory,
 		}),
 	};
 };
 
-export default resolveCapabilities;
+export default resolveRunSetup;

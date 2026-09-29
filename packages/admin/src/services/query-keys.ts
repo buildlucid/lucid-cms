@@ -24,6 +24,8 @@ export const queryKeys = {
 			["lucid", "agent", "conversations", id] as const,
 		messages: (id: string | undefined) =>
 			["lucid", "agent", "conversations", id, "messages"] as const,
+		references: (id: string | undefined) =>
+			["lucid", "agent", "conversations", id, "references"] as const,
 		conversationDetails: (id: string | undefined) =>
 			["lucid", "agent", "conversations", id, "details"] as const,
 		routines: () => ["lucid", "agent", "routines"] as const,

@@ -1,10 +1,15 @@
-import type { AgentDelivery, AgentInputAction } from "@types";
+import type {
+	AgentDelivery,
+	AgentInputAction,
+	AgentReferenceInput,
+} from "@types";
 import request from "@/utils/request";
 
 /** Input commands never replace the stream carrying the current reply. */
 export const submitInput = (props: {
 	conversationId: string;
 	text: string;
+	references: AgentReferenceInput[];
 	requestId: string;
 	delivery: AgentDelivery;
 }) =>
@@ -13,6 +18,7 @@ export const submitInput = (props: {
 		method: "POST",
 		body: {
 			text: props.text,
+			references: props.references,
 			requestId: props.requestId,
 			delivery: props.delivery,
 		},

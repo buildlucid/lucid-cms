@@ -27,7 +27,7 @@ const AgentChatSidebar: Component<{
 	return (
 		<div
 			ref={props.ref}
-			class="absolute top-0 inset-e-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-y-auto p-4 scrollbar lg:flex"
+			class="absolute top-0 inset-e-0 z-20 hidden max-h-full w-96 flex-col gap-4 overflow-x-hidden overflow-y-auto p-4 scrollbar lg:flex"
 		>
 			<Show when={props.routine}>
 				{(routine) => (

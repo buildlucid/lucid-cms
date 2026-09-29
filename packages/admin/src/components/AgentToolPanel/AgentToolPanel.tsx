@@ -1,12 +1,14 @@
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
+import AgentMarkdown from "@/components/AgentMessage/parts/AgentMarkdown";
 import { toolLabel } from "@/components/AgentMessage/parts/AgentToolCall";
 import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
+import AgentToolDetails from "@/components/AgentToolDetails/AgentToolDetails";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
-import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import Pill, { type PillVariant } from "@/components/Pill/Pill";
 import T from "@/translations";
 import {
 	type AgentToolPart,
+	analyzeResourceTool,
 	isWebFetchOutput,
 	isWebSearchOutput,
 	webFetchTool,
@@ -17,8 +19,8 @@ import WebSearchView from "./parts/WebSearchView";
 
 /**
  * A tool call in the chat's sidebar. Web research shows the pages it found or
- * read, with its query or site as the title. Other tools show their status,
- * input and output.
+ * read, with its query or site as the title. File analysis shows its answer.
+ * Other tools show their status, with the raw input and output folded away.
  */
 const AgentToolPanel: Component<{
 	part: AgentToolPart;
@@ -60,6 +62,16 @@ const AgentToolPanel: Component<{
 			? output.error
 			: undefined;
 	});
+	const analysis = createMemo(() => {
+		const output = props.part.output;
+		return props.part.name === analyzeResourceTool &&
+			typeof output === "object" &&
+			output !== null &&
+			"analysis" in output &&
+			typeof output.analysis === "string"
+			? output.analysis
+			: undefined;
+	});
 	const isWeb = createMemo(
 		() => props.part.name === webSearchTool || props.part.name === webFetchTool,
 	);
@@ -79,6 +91,7 @@ const AgentToolPanel: Component<{
 	return (
 		<AgentSidebarCard
 			title={toolLabel(props.part)}
+			reveal={props.part.id}
 			onClose={props.onClose}
 			class={props.class}
 		>
@@ -100,32 +113,25 @@ const AgentToolPanel: Component<{
 			<Switch
 				fallback={
 					<Show when={!isWeb()}>
-						<section class="flex flex-col gap-2">
-							<h4 class="text-xs font-medium text-subtitle">
-								{T()("agent.tool.input")}
-							</h4>
-							<JSONPreview json={props.part.input} />
-						</section>
-						<section class="flex flex-col gap-2">
-							<h4 class="text-xs font-medium text-subtitle">
-								{T()("agent.tool.output")}
-							</h4>
-							<Show
-								when={props.part.output !== undefined}
-								fallback={
-									<p class="text-sm text-muted">
-										{T()(
-											props.part.status === "pending" ||
-												props.part.status === "running"
-												? "agent.tool.output.waiting"
-												: "agent.tool.output.none",
-										)}
-									</p>
-								}
-							>
-								<JSONPreview json={props.part.output} />
-							</Show>
-						</section>
+						<Show when={analysis()}>
+							{(text) => <AgentMarkdown text={text()} size="sm" />}
+						</Show>
+						<Show when={props.part.output === undefined}>
+							<p class="text-sm text-muted">
+								{T()(
+									props.part.status === "pending" ||
+										props.part.status === "running"
+										? "agent.tool.output.waiting"
+										: "agent.tool.output.none",
+								)}
+							</p>
+						</Show>
+						<AgentToolDetails
+							sections={[
+								{ label: T()("agent.tool.input"), value: props.part.input },
+								{ label: T()("agent.tool.output"), value: props.part.output },
+							]}
+						/>
 					</Show>
 				}
 			>

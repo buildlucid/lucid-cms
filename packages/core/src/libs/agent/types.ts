@@ -183,6 +183,8 @@ export type DefineAgentOptions<Key extends string> = {
 	/** The tools the agent can call, such as `agentTools.content()` or your own `defineAgentTool` tools. Bundles are flattened. */
 	tools?: readonly (AgentToolDefinition | readonly AgentToolDefinition[])[];
 	skills?: readonly SkillDefinition[];
+	/** Resource types the chat composer offers to attach. Both are enabled by default. Tools can always link resources. */
+	attachments?: { media?: boolean; documents?: boolean };
 	/** The default model and the models people can choose. Leave out to offer every model the Lucid service provides. */
 	models?: AiModelConfig;
 	/** Messages people can select to start a chat. Plain message strings have their common indentation removed. */
@@ -205,6 +207,11 @@ export type AgentDefinition<Key extends string = string> = {
 	readonly instructions: string;
 	readonly tools: readonly AgentToolDefinition[];
 	readonly skills: readonly SkillDefinition[];
+	/** Resource types the chat composer offers to attach. */
+	readonly attachments: {
+		readonly media: boolean;
+		readonly documents: boolean;
+	};
 	readonly models?: AiModelConfig;
 	readonly suggestions: readonly {
 		readonly title: ResolvedAdminCopy;

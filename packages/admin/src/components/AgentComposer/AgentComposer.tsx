@@ -1,15 +1,12 @@
 import { debounce } from "@solid-primitives/scheduled";
 import { Editor } from "@tiptap/core";
+import type { Agent, AgentReferenceInput } from "@types";
 import classnames from "classnames";
-import {
-	FaSolidArrowUp,
-	FaSolidPaperclip,
-	FaSolidPlus,
-	FaSolidStop,
-} from "solid-icons/fa";
+import { FaSolidArrowUp, FaSolidStop } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
+	createMemo,
 	createSignal,
 	type JSX,
 	on,
@@ -17,24 +14,45 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
+import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import Button from "@/components/Button/Button";
-import Menu from "@/components/Menu/Menu";
+import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
 import T from "@/translations";
+import {
+	type AgentReferenceItem,
+	agentReferenceItem,
+	agentReferenceKey,
+	mergeAgentReferences,
+} from "@/utils/agent-references";
+import { readDraft, restoreSubmittedDraft, writeDraft } from "./draft";
 import { composerExtensions, isBlank } from "./editor";
+import AgentCapabilityHints from "./parts/AgentCapabilityHints";
+import AgentReferenceMenu from "./parts/AgentReferenceMenu";
 
 /** Lets a page put text into the box, such as a queued message taken back to edit. */
 export interface AgentComposerHandle {
-	insert: (markdown: string) => void;
+	/** Bare references are filled in from `referenceDetails` when they are known. */
+	insert: (
+		markdown: string,
+		references?: (AgentReferenceInput | AgentReferenceItem)[],
+	) => void;
 	focus: () => void;
 }
 
 export interface AgentComposerProps {
 	placeholder: string;
+	/** Resource types the add menu offers. */
+	attachments?: Agent["attachments"];
+	/** What the agent can do, shown on attached files and in the toolbar. */
+	capabilities?: Agent["capabilities"];
+	/** Current details for resources already linked to the chat, keyed by `agentReferenceKey`. */
+	referenceDetails?: Readonly<Record<string, AgentReferenceItem>>;
 	/** Resolves false when the message was not accepted, which puts it back in the box. */
 	onSubmit: (
 		text: string,
 		mode: "send" | "steer",
+		references: AgentReferenceItem[],
 	) => boolean | Promise<boolean>;
 	/** Shows a stop button. */
 	onStop?: () => void;
@@ -47,6 +65,13 @@ export interface AgentComposerProps {
 	autofocus?: boolean;
 	/** Reports whether the composer is empty, including a restored draft. */
 	onBlankChange?: (blank: boolean) => void;
+	/**
+	 * Lifts attached files out of the flow, floating them above the nearest
+	 * positioned container so content scrolls behind them.
+	 */
+	floatAttachments?: boolean;
+	/** Reports whether any files are attached, so a page can make room for them. */
+	onAttachedChange?: (attached: boolean) => void;
 	/** Keeps an unsent draft for the browser session. */
 	draftKey?: string;
 	/** Toolbar slots along the bottom edge. `start` comes before the add menu, as it can change what the menu offers. */
@@ -64,28 +89,8 @@ export interface AgentComposerProps {
 
 const editorHeight = { md: "1.5rem", lg: "4.5rem" } as const;
 
-const draftPrefix = "lucid:agent-draft:";
-
 export const composerTriggerClasses =
 	"flex h-7 items-center justify-center gap-1.5 rounded-md text-xs text-subtitle fill-subtitle transition-colors hover:bg-card-hover hover:text-title hover:fill-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary";
-
-//* storage can be unavailable, such as in a private window
-const readDraft = (key?: string) => {
-	if (!key) return "";
-	try {
-		return sessionStorage.getItem(draftPrefix + key) ?? "";
-	} catch {
-		return "";
-	}
-};
-
-const writeDraft = (key: string | undefined, markdown: string) => {
-	if (!key) return;
-	try {
-		if (markdown) sessionStorage.setItem(draftPrefix + key, markdown);
-		else sessionStorage.removeItem(draftPrefix + key);
-	} catch {}
-};
 
 /**
  * The message box for talking to the agent. It supports markdown formatting as
@@ -101,47 +106,85 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	const painted = useFirstPaint();
 	let container: HTMLDivElement | undefined;
 	const [submitting, setSubmitting] = createSignal(false);
+	const draft = readDraft(props.draftKey);
+	const [references, setReferences] = createSignal(draft.references);
+
+	// ----------------------------------------
+	// Memos
+	const unsupportedReferences = createMemo(() => {
+		const attachments = props.attachments;
+		return (
+			attachments !== undefined &&
+			references().some((reference) =>
+				reference.type === "media"
+					? !attachments.media
+					: !attachments.documents,
+			)
+		);
+	});
 
 	// ----------------------------------------
 	// Functions
 	const updateBlank = (instance: Editor) => {
-		const value = isBlank(instance);
+		const value = isBlank(instance) && references().length === 0;
 		setBlank(value);
 		props.onBlankChange?.(value);
 	};
 	//* the key is taken when the save is scheduled, so switching chats never mixes drafts
-	const saveDraft = debounce(
-		(key: string | undefined, instance: Editor) =>
-			writeDraft(key, instance.getMarkdown()),
-		300,
-	);
+	const saveDraft = debounce(writeDraft, 300);
+	const scheduleDraft = (key: string | undefined, instance: Editor) =>
+		saveDraft(key, {
+			text: instance.getMarkdown(),
+			references: references(),
+		});
 
 	const submit = async (mode: "send" | "steer") => {
 		const instance = editor();
-		if (!instance || submitting() || props.disabled || isBlank(instance)) {
+		if (
+			!instance ||
+			submitting() ||
+			props.disabled ||
+			unsupportedReferences() ||
+			(isBlank(instance) && references().length === 0)
+		) {
 			return;
 		}
 		if (props.busy && !props.queueable) return;
 
-		const text = instance.getMarkdown().trim();
+		const key = props.draftKey;
+		const submitted = {
+			text: instance.getMarkdown().trim(),
+			references: references(),
+		};
+		setReferences([]);
 		//* cleared straight away, and restored if the message is not accepted
 		instance.commands.clearContent(true);
-		//* the saved draft goes now, not after the debounce, so sent text never comes back
 		saveDraft.clear();
-		writeDraft(props.draftKey, "");
+		writeDraft(key, { text: "", references: [] });
 		setSubmitting(true);
+		let accepted = false;
 		try {
-			const accepted = await props.onSubmit(
-				text,
+			accepted = await props.onSubmit(
+				submitted.text,
 				mode === "steer" && props.busy && props.queueable ? "steer" : "send",
+				submitted.references,
 			);
-			if (accepted === false && isBlank(instance)) {
-				instance.commands.setContent(text, {
-					contentType: "markdown",
-					emitUpdate: true,
-				});
-			}
 		} finally {
+			if (!accepted) {
+				if (!instance.isDestroyed && props.draftKey === key) {
+					const restored = restoreSubmittedDraft(submitted, {
+						text: instance.getMarkdown().trim(),
+						references: references(),
+					});
+					setReferences(restored.references);
+					instance.commands.setContent(restored.text, {
+						contentType: "markdown",
+						emitUpdate: true,
+					});
+				} else {
+					writeDraft(key, restoreSubmittedDraft(submitted, readDraft(key)));
+				}
+			}
 			setSubmitting(false);
 		}
 	};
@@ -157,10 +200,11 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				placeholder: () => props.placeholder,
 				keys: {
 					submit: (mode) => void submit(mode),
-					editLast: () => props.onEditLast?.() ?? false,
+					editLast: () =>
+						references().length === 0 && (props.onEditLast?.() ?? false),
 				},
 			}),
-			content: readDraft(props.draftKey),
+			content: draft.text,
 			contentType: "markdown",
 			autofocus: false,
 			editable: !props.disabled,
@@ -176,13 +220,21 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			},
 			onUpdate: ({ editor: updated }) => {
 				updateBlank(updated);
-				saveDraft(props.draftKey, updated);
+				scheduleDraft(props.draftKey, updated);
 			},
 		});
 		setEditor(instance);
 		updateBlank(instance);
 		props.ref?.({
-			insert: (markdown) => {
+			insert: (markdown, added = []) => {
+				setReferences((current) =>
+					mergeAgentReferences(
+						current,
+						added.map((reference) =>
+							agentReferenceItem(reference, props.referenceDetails),
+						),
+					),
+				);
 				const joined = isBlank(instance)
 					? markdown
 					: `${instance.getMarkdown().trim()}\n\n${markdown}`;
@@ -207,8 +259,13 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				const instance = editor();
 				if (!instance) return;
 				saveDraft.clear();
-				writeDraft(previous, instance.getMarkdown());
-				instance.commands.setContent(readDraft(key), {
+				writeDraft(previous, {
+					text: instance.getMarkdown(),
+					references: references(),
+				});
+				const restored = readDraft(key);
+				setReferences(restored.references);
+				instance.commands.setContent(restored.text, {
 					contentType: "markdown",
 				});
 				updateBlank(instance);
@@ -235,12 +292,29 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 		),
 	);
 
+	createEffect(
+		on(
+			() => references().length > 0,
+			(attached) => props.onAttachedChange?.(attached),
+		),
+	);
+	createEffect(() => {
+		references();
+		const instance = editor();
+		if (!instance) return;
+		updateBlank(instance);
+		scheduleDraft(props.draftKey, instance);
+	});
+
 	//* a pending save is written rather than dropped, so leaving never loses or revives text
 	onCleanup(() => {
 		saveDraft.clear();
 		const instance = editor();
 		if (!instance) return;
-		writeDraft(props.draftKey, instance.getMarkdown());
+		writeDraft(props.draftKey, {
+			text: instance.getMarkdown(),
+			references: references(),
+		});
 		instance.destroy();
 	});
 
@@ -248,6 +322,23 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	// Render
 	return (
 		<div class={props.class}>
+			<AgentReferenceFiles
+				references={references()}
+				capabilities={props.capabilities}
+				class={
+					props.floatAttachments
+						? "pointer-events-none absolute inset-x-0 bottom-full z-10 mb-2 [&>li]:pointer-events-auto"
+						: "-mx-1"
+				}
+				onRemove={(removed) =>
+					setReferences((current) =>
+						current.filter(
+							(reference) =>
+								agentReferenceKey(reference) !== agentReferenceKey(removed),
+						),
+					)
+				}
+			/>
 			<form
 				class={classnames(
 					"relative rounded-2xl border bg-card shadow-sm transition-colors focus-within:border-primary",
@@ -261,6 +352,15 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				<Show when={props.header}>
 					<div class="overflow-hidden rounded-t-2xl">{props.header}</div>
 				</Show>
+				<ErrorMessage
+					theme="basic"
+					classes="px-4 pt-3"
+					message={
+						unsupportedReferences()
+							? T()("agent.references.unsupported")
+							: undefined
+					}
+				/>
 				<div
 					ref={container}
 					class={classnames(
@@ -285,22 +385,19 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				/>
 				<div class="flex items-center gap-0.5 px-3 pb-3">
 					{props.start}
-					<Menu.Root placement="top-start">
-						<Menu.Trigger
-							class={classnames(composerTriggerClasses, "w-7")}
-							aria-label={T()("agent.composer.add")}
-							title={T()("agent.composer.add")}
-						>
-							<FaSolidPlus size={11} />
-						</Menu.Trigger>
-						<Menu.Content>
-							{/* placeholder until skills and uploads can be added to a message */}
-							<Menu.Item icon={<FaSolidPaperclip size={12} />} disabled={true}>
-								{T()("agent.composer.add.files")}
-							</Menu.Item>
-						</Menu.Content>
-					</Menu.Root>
+					<AgentReferenceMenu
+						attachments={props.attachments}
+						references={references()}
+						disabled={props.disabled || submitting()}
+						onSelect={(type, selected) =>
+							setReferences((current) => [
+								...current.filter((reference) => reference.type !== type),
+								...selected,
+							])
+						}
+					/>
 					{props.controls}
+					<AgentCapabilityHints capabilities={props.capabilities} />
 					<div class="ms-auto flex items-center gap-0.5">
 						{props.end}
 						<Show when={props.onStop}>
@@ -323,6 +420,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 							class="focus-visible:ring-inset"
 							disabled={
 								blank() ||
+								unsupportedReferences() ||
 								submitting() ||
 								props.disabled ||
 								(props.busy && !props.queueable)

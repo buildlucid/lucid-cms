@@ -9,6 +9,7 @@ import { documentBricksFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
+	AgentDocumentReferencesRepository,
 	DocumentBricksRepository,
 	DocumentReferencesRepository,
 	DocumentsRepository,
@@ -358,12 +359,23 @@ const promoteVersion: ServiceFn<
 			if (insertRes.error) return insertRes;
 
 			const DocumentReferences = new DocumentReferencesRepository(context.db);
-			const pruned = await DocumentReferences.pruneVersions({
-				collectionKey: data.collectionKey,
-				versionTable: tableNameRes.data.version,
-				documentId: data.documentId,
-			});
+			const AgentDocumentReferences = new AgentDocumentReferencesRepository(
+				context.db,
+			);
+			const [pruned, agentReferences] = await Promise.all([
+				DocumentReferences.pruneVersions({
+					collectionKey: data.collectionKey,
+					versionTable: tableNameRes.data.version,
+					documentId: data.documentId,
+				}),
+				AgentDocumentReferences.pruneVersions({
+					collectionKey: data.collectionKey,
+					versionTable: tableNameRes.data.version,
+					documentId: data.documentId,
+				}),
+			]);
 			if (pruned.error) return pruned;
+			if (agentReferences.error) return agentReferences;
 
 			// -------------------------------------------------------------------------------
 			// Execute hook

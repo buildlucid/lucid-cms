@@ -3,6 +3,9 @@ import { useQueryClient } from "@tanstack/solid-query";
 import { type Component, createMemo, createSignal } from "solid-js";
 import AgentHeader from "@/components/AgentHeader/AgentHeader";
 import AgentHistoryList from "@/components/AgentHistoryList/AgentHistoryList";
+import CreateMenu, {
+	type CreateMenuAction,
+} from "@/components/CreateMenu/CreateMenu";
 import type { FilterField } from "@/components/FilterPanel/FilterPanel";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
@@ -50,6 +53,17 @@ const AgentHistoryPage: Component = () => {
 
 	// ----------------------------------------
 	// Memos
+	const createActions = createMemo<CreateMenuAction[]>(() =>
+		getAgentAccess().use.length > 0
+			? [
+					{
+						type: "link",
+						label: T()("agent.chat.new"),
+						href: "/lucid/agent",
+					},
+				]
+			: [],
+	);
 	const filterFields = createMemo(() => {
 		const agents = getAgentAccess().all;
 		const fields: FilterField[] = [
@@ -96,6 +110,7 @@ const AgentHistoryPage: Component = () => {
 			<AgentHeader
 				title={T()("routes.agent.history")}
 				description={T()("routes.agent.history.description")}
+				actions={<CreateMenu actions={createActions()} />}
 			>
 				<QueryToolbar
 					queryState={searchParams}

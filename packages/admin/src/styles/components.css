@@ -52,11 +52,39 @@
 		animation: agent-shimmer 2s ease-in-out infinite;
 	}
 
+	/* files fade out at both ends rather than being cut off where the row scrolls */
+	.agent-reference-strip {
+		mask-image: linear-gradient(
+			90deg,
+			transparent,
+			rgb(0 0 0) 1rem,
+			rgb(0 0 0) calc(100% - 1rem),
+			transparent
+		);
+	}
+
+	.agent-reference-file {
+		rotate: var(--agent-reference-tilt, 0deg);
+		transition:
+			rotate 200ms var(--ease-emphasized),
+			translate 200ms var(--ease-emphasized);
+
+		&:hover,
+		&:focus-within {
+			rotate: 0deg;
+			translate: 0 -0.125rem;
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.skeleton-shimmer,
 		.agent-shimmer,
 		.agent-markdown .agent-fade {
 			animation: none;
+		}
+
+		.agent-reference-file {
+			transition: none;
 		}
 
 		.agent-shimmer {

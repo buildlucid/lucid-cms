@@ -1,5 +1,6 @@
 import type {
 	AiUsageChartMetric,
+	AiUsageFeatureKey,
 	AiUsageMeasure,
 	AiUsageSessionType,
 } from "@types";
@@ -38,40 +39,25 @@ export const formatAiCredits = (value?: number | null) => {
 	});
 };
 
-export const getAiUsageFeatureOptions = () => [
-	{
-		value: "agent.chat",
-		label: T()("ai.usage.features.agent.chat"),
-	},
-	{
-		value: "agent.compact",
-		label: T()("ai.usage.features.agent.compact"),
-	},
-	{
-		value: "agent.title.generate",
-		label: T()("ai.usage.features.agent.title.generate"),
-	},
-	{
-		value: "web.search",
-		label: T()("ai.usage.features.web.search"),
-	},
-	{
-		value: "web.fetch",
-		label: T()("ai.usage.features.web.fetch"),
-	},
-	{
-		value: "custom-field.input.generate",
-		label: T()("ai.usage.features.custom.field.input.generate"),
-	},
-	{
-		value: "media.alt.generate",
-		label: T()("ai.usage.features.media.alt.generate"),
-	},
-	{
-		value: "media.image.generate",
-		label: T()("ai.usage.features.media.image.generate"),
-	},
-];
+//* typed against every usage feature, so a new feature cannot ship without a label
+const aiUsageFeatureLabels = {
+	"agent.chat": "ai.usage.features.agent.chat",
+	"agent.compact": "ai.usage.features.agent.compact",
+	"agent.title.generate": "ai.usage.features.agent.title.generate",
+	"web.search": "ai.usage.features.web.search",
+	"web.fetch": "ai.usage.features.web.fetch",
+	"resource.analyze": "ai.usage.features.resource.analyze",
+	"custom-field.input.generate":
+		"ai.usage.features.custom.field.input.generate",
+	"media.alt.generate": "ai.usage.features.media.alt.generate",
+	"media.image.generate": "ai.usage.features.media.image.generate",
+} satisfies Record<AiUsageFeatureKey, string>;
+
+export const getAiUsageFeatureOptions = () =>
+	Object.entries(aiUsageFeatureLabels).map(([value, label]) => ({
+		value,
+		label: T()(label),
+	}));
 
 export const getAiUsageFeatureLabel = (key: string) =>
 	getAiUsageFeatureOptions().find((option) => option.value === key)?.label ??

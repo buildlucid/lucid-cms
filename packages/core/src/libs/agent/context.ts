@@ -1,4 +1,5 @@
 import type { AgentMessagePart } from "../../types/response.js";
+import { messageText } from "./input.js";
 import runnerTools from "./runner-tools.js";
 import type { Checkpoint, ConversationContext, ModelMessage } from "./types.js";
 
@@ -21,8 +22,8 @@ export const contextLimits = {
 	historyPreviewChars: 400,
 } as const;
 
-/** The parts of a run's capabilities that are sent with every request. */
-export type ContextCapabilities = {
+/** The parts of a run's setup that are sent with every request. */
+export type ContextSetup = {
 	instructions: string;
 	definitions: unknown[];
 };
@@ -40,10 +41,7 @@ export const tokenLimit = (checkpoint: Checkpoint) =>
 	checkpoint.model?.tokenLimit ?? contextLimits.defaultTokenLimit;
 
 /** Tokens the next request uses: the last provider count plus an estimate for anything added since. */
-export const contextTokens = (
-	checkpoint: Checkpoint,
-	capabilities: ContextCapabilities,
-) => {
+export const contextTokens = (checkpoint: Checkpoint, setup: ContextSetup) => {
 	const { measured } = checkpoint;
 	if (measured) {
 		return (
@@ -54,29 +52,26 @@ export const contextTokens = (
 
 	return (
 		estimateTokens(checkpoint.messages) +
-		estimateTokens(capabilities.instructions) +
-		estimateTokens(capabilities.definitions)
+		estimateTokens(setup.instructions) +
+		estimateTokens(setup.definitions)
 	);
 };
 
 /** Context compacts before a request that would come close to the model's input limit. */
-export const needsCompaction = (
-	checkpoint: Checkpoint,
-	capabilities: ContextCapabilities,
-) =>
-	contextTokens(checkpoint, capabilities) >=
+export const needsCompaction = (checkpoint: Checkpoint, setup: ContextSetup) =>
+	contextTokens(checkpoint, setup) >=
 	tokenLimit(checkpoint) * contextLimits.compactAt;
 
 /** The snapshot stored on the conversation. Unknown until the API names the model. */
 export const conversationContext = (
 	checkpoint: Checkpoint,
-	capabilities: ContextCapabilities,
+	setup: ContextSetup,
 	status: ConversationContext["status"],
 ): ConversationContext | null =>
 	checkpoint.model
 		? {
 				model: checkpoint.model.id,
-				tokens: contextTokens(checkpoint, capabilities),
+				tokens: contextTokens(checkpoint, setup),
 				tokenLimit: checkpoint.model.tokenLimit,
 				status,
 			}
@@ -136,9 +131,7 @@ export const historyMessage = (message: {
 	parts: AgentMessagePart[];
 }) => {
 	let truncated = false;
-	const text = message.parts
-		.flatMap((part) => (part.type === "text" ? [part.text] : []))
-		.join("");
+	const text = messageText(message.parts);
 	const tools = message.parts.filter((part) => part.type === "tool");
 	const preview = <Value>(value: Value, toolCallId: string) => {
 		const cut = toolValuePreview(value, { messageId: message.id, toolCallId });

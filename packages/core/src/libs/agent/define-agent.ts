@@ -3,8 +3,8 @@ import { normalizeCopy } from "../i18n/copy.js";
 import type { AgentDefinition, DefineAgentOptions } from "./types.js";
 
 /**
- * Defines an agent for the admin. It has only the tools it lists, and each
- * uses the permissions of the person the agent acts for.
+ * Defines an agent for the admin. Configured tools extend Lucid’s core
+ * capabilities and use the permissions of the person the agent acts for.
  *
  * @example
  * const seoAgent = defineAgent({
@@ -30,6 +30,10 @@ const defineAgent = <const Key extends string>(
 	tools: options.tools?.flat() ?? [],
 	skills: options.skills ?? [],
 	models: options.models,
+	attachments: {
+		media: options.attachments?.media ?? true,
+		documents: options.attachments?.documents ?? true,
+	},
 	suggestions: (options.suggestions ?? []).map((suggestion) => ({
 		title: normalizeCopy(suggestion.title),
 		description: normalizeCopy(suggestion.description),

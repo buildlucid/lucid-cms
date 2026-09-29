@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../constants/constants.js";
 import { summaryMessage } from "../../libs/agent/context.js";
+import { inputMessageParts } from "../../libs/agent/input.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentCompactionsRepository,
@@ -8,16 +9,19 @@ import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
+import type { AgentReferenceInput } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import enqueueTitle from "./helpers/enqueue-title.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import titleFromMessage from "./helpers/title-from-message.js";
+import registerReferences from "./references/register.js";
 
 /**
  * Records a user message and creates the queued run that answers it. The request
  * id becomes the run id, so resubmitting the same request is safe. Callers check
  * access first; the run acts for `userId`, or for the system when it is null.
+ * Compaction and retries start a run without a new message.
  */
 const startRun: ServiceFn<
 	[
@@ -26,10 +30,11 @@ const startRun: ServiceFn<
 			userId: number | null;
 			requestId: string;
 			routineId?: string;
+			references?: AgentReferenceInput[];
 			/** Extra model context that is not shown as part of the message. */
 			context?: string;
 		} & (
-			| { purpose: "compact"; text?: never }
+			| { purpose: "compact" | "retry"; text?: never }
 			| { purpose?: never; text: string }
 		),
 	],
@@ -70,12 +75,27 @@ const startRun: ServiceFn<
 		const conversations = new AgentConversationsRepository(context.db);
 		const messages = new AgentMessagesRepository(context.db);
 		const runs = new AgentRunsRepository(context.db);
-		const message = {
-			id: input.requestId,
-			conversationId: input.conversationId,
-			runId: input.requestId,
-			parts: [{ type: "text" as const, text: input.text ?? "" }],
-			createdAt: now,
+
+		//* attachments are linked first, so the message saves the details the agent sees
+		const appendMessage = async () => {
+			const references = await registerReferences(context, {
+				conversationId: input.conversationId,
+				references: input.references ?? [],
+				source: { type: "message" },
+				skipMissing: true,
+			});
+			if (references.error) return references;
+
+			return messages.appendOnce({
+				id: input.requestId,
+				conversationId: input.conversationId,
+				runId: input.requestId,
+				parts: inputMessageParts({
+					text: input.text ?? "",
+					references: references.data,
+				}),
+				createdAt: now,
+			});
 		};
 
 		const existing = await runs.selectSingle({
@@ -96,7 +116,7 @@ const startRun: ServiceFn<
 			}
 
 			if (!input.purpose) {
-				const restored = await messages.appendOnce(message);
+				const restored = await appendMessage();
 				if (restored.error) return restored;
 			}
 
@@ -107,7 +127,8 @@ const startRun: ServiceFn<
 			conversationId: input.conversationId,
 			runId: input.requestId,
 			updatedAt: now,
-			allowPaused: input.purpose === "compact",
+			//* a failed run pauses the queue, and retrying is how a person picks it back up
+			allowPaused: input.purpose !== undefined,
 		});
 		if (claim.error) return claim;
 		if (!claim.data) {
@@ -158,7 +179,7 @@ const startRun: ServiceFn<
 				//* the run loads history, including this message, after the latest summary
 				historyAfter: latest.data?.through_position ?? 0,
 				extraContext: input.context,
-				purpose: input.purpose,
+				purpose: input.purpose === "compact" ? "compact" : undefined,
 				selection: modelSelection ?? undefined,
 				trimmed: latest.data ? true : undefined,
 				nudges: 0,
@@ -185,7 +206,7 @@ const startRun: ServiceFn<
 		}
 
 		if (!input.purpose) {
-			const appended = await messages.appendOnce(message);
+			const appended = await appendMessage();
 			if (appended.error) return appended;
 		}
 		if (firstMessage) {

@@ -6,7 +6,9 @@ import type DatabaseAdapter from "./adapter-base.js";
 import type {
 	LucidAgentCompactions,
 	LucidAgentConversations,
+	LucidAgentDocumentReferences,
 	LucidAgentInputs,
+	LucidAgentMediaReferences,
 	LucidAgentMessages,
 	LucidAgentRoutines,
 	LucidAgentRoutineTools,
@@ -303,6 +305,8 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_job_scheduler: LucidJobScheduler;
 	lucid_job_schedule_overrides: LucidJobScheduleOverrides;
 	lucid_ai_generations: LucidAiGenerations;
+	lucid_agent_media_references: LucidAgentMediaReferences;
+	lucid_agent_document_references: LucidAgentDocumentReferences;
 	lucid_agent_conversations: LucidAgentConversations;
 	lucid_agent_compactions: LucidAgentCompactions;
 	lucid_agent_inputs: LucidAgentInputs;

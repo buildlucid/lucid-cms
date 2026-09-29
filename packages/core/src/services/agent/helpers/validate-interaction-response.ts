@@ -12,7 +12,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess, {
 	getConversationLevel,
 } from "./check-agent-access.js";
-import resolveCapabilities from "./resolve-capabilities.js";
+import resolveRunSetup from "./resolve-run-setup.js";
 import type { SessionRun } from "./run-session.js";
 
 /**
@@ -86,7 +86,7 @@ const validateInteractionResponse: ServiceFn<
 	if (executionAccess.error) return executionAccess;
 
 	const call = checkpoint.calls[checkpoint.cursor];
-	const tool = resolveCapabilities(context, {
+	const tool = resolveRunSetup(context, {
 		...executionAccess.data,
 		mode: run.routine_id ? "routine" : "chat",
 		hasHistory: checkpoint.trimmed === true,

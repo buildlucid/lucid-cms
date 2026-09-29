@@ -16,5 +16,9 @@
 	"core.tools.lucid_load_skill.title": "Load skill",
 	"core.tools.lucid_finish_run.title": "Finish run",
 	"core.tools.web_search.title": "Search the web",
-	"core.tools.web_fetch.title": "Read a webpage"
+	"core.tools.web_fetch.title": "Read a webpage",
+	"core.tools.lucid_register_references.title": "Register chat references",
+	"core.tools.lucid_remove_reference.title": "Remove chat reference",
+	"core.tools.lucid_list_references.title": "List chat references",
+	"core.tools.resources_analyze.title": "Analyse a file"
 }

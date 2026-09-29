@@ -63,6 +63,7 @@ function defineAgentTool<
 		permissions: options.permissions,
 		readOnly: options.readOnly ?? false,
 		requiresApproval: options.requiresApproval ?? false,
+		capabilities: options.capabilities,
 	};
 	const checkResult = checkToolResult(options);
 

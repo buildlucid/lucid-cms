@@ -72,10 +72,8 @@ describe("getDocumentLabel", () => {
 			bricks: bricks as unknown as DocumentBricksRepository,
 			collection,
 			tables,
-			operation: {
-				document_id: 1,
-				source_version_id: 2,
-			},
+			documentId: 1,
+			versionId: 2,
 		});
 
 		expect(result.error).toBeUndefined();

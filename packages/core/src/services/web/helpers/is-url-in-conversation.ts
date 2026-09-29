@@ -1,17 +1,23 @@
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import scanMessages from "../../agent/helpers/scan-messages.js";
+import { analyzeResourceToolName } from "../../agent/tools/analyze-resource/constants.js";
 import { addWebUrlKeys, webUrlKey } from "./url-keys.js";
 
-/** Runner tools whose results can repeat the agent's own words, so they cannot vouch for a URL. */
-const echoingTools: ReadonlySet<string> = new Set(
-	[
+/**
+ * Tools whose results can repeat the agent's own words, so they cannot vouch
+ * for a URL. File analysis is written by a model that sees the agent's
+ * question, so a file could make it echo that question back inside a URL.
+ */
+const echoingTools: ReadonlySet<string> = new Set([
+	...[
 		runnerTools.history,
 		runnerTools.progress,
 		runnerTools.skill,
 		runnerTools.finish,
 	].map((tool) => tool.name),
-);
+	analyzeResourceToolName,
+]);
 
 /**
  * Whether a URL appeared in this chat in something the agent did not write: a

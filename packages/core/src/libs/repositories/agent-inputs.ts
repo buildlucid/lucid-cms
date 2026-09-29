@@ -1,3 +1,4 @@
+import type { AgentReferenceInput } from "../../types/response.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import { agentInputsTable } from "../db/tables/agent-inputs.js";
 import StaticRepository from "./parents/static-repository.js";
@@ -11,12 +12,13 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 		super(db, agentInputsTable);
 	}
 
-	/** A retried submission with the same id is ignored, so callers compare the stored text. */
+	/** A retried submission with the same id is ignored, so callers compare the stored input. */
 	async submit(input: {
 		id: string;
 		conversationId: string;
 		userId: number;
 		text: string;
+		references?: AgentReferenceInput[];
 		targetRunId: string | null;
 	}) {
 		const result = await this.executeQuery(
@@ -28,6 +30,7 @@ export default class AgentInputsRepository extends StaticRepository<"lucid_agent
 						conversation_id: input.conversationId,
 						user_id: input.userId,
 						text: input.text,
+						references: input.references ?? [],
 						target_run_id: input.targetRunId,
 						status: "pending",
 						created_at: new Date().toISOString(),

@@ -414,9 +414,12 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	async deleteExpiredRevisions(
 		props: {
 			cutoffDate: string;
+			documentIds: number[];
 		},
 		dynamicConfig: DynamicConfig<LucidVersionTableName>,
 	) {
+		if (!props.documentIds.length) return { error: undefined, data: undefined };
+
 		const { table } = this.db.dynamic;
 		const versionTable = dynamicConfig.tableName;
 
@@ -424,6 +427,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 			await this.db
 				.deleteFrom(versionTable)
 				.where(`${versionTable}.type`, "=", "revision")
+				.where(`${versionTable}.document_id`, "in", props.documentIds)
 				.where(`${versionTable}.created_at`, "<", props.cutoffDate)
 				.where(({ not, exists, selectFrom }) =>
 					not(

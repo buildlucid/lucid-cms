@@ -6,8 +6,8 @@ import {
 } from "solid-icons/fa";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
+import AgentToolDetails from "@/components/AgentToolDetails/AgentToolDetails";
 import AgentTranscriptRow from "@/components/AgentTranscriptRow/AgentTranscriptRow";
-import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
 import { approvalWidget, questionWidget } from "@/utils/agent-chat";
@@ -101,22 +101,34 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 									</span>
 								</>
 							}
-							panelTitle={interaction().title}
+							panelTitle={
+								question() ? T()("agent.question.asked") : interaction().title
+							}
 							renderPanel={() => (
 								<Switch>
 									<Match when={question()}>
-										<p class="whitespace-pre-wrap wrap-break-word text-xs text-subtitle">
-											{interaction().title}
-										</p>
-										<Show when={response()}>
-											{(answered) => (
-												<p class="mt-1 text-xs text-body">
-													{T()("agent.question.answered", {
-														answer: String(answered().answer ?? ""),
-													})}
-												</p>
-											)}
-										</Show>
+										<dl class="flex flex-col gap-3 text-xs">
+											<div class="flex flex-col gap-1">
+												<dt class="text-[11px] text-muted">
+													{T()("agent.question.label")}
+												</dt>
+												<dd class="whitespace-pre-wrap wrap-break-word text-title">
+													{interaction().title}
+												</dd>
+											</div>
+											<Show when={response()}>
+												{(answered) => (
+													<div class="flex flex-col gap-1">
+														<dt class="text-[11px] text-muted">
+															{T()("agent.question.answer")}
+														</dt>
+														<dd class="whitespace-pre-wrap wrap-break-word text-body">
+															{String(answered().answer ?? "")}
+														</dd>
+													</div>
+												)}
+											</Show>
+										</dl>
 									</Match>
 									<Match when={true}>
 										<div class="flex flex-col gap-5">
@@ -140,12 +152,14 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 																{approval().toolName}
 															</code>
 														</div>
-														<section class="flex flex-col gap-2">
-															<h4 class="text-xs font-medium text-subtitle">
-																{T()("agent.tool.input")}
-															</h4>
-															<JSONPreview json={approval().input} />
-														</section>
+														<AgentToolDetails
+															sections={[
+																{
+																	label: T()("agent.tool.input"),
+																	value: approval().input,
+																},
+															]}
+														/>
 													</>
 												)}
 											</Show>
@@ -153,12 +167,14 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 												when={props.widget.key !== approvalWidget && response()}
 											>
 												{(answered) => (
-													<section class="flex flex-col gap-2">
-														<h4 class="text-xs font-medium text-subtitle">
-															{T()("agent.interaction.response")}
-														</h4>
-														<JSONPreview json={answered()} />
-													</section>
+													<AgentToolDetails
+														sections={[
+															{
+																label: T()("agent.interaction.response"),
+																value: answered(),
+															},
+														]}
+													/>
 												)}
 											</Show>
 										</div>

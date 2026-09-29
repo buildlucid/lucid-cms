@@ -109,7 +109,7 @@ const AgentContextRing: Component<AgentContextRingProps> = (props) => {
 					onPointerEnter={hover(true)}
 					onPointerLeave={hover(false)}
 				>
-					<div class="flex items-baseline justify-between gap-3 text-sm">
+					<div class="flex items-baseline justify-between gap-3 text-xs">
 						<span class="font-medium text-title">
 							{T()("agent.context.title")}
 						</span>

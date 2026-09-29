@@ -11,10 +11,12 @@ import type { Checkpoint } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { AgentMessagesRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type resolveCapabilities from "./resolve-capabilities.js";
+import type resolveRunSetup from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import streamModelTurn from "./stream-model-turn.js";
-import trackPaidRequest from "./track-paid-request.js";
+import trackPaidRequest, {
+	type PaidRequestRecord,
+} from "./track-paid-request.js";
 
 /**
  * Summarises older context into one message and keeps recent messages verbatim.
@@ -27,11 +29,11 @@ const compactContext: ServiceFn<
 			run: SessionRun;
 			checkpoint: Checkpoint;
 			session: RunSession;
-			capabilities: ReturnType<typeof resolveCapabilities>;
+			setup: ReturnType<typeof resolveRunSetup>;
 		},
 	],
 	boolean
-> = async (context, { run, checkpoint, session, capabilities }) => {
+> = async (context, { run, checkpoint, session, setup }) => {
 	if (!checkpoint.compaction) {
 		const limit = tokenLimit(checkpoint);
 		const count = compactionCut(checkpoint.messages, {
@@ -39,8 +41,8 @@ const compactContext: ServiceFn<
 			//* the summary request repeats the instructions and tools, so they share the budget
 			max:
 				limit * contextLimits.compactAt -
-				estimateTokens(capabilities.instructions) -
-				estimateTokens(capabilities.definitions),
+				estimateTokens(setup.instructions) -
+				estimateTokens(setup.definitions),
 		});
 		const sourceId = checkpoint.messages[count - 1]?.sourceId;
 		if (!count || !sourceId) return { error: undefined, data: false };
@@ -66,9 +68,9 @@ const compactContext: ServiceFn<
 	}
 
 	const pending = checkpoint.compaction;
-	await session.saveContext(capabilities, "compacting");
+	await session.saveContext(setup, "compacting");
 
-	const record = {
+	const record: PaidRequestRecord = {
 		requestId: pending.requestId,
 		featureKey: "agent.compact",
 		runId: run.id,
@@ -86,10 +88,10 @@ const compactContext: ServiceFn<
 				requestId: pending.requestId,
 				sessionId: run.conversation_id,
 				purpose: "compact",
-				instructions: capabilities.instructions,
+				instructions: setup.instructions,
 				selection: checkpoint.selection,
 				messages: modelMessages(checkpoint.messages.slice(0, pending.count)),
-				tools: capabilities.definitions,
+				tools: setup.definitions,
 				signal: session.signal,
 				onRequest: start,
 				emit: async (event) => {
@@ -154,7 +156,7 @@ const compactContext: ServiceFn<
 		}
 	}
 
-	await session.saveContext(capabilities, "ready");
+	await session.saveContext(setup, "ready");
 	return { error: undefined, data: true };
 };
 

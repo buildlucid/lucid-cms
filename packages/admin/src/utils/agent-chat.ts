@@ -22,6 +22,7 @@ export const approvalWidget = "lucid-tool-approval";
 export const skillTool = "lucid_load_skill";
 export const webSearchTool = "web_search";
 export const webFetchTool = "web_fetch";
+export const analyzeResourceTool = "resources_analyze";
 
 export const webSiteName = (url: string) => {
 	try {
@@ -82,6 +83,7 @@ export const partLayout = (
 	hasRow: (widget: AgentWidgetPart) => boolean,
 ): "row" | "block" | "hidden" => {
 	switch (part.type) {
+		case "reference":
 		case "text": {
 			return "block";
 		}

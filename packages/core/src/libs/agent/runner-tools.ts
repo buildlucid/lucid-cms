@@ -1,5 +1,6 @@
 import z from "zod";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
+import { agentReferenceInputSchema } from "../../schemas/agent-references.js";
 import { copy } from "../i18n/index.js";
 import type { RunMode } from "./types.js";
 
@@ -16,6 +17,32 @@ export type RunnerToolContext = {
  * handlers live in `services/agent/helpers/runner-tools`.
  */
 const runnerTools = {
+	references: {
+		name: "lucid_list_references",
+		title: copy("admin:core.tools.lucid_list_references.title"),
+		description:
+			"List the media and documents linked to this chat, including those linked by tools, with their names and file types. This does not read their contents or grant access.",
+		input: z.object({ offset: z.number().int().nonnegative().default(0) }),
+		available: () => true,
+	},
+	registerReferences: {
+		name: "lucid_register_references",
+		title: copy("admin:core.tools.lucid_register_references.title"),
+		description:
+			"Add media or documents to this chat's references, the record of resources the chat involves. Call it when the person names, gives an ID for or picks a resource, and when you read, create or change one. Use IDs from their message or tool results. Linking again is harmless. This does not read contents or grant access.",
+		input: z.object({
+			references: z.array(agentReferenceInputSchema).min(1).max(50),
+		}),
+		available: () => true,
+	},
+	removeReference: {
+		name: "lucid_remove_reference",
+		title: copy("admin:core.tools.lucid_remove_reference.title"),
+		description:
+			"Remove a tool-added reference from this chat when it is no longer useful. Use its ID from lucid_list_references. This does not delete the resource or message attachments. User-attached references can only be removed by the user in the chat UI.",
+		input: z.object({ referenceId: z.uuid() }),
+		available: () => true,
+	},
 	ask: {
 		name: "lucid_ask_user",
 		title: copy("admin:core.tools.lucid_ask_user.title"),

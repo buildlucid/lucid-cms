@@ -52,6 +52,10 @@ import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesSt
 import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import { isToolRow, placeCompactions } from "@/utils/agent-chat";
+import {
+	type AgentReferenceItem,
+	agentReferenceKey,
+} from "@/utils/agent-references";
 import AgentChatActions from "./parts/AgentChatActions";
 import AgentChatHeader from "./parts/AgentChatHeader";
 import AgentChatSidebar from "./parts/AgentChatSidebar";
@@ -72,6 +76,7 @@ const AgentConversationPage: Component = () => {
 	//* a chat started from the agent home arrives unsaved, with the agent and first message
 	const location = useLocation<{
 		message?: string;
+		references?: AgentReferenceItem[];
 		agentKey?: string;
 		approvalMode?: AgentApprovalMode;
 		modelSelection?: AiModelSelection;
@@ -83,6 +88,7 @@ const AgentConversationPage: Component = () => {
 	const chat = useAgentChat(() =>
 		creating() ? undefined : params.conversationId,
 	);
+	const definitions = api.agent.useGetDefinitions();
 	const createConversation = api.agent.useCreateConversation();
 	const updateConversation = api.agent.useUpdateConversation();
 	const scroll = useChatScroll({
@@ -101,10 +107,28 @@ const AgentConversationPage: Component = () => {
 	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
 	const [runsOpen, setRunsOpen] = createSignal(false);
 	let composer: AgentComposerHandle | undefined;
+	//* attached files float over the timeline, so it makes room for them
+	const [attached, setAttached] = createSignal(false);
 
 	// ----------------------------------------
 	// Memos
 	const conversation = createMemo(() => chat.data());
+	const references = api.agent.useGetReferences({
+		id: () => conversation()?.id,
+	});
+	const referenceDetails = createMemo(() =>
+		Object.fromEntries(
+			(references.data?.data ?? []).map((reference) => [
+				agentReferenceKey(reference),
+				reference,
+			]),
+		),
+	);
+	const agent = createMemo(() =>
+		definitions.data?.data.agents.find(
+			(agent) => agent.key === conversation()?.agentKey,
+		),
+	);
 	const unavailable = createMemo(() => getAgentUnavailableReason());
 	const latestRun = createMemo(() => conversation()?.latestRun);
 	//* shares the model picker's query; chat waits for it as it needs the same Lucid connection
@@ -172,7 +196,11 @@ const AgentConversationPage: Component = () => {
 
 	// ----------------------------------------
 	// Functions
-	const send = (text: string, mode: "send" | "steer") => {
+	const send = (
+		text: string,
+		mode: "send" | "steer",
+		references: AgentReferenceItem[],
+	) => {
 		//* a run reads the chat's settings when it starts, so wait for a change to save
 		if (
 			unavailable() ||
@@ -182,7 +210,7 @@ const AgentConversationPage: Component = () => {
 			return false;
 		}
 		scroll.scrollToEnd("smooth");
-		return chat.send(text, chat.waiting() ? "steer" : mode);
+		return chat.send(text, chat.waiting() ? "steer" : mode, references);
 	};
 	const respond = async (
 		interactionId: string,
@@ -209,7 +237,7 @@ const AgentConversationPage: Component = () => {
 	/** Editing takes a queued message back into the chat box. */
 	const edit = async (input: AgentInput) => {
 		if (await chat.updateInput({ kind: "cancel", id: input.id })) {
-			composer?.insert(input.text);
+			composer?.insert(input.text, input.references);
 		}
 	};
 	const editLast = () => {
@@ -257,9 +285,9 @@ const AgentConversationPage: Component = () => {
 	 * cannot be saved, the message goes back to the agent home.
 	 */
 	onMount(async () => {
-		const { message, agentKey, approvalMode, modelSelection } =
+		const { message, agentKey, approvalMode, modelSelection, references } =
 			location.state ?? {};
-		if (!message) return;
+		if (message === undefined) return;
 		navigate(location.pathname, { replace: true, state: {} });
 		if (agentKey) {
 			try {
@@ -272,14 +300,16 @@ const AgentConversationPage: Component = () => {
 			} catch {
 				navigate("/lucid/agent", {
 					replace: true,
-					state: { message, approvalMode, modelSelection },
+					state: { message, approvalMode, modelSelection, references },
 				});
 				return;
 			}
 			setCreating(false);
 		}
 		//* a message the agent did not accept goes into the chat box to try again
-		if (!(await chat.send(message))) composer?.insert(message);
+		if (!(await chat.send(message, "send", references))) {
+			composer?.insert(message, references);
+		}
 	});
 	createEffect(() => {
 		if (!selectedId()) return;
@@ -366,7 +396,10 @@ const AgentConversationPage: Component = () => {
 										<div ref={scroll.setSentinel} aria-hidden="true" />
 										<div
 											ref={scroll.setContent}
-											class="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-8 pb-10 md:px-6"
+											class={classnames(
+												"mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-8 md:px-6",
+												attached() ? "pb-32" : "pb-10",
+											)}
 										>
 											<For each={chat.messages}>
 												{(message, index) => (
@@ -386,6 +419,7 @@ const AgentConversationPage: Component = () => {
 														>
 															<AgentMessage
 																message={message}
+																referenceDetails={referenceDetails()}
 																pendingInteractionId={
 																	chat.pendingInteraction()?.id
 																}
@@ -448,13 +482,28 @@ const AgentConversationPage: Component = () => {
 												</p>
 											</Show>
 											<Show when={chat.error() ?? runError()}>
-												{(message) => <AgentErrorNotice message={message()} />}
+												{(message) => (
+													<AgentErrorNotice
+														message={message()}
+														onRetry={
+															latestRun()?.status === "failed" &&
+															!chat.working() &&
+															!unavailable()
+																? () => void chat.retry()
+																: undefined
+														}
+													/>
+												)}
 											</Show>
 										</div>
 									</div>
+									{/* with files attached it reaches halfway up behind them, so text fades out beneath the cards */}
 									<div
 										aria-hidden="true"
-										class="pointer-events-none absolute inset-x-0 -bottom-2.5 h-10.5 bg-linear-to-t from-background to-transparent"
+										class={classnames(
+											"pointer-events-none absolute inset-x-0 -bottom-2.5 bg-linear-to-t from-background to-transparent",
+											attached() ? "h-18" : "h-10.5",
+										)}
 									/>
 									<AgentChatTimeline
 										messages={chat.messages}
@@ -467,7 +516,12 @@ const AgentConversationPage: Component = () => {
 										</div>
 									</Show>
 									<Show when={!scroll.following()}>
-										<div class="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
+										<div
+											class={classnames(
+												"pointer-events-none absolute inset-x-0 flex justify-center",
+												attached() ? "bottom-32" : "bottom-3",
+											)}
+										>
 											<Button
 												variant="secondary"
 												size="xs"
@@ -523,6 +577,11 @@ const AgentConversationPage: Component = () => {
 												class="agent-composer-morph"
 												autofocus={true}
 												draftKey={params.conversationId}
+												floatAttachments={true}
+												onAttachedChange={setAttached}
+												referenceDetails={referenceDetails()}
+												attachments={agent()?.attachments}
+												capabilities={agent()?.capabilities}
 												disabled={!models.isSuccess}
 												placeholder={T()(
 													models.isError

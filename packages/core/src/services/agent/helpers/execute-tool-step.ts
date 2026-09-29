@@ -7,7 +7,7 @@ import type {
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { AgentWidgetPart } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type resolveCapabilities from "./resolve-capabilities.js";
+import type resolveRunSetup from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import runToolCall from "./run-tool-call.js";
 
@@ -22,7 +22,7 @@ const executeToolStep: ServiceFn<
 			call: ToolCall;
 			checkpoint: Checkpoint;
 			session: RunSession;
-			capabilities: ReturnType<typeof resolveCapabilities>;
+			setup: ReturnType<typeof resolveRunSetup>;
 			authority: AgentToolAuthority;
 		},
 	],

@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import constants from "../../../constants/constants.js";
 import {
-	type ContextCapabilities,
+	type ContextSetup,
 	conversationContext,
 } from "../../../libs/agent/context.js";
+import { inputMessageParts } from "../../../libs/agent/input.js";
 import type {
 	Checkpoint,
 	ConversationContext,
@@ -18,6 +19,8 @@ import {
 	AgentRunsRepository,
 } from "../../../libs/repositories/index.js";
 import type {
+	AgentMessagePart,
+	AgentReferenceInput,
 	AgentRunStatus,
 	AgentStreamEvent,
 } from "../../../types/response.js";
@@ -26,6 +29,7 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
+import registerReferences from "../references/register.js";
 import enqueueRun from "./enqueue-run.js";
 import enqueueTitle from "./enqueue-title.js";
 
@@ -174,26 +178,43 @@ const openRunSession = async (
 		data: {
 			signal,
 			claimSteering: () => Inputs.claimSteering(run.id, token),
+			/** Saves steered input as a user message, returning its parts with attachment details. */
 			appendInput: async (input: {
 				id: string;
 				text: string;
+				references: AgentReferenceInput[];
 				createdAt: string;
-			}): ServiceResponse<undefined> => {
-				const AgentMessages = new AgentMessagesRepository(context.db);
-				const stored = await AgentMessages.upsertForRun({
-					id: input.id,
-					conversationId: run.conversation_id,
-					runId: run.id,
-					token,
-					role: "user",
-					parts: [{ type: "text", text: input.text }],
-					now: input.createdAt,
-				});
-				if (stored.error) return stored;
-				if (!stored.data) return superseded();
+			}) =>
+				withTransaction<AgentMessagePart[]>(context, async (context) => {
+					const references = await registerReferences(context, {
+						conversationId: run.conversation_id,
+						references: input.references,
+						source: { type: "message" },
+						skipMissing: true,
+					});
+					if (references.error) return references;
 
-				return { error: undefined, data: undefined };
-			},
+					const parts = inputMessageParts({
+						text: input.text,
+						references: references.data,
+					});
+
+					const AgentMessages = new AgentMessagesRepository(context.db);
+
+					const stored = await AgentMessages.upsertForRun({
+						id: input.id,
+						conversationId: run.conversation_id,
+						runId: run.id,
+						token,
+						role: "user",
+						parts,
+						now: input.createdAt,
+					});
+					if (stored.error) return stored;
+					if (!stored.data) return superseded();
+
+					return { error: undefined, data: parts };
+				}),
 			emit,
 			/** Persists the assistant message being written, without the rest of the checkpoint. */
 			saveReply: () => saveReply(),
@@ -271,10 +292,10 @@ const openRunSession = async (
 			},
 			/** Stores the conversation's context for its chat view and streams it. Display state only, so a failed write never stops the run. */
 			saveContext: async (
-				capabilities: ContextCapabilities,
+				setup: ContextSetup,
 				status: ConversationContext["status"],
 			) => {
-				const value = conversationContext(checkpoint, capabilities, status);
+				const value = conversationContext(checkpoint, setup, status);
 				if (!value) return;
 
 				const AgentConversations = new AgentConversationsRepository(context.db);

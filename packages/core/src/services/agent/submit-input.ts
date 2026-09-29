@@ -1,13 +1,18 @@
+import { isDeepStrictEqual } from "node:util";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
 	AgentInputsRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
-import type { AgentDelivery } from "../../types/response.js";
+import type {
+	AgentDelivery,
+	AgentReferenceInput,
+} from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import advanceInputs from "./advance-inputs.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
+import checkReferenceInput from "./references/check-input.js";
 
 /**
  * Records input sent to a conversation. Sending resumes a paused queue, since the
@@ -21,6 +26,7 @@ const submitInput: ServiceFn<
 			userId: number;
 			requestId: string;
 			text: string;
+			references?: AgentReferenceInput[];
 			delivery: AgentDelivery;
 			dispatch?: boolean;
 		},
@@ -32,6 +38,16 @@ const submitInput: ServiceFn<
 		userId: input.userId,
 	});
 	if (owned.error) return owned;
+
+	const references = input.references ?? [];
+	if (references.length) {
+		const checked = await checkReferenceInput(context, {
+			userId: input.userId,
+			agentKey: owned.data.agent_key,
+			references,
+		});
+		if (checked.error) return checked;
+	}
 
 	const Inputs = new AgentInputsRepository(context.db);
 	const Conversations = new AgentConversationsRepository(context.db);
@@ -58,13 +74,14 @@ const submitInput: ServiceFn<
 		conversationId: input.conversationId,
 		userId: input.userId,
 		text: input.text,
+		references,
 		targetRunId,
 	});
 	if (submitted.error) return submitted;
 
 	//* a retry must repeat the original submission
 	const receipt = await Inputs.selectSingle({
-		select: ["conversation_id", "user_id", "text"],
+		select: ["conversation_id", "user_id", "text", "references"],
 		where: [{ key: "id", operator: "=", value: input.requestId }],
 	});
 	if (receipt.error) return receipt;
@@ -72,7 +89,8 @@ const submitInput: ServiceFn<
 	if (
 		receipt.data?.conversation_id !== input.conversationId ||
 		receipt.data.user_id !== input.userId ||
-		receipt.data.text !== input.text
+		receipt.data.text !== input.text ||
+		!isDeepStrictEqual(receipt.data.references, references)
 	) {
 		return {
 			data: undefined,

@@ -1,5 +1,5 @@
 import {
-	type ContextCapabilities,
+	type ContextSetup,
 	contextLimits,
 	contextTokens,
 	estimateTokens,
@@ -21,11 +21,11 @@ const loadHistory: ServiceFn<
 		{
 			run: SessionRun;
 			checkpoint: Checkpoint;
-			capabilities: ContextCapabilities;
+			setup: ContextSetup;
 		},
 	],
 	boolean
-> = async (context, { run, checkpoint, capabilities }) => {
+> = async (context, { run, checkpoint, setup }) => {
 	if (checkpoint.historyAfter === undefined) {
 		return { error: undefined, data: false };
 	}
@@ -40,7 +40,7 @@ const loadHistory: ServiceFn<
 	if (history.error) return history;
 
 	const budget = tokenLimit(checkpoint) * contextLimits.compactAt;
-	let tokens = contextTokens(checkpoint, capabilities);
+	let tokens = contextTokens(checkpoint, setup);
 
 	for (const saved of history.data) {
 		//* a saved message loads whole, so a call is never separated from its result

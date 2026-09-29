@@ -13,6 +13,10 @@ import type {
 	AgentRunStatus,
 	AgentUsage,
 } from "../../types/response.js";
+import {
+	getCapabilityProviders,
+	summariseCapabilities,
+} from "../agent/capabilities.js";
 import { contextLimits } from "../agent/context.js";
 import { getAgents } from "../agent/registry.js";
 import type { ConversationContext, RoutineTools } from "../agent/types.js";
@@ -27,6 +31,7 @@ import type { Select } from "../db/types.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
 import { getAgentPermission } from "../permission/agent-permissions.js";
 import hasAccess from "../permission/has-access.js";
+import type { Permission } from "../permission/types.js";
 import formatter from "./helpers.js";
 
 const formatDefinitions = (props: {
@@ -53,11 +58,20 @@ const formatDefinitions = (props: {
 				user: props.authUser,
 				requiredPermissions: [getAgentPermission(agent.key, "manage")],
 			});
+			const can = (permission: Permission) =>
+				hasAccess({ user: props.authUser, requiredPermissions: [permission] });
 
 			return {
 				key: agent.key,
 				name: agent.name,
 				description: agent.description,
+				attachments: agent.attachments,
+				capabilities: summariseCapabilities(
+					getCapabilityProviders({
+						tools: agent.tools.filter((tool) => tool.permissions.every(can)),
+						can,
+					}),
+				),
 				suggestions: canUse
 					? agent.suggestions.map((suggestion) => ({
 							title: withDefaultMessage(suggestion.title),
@@ -176,6 +190,7 @@ const formatInput = (props: {
 }): AgentInput => ({
 	id: props.input.id,
 	text: props.input.text,
+	references: props.input.references,
 	status: props.input.status === "claimed" ? "claimed" : "pending",
 	delivery: props.input.target_run_id
 		? { kind: "steer", targetRunId: props.input.target_run_id }

@@ -2,6 +2,7 @@ import type { ServiceFn } from "../../exports/types.js";
 import { DocumentReferencesRepository } from "../../libs/repositories/index.js";
 import type { DocumentEditToken } from "../../libs/toolkit/documents/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import deleteAgentReferences from "../agent/references/delete-for-documents.js";
 import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import removeTarget from "../document-references/remove-target.js";
 import deleteWorkflowsForDocuments from "../document-workflows/delete-for-documents.js";
@@ -55,6 +56,7 @@ const deleteSinglePermanently: ServiceFn<
 				deletePreviewsRes,
 				cancelRequestsRes,
 				workflowDeleteRes,
+				agentReferencesRes,
 			] = await Promise.all([
 				documents.deleteSingle(
 					{
@@ -93,12 +95,17 @@ const deleteSinglePermanently: ServiceFn<
 					collectionKey: data.collectionKey,
 					documentIds: [data.id],
 				}),
+				deleteAgentReferences(context, {
+					collectionKey: data.collectionKey,
+					documentIds: [data.id],
+				}),
 			]);
 			if (deleteDocumentRes.error) return deleteDocumentRes;
 			if (deleteRelationsRes.error) return deleteRelationsRes;
 			if (deletePreviewsRes.error) return deletePreviewsRes;
 			if (cancelRequestsRes.error) return cancelRequestsRes;
 			if (workflowDeleteRes.error) return workflowDeleteRes;
+			if (agentReferencesRes.error) return agentReferencesRes;
 
 			const DocumentReferences = new DocumentReferencesRepository(context.db);
 			const pruned = await DocumentReferences.pruneVersions({

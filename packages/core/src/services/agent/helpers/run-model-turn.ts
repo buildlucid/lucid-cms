@@ -4,11 +4,13 @@ import { modelMessages } from "../../../libs/agent/context.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
 import { AiGenerationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import type resolveCapabilities from "./resolve-capabilities.js";
+import type resolveRunSetup from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import streamModelTurn from "./stream-model-turn.js";
 import textFromParts from "./text-from-parts.js";
-import trackPaidRequest from "./track-paid-request.js";
+import trackPaidRequest, {
+	type PaidRequestRecord,
+} from "./track-paid-request.js";
 
 type TurnResult =
 	| { kind: "continue" }
@@ -24,11 +26,11 @@ const runModelTurn: ServiceFn<
 			run: SessionRun;
 			checkpoint: Checkpoint;
 			session: RunSession;
-			capabilities: ReturnType<typeof resolveCapabilities>;
+			setup: ReturnType<typeof resolveRunSetup>;
 		},
 	],
 	TurnResult
-> = async (context, { run, checkpoint, session, capabilities }) => {
+> = async (context, { run, checkpoint, session, setup }) => {
 	const { limits } = constants.agent;
 	checkpoint.parts = [];
 	checkpoint.calls = [];
@@ -49,7 +51,7 @@ const runModelTurn: ServiceFn<
 	//* approximate serialised size, tracked incrementally rather than re-stringifying every delta
 	let partsSize = 0;
 	let saveError: Awaited<ReturnType<RunSession["save"]>>["error"];
-	const usageRecord = {
+	const usageRecord: PaidRequestRecord = {
 		featureKey: "agent.chat",
 		requestId: checkpoint.requestId,
 		runId: run.id,
@@ -85,7 +87,7 @@ const runModelTurn: ServiceFn<
 			const part = {
 				type: "tool" as const,
 				...call,
-				title: capabilities.titles.get(call.name),
+				title: setup.titles.get(call.name),
 				status: "pending" as const,
 			};
 			checkpoint.calls.push(call);
@@ -113,10 +115,10 @@ const runModelTurn: ServiceFn<
 			streamModelTurn(context, {
 				requestId: checkpoint.requestId,
 				sessionId: run.conversation_id,
-				instructions: capabilities.instructions,
+				instructions: setup.instructions,
 				selection: checkpoint.selection,
 				messages: modelMessages(checkpoint.messages),
-				tools: capabilities.definitions,
+				tools: setup.definitions,
 				signal: AbortSignal.any([session.signal, stop.signal]),
 				onRequest: start,
 				emit: onEvent,
@@ -200,7 +202,7 @@ const runModelTurn: ServiceFn<
 
 	const saved = await session.save();
 	if (saved.error) return saved;
-	await session.saveContext(capabilities, "ready");
+	await session.saveContext(setup, "ready");
 
 	return { error: undefined, data: { kind: "continue" } };
 };

@@ -129,3 +129,40 @@ test("a saved response releases the form before the remaining model stream finis
 		dispose();
 	}
 });
+
+test("retrying the same text with different references creates a new submission", async () => {
+	const previousRun = conversation.latestRun;
+	conversation.latestRun = null;
+	mocks.stream.mockReset().mockResolvedValue(undefined);
+	const { chat, dispose } = createRoot((dispose) => ({
+		chat: useAgentChat(() => "conversation"),
+		dispose,
+	}));
+	try {
+		const first = [
+			{
+				type: "media" as const,
+				mediaId: 12,
+				label: "Hero",
+				mimeType: "image/png",
+			},
+		];
+		expect(await chat.send("Review this", "send", first)).toBe(false);
+		await Promise.resolve();
+		expect(await chat.send("Review this", "send", first)).toBe(false);
+		await Promise.resolve();
+		expect(
+			await chat.send("Review this", "send", [
+				{ type: "media", mediaId: 13, label: "Logo" },
+			]),
+		).toBe(false);
+		const bodies = mocks.stream.mock.calls.map(([request]) => request.body);
+		//* the server gets identities only; labels are for the optimistic message
+		expect(bodies[0]?.references).toEqual([{ type: "media", mediaId: 12 }]);
+		expect(bodies[1]?.requestId).toBe(bodies[0]?.requestId);
+		expect(bodies[2]?.requestId).not.toBe(bodies[0]?.requestId);
+	} finally {
+		conversation.latestRun = previousRun;
+		dispose();
+	}
+});

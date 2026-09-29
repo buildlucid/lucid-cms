@@ -106,6 +106,18 @@ export type MediaImageGenerateCompletionPollResponse =
 	| MediaImageGenerateResponse
 	| MediaImageGenerateCompletionResponse;
 
+/** Lucid AI features that record usage. */
+export type AiUsageFeatureKey =
+	| "agent.chat"
+	| "agent.compact"
+	| "agent.title.generate"
+	| "web.search"
+	| "web.fetch"
+	| "resource.analyze"
+	| "custom-field.input.generate"
+	| "media.alt.generate"
+	| "media.image.generate";
+
 /** What a usage session was for. Agent sessions are chats, including routine runs. */
 export type AiUsageSessionType =
 	| "agent"

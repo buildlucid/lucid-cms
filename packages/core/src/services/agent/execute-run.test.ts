@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import {
 	afterAll,
 	afterEach,
+	assert,
 	beforeAll,
 	beforeEach,
 	describe,
@@ -20,11 +21,13 @@ import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 	AiGenerationsRepository,
+	MediaRepository,
 } from "../../libs/repositories/index.js";
 import defineAgentTool from "../../libs/tools/define-agent-tool.js";
 import { agentTools } from "../../libs/tools/lucid-tools.js";
 import type {
 	AgentApprovalMode,
+	AgentReferenceInput,
 	AgentStreamEvent,
 } from "../../types/response.js";
 import LucidError from "../../utils/errors/lucid-error.js";
@@ -42,9 +45,10 @@ import getInputs from "./get-inputs.js";
 import getRoutine from "./get-routine.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import insertConversation from "./helpers/insert-conversation.js";
-import resolveCapabilities from "./helpers/resolve-capabilities.js";
+import resolveRunSetup from "./helpers/resolve-run-setup.js";
 import streamModelTurn from "./helpers/stream-model-turn.js";
 import recoverInputs from "./recover-inputs.js";
+import retryConversation from "./retry-conversation.js";
 import startRun from "./start-run.js";
 import submitInput from "./submit-input.js";
 import updateConversation from "./update-conversation.js";
@@ -185,12 +189,12 @@ const testAgent = defineAgent({
 		restrictedWriteTool,
 	],
 });
-//* its own agent, so web tool descriptions leave the compaction tests' token budgets alone
+//* its own agent, so web and analysis tool descriptions leave the compaction tests' token budgets alone
 const webAgent = defineAgent({
 	key: "test-web",
 	name: "Web Agent",
 	description: "Researches the web in tests.",
-	tools: [agentTools.web()],
+	tools: [agentTools.web(), agentTools.analyzeResource()],
 });
 const usage: ModelUsage = {
 	model: "test-model",
@@ -234,7 +238,10 @@ beforeAll(async () => {
 	context = createServiceContext({
 		config: {
 			...config,
-			ai: { ...config.ai, agents: { definitions: [testAgent, webAgent] } },
+			ai: {
+				...config.ai,
+				agents: { definitions: [testAgent, webAgent] },
+			},
 		},
 		database,
 		translationStore: createTranslationStore({
@@ -343,7 +350,7 @@ describe("agent runner", () => {
 		"chat",
 		"routine",
 	] as const)("tool descriptions receive %s context", (mode) => {
-		const capabilities = resolveCapabilities(context, {
+		const setup = resolveRunSetup(context, {
 			agent: testAgent,
 			authority: {
 				principal: { type: "user", userId },
@@ -354,13 +361,11 @@ describe("agent runner", () => {
 			hasHistory: false,
 		});
 		expect(
-			capabilities.definitions.find((tool) => tool.name === readTool.name)
+			setup.definitions.find((tool) => tool.name === readTool.name)
 				?.description,
 		).toBe(`Read in ${mode} mode`);
 		expect(
-			capabilities.definitions.some(
-				(tool) => tool.name === "lucid_share_progress",
-			),
+			setup.definitions.some((tool) => tool.name === "lucid_share_progress"),
 		).toBe(mode === "chat");
 	});
 
@@ -1363,7 +1368,8 @@ describe("conversation compaction", () => {
 		return { ...prepared, compactId: requestId };
 	};
 	beforeEach(() => {
-		inputTokenLimit = 4_000;
+		// Leave room for the runner tool definitions as well as conversation history.
+		inputTokenLimit = 5_000;
 	});
 
 	test("manual compaction keeps history and continues from only the newest summary", async () => {
@@ -1691,7 +1697,7 @@ describe("conversation compaction", () => {
 						...usage,
 						tokens: {
 							...usage.tokens,
-							input: { ...usage.tokens.input, total: 3_700 },
+							input: { ...usage.tokens.input, total: inputTokenLimit - 300 },
 						},
 					},
 					connectionId,
@@ -1843,6 +1849,182 @@ describe("queued and steering inputs", () => {
 		});
 	const pending = async (conversationId: string) =>
 		(await getInputs(context, { conversationId })).data ?? [];
+
+	test.each([
+		"queue",
+		"steer",
+	] as const)("keeps %s references pending until delivery and replays them to the model", async (delivery) => {
+		const prepared = await prepare();
+		const media = await new MediaRepository(context.db).createSingle({
+			data: {
+				key: randomUUID(),
+				storage_adapter_key: "test",
+				origin: "human",
+				type: "image",
+				mime_type: "image/png",
+				file_extension: "png",
+				file_size: 1,
+			},
+			returning: ["id"],
+			validation: { enabled: true },
+		});
+		expect(media.error).toBeUndefined();
+		if (!media.data) throw new Error("Expected the media fixture");
+		const references: AgentReferenceInput[] = [
+			{ type: "media", mediaId: media.data.id },
+		];
+		const denied = await submitInput(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			requestId: randomUUID(),
+			text: "",
+			references,
+			delivery: { kind: "queue" },
+		});
+		expect(denied.error?.status).toBe(403);
+		const requestId = randomUUID();
+		const submitted = await new AgentInputsRepository(context.db).submit({
+			id: requestId,
+			conversationId: prepared.conversationId,
+			userId,
+			text: "",
+			references,
+			targetRunId: delivery === "steer" ? prepared.runId : null,
+		});
+		expect(submitted.error).toBeUndefined();
+		expect(await pending(prepared.conversationId)).toEqual([
+			expect.objectContaining({ id: requestId, text: "", references }),
+		]);
+		const linked = () =>
+			context.db.kysely
+				.selectFrom("lucid_agent_media_references")
+				.selectAll()
+				.where("conversation_id", "=", prepared.conversationId)
+				.execute();
+		expect(await linked()).toEqual([]);
+		reply("First done");
+		await executeRun(context, { runId: prepared.runId });
+		expect(await linked()).toEqual([
+			expect.objectContaining({ media_id: media.data.id }),
+		]);
+		expect(await partsOf(prepared.conversationId)).toContainEqual({
+			type: "reference",
+			reference: expect.objectContaining({
+				...references[0],
+				label: expect.any(String),
+				mimeType: "image/png",
+			}),
+		});
+		if (delivery === "queue") {
+			reply("Image linked");
+			await executeRun(context, { runId: requestId });
+		}
+		const checkpoint = (
+			await selectRun(delivery === "queue" ? requestId : prepared.runId)
+		)?.checkpoint;
+		expect(checkpoint?.messages).toContainEqual(
+			expect.objectContaining({
+				role: "user",
+				sourceId: requestId,
+				content: expect.stringContaining(
+					`<attachment type="media" media_id="${media.data.id}"`,
+				),
+			}),
+		);
+	});
+
+	test("retries preserve attachments and cancellation never registers queued resources", async () => {
+		const client = (await testConfig.getDatabase()).client;
+		const editor = await client
+			.insertInto("lucid_users")
+			.values({
+				email: `${randomUUID()}@example.test`,
+				username: randomUUID(),
+				secret: "test",
+				super_admin: 1,
+			})
+			.returning("id")
+			.executeTakeFirstOrThrow();
+		const chat = await insertConversation(context, {
+			agentKey: testAgent.key,
+			userId: editor.id,
+		});
+		if (!chat.data) throw new Error("Expected the chat fixture");
+		await startRun(context, {
+			conversationId: chat.data.id,
+			userId: editor.id,
+			requestId: randomUUID(),
+			text: "Start",
+		});
+		const media = await new MediaRepository(context.db).createSingle({
+			data: {
+				key: randomUUID(),
+				storage_adapter_key: "test",
+				origin: "human",
+				type: "image",
+				mime_type: "image/png",
+				file_extension: "png",
+				file_size: 1,
+			},
+			returning: ["id"],
+			validation: { enabled: true },
+		});
+		if (!media.data) throw new Error("Expected the media fixture");
+		const input = {
+			conversationId: chat.data.id,
+			userId: editor.id,
+			requestId: randomUUID(),
+			text: "Review",
+			references: [{ type: "media" as const, mediaId: media.data.id }],
+			delivery: { kind: "queue" as const },
+		};
+		const disabledContext = {
+			...context,
+			config: {
+				...context.config,
+				ai: {
+					...context.config.ai,
+					agents: {
+						definitions: [
+							{ ...testAgent, attachments: { media: false, documents: true } },
+						],
+					},
+				},
+			},
+		};
+		expect((await submitInput(disabledContext, input)).error?.status).toBe(403);
+		expect(await pending(chat.data.id)).toEqual([]);
+		expect((await submitInput(context, input)).error).toBeUndefined();
+		expect(
+			(
+				await submitInput(context, {
+					...input,
+					references: [{ mediaId: media.data.id, type: "media" }],
+				})
+			).error,
+		).toBeUndefined();
+		expect(
+			(await submitInput(context, { ...input, references: [] })).error?.status,
+		).toBe(409);
+		expect(await pending(chat.data.id)).toHaveLength(1);
+		expect(
+			(
+				await updateInput(context, {
+					conversationId: chat.data.id,
+					userId: editor.id,
+					action: { kind: "cancel", id: input.requestId },
+				})
+			).error,
+		).toBeUndefined();
+		expect(await pending(chat.data.id)).toEqual([]);
+		expect(
+			await client
+				.selectFrom("lucid_agent_media_references")
+				.selectAll()
+				.where("conversation_id", "=", chat.data.id)
+				.execute(),
+		).toEqual([]);
+	});
 
 	test("starts follow-ups in order and accepts retries only with the original text", async () => {
 		const prepared = await prepare();
@@ -2724,4 +2906,93 @@ test("a run stops before calling a model that accepts fewer tools than the agent
 		data: { status: "failed" },
 	});
 	expect(model).not.toHaveBeenCalled();
+});
+
+test("confirm-all asks before resource analysis starts", async () => {
+	const prepared = await prepare({
+		approvalMode: "confirm-all",
+		agentKey: webAgent.key,
+	});
+	callTool({
+		id: "analyze-file",
+		name: "resources_analyze",
+		input: {
+			source: { type: "url", url: "https://example.com/file.pdf" },
+			question: "Summarise this file",
+		},
+	});
+	expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+		data: { status: "waiting" },
+	});
+	expect(
+		remoteRequest.mock.calls.filter(
+			([, options]) => options.body?.feature?.key === "resource.analyze",
+		),
+	).toHaveLength(0);
+	expect(await partsOf(prepared.conversationId)).toContainEqual(
+		expect.objectContaining({
+			type: "widget",
+			interaction: expect.objectContaining({
+				approval: {
+					toolName: "resources_analyze",
+					input: {
+						source: { type: "url", url: "https://example.com/file.pdf" },
+						question: "Summarise this file",
+					},
+				},
+			}),
+		}),
+	);
+});
+
+test("retrying a failed chat answers again without adding a message", async () => {
+	const prepared = await prepare({ text: "Summarise the homepage" });
+	model.mockImplementationOnce(async () => ({
+		data: undefined,
+		error: {
+			type: "basic",
+			status: 400,
+			message: copy("server:agent.connection.failed"),
+		},
+	}));
+	expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+		data: { status: "failed" },
+	});
+	const Messages = new AgentMessagesRepository(context.db);
+	const before = await Messages.selectLatest({
+		conversationId: prepared.conversationId,
+		limit: 20,
+	});
+
+	const retried = await retryConversation(context, {
+		conversationId: prepared.conversationId,
+		userId,
+		requestId: randomUUID(),
+	});
+	assert(retried.data, JSON.stringify(retried.error));
+	reply("The homepage covers our services.");
+	expect(
+		await executeRun(context, { runId: retried.data.runId }),
+	).toMatchObject({ data: { status: "completed" } });
+	expect(model.mock.calls.at(-1)?.[1].messages.at(-1)).toEqual({
+		role: "user",
+		content: "Summarise the homepage",
+	});
+	const after = await Messages.selectLatest({
+		conversationId: prepared.conversationId,
+		limit: 20,
+	});
+	expect(after.data?.filter((message) => message.role === "user")).toHaveLength(
+		before.data?.filter((message) => message.role === "user").length ?? 0,
+	);
+
+	expect(
+		(
+			await retryConversation(context, {
+				conversationId: prepared.conversationId,
+				userId,
+				requestId: randomUUID(),
+			})
+		).error?.status,
+	).toBe(409);
 });

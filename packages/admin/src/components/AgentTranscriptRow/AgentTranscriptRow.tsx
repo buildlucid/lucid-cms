@@ -146,6 +146,7 @@ const AgentTranscriptRow: Component<AgentTranscriptRowProps> = (props) => {
 						<Portal mount={sidebar()}>
 							<AgentSidebarCard
 								title={props.panelTitle ?? props.label}
+								reveal={id}
 								onClose={() => transcript?.select(undefined)}
 							>
 								{props.renderPanel?.()}

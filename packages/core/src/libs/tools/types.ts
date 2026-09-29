@@ -76,6 +76,20 @@ export type McpToolHandler<Input, Output> = ToolHandler<
 	McpToolExecution
 >;
 
+/**
+ * What a tool lets an agent do, from a person's point of view. Lucid combines
+ * these across an agent's tools to show people what it can do, such as which
+ * attached files it can open or whether it can search the web.
+ */
+export type AgentToolCapabilities = {
+	/** Opens attached media of these MIME types, eg. "application/pdf" or "image/*". */
+	media?: { mimeTypes: readonly string[] };
+	/** Searches the public web. */
+	webSearch?: boolean;
+	/** Reads public webpages. */
+	webRead?: boolean;
+};
+
 export type AgentToolDescriptionProps = { mode: RunMode };
 
 export type AgentToolDescription =
@@ -129,6 +143,8 @@ export type DefineAgentToolOptions<
 	readOnly?: boolean;
 	/** Ask before executing in tool-defaults mode. Routines can override this. Defaults to false. */
 	requiresApproval?: boolean;
+	/** What this tool lets the agent do, shown to people in the chat. */
+	capabilities?: AgentToolCapabilities;
 	handler: AgentToolHandler<z.output<Input>, z.output<Output>>;
 };
 
@@ -240,6 +256,7 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly permissions: readonly Permission[];
 	readonly readOnly: boolean;
 	readonly requiresApproval: boolean;
+	readonly capabilities?: AgentToolCapabilities;
 	readonly interaction?: { readonly key: string; readonly version: number };
 	readonly [toolDefinitionInternal]: {
 		readonly interaction?: {

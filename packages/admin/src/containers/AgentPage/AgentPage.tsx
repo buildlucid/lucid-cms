@@ -26,6 +26,7 @@ import {
 	getAgentAccess,
 	getAgentUnavailableReason,
 } from "@/utils/agent-access";
+import type { AgentReferenceItem } from "@/utils/agent-references";
 import { startViewTransition } from "@/utils/view-transition";
 import AgentPicker from "./parts/AgentPicker";
 import AgentSuggestionButton from "./parts/AgentSuggestionButton";
@@ -43,11 +44,13 @@ const AgentPage: Component = () => {
 	// State & Hooks
 	const location = useLocation<{
 		message?: string;
+		references?: AgentReferenceItem[];
 		approvalMode?: AgentApprovalMode;
 		modelSelection?: AiModelSelection;
 	}>();
 	const navigate = useNavigate();
 	const returned = location.state?.message;
+	const returnedReferences = location.state?.references;
 	const [modelSelection, setModelSelection] =
 		createSignal<AiModelSelection | null>(
 			location.state?.modelSelection ?? null,
@@ -104,7 +107,11 @@ const AgentPage: Component = () => {
 
 	// ----------------------------------------
 	// Functions
-	const start = (text: string) => {
+	const start = (
+		text: string,
+		_mode: "send" | "steer" = "send",
+		references: AgentReferenceItem[] = [],
+	) => {
 		const selected = agent();
 		if (
 			!selected ||
@@ -120,6 +127,7 @@ const AgentPage: Component = () => {
 				navigate(`/lucid/agent/chats/${crypto.randomUUID()}`, {
 					state: {
 						message: text,
+						references,
 						agentKey: selected.key,
 						approvalMode: approvalMode(),
 						modelSelection: modelSelection() ?? undefined,
@@ -134,7 +142,9 @@ const AgentPage: Component = () => {
 	// Effects
 	onMount(() => {
 		void import("@/containers/AgentConversationPage/AgentConversationPage");
-		if (returned) navigate(location.pathname, { replace: true, state: {} });
+		if (returned !== undefined) {
+			navigate(location.pathname, { replace: true, state: {} });
+		}
 	});
 
 	// ----------------------------------------
@@ -163,7 +173,8 @@ const AgentPage: Component = () => {
 									<div class="flex flex-col">
 										<AgentComposer
 											ref={(handle: AgentComposerHandle) => {
-												if (returned) handle.insert(returned);
+												if (returned !== undefined)
+													handle.insert(returned, returnedReferences);
 											}}
 											class="agent-composer-morph"
 											size="lg"
@@ -177,6 +188,8 @@ const AgentPage: Component = () => {
 													: "agent.composer.placeholder",
 											)}
 											draftKey="new"
+											attachments={current().attachments}
+											capabilities={current().capabilities}
 											onSubmit={start}
 											controls={
 												<AgentApprovalPicker

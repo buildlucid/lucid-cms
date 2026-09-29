@@ -7,6 +7,22 @@ import { getValidPermissions } from "../../permission/registry.js";
 import { isToolDefinition } from "../../tools/registry.js";
 import type { ToolDefinition } from "../../tools/types.js";
 
+const agentToolCapabilitiesSchema = z
+	.object({
+		media: z
+			.object({
+				mimeTypes: z
+					.array(z.string().regex(/^[a-z]+\/(\*|[a-z0-9.+-]+)$/))
+					.min(1),
+			})
+			.strict()
+			.optional(),
+		webSearch: z.boolean().optional(),
+		webRead: z.boolean().optional(),
+	})
+	.strict()
+	.optional();
+
 /** Checks a tool's name, schemas and access requirements. */
 const checkTool = (
 	config: ResolvedLucidConfig,
@@ -66,6 +82,15 @@ const checkTool = (
 		) {
 			throw new Error(
 				`Agent tool "${tool.name}" needs an interaction key that does not start with "${constants.agent.widgets.reservedPrefix}" and a positive whole-number version.`,
+			);
+		}
+
+		const capabilities = agentToolCapabilitiesSchema.safeParse(
+			tool.capabilities,
+		);
+		if (!capabilities.success) {
+			throw new Error(
+				`Agent tool "${tool.name}" has invalid capabilities: ${z.prettifyError(capabilities.error)}`,
 			);
 		}
 

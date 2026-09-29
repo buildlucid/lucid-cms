@@ -14,6 +14,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
 import { layoutOf } from "@/components/AgentWidget/slots";
@@ -26,6 +27,10 @@ import {
 	messageText,
 	progressTool,
 } from "@/utils/agent-chat";
+import {
+	type AgentReferenceItem,
+	agentReferenceKey,
+} from "@/utils/agent-references";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
 import AgentRunFinish from "./parts/AgentRunFinish";
@@ -33,6 +38,8 @@ import AgentToolCall from "./parts/AgentToolCall";
 
 export interface AgentMessageProps {
 	message: AgentMessageData;
+	/** Current details for linked resources, keyed by `agentReferenceKey`, so attachments can show previews. */
+	referenceDetails?: Readonly<Record<string, AgentReferenceItem>>;
 	pendingInteractionId?: string;
 	onRespond?: (
 		interactionId: string,
@@ -69,6 +76,24 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// Memos
 	const user = createMemo(() => props.message.role === "user");
 	const text = createMemo(() => messageText(props.message));
+	const hasText = createMemo(() =>
+		props.message.parts.some((part) => part.type === "text" && part.text),
+	);
+	//* saved details are what was sent; current details add previews when the resource still exists
+	const attachments = createMemo(() =>
+		props.message.parts.flatMap((part) =>
+			part.type === "reference"
+				? [
+						{
+							...part.reference,
+							previewUrl:
+								props.referenceDetails?.[agentReferenceKey(part.reference)]
+									?.previewUrl,
+						},
+					]
+				: [],
+		),
+	);
 	//* a message that ends in a row, such as a tool call, carries on in the next turn, so it has no timestamp
 	const endsInText = createMemo(() => {
 		const last = props.message.parts.findLast(
@@ -129,14 +154,23 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 			<Show
 				when={!user()}
 				fallback={
-					<div class="ms-auto max-w-[85%] rounded-2xl rounded-ee-md bg-input px-4 py-2.5">
-						<For each={props.message.parts}>
-							{(part) =>
-								part.type === "text" ? (
-									<AgentMarkdown text={part.text} tone="bubble" />
-								) : null
-							}
-						</For>
+					<div class="flex flex-col items-end gap-1">
+						<AgentReferenceFiles
+							references={attachments()}
+							align="end"
+							class="-me-4 w-[calc(85%+1rem)]"
+						/>
+						<Show when={hasText()}>
+							<div class="max-w-[85%] rounded-2xl rounded-ee-md bg-input px-4 py-2.5">
+								<For each={props.message.parts}>
+									{(part) =>
+										part.type === "text" ? (
+											<AgentMarkdown text={part.text} tone="bubble" />
+										) : null
+									}
+								</For>
+							</div>
+						</Show>
 					</div>
 				}
 			>

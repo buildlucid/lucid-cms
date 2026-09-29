@@ -228,6 +228,29 @@ test.each([
 	});
 });
 
+test("keeps the caller's failure reason when an unbilled request settles", async () => {
+	const input = await pending(false);
+	request.mockResolvedValue({
+		error: undefined,
+		data: {
+			json: { data: { requestId: input.requestId, status: "failed" } },
+		},
+	});
+	await reconcileUsage(context, {
+		requestId: input.requestId,
+		errorMessage: "The page could not be read.",
+	});
+	const AiGenerations = new AiGenerationsRepository(context.db);
+	const stored = await AiGenerations.selectSingleByRequestId({
+		requestId: input.requestId,
+		select: ["status", "error_message"],
+	});
+	expect(stored.data).toMatchObject({
+		status: "failed",
+		error_message: "The page could not be read.",
+	});
+});
+
 test.each([
 	"processing",
 	"complete",

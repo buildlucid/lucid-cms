@@ -1,6 +1,8 @@
-import type { Generated } from "kysely";
+import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
 import { agentInputStatusSchema } from "../../../schemas/agent.js";
+import { agentReferenceInputSchema } from "../../../schemas/agent-references.js";
+import type { AgentReferenceInput } from "../../../types/response.js";
 import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable } from "../types.js";
 
@@ -11,6 +13,7 @@ export const agentInputsTable = defineTable("lucid_agent_inputs", () => ({
 		conversation_id: { schema: z.uuid(), type: "text" },
 		user_id: { schema: z.number(), type: "integer" },
 		text: { schema: z.string(), type: "text" },
+		references: { schema: z.array(agentReferenceInputSchema), type: "json" },
 		target_run_id: { schema: z.uuid().nullable(), type: "text" },
 		status: { schema: agentInputStatusSchema, type: "text" },
 		created_at: { schema: z.union([z.string(), z.date()]), type: "timestamp" },
@@ -25,6 +28,11 @@ export interface LucidAgentInputs {
 	/** Who sent it. The run it starts acts for them. */
 	user_id: number;
 	text: string;
+	references: JSONColumnType<
+		AgentReferenceInput[],
+		AgentReferenceInput[],
+		AgentReferenceInput[]
+	>;
 	target_run_id: string | null;
 	status: Generated<z.infer<typeof agentInputStatusSchema>>;
 	created_at: TimestampImmutable;

@@ -315,7 +315,12 @@ it("a skipped tool dismisses its approval and steering receipts deduplicate on r
 });
 
 describe("awaitsDelivery", () => {
-	const queued = { id: "input", text: "Next", status: "pending" as const };
+	const queued = {
+		id: "input",
+		text: "Next",
+		references: [],
+		status: "pending" as const,
+	};
 	const run = (status: AgentRunStatus) => ({
 		id: "run",
 		status,

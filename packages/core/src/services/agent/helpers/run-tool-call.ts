@@ -47,7 +47,7 @@ const runToolCall = async (
 		authority: AgentToolAuthority;
 	},
 ): Promise<ToolOutcome> => {
-	const { run, call, checkpoint, session, capabilities } = props;
+	const { run, call, checkpoint, session, setup } = props;
 	const { pending } = checkpoint;
 	const answer = pending?.answer;
 	//* the model needs to know a refusal was deliberate, so it does not simply try again
@@ -64,7 +64,7 @@ const runToolCall = async (
 	const runnerTool = runnerToolHandlers.get(call.name);
 	if (runnerTool) return runnerTool(context, { ...props, answer });
 
-	const tool = capabilities.tools.find((tool) => tool.name === call.name);
+	const tool = setup.tools.find((tool) => tool.name === call.name);
 	if (!tool) {
 		return toolFailure(context.translate("server:agent.tool.unavailable"));
 	}

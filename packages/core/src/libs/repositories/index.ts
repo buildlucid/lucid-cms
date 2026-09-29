@@ -1,6 +1,8 @@
 export { default as AgentCompactionsRepository } from "./agent-compactions.js";
 export { default as AgentConversationsRepository } from "./agent-conversations.js";
+export { default as AgentDocumentReferencesRepository } from "./agent-document-references.js";
 export { default as AgentInputsRepository } from "./agent-inputs.js";
+export { default as AgentMediaReferencesRepository } from "./agent-media-references.js";
 export { default as AgentMessagesRepository } from "./agent-messages.js";
 export { default as AgentRoutineToolsRepository } from "./agent-routine-tools.js";
 export { default as AgentRoutinesRepository } from "./agent-routines.js";

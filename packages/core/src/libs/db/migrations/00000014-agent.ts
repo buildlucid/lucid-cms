@@ -161,6 +161,88 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.execute();
 
 		await db.schema
+			.createTable("lucid_agent_media_references")
+			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col
+					.notNull()
+					.references("lucid_agent_conversations.id")
+					.onDelete("cascade"),
+			)
+			.addColumn("media_id", adapter.getDataType("integer"), (col) =>
+				col.notNull().references("lucid_media.id").onDelete("cascade"),
+			)
+			.addColumn("source", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("tool_name", adapter.getDataType("text"))
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col.notNull(),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("uniq_agent_media_reference")
+			.on("lucid_agent_media_references")
+			.columns(["conversation_id", "media_id"])
+			.unique()
+			.execute();
+
+		await db.schema
+			.createIndex("idx_agent_media_reference_target")
+			.on("lucid_agent_media_references")
+			.column("media_id")
+			.execute();
+
+		await db.schema
+			.createTable("lucid_agent_document_references")
+			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col
+					.notNull()
+					.references("lucid_agent_conversations.id")
+					.onDelete("cascade"),
+			)
+			.addColumn("collection_key", adapter.getDataType("text"), (col) =>
+				col.notNull().references("lucid_collections.key").onDelete("cascade"),
+			)
+			.addColumn("document_id", adapter.getDataType("integer"), (col) =>
+				col.notNull(),
+			)
+			.addColumn("version_id", adapter.getDataType("integer"))
+			.addColumn("source", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("tool_name", adapter.getDataType("text"))
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col.notNull(),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("uniq_agent_document_reference")
+			.on("lucid_agent_document_references")
+			.columns(["conversation_id", "collection_key", "document_id"])
+			.where(sql<boolean>`version_id is null`)
+			.unique()
+			.execute();
+
+		await db.schema
+			.createIndex("uniq_agent_document_version_reference")
+			.on("lucid_agent_document_references")
+			.columns([
+				"conversation_id",
+				"collection_key",
+				"document_id",
+				"version_id",
+			])
+			.where(sql<boolean>`version_id is not null`)
+			.unique()
+			.execute();
+
+		await db.schema
+			.createIndex("idx_agent_document_reference_target")
+			.on("lucid_agent_document_references")
+			.columns(["collection_key", "document_id", "version_id"])
+			.execute();
+
+		await db.schema
 			.createTable("lucid_agent_inputs")
 			.addColumn("sequence", adapter.getDataType("primary"), (col) =>
 				adapter.primaryKeyColumnBuilder(col),
@@ -178,6 +260,9 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 				col.notNull().references("lucid_users.id").onDelete("cascade"),
 			)
 			.addColumn("text", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("references", adapter.getDataType("json"), (col) =>
+				col.notNull().defaultTo("[]"),
+			)
 			.addColumn("target_run_id", adapter.getDataType("text"))
 			.addColumn("status", adapter.getDataType("text"), (col) =>
 				col.notNull().defaultTo("pending"),

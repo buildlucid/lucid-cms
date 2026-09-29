@@ -13,6 +13,10 @@ import type {
 	AgentRoutineSource,
 	AgentTitleStatus,
 } from "../types/response.js";
+import {
+	agentReferenceInputSchema,
+	agentReferenceSnapshotSchema,
+} from "./agent-references.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 
 /** Pending and claimed input is still to be delivered; the rest is kept as a receipt. */
@@ -31,6 +35,7 @@ export const agentDeliverySchema = z.discriminatedUnion("kind", [
 export const agentInputSchema = z.object({
 	id: z.uuid(),
 	text: z.string(),
+	references: z.array(agentReferenceInputSchema).default([]),
 	status: z.enum(["pending", "claimed"]),
 	delivery: agentDeliverySchema,
 }) satisfies z.ZodType<AgentInput>;
@@ -133,6 +138,12 @@ export const agentMessagePartSchema = z.discriminatedUnion("type", [
 	z.object({ type: z.literal("text"), text: z.string() }).strict(),
 	z
 		.object({
+			type: z.literal("reference"),
+			reference: agentReferenceSnapshotSchema,
+		})
+		.strict(),
+	z
+		.object({
 			type: z.literal("tool"),
 			id: z.string(),
 			name: z.string(),
@@ -219,6 +230,12 @@ const agentCatalogResponseSchema = z.object({
 			key: z.string(),
 			name: z.string(),
 			description: z.string(),
+			attachments: z.object({ media: z.boolean(), documents: z.boolean() }),
+			capabilities: z.object({
+				media: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
+				webSearch: z.boolean(),
+				webRead: z.boolean(),
+			}),
 			suggestions: z.array(
 				z.object({
 					title: resolvedAdminCopySchema,
@@ -417,11 +434,16 @@ export const controllerSchemas = {
 		response: z.array(agentMessageResponseSchema),
 	} satisfies ControllerSchema,
 	sendMessage: {
-		body: z.object({
-			text: z.string().trim().min(1).max(20_000),
-			delivery: agentDeliverySchema.default({ kind: "queue" }),
-			requestId: z.uuid(),
-		}),
+		body: z
+			.object({
+				text: z.string().trim().max(20_000),
+				references: z.array(agentReferenceInputSchema).max(50).default([]),
+				delivery: agentDeliverySchema.default({ kind: "queue" }),
+				requestId: z.uuid(),
+			})
+			.refine((input) => input.text.length > 0 || input.references.length > 0, {
+				path: ["text"],
+			}),
 		query: noQuery,
 		params: idParams,
 		response: undefined,
@@ -433,6 +455,12 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	compactConversation: {
+		body: z.object({ requestId: z.uuid() }),
+		query: noQuery,
+		params: idParams,
+		response: undefined,
+	} satisfies ControllerSchema,
+	retryConversation: {
 		body: z.object({ requestId: z.uuid() }),
 		query: noQuery,
 		params: idParams,

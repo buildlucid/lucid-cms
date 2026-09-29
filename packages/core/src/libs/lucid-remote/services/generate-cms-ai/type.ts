@@ -4,6 +4,8 @@ import type {
 	AiGenerateUsage,
 } from "@lucidcms/types";
 
+import type { ResourceAnalyzeRequest } from "../../schema/resource.js";
+
 export type CmsAiGenerateRequestInputText<TRole extends string = string> = {
 	type: "text";
 	role: TRole;
@@ -220,6 +222,7 @@ export type AgentTitleGenerateV1Request = CmsAiGenerateBaseRequest<
 >;
 
 export type CmsAiGenerateRequest =
+	| ResourceAnalyzeRequest
 	| AgentTitleGenerateV1Request
 	| CustomFieldInputV1Request
 	| MediaAltGenerateV1Request
@@ -231,6 +234,8 @@ export type GenerateCmsAiProps = {
 	accessToken: string;
 	request: CmsAiGenerateRequest;
 	idempotencyKey?: string;
+	/** Stops waiting when the caller cancels the request. */
+	signal?: AbortSignal;
 };
 
 export type CmsAiGenerateCompletedData = {

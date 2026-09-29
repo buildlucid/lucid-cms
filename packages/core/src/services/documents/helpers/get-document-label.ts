@@ -2,7 +2,6 @@ import type { CollectionTableNames } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import {
 	formatDocumentLabelValue,
-	getDocumentFallbackLabel,
 	getDocumentLabelField,
 } from "../../../libs/collection/helpers/document-label.js";
 import prefixGeneratedColName from "../../../libs/collection/helpers/prefix-generated-column-name.js";
@@ -13,25 +12,28 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 
-/** Resolves the document label snapshot stored on publish operation events. */
+/** Reads the configured label for a document version, falling back to its collection name and ID. */
 const getDocumentLabel = async (params: {
 	context: ServiceContext;
 	bricks: DocumentBricksRepository;
 	collection: CollectionBuilder;
 	tables: CollectionTableNames;
-	operation: {
-		document_id: number;
-		source_version_id: number;
+	documentId: number;
+	versionId: number;
+}): ServiceResponse<string> => {
+	const fallbackLabel = () => {
+		const labels = params.collection.getData.details.labels;
+		const name =
+			params.context.translate(labels.singular) ||
+			params.context.translate(labels.plural) ||
+			params.collection.key;
+		return `${name} #${params.documentId}`;
 	};
-}): ServiceResponse<string | null> => {
 	const labelField = getDocumentLabelField(params.collection);
 	if (!labelField) {
 		return {
 			error: undefined,
-			data: getDocumentFallbackLabel(
-				params.collection,
-				params.operation.document_id,
-			),
+			data: fallbackLabel(),
 		};
 	}
 
@@ -43,17 +45,14 @@ const getDocumentLabel = async (params: {
 	if (!documentFieldsTableSchemaRes.data) {
 		return {
 			error: undefined,
-			data: getDocumentFallbackLabel(
-				params.collection,
-				params.operation.document_id,
-			),
+			data: fallbackLabel(),
 		};
 	}
 
 	const fieldsRes = await params.bricks.selectMultipleByVersionId(
 		{
-			versionId: params.operation.source_version_id,
-			documentId: params.operation.document_id,
+			versionId: params.versionId,
+			documentId: params.documentId,
 			bricksSchema: [
 				{
 					name: params.tables.documentFields,
@@ -68,8 +67,7 @@ const getDocumentLabel = async (params: {
 	if (fieldsRes.error) return fieldsRes;
 
 	const columnName = prefixGeneratedColName(labelField.key);
-	const documentFields = (fieldsRes.data?.[params.tables.documentFields] ??
-		[]) as Array<Record<string, unknown>>;
+	const documentFields = fieldsRes.data?.[params.tables.documentFields] ?? [];
 	const value = documentFields
 		.map((field) => field[columnName])
 		.map((value) => formatDocumentLabelValue(labelField, value))
@@ -77,9 +75,7 @@ const getDocumentLabel = async (params: {
 
 	return {
 		error: undefined,
-		data:
-			value ??
-			getDocumentFallbackLabel(params.collection, params.operation.document_id),
+		data: value ?? fallbackLabel(),
 	};
 };
 

@@ -16,8 +16,8 @@ import compactContext from "./compact-context.js";
 import consumeSteering from "./consume-steering.js";
 import executeToolStep from "./execute-tool-step.js";
 import loadHistory from "./load-history.js";
-import resolveCapabilities from "./resolve-capabilities.js";
 import resolveModel from "./resolve-model.js";
+import resolveRunSetup from "./resolve-run-setup.js";
 import runModelTurn from "./run-model-turn.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import startNextTurn from "./start-next-turn.js";
@@ -74,13 +74,13 @@ const driveRun: ServiceFn<
 
 	//* resolved before each model turn, since trimmed context adds the history tool
 	const resolve = () =>
-		resolveCapabilities(context, {
+		resolveRunSetup(context, {
 			...access.data,
 			mode,
 			hasHistory: checkpoint.trimmed === true,
 		});
 
-	let capabilities = resolve();
+	let setup = resolve();
 	if (checkpoint.inFlightWrite) {
 		return session.finish(
 			"failed",
@@ -94,11 +94,11 @@ const driveRun: ServiceFn<
 		}
 
 		if (checkpoint.phase === "model") {
-			capabilities = resolve();
+			setup = resolve();
 
 			const history = checkpoint.compaction
 				? { error: undefined, data: false }
-				: await loadHistory(context, { run, checkpoint, capabilities });
+				: await loadHistory(context, { run, checkpoint, setup });
 			if (history.error) return history;
 
 			//* steering is taken before each model request and before each tool
@@ -116,14 +116,13 @@ const driveRun: ServiceFn<
 				checkpoint.compaction ||
 				manual ||
 				required ||
-				(!checkpoint.compactionFailed &&
-					needsCompaction(checkpoint, capabilities))
+				(!checkpoint.compactionFailed && needsCompaction(checkpoint, setup))
 			) {
 				const compacted = await compactContext(context, {
 					run,
 					checkpoint,
 					session,
-					capabilities,
+					setup,
 				});
 				if (compacted.error) {
 					if (session.signal.aborted) return session.handOff();
@@ -132,11 +131,11 @@ const driveRun: ServiceFn<
 					if (
 						!manual &&
 						!required &&
-						contextTokens(checkpoint, capabilities) <= tokenLimit(checkpoint)
+						contextTokens(checkpoint, setup) <= tokenLimit(checkpoint)
 					) {
 						checkpoint.compaction = undefined;
 						checkpoint.compactionFailed = true;
-						await session.saveContext(capabilities, "ready");
+						await session.saveContext(setup, "ready");
 						continue;
 					}
 
@@ -179,7 +178,7 @@ const driveRun: ServiceFn<
 			}
 			if (checkpoint.historyAfter !== undefined) continue;
 
-			if (contextTokens(checkpoint, capabilities) > tokenLimit(checkpoint)) {
+			if (contextTokens(checkpoint, setup) > tokenLimit(checkpoint)) {
 				return session.finish(
 					"failed",
 					context.translate("server:agent.conversation.too.large"),
@@ -189,13 +188,13 @@ const driveRun: ServiceFn<
 			//* the provider caps how many tools one request can offer
 			if (
 				checkpoint.model &&
-				capabilities.definitions.length > checkpoint.model.toolLimit
+				setup.definitions.length > checkpoint.model.toolLimit
 			) {
 				return session.finish(
 					"failed",
 					context.translate("server:agent.tools.too.many", {
 						data: {
-							count: capabilities.definitions.length,
+							count: setup.definitions.length,
 							limit: checkpoint.model.toolLimit,
 						},
 					}),
@@ -206,7 +205,7 @@ const driveRun: ServiceFn<
 				run,
 				checkpoint,
 				session,
-				capabilities,
+				setup,
 			});
 			if (turn.error) return turn;
 			if (turn.data.kind === "aborted") return session.handOff();
@@ -256,7 +255,7 @@ const driveRun: ServiceFn<
 				call,
 				checkpoint,
 				session,
-				capabilities,
+				setup,
 				authority: access.data.authority,
 			});
 			if (step.error) return step;

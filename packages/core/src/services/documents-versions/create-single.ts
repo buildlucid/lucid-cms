@@ -5,6 +5,7 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
 import {
+	AgentDocumentReferencesRepository,
 	DocumentReferencesRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
@@ -263,12 +264,23 @@ const createSingle: ServiceFn<
 	}
 
 	const DocumentReferences = new DocumentReferencesRepository(context.db);
-	const pruned = await DocumentReferences.pruneVersions({
-		collectionKey: data.collection.key,
-		versionTable: tableNamesRes.data.version,
-		documentId: data.documentId,
-	});
+	const AgentDocumentReferences = new AgentDocumentReferencesRepository(
+		context.db,
+	);
+	const [pruned, agentReferences] = await Promise.all([
+		DocumentReferences.pruneVersions({
+			collectionKey: data.collection.key,
+			versionTable: tableNamesRes.data.version,
+			documentId: data.documentId,
+		}),
+		AgentDocumentReferences.pruneVersions({
+			collectionKey: data.collection.key,
+			versionTable: tableNamesRes.data.version,
+			documentId: data.documentId,
+		}),
+	]);
 	if (pruned.error) return pruned;
+	if (agentReferences.error) return agentReferences;
 
 	return {
 		error: undefined,

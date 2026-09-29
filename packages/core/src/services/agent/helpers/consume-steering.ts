@@ -1,3 +1,4 @@
+import { messageText } from "../../../libs/agent/input.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import {
@@ -85,6 +86,7 @@ const consumeSteering: ServiceFn<
 			const appended = await session.appendInput({
 				id: input.id,
 				text: input.text,
+				references: input.references,
 				createdAt: new Date(input.created_at).toISOString(),
 			});
 			if (appended.error) return appended;
@@ -95,7 +97,7 @@ const consumeSteering: ServiceFn<
 				checkpoint.messages.push({
 					sourceId: input.id,
 					role: "user",
-					content: input.text,
+					content: messageText(appended.data),
 				});
 			}
 		}

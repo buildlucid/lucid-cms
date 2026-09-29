@@ -5,6 +5,9 @@ import ask from "./ask.js";
 import finish from "./finish.js";
 import history from "./history.js";
 import progress from "./progress.js";
+import references from "./references.js";
+import registerReferences from "./register-references.js";
+import removeReference from "./remove-reference.js";
 import skill from "./skill.js";
 import type { RunnerToolHandler } from "./types.js";
 
@@ -12,6 +15,9 @@ export const runnerToolHandlers: ReadonlyMap<string, RunnerToolHandler> =
 	new Map(
 		Object.entries({
 			[runnerTools.ask.name]: ask,
+			[runnerTools.references.name]: references,
+			[runnerTools.registerReferences.name]: registerReferences,
+			[runnerTools.removeReference.name]: removeReference,
 			[runnerTools.progress.name]: progress,
 			[runnerTools.history.name]: history,
 			[runnerTools.skill.name]: skill,

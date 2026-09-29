@@ -70,27 +70,12 @@ const AiUsageSessionTableRow: Component<AiUsageSessionTableRowProps> = (
 				text={formatAiCredits(props.session.credits)}
 			/>
 			<Table.Cell column="usage" minWidth={220}>
-				<div class="flex flex-col gap-0.5 text-xs text-body">
-					<span>
-						{T()("ai.usage.tokens.summary", {
-							input: formatAiUsageNumber(props.session.tokens.input),
-							output: formatAiUsageNumber(props.session.tokens.output),
-						})}
-					</span>
-					<Show
-						when={
-							props.session.requests.webSearches > 0 ||
-							props.session.requests.webFetches > 0
-						}
-					>
-						<span>
-							{T()("ai.usage.web.summary", {
-								searches: props.session.requests.webSearches,
-								fetches: props.session.requests.webFetches,
-							})}
-						</span>
-					</Show>
-				</div>
+				<span class="text-xs text-body">
+					{T()("ai.usage.tokens.summary", {
+						input: formatAiUsageNumber(props.session.tokens.input),
+						output: formatAiUsageNumber(props.session.tokens.output),
+					})}
+				</span>
 			</Table.Cell>
 			<Table.Cell column="requests">
 				<div class="flex items-center gap-2 text-sm text-body">
