@@ -12,7 +12,10 @@ import type {
 	EnvironmentVariables,
 	ResolvedLucidConfig,
 } from "../../exports/types.js";
-import type { LucidHonoGeneric } from "../../types/hono.js";
+import type {
+	LucidExecutionContext,
+	LucidHonoGeneric,
+} from "../../types/hono.js";
 import {
 	LucidAPIError,
 	LucidError,
@@ -38,6 +41,7 @@ const invocationSymbol = Symbol("@lucidcms/core:http-invocation");
 type HttpInvocation = {
 	db: LucidDatabase;
 	env?: EnvironmentVariables;
+	executionContext: LucidExecutionContext;
 };
 
 type HttpInvocationBindings = EnvironmentVariables & {
@@ -133,7 +137,10 @@ const createApp = async (props: {
 			c.set("env", invocation.env ?? null);
 			c.set("cf", c.get("cf") ?? null);
 			c.set("caches", c.get("caches") ?? null);
-			c.set("ctx", c.get("ctx") ?? null);
+			c.set("ctx", {
+				...c.get("ctx"),
+				...invocation.executionContext,
+			});
 			await next();
 		})
 		.route("/", routes)
@@ -419,7 +426,10 @@ const createApp = async (props: {
 			request: Request;
 			db: LucidDatabase;
 			env?: EnvironmentVariables;
-			executionContext?: unknown;
+			executionContext: LucidExecutionContext & {
+				props?: unknown;
+				exports?: unknown;
+			};
 			requestBindings?: object;
 		}) =>
 			app.fetch(
@@ -428,10 +438,16 @@ const createApp = async (props: {
 					{
 						db: options.db,
 						env: options.env,
+						executionContext: options.executionContext,
 					},
 					options.requestBindings,
 				),
-				options.executionContext as Parameters<typeof app.fetch>[2],
+				{
+					...options.executionContext,
+					passThroughOnException:
+						options.executionContext.passThroughOnException ?? (() => {}),
+					props: options.executionContext.props,
+				},
 			),
 		issues: supportChecksRes.issues,
 		destroy: () => {

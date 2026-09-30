@@ -54,6 +54,7 @@ export const describeCollectionAgentTool = (
 		output: outputSchema,
 		permissions: [],
 		readOnly: true,
+		parallelSafe: true,
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],

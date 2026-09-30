@@ -27,7 +27,11 @@ const useGetConversations = (params: QueryHook<QueryParams>) => {
 	// -----------------------------
 	// Query
 	return useQuery(() => ({
-		queryKey: [...queryKeys.agent.conversations(), queryKey(), params.key?.()],
+		queryKey: [
+			...queryKeys.agent.conversationLists(),
+			queryKey(),
+			params.key?.(),
+		],
 		queryFn: () =>
 			request<ResponseBody<AgentConversation[]>>({
 				url: "/lucid/api/v1/agent/conversations",

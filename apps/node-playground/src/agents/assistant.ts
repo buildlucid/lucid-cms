@@ -14,7 +14,7 @@ export const assistantAgent = defineAgent({
 	tools: [
 		agentTools.content(),
 		agentTools.web(),
-		agentTools.analyzeResource(),
+		agentTools.analyzeMedia(),
 		echoAgentTool,
 		addAgentTool,
 		saveNoteTool,

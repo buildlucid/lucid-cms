@@ -5,10 +5,10 @@ import type { ServiceContext } from "../../../../utils/services/types.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import { createTranslationStore } from "../../../i18n/index.js";
 import {
-	resourceAnalyzeRequestSchema,
-	resourceSourceSchema,
-} from "../../schema/resource.js";
-import analyzeResource from "./index.js";
+	mediaAnalyzeRequestSchema,
+	mediaSourceSchema,
+} from "../../schema/media.js";
+import analyzeMedia from "./index.js";
 
 const testConfig = getTestConfig();
 let context: ServiceContext;
@@ -47,8 +47,8 @@ const usage = {
 	},
 	cost: { creditsCharged: "1" },
 };
-const request = resourceAnalyzeRequestSchema.parse({
-	feature: { key: "resource.analyze", version: "v1" },
+const request = mediaAnalyzeRequestSchema.parse({
+	feature: { key: "media.analyze", version: "v1" },
 	sessionId: randomUUID(),
 	input: [],
 	context: {
@@ -71,7 +71,7 @@ test("posts inline sources with the billing identity and parses analysis", async
 		return Response.json({ data: result });
 	});
 	const requestId = randomUUID();
-	const response = await analyzeResource(context, {
+	const response = await analyzeMedia(context, {
 		requestId,
 		request,
 		accessToken: "test",
@@ -97,7 +97,7 @@ test("polls an existing analysis instead of resubmitting a paid request", async 
 				)
 			: Response.json({ data: result });
 	});
-	const response = await analyzeResource(context, {
+	const response = await analyzeMedia(context, {
 		requestId: randomUUID(),
 		request,
 		accessToken: "test",
@@ -114,7 +114,7 @@ test.each([
 	vi.stubGlobal("fetch", async () => Response.json({ data }));
 	expect(
 		(
-			await analyzeResource(context, {
+			await analyzeMedia(context, {
 				requestId: randomUUID(),
 				request,
 				accessToken: "test",
@@ -126,14 +126,14 @@ test.each([
 
 test("accepts the largest inline input without overflowing the validator", () => {
 	expect(
-		resourceSourceSchema.safeParse({
+		mediaSourceSchema.safeParse({
 			type: "base64",
 			data: "A".repeat(8_000_000),
 			mimeType: "application/pdf",
 		}).success,
 	).toBe(true);
 	expect(
-		resourceSourceSchema.safeParse({
+		mediaSourceSchema.safeParse({
 			type: "base64",
 			data: "a===",
 			mimeType: "application/pdf",

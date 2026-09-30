@@ -14,6 +14,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import enqueueTitle from "./helpers/enqueue-title.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
+import registerUrlKeys from "./helpers/register-url-keys.js";
 import titleFromMessage from "./helpers/title-from-message.js";
 import registerReferences from "./references/register.js";
 
@@ -86,15 +87,27 @@ const startRun: ServiceFn<
 			});
 			if (references.error) return references;
 
-			return messages.appendOnce({
+			const parts = inputMessageParts({
+				text: input.text ?? "",
+				references: references.data,
+			});
+
+			const appended = await messages.appendOnce({
 				id: input.requestId,
 				conversationId: input.conversationId,
 				runId: input.requestId,
-				parts: inputMessageParts({
-					text: input.text ?? "",
-					references: references.data,
-				}),
+				parts,
 				createdAt: now,
+			});
+			if (appended.error) return appended;
+
+			//* a retry keeps the first message, so its changed text cannot add URLs
+			if (!appended.data) return { error: undefined, data: undefined };
+
+			return registerUrlKeys(context, {
+				conversationId: input.conversationId,
+				role: "user",
+				parts,
 			});
 		};
 

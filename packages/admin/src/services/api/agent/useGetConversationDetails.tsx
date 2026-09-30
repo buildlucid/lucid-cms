@@ -5,8 +5,8 @@ import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 
 /**
- * Gets the web sources a conversation used. Its key sits under the
- * conversation list, so refreshing chats after a run refreshes it too.
+ * Gets a conversation's web sources. The chat refreshes them after web tools
+ * finish and once more when the stream ends.
  */
 const useGetConversationDetails = (params: {
 	id: Accessor<string | undefined>;

@@ -125,13 +125,13 @@ export type AgentRunnerToolName =
 	| "lucid_finish_run";
 
 /** Lucid's own agent tools that the admin shows in their own way. */
-export type AgentLucidToolName =
-	| "web_search"
-	| "web_fetch"
-	| "resources_analyze";
+export type AgentLucidToolName = "web_search" | "web_fetch" | "media_analyze";
 
 /** Widgets the runner creates itself: a question from the agent, and a tool waiting for approval. */
-export type AgentRunnerWidgetKey = "lucid-question" | "lucid-tool-approval";
+export type AgentRunnerWidgetKey =
+	| "lucid-question"
+	| "lucid-tool-approval"
+	| "lucid-tool-approval-batch";
 
 /** The lifecycle state of an agent run. */
 export type AgentRunStatus =
@@ -169,6 +169,13 @@ export type AgentInteraction = {
 	placement: "inline" | "composer";
 	/** Present when submission also authorises this invocation. */
 	approval?: { toolName: string; input: Record<string, unknown> };
+	/** Exact independent calls covered by a grouped approval. Unselected calls are denied. */
+	approvals?: {
+		toolCallId: string;
+		toolName: string;
+		title: string;
+		input: Record<string, unknown>;
+	}[];
 } & (
 	| { status: "pending" }
 	| { status: "answered"; response: Record<string, unknown> }
@@ -183,19 +190,36 @@ export type AgentWidgetPart = {
 	interaction?: AgentInteraction;
 };
 
+/** Small values a tool derives from its input, so the chat can describe a call without its raw data. */
+export type AgentToolDisplay =
+	| { kind: "text"; text: string }
+	| { kind: "search"; query: string }
+	| { kind: "fetch"; url: string }
+	| { kind: "skill"; name: string }
+	| { kind: "progress"; message: string }
+	| { kind: "finish"; outcome: AgentRunOutcome; summary: string };
+
+/** Full values for one tool call, fetched when its details are opened. */
+export type AgentToolDetails = {
+	type: "tool";
+	id: string;
+	name: string;
+	title?: ResolvedAdminCopy;
+	display?: AgentToolDisplay;
+	input: Record<string, unknown>;
+	output?: unknown;
+	status: AgentToolStatus;
+};
+
+export type AgentToolSummary = Omit<AgentToolDetails, "input" | "output"> & {
+	/** False while a newly streamed call has not yet been saved. */
+	detailsAvailable: boolean;
+};
+
 export type AgentMessagePart =
 	| { type: "text"; text: string }
 	| { type: "reference"; reference: AgentReferenceSnapshot }
-	| {
-			type: "tool";
-			id: string;
-			name: string;
-			/** The tool's plain-language name, saved when it was called. */
-			title?: ResolvedAdminCopy;
-			input: Record<string, unknown>;
-			output?: unknown;
-			status: AgentToolStatus;
-	  }
+	| AgentToolSummary
 	| AgentWidgetPart;
 
 export interface AgentUsage {

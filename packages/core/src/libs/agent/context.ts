@@ -1,5 +1,6 @@
+import type { StoredAgentMessagePart } from "../../schemas/agent.js";
 import type {
-	AgentMessagePart,
+	AgentToolDetails,
 	AgentToolStatus,
 } from "../../types/response.js";
 import { messageText } from "./input.js";
@@ -136,20 +137,40 @@ export const toolValuePreview = <Value>(
 	};
 };
 
+/** Saved terminal parts are receipts, including completions ahead of the cursor. */
+export const isToolCallComplete = (checkpoint: Checkpoint, callId: string) =>
+	checkpoint.parts.some(
+		(part) =>
+			part.type === "tool" &&
+			part.id === callId &&
+			(part.status === "complete" ||
+				part.status === "failed" ||
+				part.status === "skipped"),
+	);
+
+export const advanceToolCursor = (checkpoint: Checkpoint) => {
+	for (const call of checkpoint.calls.slice(checkpoint.cursor)) {
+		if (!isToolCallComplete(checkpoint, call.id)) break;
+		checkpoint.cursor++;
+	}
+};
+
 /**
  * Records a tool call's result in the reply being written and in the context
  * the model reads next. The full result is saved with the message, so context
- * only needs a preview of a long one.
+ * only needs a preview of a long one. Returns the saved part.
  */
 export const settleToolCall = (
 	checkpoint: Checkpoint,
 	call: ToolCall,
 	result: { status: AgentToolStatus; output: unknown },
 ) => {
+	let settled: AgentToolDetails | undefined;
 	for (const part of checkpoint.parts) {
 		if (part.type === "tool" && part.id === call.id) {
 			part.status = result.status;
 			part.output = result.output;
+			settled = part;
 		}
 	}
 
@@ -159,13 +180,27 @@ export const settleToolCall = (
 	});
 	if (preview.truncated) checkpoint.trimmed = true;
 
-	checkpoint.messages.push({
+	const callIndex = checkpoint.calls.findIndex((value) => value.id === call.id);
+	const laterCalls = new Set(
+		checkpoint.calls.slice(callIndex + 1).map((value) => value.id),
+	);
+	let nextResult = checkpoint.messages.length;
+	for (let i = checkpoint.messages.length - 1; i >= 0; i--) {
+		const message = checkpoint.messages[i];
+		if (message?.role !== "tool" || message.sourceId !== checkpoint.messageId) {
+			break;
+		}
+		if (laterCalls.has(message.toolCallId)) nextResult = i;
+	}
+	checkpoint.messages.splice(nextResult, 0, {
 		sourceId: checkpoint.messageId,
 		role: "tool",
 		toolCallId: call.id,
 		name: call.name,
 		output: preview.value,
 	});
+
+	return settled ?? { type: "tool" as const, ...call, ...result };
 };
 
 /**
@@ -179,7 +214,7 @@ export const historyMessage = (message: {
 	id: string;
 	role: "user" | "assistant";
 	position: number;
-	parts: AgentMessagePart[];
+	parts: StoredAgentMessagePart[];
 }) => {
 	let truncated = false;
 	const text = messageText(message.parts);
@@ -263,8 +298,9 @@ export const compactionCut = (
 			!pending.size &&
 			message.sourceId &&
 			message.sourceId !== messages[i + 1]?.sourceId
-		)
+		) {
 			cut = i + 1;
+		}
 	}
 	return cut;
 };

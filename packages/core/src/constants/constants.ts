@@ -224,6 +224,7 @@ export default Object.freeze({
 		widgets: {
 			question: "lucid-question" satisfies AgentRunnerWidgetKey,
 			approval: "lucid-tool-approval" satisfies AgentRunnerWidgetKey,
+			approvalBatch: "lucid-tool-approval-batch" satisfies AgentRunnerWidgetKey,
 			reservedPrefix: "lucid-",
 		},
 		runStatuses: {
@@ -242,6 +243,13 @@ export default Object.freeze({
 		},
 		/** A slice is one uninterrupted stretch of execution before it hands off to the queue. */
 		sliceMs: 240_000,
+		readConcurrency: 3,
+		streamReplay: {
+			events: 512,
+			bytes: 256 * 1024,
+			runs: 64,
+			retentionMs: 60_000,
+		},
 		leaseMs: 60_000,
 		heartbeatMs: 15_000,
 		replySaveIntervalMs: 1_000,

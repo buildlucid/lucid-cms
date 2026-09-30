@@ -1,4 +1,4 @@
-import { analyzeResourceAgentTool } from "../../services/agent/tools/analyze-resource/index.js";
+import { analyzeMediaAgentTool } from "../../services/agent/tools/analyze-media/index.js";
 import {
 	describeCollectionAgentTool,
 	describeCollectionMcpTool,
@@ -58,7 +58,7 @@ export const agentTools = {
 	/** Reads a public webpage already mentioned in the chat. Uses Lucid credits. */
 	webFetch: webFetchAgentTool,
 	/** Analyses linked images, PDFs, audio, video and text files, or public files mentioned in the chat. Files are sent to Lucid for analysis and use Lucid credits. */
-	analyzeResource: analyzeResourceAgentTool,
+	analyzeMedia: analyzeMediaAgentTool,
 	/** Every content reading tool: collections, documents, media and locales. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),

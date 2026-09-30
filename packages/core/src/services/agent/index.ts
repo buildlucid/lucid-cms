@@ -17,6 +17,7 @@ export { default as getReferences } from "./get-references.js";
 export { default as getRoutine } from "./get-routine.js";
 export { default as getRoutineRuns } from "./get-routine-runs.js";
 export { default as getRoutines } from "./get-routines.js";
+export { default as getToolDetails } from "./get-tool-details.js";
 export { default as retryConversation } from "./retry-conversation.js";
 export { default as runRoutine } from "./run-routine.js";
 export { default as submitInput } from "./submit-input.js";

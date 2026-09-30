@@ -5,23 +5,23 @@ import { copy } from "../../../i18n/index.js";
 import { getLucidRemoteClient } from "../../client.js";
 import { lucidRemotePaths } from "../../constants.js";
 import {
-	type ResourceAnalyzeRequest,
-	type ResourceAnalyzeResponse,
-	resourceAnalyzeResponseSchema,
-} from "../../schema/resource.js";
+	type MediaAnalyzeRequest,
+	type MediaAnalyzeResponse,
+	mediaAnalyzeResponseSchema,
+} from "../../schema/media.js";
 import generateCmsAi from "../generate-cms-ai/index.js";
 
 /** Analyses a file and recovers a request already running under the same identity. */
-const analyzeResource: ServiceFn<
+const analyzeMedia: ServiceFn<
 	[
 		{
 			accessToken: string;
 			requestId: string;
-			request: ResourceAnalyzeRequest;
+			request: MediaAnalyzeRequest;
 			signal: AbortSignal;
 		},
 	],
-	ResourceAnalyzeResponse
+	MediaAnalyzeResponse
 > = async (context, input) => {
 	const response = await generateCmsAi(context, {
 		accessToken: input.accessToken,
@@ -56,7 +56,7 @@ const analyzeResource: ServiceFn<
 
 	if (error) return { error, data: undefined };
 	const parsed = z
-		.object({ data: resourceAnalyzeResponseSchema })
+		.object({ data: mediaAnalyzeResponseSchema })
 		.safeParse(value);
 	if (!parsed.success) {
 		return {
@@ -64,7 +64,7 @@ const analyzeResource: ServiceFn<
 			error: {
 				type: "basic",
 				status: 502,
-				message: copy("server:agent.resource.analyze.failed"),
+				message: copy("server:agent.media.analyze.failed"),
 			},
 		};
 	}
@@ -72,4 +72,4 @@ const analyzeResource: ServiceFn<
 	return { data: parsed.data.data, error: undefined };
 };
 
-export default analyzeResource;
+export default analyzeMedia;

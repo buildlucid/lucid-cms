@@ -6,11 +6,57 @@ import {
 	estimateTokens,
 	historyMessage,
 	modelMessages,
+	settleToolCall,
 	summaryMessage,
 } from "./context.js";
 import type { Checkpoint } from "./types.js";
 
 const unlimited = { retain: 0, max: Number.POSITIVE_INFINITY };
+
+test("orders completed calls within their turn without moving earlier tool history", () => {
+	const messageId = randomUUID();
+	const earlier = historyMessage({
+		id: randomUUID(),
+		position: 1,
+		role: "assistant",
+		parts: [
+			{
+				type: "tool",
+				id: "second",
+				name: "read",
+				input: {},
+				status: "complete",
+				output: "earlier result",
+			},
+		],
+	}).messages;
+	const first = { id: "first", name: "read", input: {} };
+	const second = { id: "second", name: "read", input: {} };
+	const checkpoint: Checkpoint = {
+		version: 1,
+		approvalMode: "confirm-all",
+		nudges: 0,
+		requestId: randomUUID(),
+		messageId,
+		messages: [
+			...earlier,
+			{ role: "assistant", sourceId: messageId, toolCalls: [first, second] },
+		],
+		parts: [],
+		calls: [first, second],
+		cursor: 0,
+		phase: "tools",
+	};
+
+	settleToolCall(checkpoint, second, { status: "complete", output: 2 });
+	settleToolCall(checkpoint, first, { status: "complete", output: 1 });
+
+	expect(checkpoint.messages.slice(0, earlier.length)).toEqual(earlier);
+	expect(checkpoint.messages.slice(earlier.length + 1)).toMatchObject([
+		{ role: "tool", sourceId: messageId, toolCallId: "first", output: 1 },
+		{ role: "tool", sourceId: messageId, toolCallId: "second", output: 2 },
+	]);
+});
 
 test("retains complete tool exchanges when selecting a compaction boundary", () => {
 	const first = randomUUID();

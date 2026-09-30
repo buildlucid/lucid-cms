@@ -3,12 +3,14 @@ import AgentMarkdown from "@/components/AgentMessage/parts/AgentMarkdown";
 import { toolLabel } from "@/components/AgentMessage/parts/AgentToolCall";
 import AgentSidebarCard from "@/components/AgentSidebarCard/AgentSidebarCard";
 import AgentToolDetails from "@/components/AgentToolDetails/AgentToolDetails";
+import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Pill, { type PillVariant } from "@/components/Pill/Pill";
+import api from "@/services/api";
 import T from "@/translations";
 import {
 	type AgentToolPart,
-	analyzeResourceTool,
+	analyzeMediaTool,
 	isWebFetchOutput,
 	isWebSearchOutput,
 	toolOutputText,
@@ -32,35 +34,48 @@ const statusVariants = {
  * Other tools show their status, with the raw input and output folded away.
  */
 const AgentToolPanel: Component<{
+	conversationId: string;
+	messageId: string;
 	part: AgentToolPart;
 	onClose: () => void;
 	class?: string;
 }> = (props) => {
 	// ----------------------------------------
+	// State & Hooks
+	const details = api.agent.useGetToolDetails({
+		conversationId: () => props.conversationId,
+		messageId: () => props.messageId,
+		tool: () => props.part,
+	});
+
+	// ----------------------------------------
 	// Memos
+	const output = createMemo(() => details.data?.data.output);
 	const error = createMemo(() =>
 		props.part.status === "failed"
-			? toolOutputText(props.part.output, "error")
+			? toolOutputText(output(), "error")
 			: undefined,
 	);
 	const analysis = createMemo(() =>
-		props.part.name === analyzeResourceTool
-			? toolOutputText(props.part.output, "analysis")
+		props.part.name === analyzeMediaTool
+			? toolOutputText(output(), "analysis")
 			: undefined,
 	);
 	const isWeb = createMemo(
 		() => props.part.name === webSearchTool || props.part.name === webFetchTool,
 	);
-	const searchOutput = createMemo(() =>
-		props.part.name === webSearchTool && isWebSearchOutput(props.part.output)
-			? props.part.output
-			: undefined,
-	);
-	const fetchOutput = createMemo(() =>
-		props.part.name === webFetchTool && isWebFetchOutput(props.part.output)
-			? props.part.output
-			: undefined,
-	);
+	const searchOutput = createMemo(() => {
+		const value = output();
+		return props.part.name === webSearchTool && isWebSearchOutput(value)
+			? value
+			: undefined;
+	});
+	const fetchOutput = createMemo(() => {
+		const value = output();
+		return props.part.name === webFetchTool && isWebFetchOutput(value)
+			? value
+			: undefined;
+	});
 
 	// ----------------------------------------
 	// Render
@@ -81,54 +96,82 @@ const AgentToolPanel: Component<{
 					</code>
 				</div>
 			</Show>
-			<Show when={error()}>
-				{(message) => (
-					<ErrorMessage theme="inline" icon={false} message={message()} />
-				)}
-			</Show>
-			<Switch
-				fallback={
-					<Show when={!isWeb()}>
-						<Show when={analysis()}>
-							{(text) => <AgentMarkdown text={text()} size="sm" />}
-						</Show>
-						<Show when={props.part.output === undefined}>
-							<p class="text-sm text-muted">
-								{T()(
-									props.part.status === "pending" ||
-										props.part.status === "running"
-										? "agent.tool.output.waiting"
-										: "agent.tool.output.none",
-								)}
-							</p>
-						</Show>
-						<AgentToolDetails
-							sections={[
-								{ label: T()("agent.tool.input"), value: props.part.input },
-								{ label: T()("agent.tool.output"), value: props.part.output },
-							]}
-						/>
-					</Show>
-				}
-			>
-				<Match when={searchOutput()}>
-					{(output) => (
-						<div class="-mt-3 flex flex-col gap-2.5">
-							<p class="text-[11px] text-muted">
-								{T()("agent.web.sources.count", {
-									count: output().results.length,
-								})}
-							</p>
-							<WebSearchView output={output()} />
-						</div>
-					)}
+			<Switch>
+				<Match when={details.isError}>
+					<ErrorMessage
+						theme="inline"
+						icon={false}
+						message={T()("agent.tool.details.unavailable")}
+					/>
+					<Button
+						variant="secondary"
+						size="xs"
+						onClick={() => void details.refetch()}
+					>
+						{T()("agent.error.retry")}
+					</Button>
 				</Match>
-				<Match when={fetchOutput()}>
-					{(output) => (
-						<div class="-mt-3 flex flex-col gap-3">
-							<WebFetchView output={output()} />
-						</div>
-					)}
+				<Match when={props.part.detailsAvailable && details.isPending}>
+					<div
+						class="skeleton-shimmer h-7 w-full rounded-md"
+						aria-hidden="true"
+					/>
+				</Match>
+				<Match when={details.isSuccess}>
+					<Show when={error()}>
+						{(message) => (
+							<ErrorMessage theme="inline" icon={false} message={message()} />
+						)}
+					</Show>
+					<Switch
+						fallback={
+							<Show when={!isWeb()}>
+								<Show when={analysis()}>
+									{(text) => <AgentMarkdown text={text()} size="sm" />}
+								</Show>
+								<Show
+									when={
+										output() === undefined &&
+										props.part.status !== "pending" &&
+										props.part.status !== "running"
+									}
+								>
+									<p class="text-sm text-muted">
+										{T()("agent.tool.output.none")}
+									</p>
+								</Show>
+								<AgentToolDetails
+									sections={[
+										{
+											label: T()("agent.tool.input"),
+											value: details.data?.data.input,
+										},
+										{ label: T()("agent.tool.output"), value: output() },
+									]}
+								/>
+							</Show>
+						}
+					>
+						<Match when={searchOutput()}>
+							{(output) => (
+								<div class="-mt-3 flex flex-col gap-2.5">
+									<p class="text-[11px] text-muted">
+										{T()("agent.web.sources.count", {
+											count: output().results.length,
+										})}
+									</p>
+									<WebSearchView output={output()} />
+								</div>
+							)}
+						</Match>
+						<Match when={fetchOutput()}>
+							{(output) => (
+								<div class="-mt-3 flex flex-col gap-3">
+									<WebFetchView output={output()} />
+								</div>
+							)}
+						</Match>
+					</Switch>
 				</Match>
 			</Switch>
 		</AgentSidebarCard>

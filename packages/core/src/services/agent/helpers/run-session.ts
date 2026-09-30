@@ -19,8 +19,8 @@ import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../../libs/repositories/index.js";
+import type { StoredAgentMessagePart } from "../../../schemas/agent.js";
 import type {
-	AgentMessagePart,
 	AgentReferenceInput,
 	AgentRunStatus,
 	AgentStreamEvent,
@@ -33,6 +33,7 @@ import withTransaction from "../../../utils/services/with-transaction.js";
 import registerReferences from "../references/register.js";
 import enqueueRun from "./enqueue-run.js";
 import enqueueTitle from "./enqueue-title.js";
+import registerUrlKeys from "./register-url-keys.js";
 
 export type SessionRun = {
 	id: string;
@@ -78,6 +79,10 @@ const openRunSession = async (
 	const runs = new AgentRunsRepository(context.db);
 	const Inputs = new AgentInputsRepository(context.db);
 	const token = randomUUID();
+	const executionVersion = run.execution_version + 1;
+	let replyRevision = 0;
+	//* tool outputs are the only assistant URL source, so keys only change when a call settles
+	const registeredCalls = new Set<string>();
 
 	const claim = await runs.claimExecution({
 		runId: run.id,
@@ -154,6 +159,8 @@ const openRunSession = async (
 			runId: run.id,
 			token,
 			parts: checkpoint.parts,
+			executionVersion,
+			revision: ++replyRevision,
 			now: new Date().toISOString(),
 		});
 		if (message.error) return message;
@@ -178,7 +185,7 @@ const openRunSession = async (
 				references: AgentReferenceInput[];
 				createdAt: string;
 			}) =>
-				withTransaction<AgentMessagePart[]>(context, async (context) => {
+				withTransaction<StoredAgentMessagePart[]>(context, async (context) => {
 					const references = await registerReferences(context, {
 						conversationId: run.conversation_id,
 						references: input.references,
@@ -201,24 +208,55 @@ const openRunSession = async (
 						token,
 						role: "user",
 						parts,
+						executionVersion,
+						revision: ++replyRevision,
 						now: input.createdAt,
 					});
 					if (stored.error) return stored;
 					if (!stored.data) return superseded();
+
+					const registered = await registerUrlKeys(context, {
+						conversationId: run.conversation_id,
+						role: "user",
+						parts,
+					});
+					if (registered.error) return registered;
 
 					return { error: undefined, data: parts };
 				}),
 			emit,
 			/** Persists the assistant message being written, without the rest of the checkpoint. */
 			saveReply: () => saveReply(),
-			/** Persists the checkpoint and the assistant message being written. */
-			save: (): ServiceResponse<undefined> =>
-				withTransaction(context, async (context) => {
-					const saved = await write("running", undefined, context);
-					if (saved.error) return saved;
+			/** Persists the checkpoint and the assistant message being written, with the URLs its settled tools returned. */
+			save: async (): ServiceResponse<undefined> => {
+				const settled = checkpoint.parts.flatMap((part) =>
+					part.type === "tool" &&
+					part.status !== "pending" &&
+					part.status !== "running" &&
+					!registeredCalls.has(part.id)
+						? [part]
+						: [],
+				);
 
-					return saveReply(context);
-				}),
+				const saved = await withTransaction(context, async (context) => {
+					const written = await write("running", undefined, context);
+					if (written.error) return written;
+
+					const reply = await saveReply(context);
+					if (reply.error) return reply;
+
+					return registerUrlKeys(context, {
+						conversationId: run.conversation_id,
+						role: "assistant",
+						parts: settled,
+					});
+				});
+				if (saved.error) return saved;
+
+				for (const part of settled) registeredCalls.add(part.id);
+
+				return saved;
+			},
 			/** Stops execution in a final or paused state. */
 			finish: async (
 				status: Exclude<AgentRunStatus, "queued" | "running">,

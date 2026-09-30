@@ -10,7 +10,12 @@ import AgentToolDetails from "@/components/AgentToolDetails/AgentToolDetails";
 import AgentTranscriptRow from "@/components/AgentTranscriptRow/AgentTranscriptRow";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
-import { approvalWidget, questionWidget } from "@/utils/agent-tools";
+import {
+	approvalBatchWidget,
+	approvalWidget,
+	questionWidget,
+} from "@/utils/agent-tools";
+import AgentApprovalDetails from "./AgentApprovalDetails";
 import { resolveAgentSlot } from "./slots";
 
 const interactionStatus = (interaction: AgentInteraction, key: string) => {
@@ -20,6 +25,7 @@ const interactionStatus = (interaction: AgentInteraction, key: string) => {
 		case "dismissed":
 			return T()("agent.question.dismissed.short");
 		case "answered":
+			if (interaction.approvals) return T()("agent.approval.batch.reviewed");
 			if (interaction.approval) return T()("agent.approval.approved");
 			return T()(
 				key === questionWidget
@@ -28,7 +34,7 @@ const interactionStatus = (interaction: AgentInteraction, key: string) => {
 			);
 		case "cancelled":
 			return T()(
-				interaction.approval
+				interaction.approval || interaction.approvals
 					? "agent.approval.denied"
 					: "agent.interaction.cancelled",
 			);
@@ -58,11 +64,20 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 			? interaction.response
 			: undefined;
 	});
+	const selectedCalls = createMemo(() => {
+		const ids = response()?.approvedToolCallIds;
+		return Array.isArray(ids)
+			? ids.filter((id): id is string => typeof id === "string")
+			: [];
+	});
 	const expandable = createMemo(
 		() =>
 			question() ||
 			props.widget.interaction?.approval !== undefined ||
-			(props.widget.key !== approvalWidget && response() !== undefined),
+			props.widget.interaction?.approvals !== undefined ||
+			(props.widget.key !== approvalWidget &&
+				props.widget.key !== approvalBatchWidget &&
+				response() !== undefined),
 	);
 
 	// ----------------------------------------
@@ -81,7 +96,9 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 									<Match when={question()}>
 										<FaSolidCircleQuestion size={10} />
 									</Match>
-									<Match when={interaction().approval}>
+									<Match
+										when={interaction().approval || interaction().approvals}
+									>
 										<FaSolidShieldHalved size={10} />
 									</Match>
 								</Switch>
@@ -132,6 +149,15 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 									</Match>
 									<Match when={true}>
 										<div class="flex flex-col gap-5">
+											<Show when={interaction().approvals}>
+												{(approvals) => (
+													<AgentApprovalDetails
+														approvals={approvals()}
+														selected={selectedCalls()}
+														status={interaction().status}
+													/>
+												)}
+											</Show>
 											<Show when={interaction().approval}>
 												{(approval) => (
 													<>
@@ -164,7 +190,11 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 												)}
 											</Show>
 											<Show
-												when={props.widget.key !== approvalWidget && response()}
+												when={
+													props.widget.key !== approvalWidget &&
+													props.widget.key !== approvalBatchWidget &&
+													response()
+												}
 											>
 												{(answered) => (
 													<AgentToolDetails

@@ -5,14 +5,12 @@ import type {
 	AgentMessagePart,
 	AgentRunStatus,
 	AgentStreamEvent,
+	AgentToolSummary,
 	AgentWidgetPart,
 } from "@types";
-import {
-	type AgentToolPart,
-	askTool,
-	finishTool,
-	progressTool,
-} from "@/utils/agent-tools";
+import { batch } from "solid-js";
+import { createStore, reconcile, unwrap } from "solid-js/store";
+import { askTool, finishTool, progressTool } from "@/utils/agent-tools";
 
 export const shouldPollTitle = (
 	conversation: Pick<
@@ -67,9 +65,9 @@ export const messageText = (message: Pick<AgentMessage, "parts">) =>
 				part.type === "tool" &&
 				part.name === progressTool &&
 				part.status === "complete" &&
-				typeof part.input.message === "string"
+				part.display?.kind === "progress"
 			) {
-				return [part.input.message];
+				return [part.display.message];
 			}
 
 			return [];
@@ -77,123 +75,126 @@ export const messageText = (message: Pick<AgentMessage, "parts">) =>
 		.join("\n\n")
 		.trim();
 
-/** Updates a tool part with the same id, or appends it. Later events can leave out fields set when the call started, such as its title. */
-const upsertPart = (
-	parts: AgentMessagePart[],
-	part: AgentToolPart,
-): AgentMessagePart[] => {
-	const index = parts.findIndex(
-		(existing) => existing.type === part.type && existing.id === part.id,
-	);
+/** Keeps row identities stable and applies stream deltas only to their message and part. */
+export const createAgentMessages = () => {
+	const [messages, setMessages] = createStore<AgentMessage[]>([]);
+	const messageIndices = new Map<string, number>();
 
-	return index < 0
-		? [...parts, part]
-		: parts.map((existing, position) =>
-				position === index ? { ...existing, ...part } : existing,
-			);
-};
+	const replace = (rows: AgentMessage[]) => {
+		setMessages(reconcile(structuredClone(unwrap(rows)), { key: "id" }));
 
-const appendText = (
-	parts: AgentMessagePart[],
-	text: string,
-): AgentMessagePart[] => {
-	const last = parts.at(-1);
+		messageIndices.clear();
+		messages.forEach((message, index) => {
+			messageIndices.set(message.id, index);
+		});
+	};
 
-	return last?.type === "text"
-		? [...parts.slice(0, -1), { type: "text", text: last.text + text }]
-		: [...parts, { type: "text", text }];
-};
+	const startMessage = (
+		event: Extract<AgentStreamEvent, { type: "start" }>,
+		conversationId: string,
+	) => {
+		const index = messageIndices.get(event.messageId);
 
-/** Applies one streamed run event to the messages shown in a conversation. */
-export const applyStreamEvent = (
-	messages: AgentMessage[],
-	event: AgentStreamEvent,
-	conversationId: string,
-): AgentMessage[] => {
-	if (
-		event.type === "finish" ||
-		event.type === "error" ||
-		event.type === "context" ||
-		event.type === "inputs" ||
-		event.type === "next"
-	) {
-		return messages;
-	}
-
-	if (event.type === "message") {
-		const exists = messages.some(({ id }) => id === event.message.id);
-
-		return exists
-			? messages.map((message) =>
-					message.id === event.message.id ? event.message : message,
-				)
-			: [...messages, event.message].sort((a, b) => a.position - b.position);
-	}
-
-	if (event.type === "start") {
-		const exists = messages.some((message) => message.id === event.messageId);
 		//* a restarted turn replaces what the previous attempt streamed
-		if (exists) {
-			return messages.map((message) =>
-				message.id === event.messageId ? { ...message, parts: [] } : message,
+		if (index !== undefined) {
+			setMessages(index, "parts", []);
+			return;
+		}
+
+		messageIndices.set(event.messageId, messages.length);
+		setMessages(messages.length, {
+			id: event.messageId,
+			conversationId,
+			runId: event.runId,
+			position: (messages.at(-1)?.position ?? 0) + 1,
+			role: "assistant",
+			parts: [],
+			createdAt: new Date().toISOString(),
+		});
+	};
+
+	const appendText = (index: number, text: string) => {
+		const parts = messages[index].parts;
+		const last = parts.at(-1);
+
+		if (last?.type === "text") {
+			setMessages(index, "parts", parts.length - 1, {
+				type: "text",
+				text: last.text + text,
+			});
+			return;
+		}
+
+		setMessages(index, "parts", parts.length, { type: "text", text });
+	};
+
+	/** Later tool events can leave out fields set when the call started, so tool parts merge. */
+	const upsertPart = (
+		index: number,
+		part: AgentToolSummary | AgentWidgetPart,
+	) => {
+		const parts = messages[index].parts;
+		const partIndex = parts.findIndex((existing) =>
+			part.type === "tool"
+				? existing.type === "tool" && existing.id === part.id
+				: existing.type === "widget" &&
+					!!part.interaction?.id &&
+					existing.interaction?.id === part.interaction.id,
+		);
+
+		batch(() => {
+			if (partIndex < 0) {
+				setMessages(index, "parts", parts.length, part);
+			} else if (part.type === "tool") {
+				setMessages(index, "parts", partIndex, part);
+			} else {
+				setMessages(index, "parts", partIndex, reconcile(part));
+			}
+
+			if (part.type !== "tool" || part.status !== "skipped") return;
+
+			parts.forEach((existing, widgetIndex) => {
+				if (
+					existing.type === "widget" &&
+					existing.interaction?.toolCallId === part.id &&
+					existing.interaction.status === "pending"
+				) {
+					setMessages(index, "parts", widgetIndex, {
+						type: "widget",
+						interaction: { ...existing.interaction, status: "dismissed" },
+					});
+				}
+			});
+		});
+	};
+
+	const apply = (event: AgentStreamEvent, conversationId: string) => {
+		if (event.type === "message") {
+			const index = messageIndices.get(event.message.id);
+			if (index !== undefined) {
+				setMessages(index, reconcile(event.message));
+				return;
+			}
+
+			replace(
+				[...messages, event.message].sort((a, b) => a.position - b.position),
 			);
+			return;
 		}
 
-		return [
-			...messages,
-			{
-				id: event.messageId,
-				conversationId,
-				runId: event.runId,
-				position: (messages.at(-1)?.position ?? 0) + 1,
-				role: "assistant",
-				parts: [],
-				createdAt: new Date().toISOString(),
-			},
-		];
-	}
+		if (!("messageId" in event)) return;
+		if (event.type === "start") return startMessage(event, conversationId);
 
-	return messages.map((message) => {
-		if (message.id !== event.messageId) return message;
-		if (event.type === "text-delta") {
-			return { ...message, parts: appendText(message.parts, event.text) };
-		}
+		const index = messageIndices.get(event.messageId);
+		if (index === undefined) return;
+
+		if (event.type === "text-delta") return appendText(index, event.text);
+
 		const { messageId: _, ...part } = event;
-		if (part.type === "widget") {
-			const id = part.interaction?.id;
-			const exists =
-				id &&
-				message.parts.some(
-					(existing) =>
-						existing.type === "widget" && existing.interaction?.id === id,
-				);
-			return {
-				...message,
-				parts: exists
-					? message.parts.map((existing) =>
-							existing.type === "widget" && existing.interaction?.id === id
-								? part
-								: existing,
-						)
-					: [...message.parts, part],
-			};
-		}
+		upsertPart(index, part);
+	};
 
-		return {
-			...message,
-			parts: upsertPart(message.parts, part).map((existing) =>
-				part.status === "skipped" &&
-				existing.type === "widget" &&
-				existing.interaction?.toolCallId === part.id &&
-				existing.interaction.status === "pending"
-					? {
-							...existing,
-							interaction: { ...existing.interaction, status: "dismissed" },
-						}
-					: existing,
-			),
-		};
-	});
+	return { messages, replace, apply };
 };
 
 /** The active interaction is recovered from saved messages after a reload. */
@@ -246,7 +247,9 @@ export const placeCompactions = (
 			(message) => (message.createdAt ?? "") > (compaction.createdAt ?? ""),
 		);
 		if (next) before.add(next.id);
-		else trailing = true;
+		else {
+			trailing = true;
+		}
 	}
 
 	return { before, trailing };
@@ -267,5 +270,42 @@ export const awaitsDelivery = (
 	return (
 		status !== "waiting" ||
 		conversation.inputs.some((input) => input.delivery.kind === "steer")
+	);
+};
+
+/** Whether an event confirms that an interaction was answered or cancelled. */
+export const settlesInteraction = (
+	event: AgentStreamEvent,
+	interactionId: string,
+) => {
+	const parts =
+		event.type === "message"
+			? event.message.parts
+			: event.type === "widget"
+				? [event]
+				: [];
+
+	return parts.some(
+		(part) =>
+			part.type === "widget" &&
+			part.interaction?.id === interactionId &&
+			(part.interaction.status === "answered" ||
+				part.interaction.status === "cancelled"),
+	);
+};
+
+/** The completed tool calls an event reports, keyed by message and call. */
+export const completedTools = (event: AgentStreamEvent) => {
+	if (event.type === "tool") {
+		return event.status === "complete"
+			? [{ key: `${event.messageId}:${event.id}`, name: event.name }]
+			: [];
+	}
+	if (event.type !== "message") return [];
+
+	return event.message.parts.flatMap((part) =>
+		part.type === "tool" && part.status === "complete"
+			? [{ key: `${event.message.id}:${part.id}`, name: part.name }]
+			: [],
 	);
 };

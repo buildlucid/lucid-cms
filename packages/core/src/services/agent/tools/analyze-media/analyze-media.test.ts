@@ -11,10 +11,10 @@ import {
 import defineAgent from "../../../../libs/agent/define-agent.js";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
 import {
-	MAX_RESOURCE_BYTES,
-	resourceAnalyzeResponseSchema,
-} from "../../../../libs/lucid-remote/schema/resource.js";
-import analyzeResource from "../../../../libs/lucid-remote/services/analyze-resource/index.js";
+	MAX_MEDIA_BYTES,
+	mediaAnalyzeResponseSchema,
+} from "../../../../libs/lucid-remote/schema/media.js";
+import analyzeMedia from "../../../../libs/lucid-remote/services/analyze-media/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
 import {
 	AgentMessagesRepository,
@@ -22,20 +22,21 @@ import {
 } from "../../../../libs/repositories/index.js";
 import { executeAgentTool } from "../../../../libs/tools/execute-tool.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
-import type { AgentMessagePart } from "../../../../types/response.js";
+import type { StoredAgentMessagePart } from "../../../../schemas/agent.js";
 import createServiceContext from "../../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import streamMedia from "../../../media/stream.js";
 import insertConversation from "../../helpers/insert-conversation.js";
+import registerUrlKeys from "../../helpers/register-url-keys.js";
 import resolveRunSetup from "../../helpers/resolve-run-setup.js";
 import register from "../../references/register.js";
-import { analyzeResourceAgentTool } from "./index.js";
+import { analyzeMediaAgentTool } from "./index.js";
 import resolveSource from "./resolve-source.js";
 
 vi.mock("../../../media/stream.js", () => ({ default: vi.fn() }));
 vi.mock(
-	"../../../../libs/lucid-remote/services/analyze-resource/index.js",
+	"../../../../libs/lucid-remote/services/analyze-media/index.js",
 	() => ({ default: vi.fn() }),
 );
 //* runs the request straight away, as billing is covered by the paid request tests
@@ -49,12 +50,12 @@ vi.mock("../../helpers/run-paid-tool-request.js", () => ({
 	),
 }));
 const fixture = getTestConfig();
-const analyzeResourceTool = analyzeResourceAgentTool();
+const analyzeMediaTool = analyzeMediaAgentTool();
 const agent = defineAgent({
 	key: "analysis",
 	name: "Analysis",
 	description: "Tests file analysis.",
-	tools: [analyzeResourceTool],
+	tools: [analyzeMediaTool],
 });
 const withoutAnalysis = defineAgent({
 	key: "no-analysis",
@@ -62,10 +63,10 @@ const withoutAnalysis = defineAgent({
 	description: "Has no file tools.",
 });
 const analysis = (text: string) =>
-	resourceAnalyzeResponseSchema.parse({
+	mediaAnalyzeResponseSchema.parse({
 		mode: "sync",
 		requestId: randomUUID(),
-		feature: { key: "resource.analyze", version: "v1" },
+		feature: { key: "media.analyze", version: "v1" },
 		output: { analysis: text },
 		usage: {
 			model: "test-model",
@@ -115,7 +116,7 @@ beforeAll(async () => {
 afterAll(() => fixture.destroy());
 beforeEach(() => {
 	vi.mocked(streamMedia).mockReset();
-	vi.mocked(analyzeResource).mockReset();
+	vi.mocked(analyzeMedia).mockReset();
 });
 
 const executionFor = async (): Promise<AgentToolExecution> => {
@@ -139,7 +140,8 @@ const linkedMedia = async (
 	execution: AgentToolExecution,
 	props?: { fileSize?: number; mimeType?: string },
 ) => {
-	const media = await new MediaRepository(context.db).createSingle({
+	const Media = new MediaRepository(context.db);
+	const media = await Media.createSingle({
 		data: {
 			key: randomUUID(),
 			storage_adapter_key: "test",
@@ -169,9 +171,10 @@ const linkedMedia = async (
 const writeMessage = async (
 	execution: AgentToolExecution,
 	role: "user" | "assistant",
-	parts: AgentMessagePart[],
+	parts: StoredAgentMessagePart[],
 ) => {
-	const saved = await new AgentMessagesRepository(context.db).createSingle({
+	const AgentMessages = new AgentMessagesRepository(context.db);
+	const saved = await AgentMessages.createSingle({
 		data: {
 			id: randomUUID(),
 			conversation_id: execution.run.conversationId,
@@ -184,6 +187,13 @@ const writeMessage = async (
 		validation: { enabled: true },
 	});
 	expect(saved.error).toBeUndefined();
+
+	const registered = await registerUrlKeys(context, {
+		conversationId: execution.run.conversationId,
+		role,
+		parts,
+	});
+	expect(registered.error).toBeUndefined();
 };
 
 const mockFile = (bytes: Uint8Array) =>
@@ -206,13 +216,13 @@ test("private linked media reaches analysis as base64 without a download URL", a
 	const execution = await executionFor();
 	const source = await linkedMedia(execution);
 	mockFile(png);
-	vi.mocked(analyzeResource).mockResolvedValue({
+	vi.mocked(analyzeMedia).mockResolvedValue({
 		error: undefined,
 		data: analysis("An image."),
 	});
 	const result = await executeAgentTool({
 		context,
-		tool: analyzeResourceTool,
+		tool: analyzeMediaTool,
 		input: { source, question: "Describe it" },
 		execution,
 	});
@@ -220,17 +230,15 @@ test("private linked media reaches analysis as base64 without a download URL", a
 		type: "success",
 		data: { output: { analysis: "An image." } },
 	});
-	expect(vi.mocked(analyzeResource).mock.calls[0]?.[1].request.context).toEqual(
-		{
-			question: "Describe it",
-			source: {
-				type: "base64",
-				data: Buffer.from(png).toString("base64"),
-				mimeType: "image/png",
-				filename: "private.png",
-			},
+	expect(vi.mocked(analyzeMedia).mock.calls[0]?.[1].request.context).toEqual({
+		question: "Describe it",
+		source: {
+			type: "base64",
+			data: Buffer.from(png).toString("base64"),
+			mimeType: "image/png",
+			filename: "private.png",
 		},
-	);
+	});
 });
 
 test("a media reference in another chat grants no access", async () => {
@@ -247,7 +255,7 @@ test("losing media read permission prevents analysis even while the reference re
 	const source = await linkedMedia(execution);
 	const result = await executeAgentTool({
 		context,
-		tool: analyzeResourceTool,
+		tool: analyzeMediaTool,
 		input: { source, question: "Describe it" },
 		execution: {
 			...execution,
@@ -256,7 +264,7 @@ test("losing media read permission prevents analysis even while the reference re
 	});
 	expect(result).toEqual({ type: "forbidden" });
 	expect(streamMedia).not.toHaveBeenCalled();
-	expect(analyzeResource).not.toHaveBeenCalled();
+	expect(analyzeMedia).not.toHaveBeenCalled();
 });
 
 test.each([
@@ -266,9 +274,10 @@ test.each([
 ] as const)("rejects a URL whose only provenance is %s", async (origin) => {
 	const execution = await executionFor();
 	const url = "https://example.com/file.png";
-	if (origin === "assistant")
+	if (origin === "assistant") {
 		await writeMessage(execution, "assistant", [{ type: "text", text: url }]);
-	if (origin === "history")
+	}
+	if (origin === "history") {
 		await writeMessage(execution, "assistant", [
 			{
 				type: "tool",
@@ -279,6 +288,7 @@ test.each([
 				status: "complete",
 			},
 		]);
+	}
 	expect(
 		(await resolveSource(context, { source: { type: "url", url }, execution }))
 			.error?.status,
@@ -314,7 +324,7 @@ test.each([
 
 test.each([
 	{ mimeType: "application/zip", fileSize: 4, status: 415 },
-	{ mimeType: "image/png", fileSize: MAX_RESOURCE_BYTES + 1, status: 413 },
+	{ mimeType: "image/png", fileSize: MAX_MEDIA_BYTES + 1, status: 413 },
 ])("rejects metadata with $mimeType and $fileSize bytes before reading storage", async ({
 	status,
 	...props
@@ -330,11 +340,11 @@ test.each([
 test("enforces the actual stream size when stored metadata understates it", async () => {
 	const execution = await executionFor();
 	const source = await linkedMedia(execution);
-	mockFile(new Uint8Array(MAX_RESOURCE_BYTES + 1));
+	mockFile(new Uint8Array(MAX_MEDIA_BYTES + 1));
 	expect(
 		(await resolveSource(context, { source, execution })).error?.status,
 	).toBe(413);
-	expect(analyzeResource).not.toHaveBeenCalled();
+	expect(analyzeMedia).not.toHaveBeenCalled();
 });
 
 test("sends a linked video whose contents match its type", async () => {
@@ -377,15 +387,15 @@ test("analysis is offered only to agents that list it, and the prompt says what 
 
 	const listed = setup(agent);
 	expect(listed.definitions.map((tool) => tool.name)).toContain(
-		analyzeResourceTool.name,
+		analyzeMediaTool.name,
 	);
 	expect(listed.instructions).toContain(
-		`Open attached media with ${analyzeResourceTool.name}.`,
+		`Open attached media with ${analyzeMediaTool.name}.`,
 	);
 
 	const unlisted = setup(withoutAnalysis);
 	expect(unlisted.definitions.map((tool) => tool.name)).not.toContain(
-		analyzeResourceTool.name,
+		analyzeMediaTool.name,
 	);
 	expect(unlisted.instructions).toContain("No tool can open attached media.");
 });

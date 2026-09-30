@@ -1,23 +1,6 @@
-import runnerTools from "../../../libs/agent/runner-tools.js";
+import { urlKeyDigest, webUrlKey } from "../../../libs/agent/url-keys.js";
+import { AgentUrlKeysRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import scanMessages from "../../agent/helpers/scan-messages.js";
-import { analyzeResourceToolName } from "../../agent/tools/analyze-resource/constants.js";
-import { addWebUrlKeys, webUrlKey } from "./url-keys.js";
-
-/**
- * Tools whose results can repeat the agent's own words, so they cannot vouch
- * for a URL. File analysis is written by a model that sees the agent's
- * question, so a file could make it echo that question back inside a URL.
- */
-const echoingTools: ReadonlySet<string> = new Set([
-	...[
-		runnerTools.history,
-		runnerTools.progress,
-		runnerTools.skill,
-		runnerTools.finish,
-	].map((tool) => tool.name),
-	analyzeResourceToolName,
-]);
 
 /**
  * Whether a URL appeared in this chat in something the agent did not write: a
@@ -32,22 +15,18 @@ const isUrlInConversation: ServiceFn<
 	const key = webUrlKey(input.url);
 	if (!key) return { error: undefined, data: false };
 
-	const keys = new Set<string>();
+	const AgentUrlKeys = new AgentUrlKeysRepository(context.db);
 
-	return scanMessages(context, {
-		conversationId: input.conversationId,
-		visit: (message) => {
-			for (const part of message.parts) {
-				if (message.role === "user" && part.type === "text") {
-					addWebUrlKeys(keys, part.text);
-				} else if (part.type === "tool" && !echoingTools.has(part.name)) {
-					addWebUrlKeys(keys, JSON.stringify(part.output ?? null));
-				}
-			}
-
-			return keys.has(key);
-		},
+	const existing = await AgentUrlKeys.selectSingle({
+		select: ["url_key"],
+		where: [
+			{ key: "conversation_id", operator: "=", value: input.conversationId },
+			{ key: "url_key", operator: "=", value: urlKeyDigest(key) },
+		],
 	});
+	if (existing.error) return existing;
+
+	return { error: undefined, data: existing.data !== undefined };
 };
 
 export default isUrlInConversation;

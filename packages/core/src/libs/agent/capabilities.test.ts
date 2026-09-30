@@ -9,7 +9,7 @@ import {
 const noPermissions = { superAdmin: false, permissions: [] };
 const tools = [
 	...agentTools.web(),
-	agentTools.analyzeResource(),
+	agentTools.analyzeMedia(),
 	...agentTools.content(),
 ];
 

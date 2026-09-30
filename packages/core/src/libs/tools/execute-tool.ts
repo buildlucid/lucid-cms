@@ -18,7 +18,7 @@ type ExecutionArgs<Execution> = {
 };
 
 /** Keeps parsing, execution and error handling common while authority stays target-specific. */
-const execute = async <Execution, Result, Requirement>(
+const prepare = async <Execution, Result, Requirement>(
 	args: ExecutionArgs<Execution>,
 	tool:
 		| {
@@ -41,14 +41,38 @@ const execute = async <Execution, Result, Requirement>(
 			return { type: "forbidden" as const };
 		}
 
-		return await preparation.data.run({
+		return preparation;
+	} catch (error) {
+		logger.error({
+			event: "tools.execution.failed",
+			message: `Tool ${tool.name} failed`,
+			error,
+		});
+		return {
+			type: "failed" as const,
+			message: args.context.translate("server:core.tools.failed"),
+		};
+	}
+};
+
+/** Runs validated input, with handler failures contained at the tool boundary. */
+const execute = async <Execution, Result, Requirement>(
+	args: ExecutionArgs<Execution>,
+	tool: Parameters<typeof prepare<Execution, Result, Requirement>>[1],
+	allowed: (requirements: readonly Requirement[]) => boolean,
+) => {
+	const prepared = await prepare(args, tool, allowed);
+	if (prepared.type !== "ready") return prepared;
+
+	try {
+		return await prepared.data.run({
 			context: args.context,
 			execution: args.execution,
 		});
 	} catch (error) {
 		logger.error({
 			event: "tools.execution.failed",
-			message: `Tool ${tool.name} failed`,
+			message: `Tool ${tool?.name} failed`,
 			error,
 		});
 		return {
@@ -98,6 +122,20 @@ export const executeAgentTool = (
 	args: ExecutionArgs<AgentToolExecution> & { tool: AgentToolDefinition },
 ) =>
 	execute(
+		args,
+		{
+			name: args.tool.name,
+			requirements: args.tool.permissions,
+			prepareInput: args.tool[toolDefinitionInternal].prepareInput,
+		},
+		agentPermissionCheck(args),
+	);
+
+/** Validates an ordinary call and its input-dependent permissions without running its handler. */
+export const preflightAgentTool = (
+	args: ExecutionArgs<AgentToolExecution> & { tool: AgentToolDefinition },
+) =>
+	prepare(
 		args,
 		{
 			name: args.tool.name,

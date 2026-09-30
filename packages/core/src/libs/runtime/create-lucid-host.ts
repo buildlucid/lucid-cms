@@ -14,6 +14,7 @@ import createApp from "../http/app.js";
 import type { HttpExtension } from "../http/types.js";
 import prepareTranslations from "../i18n/prepare-translations.js";
 import type { TranslationBundles, TranslationStore } from "../i18n/types.js";
+import logger from "../logger/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
 import type { Toolkit } from "../toolkit/types.js";
 import createLucidAdapters, {
@@ -28,6 +29,40 @@ import type {
 	LucidConfigDefinition,
 	LucidConfigDefinitionMeta,
 } from "./types.js";
+
+/** Reads platform methods at the host boundary and preserves their receivers. */
+const parseExecutionContext = (input: unknown) => {
+	if (
+		typeof input !== "object" ||
+		input === null ||
+		!("waitUntil" in input) ||
+		typeof input.waitUntil !== "function"
+	) {
+		return null;
+	}
+
+	const waitUntil = input.waitUntil;
+	const passThroughOnException =
+		"passThroughOnException" in input &&
+		typeof input.passThroughOnException === "function"
+			? input.passThroughOnException
+			: undefined;
+
+	return {
+		waitUntil: (promise: Promise<unknown>) => {
+			waitUntil.call(input, promise);
+		},
+		...(passThroughOnException
+			? {
+					passThroughOnException: () => {
+						passThroughOnException.call(input);
+					},
+				}
+			: {}),
+		props: "props" in input ? input.props : undefined,
+		exports: "exports" in input ? input.exports : undefined,
+	};
+};
 
 type CreateLucidHostSharedOptions = {
 	runtimeContext: AdapterRuntimeContext;
@@ -73,7 +108,7 @@ export type LucidInvocation = {
 		executionContext?: unknown;
 		requestBindings?: object;
 	}): Promise<Response>;
-	/** Releases resources owned by this invocation. */
+	/** Waits for registered background work before releasing invocation resources. */
 	destroy(): Promise<void>;
 };
 
@@ -233,17 +268,15 @@ const createLucidHost = async (
 			let invocationLucidDatabasePromise: Promise<LucidDatabase> | undefined;
 			let invocationDestroyed = false;
 			let invocationDestroyPromise: Promise<void> | undefined;
+			const backgroundTasks = new Set<Promise<void>>();
 
 			const getDatabase = () => {
-				if (destroyed) {
-					throw new LucidError({
-						message: "Cannot use a Lucid host after it has been destroyed.",
-					});
-				}
+				//* host destruction waits for this invocation's background work, so only its own state is checked
 				if (invocationDestroyed) {
 					throw new LucidError({
-						message:
-							"Cannot use a Lucid invocation after it has been destroyed.",
+						message: destroyed
+							? "Cannot use a Lucid host after it has been destroyed."
+							: "Cannot use a Lucid invocation after it has been destroyed.",
 					});
 				}
 				if (options.databaseScope === "runtime") {
@@ -305,24 +338,68 @@ const createLucidHost = async (
 				});
 			};
 
+			/** Tracks work that outlives a response, so destroy waits for it before releasing resources. */
+			const waitUntil = (
+				promise: Promise<unknown>,
+				platformContext: ReturnType<typeof parseExecutionContext>,
+			) => {
+				if (invocationDestroyed) {
+					throw new LucidError({
+						message:
+							"Cannot register background work after a Lucid invocation has been destroyed.",
+					});
+				}
+
+				const task = promise
+					.then(() => undefined)
+					.catch((error) => {
+						logger.error({
+							message: "Lucid invocation background work failed",
+							event: "runtime.background-task.failed",
+							error,
+						});
+					})
+					.finally(() => backgroundTasks.delete(task));
+
+				backgroundTasks.add(task);
+				platformContext?.waitUntil(task);
+			};
+
 			const invocation: LucidInvocation = {
 				getServiceContext,
 				getToolkit: async (request) =>
 					createToolkit(await getServiceContext(request)),
 				handle: async (handleOptions): Promise<Response> => {
+					if (invocationDestroyPromise) {
+						throw new LucidError({
+							message:
+								"Cannot handle a request after a Lucid invocation has started closing.",
+						});
+					}
+
 					const db = await getLucidDatabase();
+					const platformContext = parseExecutionContext(
+						handleOptions.executionContext,
+					);
+
 					return app.handle({
 						request: handleOptions.request,
 						db,
 						env,
-						executionContext: handleOptions.executionContext,
+						executionContext: {
+							...platformContext,
+							waitUntil: (promise) => waitUntil(promise, platformContext),
+						},
 						requestBindings: handleOptions.requestBindings,
 					});
 				},
 				destroy: async () => {
 					invocationDestroyPromise ??= (async () => {
-						invocationDestroyed = true;
 						try {
+							while (backgroundTasks.size > 0) {
+								await Promise.all(backgroundTasks);
+							}
+							invocationDestroyed = true;
 							if (
 								options.databaseScope === "invocation" &&
 								invocationDatabasePromise

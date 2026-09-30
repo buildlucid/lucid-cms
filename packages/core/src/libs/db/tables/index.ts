@@ -7,6 +7,7 @@ import { agentMessagesTable } from "./agent-messages.js";
 import { agentRoutineToolsTable } from "./agent-routine-tools.js";
 import { agentRoutinesTable } from "./agent-routines.js";
 import { agentRunsTable } from "./agent-runs.js";
+import { agentUrlKeysTable } from "./agent-url-keys.js";
 import { aiGenerationsTable } from "./ai-generations.js";
 import { alertRecipientsTable } from "./alert-recipients.js";
 import { alertsTable } from "./alerts.js";
@@ -69,6 +70,7 @@ export * from "./agent-messages.js";
 export * from "./agent-routine-tools.js";
 export * from "./agent-routines.js";
 export * from "./agent-runs.js";
+export * from "./agent-url-keys.js";
 export * from "./ai-generations.js";
 export * from "./alert-recipients.js";
 export * from "./alerts.js";
@@ -134,6 +136,7 @@ export const coreTableDefinitions = [
 	agentRoutinesTable,
 	agentRoutineToolsTable,
 	agentRunsTable,
+	agentUrlKeysTable,
 	alertRecipientsTable,
 	alertsTable,
 	authStatesTable,

@@ -10,6 +10,7 @@ import checkAgentAccess, {
 } from "./check-agent-access.js";
 import compactContext from "./compact-context.js";
 import consumeSteering from "./consume-steering.js";
+import executeReadBatch, { getReadBatch } from "./execute-read-batch.js";
 import executeToolStep from "./execute-tool-step.js";
 import loadHistory from "./load-history.js";
 import resolveModel from "./resolve-model.js";
@@ -177,7 +178,9 @@ const driveRun: ServiceFn<
 		}
 
 		while (checkpoint.cursor < checkpoint.calls.length) {
-			if (session.signal.aborted) return session.handOff();
+			if (session.signal.aborted || Date.now() > deadline) {
+				return session.handOff();
+			}
 
 			const steered = await consumeSteering(context, { checkpoint, session });
 			if (steered.error) return steered;
@@ -186,6 +189,20 @@ const driveRun: ServiceFn<
 			const call = checkpoint.calls[checkpoint.cursor];
 
 			if (!call) break;
+
+			const batch = getReadBatch({ checkpoint, setup });
+			if (batch.length > 1) {
+				const step = await executeReadBatch(context, {
+					run,
+					checkpoint,
+					session,
+					authority: access.data.authority,
+					batch,
+				});
+				if (step.error) return step;
+				if (step.data === "waiting") return session.finish("waiting");
+				continue;
+			}
 
 			const step = await executeToolStep(context, {
 				run,

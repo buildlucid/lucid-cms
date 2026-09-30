@@ -5,6 +5,7 @@ import type {
 import type { z } from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidExternalAuth } from "../../types/hono.js";
+import type { AgentToolDisplay } from "../../types/response.js";
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -136,15 +137,20 @@ export type DefineAgentToolOptions<
 	Input extends z.ZodObject,
 	Output extends z.ZodObject,
 > = ToolOptions<Name, Input, Output, AgentToolDescription> & {
-	/** Pass [] for tools available to every user with agent access. */
+	/** Needed for the agent to be offered this tool at all. Pass [] for every user with agent access. */
 	permissions: readonly Permission[];
+	/** Checked for each call against its validated input, eg. read access to the requested collection. */
 	requiredPermissions?: (input: z.output<Input>) => readonly Permission[];
 	/** Whether the handler only reads data. Defaults to false. Writes are checkpointed before execution for safe recovery. */
 	readOnly?: boolean;
+	/** Safe to run alongside other independent reads. Requires readOnly. Defaults to false, including for paid or state-dependent reads. */
+	parallelSafe?: boolean;
 	/** Ask before executing in tool-defaults mode. Routines can override this. Defaults to false. */
 	requiresApproval?: boolean;
 	/** What this tool lets the agent do, shown to people in the chat. */
 	capabilities?: AgentToolCapabilities;
+	/** Describes a call in the chat from its input, eg. `{ kind: "text", text: \`Updated ${input.title}\` }`. Defaults to the title. */
+	display?: (input: z.output<Input>) => AgentToolDisplay | undefined;
 	handler: AgentToolHandler<z.output<Input>, z.output<Output>>;
 };
 
@@ -255,8 +261,12 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly title: ResolvedAdminCopy;
 	readonly permissions: readonly Permission[];
 	readonly readOnly: boolean;
+	readonly parallelSafe: boolean;
 	readonly requiresApproval: boolean;
 	readonly capabilities?: AgentToolCapabilities;
+	readonly display?: (
+		input: Record<string, unknown>,
+	) => AgentToolDisplay | undefined;
 	readonly interaction?: { readonly key: string; readonly version: number };
 	readonly [toolDefinitionInternal]: {
 		readonly interaction?: {

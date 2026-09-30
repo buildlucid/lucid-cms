@@ -9,6 +9,7 @@ import {
 	toolDefinitionBase,
 	toolDefinitionInternal,
 } from "./tool-definition-internal.js";
+import { toolDisplay } from "./tool-display.js";
 import type {
 	AgentToolDefinition,
 	AgentToolPreparation,
@@ -62,8 +63,10 @@ function defineAgentTool<
 		target: "agent" as const,
 		permissions: options.permissions,
 		readOnly: options.readOnly ?? false,
+		parallelSafe: options.parallelSafe ?? false,
 		requiresApproval: options.requiresApproval ?? false,
 		capabilities: options.capabilities,
+		display: options.display && toolDisplay(options.input, options.display),
 	};
 	const checkResult = checkToolResult(options);
 

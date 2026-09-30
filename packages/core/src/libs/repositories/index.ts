@@ -7,6 +7,7 @@ export { default as AgentMessagesRepository } from "./agent-messages.js";
 export { default as AgentRoutineToolsRepository } from "./agent-routine-tools.js";
 export { default as AgentRoutinesRepository } from "./agent-routines.js";
 export { default as AgentRunsRepository } from "./agent-runs.js";
+export { default as AgentUrlKeysRepository } from "./agent-url-keys.js";
 export { default as AiGenerationsRepository } from "./ai-generations.js";
 export { default as AlertRecipientsRepository } from "./alert-recipients.js";
 export { default as AlertsRepository } from "./alerts.js";

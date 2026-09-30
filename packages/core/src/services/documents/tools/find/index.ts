@@ -50,6 +50,7 @@ export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
 		output: outputSchema,
 		permissions: [],
 		readOnly: true,
+		parallelSafe: true,
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],

@@ -1,3 +1,4 @@
+import type { AgentToolStatus } from "@types";
 import type { QueryBuilderProps } from "@/utils/query-builder";
 
 /**
@@ -20,6 +21,8 @@ export const queryKeys = {
 		models: (agentKey: string | undefined, routineId?: string) =>
 			["lucid", "agent", "models", agentKey, routineId] as const,
 		conversations: () => ["lucid", "agent", "conversations"] as const,
+		conversationLists: () =>
+			["lucid", "agent", "conversations", "list"] as const,
 		conversation: (id: string | undefined) =>
 			["lucid", "agent", "conversations", id] as const,
 		messages: (id: string | undefined) =>
@@ -28,6 +31,22 @@ export const queryKeys = {
 			["lucid", "agent", "conversations", id, "references"] as const,
 		conversationDetails: (id: string | undefined) =>
 			["lucid", "agent", "conversations", id, "details"] as const,
+		toolDetails: (
+			id: string,
+			messageId: string,
+			callId: string,
+			status: AgentToolStatus,
+		) =>
+			[
+				"lucid",
+				"agent",
+				"conversations",
+				id,
+				"tools",
+				messageId,
+				callId,
+				status,
+			] as const,
 		routines: () => ["lucid", "agent", "routines"] as const,
 		routine: (id: string | undefined) =>
 			["lucid", "agent", "routines", id] as const,

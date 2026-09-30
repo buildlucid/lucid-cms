@@ -3,6 +3,7 @@ import constants from "../../../constants/constants.js";
 import { modelMessages, reportedModel } from "../../../libs/agent/context.js";
 import { textFromParts } from "../../../libs/agent/input.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
+import { agentFormatter } from "../../../libs/formatters/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import isPermanentFailure from "./is-permanent-failure.js";
 import type { RunSetup } from "./resolve-run-setup.js";
@@ -71,16 +72,21 @@ const runModelTurn: ServiceFn<
 			});
 		} else if (event.type === "tool-call") {
 			const call = { id: event.id, name: event.name, input: event.input };
+			const presentation = setup.presentation.get(call.name);
 			const part = {
 				type: "tool" as const,
 				...call,
-				title: setup.titles.get(call.name),
+				title: presentation?.title,
+				display: presentation?.display?.(call.input),
 				status: "pending" as const,
 			};
 			checkpoint.calls.push(call);
 			checkpoint.parts.push(part);
 			partsSize += JSON.stringify(part).length;
-			await session.emit({ messageId: checkpoint.messageId, ...part });
+			await session.emit({
+				messageId: checkpoint.messageId,
+				...agentFormatter.formatTool({ part, detailsAvailable: false }),
+			});
 		}
 		if (partsSize > limits.partsChars) {
 			tooLarge = true;

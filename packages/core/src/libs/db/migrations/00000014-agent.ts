@@ -391,6 +391,12 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("position", adapter.getDataType("integer"), (col) =>
 				col.notNull(),
 			)
+			.addColumn("execution_version", adapter.getDataType("integer"), (col) =>
+				col.notNull().defaultTo(0),
+			)
+			.addColumn("revision", adapter.getDataType("integer"), (col) =>
+				col.notNull().defaultTo(0),
+			)
 			.addColumn("role", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("parts", adapter.getDataType("json"), (col) => col.notNull())
 			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
@@ -425,7 +431,22 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 		await db.schema
 			.createIndex("idx_agent_messages_run")
 			.on("lucid_agent_messages")
-			.column("run_id")
+			.columns(["run_id", "execution_version", "revision"])
+			.execute();
+
+		await db.schema
+			.createTable("lucid_agent_url_keys")
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col
+					.notNull()
+					.references("lucid_agent_conversations.id")
+					.onDelete("cascade"),
+			)
+			.addColumn("url_key", adapter.getDataType("text"), (col) => col.notNull())
+			.addPrimaryKeyConstraint("pk_agent_url_keys", [
+				"conversation_id",
+				"url_key",
+			])
 			.execute();
 
 		await db.schema

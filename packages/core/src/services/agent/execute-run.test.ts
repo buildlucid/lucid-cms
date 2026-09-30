@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { Hono } from "hono";
 import {
 	afterAll,
 	afterEach,
@@ -12,8 +13,15 @@ import {
 } from "vitest";
 import z from "zod";
 import defineAgent from "../../libs/agent/define-agent.js";
+import {
+	findRunStream,
+	savedStreamCursor,
+	startRunStream,
+} from "../../libs/agent/run-stream.js";
 import type { Checkpoint, ModelUsage } from "../../libs/agent/types.js";
 import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
+import { streamRun } from "../../libs/http/utils/agent-stream-events.js";
+import * as httpServiceContext from "../../libs/http/utils/create-service-context.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import {
 	AgentConversationsRepository,
@@ -25,6 +33,8 @@ import {
 } from "../../libs/repositories/index.js";
 import defineAgentTool from "../../libs/tools/define-agent-tool.js";
 import { agentTools } from "../../libs/tools/lucid-tools.js";
+import type { AgentToolHandler } from "../../libs/tools/types.js";
+import type { LucidHonoGeneric } from "../../types/hono.js";
 import type {
 	AgentApprovalMode,
 	AgentReferenceInput,
@@ -34,6 +44,7 @@ import LucidError from "../../utils/errors/lucid-error.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
+import isUrlInConversation from "../web/helpers/is-url-in-conversation.js";
 import runWebResearch from "../web/helpers/run-web-research.js";
 import advanceInputs from "./advance-inputs.js";
 import cancelRun from "./cancel-run.js";
@@ -68,7 +79,7 @@ vi.mock("./helpers/check-agent-access.js", async (importOriginal) => ({
 					input.userId === null
 						? { type: "system" }
 						: { type: "user", userId: input.userId },
-				permissions: [],
+				permissions: livePermissions,
 				superAdmin: input.userId === null,
 			},
 		},
@@ -92,6 +103,7 @@ const testConfig = getTestConfig();
 let context: ServiceContext;
 let userId: number;
 let connectionId: number;
+let livePermissions: string[] = [];
 const writeHandler = vi.fn(async () => ({
 	error: undefined,
 	data: { output: { done: true } },
@@ -125,6 +137,24 @@ const readTool = defineAgentTool({
 	permissions: [],
 	readOnly: true,
 	handler: readHandler,
+});
+const parallelHandler = vi.fn<
+	AgentToolHandler<
+		{ id: string; payload?: string },
+		{ id: string; payload?: string }
+	>
+>(async ({ input }) => ({ error: undefined, data: { output: input } }));
+const parallelTool = defineAgentTool({
+	name: "test_parallel_read",
+	description: "Independent test read",
+	input: z.object({ id: z.string(), payload: z.string().optional() }),
+	output: z.object({ id: z.string(), payload: z.string().optional() }),
+	permissions: [],
+	requiredPermissions: ({ id }) =>
+		id === "restricted" ? ["users:create"] : [],
+	readOnly: true,
+	parallelSafe: true,
+	handler: parallelHandler,
 });
 const prepareSelection = vi.fn(async () => ({
 	error: undefined,
@@ -184,6 +214,7 @@ const testAgent = defineAgent({
 		writeTool,
 		approvalTool,
 		readTool,
+		parallelTool,
 		selectionTool,
 		selectionWriteTool,
 		restrictedWriteTool,
@@ -194,7 +225,7 @@ const webAgent = defineAgent({
 	key: "test-web",
 	name: "Web Agent",
 	description: "Researches the web in tests.",
-	tools: [agentTools.web(), agentTools.analyzeResource()],
+	tools: [agentTools.web(), agentTools.analyzeMedia()],
 });
 const usage: ModelUsage = {
 	model: "test-model",
@@ -271,12 +302,18 @@ beforeAll(async () => {
 afterAll(() => testConfig.destroy());
 afterEach(() => vi.restoreAllMocks());
 beforeEach(() => {
+	livePermissions = [];
 	inputTokenLimit = 128_000;
 	toolLimit = 128;
 	model.mockReset();
 	remoteRequest.mockReset();
 	writeHandler.mockClear();
 	readHandler.mockClear();
+	parallelHandler.mockReset();
+	parallelHandler.mockImplementation(async ({ input }) => ({
+		error: undefined,
+		data: { output: input },
+	}));
 	vi.mocked(enqueueRun).mockClear();
 });
 
@@ -345,6 +382,418 @@ const selectRun = async (runId: string) => {
 	return result.data;
 };
 
+const callTools = (calls: Checkpoint["calls"]) =>
+	model.mockImplementationOnce(async (_context, input) => {
+		await input.emit(start());
+		for (const call of calls) await input.emit({ type: "tool-call", ...call });
+		return { error: undefined, data: { usage, connectionId } };
+	});
+const parallelCall = (id: string, payload?: string) => ({
+	id,
+	name: parallelTool.name,
+	input: { id, ...(payload ? { payload } : {}) },
+});
+
+describe("independent read batches", () => {
+	test("caps concurrency, saves out-of-order receipts and preserves model order with large results", async () => {
+		const prepared = await prepare();
+		const gates = Array.from({ length: 4 }, () =>
+			Promise.withResolvers<void>(),
+		);
+		let active = 0;
+		let peak = 0;
+		parallelHandler.mockImplementation(async ({ input }) => {
+			active++;
+			peak = Math.max(peak, active);
+			await gates[Number(input.id)]?.promise;
+			active--;
+			return { error: undefined, data: { output: input } };
+		});
+		callTools([
+			parallelCall("0"),
+			parallelCall("1"),
+			parallelCall("2", "x".repeat(32_000)),
+			parallelCall("3"),
+		]);
+		reply("Done");
+		const running = executeRun(context, { runId: prepared.runId });
+		await vi.waitFor(() => expect(parallelHandler).toHaveBeenCalledTimes(3));
+		expect(active).toBe(3);
+		gates[2]?.resolve();
+		await vi.waitFor(async () =>
+			expect(
+				(await selectRun(prepared.runId))?.checkpoint?.parts,
+			).toContainEqual(
+				expect.objectContaining({ id: "2", status: "complete" }),
+			),
+		);
+		const partial = (await selectRun(prepared.runId))?.checkpoint;
+		expect(partial?.cursor).toBe(0);
+		expect(
+			partial?.messages
+				.filter((message) => message.role === "tool")
+				.map((message) => message.toolCallId),
+		).toEqual(["2"]);
+		gates[1]?.resolve();
+		gates[0]?.resolve();
+		await vi.waitFor(() => expect(parallelHandler).toHaveBeenCalledTimes(4));
+		gates[3]?.resolve();
+		expect(await running).toMatchObject({ data: { status: "completed" } });
+		expect(peak).toBe(3);
+		const results = model.mock.calls
+			.at(-1)?.[1]
+			.messages.filter((message) => message.role === "tool");
+		expect(results?.map((message) => message.toolCallId)).toEqual([
+			"0",
+			"1",
+			"2",
+			"3",
+		]);
+		expect(results?.[2]?.output).toMatchObject({
+			truncated: true,
+			toolCallId: "2",
+		});
+		expect(
+			(await partsOf(prepared.conversationId))?.find(
+				(part) => part.type === "tool" && part.id === "2",
+			),
+		).toMatchObject({ output: { payload: "x".repeat(32_000) } });
+	});
+
+	test("writes and state-dependent reads form sequential boundaries", async () => {
+		const prepared = await prepare();
+		const trace: string[] = [];
+		let active = 0;
+		parallelHandler.mockImplementation(async ({ input }) => {
+			active++;
+			trace.push(`start:${input.id}`);
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			trace.push(`end:${input.id}`);
+			active--;
+			return { error: undefined, data: { output: input } };
+		});
+		writeHandler.mockImplementationOnce(async () => {
+			expect(active).toBe(0);
+			trace.push("write");
+			return { error: undefined, data: { output: { done: true } } };
+		});
+		readHandler.mockImplementationOnce(async () => {
+			expect(active).toBe(0);
+			trace.push("dependent");
+			return { error: undefined, data: { output: { done: true } } };
+		});
+		callTools([
+			parallelCall("a"),
+			parallelCall("b"),
+			{ id: "write", name: writeTool.name, input: {} },
+			parallelCall("c"),
+			{ id: "dependent", name: readTool.name, input: {} },
+			parallelCall("d"),
+		]);
+		reply("Done");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(trace.indexOf("write")).toBeGreaterThan(trace.indexOf("end:a"));
+		expect(trace.indexOf("write")).toBeGreaterThan(trace.indexOf("end:b"));
+		expect(trace.indexOf("start:c")).toBeGreaterThan(trace.indexOf("write"));
+		expect(trace.indexOf("dependent")).toBeGreaterThan(trace.indexOf("end:c"));
+		expect(trace.indexOf("start:d")).toBeGreaterThan(
+			trace.indexOf("dependent"),
+		);
+	});
+
+	test("groups exact approvals, rejects forged decisions and never grants a future call", async () => {
+		const prepared = await prepare({ approvalMode: "confirm-all" });
+		callTools([
+			parallelCall("a"),
+			parallelCall("b"),
+			parallelCall("c"),
+			parallelCall("future"),
+		]);
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		expect(parallelHandler).not.toHaveBeenCalled();
+		const id = await interactionId(prepared.conversationId);
+		const widget = (await selectRun(prepared.runId))?.checkpoint?.pending
+			?.widget;
+		expect(widget).toMatchObject({
+			key: "lucid-tool-approval-batch",
+			interaction: {
+				approvals: [
+					{ toolCallId: "a", input: { id: "a" } },
+					{ toolCallId: "b", input: { id: "b" } },
+					{ toolCallId: "c", input: { id: "c" } },
+				],
+			},
+		});
+		for (const approvedToolCallIds of [["future"], ["a", "a"]]) {
+			expect(
+				await executeRun(context, {
+					runId: prepared.runId,
+					answer: {
+						interactionId: id,
+						action: "submit",
+						response: { approvedToolCallIds },
+						userId,
+					},
+				}),
+			).toMatchObject({ error: { status: 400 } });
+		}
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: id,
+					action: "submit",
+					response: { approvedToolCallIds: ["a", "c"] },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "waiting" } });
+		expect(parallelHandler.mock.calls.map(([args]) => args.input.id)).toEqual([
+			"a",
+			"c",
+		]);
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({ id: "b", status: "failed" }),
+		);
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "cancel",
+					response: {},
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(parallelHandler).toHaveBeenCalledTimes(2);
+	});
+
+	test("preflight rejects invalid input and input-dependent permissions before asking", async () => {
+		const prepared = await prepare({ approvalMode: "confirm-all" });
+		callTools([
+			{ id: "invalid", name: parallelTool.name, input: { id: 123 } },
+			parallelCall("restricted"),
+			parallelCall("valid"),
+		]);
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		expect(parallelHandler).not.toHaveBeenCalled();
+		const checkpoint = (await selectRun(prepared.runId))?.checkpoint;
+		expect(checkpoint?.parts).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: "invalid", status: "failed" }),
+				expect.objectContaining({ id: "restricted", status: "failed" }),
+			]),
+		);
+		expect(checkpoint?.pending?.widget.interaction.approval).toMatchObject({
+			input: { id: "valid" },
+		});
+	});
+
+	test("approval does not retain permissions revoked before execution", async () => {
+		livePermissions = ["users:create"];
+		const prepared = await prepare({ approvalMode: "confirm-all" });
+		callTools([parallelCall("restricted"), parallelCall("allowed")]);
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		livePermissions = [];
+		reply("Done");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: await interactionId(prepared.conversationId),
+					action: "submit",
+					response: { approvedToolCallIds: ["restricted", "allowed"] },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(parallelHandler.mock.calls.map(([args]) => args.input.id)).toEqual([
+			"allowed",
+		]);
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({ id: "restricted", status: "failed" }),
+		);
+	});
+
+	test("disconnect recovery retries only unfinished reads and retains successful siblings of a failure", async () => {
+		const prepared = await prepare();
+		const controller = new AbortController();
+		parallelHandler.mockImplementation(async ({ input, execution }) => {
+			if (input.id === "slow") {
+				await new Promise<void>((resolve) =>
+					execution.signal.addEventListener("abort", () => resolve(), {
+						once: true,
+					}),
+				);
+				execution.signal.throwIfAborted();
+			}
+			if (input.id === "failed") {
+				return {
+					data: undefined,
+					error: {
+						type: "basic",
+						status: 400,
+						message: "Deliberate read failure",
+					},
+				};
+			}
+			return { error: undefined, data: { output: input } };
+		});
+		callTools([
+			parallelCall("slow"),
+			parallelCall("failed"),
+			parallelCall("fast"),
+		]);
+		const running = executeRun(context, {
+			runId: prepared.runId,
+			signal: controller.signal,
+			emit: async (event) => {
+				if (
+					event.type === "tool" &&
+					event.id === "fast" &&
+					event.status === "complete"
+				) {
+					controller.abort();
+				}
+			},
+		});
+		expect(await running).toMatchObject({ data: { status: "queued" } });
+		const partial = (await selectRun(prepared.runId))?.checkpoint;
+		expect(partial?.cursor).toBe(0);
+		expect(partial?.parts).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: "fast", status: "complete" }),
+				expect.objectContaining({ id: "failed", status: "failed" }),
+				expect.objectContaining({ id: "slow", status: "pending" }),
+			]),
+		);
+		parallelHandler.mockImplementation(async ({ input }) => ({
+			error: undefined,
+			data: { output: input },
+		}));
+		reply("Done");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(parallelHandler.mock.calls.map(([args]) => args.input.id)).toEqual([
+			"slow",
+			"failed",
+			"fast",
+			"slow",
+		]);
+		expect(model).toHaveBeenCalledTimes(2);
+		expect(
+			model.mock.calls
+				.at(-1)?.[1]
+				.messages.filter((message) => message.role === "tool")
+				.map((message) => message.toolCallId),
+		).toEqual(["slow", "failed", "fast"]);
+	});
+
+	test("lease loss fences old completions and recovery never repeats a saved read or a write", async () => {
+		const prepared = await prepare();
+		const slow = Promise.withResolvers<void>();
+		parallelHandler.mockImplementation(async ({ input }) => {
+			if (input.id === "slow") await slow.promise;
+			return { error: undefined, data: { output: input } };
+		});
+		callTools([
+			parallelCall("slow"),
+			parallelCall("fast"),
+			{ id: "write", name: writeTool.name, input: {} },
+		]);
+		const running = await executeRun(context, {
+			runId: prepared.runId,
+			emit: async (event) => {
+				if (
+					event.type !== "tool" ||
+					event.id !== "fast" ||
+					event.status !== "complete"
+				) {
+					return;
+				}
+				await context.db.kysely
+					.updateTable("lucid_agent_runs")
+					.set({
+						execution_token: randomUUID(),
+						lease_expires_at: "2000-01-01T00:00:00.000Z",
+					})
+					.where("id", "=", prepared.runId)
+					.execute();
+				slow.resolve();
+			},
+		});
+		expect(running.error?.status).toBe(409);
+		expect(writeHandler).not.toHaveBeenCalled();
+		expect((await selectRun(prepared.runId))?.checkpoint?.parts).toContainEqual(
+			expect.objectContaining({ id: "fast", status: "complete" }),
+		);
+		parallelHandler.mockImplementation(async ({ input }) => ({
+			error: undefined,
+			data: { output: input },
+		}));
+		reply("Done");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(parallelHandler.mock.calls.map(([args]) => args.input.id)).toEqual([
+			"slow",
+			"fast",
+			"slow",
+		]);
+		expect(writeHandler).toHaveBeenCalledTimes(1);
+	});
+
+	test("a steer waits for started reads and skips every unstarted call", async () => {
+		const prepared = await prepare();
+		parallelHandler.mockImplementation(async ({ input }) => {
+			if (input.id === "a") {
+				await submitInput(context, {
+					conversationId: prepared.conversationId,
+					userId,
+					requestId: randomUUID(),
+					text: "Change direction",
+					delivery: { kind: "steer", targetRunId: prepared.runId },
+					dispatch: false,
+				});
+			}
+			return { error: undefined, data: { output: input } };
+		});
+		callTools([
+			parallelCall("a"),
+			parallelCall("b"),
+			parallelCall("c"),
+			parallelCall("unstarted"),
+			{ id: "write", name: writeTool.name, input: {} },
+		]);
+		reply("Changed direction");
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(parallelHandler).toHaveBeenCalledTimes(3);
+		expect(writeHandler).not.toHaveBeenCalled();
+		expect(await partsOf(prepared.conversationId)).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: "a", status: "complete" }),
+				expect.objectContaining({ id: "b", status: "complete" }),
+				expect.objectContaining({ id: "c", status: "complete" }),
+				expect.objectContaining({ id: "unstarted", status: "skipped" }),
+				expect.objectContaining({ id: "write", status: "skipped" }),
+			]),
+		);
+	});
+});
+
 describe("agent runner", () => {
 	test.each([
 		"chat",
@@ -354,7 +803,7 @@ describe("agent runner", () => {
 			agent: testAgent,
 			authority: {
 				principal: { type: "user", userId },
-				permissions: [],
+				permissions: livePermissions,
 				superAdmin: false,
 			},
 			mode,
@@ -556,7 +1005,8 @@ describe("agent runner", () => {
 
 	test("denial skips execution and a chat policy change only affects later runs", async () => {
 		const prepared = await prepare({ approvalMode: "confirm-all" });
-		await new AgentConversationsRepository(context.db).updateSingle({
+		const AgentConversations = new AgentConversationsRepository(context.db);
+		await AgentConversations.updateSingle({
 			where: [{ key: "id", operator: "=", value: prepared.conversationId }],
 			data: { approval_mode: "automatic" },
 		});
@@ -742,11 +1192,14 @@ describe("agent runner", () => {
 		).toMatchObject([
 			{
 				name: "lucid_share_progress",
-				input: { message: "I found the relevant pages." },
+				display: { kind: "progress", message: "I found the relevant pages." },
 			},
 			{
 				name: "lucid_share_progress",
-				input: { message: "I checked their current status." },
+				display: {
+					kind: "progress",
+					message: "I checked their current status.",
+				},
 			},
 		]);
 
@@ -931,8 +1384,12 @@ describe("agent runner", () => {
 				userId,
 			},
 			emit: async (event) => {
-				if (event.type === "widget" && event.interaction?.status === "answered")
+				if (
+					event.type === "widget" &&
+					event.interaction?.status === "answered"
+				) {
 					abort.abort();
+				}
 			},
 		});
 		expect(selectedHandler).not.toHaveBeenCalled();
@@ -1041,13 +1498,15 @@ describe("agent runner", () => {
 			name: mode === "routine" ? approvalTool.name : writeTool.name,
 			input: {},
 		});
-		if (mode === "routine")
+		if (mode === "routine") {
 			callTool({
 				id: "finish",
 				name: "lucid_finish_run",
 				input: { outcome: "done", summary: "Written" },
 			});
-		else reply("Written");
+		} else {
+			reply("Written");
+		}
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "completed" },
 		});
@@ -1095,8 +1554,9 @@ describe("agent runner", () => {
 		const fail = vi
 			.spyOn(AgentRunsRepository.prototype, "updateWithToken")
 			.mockImplementation(function (this: AgentRunsRepository, props) {
-				if (writeHandler.mock.calls.length && !props.checkpoint.inFlightWrite)
+				if (writeHandler.mock.calls.length && !props.checkpoint.inFlightWrite) {
 					throw new LucidError({ message: "Lost write outcome" });
+				}
 				return update.call(this, props);
 			});
 		callTool({ id: "uncertain", name: writeTool.name, input: {} });
@@ -1104,7 +1564,8 @@ describe("agent runner", () => {
 			executeRun(context, { runId: prepared.runId }),
 		).rejects.toThrow("Lost write outcome");
 		fail.mockRestore();
-		await new AgentRunsRepository(context.db).transition({
+		const AgentRuns = new AgentRunsRepository(context.db);
+		await AgentRuns.transition({
 			runId: prepared.runId,
 			from: ["running"],
 			status: "interrupted",
@@ -1343,6 +1804,243 @@ describe("agent runner", () => {
 			{ type: "inputs", inputs: [], queuePaused: false },
 			{ type: "finish", runId: prepared.runId, status: "completed" },
 		]);
+	});
+
+	test("a disconnected HTTP viewer leaves the same model request running and can replay its remaining events", async () => {
+		const prepared = await prepare();
+		const started = Promise.withResolvers<void>();
+		const resume = Promise.withResolvers<void>();
+		model.mockImplementationOnce(async (_context, input) => {
+			await input.emit(start());
+			await input.emit({ type: "text-delta", text: "First. " });
+			started.resolve();
+			await resume.promise;
+			expect(input.signal?.aborted).toBe(false);
+			await input.emit({ type: "text-delta", text: "Second." });
+			return { error: undefined, data: { usage, connectionId } };
+		});
+		vi.spyOn(httpServiceContext, "default").mockReturnValue(context);
+		const tasks: Promise<unknown>[] = [];
+		const app = new Hono<LucidHonoGeneric>();
+		app.post("/run", (c) => {
+			c.set("ctx", {
+				waitUntil: (task) => {
+					tasks.push(task);
+				},
+			});
+			return streamRun(c, context, { runId: prepared.runId });
+		});
+		const response = await app.request("/run", { method: "POST" });
+		expect(response.headers.get("X-Lucid-Agent-Run-ID")).toBe(prepared.runId);
+		expect(response.headers.get("Cache-Control")).toBe(
+			"no-cache, no-transform",
+		);
+		const reader = response.body?.getReader();
+		assert(reader);
+		await started.promise;
+		const stream = findRunStream(context.config, prepared.runId);
+		assert(stream);
+		const first = stream
+			.read(stream.initialCursor)
+			?.find((entry) => entry.event.type === "text-delta");
+		assert(first);
+		await reader.cancel();
+		resume.resolve();
+		await Promise.all(tasks);
+		const events: AgentStreamEvent[] = [];
+		const changed = vi.spyOn(
+			AgentMessagesRepository.prototype,
+			"selectChangedForRun",
+		);
+		await watchRun(context, {
+			runId: prepared.runId,
+			cursor: first.id,
+			signal: new AbortController().signal,
+			emit: async (event) => {
+				events.push(event);
+			},
+		});
+		expect(events.filter((event) => event.type === "text-delta")).toMatchObject(
+			[{ text: "Second." }],
+		);
+		expect(events).toContainEqual({
+			type: "finish",
+			runId: prepared.runId,
+			status: "completed",
+		});
+		expect(changed).not.toHaveBeenCalled();
+		expect(model).toHaveBeenCalledTimes(1);
+		expect(tasks).toHaveLength(1);
+	});
+
+	test("a saved cursor resumes updates to earlier messages even when timestamps match", async () => {
+		const prepared = await prepare();
+		const Messages = new AgentMessagesRepository(context.db);
+		const Runs = new AgentRunsRepository(context.db);
+		const selected = await Runs.selectSingle({
+			select: ["id", "execution_version"],
+			where: [{ key: "id", operator: "=", value: prepared.runId }],
+		});
+		const run = selected.data;
+		assert(run);
+		const token = randomUUID();
+		expect(
+			(
+				await Runs.claimExecution({
+					runId: run.id,
+					token,
+					expectedVersion: run.execution_version,
+					now: new Date().toISOString(),
+					leaseExpiresAt: new Date(Date.now() + 60_000).toISOString(),
+				})
+			).data,
+		).toBe(true);
+		const now = new Date().toISOString();
+		const firstId = randomUUID();
+		const write = (id: string, revision: number, text: string) =>
+			Messages.upsertForRun({
+				id,
+				conversationId: prepared.conversationId,
+				runId: prepared.runId,
+				token,
+				executionVersion: run.execution_version + 1,
+				revision,
+				parts: [{ type: "text", text }],
+				now,
+			});
+		expect((await write(firstId, 1, "old")).data).toBe(true);
+		expect((await write(randomUUID(), 2, "later")).data).toBe(true);
+		const cursor = { executionVersion: run.execution_version + 1, revision: 2 };
+		expect((await write(firstId, 3, "new")).data).toBe(true);
+		const updated = await Messages.selectChangedForRun({
+			runId: prepared.runId,
+			cursor,
+		});
+		expect(updated.data).toMatchObject([
+			{ id: firstId, parts: [{ text: "new" }], revision: 3 },
+		]);
+		await cancelRun(context, { runId: prepared.runId, userId });
+		const ids: (string | undefined)[] = [];
+		const events: AgentStreamEvent[] = [];
+		await watchRun(context, {
+			runId: prepared.runId,
+			cursor: savedStreamCursor(prepared.runId, cursor),
+			signal: new AbortController().signal,
+			emit: async (event, id) => {
+				events.push(event);
+				ids.push(id);
+			},
+		});
+		expect(events.filter((event) => event.type === "message")).toMatchObject([
+			{ message: { id: firstId } },
+		]);
+		expect(ids[0]).toBe(
+			savedStreamCursor(prepared.runId, { ...cursor, revision: 3 }),
+		);
+	});
+
+	test("an expired live cursor recovers replacing snapshots without repeating the model", async () => {
+		const prepared = await prepare();
+		reply("A recovered reply.");
+		await executeRun(context, { runId: prepared.runId });
+		const events: AgentStreamEvent[] = [];
+		await watchRun(context, {
+			runId: prepared.runId,
+			cursor: `live:${randomUUID()}:999`,
+			signal: new AbortController().signal,
+			emit: async (event) => {
+				events.push(event);
+			},
+		});
+		expect(events.filter((event) => event.type === "message")).toHaveLength(2);
+		expect(events).toContainEqual({
+			type: "finish",
+			runId: prepared.runId,
+			status: "completed",
+		});
+		expect(model).toHaveBeenCalledTimes(1);
+	});
+
+	test("a slow viewer receives queue events published while the execution buffer closes", async () => {
+		const prepared = await prepare();
+		const stream = startRunStream(context.config, prepared.runId);
+		stream.publish({
+			type: "finish",
+			runId: prepared.runId,
+			status: "completed",
+		});
+		const events: AgentStreamEvent[] = [];
+		await watchRun(context, {
+			runId: prepared.runId,
+			cursor: stream.initialCursor,
+			signal: new AbortController().signal,
+			emit: async (event) => {
+				events.push(event);
+				if (event.type === "finish") {
+					stream.publish({ type: "next", runId: "next-run" });
+					stream.close();
+				}
+			},
+		});
+		expect(events).toEqual([
+			{ type: "finish", runId: prepared.runId, status: "completed" },
+			{ type: "next", runId: "next-run" },
+		]);
+	});
+
+	test("an unchanged saved version avoids decoding reply payloads on subsequent watch polls", async () => {
+		const prepared = await prepare();
+		const controller = new AbortController();
+		const changed = vi.spyOn(
+			AgentMessagesRepository.prototype,
+			"selectChangedForRun",
+		);
+		const read = AgentMessagesRepository.prototype.selectRunVersion;
+		let polls = 0;
+		vi.spyOn(
+			AgentMessagesRepository.prototype,
+			"selectRunVersion",
+		).mockImplementation(async function (runId) {
+			const result = await read.call(this, runId);
+			if (++polls === 3) controller.abort();
+			return result;
+		});
+		await watchRun(context, {
+			runId: prepared.runId,
+			signal: controller.signal,
+			emit: async () => {},
+		});
+		expect(polls).toBe(3);
+		expect(changed).toHaveBeenCalledTimes(1);
+	});
+
+	test("saved user messages register provenance once and retries cannot authorise changed URLs", async () => {
+		const prepared = await prepare({
+			text: "Read https://example.com/original",
+		});
+		expect(
+			(
+				await isUrlInConversation(context, {
+					conversationId: prepared.conversationId,
+					url: "https://example.com/original",
+				})
+			).data,
+		).toBe(true);
+		const retried = await startRun(context, {
+			userId,
+			conversationId: prepared.conversationId,
+			text: "Read https://example.com/invented",
+			requestId: prepared.requestId,
+		});
+		expect(retried.error).toBeUndefined();
+		expect(
+			(
+				await isUrlInConversation(context, {
+					conversationId: prepared.conversationId,
+					url: "https://example.com/invented",
+				})
+			).data,
+		).toBe(false);
 	});
 });
 
@@ -1855,7 +2553,8 @@ describe("queued and steering inputs", () => {
 		"steer",
 	] as const)("keeps %s references pending until delivery and replays them to the model", async (delivery) => {
 		const prepared = await prepare();
-		const media = await new MediaRepository(context.db).createSingle({
+		const Media = new MediaRepository(context.db);
+		const media = await Media.createSingle({
 			data: {
 				key: randomUUID(),
 				storage_adapter_key: "test",
@@ -1883,7 +2582,8 @@ describe("queued and steering inputs", () => {
 		});
 		expect(denied.error?.status).toBe(403);
 		const requestId = randomUUID();
-		const submitted = await new AgentInputsRepository(context.db).submit({
+		const AgentInputs = new AgentInputsRepository(context.db);
+		const submitted = await AgentInputs.submit({
 			id: requestId,
 			conversationId: prepared.conversationId,
 			userId,
@@ -1956,7 +2656,8 @@ describe("queued and steering inputs", () => {
 			requestId: randomUUID(),
 			text: "Start",
 		});
-		const media = await new MediaRepository(context.db).createSingle({
+		const Media = new MediaRepository(context.db);
+		const media = await Media.createSingle({
 			data: {
 				key: randomUUID(),
 				storage_adapter_key: "test",
@@ -2609,7 +3310,8 @@ describe("saved model choices", () => {
 			text: "Continue.",
 		});
 		expect(next.error).toBeUndefined();
-		const saved = await new AgentRunsRepository(context.db).selectSingle({
+		const AgentRuns = new AgentRunsRepository(context.db);
+		const saved = await AgentRuns.selectSingle({
 			select: ["checkpoint"],
 			where: [{ key: "id", operator: "=", value: next.data?.runId ?? "" }],
 		});
@@ -2908,14 +3610,14 @@ test("a run stops before calling a model that accepts fewer tools than the agent
 	expect(model).not.toHaveBeenCalled();
 });
 
-test("confirm-all asks before resource analysis starts", async () => {
+test("confirm-all asks before media analysis starts", async () => {
 	const prepared = await prepare({
 		approvalMode: "confirm-all",
 		agentKey: webAgent.key,
 	});
 	callTool({
 		id: "analyze-file",
-		name: "resources_analyze",
+		name: "media_analyze",
 		input: {
 			source: { type: "url", url: "https://example.com/file.pdf" },
 			question: "Summarise this file",
@@ -2926,7 +3628,7 @@ test("confirm-all asks before resource analysis starts", async () => {
 	});
 	expect(
 		remoteRequest.mock.calls.filter(
-			([, options]) => options.body?.feature?.key === "resource.analyze",
+			([, options]) => options.body?.feature?.key === "media.analyze",
 		),
 	).toHaveLength(0);
 	expect(await partsOf(prepared.conversationId)).toContainEqual(
@@ -2934,7 +3636,7 @@ test("confirm-all asks before resource analysis starts", async () => {
 			type: "widget",
 			interaction: expect.objectContaining({
 				approval: {
-					toolName: "resources_analyze",
+					toolName: "media_analyze",
 					input: {
 						source: { type: "url", url: "https://example.com/file.pdf" },
 						question: "Summarise this file",

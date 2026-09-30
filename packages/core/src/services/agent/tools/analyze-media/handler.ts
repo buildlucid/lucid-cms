@@ -1,5 +1,5 @@
 import type z from "zod";
-import analyzeResource from "../../../../libs/lucid-remote/services/analyze-resource/index.js";
+import analyzeMedia from "../../../../libs/lucid-remote/services/analyze-media/index.js";
 import type { AgentToolHandler } from "../../../../libs/tools/types.js";
 import runPaidToolRequest from "../../helpers/run-paid-tool-request.js";
 import resolveSource from "./resolve-source.js";
@@ -17,13 +17,13 @@ const handler: AgentToolHandler<
 
 	const result = await runPaidToolRequest(context, {
 		execution,
-		featureKey: "resource.analyze",
+		featureKey: "media.analyze",
 		timeoutMs: 120_000,
 		send: (paid) =>
-			analyzeResource(context, {
+			analyzeMedia(context, {
 				...paid,
 				request: {
-					feature: { key: "resource.analyze", version: "v1" },
+					feature: { key: "media.analyze", version: "v1" },
 					sessionId: execution.run.conversationId,
 					input: [],
 					context: { question: input.question, source: source.data },

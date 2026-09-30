@@ -46,7 +46,7 @@ const aiUsageFeatureLabels = {
 	"agent.title.generate": "ai.usage.features.agent.title.generate",
 	"web.search": "ai.usage.features.web.search",
 	"web.fetch": "ai.usage.features.web.fetch",
-	"resource.analyze": "ai.usage.features.resource.analyze",
+	"media.analyze": "ai.usage.features.media.analyze",
 	"custom-field.input.generate":
 		"ai.usage.features.custom.field.input.generate",
 	"media.alt.generate": "ai.usage.features.media.alt.generate",

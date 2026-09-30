@@ -1,7 +1,7 @@
 import z from "zod";
+import { webSourceKey } from "../../../libs/agent/url-keys.js";
 import type { AgentConversationSource } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import { webSourceKey } from "../../web/helpers/url-keys.js";
 import { webFetchToolName } from "../../web/tools/fetch/index.js";
 import { webSearchToolName } from "../../web/tools/search/index.js";
 import scanMessages from "./scan-messages.js";

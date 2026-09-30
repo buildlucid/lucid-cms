@@ -9,8 +9,8 @@ import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
+import { streamRun } from "../../utils/agent-stream-events.js";
 import createServiceContext from "../../utils/create-service-context.js";
-import { streamRun } from "./helpers/stream-events.js";
 
 const factory = createFactory();
 

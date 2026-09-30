@@ -1,57 +1,19 @@
 import constants from "../../../constants/constants.js";
-import { createInteraction } from "../../../libs/agent/interactions.js";
-import type { Checkpoint } from "../../../libs/agent/types.js";
 import {
-	executeAgentTool,
-	prepareAgentTool,
-} from "../../../libs/tools/execute-tool.js";
-import type {
-	AgentToolAuthority,
-	AgentToolDefinition,
-} from "../../../libs/tools/types.js";
+	createInteraction,
+	needsApproval,
+	toolInteractionAnswer,
+} from "../../../libs/agent/interactions.js";
+import { prepareAgentTool } from "../../../libs/tools/execute-tool.js";
+import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
+import invokeAgentTool, { failedToolRun } from "./invoke-agent-tool.js";
 import type { RunSession } from "./run-session.js";
 import {
 	type RunnerToolCall,
 	runnerToolHandlers,
 } from "./runner-tools/index.js";
-import {
-	type ToolOutcome,
-	type ToolResult,
-	toolFailure,
-	toolResult,
-} from "./tool-outcome.js";
-
-/**
- * Whether the run's approval policy asks before an agent tool runs. Tool
- * defaults use each tool's own setting, which a routine can override.
- */
-const needsApproval = (checkpoint: Checkpoint, tool: AgentToolDefinition) => {
-	switch (checkpoint.approvalMode) {
-		case "confirm-all":
-			return true;
-		case "tool-defaults":
-			return (
-				checkpoint.routineTools?.[tool.name]?.requiresApproval ??
-				tool.requiresApproval
-			);
-		case "automatic":
-			return false;
-	}
-};
-
-type FailedRun = Exclude<
-	Awaited<ReturnType<typeof executeAgentTool>>,
-	{ type: "success" }
->;
-
-/** A failed tool run keeps its message for the model. A missing or forbidden tool reads as unavailable. */
-const failedRun = (context: ServiceContext, result: FailedRun): ToolResult =>
-	toolFailure(
-		"message" in result
-			? result.message
-			: context.translate("server:agent.tool.unavailable"),
-	);
+import { type ToolOutcome, toolFailure, toolResult } from "./tool-outcome.js";
 
 /**
  * Handles one tool invocation. Runner tools run straight away. Agent tools
@@ -67,12 +29,13 @@ const runToolCall = async (
 ): Promise<ToolOutcome> => {
 	const { run, call, checkpoint, session, setup } = props;
 	const { pending } = checkpoint;
-	const answer = pending?.answer;
+	const answer = toolInteractionAnswer(checkpoint, call);
 	//* the model needs to know a refusal was deliberate, so it does not simply try again
 	if (answer?.action === "cancel") {
 		return toolFailure(
 			context.translate(
-				pending?.widget.interaction.approval
+				pending?.widget.interaction.approval ||
+					pending?.widget.interaction.approvals
 					? "server:agent.tool.denied"
 					: "server:agent.tool.dismissed",
 			),
@@ -114,7 +77,7 @@ const runToolCall = async (
 			input: call.input,
 			execution,
 		});
-		if (prepared.type !== "success") return failedRun(context, prepared);
+		if (prepared.type !== "success") return failedToolRun(context, prepared);
 		if ("output" in prepared.data) {
 			return toolResult(prepared.data.output, prepared.data.widgets);
 		}
@@ -154,24 +117,15 @@ const runToolCall = async (
 		}
 	}
 
-	await session.emit({
-		messageId: checkpoint.messageId,
-		type: "tool",
-		...call,
-		status: "running",
-	});
-
-	const executed = await executeAgentTool({
-		context,
+	const result = await invokeAgentTool(context, {
+		call,
 		tool,
-		input: call.input,
 		execution,
+		messageId: checkpoint.messageId,
+		emit: session.emit,
 	});
-	checkpoint.inFlightWrite = undefined;
-
-	if (executed.type !== "success") return failedRun(context, executed);
-
-	return toolResult(executed.data.output, executed.data.widgets);
+	if (!tool.readOnly) checkpoint.inFlightWrite = undefined;
+	return result;
 };
 
 export default runToolCall;

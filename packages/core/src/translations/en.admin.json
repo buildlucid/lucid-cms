@@ -20,5 +20,5 @@
 	"core.tools.lucid_register_references.title": "Register chat references",
 	"core.tools.lucid_remove_reference.title": "Remove chat reference",
 	"core.tools.lucid_list_references.title": "List chat references",
-	"core.tools.resources_analyze.title": "Analyse a file"
+	"core.tools.media_analyze.title": "Analyse a file"
 }

@@ -40,6 +40,7 @@ export const listCollectionsAgentTool = (options: CollectionToolOptions = {}) =>
 		output: outputSchema,
 		permissions: [],
 		readOnly: true,
+		parallelSafe: true,
 		handler: ({ context, input, execution }) =>
 			listCollections(context, {
 				input,

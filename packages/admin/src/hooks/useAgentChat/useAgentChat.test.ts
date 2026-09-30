@@ -24,8 +24,8 @@ vi.mock("@/services/api", async () => ({
 				data: { data: conversation },
 			}),
 			useGetMessages: () => ({
-				isSuccess: true,
-				data: { pages: [{ data: [message] }] },
+				query: { isSuccess: true, data: { pages: [{ data: [message] }] } },
+				refreshLatest: mocks.refresh,
 			}),
 			useCancelRun: () => ({ action: { mutateAsync: vi.fn() } }),
 			streamRun: mocks.stream,
@@ -105,7 +105,10 @@ test("an open stream does not dismiss a form whose response the server rejects",
 	}
 });
 
-test("a saved response releases the form before the remaining model stream finishes", async () => {
+test.each([
+	"widget",
+	"snapshot",
+])("a saved response received as a %s releases the form before the remaining model stream finishes", async (delivery) => {
 	const ended = Promise.withResolvers<void>();
 	mocks.stream.mockReset().mockReturnValue(ended.promise);
 	const { chat, dispose } = createRoot((dispose) => ({
@@ -117,15 +120,19 @@ test("a saved response releases the form before the remaining model stream finis
 		const stream = mocks.stream.mock.calls[0]?.[0];
 		if (!stream) return expect.fail("Missing response stream");
 		stream.onAccepted?.();
-		stream.onEvent({
-			messageId: "message",
+		const answered = {
 			...widget,
 			interaction: {
 				...widget.interaction,
-				status: "answered",
+				status: "answered" as const,
 				response: { id: 1 },
 			},
-		});
+		};
+		stream.onEvent(
+			delivery === "widget"
+				? { ...answered, messageId: "message" }
+				: { type: "message", message: { ...message, parts: [answered] } },
+		);
 		expect(await result).toEqual({ error: undefined });
 		expect(chat.pendingInteraction()).toBeUndefined();
 		expect(chat.streaming()).toBe(true);
@@ -168,6 +175,77 @@ test("retrying the same text with different references creates a new submission"
 		expect(bodies[2]?.requestId).not.toBe(bodies[0]?.requestId);
 	} finally {
 		conversation.latestRun = previousRun;
+		dispose();
+	}
+});
+
+test("ordinary tools do not refresh references, and repeated watch snapshots refresh each relevant call once", async () => {
+	const ended = Promise.withResolvers<void>();
+	mocks.stream.mockReset().mockReturnValue(ended.promise);
+	mocks.refresh.mockClear();
+	const { chat, dispose } = createRoot((dispose) => ({
+		chat: useAgentChat(() => "conversation"),
+		dispose,
+	}));
+	try {
+		void chat.respond({ runId: "run", id: "selection" }, { id: 1 });
+		const stream = mocks.stream.mock.calls[0]?.[0];
+		if (!stream) return expect.fail("Missing response stream");
+		stream.onEvent({ type: "start", runId: "run", messageId: "reply" });
+		expect(mocks.refresh).toHaveBeenCalledTimes(2);
+		stream.onEvent({
+			type: "tool",
+			messageId: "reply",
+			id: "read",
+			name: "documents_get",
+			status: "complete",
+			detailsAvailable: true,
+		});
+		expect(mocks.refresh).toHaveBeenCalledTimes(2);
+		const reference = {
+			type: "tool" as const,
+			id: "reference",
+			name: "lucid_register_references",
+			status: "complete" as const,
+			detailsAvailable: true,
+		};
+		for (let index = 0; index < 3; index++)
+			stream.onEvent({
+				type: "message",
+				message: {
+					...message,
+					id: "reply",
+					parts: [reference, { type: "text", text: String(index) }],
+				},
+			});
+		expect(mocks.refresh).toHaveBeenCalledTimes(3);
+		stream.onEvent({
+			type: "tool",
+			messageId: "reply",
+			id: "search",
+			name: "web_search",
+			status: "complete",
+			detailsAvailable: true,
+		});
+		expect(mocks.refresh).toHaveBeenCalledTimes(4);
+		for (let index = 0; index < 3; index++)
+			stream.onEvent({
+				type: "message",
+				message: {
+					...message,
+					id: "steer",
+					role: "user",
+					parts: [
+						{
+							type: "reference",
+							reference: { type: "media", mediaId: 12, label: "Hero" },
+						},
+					],
+				},
+			});
+		expect(mocks.refresh).toHaveBeenCalledTimes(5);
+	} finally {
+		ended.resolve();
 		dispose();
 	}
 });

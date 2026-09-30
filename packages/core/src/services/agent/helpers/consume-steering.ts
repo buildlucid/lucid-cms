@@ -1,4 +1,7 @@
-import { settleToolCall } from "../../../libs/agent/context.js";
+import {
+	isToolCallComplete,
+	settleToolCall,
+} from "../../../libs/agent/context.js";
 import { messageText } from "../../../libs/agent/input.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
@@ -45,7 +48,11 @@ const consumeSteering: ServiceFn<
 		};
 
 		for (const call of checkpoint.calls.slice(checkpoint.cursor)) {
-			settleToolCall(checkpoint, call, { status: "skipped", output });
+			if (isToolCallComplete(checkpoint, call.id)) continue;
+			const skipped = settleToolCall(checkpoint, call, {
+				status: "skipped",
+				output,
+			});
 
 			for (const part of checkpoint.parts) {
 				if (
@@ -58,11 +65,11 @@ const consumeSteering: ServiceFn<
 			}
 
 			await session.emit({
-				type: "tool",
 				messageId: checkpoint.messageId,
-				...call,
-				status: "skipped",
-				output,
+				...agentFormatter.formatTool({
+					part: skipped,
+					detailsAvailable: false,
+				}),
 			});
 		}
 

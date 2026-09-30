@@ -13,7 +13,6 @@ import Spinner from "@/components/Spinner/Spinner";
 import T from "@/translations";
 import {
 	type AgentToolPart,
-	skillTool,
 	toolTitle,
 	webFetchTool,
 	webSearchTool,
@@ -21,35 +20,29 @@ import {
 } from "@/utils/agent-tools";
 
 /**
- * What a tool call did. Built-in tools read better named after their input,
- * such as `Searched "lucid cms"` or "Read example.com"; others use their title.
+ * What a tool call did. Tools can describe a call from its input, such as
+ * `Searched "lucid cms"` or "Read example.com"; others use their title.
  */
 const describeTool = (part: AgentToolPart) => {
-	const { name, query, url } = part.input;
+	const { display } = part;
 	const done = part.status === "complete";
 
-	switch (part.name) {
-		case skillTool: {
-			if (typeof name === "string") return T()("agent.tool.skill", { name });
-			break;
-		}
-		case webSearchTool: {
-			if (typeof query === "string")
-				return T()(done ? "agent.tool.web.searched" : "agent.tool.web.search", {
-					query,
-				});
-			break;
-		}
-		case webFetchTool: {
-			if (typeof url === "string")
-				return T()(done ? "agent.tool.web.fetched" : "agent.tool.web.fetch", {
-					site: webSiteName(url),
-				});
-			break;
-		}
+	switch (display?.kind) {
+		case "text":
+			return display.text;
+		case "skill":
+			return T()("agent.tool.skill", { name: display.name });
+		case "search":
+			return T()(done ? "agent.tool.web.searched" : "agent.tool.web.search", {
+				query: display.query,
+			});
+		case "fetch":
+			return T()(done ? "agent.tool.web.fetched" : "agent.tool.web.fetch", {
+				site: webSiteName(display.url),
+			});
+		default:
+			return toolTitle(part);
 	}
-
-	return toolTitle(part);
 };
 
 export const toolLabel = (part: AgentToolPart) =>

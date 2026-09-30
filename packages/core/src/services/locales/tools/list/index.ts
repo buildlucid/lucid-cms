@@ -28,5 +28,6 @@ export const listLocalesAgentTool = () =>
 		output: outputSchema,
 		permissions: [],
 		readOnly: true,
+		parallelSafe: true,
 		handler: ({ context, input }) => listLocales(context, { input }),
 	});

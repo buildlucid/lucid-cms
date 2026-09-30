@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../constants/constants.js";
 import type { ControllerSchema } from "../exports/types.js";
 import {
 	aiModelCatalogSchema,
@@ -16,7 +17,10 @@ import type {
 	AgentRunOutcome,
 	AgentRunStatus,
 	AgentTitleStatus,
+	AgentToolDetails,
+	AgentToolDisplay,
 	AgentToolStatus,
+	AgentToolSummary,
 } from "../types/response.js";
 import {
 	agentReferenceInputSchema,
@@ -113,6 +117,18 @@ export const agentInteractionSchema = agentInteractionRequestSchema
 				input: z.record(z.string(), z.unknown()),
 			})
 			.optional(),
+		approvals: z
+			.array(
+				z.object({
+					toolCallId: z.string().min(1),
+					toolName: z.string().min(1),
+					title: z.string(),
+					input: z.record(z.string(), z.unknown()),
+				}),
+			)
+			.min(2)
+			.max(constants.agent.readConcurrency)
+			.optional(),
 	})
 	.and(
 		z.discriminatedUnion("status", [
@@ -140,32 +156,68 @@ export const agentInteractiveWidgetSchema = agentWidgetSchema.extend({
 	interaction: agentInteractionSchema,
 });
 
+const agentToolDisplaySchema = z.discriminatedUnion("kind", [
+	z.object({ kind: z.literal("text"), text: z.string() }),
+	z.object({ kind: z.literal("search"), query: z.string() }),
+	z.object({ kind: z.literal("fetch"), url: z.string() }),
+	z.object({ kind: z.literal("skill"), name: z.string() }),
+	z.object({ kind: z.literal("progress"), message: z.string() }),
+	z.object({
+		kind: z.literal("finish"),
+		outcome: agentRunOutcomeSchema,
+		summary: z.string(),
+	}),
+]) satisfies z.ZodType<AgentToolDisplay>;
+
+export const agentToolDetailsSchema = z
+	.object({
+		type: z.literal("tool"),
+		id: z.string(),
+		name: z.string(),
+		title: resolvedAdminCopySchema.optional(),
+		display: agentToolDisplaySchema.optional(),
+		input: z.record(z.string(), z.unknown()),
+		output: z.unknown().optional(),
+		status: z.enum([
+			"pending",
+			"running",
+			"complete",
+			"failed",
+			"skipped",
+		]) satisfies z.ZodType<AgentToolStatus>,
+	})
+	.strict() satisfies z.ZodType<AgentToolDetails>;
+
+const agentToolSummarySchema = agentToolDetailsSchema
+	.omit({ input: true, output: true })
+	.extend({
+		detailsAvailable: z.boolean(),
+	}) satisfies z.ZodType<AgentToolSummary>;
+
+const agentTextPartSchema = z
+	.object({ type: z.literal("text"), text: z.string() })
+	.strict();
+const agentReferencePartSchema = z
+	.object({
+		type: z.literal("reference"),
+		reference: agentReferenceSnapshotSchema,
+	})
+	.strict();
+
+/** Stored parts retain full tool values for recovery, audit and model context. */
 export const agentMessagePartSchema = z.discriminatedUnion("type", [
-	z.object({ type: z.literal("text"), text: z.string() }).strict(),
-	z
-		.object({
-			type: z.literal("reference"),
-			reference: agentReferenceSnapshotSchema,
-		})
-		.strict(),
-	z
-		.object({
-			type: z.literal("tool"),
-			id: z.string(),
-			name: z.string(),
-			/** The tool's plain-language name, saved when it was called. */
-			title: resolvedAdminCopySchema.optional(),
-			input: z.record(z.string(), z.unknown()),
-			output: z.unknown().optional(),
-			status: z.enum([
-				"pending",
-				"running",
-				"complete",
-				"failed",
-				"skipped",
-			]) satisfies z.ZodType<AgentToolStatus>,
-		})
-		.strict(),
+	agentTextPartSchema,
+	agentReferencePartSchema,
+	agentToolDetailsSchema,
+	agentWidgetSchema,
+]);
+
+export type StoredAgentMessagePart = z.output<typeof agentMessagePartSchema>;
+
+const agentChatPartSchema = z.discriminatedUnion("type", [
+	agentTextPartSchema,
+	agentReferencePartSchema,
+	agentToolSummarySchema,
 	agentWidgetSchema,
 ]) satisfies z.ZodType<AgentMessagePart>;
 
@@ -231,7 +283,7 @@ const agentMessageResponseSchema = z.object({
 	runId: z.uuid().nullable(),
 	position: z.number(),
 	role: z.enum(["user", "assistant"]),
-	parts: z.array(agentMessagePartSchema),
+	parts: z.array(agentChatPartSchema),
 	createdAt: z.string().nullable(),
 });
 
@@ -456,6 +508,16 @@ export const controllerSchemas = {
 		},
 		params: idParams,
 		response: z.array(agentMessageResponseSchema),
+	} satisfies ControllerSchema,
+	getToolDetails: {
+		body: undefined,
+		query: noQuery,
+		params: z.object({
+			id: z.uuid(),
+			messageId: z.uuid(),
+			toolCallId: z.string().min(1),
+		}),
+		response: agentToolDetailsSchema,
 	} satisfies ControllerSchema,
 	sendMessage: {
 		body: z

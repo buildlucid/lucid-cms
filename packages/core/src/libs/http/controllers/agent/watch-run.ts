@@ -9,8 +9,8 @@ import agentAccess from "../../middleware/agent-access.js";
 import authenticate from "../../middleware/authenticate.js";
 import validate from "../../middleware/validate.js";
 import openAPI from "../../openapi/index.js";
+import streamEvents from "../../utils/agent-stream-events.js";
 import createServiceContext from "../../utils/create-service-context.js";
-import streamEvents from "./helpers/stream-events.js";
 
 const factory = createFactory();
 
@@ -36,11 +36,16 @@ const watchRunController = factory.createHandlers(
 			userId: c.get("auth").id,
 		});
 		if (run.error) throw new LucidAPIError(run.error);
+		c.header("X-Lucid-Agent-Run-ID", run.data.id);
 
 		return streamEvents(c, (stream) =>
 			serviceWrapper(agentServices.watchRun, {
 				transaction: false,
-			})(context, { runId: run.data.id, ...stream }),
+			})(context, {
+				runId: run.data.id,
+				cursor: c.req.header("Last-Event-ID"),
+				...stream,
+			}),
 		);
 	},
 );

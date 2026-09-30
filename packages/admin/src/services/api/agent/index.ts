@@ -17,6 +17,7 @@ import useGetReferences from "./useGetReferences";
 import useGetRoutine from "./useGetRoutine";
 import useGetRoutineRuns from "./useGetRoutineRuns";
 import useGetRoutines from "./useGetRoutines";
+import useGetToolDetails from "./useGetToolDetails";
 import useRunRoutine from "./useRunRoutine";
 import useUpdateConversation from "./useUpdateConversation";
 import useUpdateRoutine from "./useUpdateRoutine";
@@ -39,6 +40,7 @@ const exportObject = {
 	useGetConversations,
 	useGetDefinitions,
 	useGetMessages,
+	useGetToolDetails,
 	useGetModels,
 	useGetRoutine,
 	useGetRoutineRuns,

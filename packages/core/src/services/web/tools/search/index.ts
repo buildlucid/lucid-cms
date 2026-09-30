@@ -22,6 +22,7 @@ export const webSearchAgentTool = (options: WebToolOptions = {}) => {
 		output: outputSchema,
 		permissions: [],
 		readOnly: true,
+		display: (input) => ({ kind: "search", query: input.query.slice(0, 500) }),
 		capabilities: { webSearch: true },
 		handler: ({ context, input, execution }) =>
 			searchWeb(context, { input, execution, allowedDomains }),

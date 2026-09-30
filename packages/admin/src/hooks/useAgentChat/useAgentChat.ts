@@ -19,21 +19,29 @@ import {
 	onCleanup,
 	untrack,
 } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import { createStore, reconcile, unwrap } from "solid-js/store";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import {
-	applyStreamEvent,
 	awaitsDelivery,
+	completedTools,
+	createAgentMessages,
 	findPendingInteraction,
 	isRunWorking,
+	settlesInteraction,
 	shouldPollTitle,
 } from "@/utils/agent-chat";
 import {
 	type AgentReferenceItem,
 	agentReferenceInput,
 } from "@/utils/agent-references";
+import {
+	registerReferencesTool,
+	removeReferenceTool,
+	webFetchTool,
+	webSearchTool,
+} from "@/utils/agent-tools";
 
 /** Input the server has not yet accepted, kept so a retry reuses its request ID. */
 type PendingSubmission = {
@@ -54,18 +62,18 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// ----------------------------------------
 	// State & Hooks
 	const queryClient = useQueryClient();
-	const [live, setLive] = createSignal<AgentMessage[]>();
+	const [streaming, setStreaming] = createSignal(false);
 	const [responding, setResponding] = createSignal(false);
 	const [liveRunId, setLiveRunId] = createSignal<string>();
 	const [error, setError] = createSignal<string>();
 	const [liveContext, setLiveContext] = createSignal<AgentContext>();
 	//* reconciled so streamed updates patch rendered rows instead of remounting them
 	const [inputs, setInputs] = createStore<AgentInput[]>([]);
-	const [messages, setMessages] = createStore<AgentMessage[]>([]);
+	const transcript = createAgentMessages();
+	const messages = transcript.messages;
 	//* a failed submission keeps its request id, so resending it cannot create a duplicate
 	let retrySubmission: PendingSubmission | undefined;
 	let controller: AbortController | undefined;
-	const streaming = createMemo(() => live() !== undefined);
 
 	// ----------------------------------------
 	// Queries & Mutations
@@ -83,7 +91,8 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	const background = createMemo(
 		() => !streaming() && isRunWorking(latestRun()?.status),
 	);
-	const history = api.agent.useGetMessages({ id: conversationId });
+	const messageHistory = api.agent.useGetMessages({ id: conversationId });
+	const history = messageHistory.query;
 	const cancelRun = api.agent.useCancelRun();
 
 	// ----------------------------------------
@@ -95,7 +104,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	);
 	const pendingInteraction = createMemo(() =>
 		latestRun()?.status === "waiting" && (!streaming() || responding())
-			? findPendingInteraction(live() ?? saved(), latestRun()?.id)
+			? findPendingInteraction(messages, latestRun()?.id)
 			: undefined,
 	);
 	const activeRunId = createMemo(
@@ -108,11 +117,6 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 
 	// ----------------------------------------
 	// Functions
-	//* the list key prefixes the conversation and message keys, so this refreshes all three
-	const refresh = () =>
-		queryClient.invalidateQueries({
-			queryKey: queryKeys.agent.conversations(),
-		});
 	const refreshConversation = (id: string) =>
 		queryClient.invalidateQueries({
 			queryKey: queryKeys.agent.conversation(id),
@@ -121,7 +125,22 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	const refreshReferences = (id: string) =>
 		queryClient.invalidateQueries({
 			queryKey: queryKeys.agent.references(id),
+			exact: true,
 		});
+	const refreshDetails = (id: string) =>
+		queryClient.invalidateQueries({
+			queryKey: queryKeys.agent.conversationDetails(id),
+			exact: true,
+		});
+	/** Tools that change references or web sources refresh them during the run. */
+	const refreshAfterTool = (id: string, name: string) => {
+		if (name === registerReferencesTool || name === removeReferenceTool) {
+			void refreshReferences(id);
+		}
+		if (name === webSearchTool || name === webFetchTool) {
+			void refreshDetails(id);
+		}
+	};
 	/** Applies a change to the cached conversation, so the chat updates before the server confirms it. */
 	const patchConversation = (
 		id: string,
@@ -150,12 +169,18 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	) => {
 		const id = conversationId();
 		if (!id || streaming()) return Promise.resolve(false);
+
 		const accepted = Promise.withResolvers<boolean>();
 		const current = new AbortController();
+		const refreshedTools = new Set<string>();
+		const referencedMessages = new Set<string>();
 		let started = false;
+		let connected = false;
+
 		controller = current;
 		setError(undefined);
-		setLive(options.prepare?.(saved()) ?? saved());
+		setStreaming(true);
+		transcript.replace(options.prepare?.(saved()) ?? saved());
 
 		void (async () => {
 			try {
@@ -164,14 +189,14 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 					body: options.body,
 					signal: current.signal,
 					onAccepted: () => {
+						connected = true;
 						if (!options.interactionId) accepted.resolve(true);
 					},
 					onEvent: (event) => {
+						if (conversationId() !== id || current.signal.aborted) return;
 						if (
-							event.type === "widget" &&
-							event.interaction?.id === options.interactionId &&
-							(event.interaction?.status === "answered" ||
-								event.interaction?.status === "cancelled")
+							options.interactionId &&
+							settlesInteraction(event, options.interactionId)
 						) {
 							accepted.resolve(true);
 						}
@@ -192,7 +217,6 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 								setLiveContext(event.context);
 								return;
 							case "inputs":
-								void refreshReferences(id);
 								patchConversation(id, (data) => ({
 									...data,
 									inputs: event.inputs,
@@ -220,31 +244,50 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 								void refreshReferences(id);
 								break;
 						}
+
 						if (
-							(event.type === "tool" && event.status === "complete") ||
-							(event.type === "message" &&
-								event.message.parts.some(
-									(part) =>
-										part.type === "reference" ||
-										(part.type === "tool" && part.status === "complete"),
-								))
+							event.type === "message" &&
+							event.message.parts.some((part) => part.type === "reference") &&
+							!referencedMessages.has(event.message.id)
 						) {
+							referencedMessages.add(event.message.id);
 							void refreshReferences(id);
 						}
-						setLive((messages) => applyStreamEvent(messages ?? [], event, id));
+						//* watch snapshots repeat completed calls, so each one refreshes once
+						for (const tool of completedTools(event)) {
+							if (refreshedTools.has(tool.key)) continue;
+							refreshedTools.add(tool.key);
+							refreshAfterTool(id, tool.name);
+						}
+
+						transcript.apply(event, id);
 					},
 				});
 			} catch (cause) {
 				if (!current.signal.aborted) failed(cause);
 			} finally {
-				accepted.resolve(false);
-				await refresh();
+				await Promise.allSettled([
+					conversationId() === id
+						? messageHistory.refreshLatest(
+								connected ? structuredClone(unwrap(messages)) : undefined,
+							)
+						: Promise.resolve(),
+					refreshConversation(id),
+					refreshReferences(id),
+					refreshDetails(id),
+					queryClient.invalidateQueries({
+						queryKey: queryKeys.agent.conversationLists(),
+					}),
+				]);
+
 				if (controller === current) {
 					controller = undefined;
-					setLive(undefined);
+					setStreaming(false);
+					transcript.replace(saved());
 					setLiveRunId(undefined);
 					setLiveContext(undefined);
 				}
+				accepted.resolve(false);
 			}
 		})();
 
@@ -285,18 +328,20 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// ----------------------------------------
 	// Effects
 	createEffect(() => setInputs(reconcile(data()?.inputs ?? [], { key: "id" })));
-	//* older pages loaded mid-reply go above the live messages
-	createEffect(() => {
-		const current = live();
-		const first = current?.[0]?.position;
-		const earlier =
-			first === undefined
-				? []
-				: saved().filter((message) => message.position < first);
-		setMessages(
-			reconcile([...earlier, ...(current ?? saved())], { key: "id" }),
-		);
-	});
+	//* History changes are infrequent; text deltas patch the store directly.
+	createEffect(
+		on(saved, (rows) => {
+			if (!untrack(streaming)) transcript.replace(rows);
+			else {
+				const current = untrack(() => [...messages]);
+				const first = current[0]?.position;
+				transcript.replace([
+					...rows.filter((row) => first === undefined || row.position < first),
+					...current,
+				]);
+			}
+		}),
+	);
 	createEffect(
 		on(
 			conversationId,
@@ -324,10 +369,9 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		on(
 			[() => latestRun()?.id, () => latestRun()?.status],
 			() => {
-				if (!untrack(streaming))
-					void queryClient.invalidateQueries({
-						queryKey: queryKeys.agent.messages(conversationId()),
-					});
+				if (!untrack(streaming)) {
+					void messageHistory.refreshLatest().catch(failed);
+				}
 			},
 			{ defer: true },
 		),

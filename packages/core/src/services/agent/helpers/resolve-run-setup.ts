@@ -60,8 +60,12 @@ const resolveRunSetup = (
 	return {
 		tools,
 		skills,
-		titles: new Map(
-			[...tools, ...runnerTools].map((tool) => [tool.name, tool.title]),
+		/** How each offered tool's calls appear in the chat. */
+		presentation: new Map(
+			[...tools, ...runnerTools].map((tool) => [
+				tool.name,
+				{ title: tool.title, display: tool.display },
+			]),
 		),
 		definitions: [...tools, ...runnerTools].map(
 			(tool): ModelToolDefinition => ({

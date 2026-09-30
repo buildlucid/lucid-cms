@@ -11,6 +11,8 @@ import type {
 	AgentRun,
 	AgentRunOutcome,
 	AgentRunStatus,
+	AgentToolDetails,
+	AgentToolSummary,
 	AgentUsage,
 } from "../../types/response.js";
 import {
@@ -197,15 +199,27 @@ const formatInput = (props: {
 		: { kind: "queue" },
 });
 
+/** Keeps the values the chat renders; full tool inputs and outputs are fetched separately. */
+const formatTool = (props: {
+	part: AgentToolDetails;
+	detailsAvailable?: boolean;
+}): AgentToolSummary => {
+	const { input: _input, output: _output, ...summary } = props.part;
+
+	return { ...summary, detailsAvailable: props.detailsAvailable ?? true };
+};
+
 const formatMessage = (props: {
-	message: Select<LucidAgentMessages>;
+	message: Omit<Select<LucidAgentMessages>, "execution_version" | "revision">;
 }): AgentMessage => ({
 	id: props.message.id,
 	conversationId: props.message.conversation_id,
 	runId: props.message.run_id,
 	position: props.message.position,
 	role: props.message.role,
-	parts: props.message.parts,
+	parts: props.message.parts.map((part) =>
+		part.type === "tool" ? formatTool({ part }) : part,
+	),
 	createdAt: formatter.formatDate(props.message.created_at),
 });
 
@@ -259,6 +273,7 @@ export default {
 	formatConversation,
 	formatInput,
 	formatMessage,
+	formatTool,
 	formatRun,
 	formatRoutine,
 };

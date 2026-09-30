@@ -1,5 +1,6 @@
 import constants from "../../../constants/constants.js";
 import {
+	approvalBatchResponseSchema,
 	type InteractionAnswer,
 	type PendingInteraction,
 	questionResponseSchema,
@@ -57,6 +58,37 @@ const validateInteractionResponse: ServiceFn<
 	const { widgets } = constants.agent;
 	if (pending.widget.key === widgets.approval) {
 		return { error: undefined, data: { action: "submit", response: {} } };
+	}
+	if (pending.widget.key === widgets.approvalBatch) {
+		const parsed = approvalBatchResponseSchema.safeParse(props.response);
+		const ids = parsed.data?.approvedToolCallIds ?? [];
+		const offered = new Set(
+			pending.widget.interaction.approvals?.map(
+				(approval) => approval.toolCallId,
+			),
+		);
+
+		//* each approved call must be one this widget offered, listed once
+		const valid =
+			parsed.success &&
+			offered.size > 0 &&
+			new Set(ids).size === ids.length &&
+			ids.every((id) => offered.has(id));
+		if (!valid) {
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 400,
+					message: copy("server:agent.interaction.invalid"),
+				},
+			};
+		}
+
+		return {
+			error: undefined,
+			data: { action: "submit", response: { approvedToolCallIds: ids } },
+		};
 	}
 
 	if (pending.widget.key === widgets.question) {

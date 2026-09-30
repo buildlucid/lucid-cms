@@ -17,13 +17,18 @@ export const finishTool = "lucid_finish_run" satisfies AgentRunnerToolName;
 export const progressTool =
 	"lucid_share_progress" satisfies AgentRunnerToolName;
 export const skillTool = "lucid_load_skill" satisfies AgentRunnerToolName;
+export const registerReferencesTool =
+	"lucid_register_references" satisfies AgentRunnerToolName;
+export const removeReferenceTool =
+	"lucid_remove_reference" satisfies AgentRunnerToolName;
 export const questionWidget = "lucid-question" satisfies AgentRunnerWidgetKey;
 export const approvalWidget =
 	"lucid-tool-approval" satisfies AgentRunnerWidgetKey;
+export const approvalBatchWidget =
+	"lucid-tool-approval-batch" satisfies AgentRunnerWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
-export const analyzeResourceTool =
-	"resources_analyze" satisfies AgentLucidToolName;
+export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>

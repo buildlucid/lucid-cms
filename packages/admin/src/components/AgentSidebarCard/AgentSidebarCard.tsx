@@ -23,21 +23,28 @@ const AgentSidebarCard: ParentComponent<{
 
 	// ----------------------------------------
 	// Effects
-	//* the details card can push this below the fold of the sidebar
+	//* the details card can push this below the fold of the sidebar. Scrolling waits for the
+	//* slide-in, otherwise the off-screen start position scrolls the whole sidebar sideways
 	createEffect(
 		on(
 			() => props.reveal,
-			(reveal) => {
+			async (reveal) => {
 				if (reveal === undefined) return;
-				requestAnimationFrame(() =>
-					card?.scrollIntoView({
-						block: "nearest",
-						behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-							.matches
-							? "auto"
-							: "smooth",
-					}),
+
+				await new Promise(requestAnimationFrame);
+				if (!card) return;
+
+				await Promise.allSettled(
+					card.getAnimations().map((animation) => animation.finished),
 				);
+
+				card.scrollIntoView({
+					block: "nearest",
+					behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+						.matches
+						? "auto"
+						: "smooth",
+				});
 			},
 		),
 	);

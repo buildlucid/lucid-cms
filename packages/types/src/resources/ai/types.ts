@@ -113,7 +113,7 @@ export type AiUsageFeatureKey =
 	| "agent.title.generate"
 	| "web.search"
 	| "web.fetch"
-	| "resource.analyze"
+	| "media.analyze"
 	| "custom-field.input.generate"
 	| "media.alt.generate"
 	| "media.image.generate";

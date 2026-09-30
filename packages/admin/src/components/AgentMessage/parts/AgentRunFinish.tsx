@@ -1,30 +1,15 @@
-import type { AgentRunOutcome } from "@types";
 import { FaSolidFlagCheckered } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import T from "@/translations";
 import type { AgentToolPart } from "@/utils/agent-tools";
 
-const outcomes = new Set<AgentRunOutcome>([
-	"done",
-	"nothing_to_report",
-	"needs_review",
-]);
-
 /** The summary a routine run left when it finished. */
 const AgentRunFinish: Component<{ part: AgentToolPart }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const outcome = createMemo(() => {
-		const value = props.part.input.outcome;
-		return outcomes.has(value as AgentRunOutcome)
-			? (value as AgentRunOutcome)
-			: undefined;
-	});
-	const summary = createMemo(() =>
-		typeof props.part.input.summary === "string"
-			? props.part.input.summary
-			: undefined,
+	const finish = createMemo(() =>
+		props.part.display?.kind === "finish" ? props.part.display : undefined,
 	);
 
 	// ----------------------------------------
@@ -36,11 +21,11 @@ const AgentRunFinish: Component<{ part: AgentToolPart }> = (props) => {
 					<FaSolidFlagCheckered size={10} />
 					{T()("agent.run.finished")}
 				</p>
-				<AgentRunStatus status="completed" outcome={outcome()} />
+				<AgentRunStatus status="completed" outcome={finish()?.outcome} />
 			</div>
-			<Show when={summary()}>
-				<p class="mt-1 whitespace-pre-wrap break-words text-sm text-subtitle">
-					{summary()}
+			<Show when={finish()?.summary}>
+				<p class="mt-1 whitespace-pre-wrap wrap-break-words text-sm text-subtitle">
+					{finish()?.summary}
 				</p>
 			</Show>
 		</div>

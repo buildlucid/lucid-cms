@@ -4,7 +4,7 @@ import type {
 	AiGenerateUsage,
 } from "@lucidcms/types";
 
-import type { ResourceAnalyzeRequest } from "../../schema/resource.js";
+import type { MediaAnalyzeRequest } from "../../schema/media.js";
 
 export type CmsAiGenerateRequestInputText<TRole extends string = string> = {
 	type: "text";
@@ -222,7 +222,7 @@ export type AgentTitleGenerateV1Request = CmsAiGenerateBaseRequest<
 >;
 
 export type CmsAiGenerateRequest =
-	| ResourceAnalyzeRequest
+	| MediaAnalyzeRequest
 	| AgentTitleGenerateV1Request
 	| CustomFieldInputV1Request
 	| MediaAltGenerateV1Request

@@ -1,10 +1,10 @@
 import type z from "zod";
 import { copy } from "../../../../libs/i18n/index.js";
 import {
-	MAX_RESOURCE_BYTES,
-	type ResourceSource,
-	resourceMimeTypeSchema,
-} from "../../../../libs/lucid-remote/schema/resource.js";
+	MAX_MEDIA_BYTES,
+	type MediaSource,
+	mediaMimeTypeSchema,
+} from "../../../../libs/lucid-remote/schema/media.js";
 import { toWebReadable } from "../../../../libs/media-storage/normalize-body.js";
 import {
 	AgentMediaReferencesRepository,
@@ -25,7 +25,7 @@ const resolveSource: ServiceFn<
 			execution: AgentToolExecution;
 		},
 	],
-	ResourceSource
+	MediaSource
 > = async (context, { source, execution }) => {
 	if (source.type === "url") {
 		const mentioned = await isUrlInConversation(context, {
@@ -39,7 +39,7 @@ const resolveSource: ServiceFn<
 				error: {
 					type: "basic",
 					status: 403,
-					message: copy("server:agent.resource.source.denied"),
+					message: copy("server:agent.media.source.denied"),
 				},
 			};
 		}
@@ -68,7 +68,7 @@ const resolveSource: ServiceFn<
 			error: {
 				type: "basic",
 				status: 403,
-				message: copy("server:agent.resource.source.denied"),
+				message: copy("server:agent.media.source.denied"),
 			},
 		};
 	}
@@ -92,17 +92,18 @@ const resolveSource: ServiceFn<
 		},
 	});
 	if (media.error) return media;
-	const mimeType = resourceMimeTypeSchema.safeParse(media.data.mime_type);
+
+	const mimeType = mediaMimeTypeSchema.safeParse(media.data.mime_type);
 	if (!mimeType.success) {
 		return {
 			data: undefined,
 			error: {
 				type: "basic",
 				status: 415,
-				message: copy("server:agent.resource.unsupported", {
+				message: copy("server:agent.media.unsupported", {
 					data: {
 						type: media.data.mime_type,
-						supported: resourceMimeTypeSchema.options.join(", "),
+						supported: mediaMimeTypeSchema.options.join(", "),
 					},
 				}),
 			},
@@ -115,18 +116,18 @@ const resolveSource: ServiceFn<
 			error: {
 				type: "basic",
 				status: 409,
-				message: copy("server:agent.resource.not.ready"),
+				message: copy("server:agent.media.not.ready"),
 			},
 		};
 	}
 
-	if (media.data.file_size > MAX_RESOURCE_BYTES) {
+	if (media.data.file_size > MAX_MEDIA_BYTES) {
 		return {
 			data: undefined,
 			error: {
 				type: "basic",
 				status: 413,
-				message: copy("server:agent.resource.too.large"),
+				message: copy("server:agent.media.too.large"),
 			},
 		};
 	}
@@ -145,14 +146,14 @@ const resolveSource: ServiceFn<
 			const chunk = await reader.read();
 			if (chunk.done) break;
 			size += chunk.value.byteLength;
-			if (size > MAX_RESOURCE_BYTES) {
+			if (size > MAX_MEDIA_BYTES) {
 				await reader.cancel();
 				return {
 					data: undefined,
 					error: {
 						type: "basic",
 						status: 413,
-						message: copy("server:agent.resource.too.large"),
+						message: copy("server:agent.media.too.large"),
 					},
 				};
 			}
@@ -166,7 +167,7 @@ const resolveSource: ServiceFn<
 				error: {
 					type: "basic",
 					status: 499,
-					message: copy("server:agent.resource.cancelled"),
+					message: copy("server:agent.media.cancelled"),
 				},
 			};
 		}
@@ -178,7 +179,7 @@ const resolveSource: ServiceFn<
 				error: {
 					type: "basic",
 					status: 415,
-					message: copy("server:agent.resource.mismatch"),
+					message: copy("server:agent.media.mismatch"),
 				},
 			};
 		}

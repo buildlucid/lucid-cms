@@ -29,5 +29,6 @@ export const findMediaAgentTool = () =>
 		output: outputSchema,
 		permissions: [Permissions.MediaRead],
 		readOnly: true,
+		parallelSafe: true,
 		handler: ({ context, input }) => findMedia(context, { input }),
 	});

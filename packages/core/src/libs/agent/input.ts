@@ -1,13 +1,11 @@
-import type {
-	AgentMessagePart,
-	AgentReferenceSnapshot,
-} from "../../types/response.js";
+import type { StoredAgentMessagePart } from "../../schemas/agent.js";
+import type { AgentReferenceSnapshot } from "../../types/response.js";
 
 /** Keeps attached resources alongside the message that introduced them. */
 export const inputMessageParts = (input: {
 	text: string;
 	references?: AgentReferenceSnapshot[];
-}): AgentMessagePart[] => [
+}): StoredAgentMessagePart[] => [
 	...(input.text ? [{ type: "text" as const, text: input.text }] : []),
 	...(input.references ?? []).map((reference) => ({
 		type: "reference" as const,
@@ -47,11 +45,11 @@ const attachmentTag = (reference: AgentReferenceSnapshot) => {
 };
 
 /** Joins visible model text without including tool output or widget data. */
-export const textFromParts = (parts: AgentMessagePart[]) =>
+export const textFromParts = (parts: StoredAgentMessagePart[]) =>
 	parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
 
 /** A message as the model sees it: its text, then the resources attached to it. Contents are never fetched. */
-export const messageText = (parts: AgentMessagePart[]) => {
+export const messageText = (parts: StoredAgentMessagePart[]) => {
 	const text = textFromParts(parts);
 
 	const references = parts.flatMap((part) =>

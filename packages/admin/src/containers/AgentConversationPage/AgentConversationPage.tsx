@@ -129,10 +129,14 @@ const AgentConversationPage: Component = () => {
 		() => routineCard() !== undefined || detailsOpen() || !!selectedId(),
 	);
 	const tools = createMemo(() =>
-		chat.messages.flatMap((message) => message.parts.filter(isToolRow)),
+		chat.messages.flatMap((message) =>
+			message.parts
+				.filter(isToolRow)
+				.map((part) => ({ messageId: message.id, part })),
+		),
 	);
 	const selectedTool = createMemo(() =>
-		tools().find((tool) => tool.id === selectedId()),
+		tools().find((tool) => tool.part.id === selectedId()),
 	);
 
 	// ----------------------------------------

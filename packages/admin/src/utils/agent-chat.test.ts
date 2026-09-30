@@ -4,10 +4,11 @@ import type {
 	AgentRunStatus,
 	AgentStreamEvent,
 } from "@types";
+import { createMemo, createRoot } from "solid-js";
 import { describe, expect, it, vi } from "vitest";
 import {
-	applyStreamEvent,
 	awaitsDelivery,
+	createAgentMessages,
 	findPendingInteraction,
 	messageText,
 	partLayout,
@@ -17,11 +18,12 @@ import {
 import { isToolRow } from "./agent-tools";
 
 const conversationId = "conversation";
-const apply = (events: AgentStreamEvent[], messages: AgentMessage[] = []) =>
-	events.reduce(
-		(current, event) => applyStreamEvent(current, event, conversationId),
-		messages,
-	);
+const apply = (events: AgentStreamEvent[], messages: AgentMessage[] = []) => {
+	const transcript = createAgentMessages();
+	transcript.replace(messages);
+	for (const event of events) transcript.apply(event, conversationId);
+	return transcript.messages;
+};
 
 it("polls only for a recent, pending automatic title", () => {
 	const now = Date.now();
@@ -49,7 +51,7 @@ it("polls only for a recent, pending automatic title", () => {
 	}
 });
 
-describe("applyStreamEvent", () => {
+describe("streamed messages", () => {
 	it("builds a reply from streamed text, tools and widgets", () => {
 		const [message] = apply([
 			{ type: "start", runId: "run", messageId: "m1" },
@@ -61,7 +63,7 @@ describe("applyStreamEvent", () => {
 				id: "t1",
 				name: "echo",
 				title: { type: "lucid.literal", value: "Echo" },
-				input: {},
+				detailsAvailable: true,
 				status: "pending",
 			},
 			{
@@ -69,9 +71,8 @@ describe("applyStreamEvent", () => {
 				messageId: "m1",
 				id: "t1",
 				name: "echo",
-				input: {},
+				detailsAvailable: true,
 				status: "complete",
-				output: { ok: true },
 			},
 			{ type: "widget", messageId: "m1", key: "chart", version: 1, data: {} },
 		]);
@@ -83,9 +84,8 @@ describe("applyStreamEvent", () => {
 				id: "t1",
 				name: "echo",
 				title: { type: "lucid.literal", value: "Echo" },
-				input: {},
+				detailsAvailable: true,
 				status: "complete",
-				output: { ok: true },
 			},
 			{ type: "widget", key: "chart", version: 1, data: {} },
 		]);
@@ -157,7 +157,7 @@ describe("partLayout", () => {
 					type: "tool",
 					id: "t1",
 					name: "lucid_ask_user",
-					input: {},
+					detailsAvailable: true,
 					status: "complete",
 				},
 				noRows,
@@ -170,7 +170,8 @@ describe("partLayout", () => {
 			type: "tool",
 			id: "p1",
 			name: "lucid_share_progress",
-			input: { message: "I checked the pages." },
+			detailsAvailable: true,
+			display: { kind: "progress", message: "I checked the pages." },
 			status: "complete",
 		} as const;
 		expect(partLayout({ ...progress, status: "pending" }, noRows)).toBe(
@@ -288,9 +289,8 @@ it("a skipped tool dismisses its approval and steering receipts deduplicate on r
 				messageId: "assistant",
 				id: "write",
 				name: "write",
-				input: {},
+				detailsAvailable: true,
 				status: "skipped",
-				output: { skipped: true },
 			},
 		],
 		before,
@@ -362,4 +362,76 @@ describe("awaitsDelivery", () => {
 			}),
 		).toBe(true);
 	});
+});
+
+it("text deltas keep row identities and do not recompute the tool list", () => {
+	createRoot((dispose) => {
+		try {
+			const transcript = createAgentMessages();
+			transcript.replace(
+				Array.from({ length: 1000 }, (_, index) => ({
+					id: String(index),
+					conversationId,
+					runId: "old",
+					role: "assistant",
+					position: index + 1,
+					parts: [{ type: "text", text: "Saved message" }],
+					createdAt: null,
+				})),
+			);
+			transcript.apply(
+				{ type: "start", runId: "run", messageId: "reply" },
+				conversationId,
+			);
+			transcript.apply(
+				{ type: "text-delta", messageId: "reply", text: "First" },
+				conversationId,
+			);
+			const first = transcript.messages[0];
+			const reply = transcript.messages.at(-1);
+			let scans = 0;
+			const tools = createMemo(() => {
+				scans++;
+				return transcript.messages.flatMap((message) =>
+					message.parts.filter(isToolRow),
+				);
+			});
+			for (let index = 0; index < 100; index++)
+				transcript.apply(
+					{ type: "text-delta", messageId: "reply", text: "." },
+					conversationId,
+				);
+			expect(transcript.messages[0]).toBe(first);
+			expect(transcript.messages.at(-1)).toBe(reply);
+			expect(reply?.parts).toEqual([
+				{ type: "text", text: `First${".".repeat(100)}` },
+			]);
+			expect(tools()).toEqual([]);
+			expect(scans).toBe(1);
+		} finally {
+			dispose();
+		}
+	});
+});
+
+it("streamed updates do not mutate the saved query data", () => {
+	const saved: AgentMessage = {
+		id: "reply",
+		conversationId,
+		runId: "run",
+		position: 1,
+		role: "assistant",
+		parts: [{ type: "text", text: "Saved" }],
+		createdAt: null,
+	};
+	const transcript = createAgentMessages();
+	transcript.replace([saved]);
+	transcript.apply(
+		{ type: "text-delta", messageId: "reply", text: " delta" },
+		conversationId,
+	);
+	expect(saved.parts).toEqual([{ type: "text", text: "Saved" }]);
+	expect(transcript.messages[0].parts).toEqual([
+		{ type: "text", text: "Saved delta" },
+	]);
 });

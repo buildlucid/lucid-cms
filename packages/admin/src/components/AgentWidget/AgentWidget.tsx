@@ -3,9 +3,11 @@ import classnames from "classnames";
 import { FaSolidCode } from "solid-icons/fa";
 import {
 	type Component,
+	createEffect,
 	createMemo,
 	createSignal,
 	Match,
+	on,
 	Show,
 	Switch,
 } from "solid-js";
@@ -15,7 +17,11 @@ import AgentQuestionPanel from "@/components/AgentQuestionPanel/AgentQuestionPan
 import Button from "@/components/Button/Button";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import T from "@/translations";
-import { approvalWidget, questionWidget } from "@/utils/agent-tools";
+import {
+	approvalBatchWidget,
+	approvalWidget,
+	questionWidget,
+} from "@/utils/agent-tools";
 import { resolveAgentSlot } from "./slots";
 import type { AgentWidgetInteraction, AgentWidgetSubmitResult } from "./types";
 
@@ -35,6 +41,8 @@ const AgentWidget: Component<{
 	const [submitting, setSubmitting] = createSignal(false);
 	const [error, setError] = createSignal<string>();
 	const [showInput, setShowInput] = createSignal(false);
+	const [approvedCalls, setApprovedCalls] = createSignal<string[]>([]);
+	const [approvalStep, setApprovalStep] = createSignal(0);
 	const [draft, setDraft] = createSignal<{
 		id: string;
 		response: Record<string, unknown>;
@@ -51,8 +59,30 @@ const AgentWidget: Component<{
 			: undefined,
 	);
 	const active = createMemo(() => !!pending() && !!props.onRespond);
-	const approvalOnly = createMemo(() => props.widget.key === approvalWidget);
-	const approval = createMemo(() => pending()?.approval);
+	const batch = createMemo(() => pending()?.approvals);
+	const approvalOnly = createMemo(
+		() =>
+			props.widget.key === approvalWidget ||
+			props.widget.key === approvalBatchWidget,
+	);
+	const currentApproval = createMemo(() => batch()?.[approvalStep()]);
+	const approval = createMemo(() => currentApproval() ?? pending()?.approval);
+	const hasApproval = createMemo(
+		() => approval() !== undefined || batch() !== undefined,
+	);
+	const waitingText = createMemo(() => {
+		const approvals = batch();
+		if (approvals) {
+			return T()("agent.approval.waiting.step", {
+				current: approvalStep() + 1,
+				total: approvals.length,
+			});
+		}
+
+		return T()(
+			hasApproval() ? "agent.approval.waiting" : "agent.interaction.waiting",
+		);
+	});
 	const collapsed = createMemo(() => approvalOnly() && !showInput());
 	const ready = createMemo(
 		() => approvalOnly() || draft()?.id === pending()?.id,
@@ -76,10 +106,11 @@ const AgentWidget: Component<{
 			submitting: submitting(),
 			error: error(),
 			setResponse: (response) => {
-				if (active() && pending()?.id === state.id && !submitting())
+				if (active() && pending()?.id === state.id && !submitting()) {
 					setDraft(
 						response === undefined ? undefined : { id: state.id, response },
 					);
+				}
 			},
 		};
 	});
@@ -118,12 +149,44 @@ const AgentWidget: Component<{
 			setSubmitting(false);
 		}
 	};
+	/** Grouped approvals collect each decision locally and submit once after the last call. */
 	const decide = (action: AgentInteractionAction) => {
-		if (action === "submit" && !ready()) return;
-		void submit(action === "cancel" ? {} : (draft()?.response ?? {}), action);
+		if (submitting() || (action === "submit" && !ready())) return;
+
+		const current = currentApproval();
+		if (!current) {
+			void submit(action === "cancel" ? {} : (draft()?.response ?? {}), action);
+			return;
+		}
+
+		const approvedToolCallIds =
+			action === "submit"
+				? [...approvedCalls(), current.toolCallId]
+				: approvedCalls();
+
+		if (approvalStep() + 1 < (batch()?.length ?? 0)) {
+			setApprovedCalls(approvedToolCallIds);
+			setApprovalStep((step) => step + 1);
+			setError(undefined);
+			return;
+		}
+
+		void submit({ approvedToolCallIds });
 	};
 	const answer = async (value: string) =>
 		(await submit({ answer: value })).error === undefined;
+
+	// ----------------------------------------
+	// Effects
+	createEffect(
+		on(
+			() => pending()?.id,
+			() => {
+				setApprovalStep(0);
+				setApprovedCalls([]);
+			},
+		),
+	);
 
 	// ----------------------------------------
 	// Render
@@ -150,7 +213,7 @@ const AgentWidget: Component<{
 						<Show when={props.view === "composer" && pending()}>
 							{(state) => (
 								<AgentInteractionBar
-									title={state().title}
+									title={currentApproval()?.title ?? state().title}
 									onRedirect={props.onRedirect}
 									onStop={props.onStop}
 									details={
@@ -224,17 +287,11 @@ const AgentWidget: Component<{
 								)}
 							>
 								<Show when={props.view === "composer"}>
-									<p class="min-w-0 grow text-xs text-muted">
-										{T()(
-											approval()
-												? "agent.approval.waiting"
-												: "agent.interaction.waiting",
-										)}
-									</p>
+									<p class="min-w-0 grow text-xs text-muted">{waitingText()}</p>
 								</Show>
 								<Show when={props.view === "inline"}>
 									<p class="min-w-0 grow text-xs text-muted">
-										{pending()?.title}
+										{currentApproval()?.title ?? pending()?.title}
 									</p>
 									<Show when={approvalOnly()}>
 										<Button
@@ -267,7 +324,7 @@ const AgentWidget: Component<{
 									onClick={() => decide("cancel")}
 								>
 									{T()(
-										approval()
+										hasApproval()
 											? "agent.approval.deny"
 											: "agent.interaction.cancel",
 									)}
@@ -283,7 +340,7 @@ const AgentWidget: Component<{
 									onClick={() => decide("submit")}
 								>
 									{T()(
-										approval()
+										hasApproval()
 											? "agent.approval.approve"
 											: "agent.interaction.continue",
 									)}

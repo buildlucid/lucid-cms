@@ -1,6 +1,7 @@
 import constants from "../../constants/constants.js";
 import { answerInteraction } from "../../libs/agent/interactions.js";
 import { isTerminalRunStatus } from "../../libs/agent/run-status.js";
+import type { RunStream } from "../../libs/agent/run-stream.js";
 import { checkpointSchema } from "../../libs/agent/types.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
@@ -57,7 +58,7 @@ const continueQueue = async (
  * of time. Unfinished work is handed back to the queue, so a routine can loop for
  * longer than any single request or job allows.
  */
-const executeRun: ServiceFn<
+const executeRunSlice: ServiceFn<
 	[
 		{
 			runId: string;
@@ -186,11 +187,41 @@ const executeRun: ServiceFn<
 		);
 	} finally {
 		session.data.close();
-		//* only a watching chat needs telling; background workers skip the extra reads
+		//* Include the next run in replay so a returning chat follows the queue.
 		await continueQueue(context, {
 			conversationId: run.conversation_id,
 			emit: input.emit,
 		});
+	}
+};
+
+/** Runs one slice. A viewer's replay buffer receives its events, then closes when the slice stops. */
+const executeRun: ServiceFn<
+	[Parameters<typeof executeRunSlice>[1] & { stream?: RunStream }],
+	{ status: AgentRunStatus }
+> = async (context, { stream, ...input }) => {
+	if (!stream) return executeRunSlice(context, input);
+
+	try {
+		const result = await executeRunSlice(context, {
+			...input,
+			emit: async (event) => {
+				stream.publish(event);
+				await input.emit?.(event);
+			},
+		});
+		if (result.error) {
+			stream.publish({
+				type: "error",
+				message: context.translate(
+					result.error.message ?? copy("server:core.errors.default.message"),
+				),
+			});
+		}
+
+		return result;
+	} finally {
+		stream.close();
 	}
 };
 

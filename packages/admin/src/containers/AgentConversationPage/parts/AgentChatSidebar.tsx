@@ -15,7 +15,7 @@ const AgentChatSidebar: Component<{
 	conversation: AgentConversation;
 	routine?: AgentRoutine;
 	detailsOpen: boolean;
-	selectedTool?: AgentToolPart;
+	selectedTool?: { messageId: string; part: AgentToolPart };
 	onRoutineRuns: () => void;
 	onRoutineOpen: () => void;
 	onRoutineClose: () => void;
@@ -49,7 +49,9 @@ const AgentChatSidebar: Component<{
 			<Show when={props.selectedTool}>
 				{(tool) => (
 					<AgentToolPanel
-						part={tool()}
+						conversationId={props.conversation.id}
+						messageId={tool().messageId}
+						part={tool().part}
 						onClose={props.onToolClose}
 						class="flex shrink-0"
 					/>
