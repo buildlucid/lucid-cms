@@ -21,6 +21,8 @@ const getAccessibleRoutine: ServiceFn<
 			"name",
 			"instructions",
 			"model_selection",
+			"conversation_mode",
+			"conversation_id",
 			"cron",
 			"timezone",
 			"enabled",

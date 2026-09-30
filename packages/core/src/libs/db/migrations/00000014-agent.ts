@@ -16,6 +16,9 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("instructions", adapter.getDataType("text"), (col) =>
 				col.notNull(),
 			)
+			.addColumn("conversation_mode", adapter.getDataType("text"), (col) =>
+				col.notNull().defaultTo("new"),
+			)
 			.addColumn("model_selection", adapter.getDataType("json"))
 			.addColumn("cron", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("timezone", adapter.getDataType("text"), (col) =>
@@ -132,6 +135,14 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 							adapter.getDefault("timestamp", "now"),
 						),
 					),
+			)
+			.execute();
+
+		//* routines and their chats reference each other, so this column is added once both tables exist
+		await db.schema
+			.alterTable("lucid_agent_routines")
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_conversations.id").onDelete("set null"),
 			)
 			.execute();
 

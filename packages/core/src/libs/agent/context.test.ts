@@ -275,3 +275,22 @@ test("replays attachments with their names and types, keeping labels as quoted d
 		].join("\n"),
 	);
 });
+
+test("a routine request reads as the routine's standing task, not a request to schedule it", () => {
+	const request = (parts: Parameters<typeof historyMessage>[0]["parts"]) =>
+		historyMessage({ id: "m1", role: "user", position: 1, parts }).messages[0]
+			?.content;
+	const routine = {
+		type: "routine",
+		name: "Fact check",
+		instructions: "Every morning, check each blog.",
+		trigger: "schedule",
+	} as const;
+
+	expect(request([routine, { type: "text", text: routine.instructions }])).toBe(
+		'Start a run of the "Fact check" routine. Its standing instructions follow:\n\nEvery morning, check each blog.',
+	);
+	expect(request([routine])).toBe(
+		'Start a run of the "Fact check" routine. Its instructions are unchanged from earlier in this chat.',
+	);
+});

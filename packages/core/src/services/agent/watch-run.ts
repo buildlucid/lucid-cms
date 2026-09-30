@@ -184,6 +184,15 @@ const watchRun: ServiceFn<
 
 		const status = run.data.status;
 		if (!isWorkingRunStatus(status)) {
+			if (status === "completed") {
+				const results = await AgentRuns.selectResults([input.runId]);
+				if (results.error) return results;
+
+				const [completed] = results.data;
+				const result =
+					completed && agentFormatter.formatRunResult({ run: completed });
+				if (result) await emit({ messageId: input.runId, ...result });
+			}
 			await emit({ type: "finish", runId: input.runId, status });
 			const next = conversation.data?.active_run_id;
 			if (next && next !== input.runId) {

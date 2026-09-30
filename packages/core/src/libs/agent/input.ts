@@ -50,7 +50,15 @@ export const textFromParts = (parts: StoredAgentMessagePart[]) =>
 
 /** A message as the model sees it: its text, then the resources attached to it. Contents are never fetched. */
 export const messageText = (parts: StoredAgentMessagePart[]) => {
-	const text = textFromParts(parts);
+	const routine = parts.find((part) => part.type === "routine");
+	let text = textFromParts(parts);
+	//* framed as the routine's standing task, so wording like "every morning" is not read as a request to schedule it.
+	//* A routine run only repeats its instructions when they changed, see routineRequestParts
+	if (routine) {
+		text = text
+			? `Start a run of the "${routine.name}" routine. Its standing instructions follow:\n\n${text}`
+			: `Start a run of the "${routine.name}" routine. Its instructions are unchanged from earlier in this chat.`;
+	}
 
 	const references = parts.flatMap((part) =>
 		part.type === "reference" ? [part.reference] : [],

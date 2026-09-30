@@ -46,6 +46,7 @@ const createRoutineController = factory.createHandlers(
 			enabled: body.enabled,
 			tools: body.tools,
 			modelSelection: body.modelSelection,
+			conversationMode: body.conversationMode,
 		});
 		if (routine.error) throw new LucidAPIError(routine.error);
 

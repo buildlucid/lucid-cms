@@ -7,7 +7,11 @@ import {
 	agentRunOutcomeSchema,
 	routineToolsSchema,
 } from "../../schemas/agent.js";
-import type { AiModelConfig, AiModelSelection } from "../../types/response.js";
+import type {
+	AgentRoutineConversationMode,
+	AiModelConfig,
+	AiModelSelection,
+} from "../../types/response.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import { cmsAiUsageSchema } from "../lucid-remote/schema/ai.js";
 import type { SkillDefinition } from "../skills/types.js";
@@ -104,6 +108,8 @@ export const checkpointSchema = z.object({
 		})
 		.optional(),
 	nudges: z.number().int().nonnegative(),
+	/** Whether an earlier turn of this run replied with text. A routine run only finishes after replying. */
+	replied: z.boolean().optional(),
 	requestId: z.uuid(),
 	messageId: z.uuid(),
 	parts: z.array(agentMessagePartSchema),
@@ -144,7 +150,6 @@ export type ModelEvent = z.infer<typeof modelEventSchema>;
 export type ModelUsage = Extract<ModelEvent, { type: "finish" }>["usage"];
 export type Checkpoint = z.infer<typeof checkpointSchema>;
 export type ConversationContext = z.infer<typeof agentContextSchema>;
-/** Chat runs answer a person; routine runs work unattended until they finish. */
 export type RunMode = "chat" | "routine";
 export type RoutineTools = z.infer<typeof routineToolsSchema>;
 
@@ -154,6 +159,8 @@ export type DefineRoutineOptions<Key extends string> = {
 	name: string;
 	/** What each run should do. Common indentation is removed, so template literals can be indented. */
 	instructions: string;
+	/** New chats by default. Reuse continues the routine's saved chat, including human follow-ups. */
+	conversationMode?: AgentRoutineConversationMode;
 	/** The model each run uses, eg. `{ modelId: "openai/gpt-6-luna", reasoningEffort: "low" }`. Defaults to the agent's model. */
 	model?: AiModelSelection;
 	/** Per-tool settings by tool name, eg. `{ save_note: { requiresApproval: true } }`. Omitted tools and settings keep the tool's defaults. */
@@ -172,6 +179,7 @@ export type RoutineDefinition<Key extends string = string> = {
 	readonly key: Key;
 	readonly name: string;
 	readonly instructions: string;
+	readonly conversationMode: AgentRoutineConversationMode;
 	readonly model?: AiModelSelection;
 	readonly tools: Readonly<RoutineTools>;
 	readonly schedule: { readonly cron: string; readonly timezone: string };

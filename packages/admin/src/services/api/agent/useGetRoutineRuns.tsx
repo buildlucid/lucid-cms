@@ -9,9 +9,12 @@ import serviceHelpers from "@/utils/service-helpers";
 
 interface QueryParams {
 	queryString?: Accessor<string>;
+	filters?: {
+		conversationId?: Accessor<string | undefined> | string;
+	};
+	perPage?: Accessor<number> | number;
 }
 
-/** Gets a routine's runs, refetching while one is still working. */
 const useGetRoutineRuns = (
 	params: QueryHook<QueryParams> & { id: Accessor<string | undefined> },
 ) => {

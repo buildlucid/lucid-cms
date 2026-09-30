@@ -10,7 +10,10 @@ const runRoutine: ServiceFn<
 	const routine = await getAccessibleRoutine(context, input);
 	if (routine.error) return routine;
 
-	const run = await startRoutineRun(context, { routine: routine.data });
+	const run = await startRoutineRun(context, {
+		routineId: routine.data.id,
+		trigger: "manual",
+	});
 	if (run.error) return run;
 	if (!run.data) {
 		return {

@@ -7,6 +7,7 @@ import T from "@/translations";
 
 const AgentChatActions: Component<{
 	routineCard?: { open: boolean; onToggle: () => void };
+	runRoutine?: { disabled: boolean; onRun: () => void };
 	details: { open: boolean; onToggle: () => void };
 	onRename: () => void;
 	onDelete: () => void;
@@ -34,6 +35,14 @@ const AgentChatActions: Component<{
 			<ActionMenu
 				variant="ghost"
 				actions={[
+					{
+						label: T()("agent.routine.run.now"),
+						type: "button",
+						icon: "rotate",
+						show: props.runRoutine !== undefined,
+						disabled: props.runRoutine?.disabled,
+						onClick: () => props.runRoutine?.onRun(),
+					},
 					{
 						label: T()("common.rename"),
 						type: "button",

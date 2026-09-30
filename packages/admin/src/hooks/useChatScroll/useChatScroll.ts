@@ -85,17 +85,21 @@ export const useChatScroll = (options: UseChatScrollOptions) => {
 			`[data-chat-message="${CSS.escape(id)}"]`,
 		);
 		if (!element || !target) return;
-		setFollowing(false);
-		//* the jump is the reader's, so its first steps near the end don't follow again
-		onIntent();
-		element.scrollTo({
-			top:
-				element.scrollTop +
+		const end = element.scrollHeight - element.clientHeight;
+		const top = Math.min(
+			end,
+			element.scrollTop +
 				target.getBoundingClientRect().top -
 				element.getBoundingClientRect().top -
 				messageOffset,
-			behavior: "smooth",
-		});
+		);
+		//* a message that lands at the end, such as in a chat too short to scroll, keeps following, as no scroll would turn it back on
+		if (end - top > endThreshold) {
+			setFollowing(false);
+			//* the jump is the reader's, so its first steps near the end don't follow again
+			onIntent();
+		}
+		element.scrollTo({ top, behavior: "smooth" });
 	};
 	const onKeyDown = (event: KeyboardEvent) => {
 		const target = event.target;
@@ -193,6 +197,8 @@ export const useChatScroll = (options: UseChatScrollOptions) => {
 		if (!element || !scroller) return;
 		const observer = new ResizeObserver(() => {
 			if (following()) scroller.scrollTop = scroller.scrollHeight;
+			//* content that shrinks until it no longer scrolls leaves the reader at the end without a scroll event
+			else if (distanceFromEnd(scroller) <= endThreshold) setFollowing(true);
 		});
 		const changes = new MutationObserver(() => {
 			changedAt = performance.now();

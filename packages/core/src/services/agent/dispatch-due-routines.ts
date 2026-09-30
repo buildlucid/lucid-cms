@@ -53,7 +53,10 @@ const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 		});
 		if (access.error) continue;
 
-		const run = await startRoutineRun(context, { routine });
+		const run = await startRoutineRun(context, {
+			routineId: routine.id,
+			trigger: "schedule",
+		});
 		if (run.error) {
 			logger.error({
 				message: `Agent routine ${routine.id} could not start: ${context.translate(run.error.message)}`,

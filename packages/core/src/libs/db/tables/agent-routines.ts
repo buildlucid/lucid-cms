@@ -1,6 +1,9 @@
-import type { JSONColumnType } from "kysely";
+import type { Generated, JSONColumnType } from "kysely";
 import z from "zod";
-import { agentRoutineSourceSchema } from "../../../schemas/agent.js";
+import {
+	agentRoutineConversationModeSchema,
+	agentRoutineSourceSchema,
+} from "../../../schemas/agent.js";
 import type { AiModelSelection } from "../../../types/response.js";
 import { aiModelSelectionSchema } from "../../agent/model-selection.js";
 import { defineTable } from "../client/table/definition.js";
@@ -19,6 +22,11 @@ export const agentRoutinesTable = defineTable("lucid_agent_routines", () => ({
 		source: { schema: agentRoutineSourceSchema, type: "text" },
 		name: { schema: z.string(), type: "text" },
 		instructions: { schema: z.string(), type: "text" },
+		conversation_mode: {
+			schema: agentRoutineConversationModeSchema,
+			type: "text",
+		},
+		conversation_id: { schema: z.uuid().nullable(), type: "text" },
 		model_selection: {
 			schema: aiModelSelectionSchema.nullable(),
 			type: "json",
@@ -53,6 +61,10 @@ export interface LucidAgentRoutines {
 	source: z.infer<typeof agentRoutineSourceSchema>;
 	name: string;
 	instructions: string;
+	conversation_mode: Generated<
+		z.infer<typeof agentRoutineConversationModeSchema>
+	>;
+	conversation_id: Generated<string | null>;
 	/** Null uses the agent's default model. */
 	model_selection: JSONColumnType<
 		AiModelSelection | null,

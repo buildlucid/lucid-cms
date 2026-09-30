@@ -12,6 +12,7 @@ const eventTypes = {
 	"text-delta": true,
 	tool: true,
 	widget: true,
+	"run-result": true,
 	message: true,
 	inputs: true,
 	finish: true,

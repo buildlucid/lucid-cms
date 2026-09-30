@@ -8,6 +8,7 @@ export type RoutineBody = Pick<
 	AgentRoutine,
 	| "name"
 	| "instructions"
+	| "conversationMode"
 	| "modelSelection"
 	| "cron"
 	| "timezone"
@@ -26,9 +27,13 @@ const useCreateRoutine = (props?: { onSuccess?: () => void }) =>
 				method: "POST",
 				body,
 			}),
-		getSuccessToast: () => ({
+		getSuccessToast: (response) => ({
 			title: T()("toasts.agent.routine.created.title"),
-			message: T()("toasts.agent.routine.created.message"),
+			message: T()(
+				response.data.enabled
+					? "toasts.agent.routine.created.message"
+					: "toasts.agent.routine.created.paused.message",
+			),
 		}),
 		invalidates: [queryKeys.agent.routines()],
 		onSuccess: props?.onSuccess,

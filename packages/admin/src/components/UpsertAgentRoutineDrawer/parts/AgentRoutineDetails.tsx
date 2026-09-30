@@ -3,7 +3,7 @@ import { type Component, createMemo } from "solid-js";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import api from "@/services/api";
 import T from "@/translations";
-import { getAgentName } from "@/utils/agent-access";
+import { conversationModeLabels, getAgentName } from "@/utils/agent-access";
 import { describeSchedule } from "@/utils/agent-schedule";
 
 const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
@@ -16,7 +16,6 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 
 	// ----------------------------------------
 	// Memos
-	//* the routine's model is the catalogue default when a routine is given
 	const model = createMemo(() => {
 		const catalog = models.isSuccess ? models.data.data : undefined;
 		const modelId =
@@ -40,6 +39,10 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 					{
 						label: T()("agent.models.label"),
 						value: model() ?? T()("agent.models.default.plain"),
+					},
+					{
+						label: T()("agent.routine.conversation.label"),
+						value: T()(conversationModeLabels[props.routine.conversationMode]),
 					},
 					{
 						label: T()("common.schedule"),

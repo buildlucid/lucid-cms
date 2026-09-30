@@ -18,7 +18,7 @@ const factory = createFactory();
 const runRoutineController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Starts a routine run now in a new conversation. The run continues in the background.",
+			"Starts a routine run now using its chat history setting. The run continues in the background.",
 		tags: ["agent"],
 		summary: "Run Agent Routine",
 		responses: openAPI.responses({

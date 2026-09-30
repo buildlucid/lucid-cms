@@ -70,7 +70,29 @@ test("only enabled agents are used, and only while their feature is on", () => {
 });
 
 test("routines normalise their schedule and default to UTC", () => {
+	expect(routine.conversationMode).toBe("new");
 	expect(routine.schedule).toEqual({ cron: "0 9 * * 1", timezone: "UTC" });
+});
+
+test("routines can opt into reusing their chat", () => {
+	const reusable = defineRoutine({
+		key: "reuse",
+		name: "Reuse",
+		instructions: "Check things.",
+		conversationMode: "reuse",
+		schedule: { cron: "0 9 * * 1" },
+	});
+	expect(reusable.conversationMode).toBe("reuse");
+	expect(
+		check([
+			defineAgent({
+				key: "test",
+				name: "Test",
+				description: "Test",
+				routines: [reusable],
+			}),
+		]),
+	).not.toThrow();
 });
 
 test("suggestions normalise admin copy and reject empty messages", () => {

@@ -38,7 +38,7 @@ const progressInput = z.object({
 const skillInput = z.object({ name: z.string() });
 const finishInput = z.object({
 	outcome: agentRunOutcomeSchema,
-	summary: z.string().min(1).max(4000),
+	summary: z.string().trim().min(1).max(4000),
 });
 
 /**
@@ -125,13 +125,8 @@ const runnerTools = {
 		name: "lucid_finish_run",
 		title: copy("admin:core.tools.lucid_finish_run.title"),
 		description:
-			"Finish this routine run once its goal is met. Summarise what you did and found for the next run and the people reviewing it.",
+			"End this routine run immediately, after replying to the person with the result. Use done when the goal is met, nothing_to_report when no work was needed, or needs_review when a person must follow up. The summary is a short recap for the run history and the next run, not the result itself. No further tools will run after this request.",
 		input: finishInput,
-		display: toolDisplay(finishInput, (input) => ({
-			kind: "finish",
-			outcome: input.outcome,
-			summary: input.summary,
-		})),
 		available: ({ mode }) => mode === "routine",
 	},
 } as const satisfies Record<string, RunnerToolDefinition>;

@@ -38,6 +38,7 @@ import type { LucidHonoGeneric } from "../../types/hono.js";
 import type {
 	AgentApprovalMode,
 	AgentReferenceInput,
+	AgentRunOutcome,
 	AgentStreamEvent,
 } from "../../types/response.js";
 import LucidError from "../../utils/errors/lucid-error.js";
@@ -53,6 +54,7 @@ import executeRun from "./execute-run.js";
 import getConversation from "./get-conversation.js";
 import getConversationDetails from "./get-conversation-details.js";
 import getInputs from "./get-inputs.js";
+import getMessages from "./get-messages.js";
 import getRoutine from "./get-routine.js";
 import enqueueRun from "./helpers/enqueue-run.js";
 import insertConversation from "./helpers/insert-conversation.js";
@@ -334,9 +336,16 @@ const prepare = async (props?: {
 	const run = await startRun(context, {
 		userId,
 		conversationId: conversation.data.id,
-		text: props?.text ?? "Hello",
 		requestId,
-		routineId: props?.routineId,
+		...(props?.routineId
+			? {
+					routine: {
+						id: props.routineId,
+						name: "Routine",
+						instructions: props.text ?? "Hello",
+					},
+				}
+			: { text: props?.text ?? "Hello" }),
 	});
 	if (run.error) throw run.error;
 	return {
@@ -366,6 +375,30 @@ const partsOf = async (conversationId: string) => {
 	const result = await Messages.selectLatest({ conversationId, limit: 20 });
 	return result.data?.flatMap((message) => message.parts);
 };
+const resultsOf = async (conversationId: string) => {
+	const messages = await getMessages(context, {
+		conversationId,
+		userId,
+		limit: 20,
+	});
+	if (messages.error) throw messages.error;
+	return messages.data.flatMap((message) =>
+		message.parts.filter((part) => part.type === "run-result"),
+	);
+};
+const prepareRoutine = async () => {
+	const routine = await createRoutine(context, {
+		agentKey: testAgent.key,
+		userId,
+		name: "Check",
+		instructions: "Check things.",
+		cron: "0 9 * * 1",
+		timezone: "UTC",
+		enabled: false,
+	});
+	if (routine.error) throw routine.error;
+	return prepare({ routineId: routine.data.id });
+};
 const interactionId = async (conversationId: string) => {
 	const part = (await partsOf(conversationId))?.findLast(
 		(part) => part.type === "widget" && part.interaction?.status === "pending",
@@ -382,10 +415,27 @@ const selectRun = async (runId: string) => {
 	return result.data;
 };
 
-const callTools = (calls: Checkpoint["calls"]) =>
+const callTools = (calls: Checkpoint["calls"], text?: string) =>
 	model.mockImplementationOnce(async (_context, input) => {
 		await input.emit(start());
+		if (text) await input.emit({ type: "text-delta", text });
 		for (const call of calls) await input.emit({ type: "tool-call", ...call });
+		return { error: undefined, data: { usage, connectionId } };
+	});
+/** Replies with the result, then finishes the routine run in the same turn, as a routine run must. */
+const finishRun = (
+	input: { outcome: AgentRunOutcome; summary: string },
+	id = "finish",
+) =>
+	model.mockImplementationOnce(async (_context, modelInput) => {
+		await modelInput.emit(start());
+		await modelInput.emit({ type: "text-delta", text: input.summary });
+		await modelInput.emit({
+			type: "tool-call",
+			id,
+			name: "lucid_finish_run",
+			input,
+		});
 		return { error: undefined, data: { usage, connectionId } };
 	});
 const parallelCall = (id: string, payload?: string) => ({
@@ -854,11 +904,7 @@ describe("agent runner", () => {
 			approvalMode: "automatic",
 		});
 		callTool({ id: "routine-policy", name: tool.name, input: {} });
-		callTool({
-			id: "finish",
-			name: "lucid_finish_run",
-			input: { outcome: "done", summary: "Written" },
-		});
+		finishRun({ outcome: "done", summary: "Written" });
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: waits ? "waiting" : "completed" },
 		});
@@ -917,11 +963,7 @@ describe("agent runner", () => {
 				})
 			).error?.status,
 		).toBe(400);
-		callTool({
-			id: "finish",
-			name: "lucid_finish_run",
-			input: { outcome: "done", summary: "Denied" },
-		});
+		finishRun({ outcome: "done", summary: "Denied" });
 		await executeRun(context, {
 			runId: prepared.runId,
 			answer: {
@@ -1499,11 +1541,7 @@ describe("agent runner", () => {
 			input: {},
 		});
 		if (mode === "routine") {
-			callTool({
-				id: "finish",
-				name: "lucid_finish_run",
-				input: { outcome: "done", summary: "Written" },
-			});
+			finishRun({ outcome: "done", summary: "Written" });
 		} else {
 			reply("Written");
 		}
@@ -1633,23 +1671,9 @@ describe("agent runner", () => {
 	});
 
 	test("keeps a routine working until it finishes with a summary", async () => {
-		const routine = await createRoutine(context, {
-			agentKey: testAgent.key,
-			userId,
-			name: "Weekly check",
-			instructions: "Check things.",
-			cron: "0 9 * * 1",
-			timezone: "UTC",
-			enabled: false,
-		});
-		if (routine.error) throw routine.error;
-		const prepared = await prepare({ routineId: routine.data.id });
+		const prepared = await prepareRoutine();
 		reply("Looking into it.");
-		callTool({
-			id: "f1",
-			name: "lucid_finish_run",
-			input: { outcome: "done", summary: "Everything checked." },
-		});
+		finishRun({ outcome: "done", summary: "Everything checked." }, "f1");
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 			data: { status: "completed" },
 		});
@@ -1664,21 +1688,161 @@ describe("agent runner", () => {
 			outcome: "done",
 			summary: "Everything checked.",
 		});
+		const messages = await getMessages(context, {
+			conversationId: prepared.conversationId,
+			userId,
+			limit: 20,
+		});
+		//* the result shows on the routine request, which shares the run's id
+		expect(messages.data?.[0]?.id).toBe(prepared.runId);
+		expect(messages.data?.[0]?.parts.at(-1)).toEqual({
+			type: "run-result",
+			outcome: "done",
+			summary: "Everything checked.",
+			finishedAt: expect.any(String),
+		});
+	});
+
+	test("a routine must reply with its result before it can finish", async () => {
+		const prepared = await prepareRoutine();
+		callTool({
+			id: "early",
+			name: "lucid_finish_run",
+			input: { outcome: "done", summary: "Checked." },
+		});
+		finishRun({ outcome: "done", summary: "Checked." });
+		expect(
+			(await executeRun(context, { runId: prepared.runId })).data?.status,
+		).toBe("completed");
+		expect(model).toHaveBeenCalledTimes(2);
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({ type: "tool", id: "early", status: "failed" }),
+		);
+	});
+
+	test("a completion request skips following tools, including after recovery", async () => {
+		const prepared = await prepareRoutine();
+		callTools(
+			[
+				{
+					id: "finish",
+					name: "lucid_finish_run",
+					input: { outcome: "needs_review", summary: "Please check this." },
+				},
+				{ id: "trailing", name: writeTool.name, input: {} },
+			],
+			"Please check this.",
+		);
+		expect(
+			(await executeRun(context, { runId: prepared.runId })).data?.status,
+		).toBe("completed");
+		expect(writeHandler).not.toHaveBeenCalled();
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "trailing",
+				status: "skipped",
+			}),
+		);
+		const finished = await selectRun(prepared.runId);
+		if (!finished?.checkpoint) throw new Error("Missing checkpoint");
+		const Runs = new AgentRunsRepository(context.db);
+		await Runs.updateSingle({
+			where: [{ key: "id", operator: "=", value: prepared.runId }],
+			data: {
+				status: "queued",
+				checkpoint: {
+					...finished.checkpoint,
+					parts: finished.checkpoint.parts.filter(
+						(part) => !(part.type === "tool" && part.id === "trailing"),
+					),
+					cursor: 1,
+				},
+			},
+		});
+		expect(
+			(await executeRun(context, { runId: prepared.runId })).data?.status,
+		).toBe("completed");
+		expect(writeHandler).not.toHaveBeenCalled();
+		expect(model).toHaveBeenCalledTimes(1);
+	});
+
+	test("a failed completion commit publishes no result and can recover", async () => {
+		const prepared = await prepareRoutine();
+		finishRun({ outcome: "done", summary: "Finished safely." });
+		const update = AgentRunsRepository.prototype.updateWithToken;
+		const persistence = vi
+			.spyOn(AgentRunsRepository.prototype, "updateWithToken")
+			.mockImplementation(async function (this: AgentRunsRepository, props) {
+				if (props.status === "completed") {
+					throw new Error("Commit interrupted");
+				}
+				return update.call(this, props);
+			});
+		const events: AgentStreamEvent[] = [];
+		try {
+			expect(
+				(
+					await executeRun(context, {
+						runId: prepared.runId,
+						emit: async (event) => {
+							events.push(event);
+						},
+					})
+				).data?.status,
+			).toBe("interrupted");
+		} finally {
+			persistence.mockRestore();
+		}
+		expect(events.some((event) => event.type === "run-result")).toBe(false);
+		expect(await resultsOf(prepared.conversationId)).toEqual([]);
+		expect(
+			(await executeRun(context, { runId: prepared.runId })).data?.status,
+		).toBe("completed");
+		expect(model).toHaveBeenCalledTimes(1);
+		expect(await resultsOf(prepared.conversationId)).toEqual([
+			{
+				type: "run-result",
+				outcome: "done",
+				summary: "Finished safely.",
+				finishedAt: expect.any(String),
+			},
+		]);
+	});
+
+	test("invalid completion input remains a failed tool call until a valid finish", async () => {
+		const prepared = await prepareRoutine();
+		callTool({
+			id: "invalid",
+			name: "lucid_finish_run",
+			input: { outcome: "done", summary: "   " },
+		});
+		finishRun(
+			{ outcome: "nothing_to_report", summary: "No changes needed." },
+			"valid",
+		);
+		expect(
+			(await executeRun(context, { runId: prepared.runId })).data?.status,
+		).toBe("completed");
+		expect(await partsOf(prepared.conversationId)).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "invalid",
+				status: "failed",
+			}),
+		);
+		expect(await resultsOf(prepared.conversationId)).toEqual([
+			{
+				type: "run-result",
+				outcome: "nothing_to_report",
+				summary: "No changes needed.",
+				finishedAt: expect.any(String),
+			},
+		]);
 	});
 
 	test("a routine that exhausts its nudges needs review instead of claiming success", async () => {
-		const routine = await createRoutine(context, {
-			agentKey: testAgent.key,
-			userId,
-			name: "Unfinished check",
-			instructions: "Check things.",
-			cron: "0 9 * * 1",
-			timezone: "UTC",
-			enabled: false,
-		});
-		if (routine.error) throw routine.error;
-
-		const prepared = await prepare({ routineId: routine.data.id });
+		const prepared = await prepareRoutine();
 		reply("Starting.");
 		reply("Still looking.");
 		reply("I have not completed the check.");
@@ -1686,6 +1850,14 @@ describe("agent runner", () => {
 			data: { status: "completed" },
 		});
 		expect(model).toHaveBeenCalledTimes(3);
+		expect(await resultsOf(prepared.conversationId)).toEqual([
+			{
+				type: "run-result",
+				outcome: "needs_review",
+				summary: "I have not completed the check.",
+				finishedAt: expect.any(String),
+			},
+		]);
 		expect(await selectRun(prepared.runId)).toMatchObject({
 			outcome: "needs_review",
 			summary: "I have not completed the check.",
@@ -2524,8 +2696,9 @@ describe("conversation compaction", () => {
 		const supplied = JSON.stringify(
 			model.mock.calls.map(([, input]) => input.messages),
 		);
-		for (let i = 0; i < 65; i++)
+		for (let i = 0; i < 65; i++) {
 			expect(supplied).toContain(`Saved requirement ${i}.`);
+		}
 	});
 });
 

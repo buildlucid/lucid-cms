@@ -188,19 +188,42 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		return exec.response;
 	}
-	/** Waiting and interrupted runs still block the routine's next occurrence. */
-	async selectActiveForRoutine(routineId: string) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.selectFrom("lucid_agent_runs")
-					.select("id")
-					.where("routine_id", "=", routineId)
-					.where("status", "in", constants.agent.runStatuses.active)
-					.limit(1)
-					.executeTakeFirst(),
-			{ method: "selectActiveForRoutine" },
-		);
+	async selectResults(runIds: string[]) {
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.select(["id", "outcome", "summary", "finished_at"])
+			.where("id", "in", runIds)
+			.where("status", "=", "completed")
+			.where("outcome", "is not", null);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectResults",
+		});
+
+		return exec.response;
+	}
+	/** Waiting and interrupted runs still block the routine's next occurrence, as do any runs in the chat it reuses. */
+	async selectActiveForRoutine(props: {
+		routineId: string;
+		conversationId: string | null;
+	}) {
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.select("id")
+			.where((eb) =>
+				eb.or([
+					eb("routine_id", "=", props.routineId),
+					...(props.conversationId
+						? [eb("conversation_id", "=", props.conversationId)]
+						: []),
+				]),
+			)
+			.where("status", "in", constants.agent.runStatuses.active)
+			.limit(1);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectActiveForRoutine",
+		});
 
 		return exec.response;
 	}

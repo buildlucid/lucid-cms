@@ -3,10 +3,15 @@ import type { RoutineTools } from "../../libs/agent/types.js";
 import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
-import type { AgentRoutine, AiModelSelection } from "../../types/response.js";
+import type {
+	AgentRoutine,
+	AgentRoutineConversationMode,
+	AiModelSelection,
+} from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutine from "./get-routine.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
+import resolveRoutineConversation from "./helpers/resolve-routine-conversation.js";
 import saveRoutineTools from "./helpers/save-routine-tools.js";
 import validateRoutineTools from "./helpers/validate-routine-tools.js";
 
@@ -19,6 +24,7 @@ const updateRoutine: ServiceFn<
 			name?: string;
 			tools?: RoutineTools;
 			modelSelection?: AiModelSelection | null;
+			conversationMode?: AgentRoutineConversationMode;
 			instructions?: string;
 			cron?: string;
 			timezone?: string;
@@ -39,6 +45,7 @@ const updateRoutine: ServiceFn<
 			input.timezone,
 			input.tools,
 			input.modelSelection,
+			input.conversationMode,
 		].some((value) => value !== undefined)
 	) {
 		return {
@@ -75,9 +82,18 @@ const updateRoutine: ServiceFn<
 
 	const AgentRoutines = new AgentRoutinesRepository(context.db);
 
+	const conversation = await resolveRoutineConversation(context, {
+		routineId: input.id,
+		from: routine.data.conversation_mode,
+		to: input.conversationMode,
+	});
+	if (conversation.error) return conversation;
+
 	const updated = await AgentRoutines.updateSingle({
 		where: [{ key: "id", operator: "=", value: input.id }],
 		data: {
+			conversation_mode: input.conversationMode,
+			conversation_id: conversation.data,
 			name: input.name,
 			instructions: input.instructions,
 			model_selection: input.modelSelection,

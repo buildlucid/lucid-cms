@@ -23,7 +23,7 @@ const AgentRunTableRow: Component<{
 					label: T()("agent.routine.run.open"),
 					type: "link",
 					icon: "eye",
-					href: `/lucid/agent/chats/${props.run.conversationId}`,
+					href: `/lucid/agent/chats/${props.run.conversationId}?runId=${props.run.id}`,
 				},
 				{
 					label: T()("ai.usage.view"),

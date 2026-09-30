@@ -3,6 +3,7 @@ import type {
 	AgentConversation,
 	AgentMessage,
 	AgentMessagePart,
+	AgentRunResultPart,
 	AgentRunStatus,
 	AgentStreamEvent,
 	AgentToolSummary,
@@ -34,6 +35,8 @@ export const partLayout = (
 	hasRow: (widget: AgentWidgetPart) => boolean,
 ): "row" | "block" | "hidden" => {
 	switch (part.type) {
+		case "routine":
+		case "run-result":
 		case "reference":
 		case "text": {
 			return "block";
@@ -44,7 +47,9 @@ export const partLayout = (
 				return part.status === "complete" ? "block" : "hidden";
 			}
 
-			return part.name === finishTool ? "block" : "row";
+			return part.name === finishTool && part.status === "complete"
+				? "hidden"
+				: "row";
 		}
 		case "widget": {
 			if (!part.interaction) return hasRow(part) ? "row" : "block";
@@ -131,15 +136,17 @@ export const createAgentMessages = () => {
 	/** Later tool events can leave out fields set when the call started, so tool parts merge. */
 	const upsertPart = (
 		index: number,
-		part: AgentToolSummary | AgentWidgetPart,
+		part: AgentToolSummary | AgentWidgetPart | AgentRunResultPart,
 	) => {
 		const parts = messages[index].parts;
 		const partIndex = parts.findIndex((existing) =>
 			part.type === "tool"
 				? existing.type === "tool" && existing.id === part.id
-				: existing.type === "widget" &&
-					!!part.interaction?.id &&
-					existing.interaction?.id === part.interaction.id,
+				: part.type === "run-result"
+					? existing.type === "run-result"
+					: existing.type === "widget" &&
+						!!part.interaction?.id &&
+						existing.interaction?.id === part.interaction.id,
 		);
 
 		batch(() => {

@@ -76,13 +76,21 @@ const AgentConversationPage: Component = () => {
 	);
 	const definitions = api.agent.useGetDefinitions();
 	const createConversation = api.agent.useCreateConversation();
+	const runRoutine = api.agent.useRunRoutine({
+		onSuccess: (response) => {
+			if (response.data.conversationId === params.conversationId) {
+				scroll.scrollToEnd("smooth");
+			} else {
+				navigate(`/lucid/agent/chats/${response.data.conversationId}`);
+			}
+		},
+	});
 	const scroll = useChatScroll({
 		hasEarlier: () => chat.history.hasNextPage,
 		loadEarlier: () => chat.history.fetchNextPage(),
 	});
 	const [renameOpen, setRenameOpen] = createSignal(false);
 	const [deleteOpen, setDeleteOpen] = createSignal(false);
-	//* one item is open in the sidebar at a time: a tool call or a transcript row's panel
 	const [selectedId, setSelectedId] = createSignal<string>();
 	const [sidebar, setSidebar] = createSignal<HTMLElement>();
 	const [routineOpen, setRoutineOpen] = createSignal(false);
@@ -90,7 +98,6 @@ const AgentConversationPage: Component = () => {
 	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
 	const [runsOpen, setRunsOpen] = createSignal(false);
 	let composer: AgentComposerHandle | undefined;
-	//* attached files float over the timeline, so it makes room for them
 	const [attached, setAttached] = createSignal(false);
 
 	// ----------------------------------------
@@ -203,6 +210,37 @@ const AgentConversationPage: Component = () => {
 			composer?.insert(message, references);
 		}
 	});
+	//* a run's request message shares the run's id, so `?runId=` scrolls to where the run starts, loading older pages until it is found
+	createEffect(
+		on(
+			[
+				() => location.search,
+				() => params.conversationId,
+				() => chat.history.isSuccess,
+			],
+			([search, , ready]) => {
+				const runId = new URLSearchParams(search).get("runId");
+				if (!runId || !ready) return;
+				let cancelled = false;
+				onCleanup(() => {
+					cancelled = true;
+				});
+				void (async () => {
+					while (
+						!cancelled &&
+						!chat.messages.some((message) => message.id === runId)
+					) {
+						if (!chat.history.hasNextPage) return;
+						const page = await chat.history.fetchNextPage();
+						if (page.isError) return;
+					}
+					requestAnimationFrame(() => {
+						if (!cancelled) scroll.scrollToMessage(runId);
+					});
+				})();
+			},
+		),
+	);
 	createEffect(() => {
 		if (!selectedId()) return;
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -215,11 +253,13 @@ const AgentConversationPage: Component = () => {
 	});
 	createEffect(
 		on(
-			() => params.conversationId,
+			[() => params.conversationId, () => location.search],
 			() => {
 				setSelectedId(undefined);
 				setRunsOpen(false);
-				scroll.scrollToEnd();
+				if (!new URLSearchParams(location.search).has("runId")) {
+					scroll.scrollToEnd();
+				}
 			},
 			{ defer: true },
 		),
@@ -244,6 +284,20 @@ const AgentConversationPage: Component = () => {
 									? {
 											open: routineCardOpen(),
 											onToggle: () => setRoutineCardOpen((open) => !open),
+										}
+									: undefined
+							}
+							runRoutine={
+								routine()
+									? {
+											disabled:
+												runRoutine.action.isPending ||
+												chat.working() ||
+												unavailable() !== undefined,
+											onRun: () => {
+												const id = routine()?.id;
+												if (id) runRoutine.action.mutate({ id });
+											},
 										}
 									: undefined
 							}
@@ -302,13 +356,16 @@ const AgentConversationPage: Component = () => {
 											/>
 										</div>
 									</div>
-									{/* with files attached it reaches halfway up behind them, so text fades out beneath the cards */}
 									<div
 										aria-hidden="true"
 										class={classnames(
 											"pointer-events-none absolute inset-x-0 -bottom-2.5 bg-linear-to-t from-background to-transparent",
 											attached() ? "h-18" : "h-10.5",
 										)}
+									/>
+									<div
+										aria-hidden="true"
+										class="pointer-events-none absolute inset-x-0 top-0 h-8 bg-linear-to-b from-background to-transparent"
 									/>
 									<AgentChatTimeline
 										messages={chat.messages}
@@ -331,12 +388,25 @@ const AgentConversationPage: Component = () => {
 												variant="secondary"
 												size="xs"
 												shape="circle"
-												class="pointer-events-auto shadow-md"
+												class="group pointer-events-auto shadow-md"
 												aria-label={T()("agent.chat.latest")}
 												title={T()("agent.chat.latest")}
 												onClick={() => scroll.scrollToEnd("smooth")}
 											>
-												<FaSolidArrowDown size={11} />
+												<Show
+													when={chat.working() && !chat.pendingInteraction()}
+													fallback={<FaSolidArrowDown size={11} />}
+												>
+													<Spinner
+														size="sm"
+														variant="secondary"
+														class="group-hover:hidden group-focus-visible:hidden"
+													/>
+													<FaSolidArrowDown
+														size={11}
+														class="hidden group-hover:block group-focus-visible:block"
+													/>
+												</Show>
 											</Button>
 										</div>
 									</Show>
@@ -375,6 +445,14 @@ const AgentConversationPage: Component = () => {
 								routine={routineCard()}
 								detailsOpen={detailsOpen()}
 								selectedTool={selectedTool()}
+								onRoutineRun={(runId) => {
+									//* older runs may not be loaded yet, and the runId link loads pages until it finds them
+									if (chat.messages.some((message) => message.id === runId)) {
+										scroll.scrollToMessage(runId);
+									} else {
+										navigate(`${location.pathname}?runId=${runId}`);
+									}
+								}}
 								onRoutineRuns={() => setRunsOpen(true)}
 								onRoutineOpen={() => {
 									setFocusApprovals(false);

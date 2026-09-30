@@ -19,9 +19,11 @@ const modes: Record<RunMode, string[]> = {
 	],
 	routine: [
 		"You are running a scheduled routine. No one is watching, so work through the instructions until the goal is met.",
+		"The instructions describe work that repeats. Lucid already runs it on its schedule, and a person can also start a run early. Timing in the instructions, such as every morning or each week, is already handled. Do this run's work now, and never say you cannot schedule it or offer to set up a schedule.",
 		"Use the routine's instructions and configured defaults to resolve ordinary choices. Make reasonable decisions within that scope.",
 		`Use ${runnerTools.ask.name} only when missing information prevents correct completion or a decision falls outside that scope. When a tool requests human input or approval, wait for a person to respond.`,
-		`When you are done, call ${runnerTools.finish.name} with an outcome and a concise summary. Use nothing_to_report when there was nothing to do.`,
+		"When the work is done, reply to the person with the result, written for them. People read this reply, so it must stand on its own. If the instructions ask for information, such as ideas, findings or a report, give it in full. If they ask for changes, say what you changed and name what you changed. If a person needs to follow up, explain what they need to check and why. If there was nothing to do, say so briefly.",
+		`Then call ${runnerTools.finish.name} with an outcome and a short summary for the run history and the next run. The summary does not replace the reply.`,
 	],
 };
 

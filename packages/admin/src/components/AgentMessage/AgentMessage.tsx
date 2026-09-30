@@ -26,10 +26,10 @@ import {
 	type AgentReferenceItem,
 	agentReferenceKey,
 } from "@/utils/agent-references";
-import { finishTool, isToolRow, progressTool } from "@/utils/agent-tools";
+import { isToolRow, progressTool } from "@/utils/agent-tools";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
-import AgentRunFinish from "./parts/AgentRunFinish";
+import AgentRoutineRequest from "./parts/AgentRoutineRequest";
 import AgentToolCall from "./parts/AgentToolCall";
 
 export interface AgentMessageProps {
@@ -64,12 +64,17 @@ const isToolAt = (parts: AgentMessagePart[], index: number) => {
 const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	//* runs of tool calls that are open, by the id of their first call
 	const [expanded, setExpanded] = createSignal<ReadonlySet<string>>(new Set());
 	const [copied, copy] = createCopy(() => messageText(props.message));
 
 	// ----------------------------------------
 	// Memos
+	const routine = createMemo(() =>
+		props.message.parts.find((part) => part.type === "routine"),
+	);
+	const result = createMemo(() =>
+		props.message.parts.find((part) => part.type === "run-result"),
+	);
 	const user = createMemo(() => props.message.role === "user");
 	const text = createMemo(() => messageText(props.message));
 	const hasText = createMemo(() =>
@@ -103,13 +108,11 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
-	/** The index of the first call in the run of tool calls this index belongs to. */
 	const leadOf = (index: number) => {
 		let lead = index;
 		while (isToolAt(props.message.parts, lead - 1)) lead--;
 		return lead;
 	};
-	/** How many tool calls follow the one at this index in its run. */
 	const followers = (index: number) => {
 		let last = index;
 		while (isToolAt(props.message.parts, last + 1)) last++;
@@ -147,9 +150,19 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// Render
 	return (
 		<div class="flex flex-col">
-			<Show
-				when={!user()}
-				fallback={
+			<Switch>
+				<Match when={routine()}>
+					{(routine) => (
+						<AgentRoutineRequest
+							name={routine().name}
+							instructions={routine().instructions}
+							trigger={routine().trigger}
+							createdAt={props.message.createdAt}
+							result={result()}
+						/>
+					)}
+				</Match>
+				<Match when={user()}>
 					<div class="flex flex-col items-end gap-1">
 						<AgentReferenceFiles
 							references={attachments()}
@@ -168,110 +181,107 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 							</div>
 						</Show>
 					</div>
-				}
-			>
-				<div class="flex w-full flex-col gap-6 [&>[data-layout=row]+[data-layout=row]]:-mt-5">
-					<For each={props.message.parts}>
-						{(part, index) => {
-							//* read once, so only parts that mount mid-stream animate in
-							const live = props.live;
-							//* cleared once it has played, as hiding and showing an element replays its animation
-							const [entering, setEntering] = createSignal(
-								live === true && part.type === "widget",
-							);
-							return (
-								<Show when={visible(index())}>
-									<div
-										data-layout={layoutOf(part)}
-										class={classnames("flex flex-col", {
-											"motion-safe:animate-rise-in": entering(),
-										})}
-										onAnimationEnd={(event) => {
-											if (event.target === event.currentTarget) {
-												setEntering(false);
-											}
-										}}
-									>
-										{/* the shimmer animates its own element, as swapping animations on one element replays the entrance each time the shimmer stops */}
+				</Match>
+				<Match when={true}>
+					<div class="flex w-full flex-col gap-6 [&>[data-layout=row]+[data-layout=row]]:-mt-5">
+						<For each={props.message.parts}>
+							{(part, index) => {
+								//* read once, so only parts that mount mid-stream animate in
+								const live = props.live;
+								//* cleared once it has played, as hiding and showing an element replays its animation
+								const [entering, setEntering] = createSignal(
+									live === true && part.type === "widget",
+								);
+								return (
+									<Show when={visible(index())}>
 										<div
+											data-layout={layoutOf(part)}
 											class={classnames("flex flex-col", {
-												"agent-shimmer w-fit max-w-full": shimmers(index()),
+												"motion-safe:animate-rise-in": entering(),
 											})}
+											onAnimationEnd={(event) => {
+												if (event.target === event.currentTarget) {
+													setEntering(false);
+												}
+											}}
 										>
-											<Switch>
-												<Match when={part.type === "text" && part}>
-													{(text) => (
-														<AgentMarkdown text={text().text} animate={live} />
-													)}
-												</Match>
-												<Match
-													when={
-														part.type === "tool" &&
-														part.name === progressTool &&
-														part
-													}
-												>
-													{(tool) => (
-														<AgentMarkdown
-															text={messageText({ parts: [tool()] })}
-															animate={live}
-														/>
-													)}
-												</Match>
-												<Match
-													when={
-														part.type === "tool" &&
-														part.name === finishTool &&
-														part
-													}
-												>
-													{(tool) => <AgentRunFinish part={tool()} />}
-												</Match>
-												<Match when={isToolRow(part) && part}>
-													{(tool) => (
-														<AgentToolCall
-															part={tool()}
-															selected={props.selectedToolId === tool().id}
-															onSelect={props.onSelectTool}
-															more={
-																leadOf(index()) === index()
-																	? followers(index())
-																	: undefined
-															}
-															expanded={expanded().has(tool().id)}
-															onToggle={() => toggle(tool().id)}
-														/>
-													)}
-												</Match>
-												<Match when={part.type === "widget" && part}>
-													{(widget) => (
-														<Show
-															when={layoutOf(widget()) === "block"}
-															fallback={<AgentWidgetRow widget={widget()} />}
-														>
-															<AgentWidget
-																widget={widget()}
-																view="inline"
-																onRespond={
-																	widget().interaction?.id ===
-																	props.pendingInteractionId
-																		? props.onRespond
+											{/* the shimmer animates its own element, as swapping animations on one element replays the entrance each time the shimmer stops */}
+											<div
+												class={classnames("flex flex-col", {
+													"agent-shimmer w-fit max-w-full": shimmers(index()),
+												})}
+											>
+												<Switch>
+													<Match when={part.type === "text" && part}>
+														{(text) => (
+															<AgentMarkdown
+																text={text().text}
+																animate={live}
+															/>
+														)}
+													</Match>
+													<Match
+														when={
+															part.type === "tool" &&
+															part.name === progressTool &&
+															part
+														}
+													>
+														{(tool) => (
+															<AgentMarkdown
+																text={messageText({ parts: [tool()] })}
+																animate={live}
+															/>
+														)}
+													</Match>
+													<Match when={isToolRow(part) && part}>
+														{(tool) => (
+															<AgentToolCall
+																part={tool()}
+																selected={props.selectedToolId === tool().id}
+																onSelect={props.onSelectTool}
+																more={
+																	leadOf(index()) === index()
+																		? followers(index())
 																		: undefined
 																}
+																expanded={expanded().has(tool().id)}
+																onToggle={() => toggle(tool().id)}
 															/>
-														</Show>
-													)}
-												</Match>
-											</Switch>
+														)}
+													</Match>
+													<Match when={part.type === "widget" && part}>
+														{(widget) => (
+															<Show
+																when={layoutOf(widget()) === "block"}
+																fallback={<AgentWidgetRow widget={widget()} />}
+															>
+																<AgentWidget
+																	widget={widget()}
+																	view="inline"
+																	onRespond={
+																		widget().interaction?.id ===
+																		props.pendingInteractionId
+																			? props.onRespond
+																			: undefined
+																	}
+																/>
+															</Show>
+														)}
+													</Match>
+												</Switch>
+											</div>
 										</div>
-									</div>
-								</Show>
-							);
-						}}
-					</For>
-				</div>
-			</Show>
-			<Show when={text() && (user() || (endsInText() && !props.live))}>
+									</Show>
+								);
+							}}
+						</For>
+					</div>
+				</Match>
+			</Switch>
+			<Show
+				when={text() && !routine() && (user() || (endsInText() && !props.live))}
+			>
 				<div
 					class={classnames(
 						"mt-1.5 flex items-center gap-1 text-xs text-muted",

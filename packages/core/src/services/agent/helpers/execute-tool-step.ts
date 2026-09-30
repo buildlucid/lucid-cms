@@ -9,6 +9,7 @@ import recordToolResult from "./record-tool-result.js";
 import type { RunSetup } from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
 import runToolCall from "./run-tool-call.js";
+import { toolResult } from "./tool-outcome.js";
 
 /** Executes one checkpointed tool call, pausing when it needs a person's input. */
 const executeToolStep: ServiceFn<
@@ -44,6 +45,15 @@ const executeToolStep: ServiceFn<
 		return { error: undefined, data: "waiting" };
 	}
 
+	if (outcome.kind === "finish") {
+		checkpoint.finish = outcome.finish;
+		return recordToolResult(context, {
+			call,
+			checkpoint,
+			session,
+			outcome: toolResult({ finished: true }),
+		});
+	}
 	return recordToolResult(context, { call, checkpoint, session, outcome });
 };
 

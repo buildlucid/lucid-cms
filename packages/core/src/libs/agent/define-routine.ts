@@ -12,6 +12,7 @@ const defineRoutine = <const Key extends string>(
 	key: options.key,
 	name: options.name,
 	instructions: dedent(options.instructions),
+	conversationMode: options.conversationMode ?? "new",
 	model: options.model,
 	//* unset settings are dropped so sync compares code and stored settings exactly
 	tools: Object.fromEntries(

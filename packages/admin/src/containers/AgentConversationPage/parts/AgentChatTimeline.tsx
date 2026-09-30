@@ -198,7 +198,9 @@ const AgentChatTimeline: Component<{
 							class="absolute inset-s-full w-72 -translate-y-1/2 rounded-lg border border-border bg-popover px-3 py-2 shadow-md motion-safe:animate-fade-in motion-safe:transition-[top] motion-safe:duration-150 motion-safe:ease-out"
 							style={{ top: `${cardTop()}px` }}
 						>
-							<p class="line-clamp-1 text-sm text-title">{current().message}</p>
+							<p class="line-clamp-1 text-xs font-medium text-title">
+								{current().message}
+							</p>
 							<Show when={current().reply}>
 								{(reply) => (
 									<p class="mt-1 line-clamp-2 text-xs leading-5 text-muted">

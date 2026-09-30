@@ -131,6 +131,31 @@ export default class AgentMessagesRepository extends StaticRepository<"lucid_age
 
 		return exec.response;
 	}
+	/** Routine run requests after a position, newest first. */
+	async selectRoutineRequests(props: {
+		conversationId: string;
+		after: number;
+	}) {
+		const query = this.db
+			.selectFrom("lucid_agent_messages")
+			.innerJoin(
+				"lucid_agent_runs",
+				"lucid_agent_runs.id",
+				"lucid_agent_messages.run_id",
+			)
+			.select(["lucid_agent_messages.parts"])
+			.where("lucid_agent_messages.conversation_id", "=", props.conversationId)
+			.where("lucid_agent_messages.role", "=", "user")
+			.where("lucid_agent_messages.position", ">", props.after)
+			.where("lucid_agent_runs.routine_id", "is not", null)
+			.orderBy("lucid_agent_messages.position", "desc");
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectRoutineRequests",
+		});
+
+		return exec.response;
+	}
 	/** Reads history in bounded pages, including messages no longer in model context. */
 	async selectAfter(props: {
 		conversationId: string;

@@ -3,7 +3,6 @@ import { type Component, createMemo } from "solid-js";
 import Pill, { type PillSize, type PillVariant } from "@/components/Pill/Pill";
 import T from "@/translations";
 
-/** A run's state in plain words. Finished routine runs show their outcome. */
 const AgentRunStatus: Component<{
 	status: Status;
 	outcome?: AgentRunOutcome | null;
@@ -35,7 +34,7 @@ const AgentRunStatus: Component<{
 				if (props.outcome === "needs_review") {
 					return {
 						label: T()("agent.status.review"),
-						variant: "primary-subtle",
+						variant: "warning-subtle",
 					};
 				}
 				if (props.outcome === "nothing_to_report") {

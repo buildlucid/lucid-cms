@@ -1,7 +1,11 @@
-import type { AgentRoutine, AgentSummary } from "@types";
+import type {
+	AgentRoutine,
+	AgentRoutineConversationMode,
+	AgentSummary,
+} from "@types";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
-import T from "@/translations";
+import T, { type TranslationKeys } from "@/translations";
 
 /** The agents the current user can use or manage. Reactive when read inside a memo or effect. */
 export const getAgentAccess = () => {
@@ -19,6 +23,11 @@ export const getAgentAccess = () => {
 /** An agent's display name, falling back to its key once it is removed from config. */
 export const getAgentName = (key: string) =>
 	siteStore.get.ai.agents.find((agent) => agent.key === key)?.name ?? key;
+
+export const conversationModeLabels = {
+	new: "agent.routine.conversation.new",
+	reuse: "agent.routine.conversation.reuse",
+} as const satisfies Record<AgentRoutineConversationMode, TranslationKeys>;
 
 export type AgentUnavailableReason = "no-connection" | "connection-revoked";
 

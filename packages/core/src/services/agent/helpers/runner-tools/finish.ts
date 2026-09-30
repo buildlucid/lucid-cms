@@ -1,8 +1,12 @@
+import { textFromParts } from "../../../../libs/agent/input.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
-import { toolFailure, toolResult } from "../tool-outcome.js";
+import { toolFailure } from "../tool-outcome.js";
 import type { RunnerToolInputHandler } from "./types.js";
 
-/** Records a routine run's outcome. The runner ends the run once this call's result is saved. */
+/**
+ * Requests completion; the runner owns saving the result and stopping execution.
+ * The reply is the result people read, so a run cannot finish before giving one.
+ */
 const finish: RunnerToolInputHandler<typeof runnerTools.finish> = async (
 	context,
 	{ input, mode, checkpoint },
@@ -10,10 +14,11 @@ const finish: RunnerToolInputHandler<typeof runnerTools.finish> = async (
 	if (mode !== "routine") {
 		return toolFailure(context.translate("server:agent.tool.unavailable"));
 	}
+	if (!checkpoint.replied && !textFromParts(checkpoint.parts).trim()) {
+		return toolFailure(context.translate("server:agent.routine.finish.reply"));
+	}
 
-	checkpoint.finish = input;
-
-	return toolResult({ finished: true });
+	return { kind: "finish", finish: input };
 };
 
 export default finish;

@@ -473,7 +473,7 @@
 		color: inherit;
 	}
 
-	/* blocks are spaced by the gap before them, and the first and last sit flush */
+	/* blocks are spaced by the gap before them */
 	.agent-markdown :where(p, ul, ol, pre, blockquote, table, hr, .agent-code) {
 		@apply my-4;
 	}
@@ -488,14 +488,6 @@
 
 	.agent-markdown .agent-fade {
 		animation: animation-fade-in 400ms ease-out both;
-	}
-
-	.agent-markdown > :first-child {
-		@apply mt-0;
-	}
-
-	.agent-markdown > :last-child {
-		@apply mb-0;
 	}
 
 	.agent-markdown :where(h1, h2, h3, h4) {
@@ -628,6 +620,15 @@
 	}
 
 	/* the chat box's TipTap placeholder */
+	/* the first and last blocks sit flush. After the variants, so their spacing never overrides it */
+	.agent-markdown > :first-child {
+		@apply mt-0;
+	}
+
+	.agent-markdown > :last-child {
+		@apply mb-0;
+	}
+
 	.agent-markdown .is-editor-empty:first-child::before {
 		@apply pointer-events-none float-left h-0 text-muted;
 		content: attr(data-placeholder);

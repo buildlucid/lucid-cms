@@ -10,6 +10,7 @@ import type {
 	AgentRoutine,
 	AgentRun,
 	AgentRunOutcome,
+	AgentRunResultPart,
 	AgentRunStatus,
 	AgentToolDetails,
 	AgentToolSummary,
@@ -209,17 +210,39 @@ const formatTool = (props: {
 	return { ...summary, detailsAvailable: props.detailsAvailable ?? true };
 };
 
+/** A completed routine run's result. Runs without an outcome, such as chat runs, have none. */
+const formatRunResult = (props: {
+	run: Pick<Select<LucidAgentRuns>, "outcome" | "summary" | "finished_at">;
+}): AgentRunResultPart | undefined => {
+	const finishedAt = formatter.formatDate(props.run.finished_at);
+	if (!props.run.outcome || props.run.summary === null || !finishedAt) {
+		return undefined;
+	}
+
+	return {
+		type: "run-result",
+		outcome: props.run.outcome,
+		summary: props.run.summary,
+		finishedAt,
+	};
+};
+
 const formatMessage = (props: {
 	message: Omit<Select<LucidAgentMessages>, "execution_version" | "revision">;
+	/** Shown on a routine run's request. Only pass it once the run has completed. */
+	result?: AgentRunResultPart;
 }): AgentMessage => ({
 	id: props.message.id,
 	conversationId: props.message.conversation_id,
 	runId: props.message.run_id,
 	position: props.message.position,
 	role: props.message.role,
-	parts: props.message.parts.map((part) =>
-		part.type === "tool" ? formatTool({ part }) : part,
-	),
+	parts: [
+		...props.message.parts.map((part) =>
+			part.type === "tool" ? formatTool({ part }) : part,
+		),
+		...(props.result ? [props.result] : []),
+	],
 	createdAt: formatter.formatDate(props.message.created_at),
 });
 
@@ -248,6 +271,8 @@ const formatRoutine = (props: {
 	source: props.routine.source,
 	name: props.routine.name,
 	instructions: props.routine.instructions,
+	conversationMode: props.routine.conversation_mode,
+	conversationId: props.routine.conversation_id,
 	modelSelection: props.routine.model_selection,
 	tools: props.tools,
 	cron: props.routine.cron,
@@ -273,6 +298,7 @@ export default {
 	formatConversation,
 	formatInput,
 	formatMessage,
+	formatRunResult,
 	formatTool,
 	formatRun,
 	formatRoutine,

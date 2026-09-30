@@ -9,12 +9,17 @@ import {
 	AgentMessagesRepository,
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
-import type { AgentReferenceInput } from "../../types/response.js";
-import type { ServiceFn } from "../../utils/services/types.js";
+import type { StoredAgentMessagePart } from "../../schemas/agent.js";
+import type {
+	AgentReferenceInput,
+	AgentRoutineTrigger,
+} from "../../types/response.js";
+import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import enqueueTitle from "./helpers/enqueue-title.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import registerUrlKeys from "./helpers/register-url-keys.js";
+import routineRequestParts from "./helpers/routine-request-parts.js";
 import titleFromMessage from "./helpers/title-from-message.js";
 import registerReferences from "./references/register.js";
 
@@ -30,13 +35,22 @@ const startRun: ServiceFn<
 			conversationId: string;
 			userId: number | null;
 			requestId: string;
-			routineId?: string;
 			references?: AgentReferenceInput[];
 			/** Extra model context that is not shown as part of the message. */
 			context?: string;
 		} & (
-			| { purpose: "compact" | "retry"; text?: never }
-			| { purpose?: never; text: string }
+			| { purpose: "compact" | "retry"; text?: never; routine?: never }
+			| { purpose?: never; text: string; routine?: never }
+			| {
+					purpose?: never;
+					text?: never;
+					routine: {
+						id: string;
+						name: string;
+						instructions: string;
+						trigger: AgentRoutineTrigger;
+					};
+			  }
 		),
 	],
 	{ runId: string }
@@ -44,7 +58,7 @@ const startRun: ServiceFn<
 	const AgentConversations = new AgentConversationsRepository(context.db);
 
 	const conversation = await AgentConversations.selectSingle({
-		select: ["approval_mode", "routine_id", "model_selection"],
+		select: ["approval_mode", "routine_id", "model_selection", "queue_paused"],
 		where: [{ key: "id", operator: "=", value: input.conversationId }],
 	});
 	if (conversation.error) return conversation;
@@ -62,6 +76,7 @@ const startRun: ServiceFn<
 		approval_mode: approvalMode,
 		routine_id: routineId,
 		model_selection: modelSelection,
+		queue_paused: queuePaused,
 	} = conversation.data;
 
 	const repaired = await AgentConversations.releaseFinishedClaims({
@@ -76,9 +91,23 @@ const startRun: ServiceFn<
 		const conversations = new AgentConversationsRepository(context.db);
 		const messages = new AgentMessagesRepository(context.db);
 		const runs = new AgentRunsRepository(context.db);
+		const compactions = new AgentCompactionsRepository(context.db);
+
+		const latest = await compactions.selectLatest(input.conversationId);
+		if (latest.error) return latest;
 
 		//* attachments are linked first, so the message saves the details the agent sees
-		const appendMessage = async () => {
+		const messageParts = async (): ServiceResponse<
+			StoredAgentMessagePart[]
+		> => {
+			if (input.routine) {
+				return routineRequestParts(context, {
+					conversationId: input.conversationId,
+					after: latest.data?.through_position ?? 0,
+					routine: input.routine,
+				});
+			}
+
 			const references = await registerReferences(context, {
 				conversationId: input.conversationId,
 				references: input.references ?? [],
@@ -87,16 +116,24 @@ const startRun: ServiceFn<
 			});
 			if (references.error) return references;
 
-			const parts = inputMessageParts({
-				text: input.text ?? "",
-				references: references.data,
-			});
+			return {
+				error: undefined,
+				data: inputMessageParts({
+					text: input.text ?? "",
+					references: references.data,
+				}),
+			};
+		};
+
+		const appendMessage = async () => {
+			const parts = await messageParts();
+			if (parts.error) return parts;
 
 			const appended = await messages.appendOnce({
 				id: input.requestId,
 				conversationId: input.conversationId,
 				runId: input.requestId,
-				parts,
+				parts: parts.data,
 				createdAt: now,
 			});
 			if (appended.error) return appended;
@@ -107,7 +144,7 @@ const startRun: ServiceFn<
 			return registerUrlKeys(context, {
 				conversationId: input.conversationId,
 				role: "user",
-				parts,
+				parts: parts.data,
 			});
 		};
 
@@ -150,17 +187,17 @@ const startRun: ServiceFn<
 				error: {
 					type: "basic",
 					status: 409,
-					message: copy("server:agent.run.active"),
+					message: copy(
+						queuePaused
+							? "server:agent.conversation.queue.paused"
+							: "server:agent.run.active",
+					),
 				},
 			};
 		}
 
-		const compactions = new AgentCompactionsRepository(context.db);
-		const latest = await compactions.selectLatest(input.conversationId);
-		if (latest.error) return latest;
-
 		let firstMessage = false;
-		if (!input.routineId && !input.purpose) {
+		if (!input.routine && !input.purpose) {
 			const previous = await messages.selectLatest({
 				conversationId: input.conversationId,
 				limit: 1,
@@ -181,7 +218,7 @@ const startRun: ServiceFn<
 		const run = await runs.createOnce({
 			id: input.requestId,
 			conversation_id: input.conversationId,
-			routine_id: input.routineId ?? null,
+			routine_id: input.routine?.id ?? null,
 			user_id: input.userId,
 			status: "queued",
 			checkpoint: {
@@ -193,7 +230,8 @@ const startRun: ServiceFn<
 				historyAfter: latest.data?.through_position ?? 0,
 				extraContext: input.context,
 				purpose: input.purpose === "compact" ? "compact" : undefined,
-				selection: modelSelection ?? undefined,
+				//* routine runs leave the chat's choice to resolve to the routine's model
+				selection: input.routine ? undefined : (modelSelection ?? undefined),
 				trimmed: latest.data ? true : undefined,
 				nudges: 0,
 				requestId: randomUUID(),

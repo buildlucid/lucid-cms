@@ -203,6 +203,21 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 
 		return exec.response;
 	}
+	async selectLatestForRoutine(routineId: string) {
+		const query = this.db
+			.selectFrom("lucid_agent_conversations")
+			.select("id")
+			.where("routine_id", "=", routineId)
+			.orderBy("created_at", "desc")
+			.orderBy("id", "desc")
+			.limit(1);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectLatestForRoutine",
+		});
+
+		return exec.response;
+	}
 	/** Reserves one automatic title attempt while the title is still provisional. */
 	async beginTitleGeneration(props: {
 		conversationId: string;

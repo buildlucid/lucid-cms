@@ -34,7 +34,7 @@ export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 	part.type === "tool" &&
 	part.name !== askTool &&
-	part.name !== finishTool &&
+	(part.name !== finishTool || part.status !== "complete") &&
 	part.name !== progressTool;
 
 export const toolTitle = (part: Pick<AgentToolPart, "name" | "title">) =>

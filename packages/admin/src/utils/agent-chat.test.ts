@@ -130,6 +130,33 @@ describe("streamed messages", () => {
 	});
 });
 
+it("upserts a committed result once", () => {
+	const result = {
+		type: "run-result",
+		messageId: "m1",
+		outcome: "needs_review",
+		summary: "Review the draft.",
+		finishedAt: "2026-09-30T10:00:00Z",
+	} as const;
+	const [message] = apply([
+		{ type: "start", runId: "run", messageId: "m1" },
+		result,
+		result,
+	]);
+	expect(message?.parts).toHaveLength(1);
+	const finish = {
+		type: "tool",
+		id: "f",
+		name: "lucid_finish_run",
+		detailsAvailable: true,
+		status: "pending",
+	} as const;
+	expect(partLayout(finish, () => false)).toBe("row");
+	expect(partLayout({ ...finish, status: "complete" }, () => false)).toBe(
+		"hidden",
+	);
+});
+
 describe("partLayout", () => {
 	const interaction = (
 		placement: AgentInteraction["placement"],

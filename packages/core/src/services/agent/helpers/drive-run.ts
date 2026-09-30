@@ -1,8 +1,15 @@
 import constants from "../../../constants/constants.js";
-import { contextTokens, tokenLimit } from "../../../libs/agent/context.js";
+import {
+	advanceToolCursor,
+	contextTokens,
+	isToolCallComplete,
+	settleToolCall,
+	tokenLimit,
+} from "../../../libs/agent/context.js";
 import { textFromParts } from "../../../libs/agent/input.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
+import { agentFormatter } from "../../../libs/formatters/index.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess, {
@@ -27,6 +34,31 @@ const driveRun: ServiceFn<
 	const { limits } = constants.agent;
 	const mode: RunMode = run.routine_id ? "routine" : "chat";
 	const deadline = Date.now() + constants.agent.sliceMs;
+
+	const completeRoutineRun = async () => {
+		const skipped = checkpoint.calls
+			.filter((call) => !isToolCallComplete(checkpoint, call.id))
+			.map((call) =>
+				settleToolCall(checkpoint, call, {
+					status: "skipped",
+					output: { error: "Skipped because the routine run has finished." },
+				}),
+			);
+		advanceToolCursor(checkpoint);
+		checkpoint.pending = undefined;
+		const saved = await session.save();
+		if (saved.error) return saved;
+
+		for (const part of skipped) {
+			await session.emit({
+				messageId: checkpoint.messageId,
+				...agentFormatter.formatTool({ part }),
+			});
+		}
+		return session.finish("completed");
+	};
+	// A saved completion request survives recovery without executing more work.
+	if (checkpoint.finish) return completeRoutineRun();
 
 	// Access is resolved once per slice. Tool execution also checks its required permissions.
 	const access = await checkAgentAccess(context, {
@@ -86,6 +118,7 @@ const driveRun: ServiceFn<
 	let setup = resolve();
 
 	runLoop: while (true) {
+		if (checkpoint.finish) return completeRoutineRun();
 		if (session.signal.aborted || Date.now() > deadline) {
 			return session.handOff();
 		}
@@ -170,7 +203,7 @@ const driveRun: ServiceFn<
 				checkpoint.nudges++;
 				checkpoint.messages.push({
 					role: "user",
-					content: `Continue working on the routine. If the goal is met, call ${runnerTools.finish.name} with a summary.`,
+					content: `Continue working on the routine. If the goal is met, reply with the result, then call ${runnerTools.finish.name}.`,
 				});
 				startNextTurn(checkpoint);
 				continue;
@@ -178,6 +211,7 @@ const driveRun: ServiceFn<
 		}
 
 		while (checkpoint.cursor < checkpoint.calls.length) {
+			if (checkpoint.finish) return completeRoutineRun();
 			if (session.signal.aborted || Date.now() > deadline) {
 				return session.handOff();
 			}
@@ -217,7 +251,7 @@ const driveRun: ServiceFn<
 			if (step.data === "waiting") return session.finish("waiting");
 		}
 
-		if (checkpoint.finish) return session.finish("completed");
+		if (checkpoint.finish) return completeRoutineRun();
 
 		startNextTurn(checkpoint);
 	}

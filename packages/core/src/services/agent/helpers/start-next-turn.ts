@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
+import { textFromParts } from "../../../libs/agent/input.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 
 /** Starts a model turn with fresh request and message IDs, keeping the transcript. */
 const startNextTurn = (checkpoint: Checkpoint) => {
+	if (textFromParts(checkpoint.parts).trim()) checkpoint.replied = true;
 	checkpoint.phase = "model";
 	checkpoint.requestId = randomUUID();
 	checkpoint.messageId = randomUUID();

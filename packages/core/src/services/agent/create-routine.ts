@@ -3,7 +3,11 @@ import nextRoutineOccurrence from "../../libs/agent/next-routine-occurrence.js";
 import type { RoutineTools } from "../../libs/agent/types.js";
 import { agentFormatter } from "../../libs/formatters/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
-import type { AgentRoutine, AiModelSelection } from "../../types/response.js";
+import type {
+	AgentRoutine,
+	AgentRoutineConversationMode,
+	AiModelSelection,
+} from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkAgentAccess from "./helpers/check-agent-access.js";
 import saveRoutineTools from "./helpers/save-routine-tools.js";
@@ -18,6 +22,7 @@ const createRoutine: ServiceFn<
 			name: string;
 			tools?: RoutineTools;
 			modelSelection?: AiModelSelection | null;
+			conversationMode?: AgentRoutineConversationMode;
 			instructions: string;
 			cron: string;
 			timezone: string;
@@ -55,6 +60,8 @@ const createRoutine: ServiceFn<
 			source: "database",
 			name: input.name,
 			instructions: input.instructions,
+			conversation_mode: input.conversationMode ?? "new",
+			conversation_id: null,
 			model_selection: input.modelSelection ?? null,
 			cron: input.cron,
 			timezone: input.timezone,

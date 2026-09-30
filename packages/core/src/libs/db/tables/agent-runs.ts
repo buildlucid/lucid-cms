@@ -45,7 +45,7 @@ export const agentRunsTable = defineTable("lucid_agent_runs", () => ({
 		},
 	},
 	query: {
-		filters: { status: "status" },
+		filters: { status: "status", conversationId: "conversation_id" },
 		sorts: { createdAt: "created_at" },
 	},
 }));

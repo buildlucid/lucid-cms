@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type { LucidAgentRoutines } from "../../../libs/db/tables/agent-routines.js";
-import type { Select } from "../../../libs/db/types.js";
 import formatter from "../../../libs/formatters/index.js";
-import { AgentRunsRepository } from "../../../libs/repositories/index.js";
+import {
+	AgentRoutinesRepository,
+	AgentRunsRepository,
+} from "../../../libs/repositories/index.js";
+import type { AgentRoutineTrigger } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import startRun from "../start-run.js";
@@ -10,64 +12,99 @@ import enqueueRun from "./enqueue-run.js";
 import insertConversation from "./insert-conversation.js";
 
 /**
- * Starts a routine run in a new conversation, carrying over the previous run's
- * summary. The run acts for the routine's user, or for the system when it is
- * defined in code. Returns null when the routine still has an unfinished run.
+ * Starts one routine occurrence. Reuse mode continues the routine's saved chat,
+ * creating it on the first run. Otherwise each run starts a new chat with the
+ * previous run's summary. The run acts for the routine's user, or for the system
+ * when it is defined in code. Returns null while the routine, or the chat it
+ * reuses, still has an unfinished run.
  */
 const startRoutineRun: ServiceFn<
-	[
-		{
-			routine: Pick<
-				Select<LucidAgentRoutines>,
-				"id" | "agent_key" | "name" | "instructions" | "user_id"
-			>;
-		},
-	],
+	[{ routineId: string; trigger: AgentRoutineTrigger }],
 	{ conversationId: string; runId: string } | null
-> = async (context, { routine }) => {
-	const runs = new AgentRunsRepository(context.db);
+> = async (context, input) =>
+	withTransaction(context, async (context) => {
+		const AgentRoutines = new AgentRoutinesRepository(context.db);
+		const AgentRuns = new AgentRunsRepository(context.db);
 
-	const active = await runs.selectActiveForRoutine(routine.id);
-	if (active.error) return active;
-	if (active.data) return { error: undefined, data: null };
-
-	const previous = await runs.selectLatestSummary(routine.id);
-	if (previous.error) return previous;
-
-	const summary = previous.data?.summary
-		? `Summary of the previous run (${formatter.formatDate(previous.data.finished_at)}):\n${previous.data.summary}`
-		: undefined;
-
-	return withTransaction(context, async (context) => {
-		const conversation = await insertConversation(context, {
-			agentKey: routine.agent_key,
-			userId: routine.user_id,
-			title: routine.name,
-			routineId: routine.id,
+		const routine = await AgentRoutines.selectSingle({
+			select: [
+				"id",
+				"agent_key",
+				"name",
+				"instructions",
+				"user_id",
+				"conversation_mode",
+				"conversation_id",
+			],
+			where: [{ key: "id", operator: "=", value: input.routineId }],
 		});
-		if (conversation.error) return conversation;
+		if (routine.error) return routine;
+		if (!routine.data) return { error: undefined, data: null };
+
+		const reusedId =
+			routine.data.conversation_mode === "reuse"
+				? routine.data.conversation_id
+				: null;
+
+		const active = await AgentRuns.selectActiveForRoutine({
+			routineId: routine.data.id,
+			conversationId: reusedId,
+		});
+		if (active.error) return active;
+		if (active.data) return { error: undefined, data: null };
+
+		let conversationId = reusedId;
+		let summary: string | undefined;
+		if (!conversationId) {
+			const previous = await AgentRuns.selectLatestSummary(routine.data.id);
+			if (previous.error) return previous;
+
+			if (previous.data?.summary) {
+				summary = `Summary of the previous run (${formatter.formatDate(previous.data.finished_at)}):\n${previous.data.summary}`;
+			}
+
+			const conversation = await insertConversation(context, {
+				agentKey: routine.data.agent_key,
+				userId: routine.data.user_id,
+				title: routine.data.name,
+				routineId: routine.data.id,
+			});
+			if (conversation.error) return conversation;
+			conversationId = conversation.data.id;
+
+			if (routine.data.conversation_mode === "reuse") {
+				const saved = await AgentRoutines.updateSingle({
+					where: [{ key: "id", operator: "=", value: routine.data.id }],
+					data: { conversation_id: conversationId },
+				});
+				if (saved.error) return saved;
+			}
+		}
 
 		const run = await startRun(context, {
-			conversationId: conversation.data.id,
-			userId: routine.user_id,
-			text: routine.instructions,
+			conversationId,
+			userId: routine.data.user_id,
 			requestId: randomUUID(),
-			routineId: routine.id,
+			routine: {
+				id: routine.data.id,
+				name: routine.data.name,
+				instructions: routine.data.instructions,
+				trigger: input.trigger,
+			},
 			context: summary,
 		});
 		if (run.error) return run;
 
 		const queued = await enqueueRun(context, {
 			runId: run.data.runId,
-			userId: routine.user_id,
+			userId: routine.data.user_id,
 		});
 		if (queued.error) return queued;
 
 		return {
 			error: undefined,
-			data: { conversationId: conversation.data.id, runId: run.data.runId },
+			data: { conversationId, runId: run.data.runId },
 		};
 	});
-};
 
 export default startRoutineRun;

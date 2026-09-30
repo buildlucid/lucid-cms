@@ -6,6 +6,7 @@ import logger from "../../libs/logger/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRoutineTools from "../agent/helpers/get-routine-tools.js";
+import resolveRoutineConversation from "../agent/helpers/resolve-routine-conversation.js";
 import saveRoutineTools from "../agent/helpers/save-routine-tools.js";
 
 /**
@@ -24,6 +25,8 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			"name",
 			"instructions",
 			"model_selection",
+			"conversation_mode",
+			"conversation_id",
 			"cron",
 			"timezone",
 			"enabled",
@@ -66,6 +69,8 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 					source: "code",
 					name: routine.name,
 					instructions: routine.instructions,
+					conversation_mode: routine.conversationMode,
+					conversation_id: null,
 					model_selection: routine.model ?? null,
 					cron: routine.schedule.cron,
 					timezone: routine.schedule.timezone,
@@ -105,6 +110,7 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 		if (
 			!rescheduled &&
 			!toolsChanged &&
+			current.conversation_mode === routine.conversationMode &&
 			current.name === routine.name &&
 			current.instructions === routine.instructions &&
 			isDeepStrictEqual(current.model_selection, routine.model ?? null)
@@ -112,9 +118,18 @@ const syncAgentRoutines: ServiceFn<[], undefined> = async (context) => {
 			continue;
 		}
 
+		const conversation = await resolveRoutineConversation(context, {
+			routineId: current.id,
+			from: current.conversation_mode,
+			to: routine.conversationMode,
+		});
+		if (conversation.error) return conversation;
+
 		const updated = await AgentRoutines.updateSingle({
 			where: [{ key: "id", operator: "=", value: current.id }],
 			data: {
+				conversation_mode: routine.conversationMode,
+				conversation_id: conversation.data,
 				name: routine.name,
 				instructions: routine.instructions,
 				model_selection: routine.model ?? null,

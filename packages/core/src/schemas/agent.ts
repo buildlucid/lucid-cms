@@ -13,8 +13,11 @@ import type {
 	AgentInputAction,
 	AgentInteractionAction,
 	AgentMessagePart,
+	AgentRoutineConversationMode,
 	AgentRoutineSource,
+	AgentRoutineTrigger,
 	AgentRunOutcome,
+	AgentRunResultPart,
 	AgentRunStatus,
 	AgentTitleStatus,
 	AgentToolDetails,
@@ -66,6 +69,16 @@ export const agentRoutineSourceSchema = z.enum([
 	"code",
 	"database",
 ]) satisfies z.ZodType<AgentRoutineSource>;
+
+export const agentRoutineTriggerSchema = z.enum([
+	"schedule",
+	"manual",
+]) satisfies z.ZodType<AgentRoutineTrigger>;
+
+export const agentRoutineConversationModeSchema = z.enum([
+	"new",
+	"reuse",
+]) satisfies z.ZodType<AgentRoutineConversationMode>;
 
 export const agentRunStatusSchema = z.enum([
 	"queued",
@@ -162,11 +175,6 @@ const agentToolDisplaySchema = z.discriminatedUnion("kind", [
 	z.object({ kind: z.literal("fetch"), url: z.string() }),
 	z.object({ kind: z.literal("skill"), name: z.string() }),
 	z.object({ kind: z.literal("progress"), message: z.string() }),
-	z.object({
-		kind: z.literal("finish"),
-		outcome: agentRunOutcomeSchema,
-		summary: z.string(),
-	}),
 ]) satisfies z.ZodType<AgentToolDisplay>;
 
 export const agentToolDetailsSchema = z
@@ -204,10 +212,29 @@ const agentReferencePartSchema = z
 	})
 	.strict();
 
+const agentRoutinePartSchema = z
+	.object({
+		type: z.literal("routine"),
+		name: z.string(),
+		instructions: z.string(),
+		trigger: agentRoutineTriggerSchema,
+	})
+	.strict();
+
+const agentRunResultPartSchema = z
+	.object({
+		type: z.literal("run-result"),
+		outcome: agentRunOutcomeSchema,
+		summary: z.string(),
+		finishedAt: z.string(),
+	})
+	.strict() satisfies z.ZodType<AgentRunResultPart>;
+
 /** Stored parts retain full tool values for recovery, audit and model context. */
 export const agentMessagePartSchema = z.discriminatedUnion("type", [
 	agentTextPartSchema,
 	agentReferencePartSchema,
+	agentRoutinePartSchema,
 	agentToolDetailsSchema,
 	agentWidgetSchema,
 ]);
@@ -217,6 +244,8 @@ export type StoredAgentMessagePart = z.output<typeof agentMessagePartSchema>;
 const agentChatPartSchema = z.discriminatedUnion("type", [
 	agentTextPartSchema,
 	agentReferencePartSchema,
+	agentRoutinePartSchema,
+	agentRunResultPartSchema,
 	agentToolSummarySchema,
 	agentWidgetSchema,
 ]) satisfies z.ZodType<AgentMessagePart>;
@@ -347,6 +376,8 @@ const agentRoutineResponseSchema = z.object({
 	source: agentRoutineSourceSchema,
 	name: z.string(),
 	instructions: z.string(),
+	conversationMode: agentRoutineConversationModeSchema,
+	conversationId: z.uuid().nullable(),
 	modelSelection: aiModelSelectionSchema.nullable(),
 	tools: routineToolsSchema,
 	cron: z.string(),
@@ -369,6 +400,7 @@ const agentRoutineResponseSchema = z.object({
 const idParams = z.object({ id: z.uuid() });
 const noQuery = { string: undefined, formatted: undefined };
 const routineBody = z.object({
+	conversationMode: agentRoutineConversationModeSchema.optional(),
 	tools: routineToolsSchema.optional(),
 	name: z.string().trim().min(1).max(255),
 	instructions: z.string().trim().min(1).max(20_000),
@@ -649,6 +681,7 @@ export const controllerSchemas = {
 					"filter[status]": queryString.schema.filter(true, {
 						example: "completed",
 					}),
+					"filter[conversationId]": queryString.schema.filter(false),
 					sort: queryString.schema.sort("createdAt"),
 					page: queryString.schema.page,
 					perPage: queryString.schema.perPage,
@@ -658,6 +691,7 @@ export const controllerSchemas = {
 				filter: z
 					.object({
 						status: queryFormatted.schema.filters.union.optional(),
+						conversationId: queryFormatted.schema.filters.single.optional(),
 					})
 					.optional(),
 				sort: z

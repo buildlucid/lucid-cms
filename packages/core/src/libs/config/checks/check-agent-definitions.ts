@@ -1,5 +1,8 @@
 import z from "zod";
-import { routineToolsSchema } from "../../../schemas/agent.js";
+import {
+	agentRoutineConversationModeSchema,
+	routineToolsSchema,
+} from "../../../schemas/agent.js";
 import type { ResolvedLucidConfig } from "../../../types/config.js";
 import {
 	aiModelConfigSchema,
@@ -92,6 +95,14 @@ const checkAgentDefinitions = (config: {
 			}
 
 			const label = `${agent.key}:${routine.key}`;
+			const conversationMode = agentRoutineConversationModeSchema.safeParse(
+				routine.conversationMode,
+			);
+			if (!conversationMode.success) {
+				throw new Error(
+					`Routine "${label}" has an invalid conversation mode: ${z.prettifyError(conversationMode.error)}`,
+				);
+			}
 			const model = aiModelSelectionSchema.optional().safeParse(routine.model);
 			if (!model.success) {
 				throw new Error(

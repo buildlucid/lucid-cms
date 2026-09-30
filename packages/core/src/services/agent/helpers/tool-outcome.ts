@@ -1,4 +1,5 @@
 import type { PendingInteraction } from "../../../libs/agent/interactions.js";
+import type { Checkpoint } from "../../../libs/agent/types.js";
 import type { AgentToolResult } from "../../../libs/tools/types.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -10,12 +11,11 @@ export type ToolResult = {
 	widgets?: AgentToolResult<unknown>["widgets"];
 };
 
-/** A tool call either finishes with a result or pauses for a person. */
 export type ToolOutcome =
 	| ToolResult
-	| { kind: "pending"; pending: PendingInteraction };
+	| { kind: "pending"; pending: PendingInteraction }
+	| { kind: "finish"; finish: NonNullable<Checkpoint["finish"]> };
 
-/** A successful result, with any widgets the tool shows. */
 export const toolResult = (
 	output: unknown,
 	widgets?: ToolResult["widgets"],

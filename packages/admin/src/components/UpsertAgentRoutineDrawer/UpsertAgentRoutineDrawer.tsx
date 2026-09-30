@@ -1,4 +1,8 @@
-import type { AgentRoutine, AiModelSelection } from "@types";
+import type {
+	AgentRoutine,
+	AgentRoutineConversationMode,
+	AiModelSelection,
+} from "@types";
 import {
 	type Accessor,
 	type Component,
@@ -20,7 +24,7 @@ import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getAgentAccess } from "@/utils/agent-access";
+import { conversationModeLabels, getAgentAccess } from "@/utils/agent-access";
 import {
 	defaultSchedule,
 	parseSchedule,
@@ -47,6 +51,8 @@ const UpsertAgentRoutineDrawer: Component<{
 	// State
 	const [agentKey, setAgentKey] = createSignal<string>();
 	const [name, setName] = createSignal("");
+	const [conversationMode, setConversationMode] =
+		createSignal<AgentRoutineConversationMode>("new");
 	const [instructions, setInstructions] = createSignal("");
 	const [modelSelection, setModelSelection] =
 		createSignal<AiModelSelection | null>(null);
@@ -99,16 +105,18 @@ const UpsertAgentRoutineDrawer: Component<{
 				setRoutineTools(routine?.tools ?? {});
 				setName(routine?.name ?? "");
 				setInstructions(routine?.instructions ?? "");
+				setConversationMode(routine?.conversationMode ?? "new");
 				setModelSelection(routine?.modelSelection ?? null);
 				setSchedule(routine ? parseSchedule(routine.cron) : defaultSchedule);
 				setTimezone(routine?.timezone ?? getDefaultTimezone());
 				setEnabled(routine?.enabled ?? true);
-				if (props.focusApprovals)
+				if (props.focusApprovals) {
 					requestAnimationFrame(() =>
 						document
 							.getElementById("agent-routine-tool-approvals")
 							?.scrollIntoView({ block: "start" }),
 					);
+				}
 			},
 		),
 	);
@@ -147,6 +155,7 @@ const UpsertAgentRoutineDrawer: Component<{
 					const body = {
 						name: name(),
 						instructions: instructions(),
+						conversationMode: conversationMode(),
 						modelSelection: modelSelection(),
 						cron: toCron(schedule()),
 						timezone: timezone(),
@@ -217,6 +226,33 @@ const UpsertAgentRoutineDrawer: Component<{
 									onChange={setModelSelection}
 									errors={getBodyError("modelSelection", errors)}
 								/>
+								<Select
+									id="agent-routine-conversation-mode"
+									name="conversationMode"
+									value={conversationMode()}
+									onChange={(value) => {
+										if (value === "new" || value === "reuse") {
+											setConversationMode(value);
+										}
+									}}
+									options={[
+										{
+											value: "new",
+											label: T()(conversationModeLabels.new),
+										},
+										{
+											value: "reuse",
+											label: T()(conversationModeLabels.reuse),
+										},
+									]}
+									label={T()("agent.routine.conversation.label")}
+									description={T()(
+										conversationMode() === "reuse"
+											? "agent.routine.conversation.reuse.description"
+											: "agent.routine.conversation.new.description",
+									)}
+									errors={getBodyError("conversationMode", errors)}
+								/>
 								<Textarea
 									id="agent-routine-instructions"
 									name="instructions"
@@ -231,7 +267,6 @@ const UpsertAgentRoutineDrawer: Component<{
 							</div>
 						</section>
 					</Show>
-					{/* code routines can still be paused, so the switch sits outside the locked fields */}
 					<section class="mt-2">
 						<SectionHeading
 							level={3}

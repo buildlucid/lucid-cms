@@ -54,7 +54,7 @@ export interface AgentComposerProps {
 		mode: "send" | "steer",
 		references: AgentReferenceItem[],
 	) => boolean | Promise<boolean>;
-	/** Shows a stop button. */
+	/** Turns the send button into a stop button while the box is empty. */
 	onStop?: () => void;
 	/** ↑ in an empty box. Returns false when there is nothing to take back. */
 	onEditLast?: () => boolean;
@@ -211,7 +211,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			editorProps: {
 				attributes: {
 					class:
-						"agent-markdown agent-markdown-tight grow px-4 pt-3.5 pb-2.5 outline-hidden",
+						"agent-markdown agent-markdown-tight grow px-4 pt-4.5 pb-3.5 outline-hidden",
 					style: `min-height: ${editorHeight[props.size ?? "md"]}`,
 					"aria-label": T()("agent.composer.label"),
 					"aria-multiline": "true",
@@ -378,7 +378,6 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 							: undefined
 					}
 				/>
-				{/* long messages fade out behind the toolbar rather than stopping at a hard edge */}
 				<div
 					aria-hidden="true"
 					class="pointer-events-none relative -mt-2.5 h-2.5 bg-linear-to-t from-card to-transparent"
@@ -400,42 +399,46 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 					<AgentCapabilityHints capabilities={props.capabilities} />
 					<div class="ms-auto flex items-center gap-0.5">
 						{props.end}
-						<Show when={props.onStop}>
+						<Show
+							when={!(props.onStop && blank())}
+							fallback={
+								<Button
+									shape="circle"
+									size="xs"
+									variant="secondary"
+									class="focus-visible:ring-inset"
+									onClick={() => props.onStop?.()}
+									aria-label={T()("agent.composer.stop")}
+									title={T()("agent.composer.stop")}
+								>
+									<FaSolidStop size={10} />
+								</Button>
+							}
+						>
 							<Button
+								type="submit"
 								shape="circle"
 								size="xs"
-								variant="secondary"
-								class="focus-visible:ring-inset me-1"
-								onClick={() => props.onStop?.()}
-								aria-label={T()("agent.composer.stop")}
-								title={T()("agent.composer.stop")}
+								class="focus-visible:ring-inset"
+								disabled={
+									blank() ||
+									unsupportedReferences() ||
+									submitting() ||
+									props.disabled ||
+									(props.busy && !props.queueable)
+								}
+								aria-label={T()(
+									props.busy ? "agent.composer.queue" : "agent.composer.send",
+								)}
+								title={T()(
+									props.busy && props.queueable
+										? "agent.composer.hint.busy"
+										: "agent.composer.send",
+								)}
 							>
-								<FaSolidStop size={10} />
+								<FaSolidArrowUp size={11} />
 							</Button>
 						</Show>
-						<Button
-							type="submit"
-							shape="circle"
-							size="xs"
-							class="focus-visible:ring-inset"
-							disabled={
-								blank() ||
-								unsupportedReferences() ||
-								submitting() ||
-								props.disabled ||
-								(props.busy && !props.queueable)
-							}
-							aria-label={T()(
-								props.busy ? "agent.composer.queue" : "agent.composer.send",
-							)}
-							title={T()(
-								props.busy && props.queueable
-									? "agent.composer.hint.busy"
-									: "agent.composer.send",
-							)}
-						>
-							<FaSolidArrowUp size={11} />
-						</Button>
 					</div>
 				</div>
 			</form>

@@ -146,6 +146,18 @@ export type AgentRunStatus =
 /** How a routine run described its result when it finished. */
 export type AgentRunOutcome = "done" | "nothing_to_report" | "needs_review";
 
+export type AgentRoutineTrigger = "schedule" | "manual";
+
+export type AgentRoutineConversationMode = "new" | "reuse";
+
+/** A finished routine run's result, read from the run and shown on the card that starts it. */
+export type AgentRunResultPart = {
+	type: "run-result";
+	outcome: AgentRunOutcome;
+	summary: string;
+	finishedAt: string;
+};
+
 export type AgentTitleStatus = "provisional" | "generated" | "user_set";
 
 export type AgentToolStatus =
@@ -196,8 +208,7 @@ export type AgentToolDisplay =
 	| { kind: "search"; query: string }
 	| { kind: "fetch"; url: string }
 	| { kind: "skill"; name: string }
-	| { kind: "progress"; message: string }
-	| { kind: "finish"; outcome: AgentRunOutcome; summary: string };
+	| { kind: "progress"; message: string };
 
 /** Full values for one tool call, fetched when its details are opened. */
 export type AgentToolDetails = {
@@ -219,6 +230,14 @@ export type AgentToolSummary = Omit<AgentToolDetails, "input" | "output"> & {
 export type AgentMessagePart =
 	| { type: "text"; text: string }
 	| { type: "reference"; reference: AgentReferenceSnapshot }
+	/** Starts a routine run. The instructions stay here for display, and a text part repeats them only when the agent needs them. */
+	| {
+			type: "routine";
+			name: string;
+			instructions: string;
+			trigger: AgentRoutineTrigger;
+	  }
+	| AgentRunResultPart
 	| AgentToolSummary
 	| AgentWidgetPart;
 
@@ -337,6 +356,9 @@ export interface AgentRoutine {
 	source: AgentRoutineSource;
 	name: string;
 	instructions: string;
+	conversationMode: AgentRoutineConversationMode;
+	/** The saved chat used in reuse mode. Null until the first run, or after deletion. */
+	conversationId: string | null;
 	/** Null uses the agent's default model. */
 	modelSelection: AiModelSelection | null;
 	/** Per-tool settings by tool name. Missing tools and settings use the tool's defaults. */
@@ -360,6 +382,7 @@ export type AgentStreamEvent =
 	| { type: "text-delta"; messageId: string; text: string }
 	| ({ messageId: string } & Extract<AgentMessagePart, { type: "tool" }>)
 	| ({ messageId: string } & Extract<AgentMessagePart, { type: "widget" }>)
+	| ({ messageId: string } & AgentRunResultPart)
 	/** A saved reply, sent when watching a run that is executing elsewhere. */
 	| { type: "message"; message: AgentMessage }
 	/** The conversation's pending input after it changed. */

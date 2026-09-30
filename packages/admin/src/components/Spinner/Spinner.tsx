@@ -7,8 +7,11 @@ export type SpinnerSize = "sm" | "md" | "lg";
 export interface SpinnerProps {
 	/** @default "md" */
 	size?: SpinnerSize;
-	/** @default "primary" */
-	variant?: "primary" | "subtle";
+	/**
+	 * `secondary` sits on secondary surfaces, such as a secondary button, with a rail tinted from its text colour.
+	 * @default "primary"
+	 */
+	variant?: "primary" | "subtle" | "secondary";
 	class?: string;
 }
 
@@ -30,8 +33,11 @@ const Spinner: Component<SpinnerProps> = (props) => {
 			<svg
 				aria-hidden="true"
 				class={classnames("animate-spin", {
-					"text-card-hover fill-primary": props.variant !== "subtle",
+					"text-card-hover fill-primary":
+						props.variant === undefined || props.variant === "primary",
 					"text-border fill-muted": props.variant === "subtle",
+					"text-secondary-foreground/25 fill-secondary-foreground":
+						props.variant === "secondary",
 					"w-4 h-4": props.size === "sm",
 					"w-6 h-6": props.size === undefined || props.size === "md",
 					"w-8 h-8": props.size === "lg",

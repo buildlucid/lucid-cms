@@ -128,7 +128,7 @@ const openRunSession = async (
 
 	const write = async (
 		status: AgentRunStatus,
-		props?: { errorMessage?: string | null },
+		props?: { errorMessage?: string | null; now?: string },
 		writeContext = context,
 	): ServiceResponse<undefined> => {
 		const AgentRuns = new AgentRunsRepository(writeContext.db);
@@ -139,7 +139,7 @@ const openRunSession = async (
 			status,
 			errorMessage: props?.errorMessage,
 			finish: status === "completed" ? checkpoint.finish : undefined,
-			now: new Date().toISOString(),
+			now: props?.now ?? new Date().toISOString(),
 		});
 		if (updated.error) return updated;
 		if (!updated.data) return superseded();
@@ -275,11 +275,14 @@ const openRunSession = async (
 					if (!paused.data) return superseded();
 				}
 
+				const finishedAt = new Date().toISOString();
+
 				const finishRun = async (writeContext = context) => {
 					const saved = await write(
 						status,
 						{
 							errorMessage: errorMessage ?? null,
+							now: finishedAt,
 						},
 						writeContext,
 					);
@@ -314,6 +317,15 @@ const openRunSession = async (
 						? await withTransaction(context, finishRun)
 						: await finishRun();
 				if (finished.error) return finished;
+
+				if (status === "completed" && run.routine_id && checkpoint.finish) {
+					await emit({
+						type: "run-result",
+						messageId: run.id,
+						...checkpoint.finish,
+						finishedAt,
+					});
+				}
 
 				if (errorMessage) await emit({ type: "error", message: errorMessage });
 

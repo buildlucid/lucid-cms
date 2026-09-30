@@ -16,6 +16,7 @@ const AgentChatSidebar: Component<{
 	routine?: AgentRoutine;
 	detailsOpen: boolean;
 	selectedTool?: { messageId: string; part: AgentToolPart };
+	onRoutineRun: (runId: string) => void;
 	onRoutineRuns: () => void;
 	onRoutineOpen: () => void;
 	onRoutineClose: () => void;
@@ -34,6 +35,7 @@ const AgentChatSidebar: Component<{
 					<AgentRoutineCard
 						routine={routine()}
 						conversation={props.conversation}
+						onSelectRun={props.onRoutineRun}
 						onRuns={props.onRoutineRuns}
 						onOpen={props.onRoutineOpen}
 						onClose={props.onRoutineClose}
