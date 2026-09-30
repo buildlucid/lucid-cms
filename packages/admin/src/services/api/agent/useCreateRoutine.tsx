@@ -16,7 +16,9 @@ export type RoutineBody = Pick<
 	| "tools"
 >;
 
-const useCreateRoutine = (props?: { onSuccess?: () => void }) =>
+const useCreateRoutine = (props?: {
+	onSuccess?: (response: ResponseBody<AgentRoutine>) => void;
+}) =>
 	serviceHelpers.useMutationWrapper<
 		RoutineBody & Pick<AgentRoutine, "agentKey">,
 		ResponseBody<AgentRoutine>

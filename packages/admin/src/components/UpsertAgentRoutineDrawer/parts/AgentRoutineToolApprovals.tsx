@@ -1,8 +1,5 @@
 import type { Agent, AgentRoutine } from "@types";
-import { FaSolidArrowRotateLeft } from "solid-icons/fa";
-import { type Component, createMemo, For, Show } from "solid-js";
-import Button from "@/components/Button/Button";
-import SectionHeading from "@/components/SectionHeading/SectionHeading";
+import { type Component, createMemo, For } from "solid-js";
 import Select from "@/components/Select/Select";
 import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants";
 import T, { translateAdminCopy } from "@/translations";
@@ -24,9 +21,6 @@ const AgentRoutineToolApprovals: Component<{
 		Object.keys(props.value).filter(
 			(name) => !props.tools.some((tool) => tool.name === name),
 		),
-	);
-	const hasInteractive = createMemo(() =>
-		props.tools.some((tool) => tool.interactive),
 	);
 
 	// ----------------------------------------
@@ -53,31 +47,6 @@ const AgentRoutineToolApprovals: Component<{
 	// Render
 	return (
 		<section id="agent-routine-tool-approvals" class="mt-2 w-full">
-			<SectionHeading
-				level={3}
-				title={T()("agent.routine.approvals.title")}
-				description={`${T()("agent.routine.approvals.description")}${
-					hasInteractive()
-						? ` ${T()("agent.routine.approvals.interactive")}`
-						: ""
-				}`}
-				actions={
-					<Show when={!props.disabled && Object.keys(props.value).length > 0}>
-						<Button
-							type="button"
-							variant="ghost"
-							size="xs"
-							shape="square"
-							class="shrink-0"
-							title={T()("agent.routine.approvals.reset")}
-							aria-label={T()("agent.routine.approvals.reset")}
-							onClick={() => props.onChange({})}
-						>
-							<FaSolidArrowRotateLeft size={12} />
-						</Button>
-					</Show>
-				}
-			/>
 			<UnavailableGrants
 				keys={unavailable()}
 				title={T()("agent.routine.approvals.unavailable.title")}

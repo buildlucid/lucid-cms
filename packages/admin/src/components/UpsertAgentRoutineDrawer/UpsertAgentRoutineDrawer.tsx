@@ -1,3 +1,4 @@
+import { useNavigate } from "@solidjs/router";
 import type {
 	AgentRoutine,
 	AgentRoutineConversationMode,
@@ -17,14 +18,13 @@ import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Input from "@/components/Input/Input";
-import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
 import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { conversationModeLabels, getAgentAccess } from "@/utils/agent-access";
+import { getAgentAccess } from "@/utils/agent-access";
 import {
 	defaultSchedule,
 	parseSchedule,
@@ -38,7 +38,11 @@ import AgentRoutineModelField from "./parts/AgentRoutineModelField";
 import AgentRoutineToolApprovals from "./parts/AgentRoutineToolApprovals";
 import AgentScheduleField from "./parts/AgentScheduleField";
 
-/** Creates a routine, or edits one when `routine` is set. Code routines are read only. */
+/**
+ * Creates a routine, or edits one when `routine` is set. Code routines are read
+ * only. Fields are split into tabs: the task, when it runs, tool approvals, and
+ * the model and chat history.
+ */
 const UpsertAgentRoutineDrawer: Component<{
 	routine?: Accessor<AgentRoutine | undefined>;
 	focusApprovals?: boolean;
@@ -49,6 +53,7 @@ const UpsertAgentRoutineDrawer: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// State
+	const navigate = useNavigate();
 	const [agentKey, setAgentKey] = createSignal<string>();
 	const [name, setName] = createSignal("");
 	const [conversationMode, setConversationMode] =
@@ -62,11 +67,25 @@ const UpsertAgentRoutineDrawer: Component<{
 	const [routineTools, setRoutineTools] = createSignal<AgentRoutine["tools"]>(
 		{},
 	);
+	const [activeTab, setActiveTab] = createSignal("task");
+	//* set by "Create & Run", so the new routine starts once it is saved
+	const [runAfterCreate, setRunAfterCreate] = createSignal(false);
 
 	// ----------------------------------------
 	// Mutations
 	const close = () => props.state.setOpen(false);
-	const createRoutine = api.agent.useCreateRoutine({ onSuccess: close });
+	const runRoutine = api.agent.useRunRoutine({
+		onSuccess: (response) =>
+			navigate(
+				`/lucid/agent/chats/${response.data.conversationId}?runId=${response.data.runId}`,
+			),
+	});
+	const createRoutine = api.agent.useCreateRoutine({
+		onSuccess: (response) => {
+			close();
+			if (runAfterCreate()) runRoutine.action.mutate({ id: response.data.id });
+		},
+	});
 	const updateRoutine = api.agent.useUpdateRoutine({ onSuccess: close });
 	const definitions = api.agent.useGetDefinitions({
 		enabled: () => props.state.open,
@@ -81,6 +100,10 @@ const UpsertAgentRoutineDrawer: Component<{
 		existing() ? updateRoutine : createRoutine,
 	);
 	const errors = createMemo(() => mutation().errors());
+	const incomplete = createMemo(() => !name().trim() || !instructions().trim());
+	//* a tab shows as invalid when a field inside it has an error
+	const tabInvalid = (fields: string[]) =>
+		fields.some((field) => getBodyError(field, errors) !== undefined);
 	const agentTools = createMemo(() => {
 		const agent = definitions.data?.data.agents.find(
 			(agent) => agent.key === (existing()?.agentKey ?? agentKey()),
@@ -110,13 +133,8 @@ const UpsertAgentRoutineDrawer: Component<{
 				setSchedule(routine ? parseSchedule(routine.cron) : defaultSchedule);
 				setTimezone(routine?.timezone ?? getDefaultTimezone());
 				setEnabled(routine?.enabled ?? true);
-				if (props.focusApprovals) {
-					requestAnimationFrame(() =>
-						document
-							.getElementById("agent-routine-tool-approvals")
-							?.scrollIntoView({ block: "start" }),
-					);
-				}
+				setRunAfterCreate(false);
+				setActiveTab(props.focusApprovals ? "approvals" : "task");
 			},
 		),
 	);
@@ -169,119 +187,106 @@ const UpsertAgentRoutineDrawer: Component<{
 							id: routine.id,
 							body: locked() ? { enabled: body.enabled } : body,
 						});
-					} else if (key)
+					} else if (key) {
 						createRoutine.action.mutate({ ...body, agentKey: key });
+					}
 				}}
 			>
 				<Drawer.Body class="flex flex-col gap-4">
-					<Show
-						when={!locked()}
-						fallback={
-							<Show when={existing()}>
-								{(routine) => <AgentRoutineDetails routine={routine()} />}
-							</Show>
-						}
-					>
-						<Show when={!existing() && agents().length > 1}>
-							<Select
-								id="agent-routine-agent"
-								name="agentKey"
-								value={agentKey()}
-								onChange={(value) => {
-									if (value) {
-										setAgentKey(String(value));
-										setRoutineTools({});
-										setModelSelection(null);
-									}
-								}}
-								options={agents().map((agent) => ({
-									value: agent.key,
-									label: agent.name,
-								}))}
-								required={true}
-								label={T()("agent.select.label")}
-								errors={getBodyError("agentKey", errors)}
-							/>
-						</Show>
-						<Input
-							id="agent-routine-name"
-							name="name"
-							type="text"
-							value={name()}
-							onChange={setName}
-							required={true}
-							label={T()("common.name")}
-							errors={getBodyError("name", errors)}
-						/>
-						<section class="mt-2">
-							<SectionHeading
-								level={3}
-								title={T()("agent.routine.section.task.title")}
-								description={T()("agent.routine.section.task.description")}
-							/>
-							<div class="flex flex-col gap-4">
-								<AgentRoutineModelField
-									agentKey={props.state.open ? agentKey() : undefined}
-									value={modelSelection()}
-									onChange={setModelSelection}
-									errors={getBodyError("modelSelection", errors)}
-								/>
+					<Drawer.Tabs
+						items={[
+							{
+								value: "task",
+								label: T()(
+									locked() ? "common.details" : "agent.routine.tab.task",
+								),
+								invalid: tabInvalid(["agentKey", "name", "instructions"]),
+							},
+							{
+								value: "schedule",
+								label: T()("common.schedule"),
+								invalid: tabInvalid(["cron", "timezone", "enabled"]),
+							},
+							{
+								value: "approvals",
+								label: T()("agent.routine.approvals.title"),
+								invalid: tabInvalid(["tools"]),
+							},
+							{
+								value: "options",
+								label: T()("common.options"),
+								invalid: tabInvalid(["modelSelection", "conversationMode"]),
+								show: !locked(),
+							},
+						]}
+						value={activeTab()}
+						onChange={setActiveTab}
+					/>
+					<Show when={activeTab() === "task"}>
+						<Show
+							when={!locked()}
+							fallback={
+								<Show when={existing()}>
+									{(routine) => <AgentRoutineDetails routine={routine()} />}
+								</Show>
+							}
+						>
+							<Show when={!existing() && agents().length > 1}>
 								<Select
-									id="agent-routine-conversation-mode"
-									name="conversationMode"
-									value={conversationMode()}
+									id="agent-routine-agent"
+									name="agentKey"
+									value={agentKey()}
 									onChange={(value) => {
-										if (value === "new" || value === "reuse") {
-											setConversationMode(value);
+										if (value) {
+											setAgentKey(String(value));
+											setRoutineTools({});
+											setModelSelection(null);
 										}
 									}}
-									options={[
-										{
-											value: "new",
-											label: T()(conversationModeLabels.new),
-										},
-										{
-											value: "reuse",
-											label: T()(conversationModeLabels.reuse),
-										},
-									]}
-									label={T()("agent.routine.conversation.label")}
-									description={T()(
-										conversationMode() === "reuse"
-											? "agent.routine.conversation.reuse.description"
-											: "agent.routine.conversation.new.description",
-									)}
-									errors={getBodyError("conversationMode", errors)}
-								/>
-								<Textarea
-									id="agent-routine-instructions"
-									name="instructions"
-									value={instructions()}
-									onChange={setInstructions}
-									rows={8}
+									options={agents().map((agent) => ({
+										value: agent.key,
+										label: agent.name,
+									}))}
 									required={true}
-									label={T()("agent.routine.instructions")}
-									description={T()("agent.routine.instructions.description")}
-									errors={getBodyError("instructions", errors)}
-								/>
-							</div>
-						</section>
-					</Show>
-					<section class="mt-2">
-						<SectionHeading
-							level={3}
-							title={T()("common.schedule")}
-							description={T()("agent.routine.section.schedule.description")}
-						/>
-						<div class="flex flex-col gap-4">
-							<Show when={!locked()}>
-								<AgentScheduleField
-									schedule={schedule()}
-									setSchedule={setSchedule}
-									timezone={timezone()}
-									setTimezone={setTimezone}
+									label={T()("agent.select.label")}
+									errors={getBodyError("agentKey", errors)}
 								/>
 							</Show>
+							<Input
+								id="agent-routine-name"
+								name="name"
+								type="text"
+								value={name()}
+								onChange={setName}
+								required={true}
+								label={T()("common.name")}
+								errors={getBodyError("name", errors)}
+							/>
+							<Textarea
+								id="agent-routine-instructions"
+								name="instructions"
+								value={instructions()}
+								onChange={setInstructions}
+								rows={10}
+								required={true}
+								label={T()("agent.routine.task.label")}
+								placeholder={T()("agent.routine.instructions.placeholder")}
+								description={T()("agent.routine.instructions.description")}
+								errors={getBodyError("instructions", errors)}
+							/>
+						</Show>
+					</Show>
+					<Show when={activeTab() === "schedule"}>
+						<Show when={!locked()}>
+							<AgentScheduleField
+								schedule={schedule()}
+								setSchedule={setSchedule}
+								timezone={timezone()}
+								setTimezone={setTimezone}
+							/>
+						</Show>
+						{/* new routines start on their schedule; pausing is for existing ones, including code routines */}
+						<Show when={existing()}>
 							<Switch
 								id="agent-routine-enabled"
 								name="enabled"
@@ -292,14 +297,39 @@ const UpsertAgentRoutineDrawer: Component<{
 								label={T()("agent.routine.enabled")}
 								description={T()("agent.routine.enabled.description")}
 							/>
-						</div>
-					</section>
-					<AgentRoutineToolApprovals
-						tools={agentTools()}
-						value={routineTools()}
-						onChange={setRoutineTools}
-						disabled={locked()}
-					/>
+						</Show>
+					</Show>
+					<Show when={activeTab() === "approvals"}>
+						<AgentRoutineToolApprovals
+							tools={agentTools()}
+							value={routineTools()}
+							onChange={setRoutineTools}
+							disabled={locked()}
+						/>
+					</Show>
+					<Show when={activeTab() === "options" && !locked()}>
+						<AgentRoutineModelField
+							agentKey={props.state.open ? agentKey() : undefined}
+							value={modelSelection()}
+							onChange={setModelSelection}
+							errors={getBodyError("modelSelection", errors)}
+						/>
+						<Switch
+							id="agent-routine-conversation-mode"
+							name="conversationMode"
+							value={conversationMode() === "reuse"}
+							onChange={(reuse) => setConversationMode(reuse ? "reuse" : "new")}
+							trueLabel={T()("common.yes")}
+							falseLabel={T()("common.no")}
+							label={T()("agent.routine.conversation.reuse.label")}
+							description={T()(
+								conversationMode() === "reuse"
+									? "agent.routine.conversation.reuse.description"
+									: "agent.routine.conversation.new.description",
+							)}
+							errors={getBodyError("conversationMode", errors)}
+						/>
+					</Show>
 				</Drawer.Body>
 				<Drawer.Footer>
 					<ErrorMessage theme="basic" message={errors()?.message} />
@@ -309,8 +339,9 @@ const UpsertAgentRoutineDrawer: Component<{
 						</Button>
 						<Button
 							type="submit"
-							loading={mutation().action.isPending}
-							disabled={!locked() && (!name().trim() || !instructions().trim())}
+							loading={mutation().action.isPending && !runAfterCreate()}
+							disabled={!locked() && incomplete()}
+							onClick={() => setRunAfterCreate(false)}
 						>
 							{existing() ? T()("common.update") : T()("common.create")}
 						</Button>
