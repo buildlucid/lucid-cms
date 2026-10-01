@@ -28,6 +28,11 @@ const getFileMetadata = async (props: {
 	if (mimeType === "application/mp4") {
 		mimeType = "video/mp4";
 	}
+	//* Windows reports CSV files as Excel spreadsheets when Excel is installed
+	if (mimeType === "application/vnd.ms-excel" && fileNameExtension === "csv") {
+		mimeType = "text/csv";
+		extension = "csv";
+	}
 	if (mimeType === undefined || mimeType === null) {
 		mimeType = fallbackMimeType;
 	}

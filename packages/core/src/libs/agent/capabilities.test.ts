@@ -28,6 +28,13 @@ test("combines tool capabilities into what an agent can do", () => {
 		mediaAnalysis: {
 			mimeTypes: expect.arrayContaining(["application/pdf", "video/mp4"]),
 		},
+		fileRead: {
+			mimeTypes: expect.arrayContaining([
+				"text/plain",
+				"text/html",
+				"application/json",
+			]),
+		},
 		webSearch: true,
 		webRead: true,
 	});
@@ -40,7 +47,12 @@ test("analysis needs an analysis tool but no library permissions", () => {
 				tools: agentTools.content(),
 			}),
 		),
-	).toEqual({ mediaAnalysis: null, webSearch: false, webRead: false });
+	).toEqual({
+		mediaAnalysis: null,
+		fileRead: null,
+		webSearch: false,
+		webRead: false,
+	});
 	expect(
 		getCapabilityProviders({
 			tools: getAvailableTools({ tools }, noPermissions),
@@ -58,6 +70,7 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 		readOnly: true,
 		capabilities: {
 			mediaAnalysis: { mimeTypes: ["image/png"] },
+			fileRead: { mimeTypes: ["text/plain"] },
 			webSearch: true,
 			webRead: true,
 		},
@@ -68,7 +81,7 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 		name: "Custom",
 		description: "Custom providers",
 		features: {
-			media: { analyze: false },
+			media: { analyze: false, readFile: false },
 			web: { search: false, read: false },
 		},
 		tools: [provider],
@@ -81,6 +94,7 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 		),
 	).toEqual({
 		mediaAnalysis: { mimeTypes: ["image/png"] },
+		fileRead: { mimeTypes: ["text/plain"] },
 		webSearch: true,
 		webRead: true,
 	});

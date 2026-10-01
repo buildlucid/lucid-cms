@@ -6,7 +6,7 @@ export const inputSchema = z
 			.number()
 			.int()
 			.positive()
-			.describe("A personal media ID linked to this chat, such as an upload."),
+			.describe("ID of the user's personal media, such as a chat upload."),
 		public: z
 			.boolean()
 			.default(true)

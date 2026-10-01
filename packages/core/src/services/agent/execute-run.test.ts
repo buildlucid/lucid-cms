@@ -212,7 +212,7 @@ const testAgent = defineAgent({
 	name: "Test Agent",
 	description: "Runs tests.",
 	features: {
-		media: { analyze: false },
+		media: { analyze: false, readFile: false },
 		web: { search: false, read: false },
 	},
 	tools: [

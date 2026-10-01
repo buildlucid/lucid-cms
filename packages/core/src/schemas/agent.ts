@@ -330,6 +330,7 @@ const agentCatalogResponseSchema = z.object({
 			}),
 			capabilities: z.object({
 				mediaAnalysis: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
+				fileRead: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
 				webSearch: z.boolean(),
 				webRead: z.boolean(),
 			}),

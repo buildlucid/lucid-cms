@@ -1,4 +1,5 @@
 import { analyzeMediaAgentTool } from "../../services/agent/tools/analyze-media/index.js";
+import { readFileAgentTool } from "../../services/agent/tools/read-file/index.js";
 import { removeMediaOwnershipAgentTool } from "../../services/media/tools/remove-ownership/index.js";
 import { resolveWebToolOptions } from "../../services/web/helpers/web-tool-options.js";
 import { webFetchAgentTool } from "../../services/web/tools/fetch/index.js";
@@ -33,6 +34,7 @@ const defineAgent = <const Key extends string>(
 			upload: options.features?.media?.upload ?? true,
 			attach: options.features?.media?.attach ?? true,
 			analyze: options.features?.media?.analyze ?? true,
+			readFile: options.features?.media?.readFile ?? true,
 		},
 		documents: { attach: options.features?.documents?.attach ?? true },
 		web: {
@@ -53,6 +55,7 @@ const defineAgent = <const Key extends string>(
 		instructions: options.instructions ? dedent(options.instructions) : "",
 		tools: [
 			...(features.media.analyze ? [analyzeMediaAgentTool()] : []),
+			...(features.media.readFile ? [readFileAgentTool()] : []),
 			...(features.web.search
 				? [
 						webSearchAgentTool({

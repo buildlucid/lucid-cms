@@ -34,6 +34,7 @@ it("keeps pinned versions when confirming a document selector and drops deselect
 it("opens media only when a tool accepts its type, and leaves documents unanswered", () => {
 	const capabilities = {
 		mediaAnalysis: { mimeTypes: ["application/pdf", "image/*"] },
+		fileRead: { mimeTypes: ["text/*", "application/json"] },
 		webSearch: false,
 		webRead: false,
 	};
@@ -46,6 +47,13 @@ it("opens media only when a tool accepts its type, and leaves documents unanswer
 
 	expect(canAgentOpen(media("application/pdf"), capabilities)).toBe(true);
 	expect(canAgentOpen(media("image/webp"), capabilities)).toBe(true);
+	expect(
+		canAgentOpen(media("text/html"), { ...capabilities, mediaAnalysis: null }),
+	).toBe(true);
+	expect(canAgentOpen(media("application/json"), capabilities)).toBe(true);
+	expect(
+		canAgentOpen(media("text/plain"), { ...capabilities, fileRead: null }),
+	).toBe(false);
 	expect(canAgentOpen(media("audio/mpeg"), capabilities)).toBe(false);
 	expect(canAgentOpen(media(), capabilities)).toBe(false);
 	expect(

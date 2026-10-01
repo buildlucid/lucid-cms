@@ -2,6 +2,8 @@ import type z from "zod";
 import analyzeMedia from "../../../../libs/lucid-remote/services/analyze-media/index.js";
 import type { AgentToolHandler } from "../../../../libs/tools/types.js";
 import runPaidToolRequest from "../../helpers/run-paid-tool-request.js";
+import register from "../../references/register.js";
+import { analyzeMediaToolName } from "./constants.js";
 import resolveSource from "./resolve-source.js";
 import type { inputSchema, outputSchema } from "./schema.js";
 
@@ -14,6 +16,13 @@ const handler: AgentToolHandler<
 		execution,
 	});
 	if (source.error) return source;
+
+	const linked = await register(context, {
+		conversationId: execution.run.conversationId,
+		references: [{ type: "media", mediaId: input.mediaId }],
+		source: { type: "tool", toolName: analyzeMediaToolName },
+	});
+	if (linked.error) return linked;
 
 	const result = await runPaidToolRequest(context, {
 		execution,

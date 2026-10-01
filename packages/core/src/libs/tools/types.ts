@@ -85,6 +85,8 @@ export type McpToolHandler<Input, Output> = ToolHandler<
 export type AgentToolCapabilities = {
 	/** Analyses attached media of these MIME types, eg. "application/pdf" or "image/*". */
 	mediaAnalysis?: { mimeTypes: readonly string[] };
+	/** Reads attached text files of these MIME types. */
+	fileRead?: { mimeTypes: readonly string[] };
 	/** Searches the public web. */
 	webSearch?: boolean;
 	/** Reads public webpages. */

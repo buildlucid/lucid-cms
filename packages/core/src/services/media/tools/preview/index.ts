@@ -1,10 +1,7 @@
 import ipaddr from "ipaddr.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import {
-	toNodeReadable,
-	toWebReadable,
-} from "../../../../libs/media-storage/normalize-body.js";
-import type { MediaStorageAdapterStreamBody } from "../../../../libs/media-storage/types.js";
+import { toNodeReadable } from "../../../../libs/media-storage/normalize-body.js";
+import readBoundedBody from "../../../../libs/media-storage/read-bounded-body.js";
 import { ExternalScopes } from "../../../../libs/permission/external-scopes.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import type { Media } from "../../../../types/response.js";
@@ -61,34 +58,6 @@ const isPublicDeliveryUrl = (value: string): boolean => {
 	return (
 		!ipaddr.isValid(hostname) || ipaddr.process(hostname).range() === "unicast"
 	);
-};
-
-/** Reads no more than the MCP inline image limit, cancelling oversized streams. */
-const readBounded = async (
-	body: MediaStorageAdapterStreamBody,
-	signal: AbortSignal,
-): Promise<Buffer | null> => {
-	const reader = toWebReadable(body).getReader();
-	const chunks: Uint8Array[] = [];
-	let size = 0;
-	try {
-		while (true) {
-			if (signal.aborted) {
-				await reader.cancel();
-				return null;
-			}
-			const chunk = await reader.read();
-			if (chunk.done) return Buffer.concat(chunks, size);
-			size += chunk.value.byteLength;
-			if (size > MAX_PREVIEW_BYTES) {
-				await reader.cancel();
-				return null;
-			}
-			chunks.push(chunk.value);
-		}
-	} finally {
-		reader.releaseLock();
-	}
 };
 
 const originalFits = (source: PreviewSource): boolean =>
@@ -163,8 +132,11 @@ const inlineImage = async (args: {
 		key: args.source.key,
 	});
 	if (streamed.error) return streamed;
-	const buffer = await readBounded(streamed.data.body, args.signal);
-	if (!buffer) {
+	const body = await readBoundedBody(streamed.data.body, {
+		maxBytes: MAX_PREVIEW_BYTES,
+		signal: args.signal,
+	});
+	if (body.type === "too-large") {
 		return {
 			error: {
 				type: "basic",
@@ -174,10 +146,20 @@ const inlineImage = async (args: {
 			data: undefined,
 		};
 	}
+	if (body.type === "aborted") {
+		return {
+			error: {
+				type: "basic",
+				status: 499,
+				message: copy("server:core.tools.media.preview.cancelled"),
+			},
+			data: undefined,
+		};
+	}
 
 	return {
 		error: undefined,
-		data: { buffer, mimeType: args.source.meta.mimeType },
+		data: { buffer: body.bytes, mimeType: args.source.meta.mimeType },
 	};
 };
 

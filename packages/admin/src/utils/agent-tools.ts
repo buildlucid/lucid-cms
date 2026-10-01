@@ -1,4 +1,5 @@
 import type {
+	AgentFileReadOutput,
 	AgentLucidToolName,
 	AgentMessagePart,
 	AgentRunnerToolName,
@@ -33,6 +34,7 @@ export const approvalBatchWidget =
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
+export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
 
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
@@ -77,3 +79,19 @@ export const isWebFetchOutput = (
 	isObjectRecord(value) &&
 	typeof value.url === "string" &&
 	typeof value.content === "string";
+
+export const isFileReadOutput = (
+	value: unknown,
+): value is AgentFileReadOutput =>
+	isObjectRecord(value) &&
+	typeof value.mediaId === "number" &&
+	(value.mode === "read" || value.mode === "search") &&
+	typeof value.totalChars === "number" &&
+	typeof value.truncated === "boolean" &&
+	Array.isArray(value.passages) &&
+	value.passages.every(
+		(passage) =>
+			isObjectRecord(passage) &&
+			typeof passage.offset === "number" &&
+			typeof passage.text === "string",
+	);

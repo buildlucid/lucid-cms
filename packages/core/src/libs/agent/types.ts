@@ -222,6 +222,8 @@ export type AgentFeatures = {
 		attach: boolean;
 		/** Register Lucid's media analysis tool. Disable when providing your own. */
 		analyze: boolean;
+		/** Register Lucid's text file reader. Disable when providing your own. */
+		readFile: boolean;
 	};
 	documents: {
 		/** Let people select CMS documents in the composer. */

@@ -31,6 +31,11 @@ export const getCapabilityProviders = (props: {
 				]
 			: [],
 	),
+	fileRead: props.tools.flatMap((tool) =>
+		tool.capabilities?.fileRead
+			? [{ tool: tool.name, mimeTypes: tool.capabilities.fileRead.mimeTypes }]
+			: [],
+	),
 	webSearch: props.tools.flatMap((tool) =>
 		tool.capabilities?.webSearch ? [tool.name] : [],
 	),
@@ -39,7 +44,6 @@ export const getCapabilityProviders = (props: {
 	),
 });
 
-/** Combines providers into what the admin shows, without tool names. */
 export const summariseCapabilities = (
 	providers: ReturnType<typeof getCapabilityProviders>,
 ): AgentCapabilities => ({
@@ -48,6 +52,15 @@ export const summariseCapabilities = (
 				mimeTypes: [
 					...new Set(
 						providers.mediaAnalysis.flatMap((provider) => provider.mimeTypes),
+					),
+				],
+			}
+		: null,
+	fileRead: providers.fileRead.length
+		? {
+				mimeTypes: [
+					...new Set(
+						providers.fileRead.flatMap((provider) => provider.mimeTypes),
 					),
 				],
 			}

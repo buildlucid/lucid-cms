@@ -27,7 +27,7 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
 
 /**
  * Lucid's tools for agents. Call one to add it to an agent's `tools`, or use
- * a bundle such as `content()`. Web, media analysis and library tools are
+ * a bundle such as `content()`. Web, media analysis, file reading and library tools are
  * built in and configured with `defineAgent`'s `features`. Every tool uses the
  * permissions of the person the agent acts for.
  *

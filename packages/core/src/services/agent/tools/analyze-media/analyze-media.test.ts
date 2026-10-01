@@ -25,7 +25,6 @@ import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import streamMedia from "../../../media/stream.js";
 import insertConversation from "../../helpers/insert-conversation.js";
 import resolveRunSetup from "../../helpers/resolve-run-setup.js";
-import register from "../../references/register.js";
 import { analyzeMediaAgentTool } from "./index.js";
 import resolveSource from "./resolve-source.js";
 
@@ -55,7 +54,7 @@ const withoutAnalysis = defineAgent({
 	key: "no-analysis",
 	name: "No analysis",
 	description: "Has no analysis tools.",
-	features: { media: { analyze: false } },
+	features: { media: { analyze: false, readFile: false } },
 });
 const analysis = (text: string) =>
 	mediaAnalyzeResponseSchema.parse({
@@ -131,10 +130,10 @@ const executionFor = async (): Promise<AgentToolExecution> => {
 		run: { id: randomUUID(), conversationId: chat.data.id, userId: null },
 	};
 };
-const linkedMedia = async (
-	execution: AgentToolExecution,
-	props?: { fileSize?: number; mimeType?: string },
-) => {
+const createMedia = async (props?: {
+	fileSize?: number;
+	mimeType?: string;
+}) => {
 	const Media = new MediaRepository(context.db);
 	const mimeType = props?.mimeType ?? "image/png";
 	const media = await Media.createSingle({
@@ -159,15 +158,6 @@ const linkedMedia = async (
 		validation: { enabled: true },
 	});
 	assert(media.data, JSON.stringify(media.error));
-	expect(
-		(
-			await register(context, {
-				conversationId: execution.run.conversationId,
-				references: [{ type: "media", mediaId: media.data.id }],
-				source: { type: "message" },
-			})
-		).error,
-	).toBeUndefined();
 	return media.data.id;
 };
 const mockFile = (bytes: Uint8Array) =>
@@ -186,9 +176,9 @@ const mockFile = (bytes: Uint8Array) =>
 		},
 	});
 
-test("private linked media reaches analysis as base64 without a download URL", async () => {
+test("unreferenced private media reaches analysis as base64 without a download URL", async () => {
 	const execution = await executionFor();
-	const mediaId = await linkedMedia(execution);
+	const mediaId = await createMedia();
 	mockFile(png);
 	vi.mocked(analyzeMedia).mockResolvedValue({
 		error: undefined,
@@ -215,18 +205,9 @@ test("private linked media reaches analysis as base64 without a download URL", a
 	});
 });
 
-test("a media reference in another chat grants no access", async () => {
-	const mediaId = await linkedMedia(await executionFor());
+test("losing media read permission prevents analysis of library media", async () => {
 	const execution = await executionFor();
-	expect(
-		(await resolveSource(context, { mediaId, execution })).error?.status,
-	).toBe(403);
-	expect(streamMedia).not.toHaveBeenCalled();
-});
-
-test("losing media read permission prevents analysis of library media even while the reference remains", async () => {
-	const execution = await executionFor();
-	const mediaId = await linkedMedia(execution);
+	const mediaId = await createMedia();
 	const result = await executeAgentTool({
 		context,
 		tool: analyzeMediaTool,
@@ -269,7 +250,7 @@ test.each([
 	...props
 }) => {
 	const execution = await executionFor();
-	const mediaId = await linkedMedia(execution, props);
+	const mediaId = await createMedia(props);
 	expect(
 		(await resolveSource(context, { mediaId, execution })).error?.status,
 	).toBe(status);
@@ -279,7 +260,7 @@ test.each([
 
 test("enforces the actual stream size when stored metadata understates it", async () => {
 	const execution = await executionFor();
-	const mediaId = await linkedMedia(execution);
+	const mediaId = await createMedia();
 	mockFile(new Uint8Array(MAX_MEDIA_BYTES + 1));
 	expect(
 		(await resolveSource(context, { mediaId, execution })).error?.status,
@@ -303,12 +284,12 @@ test.each([
 			...new TextEncoder().encode("ftypmp42"),
 		]),
 	},
-])("sends linked $mimeType whose contents match its type", async ({
+])("sends unreferenced $mimeType whose contents match its type", async ({
 	mimeType,
 	bytes,
 }) => {
 	const execution = await executionFor();
-	const mediaId = await linkedMedia(execution, { mimeType });
+	const mediaId = await createMedia({ mimeType });
 	mockFile(bytes);
 	expect(await resolveSource(context, { mediaId, execution })).toMatchObject({
 		data: {
@@ -321,7 +302,7 @@ test.each([
 
 test("refuses a file whose contents do not match its stored type", async () => {
 	const execution = await executionFor();
-	const mediaId = await linkedMedia(execution);
+	const mediaId = await createMedia();
 	mockFile(new TextEncoder().encode("<html>not a png</html>"));
 	expect(
 		(await resolveSource(context, { mediaId, execution })).error?.status,
@@ -346,14 +327,12 @@ test("analysis is on by default without library permission and can be disabled",
 		analyzeMediaTool.name,
 	);
 	expect(listed.instructions).toContain(
-		`Analyse attached media with ${analyzeMediaTool.name}.`,
+		`Analyse Lucid media with ${analyzeMediaTool.name}.`,
 	);
 
 	const unlisted = setup(withoutAnalysis);
 	expect(unlisted.definitions.map((tool) => tool.name)).not.toContain(
 		analyzeMediaTool.name,
 	);
-	expect(unlisted.instructions).toContain(
-		"No tool can analyse attached media.",
-	);
+	expect(unlisted.instructions).toContain("No tool can read attached files.");
 });

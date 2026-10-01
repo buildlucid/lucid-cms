@@ -108,19 +108,22 @@ const matchesMimeType = (mimeType: string, patterns: readonly string[]) =>
 			(pattern.endsWith("/*") && mimeType.startsWith(pattern.slice(0, -1))),
 	);
 
-/**
- * Whether the agent can open an attached file, from its media capability.
- * Documents are read through content tools, so they have no answer.
- */
+export const readableMimeTypes = (capabilities: AgentCapabilities) => [
+	...new Set([
+		...(capabilities.mediaAnalysis?.mimeTypes ?? []),
+		...(capabilities.fileRead?.mimeTypes ?? []),
+	]),
+];
+
+/** Whether a tool can open this attachment. CMS documents are read through content tools. */
 export const canAgentOpen = (
 	reference: AgentReferenceSnapshot,
 	capabilities: AgentCapabilities,
 ) => {
 	if (reference.type === "document") return undefined;
 	return (
-		capabilities.mediaAnalysis !== null &&
 		reference.mimeType !== undefined &&
-		matchesMimeType(reference.mimeType, capabilities.mediaAnalysis.mimeTypes)
+		matchesMimeType(reference.mimeType, readableMimeTypes(capabilities))
 	);
 };
 
@@ -153,7 +156,15 @@ export const agentReferenceKind = (
 	if (mimeType.startsWith("image/")) return "image";
 	if (mimeType.startsWith("audio/")) return "audio";
 	if (mimeType.startsWith("video/")) return "video";
-	if (mimeType.startsWith("text/")) return "text";
+	if (
+		mimeType.startsWith("text/") ||
+		mimeType === "application/json" ||
+		mimeType === "application/yaml" ||
+		mimeType === "application/xml" ||
+		mimeType === "application/x-subrip"
+	) {
+		return "text";
+	}
 	return "file";
 };
 

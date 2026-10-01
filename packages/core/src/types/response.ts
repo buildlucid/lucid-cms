@@ -10,6 +10,7 @@ export type {
 	AgentConversationDetails,
 	AgentConversationSource,
 	AgentDelivery,
+	AgentFileReadOutput,
 	AgentInput,
 	AgentInputAction,
 	AgentInteraction,

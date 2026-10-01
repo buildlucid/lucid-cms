@@ -837,11 +837,12 @@
 	"agent.references.unavailable": "The chat references could not be loaded.",
 	"agent.references.media.label": "Media {{id}}",
 	"agent.media.analyze.failed": "The media could not be analysed.",
-	"agent.media.source.denied": "Use media linked to this chat that you have permission to read.",
+	"agent.media.source.denied": "You do not have permission to read this media.",
 	"agent.media.preview.unsupported": "Media previews only support images, video and audio. Link PDFs and other files as chat references instead.",
-	"agent.media.unsupported": "{{type}} files cannot be analysed. Supported types are {{supported}}.",
+	"agent.media.unsupported": "{{type}} files cannot be read by this tool. Supported types are {{supported}}.",
 	"agent.media.mismatch": "This file’s contents do not match its file type, so it cannot be analysed.",
 	"agent.media.not.ready": "This file is still processing. Try again when it is ready.",
-	"agent.media.too.large": "Files must be at most 6 MB for analysis.",
-	"agent.media.cancelled": "Media analysis was cancelled."
+	"agent.media.too.large": "Files must be at most {{maxMB}} MB for this tool.",
+	"agent.media.cancelled": "File reading was cancelled.",
+	"agent.file.unreadable": "This file must contain UTF-8 or UTF-16 text. Binary files and other encodings are not supported."
 }

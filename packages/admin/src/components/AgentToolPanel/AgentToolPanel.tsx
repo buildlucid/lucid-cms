@@ -11,12 +11,15 @@ import T from "@/translations";
 import {
 	type AgentToolPart,
 	analyzeMediaTool,
+	isFileReadOutput,
 	isWebFetchOutput,
 	isWebSearchOutput,
+	readFileTool,
 	toolOutputText,
 	webFetchTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
+import FileReadView from "./parts/FileReadView";
 import WebFetchView from "./parts/WebFetchView";
 import WebSearchView from "./parts/WebSearchView";
 
@@ -30,7 +33,8 @@ const statusVariants = {
 
 /**
  * A tool call in the chat's sidebar. Web research shows the pages it found or
- * read, with its query or site as the title. File analysis shows its answer.
+ * read, with its query or site as the title. File analysis shows its answer,
+ * and file reading shows the passages it read.
  * Other tools show their status, with the raw input and output folded away.
  */
 const AgentToolPanel: Component<{
@@ -73,6 +77,12 @@ const AgentToolPanel: Component<{
 	const fetchOutput = createMemo(() => {
 		const value = output();
 		return props.part.name === webFetchTool && isWebFetchOutput(value)
+			? value
+			: undefined;
+	});
+	const fileOutput = createMemo(() => {
+		const value = output();
+		return props.part.name === readFileTool && isFileReadOutput(value)
 			? value
 			: undefined;
 	});
@@ -169,6 +179,14 @@ const AgentToolPanel: Component<{
 								<div class="-mt-3 flex flex-col gap-3">
 									<WebFetchView output={output()} />
 								</div>
+							)}
+						</Match>
+						<Match when={fileOutput()}>
+							{(output) => (
+								<FileReadView
+									output={output()}
+									search={toolOutputText(details.data?.data.input, "search")}
+								/>
 							)}
 						</Match>
 					</Switch>

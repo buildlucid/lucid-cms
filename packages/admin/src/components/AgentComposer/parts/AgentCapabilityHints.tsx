@@ -4,7 +4,10 @@ import classnames from "classnames";
 import { FaSolidEye, FaSolidEyeSlash, FaSolidGlobe } from "solid-icons/fa";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import T from "@/translations";
-import { describeReadableMedia } from "@/utils/agent-references";
+import {
+	describeReadableMedia,
+	readableMimeTypes,
+} from "@/utils/agent-references";
 
 const CapabilityHint: Component<{
 	active: boolean;
@@ -52,6 +55,9 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 ) => {
 	// ----------------------------------------
 	// Memos
+	const mimeTypes = createMemo(() =>
+		props.capabilities ? readableMimeTypes(props.capabilities) : [],
+	);
 	const web = createMemo(() => {
 		const capabilities = props.capabilities;
 		if (capabilities?.webSearch && capabilities.webRead) {
@@ -66,45 +72,41 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 	// Render
 	return (
 		<Show when={props.capabilities}>
-			{(capabilities) => (
-				<div class="flex items-center">
-					<CapabilityHint
-						active={capabilities().mediaAnalysis !== null}
-						icon={
-							<Show
-								when={capabilities().mediaAnalysis}
-								fallback={<FaSolidEyeSlash size={11} />}
-							>
-								<FaSolidEye size={11} />
-							</Show>
-						}
-						title={T()(
-							capabilities().mediaAnalysis
-								? "agent.capabilities.media"
-								: "agent.capabilities.media.none",
-						)}
-						description={
-							capabilities().mediaAnalysis
-								? T()("agent.capabilities.media.description", {
-										kinds: describeReadableMedia(
-											capabilities().mediaAnalysis?.mimeTypes ?? [],
-										),
-									})
-								: T()("agent.capabilities.media.none.description")
-						}
-					/>
-					<CapabilityHint
-						active={web() !== undefined}
-						icon={<FaSolidGlobe size={11} />}
-						title={web() ?? T()("agent.capabilities.web.none")}
-						description={T()(
-							web() === undefined
-								? "agent.capabilities.web.none.description"
-								: "agent.capabilities.web.description",
-						)}
-					/>
-				</div>
-			)}
+			<div class="flex items-center">
+				<CapabilityHint
+					active={mimeTypes().length > 0}
+					icon={
+						<Show
+							when={mimeTypes().length > 0}
+							fallback={<FaSolidEyeSlash size={11} />}
+						>
+							<FaSolidEye size={11} />
+						</Show>
+					}
+					title={T()(
+						mimeTypes().length
+							? "agent.capabilities.media"
+							: "agent.capabilities.media.none",
+					)}
+					description={
+						mimeTypes().length
+							? T()("agent.capabilities.media.description", {
+									kinds: describeReadableMedia(mimeTypes()),
+								})
+							: T()("agent.capabilities.media.none.description")
+					}
+				/>
+				<CapabilityHint
+					active={web() !== undefined}
+					icon={<FaSolidGlobe size={11} />}
+					title={web() ?? T()("agent.capabilities.web.none")}
+					description={T()(
+						web() === undefined
+							? "agent.capabilities.web.none.description"
+							: "agent.capabilities.web.description",
+					)}
+				/>
+			</div>
 		</Show>
 	);
 };

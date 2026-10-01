@@ -43,6 +43,8 @@ export type AgentReference = {
 export type AgentCapabilities = {
 	/** MIME types of media the agent can analyse. Null when no analysis provider is available. */
 	mediaAnalysis: { mimeTypes: string[] } | null;
+	/** MIME types of files the agent can read. Null when no file reader is available. */
+	fileRead: { mimeTypes: string[] } | null;
 	/** Whether the agent can search the public web. */
 	webSearch: boolean;
 	/** Whether the agent can read public webpages. */
@@ -129,7 +131,11 @@ export type AgentRunnerToolName =
 	| "lucid_finish_run";
 
 /** Lucid's own agent tools that the admin shows in their own way. */
-export type AgentLucidToolName = "web_search" | "web_fetch" | "media_analyze";
+export type AgentLucidToolName =
+	| "web_search"
+	| "web_fetch"
+	| "media_analyze"
+	| "media_read_file";
 
 /** Widgets the runner creates itself, including media galleries, questions and approvals. */
 export type AgentRunnerWidgetKey =
@@ -266,6 +272,21 @@ export interface AgentWebFetchOutput extends AgentWebSource {
 	content: string;
 	/** Full page text from the start, or excerpts chosen for an objective. */
 	contentType: "page" | "excerpts";
+	truncated: boolean;
+}
+
+/** A text file the agent read: a page from an offset, or the passages around search matches. */
+export interface AgentFileReadOutput {
+	mediaId: number;
+	filename?: string;
+	mimeType: string;
+	/** Stored text, or readable text extracted from HTML. Offsets refer to this text. */
+	contentType: "text" | "extracted-text";
+	mode: "read" | "search";
+	totalChars: number;
+	passages: Array<{ offset: number; text: string }>;
+	/** Where to continue reading or searching. Null when nothing is left. */
+	nextOffset: number | null;
 	truncated: boolean;
 }
 

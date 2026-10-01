@@ -15,4 +15,17 @@ describe("getFileMetadata", () => {
 			extension: "mjml",
 		});
 	});
+
+	it("stores CSV files that Windows reports as Excel spreadsheets as CSV", async () => {
+		const result = await getFileMetadata({
+			mimeType: "application/vnd.ms-excel",
+			fileName: "prices.csv",
+		});
+
+		expect(result.data).toEqual({
+			mimeType: "text/csv",
+			type: "document",
+			extension: "csv",
+		});
+	});
 });

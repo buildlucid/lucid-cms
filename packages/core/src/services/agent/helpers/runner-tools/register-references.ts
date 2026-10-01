@@ -29,22 +29,29 @@ const registerReferences: RunnerToolInputHandler<
 		);
 	}
 
-	if (
-		input.references.some(
-			(reference) =>
-				!canReadReference({
-					reference,
-					ownership:
-						reference.type === "media"
-							? ownership.data?.get(reference.mediaId)
-							: undefined,
-					userId: run.user_id,
-					grant: access?.data,
-				}),
-		)
-	) {
+	const denied = input.references.find(
+		(reference) =>
+			!canReadReference({
+				reference,
+				ownership:
+					reference.type === "media"
+						? ownership.data?.get(reference.mediaId)
+						: undefined,
+				userId: run.user_id,
+				grant: access?.data,
+			}),
+	);
+	if (denied) {
+		//* other users' personal and system media reads as missing, so IDs cannot reveal it exists
+		const owner =
+			denied.type === "media" ? ownership.data?.get(denied.mediaId) : undefined;
+		const hidden = owner?.type === "user" || owner?.type === "system";
 		return toolFailure(
-			context.translate("server:agent.references.register.denied"),
+			context.translate(
+				hidden
+					? "server:core.media.not.found.message"
+					: "server:agent.references.register.denied",
+			),
 		);
 	}
 

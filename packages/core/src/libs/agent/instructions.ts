@@ -28,34 +28,33 @@ const modes: Record<RunMode, string[]> = {
 	],
 };
 
-/** Says which tools can analyse each attachment type, so the agent never guesses at a file it cannot read. */
-const mediaLines = (
-	providers: ReturnType<typeof getCapabilityProviders>["mediaAnalysis"],
-) =>
-	providers.length
-		? [
-				...providers.map(
-					(provider) =>
-						`Analyse attached media with ${provider.tool}. It accepts: ${provider.mimeTypes.join(", ")}.`,
-				),
-				"If no available tool supports an attachment's MIME type, explain that you cannot read its contents rather than guessing.",
-			]
-		: [
-				"No tool can analyse attached media. If asked about a file's contents, say so rather than guessing.",
-			];
+/** Identifies tools that can inspect each file type without guessing at unsupported attachments. */
+const mediaLines = (providers: ReturnType<typeof getCapabilityProviders>) => [
+	...providers.mediaAnalysis.map(
+		(provider) =>
+			`Analyse Lucid media with ${provider.tool}. It accepts: ${provider.mimeTypes.join(", ")}.`,
+	),
+	...providers.fileRead.map(
+		(provider) =>
+			`Read Lucid text files with ${provider.tool}. It accepts: ${provider.mimeTypes.join(", ")}. Start with a normal read for an overview or open-ended question. Search for relevant terms when answering specific questions. If a search finds no passages, read a page before choosing another term. Reuse results already read and continue only when more text is needed. A passage is not the whole file.`,
+	),
+	providers.mediaAnalysis.length || providers.fileRead.length
+		? "If no available tool supports an attachment's MIME type, explain that you cannot read its contents rather than guessing."
+		: "No tool can read attached files. If asked about a file's contents, say so rather than guessing.",
+];
 
-/** Builds the system prompt for a run from its agent, mode, the skills it can load, which tools analyse media and whether history is trimmed. */
+/** Builds the system prompt for a run from its agent, mode, the skills it can load, which tools inspect files and whether history is trimmed. */
 const buildInstructions = (props: {
 	agent: Pick<AgentDefinition, "name" | "instructions">;
 	mode: RunMode;
 	skills: readonly Pick<SkillDefinition, "name" | "description">[];
-	media: ReturnType<typeof getCapabilityProviders>["mediaAnalysis"];
+	capabilities: ReturnType<typeof getCapabilityProviders>;
 	hasHistory: boolean;
 }) =>
 	[
 		`You are ${props.agent.name}, an agent in Lucid CMS.`,
 		...shared,
-		...mediaLines(props.media),
+		...mediaLines(props.capabilities),
 		...modes[props.mode],
 		...(props.hasHistory ? [history] : []),
 		...(props.skills.length

@@ -12,6 +12,7 @@ test("built-in features are enabled by default and explicit bundles flatten", ()
 	const agent = defineAgent({ ...options, tools: [agentTools.content()] });
 	expect(agent.tools.map((tool) => tool.name)).toEqual([
 		"media_analyze",
+		"media_read_file",
 		"web_search",
 		"web_fetch",
 		"media_remove_ownership",
@@ -26,7 +27,7 @@ test("all features can be disabled without registering supporting tools", () => 
 	const agent = defineAgent({
 		...options,
 		features: {
-			media: { upload: false, attach: false, analyze: false },
+			media: { upload: false, attach: false, analyze: false, readFile: false },
 			documents: { attach: false },
 			web: { search: false, read: false },
 		},

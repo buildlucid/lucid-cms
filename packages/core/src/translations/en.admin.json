@@ -22,5 +22,6 @@
 	"core.tools.lucid_preview_media.title": "Show media previews",
 	"core.tools.lucid_list_references.title": "List chat references",
 	"core.tools.media_analyze.title": "Analyse media",
+	"core.tools.media_read_file.title": "Read file",
 	"core.tools.media_remove_ownership.title": "Add to media library"
 }

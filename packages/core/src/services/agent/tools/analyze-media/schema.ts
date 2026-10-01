@@ -6,7 +6,9 @@ export const inputSchema = z
 			.number()
 			.int()
 			.positive()
-			.describe("ID of Lucid media linked to this chat."),
+			.describe(
+				"ID of accessible Lucid media from the person or tool results.",
+			),
 		question: z
 			.string()
 			.trim()

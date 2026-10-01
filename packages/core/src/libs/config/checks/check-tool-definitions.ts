@@ -7,16 +7,15 @@ import { getValidPermissions } from "../../permission/registry.js";
 import { isToolDefinition } from "../../tools/registry.js";
 import type { ToolDefinition } from "../../tools/types.js";
 
+const mimeCapabilitySchema = z
+	.object({
+		mimeTypes: z.array(z.string().regex(/^[a-z]+\/(\*|[a-z0-9.+-]+)$/)).min(1),
+	})
+	.strict();
 const agentToolCapabilitiesSchema = z
 	.object({
-		mediaAnalysis: z
-			.object({
-				mimeTypes: z
-					.array(z.string().regex(/^[a-z]+\/(\*|[a-z0-9.+-]+)$/))
-					.min(1),
-			})
-			.strict()
-			.optional(),
+		mediaAnalysis: mimeCapabilitySchema.optional(),
+		fileRead: mimeCapabilitySchema.optional(),
 		webSearch: z.boolean().optional(),
 		webRead: z.boolean().optional(),
 	})

@@ -20,6 +20,7 @@ const featuresSchema = z
 				upload: z.boolean(),
 				attach: z.boolean(),
 				analyze: z.boolean(),
+				readFile: z.boolean(),
 			})
 			.strict(),
 		documents: z.object({ attach: z.boolean() }).strict(),

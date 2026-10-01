@@ -983,7 +983,14 @@ test("personal media is only linked and listed for its owner, and system media n
 	});
 	expect(owned.data?.map((reference) => reference.type)).toEqual(["media"]);
 
-	//* a super admin can see every file in the library, but not link someone's personal file
+	//* a super admin can see every file in the library, but someone's personal file fails as a missing one does
+	const missing = await callReferenceTool(
+		adminChat,
+		runnerTools.registerReferences.name,
+		{ references: [{ type: "media", mediaId: 2_147_483_000 }] },
+		adminId,
+	);
+	expect(missing).toMatchObject({ failed: true });
 	for (const references of [[upload], [logo]]) {
 		expect(
 			await callReferenceTool(
@@ -992,7 +999,7 @@ test("personal media is only linked and listed for its owner, and system media n
 				{ references },
 				adminId,
 			),
-		).toMatchObject({ failed: true });
+		).toEqual(missing);
 	}
 	expect(
 		await callReferenceTool(

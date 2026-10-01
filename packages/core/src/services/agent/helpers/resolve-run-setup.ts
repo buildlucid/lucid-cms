@@ -80,7 +80,7 @@ const resolveRunSetup = (
 			agent,
 			mode: props.mode,
 			skills,
-			media: getCapabilityProviders({ tools }).mediaAnalysis,
+			capabilities: getCapabilityProviders({ tools }),
 			hasHistory: props.hasHistory,
 		}),
 	};
