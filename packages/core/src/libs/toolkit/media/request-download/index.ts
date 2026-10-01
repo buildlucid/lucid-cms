@@ -7,9 +7,7 @@ import type {
 import { runToolkitService } from "../../utils.js";
 import { inputSchema } from "./schema.js";
 
-/** Media item to download. */
 export type ToolkitMediaRequestDownloadInput = z.input<typeof inputSchema>;
-/** Temporary download URL. */
 export type ToolkitMediaRequestDownloadResult = NonNullable<
 	Awaited<ReturnType<typeof requestDownload>>["data"]
 >;
@@ -27,7 +25,9 @@ const requestMediaDownload = (
 				"../../../../services/media/request-download.js"
 			);
 
-			return requestDownload(context, { target: { type: "id", id: data.id } });
+			return requestDownload(context, {
+				target: { type: "id", id: data.id, actor: { type: "internal" } },
+			});
 		},
 		name: {
 			key: "core.toolkit.media.request-download.error.name",

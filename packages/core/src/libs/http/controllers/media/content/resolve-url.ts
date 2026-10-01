@@ -50,6 +50,7 @@ const resolveUrlController = factory.createHandlers(
 		})(context, {
 			key: c.req.valid("param").key,
 			options: c.req.valid("json"),
+			actor: { type: "content" },
 		});
 		if (media.error) throw new LucidAPIError(media.error);
 

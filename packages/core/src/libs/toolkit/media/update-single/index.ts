@@ -11,7 +11,6 @@ import type {
 
 export type * from "./types.js";
 
-/** Updates media details without uploading a file. */
 const updateSingle = (
 	context: ServiceContext,
 	input: ToolkitMediaUpdateSingleInput,
@@ -29,7 +28,7 @@ const updateSingle = (
 
 			const result = await serviceWrapper(updateSingleMedia, {
 				transaction: true,
-			})(context, data);
+			})(context, { ...data, actor: { type: "internal" } });
 			if (result.error) return result;
 
 			return { error: undefined, data: { id: result.data } };

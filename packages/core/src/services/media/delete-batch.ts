@@ -5,6 +5,7 @@ import {
 	MediaFoldersRepository,
 	MediaRepository,
 } from "../../libs/repositories/index.js";
+import type { MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
@@ -18,6 +19,7 @@ const deleteBatch: ServiceFn<
 			mediaIds: number[];
 			folderIds: number[];
 			recursiveMedia: boolean;
+			actor: MediaActor;
 			userId: number;
 		},
 	],
@@ -39,6 +41,8 @@ const deleteBatch: ServiceFn<
 	if (data.mediaIds && data.mediaIds.length > 0) {
 		const mediaAccessRes = await checkMediaAccess(context, {
 			ids: data.mediaIds,
+			actor: data.actor,
+			action: "delete",
 		});
 		if (mediaAccessRes.error) return mediaAccessRes;
 	}

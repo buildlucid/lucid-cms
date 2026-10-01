@@ -176,6 +176,7 @@ const AgentChatComposer: Component<{
 						floatAttachments={true}
 						onAttachedChange={props.onAttachedChange}
 						referenceDetails={props.referenceDetails}
+						agentKey={props.agent?.key}
 						attachments={props.agent?.attachments}
 						capabilities={props.agent?.capabilities}
 						disabled={!models.isSuccess}

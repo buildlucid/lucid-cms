@@ -3,12 +3,18 @@ import { copy } from "../../libs/i18n/index.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
 import type { Media } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
+import {
+	canAccessMedia,
+	getMediaOwnership,
+	type MediaActor,
+} from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
 	[
 		{
 			id: number;
+			actor: MediaActor;
 		},
 	],
 	Media
@@ -26,6 +32,23 @@ const getSingle: ServiceFn<
 		},
 	});
 	if (mediaRes.error) return mediaRes;
+
+	if (
+		!canAccessMedia({
+			actor: data.actor,
+			ownership: getMediaOwnership(mediaRes.data),
+			action: "read",
+		})
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.media.not.found.message"),
+				status: 404,
+			},
+			data: undefined,
+		};
+	}
 
 	return {
 		error: undefined,

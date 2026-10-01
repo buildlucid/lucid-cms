@@ -1,5 +1,7 @@
-import { sql } from "kysely";
+import { type RawBuilder, type SqlBool, sql } from "kysely";
 import type { GetMultipleQueryParams } from "../../schemas/media.js";
+import type { MediaOwnership } from "../../types/response.js";
+import type { MediaListAccess } from "../../utils/media/media-access.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
 import { mediaTable } from "../db/tables/media.js";
@@ -75,6 +77,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"source.storage_adapter_reference as source_storage_adapter_reference",
 				"source.storage_adapter_data as source_storage_adapter_data",
 				"source.public as source_public",
+				"source.owner_user_id as source_owner_user_id",
+				"source.is_system as source_is_system",
 				"source.mime_type as source_mime_type",
 				"source.file_name as source_file_name",
 				"source.file_extension as source_file_extension",
@@ -124,6 +128,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							? result.active_crop_storage_adapter_data
 							: result.source_storage_adapter_data,
 					public: result.active_crop_public ?? result.source_public,
+					owner_user_id: result.source_owner_user_id,
+					is_system: result.source_is_system,
 					mime_type: result.active_crop_mime_type ?? result.source_mime_type,
 					file_name:
 						result.active_crop_id !== null
@@ -198,6 +204,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
+				"owner_user_id",
+				"is_system",
 				this.database.fn
 					.jsonArrayFrom(
 						eb
@@ -425,6 +433,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"deleted_by",
 				"translations",
 				"public",
+				"owner_user_id",
+				"is_system",
 				"poster",
 				"crop",
 			],
@@ -481,6 +491,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
+				"owner_user_id",
+				"is_system",
 				this.database.fn
 					.jsonArrayFrom(
 						eb
@@ -707,12 +719,13 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"deleted_by",
 				"translations",
 				"public",
+				"owner_user_id",
+				"is_system",
 				"poster",
 				"crop",
 			],
 		});
 	}
-	/** Fetches media rows used by field validation. */
 	async selectMultipleValidationData<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -723,7 +736,15 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 	) {
 		const query = this.db
 			.selectFrom("lucid_media")
-			.select(["id", "file_extension", "width", "height", "type"])
+			.select([
+				"id",
+				"file_extension",
+				"width",
+				"height",
+				"type",
+				"owner_user_id",
+				"is_system",
+			])
 			.where("id", "in", props.ids)
 			.where("parent_media_id", "is", null);
 
@@ -735,11 +756,18 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 		return this.validateResponse(exec, {
 			...props.validation,
 			mode: "multiple",
-			select: ["id", "file_extension", "width", "height", "type"],
+			select: [
+				"id",
+				"file_extension",
+				"width",
+				"height",
+				"type",
+				"owner_user_id",
+				"is_system",
+			],
 		});
 	}
 
-	/** Fetches media IDs inside folders. */
 	async selectMultipleIdsByFolderIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -772,9 +800,18 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 			V,
 			{
 				queryParams: GetMultipleQueryParams;
+				access: MediaListAccess;
 			}
 		>,
 	) {
+		//* library media unless the ownership filter asks for more
+		const conditions = [
+			this.accessCondition(props.access),
+			props.queryParams.filter?.ownership === undefined
+				? ownershipConditions.library
+				: undefined,
+		].filter((condition) => condition !== undefined);
+
 		const exec = await this.executeQuery(
 			async () => {
 				const mainQuery = this.db
@@ -822,6 +859,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 						"lucid_media.is_deleted_at",
 						"lucid_media.deleted_by",
 						"lucid_media.public",
+						"lucid_media.owner_user_id",
+						"lucid_media.is_system",
 						eb.fn.min<string>("translation.title").as("title_sort"),
 						this.database.fn
 							.jsonArrayFrom(
@@ -906,12 +945,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							.as("poster"),
 						activeMediaCropSelect(this.database, "lucid_media.id"),
 					])
-					.where(
-						"lucid_media.is_hidden",
-						"=",
-						this.dbAdapter.getDefault("boolean", "false"),
-					)
 					.where("lucid_media.parent_media_id", "is", null)
+					.where((eb) => eb.and(conditions))
 					.groupBy("lucid_media.id");
 
 				const countQuery = this.db
@@ -920,12 +955,8 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 					.leftJoin("lucid_media_translations as translation", (join) =>
 						join.onRef("translation.media_id", "=", "lucid_media.id"),
 					)
-					.where(
-						"lucid_media.is_hidden",
-						"=",
-						this.dbAdapter.getDefault("boolean", "false"),
-					)
-					.where("lucid_media.parent_media_id", "is", null);
+					.where("lucid_media.parent_media_id", "is", null)
+					.where((eb) => eb.and(conditions));
 
 				const { main, count } = queryBuilder.main(
 					{
@@ -949,6 +980,10 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 							},
 							operators: {
 								title: "contains",
+							},
+							customFilters: {
+								ownership: ({ filter }) =>
+									this.ownershipCondition(filter.value),
 							},
 						},
 					},
@@ -1010,10 +1045,48 @@ export default class MediaRepository extends StaticRepository<"lucid_media"> {
 				"is_deleted_at",
 				"deleted_by",
 				"public",
+				"owner_user_id",
+				"is_system",
 				"translations",
 				"poster",
 				"crop",
 			],
 		});
 	}
+
+	/** Limits a list to the rows its viewer can see. Other users' personal media needs `media:read-all`. */
+	private accessCondition(access: MediaListAccess) {
+		switch (access.type) {
+			case "all":
+				return undefined;
+			case "library":
+				return ownershipConditions.library;
+			case "owner":
+				return sql<SqlBool>`(${ownershipConditions.library} or lucid_media.owner_user_id = ${access.userId})`;
+		}
+	}
+	/** Matches any of the requested ownership types, defaulting to library media. */
+	private ownershipCondition(value: unknown) {
+		const types = (Array.isArray(value) ? value : [value]).filter(
+			isOwnershipType,
+		);
+		if (types.length === 0) return ownershipConditions.library;
+
+		return sql<SqlBool>`(${sql.join(
+			types.map((type) => ownershipConditions[type]),
+			sql` or `,
+		)})`;
+	}
 }
+
+const ownershipConditions: Record<
+	MediaOwnership["type"],
+	RawBuilder<SqlBool>
+> = {
+	library: sql<SqlBool>`(lucid_media.owner_user_id is null and not lucid_media.is_system)`,
+	user: sql<SqlBool>`lucid_media.owner_user_id is not null`,
+	system: sql<SqlBool>`lucid_media.is_system`,
+};
+
+const isOwnershipType = (value: unknown): value is MediaOwnership["type"] =>
+	typeof value === "string" && Object.hasOwn(ownershipConditions, value);

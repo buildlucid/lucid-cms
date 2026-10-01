@@ -42,6 +42,7 @@ import MoveToFolderModal, {
 } from "@/components/MoveToFolderModal/MoveToFolderModal";
 import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import RemoveMediaOwnershipModal from "@/components/RemoveMediaOwnershipModal/RemoveMediaOwnershipModal";
 import RestoreMediaBatchModal from "@/components/RestoreMediaBatchModal/RestoreMediaBatchModal";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
 import UpdateMediaFolderModal from "@/components/UpdateMediaFolderModal/UpdateMediaFolderModal";
@@ -58,6 +59,7 @@ import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import mediaStore from "@/store/mediaStore/mediaStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import helpers from "@/utils/helpers";
 import {
 	type ImageCropProvenance,
 	type ImageCropSource,
@@ -66,7 +68,6 @@ import {
 import { getImageMeta as getFileImageMeta } from "@/utils/media-meta";
 import { recordToTranslations } from "@/utils/translation-helpers";
 
-/** Skeletons shown while the grid loads, enough to fill a couple of rows. */
 const LOADING_CARDS = 8;
 
 export const MediaList: Component<{
@@ -99,6 +100,7 @@ export const MediaList: Component<{
 			deleteAllShareLinks: false,
 			quickCrop: false,
 			download: false,
+			removeOwnership: false,
 		},
 	});
 	const mediaAltGeneration = useMediaAltGeneration();
@@ -121,6 +123,15 @@ export const MediaList: Component<{
 	const isDeletedFilter = createMemo(() =>
 		props.state.showingDeleted() ? 1 : 0,
 	);
+	//* the ownership filter picks personal or system media, otherwise it's the shared library
+	const ownership = createMemo(() => {
+		const value = props.state.searchParams.getFilter("ownership")?.value;
+		return typeof value === "string" && value !== "" ? value : "library";
+	});
+	const isLibraryView = createMemo(() => ownership() === "library");
+	const folderIdFilter = createMemo(() =>
+		isLibraryView() ? props.state.parentFolderId() : undefined,
+	);
 
 	// ----------------------------------
 	// Queries
@@ -128,11 +139,30 @@ export const MediaList: Component<{
 		queryParams: {
 			queryString: props.state.searchParams.queryString,
 			filters: {
-				folderId: props.state.parentFolderId,
+				folderId: folderIdFilter,
 				isDeleted: isDeletedFilter,
 			},
 		},
 		enabled: () => props.state.searchParams.ready(),
+	});
+	const ownerIds = createMemo(() => [
+		...new Set(
+			(media.data?.data ?? []).flatMap((item) =>
+				item.ownership.type === "user" &&
+				item.ownership.userId !== userStore.get.user?.id
+					? [item.ownership.userId]
+					: [],
+			),
+		),
+	]);
+	const owners = api.users.useGetMultiple({
+		queryParams: {
+			filters: {
+				id: ownerIds,
+			},
+			perPage: -1,
+		},
+		enabled: () => ownerIds().length > 0,
 	});
 	const folders = api.mediaFolders.useGetMultiple({
 		queryParams: {
@@ -141,6 +171,7 @@ export const MediaList: Component<{
 			},
 			perPage: -1,
 		},
+		enabled: isLibraryView,
 	});
 
 	// ----------------------------------
@@ -269,13 +300,23 @@ export const MediaList: Component<{
 		return media.data?.data.find((item) => item.id === rowTarget.getTargetId());
 	});
 	const isTopLevel = createMemo(() => props.state.parentFolderId() === "");
+	const ownerNames = createMemo(
+		() =>
+			new Map(
+				(owners.data?.data ?? []).map((user) => [
+					user.id,
+					helpers.formatUserName(user, "name"),
+				]),
+			),
+	);
 	const isError = createMemo(() => {
 		return media.isError || folders.isError;
 	});
 	const isFetching = createMemo(() => media.isFetching || folders.isFetching);
 	const containerEmpty = createMemo(() => {
-		if (props.state.showingDeleted()) return mediaCount() === 0;
-		//* if we're at the top level and there are no folders or media, we're empty
+		if (props.state.showingDeleted() || !isLibraryView()) {
+			return mediaCount() === 0;
+		}
 		return isTopLevel() && foldersCount() === 0 && mediaCount() === 0;
 	});
 	const noEntriesCopy = createMemo(() => {
@@ -285,6 +326,18 @@ export const MediaList: Component<{
 				description: T()("empty.states.media.deleted.description"),
 			};
 		}
+		if (ownership() === "user") {
+			return {
+				title: T()("empty.states.media.personal.title"),
+				description: T()("empty.states.media.personal.description"),
+			};
+		}
+		if (!isLibraryView()) {
+			return {
+				title: T()("empty.states.media.filtered.title"),
+				description: T()("empty.states.media.filtered.description"),
+			};
+		}
 		return {
 			title: T()("empty.states.media.title"),
 			description: T()("empty.states.media.description"),
@@ -292,14 +345,16 @@ export const MediaList: Component<{
 		};
 	});
 	const createEntryCallback = createMemo(() => {
-		if (props.state.showingDeleted()) {
+		if (props.state.showingDeleted() || !isLibraryView()) {
 			return undefined;
 		}
 		return openCreateMediaPanel;
 	});
 	const showFoldersSection = createMemo(() => {
 		return (
-			!props.state.showingDeleted() && (!isTopLevel() || foldersCount() > 0)
+			!props.state.showingDeleted() &&
+			isLibraryView() &&
+			(!isTopLevel() || foldersCount() > 0)
 		);
 	});
 	const mediaGridNoEntriesCopy = createMemo(() => {
@@ -427,6 +482,11 @@ export const MediaList: Component<{
 												media={item}
 												rowTarget={rowTarget}
 												contentLocale={contentLocale()}
+												ownerName={
+													item.ownership.type === "user"
+														? ownerNames().get(item.ownership.userId)
+														: undefined
+												}
 												showingDeleted={props.state.showingDeleted}
 												isDragging={isDragging}
 												onGenerateAlt={openAltGeneration}
@@ -489,6 +549,15 @@ export const MediaList: Component<{
 						rowTarget.setTrigger("moveToFolder", state);
 					},
 					params: getMoveModalParams(),
+				}}
+			/>
+			<RemoveMediaOwnershipModal
+				id={rowTarget.getTargetId}
+				state={{
+					open: rowTarget.getTriggers().removeOwnership,
+					setOpen: (state: boolean) => {
+						rowTarget.setTrigger("removeOwnership", state);
+					},
 				}}
 			/>
 			<CreateUpdateMediaDrawer

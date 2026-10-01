@@ -786,6 +786,7 @@ export type {
 	MediaImagePreview,
 	MediaOrigin,
 	MediaOriginalFile,
+	MediaOwnership,
 	MediaPoster,
 	MediaRef,
 	MediaShareLink,

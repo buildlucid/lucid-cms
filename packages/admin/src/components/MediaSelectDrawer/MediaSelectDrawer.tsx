@@ -35,6 +35,7 @@ import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import type { MediaDimensionValidation } from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import type { MediaRelationRef } from "@/utils/relation-field-helpers";
 import { mediaResponseToRef } from "@/utils/relation-field-helpers";
@@ -53,6 +54,8 @@ interface MediaSelectPanelProps {
 		multiple?: boolean;
 		/** Restricts selection to public files. Defaults to true. */
 		publicOnly?: boolean;
+		/** Adds a tab for the user's own personal media, such as agent chat uploads. Content fields leave this off, as they only take library media. */
+		includePersonal?: boolean;
 		selected?: number[];
 		selectedRefs?: MediaRelationRef[];
 	};
@@ -87,6 +90,7 @@ const MediaSelectDrawer: Component<MediaSelectPanelProps> = (props) => {
 					height={props.state.height}
 					multiple={props.state.multiple}
 					publicOnly={props.state.publicOnly}
+					includePersonal={props.state.includePersonal}
 					selected={props.state.selected}
 					selectedRefs={props.state.selectedRefs}
 					onClose={() => props.state.setOpen(false)}
@@ -108,6 +112,7 @@ interface SelectMediaContentProps {
 	height?: MediaDimensionValidation;
 	multiple?: boolean;
 	publicOnly?: boolean;
+	includePersonal?: boolean;
 	selected?: number[];
 	selectedRefs?: MediaRelationRef[];
 	onClose: () => void;
@@ -139,6 +144,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				mimeType: textFilter(),
 				key: textFilter(),
 				origin: textFilter(),
+				ownership: textFilter(),
 			},
 			defaultOrFilterGroups: validationFilterSchema.defaultOrFilterGroups,
 			sorts: {
@@ -180,6 +186,10 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 				isDeleted: showingDeleted,
 				public: props.publicOnly === false ? undefined : 1,
 				status: "ready",
+				ownerId: () =>
+					searchParams.getFilter("ownership")?.value === "user"
+						? userStore.get.user?.id
+						: undefined,
 			},
 		},
 	});
@@ -305,6 +315,25 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						key: "key",
 						type: "text",
 					},
+					...(props.includePersonal
+						? [
+								{
+									label: T()("media.ownership"),
+									key: "ownership",
+									type: "select" as const,
+									options: [
+										{
+											label: T()("media.ownership.library"),
+											value: "library",
+										},
+										{
+											label: T()("media.ownership.personal"),
+											value: "user",
+										},
+									],
+								},
+							]
+						: []),
 					{
 						label: T()("common.type"),
 						key: "type",

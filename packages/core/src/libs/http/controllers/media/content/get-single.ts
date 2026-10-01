@@ -60,6 +60,7 @@ const getSingleController = factory.createHandlers(
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),
+			actor: { type: "content" },
 		});
 		if (media.error) throw new LucidAPIError(media.error);
 

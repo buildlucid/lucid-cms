@@ -15,6 +15,7 @@ import getSingle from "../../../controllers/media/get-single.js";
 import getUploadPartUrls from "../../../controllers/media/get-upload-part-urls.js";
 import getUploadSession from "../../../controllers/media/get-upload-session.js";
 import moveFolder from "../../../controllers/media/move-folder.js";
+import removeOwnership from "../../../controllers/media/remove-ownership.js";
 import requestDownload from "../../../controllers/media/request-download.js";
 import restoreMultiple from "../../../controllers/media/restore-multiple.js";
 import updateSingle from "../../../controllers/media/update-single.js";
@@ -47,6 +48,7 @@ const mediaRoutes = new Hono<LucidHonoGeneric>()
 	.post("/", ...createSingle)
 	.post("/restore", ...restoreMultiple)
 	.post("/:id/download", ...requestDownload)
+	.post("/:id/remove-ownership", ...removeOwnership)
 	.post("/:id/share-links", ...createMediaShareLink)
 	.patch("/folders/:id", ...updateSingleFolder)
 	.patch("/:id/move", ...moveFolder)

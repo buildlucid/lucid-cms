@@ -352,12 +352,28 @@ const mediaBaseResponseShape = {
 	title: mediaTranslationsResponseSchema,
 };
 
+const mediaOwnershipResponseSchema = z
+	.discriminatedUnion("type", [
+		z.object({ type: z.literal("library") }),
+		z.object({
+			type: z.literal("user"),
+			userId: z.number().meta({ description: "The owner's user ID" }),
+		}),
+		z.object({ type: z.literal("system") }),
+	])
+	.meta({
+		description:
+			"Who the media belongs to. Library media is shared, user media is personal to its owner and system media is managed by another record",
+		example: { type: "library" },
+	});
+
 const mediaStateResponseShape = {
 	public: z.boolean().meta({
 		description:
 			"Media visibility. Private media can only be accessed by authorized users and when shared",
 		example: true,
 	}),
+	ownership: mediaOwnershipResponseSchema,
 	isDeleted: z.boolean().nullable().meta({
 		description: "Whether the media is deleted",
 		example: true,
@@ -502,28 +518,40 @@ const mediaGetMultipleQueryStringSchema = z
 	})
 	.meta(queryString.meta);
 
+//* the admin library can also list personal and system media
+const mediaAdminGetMultipleQueryStringSchema = mediaGetMultipleQueryStringSchema
+	.extend({
+		"filter[ownership]": queryString.schema.filter(true, {
+			example: "library,user,system",
+		}),
+		"filter[ownerId]": queryString.schema.filter(true, {
+			example: "1",
+		}),
+	})
+	.meta(queryString.meta);
+
+const mediaFilterShape = {
+	id: queryFormatted.schema.filters.union.optional(),
+	title: queryFormatted.schema.filters.single.optional(),
+	key: queryFormatted.schema.filters.single.optional(),
+	status: queryFormatted.schema.filters.union.optional(),
+	mimeType: queryFormatted.schema.filters.union.optional(),
+	folderId: queryFormatted.schema.filters.single.optional(),
+	type: queryFormatted.schema.filters.union.optional(),
+	extension: queryFormatted.schema.filters.union.optional(),
+	isDeleted: queryFormatted.schema.filters.single.optional(),
+	deletedBy: queryFormatted.schema.filters.union.optional(),
+	public: queryFormatted.schema.filters.single.optional(),
+	origin: queryFormatted.schema.filters.union.optional(),
+	fileSize: queryFormatted.schema.filters.single.optional(),
+	width: queryFormatted.schema.filters.single.optional(),
+	height: queryFormatted.schema.filters.single.optional(),
+	createdAt: queryFormatted.schema.filters.single.optional(),
+	updatedAt: queryFormatted.schema.filters.single.optional(),
+};
+
 const mediaGetMultipleQueryFormattedSchema = z.object({
-	filter: z
-		.object({
-			id: queryFormatted.schema.filters.union.optional(),
-			title: queryFormatted.schema.filters.single.optional(),
-			key: queryFormatted.schema.filters.single.optional(),
-			status: queryFormatted.schema.filters.union.optional(),
-			mimeType: queryFormatted.schema.filters.union.optional(),
-			folderId: queryFormatted.schema.filters.single.optional(),
-			type: queryFormatted.schema.filters.union.optional(),
-			extension: queryFormatted.schema.filters.union.optional(),
-			isDeleted: queryFormatted.schema.filters.single.optional(),
-			deletedBy: queryFormatted.schema.filters.union.optional(),
-			public: queryFormatted.schema.filters.single.optional(),
-			origin: queryFormatted.schema.filters.union.optional(),
-			fileSize: queryFormatted.schema.filters.single.optional(),
-			width: queryFormatted.schema.filters.single.optional(),
-			height: queryFormatted.schema.filters.single.optional(),
-			createdAt: queryFormatted.schema.filters.single.optional(),
-			updatedAt: queryFormatted.schema.filters.single.optional(),
-		})
-		.optional(),
+	filter: z.object(mediaFilterShape).optional(),
 	filterOr: queryFormatted.schema.filterOr,
 	sort: z
 		.array(
@@ -548,7 +576,17 @@ const mediaGetMultipleQueryFormattedSchema = z.object({
 	perPage: queryFormatted.schema.perPage,
 });
 
-/** Fields used to register an uploaded media file. */
+const mediaAdminGetMultipleQueryFormattedSchema =
+	mediaGetMultipleQueryFormattedSchema.extend({
+		filter: z
+			.object({
+				...mediaFilterShape,
+				ownership: queryFormatted.schema.filters.union.optional(),
+				ownerId: queryFormatted.schema.filters.union.optional(),
+			})
+			.optional(),
+	});
+
 export const createMediaSchema = z.object({
 	crop: mediaCropInputSchema.optional(),
 	key: z.string().trim().meta({
@@ -705,20 +743,17 @@ export const createMediaSchema = z.object({
 			example: 1,
 		})
 		.optional(),
-	isHidden: z
+	owned: z
 		.boolean()
 		.meta({
-			description: "Whether the media should be hidden from library lists",
-			example: true,
+			description:
+				"Makes the media personal to you. It must be private and outside folders, and stays out of the media library until you remove your ownership.",
+			example: false,
 		})
 		.optional(),
 });
 
-/** Fields used to update media details or replace its file. */
 export const updateMediaSchema = z.object({
-	isHidden: z.boolean().optional().meta({
-		description: "Whether the media should be hidden from library lists",
-	}),
 	crop: mediaCropInputSchema.nullable().optional(),
 	key: z
 		.string()
@@ -907,8 +942,8 @@ export const updateMediaSchema = z.object({
 export const controllerSchemas = {
 	getMultiple: {
 		query: {
-			string: mediaGetMultipleQueryStringSchema,
-			formatted: mediaGetMultipleQueryFormattedSchema,
+			string: mediaAdminGetMultipleQueryStringSchema,
+			formatted: mediaAdminGetMultipleQueryFormattedSchema,
 		},
 		params: undefined,
 		body: undefined,
@@ -1031,6 +1066,33 @@ export const controllerSchemas = {
 				description: "The media folder ID",
 				example: 1,
 			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			id: z.string().trim().meta({
+				description: "The media ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	removeOwnership: {
+		body: z.object({
+			public: z.boolean().meta({
+				description: "Whether the media is public once it's in the library",
+				example: false,
+			}),
+			folderId: z
+				.number()
+				.nullable()
+				.meta({
+					description: "The media folder ID",
+					example: 1,
+				})
+				.optional(),
 		}),
 		query: {
 			string: undefined,

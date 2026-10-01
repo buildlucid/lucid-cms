@@ -1,5 +1,10 @@
 import type { Agent, AgentReferenceInput, DocumentRef } from "@types";
-import { FaSolidFileLines, FaSolidImage, FaSolidPlus } from "solid-icons/fa";
+import {
+	FaSolidFileLines,
+	FaSolidImage,
+	FaSolidPlus,
+	FaSolidUpload,
+} from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
@@ -19,11 +24,13 @@ import mediaUrl from "@/utils/media-url";
 import type { MediaRelationRef } from "@/utils/relation-field-helpers";
 import { composerTriggerClasses } from "../AgentComposer";
 
-/** Adds existing media and documents to the message. */
+/** Adds existing media and documents to the message, or uploads new files when `onUpload` is set. */
 const AgentReferenceMenu: Component<{
 	attachments?: Agent["attachments"];
 	references: AgentReferenceItem[];
 	disabled?: boolean;
+	/** Opens the file picker. Uploads are personal, so they don't need media library access. */
+	onUpload?: () => void;
 	onSelect: (
 		type: AgentReferenceInput["type"],
 		references: AgentReferenceItem[],
@@ -124,7 +131,7 @@ const AgentReferenceMenu: Component<{
 	// Render
 	return (
 		<>
-			<Show when={canMedia() || canDocuments()}>
+			<Show when={props.onUpload || canMedia() || canDocuments()}>
 				<Menu.Root placement="top-start">
 					<Menu.Trigger
 						class={`${composerTriggerClasses} w-7`}
@@ -135,6 +142,16 @@ const AgentReferenceMenu: Component<{
 						<FaSolidPlus size={11} />
 					</Menu.Trigger>
 					<Menu.Content>
+						<Show when={props.onUpload}>
+							{(upload) => (
+								<Menu.Item
+									icon={<FaSolidUpload size={12} />}
+									onSelect={() => upload()()}
+								>
+									{T()("agent.uploads.add")}
+								</Menu.Item>
+							)}
+						</Show>
 						<Show when={canMedia()}>
 							<Menu.Item
 								icon={<FaSolidImage size={12} />}
@@ -161,6 +178,7 @@ const AgentReferenceMenu: Component<{
 						setOpen: setMediaOpen,
 						multiple: true,
 						publicOnly: false,
+						includePersonal: true,
 						selected: props.references.flatMap((reference) =>
 							reference.type === "media" ? [reference.mediaId] : [],
 						),

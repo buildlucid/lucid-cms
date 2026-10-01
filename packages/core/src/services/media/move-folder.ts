@@ -2,8 +2,10 @@ import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
+import { getMediaOwnership, type MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
+import { mediaAccessError } from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
 const moveFolder: ServiceFn<
@@ -11,6 +13,7 @@ const moveFolder: ServiceFn<
 		{
 			id: number;
 			folderId: number | null;
+			actor: MediaActor;
 			userId: number;
 		},
 	],
@@ -34,6 +37,25 @@ const moveFolder: ServiceFn<
 		},
 	});
 	if (mediaRes.error) return mediaRes;
+
+	const ownership = getMediaOwnership(mediaRes.data);
+	const accessError = mediaAccessError({
+		actor: data.actor,
+		ownership,
+		action: "update",
+	});
+	if (accessError) return { error: accessError, data: undefined };
+
+	if (ownership.type !== "library") {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.media.personal.library.required"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
 
 	if (mediaRes.data.is_deleted) {
 		return {

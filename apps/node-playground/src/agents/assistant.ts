@@ -15,6 +15,7 @@ export const assistantAgent = defineAgent({
 		agentTools.content(),
 		agentTools.web(),
 		agentTools.analyzeMedia(),
+		agentTools.removeMediaOwnership(),
 		echoAgentTool,
 		addAgentTool,
 		saveNoteTool,

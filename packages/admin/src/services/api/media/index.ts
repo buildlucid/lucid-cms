@@ -9,6 +9,7 @@ import useDeleteSinglePermanently from "./useDeleteSinglePermanently";
 import useGetMultiple from "./useGetMultiple";
 import useGetSingle from "./useGetSingle";
 import useMoveFolder from "./useMoveFolder";
+import useRemoveOwnership from "./useRemoveOwnership";
 import useRequestDownload from "./useRequestDownload";
 import useRestore from "./useRestore";
 import useUpdateSingle from "./useUpdateSingle";
@@ -26,6 +27,7 @@ const exportObject = {
 	useDeleteBatch,
 	useDeleteMultiplePermanently,
 	useMoveFolder,
+	useRemoveOwnership,
 	useRestore,
 	useRequestDownload,
 };

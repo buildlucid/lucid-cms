@@ -1,5 +1,4 @@
-import { referenceReadPermission } from "../../../libs/agent/references.js";
-import hasPermission from "../../../libs/permission/has-permission.js";
+import { canReadReference } from "../../../libs/agent/references.js";
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
@@ -10,6 +9,7 @@ import type {
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveUserAccess from "../../users/resolve-access.js";
+import mediaOwnership from "./media-ownership.js";
 
 export type AgentReferenceLink = AgentReferenceInput & {
 	id: string;
@@ -34,9 +34,6 @@ const list: ServiceFn<
 			? undefined
 			: await resolveUserAccess(context, { userId: input.userId });
 	if (access?.error) return access;
-	//* a system run reads every linked resource
-	const canRead = (reference: AgentReferenceInput) =>
-		!access || hasPermission(access.data, referenceReadPermission(reference));
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
 
@@ -74,6 +71,11 @@ const list: ServiceFn<
 	if (media.error) return media;
 	if (documents.error) return documents;
 
+	const ownership = await mediaOwnership(context, {
+		mediaIds: media.data.map((row) => row.media_id),
+	});
+	if (ownership.error) return ownership;
+
 	const links: AgentReferenceLink[] = [
 		...media.data.map((row) => ({
 			id: row.id,
@@ -91,7 +93,20 @@ const list: ServiceFn<
 		})),
 	];
 
-	return { error: undefined, data: links.filter(canRead) };
+	return {
+		error: undefined,
+		data: links.filter((reference) =>
+			canReadReference({
+				reference,
+				ownership:
+					reference.type === "media"
+						? ownership.data.get(reference.mediaId)
+						: undefined,
+				userId: input.userId,
+				grant: access?.data,
+			}),
+		),
+	};
 };
 
 export default list;

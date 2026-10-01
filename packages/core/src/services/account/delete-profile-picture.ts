@@ -3,6 +3,7 @@ import { UsersRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import deleteMediaPermanently from "../media/delete-single-permanently.js";
+import ownedProfilePicture from "./helpers/owned-profile-picture.js";
 
 const deleteProfilePicture: ServiceFn<
 	[
@@ -61,6 +62,13 @@ const deleteProfilePicture: ServiceFn<
 		};
 	}
 
+	//* a picture moved to the media library is only unlinked
+	const ownedRes = await ownedProfilePicture(context, {
+		mediaId: userRes.data.profile_picture_media_id,
+		userId: data.targetUserId,
+	});
+	if (ownedRes.error) return ownedRes;
+
 	const updateUserRes = await Users.updateSingle({
 		data: {
 			profile_picture_media_id: null,
@@ -87,11 +95,14 @@ const deleteProfilePicture: ServiceFn<
 	});
 	if (references.error) return references;
 
-	const deleteMediaRes = await deleteMediaPermanently(context, {
-		id: userRes.data.profile_picture_media_id,
-		userId: data.actorUserId,
-	});
-	if (deleteMediaRes.error) return deleteMediaRes;
+	if (ownedRes.data !== null) {
+		const deleteMediaRes = await deleteMediaPermanently(context, {
+			id: ownedRes.data,
+			actor: { type: "internal" },
+			userId: data.actorUserId,
+		});
+		if (deleteMediaRes.error) return deleteMediaRes;
+	}
 
 	return {
 		error: undefined,

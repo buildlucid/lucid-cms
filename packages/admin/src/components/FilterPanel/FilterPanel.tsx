@@ -80,7 +80,7 @@ export interface FilterPanelProps {
 	padding?: FilterPanelPadding;
 	/** Shows the panel as a standalone card, rather than attached to a toolbar. */
 	embedded?: boolean;
-	/** Preset filters, shown as buttons above the filters. */
+	/** Preset filters, shown as buttons above the filters when there's more than one. Clicking the active preset resets the filters. */
 	presets?: FilterPreset[];
 	class?: string;
 }
@@ -563,8 +563,12 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 
 	const handleFieldChange = (row: RowModel, nextKey: string) => {
 		const operator = defaultOperator(nextKey, row.groupTag);
+		const defaultValue = fieldsByKey().get(nextKey)?.defaultValue;
 		if (row.ref.source === "draft") {
 			updateDraft(row.ref.draftId, { key: nextKey, operator, value: "" });
+			if (defaultValue !== undefined) {
+				commitDraftValue(row.ref.draftId, defaultValue);
+			}
 			return;
 		}
 		if (row.ref.source === "top") {
@@ -574,7 +578,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 				props.queryState.setParams({
 					filters: {
 						[oldKey]: { value: undefined, operator: undefined },
-						[nextKey]: { value: undefined, operator },
+						[nextKey]: { value: defaultValue, operator },
 					},
 				});
 				replaceIdentity(`top:${oldKey}`, `top:${nextKey}`);
@@ -585,7 +589,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 			target: row.ref.groupIndex,
 			key: nextKey,
 			operator,
-			value: "",
+			value: defaultValue ?? "",
 		});
 	};
 
@@ -726,7 +730,8 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 	const applyPreset = (preset: FilterPreset) => {
 		setDrafts([]);
 		setRowOrder([]);
-		props.queryState.replaceFilters(preset.filters);
+		if (isPresetActive(preset)) props.queryState.resetFilters();
+		else props.queryState.replaceFilters(preset.filters);
 	};
 
 	/** Group index a row's + action should extend. */
@@ -830,7 +835,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 					props.class,
 				)}
 			>
-				<Show when={(props.presets?.length ?? 0) > 0}>
+				<Show when={(props.presets?.length ?? 0) > 1}>
 					<div class="mb-4 border-b border-border pb-4">
 						<h3 class="mb-2 text-sm font-medium text-title">
 							{T()("filter.section.presets")}
@@ -845,11 +850,10 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 											variant="outline"
 											size="sm"
 											type="button"
-											disabled={active()}
 											aria-pressed={active()}
 											class={
 												active()
-													? "gap-1.5 border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground! opacity-100! cursor-default!"
+													? "gap-1.5 border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground!"
 													: "gap-1.5"
 											}
 											onClick={() => applyPreset(preset)}

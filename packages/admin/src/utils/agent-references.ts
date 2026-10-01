@@ -10,6 +10,14 @@ export type AgentReferenceItem = AgentReferenceSnapshot & {
 	previewUrl?: string;
 };
 
+export type AgentUpload = {
+	id: string;
+	name: string;
+	/** Percent uploaded, from 0 to 100. */
+	progress: number;
+	error?: string;
+};
+
 export type AgentReferenceKind =
 	| "document"
 	| "image"

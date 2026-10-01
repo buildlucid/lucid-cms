@@ -67,7 +67,7 @@ describe("complete upload session", () => {
 					getMeta,
 				},
 			} as never,
-			{ sessionId: "session-id" },
+			{ sessionId: "session-id", userId: 1 },
 		);
 
 		expect(response).toMatchObject({
@@ -104,7 +104,7 @@ describe("complete upload session", () => {
 				db: {},
 				mediaStorage: { key: "current-storage", getMeta },
 			} as never,
-			{ sessionId: "session-id" },
+			{ sessionId: "session-id", userId: 1 },
 		);
 
 		expect(response.error?.status).toBe(400);

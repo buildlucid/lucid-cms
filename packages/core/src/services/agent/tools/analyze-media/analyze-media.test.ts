@@ -250,7 +250,7 @@ test("a media reference in another chat grants no access", async () => {
 	expect(streamMedia).not.toHaveBeenCalled();
 });
 
-test("losing media read permission prevents analysis even while the reference remains", async () => {
+test("losing media read permission prevents analysis of library media even while the reference remains", async () => {
 	const execution = await executionFor();
 	const source = await linkedMedia(execution);
 	const result = await executeAgentTool({
@@ -262,7 +262,7 @@ test("losing media read permission prevents analysis even while the reference re
 			authority: { ...execution.authority, permissions: [] },
 		},
 	});
-	expect(result).toEqual({ type: "forbidden" });
+	expect(result).toMatchObject({ type: "failed" });
 	expect(streamMedia).not.toHaveBeenCalled();
 	expect(analyzeMedia).not.toHaveBeenCalled();
 });

@@ -14,14 +14,20 @@ import {
 import type {
 	MediaCropInput,
 	MediaOrigin,
+	MediaOwnership,
 	MediaType,
 } from "../../types/response.js";
 import changeKeyVisibility from "../../utils/media/change-key-visibility.js";
 import getKeyVisibility from "../../utils/media/get-key-visibility.js";
+import {
+	getMediaOwnership,
+	type MediaActor,
+} from "../../utils/media/media-access.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearProcessedImage from "../processed-images/clear-single.js";
 import checkAwaitingSync from "./checks/check-awaiting-sync.js";
+import { mediaAccessError } from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import deactivateCrop from "./helpers/deactivate-crop.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";
@@ -42,7 +48,8 @@ const updateSingle: ServiceFn<
 			fileName?: string;
 			folderId?: number | null;
 			public?: boolean;
-			isHidden?: boolean;
+			/** Removes ownership of personal media, so it joins the shared media library. */
+			removeOwnership?: boolean;
 			isDeleted?: boolean;
 			origin?: MediaOrigin;
 			aiGenerationRequestId?: string;
@@ -64,6 +71,7 @@ const updateSingle: ServiceFn<
 			expectedSize?: number;
 			validation?: { maxBytes?: number; mimeTypes?: readonly string[] };
 			allowedType?: MediaType;
+			actor: MediaActor;
 			userId: number | null;
 		},
 	],
@@ -101,6 +109,36 @@ const updateSingle: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const currentOwnership = getMediaOwnership(mediaRes.data);
+	const accessError = mediaAccessError({
+		actor: data.actor,
+		ownership: currentOwnership,
+		action: "update",
+	});
+	if (accessError) return { error: accessError, data: undefined };
+
+	const ownership: MediaOwnership = data.removeOwnership
+		? { type: "library" }
+		: currentOwnership;
+
+	//* people can't publish or file personal media without moving it to the library first
+	if (
+		data.actor.type === "user" &&
+		ownership.type !== "library" &&
+		(data.public === true ||
+			(data.folderId !== undefined && data.folderId !== null))
+	) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:core.media.personal.library.required"),
+			},
+			data: undefined,
+		};
+	}
+
 	if (data.crop && mediaRes.data.type !== "image") {
 		return {
 			error: {
@@ -132,6 +170,7 @@ const updateSingle: ServiceFn<
 		const posterRes = await resolvePoster(context, {
 			posterId: data.posterId,
 			parentId: data.id,
+			ownership,
 		});
 		if (posterRes.error) return posterRes;
 	}
@@ -361,7 +400,7 @@ const updateSingle: ServiceFn<
 		is_light: updateObjectRes ? (data.isLight ?? null) : data.isLight,
 		folder_id: data.folderId,
 		public: isPublic ?? data.public,
-		is_hidden: mediaRes.data.parent_media_id == null ? data.isHidden : true,
+		owner_user_id: data.removeOwnership ? null : undefined,
 		is_deleted: data.isDeleted,
 		is_deleted_at: data.isDeleted
 			? new Date().toISOString()
@@ -462,7 +501,6 @@ const updateSingle: ServiceFn<
 		const hidePosterRes = await Media.updateSingle({
 			where: [{ key: "id", operator: "=", value: data.posterId }],
 			data: {
-				is_hidden: true,
 				folder_id: null,
 				parent_media_id: mediaRes.data.id,
 				relation_type: "poster",
@@ -495,6 +533,8 @@ const updateSingle: ServiceFn<
 				type: finalType,
 				origin: data.origin ?? mediaRes.data.origin,
 				public: isPublic ?? data.public ?? mediaRes.data.public,
+				owner_user_id: ownership.type === "user" ? ownership.userId : null,
+				is_system: ownership.type === "system",
 				relation_type: mediaRes.data.relation_type,
 			},
 			crop: data.crop,
@@ -506,6 +546,8 @@ const updateSingle: ServiceFn<
 	const visibilityRes = await syncOwnedVisibility(context, {
 		parentId: mediaRes.data.id,
 		public: isPublic ?? data.public ?? currentPublic,
+		ownerUserId: ownership.type === "user" ? ownership.userId : null,
+		isSystem: ownership.type === "system",
 		userId: data.userId,
 	});
 	if (visibilityRes.error) return visibilityRes;

@@ -54,7 +54,6 @@ const updateSingleController = factory.createHandlers(
 			fileName: body.fileName,
 			key: body.key,
 			public: body.public,
-			isHidden: body.isHidden,
 			folderId: body.folderId,
 			title: body.title,
 			alt: body.alt,
@@ -74,6 +73,7 @@ const updateSingleController = factory.createHandlers(
 			crop: body.crop,
 			origin: body.origin,
 			aiGenerationRequestId: body.aiGenerationRequestId,
+			actor: { type: "user", user: c.get("auth") },
 			userId: c.get("auth").id,
 		});
 		if (updateMedia.error) throw new LucidAPIError(updateMedia.error);

@@ -1,7 +1,9 @@
 import { MediaRepository } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
+import { getMediaOwnership, type MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
+import { mediaAccessError } from "./checks/check-media-access.js";
 
 const requestDownload: ServiceFn<
 	[
@@ -10,6 +12,7 @@ const requestDownload: ServiceFn<
 				| {
 						type: "id";
 						id: number;
+						actor: MediaActor;
 				  }
 				| {
 						type: "key";
@@ -54,6 +57,13 @@ const requestDownload: ServiceFn<
 			validation: { enabled: true },
 		});
 		if (mediaRes.error) return mediaRes;
+
+		const accessError = mediaAccessError({
+			actor: data.target.actor,
+			ownership: getMediaOwnership(mediaRes.data),
+			action: "read",
+		});
+		if (accessError) return { error: accessError, data: undefined };
 
 		return getDownloadUrl(mediaRes.data.crop?.[0] ?? mediaRes.data);
 	}

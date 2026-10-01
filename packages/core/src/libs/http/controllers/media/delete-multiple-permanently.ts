@@ -53,6 +53,7 @@ const deleteMultiplePermanentlyController = factory.createHandlers(
 			},
 		)(context, {
 			ids,
+			actor: { type: "user", user: c.get("auth") },
 			userId: c.get("auth").id,
 		});
 		if (deleteMultiplePermanently.error)

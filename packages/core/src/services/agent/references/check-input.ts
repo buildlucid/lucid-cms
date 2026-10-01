@@ -1,17 +1,17 @@
 import {
+	canReadReference,
 	referenceKey,
 	referenceNotFoundError,
-	referenceReadPermission,
 } from "../../../libs/agent/references.js";
 import { getAgent } from "../../../libs/agent/registry.js";
 import { copy } from "../../../libs/i18n/index.js";
-import hasPermission from "../../../libs/permission/has-permission.js";
 import type { AgentReferenceInput } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 import describe from "./describe.js";
+import mediaOwnership from "./media-ownership.js";
 
-/** Checks attachments against the agent's settings, the sender's current access and whether each resource exists. */
+/** Checks attachments against the agent's settings, the sender's current access and whether each resource exists. Personal media can only be attached by its owner. */
 const checkInput: ServiceFn<
 	[{ userId: number; agentKey: string; references: AgentReferenceInput[] }],
 	undefined
@@ -19,12 +19,18 @@ const checkInput: ServiceFn<
 	if (!input.references.length) return { error: undefined, data: undefined };
 
 	const agent = getAgent(context.config, input.agentKey);
-	const [access, details] = await Promise.all([
+	const [access, details, ownership] = await Promise.all([
 		resolveUserAccess(context, { userId: input.userId }),
 		describe(context, { references: input.references }),
+		mediaOwnership(context, {
+			mediaIds: input.references.flatMap((reference) =>
+				reference.type === "media" ? [reference.mediaId] : [],
+			),
+		}),
 	]);
 	if (access.error) return access;
 	if (details.error) return details;
+	if (ownership.error) return ownership;
 
 	for (const reference of input.references) {
 		const attachable =
@@ -32,9 +38,19 @@ const checkInput: ServiceFn<
 				? agent?.attachments.media
 				: agent?.attachments.documents;
 
+		const detail = details.data.get(referenceKey(reference));
+
 		if (
 			!attachable ||
-			!hasPermission(access.data, referenceReadPermission(reference))
+			!canReadReference({
+				reference,
+				ownership:
+					reference.type === "media"
+						? ownership.data.get(reference.mediaId)
+						: undefined,
+				userId: input.userId,
+				grant: access.data,
+			})
 		) {
 			return {
 				data: undefined,
@@ -46,7 +62,7 @@ const checkInput: ServiceFn<
 			};
 		}
 
-		if (!details.data.has(referenceKey(reference))) {
+		if (!detail) {
 			return { data: undefined, error: referenceNotFoundError(reference) };
 		}
 	}

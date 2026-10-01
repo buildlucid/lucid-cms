@@ -31,6 +31,7 @@ import {
 	agentReferenceSnapshotSchema,
 } from "./agent-references.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
+import { mediaResponseSchema, uploadSessionResponseSchema } from "./media.js";
 
 /** Pending and claimed input is still to be delivered; the rest is kept as a receipt. */
 export const agentInputStatusSchema = z.enum([
@@ -412,6 +413,56 @@ const routineBody = z.object({
 });
 
 export const controllerSchemas = {
+	createUploadSession: {
+		body: z.object({
+			agentKey: z.string().trim().min(1).meta({
+				description: "The agent the file is attached to",
+				example: "assistant",
+			}),
+			fileName: z.string().trim().meta({
+				description: "The file name",
+				example: "brief.pdf",
+			}),
+			mimeType: z.string().trim().meta({
+				description: "The file's MIME type",
+				example: "application/pdf",
+			}),
+			size: z.number().nonnegative().meta({
+				description: "The file size in bytes",
+				example: 1048576,
+			}),
+		}),
+		params: undefined,
+		query: noQuery,
+		response: uploadSessionResponseSchema,
+	} satisfies ControllerSchema,
+	createUpload: {
+		body: z.object({
+			agentKey: z.string().trim().min(1).meta({
+				description: "The agent the file is attached to",
+				example: "assistant",
+			}),
+			key: z.string().trim().meta({
+				description: "The uploaded media key",
+				example: "private/123e4567e89b12d3a456426614174000",
+			}),
+			fileName: z.string().trim().meta({
+				description: "The file name",
+				example: "brief.pdf",
+			}),
+			width: z.number().positive().optional().meta({
+				description: "The image or video width",
+				example: 1200,
+			}),
+			height: z.number().positive().optional().meta({
+				description: "The image or video height",
+				example: 800,
+			}),
+		}),
+		params: undefined,
+		query: noQuery,
+		response: mediaResponseSchema,
+	} satisfies ControllerSchema,
 	getDefinitions: {
 		body: undefined,
 		params: undefined,

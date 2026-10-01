@@ -32,6 +32,7 @@ const getMultiple = async (
 
 			return getMultipleMedia(context, {
 				query: data.query,
+				actor: { type: "internal" },
 			});
 		},
 		name: {

@@ -14,6 +14,7 @@ export type CorePermission =
 	| "media:create"
 	| "media:update"
 	| "media:delete"
+	| "media:read-all"
 	| "email:read"
 	| "email:delete"
 	| "email:send"

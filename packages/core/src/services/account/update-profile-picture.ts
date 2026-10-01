@@ -5,6 +5,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import notifyDependants from "../document-references/notify-dependants.js";
 import createMedia from "../media/create-single.js";
 import updateMedia from "../media/update-single.js";
+import ownedProfilePicture from "./helpers/owned-profile-picture.js";
 
 const updateProfilePicture: ServiceFn<
 	[
@@ -80,7 +81,14 @@ const updateProfilePicture: ServiceFn<
 	});
 	if (userRes.error) return userRes;
 
-	const existingProfilePictureId = userRes.data.profile_picture_media_id;
+	//* a picture moved to the media library stays there, so a new one is created instead
+	const existingRes = await ownedProfilePicture(context, {
+		mediaId: userRes.data.profile_picture_media_id,
+		userId: data.targetUserId,
+	});
+	if (existingRes.error) return existingRes;
+
+	const existingProfilePictureId = existingRes.data;
 	if (existingProfilePictureId !== null) {
 		const updateMediaRes = await updateMedia(context, {
 			id: existingProfilePictureId,
@@ -102,6 +110,7 @@ const updateProfilePicture: ServiceFn<
 			aiGenerationRequestId: data.aiGenerationRequestId,
 			crop: data.crop,
 			allowedType: "image",
+			actor: { type: "internal" },
 			userId: data.actorUserId,
 		});
 		if (updateMediaRes.error) return updateMediaRes;
@@ -169,9 +178,10 @@ const updateProfilePicture: ServiceFn<
 		title: data.title || [],
 		alt: data.alt || [],
 		folderId: null,
-		isHidden: true,
+		ownerUserId: data.targetUserId,
 		crop: data.crop ?? undefined,
 		allowedType: "image",
+		actor: { type: "internal" },
 		userId: data.actorUserId,
 	});
 	if (createMediaRes.error) return createMediaRes;

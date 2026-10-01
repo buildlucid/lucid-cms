@@ -51,6 +51,7 @@ const requestDownloadController = factory.createHandlers(
 			target: {
 				type: "id",
 				id: Number.parseInt(id, 10),
+				actor: { type: "user", user: c.get("auth") },
 			},
 		});
 		if (downloadRes.error) throw new LucidAPIError(downloadRes.error);

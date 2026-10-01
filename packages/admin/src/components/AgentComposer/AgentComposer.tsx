@@ -17,6 +17,7 @@ import {
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import useAgentUploads from "@/hooks/useAgentUploads/useAgentUploads";
 import useFirstPaint from "@/hooks/useFirstPaint/useFirstPaint";
 import T from "@/translations";
 import {
@@ -42,6 +43,8 @@ export interface AgentComposerHandle {
 
 export interface AgentComposerProps {
 	placeholder: string;
+	/** The agent files are uploaded for. Uploading is off without it. */
+	agentKey?: string;
 	/** Resource types the add menu offers. */
 	attachments?: Agent["attachments"];
 	/** What the agent can do, shown on attached files and in the toolbar. */
@@ -96,7 +99,8 @@ export const composerTriggerClasses =
  * The message box for talking to the agent. It supports markdown formatting as
  * you type and sends markdown. Enter sends, or queues while the agent is busy;
  * Mod + Enter steers; Shift + Enter adds a line. It grows with its content, then
- * scrolls.
+ * scrolls. Files dropped on it or picked from the add menu upload as the user's
+ * personal media and attach once they finish.
  */
 const AgentComposer: Component<AgentComposerProps> = (props) => {
 	// ----------------------------------------
@@ -105,12 +109,25 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	const [blank, setBlank] = createSignal(true);
 	const painted = useFirstPaint();
 	let container: HTMLDivElement | undefined;
+	let fileInput: HTMLInputElement | undefined;
 	const [submitting, setSubmitting] = createSignal(false);
+	const [dragDepth, setDragDepth] = createSignal(0);
 	const draft = readDraft(props.draftKey);
 	const [references, setReferences] = createSignal(draft.references);
+	const uploads = useAgentUploads({
+		agentKey: () => props.agentKey,
+		onUploaded: (reference) =>
+			setReferences((current) => mergeAgentReferences(current, [reference])),
+	});
 
 	// ----------------------------------------
 	// Memos
+	const canUpload = createMemo(
+		() =>
+			props.agentKey !== undefined &&
+			props.attachments?.media === true &&
+			!props.disabled,
+	);
 	const unsupportedReferences = createMemo(() => {
 		const attachments = props.attachments;
 		return (
@@ -138,12 +155,37 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			references: references(),
 		});
 
+	const hasFiles = (event: DragEvent) =>
+		canUpload() &&
+		Array.from(event.dataTransfer?.types ?? []).includes("Files");
+	const onDragEnter = (event: DragEvent) => {
+		if (!hasFiles(event)) return;
+		event.preventDefault();
+		setDragDepth((depth) => depth + 1);
+	};
+	const onDragOver = (event: DragEvent) => {
+		if (!hasFiles(event)) return;
+		event.preventDefault();
+		if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+	};
+	const onDragLeave = (event: DragEvent) => {
+		if (!hasFiles(event)) return;
+		setDragDepth((depth) => Math.max(0, depth - 1));
+	};
+	const onDrop = (event: DragEvent) => {
+		if (!hasFiles(event)) return;
+		event.preventDefault();
+		setDragDepth(0);
+		uploads.add(Array.from(event.dataTransfer?.files ?? []));
+	};
+
 	const submit = async (mode: "send" | "steer") => {
 		const instance = editor();
 		if (
 			!instance ||
 			submitting() ||
 			props.disabled ||
+			uploads.uploading() ||
 			unsupportedReferences() ||
 			(isBlank(instance) && references().length === 0)
 		) {
@@ -258,6 +300,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			(key, previous) => {
 				const instance = editor();
 				if (!instance) return;
+				uploads.clear();
 				saveDraft.clear();
 				writeDraft(previous, {
 					text: instance.getMarkdown(),
@@ -294,7 +337,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 
 	createEffect(
 		on(
-			() => references().length > 0,
+			() => references().length > 0 || uploads.uploads().length > 0,
 			(attached) => props.onAttachedChange?.(attached),
 		),
 	);
@@ -321,9 +364,30 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class={props.class}>
+		// biome-ignore lint/a11y/noStaticElementInteractions: files can also be picked from the add menu
+		<div
+			class={props.class}
+			onDragEnter={onDragEnter}
+			onDragOver={onDragOver}
+			onDragLeave={onDragLeave}
+			onDrop={onDrop}
+		>
+			<input
+				ref={fileInput}
+				type="file"
+				multiple
+				class="hidden"
+				tabIndex={-1}
+				aria-hidden="true"
+				onChange={(event) => {
+					uploads.add(Array.from(event.currentTarget.files ?? []));
+					event.currentTarget.value = "";
+				}}
+			/>
 			<AgentReferenceFiles
 				references={references()}
+				uploads={uploads.uploads()}
+				onRemoveUpload={(upload) => uploads.remove(upload.id)}
 				capabilities={props.capabilities}
 				class={
 					props.floatAttachments
@@ -349,6 +413,11 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 					void submit("send");
 				}}
 			>
+				<Show when={dragDepth() > 0}>
+					<div class="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-2xl border-2 border-dashed border-primary bg-card/90 text-sm font-medium text-title">
+						{T()("agent.uploads.drop")}
+					</div>
+				</Show>
 				<Show when={props.header}>
 					<div class="overflow-hidden rounded-t-2xl">{props.header}</div>
 				</Show>
@@ -388,6 +457,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 						attachments={props.attachments}
 						references={references()}
 						disabled={props.disabled || submitting()}
+						onUpload={canUpload() ? () => fileInput?.click() : undefined}
 						onSelect={(type, selected) =>
 							setReferences((current) => [
 								...current.filter((reference) => reference.type !== type),
@@ -422,6 +492,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 								class="focus-visible:ring-inset"
 								disabled={
 									blank() ||
+									uploads.uploading() ||
 									unsupportedReferences() ||
 									submitting() ||
 									props.disabled ||

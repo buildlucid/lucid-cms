@@ -308,7 +308,10 @@ describe("unassigned content locales", () => {
 			expect(result.error).toBeUndefined();
 		}
 		context.config.localization.defaultLocale = null;
-		const unassigned = await getMedia(context, { id: media.data.id });
+		const unassigned = await getMedia(context, {
+			id: media.data.id,
+			actor: { type: "internal" },
+		});
 		assert(unassigned.data, JSON.stringify(unassigned.error));
 		expect(unassigned.data.title).toBe("Zweite");
 
@@ -317,20 +320,37 @@ describe("unassigned content locales", () => {
 			{ code: "fr", label: "French" },
 		];
 		context.config.localization.defaultLocale = "de";
-		const inherited = await getMedia(context, { id: media.data.id });
+		const inherited = await getMedia(context, {
+			id: media.data.id,
+			actor: { type: "internal" },
+		});
 		assert(inherited.data, JSON.stringify(inherited.error));
 		expect(inherited.data.title).toEqual({ de: "Zweite" });
 
 		context.config.localization.defaultLocale = "fr";
-		const french = await getMedia(context, { id: media.data.id });
+		const french = await getMedia(context, {
+			id: media.data.id,
+			actor: { type: "internal" },
+		});
 		expect(french.data?.title).toEqual({ fr: "Zweite" });
 		context.config.localization.defaultLocale = "de";
 		expect(
-			(await updateMedia(context, { id: media.data.id, userId })).error,
+			(
+				await updateMedia(context, {
+					id: media.data.id,
+					actor: { type: "internal" },
+					userId,
+				})
+			).error,
 		).toBeUndefined();
 		context.config.localization.defaultLocale = "fr";
 		expect(
-			(await getMedia(context, { id: media.data.id })).data?.title,
+			(
+				await getMedia(context, {
+					id: media.data.id,
+					actor: { type: "internal" },
+				})
+			).data?.title,
 		).toEqual({ de: "Zweite" });
 		context.config.localization.defaultLocale = "de";
 
@@ -352,15 +372,30 @@ describe("unassigned content locales", () => {
 			locales: [{ code: "fr", label: "French" }],
 		};
 		expect(
-			(await getMedia(context, { id: media.data.id })).data?.title,
+			(
+				await getMedia(context, {
+					id: media.data.id,
+					actor: { type: "internal" },
+				})
+			).data?.title,
 		).toEqual({});
 		context.config.localization = { defaultLocale: null, locales: [] };
 		expect(
-			(await getMedia(context, { id: media.data.id })).data?.title,
+			(
+				await getMedia(context, {
+					id: media.data.id,
+					actor: { type: "internal" },
+				})
+			).data?.title,
 		).toBeNull();
 		context.config.localization = configured;
 		expect(
-			(await getMedia(context, { id: media.data.id })).data?.title,
+			(
+				await getMedia(context, {
+					id: media.data.id,
+					actor: { type: "internal" },
+				})
+			).data?.title,
 		).toEqual({ de: "Zweite" });
 
 		// A cleared default value must not resurrect the unassigned text.
@@ -383,7 +418,10 @@ describe("unassigned content locales", () => {
 			}),
 		]);
 		for (const result of clearedResults) expect(result.error).toBeUndefined();
-		const explicit = await getMedia(context, { id: media.data.id });
+		const explicit = await getMedia(context, {
+			id: media.data.id,
+			actor: { type: "internal" },
+		});
 		assert(explicit.data, JSON.stringify(explicit.error));
 		expect(explicit.data.title).toEqual({ de: null });
 		expect(

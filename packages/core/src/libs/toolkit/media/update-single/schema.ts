@@ -11,7 +11,6 @@ export const inputSchema = z.object({
 	fileName: z.string().trim().min(1).optional(),
 	folderId: z.number().int().positive().nullable().optional(),
 	public: z.boolean().optional(),
-	isHidden: z.boolean().optional(),
 	isDeleted: z.boolean().optional(),
 	origin: originSchema.optional(),
 	title: translationsSchema.optional(),

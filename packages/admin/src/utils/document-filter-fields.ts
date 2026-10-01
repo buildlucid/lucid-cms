@@ -38,6 +38,8 @@ export interface FilterField {
 	type: FilterFieldType;
 	/** For `select` fields. */
 	options?: Array<{ value: string; label: string }>;
+	/** The value a row starts with when this field is picked, such as the only option a user can choose. */
+	defaultValue?: string;
 	/** Adds a time input, for `datetime` fields. */
 	time?: boolean;
 	/** For `checkbox` fields. */

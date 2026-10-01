@@ -4,6 +4,8 @@ import cancelRun from "../../../controllers/agent/cancel-run.js";
 import compactConversation from "../../../controllers/agent/compact-conversation.js";
 import createConversation from "../../../controllers/agent/create-conversation.js";
 import createRoutine from "../../../controllers/agent/create-routine.js";
+import createUpload from "../../../controllers/agent/create-upload.js";
+import createUploadSession from "../../../controllers/agent/create-upload-session.js";
 import deleteConversation from "../../../controllers/agent/delete-conversation.js";
 import deleteReference from "../../../controllers/agent/delete-reference.js";
 import deleteRoutine from "../../../controllers/agent/delete-routine.js";
@@ -31,6 +33,8 @@ import watchRun from "../../../controllers/agent/watch-run.js";
 const agentRoutes = new Hono<LucidHonoGeneric>()
 	.get("/definitions", ...getDefinitions)
 	.get("/models/:agentKey", ...getModels)
+	.post("/uploads/session", ...createUploadSession)
+	.post("/uploads", ...createUpload)
 	.get("/conversations", ...getConversations)
 	.post("/conversations", ...createConversation)
 	.get("/conversations/:id", ...getConversation)

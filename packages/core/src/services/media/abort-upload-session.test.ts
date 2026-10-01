@@ -45,7 +45,7 @@ describe("abort upload session", () => {
 					delete: deleteFile,
 				},
 			} as never,
-			{ sessionId: "session-id" },
+			{ sessionId: "session-id", userId: 1 },
 		);
 
 		expect(response.error?.status).toBe(400);
@@ -91,7 +91,7 @@ describe("abort upload session", () => {
 					delete: deleteFile,
 				},
 			} as never,
-			{ sessionId: "session-id" },
+			{ sessionId: "session-id", userId: 1 },
 		);
 
 		expect(response.error).toBeUndefined();

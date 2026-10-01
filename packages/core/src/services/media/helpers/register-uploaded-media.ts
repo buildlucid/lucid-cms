@@ -12,6 +12,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import getKeyVisibility from "../../../utils/media/get-key-visibility.js";
+import { getMediaOwnership } from "../../../utils/media/media-access.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type createSingle from "../create-single.js";
 import notifyChange from "../notify-change.js";
@@ -78,10 +79,32 @@ const registerUploadedMedia: ServiceFn<
 		};
 	}
 
-	//* verify the poster exists
+	const ownerUserId = data.ownerUserId ?? null;
+	const isSystem = data.isSystem ?? false;
+
+	//* people can't publish or file personal media, only internal code can, such as for profile pictures
+	if (
+		data.actor.type === "user" &&
+		ownerUserId !== null &&
+		(isPublic || (data.folderId !== undefined && data.folderId !== null))
+	) {
+		return {
+			error: {
+				type: "basic",
+				status: 400,
+				message: copy("server:core.media.personal.library.required"),
+			},
+			data: undefined,
+		};
+	}
+
 	if (data.posterId !== undefined && data.posterId !== null) {
 		const posterRes = await resolvePoster(context, {
 			posterId: data.posterId,
+			ownership: getMediaOwnership({
+				owner_user_id: ownerUserId,
+				is_system: isSystem,
+			}),
 		});
 		if (posterRes.error) return posterRes;
 	}
@@ -133,7 +156,8 @@ const registerUploadedMedia: ServiceFn<
 			is_dark: isImage ? (data.isDark ?? null) : null,
 			is_light: isImage ? (data.isLight ?? null) : null,
 			folder_id: data.folderId ?? null,
-			is_hidden: data.isHidden ?? false,
+			owner_user_id: ownerUserId,
+			is_system: isSystem,
 			created_by: data.userId,
 			updated_by: data.userId,
 			updated_at: new Date().toISOString(),
@@ -157,7 +181,6 @@ const registerUploadedMedia: ServiceFn<
 		const hidePosterRes = await Media.updateSingle({
 			where: [{ key: "id", operator: "=", value: data.posterId }],
 			data: {
-				is_hidden: true,
 				folder_id: null,
 				parent_media_id: mediaRes.data.id,
 				relation_type: "poster",
@@ -179,6 +202,8 @@ const registerUploadedMedia: ServiceFn<
 				type: uploaded.type,
 				origin: data.origin,
 				public: isPublic,
+				owner_user_id: ownerUserId,
+				is_system: isSystem,
 				relation_type: null,
 			},
 			crop: data.crop,
@@ -190,6 +215,8 @@ const registerUploadedMedia: ServiceFn<
 	const visibilityRes = await syncOwnedVisibility(context, {
 		parentId: mediaRes.data.id,
 		public: isPublic,
+		ownerUserId,
+		isSystem,
 		userId: data.userId,
 	});
 	if (visibilityRes.error) return visibilityRes;

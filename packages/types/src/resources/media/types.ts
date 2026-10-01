@@ -110,6 +110,17 @@ export type MediaImageFile =
 /** Unassigned text is a string; translated text is keyed by language. */
 export type MediaTranslationMap = string | Record<string, string | null> | null;
 
+/**
+ * Who media belongs to. Library media is shared through the media library,
+ * user media is personal to its owner, such as agent chat uploads and profile
+ * pictures, and system media is managed by another record, such as an OAuth
+ * client logo.
+ */
+export type MediaOwnership =
+	| { type: "library" }
+	| { type: "user"; userId: number }
+	| { type: "system" };
+
 interface MediaBase<Type extends MediaType> {
 	id: number;
 	type: Type;
@@ -118,6 +129,7 @@ interface MediaBase<Type extends MediaType> {
 	origin: MediaOrigin;
 	title: MediaTranslationMap;
 	public: boolean;
+	ownership: MediaOwnership;
 	isDeleted: boolean | null;
 	isDeletedAt: string | null;
 	deletedBy: number | null;

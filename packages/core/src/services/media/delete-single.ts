@@ -2,6 +2,7 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
+import type { MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
 import checkMediaAccess from "./checks/check-media-access.js";
@@ -12,6 +13,7 @@ const deleteSingle: ServiceFn<
 	[
 		{
 			id: number;
+			actor: MediaActor;
 			userId: number | null;
 		},
 	],
@@ -24,6 +26,8 @@ const deleteSingle: ServiceFn<
 
 	const accessRes = await checkMediaAccess(context, {
 		id: data.id,
+		actor: data.actor,
+		action: "delete",
 	});
 	if (accessRes.error) return accessRes;
 

@@ -6,7 +6,6 @@ import type {
 import { runToolkitService } from "../../utils.js";
 import { inputSchema } from "./schema.js";
 
-/** Media item to delete. */
 export type ToolkitMediaDeleteSingleInput = z.input<typeof inputSchema>;
 
 /** Soft-deletes media by default. Set hard to permanently remove it and its owned files. */
@@ -29,7 +28,7 @@ const deleteSingle = (
 
 			return serviceWrapper(deleteMedia, {
 				transaction: true,
-			})(context, { id: data.id, userId: null });
+			})(context, { id: data.id, actor: { type: "internal" }, userId: null });
 		},
 		name: {
 			key: "core.toolkit.media.delete-single.error.name",

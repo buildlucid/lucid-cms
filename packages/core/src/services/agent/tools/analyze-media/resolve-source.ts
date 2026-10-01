@@ -1,4 +1,5 @@
 import type z from "zod";
+import { canReadReference } from "../../../../libs/agent/references.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import {
 	MAX_MEDIA_BYTES,
@@ -11,6 +12,7 @@ import {
 	MediaRepository,
 } from "../../../../libs/repositories/index.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
+import { getMediaOwnership } from "../../../../utils/media/index.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import streamMedia from "../../../media/stream.js";
 import isUrlInConversation from "../../../web/helpers/is-url-in-conversation.js";
@@ -74,7 +76,7 @@ const resolveSource: ServiceFn<
 	}
 
 	const media = await Media.selectSingle({
-		select: ["mime_type", "file_size", "status"],
+		select: ["mime_type", "file_size", "status", "owner_user_id", "is_system"],
 		where: [
 			{ key: "id", operator: "=", value: source.mediaId },
 			{
@@ -92,6 +94,26 @@ const resolveSource: ServiceFn<
 		},
 	});
 	if (media.error) return media;
+
+	//* linked media stays readable only while the run's principal could link it
+	const { principal } = execution.authority;
+	if (
+		!canReadReference({
+			reference: { type: "media", mediaId: source.mediaId },
+			ownership: getMediaOwnership(media.data),
+			userId: principal.type === "user" ? principal.userId : null,
+			grant: principal.type === "user" ? execution.authority : undefined,
+		})
+	) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 403,
+				message: copy("server:agent.media.source.denied"),
+			},
+		};
+	}
 
 	const mimeType = mediaMimeTypeSchema.safeParse(media.data.mime_type);
 	if (!mimeType.success) {

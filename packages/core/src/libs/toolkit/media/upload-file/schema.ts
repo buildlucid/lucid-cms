@@ -17,8 +17,8 @@ export const inputSchema = fileMetadataSchema.extend({
 	origin: originSchema.default("human"),
 	/** Allow unauthenticated file access. Defaults to false. */
 	public: z.boolean().default(false),
-	/** Exclude the item from ordinary library lists. Defaults to false. */
-	isHidden: z.boolean().default(false),
+	/** Keeps the file out of the media library for a feature that manages it, like an OAuth client logo. Defaults to false. */
+	isSystem: z.boolean().default(false),
 	folderId: z.number().int().positive().nullable().optional(),
 	title: translationsSchema.optional(),
 	alt: translationsSchema.optional(),

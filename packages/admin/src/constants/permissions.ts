@@ -14,6 +14,7 @@ export const Permissions = {
 	MediaCreate: "media:create",
 	MediaUpdate: "media:update",
 	MediaDelete: "media:delete",
+	MediaReadAll: "media:read-all",
 	EmailRead: "email:read",
 	EmailSend: "email:send",
 	EmailDelete: "email:delete",

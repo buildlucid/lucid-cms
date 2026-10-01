@@ -15,6 +15,8 @@ import CreateMenu, {
 	type CreateMenuAction,
 } from "@/components/CreateMenu/CreateMenu";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
+import type { FilterField } from "@/components/FilterPanel/FilterPanel";
+import type { FilterPreset } from "@/components/FilterPanel/preset-state";
 import MediaAltGenerationModal from "@/components/MediaAltGenerationModal/MediaAltGenerationModal";
 import MediaImageGenerationModal from "@/components/MediaImageGenerationModal/MediaImageGenerationModal";
 import { MediaList } from "@/components/MediaList/MediaList";
@@ -37,6 +39,7 @@ import mediaStore from "@/store/mediaStore/mediaStore";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import helpers from "@/utils/helpers";
 
 const MediaPage: Component = () => {
 	// ----------------------------------
@@ -59,6 +62,8 @@ const MediaPage: Component = () => {
 				height: numberFilter(),
 				createdAt: textFilter(),
 				updatedAt: textFilter(),
+				ownership: textFilter(),
+				ownerId: numberFilter(),
 			},
 			sorts: {
 				fileSize: sort(),
@@ -106,6 +111,58 @@ const MediaPage: Component = () => {
 	});
 	const canCreateMedia = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.MediaCreate]).all;
+	});
+	const canReadAllMedia = createMemo(() => {
+		return userStore.get.hasPermission([Permissions.MediaReadAll]).all;
+	});
+	const ownerFilterField = createMemo<FilterField>(() => {
+		const user = userStore.get.user;
+		if (canReadAllMedia() || !user) {
+			return {
+				label: T()("media.ownership.owner"),
+				key: "ownerId",
+				type: "user",
+			};
+		}
+		return {
+			label: T()("media.ownership.owner"),
+			key: "ownerId",
+			type: "select",
+			options: [
+				{ value: String(user.id), label: helpers.formatUserName(user, "name") },
+			],
+			defaultValue: String(user.id),
+		};
+	});
+	const mediaPresets = createMemo<FilterPreset[]>(() => {
+		const userId = userStore.get.user?.id;
+		const presets: FilterPreset[] = [
+			{
+				key: "mine",
+				label: T()("media.presets.mine"),
+				filters: {
+					ownership: { value: "user", operator: "=" },
+					...(userId !== undefined
+						? { ownerId: { value: userId, operator: "=" } }
+						: {}),
+				},
+			},
+		];
+		if (canReadAllMedia()) {
+			presets.push(
+				{
+					key: "personal",
+					label: T()("media.presets.personal"),
+					filters: { ownership: { value: "user", operator: "=" } },
+				},
+				{
+					key: "system",
+					label: T()("media.presets.system"),
+					filters: { ownership: { value: "system", operator: "=" } },
+				},
+			);
+		}
+		return presets;
 	});
 	const aiImageGenerationEnabled = createMemo(() =>
 		siteStore.get.isAiFeatureEnabled("imageGeneration"),
@@ -316,6 +373,7 @@ const MediaPage: Component = () => {
 							});
 						}}
 						filterSubject={T()("routes.media.title")}
+						filterPresets={mediaPresets()}
 						filterFields={[
 							{
 								label: T()("common.name"),
@@ -439,6 +497,30 @@ const MediaPage: Component = () => {
 										},
 									]
 								: []),
+							{
+								label: T()("media.ownership"),
+								key: "ownership",
+								type: "select",
+								options: [
+									{
+										label: T()("media.ownership.library"),
+										value: "library",
+									},
+									{
+										label: T()("media.ownership.personal"),
+										value: "user",
+									},
+									...(canReadAllMedia()
+										? [
+												{
+													label: T()("media.ownership.system"),
+													value: "system",
+												},
+											]
+										: []),
+								],
+							},
+							ownerFilterField(),
 						]}
 						sorts={[
 							{
@@ -489,6 +571,7 @@ const MediaPage: Component = () => {
 						}}
 					/>
 					<CreateUpdateMediaDrawer
+						allowOwned={true}
 						initialFile={getSingleUploadInitialFile}
 						openImageGenerationOnCreate={getOpenImageGenerationOnCreate}
 						state={{

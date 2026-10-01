@@ -5,7 +5,10 @@ import { MediaRepository } from "../../libs/repositories/index.js";
 import type { MediaUrl } from "../../types/response.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import {
+	canAccessMedia,
+	getMediaOwnership,
 	isProcessedImageKey,
+	type MediaActor,
 	normalizeMediaKey,
 	resolveDeliveryUrl,
 	resolveProcessingRequest,
@@ -18,6 +21,7 @@ const resolveUrl: ServiceFn<
 		{
 			key: string;
 			options: MediaResolveUrlOptions;
+			actor: MediaActor;
 		},
 	],
 	MediaUrl
@@ -42,13 +46,19 @@ const resolveUrl: ServiceFn<
 	const mediaStorageRes = await checkHasMediaStorage(context);
 	if (mediaStorageRes.error) return mediaStorageRes;
 
-	//* resolves the source and its active crop in a single lookup
 	const mediaRes = await Media.selectSingleActivePresentationByKey({
 		key: normalizedKey,
 	});
 	if (mediaRes.error) return mediaRes;
 
-	if (!mediaRes.data) {
+	if (
+		!mediaRes.data ||
+		!canAccessMedia({
+			actor: data.actor,
+			ownership: getMediaOwnership(mediaRes.data),
+			action: "read",
+		})
+	) {
 		return {
 			error: {
 				type: "basic",

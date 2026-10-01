@@ -108,11 +108,6 @@ export default class MediaFoldersRepository extends StaticRepository<"lucid_medi
 								fn.count<number>("lucid_media.id").as("media_count"),
 							)
 							.whereRef("lucid_media.folder_id", "=", "lucid_media_folders.id")
-							.where(
-								"lucid_media.is_hidden",
-								"=",
-								this.dbAdapter.getDefault("boolean", "false"),
-							)
 							.as("media_count"),
 					]);
 

@@ -66,6 +66,8 @@ import { captureVideoPosterFrame } from "./utils/video-frame";
 
 interface CreateUpdateMediaPanelProps {
 	id?: Accessor<number | undefined>;
+	/** Offers to make new uploads personal. Leave it off where media must go in content, such as the document editor. */
+	allowOwned?: boolean;
 	initialFile?: Accessor<File | null | undefined>;
 	openImageGenerationOnCreate?: Accessor<boolean>;
 	state: {
@@ -191,6 +193,12 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 
 	// ---------------------------------
 	// Memos
+	//* personal and system media stays private and out of folders
+	const isLibraryMedia = createMemo(() =>
+		panelMode() === "create"
+			? !createMedia.state.owned()
+			: media.data?.data.ownership.type === "library",
+	);
 	const showAltInput = createMemo(() => {
 		if (MediaFile.getFile() !== null) {
 			const type = helpers.getMediaType(MediaFile.getMimeType());
@@ -870,7 +878,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 			alt: posterAlt(),
 			folderId: null,
 			public: targetState()?.public() ?? true,
-			isHidden: true,
 			focalPoint: PosterFile.getFocalPoint() ?? undefined,
 			origin: PosterFile.getFileProvenance()?.origin,
 			aiGenerationRequestId:
@@ -1261,33 +1268,49 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 								onChange={setActiveTab}
 							/>
 							<Show when={activeTab() === "details"}>
-								<Select
-									id="media-folder"
-									value={targetState()?.folderId() ?? undefined}
-									onChange={(val) => {
-										const id =
-											typeof val === "string" ? Number.parseInt(val, 10) : val;
-										targetAction()?.setFolderId(id);
-									}}
-									name="media-folder"
-									options={folderOptions()}
-									label={T()("common.folder")}
-									required={false}
-									errors={getBodyError("folderId", mutateErrors())}
-								/>
-								<Switch
-									id="public"
-									value={targetState()?.public() ?? true}
-									onChange={(val) => {
-										targetAction()?.setPublic(val);
-									}}
-									name="public"
-									label={T()("common.publicly.available")}
-									tooltip={T()("media.visibility.public.description")}
-									trueLabel={T()("common.public")}
-									falseLabel={T()("common.private")}
-									errors={getBodyError("featured", mutateErrors())}
-								/>
+								<Show when={props.allowOwned && panelMode() === "create"}>
+									<Switch
+										id="owned"
+										value={createMedia.state.owned()}
+										onChange={createMedia.setOwned}
+										name="owned"
+										label={T()("media.ownership.visible.to")}
+										tooltip={T()("media.ownership.owned.description")}
+										trueLabel={T()("media.ownership.only.me")}
+										falseLabel={T()("media.ownership.everyone")}
+									/>
+								</Show>
+								<Show when={isLibraryMedia()}>
+									<Select
+										id="media-folder"
+										value={targetState()?.folderId() ?? undefined}
+										onChange={(val) => {
+											const id =
+												typeof val === "string"
+													? Number.parseInt(val, 10)
+													: val;
+											targetAction()?.setFolderId(id);
+										}}
+										name="media-folder"
+										options={folderOptions()}
+										label={T()("common.folder")}
+										required={false}
+										errors={getBodyError("folderId", mutateErrors())}
+									/>
+									<Switch
+										id="public"
+										value={targetState()?.public() ?? true}
+										onChange={(val) => {
+											targetAction()?.setPublic(val);
+										}}
+										name="public"
+										label={T()("common.publicly.available")}
+										tooltip={T()("media.visibility.public.description")}
+										trueLabel={T()("common.public")}
+										falseLabel={T()("common.private")}
+										errors={getBodyError("featured", mutateErrors())}
+									/>
+								</Show>
 								<For each={editableLocales()}>
 									{(locale, index) => (
 										<Show when={locale.code === (contentLocale() ?? null)}>

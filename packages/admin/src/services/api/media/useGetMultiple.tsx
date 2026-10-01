@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/solid-query";
-import type { Media, MediaStatus, ResponseBody } from "@types";
+import type { Media, MediaOwnership, MediaStatus, ResponseBody } from "@types";
 import { type Accessor, createMemo } from "solid-js";
 import { queryKeys } from "@/services/query-keys";
 import { getRequestInterfaceLocale } from "@/translations";
@@ -19,6 +19,11 @@ interface QueryParams {
 		folderId?: Accessor<number | string | undefined>;
 		isDeleted?: Accessor<1 | 0> | 0 | 1;
 		public?: Accessor<1 | 0> | 0 | 1;
+		/** Library media unless set. Personal and system media only lists for those who can see it. */
+		ownership?: Accessor<
+			MediaOwnership["type"] | MediaOwnership["type"][] | undefined
+		>;
+		ownerId?: Accessor<number | undefined>;
 	};
 	perPage?: number;
 }

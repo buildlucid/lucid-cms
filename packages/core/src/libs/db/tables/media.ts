@@ -179,7 +179,11 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			schema: z.string().nullable(),
 			type: "text",
 		},
-		is_hidden: {
+		owner_user_id: {
+			schema: z.number().nullable(),
+			type: "integer",
+		},
+		is_system: {
 			schema: z.union([
 				z.literal(adapter.config.defaults.boolean.true),
 				z.literal(adapter.config.defaults.boolean.false),
@@ -404,7 +408,7 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			isDeleted: "is_deleted",
 			deletedBy: "deleted_by",
 			public: "public",
-			isHidden: "is_hidden",
+			ownerId: "owner_user_id",
 			origin: "origin",
 			fileSize: "file_size",
 			width: "width",
@@ -467,7 +471,10 @@ export interface LucidMedia {
 	is_dark: BooleanInt | null;
 	is_light: BooleanInt | null;
 	custom_meta: string | null;
-	is_hidden: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
+	/** Makes the media personal to this user. It stays out of the library and folders. */
+	owner_user_id: number | null;
+	/** Media another record manages, such as an OAuth client logo. It stays out of the library and folders. */
+	is_system: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted: ColumnType<BooleanInt, BooleanInt | undefined, BooleanInt>;
 	is_deleted_at: TimestampMutable;
 	deleted_by: number | null;

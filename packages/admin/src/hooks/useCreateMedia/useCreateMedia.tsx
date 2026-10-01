@@ -22,6 +22,8 @@ export const useCreateMedia = () => {
 		undefined,
 	);
 	const [getPublic, setPublic] = createSignal<boolean>(true);
+	//* personal media is always private and outside folders
+	const [getOwned, setOwned] = createSignal<boolean>(false);
 	const [getUploadErrors, setUploadErrors] = createSignal<ErrorResponse>();
 	const [getUploadLoading, setUploadLoading] = createSignal<boolean>(false);
 	const [getUploadProgress, setUploadProgress] = createSignal<number>(0);
@@ -85,7 +87,6 @@ export const useCreateMedia = () => {
 			summary?: MediaTranslation[];
 			folderId?: number | null;
 			public?: boolean;
-			isHidden?: boolean;
 			posterId?: number | null;
 			focalPoint?: MediaImageMeta["focalPoint"];
 			origin?: Media["origin"];
@@ -99,6 +100,8 @@ export const useCreateMedia = () => {
 		},
 	): Promise<Media | null> => {
 		let fileKey = getKey();
+		const owned = getOwned();
+		const isPublic = owned ? false : (options?.public ?? getPublic());
 		const mediaType = helpers.getMediaType(file?.type);
 		const videoMeta =
 			file && mediaType === "video" ? await getVideoMeta(file) : null;
@@ -106,19 +109,12 @@ export const useCreateMedia = () => {
 			file && mediaType === "audio" ? await getAudioMeta(file) : null;
 
 		if (file) {
-			const uploadFileRes = await uploadFile(
-				file,
-				options?.public ?? getPublic(),
-			);
+			const uploadFileRes = await uploadFile(file, isPublic);
 			if (!uploadFileRes) return null;
 			fileKey = uploadFileRes;
 		}
 		const cropKey = options?.crop
-			? await uploadFile(
-					options.crop.file,
-					options?.public ?? getPublic(),
-					false,
-				)
+			? await uploadFile(options.crop.file, isPublic, false)
 			: undefined;
 		if (options?.crop && !cropKey) return null;
 		const result = await createSingle.action.mutateAsync({
@@ -136,9 +132,9 @@ export const useCreateMedia = () => {
 					: undefined,
 			origin: options?.origin ?? "human",
 			aiGenerationRequestId: options?.aiGenerationRequestId,
-			folderId: options?.folderId ?? getFolderId() ?? null,
+			folderId: owned ? null : (options?.folderId ?? getFolderId() ?? null),
+			owned,
 			posterId: mediaType === "video" ? options?.posterId : undefined,
-			isHidden: options?.isHidden,
 			width:
 				mediaType === "image"
 					? imageMeta?.width
@@ -208,6 +204,7 @@ export const useCreateMedia = () => {
 		setSummary,
 		setFolderId,
 		setPublic,
+		setOwned,
 		errors: errors,
 		isLoading: isLoading,
 		uploadProgress: getUploadProgress,
@@ -219,6 +216,7 @@ export const useCreateMedia = () => {
 			key: getKey,
 			folderId: getFolderId,
 			public: getPublic,
+			owned: getOwned,
 			posterId: () => undefined,
 		},
 		reset: () => {
@@ -229,6 +227,7 @@ export const useCreateMedia = () => {
 			setKey(undefined);
 			setFolderId(undefined);
 			setPublic(true);
+			setOwned(false);
 			setUploadErrors();
 			setUploadProgress(0);
 			createSingle.reset();

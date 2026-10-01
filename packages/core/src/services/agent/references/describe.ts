@@ -58,10 +58,15 @@ const describe: ServiceFn<
 						filter: {
 							id: { value: mediaIds, operator: "in" },
 							isDeleted: { value: false, operator: "=" },
+							ownership: {
+								value: ["library", "user", "system"],
+								operator: "in",
+							},
 						},
 						page: 1,
 						perPage: mediaIds.length,
 					},
+					actor: { type: "internal" },
 				})
 			: undefined,
 		...documents.map(async (reference) => {

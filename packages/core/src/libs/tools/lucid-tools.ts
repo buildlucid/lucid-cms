@@ -24,6 +24,7 @@ import {
 	findMediaMcpTool,
 } from "../../services/media/tools/find/index.js";
 import { previewMediaMcpTool } from "../../services/media/tools/preview/index.js";
+import { removeMediaOwnershipAgentTool } from "../../services/media/tools/remove-ownership/index.js";
 import type { WebToolOptions } from "../../services/web/helpers/web-tool-options.js";
 import { webFetchAgentTool } from "../../services/web/tools/fetch/index.js";
 import { webSearchAgentTool } from "../../services/web/tools/search/index.js";
@@ -59,6 +60,8 @@ export const agentTools = {
 	webFetch: webFetchAgentTool,
 	/** Analyses linked images, PDFs, audio, video and text files, or public files mentioned in the chat. Files are sent to Lucid for analysis and use Lucid credits. */
 	analyzeMedia: analyzeMediaAgentTool,
+	/** Removes a user's ownership of their personal media, such as a chat upload, so it joins the media library. Asks them to approve it first. */
+	removeMediaOwnership: removeMediaOwnershipAgentTool,
 	/** Every content reading tool: collections, documents, media and locales. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),

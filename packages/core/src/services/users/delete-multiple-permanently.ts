@@ -5,6 +5,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import removeTarget from "../document-references/remove-target.js";
 import checkUserAccess from "./checks/check-user-access.js";
+import deleteOwnedMedia from "./helpers/delete-owned-media.js";
 
 const deleteMultiplePermanently: ServiceFn<
 	[
@@ -103,6 +104,12 @@ const deleteMultiplePermanently: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const ownedMediaRes = await deleteOwnedMedia(context, {
+		userIds: data.ids,
+		actorUserId: data.currentUserId,
+	});
+	if (ownedMediaRes.error) return ownedMediaRes;
 
 	const deleteUsersRes = await Users.deleteMultiple({
 		where: [

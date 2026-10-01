@@ -2,6 +2,8 @@ export { default as cancelRun } from "./cancel-run.js";
 export { default as compactConversation } from "./compact-conversation.js";
 export { default as createConversation } from "./create-conversation.js";
 export { default as createRoutine } from "./create-routine.js";
+export { default as createUpload } from "./create-upload.js";
+export { default as createUploadSession } from "./create-upload-session.js";
 export { default as deleteConversation } from "./delete-conversation.js";
 export { default as deleteReference } from "./delete-reference.js";
 export { default as deleteRoutine } from "./delete-routine.js";

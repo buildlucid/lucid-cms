@@ -8,6 +8,8 @@ const getUploadSession: ServiceFn<
 	[
 		{
 			sessionId: string;
+			/** Only the user who started a session can continue it. */
+			userId: number;
 		},
 	],
 	UploadSessionStateResponse
@@ -28,6 +30,7 @@ const getUploadSession: ServiceFn<
 		where: [
 			{ key: "session_id", operator: "=", value: data.sessionId },
 			{ key: "status", operator: "=", value: "active" },
+			{ key: "created_by", operator: "=", value: data.userId },
 		],
 		validation: {
 			enabled: true,

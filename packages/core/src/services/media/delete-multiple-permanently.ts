@@ -3,6 +3,7 @@ import { copy } from "../../libs/i18n/index.js";
 import cacheKeys from "../../libs/kv/cache-keys.js";
 import { invalidateHttpCacheTags } from "../../libs/kv/http-cache.js";
 import { MediaRepository } from "../../libs/repositories/index.js";
+import type { MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkMediaAccess from "./checks/check-media-access.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
@@ -13,6 +14,7 @@ const deleteMultiplePermanently: ServiceFn<
 	[
 		{
 			ids: number[];
+			actor: MediaActor;
 			userId: number;
 		},
 	],
@@ -29,6 +31,8 @@ const deleteMultiplePermanently: ServiceFn<
 
 	const accessRes = await checkMediaAccess(context, {
 		ids: data.ids,
+		actor: data.actor,
+		action: "delete",
 	});
 	if (accessRes.error) return accessRes;
 

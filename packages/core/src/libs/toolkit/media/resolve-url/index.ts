@@ -28,6 +28,7 @@ const resolveUrl = async (
 					preset: data.preset,
 					format: data.format,
 				},
+				actor: { type: "internal" },
 			});
 		},
 		name: {

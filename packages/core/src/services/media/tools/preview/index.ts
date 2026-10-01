@@ -193,7 +193,10 @@ export const previewMediaMcpTool = () =>
 		scopes: [ExternalScopes.MediaRead],
 		annotations: { readOnlyHint: true },
 		handler: async ({ context, input, execution }) => {
-			const mediaRes = await getSingle(context, { id: input.id });
+			const mediaRes = await getSingle(context, {
+				id: input.id,
+				actor: { type: "content" },
+			});
 			if (mediaRes.error) return mediaRes;
 			if (mediaRes.data.isDeleted) {
 				return {

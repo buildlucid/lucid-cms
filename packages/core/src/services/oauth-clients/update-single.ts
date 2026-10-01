@@ -167,6 +167,7 @@ const updateSingle: ServiceFn<
 	if (data.removeLogo === true && existingRes.data.logo_media_id !== null) {
 		const deleteLogoRes = await deleteMediaPermanently(context, {
 			id: existingRes.data.logo_media_id,
+			actor: { type: "internal" },
 			userId: data.userId,
 		});
 		if (deleteLogoRes.error) return deleteLogoRes;

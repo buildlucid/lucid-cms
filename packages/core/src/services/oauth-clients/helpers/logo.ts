@@ -24,9 +24,10 @@ export const createOAuthClientLogo = async (
 		title: [],
 		alt: [],
 		folderId: null,
-		isHidden: true,
+		isSystem: true,
 		origin: "human",
 		allowedType: "image",
+		actor: { type: "internal" },
 		userId,
 	});
 	if (createRes.error) return createRes;
@@ -58,6 +59,7 @@ export const updateOAuthClientLogo = async (
 		isLight: input.isLight,
 		origin: "human",
 		allowedType: "image",
+		actor: { type: "internal" },
 		userId,
 	});
 	if (updateRes.error) return updateRes;

@@ -19,6 +19,7 @@ export const Permissions = {
 	MediaCreate: "media:create",
 	MediaUpdate: "media:update",
 	MediaDelete: "media:delete",
+	MediaReadAll: "media:read-all",
 
 	// Email permissions
 	EmailRead: "email:read",
@@ -189,6 +190,22 @@ export const PermissionGroups = Object.freeze({
 					name: copy("admin:core.permissions.delete.media", {
 						defaultMessage: "Delete Media",
 					}),
+				},
+				core: true,
+			},
+			{
+				key: Permissions.MediaReadAll,
+				details: {
+					name: copy("admin:core.permissions.read.all.media", {
+						defaultMessage: "View All Media",
+					}),
+					description: copy(
+						"admin:core.permissions.read.all.media.description",
+						{
+							defaultMessage:
+								"View every user's personal files, such as agent chat uploads, and files managed by the system. Combine with Delete Media to remove them.",
+						},
+					),
 				},
 				core: true,
 			},

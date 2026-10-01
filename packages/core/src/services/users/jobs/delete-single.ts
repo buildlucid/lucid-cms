@@ -7,6 +7,7 @@ import { invalidateAuthCache } from "../../auth/helpers/auth-cache.js";
 import removeTarget from "../../document-references/remove-target.js";
 import checkNotLastUser from "../checks/check-not-last-user.js";
 import checkUserAccess from "../checks/check-user-access.js";
+import deleteOwnedMedia from "../helpers/delete-owned-media.js";
 
 const input = z.object({ id: z.number().int().positive() });
 
@@ -40,6 +41,12 @@ const deleteUser: JobHandler<z.infer<typeof input>> = async ({
 		const notLastUserRes = await checkNotLastUser(context);
 		if (notLastUserRes.error) return notLastUserRes;
 	}
+
+	const ownedMediaRes = await deleteOwnedMedia(context, {
+		userIds: [input.id],
+		actorUserId: null,
+	});
+	if (ownedMediaRes.error) return ownedMediaRes;
 
 	const deleteRes = await User.deleteSingle({
 		where: [

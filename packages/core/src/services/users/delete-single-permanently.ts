@@ -6,6 +6,7 @@ import { invalidateAuthCache } from "../auth/helpers/auth-cache.js";
 import removeTarget from "../document-references/remove-target.js";
 import checkNotLastUser from "./checks/check-not-last-user.js";
 import checkUserAccess from "./checks/check-user-access.js";
+import deleteOwnedMedia from "./helpers/delete-owned-media.js";
 
 const deleteSinglePermanently: ServiceFn<
 	[
@@ -57,6 +58,12 @@ const deleteSinglePermanently: ServiceFn<
 		const notLastUserRes = await checkNotLastUser(context);
 		if (notLastUserRes.error) return notLastUserRes;
 	}
+
+	const ownedMediaRes = await deleteOwnedMedia(context, {
+		userIds: [data.userId],
+		actorUserId: data.currentUserId,
+	});
+	if (ownedMediaRes.error) return ownedMediaRes;
 
 	const deleteUserRes = await Users.deleteSingle({
 		where: [

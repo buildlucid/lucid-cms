@@ -45,6 +45,7 @@ const restoreMultipleController = factory.createHandlers(
 			},
 		})(context, {
 			ids,
+			actor: { type: "user", user: c.get("auth") },
 		});
 		if (restoreRes.error) throw new LucidAPIError(restoreRes.error);
 

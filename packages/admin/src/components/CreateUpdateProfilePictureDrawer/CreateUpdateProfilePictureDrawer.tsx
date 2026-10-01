@@ -424,16 +424,11 @@ const CreateUpdateProfilePictureDrawer: Component<
 					<Drawer.Form onSubmit={onSubmit}>
 						<Drawer.Body class="flex flex-col gap-3">
 							<MediaFile.Render />
-							<div class="border-b border-border">
-								<div class="flex flex-row flex-wrap items-center gap-4">
-									<button
-										type="button"
-										class="border-b-2 -mb-px text-sm font-medium pb-2 focus:outline-hidden ring-inset focus-visible:ring-1 ring-primary transition-colors duration-200 border-primary text-title"
-									>
-										{T()("common.details")}
-									</button>
-								</div>
-							</div>
+							<Drawer.Tabs
+								items={[{ value: "details", label: T()("common.details") }]}
+								value="details"
+								onChange={() => {}}
+							/>
 							<For each={editableLocales()}>
 								{(locale, index) => (
 									<Show when={locale.code === (contentLocale() ?? null)}>

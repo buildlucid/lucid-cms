@@ -24,6 +24,8 @@ type CropParent = {
 	type: MediaType;
 	origin: MediaOrigin;
 	public: BooleanInt;
+	owner_user_id: number | null;
+	is_system: BooleanInt;
 	relation_type?: "crop" | "poster" | null;
 };
 
@@ -155,7 +157,8 @@ const upsertCrop: ServiceFn<
 		base64: data.crop.base64 ?? null,
 		is_dark: data.crop.isDark ?? null,
 		is_light: data.crop.isLight ?? null,
-		is_hidden: true,
+		owner_user_id: data.parent.owner_user_id,
+		is_system: data.parent.is_system,
 		is_deleted: false,
 		is_deleted_at: null,
 		deleted_by: null,

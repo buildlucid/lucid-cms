@@ -104,7 +104,10 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("is_dark", adapter.getDataType("boolean"))
 				.addColumn("is_light", adapter.getDataType("boolean"))
 				.addColumn("custom_meta", adapter.getDataType("text"))
-				.addColumn("is_hidden", adapter.getDataType("boolean"), (col) =>
+				.addColumn("owner_user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id"),
+				)
+				.addColumn("is_system", adapter.getDataType("boolean"), (col) =>
 					col
 						.notNull()
 						.defaultTo(
@@ -161,6 +164,14 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 					sql`type IN ('image', 'video', 'audio', 'document', 'archive', 'unknown')`,
 				)
 				.addCheckConstraint(
+					"lucid_media_ownership_valid",
+					sql`owner_user_id IS NULL OR NOT is_system`,
+				)
+				.addCheckConstraint(
+					"lucid_media_library_folder_only",
+					sql`folder_id IS NULL OR (owner_user_id IS NULL AND NOT is_system)`,
+				)
+				.addCheckConstraint(
 					"lucid_media_owned_relation_complete",
 					sql`(
 						(parent_media_id IS NULL AND relation_type IS NULL) OR
@@ -211,6 +222,12 @@ const Migration00000006: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_media_storage_adapter_reference")
 				.on("lucid_media")
 				.columns(["storage_adapter_key", "storage_adapter_reference"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_media_owner_user_id")
+				.on("lucid_media")
+				.column("owner_user_id")
 				.execute();
 
 			await db.schema

@@ -6,9 +6,7 @@ import { mediaServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
-import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
-import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
 import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
@@ -37,7 +35,6 @@ const completeUploadSessionController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate(),
-	permissions([Permissions.MediaCreate, Permissions.MediaUpdate]),
 	validate("param", controllerSchemas.completeUploadSession.params),
 	validate("json", controllerSchemas.completeUploadSession.body),
 	async (c) => {
@@ -59,6 +56,7 @@ const completeUploadSessionController = factory.createHandlers(
 			},
 		)(context, {
 			sessionId: params.sessionId,
+			userId: c.get("auth").id,
 			parts: body.parts,
 		});
 		if (completed.error) throw new LucidAPIError(completed.error);

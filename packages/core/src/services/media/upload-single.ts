@@ -26,7 +26,8 @@ const uploadSingle: ServiceFn<
 			id?: number;
 			userId: number | null;
 			public?: boolean;
-			isHidden?: boolean;
+			/** Marks media another record manages. Only applies to new media. */
+			isSystem?: boolean;
 			origin?: MediaOrigin;
 			folderId?: number | null;
 			title?: { localeCode: string | null; value: string | null }[];
@@ -126,6 +127,7 @@ const uploadSingle: ServiceFn<
 					key: key.data,
 					fileName: file.fileName,
 					expectedSize: file.size,
+					actor: { type: "internal" },
 				},
 			);
 			if (result.error) return result;
@@ -142,6 +144,7 @@ const uploadSingle: ServiceFn<
 				fileName: file.fileName,
 				expectedSize: file.size,
 				origin: input.origin ?? "human",
+				actor: { type: "internal" },
 			},
 		);
 		if (result.error) return result;

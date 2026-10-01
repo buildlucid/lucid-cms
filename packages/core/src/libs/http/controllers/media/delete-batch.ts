@@ -49,6 +49,7 @@ const deleteBatchController = factory.createHandlers(
 			folderIds,
 			mediaIds,
 			recursiveMedia,
+			actor: { type: "user", user: c.get("auth") },
 			userId: c.get("auth").id,
 		});
 		if (deleteBatch.error) throw new LucidAPIError(deleteBatch.error);

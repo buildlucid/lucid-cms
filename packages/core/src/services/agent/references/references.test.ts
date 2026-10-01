@@ -97,7 +97,9 @@ const createChat = async (userId: number | null = null) => {
 	assert(result.data, JSON.stringify(result.error));
 	return result.data.id;
 };
-const createMedia = async () => {
+const createMedia = async (
+	ownership: { owner_user_id?: number; is_system?: boolean } = {},
+) => {
 	const result = await new MediaRepository(context.db).createSingle({
 		data: {
 			key: randomUUID(),
@@ -107,6 +109,7 @@ const createMedia = async () => {
 			mime_type: "image/png",
 			file_extension: "png",
 			file_size: 1,
+			...ownership,
 		},
 		returning: ["id"],
 		validation: { enabled: true },
@@ -934,4 +937,62 @@ test("reference registration checks the whole batch's read permissions and valid
 			userId,
 		),
 	).toMatchObject({ failed: true });
+});
+
+test("personal media is only linked and listed for its owner, and system media never is", async () => {
+	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const adminId = await createReader();
+	const ownerChat = await createChat(ownerId);
+	const adminChat = await createChat(adminId);
+	const upload: AgentReferenceInput = {
+		type: "media",
+		mediaId: await createMedia({ owner_user_id: ownerId }),
+	};
+	const logo: AgentReferenceInput = {
+		type: "media",
+		mediaId: await createMedia({ is_system: true }),
+	};
+
+	//* the owner needs no media permissions for their own upload
+	expect(
+		await callReferenceTool(
+			ownerChat,
+			runnerTools.registerReferences.name,
+			{ references: [upload] },
+			ownerId,
+		),
+	).toMatchObject({ failed: false });
+	const owned = await getReferences(context, {
+		id: ownerChat,
+		userId: ownerId,
+	});
+	expect(owned.data?.map((reference) => reference.type)).toEqual(["media"]);
+
+	//* a super admin can see every file in the library, but not link someone's personal file
+	for (const references of [[upload], [logo]]) {
+		expect(
+			await callReferenceTool(
+				adminChat,
+				runnerTools.registerReferences.name,
+				{ references },
+				adminId,
+			),
+		).toMatchObject({ failed: true });
+	}
+	expect(
+		await callReferenceTool(
+			ownerChat,
+			runnerTools.registerReferences.name,
+			{ references: [logo] },
+			ownerId,
+		),
+	).toMatchObject({ failed: true });
+
+	//* links made before an ownership change stay hidden from anyone else
+	expect((await link(adminChat, [upload])).error).toBeUndefined();
+	const hidden = await list(context, {
+		conversationId: adminChat,
+		userId: adminId,
+	});
+	expect(hidden.data).toEqual([]);
 });

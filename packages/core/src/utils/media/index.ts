@@ -14,6 +14,16 @@ export { default as getFileMetadata } from "./get-file-metadata.js";
 export { default as getKeyVisibility } from "./get-key-visibility.js";
 export { default as getMediaType } from "./get-media-type.js";
 export { default as isProcessedImageKey } from "./is-processed-image-key.js";
+export type {
+	MediaAction,
+	MediaActor,
+	MediaListAccess,
+} from "./media-access.js";
+export {
+	canAccessMedia,
+	getMediaListAccess,
+	getMediaOwnership,
+} from "./media-access.js";
 export {
 	getMediaKeyParts,
 	getMediaKeyRootIndex,

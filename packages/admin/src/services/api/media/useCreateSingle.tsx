@@ -31,7 +31,8 @@ interface Params {
 	aiGenerationRequestId?: string;
 	folderId?: number | null;
 	posterId?: number | null;
-	isHidden?: boolean;
+	/** Makes the media personal to you. It must be private and outside folders. */
+	owned?: boolean;
 	width?: number;
 	height?: number;
 	duration?: number;

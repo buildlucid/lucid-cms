@@ -4,6 +4,7 @@ import type {
 	MediaOrigin,
 	MediaType,
 } from "../../types/response.js";
+import type { MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import checkAwaitingSync from "./checks/check-awaiting-sync.js";
@@ -17,7 +18,10 @@ const createSingle: ServiceFn<
 			key: string;
 			fileName: string;
 			folderId?: number | null;
-			isHidden?: boolean;
+			/** Makes the media personal to this user, such as an agent chat upload or a profile picture. */
+			ownerUserId?: number | null;
+			/** Marks media another record manages, such as an OAuth client logo. */
+			isSystem?: boolean;
 			origin: MediaOrigin;
 			aiGenerationRequestId?: string;
 			title?: { localeCode: string | null; value: string | null }[];
@@ -38,6 +42,7 @@ const createSingle: ServiceFn<
 			expectedSize?: number;
 			validation?: { maxBytes?: number; mimeTypes?: readonly string[] };
 			allowedType?: MediaType;
+			actor: MediaActor;
 			userId: number | null;
 		},
 	],

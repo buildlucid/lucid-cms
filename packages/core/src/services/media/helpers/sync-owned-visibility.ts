@@ -7,14 +7,22 @@ import clearProcessedImage from "../../processed-images/clear-single.js";
 import notifyChange from "../notify-change.js";
 import renameMedia from "../strategies/rename.js";
 
-/** Synchronizes visibility and storage keys across all owned descendants. */
+/** Synchronizes visibility, ownership and storage keys across all owned descendants. */
 const syncOwnedVisibility: ServiceFn<
-	[{ parentId: number; public: boolean; userId: number | null }],
+	[
+		{
+			parentId: number;
+			public: boolean;
+			ownerUserId: number | null;
+			isSystem: boolean;
+			userId: number | null;
+		},
+	],
 	undefined
 > = async (context, data) => {
 	const Media = new MediaRepository(context.db);
 	const childrenRes = await Media.selectMultiple({
-		select: ["id", "key", "public"],
+		select: ["id", "key", "public", "owner_user_id", "is_system"],
 		where: [{ key: "parent_media_id", operator: "=", value: data.parentId }],
 		validation: { enabled: true },
 	});
@@ -44,13 +52,17 @@ const syncOwnedVisibility: ServiceFn<
 
 			if (
 				targetKey !== child.key ||
-				formatter.formatBoolean(child.public) !== data.public
+				formatter.formatBoolean(child.public) !== data.public ||
+				child.owner_user_id !== data.ownerUserId ||
+				formatter.formatBoolean(child.is_system) !== data.isSystem
 			) {
 				const updateRes = await Media.updateSingle({
 					where: [{ key: "id", operator: "=", value: child.id }],
 					data: {
 						key: targetKey,
 						public: data.public,
+						owner_user_id: data.ownerUserId,
+						is_system: data.isSystem,
 						updated_at: new Date().toISOString(),
 						updated_by: data.userId,
 					},
@@ -63,6 +75,8 @@ const syncOwnedVisibility: ServiceFn<
 				parentId: child.id,
 				public: data.public,
 				userId: data.userId,
+				ownerUserId: data.ownerUserId,
+				isSystem: data.isSystem,
 			});
 		}),
 	);

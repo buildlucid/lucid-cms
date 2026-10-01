@@ -340,6 +340,7 @@ export const DashboardContent: Component = () => {
 			<MediaAltGenerationModal />
 			<MediaImageGenerationModal />
 			<CreateUpdateMediaDrawer
+				allowOwned={true}
 				state={{
 					open: createMediaPanelOpen(),
 					setOpen: setCreateMediaPanelOpen,

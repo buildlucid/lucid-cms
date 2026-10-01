@@ -15,7 +15,6 @@ const translateMedia = (
 	return value[locale] ?? null;
 };
 
-/** Searches visible media through the existing filtered media service. */
 const findMedia: ServiceFn<
 	[{ input: z.output<typeof inputSchema> }],
 	{ output: z.output<typeof outputSchema> }
@@ -44,7 +43,11 @@ const findMedia: ServiceFn<
 		},
 	} satisfies Parameters<typeof getMultiple>[1]["query"];
 
-	const mediaRes = await getMultiple(context, { query });
+	//* tools only search the media library, so personal files never reach agent or MCP results
+	const mediaRes = await getMultiple(context, {
+		query,
+		actor: { type: "content" },
+	});
 	if (mediaRes.error) return mediaRes;
 
 	return {

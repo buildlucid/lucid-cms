@@ -11,6 +11,7 @@ const abortUploadSession: JobHandler<z.infer<typeof input>> = async ({
 }) => {
 	return abortUploadSessionService(context, {
 		sessionId: input.sessionId,
+		userId: null,
 	});
 };
 

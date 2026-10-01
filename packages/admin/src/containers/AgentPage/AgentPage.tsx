@@ -188,6 +188,7 @@ const AgentPage: Component = () => {
 													: "agent.composer.placeholder",
 											)}
 											draftKey="new"
+											agentKey={current().key}
 											attachments={current().attachments}
 											capabilities={current().capabilities}
 											onSubmit={start}

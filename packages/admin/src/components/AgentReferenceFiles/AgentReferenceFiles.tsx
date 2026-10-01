@@ -4,13 +4,17 @@ import { type Component, For, Show } from "solid-js";
 import T from "@/translations";
 import {
 	type AgentReferenceItem,
+	type AgentUpload,
 	canAgentOpen,
 } from "@/utils/agent-references";
 import AgentReferenceFile from "./parts/AgentReferenceFile";
+import AgentUploadFile from "./parts/AgentUploadFile";
 
 /** Resources attached to a draft or message, laid out as tilted file cards in one row that scrolls sideways. */
 const AgentReferenceFiles: Component<{
 	references: AgentReferenceItem[];
+	uploads?: AgentUpload[];
+	onRemoveUpload?: (upload: AgentUpload) => void;
 	/** Shows whether the agent can open each file. */
 	capabilities?: AgentCapabilities;
 	align?: "start" | "end";
@@ -20,7 +24,9 @@ const AgentReferenceFiles: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Show when={props.references.length > 0}>
+		<Show
+			when={props.references.length > 0 || (props.uploads?.length ?? 0) > 0}
+		>
 			<ul
 				class={classnames(
 					"agent-reference-strip flex gap-2 overflow-x-auto px-4 pt-3 pb-2 scrollbar-none",
@@ -44,6 +50,16 @@ const AgentReferenceFiles: Component<{
 								onRemove={
 									props.onRemove ? () => props.onRemove?.(reference) : undefined
 								}
+							/>
+						</li>
+					)}
+				</For>
+				<For each={props.uploads}>
+					{(upload) => (
+						<li class="shrink-0">
+							<AgentUploadFile
+								upload={upload}
+								onRemove={() => props.onRemoveUpload?.(upload)}
 							/>
 						</li>
 					)}

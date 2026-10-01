@@ -1,6 +1,7 @@
 import { createDraggable } from "@thisbeyond/solid-dnd";
 import type { Media } from "@types";
 import classNames from "classnames";
+import { FaSolidGear, FaSolidUserLock } from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import ActionMenu, {
 	type ActionMenuItem,
@@ -33,9 +34,11 @@ interface MediaCardProps {
 			| "createShareLink"
 			| "deleteAllShareLinks"
 			| "download"
+			| "removeOwnership"
 		>
 	>;
 	contentLocale?: string;
+	ownerName?: string;
 	showingDeleted?: Accessor<boolean>;
 	isDragging: Accessor<boolean>;
 	onGenerateAlt?: (_media: Media) => void;
@@ -79,7 +82,8 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			| "viewShareLinks"
 			| "createShareLink"
 			| "deleteAllShareLinks"
-			| "download",
+			| "download"
+			| "removeOwnership",
 	) => {
 		props.rowTarget.setTargetId(props.media.id);
 		props.rowTarget.setTrigger(trigger, true);
@@ -102,6 +106,28 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	const hasAiAltGeneratePermission = createMemo(() => {
 		return userStore.get.hasPermission([Permissions.AiAltGenerate]).all;
 	});
+	const ownership = createMemo(() => props.media.ownership);
+	const isLibrary = createMemo(() => ownership().type === "library");
+	const isOwn = createMemo(() => {
+		const current = ownership();
+		return current.type === "user" && current.userId === userStore.get.user?.id;
+	});
+	//* other people's personal media and system media can only be viewed, downloaded or removed here
+	const canEdit = createMemo(
+		() => hasUpdatePermission() && (isLibrary() || isOwn()),
+	);
+	const canDelete = createMemo(
+		() => hasDeletePermission() && ownership().type !== "system",
+	);
+	const ownershipLabel = createMemo(() => {
+		const current = ownership();
+		if (current.type === "system") return T()("media.ownership.system");
+		if (current.type !== "user") return undefined;
+		if (isOwn()) return T()("media.ownership.yours");
+		return props.ownerName
+			? T()("media.ownership.owned.by", { name: props.ownerName })
+			: T()("media.ownership.user");
+	});
 	const title = createMemo(() => {
 		return helpers.getTranslation(props.media.title, props.contentLocale);
 	});
@@ -117,9 +143,9 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 	});
 	const canSelect = createMemo(() => {
 		if (props.showingDeleted?.()) {
-			return hasUpdatePermission() || hasDeletePermission();
+			return canEdit() || canDelete();
 		}
-		return hasUpdatePermission();
+		return canEdit();
 	});
 	const aiAltAccessDisabledToast = createMemo(() => {
 		if (
@@ -151,14 +177,14 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			icon: "eye",
 			onClick: () => openMediaAction("view"),
 			permission: true,
-			show: props.showingDeleted?.() === true,
+			show: props.showingDeleted?.() === true || !canEdit(),
 		},
 		{
 			label: T()("common.edit"),
 			type: "button",
 			icon: "pen",
 			onClick: () => openMediaAction("update"),
-			permission: hasUpdatePermission(),
+			permission: canEdit(),
 			show: !props.showingDeleted?.(),
 		},
 		{
@@ -166,7 +192,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			type: "button",
 			icon: "restore",
 			onClick: () => openMediaAction("restore"),
-			permission: hasUpdatePermission(),
+			permission: canDelete(),
 			show: props.showingDeleted?.() !== false,
 			variant: "primary",
 		},
@@ -174,7 +200,10 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			label: T()("media.images.action"),
 			type: "group",
 			icon: "image",
-			show: props.media.type === "image" && props.media.status === "ready",
+			show:
+				props.media.type === "image" &&
+				props.media.status === "ready" &&
+				canEdit(),
 			actions: [
 				{
 					label: T()("media.crop.action"),
@@ -218,7 +247,11 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			label: T()("media.share.links.action"),
 			type: "group",
 			icon: "link",
-			show: !props.showingDeleted?.() && props.media.status === "ready",
+			//* personal and system media can't be shared by link
+			show:
+				!props.showingDeleted?.() &&
+				props.media.status === "ready" &&
+				isLibrary(),
 			actions: [
 				{
 					label: T()("media.share.links.create.action"),
@@ -253,11 +286,20 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			show: !props.showingDeleted?.() && props.media.status === "ready",
 		},
 		{
+			label: T()("media.ownership.remove.action"),
+			type: "button",
+			icon: "user",
+			onClick: () => openMediaAction("removeOwnership"),
+			permission: hasCreatePermission(),
+			show: isOwn() && !props.showingDeleted?.(),
+			variant: "danger",
+		},
+		{
 			label: T()("common.delete"),
 			type: "button",
 			icon: "trash",
 			onClick: () => openMediaAction("delete"),
-			permission: hasDeletePermission(),
+			permission: canDelete(),
 			show: !props.showingDeleted?.(),
 			variant: "danger",
 		},
@@ -266,7 +308,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			type: "button",
 			icon: "trash",
 			onClick: () => openMediaAction("deletePermanently"),
-			permission: hasDeletePermission(),
+			permission: canDelete(),
 			show: props.showingDeleted?.() !== false,
 			variant: "danger",
 		},
@@ -282,7 +324,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 				"bg-card hover:bg-background-hover border rounded-md group overflow-hidden relative transition-colors duration-200",
 				mediaStatusBorderClass(props.media.status),
 				{
-					"cursor-pointer": hasUpdatePermission() || props.showingDeleted?.(),
+					"cursor-pointer": canEdit() || props.showingDeleted?.(),
 				},
 			)}
 			onClick={(event) => {
@@ -296,9 +338,9 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					return;
 				}
 				props.rowTarget.setTargetId(props.media.id);
-				if (props.showingDeleted?.()) {
+				if (props.showingDeleted?.() || !canEdit()) {
 					props.rowTarget.setTrigger("view", true);
-				} else if (hasUpdatePermission()) {
+				} else {
 					props.rowTarget.setTrigger("update", true);
 				}
 			}}
@@ -309,6 +351,27 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			<div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100">
 				<ActionMenu actions={actionMenuActions()} placement="bottom-start" />
 			</div>
+			<Show when={ownershipLabel()}>
+				{(label) => (
+					<span
+						class="absolute top-3 left-3 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-subtitle fill-subtitle shadow-sm"
+						role="img"
+						aria-label={label()}
+						title={`${label()}. ${
+							ownership().type === "system"
+								? T()("media.ownership.system.description")
+								: T()("media.ownership.user.description")
+						}`}
+					>
+						<Show
+							when={ownership().type === "system"}
+							fallback={<FaSolidUserLock size={11} />}
+						>
+							<FaSolidGear size={11} />
+						</Show>
+					</span>
+				)}
+			</Show>
 			{/* Image */}
 			<AspectRatio
 				ratio="16:9"

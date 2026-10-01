@@ -10,6 +10,8 @@ const abortUploadSession: ServiceFn<
 	[
 		{
 			sessionId: string;
+			/** Only the user who started a session can abort it. Null is maintenance, which aborts any expired session. */
+			userId: number | null;
 		},
 	],
 	undefined
@@ -26,7 +28,15 @@ const abortUploadSession: ServiceFn<
 			"protocol",
 			"status",
 		],
-		where: [{ key: "session_id", operator: "=", value: data.sessionId }],
+		where: [
+			{ key: "session_id", operator: "=", value: data.sessionId },
+			{
+				key: "created_by",
+				operator: "=",
+				value: data.userId,
+				condition: data.userId !== null,
+			},
+		],
 		validation: {
 			enabled: true,
 			defaultError: {

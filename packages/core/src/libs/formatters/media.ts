@@ -16,6 +16,7 @@ import type {
 	MediaVideoThumbnail,
 } from "../../types/response.js";
 import {
+	getMediaOwnership,
 	mediaAdapterDataSchema,
 	resolveDeliveryUrl,
 } from "../../utils/media/index.js";
@@ -84,6 +85,8 @@ export interface MediaPropsT extends MediaPosterPropsT {
 	updated_at: Date | string | null;
 	poster?: MediaPosterPropsT[];
 	folder_id: number | null;
+	owner_user_id: number | null;
+	is_system: BooleanInt;
 	is_deleted: BooleanInt;
 	is_deleted_at: Date | string | null;
 	deleted_by: number | null;
@@ -400,6 +403,7 @@ const formatSingle = (props: {
 		folderId: props.media.folder_id,
 		origin: props.media.origin,
 		public: formatter.formatBoolean(props.media.public),
+		ownership: getMediaOwnership(props.media),
 		title: translationsFor(props.media, "title", props.options),
 	};
 	const lifecycle = {
