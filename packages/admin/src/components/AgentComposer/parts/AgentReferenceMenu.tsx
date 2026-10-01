@@ -26,7 +26,7 @@ import { composerTriggerClasses } from "../AgentComposer";
 
 /** Adds existing media and documents to the message, or uploads new files when `onUpload` is set. */
 const AgentReferenceMenu: Component<{
-	attachments?: Agent["attachments"];
+	features?: Agent["features"];
 	references: AgentReferenceItem[];
 	disabled?: boolean;
 	/** Opens the file picker. Uploads are personal, so they don't need media library access. */
@@ -42,7 +42,7 @@ const AgentReferenceMenu: Component<{
 	const [documentsOpen, setDocumentsOpen] = createSignal(false);
 	const collections = api.collections.useGetAll({
 		queryParams: { include: { fields: true } },
-		enabled: () => props.attachments?.documents === true,
+		enabled: () => props.features?.documents.attach === true,
 	});
 
 	// ----------------------------------------
@@ -58,11 +58,12 @@ const AgentReferenceMenu: Component<{
 	);
 	const canMedia = createMemo(
 		() =>
-			props.attachments?.media === true &&
+			props.features?.media.attach === true &&
 			userStore.get.hasPermission(["media:read"]).all,
 	);
 	const canDocuments = createMemo(
-		() => props.attachments?.documents === true && collectionKeys().length > 0,
+		() =>
+			props.features?.documents.attach === true && collectionKeys().length > 0,
 	);
 	// ----------------------------------------
 	// Functions

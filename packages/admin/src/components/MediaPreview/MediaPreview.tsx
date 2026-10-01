@@ -19,6 +19,7 @@ import {
 } from "solid-js";
 import Image from "@/components/Image/Image";
 import MediaStatusPreview from "@/components/MediaStatusPreview/MediaStatusPreview";
+import PdfBadge from "@/components/PdfBadge/PdfBadge";
 import mediaUrl, { type MediaPreset } from "@/utils/media-url";
 
 interface MediaPreviewProps {
@@ -26,6 +27,7 @@ interface MediaPreviewProps {
 		delivery?: Media["delivery"];
 		sources?: MediaVideoSource[];
 		poster?: MediaPoster | null;
+		mimeType?: string;
 	};
 	richPreview?: boolean;
 	alt: string | null;
@@ -92,12 +94,12 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 						/>
 					</Match>
 					<Match when={props.media.type === "archive"}>
-						<div class="w-full h-full flex justify-center items-center">
+						<div class="relative z-10 w-full h-full flex justify-center items-center">
 							<FaSolidFileZipper size={40} class="text-icon opacity-40" />
 						</div>
 					</Match>
 					<Match when={props.media.type === "audio"}>
-						<div class={"w-full h-full flex justify-center items-center"}>
+						<div class="relative z-10 w-full h-full flex justify-center items-center">
 							<Switch>
 								<Match when={props.richPreview}>
 									<Show when={renderNativeMedia()}>
@@ -121,7 +123,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 						</div>
 					</Match>
 					<Match when={props.media.type === "video"}>
-						<div class={"w-full h-full flex justify-center items-center"}>
+						<div class="relative z-10 w-full h-full flex justify-center items-center">
 							<Switch>
 								<Match when={props.media.poster}>
 									{(poster) => (
@@ -172,12 +174,19 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 						</div>
 					</Match>
 					<Match when={props.media.type === "document"}>
-						<div class="w-full h-full flex justify-center items-center group-hover:scale-110 transition duration-100">
-							<FaSolidFileLines size={40} class="text-icon opacity-40" />
+						<div class="relative z-10 w-full h-full flex justify-center items-center group-hover:scale-110 transition duration-100">
+							<Show
+								when={props.media.mimeType === "application/pdf"}
+								fallback={
+									<FaSolidFileLines size={40} class="text-icon opacity-40" />
+								}
+							>
+								<PdfBadge size="md" />
+							</Show>
 						</div>
 					</Match>
 					<Match when={props.media.type === "unknown"}>
-						<div class="w-full h-full flex justify-center items-center group-hover:scale-110 transition duration-100">
+						<div class="relative z-10 w-full h-full flex justify-center items-center group-hover:scale-110 transition duration-100">
 							<FaSolidFile size={40} class="text-icon opacity-40" />
 						</div>
 					</Match>

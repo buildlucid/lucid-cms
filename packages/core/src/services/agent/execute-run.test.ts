@@ -211,6 +211,10 @@ const testAgent = defineAgent({
 	key: "test",
 	name: "Test Agent",
 	description: "Runs tests.",
+	features: {
+		media: { analyze: false },
+		web: { search: false, read: false },
+	},
 	tools: [
 		agentTools.content(),
 		writeTool,
@@ -227,7 +231,6 @@ const webAgent = defineAgent({
 	key: "test-web",
 	name: "Web Agent",
 	description: "Researches the web in tests.",
-	tools: [agentTools.web(), agentTools.analyzeMedia()],
 });
 const usage: ModelUsage = {
 	model: "test-model",
@@ -2239,11 +2242,11 @@ describe("conversation compaction", () => {
 	};
 	beforeEach(() => {
 		// Leave room for the runner tool definitions as well as conversation history.
-		inputTokenLimit = 5_000;
+		inputTokenLimit = 6_000;
 	});
 
 	test("manual compaction keeps history and continues from only the newest summary", async () => {
-		inputTokenLimit = 5_000;
+		inputTokenLimit = 6_000;
 		const prepared = await compactAfterReply();
 		reply(
 			"Current goal: draft content. Constraint: never publish without approval.",
@@ -2349,7 +2352,7 @@ describe("conversation compaction", () => {
 		expect(conversation.data?.compactions).toHaveLength(2);
 		expect(conversation.data?.context).toMatchObject({
 			model: "test-model",
-			tokenLimit: 5_000,
+			tokenLimit: 6_000,
 			status: "ready",
 		});
 	});
@@ -2860,7 +2863,17 @@ describe("queued and steering inputs", () => {
 					...context.config.ai,
 					agents: {
 						definitions: [
-							{ ...testAgent, attachments: { media: false, documents: true } },
+							{
+								...testAgent,
+								features: {
+									...testAgent.features,
+									media: {
+										...testAgent.features.media,
+										upload: false,
+										attach: false,
+									},
+								},
+							},
 						],
 					},
 				},
@@ -3792,7 +3805,7 @@ test("confirm-all asks before media analysis starts", async () => {
 		id: "analyze-file",
 		name: "media_analyze",
 		input: {
-			source: { type: "url", url: "https://example.com/file.pdf" },
+			mediaId: 1,
 			question: "Summarise this file",
 		},
 	});
@@ -3811,7 +3824,7 @@ test("confirm-all asks before media analysis starts", async () => {
 				approval: {
 					toolName: "media_analyze",
 					input: {
-						source: { type: "url", url: "https://example.com/file.pdf" },
+						mediaId: 1,
 						question: "Summarise this file",
 					},
 				},

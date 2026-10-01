@@ -12,12 +12,12 @@ export const analyzeMediaAgentTool = () =>
 	defineAgentTool({
 		name: analyzeMediaToolName,
 		title: copy("admin:core.tools.media_analyze.title"),
-		description: `Analyse an image, PDF, audio recording, video or text file to answer a question. Use a media ID linked to this chat, or a public HTTPS URL supplied by the user or a tool. Files must be at most ${MAX_MEDIA_BYTES / 1_000_000} MB. Uses a separate analysis model and Lucid credits; the chat model does not need vision. This returns an analysis, not direct access to the original file.`,
+		description: `Analyse an image, audio recording, video or PDF stored in Lucid to answer a question. Use a media ID linked to this chat. Files must be at most ${MAX_MEDIA_BYTES / 1_000_000} MB. Uses a separate analysis model and Lucid credits, independently of the chat model's vision support.`,
 		input: inputSchema,
 		output: outputSchema,
 		//* linked media is checked when resolved, so owners can analyse their own uploads without `media:read`
 		permissions: [],
 		readOnly: true,
-		capabilities: { media: { mimeTypes: mediaMimeTypeSchema.options } },
+		capabilities: { mediaAnalysis: { mimeTypes: mediaMimeTypeSchema.options } },
 		handler,
 	});

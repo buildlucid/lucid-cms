@@ -54,14 +54,6 @@ export type RunSession = NonNullable<
 const leaseExpiry = () =>
 	new Date(Date.now() + constants.agent.leaseMs).toISOString();
 
-//* another worker, or a cancellation, took the run
-const supersededError = () =>
-	({
-		type: "basic",
-		status: 409,
-		message: copy("server:agent.run.superseded"),
-	}) as const;
-
 /**
  * Claims a run for this worker and owns it until it stops. Every write is fenced
  * by the execution token, so a stale or cancelled worker cannot overwrite newer state.
@@ -92,7 +84,17 @@ const openRunSession = async (
 		leaseExpiresAt: leaseExpiry(),
 	});
 	if (claim.error) return claim;
-	if (!claim.data) return { data: undefined, error: supersededError() };
+	//* another worker, or a cancellation, took the run
+	if (!claim.data) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic" as const,
+				status: 409,
+				message: copy("server:agent.run.superseded"),
+			},
+		};
+	}
 
 	const lease = new AbortController();
 	const signal = AbortSignal.any(
@@ -123,7 +125,14 @@ const openRunSession = async (
 
 	const superseded = () => {
 		loseLease();
-		return { data: undefined, error: supersededError() };
+		return {
+			data: undefined,
+			error: {
+				type: "basic" as const,
+				status: 409,
+				message: copy("server:agent.run.superseded"),
+			},
+		};
 	};
 
 	const write = async (
@@ -377,7 +386,14 @@ const openRunSession = async (
 			/** Returns the run to the queue so a background worker continues it. */
 			handOff: async (): ServiceResponse<{ status: AgentRunStatus }> => {
 				if (lease.signal.aborted) {
-					return { data: undefined, error: supersededError() };
+					return {
+						data: undefined,
+						error: {
+							type: "basic",
+							status: 409,
+							message: copy("server:agent.run.superseded"),
+						},
+					};
 				}
 
 				const queued = await withTransaction(context, async (context) => {

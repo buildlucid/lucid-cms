@@ -173,8 +173,9 @@ const AgentPage: Component = () => {
 									<div class="flex flex-col">
 										<AgentComposer
 											ref={(handle: AgentComposerHandle) => {
-												if (returned !== undefined)
+												if (returned !== undefined) {
 													handle.insert(returned, returnedReferences);
+												}
 											}}
 											class="agent-composer-morph"
 											size="lg"
@@ -189,7 +190,7 @@ const AgentPage: Component = () => {
 											)}
 											draftKey="new"
 											agentKey={current().key}
-											attachments={current().attachments}
+											features={current().features}
 											capabilities={current().capabilities}
 											onSubmit={start}
 											controls={

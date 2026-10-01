@@ -12,6 +12,7 @@ import useGetConversation from "./useGetConversation";
 import useGetConversationDetails from "./useGetConversationDetails";
 import useGetConversations from "./useGetConversations";
 import useGetDefinitions from "./useGetDefinitions";
+import useGetMediaPreviews from "./useGetMediaPreviews";
 import useGetMessages from "./useGetMessages";
 import useGetModels from "./useGetModels";
 import useGetReferences from "./useGetReferences";
@@ -42,6 +43,7 @@ const exportObject = {
 	useGenerateConversationTitle,
 	useGetConversations,
 	useGetDefinitions,
+	useGetMediaPreviews,
 	useGetMessages,
 	useGetToolDetails,
 	useGetModels,

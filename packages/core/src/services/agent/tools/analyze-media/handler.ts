@@ -10,7 +10,7 @@ const handler: AgentToolHandler<
 	z.output<typeof outputSchema>
 > = async ({ context, input, execution }) => {
 	const source = await resolveSource(context, {
-		source: input.source,
+		mediaId: input.mediaId,
 		execution,
 	});
 	if (source.error) return source;

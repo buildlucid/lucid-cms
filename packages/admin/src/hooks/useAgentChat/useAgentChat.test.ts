@@ -209,7 +209,7 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 			status: "complete" as const,
 			detailsAvailable: true,
 		};
-		for (let index = 0; index < 3; index++)
+		for (let index = 0; index < 3; index++) {
 			stream.onEvent({
 				type: "message",
 				message: {
@@ -218,6 +218,7 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 					parts: [reference, { type: "text", text: String(index) }],
 				},
 			});
+		}
 		expect(mocks.refresh).toHaveBeenCalledTimes(3);
 		stream.onEvent({
 			type: "tool",
@@ -228,7 +229,7 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 			detailsAvailable: true,
 		});
 		expect(mocks.refresh).toHaveBeenCalledTimes(4);
-		for (let index = 0; index < 3; index++)
+		for (let index = 0; index < 3; index++) {
 			stream.onEvent({
 				type: "message",
 				message: {
@@ -243,6 +244,7 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 					],
 				},
 			});
+		}
 		expect(mocks.refresh).toHaveBeenCalledTimes(5);
 	} finally {
 		ended.resolve();

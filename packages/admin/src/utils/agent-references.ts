@@ -1,7 +1,9 @@
 import type {
+	Agent,
 	AgentCapabilities,
 	AgentReferenceInput,
 	AgentReferenceSnapshot,
+	Media,
 } from "@types";
 import T from "@/translations";
 
@@ -116,10 +118,29 @@ export const canAgentOpen = (
 ) => {
 	if (reference.type === "document") return undefined;
 	return (
-		capabilities.media !== null &&
+		capabilities.mediaAnalysis !== null &&
 		reference.mimeType !== undefined &&
-		matchesMimeType(reference.mimeType, capabilities.media.mimeTypes)
+		matchesMimeType(reference.mimeType, capabilities.mediaAnalysis.mimeTypes)
 	);
+};
+
+/**
+ * Whether media can be attached to a message, matching the server's check.
+ * Personal files need uploads or attachments, library media needs attachments
+ * and permission to read the library, and system media is never attachable.
+ */
+export const canAttachMedia = (
+	media: Pick<Media, "ownership">,
+	props: { features: Agent["features"]; canReadLibrary: boolean },
+) => {
+	switch (media.ownership.type) {
+		case "user":
+			return props.features.media.upload || props.features.media.attach;
+		case "library":
+			return props.features.media.attach && props.canReadLibrary;
+		case "system":
+			return false;
+	}
 };
 
 /** A coarse file kind, for choosing an icon when there is no preview. */

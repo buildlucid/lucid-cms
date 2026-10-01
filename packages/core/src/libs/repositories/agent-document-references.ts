@@ -23,42 +23,43 @@ export default class AgentDocumentReferencesRepository extends StaticRepository<
 	}) {
 		const now = new Date().toISOString();
 
+		// Pinned and unpinned links have separate unique indexes.
+		const queries = [false, true].flatMap((pinned) => {
+			const documents = props.documents.filter(
+				(document) => (document.versionId !== undefined) === pinned,
+			);
+			if (!documents.length) return [];
+
+			return this.db
+				.insertInto("lucid_agent_document_references")
+				.values(
+					documents.map((document) => ({
+						id: crypto.randomUUID(),
+						conversation_id: props.conversationId,
+						collection_key: document.collectionKey,
+						document_id: document.documentId,
+						version_id: document.versionId ?? null,
+						source: props.source,
+						tool_name: props.toolName ?? null,
+						created_at: now,
+					})),
+				)
+				.onConflict((conflict) => {
+					if (props.source !== "message") return conflict.doNothing();
+					const target = conflict.columns([
+						"conversation_id",
+						"collection_key",
+						"document_id",
+					]);
+					return (pinned ? target.column("version_id") : target)
+						.where("version_id", pinned ? "is not" : "is", null)
+						.doUpdateSet({ source: "message", tool_name: null });
+				});
+		});
+
 		const result = await this.executeQuery(
 			async () => {
-				// Pinned and unpinned links have separate unique indexes.
-				for (const pinned of [false, true]) {
-					const documents = props.documents.filter(
-						(document) => (document.versionId !== undefined) === pinned,
-					);
-					if (!documents.length) continue;
-
-					await this.db
-						.insertInto("lucid_agent_document_references")
-						.values(
-							documents.map((document) => ({
-								id: crypto.randomUUID(),
-								conversation_id: props.conversationId,
-								collection_key: document.collectionKey,
-								document_id: document.documentId,
-								version_id: document.versionId ?? null,
-								source: props.source,
-								tool_name: props.toolName ?? null,
-								created_at: now,
-							})),
-						)
-						.onConflict((conflict) => {
-							if (props.source !== "message") return conflict.doNothing();
-							const target = conflict.columns([
-								"conversation_id",
-								"collection_key",
-								"document_id",
-							]);
-							return (pinned ? target.column("version_id") : target)
-								.where("version_id", pinned ? "is not" : "is", null)
-								.doUpdateSet({ source: "message", tool_name: null });
-						})
-						.execute();
-				}
+				for (const query of queries) await query.execute();
 			},
 			{ method: "register" },
 		);

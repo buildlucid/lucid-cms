@@ -391,6 +391,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 							props.media.type === "video" ? props.media.sources : undefined,
 						poster:
 							props.media.type === "video" ? props.media.poster : undefined,
+						mimeType: props.media.meta.mimeType,
 					}}
 					alt={alt() || displayTitle() || ""}
 					imageFit={

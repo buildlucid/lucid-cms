@@ -20,57 +20,51 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 	/** Concurrent retries may create the same run; preserve the first checkpoint. */
 	async createOnce(data: Insertable<LucidAgentRuns>) {
-		const result = await this.executeQuery(
-			() =>
-				this.db
-					.insertInto("lucid_agent_runs")
-					.values(data)
-					.onConflict((conflict) =>
-						conflict
-							.column("id")
-							.doUpdateSet({ id: data.id })
-							.where(
-								"lucid_agent_runs.conversation_id",
-								"=",
-								data.conversation_id,
-							),
-					)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "createOnce" },
-		);
+		const query = this.db
+			.insertInto("lucid_agent_runs")
+			.values(data)
+			.onConflict((conflict) =>
+				conflict
+					.column("id")
+					.doUpdateSet({ id: data.id })
+					.where("lucid_agent_runs.conversation_id", "=", data.conversation_id),
+			)
+			.returning("id");
+
+		const result = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "createOnce",
+		});
 
 		return result.response;
 	}
 	/** A run with its conversation's agent and owner, which decide the access it needs. */
 	async selectForExecution(runId: string) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.selectFrom("lucid_agent_runs")
-					.innerJoin(
-						"lucid_agent_conversations",
-						"lucid_agent_conversations.id",
-						"lucid_agent_runs.conversation_id",
-					)
-					.select([
-						"lucid_agent_runs.id",
-						"lucid_agent_runs.conversation_id",
-						"lucid_agent_runs.routine_id",
-						"lucid_agent_runs.user_id",
-						"lucid_agent_runs.status",
-						"lucid_agent_runs.created_at",
-						"lucid_agent_runs.finished_at",
-						"lucid_agent_runs.checkpoint",
-						"lucid_agent_runs.execution_version",
-						"lucid_agent_conversations.agent_key",
-						"lucid_agent_conversations.user_id as conversation_user_id",
-						"lucid_agent_conversations.routine_id as conversation_routine_id",
-					])
-					.where("lucid_agent_runs.id", "=", runId)
-					.executeTakeFirst(),
-			{ method: "selectForExecution" },
-		);
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.innerJoin(
+				"lucid_agent_conversations",
+				"lucid_agent_conversations.id",
+				"lucid_agent_runs.conversation_id",
+			)
+			.select([
+				"lucid_agent_runs.id",
+				"lucid_agent_runs.conversation_id",
+				"lucid_agent_runs.routine_id",
+				"lucid_agent_runs.user_id",
+				"lucid_agent_runs.status",
+				"lucid_agent_runs.created_at",
+				"lucid_agent_runs.finished_at",
+				"lucid_agent_runs.checkpoint",
+				"lucid_agent_runs.execution_version",
+				"lucid_agent_conversations.agent_key",
+				"lucid_agent_conversations.user_id as conversation_user_id",
+				"lucid_agent_conversations.routine_id as conversation_routine_id",
+			])
+			.where("lucid_agent_runs.id", "=", runId);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectForExecution",
+		});
 
 		return exec.response;
 	}
@@ -140,51 +134,49 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 	async selectLatestForRoutines(routineIds: string[]) {
 		if (!routineIds.length) return { error: undefined, data: [] };
 
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.selectFrom("lucid_agent_runs as run")
-					.select([
-						"run.id",
-						"run.routine_id",
-						"run.conversation_id",
-						"run.status",
-						"run.outcome",
-						"run.created_at",
-					])
-					.where("run.routine_id", "in", routineIds)
-					.where(({ eb, selectFrom }) =>
-						eb(
-							"run.id",
-							"=",
-							selectFrom("lucid_agent_runs as latest")
-								.select("latest.id")
-								.whereRef("latest.routine_id", "=", "run.routine_id")
-								.orderBy("latest.created_at", "desc")
-								.orderBy("latest.id", "desc")
-								.limit(1),
-						),
-					)
-					.execute(),
-			{ method: "selectLatestForRoutines" },
-		);
+		const query = this.db
+			.selectFrom("lucid_agent_runs as run")
+			.select([
+				"run.id",
+				"run.routine_id",
+				"run.conversation_id",
+				"run.status",
+				"run.outcome",
+				"run.created_at",
+			])
+			.where("run.routine_id", "in", routineIds)
+			.where(({ eb, selectFrom }) =>
+				eb(
+					"run.id",
+					"=",
+					selectFrom("lucid_agent_runs as latest")
+						.select("latest.id")
+						.whereRef("latest.routine_id", "=", "run.routine_id")
+						.orderBy("latest.created_at", "desc")
+						.orderBy("latest.id", "desc")
+						.limit(1),
+				),
+			);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectLatestForRoutines",
+		});
 
 		return exec.response;
 	}
 	/** The last summary a routine left for its next run. */
 	async selectLatestSummary(routineId: string) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.selectFrom("lucid_agent_runs")
-					.select(["summary", "finished_at"])
-					.where("routine_id", "=", routineId)
-					.where("summary", "is not", null)
-					.orderBy("finished_at", "desc")
-					.limit(1)
-					.executeTakeFirst(),
-			{ method: "selectLatestSummary" },
-		);
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.select(["summary", "finished_at"])
+			.where("routine_id", "=", routineId)
+			.where("summary", "is not", null)
+			.orderBy("finished_at", "desc")
+			.limit(1);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectLatestSummary",
+		});
 
 		return exec.response;
 	}
@@ -229,25 +221,24 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 	}
 	/** Runs whose worker stopped: interrupted ones, and queued ones no worker picked up. */
 	async selectRecoverable(props: { staleBefore: string; limit: number }) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.selectFrom("lucid_agent_runs")
-					.select(["id", "conversation_id", "user_id", "recoveries"])
-					.where((eb) =>
-						eb.or([
-							eb("status", "=", "interrupted"),
-							eb.and([
-								eb("status", "=", "queued"),
-								eb("updated_at", "<", props.staleBefore),
-							]),
-						]),
-					)
-					.orderBy("updated_at", "asc")
-					.limit(props.limit)
-					.execute(),
-			{ method: "selectRecoverable" },
-		);
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.select(["id", "conversation_id", "user_id", "recoveries"])
+			.where((eb) =>
+				eb.or([
+					eb("status", "=", "interrupted"),
+					eb.and([
+						eb("status", "=", "queued"),
+						eb("updated_at", "<", props.staleBefore),
+					]),
+				]),
+			)
+			.orderBy("updated_at", "asc")
+			.limit(props.limit);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectRecoverable",
+		});
 
 		return exec.response;
 	}
@@ -262,29 +253,26 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 	}) {
 		const terminal = isTerminalRunStatus(props.status);
 
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_runs")
-					.set({
-						status: props.status,
-						execution_token: null,
-						lease_expires_at: null,
-						updated_at: props.now,
-						...(props.errorMessage !== undefined
-							? { error_message: props.errorMessage }
-							: {}),
-						...(props.recovered
-							? { recoveries: sql<number>`recoveries + 1` }
-							: {}),
-						...(terminal ? { finished_at: props.now } : {}),
-					})
-					.where("id", "=", props.runId)
-					.where("status", "in", props.from)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "transition" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({
+				status: props.status,
+				execution_token: null,
+				lease_expires_at: null,
+				updated_at: props.now,
+				...(props.errorMessage !== undefined
+					? { error_message: props.errorMessage }
+					: {}),
+				...(props.recovered ? { recoveries: sql<number>`recoveries + 1` } : {}),
+				...(terminal ? { finished_at: props.now } : {}),
+			})
+			.where("id", "=", props.runId)
+			.where("status", "in", props.from)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "transition",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
@@ -297,33 +285,32 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		now: string;
 		leaseExpiresAt: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_runs")
-					.set({
-						status: "running",
-						execution_token: props.token,
-						execution_version: sql<number>`execution_version + 1`,
-						lease_expires_at: props.leaseExpiresAt,
-						started_at: sql`coalesce(started_at, ${props.now})`,
-						updated_at: props.now,
-					})
-					.where("id", "=", props.runId)
-					.where("execution_version", "=", props.expectedVersion)
-					.where((eb) =>
-						eb.or([
-							eb("status", "in", ["queued", "waiting", "interrupted"]),
-							eb.and([
-								eb("status", "=", "running"),
-								eb("lease_expires_at", "<", props.now),
-							]),
-						]),
-					)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "claimExecution" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({
+				status: "running",
+				execution_token: props.token,
+				execution_version: sql<number>`execution_version + 1`,
+				lease_expires_at: props.leaseExpiresAt,
+				started_at: sql`coalesce(started_at, ${props.now})`,
+				updated_at: props.now,
+			})
+			.where("id", "=", props.runId)
+			.where("execution_version", "=", props.expectedVersion)
+			.where((eb) =>
+				eb.or([
+					eb("status", "in", ["queued", "waiting", "interrupted"]),
+					eb.and([
+						eb("status", "=", "running"),
+						eb("lease_expires_at", "<", props.now),
+					]),
+				]),
+			)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "claimExecution",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
@@ -334,21 +321,20 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		leaseExpiresAt: string;
 		now: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_runs")
-					.set({
-						lease_expires_at: props.leaseExpiresAt,
-						updated_at: props.now,
-					})
-					.where("id", "=", props.runId)
-					.where("execution_token", "=", props.token)
-					.where("status", "=", "running")
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "heartbeatExecution" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({
+				lease_expires_at: props.leaseExpiresAt,
+				updated_at: props.now,
+			})
+			.where("id", "=", props.runId)
+			.where("execution_token", "=", props.token)
+			.where("status", "=", "running")
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "heartbeatExecution",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
@@ -366,51 +352,47 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 		const terminal = isTerminalRunStatus(props.status);
 		const released = props.status !== "running";
 
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_runs")
-					.set({
-						status: props.status,
-						checkpoint: props.checkpoint,
-						updated_at: props.now,
-						...(props.errorMessage !== undefined
-							? { error_message: props.errorMessage }
-							: {}),
-						...(props.finish
-							? { outcome: props.finish.outcome, summary: props.finish.summary }
-							: {}),
-						...(terminal ? { finished_at: props.now } : {}),
-						...(released
-							? { lease_expires_at: null, execution_token: null }
-							: {}),
-					})
-					.where("id", "=", props.runId)
-					.where("execution_token", "=", props.token)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "updateWithToken" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({
+				status: props.status,
+				checkpoint: props.checkpoint,
+				updated_at: props.now,
+				...(props.errorMessage !== undefined
+					? { error_message: props.errorMessage }
+					: {}),
+				...(props.finish
+					? { outcome: props.finish.outcome, summary: props.finish.summary }
+					: {}),
+				...(terminal ? { finished_at: props.now } : {}),
+				...(released ? { lease_expires_at: null, execution_token: null } : {}),
+			})
+			.where("id", "=", props.runId)
+			.where("execution_token", "=", props.token)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "updateWithToken",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
 	}
 	async interruptExpired(props: { now: string }) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_runs")
-					.set({
-						status: "interrupted",
-						execution_token: null,
-						lease_expires_at: null,
-						updated_at: props.now,
-					})
-					.where("status", "=", "running")
-					.where("lease_expires_at", "<", props.now)
-					.execute(),
-			{ method: "interruptExpired" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_runs")
+			.set({
+				status: "interrupted",
+				execution_token: null,
+				lease_expires_at: null,
+				updated_at: props.now,
+			})
+			.where("status", "=", "running")
+			.where("lease_expires_at", "<", props.now);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "interruptExpired",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: undefined };

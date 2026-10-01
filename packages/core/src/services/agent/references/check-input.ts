@@ -1,7 +1,6 @@
 import {
 	canReadReference,
 	referenceKey,
-	referenceNotFoundError,
 } from "../../../libs/agent/references.js";
 import { getAgent } from "../../../libs/agent/registry.js";
 import { copy } from "../../../libs/i18n/index.js";
@@ -35,8 +34,10 @@ const checkInput: ServiceFn<
 	for (const reference of input.references) {
 		const attachable =
 			reference.type === "media"
-				? agent?.attachments.media
-				: agent?.attachments.documents;
+				? agent?.features.media.attach ||
+					(ownership.data.get(reference.mediaId)?.type === "user" &&
+						agent?.features.media.upload)
+				: agent?.features.documents.attach;
 
 		const detail = details.data.get(referenceKey(reference));
 
@@ -63,7 +64,17 @@ const checkInput: ServiceFn<
 		}
 
 		if (!detail) {
-			return { data: undefined, error: referenceNotFoundError(reference) };
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 404,
+					message:
+						reference.type === "media"
+							? copy("server:core.media.not.found.message")
+							: copy("server:core.documents.not.found.message"),
+				},
+			};
 		}
 	}
 

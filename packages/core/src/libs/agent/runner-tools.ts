@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../../constants/constants.js";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
 import { agentReferenceInputSchema } from "../../schemas/agent-references.js";
 import type {
@@ -48,6 +49,20 @@ const finishInput = z.object({
  * handlers live in `services/agent/helpers/runner-tools`.
  */
 const runnerTools = {
+	previewMedia: {
+		name: "lucid_preview_media",
+		title: copy("admin:core.tools.lucid_preview_media.title"),
+		description: `Show 1 to ${constants.agent.previewMediaLimit} Lucid images, videos or audio recordings in the chat as a preview gallery. Use this when showing a selected item, comparing choices or recommending an image for a document. Use media IDs from the person or tool results. PDFs and other files cannot be previewed; link them with lucid_register_references instead. This shows media to the person; it does not analyse the contents or grant access.`,
+		input: z
+			.object({
+				mediaIds: z
+					.array(z.number().int().positive())
+					.min(1)
+					.max(constants.agent.previewMediaLimit),
+			})
+			.strict(),
+		available: () => true,
+	},
 	references: {
 		name: "lucid_list_references",
 		title: copy("admin:core.tools.lucid_list_references.title"),

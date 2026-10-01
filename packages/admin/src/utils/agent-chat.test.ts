@@ -423,11 +423,12 @@ it("text deltas keep row identities and do not recompute the tool list", () => {
 					message.parts.filter(isToolRow),
 				);
 			});
-			for (let index = 0; index < 100; index++)
+			for (let index = 0; index < 100; index++) {
 				transcript.apply(
 					{ type: "text-delta", messageId: "reply", text: "." },
 					conversationId,
 				);
+			}
 			expect(transcript.messages[0]).toBe(first);
 			expect(transcript.messages.at(-1)).toBe(reply);
 			expect(reply?.parts).toEqual([

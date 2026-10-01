@@ -4,6 +4,7 @@ import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
+import { queryFormatted } from "../../../../schemas/helpers/querystring.js";
 import { mediaStatusSchema } from "../../../../schemas/media.js";
 import type { MediaType } from "../../../../types/response.js";
 
@@ -18,11 +19,33 @@ const mediaTypes = [
 
 export const inputSchema = z.object({
 	query: querySchema
-		.extend({ perPage: paginationInput.perPage })
+		.omit({ filter: true })
+		.extend({
+			filter: z
+				.array(
+					queryFormatted.schema.filterOr.unwrap().element.element.extend({
+						key: querySchema.shape.filter.unwrap().keyof(),
+					}),
+				)
+				.optional(),
+			perPage: paginationInput.perPage,
+		})
 		.prefault({})
+		.transform(
+			({ filter, filterOr, ...query }): z.input<typeof querySchema> => ({
+				...query,
+				// Keep repeated columns and combine AND conditions with each optional OR group.
+				filterOr: filter?.length
+					? filterOr?.length
+						? filterOr.map((group) => [...filter, ...group])
+						: [filter]
+					: filterOr,
+			}),
+		)
+		.pipe(querySchema)
 		.meta({
 			description:
-				"Media filter/sort/page query (perPage max 50). For example {filter:{title:{operator:'contains',value:'logo'}}}. Uses the same filter operators as Lucid's content API.",
+				"All query fields are optional. filter is a list of conditions combined with AND. Include only conditions needed for the search. For images use {filter:[{key:'type',value:'image',operator:'='}]}. For a title search use {filter:[{key:'title',value:'logo',operator:'contains'}]}. Use {} to browse without filters. perPage max 50.",
 		}),
 	contentLocale: z.string().trim().min(1).optional().meta({
 		description:

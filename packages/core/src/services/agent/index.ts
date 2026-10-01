@@ -13,6 +13,7 @@ export { default as getConversation } from "./get-conversation.js";
 export { default as getConversationDetails } from "./get-conversation-details.js";
 export { default as getConversations } from "./get-conversations.js";
 export { default as getDefinitions } from "./get-definitions.js";
+export { default as getMediaPreviews } from "./get-media-previews.js";
 export { default as getMessages } from "./get-messages.js";
 export { default as getModels } from "./get-models.js";
 export { default as getReferences } from "./get-references.js";

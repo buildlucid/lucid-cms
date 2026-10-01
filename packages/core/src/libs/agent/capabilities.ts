@@ -1,5 +1,4 @@
 import type { AgentCapabilities } from "../../types/response.js";
-import { Permissions } from "../permission/definitions.js";
 import hasPermission, {
 	type PermissionGrant,
 } from "../permission/has-permission.js";
@@ -17,20 +16,21 @@ export const getAvailableTools = (
 
 /**
  * The tools that provide each capability, from their `capabilities`
- * declarations. Pass tools the principal can already use; media also needs
- * permission to read media.
+ * declarations. Pass tools the principal can already use. Resource access is checked when a tool runs.
  */
 export const getCapabilityProviders = (props: {
 	tools: readonly AgentToolDefinition[];
-	grant: PermissionGrant;
 }) => ({
-	media: hasPermission(props.grant, Permissions.MediaRead)
-		? props.tools.flatMap((tool) =>
-				tool.capabilities?.media
-					? [{ tool: tool.name, mimeTypes: tool.capabilities.media.mimeTypes }]
-					: [],
-			)
-		: [],
+	mediaAnalysis: props.tools.flatMap((tool) =>
+		tool.capabilities?.mediaAnalysis
+			? [
+					{
+						tool: tool.name,
+						mimeTypes: tool.capabilities.mediaAnalysis.mimeTypes,
+					},
+				]
+			: [],
+	),
 	webSearch: props.tools.flatMap((tool) =>
 		tool.capabilities?.webSearch ? [tool.name] : [],
 	),
@@ -43,10 +43,12 @@ export const getCapabilityProviders = (props: {
 export const summariseCapabilities = (
 	providers: ReturnType<typeof getCapabilityProviders>,
 ): AgentCapabilities => ({
-	media: providers.media.length
+	mediaAnalysis: providers.mediaAnalysis.length
 		? {
 				mimeTypes: [
-					...new Set(providers.media.flatMap((provider) => provider.mimeTypes)),
+					...new Set(
+						providers.mediaAnalysis.flatMap((provider) => provider.mimeTypes),
+					),
 				],
 			}
 		: null,

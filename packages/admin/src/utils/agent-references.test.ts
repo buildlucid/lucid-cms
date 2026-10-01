@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import {
 	canAgentOpen,
+	canAttachMedia,
 	preserveSelectedDocumentVersions,
 } from "./agent-references";
 
@@ -32,7 +33,7 @@ it("keeps pinned versions when confirming a document selector and drops deselect
 
 it("opens media only when a tool accepts its type, and leaves documents unanswered", () => {
 	const capabilities = {
-		media: { mimeTypes: ["application/pdf", "image/*"] },
+		mediaAnalysis: { mimeTypes: ["application/pdf", "image/*"] },
 		webSearch: false,
 		webRead: false,
 	};
@@ -48,7 +49,10 @@ it("opens media only when a tool accepts its type, and leaves documents unanswer
 	expect(canAgentOpen(media("audio/mpeg"), capabilities)).toBe(false);
 	expect(canAgentOpen(media(), capabilities)).toBe(false);
 	expect(
-		canAgentOpen(media("application/pdf"), { ...capabilities, media: null }),
+		canAgentOpen(media("application/pdf"), {
+			...capabilities,
+			mediaAnalysis: null,
+		}),
 	).toBe(false);
 	expect(
 		canAgentOpen(
@@ -56,4 +60,44 @@ it("opens media only when a tool accepts its type, and leaves documents unanswer
 			capabilities,
 		),
 	).toBeUndefined();
+});
+
+it("attaches personal files with uploads alone, and library media only with attachments and read access", () => {
+	const features = (upload: boolean, attach: boolean) => ({
+		media: { upload, attach },
+		documents: { attach: false },
+	});
+	const personal = { ownership: { type: "user" as const, userId: 1 } };
+	const library = { ownership: { type: "library" as const } };
+
+	expect(
+		canAttachMedia(personal, {
+			features: features(true, false),
+			canReadLibrary: false,
+		}),
+	).toBe(true);
+	expect(
+		canAttachMedia(library, {
+			features: features(true, false),
+			canReadLibrary: true,
+		}),
+	).toBe(false);
+	expect(
+		canAttachMedia(library, {
+			features: features(false, true),
+			canReadLibrary: false,
+		}),
+	).toBe(false);
+	expect(
+		canAttachMedia(library, {
+			features: features(false, true),
+			canReadLibrary: true,
+		}),
+	).toBe(true);
+	expect(
+		canAttachMedia(
+			{ ownership: { type: "system" } },
+			{ features: features(true, true), canReadLibrary: true },
+		),
+	).toBe(false);
 });

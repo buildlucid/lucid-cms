@@ -1,9 +1,8 @@
 import z from "zod";
 import { cmsAiGenerateCompletedDataSchema } from "./ai.js";
-import { webUrlSchema } from "./web.js";
 
 export const MAX_MEDIA_BYTES = 6_000_000;
-export const MAX_MEDIA_BASE64_LENGTH = 8_000_000;
+export const MAX_MEDIA_BASE64_LENGTH = Math.ceil(MAX_MEDIA_BYTES / 3) * 4;
 
 export const mediaMimeTypeSchema = z.enum([
 	"image/jpeg",
@@ -20,35 +19,22 @@ export const mediaMimeTypeSchema = z.enum([
 	"video/webm",
 	"video/quicktime",
 	"video/mpeg",
-	"text/plain",
-	"text/markdown",
-	"text/csv",
 ]);
 
-/** A public URL or inline file to analyse. Private media must use inline data. */
-export const mediaSourceSchema = z.discriminatedUnion("type", [
-	z
-		.object({
-			type: z.literal("url"),
-			url: webUrlSchema.refine((value) => new URL(value).protocol === "https:"),
-			mimeType: mediaMimeTypeSchema.optional(),
-			filename: z.string().trim().min(1).max(255).optional(),
-		})
-		.strict(),
-	z
-		.object({
-			type: z.literal("base64"),
-			data: z
-				.string()
-				.min(4)
-				.max(MAX_MEDIA_BASE64_LENGTH)
-				.regex(/^[A-Za-z0-9+/]+={0,2}$/)
-				.refine((value) => value.length % 4 === 0),
-			mimeType: mediaMimeTypeSchema,
-			filename: z.string().trim().min(1).max(255).optional(),
-		})
-		.strict(),
-]);
+/** File bytes read from Lucid media and sent for analysis. */
+export const mediaSourceSchema = z
+	.object({
+		type: z.literal("base64"),
+		data: z
+			.string()
+			.min(4)
+			.max(MAX_MEDIA_BASE64_LENGTH)
+			.regex(/^[A-Za-z0-9+/]+={0,2}$/)
+			.refine((value) => value.length % 4 === 0),
+		mimeType: mediaMimeTypeSchema,
+		filename: z.string().trim().min(1).max(255).optional(),
+	})
+	.strict();
 
 export const mediaAnalyzeRequestSchema = z
 	.object({

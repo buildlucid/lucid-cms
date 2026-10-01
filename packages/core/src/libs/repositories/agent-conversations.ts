@@ -226,25 +226,24 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		const staleBefore = new Date(
 			new Date(props.requestedAt).getTime() - 60 * 60 * 1_000,
 		).toISOString();
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({
-						title_generation_requested_at: props.requestedAt,
-					})
-					.where("id", "=", props.conversationId)
-					.where("title_status", "=", "provisional")
-					.where((eb) =>
-						eb.or([
-							eb("title_generation_requested_at", "is", null),
-							eb("title_generation_requested_at", "<", staleBefore),
-						]),
-					)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "beginTitleGeneration" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({
+				title_generation_requested_at: props.requestedAt,
+			})
+			.where("id", "=", props.conversationId)
+			.where("title_status", "=", "provisional")
+			.where((eb) =>
+				eb.or([
+					eb("title_generation_requested_at", "is", null),
+					eb("title_generation_requested_at", "<", staleBefore),
+				]),
+			)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "beginTitleGeneration",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
@@ -253,16 +252,15 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		conversationId: string;
 		title: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({ title: props.title })
-					.where("id", "=", props.conversationId)
-					.where("title_status", "=", "provisional")
-					.execute(),
-			{ method: "updateProvisionalTitle" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({ title: props.title })
+			.where("id", "=", props.conversationId)
+			.where("title_status", "=", "provisional");
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "updateProvisionalTitle",
+		});
 		if (exec.response.error) return exec.response;
 		return { error: undefined, data: undefined };
 	}
@@ -272,22 +270,21 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		requestedAt: string;
 		title: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({
-						title: props.title,
-						title_status: "generated",
-						updated_at: new Date().toISOString(),
-					})
-					.where("id", "=", props.conversationId)
-					.where("title_status", "=", "provisional")
-					.where("title_generation_requested_at", "=", props.requestedAt)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "completeGeneratedTitle" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({
+				title: props.title,
+				title_status: "generated",
+				updated_at: new Date().toISOString(),
+			})
+			.where("id", "=", props.conversationId)
+			.where("title_status", "=", "provisional")
+			.where("title_generation_requested_at", "=", props.requestedAt)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "completeGeneratedTitle",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
@@ -297,17 +294,16 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		conversationId: string;
 		requestedAt: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({ title_generation_requested_at: null })
-					.where("id", "=", props.conversationId)
-					.where("title_status", "=", "provisional")
-					.where("title_generation_requested_at", "=", props.requestedAt)
-					.execute(),
-			{ method: "clearTitleGenerationRequest" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({ title_generation_requested_at: null })
+			.where("id", "=", props.conversationId)
+			.where("title_status", "=", "provisional")
+			.where("title_generation_requested_at", "=", props.requestedAt);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "clearTitleGenerationRequest",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: undefined };
@@ -319,25 +315,24 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		runId: string;
 		updatedAt: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({ active_run_id: props.runId, updated_at: props.updatedAt })
-					.where("id", "=", props.conversationId)
-					.$if(props.allowPaused !== true, (q) =>
-						q.where("queue_paused", "=", false),
-					)
-					.where((eb) =>
-						eb.or([
-							eb("active_run_id", "is", null),
-							eb("active_run_id", "=", props.runId),
-						]),
-					)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "claimRun" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({ active_run_id: props.runId, updated_at: props.updatedAt })
+			.where("id", "=", props.conversationId)
+			.$if(props.allowPaused !== true, (q) =>
+				q.where("queue_paused", "=", false),
+			)
+			.where((eb) =>
+				eb.or([
+					eb("active_run_id", "is", null),
+					eb("active_run_id", "=", props.runId),
+				]),
+			)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "claimRun",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };
@@ -348,16 +343,15 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		runId: string;
 		context: ConversationContext;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({ context: props.context })
-					.where("id", "=", props.conversationId)
-					.where("active_run_id", "=", props.runId)
-					.execute(),
-			{ method: "updateContext" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({ context: props.context })
+			.where("id", "=", props.conversationId)
+			.where("active_run_id", "=", props.runId);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "updateContext",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: undefined };
@@ -368,16 +362,15 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		runId: string;
 		updatedAt: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({ active_run_id: null, updated_at: props.updatedAt })
-					.where("id", "=", props.conversationId)
-					.where("active_run_id", "=", props.runId)
-					.execute(),
-			{ method: "releaseRun" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({ active_run_id: null, updated_at: props.updatedAt })
+			.where("id", "=", props.conversationId)
+			.where("active_run_id", "=", props.runId);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "releaseRun",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: undefined };
@@ -388,44 +381,42 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		runId: string;
 		token?: string;
 	}) {
-		const result = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({ queue_paused: true })
-					.where("id", "=", props.conversationId)
-					.where("active_run_id", "=", props.runId)
-					.$if(props.token !== undefined, (query) =>
-						query.where((eb) =>
-							eb.exists(
-								eb
-									.selectFrom("lucid_agent_runs")
-									.select("id")
-									.where("id", "=", props.runId)
-									.where("execution_token", "=", props.token ?? null)
-									.where("status", "=", "running"),
-							),
-						),
-					)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "pauseQueue" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({ queue_paused: true })
+			.where("id", "=", props.conversationId)
+			.where("active_run_id", "=", props.runId)
+			.$if(props.token !== undefined, (query) =>
+				query.where((eb) =>
+					eb.exists(
+						eb
+							.selectFrom("lucid_agent_runs")
+							.select("id")
+							.where("id", "=", props.runId)
+							.where("execution_token", "=", props.token ?? null)
+							.where("status", "=", "running"),
+					),
+				),
+			)
+			.returning("id");
+
+		const result = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "pauseQueue",
+		});
 		if (result.response.error) return result.response;
 
 		return { error: undefined, data: result.response.data !== undefined };
 	}
 	/** Lets queued input start again after a pause. */
 	async resumeQueue(props: { conversationId: string }) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_conversations")
-					.set({ queue_paused: false })
-					.where("id", "=", props.conversationId)
-					.execute(),
-			{ method: "resumeQueue" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_conversations")
+			.set({ queue_paused: false })
+			.where("id", "=", props.conversationId);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "resumeQueue",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: undefined };

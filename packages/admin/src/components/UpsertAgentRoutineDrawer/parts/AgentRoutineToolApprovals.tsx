@@ -61,7 +61,6 @@ const AgentRoutineToolApprovals: Component<{
 							<li class="group flex items-center justify-between gap-3 px-3 py-2">
 								<label
 									for={`routine-tool-${tool.name}`}
-									//* matches FormLabel, which turns primary while its field is focused
 									class="min-w-0 truncate text-sm text-body transition-colors duration-200 ease-in-out group-focus-within:text-primary-hover"
 								>
 									{translateAdminCopy(tool.title)}
@@ -96,8 +95,9 @@ const AgentRoutineToolApprovals: Component<{
 											value === "default" ||
 											value === "ask" ||
 											value === "run"
-										)
+										) {
 											setChoice(tool, value);
+										}
 									}}
 								/>
 							</li>

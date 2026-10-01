@@ -19,7 +19,10 @@ import {
 	Switch,
 } from "solid-js";
 import type { AgentComposerHandle } from "@/components/AgentComposer/AgentComposer";
-import { AgentTranscriptContext } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
+import {
+	type AgentMediaAttachments,
+	AgentTranscriptContext,
+} from "@/components/AgentTranscriptRow/AgentTranscriptContext";
 import Button from "@/components/Button/Button";
 import DeleteAgentConversationModal from "@/components/DeleteAgentConversationModal/DeleteAgentConversationModal";
 import ErrorState from "@/components/ErrorState/ErrorState";
@@ -34,11 +37,13 @@ import useAgentChat from "@/hooks/useAgentChat/useAgentChat";
 import useChatScroll from "@/hooks/useChatScroll/useChatScroll";
 import api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import {
 	type AgentReferenceItem,
 	agentReferenceKey,
+	canAttachMedia,
 } from "@/utils/agent-references";
 import { isToolRow } from "@/utils/agent-tools";
 import AgentChatActions from "./parts/AgentChatActions";
@@ -92,6 +97,7 @@ const AgentConversationPage: Component = () => {
 	const [runsOpen, setRunsOpen] = createSignal(false);
 	let composer: AgentComposerHandle | undefined;
 	const [attached, setAttached] = createSignal(false);
+	const [attachedKeys, setAttachedKeys] = createSignal<ReadonlySet<string>>();
 
 	// ----------------------------------------
 	// Memos
@@ -113,6 +119,20 @@ const AgentConversationPage: Component = () => {
 		),
 	);
 	const unavailable = createMemo(() => getAgentUnavailableReason());
+	const mediaAttachments = createMemo((): AgentMediaAttachments | undefined => {
+		const keys = attachedKeys();
+		const features = agent()?.features;
+		if (!keys || !features || unavailable()) return undefined;
+		const canReadLibrary = userStore.get.hasPermission(["media:read"]).all;
+
+		return {
+			canAttach: (media) => canAttachMedia(media, { features, canReadLibrary }),
+			isAttached: (mediaId) =>
+				keys.has(agentReferenceKey({ type: "media", mediaId })),
+			toggle: (media) =>
+				composer?.toggleReference({ type: "media", mediaId: media.id }),
+		};
+	});
 	const routineQuery = api.agent.useGetRoutine({
 		id: () => conversation()?.routineId ?? undefined,
 	});
@@ -165,7 +185,6 @@ const AgentConversationPage: Component = () => {
 	};
 	const setDetailsOpen = (open: boolean) =>
 		userPreferencesStore.setSectionOpen("agent.chat.details", open);
-	/** Opens a tool call in the panel, or closes it when it is already open. */
 	const selectTool = (id: string) =>
 		setSelectedId((current) => (current === id ? undefined : id));
 
@@ -263,7 +282,12 @@ const AgentConversationPage: Component = () => {
 	// Render
 	return (
 		<AgentTranscriptContext.Provider
-			value={{ selected: selectedId, select: setSelectedId, sidebar }}
+			value={{
+				selected: selectedId,
+				select: setSelectedId,
+				sidebar,
+				mediaAttachments,
+			}}
 		>
 			<div
 				data-agent-chat
@@ -417,6 +441,12 @@ const AgentConversationPage: Component = () => {
 											composer = handle;
 										}}
 										onAttachedChange={setAttached}
+										onReferencesChange={(references) =>
+											setAttachedKeys(
+												references &&
+													new Set(references.map(agentReferenceKey)),
+											)
+										}
 										onRespond={respond}
 										onSend={() => scroll.scrollToEnd("smooth")}
 										onEditRoutineApprovals={() => {

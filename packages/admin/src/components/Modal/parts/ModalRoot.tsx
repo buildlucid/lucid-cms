@@ -69,7 +69,7 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 				<div class="fixed inset-0" style={{ "z-index": layer() }}>
 					<Dialog.Content
 						role={props.role}
-						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center animate-modal-hide data-expanded:animate-modal-show"
+						class="overflow-y-auto h-full p-4 pointer-events-none! flex items-center justify-center outline-hidden animate-modal-hide data-expanded:animate-modal-show"
 						onEscapeKeyDown={(event) => {
 							if (!dismissible()) event.preventDefault();
 						}}

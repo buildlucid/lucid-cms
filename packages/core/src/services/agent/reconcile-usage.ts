@@ -10,7 +10,8 @@ import {
 } from "../ai/helpers/date-helpers.js";
 import handleProtectedResourceUnauthorized from "../connection/helpers/handle-protected-resource-unauthorized.js";
 import getAccessToken from "../connection/token-manager.js";
-import storeUsage, { storeFailedUsage } from "./helpers/store-usage.js";
+import storeFailedUsage from "./helpers/store-failed-usage.js";
+import storeUsage from "./helpers/store-usage.js";
 
 const remoteStatusSchema = z.object({
 	data: z.object({

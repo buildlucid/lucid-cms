@@ -38,6 +38,10 @@ export interface AgentComposerHandle {
 		markdown: string,
 		references?: (AgentReferenceInput | AgentReferenceItem)[],
 	) => void;
+	/** Attaches a resource, or removes it when it is already attached. */
+	toggleReference: (
+		reference: AgentReferenceInput | AgentReferenceItem,
+	) => void;
 	focus: () => void;
 }
 
@@ -46,7 +50,7 @@ export interface AgentComposerProps {
 	/** The agent files are uploaded for. Uploading is off without it. */
 	agentKey?: string;
 	/** Resource types the add menu offers. */
-	attachments?: Agent["attachments"];
+	features?: Agent["features"];
 	/** What the agent can do, shown on attached files and in the toolbar. */
 	capabilities?: Agent["capabilities"];
 	/** Current details for resources already linked to the chat, keyed by `agentReferenceKey`. */
@@ -75,6 +79,8 @@ export interface AgentComposerProps {
 	floatAttachments?: boolean;
 	/** Reports whether any files are attached, so a page can make room for them. */
 	onAttachedChange?: (attached: boolean) => void;
+	/** Reports the attached resources, so a page can show which ones are selected. Undefined once the box closes. */
+	onReferencesChange?: (references: AgentReferenceItem[] | undefined) => void;
 	/** Keeps an unsent draft for the browser session. */
 	draftKey?: string;
 	/** Toolbar slots along the bottom edge. `start` comes before the add menu, as it can change what the menu offers. */
@@ -125,17 +131,17 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 	const canUpload = createMemo(
 		() =>
 			props.agentKey !== undefined &&
-			props.attachments?.media === true &&
+			props.features?.media.upload === true &&
 			!props.disabled,
 	);
 	const unsupportedReferences = createMemo(() => {
-		const attachments = props.attachments;
+		const features = props.features;
 		return (
-			attachments !== undefined &&
+			features !== undefined &&
 			references().some((reference) =>
 				reference.type === "media"
-					? !attachments.media
-					: !attachments.documents,
+					? !(features.media.attach || features.media.upload)
+					: !features.documents.attach,
 			)
 		);
 	});
@@ -286,6 +292,17 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				});
 				instance.commands.focus("end");
 			},
+			toggleReference: (reference) => {
+				const key = agentReferenceKey(reference);
+				setReferences((current) =>
+					current.some((item) => agentReferenceKey(item) === key)
+						? current.filter((item) => agentReferenceKey(item) !== key)
+						: [
+								...current,
+								agentReferenceItem(reference, props.referenceDetails),
+							],
+				);
+			},
 			focus: () => instance.commands.focus("end"),
 		});
 		//* a route can mount before it is shown, so focusing waits a frame for the box to be on screen
@@ -341,6 +358,10 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			(attached) => props.onAttachedChange?.(attached),
 		),
 	);
+	createEffect(
+		on(references, (current) => props.onReferencesChange?.(current)),
+	);
+	onCleanup(() => props.onReferencesChange?.(undefined));
 	createEffect(() => {
 		references();
 		const instance = editor();
@@ -454,7 +475,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 				<div class="flex items-center gap-0.5 px-3 pb-3">
 					{props.start}
 					<AgentReferenceMenu
-						attachments={props.attachments}
+						features={props.features}
 						references={references()}
 						disabled={props.disabled || submitting()}
 						onUpload={canUpload() ? () => fileInput?.click() : undefined}

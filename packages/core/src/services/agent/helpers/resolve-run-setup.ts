@@ -60,7 +60,6 @@ const resolveRunSetup = (
 	return {
 		tools,
 		skills,
-		/** How each offered tool's calls appear in the chat. */
 		presentation: new Map(
 			[...tools, ...runnerTools].map((tool) => [
 				tool.name,
@@ -81,7 +80,7 @@ const resolveRunSetup = (
 			agent,
 			mode: props.mode,
 			skills,
-			media: getCapabilityProviders({ tools, grant: authority }).media,
+			media: getCapabilityProviders({ tools }).mediaAnalysis,
 			hasHistory: props.hasHistory,
 		}),
 	};

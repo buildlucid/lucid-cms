@@ -324,9 +324,12 @@ const agentCatalogResponseSchema = z.object({
 			key: z.string(),
 			name: z.string(),
 			description: z.string(),
-			attachments: z.object({ media: z.boolean(), documents: z.boolean() }),
+			features: z.object({
+				media: z.object({ upload: z.boolean(), attach: z.boolean() }),
+				documents: z.object({ attach: z.boolean() }),
+			}),
 			capabilities: z.object({
-				media: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
+				mediaAnalysis: z.object({ mimeTypes: z.array(z.string()) }).nullable(),
 				webSearch: z.boolean(),
 				webRead: z.boolean(),
 			}),
@@ -543,6 +546,12 @@ export const controllerSchemas = {
 		query: noQuery,
 		params: idParams,
 		response: agentConversationDetailsResponseSchema,
+	} satisfies ControllerSchema,
+	getMediaPreviews: {
+		body: undefined,
+		query: noQuery,
+		params: idParams,
+		response: z.array(mediaResponseSchema),
 	} satisfies ControllerSchema,
 	getReferences: {
 		body: undefined,

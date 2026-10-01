@@ -7,12 +7,12 @@ import {
 } from "solid-icons/fa";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import Image from "@/components/Image/Image";
+import PdfBadge from "@/components/PdfBadge/PdfBadge";
 import {
 	type AgentReferenceItem,
 	agentReferenceKind,
 } from "@/utils/agent-references";
 
-/** A reference's image preview, or an icon for its kind when there is none. Fills its container. */
 const AgentReferenceThumb: Component<{
 	reference: AgentReferenceItem;
 	iconSize?: number;
@@ -50,9 +50,7 @@ const AgentReferenceThumb: Component<{
 			</Match>
 			<Match when={kind() === "pdf"}>
 				<span class="flex h-full w-full items-center justify-center bg-input">
-					<span class="rounded border border-danger-low-border bg-danger-low px-1.5 py-0.5 text-[11px] font-medium text-danger-low-foreground">
-						PDF
-					</span>
+					<PdfBadge />
 				</span>
 			</Match>
 			<Match when={kind() === "document"}>

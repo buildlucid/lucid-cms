@@ -1,4 +1,3 @@
-import { analyzeMediaAgentTool } from "../../services/agent/tools/analyze-media/index.js";
 import {
 	describeCollectionAgentTool,
 	describeCollectionMcpTool,
@@ -24,16 +23,13 @@ import {
 	findMediaMcpTool,
 } from "../../services/media/tools/find/index.js";
 import { previewMediaMcpTool } from "../../services/media/tools/preview/index.js";
-import { removeMediaOwnershipAgentTool } from "../../services/media/tools/remove-ownership/index.js";
-import type { WebToolOptions } from "../../services/web/helpers/web-tool-options.js";
-import { webFetchAgentTool } from "../../services/web/tools/fetch/index.js";
-import { webSearchAgentTool } from "../../services/web/tools/search/index.js";
 import type { CollectionToolOptions } from "../permission/readable-collections.js";
 
 /**
  * Lucid's tools for agents. Call one to add it to an agent's `tools`, or use
- * a bundle such as `content()` or `web()`. An agent only has the tools it
- * lists. Every tool uses the permissions of the person the agent acts for.
+ * a bundle such as `content()`. Web, media analysis and library tools are
+ * built in and configured with `defineAgent`'s `features`. Every tool uses the
+ * permissions of the person the agent acts for.
  *
  * @example
  * ```ts
@@ -42,7 +38,6 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * 	name: "SEO Agent",
  * 	tools: [
  * 		agentTools.content({ collections: ["pages"] }),
- * 		agentTools.web({ allowedDomains: ["example.com"] }),
  * 	],
  * });
  * ```
@@ -54,14 +49,6 @@ export const agentTools = {
 	getDocument: getDocumentAgentTool,
 	findMedia: findMediaAgentTool,
 	listLocales: listLocalesAgentTool,
-	/** Searches the public web. Uses Lucid credits. */
-	webSearch: webSearchAgentTool,
-	/** Reads a public webpage already mentioned in the chat. Uses Lucid credits. */
-	webFetch: webFetchAgentTool,
-	/** Analyses linked images, PDFs, audio, video and text files, or public files mentioned in the chat. Files are sent to Lucid for analysis and use Lucid credits. */
-	analyzeMedia: analyzeMediaAgentTool,
-	/** Removes a user's ownership of their personal media, such as a chat upload, so it joins the media library. Asks them to approve it first. */
-	removeMediaOwnership: removeMediaOwnershipAgentTool,
 	/** Every content reading tool: collections, documents, media and locales. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),
@@ -70,11 +57,6 @@ export const agentTools = {
 		getDocumentAgentTool(options),
 		findMediaAgentTool(),
 		listLocalesAgentTool(),
-	],
-	/** Web search and webpage reads, sharing one set of allowed domains. */
-	web: (options: WebToolOptions = {}) => [
-		webSearchAgentTool(options),
-		webFetchAgentTool(options),
 	],
 };
 

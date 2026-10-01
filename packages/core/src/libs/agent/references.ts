@@ -2,7 +2,6 @@ import type {
 	AgentReferenceInput,
 	MediaOwnership,
 } from "../../types/response.js";
-import { copy } from "../i18n/index.js";
 import { getCollectionPermission } from "../permission/collection-permissions.js";
 import { Permissions } from "../permission/definitions.js";
 import hasPermission, {
@@ -46,13 +45,3 @@ export const canReadReference = (props: {
 		hasPermission(props.grant, referenceReadPermission(props.reference))
 	);
 };
-
-/** The error for a referenced resource that no longer exists. */
-export const referenceNotFoundError = (reference: AgentReferenceInput) => ({
-	type: "basic" as const,
-	status: 404,
-	message:
-		reference.type === "media"
-			? copy("server:core.media.not.found.message")
-			: copy("server:core.documents.not.found.message"),
-});

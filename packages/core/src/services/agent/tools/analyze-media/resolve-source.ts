@@ -1,4 +1,3 @@
-import type z from "zod";
 import { canReadReference } from "../../../../libs/agent/references.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import {
@@ -15,40 +14,18 @@ import type { AgentToolExecution } from "../../../../libs/tools/types.js";
 import { getMediaOwnership } from "../../../../utils/media/index.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import streamMedia from "../../../media/stream.js";
-import isUrlInConversation from "../../../web/helpers/is-url-in-conversation.js";
 import hasFileSignature from "./file-signature.js";
-import type { inputSchema } from "./schema.js";
 
 /** Resolves chat media locally, so private file URLs never leave the CMS. The file itself is sent for analysis. */
 const resolveSource: ServiceFn<
 	[
 		{
-			source: z.output<typeof inputSchema>["source"];
+			mediaId: number;
 			execution: AgentToolExecution;
 		},
 	],
 	MediaSource
-> = async (context, { source, execution }) => {
-	if (source.type === "url") {
-		const mentioned = await isUrlInConversation(context, {
-			url: source.url,
-			conversationId: execution.run.conversationId,
-		});
-		if (mentioned.error) return mentioned;
-		if (!mentioned.data) {
-			return {
-				data: undefined,
-				error: {
-					type: "basic",
-					status: 403,
-					message: copy("server:agent.media.source.denied"),
-				},
-			};
-		}
-
-		return { error: undefined, data: source };
-	}
-
+> = async (context, { mediaId, execution }) => {
 	const References = new AgentMediaReferencesRepository(context.db);
 	const Media = new MediaRepository(context.db);
 
@@ -60,7 +37,7 @@ const resolveSource: ServiceFn<
 				operator: "=",
 				value: execution.run.conversationId,
 			},
-			{ key: "media_id", operator: "=", value: source.mediaId },
+			{ key: "media_id", operator: "=", value: mediaId },
 		],
 	});
 	if (reference.error) return reference;
@@ -78,7 +55,7 @@ const resolveSource: ServiceFn<
 	const media = await Media.selectSingle({
 		select: ["mime_type", "file_size", "status", "owner_user_id", "is_system"],
 		where: [
-			{ key: "id", operator: "=", value: source.mediaId },
+			{ key: "id", operator: "=", value: mediaId },
 			{
 				key: "is_deleted",
 				operator: "=",
@@ -99,7 +76,7 @@ const resolveSource: ServiceFn<
 	const { principal } = execution.authority;
 	if (
 		!canReadReference({
-			reference: { type: "media", mediaId: source.mediaId },
+			reference: { type: "media", mediaId },
 			ownership: getMediaOwnership(media.data),
 			userId: principal.type === "user" ? principal.userId : null,
 			grant: principal.type === "user" ? execution.authority : undefined,
@@ -154,7 +131,7 @@ const resolveSource: ServiceFn<
 		};
 	}
 
-	const file = await streamMedia(context, { id: source.mediaId });
+	const file = await streamMedia(context, { id: mediaId });
 	if (file.error) return file;
 	const reader = toWebReadable(file.data.body).getReader();
 	const chunks: Uint8Array[] = [];

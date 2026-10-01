@@ -6,6 +6,7 @@ import { toolFailure } from "../tool-outcome.js";
 import ask from "./ask.js";
 import finish from "./finish.js";
 import history from "./history.js";
+import previewMedia from "./preview-media.js";
 import progress from "./progress.js";
 import references from "./references.js";
 import registerReferences from "./register-references.js";
@@ -29,6 +30,10 @@ const withInput =
 export const runnerToolHandlers: ReadonlyMap<string, RunnerToolHandler> =
 	new Map(
 		Object.entries({
+			[runnerTools.previewMedia.name]: withInput(
+				runnerTools.previewMedia,
+				previewMedia,
+			),
 			[runnerTools.ask.name]: withInput(runnerTools.ask, ask),
 			[runnerTools.references.name]: withInput(
 				runnerTools.references,

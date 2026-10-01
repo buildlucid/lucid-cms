@@ -14,6 +14,7 @@ const urlPattern =
  * question, so a file could make it echo that question back inside a URL.
  */
 const echoingTools: ReadonlySet<string> = new Set([
+	runnerTools.previewMedia.name,
 	runnerTools.history.name,
 	runnerTools.progress.name,
 	runnerTools.skill.name,

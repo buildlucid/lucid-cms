@@ -20,6 +20,7 @@ export type {
 } from "@lucidcms/admin/types";
 export type {
 	AgentDefinition,
+	AgentFeatures,
 	DefineAgentOptions,
 	DefineRoutineOptions,
 	RoutineDefinition,

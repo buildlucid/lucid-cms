@@ -42,10 +42,11 @@ const AgentRoutineModelField: Component<{
 	const modelOptions = createMemo((): ModelOption[] => {
 		const models = catalog()?.models;
 		//* without the catalogue, the saved choice is still shown by its ID
-		if (!models)
+		if (!models) {
 			return props.value
 				? [{ value: props.value.modelId, label: props.value.modelId }]
 				: [];
+		}
 		return [
 			{ value: "", label: defaultLabel() },
 			...models.map((model) => ({
@@ -114,11 +115,12 @@ const AgentRoutineModelField: Component<{
 							const effort = current().reasoningEfforts.find(
 								(option) => option === value,
 							);
-							if (effort)
+							if (effort) {
 								props.onChange({
 									modelId: current().id,
 									reasoningEffort: effort,
 								});
+							}
 						}}
 						options={effortOptions()}
 						label={T()("agent.models.effort")}

@@ -16,19 +16,14 @@ import {
 } from "../../../../libs/lucid-remote/schema/media.js";
 import analyzeMedia from "../../../../libs/lucid-remote/services/analyze-media/index.js";
 import { Permissions } from "../../../../libs/permission/definitions.js";
-import {
-	AgentMessagesRepository,
-	MediaRepository,
-} from "../../../../libs/repositories/index.js";
+import { MediaRepository } from "../../../../libs/repositories/index.js";
 import { executeAgentTool } from "../../../../libs/tools/execute-tool.js";
 import type { AgentToolExecution } from "../../../../libs/tools/types.js";
-import type { StoredAgentMessagePart } from "../../../../schemas/agent.js";
 import createServiceContext from "../../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../../utils/services/types.js";
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import streamMedia from "../../../media/stream.js";
 import insertConversation from "../../helpers/insert-conversation.js";
-import registerUrlKeys from "../../helpers/register-url-keys.js";
 import resolveRunSetup from "../../helpers/resolve-run-setup.js";
 import register from "../../references/register.js";
 import { analyzeMediaAgentTool } from "./index.js";
@@ -54,13 +49,13 @@ const analyzeMediaTool = analyzeMediaAgentTool();
 const agent = defineAgent({
 	key: "analysis",
 	name: "Analysis",
-	description: "Tests file analysis.",
-	tools: [analyzeMediaTool],
+	description: "Tests media analysis.",
 });
 const withoutAnalysis = defineAgent({
 	key: "no-analysis",
 	name: "No analysis",
-	description: "Has no file tools.",
+	description: "Has no analysis tools.",
+	features: { media: { analyze: false } },
 });
 const analysis = (text: string) =>
 	mediaAnalyzeResponseSchema.parse({
@@ -141,6 +136,7 @@ const linkedMedia = async (
 	props?: { fileSize?: number; mimeType?: string },
 ) => {
 	const Media = new MediaRepository(context.db);
+	const mimeType = props?.mimeType ?? "image/png";
 	const media = await Media.createSingle({
 		data: {
 			key: randomUUID(),
@@ -148,9 +144,15 @@ const linkedMedia = async (
 			origin: "human",
 			public: false,
 			status: "ready",
-			type: "image",
-			mime_type: props?.mimeType ?? "image/png",
-			file_extension: "png",
+			type: mimeType.startsWith("image/")
+				? "image"
+				: mimeType.startsWith("audio/")
+					? "audio"
+					: mimeType.startsWith("video/")
+						? "video"
+						: "document",
+			mime_type: mimeType,
+			file_extension: mimeType.split("/")[1] ?? "bin",
 			file_size: props?.fileSize ?? 4,
 		},
 		returning: ["id"],
@@ -166,36 +168,8 @@ const linkedMedia = async (
 			})
 		).error,
 	).toBeUndefined();
-	return { type: "media" as const, mediaId: media.data.id };
+	return media.data.id;
 };
-const writeMessage = async (
-	execution: AgentToolExecution,
-	role: "user" | "assistant",
-	parts: StoredAgentMessagePart[],
-) => {
-	const AgentMessages = new AgentMessagesRepository(context.db);
-	const saved = await AgentMessages.createSingle({
-		data: {
-			id: randomUUID(),
-			conversation_id: execution.run.conversationId,
-			run_id: null,
-			position: 1,
-			role,
-			parts,
-		},
-		returning: ["id"],
-		validation: { enabled: true },
-	});
-	expect(saved.error).toBeUndefined();
-
-	const registered = await registerUrlKeys(context, {
-		conversationId: execution.run.conversationId,
-		role,
-		parts,
-	});
-	expect(registered.error).toBeUndefined();
-};
-
 const mockFile = (bytes: Uint8Array) =>
 	vi.mocked(streamMedia).mockResolvedValue({
 		error: undefined,
@@ -214,7 +188,7 @@ const mockFile = (bytes: Uint8Array) =>
 
 test("private linked media reaches analysis as base64 without a download URL", async () => {
 	const execution = await executionFor();
-	const source = await linkedMedia(execution);
+	const mediaId = await linkedMedia(execution);
 	mockFile(png);
 	vi.mocked(analyzeMedia).mockResolvedValue({
 		error: undefined,
@@ -223,7 +197,7 @@ test("private linked media reaches analysis as base64 without a download URL", a
 	const result = await executeAgentTool({
 		context,
 		tool: analyzeMediaTool,
-		input: { source, question: "Describe it" },
+		input: { mediaId, question: "Describe it" },
 		execution,
 	});
 	expect(result).toMatchObject({
@@ -242,21 +216,21 @@ test("private linked media reaches analysis as base64 without a download URL", a
 });
 
 test("a media reference in another chat grants no access", async () => {
-	const source = await linkedMedia(await executionFor());
+	const mediaId = await linkedMedia(await executionFor());
 	const execution = await executionFor();
 	expect(
-		(await resolveSource(context, { source, execution })).error?.status,
+		(await resolveSource(context, { mediaId, execution })).error?.status,
 	).toBe(403);
 	expect(streamMedia).not.toHaveBeenCalled();
 });
 
 test("losing media read permission prevents analysis of library media even while the reference remains", async () => {
 	const execution = await executionFor();
-	const source = await linkedMedia(execution);
+	const mediaId = await linkedMedia(execution);
 	const result = await executeAgentTool({
 		context,
 		tool: analyzeMediaTool,
-		input: { source, question: "Describe it" },
+		input: { mediaId, question: "Describe it" },
 		execution: {
 			...execution,
 			authority: { ...execution.authority, permissions: [] },
@@ -267,62 +241,27 @@ test("losing media read permission prevents analysis of library media even while
 	expect(analyzeMedia).not.toHaveBeenCalled();
 });
 
-test.each([
-	"unmentioned",
-	"assistant",
-	"history",
-] as const)("rejects a URL whose only provenance is %s", async (origin) => {
-	const execution = await executionFor();
-	const url = "https://example.com/file.png";
-	if (origin === "assistant") {
-		await writeMessage(execution, "assistant", [{ type: "text", text: url }]);
-	}
-	if (origin === "history") {
-		await writeMessage(execution, "assistant", [
-			{
-				type: "tool",
-				id: "call",
-				name: "lucid_read_history",
-				input: {},
-				output: { url },
-				status: "complete",
-			},
-		]);
-	}
-	expect(
-		(await resolveSource(context, { source: { type: "url", url }, execution }))
-			.error?.status,
-	).toBe(403);
+test("rejects URL input before reading storage or requesting analysis", async () => {
+	const result = await executeAgentTool({
+		context,
+		tool: analyzeMediaTool,
+		input: {
+			source: { type: "url", url: "https://example.com/file.png" },
+			question: "Describe it",
+		},
+		execution: await executionFor(),
+	});
+	expect(result).toMatchObject({ type: "invalid-input" });
+	expect(streamMedia).not.toHaveBeenCalled();
+	expect(analyzeMedia).not.toHaveBeenCalled();
 });
 
 test.each([
-	"user",
-	"tool",
-] as const)("accepts URLs supplied by a %s", async (origin) => {
-	const execution = await executionFor();
-	const url = "https://example.com/file.png";
-	await writeMessage(
-		execution,
-		origin === "user" ? "user" : "assistant",
-		origin === "user"
-			? [{ type: "text", text: `Please read ${url}` }]
-			: [
-					{
-						type: "tool",
-						id: "call",
-						name: "web_search",
-						input: {},
-						output: { url },
-						status: "complete",
-					},
-				],
-	);
-	expect(
-		await resolveSource(context, { source: { type: "url", url }, execution }),
-	).toEqual({ error: undefined, data: { type: "url", url } });
-});
-
-test.each([
+	{ mimeType: "text/plain", fileSize: 4, status: 415 },
+	{ mimeType: "text/markdown", fileSize: 4, status: 415 },
+	{ mimeType: "text/csv", fileSize: 4, status: 415 },
+	{ mimeType: "text/html", fileSize: 4, status: 415 },
+	{ mimeType: "application/json", fileSize: 4, status: 415 },
 	{ mimeType: "application/zip", fileSize: 4, status: 415 },
 	{ mimeType: "image/png", fileSize: MAX_MEDIA_BYTES + 1, status: 413 },
 ])("rejects metadata with $mimeType and $fileSize bytes before reading storage", async ({
@@ -330,56 +269,73 @@ test.each([
 	...props
 }) => {
 	const execution = await executionFor();
-	const source = await linkedMedia(execution, props);
+	const mediaId = await linkedMedia(execution, props);
 	expect(
-		(await resolveSource(context, { source, execution })).error?.status,
+		(await resolveSource(context, { mediaId, execution })).error?.status,
 	).toBe(status);
 	expect(streamMedia).not.toHaveBeenCalled();
+	expect(analyzeMedia).not.toHaveBeenCalled();
 });
 
 test("enforces the actual stream size when stored metadata understates it", async () => {
 	const execution = await executionFor();
-	const source = await linkedMedia(execution);
+	const mediaId = await linkedMedia(execution);
 	mockFile(new Uint8Array(MAX_MEDIA_BYTES + 1));
 	expect(
-		(await resolveSource(context, { source, execution })).error?.status,
+		(await resolveSource(context, { mediaId, execution })).error?.status,
 	).toBe(413);
 	expect(analyzeMedia).not.toHaveBeenCalled();
 });
 
-test("sends a linked video whose contents match its type", async () => {
+test.each([
+	{
+		mimeType: "application/pdf",
+		bytes: new TextEncoder().encode("%PDF-1.7\n"),
+	},
+	{ mimeType: "audio/mpeg", bytes: new TextEncoder().encode("ID3") },
+	{
+		mimeType: "video/mp4",
+		bytes: new Uint8Array([
+			0,
+			0,
+			0,
+			24,
+			...new TextEncoder().encode("ftypmp42"),
+		]),
+	},
+])("sends linked $mimeType whose contents match its type", async ({
+	mimeType,
+	bytes,
+}) => {
 	const execution = await executionFor();
-	const source = await linkedMedia(execution, { mimeType: "video/mp4" });
-	const mp4 = new Uint8Array([
-		0,
-		0,
-		0,
-		24,
-		...new TextEncoder().encode("ftypmp42"),
-	]);
-	mockFile(mp4);
-	expect(await resolveSource(context, { source, execution })).toMatchObject({
-		data: { type: "base64", mimeType: "video/mp4" },
+	const mediaId = await linkedMedia(execution, { mimeType });
+	mockFile(bytes);
+	expect(await resolveSource(context, { mediaId, execution })).toMatchObject({
+		data: {
+			type: "base64",
+			mimeType,
+			data: Buffer.from(bytes).toString("base64"),
+		},
 	});
 });
 
 test("refuses a file whose contents do not match its stored type", async () => {
 	const execution = await executionFor();
-	const source = await linkedMedia(execution);
+	const mediaId = await linkedMedia(execution);
 	mockFile(new TextEncoder().encode("<html>not a png</html>"));
 	expect(
-		(await resolveSource(context, { source, execution })).error?.status,
+		(await resolveSource(context, { mediaId, execution })).error?.status,
 	).toBe(415);
 });
 
-test("analysis is offered only to agents that list it, and the prompt says what it opens", () => {
+test("analysis is on by default without library permission and can be disabled", () => {
 	const setup = (definition: typeof agent) =>
 		resolveRunSetup(context, {
 			agent: definition,
 			authority: {
 				principal: { type: "user", userId: 1 },
 				superAdmin: false,
-				permissions: [Permissions.MediaRead],
+				permissions: [],
 			},
 			mode: "chat",
 			hasHistory: false,
@@ -390,12 +346,14 @@ test("analysis is offered only to agents that list it, and the prompt says what 
 		analyzeMediaTool.name,
 	);
 	expect(listed.instructions).toContain(
-		`Open attached media with ${analyzeMediaTool.name}.`,
+		`Analyse attached media with ${analyzeMediaTool.name}.`,
 	);
 
 	const unlisted = setup(withoutAnalysis);
 	expect(unlisted.definitions.map((tool) => tool.name)).not.toContain(
 		analyzeMediaTool.name,
 	);
-	expect(unlisted.instructions).toContain("No tool can open attached media.");
+	expect(unlisted.instructions).toContain(
+		"No tool can analyse attached media.",
+	);
 });

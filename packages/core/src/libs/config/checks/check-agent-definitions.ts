@@ -10,7 +10,28 @@ import {
 } from "../../agent/model-selection.js";
 import nextRoutineOccurrence from "../../agent/next-routine-occurrence.js";
 import { isRoutineDefinition } from "../../agent/registry.js";
+import type { AgentFeatures } from "../../agent/types.js";
 import { resolvedAdminCopySchema } from "../../i18n/copy.js";
+
+const featuresSchema = z
+	.object({
+		media: z
+			.object({
+				upload: z.boolean(),
+				attach: z.boolean(),
+				analyze: z.boolean(),
+			})
+			.strict(),
+		documents: z.object({ attach: z.boolean() }).strict(),
+		web: z
+			.object({
+				search: z.boolean(),
+				read: z.boolean(),
+				allowedDomains: z.array(z.string()).optional(),
+			})
+			.strict(),
+	})
+	.strict() satisfies z.ZodType<AgentFeatures>;
 
 //* keys appear in permission names, so they share the skill naming rules
 const keyPattern = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -68,13 +89,10 @@ const checkAgentDefinitions = (config: {
 			}
 		}
 
-		const attachments = z
-			.object({ media: z.boolean(), documents: z.boolean() })
-			.strict()
-			.safeParse(agent.attachments);
-		if (!attachments.success) {
+		const features = featuresSchema.safeParse(agent.features);
+		if (!features.success) {
 			throw new Error(
-				`Agent "${agent.key}" has invalid attachments: ${z.prettifyError(attachments.error)}`,
+				`Agent "${agent.key}" has invalid features: ${z.prettifyError(features.error)}`,
 			);
 		}
 

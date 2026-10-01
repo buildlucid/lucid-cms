@@ -41,8 +41,8 @@ export type AgentReference = {
 
 /** What an agent can do for the current user, combined from the tools they can use. */
 export type AgentCapabilities = {
-	/** MIME types of attached media the agent can open. Null when it cannot open any. */
-	media: { mimeTypes: string[] } | null;
+	/** MIME types of media the agent can analyse. Null when no analysis provider is available. */
+	mediaAnalysis: { mimeTypes: string[] } | null;
 	/** Whether the agent can search the public web. */
 	webSearch: boolean;
 	/** Whether the agent can read public webpages. */
@@ -57,8 +57,11 @@ export interface Agent {
 	key: string;
 	name: string;
 	description: string;
-	/** Resource types the chat composer offers to attach. Tools can always link resources. */
-	attachments: { media: boolean; documents: boolean };
+	/** What the composer offers: personal uploads, existing media and documents. */
+	features: {
+		media: { upload: boolean; attach: boolean };
+		documents: { attach: boolean };
+	};
 	/** What the agent can do for the current user, such as open attached files or search the web. */
 	capabilities: AgentCapabilities;
 	/** Messages offered when starting a chat. Empty without the agent's use permission. */
@@ -115,6 +118,7 @@ export type AgentInputAction =
 
 /** Tools the agent runner handles itself. Their names are reserved, so agent tools cannot use them. */
 export type AgentRunnerToolName =
+	| "lucid_preview_media"
 	| "lucid_list_references"
 	| "lucid_register_references"
 	| "lucid_remove_reference"
@@ -127,8 +131,9 @@ export type AgentRunnerToolName =
 /** Lucid's own agent tools that the admin shows in their own way. */
 export type AgentLucidToolName = "web_search" | "web_fetch" | "media_analyze";
 
-/** Widgets the runner creates itself: a question from the agent, and a tool waiting for approval. */
+/** Widgets the runner creates itself, including media galleries, questions and approvals. */
 export type AgentRunnerWidgetKey =
+	| "lucid-media-preview"
 	| "lucid-question"
 	| "lucid-tool-approval"
 	| "lucid-tool-approval-batch";

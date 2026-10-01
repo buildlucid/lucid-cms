@@ -1,4 +1,4 @@
-import type { AgentRunnerWidgetKey } from "../types/response.js";
+import type { AgentRunnerWidgetKey, MediaType } from "../types/response.js";
 import emailConstants from "./emails.js";
 
 export default Object.freeze({
@@ -220,8 +220,12 @@ export default Object.freeze({
 	agent: {
 		defaultTitle: "New chat",
 		titleLength: 80,
+		/** The most media one preview gallery shows. */
+		previewMediaLimit: 8,
+		previewMediaTypes: ["image", "video", "audio"] satisfies MediaType[],
 		/** Widgets the runner creates itself. Tool widget keys cannot start with `reservedPrefix`. */
 		widgets: {
+			previewMedia: "lucid-media-preview" satisfies AgentRunnerWidgetKey,
 			question: "lucid-question" satisfies AgentRunnerWidgetKey,
 			approval: "lucid-tool-approval" satisfies AgentRunnerWidgetKey,
 			approvalBatch: "lucid-tool-approval-batch" satisfies AgentRunnerWidgetKey,

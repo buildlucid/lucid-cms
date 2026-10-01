@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
+import constants from "../../../constants/constants.js";
 import defineAgent from "../../../libs/agent/define-agent.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import applyCollectionMigrations from "../../../libs/collection/apply-collection-migrations.js";
@@ -25,6 +26,7 @@ import { agentReferenceSchema } from "../../../schemas/agent-references.js";
 import type {
 	AgentReferenceInput,
 	AgentRunnerToolName,
+	MediaType,
 } from "../../../types/response.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -38,10 +40,13 @@ import { deleteExpiredRevisionsJob } from "../../documents-versions/jobs/delete-
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
 import deleteReference from "../delete-reference.js";
+import getMediaPreviews from "../get-media-previews.js";
 import getReferences from "../get-references.js";
+import checkUploadAccess from "../helpers/check-upload-access.js";
 import insertConversation from "../helpers/insert-conversation.js";
 import resolveRunSetup from "../helpers/resolve-run-setup.js";
 import { runnerToolHandlers } from "../helpers/runner-tools/index.js";
+import checkInput from "./check-input.js";
 import list from "./list.js";
 import register from "./register.js";
 
@@ -59,7 +64,10 @@ const agent = defineAgent({
 	key: "references",
 	name: "References",
 	description: "Tests linked resources.",
-	attachments: { media: false, documents: false },
+	features: {
+		media: { upload: false, attach: false },
+		documents: { attach: false },
+	},
 });
 let context: ServiceContext;
 
@@ -98,7 +106,13 @@ const createChat = async (userId: number | null = null) => {
 	return result.data.id;
 };
 const createMedia = async (
-	ownership: { owner_user_id?: number; is_system?: boolean } = {},
+	props: {
+		owner_user_id?: number;
+		is_system?: boolean;
+		type?: MediaType;
+		mime_type?: string;
+		file_extension?: string;
+	} = {},
 ) => {
 	const result = await new MediaRepository(context.db).createSingle({
 		data: {
@@ -109,7 +123,7 @@ const createMedia = async (
 			mime_type: "image/png",
 			file_extension: "png",
 			file_size: 1,
-			...ownership,
+			...props,
 		},
 		returning: ["id"],
 		validation: { enabled: true },
@@ -314,10 +328,11 @@ test("media hard deletion cascades through references in every chat", async () =
 			})
 		).error,
 	).toBeUndefined();
-	for (const conversationId of [first, second])
+	for (const conversationId of [first, second]) {
 		expect(await mediaLinks(conversationId)).toEqual([
 			{ media_id: retainedId },
 		]);
+	}
 });
 
 test.each([
@@ -995,4 +1010,217 @@ test("personal media is only linked and listed for its owner, and system media n
 		userId: adminId,
 	});
 	expect(hidden.data).toEqual([]);
+});
+
+test("media previews register a bounded gallery and owners need no library permissions", async () => {
+	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const chatId = await createChat(ownerId);
+	const mediaId = await createMedia({ owner_user_id: ownerId });
+	const outcome = await callReferenceTool(
+		chatId,
+		runnerTools.previewMedia.name,
+		{ mediaIds: [mediaId, mediaId] },
+		ownerId,
+	);
+	expect(outcome).toMatchObject({
+		failed: false,
+		output: { mediaIds: [mediaId] },
+		widgets: [
+			{ key: "lucid-media-preview", version: 1, data: { mediaIds: [mediaId] } },
+		],
+	});
+	expect(await mediaLinks(chatId)).toHaveLength(1);
+	const preview = await getMediaPreviews(context, {
+		id: chatId,
+		userId: ownerId,
+	});
+	expect(preview.error).toBeUndefined();
+	expect(preview.data?.map((item) => item.id)).toEqual([mediaId]);
+	const overLimit = Array.from(
+		{ length: constants.agent.previewMediaLimit + 1 },
+		(_, index) => index + 1,
+	);
+	for (const mediaIds of [[], overLimit, [0], ["1"]]) {
+		expect(
+			await callReferenceTool(
+				chatId,
+				runnerTools.previewMedia.name,
+				{ mediaIds },
+				ownerId,
+			),
+		).toMatchObject({ failed: true });
+	}
+});
+
+test("media previews show images, video and audio while other linked files stay as references", async () => {
+	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const chatId = await createChat(ownerId);
+	const richMediaIds = await Promise.all([
+		createMedia({ owner_user_id: ownerId }),
+		createMedia({
+			owner_user_id: ownerId,
+			type: "video",
+			mime_type: "video/mp4",
+			file_extension: "mp4",
+		}),
+		createMedia({
+			owner_user_id: ownerId,
+			type: "audio",
+			mime_type: "audio/mpeg",
+			file_extension: "mp3",
+		}),
+	]);
+	expect(
+		await callReferenceTool(
+			chatId,
+			runnerTools.previewMedia.name,
+			{ mediaIds: richMediaIds },
+			ownerId,
+		),
+	).toMatchObject({ failed: false, output: { mediaIds: richMediaIds } });
+	const pdfId = await createMedia({
+		owner_user_id: ownerId,
+		type: "document",
+		mime_type: "application/pdf",
+		file_extension: "pdf",
+	});
+	expect(
+		(await link(chatId, [{ type: "media", mediaId: pdfId }])).error,
+	).toBeUndefined();
+	const previews = await getMediaPreviews(context, {
+		id: chatId,
+		userId: ownerId,
+	});
+	expect(previews.error).toBeUndefined();
+	expect(previews.data?.map((item) => item.id).sort()).toEqual(
+		[...richMediaIds].sort(),
+	);
+	expect(await mediaLinks(chatId)).toHaveLength(4);
+});
+
+test.each([
+	{ type: "document", mime_type: "application/pdf", file_extension: "pdf" },
+	{ type: "document", mime_type: "text/plain", file_extension: "txt" },
+	{ type: "archive", mime_type: "application/zip", file_extension: "zip" },
+	{
+		type: "unknown",
+		mime_type: "application/octet-stream",
+		file_extension: "bin",
+	},
+] satisfies {
+	type: MediaType;
+	mime_type: string;
+	file_extension: string;
+}[])("media previews reject $mime_type before linking any items in a mixed gallery", async (file) => {
+	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const chatId = await createChat(ownerId);
+	const imageId = await createMedia({ owner_user_id: ownerId });
+	const fileId = await createMedia({ ...file, owner_user_id: ownerId });
+	const outcome = await callReferenceTool(
+		chatId,
+		runnerTools.previewMedia.name,
+		{ mediaIds: [imageId, fileId] },
+		ownerId,
+	);
+	expect(outcome).toMatchObject({
+		failed: true,
+		output: {
+			error: context.translate("server:agent.media.preview.unsupported"),
+		},
+	});
+	expect(outcome).not.toHaveProperty("widgets");
+	expect(await mediaLinks(chatId)).toEqual([]);
+});
+
+test("media previews enforce ownership, viewer access and current deletion state", async () => {
+	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const otherId = await createReader();
+	const chatId = await createChat(ownerId);
+	const mediaId = await createMedia({ owner_user_id: ownerId });
+	const otherChat = await createChat(otherId);
+	expect(
+		await callReferenceTool(
+			otherChat,
+			runnerTools.previewMedia.name,
+			{ mediaIds: [mediaId] },
+			otherId,
+		),
+	).toMatchObject({ failed: true });
+	expect(
+		await callReferenceTool(
+			chatId,
+			runnerTools.previewMedia.name,
+			{ mediaIds: [mediaId] },
+			ownerId,
+		),
+	).toMatchObject({ failed: false });
+	expect(
+		(
+			await getMediaPreviews(context, {
+				id: chatId,
+				userId: otherId,
+			})
+		).error?.status,
+	).toBe(404);
+	await context.db.kysely
+		.updateTable("lucid_media")
+		.set({ is_deleted: true })
+		.where("id", "=", mediaId)
+		.execute();
+	expect(
+		(
+			await getMediaPreviews(context, {
+				id: chatId,
+				userId: ownerId,
+			})
+		).data,
+	).toEqual([]);
+});
+
+test("upload-only agents accept owned files without enabling existing media or document attachments", async () => {
+	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const uploadOnly = defineAgent({
+		key: agent.key,
+		name: agent.name,
+		description: agent.description,
+		features: {
+			media: { upload: true, attach: false },
+			documents: { attach: false },
+		},
+	});
+	const uploadContext = {
+		...context,
+		config: {
+			...context.config,
+			ai: { ...context.config.ai, agents: { definitions: [uploadOnly] } },
+		},
+	};
+	const mediaId = await createMedia({ owner_user_id: ownerId });
+	expect(
+		(
+			await checkUploadAccess(uploadContext, {
+				userId: ownerId,
+				agentKey: agent.key,
+			})
+		).error,
+	).toBeUndefined();
+	expect(
+		(
+			await checkInput(uploadContext, {
+				userId: ownerId,
+				agentKey: agent.key,
+				references: [{ type: "media", mediaId }],
+			})
+		).error,
+	).toBeUndefined();
+	const libraryId = await createMedia();
+	expect(
+		(
+			await checkInput(uploadContext, {
+				userId: ownerId,
+				agentKey: agent.key,
+				references: [{ type: "media", mediaId: libraryId }],
+			})
+		).error?.status,
+	).toBe(403);
 });

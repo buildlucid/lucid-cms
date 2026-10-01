@@ -1,7 +1,5 @@
-import {
-	referenceKey,
-	referenceNotFoundError,
-} from "../../../libs/agent/references.js";
+import { referenceKey } from "../../../libs/agent/references.js";
+import { copy } from "../../../libs/i18n/index.js";
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
@@ -45,7 +43,17 @@ const register: ServiceFn<
 		const detail = details.data.get(referenceKey(reference));
 		if (!detail) {
 			if (input.skipMissing) continue;
-			return { data: undefined, error: referenceNotFoundError(reference) };
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 404,
+					message:
+						reference.type === "media"
+							? copy("server:core.media.not.found.message")
+							: copy("server:core.documents.not.found.message"),
+				},
+			};
 		}
 
 		snapshots.push({

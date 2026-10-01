@@ -1,5 +1,5 @@
 import { canReadReference } from "../../../../libs/agent/references.js";
-import runnerTools from "../../../../libs/agent/runner-tools.js";
+import type runnerTools from "../../../../libs/agent/runner-tools.js";
 import resolveUserAccess from "../../../users/resolve-access.js";
 import mediaOwnership from "../../references/media-ownership.js";
 import register from "../../references/register.js";
@@ -9,7 +9,7 @@ import type { RunnerToolInputHandler } from "./types.js";
 /** Links resources the run's principal can read. Attachment settings only govern user attachments. */
 const registerReferences: RunnerToolInputHandler<
 	typeof runnerTools.registerReferences
-> = async (context, { input, run }) => {
+> = async (context, { input, run, call }) => {
 	const [access, ownership] = await Promise.all([
 		run.user_id === null
 			? undefined
@@ -51,7 +51,7 @@ const registerReferences: RunnerToolInputHandler<
 	const result = await register(context, {
 		conversationId: run.conversation_id,
 		references: input.references,
-		source: { type: "tool", toolName: runnerTools.registerReferences.name },
+		source: { type: "tool", toolName: call.name },
 	});
 	if (result.error) {
 		return toolErrorFailure(

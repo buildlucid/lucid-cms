@@ -51,9 +51,10 @@ const generateTitle: ServiceFn<
 	],
 	string
 > = async (context, input) => {
-	const messages = new AgentMessagesRepository(context.db);
+	const AgentMessages = new AgentMessagesRepository(context.db);
+	const AgentRuns = new AgentRunsRepository(context.db);
 
-	const first = await messages.selectAfter({
+	const first = await AgentMessages.selectAfter({
 		conversationId: input.conversationId,
 		after: 0,
 		limit: 1,
@@ -62,7 +63,7 @@ const generateTitle: ServiceFn<
 
 	const recent =
 		input.scope === "conversation"
-			? await messages.selectLatest({
+			? await AgentMessages.selectLatest({
 					conversationId: input.conversationId,
 					limit: 8,
 				})
@@ -70,7 +71,7 @@ const generateTitle: ServiceFn<
 	if (recent?.error) return recent;
 
 	const run = input.runId
-		? await new AgentRunsRepository(context.db).selectSingle({
+		? await AgentRuns.selectSingle({
 				select: ["summary"],
 				where: [{ key: "id", operator: "=", value: input.runId }],
 			})

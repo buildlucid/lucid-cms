@@ -68,11 +68,16 @@ const formatDefinitions = (props: {
 				key: agent.key,
 				name: agent.name,
 				description: agent.description,
-				attachments: agent.attachments,
+				features: {
+					media: {
+						upload: agent.features.media.upload,
+						attach: agent.features.media.attach,
+					},
+					documents: { attach: agent.features.documents.attach },
+				},
 				capabilities: summariseCapabilities(
 					getCapabilityProviders({
 						tools: getAvailableTools(agent, grant),
-						grant,
 					}),
 				),
 				suggestions: canUse

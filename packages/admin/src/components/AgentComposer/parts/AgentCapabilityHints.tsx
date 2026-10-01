@@ -6,7 +6,6 @@ import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import T from "@/translations";
 import { describeReadableMedia } from "@/utils/agent-references";
 
-/** One capability as a small icon, dimmed when the agent lacks it, explained on hover or focus. */
 const CapabilityHint: Component<{
 	active: boolean;
 	title: string;
@@ -70,25 +69,25 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 			{(capabilities) => (
 				<div class="flex items-center">
 					<CapabilityHint
-						active={capabilities().media !== null}
+						active={capabilities().mediaAnalysis !== null}
 						icon={
 							<Show
-								when={capabilities().media}
+								when={capabilities().mediaAnalysis}
 								fallback={<FaSolidEyeSlash size={11} />}
 							>
 								<FaSolidEye size={11} />
 							</Show>
 						}
 						title={T()(
-							capabilities().media
+							capabilities().mediaAnalysis
 								? "agent.capabilities.media"
 								: "agent.capabilities.media.none",
 						)}
 						description={
-							capabilities().media
+							capabilities().mediaAnalysis
 								? T()("agent.capabilities.media.description", {
 										kinds: describeReadableMedia(
-											capabilities().media?.mimeTypes ?? [],
+											capabilities().mediaAnalysis?.mimeTypes ?? [],
 										),
 									})
 								: T()("agent.capabilities.media.none.description")

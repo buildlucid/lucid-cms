@@ -15,6 +15,7 @@ import {
 import AgentApprovalPicker from "@/components/AgentApprovalPicker/AgentApprovalPicker";
 import AgentComposer, {
 	type AgentComposerHandle,
+	type AgentComposerProps,
 } from "@/components/AgentComposer/AgentComposer";
 import AgentComposerStack from "@/components/AgentComposerStack/AgentComposerStack";
 import AgentContextRing from "@/components/AgentContextRing/AgentContextRing";
@@ -43,6 +44,7 @@ const AgentChatComposer: Component<{
 	referenceDetails: Readonly<Record<string, AgentReferenceItem>>;
 	ref: (handle: AgentComposerHandle) => void;
 	onAttachedChange: (attached: boolean) => void;
+	onReferencesChange: AgentComposerProps["onReferencesChange"];
 	onRespond: (
 		interactionId: string,
 		response: Record<string, unknown>,
@@ -175,9 +177,10 @@ const AgentChatComposer: Component<{
 						draftKey={props.conversationId}
 						floatAttachments={true}
 						onAttachedChange={props.onAttachedChange}
+						onReferencesChange={props.onReferencesChange}
 						referenceDetails={props.referenceDetails}
 						agentKey={props.agent?.key}
-						attachments={props.agent?.attachments}
+						features={props.agent?.features}
 						capabilities={props.agent?.capabilities}
 						disabled={!models.isSuccess}
 						placeholder={placeholder()}

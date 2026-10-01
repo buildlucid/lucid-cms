@@ -14,6 +14,7 @@ import {
 	Show,
 	Switch,
 } from "solid-js";
+import AgentMediaPreview from "@/components/AgentMediaPreview/AgentMediaPreview";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import AgentWidget from "@/components/AgentWidget/AgentWidget";
 import AgentWidgetRow from "@/components/AgentWidget/AgentWidgetRow";
@@ -26,7 +27,11 @@ import {
 	type AgentReferenceItem,
 	agentReferenceKey,
 } from "@/utils/agent-references";
-import { isToolRow, progressTool } from "@/utils/agent-tools";
+import {
+	isToolRow,
+	previewMediaWidget,
+	progressTool,
+} from "@/utils/agent-tools";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
 import AgentRoutineRequest from "./parts/AgentRoutineRequest";
@@ -247,6 +252,20 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 																}
 																expanded={expanded().has(tool().id)}
 																onToggle={() => toggle(tool().id)}
+															/>
+														)}
+													</Match>
+													<Match
+														when={
+															part.type === "widget" &&
+															part.key === previewMediaWidget &&
+															part
+														}
+													>
+														{(widget) => (
+															<AgentMediaPreview
+																conversationId={props.message.conversationId}
+																widget={widget()}
 															/>
 														)}
 													</Match>

@@ -13,9 +13,6 @@ export const assistantAgent = defineAgent({
 		"Answers questions about your content and tries out playground tools.",
 	tools: [
 		agentTools.content(),
-		agentTools.web(),
-		agentTools.analyzeMedia(),
-		agentTools.removeMediaOwnership(),
 		echoAgentTool,
 		addAgentTool,
 		saveNoteTool,

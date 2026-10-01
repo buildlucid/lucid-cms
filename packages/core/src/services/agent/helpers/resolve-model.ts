@@ -1,43 +1,12 @@
 import constants from "../../../constants/constants.js";
-import {
-	aiModelCatalogSchema,
-	resolveModelSelection,
-} from "../../../libs/agent/model-selection.js";
+import { resolveModelSelection } from "../../../libs/agent/model-selection.js";
 import { getAgent } from "../../../libs/agent/registry.js";
 import { copy } from "../../../libs/i18n/index.js";
-import cacheKeys from "../../../libs/kv/cache-keys.js";
 import logger from "../../../libs/logger/index.js";
-import getAgentModels from "../../../libs/lucid-remote/services/get-agent-models.js";
 import { AgentRoutinesRepository } from "../../../libs/repositories/index.js";
-import type {
-	AiModelCatalog,
-	AiModelSelection,
-} from "../../../types/response.js";
+import type { AiModelSelection } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import getAccessToken from "../../connection/token-manager.js";
-
-/** Reads the hosted catalogue, cached briefly so chats and runs rarely wait on it. */
-const getModelCatalog: ServiceFn<[], AiModelCatalog> = async (context) => {
-	const cached = aiModelCatalogSchema.safeParse(
-		await context.kv.get(context, { key: cacheKeys.ai.agentModels }),
-	);
-	if (cached.success) return { data: cached.data, error: undefined };
-
-	const token = await getAccessToken(context, {});
-	if (token.error) return token;
-	const catalog = await getAgentModels(context, {
-		accessToken: token.data.accessToken,
-	});
-	if (catalog.error) return catalog;
-
-	await context.kv.set(context, {
-		key: cacheKeys.ai.agentModels,
-		value: catalog.data,
-		ttlSeconds: constants.agent.modelCatalogTtlSeconds,
-	});
-
-	return catalog;
-};
+import getModelCatalog from "./get-model-catalog.js";
 
 /**
  * Resolves the model a run uses, and its context budget, from the agent's
@@ -53,11 +22,13 @@ const resolveModel: ServiceFn<
 	],
 	NonNullable<ReturnType<typeof resolveModelSelection>>
 > = async (context, input) => {
+	const AgentRoutines = new AgentRoutinesRepository(context.db);
+
 	const catalog = await getModelCatalog(context);
 	if (catalog.error) return catalog;
 
 	const routine = input.routineId
-		? await new AgentRoutinesRepository(context.db).selectSingle({
+		? await AgentRoutines.selectSingle({
 				select: ["model_selection"],
 				where: [{ key: "id", operator: "=", value: input.routineId }],
 			})

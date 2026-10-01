@@ -133,7 +133,6 @@ const AgentModelPicker: Component<{
 				<span class="truncate">
 					{saved().model?.name ?? T()("agent.models.label")}
 				</span>
-				{/* opacity rather than a colour, so it follows the trigger's hover colour */}
 				<Show when={saved().effort}>
 					{(value) => (
 						<span class="hidden shrink-0 opacity-60 sm:inline">
@@ -220,11 +219,12 @@ const AgentModelPicker: Component<{
 									}
 									onChange={([index]) => {
 										const next = efforts()[index ?? 0];
-										if (next && next !== shown().effort)
+										if (next && next !== shown().effort) {
 											setDraft({
 												modelId: current().id,
 												reasoningEffort: next,
 											});
+										}
 									}}
 								>
 									<div class="mb-2.5 flex items-center justify-between text-xs">

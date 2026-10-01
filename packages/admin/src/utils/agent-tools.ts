@@ -12,6 +12,10 @@ import { isObjectRecord } from "@/utils/type-guards";
 export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
 
 //* typed against the server's names, so a rename there fails to compile here
+export const previewMediaTool =
+	"lucid_preview_media" satisfies AgentRunnerToolName;
+export const previewMediaWidget =
+	"lucid-media-preview" satisfies AgentRunnerWidgetKey;
 export const askTool = "lucid_ask_user" satisfies AgentRunnerToolName;
 export const finishTool = "lucid_finish_run" satisfies AgentRunnerToolName;
 export const progressTool =

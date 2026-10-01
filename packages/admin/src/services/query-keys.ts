@@ -29,6 +29,16 @@ export const queryKeys = {
 			["lucid", "agent", "conversations", id, "messages"] as const,
 		references: (id: string | undefined) =>
 			["lucid", "agent", "conversations", id, "references"] as const,
+		//* nested under references, so refreshing references refreshes previews too
+		mediaPreviews: (id: string | undefined) =>
+			[
+				"lucid",
+				"agent",
+				"conversations",
+				id,
+				"references",
+				"media-previews",
+			] as const,
 		conversationDetails: (id: string | undefined) =>
 			["lucid", "agent", "conversations", id, "details"] as const,
 		toolDetails: (

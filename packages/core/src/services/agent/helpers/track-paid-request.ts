@@ -8,7 +8,8 @@ import type {
 } from "../../../utils/services/types.js";
 import reconcileUsage from "../reconcile-usage.js";
 import type { SessionRun } from "./run-session.js";
-import storeUsage, { storePendingUsage } from "./store-usage.js";
+import storePendingUsage from "./store-pending-usage.js";
+import storeUsage from "./store-usage.js";
 
 export type PaidRequestRecord = {
 	requestId: string;

@@ -1,4 +1,5 @@
 import { afterAll, expect, test, vi } from "vitest";
+import z from "zod";
 import { createTranslationStore } from "../../../../libs/i18n/index.js";
 import { toolDefinitionInternal } from "../../../../libs/tools/registry.js";
 import type { Media } from "../../../../types/response.js";
@@ -6,6 +7,7 @@ import createServiceContext from "../../../../utils/services/create-service-cont
 import getTestConfig from "../../../../utils/test-helpers/get-test-config.js";
 import getMultiple from "../../get-multiple.js";
 import { findMediaMcpTool } from "./index.js";
+import { inputSchema } from "./schema.js";
 
 vi.mock("../../get-multiple.js");
 
@@ -80,7 +82,9 @@ test("uses media filters and returns localized, bounded search details", async (
 	const prepared = await findMediaMcpTool()[
 		toolDefinitionInternal
 	].prepareInput({
-		query: { filter: { title: { value: "Cascade", operator: "contains" } } },
+		query: {
+			filter: [{ key: "title", value: "Cascade", operator: "contains" }],
+		},
 		contentLocale: "fr",
 	});
 	if (prepared.type !== "ready") throw new Error("Expected valid input");
@@ -93,11 +97,14 @@ test("uses media filters and returns localized, bounded search details", async (
 	});
 	expect(vi.mocked(getMultiple).mock.calls[0]?.[1].query).toMatchObject({
 		filter: {
-			title: { value: "Cascade", operator: "contains" },
 			isDeleted: { value: false, operator: "=" },
 		},
+		filterOr: [[{ key: "title", value: "Cascade", operator: "contains" }]],
 		page: 1,
 		perPage: 20,
+	});
+	expect(vi.mocked(getMultiple).mock.calls[0]?.[1].query.filter).toEqual({
+		isDeleted: { value: false, operator: "=" },
 	});
 	expect(result.type).toBe("success");
 	if (result.type !== "success") return;
@@ -118,4 +125,42 @@ test("uses media filters and returns localized, bounded search details", async (
 		meta: { contentLocale: "fr" },
 	});
 	expect(JSON.stringify(result.data)).not.toContain("private/waterfall");
+});
+
+test("model schemas offer selected conditions and accept a type-only search", () => {
+	const schema = z.toJSONSchema(inputSchema, { io: "input" });
+	const filter = schema.properties?.query.properties?.filter;
+	expect(filter?.type).toBe("array");
+	expect(
+		inputSchema.parse({ query: { filter: [{ key: "type", value: "image" }] } }),
+	).toEqual({
+		query: {
+			filterOr: [[{ key: "type", value: "image" }]],
+			page: 1,
+			perPage: 20,
+		},
+	});
+	expect(
+		inputSchema.safeParse({
+			query: { filter: [{ key: "unknown-column", value: "image" }] },
+		}).success,
+	).toBe(false);
+});
+
+test("preserves ranges and combines selected filters with OR groups", () => {
+	const filter = [
+		{ key: "width", value: 600, operator: ">=" },
+		{ key: "width", value: 1200, operator: "<=" },
+	];
+	const groups = [
+		[{ key: "type", value: "image" }],
+		[{ key: "type", value: "video" }],
+	];
+	expect(
+		inputSchema.parse({ query: { filter, filterOr: groups } }).query,
+	).toEqual({
+		filterOr: groups.map((group) => [...filter, ...group]),
+		page: 1,
+		perPage: 20,
+	});
 });

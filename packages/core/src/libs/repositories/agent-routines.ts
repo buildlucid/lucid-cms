@@ -124,18 +124,17 @@ export default class AgentRoutinesRepository extends StaticRepository<"lucid_age
 		});
 	}
 	async selectDue(props: { now: string; limit: number }) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.selectFrom("lucid_agent_routines")
-					.selectAll()
-					.where("enabled", "=", this.dbAdapter.getDefault("boolean", "true"))
-					.where("next_run_at", "<=", props.now)
-					.orderBy("next_run_at", "asc")
-					.limit(props.limit)
-					.execute(),
-			{ method: "selectDue" },
-		);
+		const query = this.db
+			.selectFrom("lucid_agent_routines")
+			.selectAll()
+			.where("enabled", "=", this.dbAdapter.getDefault("boolean", "true"))
+			.where("next_run_at", "<=", props.now)
+			.orderBy("next_run_at", "asc")
+			.limit(props.limit);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectDue",
+		});
 
 		return exec.response;
 	}
@@ -146,17 +145,16 @@ export default class AgentRoutinesRepository extends StaticRepository<"lucid_age
 		nextRunAt: string;
 		now: string;
 	}) {
-		const exec = await this.executeQuery(
-			() =>
-				this.db
-					.updateTable("lucid_agent_routines")
-					.set({ next_run_at: props.nextRunAt, updated_at: props.now })
-					.where("id", "=", props.id)
-					.where("next_run_at", "=", props.expectedNextRunAt)
-					.returning("id")
-					.executeTakeFirst(),
-			{ method: "claimOccurrence" },
-		);
+		const query = this.db
+			.updateTable("lucid_agent_routines")
+			.set({ next_run_at: props.nextRunAt, updated_at: props.now })
+			.where("id", "=", props.id)
+			.where("next_run_at", "=", props.expectedNextRunAt)
+			.returning("id");
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "claimOccurrence",
+		});
 		if (exec.response.error) return exec.response;
 
 		return { error: undefined, data: exec.response.data !== undefined };

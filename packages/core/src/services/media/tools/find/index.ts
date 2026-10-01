@@ -11,7 +11,7 @@ export const findMediaMcpTool = () =>
 		name: "media_find",
 		title: copy("admin:core.tools.media_find.title"),
 		description:
-			"Find media with Lucid's media filters, sorting and pagination. Returns IDs for media_preview.",
+			"Find media in the library with optional filters, sorting and pagination. Only include filters needed for the search; unused columns must be omitted. Returns IDs for media_preview.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [ExternalScopes.MediaRead],
@@ -24,7 +24,7 @@ export const findMediaAgentTool = () =>
 		name: "media_find",
 		title: copy("admin:core.tools.media_find.title"),
 		description:
-			"Find media with Lucid's media filters, sorting and pagination. Returns media IDs and metadata.",
+			"Find media in the library with optional filters, sorting and pagination. Only include filters needed for the search; unused columns must be omitted. Returns media IDs and metadata for analysis or previews.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.MediaRead],

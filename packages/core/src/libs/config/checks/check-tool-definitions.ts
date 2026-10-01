@@ -9,7 +9,7 @@ import type { ToolDefinition } from "../../tools/types.js";
 
 const agentToolCapabilitiesSchema = z
 	.object({
-		media: z
+		mediaAnalysis: z
 			.object({
 				mimeTypes: z
 					.array(z.string().regex(/^[a-z]+\/(\*|[a-z0-9.+-]+)$/))

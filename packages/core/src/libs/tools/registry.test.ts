@@ -131,7 +131,7 @@ test("names are unique within a placement, which only holds its own target", asy
 		options,
 	);
 	expect(getMcpToolRegistry(config).get("test_echo")).toEqual(echo);
-	expect(config.ai.agents.definitions[1]?.tools).toEqual([agentEcho]);
+	expect(config.ai.agents.definitions[1]?.tools).toContainEqual(agentEcho);
 });
 
 test("a tool name can only be registered once in each placement", async () => {

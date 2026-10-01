@@ -1,28 +1,31 @@
 import { expect, test } from "vitest";
-import { Permissions } from "../permission/definitions.js";
+import z from "zod";
+import defineAgentTool from "../tools/define-agent-tool.js";
 import { agentTools } from "../tools/lucid-tools.js";
 import {
+	getAvailableTools,
 	getCapabilityProviders,
 	summariseCapabilities,
 } from "./capabilities.js";
+import defineAgent from "./define-agent.js";
 
 const noPermissions = { superAdmin: false, permissions: [] };
-const tools = [
-	...agentTools.web(),
-	agentTools.analyzeMedia(),
-	...agentTools.content(),
-];
+const tools = defineAgent({
+	key: "test",
+	name: "Test",
+	description: "Test",
+	tools: [agentTools.content()],
+}).tools;
 
 test("combines tool capabilities into what an agent can do", () => {
 	expect(
 		summariseCapabilities(
 			getCapabilityProviders({
 				tools,
-				grant: { superAdmin: false, permissions: [Permissions.MediaRead] },
 			}),
 		),
 	).toEqual({
-		media: {
+		mediaAnalysis: {
 			mimeTypes: expect.arrayContaining(["application/pdf", "video/mp4"]),
 		},
 		webSearch: true,
@@ -30,16 +33,55 @@ test("combines tool capabilities into what an agent can do", () => {
 	});
 });
 
-test("media needs permission to read media, and web needs a web tool", () => {
+test("analysis needs an analysis tool but no library permissions", () => {
 	expect(
 		summariseCapabilities(
 			getCapabilityProviders({
 				tools: agentTools.content(),
-				grant: noPermissions,
 			}),
 		),
-	).toEqual({ media: null, webSearch: false, webRead: false });
-	expect(getCapabilityProviders({ tools, grant: noPermissions }).media).toEqual(
-		[],
-	);
+	).toEqual({ mediaAnalysis: null, webSearch: false, webRead: false });
+	expect(
+		getCapabilityProviders({
+			tools: getAvailableTools({ tools }, noPermissions),
+		}).mediaAnalysis,
+	).toHaveLength(1);
+});
+
+test("custom providers report support with Lucid's corresponding tools disabled", () => {
+	const provider = defineAgentTool({
+		name: "custom_analyze",
+		description: "Analyses images and searches the web.",
+		input: z.object({}),
+		output: z.object({}),
+		permissions: [],
+		readOnly: true,
+		capabilities: {
+			mediaAnalysis: { mimeTypes: ["image/png"] },
+			webSearch: true,
+			webRead: true,
+		},
+		handler: async () => ({ error: undefined, data: { output: {} } }),
+	});
+	const agent = defineAgent({
+		key: "custom",
+		name: "Custom",
+		description: "Custom providers",
+		features: {
+			media: { analyze: false },
+			web: { search: false, read: false },
+		},
+		tools: [provider],
+	});
+	expect(
+		summariseCapabilities(
+			getCapabilityProviders({
+				tools: getAvailableTools(agent, noPermissions),
+			}),
+		),
+	).toEqual({
+		mediaAnalysis: { mimeTypes: ["image/png"] },
+		webSearch: true,
+		webRead: true,
+	});
 });

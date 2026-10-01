@@ -37,6 +37,7 @@ import {
 	agentReferenceInput,
 } from "@/utils/agent-references";
 import {
+	previewMediaTool,
 	registerReferencesTool,
 	removeReferenceTool,
 	webFetchTool,
@@ -122,10 +123,10 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			queryKey: queryKeys.agent.conversation(id),
 			exact: true,
 		});
+	//* not exact, so media previews resolved from the references refresh with them
 	const refreshReferences = (id: string) =>
 		queryClient.invalidateQueries({
 			queryKey: queryKeys.agent.references(id),
-			exact: true,
 		});
 	const refreshDetails = (id: string) =>
 		queryClient.invalidateQueries({
@@ -134,7 +135,11 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		});
 	/** Tools that change references or web sources refresh them during the run. */
 	const refreshAfterTool = (id: string, name: string) => {
-		if (name === registerReferencesTool || name === removeReferenceTool) {
+		if (
+			name === previewMediaTool ||
+			name === registerReferencesTool ||
+			name === removeReferenceTool
+		) {
 			void refreshReferences(id);
 		}
 		if (name === webSearchTool || name === webFetchTool) {
@@ -382,7 +387,6 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 	// Return
 	return {
 		conversation,
-		/** The loaded conversation, or undefined until it loads. */
 		data,
 		context: createMemo(() => liveContext() ?? data()?.context),
 		compactions: createMemo(() => data()?.compactions ?? []),
@@ -401,7 +405,6 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		activeRunId,
 		error,
 		streaming,
-		/** True while the agent is replying here or in the background. */
 		working: createMemo(() => streaming() || background()),
 		waiting: createMemo(() => latestRun()?.status === "waiting"),
 		inputs,

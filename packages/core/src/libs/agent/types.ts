@@ -198,8 +198,10 @@ export type DefineAgentOptions<Key extends string> = {
 	/** The tools the agent can call, such as `agentTools.content()` or your own `defineAgentTool` tools. Bundles are flattened. */
 	tools?: readonly (AgentToolDefinition | readonly AgentToolDefinition[])[];
 	skills?: readonly SkillDefinition[];
-	/** Resource types the chat composer offers to attach. Both are enabled by default. Tools can always link resources. */
-	attachments?: { media?: boolean; documents?: boolean };
+	/** Built-in features and the tools behind them. Every feature is enabled unless set to false. */
+	features?: {
+		[Key in keyof AgentFeatures]?: Partial<AgentFeatures[Key]>;
+	};
 	/** The default model and the models people can choose. Leave out to offer every model the Lucid service provides. */
 	models?: AiModelConfig;
 	/** Messages people can select to start a chat. Plain message strings have their common indentation removed. */
@@ -212,6 +214,29 @@ export type DefineAgentOptions<Key extends string> = {
 	routines?: readonly RoutineDefinition[];
 };
 
+export type AgentFeatures = {
+	media: {
+		/** Let people upload personal files in the composer. Also registers the tool that moves those files into the media library. */
+		upload: boolean;
+		/** Let people select existing media from the library. */
+		attach: boolean;
+		/** Register Lucid's media analysis tool. Disable when providing your own. */
+		analyze: boolean;
+	};
+	documents: {
+		/** Let people select CMS documents in the composer. */
+		attach: boolean;
+	};
+	web: {
+		/** Register Lucid's web search tool. Disable when providing your own. */
+		search: boolean;
+		/** Register Lucid's webpage reading tool. Disable when providing your own. */
+		read: boolean;
+		/** Limit Lucid's web tools to these domains. Omit to allow public sites. */
+		allowedDomains?: string[];
+	};
+};
+
 /** An agent created with `defineAgent`. Each agent registers its own use and manage permissions. */
 export type AgentDefinition<Key extends string = string> = {
 	readonly type: "agent-definition";
@@ -222,11 +247,8 @@ export type AgentDefinition<Key extends string = string> = {
 	readonly instructions: string;
 	readonly tools: readonly AgentToolDefinition[];
 	readonly skills: readonly SkillDefinition[];
-	/** Resource types the chat composer offers to attach. */
-	readonly attachments: {
-		readonly media: boolean;
-		readonly documents: boolean;
-	};
+	/** Normalized built-in features. `tools` includes the tools they enable. */
+	readonly features: AgentFeatures;
 	readonly models?: AiModelConfig;
 	readonly suggestions: readonly {
 		readonly title: ResolvedAdminCopy;

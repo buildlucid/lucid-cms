@@ -1,6 +1,4 @@
 import constants from "../../constants/constants.js";
-import { isTerminalRunStatus } from "../../libs/agent/run-status.js";
-import { checkpointSchema } from "../../libs/agent/types.js";
 import type { LucidAgentInputs } from "../../libs/db/tables/agent-inputs.js";
 import type { Select } from "../../libs/db/types.js";
 import {
@@ -10,75 +8,8 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import enqueueRun from "./helpers/enqueue-run.js";
-import startRun from "./start-run.js";
-
-/** Starts the run answering a queued message, acting for its sender. Retrying the same input resumes a partial start. */
-const startInput: ServiceFn<
-	[
-		{
-			conversationId: string;
-			input: Pick<
-				Select<LucidAgentInputs>,
-				"id" | "user_id" | "text" | "references"
-			>;
-			dispatch: boolean;
-		},
-	],
-	{ runId: string }
-> = async (context, props) => {
-	const started = await startRun(context, {
-		conversationId: props.conversationId,
-		userId: props.input.user_id,
-		requestId: props.input.id,
-		text: props.input.text,
-		references: props.input.references,
-	});
-	if (started.error) return started;
-
-	const Inputs = new AgentInputsRepository(context.db);
-
-	const acknowledged = await Inputs.acknowledge([props.input.id]);
-	if (acknowledged.error) return acknowledged;
-
-	if (props.dispatch) {
-		const queued = await enqueueRun(context, {
-			runId: started.data.runId,
-			userId: props.input.user_id,
-		});
-		if (queued.error) return queued;
-	}
-
-	return started;
-};
-
-/** A steer whose run has stopped is acknowledged if the run took it, and otherwise becomes a follow-up. */
-const settleSteer: ServiceFn<
-	[{ input: Select<LucidAgentInputs> }],
-	undefined
-> = async (context, props) => {
-	const Inputs = new AgentInputsRepository(context.db);
-	const Runs = new AgentRunsRepository(context.db);
-
-	const run = await Runs.selectSingle({
-		select: ["status", "checkpoint"],
-		where: [
-			{ key: "id", operator: "=", value: props.input.target_run_id ?? "" },
-		],
-	});
-	if (run.error) return run;
-	if (run.data && !isTerminalRunStatus(run.data.status)) {
-		return { error: undefined, data: undefined };
-	}
-
-	const checkpoint = checkpointSchema.safeParse(run.data?.checkpoint);
-	const settled =
-		checkpoint.success && checkpoint.data.inputIds?.includes(props.input.id)
-			? await Inputs.acknowledge([props.input.id])
-			: await Inputs.defer(props.input.id);
-	if (settled.error) return settled;
-
-	return { error: undefined, data: undefined };
-};
+import settleSteer from "./helpers/settle-steer.js";
+import startInput from "./helpers/start-input.js";
 
 /**
  * Moves pending input forward: settles steers left by a stopped run, resumes a

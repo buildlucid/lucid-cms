@@ -3,8 +3,7 @@ import type { MediaMimeType } from "../../../../libs/lucid-remote/schema/media.j
 const startsWith = (bytes: Buffer, text: string, offset = 0) =>
 	bytes.toString("latin1", offset, offset + text.length) === text;
 
-//* text types have no signature, and the analysis model reads them as text
-const signatures: Partial<Record<MediaMimeType, (bytes: Buffer) => boolean>> = {
+const signatures: Record<MediaMimeType, (bytes: Buffer) => boolean> = {
 	"image/png": (bytes) => startsWith(bytes, "\x89PNG\r\n\x1a\n"),
 	"image/jpeg": (bytes) => startsWith(bytes, "\xff\xd8\xff"),
 	"image/gif": (bytes) =>
@@ -33,6 +32,6 @@ const signatures: Partial<Record<MediaMimeType, (bytes: Buffer) => boolean>> = {
 
 /** Whether a file's leading bytes match its stored type, so a mislabelled file is never sent for analysis. */
 const hasFileSignature = (bytes: Buffer, mimeType: MediaMimeType) =>
-	signatures[mimeType]?.(bytes) ?? true;
+	signatures[mimeType](bytes);
 
 export default hasFileSignature;
