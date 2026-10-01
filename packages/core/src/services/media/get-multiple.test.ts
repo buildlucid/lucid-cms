@@ -26,7 +26,8 @@ beforeAll(async () => {
 afterAll(() => fixture.destroy());
 
 const createUser = async (permissions: string[]): Promise<LucidUser> => {
-	const result = await new UsersRepository(context.db).createSingle({
+	const Users = new UsersRepository(context.db);
+	const result = await Users.createSingle({
 		data: {
 			email: `${randomUUID()}@example.test`,
 			username: randomUUID(),
@@ -46,7 +47,8 @@ const createUser = async (permissions: string[]): Promise<LucidUser> => {
 const createMedia = async (
 	ownership: { owner_user_id?: number; is_system?: boolean } = {},
 ) => {
-	const result = await new MediaRepository(context.db).createSingle({
+	const Media = new MediaRepository(context.db);
+	const result = await Media.createSingle({
 		data: {
 			key: `private/${randomUUID()}`,
 			storage_adapter_key: "test",

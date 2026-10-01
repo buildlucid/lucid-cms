@@ -153,6 +153,8 @@ export type DefineAgentToolOptions<
 	capabilities?: AgentToolCapabilities;
 	/** Describes a call in the chat from its input, eg. `{ kind: "text", text: \`Updated ${input.title}\` }`. Defaults to the title. */
 	display?: (input: z.output<Input>) => AgentToolDisplay | undefined;
+	/** Saved with each call. Bump it when the output shape changes so the admin can keep rendering older results. */
+	outputVersion?: number;
 	handler: AgentToolHandler<z.output<Input>, z.output<Output>>;
 };
 
@@ -269,6 +271,7 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly display?: (
 		input: Record<string, unknown>,
 	) => AgentToolDisplay | undefined;
+	readonly outputVersion?: number;
 	readonly interaction?: { readonly key: string; readonly version: number };
 	readonly [toolDefinitionInternal]: {
 		readonly interaction?: {

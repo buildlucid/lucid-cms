@@ -1,5 +1,6 @@
 import type { PendingInteraction } from "../../../libs/agent/interactions.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
+import type { executeAgentTool } from "../../../libs/tools/execute-tool.js";
 import type { AgentToolResult } from "../../../libs/tools/types.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -35,3 +36,19 @@ export const toolErrorFailure = (
 	fallback: string,
 ): ToolResult =>
 	toolFailure(context.translate(error.message) ?? context.translate(fallback));
+
+type FailedRun = Exclude<
+	Awaited<ReturnType<typeof executeAgentTool>>,
+	{ type: "success" }
+>;
+
+/** Missing and forbidden tools appear unavailable; other failures retain their message for the model. */
+export const failedToolRun = (
+	context: ServiceContext,
+	result: FailedRun,
+): ToolResult =>
+	toolFailure(
+		"message" in result && result.message
+			? result.message
+			: context.translate("server:agent.tool.unavailable"),
+	);

@@ -6,6 +6,7 @@ import type {
 	AgentRunnerWidgetKey,
 	AgentWebFetchOutput,
 	AgentWebSearchOutput,
+	AgentWidgetPart,
 } from "@types";
 import helpers from "@/utils/helpers";
 import { isObjectRecord } from "@/utils/type-guards";
@@ -35,6 +36,15 @@ export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
+
+/**
+ * Built-in widgets render only the versions this admin knows. Other versions
+ * show their saved data and can only be cancelled. Plugin widgets handle their
+ * own versions.
+ */
+export const isWidgetSupported = (
+	widget: Pick<AgentWidgetPart, "key" | "version">,
+) => !widget.key.startsWith("lucid-") || widget.version === 1;
 
 /** Tool calls shown as rows in the chat and listed in its sidebar. */
 export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>

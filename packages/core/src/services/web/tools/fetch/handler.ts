@@ -25,15 +25,16 @@ const fetchWeb: ServiceFn<
 	],
 	{ output: z.output<typeof outputSchema> }
 > = async (context, { input, execution, allowedDomains }) => {
-	const notAllowed = {
-		data: undefined,
-		error: {
-			type: "basic",
-			status: 403,
-			message: copy("server:core.ai.remote.web.source.not.allowed.message"),
-		},
-	} as const;
-	if (!isWebSourceAllowed(input.url, allowedDomains)) return notAllowed;
+	if (!isWebSourceAllowed(input.url, allowedDomains)) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 403,
+				message: copy("server:core.ai.remote.web.source.not.allowed.message"),
+			},
+		};
+	}
 
 	const seen = await isUrlInConversation(context, {
 		url: input.url,
@@ -75,7 +76,16 @@ const fetchWeb: ServiceFn<
 	}
 
 	//* the page may have redirected outside the allowed sources
-	if (!isWebSourceAllowed(output.url, allowedDomains)) return notAllowed;
+	if (!isWebSourceAllowed(output.url, allowedDomains)) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 403,
+				message: copy("server:core.ai.remote.web.source.not.allowed.message"),
+			},
+		};
+	}
 
 	return { error: undefined, data: { output } };
 };

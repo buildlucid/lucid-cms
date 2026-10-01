@@ -20,8 +20,9 @@ import type {
 import isPermanentFailure from "./is-permanent-failure.js";
 import type { RunSetup } from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
+import runnerRequestRecord from "./runner-request-record.js";
 import streamModelTurn from "./stream-model-turn.js";
-import trackPaidRequest, { runnerRequestRecord } from "./track-paid-request.js";
+import trackPaidRequest from "./track-paid-request.js";
 
 type CompactionProps = {
 	run: SessionRun;
@@ -31,9 +32,7 @@ type CompactionProps = {
 };
 
 type CompactionResult =
-	/** Context fits, so the model request can go ahead. */
 	| { kind: "ready" }
-	/** Context changed, so the run loop starts over. */
 	| { kind: "continue" }
 	| { kind: "aborted" }
 	| {

@@ -187,6 +187,7 @@ export const agentToolDetailsSchema = z
 		display: agentToolDisplaySchema.optional(),
 		input: z.record(z.string(), z.unknown()),
 		output: z.unknown().optional(),
+		outputVersion: z.number().int().positive().optional(),
 		status: z.enum([
 			"pending",
 			"running",

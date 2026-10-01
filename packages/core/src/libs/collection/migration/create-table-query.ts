@@ -40,10 +40,12 @@ const createTableQuery: ServiceFn<
 				foreignKey.references,
 				(constraint) => {
 					let configured = constraint;
-					if (foreignKey.onDelete)
+					if (foreignKey.onDelete) {
 						configured = configured.onDelete(foreignKey.onDelete);
-					if (foreignKey.onUpdate)
+					}
+					if (foreignKey.onUpdate) {
 						configured = configured.onUpdate(foreignKey.onUpdate);
+					}
 					return configured;
 				},
 			);

@@ -15,6 +15,7 @@ export const analyzeMediaAgentTool = () =>
 		description: `Analyse an image, audio recording, video or PDF stored in Lucid to answer a question. Use an accessible Lucid media ID from the person or tool results. Analysis links the file to this chat's references, so do not register it separately. Files must be at most ${MAX_MEDIA_BYTES / 1_000_000} MB. Uses a separate analysis model and Lucid credits, independently of the chat model's vision support.`,
 		input: inputSchema,
 		output: outputSchema,
+		outputVersion: 1,
 		//* media access is checked when resolved, so owners can analyse their own uploads without `media:read`
 		permissions: [],
 		readOnly: true,

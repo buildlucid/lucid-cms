@@ -100,7 +100,8 @@ describe("route-segment soft deletion", () => {
 		expect(
 			(await applyCollectionMigrations(context, plan.data)).error,
 		).toBeUndefined();
-		const user = await new UsersRepository(context.db).createSingle({
+		const Users = new UsersRepository(context.db);
+		const user = await Users.createSingle({
 			data: {
 				email: "segments@example.com",
 				username: "segments",
@@ -125,7 +126,8 @@ describe("route-segment soft deletion", () => {
 		);
 		assert(names.data);
 		assert(migration.data);
-		const document = await new DocumentsRepository(context.db).createSingle(
+		const Documents = new DocumentsRepository(context.db);
+		const document = await Documents.createSingle(
 			{
 				data: {
 					collection_key: collection.key,
@@ -139,9 +141,10 @@ describe("route-segment soft deletion", () => {
 			{ tableName: names.data.document },
 		);
 		assert(document.data);
+		const DocumentIdentities = new DocumentIdentitiesRepository(context.db);
 		expect(
 			(
-				await new DocumentIdentitiesRepository(context.db).createSingle({
+				await DocumentIdentities.createSingle({
 					data: {
 						collection_key: collection.key,
 						document_id: document.data.id,
@@ -149,9 +152,8 @@ describe("route-segment soft deletion", () => {
 				})
 			).error,
 		).toBeUndefined();
-		const version = await new DocumentVersionsRepository(
-			context.db,
-		).createVersion(
+		const DocumentVersions = new DocumentVersionsRepository(context.db);
+		const version = await DocumentVersions.createVersion(
 			{
 				collection_key: collection.key,
 				collection_migration_id: migration.data,

@@ -3,9 +3,10 @@ import type { ServiceFn } from "../../utils/services/types.js";
 
 /** Forgets local credentials without depending on an available authorization server. */
 const reset: ServiceFn<[], undefined> = async (context) => {
-	const result = await new LucidRemoteConnectionsRepository(
+	const LucidRemoteConnections = new LucidRemoteConnectionsRepository(
 		context.db,
-	).updateSingle({
+	);
+	const result = await LucidRemoteConnections.updateSingle({
 		data: {
 			status: "disconnected",
 			registration_encrypted: null,

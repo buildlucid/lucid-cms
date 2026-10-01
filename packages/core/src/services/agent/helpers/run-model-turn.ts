@@ -8,13 +8,13 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import isPermanentFailure from "./is-permanent-failure.js";
 import type { RunSetup } from "./resolve-run-setup.js";
 import type { RunSession, SessionRun } from "./run-session.js";
+import runnerRequestRecord from "./runner-request-record.js";
 import streamModelTurn from "./stream-model-turn.js";
-import trackPaidRequest, { runnerRequestRecord } from "./track-paid-request.js";
+import trackPaidRequest from "./track-paid-request.js";
 
 type TurnResult =
 	| { kind: "continue" }
 	| { kind: "aborted" }
-	/** The model could not read the whole request, so compact and try again. */
 	| { kind: "overflow" }
 	| { kind: "stop"; status: "failed" | "interrupted"; message: string };
 
@@ -78,6 +78,7 @@ const runModelTurn: ServiceFn<
 				...call,
 				title: presentation?.title,
 				display: presentation?.display?.(call.input),
+				outputVersion: presentation?.outputVersion,
 				status: "pending" as const,
 			};
 			checkpoint.calls.push(call);

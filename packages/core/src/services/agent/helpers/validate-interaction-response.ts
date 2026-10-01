@@ -7,12 +7,11 @@ import {
 } from "../../../libs/agent/interactions.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
+import { getConversationLevel } from "../../../libs/permission/agent-permissions.js";
 import { toolDefinitionInternal } from "../../../libs/tools/registry.js";
 import type { AgentInteractionAction } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkAgentAccess, {
-	getConversationLevel,
-} from "./check-agent-access.js";
+import checkAgentAccess from "./check-agent-access.js";
 import resolveRunSetup from "./resolve-run-setup.js";
 import type { SessionRun } from "./run-session.js";
 
@@ -56,6 +55,20 @@ const validateInteractionResponse: ServiceFn<
 	}
 
 	const { widgets } = constants.agent;
+	//* built-in widgets accept answers for their current version only; older ones can still be cancelled
+	if (
+		pending.widget.key.startsWith(widgets.reservedPrefix) &&
+		pending.widget.version !== 1
+	) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 409,
+				message: copy("server:agent.interaction.unavailable"),
+			},
+		};
+	}
 	if (pending.widget.key === widgets.approval) {
 		return { error: undefined, data: { action: "submit", response: {} } };
 	}

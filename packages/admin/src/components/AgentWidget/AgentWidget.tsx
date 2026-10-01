@@ -20,8 +20,10 @@ import T from "@/translations";
 import {
 	approvalBatchWidget,
 	approvalWidget,
+	isWidgetSupported,
 	questionWidget,
 } from "@/utils/agent-tools";
+import AgentWidgetUnavailable from "./AgentWidgetUnavailable";
 import { resolveAgentSlot } from "./slots";
 import type { AgentWidgetInteraction, AgentWidgetSubmitResult } from "./types";
 
@@ -58,12 +60,16 @@ const AgentWidget: Component<{
 			? props.widget.interaction
 			: undefined,
 	);
+	const supported = createMemo(() => isWidgetSupported(props.widget));
 	const active = createMemo(() => !!pending() && !!props.onRespond);
-	const batch = createMemo(() => pending()?.approvals);
+	const batch = createMemo(() =>
+		supported() ? pending()?.approvals : undefined,
+	);
 	const approvalOnly = createMemo(
 		() =>
-			props.widget.key === approvalWidget ||
-			props.widget.key === approvalBatchWidget,
+			supported() &&
+			(props.widget.key === approvalWidget ||
+				props.widget.key === approvalBatchWidget),
 	);
 	const currentApproval = createMemo(() => batch()?.[approvalStep()]);
 	const approval = createMemo(() => currentApproval() ?? pending()?.approval);
@@ -193,7 +199,7 @@ const AgentWidget: Component<{
 	return (
 		<div aria-busy={submitting()}>
 			<Switch>
-				<Match when={props.widget.key === questionWidget}>
+				<Match when={props.widget.key === questionWidget && supported()}>
 					<AgentQuestionPanel
 						question={question()}
 						onAnswer={answer}
@@ -241,13 +247,7 @@ const AgentWidget: Component<{
 									<Show
 										when={contribution()}
 										keyed
-										fallback={
-											<p class="text-xs text-muted">
-												{T()("agent.widget.unavailable", {
-													key: props.widget.key,
-												})}
-											</p>
-										}
+										fallback={<AgentWidgetUnavailable widget={props.widget} />}
 									>
 										{(entry) => {
 											const Renderer = entry.component;

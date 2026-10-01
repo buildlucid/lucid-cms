@@ -521,33 +521,32 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 		const { table } = this.db.dynamic;
 		const versionTable = dynamicConfig.tableName;
 
-		const queryFn = async () => {
-			if (props.documentIds.length)
-				await this.db
-					.deleteFrom(versionTable)
-					.where(`${versionTable}.type`, "=", "revision")
-					.where(`${versionTable}.document_id`, "in", props.documentIds)
-					.where(`${versionTable}.created_at`, "<", props.cutoffDate)
-					.where(({ not, exists, selectFrom }) =>
-						not(
-							exists(
-								selectFrom(table(versionTable).as("promoted"))
-									.select(sql.lit(1).as("one"))
-									.whereRef("promoted.promoted_from", "=", `${versionTable}.id`)
-									.where("promoted.type", "!=", "revision"),
-							),
-						),
-					)
-					.execute();
+		const query = this.db
+			.deleteFrom(versionTable)
+			.where(`${versionTable}.type`, "=", "revision")
+			.where(`${versionTable}.document_id`, "in", props.documentIds)
+			.where(`${versionTable}.created_at`, "<", props.cutoffDate)
+			.where(({ not, exists, selectFrom }) =>
+				not(
+					exists(
+						selectFrom(table(versionTable).as("promoted"))
+							.select(sql.lit(1).as("one"))
+							.whereRef("promoted.promoted_from", "=", `${versionTable}.id`)
+							.where("promoted.type", "!=", "revision"),
+					),
+				),
+			);
 
-			await this.deleteMissingIdentities(props.collectionKey, versionTable);
-			return undefined;
-		};
-
-		const exec = await this.executeQuery(queryFn, {
-			method: "deleteExpiredRevisions",
-			tableName: versionTable,
-		});
+		const exec = await this.executeQuery(
+			async () => {
+				if (props.documentIds.length) await query.execute();
+				await this.deleteMissingIdentities(props.collectionKey, versionTable);
+			},
+			{
+				method: "deleteExpiredRevisions",
+				tableName: versionTable,
+			},
+		);
 
 		return exec.response;
 	}

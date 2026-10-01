@@ -31,13 +31,6 @@ const normalizeTitle = (value: string) => {
 	return shortened || title.slice(0, titleLength);
 };
 
-const generationFailed = () =>
-	({
-		type: "basic",
-		status: 502,
-		message: copy("server:agent.title.generate.failed"),
-	}) as const;
-
 /** Generates a title from saved chat text, with the first message as the focus for new chats. */
 const generateTitle: ServiceFn<
 	[
@@ -140,12 +133,28 @@ const generateTitle: ServiceFn<
 
 	const result = generated.data.json.data;
 	if (!isCmsAiGenerateCompletedData(result)) {
-		return { data: undefined, error: generationFailed() };
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:agent.title.generate.failed"),
+			},
+		};
 	}
 
 	const parsed = titleSchema.safeParse(result.output);
 	const title = parsed.success ? normalizeTitle(parsed.data.title) : "";
-	if (!title) return { data: undefined, error: generationFailed() };
+	if (!title) {
+		return {
+			data: undefined,
+			error: {
+				type: "basic",
+				status: 502,
+				message: copy("server:agent.title.generate.failed"),
+			},
+		};
+	}
 
 	const stored = await storeGeneration(context, {
 		lucidRemoteConnectionId: token.data.lucidRemoteConnectionId,

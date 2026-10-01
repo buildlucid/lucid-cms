@@ -230,6 +230,8 @@ export type AgentToolDetails = {
 	display?: AgentToolDisplay;
 	input: Record<string, unknown>;
 	output?: unknown;
+	/** The shape version of a built-in tool's output, so older results keep a matching view. */
+	outputVersion?: number;
 	status: AgentToolStatus;
 };
 

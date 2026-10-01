@@ -18,7 +18,8 @@ const deleteDocumentRecords: ServiceFn<
 > = async (context, { collectionKey, documentIds, tableName }) => {
 	if (!documentIds.length) return { error: undefined, data: undefined };
 
-	const documents = await new DocumentsRepository(context.db).deleteMultiple(
+	const Documents = new DocumentsRepository(context.db);
+	const documents = await Documents.deleteMultiple(
 		{
 			where: [{ key: "id", operator: "in", value: documentIds }],
 		},

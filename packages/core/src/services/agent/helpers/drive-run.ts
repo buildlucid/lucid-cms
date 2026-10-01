@@ -10,15 +10,15 @@ import { textFromParts } from "../../../libs/agent/input.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
+import { getConversationLevel } from "../../../libs/permission/agent-permissions.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkAgentAccess, {
-	getConversationLevel,
-} from "./check-agent-access.js";
+import checkAgentAccess from "./check-agent-access.js";
 import compactContext from "./compact-context.js";
 import consumeSteering from "./consume-steering.js";
-import executeReadBatch, { getReadBatch } from "./execute-read-batch.js";
+import executeReadBatch from "./execute-read-batch.js";
 import executeToolStep from "./execute-tool-step.js";
+import getReadBatch from "./get-read-batch.js";
 import loadHistory from "./load-history.js";
 import resolveModel from "./resolve-model.js";
 import resolveRunSetup from "./resolve-run-setup.js";

@@ -3,7 +3,7 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import { getMediaOwnership, type MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkHasMediaStorage from "./checks/check-has-media-storage.js";
-import { mediaAccessError } from "./checks/check-media-access.js";
+import mediaAccessError from "./checks/media-access-error.js";
 
 const requestDownload: ServiceFn<
 	[

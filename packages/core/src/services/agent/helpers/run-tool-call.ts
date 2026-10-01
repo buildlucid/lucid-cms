@@ -7,13 +7,18 @@ import {
 import { prepareAgentTool } from "../../../libs/tools/execute-tool.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import invokeAgentTool, { failedToolRun } from "./invoke-agent-tool.js";
+import invokeAgentTool from "./invoke-agent-tool.js";
 import type { RunSession } from "./run-session.js";
 import {
 	type RunnerToolCall,
 	runnerToolHandlers,
 } from "./runner-tools/index.js";
-import { type ToolOutcome, toolFailure, toolResult } from "./tool-outcome.js";
+import {
+	failedToolRun,
+	type ToolOutcome,
+	toolFailure,
+	toolResult,
+} from "./tool-outcome.js";
 
 /**
  * Handles one tool invocation. Runner tools run straight away. Agent tools

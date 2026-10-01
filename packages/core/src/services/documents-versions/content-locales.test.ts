@@ -80,7 +80,8 @@ describe("unassigned content locales", () => {
 		expect(
 			(await applyCollectionMigrations(context, plan.data)).error,
 		).toBeUndefined();
-		const user = await new UsersRepository(context.db).createSingle({
+		const Users = new UsersRepository(context.db);
+		const user = await Users.createSingle({
 			data: {
 				email: "locale@example.com",
 				username: "locale",
@@ -110,7 +111,8 @@ describe("unassigned content locales", () => {
 			collection.key,
 		);
 		assert(migration.data);
-		const document = await new DocumentsRepository(context.db).createSingle(
+		const Documents = new DocumentsRepository(context.db);
+		const document = await Documents.createSingle(
 			{
 				data: {
 					collection_key: collection.key,
@@ -124,9 +126,10 @@ describe("unassigned content locales", () => {
 			{ tableName: names.data.document },
 		);
 		assert(document.data, JSON.stringify(document.error));
+		const DocumentIdentities = new DocumentIdentitiesRepository(context.db);
 		expect(
 			(
-				await new DocumentIdentitiesRepository(context.db).createSingle({
+				await DocumentIdentities.createSingle({
 					data: {
 						collection_key: collection.key,
 						document_id: document.data.id,
@@ -136,9 +139,8 @@ describe("unassigned content locales", () => {
 		).toBeUndefined();
 		const versionIds: number[] = [];
 		for (const type of ["latest", "published", "revision"]) {
-			const version = await new DocumentVersionsRepository(
-				context.db,
-			).createVersion(
+			const DocumentVersions = new DocumentVersionsRepository(context.db);
+			const version = await DocumentVersions.createVersion(
 				{
 					collection_key: collection.key,
 					collection_migration_id: migration.data,
@@ -176,9 +178,8 @@ describe("unassigned content locales", () => {
 			expect(saved.error).toBeUndefined();
 		}
 		const readFields = async (versionId: number) => {
-			const rows = await new DocumentBricksRepository(
-				context.db,
-			).selectMultipleByVersionId(
+			const DocumentBricks = new DocumentBricksRepository(context.db);
+			const rows = await DocumentBricks.selectMultipleByVersionId(
 				{ versionId, bricksSchema: bricksSchema },
 				{ tableName: tableNames.version },
 			);
@@ -281,7 +282,8 @@ describe("unassigned content locales", () => {
 	});
 
 	test("upserts a single unassigned media row and adopts it without changing its language later", async () => {
-		const media = await new MediaRepository(context.db).createSingle({
+		const Media = new MediaRepository(context.db);
+		const media = await Media.createSingle({
 			data: {
 				key: "unassigned-image",
 				storage_adapter_key: "test",
@@ -463,7 +465,8 @@ describe("unassigned content locales", () => {
 		context.config.localization = { locales: [], defaultLocale: null };
 		const documents: { documentId: number; versionId: number }[] = [];
 		for (const slug of ["parent", "child"]) {
-			const doc = await new DocumentsRepository(context.db).createSingle(
+			const Documents = new DocumentsRepository(context.db);
+			const doc = await Documents.createSingle(
 				{
 					data: {
 						collection_key: collection.key,
@@ -477,16 +480,16 @@ describe("unassigned content locales", () => {
 				{ tableName: tables.document },
 			);
 			assert(doc.data);
+			const DocumentIdentities = new DocumentIdentitiesRepository(context.db);
 			expect(
 				(
-					await new DocumentIdentitiesRepository(context.db).createSingle({
+					await DocumentIdentities.createSingle({
 						data: { collection_key: collection.key, document_id: doc.data.id },
 					})
 				).error,
 			).toBeUndefined();
-			const version = await new DocumentVersionsRepository(
-				context.db,
-			).createVersion(
+			const DocumentVersions = new DocumentVersionsRepository(context.db);
+			const version = await DocumentVersions.createVersion(
 				{
 					collection_key: collection.key,
 					collection_migration_id: migration.data,

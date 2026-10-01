@@ -39,7 +39,6 @@ export type SessionRun = {
 	id: string;
 	conversation_id: string;
 	routine_id: string | null;
-	/** Who the run acts for. Null when it acts as the system. */
 	user_id: number | null;
 	execution_version: number;
 	agent_key: string;
@@ -123,18 +122,6 @@ const openRunSession = async (
 		}
 	}, constants.agent.heartbeatMs);
 
-	const superseded = () => {
-		loseLease();
-		return {
-			data: undefined,
-			error: {
-				type: "basic" as const,
-				status: 409,
-				message: copy("server:agent.run.superseded"),
-			},
-		};
-	};
-
 	const write = async (
 		status: AgentRunStatus,
 		props?: { errorMessage?: string | null; now?: string },
@@ -151,7 +138,17 @@ const openRunSession = async (
 			now: props?.now ?? new Date().toISOString(),
 		});
 		if (updated.error) return updated;
-		if (!updated.data) return superseded();
+		if (!updated.data) {
+			loseLease();
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 409,
+					message: copy("server:agent.run.superseded"),
+				},
+			};
+		}
 
 		return { error: undefined, data: undefined };
 	};
@@ -173,7 +170,17 @@ const openRunSession = async (
 			now: new Date().toISOString(),
 		});
 		if (message.error) return message;
-		if (!message.data) return superseded();
+		if (!message.data) {
+			loseLease();
+			return {
+				data: undefined,
+				error: {
+					type: "basic",
+					status: 409,
+					message: copy("server:agent.run.superseded"),
+				},
+			};
+		}
 
 		return { error: undefined, data: undefined };
 	};
@@ -222,7 +229,17 @@ const openRunSession = async (
 						now: input.createdAt,
 					});
 					if (stored.error) return stored;
-					if (!stored.data) return superseded();
+					if (!stored.data) {
+						loseLease();
+						return {
+							data: undefined,
+							error: {
+								type: "basic",
+								status: 409,
+								message: copy("server:agent.run.superseded"),
+							},
+						};
+					}
 
 					const registered = await registerUrlKeys(context, {
 						conversationId: run.conversation_id,
@@ -281,7 +298,17 @@ const openRunSession = async (
 						token,
 					});
 					if (paused.error) return paused;
-					if (!paused.data) return superseded();
+					if (!paused.data) {
+						loseLease();
+						return {
+							data: undefined,
+							error: {
+								type: "basic",
+								status: 409,
+								message: copy("server:agent.run.superseded"),
+							},
+						};
+					}
 				}
 
 				const finishedAt = new Date().toISOString();
@@ -298,10 +325,10 @@ const openRunSession = async (
 					if (saved.error) return saved;
 
 					if (isTerminalRunStatus(status)) {
-						const conversations = new AgentConversationsRepository(
+						const AgentConversations = new AgentConversationsRepository(
 							writeContext.db,
 						);
-						const released = await conversations.releaseRun({
+						const released = await AgentConversations.releaseRun({
 							conversationId: run.conversation_id,
 							runId: run.id,
 							updatedAt: new Date().toISOString(),
@@ -379,7 +406,17 @@ const openRunSession = async (
 					token,
 				});
 				if (stored.error) return stored;
-				if (!stored.data) return superseded();
+				if (!stored.data) {
+					loseLease();
+					return {
+						data: undefined,
+						error: {
+							type: "basic",
+							status: 409,
+							message: copy("server:agent.run.superseded"),
+						},
+					};
+				}
 
 				return write("running");
 			},

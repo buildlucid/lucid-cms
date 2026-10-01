@@ -931,9 +931,8 @@ test("a failed identity cleanup preserves replacement content and can be retried
 		await sql`DROP TRIGGER fail_old_identity_delete`.execute(context.db.kysely);
 	}
 
-	const retried = await new DocumentVersionsRepository(
-		context.db,
-	).deleteVersions(
+	const DocumentVersions = new DocumentVersionsRepository(context.db);
+	const retried = await DocumentVersions.deleteVersions(
 		{
 			collectionKey,
 			where: [{ key: "id", operator: "=", value: previous.id }],

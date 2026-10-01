@@ -176,9 +176,8 @@ test("a title queue failure leaves the first message and provisional title intac
 		});
 		expect(started.error).toBeUndefined();
 
-		const saved = await new AgentConversationsRepository(
-			context.db,
-		).selectSingle({
+		const AgentConversations = new AgentConversationsRepository(context.db);
+		const saved = await AgentConversations.selectSingle({
 			select: ["title", "title_status", "title_generation_requested_at"],
 			where: [{ key: "id", operator: "=", value: created.data.id }],
 		});
@@ -268,9 +267,10 @@ describe("routine dispatch", () => {
 			runId: run?.id,
 			userId,
 		});
-		const conversation = await new AgentConversationsRepository(
-			context.db,
-		).selectSingleWithLatestRun({ id: run?.conversation_id ?? "" });
+		const AgentConversations = new AgentConversationsRepository(context.db);
+		const conversation = await AgentConversations.selectSingleWithLatestRun({
+			id: run?.conversation_id ?? "",
+		});
 		expect(conversation.data).toMatchObject({
 			agent_key: testAgent.key,
 			routine_id: routine.id,
@@ -645,9 +645,10 @@ describe("code routines", () => {
 			runId: run?.id,
 			userId: null,
 		});
-		const conversation = await new AgentConversationsRepository(
-			context.db,
-		).selectSingleWithLatestRun({ id: run?.conversation_id ?? "" });
+		const AgentConversations = new AgentConversationsRepository(context.db);
+		const conversation = await AgentConversations.selectSingleWithLatestRun({
+			id: run?.conversation_id ?? "",
+		});
 		expect(conversation.data?.user_id).toBeNull();
 	});
 });

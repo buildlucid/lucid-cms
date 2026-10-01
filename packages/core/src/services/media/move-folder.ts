@@ -5,7 +5,7 @@ import { MediaRepository } from "../../libs/repositories/index.js";
 import { getMediaOwnership, type MediaActor } from "../../utils/media/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
-import { mediaAccessError } from "./checks/check-media-access.js";
+import mediaAccessError from "./checks/media-access-error.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 
 const moveFolder: ServiceFn<

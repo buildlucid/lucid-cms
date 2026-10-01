@@ -63,7 +63,13 @@ const resolveRunSetup = (
 		presentation: new Map(
 			[...tools, ...runnerTools].map((tool) => [
 				tool.name,
-				{ title: tool.title, display: tool.display },
+				{
+					title: tool.title,
+					display: tool.display,
+					//* runner tools show widgets instead of versioned outputs
+					outputVersion:
+						"outputVersion" in tool ? tool.outputVersion : undefined,
+				},
 			]),
 		),
 		definitions: [...tools, ...runnerTools].map(

@@ -1,10 +1,7 @@
 import { getAgent } from "../../../libs/agent/registry.js";
 import type { AgentDefinition } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getAgentPermission } from "../../../libs/permission/agent-permissions.js";
-import hasPermission, {
-	type PermissionGrant,
-} from "../../../libs/permission/has-permission.js";
+import { hasAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -17,17 +14,6 @@ const systemAuthority: AgentToolAuthority = {
 	permissions: [],
 	superAdmin: true,
 };
-
-/** Chats owned by a user need `use`; chats started by code routines need `manage`. */
-export const getConversationLevel = (
-	ownerId: number | null,
-): AgentPermissionAction => (ownerId === null ? "manage" : "use");
-
-export const hasAgentPermission = (
-	grant: PermissionGrant,
-	agentKey: string,
-	level: AgentPermissionAction,
-) => hasPermission(grant, getAgentPermission(agentKey, level));
 
 /**
  * Resolves who a run acts for on one agent. A user needs the agent's permission

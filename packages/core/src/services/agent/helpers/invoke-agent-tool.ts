@@ -7,23 +7,12 @@ import type {
 } from "../../../libs/tools/types.js";
 import type { AgentStreamEvent } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
-import { type ToolResult, toolFailure, toolResult } from "./tool-outcome.js";
-
-type FailedRun = Exclude<
-	Awaited<ReturnType<typeof executeAgentTool>>,
-	{ type: "success" }
->;
-
-/** Missing and forbidden tools appear unavailable; other failures retain their message for the model. */
-export const failedToolRun = (
-	context: ServiceContext,
-	result: FailedRun,
-): ToolResult =>
-	toolFailure(
-		"message" in result && result.message
-			? result.message
-			: context.translate("server:agent.tool.unavailable"),
-	);
+import {
+	failedToolRun,
+	type ToolResult,
+	toolFailure,
+	toolResult,
+} from "./tool-outcome.js";
 
 /** Invokes an agent tool without access to mutable runner state. */
 const invokeAgentTool = async (

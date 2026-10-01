@@ -98,7 +98,9 @@ export const writeDraft = (key: string | undefined, draft: Draft) => {
 	try {
 		if (draft.text || draft.references.length) {
 			sessionStorage.setItem(draftPrefix + key, JSON.stringify(draft));
-		} else sessionStorage.removeItem(draftPrefix + key);
+		} else {
+			sessionStorage.removeItem(draftPrefix + key);
+		}
 	} catch {}
 };
 

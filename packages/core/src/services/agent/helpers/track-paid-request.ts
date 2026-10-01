@@ -7,7 +7,6 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import reconcileUsage from "../reconcile-usage.js";
-import type { SessionRun } from "./run-session.js";
 import storePendingUsage from "./store-pending-usage.js";
 import storeUsage from "./store-usage.js";
 
@@ -18,17 +17,6 @@ export type PaidRequestRecord = {
 	conversationId: string;
 	userId: number | null;
 };
-
-/** Attributes a request the runner makes itself, such as a model turn, to its run. */
-export const runnerRequestRecord = (
-	run: SessionRun,
-	request: Pick<PaidRequestRecord, "requestId" | "featureKey">,
-): PaidRequestRecord => ({
-	...request,
-	runId: run.id,
-	conversationId: run.conversation_id,
-	userId: run.user_id,
-});
 
 /**
  * Runs one paid Lucid request for an agent run and keeps its usage

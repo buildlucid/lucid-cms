@@ -27,7 +27,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import checkFolderAccess from "../media-folders/checks/check-folder-access.js";
 import clearProcessedImage from "../processed-images/clear-single.js";
 import checkAwaitingSync from "./checks/check-awaiting-sync.js";
-import { mediaAccessError } from "./checks/check-media-access.js";
+import mediaAccessError from "./checks/media-access-error.js";
 import clearContentMediaSingleCache from "./helpers/clear-content-media-cache.js";
 import deactivateCrop from "./helpers/deactivate-crop.js";
 import permanentlyDeleteMedia from "./helpers/permanently-delete-media.js";

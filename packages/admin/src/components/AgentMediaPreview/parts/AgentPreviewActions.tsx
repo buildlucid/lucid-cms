@@ -1,11 +1,6 @@
 import type { Media } from "@types";
 import classnames from "classnames";
-import {
-	FaSolidCheck,
-	FaSolidCircleInfo,
-	FaSolidDownload,
-	FaSolidLink,
-} from "solid-icons/fa";
+import { FaSolidCheck, FaSolidDownload, FaSolidLink } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
 import { createCopy } from "@/components/Copy/copyValue";
 import { Permissions } from "@/constants/permissions";
@@ -20,13 +15,12 @@ const buttonClass = classnames(
 );
 
 /**
- * Copy link, download and details buttons for a previewed media item. Private
- * links only open for people signed in to Lucid with access, so their label
- * says so. Download and details need media read permission, as in the library.
+ * Copy link and download buttons for a previewed media item. Private links
+ * only open for people signed in to Lucid with access, so their label says
+ * so. Download needs media read permission, as in the library.
  */
 const AgentPreviewActions: Component<{
 	media: Media;
-	onDetails?: () => void;
 	class?: string;
 }> = (props) => {
 	// ----------------------------------------
@@ -75,19 +69,6 @@ const AgentPreviewActions: Component<{
 				>
 					<FaSolidDownload size={10} />
 				</button>
-				<Show when={props.onDetails}>
-					{(onDetails) => (
-						<button
-							type="button"
-							class={buttonClass}
-							aria-label={T()("agent.preview.details", { name: name() })}
-							title={T()("agent.preview.details", { name: name() })}
-							onClick={() => onDetails()()}
-						>
-							<FaSolidCircleInfo size={10} />
-						</button>
-					)}
-				</Show>
 			</Show>
 		</div>
 	);

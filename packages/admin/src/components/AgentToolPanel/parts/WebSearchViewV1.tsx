@@ -4,7 +4,9 @@ import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import WebSourceRow from "./WebSourceRow";
 
-const WebSearchView: Component<{ output: AgentWebSearchOutput }> = (props) => {
+const WebSearchViewV1: Component<{ output: AgentWebSearchOutput }> = (
+	props,
+) => {
 	// ----------------------------------------
 	// Render
 	return (
@@ -33,4 +35,4 @@ const WebSearchView: Component<{ output: AgentWebSearchOutput }> = (props) => {
 	);
 };
 
-export default WebSearchView;
+export default WebSearchViewV1;

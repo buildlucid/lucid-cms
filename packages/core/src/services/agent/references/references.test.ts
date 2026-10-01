@@ -114,7 +114,8 @@ const createMedia = async (
 		file_extension?: string;
 	} = {},
 ) => {
-	const result = await new MediaRepository(context.db).createSingle({
+	const Media = new MediaRepository(context.db);
+	const result = await Media.createSingle({
 		data: {
 			key: randomUUID(),
 			storage_adapter_key: "test",
@@ -139,7 +140,8 @@ const createDocument = async () => {
 		collection.key,
 	);
 	assert(migration.data, JSON.stringify(migration.error));
-	const document = await new DocumentsRepository(context.db).createSingle(
+	const Documents = new DocumentsRepository(context.db);
+	const document = await Documents.createSingle(
 		{
 			data: {
 				collection_key: collection.key,
@@ -151,18 +153,18 @@ const createDocument = async () => {
 		{ tableName: names.data.document },
 	);
 	assert(document.data, JSON.stringify(document.error));
+	const DocumentIdentities = new DocumentIdentitiesRepository(context.db);
 	expect(
 		(
-			await new DocumentIdentitiesRepository(context.db).createSingle({
+			await DocumentIdentities.createSingle({
 				data: { collection_key: collection.key, document_id: document.data.id },
 			})
 		).error,
 	).toBeUndefined();
+	const DocumentVersions = new DocumentVersionsRepository(context.db);
 	const versions: number[] = [];
 	for (const type of ["latest", "revision"]) {
-		const version = await new DocumentVersionsRepository(
-			context.db,
-		).createVersion(
+		const version = await DocumentVersions.createVersion(
 			{
 				collection_key: collection.key,
 				collection_migration_id: migration.data,
@@ -184,9 +186,10 @@ const createDocument = async () => {
 	return { id: document.data.id, latestId, revisionId, tables: names.data };
 };
 const documentLinks = async (conversationId: string) => {
-	const result = await new AgentDocumentReferencesRepository(
+	const AgentDocumentReferences = new AgentDocumentReferencesRepository(
 		context.db,
-	).selectMultiple({
+	);
+	const result = await AgentDocumentReferences.selectMultiple({
 		select: ["document_id", "version_id"],
 		where: [{ key: "conversation_id", operator: "=", value: conversationId }],
 	});
@@ -194,9 +197,8 @@ const documentLinks = async (conversationId: string) => {
 	return result.data;
 };
 const mediaLinks = async (conversationId: string) => {
-	const result = await new AgentMediaReferencesRepository(
-		context.db,
-	).selectMultiple({
+	const AgentMediaReferences = new AgentMediaReferencesRepository(context.db);
+	const result = await AgentMediaReferences.selectMultiple({
 		select: ["media_id"],
 		where: [{ key: "conversation_id", operator: "=", value: conversationId }],
 	});
@@ -321,9 +323,10 @@ test("media hard deletion cascades through references in every chat", async () =
 			).error,
 		).toBeUndefined();
 	}
+	const Media = new MediaRepository(context.db);
 	expect(
 		(
-			await new MediaRepository(context.db).deleteSingle({
+			await Media.deleteSingle({
 				where: [{ key: "id", operator: "=", value: mediaId }],
 			})
 		).error,
@@ -460,9 +463,10 @@ test("delivery skips deleted resources while ordinary registration stays strict"
 	const conversationId = await createChat();
 	const mediaId = await createMedia();
 	const missingId = await createMedia();
+	const Media = new MediaRepository(context.db);
 	expect(
 		(
-			await new MediaRepository(context.db).deleteSingle({
+			await Media.deleteSingle({
 				where: [{ key: "id", operator: "=", value: missingId }],
 			})
 		).error,
@@ -551,7 +555,8 @@ test("delivery skips deleted documents while retaining surviving references", as
 });
 
 const createReader = async (permissions?: string[]) => {
-	const user = await new UsersRepository(context.db).createSingle({
+	const Users = new UsersRepository(context.db);
+	const user = await Users.createSingle({
 		data: {
 			email: `${randomUUID()}@example.test`,
 			username: randomUUID(),
@@ -565,9 +570,10 @@ const createReader = async (permissions?: string[]) => {
 	if (permissions) {
 		const role = await createRole(context, { name: randomUUID(), permissions });
 		assert(role.data, JSON.stringify(role.error));
+		const UserRoles = new UserRolesRepository(context.db);
 		expect(
 			(
-				await new UserRolesRepository(context.db).createSingle({
+				await UserRoles.createSingle({
 					data: { user_id: user.data.id, role_id: role.data },
 				})
 			).error,
@@ -597,9 +603,10 @@ test("fetches current labels and media details while preserving pinned document 
 			).error,
 		).toBeUndefined();
 	}
+	const Media = new MediaRepository(context.db);
 	expect(
 		(
-			await new MediaRepository(context.db).updateSingle({
+			await Media.updateSingle({
 				where: [{ key: "id", operator: "=", value: mediaId }],
 				data: { file_name: "Campaign.png" },
 			})
@@ -666,7 +673,7 @@ test("fetches current labels and media details while preserving pinned document 
 	}
 	expect(
 		(
-			await new MediaRepository(context.db).updateSingle({
+			await Media.updateSingle({
 				where: [{ key: "id", operator: "=", value: mediaId }],
 				data: { file_name: "Updated.png" },
 			})
@@ -871,9 +878,10 @@ test("reference tools register, list and remove resources within their own chat"
 	expect(
 		(await list(context, { conversationId: otherChat, userId: null })).data,
 	).toHaveLength(4);
+	const Media = new MediaRepository(context.db);
 	expect(
 		(
-			await new MediaRepository(context.db).selectSingle({
+			await Media.selectSingle({
 				select: ["id"],
 				where: [{ key: "id", operator: "=", value: mediaId }],
 			})

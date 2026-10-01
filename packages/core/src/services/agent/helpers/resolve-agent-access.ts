@@ -1,10 +1,10 @@
 import { getAgents } from "../../../libs/agent/registry.js";
 import { copy } from "../../../libs/i18n/index.js";
+import { hasAgentPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentPermissionAction } from "../../../libs/permission/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
-import { hasAgentPermission } from "./check-agent-access.js";
 
 /** The keys of the agents a user can use or manage, from their live permissions. Fails when there are none. */
 const resolveAgentAccess: ServiceFn<

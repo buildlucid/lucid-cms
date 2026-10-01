@@ -2,6 +2,10 @@ import { getAgent } from "../../../libs/agent/registry.js";
 import aiUsageFormatter, {
 	type AiUsageSessionPropT,
 } from "../../../libs/formatters/ai-usage.js";
+import {
+	getConversationLevel,
+	hasAgentPermission,
+} from "../../../libs/permission/agent-permissions.js";
 import formatUserRefs from "../../../libs/refs/users/format.js";
 import {
 	AgentConversationsRepository,
@@ -10,10 +14,6 @@ import {
 import type { AiUsageSession } from "../../../types/response.js";
 import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import {
-	getConversationLevel,
-	hasAgentPermission,
-} from "../../agent/helpers/check-agent-access.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
 /**

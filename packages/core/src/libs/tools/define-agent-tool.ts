@@ -67,6 +67,7 @@ function defineAgentTool<
 		requiresApproval: options.requiresApproval ?? false,
 		capabilities: options.capabilities,
 		display: options.display && toolDisplay(options.input, options.display),
+		outputVersion: options.outputVersion,
 	};
 	const checkResult = checkToolResult(options);
 

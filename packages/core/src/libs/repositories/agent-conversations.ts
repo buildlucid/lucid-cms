@@ -11,7 +11,6 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		super(db, agentConversationsTable);
 	}
 
-	/** Joins each conversation's most recent run. */
 	private selectWithLatestRun() {
 		return this.db
 			.selectFrom("lucid_agent_conversations")
@@ -173,33 +172,32 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 		});
 	}
 	async selectSingleWithLatestRun(props: { id: string }) {
-		const exec = await this.executeQuery(
-			() =>
-				this.selectWithLatestRun()
-					.select([
-						"lucid_agent_conversations.id",
-						"lucid_agent_conversations.agent_key",
-						"lucid_agent_conversations.title",
-						"lucid_agent_conversations.title_status",
-						"lucid_agent_conversations.title_generation_requested_at",
-						"lucid_agent_conversations.user_id",
-						"lucid_agent_conversations.routine_id",
-						"lucid_agent_conversations.active_run_id",
-						"lucid_agent_conversations.queue_paused",
-						"lucid_agent_conversations.context",
-						"lucid_agent_conversations.model_selection",
-						"lucid_agent_conversations.approval_mode",
-						"lucid_agent_conversations.created_at",
-						"lucid_agent_conversations.updated_at",
-						"lucid_agent_runs.id as latest_run_id",
-						"lucid_agent_runs.status as latest_run_status",
-						"lucid_agent_runs.outcome as latest_run_outcome",
-						"lucid_agent_runs.error_message as latest_run_error",
-					])
-					.where("lucid_agent_conversations.id", "=", props.id)
-					.executeTakeFirst(),
-			{ method: "selectSingleWithLatestRun" },
-		);
+		const query = this.selectWithLatestRun()
+			.select([
+				"lucid_agent_conversations.id",
+				"lucid_agent_conversations.agent_key",
+				"lucid_agent_conversations.title",
+				"lucid_agent_conversations.title_status",
+				"lucid_agent_conversations.title_generation_requested_at",
+				"lucid_agent_conversations.user_id",
+				"lucid_agent_conversations.routine_id",
+				"lucid_agent_conversations.active_run_id",
+				"lucid_agent_conversations.queue_paused",
+				"lucid_agent_conversations.context",
+				"lucid_agent_conversations.model_selection",
+				"lucid_agent_conversations.approval_mode",
+				"lucid_agent_conversations.created_at",
+				"lucid_agent_conversations.updated_at",
+				"lucid_agent_runs.id as latest_run_id",
+				"lucid_agent_runs.status as latest_run_status",
+				"lucid_agent_runs.outcome as latest_run_outcome",
+				"lucid_agent_runs.error_message as latest_run_error",
+			])
+			.where("lucid_agent_conversations.id", "=", props.id);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectSingleWithLatestRun",
+		});
 
 		return exec.response;
 	}

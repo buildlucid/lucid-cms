@@ -1,15 +1,14 @@
 import type { LucidAgentConversations } from "../../../libs/db/tables/agent-conversations.js";
 import type { Select } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
+import { getConversationLevel } from "../../../libs/permission/agent-permissions.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
 import type {
 	AgentRunOutcome,
 	AgentRunStatus,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import checkAgentAccess, {
-	getConversationLevel,
-} from "./check-agent-access.js";
+import checkAgentAccess from "./check-agent-access.js";
 
 /** Chats are private to their user. Chats started by code routines are shared with the agent's managers. */
 const getAccessibleConversation: ServiceFn<

@@ -13,9 +13,11 @@ import T from "@/translations";
 import {
 	approvalBatchWidget,
 	approvalWidget,
+	isWidgetSupported,
 	questionWidget,
 } from "@/utils/agent-tools";
 import AgentApprovalDetails from "./AgentApprovalDetails";
+import AgentWidgetUnavailable from "./AgentWidgetUnavailable";
 import { resolveAgentSlot } from "./slots";
 
 const interactionStatus = (interaction: AgentInteraction, key: string) => {
@@ -57,7 +59,10 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 			? interactionStatus(interaction, props.widget.key)
 			: undefined;
 	});
-	const question = createMemo(() => props.widget.key === questionWidget);
+	const supported = createMemo(() => isWidgetSupported(props.widget));
+	const question = createMemo(
+		() => props.widget.key === questionWidget && supported(),
+	);
 	const response = createMemo(() => {
 		const interaction = props.widget.interaction;
 		return interaction?.status === "answered"
@@ -72,6 +77,7 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 	});
 	const expandable = createMemo(
 		() =>
+			!supported() ||
 			question() ||
 			props.widget.interaction?.approval !== undefined ||
 			props.widget.interaction?.approvals !== undefined ||
@@ -123,6 +129,9 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 							}
 							renderPanel={() => (
 								<Switch>
+									<Match when={!supported()}>
+										<AgentWidgetUnavailable widget={props.widget} />
+									</Match>
 									<Match when={question()}>
 										<dl class="flex flex-col gap-3 text-xs">
 											<div class="flex flex-col gap-1">

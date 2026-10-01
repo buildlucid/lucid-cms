@@ -2,7 +2,7 @@ import type { AgentFileReadOutput } from "@types";
 import { type Component, createMemo, For, Show } from "solid-js";
 import T from "@/translations";
 
-const FileReadView: Component<{
+const FileReadViewV1: Component<{
 	output: AgentFileReadOutput;
 	search?: string;
 }> = (props) => {
@@ -49,4 +49,4 @@ const FileReadView: Component<{
 	);
 };
 
-export default FileReadView;
+export default FileReadViewV1;

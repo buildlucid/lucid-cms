@@ -12,7 +12,7 @@ const previewChars = 600;
  * Markdown renders without images, so viewing it never loads third-party
  * content.
  */
-const WebFetchView: Component<{ output: AgentWebFetchOutput }> = (props) => {
+const WebFetchViewV1: Component<{ output: AgentWebFetchOutput }> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
@@ -37,4 +37,4 @@ const WebFetchView: Component<{ output: AgentWebFetchOutput }> = (props) => {
 	);
 };
 
-export default WebFetchView;
+export default WebFetchViewV1;

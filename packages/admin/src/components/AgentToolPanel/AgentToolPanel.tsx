@@ -19,9 +19,9 @@ import {
 	webFetchTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
-import FileReadView from "./parts/FileReadView";
-import WebFetchView from "./parts/WebFetchView";
-import WebSearchView from "./parts/WebSearchView";
+import FileReadViewV1 from "./parts/FileReadViewV1";
+import WebFetchViewV1 from "./parts/WebFetchViewV1";
+import WebSearchViewV1 from "./parts/WebSearchViewV1";
 
 const statusVariants = {
 	pending: "neutral",
@@ -30,6 +30,13 @@ const statusVariants = {
 	failed: "danger-subtle",
 	skipped: "neutral",
 } satisfies Record<AgentToolPart["status"], PillVariant>;
+
+const outputViewTools: ReadonlySet<string> = new Set([
+	webSearchTool,
+	webFetchTool,
+	readFileTool,
+	analyzeMediaTool,
+]);
 
 /**
  * A tool call in the chat's sidebar. Web research shows the pages it found or
@@ -55,13 +62,20 @@ const AgentToolPanel: Component<{
 	// ----------------------------------------
 	// Memos
 	const output = createMemo(() => details.data?.data.output);
+	const v1 = createMemo(() => props.part.outputVersion === 1);
+	const unavailable = createMemo(
+		() =>
+			props.part.status === "complete" &&
+			outputViewTools.has(props.part.name) &&
+			!v1(),
+	);
 	const error = createMemo(() =>
 		props.part.status === "failed"
 			? toolOutputText(output(), "error")
 			: undefined,
 	);
 	const analysis = createMemo(() =>
-		props.part.name === analyzeMediaTool
+		props.part.name === analyzeMediaTool && v1()
 			? toolOutputText(output(), "analysis")
 			: undefined,
 	);
@@ -70,19 +84,19 @@ const AgentToolPanel: Component<{
 	);
 	const searchOutput = createMemo(() => {
 		const value = output();
-		return props.part.name === webSearchTool && isWebSearchOutput(value)
+		return props.part.name === webSearchTool && v1() && isWebSearchOutput(value)
 			? value
 			: undefined;
 	});
 	const fetchOutput = createMemo(() => {
 		const value = output();
-		return props.part.name === webFetchTool && isWebFetchOutput(value)
+		return props.part.name === webFetchTool && v1() && isWebFetchOutput(value)
 			? value
 			: undefined;
 	});
 	const fileOutput = createMemo(() => {
 		const value = output();
-		return props.part.name === readFileTool && isFileReadOutput(value)
+		return props.part.name === readFileTool && v1() && isFileReadOutput(value)
 			? value
 			: undefined;
 	});
@@ -135,7 +149,12 @@ const AgentToolPanel: Component<{
 					</Show>
 					<Switch
 						fallback={
-							<Show when={!isWeb()}>
+							<Show when={!isWeb() || unavailable()}>
+								<Show when={unavailable()}>
+									<p class="text-sm text-muted">
+										{T()("agent.tool.output.unavailable")}
+									</p>
+								</Show>
 								<Show when={analysis()}>
 									{(text) => <AgentMarkdown text={text()} size="sm" />}
 								</Show>
@@ -170,20 +189,20 @@ const AgentToolPanel: Component<{
 											count: output().results.length,
 										})}
 									</p>
-									<WebSearchView output={output()} />
+									<WebSearchViewV1 output={output()} />
 								</div>
 							)}
 						</Match>
 						<Match when={fetchOutput()}>
 							{(output) => (
 								<div class="-mt-3 flex flex-col gap-3">
-									<WebFetchView output={output()} />
+									<WebFetchViewV1 output={output()} />
 								</div>
 							)}
 						</Match>
 						<Match when={fileOutput()}>
 							{(output) => (
-								<FileReadView
+								<FileReadViewV1
 									output={output()}
 									search={toolOutputText(details.data?.data.input, "search")}
 								/>
