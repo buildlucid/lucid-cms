@@ -1842,6 +1842,8 @@
 	"modals.agent.conversation.delete.description": "The chat and its history will be deleted. If the agent is still working on it, it stops.",
 	"modals.agent.routine.delete.title": "Delete this routine?",
 	"modals.agent.routine.delete.description": "The routine stops running. Chats from its past runs are kept.",
+	"modals.agent.routine.run.title": "Run This Routine Now?",
+	"modals.agent.routine.run.description": "This starts a new run using the routine's current instructions and tool approvals.",
 	"panels.agent.routine.create.title": "New Routine",
 	"panels.agent.routine.update.title": "Edit Routine",
 	"panels.agent.routine.view.title": "Routine Details",

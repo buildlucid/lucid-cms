@@ -26,6 +26,7 @@ import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
 import LoadingState from "@/components/LoadingState/LoadingState";
 import RenameAgentConversationModal from "@/components/RenameAgentConversationModal/RenameAgentConversationModal";
+import RunAgentRoutineModal from "@/components/RunAgentRoutineModal/RunAgentRoutineModal";
 import Spinner from "@/components/Spinner/Spinner";
 import UpsertAgentRoutineDrawer from "@/components/UpsertAgentRoutineDrawer/UpsertAgentRoutineDrawer";
 import ViewAgentRoutineRunsDrawer from "@/components/ViewAgentRoutineRunsDrawer/ViewAgentRoutineRunsDrawer";
@@ -76,15 +77,6 @@ const AgentConversationPage: Component = () => {
 	);
 	const definitions = api.agent.useGetDefinitions();
 	const createConversation = api.agent.useCreateConversation();
-	const runRoutine = api.agent.useRunRoutine({
-		onSuccess: (response) => {
-			if (response.data.conversationId === params.conversationId) {
-				scroll.scrollToEnd("smooth");
-			} else {
-				navigate(`/lucid/agent/chats/${response.data.conversationId}`);
-			}
-		},
-	});
 	const scroll = useChatScroll({
 		hasEarlier: () => chat.history.hasNextPage,
 		loadEarlier: () => chat.history.fetchNextPage(),
@@ -94,6 +86,7 @@ const AgentConversationPage: Component = () => {
 	const [selectedId, setSelectedId] = createSignal<string>();
 	const [sidebar, setSidebar] = createSignal<HTMLElement>();
 	const [routineOpen, setRoutineOpen] = createSignal(false);
+	const [runRoutineOpen, setRunRoutineOpen] = createSignal(false);
 	const [focusApprovals, setFocusApprovals] = createSignal(false);
 	const [routineCardOpen, setRoutineCardOpen] = createSignal(true);
 	const [runsOpen, setRunsOpen] = createSignal(false);
@@ -257,6 +250,7 @@ const AgentConversationPage: Component = () => {
 			() => {
 				setSelectedId(undefined);
 				setRunsOpen(false);
+				setRunRoutineOpen(false);
 				if (!new URLSearchParams(location.search).has("runId")) {
 					scroll.scrollToEnd();
 				}
@@ -291,13 +285,10 @@ const AgentConversationPage: Component = () => {
 								routine()
 									? {
 											disabled:
-												runRoutine.action.isPending ||
+												runRoutineOpen() ||
 												chat.working() ||
 												unavailable() !== undefined,
-											onRun: () => {
-												const id = routine()?.id;
-												if (id) runRoutine.action.mutate({ id });
-											},
+											onRun: () => setRunRoutineOpen(true),
 										}
 									: undefined
 							}
@@ -465,6 +456,18 @@ const AgentConversationPage: Component = () => {
 						)}
 					</Show>
 				</div>
+				<RunAgentRoutineModal
+					id={() => routine()?.id}
+					disabled={chat.working() || unavailable() !== undefined}
+					state={{ open: runRoutineOpen(), setOpen: setRunRoutineOpen }}
+					onRun={(conversationId) => {
+						if (conversationId === params.conversationId) {
+							scroll.scrollToEnd("smooth");
+						} else {
+							navigate(`/lucid/agent/chats/${conversationId}`);
+						}
+					}}
+				/>
 				<RenameAgentConversationModal
 					conversation={conversation}
 					state={{ open: renameOpen(), setOpen: setRenameOpen }}
