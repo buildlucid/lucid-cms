@@ -167,7 +167,8 @@ const CopyCode: Component<{ block: HTMLElement }> = (props) => {
 /**
  * Renders message text as sanitised markdown, with a copy button on each code
  * block. Only registered widgets can render interactive content. The bubble
- * tone keeps code visible on a user message.
+ * tone is for user messages: it matches the chat box's compact spacing and
+ * keeps code visible on the bubble.
  */
 const AgentMarkdown: Component<{
 	text: string;
@@ -225,7 +226,8 @@ const AgentMarkdown: Component<{
 			<div
 				ref={element}
 				class={classnames("agent-markdown", props.class, {
-					"agent-markdown-bubble": props.tone === "bubble",
+					"agent-markdown-bubble agent-markdown-compact":
+						props.tone === "bubble",
 					"agent-markdown-sm": props.size === "sm",
 				})}
 				innerHTML={html()}

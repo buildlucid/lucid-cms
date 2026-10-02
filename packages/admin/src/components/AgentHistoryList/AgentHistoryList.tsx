@@ -20,7 +20,6 @@ import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
 
-/** Conversations as a table driven by the page's filters, sorts and pagination. */
 const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 	props,
 ) => {
@@ -35,6 +34,7 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 	const conversations = api.agent.useGetConversations({
 		queryParams: { queryString: props.searchParams.queryString },
 		enabled: () => props.searchParams.ready(),
+		idleRefetchInterval: 30_000,
 	});
 
 	// ----------------------------------------
@@ -42,7 +42,7 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 	return (
 		<>
 			<QueryBoundary
-				error={conversations.isError}
+				error={conversations.isError && !conversations.data}
 				empty={conversations.data?.data.length === 0}
 				queryState={props.searchParams}
 				emptyFallback={
@@ -62,7 +62,7 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 					id="agent.history.list"
 					rowCount={conversations.data?.data.length ?? 0}
 					queryState={props.searchParams}
-					loading={conversations.isFetching}
+					loading={conversations.isPending || conversations.isPlaceholderData}
 					columns={[
 						{
 							label: T()("common.title"),

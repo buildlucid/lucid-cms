@@ -20,7 +20,6 @@ import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Input from "@/components/Input/Input";
 import Select from "@/components/Select/Select";
 import Switch from "@/components/Switch/Switch";
-import Textarea from "@/components/Textarea/Textarea";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -34,6 +33,7 @@ import {
 import { getBodyError } from "@/utils/error-helpers";
 import { getDefaultTimezone } from "@/utils/release-schedule";
 import AgentRoutineDetails from "./parts/AgentRoutineDetails";
+import AgentRoutineInstructions from "./parts/AgentRoutineInstructions";
 import AgentRoutineModelField from "./parts/AgentRoutineModelField";
 import AgentRoutineToolApprovals from "./parts/AgentRoutineToolApprovals";
 import AgentScheduleField from "./parts/AgentScheduleField";
@@ -101,7 +101,6 @@ const UpsertAgentRoutineDrawer: Component<{
 	);
 	const errors = createMemo(() => mutation().errors());
 	const incomplete = createMemo(() => !name().trim() || !instructions().trim());
-	//* a tab shows as invalid when a field inside it has an error
 	const tabInvalid = (fields: string[]) =>
 		fields.some((field) => getBodyError(field, errors) !== undefined);
 	const agentTools = createMemo(() => {
@@ -262,16 +261,9 @@ const UpsertAgentRoutineDrawer: Component<{
 								label={T()("common.name")}
 								errors={getBodyError("name", errors)}
 							/>
-							<Textarea
-								id="agent-routine-instructions"
-								name="instructions"
+							<AgentRoutineInstructions
 								value={instructions()}
 								onChange={setInstructions}
-								rows={10}
-								required={true}
-								label={T()("agent.routine.task.label")}
-								placeholder={T()("agent.routine.instructions.placeholder")}
-								description={T()("agent.routine.instructions.description")}
 								errors={getBodyError("instructions", errors)}
 							/>
 						</Show>

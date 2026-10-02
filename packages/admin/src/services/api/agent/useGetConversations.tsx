@@ -18,7 +18,12 @@ interface QueryParams {
 	perPage?: Accessor<number> | number;
 }
 
-const useGetConversations = (params: QueryHook<QueryParams>) => {
+const useGetConversations = (
+	params: QueryHook<QueryParams> & {
+		/** Keeps a visible list current even when none of its chats are working. */
+		idleRefetchInterval?: number;
+	},
+) => {
 	const queryParams = createMemo(() =>
 		serviceHelpers.getQueryParams<QueryParams>(params.queryParams),
 	);
@@ -32,9 +37,11 @@ const useGetConversations = (params: QueryHook<QueryParams>) => {
 			queryKey(),
 			params.key?.(),
 		],
-		queryFn: () =>
+		queryFn: ({ signal }) =>
 			request<ResponseBody<AgentConversation[]>>({
 				url: "/lucid/api/v1/agent/conversations",
+				signal,
+				displayErrorToast: false,
 				//* a query string brings its own sort
 				query: queryParams().queryString
 					? queryParams()
@@ -48,7 +55,8 @@ const useGetConversations = (params: QueryHook<QueryParams>) => {
 					shouldPollTitle(conversation),
 			)
 				? 5000
-				: false,
+				: (params.idleRefetchInterval ?? false),
+		refetchIntervalInBackground: false,
 		get enabled() {
 			return params.enabled ? params.enabled() : true;
 		},

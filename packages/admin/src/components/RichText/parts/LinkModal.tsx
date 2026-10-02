@@ -33,18 +33,22 @@ export type RichTextLinkUpdate =
 			openInNewTab: boolean;
 	  };
 
+export type LinkModalState = {
+	open: boolean;
+	setOpen: (open: boolean) => void;
+	initialLabel: string;
+	initialUrl: string;
+	initialKind: "external" | "document";
+	initialDocument?: DocumentRef;
+	initialOpenInNewTab: boolean;
+	canRemove: boolean;
+};
+
 const LinkModal: Component<{
-	state: {
-		open: boolean;
-		setOpen: (open: boolean) => void;
-		initialLabel: string;
-		initialUrl: string;
-		initialKind: "external" | "document";
-		initialDocument?: DocumentRef;
-		initialOpenInNewTab: boolean;
-		canRemove: boolean;
-	};
+	state: LinkModalState;
 	options?: RichTextOptions;
+	/** Offers opening in a new tab. Off for Markdown, which cannot store it. @default true */
+	newTab?: boolean;
 	callbacks: {
 		onUpdate: (values: RichTextLinkUpdate) => void;
 		onRemove: () => void;
@@ -286,16 +290,18 @@ const LinkModal: Component<{
 						</div>
 					</Show>
 
-					<Switch
-						id="rich_text_open_in_new_tab"
-						value={openInNewTab()}
-						onChange={setOpenInNewTab}
-						name="open_in_new_tab"
-						label={T()("common.open.in.new.tab")}
-						trueLabel={T()("common.yes")}
-						falseLabel={T()("common.no")}
-						required={false}
-					/>
+					<Show when={props.newTab !== false}>
+						<Switch
+							id="rich_text_open_in_new_tab"
+							value={openInNewTab()}
+							onChange={setOpenInNewTab}
+							name="open_in_new_tab"
+							label={T()("common.open.in.new.tab")}
+							trueLabel={T()("common.yes")}
+							falseLabel={T()("common.no")}
+							required={false}
+						/>
+					</Show>
 				</div>
 			</Modal.Body>
 			<Modal.Footer>

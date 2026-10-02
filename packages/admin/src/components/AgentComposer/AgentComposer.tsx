@@ -14,6 +14,7 @@ import {
 	onMount,
 	Show,
 } from "solid-js";
+import AgentMarkdownPill from "@/components/AgentMarkdownPill/AgentMarkdownPill";
 import AgentReferenceFiles from "@/components/AgentReferenceFiles/AgentReferenceFiles";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
@@ -103,10 +104,11 @@ export const composerTriggerClasses =
 
 /**
  * The message box for talking to the agent. It supports markdown formatting as
- * you type and sends markdown. Enter sends, or queues while the agent is busy;
- * Mod + Enter steers; Shift + Enter adds a line. It grows with its content, then
- * scrolls. Files dropped on it or picked from the add menu upload as the user's
- * personal media and attach once they finish.
+ * you type, shows a formatting pill when text is selected, and sends markdown.
+ * Enter sends, or queues while the agent is busy; Mod + Enter steers; Shift +
+ * Enter adds a line. It grows with its content, then scrolls. Files dropped on
+ * it or picked from the add menu upload as the user's personal media and
+ * attach once they finish.
  */
 const AgentComposer: Component<AgentComposerProps> = (props) => {
 	// ----------------------------------------
@@ -259,7 +261,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 			editorProps: {
 				attributes: {
 					class:
-						"agent-markdown agent-markdown-tight grow px-4 pt-4.5 pb-3.5 outline-hidden",
+						"agent-markdown agent-markdown-compact grow px-4 pt-4.5 pb-3.5 outline-hidden",
 					style: `min-height: ${editorHeight[props.size ?? "md"]}`,
 					"aria-label": T()("agent.composer.label"),
 					"aria-multiline": "true",
@@ -468,6 +470,9 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 							: undefined
 					}
 				/>
+				<Show when={editor()}>
+					{(instance) => <AgentMarkdownPill editor={instance()} />}
+				</Show>
 				<div
 					aria-hidden="true"
 					class="pointer-events-none relative -mt-2.5 h-2.5 bg-linear-to-t from-card to-transparent"

@@ -26,6 +26,7 @@ import {
 	getAgentAccess,
 	getAgentUnavailableReason,
 } from "@/utils/agent-access";
+import { getAvailableModelSelection } from "@/utils/agent-models";
 import type { AgentReferenceItem } from "@/utils/agent-references";
 import { startViewTransition } from "@/utils/view-transition";
 import AgentPicker from "./parts/AgentPicker";
@@ -51,7 +52,7 @@ const AgentPage: Component = () => {
 	const navigate = useNavigate();
 	const returned = location.state?.message;
 	const returnedReferences = location.state?.references;
-	const [modelSelection, setModelSelection] =
+	const [returnedModelSelection, setReturnedModelSelection] =
 		createSignal<AiModelSelection | null>(
 			location.state?.modelSelection ?? null,
 		);
@@ -90,6 +91,15 @@ const AgentPage: Component = () => {
 		[],
 	);
 	const models = api.agent.useGetModels({ agentKey: () => agent()?.key });
+	const modelSelection = createMemo(() => {
+		const key = agent()?.key;
+		if (!key || !models.isSuccess) return null;
+		return getAvailableModelSelection(
+			models.data.data,
+			returnedModelSelection() ??
+				userPreferencesStore.getAgentModelSelection(key),
+		);
+	});
 	const waitingAgentKey = createMemo(() =>
 		agents().length > 1 ? agent()?.key : undefined,
 	);
@@ -206,7 +216,7 @@ const AgentPage: Component = () => {
 														selected={current()}
 														onSelect={(agent) => {
 															userPreferencesStore.setAgentKey(agent.key);
-															setModelSelection(null);
+															setReturnedModelSelection(null);
 														}}
 													/>
 												</Show>
@@ -215,7 +225,13 @@ const AgentPage: Component = () => {
 												<AgentModelPicker
 													agentKey={current().key}
 													value={modelSelection()}
-													onChange={setModelSelection}
+													onChange={(selection) => {
+														userPreferencesStore.setAgentModelSelection(
+															current().key,
+															selection,
+														);
+														setReturnedModelSelection(null);
+													}}
 												/>
 											}
 										/>

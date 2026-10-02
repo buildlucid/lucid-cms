@@ -1,5 +1,6 @@
 import type { AgentRoutine } from "@types";
 import { type Component, createMemo } from "solid-js";
+import AgentMarkdown from "@/components/AgentMessage/parts/AgentMarkdown";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import api from "@/services/api";
 import T from "@/translations";
@@ -55,9 +56,7 @@ const AgentRoutineDetails: Component<{ routine: AgentRoutine }> = (props) => {
 				<h3 class="mb-2 text-sm font-medium text-title">
 					{T()("agent.routine.instructions")}
 				</h3>
-				<p class="whitespace-pre-wrap wrap-break-word text-sm leading-6 text-body">
-					{props.routine.instructions}
-				</p>
+				<AgentMarkdown text={props.routine.instructions} size="sm" />
 			</section>
 		</>
 	);

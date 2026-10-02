@@ -69,6 +69,7 @@
 	"editor.rich.text.marks.italic": "Italic",
 	"editor.rich.text.marks.underline": "Underline",
 	"editor.rich.text.marks.strikethrough": "Strikethrough",
+	"editor.rich.text.marks.code": "Inline code",
 	"editor.rich.text.lists.ordered": "Ordered list",
 	"editor.rich.text.lists.bullet": "Bullet list",
 	"editor.rich.text.formatting.clear": "Clear formatting",

@@ -1,4 +1,9 @@
-import type { AiModel, AiModelSelection, AiReasoningEffort } from "@types";
+import type {
+	AiModel,
+	AiModelCatalog,
+	AiModelSelection,
+	AiReasoningEffort,
+} from "@types";
 
 /** The effort a model runs with: the chosen one when it supports it, otherwise its default. */
 export const effortFor = (model: AiModel, effort?: AiReasoningEffort | null) =>
@@ -14,3 +19,12 @@ export const selectModel = (
 	modelId: model.id,
 	reasoningEffort: effortFor(model, effort),
 });
+
+/** Restores an offered model and effort, or follows the agent default when unavailable. */
+export const getAvailableModelSelection = (
+	catalog: AiModelCatalog,
+	selection?: AiModelSelection | null,
+): AiModelSelection | null => {
+	const model = catalog.models.find((model) => model.id === selection?.modelId);
+	return model ? selectModel(model, selection?.reasoningEffort) : null;
+};

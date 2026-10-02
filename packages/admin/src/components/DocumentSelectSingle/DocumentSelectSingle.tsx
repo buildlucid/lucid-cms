@@ -48,15 +48,15 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="grow">
+		<div class="flex min-h-0 grow flex-col">
 			<Show
 				when={!props.isLoading}
-				fallback={<div class="skeleton min-h-36 rounded-lg" />}
+				fallback={<div class="skeleton min-h-36 grow rounded-lg" />}
 			>
 				<Show
 					when={!props.isError && props.document && !props.isExcluded}
 					fallback={
-						<div class="flex min-h-36 items-center justify-center rounded-lg border border-border bg-input p-6 text-center">
+						<div class="flex min-h-36 grow items-center justify-center rounded-lg border border-border bg-input p-6 text-center">
 							<p class="max-w-lg text-sm text-subtitle">
 								{props.isError
 									? T()("errors.generic.message")

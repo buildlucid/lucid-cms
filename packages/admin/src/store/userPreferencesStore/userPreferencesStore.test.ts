@@ -25,6 +25,63 @@ describe("agent preference", () => {
 
 		expect(createUserPreferencesStore({ storage }).getAgentKey()).toBe("seo");
 	});
+
+	it("remembers a separate model and effort for each agent", () => {
+		const storage = createMemoryStorage();
+		const store = createUserPreferencesStore({ storage });
+		store.setAgentModelSelection("seo", {
+			modelId: "reasoning-model",
+			reasoningEffort: "high",
+		});
+		store.setAgentModelSelection("editor", {
+			modelId: "fast-model",
+			reasoningEffort: null,
+		});
+
+		const reloaded = createUserPreferencesStore({ storage });
+		expect(reloaded.getAgentModelSelection("seo")).toEqual({
+			modelId: "reasoning-model",
+			reasoningEffort: "high",
+		});
+		expect(reloaded.getAgentModelSelection("editor")).toEqual({
+			modelId: "fast-model",
+			reasoningEffort: null,
+		});
+		expect(reloaded.getAgentModelSelection("new-agent")).toBeUndefined();
+	});
+
+	it("drops malformed model preferences while keeping valid entries", () => {
+		const storage = createMemoryStorage();
+		storage.setItem(
+			USER_PREFERENCES_STORAGE_KEY,
+			JSON.stringify({
+				version: 1,
+				preferences: {
+					agentKey: "seo",
+					agentModels: {
+						seo: { modelId: "reasoning-model", reasoningEffort: "high" },
+						defaultEffort: { modelId: "reasoning-model" },
+						missingModel: { reasoningEffort: "low" },
+						emptyModel: { modelId: "" },
+						invalidEffort: {
+							modelId: "reasoning-model",
+							reasoningEffort: "max",
+						},
+					},
+				},
+			}),
+		);
+
+		const store = createUserPreferencesStore({ storage });
+		expect(store.getAgentKey()).toBe("seo");
+		expect(store.getAgentModelSelection("seo")?.reasoningEffort).toBe("high");
+		expect(store.getAgentModelSelection("defaultEffort")?.modelId).toBe(
+			"reasoning-model",
+		);
+		expect(store.getAgentModelSelection("missingModel")).toBeUndefined();
+		expect(store.getAgentModelSelection("emptyModel")).toBeUndefined();
+		expect(store.getAgentModelSelection("invalidEffort")).toBeUndefined();
+	});
 });
 
 describe("navigation group preferences", () => {

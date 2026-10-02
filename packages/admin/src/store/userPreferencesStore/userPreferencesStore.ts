@@ -1,3 +1,4 @@
+import type { AiModelSelection } from "@types";
 import { untrack } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import {
@@ -62,7 +63,6 @@ export const createUserPreferencesStore = (
 		commit(next);
 	};
 
-	/** Returns builder state for a document. */
 	const getBuilderDocumentState = (
 		scope: Pick<BuilderPreferenceScope, "collectionKey" | "documentId">,
 	) => {
@@ -71,7 +71,6 @@ export const createUserPreferencesStore = (
 		];
 	};
 
-	/** Updates builder state for a document. */
 	const updateBuilderDocumentState = (
 		scope: Pick<BuilderPreferenceScope, "collectionKey" | "documentId">,
 		update: (documentState: BuilderDocumentState) => void,
@@ -146,17 +145,19 @@ export const createUserPreferencesStore = (
 			return state.preferences.agentKey;
 		},
 
-		/** Returns the saved auto-save preference. */
+		/** Returns the last model and effort explicitly chosen for an agent. */
+		getAgentModelSelection(agentKey: string) {
+			return state.preferences.agentModels[agentKey];
+		},
+
 		getAutoSaveEnabled() {
 			return state.preferences.autoSaveEnabled;
 		},
 
-		/** Returns the saved active tab for a builder brick. */
 		getBuilderActiveTab(scope: BuilderPreferenceScope) {
 			return getBuilderDocumentState(scope)?.bricks[scope.brickRef]?.activeTab;
 		},
 
-		/** Returns the saved open state for a builder collapsible. */
 		getBuilderCollapsibleOpen(
 			scope: BuilderPreferenceScope,
 			collapsibleKey: string,
@@ -167,12 +168,10 @@ export const createUserPreferencesStore = (
 			return typeof open === "boolean" ? open : undefined;
 		},
 
-		/** Returns the saved preview state for a collection. */
 		getCollectionPreviewOpen(collectionKey: string) {
 			return state.preferences.collections[collectionKey]?.previewOpen;
 		},
 
-		/** Returns the hidden columns saved for a table. */
 		getHiddenTableColumns(tableKey: string) {
 			return state.preferences.tables[tableKey];
 		},
@@ -181,7 +180,6 @@ export const createUserPreferencesStore = (
 			return state.preferences.navigationGroups[groupKey];
 		},
 
-		/** Returns the saved open state for a named section. */
 		getSectionOpen(section: SectionPreferenceKey) {
 			return state.preferences.sections[section];
 		},
@@ -209,7 +207,20 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		/** Saves whether document auto-save is enabled. */
+		/** Remembers a model choice for new chats with this agent. */
+		setAgentModelSelection(agentKey: string, selection: AiModelSelection) {
+			const current = state.preferences.agentModels[agentKey];
+			if (
+				current?.modelId === selection.modelId &&
+				current.reasoningEffort === selection.reasoningEffort
+			) {
+				return;
+			}
+			updatePreferences((preferenceState) => {
+				preferenceState.preferences.agentModels[agentKey] = selection;
+			});
+		},
+
 		setAutoSaveEnabled(enabled: boolean) {
 			if (state.preferences.autoSaveEnabled === enabled) return;
 			updatePreferences((preferenceState) => {
@@ -217,7 +228,6 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		/** Saves the active tab for a builder brick. */
 		setBuilderActiveTab(scope: BuilderPreferenceScope, activeTab: string) {
 			if (
 				untrack(
@@ -234,7 +244,6 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		/** Saves the open state for a builder collapsible. */
 		setBuilderCollapsibleOpen(
 			scope: BuilderPreferenceScope,
 			collapsibleKey: string,
@@ -259,7 +268,6 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		/** Saves whether previews are open for a collection. */
 		setCollectionPreviewOpen(collectionKey: string, open: boolean) {
 			if (state.preferences.collections[collectionKey]?.previewOpen === open) {
 				return;
@@ -273,7 +281,6 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		/** Saves the hidden columns for a table. */
 		setHiddenTableColumns(tableKey: string, hiddenColumns: string[]) {
 			const current = state.preferences.tables[tableKey];
 			if (
@@ -294,7 +301,6 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		/** Saves the open state for a named section. */
 		setSectionOpen(section: SectionPreferenceKey, open: boolean) {
 			if (state.preferences.sections[section] === open) return;
 			updatePreferences((preferenceState) => {

@@ -27,6 +27,7 @@ import type { AgentWidgetSubmitResult } from "@/components/AgentWidget/types";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import type { AgentChat } from "@/hooks/useAgentChat/useAgentChat";
 import api from "@/services/api";
+import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 import { getAgentUnavailableReason } from "@/utils/agent-access";
 import type { AgentReferenceItem } from "@/utils/agent-references";
@@ -245,12 +246,20 @@ const AgentChatComposer: Component<{
 											agentKey={current().agentKey}
 											routineId={current().routineId ?? undefined}
 											value={current().modelSelection}
-											onChange={(modelSelection) =>
-												updateConversation.action.mutateAsync({
-													id: props.conversationId,
-													body: { modelSelection },
-												})
-											}
+											onChange={async (modelSelection) => {
+												const chat = current();
+												const response =
+													await updateConversation.action.mutateAsync({
+														id: props.conversationId,
+														body: { modelSelection },
+													});
+												if (!chat.routineId && response.data.modelSelection) {
+													userPreferencesStore.setAgentModelSelection(
+														chat.agentKey,
+														response.data.modelSelection,
+													);
+												}
+											}}
 										/>
 									)}
 								</Show>

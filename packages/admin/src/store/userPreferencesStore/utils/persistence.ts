@@ -1,3 +1,4 @@
+import type { AiModelSelection } from "@types";
 import { isObjectRecord } from "@/utils/type-guards";
 
 export const USER_PREFERENCES_STORAGE_KEY = "lucid_user_preferences";
@@ -45,6 +46,7 @@ export type CollectionPreferenceState = {
 export type UserPreferenceState = {
 	preferences: {
 		agentKey?: string;
+		agentModels: Record<string, AiModelSelection>;
 		autoSaveEnabled?: boolean;
 		collections: Record<string, CollectionPreferenceState>;
 		/** Open state of navigation groups, keyed by group key. Unset means open. */
@@ -69,9 +71,9 @@ export type BuilderPreferenceScope = {
 	documentId: number;
 };
 
-/** Creates an empty in-memory preference state. */
 export const createEmptyPreferenceState = (): UserPreferenceState => ({
 	preferences: {
+		agentModels: {},
 		collections: {},
 		navigationGroups: {},
 		sections: {},
@@ -82,7 +84,6 @@ export const createEmptyPreferenceState = (): UserPreferenceState => ({
 	},
 });
 
-/** Creates an empty preference state with its storage version. */
 export const createEmptyStoredState = (): StoredUserPreferences => ({
 	...createEmptyPreferenceState(),
 	version: USER_PREFERENCES_VERSION,
@@ -126,11 +127,34 @@ export const ensureCollectionPreferenceState = (
 
 const sectionPreferenceKeys = new Set<string>(SECTION_PREFERENCE_KEYS);
 
-/** Checks whether a stored value is an array of strings. */
 const isStringArray = (value: unknown): value is string[] =>
 	Array.isArray(value) && value.every((item) => typeof item === "string");
 
-/** Checks whether a stored value is a valid builder preference item. */
+/** Reads a model preference from storage; availability is checked against the catalogue. */
+const parseModelSelection = (value: unknown): AiModelSelection | undefined => {
+	if (
+		!isObjectRecord(value) ||
+		typeof value.modelId !== "string" ||
+		value.modelId.length === 0 ||
+		value.modelId.length > 200
+	) {
+		return undefined;
+	}
+
+	switch (value.reasoningEffort) {
+		case undefined:
+		case null:
+		case "minimal":
+		case "low":
+		case "medium":
+		case "high":
+		case "xhigh":
+			return { modelId: value.modelId, reasoningEffort: value.reasoningEffort };
+		default:
+			return undefined;
+	}
+};
+
 const isBuilderStateItem = (value: unknown): value is BuilderStateItem => {
 	if (!isObjectRecord(value) || typeof value.lastUpdated !== "number") {
 		return false;
@@ -162,6 +186,13 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 
 		if (typeof preferences.agentKey === "string") {
 			normalized.preferences.agentKey = preferences.agentKey;
+		}
+
+		if (isObjectRecord(preferences.agentModels)) {
+			for (const [agentKey, value] of Object.entries(preferences.agentModels)) {
+				const selection = parseModelSelection(value);
+				if (selection) normalized.preferences.agentModels[agentKey] = selection;
+			}
 		}
 
 		if (isObjectRecord(preferences.sections)) {

@@ -1,11 +1,5 @@
 import { type Editor, Extension } from "@tiptap/core";
-import { CharacterCount, Placeholder } from "@tiptap/extensions";
-import { Markdown } from "@tiptap/markdown";
-import { Plugin } from "@tiptap/pm/state";
-import StarterKit from "@tiptap/starter-kit";
-
-/** The server's limit for one message. */
-export const maxMessageLength = 20_000;
+import { agentMarkdownExtensions } from "@/utils/agent-markdown-editor";
 
 export type ComposerKeyHandlers = {
 	/** Enter sends. ⌘ or Ctrl + Enter steers a busy agent. */
@@ -48,62 +42,9 @@ const composerKeys = (handlers: ComposerKeyHandlers) =>
 		},
 	});
 
-/** Plain text pasted from chats and docs is usually markdown, so it keeps its formatting. */
-const pasteMarkdown = Extension.create({
-	name: "pasteMarkdown",
-	addProseMirrorPlugins() {
-		const editor = this.editor;
-		return [
-			new Plugin({
-				props: {
-					handlePaste: (_view, event) => {
-						const data = event.clipboardData;
-						const text = data?.getData("text/plain");
-						if (
-							!text ||
-							data?.types.includes("text/html") ||
-							editor.isActive("codeBlock")
-						) {
-							return false;
-						}
-						editor.commands.insertContent(text, { contentType: "markdown" });
-						return true;
-					},
-				},
-			}),
-		];
-	},
-});
-
-/**
- * The formatting the chat box supports: emphasis, code, quotes, lists and links.
- * Markdown shortcuts such as `**bold**` apply as you type, and the content is
- * sent as markdown.
- */
 export const composerExtensions = (props: {
 	placeholder: () => string;
 	keys: ComposerKeyHandlers;
-}) => [
-	StarterKit.configure({
-		heading: false,
-		horizontalRule: false,
-		//* markdown has no underline
-		underline: false,
-		dropcursor: false,
-		gapcursor: false,
-		trailingNode: false,
-		link: { openOnClick: false, autolink: true, defaultProtocol: "https" },
-	}),
-	//* shown while disabled too, as it explains why the chat cannot be used
-	Placeholder.configure({
-		placeholder: () => props.placeholder(),
-		showOnlyWhenEditable: false,
-	}),
-	CharacterCount.configure({ limit: maxMessageLength }),
-	Markdown,
-	pasteMarkdown,
-	composerKeys(props.keys),
-];
+}) => [...agentMarkdownExtensions(props), composerKeys(props.keys)];
 
-/** Whitespace-only content counts as empty, so it cannot be sent. */
 export const isBlank = (editor: Editor) => editor.getText().trim() === "";

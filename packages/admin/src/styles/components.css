@@ -458,7 +458,7 @@
 		}
 	}
 
-	/* Agent Markdown: replies, user messages and the chat box share one look */
+	/* Agent Markdown */
 
 	.agent-markdown {
 		@apply wrap-break-word text-[0.9375rem] leading-7 text-body;
@@ -576,10 +576,42 @@
 		@apply bg-card;
 	}
 
-	/* the chat box reads as lines being written, so paragraphs sit closer together */
-	.agent-markdown.agent-markdown-tight
-	:where(p, ul, ol, pre, blockquote, .agent-code) {
+	/* the chat box, routine instructions and user messages organise a message rather than present it, so everything sits closer. Agent replies keep the reading scale */
+	.agent-markdown.agent-markdown-compact {
+		@apply leading-6;
+	}
+
+	.agent-markdown.agent-markdown-compact
+		:where(p, ul, ol, pre, blockquote, .agent-code) {
+		@apply my-1.5;
+	}
+
+	.agent-markdown.agent-markdown-compact :where(hr) {
+		@apply my-4;
+	}
+
+	.agent-markdown.agent-markdown-compact :where(h1, h2, h3, h4) {
+		@apply mt-5 mb-1.5;
+	}
+
+	.agent-markdown.agent-markdown-compact :where(h1) {
+		@apply text-lg;
+	}
+
+	.agent-markdown.agent-markdown-compact :where(h2) {
+		@apply text-base;
+	}
+
+	.agent-markdown.agent-markdown-compact :where(h3, h4) {
+		@apply text-[0.9375rem];
+	}
+
+	.agent-markdown.agent-markdown-compact :where(li, li > ul, li > ol) {
 		@apply my-1;
+	}
+
+	.agent-markdown.agent-markdown-compact :where(li > p) {
+		@apply my-0;
 	}
 
 	.agent-markdown.agent-markdown-sm {
@@ -619,7 +651,6 @@
 		@apply px-2 py-1;
 	}
 
-	/* the chat box's TipTap placeholder */
 	/* the first and last blocks sit flush. After the variants, so their spacing never overrides it */
 	.agent-markdown > :first-child {
 		@apply mt-0;
@@ -629,7 +660,8 @@
 		@apply mb-0;
 	}
 
-	.agent-markdown .is-editor-empty:first-child::before {
+	/* the editors' TipTap placeholder. Only on a plain paragraph, so typing `# ` or `- ` hides it rather than restyling it */
+	.agent-markdown p.is-editor-empty:first-child::before {
 		@apply pointer-events-none float-left h-0 text-muted;
 		content: attr(data-placeholder);
 	}
