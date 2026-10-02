@@ -152,6 +152,39 @@ describe("document list slots", () => {
 	});
 });
 
+describe("dashboard widget slots", () => {
+	const widget = {
+		key: "traffic",
+		slot: "dashboard.widget",
+		component: "./Traffic.tsx",
+	};
+
+	it("needs a card label and keeps the default size within the allowed sizes", () => {
+		expect(
+			adminConfigSchema.safeParse({
+				slots: [
+					{
+						...widget,
+						permission: "settings:read",
+						card: { label: "Traffic", size: "lg", sizes: ["md", "lg"] },
+					},
+				],
+			}).success,
+		).toBe(true);
+		for (const config of [
+			{},
+			{ label: "Traffic", size: "sm", sizes: ["md", "lg"] },
+			{ label: "Traffic", sizes: [] },
+			{ label: "Traffic", size: "xl" },
+		]) {
+			expect(
+				adminConfigSchema.safeParse({ slots: [{ ...widget, card: config }] })
+					.success,
+			).toBe(false);
+		}
+	});
+});
+
 describe("component options", () => {
 	it("accepts JSON and rejects values that cannot be serialised", () => {
 		expect(

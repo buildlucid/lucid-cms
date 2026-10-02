@@ -6,7 +6,6 @@ import { composerTriggerClasses } from "@/components/AgentComposer/AgentComposer
 import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
 
-/** Chooses which agent a new chat starts with, from the chat box's toolbar. */
 const AgentPicker: Component<{
 	agents: Agent[];
 	selected: Agent;

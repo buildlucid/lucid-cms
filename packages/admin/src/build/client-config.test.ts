@@ -3,9 +3,13 @@ import { build, createServer } from "vite";
 import { expect, test } from "vitest";
 import { adminClientConfigPlugin } from "./client-config.js";
 
-test("emits the prepared client config in dev and production", async () => {
+test.each([
+	true,
+	false,
+])("emits agentHomescreen=%s in dev and production", async (agentHomescreen) => {
 	const config = {
 		brand: { name: "Client brand" },
+		agentHomescreen,
 	};
 	const server = await createServer({
 		configFile: false,
@@ -20,6 +24,7 @@ test("emits the prepared client config in dev and production", async () => {
 			"\0virtual:lucid-admin-config",
 		);
 		expect(result?.code).toContain("Client brand");
+		expect(result?.code).toContain(`"agentHomescreen":${agentHomescreen}`);
 	} finally {
 		await server.close();
 	}
@@ -43,5 +48,6 @@ test("emits the prepared client config in dev and production", async () => {
 		.flatMap((entry) => (entry.type === "chunk" ? [entry.code] : []))
 		.join("\n");
 	expect(code).toContain("Client brand");
+	expect(code).toContain(`"agentHomescreen": ${agentHomescreen}`);
 	expect(code).toContain("Object.freeze");
 });

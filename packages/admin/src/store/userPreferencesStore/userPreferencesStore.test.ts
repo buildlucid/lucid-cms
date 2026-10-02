@@ -112,3 +112,33 @@ describe("navigation group preferences", () => {
 		expect(store.getNavigationGroupOpen("pages")).toBe(false);
 	});
 });
+
+describe("home preferences", () => {
+	it("keeps valid widget entries and drops repeats and unknown sizes", () => {
+		const storage = createMemoryStorage();
+		storage.setItem(
+			USER_PREFERENCES_STORAGE_KEY,
+			JSON.stringify({
+				version: 1,
+				preferences: {
+					home: {
+						view: "chat",
+						widgets: [
+							{ key: "lucid.needsYou", size: "full" },
+							{ key: "lucid.needsYou", hidden: true },
+							{ key: "lucid.storage", size: "xl", hidden: true },
+							{ size: "sm" },
+						],
+					},
+				},
+			}),
+		);
+
+		const store = createUserPreferencesStore({ storage });
+		expect(store.getHomeView()).toBeUndefined();
+		expect(store.getHomeWidgets()).toEqual([
+			{ key: "lucid.needsYou", size: "full", hidden: undefined },
+			{ key: "lucid.storage", size: undefined, hidden: true },
+		]);
+	});
+});

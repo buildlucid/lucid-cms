@@ -45,9 +45,7 @@ const EmailChangeRevertRoute = lazyPage(
 const ShareRoute = lazyPage(
 	() => import("@/containers/MediaSharePage/MediaSharePage"),
 );
-const DashboardRoute = lazyPage(
-	() => import("@/containers/DashboardPage/DashboardPage"),
-);
+const HomeRoute = lazyPage(() => import("@/containers/HomePage/HomePage"));
 const AgentRoute = lazyPage(() => import("@/containers/AgentPage/AgentPage"));
 const AgentHistoryRoute = lazyPage(
 	() => import("@/containers/AgentHistoryPage/AgentHistoryPage"),
@@ -144,7 +142,7 @@ const AppRouter: Component = () => {
 			{/* Authenticated */}
 			<Route component={AuthenticatedRoutes}>
 				<Route path="/lucid" component={NavigationShell}>
-					<Route path="/" component={DashboardRoute} />
+					<Route path="/" component={HomeRoute} />
 					{/* Agent */}
 					<Route
 						path="/agent"

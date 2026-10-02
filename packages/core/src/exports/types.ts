@@ -11,6 +11,8 @@ export type {
 	AdminSlot,
 	BrickSlot,
 	BrickSlotMatch,
+	DashboardWidgetPlacement,
+	DashboardWidgetSize,
 	DocumentListSlot,
 	DocumentListSlotComponent,
 	DocumentListSlotPlacement,

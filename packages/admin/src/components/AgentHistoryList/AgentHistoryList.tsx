@@ -19,6 +19,7 @@ import Table from "@/components/Table/Table";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
 import T from "@/translations";
+import { getNewChatHref } from "@/utils/home-view";
 
 const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 	props,
@@ -50,7 +51,7 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 						title={T()("agent.home.empty.title")}
 						description={T()("agent.home.empty.description")}
 						actions={
-							<Link href="/lucid/agent" size="sm">
+							<Link href={getNewChatHref()} size="sm">
 								{T()("agent.history.empty.action")}
 							</Link>
 						}

@@ -18,8 +18,8 @@ import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import { runStatusFilters } from "@/utils/agent-chat";
+import { getNewChatHref } from "@/utils/home-view";
 
-/** Every chat the user can see, as a table they can filter and sort. */
 const AgentHistoryPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
@@ -59,7 +59,7 @@ const AgentHistoryPage: Component = () => {
 					{
 						type: "link",
 						label: T()("agent.chat.new"),
-						href: "/lucid/agent",
+						href: getNewChatHref(),
 					},
 				]
 			: [],

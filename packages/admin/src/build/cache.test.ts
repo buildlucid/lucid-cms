@@ -33,7 +33,10 @@ const fixture = async () => {
 test("rebuilds without a dependency lockfile", async () => {
 	const root = await fixture();
 	expect(
-		await getAdminBuildKey(root, root, { brand: { name: "Lucid" } }),
+		await getAdminBuildKey(root, root, {
+			brand: { name: "Lucid" },
+			agentHomescreen: true,
+		}),
 	).toBeUndefined();
 });
 
@@ -42,12 +45,16 @@ test("invalidates source, compiler, shared helper and lockfile changes, includin
 	await writeFile(path.join(root, "package-lock.json"), "first lock");
 	const original = await getAdminBuildKey(root, root, {
 		brand: { name: "Lucid" },
+		agentHomescreen: true,
 	});
 	expect(original).toBeTypeOf("string");
 	await utimes(path.join(root, "src/index.tsx"), new Date(0), new Date(0));
-	expect(await getAdminBuildKey(root, root, { brand: { name: "Lucid" } })).toBe(
-		original,
-	);
+	expect(
+		await getAdminBuildKey(root, root, {
+			brand: { name: "Lucid" },
+			agentHomescreen: true,
+		}),
+	).toBe(original);
 	let previous = original;
 	for (const file of [
 		"src/index.tsx",
@@ -60,21 +67,31 @@ test("invalidates source, compiler, shared helper and lockfile changes, includin
 		await writeFile(path.join(root, file), "changed");
 		const next = await getAdminBuildKey(root, root, {
 			brand: { name: "Lucid" },
+			agentHomescreen: true,
 		});
 		expect(next).not.toBe(previous);
 		previous = next;
 	}
 	await rm(path.join(root, "src/new.tsx"));
 	expect(
-		await getAdminBuildKey(root, root, { brand: { name: "Lucid" } }),
+		await getAdminBuildKey(root, root, {
+			brand: { name: "Lucid" },
+			agentHomescreen: true,
+		}),
 	).not.toBe(previous);
 });
 
 test("invalidates builds when exposed config changes", async () => {
 	const root = await fixture();
 	await writeFile(path.join(root, "package-lock.json"), "lock");
-	const key = await getAdminBuildKey(root, root, { brand: { name: "First" } });
+	const key = await getAdminBuildKey(root, root, {
+		brand: { name: "First" },
+		agentHomescreen: true,
+	});
 	expect(
-		await getAdminBuildKey(root, root, { brand: { name: "Second" } }),
+		await getAdminBuildKey(root, root, {
+			brand: { name: "Second" },
+			agentHomescreen: true,
+		}),
 	).not.toBe(key);
 });

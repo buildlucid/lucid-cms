@@ -15,6 +15,7 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getAgentAccess } from "@/utils/agent-access";
 import helpers from "@/utils/helpers";
+import { getHomeView } from "@/utils/home-view";
 import { isNavigationLinkActive } from "@/utils/navigation";
 import {
 	getNavigationGroups,
@@ -132,7 +133,7 @@ export const NavigationMenuContent: Component<{
 						<NavigationLink
 							href="/lucid"
 							icon="dashboard"
-							title={T()("common.dashboard")}
+							title={T()("common.home")}
 						/>
 						<NavigationLink
 							href="/lucid/media"
@@ -154,13 +155,15 @@ export const NavigationMenuContent: Component<{
 							title={T()("routes.agent.title")}
 							active={isActive("/lucid/agent")}
 						>
-							<NavigationLink
-								href="/lucid/agent"
-								exact={true}
-								active={chatActive()}
-								icon="chat"
-								title={T()("routes.agent.chat")}
-							/>
+							<Show when={getHomeView() !== "ask"}>
+								<NavigationLink
+									href="/lucid/agent"
+									exact={true}
+									active={chatActive()}
+									icon="chat"
+									title={T()("routes.agent.chat")}
+								/>
+							</Show>
 							<NavigationLink
 								href="/lucid/agent/history"
 								icon="history"

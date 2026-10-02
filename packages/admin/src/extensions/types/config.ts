@@ -3,6 +3,7 @@ import type {
 	BrickSlotMatch,
 	BrickSlotPlacement,
 } from "../../components/BrickSlots/types.js";
+import type { DashboardWidgetPlacement } from "../../components/DashboardWidget/types.js";
 import type { DocumentListSlotPlacement } from "../../components/DocumentSlotCell/types.js";
 import type {
 	FieldSlot,
@@ -39,12 +40,14 @@ export type AdminSlot = {
 	options?: AdminOptions;
 } & (
 	| AgentSlotPlacement
+	| DashboardWidgetPlacement
 	| DocumentListSlotPlacement
 	| (BrickSlotPlacement & { match?: BrickSlotMatch })
 	| { slot: FieldSlot; match?: FieldSlotMatch }
 );
 
 export type AdminConfig = {
+	agentHomescreen?: boolean;
 	slots?: AdminSlot[];
 	routes?: AdminRoute[];
 	/** Local browser modules, or HTTPS classic scripts loaded with defer. */

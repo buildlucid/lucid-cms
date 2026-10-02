@@ -55,7 +55,13 @@ describe("route segments", () => {
 		});
 		const draft = {
 			i18n: { sources: [] },
-			admin: { slots: [], routes: [], scripts: [], stylesheets: [] },
+			admin: {
+				agentHomescreen: true,
+				slots: [],
+				routes: [],
+				scripts: [],
+				stylesheets: [],
+			},
 			collections: [documentation, product],
 			hooks: [],
 		} as never;

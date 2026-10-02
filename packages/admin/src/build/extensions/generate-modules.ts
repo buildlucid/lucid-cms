@@ -60,10 +60,13 @@ export const generateRegistry = async (
 	const slots: Record<SlotSurface, string[]> = {
 		agent: [],
 		brick: [],
+		dashboard: [],
 		field: [],
 		documentList: [],
 	};
-	for (const { component, match = {}, ...metadata } of admin.slots ?? []) {
+	for (const { component, ...metadata } of admin.slots ?? []) {
+		//* dashboard widgets have no match, the rest default to matching everywhere
+		const match = ("match" in metadata ? metadata.match : undefined) ?? {};
 		slots[slotDefinitions[metadata.slot].surface].push(
 			await componentEntry(
 				{ ...metadata, match },

@@ -46,6 +46,7 @@ import {
 	canAttachMedia,
 } from "@/utils/agent-references";
 import { isToolRow } from "@/utils/agent-tools";
+import { getNewChatHref } from "@/utils/home-view";
 import AgentChatActions from "./parts/AgentChatActions";
 import AgentChatComposer from "./parts/AgentChatComposer";
 import AgentChatHeader from "./parts/AgentChatHeader";
@@ -209,7 +210,7 @@ const AgentConversationPage: Component = () => {
 					modelSelection,
 				});
 			} catch {
-				navigate("/lucid/agent", {
+				navigate(getNewChatHref(), {
 					replace: true,
 					state: { message, approvalMode, modelSelection, references },
 				});
@@ -338,7 +339,7 @@ const AgentConversationPage: Component = () => {
 									title={T()("agent.chat.missing.title")}
 									description={T()("agent.chat.missing.description")}
 									actions={
-										<Link variant="primary" size="sm" href="/lucid/agent">
+										<Link variant="primary" size="sm" href={getNewChatHref()}>
 											{T()("agent.chat.new")}
 										</Link>
 									}
@@ -514,7 +515,7 @@ const AgentConversationPage: Component = () => {
 				<DeleteAgentConversationModal
 					id={() => params.conversationId}
 					state={{ open: deleteOpen(), setOpen: setDeleteOpen }}
-					onDeleted={() => navigate("/lucid/agent")}
+					onDeleted={() => navigate(getNewChatHref())}
 				/>
 			</div>
 		</AgentTranscriptContext.Provider>

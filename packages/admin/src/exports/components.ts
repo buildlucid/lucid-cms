@@ -48,6 +48,14 @@ export {
 	default as Copy,
 } from "../components/Copy/Copy.js";
 export {
+	type DashboardCardProps,
+	default as DashboardCard,
+} from "../components/DashboardCard/DashboardCard.js";
+export {
+	type DashboardCardItemProps,
+	default as DashboardCardItem,
+} from "../components/DashboardCardItem/DashboardCardItem.js";
+export {
 	type DateTextProps,
 	default as DateText,
 } from "../components/DateText/DateText.js";
@@ -139,6 +147,7 @@ export {
 	type PageLayoutBodyProps,
 	type PageLayoutHeaderProps,
 	type PageLayoutRootProps,
+	type PageLayoutVariant,
 } from "../components/PageLayout/PageLayout.js";
 export {
 	default as Pagination,

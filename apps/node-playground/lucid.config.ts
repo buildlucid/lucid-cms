@@ -173,6 +173,7 @@ export default defineConfig({
 		// 	}
 		// },
 		admin: {
+			// agentHomescreen: false,
 			slots: [
 				{
 					key: "playground-document-picker",
@@ -197,6 +198,20 @@ export default defineConfig({
 					slot: "agent.widget",
 					match: { widget: "playground-note", version: 1 },
 					component: "./src/admin/widgets/PlaygroundNote.tsx",
+				},
+				{
+					key: "playground-launch-checklist",
+					slot: "dashboard.widget",
+					component: "./src/admin/widgets/LaunchChecklist.tsx",
+					card: {
+						label: "Launch checklist",
+						description: "A sample plugin widget with options.",
+						size: "sm",
+						sizes: ["sm", "md"],
+					},
+					options: {
+						items: ["Check SEO titles", "Review redirects", "Test the forms"],
+					},
 				},
 			],
 			routes: [diagnosticsRoute, standaloneRoute, publicRoute],

@@ -9,6 +9,8 @@ import {
 	createEmptyStoredState,
 	ensureBuilderDocumentState,
 	ensureCollectionPreferenceState,
+	type HomeView,
+	type HomeWidgetPreference,
 	parseStoredState,
 	type SectionPreferenceKey,
 	type StoredUserPreferences,
@@ -16,7 +18,12 @@ import {
 	type UserPreferenceState,
 } from "./utils/persistence";
 
-export type { BuilderPreferenceScope, SectionPreferenceKey };
+export type {
+	BuilderPreferenceScope,
+	HomeView,
+	HomeWidgetPreference,
+	SectionPreferenceKey,
+};
 export { USER_PREFERENCES_STORAGE_KEY };
 
 type UserPreferencesStoreOptions = {
@@ -172,6 +179,15 @@ export const createUserPreferencesStore = (
 			return state.preferences.collections[collectionKey]?.previewOpen;
 		},
 
+		getHomeView() {
+			return state.preferences.home.view;
+		},
+
+		/** The customised overview layout, or undefined to use the defaults. */
+		getHomeWidgets() {
+			return state.preferences.home.widgets;
+		},
+
 		getHiddenTableColumns(tableKey: string) {
 			return state.preferences.tables[tableKey];
 		},
@@ -278,6 +294,20 @@ export const createUserPreferencesStore = (
 					collectionKey,
 				);
 				collectionState.previewOpen = open;
+			});
+		},
+
+		setHomeView(view: HomeView) {
+			if (state.preferences.home.view === view) return;
+			updatePreferences((preferenceState) => {
+				preferenceState.preferences.home.view = view;
+			});
+		},
+
+		/** Saves the overview layout. Undefined goes back to the defaults. */
+		setHomeWidgets(widgets: HomeWidgetPreference[] | undefined) {
+			updatePreferences((preferenceState) => {
+				preferenceState.preferences.home.widgets = widgets;
 			});
 		},
 

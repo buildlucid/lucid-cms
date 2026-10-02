@@ -26,7 +26,10 @@ export default defineConfig({
 		include: ["@codemirror/state", "@codemirror/view"],
 	},
 	plugins: [
-		adminClientConfigPlugin({ brand: { name: "Lucid test" } }),
+		adminClientConfigPlugin({
+			brand: { name: "Lucid test" },
+			agentHomescreen: true,
+		}),
 		adminExtensionsPlugin({
 			configPath: fileURLToPath(import.meta.url),
 			stylesheetPath: fileURLToPath(

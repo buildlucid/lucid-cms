@@ -1,5 +1,6 @@
 import { agentWidgetSlotPolicies } from "../components/AgentWidget/constants.js";
 import { brickSlotPolicies } from "../components/BrickSlots/constants.js";
+import { dashboardWidgetSlotPolicies } from "../components/DashboardWidget/constants.js";
 import { documentListSlotPolicies } from "../components/DocumentSlotCell/constants.js";
 import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
 
@@ -7,6 +8,7 @@ import { fieldSlotPolicies } from "../components/FieldSlots/constants.js";
 export const slotDefinitions = {
 	...agentWidgetSlotPolicies,
 	...brickSlotPolicies,
+	...dashboardWidgetSlotPolicies,
 	...documentListSlotPolicies,
 	...fieldSlotPolicies,
 } as const;

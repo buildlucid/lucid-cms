@@ -1,4 +1,6 @@
 import type { AiModelSelection } from "@types";
+import { dashboardWidgetSizes } from "@/components/DashboardWidget/constants";
+import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import { isObjectRecord } from "@/utils/type-guards";
 
 export const USER_PREFERENCES_STORAGE_KEY = "lucid_user_preferences";
@@ -43,12 +45,29 @@ export type CollectionPreferenceState = {
 	previewOpen?: boolean;
 };
 
+/** Ask opens Home on the agent's chat box, Overview on the widget dashboard. */
+export type HomeView = "ask" | "overview";
+
+/** One widget in a customised Home overview. List order is display order. */
+export type HomeWidgetPreference = {
+	key: string;
+	size?: DashboardWidgetSize;
+	hidden?: boolean;
+};
+
+export type HomePreferenceState = {
+	view?: HomeView;
+	/** Unset until the user customises the overview, so it follows the defaults. */
+	widgets?: HomeWidgetPreference[];
+};
+
 export type UserPreferenceState = {
 	preferences: {
 		agentKey?: string;
 		agentModels: Record<string, AiModelSelection>;
 		autoSaveEnabled?: boolean;
 		collections: Record<string, CollectionPreferenceState>;
+		home: HomePreferenceState;
 		/** Open state of navigation groups, keyed by group key. Unset means open. */
 		navigationGroups: Record<string, boolean>;
 		sections: Partial<Record<SectionPreferenceKey, boolean>>;
@@ -75,6 +94,7 @@ export const createEmptyPreferenceState = (): UserPreferenceState => ({
 	preferences: {
 		agentModels: {},
 		collections: {},
+		home: {},
 		navigationGroups: {},
 		sections: {},
 		tables: {},
@@ -155,6 +175,29 @@ const parseModelSelection = (value: unknown): AiModelSelection | undefined => {
 	}
 };
 
+const isDashboardWidgetSize = (value: unknown): value is DashboardWidgetSize =>
+	dashboardWidgetSizes.some((size) => size === value);
+
+/** Keeps valid widget entries, dropping repeats and unknown sizes. */
+const parseHomeWidgets = (value: unknown[]): HomeWidgetPreference[] => {
+	const widgets = new Map<string, HomeWidgetPreference>();
+	for (const item of value) {
+		if (
+			!isObjectRecord(item) ||
+			typeof item.key !== "string" ||
+			widgets.has(item.key)
+		) {
+			continue;
+		}
+		widgets.set(item.key, {
+			key: item.key,
+			size: isDashboardWidgetSize(item.size) ? item.size : undefined,
+			hidden: typeof item.hidden === "boolean" ? item.hidden : undefined,
+		});
+	}
+	return Array.from(widgets.values());
+};
+
 const isBuilderStateItem = (value: unknown): value is BuilderStateItem => {
 	if (!isObjectRecord(value) || typeof value.lastUpdated !== "number") {
 		return false;
@@ -192,6 +235,16 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 			for (const [agentKey, value] of Object.entries(preferences.agentModels)) {
 				const selection = parseModelSelection(value);
 				if (selection) normalized.preferences.agentModels[agentKey] = selection;
+			}
+		}
+
+		if (isObjectRecord(preferences.home)) {
+			const { view, widgets } = preferences.home;
+			if (view === "ask" || view === "overview") {
+				normalized.preferences.home.view = view;
+			}
+			if (Array.isArray(widgets)) {
+				normalized.preferences.home.widgets = parseHomeWidgets(widgets);
 			}
 		}
 

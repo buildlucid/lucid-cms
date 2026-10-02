@@ -71,6 +71,24 @@ const brickSlotMatch = z.strictObject({
 	kind: z.enum(["fixed", "builder", "embedded"]).optional(),
 });
 
+const dashboardWidgetSize = z.enum(["sm", "md", "lg", "full"]);
+
+const dashboardCard = z
+	.strictObject({
+		label: adminCopyInputSchema,
+		description: adminCopyInputSchema.optional(),
+		size: dashboardWidgetSize.optional(),
+		sizes: z.array(dashboardWidgetSize).min(1).optional(),
+		hidden: z.boolean().optional(),
+	})
+	.refine(
+		(card) =>
+			card.size === undefined ||
+			card.sizes === undefined ||
+			card.sizes.includes(card.size),
+		{ path: ["size"], message: "Pick a default size from the card's sizes." },
+	);
+
 const navigationIcon = z.enum([
 	"dashboard",
 	"agent",
@@ -126,6 +144,8 @@ const route = z.strictObject({
 
 export const adminConfigSchema = z
 	.strictObject({
+		/** Enables the agent chat view on the admin home screen. */
+		agentHomescreen: z.boolean().default(true),
 		slots: z
 			.array(
 				z.discriminatedUnion("slot", [
@@ -194,6 +214,16 @@ export const adminConfigSchema = z
 						options,
 						match: z.strictObject({ collection: key.optional(), field: key }),
 					}),
+					z.strictObject({
+						key,
+						priority: z.number().optional(),
+						slot: z.literal("dashboard.widget"),
+						component: componentReference,
+						options,
+						// Registration is checked against the resolved access config in checkAdminSlots.
+						permission: permissionRequirement.optional(),
+						card: dashboardCard,
+					}),
 				]),
 			)
 			.default([]),
@@ -218,7 +248,13 @@ export const adminConfigSchema = z
 		scripts: z.array(assetReference).default([]),
 		stylesheets: z.array(assetReference).default([]),
 	})
-	.default({ slots: [], routes: [], scripts: [], stylesheets: [] })
+	.default({
+		agentHomescreen: true,
+		slots: [],
+		routes: [],
+		scripts: [],
+		stylesheets: [],
+	})
 	.superRefine((config, context) => {
 		for (const kind of ["slots", "routes"] as const) {
 			const keys = new Set<string>();

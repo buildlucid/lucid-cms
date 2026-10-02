@@ -90,7 +90,7 @@ const processConfig = async (
 		// validate config
 		configRes = ConfigSchema.parse(configRes);
 
-		checkAdminSlots(configRes.admin);
+		checkAdminSlots(configRes);
 		checkAdminRoutes(configRes);
 
 		// job definitions
