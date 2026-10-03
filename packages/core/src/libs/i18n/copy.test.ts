@@ -61,3 +61,14 @@ test("translator resolves normalised literal copy without treating it as a key",
 	expect(translator(normalizeCopy("tests.label"))).toBe("tests.label");
 	expect(translator(normalizeCopy("Acme Corp"))).toBe("Acme Corp");
 });
+
+test("literal copy keeps braces it has no value for", () => {
+	const translator = createTranslator({
+		store: createTranslationStore({ defaultLocale: "en", bundles: {} }),
+		locale: "en",
+	});
+
+	expect(
+		translator(copy.literal("Use {{name}} in {{place}}", { place: "titles" })),
+	).toBe("Use {{name}} in titles");
+});

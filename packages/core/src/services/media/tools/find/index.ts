@@ -30,5 +30,23 @@ export const findMediaAgentTool = () =>
 		permissions: [Permissions.MediaRead],
 		readOnly: true,
 		parallelSafe: true,
-		handler: ({ context, input }) => findMedia(context, { input }),
+		handler: async ({ context, input }) => {
+			const result = await findMedia(context, { input });
+			if (result.error) return result;
+
+			return {
+				error: undefined,
+				data: {
+					...result.data,
+					summary: copy(
+						result.data.output.data.length === 1
+							? "admin:core.tools.media_find.summary.one"
+							: "admin:core.tools.media_find.summary",
+						{
+							data: { count: result.data.output.data.length },
+						},
+					),
+				},
+			};
+		},
 	});

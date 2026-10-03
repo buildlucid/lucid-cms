@@ -36,7 +36,15 @@ const handler: AgentToolHandler<
 
 	return {
 		error: undefined,
-		data: { output: { mediaId: moved.data, public: input.public } },
+		data: {
+			output: { mediaId: moved.data, public: input.public },
+			summary: copy(
+				input.public
+					? "admin:core.tools.media_remove_ownership.public.summary"
+					: "admin:core.tools.media_remove_ownership.summary",
+				{ data: { id: moved.data } },
+			),
+		},
 	};
 };
 

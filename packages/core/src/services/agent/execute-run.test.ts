@@ -108,7 +108,7 @@ let connectionId: number;
 let livePermissions: string[] = [];
 const writeHandler = vi.fn(async () => ({
 	error: undefined,
-	data: { output: { done: true } },
+	data: { output: { done: true }, summary: "Completed the document action." },
 }));
 const writeTool = defineAgentTool({
 	name: "test_write",
@@ -129,7 +129,7 @@ const restrictedWriteTool = defineAgentTool({
 });
 const readHandler = vi.fn(async () => ({
 	error: undefined,
-	data: { output: { done: true } },
+	data: { output: { done: true }, summary: "Completed the document action." },
 }));
 const readTool = defineAgentTool({
 	name: "test_read",
@@ -145,9 +145,16 @@ const parallelHandler = vi.fn<
 		{ id: string; payload?: string },
 		{ id: string; payload?: string }
 	>
->(async ({ input }) => ({ error: undefined, data: { output: input } }));
+>(async ({ input }) => ({
+	error: undefined,
+	data: { output: input, summary: `Read result ${input.id}.` },
+}));
 const parallelTool = defineAgentTool({
 	name: "test_parallel_read",
+	title: copy("admin:test.parallel_read.title", {
+		data: { source: "document" },
+		defaultMessage: "Read {{source}}",
+	}),
 	description: "Independent test read",
 	input: z.object({ id: z.string(), payload: z.string().optional() }),
 	output: z.object({ id: z.string(), payload: z.string().optional() }),
@@ -170,7 +177,7 @@ const prepareSelection = vi.fn(async () => ({
 }));
 const selectedHandler = vi.fn(async (response: { id: number }) => ({
 	error: undefined,
-	data: { output: response },
+	data: { output: response, summary: `Selected document ${response.id}.` },
 }));
 const selectionOptions = {
 	description: "Select a document",
@@ -317,7 +324,7 @@ beforeEach(() => {
 	parallelHandler.mockReset();
 	parallelHandler.mockImplementation(async ({ input }) => ({
 		error: undefined,
-		data: { output: input },
+		data: { output: input, summary: `Read result ${input.id}.` },
 	}));
 	vi.mocked(enqueueRun).mockClear();
 });
@@ -460,7 +467,16 @@ describe("independent read batches", () => {
 			peak = Math.max(peak, active);
 			await gates[Number(input.id)]?.promise;
 			active--;
-			return { error: undefined, data: { output: input } };
+			return {
+				error: undefined,
+				data: {
+					output: input,
+					summary: copy("admin:test.read.summary", {
+						data: { id: input.id },
+						defaultMessage: "Read result {{id}}.",
+					}),
+				},
+			};
 		});
 		callTools([
 			parallelCall("0"),
@@ -469,15 +485,43 @@ describe("independent read batches", () => {
 			parallelCall("3"),
 		]);
 		reply("Done");
-		const running = executeRun(context, { runId: prepared.runId });
+		const events: AgentStreamEvent[] = [];
+		const running = executeRun(context, {
+			runId: prepared.runId,
+			emit: async (event) => {
+				events.push(event);
+			},
+		});
 		await vi.waitFor(() => expect(parallelHandler).toHaveBeenCalledTimes(3));
 		expect(active).toBe(3);
+		expect(events).toContainEqual(
+			expect.objectContaining({
+				type: "tool",
+				id: "2",
+				status: "running",
+				summary: parallelTool.title,
+			}),
+		);
+		expect((await selectRun(prepared.runId))?.checkpoint?.parts).toContainEqual(
+			expect.objectContaining({
+				id: "2",
+				status: "pending",
+				summary: parallelTool.title,
+			}),
+		);
 		gates[2]?.resolve();
 		await vi.waitFor(async () =>
 			expect(
 				(await selectRun(prepared.runId))?.checkpoint?.parts,
 			).toContainEqual(
-				expect.objectContaining({ id: "2", status: "complete" }),
+				expect.objectContaining({
+					id: "2",
+					status: "complete",
+					summary: copy("admin:test.read.summary", {
+						data: { id: "2" },
+						defaultMessage: "Read result {{id}}.",
+					}),
+				}),
 			),
 		);
 		const partial = (await selectRun(prepared.runId))?.checkpoint;
@@ -506,6 +550,36 @@ describe("independent read batches", () => {
 			truncated: true,
 			toolCallId: "2",
 		});
+		expect(results?.[0]).toEqual({
+			role: "tool",
+			toolCallId: "0",
+			name: parallelTool.name,
+			output: { id: "0" },
+		});
+		const savedCalls = (await partsOf(prepared.conversationId))?.filter(
+			(part) => part.type === "tool",
+		);
+		expect(savedCalls?.map((part) => [part.id, part.summary])).toEqual(
+			["0", "1", "2", "3"].map((id) => [
+				id,
+				copy("admin:test.read.summary", {
+					data: { id },
+					defaultMessage: "Read result {{id}}.",
+				}),
+			]),
+		);
+		const streamedCalls = events.filter(
+			(event) => event.type === "tool" && event.status === "complete",
+		);
+		expect(streamedCalls).toHaveLength(4);
+		for (const part of savedCalls ?? []) {
+			expect(streamedCalls).toContainEqual(
+				expect.objectContaining({
+					id: part.id,
+					summary: part.summary,
+				}),
+			);
+		}
 		expect(
 			(await partsOf(prepared.conversationId))?.find(
 				(part) => part.type === "tool" && part.id === "2",
@@ -523,17 +597,32 @@ describe("independent read batches", () => {
 			await new Promise((resolve) => setTimeout(resolve, 10));
 			trace.push(`end:${input.id}`);
 			active--;
-			return { error: undefined, data: { output: input } };
+			return {
+				error: undefined,
+				data: { output: input, summary: `Read result ${input.id}.` },
+			};
 		});
 		writeHandler.mockImplementationOnce(async () => {
 			expect(active).toBe(0);
 			trace.push("write");
-			return { error: undefined, data: { output: { done: true } } };
+			return {
+				error: undefined,
+				data: {
+					output: { done: true },
+					summary: "Completed the document action.",
+				},
+			};
 		});
 		readHandler.mockImplementationOnce(async () => {
 			expect(active).toBe(0);
 			trace.push("dependent");
-			return { error: undefined, data: { output: { done: true } } };
+			return {
+				error: undefined,
+				data: {
+					output: { done: true },
+					summary: "Completed the document action.",
+				},
+			};
 		});
 		callTools([
 			parallelCall("a"),
@@ -700,7 +789,10 @@ describe("independent read batches", () => {
 					},
 				};
 			}
-			return { error: undefined, data: { output: input } };
+			return {
+				error: undefined,
+				data: { output: input, summary: `Read result ${input.id}.` },
+			};
 		});
 		callTools([
 			parallelCall("slow"),
@@ -732,7 +824,7 @@ describe("independent read batches", () => {
 		);
 		parallelHandler.mockImplementation(async ({ input }) => ({
 			error: undefined,
-			data: { output: input },
+			data: { output: input, summary: `Read result ${input.id}.` },
 		}));
 		reply("Done");
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
@@ -758,7 +850,10 @@ describe("independent read batches", () => {
 		const slow = Promise.withResolvers<void>();
 		parallelHandler.mockImplementation(async ({ input }) => {
 			if (input.id === "slow") await slow.promise;
-			return { error: undefined, data: { output: input } };
+			return {
+				error: undefined,
+				data: { output: input, summary: `Read result ${input.id}.` },
+			};
 		});
 		callTools([
 			parallelCall("slow"),
@@ -793,7 +888,7 @@ describe("independent read batches", () => {
 		);
 		parallelHandler.mockImplementation(async ({ input }) => ({
 			error: undefined,
-			data: { output: input },
+			data: { output: input, summary: `Read result ${input.id}.` },
 		}));
 		reply("Done");
 		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
@@ -820,7 +915,10 @@ describe("independent read batches", () => {
 					dispatch: false,
 				});
 			}
-			return { error: undefined, data: { output: input } };
+			return {
+				error: undefined,
+				data: { output: input, summary: `Read result ${input.id}.` },
+			};
 		});
 		callTools([
 			parallelCall("a"),
@@ -1237,14 +1335,11 @@ describe("agent runner", () => {
 		).toMatchObject([
 			{
 				name: "lucid_share_progress",
-				display: { kind: "progress", message: "I found the relevant pages." },
+				summary: copy.literal("I found the relevant pages."),
 			},
 			{
 				name: "lucid_share_progress",
-				display: {
-					kind: "progress",
-					message: "I checked their current status.",
-				},
+				summary: copy.literal("I checked their current status."),
 			},
 		]);
 
@@ -1261,6 +1356,7 @@ describe("agent runner", () => {
 				{
 					type: "tool",
 					input: { message: "I found the relevant pages." },
+					summary: copy.literal("I found the relevant pages."),
 					status: "complete",
 				},
 			],
@@ -1268,6 +1364,7 @@ describe("agent runner", () => {
 				{
 					type: "tool",
 					input: { message: "I checked their current status." },
+					summary: copy.literal("I checked their current status."),
 					status: "complete",
 				},
 			],
@@ -3120,7 +3217,13 @@ describe("queued and steering inputs", () => {
 		const prepared = await prepare();
 		readHandler.mockImplementationOnce(async () => {
 			await submit(prepared.conversationId, "Change direction", prepared.runId);
-			return { error: undefined, data: { output: { done: true } } };
+			return {
+				error: undefined,
+				data: {
+					output: { done: true },
+					summary: "Completed the document action.",
+				},
+			};
 		});
 		model.mockImplementationOnce(async (_context, input) => {
 			await input.emit(start());

@@ -107,6 +107,8 @@ const fadeChunks = (root: HTMLElement, chunks: Chunk[], now: number) => {
 	for (const node of nodes) {
 		const start = offset;
 		offset += node.length;
+		//* whitespace has nothing to fade, and wrapping the newline between blocks would stop the last block sitting flush
+		if (!node.data.trim()) continue;
 		//* the latest chunk first, so wrapping the end of a node leaves earlier offsets in place
 		for (let index = chunks.length - 1; index >= 0; index--) {
 			const chunk = chunks[index];

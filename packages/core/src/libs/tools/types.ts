@@ -5,7 +5,6 @@ import type {
 import type { z } from "zod";
 import type { ResolvedLucidConfig } from "../../types/config.js";
 import type { LucidExternalAuth } from "../../types/hono.js";
-import type { AgentToolDisplay } from "../../types/response.js";
 import type { JsonValue } from "../../utils/helpers/is-json-object.js";
 import type {
 	ServiceContext,
@@ -53,10 +52,18 @@ export type McpToolResult<Output> = {
 };
 export type AgentToolResult<Output> = {
 	output: Output;
+	/** Short, factual admin copy shown in the transcript. Translated text outside 1–2000 characters is logged and replaced by the title. Kept out of the model's output. */
+	summary: AdminCopyInput;
 	/** Trusted UI data rendered through the agent.widget slot. */
 	widgets?: { key: string; version: number; data: Record<string, JsonValue> }[];
 	content?: never;
 };
+
+/** A checked result with literal strings normalised into admin copy. */
+export type ResolvedAgentToolResult<Output> = Omit<
+	AgentToolResult<Output>,
+	"summary"
+> & { summary: ResolvedAdminCopy };
 
 export type ToolHandler<Input, Result, Execution> = (args: {
 	context: ServiceContext;
@@ -151,8 +158,8 @@ export type DefineAgentToolOptions<
 	requiresApproval?: boolean;
 	/** What this tool lets the agent do, shown to people in the chat. */
 	capabilities?: AgentToolCapabilities;
-	/** Describes a call in the chat from its input, eg. `{ kind: "text", text: \`Updated ${input.title}\` }`. Defaults to the title. */
-	display?: (input: z.output<Input>) => AgentToolDisplay | undefined;
+	/** Describes a call before it runs, eg. while it waits for approval. Defaults to the title. */
+	describe?: (input: z.output<Input>) => AdminCopyInput;
 	/** Saved with each call. Bump it when the output shape changes so the admin can keep rendering older results. */
 	outputVersion?: number;
 	handler: AgentToolHandler<z.output<Input>, z.output<Output>>;
@@ -199,7 +206,7 @@ export type DefineInteractiveAgentToolOptions<
 };
 
 export type AgentToolPreparation =
-	| AgentToolResult<Record<string, JsonValue>>
+	| ResolvedAgentToolResult<Record<string, JsonValue>>
 	| AgentToolInteraction<Record<string, JsonValue>>;
 
 export type ToolRunResult<Result> =
@@ -257,7 +264,7 @@ export type McpToolDefinition<Name extends string = string> = Definition<
 export type AgentToolDefinition<Name extends string = string> = Definition<
 	Name,
 	AgentToolExecution,
-	AgentToolResult<Record<string, JsonValue>>,
+	ResolvedAgentToolResult<Record<string, JsonValue>>,
 	Permission,
 	AgentToolDescription
 > & {
@@ -268,9 +275,8 @@ export type AgentToolDefinition<Name extends string = string> = Definition<
 	readonly parallelSafe: boolean;
 	readonly requiresApproval: boolean;
 	readonly capabilities?: AgentToolCapabilities;
-	readonly display?: (
-		input: Record<string, unknown>,
-	) => AgentToolDisplay | undefined;
+	/** Describes a call before it runs. Invalid input, or a tool without `describe`, uses the title. */
+	readonly describe: (input: Record<string, unknown>) => ResolvedAdminCopy;
 	readonly outputVersion?: number;
 	readonly interaction?: { readonly key: string; readonly version: number };
 	readonly [toolDefinitionInternal]: {

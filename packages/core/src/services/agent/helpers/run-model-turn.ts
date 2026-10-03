@@ -4,6 +4,7 @@ import { modelMessages, reportedModel } from "../../../libs/agent/context.js";
 import { textFromParts } from "../../../libs/agent/input.js";
 import type { Checkpoint, ModelEvent } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
+import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import isPermanentFailure from "./is-permanent-failure.js";
 import type { RunSetup } from "./resolve-run-setup.js";
@@ -77,7 +78,9 @@ const runModelTurn: ServiceFn<
 				type: "tool" as const,
 				...call,
 				title: presentation?.title,
-				display: presentation?.display?.(call.input),
+				summary:
+					presentation?.describe(call.input) ??
+					copy.literal(call.name.replaceAll("_", " ")),
 				outputVersion: presentation?.outputVersion,
 				status: "pending" as const,
 			};

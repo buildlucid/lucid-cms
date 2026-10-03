@@ -213,21 +213,14 @@ export type AgentWidgetPart = {
 	interaction?: AgentInteraction;
 };
 
-/** Small values a tool derives from its input, so the chat can describe a call without its raw data. */
-export type AgentToolDisplay =
-	| { kind: "text"; text: string }
-	| { kind: "search"; query: string }
-	| { kind: "fetch"; url: string }
-	| { kind: "skill"; name: string }
-	| { kind: "progress"; message: string };
-
 /** Full values for one tool call, fetched when its details are opened. */
 export type AgentToolDetails = {
 	type: "tool";
 	id: string;
 	name: string;
 	title?: ResolvedAdminCopy;
-	display?: AgentToolDisplay;
+	/** Describes the call while pending or running, then the tool's result copy once complete. Failed and skipped calls keep the earlier copy. Resolved in the admin's current language. */
+	summary: ResolvedAdminCopy;
 	input: Record<string, unknown>;
 	output?: unknown;
 	/** The shape version of a built-in tool's output, so older results keep a matching view. */

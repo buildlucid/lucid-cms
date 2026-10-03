@@ -1,56 +1,29 @@
 import classnames from "classnames";
 import {
 	FaSolidBan,
-	FaSolidChevronRight,
 	FaSolidClock,
 	FaSolidGlobe,
 	FaSolidMagnifyingGlass,
 	FaSolidWrench,
 	FaSolidXmark,
 } from "solid-icons/fa";
-import { type Component, Match, Show, Switch } from "solid-js";
+import { type Component, createMemo, Match, Switch } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
-import T from "@/translations";
+import T, { translateAdminCopy } from "@/translations";
 import {
 	type AgentToolPart,
-	toolTitle,
 	webFetchTool,
 	webSearchTool,
-	webSiteName,
 } from "@/utils/agent-tools";
 
-/**
- * What a tool call did. Tools can describe a call from its input, such as
- * `Searched "lucid cms"` or "Read example.com"; others use their title.
- */
-const describeTool = (part: AgentToolPart) => {
-	const { display } = part;
-	const done = part.status === "complete";
-
-	switch (display?.kind) {
-		case "text":
-			return display.text;
-		case "skill":
-			return T()("agent.tool.skill", { name: display.name });
-		case "search":
-			return T()(done ? "agent.tool.web.searched" : "agent.tool.web.search", {
-				query: display.query,
-			});
-		case "fetch":
-			return T()(done ? "agent.tool.web.fetched" : "agent.tool.web.fetch", {
-				site: webSiteName(display.url),
-			});
-		default:
-			return toolTitle(part);
-	}
+/** The tool's saved result copy, with a state label when the call did not complete. */
+export const toolLabel = (part: AgentToolPart) => {
+	const summary = translateAdminCopy(part.summary);
+	return part.status === "complete"
+		? summary
+		: `${summary} · ${T()(`agent.tool.status.${part.status}`)}`;
 };
 
-export const toolLabel = (part: AgentToolPart) =>
-	part.status === "complete"
-		? describeTool(part)
-		: `${describeTool(part)} · ${T()(`agent.tool.status.${part.status}`)}`;
-
-/** A tool call's status as a small icon. */
 export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -88,63 +61,34 @@ export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
 	);
 };
 
-/**
- * One tool call as a compact row. Selecting it shows its input and output in
- * the chat's sidebar. The first call in a run of calls carries a toggle that
- * shows or hides the rest.
- */
 const AgentToolCall: Component<{
 	part: AgentToolPart;
 	selected: boolean;
 	onSelect?: (id: string) => void;
-	/** How many calls follow this one in its run, when it leads the run. */
-	more?: number;
-	expanded?: boolean;
-	onToggle?: () => void;
 }> = (props) => {
+	// ----------------------------------------
+	// Memos
+	const label = createMemo(() => toolLabel(props.part));
+
 	// ----------------------------------------
 	// Render
 	return (
-		<div class="flex max-w-full items-center gap-1 self-start">
-			<button
-				type="button"
-				class={classnames(
-					"group -ms-2 flex min-w-0 items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
-					props.selected
-						? "bg-card text-title"
-						: "text-muted hover:bg-card hover:text-body",
-				)}
-				aria-pressed={props.selected}
-				onClick={() => props.onSelect?.(props.part.id)}
-			>
-				<AgentToolIcon part={props.part} />
-				<span class="min-w-0 truncate">{toolLabel(props.part)}</span>
-			</button>
-			<Show when={props.more}>
-				{(more) => (
-					<button
-						type="button"
-						class="flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-xs text-muted transition-colors hover:bg-card hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
-						aria-expanded={props.expanded}
-						aria-label={T()(
-							props.expanded
-								? "agent.tool.group.hide"
-								: "agent.tool.group.show",
-							{ count: more() },
-						)}
-						onClick={() => props.onToggle?.()}
-					>
-						<span class="tabular-nums">+{more()}</span>
-						<FaSolidChevronRight
-							size={8}
-							class={classnames("transition-transform", {
-								"rotate-90": props.expanded,
-							})}
-						/>
-					</button>
-				)}
-			</Show>
-		</div>
+		<button
+			type="button"
+			class={classnames(
+				"group -ms-2 flex max-w-full min-w-0 items-center gap-2 self-start rounded-md px-2 py-1 text-start text-xs transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary",
+				props.selected
+					? "bg-card text-title"
+					: "text-muted hover:bg-card hover:text-body",
+			)}
+			aria-pressed={props.selected}
+			onClick={() => props.onSelect?.(props.part.id)}
+		>
+			<AgentToolIcon part={props.part} />
+			<span class="min-w-0 truncate" title={label()}>
+				{label()}
+			</span>
+		</button>
 	);
 };
 

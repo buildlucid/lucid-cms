@@ -3,7 +3,7 @@ import z from "zod";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
-import { createTranslationStore } from "../i18n/index.js";
+import { copy, createTranslationStore } from "../i18n/index.js";
 import { Permissions } from "../permission/definitions.js";
 import { ExternalScopes } from "../permission/external-scopes.js";
 import defineAgentTool from "./define-agent-tool.js";
@@ -20,7 +20,7 @@ const testConfig = getTestConfig();
 let context: ServiceContext;
 const agentHandler = vi.fn(async () => ({
 	error: undefined,
-	data: { output: { source: "agent" } },
+	data: { output: { source: "agent" }, summary: "Read the agent source." },
 }));
 const mcpHandler = vi.fn(async () => ({
 	error: undefined,
@@ -67,6 +67,7 @@ beforeAll(async () => {
 afterAll(testConfig.destroy);
 
 const user = { type: "user", userId: 1 } as const;
+const run = { id: "test-run", conversationId: "test-conversation", userId: 1 };
 const runAgent = (authority: AgentToolAuthority) =>
 	executeAgentTool({
 		context,
@@ -74,6 +75,7 @@ const runAgent = (authority: AgentToolAuthority) =>
 		input: {},
 		execution: {
 			authority,
+			run,
 			signal: AbortSignal.timeout(1000),
 			operationId: "run:call",
 		},
@@ -101,7 +103,13 @@ test("agent execution checks both static and input-dependent permissions", async
 			permissions: [Permissions.MediaRead, Permissions.MediaUpdate],
 			superAdmin: false,
 		}),
-	).toMatchObject({ type: "success", data: { output: { source: "agent" } } });
+	).toMatchObject({
+		type: "success",
+		data: {
+			output: { source: "agent" },
+			summary: copy.literal("Read the agent source."),
+		},
+	});
 	expect(agentHandler).toHaveBeenLastCalledWith(
 		expect.objectContaining({
 			execution: expect.objectContaining({ operationId: "run:call" }),
@@ -149,6 +157,103 @@ test("MCP resolves only its own tools and requires their scopes", async () => {
 	expect(mcpHandler).toHaveBeenCalledTimes(1);
 });
 
+test.each([
+	copy("admin:test.source.read", {
+		data: { source: "agent", count: 3 },
+		defaultMessage: "Read {{count}} {{source}} sources.",
+	}),
+	copy.literal("Read {{count}} {{source}} sources.", {
+		source: "agent",
+		count: 3,
+	}),
+])("preserves summary descriptors and interpolation values", async (summary) => {
+	const tool = defineAgentTool({
+		name: "source_summary",
+		description: "Reads sources",
+		input: schema,
+		output,
+		permissions: [],
+		readOnly: true,
+		handler: async () => ({
+			error: undefined,
+			data: { output: { source: "agent" }, summary },
+		}),
+	});
+	expect(
+		await executeAgentTool({
+			context,
+			tool,
+			input: {},
+			execution: {
+				authority: { principal: user, permissions: [], superAdmin: false },
+				run,
+				signal: AbortSignal.timeout(1000),
+				operationId: "source-summary",
+			},
+		}),
+	).toEqual({
+		type: "success",
+		data: { output: { source: "agent" }, summary },
+	});
+});
+
+test.each([
+	["a server-scoped summary", copy("server:test.source.read")],
+	["an empty summary", ""],
+	["a blank summary", "   "],
+	["an oversized summary", "x".repeat(2001)],
+])("falls back to the title for %s instead of failing the call", async (_, summary) => {
+	const tool = defineAgentTool({
+		name: "invalid_summary",
+		title: "Read source",
+		description: "Returns a valid output with invalid transcript copy",
+		input: schema,
+		output,
+		permissions: [],
+		readOnly: true,
+		// @ts-expect-error Agent summaries only accept admin copy.
+		handler: async () => ({
+			error: undefined,
+			data: { output: { source: "agent" }, summary },
+		}),
+	});
+	expect(
+		await executeAgentTool({
+			context,
+			tool,
+			input: {},
+			execution: {
+				authority: { principal: user, permissions: [], superAdmin: false },
+				run,
+				signal: AbortSignal.timeout(1000),
+				operationId: "invalid-summary",
+			},
+		}),
+	).toEqual({
+		type: "success",
+		data: { output: { source: "agent" }, summary: copy.literal("Read source") },
+	});
+});
+
+test("describes a call from its input, or by its title when the input is invalid", () => {
+	const tool = defineAgentTool({
+		name: "describe_source",
+		title: "Read source",
+		description: "Reads one source",
+		input: z.object({ id: z.number() }),
+		output,
+		permissions: [],
+		readOnly: true,
+		describe: ({ id }) => `Read source ${id}`,
+		handler: async () => ({
+			error: undefined,
+			data: { output: { source: "agent" }, summary: "Read the source." },
+		}),
+	});
+	expect(tool.describe({ id: 7 })).toEqual(copy.literal("Read source 7"));
+	expect(tool.describe({ id: "7" })).toEqual(copy.literal("Read source"));
+});
+
 test("interaction schemas preserve raw JSON across validation and apply transforms once in the handler", async () => {
 	const tool = defineAgentTool({
 		name: "transform_picker",
@@ -178,11 +283,15 @@ test("interaction schemas preserve raw JSON across validation and apply transfor
 		},
 		handler: async ({ response }) => ({
 			error: undefined,
-			data: { output: response },
+			data: {
+				output: response,
+				summary: "Accepted the transformed selection.",
+			},
 		}),
 	});
 	const execution = {
 		authority: { principal: user, permissions: [], superAdmin: false },
+		run,
 		signal: AbortSignal.timeout(1000),
 		operationId: "transform",
 	};

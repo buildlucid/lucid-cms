@@ -12,6 +12,7 @@ import type {
 	TranslationBundles,
 	TranslationScope,
 	TranslationStore,
+	TranslationValues,
 } from "./types.js";
 
 /**
@@ -62,11 +63,16 @@ const translateCopy = (
 			options: props.options,
 		});
 	}
+	//* literal copy is already written text, so braces without a value stay as written
 	if (value.type === "lucid.literal") {
-		return formatTranslation(value.value, {
+		const values: TranslationValues = {
 			...(value.values ?? {}),
 			...(props.options?.data ?? {}),
-		});
+		};
+		return value.value.replace(
+			/\{\{(\w+)\}\}/g,
+			(match, key: string) => values[key]?.toString() ?? match,
+		);
 	}
 
 	return resolveTranslation({

@@ -32,7 +32,12 @@ const invokeAgentTool = async (
 	await props.emit({
 		messageId: props.messageId,
 		...agentFormatter.formatTool({
-			part: { type: "tool", ...props.call, status: "running" },
+			part: {
+				type: "tool",
+				...props.call,
+				summary: props.tool.describe(props.call.input),
+				status: "running",
+			},
 		}),
 	});
 	if (props.execution.signal.aborted) {
@@ -47,7 +52,7 @@ const invokeAgentTool = async (
 	});
 
 	return executed.type === "success"
-		? toolResult(executed.data.output, executed.data.widgets)
+		? toolResult(executed.data)
 		: failedToolRun(context, executed);
 };
 

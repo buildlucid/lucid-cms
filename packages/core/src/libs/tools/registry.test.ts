@@ -49,7 +49,10 @@ const agentEcho = defineAgentTool({
 	output: z.object({}),
 	permissions: [],
 	readOnly: true,
-	handler: async () => ({ error: undefined, data: { output: {} } }),
+	handler: async () => ({
+		error: undefined,
+		data: { output: {}, summary: "Completed the test action." },
+	}),
 });
 const agent = (key: string, tools: AgentToolDefinition[] = [agentEcho]) =>
 	defineAgent({ key, name: "Test", description: "Test", tools });
@@ -187,9 +190,15 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets", 
 				version: 1,
 				data: z.object({}),
 				response: () => z.object({}),
-				prepare: async () => ({ error: undefined, data: { output: {} } }),
+				prepare: async () => ({
+					error: undefined,
+					data: { output: {}, summary: "No selection was needed." },
+				}),
 			},
-			handler: async () => ({ error: undefined, data: { output: {} } }),
+			handler: async () => ({
+				error: undefined,
+				data: { output: {}, summary: "Completed the test action." },
+			}),
 		});
 	const check = (key: string) => () =>
 		checkToolDefinitions({

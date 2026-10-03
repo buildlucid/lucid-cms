@@ -690,7 +690,6 @@ export type {
 	AgentStreamEvent,
 	AgentSummary,
 	AgentToolDetails,
-	AgentToolDisplay,
 	AgentToolStatus,
 	AgentToolSummary,
 	AgentUsage,

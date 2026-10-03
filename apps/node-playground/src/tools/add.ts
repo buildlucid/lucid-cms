@@ -25,7 +25,10 @@ export const addAgentTool = defineAgentTool({
 	permissions: [],
 	handler: async ({ input }) => ({
 		error: undefined,
-		data: { output: { sum: input.a + input.b } },
+		data: {
+			output: { sum: input.a + input.b },
+			summary: `Added ${input.a} and ${input.b} to get ${input.a + input.b}`,
+		},
 	}),
 	readOnly: true,
 });

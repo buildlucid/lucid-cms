@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { expect, test } from "vitest";
+import { copy } from "../i18n/index.js";
 import {
 	compactionCut,
 	contextTokens,
@@ -26,6 +27,7 @@ test("orders completed calls within their turn without moving earlier tool histo
 				name: "read",
 				input: {},
 				status: "complete",
+				summary: copy.literal("Read the earlier source."),
 				output: "earlier result",
 			},
 		],
@@ -42,20 +44,95 @@ test("orders completed calls within their turn without moving earlier tool histo
 			...earlier,
 			{ role: "assistant", sourceId: messageId, toolCalls: [first, second] },
 		],
-		parts: [],
+		parts: [
+			{
+				type: "tool",
+				...first,
+				status: "running",
+				summary: copy.literal("Reading the first source."),
+			},
+			{
+				type: "tool",
+				...second,
+				status: "running",
+				summary: copy.literal("Reading the second source."),
+			},
+		],
 		calls: [first, second],
 		cursor: 0,
 		phase: "tools",
 	};
 
-	settleToolCall(checkpoint, second, { status: "complete", output: 2 });
-	settleToolCall(checkpoint, first, { status: "complete", output: 1 });
+	settleToolCall(checkpoint, second, {
+		status: "complete",
+		output: 2,
+		summary: copy.literal("Read the second source."),
+	});
+	settleToolCall(checkpoint, first, {
+		status: "complete",
+		output: 1,
+		summary: copy.literal("Read the first source."),
+	});
 
 	expect(checkpoint.messages.slice(0, earlier.length)).toEqual(earlier);
 	expect(checkpoint.messages.slice(earlier.length + 1)).toMatchObject([
 		{ role: "tool", sourceId: messageId, toolCallId: "first", output: 1 },
 		{ role: "tool", sourceId: messageId, toolCallId: "second", output: 2 },
 	]);
+	expect(checkpoint.parts).toMatchObject([
+		{
+			id: "first",
+			status: "complete",
+			summary: copy.literal("Read the first source."),
+		},
+		{
+			id: "second",
+			status: "complete",
+			summary: copy.literal("Read the second source."),
+		},
+	]);
+	expect(
+		modelMessages(checkpoint.messages)
+			.filter((message) => message.role === "tool")
+			.slice(-2),
+	).toEqual([
+		{ role: "tool", toolCallId: "first", name: "read", output: 1 },
+		{ role: "tool", toolCallId: "second", name: "read", output: 2 },
+	]);
+});
+
+test("a call settled without a summary keeps the one it had while running", () => {
+	const messageId = randomUUID();
+	const call = { id: "write", name: "write", input: {} };
+	const checkpoint: Checkpoint = {
+		version: 1,
+		approvalMode: "confirm-all",
+		nudges: 0,
+		requestId: randomUUID(),
+		messageId,
+		messages: [{ role: "assistant", sourceId: messageId, toolCalls: [call] }],
+		parts: [
+			{
+				type: "tool",
+				...call,
+				status: "running",
+				summary: copy.literal("Update the home page"),
+			},
+		],
+		calls: [call],
+		cursor: 0,
+		phase: "tools",
+	};
+
+	expect(
+		settleToolCall(checkpoint, call, {
+			status: "failed",
+			output: { error: "The user denied this action." },
+		}),
+	).toMatchObject({
+		status: "failed",
+		summary: copy.literal("Update the home page"),
+	});
 });
 
 test("retains complete tool exchanges when selecting a compaction boundary", () => {
@@ -133,6 +210,7 @@ test("replays saved tool calls as calls and results, never as text the assistant
 				name: "publish",
 				input: { id: 7 },
 				status: "failed",
+				summary: copy.literal("The user denied publishing."),
 				output: { error: "The user denied this action." },
 			},
 			{
@@ -141,6 +219,9 @@ test("replays saved tool calls as calls and results, never as text the assistant
 				name: "lucid_ask_user",
 				input: { question: "Which colour?" },
 				status: "complete",
+				summary: copy.literal("The user chose {{answer}}.", {
+					answer: "Blue",
+				}),
 				output: { answer: "Blue" },
 			},
 			{
@@ -205,6 +286,7 @@ test("an unfinished call still gets a result, and long values become history pre
 				name: "read",
 				input: { body: "x".repeat(30_000) },
 				status: "complete",
+				summary: copy.literal("Read the large source."),
 				output: { body: "y".repeat(30_000) },
 			},
 			{
@@ -213,6 +295,7 @@ test("an unfinished call still gets a result, and long values become history pre
 				name: "write",
 				input: {},
 				status: "running",
+				summary: copy.literal("Writing the document."),
 			},
 		],
 	});

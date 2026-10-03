@@ -8,7 +8,6 @@ import type {
 	AgentWebSearchOutput,
 	AgentWidgetPart,
 } from "@types";
-import helpers from "@/utils/helpers";
 import { isObjectRecord } from "@/utils/type-guards";
 
 export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
@@ -53,11 +52,35 @@ export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 	(part.name !== finishTool || part.status !== "complete") &&
 	part.name !== progressTool;
 
-export const toolTitle = (part: Pick<AgentToolPart, "name" | "title">) =>
-	helpers.getLocaleValue({
-		value: part.title,
-		fallback: part.name.replaceAll("_", " "),
-	});
+export type AgentToolGroup = {
+	calls: AgentToolPart[];
+	latest: AgentToolPart;
+	lastIndex: number;
+};
+
+/** Only a group's first part produces a row. Calls retain their transcript order. */
+export const toolGroupAt = (
+	parts: AgentMessagePart[],
+	index: number,
+): AgentToolGroup | undefined => {
+	const first = parts[index];
+	const previous = parts[index - 1];
+	if (!first || !isToolRow(first) || (previous && isToolRow(previous))) {
+		return undefined;
+	}
+
+	const calls = [first];
+	let latest = first;
+	let lastIndex = index;
+	for (let next = index + 1; next < parts.length; next++) {
+		const call = parts[next];
+		if (!isToolRow(call)) break;
+		calls.push(call);
+		latest = call;
+		lastIndex = next;
+	}
+	return { calls, latest, lastIndex };
+};
 
 /** A string field from a tool's output, such as its `error` or an analysis. */
 export const toolOutputText = (output: unknown, field: string) => {

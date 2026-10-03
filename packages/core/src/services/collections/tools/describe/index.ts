@@ -58,13 +58,25 @@ export const describeCollectionAgentTool = (
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],
-		handler: ({ context, input, execution }) =>
-			describeCollection(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await describeCollection(context, {
 				input,
 				allowedCollectionKeys: getPermittedCollectionKeys(
 					context.config,
 					execution.authority,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) return result;
+
+			return {
+				error: undefined,
+				data: {
+					...result.data,
+					summary: copy("admin:core.tools.collections_describe.summary", {
+						data: { collection: result.data.output.meta.collection.label },
+					}),
+				},
+			};
+		},
 	});

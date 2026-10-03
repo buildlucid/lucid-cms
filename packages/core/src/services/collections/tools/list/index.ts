@@ -41,13 +41,30 @@ export const listCollectionsAgentTool = (options: CollectionToolOptions = {}) =>
 		permissions: [],
 		readOnly: true,
 		parallelSafe: true,
-		handler: ({ context, input, execution }) =>
-			listCollections(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await listCollections(context, {
 				input,
 				allowedCollectionKeys: getPermittedCollectionKeys(
 					context.config,
 					execution.authority,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) return result;
+
+			return {
+				error: undefined,
+				data: {
+					...result.data,
+					summary: copy(
+						result.data.output.data.length === 1
+							? "admin:core.tools.collections_list.summary.one"
+							: "admin:core.tools.collections_list.summary",
+						{
+							data: { count: result.data.output.data.length },
+						},
+					),
+				},
+			};
+		},
 	});

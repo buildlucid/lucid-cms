@@ -1,6 +1,7 @@
 import constants from "../../../../constants/constants.js";
 import { createInteraction } from "../../../../libs/agent/interactions.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { copy } from "../../../../libs/i18n/index.js";
 import { toolResult } from "../tool-outcome.js";
 import type { RunnerToolInputHandler } from "./types.js";
 
@@ -9,7 +10,12 @@ const ask: RunnerToolInputHandler<typeof runnerTools.ask> = async (
 	_context,
 	{ call, input, answer },
 ) => {
-	if (answer?.action === "submit") return toolResult(answer.response);
+	if (answer?.action === "submit") {
+		return toolResult({
+			output: answer.response,
+			summary: copy("admin:core.tools.lucid_ask_user.summary"),
+		});
+	}
 
 	return {
 		kind: "pending",

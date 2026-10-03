@@ -54,13 +54,33 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 		requiredPermissions: ({ collectionKey }) => [
 			getCollectionPermission(collectionKey, "read"),
 		],
-		handler: ({ context, input, execution }) =>
-			getDocument(context, {
+		handler: async ({ context, input, execution }) => {
+			const result = await getDocument(context, {
 				input,
 				allowedCollectionKeys: getPermittedCollectionKeys(
 					context.config,
 					execution.authority,
 					options.collections,
 				),
-			}),
+			});
+			if (result.error) return result;
+
+			const labels = context.config.collections.find(
+				(collection) => collection.key === input.collectionKey,
+			)?.getData.details.labels;
+
+			return {
+				error: undefined,
+				data: {
+					...result.data,
+					summary: copy("admin:core.tools.documents_get.summary", {
+						data: {
+							id: result.data.output.data.id,
+							collection:
+								context.translate(labels?.singular) ?? input.collectionKey,
+						},
+					}),
+				},
+			};
+		},
 	});

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, assert, beforeAll, expect, test } from "vitest";
 import defineAgent from "../../libs/agent/define-agent.js";
-import { createTranslationStore } from "../../libs/i18n/index.js";
+import { copy, createTranslationStore } from "../../libs/i18n/index.js";
 import {
 	AgentMessagesRepository,
 	UsersRepository,
@@ -31,6 +31,10 @@ const tool: AgentToolDetails = {
 	id: "read/1",
 	name: "documents_get",
 	status: "complete",
+	summary: copy("admin:test.document.read", {
+		data: { title: "Accessibility notes", documentId: 12 },
+		defaultMessage: "Read {{title}}.",
+	}),
 	title: { type: "lucid.literal", value: "Read document" },
 	input: { documentId: 12, instructions: "i".repeat(8192) },
 	output: { content: "o".repeat(32_768) },
@@ -116,6 +120,7 @@ test("history sends a summary and the detail endpoint returns the unchanged save
 			id: tool.id,
 			name: tool.name,
 			title: tool.title,
+			summary: tool.summary,
 			status: "complete",
 			detailsAvailable: true,
 		},

@@ -195,6 +195,7 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 		expect(mocks.refresh).toHaveBeenCalledTimes(2);
 		stream.onEvent({
 			type: "tool",
+			summary: { type: "lucid.literal", value: "Tool completed" },
 			messageId: "reply",
 			id: "read",
 			name: "documents_get",
@@ -204,6 +205,10 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 		expect(mocks.refresh).toHaveBeenCalledTimes(2);
 		const reference = {
 			type: "tool" as const,
+			summary: {
+				type: "lucid.literal" as const,
+				value: "Linked the reference",
+			},
 			id: "reference",
 			name: "lucid_register_references",
 			status: "complete" as const,
@@ -222,6 +227,7 @@ test("ordinary tools do not refresh references, and repeated watch snapshots ref
 		expect(mocks.refresh).toHaveBeenCalledTimes(3);
 		stream.onEvent({
 			type: "tool",
+			summary: { type: "lucid.literal", value: "Tool completed" },
 			messageId: "reply",
 			id: "search",
 			name: "web_search",

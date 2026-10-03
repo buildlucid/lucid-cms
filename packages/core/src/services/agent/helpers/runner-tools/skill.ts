@@ -1,8 +1,8 @@
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { copy } from "../../../../libs/i18n/index.js";
 import { toolFailure, toolResult } from "../tool-outcome.js";
 import type { RunnerToolInputHandler } from "./types.js";
 
-/** Returns an available skill's instructions. */
 const skill: RunnerToolInputHandler<typeof runnerTools.skill> = async (
 	context,
 	{ input, setup },
@@ -12,7 +12,12 @@ const skill: RunnerToolInputHandler<typeof runnerTools.skill> = async (
 		return toolFailure(context.translate("server:agent.skill.unavailable"));
 	}
 
-	return toolResult({ name: found.name, instructions: found.instructions });
+	return toolResult({
+		output: { name: found.name, instructions: found.instructions },
+		summary: copy("admin:core.tools.lucid_load_skill.summary", {
+			data: { name: found.name },
+		}),
+	});
 };
 
 export default skill;

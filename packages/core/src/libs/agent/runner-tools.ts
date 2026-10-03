@@ -2,13 +2,9 @@ import z from "zod";
 import constants from "../../constants/constants.js";
 import { agentRunOutcomeSchema } from "../../schemas/agent.js";
 import { agentReferenceInputSchema } from "../../schemas/agent-references.js";
-import type {
-	AgentRunnerToolName,
-	AgentToolDisplay,
-} from "../../types/response.js";
+import type { AgentRunnerToolName } from "../../types/response.js";
 import { copy } from "../i18n/index.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
-import { toolDisplay } from "../tools/tool-display.js";
 import type { RunMode } from "./types.js";
 
 export type RunnerToolContext = {
@@ -22,9 +18,6 @@ type RunnerToolDefinition = {
 	title: ResolvedAdminCopy;
 	description: string;
 	input: z.ZodObject;
-	/** Describes a call in the chat from its input. */
-	display?: (input: Record<string, unknown>) => AgentToolDisplay | undefined;
-	/** Whether the tool is offered for a model turn. */
 	available: (context: RunnerToolContext) => boolean;
 };
 
@@ -52,7 +45,7 @@ const runnerTools = {
 	previewMedia: {
 		name: "lucid_preview_media",
 		title: copy("admin:core.tools.lucid_preview_media.title"),
-		description: `Show 1 to ${constants.agent.previewMediaLimit} Lucid images, videos or audio recordings in the chat as a preview gallery. Use this when showing a selected item, comparing choices or recommending an image for a document. Use media IDs from the person or tool results. PDFs and other files cannot be previewed; link them with lucid_register_references instead. This shows media to the person; it does not analyse the contents or grant access.`,
+		description: `Show 1 to ${constants.agent.previewMediaLimit} Lucid media items in the chat as a preview gallery. Only items whose type is image, video or audio can be previewed, so check the type or MIME type first. Never pass a PDF, document, archive or other file; link those with lucid_register_references instead. Use this when showing a selected item, comparing choices or recommending an image for a document. Use media IDs from the person or tool results. This shows media to the person; it does not analyse the contents or grant access.`,
 		input: z
 			.object({
 				mediaIds: z
@@ -106,10 +99,6 @@ const runnerTools = {
 		description:
 			"Send a normal assistant message without ending this chat run. Use before or between other tool calls when a multi-step task has a useful finding or decision to share. Continue working afterward.",
 		input: progressInput,
-		display: toolDisplay(progressInput, (input) => ({
-			kind: "progress",
-			message: input.message,
-		})),
 		available: ({ mode }) => mode === "chat",
 	},
 	history: {
@@ -130,10 +119,6 @@ const runnerTools = {
 		description:
 			"Load the instructions for an available skill before performing its task.",
 		input: skillInput,
-		display: toolDisplay(skillInput, (input) => ({
-			kind: "skill",
-			name: input.name,
-		})),
 		available: ({ hasSkills }) => hasSkills,
 	},
 	finish: {

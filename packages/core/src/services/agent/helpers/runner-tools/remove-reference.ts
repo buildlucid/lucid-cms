@@ -1,4 +1,5 @@
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { copy } from "../../../../libs/i18n/index.js";
 import list from "../../references/list.js";
 import remove from "../../references/remove.js";
 import { toolErrorFailure, toolFailure, toolResult } from "../tool-outcome.js";
@@ -43,7 +44,14 @@ const removeReference: RunnerToolInputHandler<
 		}
 	}
 
-	return toolResult({ referenceId: input.referenceId });
+	return toolResult({
+		output: { referenceId: input.referenceId },
+		summary: copy(
+			reference
+				? "admin:core.tools.lucid_remove_reference.summary"
+				: "admin:core.tools.lucid_remove_reference.absent.summary",
+		),
+	});
 };
 
 export default removeReference;

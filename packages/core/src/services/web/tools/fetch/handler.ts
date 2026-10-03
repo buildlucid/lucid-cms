@@ -1,7 +1,10 @@
 import type z from "zod";
 import { contextLimits } from "../../../../libs/agent/context.js";
 import { copy } from "../../../../libs/i18n/index.js";
-import type { AgentToolExecution } from "../../../../libs/tools/types.js";
+import type {
+	AgentToolExecution,
+	AgentToolResult,
+} from "../../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import isUrlInConversation from "../../helpers/is-url-in-conversation.js";
 import isWebSourceAllowed from "../../helpers/is-web-source-allowed.js";
@@ -23,7 +26,7 @@ const fetchWeb: ServiceFn<
 			allowedDomains?: string[];
 		},
 	],
-	{ output: z.output<typeof outputSchema> }
+	AgentToolResult<z.output<typeof outputSchema>>
 > = async (context, { input, execution, allowedDomains }) => {
 	if (!isWebSourceAllowed(input.url, allowedDomains)) {
 		return {
@@ -87,7 +90,15 @@ const fetchWeb: ServiceFn<
 		};
 	}
 
-	return { error: undefined, data: { output } };
+	return {
+		error: undefined,
+		data: {
+			output,
+			summary: copy("admin:core.tools.web_fetch.summary", {
+				data: { site: new URL(output.url).hostname.replace(/^www\./, "") },
+			}),
+		},
+	};
 };
 
 export default fetchWeb;

@@ -14,11 +14,12 @@ export const removeMediaOwnershipAgentTool = () =>
 		output: outputSchema,
 		permissions: [Permissions.MediaCreate],
 		requiresApproval: true,
-		display: (input) => ({
-			kind: "text",
-			text: input.public
-				? `Remove ownership of media ${input.mediaId} and make it public`
-				: `Remove ownership of media ${input.mediaId}`,
-		}),
+		describe: (input) =>
+			copy(
+				input.public
+					? "admin:core.tools.media_remove_ownership.public.describe"
+					: "admin:core.tools.media_remove_ownership.describe",
+				{ data: { id: input.mediaId } },
+			),
 		handler,
 	});

@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import type { StoredAgentMessagePart } from "../../schemas/agent.js";
+import { copy } from "../i18n/index.js";
 import runnerTools from "./runner-tools.js";
 import {
 	addWebUrlKeys,
@@ -13,6 +14,7 @@ const tool = (name: string, output: unknown): StoredAgentMessagePart => ({
 	id: "call",
 	name,
 	status: "complete",
+	summary: copy.literal("Read the source."),
 	input: { url: "https://invented.example.com/input" },
 	output,
 });

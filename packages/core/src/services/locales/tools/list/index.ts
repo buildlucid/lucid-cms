@@ -29,5 +29,23 @@ export const listLocalesAgentTool = () =>
 		permissions: [],
 		readOnly: true,
 		parallelSafe: true,
-		handler: ({ context, input }) => listLocales(context, { input }),
+		handler: async ({ context, input }) => {
+			const result = await listLocales(context, { input });
+			if (result.error) return result;
+
+			return {
+				error: undefined,
+				data: {
+					...result.data,
+					summary: copy(
+						result.data.output.data.length === 1
+							? "admin:core.tools.locales_list.summary.one"
+							: "admin:core.tools.locales_list.summary",
+						{
+							data: { count: result.data.output.data.length },
+						},
+					),
+				},
+			};
+		},
 	});

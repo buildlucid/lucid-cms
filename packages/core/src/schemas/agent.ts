@@ -21,7 +21,6 @@ import type {
 	AgentRunStatus,
 	AgentTitleStatus,
 	AgentToolDetails,
-	AgentToolDisplay,
 	AgentToolStatus,
 	AgentToolSummary,
 } from "../types/response.js";
@@ -170,21 +169,13 @@ export const agentInteractiveWidgetSchema = agentWidgetSchema.extend({
 	interaction: agentInteractionSchema,
 });
 
-const agentToolDisplaySchema = z.discriminatedUnion("kind", [
-	z.object({ kind: z.literal("text"), text: z.string() }),
-	z.object({ kind: z.literal("search"), query: z.string() }),
-	z.object({ kind: z.literal("fetch"), url: z.string() }),
-	z.object({ kind: z.literal("skill"), name: z.string() }),
-	z.object({ kind: z.literal("progress"), message: z.string() }),
-]) satisfies z.ZodType<AgentToolDisplay>;
-
 export const agentToolDetailsSchema = z
 	.object({
 		type: z.literal("tool"),
 		id: z.string(),
 		name: z.string(),
 		title: resolvedAdminCopySchema.optional(),
-		display: agentToolDisplaySchema.optional(),
+		summary: resolvedAdminCopySchema,
 		input: z.record(z.string(), z.unknown()),
 		output: z.unknown().optional(),
 		outputVersion: z.number().int().positive().optional(),

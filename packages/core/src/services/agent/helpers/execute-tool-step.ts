@@ -3,6 +3,7 @@ import type {
 	RunMode,
 	ToolCall,
 } from "../../../libs/agent/types.js";
+import { copy } from "../../../libs/i18n/index.js";
 import type { AgentToolAuthority } from "../../../libs/tools/types.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import recordToolResult from "./record-tool-result.js";
@@ -51,7 +52,10 @@ const executeToolStep: ServiceFn<
 			call,
 			checkpoint,
 			session,
-			outcome: toolResult({ finished: true }),
+			outcome: toolResult({
+				output: { finished: true },
+				summary: copy("admin:core.tools.lucid_finish_run.summary"),
+			}),
 		});
 	}
 	return recordToolResult(context, { call, checkpoint, session, outcome });

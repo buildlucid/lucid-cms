@@ -74,7 +74,10 @@ test("custom providers report support with Lucid's corresponding tools disabled"
 			webSearch: true,
 			webRead: true,
 		},
-		handler: async () => ({ error: undefined, data: { output: {} } }),
+		handler: async () => ({
+			error: undefined,
+			data: { output: {}, summary: "Analyzed the custom source." },
+		}),
 	});
 	const agent = defineAgent({
 		key: "custom",

@@ -1,4 +1,5 @@
 import type z from "zod";
+import { copy } from "../../../../libs/i18n/index.js";
 import analyzeMedia from "../../../../libs/lucid-remote/services/analyze-media/index.js";
 import type { AgentToolHandler } from "../../../../libs/tools/types.js";
 import runPaidToolRequest from "../../helpers/run-paid-tool-request.js";
@@ -41,7 +42,15 @@ const handler: AgentToolHandler<
 	});
 	if (result.error) return result;
 
-	return { error: undefined, data: { output: result.data.output } };
+	return {
+		error: undefined,
+		data: {
+			output: result.data.output,
+			summary: copy("admin:core.tools.media_analyze.summary", {
+				data: { id: input.mediaId },
+			}),
+		},
+	};
 };
 
 export default handler;

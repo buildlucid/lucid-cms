@@ -1,5 +1,6 @@
 import { canReadReference } from "../../../../libs/agent/references.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { copy } from "../../../../libs/i18n/index.js";
 import resolveUserAccess from "../../../users/resolve-access.js";
 import mediaOwnership from "../../references/media-ownership.js";
 import register from "../../references/register.js";
@@ -68,7 +69,15 @@ const registerReferences: RunnerToolInputHandler<
 		);
 	}
 
-	return toolResult({ references: result.data });
+	return toolResult({
+		output: { references: result.data },
+		summary: copy(
+			result.data.length === 1
+				? "admin:core.tools.lucid_register_references.summary.one"
+				: "admin:core.tools.lucid_register_references.summary",
+			{ data: { count: result.data.length } },
+		),
+	});
 };
 
 export default registerReferences;

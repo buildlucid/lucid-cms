@@ -3,6 +3,7 @@ import type {
 	AgentToolDetails,
 	AgentToolStatus,
 } from "../../types/response.js";
+import { copy } from "../i18n/index.js";
 import { messageText } from "./input.js";
 import runnerTools from "./runner-tools.js";
 import type {
@@ -25,7 +26,6 @@ export const contextLimits = {
 	retainAt: 0.1,
 	/** Longest tool result or saved message kept in context. The rest stays readable through the history tool. */
 	messageChars: 24_000,
-	/** Saved messages read per history query. */
 	historyBatch: 50,
 	/** Messages listed, and characters returned per page, by the history tool. */
 	historyListSize: 10,
@@ -33,7 +33,6 @@ export const contextLimits = {
 	historyPreviewChars: 400,
 } as const;
 
-/** The parts of a run's setup that are sent with every request. */
 export type ContextSetup = {
 	instructions: string;
 	definitions: ModelToolDefinition[];
@@ -158,18 +157,24 @@ export const advanceToolCursor = (checkpoint: Checkpoint) => {
 /**
  * Records a tool call's result in the reply being written and in the context
  * the model reads next. The full result is saved with the message, so context
- * only needs a preview of a long one. Returns the saved part.
+ * only needs a preview of a long one. Without a summary, the call keeps the one
+ * it had while running. Returns the saved part.
  */
 export const settleToolCall = (
 	checkpoint: Checkpoint,
 	call: ToolCall,
-	result: { status: AgentToolStatus; output: unknown },
+	result: {
+		status: AgentToolStatus;
+		output: unknown;
+		summary?: AgentToolDetails["summary"];
+	},
 ) => {
 	let settled: AgentToolDetails | undefined;
 	for (const part of checkpoint.parts) {
 		if (part.type === "tool" && part.id === call.id) {
 			part.status = result.status;
 			part.output = result.output;
+			if (result.summary) part.summary = result.summary;
 			settled = part;
 		}
 	}
@@ -200,7 +205,14 @@ export const settleToolCall = (
 		output: preview.value,
 	});
 
-	return settled ?? { type: "tool" as const, ...call, ...result };
+	return (
+		settled ?? {
+			type: "tool" as const,
+			...call,
+			...result,
+			summary: result.summary ?? copy.literal(call.name.replaceAll("_", " ")),
+		}
+	);
 };
 
 /**

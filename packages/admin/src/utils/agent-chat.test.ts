@@ -3,6 +3,7 @@ import type {
 	AgentMessage,
 	AgentRunStatus,
 	AgentStreamEvent,
+	ResolvedAdminCopy,
 } from "@types";
 import { createMemo, createRoot } from "solid-js";
 import { describe, expect, it, vi } from "vitest";
@@ -53,6 +54,13 @@ it("polls only for a recent, pending automatic title", () => {
 
 describe("streamed messages", () => {
 	it("builds a reply from streamed text, tools and widgets", () => {
+		const summary = {
+			type: "lucid.copy",
+			scope: "admin",
+			key: "test.echo.complete",
+			values: { message: "Hello" },
+			defaultMessage: "Echoed {{message}}.",
+		} as const;
 		const [message] = apply([
 			{ type: "start", runId: "run", messageId: "m1" },
 			{ type: "text-delta", messageId: "m1", text: "Hel" },
@@ -62,6 +70,7 @@ describe("streamed messages", () => {
 				messageId: "m1",
 				id: "t1",
 				name: "echo",
+				summary: { type: "lucid.literal", value: "Echoing the message." },
 				title: { type: "lucid.literal", value: "Echo" },
 				detailsAvailable: true,
 				status: "pending",
@@ -71,6 +80,7 @@ describe("streamed messages", () => {
 				messageId: "m1",
 				id: "t1",
 				name: "echo",
+				summary,
 				detailsAvailable: true,
 				status: "complete",
 			},
@@ -83,6 +93,7 @@ describe("streamed messages", () => {
 				type: "tool",
 				id: "t1",
 				name: "echo",
+				summary,
 				title: { type: "lucid.literal", value: "Echo" },
 				detailsAvailable: true,
 				status: "complete",
@@ -148,6 +159,7 @@ it("upserts a committed result once", () => {
 		type: "tool",
 		id: "f",
 		name: "lucid_finish_run",
+		summary: { type: "lucid.literal", value: "Finishing the run." },
 		detailsAvailable: true,
 		status: "pending",
 	} as const;
@@ -184,6 +196,7 @@ describe("partLayout", () => {
 					type: "tool",
 					id: "t1",
 					name: "lucid_ask_user",
+					summary: { type: "lucid.literal", value: "Received the answer." },
 					detailsAvailable: true,
 					status: "complete",
 				},
@@ -192,13 +205,26 @@ describe("partLayout", () => {
 		).toBe("hidden");
 	});
 
-	it("shows a completed progress call as text, outside the tool rows", () => {
+	it.each<ResolvedAdminCopy>([
+		{
+			type: "lucid.literal",
+			value: "I checked the {{kind}}.",
+			values: { kind: "pages" },
+		},
+		{
+			type: "lucid.copy",
+			scope: "admin",
+			key: "test.progress.checked",
+			values: { kind: "pages" },
+			defaultMessage: "I checked the {{kind}}.",
+		},
+	])("shows translated completed progress outside the tool rows", (summary) => {
 		const progress = {
 			type: "tool",
 			id: "p1",
 			name: "lucid_share_progress",
 			detailsAvailable: true,
-			display: { kind: "progress", message: "I checked the pages." },
+			summary,
 			status: "complete",
 		} as const;
 		expect(partLayout({ ...progress, status: "pending" }, noRows)).toBe(
@@ -316,6 +342,10 @@ it("a skipped tool dismisses its approval and steering receipts deduplicate on r
 				messageId: "assistant",
 				id: "write",
 				name: "write",
+				summary: {
+					type: "lucid.literal",
+					value: "Skipped the document update.",
+				},
 				detailsAvailable: true,
 				status: "skipped",
 			},

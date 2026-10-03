@@ -47,18 +47,34 @@ const handler: AgentToolHandler<
 
 	const isHtml = file.data.mimeType === "text/html";
 
+	const output = readPassages({
+		text: isHtml ? extractHtml(text) : text,
+		input,
+		file: {
+			mimeType: file.data.mimeType,
+			filename: file.data.filename?.slice(0, 255),
+			contentType: isHtml ? "extracted-text" : "text",
+		},
+	});
+
+	const summaryKey =
+		output.mode === "search"
+			? "admin:core.tools.media_read_file.search.summary"
+			: "admin:core.tools.media_read_file.summary";
+
 	return {
 		error: undefined,
 		data: {
-			output: readPassages({
-				text: isHtml ? extractHtml(text) : text,
-				input,
-				file: {
-					mimeType: file.data.mimeType,
-					filename: file.data.filename?.slice(0, 255),
-					contentType: isHtml ? "extracted-text" : "text",
+			output,
+			summary: copy(
+				output.passages.length === 1 ? `${summaryKey}.one` : summaryKey,
+				{
+					data: {
+						count: output.passages.length,
+						file: output.filename ?? String(input.mediaId),
+					},
 				},
-			}),
+			),
 		},
 	};
 };

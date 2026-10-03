@@ -1,7 +1,6 @@
 import type {
 	AgentInteractionAction,
 	AgentMessage as AgentMessageData,
-	AgentMessagePart,
 } from "@types";
 import classnames from "classnames";
 import { FaSolidCheck, FaSolidCopy } from "solid-icons/fa";
@@ -31,11 +30,12 @@ import {
 	isToolRow,
 	previewMediaWidget,
 	progressTool,
+	toolGroupAt,
 } from "@/utils/agent-tools";
 import dateHelpers from "@/utils/date-helpers";
 import AgentMarkdown from "./parts/AgentMarkdown";
 import AgentRoutineRequest from "./parts/AgentRoutineRequest";
-import AgentToolCall from "./parts/AgentToolCall";
+import AgentToolGroup from "./parts/AgentToolGroup";
 
 export interface AgentMessageProps {
 	message: AgentMessageData;
@@ -56,11 +56,6 @@ export interface AgentMessageProps {
 	working?: boolean;
 }
 
-const isToolAt = (parts: AgentMessagePart[], index: number) => {
-	const part = parts[index];
-	return part !== undefined && isToolRow(part);
-};
-
 /**
  * One message in a conversation: the user's text, or the agent's reply with its
  * tools and widgets. A message that ends in text ends in when it was sent and
@@ -69,7 +64,6 @@ const isToolAt = (parts: AgentMessagePart[], index: number) => {
 const AgentMessage: Component<AgentMessageProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
-	const [expanded, setExpanded] = createSignal<ReadonlySet<string>>(new Set());
 	const [copied, copy] = createCopy(() => messageText(props.message));
 
 	// ----------------------------------------
@@ -113,42 +107,22 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
-	const leadOf = (index: number) => {
-		let lead = index;
-		while (isToolAt(props.message.parts, lead - 1)) lead--;
-		return lead;
-	};
-	const followers = (index: number) => {
-		let last = index;
-		while (isToolAt(props.message.parts, last + 1)) last++;
-		return last - index;
-	};
-	const leadId = (index: number) => {
-		const lead = props.message.parts[leadOf(index)];
-		return lead?.type === "tool" ? lead.id : undefined;
-	};
 	const visible = (index: number) => {
 		const part = props.message.parts[index];
-		if (!part || layoutOf(part) === "hidden") return false;
-		if (!isToolRow(part) || leadOf(index) === index) return true;
-		return expanded().has(leadId(index) ?? "");
+		return (
+			part !== undefined &&
+			layoutOf(part) !== "hidden" &&
+			(!isToolRow(part) ||
+				toolGroupAt(props.message.parts, index) !== undefined)
+		);
 	};
-	/** Whether the part at this index shimmers: the last row, or the call leading its run while the run is folded away. */
 	const shimmers = (index: number) => {
 		if (!props.working) return false;
 		const parts = props.message.parts;
 		const last = parts.findLastIndex((part) => layoutOf(part) !== "hidden");
 		const part = parts[last];
 		if (!part || layoutOf(part) !== "row") return false;
-		return (visible(last) ? last : leadOf(last)) === index;
-	};
-	const toggle = (id: string | undefined) => {
-		if (!id) return;
-		setExpanded((open) => {
-			const next = new Set(open);
-			if (!next.delete(id)) next.add(id);
-			return next;
-		});
+		return (toolGroupAt(parts, index)?.lastIndex ?? index) === last;
 	};
 
 	// ----------------------------------------
@@ -213,7 +187,8 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 											{/* the shimmer animates its own element, as swapping animations on one element replays the entrance each time the shimmer stops */}
 											<div
 												class={classnames("flex flex-col", {
-													"agent-shimmer w-fit max-w-full": shimmers(index()),
+													"agent-shimmer w-fit max-w-full":
+														!isToolRow(part) && shimmers(index()),
 												})}
 											>
 												<Switch>
@@ -239,19 +214,15 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 															/>
 														)}
 													</Match>
-													<Match when={isToolRow(part) && part}>
-														{(tool) => (
-															<AgentToolCall
-																part={tool()}
-																selected={props.selectedToolId === tool().id}
+													<Match
+														when={toolGroupAt(props.message.parts, index())}
+													>
+														{(group) => (
+															<AgentToolGroup
+																group={group()}
+																selectedToolId={props.selectedToolId}
 																onSelect={props.onSelectTool}
-																more={
-																	leadOf(index()) === index()
-																		? followers(index())
-																		: undefined
-																}
-																expanded={expanded().has(tool().id)}
-																onToggle={() => toggle(tool().id)}
+																working={shimmers(index())}
 															/>
 														)}
 													</Match>

@@ -11,6 +11,7 @@ import type {
 } from "@types";
 import { batch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
+import { translateAdminCopy } from "@/translations";
 import { askTool, finishTool, progressTool } from "@/utils/agent-tools";
 
 export const shouldPollTitle = (
@@ -69,10 +70,9 @@ export const messageText = (message: Pick<AgentMessage, "parts">) =>
 			if (
 				part.type === "tool" &&
 				part.name === progressTool &&
-				part.status === "complete" &&
-				part.display?.kind === "progress"
+				part.status === "complete"
 			) {
-				return [part.display.message];
+				return [translateAdminCopy(part.summary)];
 			}
 
 			return [];

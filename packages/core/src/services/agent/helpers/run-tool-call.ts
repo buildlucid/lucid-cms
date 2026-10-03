@@ -84,7 +84,7 @@ const runToolCall = async (
 		});
 		if (prepared.type !== "success") return failedToolRun(context, prepared);
 		if ("output" in prepared.data) {
-			return toolResult(prepared.data.output, prepared.data.widgets);
+			return toolResult(prepared.data);
 		}
 
 		return {
@@ -104,7 +104,7 @@ const runToolCall = async (
 			pending: createInteraction({
 				callId: call.id,
 				key: constants.agent.widgets.approval,
-				title: context.translate(tool.title),
+				title: context.translate(tool.describe(call.input)),
 				data: {},
 				approval,
 			}),

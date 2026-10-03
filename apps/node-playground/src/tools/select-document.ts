@@ -34,7 +34,13 @@ export const selectDocumentTool = defineAgentTool({
 			});
 			if (result.error) return result;
 			if (!result.data.documents.length) {
-				return { error: undefined, data: { output: { documentId: null } } };
+				return {
+					error: undefined,
+					data: {
+						output: { documentId: null },
+						summary: "No documents available to select",
+					},
+				};
 			}
 
 			return {
@@ -81,7 +87,10 @@ export const selectDocumentTool = defineAgentTool({
 		if (result.error) return result;
 		return {
 			error: undefined,
-			data: { output: { documentId: result.data.document.id } },
+			data: {
+				output: { documentId: result.data.document.id },
+				summary: `Selected document ${result.data.document.id}`,
+			},
 		};
 	},
 });

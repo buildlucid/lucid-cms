@@ -1,26 +1,36 @@
 import type { PendingInteraction } from "../../../libs/agent/interactions.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
+import { normalizeCopy } from "../../../libs/i18n/index.js";
 import type { executeAgentTool } from "../../../libs/tools/execute-tool.js";
-import type { AgentToolResult } from "../../../libs/tools/types.js";
+import type {
+	AgentToolResult,
+	ResolvedAgentToolResult,
+} from "../../../libs/tools/types.js";
 import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
-export type ToolResult = {
-	kind: "result";
-	output: unknown;
-	failed: boolean;
-	widgets?: AgentToolResult<unknown>["widgets"];
-};
+/** Failed results keep the call's existing summary, so the transcript shows its title with a failed status. */
+export type ToolResult = { kind: "result" } & (
+	| (ResolvedAgentToolResult<unknown> & { failed: false })
+	| {
+			output: { error: string };
+			summary?: undefined;
+			widgets?: undefined;
+			failed: true;
+	  }
+);
 
 export type ToolOutcome =
 	| ToolResult
 	| { kind: "pending"; pending: PendingInteraction }
 	| { kind: "finish"; finish: NonNullable<Checkpoint["finish"]> };
 
-export const toolResult = (
-	output: unknown,
-	widgets?: ToolResult["widgets"],
-): ToolResult => ({ kind: "result", output, widgets, failed: false });
+export const toolResult = (result: AgentToolResult<unknown>): ToolResult => ({
+	kind: "result",
+	...result,
+	summary: normalizeCopy(result.summary),
+	failed: false,
+});
 
 /** A failed result, worded for the model so it can adjust rather than retry blindly. */
 export const toolFailure = (error: string): ToolResult => ({

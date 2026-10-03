@@ -22,11 +22,11 @@ const recordToolResult: ServiceFn<
 	],
 	"completed"
 > = async (_context, { call, checkpoint, session, outcome }) => {
-	const { output, failed } = outcome;
+	const { output, summary, failed } = outcome;
 
 	const status = failed ? "failed" : "complete";
 
-	const part = settleToolCall(checkpoint, call, { status, output });
+	const part = settleToolCall(checkpoint, call, { status, output, summary });
 
 	//* a grouped approval stays pending until every call it covers has a receipt
 	const approvals = checkpoint.pending?.widget.interaction.approvals;

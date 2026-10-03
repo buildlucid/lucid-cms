@@ -36,6 +36,7 @@ export const reviewNoteTool = defineAgentTool({
 		error: undefined,
 		data: {
 			output: { saved: true, ...response },
+			summary: `Saved "${response.title}"`,
 			widgets: [{ key: "playground-note", version: 1, data: response }],
 		},
 	}),

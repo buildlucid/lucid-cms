@@ -1,5 +1,6 @@
 import constants from "../../../../constants/constants.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { copy } from "../../../../libs/i18n/index.js";
 import { MediaRepository } from "../../../../libs/repositories/index.js";
 import { toolErrorFailure, toolFailure, toolResult } from "../tool-outcome.js";
 import registerReferences from "./register-references.js";
@@ -42,13 +43,24 @@ const previewMedia: RunnerToolInputHandler<
 	});
 	if (linked.kind !== "result" || linked.failed) return linked;
 
-	return toolResult({ mediaIds }, [
-		{
-			key: constants.agent.widgets.previewMedia,
-			version: 1,
-			data: { mediaIds },
-		},
-	]);
+	return toolResult({
+		output: { mediaIds },
+		summary: copy(
+			mediaIds.length === 1
+				? "admin:core.tools.lucid_preview_media.summary.one"
+				: "admin:core.tools.lucid_preview_media.summary",
+			{
+				data: { count: mediaIds.length },
+			},
+		),
+		widgets: [
+			{
+				key: constants.agent.widgets.previewMedia,
+				version: 1,
+				data: { mediaIds },
+			},
+		],
+	});
 };
 
 export default previewMedia;

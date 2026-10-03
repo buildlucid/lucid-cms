@@ -25,7 +25,10 @@ export const echoAgentTool = defineAgentTool({
 	permissions: [],
 	handler: async ({ input }) => ({
 		error: undefined,
-		data: { output: { message: input.message } },
+		data: {
+			output: { message: input.message },
+			summary: `Echoed "${input.message}"`,
+		},
 	}),
 	readOnly: true,
 });

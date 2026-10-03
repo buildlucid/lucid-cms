@@ -1,22 +1,28 @@
-import type { z } from "zod";
+import { z } from "zod";
 import constants from "../../constants/constants.js";
 import { agentInteractionRequestSchema } from "../../schemas/agent.js";
 import { isJsonObject } from "../../utils/helpers/is-json-object.js";
-import type { ServiceResponse } from "../../utils/services/types.js";
-import { copy, normalizeCopy } from "../i18n/index.js";
+import type {
+	ServiceContext,
+	ServiceResponse,
+} from "../../utils/services/types.js";
+import { adminCopyInputSchema, copy, normalizeCopy } from "../i18n/index.js";
+import logger from "../logger/index.js";
 import prepareToolInput, { checkToolResult } from "./prepare-input.js";
 import {
 	toolDefinitionBase,
 	toolDefinitionInternal,
 } from "./tool-definition-internal.js";
-import { toolDisplay } from "./tool-display.js";
 import type {
 	AgentToolDefinition,
 	AgentToolPreparation,
+	AgentToolResult,
 	DefineAgentToolOptions,
 	DefineInteractiveAgentToolOptions,
 	ToolRunResult,
 } from "./types.js";
+
+const summaryTextSchema = z.string().trim().min(1).max(2000);
 
 /**
  * Defines a tool for agents. Register it with an agent's `tools`. It runs with
@@ -56,20 +62,50 @@ function defineAgentTool<
 		| DefineAgentToolOptions<Name, Input, Output>
 		| DefineInteractiveAgentToolOptions<Name, Input, Output, Data, Response>,
 ): AgentToolDefinition<Name> {
+	//* the transcript always shows a name, so an untitled tool uses its name with spaces
+	const title = normalizeCopy(
+		options.title ?? options.name.replaceAll("_", " "),
+	);
+	const { describe } = options;
 	const definition = {
 		...toolDefinitionBase(options),
-		//* the transcript always shows a name, so an untitled tool uses its name with spaces
-		title: normalizeCopy(options.title ?? options.name.replaceAll("_", " ")),
+		title,
+		describe: (input: Record<string, unknown>) => {
+			if (!describe) return title;
+			const parsed = options.input.safeParse(input);
+			return parsed.success ? normalizeCopy(describe(parsed.data)) : title;
+		},
 		target: "agent" as const,
 		permissions: options.permissions,
 		readOnly: options.readOnly ?? false,
 		parallelSafe: options.parallelSafe ?? false,
 		requiresApproval: options.requiresApproval ?? false,
 		capabilities: options.capabilities,
-		display: options.display && toolDisplay(options.input, options.display),
 		outputVersion: options.outputVersion,
 	};
-	const checkResult = checkToolResult(options);
+	const checkOutput = checkToolResult(options);
+	const checkResult = async (
+		result: AgentToolResult<unknown>,
+		context: ServiceContext,
+	) => {
+		const summary = adminCopyInputSchema.safeParse(result.summary);
+		if (
+			summary.success &&
+			summaryTextSchema.safeParse(context.translate(summary.data)).success
+		) {
+			return checkOutput(
+				{ ...result, summary: normalizeCopy(summary.data) },
+				context,
+			);
+		}
+
+		//* the summary is display copy, so a bad one never fails a call whose work is done
+		logger.error({
+			event: "tools.summary.invalid",
+			message: `Tool ${options.name} returned an invalid summary`,
+		});
+		return checkOutput({ ...result, summary: title }, context);
+	};
 
 	if (!("interaction" in options)) {
 		return {

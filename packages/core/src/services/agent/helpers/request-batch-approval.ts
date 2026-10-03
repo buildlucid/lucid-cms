@@ -48,7 +48,7 @@ const requestBatchApproval: ServiceFn<
 		approvals.push({
 			toolCallId: call.id,
 			toolName: tool.name,
-			title: context.translate(tool.title),
+			title: context.translate(tool.describe(call.input)),
 			input: call.input,
 		});
 	}

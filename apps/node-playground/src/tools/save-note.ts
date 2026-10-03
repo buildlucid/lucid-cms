@@ -12,6 +12,7 @@ export const saveNoteTool = defineAgentTool({
 		error: undefined,
 		data: {
 			output: { saved: true },
+			summary: `Saved "${input.title}"`,
 			widgets: [{ key: "playground-note", version: 1, data: input }],
 		},
 	}),

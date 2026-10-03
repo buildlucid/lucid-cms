@@ -1,5 +1,6 @@
 import { referenceKey } from "../../../../libs/agent/references.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
+import { copy } from "../../../../libs/i18n/index.js";
 import describe from "../../references/describe.js";
 import list from "../../references/list.js";
 import { toolFailure, toolResult } from "../tool-outcome.js";
@@ -25,7 +26,7 @@ const references: RunnerToolInputHandler<
 	const details = await describe(context, { references: page });
 	if (details.error) return unavailable();
 
-	return toolResult({
+	const output = {
 		references: page.flatMap(({ source, ...reference }) => {
 			const detail = details.data.get(referenceKey(reference));
 			return detail
@@ -40,6 +41,15 @@ const references: RunnerToolInputHandler<
 				: [];
 		}),
 		nextOffset: end < links.data.length ? end : null,
+	};
+	return toolResult({
+		output,
+		summary: copy(
+			output.references.length === 1
+				? "admin:core.tools.lucid_list_references.summary.one"
+				: "admin:core.tools.lucid_list_references.summary",
+			{ data: { count: output.references.length } },
+		),
 	});
 };
 

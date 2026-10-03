@@ -1,5 +1,8 @@
 import z from "zod";
 import defineAgent from "../agent/define-agent.js";
+import { copy } from "../i18n/index.js";
+import defineAgentTool from "./define-agent-tool.js";
+import defineMcpTool from "./define-mcp-tool.js";
 
 const input = z.object({ count: z.number() });
 const output = z.object({ ok: z.boolean() });
@@ -28,6 +31,10 @@ defineAgentTool({
 			error: undefined,
 			data: {
 				output: { ok: count > 0 && userId !== 0 },
+				summary: copy("admin:test.items.checked", {
+					data: { count },
+					defaultMessage: "Checked {{count}} items.",
+				}),
 				widgets: [{ key: operationId, version: 1, data: { count } }],
 			},
 		};
@@ -61,6 +68,7 @@ defineAgentTool({
 		error: undefined,
 		data: {
 			output: { ok: true },
+			summary: "Checked the items.",
 			content: [{ type: "text", text: "wrong target" }],
 		},
 	}),
@@ -85,6 +93,26 @@ defineAgent({
 	description: "Test",
 	// @ts-expect-error Agents only accept agent tools.
 	tools: [mcpTool],
+});
+
+defineAgentTool({
+	...base,
+	permissions: [],
+	// @ts-expect-error Agent tool results require a transcript summary.
+	handler,
+});
+
+defineAgentTool({
+	...base,
+	permissions: [],
+	// @ts-expect-error Agent tool summaries cannot use server copy.
+	handler: async () => ({
+		error: undefined,
+		data: {
+			output: { ok: true },
+			summary: copy("server:test.items.checked"),
+		},
+	}),
 });
 
 // Interaction schemas infer preparation data, response choices, and the final handler input.
@@ -117,7 +145,10 @@ defineAgentTool({
 		response.id satisfies string;
 		return {
 			error: undefined,
-			data: { output: { ok: choices.includes(id) && count > 0 } },
+			data: {
+				output: { ok: choices.includes(id) && count > 0 },
+				summary: `Selected item ${id}.`,
+			},
 		};
 	},
 });

@@ -1712,7 +1712,6 @@
 	"agent.tool.output.unavailable": "This saved result cannot be displayed. You can still view its details.",
 	"agent.tool.output.none": "This tool did not return anything.",
 	"agent.tool.group.show": "Show {{count}} more",
-	"agent.tool.group.hide": "Hide {{count}} more",
 	"agent.question.asked": "Asked a question",
 	"agent.question.dismissed.short": "Dismissed",
 	"agent.question.stop": "Stop the agent instead of answering",
@@ -1766,11 +1765,6 @@
 	"agent.chat.missing.description": "It may have been deleted, or it belongs to someone else.",
 	"agent.errors.stream": "The reply was interrupted. It will carry on in the background.",
 	"agent.errors.stream.interrupted": "The connection to the agent closed before it finished.",
-	"agent.tool.skill": "Loaded the {{name}} skill",
-	"agent.tool.web.search": "Search “{{query}}”",
-	"agent.tool.web.searched": "Searched “{{query}}”",
-	"agent.tool.web.fetch": "Read {{site}}",
-	"agent.tool.web.fetched": "Read {{site}}",
 	"agent.web.sources.count": "Sources ({{count}})",
 	"agent.web.sources.none": "No sources found.",
 	"agent.file.read.range": "Characters {{start}} to {{end}} of {{total}}",
@@ -1998,5 +1992,10 @@
 	"agent.references.kinds.audio": "audio",
 	"agent.references.kinds.video": "video",
 	"agent.references.kinds.text": "text files",
-	"agent.references.kinds.file": "files"
+	"agent.references.kinds.file": "files",
+	"agent.tool.group.calls": "{{count}} calls",
+	"agent.tool.group.failed": "{{count}} failed",
+	"agent.tool.group.skipped": "{{count}} skipped",
+	"agent.tool.group.running": "{{count}} running",
+	"agent.tool.group.pending": "{{count}} waiting"
 }

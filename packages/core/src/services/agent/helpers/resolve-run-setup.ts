@@ -65,7 +65,8 @@ const resolveRunSetup = (
 				tool.name,
 				{
 					title: tool.title,
-					display: tool.display,
+					describe: (input: Record<string, unknown>) =>
+						"describe" in tool ? tool.describe(input) : tool.title,
 					//* runner tools show widgets instead of versioned outputs
 					outputVersion:
 						"outputVersion" in tool ? tool.outputVersion : undefined,

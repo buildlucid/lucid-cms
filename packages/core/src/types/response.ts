@@ -36,7 +36,6 @@ export type {
 	AgentSummary,
 	AgentTitleStatus,
 	AgentToolDetails,
-	AgentToolDisplay,
 	AgentToolStatus,
 	AgentToolSummary,
 	AgentUsage,

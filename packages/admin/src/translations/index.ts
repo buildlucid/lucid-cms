@@ -229,11 +229,12 @@ export const translateAdminCopy = (
 
 	// Literal copy is already written text (a string authored in config), so it
 	// is interpolated directly rather than looked up as a translation key.
+	// Braces without a value stay as written.
 	if (copy.type === "lucid.literal") {
 		const values = { ...(copy.values ?? {}), ...(options?.values ?? {}) };
 		return copy.value.replace(
 			/\{\{(\w+)\}\}/g,
-			(_, key) => values[key]?.toString() ?? "",
+			(match, key) => values[key]?.toString() ?? match,
 		);
 	}
 
