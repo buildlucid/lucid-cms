@@ -7,7 +7,7 @@ import {
 } from "../../../libs/agent/interactions.js";
 import type { Checkpoint } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getConversationLevel } from "../../../libs/permission/agent-permissions.js";
+import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import { toolDefinitionInternal } from "../../../libs/tools/registry.js";
 import type { AgentInteractionAction } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -47,7 +47,7 @@ const validateInteractionResponse: ServiceFn<
 	const access = await checkAgentAccess(context, {
 		userId: props.userId,
 		agentKey: run.agent_key,
-		level: getConversationLevel(run.conversation_user_id),
+		action: getConversationPermission(run.conversation_kind),
 	});
 	if (access.error) return access;
 	if (props.action === "cancel") {
@@ -126,7 +126,7 @@ const validateInteractionResponse: ServiceFn<
 	const executionAccess = await checkAgentAccess(context, {
 		userId: run.user_id,
 		agentKey: run.agent_key,
-		level: getConversationLevel(run.conversation_user_id),
+		action: getConversationPermission(run.conversation_kind),
 	});
 	if (executionAccess.error) return executionAccess;
 

@@ -54,7 +54,7 @@ const AgentHistoryPage: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const createActions = createMemo<CreateMenuAction[]>(() =>
-		getAgentAccess().use.length > 0
+		getAgentAccess().chat.length > 0
 			? [
 					{
 						type: "link",

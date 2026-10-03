@@ -175,13 +175,21 @@ const getCollectionCapabilityGroups = (
 };
 
 const agentPermissionDetails = {
-	use: {
-		name: copy("admin:permissions.agents.use"),
-		description: copy("admin:permissions.agents.use.description"),
+	chat: {
+		name: copy("admin:permissions.agents.chat"),
+		description: copy("admin:permissions.agents.chat.description"),
 	},
-	manage: {
-		name: copy("admin:permissions.agents.manage"),
-		description: copy("admin:permissions.agents.manage.description"),
+	"manage-own-routines": {
+		name: copy("admin:permissions.agents.manage.own.routines"),
+		description: copy(
+			"admin:permissions.agents.manage.own.routines.description",
+		),
+	},
+	"manage-code-routines": {
+		name: copy("admin:permissions.agents.manage.code.routines"),
+		description: copy(
+			"admin:permissions.agents.manage.code.routines.description",
+		),
 	},
 } as const;
 

@@ -705,7 +705,7 @@ test("filters hydrated references by the viewer's resource permissions", async (
 	const document = await createDocument();
 	for (const mediaAccess of [false, true]) {
 		const userId = await createReader([
-			getAgentPermission(agent.key, "use"),
+			getAgentPermission(agent.key, "chat"),
 			...(mediaAccess ? [Permissions.MediaRead] : []),
 		]);
 		const conversationId = await createChat(userId);
@@ -792,6 +792,7 @@ const callReferenceTool = async (
 			execution_version: 1,
 			agent_key: agent.key,
 			conversation_user_id: userId,
+			conversation_kind: userId === null ? "code-routine" : "chat",
 			conversation_routine_id: null,
 		},
 		mode: "chat",
@@ -963,7 +964,7 @@ test("reference registration checks the whole batch's read permissions and valid
 });
 
 test("personal media is only linked and listed for its owner, and system media never is", async () => {
-	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
 	const adminId = await createReader();
 	const ownerChat = await createChat(ownerId);
 	const adminChat = await createChat(adminId);
@@ -1028,7 +1029,7 @@ test("personal media is only linked and listed for its owner, and system media n
 });
 
 test("media previews register a bounded gallery and owners need no library permissions", async () => {
-	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
 	const chatId = await createChat(ownerId);
 	const mediaId = await createMedia({ owner_user_id: ownerId });
 	const outcome = await callReferenceTool(
@@ -1068,7 +1069,7 @@ test("media previews register a bounded gallery and owners need no library permi
 });
 
 test("media previews show images, video and audio while other linked files stay as references", async () => {
-	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
 	const chatId = await createChat(ownerId);
 	const richMediaIds = await Promise.all([
 		createMedia({ owner_user_id: ownerId }),
@@ -1127,7 +1128,7 @@ test.each([
 	mime_type: string;
 	file_extension: string;
 }[])("media previews reject $mime_type before linking any items in a mixed gallery", async (file) => {
-	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
 	const chatId = await createChat(ownerId);
 	const imageId = await createMedia({ owner_user_id: ownerId });
 	const fileId = await createMedia({ ...file, owner_user_id: ownerId });
@@ -1148,7 +1149,7 @@ test.each([
 });
 
 test("media previews enforce ownership, viewer access and current deletion state", async () => {
-	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
 	const otherId = await createReader();
 	const chatId = await createChat(ownerId);
 	const mediaId = await createMedia({ owner_user_id: ownerId });
@@ -1193,7 +1194,7 @@ test("media previews enforce ownership, viewer access and current deletion state
 });
 
 test("upload-only agents accept owned files without enabling existing media or document attachments", async () => {
-	const ownerId = await createReader([getAgentPermission(agent.key, "use")]);
+	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
 	const uploadOnly = defineAgent({
 		key: agent.key,
 		name: agent.name,

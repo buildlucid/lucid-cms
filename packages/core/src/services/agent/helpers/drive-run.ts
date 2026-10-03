@@ -10,7 +10,7 @@ import { textFromParts } from "../../../libs/agent/input.js";
 import runnerTools from "../../../libs/agent/runner-tools.js";
 import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
-import { getConversationLevel } from "../../../libs/permission/agent-permissions.js";
+import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import type { AgentRunStatus } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkAgentAccess from "./check-agent-access.js";
@@ -64,7 +64,7 @@ const driveRun: ServiceFn<
 	const access = await checkAgentAccess(context, {
 		userId: run.user_id,
 		agentKey: run.agent_key,
-		level: getConversationLevel(run.conversation_user_id),
+		action: getConversationPermission(run.conversation_kind),
 		requireConnection: true,
 	});
 	if (access.error) {

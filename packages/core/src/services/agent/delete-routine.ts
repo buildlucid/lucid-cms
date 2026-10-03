@@ -3,7 +3,7 @@ import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 
-/** Deletes a routine created in the admin. Its past conversations are kept as ordinary chats. */
+/** Deletes a routine created in the admin. Its past conversations retain their routine workflow permission. */
 const deleteRoutine: ServiceFn<
 	[{ id: string; userId: number }],
 	undefined

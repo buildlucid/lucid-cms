@@ -5,7 +5,6 @@ import checkAgentAccess from "./helpers/check-agent-access.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
 import resolveModel from "./helpers/resolve-model.js";
 
-/** Returns the models an agent offers, and the default for a new chat or a routine's runs. */
 const getModels: ServiceFn<
 	[{ agentKey: string; userId: number; routineId?: string }],
 	AiModelCatalog
@@ -27,7 +26,7 @@ const getModels: ServiceFn<
 			};
 		}
 	} else {
-		const access = await checkAgentAccess(context, { ...input, level: "use" });
+		const access = await checkAgentAccess(context, input);
 		if (access.error) return access;
 	}
 

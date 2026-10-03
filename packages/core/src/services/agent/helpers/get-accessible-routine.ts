@@ -51,7 +51,10 @@ const getAccessibleRoutine: ServiceFn<
 	const access = await checkAgentAccess(context, {
 		userId: input.userId,
 		agentKey: result.data.agent_key,
-		level: result.data.source === "code" ? "manage" : "use",
+		action:
+			result.data.source === "code"
+				? "manage-code-routines"
+				: "manage-own-routines",
 	});
 	if (access.error) return access;
 

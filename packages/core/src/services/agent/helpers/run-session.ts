@@ -10,6 +10,7 @@ import type {
 	Checkpoint,
 	ConversationContext,
 } from "../../../libs/agent/types.js";
+import type { LucidAgentConversations } from "../../../libs/db/tables/agent-conversations.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import {
@@ -43,6 +44,7 @@ export type SessionRun = {
 	execution_version: number;
 	agent_key: string;
 	conversation_user_id: number | null;
+	conversation_kind: LucidAgentConversations["kind"];
 	conversation_routine_id: string | null;
 };
 

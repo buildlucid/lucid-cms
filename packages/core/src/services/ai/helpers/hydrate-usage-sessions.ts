@@ -3,7 +3,7 @@ import aiUsageFormatter, {
 	type AiUsageSessionPropT,
 } from "../../../libs/formatters/ai-usage.js";
 import {
-	getConversationLevel,
+	getConversationPermission,
 	hasAgentPermission,
 } from "../../../libs/permission/agent-permissions.js";
 import formatUserRefs from "../../../libs/refs/users/format.js";
@@ -47,7 +47,7 @@ const hydrateUsageSessions: ServiceFn<
 			: { error: undefined, data: [] },
 		conversationIds.length
 			? AgentConversations.selectMultiple({
-					select: ["id", "title", "user_id", "agent_key"],
+					select: ["id", "title", "user_id", "agent_key", "kind"],
 					where: [{ key: "id", operator: "in", value: conversationIds }],
 					validation: { enabled: true },
 				})
@@ -76,7 +76,7 @@ const hydrateUsageSessions: ServiceFn<
 					hasAgentPermission(
 						viewer.data,
 						conversation.agent_key,
-						getConversationLevel(conversation.user_id),
+						getConversationPermission(conversation.kind),
 					),
 			)
 			.map((conversation) => [

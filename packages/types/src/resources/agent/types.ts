@@ -66,13 +66,13 @@ export interface Agent {
 	};
 	/** What the agent can do for the current user, such as open attached files or search the web. */
 	capabilities: AgentCapabilities;
-	/** Messages offered when starting a chat. Empty without the agent's use permission. */
+	/** Messages offered when starting a chat. Empty without the agent's chat permission. */
 	suggestions: {
 		title: ResolvedAdminCopy;
 		description: ResolvedAdminCopy;
 		message: ResolvedAdminCopy;
 	}[];
-	/** Tools available to this agent. Empty when the user can neither use nor manage it. */
+	/** Tools available to this agent. Empty without an agent workflow permission. */
 	tools: {
 		name: string;
 		title: ResolvedAdminCopy;

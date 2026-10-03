@@ -2,6 +2,7 @@ import type { QueryParams } from "../../types/query-params.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
 import { agentRoutinesTable } from "../db/tables/agent-routines.js";
+import type { AgentPermissionAction } from "../permission/types.js";
 import StaticRepository from "./parents/static-repository.js";
 
 export default class AgentRoutinesRepository extends StaticRepository<"lucid_agent_routines"> {
@@ -9,79 +10,59 @@ export default class AgentRoutinesRepository extends StaticRepository<"lucid_age
 		super(db, agentRoutinesTable);
 	}
 
-	/** Lists a user's own routines for agents they use, and code routines for agents they manage. */
 	async selectMultipleFilteredForAccess(props: {
 		userId: number;
-		agentKeys: { use: string[]; manage: string[] };
+		agentKeys: Record<AgentPermissionAction, string[]>;
 		queryParams: Partial<QueryParams>;
 	}) {
+		const accessible = this.db
+			.selectFrom("lucid_agent_routines")
+			.where((eb) =>
+				eb.or([
+					...(props.agentKeys["manage-own-routines"].length
+						? [
+								eb.and([
+									eb("source", "=", "database"),
+									eb("user_id", "=", props.userId),
+									eb("agent_key", "in", props.agentKeys["manage-own-routines"]),
+								]),
+							]
+						: []),
+					...(props.agentKeys["manage-code-routines"].length
+						? [
+								eb.and([
+									eb("source", "=", "code"),
+									eb(
+										"agent_key",
+										"in",
+										props.agentKeys["manage-code-routines"],
+									),
+								]),
+							]
+						: []),
+				]),
+			);
 		const { main, count } = queryBuilder.main(
 			{
-				main: this.db
-					.selectFrom("lucid_agent_routines")
-					.select([
-						"id",
-						"agent_key",
-						"key",
-						"source",
-						"name",
-						"instructions",
-						"model_selection",
-						"conversation_mode",
-						"conversation_id",
-						"cron",
-						"timezone",
-						"enabled",
-						"user_id",
-						"next_run_at",
-						"created_at",
-						"updated_at",
-					])
-					.where((eb) =>
-						eb.or([
-							...(props.agentKeys.use.length
-								? [
-										eb.and([
-											eb("source", "=", "database"),
-											eb("user_id", "=", props.userId),
-											eb("agent_key", "in", props.agentKeys.use),
-										]),
-									]
-								: []),
-							...(props.agentKeys.manage.length
-								? [
-										eb.and([
-											eb("source", "=", "code"),
-											eb("agent_key", "in", props.agentKeys.manage),
-										]),
-									]
-								: []),
-						]),
-					),
-				count: this.db
-					.selectFrom("lucid_agent_routines")
-					.select((eb) => eb.fn.countAll<number>().as("count"))
-					.where((eb) =>
-						eb.or([
-							...(props.agentKeys.use.length
-								? [
-										eb.and([
-											eb("source", "=", "database"),
-											eb("user_id", "=", props.userId),
-											eb("agent_key", "in", props.agentKeys.use),
-										]),
-									]
-								: []),
-							...(props.agentKeys.manage.length
-								? [
-										eb.and([
-											eb("source", "=", "code"),
-											eb("agent_key", "in", props.agentKeys.manage),
-										]),
-									]
-								: []),
-						]),
-					),
+				main: accessible.select([
+					"id",
+					"agent_key",
+					"key",
+					"source",
+					"name",
+					"instructions",
+					"model_selection",
+					"conversation_mode",
+					"conversation_id",
+					"cron",
+					"timezone",
+					"enabled",
+					"user_id",
+					"next_run_at",
+					"created_at",
+					"updated_at",
+				]),
+				count: accessible.select((eb) => eb.fn.countAll<number>().as("count")),
 			},
 			{
 				queryParams: props.queryParams,

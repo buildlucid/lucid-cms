@@ -37,7 +37,6 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		return result.response;
 	}
-	/** A run with its conversation's agent and owner, which decide the access it needs. */
 	async selectForExecution(runId: string) {
 		const query = this.db
 			.selectFrom("lucid_agent_runs")
@@ -57,6 +56,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				"lucid_agent_runs.checkpoint",
 				"lucid_agent_runs.execution_version",
 				"lucid_agent_conversations.agent_key",
+				"lucid_agent_conversations.kind as conversation_kind",
 				"lucid_agent_conversations.user_id as conversation_user_id",
 				"lucid_agent_conversations.routine_id as conversation_routine_id",
 			])

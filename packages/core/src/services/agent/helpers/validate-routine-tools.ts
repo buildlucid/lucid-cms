@@ -14,7 +14,7 @@ const validateRoutineTools: ServiceFn<
 	const access = await checkAgentAccess(context, {
 		agentKey: input.agentKey,
 		userId: input.userId,
-		level: "use",
+		action: "manage-own-routines",
 	});
 	if (access.error) return access;
 

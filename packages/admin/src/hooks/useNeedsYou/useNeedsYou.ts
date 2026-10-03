@@ -54,7 +54,7 @@ export const useNeedsYou = (props: { limit: number }) => {
 	const canReadSettings = createMemo(
 		() => userStore.get.hasPermission([Permissions.SettingsRead]).all,
 	);
-	const canChat = createMemo(() => getAgentAccess().use.length > 0);
+	const canAccessAgents = createMemo(() => getAgentAccess().all.length > 0);
 
 	// ----------------------------------------
 	// Queries
@@ -75,7 +75,7 @@ export const useNeedsYou = (props: { limit: number }) => {
 	});
 	const chats = api.agent.useGetConversations({
 		queryParams: { filters: { status: "waiting" }, perPage: props.limit },
-		enabled: canChat,
+		enabled: canAccessAgents,
 	});
 	const settings = api.settings.useGetSettings({
 		queryParams: { include: { media: true } },
@@ -216,7 +216,7 @@ export const useNeedsYou = (props: { limit: number }) => {
 	const loading = createMemo(
 		() =>
 			(canReadPublishing() && (reviews.isLoading || failed.isLoading)) ||
-			(canChat() && chats.isLoading),
+			(canAccessAgents() && chats.isLoading),
 	);
 
 	return {

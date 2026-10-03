@@ -1,6 +1,8 @@
-import type { Component } from "solid-js";
+import { Navigate } from "@solidjs/router";
+import { type Component, Show } from "solid-js";
 import AgentHome from "@/components/AgentHome/AgentHome";
 import PageLayout from "@/components/PageLayout/PageLayout";
+import { getAgentAccess } from "@/utils/agent-access";
 
 const AgentPage: Component = () => {
 	// ----------------------------------------
@@ -8,7 +10,12 @@ const AgentPage: Component = () => {
 	return (
 		<PageLayout.Root>
 			<PageLayout.Body padding="md" class="blur-background">
-				<AgentHome />
+				<Show
+					when={getAgentAccess().chat.length > 0}
+					fallback={<Navigate href="/lucid/agent/routines" />}
+				>
+					<AgentHome />
+				</Show>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

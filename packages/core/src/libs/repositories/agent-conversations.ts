@@ -1,9 +1,12 @@
 import constants from "../../constants/constants.js";
+import { agentConversationKindSchema } from "../../schemas/agent.js";
 import type { QueryParams } from "../../types/query-params.js";
 import type { ConversationContext } from "../agent/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
 import { agentConversationsTable } from "../db/tables/agent-conversations.js";
+import { getConversationPermission } from "../permission/agent-permissions.js";
+import type { AgentPermissionAction } from "../permission/types.js";
 import StaticRepository from "./parents/static-repository.js";
 
 export default class AgentConversationsRepository extends StaticRepository<"lucid_agent_conversations"> {
@@ -34,101 +37,57 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 				),
 			);
 	}
-	/** Lists a user's own chats for agents they use, and code routine chats for agents they manage. */
+	/** Lists chats for each granted workflow, keeping personal chats private to their owner. */
 	async selectMultipleFilteredForAccess(props: {
 		userId: number;
-		agentKeys: { use: string[]; manage: string[] };
+		agentKeys: Record<AgentPermissionAction, string[]>;
 		queryParams: Partial<QueryParams>;
 	}) {
+		const accessible = this.selectWithLatestRun().where((eb) =>
+			eb.and([
+				eb.or([
+					eb("lucid_agent_conversations.user_id", "=", props.userId),
+					eb("lucid_agent_conversations.user_id", "is", null),
+				]),
+				eb.or(
+					agentConversationKindSchema.options.flatMap((kind) => {
+						const keys = props.agentKeys[getConversationPermission(kind)];
+						return keys.length
+							? [
+									eb.and([
+										eb("lucid_agent_conversations.kind", "=", kind),
+										eb("lucid_agent_conversations.agent_key", "in", keys),
+									]),
+								]
+							: [];
+					}),
+				),
+			]),
+		);
 		const { main, count } = queryBuilder.main(
 			{
-				main: this.selectWithLatestRun()
-					.select([
-						"lucid_agent_conversations.id",
-						"lucid_agent_conversations.agent_key",
-						"lucid_agent_conversations.title",
-						"lucid_agent_conversations.title_status",
-						"lucid_agent_conversations.title_generation_requested_at",
-						"lucid_agent_conversations.user_id",
-						"lucid_agent_conversations.routine_id",
-						"lucid_agent_conversations.active_run_id",
-						"lucid_agent_conversations.queue_paused",
-						"lucid_agent_conversations.context",
-						"lucid_agent_conversations.model_selection",
-						"lucid_agent_conversations.approval_mode",
-						"lucid_agent_conversations.created_at",
-						"lucid_agent_conversations.updated_at",
-						"lucid_agent_runs.id as latest_run_id",
-						"lucid_agent_runs.status as latest_run_status",
-						"lucid_agent_runs.outcome as latest_run_outcome",
-						"lucid_agent_runs.error_message as latest_run_error",
-					])
-					.where((eb) =>
-						eb.or([
-							...(props.agentKeys.use.length
-								? [
-										eb.and([
-											eb(
-												"lucid_agent_conversations.user_id",
-												"=",
-												props.userId,
-											),
-											eb(
-												"lucid_agent_conversations.agent_key",
-												"in",
-												props.agentKeys.use,
-											),
-										]),
-									]
-								: []),
-							...(props.agentKeys.manage.length
-								? [
-										eb.and([
-											eb("lucid_agent_conversations.user_id", "is", null),
-											eb(
-												"lucid_agent_conversations.agent_key",
-												"in",
-												props.agentKeys.manage,
-											),
-										]),
-									]
-								: []),
-						]),
-					),
-				count: this.selectWithLatestRun()
-					.select((eb) => eb.fn.countAll<number>().as("count"))
-					.where((eb) =>
-						eb.or([
-							...(props.agentKeys.use.length
-								? [
-										eb.and([
-											eb(
-												"lucid_agent_conversations.user_id",
-												"=",
-												props.userId,
-											),
-											eb(
-												"lucid_agent_conversations.agent_key",
-												"in",
-												props.agentKeys.use,
-											),
-										]),
-									]
-								: []),
-							...(props.agentKeys.manage.length
-								? [
-										eb.and([
-											eb("lucid_agent_conversations.user_id", "is", null),
-											eb(
-												"lucid_agent_conversations.agent_key",
-												"in",
-												props.agentKeys.manage,
-											),
-										]),
-									]
-								: []),
-						]),
-					),
+				main: accessible.select([
+					"lucid_agent_conversations.id",
+					"lucid_agent_conversations.agent_key",
+					"lucid_agent_conversations.kind",
+					"lucid_agent_conversations.title",
+					"lucid_agent_conversations.title_status",
+					"lucid_agent_conversations.title_generation_requested_at",
+					"lucid_agent_conversations.user_id",
+					"lucid_agent_conversations.routine_id",
+					"lucid_agent_conversations.active_run_id",
+					"lucid_agent_conversations.queue_paused",
+					"lucid_agent_conversations.context",
+					"lucid_agent_conversations.model_selection",
+					"lucid_agent_conversations.approval_mode",
+					"lucid_agent_conversations.created_at",
+					"lucid_agent_conversations.updated_at",
+					"lucid_agent_runs.id as latest_run_id",
+					"lucid_agent_runs.status as latest_run_status",
+					"lucid_agent_runs.outcome as latest_run_outcome",
+					"lucid_agent_runs.error_message as latest_run_error",
+				]),
+				count: accessible.select((eb) => eb.fn.countAll<number>().as("count")),
 			},
 			{
 				queryParams: props.queryParams,
@@ -153,6 +112,7 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 			select: [
 				"id",
 				"agent_key",
+				"kind",
 				"title",
 				"title_status",
 				"title_generation_requested_at",
@@ -176,6 +136,7 @@ export default class AgentConversationsRepository extends StaticRepository<"luci
 			.select([
 				"lucid_agent_conversations.id",
 				"lucid_agent_conversations.agent_key",
+				"lucid_agent_conversations.kind",
 				"lucid_agent_conversations.title",
 				"lucid_agent_conversations.title_status",
 				"lucid_agent_conversations.title_generation_requested_at",

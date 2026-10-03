@@ -1,7 +1,7 @@
 import type { LucidAgentConversations } from "../../../libs/db/tables/agent-conversations.js";
 import type { Select } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
-import { getConversationLevel } from "../../../libs/permission/agent-permissions.js";
+import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
 import { AgentConversationsRepository } from "../../../libs/repositories/index.js";
 import type {
 	AgentRunOutcome,
@@ -41,7 +41,7 @@ const getAccessibleConversation: ServiceFn<
 	const access = await checkAgentAccess(context, {
 		userId: input.userId,
 		agentKey: result.data.agent_key,
-		level: getConversationLevel(result.data.user_id),
+		action: getConversationPermission(result.data.kind),
 	});
 	if (access.error) return access;
 

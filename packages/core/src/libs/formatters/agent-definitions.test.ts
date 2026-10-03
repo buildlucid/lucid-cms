@@ -52,7 +52,7 @@ test("agent details expose suggestions to users and tools to managers", async ()
 			adminTranslations: { "review.title": "Review content" },
 		});
 
-	const user = format([getAgentPermission("reviewer", "use")]);
+	const user = format([getAgentPermission("reviewer", "chat")]);
 	expect(user.enabled).toBe(true);
 	expect(user.agents[0]?.suggestions[0]).toMatchObject({
 		title: { defaultMessage: "Review content" },
@@ -60,9 +60,14 @@ test("agent details expose suggestions to users and tools to managers", async ()
 	});
 	expect(user.agents[0]?.tools.length).toBeGreaterThan(0);
 
-	const manager = format([getAgentPermission("reviewer", "manage")]);
-	expect(manager.agents[0]?.suggestions).toEqual([]);
-	expect(manager.agents[0]?.tools.length).toBeGreaterThan(0);
+	for (const action of [
+		"manage-own-routines",
+		"manage-code-routines",
+	] as const) {
+		const manager = format([getAgentPermission("reviewer", action)]);
+		expect(manager.agents[0]?.suggestions).toEqual([]);
+		expect(manager.agents[0]?.tools.length).toBeGreaterThan(0);
+	}
 
 	const noAccess = format([]);
 	expect(noAccess.agents[0]).toMatchObject({ suggestions: [], tools: [] });

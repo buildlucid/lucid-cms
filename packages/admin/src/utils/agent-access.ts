@@ -1,4 +1,5 @@
 import type {
+	AgentPermissionAction,
 	AgentRoutine,
 	AgentRoutineConversationMode,
 	AgentSummary,
@@ -7,16 +8,22 @@ import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import T, { type TranslationKeys } from "@/translations";
 
-/** The agents the current user can use or manage. Reactive when read inside a memo or effect. */
+/** Agents available for each workflow. Reactive inside a memo or effect. */
 export const getAgentAccess = () => {
 	const agents = siteStore.get.ai.enabled ? siteStore.get.ai.agents : [];
-	const can = (agent: AgentSummary, level: "use" | "manage") =>
-		userStore.get.hasPermission([`agents:${agent.key}:${level}`]).all;
+	const can = (agent: AgentSummary, action: AgentPermissionAction) =>
+		userStore.get.hasPermission([`agents:${agent.key}:${action}`]).all;
 
 	return {
-		all: agents.filter((agent) => can(agent, "use") || can(agent, "manage")),
-		use: agents.filter((agent) => can(agent, "use")),
-		manage: agents.filter((agent) => can(agent, "manage")),
+		all: agents.filter(
+			(agent) =>
+				can(agent, "chat") ||
+				can(agent, "manage-own-routines") ||
+				can(agent, "manage-code-routines"),
+		),
+		chat: agents.filter((agent) => can(agent, "chat")),
+		ownRoutines: agents.filter((agent) => can(agent, "manage-own-routines")),
+		codeRoutines: agents.filter((agent) => can(agent, "manage-code-routines")),
 	};
 };
 

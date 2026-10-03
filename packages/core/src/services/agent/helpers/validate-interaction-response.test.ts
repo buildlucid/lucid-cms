@@ -14,7 +14,7 @@ import validateInteractionResponse from "./validate-interaction-response.js";
 const testConfig = getTestConfig();
 afterAll(testConfig.destroy);
 
-test("system approvals require live manage permission and user approvals stay private", async () => {
+test("system approvals require live code routine permission and user approvals stay private", async () => {
 	await testConfig.migrate();
 	const config = await testConfig.getConfig();
 	const agent = defineAgent({
@@ -77,6 +77,7 @@ test("system approvals require live manage permission and user approvals stay pr
 		execution_version: 0,
 		agent_key: agent.key,
 		conversation_user_id: null,
+		conversation_kind: "code-routine",
 		conversation_routine_id: null,
 	};
 	const answer = () =>
@@ -93,7 +94,7 @@ test("system approvals require live manage permission and user approvals stay pr
 		.insertInto("lucid_role_permissions")
 		.values({
 			role_id: role.id,
-			permission: getAgentPermission(agent.key, "use"),
+			permission: getAgentPermission(agent.key, "chat"),
 			core: true,
 		})
 		.execute();
@@ -102,7 +103,7 @@ test("system approvals require live manage permission and user approvals stay pr
 		.insertInto("lucid_role_permissions")
 		.values({
 			role_id: role.id,
-			permission: getAgentPermission(agent.key, "manage"),
+			permission: getAgentPermission(agent.key, "manage-code-routines"),
 			core: true,
 		})
 		.execute();
@@ -124,7 +125,11 @@ test("system approvals require live manage permission and user approvals stay pr
 	await context.db.kysely
 		.deleteFrom("lucid_role_permissions")
 		.where("role_id", "=", role.id)
-		.where("permission", "=", getAgentPermission(agent.key, "manage"))
+		.where(
+			"permission",
+			"=",
+			getAgentPermission(agent.key, "manage-code-routines"),
+		)
 		.execute();
 	expect((await answer()).error?.status).toBe(403);
 });

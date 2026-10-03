@@ -6,10 +6,10 @@ import { getAgentAccess } from "@/utils/agent-access";
 
 /**
  * Whether Home can open on the chat box. Needs `admin.agentHomescreen` left on in
- * lucid.config and an agent the user can use.
+ * lucid.config and an agent the user can chat with.
  */
 export const canUseAskView = () =>
-	useAdminConfig().agentHomescreen && getAgentAccess().use.length > 0;
+	useAdminConfig().agentHomescreen && getAgentAccess().chat.length > 0;
 
 /**
  * The view Home opens on. Users who can chat start on Ask until they pick,

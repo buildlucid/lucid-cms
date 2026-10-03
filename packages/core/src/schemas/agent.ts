@@ -32,6 +32,13 @@ import {
 import { queryFormatted, queryString } from "./helpers/querystring.js";
 import { mediaResponseSchema, uploadSessionResponseSchema } from "./media.js";
 
+/** A conversation keeps its workflow after its routine is deleted. */
+export const agentConversationKindSchema = z.enum([
+	"chat",
+	"own-routine",
+	"code-routine",
+]);
+
 /** Pending and claimed input is still to be delivered; the rest is kept as a receipt. */
 export const agentInputStatusSchema = z.enum([
 	"pending",

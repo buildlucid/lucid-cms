@@ -16,16 +16,16 @@ const systemAuthority: AgentToolAuthority = {
 };
 
 /**
- * Resolves who a run acts for on one agent. A user needs the agent's permission
- * for the level and a null user acts as the system. Execution also requires a
- * usable AI connection.
+ * Resolves who a run acts for on one agent. A user needs the requested workflow
+ * permission, or any agent permission when no action is given. A null user acts
+ * as the system. Execution also requires a usable AI connection.
  */
 const checkAgentAccess: ServiceFn<
 	[
 		{
 			userId: number | null;
 			agentKey: string;
-			level: AgentPermissionAction;
+			action?: AgentPermissionAction;
 			requireConnection?: boolean;
 		},
 	],
@@ -48,7 +48,7 @@ const checkAgentAccess: ServiceFn<
 	if (input.userId !== null) {
 		const user = await resolveUserAccess(context, { userId: input.userId });
 		if (user.error) return user;
-		if (!hasAgentPermission(user.data, agent.key, input.level)) {
+		if (!hasAgentPermission(user.data, agent.key, input.action)) {
 			return {
 				data: undefined,
 				error: {

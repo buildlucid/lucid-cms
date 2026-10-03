@@ -53,23 +53,25 @@ test("agent access follows live roles per agent, revocation and account locks", 
 		.insertInto("lucid_user_roles")
 		.values({ user_id: user.id, role_id: role.id })
 		.execute();
-	const check = (level: "use" | "manage", agentKey: string = agent.key) =>
-		checkAgentAccess(context, { userId: user.id, agentKey, level });
+	const check = (
+		action: "chat" | "manage-code-routines",
+		agentKey: string = agent.key,
+	) => checkAgentAccess(context, { userId: user.id, agentKey, action });
 
-	expect(await check("use")).toMatchObject({ error: { status: 403 } });
+	expect(await check("chat")).toMatchObject({ error: { status: 403 } });
 
 	await context.db.kysely
 		.insertInto("lucid_role_permissions")
 		.values([
 			{
 				role_id: role.id,
-				permission: getAgentPermission(agent.key, "use"),
+				permission: getAgentPermission(agent.key, "chat"),
 				core: true,
 			},
 			{ role_id: role.id, permission: Permissions.MediaUpdate, core: true },
 		])
 		.execute();
-	expect(await check("use")).toMatchObject({
+	expect(await check("chat")).toMatchObject({
 		data: {
 			agent: { key: agent.key },
 			authority: {
@@ -79,8 +81,10 @@ test("agent access follows live roles per agent, revocation and account locks", 
 			},
 		},
 	});
-	expect(await check("manage")).toMatchObject({ error: { status: 403 } });
-	expect(await check("use", "missing")).toMatchObject({
+	expect(await check("manage-code-routines")).toMatchObject({
+		error: { status: 403 },
+	});
+	expect(await check("chat", "missing")).toMatchObject({
 		error: { status: 403 },
 	});
 
@@ -89,21 +93,21 @@ test("agent access follows live roles per agent, revocation and account locks", 
 		.where("role_id", "=", role.id)
 		.where("permission", "=", Permissions.MediaUpdate)
 		.execute();
-	expect((await check("use")).data?.authority.permissions).toEqual([
-		getAgentPermission(agent.key, "use"),
+	expect((await check("chat")).data?.authority.permissions).toEqual([
+		getAgentPermission(agent.key, "chat"),
 	]);
 	await context.db.kysely
 		.deleteFrom("lucid_role_permissions")
 		.where("role_id", "=", role.id)
 		.execute();
-	expect(await check("use")).toMatchObject({ error: { status: 403 } });
+	expect(await check("chat")).toMatchObject({ error: { status: 403 } });
 
 	//* code routines act as the system, which needs no role
 	expect(
 		await checkAgentAccess(context, {
 			userId: null,
 			agentKey: agent.key,
-			level: "manage",
+			action: "manage-code-routines",
 		}),
 	).toMatchObject({
 		data: { authority: { principal: { type: "system" }, superAdmin: true } },
@@ -114,7 +118,7 @@ test("agent access follows live roles per agent, revocation and account locks", 
 		.set({ super_admin: true })
 		.where("id", "=", user.id)
 		.execute();
-	expect(await check("manage")).toMatchObject({
+	expect(await check("manage-code-routines")).toMatchObject({
 		data: { authority: { superAdmin: true } },
 	});
 	await context.db.kysely
@@ -122,5 +126,5 @@ test("agent access follows live roles per agent, revocation and account locks", 
 		.set({ is_locked: true })
 		.where("id", "=", user.id)
 		.execute();
-	expect(await check("use")).toMatchObject({ error: { status: 401 } });
+	expect(await check("chat")).toMatchObject({ error: { status: 401 } });
 });

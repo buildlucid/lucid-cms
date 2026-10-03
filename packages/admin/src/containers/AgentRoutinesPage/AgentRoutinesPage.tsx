@@ -41,7 +41,7 @@ const AgentRoutinesPage: Component = () => {
 
 	// ----------------------------------------
 	// Memos
-	const canCreate = createMemo(() => getAgentAccess().use.length > 0);
+	const canCreate = createMemo(() => getAgentAccess().ownRoutines.length > 0);
 	const createActions = createMemo<CreateMenuAction[]>(() =>
 		canCreate()
 			? [

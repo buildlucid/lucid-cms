@@ -33,8 +33,7 @@ import type { LucidAgentRoutines } from "../db/tables/agent-routines.js";
 import type { LucidAgentRuns } from "../db/tables/agent-runs.js";
 import type { Select } from "../db/types.js";
 import type { ResolvedAdminCopy } from "../i18n/types.js";
-import { getAgentPermission } from "../permission/agent-permissions.js";
-import hasPermission from "../permission/has-permission.js";
+import { hasAgentPermission } from "../permission/agent-permissions.js";
 import formatter from "./helpers.js";
 
 const formatDefinitions = (props: {
@@ -58,11 +57,7 @@ const formatDefinitions = (props: {
 	return {
 		enabled: isAiFeatureEnabled(props.config, "agents"),
 		agents: getAgents(props.config).map((agent) => {
-			const canUse = hasPermission(grant, getAgentPermission(agent.key, "use"));
-			const canManage = hasPermission(
-				grant,
-				getAgentPermission(agent.key, "manage"),
-			);
+			const canChat = hasAgentPermission(grant, agent.key, "chat");
 
 			return {
 				key: agent.key,
@@ -80,23 +75,22 @@ const formatDefinitions = (props: {
 						tools: getAvailableTools(agent, grant),
 					}),
 				),
-				suggestions: canUse
+				suggestions: canChat
 					? agent.suggestions.map((suggestion) => ({
 							title: withDefaultMessage(suggestion.title),
 							description: withDefaultMessage(suggestion.description),
 							message: withDefaultMessage(suggestion.message),
 						}))
 					: [],
-				tools:
-					canUse || canManage
-						? agent.tools.map((tool) => ({
-								name: tool.name,
-								title: withDefaultMessage(tool.title),
-								requiresApproval: tool.requiresApproval,
-								interactive: Boolean(tool.interaction),
-								permissions: [...tool.permissions],
-							}))
-						: [],
+				tools: hasAgentPermission(grant, agent.key)
+					? agent.tools.map((tool) => ({
+							name: tool.name,
+							title: withDefaultMessage(tool.title),
+							requiresApproval: tool.requiresApproval,
+							interactive: Boolean(tool.interaction),
+							permissions: [...tool.permissions],
+						}))
+					: [],
 			};
 		}),
 	};

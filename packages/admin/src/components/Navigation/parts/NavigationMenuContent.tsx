@@ -155,7 +155,11 @@ export const NavigationMenuContent: Component<{
 							title={T()("routes.agent.title")}
 							active={isActive("/lucid/agent")}
 						>
-							<Show when={getHomeView() !== "ask"}>
+							<Show
+								when={
+									getHomeView() !== "ask" && getAgentAccess().chat.length > 0
+								}
+							>
 								<NavigationLink
 									href="/lucid/agent"
 									exact={true}
@@ -171,6 +175,10 @@ export const NavigationMenuContent: Component<{
 							/>
 							<NavigationLink
 								href="/lucid/agent/routines"
+								permission={
+									getAgentAccess().ownRoutines.length > 0 ||
+									getAgentAccess().codeRoutines.length > 0
+								}
 								icon="routines"
 								title={T()("routes.agent.routines")}
 							/>

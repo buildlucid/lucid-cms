@@ -412,6 +412,8 @@ export type {
 	ExternalScopeGroup,
 } from "../libs/permission/scopes.js";
 export type {
+	AgentPermission,
+	AgentPermissionAction,
 	CollectionPermission,
 	CollectionPermissionAction,
 	CorePermission,

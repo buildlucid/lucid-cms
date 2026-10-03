@@ -6,7 +6,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import getAccessToken from "../../connection/token-manager.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 
-/** The keys of the agents a user can use or manage, from their live permissions. Fails when there are none. */
+/** Agent keys for each workflow, from the user's live permissions. Fails when there are none. */
 const resolveAgentAccess: ServiceFn<
 	[{ userId: number; requireConnection?: boolean }],
 	Record<AgentPermissionAction, string[]>
@@ -26,13 +26,17 @@ const resolveAgentAccess: ServiceFn<
 	const user = await resolveUserAccess(context, { userId: input.userId });
 	if (user.error) return user;
 
-	const keys = (level: AgentPermissionAction) =>
+	const keys = (action: AgentPermissionAction) =>
 		agents
-			.filter((agent) => hasAgentPermission(user.data, agent.key, level))
+			.filter((agent) => hasAgentPermission(user.data, agent.key, action))
 			.map((agent) => agent.key);
 
-	const access = { use: keys("use"), manage: keys("manage") };
-	if (access.use.length === 0 && access.manage.length === 0) {
+	const access = {
+		chat: keys("chat"),
+		"manage-own-routines": keys("manage-own-routines"),
+		"manage-code-routines": keys("manage-code-routines"),
+	};
+	if (Object.values(access).every((keys) => keys.length === 0)) {
 		return {
 			data: undefined,
 			error: {

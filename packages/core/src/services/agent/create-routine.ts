@@ -34,7 +34,7 @@ const createRoutine: ServiceFn<
 	const access = await checkAgentAccess(context, {
 		userId: input.userId,
 		agentKey: input.agentKey,
-		level: "use",
+		action: "manage-own-routines",
 	});
 	if (access.error) return access;
 

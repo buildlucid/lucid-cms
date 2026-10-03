@@ -3,6 +3,7 @@ import z from "zod";
 import {
 	agentApprovalModeSchema,
 	agentContextSchema,
+	agentConversationKindSchema,
 	agentRunOutcomeSchema,
 	agentRunStatusSchema,
 	agentTitleStatusSchema,
@@ -29,6 +30,7 @@ export const agentConversationsTable = defineTable(
 				type: "json",
 			},
 			agent_key: { schema: z.string(), type: "text" },
+			kind: { schema: agentConversationKindSchema, type: "text" },
 			title: { schema: z.string(), type: "text" },
 			title_status: { schema: agentTitleStatusSchema, type: "text" },
 			title_generation_requested_at: {
@@ -80,6 +82,8 @@ export const agentConversationsTable = defineTable(
 export interface LucidAgentConversations {
 	id: string;
 	agent_key: string;
+	/** The workflow that owns this chat, retained when its routine is deleted. */
+	kind: z.infer<typeof agentConversationKindSchema>;
 	approval_mode: Generated<z.infer<typeof agentApprovalModeSchema>>;
 	/** The chat's choice for its next run. Null uses the routine or agent default. */
 	model_selection: JSONColumnType<

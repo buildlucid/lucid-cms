@@ -16,7 +16,10 @@ export type CollectionPermission<
 	TAction extends CollectionPermissionAction = CollectionPermissionAction,
 > = `documents:${string}:${TAction}`;
 
-export type AgentPermissionAction = "use" | "manage";
+export type AgentPermissionAction =
+	| "chat"
+	| "manage-own-routines"
+	| "manage-code-routines";
 
 export type AgentPermission<
 	TAction extends AgentPermissionAction = AgentPermissionAction,

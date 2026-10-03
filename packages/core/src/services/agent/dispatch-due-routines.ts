@@ -49,7 +49,7 @@ const dispatchDueRoutines: ServiceFn<[], number> = async (context) => {
 		const access = await checkAgentAccess(context, {
 			userId: routine.user_id,
 			agentKey: routine.agent_key,
-			level: "use",
+			action: "manage-own-routines",
 		});
 		if (access.error) continue;
 

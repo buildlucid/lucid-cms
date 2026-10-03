@@ -66,7 +66,7 @@ const AgentHome: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const agents = createMemo(() => {
-		const usable = new Set(getAgentAccess().use.map((agent) => agent.key));
+		const usable = new Set(getAgentAccess().chat.map((agent) => agent.key));
 		return (
 			definitions.data?.data.agents.filter((agent) => usable.has(agent.key)) ??
 			[]

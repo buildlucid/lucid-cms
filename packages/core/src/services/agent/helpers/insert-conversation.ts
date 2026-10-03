@@ -35,6 +35,12 @@ const insertConversation: ServiceFn<
 		data: {
 			id: input.id ?? randomUUID(),
 			agent_key: input.agentKey,
+			kind:
+				input.userId === null
+					? "code-routine"
+					: input.routineId
+						? "own-routine"
+						: "chat",
 			approval_mode: input.routineId ? "tool-defaults" : input.approvalMode,
 			//* resolved when each run starts, so saving a chat never waits on the Lucid service
 			model_selection: input.modelSelection ?? null,

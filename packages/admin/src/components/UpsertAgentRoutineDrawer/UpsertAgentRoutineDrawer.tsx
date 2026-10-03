@@ -95,7 +95,7 @@ const UpsertAgentRoutineDrawer: Component<{
 	// Memos
 	const existing = createMemo(() => props.routine?.());
 	const locked = createMemo(() => existing()?.source === "code");
-	const agents = createMemo(() => getAgentAccess().use);
+	const agents = createMemo(() => getAgentAccess().ownRoutines);
 	const mutation = createMemo(() =>
 		existing() ? updateRoutine : createRoutine,
 	);

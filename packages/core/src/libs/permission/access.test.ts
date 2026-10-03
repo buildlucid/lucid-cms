@@ -1,12 +1,18 @@
 import { describe, expect, test } from "vitest";
 import LucidError from "../../utils/errors/lucid-error.js";
+import defineAgent from "../agent/define-agent.js";
+import CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import { type AccessGroup, accessGroupSchema } from "./access-config.js";
 import {
 	type AccessConfig,
 	getCapabilityRegistry,
 	getExternalCapability,
 } from "./capabilities.js";
-import { getValidPermissions } from "./registry.js";
+import {
+	getGrantablePermissionRegistry,
+	getValidPermissions,
+	isCorePermission,
+} from "./registry.js";
 import {
 	filterExternalScopes,
 	getExternalScopeGroups,
@@ -50,6 +56,56 @@ const config = (groups: AccessGroup[] = [group]): AccessConfig => ({
 		},
 		agents: { definitions: [] },
 	},
+});
+
+test("role grants put content and agents before administration and destructive actions last", () => {
+	const resolved = config();
+	resolved.collections = [
+		new CollectionBuilder("pages", {
+			mode: "multiple",
+			details: { labels: { singular: "Page", plural: "Pages" } },
+		}),
+	];
+	resolved.ai.agents.definitions = [
+		defineAgent({ key: "seo", name: "SEO", description: "SEO", tools: [] }),
+	];
+	const groups = getGrantablePermissionRegistry(resolved);
+	expect(groups.map((value) => value.key)).toEqual([
+		"documents:pages",
+		"media_permissions",
+		"publish_operations_permissions",
+		"agents:seo",
+		"ai_permissions",
+		"users_permissions",
+		"roles_permissions",
+		"integrations_permissions",
+		"emails_permissions",
+		"jobs_permissions",
+		"settings_permissions",
+		"reports",
+	]);
+	expect(groups[0]?.permissions.map((value) => value.key)).toEqual([
+		"documents:pages:read",
+		"documents:pages:create",
+		"documents:pages:update",
+		"documents:pages:restore",
+		"documents:pages:review",
+		"documents:pages:publish",
+		"documents:pages:delete",
+	]);
+	expect(
+		groups
+			.find((value) => value.key === "agents:seo")
+			?.permissions.map((value) => value.key),
+	).toEqual([
+		"agents:seo:chat",
+		"agents:seo:manage-own-routines",
+		"agents:seo:manage-code-routines",
+	]);
+	expect(isCorePermission("agents:seo:manage-own-routines")).toBe(true);
+	expect(getValidPermissions(resolved)).toContain(
+		"agents:seo:manage-own-routines",
+	);
 });
 
 describe("custom access", () => {
