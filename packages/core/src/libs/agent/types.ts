@@ -48,6 +48,7 @@ export const modelEventSchema = z.discriminatedUnion("type", [
 		model: z.string(),
 		inputTokenLimit: z.number().int().positive(),
 		toolLimit: z.number().int().positive(),
+		instructionTokens: z.number().int().nonnegative().optional(),
 	}),
 	z.object({ type: z.literal("text-delta"), text: z.string() }),
 	toolCallSchema.extend({ type: z.literal("tool-call") }),
@@ -85,6 +86,7 @@ export const checkpointSchema = z.object({
 			id: z.string(),
 			tokenLimit: z.number().int().positive(),
 			toolLimit: z.number().int().positive(),
+			instructionTokens: z.number().int().nonnegative().optional(),
 		})
 		.optional(),
 	/** Input tokens the provider counted for the last request, and how many messages it held. */

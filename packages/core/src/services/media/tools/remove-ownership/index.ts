@@ -9,7 +9,7 @@ export const removeMediaOwnershipAgentTool = () =>
 		name: "media_remove_ownership",
 		title: copy("admin:core.tools.media_remove_ownership.title"),
 		description:
-			"Remove the user's ownership of their personal media, such as a file they uploaded to this chat, so it joins the shared media library and can be used in content. Personal media can't be used in documents until its ownership is removed. Only the file's owner can do this, and it asks for approval first because it can make the file public.",
+			"Move personal media into the shared library so it can be used in documents. Only the owner can do this. Requests approval and may make the file public.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [Permissions.MediaCreate],

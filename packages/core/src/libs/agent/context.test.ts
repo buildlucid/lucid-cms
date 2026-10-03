@@ -197,6 +197,36 @@ test("counts the last measured request plus messages added since", () => {
 	).toBeGreaterThan(10_000);
 });
 
+test("reserves hosted instructions until provider usage includes them", () => {
+	const setup = { instructions: "CMS guidance", definitions: [] };
+	const checkpoint = {
+		messages: [{ role: "user", content: "Hi" }],
+		model: {
+			id: "test",
+			tokenLimit: 1000,
+			toolLimit: 10,
+			instructionTokens: 250,
+		},
+	} as Checkpoint;
+	const local = contextTokens({ ...checkpoint, model: undefined }, setup);
+	expect(contextTokens(checkpoint, setup)).toBe(local + 250);
+	expect(
+		contextTokens(
+			{ ...checkpoint, measured: { tokens: 400, messages: 1 } },
+			setup,
+		),
+	).toBe(
+		contextTokens(
+			{
+				...checkpoint,
+				model: undefined,
+				measured: { tokens: 400, messages: 1 },
+			},
+			setup,
+		),
+	);
+});
+
 test("replays saved tool calls as calls and results, never as text the assistant wrote", () => {
 	const { messages, truncated } = historyMessage({
 		id: randomUUID(),

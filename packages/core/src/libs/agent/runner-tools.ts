@@ -45,7 +45,7 @@ const runnerTools = {
 	previewMedia: {
 		name: "lucid_preview_media",
 		title: copy("admin:core.tools.lucid_preview_media.title"),
-		description: `Show 1 to ${constants.agent.previewMediaLimit} Lucid media items in the chat as a preview gallery. Only items whose type is image, video or audio can be previewed, so check the type or MIME type first. Never pass a PDF, document, archive or other file; link those with lucid_register_references instead. Use this when showing a selected item, comparing choices or recommending an image for a document. Use media IDs from the person or tool results. This shows media to the person; it does not analyse the contents or grant access.`,
+		description: `Display up to ${constants.agent.previewMediaLimit} Lucid images, videos, or audio files in this chat as a preview gallery.`,
 		input: z
 			.object({
 				mediaIds: z
@@ -60,7 +60,7 @@ const runnerTools = {
 		name: "lucid_list_references",
 		title: copy("admin:core.tools.lucid_list_references.title"),
 		description:
-			"List the media and documents linked to this chat, including those linked by tools, with their names and file types. This does not read their contents or grant access.",
+			"List media and documents linked to this chat, including reference IDs, names, and file types.",
 		input: z.object({ offset: z.number().int().nonnegative().default(0) }),
 		available: () => true,
 	},
@@ -68,7 +68,7 @@ const runnerTools = {
 		name: "lucid_register_references",
 		title: copy("admin:core.tools.lucid_register_references.title"),
 		description:
-			"Add media or documents to this chat's references, the record of resources the chat involves. Call it when the person names, gives an ID for or picks a resource, and when you read, create or change one. Use IDs from their message or tool results. Linking again is harmless. This does not read contents or grant access.",
+			"Link media or documents to this chat using their resource IDs. Existing references are reused.",
 		input: z.object({
 			references: z.array(agentReferenceInputSchema).min(1).max(50),
 		}),
@@ -78,7 +78,7 @@ const runnerTools = {
 		name: "lucid_remove_reference",
 		title: copy("admin:core.tools.lucid_remove_reference.title"),
 		description:
-			"Remove a tool-added reference from this chat when it is no longer useful. Use its ID from lucid_list_references. This does not delete the resource or message attachments. User-attached references can only be removed by the user in the chat UI.",
+			"Remove a tool-added reference from this chat without deleting its resource. Message attachments are managed by the person in the chat UI.",
 		input: z.object({ referenceId: z.uuid() }),
 		available: () => true,
 	},
@@ -86,7 +86,7 @@ const runnerTools = {
 		name: "lucid_ask_user",
 		title: copy("admin:core.tools.lucid_ask_user.title"),
 		description:
-			"Pause this run and ask a person a question. Use only when the task cannot continue without their information or decision.",
+			"Ask the person a question, with optional choices, and pause this run until they respond.",
 		input: z.object({
 			question: z.string().min(1).max(2000),
 			options: z.array(z.string().max(200)).max(10).optional(),
@@ -96,16 +96,15 @@ const runnerTools = {
 	progress: {
 		name: "lucid_share_progress",
 		title: copy("admin:core.tools.lucid_share_progress.title"),
-		description:
-			"Send a normal assistant message without ending this chat run. Use before or between other tool calls when a multi-step task has a useful finding or decision to share. Continue working afterward.",
+		description: "Show a progress message in the chat without ending this run.",
 		input: progressInput,
-		available: ({ mode }) => mode === "chat",
+		available: () => true,
 	},
 	history: {
 		name: "lucid_read_history",
 		title: copy("admin:core.tools.lucid_read_history.title"),
 		description:
-			"Recover exact earlier messages or tool results from this conversation, including history that was summarised or truncated. List positions first, then read a message in bounded character pages. Historical tool results may be stale; read current CMS data before editing.",
+			"Recover earlier conversation messages and tool results, including summarized or truncated history. Without messageId, returns a paginated list; with messageId, returns that message in character pages.",
 		input: z.object({
 			messageId: z.uuid().optional(),
 			after: z.number().int().nonnegative().default(0),
@@ -116,8 +115,7 @@ const runnerTools = {
 	skill: {
 		name: "lucid_load_skill",
 		title: copy("admin:core.tools.lucid_load_skill.title"),
-		description:
-			"Load the instructions for an available skill before performing its task.",
+		description: "Load task instructions for a configured skill by name.",
 		input: skillInput,
 		available: ({ hasSkills }) => hasSkills,
 	},
@@ -125,7 +123,7 @@ const runnerTools = {
 		name: "lucid_finish_run",
 		title: copy("admin:core.tools.lucid_finish_run.title"),
 		description:
-			"End this routine run immediately, after replying to the person with the result. Use done when the goal is met, nothing_to_report when no work was needed, or needs_review when a person must follow up. The summary is a short recap for the run history and the next run, not the result itself. No further tools will run after this request.",
+			"End this routine run with an outcome and a short summary for run history and future runs. Requires a reply with the result first.",
 		input: finishInput,
 		available: ({ mode }) => mode === "routine",
 	},

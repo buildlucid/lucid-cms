@@ -17,7 +17,7 @@ export const getDocumentMcpTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_get",
 		title: copy("admin:core.tools.documents_get.title"),
 		description:
-			"Read one document and its selected content fields and bricks.",
+			"Read a document's selected content fields and bricks from a collection.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [],
@@ -45,7 +45,7 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_get",
 		title: copy("admin:core.tools.documents_get.title"),
 		description:
-			"Read one document and its selected content fields and bricks.",
+			"Read a document's selected content fields and bricks from a collection.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

@@ -5,7 +5,7 @@ const echoInput = z.object({ message: z.string().max(200) });
 export const echoTool = defineMcpTool({
 	name: "playground_echo",
 	title: "Echo",
-	description: "Returns a short message unchanged.",
+	description: "Return the supplied message unchanged.",
 	input: echoInput,
 	output: z.object({ message: z.string() }),
 	scopes: [],
@@ -19,7 +19,7 @@ export const echoTool = defineMcpTool({
 export const echoAgentTool = defineAgentTool({
 	name: "playground_echo",
 	title: "Echo",
-	description: "Returns a short message unchanged.",
+	description: "Return the supplied message unchanged.",
 	input: echoInput,
 	output: z.object({ message: z.string() }),
 	permissions: [],

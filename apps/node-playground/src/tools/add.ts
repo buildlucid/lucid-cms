@@ -5,7 +5,7 @@ const addInput = z.object({ a: z.number(), b: z.number() });
 export const addTool = defineMcpTool({
 	name: "playground_add",
 	title: "Add numbers",
-	description: "Adds two numbers.",
+	description: "Add two numbers and return their sum.",
 	input: addInput,
 	output: z.object({ sum: z.number() }),
 	scopes: [],
@@ -19,7 +19,7 @@ export const addTool = defineMcpTool({
 export const addAgentTool = defineAgentTool({
 	name: "playground_add",
 	title: "Add numbers",
-	description: "Adds two numbers.",
+	description: "Add two numbers and return their sum.",
 	input: addInput,
 	output: z.object({ sum: z.number() }),
 	permissions: [],

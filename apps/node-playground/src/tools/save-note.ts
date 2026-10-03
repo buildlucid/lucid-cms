@@ -4,7 +4,7 @@ import { defineAgentTool, z } from "@lucidcms/core";
 export const saveNoteTool = defineAgentTool({
 	name: "playground_save_note",
 	title: "Save note",
-	description: "Saves a short note for the user.",
+	description: "Display a note in the chat as a simulated save.",
 	input: z.object({ title: z.string().max(100), body: z.string().max(1000) }),
 	output: z.object({ saved: z.boolean() }),
 	permissions: [],

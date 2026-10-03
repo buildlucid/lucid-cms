@@ -10,7 +10,7 @@ export const listLocalesMcpTool = () =>
 		name: "locales_list",
 		title: copy("admin:core.tools.locales_list.title"),
 		description:
-			"List available content languages and CMS interface languages, including each default locale. Use page and perPage for more locales.",
+			"List available content and CMS interface languages, including their defaults. Returns paginated results.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [ExternalScopes.LocalesRead],
@@ -23,7 +23,7 @@ export const listLocalesAgentTool = () =>
 		name: "locales_list",
 		title: copy("admin:core.tools.locales_list.title"),
 		description:
-			"List available content languages and CMS interface languages, including each default locale. Use page and perPage for more locales.",
+			"List available content and CMS interface languages, including their defaults. Returns paginated results.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

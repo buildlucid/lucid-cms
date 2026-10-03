@@ -17,7 +17,7 @@ export const findDocumentsMcpTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_find",
 		title: copy("admin:core.tools.documents_find.title"),
 		description:
-			"Find documents in a collection by content filters. Supports nested custom-field, brick and repeater filters.",
+			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated results.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [],
@@ -45,7 +45,7 @@ export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_find",
 		title: copy("admin:core.tools.documents_find.title"),
 		description:
-			"Find documents in a collection by content filters. Supports nested custom-field, brick and repeater filters.",
+			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated results.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

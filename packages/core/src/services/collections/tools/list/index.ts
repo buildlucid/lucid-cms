@@ -14,7 +14,7 @@ export const listCollectionsMcpTool = (options: CollectionToolOptions = {}) =>
 		name: "collections_list",
 		title: copy("admin:core.tools.collections_list.title"),
 		description:
-			"List readable collections and their content structure summaries. routing.field stores the full public URL path, including parent segments. Use collections_describe for fields and publishing details.",
+			"List accessible collections with summaries of their content structure and routing. Routing fields store the full public path, including parent segments.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [],
@@ -35,7 +35,7 @@ export const listCollectionsAgentTool = (options: CollectionToolOptions = {}) =>
 		name: "collections_list",
 		title: copy("admin:core.tools.collections_list.title"),
 		description:
-			"List readable collections and their content structure summaries. routing.field stores the full public URL path, including parent segments. Use collections_describe for fields and publishing details.",
+			"List accessible collections with summaries of their content structure and routing. Routing fields store the full public path, including parent segments.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

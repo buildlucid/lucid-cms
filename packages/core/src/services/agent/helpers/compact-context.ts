@@ -58,7 +58,8 @@ const summariseContext: ServiceFn<[CompactionProps], boolean> = async (
 			max:
 				limit * contextLimits.compactAt -
 				estimateTokens(setup.instructions) -
-				estimateTokens(setup.definitions),
+				estimateTokens(setup.definitions) -
+				(checkpoint.model?.instructionTokens ?? 0),
 		});
 		const sourceId = checkpoint.messages[count - 1]?.sourceId;
 		if (!count || !sourceId) return { error: undefined, data: false };

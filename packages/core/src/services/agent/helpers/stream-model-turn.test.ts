@@ -102,6 +102,7 @@ test("forwards fragmented SSE text before the response completes", async () => {
 	expect(JSON.parse(String(fetch.mock.calls[0]?.[1].body))).toMatchObject({
 		sessionId,
 		selection: agentModelCatalog.default,
+		instructionVersion: 1,
 	});
 	expect(fetch.mock.invocationCallOrder[0]).toBeGreaterThan(
 		pending.mock.invocationCallOrder[0] ?? 0,

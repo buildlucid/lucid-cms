@@ -327,12 +327,14 @@ test("analysis is on by default without library permission and can be disabled",
 		analyzeMediaTool.name,
 	);
 	expect(listed.instructions).toContain(
-		`Analyse Lucid media with ${analyzeMediaTool.name}.`,
+		`Analyze Lucid rich media with ${analyzeMediaTool.name}.`,
 	);
 
 	const unlisted = setup(withoutAnalysis);
 	expect(unlisted.definitions.map((tool) => tool.name)).not.toContain(
 		analyzeMediaTool.name,
 	);
-	expect(unlisted.instructions).toContain("No tool can read attached files.");
+	expect(unlisted.instructions).toContain(
+		"There are no tools that support analyzing rich media.",
+	);
 });

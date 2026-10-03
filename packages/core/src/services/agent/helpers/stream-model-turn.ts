@@ -1,6 +1,7 @@
 import { EventSourceParserStream } from "eventsource-parser/stream";
 import packageJson from "../../../../package.json" with { type: "json" };
 import constants from "../../../constants/constants.js";
+import { instructionVersion } from "../../../libs/agent/instructions/index.js";
 import {
 	type ModelEvent,
 	type ModelMessage,
@@ -95,6 +96,7 @@ const streamModelTurn: ServiceFn<
 					sessionId: input.sessionId,
 					selection: input.selection,
 					...(input.purpose ? { purpose: input.purpose } : {}),
+					instructionVersion,
 					instructions: input.instructions,
 					messages: input.messages,
 					tools: input.tools,

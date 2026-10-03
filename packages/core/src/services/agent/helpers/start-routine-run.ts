@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { previousRunSummary } from "../../../libs/agent/instructions/messages.js";
 import formatter from "../../../libs/formatters/index.js";
 import {
 	AgentRoutinesRepository,
@@ -60,7 +61,10 @@ const startRoutineRun: ServiceFn<
 			if (previous.error) return previous;
 
 			if (previous.data?.summary) {
-				summary = `Summary of the previous run (${formatter.formatDate(previous.data.finished_at)}):\n${previous.data.summary}`;
+				summary = previousRunSummary(
+					formatter.formatDate(previous.data.finished_at),
+					previous.data.summary,
+				);
 			}
 
 			const conversation = await insertConversation(context, {

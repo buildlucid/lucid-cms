@@ -169,7 +169,7 @@ export const previewMediaMcpTool = () =>
 		name: "media_preview",
 		title: copy("admin:core.tools.media_preview.title"),
 		description:
-			"Preview an image or a video's poster. Public external media returns a link; local and private media returns an inline image up to 1024px and 1MiB. Set inline to force image bytes.",
+			"Preview an image or video poster as a public URL or inline image. Inline images are limited to 1024px and 1 MiB.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [ExternalScopes.MediaRead],

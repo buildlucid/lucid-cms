@@ -1,5 +1,6 @@
 import type { StoredAgentMessagePart } from "../../schemas/agent.js";
 import type { AgentReferenceSnapshot } from "../../types/response.js";
+import { routineRequest } from "./instructions/messages.js";
 
 /** Keeps attached resources alongside the message that introduced them. */
 export const inputMessageParts = (input: {
@@ -44,7 +45,6 @@ const attachmentTag = (reference: AgentReferenceSnapshot) => {
 		.join(" ")} />`;
 };
 
-/** Joins visible model text without including tool output or widget data. */
 export const textFromParts = (parts: StoredAgentMessagePart[]) =>
 	parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
 
@@ -55,9 +55,7 @@ export const messageText = (parts: StoredAgentMessagePart[]) => {
 	//* framed as the routine's standing task, so wording like "every morning" is not read as a request to schedule it.
 	//* A routine run only repeats its instructions when they changed, see routineRequestParts
 	if (routine) {
-		text = text
-			? `Start a run of the "${routine.name}" routine. Its standing instructions follow:\n\n${text}`
-			: `Start a run of the "${routine.name}" routine. Its instructions are unchanged from earlier in this chat.`;
+		text = routineRequest(routine.name, text);
 	}
 
 	const references = parts.flatMap((part) =>

@@ -11,7 +11,7 @@ export const selectDocumentTool = defineAgentTool({
 	name: "playground_select_document",
 	title: "Select document",
 	description:
-		"Look up page documents and let the user select one. Use inline or composer placement as requested.",
+		"Let the person choose a page document using an inline or composer picker. Returns the selected document ID.",
 	input: z.object({
 		placement: z.enum(["inline", "composer"]).default("inline"),
 	}),

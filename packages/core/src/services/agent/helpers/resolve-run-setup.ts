@@ -3,7 +3,7 @@ import {
 	getAvailableTools,
 	getCapabilityProviders,
 } from "../../../libs/agent/capabilities.js";
-import buildInstructions from "../../../libs/agent/instructions.js";
+import buildInstructions from "../../../libs/agent/instructions/index.js";
 import { getRunnerTools } from "../../../libs/agent/runner-tools.js";
 import type {
 	AgentDefinition,
@@ -28,7 +28,7 @@ const toInputSchema = (input: z.ZodObject) => {
 
 /** A run's tools, skills and instructions, limited to what its principal can access. Resolved before each model turn. */
 const resolveRunSetup = (
-	context: ServiceContext,
+	context: Pick<ServiceContext, "config">,
 	props: {
 		agent: AgentDefinition;
 		authority: AgentToolAuthority;
@@ -39,7 +39,6 @@ const resolveRunSetup = (
 	const { agent, authority } = props;
 	const tools = getAvailableTools(agent, authority);
 
-	// Skills still use their existing scope contract; resolve it from current permissions.
 	const skills = agent.skills.filter((skill) =>
 		skill.scopes.every((scope) => {
 			const capability = getExternalCapability(context.config, scope, "user");
@@ -56,12 +55,14 @@ const resolveRunSetup = (
 		hasSkills: skills.length > 0,
 		hasHistory: props.hasHistory,
 	});
+	//* Runner controls first, then task tools in their configured order. Keep this stable between turns.
+	const orderedTools = [...runnerTools, ...tools];
 
 	return {
 		tools,
 		skills,
 		presentation: new Map(
-			[...tools, ...runnerTools].map((tool) => [
+			orderedTools.map((tool) => [
 				tool.name,
 				{
 					title: tool.title,
@@ -73,7 +74,7 @@ const resolveRunSetup = (
 				},
 			]),
 		),
-		definitions: [...tools, ...runnerTools].map(
+		definitions: orderedTools.map(
 			(tool): ModelToolDefinition => ({
 				name: tool.name,
 				description:

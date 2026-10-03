@@ -11,7 +11,7 @@ export const reviewNoteTool = defineAgentTool({
 	name: "playground_review_note",
 	title: "Review note",
 	description:
-		"Let the user edit a note in the composer, then pretend to save the submitted values. Stores nothing.",
+		"Ask the person to edit a note in the composer, then display the submitted note as a simulated save.",
 	input: z.object({ title: z.string().max(100), body: z.string().max(1000) }),
 	output: z.object({ saved: z.boolean(), title: z.string(), body: z.string() }),
 	permissions: [],

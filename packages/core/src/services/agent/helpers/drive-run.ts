@@ -7,7 +7,7 @@ import {
 	tokenLimit,
 } from "../../../libs/agent/context.js";
 import { textFromParts } from "../../../libs/agent/input.js";
-import runnerTools from "../../../libs/agent/runner-tools.js";
+import { routineContinuation } from "../../../libs/agent/instructions/messages.js";
 import type { Checkpoint, RunMode } from "../../../libs/agent/types.js";
 import { agentFormatter } from "../../../libs/formatters/index.js";
 import { getConversationPermission } from "../../../libs/permission/agent-permissions.js";
@@ -93,6 +93,7 @@ const driveRun: ServiceFn<
 			id: model.data.model.id,
 			tokenLimit: model.data.model.inputTokenLimit,
 			toolLimit: model.data.model.toolLimit,
+			instructionTokens: model.data.model.instructionTokens,
 		};
 		checkpoint.measured = undefined;
 
@@ -203,7 +204,7 @@ const driveRun: ServiceFn<
 				checkpoint.nudges++;
 				checkpoint.messages.push({
 					role: "user",
-					content: `Continue working on the routine. If the goal is met, reply with the result, then call ${runnerTools.finish.name}.`,
+					content: routineContinuation,
 				});
 				startNextTurn(checkpoint);
 				continue;

@@ -966,7 +966,7 @@ describe("agent runner", () => {
 		).toBe(`Read in ${mode} mode`);
 		expect(
 			setup.definitions.some((tool) => tool.name === "lucid_share_progress"),
-		).toBe(mode === "chat");
+		).toBe(true);
 	});
 
 	test.each([
@@ -1370,6 +1370,36 @@ describe("agent runner", () => {
 			],
 			[{ type: "text", text: "Here is the result." }],
 		]);
+	});
+
+	test("shares progress in a routine and continues to its reply and recorded outcome", async () => {
+		const prepared = await prepareRoutine();
+		callTool({
+			id: "progress",
+			name: "lucid_share_progress",
+			input: { message: "I found the relevant pages." },
+		});
+		finishRun({ outcome: "done", summary: "Here is the result." });
+
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(model).toHaveBeenCalledTimes(2);
+		expect(await partsOf(prepared.conversationId)).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					name: "lucid_share_progress",
+					status: "complete",
+					summary: copy.literal("I found the relevant pages."),
+					output: { shared: true },
+				}),
+				{ type: "text", text: "Here is the result." },
+			]),
+		);
+		expect(await selectRun(prepared.runId)).toMatchObject({
+			outcome: "done",
+			summary: "Here is the result.",
+		});
 	});
 
 	test("a saved inline interaction rejects invalid choices and resumes without repeating preparation", async () => {
@@ -3740,7 +3770,6 @@ test("every attempt at one web call reuses its key, so a resumed run never pays 
 	);
 });
 
-/** A completed web response from the website, as the remote client returns it. */
 const webResponse = (
 	operation: "search" | "fetch",
 	output: Record<string, unknown>,

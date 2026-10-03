@@ -116,6 +116,7 @@ type ToolOptions<
 	name: Name;
 	/** A plain-language name shown to people, eg. "Save note". Agent tools default to the name with spaces. */
 	title?: AdminCopyInput;
+	/** Model-facing guidance: what the tool does, when to use it and its constraints. */
 	description: Description;
 	input: Input;
 	output: Output;
