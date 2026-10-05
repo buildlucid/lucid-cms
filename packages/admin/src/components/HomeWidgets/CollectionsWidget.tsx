@@ -5,6 +5,7 @@ import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import { getCollectionNavigationHref } from "@/components/CollectionNavLink/CollectionNavLink";
 import DashboardCard from "@/components/DashboardCard/DashboardCard";
 import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
+import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
@@ -13,7 +14,6 @@ import {
 	getReadableCollections,
 } from "@/utils/home-widgets";
 import { getDocumentRoute } from "@/utils/route-helpers";
-import CollectionThumb from "./parts/CollectionThumb";
 
 const collapsedCount = 4;
 
@@ -63,7 +63,7 @@ const CollectionsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 								href={getCollectionNavigationHref(collection)}
 								class="flex min-w-0 grow items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 							>
-								<CollectionThumb multiple={collection.mode === "multiple"} />
+								<DocumentThumb multiple={collection.mode === "multiple"} />
 								<span class="flex min-w-0 flex-col">
 									<span class="truncate text-sm text-title">
 										{label(collection, "plural")}

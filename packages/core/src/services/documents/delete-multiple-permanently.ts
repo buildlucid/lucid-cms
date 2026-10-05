@@ -4,7 +4,6 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import withTransaction from "../../utils/services/with-transaction.js";
-import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import removeTarget from "../document-references/remove-target.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
@@ -111,22 +110,12 @@ const deleteMultiplePermanently: ServiceFn<
 			});
 			if (hookBeforeRes.error) return hookBeforeRes;
 
-			const [deleteDocumentsRes, cancelRequestsRes] = await Promise.all([
-				deleteDocumentRecords(context, {
-					collectionKey: data.collectionKey,
-					documentIds: data.ids,
-					tableName: tableNamesRes.data.document,
-				}),
-				cancelPublishOperationsForDocuments(context, {
-					collectionKey: data.collectionKey,
-					documentIds: data.ids,
-					comment: context.translate(
-						"server:core.documents.permanently.deleted.publish.request.comment",
-					),
-				}),
-			]);
-			if (deleteDocumentsRes.error) return deleteDocumentsRes;
-			if (cancelRequestsRes.error) return cancelRequestsRes;
+			const deleted = await deleteDocumentRecords(context, {
+				collectionKey: data.collectionKey,
+				documentIds: data.ids,
+				tableName: tableNamesRes.data.document,
+			});
+			if (deleted.error) return deleted;
 
 			const hookAfterRes = await executeDeleteHook(context, {
 				event: "afterDelete",

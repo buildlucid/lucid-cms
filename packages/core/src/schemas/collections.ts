@@ -276,10 +276,6 @@ const collectionResponseSchema = z.object({
 			.object({
 				requiredFor: z.array(z.string()),
 				allowSelfApproval: z.boolean(),
-				comments: z.object({
-					request: z.enum(["required", "optional"]),
-					decision: z.enum(["required", "optional"]),
-				}),
 			})
 			.optional(),
 		workflow: z

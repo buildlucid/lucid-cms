@@ -1,5 +1,10 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { FaSolidClockRotateLeft, FaSolidLink } from "solid-icons/fa";
+import {
+	FaSolidCaretLeft,
+	FaSolidCaretRight,
+	FaSolidClockRotateLeft,
+	FaSolidLink,
+} from "solid-icons/fa";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import StatusIndicator, {
@@ -10,8 +15,10 @@ import T from "@/translations";
 export interface ViewSelectorOption {
 	label: string;
 	disabled: boolean;
-	type: "latest" | "environment" | "link";
+	type: "latest" | "environment" | "proposal" | "link";
 	location: string;
+	/** The side-by-side key for this version, eg. latest, an environment or proposal:1. */
+	compareKey?: string;
 	hideInDropdown?: boolean;
 	icon?: "history";
 	status?: {
@@ -25,7 +32,12 @@ export const ViewSelector: Component<{
 	collectionSingularName: Accessor<string>;
 	isDocumentMutated?: Accessor<boolean>;
 	currentViewLabel?: Accessor<string | undefined>;
-	onBeforeVersionChange?: () => Promise<void>;
+	/** Runs before switching version and returns where to go, or null to stay. */
+	onBeforeVersionChange?: (
+		option: ViewSelectorOption,
+	) => Promise<string | null>;
+	/** While comparing, items show which side-by-side column they open in. */
+	comparing?: Accessor<boolean>;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks & State
@@ -34,35 +46,34 @@ export const ViewSelector: Component<{
 
 	// ----------------------------------
 	// Memos
-	const currentPath = createMemo(
-		() => `${location.pathname}${location.search}`,
-	);
-	const environments = createMemo(() =>
-		props
-			.options()
-			.filter(
-				(o) =>
-					(o.type === "latest" || o.type === "environment") &&
-					o.hideInDropdown !== true,
-			),
-	);
+	const currentPath = createMemo(() => {
+		const search = new URLSearchParams(location.search);
+		search.delete("compare");
+		const suffix = search.toString();
+		return `${location.pathname}${suffix ? `?${suffix}` : ""}`;
+	});
+	const versionOptions = (type: "latest" | "environment" | "proposal") =>
+		props.options().filter((o) => o.type === type && o.hideInDropdown !== true);
+	//* release proposals sit below a separator, apart from latest and its targets
+	const versionGroups = createMemo(() => [
+		{
+			separator: false,
+			options: [...versionOptions("latest"), ...versionOptions("environment")],
+		},
+		{ separator: true, options: versionOptions("proposal") },
+	]);
 	const linkOptions = createMemo(() =>
 		props
 			.options()
 			.filter((o) => o.type === "link" && o.hideInDropdown !== true),
 	);
 	const currentOption = createMemo(() => {
-		return props
-			.options()
-			.find(
-				(option) =>
-					currentPath().includes(option.location) ||
-					location.pathname.includes(option.location),
-			);
+		return props.options().find((option) => currentPath() === option.location);
 	});
 	const collectionLabel = createMemo(() => props.collectionSingularName());
 
 	const optionLabel = (option: ViewSelectorOption) => {
+		if (option.type === "proposal") return option.label;
 		if (option.type === "latest" || option.type === "environment") {
 			return T()("actions.view.selector.document.version", {
 				version: option.label.toLowerCase(),
@@ -70,11 +81,7 @@ export const ViewSelector: Component<{
 			});
 		}
 
-		if (option.label === T()("common.revision.history")) {
-			return T()("actions.view.selector.revision.history", {
-				collection: collectionLabel(),
-			});
-		}
+		if (option.label === T()("common.revision.history")) return option.label;
 
 		return T()("actions.view.selector.document.link", {
 			label: option.label.toLowerCase(),
@@ -85,7 +92,9 @@ export const ViewSelector: Component<{
 	const currentOptionLabel = createMemo(() => {
 		const option = currentOption();
 		if (!option) return props.currentViewLabel?.();
-		if (option.type === "link") return optionLabel(option);
+		if (option.type === "link" || option.type === "proposal") {
+			return optionLabel(option);
+		}
 
 		const action =
 			option.type === "latest" ? T()("common.edit") : T()("common.view");
@@ -95,8 +104,11 @@ export const ViewSelector: Component<{
 	const optionStatusVariant = (
 		option: ViewSelectorOption,
 	): StatusIndicatorVariant => {
+		if (option.type === "proposal") return "info-subtle";
 		if (option.type === "latest") {
-			return props.isDocumentMutated?.() ? "warning-subtle" : "success-subtle";
+			return currentOption()?.type === "latest" && props.isDocumentMutated?.()
+				? "warning-subtle"
+				: "success-subtle";
 		}
 		if (option.type === "environment") {
 			if (option.status?.isPublished === false) return "danger-subtle";
@@ -131,41 +143,75 @@ export const ViewSelector: Component<{
 					{currentOptionLabel()}
 				</span>
 			</Menu.Trigger>
-			<Menu.Content class="w-[260px]">
-				<For each={environments()}>
-					{(item) => (
-						<Menu.Item
-							textValue={optionLabel(item)}
-							class="capitalize"
-							selected={currentOption()?.location === item.location}
-							unavailable={item.disabled}
-							onSelect={async () => {
-								if (item.location && !item.disabled) {
-									await props.onBeforeVersionChange?.();
-									navigate(item.location);
-								}
-							}}
-							end={
-								<StatusIndicator
-									variant={optionStatusVariant(item)}
-									label={
-										item.type === "latest"
-											? props.isDocumentMutated?.()
-												? T()("common.unsaved")
-												: undefined
-											: item.type === "environment"
-												? item.status?.isPublished === false
-													? T()("common.status.unreleased")
-													: item.status?.upToDate
-														? T()("documents.release.status.up.to.date")
-														: T()("documents.release.status.out.of.date")
-												: undefined
-									}
-								/>
-							}
-						>
-							{optionLabel(item)}
-						</Menu.Item>
+			<Menu.Content class="w-65">
+				<For each={versionGroups()}>
+					{(group) => (
+						<Show when={group.options.length > 0}>
+							<Show when={group.separator}>
+								<Menu.Separator />
+							</Show>
+							<For each={group.options}>
+								{(item) => (
+									<Menu.Item
+										textValue={optionLabel(item)}
+										class="capitalize"
+										selected={currentOption()?.location === item.location}
+										unavailable={item.disabled}
+										onSelect={async () => {
+											if (!item.location || item.disabled) return;
+
+											const location = props.onBeforeVersionChange
+												? await props.onBeforeVersionChange(item)
+												: item.location;
+											if (location) navigate(location);
+										}}
+										end={
+											<span class="flex items-center gap-2">
+												<Show when={props.comparing?.() && item.compareKey}>
+													<Show
+														when={item.type === "environment"}
+														fallback={
+															<FaSolidCaretLeft
+																size={11}
+																class="fill-icon text-icon"
+																aria-label={T()("documents.compare.opens.left")}
+															/>
+														}
+													>
+														<FaSolidCaretRight
+															size={11}
+															class="fill-icon text-icon"
+															aria-label={T()("documents.compare.opens.right")}
+														/>
+													</Show>
+												</Show>
+												<StatusIndicator
+													variant={optionStatusVariant(item)}
+													label={
+														item.type === "latest"
+															? currentOption()?.type === "latest" &&
+																props.isDocumentMutated?.()
+																? T()("common.unsaved")
+																: undefined
+															: item.type === "environment"
+																? item.status?.isPublished === false
+																	? T()("common.status.unreleased")
+																	: item.status?.upToDate
+																		? T()("documents.release.status.up.to.date")
+																		: T()(
+																				"documents.release.status.out.of.date",
+																			)
+																: undefined
+													}
+												/>
+											</span>
+										}
+									>
+										{optionLabel(item)}
+									</Menu.Item>
+								)}
+							</For>
+						</Show>
 					)}
 				</For>
 				<Show when={linkOptions().length > 0}>

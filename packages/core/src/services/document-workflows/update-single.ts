@@ -4,14 +4,18 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import {
+	DocumentVersionsRepository,
 	DocumentWorkflowAssigneesRepository,
 	DocumentWorkflowsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidAuth } from "../../types/hono.js";
+import type { LucidUser } from "../../types/hono.js";
 import { sameNumericSet } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import checkDocumentAccess from "../documents/checks/check-document-access.js";
+import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
+import getUpdateContext from "../documents-versions/helpers/get-update-context.js";
+import invalidateReleases from "../releases/helpers/invalidate-releases.js";
+import recordProposalActivity from "../releases/helpers/record-proposal-activity.js";
 import {
 	getWorkflowConfig,
 	resolveEffectiveWorkflowStage,
@@ -22,13 +26,25 @@ const updateSingle: ServiceFn<
 		{
 			collectionKey: string;
 			documentId: number;
+			versionId?: number;
 			stage?: string;
 			assigneeIds?: number[];
-			user: LucidAuth;
+			user: LucidUser;
 		},
 	],
 	undefined
 > = async (context, data) => {
+	const Versions = new DocumentVersionsRepository(context.db);
+	const Workflows = new DocumentWorkflowsRepository(context.db);
+	const Assignees = new DocumentWorkflowAssigneesRepository(context.db);
+
+	const claimRes = await acquireDocumentWrites(context, {
+		collectionKey: data.collectionKey,
+		ids: [data.documentId],
+	});
+	if (claimRes.error) return claimRes;
+	await using _claim = claimRes.data;
+
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
@@ -64,18 +80,38 @@ const updateSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const documentAccessRes = await checkDocumentAccess(context, {
+	const versionRes = await Versions.selectSingle(
+		{
+			select: ["id"],
+			where: [
+				{ key: "document_id", operator: "=", value: data.documentId },
+				data.versionId === undefined
+					? { key: "type", operator: "=", value: "latest" }
+					: { key: "id", operator: "=", value: data.versionId },
+			],
+			validation: { enabled: true },
+		},
+		{ tableName: tableNamesRes.data.version },
+	);
+	if (versionRes.error) return versionRes;
+
+	//* latest unless a proposal is given, which needs edit access to its release
+	const versionId = versionRes.data.id;
+	const editableRes = await getUpdateContext(context, {
 		collectionKey: data.collectionKey,
-		id: data.documentId,
+		documentId: data.documentId,
+		versionId,
+		authUser: data.user,
 	});
-	if (documentAccessRes.error) return documentAccessRes;
+	if (editableRes.error) return editableRes;
 
-	const Workflows = new DocumentWorkflowsRepository(context.db);
-	const Assignees = new DocumentWorkflowAssigneesRepository(context.db);
-
+	//* latest's workflow has no version
+	const workflowVersionId =
+		editableRes.data.versionType === "latest" ? null : versionId;
 	const workflowRes = await Workflows.selectSingleDetailed({
 		collectionKey: data.collectionKey,
 		documentId: data.documentId,
+		versionId: workflowVersionId,
 	});
 	if (workflowRes.error) return workflowRes;
 
@@ -109,7 +145,6 @@ const updateSingle: ServiceFn<
 		data.assigneeIds !== undefined &&
 		!sameNumericSet(currentAssigneeIds, nextAssigneeIds);
 
-	// The endpoint is explicit: callers must request a real stage or assignee change.
 	if (!stageChanged && !assigneesChanged) {
 		return {
 			error: {
@@ -129,7 +164,7 @@ const updateSingle: ServiceFn<
 		});
 		const Users = new UsersRepository(context.db);
 		const assignableUsersRes = await Users.selectMultipleWithPermission({
-			permission,
+			permissions: [permission],
 		});
 		if (assignableUsersRes.error) return assignableUsersRes;
 
@@ -154,12 +189,12 @@ const updateSingle: ServiceFn<
 	const now = new Date().toISOString();
 	let workflowId = workflowRes.data?.id;
 
-	// Create the workflow row lazily, otherwise update the existing row in place.
 	if (!workflowId) {
 		const createRes = await Workflows.createSingle({
 			data: {
 				collection_key: data.collectionKey,
 				document_id: data.documentId,
+				version_id: workflowVersionId,
 				stage_key: nextStage.key,
 				created_by: data.user.id,
 				updated_by: data.user.id,
@@ -202,6 +237,26 @@ const updateSingle: ServiceFn<
 		}
 	}
 
+	if (stageChanged) {
+		const invalidateRes = await invalidateReleases(context, {
+			collectionKey: data.collectionKey,
+			documentIds: [data.documentId],
+			versionId,
+			userId: data.user.id,
+		});
+		if (invalidateRes.error) return invalidateRes;
+
+		const activityRes = await recordProposalActivity(context, {
+			type: "workflow_updated",
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			versionId,
+			stage: nextStage.key,
+			userId: data.user.id,
+		});
+		if (activityRes.error) return activityRes;
+	}
+
 	const hookRes = await executeHooks(
 		context,
 		{
@@ -221,6 +276,7 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				documentId: data.documentId,
 				userId: data.user.id,
+				versionId,
 				previousStage: currentStage.key,
 				nextStage: nextStage.key,
 				previousAssigneeIds: currentAssigneeIds,

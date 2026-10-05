@@ -1,13 +1,11 @@
-import { A } from "@solidjs/router";
 import classnames from "classnames";
-import { FaSolidArrowRight } from "solid-icons/fa";
 import {
 	type Component,
 	createUniqueId,
 	type JSXElement,
 	Show,
 } from "solid-js";
-import T from "@/translations";
+import ViewAllLink from "@/components/ViewAllLink/ViewAllLink";
 
 export interface DashboardCardProps {
 	title: string;
@@ -80,18 +78,7 @@ const DashboardCard: Component<DashboardCardProps> = (props) => {
 				<div class="flex shrink-0 items-center gap-2">
 					{props.actions}
 					<Show when={props.href}>
-						{(href) => (
-							<A
-								href={href()}
-								class="group flex items-center gap-1.5 rounded-md px-1 text-xs text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
-							>
-								{props.linkLabel ?? T()("common.view.all")}
-								<FaSolidArrowRight
-									size={9}
-									class="transition-transform group-hover:translate-x-0.5 rtl:rotate-180"
-								/>
-							</A>
-						)}
+						{(href) => <ViewAllLink href={href()} label={props.linkLabel} />}
 					</Show>
 				</div>
 			</header>

@@ -2,15 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	selectPreview: vi.fn(),
-	selectPublishOperation: vi.fn(),
 }));
 
 vi.mock("../../libs/repositories/index.js", () => ({
 	PreviewSessionsRepository: class {
 		selectSingle = mocks.selectPreview;
-	},
-	DocumentPublishOperationsRepository: class {
-		selectSingle = mocks.selectPublishOperation;
 	},
 }));
 
@@ -66,10 +62,6 @@ describe("preview session resolution and authorization", () => {
 		mocks.selectPreview.mockResolvedValue({
 			error: undefined,
 			data: buildPreview(),
-		});
-		mocks.selectPublishOperation.mockResolvedValue({
-			error: undefined,
-			data: { target: "staging" },
 		});
 	});
 
@@ -135,7 +127,7 @@ describe("preview session resolution and authorization", () => {
 
 	it.each([
 		["revision", 73, "production"],
-		["snapshot", 91, "review"],
+		["snapshot", 91, "latest"],
 		["latest", null, "latest"],
 		["staging", null, "review"],
 	] as const)("locks a scoped %s preview to its entry document while resolving auxiliary collections to %s", async (entryVersionType, entryVersionId, auxiliaryVersionType) => {
@@ -180,31 +172,6 @@ describe("preview session resolution and authorization", () => {
 				},
 				versionType: auxiliaryVersionType,
 			},
-		});
-	});
-
-	it("uses the pinned snapshot's release target when resolving scoped auxiliary collections", async () => {
-		mocks.selectPreview.mockResolvedValue({
-			error: undefined,
-			data: buildPreview({
-				entry_version_type: "snapshot",
-				entry_version_id: 91,
-			}),
-		});
-
-		await authorize(buildContext(), {
-			token,
-			collectionKey: "article",
-			versionType: "production",
-		});
-
-		expect(mocks.selectPublishOperation).toHaveBeenCalledWith({
-			select: ["target"],
-			where: [
-				{ key: "collection_key", operator: "=", value: "page" },
-				{ key: "document_id", operator: "=", value: 42 },
-				{ key: "snapshot_version_id", operator: "=", value: 91 },
-			],
 		});
 	});
 

@@ -1,16 +1,12 @@
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
-import formatter from "../../libs/formatters/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import hasAccess from "../../libs/permission/has-access.js";
-import {
-	DocumentPublishOperationsRepository,
-	DocumentsRepository,
-} from "../../libs/repositories/index.js";
+import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishingOverview } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import { getReviewableCollectionKeys } from "../document-publish-operations/helpers/index.js";
+import getReleaseOverview from "../releases/get-overview.js";
 
 const getOverview: ServiceFn<
 	[
@@ -84,43 +80,14 @@ const getOverview: ServiceFn<
 		collectionOverviews.push(result.data);
 	}
 
-	const reviewableCollectionKeys = getReviewableCollectionKeys({
-		collections: collectionsRes.data,
-		user: data.user,
-	});
-	const reviewTargets = Array.from(
-		new Set(
-			collectionsRes.data.flatMap((collection) =>
-				reviewableCollectionKeys.includes(collection.key)
-					? (collection.getData.publishing.review?.requiredFor ?? [])
-					: [],
-			),
-		),
-	);
-	const Operations = new DocumentPublishOperationsRepository(context.db);
-	const releaseRequests: PublishingOverview["releaseRequests"] = [];
-
-	for (const target of reviewTargets) {
-		const overviewRes = await Operations.selectOverview({
-			userId: data.user.id,
-			collectionKeys: reviewableCollectionKeys,
-			target,
-		});
-		if (overviewRes.error) return overviewRes;
-
-		releaseRequests.push({
-			target,
-			pending: formatter.parseCount(overviewRes.data?.pending),
-			scheduled: formatter.parseCount(overviewRes.data?.scheduled),
-			failed: formatter.parseCount(overviewRes.data?.failed),
-		});
-	}
+	const releasesRes = await getReleaseOverview(context, { user: data.user });
+	if (releasesRes.error) return releasesRes;
 
 	return {
 		error: undefined,
 		data: {
 			collections: collectionOverviews,
-			releaseRequests,
+			releases: releasesRes.data,
 		},
 	};
 };

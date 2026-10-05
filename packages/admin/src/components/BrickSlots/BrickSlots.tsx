@@ -11,10 +11,9 @@ import {
 } from "solid-js";
 import { createFieldStates } from "@/extensions/editor/field-state";
 import { resolveSlots } from "@/extensions/slot-policy";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
-
 import type { BrickData } from "@/store/brickStore/brickStore";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import AdminExtensionBoundary from "../AdminExtensionBoundary/AdminExtensionBoundary";
 import type { BrickSlot } from "./types";
@@ -35,6 +34,7 @@ const BrickSlots: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const route = useDocumentRoute(() => props.contentLocale);
 
 	// ----------------------------------

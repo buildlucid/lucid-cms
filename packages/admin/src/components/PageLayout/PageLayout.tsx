@@ -56,11 +56,11 @@ const PageLayoutRoot: Component<PageLayoutRootProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		//* the 15px leaves room for the shell's bottom padding
+		//* the 15px leaves room for the shell's bottom padding. Clipping, unlike hidden, keeps sticky content working
 		<div
 			data-page-layout-root
 			class={classnames(
-				"flex flex-col min-h-[calc(100vh-15px)] border-t border-x border-border rounded-t-xl overflow-x-hidden",
+				"flex flex-col min-h-[calc(100vh-15px)] border-t border-x border-border rounded-t-xl overflow-x-clip",
 				props.class,
 			)}
 		>
@@ -77,6 +77,7 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 		<div
 			data-page-layout-header
 			class={classnames(
+				"rounded-t-xl",
 				{
 					"bg-background border-b border-border":
 						props.variant !== "transparent",
@@ -86,7 +87,7 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 		>
 			<div
 				class={classnames(
-					"flex flex-col md:flex-row md:justify-between items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-6",
+					"flex flex-col md:flex-row md:justify-between items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-6 rounded-t-xl",
 					{
 						"pb-4": props.variant !== "transparent",
 						"md:pb-6": !props.children && props.variant !== "transparent",

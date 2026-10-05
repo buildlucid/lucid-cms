@@ -29,6 +29,7 @@ const checkSingle: ServiceFn<
 		collectionKey: data.collectionKey,
 		documentId: data.documentId,
 		versionId: data.versionId,
+		authUser: data.authUser,
 	});
 	if (updateContextRes.error) return updateContextRes;
 

@@ -8,6 +8,7 @@ export const requiresPinnedPreviewVersion = (
 	versionType: DocumentVersionType,
 ) =>
 	versionType === "revision" ||
+	versionType === constants.collectionBuilder.publishing.proposalVersionType ||
 	versionType === constants.collectionBuilder.publishing.snapshotVersionType;
 
 /** Resolves the preview mode and rejects modes unsupported by the version type. */

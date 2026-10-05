@@ -16,7 +16,7 @@ import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import RelationCount from "@/components/RelationCount/RelationCount";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
-import brickStore from "@/store/brickStore/brickStore";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import T from "@/translations";
 import { moveArrayItem } from "@/utils/array-helpers";
@@ -273,6 +273,12 @@ const UserSortableItem: Component<{
 	dragDrop: DragDropCBT;
 	disabled?: boolean;
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const brickStore = useBrickStore();
+
+	// ----------------------------------------
+	// Render
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
 		<div

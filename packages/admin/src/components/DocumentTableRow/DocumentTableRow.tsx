@@ -30,6 +30,8 @@ interface DocumentRowProps {
 	selection?: {
 		selected: boolean;
 		onChange: () => void;
+		/** Shows the row but stops it being picked, eg. when it's already in use. */
+		disabled?: boolean;
 	};
 	current?: boolean;
 	reorderable?: boolean;
@@ -61,8 +63,9 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 		<Table.Row
 			index={props.index}
 			actions={props.actions}
-			onClick={props.onClick}
+			onClick={props.selection?.disabled ? undefined : props.onClick}
 			current={props.current}
+			class={props.selection?.disabled ? "opacity-50" : undefined}
 			viewTransitionName={
 				props.reorderable
 					? `document-table-row-${props.document.collectionKey}-${props.document.id}`
@@ -76,6 +79,7 @@ const DocumentTableRow: Component<DocumentRowProps> = (props) => {
 						type="td"
 						value={selection().selected}
 						onChange={selection().onChange}
+						disabled={selection().disabled}
 					/>
 				)}
 			</Show>

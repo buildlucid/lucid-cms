@@ -9,8 +9,7 @@ import { Permissions } from "@/constants/permissions";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import userStore from "@/store/userStore/userStore";
 import { DocumentDetails } from "./parts/DocumentDetails";
-import { EnvironmentStatus } from "./parts/EnvironmentStatus";
-import { PublishRequests } from "./parts/PublishRequests";
+import { DocumentReleases } from "./parts/DocumentReleases";
 import { Workflow } from "./parts/Workflow";
 
 export const DocumentSidebar: Component<{
@@ -22,6 +21,7 @@ export const DocumentSidebar: Component<{
 	documentId: Accessor<number | undefined>;
 	disabled: Accessor<boolean>;
 	mutations: UseDocumentMutations;
+	releaseContext?: boolean;
 }> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -29,19 +29,13 @@ export const DocumentSidebar: Component<{
 		() =>
 			props.collection()?.publishing.workflow !== undefined &&
 			props.documentId() !== undefined &&
-			props.document() !== undefined,
+			Boolean(props.document()?.workflow),
 	);
 	const hasPendingReleases = createMemo(
 		() =>
-			userStore.get.hasPermission([Permissions.PublishOperationsRead]).all &&
-			((props.collection()?.publishing.review?.requiredFor?.length ?? 0) > 0 ||
-				props.collection()?.capabilities.scheduling === true),
-	);
-	const hasEnvironmentStatus = createMemo(
-		() =>
-			(props.collection()?.publishing.targets.length ?? 0) > 0 &&
-			props.documentId() !== undefined &&
-			props.document() !== undefined,
+			!props.releaseContext &&
+			userStore.get.hasPermission([Permissions.ReleasesRead]).all &&
+			props.documentId() !== undefined,
 	);
 
 	// ----------------------------------
@@ -57,27 +51,16 @@ export const DocumentSidebar: Component<{
 				disabled={props.disabled}
 				mutations={props.mutations}
 			/>
-			<Show
-				when={hasWorkflow() && (hasEnvironmentStatus() || hasPendingReleases())}
-			>
+			<Show when={hasWorkflow() && hasPendingReleases()}>
 				<div class="border-t border-border" aria-hidden="true" />
 			</Show>
-			<EnvironmentStatus
-				collection={props.collection}
-				document={props.document}
-				autoSaveMetadata={props.autoSaveMetadata}
-			/>
-			<Show when={hasEnvironmentStatus() && hasPendingReleases()}>
-				<div class="border-t border-border" aria-hidden="true" />
+			<Show when={hasPendingReleases()}>
+				<DocumentReleases
+					collectionKey={props.collectionKey}
+					documentId={props.documentId}
+				/>
 			</Show>
-			<PublishRequests
-				collection={props.collection}
-				collectionKey={props.collectionKey}
-				documentId={props.documentId}
-			/>
-			<Show
-				when={hasWorkflow() || hasEnvironmentStatus() || hasPendingReleases()}
-			>
+			<Show when={hasWorkflow() || hasPendingReleases()}>
 				<div class="border-t border-border" aria-hidden="true" />
 			</Show>
 			<DocumentDetails

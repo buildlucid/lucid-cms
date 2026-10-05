@@ -45,7 +45,7 @@ const usePromoteSingle = (props: UsePromoteSingleProps) => {
 				versionType: props.getVersionType(),
 			}),
 		}),
-		invalidates: [queryKeys.documents.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

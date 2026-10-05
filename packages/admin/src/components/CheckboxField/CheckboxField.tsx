@@ -3,8 +3,8 @@ import { type Component, createMemo, Show } from "solid-js";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import Field from "@/components/Field/Field";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
@@ -26,6 +26,7 @@ interface CheckboxFieldProps {
 export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -45,6 +46,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
 	);
 	const id = createMemo(() =>
 		brickHelpers.customFieldId({
+			scope: brickStore.idPrefix,
 			key: props.state.fieldConfig.key,
 			brickIndex: fieldRenderState.brickIndex(),
 			groupRef: props.state.groupRef,

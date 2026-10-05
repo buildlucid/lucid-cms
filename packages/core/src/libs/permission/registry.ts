@@ -57,7 +57,7 @@ const permissionGroupOrder = new Map(
 	[
 		"documents",
 		"media_permissions",
-		"publish_operations_permissions",
+		"release_permissions",
 		"agents",
 		"ai_permissions",
 		"users_permissions",

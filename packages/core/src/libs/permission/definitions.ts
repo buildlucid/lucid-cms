@@ -31,8 +31,8 @@ export const Permissions = {
 	JobsRun: "jobs:run",
 	JobsUpdate: "jobs:update",
 
-	// Publish operation permissions
-	PublishOperationsRead: "publish-operations:read",
+	// Release permissions
+	ReleasesRead: "releases:read",
 
 	// AI permissions
 	AiCustomFieldValue: "ai:custom-field-value",
@@ -325,17 +325,17 @@ export const PermissionGroups = Object.freeze({
 			},
 		],
 	},
-	"publish-operations": {
-		key: "publish_operations_permissions",
+	releases: {
+		key: "release_permissions",
 		details: {
-			name: copy("admin:permissions.groups.publish.operations"),
+			name: copy("admin:permissions.groups.releases"),
 		},
 		core: true,
 		permissions: [
 			{
-				key: Permissions.PublishOperationsRead,
+				key: Permissions.ReleasesRead,
 				details: {
-					name: copy("admin:permissions.publish.operations.read"),
+					name: copy("admin:permissions.releases.read"),
 				},
 				core: true,
 			},

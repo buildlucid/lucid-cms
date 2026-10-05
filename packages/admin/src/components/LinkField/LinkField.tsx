@@ -7,8 +7,8 @@ import {
 	createSignal,
 } from "solid-js";
 import { LinkSelect } from "@/components/LinkSelect/LinkSelect";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -29,6 +29,7 @@ interface LinkFieldProps {
 export const LinkField: Component<LinkFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 	const [getValue, setValue] = createSignal<
 		NonNullable<LinkResValue> | undefined | null
@@ -61,6 +62,7 @@ export const LinkField: Component<LinkFieldProps> = (props) => {
 	return (
 		<LinkSelect
 			id={brickHelpers.customFieldId({
+				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,

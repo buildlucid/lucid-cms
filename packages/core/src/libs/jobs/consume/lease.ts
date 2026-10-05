@@ -28,6 +28,19 @@ export const claimJob = async (
 	});
 };
 
+/** Renews an owned lease, holding its row when called inside a transaction. */
+export const renewJobLease = (context: ServiceContext, job: ClaimedJob) => {
+	const now = new Date();
+	const Jobs = new JobsRepository(context.db);
+
+	return Jobs.renewLease({
+		jobId: job.job_id,
+		leaseExpiresAt: new Date(now.getTime() + LEASE_DURATION_MS).toISOString(),
+		leaseToken: job.lease_token,
+		now: now.toISOString(),
+	});
+};
+
 /** Decides whether an unclaimed delivery should be ignored or retried later. */
 export const resolveUnclaimedDelivery = async (
 	context: ServiceContext,
@@ -74,15 +87,7 @@ export const startLeaseHeartbeat = (
 	const heartbeat = async () => {
 		if (stopped) return;
 
-		const now = new Date();
-		const Jobs = new JobsRepository(context.db);
-
-		const result = await Jobs.renewLease({
-			jobId: job.job_id,
-			leaseExpiresAt: new Date(now.getTime() + LEASE_DURATION_MS).toISOString(),
-			leaseToken: job.lease_token,
-			now: now.toISOString(),
-		});
+		const result = await renewJobLease(context, job);
 		if (result.error || !result.data) {
 			abortController.abort();
 			return;

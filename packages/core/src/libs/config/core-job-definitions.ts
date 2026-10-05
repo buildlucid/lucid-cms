@@ -3,8 +3,6 @@ import { generateAgentTitleJob } from "../../services/agent/jobs/generate-title.
 import { agentTickJob } from "../../services/agent/jobs/tick.js";
 import { deleteCollectionJob } from "../../services/collections/jobs/delete-single.js";
 import { verifyConnectionsJob } from "../../services/connection/jobs/verify-connections.js";
-import { dispatchScheduledPublishOperationsJob } from "../../services/document-publish-operations/jobs/dispatch-scheduled.js";
-import { executePublishOperationJob } from "../../services/document-publish-operations/jobs/execute.js";
 import { deleteDocumentJob } from "../../services/documents/jobs/delete-single.js";
 import { deleteExpiredRevisionsJob } from "../../services/documents-versions/jobs/delete-expired-revisions.js";
 import { sendEmailJob } from "../../services/email/jobs/send-email.js";
@@ -14,6 +12,8 @@ import { abortUploadSessionJob } from "../../services/media/jobs/abort-upload-se
 import { deleteAwaitingSyncMediaJob } from "../../services/media/jobs/delete-awaiting-sync.js";
 import { hardDeleteSingleMediaJob } from "../../services/media/jobs/hard-delete-single.js";
 import { updateMediaStorageJob } from "../../services/media/jobs/update-storage.js";
+import { dispatchScheduledReleasesJob } from "../../services/releases/jobs/dispatch-scheduled.js";
+import { executeReleaseJob } from "../../services/releases/jobs/execute.js";
 import { deleteUserJob } from "../../services/users/jobs/delete-single.js";
 import { checkSystemAlertsJob } from "../alerts/check-system-alerts.js";
 import { executeAlertJob } from "../alerts/execute-alert.js";
@@ -33,8 +33,8 @@ const coreJobDefinitions = [
 	deleteUserJob,
 	deleteDocumentJob,
 	deleteExpiredRevisionsJob,
-	executePublishOperationJob,
-	dispatchScheduledPublishOperationsJob,
+	executeReleaseJob,
+	dispatchScheduledReleasesJob,
 	deleteExpiredDataJob,
 	verifyConnectionsJob,
 	agentTickJob,

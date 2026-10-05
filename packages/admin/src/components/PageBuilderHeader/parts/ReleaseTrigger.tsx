@@ -13,7 +13,7 @@ export interface ReleaseTriggerOption {
 	label: string;
 	value: Exclude<DocumentVersionType, "revision">;
 	route: string;
-	action?: "publish" | "request";
+	action?: "publish" | "compose";
 	permission?: boolean;
 	disabled?: boolean;
 	disabledToast?: {
@@ -63,10 +63,6 @@ export const ReleaseTrigger: Component<{
 			event.stopPropagation();
 		}
 	};
-	const getOptionLabel = (option: ReleaseTriggerOption) =>
-		option.action === "request"
-			? T()("documents.release.request.publish.to")
-			: T()("documents.release.to");
 	const spawnDisabledToast = (option: ReleaseTriggerOption) => {
 		if (!option.disabledToast) return;
 
@@ -185,7 +181,7 @@ export const ReleaseTrigger: Component<{
 										/>
 									}
 								>
-									{getOptionLabel(option)} {option.label}
+									{T()("documents.release.to")} {option.label}
 								</Menu.Item>
 							)}
 						</For>

@@ -2,8 +2,8 @@ import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import Select from "@/components/Select/Select";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
@@ -25,6 +25,7 @@ interface SelectFieldProps {
 export const SelectField: Component<SelectFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -48,6 +49,7 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
 	return (
 		<Select
 			id={brickHelpers.customFieldId({
+				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,

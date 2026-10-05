@@ -40,7 +40,6 @@ const insertBrickTables: ServiceFn<
 
 		// update parent and brick IDs using the mappings before inserting
 		for (const row of table.data) {
-			// check for parent_id_ref that needs updating
 			if (
 				"parent_id_ref" in row &&
 				typeof row.parent_id_ref === "number" &&
@@ -70,7 +69,6 @@ const insertBrickTables: ServiceFn<
 				if (mappedId) row.parent_id = mappedId;
 			}
 
-			// check for brick_id that needs updating
 			if (
 				"brick_id" in row &&
 				typeof row.brick_id === "number" &&
@@ -82,13 +80,10 @@ const insertBrickTables: ServiceFn<
 			}
 		}
 
-		// determine which columns to return
 		const hasParentIdRef = table.data.some((row) => "parent_id_ref" in row);
 		const hasBrickIdRef = table.data.some((row) => "brick_id_ref" in row);
 		const returningColumns: Array<keyof LucidBricksTable> = [];
-		// always return ID
 		returningColumns.push("id");
-		// return additional columns as needed for mapping
 		if (hasParentIdRef) returningColumns.push("parent_id_ref");
 		if (hasBrickIdRef) returningColumns.push("brick_id_ref");
 
@@ -111,66 +106,74 @@ const insertBrickTables: ServiceFn<
 			if (references.error) return references;
 		}
 
-		// insert rows for this table
-		const response = await Bricks.createMultiple(
-			{
-				data: table.data,
-				returning: returningColumns,
-			},
-			{
-				tableName: table.table,
-			},
-		);
-		if (response.error) return response;
+		const columns = new Set<string>();
+		for (const row of table.data) {
+			for (const column of Object.keys(row)) columns.add(column);
+		}
+		const batchSize = context.config.db.getQueryBatchSize({
+			parametersPerItem: columns.size,
+		});
+		for (let offset = 0; offset < table.data.length; offset += batchSize) {
+			const rows = table.data.slice(offset, offset + batchSize);
+			const response = await Bricks.createMultiple(
+				{
+					data: rows,
+					returning: returningColumns,
+				},
+				{
+					tableName: table.table,
+				},
+			);
+			if (response.error) return response;
 
-		// create mappings for the next tables.
-		// Prefer returned ref values when available; fall back to original row
-		// refs for adapters that do not return custom columns in insert results.
-		if (response.data?.length) {
-			for (let i = 0; i < response.data.length; i++) {
-				const insertedRow = response.data[i];
-				const originalRow = table.data[i];
-				if (!insertedRow) continue;
-				if (typeof insertedRow.id !== "number") continue;
+			// Prefer returned ref values when available; fall back to original row
+			// refs for adapters that do not return custom columns in insert results.
+			if (response.data?.length) {
+				for (let i = 0; i < response.data.length; i++) {
+					const insertedRow = response.data[i];
+					const originalRow = rows[i];
+					if (!insertedRow) continue;
+					if (typeof insertedRow.id !== "number") continue;
 
-				let mappedFromInsertedRefs = false;
+					let mappedFromInsertedRefs = false;
 
-				if (
-					"parent_id_ref" in insertedRow &&
-					typeof insertedRow.parent_id_ref === "number" &&
-					insertedRow.parent_id_ref < 0 &&
-					isTreeTableInsert
-				) {
-					idMapping[insertedRow.parent_id_ref] = insertedRow.id;
-					mappedFromInsertedRefs = true;
-				}
+					if (
+						"parent_id_ref" in insertedRow &&
+						typeof insertedRow.parent_id_ref === "number" &&
+						insertedRow.parent_id_ref < 0 &&
+						isTreeTableInsert
+					) {
+						idMapping[insertedRow.parent_id_ref] = insertedRow.id;
+						mappedFromInsertedRefs = true;
+					}
 
-				if (
-					"brick_id_ref" in insertedRow &&
-					typeof insertedRow.brick_id_ref === "number" &&
-					insertedRow.brick_id_ref < 0
-				) {
-					idMapping[insertedRow.brick_id_ref] = insertedRow.id;
-					mappedFromInsertedRefs = true;
-				}
+					if (
+						"brick_id_ref" in insertedRow &&
+						typeof insertedRow.brick_id_ref === "number" &&
+						insertedRow.brick_id_ref < 0
+					) {
+						idMapping[insertedRow.brick_id_ref] = insertedRow.id;
+						mappedFromInsertedRefs = true;
+					}
 
-				if (mappedFromInsertedRefs || !originalRow) continue;
+					if (mappedFromInsertedRefs || !originalRow) continue;
 
-				if (
-					"parent_id_ref" in originalRow &&
-					typeof originalRow.parent_id_ref === "number" &&
-					originalRow.parent_id_ref < 0 &&
-					isTreeTableInsert
-				) {
-					idMapping[originalRow.parent_id_ref] = insertedRow.id;
-				}
+					if (
+						"parent_id_ref" in originalRow &&
+						typeof originalRow.parent_id_ref === "number" &&
+						originalRow.parent_id_ref < 0 &&
+						isTreeTableInsert
+					) {
+						idMapping[originalRow.parent_id_ref] = insertedRow.id;
+					}
 
-				if (
-					"brick_id_ref" in originalRow &&
-					typeof originalRow.brick_id_ref === "number" &&
-					originalRow.brick_id_ref < 0
-				) {
-					idMapping[originalRow.brick_id_ref] = insertedRow.id;
+					if (
+						"brick_id_ref" in originalRow &&
+						typeof originalRow.brick_id_ref === "number" &&
+						originalRow.brick_id_ref < 0
+					) {
+						idMapping[originalRow.brick_id_ref] = insertedRow.id;
+					}
 				}
 			}
 		}

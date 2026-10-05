@@ -4,6 +4,8 @@ import {
 	DocumentsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import detachDocuments from "../../releases/helpers/detach-documents.js";
+import nullifyDocumentReferences from "../nullify-document-references.js";
 
 /** Permanently removes document rows and their identities. Callers own the transaction and lifecycle actions. */
 const deleteDocumentRecords: ServiceFn<
@@ -17,6 +19,16 @@ const deleteDocumentRecords: ServiceFn<
 	undefined
 > = async (context, { collectionKey, documentIds, tableName }) => {
 	if (!documentIds.length) return { error: undefined, data: undefined };
+	const nullified = await nullifyDocumentReferences(context, {
+		collectionKey,
+		documentIds,
+	});
+	if (nullified.error) return nullified;
+	const detached = await detachDocuments(context, {
+		collectionKey,
+		documentIds,
+	});
+	if (detached.error) return detached;
 
 	const Documents = new DocumentsRepository(context.db);
 	const documents = await Documents.deleteMultiple(

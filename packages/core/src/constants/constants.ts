@@ -39,17 +39,14 @@ export default Object.freeze({
 		autoSave: false,
 		scheduling: false,
 		orderable: false,
-		protectedEnvironments: ["latest", "revision", "snapshot"],
+		protectedEnvironments: ["latest", "revision", "snapshot", "proposal"],
 		revisionRetentionDays: 30,
 		previewExpirationSeconds: 3600,
 		previewMaxExpirationSeconds: 604_800,
 		publishing: {
 			allowSelfApproval: false,
-			comments: {
-				request: "required" as const,
-				decision: "optional" as const,
-			},
 			snapshotVersionType: "snapshot" as const,
+			proposalVersionType: "proposal" as const,
 			workflow: {
 				stageColors: [
 					"grey",
@@ -102,9 +99,9 @@ export default Object.freeze({
 				{ percent: 100, level: "critical", cooldownDays: 1 },
 			] as const,
 		},
-		publishRequest: {
-			type: "publish-request" as const,
-		},
+	},
+	releases: {
+		maxDocuments: 100,
 	},
 	errors: {
 		name: "Error",

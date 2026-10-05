@@ -24,6 +24,8 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 			{
 				collectionKey: string;
 				documentId: number;
+				/** Null for latest, otherwise a release proposal. */
+				versionId: number | null;
 			}
 		>,
 	) {
@@ -31,6 +33,11 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 			.selectFrom("lucid_document_workflows")
 			.where("collection_key", "=", props.collectionKey)
 			.where("document_id", "=", props.documentId)
+			.where((eb) =>
+				props.versionId === null
+					? eb("version_id", "is", null)
+					: eb("version_id", "=", props.versionId),
+			)
 			.selectAll("lucid_document_workflows")
 			.select((eb) => [
 				this.database.fn

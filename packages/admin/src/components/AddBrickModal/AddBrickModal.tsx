@@ -10,7 +10,8 @@ import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import BrickPreview from "@/components/BrickPreview/BrickPreview";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 import Modal from "@/components/Modal/Modal";
-import brickStore from "@/store/brickStore/brickStore";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 
@@ -29,7 +30,9 @@ interface AddBrickProps {
 
 const AddBrickModal: Component<AddBrickProps> = (props) => {
 	// ------------------------------
-	// State
+	// State & Hooks
+	const brickStore = useBrickStore();
+	const localization = useDocumentLocalization();
 	const [getHighlightedBrick, setHighlightedBrick] = createSignal<
 		string | undefined
 	>(undefined);
@@ -116,6 +119,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 											} else {
 												brickStore.get.addBrick({
 													brickConfig: brickConfig,
+													locales: localization.localeCodes(),
 												});
 											}
 											props.state.setOpen(false);

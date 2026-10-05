@@ -1,7 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import type { Collection } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
-import CreatePublishRequestModal from "@/components/CreatePublishRequestModal/CreatePublishRequestModal";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
@@ -19,7 +18,6 @@ import type { UseDocumentState } from "@/hooks/useDocumentState/useDocumentState
 import type { UseDocumentUIState } from "@/hooks/useDocumentUIState/useDocumentUIState";
 import type { UseNavigationGuard } from "@/hooks/useNavigationGuard/useNavigationGuard";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
-import helpers from "@/utils/helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 export const PageBuilderModals: Component<{
@@ -39,24 +37,6 @@ export const PageBuilderModals: Component<{
 
 	// ----------------------------------
 	// Memos
-	const environmentLabel = createMemo(() => {
-		const target = props.hooks.uiState.getReleaseEnvironmentTarget();
-		if (!target) return "";
-		const environments =
-			props.hooks.state.collection()?.publishing.targets ?? [];
-		const env = environments.find((e) => e.key === target);
-		return helpers.getLocaleValue({ value: env?.label }) || target;
-	});
-	const releaseEnvironmentIsOpen = createMemo(
-		() =>
-			props.hooks.uiState.getReleaseEnvironmentOpen() &&
-			props.hooks.uiState.getReleaseEnvironmentAction() === "publish",
-	);
-	const publishRequestIsOpen = createMemo(
-		() =>
-			props.hooks.uiState.getReleaseEnvironmentOpen() &&
-			props.hooks.uiState.getReleaseEnvironmentAction() === "request",
-	);
 	const mediaSelectModal = createMemo(() =>
 		pageBuilderModalsStore.getModal("mediaSelect"),
 	);
@@ -286,77 +266,36 @@ export const PageBuilderModals: Component<{
 					},
 				}}
 			/>
-			<ReleaseEnvironmentModal
-				target={props.hooks.uiState.getReleaseEnvironmentTarget}
-				environmentLabel={environmentLabel}
-				scheduling={() =>
-					props.hooks.state.collection()?.capabilities.scheduling === true
-				}
-				state={{
-					open: releaseEnvironmentIsOpen(),
-					setOpen: props.hooks.uiState.setReleaseEnvironmentOpen,
-				}}
-				loading={
-					props.hooks.mutations.createPublishOperationMutation.action.isPending
-				}
-				error={
-					props.hooks.mutations.createPublishOperationMutation.errors()?.message
-				}
-				callbacks={{
-					onConfirm: async (target, scheduledAt, scheduledTimezone) => {
-						await props.hooks.mutations.publishDocumentAction(
-							target,
-							scheduledAt,
-							scheduledTimezone,
-						);
-						resetReleaseState();
-					},
-					onCancel: () => {
-						resetReleaseState();
-						props.hooks.mutations.createPublishOperationMutation.reset();
-					},
-				}}
-			/>
-			<CreatePublishRequestModal
-				target={props.hooks.uiState.getReleaseEnvironmentTarget}
-				environmentLabel={environmentLabel}
-				collection={props.hooks.state.collection}
-				collectionKey={props.hooks.state.collectionKey}
-				state={{
-					open: publishRequestIsOpen(),
-					setOpen: props.hooks.uiState.setReleaseEnvironmentOpen,
-				}}
-				loading={
-					props.hooks.mutations.createPublishOperationMutation.action.isPending
-				}
-				error={
-					props.hooks.mutations.createPublishOperationMutation.errors()?.message
-				}
-				callbacks={{
-					onConfirm: async (
-						target,
-						comment,
-						assigneeIds,
-						autoAccept,
-						scheduledAt,
-						scheduledTimezone,
-					) => {
-						await props.hooks.mutations.createPublishOperationAction(
-							target,
-							comment,
-							assigneeIds,
-							autoAccept,
-							scheduledAt,
-							scheduledTimezone,
-						);
-						resetReleaseState();
-					},
-					onCancel: () => {
-						resetReleaseState();
-						props.hooks.mutations.createPublishOperationMutation.reset();
-					},
-				}}
-			/>
+			<Show when={props.hooks.state.documentId()}>
+				{(documentId) => (
+					<ReleaseEnvironmentModal
+						open={props.hooks.uiState.getReleaseEnvironmentOpen()}
+						setOpen={(open) => {
+							if (open) return;
+							resetReleaseState();
+							props.hooks.mutations.publishMutation.reset();
+						}}
+						target={props.hooks.uiState.getReleaseEnvironmentTarget()}
+						action={
+							props.hooks.uiState.getReleaseEnvironmentAction() ?? "compose"
+						}
+						collection={props.hooks.state.collection()}
+						document={{
+							collectionKey: props.hooks.state.collectionKey(),
+							documentId: documentId(),
+						}}
+						source="latest"
+						publish={{
+							loading: props.hooks.mutations.publishMutation.action.isPending,
+							error: props.hooks.mutations.publishMutation.errors()?.message,
+							onConfirm: async (target) => {
+								await props.hooks.mutations.publishDocumentAction(target);
+								resetReleaseState();
+							},
+						}}
+					/>
+				)}
+			</Show>
 		</>
 	);
 };

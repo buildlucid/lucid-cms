@@ -46,6 +46,7 @@ export interface DocumentQueryResponse extends Select<LucidDocumentTable> {
 	// Target Version
 	version_id?: number | null;
 	version_type?: DocumentVersionType | null;
+	version_content_id?: string | null;
 	version_promoted_from?: number | null;
 	version_created_at?: Date | string | null;
 	version_created_by?: number | null;
@@ -234,8 +235,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									eb(
 										// @ts-expect-error
 										`${props.tables.versions}.type`,
-										"!=",
-										constants.collectionBuilder.publishing.snapshotVersionType,
+										"not in",
+										[
+											constants.collectionBuilder.publishing
+												.snapshotVersionType,
+											constants.collectionBuilder.publishing
+												.proposalVersionType,
+										],
 									),
 								),
 						)
@@ -258,6 +264,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					.select([
 						`${props.tables.versions}.id as version_id`,
 						`${props.tables.versions}.type as version_type`,
+						`${props.tables.versions}.content_id as version_content_id`,
 						`${props.tables.versions}.created_at as version_created_at`,
 						`${props.tables.versions}.created_by as version_created_by`,
 						`${props.tables.versions}.updated_at as version_updated_at`,
@@ -284,6 +291,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					.select([
 						`${props.tables.versions}.id as version_id`,
 						`${props.tables.versions}.type as version_type`,
+						`${props.tables.versions}.content_id as version_content_id`,
 						`${props.tables.versions}.created_at as version_created_at`,
 						`${props.tables.versions}.created_by as version_created_by`,
 						`${props.tables.versions}.updated_at as version_updated_at`,
@@ -384,9 +392,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										eb(
 											// @ts-expect-error
 											`${props.tables.versions}.type`,
-											"!=",
-											constants.collectionBuilder.publishing
-												.snapshotVersionType,
+											"not in",
+											[
+												constants.collectionBuilder.publishing
+													.snapshotVersionType,
+												constants.collectionBuilder.publishing
+													.proposalVersionType,
+											],
 										),
 									),
 							)
@@ -456,11 +468,12 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				.select([
 					`${props.tables.versions}.id as version_id`,
 					`${props.tables.versions}.type as version_type`,
+					`${props.tables.versions}.content_id as version_content_id`,
 				])
 				.$if(props.includeWorkflow, (qb) =>
 					qb
-						.leftJoin("lucid_document_workflows", (join) =>
-							join
+						.leftJoin("lucid_document_workflows", (join) => {
+							const document = join
 								.on(
 									"lucid_document_workflows.collection_key",
 									"=",
@@ -470,8 +483,16 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"lucid_document_workflows.document_id",
 									"=",
 									`${dynamicConfig.tableName}.id`,
-								),
-						)
+								);
+							//* latest's workflow has no version
+							return props.version === "latest"
+								? document.on("lucid_document_workflows.version_id", "is", null)
+								: document.onRef(
+										"lucid_document_workflows.version_id",
+										"=",
+										`${props.tables.versions}.id`,
+									);
+						})
 						.select([
 							"lucid_document_workflows.id as workflow_id",
 							"lucid_document_workflows.stage_key as workflow_stage_key",
@@ -529,8 +550,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					),
 				)
 				.$if(props.includeWorkflow, (qb) =>
-					qb.leftJoin("lucid_document_workflows", (join) =>
-						join
+					qb.leftJoin("lucid_document_workflows", (join) => {
+						const document = join
 							.on(
 								"lucid_document_workflows.collection_key",
 								"=",
@@ -540,8 +561,15 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 								"lucid_document_workflows.document_id",
 								"=",
 								`${dynamicConfig.tableName}.id`,
-							),
-					),
+							);
+						return props.version === "latest"
+							? document.on("lucid_document_workflows.version_id", "is", null)
+							: document.onRef(
+									"lucid_document_workflows.version_id",
+									"=",
+									`${props.tables.versions}.id`,
+								);
+					}),
 				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.version)
@@ -778,9 +806,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 										eb(
 											// @ts-expect-error
 											`${props.tables.versions}.type`,
-											"!=",
-											constants.collectionBuilder.publishing
-												.snapshotVersionType,
+											"not in",
+											[
+												constants.collectionBuilder.publishing
+													.snapshotVersionType,
+												constants.collectionBuilder.publishing
+													.proposalVersionType,
+											],
 										),
 									),
 							)
@@ -790,6 +822,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				.select([
 					`${props.tables.versions}.id as version_id`,
 					`${props.tables.versions}.type as version_type`,
+					`${props.tables.versions}.content_id as version_content_id`,
 				])
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.version)
@@ -866,13 +899,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
-	/** Fetches document IDs used by field validation. */
 	async selectMultipleValidationIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
 			{
 				ids: number[];
 				isDeleted?: Select<LucidDocumentTable>["is_deleted"];
+				protectTargets?: boolean;
 			}
 		>,
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
@@ -884,6 +917,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 		if (props.isDeleted !== undefined) {
 			query = query.where("is_deleted", "=", props.isDeleted);
+		}
+		if (
+			props.protectTargets &&
+			this.database.isTransaction &&
+			this.dbAdapter.supports("sharedRowLocks")
+		) {
+			query = query.orderBy("id", "asc").forShare();
 		}
 
 		const exec = await this.executeQuery(() => query.execute(), {
@@ -900,7 +940,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
-	/** Fetches document IDs for collection-level checks. */
 	async selectMultipleCollectionDocumentIds<V extends boolean = false>(
 		props: QueryProps<
 			V,
@@ -934,7 +973,6 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 		});
 	}
 
-	/** Fetches the last manual order key. */
 	async selectHighestOrderKey(
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {

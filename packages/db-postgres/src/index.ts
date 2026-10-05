@@ -88,6 +88,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 			support: {
 				alterColumn: true,
 				transaction: true,
+				sharedRowLocks: true,
 				multipleAlterTables: true,
 				autoIncrement: false,
 				boolean: true,

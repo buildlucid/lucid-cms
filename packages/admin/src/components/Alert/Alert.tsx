@@ -103,7 +103,7 @@ const Alert: Component<AlertProps> = (props) => {
 					</Match>
 				</Switch>
 			</span>
-			<p class="text-sm text-current">{props.children}</p>
+			<div class="min-w-0 flex-1 text-sm text-current">{props.children}</div>
 		</div>
 	);
 };

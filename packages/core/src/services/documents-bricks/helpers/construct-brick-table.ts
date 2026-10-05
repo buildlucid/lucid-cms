@@ -54,6 +54,7 @@ export type ConstructBrickTableParams = {
 		defaultLocale: string | null;
 	};
 	brickKeyTableNameMap: Map<string, LucidBrickTableName>;
+	createTempRelationId: () => number;
 	order: number;
 	open: boolean;
 	tableNameByteLimit: number | null;
@@ -108,12 +109,6 @@ const getFieldOwner = (
 		params.collection.brickInstances.find(
 			(item) => item.key === params.brick?.key,
 		) ?? null
-	);
-};
-
-const createTempRelationId = (): number => {
-	return -Math.abs(
-		Number.parseInt(crypto.randomBytes(3).toString("hex"), 16) % 2147483647,
 	);
 };
 
@@ -204,7 +199,7 @@ const fieldModeHandlers: Record<FieldDatabaseMode, FieldModeHandler> = {
 
 				const localeGroupRef = new Map<string | null, number>();
 				for (const locale of context.params.localization.locales) {
-					localeGroupRef.set(locale, createTempRelationId());
+					localeGroupRef.set(locale, context.params.createTempRelationId());
 				}
 
 				return [
@@ -388,7 +383,6 @@ const constructBrickTable = (
 		return;
 	}
 
-	//* get or build the table name
 	const mapKey = genTableMapKey({
 		brickKey: params.brick?.key,
 		fieldPath: params.fieldPath,
@@ -414,7 +408,6 @@ const constructBrickTable = (
 		params.brickKeyTableNameMap.set(mapKey, brickTableNameRes.data.name);
 	}
 
-	//* find existing table or create new one
 	let tableIndex = brickTables.findIndex((table) => table.table === tableName);
 	if (tableIndex === -1) {
 		brickTables.push({
@@ -436,7 +429,6 @@ const constructBrickTable = (
 	>();
 	const brickIdRefByLocale = new Map<string | null, number>();
 
-	//* initialize rows for each locale
 	for (const locale of params.localization.locales) {
 		const baseRowData: Partial<Insert<LucidBricksTable>> = {
 			collection_key: params.collection.key,
@@ -454,7 +446,7 @@ const constructBrickTable = (
 
 		//* generate brick_id_ref for each brick by locale
 		if (params.type === "brick" || params.type === "document-fields") {
-			const localeSpecificBrickRef = createTempRelationId();
+			const localeSpecificBrickRef = params.createTempRelationId();
 			baseRowData.brick_id_ref = localeSpecificBrickRef;
 			brickIdRefByLocale.set(locale, localeSpecificBrickRef);
 		}
@@ -494,7 +486,6 @@ const constructBrickTable = (
 		childTableBuilds.push(...fieldChildBuilds);
 	}
 
-	//* add the rows to the table
 	for (const row of rowsByLocale.values()) {
 		brickTables[tableIndex]?.data.push(row);
 	}
@@ -514,6 +505,7 @@ const constructBrickTable = (
 			brickIdByLocale: childBuild.brickIdByLocale,
 			localization: params.localization,
 			brickKeyTableNameMap: params.brickKeyTableNameMap,
+			createTempRelationId: params.createTempRelationId,
 			brick: params.brick,
 			order: childBuild.order,
 			open: childBuild.open,

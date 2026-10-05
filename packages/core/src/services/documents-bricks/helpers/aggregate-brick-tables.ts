@@ -26,6 +26,8 @@ const aggregateBrickTables = (params: {
 }) => {
 	const brickTables: Array<InsertBrickTables> = [];
 	const brickKeyTableNameMap: Map<string, LucidBrickTableName> = new Map();
+	let temporaryRelationId = 0;
+	const createTempRelationId = () => --temporaryRelationId;
 
 	const localization = resolveCollectionLocalization({
 		localization: params.localization,
@@ -44,6 +46,7 @@ const aggregateBrickTables = (params: {
 				defaultLocale: localization.storageLocale,
 			},
 			brickKeyTableNameMap: brickKeyTableNameMap,
+			createTempRelationId,
 			order: 0,
 			open: true,
 			tableNameByteLimit: params.tableNameByteLimit,
@@ -67,6 +70,7 @@ const aggregateBrickTables = (params: {
 				},
 				brick: brick,
 				brickKeyTableNameMap: brickKeyTableNameMap,
+				createTempRelationId,
 				order: brick.order !== undefined ? brick.order : i,
 				open: brick.open ?? false,
 				tableNameByteLimit: params.tableNameByteLimit,

@@ -10,7 +10,7 @@ import { unwrap } from "solid-js/store";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
-import brickStore from "@/store/brickStore/brickStore";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
@@ -26,6 +26,7 @@ const EmbeddedBrickEditDrawer: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// State
+	const brickStore = useBrickStore();
 	let fieldSnapshot: InternalDocumentField[] | undefined;
 	let capturedBrickRef: string | undefined;
 
@@ -71,8 +72,9 @@ const EmbeddedBrickEditDrawer: Component<{
 	// ----------------------------------------
 	// Effects
 	createEffect(() => {
-		if (!props.state.open || !brick() || capturedBrickRef === brick()?.ref)
+		if (!props.state.open || !brick() || capturedBrickRef === brick()?.ref) {
 			return;
+		}
 		fieldSnapshot = structuredClone(unwrap(brick()?.fields ?? []));
 		capturedBrickRef = brick()?.ref;
 		brickStore.set("autoSavePaused", true);

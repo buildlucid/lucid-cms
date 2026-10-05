@@ -30,7 +30,6 @@ type UserPreferencesStoreOptions = {
 	storage?: Storage;
 };
 
-/** Creates a reactive user-preferences store backed by the provided storage. */
 export const createUserPreferencesStore = (
 	options: UserPreferencesStoreOptions,
 ) => {
@@ -46,7 +45,6 @@ export const createUserPreferencesStore = (
 	const [state, setState] = createStore<StoredUserPreferences>(initialState);
 	let builderEntriesCleaned = false;
 
-	/** Updates reactive state and persists the same snapshot when possible. */
 	const commit = (next: StoredUserPreferences) => {
 		setState(reconcile(next));
 		try {
@@ -59,7 +57,6 @@ export const createUserPreferencesStore = (
 		}
 	};
 
-	/** Applies an immutable preference update and persists the result. */
 	const updatePreferences = (
 		update: (preferenceState: UserPreferenceState) => void,
 	) => {
@@ -196,11 +193,14 @@ export const createUserPreferencesStore = (
 			return state.preferences.navigationGroups[groupKey];
 		},
 
+		getReleaseActivityFilters() {
+			return state.preferences.releaseActivityFilters;
+		},
+
 		getSectionOpen(section: SectionPreferenceKey) {
 			return state.preferences.sections[section];
 		},
 
-		/** Reloads preferences from storage into reactive state. */
 		reload() {
 			try {
 				builderEntriesCleaned = false;
@@ -328,6 +328,12 @@ export const createUserPreferencesStore = (
 			if (state.preferences.navigationGroups[groupKey] === open) return;
 			updatePreferences((preferenceState) => {
 				preferenceState.preferences.navigationGroups[groupKey] = open;
+			});
+		},
+
+		setReleaseActivityFilters(filters: string[]) {
+			updatePreferences((preferenceState) => {
+				preferenceState.preferences.releaseActivityFilters = filters;
 			});
 		},
 

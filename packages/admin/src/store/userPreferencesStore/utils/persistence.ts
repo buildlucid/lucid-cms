@@ -14,14 +14,12 @@ export const SECTION_PREFERENCE_KEYS = [
 	"history.inspector.revisionRetention",
 	"history.inspector.versionDetails",
 	"pageBuilder.sidebar.documentDetails",
-	"pageBuilder.sidebar.environmentStatus",
-	"pageBuilder.sidebar.releaseRequests",
-	"pageBuilder.sidebar.scheduledReleases",
+	"pageBuilder.sidebar.releases",
 	"pageBuilder.sidebar.workflow",
-	"releaseRequest.sidebar.comments",
-	"releaseRequest.sidebar.details",
-	"releaseRequest.sidebar.execution",
-	"releaseRequest.sidebar.reviewers",
+	"release.sidebar.details",
+	"release.sidebar.reviewers",
+	"release.sidebar.schedule",
+	"release.sidebar.status",
 	"agent.chat.details",
 ] as const;
 
@@ -70,6 +68,8 @@ export type UserPreferenceState = {
 		home: HomePreferenceState;
 		/** Open state of navigation groups, keyed by group key. Unset means open. */
 		navigationGroups: Record<string, boolean>;
+		/** Optional release activity shown, by filter key. Unset shows none. */
+		releaseActivityFilters?: string[];
 		sections: Partial<Record<SectionPreferenceKey, boolean>>;
 		tables: Record<string, string[]>;
 	};
@@ -265,6 +265,11 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 					normalized.preferences.navigationGroups[groupKey] = open;
 				}
 			}
+		}
+
+		if (isStringArray(preferences.releaseActivityFilters)) {
+			normalized.preferences.releaseActivityFilters =
+				preferences.releaseActivityFilters;
 		}
 
 		if (isObjectRecord(preferences.tables)) {

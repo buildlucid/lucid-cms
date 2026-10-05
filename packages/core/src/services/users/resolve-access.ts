@@ -1,48 +1,33 @@
-import formatter, {
-	userPermissionsFormatter,
-} from "../../libs/formatters/index.js";
-import { UsersRepository } from "../../libs/repositories/index.js";
+import { copy } from "../../libs/i18n/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import loadActiveUser from "./helpers/load-active-user.js";
 
 /** Loads current role permissions, rejecting deleted or locked users. */
 const resolveUserAccess: ServiceFn<
 	[{ userId: number }],
 	{ userId: number; superAdmin: boolean; permissions: string[] }
 > = async (context, data) => {
-	const Users = new UsersRepository(context.db);
-
-	const userRes = await Users.selectAccessTokenUser({
-		where: [
-			{ key: "id", operator: "=", value: data.userId },
-			{
-				key: "is_deleted",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-			{
-				key: "is_locked",
-				operator: "=",
-				value: context.config.db.getDefault("boolean", "false"),
-			},
-		],
-		validation: {
-			enabled: true,
-			defaultError: {
-				type: "authorisation",
-				status: 401,
-			},
-		},
-	});
+	const userRes = await loadActiveUser(context, { id: data.userId });
 	if (userRes.error) return userRes;
 
-	const superAdmin = formatter.formatBoolean(userRes.data.super_admin ?? false);
-	const { permissions } = userPermissionsFormatter.formatMultiple({
-		roles: userRes.data.roles ?? [],
-	});
+	if (!userRes.data) {
+		return {
+			error: {
+				type: "authorisation",
+				message: copy("server:core.permissions.unauthorized"),
+				status: 401,
+			},
+			data: undefined,
+		};
+	}
 
 	return {
 		error: undefined,
-		data: { userId: data.userId, superAdmin, permissions },
+		data: {
+			userId: data.userId,
+			superAdmin: userRes.data.superAdmin,
+			permissions: userRes.data.permissions ?? [],
+		},
 	};
 };
 

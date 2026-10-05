@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import type { CollectionDocument, Refs } from "../../../exports/types.js";
 import collections from "../../../libs/collection/collections.js";
 import {
@@ -82,6 +83,25 @@ const getSingle: ContentDocumentsGetSingleService = async <
 			versionType = preview.versionType;
 			versionId = preview.versionId;
 		}
+	}
+
+	if (
+		(versionType ===
+			constants.collectionBuilder.publishing.proposalVersionType ||
+			versionType ===
+				constants.collectionBuilder.publishing.snapshotVersionType) &&
+		!data.includeReleaseVersions &&
+		!(preview?.mode === "scoped" && preview.target === "entry")
+	) {
+		return {
+			error: {
+				type: "authorisation",
+				code: "preview_scope",
+				message: copy("server:core.documents.version.release.only"),
+				status: 403,
+			},
+			data: undefined,
+		};
 	}
 
 	const Documents = new DocumentsRepository(context.db);

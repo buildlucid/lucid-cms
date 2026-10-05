@@ -254,18 +254,12 @@ const allRemoved = {
 	previews: 0,
 };
 
-test("relation constraints survive schema introspection without generating migration drift", async () => {
+test("relation schema retains authored targets without generating migration drift", async () => {
 	const table = await relationTable();
 	const schema = await context.config.db.inferSchema(context.db.kysely);
-	expect(schema.find((item) => item.name === table)?.foreignKeys).toEqual([
-		{
-			columns: ["_collection_key", "_document_id"],
-			table: "lucid_document_identities",
-			references: ["collection_key", "document_id"],
-			onDelete: "cascade",
-			onUpdate: "no action",
-		},
-	]);
+	expect(schema.find((item) => item.name === table)?.foreignKeys ?? []).toEqual(
+		[],
+	);
 	const plan = await planCollectionMigrations(context);
 	assert(plan.data, JSON.stringify(plan.error));
 	expect(
@@ -286,13 +280,23 @@ test("identity deletion scopes cascades by collection and collection deletion re
 		{ id: other, collectionKey: otherKey },
 	]);
 	const table = await relationTable();
-	await expect(
-		context.db.kysely
-			.updateTable(table)
-			.set({ _document_id: 999999 })
-			.where("document_id", "=", owner)
-			.execute(),
-	).rejects.toThrow(/FOREIGN KEY/);
+	expect(
+		(
+			await upsertSingle(context, {
+				collectionKey,
+				documentId: owner,
+				userId: null,
+				fields: [
+					{ key: "title", type: "text", value: "Invalid relation" },
+					{
+						key: "related",
+						type: "relation",
+						value: [{ collectionKey, id: 999999 }],
+					},
+				],
+			})
+		).error?.status,
+	).toBe(400);
 	await context.db.kysely
 		.deleteFrom("lucid_document_identities")
 		.where("collection_key", "=", otherKey)
@@ -306,7 +310,10 @@ test("identity deletion scopes cascades by collection and collection deletion re
 			.select(["_collection_key", "_document_id"])
 			.where("document_id", "=", owner)
 			.execute(),
-	).toEqual([{ _collection_key: collectionKey, _document_id: first }]);
+	).toEqual([
+		{ _collection_key: collectionKey, _document_id: first },
+		{ _collection_key: otherKey, _document_id: other },
+	]);
 	const next = await create(otherKey);
 	const workflow = await dependants(next, otherKey);
 	await saveRelated(owner, [
@@ -410,21 +417,7 @@ test.each([
 	);
 	const table = await relationTable(ownerKey);
 	changes.length = 0;
-	const operation = await context.db.kysely
-		.insertInto("lucid_document_publish_operations")
-		.values({
-			collection_key: collectionKey,
-			document_id: first,
-			target: "production",
-			operation_type: "direct",
-			status: "approved",
-			execution_status: "executed",
-			source_version_id: 1,
-			source_content_id: "snapshot",
-			snapshot_version_id: 1,
-		})
-		.returning("id")
-		.executeTakeFirstOrThrow();
+
 	const deleted =
 		mode === "single"
 			? await deleteSinglePermanently(context, {
@@ -438,13 +431,25 @@ test.each([
 					userId: null,
 				});
 	expect(deleted.error).toBeUndefined();
+	const tables = await getTableNames(context, ownerKey);
+	assert(tables.data);
 	const rows = await context.db.kysely
 		.selectFrom(table)
-		.select(["_document_id", "document_version_id"])
-		.where("document_id", "=", owner)
+		.innerJoin(
+			tables.data.version,
+			`${tables.data.version}.id`,
+			`${table}.document_version_id`,
+		)
+		.select([`${table}._document_id`, `${tables.data.version}.type`])
+		.where(`${table}.document_id`, "=", owner)
 		.execute();
 	expect(rows.length).toBeGreaterThan(1);
-	expect(rows.every((row) => row._document_id === retained)).toBe(true);
+	expect(
+		rows
+			.filter((row) => row.type === "latest")
+			.every((row) => row._document_id === retained),
+	).toBe(true);
+	expect(rows).toContainEqual({ _document_id: first, type: "revision" });
 	expect(
 		changes.filter(
 			(change) =>
@@ -471,13 +476,6 @@ test.each([
 		);
 	}
 	expect(await remaining(retained, retainedWorkflow)).toEqual(allPresent);
-	expect(
-		await context.db.kysely
-			.selectFrom("lucid_document_publish_operations")
-			.select("id")
-			.where("id", "=", operation.id)
-			.execute(),
-	).toEqual([{ id: operation.id }]);
 	await expect(
 		context.db.kysely
 			.insertInto("lucid_document_workflows")
@@ -485,6 +483,7 @@ test.each([
 				collection_key: collectionKey,
 				document_id: first,
 				stage_key: "draft",
+				version_id: -1,
 			})
 			.execute(),
 	).rejects.toThrow(/FOREIGN KEY/);

@@ -7,10 +7,17 @@ import T from "@/translations";
 
 export const DocumentActions: Component<{
 	collectionSingularName?: string;
+	/** Links back to the release that owns the proposal being edited. */
+	releaseLink?: string;
 	onDelete?: () => void;
 	deletePermission?: boolean;
 	duplicate?: {
 		onDuplicate: () => void;
+		permission: boolean;
+		disabled: boolean;
+	};
+	align?: {
+		onAlign: () => void;
 		permission: boolean;
 		disabled: boolean;
 	};
@@ -31,6 +38,13 @@ export const DocumentActions: Component<{
 	};
 
 	const actions = (): ActionMenuItem[] => [
+		{
+			label: T()("releases.view"),
+			type: "link",
+			icon: "share",
+			show: props.releaseLink !== undefined,
+			href: props.releaseLink,
+		},
 		{
 			label: getActionLabel(T()("preview.copy.group")),
 			type: "button",
@@ -64,6 +78,19 @@ export const DocumentActions: Component<{
 					onClick: () => props.preview?.onCopy("perspective"),
 				},
 			],
+		},
+		{
+			label: T()("documents.align.action"),
+			type: "button",
+			icon: "rotate",
+			show: props.align !== undefined,
+			permission: props.align?.permission,
+			disabled: props.align?.disabled,
+			disabledToast: {
+				title: T()("toasts.documents.align.disabled.title"),
+				message: T()("toasts.documents.align.disabled.message"),
+			},
+			onClick: props.align?.onAlign,
 		},
 		{
 			label: getActionLabel(T()("common.duplicate")),

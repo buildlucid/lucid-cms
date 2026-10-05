@@ -74,6 +74,7 @@ export class D1Adapter extends DatabaseAdapter {
 			support: {
 				alterColumn: false,
 				transaction: false,
+				sharedRowLocks: false,
 				multipleAlterTables: false,
 				boolean: false,
 				autoIncrement: true,

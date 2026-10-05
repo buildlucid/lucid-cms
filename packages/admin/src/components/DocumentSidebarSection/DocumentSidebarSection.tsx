@@ -28,8 +28,8 @@ const DocumentSidebarSection: Component<{
 	return (
 		<Collapsible.Root open={open()} onOpenChange={setOpen}>
 			<section>
-				<Collapsible.Trigger class="group flex w-full items-center gap-1.5 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary">
-					<span class="flex size-3 shrink-0 items-center justify-center text-body">
+				<Collapsible.Trigger class="group flex w-full items-center gap-2 rounded-md text-left focus:outline-hidden focus-visible:ring-1 ring-primary">
+					<span class="flex size-4 shrink-0 items-center justify-center text-icon transition-colors group-hover:text-icon-hover [&_svg]:size-3">
 						{props.icon}
 					</span>
 					<h3 class="min-w-0 flex-1 truncate text-sm font-medium text-title">
@@ -48,7 +48,7 @@ const DocumentSidebarSection: Component<{
 						)}
 					/>
 				</Collapsible.Trigger>
-				<Collapsible.Content class="mt-3">{props.children}</Collapsible.Content>
+				<Collapsible.Content class="mt-4">{props.children}</Collapsible.Content>
 			</section>
 		</Collapsible.Root>
 	);

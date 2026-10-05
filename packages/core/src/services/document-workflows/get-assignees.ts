@@ -39,7 +39,7 @@ const getAssignees: ServiceFn<
 
 	const Users = new UsersRepository(context.db);
 	const usersRes = await Users.selectMultipleWithPermission({
-		permission,
+		permissions: [permission],
 	});
 	if (usersRes.error) return usersRes;
 

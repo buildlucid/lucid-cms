@@ -8,10 +8,12 @@ import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetSingleQueryParams } from "../../schemas/documents.js";
+import type { LucidUser } from "../../types/hono.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getDocumentWorkflow from "../document-workflows/get-single.js";
 import getDocumentBricks from "../documents-bricks/get-multiple.js";
+import checkReleaseVersionAccess from "../releases/helpers/check-release-version-access.js";
 import collectDocumentRefTargets from "./helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
@@ -24,6 +26,8 @@ const getSingle: ServiceFn<
 			versionId?: number;
 			collectionKey: string;
 			query: GetSingleQueryParams;
+			/** Required to read release proposals and snapshots. */
+			authUser?: LucidUser;
 		},
 	],
 	{
@@ -33,8 +37,11 @@ const getSingle: ServiceFn<
 > = async (context, data) => {
 	const Document = new DocumentsRepository(context.db);
 
+	//* release proposals and snapshots are only addressable by their version ID
 	if (
-		data.version === constants.collectionBuilder.publishing.snapshotVersionType
+		data.version ===
+			constants.collectionBuilder.publishing.snapshotVersionType ||
+		data.version === constants.collectionBuilder.publishing.proposalVersionType
 	) {
 		return {
 			error: {
@@ -54,39 +61,42 @@ const getSingle: ServiceFn<
 	const tableNamesRes = await getTableNames(context, data.collectionKey);
 	if (tableNamesRes.error) return tableNamesRes;
 
-	const [documentRes, workflowRes] = await Promise.all([
-		Document.selectSingleById(
-			{
-				id: data.id,
-				tables: {
-					versions: tableNamesRes.data.version,
-				},
-				version: data.version,
-				versionId: data.versionId,
-				validation: {
-					enabled: true,
-					defaultError: {
-						message: copy("server:core.documents.version.not.found.message"),
-						status: 404,
-					},
+	const documentRes = await Document.selectSingleById(
+		{
+			id: data.id,
+			tables: {
+				versions: tableNamesRes.data.version,
+			},
+			version: data.version,
+			versionId: data.versionId,
+			validation: {
+				enabled: true,
+				defaultError: {
+					message: copy("server:core.documents.version.not.found.message"),
+					status: 404,
 				},
 			},
-			{
-				tableName: tableNamesRes.data.document,
-			},
-		),
-		getDocumentWorkflow(context, {
-			collectionKey: data.collectionKey,
-			documentId: data.id,
-		}),
-	]);
+		},
+		{
+			tableName: tableNamesRes.data.document,
+		},
+	);
 	if (documentRes.error) return documentRes;
-	if (workflowRes.error) return workflowRes;
 
-	const versionId =
-		data.version !== undefined ? documentRes.data.version_id : data.versionId;
-	const versionType =
-		data.version !== undefined ? data.version : documentRes.data.version_type;
+	const versionId = documentRes.data.version_id;
+	const versionType = documentRes.data.version_type;
+	const workflowRes =
+		versionId &&
+		(versionType === "latest" ||
+			versionType ===
+				constants.collectionBuilder.publishing.proposalVersionType)
+			? await getDocumentWorkflow(context, {
+					collectionKey: data.collectionKey,
+					documentId: data.id,
+					versionId: versionType === "latest" ? null : versionId,
+				})
+			: { error: undefined, data: null };
+	if (workflowRes.error) return workflowRes;
 
 	if (!versionId || !versionType) {
 		return {
@@ -97,6 +107,19 @@ const getSingle: ServiceFn<
 			},
 			data: undefined,
 		};
+	}
+	if (
+		versionType ===
+			constants.collectionBuilder.publishing.snapshotVersionType ||
+		versionType === constants.collectionBuilder.publishing.proposalVersionType
+	) {
+		const accessRes = await checkReleaseVersionAccess(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.id,
+			versionId,
+			user: data.authUser,
+		});
+		if (accessRes.error) return accessRes;
 	}
 
 	const relationVersionTypeRes = await resolveRelationVersionType(context, {

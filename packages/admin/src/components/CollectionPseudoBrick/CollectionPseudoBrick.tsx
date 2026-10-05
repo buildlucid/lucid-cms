@@ -2,7 +2,8 @@ import type { Collection } from "@types";
 import classNames from "classnames";
 import { type Component, createMemo, Show } from "solid-js";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
-import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
+import type { BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfig } from "@/types/collection-config";
 
 interface CollectionPseudoBrickProps {
@@ -18,6 +19,7 @@ export const CollectionPseudoBrick: Component<CollectionPseudoBrickProps> = (
 ) => {
 	// ------------------------------
 	// Memos
+	const brickStore = useBrickStore();
 	const collectionPseudoBrick = createMemo(() => {
 		return brickStore.get.bricks.find((b) => b.type === "collection-fields");
 	});

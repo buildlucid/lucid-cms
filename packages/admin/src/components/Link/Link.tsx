@@ -18,7 +18,8 @@ export type LinkVariant =
 	| "secondary"
 	| "outline"
 	| "danger"
-	| "danger-outline";
+	| "danger-outline"
+	| "ghost";
 
 export type LinkSize = "xs" | "sm" | "md" | "lg";
 
@@ -99,6 +100,8 @@ const Link: Component<LinkProps> = (props) => {
 					local.variant === "danger",
 				"bg-transparent border border-border hover:bg-danger-hover ring-primary fill-danger-foreground hover:text-danger-foreground":
 					local.variant === "danger-outline",
+				"text-muted fill-muted hover:text-subtitle hover:fill-subtitle hover:bg-background/50 ring-primary":
+					local.variant === "ghost",
 
 				// Shape
 				"rounded-full!": local.shape === "circle",

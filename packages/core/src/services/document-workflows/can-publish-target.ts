@@ -7,6 +7,7 @@ import {
 	workflowStageAllowsTarget,
 } from "./helpers/index.js";
 
+/** Checks latest's workflow stage allows publishing to the target. */
 const canPublishTarget: ServiceFn<
 	[
 		{
@@ -35,6 +36,7 @@ const canPublishTarget: ServiceFn<
 		where: [
 			{ key: "collection_key", operator: "=", value: data.collectionKey },
 			{ key: "document_id", operator: "=", value: data.documentId },
+			{ key: "version_id", operator: "is", value: null },
 		],
 	});
 	if (workflowRes.error) return workflowRes;

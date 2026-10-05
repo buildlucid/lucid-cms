@@ -34,7 +34,7 @@ const useRestore = (props?: UseRestoreProps) => {
 			title: T()("toasts.documents.restore.title"),
 			message: T()("toasts.documents.restore.message"),
 		}),
-		invalidates: [queryKeys.documents.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

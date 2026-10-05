@@ -116,14 +116,12 @@ export function useDocumentHistoryState() {
 		enabled: () => canFetchRevisions() && selectedVersion() !== undefined,
 		refetchOnWindowFocus: false,
 	});
-	const releaseOperationsQuery = api.publishOperations.useGetMultiple({
+	const releasesQuery = api.releases.useGetMultiple({
 		queryParams: {
 			filters: {
 				collectionKey: collectionKey,
 				documentId: documentId,
-				target: selectedReleaseTarget,
-				status: () => ["pending", "approved"],
-				executionStatus: () => ["awaiting_approval", "scheduled", "executing"],
+				status: () => "open",
 			},
 			perPage: 6,
 		},
@@ -132,8 +130,8 @@ export function useDocumentHistoryState() {
 			selectedReleaseTarget() !== undefined &&
 			collectionQuery.data?.data !== undefined &&
 			userStore.get.hasPermission([
-				Permissions.PublishOperationsRead,
-				collectionQuery.data.data.permissions.review,
+				Permissions.ReleasesRead,
+				collectionQuery.data.data.permissions.read,
 			]).all,
 	});
 
@@ -410,7 +408,7 @@ export function useDocumentHistoryState() {
 		collectionQuery,
 		revisionsQuery,
 		selectedVersionDocumentQuery,
-		releaseOperationsQuery,
+		releasesQuery,
 		collection,
 		document,
 		documentQuery,

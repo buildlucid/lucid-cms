@@ -13,9 +13,10 @@ import {
 import BrickSlots from "@/components/BrickSlots/BrickSlots";
 import { DynamicField } from "@/components/DynamicField/DynamicField";
 import { TabField } from "@/components/TabField/TabField";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import { FieldRenderStateProvider } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
+import type { BrickData } from "@/store/brickStore/brickStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import type {
 	CollectionBrickConfig,
@@ -50,6 +51,7 @@ interface BrickProps {
 export const BrickBody: Component<BrickProps> = (props) => {
 	// -------------------------------
 	// State
+	const brickStore = useBrickStore();
 	const [getActiveTab, setActiveTab] = createSignal<string>();
 	const [contentMounted, setContentMounted] = createSignal(props.open);
 	const documentLocalization = useDocumentLocalization();

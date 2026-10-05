@@ -7,8 +7,8 @@ import {
 	createSignal,
 } from "solid-js";
 import { UserSelect } from "@/components/UserSelect/UserSelect";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
@@ -31,6 +31,7 @@ interface UserFieldProps {
 export const UserField: Component<UserFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 	const [getValue, setValue] = createSignal<number[] | undefined>();
 
@@ -50,6 +51,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 	});
 	const fieldRef = createMemo(() => {
 		return brickHelpers.getFieldRefs({
+			refs: brickStore.get.refs,
 			resource: props.state.fieldConfig.resource,
 			fieldValue: fieldValue(),
 		});
@@ -72,6 +74,7 @@ export const UserField: Component<UserFieldProps> = (props) => {
 	return (
 		<UserSelect
 			id={brickHelpers.customFieldId({
+				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,

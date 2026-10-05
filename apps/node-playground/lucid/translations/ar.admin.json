@@ -31,7 +31,6 @@
 	"errors.collections.load.failed": "تعذر تحميل المجموعات.",
 	"media.library.title": "مكتبة الوسائط",
 	"permissions.groups.access.and": "الوصول والصلاحيات",
-	"publish.requests.list.title": "طلبات النشر",
 	"routes.system.jobs.title": "المهام",
 	"roles.management": "إدارة الأدوار",
 	"settings.interface.cms.locale.description": "اختر لغتك المفضلة",

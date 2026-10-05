@@ -1,3 +1,4 @@
+import type { LucidErrorData } from "../../../types/errors.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import { copy, isTranslatableCopy } from "../../i18n/index.js";
 import { JobsRepository } from "../../repositories/index.js";
@@ -24,7 +25,7 @@ export const toErrorMessage = (context: ServiceContext, error: unknown) => {
  * Finishes a cancellation requested while this consumer held the lease. The
  * job is already resolved, so the delivery is always acknowledged.
  */
-const finishCancellation = async (
+export const finishCancellation = async (
 	context: ServiceContext,
 	job: ClaimedJob,
 ): Promise<JobConsumptionResult> => {
@@ -103,6 +104,7 @@ const failJob = async (
 	context: ServiceContext,
 	job: ClaimedJob,
 	message: string,
+	error?: LucidErrorData,
 ): Promise<JobConsumptionResult> => {
 	const Jobs = new JobsRepository(context.db);
 
@@ -115,7 +117,7 @@ const failJob = async (
 	if (failed.error) return { type: "retry-transport" };
 	if (!failed.data) return finishCancellation(context, job);
 
-	await runPermanentFailureHook(context, { job, errorMessage: message });
+	await runPermanentFailureHook(context, { job, errorMessage: message, error });
 
 	return { type: "failed" };
 };
@@ -124,7 +126,12 @@ const failJob = async (
 export const handleFailure = async (
 	context: ServiceContext,
 	job: ClaimedJob,
-	props: { message: string; permanent: boolean; immediateRetry: boolean },
+	props: {
+		message: string;
+		permanent: boolean;
+		immediateRetry: boolean;
+		error?: LucidErrorData;
+	},
 ): Promise<JobConsumptionResult> => {
 	const definition = getRegisteredJob(context.config, {
 		name: job.job_name,
@@ -136,7 +143,7 @@ export const handleFailure = async (
 		!props.permanent &&
 		policy?.type === "exponential" &&
 		job.attempts < job.max_attempts;
-	if (!canRetry) return failJob(context, job, props.message);
+	if (!canRetry) return failJob(context, job, props.message, props.error);
 
 	return scheduleRetry(context, job, {
 		message: props.message,

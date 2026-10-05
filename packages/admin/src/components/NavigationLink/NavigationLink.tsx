@@ -47,7 +47,7 @@ const icons = {
 	queue: FaSolidBarsProgress,
 	integrations: FaSolidDesktop,
 	settings: FaSolidGear,
-	"release-requests": FaSolidSquareArrowUpRight,
+	releases: FaSolidSquareArrowUpRight,
 	publishing: FaSolidCloudArrowUp,
 	extensions: FaSolidPuzzlePiece,
 } satisfies Record<AdminNavigationIcon, typeof FaSolidHouse>;

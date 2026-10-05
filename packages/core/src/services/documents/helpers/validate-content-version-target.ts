@@ -10,6 +10,8 @@ const validateContentVersionTarget = async (data: {
 	const isPinnedVersion =
 		data.versionType === "revision" ||
 		data.versionType ===
+			constants.collectionBuilder.publishing.proposalVersionType ||
+		data.versionType ===
 			constants.collectionBuilder.publishing.snapshotVersionType;
 
 	const validVersionId =

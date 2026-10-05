@@ -3,7 +3,6 @@ import type CollectionBuilder from "../../../libs/collection/builders/collection
 import collections from "../../../libs/collection/collections.js";
 import type { DocumentVersionType } from "../../../libs/db/tables/index.js";
 import type { DocumentRefVersionTypeResolver } from "../../../libs/refs/documents/types.js";
-import { DocumentPublishOperationsRepository } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 type RelationVersionType = Exclude<DocumentVersionType, "revision">;
@@ -115,10 +114,8 @@ const createRelationVersionTypeResolver = (props: {
  *
  * The document being fetched and the documents it references do not always use
  * the same version type. Latest documents hydrate latest refs, revisions keep
- * the historical document body but still preview refs from latest, and snapshots
- * hydrate against the target of their publish operation so scheduled-release UI
- * reflects what will be released. Orphan snapshots fall back to latest to keep
- * old snapshot reads working.
+ * the historical document body but still preview refs from latest, and release
+ * proposals and snapshots also hydrate against latest.
  *
  * The returned `resolveVersionType` is per related collection. That lets source
  * environments map to different target environments, falls back to same-named
@@ -139,77 +136,22 @@ const resolveRelationVersionType: ServiceFn<
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
 
-	if (data.versionType === "revision") {
-		return {
-			error: undefined,
-			data: {
-				versionType: latestRelationVersionType,
-				resolveVersionType: createRelationVersionTypeResolver({
-					collections: collectionsRes.data,
-					sourceCollectionKey: data.collectionKey,
-					sourceVersionType: latestRelationVersionType,
-				}),
-			},
-		};
-	}
-
-	if (data.versionType !== snapshotVersionType) {
-		return {
-			error: undefined,
-			data: {
-				versionType: data.versionType,
-				resolveVersionType: createRelationVersionTypeResolver({
-					collections: collectionsRes.data,
-					sourceCollectionKey: data.collectionKey,
-					sourceVersionType: data.versionType,
-				}),
-			},
-		};
-	}
-
-	if (data.versionId === undefined) {
-		return {
-			error: undefined,
-			data: {
-				versionType: latestRelationVersionType,
-				resolveVersionType: createRelationVersionTypeResolver({
-					collections: collectionsRes.data,
-					sourceCollectionKey: data.collectionKey,
-					sourceVersionType: latestRelationVersionType,
-				}),
-			},
-		};
-	}
-
-	const Operations = new DocumentPublishOperationsRepository(context.db);
-	const operationRes = await Operations.selectSingle({
-		select: ["target"],
-		where: [
-			{ key: "collection_key", operator: "=", value: data.collectionKey },
-			...(data.documentId === undefined
-				? []
-				: [
-						{
-							key: "document_id" as const,
-							operator: "=" as const,
-							value: data.documentId,
-						},
-					]),
-			{ key: "snapshot_version_id", operator: "=", value: data.versionId },
-		],
-	});
-	if (operationRes.error) return operationRes;
-
-	const target = operationRes.data?.target ?? latestRelationVersionType;
+	const versionType =
+		data.versionType === "revision" ||
+		data.versionType === snapshotVersionType ||
+		data.versionType ===
+			constants.collectionBuilder.publishing.proposalVersionType
+			? latestRelationVersionType
+			: data.versionType;
 
 	return {
 		error: undefined,
 		data: {
-			versionType: target,
+			versionType,
 			resolveVersionType: createRelationVersionTypeResolver({
 				collections: collectionsRes.data,
 				sourceCollectionKey: data.collectionKey,
-				sourceVersionType: target,
+				sourceVersionType: versionType,
 			}),
 		},
 	};

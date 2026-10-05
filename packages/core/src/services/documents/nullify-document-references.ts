@@ -4,7 +4,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 const nullifyDocumentReferences: ServiceFn<
 	[
 		{
-			documentId: number;
+			documentIds: number[];
 			collectionKey: string;
 		},
 	],

@@ -6,4 +6,6 @@ export type ContentDocumentVersionInput<
 	versionType: CollectionDocumentVersion<TCollectionKey>;
 	versionId?: number;
 	preview?: string;
+	/** Trusted callers, eg. preview creation, may read release proposals and snapshots by ID. */
+	includeReleaseVersions?: boolean;
 };

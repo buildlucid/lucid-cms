@@ -19,6 +19,10 @@ export const documentWorkflowsTable = defineTable(
 				schema: z.number(),
 				type: "integer",
 			},
+			version_id: {
+				schema: z.number().nullable(),
+				type: "integer",
+			},
 			stage_key: {
 				schema: z.string(),
 				type: "text",
@@ -53,6 +57,8 @@ export interface LucidDocumentWorkflows {
 	id: Generated<number>;
 	collection_key: string;
 	document_id: number;
+	/** Null for latest, otherwise the release proposal it belongs to. */
+	version_id: number | null;
 	stage_key: string;
 	created_by: number | null;
 	updated_by: number | null;

@@ -9,9 +9,9 @@ import {
 	untrack,
 } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -36,6 +36,7 @@ type JsonFieldValue = Record<string, unknown> | unknown[] | null;
 export const JSONField: Component<JSONFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const [getValue, setValue] = createSignal("");
 	const customFieldGeneration = useCustomFieldGeneration();
 	const fieldRenderState = useFieldRenderState();
@@ -166,6 +167,7 @@ export const JSONField: Component<JSONFieldProps> = (props) => {
 				lint
 				format
 				id={brickHelpers.customFieldId({
+					scope: brickStore.idPrefix,
 					key: props.state.fieldConfig.key,
 					brickIndex: fieldRenderState.brickIndex(),
 					groupRef: props.state.groupRef,

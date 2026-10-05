@@ -85,10 +85,6 @@ const PageCollection = new CollectionBuilder("page", {
 		review: {
 			requiredFor: ["production"],
 			allowSelfApproval: true,
-			comments: {
-				request: "required",
-				decision: "optional",
-			},
 		},
 		workflow: {
 			stages: [

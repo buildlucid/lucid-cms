@@ -124,6 +124,8 @@ export type JobPermanentFailure<Input extends JobPayload | null> = {
 	readonly input: Input;
 	readonly attempts: number;
 	readonly errorMessage: string;
+	/** Original handler error when failure followed a returned service error. */
+	readonly error?: LucidErrorData;
 };
 
 /** Handles permanent failure when the stored input can still be parsed by the job schema. */
@@ -148,6 +150,8 @@ type JobDescriptionResult =
 	| { success: false; error: LucidErrorData };
 
 type JobDefinitionRuntime = {
+	/** Keeps the handler's database writes and job completion in one transaction. */
+	transaction: boolean;
 	parse: (input: unknown) => Promise<JobPayloadParseResult>;
 	execute: (
 		context: ServiceContext,
@@ -199,7 +203,7 @@ export type DefineJobOptions<
 	input: ZodType<Input>;
 	/** Defaults to 3 attempts with exponential backoff, a 1-second base, a 5-minute cap and full jitter. */
 	retry?: JobRetryPolicy;
-	/** Start a transaction when supported. Omit to run without starting one. */
+	/** Commits the handler's database writes and job completion together. Omit to run without starting a transaction. */
 	transaction?: boolean;
 	/** Recurring schedules that enqueue this job through the normal durable path. */
 	schedules?: readonly DefineJobSchedule<Input>[];

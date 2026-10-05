@@ -1,4 +1,5 @@
 import z from "zod";
+import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import buildTableName from "../../../libs/collection/helpers/build-table-name.js";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
@@ -7,6 +8,7 @@ import {
 	DocumentReferencesRepository,
 } from "../../../libs/repositories/index.js";
 import notifyCollection from "../../document-references/notify-collection.js";
+import detachDocuments from "../../releases/helpers/detach-documents.js";
 
 const input = z.object({ collectionKey: z.string().min(1) });
 
@@ -14,7 +16,16 @@ const deleteCollection: JobHandler<z.infer<typeof input>> = async ({
 	context,
 	input,
 }) => {
+	const nullified = await registeredFields.relation.nullifyReferences(
+		context,
+		input,
+	);
+	if (nullified.error) return nullified;
 	const Collections = new CollectionsRepository(context.db);
+	const detached = await detachDocuments(context, {
+		collectionKey: input.collectionKey,
+	});
+	if (detached.error) return detached;
 
 	const deleteRes = await Collections.deleteSingle({
 		where: [
@@ -53,13 +64,11 @@ const deleteCollection: JobHandler<z.infer<typeof input>> = async ({
 	};
 };
 
-/**
- * Deletes a single collection
- */
 export const deleteCollectionJob = defineJob({
 	name: "core:delete-collection",
 	version: 1,
 	input,
+	transaction: true,
 	handler: deleteCollection,
 	describe: ({ input: { collectionKey } }) => ({ collectionKey }),
 });

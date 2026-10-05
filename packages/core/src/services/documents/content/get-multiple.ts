@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import type { CollectionDocument, Refs } from "../../../exports/types.js";
 import collections from "../../../libs/collection/collections.js";
 import {
@@ -96,6 +97,22 @@ const getMultiple: ContentDocumentsGetMultipleService = async <
 		preview = previewRes.data;
 		versionType = preview.versionType;
 		versionId = preview.versionId;
+	}
+
+	if (
+		versionType ===
+			constants.collectionBuilder.publishing.proposalVersionType ||
+		versionType === constants.collectionBuilder.publishing.snapshotVersionType
+	) {
+		return {
+			error: {
+				type: "authorisation",
+				code: "preview_scope",
+				message: copy("server:core.documents.version.release.only"),
+				status: 403,
+			},
+			data: undefined,
+		};
 	}
 
 	const [collectionRes, collectionsRes] = await Promise.all([

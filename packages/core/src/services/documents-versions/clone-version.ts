@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import collections from "../../libs/collection/collections.js";
 import migrationStatus from "../../libs/collection/get-collection-migration-status.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
@@ -13,6 +14,7 @@ import {
 } from "../../libs/repositories/index.js";
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import createProposalWorkflow from "../document-workflows/create-proposal.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 
@@ -168,6 +170,19 @@ const cloneVersion: ServiceFn<
 		collection: collectionRes.data,
 	});
 	if (insertRes.error) return insertRes;
+
+	if (
+		data.toVersionType ===
+		constants.collectionBuilder.publishing.proposalVersionType
+	) {
+		const workflowRes = await createProposalWorkflow(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			versionId: newVersionRes.data.id,
+			userId: data.userId,
+		});
+		if (workflowRes.error) return workflowRes;
+	}
 
 	return {
 		error: undefined,

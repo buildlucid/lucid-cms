@@ -56,6 +56,7 @@ const getSingleController = factory.createHandlers(
 				message: copy("server:core.routes.document.fetch.error.message"),
 			},
 		})(context, {
+			authUser: c.get("auth"),
 			id: Number.parseInt(id, 10),
 			version: !isVersionId ? (versionOrId as DocumentVersionType) : undefined,
 			versionId: isVersionId ? Number.parseInt(versionOrId, 10) : undefined,

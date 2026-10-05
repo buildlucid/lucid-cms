@@ -3,6 +3,7 @@ import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getWorkflowConfig } from "./helpers/index.js";
 
+/** Starts a new document's latest workflow at the collection's initial stage. */
 const createInitial: ServiceFn<
 	[
 		{
@@ -13,6 +14,8 @@ const createInitial: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
+	const Workflows = new DocumentWorkflowsRepository(context.db);
+
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
@@ -26,27 +29,11 @@ const createInitial: ServiceFn<
 		};
 	}
 
-	const Workflows = new DocumentWorkflowsRepository(context.db);
-
-	const existingRes = await Workflows.selectSingle({
-		select: ["id"],
-		where: [
-			{ key: "collection_key", operator: "=", value: data.collectionKey },
-			{ key: "document_id", operator: "=", value: data.documentId },
-		],
-	});
-	if (existingRes.error) return existingRes;
-	if (existingRes.data) {
-		return {
-			error: undefined,
-			data: undefined,
-		};
-	}
-
 	const workflowRes = await Workflows.createSingle({
 		data: {
 			collection_key: data.collectionKey,
 			document_id: data.documentId,
+			version_id: null,
 			stage_key: workflow.initial,
 			created_by: data.userId,
 			updated_by: data.userId,

@@ -99,6 +99,8 @@ export const defaultErrorResponse = {
 const responses = (config?: {
 	/** OpenAPI schema for the data property. Omission describes a 204 response. */
 	dataSchema?: unknown;
+	/** Success status for endpoints that accept asynchronous work. Defaults to 200. */
+	status?: 200 | 202;
 	/** OpenAPI schema for the sibling refs registry. */
 	refsSchema?: unknown;
 	/** Include pagination metadata and links. */
@@ -113,7 +115,7 @@ const responses = (config?: {
 	> = {};
 
 	if (config?.dataSchema) {
-		response[200] = {
+		response[config.status ?? 200] = {
 			description: translate("server:core.openapi.response.200"),
 			content: {
 				"application/json": {

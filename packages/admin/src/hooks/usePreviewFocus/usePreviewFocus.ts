@@ -1,7 +1,7 @@
 import type { PreviewFieldTarget } from "@lucidcms/preview-protocol";
 import type { Collection } from "@types";
 import { type Accessor, onCleanup } from "solid-js";
-import brickStore from "@/store/brickStore/brickStore";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import { revealPreviewField } from "@/utils/preview-focus-dom";
@@ -17,6 +17,7 @@ export const usePreviewFocus = (props: {
 	hasUnsavedContent: Accessor<boolean>;
 	hasUnsavedBuilderStructure: Accessor<boolean>;
 }) => {
+	const brickStore = useBrickStore();
 	let revealController: AbortController | undefined;
 	let clearHighlight: (() => void) | undefined;
 

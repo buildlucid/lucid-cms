@@ -113,6 +113,21 @@ describe("navigation group preferences", () => {
 	});
 });
 
+describe("release activity preferences", () => {
+	it("persists the shown filters across store instances", () => {
+		const storage = createMemoryStorage();
+		expect(
+			createUserPreferencesStore({ storage }).getReleaseActivityFilters(),
+		).toBeUndefined();
+		createUserPreferencesStore({ storage }).setReleaseActivityFilters([
+			"reviewers",
+		]);
+
+		const reloaded = createUserPreferencesStore({ storage });
+		expect(reloaded.getReleaseActivityFilters()).toEqual(["reviewers"]);
+	});
+});
+
 describe("home preferences", () => {
 	it("keeps valid widget entries and drops repeats and unknown sizes", () => {
 		const storage = createMemoryStorage();

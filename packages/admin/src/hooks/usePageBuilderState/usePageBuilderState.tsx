@@ -1,10 +1,11 @@
-import type { PublishOperation } from "@types";
+import type { InternalCollectionDocument, Refs, Release } from "@types";
 import {
 	type Accessor,
 	createContext,
 	type ParentComponent,
 	useContext,
 } from "solid-js";
+
 import type { UseDocumentAutoSave } from "../useDocumentAutoSave/useDocumentAutoSave";
 import { DocumentLocalizationProvider } from "../useDocumentLocalization/useDocumentLocalization";
 import type { UseDocumentMutations } from "../useDocumentMutations/useDocumentMutations";
@@ -17,7 +18,7 @@ export type PageBuilderStateContextValue = {
 	version: Accessor<string>;
 	versionId: Accessor<number | undefined>;
 	relationVersionType: Accessor<string | undefined>;
-	releaseRequest?: Accessor<PublishOperation | undefined>;
+	release?: Accessor<Release | undefined>;
 	disableWorkflow: Accessor<boolean>;
 	documentState: UseDocumentState;
 	mutations: UseDocumentMutations;
@@ -40,7 +41,7 @@ export const PageBuilderStateProvider: ParentComponent<
 					version: props.version,
 					versionId: props.versionId,
 					relationVersionType: props.relationVersionType,
-					releaseRequest: props.releaseRequest,
+					release: props.release,
 					disableWorkflow: props.disableWorkflow,
 					documentState: props.documentState,
 					mutations: props.mutations,
@@ -57,4 +58,43 @@ export const PageBuilderStateProvider: ParentComponent<
 
 export const usePageBuilderState = () => {
 	return useContext(PageBuilderStateContext) ?? {};
+};
+
+/** Gives read-only field extensions the displayed document, without access to save mutations. */
+export const ReadOnlyBuilderStateProvider: ParentComponent<{
+	document: Accessor<InternalCollectionDocument>;
+	refs: Accessor<Refs | undefined>;
+}> = (props) => {
+	const state = usePageBuilderState();
+	if (!state.documentState) {
+		throw new Error("Read-only documents require page builder state.");
+	}
+
+	const documentState = {
+		...state.documentState,
+		document: props.document,
+		refs: props.refs,
+	};
+
+	return (
+		<PageBuilderStateContext.Provider
+			value={{
+				...state,
+				documentState,
+				version: () => props.document().version ?? "snapshot",
+				versionId: () => props.document().versionId ?? undefined,
+				relationVersionType: () =>
+					props.document().version === "proposal"
+						? "latest"
+						: (props.document().version ?? undefined),
+				mutations: undefined,
+				autoSave: undefined,
+				uiState: undefined,
+				release: undefined,
+				disableWorkflow: () => true,
+			}}
+		>
+			{props.children}
+		</PageBuilderStateContext.Provider>
+	);
 };

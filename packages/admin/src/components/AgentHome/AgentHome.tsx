@@ -28,15 +28,16 @@ import { getAvailableModelSelection } from "@/utils/agent-models";
 import type { AgentReferenceItem } from "@/utils/agent-references";
 import { getGreeting } from "@/utils/greeting";
 import { startViewTransition } from "@/utils/view-transition";
-import AgentNeedsYou from "./parts/AgentNeedsYou";
+
 import AgentPicker from "./parts/AgentPicker";
 import AgentSuggestionButton from "./parts/AgentSuggestionButton";
+import AgentWaitingChats from "./parts/AgentWaitingChats";
 
 const grownHeight = 96;
 
 /**
  * The agent's home: a greeting, a chat box that starts a new chat, suggestions
- * and what is waiting on the reader. Sending opens the chat straight away and
+ * and the chats waiting on the reader. Sending opens the chat straight away and
  * the chat page saves it, so there is no wait here. Shown on the agent page
  * and on Home's Ask view.
  */
@@ -101,6 +102,9 @@ const AgentHome: Component = () => {
 		);
 	});
 	const greeting = createMemo(getGreeting);
+	const waitingAgentKey = createMemo(() =>
+		agents().length > 1 ? agent()?.key : undefined,
+	);
 
 	// ----------------------------------------
 	// Functions
@@ -248,7 +252,7 @@ const AgentHome: Component = () => {
 										</div>
 									</div>
 								</div>
-								<AgentNeedsYou class="pt-6" />
+								<AgentWaitingChats agentKey={waitingAgentKey()} class="pt-6" />
 							</div>
 						</AgentUnavailableNotice>
 					</section>

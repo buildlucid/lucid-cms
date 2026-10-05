@@ -9,5 +9,6 @@ export type * from "./resources/jobs/index.js";
 export type * from "./resources/locales/index.js";
 export type * from "./resources/media/index.js";
 export type * from "./resources/refs/index.js";
+export type * from "./resources/releases/index.js";
 export type * from "./resources/settings/index.js";
 export type * from "./resources/users/index.js";

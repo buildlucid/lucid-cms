@@ -1,3 +1,4 @@
+export { default as align } from "./align.js";
 export { default as checkSingle } from "./check-single.js";
 export { default as cloneVersion } from "./clone-version.js";
 export { default as createSingle } from "./create-single.js";

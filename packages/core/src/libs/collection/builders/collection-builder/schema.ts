@@ -178,22 +178,6 @@ const CollectionConfigSchema = z
 							.boolean()
 							.default(constants.collectionBuilder.publishing.allowSelfApproval)
 							.optional(),
-						comments: z
-							.strictObject({
-								request: z
-									.enum(["required", "optional"])
-									.default(
-										constants.collectionBuilder.publishing.comments.request,
-									)
-									.optional(),
-								decision: z
-									.enum(["required", "optional"])
-									.default(
-										constants.collectionBuilder.publishing.comments.decision,
-									)
-									.optional(),
-							})
-							.optional(),
 					})
 					.optional(),
 				workflow: z

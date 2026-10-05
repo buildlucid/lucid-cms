@@ -22,8 +22,9 @@ import Button from "@/components/Button/Button";
 import DeleteDebounceButton from "@/components/DeleteDebounceButton/DeleteDebounceButton";
 import DragDrop, { type DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
-import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
+import type { BrickData } from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
@@ -40,6 +41,7 @@ interface BuilderBricksProps {
 export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 	// ------------------------------
 	// State
+	const brickStore = useBrickStore();
 	const [getSelectBrickOpen, setSelectBrickOpen] = createSignal(false);
 
 	// ------------------------------
@@ -150,6 +152,7 @@ const DRAG_DROP_KEY = "builder-bricks-zone";
 const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const localization = useDocumentLocalization();
 
 	// ------------------------------
@@ -161,8 +164,10 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 		return props.brickIndexByRef().get(props.brick.ref) ?? -1;
 	});
 	const brickOpen = createMemo(() => props.brick.open === true);
-	const previewTriggerId = createMemo(() =>
-		getPreviewStructureId({ brickIndex: brickIndex(), type: "brick" }),
+	const previewTriggerId = createMemo(
+		() =>
+			brickStore.idPrefix +
+			getPreviewStructureId({ brickIndex: brickIndex(), type: "brick" }),
 	);
 	const isDisabled = createMemo(() => {
 		return brickStore.get.locked;

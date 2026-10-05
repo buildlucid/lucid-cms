@@ -1,4 +1,4 @@
-import type { Kysely } from "kysely";
+import { type Kysely, sql } from "kysely";
 import type DatabaseAdapter from "../adapter-base.js";
 import type { MigrationFn } from "../types.js";
 
@@ -175,83 +175,130 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createTable("lucid_document_publish_operations")
+				.createTable("lucid_releases")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
+				.addColumn("title", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("description", adapter.getDataType("json"))
+				.addColumn("status", adapter.getDataType("text"), (col) =>
+					col.notNull().defaultTo("open"),
+				)
+				.addColumn("revision", adapter.getDataType("integer"), (col) =>
+					col.notNull().defaultTo(1),
+				)
+				.addColumn("approved_revision", adapter.getDataType("integer"))
+				.addColumn("approved_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("approved_at", adapter.getDataType("timestamp"))
+				.addColumn("scheduled_at", adapter.getDataType("timestamp"))
+				.addColumn("scheduled_timezone", adapter.getDataType("text"))
+				.addColumn("scheduled_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("execution_job_id", adapter.getDataType("text"))
+				.addColumn("failure", adapter.getDataType("text"))
+				.addColumn(
+					"failure_release_document_id",
+					adapter.getDataType("integer"),
+				)
+				.addColumn("failure_target", adapter.getDataType("text"))
+				.addColumn("released_at", adapter.getDataType("timestamp"))
+				.addColumn("lock_token", adapter.getDataType("text"))
+				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"))
+				.execute();
+
+			await db.schema
+				.createTable("lucid_release_documents")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("release_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_releases.id").onDelete("cascade"),
+				)
 				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
-					col.notNull().references("lucid_collections.key").onDelete("cascade"),
+					col.notNull(),
 				)
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("target", adapter.getDataType("text"), (col) =>
+				.addColumn("source", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("operation_type", adapter.getDataType("text"), (col) =>
-					col.notNull(),
+				.addColumn("source_version_id", adapter.getDataType("integer"))
+				.addColumn("approved_workflow_stage", adapter.getDataType("text"))
+				.addColumn("approved_version_id", adapter.getDataType("integer"))
+				.addForeignKeyConstraint(
+					"fk_lucid_release_documents_source",
+					["collection_key", "document_id", "source_version_id"],
+					"lucid_document_version_identities",
+					["collection_key", "document_id", "version_id"],
+					(constraint) => constraint.onDelete("restrict"),
 				)
-				.addColumn("status", adapter.getDataType("text"), (col) =>
-					col.notNull(),
+				.addForeignKeyConstraint(
+					"fk_lucid_release_documents_approved",
+					["collection_key", "document_id", "approved_version_id"],
+					"lucid_document_version_identities",
+					["collection_key", "document_id", "version_id"],
+					(constraint) => constraint.onDelete("restrict"),
 				)
-				.addColumn("source_version_id", adapter.getDataType("integer"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("source_content_id", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				)
-				.addColumn(
-					"snapshot_version_id",
-					adapter.getDataType("integer"),
-					(col) => col.notNull(),
-				)
-				.addColumn("requested_by", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_users.id").onDelete("set null"),
-				)
-				.addColumn("request_comment", adapter.getDataType("json"))
-				.addColumn("decided_by", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_users.id").onDelete("set null"),
-				)
-				.addColumn("decision_comment", adapter.getDataType("json"))
-				.addColumn("decided_at", adapter.getDataType("timestamp"))
-				.addColumn("scheduled_at", adapter.getDataType("timestamp"))
-				.addColumn("scheduled_timezone", adapter.getDataType("text"))
-				.addColumn("execution_status", adapter.getDataType("text"), (col) =>
-					col.notNull().defaultTo("awaiting_approval"),
-				)
-				.addColumn("executed_at", adapter.getDataType("timestamp"))
-				.addColumn("failed_at", adapter.getDataType("timestamp"))
-				.addColumn("execution_error_message", adapter.getDataType("text"))
-				.addColumn("execution_error_data", adapter.getDataType("json"))
-				.addColumn("scheduled_job_id", adapter.getDataType("text"))
-				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
-					col.defaultTo(
-						adapter.formatDefaultValue(
-							"timestamp",
-							adapter.getDefault("timestamp", "now"),
-						),
-					),
-				)
-				.addColumn("updated_at", adapter.getDataType("timestamp"), (col) =>
-					col.defaultTo(
-						adapter.formatDefaultValue(
-							"timestamp",
-							adapter.getDefault("timestamp", "now"),
-						),
-					),
-				)
+				.addUniqueConstraint("uniq_lucid_release_documents_document", [
+					"release_id",
+					"collection_key",
+					"document_id",
+				])
 				.execute();
 
 			await db.schema
-				.createTable("lucid_document_publish_operation_assignees")
+				.createTable("lucid_release_targets")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("operation_id", adapter.getDataType("integer"), (col) =>
-					col
-						.notNull()
-						.references("lucid_document_publish_operations.id")
-						.onDelete("cascade"),
+				.addColumn(
+					"release_document_id",
+					adapter.getDataType("integer"),
+					(col) =>
+						col
+							.notNull()
+							.references("lucid_release_documents.id")
+							.onDelete("cascade"),
+				)
+				.addColumn("target", adapter.getDataType("text"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("reviewed_version_id", adapter.getDataType("integer"))
+				.addColumn("reviewed_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("reviewed_at", adapter.getDataType("timestamp"))
+				.addColumn("approved_version_id", adapter.getDataType("integer"))
+				.addUniqueConstraint("uniq_lucid_release_targets_release", [
+					"release_document_id",
+					"target",
+				])
+				.execute();
+
+			await db.schema
+				.createTable("lucid_release_reviewers")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("release_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_releases.id").onDelete("cascade"),
 				)
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.notNull().references("lucid_users.id").onDelete("cascade"),
@@ -260,103 +307,81 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.references("lucid_users.id").onDelete("set null"),
 				)
 				.addColumn("assigned_at", adapter.getDataType("timestamp"), (col) =>
-					col.defaultTo(
-						adapter.formatDefaultValue(
-							"timestamp",
-							adapter.getDefault("timestamp", "now"),
-						),
-					),
-				)
-				.execute();
-
-			await db.schema
-				.createTable("lucid_document_publish_operation_events")
-				.addColumn("id", adapter.getDataType("primary"), (col) =>
-					adapter.primaryKeyColumnBuilder(col),
-				)
-				.addColumn("operation_id", adapter.getDataType("integer"), (col) =>
 					col
 						.notNull()
-						.references("lucid_document_publish_operations.id")
-						.onDelete("cascade"),
-				)
-				.addColumn("event_type", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_users.id").onDelete("set null"),
-				)
-				.addColumn("comment", adapter.getDataType("text"))
-				.addColumn("metadata", adapter.getDataType("json"), (col) =>
-					col.notNull(),
-				)
-				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
-					col.defaultTo(
-						adapter.formatDefaultValue(
-							"timestamp",
-							adapter.getDefault("timestamp", "now"),
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
 						),
-					),
 				)
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_publish_operations_target")
-				.on("lucid_document_publish_operations")
-				.columns(["collection_key", "document_id", "target", "status"])
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_publish_operations_execution")
-				.on("lucid_document_publish_operations")
-				.columns(["status", "execution_status", "scheduled_at"])
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_publish_operations_schedule_dispatch")
-				.on("lucid_document_publish_operations")
-				.columns([
-					"status",
-					"execution_status",
-					"scheduled_job_id",
-					"scheduled_at",
+				.addUniqueConstraint("uniq_lucid_release_reviewers_user", [
+					"release_id",
+					"user_id",
 				])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_publish_operations_requested_by")
-				.on("lucid_document_publish_operations")
-				.columns(["requested_by", "created_at"])
+				.createTable("lucid_release_events")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("release_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_releases.id").onDelete("cascade"),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull())
+				.addColumn("body", adapter.getDataType("json"))
+				.addColumn("metadata", adapter.getDataType("json"))
+				.addColumn("resolution", adapter.getDataType("text"))
+				.addColumn("resolved_by", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("resolved_at", adapter.getDataType("timestamp"))
+				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						),
+				)
+				.addColumn("updated_at", adapter.getDataType("timestamp"))
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_publish_operations_document_created")
-				.on("lucid_document_publish_operations")
-				.columns(["collection_key", "document_id", "created_at"])
-				.execute();
-
-			await db.schema
-				.createIndex("idx_lucid_publish_operations_status_created")
-				.on("lucid_document_publish_operations")
+				.createIndex("idx_lucid_releases_status")
+				.on("lucid_releases")
 				.columns(["status", "created_at"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_publish_operation_assignees_user")
-				.on("lucid_document_publish_operation_assignees")
-				.columns(["user_id", "operation_id"])
+				.createIndex("idx_lucid_releases_schedule")
+				.on("lucid_releases")
+				.columns(["status", "execution_job_id", "scheduled_at"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_publish_operation_assignees_operation_user")
-				.on("lucid_document_publish_operation_assignees")
-				.columns(["operation_id", "user_id"])
+				.createIndex("idx_lucid_release_documents_document")
+				.on("lucid_release_documents")
+				.columns(["collection_key", "document_id"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_publish_operation_events_operation")
-				.on("lucid_document_publish_operation_events")
-				.columns(["operation_id", "created_at"])
+				.createIndex("idx_lucid_release_reviewers_user")
+				.on("lucid_release_reviewers")
+				.columns(["user_id", "release_id"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_release_events_release")
+				.on("lucid_release_events")
+				.columns(["release_id", "created_at"])
 				.execute();
 
 			await db.schema
@@ -370,6 +395,8 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
+				//* null for latest, so its workflow stays put as new versions are saved
+				.addColumn("version_id", adapter.getDataType("integer"))
 				.addColumn("stage_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
 				)
@@ -402,6 +429,13 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					["collection_key", "document_id"],
 					(constraint) => constraint.onDelete("cascade"),
 				)
+				.addForeignKeyConstraint(
+					"fk_document_workflows_version",
+					["collection_key", "document_id", "version_id"],
+					"lucid_document_version_identities",
+					["collection_key", "document_id", "version_id"],
+					(constraint) => constraint.onDelete("cascade"),
+				)
 				.execute();
 
 			await db.schema
@@ -432,10 +466,18 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_document_workflows_document")
+				.createIndex("idx_lucid_document_workflows_version")
+				.on("lucid_document_workflows")
+				.columns(["collection_key", "version_id"])
+				.unique()
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_document_workflows_latest")
 				.on("lucid_document_workflows")
 				.columns(["collection_key", "document_id"])
 				.unique()
+				.where(sql<boolean>`version_id is null`)
 				.execute();
 
 			await db.schema

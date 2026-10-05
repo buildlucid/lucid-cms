@@ -3,8 +3,8 @@ import { useQueryClient } from "@tanstack/solid-query";
 import type { DocumentVersionType } from "@types";
 import objectHash from "object-hash";
 import { type Accessor, createMemo } from "solid-js";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import api from "@/services/api";
-import brickStore from "@/store/brickStore/brickStore";
 import T from "@/translations";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
@@ -15,6 +15,7 @@ export function useDocumentState(props: {
 	version: Accessor<DocumentVersionType>;
 	versionId: Accessor<number | undefined>;
 }) {
+	const brickStore = useBrickStore();
 	const params = useParams();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
@@ -29,13 +30,21 @@ export function useDocumentState(props: {
 		if (documentId() === undefined) {
 			return false;
 		}
-		if (props.version() === "revision" || props.version() === "snapshot") {
+		if (
+			props.version() === "revision" ||
+			props.version() === "snapshot" ||
+			props.version() === "proposal"
+		) {
 			return props.versionId() !== undefined;
 		}
 		return true;
 	});
 	const versionUrlParam = createMemo(() => {
-		if (props.version() === "revision" || props.version() === "snapshot") {
+		if (
+			props.version() === "revision" ||
+			props.version() === "snapshot" ||
+			props.version() === "proposal"
+		) {
 			return props.versionId();
 		}
 		return props.version();
@@ -118,7 +127,9 @@ export function useDocumentState(props: {
 	const shouldBlockNavigation = createMemo(() => {
 		//* nothing to guard when the document can't be loaded
 		if (documentAccessError()) return false;
-		if (props.version() !== "latest") return false;
+		if (props.version() !== "latest" && props.version() !== "proposal") {
+			return false;
+		}
 		return isDocumentMutated();
 	});
 

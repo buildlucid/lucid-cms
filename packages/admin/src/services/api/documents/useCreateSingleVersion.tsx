@@ -61,7 +61,7 @@ const useCreateSingleVersion = (props: UseCreateSingleVersionProps) => {
 				}),
 			};
 		},
-		invalidates: [queryKeys.documents.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

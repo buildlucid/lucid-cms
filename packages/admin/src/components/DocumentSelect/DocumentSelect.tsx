@@ -26,9 +26,9 @@ import DragDrop, { type DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
 import RelationCount from "@/components/RelationCount/RelationCount";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
 import api from "@/services/api";
-import brickStore from "@/store/brickStore/brickStore";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import T from "@/translations";
@@ -505,6 +505,7 @@ const DocumentSortableItem: Component<{
 }> = (props) => {
 	// ----------------------------------------
 	// Render
+	const brickStore = useBrickStore();
 	return (
 		<DocumentReferencePreviewCard
 			data-dragkey={DOCUMENT_SELECT_DRAG_DROP_KEY}

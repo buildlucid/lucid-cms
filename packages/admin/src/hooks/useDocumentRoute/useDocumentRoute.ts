@@ -1,10 +1,11 @@
 import { type Accessor, createMemo } from "solid-js";
 import { readDocumentRoute } from "@/extensions/editor/field-state";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
-import brickStore from "@/store/brickStore/brickStore";
 
 /** Shares the document route with field and brick extensions. */
 export const useDocumentRoute = (contentLocale: Accessor<string>) => {
+	const brickStore = useBrickStore();
 	const { documentState } = usePageBuilderState();
 
 	return createMemo(() => {

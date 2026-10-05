@@ -1,4 +1,5 @@
 import constants from "../../constants/constants.js";
+import type { LucidErrorData } from "../../types/errors.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import { getJobDefinitionRuntime, getRegisteredJob } from "./registry.js";
@@ -18,7 +19,7 @@ type FailedJob = {
  */
 export const runPermanentFailureHook = async (
 	context: ServiceContext,
-	props: { job: FailedJob; errorMessage: string },
+	props: { job: FailedJob; errorMessage: string; error?: LucidErrorData },
 ) => {
 	const definition = getRegisteredJob(context.config, {
 		name: props.job.job_name,
@@ -34,6 +35,7 @@ export const runPermanentFailureHook = async (
 			input: props.job.payload,
 			attempts: props.job.attempts,
 			errorMessage: props.errorMessage,
+			...(props.error ? { error: props.error } : {}),
 		});
 	} catch (error) {
 		logger.error({

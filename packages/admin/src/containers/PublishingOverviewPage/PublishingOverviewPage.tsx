@@ -7,7 +7,7 @@ import {
 	FaSolidClock,
 	FaSolidTriangleExclamation,
 } from "solid-icons/fa";
-import { type Component, createMemo, For } from "solid-js";
+import { type Component, createMemo, For, Show } from "solid-js";
 import DashboardMetricTile from "@/components/DashboardMetricTile/DashboardMetricTile";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import PageLayout from "@/components/PageLayout/PageLayout";
@@ -16,6 +16,7 @@ import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { releaseListRoutes } from "@/utils/releases";
 
 type CollectionTargetOverview = {
 	collectionKey: string;
@@ -33,9 +34,6 @@ type TargetOverview = {
 	name: string;
 	unreleased: number;
 	outOfSync: number;
-	pending: number;
-	scheduled: number;
-	failed: number;
 	collections: CollectionTargetOverview[];
 };
 
@@ -93,9 +91,6 @@ const PublishingOverviewPage: Component = () => {
 					name: environmentName,
 					unreleased: 0,
 					outOfSync: 0,
-					pending: 0,
-					scheduled: 0,
-					failed: 0,
 					collections: [],
 				};
 
@@ -113,15 +108,6 @@ const PublishingOverviewPage: Component = () => {
 				});
 				targetsByKey.set(environmentOverview.target, current);
 			}
-		}
-
-		for (const releaseOverview of overview.data?.data.releaseRequests ?? []) {
-			const target = targetsByKey.get(releaseOverview.target);
-			if (!target) continue;
-
-			target.pending = releaseOverview.pending;
-			target.scheduled = releaseOverview.scheduled;
-			target.failed = releaseOverview.failed;
 		}
 
 		return Array.from(targetsByKey.values());
@@ -154,152 +140,155 @@ const PublishingOverviewPage: Component = () => {
 				description={T()("routes.publishing.overview.description")}
 			/>
 			<PageLayout.Body>
-				<QueryBoundary
-					loading={collections.isLoading || overview.isLoading}
-					error={collections.isError || overview.isError}
-					empty={targets().length === 0}
-					emptyFallback={
-						<EmptyState
-							title={T()("publishing.overview.empty.title")}
-							description={T()("publishing.overview.empty.description")}
-						/>
+				<Show
+					when={!collections.isLoading && !overview.isLoading}
+					fallback={
+						<div aria-busy="true" class="flex flex-col gap-8 p-4 md:p-6">
+							<span class="skeleton block h-24 w-full" />
+							<div>
+								<span class="skeleton mb-3 block h-5 w-40" />
+								<span class="skeleton block h-28 w-full" />
+							</div>
+							<div>
+								<span class="skeleton mb-3 block h-5 w-40" />
+								<span class="skeleton block h-48 w-full" />
+							</div>
+						</div>
 					}
-					class="flex-1 h-full p-4 md:p-6"
 				>
-					<div class="flex min-w-0 flex-col gap-8">
-						<For each={targets()}>
-							{(target) => (
-								<section>
-									<div class="mb-3">
-										<h2>{target.name}</h2>
-										<p class="mt-0.5 text-sm text-body">
-											{T()("publishing.overview.target.description", {
-												target: target.name,
-											})}
-										</p>
-									</div>
-									<div class="overflow-hidden rounded-md border border-border bg-card">
-										<div class="grid grid-cols-1 bg-card sm:grid-cols-2 xl:grid-cols-5">
-											<DashboardMetricTile
-												icon={<FaSolidArrowTrendUp size={14} />}
-												label={T()("publishing.overview.behind")}
-												value={target.outOfSync}
-												descriptionLines={2}
-												description={T()(
-													"publishing.overview.behind.description",
-												)}
-												tone="yellow"
-												class="border-b border-border sm:odd:border-r xl:border-b-0 xl:not-last:border-r"
-											/>
-											<DashboardMetricTile
-												icon={<FaSolidCircleExclamation size={14} />}
-												label={T()("common.status.unreleased")}
-												value={target.unreleased}
-												descriptionLines={2}
-												description={T()(
-													"publishing.overview.unreleased.description",
-												)}
-												tone="grey"
-												class="border-b border-border xl:border-b-0 xl:not-last:border-r"
-											/>
-											<DashboardMetricTile
-												icon={<FaSolidClock size={14} />}
-												label={T()("common.pending.review")}
-												value={target.pending}
-												descriptionLines={2}
-												description={T()(
-													"dashboard.release.requests.pending.description",
-												)}
-												tone="yellow"
-												href={`/lucid/publishing/requests?filter[target]=${encodeURIComponent(target.target)}&filter[status]=pending`}
-												class="border-b border-border sm:odd:border-r xl:border-b-0 xl:not-last:border-r"
-											/>
-											<DashboardMetricTile
-												icon={<FaSolidCalendar size={14} />}
-												label={T()("common.status.scheduled")}
-												value={target.scheduled}
-												descriptionLines={2}
-												description={T()(
-													"dashboard.release.requests.scheduled.description",
-												)}
-												tone="purple"
-												href={`/lucid/publishing/requests?filter[target]=${encodeURIComponent(target.target)}&filter[executionStatus]=scheduled`}
-												class="border-b border-border xl:border-b-0 xl:not-last:border-r"
-											/>
-											<DashboardMetricTile
-												icon={<FaSolidTriangleExclamation size={14} />}
-												label={T()("common.status.failed")}
-												value={target.failed}
-												descriptionLines={2}
-												description={T()(
-													"dashboard.release.requests.failed.description",
-												)}
-												tone="red"
-												href={`/lucid/publishing/requests?filter[target]=${encodeURIComponent(target.target)}&filter[executionStatus]=failed`}
-												class="xl:not-last:border-r"
-											/>
+					<QueryBoundary
+						error={collections.isError || overview.isError}
+						empty={targets().length === 0}
+						emptyFallback={
+							<EmptyState
+								title={T()("publishing.overview.empty.title")}
+								description={T()("publishing.overview.empty.description")}
+							/>
+						}
+						class="flex-1 h-full p-4 md:p-6"
+					>
+						<div class="flex min-w-0 flex-col gap-8">
+							<div class="grid sm:grid-cols-3 rounded-lg border border-border overflow-hidden">
+								<DashboardMetricTile
+									icon={<FaSolidClock size={14} />}
+									label={T()("releases.state.pending")}
+									value={overview.data?.data.releases.awaitingApproval ?? 0}
+									tone="yellow"
+									href={releaseListRoutes.pending}
+								/>
+								<DashboardMetricTile
+									icon={<FaSolidCalendar size={14} />}
+									label={T()("common.status.scheduled")}
+									value={overview.data?.data.releases.scheduled ?? 0}
+									tone="purple"
+									href={releaseListRoutes.scheduled}
+								/>
+								<DashboardMetricTile
+									icon={<FaSolidTriangleExclamation size={14} />}
+									label={T()("common.status.failed")}
+									value={overview.data?.data.releases.failed ?? 0}
+									tone="red"
+									href={releaseListRoutes.failed}
+								/>
+							</div>
+							<For each={targets()}>
+								{(target) => (
+									<section>
+										<div class="mb-3">
+											<h2>{target.name}</h2>
+											<p class="mt-0.5 text-sm text-body">
+												{T()("publishing.overview.target.description", {
+													target: target.name,
+												})}
+											</p>
 										</div>
-									</div>
-								</section>
-							)}
-						</For>
+										<div class="overflow-hidden rounded-md border border-border bg-card">
+											<div class="grid grid-cols-1 bg-card sm:grid-cols-2 xl:grid-cols-2">
+												<DashboardMetricTile
+													icon={<FaSolidArrowTrendUp size={14} />}
+													label={T()("publishing.overview.behind")}
+													value={target.outOfSync}
+													descriptionLines={2}
+													description={T()(
+														"publishing.overview.behind.description",
+													)}
+													tone="yellow"
+													class="border-b border-border sm:odd:border-r xl:border-b-0 xl:not-last:border-r"
+												/>
+												<DashboardMetricTile
+													icon={<FaSolidCircleExclamation size={14} />}
+													label={T()("common.status.unreleased")}
+													value={target.unreleased}
+													descriptionLines={2}
+													description={T()(
+														"publishing.overview.unreleased.description",
+													)}
+													tone="grey"
+													class="border-b border-border xl:border-b-0 xl:not-last:border-r"
+												/>
+											</div>
+										</div>
+									</section>
+								)}
+							</For>
 
-						<section>
-							<div class="mb-3">
-								<h2>{T()("publishing.overview.collections.title")}</h2>
-								<p class="mt-0.5 text-sm text-body">
-									{T()("publishing.overview.collections.description")}
-								</p>
-							</div>
-							<div class="overflow-hidden rounded-md border border-border bg-card divide-y divide-border">
-								<For each={collectionRows()}>
-									{(row) => (
-										<article class="grid gap-4 px-4 py-4 md:grid-cols-[minmax(180px,1fr)_repeat(3,minmax(100px,auto))] md:items-center">
-											<div class="min-w-0">
-												<h3 class="truncate text-sm font-medium text-title">
-													{row.collectionName}
-												</h3>
-												<p class="mt-1 truncate text-xs text-body">
-													{row.environmentName}
-												</p>
-											</div>
-											<div>
-												<span class="block text-xs text-body">
-													{T()("common.status.in.sync")}
-												</span>
-												<span class="mt-1 block text-sm font-semibold text-title">
-													{row.inSync}
-												</span>
-											</div>
-											<A
-												href={statusHref(row, "out-of-sync")}
-												class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary"
-											>
-												<span class="block text-xs text-body">
-													{T()("publishing.overview.behind")}
-												</span>
-												<span class="mt-1 block text-sm font-semibold text-warning hover:underline">
-													{row.outOfSync}
-												</span>
-											</A>
-											<A
-												href={statusHref(row, "unreleased")}
-												class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary"
-											>
-												<span class="block text-xs text-body">
-													{T()("common.status.unreleased")}
-												</span>
-												<span class="mt-1 block text-sm font-semibold text-title hover:underline">
-													{row.unreleased}
-												</span>
-											</A>
-										</article>
-									)}
-								</For>
-							</div>
-						</section>
-					</div>
-				</QueryBoundary>
+							<section>
+								<div class="mb-3">
+									<h2>{T()("publishing.overview.collections.title")}</h2>
+									<p class="mt-0.5 text-sm text-body">
+										{T()("publishing.overview.collections.description")}
+									</p>
+								</div>
+								<div class="overflow-hidden rounded-md border border-border bg-card divide-y divide-border">
+									<For each={collectionRows()}>
+										{(row) => (
+											<article class="grid gap-4 px-4 py-4 md:grid-cols-[minmax(180px,1fr)_repeat(3,minmax(100px,auto))] md:items-center">
+												<div class="min-w-0">
+													<h3 class="truncate text-sm font-medium text-title">
+														{row.collectionName}
+													</h3>
+													<p class="mt-1 truncate text-xs text-body">
+														{row.environmentName}
+													</p>
+												</div>
+												<div>
+													<span class="block text-xs text-body">
+														{T()("common.status.in.sync")}
+													</span>
+													<span class="mt-1 block text-sm font-semibold text-title">
+														{row.inSync}
+													</span>
+												</div>
+												<A
+													href={statusHref(row, "out-of-sync")}
+													class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary"
+												>
+													<span class="block text-xs text-body">
+														{T()("publishing.overview.behind")}
+													</span>
+													<span class="mt-1 block text-sm font-semibold text-warning hover:underline">
+														{row.outOfSync}
+													</span>
+												</A>
+												<A
+													href={statusHref(row, "unreleased")}
+													class="rounded-sm outline-none focus-visible:ring-1 focus-visible:ring-primary"
+												>
+													<span class="block text-xs text-body">
+														{T()("common.status.unreleased")}
+													</span>
+													<span class="mt-1 block text-sm font-semibold text-title hover:underline">
+														{row.unreleased}
+													</span>
+												</A>
+											</article>
+										)}
+									</For>
+								</div>
+							</section>
+						</div>
+					</QueryBoundary>
+				</Show>
 			</PageLayout.Body>
 		</PageLayout.Root>
 	);

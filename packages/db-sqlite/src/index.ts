@@ -75,6 +75,7 @@ export class SQLiteAdapter extends DatabaseAdapter {
 			support: {
 				alterColumn: false,
 				transaction: true,
+				sharedRowLocks: false,
 				multipleAlterTables: false,
 				boolean: false,
 				autoIncrement: true,

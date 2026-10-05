@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import type { LucidHonoGeneric } from "../../../../../types/hono.js";
+import align from "../../../controllers/documents/align.js";
 import checkVersion from "../../../controllers/documents/check-version.js";
 import createPreview from "../../../controllers/documents/create-preview.js";
-import createPublishOperation from "../../../controllers/documents/create-publish-operation.js";
 import createSingle from "../../../controllers/documents/create-single.js";
 import createVersion from "../../../controllers/documents/create-version.js";
 import deleteMultiple from "../../../controllers/documents/delete-multiple.js";
@@ -15,6 +15,7 @@ import getMultipleRevisions from "../../../controllers/documents/get-multiple-re
 import getSingle from "../../../controllers/documents/get-single.js";
 import getWorkflowAssignees from "../../../controllers/documents/get-workflow-assignees.js";
 import promoteVersion from "../../../controllers/documents/promote-version.js";
+import publish from "../../../controllers/documents/publish.js";
 import restoreMultiple from "../../../controllers/documents/restore-multiple.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
 import updateOrder from "../../../controllers/documents/update-order.js";
@@ -25,7 +26,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey", ...createSingle)
 	.post("/:collectionKey/restore", ...restoreMultiple)
 	.post("/:collectionKey/:id/duplicate", ...duplicateSingle)
-	.post("/:collectionKey/:id/publish", ...createPublishOperation)
+	.post("/:collectionKey/:id/publish", ...publish)
 	.post("/:collectionKey/:id", ...createVersion)
 	.delete("/:collectionKey", ...deleteMultiple)
 	.delete("/:collectionKey/permanent", ...deleteMultiplePermanently)
@@ -39,6 +40,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:collectionKey/:id/revisions", ...getMultipleRevisions)
 	.get("/:collectionKey/:id/:versionOrId", ...getSingle)
 	.post("/:collectionKey/:id/:versionId/check", ...checkVersion)
+	.post("/:collectionKey/:id/:versionId/align", ...align)
 	.post("/:collectionKey/:id/:versionId/restore-revision", ...restoreRevision)
 	.post("/:collectionKey/:id/:versionId/promote-version", ...promoteVersion)
 	.patch("/:collectionKey/:id/:versionId", ...updateVersion);

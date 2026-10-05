@@ -8,6 +8,7 @@ export interface Params {
 	id: number;
 	collectionKey: string;
 	body: {
+		versionId?: number;
 		stage?: string;
 		assigneeIds?: number[];
 	};
@@ -37,7 +38,7 @@ const useUpdateWorkflow = (props?: UseUpdateWorkflowProps) => {
 					title: T()("toasts.common.workflow.updated.title"),
 					message: T()("toasts.common.workflow.updated.message"),
 				}),
-		invalidates: [queryKeys.documents.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

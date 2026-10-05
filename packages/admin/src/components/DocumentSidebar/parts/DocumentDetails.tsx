@@ -104,7 +104,7 @@ export const DocumentDetails: Component<{
 			icon={<FaSolidInfo size={12} />}
 			preferenceKey="pageBuilder.sidebar.documentDetails"
 		>
-			<DetailsList class="mb-6 last:mb-0" padding="sm" items={details()} />
+			<DetailsList variant="plain" items={details()} />
 		</DocumentSidebarSection>
 	);
 };

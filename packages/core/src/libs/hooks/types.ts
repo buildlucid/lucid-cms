@@ -12,10 +12,7 @@ import type {
 	ServiceResponse,
 } from "../../utils/services/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
-import type {
-	DocumentPublishOperationEventType,
-	DocumentVersionType,
-} from "../db/tables/index.js";
+import type { DocumentVersionType } from "../db/tables/index.js";
 import type { Toolkit } from "../toolkit/types.js";
 
 // --------------------------------------------------
@@ -52,9 +49,7 @@ export type HookExecutionKindMap = {
 	documentWorkflows: {
 		afterUpdate: "effect";
 	};
-	publishOperations: {
-		afterEvent: "effect";
-	};
+
 	media: {
 		afterChange: "effect";
 		afterRestore: "effect";
@@ -140,6 +135,7 @@ export type DocumentVersionPromoteHookData = {
 };
 
 export type DocumentWorkflowAfterUpdateHookData = {
+	versionId: number;
 	collectionKey: string;
 	documentId: number;
 	userId: number | null;
@@ -149,21 +145,6 @@ export type DocumentWorkflowAfterUpdateHookData = {
 	nextAssigneeIds: number[];
 	stageChanged: boolean;
 	assigneesChanged: boolean;
-};
-
-export type PublishOperationAfterEventHookData = {
-	operationId: number;
-	collectionKey: string;
-	documentId: number;
-	target: string;
-	event: {
-		id: number;
-		type: DocumentPublishOperationEventType;
-		userId: number | null;
-		comment: string | null;
-		metadata: Record<string, unknown>;
-		createdAt: string | Date;
-	};
 };
 
 export type MediaAfterCreateHookData = {
@@ -299,12 +280,7 @@ export type HookServiceHandlers = {
 			undefined
 		>;
 	};
-	publishOperations: {
-		afterEvent: HookHandler<
-			EffectHookPayload<CollectionHookMeta, PublishOperationAfterEventHookData>,
-			undefined
-		>;
-	};
+
 	media: {
 		afterChange: HookHandler<
 			EffectHookPayload<
@@ -372,8 +348,7 @@ export type CollectionBuilderHooks =
 	| LucidHookDocuments<"afterDelete">
 	| LucidHookDocuments<"afterRestore">
 	| LucidHookDocuments<"versionPromote">
-	| LucidHook<"documentWorkflows", "afterUpdate">
-	| LucidHook<"publishOperations", "afterEvent">;
+	| LucidHook<"documentWorkflows", "afterUpdate">;
 
 export type DocumentHooks =
 	| LucidHook<"documents", "afterChange">
@@ -390,11 +365,6 @@ export type DocumentWorkflowHooks = LucidHook<
 	"afterUpdate"
 >;
 
-export type PublishOperationHooks = LucidHook<
-	"publishOperations",
-	"afterEvent"
->;
-
 export type MediaHooks =
 	| LucidHook<"media", "afterChange">
 	| LucidHook<"media", "afterRestore">
@@ -403,8 +373,4 @@ export type MediaHooks =
 	| LucidHook<"media", "afterDelete">;
 
 // add all hooks to this type
-export type AllHooks =
-	| DocumentHooks
-	| DocumentWorkflowHooks
-	| PublishOperationHooks
-	| MediaHooks;
+export type AllHooks = DocumentHooks | DocumentWorkflowHooks | MediaHooks;

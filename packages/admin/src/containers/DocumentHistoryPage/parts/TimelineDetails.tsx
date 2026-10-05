@@ -3,7 +3,7 @@ import type {
 	Collection,
 	InternalCollectionDocument,
 	Permission,
-	PublishOperation,
+	ReleaseSummary,
 	UserRef,
 } from "@types";
 import classNames from "classnames";
@@ -21,8 +21,6 @@ import {
 	type Accessor,
 	type Component,
 	createMemo,
-	createSignal,
-	For,
 	type JSXElement,
 	lazy,
 	Match,
@@ -33,25 +31,20 @@ import {
 import Button from "@/components/Button/Button";
 import Copy from "@/components/Copy/Copy";
 import DateText from "@/components/DateText/DateText";
-import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Link from "@/components/Link/Link";
-import Modal from "@/components/Modal/Modal";
 import Pill, { type PillProps } from "@/components/Pill/Pill";
-import PublishRequestRow from "@/components/PublishRequestRow/PublishRequestRow";
-import ReleaseScheduleFields from "@/components/ReleaseScheduleFields/ReleaseScheduleFields";
+import ReleaseCompactList from "@/components/ReleaseCompactList/ReleaseCompactList";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import type {
 	RetentionInfo,
 	TimelineItem,
 } from "@/hooks/useDocumentHistoryState/useDocumentHistoryState";
 import useUserPreference from "@/hooks/useUserPreference/useUserPreference";
-import api from "@/services/api";
 import userPreferencesStore, {
 	type SectionPreferenceKey,
 } from "@/store/userPreferencesStore/userPreferencesStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { getDefaultTimezone, getScheduledAt } from "@/utils/release-schedule";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 const JSONPreview = lazy(() => import("@/components/JSONPreview/JSONPreview"));
@@ -88,22 +81,9 @@ const TimelineDetails: Component<{
 	selectedVersionDocumentLoading: Accessor<boolean>;
 	createdByUser: Accessor<UserRef | undefined>;
 	retention: Accessor<RetentionInfo>;
-	releaseOperations: Accessor<PublishOperation[]>;
-	releaseOperationsLoading: Accessor<boolean>;
+	releases: Accessor<ReleaseSummary[]>;
+	releasesLoading: Accessor<boolean>;
 }> = (props) => {
-	// ----------------------------------
-	// State
-	const [selectedOperation, setSelectedOperation] =
-		createSignal<PublishOperation>();
-	const [scheduleDate, setScheduleDate] = createSignal("");
-	const [scheduleTime, setScheduleTime] = createSignal("");
-	const [scheduleTimezone, setScheduleTimezone] = createSignal(
-		getDefaultTimezone(),
-	);
-	const [validationError, setValidationError] = createSignal<string>();
-
-	// ----------------------------------
-	// Functions
 	const formatTargetName = (target: string) => {
 		const environment = props
 			.collection()
@@ -116,22 +96,6 @@ const TimelineDetails: Component<{
 			}) || target
 		);
 	};
-	const resetSchedule = () => {
-		setScheduleDate("");
-		setScheduleTime("");
-		setScheduleTimezone(getDefaultTimezone());
-	};
-
-	// ----------------------------------
-	// Mutations
-	const reschedule = api.publishOperations.useReschedule({
-		onSuccess: () => {
-			setSelectedOperation(undefined);
-			resetSchedule();
-			setValidationError(undefined);
-		},
-	});
-
 	// ----------------------------------
 	// Memos
 	const title = createMemo(() => {
@@ -182,404 +146,225 @@ const TimelineDetails: Component<{
 			0,
 	);
 	const fieldCount = createMemo(() => selectedDocument()?.fields?.length ?? 0);
-	const releaseOperations = createMemo(() => props.releaseOperations());
-	const pendingReleaseCount = createMemo(
-		() =>
-			releaseOperations().filter((operation) => operation.status === "pending")
-				.length,
-	);
-	const scheduledReleaseCount = createMemo(
-		() =>
-			releaseOperations().filter(
-				(operation) => operation.executionStatus === "scheduled",
-			).length,
-	);
-	const executingReleaseCount = createMemo(
-		() =>
-			releaseOperations().filter(
-				(operation) => operation.executionStatus === "executing",
-			).length,
-	);
-	const selectedOperationHasSchedule = createMemo(() =>
-		Boolean(selectedOperation()?.scheduledAt),
-	);
-	const scheduleError = createMemo(
-		() => validationError() || reschedule.errors()?.message,
-	);
-
-	// ----------------------------------
-	// Handlers
-	const openSchedule = (operation: PublishOperation) => {
-		setSelectedOperation(operation);
-		setValidationError(undefined);
-		reschedule.reset();
-
-		if (operation.scheduledAt) {
-			const scheduledAt = new Date(operation.scheduledAt);
-			setScheduleDate(scheduledAt.toISOString().slice(0, 10));
-			setScheduleTime(scheduledAt.toISOString().slice(11, 16));
-			setScheduleTimezone(operation.scheduledTimezone ?? getDefaultTimezone());
-			return;
-		}
-
-		resetSchedule();
-	};
-	const saveSchedule = async () => {
-		const operation = selectedOperation();
-		if (!operation) return;
-
-		const scheduledAt = getScheduledAt({
-			date: scheduleDate(),
-			time: scheduleTime(),
-			timezone: scheduleTimezone(),
-		});
-		if (!scheduledAt) {
-			setValidationError(T()("documents.release.schedule.validation.required"));
-			return;
-		}
-
-		await reschedule.action.mutateAsync({
-			id: operation.id,
-			body: {
-				scheduledAt,
-				scheduledTimezone: scheduleTimezone(),
-			},
-		});
-	};
-	const removeSchedule = async () => {
-		const operation = selectedOperation();
-		if (!operation) return;
-
-		await reschedule.action.mutateAsync({
-			id: operation.id,
-			body: {
-				scheduledAt: null,
-				scheduledTimezone: null,
-			},
-		});
-	};
-
+	const releases = createMemo(() => props.releases());
 	// ----------------------------------
 	// Render
 	return (
-		<>
-			<aside class="mt-4 lg:mt-6 mx-4 md:mx-6 lg:mx-0 lg:mr-6 mb-6 md:mb-8 pb-6 lg:pb-8 space-y-4">
-				<section class="rounded-md border border-border bg-card p-4 md:p-5">
-					<div class="flex items-start justify-between gap-4">
-						<div class="min-w-0">
-							<p class="text-xs font-medium uppercase text-body">{eyebrow()}</p>
-							<h3 class="mt-1 truncate text-lg font-semibold text-title">
-								{title()}
-							</h3>
-						</div>
-						<Pill variant="outline" class="shrink-0">
-							#{props.item.id}
-						</Pill>
+		<aside class="mt-4 lg:mt-6 mx-4 md:mx-6 lg:mx-0 lg:mr-6 mb-6 md:mb-8 pb-6 lg:pb-8 space-y-4">
+			<section class="rounded-md border border-border bg-card p-4 md:p-5">
+				<div class="flex items-start justify-between gap-4">
+					<div class="min-w-0">
+						<p class="text-xs font-medium uppercase text-body">{eyebrow()}</p>
+						<h3 class="mt-1 truncate text-lg font-semibold text-title">
+							{title()}
+						</h3>
 					</div>
+					<Pill variant="outline" class="shrink-0">
+						#{props.item.id}
+					</Pill>
+				</div>
 
-					<div class="mt-3 flex flex-wrap gap-2">
-						<VersionStatusPills item={props.item} />
-					</div>
+				<div class="mt-3 flex flex-wrap gap-2">
+					<VersionStatusPills item={props.item} />
+				</div>
 
-					<div
-						class={classNames("mt-4 grid gap-2", {
-							"sm:grid-cols-2": props.item.type === "revision",
-						})}
-					>
-						<Link variant="outline" size="sm" href={viewHref()} class="w-full">
-							{props.item.type === "latest"
-								? T()("common.edit")
-								: T()("common.view")}
-						</Link>
-						<Show when={props.item.type === "revision"}>
-							<Button
-								type="button"
-								variant="secondary"
-								size="sm"
-								class="w-full"
-								loading={props.restore.loading}
-								disabled={props.document()?.isDeleted}
-								permission={props.restore.permission}
-								onClick={props.onRestore}
-							>
-								{T()("documents.revisions.restore.to.latest.action")}
-							</Button>
-						</Show>
-					</div>
-				</section>
-
-				<InspectorSection
-					title={T()("common.version.details")}
-					icon={<FaSolidCircleInfo size={14} />}
-					preferenceKey="history.inspector.versionDetails"
+				<div
+					class={classNames("mt-4 grid gap-2", {
+						"sm:grid-cols-2": props.item.type === "revision",
+					})}
 				>
-					<div class="grid gap-3">
-						<div class="grid gap-2 text-sm">
-							<DetailRow
-								label={T()("common.type")}
-								value={<VersionType item={props.item} />}
-							/>
-							<DetailRow
-								label={T()("common.created.at")}
-								value={<DateText date={props.item.createdAt} />}
-							/>
-							<DetailRow
-								label={T()("common.updated.at")}
-								value={<DateText date={props.item.updatedAt} />}
-								show={
-									props.item.type === "latest" && props.item.updatedAt !== null
-								}
-							/>
-							<DetailRow
-								label={T()("common.created.by")}
-								value={
-									<AuthorDisplay
-										user={props.createdByUser()}
-										fallbackId={props.item.createdBy}
-									/>
-								}
-							/>
-							<DetailRow
-								label={T()("common.promoted.from")}
-								value={`#${props.item.promotedFrom}`}
-								show={props.item.promotedFrom !== null}
-							/>
-							<DetailRow
-								label={T()("common.content.id")}
-								value={
-									<Show
-										when={props.item.contentId}
-										fallback={<span class="text-body">-</span>}
-									>
-										{(contentId) => (
-											<Copy.Button
-												label={contentId()}
-												value={contentId()}
-												class="text-xs"
-											/>
-										)}
-									</Show>
-								}
-								stacked={true}
-							/>
+					<Link variant="outline" size="sm" href={viewHref()} class="w-full">
+						{props.item.type === "latest"
+							? T()("common.edit")
+							: T()("common.view")}
+					</Link>
+					<Show when={props.item.type === "revision"}>
+						<Button
+							type="button"
+							variant="secondary"
+							size="sm"
+							class="w-full"
+							loading={props.restore.loading}
+							disabled={props.document()?.isDeleted}
+							permission={props.restore.permission}
+							onClick={props.onRestore}
+						>
+							{T()("documents.revisions.restore.to.latest.action")}
+						</Button>
+					</Show>
+				</div>
+			</section>
+
+			<InspectorSection
+				title={T()("common.version.details")}
+				icon={<FaSolidCircleInfo size={14} />}
+				preferenceKey="history.inspector.versionDetails"
+			>
+				<div class="grid gap-3">
+					<div class="grid gap-2 text-sm">
+						<DetailRow
+							label={T()("common.type")}
+							value={<VersionType item={props.item} />}
+						/>
+						<DetailRow
+							label={T()("common.created.at")}
+							value={<DateText date={props.item.createdAt} />}
+						/>
+						<DetailRow
+							label={T()("common.updated.at")}
+							value={<DateText date={props.item.updatedAt} />}
+							show={
+								props.item.type === "latest" && props.item.updatedAt !== null
+							}
+						/>
+						<DetailRow
+							label={T()("common.created.by")}
+							value={
+								<AuthorDisplay
+									user={props.createdByUser()}
+									fallbackId={props.item.createdBy}
+								/>
+							}
+						/>
+						<DetailRow
+							label={T()("common.promoted.from")}
+							value={`#${props.item.promotedFrom}`}
+							show={props.item.promotedFrom !== null}
+						/>
+						<DetailRow
+							label={T()("common.content.id")}
+							value={
+								<Show
+									when={props.item.contentId}
+									fallback={<span class="text-body">-</span>}
+								>
+									{(contentId) => (
+										<Copy.Button
+											label={contentId()}
+											value={contentId()}
+											class="text-xs"
+										/>
+									)}
+								</Show>
+							}
+							stacked={true}
+						/>
+					</div>
+				</div>
+			</InspectorSection>
+
+			<InspectorSection
+				title={T()("common.content.summary")}
+				icon={<FaSolidLayerGroup size={14} />}
+				preferenceKey="history.inspector.contentSummary"
+			>
+				<Switch>
+					<Match when={props.selectedVersionDocumentLoading()}>
+						<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+							<span class="h-16 rounded-md skeleton" />
+							<span class="h-16 rounded-md skeleton" />
+							<span class="h-16 rounded-md skeleton" />
+							<span class="h-16 rounded-md skeleton" />
 						</div>
+					</Match>
+					<Match when={true}>
+						<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+							<Metric
+								label={T()("common.bricks")}
+								value={builderBrickCount()}
+							/>
+							<Metric
+								label={T()("builder.bricks.fixed")}
+								value={fixedBrickCount()}
+							/>
+							<Metric
+								label={T()("builder.bricks.embedded")}
+								value={embeddedBrickCount()}
+							/>
+							<Metric label={T()("common.fields")} value={fieldCount()} />
+						</div>
+					</Match>
+				</Switch>
+			</InspectorSection>
+
+			<Show when={props.item.type === "revision"}>
+				<InspectorSection
+					title={T()("documents.revisions.retention.title")}
+					icon={<FaSolidClockRotateLeft size={14} />}
+					preferenceKey="history.inspector.revisionRetention"
+				>
+					<div class="min-w-0">
+						<div class="flex flex-wrap items-center gap-2">
+							<Pill variant={getRetentionVariant(props.retention().state)}>
+								{props.retention().label}
+							</Pill>
+							<Show when={props.retention().expiresAt}>
+								{(expiresAt) => (
+									<span class="text-xs text-body">
+										{T()("documents.revisions.retention.cleanup.after")}{" "}
+										<DateText date={expiresAt()} class="text-xs" />
+									</span>
+								)}
+							</Show>
+						</div>
+						<p class="mt-2 text-sm text-body">
+							{props.retention().description}
+						</p>
 					</div>
 				</InspectorSection>
+			</Show>
 
+			<Show when={props.item.type === "environment"}>
 				<InspectorSection
-					title={T()("common.content.summary")}
-					icon={<FaSolidLayerGroup size={14} />}
-					preferenceKey="history.inspector.contentSummary"
+					title={T()("documents.release.activity")}
+					icon={<FaSolidPaperPlane size={14} />}
+					meta={releases().length}
+					preferenceKey="history.inspector.releaseActivity"
 				>
 					<Switch>
-						<Match when={props.selectedVersionDocumentLoading()}>
-							<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-								<span class="h-16 rounded-md skeleton" />
-								<span class="h-16 rounded-md skeleton" />
-								<span class="h-16 rounded-md skeleton" />
-								<span class="h-16 rounded-md skeleton" />
+						<Match when={props.releasesLoading()}>
+							<div class="grid gap-2">
+								<span class="h-24 rounded-md skeleton" />
+								<span class="h-24 rounded-md skeleton" />
+							</div>
+						</Match>
+						<Match when={releases().length === 0}>
+							<div class="rounded-md border border-border bg-input/50 p-3">
+								<p class="text-sm text-body">
+									{T()("empty.states.release.activity")}
+								</p>
 							</div>
 						</Match>
 						<Match when={true}>
-							<div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-								<Metric
-									label={T()("common.bricks")}
-									value={builderBrickCount()}
-								/>
-								<Metric
-									label={T()("builder.bricks.fixed")}
-									value={fixedBrickCount()}
-								/>
-								<Metric
-									label={T()("builder.bricks.embedded")}
-									value={embeddedBrickCount()}
-								/>
-								<Metric label={T()("common.fields")} value={fieldCount()} />
-							</div>
+							<ReleaseCompactList releases={releases()} />
 						</Match>
 					</Switch>
 				</InspectorSection>
+			</Show>
 
-				<Show when={props.item.type === "revision"}>
-					<InspectorSection
-						title={T()("documents.revisions.retention.title")}
-						icon={<FaSolidClockRotateLeft size={14} />}
-						preferenceKey="history.inspector.revisionRetention"
-					>
-						<div class="min-w-0">
-							<div class="flex flex-wrap items-center gap-2">
-								<Pill variant={getRetentionVariant(props.retention().state)}>
-									{props.retention().label}
-								</Pill>
-								<Show when={props.retention().expiresAt}>
-									{(expiresAt) => (
-										<span class="text-xs text-body">
-											{T()("documents.revisions.retention.cleanup.after")}{" "}
-											<DateText date={expiresAt()} class="text-xs" />
-										</span>
-									)}
-								</Show>
-							</div>
-							<p class="mt-2 text-sm text-body">
-								{props.retention().description}
-							</p>
-						</div>
-					</InspectorSection>
-				</Show>
-
-				<Show when={props.item.type === "environment"}>
-					<InspectorSection
-						title={T()("documents.release.activity")}
-						icon={<FaSolidPaperPlane size={14} />}
-						meta={releaseOperations().length}
-						preferenceKey="history.inspector.releaseActivity"
-					>
-						<div class="mb-3 grid grid-cols-3 gap-2">
-							<Metric
-								label={T()("common.status.pending")}
-								value={pendingReleaseCount()}
-							/>
-							<Metric
-								label={T()("common.status.scheduled")}
-								value={scheduledReleaseCount()}
-							/>
-							<Metric
-								label={T()("common.status.executing")}
-								value={executingReleaseCount()}
-							/>
-						</div>
-						<Switch>
-							<Match when={props.releaseOperationsLoading()}>
-								<div class="grid gap-2">
-									<span class="h-24 rounded-md skeleton" />
-									<span class="h-24 rounded-md skeleton" />
-								</div>
-							</Match>
-							<Match when={releaseOperations().length === 0}>
-								<div class="rounded-md border border-border bg-input/50 p-3">
-									<p class="text-sm text-body">
-										{T()("empty.states.release.activity")}
-									</p>
-								</div>
-							</Match>
-							<Match when={true}>
-								<div class="overflow-hidden rounded-md border border-border bg-card">
-									<For each={releaseOperations()}>
-										{(operation) => (
-											<PublishRequestRow
-												collection={props.collection}
-												request={operation}
-												onSchedule={openSchedule}
-											/>
-										)}
-									</For>
-								</div>
-							</Match>
-						</Switch>
-					</InspectorSection>
-				</Show>
-
-				<InspectorSection
-					title={T()("common.document.payload")}
-					icon={<FaSolidFileLines size={14} />}
-					preferenceKey="history.inspector.documentPayload"
-				>
-					<Switch>
-						<Match when={props.selectedVersionDocumentLoading()}>
-							<span class="block h-56 rounded-md skeleton" />
-						</Match>
-						<Match when={selectedDocument()}>
-							{(document) => (
-								<Suspense
-									fallback={<span class="block h-56 rounded-md skeleton" />}
-								>
-									<JSONPreview
-										json={document() as unknown as Record<string, unknown>}
-									/>
-								</Suspense>
-							)}
-						</Match>
-					</Switch>
-				</InspectorSection>
-			</aside>
-
-			<Modal.Root
-				role="alertdialog"
-				open={selectedOperation() !== undefined}
-				onOpenChange={(open) => {
-					if (open) return;
-					setSelectedOperation(undefined);
-					resetSchedule();
-					setValidationError(undefined);
-					reschedule.reset();
-				}}
+			<InspectorSection
+				title={T()("common.document.payload")}
+				icon={<FaSolidFileLines size={14} />}
+				preferenceKey="history.inspector.documentPayload"
 			>
-				<Modal.Header>
-					<Modal.Title>
-						{selectedOperationHasSchedule()
-							? T()("common.reschedule.release")
-							: T()("documents.release.schedule.action")}
-					</Modal.Title>
-					<Modal.Description>
-						{T()("modals.common.schedule.release.description")}
-					</Modal.Description>
-				</Modal.Header>
-				<Modal.Body>
-					<div class="grid gap-3">
-						<ReleaseScheduleFields
-							date={scheduleDate()}
-							setDate={setScheduleDate}
-							time={scheduleTime()}
-							setTime={setScheduleTime}
-							timezone={scheduleTimezone()}
-							setTimezone={setScheduleTimezone}
-							onChange={() => setValidationError(undefined)}
-						/>
-					</div>
-				</Modal.Body>
-				<Modal.Footer>
-					<ErrorMessage theme="basic" message={scheduleError()} />
-					<Modal.Actions>
-						<Button
-							variant="outline"
-							size="md"
-							type="button"
-							disabled={reschedule.action.isPending}
-							onClick={() => {
-								setSelectedOperation(undefined);
-								resetSchedule();
-								setValidationError(undefined);
-								reschedule.reset();
-							}}
-						>
-							{T()("common.cancel")}
-						</Button>
-						<Show when={selectedOperationHasSchedule()}>
-							<Button
-								variant="danger-outline"
-								size="md"
-								type="button"
-								loading={reschedule.action.isPending}
-								onClick={removeSchedule}
+				<Switch>
+					<Match when={props.selectedVersionDocumentLoading()}>
+						<span class="block h-56 rounded-md skeleton" />
+					</Match>
+					<Match when={selectedDocument()}>
+						{(document) => (
+							<Suspense
+								fallback={<span class="block h-56 rounded-md skeleton" />}
 							>
-								{T()("documents.release.schedule.remove")}
-							</Button>
-						</Show>
-						<Button
-							variant="primary"
-							size="md"
-							type="button"
-							loading={reschedule.action.isPending}
-							onClick={saveSchedule}
-						>
-							{selectedOperationHasSchedule()
-								? T()("actions.update.schedule")
-								: T()("documents.release.schedule.action")}
-						</Button>
-					</Modal.Actions>
-				</Modal.Footer>
-			</Modal.Root>
-		</>
+								<JSONPreview
+									json={document() as unknown as Record<string, unknown>}
+								/>
+							</Suspense>
+						)}
+					</Match>
+				</Switch>
+			</InspectorSection>
+		</aside>
 	);
 };
 

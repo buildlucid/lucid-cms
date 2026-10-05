@@ -1,4 +1,5 @@
-import { describe, expect, test } from "vitest";
+import crypto from "node:crypto";
+import { describe, expect, test, vi } from "vitest";
 import type { FieldInputSchema } from "../../../exports/types.js";
 import BrickBuilder from "../../../libs/collection/builders/brick-builder/index.js";
 import CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
@@ -19,6 +20,77 @@ const TEST_CONFIG = {
 };
 
 describe("brick table construction", () => {
+	test("temporary references stay unique across document fields, bricks and localized repeaters", () => {
+		const brick = new BrickBuilder("nested")
+			.addRepeater("items")
+			.addRepeater("children")
+			.addText("title")
+			.endRepeater()
+			.endRepeater();
+		const collection = new CollectionBuilder("unique_references", {
+			mode: "multiple",
+			localized: true,
+			details: { labels: { singular: "Page", plural: "Pages" } },
+			bricks: { builder: [brick] },
+		}).addText("title");
+		const randomBytes = vi
+			.spyOn(crypto, "randomBytes")
+			.mockReturnValue(Buffer.from([0, 0, 1]));
+		try {
+			const tables = aggregateBrickTables({
+				collection,
+				documentId: TEST_CONFIG.documentId,
+				versionId: TEST_CONFIG.versionId,
+				localization: TEST_CONFIG.localization,
+				fields: [{ key: "title", type: "text", value: "Page" }],
+				bricks: Array.from({ length: 100 }, (_, index) => ({
+					ref: `brick-${index}`,
+					key: brick.key,
+					type: "builder",
+					fields: [
+						{
+							key: "items",
+							type: "repeater",
+							groups: Array.from({ length: 5 }, (_, group) => ({
+								ref: `item-${index}-${group}`,
+								fields: [
+									{
+										key: "children",
+										type: "repeater",
+										groups: Array.from({ length: 3 }, (_, child) => ({
+											ref: `child-${index}-${group}-${child}`,
+											fields: [{ key: "title", type: "text", value: "Child" }],
+										})),
+									},
+								],
+							})),
+						},
+					],
+				})),
+				tableNameByteLimit: null,
+			});
+			const rows = tables.flatMap((table) => table.data);
+			const references = rows.flatMap((row) => {
+				const ref = row.brick_id_ref ?? row.parent_id_ref;
+				return typeof ref === "number" ? [ref] : [];
+			});
+			const uniqueReferences = new Set(references);
+			expect(references).toHaveLength(6_303);
+			expect(uniqueReferences.size).toBe(references.length);
+			expect(references.every((ref) => ref < 0)).toBe(true);
+			for (const row of rows) {
+				if (typeof row.parent_id === "number") {
+					expect(uniqueReferences.has(row.parent_id)).toBe(true);
+				}
+				if (typeof row.brick_id === "number") {
+					expect(uniqueReferences.has(row.brick_id)).toBe(true);
+				}
+			}
+		} finally {
+			randomBytes.mockRestore();
+		}
+	});
+
 	test("should correctly generate tables for two level nested repeaters", () => {
 		const simpleBrick = new BrickBuilder("simple")
 			.addText("heading", { localized: false })
@@ -189,13 +261,11 @@ describe("brick table construction", () => {
 		});
 		brickTables.sort((a, b) => a.priority - b.priority);
 
-		// test table structure
 		expect(brickTables).toHaveLength(4);
 
 		const [fieldsTable, simpleBrickTable, itemsTable, nestedItemsTable] =
 			brickTables;
 
-		// verify table names
 		expect(fieldsTable.table).toBe("lucid_document__simple__fld");
 		expect(simpleBrickTable.table).toBe("lucid_document__simple__simple");
 		expect(itemsTable.table).toBe("lucid_document__simple__simple__rep__items");
@@ -203,13 +273,11 @@ describe("brick table construction", () => {
 			"lucid_document__simple__simple__rep__items__nestedItems",
 		);
 
-		// verify priorities
 		expect(fieldsTable.priority).toBe(0);
 		expect(simpleBrickTable.priority).toBe(0);
 		expect(itemsTable.priority).toBe(1);
 		expect(nestedItemsTable.priority).toBe(2);
 
-		// test field data
 		expect(fieldsTable.data).toHaveLength(3); // shared row plus two locales
 
 		const enField = fieldsTable.data.find((item) => item.locale === "en");
@@ -218,7 +286,6 @@ describe("brick table construction", () => {
 		expect(enField?._simpleHeading).toBe("Homepage");
 		expect(frField?._simpleHeading).toBe("Homepage FR");
 
-		// test simple brick data
 		expect(simpleBrickTable.data).toHaveLength(3); // shared row plus two locales
 
 		const enSimpleBrick = simpleBrickTable.data.find(
@@ -231,7 +298,6 @@ describe("brick table construction", () => {
 		expect(enSimpleBrick?._heading).toBe("I am the heading");
 		expect(frSimpleBrick?._heading).toBeNull();
 
-		// test items repeater data
 		expect(itemsTable.data).toHaveLength(6); // 2 items × 3 rows
 
 		// get parent references for further testing
@@ -250,20 +316,16 @@ describe("brick table construction", () => {
 
 		expect(firstItemParentRef).not.toBe(secondItemParentRef);
 
-		// tst first item data
 		expect(firstItemEn?.parent_id).toBeNull();
 		expect(firstItemEn?.is_open).toBe(false);
 		expect(firstItemEn?._itemTitle).toBe("Title One");
 
-		// test second item data
 		expect(secondItemEn?.parent_id).toBeNull();
 		expect(secondItemEn?.is_open).toBe(true);
 		expect(secondItemEn?._itemTitle).toBe("Title Two");
 
-		// test nested items
 		expect(nestedItemsTable.data).toHaveLength(12); // 4 nested items × 3 rows
 
-		// group nested items by parent
 		const nestedItemsUnderFirst = nestedItemsTable.data.filter(
 			(item) => item.parent_id === firstItemParentRef,
 		);
@@ -275,7 +337,6 @@ describe("brick table construction", () => {
 		expect(nestedItemsUnderFirst).toHaveLength(2); // 2 nested items × 1 locales
 		expect(nestedItemsUnderSecond).toHaveLength(2); // 2 nested items × 1 locales
 
-		// test nested items under first parent
 		const firstNestedItemEn = nestedItemsUnderFirst.find(
 			(item) => item.locale === "en" && item.position === 0,
 		);
@@ -286,7 +347,6 @@ describe("brick table construction", () => {
 		expect(firstNestedItemEn?._nestedItemTitle).toBe("Nested Title One One");
 		expect(secondNestedItemEn?._nestedItemTitle).toBe("Nested Title One Two");
 
-		// test nested items under second parent
 		const firstNestedSecondParentEn = nestedItemsUnderSecond.find(
 			(item) => item.locale === "en" && item.position === 0,
 		);
@@ -414,12 +474,10 @@ describe("brick table construction", () => {
 		});
 		brickTables.sort((a, b) => a.priority - b.priority);
 
-		// test table structure
 		expect(brickTables).toHaveLength(4);
 
 		const [rootTable, level1Table, level2Table, level3Table] = brickTables;
 
-		// verify table names
 		expect(rootTable.table).toBe("lucid_document__deep__deep");
 		expect(level1Table.table).toBe("lucid_document__deep__deep__rep__level1");
 		expect(level2Table.table).toBe(
@@ -429,13 +487,11 @@ describe("brick table construction", () => {
 			"lucid_document__deep__deep__rep__level1__level2__level3",
 		);
 
-		// verify priorities
 		expect(rootTable.priority).toBe(0);
 		expect(level1Table.priority).toBe(1);
 		expect(level2Table.priority).toBe(2);
 		expect(level3Table.priority).toBe(3);
 
-		// test parent/child relatio
 		const level1Item = level1Table.data.find((item) => item.locale === "en");
 		expect(level1Item).toBeDefined();
 		const level1Ref = level1Item?.parent_id_ref;
@@ -449,12 +505,10 @@ describe("brick table construction", () => {
 		expect(level3Item).toBeDefined();
 		expect(level3Item?.parent_id).toBe(level2Ref);
 
-		// test field values
 		expect(level1Item?._level1Title).toBe("Level 1 Item");
 		expect(level2Item?._level2Title).toBe("Level 2 Item");
 		expect(level3Item?._level3Title).toBe("Level 3 Item");
 
-		// test open state propagation
 		expect(level1Item?.is_open).toBe(true);
 		expect(level2Item?.is_open).toBe(true);
 		expect(level3Item?.is_open).toBe(false);

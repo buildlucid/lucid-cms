@@ -1,6 +1,7 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType, ProfilePicture } from "../media/types.js";
 import type { RefResource } from "../refs/resource.js";
+import type { ReleaseOverview } from "../releases/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
 export type BrickType = "builder" | "fixed" | "embedded";
@@ -731,10 +732,6 @@ export interface Collection {
 		review?: {
 			requiredFor: string[];
 			allowSelfApproval: boolean;
-			comments: {
-				request: "required" | "optional";
-				decision: "required" | "optional";
-			};
 		};
 		workflow?: {
 			initial: string;
@@ -835,6 +832,8 @@ export interface InternalCollectionDocument {
 	collectionKey: string;
 	version: DocumentVersionType | null;
 	versionId: number | null;
+	/** The content ID of `versionId`, which changes whenever its content does. */
+	contentId: string | null;
 	route: DocumentRoute | null;
 	versions: Record<string, DocumentVersionSummary | null>;
 	isDeleted: boolean;
@@ -884,90 +883,6 @@ export interface DocumentVersionCheckResponse {
 	fields: Array<DocumentVersionCheckField>;
 }
 
-export type PublishOperationStatus =
-	| "pending"
-	| "approved"
-	| "rejected"
-	| "cancelled"
-	| "superseded";
-
-export type PublishOperationExecutionStatus =
-	| "awaiting_approval"
-	| "scheduled"
-	| "executing"
-	| "executed"
-	| "failed"
-	| "cancelled";
-
-export type PublishOperationType = "request" | "direct";
-
-export type PublishOperationUser = {
-	id: number;
-	email: string | null;
-	username: string | null;
-	firstName: string | null;
-	lastName: string | null;
-	profilePicture: ProfilePicture | null;
-} | null;
-
-export type PublishOperationAssignee = {
-	id: number;
-	user: NonNullable<PublishOperationUser>;
-	assignedBy: number | null;
-	assignedAt: string | null;
-};
-
-export type PublishOperationEvent = {
-	id: number;
-	type: string;
-	userId: number | null;
-	comment: string | null;
-	metadata: Record<string, unknown>;
-	createdAt: string | null;
-};
-
-export type PublishOperation = {
-	id: number;
-	collectionKey: string;
-	documentId: number;
-	documentLabel: string | null;
-	target: string;
-	operationType: PublishOperationType;
-	status: PublishOperationStatus;
-	executionStatus: PublishOperationExecutionStatus;
-	sourceVersionId: number;
-	sourceContentId: string;
-	snapshotVersionId: number;
-	isOutdated: boolean;
-	releaseRequirements: Array<{
-		target: string;
-		status: DocumentEnvironmentStatus;
-	}>;
-	requestedBy: PublishOperationUser;
-	requestComment: RichTextJSON | null;
-	decidedBy: PublishOperationUser;
-	decisionComment: RichTextJSON | null;
-	decidedAt: string | null;
-	scheduledAt: string | null;
-	scheduledTimezone: string | null;
-	executedAt: string | null;
-	failedAt: string | null;
-	executionErrorMessage: string | null;
-	executionErrorData: Record<string, unknown> | null;
-	scheduledJobId: string | null;
-	createdAt: string | null;
-	updatedAt: string | null;
-	permissions: {
-		review: boolean;
-		cancel: boolean;
-		reschedule: boolean;
-		retry: boolean;
-		updateReviewers: boolean;
-	};
-	assignees: PublishOperationAssignee[];
-	events: PublishOperationEvent[];
-};
-
 export type PublishingOverview = {
 	collections: Array<{
 		collectionKey: string;
@@ -978,30 +893,5 @@ export type PublishingOverview = {
 			inSync: number;
 		}>;
 	}>;
-	releaseRequests: Array<{
-		target: string;
-		pending: number;
-		scheduled: number;
-		failed: number;
-	}>;
-};
-
-export type PublishOperationOverview = {
-	total: number;
-	pending: number;
-	assignedToMe: number;
-	requestedByMe: number;
-	scheduled: number;
-	approved: number;
-	rejected: number;
-	failed: number;
-};
-
-export type PublishOperationReviewer = {
-	id: number;
-	email: string;
-	username: string;
-	firstName: string | null;
-	lastName: string | null;
-	profilePicture: ProfilePicture | null;
+	releases: ReleaseOverview;
 };

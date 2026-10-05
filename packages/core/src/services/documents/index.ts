@@ -11,6 +11,7 @@ export { default as getMultiple } from "./get-multiple.js";
 export { default as getMultipleRevisions } from "./get-multiple-revisions.js";
 export { default as getSingle } from "./get-single.js";
 export { default as nullifyDocumentReferences } from "./nullify-document-references.js";
+export { default as publish } from "./publish.js";
 export { default as restoreMultiple } from "./restore-multiple.js";
 export { default as updateOrder } from "./update-order.js";
 export { default as upsertSingle } from "./upsert-single.js";

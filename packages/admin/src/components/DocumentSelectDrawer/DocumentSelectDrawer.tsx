@@ -64,6 +64,8 @@ interface DocumentSelectPanelProps {
 		selected?: RelationFieldValue[];
 		selectedRefs?: DocumentRef[];
 		excludeDocument?: RelationFieldValue;
+		/** Documents that are listed but can't be picked, eg. already added. */
+		disabledDocuments?: RelationFieldValue[];
 		zIndex?: number;
 	};
 	callbacks: {
@@ -74,7 +76,6 @@ interface DocumentSelectPanelProps {
 	};
 }
 
-/** Renders the reusable document selector in a bottom panel. */
 const DocumentSelectDrawer: Component<DocumentSelectPanelProps> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -98,6 +99,7 @@ const DocumentSelectDrawer: Component<DocumentSelectPanelProps> = (props) => {
 					selected={props.state.selected}
 					selectedRefs={props.state.selectedRefs}
 					excludeDocument={props.state.excludeDocument}
+					disabledDocuments={props.state.disabledDocuments}
 					onClose={() => props.state.setOpen(false)}
 					onSelect={(selection) => {
 						props.callbacks.onSelect(selection);
@@ -115,6 +117,7 @@ interface DocumentSelectContentProps {
 	selected?: RelationFieldValue[];
 	selectedRefs?: DocumentRef[];
 	excludeDocument?: RelationFieldValue;
+	disabledDocuments?: RelationFieldValue[];
 	topbarSlot?: JSXElement;
 	onClose: () => void;
 	onSelect: (selection: {
@@ -123,7 +126,6 @@ interface DocumentSelectContentProps {
 	}) => void;
 }
 
-/** Renders document selection content for panels and nested workflows. */
 export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	props,
 ) => {
@@ -556,7 +558,6 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 				fallback={
 					<>
 						<QueryBoundary
-							loading={collectionIsLoading()}
 							error={documents.isError || collectionIsError()}
 							empty={documents.data?.data.length === 0}
 							queryState={searchParams}
@@ -606,7 +607,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 										icon: <FaSolidCalendar />,
 									},
 								]}
-								loading={documents.isFetching}
+								loading={documents.isFetching || collectionIsLoading()}
 								padding="sm"
 								variant="secondary"
 							>
@@ -630,6 +631,11 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 															doc().collectionKey,
 												),
 												onChange: () => toggleSelectedDocument(doc()),
+												disabled: props.disabledDocuments?.some(
+													(disabled) =>
+														disabled.id === doc().id &&
+														disabled.collectionKey === doc().collectionKey,
+												),
 											}}
 										/>
 									)}

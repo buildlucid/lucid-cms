@@ -11,6 +11,8 @@ const getSingle: ServiceFn<
 		{
 			collectionKey: string;
 			documentId: number;
+			/** Null for latest, otherwise a release proposal. */
+			versionId: number | null;
 		},
 	],
 	DocumentWorkflow | null
@@ -32,6 +34,7 @@ const getSingle: ServiceFn<
 	const workflowRes = await Workflows.selectSingleDetailed({
 		collectionKey: data.collectionKey,
 		documentId: data.documentId,
+		versionId: data.versionId,
 	});
 	if (workflowRes.error) return workflowRes;
 

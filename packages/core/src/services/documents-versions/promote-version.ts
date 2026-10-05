@@ -13,7 +13,6 @@ import {
 	DocumentsRepository,
 	DocumentVersionsRepository,
 } from "../../libs/repositories/index.js";
-
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
@@ -24,6 +23,8 @@ import invalidateContentDocumentCache from "../documents/helpers/invalidate-cont
 import notifyChange from "../documents/notify-change.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
+import invalidateReleases from "../releases/helpers/invalidate-releases.js";
+import recordTargetPublished from "../releases/helpers/record-target-published.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -36,7 +37,10 @@ const promoteVersion: ServiceFn<
 			skipRevisionCheck?: boolean;
 			/** If set to false, a revision will not be created even if the collection supports revisions. */
 			createRevision?: boolean;
-			requirePublishOperationForEnvironmentTarget?: boolean;
+			/** Callers that already hold the document's write claim, eg. releases. */
+			skipDocumentWriteClaims?: boolean;
+			/** The release doing the promoting, which keeps its approval and is left out of the target activity. */
+			releaseId?: number;
 		},
 	],
 	undefined
@@ -44,13 +48,16 @@ const promoteVersion: ServiceFn<
 	withTransaction(
 		context,
 		async (context) => {
-			const acquired = await acquireDocumentWrites(context, {
-				collectionKey: data.collectionKey,
-				ids: [data.documentId],
-			});
-			if (acquired.error) return acquired;
+			await using claims = new AsyncDisposableStack();
+			if (!data.skipDocumentWriteClaims) {
+				const claimRes = await acquireDocumentWrites(context, {
+					collectionKey: data.collectionKey,
+					ids: [data.documentId],
+				});
+				if (claimRes.error) return claimRes;
 
-			await using _claims = acquired.data;
+				claims.use(claimRes.data);
+			}
 
 			const Versions = new DocumentVersionsRepository(context.db);
 			const Documents = new DocumentsRepository(context.db);
@@ -62,27 +69,7 @@ const promoteVersion: ServiceFn<
 				key: data.collectionKey,
 			});
 			if (collectionRes.error) return collectionRes;
-			if (data.requirePublishOperationForEnvironmentTarget === true) {
-				const isEnvironmentTarget =
-					collectionRes.data.getData.publishing.targets.some(
-						(environment) => environment.key === data.toVersionType,
-					);
-				if (isEnvironmentTarget) {
-					return {
-						error: {
-							type: "basic",
-							name: copy("server:core.collections.permission.error.name"),
-							message: copy(
-								"server:core.publish.operations.required.for.environment.target",
-							),
-							status: 403,
-						},
-						data: undefined,
-					};
-				}
-			}
 
-			//* check the schema status and if a migration is required
 			const migrationStatusRes = await migrationStatus(context, {
 				collection: collectionRes.data,
 			});
@@ -222,6 +209,7 @@ const promoteVersion: ServiceFn<
 			//-------------------------------------------------------------------------------
 			// Mutate/create revisions and update the document
 			const shouldCreateRevision =
+				data.toVersionType === "latest" &&
 				collectionRes.data.getData.revisions.enabled &&
 				data.createRevision !== false;
 
@@ -375,6 +363,26 @@ const promoteVersion: ServiceFn<
 				},
 			);
 			if (hookResponse.error) return hookResponse;
+
+			const invalidateRes = await invalidateReleases(context, {
+				collectionKey: data.collectionKey,
+				documentIds: [data.documentId],
+				versionType: data.toVersionType,
+				releaseId: data.releaseId,
+				userId: data.userId,
+			});
+			if (invalidateRes.error) return invalidateRes;
+
+			if (data.toVersionType !== "latest") {
+				const publishedRes = await recordTargetPublished(context, {
+					collectionKey: data.collectionKey,
+					documentId: data.documentId,
+					target: data.toVersionType,
+					releaseId: data.releaseId,
+					userId: data.userId,
+				});
+				if (publishedRes.error) return publishedRes;
+			}
 
 			await invalidateContentDocumentCache(context, data.collectionKey);
 

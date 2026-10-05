@@ -59,6 +59,7 @@ export const Workflow: Component<{
 	const workflowKey = createMemo(() =>
 		[
 			props.documentId(),
+			props.document()?.versionId,
 			workflow()?.stage,
 			workflow()
 				?.assignees.map((assignee) => assignee.userId)
@@ -92,7 +93,7 @@ export const Workflow: Component<{
 				collectionKey: props.collectionKey,
 			},
 		},
-		enabled: () => Boolean(workflowConfig() && props.documentId()),
+		enabled: () => Boolean(workflow() && props.documentId()),
 	});
 	const assigneeOptions = createMemo(
 		() =>
@@ -213,11 +214,7 @@ export const Workflow: Component<{
 	// Render
 	return (
 		<Show
-			when={
-				workflowConfig() &&
-				props.documentId() !== undefined &&
-				props.document() !== undefined
-			}
+			when={workflowConfig() && props.documentId() !== undefined && workflow()}
 		>
 			<DocumentSidebarSection
 				title={T()("common.workflow")}

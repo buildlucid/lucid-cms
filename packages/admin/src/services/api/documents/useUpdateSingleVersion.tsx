@@ -48,7 +48,10 @@ const useUpdateSingleVersion = (props: UseUpdateSingleVersionProps) => {
 		ResponseBody<DocumentVersionUpdateResponse>
 	>({
 		mutationFn: updateSingleVersionReq,
-		invalidates: props.invalidates ?? [queryKeys.documents.all()],
+		invalidates: props.invalidates ?? [
+			queryKeys.documents.all(),
+			queryKeys.releases.all(),
+		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 		onMutate: props?.onMutate,

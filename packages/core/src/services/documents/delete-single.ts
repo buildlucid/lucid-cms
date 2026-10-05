@@ -1,8 +1,8 @@
 import type { ServiceFn } from "../../exports/types.js";
 import type { DocumentEditToken } from "../../libs/toolkit/documents/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
-import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
+import invalidateReleases from "../releases/helpers/invalidate-releases.js";
 import deleteSinglePermanently from "./delete-single-permanently.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import beginSingleDeletion from "./helpers/begin-single-deletion.js";
@@ -79,7 +79,7 @@ const deleteSingle: ServiceFn<
 					),
 					nullifyDocumentReferences(context, {
 						collectionKey: collection.key,
-						documentId: data.id,
+						documentIds: [data.id],
 					}),
 					deletePreviewSessionsForDocuments(context, {
 						collectionKey: data.collectionKey,
@@ -90,17 +90,11 @@ const deleteSingle: ServiceFn<
 			if (deleteRelationsRes.error) return deleteRelationsRes;
 			if (deletePreviewsRes.error) return deletePreviewsRes;
 
-			const cancelRequestsRes = await cancelPublishOperationsForDocuments(
-				context,
-				{
-					collectionKey: data.collectionKey,
-					documentIds: [data.id],
-					comment: context.translate(
-						"server:core.documents.deleted.publish.request.comment",
-					),
-				},
-			);
-			if (cancelRequestsRes.error) return cancelRequestsRes;
+			const invalidateReleasesRes = await invalidateReleases(context, {
+				collectionKey: data.collectionKey,
+				documentIds: [data.id],
+			});
+			if (invalidateReleasesRes.error) return invalidateReleasesRes;
 
 			const hookAfterRes = await executeDeleteHook(context, {
 				event: "afterDelete",

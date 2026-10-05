@@ -71,6 +71,8 @@ const fetchDocumentsFromCollection = async (
 			{
 				ids,
 				isDeleted: false,
+				// Saving or approving a reference must finish before its target can be deleted.
+				protectTargets: true,
 				validation: {
 					enabled: true,
 				},

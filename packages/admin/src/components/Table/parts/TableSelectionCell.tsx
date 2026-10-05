@@ -9,6 +9,7 @@ interface TableSelectionCellProps {
 	type?: "th" | "td";
 	value: boolean;
 	onChange: (_value: boolean) => void;
+	disabled?: boolean;
 }
 
 const TableSelectionCell: Component<TableSelectionCellProps> = (props) => {
@@ -26,6 +27,7 @@ const TableSelectionCell: Component<TableSelectionCellProps> = (props) => {
 						id={`table-select-${id}`}
 						value={props.value}
 						onChange={props.onChange}
+						disabled={props.disabled}
 					/>
 				</TableHeaderCell>
 			</Match>
@@ -35,6 +37,7 @@ const TableSelectionCell: Component<TableSelectionCellProps> = (props) => {
 						id={`table-select-${id}`}
 						value={props.value}
 						onChange={props.onChange}
+						disabled={props.disabled}
 					/>
 				</TableCell>
 			</Match>

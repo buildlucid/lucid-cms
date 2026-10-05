@@ -37,7 +37,7 @@ const updateWorkflowController = factory.createHandlers(
 	collectionPermissions("update"),
 	async (c) => {
 		const { collectionKey, id } = c.req.valid("param");
-		const { stage, assigneeIds } = c.req.valid("json");
+		const { stage, assigneeIds, versionId } = c.req.valid("json");
 		const context = createServiceContext(c);
 
 		const workflow = await serviceWrapper(
@@ -55,6 +55,7 @@ const updateWorkflowController = factory.createHandlers(
 		)(context, {
 			collectionKey,
 			documentId: Number.parseInt(id, 10),
+			versionId,
 			stage,
 			assigneeIds,
 			user: c.get("auth"),

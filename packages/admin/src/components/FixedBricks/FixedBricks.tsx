@@ -5,8 +5,9 @@ import { type Accessor, type Component, createMemo, For } from "solid-js";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
 import BrickSlots from "@/components/BrickSlots/BrickSlots";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
-import brickStore, { type BrickData } from "@/store/brickStore/brickStore";
+import type { BrickData } from "@/store/brickStore/brickStore";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 import helpers from "@/utils/helpers";
 import { getPreviewStructureId } from "@/utils/preview-focus-dom";
@@ -23,6 +24,7 @@ interface FixedBricksProps {
 export const FixedBricks: Component<FixedBricksProps> = (props) => {
 	// ------------------------------
 	// Memos
+	const brickStore = useBrickStore();
 	const configByKey = createMemo(() => {
 		return new Map(props.brickConfig.map((b) => [b.key, b]));
 	});
@@ -75,6 +77,7 @@ interface FixedBrickRowProps {
 const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 	// ------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const localization = useDocumentLocalization();
 
 	// ------------------------------
@@ -86,8 +89,10 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 		return props.brickIndexByRef().get(props.brick.ref) ?? -1;
 	});
 	const brickOpen = createMemo(() => props.brick.open === true);
-	const previewTriggerId = createMemo(() =>
-		getPreviewStructureId({ brickIndex: brickIndex(), type: "brick" }),
+	const previewTriggerId = createMemo(
+		() =>
+			brickStore.idPrefix +
+			getPreviewStructureId({ brickIndex: brickIndex(), type: "brick" }),
 	);
 	const fieldErrors = createMemo(() => {
 		return (

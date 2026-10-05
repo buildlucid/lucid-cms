@@ -56,7 +56,7 @@ const builtInWidgets: HomeWidget[] = [
 		sizes: ["md", "lg", "full"],
 		hidden: false,
 		available: (context) =>
-			can(Permissions.PublishOperationsRead) &&
+			can(Permissions.ReleasesRead) &&
 			(context.collections ?? []).some(
 				(collection) =>
 					collection.publishing.targets.length > 0 &&

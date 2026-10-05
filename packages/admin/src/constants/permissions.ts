@@ -21,7 +21,7 @@ export const Permissions = {
 	JobsRead: "jobs:read",
 	JobsRun: "jobs:run",
 	JobsUpdate: "jobs:update",
-	PublishOperationsRead: "publish-operations:read",
+	ReleasesRead: "releases:read",
 	AiCustomFieldValue: "ai:custom-field-value",
 	AiImageGenerate: "ai:image-generate",
 	AiAltGenerate: "ai:alt-generate",

@@ -16,9 +16,6 @@ import { collectionMigrationsTable } from "./collection-migrations.js";
 import { collectionsTable } from "./collections.js";
 import { documentBricksTable } from "./document-bricks.js";
 import { documentIdentitiesTable } from "./document-identities.js";
-import { documentPublishOperationAssigneesTable } from "./document-publish-operation-assignees.js";
-import { documentPublishOperationEventsTable } from "./document-publish-operation-events.js";
-import { documentPublishOperationsTable } from "./document-publish-operations.js";
 import { documentReferencesTable } from "./document-references.js";
 import { documentVersionIdentitiesTable } from "./document-version-identities.js";
 import { documentVersionsTable } from "./document-versions.js";
@@ -52,6 +49,11 @@ import { oauthRefreshTokensTable } from "./oauth-refresh-tokens.js";
 import { optionsTable } from "./options.js";
 import { previewSessionsTable } from "./preview-sessions.js";
 import { processedImagesTable } from "./processed-images.js";
+import { releaseDocumentsTable } from "./release-documents.js";
+import { releaseEventsTable } from "./release-events.js";
+import { releaseReviewersTable } from "./release-reviewers.js";
+import { releaseTargetsTable } from "./release-targets.js";
+import { releasesTable } from "./releases.js";
 import { rolePermissionsTable } from "./role-permissions.js";
 import { rolesTable } from "./roles.js";
 import { securityAuditLogsTable } from "./security-audit-logs.js";
@@ -79,9 +81,6 @@ export * from "./collection-migrations.js";
 export * from "./collections.js";
 export * from "./document-bricks.js";
 export * from "./document-identities.js";
-export * from "./document-publish-operation-assignees.js";
-export * from "./document-publish-operation-events.js";
-export * from "./document-publish-operations.js";
 export * from "./document-references.js";
 export * from "./document-table-name.js";
 export * from "./document-version-identities.js";
@@ -116,6 +115,11 @@ export * from "./oauth-refresh-tokens.js";
 export * from "./options.js";
 export * from "./preview-sessions.js";
 export * from "./processed-images.js";
+export * from "./release-documents.js";
+export * from "./release-events.js";
+export * from "./release-reviewers.js";
+export * from "./release-targets.js";
+export * from "./releases.js";
 export * from "./role-permissions.js";
 export * from "./roles.js";
 export * from "./security-audit-logs.js";
@@ -144,9 +148,11 @@ export const coreTableDefinitions = [
 	collectionsTable,
 	documentBricksTable,
 	documentIdentitiesTable,
-	documentPublishOperationAssigneesTable,
-	documentPublishOperationEventsTable,
-	documentPublishOperationsTable,
+	releaseDocumentsTable,
+	releaseEventsTable,
+	releaseReviewersTable,
+	releaseTargetsTable,
+	releasesTable,
 	documentVersionsTable,
 	documentVersionIdentitiesTable,
 	documentWorkflowAssigneesTable,

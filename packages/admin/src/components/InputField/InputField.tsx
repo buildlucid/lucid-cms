@@ -2,9 +2,9 @@ import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import Input from "@/components/Input/Input";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -26,6 +26,7 @@ interface InputFieldProps {
 export const InputField: Component<InputFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const customFieldGeneration = useCustomFieldGeneration();
 	const fieldRenderState = useFieldRenderState();
 
@@ -128,6 +129,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 	return (
 		<Input
 			id={brickHelpers.customFieldId({
+				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,

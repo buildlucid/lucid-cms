@@ -1,7 +1,7 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import { documentVersionServices } from "../../../../services/index.js";
+import publish from "../../../../services/documents/publish.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
@@ -40,29 +40,26 @@ const promoteVersionController = factory.createHandlers(
 		const { collectionKey, id, versionId } = c.req.valid("param");
 		const context = createServiceContext(c);
 
-		const restoreRevisionRes = await serviceWrapper(
-			documentVersionServices.promoteVersion,
-			{
-				transaction: true,
-				defaultError: {
-					type: "basic",
-					name: copy("server:core.routes.document.promote.version.error.name"),
-					message: copy(
-						"server:core.routes.document.promote.version.error.message",
-					),
-				},
+		const restoreRevisionRes = await serviceWrapper(publish, {
+			transaction: true,
+			defaultError: {
+				type: "basic",
+				name: copy("server:core.routes.document.promote.version.error.name"),
+				message: copy(
+					"server:core.routes.document.promote.version.error.message",
+				),
 			},
-		)(context, {
-			fromVersionId: Number.parseInt(versionId, 10),
-			userId: c.get("auth").id,
+		})(context, {
+			sourceVersionId: Number.parseInt(versionId, 10),
+			user: c.get("auth"),
 			documentId: Number.parseInt(id, 10),
 			collectionKey,
-			toVersionType: versionType,
+			target: versionType,
 			createRevision: bypassRevision === true ? false : undefined,
-			requirePublishOperationForEnvironmentTarget: true,
 		});
-		if (restoreRevisionRes.error)
+		if (restoreRevisionRes.error) {
 			throw new LucidAPIError(restoreRevisionRes.error);
+		}
 
 		c.status(204);
 		return c.body(null);

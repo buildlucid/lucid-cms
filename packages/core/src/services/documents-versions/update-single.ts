@@ -18,6 +18,8 @@ import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-orde
 import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import deleteDocumentBricks from "../documents-bricks/delete-multiple.js";
+import invalidateReleases from "../releases/helpers/invalidate-releases.js";
+import recordProposalActivity from "../releases/helpers/record-proposal-activity.js";
 import getUpdateContext from "./helpers/get-update-context.js";
 
 const updateSingle: ServiceFn<
@@ -28,6 +30,8 @@ const updateSingle: ServiceFn<
 			authUser?: LucidUser;
 			documentId: number;
 			versionId: number;
+			/** Callers that already hold the document's write claim, eg. release syncs. */
+			skipDocumentWriteClaims?: boolean;
 
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
@@ -38,13 +42,16 @@ const updateSingle: ServiceFn<
 	withTransaction(
 		context,
 		async (context) => {
-			const acquired = await acquireDocumentWrites(context, {
-				collectionKey: data.collectionKey,
-				ids: [data.documentId],
-			});
-			if (acquired.error) return acquired;
+			await using claims = new AsyncDisposableStack();
+			if (!data.skipDocumentWriteClaims) {
+				const claimRes = await acquireDocumentWrites(context, {
+					collectionKey: data.collectionKey,
+					ids: [data.documentId],
+				});
+				if (claimRes.error) return claimRes;
 
-			await using _claims = acquired.data;
+				claims.use(claimRes.data);
+			}
 
 			const Version = new DocumentVersionsRepository(context.db);
 
@@ -55,6 +62,7 @@ const updateSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				documentId: data.documentId,
 				versionId: data.versionId,
+				authUser: data.authUser,
 			});
 			if (updateContextRes.error) return updateContextRes;
 
@@ -108,7 +116,6 @@ const updateSingle: ServiceFn<
 			// ----------------------------------------------
 			// Update document
 
-			//* delete all bricks that belong to the document and version
 			const deleteBricksRes = await deleteDocumentBricks(context, {
 				versionId: data.versionId,
 				documentId: data.documentId,
@@ -154,7 +161,6 @@ const updateSingle: ServiceFn<
 			);
 			if (hookAfterRes.error) return hookAfterRes;
 
-			//* update the version with the updated at/by values
 			const contentId = randomUUID();
 			const updatedAt = new Date().toISOString();
 			const updateVersionRes = await Version.updateSingle(
@@ -175,15 +181,38 @@ const updateSingle: ServiceFn<
 			);
 			if (updateVersionRes.error) return updateVersionRes;
 
-			const Documents = new DocumentsRepository(context.db);
-			const documentUpdate = await Documents.updateSingle(
-				{
-					where: [{ key: "id", operator: "=", value: data.documentId }],
-					data: { updated_by: data.userId, updated_at: updatedAt },
-				},
-				{ tableName: updateContextRes.data.tableNames.document },
-			);
-			if (documentUpdate.error) return documentUpdate;
+			if (updateContextRes.data.versionType === "latest") {
+				const Documents = new DocumentsRepository(context.db);
+				const documentUpdate = await Documents.updateSingle(
+					{
+						where: [{ key: "id", operator: "=", value: data.documentId }],
+						data: { updated_by: data.userId, updated_at: updatedAt },
+					},
+					{ tableName: updateContextRes.data.tableNames.document },
+				);
+				if (documentUpdate.error) return documentUpdate;
+			}
+
+			const invalidateRes = await invalidateReleases(context, {
+				collectionKey: data.collectionKey,
+				documentIds: [data.documentId],
+				...(updateContextRes.data.versionType === "latest"
+					? { versionType: "latest" }
+					: { versionId: data.versionId }),
+				userId: data.userId,
+			});
+			if (invalidateRes.error) return invalidateRes;
+
+			if (updateContextRes.data.versionType !== "latest") {
+				const activityRes = await recordProposalActivity(context, {
+					type: "proposal_edited",
+					collectionKey: data.collectionKey,
+					documentId: data.documentId,
+					versionId: data.versionId,
+					userId: data.userId,
+				});
+				if (activityRes.error) return activityRes;
+			}
 
 			await invalidateContentDocumentCache(context, data.collectionKey);
 

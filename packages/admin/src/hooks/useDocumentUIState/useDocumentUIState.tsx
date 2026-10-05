@@ -4,8 +4,8 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type api from "@/services/api";
-import brickStore from "@/store/brickStore/brickStore";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import brickHelpers from "@/utils/brick-helpers";
@@ -21,6 +21,7 @@ export function useDocumentUIState(props: {
 	mode: "create" | "edit" | "history";
 	version: Accessor<"latest" | string>;
 	versionId: Accessor<number | undefined>;
+	proposalEditable?: Accessor<boolean>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
@@ -28,10 +29,9 @@ export function useDocumentUIState(props: {
 	updateSingleVersionMutation?: ReturnType<
 		typeof api.documents.useUpdateSingleVersion
 	>;
-	createPublishOperationMutation?: ReturnType<
-		typeof api.documents.useCreatePublishOperation
-	>;
+	publishMutation?: ReturnType<typeof api.documents.usePublishSingle>;
 }) {
+	const brickStore = useBrickStore();
 	const { contentLocale } = createDocumentLocalization(props.collection);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
 	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
@@ -64,18 +64,12 @@ export function useDocumentUIState(props: {
 	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
 		createSignal<Exclude<DocumentVersionType, "revision"> | null>(null);
 	const [getReleaseEnvironmentAction, setReleaseEnvironmentAction] =
-		createSignal<"publish" | "request" | null>(null);
+		createSignal<"publish" | "compose" | null>(null);
 
-	/**
-	 * Checkss if services requests are loading or not
-	 */
 	const isLoading = createMemo(() => {
 		return props.collectionQuery.isLoading || props.documentQuery.isLoading;
 	});
 
-	/**
-	 * Checks if loading the required resources was successful
-	 */
 	const isSuccess = createMemo(() => {
 		if (props.mode === "create") {
 			return props.collectionQuery.isSuccess;
@@ -83,44 +77,29 @@ export function useDocumentUIState(props: {
 		return props.collectionQuery.isSuccess && props.documentQuery.isSuccess;
 	});
 
-	/**
-	 * Checks if the documnet is saving
-	 */
 	const isSaving = createMemo(() => {
 		return (
 			props.createSingleVersionMutation?.action.isPending ||
 			props.createDocumentMutation?.action.isPending
-			// props.updateSingleVersionMutation?.action.isPending
 		);
 	});
 
-	/**
-	 * Checks if auto save is currently running
-	 */
 	const isAutoSaving = createMemo(() => {
 		return props.updateSingleVersionMutation?.action.isPending || false;
 	});
 
-	/**
-	 * Checks if a publish operation mutation is currently running
-	 */
-	const isCreatingPublishOperation = createMemo(() => {
-		return props.createPublishOperationMutation?.action.isPending || false;
+	const isPublishing = createMemo(() => {
+		return props.publishMutation?.action.isPending || false;
 	});
 
-	/**
-	 * Collates mutation errors for the update and create doc services
-	 */
 	const mutateErrors = createMemo(() => {
 		return (
+			props.updateSingleVersionMutation?.errors() ||
 			props.createSingleVersionMutation?.errors() ||
 			props.createDocumentMutation?.errors()
 		);
 	});
 
-	/**
-	 * Checks for any translations errors
-	 */
 	const brickTranslationErrors = createMemo(() => {
 		return brickHelpers.hasErrorsOnOtherLocale({
 			fieldErrors: brickStore.get.fieldsErrors,
@@ -129,27 +108,23 @@ export function useDocumentUIState(props: {
 		});
 	});
 
-	/**
-	 * Determines if the collection needs migrating
-	 */
 	const collectionNeedsMigrating = createMemo(() => {
 		return props.collection()?.migrationStatus?.requiresMigration === true;
 	});
 
-	/**
-	 * Determines if the auto save is enabled on the collection
-	 */
 	const autoSave = createMemo(() => {
 		return props.collection()?.autoSave;
 	});
 
-	/**
-	 * Determines if auto-save is actively running (both collection config AND user preference enabled)
-	 */
 	const isAutoSaveActive = createMemo(() => {
+		if (props.version() === "proposal" && props.proposalEditable?.() !== true) {
+			return false;
+		}
 		if (props.mode === "create") return false;
 		if (props.mode === "history") return false;
-		if (props.version() !== "latest") return false;
+		if (props.version() !== "latest" && props.version() !== "proposal") {
+			return false;
+		}
 		if (props.document()?.isDeleted) return false;
 		const permission = props.collection()?.permissions.update;
 		if (!permission) return false;
@@ -161,9 +136,6 @@ export function useDocumentUIState(props: {
 		);
 	});
 
-	/**
-	 * Determines if the save button should be disabled
-	 */
 	const saveDisabled = createMemo(() => {
 		if (isAutoSaveActive()) {
 			return isSaving() || isAutoSaving() || brickStore.getDocumentMutated();
@@ -171,42 +143,32 @@ export function useDocumentUIState(props: {
 		return !brickStore.getDocumentMutated() || isSaving();
 	});
 
-	/**
-	 * Determines if you can publish the document
-	 */
 	const canPublishDocument = createMemo(() => {
 		// Fallback, if the document has been mutated and not saved
 		return !brickStore.getDocumentMutated() && !isSaving() && !mutateErrors();
 	});
 
-	/**
-	 * Determines if the builder should be locked
-	 */
 	const isBuilderLocked = createMemo(() => {
 		if (props.mode === "history") return true;
+		if (props.version() === "proposal" && props.proposalEditable?.() !== true) {
+			return true;
+		}
 
-		// lock builder if collection is locked
 		if (props.collection()?.locked === true) {
 			return true;
 		}
 
-		// lock builder if document is deleted
 		if (props.document()?.isDeleted === true) {
 			return true;
 		}
 
-		// lock version, if not the latest version
-		if (props.version() !== "latest") {
+		if (props.version() !== "latest" && props.version() !== "proposal") {
 			return true;
 		}
 
-		// builder not locked
 		return false;
 	});
 
-	/**
-	 * Checks if there is a published version of the document
-	 */
 	const isPublished = createMemo(() => {
 		return (
 			props.document()?.versions?.published?.id !== null &&
@@ -214,46 +176,37 @@ export function useDocumentUIState(props: {
 		);
 	});
 
-	/**
-	 * Determines if the revision navigation should show
-	 */
 	const showRevisionNavigation = createMemo(() => {
-		// if (props.mode === "create") return false;
 		return Boolean(props.collection()?.revisions.enabled);
 	});
 
-	/**
-	 * Determines when the upsert button should be visible
-	 */
 	const showUpsertButton = createMemo(() => {
 		if (isBuilderLocked()) return false;
 
 		if (props.mode === "create") return true;
-		if (props.version() === "latest") return true;
+		if (props.version() === "latest" || props.version() === "proposal") {
+			return true;
+		}
 
 		return false;
 	});
 
-	/**
-	 * Determines if the publish button should be visible
-	 */
 	const showPublishButton = createMemo(() => {
 		if (props.mode === "create" || isBuilderLocked()) return false;
-		if (props.version() !== "latest") return false;
+		if (props.version() !== "latest" && props.version() !== "proposal") {
+			return false;
+		}
 		return true;
 	});
 
-	/**
-	 * Determines if the delete document button should be visible
-	 */
 	const showDeleteButton = createMemo(() => {
+		if (props.version() === "proposal" || props.version() === "snapshot") {
+			return false;
+		}
 		if (props.document()?.isDeleted) return false;
 		return props.mode === "edit" && props.collection()?.mode === "multiple";
 	});
 
-	/**
-	 * Determines if the duplicate document button should be visible
-	 */
 	const showDuplicateButton = createMemo(() => {
 		if (props.mode !== "edit") return false;
 		if (props.version() !== "latest") return false;
@@ -269,9 +222,6 @@ export function useDocumentUIState(props: {
 		() => brickStore.getDocumentMutated() || isSaving() || isAutoSaving(),
 	);
 
-	/**
-	 * Determines if the user should be able to save (update/create) documents
-	 */
 	const hasSavePermission = createMemo(() => {
 		if (props.mode === "create") {
 			const permission = props.collection()?.permissions.create;
@@ -286,13 +236,15 @@ export function useDocumentUIState(props: {
 		return userStore.get.hasPermission([permission]).all;
 	});
 
-	/**
-	 * Determines if the auto save should be enabled
-	 */
 	const hasAutoSavePermission = createMemo(() => {
+		if (props.version() === "proposal" && props.proposalEditable?.() !== true) {
+			return false;
+		}
 		if (props.mode === "create") return false;
 		if (props.mode === "history") return false;
-		if (props.version() !== "latest") return false;
+		if (props.version() !== "latest" && props.version() !== "proposal") {
+			return false;
+		}
 		if (props.document()?.isDeleted) return false;
 
 		const permission = props.collection()?.permissions.update;
@@ -304,9 +256,6 @@ export function useDocumentUIState(props: {
 		);
 	});
 
-	/**
-	 * Determines if the user has publish permission
-	 */
 	const hasPublishPermission = createMemo(() => {
 		const target = getReleaseEnvironmentTarget();
 
@@ -324,9 +273,6 @@ export function useDocumentUIState(props: {
 		return userStore.get.hasPermission([permission]).all;
 	});
 
-	/**
-	 * Determines if the user has delete permission
-	 */
 	const hasDeletePermission = createMemo(() => {
 		const permission = props.collection()?.permissions.delete;
 		if (!permission) return false;
@@ -345,9 +291,6 @@ export function useDocumentUIState(props: {
 			.all;
 	});
 
-	/**
-	 * Determines if the restore reviision button should be visible
-	 */
 	const showRestoreRevisionButton = createMemo(() => {
 		if (props.mode === "create") return false;
 		if (props.mode === "history") return false;
@@ -358,12 +301,12 @@ export function useDocumentUIState(props: {
 		return true;
 	});
 
-	/**
-	 * Determines if the document preview is available for the current view
-	 */
 	const showPreview = createMemo(() => {
 		const version = props.version();
-		const requiresVersionId = version === "revision" || version === "snapshot";
+		const requiresVersionId =
+			version === "revision" ||
+			version === "snapshot" ||
+			version === "proposal";
 
 		return (
 			props.mode === "edit" &&
@@ -377,9 +320,6 @@ export function useDocumentUIState(props: {
 		() => showPreview() && getPreferredPreviewOpen(),
 	);
 
-	/**
-	 * The permission required to restore documents for this collection
-	 */
 	const restorePermission = createMemo(
 		() => props.collection()?.permissions.restore,
 	);
@@ -425,7 +365,7 @@ export function useDocumentUIState(props: {
 		collectionNeedsMigrating,
 		autoSave,
 		hasAutoSavePermission,
-		isCreatingPublishOperation,
+		isPublishing,
 		isAutoSaveActive,
 		showRestoreRevisionButton,
 		showPreview,

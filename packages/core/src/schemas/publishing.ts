@@ -1,5 +1,6 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
+import { releaseOverviewResponseSchema } from "./releases.js";
 
 export const controllerSchemas = {
 	getOverview: {
@@ -23,14 +24,7 @@ export const controllerSchemas = {
 					),
 				}),
 			),
-			releaseRequests: z.array(
-				z.object({
-					target: z.string(),
-					pending: z.number(),
-					scheduled: z.number(),
-					failed: z.number(),
-				}),
-			),
+			releases: releaseOverviewResponseSchema,
 		}),
 	} satisfies ControllerSchema,
 };

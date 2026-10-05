@@ -26,8 +26,8 @@ import { SectionField } from "@/components/SectionField/SectionField";
 import { SelectField } from "@/components/SelectField/SelectField";
 import { TextareaField } from "@/components/TextareaField/TextareaField";
 import { UserField } from "@/components/UserField/UserField";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type {
 	CollectionDataFieldConfig,
 	CollectionFieldConfigByType,
@@ -48,6 +48,7 @@ const fieldWidthClasses: Record<number, string> = {
 export const DynamicField: Component<DynamicFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 	const [tabHasMounted, setTabHasMounted] = createSignal(false);
 
@@ -62,8 +63,9 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 			config.type === "collapsible" ||
 			config.type === "repeater" ||
 			config.ui?.hidden
-		)
+		) {
 			return undefined;
+		}
 		return config;
 	});
 	const fieldPath = createMemo(() => [
@@ -175,10 +177,13 @@ export const DynamicField: Component<DynamicFieldProps> = (props) => {
 		if (ui !== undefined && "hidden" in ui && ui.hidden === true) {
 			return undefined;
 		}
-		return getPreviewFieldId({
-			brickIndex: fieldRenderState.brickIndex(),
-			path: fieldPath(),
-		});
+		return (
+			brickStore.idPrefix +
+			getPreviewFieldId({
+				brickIndex: fieldRenderState.brickIndex(),
+				path: fieldPath(),
+			})
+		);
 	});
 
 	// -------------------------------

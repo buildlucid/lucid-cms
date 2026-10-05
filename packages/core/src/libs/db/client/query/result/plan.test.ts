@@ -65,7 +65,7 @@ describe("result plans", () => {
 
 	test("resolves explicitly tagged computed-result codecs", () => {
 		const query = database.kysely
-			.selectFrom("lucid_document_publish_operations")
+			.selectFrom("lucid_releases")
 			.select(
 				database.fn.withCodec(sql<unknown>`'{}'`, codecs.json).as("metadata"),
 			);
@@ -114,8 +114,8 @@ describe("result plans", () => {
 		const query = database.kysely
 			.selectFrom("lucid_alerts")
 			.innerJoin(
-				"lucid_document_publish_operation_events",
-				"lucid_document_publish_operation_events.id",
+				"lucid_user_auth_providers",
+				"lucid_user_auth_providers.id",
 				"lucid_alerts.id",
 			)
 			.select("metadata");

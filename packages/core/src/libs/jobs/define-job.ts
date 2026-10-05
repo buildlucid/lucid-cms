@@ -119,6 +119,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 		schedules,
 		[jobDefinitionInternal]: {
 			runtime: {
+				transaction: options.transaction ?? false,
 				parse,
 				execute: async (context, input, execution) => {
 					const parsed = await parse(input);
@@ -187,6 +188,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 										input: parsed.data,
 										attempts: failure.attempts,
 										errorMessage: failure.errorMessage,
+										...(failure.error ? { error: failure.error } : {}),
 									},
 									toolkit: createToolkit(context),
 								});

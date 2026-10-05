@@ -27,9 +27,7 @@ export const hookExecutionKinds: {
 	documentWorkflows: {
 		afterUpdate: "effect",
 	},
-	publishOperations: {
-		afterEvent: "effect",
-	},
+
 	media: {
 		afterChange: "effect",
 		afterRestore: "effect",

@@ -23,9 +23,6 @@ import type {
 	LucidCollectionMigrations,
 	LucidCollections,
 	LucidDocumentIdentities,
-	LucidDocumentPublishOperationAssignees,
-	LucidDocumentPublishOperationEvents,
-	LucidDocumentPublishOperations,
 	LucidDocumentReferences,
 	LucidDocumentTable,
 	LucidDocumentTableName,
@@ -58,6 +55,11 @@ import type {
 	LucidOptions,
 	LucidPreviewSessions,
 	LucidProcessedImages,
+	LucidReleaseDocuments,
+	LucidReleaseEvents,
+	LucidReleaseReviewers,
+	LucidReleases,
+	LucidReleaseTargets,
 	LucidRemoteConnections,
 	LucidRolePermissions,
 	LucidRoles,
@@ -163,6 +165,8 @@ export type DatabaseConfig = {
 		 * Whether the database supports transactions.
 		 */
 		transaction: boolean;
+		/** Whether SELECT FOR SHARE can protect referenced rows until transaction commit. */
+		sharedRowLocks: boolean;
 		/**
 		 * Whether multiple columns can be altered in a single ALTER TABLE statement.
 		 * Some databases require separate statements for each column modification.
@@ -272,6 +276,11 @@ type DynamicCollectionTables = {
 };
 
 export interface LucidDB extends DynamicCollectionTables {
+	lucid_releases: LucidReleases;
+	lucid_release_documents: LucidReleaseDocuments;
+	lucid_release_targets: LucidReleaseTargets;
+	lucid_release_reviewers: LucidReleaseReviewers;
+	lucid_release_events: LucidReleaseEvents;
 	lucid_locales: LucidLocales;
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;
@@ -288,9 +297,6 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_email_transactions: LucidEmailTransactions;
 	lucid_alerts: LucidAlerts;
 	lucid_alert_recipients: LucidAlertRecipients;
-	lucid_document_publish_operations: LucidDocumentPublishOperations;
-	lucid_document_publish_operation_assignees: LucidDocumentPublishOperationAssignees;
-	lucid_document_publish_operation_events: LucidDocumentPublishOperationEvents;
 	lucid_document_references: LucidDocumentReferences;
 	lucid_document_version_identities: LucidDocumentVersionIdentities;
 	lucid_document_identities: LucidDocumentIdentities;

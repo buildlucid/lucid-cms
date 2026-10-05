@@ -4,14 +4,14 @@ import { isNavigationLinkActive } from "./navigation";
 describe("isNavigationLinkActive", () => {
 	it("matches nested routes by default", () => {
 		expect(
-			isNavigationLinkActive("/lucid/publishing/requests", "/lucid/publishing"),
+			isNavigationLinkActive("/lucid/publishing/overview", "/lucid/publishing"),
 		).toBe(true);
 	});
 
 	it("supports exact links for a parent overview route", () => {
 		expect(
 			isNavigationLinkActive(
-				"/lucid/publishing/requests",
+				"/lucid/publishing/overview",
 				"/lucid/publishing",
 				true,
 			),

@@ -103,6 +103,11 @@ const documentResponseBaseSchema = z.object({
 		description: "The current version ID",
 		example: 1,
 	}),
+	contentId: z.string().nullable().meta({
+		description:
+			"The current version's content ID, which changes whenever its content does",
+		example: "4f7c2b1e-8a3d-4c5f-9e6a-1b2c3d4e5f60",
+	}),
 	route: documentRouteSchema.meta({
 		description: "The resolved public route for this document",
 	}),
@@ -387,6 +392,33 @@ export const controllerSchemas = {
 			fields: z.array(fieldInputSchema),
 		}),
 	} satisfies ControllerSchema,
+	publish: {
+		body: z.object({
+			target: z.string().trim().min(1).meta({
+				description: "The environment to publish to",
+				example: "production",
+			}),
+			sourceVersionId: z.number().int().positive().optional().meta({
+				description: "The saved version to publish. Defaults to latest",
+				example: 1,
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().trim().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	createPreview: {
 		body: z.object({
 			locale: z.string().trim().min(1).optional(),
@@ -531,6 +563,10 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	updateWorkflow: {
 		body: z.object({
+			versionId: z.number().int().positive().optional().meta({
+				description: "The proposal version to update. Defaults to latest",
+				example: 2,
+			}),
 			stage: z.string().trim().min(1).optional(),
 			assigneeIds: z.array(z.number()).optional(),
 		}),
@@ -812,6 +848,39 @@ export const controllerSchemas = {
 			}),
 			versionId: z.string().trim().meta({
 				description: "The version ID you want to promote",
+				example: 2,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
+	align: {
+		body: z.object({
+			source: z.string().trim().min(1).meta({
+				description: "Latest or the environment to copy content from",
+				example: "production",
+			}),
+			sourceContentId: z.string().min(1).meta({
+				description: "The source content ID that was compared",
+			}),
+			destinationContentId: z.string().min(1).meta({
+				description: "The destination content ID that was compared",
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().trim().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+			versionId: z.string().trim().meta({
+				description: "The latest or proposal version to replace",
 				example: 2,
 			}),
 		}),

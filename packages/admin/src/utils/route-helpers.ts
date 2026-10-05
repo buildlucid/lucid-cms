@@ -23,3 +23,12 @@ export const getDocumentRoute = (
 
 	return `/lucid/collections/${data.collectionKey}/${data.version ?? "latest"}/${data.documentId}`;
 };
+
+/** A release's page, or the proposal or snapshot it owns for one document. */
+export const getReleaseRoute = (data: {
+	releaseId: number;
+	content?: { collectionKey: string; documentId: number };
+}) =>
+	data.content
+		? `/lucid/releases/${data.releaseId}/content/${data.content.collectionKey}/${data.content.documentId}`
+		: `/lucid/releases/${data.releaseId}`;

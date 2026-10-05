@@ -214,12 +214,16 @@ export const queryKeys = {
 		all: () => ["lucid", "permissions"] as const,
 		list: () => ["lucid", "permissions", "list"] as const,
 	},
-	publishOperations: {
-		all: () => ["lucid", "publishOperations"] as const,
-		list: () => ["lucid", "publishOperations", "list"] as const,
-		overview: () => ["lucid", "publishOperations", "overview"] as const,
-		reviewers: () => ["lucid", "publishOperations", "reviewers"] as const,
-		detail: () => ["lucid", "publishOperations", "detail"] as const,
+	releases: {
+		all: () => ["lucid", "releases"] as const,
+		list: () => ["lucid", "releases", "list"] as const,
+		overview: () => ["lucid", "releases", "overview"] as const,
+		detail: () => ["lucid", "releases", "detail"] as const,
+		reviewers: () => ["lucid", "releases", "reviewers"] as const,
+	},
+	releaseExecutions: {
+		detail: (id: number | undefined, jobId: string | null | undefined) =>
+			["lucid", "releaseExecutions", id, jobId] as const,
 	},
 	publishing: {
 		all: () => ["lucid", "publishing"] as const,

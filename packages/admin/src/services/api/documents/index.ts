@@ -1,6 +1,6 @@
+import useAlign from "./useAlign";
 import useCheckSingleVersion from "./useCheckSingleVersion";
 import useCreatePreview from "./useCreatePreview";
-import useCreatePublishOperation from "./useCreatePublishOperation";
 import useCreateSingle from "./useCreateSingle";
 import useCreateSingleVersion from "./useCreateSingleVersion";
 import useDeleteMultiple from "./useDeleteMultiple";
@@ -14,6 +14,7 @@ import useGetSingle from "./useGetSingle";
 import useGetSingleVersion from "./useGetSingleVersion";
 import useGetWorkflowAssignees from "./useGetWorkflowAssignees";
 import usePromoteSingle from "./usePromoteSingle";
+import usePublishSingle from "./usePublishSingle";
 import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
 import useUpdateOrder from "./useUpdateOrder";
@@ -21,6 +22,7 @@ import useUpdateSingleVersion from "./useUpdateSingleVersion";
 import useUpdateWorkflow from "./useUpdateWorkflow";
 
 const exportObject = {
+	useAlign,
 	useGetMultiple,
 	useCreatePreview,
 	useDeleteSingle,
@@ -29,7 +31,7 @@ const exportObject = {
 	useCheckSingleVersion,
 	useCreateSingleVersion,
 	useCreateSingle,
-	useCreatePublishOperation,
+	usePublishSingle,
 	useGetSingle,
 	usePromoteSingle,
 	useGetSingleVersion,

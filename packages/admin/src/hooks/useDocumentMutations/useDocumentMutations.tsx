@@ -1,4 +1,3 @@
-import type { RichTextJSON } from "@lucidcms/rich-text";
 import { useNavigate } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
 import type {
@@ -10,9 +9,9 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createEffect, createSignal, on } from "solid-js";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
-import brickStore from "@/store/brickStore/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
 import { getDocumentRoute } from "@/utils/route-helpers";
@@ -27,6 +26,7 @@ export function useDocumentMutations(props: {
 	document?: () => InternalCollectionDocument | undefined;
 	versionId: () => number | undefined;
 }) {
+	const brickStore = useBrickStore();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	let latestAutoSaveRequestCounter: number | null = null;
@@ -181,24 +181,7 @@ export function useDocumentMutations(props: {
 		},
 	});
 
-	const createPublishOperationMutation =
-		api.documents.useCreatePublishOperation({
-			onSuccess: () => {
-				brickStore.set("fieldsErrors", []);
-				brickStore.set("brickErrors", []);
-				brickStore.get.captureInitialSnapshot();
-			},
-			onError: (errors) => {
-				brickStore.set(
-					"fieldsErrors",
-					getBodyError<FieldError[]>("fields", errors) || [],
-				);
-				brickStore.set(
-					"brickErrors",
-					getBodyError<BrickError[]>("bricks", errors) || [],
-				);
-			},
-		});
+	const publishMutation = api.documents.usePublishSingle();
 
 	const updateWorkflowMutation = api.documents.useUpdateWorkflow({
 		silent: true,
@@ -244,6 +227,25 @@ export function useDocumentMutations(props: {
 					fields: brickHelpers.getCollectionPseudoBrickFields(),
 				},
 			});
+		} else if (props.version() === "proposal") {
+			const documentId = props.documentId();
+			const versionId = props.document?.()?.versionId;
+			if (
+				documentId === undefined ||
+				versionId === undefined ||
+				versionId === null
+			) {
+				return;
+			}
+			updateSingleVersionMutation.action.mutate({
+				collectionKey: props.collectionKey(),
+				documentId,
+				versionId,
+				body: {
+					bricks: brickHelpers.getUpsertBricks(),
+					fields: brickHelpers.getCollectionPseudoBrickFields(),
+				},
+			});
 		} else {
 			createSingleVersionMutation.action.mutate({
 				collectionKey: props.collectionKey(),
@@ -256,50 +258,15 @@ export function useDocumentMutations(props: {
 		}
 	};
 
-	const publishDocumentAction = async (
-		targetVersionType: DocumentVersionType,
-		scheduledAt?: string,
-		scheduledTimezone?: string,
-	) => {
-		if (props.documentId() === undefined) {
-			console.error("No document ID found.");
-			return;
-		}
-
-		await createPublishOperationMutation.action.mutateAsync({
+	const publishDocumentAction = async (target: DocumentVersionType) => {
+		const id = props.documentId();
+		if (id === undefined) return;
+		await publishMutation.action.mutateAsync({
 			collectionKey: props.collectionKey(),
-			id: props.documentId() as number,
+			id,
 			body: {
-				target: targetVersionType,
-				scheduledAt,
-				scheduledTimezone,
-			},
-		});
-	};
-
-	const createPublishOperationAction = async (
-		targetVersionType: Exclude<DocumentVersionType, "revision">,
-		comment?: RichTextJSON,
-		assigneeIds?: number[],
-		autoAccept?: boolean,
-		scheduledAt?: string,
-		scheduledTimezone?: string,
-	) => {
-		if (props.documentId() === undefined) {
-			console.error("No document ID found.");
-			return;
-		}
-
-		return await createPublishOperationMutation.action.mutateAsync({
-			collectionKey: props.collectionKey(),
-			id: props.documentId() as number,
-			body: {
-				target: targetVersionType,
-				comment,
-				assigneeIds,
-				autoAccept,
-				scheduledAt,
-				scheduledTimezone,
+				target,
+				sourceVersionId: props.document?.()?.versions.latest?.id,
 			},
 		});
 	};
@@ -345,7 +312,7 @@ export function useDocumentMutations(props: {
 		return await updateWorkflowMutation.action.mutateAsync({
 			collectionKey: props.collectionKey(),
 			id: props.documentId() as number,
-			body,
+			body: { ...body, versionId: props.document?.()?.versionId ?? undefined },
 		});
 	};
 
@@ -354,13 +321,13 @@ export function useDocumentMutations(props: {
 		createSingleVersionMutation,
 		updateSingleVersionMutation,
 		checkSingleVersionMutation,
-		createPublishOperationMutation,
+		publishMutation,
 		updateWorkflowMutation,
 		upsertDocumentAction,
 		publishDocumentAction,
-		createPublishOperationAction,
 		autoSaveDocument,
 		autoSaveMetadata,
+		clearAutoSaveMetadata: () => setAutoSaveMetadata(null),
 		restoreRevision,
 		restoreRevisionAction,
 		updateWorkflowAction,

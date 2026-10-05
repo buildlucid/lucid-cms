@@ -8,9 +8,9 @@ import {
 	readFieldValue,
 } from "@/extensions/editor/field-state";
 import { resolveSlots } from "@/extensions/slot-policy";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useDocumentRoute } from "@/hooks/useDocumentRoute/useDocumentRoute";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionLeafFieldConfig } from "@/types/collection-config";
 import type { FieldConditionScope } from "@/utils/field-condition-helpers";
 import { flattenStructuralScopeConfigs } from "@/utils/structural-field-helpers";
@@ -27,6 +27,7 @@ const FieldSlots: Component<{
 }> = (props) => {
 	// ----------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const context = useFieldRenderState();
 	const route = useDocumentRoute(context.contentLocale);
 

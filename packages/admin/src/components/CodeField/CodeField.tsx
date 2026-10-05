@@ -9,9 +9,9 @@ import {
 	untrack,
 } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import { getCodeDraftValue } from "@/utils/custom-field-generation";
@@ -40,6 +40,7 @@ type CodeFieldValue = {
 export const CodeField: Component<CodeFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const [getValue, setValue] = createSignal("");
 	const [getLanguage, setLanguage] = createSignal<string | undefined>(
 		undefined,
@@ -174,6 +175,7 @@ export const CodeField: Component<CodeFieldProps> = (props) => {
 		>
 			<CodeEditor
 				id={brickHelpers.customFieldId({
+					scope: brickStore.idPrefix,
 					key: props.state.fieldConfig.key,
 					brickIndex: fieldRenderState.brickIndex(),
 					groupRef: props.state.groupRef,

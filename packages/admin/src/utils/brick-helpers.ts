@@ -7,6 +7,7 @@ import type {
 	InternalCollectionDocument,
 	InternalDocumentField,
 	MediaRef,
+	Refs,
 	RelationFieldValue,
 	UserRef,
 } from "@types";
@@ -26,7 +27,6 @@ const findFieldRecursive = (props: {
 	repeaterKey?: string;
 }): InternalDocumentField | null => {
 	for (const field of props.fields) {
-		// Direct match for top-level fields if no repeater key is specified
 		if (
 			!props.repeaterKey &&
 			field.key === props.targetKey &&
@@ -93,14 +93,15 @@ const getUpsertBricks = (): UpsertBrickData[] =>
 	);
 
 const customFieldId = (props: {
+	scope?: string;
 	key: string;
 	brickIndex: number;
 	groupRef?: string;
 }): string => {
 	if (props.groupRef === undefined) {
-		return `field-${props.key}-${props.brickIndex}`;
+		return `${props.scope ?? ""}field-${props.key}-${props.brickIndex}`;
 	}
-	return `field-${props.key}-${props.brickIndex}-${props.groupRef}`;
+	return `${props.scope ?? ""}field-${props.key}-${props.brickIndex}-${props.groupRef}`;
 };
 
 const getFieldValue = <T>(props: {
@@ -136,8 +137,9 @@ const shouldClearFieldError = (
 	if (
 		target.localeCode !== undefined &&
 		fieldError.localeCode !== target.localeCode
-	)
+	) {
 		return false;
+	}
 
 	if (target.clearFromItemIndex === undefined) {
 		return true;
@@ -243,9 +245,6 @@ export const clearTargetFieldErrors = (
 	});
 };
 
-/**
- * Returns the first selected relation ID from an array-backed relation field.
- */
 const getFirstRelationValue = (
 	fieldValue: number[] | null | undefined,
 ): number | undefined => {
@@ -253,9 +252,6 @@ const getFirstRelationValue = (
 	return fieldValue[0];
 };
 
-/**
- * Returns the first selected relation from an array-backed relation field.
- */
 const getFirstRelationFieldValue = (
 	fieldValue: RelationFieldValue[] | null | undefined,
 ): RelationFieldValue | undefined => {
@@ -263,32 +259,41 @@ const getFirstRelationFieldValue = (
 	return fieldValue[0];
 };
 
+type FieldRefsInput = { refs: Refs; collection?: string } & (
+	| {
+			resource: "documents";
+			fieldValue: RelationFieldValue[] | null | undefined;
+	  }
+	| { resource: "media" | "users"; fieldValue: number[] | null | undefined }
+);
+
 function getFieldRefs(props: {
 	resource: "media";
 	fieldValue: number[] | null | undefined;
 	collection?: string;
+	refs: Refs;
 }): Array<NonNullable<MediaRef>>;
 function getFieldRefs(props: {
 	resource: "users";
 	fieldValue: number[] | null | undefined;
 	collection?: string;
+	refs: Refs;
 }): Array<NonNullable<UserRef>>;
 function getFieldRefs(props: {
 	resource: "documents";
 	fieldValue: RelationFieldValue[] | null | undefined;
 	collection?: string;
+	refs: Refs;
 }): DocumentRef[];
 /**
  * Returns matching resource refs for an array-backed field, preserving selection order.
  */
-function getFieldRefs(props: {
-	resource: "documents" | "media" | "users";
-	fieldValue: number[] | RelationFieldValue[] | null | undefined;
-	collection?: string;
-}): Array<NonNullable<MediaRef>> | Array<NonNullable<UserRef>> | DocumentRef[] {
+function getFieldRefs(
+	props: FieldRefsInput,
+): Array<NonNullable<MediaRef>> | Array<NonNullable<UserRef>> | DocumentRef[] {
 	if (props.resource === "documents") {
-		const refs = brickStore.get.refs.documents?.filter(isDocumentRef) ?? [];
-		const relationValues = (props.fieldValue ?? []) as RelationFieldValue[];
+		const refs = props.refs.documents?.filter(isDocumentRef) ?? [];
+		const relationValues = props.fieldValue ?? [];
 		return relationValues.reduce<DocumentRef[]>((acc, relation) => {
 			const targetCollectionKey = props.collection ?? relation.collectionKey;
 			const match = refs.find((ref) => {
@@ -302,10 +307,10 @@ function getFieldRefs(props: {
 		}, []);
 	}
 
-	const relationIds = (props.fieldValue ?? []) as number[];
+	const relationIds = props.fieldValue ?? [];
 
 	if (props.resource === "media") {
-		const refs = brickStore.get.refs.media ?? [];
+		const refs = props.refs.media ?? [];
 		return relationIds.reduce<Array<NonNullable<MediaRef>>>(
 			(acc, relationId) => {
 				const match = refs.find((ref) => ref.id === relationId);
@@ -317,7 +322,7 @@ function getFieldRefs(props: {
 		);
 	}
 
-	const refs = brickStore.get.refs.users ?? [];
+	const refs = props.refs.users ?? [];
 	return relationIds.reduce<Array<NonNullable<UserRef>>>((acc, relationId) => {
 		const match = refs.find((ref) => ref.id === relationId);
 
@@ -330,45 +335,46 @@ function getFieldRef(props: {
 	resource: "media";
 	fieldValue: number[] | null | undefined;
 	collection?: string;
+	refs: Refs;
 }): MediaRef | undefined;
 function getFieldRef(props: {
 	resource: "users";
 	fieldValue: number[] | null | undefined;
 	collection?: string;
+	refs: Refs;
 }): UserRef | undefined;
 function getFieldRef(props: {
 	resource: "documents";
 	fieldValue: RelationFieldValue[] | null | undefined;
 	collection?: string;
+	refs: Refs;
 }): DocumentRef | undefined;
-/**
- * Returns the first matching ref for an array-backed field.
- */
-function getFieldRef(props: {
-	resource: "documents" | "media" | "users";
-	fieldValue: number[] | RelationFieldValue[] | null | undefined;
-	collection?: string;
-}): MediaRef | UserRef | DocumentRef | undefined {
+function getFieldRef(
+	props: FieldRefsInput,
+): MediaRef | UserRef | DocumentRef | undefined {
 	if (props.resource === "documents") {
 		return getFieldRefs({
 			resource: "documents",
-			fieldValue: props.fieldValue as RelationFieldValue[] | null | undefined,
+			fieldValue: props.fieldValue,
 			collection: props.collection,
+			refs: props.refs,
 		})[0];
 	}
 
 	if (props.resource === "media") {
 		return getFieldRefs({
 			resource: "media",
-			fieldValue: props.fieldValue as number[] | null | undefined,
+			fieldValue: props.fieldValue,
 			collection: props.collection,
+			refs: props.refs,
 		})[0];
 	}
 
 	return getFieldRefs({
 		resource: "users",
-		fieldValue: props.fieldValue as number[] | null | undefined,
+		fieldValue: props.fieldValue,
 		collection: props.collection,
+		refs: props.refs,
 	})[0];
 }
 

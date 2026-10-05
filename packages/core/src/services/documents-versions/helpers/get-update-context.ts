@@ -1,3 +1,4 @@
+import constants from "../../../constants/constants.js";
 import type { CollectionTableNames } from "../../../exports/types.js";
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
@@ -8,8 +9,10 @@ import type { LucidVersionTable } from "../../../libs/db/tables/index.js";
 import type { Select } from "../../../libs/db/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
+import type { LucidUser } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
+import checkReleaseVersionAccess from "../../releases/helpers/check-release-version-access.js";
 
 const getUpdateContext: ServiceFn<
 	[
@@ -17,6 +20,8 @@ const getUpdateContext: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			versionId: number;
+			/** Required to save release proposals. */
+			authUser?: LucidUser;
 		},
 	],
 	{
@@ -109,7 +114,19 @@ const getUpdateContext: ServiceFn<
 	);
 	if (versionExistsRes.error) return versionExistsRes;
 
-	if (versionExistsRes.data.type !== "latest") {
+	if (
+		versionExistsRes.data.type ===
+		constants.collectionBuilder.publishing.proposalVersionType
+	) {
+		const accessRes = await checkReleaseVersionAccess(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			versionId: data.versionId,
+			user: data.authUser,
+			edit: true,
+		});
+		if (accessRes.error) return accessRes;
+	} else if (versionExistsRes.data.type !== "latest") {
 		return {
 			error: {
 				type: "basic" as const,

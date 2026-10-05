@@ -14,7 +14,9 @@ export function useDocumentPreview(props: {
 	// ----------------------------------
 	// Memos
 	const mode = createMemo<PreviewMode>(() =>
-		props.version() === "revision" || props.version() === "snapshot"
+		props.version() === "revision" ||
+		props.version() === "snapshot" ||
+		props.version() === "proposal"
 			? "scoped"
 			: "perspective",
 	);

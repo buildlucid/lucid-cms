@@ -15,8 +15,8 @@ import DragDrop from "@/components/DragDrop/DragDrop";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
 import { FormErrorMessage } from "@/components/FormErrorMessage/FormErrorMessage";
 import RelationCount from "@/components/RelationCount/RelationCount";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { DynamicFieldRenderer } from "@/types/custom-fields";
@@ -42,6 +42,7 @@ interface RepeaterFieldProps {
 export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -74,6 +75,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 	});
 	const fieldId = createMemo(() =>
 		brickHelpers.customFieldId({
+			scope: brickStore.idPrefix,
 			key: fieldConfig().key,
 			brickIndex: fieldRenderState.brickIndex(),
 			groupRef: props.groupRef,

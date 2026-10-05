@@ -4,8 +4,8 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import withTransaction from "../../utils/services/with-transaction.js";
-import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
+import invalidateReleases from "../releases/helpers/invalidate-releases.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import executeDeleteHook from "./helpers/execute-delete-hook.js";
@@ -127,14 +127,7 @@ const deleteMultiple: ServiceFn<
 			});
 			if (hookBeforeRes.error) return hookBeforeRes;
 
-			const nullifyPromises = data.ids.map((id) =>
-				nullifyDocumentReferences(context, {
-					collectionKey: collectionRes.data.key,
-					documentId: id,
-				}),
-			);
-
-			const [deleteDocUpdateRes, deletePreviewsRes, ...nullifyResults] =
+			const [deleteDocUpdateRes, deletePreviewsRes, nullifyResult] =
 				await Promise.all([
 					Documents.updateSingle(
 						{
@@ -163,25 +156,21 @@ const deleteMultiple: ServiceFn<
 						collectionKey: data.collectionKey,
 						documentIds: data.ids,
 					}),
-					...nullifyPromises,
+					nullifyDocumentReferences(context, {
+						collectionKey: collectionRes.data.key,
+						documentIds: data.ids,
+					}),
 				]);
 			if (deleteDocUpdateRes.error) return deleteDocUpdateRes;
 			if (deletePreviewsRes.error) return deletePreviewsRes;
 
-			const nullifyError = nullifyResults.find((result) => result.error);
-			if (nullifyError) return nullifyError;
+			if (nullifyResult.error) return nullifyResult;
 
-			const cancelRequestsRes = await cancelPublishOperationsForDocuments(
-				context,
-				{
-					collectionKey: data.collectionKey,
-					documentIds: data.ids,
-					comment: context.translate(
-						"server:core.documents.deleted.publish.request.comment",
-					),
-				},
-			);
-			if (cancelRequestsRes.error) return cancelRequestsRes;
+			const invalidateReleasesRes = await invalidateReleases(context, {
+				collectionKey: data.collectionKey,
+				documentIds: data.ids,
+			});
+			if (invalidateReleasesRes.error) return invalidateReleasesRes;
 
 			const hookAfterRes = await executeDeleteHook(context, {
 				event: "afterDelete",

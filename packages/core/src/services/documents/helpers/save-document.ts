@@ -45,7 +45,6 @@ const saveDocument: ServiceFn<
 	// ----------------------------------------------
 	// Checks
 
-	//* check collection exists
 	const [collectionRes, tableNamesRes] = await Promise.all([
 		collections.getSingle(context, { key: data.collectionKey }),
 		getTableNames(context, data.collectionKey),
@@ -53,7 +52,6 @@ const saveDocument: ServiceFn<
 	if (collectionRes.error) return collectionRes;
 	if (tableNamesRes.error) return tableNamesRes;
 
-	//* check collection is locked
 	if (collectionRes.data.getData.locked) {
 		return {
 			error: {
@@ -66,7 +64,6 @@ const saveDocument: ServiceFn<
 		};
 	}
 
-	//* check the schema status and if a migration is required
 	const [migrationStatusRes, migrationIdRes] = await Promise.all([
 		getMigrationStatus(context, { collection: collectionRes.data }),
 		getCurrentCollectionMigrationId(context, data.collectionKey),
@@ -85,7 +82,6 @@ const saveDocument: ServiceFn<
 		};
 	}
 
-	//* check if document exists within the collection
 	if (data.documentId !== undefined) {
 		const existingDocumentRes = await checkDocumentAccess(context, {
 			collectionKey: data.collectionKey,
@@ -94,7 +90,6 @@ const saveDocument: ServiceFn<
 		if (existingDocumentRes.error) return existingDocumentRes;
 	}
 
-	//* for single collections types, check if a document already exists
 	const checkDocumentCountRes = await checkSingleCollectionDocumentCount(
 		context,
 		{
@@ -176,24 +171,15 @@ const saveDocument: ServiceFn<
 
 	// ----------------------------------------------
 	// Create and manage document versions
-	const [createVersionRes, workflowRes] = await Promise.all([
-		createDocumentVersion(context, {
-			documentId: upsertDocRes.data.id,
-			userId: data.userId,
-			authUser: data.authUser,
-			bricks: data.bricks,
-			fields: data.fields,
-			collection: collectionRes.data,
-			origin: data.origin,
-		}),
-		data.documentId === undefined
-			? createInitialDocumentWorkflow(context, {
-					collectionKey: data.collectionKey,
-					documentId: upsertDocRes.data.id,
-					userId: data.userId,
-				})
-			: undefined,
-	]);
+	const createVersionRes = await createDocumentVersion(context, {
+		documentId: upsertDocRes.data.id,
+		userId: data.userId,
+		authUser: data.authUser,
+		bricks: data.bricks,
+		fields: data.fields,
+		collection: collectionRes.data,
+		origin: data.origin,
+	});
 
 	if (createVersionRes.error) {
 		if (data.documentId === undefined) {
@@ -205,6 +191,14 @@ const saveDocument: ServiceFn<
 		}
 		return createVersionRes;
 	}
+	const workflowRes =
+		data.documentId === undefined
+			? await createInitialDocumentWorkflow(context, {
+					collectionKey: data.collectionKey,
+					documentId: upsertDocRes.data.id,
+					userId: data.userId,
+				})
+			: undefined;
 	if (workflowRes?.error) {
 		if (data.documentId === undefined) {
 			await cleanupFailedCreate(context, {

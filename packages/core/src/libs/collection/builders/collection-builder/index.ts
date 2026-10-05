@@ -291,14 +291,6 @@ class CollectionBuilder<
 							allowSelfApproval:
 								review.allowSelfApproval ??
 								constants.collectionBuilder.publishing.allowSelfApproval,
-							comments: {
-								request:
-									review.comments?.request ??
-									constants.collectionBuilder.publishing.comments.request,
-								decision:
-									review.comments?.decision ??
-									constants.collectionBuilder.publishing.comments.decision,
-							},
 						}
 					: undefined,
 				workflow: workflow

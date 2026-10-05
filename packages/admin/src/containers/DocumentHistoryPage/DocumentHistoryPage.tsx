@@ -141,12 +141,8 @@ const DocumentHistoryPage: Component = () => {
 									}
 									createdByUser={state.selectedCreatedByUser}
 									retention={state.selectedRetention}
-									releaseOperations={() =>
-										state.releaseOperationsQuery.data?.data ?? []
-									}
-									releaseOperationsLoading={() =>
-										state.releaseOperationsQuery.isLoading
-									}
+									releases={() => state.releasesQuery.data?.data ?? []}
+									releasesLoading={() => state.releasesQuery.isLoading}
 								/>
 							)}
 						</Show>

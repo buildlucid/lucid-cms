@@ -16,9 +16,6 @@ export { default as CollectionMigrationsRepository } from "./collection-migratio
 export { default as CollectionsRepository } from "./collections.js";
 export { default as DocumentBricksRepository } from "./document-bricks.js";
 export { default as DocumentIdentitiesRepository } from "./document-identities.js";
-export { default as DocumentPublishOperationAssigneesRepository } from "./document-publish-operation-assignees.js";
-export { default as DocumentPublishOperationEventsRepository } from "./document-publish-operation-events.js";
-export { default as DocumentPublishOperationsRepository } from "./document-publish-operations.js";
 export { default as DocumentReferencesRepository } from "./document-references.js";
 export { default as DocumentVersionsRepository } from "./document-versions.js";
 export { default as DocumentWorkflowAssigneesRepository } from "./document-workflow-assignees.js";
@@ -51,6 +48,11 @@ export { default as OAuthRefreshTokensRepository } from "./oauth-refresh-tokens.
 export { default as OptionsRepository } from "./options.js";
 export { default as PreviewSessionsRepository } from "./preview-sessions.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
+export { default as ReleaseDocumentsRepository } from "./release-documents.js";
+export { default as ReleaseEventsRepository } from "./release-events.js";
+export { default as ReleaseReviewersRepository } from "./release-reviewers.js";
+export { default as ReleaseTargetsRepository } from "./release-targets.js";
+export { default as ReleasesRepository } from "./releases.js";
 export { default as RolePermissionsRepository } from "./role-permissions.js";
 export { default as RolesRepository } from "./roles.js";
 export { default as SecurityAuditLogsRepository } from "./security-audit-logs.js";

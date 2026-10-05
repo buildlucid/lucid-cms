@@ -2,8 +2,8 @@ import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
 import Slider from "@/components/Slider/Slider";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -24,6 +24,7 @@ interface RangeFieldProps {
 export const RangeField: Component<RangeFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -46,6 +47,7 @@ export const RangeField: Component<RangeFieldProps> = (props) => {
 	return (
 		<Slider
 			id={brickHelpers.customFieldId({
+				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,

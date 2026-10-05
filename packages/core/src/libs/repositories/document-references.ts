@@ -95,17 +95,19 @@ export default class DocumentReferencesRepository extends StaticRepository<"luci
 	async deleteRelationTargets(props: {
 		sourceTable: LucidBrickTableName;
 		targetTable: string;
-		documentId?: number;
+		documentIds?: number[];
+		versionIds: number[];
 	}) {
 		let query = this.db
 			.deleteFrom("lucid_document_references")
+			.where("version_id", "in", props.versionIds)
 			.where("source_table", "=", props.sourceTable)
 			.where("target_resource", "=", "documents")
 			.where("target_table", "=", props.targetTable)
 			.where("kind", "=", "direct");
 
-		if (props.documentId !== undefined) {
-			query = query.where("target_id", "=", props.documentId);
+		if (props.documentIds !== undefined) {
+			query = query.where("target_id", "in", props.documentIds);
 		}
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {

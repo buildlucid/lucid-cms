@@ -129,6 +129,7 @@ const LINK_VARIANTS = valuesOf<LinkVariant>({
 	outline: true,
 	danger: true,
 	"danger-outline": true,
+	ghost: true,
 });
 const LINK_SIZES = valuesOf<LinkSize>({
 	xs: true,

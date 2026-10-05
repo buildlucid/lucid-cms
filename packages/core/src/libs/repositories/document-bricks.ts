@@ -1,4 +1,5 @@
 import z from "zod";
+import constants from "../../constants/constants.js";
 import prefixGeneratedColName from "../collection/helpers/prefix-generated-column-name.js";
 import type { CollectionSchemaColumn } from "../collection/schema/types.js";
 import type { LucidDatabase } from "../db/client/index.js";
@@ -22,9 +23,6 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		super(db, documentBricksTable);
 	}
 
-	/**
-	 * Fetches all brick rows for a given document version ID
-	 */
 	async selectMultipleByVersionId(
 		props: {
 			versionId: number;
@@ -159,27 +157,94 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 			schema,
 		});
 	}
+	/**
+	 * Finds the live versions (latest and environments) whose relation fields
+	 * point at a collection's documents. Revisions and release snapshots keep
+	 * their authored references.
+	 */
+	async selectRelationReferenceVersions(
+		props: {
+			collectionKey: string;
+			documentIds?: number[];
+			versionTable: LucidVersionTableName;
+		},
+		dynamicConfig: DynamicConfig<LucidBrickTableName>,
+	) {
+		let query = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.innerJoin(
+				props.versionTable,
+				`${props.versionTable}.id`,
+				`${dynamicConfig.tableName}.document_version_id`,
+			)
+			.select([
+				`${dynamicConfig.tableName}.document_id`,
+				`${dynamicConfig.tableName}.document_version_id`,
+				`${props.versionTable}.type`,
+			])
+			.where(
+				`${dynamicConfig.tableName}.${prefixGeneratedColName("collection_key")}`,
+				"=",
+				props.collectionKey,
+			)
+			.where(`${props.versionTable}.type`, "not in", [
+				"revision",
+				constants.collectionBuilder.publishing.snapshotVersionType,
+				constants.collectionBuilder.publishing.proposalVersionType,
+			]);
+
+		if (props.documentIds !== undefined) {
+			query = query.where(
+				`${dynamicConfig.tableName}.${prefixGeneratedColName("document_id")}`,
+				"in",
+				props.documentIds,
+			);
+		}
+
+		const exec = await this.executeQuery(
+			() =>
+				query.execute() as Promise<
+					Array<{
+						document_id: number;
+						document_version_id: number;
+						type: string;
+					}>
+				>,
+			{
+				method: "selectRelationReferenceVersions",
+				tableName: dynamicConfig.tableName,
+			},
+		);
+		if (exec.response.error) return exec.response;
+
+		return this.validateResponse(exec, { mode: "multiple" });
+	}
 	/** Remove relation rows and return the documents whose content changed. */
 	async deleteRelationReferences(
-		props: { collectionKey: string; documentId?: number },
+		props: {
+			collectionKey: string;
+			documentIds?: number[];
+			versionIds: number[];
+		},
 		dynamicConfig: DynamicConfig<LucidBrickTableName>,
 	) {
 		let query = this.db
 			.deleteFrom(dynamicConfig.tableName)
+			.where("document_version_id", "in", props.versionIds)
 			.where(
 				prefixGeneratedColName("collection_key"),
 				"=",
 				props.collectionKey,
 			);
-		if (props.documentId !== undefined) {
+		if (props.documentIds !== undefined) {
 			query = query.where(
 				prefixGeneratedColName("document_id"),
-				"=",
-				props.documentId,
+				"in",
+				props.documentIds,
 			);
 		}
 		const result = await this.executeQuery(
-			() => query.returning("document_id").execute(),
+			() => query.returning(["document_id", "document_version_id"]).execute(),
 			{
 				method: "deleteRelationReferences",
 				tableName: dynamicConfig.tableName,
@@ -189,7 +254,7 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 		return this.validateResponse(result, {
 			enabled: true,
 			mode: "multiple",
-			select: ["document_id"],
+			select: ["document_id", "document_version_id"],
 		});
 	}
 }

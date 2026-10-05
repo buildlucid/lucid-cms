@@ -12,6 +12,7 @@ import {
 	FaSolidEyeSlash,
 	FaSolidLanguage,
 	FaSolidRotate,
+	FaSolidTableColumns,
 } from "solid-icons/fa";
 import type { Accessor } from "solid-js";
 import { type Component, createMemo, onCleanup, onMount, Show } from "solid-js";
@@ -19,6 +20,7 @@ import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Breadcrumbs/Bread
 import Button from "@/components/Button/Button";
 import ContentLocaleSelect from "@/components/ContentLocaleSelect/ContentLocaleSelect";
 import DateText from "@/components/DateText/DateText";
+import { Permissions } from "@/constants/permissions";
 import type { UseDocumentAutoSave } from "@/hooks/useDocumentAutoSave/useDocumentAutoSave";
 import { useDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
@@ -29,7 +31,8 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getDocumentEnvironmentStatus } from "@/utils/document-environment-status";
 import helpers from "@/utils/helpers";
-import { getDocumentRoute } from "@/utils/route-helpers";
+import { getDocumentProposals } from "@/utils/releases";
+import { getDocumentRoute, getReleaseRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import { AutoSaveStatusPill } from "./parts/AutoSaveStatusPill";
 import { DocumentActions } from "./parts/DocumentActions";
@@ -50,6 +53,10 @@ export const PageBuilderHeader: Component<{
 	version?: Accessor<"latest" | string>;
 	versionId?: Accessor<number | undefined>;
 	trailingBreadcrumbs?: Accessor<Array<HeaderBreadcrumb> | undefined>;
+	/** Toggles the side-by-side view. Left out where it isn't available. */
+	comparison?: { open: Accessor<boolean>; toggle: () => void };
+	/** The release that owns the proposal being edited. */
+	releaseLink?: string;
 	currentViewLabel?: Accessor<string | undefined>;
 	state: {
 		collection: Accessor<Collection | undefined>;
@@ -72,7 +79,11 @@ export const PageBuilderHeader: Component<{
 		publishDocumentAction?: UseDocumentMutations["publishDocumentAction"];
 		restoreRevisionAction?: UseDocumentMutations["restoreRevisionAction"];
 		togglePreview?: () => void;
-		beforeVersionChange?: () => Promise<void>;
+		beforeVersionChange?: (
+			option: ViewSelectorOption,
+		) => Promise<string | null>;
+		/** Opens the align modal. Left out when the document has nothing to align with. */
+		requestAlignment?: () => void;
 	};
 }> = (props) => {
 	// ----------------------------------
@@ -83,6 +94,20 @@ export const PageBuilderHeader: Component<{
 	// -------------------------------
 	// Queries & Mutations
 	const createPreview = api.documents.useCreatePreview();
+	const proposals = api.releases.useGetMultiple({
+		queryParams: {
+			filters: {
+				status: () => "open",
+				collectionKey: props.state.collectionKey,
+				documentId: props.state.documentID,
+			},
+			perPage: 100,
+		},
+		enabled: () =>
+			props.mode === "edit" &&
+			props.state.documentID() !== undefined &&
+			userStore.get.hasPermission([Permissions.ReleasesRead]).all,
+	});
 
 	// ----------------------------------
 	// Memos
@@ -169,6 +194,7 @@ export const PageBuilderHeader: Component<{
 				label: T()("common.status.latest"),
 				disabled: false,
 				type: "latest",
+				compareKey: "latest",
 				location: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
@@ -226,6 +252,7 @@ export const PageBuilderHeader: Component<{
 				label: helpers.getLocaleValue({ value: environment.label }),
 				disabled: !isPublished,
 				type: "environment",
+				compareKey: environment.key,
 				location: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
 					documentId: props.state.documentID(),
@@ -235,6 +262,22 @@ export const PageBuilderHeader: Component<{
 					isPublished: isPublished,
 					upToDate: status === "in-sync",
 				},
+			});
+		}
+
+		for (const { release, document } of getDocumentProposals(
+			proposals.data?.data ?? [],
+			{
+				collectionKey: props.state.collectionKey(),
+				documentId: props.state.documentID(),
+			},
+		)) {
+			options.push({
+				label: T()("releases.proposal.selector", { release: release.title }),
+				type: "proposal",
+				compareKey: `proposal:${release.id}`,
+				disabled: false,
+				location: getReleaseRoute({ releaseId: release.id, content: document }),
 			});
 		}
 
@@ -257,6 +300,7 @@ export const PageBuilderHeader: Component<{
 		const collection = props.state.collection();
 		const document = props.state.document();
 		if (
+			props.currentViewLabel?.() !== undefined ||
 			props.mode !== "edit" ||
 			!collection ||
 			!document ||
@@ -279,7 +323,7 @@ export const PageBuilderHeader: Component<{
 			]),
 		);
 
-		return environments.map((environment) => {
+		const options: ReleaseTriggerOption[] = environments.map((environment) => {
 			const label = environmentLabels.get(environment.key) || environment.key;
 
 			const environmentStatus = getDocumentEnvironmentStatus({
@@ -289,30 +333,22 @@ export const PageBuilderHeader: Component<{
 			});
 			const isPromoted = environmentStatus === "in-sync";
 
-			const publishRequestTargetEnabled =
+			const reviewRequired =
 				publishReview?.requiredFor.includes(environment.key) === true;
 
-			const action: ReleaseTriggerOption["action"] = publishRequestTargetEnabled
-				? "request"
-				: "publish";
-
-			const permission = userStore.get.hasPermission([
+			//* starting a release only needs edit access, approving and releasing are checked later
+			const canPublish = userStore.get.hasPermission([
 				environment.permissions.publish,
+			]).all;
+			const canCompose = userStore.get.hasPermission([
+				Permissions.ReleasesRead,
+				collection.permissions.update,
 			]).all;
 
 			const workflowAllowsTarget =
 				!workflow ||
 				workflowStage?.publishTargets.includes(environment.key) === true;
 
-			const workflowStageLabel =
-				helpers.getLocaleValue({
-					value: workflowStage?.label,
-					fallback: document.workflow?.stage,
-				}) ||
-				document.workflow?.stage ||
-				T()("documents.workflow.no.stage");
-
-			const workflowDisabled = !workflowAllowsTarget;
 			const latestContentId = versionContentId("latest");
 			const unmetReleaseRequirementLabels =
 				latestContentId === undefined
@@ -326,8 +362,16 @@ export const PageBuilderHeader: Component<{
 								(requiredTarget) =>
 									environmentLabels.get(requiredTarget) || requiredTarget,
 							);
-			const releaseRequirementsDisabled =
-				unmetReleaseRequirementLabels.length > 0;
+			//* anything stopping a direct publish sends the document to a release instead, which
+			//* can include the required targets and shows the workflow stage to move on
+			const action: ReleaseTriggerOption["action"] =
+				reviewRequired ||
+				!canPublish ||
+				!workflowAllowsTarget ||
+				unmetReleaseRequirementLabels.length > 0
+					? "compose"
+					: "publish";
+			const permission = action === "compose" ? canCompose : canPublish;
 
 			let disabledToast: ReleaseTriggerOption["disabledToast"];
 			if (isPromoted) {
@@ -344,22 +388,6 @@ export const PageBuilderHeader: Component<{
 						environment: label,
 					}),
 				};
-			} else if (workflowDisabled) {
-				disabledToast = {
-					title: T()("toasts.common.workflow.release.disabled.title"),
-					message: T()("toasts.common.workflow.release.disabled.message", {
-						stage: workflowStageLabel,
-						environment: label.toLowerCase(),
-					}),
-				};
-			} else if (releaseRequirementsDisabled) {
-				disabledToast = {
-					title: T()("toasts.release.requires.disabled.title"),
-					message: T()("toasts.release.requires.disabled.message", {
-						environment: label,
-						required: unmetReleaseRequirementLabels.join(", "),
-					}),
-				};
 			} else if (
 				props.state.ui.isSaving?.() ||
 				props.state.ui.isAutoSaving?.()
@@ -370,10 +398,10 @@ export const PageBuilderHeader: Component<{
 						environment: label,
 					}),
 				};
-			} else if (props.state.ui.isCreatingPublishOperation?.()) {
+			} else if (props.state.ui.isPublishing?.()) {
 				disabledToast = {
-					title: T()("toasts.release.requesting.disabled.title"),
-					message: T()("toasts.release.requesting.disabled.message", {
+					title: T()("toasts.release.publishing.disabled.title"),
+					message: T()("toasts.release.publishing.disabled.message", {
 						environment: label,
 					}),
 				};
@@ -395,7 +423,7 @@ export const PageBuilderHeader: Component<{
 
 			return {
 				label,
-				value: environment.key as ReleaseTriggerOption["value"],
+				value: environment.key,
 				action,
 				route: getDocumentRoute("edit", {
 					collectionKey: props.state.collectionKey(),
@@ -410,6 +438,8 @@ export const PageBuilderHeader: Component<{
 				},
 			};
 		});
+
+		return options;
 	});
 	const currentEnvironmentReleaseOption = createMemo(() => {
 		const version = props.version?.();
@@ -430,14 +460,19 @@ export const PageBuilderHeader: Component<{
 
 		return (
 			props.mode !== "create" &&
-			(collection.revisions.enabled ||
+			(props.currentViewLabel?.() !== undefined ||
+				(proposals.data?.data.length ?? 0) > 0 ||
+				collection.revisions.enabled ||
 				environments.length > 0 ||
 				(collection.publishing.review?.requiredFor?.length ?? 0) > 0)
 		);
 	});
 	const showCopyPreview = createMemo(() => {
 		const version = props.version?.() ?? "latest";
-		const requiresVersionId = version === "revision" || version === "snapshot";
+		const requiresVersionId =
+			version === "revision" ||
+			version === "snapshot" ||
+			version === "proposal";
 
 		return (
 			props.mode === "edit" &&
@@ -449,7 +484,9 @@ export const PageBuilderHeader: Component<{
 	});
 	const scopedPreviewOnly = createMemo(() => {
 		const version = props.version?.() ?? "latest";
-		return version === "revision" || version === "snapshot";
+		return (
+			version === "revision" || version === "snapshot" || version === "proposal"
+		);
 	});
 	const hasPreviewPermission = createMemo(() => {
 		const permission = props.state.collection()?.permissions.read;
@@ -590,6 +627,27 @@ export const PageBuilderHeader: Component<{
 									<FaSolidRotate size={12} />
 								</button>
 							</Show>
+							<Show when={props.comparison}>
+								{(comparison) => (
+									<button
+										type="button"
+										onClick={() => comparison().toggle()}
+										aria-pressed={comparison().open()}
+										class={classNames(
+											"flex items-center justify-center w-6 h-6 rounded transition-colors",
+											{
+												"text-primary hover:text-primary-hover":
+													comparison().open(),
+												"text-body/40 hover:text-body": !comparison().open(),
+											},
+										)}
+										title={T()("documents.compare.action")}
+										aria-label={T()("documents.compare.action")}
+									>
+										<FaSolidTableColumns size={12} />
+									</button>
+								)}
+							</Show>
 						</div>
 					</Show>
 				</div>
@@ -611,7 +669,7 @@ export const PageBuilderHeader: Component<{
 							</Show>
 							<Show when={props.mode !== "create" && !showViewSelector()}>
 								<h2 class="text-base font-medium text-title">
-									{props.state.collectionName()}
+									{props.currentViewLabel?.() || props.state.collectionName()}
 								</h2>
 							</Show>
 							<Show when={showViewSelector()}>
@@ -621,6 +679,7 @@ export const PageBuilderHeader: Component<{
 									isDocumentMutated={props.state.isDocumentMutated}
 									currentViewLabel={props.currentViewLabel}
 									onBeforeVersionChange={props.actions.beforeVersionChange}
+									comparing={() => props.comparison?.open() === true}
 								/>
 							</Show>
 						</div>
@@ -680,7 +739,7 @@ export const PageBuilderHeader: Component<{
 											"cursor-not-allowed opacity-80":
 												option().disabled === true,
 										})}
-										loading={props.state.ui.isCreatingPublishOperation?.()}
+										loading={props.state.ui.isPublishing?.()}
 										onClick={() => openReleaseOption(option())}
 									>
 										{T()("documents.release.update.environment", {
@@ -726,7 +785,7 @@ export const PageBuilderHeader: Component<{
 									loading={
 										props.state.ui.isSaving?.() ||
 										props.state.ui.isAutoSaving?.() ||
-										props.state.ui.isCreatingPublishOperation?.()
+										props.state.ui.isPublishing?.()
 									}
 								/>
 							</Show>
@@ -750,11 +809,14 @@ export const PageBuilderHeader: Component<{
 								when={
 									props.state.ui.showDeleteButton?.() ||
 									props.state.ui.showDuplicateButton?.() ||
+									props.actions.requestAlignment !== undefined ||
+									props.releaseLink !== undefined ||
 									showCopyPreview()
 								}
 							>
 								<DocumentActions
 									collectionSingularName={actionCollectionSingularName()}
+									releaseLink={props.releaseLink}
 									duplicate={
 										props.state.ui.showDuplicateButton?.()
 											? {
@@ -762,6 +824,19 @@ export const PageBuilderHeader: Component<{
 														props.state.ui.setDuplicateOpen(true),
 													permission: props.state.ui.hasDuplicatePermission(),
 													disabled: props.state.ui.duplicateDisabled(),
+												}
+											: undefined
+									}
+									align={
+										props.actions.requestAlignment
+											? {
+													onAlign: props.actions.requestAlignment,
+													permission: props.state.ui.hasSavePermission(),
+													disabled:
+														props.state.ui.isSaving() ||
+														props.state.ui.isAutoSaving() ||
+														props.state.autoSave?.isDraftCheckPending() ===
+															true,
 												}
 											: undefined
 									}

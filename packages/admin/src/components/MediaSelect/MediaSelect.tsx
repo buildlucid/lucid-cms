@@ -18,7 +18,7 @@ import { FormLabel } from "@/components/FormLabel/FormLabel";
 import MediaPreview from "@/components/MediaPreview/MediaPreview";
 import Pill from "@/components/Pill/Pill";
 import RelationCount from "@/components/RelationCount/RelationCount";
-import brickStore from "@/store/brickStore/brickStore";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import pageBuilderModalsStore, {
 	type MediaDimensionValidation,
@@ -500,6 +500,12 @@ const MediaSortableItem: Component<{
 	dragDrop: DragDropCBT;
 	disabled?: boolean;
 }> = (props) => {
+	// ----------------------------------------
+	// State & Hooks
+	const brickStore = useBrickStore();
+
+	// ----------------------------------------
+	// Render
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: native draggable container
 		<div

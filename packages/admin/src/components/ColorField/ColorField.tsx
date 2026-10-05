@@ -2,8 +2,8 @@ import type { FieldError, InternalDocumentField } from "@types";
 import { type Component, createMemo } from "solid-js";
 import ColorPicker from "@/components/ColorPicker/ColorPicker";
 import { FieldLabelMarkers } from "@/components/FieldLabelMarkers/FieldLabelMarkers";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import helpers from "@/utils/helpers";
@@ -24,6 +24,7 @@ interface ColorFieldProps {
 export const ColorField: Component<ColorFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 
 	// -------------------------------
@@ -48,6 +49,7 @@ export const ColorField: Component<ColorFieldProps> = (props) => {
 		<div>
 			<ColorPicker
 				id={brickHelpers.customFieldId({
+					scope: brickStore.idPrefix,
 					key: props.state.fieldConfig.key,
 					brickIndex: fieldRenderState.brickIndex(),
 					groupRef: props.state.groupRef,

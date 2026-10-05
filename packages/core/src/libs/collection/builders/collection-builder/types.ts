@@ -114,14 +114,9 @@ export type CollectionPreviewConfig<
 	TCollectionKey extends string = CollectionDocumentKey,
 > = boolean | CollectionPreviewOptions<TCollectionKey>;
 
-export type PublishingReviewCommentRequirement = "required" | "optional";
 export type PublishingReviewConfig = {
 	requiredFor: string[];
 	allowSelfApproval: boolean;
-	comments: {
-		request: PublishingReviewCommentRequirement;
-		decision: PublishingReviewCommentRequirement;
-	};
 };
 export type PublishingWorkflowStageColor =
 	| "grey"
@@ -155,19 +150,12 @@ export type CollectionRevisionOptions = {
 export type CollectionPublishingOptions = {
 	/** Allow scheduled publishing. Defaults to false. */
 	scheduling?: boolean;
-	/** Require approval for selected publishing targets. */
+	/** Require an approved release for selected publishing targets. */
 	review?: {
-		/** Publishing target keys that need review before publishing. */
+		/** Publishing target keys that can only be published through an approved release. */
 		requiredFor?: string[];
-		/** Allow the requester to approve their own request. Defaults to false. */
+		/** Allow the release creator to approve their own release. Defaults to false. */
 		allowSelfApproval?: boolean;
-		/** Choose whether reviewers and requesters must leave a comment. */
-		comments?: {
-			/** Comment requirement when requesting review. Defaults to required. */
-			request?: PublishingReviewCommentRequirement;
-			/** Comment requirement when approving or rejecting review. Defaults to optional. */
-			decision?: PublishingReviewCommentRequirement;
-		};
 	};
 	/** Editorial stages through which documents can move. */
 	workflow?: {

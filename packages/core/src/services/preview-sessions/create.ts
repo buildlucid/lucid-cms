@@ -19,6 +19,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import getContentDocument from "../documents/content/get-single.js";
 import validateContentVersionTarget from "../documents/helpers/validate-content-version-target.js";
+import checkReleaseVersionAccess from "../releases/helpers/check-release-version-access.js";
 import resolvePreviewMode, {
 	requiresPinnedPreviewVersion,
 } from "./helpers/resolve-preview-mode.js";
@@ -49,6 +50,22 @@ const create: ServiceFn<
 	});
 	if (modeRes.error) return modeRes;
 
+	if (
+		versionTargetRes.data.versionId !== undefined &&
+		(data.versionType ===
+			constants.collectionBuilder.publishing.proposalVersionType ||
+			data.versionType ===
+				constants.collectionBuilder.publishing.snapshotVersionType)
+	) {
+		const accessRes = await checkReleaseVersionAccess(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			versionId: versionTargetRes.data.versionId,
+			user: data.creator,
+		});
+		if (accessRes.error) return accessRes;
+	}
+
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
@@ -70,6 +87,7 @@ const create: ServiceFn<
 		collectionKey: data.collectionKey,
 		versionType: data.versionType,
 		versionId: versionTargetRes.data.versionId,
+		includeReleaseVersions: true,
 		query: {
 			filter: { id: { value: data.documentId } },
 			include: ["bricks", "refs", "meta"],

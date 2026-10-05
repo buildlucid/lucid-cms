@@ -86,8 +86,8 @@ const SystemJobsRoute = lazyPage(
 const EmailListRoute = lazyPage(
 	() => import("@/containers/EmailsPage/EmailsPage"),
 );
-const ReleaseRequestsListRoute = lazyPage(
-	() => import("@/containers/ReleaseRequestsPage/ReleaseRequestsPage"),
+const ReleasesListRoute = lazyPage(
+	() => import("@/containers/ReleasesPage/ReleasesPage"),
 );
 const PublishingOverviewRoute = lazyPage(
 	() => import("@/containers/PublishingOverviewPage/PublishingOverviewPage"),
@@ -107,9 +107,11 @@ const CollectionDocumentPageBuilderRoute = lazyPage(
 const CollectionsDocumentsHistoryRoute = lazyPage(
 	() => import("@/containers/DocumentHistoryPage/DocumentHistoryPage"),
 );
-const CollectionsDocumentsReleaseRequestDetailRoute = lazyPage(
-	() =>
-		import("@/containers/ReleaseRequestDetailPage/ReleaseRequestDetailPage"),
+const ReleaseRoute = lazyPage(
+	() => import("@/containers/ReleasePage/ReleasePage"),
+);
+const ReleaseProposalRoute = lazyPage(
+	() => import("@/containers/ReleaseContentPage/ReleaseContentPage"),
 );
 
 const preloadRoutes =
@@ -196,17 +198,6 @@ const AppRouter: Component = () => {
 						preload={preloadRoutes(CollectionsDocumentsHistoryRoute)}
 						component={() => <CollectionsDocumentsHistoryRoute />}
 					/>
-					<Route
-						path="/collections/:collectionKey/:documentId/release-requests/:releaseRequestId"
-						preload={preloadRoutes(
-							CollectionsDocumentsReleaseRequestDetailRoute,
-						)}
-						component={() => (
-							<PermissionGuard permission={Permissions.PublishOperationsRead}>
-								<CollectionsDocumentsReleaseRequestDetailRoute />
-							</PermissionGuard>
-						)}
-					/>
 					{/* Media */}
 					<Route
 						path="/media"
@@ -260,17 +251,35 @@ const AppRouter: Component = () => {
 						path="/publishing"
 						preload={preloadRoutes(PublishingOverviewRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.PublishOperationsRead}>
+							<PermissionGuard permission={Permissions.ReleasesRead}>
 								<PublishingOverviewRoute />
 							</PermissionGuard>
 						)}
 					/>
 					<Route
-						path="/publishing/requests"
-						preload={preloadRoutes(ReleaseRequestsListRoute)}
+						path="/releases"
+						preload={preloadRoutes(ReleasesListRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.PublishOperationsRead}>
-								<ReleaseRequestsListRoute />
+							<PermissionGuard permission={Permissions.ReleasesRead}>
+								<ReleasesListRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/releases/:releaseId"
+						preload={preloadRoutes(ReleaseRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.ReleasesRead}>
+								<ReleaseRoute />
+							</PermissionGuard>
+						)}
+					/>
+					<Route
+						path="/releases/:releaseId/content/:collectionKey/:documentId"
+						preload={preloadRoutes(ReleaseProposalRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.ReleasesRead}>
+								<ReleaseProposalRoute />
 							</PermissionGuard>
 						)}
 					/>

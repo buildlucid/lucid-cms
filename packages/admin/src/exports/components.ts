@@ -258,3 +258,7 @@ export {
 	type UserDisplayVariant,
 	type UserNameFormat,
 } from "../components/UserDisplay/UserDisplay.js";
+export {
+	default as ViewAllLink,
+	type ViewAllLinkProps,
+} from "../components/ViewAllLink/ViewAllLink.js";

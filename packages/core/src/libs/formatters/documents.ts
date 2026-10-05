@@ -1,3 +1,4 @@
+import constants from "../../constants/constants.js";
 import type {
 	CollectionDocument,
 	DocumentWorkflow,
@@ -123,6 +124,7 @@ const formatSingle = (props: {
 		collectionKey: props.document.collection_key,
 		version: props.document.version_type ?? null,
 		versionId: props.document.version_id ?? null,
+		contentId: props.document.version_content_id ?? null,
 		route: formatDocumentRoute({
 			collection: props.collection,
 			documentId: props.document.id,
@@ -136,13 +138,17 @@ const formatSingle = (props: {
 		bricks: props.bricks ?? null,
 		fields: props.fields ?? null,
 		workflow:
-			props.workflow !== undefined
-				? props.workflow
-				: (inlineWorkflow ??
-					documentWorkflowsFormatter.formatSummary({
-						collection: props.collection,
-						stageKey: props.document.workflow_stage_key,
-					})),
+			props.document.version_type !== "latest" &&
+			props.document.version_type !==
+				constants.collectionBuilder.publishing.proposalVersionType
+				? null
+				: props.workflow !== undefined
+					? props.workflow
+					: (inlineWorkflow ??
+						documentWorkflowsFormatter.formatSummary({
+							collection: props.collection,
+							stageKey: props.document.workflow_stage_key,
+						})),
 		isDeleted: formatter.formatBoolean(props.document.is_deleted),
 		createdBy: props.document.created_by ?? null,
 		updatedBy: props.document.updated_by ?? null,

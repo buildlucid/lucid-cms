@@ -21,7 +21,6 @@ describe("draft validation after reverting edits", () => {
 			},
 		]);
 		brickStore.get.captureInitialSnapshot();
-		brickStore.set("skipAutoSave", false);
 	});
 	afterEach(() => {
 		dispose();
@@ -97,5 +96,63 @@ describe("draft validation after reverting edits", () => {
 		expect(save).not.toHaveBeenCalled();
 		await vi.advanceTimersByTimeAsync(1000);
 		expect(check).toHaveBeenCalledTimes(2);
+	});
+	it("pauses an in-flight validation during alignment and resumes autosave when cancelled", async () => {
+		const response = {
+			data: { fields: [], bricks: [] },
+			meta: {
+				links: [],
+				path: "",
+				currentPage: null,
+				lastPage: null,
+				perPage: null,
+				total: null,
+			},
+		};
+		let complete: (() => void) | undefined;
+		const check = vi
+			.fn<
+				AutoSaveProps["checkSingleVersionMutation"]["action"]["mutateAsync"]
+			>()
+			.mockImplementationOnce(
+				() =>
+					new Promise((resolve) => {
+						complete = () => resolve(response);
+					}),
+			)
+			.mockResolvedValue(response);
+		const save =
+			vi.fn<AutoSaveProps["updateSingleVersionMutation"]["action"]["mutate"]>();
+		createRoot((cleanup) => {
+			dispose = cleanup;
+			useDocumentAutoSave({
+				checkSingleVersionMutation: {
+					action: { isPending: false, mutateAsync: check },
+				},
+				updateSingleVersionMutation: {
+					action: { isPending: false, mutate: save },
+				},
+				collection: () => ({ key: "page" }),
+				document: () => ({ id: 1, versionId: 1 }),
+				hasDraftSyncPermission: () => true,
+				autoSaveActive: () => true,
+			});
+		});
+		brickStore.get.addRepeaterGroup({
+			brickIndex: 0,
+			key: "metadata",
+			fieldConfig: [],
+			locales: [],
+		});
+		await vi.advanceTimersByTimeAsync(1000);
+		expect(check).toHaveBeenCalledTimes(1);
+		brickStore.set("autoSavePaused", true);
+		if (!complete) throw new Error("Expected draft validation to start");
+		complete();
+		await vi.advanceTimersByTimeAsync(0);
+		expect(save).not.toHaveBeenCalled();
+		brickStore.set("autoSavePaused", false);
+		await vi.advanceTimersByTimeAsync(1000);
+		expect(save).toHaveBeenCalledTimes(1);
 	});
 });

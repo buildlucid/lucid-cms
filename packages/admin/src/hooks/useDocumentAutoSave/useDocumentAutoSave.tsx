@@ -1,8 +1,8 @@
 import { debounce } from "@solid-primitives/scheduled";
 import type { Collection, InternalCollectionDocument } from "@types";
 import { type Accessor, createEffect, createSignal, onCleanup } from "solid-js";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type api from "@/services/api";
-import brickStore from "@/store/brickStore/brickStore";
 import brickHelpers from "@/utils/brick-helpers";
 
 const AUTO_SAVE_DEBOUNCE_MS = 800;
@@ -27,6 +27,7 @@ export function useDocumentAutoSave(props: {
 	hasDraftSyncPermission: Accessor<boolean | undefined>;
 	autoSaveActive: Accessor<boolean | undefined>;
 }) {
+	const brickStore = useBrickStore();
 	let debounceProgressRaf: number | undefined;
 	let debounceProgressStart = 0;
 	let lastAttemptedDraftCounter = 0;
@@ -92,7 +93,11 @@ export function useDocumentAutoSave(props: {
 			return false;
 		}
 
-		return brickStore.get.autoSaveCounter === params.requestCounter;
+		return (
+			brickStore.get.autoSaveCounter === params.requestCounter &&
+			props.document()?.id === params.documentId &&
+			props.document()?.versionId === params.versionId
+		);
 	};
 
 	const rawDebouncedDraftSync = debounce(async () => {
@@ -118,6 +123,10 @@ export function useDocumentAutoSave(props: {
 			requestCounter,
 		});
 		if (!draftCheckIsCurrent) return;
+		if (brickStore.get.autoSavePaused) {
+			lastAttemptedDraftCounter = 0;
+			return;
+		}
 
 		if (shouldAutoSave && brickStore.getDocumentMutated()) {
 			props.updateSingleVersionMutation.action.mutate({
@@ -176,11 +185,6 @@ export function useDocumentAutoSave(props: {
 			return;
 		}
 		if (!props.hasDraftSyncPermission()) return;
-
-		if (brickStore.get.skipAutoSave) {
-			brickStore.set("skipAutoSave", false);
-			return;
-		}
 
 		debouncedAutoSave();
 	});

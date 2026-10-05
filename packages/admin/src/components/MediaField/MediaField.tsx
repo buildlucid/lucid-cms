@@ -7,8 +7,8 @@ import {
 	createSignal,
 } from "solid-js";
 import { MediaSelect } from "@/components/MediaSelect/MediaSelect";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import brickHelpers from "@/utils/brick-helpers";
 import { getChangedItemErrorStartIndex } from "@/utils/field-error-helpers";
@@ -31,6 +31,7 @@ interface MediaFieldProps {
 export const MediaField: Component<MediaFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const [getValue, setValue] = createSignal<number[] | undefined>();
 	const fieldRenderState = useFieldRenderState();
 
@@ -48,6 +49,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	});
 	const fieldRef = createMemo(() => {
 		return brickHelpers.getFieldRefs({
+			refs: brickStore.get.refs,
 			resource: props.state.fieldConfig.resource,
 			fieldValue: fieldValue(),
 		});
@@ -70,6 +72,7 @@ export const MediaField: Component<MediaFieldProps> = (props) => {
 	return (
 		<MediaSelect
 			id={brickHelpers.customFieldId({
+				scope: brickStore.idPrefix,
 				key: props.state.fieldConfig.key,
 				brickIndex: fieldRenderState.brickIndex(),
 				groupRef: props.state.groupRef,

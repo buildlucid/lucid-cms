@@ -53,7 +53,7 @@ export const NavigationMenuContent: Component<{
 	// Memos
 	const permissions = createMemo(() => {
 		const settings = can(Permissions.SettingsRead);
-		const publishOperations = can(Permissions.PublishOperationsRead);
+		const releases = can(Permissions.ReleasesRead);
 		const collectionList = collections.data?.data ?? [];
 
 		return {
@@ -68,19 +68,13 @@ export const NavigationMenuContent: Component<{
 			aiUsage: settings && siteStore.get.hasAnyAiFeatureEnabled(),
 			agent: getAgentAccess().all.length > 0,
 			publishingOverview:
-				publishOperations &&
+				releases &&
 				collectionList.some(
 					(collection) =>
 						collection.publishing.targets.length > 0 &&
 						userStore.get.hasPermission([collection.permissions.read]).all,
 				),
-			publishRequests:
-				publishOperations &&
-				collectionList.some(
-					(collection) =>
-						(collection.publishing.review?.requiredFor?.length ?? 0) > 0 &&
-						userStore.get.hasPermission([collection.permissions.review]).all,
-				),
+			releases,
 		};
 	});
 	const visibleCollections = createMemo(() => {
@@ -186,14 +180,14 @@ export const NavigationMenuContent: Component<{
 					</Show>
 
 					<Show
-						when={
-							permissions().publishingOverview || permissions().publishRequests
-						}
+						when={permissions().publishingOverview || permissions().releases}
 					>
 						<NavigationSection
 							id="lucid:publishing"
 							title={T()("common.publishing")}
-							active={isActive("/lucid/publishing")}
+							active={
+								isActive("/lucid/publishing") || isActive("/lucid/releases")
+							}
 						>
 							<NavigationLink
 								href="/lucid/publishing"
@@ -203,10 +197,10 @@ export const NavigationMenuContent: Component<{
 								permission={permissions().publishingOverview}
 							/>
 							<NavigationLink
-								href="/lucid/publishing/requests"
-								icon="release-requests"
-								title={T()("publish.requests.list.title")}
-								permission={permissions().publishRequests}
+								href="/lucid/releases"
+								icon="releases"
+								title={T()("releases.title")}
+								permission={permissions().releases}
 							/>
 						</NavigationSection>
 					</Show>

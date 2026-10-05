@@ -1,7 +1,6 @@
 import type { ServiceFn } from "../../exports/types.js";
 import type { DocumentEditToken } from "../../libs/toolkit/documents/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
-import cancelPublishOperationsForDocuments from "../document-publish-operations/cancel-for-documents.js";
 import removeTarget from "../document-references/remove-target.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import beginSingleDeletion from "./helpers/begin-single-deletion.js";
@@ -46,22 +45,12 @@ const deleteSinglePermanently: ServiceFn<
 
 			const { collection, tableNames } = beginRes.data;
 
-			const [deleteDocumentRes, cancelRequestsRes] = await Promise.all([
-				deleteDocumentRecords(context, {
-					collectionKey: data.collectionKey,
-					documentIds: [data.id],
-					tableName: tableNames.document,
-				}),
-				cancelPublishOperationsForDocuments(context, {
-					collectionKey: data.collectionKey,
-					documentIds: [data.id],
-					comment: context.translate(
-						"server:core.documents.permanently.deleted.publish.request.comment",
-					),
-				}),
-			]);
-			if (deleteDocumentRes.error) return deleteDocumentRes;
-			if (cancelRequestsRes.error) return cancelRequestsRes;
+			const deleted = await deleteDocumentRecords(context, {
+				collectionKey: data.collectionKey,
+				documentIds: [data.id],
+				tableName: tableNames.document,
+			});
+			if (deleted.error) return deleted;
 
 			const hookAfterRes = await executeDeleteHook(context, {
 				event: "afterDelete",

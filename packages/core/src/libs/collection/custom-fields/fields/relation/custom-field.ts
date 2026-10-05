@@ -111,14 +111,7 @@ class RelationCustomField extends CustomField<"relation"> {
 						nullable: false,
 					},
 				],
-				foreignKeys: [
-					{
-						columns: ["collection_key", "document_id"],
-						table: "lucid_document_identities",
-						references: ["collection_key", "document_id"],
-						onDelete: "cascade",
-					},
-				],
+				foreignKeys: [],
 			},
 			error: undefined,
 		};

@@ -5,35 +5,36 @@ import DashboardCard from "@/components/DashboardCard/DashboardCard";
 import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import api from "@/services/api";
 import T from "@/translations";
+import { releaseListRoutes } from "@/utils/releases";
 
 const PublishingWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Queries
-	const overview = api.publishOperations.useGetOverview({ queryParams: {} });
+	const overview = api.releases.useGetOverview({ queryParams: {} });
 
 	// ----------------------------------------
 	// Memos
 	const stats = createMemo(() => [
 		{
 			key: "pending",
-			label: T()("common.pending.review"),
-			value: overview.data?.data.pending,
+			label: T()("releases.state.pending"),
+			value: overview.data?.data.awaitingApproval,
 			dot: "bg-warning",
-			href: "/lucid/publishing/requests?filter[status]=pending",
+			href: releaseListRoutes.pending,
 		},
 		{
 			key: "scheduled",
 			label: T()("common.status.scheduled"),
 			value: overview.data?.data.scheduled,
 			dot: "bg-purple",
-			href: "/lucid/publishing/requests?filter[executionStatus]=scheduled",
+			href: releaseListRoutes.scheduled,
 		},
 		{
 			key: "failed",
 			label: T()("common.status.failed"),
 			value: overview.data?.data.failed,
 			dot: "bg-danger",
-			href: "/lucid/publishing/requests?filter[executionStatus]=failed",
+			href: releaseListRoutes.failed,
 		},
 	]);
 
@@ -42,7 +43,7 @@ const PublishingWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	return (
 		<DashboardCard
 			title={T()("home.widget.publishing.label")}
-			href="/lucid/publishing/requests"
+			href="/lucid/releases"
 			padding="md"
 		>
 			<ul class="grid grid-cols-1 gap-2 @lg:grid-cols-3">

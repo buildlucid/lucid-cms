@@ -10,7 +10,7 @@ export const alertsTable = defineTable("lucid_alerts", () => ({
 			type: "primary",
 		},
 		type: {
-			schema: z.enum(["storage", "publish-request"]),
+			schema: z.enum(["storage"]),
 			type: "text",
 		},
 		level: {
@@ -44,7 +44,7 @@ export const alertsTable = defineTable("lucid_alerts", () => ({
 	},
 }));
 
-export type AlertType = "storage" | "publish-request";
+export type AlertType = "storage";
 
 export type AlertLevel = "info" | "warning" | "error" | "critical";
 

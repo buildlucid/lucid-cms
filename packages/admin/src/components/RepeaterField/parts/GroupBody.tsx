@@ -15,8 +15,8 @@ import DeleteDebounceButton from "@/components/DeleteDebounceButton/DeleteDeboun
 import type { DragDropCBT } from "@/components/DragDrop/DragDrop";
 import { FieldErrorBadge } from "@/components/FieldErrorBadge/FieldErrorBadge";
 import Pill from "@/components/Pill/Pill";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
-import brickStore from "@/store/brickStore/brickStore";
 import T from "@/translations/index";
 import type { CollectionFieldConfigByType } from "@/types/collection-config";
 import type { DynamicFieldRenderer } from "@/types/custom-fields";
@@ -50,6 +50,7 @@ interface GroupBodyProps {
 export const GroupBody: Component<GroupBodyProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const fieldRenderState = useFieldRenderState();
 	const [childrenMounted, setChildrenMounted] = createSignal(
 		props.group()?.open === true,

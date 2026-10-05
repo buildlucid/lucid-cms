@@ -20,10 +20,10 @@ import {
 } from "@/components/RichText/helpers";
 import type { RichTextOptions } from "@/components/RichText/types";
 import { Permissions } from "@/constants/permissions";
+import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import useCustomFieldGeneration from "@/hooks/useCustomFieldGeneration/useCustomFieldGeneration";
 import { useFieldRenderState } from "@/hooks/useFieldRenderState/useFieldRenderState";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
-import brickStore from "@/store/brickStore/brickStore";
 import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderModalsStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
@@ -51,6 +51,7 @@ interface RichTextFieldProps {
 export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	// -------------------------------
 	// State & Hooks
+	const brickStore = useBrickStore();
 	const customFieldGeneration = useCustomFieldGeneration();
 	const fieldRenderState = useFieldRenderState();
 	const pageBuilderState = usePageBuilderState();
@@ -155,6 +156,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	// Functions
 	const getMediaRef = (id: number): NonNullable<MediaRef> | undefined =>
 		brickHelpers.getFieldRef({
+			refs: brickStore.get.refs,
 			resource: "media",
 			fieldValue: [id],
 		}) ?? undefined;
@@ -169,6 +171,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 
 		return (
 			brickHelpers.getFieldRef({
+				refs: brickStore.get.refs,
 				resource: "documents",
 				fieldValue: [{ collectionKey, id: documentId }],
 			}) ?? undefined
@@ -176,6 +179,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 	};
 	const getUserRef = (userId: number): NonNullable<UserRef> | undefined =>
 		brickHelpers.getFieldRef({
+			refs: brickStore.get.refs,
 			resource: "users",
 			fieldValue: [userId],
 		}) ?? undefined;
@@ -465,6 +469,7 @@ export const RichTextField: Component<RichTextFieldProps> = (props) => {
 		<>
 			<DocumentRichText
 				id={brickHelpers.customFieldId({
+					scope: brickStore.idPrefix,
 					key: props.state.fieldConfig.key,
 					brickIndex: fieldRenderState.brickIndex(),
 					groupRef: props.state.groupRef,
