@@ -235,6 +235,13 @@ export const getBlockerCopy = (
 				title: T()("releases.blocker.scheduling.unavailable.title"),
 				description: T()("releases.blocker.scheduling.unavailable"),
 			};
+		case "check":
+			return {
+				title: target
+					? T()("releases.blocker.check.target.title", { target })
+					: T()("releases.blocker.check.title"),
+				description: blocker.message ?? "",
+			};
 	}
 };
 

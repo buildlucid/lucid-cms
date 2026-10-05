@@ -1,35 +1,28 @@
 import { copy } from "@lucidcms/core";
 import { prefixGeneratedColName } from "@lucidcms/core/extension";
 import type {
-	DocumentVersionType,
 	LucidBrickTableName,
 	LucidVersionTableName,
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
+import type { RouteScope } from "../types/types.js";
 import getCollectionDefaultLocale from "../utils/get-collection-default-locale.js";
 import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
 import resolveInheritedLocaleRows from "../utils/resolve-inherited-locale-rows.js";
-
-export type DescendantFieldsResponse = {
-	document_id: number;
-	document_version_id: number;
-	rows: {
-		locale: string | null;
-		_slug: string | null;
-		_fullSlug: string | null;
-		_parentPage: number | null;
-	}[];
-};
+import { scopeMemberFilter } from "../utils/route-scope.js";
+import type { PageVersionFields } from "./get-pages-fields.js";
 
 /**
- *  Get the descendant document pages fields
+ * Walks down from the given pages through the versions the scope may rewrite,
+ * returning each descendant version's route fields. The walk uses UNION, so a
+ * loop among descendants ends it instead of recursing forever.
  */
 const getDescendantFields: ServiceFn<
 	[
 		{
 			ids: number[];
-			versionType: Exclude<DocumentVersionType, "revision">;
+			scope: RouteScope;
 			collectionKey: string;
 			tables: {
 				documentFields: LucidBrickTableName;
@@ -37,7 +30,7 @@ const getDescendantFields: ServiceFn<
 			};
 		},
 	],
-	Array<DescendantFieldsResponse>
+	Array<PageVersionFields>
 > = async (context, data) => {
 	try {
 		if (data.ids.length === 0) {
@@ -61,10 +54,26 @@ const getDescendantFields: ServiceFn<
 		const parentPageTable = parentPageTableRes.data;
 		const defaultFieldsAlias = "default_fields";
 
-		const descendantsResult = await context.db
-			.query("pages.descendant-fields.find", (db) =>
-				db
-					.withRecursive("recursive_cte", (cte) =>
+		const query = context.db.kysely
+			.withRecursive("recursive_cte", (cte) =>
+				cte
+					.selectFrom(parentPageTable)
+					.innerJoin(
+						versionTable,
+						`${versionTable}.id`,
+						`${parentPageTable}.document_version_id`,
+					)
+					.select([
+						`${versionTable}.document_id as document_id`,
+						`${parentPageTable}.${parentPageColumn} as parent_id`,
+						`${parentPageTable}.document_version_id`,
+					])
+					.where(({ eb }) =>
+						eb(`${parentPageTable}.${parentPageColumn}`, "in", data.ids),
+					)
+					.where(`${parentPageTable}.locale`, "is", null)
+					.where(scopeMemberFilter(versionTable, data.scope))
+					.union(
 						cte
 							.selectFrom(parentPageTable)
 							.innerJoin(
@@ -72,90 +81,74 @@ const getDescendantFields: ServiceFn<
 								`${versionTable}.id`,
 								`${parentPageTable}.document_version_id`,
 							)
+							.innerJoin(
+								"recursive_cte as rc",
+								"rc.document_id",
+								`${parentPageTable}.${parentPageColumn}`,
+							)
 							.select([
 								`${versionTable}.document_id as document_id`,
 								`${parentPageTable}.${parentPageColumn} as parent_id`,
 								`${parentPageTable}.document_version_id`,
 							])
-							.where(({ eb }) =>
-								eb(`${parentPageTable}.${parentPageColumn}`, "in", data.ids),
-							)
 							.where(`${parentPageTable}.locale`, "is", null)
-							.where(`${versionTable}.type`, "=", data.versionType)
-							.unionAll(
-								cte
-									.selectFrom(parentPageTable)
-									.innerJoin(
-										versionTable,
-										`${versionTable}.id`,
-										`${parentPageTable}.document_version_id`,
-									)
-									.innerJoin(
-										"recursive_cte as rc",
-										"rc.document_id",
-										`${parentPageTable}.${parentPageColumn}`,
-									)
-									.select([
-										`${versionTable}.document_id as document_id`,
-										`${parentPageTable}.${parentPageColumn} as parent_id`,
-										`${parentPageTable}.document_version_id`,
-									])
-									.where(`${parentPageTable}.locale`, "is", null)
-									.where(`${versionTable}.type`, "=", data.versionType),
-							),
-					)
-					.selectFrom("recursive_cte")
-					.select((eb) => [
-						"document_id",
-						"document_version_id",
-						context.db.fn
-							.jsonArrayFrom(
-								eb
-									.selectFrom(fieldsTable)
-									.innerJoin(
-										versionTable,
-										`${versionTable}.id`,
+							.where(scopeMemberFilter(versionTable, data.scope)),
+					),
+			)
+			.selectFrom("recursive_cte")
+			.select((eb) => [
+				"document_id",
+				"document_version_id",
+				context.db.fn
+					.jsonArrayFrom(
+						eb
+							.selectFrom(fieldsTable)
+							.innerJoin(
+								versionTable,
+								`${versionTable}.id`,
+								`${fieldsTable}.document_version_id`,
+							)
+							.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
+								join
+									.onRef(
+										`${defaultFieldsAlias}.document_version_id`,
+										"=",
 										`${fieldsTable}.document_version_id`,
 									)
-									.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
-										join
-											.onRef(
-												`${defaultFieldsAlias}.document_version_id`,
-												"=",
-												`${fieldsTable}.document_version_id`,
-											)
-											.on(`${defaultFieldsAlias}.locale`, "is", null),
-									)
-									.leftJoin(parentPageTable, (join) =>
-										join
-											.onRef(
-												`${parentPageTable}.parent_id`,
-												"=",
-												`${defaultFieldsAlias}.id`,
-											)
-											.on(`${parentPageTable}.locale`, "is", null),
-									)
-									// @ts-expect-error
-									.select([
-										`${fieldsTable}.locale`,
-										`${fieldsTable}.${slugColumn} as _slug`,
-										`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
-										`${parentPageTable}.${parentPageColumn} as _parentPage`,
-									])
-									.whereRef(
-										`${versionTable}.document_id`,
-										"=",
-										"recursive_cte.document_id",
-									)
-									.where(`${versionTable}.type`, "=", data.versionType),
+									.on(`${defaultFieldsAlias}.locale`, "is", null),
 							)
-							.as("rows"),
-					])
-					.where(({ eb }) => eb("document_id", "not in", data.ids)),
-			)
+							.leftJoin(parentPageTable, (join) =>
+								join
+									.onRef(
+										`${parentPageTable}.parent_id`,
+										"=",
+										`${defaultFieldsAlias}.id`,
+									)
+									.on(`${parentPageTable}.locale`, "is", null),
+							)
+							// @ts-expect-error
+							.select([
+								`${fieldsTable}.locale`,
+								`${fieldsTable}.${slugColumn} as _slug`,
+								`${fieldsTable}.${fullSlugColumn} as _fullSlug`,
+								`${parentPageTable}.${parentPageColumn} as _parentPage`,
+							])
+							.whereRef(
+								`${versionTable}.document_id`,
+								"=",
+								"recursive_cte.document_id",
+							)
+							.where(scopeMemberFilter(versionTable, data.scope)),
+					)
+					.as("rows"),
+			])
+			.where(({ eb }) => eb("document_id", "not in", data.ids));
+
+		const descendantsResult = await context.db
+			.query("pages.descendant-fields.find", () => query)
 			.many();
 		if (descendantsResult.error) return descendantsResult;
-		const descendants = descendantsResult.data as DescendantFieldsResponse[];
+		const descendants = descendantsResult.data as PageVersionFields[];
 
 		return {
 			error: undefined,

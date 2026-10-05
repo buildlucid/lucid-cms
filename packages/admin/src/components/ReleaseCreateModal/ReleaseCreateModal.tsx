@@ -1,5 +1,9 @@
 import { useNavigate } from "@solidjs/router";
-import type { Release, ReleaseDocumentInput } from "@types";
+import type {
+	InternalCollectionDocument,
+	Release,
+	ReleaseDocumentInput,
+} from "@types";
 import { FaSolidPlus } from "solid-icons/fa";
 import {
 	type Component,
@@ -39,8 +43,13 @@ const ReleaseCreateModal: Component<{
 	const navigate = useNavigate();
 	const [title, setTitle] = createSignal("");
 	const [drafts, setDrafts] = createSignal<ReleaseDocumentInput[]>([]);
+	//* picked documents, keyed by collection and ID, so drafts need no requests of their own
+	const [records, setRecords] = createSignal<
+		Map<string, InternalCollectionDocument>
+	>(new Map());
 	const [pickerOpen, setPickerOpen] = createSignal(false);
 	const [skipped, setSkipped] = createSignal(false);
+	const [overLimit, setOverLimit] = createSignal(false);
 
 	// ----------------------------------------
 	// Queries & Mutations
@@ -81,6 +90,7 @@ const ReleaseCreateModal: Component<{
 	const ready = createMemo(
 		() =>
 			drafts().length > 0 &&
+			documentCount() <= releaseDocumentLimit &&
 			drafts().every((draft) => draft.targets.length > 0) &&
 			(props.release !== undefined || title().trim().length > 0),
 	);
@@ -93,6 +103,8 @@ const ReleaseCreateModal: Component<{
 				member.collectionKey === collectionKey &&
 				member.documentId === documentId,
 		);
+	const refKey = (collectionKey: string, documentId: number) =>
+		`${collectionKey}:${documentId}`;
 	const updateDraft = (index: number, draft: ReleaseDocumentInput) =>
 		setDrafts((current) =>
 			current.map((item, itemIndex) => (itemIndex === index ? draft : item)),
@@ -116,8 +128,10 @@ const ReleaseCreateModal: Component<{
 		if (!props.open) return;
 		setTitle("");
 		setDrafts([]);
+		setRecords(new Map());
 		setPickerOpen(false);
 		setSkipped(false);
+		setOverLimit(false);
 		create.reset();
 		add.reset();
 	});
@@ -180,6 +194,9 @@ const ReleaseCreateModal: Component<{
 											{(draft, index) => (
 												<ReleaseDocumentDraft
 													draft={draft}
+													document={records().get(
+														refKey(draft.collectionKey, draft.documentId),
+													)}
 													collection={collectionFor(draft.collectionKey)}
 													onChange={(next) => updateDraft(index(), next)}
 													onRemove={() =>
@@ -207,6 +224,13 @@ const ReleaseCreateModal: Component<{
 								<Show when={skipped()}>
 									<p class="mt-3 text-sm text-danger">
 										{T()("releases.documents.duplicate")}
+									</p>
+								</Show>
+								<Show when={overLimit()}>
+									<p class="mt-3 text-sm text-danger">
+										{T()("releases.documents.limit", {
+											limit: releaseDocumentLimit,
+										})}
 									</p>
 								</Show>
 							</div>
@@ -250,10 +274,21 @@ const ReleaseCreateModal: Component<{
 				}}
 				callbacks={{
 					onSelect: (selection) => {
-						const fresh = selection.value.filter(
+						const unique = selection.value.filter(
 							(selected) => !isIncluded(selected.collectionKey, selected.id),
 						);
-						setSkipped(fresh.length < selection.value.length);
+						setSkipped(unique.length < selection.value.length);
+						//* the picker has no limit of its own, so keep only what the release can still hold
+						const room = releaseDocumentLimit - documentCount();
+						const fresh = unique.slice(0, Math.max(room, 0));
+						setOverLimit(fresh.length < unique.length);
+						setRecords((current) => {
+							const next = new Map(current);
+							for (const document of selection.documents) {
+								next.set(refKey(document.collectionKey, document.id), document);
+							}
+							return next;
+						});
 						setDrafts((current) => [
 							...current,
 							...fresh.map((selected) => ({

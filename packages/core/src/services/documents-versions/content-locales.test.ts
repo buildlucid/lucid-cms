@@ -1,11 +1,4 @@
 import { afterAll, assert, beforeAll, describe, expect, test } from "vitest";
-import checkFullSlugUniqueness from "../../../../plugin-pages/src/services/checks/fullslug-uniqueness.js";
-import getPageDescendants from "../../../../plugin-pages/src/services/get-descendant-fields.js";
-import getPageFields from "../../../../plugin-pages/src/services/get-document-version-fields.js";
-import getStoredRouteSegmentSelections from "../../../../plugin-pages/src/services/get-stored-route-segment-selections.js";
-import fetchRouteSegmentValues from "../../../../plugin-pages/src/services/helpers/fetch-route-segment-values.js";
-import updateFullSlugFields from "../../../../plugin-pages/src/services/update-fullslug-fields.js";
-import type { CollectionConfig } from "../../../../plugin-pages/src/types/types.js";
 import applyCollectionMigrations from "../../libs/collection/apply-collection-migrations.js";
 import CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
@@ -26,7 +19,6 @@ import {
 	MediaTranslationsRepository,
 	UsersRepository,
 } from "../../libs/repositories/index.js";
-import createToolkit from "../../libs/toolkit/create-toolkit.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
@@ -51,13 +43,7 @@ const collection = new CollectionBuilder("locale_adoption", {
 	.addRepeater("items")
 	.addText("caption", { localized: true })
 	.endRepeater()
-	.addUser("authors", { localized: true, multiple: true })
-	.addText("slug", { localized: true })
-	.addText("fullSlug", { localized: true })
-	.addRelation("parentPage", {
-		collection: "locale_adoption",
-		localized: false,
-	});
+	.addUser("authors", { localized: true, multiple: true });
 
 describe("unassigned content locales", () => {
 	const fixture = getTestConfig();
@@ -440,192 +426,6 @@ describe("unassigned content locales", () => {
 			.where("media_id", "=", media.data.id)
 			.execute();
 		expect(rectified).toEqual([{ locale_code: "de", title: null }]);
-	});
-
-	test("keeps page routes and parent relations usable as the default changes without assigning stored rows", async () => {
-		const pages: CollectionConfig = {
-			key: collection.key,
-			localized: true,
-			segments: [],
-			unique: true,
-			ui: {
-				fullSlug: true,
-				placement: { at: "end" },
-				widths: { slug: 12, fullSlug: 12, parentPage: 12, segments: 12 },
-			},
-		};
-		const namesRes = await getTableNames(context, collection.key);
-		assert(namesRes.data);
-		const tables = namesRes.data;
-		const migration = await getCurrentCollectionMigrationId(
-			context,
-			collection.key,
-		);
-		assert(migration.data);
-		context.config.localization = { locales: [], defaultLocale: null };
-		const documents: { documentId: number; versionId: number }[] = [];
-		for (const slug of ["parent", "child"]) {
-			const Documents = new DocumentsRepository(context.db);
-			const doc = await Documents.createSingle(
-				{
-					data: {
-						collection_key: collection.key,
-						collection_migration_id: migration.data,
-						created_by: userId,
-						updated_by: userId,
-					},
-					returning: ["id"],
-					validation: { enabled: true },
-				},
-				{ tableName: tables.document },
-			);
-			assert(doc.data);
-			const DocumentIdentities = new DocumentIdentitiesRepository(context.db);
-			expect(
-				(
-					await DocumentIdentities.createSingle({
-						data: { collection_key: collection.key, document_id: doc.data.id },
-					})
-				).error,
-			).toBeUndefined();
-			const DocumentVersions = new DocumentVersionsRepository(context.db);
-			const version = await DocumentVersions.createVersion(
-				{
-					collection_key: collection.key,
-					collection_migration_id: migration.data,
-					document_id: doc.data.id,
-					type: "latest",
-					content_id: slug,
-					created_by: userId,
-					updated_by: userId,
-				},
-				{ tableName: tables.version },
-			);
-			assert(version.data);
-			const saved = await createDocumentBricks(context, {
-				collection,
-				documentId: doc.data.id,
-				versionId: version.data.id,
-				fields: [
-					{ key: "slug", type: "text", value: slug },
-					{ key: "fullSlug", type: "text", value: `/${slug}` },
-					{
-						key: "parentPage",
-						type: "relation",
-						value: documents[0]
-							? [{ id: documents[0].documentId, collectionKey: collection.key }]
-							: [],
-					},
-				],
-			});
-			expect(saved.error).toBeUndefined();
-			documents.push({ documentId: doc.data.id, versionId: version.data.id });
-		}
-		const [parent, child] = documents;
-		assert(parent);
-		assert(child);
-		const collision = (locale: string | null, path: string) =>
-			checkFullSlugUniqueness(context, {
-				collection: pages,
-				collectionKey: collection.key,
-				versionType: "latest",
-				tables,
-				projectedFullSlugs: [
-					{
-						documentId: 999,
-						versionId: 999,
-						fullSlugs: new Map([[locale, path]]),
-					},
-				],
-			});
-		expect((await collision(null, "/parent")).error?.status).toBe(400);
-		context.config.localization = {
-			defaultLocale: "de",
-			locales: [
-				{ code: "de", label: "German" },
-				{ code: "fr", label: "French" },
-			],
-		};
-		const fields = await getPageFields(context, {
-			...child,
-			collectionKey: collection.key,
-			versionType: "latest",
-			tables,
-		});
-		expect(fields.error).toBeUndefined();
-		expect(fields.data).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({
-					locale: "de",
-					_parentPage: parent.documentId,
-					_slug: "child",
-				}),
-			]),
-		);
-		const selections = await getStoredRouteSegmentSelections(context, {
-			collection: {
-				...pages,
-				segments: [
-					{ relation: "parentPage", collection: collection.key, field: "slug" },
-				],
-			},
-			sources: [{ sourceKey: "child", versionId: child.versionId }],
-		});
-		expect(selections.error).toBeUndefined();
-		expect(selections.data).toEqual([
-			{
-				sourceKey: "child",
-				index: 0,
-				collectionKey: collection.key,
-				documentId: parent.documentId,
-			},
-		]);
-		const descendants = await getPageDescendants(context, {
-			ids: [parent.documentId],
-			collectionKey: collection.key,
-			versionType: "latest",
-			tables,
-		});
-		expect(descendants.error).toBeUndefined();
-		expect(descendants.data?.[0]?.document_id).toBe(child.documentId);
-		expect((await collision("de", "/parent")).error?.status).toBe(400);
-		expect((await collision("fr", "/parent")).error).toBeUndefined();
-		const values = await fetchRouteSegmentValues(context, {
-			collection: pages,
-			versionType: "latest",
-			locales: ["de"],
-			targets: [
-				{
-					sourceKey: "current",
-					index: 0,
-					collectionKey: collection.key,
-					documentId: parent.documentId,
-					field: "slug",
-					localized: true,
-					storageLocale: null,
-				},
-			],
-		});
-		expect(values.error).toBeUndefined();
-		expect([...(values.data?.values() ?? [])]).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({ segment_0: "parent" }),
-			]),
-		);
-		expect(
-			(
-				await updateFullSlugFields(context, {
-					toolkit: createToolkit(context),
-					collectionKey: collection.key,
-					versionType: "latest",
-					tables,
-					docFullSlugs: [
-						{ ...child, fullSlugs: new Map([["de", "/parent/child"]]) },
-					],
-				})
-			).error,
-		).toBeUndefined();
-		expect((await collision("de", "/parent/child")).error?.status).toBe(400);
 	});
 
 	test("promotes unassigned media input while preserving an explicitly cleared default translation", () => {

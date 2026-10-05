@@ -95,47 +95,44 @@ const fetchRouteSegmentValues: ServiceFn<
 				targetCollectionKey: collectionKey,
 			});
 
-			const result = await context.db
-				.query("pages.route-segment.values.find", (db) =>
-					db
-						.selectFrom(documentTable)
-						.innerJoin(
-							versionTable,
-							// @ts-expect-error Dynamic generated table names are resolved at runtime.
-							`${versionTable}.document_id`,
-							`${documentTable}.id`,
-						)
-						.innerJoin(
-							fieldsTable,
-							// @ts-expect-error Dynamic generated table names are resolved at runtime.
-							`${fieldsTable}.document_version_id`,
-							`${versionTable}.id`,
-						)
-						// @ts-expect-error Dynamic generated table names are resolved at runtime.
-						.select([
-							`${documentTable}.id as document_id`,
-							`${fieldsTable}.locale`,
-						])
-						.select(
-							selectedTargets.map((target) =>
-								sql<unknown>`${sql.ref(
-									`${fieldsTable}.${prefixGeneratedColName(target.field)}`,
-								)}`.as(`segment_${target.index}`),
-							),
-						)
-						.where(`${documentTable}.id`, "in", [
-							...new Set(targets.map((target) => target.documentId)),
-						])
-						.where(`${versionTable}.type`, "=", targetVersionType)
-						.where(
-							`${documentTable}.is_deleted`,
-							"=",
-							context.config.db.getDefault("boolean", "false"),
-						)
-						.where(
-							sql<boolean>`(${sql.ref(`${fieldsTable}.locale`)} is null or ${requiredLocales.filter((locale) => locale !== null).length ? sql`${sql.ref(`${fieldsTable}.locale`)} in (${sql.join(requiredLocales.filter((locale) => locale !== null))})` : sql`false`})`,
-						),
+			const query = context.db.kysely
+				.selectFrom(documentTable)
+				.innerJoin(
+					versionTable,
+					// @ts-expect-error Dynamic generated table names are resolved at runtime.
+					`${versionTable}.document_id`,
+					`${documentTable}.id`,
 				)
+				.innerJoin(
+					fieldsTable,
+					// @ts-expect-error Dynamic generated table names are resolved at runtime.
+					`${fieldsTable}.document_version_id`,
+					`${versionTable}.id`,
+				)
+				// @ts-expect-error Dynamic generated table names are resolved at runtime.
+				.select([`${documentTable}.id as document_id`, `${fieldsTable}.locale`])
+				.select(
+					selectedTargets.map((target) =>
+						sql<unknown>`${sql.ref(
+							`${fieldsTable}.${prefixGeneratedColName(target.field)}`,
+						)}`.as(`segment_${target.index}`),
+					),
+				)
+				.where(`${documentTable}.id`, "in", [
+					...new Set(targets.map((target) => target.documentId)),
+				])
+				.where(`${versionTable}.type`, "=", targetVersionType)
+				.where(
+					`${documentTable}.is_deleted`,
+					"=",
+					context.config.db.getDefault("boolean", "false"),
+				)
+				.where(
+					sql<boolean>`(${sql.ref(`${fieldsTable}.locale`)} is null or ${requiredLocales.filter((locale) => locale !== null).length ? sql`${sql.ref(`${fieldsTable}.locale`)} in (${sql.join(requiredLocales.filter((locale) => locale !== null))})` : sql`false`})`,
+				);
+
+			const result = await context.db
+				.query("pages.route-segment.values.find", () => query)
 				.many();
 
 			return result.error

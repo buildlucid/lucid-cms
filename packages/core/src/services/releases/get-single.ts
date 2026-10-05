@@ -8,7 +8,6 @@ import getReleaseState from "./helpers/get-release-state.js";
 import getReleaseUsers from "./helpers/get-release-users.js";
 import loadRelease from "./helpers/load-release.js";
 
-/** Gets a release with its documents, checks, activity and the user's permissions. */
 const getSingle: ServiceFn<[{ id: number; user: LucidUser }], Release> = async (
 	context,
 	data,
@@ -38,6 +37,12 @@ const getSingle: ServiceFn<[{ id: number; user: LucidUser }], Release> = async (
 	if (stateRes.error) return stateRes;
 	if (usersRes.error) return usersRes;
 
+	const blockersRes = await getBlockers(context, {
+		release,
+		state: stateRes.data,
+	});
+	if (blockersRes.error) return blockersRes;
+
 	const { read: _read, ...permissions } = getReleaseAccess(context, {
 		release,
 		user: data.user,
@@ -48,7 +53,7 @@ const getSingle: ServiceFn<[{ id: number; user: LucidUser }], Release> = async (
 		data: releasesFormatter.formatSingle({
 			release,
 			state: stateRes.data,
-			blockers: getBlockers(context, { release, state: stateRes.data }),
+			blockers: blockersRes.data,
 			permissions,
 			user: data.user,
 			users: usersRes.data,

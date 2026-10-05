@@ -29,10 +29,7 @@ const FullSlug: FieldSlotComponent = (props) => {
 	// Render
 	return (
 		<div class="flex min-w-0 items-center justify-between gap-3 text-sm text-body">
-			<Show
-				when={path()}
-				fallback={<p class="text-sm">{t("plugin.pages.route.pending")}</p>}
-			>
+			<Show when={path()}>
 				<p class="break-all text-sm">
 					<span class="text-subtitle">{t("plugin.pages.route.label")}: </span>
 					{path()}

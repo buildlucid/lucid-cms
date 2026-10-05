@@ -11,7 +11,7 @@ The plugin achieves this by registering hooks that fire at different points in t
 The intended use case for this plugin is to enable easy document fetching for front-end applications, whereby you can use the URL location to filter a document via the `fullSlug`. Using the content endpoints that might look something like this:
 
 ```text
-/api/v1/content/document/COLLECTION_KEY/published?filter[_fullSlug]=about
+/api/v1/content/document/COLLECTION_KEY/published?filter[_fullSlug]=/about
 ```
 
 ## Installation

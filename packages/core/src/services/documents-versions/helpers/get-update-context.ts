@@ -7,6 +7,7 @@ import getCurrentCollectionMigrationId from "../../../libs/collection/migration/
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { LucidVersionTable } from "../../../libs/db/tables/index.js";
 import type { Select } from "../../../libs/db/types.js";
+import type { DocumentHookRelease } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { LucidUser } from "../../../types/hono.js";
@@ -29,6 +30,8 @@ const getUpdateContext: ServiceFn<
 		tableNames: CollectionTableNames;
 		migrationId: number;
 		versionType: Select<LucidVersionTable>["type"];
+		/** The release that owns the version, when it is a proposal. */
+		release?: DocumentHookRelease;
 	}
 > = async (context, data) => {
 	const Version = new DocumentVersionsRepository(context.db);
@@ -114,6 +117,7 @@ const getUpdateContext: ServiceFn<
 	);
 	if (versionExistsRes.error) return versionExistsRes;
 
+	let release: DocumentHookRelease | undefined;
 	if (
 		versionExistsRes.data.type ===
 		constants.collectionBuilder.publishing.proposalVersionType
@@ -126,6 +130,8 @@ const getUpdateContext: ServiceFn<
 			edit: true,
 		});
 		if (accessRes.error) return accessRes;
+
+		release = accessRes.data;
 	} else if (versionExistsRes.data.type !== "latest") {
 		return {
 			error: {
@@ -145,6 +151,7 @@ const getUpdateContext: ServiceFn<
 			tableNames: tableNamesRes.data,
 			migrationId: migrationIdRes.data,
 			versionType: versionExistsRes.data.type,
+			release,
 		},
 	};
 };

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import type { CollectionConfig } from "../types/types.js";
 import constructChildFullSlug from "./construct-child-fullslugs.js";
-import type { DescendantFieldsResponse } from "./get-descendant-fields.js";
+import type { PageVersionFields } from "./get-pages-fields.js";
 
 const localization: import("../utils/resolve-pages-collection-localization.js").ResolvedPagesCollectionLocalization =
 	{
@@ -28,7 +28,7 @@ const baseCollection = {
 
 describe("constructChildFullSlug", () => {
 	test("applies the collection prefix when descendants become top-level after a parent delete", () => {
-		const descendants: DescendantFieldsResponse[] = [
+		const descendants: PageVersionFields[] = [
 			{
 				document_id: 2,
 				document_version_id: 20,
@@ -69,18 +69,18 @@ describe("constructChildFullSlug", () => {
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: new Map([[null, "/blog/child"]]),
+				values: new Map([[null, "/blog/child"]]),
 			},
 			{
 				documentId: 3,
 				versionId: 30,
-				fullSlugs: new Map([[null, "/blog/child/grandchild"]]),
+				values: new Map([[null, "/blog/child/grandchild"]]),
 			},
 		]);
 	});
 
 	test("applies localized collection prefixes after a parent delete", () => {
-		const descendants: DescendantFieldsResponse[] = [
+		const descendants: PageVersionFields[] = [
 			{
 				document_id: 2,
 				document_version_id: 20,
@@ -124,7 +124,7 @@ describe("constructChildFullSlug", () => {
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: new Map(
+				values: new Map(
 					Object.entries({
 						en: "/blog/child",
 						fr: "/actualites/enfant",
@@ -135,7 +135,7 @@ describe("constructChildFullSlug", () => {
 	});
 
 	test("uses each descendant's resolved relation-derived prefix", () => {
-		const descendants: DescendantFieldsResponse[] = [
+		const descendants: PageVersionFields[] = [
 			{
 				document_id: 2,
 				document_version_id: 20,
@@ -167,7 +167,7 @@ describe("constructChildFullSlug", () => {
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: new Map([[null, "/docs/lucid/v1/getting-started"]]),
+				values: new Map([[null, "/docs/lucid/v1/getting-started"]]),
 			},
 		]);
 	});

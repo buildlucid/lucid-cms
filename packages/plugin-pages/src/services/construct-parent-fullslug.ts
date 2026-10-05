@@ -16,8 +16,9 @@ const parentMatchesRoutePrefix = (
 		parentFields.find((field) => field.locale === locale)?._fullSlug,
 	);
 	const normalizedPrefix = normalizePathValue(prefix);
-	if (!parentFullSlug || !normalizedPrefix || normalizedPrefix === "/")
+	if (!parentFullSlug || !normalizedPrefix || normalizedPrefix === "/") {
 		return true;
+	}
 	return (
 		parentFullSlug === normalizedPrefix ||
 		parentFullSlug.startsWith(`${normalizedPrefix}/`)
@@ -35,9 +36,8 @@ const constructParentFullSlug = (data: {
 		slug: FieldInputSchema;
 	};
 	routePrefixes?: Map<string | null, string | null>;
-	missingParentIsEmpty?: boolean;
 }): Awaited<ServiceResponse<Map<string | null, string | null>>> => {
-	if (!data.missingParentIsEmpty && data.parentFields.length > 0) {
+	if (data.parentFields.length > 0) {
 		const missingParentLocale = data.localization.locales.find((locale) => {
 			const slug =
 				locale === null
@@ -68,12 +68,10 @@ const constructParentFullSlug = (data: {
 			};
 		}
 	}
-	// initialise fullSlug with null values for each locale
 	const fullSlug = new Map<string | null, string | null>(
 		data.localization.locales.map((locale) => [locale, null]),
 	);
 
-	// if translations are enabled/set
 	if (data.localization.enabled && data.fields.slug.translations) {
 		for (let i = 0; i < data.localization.locales.length; i++) {
 			const locale = data.localization.locales[i];

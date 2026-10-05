@@ -41,9 +41,11 @@ const promoteVersion: ServiceFn<
 			skipDocumentWriteClaims?: boolean;
 			/** The release doing the promoting, which keeps its approval and is left out of the target activity. */
 			releaseId?: number;
+			/** Leaves versionPromote hooks, cache invalidation and change notifications to the caller, eg. a release that runs them once every document is in place. */
+			deferEffects?: boolean;
 		},
 	],
-	undefined
+	{ versionId: number }
 > = (context, data) =>
 	withTransaction(
 		context,
@@ -340,29 +342,31 @@ const promoteVersion: ServiceFn<
 
 			// -------------------------------------------------------------------------------
 			// Execute hook
-			const hookResponse = await executeHooks(
-				context,
-				{
-					service: "documents",
-					event: "versionPromote",
-					config: context.config,
-					collectionInstance: collectionRes.data,
-				},
-				{
-					meta: {
-						collection: collectionRes.data,
-						collectionKey: data.collectionKey,
-						userId: data.userId,
-						collectionTableNames: tableNameRes.data,
+			if (!data.deferEffects) {
+				const hookResponse = await executeHooks(
+					context,
+					{
+						service: "documents",
+						event: "versionPromote",
+						config: context.config,
+						collectionInstance: collectionRes.data,
 					},
-					data: {
-						documentId: data.documentId,
-						versionId: createVersionRes.data.id,
-						versionType: data.toVersionType,
+					{
+						meta: {
+							collection: collectionRes.data,
+							collectionKey: data.collectionKey,
+							userId: data.userId,
+							collectionTableNames: tableNameRes.data,
+						},
+						data: {
+							documentId: data.documentId,
+							versionId: createVersionRes.data.id,
+							versionType: data.toVersionType,
+						},
 					},
-				},
-			);
-			if (hookResponse.error) return hookResponse;
+				);
+				if (hookResponse.error) return hookResponse;
+			}
 
 			const invalidateRes = await invalidateReleases(context, {
 				collectionKey: data.collectionKey,
@@ -384,23 +388,25 @@ const promoteVersion: ServiceFn<
 				if (publishedRes.error) return publishedRes;
 			}
 
-			await invalidateContentDocumentCache(context, data.collectionKey);
+			if (!data.deferEffects) {
+				await invalidateContentDocumentCache(context, data.collectionKey);
 
-			const changed = await notifyChange(context, {
-				change: {
-					type: data.toVersionType === "latest" ? "updated" : "published",
-					version: data.toVersionType,
-				},
-				collectionKey: data.collectionKey,
-				ids: [data.documentId],
-			});
-			if (changed.error) return changed;
+				const changed = await notifyChange(context, {
+					change: {
+						type: data.toVersionType === "latest" ? "updated" : "published",
+						version: data.toVersionType,
+					},
+					collectionKey: data.collectionKey,
+					ids: [data.documentId],
+				});
+				if (changed.error) return changed;
+			}
 
 			// -------------------------------------------------------------------------------
 			// Success
 			return {
 				error: undefined,
-				data: undefined,
+				data: { versionId: createVersionRes.data.id },
 			};
 		},
 		{ isolate: true },

@@ -1,23 +1,23 @@
 import type { CollectionBuilder } from "@lucidcms/core";
 import type {
 	CollectionTableNames,
-	DocumentVersionType,
 	FieldInputSchema,
 	ServiceFn,
 } from "@lucidcms/core/types";
-import type { CollectionConfig } from "../../../types/types.js";
+import type { CollectionConfig, RouteScope } from "../../../types/types.js";
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
+import { scopeRelationVersionType } from "../../../utils/route-scope.js";
 import constructParentFullSlug from "../../construct-parent-fullslug.js";
 import getParentFields from "../../get-parent-fields.js";
 import resolveRoutePrefix from "../../resolve-route-prefix.js";
 
+/** Builds a page's full slug from its parent in the scope, its route prefix and its slug. */
 const resolveParentFullSlug: ServiceFn<
 	[
 		{
 			collection: CollectionConfig;
 			collectionInstance: CollectionBuilder;
-			collectionKey: string;
-			versionType: Exclude<DocumentVersionType, "revision">;
+			scope: RouteScope;
 			tables: CollectionTableNames;
 			fields: {
 				slug: FieldInputSchema;
@@ -25,7 +25,6 @@ const resolveParentFullSlug: ServiceFn<
 				all: FieldInputSchema[];
 			};
 			documentVersionId?: number;
-			missingParentIsEmpty?: boolean;
 		},
 	],
 	Map<string | null, string | null>
@@ -39,18 +38,17 @@ const resolveParentFullSlug: ServiceFn<
 	const [parentFieldsRes, routePrefixRes] = await Promise.all([
 		getParentFields(context, {
 			defaultLocale: localization.defaultLocale,
-			versionType: data.versionType,
-			collectionKey: data.collectionKey,
+			scope: data.scope,
+			collectionKey: data.collection.key,
 			fields: {
 				parentPage: data.fields.parentPage,
 			},
 			tables: data.tables,
-			missingParentIsEmpty: data.missingParentIsEmpty,
 		}),
 		resolveRoutePrefix(context, {
 			collection: data.collection,
 			collectionInstance: data.collectionInstance,
-			versionType: data.versionType,
+			versionType: scopeRelationVersionType(data.scope),
 			fields:
 				data.documentVersionId === undefined ? data.fields.all : undefined,
 			versionId: data.documentVersionId,
@@ -67,7 +65,6 @@ const resolveParentFullSlug: ServiceFn<
 			slug: data.fields.slug,
 		},
 		routePrefixes: routePrefixRes.data,
-		missingParentIsEmpty: data.missingParentIsEmpty,
 	});
 };
 

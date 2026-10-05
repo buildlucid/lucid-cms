@@ -45,9 +45,15 @@ export type HookExecutionKindMap = {
 		afterRestore: "effect";
 		afterDelete: "effect";
 		versionPromote: "effect";
+		versionCapture: "effect";
 	};
 	documentWorkflows: {
 		afterUpdate: "effect";
+	};
+	releases: {
+		check: "transform";
+		published: "effect";
+		documentRemoved: "effect";
 	};
 
 	media: {
@@ -57,6 +63,23 @@ export type HookExecutionKindMap = {
 		afterUpdate: "effect";
 		afterDelete: "effect";
 	};
+};
+
+/** The release that owns the version being written, with every version it has captured. */
+export type DocumentHookRelease = {
+	id: number;
+	documents: Array<{
+		collectionKey: string;
+		documentId: number;
+		/** Latest for a proposal, or the environment a snapshot came from. */
+		source: string;
+		/** The release's proposal or snapshot for the document. */
+		versionId: number;
+	}>;
+};
+
+type ReleaseHookMeta = {
+	userId: number | null;
 };
 
 type CollectionHookMeta = {
@@ -70,6 +93,8 @@ type DocumentHookMeta = CollectionHookMeta & {
 
 type DocumentUserHookMeta = DocumentHookMeta & {
 	userId: number | null;
+	/** Set when the version written belongs to a release, eg. a proposal edit or capture. */
+	release?: DocumentHookRelease;
 };
 
 export type DocumentBeforeUpsertHookOrigin =
@@ -134,6 +159,63 @@ export type DocumentVersionPromoteHookData = {
 	versionType: Exclude<DocumentVersionType, "revision">;
 };
 
+/** A release cloned a version into its own proposal or snapshot. */
+export type DocumentVersionCaptureHookData = {
+	documentId: number;
+	versionId: number;
+	versionType: Exclude<DocumentVersionType, "revision">;
+	sourceVersionId: number;
+	sourceVersionType: Exclude<DocumentVersionType, "revision">;
+};
+
+/** A reason a release cannot be approved or published yet. Hook blockers carry their own message. */
+export type ReleaseCheckBlocker = {
+	releaseDocumentId: number;
+	target?: string;
+	message: string;
+};
+
+/** A release has published every document to its targets. Each entry lists the new environment versions. */
+export type ReleasePublishedHookData = {
+	release: {
+		id: number;
+		revision: number;
+	};
+	documents: Array<{
+		releaseDocumentId: number;
+		collectionKey: string;
+		documentId: number;
+		source: string;
+		versions: Array<{ target: string; versionId: number }>;
+	}>;
+};
+
+/** A document left an open release. The release lists what it still holds. */
+export type ReleaseDocumentRemovedHookData = {
+	release: DocumentHookRelease;
+	collectionKey: string;
+	documentId: number;
+};
+
+/** The release being checked. Hooks push blockers for documents they cannot release as they are. */
+export type ReleaseCheckHookData = {
+	release: {
+		id: number;
+		revision: number;
+	};
+	documents: Array<{
+		releaseDocumentId: number;
+		collectionKey: string;
+		documentId: number;
+		/** Latest for a proposal, or the environment a snapshot came from. */
+		source: string;
+		/** The content that would be released. Null when it is unavailable. */
+		versionId: number | null;
+		targets: string[];
+	}>;
+	blockers: ReleaseCheckBlocker[];
+};
+
 export type DocumentWorkflowAfterUpdateHookData = {
 	versionId: number;
 	collectionKey: string;
@@ -180,6 +262,9 @@ export type TransformHookDataMap = {
 	documents: {
 		beforeUpsert: DocumentBeforeUpsertHookData;
 		afterFetch: DocumentAfterFetchHookData;
+	};
+	releases: {
+		check: ReleaseCheckHookData;
 	};
 };
 
@@ -270,6 +355,10 @@ export type HookServiceHandlers = {
 			EffectHookPayload<DocumentUserHookMeta, DocumentVersionPromoteHookData>,
 			undefined
 		>;
+		versionCapture: HookHandler<
+			EffectHookPayload<DocumentUserHookMeta, DocumentVersionCaptureHookData>,
+			undefined
+		>;
 	};
 	documentWorkflows: {
 		afterUpdate: HookHandler<
@@ -277,6 +366,20 @@ export type HookServiceHandlers = {
 				DocumentUserHookMeta,
 				DocumentWorkflowAfterUpdateHookData
 			>,
+			undefined
+		>;
+	};
+	releases: {
+		check: HookHandler<
+			TransformHookPayload<Record<string, never>, ReleaseCheckHookData>,
+			ReleaseCheckHookData | undefined
+		>;
+		published: HookHandler<
+			EffectHookPayload<ReleaseHookMeta, ReleasePublishedHookData>,
+			undefined
+		>;
+		documentRemoved: HookHandler<
+			EffectHookPayload<ReleaseHookMeta, ReleaseDocumentRemovedHookData>,
 			undefined
 		>;
 	};
@@ -348,6 +451,7 @@ export type CollectionBuilderHooks =
 	| LucidHookDocuments<"afterDelete">
 	| LucidHookDocuments<"afterRestore">
 	| LucidHookDocuments<"versionPromote">
+	| LucidHookDocuments<"versionCapture">
 	| LucidHook<"documentWorkflows", "afterUpdate">;
 
 export type DocumentHooks =
@@ -358,12 +462,18 @@ export type DocumentHooks =
 	| LucidHook<"documents", "beforeDelete">
 	| LucidHook<"documents", "afterDelete">
 	| LucidHook<"documents", "afterRestore">
-	| LucidHook<"documents", "versionPromote">;
+	| LucidHook<"documents", "versionPromote">
+	| LucidHook<"documents", "versionCapture">;
 
 export type DocumentWorkflowHooks = LucidHook<
 	"documentWorkflows",
 	"afterUpdate"
 >;
+
+export type ReleaseHooks =
+	| LucidHook<"releases", "check">
+	| LucidHook<"releases", "published">
+	| LucidHook<"releases", "documentRemoved">;
 
 export type MediaHooks =
 	| LucidHook<"media", "afterChange">
@@ -373,4 +483,8 @@ export type MediaHooks =
 	| LucidHook<"media", "afterDelete">;
 
 // add all hooks to this type
-export type AllHooks = DocumentHooks | DocumentWorkflowHooks | MediaHooks;
+export type AllHooks =
+	| DocumentHooks
+	| DocumentWorkflowHooks
+	| ReleaseHooks
+	| MediaHooks;

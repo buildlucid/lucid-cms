@@ -102,7 +102,7 @@ const align: ServiceFn<
 			}
 
 			if (destination.type === "latest") {
-				return promoteVersion(context, {
+				const promoteRes = await promoteVersion(context, {
 					collectionKey: data.collectionKey,
 					documentId: data.documentId,
 					fromVersionId: source.id,
@@ -110,6 +110,9 @@ const align: ServiceFn<
 					userId: data.user.id,
 					skipDocumentWriteClaims: true,
 				});
+				if (promoteRes.error) return promoteRes;
+
+				return { error: undefined, data: undefined };
 			}
 
 			const updateRes = await updateSingle(context, {

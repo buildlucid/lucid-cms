@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
-import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
+import type { PageVersionFields } from "../services/get-pages-fields.js";
 import buildFullSlugFromSlugs from "./build-fullslug-from-slugs.js";
 
-const descendants: Array<DescendantFieldsResponse> = [
+const descendants: Array<PageVersionFields> = [
 	{
 		document_id: 1,
 		document_version_id: 101,
@@ -44,14 +44,14 @@ const descendants: Array<DescendantFieldsResponse> = [
 test("should return correctly formatted and built fullSlug", async () => {
 	const testFullSlug = buildFullSlugFromSlugs({
 		targetLocale: "en",
-		currentDescendant: descendants[0] as DescendantFieldsResponse,
+		currentDescendant: descendants[0] as PageVersionFields,
 		descendants: descendants,
 		topLevelFullSlug: undefined,
 	});
 
 	const grandparentFullSlug = buildFullSlugFromSlugs({
 		targetLocale: "en",
-		currentDescendant: descendants[2] as DescendantFieldsResponse,
+		currentDescendant: descendants[2] as PageVersionFields,
 		descendants: descendants,
 		topLevelFullSlug: undefined,
 	});
@@ -63,14 +63,14 @@ test("should return correctly formatted and built fullSlug", async () => {
 test("should prepend topLevelFullSlug to fullSlug if it exists", async () => {
 	const testFullSlug = buildFullSlugFromSlugs({
 		targetLocale: "en",
-		currentDescendant: descendants[0] as DescendantFieldsResponse,
+		currentDescendant: descendants[0] as PageVersionFields,
 		descendants: descendants,
 		topLevelFullSlug: "/top-level",
 	});
 
 	const grandparentFullSlug = buildFullSlugFromSlugs({
 		targetLocale: "en",
-		currentDescendant: descendants[2] as DescendantFieldsResponse,
+		currentDescendant: descendants[2] as PageVersionFields,
 		descendants: descendants,
 		topLevelFullSlug:
 			"//top-level" /* double slashes to test that they are removed */,

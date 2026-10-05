@@ -47,6 +47,7 @@ const checkSingle: ServiceFn<
 				collectionKey: data.collectionKey,
 				userId: data.userId,
 				collectionTableNames: updateContextRes.data.tableNames,
+				release: updateContextRes.data.release,
 				execution: {
 					mode: "check",
 					action: "update",

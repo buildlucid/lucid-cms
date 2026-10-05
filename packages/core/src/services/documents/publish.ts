@@ -187,7 +187,7 @@ const publish: ServiceFn<
 			});
 			if (validateRes.error) return validateRes;
 
-			return promoteVersion(context, {
+			const promoteRes = await promoteVersion(context, {
 				collectionKey: data.collectionKey,
 				documentId: data.documentId,
 				userId: data.user.id,
@@ -197,6 +197,9 @@ const publish: ServiceFn<
 				skipRevisionCheck: true,
 				skipDocumentWriteClaims: true,
 			});
+			if (promoteRes.error) return promoteRes;
+
+			return { error: undefined, data: undefined };
 		},
 		{ isolate: true },
 	);

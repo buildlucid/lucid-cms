@@ -1,4 +1,4 @@
-import type { FieldWidth } from "@lucidcms/core/types";
+import type { DocumentVersionType, FieldWidth } from "@lucidcms/core/types";
 
 /** A shared URL prefix or prefixes keyed by content locale. */
 export type CollectionPrefix = string | Record<string, string>;
@@ -58,7 +58,6 @@ export interface PluginOptions {
 		ui?: CollectionUI;
 		/** Reject conflicting full paths. Defaults to true. */
 		unique?: boolean;
-		// fallbackSlugSource?: string;
 	}>;
 }
 
@@ -76,23 +75,35 @@ export interface CollectionConfig {
 		widths: Record<PagesFieldKey, FieldWidth>;
 	};
 	unique: boolean;
-	// fallbackSlugSource: string | undefined;
 }
 
+/**
+ * Which versions route queries read and rewrite. A version scope is one
+ * version per document, eg. latest or an environment. A release scope is the
+ * versions a release has captured, keyed by document ID, with every other
+ * document read from the fallback version type and never rewritten.
+ */
+export type RouteScope =
+	| {
+			type: "version";
+			versionType: Exclude<DocumentVersionType, "revision">;
+	  }
+	| {
+			type: "release";
+			versions: Map<number, number>;
+			fallback: Exclude<DocumentVersionType, "revision">;
+	  };
+
+/** A page version's computed route per locale, ready to check and write. */
 export type ProjectedFullSlug = {
 	documentId: number;
 	versionId: number;
-	fullSlugs: Map<string | null, string | null>;
+	values: Map<string | null, string | null>;
 };
 
 export type RouteUniquenessItem = {
 	documentId: number;
 	versionId: number;
-	locale: string | null;
-	fullSlug: string;
-};
-
-export type RouteUniquenessConflict = {
 	locale: string | null;
 	fullSlug: string;
 };

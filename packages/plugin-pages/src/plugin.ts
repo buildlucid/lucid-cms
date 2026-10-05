@@ -3,15 +3,19 @@ import type { LucidPlugin } from "@lucidcms/core/types";
 import { LUCID_VERSION, PLUGIN_KEY } from "./constants.js";
 import { checkRouteSegments } from "./services/checks/index.js";
 import {
-	afterFetchHandler,
 	afterRestoreHandler,
 	afterUpsertHandler,
 	beforeDeleteHandler,
 	beforeUpsertHandler,
+	releaseCheckHandler,
+	releaseDocumentRemovedHandler,
+	releasePublishedHandler,
+	versionCaptureHandler,
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
-import { pluginOptions, registerFields } from "./services/index.js";
+import pluginOptions from "./services/plugin-options.js";
 import registerAdminSlots from "./services/register-admin-slots.js";
+import registerFields from "./services/register-fields.js";
 import toolkit from "./toolkit/index.js";
 import type { PluginOptions } from "./types/types.js";
 
@@ -76,11 +80,6 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				});
 				draft.hooks.push({
 					service: "documents",
-					event: "afterFetch",
-					handler: afterFetchHandler(options),
-				});
-				draft.hooks.push({
-					service: "documents",
 					event: "beforeDelete",
 					handler: beforeDeleteHandler(options),
 				});
@@ -91,8 +90,28 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 				});
 				draft.hooks.push({
 					service: "documents",
+					event: "versionCapture",
+					handler: versionCaptureHandler(options),
+				});
+				draft.hooks.push({
+					service: "documents",
 					event: "afterRestore",
 					handler: afterRestoreHandler(options),
+				});
+				draft.hooks.push({
+					service: "releases",
+					event: "check",
+					handler: releaseCheckHandler(options),
+				});
+				draft.hooks.push({
+					service: "releases",
+					event: "published",
+					handler: releasePublishedHandler(options),
+				});
+				draft.hooks.push({
+					service: "releases",
+					event: "documentRemoved",
+					handler: releaseDocumentRemovedHandler(options),
 				});
 			}
 		},

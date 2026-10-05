@@ -12,11 +12,11 @@ test("splits lucid config into isolated config, db, runtime, and env artifacts",
 		configPath,
 		`import { defineConfig, z } from "@lucidcms/core";
 import { node } from "@lucidcms/runtime-node";
-import PagesPlugin from "@lucidcms/plugin-pages";
+import ExamplePlugin from "@example/plugin";
 import { libsql } from "@lucidcms/db-libsql";
 import PageCollection from "./src/collections/pages.js";
 
-const makePlugins = () => [PagesPlugin()];
+const makePlugins = () => [ExamplePlugin()];
 const runtime = node;
 const db = libsql;
 const config = (env) => ({
@@ -53,7 +53,7 @@ export default defineConfig({ runtime, db, config });
 			readFile(artifacts.env, "utf-8"),
 		]);
 
-		expect(config).toContain("@lucidcms/plugin-pages");
+		expect(config).toContain("@example/plugin");
 		expect(config).toContain("../../src/collections/pages.js");
 		expect(config).toContain("const config =");
 		expect(config).toContain("makePlugins");
@@ -63,7 +63,7 @@ export default defineConfig({ runtime, db, config });
 		expect(db).toContain("@lucidcms/db-libsql");
 		expect(db).toContain("const db =");
 		expect(db).toContain("libsql");
-		expect(db).not.toContain("@lucidcms/plugin-pages");
+		expect(db).not.toContain("@example/plugin");
 		expect(db).not.toContain("@lucidcms/runtime-node");
 
 		expect(runtime).toContain("@lucidcms/runtime-node/runtime");

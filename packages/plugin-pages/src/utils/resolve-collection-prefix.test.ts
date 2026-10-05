@@ -22,7 +22,7 @@ test("should resolve a shared string prefix", async () => {
 		localeCode: "en",
 	});
 
-	expect(prefix).toBe("blog");
+	expect(prefix).toBe("/blog");
 });
 
 test("should resolve a locale specific prefix", async () => {
@@ -48,5 +48,5 @@ test("should resolve a locale specific prefix", async () => {
 		localeCode: "fr",
 	});
 
-	expect(prefix).toBe("actualites");
+	expect(prefix).toBe("/actualites");
 });

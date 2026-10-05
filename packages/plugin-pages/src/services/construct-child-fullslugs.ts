@@ -1,33 +1,23 @@
 import type { FieldInputSchema, ServiceResponse } from "@lucidcms/core/types";
-import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
-import type { CollectionConfig } from "../types/types.js";
+import type { CollectionConfig, ProjectedFullSlug } from "../types/types.js";
 import buildFullSlug from "../utils/build-fullslug-from-slugs.js";
+import normalizePathValue from "../utils/normalize-path-value.js";
 import resolveCollectionPrefix from "../utils/resolve-collection-prefix.js";
 import type { ResolvedPagesCollectionLocalization } from "../utils/resolve-pages-collection-localization.js";
+import type { PageVersionFields } from "./get-pages-fields.js";
 
 /**
- *  Constructs the fullSlug for the child documents
+ * Constructs the fullSlug for the child documents, leaving out descendants
+ * whose stored routes already match so nothing is rewritten needlessly.
  */
 const constructChildFullSlug = (data: {
-	descendants: DescendantFieldsResponse[];
+	descendants: PageVersionFields[];
 	localization: ResolvedPagesCollectionLocalization;
 	parentFullSlugField?: FieldInputSchema;
 	collection: CollectionConfig;
 	routePrefixes?: Map<number, Map<string | null, string | null>>;
-}): Awaited<
-	ServiceResponse<
-		Array<{
-			documentId: number;
-			versionId: number;
-			fullSlugs: Map<string | null, string | null>;
-		}>
-	>
-> => {
-	const documentFullSlugs: Array<{
-		documentId: number;
-		versionId: number;
-		fullSlugs: Map<string | null, string | null>;
-	}> = [];
+}): Awaited<ServiceResponse<ProjectedFullSlug[]>> => {
+	const documentFullSlugs: ProjectedFullSlug[] = [];
 
 	for (const descendant of data.descendants) {
 		const fullSlug = new Map<string | null, string | null>();
@@ -39,8 +29,9 @@ const constructChildFullSlug = (data: {
 			if (
 				data.parentFullSlugField !== undefined &&
 				!data.parentFullSlugField.translations
-			)
+			) {
 				break;
+			}
 
 			for (const locale of data.localization.locales) {
 				const currentFullSlugValue =
@@ -70,8 +61,9 @@ const constructChildFullSlug = (data: {
 			if (
 				data.parentFullSlugField !== undefined &&
 				!data.parentFullSlugField.value
-			)
+			) {
 				break;
+			}
 
 			fullSlug.set(
 				data.localization.defaultLocale,
@@ -90,10 +82,18 @@ const constructChildFullSlug = (data: {
 			);
 		}
 
+		const unchanged = [...fullSlug].every(
+			([locale, value]) =>
+				normalizePathValue(
+					descendant.rows.find((row) => row.locale === locale)?._fullSlug,
+				) === normalizePathValue(value),
+		);
+		if (unchanged) continue;
+
 		documentFullSlugs.push({
 			documentId: descendant.document_id,
 			versionId: descendant.document_version_id,
-			fullSlugs: fullSlug,
+			values: fullSlug,
 		});
 	}
 

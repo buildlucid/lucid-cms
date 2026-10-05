@@ -52,7 +52,8 @@ export type ReleaseBlockerCode =
 	| "prerequisite"
 	| "review_required"
 	| "target_changed"
-	| "scheduling_unavailable";
+	| "scheduling_unavailable"
+	| "check";
 
 /** Something that stops a release from being approved or released. */
 export type ReleaseBlocker = {
@@ -61,6 +62,8 @@ export type ReleaseBlocker = {
 	target?: string;
 	/** The target that must be released first, for prerequisite blockers. */
 	required?: string;
+	/** Explains a blocker reported by a release check hook. */
+	message?: string;
 };
 
 type ReleaseEventBase = {

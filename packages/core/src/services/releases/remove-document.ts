@@ -1,3 +1,4 @@
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
 	ReleaseDocumentsRepository,
@@ -10,7 +11,10 @@ import deleteVersions from "./helpers/delete-versions.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
 import getReleaseAccess from "./helpers/get-release-access.js";
 
-/** Removes a document and its private versions. A release always keeps one document. */
+/**
+ * Removes a document and its private versions, then tells documentRemoved
+ * hooks what the release still holds. A release always keeps one document.
+ */
 const removeDocument: ServiceFn<
 	[{ id: number; releaseDocumentId: number; user: LucidUser }],
 	undefined
@@ -94,7 +98,32 @@ const removeDocument: ServiceFn<
 	});
 	if (eventsRes.error) return eventsRes;
 
-	return { error: undefined, data: undefined };
+	return executeHooks(
+		context,
+		{ service: "releases", event: "documentRemoved", config: context.config },
+		{
+			meta: { userId: data.user.id },
+			data: {
+				release: {
+					id: release.id,
+					documents: release.documents.flatMap((member) =>
+						member.id === document.id || member.source_version_id === null
+							? []
+							: [
+									{
+										collectionKey: member.collection_key,
+										documentId: member.document_id,
+										source: member.source,
+										versionId: member.source_version_id,
+									},
+								],
+					),
+				},
+				collectionKey: document.collection_key,
+				documentId: document.document_id,
+			},
+		},
+	);
 };
 
 export default removeDocument;

@@ -9,8 +9,9 @@ const resolveInheritedLocaleRows = <T extends { locale: string | null }>(
 		!inherited ||
 		locale === null ||
 		rows.some((row) => row.locale === locale)
-	)
+	) {
 		return rows;
+	}
 
 	return [...rows, { ...inherited, locale }];
 };

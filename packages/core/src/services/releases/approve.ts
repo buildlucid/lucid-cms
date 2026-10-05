@@ -112,7 +112,9 @@ const approve: ServiceFn<
 		};
 	}
 
-	if (getBlockers(context, { release, state: states }).length > 0) {
+	const blockersRes = await getBlockers(context, { release, state: states });
+	if (blockersRes.error) return blockersRes;
+	if (blockersRes.data.length > 0) {
 		return {
 			error: {
 				type: "basic",

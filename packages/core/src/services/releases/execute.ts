@@ -1,4 +1,8 @@
 import constants from "../../constants/constants.js";
+import type { CollectionTableNames } from "../../exports/types.js";
+import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
+import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
 import logger from "../../libs/logger/index.js";
 import {
@@ -7,6 +11,8 @@ import {
 	ReleasesRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
+import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
+import notifyChange from "../documents/notify-change.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
 import promoteVersion from "../documents-versions/promote-version.js";
 import loadActiveUser from "../users/helpers/load-active-user.js";
@@ -17,12 +23,16 @@ import getAllowedTargets from "./helpers/get-allowed-targets.js";
 import getBlockers from "./helpers/get-blockers.js";
 import getReleaseAccess from "./helpers/get-release-access.js";
 import getReleaseState from "./helpers/get-release-state.js";
+import type { ReleaseDocumentRecord } from "./types.js";
 
 /**
  * Runs a queued publication. Every approved snapshot is published to its
  * targets, in target order, inside the job's transaction, so either everything
- * is released or nothing is. Proposals are removed once released, as their
- * approved snapshots hold the same content.
+ * is released or nothing is. Promote hooks and change notifications run once
+ * every document is in place, so related documents in the release see each
+ * other whatever order they were added in and dependants are told once per
+ * target. Proposals are removed once released, as their approved snapshots
+ * hold the same content.
  *
  * A stale job, eg. after the schedule moved or the approval was dismissed,
  * does nothing. Failures carry diagnostics for the job's failure hook, which
@@ -75,7 +85,12 @@ const execute: ServiceFn<
 		const stateRes = await getReleaseState(context, { release });
 		if (stateRes.error) return stateRes;
 
-		if (getBlockers(context, { release, state: stateRes.data }).length > 0) {
+		const blockersRes = await getBlockers(context, {
+			release,
+			state: stateRes.data,
+		});
+		if (blockersRes.error) return blockersRes;
+		if (blockersRes.data.length > 0) {
 			return {
 				error: {
 					type: "basic",
@@ -86,6 +101,12 @@ const execute: ServiceFn<
 			};
 		}
 
+		const promoted: Array<{
+			document: ReleaseDocumentRecord;
+			collection: CollectionBuilder;
+			target: string;
+			versionId: number;
+		}> = [];
 		for (const document of release.documents) {
 			failureReleaseDocumentId = document.id;
 			failureTarget = null;
@@ -125,12 +146,119 @@ const execute: ServiceFn<
 					userId: user.id,
 					skipDocumentWriteClaims: true,
 					releaseId: release.id,
+					deferEffects: true,
 				});
 				if (promoteRes.error) return promoteRes;
+
+				promoted.push({
+					document,
+					collection: state.collection,
+					target: target.target,
+					versionId: promoteRes.data.versionId,
+				});
 			}
+		}
+
+		const tables = new Map<string, CollectionTableNames>();
+		for (const { document, collection, target, versionId } of promoted) {
+			failureReleaseDocumentId = document.id;
+			failureTarget = target;
+
+			let tableNames = tables.get(collection.key);
+			if (!tableNames) {
+				const tablesRes = await getTableNames(context, collection.key);
+				if (tablesRes.error) return tablesRes;
+
+				tableNames = tablesRes.data;
+				tables.set(collection.key, tableNames);
+			}
+
+			const hookRes = await executeHooks(
+				context,
+				{
+					service: "documents",
+					event: "versionPromote",
+					config: context.config,
+					collectionInstance: collection,
+				},
+				{
+					meta: {
+						collection,
+						collectionKey: document.collection_key,
+						userId: user.id,
+						collectionTableNames: tableNames,
+						release: {
+							id: release.id,
+							documents: release.documents.flatMap((document) =>
+								document.source_version_id === null
+									? []
+									: [
+											{
+												collectionKey: document.collection_key,
+												documentId: document.document_id,
+												source: document.source,
+												versionId: document.source_version_id,
+											},
+										],
+							),
+						},
+					},
+					data: {
+						documentId: document.document_id,
+						versionId,
+						versionType: target,
+					},
+				},
+			);
+			if (hookRes.error) return hookRes;
 		}
 		failureReleaseDocumentId = null;
 		failureTarget = null;
+
+		const publishedRes = await executeHooks(
+			context,
+			{ service: "releases", event: "published", config: context.config },
+			{
+				meta: { userId: user.id },
+				data: {
+					release: { id: release.id, revision: release.revision },
+					documents: release.documents.map((document) => ({
+						releaseDocumentId: document.id,
+						collectionKey: document.collection_key,
+						documentId: document.document_id,
+						source: document.source,
+						versions: promoted
+							.filter((entry) => entry.document.id === document.id)
+							.map((entry) => ({
+								target: entry.target,
+								versionId: entry.versionId,
+							})),
+					})),
+				},
+			},
+		);
+		if (publishedRes.error) return publishedRes;
+
+		//* dependants are told once per collection and target, after routes and other hooks have settled
+		const changes = Map.groupBy(
+			promoted,
+			(entry) => `${entry.document.collection_key}:${entry.target}`,
+		);
+		for (const collectionKey of new Set(
+			promoted.map((entry) => entry.document.collection_key),
+		)) {
+			await invalidateContentDocumentCache(context, collectionKey);
+		}
+		for (const entries of changes.values()) {
+			const [first] = entries;
+			if (!first) continue;
+			const changed = await notifyChange(context, {
+				change: { type: "published", version: first.target },
+				collectionKey: first.document.collection_key,
+				ids: [...new Set(entries.map((entry) => entry.document.document_id))],
+			});
+			if (changed.error) return changed;
+		}
 
 		const now = new Date().toISOString();
 		const updateRes = await Releases.updateSingle({

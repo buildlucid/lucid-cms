@@ -3,6 +3,7 @@ import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import resolvePagesCollectionLocalization from "../../utils/resolve-pages-collection-localization.js";
+import { resolveRouteScope } from "../../utils/route-scope.js";
 import {
 	checkCircularParents,
 	checkFieldsExist,
@@ -10,7 +11,8 @@ import {
 	checkParentIsPageOfSelf,
 	checkRootSlugWithParent,
 } from "../checks/index.js";
-import { getTargetCollection, setFullSlug } from "../index.js";
+import getTargetCollection from "../get-target-collection.js";
+import setFullSlug from "../set-full-slug.js";
 import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
 import {
 	applyDuplicateSlugCandidate,
@@ -21,6 +23,11 @@ import resolveParentFullSlug from "./helpers/resolve-parent-full-slug.js";
 
 const MAX_DUPLICATE_SLUG_ATTEMPTS = 50;
 
+/**
+ * Validates the page's parent and slug, then sets its fullSlug. Writes owned
+ * by a release read parents from the release's own versions, falling back to
+ * latest, and never compare against other releases.
+ */
 const beforeUpsertHandler =
 	(
 		options: PluginOptionsInternal,
@@ -43,6 +50,11 @@ const beforeUpsertHandler =
 			localization: context.config.localization,
 			collection: targetCollectionRes.data,
 			collectionInstance: meta.collection,
+		});
+		const scope = resolveRouteScope({
+			versionType: data.versionType,
+			release: meta.release,
+			collectionKey: meta.collectionKey,
 		});
 
 		const checkFieldsExistRes = checkFieldsExist({
@@ -89,11 +101,10 @@ const beforeUpsertHandler =
 		const isDuplicate = meta.execution.origin.type === "duplicate";
 		const duplicateSlugSource = getDuplicateSlugSource(slug);
 
-		// parent page checks and query
 		if (parentPageId !== null) {
 			const circularParentsRes = await checkCircularParents(context, {
 				documentId: data.documentId,
-				versionType: data.versionType,
+				scope,
 				collectionKey: targetCollectionRes.data.key,
 				fields: {
 					parentPage: parentPage,
@@ -108,12 +119,10 @@ const beforeUpsertHandler =
 				applyDuplicateSlugCandidate(slug, duplicateSlugSource, attempt);
 			}
 
-			// fullSlug construction
 			const fullSlugRes = await resolveParentFullSlug(context, {
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,
-				collectionKey: targetCollectionRes.data.key,
-				versionType: data.versionType,
+				scope,
 				tables: meta.collectionTableNames,
 				fields: {
 					slug: slug,
@@ -136,14 +145,13 @@ const beforeUpsertHandler =
 				{
 					documentId: data.documentId,
 					versionId: data.versionId,
-					fullSlugs: fullSlugRes.data,
+					values: fullSlugRes.data,
 				},
 			];
 
 			const descendantFullSlugsRes = await buildDescendantFullSlugs(context, {
 				documentIds: [data.documentId],
-				versionType: data.versionType,
-				collectionKey: targetCollectionRes.data.key,
+				scope,
 				tables: meta.collectionTableNames,
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,
@@ -157,8 +165,7 @@ const beforeUpsertHandler =
 				{
 					collection: targetCollectionRes.data,
 					projectedFullSlugs,
-					versionType: data.versionType,
-					collectionKey: targetCollectionRes.data.key,
+					scope,
 					tables: meta.collectionTableNames,
 					excludeDocumentIds: projectedFullSlugs.map((doc) => doc.documentId),
 				},

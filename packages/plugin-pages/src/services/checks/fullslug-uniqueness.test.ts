@@ -30,17 +30,22 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
+				values: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
+				values: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 		]);
 
 		expect(findProjectedRouteDuplicates(items)).toEqual([
-			{ locale: "en", fullSlug: "/docs/v1/about" },
+			{
+				documentId: 2,
+				versionId: 20,
+				locale: "en",
+				fullSlug: "/docs/v1/about",
+			},
 		]);
 	});
 
@@ -49,14 +54,14 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: new Map(Object.entries({ en: "/docs/v2/about" })),
+				values: new Map(Object.entries({ en: "/docs/v2/about" })),
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
+				values: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 		]);
 
@@ -70,20 +75,27 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: new Map(Object.entries({ en: "/Docs/V1/About" })),
+				values: new Map(Object.entries({ en: "/Docs/V1/About" })),
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: new Map(Object.entries({ en: "/docs/v1/about" })),
+				values: new Map(Object.entries({ en: "/docs/v1/about" })),
 			},
 		]);
 
 		expect(
 			findExistingRouteCollisions({ projectedItems, existingItems }),
-		).toEqual([{ locale: "en", fullSlug: "/docs/v1/about" }]);
+		).toEqual([
+			{
+				documentId: 1,
+				versionId: 10,
+				locale: "en",
+				fullSlug: "/docs/v1/about",
+			},
+		]);
 	});
 
 	test("keeps localized collisions scoped to their locale", () => {
@@ -91,22 +103,22 @@ describe("fullSlug route uniqueness", () => {
 			{
 				documentId: 1,
 				versionId: 10,
-				fullSlugs: new Map(Object.entries({ en: "/about", fr: "/a-propos" })),
+				values: new Map(Object.entries({ en: "/about", fr: "/a-propos" })),
 			},
 		]);
 		const existingItems = buildItems([
 			{
 				documentId: 2,
 				versionId: 20,
-				fullSlugs: new Map(
-					Object.entries({ en: "/different", fr: "/a-propos" }),
-				),
+				values: new Map(Object.entries({ en: "/different", fr: "/a-propos" })),
 			},
 		]);
 
 		expect(
 			findExistingRouteCollisions({ projectedItems, existingItems }),
-		).toEqual([{ locale: "fr", fullSlug: "/a-propos" }]);
+		).toEqual([
+			{ documentId: 1, versionId: 10, locale: "fr", fullSlug: "/a-propos" },
+		]);
 	});
 
 	test("uses the supplied message for projected collisions", async () => {
@@ -119,16 +131,15 @@ describe("fullSlug route uniqueness", () => {
 				{
 					documentId: 1,
 					versionId: 10,
-					fullSlugs: new Map(Object.entries({ en: "/about" })),
+					values: new Map(Object.entries({ en: "/about" })),
 				},
 				{
 					documentId: 2,
 					versionId: 20,
-					fullSlugs: new Map(Object.entries({ en: "/about" })),
+					values: new Map(Object.entries({ en: "/about" })),
 				},
 			],
-			versionType: "latest",
-			collectionKey: "pages",
+			scope: { type: "version", versionType: "latest" },
 			tables: {} as never,
 			duplicateMessage,
 		});
@@ -148,11 +159,10 @@ describe("fullSlug route uniqueness", () => {
 				{
 					documentId: 1,
 					versionId: 10,
-					fullSlugs: new Map(Object.entries({ en: "/about" })),
+					values: new Map(Object.entries({ en: "/about" })),
 				},
 			],
-			versionType: "latest",
-			collectionKey: "pages",
+			scope: { type: "version", versionType: "latest" },
 			tables: {} as never,
 		});
 

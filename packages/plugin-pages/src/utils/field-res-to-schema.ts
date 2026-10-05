@@ -1,21 +1,21 @@
 import type { FieldInputSchema, FieldValue } from "@lucidcms/core/types";
-import type { VersionFieldsQueryResponse } from "../services/get-document-version-fields.js";
+import type { PageFieldsRow } from "../services/get-pages-fields.js";
 import type { ResolvedPagesCollectionLocalization } from "./resolve-pages-collection-localization.js";
 
-/** Converts stored page fields into the input shape consumed by route hooks. */
 const fieldResToSchema = (
 	key: string,
 	fieldLocalized: boolean,
 	localization: ResolvedPagesCollectionLocalization,
-	items: VersionFieldsQueryResponse[],
+	items: PageFieldsRow[],
 	relationCollectionKey?: string,
 ): FieldInputSchema => {
 	if (key !== "slug" && key !== "fullSlug" && key !== "parentPage") {
 		throw new Error(`Unable to determine field type for key: ${key}`);
 	}
-	const valueFor = (item?: VersionFieldsQueryResponse): FieldValue => {
-		if (key !== "parentPage")
+	const valueFor = (item?: PageFieldsRow): FieldValue => {
+		if (key !== "parentPage") {
 			return item?.[key === "slug" ? "_slug" : "_fullSlug"] ?? null;
+		}
 		return typeof item?._parentPage === "number" && relationCollectionKey
 			? [{ id: item._parentPage, collectionKey: relationCollectionKey }]
 			: [];

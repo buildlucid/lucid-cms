@@ -94,24 +94,6 @@ test("loads a single translation file source", async () => {
 	expect(bundles.es.server["test.file"]).toBe("Single file");
 });
 
-test("loads translation sources from package subpath specifiers", async () => {
-	const prepared = await prepareResources(
-		{
-			directories: { public: false },
-			sources: { translations: ["@lucidcms/plugin-pages/translations"] },
-		},
-		process.cwd(),
-	);
-	const bundles = await loadTranslationSources({
-		files: prepared.files.translations,
-	});
-
-	expect(bundles.en.admin["plugin.pages.fields.slug.label"]).toBe("Slug");
-	expect(bundles.en.server["plugin.pages.fields.required.missing"]).toBe(
-		"Cannot find required fields for the pages plugin.",
-	);
-});
-
 test("loads package sources from the project node_modules tree", async () => {
 	const packageRoot = path.join(
 		projectRoot,

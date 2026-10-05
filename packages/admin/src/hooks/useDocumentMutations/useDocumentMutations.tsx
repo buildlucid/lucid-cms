@@ -219,6 +219,8 @@ export function useDocumentMutations(props: {
 	};
 
 	const upsertDocumentAction = async () => {
+		//* with autosave on, Save stays usable once a change has been saved; nothing is sent again
+		if (props.mode !== "create" && !brickStore.getDocumentMutated()) return;
 		if (props.mode === "create") {
 			createDocumentMutation.action.mutate({
 				collectionKey: props.collectionKey(),

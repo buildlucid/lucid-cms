@@ -116,9 +116,13 @@ const releaseBlockersSchema = z.array(
 			"review_required",
 			"target_changed",
 			"scheduling_unavailable",
+			"check",
 		]),
 		target: z.string().optional(),
 		required: z.string().optional(),
+		message: z.string().optional().meta({
+			description: "Explains a blocker reported by a release check hook",
+		}),
 	}),
 );
 

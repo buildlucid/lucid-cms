@@ -1,147 +1,51 @@
 import { copy } from "@lucidcms/core";
-import { prefixGeneratedColName } from "@lucidcms/core/extension";
 import type {
 	CollectionTableNames,
-	DocumentVersionType,
 	FieldInputSchema,
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../constants.js";
+import type { RouteScope } from "../types/types.js";
 import getParentPageId from "../utils/get-parent-page-id.js";
-import getParentPageRelationTable from "../utils/get-parent-page-relation-table.js";
-import resolveInheritedLocaleRows from "../utils/resolve-inherited-locale-rows.js";
+import getPagesFields, { type PageFieldsRow } from "./get-pages-fields.js";
 
-export type ParentPageQueryResponse = {
-	_slug: string | null;
-	_fullSlug: string | null;
-	_parentPage: number | null;
+export type ParentPageQueryResponse = PageFieldsRow & {
 	document_id: number;
-	locale: string | null;
 };
 
 /**
- *  Get the parent document pages fields
+ * Reads the parent page's route fields in the scope's version of it. A parent
+ * without that version is an error.
  */
 const getParentFields: ServiceFn<
 	[
 		{
 			defaultLocale: string | null;
-			versionType: Exclude<DocumentVersionType, "revision">;
+			scope: RouteScope;
 			collectionKey: string;
 			fields: {
 				parentPage: FieldInputSchema;
 			};
 			tables: CollectionTableNames;
-			missingParentIsEmpty?: boolean;
 		},
 	],
 	Array<ParentPageQueryResponse>
 > = async (context, data) => {
-	try {
-		const parentPageId = getParentPageId(data.fields.parentPage);
-		if (parentPageId === null) {
-			return {
-				error: undefined,
-				data: [],
-			};
-		}
-
-		const { version: versionTable, documentFields: fieldsTable } = data.tables;
-
-		const slugColumn = prefixGeneratedColName(constants.fields.slug.key);
-		const parentPageColumn = prefixGeneratedColName("document_id");
-		const fullSlugColumn = prefixGeneratedColName(
-			constants.fields.fullSlug.key,
-		);
-		const parentPageTableRes = getParentPageRelationTable(
-			data.collectionKey,
-			context.config.db.config.tableNameByteLimit,
-		);
-		if (parentPageTableRes.error) return parentPageTableRes;
-		const parentPageTable = parentPageTableRes.data;
-		const defaultFieldsAlias = "default_fields";
-
-		const parentFieldsResult = await context.db
-			.query("pages.parent-fields.find", (db) =>
-				db
-					.selectFrom(fieldsTable)
-					.innerJoin(
-						versionTable,
-						`${versionTable}.id`,
-						`${fieldsTable}.document_version_id`,
-					)
-					.leftJoin(`${fieldsTable} as ${defaultFieldsAlias}`, (join) =>
-						join
-							.onRef(
-								`${defaultFieldsAlias}.document_version_id`,
-								"=",
-								`${fieldsTable}.document_version_id`,
-							)
-							.on(`${defaultFieldsAlias}.locale`, "is", null),
-					)
-					.leftJoin(parentPageTable, (join) =>
-						join
-							.onRef(
-								`${parentPageTable}.parent_id`,
-								"=",
-								`${defaultFieldsAlias}.id`,
-							)
-							.on(`${parentPageTable}.locale`, "is", null),
-					)
-					// @ts-expect-error
-					.select([
-						`${fieldsTable}.${slugColumn}`,
-						`${fieldsTable}.${fullSlugColumn}`,
-						`${parentPageTable}.${parentPageColumn} as _parentPage`,
-						`${versionTable}.document_id`,
-						`${fieldsTable}.locale`,
-					])
-					.where(`${versionTable}.document_id`, "=", parentPageId)
-					.where(`${versionTable}.type`, "=", data.versionType),
-			)
-			.many();
-		if (parentFieldsResult.error) return parentFieldsResult;
-		const parentFields = parentFieldsResult.data;
-
-		if (!parentFields || parentFields.length === 0) {
-			if (data.missingParentIsEmpty) {
-				return {
-					error: undefined,
-					data: [],
-				};
-			}
-
-			return {
-				error: {
-					type: "basic",
-					status: 404,
-					message: copy(
-						"server:plugin.pages.parents.published.version.not.found",
-					),
-					errors: {
-						fields: [
-							{
-								key: constants.fields.parentPage.key,
-								localeCode: data.defaultLocale,
-								message: copy(
-									"server:plugin.pages.parents.published.version.not.found",
-								),
-							},
-						],
-					},
-				},
-				data: undefined,
-			};
-		}
-
+	const parentPageId = getParentPageId(data.fields.parentPage);
+	if (parentPageId === null) {
 		return {
 			error: undefined,
-			data: resolveInheritedLocaleRows(
-				parentFields as unknown as Array<ParentPageQueryResponse>,
-				data.defaultLocale,
-			),
+			data: [],
 		};
-	} catch (_error) {
+	}
+
+	const parentRes = await getPagesFields(context, {
+		collectionKey: data.collectionKey,
+		scope: data.scope,
+		tables: data.tables,
+		documentIds: [parentPageId],
+	});
+	if (parentRes.error) {
 		return {
 			error: {
 				type: "basic",
@@ -151,6 +55,39 @@ const getParentFields: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	const parent = parentRes.data[0];
+	if (!parent) {
+		return {
+			error: {
+				type: "basic",
+				status: 404,
+				message: copy(
+					"server:plugin.pages.parents.published.version.not.found",
+				),
+				errors: {
+					fields: [
+						{
+							key: constants.fields.parentPage.key,
+							localeCode: data.defaultLocale,
+							message: copy(
+								"server:plugin.pages.parents.published.version.not.found",
+							),
+						},
+					],
+				},
+			},
+			data: undefined,
+		};
+	}
+
+	return {
+		error: undefined,
+		data: parent.rows.map((row) => ({
+			...row,
+			document_id: parent.document_id,
+		})),
+	};
 };
 
 export default getParentFields;

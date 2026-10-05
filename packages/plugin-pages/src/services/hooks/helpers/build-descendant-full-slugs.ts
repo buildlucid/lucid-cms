@@ -1,33 +1,33 @@
 import type { CollectionBuilder } from "@lucidcms/core";
 import type {
 	CollectionTableNames,
-	DocumentVersionType,
 	FieldInputSchema,
 	ServiceFn,
 } from "@lucidcms/core/types";
-import type { CollectionConfig } from "../../../types/types.js";
+import type {
+	CollectionConfig,
+	ProjectedFullSlug,
+	RouteScope,
+} from "../../../types/types.js";
 import resolvePagesCollectionLocalization from "../../../utils/resolve-pages-collection-localization.js";
+import { scopeRelationVersionType } from "../../../utils/route-scope.js";
 import constructChildFullSlug from "../../construct-child-fullslugs.js";
 import getDescendantFields from "../../get-descendant-fields.js";
 import resolveStoredRoutePrefixes from "../../resolve-stored-route-prefixes.js";
 
+/** Projects new full slugs for every descendant version the scope may rewrite. */
 const buildDescendantFullSlugs: ServiceFn<
 	[
 		{
 			documentIds: number[];
-			versionType: Exclude<DocumentVersionType, "revision">;
-			collectionKey: string;
+			scope: RouteScope;
 			tables: CollectionTableNames;
 			collection: CollectionConfig;
 			collectionInstance: CollectionBuilder;
 			parentFullSlugField?: FieldInputSchema;
 		},
 	],
-	Array<{
-		documentId: number;
-		versionId: number;
-		fullSlugs: Map<string | null, string | null>;
-	}>
+	ProjectedFullSlug[]
 > = async (context, data) => {
 	const localization = resolvePagesCollectionLocalization({
 		localization: context.config.localization,
@@ -37,15 +37,15 @@ const buildDescendantFullSlugs: ServiceFn<
 
 	const descendantsRes = await getDescendantFields(context, {
 		ids: data.documentIds,
-		versionType: data.versionType,
-		collectionKey: data.collectionKey,
+		scope: data.scope,
+		collectionKey: data.collection.key,
 		tables: data.tables,
 	});
 	if (descendantsRes.error) return descendantsRes;
 	const routePrefixesRes = await resolveStoredRoutePrefixes(context, {
 		collection: data.collection,
 		collectionInstance: data.collectionInstance,
-		versionType: data.versionType,
+		versionType: scopeRelationVersionType(data.scope),
 		versionIds: descendantsRes.data.map(
 			(descendant) => descendant.document_version_id,
 		),

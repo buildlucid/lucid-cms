@@ -1,6 +1,9 @@
-export { default as afterFetchHandler } from "./after-fetch-handler.js";
 export { default as afterRestoreHandler } from "./after-restore-handler.js";
 export { default as afterUpsertHandler } from "./after-upsert-handler.js";
 export { default as beforeDeleteHandler } from "./before-delete-handler.js";
 export { default as beforeUpsertHandler } from "./before-upsert-handler.js";
+export { default as releaseCheckHandler } from "./release-check-handler.js";
+export { default as releaseDocumentRemovedHandler } from "./release-document-removed-handler.js";
+export { default as releasePublishedHandler } from "./release-published-handler.js";
+export { default as versionCaptureHandler } from "./version-capture.js";
 export { default as versionPromoteHandler } from "./version-promote.js";

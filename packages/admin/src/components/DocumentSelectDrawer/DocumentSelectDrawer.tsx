@@ -72,6 +72,8 @@ interface DocumentSelectPanelProps {
 		onSelect: (selection: {
 			value: RelationFieldValue[];
 			refs: DocumentRef[];
+			/** The picked documents as listed, for callers that need more than a ref. */
+			documents: InternalCollectionDocument[];
 		}) => void;
 	};
 }
@@ -123,6 +125,7 @@ interface DocumentSelectContentProps {
 	onSelect: (selection: {
 		value: RelationFieldValue[];
 		refs: DocumentRef[];
+		documents: InternalCollectionDocument[];
 	}) => void;
 }
 
@@ -134,6 +137,10 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	const [selectedDocuments, setSelectedDocuments] = createSignal<DocumentRef[]>(
 		[],
 	);
+	//* the listed records behind the selected refs, keyed by collection and ID
+	const [selectedRecords, setSelectedRecords] = createSignal<
+		Map<string, InternalCollectionDocument>
+	>(new Map());
 	const [activeCollectionKey, setActiveCollectionKey] = createSignal<string>();
 	const [filterSectionOpen, setFilterPanelOpen] = createSignal(false);
 	const pageBuilderState = usePageBuilderState();
@@ -464,6 +471,11 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 	// Functions
 	const toggleSelectedDocument = (document: InternalCollectionDocument) => {
 		const nextRef = documentResponseToRef(document);
+		setSelectedRecords((prev) => {
+			const next = new Map(prev);
+			next.set(`${document.collectionKey}:${document.id}`, document);
+			return next;
+		});
 
 		setSelectedDocuments((prev) => {
 			const exists = prev.some(
@@ -490,6 +502,10 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 		props.onSelect({
 			value: selectedDocumentValues(),
 			refs: selectedDocuments(),
+			documents: selectedDocuments().flatMap((ref) => {
+				const record = selectedRecords().get(`${ref.collectionKey}:${ref.id}`);
+				return record ? [record] : [];
+			}),
 		});
 	};
 

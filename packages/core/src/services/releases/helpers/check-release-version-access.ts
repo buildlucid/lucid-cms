@@ -1,3 +1,4 @@
+import type { DocumentHookRelease } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { ReleasesRepository } from "../../../libs/repositories/index.js";
 import type { LucidUser } from "../../../types/hono.js";
@@ -8,7 +9,8 @@ import getReleaseAccess from "./get-release-access.js";
 /**
  * Release proposals and snapshots belong to one release. Reading them needs
  * access to that release, and editing a proposal needs edit access to its
- * document while the release is open.
+ * document while the release is open. Returns the release and the versions it
+ * has captured, so writes can resolve relations within the release.
  */
 const checkReleaseVersionAccess: ServiceFn<
 	[
@@ -20,7 +22,7 @@ const checkReleaseVersionAccess: ServiceFn<
 			edit?: boolean;
 		},
 	],
-	undefined
+	DocumentHookRelease
 > = async (context, data) => {
 	const Releases = new ReleasesRepository(context.db);
 
@@ -57,7 +59,22 @@ const checkReleaseVersionAccess: ServiceFn<
 		};
 	}
 
-	if (!data.edit) return { error: undefined, data: undefined };
+	const release: DocumentHookRelease = {
+		id: owner.id,
+		documents: owner.documents.flatMap((document) =>
+			document.source_version_id === null
+				? []
+				: [
+						{
+							collectionKey: document.collection_key,
+							documentId: document.document_id,
+							source: document.source,
+							versionId: document.source_version_id,
+						},
+					],
+		),
+	};
+	if (!data.edit) return { error: undefined, data: release };
 
 	if (
 		owner.source !== "latest" ||
@@ -78,7 +95,7 @@ const checkReleaseVersionAccess: ServiceFn<
 		};
 	}
 
-	return { error: undefined, data: undefined };
+	return { error: undefined, data: release };
 };
 
 export default checkReleaseVersionAccess;

@@ -72,8 +72,7 @@ describe("page full-slug helpers", () => {
 		const response = await resolveParentFullSlug(context, {
 			collection,
 			collectionInstance,
-			collectionKey: "pages",
-			versionType: "latest",
+			scope: { type: "version", versionType: "latest" },
 			tables: {} as never,
 			fields: {
 				slug: { key: "slug", type: "text", value: "child" },
@@ -111,8 +110,7 @@ describe("page full-slug helpers", () => {
 
 		const response = await buildDescendantFullSlugs(context, {
 			documentIds: [1],
-			versionType: "latest",
-			collectionKey: "pages",
+			scope: { type: "version", versionType: "latest" },
 			tables: {} as never,
 			collection,
 			collectionInstance,
@@ -128,7 +126,7 @@ describe("page full-slug helpers", () => {
 			{
 				documentId: 2,
 				versionId: 22,
-				fullSlugs: new Map([[null, "/parent/child"]]),
+				values: new Map([[null, "/parent/child"]]),
 			},
 		]);
 	});

@@ -1,3 +1,4 @@
+import { z } from "@lucidcms/core";
 import {
 	buildTableName,
 	prefixGeneratedColName,
@@ -8,7 +9,6 @@ import type {
 	RouteSegmentSelection,
 } from "../types/types.js";
 
-/** Reads stored route-segment selections for a batch of page versions. */
 const getStoredRouteSegmentSelections: ServiceFn<
 	[
 		{
@@ -18,10 +18,16 @@ const getStoredRouteSegmentSelections: ServiceFn<
 	],
 	RouteSegmentSelection[]
 > = async (context, data) => {
-	if (data.sources.length === 0) return { error: undefined, data: [] };
+	if (data.sources.length === 0 || data.collection.segments.length === 0) {
+		return { error: undefined, data: [] };
+	}
 	const versionIds = [
 		...new Set(data.sources.map((source) => source.versionId)),
 	];
+	const batchSize = context.config.db.getQueryBatchSize({
+		parametersPerItem: 1,
+		reservedParameters: 1,
+	});
 	const results = await Promise.all(
 		data.collection.segments.map(async (segment, index) => {
 			const tableRes = buildTableName<LucidBrickTableName>(
@@ -35,27 +41,40 @@ const getStoredRouteSegmentSelections: ServiceFn<
 			if (tableRes.error) return tableRes;
 
 			const table = tableRes.data.name;
-			const result = await context.db
-				.query("pages.route-segment.relation.find", (db) =>
-					db
-						.selectFrom(table)
-						.select([
-							`${table}.document_version_id`,
-							`${table}.${prefixGeneratedColName("collection_key")} as collection_key`,
-							`${table}.${prefixGeneratedColName("document_id")} as document_id`,
-						])
-						.where(`${table}.document_version_id`, "in", versionIds)
-						.where(`${table}.locale`, "is", null)
-						.where(`${table}.position`, "=", 0),
-				)
-				.many();
-			if (result.error) return result;
-
-			const rows = result.data as Array<{
+			const rows: Array<{
 				document_version_id: number;
 				collection_key: string;
 				document_id: number;
-			}>;
+			}> = [];
+			for (let offset = 0; offset < versionIds.length; offset += batchSize) {
+				const query = context.db.kysely
+					.selectFrom(table)
+					.select([
+						`${table}.document_version_id`,
+						`${table}.${prefixGeneratedColName("collection_key")} as collection_key`,
+						`${table}.${prefixGeneratedColName("document_id")} as document_id`,
+					])
+					.where(
+						`${table}.document_version_id`,
+						"in",
+						versionIds.slice(offset, offset + batchSize),
+					)
+					.where(`${table}.locale`, "is", null)
+					.where(`${table}.position`, "=", 0);
+
+				const result = await context.db
+					.query("pages.route-segment.relation.find", () => query)
+					.many({
+						schema: z.object({
+							document_version_id: z.number(),
+							collection_key: z.string(),
+							document_id: z.number(),
+						}),
+					});
+				if (result.error) return result;
+				rows.push(...result.data);
+			}
+
 			const rowsByVersionId = new Map(
 				rows.map((row) => [row.document_version_id, row]),
 			);

@@ -1,17 +1,28 @@
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import constants from "../../constants.js";
 import type { PluginOptionsInternal } from "../../types/types.js";
-import { updateFullSlugFields } from "../index.js";
+import { resolveRouteScope } from "../../utils/route-scope.js";
+import updateRouteFields from "../update-route-fields.js";
 import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
 import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
+/**
+ * Rewrites descendant routes once a page is saved. A release write only
+ * rewrites descendants captured in the same release. Route-segment changes
+ * only propagate from latest and environment versions.
+ */
 const afterUpsertHandler =
 	(
 		options: PluginOptionsInternal,
 	): LucidHookDocuments<"afterUpsert">["handler"] =>
 	async ({ context, toolkit, data, meta }) => {
+		const scope = resolveRouteScope({
+			versionType: data.versionType,
+			release: meta.release,
+			collectionKey: meta.collectionKey,
+		});
+
 		// ----------------------------------------------------------------
-		// Rebuild descendants when the changed document is itself a page.
 		const pageCollection = options.collections.find(
 			(collection) => collection.key === meta.collectionKey,
 		);
@@ -21,8 +32,7 @@ const afterUpsertHandler =
 		if (pageCollection && currentFullSlugField) {
 			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
 				documentIds: [data.documentId],
-				versionType: data.versionType,
-				collectionKey: pageCollection.key,
+				scope,
 				tables: meta.collectionTableNames,
 				collection: pageCollection,
 				collectionInstance: meta.collection,
@@ -31,33 +41,30 @@ const afterUpsertHandler =
 			if (docFullSlugsRes.error) return docFullSlugsRes;
 
 			if (docFullSlugsRes.data.length > 0) {
-				const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
+				const updateRes = await updateRouteFields(context, {
 					collectionKey: meta.collectionKey,
+					field: "fullSlug",
 					excludeDocumentIds: [data.documentId],
-					docFullSlugs: docFullSlugsRes.data,
-					versionType: data.versionType,
+					values: docFullSlugsRes.data,
+					scope,
 					tables: meta.collectionTableNames,
 					toolkit,
 				});
-				if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
+				if (updateRes.error) return updateRes;
 			}
+		}
+		if (scope.type !== "version") {
+			return { error: undefined, data: undefined };
 		}
 
 		// ----------------------------------------------------------------
-		// Rebuild pages that use this document as a route segment.
-		const propagationRes = await propagateRouteSegmentUpdates(context, {
+		return propagateRouteSegmentUpdates(context, {
 			toolkit,
 			options,
 			targetCollectionKey: meta.collectionKey,
 			targetDocumentId: data.documentId,
-			targetVersionType: data.versionType,
+			targetVersionType: scope.versionType,
 		});
-		if (propagationRes.error) return propagationRes;
-
-		return {
-			error: undefined,
-			data: undefined,
-		};
 	};
 
 export default afterUpsertHandler;

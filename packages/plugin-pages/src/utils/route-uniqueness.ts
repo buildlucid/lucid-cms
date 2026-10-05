@@ -1,22 +1,17 @@
-import type {
-	ProjectedFullSlug,
-	RouteUniquenessConflict,
-	RouteUniquenessItem,
-} from "../types/types.js";
+import type { ProjectedFullSlug, RouteUniquenessItem } from "../types/types.js";
 import normalizePathValue from "./normalize-path-value.js";
 
 const routeKey = (item: RouteUniquenessItem) => {
 	return `${item.locale}::${item.fullSlug}`;
 };
 
-/** Flattens projected per-locale fullSlugs into comparable route items. */
 export const buildRouteUniquenessItems = (data: {
 	projectedFullSlugs: ProjectedFullSlug[];
 }): RouteUniquenessItem[] => {
 	const items: RouteUniquenessItem[] = [];
 
 	for (const projected of data.projectedFullSlugs) {
-		for (const [locale, fullSlug] of projected.fullSlugs) {
+		for (const [locale, fullSlug] of projected.values) {
 			const normalizedFullSlug = normalizePathValue(fullSlug);
 			if (typeof normalizedFullSlug !== "string") continue;
 
@@ -35,17 +30,14 @@ export const buildRouteUniquenessItems = (data: {
 /** Finds duplicate routes within the set we are about to write. */
 export const findProjectedRouteDuplicates = (
 	items: RouteUniquenessItem[],
-): RouteUniquenessConflict[] => {
+): RouteUniquenessItem[] => {
 	const seen = new Map<string, RouteUniquenessItem>();
-	const conflicts: RouteUniquenessConflict[] = [];
+	const conflicts: RouteUniquenessItem[] = [];
 
 	for (const item of items) {
 		const key = routeKey(item);
 		if (seen.has(key)) {
-			conflicts.push({
-				locale: item.locale,
-				fullSlug: item.fullSlug,
-			});
+			conflicts.push(item);
 			continue;
 		}
 
@@ -59,21 +51,18 @@ export const findProjectedRouteDuplicates = (
 export const findExistingRouteCollisions = (data: {
 	projectedItems: RouteUniquenessItem[];
 	existingItems: RouteUniquenessItem[];
-}): RouteUniquenessConflict[] => {
+}): RouteUniquenessItem[] => {
 	const projectedByKey = new Map<string, RouteUniquenessItem>();
 	for (const item of data.projectedItems) {
 		projectedByKey.set(routeKey(item), item);
 	}
 
-	const conflicts: RouteUniquenessConflict[] = [];
+	const conflicts: RouteUniquenessItem[] = [];
 	for (const item of data.existingItems) {
 		const projected = projectedByKey.get(routeKey(item));
 		if (!projected) continue;
 
-		conflicts.push({
-			locale: projected.locale,
-			fullSlug: projected.fullSlug,
-		});
+		conflicts.push(projected);
 	}
 
 	return conflicts;

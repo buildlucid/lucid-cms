@@ -1,10 +1,10 @@
-import type { DescendantFieldsResponse } from "../services/get-descendant-fields.js";
+import type { PageVersionFields } from "../services/get-pages-fields.js";
 import formatFullSlug from "./format-fullslug.js";
 
 const buildFullSlugFromSlugs = (data: {
 	targetLocale: string | null;
-	currentDescendant: DescendantFieldsResponse;
-	descendants: Array<DescendantFieldsResponse>;
+	currentDescendant: PageVersionFields;
+	descendants: Array<PageVersionFields>;
 	topLevelFullSlug?: string;
 }): string | null => {
 	const rowForLocale = data.currentDescendant.rows.find(

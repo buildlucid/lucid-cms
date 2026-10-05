@@ -83,37 +83,6 @@ describe("constructParentFullSlug", () => {
 		});
 	});
 
-	test("keeps snapshot previews readable when a parent route is missing", () => {
-		const result = constructParentFullSlug({
-			collection: { ...collection, localized: true },
-			missingParentIsEmpty: true,
-			localization: {
-				enabled: true,
-				defaultLocale: "fr",
-				storageLocale: null,
-				locales: ["de", "fr"],
-			},
-			parentFields: [
-				{
-					document_id: 1,
-					locale: "fr",
-					_slug: "parent",
-					_fullSlug: "/parent",
-					_parentPage: null,
-				},
-			],
-			fields: {
-				slug: {
-					key: "slug",
-					type: "text",
-					translations: { de: "child", fr: "" },
-				},
-			},
-		});
-		expect(result.error).toBeUndefined();
-		expect(result.data?.get("de")).toBe("/en/child");
-	});
-
 	test("allows a child when its parent has the matching route and other child translations are empty", () => {
 		const result = constructParentFullSlug({
 			collection: { ...collection, localized: true },
@@ -170,5 +139,32 @@ describe("constructParentFullSlug", () => {
 		});
 
 		expect(result.error?.status).toBe(400);
+	});
+
+	test("matches a parent under the collection prefix when no segment prefix is given", () => {
+		const result = constructParentFullSlug({
+			collection: {
+				...collection,
+				segments: [
+					{ relation: "product", collection: "products", field: "key" },
+				],
+			},
+			localization,
+			parentFields: [
+				{
+					document_id: 1,
+					locale: null,
+					_slug: "parent",
+					_fullSlug: "/en/parent",
+					_parentPage: null,
+				},
+			],
+			fields: {
+				slug: { key: "slug", type: "text", value: "about" },
+			},
+		});
+
+		expect(result.error).toBeUndefined();
+		expect(result.data?.get(null)).toBe("/en/parent/about");
 	});
 });

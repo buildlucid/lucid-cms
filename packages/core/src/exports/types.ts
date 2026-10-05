@@ -231,7 +231,9 @@ export type {
 	DocumentBeforeUpsertHookOrigin,
 	DocumentChangeMetadata,
 	DocumentDeleteHookData,
+	DocumentHookRelease,
 	DocumentHooks,
+	DocumentVersionCaptureHookData,
 	DocumentVersionPromoteHookData,
 	DocumentWorkflowAfterUpdateHookData,
 	DocumentWorkflowHooks,
@@ -244,6 +246,11 @@ export type {
 	MediaAfterUpdateHookData,
 	MediaChangeMetadata,
 	MediaHooks,
+	ReleaseCheckBlocker,
+	ReleaseCheckHookData,
+	ReleaseDocumentRemovedHookData,
+	ReleaseHooks,
+	ReleasePublishedHookData,
 	TransformHookPayload,
 } from "../libs/hooks/types.js";
 export type {

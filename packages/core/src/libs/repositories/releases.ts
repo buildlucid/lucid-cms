@@ -471,7 +471,12 @@ export default class ReleasesRepository extends StaticRepository<"lucid_releases
 					.jsonArrayFrom(
 						eb
 							.selectFrom("lucid_release_documents as members")
-							.select("members.collection_key")
+							.select([
+								"members.collection_key",
+								"members.document_id",
+								"members.source",
+								"members.source_version_id",
+							])
 							.whereRef("members.release_id", "=", "lucid_releases.id"),
 					)
 					.as("documents"),

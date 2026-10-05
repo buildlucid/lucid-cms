@@ -1,11 +1,14 @@
-import type { Collection, ReleaseDocumentInput } from "@types";
+import type {
+	Collection,
+	InternalCollectionDocument,
+	ReleaseDocumentInput,
+} from "@types";
 import { FaSolidXmark } from "solid-icons/fa";
 import { type Component, createMemo, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
 import Select from "@/components/Select/Select";
-import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
@@ -14,35 +17,23 @@ import { getAllowedTargets, getTargetLabel } from "@/utils/releases";
 
 const ReleaseDocumentDraft: Component<{
 	draft: ReleaseDocumentInput;
+	/** The picked document as listed, which carries its label fields and version summary. */
+	document: InternalCollectionDocument | undefined;
 	collection: Collection | undefined;
 	onChange: (draft: ReleaseDocumentInput) => void;
 	onRemove: () => void;
 }> = (props) => {
 	// ----------------------------------------
-	// Queries
-	const saved = api.documents.useGetSingle({
-		queryParams: {
-			location: {
-				collectionKey: () => props.draft.collectionKey,
-				id: () => props.draft.documentId,
-				version: "latest",
-			},
-			include: { bricks: true },
-		},
-	});
-
-	// ----------------------------------------
 	// Memos
-	const label = createMemo(() => {
-		const record = saved.data?.data;
-		return props.collection && record
+	const label = createMemo(() =>
+		props.collection && props.document
 			? getDocumentPreviewLabel({
 					collection: props.collection,
-					document: record,
+					document: props.document,
 					contentLocale: contentLocaleStore.get.contentLocale ?? "",
 				})
-			: undefined;
-	});
+			: undefined,
+	);
 	const collectionLabel = createMemo(
 		() =>
 			helpers.getLocaleValue({
@@ -56,7 +47,7 @@ const ReleaseDocumentDraft: Component<{
 		...(props.collection?.publishing.targets ?? [])
 			.filter(
 				(environment) =>
-					saved.data?.data.versions[environment.key] &&
+					props.document?.versions[environment.key] &&
 					getAllowedTargets(props.collection, environment.key).length > 0,
 			)
 			.map((environment) => ({

@@ -1,13 +1,16 @@
 import { copy } from "@lucidcms/core";
 import type { LucidHookDocuments } from "@lucidcms/core/types";
-import type { PluginOptionsInternal } from "../../types/types.js";
+import type { PluginOptionsInternal, RouteScope } from "../../types/types.js";
 import { checkFullSlugUniqueness } from "../checks/index.js";
-import { getTargetCollection, updateFullSlugFields } from "../index.js";
+import getTargetCollection from "../get-target-collection.js";
+import updateRouteFields from "../update-route-fields.js";
 import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
 import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
 /**
- * Removes deleted parent pages and route segments from affected page paths.
+ * Removes deleted parent pages and route segments from affected page paths in
+ * latest and every environment. Release versions keep their routes until the
+ * release recomputes them.
  */
 const beforeDeleteHandler =
 	(
@@ -29,14 +32,12 @@ const beforeDeleteHandler =
 			collectionKey: meta.collectionKey,
 		});
 		if (targetCollectionRes.error) {
-			//* early return as doesnt apply to the current collection
 			return {
 				error: undefined,
 				data: undefined,
 			};
 		}
 
-		// Process both latest and all configured environments
 		const versionTypes = [
 			"latest",
 			...(meta.collection.getData.publishing.targets?.map((env) => env.key) ||
@@ -44,17 +45,16 @@ const beforeDeleteHandler =
 		];
 
 		for (const versionType of versionTypes) {
+			const scope: RouteScope = { type: "version", versionType };
 			const docFullSlugsRes = await buildDescendantFullSlugs(context, {
 				documentIds: data.ids,
-				versionType,
-				collectionKey: targetCollectionRes.data.key,
+				scope,
 				tables: meta.collectionTableNames,
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,
 			});
 			if (docFullSlugsRes.error) return docFullSlugsRes;
 
-			// Skip to next version type if no descendants found
 			if (docFullSlugsRes.data.length === 0) {
 				continue;
 			}
@@ -67,8 +67,7 @@ const beforeDeleteHandler =
 				{
 					collection: targetCollectionRes.data,
 					projectedFullSlugs: docFullSlugsRes.data,
-					versionType,
-					collectionKey: targetCollectionRes.data.key,
+					scope,
 					tables: meta.collectionTableNames,
 					excludeDocumentIds: [...data.ids, ...projectedDocumentIds],
 					duplicateMessage: copy(
@@ -78,15 +77,16 @@ const beforeDeleteHandler =
 			);
 			if (checkFullSlugUniquenessRes.error) return checkFullSlugUniquenessRes;
 
-			const updateFullSlugFieldsRes = await updateFullSlugFields(context, {
+			const updateRes = await updateRouteFields(context, {
 				toolkit,
 				collectionKey: meta.collectionKey,
+				field: "fullSlug",
 				excludeDocumentIds: data.ids,
-				docFullSlugs: docFullSlugsRes.data,
-				versionType,
+				values: docFullSlugsRes.data,
+				scope,
 				tables: meta.collectionTableNames,
 			});
-			if (updateFullSlugFieldsRes.error) return updateFullSlugFieldsRes;
+			if (updateRes.error) return updateRes;
 		}
 
 		return {

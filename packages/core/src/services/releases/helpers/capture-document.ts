@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
@@ -18,7 +19,8 @@ import createTargets from "./create-targets.js";
 import resolveTargets from "./resolve-targets.js";
 
 /**
- * Captures a document's fixed source and initial destinations for a release.
+ * Captures a document's fixed source and initial destinations for a release,
+ * then tells versionCapture hooks about the new proposal or snapshot.
  */
 const captureDocument: ServiceFn<
 	[
@@ -142,7 +144,54 @@ const captureDocument: ServiceFn<
 	});
 	if (targetsCreateRes.error) return targetsCreateRes;
 
-	return { error: undefined, data: undefined };
+	const membersRes = await ReleaseDocuments.selectMultiple({
+		select: ["collection_key", "document_id", "source", "source_version_id"],
+		where: [{ key: "release_id", operator: "=", value: data.releaseId }],
+	});
+	if (membersRes.error) return membersRes;
+
+	return executeHooks(
+		context,
+		{
+			service: "documents",
+			event: "versionCapture",
+			config: context.config,
+			collectionInstance: collectionRes.data,
+		},
+		{
+			meta: {
+				collection: collectionRes.data,
+				collectionKey: data.collectionKey,
+				userId: data.user.id,
+				collectionTableNames: tablesRes.data,
+				release: {
+					id: data.releaseId,
+					documents: (membersRes.data ?? []).flatMap((member) =>
+						member.source_version_id === null
+							? []
+							: [
+									{
+										collectionKey: member.collection_key,
+										documentId: member.document_id,
+										source: member.source,
+										versionId: member.source_version_id,
+									},
+								],
+					),
+				},
+			},
+			data: {
+				documentId: data.documentId,
+				versionId: cloneRes.data.versionId,
+				versionType:
+					cloneRes.data.sourceVersionType === "latest"
+						? constants.collectionBuilder.publishing.proposalVersionType
+						: constants.collectionBuilder.publishing.snapshotVersionType,
+				sourceVersionId: sourceRes.data.id,
+				sourceVersionType: data.source,
+			},
+		},
+	);
 };
 
 export default captureDocument;

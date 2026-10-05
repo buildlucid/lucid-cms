@@ -46,7 +46,7 @@ describe("resolveRouteSegmentValues", () => {
 
 		expect(result.error).toBeUndefined();
 		expect(result.data?.get("current")).toEqual(
-			new Map(Object.entries({ fr: "fr" })),
+			new Map(Object.entries({ fr: "/fr" })),
 		);
 	});
 

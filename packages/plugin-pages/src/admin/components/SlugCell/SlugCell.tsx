@@ -17,7 +17,7 @@ const SlugCell: DocumentListSlotComponent = (props) => {
 	// ----------------------------------
 	// Render
 	return (
-		<div class="min-w-0">
+		<div class="min-w-0 max-w-64">
 			<p class="truncate text-sm text-subtitle" title={slug()}>
 				{slug() || "—"}
 			</p>

@@ -1,23 +1,27 @@
-import { copy } from "@lucidcms/core";
+import { copy, z } from "@lucidcms/core";
 import { prefixGeneratedColName } from "@lucidcms/core/extension";
 import type {
 	CollectionTableNames,
-	DocumentVersionType,
 	FieldInputSchema,
 	ServiceFn,
 } from "@lucidcms/core/types";
 import constants from "../../constants.js";
+import type { RouteScope } from "../../types/types.js";
 import getParentPageId from "../../utils/get-parent-page-id.js";
 import getParentPageRelationTable from "../../utils/get-parent-page-relation-table.js";
+import { scopeVersionFilter } from "../../utils/route-scope.js";
 
 /**
- *  Recursively checks all parent pages for a circular reference and errors in that case
+ * Walks up the parent chain, reading each ancestor in the scope's version, and
+ * errors when it leads back to the document or loops among the ancestors. The
+ * query uses UNION, so a loop ends it instead of recursing forever, and the
+ * returned chain is then followed in memory to find one.
  */
 const checkCircularParents: ServiceFn<
 	[
 		{
 			documentId: number;
-			versionType: Exclude<DocumentVersionType, "revision">;
+			scope: RouteScope;
 			collectionKey: string;
 			fields: {
 				parentPage: FieldInputSchema;
@@ -46,10 +50,23 @@ const checkCircularParents: ServiceFn<
 		if (parentPageTableRes.error) return parentPageTableRes;
 		const parentPageTable = parentPageTableRes.data;
 
-		const resultResponse = await context.db
-			.query("pages.circular-parent.check", (db) =>
-				db
-					.withRecursive("ancestors", (recursive) =>
+		const query = context.db.kysely
+			.withRecursive("ancestors", (recursive) =>
+				recursive
+					.selectFrom(parentPageTable)
+					.innerJoin(
+						versionTable,
+						`${versionTable}.id`,
+						`${parentPageTable}.document_version_id`,
+					)
+					.select([
+						`${versionTable}.document_id as current_id`,
+						`${parentPageTable}.${parentPageField} as parent_id`,
+					])
+					.where(`${parentPageTable}.locale`, "is", null)
+					.where(scopeVersionFilter(versionTable, data.scope))
+					.where(`${versionTable}.document_id`, "=", parentPageId)
+					.union(
 						recursive
 							.selectFrom(parentPageTable)
 							.innerJoin(
@@ -57,60 +74,65 @@ const checkCircularParents: ServiceFn<
 								`${versionTable}.id`,
 								`${parentPageTable}.document_version_id`,
 							)
+							.innerJoin(
+								"ancestors",
+								"ancestors.parent_id",
+								`${versionTable}.document_id`,
+							)
 							.select([
 								`${versionTable}.document_id as current_id`,
 								`${parentPageTable}.${parentPageField} as parent_id`,
 							])
 							.where(`${parentPageTable}.locale`, "is", null)
-							.where(`${versionTable}.type`, "=", data.versionType)
-							.where(`${versionTable}.document_id`, "=", parentPageId)
-							.unionAll(
-								recursive
-									.selectFrom(parentPageTable)
-									.innerJoin(
-										versionTable,
-										`${versionTable}.id`,
-										`${parentPageTable}.document_version_id`,
-									)
-									.innerJoin(
-										"ancestors",
-										"ancestors.parent_id",
-										`${versionTable}.document_id`,
-									)
-									.select([
-										`${versionTable}.document_id as current_id`,
-										`${parentPageTable}.${parentPageField} as parent_id`,
-									])
-									.where(`${parentPageTable}.locale`, "is", null)
-									.where(`${versionTable}.type`, "=", data.versionType),
-							),
-					)
-					.selectFrom("ancestors")
-					.select("parent_id")
-					.where("parent_id", "=", data.documentId),
+							.where(scopeVersionFilter(versionTable, data.scope)),
+					),
 			)
-			.first();
-		if (resultResponse.error) return resultResponse;
-		const result = resultResponse.data;
+			.selectFrom("ancestors")
+			.select(["current_id", "parent_id"]);
 
-		if (result) {
-			return {
-				error: {
-					type: "basic",
-					status: 400,
-					message: copy("server:plugin.pages.parents.circular"),
-					errors: {
-						fields: [
-							{
-								key: constants.fields.parentPage.key,
-								localeCode: null,
-								message: copy("server:plugin.pages.parents.circular"),
-							},
-						],
+		const resultResponse = await context.db
+			.query("pages.circular-parent.check", () => query)
+			.many({
+				schema: z.object({
+					current_id: z.number(),
+					parent_id: z.number().nullable(),
+				}),
+			});
+		if (resultResponse.error) return resultResponse;
+		const parents = new Map(
+			resultResponse.data.map((row) => [row.current_id, row.parent_id]),
+		);
+
+		const visited = new Set<number>();
+		let current: number | null = parentPageId;
+		while (current !== null) {
+			const message =
+				current === data.documentId
+					? copy("server:plugin.pages.parents.circular")
+					: visited.has(current)
+						? copy("server:plugin.pages.parents.loop")
+						: undefined;
+			if (message) {
+				return {
+					error: {
+						type: "basic",
+						status: 400,
+						message,
+						errors: {
+							fields: [
+								{
+									key: constants.fields.parentPage.key,
+									localeCode: null,
+									message,
+								},
+							],
+						},
 					},
-				},
-				data: undefined,
-			};
+					data: undefined,
+				};
+			}
+			visited.add(current);
+			current = parents.get(current) ?? null;
 		}
 
 		return {

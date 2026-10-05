@@ -23,9 +23,15 @@ export const hookExecutionKinds: {
 		afterRestore: "effect",
 		afterDelete: "effect",
 		versionPromote: "effect",
+		versionCapture: "effect",
 	},
 	documentWorkflows: {
 		afterUpdate: "effect",
+	},
+	releases: {
+		check: "transform",
+		published: "effect",
+		documentRemoved: "effect",
 	},
 
 	media: {
