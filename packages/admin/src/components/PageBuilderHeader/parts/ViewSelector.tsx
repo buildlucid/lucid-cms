@@ -73,7 +73,9 @@ export const ViewSelector: Component<{
 	const collectionLabel = createMemo(() => props.collectionSingularName());
 
 	const optionLabel = (option: ViewSelectorOption) => {
-		if (option.type === "proposal") return option.label;
+		if (option.type === "proposal") {
+			return T()("releases.proposal.option", { release: option.label });
+		}
 		if (option.type === "latest" || option.type === "environment") {
 			return T()("actions.view.selector.document.version", {
 				version: option.label.toLowerCase(),
@@ -92,8 +94,9 @@ export const ViewSelector: Component<{
 	const currentOptionLabel = createMemo(() => {
 		const option = currentOption();
 		if (!option) return props.currentViewLabel?.();
-		if (option.type === "link" || option.type === "proposal") {
-			return optionLabel(option);
+		if (option.type === "link") return optionLabel(option);
+		if (option.type === "proposal") {
+			return T()("releases.proposal.selector", { release: option.label });
 		}
 
 		const action =
@@ -139,7 +142,10 @@ export const ViewSelector: Component<{
 		<Menu.Root>
 			<Menu.Trigger class="group flex items-center gap-2 text-base font-medium text-title rounded-md transition-colors outline-none focus-visible:ring-2 ring-primary">
 				<StatusIndicator variant={currentStatusVariant()} size="md" />
-				<span class="group-hover:text-body transition-colors duration-200 inline-block capitalize">
+				<span
+					class="group-hover:text-body transition-colors duration-200 inline-block"
+					classList={{ capitalize: currentOption()?.type !== "proposal" }}
+				>
 					{currentOptionLabel()}
 				</span>
 			</Menu.Trigger>
@@ -154,7 +160,7 @@ export const ViewSelector: Component<{
 								{(item) => (
 									<Menu.Item
 										textValue={optionLabel(item)}
-										class="capitalize"
+										class={item.type === "proposal" ? undefined : "capitalize"}
 										selected={currentOption()?.location === item.location}
 										unavailable={item.disabled}
 										onSelect={async () => {

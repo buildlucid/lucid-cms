@@ -81,6 +81,15 @@
 		}
 	}
 
+	@keyframes animation-progress {
+		0% {
+			transform: translateX(-100%);
+		}
+		100% {
+			transform: translateX(300%);
+		}
+	}
+
 	@keyframes animation-fade-out {
 		0% {
 			opacity: 1;

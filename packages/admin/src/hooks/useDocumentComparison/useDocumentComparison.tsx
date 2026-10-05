@@ -120,7 +120,7 @@ export const useDocumentComparison = (props: {
 		})) {
 			options.push({
 				key: `proposal:${proposal.release.id}`,
-				label: T()("releases.proposal.selector", {
+				label: T()("releases.proposal.option", {
 					release: proposal.release.title,
 				}),
 				versionId: proposal.versionId,

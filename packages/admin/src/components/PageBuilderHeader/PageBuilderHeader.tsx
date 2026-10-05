@@ -273,7 +273,7 @@ export const PageBuilderHeader: Component<{
 			},
 		)) {
 			options.push({
-				label: T()("releases.proposal.selector", { release: release.title }),
+				label: release.title,
 				type: "proposal",
 				compareKey: `proposal:${release.id}`,
 				disabled: false,

@@ -41,7 +41,7 @@ export const ReleaseReadiness: Component<{
 	return (
 		<section id="release-checks" class="scroll-mt-6">
 			<SectionHeading title={T()("releases.checks.title")} />
-			<ul class="divide-y divide-border rounded-md border border-border">
+			<ul class="divide-y divide-border rounded-md border border-border bg-card">
 				<For each={props.release.documents}>
 					{(document) => (
 						<ReleaseCheckRow

@@ -340,16 +340,16 @@ const DocumentEditorPage: Component<{
 		const link = releaseLink();
 		return release && link ? [{ label: release.title, link }] : undefined;
 	});
-	const currentViewLabel = createMemo(() =>
-		props.release?.()
-			? T()(
-					versionType() === "proposal"
-						? "releases.proposal.selector"
-						: "releases.snapshot.selector",
-					{ release: props.release?.()?.title ?? "" },
-				)
-			: undefined,
-	);
+	const currentViewLabel = createMemo(() => {
+		const release = props.release?.();
+		if (!release) return undefined;
+		return T()(
+			versionType() === "proposal"
+				? "releases.proposal.selector"
+				: "releases.snapshot.selector",
+			{ release: release.title },
+		);
+	});
 	//* latest aligns with environments, proposals also with latest
 	const alignmentSources = createMemo<AlignmentSource[]>(() => {
 		const document = docState.document();
@@ -436,7 +436,13 @@ const DocumentEditorPage: Component<{
 		if (!option.location || !compared) return;
 
 		comparison.rememberView(undefined);
-		navigate(`${option.location}?compare=${encodeURIComponent(compared)}`);
+		//* opening the right column's version on the left swaps the columns
+		const keep = option.key === compared ? comparisonKey() : compared;
+		navigate(
+			keep
+				? `${option.location}?compare=${encodeURIComponent(keep)}`
+				: option.location,
+		);
 	};
 
 	// ----------------------------------

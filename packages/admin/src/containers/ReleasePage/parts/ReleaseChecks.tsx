@@ -157,7 +157,7 @@ export const ReleaseChecks: Component<{
 			}
 		>
 			<div class="grid w-full gap-3">
-				<ul class="divide-y divide-border rounded-md border border-border">
+				<ul class="divide-y divide-border rounded-md border border-border bg-input">
 					<Show when={failed()}>
 						<ReleaseCheckRow
 							tone="danger"
@@ -245,7 +245,7 @@ export const ReleaseChecks: Component<{
 												label={T()("releases.checks.published", {
 													target: group.label,
 												})}
-												class="[&_[data-checkbox-label]]:sr-only"
+												class="**:data-checkbox-label:sr-only"
 												disabled={
 													!props.document.permissions.edit ||
 													review.action.isPending

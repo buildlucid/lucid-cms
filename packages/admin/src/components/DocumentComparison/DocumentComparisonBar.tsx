@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { FaSolidXmark } from "solid-icons/fa";
 import {
 	type Component,
+	createMemo,
 	createSignal,
 	type JSXElement,
 	onCleanup,
@@ -32,6 +33,20 @@ const DocumentComparisonBar: Component<{
 	// State & Hooks
 	let ref: HTMLDivElement | undefined;
 	const [stuck, setStuck] = createSignal(false);
+
+	// ----------------------------------------
+	// Memos
+	const leftOptions = createMemo(() =>
+		props.comparison.options().filter((option) => option.editable),
+	);
+	//* columns swap when each one's version can also open in the other
+	const swappable = createMemo(
+		() =>
+			leftOptions().some(
+				(option) => option.key === props.comparison.selectedKey(),
+			) &&
+			props.comparison.options().some((option) => option.key === props.leftKey),
+	);
 
 	// ----------------------------------------
 	// Functions
@@ -78,11 +93,10 @@ const DocumentComparisonBar: Component<{
 				<ComparisonVersionSelect
 					label={T()("documents.compare.left")}
 					placeholder={T()("documents.compare.select")}
-					options={props.comparison
-						.options()
-						.filter((option) => option.editable)}
+					options={leftOptions()}
 					value={props.leftKey}
 					otherValue={props.comparison.selectedKey()}
+					swappable={swappable()}
 					onSelect={props.onSelectLeft}
 				/>
 				<div class="flex shrink-0 items-center">{props.leftEnd}</div>
@@ -94,7 +108,16 @@ const DocumentComparisonBar: Component<{
 					options={props.comparison.options()}
 					value={props.comparison.selectedKey()}
 					otherValue={props.leftKey}
-					onSelect={(option) => props.comparison.select(option.key)}
+					swappable={swappable()}
+					onSelect={(option) => {
+						//* swapping from the right opens its version on the left
+						const current = props.comparison.selected();
+						if (option.key === props.leftKey && current) {
+							props.onSelectLeft(current);
+							return;
+						}
+						props.comparison.select(option.key);
+					}}
 				/>
 				<div class="flex shrink-0 items-center gap-2">
 					<span class="text-xs text-muted">

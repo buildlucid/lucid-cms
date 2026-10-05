@@ -2,7 +2,6 @@ import { useParams } from "@solidjs/router";
 import type { ReleaseDocument } from "@types";
 import { FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
-import Alert from "@/components/Alert/Alert";
 import Modal from "@/components/Modal/Modal";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
@@ -20,6 +19,7 @@ import { ReleaseDescription } from "./parts/ReleaseDescription";
 import { ReleaseDocumentCard } from "./parts/ReleaseDocumentCard";
 import { ReleaseHeaderActions } from "./parts/ReleaseHeaderActions";
 import { ReleasePageSkeleton } from "./parts/ReleasePageSkeleton";
+import { ReleasePublishing } from "./parts/ReleasePublishing";
 import { ReleaseReadiness } from "./parts/ReleaseReadiness";
 import { ReleaseSidebar } from "./parts/ReleaseSidebar";
 
@@ -136,11 +136,15 @@ const ReleasePage: Component = () => {
 									<div class="flex w-full grow flex-col lg:flex-row">
 										<div class="flex min-w-0 grow flex-col gap-10 px-4 pt-4 md:px-6 md:pt-6">
 											<Show when={publishing()}>
-												<div role="status" aria-live="polite">
-													<Alert>
-														{T()("releases.publishing.description")}
-													</Alert>
-												</div>
+												<ReleasePublishing
+													release={data()}
+													collections={collections.data?.data ?? []}
+													status={
+														execution.data?.data?.status === "queued"
+															? "queued"
+															: "running"
+													}
+												/>
 											</Show>
 											<ReleaseDescription release={data()} />
 											<Show when={data().status === "open"}>

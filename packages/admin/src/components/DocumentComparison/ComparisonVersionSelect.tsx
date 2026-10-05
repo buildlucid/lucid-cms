@@ -4,8 +4,9 @@ import Menu from "@/components/Menu/Menu";
 import type { ComparisonOption } from "@/hooks/useDocumentComparison/useDocumentComparison";
 
 /**
- * A ghost version picker for a side-by-side column. Versions without content,
- * and the one open in the other column, are listed but can't be picked.
+ * A ghost version picker for a side-by-side column. Versions without content
+ * are listed but can't be picked. The one open in the other column can only
+ * be picked when the columns can swap.
  */
 const ComparisonVersionSelect: Component<{
 	label: string;
@@ -14,6 +15,8 @@ const ComparisonVersionSelect: Component<{
 	value: string | undefined;
 	/** The version open in the other column. */
 	otherValue: string | undefined;
+	/** Picking the other column's version swaps the columns instead. */
+	swappable: boolean;
 	onSelect: (option: ComparisonOption) => void;
 }> = (props) => {
 	// ----------------------------------------
@@ -38,7 +41,8 @@ const ComparisonVersionSelect: Component<{
 					{(option) => (
 						<Menu.Item
 							disabled={
-								option.versionId === null || option.key === props.otherValue
+								option.versionId === null ||
+								(option.key === props.otherValue && !props.swappable)
 							}
 							selected={option.key === props.value}
 							onSelect={() => {
