@@ -4,7 +4,6 @@ import type {
 	RequestDetail,
 	RequestDocumentInput,
 } from "@types";
-import { FaSolidPlus } from "solid-icons/fa";
 import {
 	type Component,
 	createEffect,
@@ -129,7 +128,8 @@ const RequestCreateModal: Component<{
 		setTitle("");
 		setDrafts([]);
 		setRecords(new Map());
-		setPickerOpen(false);
+		//* adding to a request starts with the picker, as there's nothing else to fill in first
+		setPickerOpen(props.request !== undefined);
 		setSkipped(false);
 		setOverLimit(false);
 		create.reset();
@@ -212,14 +212,14 @@ const RequestCreateModal: Component<{
 									</ul>
 								</Show>
 								<Show when={documentCount() < requestDocumentLimit}>
-									<button
-										type="button"
-										class="flex h-20 w-full items-center justify-center gap-2 rounded-md border border-dashed border-border bg-input/40 text-sm text-muted transition-colors hover:border-primary/60 hover:bg-input hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+									<Button
+										variant="outline"
+										size="md"
+										class="w-fit"
 										onClick={() => setPickerOpen(true)}
 									>
-										<FaSolidPlus size={12} />
 										{T()("requests.documents.select")}
-									</button>
+									</Button>
 								</Show>
 								<Show when={skipped()}>
 									<p class="mt-3 text-sm text-danger">
@@ -261,7 +261,12 @@ const RequestCreateModal: Component<{
 			<DocumentSelectDrawer
 				state={{
 					open: props.open && pickerOpen(),
-					setOpen: setPickerOpen,
+					setOpen: (open) => {
+						setPickerOpen(open);
+						if (!open && props.request && drafts().length === 0) {
+							props.setOpen(false);
+						}
+					},
 					multiple: true,
 					collectionKeys: collectionKeys(),
 					disabledDocuments: [

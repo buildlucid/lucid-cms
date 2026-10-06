@@ -78,7 +78,7 @@ export const RequestDescription: Component<{
 							title={T()("requests.description.edit")}
 							onClick={startEditing}
 						>
-							<FaSolidPen size={10} />
+							<FaSolidPen size={12} />
 						</Button>
 					</Show>
 				}

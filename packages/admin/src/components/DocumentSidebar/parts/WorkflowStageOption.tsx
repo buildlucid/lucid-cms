@@ -4,14 +4,15 @@ import StatusIndicator, {
 	type StatusIndicatorVariant,
 } from "@/components/StatusIndicator/StatusIndicator";
 
-const stageVariants: Record<WorkflowStageColor, StatusIndicatorVariant> = {
-	grey: "neutral-subtle",
-	red: "danger-subtle",
-	yellow: "yellow-subtle",
-	green: "green-subtle",
-	blue: "blue-subtle",
-	purple: "purple-subtle",
-};
+export const stageVariants: Record<WorkflowStageColor, StatusIndicatorVariant> =
+	{
+		grey: "neutral-subtle",
+		red: "danger-subtle",
+		yellow: "yellow-subtle",
+		green: "green-subtle",
+		blue: "blue-subtle",
+		purple: "purple-subtle",
+	};
 
 const WorkflowStageOption: Component<{
 	label: string;

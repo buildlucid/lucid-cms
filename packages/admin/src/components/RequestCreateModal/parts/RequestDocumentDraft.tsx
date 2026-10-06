@@ -74,8 +74,8 @@ const RequestDocumentDraft: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<li class="rounded-md border border-border bg-input">
-			<div class="flex items-center gap-3 p-2.5">
+		<li class="rounded-md border border-border bg-card">
+			<div class="group/draft flex items-center gap-3 p-2.5">
 				<DocumentThumb />
 				<div class="min-w-0 grow">
 					<Show
@@ -92,11 +92,12 @@ const RequestDocumentDraft: Component<{
 					variant="danger-ghost"
 					size="xs"
 					shape="square"
+					class="transition-opacity md:opacity-0 md:group-hover/draft:opacity-100 md:focus-visible:opacity-100"
 					aria-label={T()("requests.create.clear.document")}
 					title={T()("requests.create.clear.document")}
 					onClick={props.onRemove}
 				>
-					<FaSolidXmark size={12} />
+					<FaSolidXmark size={14} />
 				</Button>
 			</div>
 			<div class="flex flex-col gap-2 border-t border-border px-3 py-2.5 sm:flex-row sm:items-center sm:gap-4">

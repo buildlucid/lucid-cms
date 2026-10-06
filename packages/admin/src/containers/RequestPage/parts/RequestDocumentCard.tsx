@@ -1,14 +1,9 @@
 import { A } from "@solidjs/router";
 import type { Collection, RequestDetail, RequestDocument } from "@types";
-import {
-	FaSolidArrowUpRightFromSquare,
-	FaSolidPen,
-	FaSolidXmark,
-} from "solid-icons/fa";
+import { FaSolidArrowUpRightFromSquare } from "solid-icons/fa";
 import { type Component, createMemo, Show } from "solid-js";
-import Button from "@/components/Button/Button";
+import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
-import Link from "@/components/Link/Link";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getRequestDocumentLabel, getTargetLabel } from "@/utils/requests";
@@ -34,10 +29,11 @@ export const RequestDocumentCard: Component<{
 				fallback: props.document.collectionKey,
 			}) || props.document.collectionKey,
 	);
+	const canEdit = createMemo(
+		() => props.document.source === "latest" && props.document.permissions.edit,
+	);
 	const contentLabel = createMemo(() =>
-		props.document.source === "latest" && props.document.permissions.edit
-			? T()("requests.document.edit")
-			: T()("requests.document.view"),
+		canEdit() ? T()("requests.document.edit") : T()("requests.document.view"),
 	);
 	const contentHref = createMemo(() =>
 		getRequestRoute({ requestId: props.request.id, content: props.document }),
@@ -48,7 +44,7 @@ export const RequestDocumentCard: Component<{
 	return (
 		<section id={`request-document-${props.document.id}`} class="scroll-mt-6">
 			<div class="rounded-md border border-border bg-card">
-				<div class="flex items-center gap-3 p-4">
+				<div class="group/document flex items-center gap-3 p-4">
 					<DocumentThumb />
 					<div class="min-w-0 grow">
 						<A
@@ -79,46 +75,40 @@ export const RequestDocumentCard: Component<{
 						</p>
 					</div>
 					<div class="flex shrink-0 items-center gap-1.5">
+						<div class="transition-opacity md:opacity-0 md:group-hover/document:opacity-100 md:focus-within:opacity-100 md:has-data-expanded:opacity-100">
+							<ActionMenu
+								variant="ghost"
+								orientation="horizontal"
+								placement="bottom-end"
+								actions={[
+									{
+										label: contentLabel(),
+										type: "link",
+										icon: canEdit() ? "pen" : "eye",
+										href: contentHref(),
+										show:
+											props.document.versionId !== null ||
+											props.document.approvedVersionId !== null,
+									},
+									{
+										label: T()("requests.documents.remove"),
+										type: "button",
+										icon: "trash",
+										variant: "danger",
+										show:
+											props.request.permissions.edit &&
+											props.request.documents.length > 1,
+										onClick: props.onRemove,
+									},
+								]}
+							/>
+						</div>
 						{/* workflow stages gate environments, so they don't apply to requested documents */}
 						<Show when={props.request.type === "publish"}>
 							<RequestWorkflowStage
 								document={props.document}
 								collection={props.collection}
 							/>
-						</Show>
-						<Show
-							when={
-								props.document.versionId !== null ||
-								props.document.approvedVersionId !== null
-							}
-						>
-							<Link
-								variant="ghost"
-								size="xs"
-								shape="square"
-								href={contentHref()}
-								aria-label={contentLabel()}
-								title={contentLabel()}
-							>
-								<FaSolidPen size={10} />
-							</Link>
-						</Show>
-						<Show
-							when={
-								props.request.permissions.edit &&
-								props.request.documents.length > 1
-							}
-						>
-							<Button
-								variant="danger-ghost"
-								size="xs"
-								shape="square"
-								aria-label={T()("requests.documents.remove")}
-								title={T()("requests.documents.remove")}
-								onClick={props.onRemove}
-							>
-								<FaSolidXmark size={10} />
-							</Button>
 						</Show>
 					</div>
 				</div>

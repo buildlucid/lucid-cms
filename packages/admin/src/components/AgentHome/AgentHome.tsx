@@ -152,7 +152,7 @@ const AgentHome: Component = () => {
 	// Render
 	return (
 		<QueryBoundary
-			class="w-full"
+			class="w-full grow"
 			loading={definitions.isLoading}
 			error={definitions.isError}
 			empty={!definitions.data?.data.enabled || agents().length === 0}

@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import type { RequestDocument } from "@types";
-import { FaSolidPlus } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
@@ -177,14 +177,14 @@ const RequestPage: Component = () => {
 															data().documents.length < requestDocumentLimit
 														}
 													>
-														<button
-															type="button"
-															class="flex min-h-14 w-full items-center justify-center gap-2 rounded-md border border-dashed border-border px-4 text-sm font-medium text-body transition-colors hover:border-primary hover:bg-primary-low focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+														<Button
+															variant="outline"
+															size="md"
+															class="w-fit"
 															onClick={() => setAddOpen(true)}
 														>
-															<FaSolidPlus size={12} />
 															{T()("requests.documents.add")}
-														</button>
+														</Button>
 													</Show>
 												</div>
 											</section>

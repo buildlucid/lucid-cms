@@ -44,7 +44,7 @@ const HomePage: Component = () => {
 			<Match when={getHomeView() === "ask"}>
 				<PageLayout.Root>
 					<PageLayout.Body padding="md" class="blur-background">
-						<div data-home-view="ask" class="flex flex-col">
+						<div data-home-view="ask" class="flex grow flex-col">
 							<div class="flex justify-end">
 								<HomeViewSwitch />
 							</div>

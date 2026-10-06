@@ -87,9 +87,10 @@ export const RequestActivity: Component<{
 							title={T()("requests.activity.filters")}
 						>
 							<span class="sr-only">{T()("requests.activity.filters")}</span>
-							<FaSolidFilter size={12} />
+							<FaSolidFilter size={14} />
 						</Menu.Trigger>
 						<Menu.Content>
+							<Menu.Label>{T()("requests.activity.filters")}</Menu.Label>
 							<For each={requestActivityFilters}>
 								{(filter) => (
 									<Menu.CheckboxItem

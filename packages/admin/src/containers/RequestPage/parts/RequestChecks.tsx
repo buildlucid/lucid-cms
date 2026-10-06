@@ -135,7 +135,7 @@ export const RequestChecks: Component<{
 			return (
 				<Button
 					variant="outline"
-					size="xs"
+					size="sm"
 					loading={update.action.isPending}
 					onClick={() => addTarget(required)}
 				>
@@ -185,7 +185,7 @@ export const RequestChecks: Component<{
 										props.request.blockers.length === 0
 									}
 								>
-									<Button variant="outline" size="xs" onClick={props.onRetry}>
+									<Button variant="outline" size="sm" onClick={props.onRetry}>
 										{T()("requests.retry")}
 									</Button>
 								</Show>
@@ -239,7 +239,7 @@ export const RequestChecks: Component<{
 										})}
 										description={T()("requests.checks.published.description")}
 										href={compareHref(group.target.target)}
-										action={
+										control={
 											<Checkbox
 												id={`review-target-${props.document.id}-${group.target.target}`}
 												value={group.target.reviewed}
