@@ -2,7 +2,18 @@ import type {
 	DocumentEnvironmentStatus,
 	InternalCollectionDocument,
 } from "@types";
+import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
+
+/** How each environment status is coloured as a status dot. */
+export const documentEnvironmentStatusVariants: Record<
+	DocumentEnvironmentStatus,
+	StatusIndicatorVariant
+> = {
+	"in-sync": "success-subtle",
+	"out-of-sync": "warning-subtle",
+	unreleased: "danger-subtle",
+};
 
 /** Resolves whether an environment contains the latest saved document content. */
 export const getDocumentEnvironmentStatus = (props: {

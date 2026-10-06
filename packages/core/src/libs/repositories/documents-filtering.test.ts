@@ -364,3 +364,81 @@ describe("document environment status filters", async () => {
 		expect(rows).toEqual([{ id: 1 }, { id: 2 }]);
 	});
 });
+
+describe("document environment status counts", async () => {
+	const db = new SQLiteAdapter({ database: ":memory:" });
+	const connection = await db.connect();
+	const database = createLucidDatabase({
+		client: connection.client,
+		adapter: db,
+	});
+	const Documents = new DocumentsRepository(database);
+	const documentTable = "lucid_document__posts";
+	const versionTable = "lucid_document__posts__ver";
+
+	beforeAll(async () => {
+		await connection.client.schema
+			.createTable(documentTable)
+			.addColumn("id", "integer", (column) => column.primaryKey())
+			.addColumn("is_deleted", "integer", (column) => column.notNull())
+			.addColumn("create_request_id", "integer")
+			.execute();
+		await connection.client.schema
+			.createTable(versionTable)
+			.addColumn("id", "integer", (column) => column.primaryKey())
+			.addColumn("document_id", "integer", (column) => column.notNull())
+			.addColumn("type", "text", (column) => column.notNull())
+			.addColumn("content_id", "text", (column) => column.notNull())
+			.execute();
+
+		//* 4 is deleted and 5 only exists as a create request's proposal
+		await connection.client
+			.insertInto(documentTable)
+			.values([
+				{ id: 1, is_deleted: 0, create_request_id: null },
+				{ id: 2, is_deleted: 0, create_request_id: null },
+				{ id: 3, is_deleted: 0, create_request_id: null },
+				{ id: 4, is_deleted: 1, create_request_id: null },
+				{ id: 5, is_deleted: 0, create_request_id: 1 },
+			])
+			.execute();
+		await connection.client
+			.insertInto(versionTable)
+			.values([
+				{ id: 101, document_id: 1, type: "latest", content_id: "one" },
+				{ id: 102, document_id: 1, type: "production", content_id: "one" },
+				{ id: 103, document_id: 1, type: "staging", content_id: "one" },
+				{ id: 201, document_id: 2, type: "latest", content_id: "two" },
+				{ id: 202, document_id: 2, type: "production", content_id: "old" },
+				{ id: 301, document_id: 3, type: "latest", content_id: "three" },
+				{ id: 401, document_id: 4, type: "latest", content_id: "four" },
+				{ id: 402, document_id: 4, type: "production", content_id: "four" },
+				{ id: 501, document_id: 5, type: "latest", content_id: "five" },
+				{ id: 502, document_id: 5, type: "production", content_id: "five" },
+			])
+			.execute();
+	});
+
+	afterAll(() => connection.destroy());
+
+	test("counts documents, and each environment's released and in-sync documents", async () => {
+		const counts = await Documents.selectEnvironmentStatusCounts(
+			{
+				environmentKeys: ["production", "staging", "preview"],
+				versionTableName: versionTable,
+			},
+			{ tableName: documentTable },
+		);
+
+		expect(counts.error).toBeUndefined();
+		expect(counts.data?.total).toBe(3);
+		expect(
+			counts.data?.environments.toSorted((a, b) =>
+				a.environment_key.localeCompare(b.environment_key),
+			),
+		).toEqual([
+			{ environment_key: "production", released: 2, in_sync: 1 },
+			{ environment_key: "staging", released: 1, in_sync: 1 },
+		]);
+	});
+});

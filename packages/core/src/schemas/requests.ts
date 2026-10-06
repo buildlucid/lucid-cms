@@ -339,6 +339,10 @@ export const controllerSchemas = {
 					"filter[assignedToMe]": queryString.schema.filter(false, {
 						example: "true",
 					}),
+					"filter[involvesMe]": queryString.schema.filter(false, {
+						example: "true",
+						description: "Requests you review or created",
+					}),
 					"filter[createdBy]": queryString.schema.filter(true, {
 						example: "1",
 					}),
@@ -372,6 +376,7 @@ export const controllerSchemas = {
 						scheduled: queryFormatted.schema.filters.single.optional(),
 						failed: queryFormatted.schema.filters.single.optional(),
 						assignedToMe: queryFormatted.schema.filters.single.optional(),
+						involvesMe: queryFormatted.schema.filters.single.optional(),
 						createdBy: queryFormatted.schema.filters.union.optional(),
 						collectionKey: queryFormatted.schema.filters.single.optional(),
 						documentId: queryFormatted.schema.filters.single.optional(),

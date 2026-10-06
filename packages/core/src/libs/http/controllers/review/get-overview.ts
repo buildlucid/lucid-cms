@@ -1,8 +1,8 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
-import { controllerSchemas } from "../../../../schemas/publishing.js";
-import { publishingServices } from "../../../../services/index.js";
+import { controllerSchemas } from "../../../../schemas/review.js";
+import { reviewServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { Permissions } from "../../../permission/definitions.js";
@@ -16,9 +16,10 @@ const factory = createFactory();
 
 const getOverviewController = factory.createHandlers(
 	describeRoute({
-		description: "Get publishing status counts across readable collections.",
-		tags: ["publishing"],
-		summary: "Get Publishing Overview",
+		description:
+			"Get open request counts, and how each readable collection's documents in every publish target compare to latest.",
+		tags: ["review"],
+		summary: "Get Review Overview",
 		responses: openAPI.responses({
 			dataSchema: z.toJSONSchema(controllerSchemas.getOverview.response),
 		}),
@@ -27,7 +28,7 @@ const getOverviewController = factory.createHandlers(
 	permissions([Permissions.RequestsRead]),
 	async (c) => {
 		const context = createServiceContext(c);
-		const overview = await serviceWrapper(publishingServices.getOverview, {
+		const overview = await serviceWrapper(reviewServices.getOverview, {
 			transaction: false,
 		})(context, {
 			user: c.get("auth"),

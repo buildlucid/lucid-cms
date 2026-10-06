@@ -1371,6 +1371,37 @@ test("new requests have timestamps and sort by their latest update", async () =>
 	]);
 });
 
+test("the involvesMe filter lists requests the user made or reviews", async () => {
+	const documentId = await createDocument();
+	const reviewed = await createRequest(documentId);
+	const unrelated = await createRequest(documentId);
+	const assigned = await updateSingle(context, {
+		id: reviewed.id,
+		user: creator,
+		reviewerIds: [reviewer.id],
+	});
+	assert(!assigned.error, JSON.stringify(assigned.error));
+	const list = async (user: LucidUser) => {
+		const listed = await getMultiple(context, {
+			user,
+			query: {
+				filter: {
+					documentId: { value: documentId, operator: "=" },
+					involvesMe: { value: "true", operator: "=" },
+				},
+				page: 1,
+				perPage: 10,
+			},
+		});
+		assert(listed.data, JSON.stringify(listed.error));
+		return listed.data.data
+			.map((request) => request.id)
+			.toSorted((a, b) => a - b);
+	};
+	expect(await list(creator)).toEqual([reviewed.id, unrelated.id]);
+	expect(await list(reviewer)).toEqual([reviewed.id]);
+});
+
 test("proposals start with the default workflow, and only their own stage changes dismiss approval", async () => {
 	const key = "workflow_pages";
 	const id = await createDocument(key);

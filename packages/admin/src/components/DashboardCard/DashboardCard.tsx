@@ -60,7 +60,7 @@ const DashboardCard: Component<DashboardCardProps> = (props) => {
 			data-dashboard-card
 			aria-labelledby={titleId}
 			class={classnames(
-				"flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card",
+				"flex h-full min-w-0 flex-col overflow-hidden rounded-md border border-border bg-card",
 				props.class,
 			)}
 		>

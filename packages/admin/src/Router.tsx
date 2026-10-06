@@ -89,8 +89,8 @@ const EmailListRoute = lazyPage(
 const RequestsListRoute = lazyPage(
 	() => import("@/containers/RequestsPage/RequestsPage"),
 );
-const PublishingOverviewRoute = lazyPage(
-	() => import("@/containers/PublishingOverviewPage/PublishingOverviewPage"),
+const ReviewOverviewRoute = lazyPage(
+	() => import("@/containers/ReviewOverviewPage/ReviewOverviewPage"),
 );
 const AccountRoute = lazyPage(
 	() => import("@/containers/AccountPage/AccountPage"),
@@ -248,11 +248,11 @@ const AppRouter: Component = () => {
 						)}
 					/>
 					<Route
-						path="/publishing"
-						preload={preloadRoutes(PublishingOverviewRoute)}
+						path="/review"
+						preload={preloadRoutes(ReviewOverviewRoute)}
 						component={() => (
 							<PermissionGuard permission={Permissions.RequestsRead}>
-								<PublishingOverviewRoute />
+								<ReviewOverviewRoute />
 							</PermissionGuard>
 						)}
 					/>

@@ -30,7 +30,6 @@ import Pagination from "@/components/Pagination/Pagination";
 import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QuerySort from "@/components/QuerySort/QuerySort";
-import ResetFilters from "@/components/ResetFilters/ResetFilters";
 import Select from "@/components/Select/Select";
 import Table from "@/components/Table/Table";
 import { usePageBuilderState } from "@/hooks/usePageBuilderState/usePageBuilderState";
@@ -521,6 +520,7 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 						queryState={searchParams}
 						active={!isSingleCollection() && searchParams.hasFiltersApplied()}
 						disabled={isSingleCollection() || getFilterFields().length === 0}
+						onReset={searchParams.clearFilters}
 					/>
 					<QuerySort
 						sorts={documentSortOptions()}
@@ -543,11 +543,6 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 								size="sm"
 							/>
 						</div>
-					</Show>
-					<Show
-						when={!isSingleCollection() && searchParams.hasFiltersApplied()}
-					>
-						<ResetFilters onReset={searchParams.clearFilters} />
 					</Show>
 				</div>
 				<PerPageSelect

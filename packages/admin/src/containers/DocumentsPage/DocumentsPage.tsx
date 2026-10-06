@@ -117,8 +117,8 @@ const DocumentsPage: Component = () => {
 			requests: canSeeRequests(),
 		}),
 	);
-	const getFilterPresets = createMemo((): FilterPreset[] =>
-		canSeeRequests()
+	const getFilterPresets = createMemo((): FilterPreset[] => [
+		...(canSeeRequests()
 			? [
 					{
 						key: "requests",
@@ -126,8 +126,29 @@ const DocumentsPage: Component = () => {
 						filters: { pending: { value: true, operator: "=" } },
 					},
 				]
-			: [],
-	);
+			: []),
+		//* grouped by status, so each status's targets sit together
+		...(["unreleased", "out-of-sync"] as const).flatMap((status) =>
+			(collectionData()?.publishing.targets ?? []).map((target) => ({
+				key: `${status}.${target.key}`,
+				label: T()(
+					status === "unreleased"
+						? "documents.filter.unreleased"
+						: "documents.filter.out.of.sync",
+					{
+						target:
+							helpers.getLocaleValue({
+								value: target.label,
+								fallback: target.key,
+							}) || target.key,
+					},
+				),
+				filters: {
+					[`envStatus.${target.key}`]: { value: status, operator: "=" },
+				},
+			})),
+		),
+	]);
 	const showingRequests = createMemo(
 		() => searchParams.filters().get("pending") === true,
 	);
@@ -365,11 +386,20 @@ const DocumentsPage: Component = () => {
 							canReorderDocuments() && !showingDeleted() && !showingRequests()
 						}
 					>
+						{/* icon only until order mode, where its label says how to leave */}
 						<Button
 							variant={orderMode() ? "primary" : "outline"}
 							size="sm"
+							shape={orderMode() ? "standard" : "square"}
 							type="button"
 							class="gap-2"
+							aria-pressed={orderMode()}
+							aria-label={
+								orderMode() ? undefined : T()("documents.order.mode.action")
+							}
+							title={
+								orderMode() ? undefined : T()("documents.order.mode.action")
+							}
 							onClick={() => {
 								if (orderMode()) {
 									exitOrderMode();
@@ -378,12 +408,10 @@ const DocumentsPage: Component = () => {
 								}
 							}}
 						>
-							<FaSolidArrowDownWideShort size={14} />
-							<span>
-								{orderMode()
-									? T()("documents.order.mode.exit")
-									: T()("documents.order.mode.action")}
-							</span>
+							<FaSolidArrowDownWideShort size={13} />
+							<Show when={orderMode()}>
+								<span>{T()("documents.order.mode.exit")}</span>
+							</Show>
 						</Button>
 					</Show>
 				</QueryToolbar>

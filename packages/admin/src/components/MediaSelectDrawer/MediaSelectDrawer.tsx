@@ -10,7 +10,6 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import Checkbox from "@/components/Checkbox/Checkbox";
 import ClearProcessedImagesModal from "@/components/ClearProcessedImagesModal/ClearProcessedImagesModal";
 import Drawer from "@/components/Drawer/Drawer";
 import EmptyState from "@/components/EmptyState/EmptyState";
@@ -24,8 +23,8 @@ import Pagination from "@/components/Pagination/Pagination";
 import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QuerySort from "@/components/QuerySort/QuerySort";
-import ResetFilters from "@/components/ResetFilters/ResetFilters";
 import RestoreMediaModal from "@/components/RestoreMediaModal/RestoreMediaModal";
+import ShowDeletedToggle from "@/components/ShowDeletedToggle/ShowDeletedToggle";
 import useQueryState, {
 	pagination,
 	sort,
@@ -240,6 +239,7 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						onOpenChange={setFilterPanelOpen}
 						queryState={searchParams}
 						active={searchParams.hasFiltersApplied()}
+						onReset={searchParams.clearFilters}
 					/>
 					<QuerySort
 						sorts={[
@@ -278,19 +278,10 @@ const SelectMediaContent: Component<SelectMediaContentProps> = (props) => {
 						]}
 						queryState={searchParams}
 					/>
-					<Checkbox
-						variant="button-secondary"
-						id="isDeleted"
+					<ShowDeletedToggle
 						value={showingDeleted() === 1}
-						onChange={(value) => {
-							setShowingDeleted(value ? 1 : 0);
-						}}
-						name={"isDeleted"}
-						label={T()("actions.show.deleted")}
+						onChange={(value) => setShowingDeleted(value ? 1 : 0)}
 					/>
-					<Show when={searchParams.hasFiltersApplied()}>
-						<ResetFilters onReset={searchParams.clearFilters} />
-					</Show>
 				</div>
 				<PerPageSelect options={[10, 20, 40]} queryState={searchParams} />
 			</div>

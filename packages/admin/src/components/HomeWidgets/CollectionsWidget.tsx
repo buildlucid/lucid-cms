@@ -61,7 +61,7 @@ const CollectionsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 						<li class="flex items-center gap-1">
 							<A
 								href={getCollectionNavigationHref(collection)}
-								class="flex min-w-0 grow items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+								class="flex min-w-0 grow items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 							>
 								<DocumentThumb multiple={collection.mode === "multiple"} />
 								<span class="flex min-w-0 flex-col">

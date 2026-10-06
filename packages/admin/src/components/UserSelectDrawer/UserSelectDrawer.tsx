@@ -7,7 +7,6 @@ import {
 	createSignal,
 	Index,
 	type JSXElement,
-	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
 import Drawer from "@/components/Drawer/Drawer";
@@ -18,7 +17,6 @@ import Pagination from "@/components/Pagination/Pagination";
 import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QuerySort from "@/components/QuerySort/QuerySort";
-import ResetFilters from "@/components/ResetFilters/ResetFilters";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import Table from "@/components/Table/Table";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
@@ -182,6 +180,7 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						onOpenChange={setFilterPanelOpen}
 						queryState={searchParams}
 						active={searchParams.hasFiltersApplied()}
+						onReset={searchParams.clearFilters}
 					/>
 					<QuerySort
 						sorts={[
@@ -213,9 +212,6 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						queryState={searchParams}
 					/>
 					{props.topbarSlot}
-					<Show when={searchParams.hasFiltersApplied()}>
-						<ResetFilters onReset={searchParams.clearFilters} />
-					</Show>
 				</div>
 				<PerPageSelect options={[10, 20, 40]} queryState={searchParams} />
 			</div>

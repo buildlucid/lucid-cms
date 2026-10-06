@@ -8,7 +8,6 @@ import {
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import Checkbox from "@/components/Checkbox/Checkbox";
 import FilterPanel, {
 	type FilterField,
 	type FilterPreset,
@@ -18,7 +17,7 @@ import PerPageSelect from "@/components/PerPageSelect/PerPageSelect";
 import QuerySort, {
 	type QuerySortProps,
 } from "@/components/QuerySort/QuerySort";
-import ResetFilters from "@/components/ResetFilters/ResetFilters";
+import ShowDeletedToggle from "@/components/ShowDeletedToggle/ShowDeletedToggle";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
 
@@ -44,7 +43,7 @@ export interface QueryToolbarProps {
 	onRefresh?: () => void;
 	/** Replaces the default filter reset. */
 	onResetFilters?: () => void;
-	/** Adds a "show deleted" checkbox. Requires `onShowDeletedChange`. */
+	/** Adds a "show deleted" toggle button. Requires `onShowDeletedChange`. */
 	showDeleted?: boolean;
 	onShowDeletedChange?: (_value: boolean) => void;
 	/** @default "md" */
@@ -136,6 +135,10 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 								onOpenChange={setFilterPanelOpen}
 								queryState={props.queryState}
 								disabled={fields().length === 0}
+								onReset={() => {
+									if (props.onResetFilters) props.onResetFilters();
+									else props.queryState.resetFilters();
+								}}
 							/>
 						)}
 					</Show>
@@ -152,29 +155,9 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 							props.onShowDeletedChange !== undefined
 						}
 					>
-						<Checkbox
-							variant="button-danger"
-							id="isDeleted"
+						<ShowDeletedToggle
 							value={props.showDeleted ?? false}
-							onChange={(value) => {
-								props.onShowDeletedChange?.(value);
-							}}
-							name={"isDeleted"}
-							label={T()("actions.show.deleted")}
-						/>
-					</Show>
-					<Show
-						when={
-							(filterFields() !== undefined ||
-								props.onResetFilters !== undefined) &&
-							!props.queryState.filtersAreDefault()
-						}
-					>
-						<ResetFilters
-							onReset={() => {
-								if (props.onResetFilters) props.onResetFilters();
-								else props.queryState.resetFilters();
-							}}
+							onChange={(value) => props.onShowDeletedChange?.(value)}
 						/>
 					</Show>
 				</div>

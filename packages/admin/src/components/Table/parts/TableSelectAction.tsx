@@ -123,7 +123,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 							isWidePill() ? "max-w-[460px]" : "max-w-[400px]",
 						)}
 					>
-						<p class="text-sm">
+						<p class="ml-2 text-sm">
 							<span class="font-bold">
 								{props.selectedCount() > 1
 									? `${props.selectedCount()} ${T()("common.items")}`

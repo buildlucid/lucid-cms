@@ -12,8 +12,7 @@ import { getReadableCollections } from "@/utils/home-widgets";
 import AgentActivityWidget from "./AgentActivityWidget";
 import AiCreditsWidget from "./AiCreditsWidget";
 import CollectionsWidget from "./CollectionsWidget";
-import DocumentRequestsWidget from "./DocumentRequestsWidget";
-import PublishingWidget from "./PublishingWidget";
+import ReviewWidget from "./ReviewWidget";
 import StorageWidget from "./StorageWidget";
 import type { HomeWidget } from "./types";
 
@@ -49,41 +48,27 @@ const builtInWidgets: HomeWidget[] = [
 		component: AiCreditsWidget,
 	},
 	{
-		key: "lucid.publishing",
+		key: "lucid.review",
 		priority: 80,
-		label: () => T()("home.widget.publishing.label"),
-		description: () => T()("home.widget.publishing.description"),
+		label: () => T()("home.widget.review.label"),
+		description: () => T()("home.widget.review.description"),
 		size: "full",
 		sizes: ["md", "lg", "full"],
 		hidden: false,
+		//* any collection the user can publish from or request new documents in
 		available: (context) =>
 			can(Permissions.RequestsRead) &&
 			(context.collections ?? []).some(
 				(collection) =>
-					collection.publishing.targets.length > 0 &&
-					userStore.get.hasPermission([collection.permissions.read]).all,
+					(collection.publishing.targets.length > 0 &&
+						userStore.get.hasPermission([collection.permissions.read]).all) ||
+					(collection.mode === "multiple" &&
+						userStore.get.hasPermission([
+							collection.permissions.create,
+							collection.permissions["create-request"],
+						]).some),
 			),
-		component: PublishingWidget,
-	},
-	{
-		key: "lucid.documentRequests",
-		priority: 75,
-		label: () => T()("home.widget.requests.label"),
-		description: () => T()("home.widget.requests.description"),
-		size: "md",
-		sizes: ["md", "lg", "full"],
-		hidden: false,
-		available: (context) =>
-			can(Permissions.RequestsRead) &&
-			(context.collections ?? []).some(
-				(collection) =>
-					collection.mode === "multiple" &&
-					userStore.get.hasPermission([
-						collection.permissions.create,
-						collection.permissions["create-request"],
-					]).some,
-			),
-		component: DocumentRequestsWidget,
+		component: ReviewWidget,
 	},
 	{
 		key: "lucid.collections",

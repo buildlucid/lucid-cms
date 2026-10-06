@@ -8,8 +8,20 @@
 		scrollbar-width: thin;
 	}
 
+	/* while rows scroll under it, the actions cell takes the row's colour and fades in over 2rem */
 	[data-overflowing="true"] .row-actions-td {
-		filter: drop-shadow(-5px 0px 5px oklch(0% 0 0 / 0.1));
+		background-color: var(--table-row-bg);
+		transition: background-color 200ms;
+	}
+	[data-overflowing="true"] .row-actions-td::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		bottom: 1px;
+		right: 100%;
+		width: 2rem;
+		pointer-events: none;
+		background: linear-gradient(to right, transparent, var(--table-row-bg));
 	}
 	.dropdown-trigger {
 		@apply duration-200 transition-colors outline-primary focus:outline-1;
@@ -52,8 +64,8 @@
 		animation: agent-shimmer 2s ease-in-out infinite;
 	}
 
-	/* files fade out at both ends rather than being cut off where the row scrolls */
-	.agent-reference-strip {
+	/* items fade out over a 1rem inline padding rather than being cut off where a row scrolls */
+	.scroll-fade-x {
 		mask-image: linear-gradient(
 			90deg,
 			transparent,

@@ -14,6 +14,7 @@ interface QueryParams {
 		approval?: Accessor<string | undefined>;
 		failed?: Accessor<string | undefined>;
 		assignedToMe?: Accessor<string | undefined>;
+		involvesMe?: Accessor<string | undefined>;
 		createdBy?: Accessor<number | undefined>;
 		collectionKey?: Accessor<string | undefined>;
 		documentId?: Accessor<number | undefined>;

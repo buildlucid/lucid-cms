@@ -1,25 +1,12 @@
-import type {
-	DocumentEnvironmentStatus,
-	InternalCollectionDocument,
-} from "@types";
+import type { InternalCollectionDocument } from "@types";
 import { type Component, createMemo } from "solid-js";
-import StatusIndicator, {
-	type StatusIndicatorVariant,
-} from "@/components/StatusIndicator/StatusIndicator";
+import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import Table from "@/components/Table/Table";
 import {
+	documentEnvironmentStatusVariants,
 	getDocumentEnvironmentStatus,
 	getDocumentEnvironmentStatusLabel,
 } from "@/utils/document-environment-status";
-
-const statusVariants: Record<
-	DocumentEnvironmentStatus,
-	StatusIndicatorVariant
-> = {
-	"in-sync": "success-subtle",
-	"out-of-sync": "warning-subtle",
-	unreleased: "danger-subtle",
-};
 
 const DocumentEnvironmentStatusCell: Component<{
 	column?: string;
@@ -40,7 +27,9 @@ const DocumentEnvironmentStatusCell: Component<{
 	return (
 		<Table.Cell column={props.column} minWidth={140}>
 			<div class="flex items-center gap-2 whitespace-nowrap">
-				<StatusIndicator variant={statusVariants[status()]} />
+				<StatusIndicator
+					variant={documentEnvironmentStatusVariants[status()]}
+				/>
 				<span class="text-sm text-subtitle">
 					{getDocumentEnvironmentStatusLabel(status())}
 				</span>

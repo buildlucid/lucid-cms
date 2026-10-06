@@ -222,13 +222,13 @@ export const queryKeys = {
 		reviewers: () => ["lucid", "requests", "reviewers"] as const,
 		mentionableUsers: () => ["lucid", "requests", "mentionableUsers"] as const,
 	},
+	review: {
+		all: () => ["lucid", "review"] as const,
+		overview: () => ["lucid", "review", "overview"] as const,
+	},
 	requestExecutions: {
 		detail: (id: number | undefined, jobId: string | null | undefined) =>
 			["lucid", "requestExecutions", id, jobId] as const,
-	},
-	publishing: {
-		all: () => ["lucid", "publishing"] as const,
-		overview: () => ["lucid", "publishing", "overview"] as const,
 	},
 	roles: {
 		all: () => ["lucid", "roles"] as const,

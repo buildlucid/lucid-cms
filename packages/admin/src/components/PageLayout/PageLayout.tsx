@@ -6,11 +6,7 @@ export interface PageLayoutRootProps {
 	children?: JSXElement;
 }
 
-export type PageLayoutVariant = "default" | "transparent";
-
 export interface PageLayoutHeaderProps {
-	/** @default "default" */
-	variant?: PageLayoutVariant;
 	title?: string;
 	description?: string;
 	actions?: JSXElement;
@@ -20,8 +16,6 @@ export interface PageLayoutHeaderProps {
 }
 
 export interface PageLayoutBodyProps {
-	/** @default "default" */
-	variant?: PageLayoutVariant;
 	/** @default "none" */
 	padding?: "none" | "sm" | "md";
 	class?: string;
@@ -77,20 +71,15 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 		<div
 			data-page-layout-header
 			class={classnames(
-				"rounded-t-xl",
-				{
-					"bg-background border-b border-border":
-						props.variant !== "transparent",
-				},
+				"rounded-t-xl bg-background border-b border-border",
 				props.class,
 			)}
 		>
 			<div
 				class={classnames(
-					"flex flex-col md:flex-row md:justify-between items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-6 rounded-t-xl",
+					"flex flex-col md:flex-row md:justify-between items-start gap-x-8 gap-y-4 px-4 md:px-6 pt-4 md:pt-6 pb-4 rounded-t-xl",
 					{
-						"pb-4": props.variant !== "transparent",
-						"md:pb-6": !props.children && props.variant !== "transparent",
+						"md:pb-6": !props.children,
 					},
 				)}
 			>
@@ -121,9 +110,8 @@ const PageLayoutBody: Component<PageLayoutBodyProps> = (props) => {
 		<div
 			data-page-layout-body
 			class={classnames(
-				"flex grow flex-col justify-between",
+				"flex grow flex-col justify-between bg-background",
 				{
-					"bg-background": props.variant !== "transparent",
 					"p-4": props.padding === "sm",
 					"p-4 md:p-6": props.padding === "md",
 				},

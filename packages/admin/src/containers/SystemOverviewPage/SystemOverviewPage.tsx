@@ -10,6 +10,7 @@ import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { getStorageUsage } from "@/utils/media-storage";
 
 /** Past this much of the storage limit the usage bar warns. */
 const STORAGE_DANGER_PERCENT = 90;
@@ -33,29 +34,18 @@ const SystemOverviewPage: Component = () => {
 	const storageInfo = createMemo(
 		() => settingsData.data?.data?.media?.storage ?? null,
 	);
-	const isUnlimitedStorage = createMemo(
-		() => storageInfo()?.total === null || storageInfo()?.remaining === null,
-	);
+	const storageUsage = createMemo(() => getStorageUsage(storageInfo()));
 	const clampedRemainingStorage = createMemo(() =>
 		Math.max(0, storageInfo()?.remaining ?? 0),
 	);
-	const percentUsed = createMemo(() => {
-		if (isUnlimitedStorage()) return 100;
-		const total = storageInfo()?.total ?? 0;
-		const used = storageInfo()?.used ?? 0;
-		if (total <= 0 || used <= 0) return 0;
-
-		const rawPercent = (used / total) * 100;
-		return Math.max(0, Math.min(100, Math.floor(rawPercent)));
-	});
 	const storageTitle = createMemo(() => {
-		if (isUnlimitedStorage()) return T()("media.storage.unlimited.title");
+		if (storageUsage().unlimited) return T()("media.storage.unlimited.title");
 		return T()("media.storage.remaining.title", {
 			storage: helpers.bytesToSize(clampedRemainingStorage()),
 		});
 	});
 	const storageBarLabels = createMemo(() => {
-		if (isUnlimitedStorage()) {
+		if (storageUsage().unlimited) {
 			return {
 				start: helpers.bytesToSize(storageInfo()?.used),
 				end: T()("common.unlimited"),
@@ -95,10 +85,9 @@ const SystemOverviewPage: Component = () => {
 					>
 						<InfoRow.Content title={storageTitle()}>
 							<ProgressBar
-								value={percentUsed()}
+								value={storageUsage().percent}
 								variant={
-									percentUsed() > STORAGE_DANGER_PERCENT &&
-									!isUnlimitedStorage()
+									storageUsage().percent > STORAGE_DANGER_PERCENT
 										? "danger"
 										: "primary"
 								}

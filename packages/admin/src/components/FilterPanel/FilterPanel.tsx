@@ -319,7 +319,6 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 			.orFilterGroups()
 			.map((group) => group.map((c) => ({ ...c })));
 
-	//* clears every committed section-owned top-level filter
 	const clearedTopFilters = () => {
 		const cleared: Record<string, { value: undefined; operator: undefined }> =
 			{};
@@ -841,7 +840,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 						<h3 class="mb-2 text-sm font-medium text-title">
 							{T()("filter.section.presets")}
 						</h3>
-						<div class="flex flex-wrap gap-2">
+						<div class="scroll-fade-x hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
 							<For each={props.presets}>
 								{(preset) => {
 									const active = () => isPresetActive(preset);
@@ -854,8 +853,8 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 											aria-pressed={active()}
 											class={
 												active()
-													? "gap-1.5 border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground!"
-													: "gap-1.5"
+													? "shrink-0 gap-1.5 border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground!"
+													: "shrink-0 gap-1.5"
 											}
 											onClick={() => applyPreset(preset)}
 										>

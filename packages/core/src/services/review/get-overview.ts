@@ -1,20 +1,22 @@
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import { reviewFormatter } from "../../libs/formatters/index.js";
 import { resolveCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import hasAccess from "../../libs/permission/has-access.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
-import type { PublishingOverview } from "../../types/response.js";
+import type { ReviewOverview } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getRequestOverview from "../requests/get-overview.js";
 
+/** Publish target status counts for each readable collection, and open request counts, for the Review overview. */
 const getOverview: ServiceFn<
 	[
 		{
 			user: LucidAuth;
 		},
 	],
-	PublishingOverview
+	ReviewOverview
 > = async (context, data) => {
 	const collectionsRes = await collections.getAll(context, {});
 	if (collectionsRes.error) return collectionsRes;
@@ -29,55 +31,44 @@ const getOverview: ServiceFn<
 				],
 			}),
 	);
-	const Documents = new DocumentsRepository(context.db);
-	const collectionOverviews: PublishingOverview["collections"] = [];
 
-	const collectionOverviewResults = await Promise.all(
+	const Documents = new DocumentsRepository(context.db);
+
+	const collectionCountsResults = await Promise.all(
 		readableCollections.map(async (collection) => {
 			const tableNamesRes = await getTableNames(context, collection.key);
-			if (tableNamesRes.error) {
-				return { error: tableNamesRes.error, data: undefined };
-			}
-			const environmentKeys = collection.getData.publishing.targets.map(
-				(environment) => environment.key,
+			if (tableNamesRes.error) return tableNamesRes;
+
+			const targets = collection.getData.publishing.targets.map(
+				(target) => target.key,
 			);
-			const statusRes = await Documents.selectEnvironmentStatusOverview(
+
+			const countsRes = await Documents.selectEnvironmentStatusCounts(
 				{
-					environmentKeys,
+					environmentKeys: targets,
 					versionTableName: tableNamesRes.data.version,
 				},
 				{
 					tableName: tableNamesRes.data.document,
 				},
 			);
-			if (statusRes.error) {
-				return { error: statusRes.error, data: undefined };
-			}
+			if (countsRes.error) return countsRes;
 
-			const counts = new Map(
-				statusRes.data.map((item) => [
-					`${item.environmentKey}:${item.status}`,
-					item.count,
-				]),
-			);
 			return {
 				error: undefined,
 				data: {
-					collectionKey: collection.key,
-					environments: environmentKeys.map((target) => ({
-						target,
-						unreleased: counts.get(`${target}:unreleased`) ?? 0,
-						outOfSync: counts.get(`${target}:out-of-sync`) ?? 0,
-						inSync: counts.get(`${target}:in-sync`) ?? 0,
-					})),
+					key: collection.key,
+					targets,
+					counts: countsRes.data,
 				},
 			};
 		}),
 	);
 
-	for (const result of collectionOverviewResults) {
+	const collectionCounts = [];
+	for (const result of collectionCountsResults) {
 		if (result.error) return result;
-		collectionOverviews.push(result.data);
+		collectionCounts.push(result.data);
 	}
 
 	const requestsRes = await getRequestOverview(context, { user: data.user });
@@ -85,10 +76,10 @@ const getOverview: ServiceFn<
 
 	return {
 		error: undefined,
-		data: {
-			collections: collectionOverviews,
+		data: reviewFormatter.formatOverview({
+			collections: collectionCounts,
 			requests: requestsRes.data,
-		},
+		}),
 	};
 };
 

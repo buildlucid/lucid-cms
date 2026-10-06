@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/solid-query";
-import type { RequestOverviewCounts } from "@types";
 import {
 	FaSolidCalendar,
 	FaSolidCircleCheck,
@@ -31,6 +30,7 @@ import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { countRequestQueue, requestQueues } from "@/utils/requests";
 
 const RequestsPage: Component = () => {
 	// ----------------------------------------
@@ -81,54 +81,33 @@ const RequestsPage: Component = () => {
 	// Memos
 	const presets = createMemo(() => {
 		const overviewData = overview.data?.data;
-		//* the list shows every type, so its presets count them all
-		const count = (key: keyof RequestOverviewCounts) =>
-			overviewData
-				? overviewData.publish[key] + overviewData.create[key]
-				: undefined;
 		const items: FilterPreset[] = [
+			...requestQueues.map(
+				(queue): FilterPreset => ({
+					key: queue.key,
+					label: queue.label(),
+					count: overviewData
+						? countRequestQueue(overviewData, queue)
+						: undefined,
+					loading: overview.isFetching,
+					filters: queue.filters,
+				}),
+			),
 			{
-				key: "pending",
-				label: T()("requests.state.pending"),
-				count: count("awaitingApproval"),
+				key: "publish",
+				label: T()("requests.filter.publish"),
+				count: overviewData
+					? overviewData.publish.awaitingApproval +
+						overviewData.publish.approved
+					: undefined,
 				loading: overview.isFetching,
 				filters: {
 					status: { value: "open", operator: "=" },
-					approval: { value: "pending", operator: "=" },
+					type: { value: "publish", operator: "=" },
 				},
 			},
 			{
-				key: "assigned",
-				label: T()("requests.filter.assigned"),
-				count: count("assignedToMe"),
-				loading: overview.isFetching,
-				filters: {
-					status: { value: "open", operator: "=" },
-					assignedToMe: { value: true, operator: "=" },
-				},
-			},
-			{
-				key: "approved",
-				label: T()("requests.state.approved"),
-				count: count("approved"),
-				loading: overview.isFetching,
-				filters: {
-					status: { value: "open", operator: "=" },
-					approval: { value: "approved", operator: "=" },
-				},
-			},
-			{
-				key: "failed",
-				label: T()("requests.state.failed"),
-				count: count("failed"),
-				loading: overview.isFetching,
-				filters: {
-					status: { value: "open", operator: "=" },
-					failed: { value: true, operator: "=" },
-				},
-			},
-			{
-				key: "requests",
+				key: "create",
 				label: T()("requests.filter.requests"),
 				count: overviewData
 					? overviewData.create.awaitingApproval + overviewData.create.approved

@@ -5,6 +5,7 @@ import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import api from "@/services/api";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
+import { getStorageUsage } from "@/utils/media-storage";
 
 const StorageWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
@@ -16,10 +17,17 @@ const StorageWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Memos
 	const storage = createMemo(() => settings.data?.data.media?.storage);
-	const percent = createMemo(() => {
-		const { total, used } = storage() ?? {};
-		if (!total || !used || total <= 0) return 0;
-		return Math.min(100, Math.floor((used / total) * 100));
+	const usage = createMemo(() => getStorageUsage(storage()));
+	const labels = createMemo(() => {
+		const current = storage();
+		if (!current) return undefined;
+		if (usage().unlimited || !current.total) {
+			return { start: T()("home.widget.storage.unlimited") };
+		}
+		return {
+			start: T()("home.widget.storage.used", { percent: usage().percent }),
+			end: helpers.bytesToSize(current.total),
+		};
 	});
 
 	// ----------------------------------------
@@ -36,26 +44,12 @@ const StorageWidget: Component<{ size: DashboardWidgetSize }> = () => {
 						{helpers.bytesToSize(storage()?.used ?? 0)}
 					</Show>
 				</p>
-				<Show
-					when={storage()?.total}
-					fallback={
-						<p class="text-xs text-body">
-							{T()("home.widget.storage.unlimited")}
-						</p>
-					}
-				>
-					{(total) => (
-						<ProgressBar
-							value={percent()}
-							size="sm"
-							variant={percent() >= 90 ? "warning" : "primary"}
-							labels={{
-								start: T()("home.widget.storage.used", { percent: percent() }),
-								end: helpers.bytesToSize(total()),
-							}}
-						/>
-					)}
-				</Show>
+				<ProgressBar
+					value={usage().percent}
+					size="sm"
+					variant={usage().percent >= 90 ? "warning" : "primary"}
+					labels={labels()}
+				/>
 			</div>
 		</DashboardCard>
 	);

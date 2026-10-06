@@ -1319,65 +1319,94 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			return eb.exists(subQuery.select(sql.lit(1).as("exists")));
 		});
 	}
-	/** Counts each configured environment's relationship to latest without loading document content. */
-	async selectEnvironmentStatusOverview(
+	/**
+	 * Counts a collection's documents and, for each environment, how many have
+	 * been released there and how many of those match latest. Documents that
+	 * only exist as a create request's proposal are left out. Counts are raw,
+	 * as some databases return them as strings.
+	 */
+	async selectEnvironmentStatusCounts(
 		props: {
 			environmentKeys: string[];
 			versionTableName: LucidVersionTableName;
 		},
 		dynamicConfig: DynamicConfig<LucidDocumentTableName>,
 	) {
-		const statuses = [
-			"unreleased",
-			"out-of-sync",
-			"in-sync",
-		] as const satisfies readonly DocumentEnvironmentStatusFilter["status"][];
+		const { ref } = this.db.dynamic;
+		const totalQuery = this.db
+			.selectFrom(dynamicConfig.tableName)
+			.select(sql<string | number>`count(*)`.as("count"))
+			.where("is_deleted", "=", this.dbAdapter.getDefault("boolean", "false"))
+			.where("create_request_id", "is", null);
+
+		const environmentsQuery = this.db
+			.selectFrom(
+				sql
+					.table<LucidVersionTable>(props.versionTableName)
+					.as("status_environment"),
+			)
+			.innerJoin(
+				sql
+					.table<LucidVersionTable>(props.versionTableName)
+					.as("status_latest"),
+				(join) =>
+					join
+						.onRef(
+							ref("status_latest.document_id"),
+							"=",
+							ref("status_environment.document_id"),
+						)
+						.on(ref("status_latest.type"), "=", "latest"),
+			)
+			.innerJoin(
+				sql
+					.table<LucidDocumentTable>(dynamicConfig.tableName)
+					.as("status_document"),
+				(join) =>
+					join.onRef(
+						ref("status_document.id"),
+						"=",
+						ref("status_environment.document_id"),
+					),
+			)
+			.select([
+				sql<string>`${ref("status_environment.type")}`.as("environment_key"),
+				sql<string | number>`count(*)`.as("released"),
+				sql<
+					string | number
+				>`sum(case when ${ref("status_environment.content_id")} = ${ref("status_latest.content_id")} then 1 else 0 end)`.as(
+					"in_sync",
+				),
+			])
+			.where(ref("status_environment.type"), "in", props.environmentKeys)
+			.where(
+				ref("status_document.is_deleted"),
+				"=",
+				this.dbAdapter.getDefault("boolean", "false"),
+			)
+			.where(ref("status_document.create_request_id"), "is", null)
+			.groupBy(ref("status_environment.type"));
 
 		const exec = await this.executeQuery(
 			() =>
-				Promise.all(
-					props.environmentKeys.flatMap((environmentKey) =>
-						statuses.map(async (status) => {
-							let query = this.db
-								.selectFrom(dynamicConfig.tableName)
-								.select(sql<string | number>`count(*)`.as("count"))
-								.where(
-									"is_deleted",
-									"=",
-									this.dbAdapter.getDefault("boolean", "false"),
-								)
-								.where("create_request_id", "is", null);
-
-							query = this.applyEnvironmentStatusFiltersToQuery(
-								query,
-								[{ environmentKey, status }],
-								dynamicConfig.tableName,
-								props.versionTableName,
-							);
-
-							const row = await query.executeTakeFirst();
-							return {
-								environmentKey,
-								status,
-								count: row?.count ?? 0,
-							};
-						}),
-					),
-				),
+				Promise.all([
+					totalQuery.executeTakeFirst(),
+					environmentsQuery.execute(),
+				]),
 			{
-				method: "selectEnvironmentStatusOverview",
+				method: "selectEnvironmentStatusCounts",
 				tableName: dynamicConfig.tableName,
 			},
 		);
 		if (exec.response.error) return exec.response;
 
+		const [total, environments] = exec.response.data ?? [undefined, []];
 		return {
 			error: undefined,
-			data: (exec.response.data ?? []).map((item) => ({
-				environmentKey: item.environmentKey,
-				status: item.status,
-				count: Number(item.count),
-			})),
+			data: {
+				total: total?.count,
+				environments,
+			},
 		};
 	}
 

@@ -14,12 +14,13 @@ export const controllerSchemas = {
 			collections: z.array(
 				z.object({
 					collectionKey: z.string(),
-					environments: z.array(
+					total: z.number(),
+					targets: z.array(
 						z.object({
-							target: z.string(),
-							unreleased: z.number(),
-							outOfSync: z.number(),
+							key: z.string(),
 							inSync: z.number(),
+							outOfSync: z.number(),
+							unreleased: z.number(),
 						}),
 					),
 				}),

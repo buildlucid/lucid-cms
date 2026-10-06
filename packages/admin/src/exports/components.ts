@@ -147,7 +147,6 @@ export {
 	type PageLayoutBodyProps,
 	type PageLayoutHeaderProps,
 	type PageLayoutRootProps,
-	type PageLayoutVariant,
 } from "../components/PageLayout/PageLayout.js";
 export {
 	default as Pagination,

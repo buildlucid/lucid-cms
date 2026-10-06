@@ -185,6 +185,28 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 							);
 							return this.isTrue(filter.value) ? assigned : eb.not(assigned);
 						},
+						//* requests the user reviews or made, for their own to-do lists
+						involvesMe: ({ eb, filter }) => {
+							const involved = eb.or([
+								eb("lucid_requests.created_by", "=", props.access.userId),
+								eb.exists(
+									eb
+										.selectFrom("lucid_request_reviewers")
+										.select(sql.lit(1).as("one"))
+										.whereRef(
+											"lucid_request_reviewers.request_id",
+											"=",
+											"lucid_requests.id",
+										)
+										.where(
+											"lucid_request_reviewers.user_id",
+											"=",
+											props.access.userId,
+										),
+								),
+							]);
+							return this.isTrue(filter.value) ? involved : eb.not(involved);
+						},
 					},
 				},
 			},

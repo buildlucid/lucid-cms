@@ -32,11 +32,16 @@ export const formatAiUsageNumber = (value?: number | null) => {
 	return numberFormatter.format(value);
 };
 
-export const formatAiCredits = (value?: number | null) => {
+/** A credit amount without its unit, for when the unit is styled apart from it. */
+export const formatAiCreditAmount = (value?: number | null) => {
 	if (value === undefined || value === null) return undefined;
-	return T()("ai.usage.credits.value", {
-		value: creditsFormatter.format(value),
-	});
+	return creditsFormatter.format(value);
+};
+
+export const formatAiCredits = (value?: number | null) => {
+	const amount = formatAiCreditAmount(value);
+	if (amount === undefined) return undefined;
+	return T()("ai.usage.credits.value", { value: amount });
 };
 
 //* typed against every usage feature, so a new feature cannot ship without a label

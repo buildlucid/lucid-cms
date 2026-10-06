@@ -29,7 +29,7 @@ const AgentReferenceFiles: Component<{
 		>
 			<ul
 				class={classnames(
-					"agent-reference-strip flex gap-2 overflow-x-auto px-4 pt-3 pb-2 scrollbar-none",
+					"scroll-fade-x flex gap-2 overflow-x-auto px-4 pt-3 pb-2 scrollbar-none",
 					props.class,
 				)}
 				aria-label={T()("agent.references.attached")}

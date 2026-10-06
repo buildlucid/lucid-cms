@@ -53,7 +53,7 @@ const useGetExecution = (params: {
 		refreshed = attempt;
 		queryClient.invalidateQueries({ queryKey: queryKeys.requests.all() });
 		queryClient.invalidateQueries({ queryKey: queryKeys.documents.all() });
-		queryClient.invalidateQueries({ queryKey: queryKeys.publishing.all() });
+		queryClient.invalidateQueries({ queryKey: queryKeys.review.all() });
 	});
 
 	return query;

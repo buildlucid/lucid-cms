@@ -100,10 +100,11 @@ const TableRow: Component<TableRowProps> = (props) => {
 						firstPermittedAction() !== undefined || props.onClick,
 					"outline outline-primary-low-border -outline-offset-1 [&>td]:bg-primary-low [&>td]:after:border-primary-low-border":
 						props.current,
-					"bg-background hover:bg-background-hover":
+					//* --table-row-bg lets the sticky actions cell match the row
+					"bg-background hover:bg-background-hover [--table-row-bg:var(--color-background)] hover:[--table-row-bg:var(--color-background-hover)]":
 						(table.variant() === "primary" || table.variant() === undefined) &&
 						!props.current,
-					"bg-card hover:bg-background-hover":
+					"bg-card hover:bg-background-hover [--table-row-bg:var(--color-card)] hover:[--table-row-bg:var(--color-background-hover)]":
 						(table.variant() === "secondary" ||
 							table.variant() === "contained") &&
 						!props.current,

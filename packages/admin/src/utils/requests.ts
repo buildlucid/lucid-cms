@@ -4,30 +4,87 @@ import type {
 	RequestDetail,
 	RequestDocument,
 	RequestEvent,
+	RequestOverview,
+	RequestOverviewCounts,
 	RequestSummary,
 	RequestTarget,
-	RequestType,
 } from "@types";
 import type { PillVariant } from "@/components/Pill/Pill";
 import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
 import { Permissions } from "@/constants/permissions";
+import type { FilterState } from "@/hooks/useQueryState/useQueryState";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-const requestListFilters = {
-	pending: "filter[status]=open&filter[approval]=pending",
-	approved: "filter[status]=open&filter[approval]=approved",
-	scheduled:
-		"filter[status]=open&filter[approval]=approved&filter[scheduled]=1",
-	failed: "filter[status]=open&filter[failed]=1",
-};
+/**
+ * The open requests people act on, in the order dashboards show them. Each
+ * queue is also a Requests page preset, and counts add up both request types.
+ */
+export const requestQueues = [
+	{
+		key: "assigned",
+		count: "assignedToMe",
+		label: () => T()("requests.filter.assigned"),
+		indicator: "primary-subtle",
+		filters: {
+			status: { value: "open", operator: "=" },
+			assignedToMe: { value: true, operator: "=" },
+		},
+	},
+	{
+		key: "pending",
+		count: "awaitingApproval",
+		label: () => T()("requests.state.pending"),
+		indicator: "warning-subtle",
+		filters: {
+			status: { value: "open", operator: "=" },
+			approval: { value: "pending", operator: "=" },
+		},
+	},
+	{
+		key: "approved",
+		count: "approved",
+		label: () => T()("requests.state.approved"),
+		indicator: "success-subtle",
+		filters: {
+			status: { value: "open", operator: "=" },
+			approval: { value: "approved", operator: "=" },
+		},
+	},
+	{
+		key: "failed",
+		count: "failed",
+		label: () => T()("requests.state.failed"),
+		indicator: "danger-subtle",
+		filters: {
+			status: { value: "open", operator: "=" },
+			failed: { value: true, operator: "=" },
+		},
+	},
+] as const satisfies ReadonlyArray<{
+	key: string;
+	count: keyof RequestOverviewCounts;
+	label: () => string;
+	indicator: StatusIndicatorVariant;
+	filters: Record<string, FilterState>;
+}>;
 
-/** A filtered list of one type of request, which dashboards and overviews link to. */
-export const getRequestListRoute = (
-	type: RequestType,
-	view: keyof typeof requestListFilters,
-) => `/lucid/requests?filter[type]=${type}&${requestListFilters[view]}`;
+export type RequestQueue = (typeof requestQueues)[number];
+
+/** How many open requests of both types are in a queue. */
+export const countRequestQueue = (
+	overview: RequestOverview,
+	queue: RequestQueue,
+) => overview.publish[queue.count] + overview.create[queue.count];
+
+export const getRequestQueueRoute = (queue: RequestQueue) =>
+	`/lucid/requests?${Object.entries(queue.filters)
+		.map(
+			([key, filter]) =>
+				`filter[${key}]=${typeof filter.value === "boolean" ? Number(filter.value) : filter.value}`,
+		)
+		.join("&")}`;
 
 export type RequestState =
 	| "completed"
@@ -36,7 +93,6 @@ export type RequestState =
 	| "approved"
 	| "pending";
 
-/** The one status people see: completed, closed, failed, approved or awaiting approval. */
 export const getRequestState = (
 	request: RequestDetail | RequestSummary,
 ): RequestState => {
@@ -46,7 +102,6 @@ export const getRequestState = (
 	return request.approved ? "approved" : "pending";
 };
 
-/** How each request state is labelled and coloured, as a pill or a status dot. */
 export const requestStates: Record<
 	RequestState,
 	{

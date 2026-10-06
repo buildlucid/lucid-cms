@@ -42,8 +42,8 @@ const HomePage: Component = () => {
 	return (
 		<Switch>
 			<Match when={getHomeView() === "ask"}>
-				<PageLayout.Root class="blur-background bg-background">
-					<PageLayout.Body variant="transparent" padding="md">
+				<PageLayout.Root>
+					<PageLayout.Body padding="md" class="blur-background">
 						<div data-home-view="ask" class="flex flex-col">
 							<div class="flex justify-end">
 								<HomeViewSwitch />
@@ -54,9 +54,8 @@ const HomePage: Component = () => {
 				</PageLayout.Root>
 			</Match>
 			<Match when={getHomeView() === "overview"}>
-				<PageLayout.Root class="blur-background bg-background">
+				<PageLayout.Root>
 					<PageLayout.Header
-						variant="transparent"
 						title={greeting()}
 						description={T()("home.overview.description")}
 						actions={
@@ -79,7 +78,7 @@ const HomePage: Component = () => {
 							</Show>
 						}
 					/>
-					<PageLayout.Body variant="transparent" padding="md">
+					<PageLayout.Body padding="md">
 						<div data-home-view="overview" class="flex grow flex-col">
 							<Show
 								when={hasAnyPermissions()}

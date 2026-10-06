@@ -26,7 +26,7 @@ export interface ProgressBarProps {
 	size?: ProgressBarSize;
 	/** Removes the rounded corners. */
 	square?: boolean;
-	/** Text shown under each end of the bar. */
+	/** Text shown under each end of the bar. Smaller with the `sm` size. */
 	labels?: {
 		start?: string;
 		end?: string;
@@ -95,9 +95,14 @@ export const ProgressBar: Component<ProgressBarProps> = (props) => {
 				/>
 			</div>
 			<Show when={props.labels}>
-				<div class="flex justify-between gap-4 mt-2.5">
-					<span class="text-sm">{props.labels?.start}</span>
-					<span class="text-sm">{props.labels?.end}</span>
+				<div
+					class={classnames("flex justify-between gap-4", {
+						"mt-1.5 text-xs": props.size === "sm",
+						"mt-2.5 text-sm": props.size !== "sm",
+					})}
+				>
+					<span>{props.labels?.start}</span>
+					<span>{props.labels?.end}</span>
 				</div>
 			</Show>
 		</div>

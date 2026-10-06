@@ -1,7 +1,6 @@
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { MediaType, ProfilePicture } from "../media/types.js";
 import type { RefResource } from "../refs/resource.js";
-import type { RequestOverview } from "../requests/types.js";
 
 export type DocumentVersionType = "latest" | "revision" | string;
 export type BrickType = "builder" | "fixed" | "embedded";
@@ -887,16 +886,3 @@ export interface DocumentVersionCheckResponse {
 	bricks: Array<DocumentVersionCheckBrick>;
 	fields: Array<DocumentVersionCheckField>;
 }
-
-export type PublishingOverview = {
-	collections: Array<{
-		collectionKey: string;
-		environments: Array<{
-			target: string;
-			unreleased: number;
-			outOfSync: number;
-			inSync: number;
-		}>;
-	}>;
-	requests: RequestOverview;
-};

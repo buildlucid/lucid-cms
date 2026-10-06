@@ -18,7 +18,7 @@ const usePublishSingle = () =>
 			}),
 		invalidates: [
 			queryKeys.documents.all(),
-			queryKeys.publishing.overview(),
+			queryKeys.review.overview(),
 			queryKeys.requests.all(),
 		],
 	});

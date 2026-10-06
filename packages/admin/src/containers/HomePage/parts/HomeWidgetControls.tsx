@@ -51,7 +51,7 @@ const HomeWidgetControls: Component<{
 	return (
 		<div
 			class={classnames(
-				"flex h-8 min-w-0 cursor-grab items-center gap-1 rounded-lg border bg-card px-1 transition-colors active:cursor-grabbing",
+				"flex h-8 min-w-0 cursor-grab items-center gap-1 rounded-md border bg-card px-1 transition-colors active:cursor-grabbing",
 				{
 					"border-primary": props.dropTarget,
 					"border-border": !props.dropTarget,
