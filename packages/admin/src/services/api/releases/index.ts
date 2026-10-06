@@ -5,6 +5,7 @@ import useCreateComment from "./useCreateComment";
 import useCreateSingle from "./useCreateSingle";
 import useDeleteComment from "./useDeleteComment";
 import useGetExecution from "./useGetExecution";
+import useGetMentionableUsers from "./useGetMentionableUsers";
 import useGetMultiple from "./useGetMultiple";
 import useGetOverview from "./useGetOverview";
 import useGetReviewers from "./useGetReviewers";
@@ -28,6 +29,7 @@ const exportObject = {
 	useGetSingle,
 	useGetExecution,
 	useGetReviewers,
+	useGetMentionableUsers,
 	useCreateSingle,
 	useUpdateSingle,
 	useUpdateTargets,

@@ -27,7 +27,7 @@ const releaseEventTypeSchema = z.enum([
 	"proposal_edited",
 ]);
 
-/** Comments from other people need one of these before a release can be approved. */
+/** Every comment needs one of these before a release can be approved. */
 export const releaseCommentResolutionSchema = z.enum(["resolved", "closed"]);
 
 /** Event details that are not part of the comment body. */
@@ -61,6 +61,10 @@ export const releaseEventsTable = defineTable("lucid_release_events", () => ({
 			type: "integer",
 		},
 		user_id: {
+			schema: z.number().nullable(),
+			type: "integer",
+		},
+		parent_id: {
 			schema: z.number().nullable(),
 			type: "integer",
 		},
@@ -140,13 +144,14 @@ export type ReleaseEventMetadataByType = {
 	reviewer_removed: { userId: number };
 };
 
-/** A new activity entry, with its metadata checked against its type. */
+/** A new activity entry, with its metadata checked against its type. Only comments have replies. */
 export type ReleaseEventInsert = {
 	[Type in ReleaseEventType]: {
 		release_id: number;
 		user_id: number | null;
 		type: Type;
 		body?: RichTextJSON | null;
+		parent_id?: Type extends "comment" ? number | null : never;
 	} & (ReleaseEventMetadataByType[Type] extends null
 		? { metadata?: never }
 		: { metadata: ReleaseEventMetadataByType[Type] });
@@ -156,6 +161,8 @@ export interface LucidReleaseEvents {
 	id: Generated<number>;
 	release_id: number;
 	user_id: number | null;
+	/** The comment a reply belongs to. Null for top-level comments and other activity. */
+	parent_id: number | null;
 	type: ReleaseEventType;
 	body: JSONColumnType<
 		RichTextJSON | null,

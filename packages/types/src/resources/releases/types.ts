@@ -81,6 +81,8 @@ export type ReleaseEvent = ReleaseEventBase &
 				/** How the comment was dealt with. Null while it is open. */
 				resolution: ReleaseCommentResolution | null;
 				resolvedBy: ReleaseUser | null;
+				/** Oldest first. */
+				replies: ReleaseCommentReply[];
 		  }
 		| { type: "approved"; body: RichTextJSON | null }
 		| {
@@ -129,6 +131,9 @@ export type ReleaseEventType = ReleaseEvent["type"];
 
 export type ReleaseCommentResolution = "resolved" | "closed";
 
+/** A reply in a comment's thread. Replies don't change the release or need resolving. */
+export type ReleaseCommentReply = ReleaseEventBase & { body: RichTextJSON };
+
 export type ReleasePermissions = {
 	/** Edit proposal content, title, targets and reviewers. */
 	edit: boolean;
@@ -166,7 +171,7 @@ export type Release = {
 	documents: ReleaseDocument[];
 	events: ReleaseEvent[];
 	blockers: ReleaseBlocker[];
-	/** Comments from other people still waiting to be resolved or closed. */
+	/** Comments still waiting to be resolved or closed. These stop approval. */
 	openComments: number;
 	permissions: ReleasePermissions;
 };

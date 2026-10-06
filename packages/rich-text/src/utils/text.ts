@@ -1,4 +1,4 @@
-import type { RichTextJSON } from "../types.js";
+import { type RichTextJSON, richTextNodeNames } from "../types.js";
 
 const renderInlineContent = (content?: RichTextJSON[]): string =>
 	(content ?? []).map((node) => renderNode(node)).join("");
@@ -61,6 +61,10 @@ const renderNode = (node: RichTextJSON, depth = 0): string => {
 			return node.text ?? "";
 		case "hardBreak":
 			return "\n";
+		case richTextNodeNames.mention:
+			return typeof node.attrs?.label === "string"
+				? `@${node.attrs.label}`
+				: "";
 		case "bulletList":
 			return renderList(node, false, depth);
 		case "orderedList":

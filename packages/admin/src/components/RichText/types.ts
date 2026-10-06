@@ -9,6 +9,7 @@ import type {
 	RichTextUserVariableField,
 	UserRef,
 } from "@types";
+import type { UserDisplayUser } from "@/components/UserDisplay/UserDisplay";
 import type { CollectionBrickConfig } from "@/types/collection-config";
 
 export type RichTextVariableReference =
@@ -103,4 +104,15 @@ export interface RichTextOptions {
 		selectEmbeddedBrick?: (props: { onSelect: (ref: string) => void }) => void;
 		editEmbeddedBrick?: (ref: string) => void;
 	};
+}
+
+/** A person offered while typing an `@` mention. */
+export interface RichTextMentionOption {
+	id: number;
+	/** Inserted after the `@`. */
+	label: string;
+	/** Shown beside the label and matched when searching, such as a username. */
+	hint?: string | null;
+	/** Shows their profile picture, or initials, before the label. */
+	user?: UserDisplayUser;
 }

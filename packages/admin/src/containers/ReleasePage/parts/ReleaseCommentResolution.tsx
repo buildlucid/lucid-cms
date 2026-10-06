@@ -31,9 +31,10 @@ const resolutionStates: Record<
 };
 
 /**
- * Whether a comment is still open, resolved or closed. Open comments from
- * other people stop the release being approved. The author and anyone who can
- * edit or approve the release can change it while the release is open.
+ * Whether a comment thread is open, resolved or closed, shown as a pill at
+ * the end of the first comment's header with who changed it on hover. Open comments
+ * stop the release being approved. The author and anyone who can edit or
+ * approve the release can change it while the release is open.
  */
 export const ReleaseCommentResolutionSelect: Component<{
 	release: Release;
@@ -60,7 +61,6 @@ export const ReleaseCommentResolutionSelect: Component<{
 			? T()("releases.comment.resolution.by", {
 					name:
 						helpers.formatUserName(props.comment.resolvedBy, "name") ||
-						props.comment.resolvedBy.email ||
 						T()("common.unknown"),
 				})
 			: undefined,
@@ -73,7 +73,7 @@ export const ReleaseCommentResolutionSelect: Component<{
 			when={editable()}
 			fallback={
 				<span
-					class="flex items-center gap-1.5 text-xs text-body"
+					class="flex h-5 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-2 text-xs text-body"
 					title={resolvedBy()}
 				>
 					<StatusIndicator variant={resolutionStates[current()].indicator} />
@@ -83,7 +83,7 @@ export const ReleaseCommentResolutionSelect: Component<{
 		>
 			<Menu.Root placement="bottom-end">
 				<Menu.Trigger
-					class="flex h-7 items-center gap-1.5 rounded-md px-2 text-xs text-body transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60"
+					class="flex h-5 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-border px-2 text-xs text-body transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60"
 					disabled={update.action.isPending}
 					aria-label={T()("releases.comment.resolution")}
 					title={resolvedBy()}

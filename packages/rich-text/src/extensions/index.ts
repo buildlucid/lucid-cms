@@ -9,6 +9,7 @@ import { LucidDocument } from "./document/index.js";
 import { LucidEmbeddedBrick } from "./embedded-brick/index.js";
 import { LucidLink } from "./link/index.js";
 import { LucidMedia } from "./media/index.js";
+import { LucidMention } from "./mention/index.js";
 import { LucidVariable } from "./variable/index.js";
 
 const flattenRichTextExtensions = (inputExtensions: Extensions): Extensions => {
@@ -48,10 +49,11 @@ const createCoreExtensions = (): Extensions => {
 		LucidMedia,
 		LucidVariable,
 		LucidEmbeddedBrick,
+		LucidMention,
 	]);
 };
 
-/** Default Tiptap extensions for Lucid content, including media, documents, variables and embedded bricks. */
+/** Default Tiptap extensions for Lucid content, including media, documents, variables, embedded bricks and mentions. */
 export const extensions = createCoreExtensions();
 
 /** Merges custom extensions by name over Lucid's defaults. */
@@ -73,4 +75,5 @@ export { LucidDocument } from "./document/index.js";
 export { LucidEmbeddedBrick } from "./embedded-brick/index.js";
 export { LucidLink } from "./link/index.js";
 export { LucidMedia } from "./media/index.js";
+export { LucidMention } from "./mention/index.js";
 export { LucidVariable } from "./variable/index.js";

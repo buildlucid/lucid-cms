@@ -220,6 +220,7 @@ export const queryKeys = {
 		overview: () => ["lucid", "releases", "overview"] as const,
 		detail: () => ["lucid", "releases", "detail"] as const,
 		reviewers: () => ["lucid", "releases", "reviewers"] as const,
+		mentionableUsers: () => ["lucid", "releases", "mentionableUsers"] as const,
 	},
 	releaseExecutions: {
 		detail: (id: number | undefined, jobId: string | null | undefined) =>

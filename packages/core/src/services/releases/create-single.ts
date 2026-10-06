@@ -6,9 +6,9 @@ import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import captureDocument from "./helpers/capture-document.js";
 import checkReleaseSize from "./helpers/check-release-size.js";
+import resolveMentions from "./helpers/resolve-mentions.js";
 import setReviewers from "./helpers/set-reviewers.js";
 
-/** Creates a release containing private proposals or immutable environment snapshots. */
 const createSingle: ServiceFn<
 	[
 		{
@@ -40,11 +40,23 @@ const createSingle: ServiceFn<
 	const sizeRes = checkReleaseSize(data.documents.length);
 	if (sizeRes.error) return sizeRes;
 
+	const descriptionRes = data.description
+		? await resolveMentions(context, {
+				release: {
+					documents: data.documents.map((document) => ({
+						collection_key: document.collectionKey,
+					})),
+				},
+				body: data.description,
+			})
+		: undefined;
+	if (descriptionRes?.error) return descriptionRes;
+
 	const now = new Date().toISOString();
 	const releaseRes = await Releases.createSingle({
 		data: {
 			title: data.title,
-			description: data.description ?? null,
+			description: descriptionRes?.data ?? null,
 			status: "open",
 			revision: 1,
 			created_by: data.user.id,

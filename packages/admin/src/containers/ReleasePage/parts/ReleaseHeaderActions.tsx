@@ -34,7 +34,7 @@ export const ReleaseHeaderActions: Component<{
 	// ----------------------------------------
 	// Memos
 	const open = createMemo(() => props.release.status === "open");
-	//* open comments from other people also stop approval
+	//* open comments also stop approval
 	const blocked = createMemo(
 		() =>
 			props.release.blockers.length > 0 ||

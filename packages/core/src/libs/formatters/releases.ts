@@ -52,9 +52,13 @@ const formatUsers = (props: {
 		]),
 	);
 
-/** Formats one activity entry. Entries missing the details their type needs are left out. */
+/**
+ * Formats one activity entry. Entries missing the details their type needs
+ * are left out. Comments carry their replies, which aren't entries themselves.
+ */
 const formatEvent = (props: {
 	event: Select<LucidReleaseEvents>;
+	replies: Select<LucidReleaseEvents>[];
 	users: Map<number, ReleaseUser>;
 }): ReleaseEvent | null => {
 	const userOrNull = (id: number | null) =>
@@ -76,6 +80,19 @@ const formatEvent = (props: {
 				body: props.event.body,
 				resolution: props.event.resolution,
 				resolvedBy: userOrNull(props.event.resolved_by),
+				replies: props.replies.flatMap((reply) =>
+					reply.body
+						? [
+								{
+									id: reply.id,
+									user: userOrNull(reply.user_id),
+									body: reply.body,
+									createdAt: formatter.formatDate(reply.created_at),
+									updatedAt: formatter.formatDate(reply.updated_at),
+								},
+							]
+						: [],
+				),
 			};
 		}
 		case "approved":
@@ -194,6 +211,10 @@ const formatSingle = (props: {
 	const userOrNull = (id: number | null) =>
 		id === null ? null : (props.users.get(id) ?? null);
 	const approved = props.release.approved_revision === props.release.revision;
+	const repliesByParent = Map.groupBy(
+		props.release.events.filter((event) => event.parent_id !== null),
+		(event) => event.parent_id,
+	);
 
 	return {
 		id: props.release.id,
@@ -261,14 +282,16 @@ const formatSingle = (props: {
 			};
 		}),
 		events: props.release.events.flatMap((event) => {
-			const formatted = formatEvent({ event, users: props.users });
+			if (event.parent_id !== null) return [];
+			const formatted = formatEvent({
+				event,
+				replies: repliesByParent.get(event.id) ?? [],
+				users: props.users,
+			});
 			return formatted ? [formatted] : [];
 		}),
 		blockers: props.blockers,
-		openComments: countOpenComments({
-			events: props.release.events,
-			userId: props.user.id,
-		}),
+		openComments: countOpenComments({ events: props.release.events }),
 		permissions: props.permissions,
 	};
 };

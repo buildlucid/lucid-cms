@@ -11,6 +11,7 @@ export const richTextNodeNames = {
 	media: "lucidMedia",
 	variable: "lucidVariable",
 	embeddedBrick: "lucidEmbeddedBrick",
+	mention: "lucidMention",
 } as const;
 
 export type RichTextHydratedImage = {
@@ -83,7 +84,8 @@ export type RichTextElement =
 	| "document"
 	| "media"
 	| "variable"
-	| "brick";
+	| "brick"
+	| "mention";
 
 /** Node or mark being rendered, its rendered children and Lucid's default HTML. */
 export type RichTextElementRendererProps<Element extends string = string> = {
@@ -159,6 +161,12 @@ export type RichTextRenderers<
 	brick?: (
 		props: RichTextElementRendererProps<"brick"> & {
 			brick: RichTextRenderBrick<TDocument> | null;
+		},
+	) => string;
+	mention?: (
+		props: RichTextElementRendererProps<"mention"> & {
+			userId: number | null;
+			label: string | null;
 		},
 	) => string;
 	/** Handles any node or mark without a more specific renderer. */

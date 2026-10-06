@@ -1,5 +1,11 @@
 import classNames from "classnames";
-import { type Component, createMemo } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	onCleanup,
+	onMount,
+} from "solid-js";
 import dateHelpers from "@/utils/date-helpers";
 
 export interface DateTextProps {
@@ -8,6 +14,8 @@ export interface DateTextProps {
 	includeTime?: boolean;
 	/** Treats the value as a calendar date, without converting timezones. */
 	dateOnly?: boolean;
+	/** Shows how long ago it was, such as "6 minutes ago", and keeps it current. */
+	relative?: boolean;
 	class?: string;
 }
 
@@ -24,9 +32,15 @@ export interface DateTextProps {
  */
 const DateText: Component<DateTextProps> = (props) => {
 	// ----------------------------------------
+	// State & Hooks
+	const [now, setNow] = createSignal(Date.now());
+
+	// ----------------------------------------
 	// Memos
 	const date = createMemo(() => {
 		if (!props.date) return null;
+		if (props.relative)
+			return dateHelpers.formatRelativeDate(props.date, now());
 		return dateHelpers.formatDate(props.date, {
 			includeTime: props.includeTime,
 			localDateOnly: props.dateOnly,
@@ -38,6 +52,14 @@ const DateText: Component<DateTextProps> = (props) => {
 			includeTime: !props.dateOnly,
 			localDateOnly: props.dateOnly,
 		});
+	});
+
+	// ----------------------------------------
+	// Effects
+	onMount(() => {
+		if (!props.relative) return;
+		const interval = setInterval(() => setNow(Date.now()), 60_000);
+		onCleanup(() => clearInterval(interval));
 	});
 
 	// ----------------------------------------

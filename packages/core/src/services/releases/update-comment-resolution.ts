@@ -10,6 +10,7 @@ import lockRelease from "./helpers/lock-release.js";
 /**
  * Resolves or closes a comment on an open release, or reopens it with null.
  * The comment's author and anyone who can edit or approve the release can.
+ * Replies are resolved with their thread.
  */
 const updateCommentResolution: ServiceFn<
 	[
@@ -34,7 +35,10 @@ const updateCommentResolution: ServiceFn<
 
 	const release = releaseRes.data;
 	const comment = release.events.find(
-		(event) => event.id === data.eventId && event.type === "comment",
+		(event) =>
+			event.id === data.eventId &&
+			event.type === "comment" &&
+			event.parent_id === null,
 	);
 	if (!comment) {
 		return {

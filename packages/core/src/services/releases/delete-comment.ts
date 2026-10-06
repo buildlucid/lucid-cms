@@ -4,7 +4,10 @@ import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import loadRelease from "./helpers/load-release.js";
 
-/** People can only delete their own comments. */
+/**
+ * People can delete their own comments and replies, and super admins can
+ * delete anyone's. Deleting a comment removes its replies too.
+ */
 const deleteComment: ServiceFn<
 	[{ id: number; eventId: number; user: LucidUser }],
 	undefined
@@ -17,7 +20,7 @@ const deleteComment: ServiceFn<
 	const comment = releaseRes.data.events.find(
 		(event) => event.id === data.eventId && event.type === "comment",
 	);
-	if (!comment || comment.user_id !== data.user.id) {
+	if (!comment || (comment.user_id !== data.user.id && !data.user.superAdmin)) {
 		return {
 			error: {
 				type: "basic",

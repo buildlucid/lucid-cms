@@ -5,6 +5,7 @@ export { default as createComment } from "./create-comment.js";
 export { default as createSingle } from "./create-single.js";
 export { default as deleteComment } from "./delete-comment.js";
 export { default as getExecution } from "./get-execution.js";
+export { default as getMentionableUsers } from "./get-mentionable-users.js";
 export { default as getMultiple } from "./get-multiple.js";
 export { default as getOverview } from "./get-overview.js";
 export { default as getReviewers } from "./get-reviewers.js";

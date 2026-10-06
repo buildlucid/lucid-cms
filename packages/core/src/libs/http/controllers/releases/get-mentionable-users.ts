@@ -1,5 +1,6 @@
 import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
+import z from "zod";
 import { controllerSchemas } from "../../../../schemas/releases.js";
 import { releaseServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
@@ -9,40 +10,36 @@ import { Permissions } from "../../../permission/definitions.js";
 import authenticate from "../../middleware/authenticate.js";
 import permissions from "../../middleware/permissions.js";
 import validate from "../../middleware/validate.js";
-import validateCSRF from "../../middleware/validate-csrf.js";
 import openAPI from "../../openapi/index.js";
+import formatAPIResponse from "../../utils/build-response.js";
 import createServiceContext from "../../utils/create-service-context.js";
 
 const factory = createFactory();
 
-const createCommentController = factory.createHandlers(
+const getMentionableUsersController = factory.createHandlers(
 	describeRoute({
-		description: "Add a comment to a release, or reply to one of its comments.",
+		description:
+			"List the people who can see a release, and so can be mentioned in its comments.",
 		tags: ["releases"],
-		summary: "Comment On Release",
+		summary: "Get Release Mentionable Users",
 		responses: openAPI.responses({
-			noProperties: true,
+			dataSchema: z.toJSONSchema(
+				controllerSchemas.getMentionableUsers.response,
+			),
 		}),
 		parameters: openAPI.parameters({
-			params: controllerSchemas.createComment.params,
-			headers: {
-				csrf: true,
-			},
+			params: controllerSchemas.getMentionableUsers.params,
 		}),
-		requestBody: openAPI.requestBody(controllerSchemas.createComment.body),
 	}),
-	validateCSRF,
 	authenticate(),
 	permissions([Permissions.ReleasesRead]),
-	validate("param", controllerSchemas.createComment.params),
-	validate("json", controllerSchemas.createComment.body),
+	validate("param", controllerSchemas.getMentionableUsers.params),
 	async (c) => {
 		const { id } = c.req.valid("param");
-		const body = c.req.valid("json");
 		const context = createServiceContext(c);
 
-		const result = await serviceWrapper(releaseServices.createComment, {
-			transaction: true,
+		const result = await serviceWrapper(releaseServices.getMentionableUsers, {
+			transaction: false,
 			defaultError: {
 				type: "basic",
 				name: copy("server:core.routes.releases.error.name"),
@@ -50,15 +47,13 @@ const createCommentController = factory.createHandlers(
 			},
 		})(context, {
 			id: Number.parseInt(id, 10),
-			body: body.body,
-			parentId: body.parentId,
 			user: c.get("auth"),
 		});
 		if (result.error) throw new LucidAPIError(result.error);
 
-		c.status(204);
-		return c.body(null);
+		c.status(200);
+		return c.json(formatAPIResponse(c, { data: result.data }));
 	},
 );
 
-export default createCommentController;
+export default getMentionableUsersController;

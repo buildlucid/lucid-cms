@@ -51,6 +51,7 @@ describe("rich-text references", () => {
 					],
 				},
 				{ type: "lucidEmbeddedBrick", attrs: { ref: "hero-ref" } },
+				{ type: "lucidMention", attrs: { userId: 5, label: "Ada" } },
 			],
 		};
 
@@ -83,6 +84,7 @@ describe("rich-text references", () => {
 				fieldKey: "firstName",
 			},
 			{ type: "rich-text-embedded-brick", ref: "hero-ref" },
+			{ type: "rich-text-mention", userId: 5 },
 		]);
 	});
 

@@ -1024,7 +1024,7 @@ test("adding and removing reviewers is added to the activity", async () => {
 	]);
 });
 
-test("comments withdraw approval, and comments from others must be resolved before approving again", async () => {
+test("comments withdraw approval, and every comment must be resolved before approving again", async () => {
 	const id = await createDocument();
 	const release = await createRelease(id);
 	const body = {
@@ -1058,12 +1058,154 @@ test("comments withdraw approval, and comments from others must be resolved befo
 	assert(!resolved.error, JSON.stringify(resolved.error));
 	expect((await readRelease(release.id)).openComments).toBe(0);
 	await approveRelease(release.id);
-	//* the approver's own comment withdraws the approval, but they needn't resolve it
+	//* the approver's own comment withdraws the approval and must be resolved too
 	await createComment(context, { id: release.id, user: reviewer, body });
-	expect((await readRelease(release.id)).approved).toBe(false);
-	await approveRelease(release.id);
+	const withOwnComment = await readRelease(release.id);
+	expect(withOwnComment.approved).toBe(false);
+	expect(withOwnComment.openComments).toBe(1);
+	expect(
+		(
+			await approve(context, {
+				...reviewInput(withOwnComment),
+				user: reviewer,
+			})
+		).error?.status,
+	).toBe(409);
+});
+
+test("replies leave approval alone, go one level deep and are deleted with their thread", async () => {
+	const release = await createRelease(await createDocument());
+	const body = {
+		type: "doc" as const,
+		content: [
+			{ type: "paragraph", content: [{ type: "text", text: "Looks good" }] },
+		],
+	};
 	await createComment(context, { id: release.id, user: creator, body });
-	expect((await readRelease(release.id)).approved).toBe(false);
+	const comment = (await readRelease(release.id)).events.find(
+		(event) => event.type === "comment",
+	);
+	assert(comment);
+	await updateCommentResolution(context, {
+		id: release.id,
+		eventId: comment.id,
+		user: reviewer,
+		resolution: "resolved",
+	});
+	await approveRelease(release.id);
+
+	const replied = await createComment(context, {
+		id: release.id,
+		user: creator,
+		body,
+		parentId: comment.id,
+	});
+	assert(!replied.error, JSON.stringify(replied.error));
+	const withReply = await getSingle(context, {
+		id: release.id,
+		user: reviewer,
+	});
+	assert(withReply.data, JSON.stringify(withReply.error));
+	expect(withReply.data.approved).toBe(true);
+	expect(withReply.data.openComments).toBe(0);
+	const thread = withReply.data.events.filter(
+		(event) => event.type === "comment",
+	);
+	expect(thread).toHaveLength(1);
+	const reply = thread[0]?.type === "comment" ? thread[0].replies[0] : null;
+	assert(reply);
+
+	expect(
+		(
+			await createComment(context, {
+				id: release.id,
+				user: creator,
+				body,
+				parentId: reply.id,
+			})
+		).error?.status,
+	).toBe(404);
+	expect(
+		(
+			await updateCommentResolution(context, {
+				id: release.id,
+				eventId: reply.id,
+				user: creator,
+				resolution: "closed",
+			})
+		).error?.status,
+	).toBe(404);
+
+	const deleted = await deleteComment(context, {
+		id: release.id,
+		eventId: comment.id,
+		user: creator,
+	});
+	assert(!deleted.error, JSON.stringify(deleted.error));
+	const remaining = await context.db.kysely
+		.selectFrom("lucid_release_events")
+		.select("id")
+		.where("id", "=", reply.id)
+		.execute();
+	expect(remaining).toEqual([]);
+});
+
+test("mentions in comments and descriptions are limited to people who can read the release", async () => {
+	const release = await createRelease(await createDocument());
+	const outsider = await context.db.kysely
+		.insertInto("lucid_users")
+		.values({
+			email: `${randomUUID()}@example.test`,
+			username: randomUUID(),
+			secret: "test",
+			super_admin: false,
+		})
+		.returning("id")
+		.executeTakeFirstOrThrow();
+	const mention = (userId: number) => ({
+		type: "doc" as const,
+		content: [
+			{
+				type: "paragraph",
+				content: [
+					{ type: "lucidMention", attrs: { userId, label: "Someone else" } },
+				],
+			},
+		],
+	});
+
+	expect(
+		(
+			await createComment(context, {
+				id: release.id,
+				user: creator,
+				body: mention(outsider.id),
+			})
+		).error?.status,
+	).toBe(400);
+	expect(
+		(
+			await updateSingle(context, {
+				id: release.id,
+				user: creator,
+				description: mention(outsider.id),
+			})
+		).error?.status,
+	).toBe(400);
+	const mentioned = await createComment(context, {
+		id: release.id,
+		user: creator,
+		body: mention(reviewer.id),
+	});
+	assert(!mentioned.error, JSON.stringify(mentioned.error));
+	const comment = (await readRelease(release.id)).events.find(
+		(event) => event.type === "comment",
+	);
+	expect(
+		comment?.type === "comment"
+			? comment.body.content?.[0]?.content?.[0]?.attrs?.label
+			: null,
+	).toBe(reviewer.username);
 });
 
 test("target, workflow and proposal changes are recorded in the activity", async () => {
@@ -1137,7 +1279,14 @@ test("closing preserves proposal and comments, and reopening restores edit acces
 			await deleteComment(context, {
 				id: release.id,
 				eventId: comment.id,
-				user: reviewer,
+				user: {
+					...reviewer,
+					superAdmin: false,
+					permissions: [
+						Permissions.ReleasesRead,
+						getCollectionPermission("release_pages", "read"),
+					],
+				},
 			})
 		).error?.status,
 	).toBe(404);

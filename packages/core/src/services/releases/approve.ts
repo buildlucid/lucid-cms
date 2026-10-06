@@ -68,7 +68,7 @@ const approve: ServiceFn<
 		};
 	}
 
-	if (countOpenComments({ events: release.events, userId: data.user.id }) > 0) {
+	if (countOpenComments({ events: release.events }) > 0) {
 		return {
 			error: {
 				type: "basic",

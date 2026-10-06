@@ -5,8 +5,9 @@ import { ReleaseEventsRepository } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import loadRelease from "./helpers/load-release.js";
+import resolveMentions from "./helpers/resolve-mentions.js";
 
-/** People can only edit their own comments. */
+/** People can only edit their own comments and replies. */
 const updateComment: ServiceFn<
 	[{ id: number; eventId: number; user: LucidUser; body: RichTextJSON }],
 	undefined
@@ -41,8 +42,14 @@ const updateComment: ServiceFn<
 		};
 	}
 
+	const bodyRes = await resolveMentions(context, {
+		release: releaseRes.data,
+		body: data.body,
+	});
+	if (bodyRes.error) return bodyRes;
+
 	const updateRes = await ReleaseEvents.updateSingle({
-		data: { body: data.body, updated_at: new Date().toISOString() },
+		data: { body: bodyRes.data, updated_at: new Date().toISOString() },
 		where: [{ key: "id", operator: "=", value: comment.id }],
 	});
 	if (updateRes.error) return updateRes;

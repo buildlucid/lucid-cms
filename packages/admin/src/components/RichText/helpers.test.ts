@@ -73,6 +73,17 @@ describe("richTextHasContent", () => {
 				],
 			}),
 		).toBe(true);
+		expect(
+			richTextHasContent({
+				type: "doc",
+				content: [
+					{
+						type: "paragraph",
+						content: [{ type: "lucidMention", attrs: { userId: 1 } }],
+					},
+				],
+			}),
+		).toBe(true);
 	});
 });
 

@@ -316,6 +316,10 @@
 		@apply font-semibold text-title;
 	}
 
+	.rich-text-content [data-lucid-mention] {
+		@apply font-medium text-primary;
+	}
+
 	.rich-text-content blockquote {
 		@apply border-l-2 border-border pl-3 italic text-sm leading-5 text-subtitle my-2;
 	}

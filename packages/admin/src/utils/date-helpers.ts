@@ -90,6 +90,47 @@ const formatTimestamp = (date?: string | null) => {
 	);
 };
 
+const DAY = 24 * 60 * 60;
+const relativeUnits: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+	["year", 365 * DAY],
+	["month", 30 * DAY],
+	["week", 7 * DAY],
+];
+
+/**
+ * How long ago a date was, such as "6 minutes ago", "yesterday" or "3 weeks
+ * ago". Days count calendar days, so last night is "yesterday".
+ */
+const formatRelativeDate = (date?: string | null, now = Date.now()) => {
+	if (!date) return undefined;
+	const value = new Date(date);
+	if (Number.isNaN(value.getTime())) return date;
+
+	const formatter = new Intl.RelativeTimeFormat(browserLocale(), {
+		numeric: "auto",
+	});
+	const seconds = Math.round((value.getTime() - now) / 1000);
+	for (const [unit, size] of relativeUnits) {
+		if (Math.abs(seconds) >= size) {
+			return formatter.format(Math.trunc(seconds / size), unit);
+		}
+	}
+
+	const days = Math.round(
+		(new Date(value).setHours(0, 0, 0, 0) -
+			new Date(now).setHours(0, 0, 0, 0)) /
+			(DAY * 1000),
+	);
+	if (days !== 0) return formatter.format(days, "day");
+	if (Math.abs(seconds) >= 60 * 60) {
+		return formatter.format(Math.trunc(seconds / (60 * 60)), "hour");
+	}
+	if (Math.abs(seconds) >= 60) {
+		return formatter.format(Math.trunc(seconds / 60), "minute");
+	}
+	return formatter.format(0, "second");
+};
+
 const toDateInputValue = (utcDate?: string | null) => {
 	if (!utcDate) return "";
 
@@ -105,6 +146,7 @@ const dateHelpers = {
 	formatDate,
 	formatFullDate,
 	formatTimestamp,
+	formatRelativeDate,
 	toDateInputValue,
 };
 

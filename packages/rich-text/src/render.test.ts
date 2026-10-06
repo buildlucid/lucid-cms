@@ -1,7 +1,7 @@
 import type { CollectionDocument } from "@lucidcms/types";
 import { Node } from "@tiptap/core";
 import { describe, expect, test } from "vitest";
-import { generateHTML } from "./server.js";
+import { generateHTML, generateText } from "./server.js";
 
 describe("generateHTML", () => {
 	test("renders hydrated internal links and drops unavailable ones", () => {
@@ -61,6 +61,26 @@ describe("generateHTML", () => {
 				],
 			}),
 		).toBe("<p>support@example.com &lt;help&gt;</p>");
+	});
+
+	test("renders mentions as escaped, marked labels", () => {
+		const value = {
+			type: "doc",
+			content: [
+				{
+					type: "paragraph",
+					content: [
+						{ type: "text", text: "Thanks " },
+						{ type: "lucidMention", attrs: { userId: 4, label: "Ada <L>" } },
+					],
+				},
+			],
+		};
+
+		expect(generateHTML(value)).toBe(
+			'<p>Thanks <span data-lucid-mention="" data-lucid-user-id="4">@Ada &lt;L&gt;</span></p>',
+		);
+		expect(generateText(value)).toBe("Thanks @Ada <L>");
 	});
 
 	test("renders hydrated image, audio and video nodes", () => {

@@ -7,7 +7,7 @@
 It provides:
 
 - A shared `extensions` array for Tiptap.
-- Lucid document-link, document, media, variable, and embedded-brick nodes.
+- Lucid document-link, document, media, variable, embedded-brick, and mention nodes.
 - A `RichTextJSON` type for rich text field values.
 - Browser and server HTML generation utilities.
 - Browser and server JSON generation utilities.
@@ -117,6 +117,7 @@ const htmlWithReferences = generateHTML(document.fields.body, {
 - Media nodes retain their media ID and receive compact response-only render data. Images render as responsive `<picture>` markup; files render as links.
 - Variable nodes retain their document and field identity and receive the current scalar value.
 - Embedded-brick nodes store a stable brick ref. When `document` is supplied, `renderers.brick` receives the matching item from `document.bricks`.
+- Mention nodes store a user ID and the label shown when they were written. They render as `<span data-lucid-mention>@label</span>`. Lucid only accepts them in release comments.
 
 The source document and response-level refs registry are optional. Fetch refs and bricks when those callbacks need related documents or embedded-brick data; unresolved targets are passed as `null`.
 

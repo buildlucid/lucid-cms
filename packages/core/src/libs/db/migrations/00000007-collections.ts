@@ -333,6 +333,9 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
+				.addColumn("parent_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_release_events.id").onDelete("cascade"),
+				)
 				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull())
 				.addColumn("body", adapter.getDataType("json"))
 				.addColumn("metadata", adapter.getDataType("json"))
@@ -382,6 +385,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_release_events_release")
 				.on("lucid_release_events")
 				.columns(["release_id", "created_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_release_events_parent")
+				.on("lucid_release_events")
+				.column("parent_id")
 				.execute();
 
 			await db.schema

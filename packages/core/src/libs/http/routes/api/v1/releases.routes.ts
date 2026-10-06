@@ -7,6 +7,7 @@ import createComment from "../../../controllers/releases/create-comment.js";
 import createSingle from "../../../controllers/releases/create-single.js";
 import deleteComment from "../../../controllers/releases/delete-comment.js";
 import getExecution from "../../../controllers/releases/get-execution.js";
+import getMentionableUsers from "../../../controllers/releases/get-mentionable-users.js";
 import getMultiple from "../../../controllers/releases/get-multiple.js";
 import getOverview from "../../../controllers/releases/get-overview.js";
 import getReviewers from "../../../controllers/releases/get-reviewers.js";
@@ -29,6 +30,7 @@ const releasesRoutes = new Hono<LucidHonoGeneric>()
 	.get("/:id/execution", ...getExecution)
 	.patch("/:id", ...updateSingle)
 	.get("/:id/reviewers", ...getReviewers)
+	.get("/:id/mentionable-users", ...getMentionableUsers)
 	.post("/:id/documents", ...addDocuments)
 	.delete("/:id/documents/:releaseDocumentId", ...removeDocument)
 	.patch("/:id/documents/:releaseDocumentId/targets", ...updateTargets)

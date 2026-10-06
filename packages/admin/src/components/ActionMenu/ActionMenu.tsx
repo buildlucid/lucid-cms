@@ -1,6 +1,7 @@
 import classNames from "classnames";
-import { FaSolidEllipsisVertical } from "solid-icons/fa";
+import { FaSolidEllipsis, FaSolidEllipsisVertical } from "solid-icons/fa";
 import { type Component, createMemo, For, Show } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import ActionIcon, {
 	type ActionIconName,
 } from "@/components/ActionIcon/ActionIcon";
@@ -62,6 +63,8 @@ export interface ActionMenuProps {
 	size?: ActionMenuSize;
 	/** `ghost` drops the trigger's background and border, like the ghost button. @default "outline" */
 	variant?: ActionMenuVariant;
+	/** Which way the trigger's dots run. @default "vertical" */
+	orientation?: "vertical" | "horizontal";
 	placement?: MenuPlacement;
 	/** Applied to the trigger button. */
 	class?: string;
@@ -166,7 +169,12 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 					)}
 				>
 					<span class="sr-only">{T()("common.actions.options.show")}</span>
-					<FaSolidEllipsisVertical
+					<Dynamic
+						component={
+							props.orientation === "horizontal"
+								? FaSolidEllipsis
+								: FaSolidEllipsisVertical
+						}
 						class={classNames("pointer-events-none", {
 							"text-subtitle": props.variant !== "ghost",
 						})}

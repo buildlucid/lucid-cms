@@ -39,7 +39,8 @@ export const richTextHasContent = (
 		value.type === "lucidDocument" ||
 		value.type === "lucidMedia" ||
 		value.type === "lucidVariable" ||
-		value.type === "lucidEmbeddedBrick"
+		value.type === "lucidEmbeddedBrick" ||
+		value.type === "lucidMention"
 	) {
 		return true;
 	}

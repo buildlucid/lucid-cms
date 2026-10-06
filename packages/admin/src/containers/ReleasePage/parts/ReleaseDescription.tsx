@@ -3,21 +3,25 @@ import type { Release } from "@types";
 import { FaSolidPen } from "solid-icons/fa";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
-import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import { richTextHasContent } from "@/components/RichText/helpers";
-import RichText from "@/components/RichText/RichText";
-import RichTextContent from "@/components/RichTextContent/RichTextContent";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import api from "@/services/api";
 import T from "@/translations";
+import { ReleaseRichTextContent } from "./ReleaseRichTextContent";
+import { ReleaseRichTextEditor } from "./ReleaseRichTextEditor";
 
+/**
+ * The release's description. People who can edit the release write it in
+ * the same box as comments, so they can mention people too. Saving it empty
+ * clears it.
+ */
 export const ReleaseDescription: Component<{
 	release: Release;
 }> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
 	const [editing, setEditing] = createSignal(false);
-	const [body, setBody] = createSignal<RichTextJSON | null>(null);
+	const [body, setBody] = createSignal<RichTextJSON>();
 
 	// ----------------------------------------
 	// Queries & Mutations
@@ -34,7 +38,7 @@ export const ReleaseDescription: Component<{
 	// ----------------------------------------
 	// Functions
 	const startEditing = () => {
-		setBody(props.release.description);
+		setBody(props.release.description ?? undefined);
 		update.reset();
 		setEditing(true);
 	};
@@ -46,6 +50,16 @@ export const ReleaseDescription: Component<{
 				description: value && richTextHasContent(value) ? value : null,
 			},
 		});
+	};
+	//* editing ends when focus leaves without changes. The saved value is a
+	//* store proxy, so compare text
+	const closeIfUnchanged = () => {
+		if (
+			JSON.stringify(body() ?? null) ===
+			JSON.stringify(props.release.description)
+		) {
+			setEditing(false);
+		}
 	};
 
 	// ----------------------------------------
@@ -81,36 +95,30 @@ export const ReleaseDescription: Component<{
 						}
 					>
 						{(description) => (
-							<div class="text-sm text-subtitle">
-								<RichTextContent value={description()} />
-							</div>
+							<ReleaseRichTextContent
+								release={props.release}
+								value={description()}
+							/>
 						)}
 					</Show>
 				}
 			>
-				<div class="grid gap-2">
-					<RichText
-						id="release-description"
-						name="release-description"
-						value={body()}
-						onChange={setBody}
-						placeholder={T()("releases.description.placeholder")}
-						headings={false}
-					/>
-					<ErrorMessage theme="basic" message={update.errors()?.message} />
-					<div class="flex justify-end gap-2">
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={() => setEditing(false)}
-						>
-							{T()("common.cancel")}
-						</Button>
-						<Button size="sm" loading={update.action.isPending} onClick={save}>
-							{T()("common.save")}
-						</Button>
-					</div>
-				</div>
+				<ReleaseRichTextEditor
+					release={props.release}
+					id="release-description"
+					value={body()}
+					onChange={setBody}
+					onSubmit={save}
+					submitting={update.action.isPending}
+					submitLabel={T()("common.save")}
+					placeholder={T()("releases.description.placeholder")}
+					error={update.errors()?.message}
+					allowEmpty={true}
+					variant="inline"
+					onFocusLeave={closeIfUnchanged}
+					onEscape={() => setEditing(false)}
+					onClose={() => setEditing(false)}
+				/>
 			</Show>
 		</section>
 	);

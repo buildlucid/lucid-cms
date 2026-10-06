@@ -10,13 +10,13 @@ import {
 	type ReleaseActivityFilter,
 	releaseActivityFilters,
 } from "@/utils/releases";
-import { ReleaseCommentEntry } from "./ReleaseCommentEntry";
+import { ReleaseCommentThread } from "./ReleaseCommentThread";
 import { ReleaseEventEntry } from "./ReleaseEventEntry";
 
 type SystemEvent = Exclude<ReleaseEvent, { type: "comment" }>;
 
 /**
- * The conversation on a release, newest first. Comments, approvals and
+ * The conversation on a release, newest first. Comment threads, approvals and
  * releasing always show. Other activity, eg. content edits, is shown from the
  * filter menu, which is remembered per user.
  */
@@ -118,7 +118,7 @@ export const ReleaseActivity: Component<{
 						<Switch>
 							<Match when={event.type === "comment" ? event : undefined}>
 								{(comment) => (
-									<ReleaseCommentEntry
+									<ReleaseCommentThread
 										release={props.release}
 										comment={comment()}
 									/>

@@ -27,6 +27,10 @@ export type RichTextReference =
 	| {
 			type: "rich-text-embedded-brick";
 			ref: unknown;
+	  }
+	| {
+			type: "rich-text-mention";
+			userId: unknown;
 	  };
 
 /** Extracts every Lucid reference from rich-text JSON. */
@@ -67,6 +71,13 @@ export const extractRichTextReferences = (
 			references.push({
 				type: "rich-text-embedded-brick",
 				ref: node.attrs?.ref,
+			});
+		}
+
+		if (node.type === richTextNodeNames.mention) {
+			references.push({
+				type: "rich-text-mention",
+				userId: node.attrs?.userId,
 			});
 		}
 

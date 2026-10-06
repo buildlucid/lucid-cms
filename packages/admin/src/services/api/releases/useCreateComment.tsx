@@ -6,7 +6,8 @@ import serviceHelpers from "@/utils/service-helpers";
 
 export interface Params {
 	id: number;
-	body: { body: RichTextJSON };
+	/** `parentId` replies to a top-level comment. */
+	body: { body: RichTextJSON; parentId?: number };
 }
 
 export const createCommentReq = (params: Params) => {

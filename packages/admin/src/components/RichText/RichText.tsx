@@ -13,8 +13,9 @@ import {
 import Field from "@/components/Field/Field";
 import T from "@/translations";
 import { richTextHasContent } from "./helpers";
+import { createMentionExtension } from "./mentions";
 import Toolbar from "./parts/Toolbar";
-import type { RichTextOptions } from "./types";
+import type { RichTextMentionOption, RichTextOptions } from "./types";
 import useEditor from "./useEditor";
 
 export interface RichTextProps extends JSX.AriaAttributes {
@@ -48,6 +49,11 @@ export interface RichTextProps extends JSX.AriaAttributes {
 	links?: boolean;
 	/** Tiptap extensions to add, or to replace built in ones with the same name. Read once on mount. */
 	extensions?: Extensions;
+	/**
+	 * People who can be mentioned by typing `@`. Whether mentions are on is
+	 * read once on mount, so pass an empty array while they load.
+	 */
+	mentions?: RichTextMentionOption[];
 	/** Content added to the end of the toolbar. */
 	toolbarEnd?: JSXElement;
 	labelStart?: JSXElement;
@@ -103,6 +109,7 @@ const RichText: Component<RichTextProps> = (props) => {
 		"clearFormatting",
 		"links",
 		"extensions",
+		"mentions",
 		"toolbarEnd",
 		"labelStart",
 		"labelEnd",
@@ -123,6 +130,11 @@ const RichText: Component<RichTextProps> = (props) => {
 		fullscreen: false,
 	}));
 
+	const mentionExtension =
+		props.mentions !== undefined
+			? createMentionExtension(() => props.mentions ?? [])
+			: undefined;
+
 	const { editor, setContainer } = useEditor({
 		get value() {
 			return props.value ?? null;
@@ -135,7 +147,9 @@ const RichText: Component<RichTextProps> = (props) => {
 			return options();
 		},
 		get extensions() {
-			return props.extensions;
+			return mentionExtension
+				? [...(props.extensions ?? []), mentionExtension]
+				: props.extensions;
 		},
 	});
 

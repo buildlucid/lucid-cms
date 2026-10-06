@@ -34,6 +34,9 @@ const releaseEventSchema: z.ZodType<ReleaseEvent> = z.discriminatedUnion(
 			body: richTextJSONSchema,
 			resolution: releaseCommentResolutionSchema.nullable(),
 			resolvedBy: releaseUserSchema.nullable(),
+			replies: z.array(
+				z.object({ ...releaseEventBaseShape, body: richTextJSONSchema }),
+			),
 		}),
 		z.object({
 			...releaseEventBaseShape,
@@ -187,8 +190,7 @@ const releaseResponseSchema = z.object({
 	events: z.array(releaseEventSchema),
 	blockers: releaseBlockersSchema,
 	openComments: z.number().meta({
-		description:
-			"Comments from other people still waiting to be resolved or closed",
+		description: "Comments still waiting to be resolved or closed",
 	}),
 	permissions: z.object({
 		edit: z.boolean(),
@@ -391,6 +393,12 @@ export const controllerSchemas = {
 		params: releaseParams,
 		response: z.array(releaseUserSchema),
 	} satisfies ControllerSchema,
+	getMentionableUsers: {
+		body: undefined,
+		query: noQuery,
+		params: releaseParams,
+		response: z.array(releaseUserSchema),
+	} satisfies ControllerSchema,
 	getExecution: {
 		body: undefined,
 		query: noQuery,
@@ -500,7 +508,13 @@ export const controllerSchemas = {
 		response: undefined,
 	} satisfies ControllerSchema,
 	createComment: {
-		body: z.object({ body: richTextJSONSchema }),
+		body: z.object({
+			body: richTextJSONSchema,
+			parentId: z.number().optional().meta({
+				description: "The comment to reply to. Replies go one level deep",
+				example: 1,
+			}),
+		}),
 		query: noQuery,
 		params: releaseParams,
 		response: undefined,

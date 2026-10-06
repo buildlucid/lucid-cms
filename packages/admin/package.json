@@ -108,6 +108,7 @@
 		"@tiptap/markdown": "^3.27.1",
 		"@tiptap/pm": "^3.27.1",
 		"@tiptap/starter-kit": "^3.27.1",
+		"@tiptap/suggestion": "^3.27.1",
 		"blurhash": "^2.0.5",
 		"chart.js": "^4.5.1",
 		"classnames": "^2.5.1",

@@ -1,11 +1,21 @@
 import type { BooleanInt } from "../db/types.js";
 
+/** SQLite CURRENT_TIMESTAMP output, eg. `2026-10-06 00:35:14`. UTC, but carries no zone. */
+const SQLITE_TIMESTAMP = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$/;
+
+/**
+ * Formats a DB date as a UTC ISO string. Zone-less SQLite timestamps are read as UTC,
+ * so browsers don't parse them as local time. Unparseable strings are returned as is.
+ */
 function formatDate(date: Date | string): string;
 function formatDate(date: null | undefined): null;
 function formatDate(date: Date | string | null | undefined): string | null;
 function formatDate(date: Date | string | null | undefined): string | null {
 	if (typeof date === "string") {
-		return date;
+		const parsed = new Date(
+			SQLITE_TIMESTAMP.test(date) ? `${date.replace(" ", "T")}Z` : date,
+		);
+		return Number.isNaN(parsed.getTime()) ? date : parsed.toISOString();
 	}
 	return date ? date.toISOString() : null;
 }

@@ -1,10 +1,19 @@
 import { useParams } from "@solidjs/router";
 import { type Component, createMemo, Show } from "solid-js";
+import EmptyState from "@/components/EmptyState/EmptyState";
+import Link from "@/components/Link/Link";
+import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import DocumentEditorPage from "@/containers/DocumentEditorPage/DocumentEditorPage";
 import api from "@/services/api";
+import T from "@/translations";
+import { getReleaseRoute } from "@/utils/route-helpers";
 
-/** Opens the content a release owns for one document. Proposals are editable and snapshots are read only. */
+/**
+ * Opens the content a release owns for one document. Proposals are editable
+ * and snapshots are read only. Documents no longer in the release link back
+ * to it.
+ */
 const ReleaseContentPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
@@ -46,23 +55,50 @@ const ReleaseContentPage: Component = () => {
 	// ----------------------------------------
 	// Render
 	return (
-		<QueryBoundary
-			loading={query.isLoading}
-			error={query.isError}
-			empty={query.isSuccess && !content()?.versionId}
+		<Show
+			when={content()?.versionId}
+			fallback={
+				<PageLayout.Root>
+					<PageLayout.Body class="rounded-t-xl">
+						<QueryBoundary
+							class="grow"
+							loading={query.isLoading}
+							error={query.isError}
+							empty={true}
+							emptyFallback={
+								<EmptyState
+									title={T()("releases.content.missing.title")}
+									description={T()("releases.content.missing.description")}
+									actions={
+										<Link
+											variant="primary"
+											size="sm"
+											href={getReleaseRoute({
+												releaseId: Number(params.releaseId),
+											})}
+										>
+											{T()("releases.content.missing.back")}
+										</Link>
+									}
+								/>
+							}
+						>
+							{null}
+						</QueryBoundary>
+					</PageLayout.Body>
+				</PageLayout.Root>
+			}
 		>
-			<Show when={content()?.versionId}>
-				{(versionId) => (
-					<DocumentEditorPage
-						mode="edit"
-						version={content()?.type}
-						versionId={versionId}
-						release={release}
-						releaseDocument={document}
-					/>
-				)}
-			</Show>
-		</QueryBoundary>
+			{(versionId) => (
+				<DocumentEditorPage
+					mode="edit"
+					version={content()?.type}
+					versionId={versionId}
+					release={release}
+					releaseDocument={document}
+				/>
+			)}
+		</Show>
 	);
 };
 

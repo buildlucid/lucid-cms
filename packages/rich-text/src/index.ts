@@ -5,6 +5,7 @@ export {
 	LucidEmbeddedBrick,
 	LucidLink,
 	LucidMedia,
+	LucidMention,
 	LucidVariable,
 	mergeExtensions,
 } from "./extensions/index.js";

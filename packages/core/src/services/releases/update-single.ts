@@ -11,6 +11,7 @@ import getReleaseAccess from "./helpers/get-release-access.js";
 import loadRelease from "./helpers/load-release.js";
 import lockRelease from "./helpers/lock-release.js";
 import parseSchedule from "./helpers/parse-schedule.js";
+import resolveMentions from "./helpers/resolve-mentions.js";
 import scheduleRelease from "./helpers/schedule-release.js";
 import setReviewers from "./helpers/set-reviewers.js";
 
@@ -60,6 +61,11 @@ const updateSingle: ServiceFn<
 		};
 	}
 
+	const descriptionRes = data.description
+		? await resolveMentions(context, { release, body: data.description })
+		: undefined;
+	if (descriptionRes?.error) return descriptionRes;
+
 	const scheduleRes =
 		data.scheduledAt !== undefined
 			? parseSchedule({
@@ -81,7 +87,7 @@ const updateSingle: ServiceFn<
 	const updateRes = await Releases.updateSingle({
 		data: {
 			title: data.title,
-			description: data.description,
+			description: descriptionRes ? descriptionRes.data : data.description,
 			...(schedule
 				? {
 						scheduled_at: schedule.scheduledAt,

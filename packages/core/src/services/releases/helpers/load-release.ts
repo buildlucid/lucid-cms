@@ -77,6 +77,7 @@ const loadRelease: ServiceFn<
 					"id",
 					"release_id",
 					"user_id",
+					"parent_id",
 					"type",
 					"body",
 					"metadata",

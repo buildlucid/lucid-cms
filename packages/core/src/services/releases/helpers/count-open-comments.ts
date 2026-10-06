@@ -1,21 +1,20 @@
 import type { ReleaseRecord } from "../types.js";
 
 /**
- * Counts comments still waiting to be resolved or closed. People never need
- * to resolve their own comments, so those don't count for them.
+ * Counts comments still waiting to be resolved or closed, whoever wrote them.
+ * Replies are resolved with their thread, so they don't count.
  */
 const countOpenComments = (data: {
 	events: Pick<
 		ReleaseRecord["events"][number],
-		"type" | "user_id" | "resolution"
+		"type" | "parent_id" | "resolution"
 	>[];
-	userId: number;
 }) =>
 	data.events.filter(
 		(event) =>
 			event.type === "comment" &&
-			event.resolution === null &&
-			event.user_id !== data.userId,
+			event.parent_id === null &&
+			event.resolution === null,
 	).length;
 
 export default countOpenComments;

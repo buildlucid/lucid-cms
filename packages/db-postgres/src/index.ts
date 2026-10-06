@@ -62,17 +62,12 @@ export class PostgresAdapter extends DatabaseAdapter {
 			dialect: new PostgresJSDialect({
 				postgres: postgresClient(url, {
 					...postgresOptions,
+					//* sent on connect, so every pooled connection uses UTC
+					connection: { ...postgresOptions.connection, TimeZone: "UTC" },
 					onnotice: () => {},
 				}),
 			}),
 		});
-
-		try {
-			await sql`SET timezone = 'UTC'`.execute(client);
-		} catch (error) {
-			await client.destroy();
-			throw error;
-		}
 
 		return {
 			client,
@@ -100,7 +95,7 @@ export class PostgresAdapter extends DatabaseAdapter {
 				boolean: "boolean",
 				json: "jsonb",
 				text: "text",
-				timestamp: "timestamp",
+				timestamp: "timestamptz",
 				char: (length: number) => `char(${length})`,
 				varchar: (length?: number) =>
 					length ? `varchar(${length})` : "varchar",

@@ -368,6 +368,13 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 				continue;
 			}
 
+			if (reference.type === "rich-text-mention") {
+				addError("mention:not.allowed", {
+					message: copy("server:core.fields.rich.text.mention.not.allowed"),
+				});
+				continue;
+			}
+
 			if (reference.type === "rich-text-document-link") {
 				if (
 					typeof reference.collectionKey !== "string" ||

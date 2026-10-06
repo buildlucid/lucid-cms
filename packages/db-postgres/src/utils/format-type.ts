@@ -4,7 +4,8 @@ const formatType = (
 	type: ColumnDataType | string,
 	defaultValue: string | null,
 ): ColumnDataType => {
-	//* handles types like timestamp without time zone
+	//* timestamps are created as timestamptz, so a plain timestamp column reads as a type change
+	if (type === "timestamp with time zone") return "timestamptz";
 	if (type.includes("timestamp")) return "timestamp";
 	if (type.includes("character")) return "text";
 

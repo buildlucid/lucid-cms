@@ -1,5 +1,6 @@
 import constants from "../../../constants/constants.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
+import formatter from "../../formatters/helpers.js";
 import { parseEmailStorageRules } from "./config.js";
 import type { EmailResendState, EmailStorageConfig } from "./types.js";
 
@@ -30,12 +31,9 @@ export const getEmailResendState = (props: {
 	const hasNeverStoreRes = hasNeverStoreEmailStorageRules(props.storage);
 	if (hasNeverStoreRes.error) return hasNeverStoreRes;
 
-	const createdAt =
-		props.createdAt instanceof Date
-			? props.createdAt
-			: props.createdAt
-				? new Date(props.createdAt)
-				: null;
+	const createdAt = props.createdAt
+		? new Date(formatter.formatDate(props.createdAt))
+		: null;
 
 	const validCreatedAt =
 		createdAt !== null && !Number.isNaN(createdAt.getTime());

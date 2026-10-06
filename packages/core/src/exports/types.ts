@@ -833,6 +833,7 @@ export type {
 	Release,
 	ReleaseBlocker,
 	ReleaseBlockerCode,
+	ReleaseCommentReply,
 	ReleaseCommentResolution,
 	ReleaseDocument,
 	ReleaseEvent,

@@ -8,6 +8,7 @@ import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
 import { mergeExtensions } from "./extensions/index.js";
 import { renderLinkMark } from "./extensions/link/render.js";
 import { renderMediaNode } from "./extensions/media/render.js";
+import { renderMentionNode } from "./extensions/mention/render.js";
 import { renderVariableNode } from "./extensions/variable/render.js";
 import {
 	type RichTextElement,
@@ -243,6 +244,26 @@ const createRenderMappings = <
 				children: childrenToHTML(children),
 				defaultHTML: "",
 				brick,
+			},
+		});
+	};
+
+	nodeMapping[richTextNodeNames.mention] = ({ node, children }) => {
+		const nodeJSON = node.toJSON() as RichTextJSON;
+		const userId =
+			typeof node.attrs.userId === "number" ? node.attrs.userId : null;
+		const label =
+			typeof node.attrs.label === "string" ? node.attrs.label : null;
+		return renderWithCallback({
+			renderer: renderers?.mention,
+			fallback: renderers?.fallback,
+			rendererProps: {
+				element: "mention",
+				node: nodeJSON,
+				children: childrenToHTML(children),
+				defaultHTML: renderMentionNode({ userId, label }),
+				userId,
+				label,
 			},
 		});
 	};

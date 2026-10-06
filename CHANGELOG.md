@@ -10,6 +10,10 @@
 
 - Document and version links now use shared identity tables with automatic cleanup on deletion.
 
+### Bug Fixes:
+
+- Fixed API dates being read in the server or browser's local timezone. Dates are now always returned as UTC ISO strings, and Postgres timestamps use `timestamptz`.
+
 ## v0.19.0-alpha.0
 
 ### Features:
