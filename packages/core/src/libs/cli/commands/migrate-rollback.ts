@@ -70,14 +70,14 @@ const migrateRollbackCommand = async (options?: {
 		});
 		database = await config.db.connect(env);
 
-		//* executed migrations that are no longer registered would fail the rollback midway, so surface them upfront
+		//* missing Lucid migrations would fail the rollback midway, so surface them upfront
 		const migrationStatus = await config.db.getMigrationStatus(database.client);
 		if (migrationStatus.missing.length > 0) {
 			cliLogger.error(
-				`Cannot rollback: previously executed migration(s) are no longer registered: ${migrationStatus.missing.join(", ")}`,
+				`Cannot rollback: previously executed Lucid migration(s) are no longer registered: ${migrationStatus.missing.join(", ")}`,
 			);
 			cliLogger.info(
-				"If you removed a plugin or migration file, restore it so its migrations can be rolled back.",
+				"Check the installed @lucidcms/core version matches the database.",
 			);
 			await cleanup();
 			await stopLoggerBuffering();
@@ -90,7 +90,9 @@ const migrateRollbackCommand = async (options?: {
 			process.exit(0);
 		}
 
-		const migrations = await config.db.createMigrator(database).getMigrations();
+		const migrations = await (
+			await config.db.createMigrator(database)
+		).getMigrations();
 
 		//* rollbacks happen in execution order, which can diverge from name order with external migrations
 		const executedMigrations = migrations
@@ -125,6 +127,19 @@ const migrateRollbackCommand = async (options?: {
 					cliLogger.color.cyan("migrate:reset"),
 					"or",
 					cliLogger.color.cyan("migrate:fresh"),
+				);
+				await cleanup();
+				await stopLoggerBuffering();
+				process.exit(1);
+			}
+
+			//* retired migrations have nothing to undo, and removing them would rerun them if their plugin comes back
+			if (migrationStatus.retired.includes(migration.name)) {
+				cliLogger.error(
+					`Cannot rollback migration "${migration.name}" as it is no longer registered`,
+				);
+				cliLogger.info(
+					"Restore the plugin or migration file that registered it to roll it back.",
 				);
 				await cleanup();
 				await stopLoggerBuffering();
@@ -175,7 +190,7 @@ const migrateRollbackCommand = async (options?: {
 			runtimeContext,
 			kv: kvInstance,
 		});
-		const migrator = config.db.createMigrator(database, serviceContext);
+		const migrator = await config.db.createMigrator(database, serviceContext);
 
 		cliLogger.info(
 			`Rolling back ${migrationsToRollback.length} migration(s)...`,

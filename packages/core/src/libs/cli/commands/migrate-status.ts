@@ -24,8 +24,9 @@ import { describeMigrationRiskReason } from "../services/migration-report.js";
 /**
  * A read-only preflight that reports what `migrate` would do and whether the
  * migration history is healthy. With `--check` it exits non-zero when
- * migrations are pending or executed migrations are missing from the
- * registered set, so it can gate CI and deploy pipelines.
+ * migrations are pending or executed Lucid migrations are missing from the
+ * registered set, so it can gate CI and deploy pipelines. Retired plugin
+ * migrations only warn.
  */
 const migrateStatusCommand = async (options?: {
 	check?: boolean;
@@ -145,13 +146,24 @@ const migrateStatusCommand = async (options?: {
 
 		if (migrationStatus.missing.length > 0) {
 			cliLogger.error(
-				`${migrationStatus.missing.length} previously executed migration(s) are no longer registered`,
+				`${migrationStatus.missing.length} previously executed Lucid migration(s) are no longer registered`,
 			);
 			for (const name of migrationStatus.missing) {
 				cliLogger.log(cliLogger.color.red(name), { indent: 2 });
 			}
 			cliLogger.info(
-				"If you removed a plugin or migration file, restore it so its migrations can be run or rolled back.",
+				"Check the installed @lucidcms/core version matches the database.",
+			);
+		}
+		if (migrationStatus.retired.length > 0) {
+			cliLogger.warn(
+				`${migrationStatus.retired.length} previously executed migration(s) are no longer registered and are skipped`,
+			);
+			for (const name of migrationStatus.retired) {
+				cliLogger.log(cliLogger.color.yellow(name), { indent: 2 });
+			}
+			cliLogger.info(
+				"These came from a removed plugin or migration file. Any tables they created are left in place.",
 			);
 		}
 

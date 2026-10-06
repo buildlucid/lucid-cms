@@ -88,9 +88,6 @@ export default abstract class DatabaseAdapter {
 	 * Infers the database schema using the supplied connection or transaction.
 	 */
 	abstract inferSchema(db: KyselyDB): Promise<InferredTable[]>;
-	/**
-	 * Drops all tables in the database
-	 */
 	abstract dropAllTables(connection: DatabaseConnection): Promise<void>;
 	/**
 	 * Handles formatting of certain values based on the columns data type. This is used specifically for default values
@@ -141,9 +138,6 @@ export default abstract class DatabaseAdapter {
 
 		return value as T;
 	}
-	/**
-	 * A helper for returning supported column data types
-	 */
 	getDataType(
 		type: keyof DatabaseConfig["dataTypes"],
 		...args: unknown[]
@@ -163,15 +157,9 @@ export default abstract class DatabaseAdapter {
 			? col.primaryKey().autoIncrement()
 			: col.primaryKey();
 	}
-	/**
-	 * A helper for feature support
-	 */
 	supports(key: keyof DatabaseConfig["support"]) {
 		return this.config.support[key];
 	}
-	/**
-	 * A helper for accessing the config default values
-	 */
 	getDefault<
 		T extends keyof DatabaseConfig["defaults"],
 		K extends keyof DatabaseConfig["defaults"][T] | undefined = undefined,
@@ -214,9 +202,8 @@ export default abstract class DatabaseAdapter {
 		const targetMigration = status.pendingCore.at(-1);
 		if (!targetMigration) return;
 
-		this.handleMigrationResult(
-			await this.createMigrator(connection).migrateTo(targetMigration),
-		);
+		const migrator = await this.createMigrator(connection);
+		this.handleMigrationResult(await migrator.migrateTo(targetMigration));
 	}
 
 	/** Runs pending plugin and project migrations after Lucid schema setup. */
@@ -234,9 +221,8 @@ export default abstract class DatabaseAdapter {
 		}
 		if (status.pendingExternal.length === 0) return;
 
-		this.handleMigrationResult(
-			await this.createMigrator(connection, context).migrateToLatest(),
-		);
+		const migrator = await this.createMigrator(connection, context);
+		this.handleMigrationResult(await migrator.migrateToLatest());
 	}
 
 	/**
@@ -245,11 +231,12 @@ export default abstract class DatabaseAdapter {
 	 * transaction where the dialect supports transactional DDL), while retaining
 	 * all other service context state.
 	 */
-	createMigrator(
+	async createMigrator(
 		connection: DatabaseConnection,
 		context?: ServiceContext,
-	): Migrator {
-		const migrations = this.createMigrations(context);
+	): Promise<Migrator> {
+		const status = await this.getMigrationStatus(connection.client);
+		const migrations = this.createMigrations(status.retired, context);
 
 		return new Migrator({
 			db: connection.client,
@@ -296,7 +283,7 @@ export default abstract class DatabaseAdapter {
 				error.message.includes("is missing")
 			) {
 				throw new LucidError({
-					message: `${error.message}. A migration that has already run is no longer registered - if you removed a plugin or migration file, restore it, or roll its migrations back before removing it.`,
+					message: `${error.message}. A Lucid migration that has already run is no longer registered - check the installed @lucidcms/core version matches the database.`,
 					data: errorData,
 				});
 			}
@@ -316,7 +303,7 @@ export default abstract class DatabaseAdapter {
 		if (status.missing.length === 0) return;
 
 		throw new LucidError({
-			message: `Previously executed migrations are no longer registered: ${status.missing.join(", ")}. If you removed a plugin or migration file, restore it or roll its migrations back before removing it.`,
+			message: `Previously executed Lucid migrations are no longer registered: ${status.missing.join(", ")}. Check the installed @lucidcms/core version matches the database.`,
 		});
 	}
 
@@ -341,23 +328,35 @@ export default abstract class DatabaseAdapter {
 
 		const executedNames = new Set(executed);
 		const registeredNames = new Set(registered);
+		const unregistered = executed.filter((name) => !registeredNames.has(name));
 		return {
 			registered,
 			executed,
 			pendingCore: core.filter((name) => !executedNames.has(name)),
 			pendingExternal: external.filter((name) => !executedNames.has(name)),
-			missing: executed.filter((name) => !registeredNames.has(name)),
+			missing: unregistered.filter(
+				(name) => !constants.db.externalMigrationNameRegex.test(name),
+			),
+			retired: unregistered.filter((name) =>
+				constants.db.externalMigrationNameRegex.test(name),
+			),
 		};
 	}
 
 	/**
 	 * Builds Kysely migrations from core definitions and the context-aware
-	 * external definitions registered for this config.
+	 * external definitions registered for this config. Retired migrations get
+	 * an empty placeholder, so removing a plugin doesn't break the history and
+	 * adding it back doesn't run its migrations twice.
 	 */
 	private createMigrations(
+		retired: string[],
 		context?: ServiceContext,
 	): Record<string, Migration> {
 		const migrations = this.coreMigrations;
+		for (const name of retired) {
+			migrations[name] = { up: async () => {} };
+		}
 
 		for (const [name, migration] of Object.entries(this.externalMigrations)) {
 			const down = migration.down;

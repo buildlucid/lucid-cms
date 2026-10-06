@@ -13,6 +13,7 @@
 ### Bug Fixes:
 
 - Fixed API dates being read in the server or browser's local timezone. Dates are now always returned as UTC ISO strings, and Postgres timestamps use `timestamptz`.
+- Fixed migrations failing after removing a plugin that had its own migrations. They are now skipped with a warning, and their tables are left in place.
 
 ## v0.19.0-alpha.0
 

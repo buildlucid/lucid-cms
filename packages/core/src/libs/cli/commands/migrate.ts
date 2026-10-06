@@ -101,7 +101,6 @@ const migrateCommand = (
 		let database: DatabaseConnection | undefined;
 		const mode = props?.mode ?? "process";
 
-		/** Destroys adapters initialized during this migration command. */
 		const cleanupAdapters = async (): Promise<void> => {
 			if (config) {
 				await Promise.allSettled([
@@ -191,15 +190,31 @@ const migrateCommand = (
 			);
 			if (migrationStatus.missing.length > 0) {
 				cliLogger.error(
-					`${migrationStatus.missing.length} previously executed migration(s) are no longer registered`,
+					`${migrationStatus.missing.length} previously executed Lucid migration(s) are no longer registered`,
 				);
 				for (const name of migrationStatus.missing) {
 					cliLogger.log(cliLogger.color.red(name), { indent: 2 });
 				}
 				cliLogger.info(
-					"If you removed a plugin or migration file, restore it before running migrations.",
+					"Check the installed @lucidcms/core version matches the database.",
 				);
 				return await stopCommand(1);
+			}
+			if (migrationStatus.retired.length > 0) {
+				cliLogger.warn(
+					`${migrationStatus.retired.length} previously executed migration(s) are no longer registered and will be skipped`,
+					{ silent: quiet },
+				);
+				for (const name of migrationStatus.retired) {
+					cliLogger.log(cliLogger.color.yellow(name), {
+						indent: 2,
+						silent: quiet,
+					});
+				}
+				cliLogger.info(
+					"These came from a removed plugin or migration file. Any tables they created are left in place.",
+					{ silent: quiet },
+				);
 			}
 			const needsCoreMigrations = migrationStatus.pendingCore.length > 0;
 			const needsExternalMigrations =

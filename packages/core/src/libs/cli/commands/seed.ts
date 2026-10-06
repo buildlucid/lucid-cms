@@ -167,7 +167,7 @@ const seedCommand = async (
 		const migrationStatus = await config.db.getMigrationStatus(database.client);
 		if (migrationStatus.missing.length > 0) {
 			throw new LucidError({
-				message: `Cannot run seeds because previously executed migrations are no longer registered: ${migrationStatus.missing.join(", ")}.`,
+				message: `Cannot run seeds because previously executed Lucid migrations are no longer registered: ${migrationStatus.missing.join(", ")}.`,
 			});
 		}
 		if (

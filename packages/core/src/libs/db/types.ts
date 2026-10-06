@@ -122,7 +122,10 @@ export type DatabaseMigrationStatus = {
 	executed: string[];
 	pendingCore: string[];
 	pendingExternal: string[];
+	/** Executed Lucid migrations that are no longer registered, which means a broken install. */
 	missing: string[];
+	/** Executed plugin or project migrations that are no longer registered, eg. after removing a plugin. They stay executed. */
+	retired: string[];
 };
 
 export type Select<T> = {
