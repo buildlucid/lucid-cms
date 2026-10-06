@@ -23,6 +23,20 @@
 		pointer-events: none;
 		background: linear-gradient(to right, transparent, var(--table-row-bg));
 	}
+	.inverted-corner-left {
+		mask: radial-gradient(
+			calc(var(--radius-xl) - 0.3px) at bottom right,
+			transparent calc(var(--radius-xl) - 0.3px),
+			black calc(var(--radius-xl) + 0.3px)
+		);
+	}
+	.inverted-corner-right {
+		mask: radial-gradient(
+			calc(var(--radius-xl) - 0.3px) at bottom left,
+			transparent calc(var(--radius-xl) - 0.3px),
+			black calc(var(--radius-xl) + 0.3px)
+		);
+	}
 	.dropdown-trigger {
 		@apply duration-200 transition-colors outline-primary focus:outline-1;
 	}

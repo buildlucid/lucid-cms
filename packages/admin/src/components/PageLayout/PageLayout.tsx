@@ -1,5 +1,6 @@
 import classnames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
+import { PageLayoutCorners } from "./parts/PageLayoutCorners";
 
 export interface PageLayoutRootProps {
 	class?: string;
@@ -50,20 +51,21 @@ const PageLayoutRoot: Component<PageLayoutRootProps> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
-		//* the 15px leaves room for the shell's bottom padding. Clipping, unlike hidden, keeps sticky content working
+		//* the 15px leaves room for the shell's bottom padding. Sticky content uses --page-layout-sticky-top to sit under the corners
 		<div
 			data-page-layout-root
 			class={classnames(
-				"flex flex-col min-h-[calc(100vh-15px)] border-t border-x border-border rounded-t-xl overflow-x-clip",
+				"flex flex-col min-h-[calc(100vh-15px)] border-t md:border-t-0 border-x border-border rounded-t-xl [--page-layout-sticky-top:0px] md:[--page-layout-sticky-top:calc(--spacing(4)+1px)]",
 				props.class,
 			)}
 		>
-			{props.children}
+			<PageLayoutCorners />
+			{/* clipping, unlike hidden, keeps sticky content working. It sits inside the border so the corners can cover it */}
+			<div class="flex grow flex-col overflow-x-clip">{props.children}</div>
 		</div>
 	);
 };
 
-/** The page's title, description and actions. */
 const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -102,7 +104,6 @@ const PageLayoutHeader: Component<PageLayoutHeaderProps> = (props) => {
 	);
 };
 
-/** The page's content. Fills the remaining height. */
 const PageLayoutBody: Component<PageLayoutBodyProps> = (props) => {
 	// ----------------------------------------
 	// Render

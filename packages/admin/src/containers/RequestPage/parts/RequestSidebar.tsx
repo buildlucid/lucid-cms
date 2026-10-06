@@ -159,7 +159,7 @@ export const RequestSidebar: Component<{
 	// Render
 	return (
 		<aside class="w-full shrink-0 rounded-t-xl border-t border-border bg-card lg:w-82.5 lg:self-stretch lg:rounded-none lg:border-t-0 lg:border-s">
-			<div class="flex flex-col gap-5 p-4 md:p-5 lg:sticky lg:top-0">
+			<div class="flex flex-col gap-5 p-4 md:p-5 lg:sticky lg:top-(--page-layout-sticky-top)">
 				<DocumentSidebarSection
 					title={T()("requests.sidebar.status")}
 					icon={<FaSolidCircleDot size={12} />}

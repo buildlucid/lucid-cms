@@ -41,7 +41,7 @@ export const RequestPublishing: Component<{
 		<section
 			role="status"
 			aria-live="polite"
-			class="sticky top-0 z-10 -mx-4 -mt-4 border-b border-border bg-card pb-3.5 md:-mx-6 md:-mt-6"
+			class="sticky top-(--page-layout-sticky-top) z-10 -mx-4 -mt-4 border-b border-border bg-card pb-3.5 md:-mx-6 md:-mt-6"
 		>
 			<div class="px-4 pt-3.5 md:px-6">
 				<p class="text-sm font-medium text-title">
