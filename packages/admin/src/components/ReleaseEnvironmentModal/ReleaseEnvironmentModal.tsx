@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import type { Collection } from "@types";
+import type { Collection, RequestSummary } from "@types";
 import {
 	type Component,
 	createEffect,
@@ -12,13 +12,13 @@ import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Modal from "@/components/Modal/Modal";
 import RequestCreateFields from "@/components/RequestCreateFields/RequestCreateFields";
-import Select from "@/components/Select/Select";
+import RequestSelectDrawer from "@/components/RequestSelectDrawer/RequestSelectDrawer";
 import Tabs from "@/components/Tabs/Tabs";
-import { requestDocumentLimit } from "@/constants/requests";
 import api from "@/services/api";
 import T from "@/translations";
 import { getTargetLabel } from "@/utils/requests";
 import { getRequestRoute } from "@/utils/route-helpers";
+import { RequestPickerField } from "./parts/RequestPickerField";
 
 type RequestMode = "now" | "request" | "existing";
 
@@ -41,7 +41,8 @@ const ReleaseEnvironmentModal: Component<{
 	// State & Hooks
 	const navigate = useNavigate();
 	const [mode, setMode] = createSignal<RequestMode>("now");
-	const [existingId, setExistingId] = createSignal<number>();
+	const [existing, setExisting] = createSignal<RequestSummary>();
+	const [pickerOpen, setPickerOpen] = createSignal(false);
 	const [title, setTitle] = createSignal("");
 	const [targets, setTargets] = createSignal<string[]>([]);
 
@@ -54,33 +55,24 @@ const ReleaseEnvironmentModal: Component<{
 		},
 	});
 
-	const requests = api.requests.useGetMultiple({
+	//* one row is enough to know whether adding to a request is an option
+	const addable = api.requests.useGetMultiple({
 		queryParams: {
-			//* create requests always hold their one requested document
-			queryString: () =>
-				"filter[status]=open&filter[type]=publish&sort=-updatedAt&perPage=100",
+			filters: {
+				addable: () =>
+					`${props.document.collectionKey}:${props.document.documentId}`,
+			},
+			perPage: 1,
 		},
 		enabled: () => props.open,
 	});
 	const add = api.requests.useAddDocuments({
 		onSuccess: () => {
-			const id = existingId();
+			const request = existing();
 			props.setOpen(false);
-			if (id !== undefined) navigate(getRequestRoute({ requestId: id }));
+			if (request) navigate(getRequestRoute({ requestId: request.id }));
 		},
 	});
-	const eligible = createMemo(() =>
-		(requests.data?.data ?? []).filter(
-			(request) =>
-				request.permissions.edit &&
-				request.documents.length < requestDocumentLimit &&
-				!request.documents.some(
-					(member) =>
-						member.collectionKey === props.document.collectionKey &&
-						member.documentId === props.document.documentId,
-				),
-		),
-	);
 
 	// ----------------------------------------
 	// Memos
@@ -110,9 +102,29 @@ const ReleaseEnvironmentModal: Component<{
 		).filter(
 			(option) =>
 				(props.action === "publish" || option.value !== "now") &&
-				(option.value !== "existing" || eligible().length > 0),
+				(option.value !== "existing" || (addable.data?.meta.total ?? 0) > 0),
 		),
 	);
+	const heading = createMemo(() => {
+		const values = { environment: environment() };
+		switch (mode()) {
+			case "now":
+				return {
+					title: T()("modals.release.environment.title", values),
+					description: T()("requests.mode.now.description", values),
+				};
+			case "request":
+				return {
+					title: T()("requests.mode.request"),
+					description: T()("requests.mode.request.description", values),
+				};
+			case "existing":
+				return {
+					title: T()("requests.mode.existing"),
+					description: T()("requests.mode.existing.description", values),
+				};
+		}
+	});
 	const loading = createMemo(
 		() =>
 			props.publish.loading || create.action.isPending || add.action.isPending,
@@ -131,7 +143,7 @@ const ReleaseEnvironmentModal: Component<{
 		if (!props.open) return;
 		untrack(() => {
 			setMode(props.action === "compose" ? "request" : "now");
-			setExistingId(undefined);
+			setExisting(undefined);
 			setTitle("");
 			setTargets(props.target ? [props.target] : []);
 			create.reset();
@@ -152,9 +164,9 @@ const ReleaseEnvironmentModal: Component<{
 			targets: targets(),
 		};
 		if (mode() === "existing") {
-			const id = existingId();
-			if (id !== undefined) {
-				add.action.mutate({ id, body: { documents: [document] } });
+			const request = existing();
+			if (request) {
+				add.action.mutate({ id: request.id, body: { documents: [document] } });
 			}
 			return;
 		}
@@ -164,7 +176,23 @@ const ReleaseEnvironmentModal: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<Modal.Root open={props.open} onOpenChange={props.setOpen}>
+		<Modal.Root
+			open={props.open}
+			onOpenChange={props.setOpen}
+			above={
+				<Show when={modes().length > 1}>
+					<Tabs.Root
+						stretch={true}
+						value={mode()}
+						onChange={(value) => setMode(value as RequestMode)}
+						items={modes().map((option) => ({
+							value: option.value,
+							label: option.label,
+						}))}
+					/>
+				</Show>
+			}
+		>
 			<form
 				class="w-full"
 				onSubmit={(event) => {
@@ -173,51 +201,19 @@ const ReleaseEnvironmentModal: Component<{
 				}}
 			>
 				<Modal.Header>
-					<Modal.Title>
-						{T()("modals.release.environment.title", {
-							environment: environment(),
-						})}
-					</Modal.Title>
-					<Show when={props.action === "compose"}>
-						<Modal.Description>
-							{T()("requests.mode.required", { environment: environment() })}
-						</Modal.Description>
-					</Show>
+					<Modal.Title>{heading().title}</Modal.Title>
+					<Modal.Description>{heading().description}</Modal.Description>
 				</Modal.Header>
-				<Modal.Body>
-					<div class="grid gap-4">
-						<Show when={modes().length > 1}>
-							<Tabs.Root
-								stretch={true}
-								value={mode()}
-								onChange={(value) => setMode(value as RequestMode)}
-								items={modes().map((option) => ({
-									value: option.value,
-									label: option.label,
-								}))}
-							/>
-						</Show>
-						<Show when={mode() !== "now"}>
+				<Show when={mode() !== "now"}>
+					<Modal.Body>
+						<div class="grid gap-4">
 							<Show when={mode() === "existing"}>
-								<Select
-									id="existing-request"
-									name="request"
-									label={T()("requests.mode.existing.select")}
-									value={existingId()}
-									options={eligible().map((request) => ({
-										value: request.id,
-										label: request.title,
-									}))}
-									onChange={(value) => {
-										if (typeof value === "number") setExistingId(value);
-									}}
+								<RequestPickerField
+									request={existing()}
+									onOpen={() => setPickerOpen(true)}
+									onClear={() => setExisting(undefined)}
 								/>
-								<Show
-									when={
-										eligible().find((request) => request.id === existingId())
-											?.approved
-									}
-								>
+								<Show when={existing()?.approved}>
 									<p class="text-xs text-warning">
 										{T()("requests.documents.add.approved")}
 									</p>
@@ -233,9 +229,9 @@ const ReleaseEnvironmentModal: Component<{
 								targets={targets()}
 								onTargetsChange={setTargets}
 							/>
-						</Show>
-					</div>
-				</Modal.Body>
+						</div>
+					</Modal.Body>
+				</Show>
 				<Modal.Footer>
 					<ErrorMessage theme="basic" message={error()} />
 					<Modal.Actions>
@@ -250,7 +246,7 @@ const ReleaseEnvironmentModal: Component<{
 									? props.target === null
 									: (mode() === "request"
 											? !title().trim()
-											: existingId() === undefined) || targets().length === 0
+											: existing() === undefined) || targets().length === 0
 							}
 						>
 							{mode() === "now"
@@ -264,6 +260,15 @@ const ReleaseEnvironmentModal: Component<{
 					</Modal.Actions>
 				</Modal.Footer>
 			</form>
+			<RequestSelectDrawer
+				state={{
+					open: pickerOpen(),
+					setOpen: setPickerOpen,
+					document: props.document,
+					selected: existing(),
+				}}
+				callbacks={{ onSelect: setExisting }}
+			/>
 		</Modal.Root>
 	);
 };

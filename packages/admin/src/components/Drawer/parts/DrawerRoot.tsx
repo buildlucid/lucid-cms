@@ -51,7 +51,7 @@ export interface DrawerRootProps {
 	initialLocale?: "active" | "default";
 	/** Runs when the drawer closes, such as to reset a form. */
 	onReset?: () => void;
-	/** Set automatically when opened from another drawer. */
+	/** Set automatically when opened from another drawer or a modal. */
 	zIndex?: number;
 	/** Applied to the drawer panel. */
 	class?: string;
@@ -61,7 +61,6 @@ export interface DrawerRootProps {
 		| ((_locale: Accessor<string | undefined>) => JSXElement);
 }
 
-/** Holds the drawer's parts and its open state. */
 export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	// ------------------------------
 	// State & Hooks
@@ -73,6 +72,7 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 	);
 	const interfaceDirection = useInterfaceDirection();
 	const parentDrawer = useContext(DrawerNestingContext);
+	const parentLayer = useContext(LayerContext);
 	const drawerId = Symbol("drawer");
 	usePageScrollPin(() => props.open);
 
@@ -129,8 +129,9 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 			bottom: parent.bottom + (side() === "bottom" ? 1 : 0),
 		};
 	});
+	//* the parent layer is the drawer or modal this opened from
 	const zIndex = createMemo(() =>
-		Math.max(props.zIndex ?? 40, (parentDrawer?.zIndex() ?? 38) + 2),
+		Math.max(props.zIndex ?? 40, (parentLayer?.() ?? 38) + 2),
 	);
 	const isCovered = createMemo(() => {
 		for (const childSide of openChildren().values()) {

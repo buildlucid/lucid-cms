@@ -18,6 +18,8 @@ interface QueryParams {
 		createdBy?: Accessor<number | undefined>;
 		collectionKey?: Accessor<string | undefined>;
 		documentId?: Accessor<number | undefined>;
+		/** `collectionKey:documentId`, for requests that document can be added to. */
+		addable?: Accessor<string | undefined>;
 	};
 	perPage?: number;
 }

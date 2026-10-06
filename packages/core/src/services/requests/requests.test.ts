@@ -1402,6 +1402,52 @@ test("the involvesMe filter lists requests the user made or reviews", async () =
 	expect(await list(reviewer)).toEqual([reviewed.id]);
 });
 
+test("the addable filter lists open publish requests the user can add the document to", async () => {
+	const documentId = await createDocument();
+	const other = await createDocument();
+	const holding = await createSingle(context, {
+		title: "Holding",
+		documents: [documentId, other].map((id) => ({
+			collectionKey: "request_pages",
+			documentId: id,
+			source: "latest",
+			targets: ["staging"],
+		})),
+		user: creator,
+	});
+	assert(holding.data, JSON.stringify(holding.error));
+	const open = await createRequest(other);
+	const closed = await createRequest(other);
+	expect(
+		(await close(context, { id: closed.id, user: creator })).error,
+	).toBeUndefined();
+	const list = async (user: LucidUser) => {
+		const listed = await getMultiple(context, {
+			user,
+			query: {
+				filter: {
+					documentId: { value: other, operator: "=" },
+					addable: { value: `request_pages:${documentId}`, operator: "=" },
+				},
+				page: 1,
+				perPage: 10,
+			},
+		});
+		assert(listed.data, JSON.stringify(listed.error));
+		return listed.data.data.map((request) => request.id);
+	};
+	expect(await list(creator)).toEqual([open.id]);
+	const readOnly: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: [
+			Permissions.RequestsRead,
+			getCollectionPermission("request_pages", "read"),
+		],
+	};
+	expect(await list(readOnly)).toEqual([]);
+});
+
 test("proposals start with the default workflow, and only their own stage changes dismiss approval", async () => {
 	const key = "workflow_pages";
 	const id = await createDocument(key);

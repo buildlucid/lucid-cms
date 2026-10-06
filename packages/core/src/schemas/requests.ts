@@ -352,6 +352,11 @@ export const controllerSchemas = {
 					"filter[documentId]": queryString.schema.filter(false, {
 						example: "1",
 					}),
+					"filter[addable]": queryString.schema.filter(false, {
+						example: "page:1",
+						description:
+							"Open publish requests you can add this collectionKey:documentId document to",
+					}),
 					"filter[createdAt]": queryString.schema.filter(false, {
 						example: "2026-01-01T00:00:00Z",
 					}),
@@ -380,6 +385,7 @@ export const controllerSchemas = {
 						createdBy: queryFormatted.schema.filters.union.optional(),
 						collectionKey: queryFormatted.schema.filters.single.optional(),
 						documentId: queryFormatted.schema.filters.single.optional(),
+						addable: queryFormatted.schema.filters.single.optional(),
 						createdAt: queryFormatted.schema.filters.single.optional(),
 						updatedAt: queryFormatted.schema.filters.single.optional(),
 						scheduledAt: queryFormatted.schema.filters.single.optional(),

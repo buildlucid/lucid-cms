@@ -1,5 +1,6 @@
 import type { Collection, RequestSummary } from "@types";
-import type { Component } from "solid-js";
+import { type Component, Show } from "solid-js";
+import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import Table from "@/components/Table/Table";
 import TableUserStackCell from "@/components/TableUserStackCell/TableUserStackCell";
 import T from "@/translations";
@@ -11,21 +12,42 @@ const RequestTableRow: Component<{
 	index: number;
 	request: RequestSummary;
 	collections: Collection[];
+	onClick?: () => void;
+	/** Opt-in leading checkbox the host drives itself, under the "select" column. Hides the open action. */
+	selection?: {
+		selected: boolean;
+		onChange: () => void;
+	};
 }> = (props) => {
 	// ----------------------------------------
 	// Render
 	return (
 		<Table.Row
 			index={props.index}
-			actions={[
-				{
-					label: T()("requests.open"),
-					type: "link",
-					icon: "eye",
-					href: getRequestRoute({ requestId: props.request.id }),
-				},
-			]}
+			onClick={props.onClick}
+			actions={
+				props.selection
+					? undefined
+					: [
+							{
+								label: T()("requests.open"),
+								type: "link",
+								icon: "eye",
+								href: getRequestRoute({ requestId: props.request.id }),
+							},
+						]
+			}
 		>
+			<Show when={props.selection}>
+				{(selection) => (
+					<TableSelectionCell
+						column="select"
+						type="td"
+						value={selection().selected}
+						onChange={selection().onChange}
+					/>
+				)}
+			</Show>
 			<Table.Cell column="title" minWidth={280}>
 				<div class="min-w-0">
 					<p class="truncate text-sm text-title">{props.request.title}</p>

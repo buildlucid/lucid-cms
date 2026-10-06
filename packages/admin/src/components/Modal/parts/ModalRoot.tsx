@@ -2,8 +2,10 @@ import { Dialog } from "@kobalte/core";
 import classNames from "classnames";
 import {
 	type Component,
+	children,
 	createMemo,
 	type JSXElement,
+	Show,
 	useContext,
 } from "solid-js";
 import { LayerContext } from "@/hooks/useLayer/useLayer";
@@ -25,12 +27,13 @@ export interface ModalRootProps {
 	role?: ModalRole;
 	/** Set automatically when opened from a drawer or another modal. */
 	zIndex?: number;
+	/** Shown above the dialog, such as tabs that switch what it shows. */
+	above?: JSXElement;
 	/** Applied to the dialog. */
 	class?: string;
 	children: JSXElement;
 }
 
-/** Holds the modal's parts and its open state. */
 export const ModalRoot: Component<ModalRootProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
@@ -39,6 +42,7 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 
 	// ----------------------------------------
 	// Memos
+	const above = children(() => props.above);
 	const dismissible = createMemo(() => props.dismissible !== false);
 	const layer = createMemo(
 		() => props.zIndex ?? (parentLayer ? parentLayer() + 20 : 50),
@@ -78,20 +82,26 @@ export const ModalRoot: Component<ModalRootProps> = (props) => {
 						}}
 					>
 						<div
-							data-modal-content
-							class={classNames(
-								"w-full bg-background border border-border rounded-xl overflow-hidden m-auto pointer-events-auto",
-								{
-									"max-w-md": props.size === "sm",
-									"max-w-2xl": props.size === undefined || props.size === "md",
-									"max-w-7xl": props.size === "lg",
-								},
-								props.class,
-							)}
+							class={classNames("w-full m-auto flex flex-col gap-3", {
+								"max-w-md": props.size === "sm",
+								"max-w-2xl": props.size === undefined || props.size === "md",
+								"max-w-7xl": props.size === "lg",
+							})}
 						>
 							<LayerContext.Provider value={layer}>
 								<ModalContext.Provider value={{ dismissible }}>
-									{props.children}
+									<Show when={above()}>
+										<div class="pointer-events-auto">{above()}</div>
+									</Show>
+									<div
+										data-modal-content
+										class={classNames(
+											"w-full bg-background border border-border rounded-xl overflow-hidden pointer-events-auto",
+											props.class,
+										)}
+									>
+										{props.children}
+									</div>
 								</ModalContext.Provider>
 							</LayerContext.Provider>
 						</div>
