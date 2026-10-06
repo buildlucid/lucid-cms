@@ -21,7 +21,7 @@ export type CorePermission =
 	| "jobs:read"
 	| "jobs:run"
 	| "jobs:update"
-	| "releases:read"
+	| "requests:read"
 	| `documents:${string}:${"read" | "create" | "create-request" | "update" | "delete" | "restore" | "publish" | "review"}`
 	| "ai:custom-field-value"
 	| "ai:image-generate"

@@ -7,9 +7,9 @@ import {
 	afterUpsertHandler,
 	beforeDeleteHandler,
 	beforeUpsertHandler,
-	releaseCheckHandler,
-	releaseDocumentRemovedHandler,
-	releasePublishedHandler,
+	requestCheckHandler,
+	requestCompletedHandler,
+	requestDocumentRemovedHandler,
 	versionCaptureHandler,
 	versionPromoteHandler,
 } from "./services/hooks/index.js";
@@ -99,19 +99,19 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 					handler: afterRestoreHandler(options),
 				});
 				draft.hooks.push({
-					service: "releases",
+					service: "requests",
 					event: "check",
-					handler: releaseCheckHandler(options),
+					handler: requestCheckHandler(options),
 				});
 				draft.hooks.push({
-					service: "releases",
-					event: "published",
-					handler: releasePublishedHandler(options),
+					service: "requests",
+					event: "completed",
+					handler: requestCompletedHandler(options),
 				});
 				draft.hooks.push({
-					service: "releases",
+					service: "requests",
 					event: "documentRemoved",
-					handler: releaseDocumentRemovedHandler(options),
+					handler: requestDocumentRemovedHandler(options),
 				});
 			}
 		},

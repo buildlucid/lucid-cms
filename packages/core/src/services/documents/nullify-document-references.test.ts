@@ -16,10 +16,10 @@ import type { ServiceContext } from "../../utils/services/types.js";
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import readVersionContent from "../documents-versions/helpers/read-version-content.js";
 import updateVersion from "../documents-versions/update-single.js";
-import approve from "../releases/approve.js";
-import createSingle from "../releases/create-single.js";
-import getSingle from "../releases/get-single.js";
-import publish from "../releases/publish.js";
+import approve from "../requests/approve.js";
+import complete from "../requests/complete.js";
+import createSingle from "../requests/create-single.js";
+import getSingle from "../requests/get-single.js";
 import syncCollections from "../sync/sync-collections.js";
 import deleteMultiple from "./delete-multiple.js";
 import deleteSingle from "./delete-single.js";
@@ -27,9 +27,9 @@ import deleteSinglePermanently from "./delete-single-permanently.js";
 import upsertSingle from "./upsert-single.js";
 
 const fixture = getTestConfig();
-const postgresUrl = process.env.LUCID_RELEASE_TEST_POSTGRES_URL;
+const postgresUrl = process.env.LUCID_REQUEST_TEST_POSTGRES_URL;
 let postgresDatabase: DatabaseConnection | undefined;
-const key = "relation_release_docs";
+const key = "relation_request_docs";
 const collection = new CollectionBuilder(key, {
 	mode: "multiple",
 	details: { labels: { singular: "Document", plural: "Documents" } },
@@ -114,23 +114,23 @@ const save = async (title: string, ids: number[], documentId?: number) => {
 const approved = async (documentId: number, target: string) => {
 	const created = await createSingle(context, {
 		user: actor,
-		title: `Release to ${target}`,
+		title: `Publish to ${target}`,
 		documents: [
 			{ collectionKey: key, documentId, source: "latest", targets: [target] },
 		],
 	});
 	assert(created.data, JSON.stringify(created.error));
-	const release = await getSingle(context, {
+	const request = await getSingle(context, {
 		id: created.data.id,
 		user: actor,
 	});
-	assert(release.data, JSON.stringify(release.error));
+	assert(request.data, JSON.stringify(request.error));
 	const decision = await approve(context, {
-		id: release.data.id,
+		id: request.data.id,
 		user: actor,
-		revision: release.data.revision,
+		revision: request.data.revision,
 		expectedTargets: Object.fromEntries(
-			release.data.documents.map((document) => [
+			request.data.documents.map((document) => [
 				document.id,
 				Object.fromEntries(
 					document.targets.map((target) => [target.target, target.versionId]),
@@ -139,19 +139,19 @@ const approved = async (documentId: number, target: string) => {
 		),
 	});
 	assert(!decision.error, JSON.stringify(decision.error));
-	const read = await getSingle(context, { id: release.data.id, user: actor });
+	const read = await getSingle(context, { id: request.data.id, user: actor });
 	assert(read.data, JSON.stringify(read.error));
 	return read.data;
 };
 
-test("bulk relation deletion claims cross-related documents once, dismisses approvals and preserves frozen release references", async () => {
+test("bulk relation deletion claims cross-related documents once, dismisses approvals and preserves frozen request references", async () => {
 	const first = await save("First", []);
 	const second = await save("Second", [first]);
 	await save("First", [second], first);
 	const owner = await save("Owner", [first, second]);
-	const firstRelease = await approved(owner, "staging");
-	const stagingRelease = await approved(owner, "staging");
-	const item = firstRelease.documents[0];
+	const firstRequest = await approved(owner, "staging");
+	const stagingRequest = await approved(owner, "staging");
+	const item = firstRequest.documents[0];
 	assert(item?.approvedVersionId);
 	assert(item.versionId);
 	const approvedVersionId = item.approvedVersionId;
@@ -184,12 +184,12 @@ test("bulk relation deletion claims cross-related documents once, dismisses appr
 		after.data.content.fields.find((field) => field.key === "related"),
 	).toMatchObject({ value: [] });
 	const invalidated = await getSingle(context, {
-		id: firstRelease.id,
+		id: firstRequest.id,
 		user: actor,
 	});
 	assert(invalidated.data, JSON.stringify(invalidated.error));
 	expect(invalidated.data.approved).toBe(false);
-	expect(invalidated.data.revision).toBeGreaterThan(firstRelease.revision);
+	expect(invalidated.data.revision).toBeGreaterThan(firstRequest.revision);
 	expect(invalidated.data.events.map((event) => event.type)).toContain(
 		"approval_dismissed",
 	);
@@ -235,15 +235,15 @@ test("bulk relation deletion claims cross-related documents once, dismisses appr
 		versionId: approvedVersionId,
 	});
 	expect(afterPermanent.data?.content).toEqual(frozen.data.content);
-	//* every release of the document may link to the deleted documents, so all lose their approval
+	//* every request of the document may link to the deleted documents, so all lose their approval
 	const stagingAfter = await getSingle(context, {
-		id: stagingRelease.id,
+		id: stagingRequest.id,
 		user: actor,
 	});
 	assert(stagingAfter.data, JSON.stringify(stagingAfter.error));
 	expect(stagingAfter.data.approved).toBe(false);
 	expect(
-		(await publish(context, { id: stagingRelease.id, user: actor })).error,
+		(await complete(context, { id: stagingRequest.id, user: actor })).error,
 	).toBeDefined();
 	const staging = await readVersionContent(context, {
 		collectionKey: key,
@@ -277,12 +277,12 @@ test.skipIf(!postgresUrl)(
 			],
 		});
 		assert(group.data, JSON.stringify(group.error));
-		const release = await getSingle(context, {
+		const request = await getSingle(context, {
 			id: group.data.id,
 			user: actor,
 		});
-		assert(release.data, JSON.stringify(release.error));
-		const item = release.data.documents[0];
+		assert(request.data, JSON.stringify(request.error));
+		const item = request.data.documents[0];
 		assert(item?.versionId);
 		let signalValidated: (() => void) | undefined;
 		let finishValidation: (() => void) | undefined;
@@ -370,11 +370,11 @@ test.skipIf(!postgresUrl)(
 		expect(
 			(
 				await approve(context, {
-					id: release.data.id,
+					id: request.data.id,
 					user: actor,
-					revision: release.data.revision,
+					revision: request.data.revision,
 					expectedTargets: Object.fromEntries(
-						release.data.documents.map((document) => [
+						request.data.documents.map((document) => [
 							document.id,
 							Object.fromEntries(
 								document.targets.map((target) => [

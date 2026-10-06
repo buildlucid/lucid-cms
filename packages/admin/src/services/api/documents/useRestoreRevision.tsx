@@ -37,7 +37,7 @@ const useRestoreRevision = (props: UsePromoteSingleProps) => {
 				name: props.getCollectionName().toLowerCase(),
 			}),
 		}),
-		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.requests.all()],
 		onSuccess: props.onSuccess,
 		onError: props.onError,
 	});

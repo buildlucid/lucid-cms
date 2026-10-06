@@ -11,18 +11,18 @@ import {
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Modal from "@/components/Modal/Modal";
-import ReleaseCreateFields from "@/components/ReleaseCreateFields/ReleaseCreateFields";
+import RequestCreateFields from "@/components/RequestCreateFields/RequestCreateFields";
 import Select from "@/components/Select/Select";
 import Tabs from "@/components/Tabs/Tabs";
-import { releaseDocumentLimit } from "@/constants/releases";
+import { requestDocumentLimit } from "@/constants/requests";
 import api from "@/services/api";
 import T from "@/translations";
-import { getTargetLabel } from "@/utils/releases";
-import { getReleaseRoute } from "@/utils/route-helpers";
+import { getTargetLabel } from "@/utils/requests";
+import { getRequestRoute } from "@/utils/route-helpers";
 
-type ReleaseMode = "now" | "request" | "existing";
+type RequestMode = "now" | "request" | "existing";
 
-/** Publishes directly when allowed, or adds the document to a new or existing release. */
+/** Publishes directly when allowed, or adds the document to a new or existing request. */
 const ReleaseEnvironmentModal: Component<{
 	open: boolean;
 	setOpen: (open: boolean) => void;
@@ -40,41 +40,41 @@ const ReleaseEnvironmentModal: Component<{
 	// ----------------------------------------
 	// State & Hooks
 	const navigate = useNavigate();
-	const [mode, setMode] = createSignal<ReleaseMode>("now");
+	const [mode, setMode] = createSignal<RequestMode>("now");
 	const [existingId, setExistingId] = createSignal<number>();
 	const [title, setTitle] = createSignal("");
 	const [targets, setTargets] = createSignal<string[]>([]);
 
 	// ----------------------------------------
 	// Queries & Mutations
-	const create = api.releases.useCreateSingle({
+	const create = api.requests.useCreateSingle({
 		onSuccess: (response) => {
 			props.setOpen(false);
-			navigate(getReleaseRoute({ releaseId: response.data.id }));
+			navigate(getRequestRoute({ requestId: response.data.id }));
 		},
 	});
 
-	const releases = api.releases.useGetMultiple({
+	const requests = api.requests.useGetMultiple({
 		queryParams: {
-			//* create releases always hold their one requested document
+			//* create requests always hold their one requested document
 			queryString: () =>
 				"filter[status]=open&filter[type]=publish&sort=-updatedAt&perPage=100",
 		},
 		enabled: () => props.open,
 	});
-	const add = api.releases.useAddDocuments({
+	const add = api.requests.useAddDocuments({
 		onSuccess: () => {
 			const id = existingId();
 			props.setOpen(false);
-			if (id !== undefined) navigate(getReleaseRoute({ releaseId: id }));
+			if (id !== undefined) navigate(getRequestRoute({ requestId: id }));
 		},
 	});
 	const eligible = createMemo(() =>
-		(releases.data?.data ?? []).filter(
-			(release) =>
-				release.permissions.edit &&
-				release.documents.length < releaseDocumentLimit &&
-				!release.documents.some(
+		(requests.data?.data ?? []).filter(
+			(request) =>
+				request.permissions.edit &&
+				request.documents.length < requestDocumentLimit &&
+				!request.documents.some(
 					(member) =>
 						member.collectionKey === props.document.collectionKey &&
 						member.documentId === props.document.documentId,
@@ -87,24 +87,24 @@ const ReleaseEnvironmentModal: Component<{
 	const environment = createMemo(() =>
 		getTargetLabel(props.collection, props.target ?? ""),
 	);
-	//* publishing now is only offered when nothing requires a release first
+	//* publishing now is only offered when nothing requires a request first
 	const modes = createMemo(() =>
 		(
 			[
 				{
 					value: "now",
-					label: T()("releases.mode.now"),
+					label: T()("requests.mode.now"),
 				},
 				{
 					value: "request",
-					label: T()("releases.mode.request"),
+					label: T()("requests.mode.request"),
 				},
 				{
 					value: "existing",
-					label: T()("releases.mode.existing"),
+					label: T()("requests.mode.existing"),
 				},
 			] satisfies Array<{
-				value: ReleaseMode;
+				value: RequestMode;
 				label: string;
 			}>
 		).filter(
@@ -180,7 +180,7 @@ const ReleaseEnvironmentModal: Component<{
 					</Modal.Title>
 					<Show when={props.action === "compose"}>
 						<Modal.Description>
-							{T()("releases.mode.required", { environment: environment() })}
+							{T()("requests.mode.required", { environment: environment() })}
 						</Modal.Description>
 					</Show>
 				</Modal.Header>
@@ -190,7 +190,7 @@ const ReleaseEnvironmentModal: Component<{
 							<Tabs.Root
 								stretch={true}
 								value={mode()}
-								onChange={(value) => setMode(value as ReleaseMode)}
+								onChange={(value) => setMode(value as RequestMode)}
 								items={modes().map((option) => ({
 									value: option.value,
 									label: option.label,
@@ -200,13 +200,13 @@ const ReleaseEnvironmentModal: Component<{
 						<Show when={mode() !== "now"}>
 							<Show when={mode() === "existing"}>
 								<Select
-									id="existing-release"
-									name="release"
-									label={T()("releases.mode.existing.select")}
+									id="existing-request"
+									name="request"
+									label={T()("requests.mode.existing.select")}
 									value={existingId()}
-									options={eligible().map((release) => ({
-										value: release.id,
-										label: release.title,
+									options={eligible().map((request) => ({
+										value: request.id,
+										label: request.title,
 									}))}
 									onChange={(value) => {
 										if (typeof value === "number") setExistingId(value);
@@ -214,16 +214,16 @@ const ReleaseEnvironmentModal: Component<{
 								/>
 								<Show
 									when={
-										eligible().find((release) => release.id === existingId())
+										eligible().find((request) => request.id === existingId())
 											?.approved
 									}
 								>
 									<p class="text-xs text-warning">
-										{T()("releases.documents.add.approved")}
+										{T()("requests.documents.add.approved")}
 									</p>
 								</Show>
 							</Show>
-							<ReleaseCreateFields
+							<RequestCreateFields
 								showTitle={mode() === "request"}
 								collection={props.collection}
 								document={props.document}
@@ -254,11 +254,11 @@ const ReleaseEnvironmentModal: Component<{
 							}
 						>
 							{mode() === "now"
-								? T()("releases.release.now")
+								? T()("requests.mode.now")
 								: T()(
 										mode() === "existing"
-											? "releases.documents.add"
-											: "releases.create",
+											? "requests.documents.add"
+											: "requests.create",
 									)}
 						</Button>
 					</Modal.Actions>

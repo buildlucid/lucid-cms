@@ -1,37 +1,37 @@
-import type { DocumentHookRelease } from "@lucidcms/core/types";
+import type { DocumentHookRequest } from "@lucidcms/core/types";
 import { type RawBuilder, sql } from "kysely";
 import type { RouteScope } from "../types/types.js";
 
-/** The scope hooks work in: a release's captured versions when a release owns the write, otherwise the version type. */
+/** The scope hooks work in: a request's captured versions when a request owns the write, otherwise the version type. */
 export const resolveRouteScope = (data: {
 	versionType: Extract<RouteScope, { type: "version" }>["versionType"];
-	release?: DocumentHookRelease;
+	request?: DocumentHookRequest;
 	collectionKey: string;
 }): RouteScope => {
-	if (!data.release) {
+	if (!data.request) {
 		return { type: "version", versionType: data.versionType };
 	}
-	return releaseScope({
-		release: data.release,
+	return requestScope({
+		request: data.request,
 		collectionKey: data.collectionKey,
 		fallback: "latest",
 	});
 };
 
 /**
- * A release's proposals for one collection, with other documents read from the
+ * A request's proposals for one collection, with other documents read from the
  * fallback type. Snapshots are frozen copies of an environment, so they are
  * neither read as parents nor rewritten.
  */
-export const releaseScope = (data: {
-	release: DocumentHookRelease;
+export const requestScope = (data: {
+	request: DocumentHookRequest;
 	collectionKey: string;
 	fallback: Extract<RouteScope, { type: "version" }>["versionType"];
 }): RouteScope => ({
-	type: "release",
+	type: "request",
 	fallback: data.fallback,
 	versions: new Map(
-		data.release.documents
+		data.request.documents
 			.filter(
 				(document) =>
 					document.collectionKey === data.collectionKey &&
@@ -60,7 +60,7 @@ export const scopeVersionFilter = (
 	return sql<boolean>`(${sql.ref(`${versionTable}.id`)} in (${sql.join([...scope.versions.values()])}) or (${type} = ${scope.fallback} and ${sql.ref(`${versionTable}.document_id`)} not in (${sql.join([...scope.versions.keys()])})))`;
 };
 
-/** Matches only the versions a scope may rewrite: a release never touches documents outside it. */
+/** Matches only the versions a scope may rewrite: a request never touches documents outside it. */
 export const scopeMemberFilter = (
 	versionTable: string,
 	scope: RouteScope,

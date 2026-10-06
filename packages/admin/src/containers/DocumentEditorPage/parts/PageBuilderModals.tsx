@@ -93,7 +93,7 @@ export const PageBuilderModals: Component<{
 
 	// ----------------------------------
 	// Functions
-	const resetReleaseState = () => {
+	const resetRequestState = () => {
 		props.hooks.uiState.setReleaseEnvironmentOpen(false);
 		props.hooks.uiState.setReleaseEnvironmentTarget(null);
 		props.hooks.uiState.setReleaseEnvironmentAction(null);
@@ -284,7 +284,7 @@ export const PageBuilderModals: Component<{
 						open={props.hooks.uiState.getReleaseEnvironmentOpen()}
 						setOpen={(open) => {
 							if (open) return;
-							resetReleaseState();
+							resetRequestState();
 							props.hooks.mutations.publishMutation.reset();
 						}}
 						target={props.hooks.uiState.getReleaseEnvironmentTarget()}
@@ -302,7 +302,7 @@ export const PageBuilderModals: Component<{
 							error: props.hooks.mutations.publishMutation.errors()?.message,
 							onConfirm: async (target) => {
 								await props.hooks.mutations.publishDocumentAction(target);
-								resetReleaseState();
+								resetRequestState();
 							},
 						}}
 					/>

@@ -15,12 +15,12 @@ import { createBrickStore } from "@/store/brickStore/brickStore";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { getDocumentProposals } from "@/utils/releases";
-import { getDocumentRoute, getReleaseRoute } from "@/utils/route-helpers";
+import { getDocumentProposals } from "@/utils/requests";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import type { UseDocumentState } from "../useDocumentState/useDocumentState";
 
 export type ComparisonOption = {
-	/** latest, an environment key or proposal:{releaseId}. */
+	/** latest, an environment key or proposal:{requestId}. */
 	key: string;
 	label: string;
 	versionId: number | null;
@@ -66,7 +66,7 @@ export const useDocumentComparison = (props: {
 
 	// ----------------------------------------
 	// Queries
-	const proposals = api.releases.useGetMultiple({
+	const proposals = api.requests.useGetMultiple({
 		queryParams: {
 			filters: {
 				status: () => "open",
@@ -78,7 +78,7 @@ export const useDocumentComparison = (props: {
 		enabled: () =>
 			props.available() &&
 			props.state.documentId() !== undefined &&
-			userStore.get.hasPermission([Permissions.ReleasesRead]).all,
+			userStore.get.hasPermission([Permissions.RequestsRead]).all,
 	});
 
 	// ----------------------------------------
@@ -119,14 +119,14 @@ export const useDocumentComparison = (props: {
 			documentId: props.state.documentId(),
 		})) {
 			options.push({
-				key: `proposal:${proposal.release.id}`,
-				label: T()("releases.proposal.option", {
-					release: proposal.release.title,
+				key: `proposal:${proposal.request.id}`,
+				label: T()("requests.proposal.option", {
+					request: proposal.request.title,
 				}),
 				versionId: proposal.versionId,
 				editable: true,
-				location: getReleaseRoute({
-					releaseId: proposal.release.id,
+				location: getRequestRoute({
+					requestId: proposal.request.id,
 					content: proposal.document,
 				}),
 			});

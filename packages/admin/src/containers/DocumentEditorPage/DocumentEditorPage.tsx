@@ -1,6 +1,6 @@
 import type { PreviewScrollState } from "@lucidcms/preview-protocol";
 import { useNavigate, useParams } from "@solidjs/router";
-import type { Release, ReleaseDocument } from "@types";
+import type { RequestDetail, RequestDocument } from "@types";
 import classnames from "classnames";
 import type { Accessor } from "solid-js";
 import {
@@ -51,16 +51,16 @@ import pageBuilderModalsStore from "@/store/pageBuilderModalsStore/pageBuilderMo
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { getReleaseRoute } from "@/utils/route-helpers";
+import { getRequestRoute } from "@/utils/route-helpers";
 import { PageBuilderModals } from "./parts/PageBuilderModals";
 
 const DocumentEditorPage: Component<{
 	mode: "create" | "edit";
 	version?: "latest" | "revision" | "snapshot" | "proposal";
 	versionId?: Accessor<number | undefined>;
-	/** Set when editing a release proposal, which keeps the editor inside its release. */
-	release?: Accessor<Release | undefined>;
-	releaseDocument?: Accessor<ReleaseDocument | undefined>;
+	/** Set when editing a request proposal, which keeps the editor inside its request. */
+	request?: Accessor<RequestDetail | undefined>;
+	requestDocument?: Accessor<RequestDocument | undefined>;
 }> = (props) => {
 	// ----------------------------------
 	// Hooks & State
@@ -113,8 +113,8 @@ const DocumentEditorPage: Component<{
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		publishMutation: mutations.publishMutation,
 		proposalEditable: () =>
-			props.release?.()?.status === "open" &&
-			props.releaseDocument?.()?.permissions.edit === true,
+			props.request?.()?.status === "open" &&
+			props.requestDocument?.()?.permissions.edit === true,
 	});
 
 	const autoSave = useDocumentAutoSave({
@@ -126,16 +126,16 @@ const DocumentEditorPage: Component<{
 			uiState.hasSavePermission() && !uiState.isBuilderLocked(),
 		autoSaveActive: uiState.isAutoSaveActive,
 	});
-	//* release snapshots can't change, so only latest and proposals open side by side
+	//* request snapshots can't change, so only latest and proposals open side by side
 	const comparisonAvailable = () =>
 		props.mode === "edit" &&
 		(versionType() === "latest" || versionType() === "proposal");
 	//* the side-by-side key of the editable document on the left
 	const comparisonKey = createMemo(() => {
 		if (versionType() === "latest") return "latest";
-		const release = props.release?.();
-		return release && versionType() === "proposal"
-			? `proposal:${release.id}`
+		const request = props.request?.();
+		return request && versionType() === "proposal"
+			? `proposal:${request.id}`
 			: undefined;
 	});
 	const comparison = useDocumentComparison({
@@ -153,7 +153,7 @@ const DocumentEditorPage: Component<{
 			return metadata.contentId;
 		}
 		if (versionType() === "proposal") {
-			return props.releaseDocument?.()?.contentId ?? undefined;
+			return props.requestDocument?.()?.contentId ?? undefined;
 		}
 		return document?.versions[versionType()]?.contentId;
 	};
@@ -332,23 +332,23 @@ const DocumentEditorPage: Component<{
 			docState.document()?.isDeleted === true ||
 			uiState.isBuilderLocked(),
 	);
-	const releaseLink = createMemo(() => {
-		const release = props.release?.();
-		return release ? getReleaseRoute({ releaseId: release.id }) : undefined;
+	const requestLink = createMemo(() => {
+		const request = props.request?.();
+		return request ? getRequestRoute({ requestId: request.id }) : undefined;
 	});
 	const trailingBreadcrumbs = createMemo(() => {
-		const release = props.release?.();
-		const link = releaseLink();
-		return release && link ? [{ label: release.title, link }] : undefined;
+		const request = props.request?.();
+		const link = requestLink();
+		return request && link ? [{ label: request.title, link }] : undefined;
 	});
 	const currentViewLabel = createMemo(() => {
-		const release = props.release?.();
-		if (!release) return undefined;
+		const request = props.request?.();
+		if (!request) return undefined;
 		return T()(
 			versionType() === "proposal"
-				? "releases.proposal.selector"
-				: "releases.snapshot.selector",
-			{ release: release.title },
+				? "requests.proposal.selector"
+				: "requests.snapshot.selector",
+			{ request: request.title },
 		);
 	});
 	//* latest aligns with environments, proposals also with latest
@@ -473,7 +473,7 @@ const DocumentEditorPage: Component<{
 					version={versionType}
 					versionId={versionId}
 					relationVersionType={relationVersionType}
-					release={props.release}
+					request={props.request}
 					disableWorkflow={disableWorkflow}
 					documentState={docState}
 					mutations={mutations}
@@ -498,7 +498,7 @@ const DocumentEditorPage: Component<{
 								? { open: comparison.open, toggle: comparison.toggle }
 								: undefined
 						}
-						releaseLink={releaseLink()}
+						requestLink={requestLink()}
 						state={{
 							collection: docState.collection,
 							collectionKey: docState.collectionKey,
@@ -723,7 +723,7 @@ const DocumentEditorPage: Component<{
 									when={
 										!comparison.open() &&
 										!uiState.getPreviewOpen() &&
-										(!props.release || versionType() === "proposal")
+										(!props.request || versionType() === "proposal")
 									}
 								>
 									<DocumentSidebar
@@ -735,7 +735,7 @@ const DocumentEditorPage: Component<{
 										documentId={docState.documentId}
 										disabled={disableWorkflow}
 										mutations={mutations}
-										releaseContext={Boolean(props.release)}
+										requestContext={Boolean(props.request)}
 									/>
 								</Show>
 							</div>

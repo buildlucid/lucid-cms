@@ -5,7 +5,7 @@ import Input from "@/components/Input/Input";
 import Modal from "@/components/Modal/Modal";
 import T from "@/translations";
 
-/** Requests a new document through a create release, which creates it once approved and released. */
+/** Requests a new document through a create request, which creates it once approved and completed. */
 const DocumentRequestModal: Component<{
 	open: boolean;
 	setOpen: (open: boolean) => void;
@@ -52,7 +52,7 @@ const DocumentRequestModal: Component<{
 						value={title()}
 						onChange={setTitle}
 						required={true}
-						label={T()("releases.title.label")}
+						label={T()("requests.title.label")}
 					/>
 				</Modal.Body>
 				<Modal.Footer>

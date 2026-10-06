@@ -55,12 +55,12 @@ import type {
 	LucidOptions,
 	LucidPreviewSessions,
 	LucidProcessedImages,
-	LucidReleaseDocuments,
-	LucidReleaseEvents,
-	LucidReleaseReviewers,
-	LucidReleases,
-	LucidReleaseTargets,
 	LucidRemoteConnections,
+	LucidRequestDocuments,
+	LucidRequestEvents,
+	LucidRequestReviewers,
+	LucidRequests,
+	LucidRequestTargets,
 	LucidRolePermissions,
 	LucidRoles,
 	LucidSecurityAuditLogs,
@@ -276,11 +276,11 @@ type DynamicCollectionTables = {
 };
 
 export interface LucidDB extends DynamicCollectionTables {
-	lucid_releases: LucidReleases;
-	lucid_release_documents: LucidReleaseDocuments;
-	lucid_release_targets: LucidReleaseTargets;
-	lucid_release_reviewers: LucidReleaseReviewers;
-	lucid_release_events: LucidReleaseEvents;
+	lucid_requests: LucidRequests;
+	lucid_request_documents: LucidRequestDocuments;
+	lucid_request_targets: LucidRequestTargets;
+	lucid_request_reviewers: LucidRequestReviewers;
+	lucid_request_events: LucidRequestEvents;
 	lucid_locales: LucidLocales;
 	lucid_options: LucidOptions;
 	lucid_users: LucidUsers;

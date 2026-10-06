@@ -38,7 +38,7 @@ const useUpdateWorkflow = (props?: UseUpdateWorkflowProps) => {
 					title: T()("toasts.common.workflow.updated.title"),
 					message: T()("toasts.common.workflow.updated.message"),
 				}),
-		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.requests.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

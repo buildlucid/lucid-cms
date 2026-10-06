@@ -23,8 +23,8 @@ import invalidateContentDocumentCache from "../documents/helpers/invalidate-cont
 import notifyChange from "../documents/notify-change.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
-import invalidateReleases from "../releases/helpers/invalidate-releases.js";
-import recordTargetPublished from "../releases/helpers/record-target-published.js";
+import invalidateRequests from "../requests/helpers/invalidate-requests.js";
+import recordTargetPublished from "../requests/helpers/record-target-published.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -37,11 +37,11 @@ const promoteVersion: ServiceFn<
 			skipRevisionCheck?: boolean;
 			/** If set to false, a revision will not be created even if the collection supports revisions. */
 			createRevision?: boolean;
-			/** Callers that already hold the document's write claim, eg. releases. */
+			/** Callers that already hold the document's write claim, eg. requests. */
 			skipDocumentWriteClaims?: boolean;
-			/** The release doing the promoting, which keeps its approval and is left out of the target activity. */
-			releaseId?: number;
-			/** Leaves versionPromote hooks, cache invalidation and change notifications to the caller, eg. a release that runs them once every document is in place. */
+			/** The request doing the promoting, which keeps its approval and is left out of the target activity. */
+			requestId?: number;
+			/** Leaves versionPromote hooks, cache invalidation and change notifications to the caller, eg. a request that runs them once every document is in place. */
 			deferEffects?: boolean;
 		},
 	],
@@ -368,11 +368,11 @@ const promoteVersion: ServiceFn<
 				if (hookResponse.error) return hookResponse;
 			}
 
-			const invalidateRes = await invalidateReleases(context, {
+			const invalidateRes = await invalidateRequests(context, {
 				collectionKey: data.collectionKey,
 				documentIds: [data.documentId],
 				versionType: data.toVersionType,
-				releaseId: data.releaseId,
+				requestId: data.requestId,
 				userId: data.userId,
 			});
 			if (invalidateRes.error) return invalidateRes;
@@ -382,7 +382,7 @@ const promoteVersion: ServiceFn<
 					collectionKey: data.collectionKey,
 					documentId: data.documentId,
 					target: data.toVersionType,
-					releaseId: data.releaseId,
+					requestId: data.requestId,
 					userId: data.userId,
 				});
 				if (publishedRes.error) return publishedRes;

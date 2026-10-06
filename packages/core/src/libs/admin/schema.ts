@@ -107,7 +107,7 @@ const navigationIcon = z.enum([
 	"queue",
 	"integrations",
 	"settings",
-	"releases",
+	"requests",
 	"publishing",
 	"extensions",
 ]) satisfies z.ZodType<AdminNavigationIcon>;

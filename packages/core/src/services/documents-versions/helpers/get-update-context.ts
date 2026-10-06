@@ -7,7 +7,7 @@ import getCurrentCollectionMigrationId from "../../../libs/collection/migration/
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import type { LucidVersionTable } from "../../../libs/db/tables/index.js";
 import type { Select } from "../../../libs/db/types.js";
-import type { DocumentHookRelease } from "../../../libs/hooks/types.js";
+import type { DocumentHookRequest } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
@@ -15,7 +15,7 @@ import { DocumentVersionsRepository } from "../../../libs/repositories/index.js"
 import type { LucidUser } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
-import checkReleaseVersionAccess from "../../releases/helpers/check-release-version-access.js";
+import checkRequestVersionAccess from "../../requests/helpers/check-request-version-access.js";
 
 const getUpdateContext: ServiceFn<
 	[
@@ -23,7 +23,7 @@ const getUpdateContext: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			versionId: number;
-			/** Required to save release proposals. When given, saving latest needs update access. */
+			/** Required to save request proposals. When given, saving latest needs update access. */
 			authUser?: LucidUser;
 		},
 	],
@@ -32,8 +32,8 @@ const getUpdateContext: ServiceFn<
 		tableNames: CollectionTableNames;
 		migrationId: number;
 		versionType: Select<LucidVersionTable>["type"];
-		/** The release that owns the version, when it is a proposal. */
-		release?: DocumentHookRelease;
+		/** The request that owns the version, when it is a proposal. */
+		request?: DocumentHookRequest;
 	}
 > = async (context, data) => {
 	const Version = new DocumentVersionsRepository(context.db);
@@ -119,12 +119,12 @@ const getUpdateContext: ServiceFn<
 	);
 	if (versionExistsRes.error) return versionExistsRes;
 
-	let release: DocumentHookRelease | undefined;
+	let request: DocumentHookRequest | undefined;
 	if (
 		versionExistsRes.data.type ===
 		constants.collectionBuilder.publishing.proposalVersionType
 	) {
-		const accessRes = await checkReleaseVersionAccess(context, {
+		const accessRes = await checkRequestVersionAccess(context, {
 			collectionKey: data.collectionKey,
 			documentId: data.documentId,
 			versionId: data.versionId,
@@ -133,7 +133,7 @@ const getUpdateContext: ServiceFn<
 		});
 		if (accessRes.error) return accessRes;
 
-		release = accessRes.data;
+		request = accessRes.data;
 	} else if (
 		versionExistsRes.data.type === "latest" &&
 		data.authUser &&
@@ -174,7 +174,7 @@ const getUpdateContext: ServiceFn<
 			tableNames: tableNamesRes.data,
 			migrationId: migrationIdRes.data,
 			versionType: versionExistsRes.data.type,
-			release,
+			request,
 		},
 	};
 };

@@ -20,7 +20,7 @@ export { default as oauthConnectionsFormatter } from "./oauth-connections.js";
 export { default as optionsFormatter } from "./options.js";
 export { default as permissionsFormatter } from "./permissions.js";
 export { default as previewSessionsFormatter } from "./preview-sessions.js";
-export { default as releasesFormatter } from "./releases.js";
+export { default as requestsFormatter } from "./requests.js";
 export { default as rolesFormatter } from "./roles.js";
 export { default as settingsFormatter } from "./settings.js";
 export { default as userLoginsFormatter } from "./user-logins.js";

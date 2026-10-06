@@ -184,7 +184,7 @@ const collectionResponseSchema = z.object({
 	capabilities: z.object({
 		scheduling: z.boolean().meta({
 			description:
-				"Whether this collection can create scheduled releases in the current runtime",
+				"Whether this collection can create scheduled requests in the current runtime",
 			example: false,
 		}),
 		preview: z.boolean().meta({
@@ -257,7 +257,7 @@ const collectionResponseSchema = z.object({
 				}),
 				requires: z.array(z.string()).meta({
 					description:
-						"Environment keys that must match latest before releases can be created for this environment",
+						"Environment keys that must match latest before requests can be created for this environment",
 					example: ["staging"],
 				}),
 				permissions: z.object({
@@ -267,7 +267,7 @@ const collectionResponseSchema = z.object({
 					}),
 					review: z.string().meta({
 						description:
-							"Permission required to review releases for this environment",
+							"Permission required to review requests for this environment",
 						example: "documents:pages:review",
 					}),
 				}),
@@ -277,15 +277,15 @@ const collectionResponseSchema = z.object({
 			.object({
 				targets: z.array(z.string()).meta({
 					description:
-						"Publishing targets that can only be published through an approved release",
+						"Publishing targets that can only be published through an approved request",
 				}),
 				create: z.boolean().meta({
 					description:
-						"Whether new documents can only be created through an approved create release",
+						"Whether new documents can only be created through an approved create request",
 				}),
 				selfApproval: z.boolean().meta({
 					description:
-						"Whether release creators can approve their own releases",
+						"Whether request creators can approve their own requests",
 				}),
 			})
 			.optional(),
@@ -303,7 +303,7 @@ const collectionResponseSchema = z.object({
 			})
 			.optional(),
 		scheduling: z.boolean().meta({
-			description: "Whether the collection has release scheduling enabled",
+			description: "Whether the collection has request scheduling enabled",
 			example: false,
 		}),
 	}),

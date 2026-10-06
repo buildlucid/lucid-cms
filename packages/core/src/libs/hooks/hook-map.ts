@@ -28,9 +28,9 @@ export const hookExecutionKinds: {
 	documentWorkflows: {
 		afterUpdate: "effect",
 	},
-	releases: {
+	requests: {
 		check: "transform",
-		published: "effect",
+		completed: "effect",
 		documentRemoved: "effect",
 	},
 

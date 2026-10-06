@@ -41,7 +41,7 @@ import {
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { getDocumentRoute, getReleaseRoute } from "@/utils/route-helpers";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import { useDocumentOrderSave } from "./hooks/useDocumentOrderSave";
 
@@ -54,7 +54,7 @@ export const DocumentsList: Component<{
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: QueryStateResponse;
 		showingDeleted: Accessor<boolean>;
-		/** Whether the pending filter lists requested documents, which only exist as their create release's proposal. */
+		/** Whether the pending filter lists requested documents, which only exist as their create request's proposal. */
 		showingRequests: Accessor<boolean>;
 		orderMode: Accessor<boolean>;
 	};
@@ -162,7 +162,7 @@ export const DocumentsList: Component<{
 		() => props.state.collection?.permissions,
 	);
 	const rowsAreSelectable = createMemo(() => {
-		//* bulk selection is disabled while reordering, and requests are managed from their release
+		//* bulk selection is disabled while reordering, and requests are managed from their request
 		if (props.state.orderMode() || props.state.showingRequests()) return false;
 
 		const permissions = collectionPermissions();
@@ -584,11 +584,11 @@ export const DocumentsList: Component<{
 										type: "link",
 										icon: "eye",
 										href: (() => {
-											const releaseId = doc().createReleaseId;
-											return releaseId === null
+											const requestId = doc().createRequestId;
+											return requestId === null
 												? undefined
-												: getReleaseRoute({
-														releaseId,
+												: getRequestRoute({
+														requestId,
 														content: {
 															collectionKey: collectionKey(),
 															documentId: doc().id,

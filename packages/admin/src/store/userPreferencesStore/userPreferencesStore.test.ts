@@ -113,18 +113,18 @@ describe("navigation group preferences", () => {
 	});
 });
 
-describe("release activity preferences", () => {
+describe("request activity preferences", () => {
 	it("persists the shown filters across store instances", () => {
 		const storage = createMemoryStorage();
 		expect(
-			createUserPreferencesStore({ storage }).getReleaseActivityFilters(),
+			createUserPreferencesStore({ storage }).getRequestActivityFilters(),
 		).toBeUndefined();
-		createUserPreferencesStore({ storage }).setReleaseActivityFilters([
+		createUserPreferencesStore({ storage }).setRequestActivityFilters([
 			"reviewers",
 		]);
 
 		const reloaded = createUserPreferencesStore({ storage });
-		expect(reloaded.getReleaseActivityFilters()).toEqual(["reviewers"]);
+		expect(reloaded.getRequestActivityFilters()).toEqual(["reviewers"]);
 	});
 });
 

@@ -65,7 +65,7 @@ describe("result plans", () => {
 
 	test("resolves explicitly tagged computed-result codecs", () => {
 		const query = database.kysely
-			.selectFrom("lucid_releases")
+			.selectFrom("lucid_requests")
 			.select(
 				database.fn.withCodec(sql<unknown>`'{}'`, codecs.json).as("metadata"),
 			);

@@ -18,7 +18,7 @@ export interface Params {
 	};
 }
 
-type Response = ResponseBody<{ id: number; releaseId: number }>;
+type Response = ResponseBody<{ id: number; requestId: number }>;
 
 export const requestCreationReq = (params: Params) => {
 	return request<Response>({
@@ -48,7 +48,7 @@ const useRequestCreation = (props: UseRequestCreationProps) => {
 				message: T()("toasts.document.request.message"),
 			};
 		},
-		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.requests.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

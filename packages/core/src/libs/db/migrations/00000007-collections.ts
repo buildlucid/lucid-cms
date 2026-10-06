@@ -175,7 +175,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createTable("lucid_releases")
+				.createTable("lucid_requests")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
@@ -201,11 +201,11 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("execution_job_id", adapter.getDataType("text"))
 				.addColumn("failure", adapter.getDataType("text"))
 				.addColumn(
-					"failure_release_document_id",
+					"failure_request_document_id",
 					adapter.getDataType("integer"),
 				)
 				.addColumn("failure_target", adapter.getDataType("text"))
-				.addColumn("released_at", adapter.getDataType("timestamp"))
+				.addColumn("completed_at", adapter.getDataType("timestamp"))
 				.addColumn("lock_token", adapter.getDataType("text"))
 				.addColumn("created_by", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
@@ -224,12 +224,12 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createTable("lucid_release_documents")
+				.createTable("lucid_request_documents")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("release_id", adapter.getDataType("integer"), (col) =>
-					col.notNull().references("lucid_releases.id").onDelete("cascade"),
+				.addColumn("request_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_requests.id").onDelete("cascade"),
 				)
 				.addColumn("collection_key", adapter.getDataType("text"), (col) =>
 					col.notNull(),
@@ -244,38 +244,38 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("approved_workflow_stage", adapter.getDataType("text"))
 				.addColumn("approved_version_id", adapter.getDataType("integer"))
 				.addForeignKeyConstraint(
-					"fk_lucid_release_documents_source",
+					"fk_lucid_request_documents_source",
 					["collection_key", "document_id", "source_version_id"],
 					"lucid_document_version_identities",
 					["collection_key", "document_id", "version_id"],
 					(constraint) => constraint.onDelete("restrict"),
 				)
 				.addForeignKeyConstraint(
-					"fk_lucid_release_documents_approved",
+					"fk_lucid_request_documents_approved",
 					["collection_key", "document_id", "approved_version_id"],
 					"lucid_document_version_identities",
 					["collection_key", "document_id", "version_id"],
 					(constraint) => constraint.onDelete("restrict"),
 				)
-				.addUniqueConstraint("uniq_lucid_release_documents_document", [
-					"release_id",
+				.addUniqueConstraint("uniq_lucid_request_documents_document", [
+					"request_id",
 					"collection_key",
 					"document_id",
 				])
 				.execute();
 
 			await db.schema
-				.createTable("lucid_release_targets")
+				.createTable("lucid_request_targets")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
 				.addColumn(
-					"release_document_id",
+					"request_document_id",
 					adapter.getDataType("integer"),
 					(col) =>
 						col
 							.notNull()
-							.references("lucid_release_documents.id")
+							.references("lucid_request_documents.id")
 							.onDelete("cascade"),
 				)
 				.addColumn("target", adapter.getDataType("text"), (col) =>
@@ -287,19 +287,19 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("reviewed_at", adapter.getDataType("timestamp"))
 				.addColumn("approved_version_id", adapter.getDataType("integer"))
-				.addUniqueConstraint("uniq_lucid_release_targets_release", [
-					"release_document_id",
+				.addUniqueConstraint("uniq_lucid_request_targets_request", [
+					"request_document_id",
 					"target",
 				])
 				.execute();
 
 			await db.schema
-				.createTable("lucid_release_reviewers")
+				.createTable("lucid_request_reviewers")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("release_id", adapter.getDataType("integer"), (col) =>
-					col.notNull().references("lucid_releases.id").onDelete("cascade"),
+				.addColumn("request_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_requests.id").onDelete("cascade"),
 				)
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.notNull().references("lucid_users.id").onDelete("cascade"),
@@ -317,25 +317,25 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 							),
 						),
 				)
-				.addUniqueConstraint("uniq_lucid_release_reviewers_user", [
-					"release_id",
+				.addUniqueConstraint("uniq_lucid_request_reviewers_user", [
+					"request_id",
 					"user_id",
 				])
 				.execute();
 
 			await db.schema
-				.createTable("lucid_release_events")
+				.createTable("lucid_request_events")
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
-				.addColumn("release_id", adapter.getDataType("integer"), (col) =>
-					col.notNull().references("lucid_releases.id").onDelete("cascade"),
+				.addColumn("request_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_requests.id").onDelete("cascade"),
 				)
 				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
 				.addColumn("parent_id", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_release_events.id").onDelete("cascade"),
+					col.references("lucid_request_events.id").onDelete("cascade"),
 				)
 				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull())
 				.addColumn("body", adapter.getDataType("json"))
@@ -359,38 +359,38 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_releases_status")
-				.on("lucid_releases")
+				.createIndex("idx_lucid_requests_status")
+				.on("lucid_requests")
 				.columns(["status", "created_at"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_releases_schedule")
-				.on("lucid_releases")
+				.createIndex("idx_lucid_requests_schedule")
+				.on("lucid_requests")
 				.columns(["status", "execution_job_id", "scheduled_at"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_release_documents_document")
-				.on("lucid_release_documents")
+				.createIndex("idx_lucid_request_documents_document")
+				.on("lucid_request_documents")
 				.columns(["collection_key", "document_id"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_release_reviewers_user")
-				.on("lucid_release_reviewers")
-				.columns(["user_id", "release_id"])
+				.createIndex("idx_lucid_request_reviewers_user")
+				.on("lucid_request_reviewers")
+				.columns(["user_id", "request_id"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_release_events_release")
-				.on("lucid_release_events")
-				.columns(["release_id", "created_at"])
+				.createIndex("idx_lucid_request_events_request")
+				.on("lucid_request_events")
+				.columns(["request_id", "created_at"])
 				.execute();
 
 			await db.schema
-				.createIndex("idx_lucid_release_events_parent")
-				.on("lucid_release_events")
+				.createIndex("idx_lucid_request_events_parent")
+				.on("lucid_request_events")
 				.column("parent_id")
 				.execute();
 

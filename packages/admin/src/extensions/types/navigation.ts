@@ -18,7 +18,7 @@ export type AdminNavigationIcon =
 	| "queue"
 	| "integrations"
 	| "settings"
-	| "releases"
+	| "requests"
 	| "publishing"
 	| "extensions";
 

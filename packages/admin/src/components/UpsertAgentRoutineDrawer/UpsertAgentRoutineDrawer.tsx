@@ -31,7 +31,7 @@ import {
 	toCron,
 } from "@/utils/agent-schedule";
 import { getBodyError } from "@/utils/error-helpers";
-import { getDefaultTimezone } from "@/utils/release-schedule";
+import { getDefaultTimezone } from "@/utils/request-schedule";
 import AgentRoutineDetails from "./parts/AgentRoutineDetails";
 import AgentRoutineInstructions from "./parts/AgentRoutineInstructions";
 import AgentRoutineModelField from "./parts/AgentRoutineModelField";

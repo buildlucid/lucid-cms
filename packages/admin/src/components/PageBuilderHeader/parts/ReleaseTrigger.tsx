@@ -28,7 +28,7 @@ export interface ReleaseTriggerOption {
 	};
 }
 
-/** An alternative to saving, listed in the menu above the release options. */
+/** An alternative to saving, listed in the menu above the request options. */
 export interface ReleaseTriggerAction {
 	label: string;
 	onSelect: () => void;

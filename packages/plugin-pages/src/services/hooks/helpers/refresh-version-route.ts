@@ -23,8 +23,8 @@ import resolveParentFullSlug from "./resolve-parent-full-slug.js";
 /**
  * Recomputes a stored page version's route from its parent in the scope, then
  * rewrites the descendants the scope may touch. Used after a version is
- * promoted into latest or an environment, captured into a release or restored,
- * and when a parent page is removed from a release.
+ * promoted into latest or an environment, captured into a request or restored,
+ * and when a parent page is removed from a request.
  */
 const refreshVersionRoute: ServiceFn<
 	[

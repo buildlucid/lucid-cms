@@ -5,7 +5,7 @@ import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
-import invalidateReleases from "../releases/helpers/invalidate-releases.js";
+import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import checkDocumentAccess from "./checks/check-document-access.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import executeDeleteHook from "./helpers/execute-delete-hook.js";
@@ -166,11 +166,11 @@ const deleteMultiple: ServiceFn<
 
 			if (nullifyResult.error) return nullifyResult;
 
-			const invalidateReleasesRes = await invalidateReleases(context, {
+			const invalidateRequestsRes = await invalidateRequests(context, {
 				collectionKey: data.collectionKey,
 				documentIds: data.ids,
 			});
-			if (invalidateReleasesRes.error) return invalidateReleasesRes;
+			if (invalidateRequestsRes.error) return invalidateRequestsRes;
 
 			const hookAfterRes = await executeDeleteHook(context, {
 				event: "afterDelete",

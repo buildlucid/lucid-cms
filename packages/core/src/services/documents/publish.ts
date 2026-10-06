@@ -17,7 +17,7 @@ import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 /**
  * Publishes saved content straight to an environment, from latest unless
  * another saved version is given. Environments that need review can only be
- * published through an approved release.
+ * published through an approved request.
  */
 const publish: ServiceFn<
 	[
@@ -144,7 +144,7 @@ const publish: ServiceFn<
 				return {
 					error: {
 						type: "basic",
-						message: copy("server:core.documents.publish.release.version"),
+						message: copy("server:core.documents.publish.request.version"),
 						status: 403,
 					},
 					data: undefined,

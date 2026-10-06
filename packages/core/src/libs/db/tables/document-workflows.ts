@@ -57,7 +57,7 @@ export interface LucidDocumentWorkflows {
 	id: Generated<number>;
 	collection_key: string;
 	document_id: number;
-	/** Null for latest, otherwise the release proposal it belongs to. */
+	/** Null for latest, otherwise the request proposal it belongs to. */
 	version_id: number | null;
 	stage_key: string;
 	created_by: number | null;

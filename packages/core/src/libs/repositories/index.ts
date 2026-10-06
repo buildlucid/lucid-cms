@@ -48,11 +48,11 @@ export { default as OAuthRefreshTokensRepository } from "./oauth-refresh-tokens.
 export { default as OptionsRepository } from "./options.js";
 export { default as PreviewSessionsRepository } from "./preview-sessions.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
-export { default as ReleaseDocumentsRepository } from "./release-documents.js";
-export { default as ReleaseEventsRepository } from "./release-events.js";
-export { default as ReleaseReviewersRepository } from "./release-reviewers.js";
-export { default as ReleaseTargetsRepository } from "./release-targets.js";
-export { default as ReleasesRepository } from "./releases.js";
+export { default as RequestDocumentsRepository } from "./request-documents.js";
+export { default as RequestEventsRepository } from "./request-events.js";
+export { default as RequestReviewersRepository } from "./request-reviewers.js";
+export { default as RequestTargetsRepository } from "./request-targets.js";
+export { default as RequestsRepository } from "./requests.js";
 export { default as RolePermissionsRepository } from "./role-permissions.js";
 export { default as RolesRepository } from "./roles.js";
 export { default as SecurityAuditLogsRepository } from "./security-audit-logs.js";

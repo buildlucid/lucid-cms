@@ -8,7 +8,7 @@ import {
 	DocumentReferencesRepository,
 } from "../../../libs/repositories/index.js";
 import notifyCollection from "../../document-references/notify-collection.js";
-import detachDocuments from "../../releases/helpers/detach-documents.js";
+import detachDocuments from "../../requests/helpers/detach-documents.js";
 
 const input = z.object({ collectionKey: z.string().min(1) });
 

@@ -36,7 +36,7 @@ import {
 	collectionFieldSorts,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { getDocumentCreateActions } from "@/utils/releases";
+import { getDocumentCreateActions } from "@/utils/requests";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 const DocumentsPage: Component = () => {
@@ -106,11 +106,11 @@ const DocumentsPage: Component = () => {
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collectionData()),
 	);
-	//* requested documents are listed through their create requests, which need release access
+	//* requested documents are listed through their create requests, which need request access
 	const canSeeRequests = createMemo(
 		() =>
 			collectionData()?.mode === "multiple" &&
-			userStore.get.hasPermission([Permissions.ReleasesRead]).all,
+			userStore.get.hasPermission([Permissions.RequestsRead]).all,
 	);
 	const getFilterFields = createMemo(() =>
 		documentFilterPanelFields(collectionData(), {
@@ -122,7 +122,7 @@ const DocumentsPage: Component = () => {
 			? [
 					{
 						key: "requests",
-						label: T()("releases.filter.requests"),
+						label: T()("requests.filter.requests"),
 						filters: { pending: { value: true, operator: "=" } },
 					},
 				]

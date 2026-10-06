@@ -5,36 +5,36 @@ import DashboardCard from "@/components/DashboardCard/DashboardCard";
 import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import api from "@/services/api";
 import T from "@/translations";
-import { getReleaseListRoute } from "@/utils/releases";
+import { getRequestListRoute } from "@/utils/requests";
 
 const PublishingWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Queries
-	const overview = api.releases.useGetOverview({ queryParams: {} });
+	const overview = api.requests.useGetOverview({ queryParams: {} });
 
 	// ----------------------------------------
 	// Memos
 	const stats = createMemo(() => [
 		{
 			key: "pending",
-			label: T()("releases.state.pending"),
+			label: T()("requests.state.pending"),
 			value: overview.data?.data.publish.awaitingApproval,
 			dot: "bg-warning",
-			href: getReleaseListRoute("publish", "pending"),
+			href: getRequestListRoute("publish", "pending"),
 		},
 		{
 			key: "scheduled",
 			label: T()("common.status.scheduled"),
 			value: overview.data?.data.publish.scheduled,
 			dot: "bg-purple",
-			href: getReleaseListRoute("publish", "scheduled"),
+			href: getRequestListRoute("publish", "scheduled"),
 		},
 		{
 			key: "failed",
 			label: T()("common.status.failed"),
 			value: overview.data?.data.publish.failed,
 			dot: "bg-danger",
-			href: getReleaseListRoute("publish", "failed"),
+			href: getRequestListRoute("publish", "failed"),
 		},
 	]);
 
@@ -43,7 +43,7 @@ const PublishingWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	return (
 		<DashboardCard
 			title={T()("home.widget.publishing.label")}
-			href="/lucid/releases"
+			href="/lucid/requests"
 			padding="md"
 		>
 			<ul class="grid grid-cols-1 gap-2 @lg:grid-cols-3">

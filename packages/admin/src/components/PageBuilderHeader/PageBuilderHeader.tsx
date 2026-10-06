@@ -31,8 +31,8 @@ import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getDocumentEnvironmentStatus } from "@/utils/document-environment-status";
 import helpers from "@/utils/helpers";
-import { getDocumentProposals } from "@/utils/releases";
-import { getDocumentRoute, getReleaseRoute } from "@/utils/route-helpers";
+import { getDocumentProposals } from "@/utils/requests";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import { AutoSaveStatusPill } from "./parts/AutoSaveStatusPill";
 import { DocumentActions } from "./parts/DocumentActions";
@@ -56,8 +56,8 @@ export const PageBuilderHeader: Component<{
 	trailingBreadcrumbs?: Accessor<Array<HeaderBreadcrumb> | undefined>;
 	/** Toggles the side-by-side view. Left out where it isn't available. */
 	comparison?: { open: Accessor<boolean>; toggle: () => void };
-	/** The release that owns the proposal being edited. */
-	releaseLink?: string;
+	/** The request that owns the proposal being edited. */
+	requestLink?: string;
 	currentViewLabel?: Accessor<string | undefined>;
 	state: {
 		collection: Accessor<Collection | undefined>;
@@ -95,7 +95,7 @@ export const PageBuilderHeader: Component<{
 	// -------------------------------
 	// Queries & Mutations
 	const createPreview = api.documents.useCreatePreview();
-	const proposals = api.releases.useGetMultiple({
+	const proposals = api.requests.useGetMultiple({
 		queryParams: {
 			filters: {
 				status: () => "open",
@@ -107,7 +107,7 @@ export const PageBuilderHeader: Component<{
 		enabled: () =>
 			props.mode === "edit" &&
 			props.state.documentID() !== undefined &&
-			userStore.get.hasPermission([Permissions.ReleasesRead]).all,
+			userStore.get.hasPermission([Permissions.RequestsRead]).all,
 	});
 
 	// ----------------------------------
@@ -266,7 +266,7 @@ export const PageBuilderHeader: Component<{
 			});
 		}
 
-		for (const { release, document } of getDocumentProposals(
+		for (const { request, document } of getDocumentProposals(
 			proposals.data?.data ?? [],
 			{
 				collectionKey: props.state.collectionKey(),
@@ -274,11 +274,11 @@ export const PageBuilderHeader: Component<{
 			},
 		)) {
 			options.push({
-				label: release.title,
+				label: request.title,
 				type: "proposal",
-				compareKey: `proposal:${release.id}`,
+				compareKey: `proposal:${request.id}`,
 				disabled: false,
-				location: getReleaseRoute({ releaseId: release.id, content: document }),
+				location: getRequestRoute({ requestId: request.id, content: document }),
 			});
 		}
 
@@ -337,12 +337,12 @@ export const PageBuilderHeader: Component<{
 			const reviewRequired =
 				publishReview?.targets.includes(environment.key) === true;
 
-			//* starting a release only needs edit access, approving and releasing are checked later
+			//* starting a request only needs edit access, approving and completing are checked later
 			const canPublish = userStore.get.hasPermission([
 				environment.permissions.publish,
 			]).all;
 			const canCompose = userStore.get.hasPermission([
-				Permissions.ReleasesRead,
+				Permissions.RequestsRead,
 				collection.permissions.update,
 			]).all;
 
@@ -363,7 +363,7 @@ export const PageBuilderHeader: Component<{
 								(requiredTarget) =>
 									environmentLabels.get(requiredTarget) || requiredTarget,
 							);
-			//* anything stopping a direct publish sends the document to a release instead, which
+			//* anything stopping a direct publish sends the document to a request instead, which
 			//* can include the required targets and shows the workflow stage to move on
 			const action: ReleaseTriggerOption["action"] =
 				reviewRequired ||
@@ -472,8 +472,8 @@ export const PageBuilderHeader: Component<{
 	const showViewSelector = createMemo(() => {
 		const collection = props.state.collection();
 		if (!collection) return false;
-		//* a requested document only exists as its create release's proposal
-		if (props.state.document()?.createReleaseId) return false;
+		//* a requested document only exists as its create request's proposal
+		if (props.state.document()?.createRequestId) return false;
 
 		const environments = collection.publishing.targets ?? [];
 
@@ -841,13 +841,13 @@ export const PageBuilderHeader: Component<{
 									props.state.ui.showDeleteButton?.() ||
 									props.state.ui.showDuplicateButton?.() ||
 									props.actions.requestAlignment !== undefined ||
-									props.releaseLink !== undefined ||
+									props.requestLink !== undefined ||
 									showCopyPreview()
 								}
 							>
 								<DocumentActions
 									collectionSingularName={actionCollectionSingularName()}
-									releaseLink={props.releaseLink}
+									requestLink={props.requestLink}
 									duplicate={
 										props.state.ui.showDuplicateButton?.()
 											? {

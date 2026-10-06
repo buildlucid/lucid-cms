@@ -193,8 +193,8 @@ export const createUserPreferencesStore = (
 			return state.preferences.navigationGroups[groupKey];
 		},
 
-		getReleaseActivityFilters() {
-			return state.preferences.releaseActivityFilters;
+		getRequestActivityFilters() {
+			return state.preferences.requestActivityFilters;
 		},
 
 		getSectionOpen(section: SectionPreferenceKey) {
@@ -331,9 +331,9 @@ export const createUserPreferencesStore = (
 			});
 		},
 
-		setReleaseActivityFilters(filters: string[]) {
+		setRequestActivityFilters(filters: string[]) {
 			updatePreferences((preferenceState) => {
-				preferenceState.preferences.releaseActivityFilters = filters;
+				preferenceState.preferences.requestActivityFilters = filters;
 			});
 		},
 

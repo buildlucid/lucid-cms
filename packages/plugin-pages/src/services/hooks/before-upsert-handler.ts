@@ -25,8 +25,8 @@ const MAX_DUPLICATE_SLUG_ATTEMPTS = 50;
 
 /**
  * Validates the page's parent and slug, then sets its fullSlug. Writes owned
- * by a release read parents from the release's own versions, falling back to
- * latest, and never compare against other releases.
+ * by a request read parents from the request's own versions, falling back to
+ * latest, and never compare against other requests.
  */
 const beforeUpsertHandler =
 	(
@@ -53,7 +53,7 @@ const beforeUpsertHandler =
 		});
 		const scope = resolveRouteScope({
 			versionType: data.versionType,
-			release: meta.release,
+			request: meta.request,
 			collectionKey: meta.collectionKey,
 		});
 

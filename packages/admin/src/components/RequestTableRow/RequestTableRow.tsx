@@ -1,0 +1,86 @@
+import type { Collection, RequestSummary } from "@types";
+import type { Component } from "solid-js";
+import Table from "@/components/Table/Table";
+import TableUserStackCell from "@/components/TableUserStackCell/TableUserStackCell";
+import T from "@/translations";
+import helpers from "@/utils/helpers";
+import { getRequestState, requestStates } from "@/utils/requests";
+import { getRequestRoute } from "@/utils/route-helpers";
+
+const RequestTableRow: Component<{
+	index: number;
+	request: RequestSummary;
+	collections: Collection[];
+}> = (props) => {
+	// ----------------------------------------
+	// Render
+	return (
+		<Table.Row
+			index={props.index}
+			actions={[
+				{
+					label: T()("requests.open"),
+					type: "link",
+					icon: "eye",
+					href: getRequestRoute({ requestId: props.request.id }),
+				},
+			]}
+		>
+			<Table.Cell column="title" minWidth={280}>
+				<div class="min-w-0">
+					<p class="truncate text-sm text-title">{props.request.title}</p>
+					<p class="truncate text-xs text-body">
+						{T()("requests.documents.count", {
+							count: props.request.documents.length,
+						})}
+						{" · "}
+						{[
+							...new Set(
+								props.request.documents.map((document) =>
+									helpers.getLocaleValue({
+										value: props.collections.find(
+											(collection) => collection.key === document.collectionKey,
+										)?.details.labels.plural,
+										fallback: document.collectionKey,
+									}),
+								),
+							),
+						].join(", ")}
+					</p>
+				</div>
+			</Table.Cell>
+			<Table.Pill
+				column="type"
+				text={
+					props.request.type === "create"
+						? T()("requests.type.create")
+						: T()("requests.type.publish")
+				}
+				variant={props.request.type === "create" ? "blue-subtle" : "outline"}
+				tooltip={
+					props.request.type === "create"
+						? T()("requests.type.create.tooltip")
+						: T()("requests.type.publish.tooltip")
+				}
+			/>
+			<Table.Pill
+				column="status"
+				text={requestStates[getRequestState(props.request)].label()}
+				variant={requestStates[getRequestState(props.request)].pill}
+			/>
+			<TableUserStackCell column="reviewers" users={props.request.reviewers} />
+			<TableUserStackCell
+				column="createdBy"
+				users={props.request.createdBy ? [props.request.createdBy] : []}
+			/>
+			<Table.Date
+				column="scheduledAt"
+				date={props.request.scheduledAt}
+				includeTime={true}
+			/>
+			<Table.Date column="updatedAt" date={props.request.updatedAt} />
+		</Table.Row>
+	);
+};
+
+export default RequestTableRow;

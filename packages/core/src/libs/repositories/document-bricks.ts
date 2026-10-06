@@ -159,7 +159,7 @@ export default class DocumentBricksRepository extends DynamicRepository<LucidBri
 	}
 	/**
 	 * Finds the live versions (latest and environments) whose relation fields
-	 * point at a collection's documents. Revisions and release snapshots keep
+	 * point at a collection's documents. Revisions and request snapshots keep
 	 * their authored references.
 	 */
 	async selectRelationReferenceVersions(

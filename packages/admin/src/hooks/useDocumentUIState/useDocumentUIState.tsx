@@ -9,7 +9,7 @@ import type api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import brickHelpers from "@/utils/brick-helpers";
-import { getDocumentCreateActions } from "@/utils/releases";
+import { getDocumentCreateActions } from "@/utils/requests";
 import { createDocumentLocalization } from "../useDocumentLocalization/useDocumentLocalization";
 import useUserPreference from "../useUserPreference/useUserPreference";
 
@@ -121,7 +121,7 @@ export function useDocumentUIState(props: {
 		return props.collection()?.autoSave;
 	});
 
-	/** Proposals follow their release's edit access, which also covers people requesting a document. */
+	/** Proposals follow their request's edit access, which also covers people requesting a document. */
 	const hasUpdateAccess = createMemo(() => {
 		if (props.version() === "proposal")
 			return props.proposalEditable?.() === true;

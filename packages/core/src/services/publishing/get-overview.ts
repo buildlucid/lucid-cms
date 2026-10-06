@@ -6,7 +6,7 @@ import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { LucidAuth } from "../../types/hono.js";
 import type { PublishingOverview } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import getReleaseOverview from "../releases/get-overview.js";
+import getRequestOverview from "../requests/get-overview.js";
 
 const getOverview: ServiceFn<
 	[
@@ -80,14 +80,14 @@ const getOverview: ServiceFn<
 		collectionOverviews.push(result.data);
 	}
 
-	const releasesRes = await getReleaseOverview(context, { user: data.user });
-	if (releasesRes.error) return releasesRes;
+	const requestsRes = await getRequestOverview(context, { user: data.user });
+	if (requestsRes.error) return requestsRes;
 
 	return {
 		error: undefined,
 		data: {
 			collections: collectionOverviews,
-			releases: releasesRes.data,
+			requests: requestsRes.data,
 		},
 	};
 };

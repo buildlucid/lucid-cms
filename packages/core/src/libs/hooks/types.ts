@@ -50,9 +50,9 @@ export type HookExecutionKindMap = {
 	documentWorkflows: {
 		afterUpdate: "effect";
 	};
-	releases: {
+	requests: {
 		check: "transform";
-		published: "effect";
+		completed: "effect";
 		documentRemoved: "effect";
 	};
 
@@ -65,20 +65,20 @@ export type HookExecutionKindMap = {
 	};
 };
 
-/** The release that owns the version being written, with every version it has captured. */
-export type DocumentHookRelease = {
+/** The request that owns the version being written, with every version it has captured. */
+export type DocumentHookRequest = {
 	id: number;
 	documents: Array<{
 		collectionKey: string;
 		documentId: number;
 		/** Latest for a proposal, or the environment a snapshot came from. */
 		source: string;
-		/** The release's proposal or snapshot for the document. */
+		/** The request's proposal or snapshot for the document. */
 		versionId: number;
 	}>;
 };
 
-type ReleaseHookMeta = {
+type RequestHookMeta = {
 	userId: number | null;
 };
 
@@ -93,8 +93,8 @@ type DocumentHookMeta = CollectionHookMeta & {
 
 type DocumentUserHookMeta = DocumentHookMeta & {
 	userId: number | null;
-	/** Set when the version written belongs to a release, eg. a proposal edit or capture. */
-	release?: DocumentHookRelease;
+	/** Set when the version written belongs to a request, eg. a proposal edit or capture. */
+	request?: DocumentHookRequest;
 };
 
 export type DocumentBeforeUpsertHookOrigin =
@@ -159,7 +159,7 @@ export type DocumentVersionPromoteHookData = {
 	versionType: Exclude<DocumentVersionType, "revision">;
 };
 
-/** A release cloned a version into its own proposal or snapshot. */
+/** A request cloned a version into its own proposal or snapshot. */
 export type DocumentVersionCaptureHookData = {
 	documentId: number;
 	versionId: number;
@@ -168,21 +168,21 @@ export type DocumentVersionCaptureHookData = {
 	sourceVersionType: Exclude<DocumentVersionType, "revision">;
 };
 
-/** A reason a release cannot be approved or published yet. Hook blockers carry their own message. */
-export type ReleaseCheckBlocker = {
-	releaseDocumentId: number;
+/** A reason a request cannot be approved or published yet. Hook blockers carry their own message. */
+export type RequestCheckBlocker = {
+	requestDocumentId: number;
 	target?: string;
 	message: string;
 };
 
-/** A release has published every document to its targets. Each entry lists the new environment versions. */
-export type ReleasePublishedHookData = {
-	release: {
+/** A request has published every document to its targets. Each entry lists the new environment versions. */
+export type RequestCompletedHookData = {
+	request: {
 		id: number;
 		revision: number;
 	};
 	documents: Array<{
-		releaseDocumentId: number;
+		requestDocumentId: number;
 		collectionKey: string;
 		documentId: number;
 		source: string;
@@ -190,30 +190,30 @@ export type ReleasePublishedHookData = {
 	}>;
 };
 
-/** A document left an open release. The release lists what it still holds. */
-export type ReleaseDocumentRemovedHookData = {
-	release: DocumentHookRelease;
+/** A document left an open request. The request lists what it still holds. */
+export type RequestDocumentRemovedHookData = {
+	request: DocumentHookRequest;
 	collectionKey: string;
 	documentId: number;
 };
 
-/** The release being checked. Hooks push blockers for documents they cannot release as they are. */
-export type ReleaseCheckHookData = {
-	release: {
+/** The request being checked. Hooks push blockers for documents they cannot request as they are. */
+export type RequestCheckHookData = {
+	request: {
 		id: number;
 		revision: number;
 	};
 	documents: Array<{
-		releaseDocumentId: number;
+		requestDocumentId: number;
 		collectionKey: string;
 		documentId: number;
 		/** Latest for a proposal, or the environment a snapshot came from. */
 		source: string;
-		/** The content that would be released. Null when it is unavailable. */
+		/** The content that would be completed. Null when it is unavailable. */
 		versionId: number | null;
 		targets: string[];
 	}>;
-	blockers: ReleaseCheckBlocker[];
+	blockers: RequestCheckBlocker[];
 };
 
 export type DocumentWorkflowAfterUpdateHookData = {
@@ -263,8 +263,8 @@ export type TransformHookDataMap = {
 		beforeUpsert: DocumentBeforeUpsertHookData;
 		afterFetch: DocumentAfterFetchHookData;
 	};
-	releases: {
-		check: ReleaseCheckHookData;
+	requests: {
+		check: RequestCheckHookData;
 	};
 };
 
@@ -369,17 +369,17 @@ export type HookServiceHandlers = {
 			undefined
 		>;
 	};
-	releases: {
+	requests: {
 		check: HookHandler<
-			TransformHookPayload<Record<string, never>, ReleaseCheckHookData>,
-			ReleaseCheckHookData | undefined
+			TransformHookPayload<Record<string, never>, RequestCheckHookData>,
+			RequestCheckHookData | undefined
 		>;
-		published: HookHandler<
-			EffectHookPayload<ReleaseHookMeta, ReleasePublishedHookData>,
+		completed: HookHandler<
+			EffectHookPayload<RequestHookMeta, RequestCompletedHookData>,
 			undefined
 		>;
 		documentRemoved: HookHandler<
-			EffectHookPayload<ReleaseHookMeta, ReleaseDocumentRemovedHookData>,
+			EffectHookPayload<RequestHookMeta, RequestDocumentRemovedHookData>,
 			undefined
 		>;
 	};
@@ -470,10 +470,10 @@ export type DocumentWorkflowHooks = LucidHook<
 	"afterUpdate"
 >;
 
-export type ReleaseHooks =
-	| LucidHook<"releases", "check">
-	| LucidHook<"releases", "published">
-	| LucidHook<"releases", "documentRemoved">;
+export type RequestHooks =
+	| LucidHook<"requests", "check">
+	| LucidHook<"requests", "completed">
+	| LucidHook<"requests", "documentRemoved">;
 
 export type MediaHooks =
 	| LucidHook<"media", "afterChange">
@@ -486,5 +486,5 @@ export type MediaHooks =
 export type AllHooks =
 	| DocumentHooks
 	| DocumentWorkflowHooks
-	| ReleaseHooks
+	| RequestHooks
 	| MediaHooks;

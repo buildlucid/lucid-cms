@@ -9,7 +9,7 @@ import { Permissions } from "@/constants/permissions";
 import type { UseDocumentMutations } from "@/hooks/useDocumentMutations/useDocumentMutations";
 import userStore from "@/store/userStore/userStore";
 import { DocumentDetails } from "./parts/DocumentDetails";
-import { DocumentReleases } from "./parts/DocumentReleases";
+import { DocumentRequests } from "./parts/DocumentRequests";
 import { Workflow } from "./parts/Workflow";
 
 export const DocumentSidebar: Component<{
@@ -21,7 +21,7 @@ export const DocumentSidebar: Component<{
 	documentId: Accessor<number | undefined>;
 	disabled: Accessor<boolean>;
 	mutations: UseDocumentMutations;
-	releaseContext?: boolean;
+	requestContext?: boolean;
 }> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -31,10 +31,10 @@ export const DocumentSidebar: Component<{
 			props.documentId() !== undefined &&
 			Boolean(props.document()?.workflow),
 	);
-	const hasPendingReleases = createMemo(
+	const hasPendingRequests = createMemo(
 		() =>
-			!props.releaseContext &&
-			userStore.get.hasPermission([Permissions.ReleasesRead]).all &&
+			!props.requestContext &&
+			userStore.get.hasPermission([Permissions.RequestsRead]).all &&
 			props.documentId() !== undefined,
 	);
 
@@ -51,16 +51,16 @@ export const DocumentSidebar: Component<{
 				disabled={props.disabled}
 				mutations={props.mutations}
 			/>
-			<Show when={hasWorkflow() && hasPendingReleases()}>
+			<Show when={hasWorkflow() && hasPendingRequests()}>
 				<div class="border-t border-border" aria-hidden="true" />
 			</Show>
-			<Show when={hasPendingReleases()}>
-				<DocumentReleases
+			<Show when={hasPendingRequests()}>
+				<DocumentRequests
 					collectionKey={props.collectionKey}
 					documentId={props.documentId}
 				/>
 			</Show>
-			<Show when={hasWorkflow() || hasPendingReleases()}>
+			<Show when={hasWorkflow() || hasPendingRequests()}>
 				<div class="border-t border-border" aria-hidden="true" />
 			</Show>
 			<DocumentDetails

@@ -117,9 +117,9 @@ const documentResponseBaseSchema = z.object({
 		description: "Whether the document has been deleted",
 		example: false,
 	}),
-	createReleaseId: z.number().nullable().meta({
+	createRequestId: z.number().nullable().meta({
 		description:
-			"The open create release requesting this document. Null once the document is created",
+			"The open create request requesting this document. Null once the document is created",
 		example: null,
 	}),
 	createdBy: z.number().nullable(),
@@ -248,7 +248,7 @@ export const controllerSchemas = {
 	requestCreation: {
 		body: z.object({
 			title: z.string().trim().min(1).max(200).meta({
-				description: "The title of the create release",
+				description: "The title of the create request",
 				example: "New about page",
 			}),
 			description: richTextJSONSchema.nullable().optional(),
@@ -281,8 +281,8 @@ export const controllerSchemas = {
 				description: "The requested document's ID",
 				example: 1,
 			}),
-			releaseId: z.number().meta({
-				description: "The create release that will create the document",
+			requestId: z.number().meta({
+				description: "The create request that will create the document",
 				example: 1,
 			}),
 		}),
@@ -724,7 +724,7 @@ export const controllerSchemas = {
 					}),
 					"filter[pending]": queryString.schema.filter(false, {
 						description:
-							"List requested documents waiting on their create release instead of created ones. Requested documents are read from their proposal",
+							"List requested documents waiting on their create request instead of created ones. Requested documents are read from their proposal",
 						example: "true",
 					}),
 					"filter[workflowStage]": queryString.schema.filter(false, {
@@ -735,7 +735,7 @@ export const controllerSchemas = {
 					}),
 					"filter[envStatus.key]": queryString.schema.filter(false, {
 						description:
-							"Filter by an environment's release status: unreleased, out-of-sync or in-sync",
+							"Filter by an environment's request status: unreleased, out-of-sync or in-sync",
 						example: "out-of-sync",
 					}),
 					"filter[_customFieldKey]": queryString.schema.filter(true, {

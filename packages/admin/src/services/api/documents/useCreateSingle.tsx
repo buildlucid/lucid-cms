@@ -60,7 +60,7 @@ const useCreateSingle = (props: UseCreateSingleProps) => {
 				}),
 			};
 		},
-		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.requests.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

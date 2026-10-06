@@ -14,8 +14,8 @@ import { sameNumericSet } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import getUpdateContext from "../documents-versions/helpers/get-update-context.js";
-import invalidateReleases from "../releases/helpers/invalidate-releases.js";
-import recordProposalActivity from "../releases/helpers/record-proposal-activity.js";
+import invalidateRequests from "../requests/helpers/invalidate-requests.js";
+import recordProposalActivity from "../requests/helpers/record-proposal-activity.js";
 import {
 	getWorkflowConfig,
 	resolveEffectiveWorkflowStage,
@@ -95,7 +95,7 @@ const updateSingle: ServiceFn<
 	);
 	if (versionRes.error) return versionRes;
 
-	//* latest unless a proposal is given, which needs edit access to its release
+	//* latest unless a proposal is given, which needs edit access to its request
 	const versionId = versionRes.data.id;
 	const editableRes = await getUpdateContext(context, {
 		collectionKey: data.collectionKey,
@@ -238,7 +238,7 @@ const updateSingle: ServiceFn<
 	}
 
 	if (stageChanged) {
-		const invalidateRes = await invalidateReleases(context, {
+		const invalidateRes = await invalidateRequests(context, {
 			collectionKey: data.collectionKey,
 			documentIds: [data.documentId],
 			versionId,

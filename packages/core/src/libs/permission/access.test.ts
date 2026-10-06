@@ -73,7 +73,7 @@ test("role grants put content and agents before administration and destructive a
 	expect(groups.map((value) => value.key)).toEqual([
 		"documents:pages",
 		"media_permissions",
-		"release_permissions",
+		"request_permissions",
 		"agents:seo",
 		"ai_permissions",
 		"users_permissions",

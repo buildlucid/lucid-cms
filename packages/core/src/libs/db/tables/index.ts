@@ -49,11 +49,11 @@ import { oauthRefreshTokensTable } from "./oauth-refresh-tokens.js";
 import { optionsTable } from "./options.js";
 import { previewSessionsTable } from "./preview-sessions.js";
 import { processedImagesTable } from "./processed-images.js";
-import { releaseDocumentsTable } from "./release-documents.js";
-import { releaseEventsTable } from "./release-events.js";
-import { releaseReviewersTable } from "./release-reviewers.js";
-import { releaseTargetsTable } from "./release-targets.js";
-import { releasesTable } from "./releases.js";
+import { requestDocumentsTable } from "./request-documents.js";
+import { requestEventsTable } from "./request-events.js";
+import { requestReviewersTable } from "./request-reviewers.js";
+import { requestTargetsTable } from "./request-targets.js";
+import { requestsTable } from "./requests.js";
 import { rolePermissionsTable } from "./role-permissions.js";
 import { rolesTable } from "./roles.js";
 import { securityAuditLogsTable } from "./security-audit-logs.js";
@@ -115,11 +115,11 @@ export * from "./oauth-refresh-tokens.js";
 export * from "./options.js";
 export * from "./preview-sessions.js";
 export * from "./processed-images.js";
-export * from "./release-documents.js";
-export * from "./release-events.js";
-export * from "./release-reviewers.js";
-export * from "./release-targets.js";
-export * from "./releases.js";
+export * from "./request-documents.js";
+export * from "./request-events.js";
+export * from "./request-reviewers.js";
+export * from "./request-targets.js";
+export * from "./requests.js";
 export * from "./role-permissions.js";
 export * from "./roles.js";
 export * from "./security-audit-logs.js";
@@ -148,11 +148,11 @@ export const coreTableDefinitions = [
 	collectionsTable,
 	documentBricksTable,
 	documentIdentitiesTable,
-	releaseDocumentsTable,
-	releaseEventsTable,
-	releaseReviewersTable,
-	releaseTargetsTable,
-	releasesTable,
+	requestDocumentsTable,
+	requestEventsTable,
+	requestReviewersTable,
+	requestTargetsTable,
+	requestsTable,
 	documentVersionsTable,
 	documentVersionIdentitiesTable,
 	documentWorkflowAssigneesTable,

@@ -114,7 +114,7 @@ const createRelationVersionTypeResolver = (props: {
  *
  * The document being fetched and the documents it references do not always use
  * the same version type. Latest documents hydrate latest refs, revisions keep
- * the historical document body but still preview refs from latest, and release
+ * the historical document body but still preview refs from latest, and request
  * proposals and snapshots also hydrate against latest.
  *
  * The returned `resolveVersionType` is per related collection. That lets source

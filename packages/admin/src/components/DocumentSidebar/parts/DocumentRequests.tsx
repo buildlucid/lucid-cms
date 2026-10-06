@@ -1,0 +1,58 @@
+import { FaSolidSquareArrowUpRight } from "solid-icons/fa";
+import { type Accessor, type Component, Show } from "solid-js";
+import DocumentSidebarSection from "@/components/DocumentSidebarSection/DocumentSidebarSection";
+import RequestCompactList from "@/components/RequestCompactList/RequestCompactList";
+import ViewAllLink from "@/components/ViewAllLink/ViewAllLink";
+import { Permissions } from "@/constants/permissions";
+import api from "@/services/api";
+import userStore from "@/store/userStore/userStore";
+import T from "@/translations";
+
+export const DocumentRequests: Component<{
+	collectionKey: Accessor<string>;
+	documentId: Accessor<number | undefined>;
+}> = (props) => {
+	// ----------------------------------------
+	// Memos
+	const enabled = () =>
+		props.documentId() !== undefined &&
+		userStore.get.hasPermission([Permissions.RequestsRead]).all;
+
+	// ----------------------------------------
+	// Queries
+	const requests = api.requests.useGetMultiple({
+		queryParams: {
+			filters: {
+				status: () => "open",
+				collectionKey: props.collectionKey,
+				documentId: props.documentId,
+			},
+			perPage: 5,
+		},
+		enabled,
+	});
+
+	// ----------------------------------------
+	// Render
+	return (
+		<Show when={enabled()}>
+			<DocumentSidebarSection
+				title={T()("requests.title")}
+				icon={<FaSolidSquareArrowUpRight size={12} />}
+				preferenceKey="pageBuilder.sidebar.requests"
+				meta={requests.data?.meta.total || undefined}
+			>
+				<RequestCompactList
+					requests={requests.data?.data ?? []}
+					loading={requests.isLoading}
+				/>
+				<Show when={(requests.data?.data.length ?? 0) > 0}>
+					<ViewAllLink
+						class="mt-2 -ms-1 w-fit"
+						href={`/lucid/requests?filter[collectionKey]=${encodeURIComponent(props.collectionKey())}&filter[documentId]=${props.documentId()}`}
+					/>
+				</Show>
+			</DocumentSidebarSection>
+		</Show>
+	);
+};

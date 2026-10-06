@@ -4,7 +4,7 @@ import {
 	DocumentsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import detachDocuments from "../../releases/helpers/detach-documents.js";
+import detachDocuments from "../../requests/helpers/detach-documents.js";
 import nullifyDocumentReferences from "../nullify-document-references.js";
 
 /** Permanently removes document rows and their identities. Callers own the transaction and lifecycle actions. */

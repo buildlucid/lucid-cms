@@ -99,12 +99,12 @@ const createDocumentTable = (props: {
 						},
 					},
 					{
-						name: "create_release_id",
+						name: "create_request_id",
 						source: "core",
 						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
-							table: "lucid_releases",
+							table: "lucid_requests",
 							column: "id",
 							onDelete: "restrict",
 						},
@@ -168,7 +168,7 @@ const createDocumentTable = (props: {
 					buildSchemaIndex({
 						db: props.db,
 						tableName,
-						columns: ["create_release_id"],
+						columns: ["create_request_id"],
 						source: "core",
 					}),
 					buildSchemaIndex({

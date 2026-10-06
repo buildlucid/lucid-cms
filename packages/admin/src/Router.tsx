@@ -86,8 +86,8 @@ const SystemJobsRoute = lazyPage(
 const EmailListRoute = lazyPage(
 	() => import("@/containers/EmailsPage/EmailsPage"),
 );
-const ReleasesListRoute = lazyPage(
-	() => import("@/containers/ReleasesPage/ReleasesPage"),
+const RequestsListRoute = lazyPage(
+	() => import("@/containers/RequestsPage/RequestsPage"),
 );
 const PublishingOverviewRoute = lazyPage(
 	() => import("@/containers/PublishingOverviewPage/PublishingOverviewPage"),
@@ -107,11 +107,11 @@ const CollectionDocumentPageBuilderRoute = lazyPage(
 const CollectionsDocumentsHistoryRoute = lazyPage(
 	() => import("@/containers/DocumentHistoryPage/DocumentHistoryPage"),
 );
-const ReleaseRoute = lazyPage(
-	() => import("@/containers/ReleasePage/ReleasePage"),
+const RequestRoute = lazyPage(
+	() => import("@/containers/RequestPage/RequestPage"),
 );
-const ReleaseProposalRoute = lazyPage(
-	() => import("@/containers/ReleaseContentPage/ReleaseContentPage"),
+const RequestProposalRoute = lazyPage(
+	() => import("@/containers/RequestContentPage/RequestContentPage"),
 );
 
 const preloadRoutes =
@@ -251,35 +251,35 @@ const AppRouter: Component = () => {
 						path="/publishing"
 						preload={preloadRoutes(PublishingOverviewRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.ReleasesRead}>
+							<PermissionGuard permission={Permissions.RequestsRead}>
 								<PublishingOverviewRoute />
 							</PermissionGuard>
 						)}
 					/>
 					<Route
-						path="/releases"
-						preload={preloadRoutes(ReleasesListRoute)}
+						path="/requests"
+						preload={preloadRoutes(RequestsListRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.ReleasesRead}>
-								<ReleasesListRoute />
+							<PermissionGuard permission={Permissions.RequestsRead}>
+								<RequestsListRoute />
 							</PermissionGuard>
 						)}
 					/>
 					<Route
-						path="/releases/:releaseId"
-						preload={preloadRoutes(ReleaseRoute)}
+						path="/requests/:requestId"
+						preload={preloadRoutes(RequestRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.ReleasesRead}>
-								<ReleaseRoute />
+							<PermissionGuard permission={Permissions.RequestsRead}>
+								<RequestRoute />
 							</PermissionGuard>
 						)}
 					/>
 					<Route
-						path="/releases/:releaseId/content/:collectionKey/:documentId"
-						preload={preloadRoutes(ReleaseProposalRoute)}
+						path="/requests/:requestId/content/:collectionKey/:documentId"
+						preload={preloadRoutes(RequestProposalRoute)}
 						component={() => (
-							<PermissionGuard permission={Permissions.ReleasesRead}>
-								<ReleaseProposalRoute />
+							<PermissionGuard permission={Permissions.RequestsRead}>
+								<RequestProposalRoute />
 							</PermissionGuard>
 						)}
 					/>

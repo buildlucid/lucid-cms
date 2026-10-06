@@ -18,8 +18,8 @@ import checkDuplicateOrder from "../documents-bricks/checks/check-duplicate-orde
 import checkValidateBricksFields from "../documents-bricks/checks/check-validate-bricks-fields.js";
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import deleteDocumentBricks from "../documents-bricks/delete-multiple.js";
-import invalidateReleases from "../releases/helpers/invalidate-releases.js";
-import recordProposalActivity from "../releases/helpers/record-proposal-activity.js";
+import invalidateRequests from "../requests/helpers/invalidate-requests.js";
+import recordProposalActivity from "../requests/helpers/record-proposal-activity.js";
 import getUpdateContext from "./helpers/get-update-context.js";
 
 const updateSingle: ServiceFn<
@@ -30,7 +30,7 @@ const updateSingle: ServiceFn<
 			authUser?: LucidUser;
 			documentId: number;
 			versionId: number;
-			/** Callers that already hold the document's write claim, eg. release syncs. */
+			/** Callers that already hold the document's write claim, eg. request syncs. */
 			skipDocumentWriteClaims?: boolean;
 
 			bricks?: Array<BrickInputSchema>;
@@ -81,7 +81,7 @@ const updateSingle: ServiceFn<
 						collectionKey: data.collectionKey,
 						userId: data.userId,
 						collectionTableNames: updateContextRes.data.tableNames,
-						release: updateContextRes.data.release,
+						request: updateContextRes.data.request,
 						execution: {
 							mode: "upsert",
 							action: "update",
@@ -150,7 +150,7 @@ const updateSingle: ServiceFn<
 						collectionKey: data.collectionKey,
 						userId: data.userId,
 						collectionTableNames: updateContextRes.data.tableNames,
-						release: updateContextRes.data.release,
+						request: updateContextRes.data.request,
 					},
 					data: {
 						documentId: data.documentId,
@@ -195,7 +195,7 @@ const updateSingle: ServiceFn<
 				if (documentUpdate.error) return documentUpdate;
 			}
 
-			const invalidateRes = await invalidateReleases(context, {
+			const invalidateRes = await invalidateRequests(context, {
 				collectionKey: data.collectionKey,
 				documentIds: [data.documentId],
 				...(updateContextRes.data.versionType === "latest"

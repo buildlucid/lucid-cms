@@ -38,7 +38,7 @@ const getMultiple: ServiceFn<
 			collectionKey: string;
 			version: DocumentVersionType;
 			query: GetMultipleQueryParams;
-			/** Listing requested documents needs the same release access as reading their requests. */
+			/** Listing requested documents needs the same request access as reading their requests. */
 			user: LucidUser;
 		},
 	],
@@ -62,7 +62,7 @@ const getMultiple: ServiceFn<
 		};
 	}
 
-	//* requested documents only exist as their create release's proposal, which latest lists can opt into
+	//* requested documents only exist as their create request's proposal, which latest lists can opt into
 	const pendingFilter = data.query.filter?.pending?.value;
 	const pending =
 		data.version === "latest" &&
@@ -74,7 +74,7 @@ const getMultiple: ServiceFn<
 		pending &&
 		!hasAccess({
 			user: data.user,
-			requiredPermissions: [Permissions.ReleasesRead],
+			requiredPermissions: [Permissions.RequestsRead],
 		})
 	) {
 		return {

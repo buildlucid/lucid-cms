@@ -6,8 +6,8 @@ import refreshVersionRoute from "./helpers/refresh-version-route.js";
 
 /**
  * Rebuilds the promoted version's route from its parent in the destination,
- * then its descendants there. Release publications are left to the published
- * hook, which handles every released page together. Promoting a
+ * then its descendants there. Request publications are left to the completed
+ * hook, which handles every completed page together. Promoting a
  * route-segment document rebuilds the pages that use it.
  */
 const versionPromoteHandler =
@@ -19,7 +19,7 @@ const versionPromoteHandler =
 			options,
 			collectionKey: meta.collectionKey,
 		});
-		if (!targetCollectionRes.error && !meta.release) {
+		if (!targetCollectionRes.error && !meta.request) {
 			const refreshRes = await refreshVersionRoute(context, {
 				collection: targetCollectionRes.data,
 				collectionInstance: meta.collection,

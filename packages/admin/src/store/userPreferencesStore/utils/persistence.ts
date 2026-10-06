@@ -10,16 +10,16 @@ export const BUILDER_STATE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 export const SECTION_PREFERENCE_KEYS = [
 	"history.inspector.contentSummary",
 	"history.inspector.documentPayload",
-	"history.inspector.releaseActivity",
+	"history.inspector.requestActivity",
 	"history.inspector.revisionRetention",
 	"history.inspector.versionDetails",
 	"pageBuilder.sidebar.documentDetails",
-	"pageBuilder.sidebar.releases",
+	"pageBuilder.sidebar.requests",
 	"pageBuilder.sidebar.workflow",
-	"release.sidebar.details",
-	"release.sidebar.reviewers",
-	"release.sidebar.schedule",
-	"release.sidebar.status",
+	"request.sidebar.details",
+	"request.sidebar.reviewers",
+	"request.sidebar.schedule",
+	"request.sidebar.status",
 	"agent.chat.details",
 ] as const;
 
@@ -68,8 +68,8 @@ export type UserPreferenceState = {
 		home: HomePreferenceState;
 		/** Open state of navigation groups, keyed by group key. Unset means open. */
 		navigationGroups: Record<string, boolean>;
-		/** Optional release activity shown, by filter key. Unset shows none. */
-		releaseActivityFilters?: string[];
+		/** Optional request activity shown, by filter key. Unset shows none. */
+		requestActivityFilters?: string[];
 		sections: Partial<Record<SectionPreferenceKey, boolean>>;
 		tables: Record<string, string[]>;
 	};
@@ -267,9 +267,9 @@ const normalizePreferenceState = (value: unknown): UserPreferenceState => {
 			}
 		}
 
-		if (isStringArray(preferences.releaseActivityFilters)) {
-			normalized.preferences.releaseActivityFilters =
-				preferences.releaseActivityFilters;
+		if (isStringArray(preferences.requestActivityFilters)) {
+			normalized.preferences.requestActivityFilters =
+				preferences.requestActivityFilters;
 		}
 
 		if (isObjectRecord(preferences.tables)) {

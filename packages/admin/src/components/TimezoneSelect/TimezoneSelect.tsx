@@ -4,9 +4,8 @@ import T from "@/translations";
 import {
 	getDefaultTimezone,
 	getSupportedTimezones,
-} from "@/utils/release-schedule";
+} from "@/utils/request-schedule";
 
-/** A searchable select of IANA timezones. */
 const TimezoneSelect: Component<{
 	id: string;
 	value: string;

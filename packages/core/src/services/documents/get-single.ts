@@ -13,7 +13,7 @@ import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getDocumentWorkflow from "../document-workflows/get-single.js";
 import getDocumentBricks from "../documents-bricks/get-multiple.js";
-import checkReleaseVersionAccess from "../releases/helpers/check-release-version-access.js";
+import checkRequestVersionAccess from "../requests/helpers/check-request-version-access.js";
 import collectDocumentRefTargets from "./helpers/collect-document-ref-targets.js";
 import resolveDocumentIncludes from "./helpers/resolve-document-includes.js";
 import resolveRelationVersionType from "./helpers/resolve-relation-version-type.js";
@@ -26,7 +26,7 @@ const getSingle: ServiceFn<
 			versionId?: number;
 			collectionKey: string;
 			query: GetSingleQueryParams;
-			/** Required to read release proposals and snapshots. */
+			/** Required to read request proposals and snapshots. */
 			authUser?: LucidUser;
 		},
 	],
@@ -37,7 +37,7 @@ const getSingle: ServiceFn<
 > = async (context, data) => {
 	const Document = new DocumentsRepository(context.db);
 
-	//* release proposals and snapshots are only addressable by their version ID
+	//* request proposals and snapshots are only addressable by their version ID
 	if (
 		data.version ===
 			constants.collectionBuilder.publishing.snapshotVersionType ||
@@ -113,7 +113,7 @@ const getSingle: ServiceFn<
 			constants.collectionBuilder.publishing.snapshotVersionType ||
 		versionType === constants.collectionBuilder.publishing.proposalVersionType
 	) {
-		const accessRes = await checkReleaseVersionAccess(context, {
+		const accessRes = await checkRequestVersionAccess(context, {
 			collectionKey: data.collectionKey,
 			documentId: data.id,
 			versionId,

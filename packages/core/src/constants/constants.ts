@@ -100,7 +100,7 @@ export default Object.freeze({
 			] as const,
 		},
 	},
-	releases: {
+	requests: {
 		maxDocuments: 100,
 	},
 	errors: {

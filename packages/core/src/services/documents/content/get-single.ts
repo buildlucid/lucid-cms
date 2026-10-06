@@ -90,14 +90,14 @@ const getSingle: ContentDocumentsGetSingleService = async <
 			constants.collectionBuilder.publishing.proposalVersionType ||
 			versionType ===
 				constants.collectionBuilder.publishing.snapshotVersionType) &&
-		!data.includeReleaseVersions &&
+		!data.includeRequestVersions &&
 		!(preview?.mode === "scoped" && preview.target === "entry")
 	) {
 		return {
 			error: {
 				type: "authorisation",
 				code: "preview_scope",
-				message: copy("server:core.documents.version.release.only"),
+				message: copy("server:core.documents.version.request.only"),
 				status: 403,
 			},
 			data: undefined,

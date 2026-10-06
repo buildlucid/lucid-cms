@@ -3,7 +3,7 @@ import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import { getWorkflowConfig } from "./helpers/index.js";
 
-/** Starts a release proposal's workflow at the collection's initial stage. The caller holds the document claim. */
+/** Starts a request proposal's workflow at the collection's initial stage. The caller holds the document claim. */
 const createProposal: ServiceFn<
 	[
 		{

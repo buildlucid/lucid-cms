@@ -151,13 +151,13 @@ export type CollectionRevisionOptions = {
 export type CollectionPublishingOptions = {
 	/** Allow scheduled publishing. Defaults to false. */
 	scheduling?: boolean;
-	/** What needs an approved release before it can happen. */
+	/** What needs an approved request before it can happen. */
 	review?: {
-		/** Publishing target keys that can only be published through an approved release. */
+		/** Publishing target keys that can only be published through an approved request. */
 		targets?: string[];
-		/** New documents can only be created through an approved create release. Defaults to false. */
+		/** New documents can only be created through an approved create request. Defaults to false. */
 		create?: boolean;
-		/** Allow the release creator to approve their own release. Defaults to false. */
+		/** Allow the request creator to approve their own request. Defaults to false. */
 		selfApproval?: boolean;
 	};
 	/** Editorial stages through which documents can move. */

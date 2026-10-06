@@ -7,7 +7,7 @@ import type {
 import acquireDocumentWrites from "../../../../../services/documents/helpers/acquire-document-writes.js";
 import invalidateContentDocumentCache from "../../../../../services/documents/helpers/invalidate-content-cache.js";
 import notifyChange from "../../../../../services/documents/notify-change.js";
-import invalidateReleases from "../../../../../services/releases/helpers/invalidate-releases.js";
+import invalidateRequests from "../../../../../services/requests/helpers/invalidate-requests.js";
 import type { LucidBrickTableName } from "../../../../db/tables/index.js";
 import { copy } from "../../../../i18n/index.js";
 import {
@@ -287,8 +287,8 @@ const nullifyRelationReferences: ServiceFn<
 			if (contentRes.error) return contentRes;
 		}
 
-		//* every release of these documents may link to the deleted documents, so all need approving again
-		const invalidateRes = await invalidateReleases(context, {
+		//* every request of these documents may link to the deleted documents, so all need approving again
+		const invalidateRes = await invalidateRequests(context, {
 			collectionKey,
 			documentIds: [
 				...new Set([...versions.values()].map((version) => version.documentId)),

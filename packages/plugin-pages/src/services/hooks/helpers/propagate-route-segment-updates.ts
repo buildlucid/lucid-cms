@@ -23,7 +23,7 @@ import updateRouteFields from "../../update-route-fields.js";
 
 /**
  * Rebuilds page routes that depend on a changed route-segment document, in
- * latest and every environment. Release proposals read segments from latest
+ * latest and every environment. Request proposals read segments from latest
  * and are rebuilt when they are edited or captured instead.
  */
 const propagateRouteSegmentUpdates: ServiceFn<

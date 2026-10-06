@@ -298,7 +298,7 @@ export default class DocumentVersionsRepository extends DynamicRepository<LucidV
 	/**
 	 * Selects document history entries for a document ID and returns basic info
 	 * for each brick table for meta data. This includes normal revisions and
-	 * release snapshots that current environment versions were promoted
+	 * request snapshots that current environment versions were promoted
 	 * from, so the admin history timeline can attach environments to their source.
 	 */
 	async selectMultipleRevisions(

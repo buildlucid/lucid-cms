@@ -60,7 +60,7 @@ export function useDocumentHistoryState() {
 		if (item.type === "environment") return item.version;
 		return undefined;
 	});
-	const selectedReleaseTarget = createMemo(() => {
+	const selectedRequestTarget = createMemo(() => {
 		const item = selectedItem();
 		return item?.type === "environment" ? item.version : undefined;
 	});
@@ -116,7 +116,7 @@ export function useDocumentHistoryState() {
 		enabled: () => canFetchRevisions() && selectedVersion() !== undefined,
 		refetchOnWindowFocus: false,
 	});
-	const releasesQuery = api.releases.useGetMultiple({
+	const requestsQuery = api.requests.useGetMultiple({
 		queryParams: {
 			filters: {
 				collectionKey: collectionKey,
@@ -127,10 +127,10 @@ export function useDocumentHistoryState() {
 		},
 		enabled: () =>
 			canFetchRevisions() &&
-			selectedReleaseTarget() !== undefined &&
+			selectedRequestTarget() !== undefined &&
 			collectionQuery.data?.data !== undefined &&
 			userStore.get.hasPermission([
-				Permissions.ReleasesRead,
+				Permissions.RequestsRead,
 				collectionQuery.data.data.permissions.read,
 			]).all,
 	});
@@ -408,7 +408,7 @@ export function useDocumentHistoryState() {
 		collectionQuery,
 		revisionsQuery,
 		selectedVersionDocumentQuery,
-		releasesQuery,
+		requestsQuery,
 		collection,
 		document,
 		documentQuery,

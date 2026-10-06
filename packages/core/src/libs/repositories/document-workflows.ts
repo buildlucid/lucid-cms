@@ -24,7 +24,7 @@ export default class DocumentWorkflowsRepository extends StaticRepository<"lucid
 			{
 				collectionKey: string;
 				documentId: number;
-				/** Null for latest, otherwise a release proposal. */
+				/** Null for latest, otherwise a request proposal. */
 				versionId: number | null;
 			}
 		>,

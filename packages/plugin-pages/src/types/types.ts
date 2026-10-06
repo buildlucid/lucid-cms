@@ -79,8 +79,8 @@ export interface CollectionConfig {
 
 /**
  * Which versions route queries read and rewrite. A version scope is one
- * version per document, eg. latest or an environment. A release scope is the
- * versions a release has captured, keyed by document ID, with every other
+ * version per document, eg. latest or an environment. A request scope is the
+ * versions a request has captured, keyed by document ID, with every other
  * document read from the fallback version type and never rewritten.
  */
 export type RouteScope =
@@ -89,7 +89,7 @@ export type RouteScope =
 			versionType: Exclude<DocumentVersionType, "revision">;
 	  }
 	| {
-			type: "release";
+			type: "request";
 			versions: Map<number, number>;
 			fallback: Exclude<DocumentVersionType, "revision">;
 	  };

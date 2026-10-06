@@ -31,7 +31,7 @@ const useAlign = (props?: {
 			title: T()("documents.align.success"),
 			message: T()("documents.align.success.message"),
 		}),
-		invalidates: [queryKeys.documents.all(), queryKeys.releases.all()],
+		invalidates: [queryKeys.documents.all(), queryKeys.requests.all()],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,
 	});

@@ -17,7 +17,7 @@ const factory = createFactory();
 const publishController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Publish saved document content to a target that does not need an approved release.",
+			"Publish saved document content to a target that does not need an approved request.",
 		tags: ["documents"],
 		summary: "Publish Document",
 		responses: openAPI.responses({

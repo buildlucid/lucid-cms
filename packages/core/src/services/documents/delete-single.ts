@@ -2,7 +2,7 @@ import type { ServiceFn } from "../../exports/types.js";
 import type { DocumentEditToken } from "../../libs/toolkit/documents/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import deletePreviewSessionsForDocuments from "../preview-sessions/delete-for-documents.js";
-import invalidateReleases from "../releases/helpers/invalidate-releases.js";
+import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import deleteSinglePermanently from "./delete-single-permanently.js";
 import acquireDocumentWrites from "./helpers/acquire-document-writes.js";
 import beginSingleDeletion from "./helpers/begin-single-deletion.js";
@@ -90,11 +90,11 @@ const deleteSingle: ServiceFn<
 			if (deleteRelationsRes.error) return deleteRelationsRes;
 			if (deletePreviewsRes.error) return deletePreviewsRes;
 
-			const invalidateReleasesRes = await invalidateReleases(context, {
+			const invalidateRequestsRes = await invalidateRequests(context, {
 				collectionKey: data.collectionKey,
 				documentIds: [data.id],
 			});
-			if (invalidateReleasesRes.error) return invalidateReleasesRes;
+			if (invalidateRequestsRes.error) return invalidateRequestsRes;
 
 			const hookAfterRes = await executeDeleteHook(context, {
 				event: "afterDelete",

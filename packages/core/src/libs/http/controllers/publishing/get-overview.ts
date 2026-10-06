@@ -24,7 +24,7 @@ const getOverviewController = factory.createHandlers(
 		}),
 	}),
 	authenticate(),
-	permissions([Permissions.ReleasesRead]),
+	permissions([Permissions.RequestsRead]),
 	async (c) => {
 		const context = createServiceContext(c);
 		const overview = await serviceWrapper(publishingServices.getOverview, {

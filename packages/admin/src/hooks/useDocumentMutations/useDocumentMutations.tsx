@@ -14,7 +14,7 @@ import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
-import { getDocumentRoute, getReleaseRoute } from "@/utils/route-helpers";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 
 export function useDocumentMutations(props: {
 	collection: Accessor<Collection | undefined>;
@@ -78,7 +78,7 @@ export function useDocumentMutations(props: {
 			brickStore.set("fieldsErrors", []);
 			brickStore.set("brickErrors", []);
 			brickStore.get.captureInitialSnapshot();
-			navigate(getReleaseRoute({ releaseId: data.data.releaseId }));
+			navigate(getRequestRoute({ requestId: data.data.requestId }));
 		},
 		onError: (errors) => {
 			brickStore.set(
@@ -280,7 +280,7 @@ export function useDocumentMutations(props: {
 		}
 	};
 
-	/** Requests the new document through a create release instead of creating it. Opens the release once requested. */
+	/** Requests the new document through a create request instead of creating it. Opens the request once requested. */
 	const requestCreationAction = (title: string) => {
 		requestCreationMutation.action.mutate({
 			collectionKey: props.collectionKey(),

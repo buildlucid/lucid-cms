@@ -50,7 +50,7 @@ const useUpdateSingleVersion = (props: UseUpdateSingleVersionProps) => {
 		mutationFn: updateSingleVersionReq,
 		invalidates: props.invalidates ?? [
 			queryKeys.documents.all(),
-			queryKeys.releases.all(),
+			queryKeys.requests.all(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

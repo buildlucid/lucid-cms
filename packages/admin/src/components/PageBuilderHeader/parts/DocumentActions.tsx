@@ -7,8 +7,7 @@ import T from "@/translations";
 
 export const DocumentActions: Component<{
 	collectionSingularName?: string;
-	/** Links back to the release that owns the proposal being edited. */
-	releaseLink?: string;
+	requestLink?: string;
 	onDelete?: () => void;
 	deletePermission?: boolean;
 	duplicate?: {
@@ -39,11 +38,11 @@ export const DocumentActions: Component<{
 
 	const actions = (): ActionMenuItem[] => [
 		{
-			label: T()("releases.view"),
+			label: T()("requests.view"),
 			type: "link",
 			icon: "share",
-			show: props.releaseLink !== undefined,
-			href: props.releaseLink,
+			show: props.requestLink !== undefined,
+			href: props.requestLink,
 		},
 		{
 			label: getActionLabel(T()("preview.copy.group")),

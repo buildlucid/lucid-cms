@@ -19,7 +19,7 @@ const usePublishSingle = () =>
 		invalidates: [
 			queryKeys.documents.all(),
 			queryKeys.publishing.overview(),
-			queryKeys.releases.all(),
+			queryKeys.requests.all(),
 		],
 	});
 export default usePublishSingle;

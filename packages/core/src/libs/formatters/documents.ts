@@ -150,7 +150,7 @@ const formatSingle = (props: {
 							stageKey: props.document.workflow_stage_key,
 						})),
 		isDeleted: formatter.formatBoolean(props.document.is_deleted),
-		createReleaseId: props.document.create_release_id ?? null,
+		createRequestId: props.document.create_request_id ?? null,
 		createdBy: props.document.created_by ?? null,
 		updatedBy: props.document.updated_by ?? null,
 		createdAt: formatter.formatDate(props.document.created_at),

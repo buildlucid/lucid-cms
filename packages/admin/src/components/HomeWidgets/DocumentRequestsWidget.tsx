@@ -7,14 +7,14 @@ import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
-import { getReleaseState, releaseStates } from "@/utils/releases";
-import { getReleaseRoute } from "@/utils/route-helpers";
+import { getRequestState, requestStates } from "@/utils/requests";
+import { getRequestRoute } from "@/utils/route-helpers";
 
-/** The open create releases the current user has made, so they can follow their requested documents. */
+/** The open create requests the current user has made, so they can follow their requested documents. */
 const DocumentRequestsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
 	// Queries
-	const requests = api.releases.useGetMultiple({
+	const requests = api.requests.useGetMultiple({
 		queryParams: {
 			filters: {
 				type: () => "create",
@@ -31,7 +31,7 @@ const DocumentRequestsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	return (
 		<DashboardCard
 			title={T()("home.widget.requests.label")}
-			href={`/lucid/releases?filter[status]=open&filter[type]=create&filter[createdBy]=${userStore.get.user?.id ?? ""}`}
+			href={`/lucid/requests?filter[status]=open&filter[type]=create&filter[createdBy]=${userStore.get.user?.id ?? ""}`}
 		>
 			<Show
 				when={requests.isLoading || (requests.data?.data.length ?? 0) > 0}
@@ -56,19 +56,19 @@ const DocumentRequestsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 						}
 					>
 						<For each={requests.data?.data}>
-							{(release) => (
+							{(request) => (
 								<li>
 									<DashboardCardItem
-										href={getReleaseRoute({ releaseId: release.id })}
-										title={release.title}
-										description={dateHelpers.formatTimestamp(release.updatedAt)}
+										href={getRequestRoute({ requestId: request.id })}
+										title={request.title}
+										description={dateHelpers.formatTimestamp(request.updatedAt)}
 										meta={
 											<StatusIndicator
 												size="xs"
 												variant={
-													releaseStates[getReleaseState(release)].indicator
+													requestStates[getRequestState(request)].indicator
 												}
-												label={releaseStates[getReleaseState(release)].label()}
+												label={requestStates[getRequestState(request)].label()}
 											/>
 										}
 									/>

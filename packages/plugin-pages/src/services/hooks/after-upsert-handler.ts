@@ -7,8 +7,8 @@ import buildDescendantFullSlugs from "./helpers/build-descendant-full-slugs.js";
 import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-updates.js";
 
 /**
- * Rewrites descendant routes once a page is saved. A release write only
- * rewrites descendants captured in the same release. Route-segment changes
+ * Rewrites descendant routes once a page is saved. A request write only
+ * rewrites descendants captured in the same request. Route-segment changes
  * only propagate from latest and environment versions.
  */
 const afterUpsertHandler =
@@ -18,7 +18,7 @@ const afterUpsertHandler =
 	async ({ context, toolkit, data, meta }) => {
 		const scope = resolveRouteScope({
 			versionType: data.versionType,
-			release: meta.release,
+			request: meta.request,
 			collectionKey: meta.collectionKey,
 		});
 

@@ -1,11 +1,11 @@
 import type { LucidHookDocuments } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
-import { releaseScope } from "../../utils/route-scope.js";
+import { requestScope } from "../../utils/route-scope.js";
 import getTargetCollection from "../get-target-collection.js";
 import refreshVersionRoute from "./helpers/refresh-version-route.js";
 
 /**
- * Rebuilds a captured proposal's route within its release, so it reflects
+ * Rebuilds a captured proposal's route within its request, so it reflects
  * parents already proposed there, and updates captured descendants beneath
  * it. Snapshots keep the route of the environment they came from.
  */
@@ -21,7 +21,7 @@ const versionCaptureHandler =
 		if (
 			targetCollectionRes.error ||
 			data.sourceVersionType !== "latest" ||
-			!meta.release
+			!meta.request
 		) {
 			return { error: undefined, data: undefined };
 		}
@@ -31,8 +31,8 @@ const versionCaptureHandler =
 			collectionInstance: meta.collection,
 			tables: meta.collectionTableNames,
 			toolkit,
-			scope: releaseScope({
-				release: meta.release,
+			scope: requestScope({
+				request: meta.request,
 				collectionKey: meta.collectionKey,
 				fallback: "latest",
 			}),

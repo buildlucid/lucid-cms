@@ -57,7 +57,7 @@ const builtInWidgets: HomeWidget[] = [
 		sizes: ["md", "lg", "full"],
 		hidden: false,
 		available: (context) =>
-			can(Permissions.ReleasesRead) &&
+			can(Permissions.RequestsRead) &&
 			(context.collections ?? []).some(
 				(collection) =>
 					collection.publishing.targets.length > 0 &&
@@ -74,7 +74,7 @@ const builtInWidgets: HomeWidget[] = [
 		sizes: ["md", "lg", "full"],
 		hidden: false,
 		available: (context) =>
-			can(Permissions.ReleasesRead) &&
+			can(Permissions.RequestsRead) &&
 			(context.collections ?? []).some(
 				(collection) =>
 					collection.mode === "multiple" &&

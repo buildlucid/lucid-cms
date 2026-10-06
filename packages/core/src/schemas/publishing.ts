@@ -1,6 +1,6 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
-import { releaseOverviewResponseSchema } from "./releases.js";
+import { requestOverviewResponseSchema } from "./requests.js";
 
 export const controllerSchemas = {
 	getOverview: {
@@ -24,7 +24,7 @@ export const controllerSchemas = {
 					),
 				}),
 			),
-			releases: releaseOverviewResponseSchema,
+			requests: requestOverviewResponseSchema,
 		}),
 	} satisfies ControllerSchema,
 };

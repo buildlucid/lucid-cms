@@ -3,7 +3,7 @@ import type {
 	Collection,
 	InternalCollectionDocument,
 	Permission,
-	ReleaseSummary,
+	RequestSummary,
 	UserRef,
 } from "@types";
 import classNames from "classnames";
@@ -33,7 +33,7 @@ import Copy from "@/components/Copy/Copy";
 import DateText from "@/components/DateText/DateText";
 import Link from "@/components/Link/Link";
 import Pill, { type PillProps } from "@/components/Pill/Pill";
-import ReleaseCompactList from "@/components/ReleaseCompactList/ReleaseCompactList";
+import RequestCompactList from "@/components/RequestCompactList/RequestCompactList";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
 import type {
 	RetentionInfo,
@@ -81,8 +81,8 @@ const TimelineDetails: Component<{
 	selectedVersionDocumentLoading: Accessor<boolean>;
 	createdByUser: Accessor<UserRef | undefined>;
 	retention: Accessor<RetentionInfo>;
-	releases: Accessor<ReleaseSummary[]>;
-	releasesLoading: Accessor<boolean>;
+	requests: Accessor<RequestSummary[]>;
+	requestsLoading: Accessor<boolean>;
 }> = (props) => {
 	const formatTargetName = (target: string) => {
 		const environment = props
@@ -146,7 +146,7 @@ const TimelineDetails: Component<{
 			0,
 	);
 	const fieldCount = createMemo(() => selectedDocument()?.fields?.length ?? 0);
-	const releases = createMemo(() => props.releases());
+	const requests = createMemo(() => props.requests());
 	// ----------------------------------
 	// Render
 	return (
@@ -316,27 +316,27 @@ const TimelineDetails: Component<{
 
 			<Show when={props.item.type === "environment"}>
 				<InspectorSection
-					title={T()("documents.release.activity")}
+					title={T()("documents.request.activity")}
 					icon={<FaSolidPaperPlane size={14} />}
-					meta={releases().length}
-					preferenceKey="history.inspector.releaseActivity"
+					meta={requests().length}
+					preferenceKey="history.inspector.requestActivity"
 				>
 					<Switch>
-						<Match when={props.releasesLoading()}>
+						<Match when={props.requestsLoading()}>
 							<div class="grid gap-2">
 								<span class="h-24 rounded-md skeleton" />
 								<span class="h-24 rounded-md skeleton" />
 							</div>
 						</Match>
-						<Match when={releases().length === 0}>
+						<Match when={requests().length === 0}>
 							<div class="rounded-md border border-border bg-input/50 p-3">
 								<p class="text-sm text-body">
-									{T()("empty.states.release.activity")}
+									{T()("empty.states.request.activity")}
 								</p>
 							</div>
 						</Match>
 						<Match when={true}>
-							<ReleaseCompactList releases={releases()} />
+							<RequestCompactList requests={requests()} />
 						</Match>
 					</Switch>
 				</InspectorSection>

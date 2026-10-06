@@ -2,7 +2,7 @@ import { createFactory } from "hono/factory";
 import { describeRoute } from "hono-openapi";
 import z from "zod";
 import { controllerSchemas } from "../../../../schemas/documents.js";
-import { releaseServices } from "../../../../services/index.js";
+import { requestServices } from "../../../../services/index.js";
 import { LucidAPIError } from "../../../../utils/errors/index.js";
 import serviceWrapper from "../../../../utils/services/service-wrapper.js";
 import { copy } from "../../../i18n/index.js";
@@ -20,7 +20,7 @@ const factory = createFactory();
 const requestCreationController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Request a new document through a create release. The document is only created once the release is approved and released.",
+			"Request a new document through a create request. The document is only created once the request is approved and completed.",
 		tags: ["documents"],
 		summary: "Request Document",
 		responses: openAPI.responses({
@@ -36,7 +36,7 @@ const requestCreationController = factory.createHandlers(
 	}),
 	validateCSRF,
 	authenticate(),
-	permissions([Permissions.ReleasesRead]),
+	permissions([Permissions.RequestsRead]),
 	validate("json", controllerSchemas.requestCreation.body),
 	validate("param", controllerSchemas.requestCreation.params),
 	async (c) => {
@@ -44,7 +44,7 @@ const requestCreationController = factory.createHandlers(
 		const { collectionKey } = c.req.valid("param");
 		const context = createServiceContext(c);
 
-		const result = await serviceWrapper(releaseServices.requestCreation, {
+		const result = await serviceWrapper(requestServices.requestCreation, {
 			transaction: true,
 			defaultError: {
 				type: "basic",

@@ -41,7 +41,7 @@ const useUpdateOrder = (props?: UseUpdateOrderProps) => {
 				}),
 		invalidates: props?.invalidates ?? [
 			queryKeys.documents.all(),
-			queryKeys.releases.all(),
+			queryKeys.requests.all(),
 		],
 		onSuccess: props?.onSuccess,
 		onError: props?.onError,

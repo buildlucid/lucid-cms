@@ -1,4 +1,4 @@
-import type { InternalCollectionDocument, Refs, Release } from "@types";
+import type { InternalCollectionDocument, Refs, RequestDetail } from "@types";
 import {
 	type Accessor,
 	createContext,
@@ -18,7 +18,7 @@ export type PageBuilderStateContextValue = {
 	version: Accessor<string>;
 	versionId: Accessor<number | undefined>;
 	relationVersionType: Accessor<string | undefined>;
-	release?: Accessor<Release | undefined>;
+	request?: Accessor<RequestDetail | undefined>;
 	disableWorkflow: Accessor<boolean>;
 	documentState: UseDocumentState;
 	mutations: UseDocumentMutations;
@@ -41,7 +41,7 @@ export const PageBuilderStateProvider: ParentComponent<
 					version: props.version,
 					versionId: props.versionId,
 					relationVersionType: props.relationVersionType,
-					release: props.release,
+					request: props.request,
 					disableWorkflow: props.disableWorkflow,
 					documentState: props.documentState,
 					mutations: props.mutations,
@@ -90,7 +90,7 @@ export const ReadOnlyBuilderStateProvider: ParentComponent<{
 				mutations: undefined,
 				autoSave: undefined,
 				uiState: undefined,
-				release: undefined,
+				request: undefined,
 				disableWorkflow: () => true,
 			}}
 		>

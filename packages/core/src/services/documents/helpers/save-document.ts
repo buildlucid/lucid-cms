@@ -27,8 +27,8 @@ import invalidateContentDocumentCache from "./invalidate-content-cache.js";
 
 /**
  * Persists a full payload. Callers own the transaction and any existing-document claim.
- * A requested document is saved as its create release's proposal instead of latest,
- * and stays hidden until the release is released.
+ * A requested document is saved as its create request's proposal instead of latest,
+ * and stays hidden until the request is completed.
  */
 const saveDocument: ServiceFn<
 	[
@@ -41,8 +41,8 @@ const saveDocument: ServiceFn<
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
-			/** The create release requesting a new document. Only used when creating. */
-			createReleaseId?: number;
+			/** The create request requesting a new document. Only used when creating. */
+			createRequestId?: number;
 		},
 	],
 	number
@@ -89,9 +89,9 @@ const saveDocument: ServiceFn<
 		};
 	}
 
-	const createReleaseId =
-		data.documentId === undefined ? data.createReleaseId : undefined;
-	const requested = createReleaseId !== undefined;
+	const createRequestId =
+		data.documentId === undefined ? data.createRequestId : undefined;
+	const requested = createRequestId !== undefined;
 	if (
 		data.documentId === undefined &&
 		!requested &&
@@ -160,7 +160,7 @@ const saveDocument: ServiceFn<
 							collection_migration_id: migrationIdRes.data,
 							//* only applied on insert; reorders use documentServices.updateOrder
 							order: order ?? null,
-							create_release_id: createReleaseId ?? null,
+							create_request_id: createRequestId ?? null,
 							created_by: data.userId,
 							updated_by: data.userId,
 							is_deleted: false,
@@ -205,7 +205,7 @@ const saveDocument: ServiceFn<
 		fields: data.fields,
 		collection: collectionRes.data,
 		origin: data.origin,
-		createReleaseId,
+		createRequestId,
 	});
 
 	if (createVersionRes.error) {
@@ -258,7 +258,7 @@ const saveDocument: ServiceFn<
 		);
 		if (updated.error) return updated;
 	}
-	//* requested documents stay out of content until their create release is released
+	//* requested documents stay out of content until their create request is completed
 	if (requested) {
 		return { error: undefined, data: upsertDocRes.data.id };
 	}

@@ -6,7 +6,7 @@ import { getTableNames } from "../../libs/collection/schema/runtime/runtime-sche
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import type {
 	DocumentBeforeUpsertHookOrigin,
-	DocumentHookRelease,
+	DocumentHookRequest,
 } from "../../libs/hooks/types.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 
@@ -20,8 +20,8 @@ import rollbackVersionCreate from "./helpers/rollback-version-create.js";
 
 /**
  * Creates a new latest version. A requested document's content is instead
- * created as the proposal of its create release, so it has no latest version
- * until the release is released.
+ * created as the proposal of its create request, so it has no latest version
+ * until the request is completed.
  */
 const createSingle: ServiceFn<
 	[
@@ -33,8 +33,8 @@ const createSingle: ServiceFn<
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
-			/** The create release requesting a new document. */
-			createReleaseId?: number;
+			/** The create request requesting a new document. */
+			createRequestId?: number;
 		},
 	],
 	{ versionId: number }
@@ -49,7 +49,7 @@ const createSingle: ServiceFn<
 	const DocumentVersions = new DocumentVersionsRepository(context.db);
 
 	const versionType =
-		data.createReleaseId === undefined
+		data.createRequestId === undefined
 			? "latest"
 			: constants.collectionBuilder.publishing.proposalVersionType;
 
@@ -125,12 +125,12 @@ const createSingle: ServiceFn<
 		return newVersionRes;
 	}
 
-	//* a requested document is its create release's only document
-	const release: DocumentHookRelease | undefined =
-		data.createReleaseId === undefined
+	//* a requested document is its create request's only document
+	const request: DocumentHookRequest | undefined =
+		data.createRequestId === undefined
 			? undefined
 			: {
-					id: data.createReleaseId,
+					id: data.createRequestId,
 					documents: [
 						{
 							collectionKey: data.collection.key,
@@ -157,7 +157,7 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				release,
+				request,
 				execution: {
 					mode: "upsert",
 					action: "create",
@@ -227,7 +227,7 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
-				release,
+				request,
 			},
 			data: {
 				documentId: data.documentId,

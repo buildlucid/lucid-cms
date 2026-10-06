@@ -9,8 +9,8 @@ import propagateRouteSegmentUpdates from "./helpers/propagate-route-segment-upda
 
 /**
  * Removes deleted parent pages and route segments from affected page paths in
- * latest and every environment. Release versions keep their routes until the
- * release recomputes them.
+ * latest and every environment. Request versions keep their routes until the
+ * request recomputes them.
  */
 const beforeDeleteHandler =
 	(

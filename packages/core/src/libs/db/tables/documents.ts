@@ -45,7 +45,7 @@ export const documentsTable = defineTable(
 				schema: z.number().nullable(),
 				type: "integer",
 			},
-			create_release_id: {
+			create_request_id: {
 				schema: z.number().nullable(),
 				type: "integer",
 			},
@@ -100,8 +100,8 @@ export interface LucidDocumentTable {
 	is_deleted: BooleanInt;
 	is_deleted_at: TimestampMutable;
 	deleted_by: number | null;
-	/** The open create release requesting this document. Null once created. */
-	create_release_id: number | null;
+	/** The open create request requesting this document. Null once created. */
+	create_request_id: number | null;
 	created_by: number | null;
 	created_at: TimestampImmutable;
 	updated_by: number | null;

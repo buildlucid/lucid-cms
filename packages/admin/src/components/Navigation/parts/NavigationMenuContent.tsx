@@ -53,7 +53,7 @@ export const NavigationMenuContent: Component<{
 	// Memos
 	const permissions = createMemo(() => {
 		const settings = can(Permissions.SettingsRead);
-		const releases = can(Permissions.ReleasesRead);
+		const requests = can(Permissions.RequestsRead);
 		const collectionList = collections.data?.data ?? [];
 
 		return {
@@ -68,13 +68,13 @@ export const NavigationMenuContent: Component<{
 			aiUsage: settings && siteStore.get.hasAnyAiFeatureEnabled(),
 			agent: getAgentAccess().all.length > 0,
 			publishingOverview:
-				releases &&
+				requests &&
 				collectionList.some(
 					(collection) =>
 						collection.publishing.targets.length > 0 &&
 						userStore.get.hasPermission([collection.permissions.read]).all,
 				),
-			releases,
+			requests,
 		};
 	});
 	const visibleCollections = createMemo(() => {
@@ -180,13 +180,13 @@ export const NavigationMenuContent: Component<{
 					</Show>
 
 					<Show
-						when={permissions().publishingOverview || permissions().releases}
+						when={permissions().publishingOverview || permissions().requests}
 					>
 						<NavigationSection
 							id="lucid:publishing"
 							title={T()("common.publishing")}
 							active={
-								isActive("/lucid/publishing") || isActive("/lucid/releases")
+								isActive("/lucid/publishing") || isActive("/lucid/requests")
 							}
 						>
 							<NavigationLink
@@ -197,10 +197,10 @@ export const NavigationMenuContent: Component<{
 								permission={permissions().publishingOverview}
 							/>
 							<NavigationLink
-								href="/lucid/releases"
-								icon="releases"
-								title={T()("releases.title")}
-								permission={permissions().releases}
+								href="/lucid/requests"
+								icon="requests"
+								title={T()("requests.title")}
+								permission={permissions().requests}
 							/>
 						</NavigationSection>
 					</Show>

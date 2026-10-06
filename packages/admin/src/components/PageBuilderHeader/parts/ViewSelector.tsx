@@ -54,7 +54,7 @@ export const ViewSelector: Component<{
 	});
 	const versionOptions = (type: "latest" | "environment" | "proposal") =>
 		props.options().filter((o) => o.type === type && o.hideInDropdown !== true);
-	//* release proposals sit below a separator, apart from latest and its targets
+	//* request proposals sit below a separator, apart from latest and its targets
 	const versionGroups = createMemo(() => [
 		{
 			separator: false,
@@ -74,7 +74,7 @@ export const ViewSelector: Component<{
 
 	const optionLabel = (option: ViewSelectorOption) => {
 		if (option.type === "proposal") {
-			return T()("releases.proposal.option", { release: option.label });
+			return T()("requests.proposal.option", { request: option.label });
 		}
 		if (option.type === "latest" || option.type === "environment") {
 			return T()("actions.view.selector.document.version", {
@@ -96,7 +96,7 @@ export const ViewSelector: Component<{
 		if (!option) return props.currentViewLabel?.();
 		if (option.type === "link") return optionLabel(option);
 		if (option.type === "proposal") {
-			return T()("releases.proposal.selector", { release: option.label });
+			return T()("requests.proposal.selector", { request: option.label });
 		}
 
 		const action =
