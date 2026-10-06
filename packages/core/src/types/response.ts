@@ -169,6 +169,7 @@ export type {
 	RefResourceMap,
 	Refs,
 	RelationFieldValue,
+	RequestApproval,
 	RequestBlocker,
 	RequestBlockerCode,
 	RequestCommentReply,

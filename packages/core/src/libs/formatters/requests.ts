@@ -205,6 +205,7 @@ const formatSingle = (props: {
 	state: RequestState;
 	blockers: RequestBlocker[];
 	permissions: RequestPermissions;
+	requiredApprovals: number;
 	user: LucidUser;
 	users: Map<number, RequestUser>;
 }): RequestDetail => {
@@ -226,8 +227,11 @@ const formatSingle = (props: {
 		revision: props.request.revision,
 		executionJobId: props.request.execution_job_id,
 		createdBy: userOrNull(props.request.created_by),
-		approvedBy: userOrNull(props.request.approved_by),
-		approvedAt: formatter.formatDate(props.request.approved_at),
+		approvals: props.request.approvals.map((approval) => ({
+			user: userOrNull(approval.user_id),
+			approvedAt: formatter.formatDate(approval.approved_at),
+		})),
+		requiredApprovals: props.requiredApprovals,
 		scheduledAt: formatter.formatDate(props.request.scheduled_at),
 		scheduledTimezone: props.request.scheduled_timezone,
 		failure: props.request.failure,

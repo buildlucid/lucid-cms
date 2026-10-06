@@ -2,6 +2,7 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import constants from "../../constants/constants.js";
 import { copy } from "../../libs/i18n/index.js";
 import {
+	RequestApprovalsRepository,
 	RequestDocumentsRepository,
 	RequestEventsRepository,
 	RequestsRepository,
@@ -18,11 +19,14 @@ import deleteVersions from "./helpers/delete-versions.js";
 import getBlockers from "./helpers/get-blockers.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestState from "./helpers/get-request-state.js";
+import getRequiredApprovals from "./helpers/get-required-approvals.js";
 import scheduleRequest from "./helpers/schedule-request.js";
 
 /**
- * Approves the current revision. Proposal content is frozen into a
- * snapshot; environment requests retain their existing immutable snapshot.
+ * Adds the user's approval of the current revision. The approval that meets
+ * the collections' required count approves the request: proposal content is
+ * frozen into a snapshot, while environment requests retain their existing
+ * immutable snapshot.
  */
 const approve: ServiceFn<
 	[
@@ -40,6 +44,7 @@ const approve: ServiceFn<
 	const Requests = new RequestsRepository(context.db);
 	const RequestTargets = new RequestTargetsRepository(context.db);
 	const RequestEvents = new RequestEventsRepository(context.db);
+	const RequestApprovals = new RequestApprovalsRepository(context.db);
 
 	const claimRes = await acquireRequestWrites(context, data);
 	if (claimRes.error) return claimRes;
@@ -62,6 +67,25 @@ const approve: ServiceFn<
 			error: {
 				type: "basic",
 				message: copy("server:core.requests.already.approved"),
+				status: 409,
+			},
+			data: undefined,
+		};
+	}
+
+	const requiredApprovals = getRequiredApprovals(
+		context,
+		request.documents.map((document) => document.collection_key),
+	);
+	//* an earlier approval can still approve the request if its collections now need fewer
+	const approvedBefore = request.approvals.some(
+		(approval) => approval.user_id === data.user.id,
+	);
+	if (approvedBefore && request.approvals.length < requiredApprovals) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.requests.approval.given"),
 				status: 409,
 			},
 			data: undefined,
@@ -144,6 +168,45 @@ const approve: ServiceFn<
 			user: data.user,
 		});
 		if (validateRes.error) return validateRes;
+	}
+
+	if (!approvedBefore) {
+		const approvalRes = await RequestApprovals.createSingle({
+			data: {
+				request_id: request.id,
+				user_id: data.user.id,
+				revision: request.revision,
+			},
+		});
+		if (approvalRes.error) return approvalRes;
+
+		const reviewerRes = await addReviewer(context, {
+			request,
+			userId: data.user.id,
+		});
+		if (reviewerRes.error) return reviewerRes;
+	}
+
+	const eventsRes = await RequestEvents.createEvents({
+		data: [
+			{
+				request_id: request.id,
+				user_id: data.user.id,
+				type: "approved",
+				body: data.body ?? null,
+			},
+		],
+	});
+	if (eventsRes.error) return eventsRes;
+
+	const approvals = request.approvals.length + (approvedBefore ? 0 : 1);
+	if (approvals < requiredApprovals) {
+		return { error: undefined, data: undefined };
+	}
+
+	for (const document of request.documents) {
+		const state = states.get(document.id);
+		if (!state?.source) continue;
 
 		let approvedVersionId = state.source.id;
 		if (document.source === "latest") {
@@ -194,17 +257,9 @@ const approve: ServiceFn<
 		}
 	}
 
-	const reviewerRes = await addReviewer(context, {
-		request,
-		userId: data.user.id,
-	});
-	if (reviewerRes.error) return reviewerRes;
-
 	const updateRes = await Requests.updateSingle({
 		data: {
 			approved_revision: request.revision,
-			approved_by: data.user.id,
-			approved_at: new Date().toISOString(),
 			failure: null,
 			failure_request_document_id: null,
 			failure_target: null,
@@ -213,18 +268,6 @@ const approve: ServiceFn<
 		where: [{ key: "id", operator: "=", value: request.id }],
 	});
 	if (updateRes.error) return updateRes;
-
-	const eventsRes = await RequestEvents.createEvents({
-		data: [
-			{
-				request_id: request.id,
-				user_id: data.user.id,
-				type: "approved",
-				body: data.body ?? null,
-			},
-		],
-	});
-	if (eventsRes.error) return eventsRes;
 
 	const scheduleRes = await scheduleRequest(context, {
 		id: request.id,

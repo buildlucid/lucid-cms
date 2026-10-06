@@ -81,9 +81,8 @@ export const RequestChecks: Component<{
 					(blocker) =>
 						blocker.code !== "workflow" && blocker.code !== "review_required",
 				),
-				//* workflow stages only gate environments, never latest
 				workflowAllowed:
-					workflowCheckable() && !unavailable && target.target !== "latest"
+					workflowCheckable() && !unavailable
 						? !blockers.some((blocker) => blocker.code === "workflow")
 						: undefined,
 			};
@@ -217,14 +216,30 @@ export const RequestChecks: Component<{
 									<RequestCheckRow
 										tone={group.workflowAllowed ? "success" : "warning"}
 										{...(group.workflowAllowed
-											? {
-													title: T()("requests.checks.workflow.allowed.title", {
-														target: group.label,
-													}),
-													description: T()("requests.checks.workflow.allowed", {
-														target: group.label,
-													}),
-												}
+											? group.target.target === "latest"
+												? {
+														//* create requests target latest
+														title: T()(
+															"requests.checks.workflow.create.allowed.title",
+														),
+														description: T()(
+															"requests.checks.workflow.create.allowed",
+														),
+													}
+												: {
+														title: T()(
+															"requests.checks.workflow.allowed.title",
+															{
+																target: group.label,
+															},
+														),
+														description: T()(
+															"requests.checks.workflow.allowed",
+															{
+																target: group.label,
+															},
+														),
+													}
 											: getBlockerCopy(
 													{ code: "workflow", target: group.target.target },
 													props.collection,

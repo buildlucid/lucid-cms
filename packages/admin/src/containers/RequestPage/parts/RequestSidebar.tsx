@@ -1,4 +1,5 @@
 import type { RequestDetail, RequestUser } from "@types";
+import classNames from "classnames";
 import {
 	FaSolidCalendar,
 	FaSolidCircleDot,
@@ -45,6 +46,10 @@ export const RequestSidebar: Component<{
 	// ----------------------------------------
 	// Memos
 	const state = createMemo(() => getRequestState(props.request));
+	//* the approval that completed the set
+	const approvedAt = createMemo(
+		() => props.request.approvals.at(-1)?.approvedAt ?? null,
+	);
 	const reviewerOptions = createMemo(() =>
 		props.request.reviewers.map(toOption),
 	);
@@ -77,21 +82,50 @@ export const RequestSidebar: Component<{
 			),
 		},
 		{
+			label: T()("requests.sidebar.approvals"),
+			value: T()("requests.sidebar.approvals.count", {
+				count: props.request.approvals.length,
+				required: props.request.requiredApprovals,
+			}),
+			//* only while waiting, as a request keeps its approval if collections later need more
+			show:
+				props.request.status === "open" &&
+				!props.request.approved &&
+				props.request.requiredApprovals > 1,
+		},
+		{
 			label: T()("requests.sidebar.approved.by"),
-			value: props.request.approvedBy ? (
-				<UserDisplay
-					user={props.request.approvedBy}
-					variant="horizontal"
-					size="xs"
-					nameFormat="name"
-				/>
-			) : null,
-			show: props.request.approved,
+			value: (
+				<ul
+					class={classNames("grid gap-2", {
+						"pt-1.5": props.request.approvals.length > 1,
+					})}
+				>
+					<For each={props.request.approvals}>
+						{(approval) => (
+							<li>
+								<Show when={approval.user} fallback={T()("common.unknown")}>
+									{(user) => (
+										<UserDisplay
+											user={user()}
+											variant="horizontal"
+											size="xs"
+											nameFormat="name"
+										/>
+									)}
+								</Show>
+							</li>
+						)}
+					</For>
+				</ul>
+			),
+			show: props.request.approvals.length > 0,
+			stacked: props.request.approvals.length > 1,
 		},
 		{
 			label: T()("requests.sidebar.approved.at"),
-			value: <DateText date={props.request.approvedAt} class="text-sm" />,
-			show: props.request.approved && props.request.approvedAt !== null,
+			value: <DateText date={approvedAt()} class="text-sm" />,
+			show: props.request.approved && approvedAt() !== null,
 		},
 		{
 			label: T()("requests.meta.completed"),

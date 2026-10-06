@@ -1,16 +1,27 @@
 import { copy } from "../../libs/i18n/index.js";
+import {
+	RequestApprovalsRepository,
+	RequestEventsRepository,
+	RequestsRepository,
+} from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
-import addReviewer from "./helpers/add-reviewer.js";
-import dismissApproval from "./helpers/dismiss-approval.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
 
+/**
+ * Withdraws the user's approval of the current revision. Other approvals still
+ * count, but an approved request goes back to waiting for approval.
+ */
 const unapprove: ServiceFn<
 	[{ id: number; user: LucidUser }],
 	undefined
 > = async (context, data) => {
+	const Requests = new RequestsRepository(context.db);
+	const RequestApprovals = new RequestApprovalsRepository(context.db);
+	const RequestEvents = new RequestEventsRepository(context.db);
+
 	const lockRes = await lockRequest(context, { id: data.id });
 	if (lockRes.error) return lockRes;
 	await using _lock = lockRes.data;
@@ -30,7 +41,10 @@ const unapprove: ServiceFn<
 		};
 	}
 
-	if (request.approved_revision !== request.revision) {
+	const approval = request.approvals.find(
+		(approval) => approval.user_id === data.user.id,
+	);
+	if (!approval) {
 		return {
 			error: {
 				type: "basic",
@@ -41,17 +55,33 @@ const unapprove: ServiceFn<
 		};
 	}
 
-	const reviewerRes = await addReviewer(context, {
-		request,
-		userId: data.user.id,
+	const deleteRes = await RequestApprovals.deleteSingle({
+		where: [{ key: "id", operator: "=", value: approval.id }],
 	});
-	if (reviewerRes.error) return reviewerRes;
+	if (deleteRes.error) return deleteRes;
 
-	const dismissRes = await dismissApproval(context, {
-		ids: [request.id],
-		userId: data.user.id,
+	if (request.approved_revision === request.revision) {
+		const updateRes = await Requests.updateSingle({
+			data: {
+				approved_revision: null,
+				execution_job_id: null,
+				updated_at: new Date().toISOString(),
+			},
+			where: [{ key: "id", operator: "=", value: request.id }],
+		});
+		if (updateRes.error) return updateRes;
+	}
+
+	const eventsRes = await RequestEvents.createEvents({
+		data: [
+			{
+				request_id: request.id,
+				user_id: data.user.id,
+				type: "approval_dismissed",
+			},
+		],
 	});
-	if (dismissRes.error) return dismissRes;
+	if (eventsRes.error) return eventsRes;
 
 	return { error: undefined, data: undefined };
 };

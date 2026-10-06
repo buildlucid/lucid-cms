@@ -179,6 +179,12 @@ const CollectionConfigSchema = z
 							.boolean()
 							.default(constants.collectionBuilder.publishing.selfApproval)
 							.optional(),
+						approvals: z
+							.number()
+							.int()
+							.min(1)
+							.default(constants.collectionBuilder.publishing.approvals)
+							.optional(),
 					})
 					.optional(),
 				workflow: z
@@ -204,7 +210,7 @@ const CollectionConfigSchema = z
 												.stageColors,
 										)
 										.optional(),
-									publishTargets: z
+									targets: z
 										.array(
 											z
 												.string()
@@ -212,6 +218,12 @@ const CollectionConfigSchema = z
 												.max(50)
 												.regex(/^[a-z0-9-_]+$/),
 										)
+										.optional(),
+									resetTo: z
+										.string()
+										.min(1)
+										.max(50)
+										.regex(/^[a-z0-9-_]+$/)
 										.optional(),
 								}),
 							)
@@ -323,10 +335,13 @@ const CollectionConfigSchema = z
 		}
 
 		for (const [stageIndex, stage] of workflow.stages.entries()) {
-			for (const [targetIndex, target] of (
-				stage.publishTargets ?? []
-			).entries()) {
-				if (environmentKeys.has(target)) continue;
+			for (const [targetIndex, target] of (stage.targets ?? []).entries()) {
+				//* latest gates create requests, so it needs them enabled
+				if (
+					target === "latest" ? review?.create : environmentKeys.has(target)
+				) {
+					continue;
+				}
 				ctx.addIssue({
 					code: "custom",
 					path: [
@@ -334,12 +349,36 @@ const CollectionConfigSchema = z
 						"workflow",
 						"stages",
 						stageIndex,
-						"publishTargets",
+						"targets",
 						targetIndex,
 					],
-					message: `Workflow publishTargets target "${target}" must reference a configured publishing target`,
+					message:
+						target === "latest"
+							? `Workflow stage "${stage.key}" can only target "latest" when review create is enabled`
+							: `Workflow stage target "${target}" must reference a configured publishing target`,
 				});
 			}
+
+			if (stage.resetTo === undefined) continue;
+			if (stage.resetTo === stage.key || !stageKeys.includes(stage.resetTo)) {
+				ctx.addIssue({
+					code: "custom",
+					path: ["publishing", "workflow", "stages", stageIndex, "resetTo"],
+					message: `Workflow stage "${stage.key}" resetTo must reference another configured stage`,
+				});
+			}
+		}
+
+		if (
+			review?.create &&
+			!workflow.stages.some((stage) => stage.targets?.includes("latest"))
+		) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["publishing", "workflow", "stages"],
+				message:
+					'A workflow stage must target "latest" when review create is enabled, so create requests can be completed',
+			});
 		}
 	});
 

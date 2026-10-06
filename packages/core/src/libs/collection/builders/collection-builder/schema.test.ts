@@ -239,7 +239,8 @@ test("collection workflow features validates stages, targets and palette", async
 							defaultMessage: "Done",
 						}),
 						color: "green",
-						publishTargets: ["production"],
+						targets: ["production"],
+						resetTo: "todo",
 					},
 				],
 			},
@@ -324,7 +325,7 @@ test("collection workflow features validates stages, targets and palette", async
 							label: copy("admin:tests.workflow.done.name", {
 								defaultMessage: "Done",
 							}),
-							publishTargets: ["missing"],
+							targets: ["missing"],
 						},
 					],
 				},
@@ -332,6 +333,52 @@ test("collection workflow features validates stages, targets and palette", async
 		}),
 	).resolves.toMatchObject({
 		success: false,
+	});
+
+	const [todo, done] = validConfig.publishing.workflow.stages;
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			publishing: {
+				...validConfig.publishing,
+				workflow: { stages: [todo, { ...done, resetTo: "missing" }] },
+			},
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+
+	//* latest only gates create requests
+	const latestWorkflow = {
+		stages: [todo, { ...done, targets: ["latest", "production"] }],
+	};
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			publishing: { ...validConfig.publishing, workflow: latestWorkflow },
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			publishing: { ...validConfig.publishing, review: { create: true } },
+		}),
+	).resolves.toMatchObject({
+		success: false,
+	});
+	await expect(
+		CollectionConfigSchema.safeParseAsync({
+			...validConfig,
+			publishing: {
+				...validConfig.publishing,
+				review: { create: true },
+				workflow: latestWorkflow,
+			},
+		}),
+	).resolves.toMatchObject({
+		success: true,
 	});
 });
 

@@ -26,15 +26,22 @@ export const RequestReadiness: Component<{
 			(blocker) => blocker.requestDocumentId === undefined,
 		),
 	);
-	const approverName = createMemo(() => {
-		const user = props.request.approvedBy;
-		if (!user) return T()("common.unknown");
-		return (
-			helpers.formatUserName(user, "name") ||
-			user.email ||
-			T()("common.unknown")
-		);
-	});
+	const approverNames = createMemo(() =>
+		new Intl.ListFormat(document.documentElement.lang || undefined, {
+			type: "conjunction",
+		}).format(
+			props.request.approvals.map(
+				(approval) =>
+					(approval.user &&
+						(helpers.formatUserName(approval.user, "name") ||
+							approval.user.email)) ||
+					T()("common.unknown"),
+			),
+		),
+	);
+	const approvedAt = createMemo(
+		() => props.request.approvals.at(-1)?.approvedAt ?? null,
+	);
 
 	// ----------------------------------------
 	// Render
@@ -90,7 +97,14 @@ export const RequestReadiness: Component<{
 						<RequestCheckRow
 							tone="pending"
 							title={T()("requests.checks.approval.title")}
-							description={T()("requests.checks.approval")}
+							description={
+								props.request.requiredApprovals > 1
+									? T()("requests.checks.approval.count", {
+											count: props.request.approvals.length,
+											required: props.request.requiredApprovals,
+										})
+									: T()("requests.checks.approval")
+							}
 						/>
 					}
 				>
@@ -99,9 +113,9 @@ export const RequestReadiness: Component<{
 						title={T()("requests.checks.approved.title")}
 						description={
 							<>
-								{T()("requests.status.approved.by", { name: approverName() })}
+								{T()("requests.status.approved.by", { name: approverNames() })}
 								<span aria-hidden="true"> · </span>
-								<DateText date={props.request.approvedAt} class="text-sm" />
+								<DateText date={approvedAt()} class="text-sm" />
 							</>
 						}
 					/>

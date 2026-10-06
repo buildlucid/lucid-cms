@@ -85,6 +85,8 @@ const PageCollection = new CollectionBuilder("page", {
 		review: {
 			targets: ["production"],
 			selfApproval: true,
+			// approvals: 2,
+			// create: true,
 		},
 		workflow: {
 			stages: [
@@ -96,13 +98,14 @@ const PageCollection = new CollectionBuilder("page", {
 				{
 					key: "in-progress",
 					label: copy("admin:collections.page.workflow.in-progress.name"),
-					publishTargets: ["staging"],
+					targets: ["staging"],
 					color: "blue",
 				},
 				{
 					key: "done",
 					label: copy("admin:collections.page.workflow.done.name"),
-					publishTargets: ["production", "staging"],
+					targets: ["production", "staging"],
+					resetTo: "in-progress",
 					color: "green",
 				},
 			],

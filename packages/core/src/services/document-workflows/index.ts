@@ -8,4 +8,5 @@ export {
 	resolveEffectiveWorkflowStage,
 	workflowStageAllowsTarget,
 } from "./helpers/index.js";
+export { default as resetStage } from "./reset-stage.js";
 export { default as updateSingle } from "./update-single.js";

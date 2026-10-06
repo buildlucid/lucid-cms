@@ -5,8 +5,8 @@ import {
 import type { ServiceFn } from "../../../utils/services/types.js";
 
 /**
- * Moves requests to a new revision after their content or plan changes, so an
- * earlier approval no longer applies. Approved requests record why.
+ * Moves requests to a new revision after their content or plan changes, so
+ * earlier approvals no longer apply. Requests that had approvals record why.
  */
 const dismissApproval: ServiceFn<
 	[{ ids: number[]; userId?: number | null }],
@@ -18,7 +18,7 @@ const dismissApproval: ServiceFn<
 	const Requests = new RequestsRepository(context.db);
 	const RequestEvents = new RequestEventsRepository(context.db);
 
-	const approvedRes = await Requests.selectApprovedIds({ ids });
+	const approvedRes = await Requests.selectIdsWithApprovals({ ids });
 	if (approvedRes.error) return approvedRes;
 
 	const dismissRes = await Requests.dismissApproval({ ids });

@@ -159,8 +159,10 @@ export type RequestDetail = {
 	/** The current publication attempt, retained until the request plan changes. */
 	executionJobId: string | null;
 	createdBy: RequestUser | null;
-	approvedBy: RequestUser | null;
-	approvedAt: string | null;
+	/** Approvals of the current revision. */
+	approvals: RequestApproval[];
+	/** Approvals the request needs, the highest its collections ask for. */
+	requiredApprovals: number;
 	scheduledAt: string | null;
 	scheduledTimezone: string | null;
 	/** Why the last request attempt failed. Cleared on the next attempt. */
@@ -178,6 +180,11 @@ export type RequestDetail = {
 	/** Comments still waiting to be resolved or closed. These stop approval. */
 	openComments: number;
 	permissions: RequestPermissions;
+};
+
+export type RequestApproval = {
+	user: RequestUser | null;
+	approvedAt: string | null;
 };
 
 /** Each document has independent captured content, destinations and checks. */

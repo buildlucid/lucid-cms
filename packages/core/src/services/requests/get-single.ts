@@ -6,6 +6,7 @@ import getBlockers from "./helpers/get-blockers.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestState from "./helpers/get-request-state.js";
 import getRequestUsers from "./helpers/get-request-users.js";
+import getRequiredApprovals from "./helpers/get-required-approvals.js";
 import loadRequest from "./helpers/load-request.js";
 
 const getSingle: ServiceFn<
@@ -21,7 +22,7 @@ const getSingle: ServiceFn<
 		getRequestUsers(context, {
 			ids: [
 				request.created_by,
-				request.approved_by,
+				...request.approvals.map((approval) => approval.user_id),
 				...request.documents.flatMap((document) =>
 					document.targets.map((target) => target.reviewed_by),
 				),
@@ -55,6 +56,10 @@ const getSingle: ServiceFn<
 			state: stateRes.data,
 			blockers: blockersRes.data,
 			permissions,
+			requiredApprovals: getRequiredApprovals(
+				context,
+				request.documents.map((document) => document.collection_key),
+			),
 			user: data.user,
 			users: usersRes.data,
 		}),

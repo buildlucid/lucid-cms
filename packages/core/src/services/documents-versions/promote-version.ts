@@ -16,7 +16,7 @@ import {
 import { getBaseUrl } from "../../utils/helpers/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
-
+import resetStage from "../document-workflows/reset-stage.js";
 import checkDocumentAccess from "../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
@@ -376,6 +376,19 @@ const promoteVersion: ServiceFn<
 				userId: data.userId,
 			});
 			if (invalidateRes.error) return invalidateRes;
+
+			//* restores and alignments change latest, while create requests land approved content
+			if (data.toVersionType === "latest" && data.requestId === undefined) {
+				const resetRes = await resetStage(context, {
+					collection: collectionRes.data,
+					tableNames: tableNameRes.data,
+					documentId: data.documentId,
+					versionId: createVersionRes.data.id,
+					versionType: data.toVersionType,
+					userId: data.userId,
+				});
+				if (resetRes.error) return resetRes;
+			}
 
 			if (data.toVersionType !== "latest") {
 				const publishedRes = await recordTargetPublished(context, {

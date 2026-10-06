@@ -197,19 +197,20 @@ export type RequestDocumentRemovedHookData = {
 	documentId: number;
 };
 
-/** The request being checked. Hooks push blockers for documents they cannot request as they are. */
+/** The request being checked. Hooks push blockers for documents that cannot be created or published as they are. */
 export type RequestCheckHookData = {
 	request: {
 		id: number;
 		revision: number;
 	};
+	/** The request's documents from one collection. Hooks run once for each collection. */
 	documents: Array<{
 		requestDocumentId: number;
 		collectionKey: string;
 		documentId: number;
 		/** Latest for a proposal, or the environment a snapshot came from. */
 		source: string;
-		/** The content that would be completed. Null when it is unavailable. */
+		/** The content to be created or published. Null when it is unavailable. */
 		versionId: number | null;
 		targets: string[];
 	}>;
@@ -440,8 +441,7 @@ export type HookData<
 // --------------------------------------------------
 // service config
 
-// used for collection builder hook config
-/** Document hooks registered only for one collection. */
+/** Hooks registered only for one collection. */
 export type CollectionBuilderHooks =
 	| LucidHookDocuments<"afterChange">
 	| LucidHookDocuments<"beforeUpsert">
@@ -452,7 +452,8 @@ export type CollectionBuilderHooks =
 	| LucidHookDocuments<"afterRestore">
 	| LucidHookDocuments<"versionPromote">
 	| LucidHookDocuments<"versionCapture">
-	| LucidHook<"documentWorkflows", "afterUpdate">;
+	| LucidHook<"documentWorkflows", "afterUpdate">
+	| LucidHook<"requests", "check">;
 
 export type DocumentHooks =
 	| LucidHook<"documents", "afterChange">

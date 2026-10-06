@@ -189,10 +189,6 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 					col.notNull().defaultTo(1),
 				)
 				.addColumn("approved_revision", adapter.getDataType("integer"))
-				.addColumn("approved_by", adapter.getDataType("integer"), (col) =>
-					col.references("lucid_users.id").onDelete("set null"),
-				)
-				.addColumn("approved_at", adapter.getDataType("timestamp"))
 				.addColumn("scheduled_at", adapter.getDataType("timestamp"))
 				.addColumn("scheduled_timezone", adapter.getDataType("text"))
 				.addColumn("scheduled_by", adapter.getDataType("integer"), (col) =>
@@ -319,6 +315,37 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addUniqueConstraint("uniq_lucid_request_reviewers_user", [
 					"request_id",
+					"user_id",
+				])
+				.execute();
+
+			await db.schema
+				.createTable("lucid_request_approvals")
+				.addColumn("id", adapter.getDataType("primary"), (col) =>
+					adapter.primaryKeyColumnBuilder(col),
+				)
+				.addColumn("request_id", adapter.getDataType("integer"), (col) =>
+					col.notNull().references("lucid_requests.id").onDelete("cascade"),
+				)
+				.addColumn("user_id", adapter.getDataType("integer"), (col) =>
+					col.references("lucid_users.id").onDelete("set null"),
+				)
+				.addColumn("revision", adapter.getDataType("integer"), (col) =>
+					col.notNull(),
+				)
+				.addColumn("approved_at", adapter.getDataType("timestamp"), (col) =>
+					col
+						.notNull()
+						.defaultTo(
+							adapter.formatDefaultValue(
+								"timestamp",
+								adapter.getDefault("timestamp", "now"),
+							),
+						),
+				)
+				.addUniqueConstraint("uniq_lucid_request_approvals_user", [
+					"request_id",
+					"revision",
 					"user_id",
 				])
 				.execute();

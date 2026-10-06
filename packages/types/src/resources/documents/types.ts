@@ -733,6 +733,7 @@ export interface Collection {
 			targets: string[];
 			create: boolean;
 			selfApproval: boolean;
+			approvals: number;
 		};
 		workflow?: {
 			initial: string;
@@ -740,7 +741,10 @@ export interface Collection {
 				key: string;
 				label: ResolvedAdminCopy;
 				color: WorkflowStageColor;
-				publishTargets: string[];
+				/** Includes "latest" when create requests can complete from this stage. */
+				targets: string[];
+				/** Stage to move back to when content changes while in this stage. */
+				resetTo: string | null;
 			}>;
 		};
 		targets: {

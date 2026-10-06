@@ -103,13 +103,10 @@ export const RequestDocumentCard: Component<{
 								]}
 							/>
 						</div>
-						{/* workflow stages gate environments, so they don't apply to requested documents */}
-						<Show when={props.request.type === "publish"}>
-							<RequestWorkflowStage
-								document={props.document}
-								collection={props.collection}
-							/>
-						</Show>
+						<RequestWorkflowStage
+							document={props.document}
+							collection={props.collection}
+						/>
 					</div>
 				</div>
 				<RequestOverviewRow

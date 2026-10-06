@@ -18,7 +18,7 @@ const factory = createFactory();
 const unapproveController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Withdraw the approval of a request, so it needs approving again.",
+			"Withdraw your approval of a request. Other approvals still count, but an approved request needs approving again.",
 		tags: ["requests"],
 		summary: "Withdraw Request Approval",
 		responses: openAPI.responses({

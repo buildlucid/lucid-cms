@@ -45,6 +45,7 @@ import removeDocument from "./remove-document.js";
 import reopen from "./reopen.js";
 import requestCreation from "./request-creation.js";
 import reviewTarget from "./review-target.js";
+import unapprove from "./unapprove.js";
 import updateCommentResolution from "./update-comment-resolution.js";
 import updateSingle from "./update-single.js";
 import updateTargets from "./update-targets.js";
@@ -80,11 +81,11 @@ const collections = [
 			workflow: {
 				initial: "draft",
 				stages: [
-					{ key: "draft", label: "Draft", publishTargets: [] },
+					{ key: "draft", label: "Draft" },
 					{
 						key: "ready",
 						label: "Ready",
-						publishTargets: ["staging", "production"],
+						targets: ["staging", "production"],
 					},
 				],
 			},
@@ -102,8 +103,8 @@ const collections = [
 			workflow: {
 				initial: "draft",
 				stages: [
-					{ key: "draft", label: "Draft", publishTargets: [] },
-					{ key: "ready", label: "Ready", publishTargets: ["staging"] },
+					{ key: "draft", label: "Draft" },
+					{ key: "ready", label: "Ready", targets: ["latest", "staging"] },
 				],
 			},
 		},
@@ -111,10 +112,65 @@ const collections = [
 		.addText("title", { validation: { required: true } })
 		.addText("summary")
 		.addRelation("related", { collection: "create_request_pages" }),
+	new CollectionBuilder("approval_pages", {
+		details: { labels: { singular: "Page", plural: "Pages" } },
+		mode: "multiple",
+		publishing: {
+			review: { targets: ["staging"], approvals: 2 },
+			targets: [{ key: "staging", label: "Staging" }],
+		},
+	})
+		.addText("title")
+		.addText("summary"),
+	new CollectionBuilder("reset_pages", {
+		details: { labels: { singular: "Page", plural: "Pages" } },
+		mode: "multiple",
+		publishing: {
+			targets: [{ key: "staging", label: "Staging" }],
+			workflow: {
+				initial: "draft",
+				stages: [
+					{ key: "draft", label: "Draft" },
+					{ key: "review", label: "Review" },
+					{
+						key: "ready",
+						label: "Ready",
+						targets: ["staging"],
+						resetTo: "review",
+					},
+				],
+			},
+		},
+	})
+		.addText("title")
+		.addText("summary"),
+	new CollectionBuilder("checked_pages", {
+		details: { labels: { singular: "Page", plural: "Pages" } },
+		mode: "multiple",
+		publishing: { targets: [{ key: "staging", label: "Staging" }] },
+		hooks: [
+			{
+				service: "requests",
+				event: "check",
+				handler: async ({ data }) => {
+					for (const document of data.documents) {
+						data.blockers.push({
+							requestDocumentId: document.requestDocumentId,
+							message: `Checked ${document.collectionKey}`,
+						});
+					}
+					return { error: undefined, data: undefined };
+				},
+			},
+		],
+	})
+		.addText("title")
+		.addText("summary"),
 ];
 let context: ServiceContext;
 let creator: LucidUser;
 let reviewer: LucidUser;
+let secondReviewer: LucidUser;
 
 beforeAll(async () => {
 	const config = await fixture.getConfig();
@@ -163,6 +219,7 @@ beforeAll(async () => {
 	};
 	creator = await createUser();
 	reviewer = await createUser();
+	secondReviewer = await createUser();
 });
 afterAll(async () => {
 	await fixture.destroy();
@@ -242,10 +299,10 @@ const reviewInput = (request: RequestDetail) => ({
 		]),
 	),
 });
-const approveRequest = async (id: number) => {
+const approveRequest = async (id: number, user = reviewer) => {
 	const approved = await approve(context, {
 		...reviewInput(await readRequest(id)),
-		user: reviewer,
+		user,
 	});
 	assert(!approved.error, JSON.stringify(approved.error));
 	return readRequest(id);
@@ -2193,7 +2250,14 @@ test("requested documents only exist as their create request's proposal until co
 	expect(member(request).targets.map((target) => target.target)).toEqual([
 		"latest",
 	]);
-	expect(request.blockers).toEqual([]);
+	//* the initial stage doesn't target latest
+	expect(request.blockers).toEqual([
+		{
+			code: "workflow",
+			target: "latest",
+			requestDocumentId: member(request).id,
+		},
+	]);
 
 	expect(await listRequestPages(false)).not.toContain(requested.id);
 	expect(await listRequestPages(true)).toContain(requested.id);
@@ -2358,6 +2422,15 @@ test("create requests are edited, approved and completed with create access, and
 			.error,
 	);
 
+	const ready = await updateWorkflow(context, {
+		collectionKey: "create_request_pages",
+		documentId: requested.id,
+		versionId: versionOf(asRequester.data),
+		stage: "ready",
+		user: creator,
+	});
+	assert(!ready.error, JSON.stringify(ready.error));
+
 	const updater: LucidUser = {
 		...reviewer,
 		superAdmin: false,
@@ -2458,4 +2531,212 @@ test("completing a create request creates the document in latest with its approv
 	expect(workflow.data?.assignees.map((assignee) => assignee.userId)).toEqual([
 		reviewer.id,
 	]);
+});
+
+test("requests need every approval their collections ask for, and withdrawing keeps the others", async () => {
+	const id = await createDocument("approval_pages");
+	const request = await createRequest(
+		id,
+		["staging"],
+		"latest",
+		"approval_pages",
+	);
+	expect(request.requiredApprovals).toBe(2);
+
+	const first = await approveRequest(request.id);
+	expect(first.approved).toBe(false);
+	expect(first.approvals.map((approval) => approval.user?.id)).toEqual([
+		reviewer.id,
+	]);
+	expect(member(first).approvedVersionId).toBeNull();
+	expect(
+		(await approve(context, { ...reviewInput(first), user: reviewer })).error
+			?.status,
+	).toBe(409);
+
+	const second = await approveRequest(request.id, secondReviewer);
+	expect(second.approved).toBe(true);
+	expect(member(second).approvedVersionId).not.toBeNull();
+
+	assert(!(await unapprove(context, { id: request.id, user: reviewer })).error);
+	const withdrawn = await readRequest(request.id);
+	expect(withdrawn.approved).toBe(false);
+	expect(withdrawn.approvals.map((approval) => approval.user?.id)).toEqual([
+		secondReviewer.id,
+	]);
+	expect(
+		(await unapprove(context, { id: request.id, user: reviewer })).error
+			?.status,
+	).toBe(409);
+
+	const reapproved = await approveRequest(request.id);
+	expect(reapproved.approved).toBe(true);
+	const completed = await completeRequest(request.id);
+	expect(completed.status).toBe("completed");
+});
+
+test("edits clear partial approvals, and mixed requests need the most approvals", async () => {
+	const request = await createRequest(
+		await createDocument("approval_pages"),
+		["staging"],
+		"latest",
+		"approval_pages",
+	);
+	await approveRequest(request.id);
+	const edited = await editProposal(request, "Changed");
+	expect(edited.approvals).toEqual([]);
+	expect(edited.events.map((event) => event.type)).toContain(
+		"approval_dismissed",
+	);
+
+	const mixed = await createSingle(context, {
+		title: "Mixed",
+		documents: [
+			{
+				collectionKey: "request_pages",
+				documentId: await createDocument(),
+				source: "latest",
+				targets: ["staging"],
+			},
+			{
+				collectionKey: "approval_pages",
+				documentId: await createDocument("approval_pages"),
+				source: "latest",
+				targets: ["staging"],
+			},
+		],
+		user: creator,
+	});
+	assert(mixed.data, JSON.stringify(mixed.error));
+	expect((await readRequest(mixed.data.id)).requiredApprovals).toBe(2);
+});
+
+test("content changes move a stage with resetTo back, for latest and proposals", async () => {
+	const id = await createDocument("reset_pages");
+	const moveLatest = async (stage: string) => {
+		const moved = await updateWorkflow(context, {
+			collectionKey: "reset_pages",
+			documentId: id,
+			stage,
+			user: creator,
+		});
+		assert(!moved.error, JSON.stringify(moved.error));
+	};
+	const latestStage = async () =>
+		(
+			await getWorkflow(context, {
+				collectionKey: "reset_pages",
+				documentId: id,
+				versionId: null,
+			})
+		).data?.stage;
+
+	await moveLatest("ready");
+	await editLatest(id, "Changed", "reset_pages");
+	expect(await latestStage()).toBe("review");
+	await editLatest(id, "Changed again", "reset_pages");
+	expect(await latestStage()).toBe("review");
+
+	const request = await createRequest(id, ["staging"], "latest", "reset_pages");
+	const moved = await updateWorkflow(context, {
+		collectionKey: "reset_pages",
+		documentId: id,
+		versionId: versionOf(request),
+		stage: "ready",
+		user: creator,
+	});
+	assert(!moved.error, JSON.stringify(moved.error));
+	const edited = await editProposal(request, "Proposal");
+	expect(member(edited).workflowStage).toBe("review");
+	expect(edited.events.at(-1)).toMatchObject({
+		type: "workflow_updated",
+		stage: "review",
+	});
+});
+
+test("collection request checks only see their own collection's documents", async () => {
+	const created = await createSingle(context, {
+		title: "Checked",
+		documents: [
+			{
+				collectionKey: "request_pages",
+				documentId: await createDocument(),
+				source: "latest",
+				targets: ["staging"],
+			},
+			{
+				collectionKey: "checked_pages",
+				documentId: await createDocument("checked_pages"),
+				source: "latest",
+				targets: ["staging"],
+			},
+		],
+		user: creator,
+	});
+	assert(created.data, JSON.stringify(created.error));
+	const request = await readRequest(created.data.id);
+	const checked = request.documents.find(
+		(document) => document.collectionKey === "checked_pages",
+	);
+	assert(checked);
+	expect(request.blockers).toEqual([
+		{
+			code: "check",
+			requestDocumentId: checked.id,
+			message: "Checked checked_pages",
+		},
+	]);
+});
+
+test("create requests aren't gated by stages unless the collection requires create requests", async () => {
+	const requested = await requestCreation(context, {
+		collectionKey: "workflow_pages",
+		title: "New page",
+		fields: [{ key: "title", type: "text", value: "Requested" }],
+		user: creator,
+	});
+	assert(requested.data, JSON.stringify(requested.error));
+	const request = await readRequest(requested.data.requestId);
+	expect(member(request).workflowStage).toBeNull();
+	expect(request.blockers).toEqual([]);
+});
+
+test("an earlier approval approves the request once its collections need fewer", async () => {
+	const request = await createRequest(
+		await createDocument("approval_pages"),
+		["staging"],
+		"latest",
+		"approval_pages",
+	);
+	await approveRequest(request.id);
+
+	const lowered: ServiceContext = {
+		...context,
+		config: {
+			...context.config,
+			collections: context.config.collections.map((collection) =>
+				collection.key === "approval_pages"
+					? new CollectionBuilder("approval_pages", {
+							details: { labels: { singular: "Page", plural: "Pages" } },
+							mode: "multiple",
+							publishing: {
+								review: { targets: ["staging"] },
+								targets: [{ key: "staging", label: "Staging" }],
+							},
+						})
+							.addText("title")
+							.addText("summary")
+					: collection,
+			),
+		},
+	};
+	const approved = await approve(lowered, {
+		...reviewInput(await readRequest(request.id)),
+		user: reviewer,
+	});
+	assert(!approved.error, JSON.stringify(approved.error));
+	const read = await getSingle(lowered, { id: request.id, user: creator });
+	assert(read.data, JSON.stringify(read.error));
+	expect(read.data.approved).toBe(true);
+	expect(read.data.approvals).toHaveLength(1);
 });

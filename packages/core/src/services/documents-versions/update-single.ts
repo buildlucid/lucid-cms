@@ -11,6 +11,7 @@ import type { LucidUser } from "../../types/hono.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
+import resetStage from "../document-workflows/reset-stage.js";
 import acquireDocumentWrites from "../documents/helpers/acquire-document-writes.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import notifyChange from "../documents/notify-change.js";
@@ -215,6 +216,16 @@ const updateSingle: ServiceFn<
 				});
 				if (activityRes.error) return activityRes;
 			}
+
+			const resetRes = await resetStage(context, {
+				collection: updateContextRes.data.collection,
+				tableNames: updateContextRes.data.tableNames,
+				documentId: data.documentId,
+				versionId: data.versionId,
+				versionType: updateContextRes.data.versionType,
+				userId: data.userId,
+			});
+			if (resetRes.error) return resetRes;
 
 			await invalidateContentDocumentCache(context, data.collectionKey);
 

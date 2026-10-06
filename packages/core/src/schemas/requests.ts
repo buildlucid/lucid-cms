@@ -182,8 +182,19 @@ const requestResponseSchema = z.object({
 	revision: z.number(),
 	executionJobId: z.string().nullable(),
 	createdBy: requestUserSchema.nullable(),
-	approvedBy: requestUserSchema.nullable(),
-	approvedAt: z.string().nullable(),
+	approvals: z
+		.array(
+			z.object({
+				user: requestUserSchema.nullable(),
+				approvedAt: z.string().nullable(),
+			}),
+		)
+		.meta({ description: "Approvals of the current revision" }),
+	requiredApprovals: z.number().meta({
+		description:
+			"Approvals the request needs, the highest its collections ask for",
+		example: 1,
+	}),
 	scheduledAt: z.string().nullable(),
 	scheduledTimezone: z.string().nullable(),
 	failure: z.string().nullable(),

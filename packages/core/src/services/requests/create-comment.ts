@@ -77,10 +77,7 @@ const createComment: ServiceFn<
 	});
 	if (eventsRes.error) return eventsRes;
 
-	if (
-		data.parentId === undefined &&
-		request.approved_revision === request.revision
-	) {
+	if (data.parentId === undefined && request.approvals.length > 0) {
 		const dismissRes = await dismissApproval(context, {
 			ids: [request.id],
 			userId: data.user.id,

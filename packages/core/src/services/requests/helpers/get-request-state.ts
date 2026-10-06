@@ -117,6 +117,11 @@ const getRequestState: ServiceFn<
 		if (workflowsRes.error) return workflowsRes;
 
 		for (const document of documents) {
+			//* snapshots have no stage, and stages only gate create requests while the collection requires them
+			const staged =
+				document.source === "latest" &&
+				(data.request.type === "publish" ||
+					collection.getData.publishing.review?.create === true);
 			const versions = (versionsRes.data ?? []).filter(
 				(version) => version.document_id === document.document_id,
 			);
@@ -157,13 +162,12 @@ const getRequestState: ServiceFn<
 				migrationRequired: false,
 				deleted: !row || formatter.formatBoolean(row.is_deleted),
 				label,
-				workflowStage:
-					document.source !== "latest"
-						? null
-						: approved
-							? document.approved_workflow_stage
-							: (resolveEffectiveWorkflowStage({ collection, stageKey })?.key ??
-								null),
+				workflowStage: !staged
+					? null
+					: approved
+						? document.approved_workflow_stage
+						: (resolveEffectiveWorkflowStage({ collection, stageKey })?.key ??
+							null),
 				versions: new Map(
 					versions
 						.filter(

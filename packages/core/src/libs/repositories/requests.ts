@@ -400,7 +400,22 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 							"lucid_requests.id",
 						)
 						.where("lucid_request_reviewers.user_id", "=", props.access.userId),
-				)} and not (${approved}) then 1 else 0 end)`.as("assigned_to_me"),
+				)} and not (${approved}) and not ${eb.exists(
+					eb
+						.selectFrom("lucid_request_approvals")
+						.select(sql.lit(1).as("one"))
+						.whereRef(
+							"lucid_request_approvals.request_id",
+							"=",
+							"lucid_requests.id",
+						)
+						.whereRef(
+							"lucid_request_approvals.revision",
+							"=",
+							"lucid_requests.revision",
+						)
+						.where("lucid_request_approvals.user_id", "=", props.access.userId),
+				)} then 1 else 0 end)`.as("assigned_to_me"),
 			]);
 
 		const exec = await this.executeQuery(() => query.execute(), {
@@ -443,17 +458,33 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 		});
 		return exec.response;
 	}
-	/** Of the given requests, returns the open ones whose current revision is approved. */
-	async selectApprovedIds(props: { ids: number[] }) {
+	/** Of the given requests, returns the open ones with approvals of their current revision. */
+	async selectIdsWithApprovals(props: { ids: number[] }) {
 		const query = this.db
 			.selectFrom("lucid_requests")
-			.select(["id"])
-			.where("id", "in", props.ids)
-			.where("status", "=", "open")
-			.whereRef("approved_revision", "=", "revision");
+			.select(["lucid_requests.id"])
+			.where("lucid_requests.id", "in", props.ids)
+			.where("lucid_requests.status", "=", "open")
+			.where((eb) =>
+				eb.exists(
+					eb
+						.selectFrom("lucid_request_approvals")
+						.select(sql.lit(1).as("one"))
+						.whereRef(
+							"lucid_request_approvals.request_id",
+							"=",
+							"lucid_requests.id",
+						)
+						.whereRef(
+							"lucid_request_approvals.revision",
+							"=",
+							"lucid_requests.revision",
+						),
+				),
+			);
 
 		const exec = await this.executeQuery(() => query.execute(), {
-			method: "selectApprovedIds",
+			method: "selectIdsWithApprovals",
 		});
 		if (exec.response.error) return exec.response;
 
@@ -472,8 +503,6 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 				failure: null,
 				failure_request_document_id: null,
 				failure_target: null,
-				approved_by: null,
-				approved_at: null,
 				execution_job_id: null,
 				updated_at: new Date().toISOString(),
 			}))

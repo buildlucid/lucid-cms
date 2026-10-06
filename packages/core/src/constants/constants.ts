@@ -45,6 +45,7 @@ export default Object.freeze({
 		previewMaxExpirationSeconds: 604_800,
 		publishing: {
 			selfApproval: false,
+			approvals: 1,
 			snapshotVersionType: "snapshot" as const,
 			proposalVersionType: "proposal" as const,
 			workflow: {

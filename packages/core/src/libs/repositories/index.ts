@@ -48,6 +48,7 @@ export { default as OAuthRefreshTokensRepository } from "./oauth-refresh-tokens.
 export { default as OptionsRepository } from "./options.js";
 export { default as PreviewSessionsRepository } from "./preview-sessions.js";
 export { default as ProcessedImagesRepository } from "./processed-images.js";
+export { default as RequestApprovalsRepository } from "./request-approvals.js";
 export { default as RequestDocumentsRepository } from "./request-documents.js";
 export { default as RequestEventsRepository } from "./request-events.js";
 export { default as RequestReviewersRepository } from "./request-reviewers.js";

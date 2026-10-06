@@ -56,5 +56,5 @@ export const workflowStageAllowsTarget = (props: {
 	});
 	if (!stage) return true;
 
-	return stage.publishTargets.includes(props.target);
+	return stage.targets.includes(props.target);
 };

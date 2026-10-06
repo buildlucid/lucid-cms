@@ -13,7 +13,8 @@ import { getRequestRoute } from "@/utils/route-helpers";
 
 /**
  * The open request queues, then the open requests the user reviews or made,
- * so they can see what needs them and follow their own.
+ * so they can see what needs them and follow their own. The list is left out
+ * when there are none.
  */
 const ReviewWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
@@ -38,17 +39,10 @@ const ReviewWidget: Component<{ size: DashboardWidgetSize }> = () => {
 				loading={overview.isLoading}
 				class="px-2 pt-1"
 			/>
-			<h3 class="mt-4 mb-1 px-2 text-xs text-muted">
-				{T()("home.widget.review.mine")}
-			</h3>
-			<Show
-				when={requests.isLoading || (requests.data?.data.length ?? 0) > 0}
-				fallback={
-					<p class="flex min-h-9 items-center px-2 text-sm text-muted">
-						{T()("home.widget.review.mine.empty")}
-					</p>
-				}
-			>
+			<Show when={requests.isLoading || (requests.data?.data.length ?? 0) > 0}>
+				<h3 class="mt-4 mb-1 px-2 text-xs text-muted">
+					{T()("home.widget.review.mine")}
+				</h3>
 				<ul class="flex flex-col">
 					<Show
 						when={!requests.isLoading}

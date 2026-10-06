@@ -18,6 +18,7 @@ import {
 import type { ServiceFn } from "../../../utils/services/types.js";
 import createInitialDocumentWorkflow from "../../document-workflows/create-initial.js";
 import createProposalWorkflow from "../../document-workflows/create-proposal.js";
+import resetWorkflowStage from "../../document-workflows/reset-stage.js";
 import createDocumentVersion from "../../documents-versions/create-single.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
 import checkSingleCollectionDocumentCount from "../checks/check-single-collection-document-count.js";
@@ -257,6 +258,16 @@ const saveDocument: ServiceFn<
 			{ tableName: tableNamesRes.data.document },
 		);
 		if (updated.error) return updated;
+
+		const resetRes = await resetWorkflowStage(context, {
+			collection: collectionRes.data,
+			tableNames: tableNamesRes.data,
+			documentId: data.documentId,
+			versionId: createVersionRes.data.versionId,
+			versionType: "latest",
+			userId: data.userId,
+		});
+		if (resetRes.error) return resetRes;
 	}
 	//* requested documents stay out of content until their create request is completed
 	if (requested) {

@@ -118,6 +118,7 @@ export type PublishingReviewConfig = {
 	targets: string[];
 	create: boolean;
 	selfApproval: boolean;
+	approvals: number;
 };
 export type PublishingWorkflowStageColor =
 	| "grey"
@@ -131,7 +132,8 @@ export type PublishingWorkflowStageConfig = {
 	key: string;
 	label: ResolvedAdminCopy;
 	color: PublishingWorkflowStageColor;
-	publishTargets: string[];
+	targets: string[];
+	resetTo: string | null;
 };
 
 export type PublishingWorkflowConfig = {
@@ -159,6 +161,8 @@ export type CollectionPublishingOptions = {
 		create?: boolean;
 		/** Allow the request creator to approve their own request. Defaults to false. */
 		selfApproval?: boolean;
+		/** Approvals a request needs before it can be completed. Requests use the highest of their collections. Defaults to 1. */
+		approvals?: number;
 	};
 	/** Editorial stages through which documents can move. */
 	workflow?: {
@@ -171,8 +175,10 @@ export type CollectionPublishingOptions = {
 			label: AdminCopyInput;
 			/** Stage badge color. Defaults to grey. */
 			color?: PublishingWorkflowStageColor;
-			/** Publishing targets available from this stage. */
-			publishTargets?: string[];
+			/** Publishing targets available from this stage. Include "latest" to let create requests complete from it. */
+			targets?: string[];
+			/** Stage to move back to when content changes while in this stage. */
+			resetTo?: string;
 		}>;
 	};
 	/** Named versions that editors may publish to. */

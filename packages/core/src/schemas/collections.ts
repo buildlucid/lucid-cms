@@ -287,6 +287,10 @@ const collectionResponseSchema = z.object({
 					description:
 						"Whether request creators can approve their own requests",
 				}),
+				approvals: z.number().meta({
+					description: "Approvals a request needs before it can be completed",
+					example: 1,
+				}),
 			})
 			.optional(),
 		workflow: z
@@ -297,7 +301,14 @@ const collectionResponseSchema = z.object({
 						key: z.string(),
 						label: resolvedAdminCopySchema,
 						color: z.enum(["grey", "red", "yellow", "green", "blue", "purple"]),
-						publishTargets: z.array(z.string()),
+						targets: z.array(z.string()).meta({
+							description:
+								"Publishing targets available from this stage. Latest lets create requests complete",
+						}),
+						resetTo: z.string().nullable().meta({
+							description:
+								"Stage to move back to when content changes while in this stage",
+						}),
 					}),
 				),
 			})

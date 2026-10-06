@@ -49,6 +49,7 @@ import { oauthRefreshTokensTable } from "./oauth-refresh-tokens.js";
 import { optionsTable } from "./options.js";
 import { previewSessionsTable } from "./preview-sessions.js";
 import { processedImagesTable } from "./processed-images.js";
+import { requestApprovalsTable } from "./request-approvals.js";
 import { requestDocumentsTable } from "./request-documents.js";
 import { requestEventsTable } from "./request-events.js";
 import { requestReviewersTable } from "./request-reviewers.js";
@@ -115,6 +116,7 @@ export * from "./oauth-refresh-tokens.js";
 export * from "./options.js";
 export * from "./preview-sessions.js";
 export * from "./processed-images.js";
+export * from "./request-approvals.js";
 export * from "./request-documents.js";
 export * from "./request-events.js";
 export * from "./request-reviewers.js";
@@ -148,6 +150,7 @@ export const coreTableDefinitions = [
 	collectionsTable,
 	documentBricksTable,
 	documentIdentitiesTable,
+	requestApprovalsTable,
 	requestDocumentsTable,
 	requestEventsTable,
 	requestReviewersTable,

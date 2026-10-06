@@ -2,7 +2,7 @@ import { RequestReviewersRepository } from "../../../libs/repositories/index.js"
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { RequestRecord } from "../types.js";
 
-/** Adds someone who approved or withdrew an approval to the reviewers, if they are not one already. */
+/** Adds someone who approved to the reviewers, if they are not one already. */
 const addReviewer: ServiceFn<
 	[{ request: Pick<RequestRecord, "id" | "reviewers">; userId: number }],
 	undefined

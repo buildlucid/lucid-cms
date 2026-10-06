@@ -1,6 +1,12 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { RequestDetail } from "@types";
-import { type Component, createEffect, createSignal, untrack } from "solid-js";
+import {
+	type Component,
+	createEffect,
+	createMemo,
+	createSignal,
+	untrack,
+} from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import Modal from "@/components/Modal/Modal";
@@ -8,6 +14,7 @@ import { richTextHasContent } from "@/components/RichText/helpers";
 import RichText from "@/components/RichText/RichText";
 import api from "@/services/api";
 import T from "@/translations";
+import { getApprovalsAfter } from "@/utils/requests";
 
 /**
  * Approves a request, with an optional note for the people involved. With
@@ -37,6 +44,21 @@ const RequestApproveModal: Component<{
 			}
 			props.setOpen(false);
 		},
+	});
+
+	// ----------------------------------------
+	// Memos
+	const approvalCount = createMemo(() => getApprovalsAfter(props.request));
+	const description = createMemo(() => {
+		if (approvalCount() < props.request.requiredApprovals) {
+			return T()("requests.approve.description.partial", {
+				count: approvalCount(),
+				required: props.request.requiredApprovals,
+			});
+		}
+		return props.request.scheduledAt
+			? T()("requests.approve.description.scheduled")
+			: T()("requests.approve.description");
 	});
 
 	// ----------------------------------------
@@ -90,11 +112,7 @@ const RequestApproveModal: Component<{
 							? T()("requests.approve.and.complete.title")
 							: T()("requests.approve.title")}
 					</Modal.Title>
-					<Modal.Description>
-						{props.request.scheduledAt
-							? T()("requests.approve.description.scheduled")
-							: T()("requests.approve.description")}
-					</Modal.Description>
+					<Modal.Description>{description()}</Modal.Description>
 				</Modal.Header>
 				<Modal.Body>
 					<RichText

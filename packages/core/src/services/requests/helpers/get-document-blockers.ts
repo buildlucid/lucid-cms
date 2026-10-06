@@ -56,9 +56,8 @@ const getDocumentBlockers = (
 			blockers.push({ code: "review_required", target: target.target });
 		}
 
-		//* workflow stages only gate environments, and create requests land in latest
+		//* create requests target latest, which stages list to allow them
 		if (
-			request.type === "publish" &&
 			state.workflowStage !== null &&
 			!workflowStageAllowsTarget({
 				collection: state.collection,

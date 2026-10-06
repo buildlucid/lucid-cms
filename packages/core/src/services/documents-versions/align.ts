@@ -11,9 +11,10 @@ import updateSingle from "./update-single.js";
 
 /**
  * Replaces latest or a proposal with another version's content, keeping its
- * workflow. Latest can align with an environment, and proposals with an
- * environment or latest. The content IDs both sides were compared at must
- * still match, so nothing changed in between is overwritten.
+ * workflow unless its stage has `resetTo`. Latest can align with an
+ * environment, and proposals with an environment or latest. The content IDs
+ * both sides were compared at must still match, so nothing changed in between
+ * is overwritten.
  */
 const align: ServiceFn<
 	[

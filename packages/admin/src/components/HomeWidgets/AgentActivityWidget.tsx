@@ -7,13 +7,11 @@ import DashboardCardItem from "@/components/DashboardCardItem/DashboardCardItem"
 import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import Pill from "@/components/Pill/Pill";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
-import ViewAllLink from "@/components/ViewAllLink/ViewAllLink";
 import api from "@/services/api";
 import T from "@/translations";
 import { getAgentName } from "@/utils/agent-access";
 import { isRunWorking } from "@/utils/agent-chat";
 import dateHelpers from "@/utils/date-helpers";
-import { canUseAskView, getNewChatHref } from "@/utils/home-view";
 
 /**
  * The user's latest agent chats. Each row leads with a dot for its last run,
@@ -38,15 +36,9 @@ const AgentActivityWidget: Component<{ size: DashboardWidgetSize }> = () => {
 					conversations.isLoading || (conversations.data?.data.length ?? 0) > 0
 				}
 				fallback={
-					<div class="flex min-h-9 items-center justify-between gap-3 px-2">
-						<p class="text-sm text-muted">{T()("agent.home.empty.title")}</p>
-						<Show when={canUseAskView()}>
-							<ViewAllLink
-								href={getNewChatHref()}
-								label={T()("agent.chat.new")}
-							/>
-						</Show>
-					</div>
+					<p class="flex min-h-9 items-center px-2 text-sm text-muted">
+						{T()("agent.home.empty.title")}
+					</p>
 				}
 			>
 				<ul class="flex flex-col">

@@ -18,7 +18,7 @@ const factory = createFactory();
 const approveController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Approve the current revision of a request, with an optional comment.",
+			"Add your approval of the current revision of a request, with an optional comment. The request is approved once it has the approvals its collections require.",
 		tags: ["requests"],
 		summary: "Approve Request",
 		responses: openAPI.responses({

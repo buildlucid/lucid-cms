@@ -1,5 +1,6 @@
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import type {
+	LucidRequestApprovals,
 	LucidRequestDocuments,
 	LucidRequestEvents,
 	LucidRequestReviewers,
@@ -12,6 +13,8 @@ import type { Select } from "../../libs/db/types.js";
 export type RequestRecord = Select<LucidRequests> & {
 	documents: RequestDocumentRecord[];
 	reviewers: Select<LucidRequestReviewers>[];
+	/** Approvals of the current revision. */
+	approvals: Select<LucidRequestApprovals>[];
 	events: Select<LucidRequestEvents>[];
 };
 
@@ -27,6 +30,7 @@ export type RequestDocumentState = {
 	migrationRequired: boolean;
 	deleted: boolean;
 	label: string | null;
+	/** Null when no stage gates the document, eg. snapshots. */
 	workflowStage: string | null;
 	versions: Map<string, RequestVersionState>;
 	/** The proposal or snapshot captured when the request was created. */

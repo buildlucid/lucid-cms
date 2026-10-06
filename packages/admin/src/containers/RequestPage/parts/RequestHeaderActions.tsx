@@ -8,6 +8,7 @@ import Menu from "@/components/Menu/Menu";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import api from "@/services/api";
 import T from "@/translations";
+import { getApprovalsAfter, hasApproved } from "@/utils/requests";
 
 /**
  * The request's next step as a split button, eg. Approve, with related
@@ -34,7 +35,20 @@ export const RequestHeaderActions: Component<{
 	// ----------------------------------------
 	// Memos
 	const open = createMemo(() => props.request.status === "open");
-	//* open comments also stop approval
+	const approvedByMe = createMemo(() => hasApproved(props.request));
+	const approvalCompletes = createMemo(
+		() => getApprovalsAfter(props.request) >= props.request.requiredApprovals,
+	);
+	//* an earlier approval can approve again once the request needs fewer
+	const canApprove = createMemo(
+		() =>
+			!props.request.approved &&
+			props.request.permissions.approve &&
+			(!approvedByMe() || approvalCompletes()),
+	);
+	const canWithdraw = createMemo(
+		() => open() && approvedByMe() && props.request.permissions.approve,
+	);
 	const blocked = createMemo(
 		() =>
 			props.request.blockers.length > 0 ||
@@ -42,7 +56,7 @@ export const RequestHeaderActions: Component<{
 	);
 	const primary = createMemo(() => {
 		if (!open()) return undefined;
-		if (!props.request.approved && props.request.permissions.approve) {
+		if (canApprove()) {
 			return { label: T()("requests.approve"), onClick: props.onApprove };
 		}
 		if (props.request.approved && props.request.permissions.request) {
@@ -63,16 +77,15 @@ export const RequestHeaderActions: Component<{
 				disabled: blocked(),
 				show:
 					open() &&
-					!props.request.approved &&
-					props.request.permissions.approve &&
+					canApprove() &&
+					approvalCompletes() &&
 					props.request.permissions.request,
 			},
 			{
 				label: T()("requests.withdraw"),
 				onSelect: () => unapprove.action.mutate({ id: props.request.id }),
 				disabled: false,
-				show:
-					open() && props.request.approved && props.request.permissions.approve,
+				show: canWithdraw() && primary() !== undefined,
 			},
 		].filter((action) => action.show),
 	);
@@ -84,6 +97,16 @@ export const RequestHeaderActions: Component<{
 			<Show when={props.publishing}>
 				<Button size="sm" variant="secondary" loading={true}>
 					{T()("common.publishing")}
+				</Button>
+			</Show>
+			<Show when={!primary() && canWithdraw()}>
+				<Button
+					size="sm"
+					variant="outline"
+					loading={unapprove.action.isPending}
+					onClick={() => unapprove.action.mutate({ id: props.request.id })}
+				>
+					{T()("requests.withdraw")}
 				</Button>
 			</Show>
 			<Show when={primary()}>

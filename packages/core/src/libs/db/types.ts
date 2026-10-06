@@ -56,6 +56,7 @@ import type {
 	LucidPreviewSessions,
 	LucidProcessedImages,
 	LucidRemoteConnections,
+	LucidRequestApprovals,
 	LucidRequestDocuments,
 	LucidRequestEvents,
 	LucidRequestReviewers,
@@ -280,6 +281,7 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_request_documents: LucidRequestDocuments;
 	lucid_request_targets: LucidRequestTargets;
 	lucid_request_reviewers: LucidRequestReviewers;
+	lucid_request_approvals: LucidRequestApprovals;
 	lucid_request_events: LucidRequestEvents;
 	lucid_locales: LucidLocales;
 	lucid_options: LucidOptions;

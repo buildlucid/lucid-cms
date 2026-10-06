@@ -39,14 +39,6 @@ export const requestsTable = defineTable("lucid_requests", () => ({
 			schema: z.number().nullable(),
 			type: "integer",
 		},
-		approved_by: {
-			schema: z.number().nullable(),
-			type: "integer",
-		},
-		approved_at: {
-			schema: z.union([z.string(), z.date()]).nullable(),
-			type: "timestamp",
-		},
 		scheduled_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
 			type: "timestamp",
@@ -145,9 +137,8 @@ export interface LucidRequests {
 	>;
 	status: RequestStatus;
 	revision: number;
+	/** Set once the current revision has every approval it needs. */
 	approved_revision: number | null;
-	approved_by: number | null;
-	approved_at: TimestampMutable;
 	scheduled_at: TimestampMutable;
 	scheduled_timezone: string | null;
 	scheduled_by: number | null;

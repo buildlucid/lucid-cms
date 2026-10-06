@@ -292,6 +292,9 @@ class CollectionBuilder<
 							selfApproval:
 								review.selfApproval ??
 								constants.collectionBuilder.publishing.selfApproval,
+							approvals:
+								review.approvals ??
+								constants.collectionBuilder.publishing.approvals,
 						}
 					: undefined,
 				workflow: workflow
@@ -303,7 +306,8 @@ class CollectionBuilder<
 								color:
 									stage.color ??
 									constants.collectionBuilder.publishing.workflow.color,
-								publishTargets: [...(stage.publishTargets ?? [])],
+								targets: [...(stage.targets ?? [])],
+								resetTo: stage.resetTo ?? null,
 							})),
 						}
 					: undefined,

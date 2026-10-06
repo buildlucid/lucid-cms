@@ -347,8 +347,7 @@ export const PageBuilderHeader: Component<{
 			]).all;
 
 			const workflowAllowsTarget =
-				!workflow ||
-				workflowStage?.publishTargets.includes(environment.key) === true;
+				!workflow || workflowStage?.targets.includes(environment.key) === true;
 
 			const latestContentId = versionContentId("latest");
 			const unmetReleaseRequirementLabels =

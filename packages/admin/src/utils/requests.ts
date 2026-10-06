@@ -102,6 +102,20 @@ export const getRequestState = (
 	return request.approved ? "approved" : "pending";
 };
 
+/** Whether the signed in user has approved the request's current revision. */
+export const hasApproved = (request: RequestDetail) =>
+	request.approvals.some(
+		(approval) => approval.user?.id === userStore.get.user?.id,
+	);
+
+/**
+ * How many approvals the request would have once the user approves. An
+ * earlier approval counts once, and can approve the request on its own once
+ * its collections need fewer.
+ */
+export const getApprovalsAfter = (request: RequestDetail) =>
+	request.approvals.length + (hasApproved(request) ? 0 : 1);
+
 export const requestStates: Record<
 	RequestState,
 	{
@@ -299,6 +313,13 @@ export const getBlockerCopy = (
 				description: T()("requests.blocker.target.unavailable", { target }),
 			};
 		case "workflow":
+			//* create requests target latest
+			if (blocker.target === "latest") {
+				return {
+					title: T()("requests.blocker.workflow.create.title"),
+					description: T()("requests.blocker.workflow.create"),
+				};
+			}
 			return {
 				title: T()("requests.blocker.workflow.title", { target }),
 				description: T()("requests.blocker.workflow", { target }),
