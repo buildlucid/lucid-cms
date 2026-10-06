@@ -262,7 +262,7 @@ const accountCapabilityGroup: CapabilityGroup = {
 	key: "account",
 	details: {
 		name: copy("admin:integrations.scopes.account.label", {
-			defaultMessage: "Account Scopes",
+			defaultMessage: "Account",
 		}),
 	},
 	core: true,
@@ -271,7 +271,7 @@ const accountCapabilityGroup: CapabilityGroup = {
 			key: ExternalScopes.AccountRead,
 			details: {
 				name: copy("admin:integrations.scopes.account.read", {
-					defaultMessage: "Read Your Account",
+					defaultMessage: "Read",
 				}),
 				description: copy(
 					"admin:integrations.scopes.account.read.description",
@@ -428,7 +428,6 @@ export const getCapabilityRegistry = (
 	return groups;
 };
 
-/** Finds the external capability registered for a scope. */
 export const getExternalCapability = (
 	config: AccessConfig,
 	scope: string,

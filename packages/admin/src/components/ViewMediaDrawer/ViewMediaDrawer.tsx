@@ -11,14 +11,16 @@ import Button from "@/components/Button/Button";
 import DetailsList from "@/components/DetailsList/DetailsList";
 import Drawer from "@/components/Drawer/Drawer";
 import Input from "@/components/Input/Input";
+import MediaLinkAccess from "@/components/MediaLinkAccess/MediaLinkAccess";
 import ReadonlyMediaPreview from "@/components/ReadonlyMediaPreview/ReadonlyMediaPreview";
 import Select from "@/components/Select/Select";
-import Switch from "@/components/Switch/Switch";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
 import helpers from "@/utils/helpers";
+
+type ViewMediaDrawerTab = "details" | "access" | "meta";
 
 interface ViewMediaPanelProps {
 	id?: Accessor<number | undefined>;
@@ -32,7 +34,7 @@ interface ViewMediaPanelProps {
 const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 	// ------------------------------
 	// State
-	const [activeTab, setActiveTab] = createSignal<"details" | "meta">("details");
+	const [activeTab, setActiveTab] = createSignal<ViewMediaDrawerTab>("details");
 
 	// ---------------------------------
 	// Queries
@@ -56,6 +58,9 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 			? locales().map((locale) => ({ code: locale.code }))
 			: [{ code: null }],
 	);
+	const isLibraryMedia = createMemo(() => {
+		return media.data?.data.ownership.type === "library";
+	});
 	const showAltInput = createMemo(() => {
 		return media.data?.data.type === "image";
 	});
@@ -108,11 +113,20 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 			isError: media.isError || foldersHierarchy.isError,
 		};
 	});
-	const visibleTabs = createMemo<Array<"details" | "meta">>(() => {
-		const tabs: Array<"details" | "meta"> = ["details"];
+	const visibleTabs = createMemo<ViewMediaDrawerTab[]>(() => {
+		const tabs: ViewMediaDrawerTab[] = ["details"];
+		if (isLibraryMedia()) tabs.push("access");
 		if (props.id !== undefined) tabs.push("meta");
 		return tabs;
 	});
+
+	// ---------------------------------
+	// Functions
+	function tabLabel(tab: ViewMediaDrawerTab) {
+		if (tab === "details") return T()("common.details");
+		if (tab === "access") return T()("common.access");
+		return T()("common.meta");
+	}
 
 	// ---------------------------------
 	// Effects
@@ -163,10 +177,7 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 						<Drawer.Tabs
 							items={visibleTabs().map((tab) => ({
 								value: tab,
-								label:
-									tab === "details"
-										? T()("common.details")
-										: T()("common.meta"),
+								label: tabLabel(tab),
 							}))}
 							value={activeTab()}
 							onChange={setActiveTab}
@@ -213,6 +224,8 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 									</Show>
 								)}
 							</For>
+						</Show>
+						<Show when={activeTab() === "access" && isLibraryMedia()}>
 							<Select
 								id="media-folder"
 								value={media.data?.data.folderId ?? undefined}
@@ -224,16 +237,11 @@ const ViewMediaDrawer: Component<ViewMediaPanelProps> = (props) => {
 								errors={undefined}
 								disabled={true}
 							/>
-							<Switch
+							<MediaLinkAccess
 								id="public"
 								value={media.data?.data.public ?? true}
 								onChange={() => {}}
-								name="public"
 								disabled={true}
-								label={T()("common.publicly.available")}
-								tooltip={T()("media.visibility.public.description")}
-								trueLabel={T()("common.public")}
-								falseLabel={T()("common.private")}
 							/>
 						</Show>
 						<Show when={activeTab() === "meta" && props.id !== undefined}>

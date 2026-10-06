@@ -4,6 +4,8 @@ import { useDrawerContext } from "../DrawerContext";
 import { DrawerCloseButton } from "./DrawerCloseButton";
 
 export interface DrawerHeaderProps {
+	/** Turn off when tabs sit directly below, as they draw their own border. @default true */
+	border?: boolean;
 	class?: string;
 	children: JSXElement;
 }
@@ -23,8 +25,9 @@ export const DrawerHeader: Component<DrawerHeaderProps> = (props) => {
 		<div
 			data-drawer-header
 			class={classNames(
-				"relative mb-4 border-b border-border",
+				"relative",
 				{
+					"mb-4 border-b border-border": props.border ?? true,
 					"mx-4 py-4": padding() === "sm",
 					"mx-4 md:mx-6 py-4 md:pt-6": padding() === "md",
 				},

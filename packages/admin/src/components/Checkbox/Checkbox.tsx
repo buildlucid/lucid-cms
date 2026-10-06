@@ -1,8 +1,15 @@
 import { Checkbox as KobalteCheckbox, Tooltip } from "@kobalte/core";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck } from "solid-icons/fa";
-import { type Component, createSignal, type JSXElement, Show } from "solid-js";
+import { FaSolidCheck, FaSolidMinus } from "solid-icons/fa";
+import {
+	type Component,
+	createSignal,
+	type JSX,
+	type JSXElement,
+	Show,
+	splitProps,
+} from "solid-js";
 import Field from "@/components/Field/Field";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
@@ -16,11 +23,13 @@ export type CheckboxVariant =
 	| "button-secondary"
 	| "button-danger";
 
-export interface CheckboxProps {
+export interface CheckboxProps extends JSX.AriaAttributes {
 	id: string;
 	name?: string;
 	value: boolean;
 	onChange: (_value: boolean) => void;
+	/** Shows a dash instead of a tick, such as when only some of a group is selected. */
+	indeterminate?: boolean;
 	label?: string;
 	/** @default "default" */
 	variant?: CheckboxVariant;
@@ -58,6 +67,22 @@ export interface CheckboxProps {
 const Checkbox: Component<CheckboxProps> = (props) => {
 	// ----------------------------------------
 	// State & Hooks
+	const [, ariaProps] = splitProps(props, [
+		"id",
+		"name",
+		"value",
+		"onChange",
+		"indeterminate",
+		"label",
+		"variant",
+		"labelStart",
+		"description",
+		"tooltip",
+		"errors",
+		"required",
+		"disabled",
+		"class",
+	]);
 	const [focused, setFocused] = createSignal(false);
 	const [tooltipOpen, setTooltipOpen] = createSignal(false);
 
@@ -98,10 +123,12 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 			disabled={props.disabled}
 			name={props.name}
 			checked={props.value}
+			indeterminate={props.indeterminate}
 			onChange={props.onChange}
 			id={props.id}
 		>
 			<KobalteCheckbox.Input
+				{...ariaProps}
 				onFocus={(event) => {
 					setFocused(true);
 					if (event.currentTarget.matches(":focus-visible")) {
@@ -121,7 +148,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 					{
 						//* stretches the hit area over the whole box, so any part of it toggles
 						"after:absolute after:inset-0 after:content-['']": boxed(),
-						"cursor-pointer border-border bg-input text-secondary-foreground hover:border-secondary data-checked:border-secondary-hover data-checked:bg-secondary data-checked:fill-secondary-foreground":
+						"cursor-pointer border-border bg-input text-secondary-foreground hover:border-secondary data-checked:border-secondary-hover data-checked:bg-secondary data-checked:fill-secondary-foreground data-indeterminate:border-secondary-hover data-indeterminate:bg-secondary data-indeterminate:fill-secondary-foreground":
 							!filled(),
 						"border-primary": !filled() && focused(),
 						"border-card bg-card text-body": filled(),
@@ -130,7 +157,12 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 			>
 				<KobalteCheckbox.Indicator class="w-full h-full relative">
 					<div class="absolute inset-0 flex justify-center items-center">
-						<FaSolidCheck size={10} />
+						<Show
+							when={props.indeterminate}
+							fallback={<FaSolidCheck size={10} />}
+						>
+							<FaSolidMinus size={10} />
+						</Show>
 					</div>
 				</KobalteCheckbox.Indicator>
 			</KobalteCheckbox.Control>

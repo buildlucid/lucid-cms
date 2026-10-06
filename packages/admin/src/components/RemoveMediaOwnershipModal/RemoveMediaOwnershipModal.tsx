@@ -5,9 +5,9 @@ import {
 	createMemo,
 	createSignal,
 } from "solid-js";
+import MediaLinkAccess from "@/components/MediaLinkAccess/MediaLinkAccess";
 import Modal from "@/components/Modal/Modal";
 import Select from "@/components/Select/Select";
-import Switch from "@/components/Switch/Switch";
 import api from "@/services/api";
 import T from "@/translations";
 
@@ -101,15 +101,10 @@ const RemoveMediaOwnershipModal: Component<{
 					options={folderOptions()}
 					label={T()("common.folder")}
 				/>
-				<Switch
+				<MediaLinkAccess
 					id="library-public"
 					value={getPublic()}
 					onChange={setPublic}
-					name="library-public"
-					label={T()("common.publicly.available")}
-					tooltip={T()("media.visibility.public.description")}
-					trueLabel={T()("common.public")}
-					falseLabel={T()("common.private")}
 				/>
 			</div>
 		</Modal.Confirm>

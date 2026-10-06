@@ -33,10 +33,11 @@ import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import FocalPointEditorModal from "@/components/FocalPointEditorModal/FocalPointEditorModal";
 import ImageCropEditorModal from "@/components/ImageCropEditorModal/ImageCropEditorModal";
 import Input from "@/components/Input/Input";
+import MediaLinkAccess from "@/components/MediaLinkAccess/MediaLinkAccess";
 import Pill from "@/components/Pill/Pill";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
+import RadioCards from "@/components/RadioCards/RadioCards";
 import Select from "@/components/Select/Select";
-import Switch from "@/components/Switch/Switch";
 import Textarea from "@/components/Textarea/Textarea";
 import { useCreateMedia } from "@/hooks/useCreateMedia/useCreateMedia";
 import useMediaAltGeneration from "@/hooks/useMediaAltGeneration/useMediaAltGeneration";
@@ -63,6 +64,8 @@ import {
 	updateTranslation,
 } from "@/utils/translation-helpers";
 import { captureVideoPosterFrame } from "./utils/video-frame";
+
+type MediaDrawerTab = "details" | "poster" | "access" | "meta";
 
 interface CreateUpdateMediaPanelProps {
 	id?: Accessor<number | undefined>;
@@ -103,9 +106,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 	const [activePosterCropSource, setActivePosterCropSource] =
 		createSignal<ImageCropSource | null>(null);
 	const [hydratedMediaId, setHydratedMediaId] = createSignal<number>();
-	const [activeTab, setActiveTab] = createSignal<"details" | "poster" | "meta">(
-		"details",
-	);
+	const [activeTab, setActiveTab] = createSignal<MediaDrawerTab>("details");
 	const createMedia = useCreateMedia();
 	const createPosterMedia = useCreateMedia();
 	const updateMedia = props.id ? useUpdateMedia(props.id) : null;
@@ -536,9 +537,13 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 			Boolean(getBodyError("title", mutateErrors())) ||
 			Boolean(getBodyError("alt", mutateErrors())) ||
 			Boolean(getBodyError("description", mutateErrors())) ||
-			Boolean(getBodyError("summary", mutateErrors())) ||
+			Boolean(getBodyError("summary", mutateErrors()))
+		);
+	});
+	const hasAccessErrors = createMemo(() => {
+		return (
 			Boolean(getBodyError("folderId", mutateErrors())) ||
-			Boolean(getBodyError("featured", mutateErrors()))
+			Boolean(getBodyError("public", mutateErrors()))
 		);
 	});
 	const hasPosterErrors = createMemo(() => {
@@ -548,9 +553,13 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 				getBodyError("alt", updatePosterAlt.errors()),
 		);
 	});
-	const visibleTabs = createMemo<Array<"details" | "poster" | "meta">>(() => {
-		const tabs: Array<"details" | "poster" | "meta"> = ["details"];
+	const showAccessTab = createMemo(() => {
+		return (props.allowOwned && panelMode() === "create") || isLibraryMedia();
+	});
+	const visibleTabs = createMemo<MediaDrawerTab[]>(() => {
+		const tabs: MediaDrawerTab[] = ["details"];
 		if (showPosterInput()) tabs.push("poster");
+		if (showAccessTab()) tabs.push("access");
 		if (props.id !== undefined) tabs.push("meta");
 		return tabs;
 	});
@@ -762,14 +771,16 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 		if (errors) return errors[index];
 		return undefined;
 	}
-	function tabLabel(tab: "details" | "poster" | "meta") {
+	function tabLabel(tab: MediaDrawerTab) {
 		if (tab === "details") return T()("common.details");
 		if (tab === "poster") return T()("media.poster.label");
+		if (tab === "access") return T()("common.access");
 		return T()("common.meta");
 	}
-	function tabHasError(tab: "details" | "poster" | "meta") {
+	function tabHasError(tab: MediaDrawerTab) {
 		if (tab === "details") return hasDetailsErrors();
 		if (tab === "poster") return hasPosterErrors();
+		if (tab === "access") return hasAccessErrors();
 		return false;
 	}
 	function openPosterFileBrowser() {
@@ -1268,49 +1279,6 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 								onChange={setActiveTab}
 							/>
 							<Show when={activeTab() === "details"}>
-								<Show when={props.allowOwned && panelMode() === "create"}>
-									<Switch
-										id="owned"
-										value={createMedia.state.owned()}
-										onChange={createMedia.setOwned}
-										name="owned"
-										label={T()("media.ownership.visible.to")}
-										tooltip={T()("media.ownership.owned.description")}
-										trueLabel={T()("media.ownership.only.me")}
-										falseLabel={T()("media.ownership.everyone")}
-									/>
-								</Show>
-								<Show when={isLibraryMedia()}>
-									<Select
-										id="media-folder"
-										value={targetState()?.folderId() ?? undefined}
-										onChange={(val) => {
-											const id =
-												typeof val === "string"
-													? Number.parseInt(val, 10)
-													: val;
-											targetAction()?.setFolderId(id);
-										}}
-										name="media-folder"
-										options={folderOptions()}
-										label={T()("common.folder")}
-										required={false}
-										errors={getBodyError("folderId", mutateErrors())}
-									/>
-									<Switch
-										id="public"
-										value={targetState()?.public() ?? true}
-										onChange={(val) => {
-											targetAction()?.setPublic(val);
-										}}
-										name="public"
-										label={T()("common.publicly.available")}
-										tooltip={T()("media.visibility.public.description")}
-										trueLabel={T()("common.public")}
-										falseLabel={T()("common.private")}
-										errors={getBodyError("featured", mutateErrors())}
-									/>
-								</Show>
 								<For each={editableLocales()}>
 									{(locale, index) => (
 										<Show when={locale.code === (contentLocale() ?? null)}>
@@ -1685,6 +1653,55 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 											</Show>
 										)}
 									</For>
+								</Show>
+							</Show>
+							<Show when={activeTab() === "access" && showAccessTab()}>
+								<Show when={props.allowOwned && panelMode() === "create"}>
+									<RadioCards
+										id="owned"
+										name="owned"
+										value={createMedia.state.owned() ? "personal" : "library"}
+										onChange={(value) =>
+											createMedia.setOwned(value === "personal")
+										}
+										label={T()("media.ownership.visible.to")}
+										options={[
+											{
+												value: "library",
+												label: T()("media.ownership.library"),
+												description: T()("media.ownership.library.description"),
+											},
+											{
+												value: "personal",
+												label: T()("media.ownership.only.me"),
+												description: T()("media.ownership.owned.description"),
+											},
+										]}
+									/>
+								</Show>
+								<Show when={isLibraryMedia()}>
+									<Select
+										id="media-folder"
+										value={targetState()?.folderId() ?? undefined}
+										onChange={(val) => {
+											const id =
+												typeof val === "string"
+													? Number.parseInt(val, 10)
+													: val;
+											targetAction()?.setFolderId(id);
+										}}
+										name="media-folder"
+										options={folderOptions()}
+										label={T()("common.folder")}
+										required={false}
+										errors={getBodyError("folderId", mutateErrors())}
+									/>
+									<MediaLinkAccess
+										id="public"
+										value={targetState()?.public() ?? true}
+										onChange={(value) => targetAction()?.setPublic(value)}
+										errors={getBodyError("public", mutateErrors())}
+									/>
 								</Show>
 							</Show>
 							<Show when={activeTab() === "meta" && props.id !== undefined}>

@@ -24,9 +24,9 @@ export interface SwitchProps extends JSX.AriaAttributes {
 	description?: string;
 	/** Help text shown in a tooltip beside the label. */
 	tooltip?: string;
-	/** @default "True" */
+	/** @default "Yes" */
 	trueLabel?: string;
-	/** @default "False" */
+	/** @default "No" */
 	falseLabel?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
@@ -54,8 +54,6 @@ export interface SwitchProps extends JSX.AriaAttributes {
  * 		label={t("common.status.enabled")}
  * 		value={enabled()}
  * 		onChange={setEnabled}
- * 		trueLabel={t("common.yes")}
- * 		falseLabel={t("common.no")}
  * 	/>
  * );
  * ```
@@ -175,7 +173,7 @@ const Switch: Component<SwitchProps> = (props) => {
 						props.value && "text-subtitle",
 					)}
 				>
-					{props.falseLabel || T()("common.false")}
+					{props.falseLabel || T()("common.no")}
 				</span>
 				<span
 					ref={trueSpanRef}
@@ -185,7 +183,7 @@ const Switch: Component<SwitchProps> = (props) => {
 						!props.value && "text-subtitle",
 					)}
 				>
-					{props.trueLabel || T()("common.true")}
+					{props.trueLabel || T()("common.yes")}
 				</span>
 				<span
 					ref={overlayRef}

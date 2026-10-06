@@ -4,17 +4,14 @@ import {
 	createEffect,
 	createMemo,
 	createSignal,
-	For,
 	Show,
 } from "solid-js";
 import Button from "@/components/Button/Button";
-import Checkbox from "@/components/Checkbox/Checkbox";
 import Drawer from "@/components/Drawer/Drawer";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
+import GrantPicker from "@/components/GrantPicker/GrantPicker";
 import Input from "@/components/Input/Input";
-import InputGrid from "@/components/InputGrid/InputGrid";
 import Textarea from "@/components/Textarea/Textarea";
-import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants";
 import api from "@/services/api";
 import T from "@/translations";
 import { getBodyError } from "@/utils/error-helpers";
@@ -37,6 +34,7 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 	);
 	const [name, setName] = createSignal("");
 	const [description, setDescription] = createSignal("");
+	const [activeTab, setActiveTab] = createSignal("details");
 
 	// ---------------------------------
 	// Query
@@ -110,6 +108,15 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 		if (!props.id) return createRole.errors();
 		return updateRole.errors();
 	});
+	const permissionGroups = createMemo(() =>
+		(permissions.data?.data ?? []).map((group) => ({
+			key: group.key,
+			details: group.details,
+			grants: group.permissions,
+		})),
+	);
+	const tabInvalid = (fields: string[]) =>
+		fields.some((field) => getBodyError(field, errors) !== undefined);
 
 	const updateData = createMemo(() => {
 		return helpers.updateData(
@@ -151,11 +158,12 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 				setSelectedPermissions([]);
 				setName("");
 				setDescription("");
+				setActiveTab("details");
 				createRole.reset();
 				updateRole.reset();
 			}}
 		>
-			<Drawer.Header>
+			<Drawer.Header border={false}>
 				<Drawer.Title>{panelTitle()}</Drawer.Title>
 				<Show
 					when={
@@ -188,7 +196,23 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 				}
 			>
 				<Drawer.Body class="flex flex-col gap-3">
-					<InputGrid columns={2}>
+					<Drawer.Tabs
+						items={[
+							{
+								value: "details",
+								label: T()("common.details"),
+								invalid: tabInvalid(["name", "description"]),
+							},
+							{
+								value: "permissions",
+								label: T()("common.permissions"),
+								invalid: tabInvalid(["permissions"]),
+							},
+						]}
+						value={activeTab()}
+						onChange={setActiveTab}
+					/>
+					<Show when={activeTab() === "details"}>
 						<Input
 							id="name"
 							name="name"
@@ -200,134 +224,26 @@ const UpsertRoleDrawer: Component<UpsertRolePanelProps> = (props) => {
 							required={true}
 							errors={getBodyError("name", errors)}
 						/>
-					</InputGrid>
-					<Textarea
-						id="description"
-						name="description"
-						value={description()}
-						onChange={setDescription}
-						disabled={isReadOnly()}
-						label={T()("common.description")}
-						errors={getBodyError("description", errors)}
-						rows={4}
-					/>
-					<div class="w-full">
-						<div class="mb-1.5">
-							<h3 class="text-sm text-body">{T()("common.permissions")}</h3>
-						</div>
-						<div class="w-full">
-							<UnavailableGrants
-								keys={selectedPermissions().filter(
-									(key) =>
-										!permissions.data?.data.some((group) =>
-											group.permissions.some(
-												(permission) => permission.key === key,
-											),
-										),
-								)}
-								onRemove={(key) =>
-									setSelectedPermissions((values) =>
-										values.filter((value) => value !== key),
-									)
-								}
-								disabled={isReadOnly()}
-							/>
-							<For each={permissions?.data?.data}>
-								{(option) => (
-									<div class="mb-3 last:mb-0 p-3 rounded-md border border-border bg-card">
-										<div class="flex justify-between items-start gap-3">
-											<h4 class="text-sm font-medium text-body">
-												{helpers.getLocaleValue({
-													value: option.details.name,
-													fallback: option.key,
-												})}
-											</h4>
-											<Show when={!isReadOnly()}>
-												<button
-													type="button"
-													class="text-xs text-muted hover:text-body transition-colors"
-													onClick={() => {
-														const groupIsSelected = option.permissions.every(
-															(permission) =>
-																selectedPermissions().includes(permission.key),
-														);
-
-														if (groupIsSelected) {
-															setSelectedPermissions((prev) =>
-																prev.filter(
-																	(permission) =>
-																		!option.permissions.some(
-																			(optionPermission) =>
-																				optionPermission.key === permission,
-																		),
-																),
-															);
-															return;
-														}
-
-														setSelectedPermissions((prev) => [
-															...new Set([
-																...prev,
-																...option.permissions.map(
-																	(permission) => permission.key,
-																),
-															]),
-														]);
-													}}
-												>
-													{option.permissions.every((permission) =>
-														selectedPermissions().includes(permission.key),
-													)
-														? T()("common.clear")
-														: T()("selectors.all")}
-												</button>
-											</Show>
-										</div>
-										<Show when={option.details.description}>
-											<p class="text-xs text-muted mt-1">
-												{helpers.getLocaleValue({
-													value: option.details.description,
-												})}
-											</p>
-										</Show>
-										<div class="mt-2 flex flex-wrap gap-2">
-											<For each={option.permissions}>
-												{(permission) => (
-													<Checkbox
-														variant="button-secondary"
-														id={`permission-${option.key}-${permission.key}`}
-														value={selectedPermissions().includes(
-															permission.key,
-														)}
-														onChange={() => {
-															setSelectedPermissions((prev) => {
-																if (prev.includes(permission.key)) {
-																	return prev.filter(
-																		(p) => p !== permission.key,
-																	);
-																}
-																return [...prev, permission.key];
-															});
-														}}
-														label={helpers.getLocaleValue({
-															value: permission.details.name,
-															fallback: permission.key,
-														})}
-														tooltip={
-															helpers.getLocaleValue({
-																value: permission.details.description,
-															}) || undefined
-														}
-														disabled={isReadOnly()}
-													/>
-												)}
-											</For>
-										</div>
-									</div>
-								)}
-							</For>
-						</div>
-					</div>
+						<Textarea
+							id="description"
+							name="description"
+							value={description()}
+							onChange={setDescription}
+							disabled={isReadOnly()}
+							label={T()("common.description")}
+							errors={getBodyError("description", errors)}
+							rows={4}
+						/>
+					</Show>
+					<Show when={activeTab() === "permissions"}>
+						<GrantPicker
+							id="permissions"
+							groups={permissionGroups()}
+							value={selectedPermissions()}
+							onChange={setSelectedPermissions}
+							disabled={isReadOnly()}
+						/>
+					</Show>
 				</Drawer.Body>
 				<Drawer.Footer>
 					<ErrorMessage theme="basic" message={errors()?.message} />
