@@ -108,6 +108,7 @@ const DocumentEditorPage: Component<{
 		version: versionType,
 		versionId: versionId,
 		createDocumentMutation: mutations.createDocumentMutation,
+		requestCreationMutation: mutations.requestCreationMutation,
 		createSingleVersionMutation: mutations.createSingleVersionMutation,
 		updateSingleVersionMutation: mutations.updateSingleVersionMutation,
 		publishMutation: mutations.publishMutation,

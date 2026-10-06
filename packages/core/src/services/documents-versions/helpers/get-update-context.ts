@@ -9,6 +9,8 @@ import type { LucidVersionTable } from "../../../libs/db/tables/index.js";
 import type { Select } from "../../../libs/db/types.js";
 import type { DocumentHookRelease } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
+import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
+import hasAccess from "../../../libs/permission/has-access.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
 import type { LucidUser } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -21,7 +23,7 @@ const getUpdateContext: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			versionId: number;
-			/** Required to save release proposals. */
+			/** Required to save release proposals. When given, saving latest needs update access. */
 			authUser?: LucidUser;
 		},
 	],
@@ -132,6 +134,27 @@ const getUpdateContext: ServiceFn<
 		if (accessRes.error) return accessRes;
 
 		release = accessRes.data;
+	} else if (
+		versionExistsRes.data.type === "latest" &&
+		data.authUser &&
+		!hasAccess({
+			user: data.authUser,
+			requiredPermissions: [
+				getCollectionPermission(data.collectionKey, "update"),
+			],
+		})
+	) {
+		return {
+			error: {
+				type: "basic" as const,
+				name: copy("server:core.collections.permission.error.name"),
+				message: copy("server:core.collections.permission.error.message", {
+					data: { collection: data.collectionKey, action: "update" },
+				}),
+				status: 403,
+			},
+			data: undefined,
+		};
 	} else if (versionExistsRes.data.type !== "latest") {
 		return {
 			error: {

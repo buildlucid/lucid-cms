@@ -1,8 +1,10 @@
 import { useQueryClient } from "@tanstack/solid-query";
+import type { ReleaseOverviewCounts } from "@types";
 import {
 	FaSolidCalendar,
 	FaSolidCircleCheck,
 	FaSolidT,
+	FaSolidTag,
 	FaSolidUser,
 	FaSolidUsers,
 } from "solid-icons/fa";
@@ -39,6 +41,7 @@ const ReleasesPage: Component = () => {
 		mode: "url",
 		schema: {
 			filters: {
+				type: textFilter(),
 				title: textFilter(),
 				status: textFilter({ defaultValue: "open" }),
 				approval: textFilter({ defaultValue: "pending" }),
@@ -76,12 +79,17 @@ const ReleasesPage: Component = () => {
 	// ----------------------------------------
 	// Memos
 	const presets = createMemo(() => {
-		const counts = overview.data?.data;
+		const overviewData = overview.data?.data;
+		//* the list shows every type, so its presets count them all
+		const count = (key: keyof ReleaseOverviewCounts) =>
+			overviewData
+				? overviewData.publish[key] + overviewData.create[key]
+				: undefined;
 		const items: FilterPreset[] = [
 			{
 				key: "pending",
 				label: T()("releases.state.pending"),
-				count: counts?.awaitingApproval,
+				count: count("awaitingApproval"),
 				loading: overview.isFetching,
 				filters: {
 					status: { value: "open", operator: "=" },
@@ -91,7 +99,7 @@ const ReleasesPage: Component = () => {
 			{
 				key: "assigned",
 				label: T()("releases.filter.assigned"),
-				count: counts?.assignedToMe,
+				count: count("assignedToMe"),
 				loading: overview.isFetching,
 				filters: {
 					status: { value: "open", operator: "=" },
@@ -101,7 +109,7 @@ const ReleasesPage: Component = () => {
 			{
 				key: "approved",
 				label: T()("releases.state.approved"),
-				count: counts?.approved,
+				count: count("approved"),
 				loading: overview.isFetching,
 				filters: {
 					status: { value: "open", operator: "=" },
@@ -111,27 +119,37 @@ const ReleasesPage: Component = () => {
 			{
 				key: "failed",
 				label: T()("releases.state.failed"),
-				count: counts?.failed,
+				count: count("failed"),
 				loading: overview.isFetching,
 				filters: {
 					status: { value: "open", operator: "=" },
 					failed: { value: true, operator: "=" },
 				},
 			},
+			{
+				key: "requests",
+				label: T()("releases.filter.requests"),
+				count: overviewData
+					? overviewData.create.awaitingApproval + overviewData.create.approved
+					: undefined,
+				loading: overview.isFetching,
+				filters: {
+					status: { value: "open", operator: "=" },
+					type: { value: "create", operator: "=" },
+				},
+			},
 		];
 		return items;
 	});
 	const collectionOptions = createMemo(() =>
-		(collections.data?.data ?? [])
-			.filter((collection) => collection.publishing.targets.length > 0)
-			.map((collection) => ({
-				value: collection.key,
-				label:
-					helpers.getLocaleValue({
-						value: collection.details.labels.plural,
-						fallback: collection.key,
-					}) || collection.key,
-			})),
+		(collections.data?.data ?? []).map((collection) => ({
+			value: collection.key,
+			label:
+				helpers.getLocaleValue({
+					value: collection.details.labels.plural,
+					fallback: collection.key,
+				}) || collection.key,
+		})),
 	);
 
 	// ----------------------------------------
@@ -173,6 +191,15 @@ const ReleasesPage: Component = () => {
 					filterPresets={presets()}
 					filterFields={[
 						{ label: T()("common.title"), key: "title", type: "text" },
+						{
+							label: T()("releases.type"),
+							key: "type",
+							type: "select",
+							options: [
+								{ label: T()("releases.type.publish"), value: "publish" },
+								{ label: T()("releases.type.create"), value: "create" },
+							],
+						},
 						{
 							label: T()("common.status"),
 							key: "status",
@@ -265,6 +292,11 @@ const ReleasesPage: Component = () => {
 								key: "title",
 								icon: <FaSolidT />,
 								minWidth: 280,
+							},
+							{
+								label: T()("releases.type"),
+								key: "type",
+								icon: <FaSolidTag />,
 							},
 							{
 								label: T()("common.status"),

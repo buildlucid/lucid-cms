@@ -3,14 +3,18 @@ import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import getAllowedTargets from "./get-allowed-targets.js";
 
-/** Checks the explicitly selected publication environments. */
+/** Checks the explicitly selected publication environments of a publish release. */
 const resolveTargets = (data: {
 	collection: CollectionBuilder;
 	source: string;
 	targets: string[];
 }): Awaited<ServiceResponse<string[]>> => {
 	const targets = [...new Set(data.targets)];
-	const allowed = getAllowedTargets(data.collection, data.source);
+	const allowed = getAllowedTargets({
+		collection: data.collection,
+		type: "publish",
+		source: data.source,
+	});
 	if (
 		data.targets.includes("latest") ||
 		targets.length === 0 ||

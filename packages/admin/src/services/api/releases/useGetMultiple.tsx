@@ -9,10 +9,12 @@ import serviceHelpers from "@/utils/service-helpers";
 interface QueryParams {
 	queryString?: Accessor<string>;
 	filters?: {
+		type?: Accessor<string | undefined>;
 		status?: Accessor<string | undefined>;
 		approval?: Accessor<string | undefined>;
 		failed?: Accessor<string | undefined>;
 		assignedToMe?: Accessor<string | undefined>;
+		createdBy?: Accessor<number | undefined>;
 		collectionKey?: Accessor<string | undefined>;
 		documentId?: Accessor<number | undefined>;
 	};

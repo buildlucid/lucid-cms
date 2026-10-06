@@ -203,6 +203,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				`${dynamicConfig.tableName}.updated_at`,
 				`${dynamicConfig.tableName}.updated_by`,
 				`${dynamicConfig.tableName}.is_deleted`,
+				`${dynamicConfig.tableName}.create_release_id`,
 			])
 			.select([
 				(eb) =>
@@ -336,6 +337,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			includeWorkflow: boolean;
 			workflowAssigneeFilterValues?: Array<string | number>;
 			filterOr?: DocumentFilterGroup[];
+			/** List requested documents, which only exist as their create release's proposal, instead of created ones. */
+			pending?: boolean;
 			tables: {
 				versions: LucidVersionTableName;
 				documentFields: LucidBrickTableName;
@@ -360,6 +363,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${dynamicConfig.tableName}.updated_at`,
 					`${dynamicConfig.tableName}.updated_by`,
 					`${dynamicConfig.tableName}.is_deleted`,
+					`${dynamicConfig.tableName}.create_release_id`,
 				])
 				.select([
 					(eb) =>
@@ -528,6 +532,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.version)
+				.where(
+					`${dynamicConfig.tableName}.create_release_id`,
+					props.pending ? "is not" : "is",
+					null,
+				)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(
 						`${props.tables.versions}.id`,
@@ -573,6 +582,11 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.version)
+				.where(
+					`${dynamicConfig.tableName}.create_release_id`,
+					props.pending ? "is not" : "is",
+					null,
+				)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(
 						`${props.tables.versions}.id`,
@@ -774,6 +788,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					`${dynamicConfig.tableName}.updated_at`,
 					`${dynamicConfig.tableName}.updated_by`,
 					`${dynamicConfig.tableName}.is_deleted`,
+					`${dynamicConfig.tableName}.create_release_id`,
 				])
 				.select([
 					(eb) =>
@@ -905,6 +920,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			{
 				ids: number[];
 				isDeleted?: Select<LucidDocumentTable>["is_deleted"];
+				/** False leaves out requested documents, which don't exist until their create release is released. */
+				pending?: boolean;
 				protectTargets?: boolean;
 			}
 		>,
@@ -917,6 +934,13 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 
 		if (props.isDeleted !== undefined) {
 			query = query.where("is_deleted", "=", props.isDeleted);
+		}
+		if (props.pending !== undefined) {
+			query = query.where(
+				"create_release_id",
+				props.pending ? "is not" : "is",
+				null,
+			);
 		}
 		if (
 			props.protectTargets &&
@@ -1321,7 +1345,8 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 									"is_deleted",
 									"=",
 									this.dbAdapter.getDefault("boolean", "false"),
-								);
+								)
+								.where("create_release_id", "is", null);
 
 							query = this.applyEnvironmentStatusFiltersToQuery(
 								query,

@@ -81,8 +81,9 @@ export const ReleaseChecks: Component<{
 					(blocker) =>
 						blocker.code !== "workflow" && blocker.code !== "review_required",
 				),
+				//* workflow stages only gate environments, never latest
 				workflowAllowed:
-					workflowCheckable() && !unavailable
+					workflowCheckable() && !unavailable && target.target !== "latest"
 						? !blockers.some((blocker) => blocker.code === "workflow")
 						: undefined,
 			};

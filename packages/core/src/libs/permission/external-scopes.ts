@@ -12,6 +12,7 @@ const externalScopeValues = {
 export type CollectionExternalScopeAction =
 	| "read"
 	| "create"
+	| "create-request"
 	| "update"
 	| "delete"
 	| "restore"
@@ -22,13 +23,18 @@ export type CollectionExternalScope<
 	TAction extends CollectionExternalScopeAction = CollectionExternalScopeAction,
 > = `documents:${string}:${TAction}`;
 
+/** Converts a kebab-case action into PascalCase, eg. create-request to CreateRequest. */
+type PascalAction<TAction extends string> =
+	TAction extends `${infer THead}-${infer TTail}`
+		? `${Capitalize<THead>}${PascalAction<TTail>}`
+		: Capitalize<TAction>;
+
 type DocumentScopeFactories = {
-	[TAction in CollectionExternalScopeAction as `Document${Capitalize<TAction>}`]: (
+	[TAction in CollectionExternalScopeAction as `Document${PascalAction<TAction>}`]: (
 		collectionKey: string,
 	) => CollectionExternalScope<TAction>;
 };
 
-/** Builds the external scope key for a collection action. */
 export const getCollectionExternalScope = <
 	const TAction extends CollectionExternalScopeAction,
 >(
@@ -41,6 +47,8 @@ const documentScopeFactories = {
 		getCollectionExternalScope(collectionKey, "read"),
 	DocumentCreate: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "create"),
+	DocumentCreateRequest: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "create-request"),
 	DocumentUpdate: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "update"),
 	DocumentDelete: (collectionKey: string) =>

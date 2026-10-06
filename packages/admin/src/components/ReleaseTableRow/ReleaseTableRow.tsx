@@ -50,6 +50,20 @@ const ReleaseTableRow: Component<{
 				</div>
 			</Table.Cell>
 			<Table.Pill
+				column="type"
+				text={
+					props.release.type === "create"
+						? T()("releases.type.create")
+						: T()("releases.type.publish")
+				}
+				variant={props.release.type === "create" ? "blue-subtle" : "outline"}
+				tooltip={
+					props.release.type === "create"
+						? T()("releases.type.create.tooltip")
+						: T()("releases.type.publish.tooltip")
+				}
+			/>
+			<Table.Pill
 				column="status"
 				text={releaseStates[getReleaseState(props.release)].label()}
 				variant={releaseStates[getReleaseState(props.release)].pill}

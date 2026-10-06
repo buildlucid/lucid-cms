@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
+import constants from "../../constants/constants.js";
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import getCurrentCollectionMigrationId from "../../libs/collection/migration/get-current-collection-migration-id.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
-import type { DocumentBeforeUpsertHookOrigin } from "../../libs/hooks/types.js";
+import type {
+	DocumentBeforeUpsertHookOrigin,
+	DocumentHookRelease,
+} from "../../libs/hooks/types.js";
 import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
@@ -15,7 +19,9 @@ import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import rollbackVersionCreate from "./helpers/rollback-version-create.js";
 
 /**
- * Creates a new version. This is always for the "latest" version type
+ * Creates a new latest version. A requested document's content is instead
+ * created as the proposal of its create release, so it has no latest version
+ * until the release is released.
  */
 const createSingle: ServiceFn<
 	[
@@ -27,9 +33,11 @@ const createSingle: ServiceFn<
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
+			/** The create release requesting a new document. */
+			createReleaseId?: number;
 		},
 	],
-	number
+	{ versionId: number }
 > = async (context, data) => {
 	const [tableNamesRes, migrationIdRes] = await Promise.all([
 		getTableNames(context, data.collection.key),
@@ -40,7 +48,10 @@ const createSingle: ServiceFn<
 
 	const DocumentVersions = new DocumentVersionsRepository(context.db);
 
-	const versionType = "latest";
+	const versionType =
+		data.createReleaseId === undefined
+			? "latest"
+			: constants.collectionBuilder.publishing.proposalVersionType;
 
 	const currentLatestRes = await DocumentVersions.selectSingle(
 		{
@@ -114,6 +125,22 @@ const createSingle: ServiceFn<
 		return newVersionRes;
 	}
 
+	//* a requested document is its create release's only document
+	const release: DocumentHookRelease | undefined =
+		data.createReleaseId === undefined
+			? undefined
+			: {
+					id: data.createReleaseId,
+					documents: [
+						{
+							collectionKey: data.collection.key,
+							documentId: data.documentId,
+							source: "latest",
+							versionId: newVersionRes.data.id,
+						},
+					],
+				};
+
 	// ----------------------------------------------
 	// Fire beforeUpsert transform hooks
 	const hookResponse = await executeHooks(
@@ -130,6 +157,7 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				release,
 				execution: {
 					mode: "upsert",
 					action: "create",
@@ -199,6 +227,7 @@ const createSingle: ServiceFn<
 				collectionKey: data.collection.key,
 				userId: data.userId,
 				collectionTableNames: tableNamesRes.data,
+				release,
 			},
 			data: {
 				documentId: data.documentId,
@@ -257,7 +286,7 @@ const createSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: data.documentId,
+		data: { versionId: newVersionRes.data.id },
 	};
 };
 

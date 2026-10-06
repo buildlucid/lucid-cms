@@ -9,6 +9,7 @@ import type api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
 import userStore from "@/store/userStore/userStore";
 import brickHelpers from "@/utils/brick-helpers";
+import { getDocumentCreateActions } from "@/utils/releases";
 import { createDocumentLocalization } from "../useDocumentLocalization/useDocumentLocalization";
 import useUserPreference from "../useUserPreference/useUserPreference";
 
@@ -23,6 +24,7 @@ export function useDocumentUIState(props: {
 	versionId: Accessor<number | undefined>;
 	proposalEditable?: Accessor<boolean>;
 	createDocumentMutation?: ReturnType<typeof api.documents.useCreateSingle>;
+	requestCreationMutation?: ReturnType<typeof api.documents.useRequestCreation>;
 	createSingleVersionMutation?: ReturnType<
 		typeof api.documents.useCreateSingleVersion
 	>;
@@ -59,6 +61,7 @@ export function useDocumentUIState(props: {
 		defaultValue: false,
 	});
 
+	const [getRequestCreationOpen, setRequestCreationOpen] = createSignal(false);
 	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
 		createSignal(false);
 	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
@@ -80,7 +83,8 @@ export function useDocumentUIState(props: {
 	const isSaving = createMemo(() => {
 		return (
 			props.createSingleVersionMutation?.action.isPending ||
-			props.createDocumentMutation?.action.isPending
+			props.createDocumentMutation?.action.isPending ||
+			props.requestCreationMutation?.action.isPending
 		);
 	});
 
@@ -96,7 +100,8 @@ export function useDocumentUIState(props: {
 		return (
 			props.updateSingleVersionMutation?.errors() ||
 			props.createSingleVersionMutation?.errors() ||
-			props.createDocumentMutation?.errors()
+			props.createDocumentMutation?.errors() ||
+			props.requestCreationMutation?.errors()
 		);
 	});
 
@@ -116,6 +121,17 @@ export function useDocumentUIState(props: {
 		return props.collection()?.autoSave;
 	});
 
+	/** Proposals follow their release's edit access, which also covers people requesting a document. */
+	const hasUpdateAccess = createMemo(() => {
+		if (props.version() === "proposal")
+			return props.proposalEditable?.() === true;
+
+		const permission = props.collection()?.permissions.update;
+		if (!permission) return false;
+
+		return userStore.get.hasPermission([permission]).all;
+	});
+
 	const isAutoSaveActive = createMemo(() => {
 		if (props.version() === "proposal" && props.proposalEditable?.() !== true) {
 			return false;
@@ -126,14 +142,8 @@ export function useDocumentUIState(props: {
 			return false;
 		}
 		if (props.document()?.isDeleted) return false;
-		const permission = props.collection()?.permissions.update;
-		if (!permission) return false;
 
-		return (
-			userStore.get.hasPermission([permission]).all &&
-			autoSave() &&
-			autoSaveUserEnabled()
-		);
+		return hasUpdateAccess() && autoSave() && autoSaveUserEnabled();
 	});
 
 	const saveDisabled = createMemo(() => {
@@ -222,18 +232,14 @@ export function useDocumentUIState(props: {
 		() => brickStore.getDocumentMutated() || isSaving() || isAutoSaving(),
 	);
 
+	/** How the create screen can add the document, default first: create it or request it. */
+	const createActions = createMemo(() =>
+		getDocumentCreateActions(props.collection()),
+	);
+
 	const hasSavePermission = createMemo(() => {
-		if (props.mode === "create") {
-			const permission = props.collection()?.permissions.create;
-			if (!permission) return false;
-
-			return userStore.get.hasPermission([permission]).all;
-		}
-
-		const permission = props.collection()?.permissions.update;
-		if (!permission) return false;
-
-		return userStore.get.hasPermission([permission]).all;
+		if (props.mode === "create") return createActions().length > 0;
+		return hasUpdateAccess();
 	});
 
 	const hasAutoSavePermission = createMemo(() => {
@@ -247,13 +253,7 @@ export function useDocumentUIState(props: {
 		}
 		if (props.document()?.isDeleted) return false;
 
-		const permission = props.collection()?.permissions.update;
-		if (!permission) return false;
-
-		return (
-			userStore.get.hasPermission([permission]).all &&
-			props.collection()?.autoSave
-		);
+		return hasUpdateAccess() && props.collection()?.autoSave;
 	});
 
 	const hasPublishPermission = createMemo(() => {
@@ -337,6 +337,8 @@ export function useDocumentUIState(props: {
 		setRestoreRevisionVersionId,
 		getPreviewOpen,
 		setPreviewOpen,
+		getRequestCreationOpen,
+		setRequestCreationOpen,
 		getReleaseEnvironmentOpen,
 		setReleaseEnvironmentOpen,
 		getReleaseEnvironmentTarget,
@@ -354,6 +356,7 @@ export function useDocumentUIState(props: {
 		isPublished,
 		showRevisionNavigation,
 		showUpsertButton,
+		createActions,
 		hasSavePermission,
 		hasPublishPermission,
 		showPublishButton,

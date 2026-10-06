@@ -6,19 +6,28 @@ import type {
 	ReleaseEvent,
 	ReleaseSummary,
 	ReleaseTarget,
+	ReleaseType,
 } from "@types";
 import type { PillVariant } from "@/components/Pill/Pill";
 import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
+import { Permissions } from "@/constants/permissions";
+import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 
-/** Filtered release lists that dashboards and overviews link to. */
-export const releaseListRoutes = {
-	pending: "/lucid/releases?filter[status]=open&filter[approval]=pending",
+const releaseListFilters = {
+	pending: "filter[status]=open&filter[approval]=pending",
+	approved: "filter[status]=open&filter[approval]=approved",
 	scheduled:
-		"/lucid/releases?filter[status]=open&filter[approval]=approved&filter[scheduled]=1",
-	failed: "/lucid/releases?filter[status]=open&filter[failed]=1",
+		"filter[status]=open&filter[approval]=approved&filter[scheduled]=1",
+	failed: "filter[status]=open&filter[failed]=1",
 };
+
+/** A filtered list of one type of release, which dashboards and overviews link to. */
+export const getReleaseListRoute = (
+	type: ReleaseType,
+	view: keyof typeof releaseListFilters,
+) => `/lucid/releases?filter[type]=${type}&${releaseListFilters[view]}`;
 
 export type ReleaseState =
 	| "released"
@@ -132,6 +141,34 @@ export const getAllowedTargets = (
 
 	const index = environments.indexOf(source);
 	return index === -1 ? [] : environments.slice(index + 1);
+};
+
+/**
+ * The ways someone can add documents to a collection, default first: create
+ * them straight away, or request them through a create release. Creating is
+ * unavailable when the collection reviews new documents. Anyone who can
+ * create can also choose to request.
+ */
+export const getDocumentCreateActions = (
+	collection: Collection | undefined,
+): Array<"create" | "request"> => {
+	if (!collection) return [];
+
+	const canCreate =
+		collection.publishing.review?.create !== true &&
+		userStore.get.hasPermission([collection.permissions.create]).all;
+	const canRequest =
+		collection.mode === "multiple" &&
+		userStore.get.hasPermission([Permissions.ReleasesRead]).all &&
+		userStore.get.hasPermission([
+			collection.permissions.create,
+			collection.permissions["create-request"],
+		]).some;
+
+	return [
+		...(canCreate ? (["create"] as const) : []),
+		...(canRequest ? (["request"] as const) : []),
+	];
 };
 
 /** The open proposals a document has in each release, with their editable versions. */

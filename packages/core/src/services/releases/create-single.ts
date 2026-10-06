@@ -55,6 +55,7 @@ const createSingle: ServiceFn<
 	const now = new Date().toISOString();
 	const releaseRes = await Releases.createSingle({
 		data: {
+			type: "publish",
 			title: data.title,
 			description: descriptionRes?.data ?? null,
 			status: "open",
@@ -88,6 +89,7 @@ const createSingle: ServiceFn<
 		const reviewersRes = await setReviewers(context, {
 			release: {
 				id: releaseRes.data.id,
+				type: "publish",
 				created_by: data.user.id,
 				documents: data.documents.map((document) => ({
 					collection_key: document.collectionKey,

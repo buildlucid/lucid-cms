@@ -195,6 +195,7 @@ const collectionResponseSchema = z.object({
 	permissions: z.object({
 		read: z.string(),
 		create: z.string(),
+		"create-request": z.string(),
 		update: z.string(),
 		delete: z.string(),
 		restore: z.string(),
@@ -274,8 +275,18 @@ const collectionResponseSchema = z.object({
 		),
 		review: z
 			.object({
-				requiredFor: z.array(z.string()),
-				allowSelfApproval: z.boolean(),
+				targets: z.array(z.string()).meta({
+					description:
+						"Publishing targets that can only be published through an approved release",
+				}),
+				create: z.boolean().meta({
+					description:
+						"Whether new documents can only be created through an approved create release",
+				}),
+				selfApproval: z.boolean().meta({
+					description:
+						"Whether release creators can approve their own releases",
+				}),
 			})
 			.optional(),
 		workflow: z

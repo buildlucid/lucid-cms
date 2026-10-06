@@ -26,8 +26,8 @@ const PageCollection = new CollectionBuilder("page", {
 			},
 		],
 		review: {
-			requiredFor: ["production"],
-			allowSelfApproval: true,
+			targets: ["production"],
+			selfApproval: true,
 		},
 	},
 })

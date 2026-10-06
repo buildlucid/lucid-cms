@@ -38,6 +38,17 @@ const removeDocument: ServiceFn<
 		};
 	}
 
+	if (release.type === "create") {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.releases.create.fixed"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
 	const document = release.documents.find(
 		(document) => document.id === data.releaseDocumentId,
 	);

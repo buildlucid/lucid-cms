@@ -322,6 +322,8 @@
 	"core.routes.document.update.error.message": "An error occurred while updating the document.",
 	"core.routes.document.create.error.name": "Document Create Error",
 	"core.routes.document.create.error.message": "An error occurred while creating the document.",
+	"core.routes.document.request.error.name": "Document Request Error",
+	"core.routes.document.request.error.message": "An error occurred while requesting the document.",
 	"core.routes.document.duplicate.error.name": "Document Duplicate Error",
 	"core.routes.document.duplicate.error.message": "An error occurred while duplicating the document.",
 	"core.routes.collection.fetch.error.name": "Collection(s) Fetch Error",
@@ -842,5 +844,10 @@
 	"core.releases.documents.invalid": "A release must contain distinct documents.",
 	"core.releases.document.not.found": "This document is not part of the release.",
 	"core.releases.document.duplicate": "This document is already included in the release.",
-	"core.releases.document.last": "A release must contain at least one document."
+	"core.releases.document.last": "A release must contain at least one document.",
+	"core.releases.create.fixed": "A document request holds one new document, which is created in latest. Its documents and targets can't change.",
+	"core.releases.create.collection": "Documents can only be requested in collections that hold multiple documents.",
+	"core.releases.create.permission": "You do not have permission to request documents in this collection.",
+	"core.documents.pending.permission": "You need permission to read releases to see requested documents.",
+	"core.documents.create.review.required": "New documents in this collection need an approved request. Request the document instead."
 }

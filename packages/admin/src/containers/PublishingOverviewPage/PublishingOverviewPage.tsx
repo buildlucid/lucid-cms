@@ -3,6 +3,7 @@ import type { Collection } from "@types";
 import {
 	FaSolidArrowTrendUp,
 	FaSolidCalendar,
+	FaSolidCircleCheck,
 	FaSolidCircleExclamation,
 	FaSolidClock,
 	FaSolidTriangleExclamation,
@@ -16,7 +17,7 @@ import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { releaseListRoutes } from "@/utils/releases";
+import { getReleaseListRoute } from "@/utils/releases";
 
 type CollectionTargetOverview = {
 	collectionKey: string;
@@ -115,6 +116,12 @@ const PublishingOverviewPage: Component = () => {
 	const collectionRows = createMemo(() =>
 		targets().flatMap((target) => target.collections),
 	);
+	const releases = createMemo(() => overview.data?.data.releases);
+	const openCreateRequests = createMemo(
+		() =>
+			(releases()?.create.awaitingApproval ?? 0) +
+			(releases()?.create.approved ?? 0),
+	);
 
 	// ----------------------------------
 	// Functions
@@ -158,7 +165,7 @@ const PublishingOverviewPage: Component = () => {
 				>
 					<QueryBoundary
 						error={collections.isError || overview.isError}
-						empty={targets().length === 0}
+						empty={targets().length === 0 && openCreateRequests() === 0}
 						emptyFallback={
 							<EmptyState
 								title={T()("publishing.overview.empty.title")}
@@ -168,29 +175,68 @@ const PublishingOverviewPage: Component = () => {
 						class="flex-1 h-full p-4 md:p-6"
 					>
 						<div class="flex min-w-0 flex-col gap-8">
-							<div class="grid sm:grid-cols-3 rounded-lg border border-border overflow-hidden">
-								<DashboardMetricTile
-									icon={<FaSolidClock size={14} />}
-									label={T()("releases.state.pending")}
-									value={overview.data?.data.releases.awaitingApproval ?? 0}
-									tone="yellow"
-									href={releaseListRoutes.pending}
-								/>
-								<DashboardMetricTile
-									icon={<FaSolidCalendar size={14} />}
-									label={T()("common.status.scheduled")}
-									value={overview.data?.data.releases.scheduled ?? 0}
-									tone="purple"
-									href={releaseListRoutes.scheduled}
-								/>
-								<DashboardMetricTile
-									icon={<FaSolidTriangleExclamation size={14} />}
-									label={T()("common.status.failed")}
-									value={overview.data?.data.releases.failed ?? 0}
-									tone="red"
-									href={releaseListRoutes.failed}
-								/>
-							</div>
+							<section>
+								<div class="mb-3">
+									<h2>{T()("publishing.overview.publish.title")}</h2>
+									<p class="mt-0.5 text-sm text-body">
+										{T()("publishing.overview.publish.description")}
+									</p>
+								</div>
+								<div class="grid sm:grid-cols-3 rounded-lg border border-border overflow-hidden">
+									<DashboardMetricTile
+										icon={<FaSolidClock size={14} />}
+										label={T()("releases.state.pending")}
+										value={releases()?.publish.awaitingApproval ?? 0}
+										tone="yellow"
+										href={getReleaseListRoute("publish", "pending")}
+									/>
+									<DashboardMetricTile
+										icon={<FaSolidCalendar size={14} />}
+										label={T()("common.status.scheduled")}
+										value={releases()?.publish.scheduled ?? 0}
+										tone="purple"
+										href={getReleaseListRoute("publish", "scheduled")}
+									/>
+									<DashboardMetricTile
+										icon={<FaSolidTriangleExclamation size={14} />}
+										label={T()("common.status.failed")}
+										value={releases()?.publish.failed ?? 0}
+										tone="red"
+										href={getReleaseListRoute("publish", "failed")}
+									/>
+								</div>
+							</section>
+							<section>
+								<div class="mb-3">
+									<h2>{T()("publishing.overview.create.title")}</h2>
+									<p class="mt-0.5 text-sm text-body">
+										{T()("publishing.overview.create.description")}
+									</p>
+								</div>
+								<div class="grid sm:grid-cols-3 rounded-lg border border-border overflow-hidden">
+									<DashboardMetricTile
+										icon={<FaSolidClock size={14} />}
+										label={T()("releases.state.pending")}
+										value={releases()?.create.awaitingApproval ?? 0}
+										tone="yellow"
+										href={getReleaseListRoute("create", "pending")}
+									/>
+									<DashboardMetricTile
+										icon={<FaSolidCircleCheck size={14} />}
+										label={T()("publishing.overview.create.approved")}
+										value={releases()?.create.approved ?? 0}
+										tone="green"
+										href={getReleaseListRoute("create", "approved")}
+									/>
+									<DashboardMetricTile
+										icon={<FaSolidTriangleExclamation size={14} />}
+										label={T()("common.status.failed")}
+										value={releases()?.create.failed ?? 0}
+										tone="red"
+										href={getReleaseListRoute("create", "failed")}
+									/>
+								</div>
+							</section>
 							<For each={targets()}>
 								{(target) => (
 									<section>

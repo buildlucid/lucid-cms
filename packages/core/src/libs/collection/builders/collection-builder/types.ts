@@ -115,8 +115,9 @@ export type CollectionPreviewConfig<
 > = boolean | CollectionPreviewOptions<TCollectionKey>;
 
 export type PublishingReviewConfig = {
-	requiredFor: string[];
-	allowSelfApproval: boolean;
+	targets: string[];
+	create: boolean;
+	selfApproval: boolean;
 };
 export type PublishingWorkflowStageColor =
 	| "grey"
@@ -150,12 +151,14 @@ export type CollectionRevisionOptions = {
 export type CollectionPublishingOptions = {
 	/** Allow scheduled publishing. Defaults to false. */
 	scheduling?: boolean;
-	/** Require an approved release for selected publishing targets. */
+	/** What needs an approved release before it can happen. */
 	review?: {
 		/** Publishing target keys that can only be published through an approved release. */
-		requiredFor?: string[];
+		targets?: string[];
+		/** New documents can only be created through an approved create release. Defaults to false. */
+		create?: boolean;
 		/** Allow the release creator to approve their own release. Defaults to false. */
-		allowSelfApproval?: boolean;
+		selfApproval?: boolean;
 	};
 	/** Editorial stages through which documents can move. */
 	workflow?: {

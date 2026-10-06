@@ -78,13 +78,17 @@ const externalPermissionScopes: Partial<
 };
 
 const collectionPermissionDetails = {
-	read: copy("admin:permissions.documents.read"),
-	create: copy("admin:permissions.documents.create"),
-	update: copy("admin:permissions.documents.update"),
-	delete: copy("admin:permissions.documents.delete"),
-	restore: copy("admin:permissions.documents.restore"),
-	publish: copy("admin:permissions.documents.publish"),
-	review: copy("admin:permissions.documents.review"),
+	read: { name: copy("admin:permissions.documents.read") },
+	create: { name: copy("admin:permissions.documents.create") },
+	"create-request": {
+		name: copy("admin:permissions.documents.create.request"),
+		description: copy("admin:permissions.documents.create.request.description"),
+	},
+	update: { name: copy("admin:permissions.documents.update") },
+	delete: { name: copy("admin:permissions.documents.delete") },
+	restore: { name: copy("admin:permissions.documents.restore") },
+	publish: { name: copy("admin:permissions.documents.publish") },
+	review: { name: copy("admin:permissions.documents.review") },
 } as const;
 
 const getStaticCapabilityGroups = (): CapabilityGroup[] => {
@@ -155,9 +159,7 @@ const getCollectionCapabilityGroups = (
 
 				return {
 					key: permission,
-					details: {
-						name: collectionPermissionDetails[action],
-					},
+					details: collectionPermissionDetails[action],
 					core: true,
 					permission,
 					external: {

@@ -11,6 +11,7 @@ import {
 	mediaImagePreviewResponseSchema,
 	mediaResponseSchema,
 } from "./media.js";
+import { richTextJSONSchema } from "./shared/rich-text.js";
 
 const previewTokenSchema = z.string().meta({
 	description: "An opaque preview token",
@@ -115,6 +116,11 @@ const documentResponseBaseSchema = z.object({
 	isDeleted: z.boolean().meta({
 		description: "Whether the document has been deleted",
 		example: false,
+	}),
+	createReleaseId: z.number().nullable().meta({
+		description:
+			"The open create release requesting this document. Null once the document is created",
+		example: null,
 	}),
 	createdBy: z.number().nullable(),
 	updatedBy: z.number().nullable(),
@@ -235,6 +241,48 @@ export const controllerSchemas = {
 		response: z.object({
 			id: z.number().meta({
 				description: "The new document's ID",
+				example: 1,
+			}),
+		}),
+	} satisfies ControllerSchema,
+	requestCreation: {
+		body: z.object({
+			title: z.string().trim().min(1).max(200).meta({
+				description: "The title of the create release",
+				example: "New about page",
+			}),
+			description: richTextJSONSchema.nullable().optional(),
+			reviewerIds: z.array(z.number().int().positive()).optional(),
+			bricks: z
+				.array(brickInputSchema)
+				.meta({
+					description: "An array of bricks to be added to the document",
+				})
+				.optional(),
+			fields: z
+				.array(fieldInputSchema)
+				.meta({
+					description: "Collection field values",
+				})
+				.optional(),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+		}),
+		response: z.object({
+			id: z.number().meta({
+				description: "The requested document's ID",
+				example: 1,
+			}),
+			releaseId: z.number().meta({
+				description: "The create release that will create the document",
 				example: 1,
 			}),
 		}),
@@ -674,6 +722,11 @@ export const controllerSchemas = {
 					"filter[deletedBy]": queryString.schema.filter(true, {
 						example: "1",
 					}),
+					"filter[pending]": queryString.schema.filter(false, {
+						description:
+							"List requested documents waiting on their create release instead of created ones. Requested documents are read from their proposal",
+						example: "true",
+					}),
 					"filter[workflowStage]": queryString.schema.filter(false, {
 						example: "done",
 					}),
@@ -753,6 +806,7 @@ export const controllerSchemas = {
 							updatedAt: queryFormatted.schema.filters.single.optional(),
 							isDeleted: queryFormatted.schema.filters.single.optional(),
 							deletedBy: queryFormatted.schema.filters.union.optional(),
+							pending: queryFormatted.schema.filters.single.optional(),
 							workflowStage: queryFormatted.schema.filters.single.optional(),
 							workflowAssignee: queryFormatted.schema.filters.union.optional(),
 						}),

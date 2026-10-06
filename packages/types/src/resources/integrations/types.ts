@@ -5,6 +5,7 @@ export type CoreExternalScope =
 	| `documents:${string}:${
 			| "read"
 			| "create"
+			| "create-request"
 			| "update"
 			| "delete"
 			| "restore"

@@ -1,20 +1,24 @@
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import { Permissions } from "../../../libs/permission/definitions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
+import type { CollectionPermissionAction } from "../../../libs/permission/types.js";
 import type { LucidUser } from "../../../types/hono.js";
 import type { ReleasePermissions } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import type { ReleaseRecord } from "../types.js";
 import allowsSelfApproval from "./allows-self-approval.js";
+import canWriteDocument from "./can-write-document.js";
 
 /**
  * Works out what a user can do with a release. Actions need the matching
- * permission on every document's collection.
+ * permission on every document's collection. Create releases land their
+ * document in latest, so approving and releasing them needs create access
+ * in place of update and publish access.
  */
 const getReleaseAccess = (
 	context: ServiceContext,
 	data: {
-		release: Pick<ReleaseRecord, "status" | "created_by"> & {
+		release: Pick<ReleaseRecord, "type" | "status" | "created_by"> & {
 			documents: Array<{ collection_key: string }>;
 		};
 		user: LucidUser;
@@ -25,13 +29,21 @@ const getReleaseAccess = (
 			data.release.documents.map((document) => document.collection_key),
 		),
 	];
-	const can = (action: "read" | "update" | "review" | "publish"): boolean =>
+	const can = (action: CollectionPermissionAction): boolean =>
 		hasAccess({
 			user: data.user,
 			requiredPermissions: collectionKeys.map((key) =>
 				getCollectionPermission(key, action),
 			),
 		});
+	const write = collectionKeys.every((collectionKey) =>
+		canWriteDocument({
+			release: data.release,
+			collectionKey,
+			user: data.user,
+		}),
+	);
+	const create = data.release.type === "create";
 
 	const read =
 		hasAccess({
@@ -47,10 +59,14 @@ const getReleaseAccess = (
 
 	return {
 		read,
-		edit: open && can("update"),
-		approve: open && can("review") && can("update") && selfApproval,
-		release: open && can("publish"),
-		reopen: read && data.release.status === "closed" && can("update"),
+		edit: open && write,
+		approve:
+			open &&
+			can("review") &&
+			can(create ? "create" : "update") &&
+			selfApproval,
+		release: open && can(create ? "create" : "publish"),
+		reopen: read && data.release.status === "closed" && write,
 	};
 };
 

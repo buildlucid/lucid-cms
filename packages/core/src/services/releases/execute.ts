@@ -17,6 +17,7 @@ import validateVersionContent from "../documents-versions/helpers/validate-versi
 import promoteVersion from "../documents-versions/promote-version.js";
 import loadActiveUser from "../users/helpers/load-active-user.js";
 import acquireReleaseWrites from "./helpers/acquire-release-writes.js";
+import completeCreation from "./helpers/complete-creation.js";
 import deleteVersions from "./helpers/delete-versions.js";
 import ReleaseExecutionError from "./helpers/execution-error.js";
 import getAllowedTargets from "./helpers/get-allowed-targets.js";
@@ -32,7 +33,8 @@ import type { ReleaseDocumentRecord } from "./types.js";
  * every document is in place, so related documents in the release see each
  * other whatever order they were added in and dependants are told once per
  * target. Proposals are removed once released, as their approved snapshots
- * hold the same content.
+ * hold the same content. A create release's document is marked as created
+ * before any hooks run, so they see it like any other document.
  *
  * A stale job, eg. after the schedule moved or the approval was dismissed,
  * does nothing. Failures carry diagnostics for the job's failure hook, which
@@ -131,7 +133,11 @@ const execute: ServiceFn<
 			});
 			if (validateRes.error) return validateRes;
 
-			const order = getAllowedTargets(state.collection, document.source);
+			const order = getAllowedTargets({
+				collection: state.collection,
+				type: release.type,
+				source: document.source,
+			});
 			const targets = document.targets.toSorted(
 				(a, b) => order.indexOf(a.target) - order.indexOf(b.target),
 			);
@@ -156,6 +162,19 @@ const execute: ServiceFn<
 					target: target.target,
 					versionId: promoteRes.data.versionId,
 				});
+			}
+		}
+
+		if (release.type === "create") {
+			for (const document of release.documents) {
+				failureReleaseDocumentId = document.id;
+				failureTarget = null;
+
+				const createdRes = await completeCreation(context, {
+					document,
+					userId: user.id,
+				});
+				if (createdRes.error) return createdRes;
 			}
 		}
 
@@ -253,7 +272,10 @@ const execute: ServiceFn<
 			const [first] = entries;
 			if (!first) continue;
 			const changed = await notifyChange(context, {
-				change: { type: "published", version: first.target },
+				change:
+					first.target === "latest"
+						? { type: "created" }
+						: { type: "published", version: first.target },
 				collectionKey: first.document.collection_key,
 				ids: [...new Set(entries.map((entry) => entry.document.document_id))],
 			});

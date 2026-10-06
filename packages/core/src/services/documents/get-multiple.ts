@@ -13,8 +13,11 @@ import type { DocumentVersionType } from "../../libs/db/tables/index.js";
 import formatter, { documentsFormatter } from "../../libs/formatters/index.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
 import { copy } from "../../libs/i18n/index.js";
+import { Permissions } from "../../libs/permission/definitions.js";
+import hasAccess from "../../libs/permission/has-access.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import type { GetMultipleQueryParams } from "../../schemas/documents.js";
+import type { LucidUser } from "../../types/hono.js";
 import type { InternalCollectionDocument, Refs } from "../../types/response.js";
 import {
 	getBaseUrl,
@@ -35,6 +38,8 @@ const getMultiple: ServiceFn<
 			collectionKey: string;
 			version: DocumentVersionType;
 			query: GetMultipleQueryParams;
+			/** Listing requested documents needs the same release access as reading their requests. */
+			user: LucidUser;
 		},
 	],
 	{
@@ -56,6 +61,34 @@ const getMultiple: ServiceFn<
 			data: undefined,
 		};
 	}
+
+	//* requested documents only exist as their create release's proposal, which latest lists can opt into
+	const pendingFilter = data.query.filter?.pending?.value;
+	const pending =
+		data.version === "latest" &&
+		(pendingFilter === true ||
+			pendingFilter === "true" ||
+			pendingFilter === 1 ||
+			pendingFilter === "1");
+	if (
+		pending &&
+		!hasAccess({
+			user: data.user,
+			requiredPermissions: [Permissions.ReleasesRead],
+		})
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.pending.permission"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
+	const versionType = pending
+		? constants.collectionBuilder.publishing.proposalVersionType
+		: data.version;
 
 	const [collectionRes, collectionsRes] = await Promise.all([
 		collections.getSingle(context, { key: data.collectionKey }),
@@ -146,7 +179,8 @@ const getMultiple: ServiceFn<
 
 	const documentsRes = await Document.selectMultipleFiltered(
 		{
-			version: data.version,
+			version: versionType,
+			pending,
 			query: data.query,
 			documentFilters,
 			environmentStatusFilters,
@@ -220,7 +254,7 @@ const getMultiple: ServiceFn<
 				collectionTableNames: tableNameRes.data,
 			},
 			data: {
-				versionType: data.version,
+				versionType,
 				relationVersionType: relationVersionTypeRes.data.versionType,
 				documents,
 			},

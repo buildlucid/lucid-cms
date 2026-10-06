@@ -165,7 +165,7 @@ const CollectionConfigSchema = z
 					.optional(),
 				review: z
 					.strictObject({
-						requiredFor: z
+						targets: z
 							.array(
 								z
 									.string()
@@ -174,9 +174,10 @@ const CollectionConfigSchema = z
 									.regex(/^[a-z0-9-_]+$/),
 							)
 							.optional(),
-						allowSelfApproval: z
+						create: z.boolean().default(false).optional(),
+						selfApproval: z
 							.boolean()
-							.default(constants.collectionBuilder.publishing.allowSelfApproval)
+							.default(constants.collectionBuilder.publishing.selfApproval)
 							.optional(),
 					})
 					.optional(),
@@ -265,12 +266,20 @@ const CollectionConfigSchema = z
 			}
 		}
 		const review = data.publishing?.review;
-		for (const [targetIndex, target] of (review?.requiredFor ?? []).entries()) {
+		for (const [targetIndex, target] of (review?.targets ?? []).entries()) {
 			if (environmentKeys.has(target)) continue;
 			ctx.addIssue({
 				code: "custom",
-				path: ["publishing", "review", "requiredFor", targetIndex],
-				message: `Review requiredFor target "${target}" must reference a configured publishing target`,
+				path: ["publishing", "review", "targets", targetIndex],
+				message: `Review target "${target}" must reference a configured publishing target`,
+			});
+		}
+		if (review?.create && data.mode === "single") {
+			ctx.addIssue({
+				code: "custom",
+				path: ["publishing", "review", "create"],
+				message:
+					"Review create is only available for multiple mode collections",
 			});
 		}
 

@@ -37,7 +37,8 @@ const checkVersionController = factory.createHandlers(
 	authenticate(),
 	validate("json", controllerSchemas.checkVersion.body),
 	validate("param", controllerSchemas.checkVersion.params),
-	collectionPermissions("update"),
+	//* proposals follow their release's edit access, and latest needs update access, so the service checks writes
+	collectionPermissions("read"),
 	async (c) => {
 		const { bricks, fields } = c.req.valid("json");
 		const { collectionKey, id, versionId } = c.req.valid("param");

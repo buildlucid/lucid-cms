@@ -6,6 +6,8 @@ export type StaticPermission = (typeof Permissions)[keyof typeof Permissions];
 export type CollectionPermissionAction =
 	| "read"
 	| "create"
+	/** Request new documents, which are only created once their create release is released. */
+	| "create-request"
 	| "update"
 	| "delete"
 	| "restore"

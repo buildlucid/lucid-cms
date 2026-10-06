@@ -408,6 +408,56 @@ describe("documentFilterPanelFields", () => {
 			]),
 		);
 	});
+
+	it("lists status, workflow and request filters before fields, and authorship last", () => {
+		const collection: Collection = {
+			...buildCollection([
+				{ key: "title", type: "text", details: { label: literal("Title") } },
+			]),
+			publishing: {
+				scheduling: false,
+				targets: [
+					{
+						key: "production",
+						label: literal("Production"),
+						requires: [],
+						permissions: {
+							publish: "documents:pages:publish",
+							review: "documents:pages:review",
+						},
+					},
+				],
+				workflow: {
+					initial: "draft",
+					stages: [
+						{
+							key: "draft",
+							label: literal("Draft"),
+							color: "grey",
+							publishTargets: [],
+						},
+					],
+				},
+			},
+		};
+
+		expect(
+			documentFilterPanelFields(collection, { requests: true }).map(
+				(field) => field.key,
+			),
+		).toEqual([
+			"id",
+			"envStatus.production",
+			"workflowStage",
+			"workflowAssignee",
+			"pending",
+			"_title",
+			"createdBy",
+			"updatedBy",
+			"createdAt",
+			"updatedAt",
+		]);
+	});
 });
 
 describe("isEntityPickerFieldType", () => {

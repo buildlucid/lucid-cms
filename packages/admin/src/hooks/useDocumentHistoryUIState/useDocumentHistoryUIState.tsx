@@ -14,6 +14,7 @@ export function useDocumentHistoryUIState(props: {
 		createSignal<number | null>(null);
 	const [getPreviewOpen, setPreviewOpen] = createSignal(false);
 
+	const [getRequestCreationOpen, setRequestCreationOpen] = createSignal(false);
 	const [getReleaseEnvironmentOpen, setReleaseEnvironmentOpen] =
 		createSignal(false);
 	const [getReleaseEnvironmentTarget, setReleaseEnvironmentTarget] =
@@ -65,6 +66,7 @@ export function useDocumentHistoryUIState(props: {
 	const showDuplicateButton = createMemo(() => false);
 	const duplicateDisabled = createMemo(() => true);
 
+	const createActions = createMemo((): Array<"create" | "request"> => []);
 	const hasSavePermission = createMemo(() => false);
 
 	const hasAutoSavePermission = createMemo(() => false);
@@ -94,6 +96,8 @@ export function useDocumentHistoryUIState(props: {
 		setRestoreRevisionVersionId,
 		getPreviewOpen,
 		setPreviewOpen,
+		getRequestCreationOpen,
+		setRequestCreationOpen,
 		getReleaseEnvironmentOpen,
 		setReleaseEnvironmentOpen,
 		getReleaseEnvironmentTarget,
@@ -111,6 +115,7 @@ export function useDocumentHistoryUIState(props: {
 		isPublished,
 		showRevisionNavigation,
 		showUpsertButton,
+		createActions,
 		hasSavePermission,
 		hasPublishPermission,
 		showPublishButton,

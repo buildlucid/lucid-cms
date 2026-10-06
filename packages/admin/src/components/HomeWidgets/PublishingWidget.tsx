@@ -5,7 +5,7 @@ import DashboardCard from "@/components/DashboardCard/DashboardCard";
 import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import api from "@/services/api";
 import T from "@/translations";
-import { releaseListRoutes } from "@/utils/releases";
+import { getReleaseListRoute } from "@/utils/releases";
 
 const PublishingWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	// ----------------------------------------
@@ -18,23 +18,23 @@ const PublishingWidget: Component<{ size: DashboardWidgetSize }> = () => {
 		{
 			key: "pending",
 			label: T()("releases.state.pending"),
-			value: overview.data?.data.awaitingApproval,
+			value: overview.data?.data.publish.awaitingApproval,
 			dot: "bg-warning",
-			href: releaseListRoutes.pending,
+			href: getReleaseListRoute("publish", "pending"),
 		},
 		{
 			key: "scheduled",
 			label: T()("common.status.scheduled"),
-			value: overview.data?.data.scheduled,
+			value: overview.data?.data.publish.scheduled,
 			dot: "bg-purple",
-			href: releaseListRoutes.scheduled,
+			href: getReleaseListRoute("publish", "scheduled"),
 		},
 		{
 			key: "failed",
 			label: T()("common.status.failed"),
-			value: overview.data?.data.failed,
+			value: overview.data?.data.publish.failed,
 			dot: "bg-danger",
-			href: releaseListRoutes.failed,
+			href: getReleaseListRoute("publish", "failed"),
 		},
 	]);
 

@@ -11,7 +11,10 @@ import getEligibleReviewers from "./get-eligible-reviewers.js";
 const setReviewers: ServiceFn<
 	[
 		{
-			release: Pick<ReleaseRecord, "id" | "created_by" | "reviewers"> & {
+			release: Pick<
+				ReleaseRecord,
+				"id" | "type" | "created_by" | "reviewers"
+			> & {
 				documents: Array<Pick<ReleaseDocumentRecord, "collection_key">>;
 			};
 			reviewerIds: number[];

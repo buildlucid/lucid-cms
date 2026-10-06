@@ -16,6 +16,9 @@ export type ReleaseExecution = {
 /** Open releases can still change. Released and closed releases are read only. */
 export type ReleaseStatus = "open" | "released" | "closed";
 
+/** Publish releases move existing documents to environments. Create releases request one new document, which only exists once released. */
+export type ReleaseType = "publish" | "create";
+
 export type ReleaseUser = {
 	id: number;
 	email: string | null;
@@ -147,6 +150,7 @@ export type ReleasePermissions = {
 
 export type Release = {
 	id: number;
+	type: ReleaseType;
 	title: string;
 	description: RichTextJSON | null;
 	status: ReleaseStatus;
@@ -199,6 +203,7 @@ export type ReleaseDocument = {
 export type ReleaseSummary = Pick<
 	Release,
 	| "id"
+	| "type"
 	| "title"
 	| "status"
 	| "approved"
@@ -222,10 +227,13 @@ export type ReleaseSummary = Pick<
 	>;
 };
 
-export type ReleaseOverview = {
+/** Open releases of one type, by state. */
+export type ReleaseOverviewCounts = {
 	awaitingApproval: number;
 	approved: number;
 	scheduled: number;
 	failed: number;
 	assignedToMe: number;
 };
+
+export type ReleaseOverview = Record<ReleaseType, ReleaseOverviewCounts>;

@@ -16,8 +16,10 @@ import CreateMenu, {
 	type CreateMenuAction,
 } from "@/components/CreateMenu/CreateMenu";
 import { DocumentsList } from "@/components/DocumentsList/DocumentsList";
+import type { FilterPreset } from "@/components/FilterPanel/preset-state";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
+import { Permissions } from "@/constants/permissions";
 import { createDocumentLocalization } from "@/hooks/useDocumentLocalization/useDocumentLocalization";
 import useQueryState, { sort } from "@/hooks/useQueryState/useQueryState";
 import api from "@/services/api";
@@ -34,6 +36,7 @@ import {
 	collectionFieldSorts,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
+import { getDocumentCreateActions } from "@/utils/releases";
 import { getDocumentRoute } from "@/utils/route-helpers";
 
 const DocumentsPage: Component = () => {
@@ -103,8 +106,30 @@ const DocumentsPage: Component = () => {
 	const getCollectionFieldIncludes = createMemo(() =>
 		collectionFieldIncludes(collectionData()),
 	);
+	//* requested documents are listed through their create requests, which need release access
+	const canSeeRequests = createMemo(
+		() =>
+			collectionData()?.mode === "multiple" &&
+			userStore.get.hasPermission([Permissions.ReleasesRead]).all,
+	);
 	const getFilterFields = createMemo(() =>
-		documentFilterPanelFields(collectionData()),
+		documentFilterPanelFields(collectionData(), {
+			requests: canSeeRequests(),
+		}),
+	);
+	const getFilterPresets = createMemo((): FilterPreset[] =>
+		canSeeRequests()
+			? [
+					{
+						key: "requests",
+						label: T()("releases.filter.requests"),
+						filters: { pending: { value: true, operator: "=" } },
+					},
+				]
+			: [],
+	);
+	const showingRequests = createMemo(
+		() => searchParams.filters().get("pending") === true,
 	);
 	const getCollectionFieldSorts = createMemo(() =>
 		collectionFieldSorts(collectionData()),
@@ -233,18 +258,23 @@ const DocumentsPage: Component = () => {
 	const contentLocales = createMemo(() =>
 		collectionData()?.localized ? documentLocalization.locales() : undefined,
 	);
+	//* the editor offers requesting as well, so the menu links to the default
+	const createAction = createMemo(
+		() => getDocumentCreateActions(collectionData())[0],
+	);
 	const createActions = createMemo<CreateMenuAction[]>(() => {
-		const canCreate = userStore.get.hasPermission([
-			collectionData()?.permissions.create,
-		]).some;
-		if (!canCreate || collectionData()?.locked === true) return [];
+		const action = createAction();
+		if (action === undefined || collectionData()?.locked === true) return [];
 
 		return [
 			{
 				type: "link",
-				label: T()("actions.create.dynamic", {
-					name: collectionSingularName() || "",
-				}),
+				label: T()(
+					action === "request"
+						? "documents.request.create"
+						: "actions.create.dynamic",
+					{ name: collectionSingularName() || "" },
+				),
 				href: getDocumentRoute("create", {
 					collectionKey: collectionKey() || "",
 				}),
@@ -280,9 +310,11 @@ const DocumentsPage: Component = () => {
 			>
 				<QueryToolbar
 					queryState={searchParams}
-					showDeleted={orderMode() ? undefined : showingDeleted()}
+					showDeleted={
+						orderMode() || showingRequests() ? undefined : showingDeleted()
+					}
 					onShowDeletedChange={
-						orderMode()
+						orderMode() || showingRequests()
 							? undefined
 							: (value: boolean) => {
 									setShowingDeleted(value);
@@ -302,6 +334,7 @@ const DocumentsPage: Component = () => {
 					filterSubject={collectionName()}
 					preserveFilterSubjectCase
 					filterFields={orderMode() ? undefined : getFilterFields()}
+					filterPresets={orderMode() ? undefined : getFilterPresets()}
 					sorts={
 						orderMode()
 							? undefined
@@ -327,7 +360,11 @@ const DocumentsPage: Component = () => {
 					}
 					perPage
 				>
-					<Show when={canReorderDocuments() && !showingDeleted()}>
+					<Show
+						when={
+							canReorderDocuments() && !showingDeleted() && !showingRequests()
+						}
+					>
 						<Button
 							variant={orderMode() ? "primary" : "outline"}
 							size="sm"
@@ -361,6 +398,7 @@ const DocumentsPage: Component = () => {
 						isLoading: collection.isFetching,
 						collectionIsSuccess: collectionIsSuccess,
 						showingDeleted: showingDeleted,
+						showingRequests: showingRequests,
 						orderMode: orderMode,
 					}}
 				/>

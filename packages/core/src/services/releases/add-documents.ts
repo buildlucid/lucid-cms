@@ -9,7 +9,7 @@ import checkReleaseSize from "./helpers/check-release-size.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
 import getReleaseAccess from "./helpers/get-release-access.js";
 
-/** Adds fresh proposals or snapshots, so the whole group needs approving again. */
+/** Adds fresh proposals or snapshots, so the whole group needs approving again. Create releases keep their one document. */
 const addDocuments: ServiceFn<
 	[{ id: number; documents: ReleaseDocumentInput[]; user: LucidUser }],
 	undefined
@@ -31,6 +31,17 @@ const addDocuments: ServiceFn<
 				type: "basic",
 				message: copy("server:core.releases.permission"),
 				status: 403,
+			},
+			data: undefined,
+		};
+	}
+
+	if (release.type === "create") {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.releases.create.fixed"),
+				status: 400,
 			},
 			data: undefined,
 		};

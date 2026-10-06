@@ -35,8 +35,8 @@ const collection = new CollectionBuilder(key, {
 	details: { labels: { singular: "Document", plural: "Documents" } },
 	publishing: {
 		review: {
-			requiredFor: [],
-			allowSelfApproval: true,
+			targets: [],
+			selfApproval: true,
 		},
 		targets: [{ key: "staging", label: "Staging" }],
 	},

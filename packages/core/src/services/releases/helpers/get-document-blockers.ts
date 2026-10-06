@@ -32,7 +32,11 @@ const getDocumentBlockers = (
 	if (!state.source) blockers.push({ code: "source_missing" });
 	if (document.targets.length === 0) blockers.push({ code: "no_targets" });
 	const approved = release.approved_revision === release.revision;
-	const allowed = getAllowedTargets(state.collection, document.source);
+	const allowed = getAllowedTargets({
+		collection: state.collection,
+		type: release.type,
+		source: document.source,
+	});
 	for (const target of document.targets) {
 		if (!allowed.includes(target.target)) {
 			blockers.push({ code: "target_unavailable", target: target.target });
@@ -52,7 +56,9 @@ const getDocumentBlockers = (
 			blockers.push({ code: "review_required", target: target.target });
 		}
 
+		//* workflow stages only gate environments, and create releases land in latest
 		if (
+			release.type === "publish" &&
 			state.workflowStage !== null &&
 			!workflowStageAllowsTarget({
 				collection: state.collection,

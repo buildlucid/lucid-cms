@@ -38,7 +38,7 @@ export const Permissions = {
 
 export type CorePermission = (typeof Permissions)[keyof typeof Permissions];
 export type DocumentPermission =
-	`documents:${string}:${"read" | "create" | "update" | "delete" | "restore" | "publish" | "review"}`;
+	`documents:${string}:${"read" | "create" | "create-request" | "update" | "delete" | "restore" | "publish" | "review"}`;
 export type AgentPermission =
 	`agents:${string}:${"chat" | "manage-own-routines" | "manage-code-routines"}`;
 

@@ -7,7 +7,7 @@ const allowsSelfApproval = (
 	collectionKeys.every(
 		(key) =>
 			context.config.collections.find((collection) => collection.key === key)
-				?.getData.publishing.review?.allowSelfApproval === true,
+				?.getData.publishing.review?.selfApproval === true,
 	);
 
 export default allowsSelfApproval;

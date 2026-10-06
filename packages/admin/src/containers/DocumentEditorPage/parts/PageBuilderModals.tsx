@@ -3,6 +3,7 @@ import type { Collection } from "@types";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/CreateUpdateMediaDrawer";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
+import DocumentRequestModal from "@/components/DocumentRequestModal/DocumentRequestModal";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import DuplicateDocumentModal from "@/components/DuplicateDocumentModal/DuplicateDocumentModal";
 import EmbeddedBrickEditDrawer from "@/components/EmbeddedBrickEditDrawer/EmbeddedBrickEditDrawer";
@@ -265,6 +266,17 @@ export const PageBuilderModals: Component<{
 						props.hooks.mutations.restoreRevision.reset();
 					},
 				}}
+			/>
+			<DocumentRequestModal
+				open={props.hooks.uiState.getRequestCreationOpen()}
+				setOpen={(open) => {
+					props.hooks.uiState.setRequestCreationOpen(open);
+					if (!open) props.hooks.mutations.requestCreationMutation.reset();
+				}}
+				collectionName={props.hooks.state.collectionSingularName()}
+				loading={props.hooks.mutations.requestCreationMutation.action.isPending}
+				error={props.hooks.mutations.requestCreationMutation.errors()?.message}
+				onConfirm={props.hooks.mutations.requestCreationAction}
 			/>
 			<Show when={props.hooks.state.documentId()}>
 				{(documentId) => (

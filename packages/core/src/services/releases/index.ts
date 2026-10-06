@@ -13,6 +13,7 @@ export { default as getSingle } from "./get-single.js";
 export { default as publish } from "./publish.js";
 export { default as removeDocument } from "./remove-document.js";
 export { default as reopen } from "./reopen.js";
+export { default as requestCreation } from "./request-creation.js";
 export { default as reviewTarget } from "./review-target.js";
 export { default as unapprove } from "./unapprove.js";
 export { default as updateComment } from "./update-comment.js";

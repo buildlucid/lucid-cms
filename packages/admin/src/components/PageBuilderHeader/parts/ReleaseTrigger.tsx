@@ -28,10 +28,21 @@ export interface ReleaseTriggerOption {
 	};
 }
 
+/** An alternative to saving, listed in the menu above the release options. */
+export interface ReleaseTriggerAction {
+	label: string;
+	onSelect: () => void;
+	disabled?: boolean;
+}
+
 export const ReleaseTrigger: Component<{
 	options: Accessor<ReleaseTriggerOption[]>;
 	onSelect: (option: ReleaseTriggerOption) => void;
+	/** Alternatives to saving, eg. requesting a new document instead of creating it. */
+	actions?: ReleaseTriggerAction[];
 	onSave?: () => void;
+	/** Defaults to Save. */
+	saveLabel?: string;
 	saveDisabled?: boolean;
 	savePermission?: boolean;
 	disabled?: boolean;
@@ -44,11 +55,13 @@ export const ReleaseTrigger: Component<{
 
 	// ----------------------------------------
 	// Memos
-	const isDisabled = createMemo(() => {
-		return props.disabled || props.options().length === 0;
-	});
+	const hasOptions = createMemo(
+		() => props.options().length > 0 || (props.actions?.length ?? 0) > 0,
+	);
 
-	const hasOptions = createMemo(() => props.options().length > 0);
+	const isDisabled = createMemo(() => {
+		return props.disabled || !hasOptions();
+	});
 
 	// ----------------------------------------
 	// Functions
@@ -113,7 +126,7 @@ export const ReleaseTrigger: Component<{
 					},
 				)}
 			>
-				{T()("common.save")}
+				{props.saveLabel ?? T()("common.save")}
 			</button>
 			<Show when={hasOptions()}>
 				<Menu.Root>
@@ -135,6 +148,20 @@ export const ReleaseTrigger: Component<{
 						<FaSolidChevronDown />
 					</Menu.Trigger>
 					<Menu.Content>
+						<For each={props.actions}>
+							{(action) => (
+								<Menu.Item
+									textValue={action.label}
+									unavailable={action.disabled === true || isDisabled()}
+									onSelect={() => {
+										if (action.disabled === true || isDisabled()) return;
+										action.onSelect();
+									}}
+								>
+									{action.label}
+								</Menu.Item>
+							)}
+						</For>
 						<For each={props.options()}>
 							{(option) => (
 								<Menu.Item

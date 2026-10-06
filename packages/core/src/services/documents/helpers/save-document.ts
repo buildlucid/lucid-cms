@@ -17,6 +17,7 @@ import {
 } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import createInitialDocumentWorkflow from "../../document-workflows/create-initial.js";
+import createProposalWorkflow from "../../document-workflows/create-proposal.js";
 import createDocumentVersion from "../../documents-versions/create-single.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
 import checkSingleCollectionDocumentCount from "../checks/check-single-collection-document-count.js";
@@ -24,7 +25,11 @@ import notifyChange from "../notify-change.js";
 import cleanupFailedCreate from "./cleanup-failed-create.js";
 import invalidateContentDocumentCache from "./invalidate-content-cache.js";
 
-/** Persists a full payload. Callers own the transaction and any existing-document claim. */
+/**
+ * Persists a full payload. Callers own the transaction and any existing-document claim.
+ * A requested document is saved as its create release's proposal instead of latest,
+ * and stays hidden until the release is released.
+ */
 const saveDocument: ServiceFn<
 	[
 		{
@@ -36,6 +41,8 @@ const saveDocument: ServiceFn<
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
+			/** The create release requesting a new document. Only used when creating. */
+			createReleaseId?: number;
 		},
 	],
 	number
@@ -77,6 +84,24 @@ const saveDocument: ServiceFn<
 				name: copy("server:core.error.schema.migration.required.name"),
 				message: copy("server:core.error.schema.migration.required.message"),
 				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
+	const createReleaseId =
+		data.documentId === undefined ? data.createReleaseId : undefined;
+	const requested = createReleaseId !== undefined;
+	if (
+		data.documentId === undefined &&
+		!requested &&
+		collectionRes.data.getData.publishing.review?.create
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.create.review.required"),
+				status: 403,
 			},
 			data: undefined,
 		};
@@ -135,6 +160,7 @@ const saveDocument: ServiceFn<
 							collection_migration_id: migrationIdRes.data,
 							//* only applied on insert; reorders use documentServices.updateOrder
 							order: order ?? null,
+							create_release_id: createReleaseId ?? null,
 							created_by: data.userId,
 							updated_by: data.userId,
 							is_deleted: false,
@@ -179,6 +205,7 @@ const saveDocument: ServiceFn<
 		fields: data.fields,
 		collection: collectionRes.data,
 		origin: data.origin,
+		createReleaseId,
 	});
 
 	if (createVersionRes.error) {
@@ -192,13 +219,20 @@ const saveDocument: ServiceFn<
 		return createVersionRes;
 	}
 	const workflowRes =
-		data.documentId === undefined
-			? await createInitialDocumentWorkflow(context, {
-					collectionKey: data.collectionKey,
-					documentId: upsertDocRes.data.id,
-					userId: data.userId,
-				})
-			: undefined;
+		data.documentId !== undefined
+			? undefined
+			: requested
+				? await createProposalWorkflow(context, {
+						collectionKey: data.collectionKey,
+						documentId: upsertDocRes.data.id,
+						versionId: createVersionRes.data.versionId,
+						userId: data.userId,
+					})
+				: await createInitialDocumentWorkflow(context, {
+						collectionKey: data.collectionKey,
+						documentId: upsertDocRes.data.id,
+						userId: data.userId,
+					});
 	if (workflowRes?.error) {
 		if (data.documentId === undefined) {
 			await cleanupFailedCreate(context, {
@@ -224,6 +258,11 @@ const saveDocument: ServiceFn<
 		);
 		if (updated.error) return updated;
 	}
+	//* requested documents stay out of content until their create release is released
+	if (requested) {
+		return { error: undefined, data: upsertDocRes.data.id };
+	}
+
 	await invalidateContentDocumentCache(context, data.collectionKey);
 
 	const changed = await notifyChange(context, {

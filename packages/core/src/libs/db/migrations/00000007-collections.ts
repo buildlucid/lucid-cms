@@ -179,6 +179,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("id", adapter.getDataType("primary"), (col) =>
 					adapter.primaryKeyColumnBuilder(col),
 				)
+				.addColumn("type", adapter.getDataType("text"), (col) => col.notNull())
 				.addColumn("title", adapter.getDataType("text"), (col) => col.notNull())
 				.addColumn("description", adapter.getDataType("json"))
 				.addColumn("status", adapter.getDataType("text"), (col) =>

@@ -19,6 +19,7 @@ import { createTestQueueAdapter } from "../../utils/test-helpers/create-jobs-con
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import getWorkflow from "../document-workflows/get-single.js";
 import updateWorkflow from "../document-workflows/update-single.js";
+import getDocuments from "../documents/get-multiple.js";
 import getDocument from "../documents/get-single.js";
 import upsertSingle from "../documents/upsert-single.js";
 import align from "../documents-versions/align.js";
@@ -34,6 +35,7 @@ import deleteComment from "./delete-comment.js";
 import execute from "./execute.js";
 import getExecution from "./get-execution.js";
 import getMultiple from "./get-multiple.js";
+import getOverview from "./get-overview.js";
 import getSingle from "./get-single.js";
 import ReleaseExecutionError from "./helpers/execution-error.js";
 import scheduleRelease from "./helpers/schedule-release.js";
@@ -41,6 +43,7 @@ import { executeReleaseJob } from "./jobs/execute.js";
 import publish from "./publish.js";
 import removeDocument from "./remove-document.js";
 import reopen from "./reopen.js";
+import requestCreation from "./request-creation.js";
 import reviewTarget from "./review-target.js";
 import updateCommentResolution from "./update-comment-resolution.js";
 import updateSingle from "./update-single.js";
@@ -55,7 +58,7 @@ const collections = [
 			details: { labels: { singular: "Page", plural: "Pages" } },
 			publishing: {
 				scheduling: true,
-				review: { requiredFor: ["production"], allowSelfApproval: false },
+				review: { targets: ["production"], selfApproval: false },
 				targets: [
 					{ key: "staging", label: "Staging" },
 					{ key: "production", label: "Production", requires: ["staging"] },
@@ -89,6 +92,25 @@ const collections = [
 	})
 		.addText("title")
 		.addText("summary"),
+	new CollectionBuilder("request_pages", {
+		details: { labels: { singular: "Page", plural: "Pages" } },
+		mode: "multiple",
+		revisions: true,
+		publishing: {
+			review: { create: true },
+			targets: [{ key: "staging", label: "Staging" }],
+			workflow: {
+				initial: "draft",
+				stages: [
+					{ key: "draft", label: "Draft", publishTargets: [] },
+					{ key: "ready", label: "Ready", publishTargets: ["staging"] },
+				],
+			},
+		},
+	})
+		.addText("title", { validation: { required: true } })
+		.addText("summary")
+		.addRelation("related", { collection: "request_pages" }),
 ];
 let context: ServiceContext;
 let creator: LucidUser;
@@ -2048,4 +2070,309 @@ test("one scheduled job publishes mixed proposals and snapshots for the group", 
 			"release_articles",
 		),
 	).toBe("Original");
+});
+
+const requestDocument = async (user: LucidUser, title = "Requested") => {
+	const requested = await requestCreation(context, {
+		collectionKey: "request_pages",
+		title: "New page",
+		fields: [
+			{ key: "title", type: "text", value: title },
+			{ key: "summary", type: "text", value: "Draft" },
+		],
+		user,
+	});
+	assert(requested.data, JSON.stringify(requested.error));
+	return requested.data;
+};
+const listRequestPages = async (pending: boolean) => {
+	const listed = await getDocuments(context, {
+		collectionKey: "request_pages",
+		version: "latest",
+		query: {
+			filter: { pending: { value: pending } },
+			page: 1,
+			perPage: 100,
+		},
+		user: creator,
+	});
+	assert(listed.data, JSON.stringify(listed.error));
+	return listed.data.documents.map((document) => document.id);
+};
+
+test("requested documents only exist as their create release's proposal until released", async () => {
+	const before = await getOverview(context, { user: creator });
+	assert(before.data, JSON.stringify(before.error));
+	const requested = await requestDocument(creator);
+	const after = await getOverview(context, { user: creator });
+	assert(after.data, JSON.stringify(after.error));
+	expect(after.data.create.awaitingApproval).toBe(
+		before.data.create.awaitingApproval + 1,
+	);
+	expect(after.data.publish).toEqual(before.data.publish);
+	const release = await readRelease(requested.releaseId);
+	expect(release.type).toBe("create");
+	expect(member(release).documentId).toBe(requested.id);
+	expect(member(release).targets.map((target) => target.target)).toEqual([
+		"latest",
+	]);
+	expect(release.blockers).toEqual([]);
+
+	expect(await listRequestPages(false)).not.toContain(requested.id);
+	expect(await listRequestPages(true)).toContain(requested.id);
+	const pagesReader: LucidUser = {
+		...reviewer,
+		superAdmin: false,
+		permissions: [getCollectionPermission("request_pages", "read")],
+	};
+	expect(
+		(
+			await getDocuments(context, {
+				collectionKey: "request_pages",
+				version: "latest",
+				query: { filter: { pending: { value: true } }, page: 1, perPage: 10 },
+				user: pagesReader,
+			})
+		).error?.status,
+	).toBe(403);
+	expect(
+		(
+			await getDocument(context, {
+				collectionKey: "request_pages",
+				id: requested.id,
+				version: "latest",
+				query: {},
+				authUser: creator,
+			})
+		).error?.status,
+	).toBe(404);
+
+	const direct = await upsertSingle(context, {
+		collectionKey: "request_pages",
+		userId: creator.id,
+		fields: [{ key: "title", type: "text", value: "Direct" }],
+	});
+	expect(direct.error?.status).toBe(403);
+
+	const relating = await requestCreation(context, {
+		collectionKey: "request_pages",
+		title: "Related page",
+		fields: [
+			{ key: "title", type: "text", value: "Relating" },
+			{
+				key: "related",
+				type: "relation",
+				value: [{ id: requested.id, collectionKey: "request_pages" }],
+			},
+		],
+		user: creator,
+	});
+	expect(relating.error).toMatchObject({
+		status: 400,
+		errors: { fields: [{ key: "related" }] },
+	});
+
+	expect(
+		(
+			await addDocuments(context, {
+				id: release.id,
+				documents: [
+					{
+						collectionKey: "release_pages",
+						documentId: await createDocument(),
+						source: "latest",
+						targets: ["staging"],
+					},
+				],
+				user: creator,
+			})
+		).error?.status,
+	).toBe(400);
+	expect(
+		(
+			await updateTargets(context, {
+				id: release.id,
+				releaseDocumentId: member(release).id,
+				targets: ["staging"],
+				user: creator,
+			})
+		).error?.status,
+	).toBe(400);
+});
+
+test("create requests are edited, approved and released with create access, and requesters keep their own", async () => {
+	const read = [
+		Permissions.ReleasesRead,
+		getCollectionPermission("request_pages", "read"),
+	];
+	const requester: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: [
+			...read,
+			getCollectionPermission("request_pages", "create-request"),
+		],
+	};
+	const requested = await requestDocument(requester);
+	const asRequester = await getSingle(context, {
+		id: requested.releaseId,
+		user: requester,
+	});
+	assert(asRequester.data, JSON.stringify(asRequester.error));
+	expect(asRequester.data.permissions).toEqual({
+		edit: true,
+		approve: false,
+		release: false,
+		reopen: false,
+	});
+	expect(member(asRequester.data).permissions.edit).toBe(true);
+
+	const edited = await updateVersion(context, {
+		collectionKey: "request_pages",
+		documentId: requested.id,
+		versionId: versionOf(asRequester.data),
+		userId: requester.id,
+		authUser: requester,
+		fields: [
+			{ key: "title", type: "text", value: "Requested" },
+			{ key: "summary", type: "text", value: "Edited" },
+		],
+	});
+	assert(!edited.error, JSON.stringify(edited.error));
+	const otherRequester = { ...requester, id: reviewer.id };
+	expect(
+		(
+			await updateVersion(context, {
+				collectionKey: "request_pages",
+				documentId: requested.id,
+				versionId: versionOf(asRequester.data),
+				userId: otherRequester.id,
+				authUser: otherRequester,
+				fields: [{ key: "title", type: "text", value: "Taken over" }],
+			})
+		).error?.status,
+	).toBe(403);
+
+	const latestId = await createDocument();
+	const latest = await readVersionContent(context, {
+		collectionKey: "release_pages",
+		documentId: latestId,
+		versionType: "latest",
+	});
+	assert(latest.data);
+	expect(
+		(
+			await updateVersion(context, {
+				collectionKey: "release_pages",
+				documentId: latestId,
+				versionId: latest.data.id,
+				userId: requester.id,
+				authUser: requester,
+				fields: [{ key: "title", type: "text", value: "Not allowed" }],
+			})
+		).error?.status,
+	).toBe(403);
+
+	assert(
+		!(await close(context, { id: requested.releaseId, user: requester })).error,
+	);
+	assert(
+		!(await reopen(context, { id: requested.releaseId, user: requester }))
+			.error,
+	);
+
+	const updater: LucidUser = {
+		...reviewer,
+		superAdmin: false,
+		permissions: [
+			...read,
+			getCollectionPermission("request_pages", "update"),
+			getCollectionPermission("request_pages", "review"),
+			getCollectionPermission("request_pages", "publish"),
+		],
+	};
+	const creatorAccess: LucidUser = {
+		...updater,
+		permissions: [
+			...read,
+			getCollectionPermission("request_pages", "create"),
+			getCollectionPermission("request_pages", "review"),
+		],
+	};
+	const asUpdater = await getSingle(context, {
+		id: requested.releaseId,
+		user: updater,
+	});
+	assert(asUpdater.data, JSON.stringify(asUpdater.error));
+	expect(asUpdater.data.permissions).toMatchObject({
+		edit: false,
+		approve: false,
+		release: false,
+	});
+	const asCreator = await getSingle(context, {
+		id: requested.releaseId,
+		user: creatorAccess,
+	});
+	assert(asCreator.data, JSON.stringify(asCreator.error));
+	expect(asCreator.data.permissions).toMatchObject({
+		edit: true,
+		approve: true,
+		release: true,
+	});
+
+	const approved = await approve(context, {
+		...reviewInput(asCreator.data),
+		user: creatorAccess,
+	});
+	assert(!approved.error, JSON.stringify(approved.error));
+	expect(
+		(await publish(context, { id: requested.releaseId, user: updater })).error
+			?.status,
+	).toBe(403);
+	const released = await publishRelease(requested.releaseId, creatorAccess);
+	expect(released.status).toBe("released");
+});
+
+test("releasing a create release creates the document in latest with its approved workflow", async () => {
+	const requested = await requestDocument(creator, "Landing");
+	const release = await readRelease(requested.releaseId);
+	const moved = await updateWorkflow(context, {
+		collectionKey: "request_pages",
+		documentId: requested.id,
+		versionId: versionOf(release),
+		stage: "ready",
+		assigneeIds: [reviewer.id],
+		user: creator,
+	});
+	assert(!moved.error, JSON.stringify(moved.error));
+
+	await approveRelease(release.id);
+	const released = await publishRelease(release.id);
+	expect(released.status).toBe("released");
+	expect(member(released).versionId).toBeNull();
+
+	expect(await listRequestPages(false)).toContain(requested.id);
+	expect(await listRequestPages(true)).not.toContain(requested.id);
+	expect(
+		await fieldOf(requested.id, "title", "latest", undefined, "request_pages"),
+	).toBe("Landing");
+	const created = await getDocument(context, {
+		collectionKey: "request_pages",
+		id: requested.id,
+		version: "latest",
+		query: {},
+		authUser: creator,
+	});
+	assert(created.data, JSON.stringify(created.error));
+	expect(created.data.document.createReleaseId).toBeNull();
+	expect(created.data.document.createdBy).toBe(creator.id);
+	const workflow = await getWorkflow(context, {
+		collectionKey: "request_pages",
+		documentId: requested.id,
+		versionId: null,
+	});
+	expect(workflow.data?.stage).toBe("ready");
+	expect(workflow.data?.assignees.map((assignee) => assignee.userId)).toEqual([
+		reviewer.id,
+	]);
 });

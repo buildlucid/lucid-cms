@@ -66,21 +66,26 @@ export const ReleaseDocumentCard: Component<{
 						<p class="mt-0.5 truncate text-xs text-muted">
 							{collectionLabel()} #{props.document.documentId}
 							<span aria-hidden="true"> · </span>
-							{props.document.source === "latest"
-								? T()("releases.document.source.proposal")
-								: T()("releases.document.source.snapshot", {
-										source: getTargetLabel(
-											props.collection,
-											props.document.source,
-										),
-									})}
+							{props.release.type === "create"
+								? T()("releases.document.source.request")
+								: props.document.source === "latest"
+									? T()("releases.document.source.proposal")
+									: T()("releases.document.source.snapshot", {
+											source: getTargetLabel(
+												props.collection,
+												props.document.source,
+											),
+										})}
 						</p>
 					</div>
 					<div class="flex shrink-0 items-center gap-1.5">
-						<ReleaseWorkflowStage
-							document={props.document}
-							collection={props.collection}
-						/>
+						{/* workflow stages gate environments, so they don't apply to requested documents */}
+						<Show when={props.release.type === "publish"}>
+							<ReleaseWorkflowStage
+								document={props.document}
+								collection={props.collection}
+							/>
+						</Show>
 						<Show
 							when={
 								props.document.versionId !== null ||

@@ -14,7 +14,7 @@ import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import brickHelpers from "@/utils/brick-helpers";
 import { getBodyError } from "@/utils/error-helpers";
-import { getDocumentRoute } from "@/utils/route-helpers";
+import { getDocumentRoute, getReleaseRoute } from "@/utils/route-helpers";
 
 export function useDocumentMutations(props: {
 	collection: Accessor<Collection | undefined>;
@@ -59,6 +59,26 @@ export function useDocumentMutations(props: {
 				queryKey: queryKeys.collections.all(),
 			});
 			return;
+		},
+		onError: (errors) => {
+			brickStore.set(
+				"fieldsErrors",
+				getBodyError<FieldError[]>("fields", errors) || [],
+			);
+			brickStore.set(
+				"brickErrors",
+				getBodyError<BrickError[]>("bricks", errors) || [],
+			);
+		},
+		getCollectionName: props.collectionSingularName,
+	});
+
+	const requestCreationMutation = api.documents.useRequestCreation({
+		onSuccess: (data) => {
+			brickStore.set("fieldsErrors", []);
+			brickStore.set("brickErrors", []);
+			brickStore.get.captureInitialSnapshot();
+			navigate(getReleaseRoute({ releaseId: data.data.releaseId }));
 		},
 		onError: (errors) => {
 			brickStore.set(
@@ -260,6 +280,18 @@ export function useDocumentMutations(props: {
 		}
 	};
 
+	/** Requests the new document through a create release instead of creating it. Opens the release once requested. */
+	const requestCreationAction = (title: string) => {
+		requestCreationMutation.action.mutate({
+			collectionKey: props.collectionKey(),
+			body: {
+				title,
+				bricks: brickHelpers.getUpsertBricks(),
+				fields: brickHelpers.getCollectionPseudoBrickFields(),
+			},
+		});
+	};
+
 	const publishDocumentAction = async (target: DocumentVersionType) => {
 		const id = props.documentId();
 		if (id === undefined) return;
@@ -320,12 +352,14 @@ export function useDocumentMutations(props: {
 
 	return {
 		createDocumentMutation,
+		requestCreationMutation,
 		createSingleVersionMutation,
 		updateSingleVersionMutation,
 		checkSingleVersionMutation,
 		publishMutation,
 		updateWorkflowMutation,
 		upsertDocumentAction,
+		requestCreationAction,
 		publishDocumentAction,
 		autoSaveDocument,
 		autoSaveMetadata,

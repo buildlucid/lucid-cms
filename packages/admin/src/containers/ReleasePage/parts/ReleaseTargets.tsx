@@ -51,8 +51,12 @@ export const ReleaseTargets: Component<{
 	const selected = createMemo(() =>
 		props.document.targets.map((target) => target.target),
 	);
+	//* create releases always land their document in latest
 	const editable = createMemo(
-		() => props.release.status === "open" && props.release.permissions.edit,
+		() =>
+			props.release.type === "publish" &&
+			props.release.status === "open" &&
+			props.release.permissions.edit,
 	);
 	const available = createMemo(() =>
 		getAllowedTargets(props.collection, props.document.source).filter(

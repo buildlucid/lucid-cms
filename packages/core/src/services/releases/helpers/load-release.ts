@@ -30,6 +30,7 @@ const loadRelease: ServiceFn<
 			Releases.selectSingle({
 				select: [
 					"id",
+					"type",
 					"title",
 					"description",
 					"status",

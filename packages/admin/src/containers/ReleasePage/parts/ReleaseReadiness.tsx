@@ -84,13 +84,6 @@ export const ReleaseReadiness: Component<{
 							: T()("releases.readiness.comments.open")
 					}
 				/>
-				<Show when={props.release.blockers.length === 0}>
-					<ReleaseCheckRow
-						tone="success"
-						title={T()("releases.checks.clear.title")}
-						description={T()("releases.checks.clear")}
-					/>
-				</Show>
 				<Show
 					when={props.release.approved}
 					fallback={

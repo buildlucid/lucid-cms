@@ -11,7 +11,7 @@ import allowsSelfApproval from "./allows-self-approval.js";
 const getEligibleReviewers: ServiceFn<
 	[
 		{
-			release: Pick<ReleaseRecord, "created_by"> & {
+			release: Pick<ReleaseRecord, "type" | "created_by"> & {
 				documents: Array<Pick<ReleaseDocumentRecord, "collection_key">>;
 			};
 		},
@@ -29,7 +29,11 @@ const getEligibleReviewers: ServiceFn<
 		Permissions.ReleasesRead,
 		...collectionKeys.flatMap((key) => [
 			getCollectionPermission(key, "read"),
-			getCollectionPermission(key, "update"),
+			//* matches the approve access in getReleaseAccess
+			getCollectionPermission(
+				key,
+				data.release.type === "create" ? "create" : "update",
+			),
 			getCollectionPermission(key, "review"),
 		]),
 	];

@@ -15,6 +15,7 @@ export interface ReleaseSummaryQueryResponse
 	extends Pick<
 		Select<LucidReleases>,
 		| "id"
+		| "type"
 		| "title"
 		| "status"
 		| "revision"
@@ -190,6 +191,7 @@ export default class ReleasesRepository extends StaticRepository<"lucid_releases
 		);
 		const query = main.select((eb) => [
 			"lucid_releases.id",
+			"lucid_releases.type",
 			"lucid_releases.title",
 			"lucid_releases.status",
 			"lucid_releases.revision",
@@ -263,6 +265,7 @@ export default class ReleasesRepository extends StaticRepository<"lucid_releases
 			mode: "multiple-count",
 			select: [
 				"id",
+				"type",
 				"title",
 				"status",
 				"revision",
@@ -279,6 +282,7 @@ export default class ReleasesRepository extends StaticRepository<"lucid_releases
 			],
 		});
 	}
+	/** Counts open releases for each release type. Types without open releases are left out. */
 	async selectOverview<V extends boolean = false>(
 		props: QueryProps<V, { access: ReleaseAccess }>,
 	) {
@@ -287,7 +291,9 @@ export default class ReleasesRepository extends StaticRepository<"lucid_releases
 			.selectFrom("lucid_releases")
 			.where("lucid_releases.status", "=", "open")
 			.where((eb) => this.accessible(eb, props.access))
+			.groupBy("lucid_releases.type")
 			.select((eb) => [
+				"lucid_releases.type",
 				sql<number>`sum(case when ${approved} then 0 else 1 end)`.as(
 					"awaiting_approval",
 				),
@@ -313,14 +319,14 @@ export default class ReleasesRepository extends StaticRepository<"lucid_releases
 				)} and not (${approved}) then 1 else 0 end)`.as("assigned_to_me"),
 			]);
 
-		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectOverview",
 		});
 		if (exec.response.error) return exec.response;
 
 		return this.validateResponse(exec, {
 			...props.validation,
-			mode: "single",
+			mode: "multiple",
 		});
 	}
 	/** Claims the release for one writer. Returns the number of rows claimed. */
@@ -463,6 +469,7 @@ export default class ReleasesRepository extends StaticRepository<"lucid_releases
 			)
 			.select((eb) => [
 				"lucid_releases.id",
+				"lucid_releases.type",
 				"lucid_releases.status",
 				"lucid_releases.created_by",
 				"lucid_release_documents.source",

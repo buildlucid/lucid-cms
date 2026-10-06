@@ -12,6 +12,7 @@ import { getReadableCollections } from "@/utils/home-widgets";
 import AgentActivityWidget from "./AgentActivityWidget";
 import AiCreditsWidget from "./AiCreditsWidget";
 import CollectionsWidget from "./CollectionsWidget";
+import DocumentRequestsWidget from "./DocumentRequestsWidget";
 import PublishingWidget from "./PublishingWidget";
 import StorageWidget from "./StorageWidget";
 import type { HomeWidget } from "./types";
@@ -63,6 +64,26 @@ const builtInWidgets: HomeWidget[] = [
 					userStore.get.hasPermission([collection.permissions.read]).all,
 			),
 		component: PublishingWidget,
+	},
+	{
+		key: "lucid.documentRequests",
+		priority: 75,
+		label: () => T()("home.widget.requests.label"),
+		description: () => T()("home.widget.requests.description"),
+		size: "md",
+		sizes: ["md", "lg", "full"],
+		hidden: false,
+		available: (context) =>
+			can(Permissions.ReleasesRead) &&
+			(context.collections ?? []).some(
+				(collection) =>
+					collection.mode === "multiple" &&
+					userStore.get.hasPermission([
+						collection.permissions.create,
+						collection.permissions["create-request"],
+					]).some,
+			),
+		component: DocumentRequestsWidget,
 	},
 	{
 		key: "lucid.collections",

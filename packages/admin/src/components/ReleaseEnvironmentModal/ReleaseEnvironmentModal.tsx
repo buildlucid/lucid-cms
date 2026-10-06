@@ -56,7 +56,9 @@ const ReleaseEnvironmentModal: Component<{
 
 	const releases = api.releases.useGetMultiple({
 		queryParams: {
-			queryString: () => "filter[status]=open&sort=-updatedAt&perPage=100",
+			//* create releases always hold their one requested document
+			queryString: () =>
+				"filter[status]=open&filter[type]=publish&sort=-updatedAt&perPage=100",
 		},
 		enabled: () => props.open,
 	});

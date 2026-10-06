@@ -15,6 +15,7 @@ import useGetSingleVersion from "./useGetSingleVersion";
 import useGetWorkflowAssignees from "./useGetWorkflowAssignees";
 import usePromoteSingle from "./usePromoteSingle";
 import usePublishSingle from "./usePublishSingle";
+import useRequestCreation from "./useRequestCreation";
 import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
 import useUpdateOrder from "./useUpdateOrder";
@@ -31,6 +32,7 @@ const exportObject = {
 	useCheckSingleVersion,
 	useCreateSingleVersion,
 	useCreateSingle,
+	useRequestCreation,
 	usePublishSingle,
 	useGetSingle,
 	usePromoteSingle,

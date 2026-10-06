@@ -41,7 +41,7 @@ import {
 	tableHeadColumns,
 } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { getDocumentRoute } from "@/utils/route-helpers";
+import { getDocumentRoute, getReleaseRoute } from "@/utils/route-helpers";
 import spawnToast from "@/utils/spawn-toast";
 import { useDocumentOrderSave } from "./hooks/useDocumentOrderSave";
 
@@ -54,6 +54,8 @@ export const DocumentsList: Component<{
 		collectionIsSuccess: Accessor<boolean>;
 		searchParams: QueryStateResponse;
 		showingDeleted: Accessor<boolean>;
+		/** Whether the pending filter lists requested documents, which only exist as their create release's proposal. */
+		showingRequests: Accessor<boolean>;
 		orderMode: Accessor<boolean>;
 	};
 }> = (props) => {
@@ -160,8 +162,8 @@ export const DocumentsList: Component<{
 		() => props.state.collection?.permissions,
 	);
 	const rowsAreSelectable = createMemo(() => {
-		//* bulk selection is disabled while reordering
-		if (props.state.orderMode()) return false;
+		//* bulk selection is disabled while reordering, and requests are managed from their release
+		if (props.state.orderMode() || props.state.showingRequests()) return false;
 
 		const permissions = collectionPermissions();
 		if (!permissions) return false;
@@ -234,6 +236,14 @@ export const DocumentsList: Component<{
 		props.state.showingDeleted() ? 1 : 0,
 	);
 	const noEntriesCopy = createMemo(() => {
+		if (props.state.showingRequests()) {
+			return {
+				title: T()("empty.states.documents.requests.title", {
+					collectionMultiple: collectionName(),
+				}),
+				description: T()("empty.states.documents.requests.description"),
+			};
+		}
 		if (props.state.showingDeleted()) {
 			return {
 				title: T()("empty.states.documents.deleted.title", {
@@ -256,7 +266,7 @@ export const DocumentsList: Component<{
 		};
 	});
 	const createEntryCallback = createMemo(() => {
-		if (props.state.showingDeleted()) {
+		if (props.state.showingDeleted() || props.state.showingRequests()) {
 			return undefined;
 		}
 		return documentCreateEntry;
@@ -514,6 +524,7 @@ export const DocumentsList: Component<{
 											: false,
 										show:
 											!props.state.showingDeleted() &&
+											!props.state.showingRequests() &&
 											props.state.collection?.capabilities.preview === true,
 										actions: [
 											{
@@ -563,7 +574,29 @@ export const DocumentsList: Component<{
 													collectionPermissions()?.update,
 												]).some
 											: false,
-										show: !props.state.showingDeleted(),
+										show:
+											!props.state.showingDeleted() &&
+											!props.state.showingRequests(),
+										sortOrder: 0,
+									},
+									{
+										label: T()("documents.request.open"),
+										type: "link",
+										icon: "eye",
+										href: (() => {
+											const releaseId = doc().createReleaseId;
+											return releaseId === null
+												? undefined
+												: getReleaseRoute({
+														releaseId,
+														content: {
+															collectionKey: collectionKey(),
+															documentId: doc().id,
+														},
+													});
+										})(),
+										permission: true,
+										show: props.state.showingRequests(),
 										sortOrder: 0,
 									},
 									{
@@ -597,6 +630,7 @@ export const DocumentsList: Component<{
 										permission: canDuplicateDocuments(),
 										show:
 											!props.state.showingDeleted() &&
+											!props.state.showingRequests() &&
 											props.state.collection?.locked !== true &&
 											props.state.collection?.mode === "multiple",
 										sortOrder: 30,
@@ -632,7 +666,9 @@ export const DocumentsList: Component<{
 												]).all
 											: false,
 										excludeFromRowClick: true,
-										show: !props.state.showingDeleted(),
+										show:
+											!props.state.showingDeleted() &&
+											!props.state.showingRequests(),
 										variant: "danger",
 										sortOrder: 70,
 									},

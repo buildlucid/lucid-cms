@@ -218,6 +218,7 @@ const formatSingle = (props: {
 
 	return {
 		id: props.release.id,
+		type: props.release.type,
 		title: props.release.title,
 		description: props.release.description,
 		status: props.release.status,
@@ -302,6 +303,7 @@ const formatSummary = (props: {
 	users: Map<number, ReleaseUser>;
 }): ReleaseSummary => ({
 	id: props.release.id,
+	type: props.release.type,
 	title: props.release.title,
 	status: props.release.status,
 	approved: props.release.approved_revision === props.release.revision,

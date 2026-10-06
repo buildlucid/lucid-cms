@@ -7,16 +7,12 @@ import buildTableName from "../../../helpers/build-table-name.js";
 import type { FieldRelationValidationInput } from "../../types.js";
 import type { RelationValidationData } from "./types.js";
 
-/**
- * Validate document input data
- */
 const validateRelationInputData = async (
 	context: ServiceContext,
 	input: FieldRelationValidationInput,
 ): Promise<RelationValidationData[]> => {
 	const allDocuments: RelationValidationData[] = [];
 	try {
-		//* create queries for each collection key
 		const promises = Object.entries(input).map(([collectionKey, ids]) => {
 			if (ids.length === 0) return Promise.resolve([]);
 
@@ -36,9 +32,6 @@ const validateRelationInputData = async (
 	}
 };
 
-/**
- * Fetch documents from a specific collection
- */
 const fetchDocumentsFromCollection = async (
 	context: ServiceContext,
 	collectionKey: string,
@@ -71,6 +64,7 @@ const fetchDocumentsFromCollection = async (
 			{
 				ids,
 				isDeleted: false,
+				pending: false,
 				// Saving or approving a reference must finish before its target can be deleted.
 				protectTargets: true,
 				validation: {

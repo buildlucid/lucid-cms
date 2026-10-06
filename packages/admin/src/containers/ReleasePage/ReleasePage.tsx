@@ -172,6 +172,7 @@ const ReleasePage: Component = () => {
 													</For>
 													<Show
 														when={
+															data().type === "publish" &&
 															data().permissions.edit &&
 															data().documents.length < releaseDocumentLimit
 														}

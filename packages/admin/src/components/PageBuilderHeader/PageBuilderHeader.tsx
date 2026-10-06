@@ -38,6 +38,7 @@ import { AutoSaveStatusPill } from "./parts/AutoSaveStatusPill";
 import { DocumentActions } from "./parts/DocumentActions";
 import {
 	ReleaseTrigger,
+	type ReleaseTriggerAction,
 	type ReleaseTriggerOption,
 } from "./parts/ReleaseTrigger";
 import { ViewSelector, type ViewSelectorOption } from "./parts/ViewSelector";
@@ -334,7 +335,7 @@ export const PageBuilderHeader: Component<{
 			const isPromoted = environmentStatus === "in-sync";
 
 			const reviewRequired =
-				publishReview?.requiredFor.includes(environment.key) === true;
+				publishReview?.targets.includes(environment.key) === true;
 
 			//* starting a release only needs edit access, approving and releasing are checked later
 			const canPublish = userStore.get.hasPermission([
@@ -452,9 +453,27 @@ export const PageBuilderHeader: Component<{
 
 		return releaseOptions().find((option) => option.value === version);
 	});
+	//* the create screen creates by default, or requests when creating isn't available
+	const createDefault = createMemo(() =>
+		props.mode === "create" ? props.state.ui.createActions()[0] : undefined,
+	);
+	const createAlternatives = createMemo((): ReleaseTriggerAction[] =>
+		createDefault() === "create" &&
+		props.state.ui.createActions().includes("request")
+			? [
+					{
+						label: T()("documents.request.instead"),
+						disabled: props.state.ui.isSaving(),
+						onSelect: () => props.state.ui.setRequestCreationOpen(true),
+					},
+				]
+			: [],
+	);
 	const showViewSelector = createMemo(() => {
 		const collection = props.state.collection();
 		if (!collection) return false;
+		//* a requested document only exists as its create release's proposal
+		if (props.state.document()?.createReleaseId) return false;
 
 		const environments = collection.publishing.targets ?? [];
 
@@ -464,7 +483,7 @@ export const PageBuilderHeader: Component<{
 				(proposals.data?.data.length ?? 0) > 0 ||
 				collection.revisions.enabled ||
 				environments.length > 0 ||
-				(collection.publishing.review?.requiredFor?.length ?? 0) > 0)
+				(collection.publishing.review?.targets?.length ?? 0) > 0)
 		);
 	});
 	const showCopyPreview = createMemo(() => {
@@ -776,10 +795,22 @@ export const PageBuilderHeader: Component<{
 								<ReleaseTrigger
 									options={releaseOptions}
 									onSelect={openReleaseOption}
+									actions={createAlternatives()}
 									onSave={() => {
+										if (createDefault() === "request") {
+											props.state.ui.setRequestCreationOpen(true);
+											return;
+										}
 										props.state.autoSave?.debouncedAutoSave.clear();
 										props.actions?.upsertDocumentAction?.();
 									}}
+									saveLabel={
+										createDefault() === "request"
+											? T()("documents.request.action")
+											: createDefault() === "create"
+												? T()("common.create")
+												: undefined
+									}
 									saveDisabled={props.state.ui.saveDisabled?.()}
 									savePermission={props.state.ui.hasSavePermission?.()}
 									loading={

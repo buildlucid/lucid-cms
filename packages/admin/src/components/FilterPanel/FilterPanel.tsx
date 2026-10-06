@@ -836,7 +836,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 					props.class,
 				)}
 			>
-				<Show when={(props.presets?.length ?? 0) > 1}>
+				<Show when={(props.presets?.length ?? 0) > 0}>
 					<div class="mb-4 border-b border-border pb-4">
 						<h3 class="mb-2 text-sm font-medium text-title">
 							{T()("filter.section.presets")}

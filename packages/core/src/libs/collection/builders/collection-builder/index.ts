@@ -287,10 +287,11 @@ class CollectionBuilder<
 					})) ?? [],
 				review: review
 					? {
-							requiredFor: [...(review.requiredFor ?? [])],
-							allowSelfApproval:
-								review.allowSelfApproval ??
-								constants.collectionBuilder.publishing.allowSelfApproval,
+							targets: [...(review.targets ?? [])],
+							create: review.create ?? false,
+							selfApproval:
+								review.selfApproval ??
+								constants.collectionBuilder.publishing.selfApproval,
 						}
 					: undefined,
 				workflow: workflow

@@ -11,6 +11,7 @@ type CollectionPermissions = {
 export const collectionPermissionActions = [
 	"read",
 	"create",
+	"create-request",
 	"update",
 	"delete",
 	"restore",
@@ -18,7 +19,6 @@ export const collectionPermissionActions = [
 	"review",
 ] as const satisfies CollectionPermissionAction[];
 
-/** Builds the canonical document permission for one registered collection. */
 export const getCollectionPermission = <
 	TAction extends CollectionPermissionAction,
 >(
@@ -26,7 +26,6 @@ export const getCollectionPermission = <
 	action: TAction,
 ): CollectionPermission<TAction> => `documents:${collectionKey}:${action}`;
 
-/** Resolves the document permission required for a collection action. */
 export const resolveCollectionPermission = <
 	TAction extends CollectionPermissionAction,
 >(params: {
@@ -36,7 +35,6 @@ export const resolveCollectionPermission = <
 	return getCollectionPermission(params.collection.key, params.action);
 };
 
-/** Expands every generated document permission for a collection. */
 export const resolveCollectionPermissions = (
 	collection: CollectionBuilder,
 ): CollectionPermissions => {

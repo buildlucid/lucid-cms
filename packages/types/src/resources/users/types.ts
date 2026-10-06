@@ -22,7 +22,7 @@ export type CorePermission =
 	| "jobs:run"
 	| "jobs:update"
 	| "releases:read"
-	| `documents:${string}:${"read" | "create" | "update" | "delete" | "restore" | "publish" | "review"}`
+	| `documents:${string}:${"read" | "create" | "create-request" | "update" | "delete" | "restore" | "publish" | "review"}`
 	| "ai:custom-field-value"
 	| "ai:image-generate"
 	| "ai:alt-generate"

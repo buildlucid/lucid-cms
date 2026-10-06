@@ -265,17 +265,25 @@ export const documentFilterFields = (
 	});
 };
 
-/** Collection fields plus management metadata used by document listings. */
+/**
+ * Filters for document listings, in display order: the ID, then status,
+ * workflow and request filters, the collection's own fields, and authorship
+ * last.
+ */
 export const documentFilterPanelFields = (
 	collection?: Collection,
+	options?: {
+		/** Adds the requested documents filter, for people who can read their create requests. */
+		requests?: boolean;
+	},
 ): FilterField[] => {
-	const result = documentFilterFields(collection);
-
-	result.unshift({
-		key: "id",
-		label: T()("common.document.id"),
-		type: "number",
-	});
+	const result: FilterField[] = [
+		{
+			key: "id",
+			label: T()("common.document.id"),
+			type: "number",
+		},
+	];
 
 	for (const environment of collection?.publishing.targets ?? []) {
 		const environmentLabel =
@@ -330,6 +338,16 @@ export const documentFilterPanelFields = (
 			},
 		);
 	}
+
+	if (options?.requests) {
+		result.push({
+			key: "pending",
+			label: T()("documents.filter.requests"),
+			type: "checkbox",
+		});
+	}
+
+	result.push(...documentFilterFields(collection));
 
 	result.push(
 		{

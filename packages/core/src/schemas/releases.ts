@@ -1,7 +1,10 @@
 import z from "zod";
 import type { ControllerSchema } from "../exports/types.js";
 import { releaseCommentResolutionSchema } from "../libs/db/tables/release-events.js";
-import { releaseStatusSchema } from "../libs/db/tables/releases.js";
+import {
+	releaseStatusSchema,
+	releaseTypeSchema,
+} from "../libs/db/tables/releases.js";
 import { jobStatusSchema } from "../libs/jobs/payload.js";
 import type { ReleaseEvent } from "../types/response.js";
 import { queryFormatted, queryString } from "./helpers/querystring.js";
@@ -166,6 +169,10 @@ const releaseDocumentResponseSchema = z.object({
 
 const releaseResponseSchema = z.object({
 	id: z.number(),
+	type: releaseTypeSchema.meta({
+		description:
+			"Publish releases move documents to environments. Create releases request one new document, created once released",
+	}),
 	title: z.string(),
 	description: richTextJSONSchema.nullable(),
 	status: releaseStatusSchema,
@@ -203,6 +210,7 @@ const releaseResponseSchema = z.object({
 const releaseSummaryResponseSchema = releaseResponseSchema
 	.pick({
 		id: true,
+		type: true,
 		title: true,
 		status: true,
 		approved: true,
@@ -230,12 +238,21 @@ const releaseSummaryResponseSchema = releaseResponseSchema
 		),
 	});
 
-export const releaseOverviewResponseSchema = z.object({
+const releaseOverviewCountsSchema = z.object({
 	awaitingApproval: z.number(),
 	approved: z.number(),
 	scheduled: z.number(),
 	failed: z.number(),
 	assignedToMe: z.number(),
+});
+
+export const releaseOverviewResponseSchema = z.object({
+	publish: releaseOverviewCountsSchema.meta({
+		description: "Open releases publishing existing documents",
+	}),
+	create: releaseOverviewCountsSchema.meta({
+		description: "Open releases requesting new documents",
+	}),
 });
 
 const releaseDocumentInputSchema = z.object({
@@ -300,6 +317,9 @@ export const controllerSchemas = {
 		query: {
 			string: z
 				.object({
+					"filter[type]": queryString.schema.filter(false, {
+						example: "create",
+					}),
 					"filter[title]": queryString.schema.filter(false, {
 						example: "Spring launch",
 					}),
@@ -345,6 +365,7 @@ export const controllerSchemas = {
 			formatted: z.object({
 				filter: z
 					.object({
+						type: queryFormatted.schema.filters.single.optional(),
 						title: queryFormatted.schema.filters.single.optional(),
 						status: queryFormatted.schema.filters.union.optional(),
 						approval: queryFormatted.schema.filters.single.optional(),

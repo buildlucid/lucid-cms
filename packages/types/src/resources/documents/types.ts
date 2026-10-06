@@ -689,6 +689,7 @@ export interface CollectionPreviewBreakpoint {
 export type CollectionPermissionAction =
 	| "read"
 	| "create"
+	| "create-request"
 	| "update"
 	| "delete"
 	| "restore"
@@ -730,8 +731,9 @@ export interface Collection {
 	publishing: {
 		scheduling: boolean;
 		review?: {
-			requiredFor: string[];
-			allowSelfApproval: boolean;
+			targets: string[];
+			create: boolean;
+			selfApproval: boolean;
 		};
 		workflow?: {
 			initial: string;
@@ -762,6 +764,7 @@ export interface Collection {
 	permissions: {
 		read: CollectionPermission<"read">;
 		create: CollectionPermission<"create">;
+		"create-request": CollectionPermission<"create-request">;
 		update: CollectionPermission<"update">;
 		delete: CollectionPermission<"delete">;
 		restore: CollectionPermission<"restore">;
@@ -837,6 +840,8 @@ export interface InternalCollectionDocument {
 	route: DocumentRoute | null;
 	versions: Record<string, DocumentVersionSummary | null>;
 	isDeleted: boolean;
+	/** The open create release requesting this document. Null once the document is created. */
+	createReleaseId: number | null;
 	createdBy: number | null;
 	createdAt: string | null;
 	updatedAt: string | null;

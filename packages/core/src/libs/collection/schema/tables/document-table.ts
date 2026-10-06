@@ -5,9 +5,6 @@ import buildSchemaIndex from "../../helpers/build-schema-index.js";
 import buildTableName from "../../helpers/build-table-name.js";
 import type { CollectionSchemaTable } from "../types.js";
 
-/**
- * Returns the document table
- */
 const createDocumentTable = (props: {
 	collection: CollectionBuilder;
 	db: DatabaseAdapter;
@@ -102,6 +99,17 @@ const createDocumentTable = (props: {
 						},
 					},
 					{
+						name: "create_release_id",
+						source: "core",
+						type: props.db.getDataType("integer"),
+						nullable: true,
+						foreignKey: {
+							table: "lucid_releases",
+							column: "id",
+							onDelete: "restrict",
+						},
+					},
+					{
 						name: "created_by",
 						source: "core",
 						type: props.db.getDataType("integer"),
@@ -155,6 +163,12 @@ const createDocumentTable = (props: {
 						db: props.db,
 						tableName,
 						columns: ["is_deleted", "created_at"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["create_release_id"],
 						source: "core",
 					}),
 					buildSchemaIndex({

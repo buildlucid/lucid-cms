@@ -6,12 +6,18 @@ import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable, TimestampMutable } from "../types.js";
 
 export const releaseStatusSchema = z.enum(["open", "released", "closed"]);
+/** Publish releases move existing documents to environments. Create releases request one new document. */
+export const releaseTypeSchema = z.enum(["publish", "create"]);
 
 export const releasesTable = defineTable("lucid_releases", () => ({
 	columns: {
 		id: {
 			schema: z.number(),
 			type: "primary",
+		},
+		type: {
+			schema: releaseTypeSchema,
+			type: "text",
 		},
 		title: {
 			schema: z.string(),
@@ -109,6 +115,7 @@ export const releasesTable = defineTable("lucid_releases", () => ({
 	},
 	query: {
 		filters: {
+			type: "lucid_releases.type",
 			title: "lucid_releases.title",
 			status: "lucid_releases.status",
 			createdBy: "lucid_releases.created_by",
@@ -125,9 +132,11 @@ export const releasesTable = defineTable("lucid_releases", () => ({
 }));
 
 export type ReleaseStatus = z.infer<typeof releaseStatusSchema>;
+export type ReleaseType = z.infer<typeof releaseTypeSchema>;
 
 export interface LucidReleases {
 	id: Generated<number>;
+	type: ReleaseType;
 	title: string;
 	description: JSONColumnType<
 		RichTextJSON | null,
