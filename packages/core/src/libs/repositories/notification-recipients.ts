@@ -7,15 +7,19 @@ export default class NotificationRecipientsRepository extends StaticRepository<"
 		super(db, notificationRecipientsTable);
 	}
 
-	/** People still to be emailed about a revision, with their address and email preference for the type. */
-	async selectEmailCandidates(props: {
-		notificationId: number;
-		revision: number;
-		type: string;
+	/** People whose notification emails are due, oldest first, with their address and email preference for the type. */
+	async selectDueEmails(props: {
+		before: string;
+		notificationId?: number;
+		limit?: number;
 	}) {
-		const falseValue = this.dbAdapter.getDefault("boolean", "false");
 		const query = this.db
 			.selectFrom("lucid_notification_recipients")
+			.innerJoin(
+				"lucid_notifications",
+				"lucid_notifications.id",
+				"lucid_notification_recipients.notification_id",
+			)
 			.innerJoin(
 				"lucid_users",
 				"lucid_users.id",
@@ -28,53 +32,62 @@ export default class NotificationRecipientsRepository extends StaticRepository<"
 						"=",
 						"lucid_notification_recipients.user_id",
 					)
-					.on("lucid_notification_preferences.type", "=", props.type),
+					.onRef(
+						"lucid_notification_preferences.type",
+						"=",
+						"lucid_notifications.type",
+					),
 			)
 			.select([
+				"lucid_notification_recipients.notification_id",
 				"lucid_notification_recipients.user_id",
+				"lucid_notification_recipients.read_at",
+				"lucid_notification_recipients.archived_at",
 				"lucid_users.email",
+				"lucid_users.is_deleted",
+				"lucid_users.is_locked",
 				"lucid_notification_preferences.email_enabled",
 			])
-			.where(
-				"lucid_notification_recipients.notification_id",
-				"=",
-				props.notificationId,
+			.where("lucid_notification_recipients.email_due_at", "<=", props.before)
+			.$if(props.notificationId !== undefined, (qb) =>
+				qb.where(
+					"lucid_notification_recipients.notification_id",
+					"=",
+					props.notificationId ?? 0,
+				),
 			)
-			.where((eb) =>
-				eb.or([
-					eb("lucid_notification_recipients.emailed_revision", "is", null),
-					eb(
-						"lucid_notification_recipients.emailed_revision",
-						"<",
-						props.revision,
-					),
-				]),
-			)
-			.where("lucid_users.is_deleted", "=", falseValue)
-			.where("lucid_users.is_locked", "=", falseValue);
+			.orderBy("lucid_notification_recipients.email_due_at")
+			.$if(props.limit !== undefined, (qb) => qb.limit(props.limit ?? 0));
 
 		const exec = await this.executeQuery(() => query.execute(), {
-			method: "selectEmailCandidates",
+			method: "selectDueEmails",
 		});
 		return exec.response;
 	}
-	/** Marks a person as handled for a revision. Returns nothing when another job already did, so nobody is emailed twice. */
+	/** Drops emails that have been due since before the cutoff, so a paused or stalled job doesn't send old news. */
+	async clearExpiredEmails(props: { before: string }) {
+		const query = this.db
+			.updateTable("lucid_notification_recipients")
+			.set({ email_due_at: null })
+			.where("email_due_at", "<", props.before);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "clearExpiredEmails",
+		});
+		return exec.response;
+	}
+	/** Clears a person's due email. Returns nothing when another job already did or it was pushed back, so nobody is emailed twice. */
 	async claimEmail(props: {
 		notificationId: number;
 		userId: number;
-		revision: number;
+		before: string;
 	}) {
 		const query = this.db
 			.updateTable("lucid_notification_recipients")
-			.set({ emailed_revision: props.revision })
+			.set({ email_due_at: null })
 			.where("notification_id", "=", props.notificationId)
 			.where("user_id", "=", props.userId)
-			.where((eb) =>
-				eb.or([
-					eb("emailed_revision", "is", null),
-					eb("emailed_revision", "<", props.revision),
-				]),
-			)
+			.where("email_due_at", "<=", props.before)
 			.returning(["user_id"]);
 
 		const exec = await this.executeQuery(() => query.executeTakeFirst(), {

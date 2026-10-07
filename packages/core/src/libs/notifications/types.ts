@@ -24,6 +24,8 @@ export type NotificationRender = {
 };
 
 export type NotificationEmail<Data> = {
+	/** Minutes to wait before emailing. Nobody is emailed about a notification they read or archive in the meantime, or once it is resolved. Defaults to 10. Use 0 for anything people must hear about straight away. */
+	delayMinutes?: number;
 	/** Template name. Defaults to Lucid's notification template, which renders the title, body and link. */
 	template?: string;
 	/** Extra template data merged with the defaults. */
@@ -77,7 +79,7 @@ export type NotificationDefinition<
 		email: boolean;
 	};
 	render: (props: { data: z.output<Data> }) => NotificationRender;
-	email?: NotificationEmail<z.output<Data>>;
+	email: NotificationEmail<z.output<Data>> & { delayMinutes: number };
 };
 
 // biome-ignore lint/suspicious/noExplicitAny: accepts any data schema

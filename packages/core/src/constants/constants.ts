@@ -93,6 +93,9 @@ export default Object.freeze({
 	},
 	notifications: {
 		emailJob: { name: "core:send-notification-emails", version: 1 },
+		emailDelayMinutes: 10,
+		emailBatchSize: 100,
+		emailExpiryHours: 24,
 		storage: {
 			key: "storage",
 			thresholds: [80, 90, 100],

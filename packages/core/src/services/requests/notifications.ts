@@ -198,6 +198,7 @@ export const failedNotification = defineNotification({
 	level: "error",
 	actionRequired: true,
 	audience: "recipients",
+	email: { delayMinutes: 0 },
 	data: requestData.extend({ message: z.string() }),
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.requests.failed.title", {

@@ -1,4 +1,5 @@
 import type z from "zod";
+import constants from "../../constants/constants.js";
 import { normalizeCopy } from "../i18n/copy.js";
 import type {
 	DefineNotificationOptions,
@@ -9,7 +10,8 @@ import type {
  * Defines a notification type. Add it to `config.notifications`,
  * then send it with `toolkit.notifications.send`. Sends of unregistered types
  * are refused. People manage it in the notification settings and their own
- * email preferences.
+ * email preferences. Emails wait `email.delayMinutes` and are skipped for
+ * anyone who reads the notification first.
  *
  * @example
  * const orderFailed = defineNotification({
@@ -20,6 +22,7 @@ import type {
  * 	level: "error",
  * 	actionRequired: true,
  * 	audience: { permission: "shop:orders:manage" },
+ * 	email: { delayMinutes: 0 },
  * 	data: z.object({ orderId: z.number(), reason: z.string() }),
  * 	render: ({ data }) => ({
  * 		title: `Order #${data.orderId} failed`,
@@ -49,7 +52,11 @@ const defineNotification = <const Key extends string, Data extends z.ZodObject>(
 		email: options.defaults?.email ?? true,
 	},
 	render: options.render,
-	email: options.email,
+	email: {
+		...options.email,
+		delayMinutes:
+			options.email?.delayMinutes ?? constants.notifications.emailDelayMinutes,
+	},
 });
 
 export default defineNotification;

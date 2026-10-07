@@ -1,7 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, assert, beforeAll, expect, test } from "vitest";
+import { afterAll, assert, beforeAll, expect, test, vi } from "vitest";
+import constants from "../../constants/constants.js";
 import { createTranslationStore } from "../../libs/i18n/index.js";
 import { consumeJob } from "../../libs/jobs/consume/index.js";
+import { enqueueJob } from "../../libs/jobs/enqueue.js";
 import { notifications } from "../../libs/notifications/lucid-notifications.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
@@ -10,6 +12,7 @@ import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import getMultiple from "./get-multiple.js";
 import getPreferences from "./get-preferences.js";
 import getSummary from "./get-summary.js";
+import { sendNotificationEmailsJob } from "./jobs/send-emails.js";
 import resolve from "./resolve.js";
 import send from "./send.js";
 import updateMultiple from "./update-multiple.js";
@@ -22,6 +25,7 @@ let context: ServiceContext;
 let author: number;
 let reviewer: number;
 let bystander: number;
+let editor: number;
 
 beforeAll(async () => {
 	const config = await fixture.getConfig();
@@ -52,6 +56,7 @@ beforeAll(async () => {
 	author = await createUser();
 	reviewer = await createUser();
 	bystander = await createUser();
+	editor = await createUser();
 });
 afterAll(async () => {
 	await fixture.destroy();
@@ -68,9 +73,33 @@ const inbox = async (userId: number, status = "inbox") => {
 const row = async (id: number) =>
 	context.db.kysely
 		.selectFrom("lucid_notifications")
-		.select(["revision", "resolved_at", "fingerprint"])
+		.select(["resolved_at", "fingerprint"])
 		.where("id", "=", id)
 		.executeTakeFirstOrThrow();
+const emailState = (id: number) =>
+	context.db.kysely
+		.selectFrom("lucid_notification_recipients")
+		.select(["user_id", "email_due_at", "email_id"])
+		.where("notification_id", "=", id)
+		.execute();
+/** Runs the scheduled email job as if `minutesLater` minutes had passed. */
+const sweep = async (minutesLater = 0) => {
+	vi.useFakeTimers({ toFake: ["Date"] });
+	try {
+		vi.setSystemTime(Date.now() + minutesLater * 60_000);
+		const enqueued = await enqueueJob(context, {
+			job: sendNotificationEmailsJob,
+			payload: null,
+		});
+		assert(enqueued.data, JSON.stringify(enqueued.error));
+		expect(await consumeJob(context, { jobId: enqueued.data.jobId })).toEqual({
+			type: "completed",
+		});
+	} finally {
+		vi.useRealTimers();
+	}
+};
+const reviewDelay = notifications.requests.reviewRequested.email.delayMinutes;
 const sendReview = (requestId: number, key?: string) =>
 	send(context, {
 		definition: notifications.requests.reviewRequested,
@@ -125,7 +154,6 @@ test("resolving clears the to-do and a later send reopens it unread", async () =
 	expect(reopened.data?.id).toBe(first.data.id);
 	const after = await row(first.data.id);
 	expect(after.resolved_at).toBeNull();
-	expect(after.revision).toBe(2);
 	const listed = await inbox(reviewer, "unread");
 	expect(listed.map((entry) => entry.id)).toContain(first.data.id);
 });
@@ -168,7 +196,6 @@ test("an upsert refreshes content quietly and only re-notifies when the fingerpr
 		},
 	});
 	expect(same.data?.id).toBe(first.data.id);
-	expect((await row(first.data.id)).revision).toBe(1);
 	const quiet = (await inbox(reviewer)).find(
 		(entry) => entry.id === first.data.id,
 	);
@@ -188,7 +215,6 @@ test("an upsert refreshes content quietly and only re-notifies when the fingerpr
 		},
 	});
 	expect(climbed.data?.id).toBe(first.data.id);
-	expect((await row(first.data.id)).revision).toBe(2);
 	const loud = (await inbox(reviewer)).find(
 		(entry) => entry.id === first.data.id,
 	);
@@ -226,7 +252,7 @@ test("an upsert keeps the audience in step and emails people it adds", async () 
 
 	//* no fingerprint keeps the stored one, so adding someone stays quiet for everyone else
 	expect((await failed([reviewer, bystander])).error).toBeUndefined();
-	expect(await row(id)).toMatchObject({ revision: 1, fingerprint: "job-1" });
+	expect((await row(id)).fingerprint).toBe("job-1");
 	const jobs = await emailJobs(id);
 	expect(jobs).toHaveLength(2);
 	for (const job of jobs) {
@@ -254,7 +280,7 @@ test("an upsert keeps the audience in step and emails people it adds", async () 
 
 	//* people who leave the audience are dropped rather than told again
 	expect((await failed([bystander], "job-2")).error).toBeUndefined();
-	expect((await row(id)).revision).toBe(2);
+	expect((await row(id)).fingerprint).toBe("job-2");
 	expect((await recipients(id)).map((recipient) => recipient.user_id)).toEqual([
 		bystander,
 	]);
@@ -308,7 +334,7 @@ test("turning a type off suppresses it, and required types stay on", async () =>
 	expect(still.data?.id).toEqual(expect.any(Number));
 });
 
-test("emails go out once per revision and respect a person's opt-out", async () => {
+test("delayed emails only reach people who haven't read the notification or opted out", async () => {
 	const optOut = await updatePreferences(context, {
 		userId: bystander,
 		preferences: [
@@ -326,32 +352,93 @@ test("emails go out once per revision and respect a person's opt-out", async () 
 	const sent = await send(context, {
 		definition: notifications.requests.reviewRequested,
 		key: "request:4:review",
-		recipients: [reviewer, bystander],
+		recipients: [reviewer, bystander, editor],
 		actorUserId: author,
 		data: { requestId: 4, title: "Spring launch" },
 	});
 	assert(sent.data?.id, JSON.stringify(sent.error));
-
-	const job = await context.db.kysely
-		.selectFrom("lucid_jobs")
-		.select(["job_id"])
-		.where("idempotency_key", "=", `notification:${sent.data.id}:1`)
-		.executeTakeFirstOrThrow();
-	expect(await consumeJob(context, { jobId: job.job_id })).toEqual({
-		type: "completed",
-	});
-
-	const recipients = await context.db.kysely
-		.selectFrom("lucid_notification_recipients")
-		.select(["user_id", "emailed_revision", "email_id"])
-		.where("notification_id", "=", sent.data.id)
-		.execute();
+	const id = sent.data.id;
 	expect(
-		recipients.find((recipient) => recipient.user_id === reviewer)?.email_id,
+		(await updateMultiple(context, { userId: reviewer, ids: [id], read: true }))
+			.error,
+	).toBeUndefined();
+
+	await sweep();
+	expect(
+		(await emailState(id)).every(
+			(recipient) => recipient.email_due_at !== null,
+		),
+	).toBe(true);
+
+	await sweep(reviewDelay + 1);
+	const after = await emailState(id);
+	expect(after.every((recipient) => recipient.email_due_at === null)).toBe(
+		true,
+	);
+	expect(
+		after.find((recipient) => recipient.user_id === editor)?.email_id,
 	).toEqual(expect.any(Number));
 	expect(
-		recipients.find((recipient) => recipient.user_id === bystander),
-	).toMatchObject({ emailed_revision: 1, email_id: null });
+		after
+			.filter((recipient) => recipient.user_id !== editor)
+			.map((recipient) => recipient.email_id),
+	).toEqual([null, null]);
+});
+
+test("nobody is emailed about a notification resolved before its email is due", async () => {
+	const sent = await send(context, {
+		definition: notifications.requests.reviewRequested,
+		key: "request:5:review",
+		recipients: [editor],
+		actorUserId: author,
+		data: { requestId: 5, title: "Spring launch" },
+	});
+	assert(sent.data?.id, JSON.stringify(sent.error));
+	const resolved = await resolve(context, {
+		definition: notifications.requests.reviewRequested,
+		key: "request:5:review",
+	});
+	expect(resolved.error).toBeUndefined();
+
+	await sweep(reviewDelay + 1);
+	expect(await emailState(sent.data.id)).toEqual([
+		{ user_id: editor, email_due_at: null, email_id: null },
+	]);
+});
+
+test("a reopened notification is emailed again, unless it goes unsent past the expiry", async () => {
+	const key = "request:6:review";
+	const sendAgain = () =>
+		send(context, {
+			definition: notifications.requests.reviewRequested,
+			key,
+			recipients: [editor],
+			actorUserId: author,
+			data: { requestId: 6, title: "Spring launch" },
+		});
+
+	const sent = await sendAgain();
+	assert(sent.data?.id, JSON.stringify(sent.error));
+	const id = sent.data.id;
+	await sweep(reviewDelay + 1);
+	const [emailed] = await emailState(id);
+	expect(emailed?.email_id).toEqual(expect.any(Number));
+
+	expect(
+		(
+			await resolve(context, {
+				definition: notifications.requests.reviewRequested,
+				key,
+			})
+		).error,
+	).toBeUndefined();
+	expect((await sendAgain()).data?.id).toBe(id);
+	expect((await emailState(id))[0]?.email_due_at).not.toBeNull();
+
+	await sweep(constants.notifications.emailExpiryHours * 60 + reviewDelay + 1);
+	expect(await emailState(id)).toEqual([
+		{ user_id: editor, email_due_at: null, email_id: emailed?.email_id },
+	]);
 });
 
 test("the summary counts unread and open to-dos, and mark all read clears them", async () => {

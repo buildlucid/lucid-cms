@@ -31,9 +31,6 @@ const Migration00000010: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("href", adapter.getDataType("text"))
 				.addColumn("data", adapter.getDataType("json"), (col) => col.notNull())
 				.addColumn("fingerprint", adapter.getDataType("text"))
-				.addColumn("revision", adapter.getDataType("integer"), (col) =>
-					col.notNull().defaultTo(1),
-				)
 				.addColumn("actor_user_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_users.id").onDelete("set null"),
 				)
@@ -86,7 +83,7 @@ const Migration00000010: MigrationFn = (adapter: DatabaseAdapter) => {
 				)
 				.addColumn("read_at", adapter.getDataType("timestamp"))
 				.addColumn("archived_at", adapter.getDataType("timestamp"))
-				.addColumn("emailed_revision", adapter.getDataType("integer"))
+				.addColumn("email_due_at", adapter.getDataType("timestamp"))
 				.addColumn("email_id", adapter.getDataType("integer"), (col) =>
 					col.references("lucid_emails.id").onDelete("set null"),
 				)
@@ -110,6 +107,12 @@ const Migration00000010: MigrationFn = (adapter: DatabaseAdapter) => {
 				.createIndex("idx_lucid_notification_recipients_user")
 				.on("lucid_notification_recipients")
 				.columns(["user_id", "archived_at", "read_at"])
+				.execute();
+
+			await db.schema
+				.createIndex("idx_lucid_notification_recipients_email_due")
+				.on("lucid_notification_recipients")
+				.columns(["email_due_at"])
 				.execute();
 
 			await db.schema

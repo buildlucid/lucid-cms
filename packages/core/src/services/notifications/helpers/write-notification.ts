@@ -23,8 +23,9 @@ import resolveRecipients from "./resolve-recipients.js";
  * recipients. Either reopens a resolved match. Refreshing drops people who
  * are no longer in the audience. Recipients are told again, in-app and by
  * email, when the notification is reopened or its fingerprint changes, and
- * people added later are emailed too. Emails go out after the caller's
- * transaction commits.
+ * people added later are emailed too. Emails are due after the type's delay
+ * and sent by the email job, straight after the caller's transaction commits
+ * when there is no delay.
  */
 const writeNotification: ServiceFn<
 	[
@@ -106,6 +107,11 @@ const writeNotification: ServiceFn<
 
 	const rendered = definition.render({ data });
 	const now = new Date().toISOString();
+	const emailDueAt = settingsRes.data.email
+		? new Date(
+				Date.parse(now) + definition.email.delayMinutes * 60_000,
+			).toISOString()
+		: null;
 	const content = {
 		category: definition.category.key,
 		level: rendered.level ?? definition.level,
@@ -124,7 +130,6 @@ const writeNotification: ServiceFn<
 			key,
 			...content,
 			fingerprint: input.fingerprint ?? null,
-			revision: 1,
 			created_at: now,
 			updated_at: now,
 		},
@@ -133,7 +138,6 @@ const writeNotification: ServiceFn<
 	if (createRes.error) return createRes;
 
 	let id: number;
-	let revision = 1;
 	let notifyAgain = true;
 	let added = recipients;
 
@@ -144,12 +148,13 @@ const writeNotification: ServiceFn<
 			data: recipients.map((userId) => ({
 				notification_id: id,
 				user_id: userId,
+				email_due_at: emailDueAt ?? undefined,
 			})),
 		});
 		if (recipientsCreateRes.error) return recipientsCreateRes;
 	} else {
 		const existingRes = await Notifications.selectSingle({
-			select: ["id", "revision", "fingerprint", "resolved_at"],
+			select: ["id", "fingerprint", "resolved_at"],
 			where: [
 				{ key: "type", operator: "=", value: definition.key },
 				{ key: "key", operator: "=", value: key },
@@ -166,14 +171,12 @@ const writeNotification: ServiceFn<
 		const fingerprint = input.fingerprint ?? existing.fingerprint;
 		notifyAgain =
 			existing.resolved_at !== null || fingerprint !== existing.fingerprint;
-		revision = notifyAgain ? existing.revision + 1 : existing.revision;
 		id = existing.id;
 
 		const updateRes = await Notifications.updateSingle({
 			data: {
 				...content,
 				fingerprint,
-				revision,
 				resolved_at: null,
 				updated_at: now,
 			},
@@ -205,13 +208,17 @@ const writeNotification: ServiceFn<
 		}
 		if (added.length > 0) {
 			const addRes = await Recipients.createMultiple({
-				data: added.map((userId) => ({ notification_id: id, user_id: userId })),
+				data: added.map((userId) => ({
+					notification_id: id,
+					user_id: userId,
+					email_due_at: emailDueAt ?? undefined,
+				})),
 			});
 			if (addRes.error) return addRes;
 		}
 		if (notifyAgain) {
 			const unreadRes = await Recipients.updateMultiple({
-				data: { read_at: null, archived_at: null },
+				data: { read_at: null, archived_at: null, email_due_at: emailDueAt },
 				where: [
 					{ key: "notification_id", operator: "=", value: id },
 					{ key: "user_id", operator: "in", value: recipients },
@@ -226,14 +233,16 @@ const writeNotification: ServiceFn<
 		context.config,
 		constants.notifications.emailJob,
 	);
-	if (settingsRes.data.email && emailJob && (notifyAgain || added.length > 0)) {
-		//* a job for people added to a revision can't share its key, so the job's own claim stops repeats
+	//* delayed emails are left for the job's schedule to find
+	if (
+		emailDueAt &&
+		definition.email.delayMinutes === 0 &&
+		emailJob &&
+		(notifyAgain || added.length > 0)
+	) {
 		const jobRes = await enqueueJob(context, {
 			job: emailJob,
-			payload: { notificationId: id, revision },
-			options: notifyAgain
-				? { idempotencyKey: `notification:${id}:${revision}` }
-				: undefined,
+			payload: { notificationId: id },
 		});
 		if (jobRes.error) return jobRes;
 	}

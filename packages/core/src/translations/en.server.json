@@ -873,6 +873,7 @@
 	"core.routes.notifications.error.message": "Something went wrong with this notification. Try again.",
 	"core.config.notification.definition.duplicate": "Notification definition \"{{definition}}\" is registered more than once.",
 	"core.config.notification.key.invalid": "Notification key \"{{definition}}\" must be a lowercase namespaced identifier, such as \"plugin:order-failed\".",
+	"core.config.notification.email.delay.invalid": "Notification \"{{definition}}\" must have an email delay of zero or more minutes.",
 	"core.toolkit.notifications.send.error.name": "Notifications Toolkit Error",
 	"core.toolkit.notifications.send.error.message": "Lucid toolkit could not send the notification.",
 	"core.toolkit.notifications.upsert.error.name": "Notifications Toolkit Error",

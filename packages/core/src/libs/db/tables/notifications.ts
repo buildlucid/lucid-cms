@@ -68,10 +68,6 @@ export const notificationsTable = defineTable(
 				schema: z.string().nullable(),
 				type: "text",
 			},
-			revision: {
-				schema: z.number(),
-				type: "integer",
-			},
 			actor_user_id: {
 				schema: z.number().nullable(),
 				type: "integer",
@@ -135,8 +131,6 @@ export interface LucidNotifications {
 	>;
 	/** Sender-supplied marker. Recipients are told again when it changes. */
 	fingerprint: string | null;
-	/** Bumped whenever recipients should be told again. Emails are sent once per revision. */
-	revision: number;
 	actor_user_id: number | null;
 	resolved_at: TimestampMutable;
 	created_at: TimestampImmutable;

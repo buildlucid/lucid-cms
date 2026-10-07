@@ -19,6 +19,7 @@ export const storageNotification = defineNotification({
 	actionRequired: true,
 	required: true,
 	audience: { permission: Permissions.SettingsRead },
+	email: { delayMinutes: 0 },
 	data: z.object({
 		thresholdPercent: z.number(),
 		percentUsed: z.number(),
