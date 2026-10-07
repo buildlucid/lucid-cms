@@ -197,7 +197,8 @@ export const getTargetLabel = (
 };
 
 /**
- * Lists selectable environments in request order. Environment snapshots move forward.
+ * Lists selectable targets in request order. Proposals can complete into
+ * latest and every environment, while environment snapshots move forward.
  */
 export const getAllowedTargets = (
 	collection: { publishing: { targets: Array<{ key: string }> } } | undefined,
@@ -206,11 +207,20 @@ export const getAllowedTargets = (
 	const environments = (collection?.publishing.targets ?? []).map(
 		(target) => target.key,
 	);
-	if (source === "latest") return environments;
+	if (source === "latest") return ["latest", ...environments];
 
 	const index = environments.indexOf(source);
 	return index === -1 ? [] : environments.slice(index + 1);
 };
+
+/** New requests start on the first environment they can move to, as latest is opt in. */
+export const getDefaultTargets = (
+	collection: { publishing: { targets: Array<{ key: string }> } } | undefined,
+	source: string,
+) =>
+	getAllowedTargets(collection, source)
+		.filter((target) => target !== "latest")
+		.slice(0, 1);
 
 /**
  * The ways someone can add documents to a collection, default first: create
@@ -269,6 +279,7 @@ export const getRequestDocumentLabel = (
 export const getBlockerCopy = (
 	blocker: RequestBlocker,
 	collection: Collection | undefined,
+	type: RequestDetail["type"],
 ): { title: string; description: string } => {
 	const target = blocker.target
 		? getTargetLabel(collection, blocker.target)
@@ -313,8 +324,7 @@ export const getBlockerCopy = (
 				description: T()("requests.blocker.target.unavailable", { target }),
 			};
 		case "workflow":
-			//* create requests target latest
-			if (blocker.target === "latest") {
+			if (type === "create") {
 				return {
 					title: T()("requests.blocker.workflow.create.title"),
 					description: T()("requests.blocker.workflow.create"),

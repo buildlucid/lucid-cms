@@ -25,12 +25,6 @@ const toneIndicators: Record<
 	muted: "neutral-subtle",
 };
 
-/**
- * The environments a request publishes to, as chips saying what the request
- * will do there. Editors add and remove them in place, and the last can't be
- * removed. Changing them on an approved request asks first, since it needs
- * approving again.
- */
 export const RequestTargets: Component<{
 	request: RequestDetail;
 	document: RequestDocument;
@@ -101,7 +95,7 @@ export const RequestTargets: Component<{
 										<StatusIndicator variant={toneIndicators[status().tone]} />
 									)}
 								</Show>
-								<span class="text-title">
+								<span class="text-subtitle">
 									{getTargetLabel(props.collection, target.target)}
 								</span>
 								<Show when={targetStatus()}>

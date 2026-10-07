@@ -14,7 +14,7 @@ export type TargetCounts = Pick<
 >;
 
 const linkClass =
-	"rounded-sm text-xs text-muted transition-colors hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary";
+	"rounded-sm text-xs leading-none text-muted transition-colors hover:text-title hover:underline focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary";
 
 /**
  * How a collection's documents in one target compare to latest: a bar split
@@ -60,7 +60,7 @@ const TargetStatus: Component<{
 				</span>
 			</Match>
 			<Match when={true}>
-				<div class="flex w-full max-w-60 flex-col gap-1.5">
+				<div class="flex w-full max-w-60 flex-col gap-2">
 					<div
 						class="flex h-1 w-full overflow-hidden rounded-full bg-input"
 						aria-hidden="true"
@@ -74,7 +74,7 @@ const TargetStatus: Component<{
 							style={{ width: percent(props.counts.outOfSync) }}
 						/>
 					</div>
-					<p class="flex flex-wrap gap-x-2 text-xs text-muted">
+					<p class="flex flex-wrap gap-x-2 gap-y-1 text-xs leading-none text-muted">
 						<Show
 							when={props.counts.outOfSync > 0 || props.counts.unreleased > 0}
 							fallback={T()("review.targets.synced")}

@@ -195,7 +195,11 @@ export const RequestChecks: Component<{
 						{(blocker) => (
 							<RequestCheckRow
 								tone="warning"
-								{...getBlockerCopy(blocker, props.collection)}
+								{...getBlockerCopy(
+									blocker,
+									props.collection,
+									props.request.type,
+								)}
 								action={fixFor(blocker)}
 							/>
 						)}
@@ -207,7 +211,11 @@ export const RequestChecks: Component<{
 									{(blocker) => (
 										<RequestCheckRow
 											tone="warning"
-											{...getBlockerCopy(blocker, props.collection)}
+											{...getBlockerCopy(
+												blocker,
+												props.collection,
+												props.request.type,
+											)}
 											action={fixFor(blocker)}
 										/>
 									)}
@@ -216,9 +224,8 @@ export const RequestChecks: Component<{
 									<RequestCheckRow
 										tone={group.workflowAllowed ? "success" : "warning"}
 										{...(group.workflowAllowed
-											? group.target.target === "latest"
+											? props.request.type === "create"
 												? {
-														//* create requests target latest
 														title: T()(
 															"requests.checks.workflow.create.allowed.title",
 														),
@@ -243,6 +250,7 @@ export const RequestChecks: Component<{
 											: getBlockerCopy(
 													{ code: "workflow", target: group.target.target },
 													props.collection,
+													props.request.type,
 												))}
 									/>
 								</Show>

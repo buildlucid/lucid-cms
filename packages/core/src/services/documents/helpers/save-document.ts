@@ -20,6 +20,8 @@ import createInitialDocumentWorkflow from "../../document-workflows/create-initi
 import createProposalWorkflow from "../../document-workflows/create-proposal.js";
 import resetWorkflowStage from "../../document-workflows/reset-stage.js";
 import createDocumentVersion from "../../documents-versions/create-single.js";
+import invalidateRequests from "../../requests/helpers/invalidate-requests.js";
+import recordTargetPublished from "../../requests/helpers/record-target-published.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
 import checkSingleCollectionDocumentCount from "../checks/check-single-collection-document-count.js";
 import notifyChange from "../notify-change.js";
@@ -268,6 +270,22 @@ const saveDocument: ServiceFn<
 			userId: data.userId,
 		});
 		if (resetRes.error) return resetRes;
+
+		const invalidateRes = await invalidateRequests(context, {
+			collectionKey: data.collectionKey,
+			documentIds: [data.documentId],
+			versionType: "latest",
+			userId: data.userId,
+		});
+		if (invalidateRes.error) return invalidateRes;
+
+		const publishedRes = await recordTargetPublished(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			target: "latest",
+			userId: data.userId,
+		});
+		if (publishedRes.error) return publishedRes;
 	}
 	//* requested documents stay out of content until their create request is completed
 	if (requested) {

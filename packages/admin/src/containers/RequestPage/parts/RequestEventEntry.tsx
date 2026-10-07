@@ -110,16 +110,26 @@ export const RequestEventEntry: Component<{
 						tone: "default",
 						text:
 							event.sourceRequestId === null ? (
-								T()("requests.activity.target.published.direct", {
-									name: name(),
-									target: targetLabel(event.target),
-								})
-							) : (
-								<>
-									{T()("requests.activity.target.published.request", {
+								event.target === "latest" ? (
+									T()("requests.activity.target.latest.direct", {
+										name: name(),
+									})
+								) : (
+									T()("requests.activity.target.published.direct", {
 										name: name(),
 										target: targetLabel(event.target),
-									})}{" "}
+									})
+								)
+							) : (
+								<>
+									{event.target === "latest"
+										? T()("requests.activity.target.latest.request", {
+												name: name(),
+											})
+										: T()("requests.activity.target.published.request", {
+												name: name(),
+												target: targetLabel(event.target),
+											})}{" "}
 									<A
 										href={getRequestRoute({ requestId: event.sourceRequestId })}
 										class="text-sm text-title underline-offset-2 hover:underline"

@@ -13,7 +13,11 @@ import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
 import helpers from "@/utils/helpers";
-import { getAllowedTargets, getTargetLabel } from "@/utils/requests";
+import {
+	getAllowedTargets,
+	getDefaultTargets,
+	getTargetLabel,
+} from "@/utils/requests";
 
 const RequestDocumentDraft: Component<{
 	draft: RequestDocumentInput;
@@ -116,7 +120,7 @@ const RequestDocumentDraft: Component<{
 							props.onChange({
 								...props.draft,
 								source: value,
-								targets: getAllowedTargets(props.collection, value).slice(0, 1),
+								targets: getDefaultTargets(props.collection, value),
 							});
 						}}
 					/>

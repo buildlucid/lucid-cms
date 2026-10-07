@@ -3,8 +3,8 @@ import type { RequestType } from "../../../libs/db/tables/requests.js";
 
 /**
  * Create requests always land their new document in latest. For publish
- * requests, proposals target environments and environment snapshots move
- * forward through configured targets.
+ * requests, proposals target latest and environments, in that order, while
+ * environment snapshots move forward through configured targets.
  */
 const getAllowedTargets = (data: {
 	collection: CollectionBuilder;
@@ -16,7 +16,7 @@ const getAllowedTargets = (data: {
 	const environments = data.collection.getData.publishing.targets.map(
 		(target) => target.key,
 	);
-	if (data.source === "latest") return environments;
+	if (data.source === "latest") return ["latest", ...environments];
 	const index = environments.indexOf(data.source);
 	return index === -1 ? [] : environments.slice(index + 1);
 };

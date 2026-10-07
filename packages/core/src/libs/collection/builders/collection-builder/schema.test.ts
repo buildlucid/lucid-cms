@@ -347,39 +347,6 @@ test("collection workflow features validates stages, targets and palette", async
 	).resolves.toMatchObject({
 		success: false,
 	});
-
-	//* latest only gates create requests
-	const latestWorkflow = {
-		stages: [todo, { ...done, targets: ["latest", "production"] }],
-	};
-	await expect(
-		CollectionConfigSchema.safeParseAsync({
-			...validConfig,
-			publishing: { ...validConfig.publishing, workflow: latestWorkflow },
-		}),
-	).resolves.toMatchObject({
-		success: false,
-	});
-	await expect(
-		CollectionConfigSchema.safeParseAsync({
-			...validConfig,
-			publishing: { ...validConfig.publishing, review: { create: true } },
-		}),
-	).resolves.toMatchObject({
-		success: false,
-	});
-	await expect(
-		CollectionConfigSchema.safeParseAsync({
-			...validConfig,
-			publishing: {
-				...validConfig.publishing,
-				review: { create: true },
-				workflow: latestWorkflow,
-			},
-		}),
-	).resolves.toMatchObject({
-		success: true,
-	});
 });
 
 test("collection group config validates shorthand and named groups", async () => {

@@ -277,9 +277,11 @@ const execute: ServiceFn<
 			if (!first) continue;
 			const changed = await notifyChange(context, {
 				change:
-					first.target === "latest"
-						? { type: "created" }
-						: { type: "published", version: first.target },
+					first.target !== "latest"
+						? { type: "published", version: first.target }
+						: request.type === "create"
+							? { type: "created" }
+							: { type: "updated", version: "latest" },
 				collectionKey: first.document.collection_key,
 				ids: [...new Set(entries.map((entry) => entry.document.document_id))],
 			});

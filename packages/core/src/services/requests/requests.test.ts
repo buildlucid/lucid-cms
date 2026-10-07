@@ -732,7 +732,7 @@ const alignContent = async (
 	});
 };
 
-test("latest creates a private proposal and only accepts environment destinations", async () => {
+test("latest creates a private proposal and only accepts latest and environment destinations", async () => {
 	const id = await createDocument();
 	const request = await createRequest(id, ["staging", "production"]);
 	expect(member(request).source).toBe("latest");
@@ -748,7 +748,6 @@ test("latest creates a private proposal and only accepts environment destination
 		),
 	).toBe("Proposed");
 	for (const input of [
-		{ source: "latest", targets: ["latest"] },
 		{ source: "latest", targets: [] },
 		{ source: "proposal", targets: ["latest"] },
 		{ source: "staging", targets: ["latest"] },
@@ -785,6 +784,46 @@ test("proposal requests replace selected environments and leave latest untouched
 	expect(await fieldOf(id, "summary", "latest")).toBe("Original");
 	expect(await fieldOf(id, "summary", "staging")).toBe("Reviewed proposal");
 	expect(await fieldOf(id, "summary", "production")).toBe("Reviewed proposal");
+});
+
+test("proposals can complete into latest, and every latest edit asks for a review again", async () => {
+	const id = await createDocument();
+	const request = await createRequest(id, ["latest", "staging"]);
+	await editProposal(request, "Proposed");
+	await editLatest(id, "Edited");
+	expect(member(await readRequest(request.id)).targets).toMatchObject([
+		{ target: "latest", changedSinceCreation: true, reviewed: false },
+		{ target: "staging", changedSinceCreation: false },
+	]);
+	await acknowledge(request, "latest");
+	//* saving latest in place keeps its version, so the acknowledgement is cleared instead
+	const latest = await readVersionContent(context, {
+		collectionKey: member(request).collectionKey,
+		documentId: id,
+		versionType: "latest",
+	});
+	assert(latest.data);
+	const updated = await updateVersion(context, {
+		collectionKey: member(request).collectionKey,
+		documentId: id,
+		versionId: latest.data.id,
+		userId: creator.id,
+		authUser: creator,
+		fields: [
+			{ key: "title", type: "text", value: "Source" },
+			{ key: "summary", type: "text", value: "Edited again" },
+		],
+	});
+	assert(updated.data, JSON.stringify(updated.error));
+	expect((await readRequest(request.id)).blockers).toContainEqual({
+		requestDocumentId: member(request).id,
+		code: "review_required",
+		target: "latest",
+	});
+	await acknowledge(request, "latest");
+	await completeNow(request);
+	expect(await fieldOf(id, "summary", "latest")).toBe("Proposed");
+	expect(await fieldOf(id, "summary", "staging")).toBe("Proposed");
 });
 
 test("parallel proposals and later latest edits remain independent during publication", async () => {
@@ -1597,6 +1636,25 @@ test("the addable filter lists open publish requests the user can add the docume
 		],
 	};
 	expect(await list(readOnly)).toEqual([]);
+});
+
+test("workflow stages only gate targets that some stage lists", async () => {
+	const id = await createDocument("workflow_pages");
+	const request = await createRequest(
+		id,
+		["latest", "staging"],
+		"latest",
+		"workflow_pages",
+	);
+	//* proposals start in draft, which lists nothing, and no stage lists latest
+	expect(request.blockers).toContainEqual({
+		requestDocumentId: member(request).id,
+		code: "workflow",
+		target: "staging",
+	});
+	expect(request.blockers).not.toContainEqual(
+		expect.objectContaining({ code: "workflow", target: "latest" }),
+	);
 });
 
 test("proposals start with the default workflow, and only their own stage changes dismiss approval", async () => {

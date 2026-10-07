@@ -56,7 +56,6 @@ const getDocumentBlockers = (
 			blockers.push({ code: "review_required", target: target.target });
 		}
 
-		//* create requests target latest, which stages list to allow them
 		if (
 			state.workflowStage !== null &&
 			!workflowStageAllowsTarget({

@@ -175,7 +175,7 @@ export type CollectionPublishingOptions = {
 			label: AdminCopyInput;
 			/** Stage badge color. Defaults to grey. */
 			color?: PublishingWorkflowStageColor;
-			/** Publishing targets available from this stage. Include "latest" to let create requests complete from it. */
+			/** Publishing targets available from this stage, including "latest". A target no stage lists is never gated by the workflow. */
 			targets?: string[];
 			/** Stage to move back to when content changes while in this stage. */
 			resetTo?: string;

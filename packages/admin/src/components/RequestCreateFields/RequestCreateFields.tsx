@@ -36,8 +36,11 @@ const RequestCreateFields: Component<{
 
 	// ----------------------------------------
 	// Memos
+	//* only opened from latest in the page builder, where completing into latest changes nothing
 	const allowed = createMemo(() =>
-		getAllowedTargets(props.collection, props.source),
+		getAllowedTargets(props.collection, props.source).filter(
+			(target) => target !== "latest",
+		),
 	);
 
 	// ----------------------------------------

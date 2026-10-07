@@ -275,19 +275,11 @@ const requestDocumentInputSchema = z.object({
 		example: "latest",
 	}),
 	targets: z
-		.array(
-			z
-				.string()
-				.trim()
-				.min(1)
-				.refine(
-					(target) => target !== "latest",
-					"Latest is edited independently and cannot be a request destination.",
-				),
-		)
+		.array(z.string().trim().min(1))
 		.min(1)
 		.meta({
-			description: "Selected publication environments.",
+			description:
+				"Selected targets: configured environments, or latest when the source is latest.",
 			example: ["staging"],
 		}),
 });

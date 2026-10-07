@@ -5,7 +5,8 @@ import dismissApproval from "./dismiss-approval.js";
 /**
  * Called after document content changes. Open requests that publish to the
  * changed version or own the edited proposal lose their approval, so reviewers
- * always approve what will actually be completed. Latest stays independent of existing requests.
+ * always approve what will actually be completed. Latest edits only affect
+ * requests that target latest.
  */
 const invalidateRequests: ServiceFn<
 	[
@@ -23,7 +24,7 @@ const invalidateRequests: ServiceFn<
 	],
 	undefined
 > = async (context, data) => {
-	if (data.documentIds.length === 0 || data.versionType === "latest") {
+	if (data.documentIds.length === 0) {
 		return { error: undefined, data: undefined };
 	}
 

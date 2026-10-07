@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import type { LucidDatabase } from "../db/client/index.js";
 import { requestDocumentsTable } from "../db/tables/request-documents.js";
 import StaticRepository from "./parents/static-repository.js";
@@ -6,12 +7,16 @@ export default class RequestDocumentsRepository extends StaticRepository<"lucid_
 	constructor(db: LucidDatabase) {
 		super(db, requestDocumentsTable);
 	}
-	/** Finds the open and closed requests that include a document. Closed requests can be reopened. */
+	/**
+	 * Finds the open and closed requests that include a document, optionally
+	 * only those targeting a version type. Closed requests can be reopened.
+	 */
 	async selectIncompleteForDocument(props: {
 		collectionKey: string;
 		documentId: number;
+		target?: string;
 	}) {
-		const query = this.db
+		let query = this.db
 			.selectFrom("lucid_request_documents")
 			.innerJoin(
 				"lucid_requests",
@@ -25,6 +30,22 @@ export default class RequestDocumentsRepository extends StaticRepository<"lucid_
 			.where("lucid_request_documents.collection_key", "=", props.collectionKey)
 			.where("lucid_request_documents.document_id", "=", props.documentId)
 			.where("lucid_requests.status", "!=", "completed");
+		if (props.target !== undefined) {
+			const target = props.target;
+			query = query.where((eb) =>
+				eb.exists(
+					eb
+						.selectFrom("lucid_request_targets")
+						.select(sql.lit(1).as("one"))
+						.whereRef(
+							"lucid_request_targets.request_document_id",
+							"=",
+							"lucid_request_documents.id",
+						)
+						.where("lucid_request_targets.target", "=", target),
+				),
+			);
+		}
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectIncompleteForDocument",

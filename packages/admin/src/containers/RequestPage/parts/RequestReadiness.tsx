@@ -72,7 +72,7 @@ export const RequestReadiness: Component<{
 					{(blocker) => (
 						<RequestCheckRow
 							tone="warning"
-							{...getBlockerCopy(blocker, undefined)}
+							{...getBlockerCopy(blocker, undefined, props.request.type)}
 						/>
 					)}
 				</For>

@@ -8,8 +8,9 @@ const collection = {
 };
 
 describe("getAllowedTargets", () => {
-	test("only environments are selectable; snapshots move forward", () => {
+	test("proposals can target latest; snapshots move forward", () => {
 		expect(getAllowedTargets(collection, "latest")).toEqual([
+			"latest",
 			"staging",
 			"production",
 		]);

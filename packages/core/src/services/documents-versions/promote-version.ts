@@ -377,7 +377,7 @@ const promoteVersion: ServiceFn<
 			});
 			if (invalidateRes.error) return invalidateRes;
 
-			//* restores and alignments change latest, while create requests land approved content
+			//* restores and alignments change latest, while requests land approved content
 			if (data.toVersionType === "latest" && data.requestId === undefined) {
 				const resetRes = await resetStage(context, {
 					collection: collectionRes.data,
@@ -390,16 +390,14 @@ const promoteVersion: ServiceFn<
 				if (resetRes.error) return resetRes;
 			}
 
-			if (data.toVersionType !== "latest") {
-				const publishedRes = await recordTargetPublished(context, {
-					collectionKey: data.collectionKey,
-					documentId: data.documentId,
-					target: data.toVersionType,
-					requestId: data.requestId,
-					userId: data.userId,
-				});
-				if (publishedRes.error) return publishedRes;
-			}
+			const publishedRes = await recordTargetPublished(context, {
+				collectionKey: data.collectionKey,
+				documentId: data.documentId,
+				target: data.toVersionType,
+				requestId: data.requestId,
+				userId: data.userId,
+			});
+			if (publishedRes.error) return publishedRes;
 
 			if (!data.deferEffects) {
 				await invalidateContentDocumentCache(context, data.collectionKey);

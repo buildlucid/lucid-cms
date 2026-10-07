@@ -44,6 +44,8 @@ export const resolveEffectiveWorkflowStage = (props: {
 
 /**
  * Checks whether the effective workflow stage allows publishing to a target.
+ * Only targets that some stage lists are gated, so a target no stage mentions
+ * is allowed whatever the stage.
  */
 export const workflowStageAllowsTarget = (props: {
 	collection: CollectionBuilder;
@@ -56,5 +58,8 @@ export const workflowStageAllowsTarget = (props: {
 	});
 	if (!stage) return true;
 
-	return stage.targets.includes(props.target);
+	const gated = getWorkflowConfig(props.collection)?.stages.some((other) =>
+		other.targets.includes(props.target),
+	);
+	return !gated || stage.targets.includes(props.target);
 };

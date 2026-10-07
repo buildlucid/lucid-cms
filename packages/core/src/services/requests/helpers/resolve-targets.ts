@@ -3,7 +3,7 @@ import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import getAllowedTargets from "./get-allowed-targets.js";
 
-/** Checks the explicitly selected publication environments of a publish request. */
+/** Checks the explicitly selected targets of a publish request. */
 const resolveTargets = (data: {
 	collection: CollectionBuilder;
 	source: string;
@@ -16,7 +16,6 @@ const resolveTargets = (data: {
 		source: data.source,
 	});
 	if (
-		data.targets.includes("latest") ||
 		targets.length === 0 ||
 		targets.some((target) => !allowed.includes(target))
 	) {

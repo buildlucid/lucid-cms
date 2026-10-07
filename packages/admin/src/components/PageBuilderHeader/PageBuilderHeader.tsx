@@ -346,8 +346,11 @@ export const PageBuilderHeader: Component<{
 				collection.permissions.update,
 			]).all;
 
+			//* only targets some stage lists are gated by the workflow
 			const workflowAllowsTarget =
-				!workflow || workflowStage?.targets.includes(environment.key) === true;
+				!workflow?.stages.some((stage) =>
+					stage.targets.includes(environment.key),
+				) || workflowStage?.targets.includes(environment.key) === true;
 
 			const latestContentId = versionContentId("latest");
 			const unmetReleaseRequirementLabels =

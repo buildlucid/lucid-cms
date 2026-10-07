@@ -22,7 +22,7 @@ import { requestDocumentLimit } from "@/constants/requests";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
-import { getAllowedTargets } from "@/utils/requests";
+import { getDefaultTargets } from "@/utils/requests";
 import { getRequestRoute } from "@/utils/route-helpers";
 import RequestDocumentDraft from "./parts/RequestDocumentDraft";
 
@@ -300,10 +300,10 @@ const RequestCreateModal: Component<{
 								collectionKey: selected.collectionKey,
 								documentId: selected.id,
 								source: "latest",
-								targets: getAllowedTargets(
+								targets: getDefaultTargets(
 									collectionFor(selected.collectionKey),
 									"latest",
-								).slice(0, 1),
+								),
 							})),
 						]);
 						setPickerOpen(false);
