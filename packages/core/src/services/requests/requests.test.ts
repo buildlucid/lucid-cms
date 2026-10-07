@@ -826,6 +826,33 @@ test("proposals can complete into latest, and every latest edit asks for a revie
 	expect(await fieldOf(id, "summary", "staging")).toBe("Proposed");
 });
 
+test("adding latest later asks for a review only when latest changed since the proposal", async () => {
+	const id = await createDocument();
+	const before = await createRequest(id);
+	await editLatest(id, "Edited");
+	const after = await createRequest(id);
+	const addLatest = async (request: RequestDetail) => {
+		const result = await updateTargets(context, {
+			id: request.id,
+			requestDocumentId: member(request).id,
+			targets: ["latest", "staging"],
+			user: creator,
+		});
+		assert(!result.error, JSON.stringify(result.error));
+		return member(await readRequest(request.id)).targets.find(
+			(target) => target.target === "latest",
+		);
+	};
+	expect(await addLatest(before)).toMatchObject({
+		target: "latest",
+		changedSinceCreation: true,
+	});
+	expect(await addLatest(after)).toMatchObject({
+		target: "latest",
+		changedSinceCreation: false,
+	});
+});
+
 test("parallel proposals and later latest edits remain independent during publication", async () => {
 	const id = await createDocument();
 	const first = await createRequest(id);
@@ -1657,6 +1684,46 @@ test("workflow stages only gate targets that some stage lists", async () => {
 	);
 });
 
+test("completing a proposal into latest gives latest the proposal's workflow", async () => {
+	const key = "workflow_pages";
+	const id = await createDocument(key);
+	const moved = await updateWorkflow(context, {
+		collectionKey: key,
+		documentId: id,
+		stage: "ready",
+		user: creator,
+	});
+	expect(moved.error).toBeUndefined();
+	//* the proposal starts in draft, which can still complete into latest as no stage lists it
+	const request = await createRequest(id, ["latest"], "latest", key);
+	const assigned = await updateWorkflow(context, {
+		collectionKey: key,
+		documentId: id,
+		versionId: versionOf(request),
+		assigneeIds: [reviewer.id],
+		user: creator,
+	});
+	expect(assigned.error).toBeUndefined();
+	await completeNow(request);
+	const workflow = await getWorkflow(context, {
+		collectionKey: key,
+		documentId: id,
+		versionId: null,
+	});
+	expect(workflow.data?.stage).toBe("draft");
+	const todo = await context.db.kysely
+		.selectFrom("lucid_notifications")
+		.select(["href", "resolved_at"])
+		.where("type", "=", "workflows:assigned")
+		.where("key", "like", `workflow:%:assignee:${reviewer.id}`)
+		.where("href", "like", `%/${id}`)
+		.executeTakeFirstOrThrow();
+	expect(todo).toEqual({
+		href: `/lucid/collections/${key}/latest/${id}`,
+		resolved_at: null,
+	});
+});
+
 test("proposals start with the default workflow, and only their own stage changes dismiss approval", async () => {
 	const key = "workflow_pages";
 	const id = await createDocument(key);
@@ -2385,6 +2452,18 @@ const listRequestPages = async (pending: boolean) => {
 	assert(listed.data, JSON.stringify(listed.error));
 	return listed.data.documents.map((document) => document.id);
 };
+
+test("requested documents are only listed while their create request is open", async () => {
+	const requested = await requestDocument(creator);
+	expect(await listRequestPages(true)).toContain(requested.id);
+	const closed = await close(context, {
+		id: requested.requestId,
+		user: creator,
+	});
+	assert(!closed.error, JSON.stringify(closed.error));
+	expect(await listRequestPages(true)).not.toContain(requested.id);
+	expect(await listRequestPages(false)).not.toContain(requested.id);
+});
 
 test("requested documents only exist as their create request's proposal until completed", async () => {
 	const before = await getOverview(context, { user: creator });

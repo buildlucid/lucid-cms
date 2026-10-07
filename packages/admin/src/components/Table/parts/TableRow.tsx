@@ -22,7 +22,6 @@ export interface TableRowProps {
 	children: JSXElement;
 }
 
-/** A table row. */
 const TableRow: Component<TableRowProps> = (props) => {
 	// ----------------------------------------
 	// State / Hooks
@@ -34,7 +33,7 @@ const TableRow: Component<TableRowProps> = (props) => {
 	const firstPermittedAction = createMemo(() => {
 		if (props.actions) {
 			return props.actions
-				.filter((a) => a.excludeFromRowClick !== true)
+				.filter((a) => a.excludeFromRowClick !== true && a.show !== false)
 				.find((action) => {
 					return (
 						checkPermission(action.permission).permitted &&

@@ -337,7 +337,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 			includeWorkflow: boolean;
 			workflowAssigneeFilterValues?: Array<string | number>;
 			filterOr?: DocumentFilterGroup[];
-			/** List requested documents, which only exist as their create request's proposal, instead of created ones. */
+			/** List requested documents with an open create request, which only exist as its proposal, instead of created ones. */
 			pending?: boolean;
 			tables: {
 				versions: LucidVersionTableName;
@@ -532,10 +532,17 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.version)
-				.where(
-					`${dynamicConfig.tableName}.create_request_id`,
-					props.pending ? "is not" : "is",
-					null,
+				.where((eb) =>
+					props.pending
+						? eb(
+								`${dynamicConfig.tableName}.create_request_id`,
+								"in",
+								eb
+									.selectFrom("lucid_requests")
+									.select("lucid_requests.id")
+									.where("lucid_requests.status", "=", "open"),
+							)
+						: eb(`${dynamicConfig.tableName}.create_request_id`, "is", null),
 				)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(
@@ -582,10 +589,17 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 				)
 				// @ts-expect-error
 				.where(`${props.tables.versions}.type`, "=", props.version)
-				.where(
-					`${dynamicConfig.tableName}.create_request_id`,
-					props.pending ? "is not" : "is",
-					null,
+				.where((eb) =>
+					props.pending
+						? eb(
+								`${dynamicConfig.tableName}.create_request_id`,
+								"in",
+								eb
+									.selectFrom("lucid_requests")
+									.select("lucid_requests.id")
+									.where("lucid_requests.status", "=", "open"),
+							)
+						: eb(`${dynamicConfig.tableName}.create_request_id`, "is", null),
 				)
 				.$if(props.versionId !== undefined, (qb) =>
 					qb.where(

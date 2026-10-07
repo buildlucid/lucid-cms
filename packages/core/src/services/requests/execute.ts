@@ -26,6 +26,7 @@ import getBlockers from "./helpers/get-blockers.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestParticipants from "./helpers/get-request-participants.js";
 import getRequestState from "./helpers/get-request-state.js";
+import landProposalWorkflow from "./helpers/land-proposal-workflow.js";
 import resolveRequestNotifications from "./helpers/resolve-request-notifications.js";
 import { completedNotification } from "./notifications/completed.js";
 import type { RequestDocumentRecord } from "./types.js";
@@ -38,7 +39,8 @@ import type { RequestDocumentRecord } from "./types.js";
  * other whatever order they were added in and dependants are told once per
  * target. Proposals are removed once completed, as their approved snapshots
  * hold the same content. A create request's document is marked as created
- * before any hooks run, so they see it like any other document.
+ * before any hooks run, so they see it like any other document, and any
+ * proposal landing in latest hands latest its workflow.
  *
  * A stale job, eg. after the schedule moved or the approval was dismissed,
  * does nothing. Failures carry diagnostics for the job's failure hook, which
@@ -169,16 +171,21 @@ const execute: ServiceFn<
 			}
 		}
 
-		if (request.type === "create") {
-			for (const document of request.documents) {
-				failureRequestDocumentId = document.id;
-				failureTarget = null;
+		for (const document of request.documents) {
+			failureRequestDocumentId = document.id;
+			failureTarget = null;
 
+			if (request.type === "create") {
 				const createdRes = await completeCreation(context, {
 					document,
 					userId: user.id,
 				});
 				if (createdRes.error) return createdRes;
+			} else if (
+				document.targets.some((target) => target.target === "latest")
+			) {
+				const workflowRes = await landProposalWorkflow(context, { document });
+				if (workflowRes.error) return workflowRes;
 			}
 		}
 

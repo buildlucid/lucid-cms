@@ -724,7 +724,7 @@ export const controllerSchemas = {
 					}),
 					"filter[pending]": queryString.schema.filter(false, {
 						description:
-							"List requested documents waiting on their create request instead of created ones. Requested documents are read from their proposal",
+							"List requested documents waiting on an open create request instead of created ones. Requested documents are read from their proposal",
 						example: "true",
 					}),
 					"filter[workflowStage]": queryString.schema.filter(false, {
