@@ -559,16 +559,12 @@ export const DocumentsList: Component<{
 									},
 									{
 										label: getActionLabel(T()("common.edit")),
-										type: "button",
+										type: "link",
 										icon: "pen",
-										onClick: () => {
-											navigate(
-												getDocumentRoute("edit", {
-													collectionKey: props.state.collection?.key as string,
-													documentId: doc().id,
-												}),
-											);
-										},
+										href: getDocumentRoute("edit", {
+											collectionKey: props.state.collection?.key as string,
+											documentId: doc().id,
+										}),
 										permission: collectionPermissions()?.update
 											? userStore.get.hasPermission([
 													collectionPermissions()?.update,
@@ -601,16 +597,12 @@ export const DocumentsList: Component<{
 									},
 									{
 										label: getActionLabel(T()("common.preview")),
-										type: "button",
+										type: "link",
 										icon: "eye",
-										onClick: () => {
-											navigate(
-												getDocumentRoute("edit", {
-													collectionKey: props.state.collection?.key as string,
-													documentId: doc().id,
-												}),
-											);
-										},
+										href: getDocumentRoute("edit", {
+											collectionKey: props.state.collection?.key as string,
+											documentId: doc().id,
+										}),
 										permission: collectionPermissions()?.read
 											? userStore.get.hasPermission([
 													collectionPermissions()?.read,
@@ -724,50 +716,6 @@ export const DocumentsList: Component<{
 						},
 					}}
 				/>
-				{/* TODO: add support to selec the target environment */}
-				{/* <PromoteToDraft
-			id={rowTarget.getTargetId}
-			publishedVersionId={getPublishedVersionId}
-			collection={props.state.collection as Collection}
-			state={{
-				open: rowTarget.getTriggers().promote,
-				setOpen: (state: boolean) => {
-					rowTarget.setTrigger("promote", state);
-				},
-			}}
-			callbacks={{
-				onSuccess: () => {
-					navigate(
-						getDocumentRoute("edit", {
-							collectionKey: props.state.collection?.key as string,
-							documentId: getDocumentId(),
-						}),
-					);
-				},
-			}}
-		/> */}
-				{/* <PublishDocument
-			id={rowTarget.getTargetId}
-			draftVersionId={getDraftVersionId}
-			collection={props.state.collection as Collection}
-			state={{
-				open: rowTarget.getTriggers().publish,
-				setOpen: (state: boolean) => {
-					rowTarget.setTrigger("publish", state);
-				},
-			}}
-			callbacks={{
-				onSuccess: () => {
-					navigate(
-						getDocumentRoute("edit", {
-							collectionKey: props.state.collection?.key as string,
-							documentId: getDocumentId(),
-							version: "latest",
-						}),
-					);
-				},
-			}}
-		/> */}
 				<RestoreDocumentModal
 					id={rowTarget.getTargetId}
 					collection={props.state.collection}

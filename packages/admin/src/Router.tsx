@@ -1,5 +1,6 @@
 import { routes as extensionRoutes } from "virtual:lucid-admin";
-import { Route, Router } from "@solidjs/router";
+import { Route, type RoutePreloadFuncArgs, Router } from "@solidjs/router";
+import { useQueryClient } from "@tanstack/solid-query";
 import type { Component } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import AuthenticatedRoutes from "@/components/AuthenticatedRoutes/AuthenticatedRoutes";
@@ -12,6 +13,10 @@ import { Permissions } from "@/constants/permissions";
 import agentGuard from "@/guards/AgentGuard/AgentGuard";
 import ConditionGuard from "@/guards/ConditionGuard/ConditionGuard";
 import PermissionGuard from "@/guards/PermissionGuard/PermissionGuard";
+import { documentQueryOptions } from "@/hooks/useDocumentState/document-query";
+import { conversationQueryOptions } from "@/services/api/agent/useGetConversation";
+import { messagesQueryOptions } from "@/services/api/agent/useGetMessages";
+import { requestQueryOptions } from "@/services/api/requests/useGetSingle";
 import siteStore from "@/store/siteStore/siteStore";
 import userStore from "@/store/userStore/userStore";
 import lazyPage from "@/utils/lazy-page";
@@ -120,10 +125,27 @@ const RequestProposalRoute = lazyPage(
 	() => import("@/containers/RequestContentPage/RequestContentPage"),
 );
 
+/**
+ * Loads route code ahead, such as when a link is hovered. Routes that also
+ * prefetch their data write their own `preload` with the page's query options,
+ * so the page opens with that data cached.
+ */
 const preloadRoutes =
 	(...routes: LazyRoute[]) =>
 	() => {
 		void Promise.all(routes.map((route) => route.preload()));
+	};
+
+const preloadRequestRoute =
+	(route: LazyRoute) =>
+	({ params }: RoutePreloadFuncArgs) => {
+		void route.preload();
+
+		const id = Number(params.requestId) || undefined;
+		if (id === undefined) return;
+
+		const queryClient = useQueryClient();
+		void queryClient.prefetchQuery(requestQueryOptions(id));
 	};
 
 const extensionRoute = (route: (typeof extensionRoutes)[number]) => (
@@ -164,7 +186,19 @@ const AppRouter: Component = () => {
 					/>
 					<Route
 						path="/agent/chats/:conversationId"
-						preload={preloadRoutes(AgentConversationRoute)}
+						preload={({ params, location }) => {
+							void AgentConversationRoute.preload();
+							//* a chat started from the agent home arrives unsaved, with nothing to fetch yet
+							if (location.state) return;
+
+							const queryClient = useQueryClient();
+							void queryClient.prefetchQuery(
+								conversationQueryOptions(params.conversationId),
+							);
+							void queryClient.prefetchInfiniteQuery(
+								messagesQueryOptions(params.conversationId),
+							);
+						}}
 						component={agentGuard(AgentConversationRoute)}
 					/>
 					<Route
@@ -201,7 +235,24 @@ const AppRouter: Component = () => {
 					/>
 					<Route
 						path="/collections/:collectionKey/:versionType/:documentId/:versionId?"
-						preload={preloadRoutes(CollectionDocumentPageBuilderRoute)}
+						preload={({ params }) => {
+							void CollectionDocumentPageBuilderRoute.preload();
+
+							const options = documentQueryOptions({
+								collectionKey: params.collectionKey || "",
+								documentId: params.documentId
+									? Number.parseInt(params.documentId, 10)
+									: undefined,
+								version: params.versionType || "latest",
+								versionId: params.versionId
+									? Number.parseInt(params.versionId, 10)
+									: undefined,
+							});
+							if (options.enabled === false) return;
+
+							const queryClient = useQueryClient();
+							void queryClient.prefetchQuery(options);
+						}}
 						component={() => <CollectionDocumentPageBuilderRoute mode="edit" />}
 					/>
 					<Route
@@ -278,7 +329,7 @@ const AppRouter: Component = () => {
 					/>
 					<Route
 						path="/requests/:requestId"
-						preload={preloadRoutes(RequestRoute)}
+						preload={preloadRequestRoute(RequestRoute)}
 						component={() => (
 							<PermissionGuard permission={Permissions.RequestsRead}>
 								<RequestRoute />
@@ -287,7 +338,7 @@ const AppRouter: Component = () => {
 					/>
 					<Route
 						path="/requests/:requestId/content/:collectionKey/:documentId"
-						preload={preloadRoutes(RequestProposalRoute)}
+						preload={preloadRequestRoute(RequestProposalRoute)}
 						component={() => (
 							<PermissionGuard permission={Permissions.RequestsRead}>
 								<RequestProposalRoute />

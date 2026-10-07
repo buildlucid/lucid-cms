@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import { useQueryClient } from "@tanstack/solid-query";
+import { useQuery, useQueryClient } from "@tanstack/solid-query";
 import type { DocumentVersionType } from "@types";
 import objectHash from "object-hash";
 import { type Accessor, createMemo } from "solid-js";
@@ -9,6 +9,7 @@ import T from "@/translations";
 import { isInaccessibleError } from "@/utils/error-handling";
 import helpers from "@/utils/helpers";
 import { createDocumentLocalization } from "../useDocumentLocalization/useDocumentLocalization";
+import { documentQueryOptions } from "./document-query";
 
 export function useDocumentState(props: {
 	mode: "create" | "edit";
@@ -26,29 +27,6 @@ export function useDocumentState(props: {
 	const documentId = createMemo(() =>
 		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
-	const canFetchDocument = createMemo(() => {
-		if (documentId() === undefined) {
-			return false;
-		}
-		if (
-			props.version() === "revision" ||
-			props.version() === "snapshot" ||
-			props.version() === "proposal"
-		) {
-			return props.versionId() !== undefined;
-		}
-		return true;
-	});
-	const versionUrlParam = createMemo(() => {
-		if (
-			props.version() === "revision" ||
-			props.version() === "snapshot" ||
-			props.version() === "proposal"
-		) {
-			return props.versionId();
-		}
-		return props.version();
-	});
 
 	// ------------------------------------------
 	// Queries
@@ -70,21 +48,14 @@ export function useDocumentState(props: {
 		enabled: () => !!collectionKey(),
 		refetchOnWindowFocus: false,
 	});
-	const documentQuery = api.documents.useGetSingle({
-		queryParams: {
-			location: {
-				collectionKey: collectionKey,
-				id: documentId,
-				version: versionUrlParam,
-			},
-			include: {
-				bricks: true,
-				refs: true,
-			},
-		},
-		enabled: () => canFetchDocument(),
-		refetchOnWindowFocus: false,
-	});
+	const documentQuery = useQuery(() =>
+		documentQueryOptions({
+			collectionKey: collectionKey(),
+			documentId: documentId(),
+			version: props.version(),
+			versionId: props.versionId(),
+		}),
+	);
 
 	// ------------------------------------------
 	// Memos

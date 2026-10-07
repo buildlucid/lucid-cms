@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import type { Component } from "solid-js";
+import { Dynamic } from "solid-js/web";
 import TableCell from "@/components/Table/parts/TableCell";
 
 export interface TableTextCellProps {
@@ -11,13 +12,13 @@ export interface TableTextCellProps {
 	 * @default 2
 	 */
 	maxLines?: 1 | 2 | 3 | 4;
+	href?: string;
 	width?: number;
 	/** Pass `false` to remove the default minimum width. */
 	minWidth?: number | false;
 	class?: string;
 }
 
-/** A table cell showing text. */
 const TableTextCell: Component<TableTextCellProps> = (props) => {
 	// ----------------------------------
 	// Memos
@@ -32,7 +33,9 @@ const TableTextCell: Component<TableTextCellProps> = (props) => {
 			minWidth={props.minWidth}
 			class={props.class}
 		>
-			<span
+			<Dynamic
+				component={props.href ? "a" : "span"}
+				href={props.href}
 				class={classNames("text-sm", {
 					"line-clamp-1": maxLines() === 1,
 					"line-clamp-2": maxLines() === 2,
@@ -42,7 +45,7 @@ const TableTextCell: Component<TableTextCellProps> = (props) => {
 				title={String(props.text ?? "-")}
 			>
 				{props.text || "-"}
-			</span>
+			</Dynamic>
 		</TableCell>
 	);
 };

@@ -37,8 +37,11 @@ const NotificationTableRow: Component<NotificationTableRowProps> = (props) => {
 
 	// ----------------------------------------
 	// Functions
-	const openNotification = () => {
+	const markRead = () => {
 		if (unread()) props.onUpdate({ ids: [props.notification.id], read: true });
+	};
+	const openNotification = () => {
+		markRead();
 		if (props.notification.href) navigate(props.notification.href);
 	};
 
@@ -47,7 +50,9 @@ const NotificationTableRow: Component<NotificationTableRowProps> = (props) => {
 	return (
 		<Table.Row
 			index={props.index}
-			onClick={openNotification}
+			href={props.notification.href ?? undefined}
+			onOpen={markRead}
+			onClick={props.notification.href ? undefined : markRead}
 			actions={[
 				{
 					label: T()("common.open"),

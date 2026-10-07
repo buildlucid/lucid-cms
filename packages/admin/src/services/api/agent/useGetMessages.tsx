@@ -1,10 +1,12 @@
 import {
 	type InfiniteData,
+	infiniteQueryOptions,
 	useInfiniteQuery,
 	useQueryClient,
 } from "@tanstack/solid-query";
 import type { AgentMessage, ResponseBody } from "@types";
 import type { Accessor } from "solid-js";
+import constants from "@/constants";
 import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 
@@ -14,35 +16,39 @@ type MessagePages = InfiniteData<
 	number | undefined
 >;
 
+const getPage = (
+	id: string | undefined,
+	before?: number,
+	signal?: AbortSignal,
+) =>
+	request<ResponseBody<AgentMessage[]>>({
+		url: `/lucid/api/v1/agent/conversations/${id}/messages?${new URLSearchParams(
+			{
+				limit: String(pageSize),
+				...(before ? { before: String(before) } : {}),
+			},
+		)}`,
+		signal,
+	});
+
+export const messagesQueryOptions = (id: string | undefined) =>
+	infiniteQueryOptions({
+		queryKey: queryKeys.agent.messages(id),
+		queryFn: ({ pageParam, signal }) => getPage(id, pageParam, signal),
+		initialPageParam: undefined as number | undefined,
+		getNextPageParam: (page) =>
+			page.data.length >= pageSize ? page.data[0]?.position : undefined,
+		enabled: id !== undefined,
+		staleTime: constants.preloadStaleTime,
+	});
+
 /** Loads the latest messages first. A run refreshes that page while keeping earlier pages in the cache. */
 const useGetMessages = (params: { id: Accessor<string | undefined> }) => {
 	const queryClient = useQueryClient();
 
-	const getPage = (
-		id: string | undefined,
-		before?: number,
-		signal?: AbortSignal,
-	) =>
-		request<ResponseBody<AgentMessage[]>>({
-			url: `/lucid/api/v1/agent/conversations/${id}/messages?${new URLSearchParams(
-				{
-					limit: String(pageSize),
-					...(before ? { before: String(before) } : {}),
-				},
-			)}`,
-			signal,
-		});
-
 	// -----------------------------
 	// Query
-	const query = useInfiniteQuery(() => ({
-		queryKey: queryKeys.agent.messages(params.id()),
-		queryFn: ({ pageParam, signal }) => getPage(params.id(), pageParam, signal),
-		initialPageParam: undefined as number | undefined,
-		getNextPageParam: (page) =>
-			page.data.length >= pageSize ? page.data[0]?.position : undefined,
-		enabled: params.id() !== undefined,
-	}));
+	const query = useInfiniteQuery(() => messagesQueryOptions(params.id()));
 
 	// -----------------------------
 	// Refresh

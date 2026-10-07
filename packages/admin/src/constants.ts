@@ -8,4 +8,6 @@ export default {
 		errorName: "errorName",
 		errorMessage: "errorMessage",
 	},
+	/** How long preloaded data stays fresh, so opening a link soon after hovering it doesn't fetch it again. */
+	preloadStaleTime: 10_000,
 };

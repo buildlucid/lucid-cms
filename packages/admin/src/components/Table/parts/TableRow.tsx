@@ -1,6 +1,12 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, usePreloadRoute } from "@solidjs/router";
 import classNames from "classnames";
-import { type Component, createMemo, type JSXElement, Show } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	type JSXElement,
+	onCleanup,
+	Show,
+} from "solid-js";
 import type { ActionMenuProps } from "@/components/ActionMenu/ActionMenu";
 import TableActionMenuCell from "@/components/Table/parts/TableActionMenuCell";
 import TableDragHandleCell from "@/components/Table/parts/TableDragHandleCell";
@@ -8,12 +14,23 @@ import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import { useTableContext } from "@/components/Table/TableContext";
 import { checkPermission } from "@/utils/permission-requirement";
 
+//* long enough that sweeping the pointer down a table doesn't preload every row
+const PRELOAD_DELAY_MS = 100;
+
+const fromControl = (event: Event) =>
+	event.defaultPrevented ||
+	(event.target instanceof Element &&
+		event.target.closest(
+			"a, button, input, select, textarea, [role=button], [contenteditable=true]",
+		) !== null);
+
 export interface TableRowProps {
 	/** The row's position, starting from 0. */
 	index: number;
 	/** Shown in the row's action menu. Clicking the row runs the first available one. */
 	actions?: ActionMenuProps["actions"];
-	/** Runs instead of the first action when the row is clicked. */
+	href?: string;
+	onOpen?: () => void;
 	onClick?: () => void;
 	/** Highlights the row. */
 	current?: boolean;
@@ -26,7 +43,9 @@ const TableRow: Component<TableRowProps> = (props) => {
 	// ----------------------------------------
 	// State / Hooks
 	const navigate = useNavigate();
+	const preloadRoute = usePreloadRoute();
 	const table = useTableContext();
+	let preloadTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	// ----------------------------------------
 	// Memos
@@ -43,34 +62,49 @@ const TableRow: Component<TableRowProps> = (props) => {
 		}
 	});
 
+	const href = createMemo(() =>
+		props.onClick ? undefined : (props.href ?? firstPermittedAction()?.href),
+	);
+
 	// ----------------------------------------
 	// Functions
 	const onClickHandler = (event: MouseEvent | KeyboardEvent) => {
-		if (
-			event.defaultPrevented ||
-			(event.target instanceof Element &&
-				event.target.closest(
-					"a, button, input, select, textarea, [role=button], [contenteditable=true]",
-				))
-		) {
-			return;
-		}
+		if (fromControl(event)) return;
 
 		if (props.onClick) {
 			props.onClick();
 			return;
 		}
 
-		const action = firstPermittedAction();
-
-		if (action) {
-			if (action?.href) {
-				navigate(action.href);
-			} else if (action.onClick) {
-				action.onClick();
-			}
+		const link = href();
+		if (link) {
+			if (event.metaKey || event.ctrlKey) window.open(link, "_blank");
+			else navigate(link);
+			props.onOpen?.();
+			return;
 		}
+
+		firstPermittedAction()?.onClick?.();
 	};
+	const onAuxClickHandler = (event: MouseEvent) => {
+		const link = href();
+		if (event.button !== 1 || !link || fromControl(event)) return;
+
+		event.preventDefault();
+		window.open(link, "_blank");
+		props.onOpen?.();
+	};
+	const schedulePreload = () => {
+		const link = href();
+		if (!link) return;
+
+		clearTimeout(preloadTimeout);
+		preloadTimeout = setTimeout(
+			() => preloadRoute(link, { preloadData: true }),
+			PRELOAD_DELAY_MS,
+		);
+	};
+	const cancelPreload = () => clearTimeout(preloadTimeout);
 
 	// ----------------------------------------
 	// Memos
@@ -86,6 +120,10 @@ const TableRow: Component<TableRowProps> = (props) => {
 			table.rowReorder.dropTargetIndex !== table.rowReorder.draggingIndex
 		);
 	});
+
+	// ----------------------------------------
+	// Effects
+	onCleanup(cancelPreload);
 
 	// ----------------------------------------
 	// Render
@@ -117,6 +155,9 @@ const TableRow: Component<TableRowProps> = (props) => {
 				"view-transition-name": props.viewTransitionName,
 			}}
 			onClick={onClickHandler}
+			onAuxClick={onAuxClickHandler}
+			onPointerEnter={schedulePreload}
+			onPointerLeave={cancelPreload}
 			onKeyDown={(e) => {
 				if (e.key === "Enter") {
 					onClickHandler(e);

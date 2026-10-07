@@ -55,6 +55,7 @@ const AgentConversationTableRow: Component<{
 			<Table.Text
 				column="title"
 				text={props.conversation.title}
+				href={`/lucid/agent/chats/${props.conversation.id}`}
 				minWidth={320}
 				maxLines={1}
 			/>
