@@ -3,6 +3,11 @@ import {
 	RequestsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import upsertNotification from "../../notifications/upsert.js";
+import {
+	failedNotification,
+	requestNotificationKeys,
+} from "../notifications.js";
 
 /**
  * Records why a publication attempt failed. Call inside a transaction.
@@ -47,11 +52,12 @@ const recordFailure: ServiceFn<
 				value: null,
 			},
 		],
-		returning: ["id"],
+		returning: ["id", "title", "created_by", "scheduled_by"],
 	});
 	if (updateRes.error) return updateRes;
 
-	if (!updateRes.data) return { error: undefined, data: undefined };
+	const request = updateRes.data;
+	if (!request) return { error: undefined, data: undefined };
 
 	const metadata = {
 		jobId: data.jobId,
@@ -85,6 +91,18 @@ const recordFailure: ServiceFn<
 		],
 	});
 	if (eventsRes.error) return eventsRes;
+
+	//* each attempt has its own job, so a later failure refreshes the message and tells people again
+	const notifyRes = await upsertNotification(context, {
+		definition: failedNotification,
+		key: requestNotificationKeys.failed(data.id),
+		fingerprint: data.jobId,
+		recipients: [request.created_by, request.scheduled_by].filter(
+			(userId): userId is number => userId !== null,
+		),
+		data: { requestId: data.id, title: request.title, message: data.message },
+	});
+	if (notifyRes.error) return notifyRes;
 
 	return { error: undefined, data: undefined };
 };

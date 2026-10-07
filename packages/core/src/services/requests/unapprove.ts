@@ -6,9 +6,11 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveNotification from "../notifications/resolve.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
+import { readyNotification, requestNotificationKeys } from "./notifications.js";
 
 /**
  * Withdraws the user's approval of the current revision. Other approvals still
@@ -70,6 +72,12 @@ const unapprove: ServiceFn<
 			where: [{ key: "id", operator: "=", value: request.id }],
 		});
 		if (updateRes.error) return updateRes;
+
+		const readyRes = await resolveNotification(context, {
+			definition: readyNotification,
+			key: requestNotificationKeys.ready(request.id),
+		});
+		if (readyRes.error) return readyRes;
 	}
 
 	const eventsRes = await RequestEvents.createEvents({

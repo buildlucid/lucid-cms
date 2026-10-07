@@ -10,6 +10,7 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
+import notifyMentions from "./helpers/notify-mentions.js";
 import parseSchedule from "./helpers/parse-schedule.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 import scheduleRequest from "./helpers/schedule-request.js";
@@ -133,6 +134,16 @@ const updateSingle: ServiceFn<
 			userId: data.user.id,
 		});
 		if (reviewersRes.error) return reviewersRes;
+	}
+
+	if (descriptionRes?.data) {
+		const mentionsRes = await notifyMentions(context, {
+			request: { id: request.id, title: data.title ?? request.title },
+			body: descriptionRes.data,
+			previous: request.description,
+			actorUserId: data.user.id,
+		});
+		if (mentionsRes.error) return mentionsRes;
 	}
 
 	return { error: undefined, data: undefined };

@@ -50,7 +50,8 @@ const InfoRowRoot: Component<InfoRowRootProps> = (props) => {
 				props.class,
 			)}
 		>
-			<div class="md:col-span-1">
+			{/* stays in view while a long section scrolls */}
+			<div class="md:sticky md:top-6 md:col-span-1 md:self-start md:pb-4 lg:top-8">
 				<Show when={props.title}>
 					<h2 class="text-base mb-0.5">{props.title}</h2>
 				</Show>

@@ -1287,6 +1287,100 @@ test("mentions in comments and descriptions are limited to people who can read t
 	).toBe(reviewer.username);
 });
 
+test("editing a description only tells people newly mentioned in it", async () => {
+	const request = await createRequest(await createDocument());
+	const description = (userIds: number[]) => ({
+		type: "doc" as const,
+		content: [
+			{
+				type: "paragraph",
+				content: userIds.map((userId) => ({
+					type: "lucidMention",
+					attrs: { userId, label: "Someone" },
+				})),
+			},
+		],
+	});
+	const mentions = async (userId: number) =>
+		(
+			await context.db.kysely
+				.selectFrom("lucid_notifications")
+				.innerJoin(
+					"lucid_notification_recipients",
+					"lucid_notification_recipients.notification_id",
+					"lucid_notifications.id",
+				)
+				.select("lucid_notifications.id")
+				.where("lucid_notifications.type", "=", "requests:mentioned")
+				.where("lucid_notification_recipients.user_id", "=", userId)
+				.execute()
+		).length;
+	const edit = async (userIds: number[]) => {
+		const updated = await updateSingle(context, {
+			id: request.id,
+			user: creator,
+			description: description(userIds),
+		});
+		assert(!updated.error, JSON.stringify(updated.error));
+	};
+
+	const before = await mentions(reviewer.id);
+	await edit([reviewer.id]);
+	await edit([reviewer.id]);
+	expect(await mentions(reviewer.id)).toBe(before + 1);
+
+	const secondBefore = await mentions(secondReviewer.id);
+	await edit([reviewer.id, secondReviewer.id]);
+	expect(await mentions(reviewer.id)).toBe(before + 1);
+	expect(await mentions(secondReviewer.id)).toBe(secondBefore + 1);
+});
+
+test("assignment to-dos clear at the last workflow stage and when the request closes", async () => {
+	const key = "reset_pages";
+	const request = await createRequest(
+		await createDocument(key),
+		["staging"],
+		"latest",
+		key,
+	);
+	const move = async (stage: string, assigneeIds?: number[]) => {
+		const result = await updateWorkflow(context, {
+			collectionKey: key,
+			documentId: member(request).documentId,
+			versionId: versionOf(request),
+			stage,
+			assigneeIds,
+			user: creator,
+		});
+		expect(result.error).toBeUndefined();
+	};
+	const assignment = async () => {
+		const workflow = await context.db.kysely
+			.selectFrom("lucid_document_workflows")
+			.select("id")
+			.where("collection_key", "=", key)
+			.where("version_id", "=", versionOf(request))
+			.executeTakeFirstOrThrow();
+		return context.db.kysely
+			.selectFrom("lucid_notifications")
+			.select(["resolved_at"])
+			.where("type", "=", "workflows:assigned")
+			.where("key", "=", `workflow:${workflow.id}:assignee:${reviewer.id}`)
+			.executeTakeFirstOrThrow();
+	};
+
+	await move("review", [reviewer.id]);
+	expect((await assignment()).resolved_at).toBeNull();
+	await move("ready");
+	expect((await assignment()).resolved_at).not.toBeNull();
+	await move("review");
+	expect((await assignment()).resolved_at).toBeNull();
+
+	const closed = await close(context, { id: request.id, user: creator });
+	expect(closed.error).toBeUndefined();
+	expect((await assignment()).resolved_at).not.toBeNull();
+});
+
 test("target, workflow and proposal changes are recorded in the activity", async () => {
 	const id = await createDocument();
 	const request = await createRequest(id);

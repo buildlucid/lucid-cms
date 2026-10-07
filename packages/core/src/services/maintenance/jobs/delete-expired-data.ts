@@ -11,6 +11,7 @@ import clearExpiredTokens from "../tasks/clear-expired-tokens.js";
 import deleteExpiredDeletedDocuments from "../tasks/delete-expired-deleted-documents.js";
 import deleteExpiredDeletedMedia from "../tasks/delete-expired-deleted-media.js";
 import deleteExpiredDeletedUsers from "../tasks/delete-expired-deleted-users.js";
+import deleteExpiredNotifications from "../tasks/delete-expired-notifications.js";
 import deleteExpiredRevisions from "../tasks/delete-expired-revisions.js";
 import deleteExpiredUnsyncedMedia from "../tasks/delete-expired-unsynced-media.js";
 
@@ -27,6 +28,7 @@ const tasks = [
 	deleteExpiredDeletedUsers,
 	deleteExpiredDeletedDocuments,
 	deleteExpiredRevisions,
+	deleteExpiredNotifications,
 ];
 
 const deleteExpiredData: JobHandler = async ({ context }) => {

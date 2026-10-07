@@ -11,6 +11,7 @@ import {
 	onCleanup,
 	Show,
 } from "solid-js";
+import NotificationBell from "@/components/NotificationBell/NotificationBell";
 import { useInterfaceDirection } from "@/hooks/useInterfaceDirection/useInterfaceDirection";
 import T from "@/translations";
 import {
@@ -99,28 +100,32 @@ export const Navigation: Component = () => {
 					<A href="/lucid" class="flex items-center min-w-0">
 						<NavigationLogo />
 					</A>
-					<button
-						type="button"
-						class="size-9 rounded-lg text-icon hover:text-icon-hover flex items-center justify-center transition-colors outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
-						onClick={() => setMobileMenuOpen((open) => !open)}
-						aria-label={menuButtonLabel()}
-						aria-expanded={mobileMenuOpen()}
-						title={menuButtonLabel()}
-					>
-						<Show
-							when={mobileMenuOpen()}
-							fallback={<FaSolidGripLines class="size-4" />}
+					<div class="flex items-center gap-1">
+						<NotificationBell size="md" />
+						<button
+							type="button"
+							class="size-9 rounded-lg text-icon hover:text-icon-hover flex items-center justify-center transition-colors outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+							onClick={() => setMobileMenuOpen((open) => !open)}
+							aria-label={menuButtonLabel()}
+							aria-expanded={mobileMenuOpen()}
+							title={menuButtonLabel()}
 						>
-							<FaSolidXmark class="size-4" />
-						</Show>
-					</button>
+							<Show
+								when={mobileMenuOpen()}
+								fallback={<FaSolidGripLines class="size-4" />}
+							>
+								<FaSolidXmark class="size-4" />
+							</Show>
+						</button>
+					</div>
 				</div>
 			</header>
 
 			{/* Desktop Navigation */}
 			<aside class="hidden md:flex w-sidebar flex-col bg-sidebar max-h-screen sticky top-0 z-10">
-				<div class="pt-6 pb-3 px-6 flex items-center">
+				<div class="pt-6 pb-3 ps-6 pe-4 flex items-center justify-between gap-2">
 					<NavigationLogo />
+					<NotificationBell />
 				</div>
 				<NavigationMenuContent />
 			</aside>

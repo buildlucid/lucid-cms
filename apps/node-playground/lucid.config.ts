@@ -31,9 +31,11 @@ import SettingsCollection from "./src/collections/settings.js";
 import SimpleCollection from "./src/collections/simple.js";
 import TestCollection from "./src/collections/test.js";
 import transporter from "./src/email-transporter.js";
+import { deployFinishedNotification } from "./src/notifications/deploy-finished.js";
 import searchRoute from "./src/routes/search.js";
 import searchMediaRoute from "./src/routes/search-media.js";
 import sendTestEmailRoute from "./src/routes/send-test-email.js";
+import sendTestNotificationRoute from "./src/routes/send-test-notification.js";
 import testOrganisationsTable from "./src/tables/test-organisations.js";
 import { addTool } from "./src/tools/add.js";
 import { echoTool } from "./src/tools/echo.js";
@@ -146,8 +148,14 @@ export default defineConfig({
 			TestCollection,
 		],
 		tables: [testOrganisationsTable],
+		notifications: [deployFinishedNotification],
 		http: {
-			routes: [searchMediaRoute, searchRoute, sendTestEmailRoute],
+			routes: [
+				searchMediaRoute,
+				searchRoute,
+				sendTestEmailRoute,
+				sendTestNotificationRoute,
+			],
 			openAPI: {
 				enabled: true,
 			},

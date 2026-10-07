@@ -5,9 +5,13 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import sendNotification from "../notifications/send.js";
 import getRequestAccess from "./helpers/get-request-access.js";
+import getRequestParticipants from "./helpers/get-request-participants.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
+import resolveRequestNotifications from "./helpers/resolve-request-notifications.js";
+import { closedNotification } from "./notifications.js";
 
 /** Closes a request without publishing it. It can be reopened later. */
 const close: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
@@ -54,6 +58,18 @@ const close: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
 		data: [{ request_id: data.id, user_id: data.user.id, type: "closed" }],
 	});
 	if (eventsRes.error) return eventsRes;
+
+	const request = requestRes.data;
+	const resolveRes = await resolveRequestNotifications(context, { request });
+	if (resolveRes.error) return resolveRes;
+
+	const closedRes = await sendNotification(context, {
+		definition: closedNotification,
+		recipients: getRequestParticipants(request),
+		actorUserId: data.user.id,
+		data: { requestId: data.id, title: request.title, reopened: false },
+	});
+	if (closedRes.error) return closedRes;
 
 	return { error: undefined, data: undefined };
 };

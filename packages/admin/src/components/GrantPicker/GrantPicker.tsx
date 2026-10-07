@@ -1,10 +1,10 @@
 import type { PermissionDetails } from "@types";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import CheckboxGroupRow from "@/components/CheckboxGroupRow/CheckboxGroupRow";
 import Input from "@/components/Input/Input";
 import UnavailableGrants from "@/components/UnavailableGrants/UnavailableGrants";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { GrantGroupRow } from "./parts/GrantGroupRow";
 
 export interface GrantGroup {
 	key: string;
@@ -85,6 +85,14 @@ const GrantPicker: Component<{
 		if (section === "agents") return T()("common.agents");
 		return T()("common.general");
 	};
+	//* a group only changes its own keys, so the rest of the value is kept as is
+	const changeGroup = (group: GrantGroup, keys: string[]) => {
+		const groupKeys = group.grants.map((grant) => grant.key);
+		props.onChange([
+			...props.value.filter((key) => !groupKeys.includes(key)),
+			...keys,
+		]);
+	};
 
 	// ----------------------------------------
 	// Render
@@ -116,11 +124,32 @@ const GrantPicker: Component<{
 						<ul class="divide-y divide-border rounded-md border border-border bg-card">
 							<For each={section.groups}>
 								{(group) => (
-									<GrantGroupRow
-										id={props.id}
-										group={group}
-										value={props.value}
-										onChange={props.onChange}
+									<CheckboxGroupRow
+										id={`${props.id}-${group.key}`}
+										name={helpers.getLocaleValue({
+											value: group.details.name,
+											fallback: group.key,
+										})}
+										description={
+											helpers.getLocaleValue({
+												value: group.details.description,
+											}) || undefined
+										}
+										items={group.grants.map((grant) => ({
+											key: grant.key,
+											label: helpers.getLocaleValue({
+												value: grant.details.name,
+												fallback: grant.key,
+											}),
+											tooltip:
+												helpers.getLocaleValue({
+													value: grant.details.description,
+												}) || undefined,
+										}))}
+										value={props.value.filter((key) =>
+											group.grants.some((grant) => grant.key === key),
+										)}
+										onChange={(keys) => changeGroup(group, keys)}
 										forceOpen={query().length > 0}
 										disabled={props.disabled}
 									/>

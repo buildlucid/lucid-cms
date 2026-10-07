@@ -4,6 +4,12 @@ import {
 	RequestReviewersRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import resolveNotification from "../../notifications/resolve.js";
+import sendNotification from "../../notifications/send.js";
+import {
+	requestNotificationKeys,
+	reviewRequestedNotification,
+} from "../notifications.js";
 import type { RequestDocumentRecord, RequestRecord } from "../types.js";
 import getEligibleReviewers from "./get-eligible-reviewers.js";
 
@@ -13,7 +19,7 @@ const setReviewers: ServiceFn<
 		{
 			request: Pick<
 				RequestRecord,
-				"id" | "type" | "created_by" | "reviewers"
+				"id" | "type" | "title" | "created_by" | "reviewers"
 			> & {
 				documents: Array<Pick<RequestDocumentRecord, "collection_key">>;
 			};
@@ -93,6 +99,24 @@ const setReviewers: ServiceFn<
 			],
 		});
 		if (eventsRes.error) return eventsRes;
+	}
+
+	for (const userId of addedIds) {
+		const sendRes = await sendNotification(context, {
+			definition: reviewRequestedNotification,
+			key: requestNotificationKeys.review(data.request.id, userId),
+			recipients: [userId],
+			actorUserId: data.userId,
+			data: { requestId: data.request.id, title: data.request.title },
+		});
+		if (sendRes.error) return sendRes;
+	}
+	for (const userId of removedIds) {
+		const resolveRes = await resolveNotification(context, {
+			definition: reviewRequestedNotification,
+			key: requestNotificationKeys.review(data.request.id, userId),
+		});
+		if (resolveRes.error) return resolveRes;
 	}
 
 	return { error: undefined, data: undefined };

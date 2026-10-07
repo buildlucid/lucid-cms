@@ -1,12 +1,12 @@
 import { type Component, createSignal } from "solid-js";
 import { IntegrationsList } from "@/components/IntegrationsList/IntegrationsList";
 import PageLayout from "@/components/PageLayout/PageLayout";
-import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
 import useQueryState, {
 	booleanFilter,
 	sort,
 	textFilter,
 } from "@/hooks/useQueryState/useQueryState";
+import T from "@/translations";
 
 const SystemIntegrationsPage: Component = () => {
 	// ----------------------------------------
@@ -42,7 +42,10 @@ const SystemIntegrationsPage: Component = () => {
 	// Render
 	return (
 		<PageLayout.Root>
-			<SystemSettingsHeader />
+			<PageLayout.Header
+				title={T()("routes.system.integrations.title")}
+				description={T()("routes.system.integrations.description")}
+			/>
 			<PageLayout.Body>
 				<IntegrationsList
 					state={{

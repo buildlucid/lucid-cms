@@ -22,7 +22,7 @@ import Migration00000006 from "./migrations/00000006-media.js";
 import Migration00000007 from "./migrations/00000007-collections.js";
 import Migration00000008 from "./migrations/00000008-integrations.js";
 import Migration00000009 from "./migrations/00000009-share-links.js";
-import Migration00000010 from "./migrations/00000010-alerts.js";
+import Migration00000010 from "./migrations/00000010-notifications.js";
 import Migration00000011 from "./migrations/00000011-lucid-remote-connections.js";
 import Migration00000012 from "./migrations/00000012-ai-generations.js";
 import Migration00000013 from "./migrations/00000013-preview-sessions.js";
@@ -64,7 +64,7 @@ export default abstract class DatabaseAdapter {
 		"00000007-collections",
 		"00000008-integrations",
 		"00000009-share-link",
-		"00000010-alerts",
+		"00000010-notifications",
 		"00000011-lucid-remote-connections",
 		"00000012-ai-generations",
 		"00000013-preview-sessions",
@@ -413,7 +413,7 @@ export default abstract class DatabaseAdapter {
 			"00000007-collections": Migration00000007(this),
 			"00000008-integrations": Migration00000008(this),
 			"00000009-share-link": Migration00000009(this),
-			"00000010-alerts": Migration00000010(this),
+			"00000010-notifications": Migration00000010(this),
 			"00000011-lucid-remote-connections": Migration00000011(this),
 			"00000012-ai-generations": Migration00000012(this),
 			"00000013-preview-sessions": Migration00000013(this),

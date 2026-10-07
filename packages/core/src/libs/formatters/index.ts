@@ -14,6 +14,7 @@ export { default as lucidRemoteConnectionsFormatter } from "./lucid-remote-conne
 export { default as mediaFormatter } from "./media.js";
 export { default as mediaFoldersFormatter } from "./media-folders.js";
 export { default as mediaShareLinksFormatter } from "./media-share-links.js";
+export { default as notificationsFormatter } from "./notifications.js";
 export { default as oauthFormatter } from "./oauth.js";
 export { default as oauthClientsFormatter } from "./oauth-clients.js";
 export { default as oauthConnectionsFormatter } from "./oauth-connections.js";

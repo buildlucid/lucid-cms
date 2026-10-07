@@ -6,12 +6,16 @@ import {
 	createSignal,
 	Index,
 	type JSXElement,
+	onCleanup,
+	onMount,
 	Show,
 } from "solid-js";
 import TableColumnToggle from "@/components/Table/parts/TableColumnToggle";
 import TableHeaderCell from "@/components/Table/parts/TableHeaderCell";
 import TableLoadingRow from "@/components/Table/parts/TableLoadingRow";
-import TableSelectAction from "@/components/Table/parts/TableSelectAction";
+import TableSelectAction, {
+	type TableSelectActionItem,
+} from "@/components/Table/parts/TableSelectAction";
 import TableSelectionCell from "@/components/Table/parts/TableSelectionCell";
 import {
 	type TableColumn,
@@ -29,6 +33,7 @@ export interface TableRootProps {
 	/** Unique ID used to remember hidden columns and scroll position. */
 	id: string;
 	rowCount: number;
+	data?: readonly unknown[];
 	columns: TableColumn[];
 	/** Required for sortable columns. */
 	queryState?: QueryStateResponse;
@@ -38,6 +43,7 @@ export interface TableRootProps {
 	caption?: string;
 	/** Adds checkboxes for selecting rows. */
 	selectable?: boolean;
+	selectActions?: TableSelectActionItem[];
 	/** @default "md" */
 	padding?: TablePadding;
 	/** @default "primary" */
@@ -248,22 +254,15 @@ const TableRoot: Component<TableRootProps> = (props) => {
 
 	// ----------------------------------------
 	// Effects
+	onMount(() => {
+		window.addEventListener("resize", setOverflowState);
+		onCleanup(() => window.removeEventListener("resize", setOverflowState));
+	});
+	//* new rows clear the selection and may change whether the table overflows
 	createEffect(() => {
-		const handleResize = () => {
-			setOverflowState();
-		};
-
-		handleResize();
-		const selectedValues = [];
-		for (let i = 0; i < props.rowCount; i++) {
-			selectedValues.push(false);
-		}
-		setSelected(selectedValues);
-
-		window.addEventListener("resize", handleResize);
-		return () => {
-			window.removeEventListener("resize", handleResize);
-		};
+		props.data;
+		setSelected(Array.from({ length: props.rowCount }, () => false));
+		setOverflowState();
 	});
 	createEffect(() => {
 		props.id;
@@ -369,6 +368,7 @@ const TableRoot: Component<TableRootProps> = (props) => {
 				allowRestore={props.allowRestore ?? false}
 				allowDelete={props.allowDelete ?? false}
 				allowDeletePermanently={props.allowDeletePermanently ?? false}
+				actions={props.selectActions ?? []}
 				callbacks={{
 					delete: props.onDeleteRows,
 					restore: props.onRestoreRows,

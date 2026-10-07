@@ -21,6 +21,8 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../media-storage/types.js";
+import { isNotificationDefinition } from "../notifications/registry.js";
+import type { AnyNotificationDefinition } from "../notifications/types.js";
 import { accessGroupSchema } from "../permission/access-config.js";
 import { PluginDefinitionSchema } from "../plugins/schema.js";
 import type { QueueAdapter, QueueAdapterInstance } from "../queue/types.js";
@@ -83,6 +85,14 @@ const QueueAdapterSchema = z.custom<
 const JobDefinitionSchema = z.custom<AnyJobDefinition>(isJobDefinition, {
 	message: "Expected a job definition created with defineJob",
 });
+
+const NotificationDefinitionSchema = z.custom<AnyNotificationDefinition>(
+	isNotificationDefinition,
+	{
+		message:
+			"Expected a notification definition created with defineNotification",
+	},
+);
 
 const McpToolDefinitionSchema = z.custom<McpToolDefinition>(
 	(value) => isToolDefinition(value) && value.target === "mcp",
@@ -362,6 +372,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 			failedDays: z.number().int().nonnegative(),
 		}),
 	}),
+	notifications: z.array(NotificationDefinitionSchema),
 	kv: z
 		.strictObject({
 			adapter: KVAdapterSchema.optional(),
@@ -382,6 +393,7 @@ const ConfigSchema: z.ZodType<ResolvedLucidConfig> = z.strictObject({
 	}),
 	retention: z.strictObject({
 		defaultPurgeAfterDays: z.number().int().positive(),
+		notificationDays: z.number().int().nonnegative(),
 		purgeAfterDays: z
 			.strictObject({
 				removedLocales: z.number().int().positive().optional(),

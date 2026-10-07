@@ -83,6 +83,12 @@ const SystemIntegrationsRoute = lazyPage(
 const SystemJobsRoute = lazyPage(
 	() => import("@/containers/SystemJobsPage/SystemJobsPage"),
 );
+const SystemNotificationsRoute = lazyPage(
+	() => import("@/containers/SystemNotificationsPage/SystemNotificationsPage"),
+);
+const NotificationsRoute = lazyPage(
+	() => import("@/containers/NotificationsPage/NotificationsPage"),
+);
 const EmailListRoute = lazyPage(
 	() => import("@/containers/EmailsPage/EmailsPage"),
 );
@@ -168,6 +174,11 @@ const AppRouter: Component = () => {
 					/>
 					<Route path="/components" component={ComponentsRoute} />
 					<Route path="/account" component={AccountRoute} />
+					<Route
+						path="/notifications"
+						preload={preloadRoutes(NotificationsRoute)}
+						component={NotificationsRoute}
+					/>
 					{extensionRoutes
 						.filter((route) => route.shell === "navigation")
 						.map(extensionRoute)}
@@ -323,6 +334,15 @@ const AppRouter: Component = () => {
 									<SystemAiUsageRoute />
 								</PermissionGuard>
 							</ConditionGuard>
+						)}
+					/>
+					<Route
+						path="/system/notifications"
+						preload={preloadRoutes(SystemNotificationsRoute)}
+						component={() => (
+							<PermissionGuard permission={Permissions.SettingsRead}>
+								<SystemNotificationsRoute />
+							</PermissionGuard>
 						)}
 					/>
 					<Route

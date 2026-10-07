@@ -15,6 +15,7 @@ import invalidateContentDocumentCache from "../documents/helpers/invalidate-cont
 import notifyChange from "../documents/notify-change.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
 import promoteVersion from "../documents-versions/promote-version.js";
+import sendNotification from "../notifications/send.js";
 import loadActiveUser from "../users/helpers/load-active-user.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import completeCreation from "./helpers/complete-creation.js";
@@ -23,7 +24,10 @@ import RequestExecutionError from "./helpers/execution-error.js";
 import getAllowedTargets from "./helpers/get-allowed-targets.js";
 import getBlockers from "./helpers/get-blockers.js";
 import getRequestAccess from "./helpers/get-request-access.js";
+import getRequestParticipants from "./helpers/get-request-participants.js";
 import getRequestState from "./helpers/get-request-state.js";
+import resolveRequestNotifications from "./helpers/resolve-request-notifications.js";
+import { completedNotification } from "./notifications.js";
 import type { RequestDocumentRecord } from "./types.js";
 
 /**
@@ -296,6 +300,10 @@ const execute: ServiceFn<
 		});
 		if (updateRes.error) return updateRes;
 
+		//* proposal workflows go with their proposals, so their to-dos are cleared first
+		const resolveRes = await resolveRequestNotifications(context, { request });
+		if (resolveRes.error) return resolveRes;
+
 		const proposals = request.documents.flatMap((document) =>
 			document.source === "latest" &&
 			document.source_version_id !== null &&
@@ -330,6 +338,14 @@ const execute: ServiceFn<
 			data: [{ request_id: request.id, user_id: user.id, type: "completed" }],
 		});
 		if (eventsRes.error) return eventsRes;
+
+		const completedRes = await sendNotification(context, {
+			definition: completedNotification,
+			recipients: getRequestParticipants(request),
+			actorUserId: user.id,
+			data: { requestId: request.id, title: request.title },
+		});
+		if (completedRes.error) return completedRes;
 
 		return { error: undefined, data: undefined };
 	})().catch((error: unknown): Awaited<ServiceResponse<undefined>> => {

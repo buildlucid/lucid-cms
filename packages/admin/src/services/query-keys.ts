@@ -214,6 +214,13 @@ export const queryKeys = {
 		all: () => ["lucid", "permissions"] as const,
 		list: () => ["lucid", "permissions", "list"] as const,
 	},
+	notifications: {
+		all: () => ["lucid", "notifications"] as const,
+		list: () => ["lucid", "notifications", "list"] as const,
+		summary: () => ["lucid", "notifications", "summary"] as const,
+		types: () => ["lucid", "notifications", "types"] as const,
+		preferences: () => ["lucid", "notifications", "preferences"] as const,
+	},
 	requests: {
 		all: () => ["lucid", "requests"] as const,
 		list: () => ["lucid", "requests", "list"] as const,

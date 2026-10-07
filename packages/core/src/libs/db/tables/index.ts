@@ -9,8 +9,6 @@ import { agentRoutinesTable } from "./agent-routines.js";
 import { agentRunsTable } from "./agent-runs.js";
 import { agentUrlKeysTable } from "./agent-url-keys.js";
 import { aiGenerationsTable } from "./ai-generations.js";
-import { alertRecipientsTable } from "./alert-recipients.js";
-import { alertsTable } from "./alerts.js";
 import { authStatesTable } from "./auth-states.js";
 import { collectionMigrationsTable } from "./collection-migrations.js";
 import { collectionsTable } from "./collections.js";
@@ -39,6 +37,10 @@ import { mediaFoldersTable } from "./media-folders.js";
 import { mediaShareLinksTable } from "./media-share-links.js";
 import { mediaTranslationsTable } from "./media-translations.js";
 import { mediaUploadSessionsTable } from "./media-upload-sessions.js";
+import { notificationPreferencesTable } from "./notification-preferences.js";
+import { notificationRecipientsTable } from "./notification-recipients.js";
+import { notificationTypeSettingsTable } from "./notification-type-settings.js";
+import { notificationsTable } from "./notifications.js";
 import { oauthAuthorizationCodesTable } from "./oauth-authorization-codes.js";
 import { oauthAuthorizationRequestsTable } from "./oauth-authorization-requests.js";
 import { oauthClientRedirectUrisTable } from "./oauth-client-redirect-uris.js";
@@ -75,8 +77,6 @@ export * from "./agent-routines.js";
 export * from "./agent-runs.js";
 export * from "./agent-url-keys.js";
 export * from "./ai-generations.js";
-export * from "./alert-recipients.js";
-export * from "./alerts.js";
 export * from "./auth-states.js";
 export * from "./collection-migrations.js";
 export * from "./collections.js";
@@ -106,6 +106,10 @@ export * from "./media-folders.js";
 export * from "./media-share-links.js";
 export * from "./media-translations.js";
 export * from "./media-upload-sessions.js";
+export * from "./notification-preferences.js";
+export * from "./notification-recipients.js";
+export * from "./notification-type-settings.js";
+export * from "./notifications.js";
 export * from "./oauth-authorization-codes.js";
 export * from "./oauth-authorization-requests.js";
 export * from "./oauth-client-redirect-uris.js";
@@ -143,8 +147,6 @@ export const coreTableDefinitions = [
 	agentRoutineToolsTable,
 	agentRunsTable,
 	agentUrlKeysTable,
-	alertRecipientsTable,
-	alertsTable,
 	authStatesTable,
 	collectionMigrationsTable,
 	collectionsTable,
@@ -172,6 +174,10 @@ export const coreTableDefinitions = [
 	localesTable,
 	lucidRemoteConnectionsTable,
 	mediaTable,
+	notificationsTable,
+	notificationRecipientsTable,
+	notificationTypeSettingsTable,
+	notificationPreferencesTable,
 	mediaAwaitingSyncTable,
 	mediaFoldersTable,
 	mediaShareLinksTable,

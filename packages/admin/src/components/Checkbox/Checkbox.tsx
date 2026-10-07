@@ -11,7 +11,6 @@ import {
 	splitProps,
 } from "solid-js";
 import Field from "@/components/Field/Field";
-import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
 
 /**
  * The button variants draw the checkbox as a box that lines up with buttons.
@@ -35,7 +34,6 @@ export interface CheckboxProps extends JSX.AriaAttributes {
 	variant?: CheckboxVariant;
 	labelStart?: JSXElement;
 	description?: string;
-	/** Help text shown in a tooltip beside the checkbox, or on hovering the whole box for the button variants. */
 	tooltip?: string;
 	errors?: ErrorResult | FieldError;
 	required?: boolean;
@@ -184,7 +182,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 					</Show>
 				</KobalteCheckbox.Label>
 			</Show>
-			<Show when={boxed() && props.tooltip}>
+			<Show when={props.tooltip}>
 				<KobalteCheckbox.Description class="sr-only">
 					{props.tooltip}
 				</KobalteCheckbox.Description>
@@ -200,16 +198,8 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 			errors={props.errors}
 			class={props.class}
 		>
-			<div class="flex items-center justify-between">
-				<Show
-					when={boxed() && props.tooltip}
-					fallback={
-						<>
-							{root()}
-							<FormTooltip copy={props.tooltip} theme="inline" />
-						</>
-					}
-				>
+			<div class="flex">
+				<Show when={props.tooltip} fallback={root()}>
 					{(tooltip) => (
 						<Tooltip.Root
 							open={tooltipOpen()}

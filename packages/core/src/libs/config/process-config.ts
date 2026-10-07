@@ -23,6 +23,7 @@ import checkField from "./checks/check-field.js";
 import checkFieldConditions from "./checks/check-field-conditions.js";
 import checkJobDefinitions from "./checks/check-job-definitions.js";
 import checkLocales from "./checks/check-locales.js";
+import checkNotificationDefinitions from "./checks/check-notification-definitions.js";
 import checkOpenRepeaters from "./checks/check-open-repeaters.js";
 import checkRepeaterDepth from "./checks/check-repeater-depth.js";
 import checkSkillDefinitions from "./checks/check-skill-definitions.js";
@@ -30,6 +31,7 @@ import checkToolDefinitions from "./checks/check-tool-definitions.js";
 import checkToolkitDefinitions from "./checks/check-toolkit-definitions.js";
 import ConfigSchema from "./config-schema.js";
 import coreJobDefinitions from "./core-job-definitions.js";
+import coreNotificationDefinitions from "./core-notification-definitions.js";
 import resolveConfig from "./resolve-config.js";
 
 /**
@@ -66,6 +68,10 @@ const processConfig = async (
 	});
 
 	const jobDefinitions = [...coreJobDefinitions, ...configRes.jobs.definitions];
+	const notificationDefinitions = [
+		...coreNotificationDefinitions,
+		...configRes.notifications,
+	];
 
 	configRes = produce(configRes, (draft) => {
 		draft.localization.locales = draft.localization.locales.map((locale) => ({
@@ -84,6 +90,7 @@ const processConfig = async (
 			...configRes.jobs,
 			definitions: jobDefinitions,
 		},
+		notifications: notificationDefinitions,
 	};
 
 	if (!options?.skipValidation) {
@@ -95,6 +102,7 @@ const processConfig = async (
 
 		// job definitions
 		await checkJobDefinitions(configRes.jobs.definitions);
+		checkNotificationDefinitions(configRes.notifications);
 
 		// plugin toolkit definitions
 		checkToolkitDefinitions(configRes.plugins);

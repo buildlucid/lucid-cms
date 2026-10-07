@@ -51,13 +51,12 @@ export interface Settings {
 		mediaStorage: string | null;
 		email: string;
 		mediaDelivery: string;
-		alertEmail: string | null;
 	};
 }
 
 export type MediaStorageOptionName = "media_storage_used";
 
-export type OptionsName = MediaStorageOptionName | "system_alert_email";
+export type OptionsName = MediaStorageOptionName;
 
 export interface Option {
 	name: OptionsName;

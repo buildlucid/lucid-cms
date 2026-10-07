@@ -10,6 +10,7 @@ const coreToolkitKeys = {
 	jobs: true,
 	locales: true,
 	media: true,
+	notifications: true,
 	previews: true,
 } satisfies Record<keyof CoreToolkit, true>;
 const unsafeToolkitKeys = new Set(["__proto__", "constructor", "prototype"]);

@@ -8,6 +8,7 @@ export type * from "./resources/integrations/index.js";
 export type * from "./resources/jobs/index.js";
 export type * from "./resources/locales/index.js";
 export type * from "./resources/media/index.js";
+export type * from "./resources/notifications/index.js";
 export type * from "./resources/refs/index.js";
 export type * from "./resources/requests/index.js";
 export type * from "./resources/review/index.js";

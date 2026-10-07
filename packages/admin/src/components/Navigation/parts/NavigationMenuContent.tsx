@@ -303,6 +303,12 @@ export const NavigationMenuContent: Component<{
 								permission={permissions().systemOverview}
 							/>
 							<NavigationLink
+								href="/lucid/system/notifications"
+								icon="notifications"
+								title={T()("notifications.title")}
+								permission={permissions().systemOverview}
+							/>
+							<NavigationLink
 								href="/lucid/system/integrations"
 								icon="integrations"
 								title={T()("routes.system.integrations.title")}

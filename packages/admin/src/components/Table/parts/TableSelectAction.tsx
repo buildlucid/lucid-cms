@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import { FaSolidXmark } from "solid-icons/fa";
 import {
 	type Accessor,
 	type Component,
@@ -7,9 +7,25 @@ import {
 	type Setter,
 	Show,
 } from "solid-js";
-import Button from "@/components/Button/Button";
+import Button, { type ButtonVariant } from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
+import SplitButton, {
+	type SplitButtonAction,
+} from "@/components/SplitButton/SplitButton";
 import T from "@/translations";
+
+export interface TableSelectActionItem {
+	label: string;
+	/** @default "outline" */
+	variant?: ButtonVariant;
+	confirm?: {
+		title: string;
+		description?: string;
+		/** @default "primary" */
+		confirmVariant?: ButtonVariant;
+	};
+	onClick: (_selected: boolean[]) => Promise<void>;
+}
 
 interface TableSelectActionProps {
 	selectedCount: Accessor<number>;
@@ -23,6 +39,7 @@ interface TableSelectActionProps {
 	allowRestore: boolean;
 	allowDelete: boolean;
 	allowDeletePermanently: boolean;
+	actions: TableSelectActionItem[];
 }
 
 const TableSelectAction: Component<TableSelectActionProps> = (props) => {
@@ -35,6 +52,9 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 	const [isDeleting, setIsDeleting] = createSignal(false);
 	const [isRestoring, setIsRestoring] = createSignal(false);
 	const [isDeletingPermanently, setIsDeletingPermanently] = createSignal(false);
+	const [pendingAction, setPendingAction] =
+		createSignal<TableSelectActionItem>();
+	const [isRunningAction, setIsRunningAction] = createSignal(false);
 
 	// ----------------------------------------
 	// Memos
@@ -43,7 +63,8 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 		if (
 			!props.callbacks.delete &&
 			!props.callbacks.restore &&
-			!props.callbacks.deletePermanently
+			!props.callbacks.deletePermanently &&
+			props.actions.length === 0
 		)
 			return false;
 		return true;
@@ -63,13 +84,57 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 		if (!props.callbacks.deletePermanently) return false;
 		return true;
 	});
-	const isWidePill = createMemo(() => {
-		let count = 1; // reset
-		if (showRestoreAction()) count++;
-		if (showDeleteAction()) count++;
-		if (showDeletePermanentlyAction()) count++;
-		return count > 2;
-	});
+	//* the built-in actions come first, so the first one is the main button
+	const items = createMemo<
+		Array<{ label: string; variant: ButtonVariant; onSelect: () => void }>
+	>(() => [
+		...(showRestoreAction()
+			? [
+					{
+						label: T()("common.restore"),
+						variant: "primary" as const,
+						onSelect: () => setRestoreModalOpen(true),
+					},
+				]
+			: []),
+		...(showDeleteAction()
+			? [
+					{
+						label: T()("common.delete"),
+						variant: "danger" as const,
+						onSelect: () => setDeleteModalOpen(true),
+					},
+				]
+			: []),
+		...(showDeletePermanentlyAction()
+			? [
+					{
+						label: T()("common.delete"),
+						variant: "danger" as const,
+						onSelect: () => setDeletePermanentlyModalOpen(true),
+					},
+				]
+			: []),
+		...props.actions.map((action) => ({
+			label: action.label,
+			variant: action.variant ?? ("outline" as const),
+			onSelect: () => {
+				setPendingAction(action);
+				if (!action.confirm) void runAction(action);
+			},
+		})),
+	]);
+	const mainItem = createMemo(() => items()[0]);
+	//* the main button's variant only makes sense for the menu's danger items
+	const menuItems = createMemo<SplitButtonAction[]>(() =>
+		items()
+			.slice(1)
+			.map((item) => ({
+				label: item.label,
+				onSelect: item.onSelect,
+				variant: item.variant === "danger" ? "danger" : undefined,
+			})),
+	);
 
 	// ----------------------------------------
 	// Handlers
@@ -98,6 +163,16 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 			}
 		}
 	};
+	const runAction = async (action: TableSelectActionItem) => {
+		setIsRunningAction(true);
+		try {
+			await action.onClick(props.selected());
+			props.setSelected((prev) => prev.map(() => false));
+			setPendingAction(undefined);
+		} finally {
+			setIsRunningAction(false);
+		}
+	};
 	const deletePermanentlyHandler = async () => {
 		if (props.callbacks?.deletePermanently) {
 			setIsDeletingPermanently(true);
@@ -117,54 +192,71 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 		<>
 			<Show when={shouldShow()}>
 				<div class="fixed bottom-4 md:bottom-6 left-0 md:left-sidebar right-0 flex justify-center items-center z-40 pointer-events-none px-4">
-					<div
-						class={classNames(
-							"pointer-events-auto bg-card p-2 border border-border rounded-md w-full justify-between flex items-center",
-							isWidePill() ? "max-w-[460px]" : "max-w-[400px]",
-						)}
-					>
-						<p class="ml-2 text-sm">
-							<span class="font-bold">
-								{props.selectedCount() > 1
-									? `${props.selectedCount()} ${T()("common.items")}`
-									: `1 ${T()("common.item")}`}
-							</span>{" "}
-							{T()("common.selected")}
-						</p>
-						<div class="ml-2 flex gap-2">
-							<Button variant="outline" size="sm" onClick={resetHandler}>
-								{T()("common.reset")}
+					<div class="pointer-events-auto flex w-full max-w-100 items-center justify-between gap-3 rounded-md border border-border bg-card p-2">
+						<div class="flex min-w-0 items-center gap-1">
+							<Button
+								variant="ghost"
+								size="sm"
+								shape="square"
+								onClick={resetHandler}
+								aria-label={T()("common.reset")}
+								title={T()("common.reset")}
+							>
+								<FaSolidXmark size={12} />
 							</Button>
-							<Show when={showRestoreAction()}>
-								<Button
-									variant="primary"
-									size="sm"
-									onClick={() => setRestoreModalOpen(true)}
-								>
-									{T()("common.restore")}
-								</Button>
-							</Show>
-							<Show when={showDeleteAction()}>
-								<Button
-									variant="danger"
-									size="sm"
-									onClick={() => setDeleteModalOpen(true)}
-								>
-									{T()("common.delete")}
-								</Button>
-							</Show>
-							<Show when={showDeletePermanentlyAction()}>
-								<Button
-									variant="danger"
-									size="sm"
-									onClick={() => setDeletePermanentlyModalOpen(true)}
-								>
-									{T()("common.delete")}
-								</Button>
-							</Show>
+							<p class="truncate text-sm">
+								<span class="font-bold">
+									{props.selectedCount() > 1
+										? `${props.selectedCount()} ${T()("common.items")}`
+										: `1 ${T()("common.item")}`}
+								</span>{" "}
+								{T()("common.selected")}
+							</p>
 						</div>
+						<Show when={mainItem()}>
+							{(main) => (
+								<Show
+									when={menuItems().length > 0}
+									fallback={
+										<Button
+											variant={main().variant}
+											size="sm"
+											loading={isRunningAction()}
+											onClick={main().onSelect}
+										>
+											{main().label}
+										</Button>
+									}
+								>
+									<SplitButton
+										label={main().label}
+										variant={main().variant}
+										size="sm"
+										loading={isRunningAction()}
+										onClick={main().onSelect}
+										actions={menuItems()}
+									/>
+								</Show>
+							)}
+						</Show>
 					</div>
 				</div>
+			</Show>
+			<Show when={pendingAction()?.confirm && pendingAction()}>
+				{(action) => (
+					<Modal.Confirm
+						open={true}
+						onOpenChange={(open) => {
+							if (!open && !isRunningAction()) setPendingAction(undefined);
+						}}
+						title={action().confirm?.title ?? action().label}
+						description={action().confirm?.description}
+						confirmLabel={action().label}
+						confirmVariant={action().confirm?.confirmVariant ?? "primary"}
+						loading={isRunningAction()}
+						onConfirm={() => void runAction(action())}
+					/>
+				)}
 			</Show>
 			<Show when={showDeleteAction()}>
 				<Modal.Confirm

@@ -12,6 +12,7 @@ import locales from "./locales";
 import media from "./media";
 import mediaFolders from "./media-folders";
 import mediaShareLinks from "./media-share-links";
+import notifications from "./notifications";
 import oauthClients from "./oauth-clients";
 import oauthConnections from "./oauth-connections";
 import permissions from "./permissions";
@@ -38,6 +39,7 @@ const exportObject = {
 	media,
 	mediaFolders,
 	mediaShareLinks,
+	notifications,
 	settings,
 	email,
 	jobs,

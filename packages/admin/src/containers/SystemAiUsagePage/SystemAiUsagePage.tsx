@@ -10,7 +10,6 @@ import InfoRow from "@/components/InfoRow/InfoRow";
 import Link from "@/components/Link/Link";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
-import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
 import useQueryState, {
 	numberFilter,
 	pagination,
@@ -64,7 +63,10 @@ const SystemAiUsagePage: Component = () => {
 	// Render
 	return (
 		<PageLayout.Root>
-			<SystemSettingsHeader />
+			<PageLayout.Header
+				title={T()("routes.system.ai.usage.title")}
+				description={T()("routes.system.ai.usage.description")}
+			/>
 			<PageLayout.Body>
 				<div class="flex-1 h-full p-4 md:p-6">
 					<Show when={!connectionActive()}>

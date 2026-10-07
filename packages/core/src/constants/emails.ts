@@ -8,6 +8,7 @@ const emailConstants = Object.freeze({
 		acceptInvitation: "/lucid/accept-invitation",
 		emailChangeConfirm: "/lucid/email-change/confirm",
 		emailChangeRevert: "/lucid/email-change/revert",
+		account: "/lucid/account",
 	},
 	storage: {
 		defaultPreviewFallback: "[REDACTED]",
@@ -62,8 +63,8 @@ const emailConstants = Object.freeze({
 				},
 			},
 		},
-		storageAlert: {
-			key: "storage-alert",
+		notification: {
+			key: "notification",
 			external: false,
 			storage: null,
 		},

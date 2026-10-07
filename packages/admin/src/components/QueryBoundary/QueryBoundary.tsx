@@ -45,7 +45,7 @@ export interface QueryBoundaryProps {
 const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
 	// ----------------------------------------
 	// Functions
-	const filtered = () => props.queryState?.hasFiltersApplied() === true;
+	const filtered = () => props.queryState?.filtersAreDefault() === false;
 	const centred = (children: JSXElement) => (
 		<div class="flex flex-1 items-center justify-center">{children}</div>
 	);

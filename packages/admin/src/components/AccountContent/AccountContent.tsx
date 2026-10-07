@@ -15,6 +15,7 @@ import CreateUpdateProfilePictureDrawer from "@/components/CreateUpdateProfilePi
 import DetailsList from "@/components/DetailsList/DetailsList";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Modal from "@/components/Modal/Modal";
+import NotificationPreferences from "@/components/NotificationPreferences/NotificationPreferences";
 import { OAuthConnectionsList } from "@/components/OAuthConnectionsList/OAuthConnectionsList";
 import PendingEmailChangeNotice from "@/components/PendingEmailChangeNotice/PendingEmailChangeNotice";
 import ProfilePicturePreviewCard from "@/components/ProfilePicturePreviewCard/ProfilePicturePreviewCard";
@@ -443,6 +444,14 @@ export const AccountContent: Component = () => {
 						}}
 						name={"cms-locale"}
 					/>
+				</InfoRow.Content>
+				<InfoRow.Content
+					title={T()("account.notifications.email.title")}
+					description={T()("account.notifications.email.description")}
+				>
+					<div class="-mx-4 -mb-4 border-t border-border">
+						<NotificationPreferences />
+					</div>
 				</InfoRow.Content>
 			</InfoRow.Root>
 

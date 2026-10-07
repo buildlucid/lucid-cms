@@ -5,7 +5,6 @@ import PageLayout from "@/components/PageLayout/PageLayout";
 import Pill from "@/components/Pill/Pill";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
 import api from "@/services/api";
 import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
@@ -72,7 +71,10 @@ const SystemOverviewPage: Component = () => {
 
 	return (
 		<PageLayout.Root>
-			<SystemSettingsHeader />
+			<PageLayout.Header
+				title={T()("routes.system.overview.title")}
+				description={T()("routes.system.overview.description")}
+			/>
 			<PageLayout.Body>
 				<QueryBoundary
 					loading={settingsData.isLoading}

@@ -15,8 +15,6 @@ import type {
 	LucidAgentRuns,
 	LucidAgentUrlKeys,
 	LucidAiGenerations,
-	LucidAlertRecipients,
-	LucidAlerts,
 	LucidAuthStates,
 	LucidBricksTable,
 	LucidBrickTableName,
@@ -45,6 +43,10 @@ import type {
 	LucidMediaShareLinks,
 	LucidMediaTranslations,
 	LucidMediaUploadSessions,
+	LucidNotificationPreferences,
+	LucidNotificationRecipients,
+	LucidNotifications,
+	LucidNotificationTypeSettings,
 	LucidOAuthAuthorizationCodes,
 	LucidOAuthAuthorizationRequests,
 	LucidOAuthClientRedirectUris,
@@ -300,8 +302,6 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_emails: LucidEmails;
 	lucid_email_attachments: LucidEmailAttachments;
 	lucid_email_transactions: LucidEmailTransactions;
-	lucid_alerts: LucidAlerts;
-	lucid_alert_recipients: LucidAlertRecipients;
 	lucid_document_references: LucidDocumentReferences;
 	lucid_document_version_identities: LucidDocumentVersionIdentities;
 	lucid_document_identities: LucidDocumentIdentities;
@@ -312,6 +312,10 @@ export interface LucidDB extends DynamicCollectionTables {
 	lucid_media_folders: LucidMediaFolders;
 	lucid_media: LucidMedia;
 	lucid_media_translations: LucidMediaTranslations;
+	lucid_notifications: LucidNotifications;
+	lucid_notification_recipients: LucidNotificationRecipients;
+	lucid_notification_type_settings: LucidNotificationTypeSettings;
+	lucid_notification_preferences: LucidNotificationPreferences;
 	lucid_media_awaiting_sync: LucidMediaAwaitingSync;
 	lucid_media_upload_sessions: LucidMediaUploadSessions;
 	lucid_media_share_links: LucidMediaShareLinks;

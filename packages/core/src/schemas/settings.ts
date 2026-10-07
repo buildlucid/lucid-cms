@@ -151,10 +151,6 @@ const settingsResponseSchema = z.object({
 				description: "The media delivery adapter key",
 				example: "custom",
 			}),
-			alertEmail: z.email().nullable().meta({
-				description: "The email address system alerts are sent to",
-				example: "alerts@example.com",
-			}),
 		})
 		.optional(),
 });
@@ -179,22 +175,6 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	clearKV: {
 		body: undefined,
-		query: {
-			string: undefined,
-			formatted: undefined,
-		},
-		params: undefined,
-		response: undefined,
-	} satisfies ControllerSchema,
-	updateSystemAlerts: {
-		body: z
-			.object({
-				alertEmail: z.union([z.email(), z.literal(""), z.null()]).meta({
-					description: "The email address system alerts are sent to",
-					example: "alerts@example.com",
-				}),
-			})
-			.strict(),
 		query: {
 			string: undefined,
 			formatted: undefined,

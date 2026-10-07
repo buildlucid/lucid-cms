@@ -5,10 +5,17 @@ import {
 } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import sendNotification from "../notifications/send.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
 import getRequestAccess from "./helpers/get-request-access.js";
+import getRequestParticipants from "./helpers/get-request-participants.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
+import {
+	closedNotification,
+	requestNotificationKeys,
+	reviewRequestedNotification,
+} from "./notifications.js";
 
 /**
  * Reopens a closed request. Content may have changed while it was closed, so
@@ -60,6 +67,26 @@ const reopen: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (
 		userId: data.user.id,
 	});
 	if (dismissRes.error) return dismissRes;
+
+	const request = requestRes.data;
+	const reopenedRes = await sendNotification(context, {
+		definition: closedNotification,
+		recipients: getRequestParticipants(request),
+		actorUserId: data.user.id,
+		data: { requestId: data.id, title: request.title, reopened: true },
+	});
+	if (reopenedRes.error) return reopenedRes;
+
+	for (const reviewer of request.reviewers) {
+		const reviewRes = await sendNotification(context, {
+			definition: reviewRequestedNotification,
+			key: requestNotificationKeys.review(data.id, reviewer.user_id),
+			recipients: [reviewer.user_id],
+			actorUserId: data.user.id,
+			data: { requestId: data.id, title: request.title },
+		});
+		if (reviewRes.error) return reviewRes;
+	}
 
 	return { error: undefined, data: undefined };
 };

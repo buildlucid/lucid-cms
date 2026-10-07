@@ -1,15 +1,12 @@
-import { type Component, createMemo, createSignal } from "solid-js";
+import { type Component, createSignal } from "solid-js";
 import Button from "@/components/Button/Button";
 import ClearAllProcessedImagesModal from "@/components/ClearAllProcessedImagesModal/ClearAllProcessedImagesModal";
 import ClearCacheModal from "@/components/ClearCacheModal/ClearCacheModal";
 import DeleteAllShareLinksSystemModal from "@/components/DeleteAllShareLinksSystemModal/DeleteAllShareLinksSystemModal";
-import DetailsList from "@/components/DetailsList/DetailsList";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import LucidConnection from "@/components/LucidConnection/LucidConnection";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
-import SystemSettingsHeader from "@/components/SystemSettingsHeader/SystemSettingsHeader";
-import UpdateSystemAlertsModal from "@/components/UpdateSystemAlertsModal/UpdateSystemAlertsModal";
 import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import T from "@/translations";
@@ -21,8 +18,6 @@ const SystemOperationsPage: Component = () => {
 		createSignal(false);
 	const [getOpenClearCache, setOpenClearCache] = createSignal(false);
 	const [getOpenDeleteAllShareLinks, setOpenDeleteAllShareLinks] =
-		createSignal(false);
-	const [updateSystemAlertsOpen, setUpdateSystemAlertsOpen] =
 		createSignal(false);
 
 	// ----------------------------------
@@ -37,14 +32,13 @@ const SystemOperationsPage: Component = () => {
 	});
 
 	// ----------------------------------------
-	// Memos
-	const systemInfo = createMemo(() => settingsData.data?.data?.system);
-
-	// ----------------------------------------
 	// Render
 	return (
 		<PageLayout.Root>
-			<SystemSettingsHeader />
+			<PageLayout.Header
+				title={T()("routes.system.operations.title")}
+				description={T()("routes.system.operations.description")}
+			/>
 			<PageLayout.Body>
 				<div class="flex-1 h-full p-4 md:p-6">
 					{/* Lucid Connection */}
@@ -60,40 +54,6 @@ const SystemOperationsPage: Component = () => {
 						loading={settingsData.isLoading}
 						error={settingsData.isError}
 					>
-						{/* System Alerts */}
-						<InfoRow.Root
-							title={T()("system.alerts.title")}
-							description={T()("system.alerts.description")}
-						>
-							<InfoRow.Content
-								title={T()("system.alerts.delivery.title")}
-								description={T()("system.alerts.email.description")}
-								actions={
-									<Button
-										size="sm"
-										type="button"
-										variant="outline"
-										permission={Permissions.SettingsUpdate}
-										onClick={() => setUpdateSystemAlertsOpen(true)}
-									>
-										{T()("system.alerts.edit.action")}
-									</Button>
-								}
-								align="center"
-							>
-								<DetailsList
-									variant="plain"
-									items={[
-										{
-											label: T()("common.alert.email"),
-											value: systemInfo()?.alertEmail || T()("common.not.set"),
-											wrap: true,
-										},
-									]}
-								/>
-							</InfoRow.Content>
-						</InfoRow.Root>
-
 						{/* Maintenance */}
 						<InfoRow.Root
 							title={T()("system.maintenance.title")}
@@ -163,13 +123,6 @@ const SystemOperationsPage: Component = () => {
 				</div>
 
 				{/* Modals */}
-				<UpdateSystemAlertsModal
-					state={{
-						open: updateSystemAlertsOpen(),
-						setOpen: setUpdateSystemAlertsOpen,
-					}}
-					alertEmail={systemInfo()?.alertEmail ?? null}
-				/>
 				<ClearAllProcessedImagesModal
 					state={{
 						open: getOpenClearAllProcessedImages(),

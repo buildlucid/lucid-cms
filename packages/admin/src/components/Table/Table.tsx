@@ -10,6 +10,7 @@ export type { TableDateCellProps } from "./parts/TableDateCell";
 export type { TablePillCellProps } from "./parts/TablePillCell";
 export type { TableRootProps } from "./parts/TableRoot";
 export type { TableRowProps } from "./parts/TableRow";
+export type { TableSelectActionItem } from "./parts/TableSelectAction";
 export type { TableTextCellProps } from "./parts/TableTextCell";
 export type { TableColumn, TablePadding, TableVariant } from "./TableContext";
 

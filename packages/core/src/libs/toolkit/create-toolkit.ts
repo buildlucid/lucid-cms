@@ -5,6 +5,7 @@ import createEmailToolkit from "./email/index.js";
 import createJobsToolkit from "./jobs/index.js";
 import createLocalesToolkit from "./locales/index.js";
 import createMediaToolkit from "./media/index.js";
+import createNotificationsToolkit from "./notifications/index.js";
 import createPreviewsToolkit from "./previews/index.js";
 import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
 
@@ -43,6 +44,7 @@ const createToolkit = (context: ToolkitContext): Toolkit => {
 		jobs: createJobsToolkit(context),
 		locales: createLocalesToolkit(context),
 		media: createMediaToolkit(context),
+		notifications: createNotificationsToolkit(context),
 		previews: createPreviewsToolkit(context),
 	};
 	const toolkit: Toolkit = { ...core };

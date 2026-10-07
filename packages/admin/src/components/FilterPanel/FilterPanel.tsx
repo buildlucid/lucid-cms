@@ -763,10 +763,10 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 	createEffect(
 		on(
 			() => !props.queryState.filtersAreDefault() && hasOwnedCommittedFilters(),
-			//* only clearing filters closes it, so a panel asked to start open stays open
 			(active, wasActive) => {
-				if (active) props.onOpenChange(true);
-				else if (wasActive && rows().length === 0) props.onOpenChange(false);
+				if (!active && wasActive && rows().length === 0) {
+					props.onOpenChange(false);
+				}
 			},
 		),
 	);

@@ -1,4 +1,5 @@
-import { type Component, For, Index, Show } from "solid-js";
+import classnames from "classnames";
+import { type Component, createMemo, For, Index, Show } from "solid-js";
 import DashboardCard from "@/components/DashboardCard/DashboardCard";
 import DashboardCardItem from "@/components/DashboardCardItem/DashboardCardItem";
 import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
@@ -31,15 +32,22 @@ const ReviewWidget: Component<{ size: DashboardWidgetSize }> = () => {
 	});
 
 	// ----------------------------------------
+	// Memos
+	const showRequests = createMemo(
+		() => requests.isLoading || (requests.data?.data.length ?? 0) > 0,
+	);
+
+	// ----------------------------------------
 	// Render
 	return (
 		<DashboardCard title={T()("home.widget.review.label")} href="/lucid/review">
 			<RequestQueues
 				overview={overview.data?.data}
 				loading={overview.isLoading}
-				class="px-2 pt-1"
+				//* list rows bring their own spacing, so the queues match the side inset on their own
+				class={classnames("px-2 pt-1", { "pb-2": !showRequests() })}
 			/>
-			<Show when={requests.isLoading || (requests.data?.data.length ?? 0) > 0}>
+			<Show when={showRequests()}>
 				<h3 class="mt-4 mb-1 px-2 text-xs text-muted">
 					{T()("home.widget.review.mine")}
 				</h3>

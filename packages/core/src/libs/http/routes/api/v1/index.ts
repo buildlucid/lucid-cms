@@ -14,6 +14,7 @@ import integrationRoutes from "./integrations.routes.js";
 import jobsRoutes from "./jobs.routes.js";
 import localeRoutes from "./locales.routes.js";
 import mediaRoutes from "./media.routes.js";
+import notificationsRoutes from "./notifications.routes.js";
 import permissionRoutes from "./permissions.routes.js";
 import requestsRoutes from "./requests.routes.js";
 import reviewRoutes from "./review.routes.js";
@@ -35,6 +36,7 @@ const routes = new Hono<LucidHonoGeneric>()
 	.route("/i18n", i18nRoutes)
 	.route("/jobs", jobsRoutes)
 	.route("/locales", localeRoutes)
+	.route("/notifications", notificationsRoutes)
 	.route("/permissions", permissionRoutes)
 	.route("/requests", requestsRoutes)
 	.route("/review", reviewRoutes)

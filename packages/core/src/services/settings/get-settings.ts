@@ -5,7 +5,6 @@ import type { LucidAuth } from "../../types/hono.js";
 import type { Settings, SettingsInclude } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import getMediaStorageUsage from "../media/get-storage-usage.js";
-import getOptions from "../options/get-multiple.js";
 import getProcessedImageCount from "../processed-images/get-count.js";
 
 const getSettings: ServiceFn<
@@ -18,21 +17,12 @@ const getSettings: ServiceFn<
 	],
 	Settings
 > = async (context, data) => {
-	const [optionsRes, processedImageCountRes, mediaStorageUsed] =
-		await Promise.all([
-			getOptions(context, {
-				names: ["system_alert_email"],
-			}),
-			getProcessedImageCount(context),
-			getMediaStorageUsage(context),
-		]);
+	const [processedImageCountRes, mediaStorageUsed] = await Promise.all([
+		getProcessedImageCount(context),
+		getMediaStorageUsage(context),
+	]);
 	if (processedImageCountRes.error) return processedImageCountRes;
-	if (optionsRes.error) return optionsRes;
 	if (mediaStorageUsed.error) return mediaStorageUsed;
-
-	const systemAlertEmailRes = optionsRes.data.find(
-		(o) => o.name === "system_alert_email",
-	);
 
 	const defaultTemplates = Object.values(constants.email.templates).map(
 		(template) => template.key,
@@ -56,7 +46,6 @@ const getSettings: ServiceFn<
 				emailSimulated: isEmailSimulated(context),
 				emailTemplates,
 				mediaDeliveryAdapterKey: context.mediaDelivery.key,
-				systemAlertEmail: systemAlertEmailRes?.valueText ?? null,
 				runtimeKey: data.runtime,
 				queueKey: context.queue.key,
 				kvKey: context.kv.key,

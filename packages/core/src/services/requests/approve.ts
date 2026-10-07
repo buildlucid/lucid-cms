@@ -12,6 +12,8 @@ import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import cloneVersion from "../documents-versions/clone-version.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
+import resolveNotification from "../notifications/resolve.js";
+import sendNotification from "../notifications/send.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import addReviewer from "./helpers/add-reviewer.js";
 import countOpenComments from "./helpers/count-open-comments.js";
@@ -21,6 +23,13 @@ import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestState from "./helpers/get-request-state.js";
 import getRequiredApprovals from "./helpers/get-required-approvals.js";
 import scheduleRequest from "./helpers/schedule-request.js";
+import {
+	approvedNotification,
+	failedNotification,
+	readyNotification,
+	requestNotificationKeys,
+	reviewRequestedNotification,
+} from "./notifications.js";
 
 /**
  * Adds the user's approval of the current revision. The approval that meets
@@ -199,6 +208,20 @@ const approve: ServiceFn<
 	});
 	if (eventsRes.error) return eventsRes;
 
+	const reviewDoneRes = await resolveNotification(context, {
+		definition: reviewRequestedNotification,
+		key: requestNotificationKeys.review(request.id, data.user.id),
+	});
+	if (reviewDoneRes.error) return reviewDoneRes;
+
+	const approvedRes = await sendNotification(context, {
+		definition: approvedNotification,
+		recipients: request.created_by === null ? [] : [request.created_by],
+		actorUserId: data.user.id,
+		data: { requestId: request.id, title: request.title },
+	});
+	if (approvedRes.error) return approvedRes;
+
 	const approvals = request.approvals.length + (approvedBefore ? 0 : 1);
 	if (approvals < requiredApprovals) {
 		return { error: undefined, data: undefined };
@@ -274,6 +297,25 @@ const approve: ServiceFn<
 		skipRequestWriteClaim: true,
 	});
 	if (scheduleRes.error) return scheduleRes;
+
+	const failedRes = await resolveNotification(context, {
+		definition: failedNotification,
+		key: requestNotificationKeys.failed(request.id),
+	});
+	if (failedRes.error) return failedRes;
+
+	const readyRes = await sendNotification(context, {
+		definition: readyNotification,
+		key: requestNotificationKeys.ready(request.id),
+		recipients: request.created_by === null ? [] : [request.created_by],
+		actorUserId: data.user.id,
+		data: {
+			requestId: request.id,
+			title: request.title,
+			scheduled: request.scheduled_at !== null,
+		},
+	});
+	if (readyRes.error) return readyRes;
 
 	return { error: undefined, data: undefined };
 };

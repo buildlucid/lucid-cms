@@ -17,6 +17,7 @@ export * as localeServices from "./locales/index.js";
 export * as mediaServices from "./media/index.js";
 export * as mediaFolderServices from "./media-folders/index.js";
 export * as mediaShareLinkServices from "./media-share-links/index.js";
+export * as notificationServices from "./notifications/index.js";
 export * as oauthServices from "./oauth/index.js";
 export * as oauthClientServices from "./oauth-clients/index.js";
 export * as optionServices from "./options/index.js";

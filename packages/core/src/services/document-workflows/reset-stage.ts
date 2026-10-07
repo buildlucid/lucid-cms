@@ -5,6 +5,7 @@ import { DocumentWorkflowsRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import recordProposalActivity from "../requests/helpers/record-proposal-activity.js";
 import { resolveEffectiveWorkflowStage } from "./helpers/index.js";
+import notifyAssignees from "./helpers/notify-assignees.js";
 
 /**
  * Called after latest or a proposal's content changes. A stage with `resetTo`
@@ -50,6 +51,12 @@ const resetStage: ServiceFn<
 	if (!currentStage?.resetTo) return { error: undefined, data: undefined };
 
 	const nextStage = currentStage.resetTo;
+	const nextStageConfig = workflow.stages.find(
+		(stage) => stage.key === nextStage,
+	);
+	if (!nextStageConfig) return { error: undefined, data: undefined };
+
+	let workflowId = workflowRes.data?.id;
 	if (workflowRes.data) {
 		const updateRes = await Workflows.updateSingle({
 			where: [{ key: "id", operator: "=", value: workflowRes.data.id }],
@@ -70,8 +77,11 @@ const resetStage: ServiceFn<
 				created_by: data.userId,
 				updated_by: data.userId,
 			},
+			returning: ["id"],
+			validation: { enabled: true },
 		});
 		if (createRes.error) return createRes;
+		workflowId = createRes.data.id;
 	}
 
 	if (workflowVersionId !== null) {
@@ -88,6 +98,25 @@ const resetStage: ServiceFn<
 
 	const assigneeIds =
 		workflowRes.data?.assignees.map((assignee) => assignee.user_id) ?? [];
+	if (workflowId !== undefined) {
+		const notifyRes = await notifyAssignees(context, {
+			collection: data.collection,
+			tableNames: data.tableNames,
+			workflow,
+			workflowId,
+			documentId: data.documentId,
+			versionId: data.versionId,
+			versionType: data.versionType,
+			stage: nextStageConfig,
+			previousStage: currentStage,
+			actorUserId: data.userId,
+			addedAssigneeIds: [],
+			removedAssigneeIds: [],
+			keptAssigneeIds: assigneeIds,
+		});
+		if (notifyRes.error) return notifyRes;
+	}
+
 	const hookRes = await executeHooks(
 		context,
 		{

@@ -29,6 +29,7 @@ import type {
 	MediaStorageAdapter,
 	MediaStorageAdapterInstance,
 } from "../libs/media-storage/types.js";
+import type { AnyNotificationDefinition } from "../libs/notifications/types.js";
 import type { AccessGroup } from "../libs/permission/access-config.js";
 import type { LucidPluginDefinition } from "../libs/plugins/types.js";
 import type {
@@ -514,6 +515,10 @@ export interface LucidConfig {
 		};
 	};
 	/**
+	 * Notification types registered by the project and its plugins. Create them with `defineNotification`.
+	 */
+	notifications?: AnyNotificationDefinition[];
+	/**
 	 * Configure the purge behavior for retained deleted data.
 	 */
 	retention?: {
@@ -521,6 +526,10 @@ export interface LucidConfig {
 		 * The fallback number of days to retain deleted data before purging. If left blank, this will fallback to 30 days.
 		 */
 		defaultPurgeAfterDays?: number;
+		/**
+		 * Days to keep notifications after their last change. Open to-dos are kept until resolved. Defaults to 90.
+		 */
+		notificationDays?: number;
 		/**
 		 * Override retention for specific data types with a positive whole number of days.
 		 */
@@ -700,8 +709,10 @@ export interface ResolvedLucidConfig {
 			failedDays: number;
 		};
 	};
+	notifications: AnyNotificationDefinition[];
 	retention: {
 		defaultPurgeAfterDays: number;
+		notificationDays: number;
 		purgeAfterDays?: {
 			removedLocales?: number;
 			deletedUsers?: number;

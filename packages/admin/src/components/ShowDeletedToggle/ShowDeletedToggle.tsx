@@ -1,5 +1,5 @@
 import { FaSolidTrashCan } from "solid-icons/fa";
-import type { Component } from "solid-js";
+import { type Component, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import T from "@/translations";
 
@@ -13,13 +13,17 @@ const ShowDeletedToggle: Component<{
 		<Button
 			variant={props.value ? "danger" : "outline"}
 			size="sm"
-			shape="square"
+			shape={props.value ? "standard" : "square"}
+			class="gap-2"
 			aria-pressed={props.value}
-			aria-label={T()("actions.show.deleted")}
-			title={T()("actions.show.deleted")}
+			aria-label={props.value ? undefined : T()("actions.show.deleted")}
+			title={props.value ? undefined : T()("actions.show.deleted")}
 			onClick={() => props.onChange(!props.value)}
 		>
 			<FaSolidTrashCan size={12} />
+			<Show when={props.value}>
+				<span>{T()("actions.hide.deleted")}</span>
+			</Show>
 		</Button>
 	);
 };

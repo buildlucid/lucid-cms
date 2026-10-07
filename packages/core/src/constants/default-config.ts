@@ -92,6 +92,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 			failedDays: 30,
 		},
 	},
+	notifications: [],
 	hooks: [],
 	collections: [],
 	plugins: [],
@@ -106,6 +107,7 @@ export const defaultConfig: Partial<ResolvedLucidConfig> = {
 	},
 	retention: {
 		defaultPurgeAfterDays: constants.retention,
+		notificationDays: 90,
 	} satisfies ResolvedLucidConfig["retention"],
 };
 

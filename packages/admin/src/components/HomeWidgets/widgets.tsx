@@ -12,6 +12,7 @@ import { getReadableCollections } from "@/utils/home-widgets";
 import AgentActivityWidget from "./AgentActivityWidget";
 import AiCreditsWidget from "./AiCreditsWidget";
 import CollectionsWidget from "./CollectionsWidget";
+import NotificationsWidget from "./NotificationsWidget";
 import ReviewWidget from "./ReviewWidget";
 import StorageWidget from "./StorageWidget";
 import type { HomeWidget } from "./types";
@@ -23,7 +24,7 @@ const can = (permission: Permission) =>
 const builtInWidgets: HomeWidget[] = [
 	{
 		key: "lucid.storage",
-		priority: 100,
+		priority: 110,
 		label: () => T()("home.widget.storage.label"),
 		description: () => T()("home.widget.storage.description"),
 		size: "sm",
@@ -34,7 +35,7 @@ const builtInWidgets: HomeWidget[] = [
 	},
 	{
 		key: "lucid.aiCredits",
-		priority: 90,
+		priority: 100,
 		label: () => T()("home.widget.ai.credits.label"),
 		description: () => T()("home.widget.ai.credits.description"),
 		size: "sm",
@@ -49,7 +50,7 @@ const builtInWidgets: HomeWidget[] = [
 	},
 	{
 		key: "lucid.review",
-		priority: 80,
+		priority: 90,
 		label: () => T()("home.widget.review.label"),
 		description: () => T()("home.widget.review.description"),
 		size: "full",
@@ -72,15 +73,26 @@ const builtInWidgets: HomeWidget[] = [
 	},
 	{
 		key: "lucid.collections",
-		priority: 70,
+		priority: 80,
 		label: () => T()("home.widget.collections.label"),
 		description: () => T()("home.widget.collections.description"),
-		size: "full",
+		size: "md",
 		sizes: dashboardWidgetSizes,
 		hidden: false,
 		available: (context) =>
 			getReadableCollections(context.collections ?? []).length > 0,
 		component: CollectionsWidget,
+	},
+	{
+		key: "lucid.notifications",
+		priority: 70,
+		label: () => T()("home.widget.notifications.label"),
+		description: () => T()("home.widget.notifications.description"),
+		size: "md",
+		sizes: dashboardWidgetSizes,
+		hidden: false,
+		available: () => true,
+		component: NotificationsWidget,
 	},
 	{
 		key: "lucid.agentActivity",

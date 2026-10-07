@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import {
 	FaSolidBan,
+	FaSolidBoxArchive,
 	FaSolidBroom,
 	FaSolidBullseye,
 	FaSolidCalendar,
@@ -35,6 +36,7 @@ import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 // ----------------------------------------
 // Types
 export type ActionIconName =
+	| "archive"
 	| "ban"
 	| "broom"
 	| "bullseye"
@@ -78,6 +80,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 	const iconSize = createMemo(() => props.size ?? 14);
 	const icon = createMemo<JSXElement>(() => {
 		switch (props.icon) {
+			case "archive":
+				return <FaSolidBoxArchive class={iconClasses()} size={iconSize()} />;
 			case "ban":
 				return <FaSolidBan class={iconClasses()} size={iconSize()} />;
 			case "broom":

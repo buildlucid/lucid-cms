@@ -51,93 +51,93 @@ describe("result plans", () => {
 
 	test("resolves codecs selected through a CTE", () => {
 		const query = database.kysely
-			.with("alert_rows", (db) =>
-				db.selectFrom("lucid_alerts").select(["id", "metadata"]),
+			.with("notification_rows", (db) =>
+				db.selectFrom("lucid_notifications").select(["id", "data"]),
 			)
-			.selectFrom("alert_rows")
-			.select("metadata");
+			.selectFrom("notification_rows")
+			.select("data");
 
 		const plan = createResultPlan(query.toOperationNode(), database.tables);
-		expect(plan.metadata?.codec).toBe(codecs.json);
-		expect(plan.metadata?.columnType).toBe("json");
-		expect(queryNodeTableName(query.toOperationNode())).toBe("lucid_alerts");
+		expect(plan.data?.codec).toBe(codecs.json);
+		expect(plan.data?.columnType).toBe("json");
+		expect(queryNodeTableName(query.toOperationNode())).toBe(
+			"lucid_notifications",
+		);
 	});
 
 	test("resolves explicitly tagged computed-result codecs", () => {
 		const query = database.kysely
 			.selectFrom("lucid_requests")
 			.select(
-				database.fn.withCodec(sql<unknown>`'{}'`, codecs.json).as("metadata"),
+				database.fn.withCodec(sql<unknown>`'{}'`, codecs.json).as("data"),
 			);
 
 		const plan = createResultPlan(query.toOperationNode(), database.tables);
-		expect(plan.metadata?.codec).toBe(codecs.json);
+		expect(plan.data?.codec).toBe(codecs.json);
 	});
 
 	test("plans select-all and aliased columns without touching plain values", () => {
-		const selectAll = database.kysely.selectFrom("lucid_alerts").selectAll();
+		const selectAll = database.kysely
+			.selectFrom("lucid_notifications")
+			.selectAll();
 		const selectAllPlan = createResultPlan(
 			selectAll.toOperationNode(),
 			database.tables,
 		);
 
-		expect(selectAllPlan.metadata?.codec).toBe(codecs.json);
+		expect(selectAllPlan.data?.codec).toBe(codecs.json);
 		expect(selectAllPlan.message).toBeUndefined();
 
 		const aliased = database.kysely
-			.selectFrom("lucid_alerts as alert")
-			.select("alert.metadata as details");
+			.selectFrom("lucid_notifications as notification")
+			.select("notification.data as details");
 		const aliasedPlan = createResultPlan(
 			aliased.toOperationNode(),
 			database.tables,
 		);
 
 		expect(aliasedPlan.details?.codec).toBe(codecs.json);
-		expect(aliasedPlan.metadata).toBeUndefined();
+		expect(aliasedPlan.data).toBeUndefined();
 	});
 
 	test("propagates codecs through derived tables", () => {
 		const query = database.kysely
 			.selectFrom(
 				database.kysely
-					.selectFrom("lucid_alerts")
-					.select("metadata")
-					.as("alert_rows"),
+					.selectFrom("lucid_notifications")
+					.select("data")
+					.as("notification_rows"),
 			)
-			.select("alert_rows.metadata");
+			.select("notification_rows.data");
 
 		const plan = createResultPlan(query.toOperationNode(), database.tables);
-		expect(plan.metadata?.codec).toBe(codecs.json);
+		expect(plan.data?.codec).toBe(codecs.json);
 	});
 
 	test("does not guess the source of an ambiguous unqualified column", () => {
 		const query = database.kysely
-			.selectFrom("lucid_alerts")
-			.innerJoin(
-				"lucid_user_auth_providers",
-				"lucid_user_auth_providers.id",
-				"lucid_alerts.id",
-			)
-			.select("metadata");
+			.selectFrom("lucid_notifications")
+			.innerJoin("lucid_emails", "lucid_emails.id", "lucid_notifications.id")
+			.select("data");
 
 		const plan = createResultPlan(query.toOperationNode(), database.tables);
-		expect(plan.metadata).toBeUndefined();
+		expect(plan.data).toBeUndefined();
 	});
 
 	test("plans codecs for mutation returning clauses", () => {
 		const query = database.kysely
-			.updateTable("lucid_alerts")
-			.set({ metadata: { source: "test" } })
-			.returning("metadata");
+			.updateTable("lucid_notifications")
+			.set({ data: { source: "test" } })
+			.returning("data");
 
 		const plan = createResultPlan(query.toOperationNode(), database.tables);
-		expect(plan.metadata?.codec).toBe(codecs.json);
+		expect(plan.data?.codec).toBe(codecs.json);
 	});
 
 	test("does not apply a branch-specific codec to UNION rows", () => {
 		const jsonBranch = database.kysely
-			.selectFrom("lucid_alerts")
-			.select("metadata as value")
+			.selectFrom("lucid_notifications")
+			.select("data as value")
 			.$castTo<{ value: unknown }>();
 		const textBranch = database.kysely
 			.selectFrom("lucid_users")

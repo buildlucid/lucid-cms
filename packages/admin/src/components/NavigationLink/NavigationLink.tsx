@@ -1,6 +1,7 @@
 import { useLocation } from "@solidjs/router";
 import {
 	FaSolidBarsProgress,
+	FaSolidBell,
 	FaSolidBox,
 	FaSolidBoxesStacked,
 	FaSolidChartSimple,
@@ -50,6 +51,7 @@ const icons = {
 	requests: FaSolidSquareArrowUpRight,
 	publishing: FaSolidCloudArrowUp,
 	extensions: FaSolidPuzzlePiece,
+	notifications: FaSolidBell,
 } satisfies Record<AdminNavigationIcon, typeof FaSolidHouse>;
 
 /** A sidebar link rendered as a list item. Hidden when `permission` is false. */

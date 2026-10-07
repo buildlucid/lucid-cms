@@ -55,7 +55,10 @@ export type HookExecutionKindMap = {
 		completed: "effect";
 		documentRemoved: "effect";
 	};
-
+	notifications: {
+		beforeSend: "transform";
+		afterSend: "effect";
+	};
 	media: {
 		afterChange: "effect";
 		afterRestore: "effect";
@@ -230,6 +233,28 @@ export type DocumentWorkflowAfterUpdateHookData = {
 	assigneesChanged: boolean;
 };
 
+/** The notification being sent. Data is what the sender passed, already validated. */
+export type NotificationHookMeta = {
+	type: string;
+	key: string | null;
+	data: Record<string, unknown>;
+	actorUserId: number | null;
+};
+
+/** Who will receive the notification. Empty the list to suppress it. */
+export type NotificationBeforeSendHookData = {
+	recipients: number[];
+};
+
+/** A notification was created, or an existing one was updated or reopened. */
+export type NotificationAfterSendHookData = {
+	id: number;
+	type: string;
+	key: string | null;
+	recipients: number[];
+	created: boolean;
+};
+
 export type MediaAfterCreateHookData = {
 	id: number;
 	userId: number | null;
@@ -266,6 +291,9 @@ export type TransformHookDataMap = {
 	};
 	requests: {
 		check: RequestCheckHookData;
+	};
+	notifications: {
+		beforeSend: NotificationBeforeSendHookData;
 	};
 };
 
@@ -385,6 +413,19 @@ export type HookServiceHandlers = {
 		>;
 	};
 
+	notifications: {
+		beforeSend: HookHandler<
+			TransformHookPayload<
+				NotificationHookMeta,
+				NotificationBeforeSendHookData
+			>,
+			NotificationBeforeSendHookData | undefined
+		>;
+		afterSend: HookHandler<
+			EffectHookPayload<NotificationHookMeta, NotificationAfterSendHookData>,
+			undefined
+		>;
+	};
 	media: {
 		afterChange: HookHandler<
 			EffectHookPayload<
@@ -476,6 +517,10 @@ export type RequestHooks =
 	| LucidHook<"requests", "completed">
 	| LucidHook<"requests", "documentRemoved">;
 
+export type NotificationHooks =
+	| LucidHook<"notifications", "beforeSend">
+	| LucidHook<"notifications", "afterSend">;
+
 export type MediaHooks =
 	| LucidHook<"media", "afterChange">
 	| LucidHook<"media", "afterRestore">
@@ -488,4 +533,5 @@ export type AllHooks =
 	| DocumentHooks
 	| DocumentWorkflowHooks
 	| RequestHooks
+	| NotificationHooks
 	| MediaHooks;

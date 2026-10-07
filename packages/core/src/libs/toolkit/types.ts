@@ -6,6 +6,7 @@ import type { ToolkitEmail } from "./email/index.js";
 import type { ToolkitJobs } from "./jobs/index.js";
 import type { ToolkitLocales } from "./locales/index.js";
 import type { ToolkitMedia } from "./media/index.js";
+import type { ToolkitNotifications } from "./notifications/index.js";
 import type { ToolkitPreviews } from "./previews/index.js";
 
 /** Lucid service context used by `createToolkit()`. */
@@ -27,6 +28,8 @@ export type CoreToolkit = {
 	locales: ToolkitLocales;
 	/** Helpers for uploading, updating, reading and deleting media. */
 	media: ToolkitMedia;
+	/** Helpers for sending in-app and email notifications. */
+	notifications: ToolkitNotifications;
 	/** Helpers for resolving and handling previews. */
 	previews: ToolkitPreviews;
 };
@@ -95,6 +98,7 @@ export type * from "./media/resolve-url/index.js";
 export type * from "./media/stream/index.js";
 export type * from "./media/update-single/index.js";
 export type * from "./media/upload-file/index.js";
+export type * from "./notifications/index.js";
 export type * from "./previews/index.js";
 export type * from "./previews/resolve/index.js";
 export type * from "./previews/state/index.js";

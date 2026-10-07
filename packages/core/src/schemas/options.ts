@@ -9,7 +9,6 @@ export const instanceIdOptionNameSchema = z.literal("instance_id");
 export const optionsNameSchema = z.union([
 	mediaStorageOptionNameSchema,
 	instanceIdOptionNameSchema,
-	z.literal("system_alert_email"),
 ]);
 
 export type OptionsName = z.infer<typeof optionsNameSchema>;

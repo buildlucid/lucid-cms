@@ -20,6 +20,7 @@ import {
 	getWorkflowConfig,
 	resolveEffectiveWorkflowStage,
 } from "./helpers/index.js";
+import notifyAssignees from "./helpers/notify-assignees.js";
 
 const updateSingle: ServiceFn<
 	[
@@ -256,6 +257,29 @@ const updateSingle: ServiceFn<
 		});
 		if (activityRes.error) return activityRes;
 	}
+
+	const notifyRes = await notifyAssignees(context, {
+		collection: collectionRes.data,
+		tableNames: tableNamesRes.data,
+		workflow,
+		workflowId,
+		documentId: data.documentId,
+		versionId,
+		versionType: editableRes.data.versionType,
+		stage: nextStage,
+		previousStage: currentStage,
+		actorUserId: data.user.id,
+		addedAssigneeIds: nextAssigneeIds.filter(
+			(userId) => !currentAssigneeIds.includes(userId),
+		),
+		removedAssigneeIds: currentAssigneeIds.filter(
+			(userId) => !nextAssigneeIds.includes(userId),
+		),
+		keptAssigneeIds: nextAssigneeIds.filter((userId) =>
+			currentAssigneeIds.includes(userId),
+		),
+	});
+	if (notifyRes.error) return notifyRes;
 
 	const hookRes = await executeHooks(
 		context,

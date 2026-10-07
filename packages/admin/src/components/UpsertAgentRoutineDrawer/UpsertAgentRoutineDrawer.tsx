@@ -153,7 +153,7 @@ const UpsertAgentRoutineDrawer: Component<{
 				updateRoutine.reset();
 			}}
 		>
-			<Drawer.Header>
+			<Drawer.Header border={false}>
 				<Drawer.Title>
 					{locked()
 						? T()("panels.agent.routine.view.title")

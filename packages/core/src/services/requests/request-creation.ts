@@ -16,6 +16,7 @@ import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import saveDocument from "../documents/helpers/save-document.js";
 import createTargets from "./helpers/create-targets.js";
+import notifyMentions from "./helpers/notify-mentions.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 import setReviewers from "./helpers/set-reviewers.js";
 
@@ -159,6 +160,7 @@ const requestCreation: ServiceFn<
 			request: {
 				id: requestRes.data.id,
 				type: "create",
+				title: data.title,
 				created_by: data.user.id,
 				documents: [{ collection_key: data.collectionKey }],
 				reviewers: [],
@@ -167,6 +169,15 @@ const requestCreation: ServiceFn<
 			userId: data.user.id,
 		});
 		if (reviewersRes.error) return reviewersRes;
+	}
+
+	if (descriptionRes?.data) {
+		const mentionsRes = await notifyMentions(context, {
+			request: { id: requestRes.data.id, title: data.title },
+			body: descriptionRes.data,
+			actorUserId: data.user.id,
+		});
+		if (mentionsRes.error) return mentionsRes;
 	}
 
 	return {

@@ -9,6 +9,7 @@
 ### Breaking Changes:
 
 - Document and version links now use shared identity tables with automatic cleanup on deletion.
+- Removed system alerts in favour of the new notification system.
 
 ### Bug Fixes:
 

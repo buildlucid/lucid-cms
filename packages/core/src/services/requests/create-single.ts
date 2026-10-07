@@ -6,6 +6,7 @@ import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import captureDocument from "./helpers/capture-document.js";
 import checkRequestSize from "./helpers/check-request-size.js";
+import notifyMentions from "./helpers/notify-mentions.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 import setReviewers from "./helpers/set-reviewers.js";
 
@@ -90,6 +91,7 @@ const createSingle: ServiceFn<
 			request: {
 				id: requestRes.data.id,
 				type: "publish",
+				title: data.title,
 				created_by: data.user.id,
 				documents: data.documents.map((document) => ({
 					collection_key: document.collectionKey,
@@ -100,6 +102,15 @@ const createSingle: ServiceFn<
 			userId: data.user.id,
 		});
 		if (reviewersRes.error) return reviewersRes;
+	}
+
+	if (descriptionRes?.data) {
+		const mentionsRes = await notifyMentions(context, {
+			request: { id: requestRes.data.id, title: data.title },
+			body: descriptionRes.data,
+			actorUserId: data.user.id,
+		});
+		if (mentionsRes.error) return mentionsRes;
 	}
 
 	return { error: undefined, data: { id: requestRes.data.id } };

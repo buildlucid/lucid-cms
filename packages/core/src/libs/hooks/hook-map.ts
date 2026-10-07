@@ -33,7 +33,10 @@ export const hookExecutionKinds: {
 		completed: "effect",
 		documentRemoved: "effect",
 	},
-
+	notifications: {
+		beforeSend: "transform",
+		afterSend: "effect",
+	},
 	media: {
 		afterChange: "effect",
 		afterRestore: "effect",

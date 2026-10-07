@@ -968,6 +968,103 @@ export default class UsersRepository extends StaticRepository<"lucid_users"> {
 			mode: "multiple",
 		});
 	}
+	/** Narrows user IDs to people who can still be told about things. */
+	async selectActiveIds(props: { ids: number[] }) {
+		const falseValue = this.dbAdapter.getDefault("boolean", "false");
+		const query = this.db
+			.selectFrom("lucid_users")
+			.select(["id"])
+			.where("id", "in", props.ids)
+			.where("is_deleted", "=", falseValue)
+			.where("is_locked", "=", falseValue);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectActiveIds",
+		});
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: (exec.response.data ?? []).map((user) => user.id),
+		};
+	}
+	/** Active people holding the permission through any of their roles. Super admins always match. */
+	async selectIdsWithPermission(props: { permission: string }) {
+		const trueValue = this.dbAdapter.getDefault("boolean", "true");
+		const falseValue = this.dbAdapter.getDefault("boolean", "false");
+		const query = this.db
+			.selectFrom("lucid_users")
+			.select(["id"])
+			.where("is_deleted", "=", falseValue)
+			.where("is_locked", "=", falseValue)
+			.where((eb) =>
+				eb.or([
+					eb("super_admin", "=", trueValue),
+					eb.exists(
+						eb
+							.selectFrom("lucid_user_roles")
+							.innerJoin(
+								"lucid_role_permissions",
+								"lucid_role_permissions.role_id",
+								"lucid_user_roles.role_id",
+							)
+							.select(sql.lit(1).as("one"))
+							.whereRef("lucid_user_roles.user_id", "=", "lucid_users.id")
+							.where(
+								"lucid_role_permissions.permission",
+								"=",
+								props.permission,
+							),
+					),
+				]),
+			);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectIdsWithPermission",
+		});
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: (exec.response.data ?? []).map((user) => user.id),
+		};
+	}
+	/** Active people in any of the roles. Super admins always match. */
+	async selectIdsByRoles(props: { roleIds: number[] }) {
+		const trueValue = this.dbAdapter.getDefault("boolean", "true");
+		const falseValue = this.dbAdapter.getDefault("boolean", "false");
+		const query = this.db
+			.selectFrom("lucid_users")
+			.select(["id"])
+			.where("is_deleted", "=", falseValue)
+			.where("is_locked", "=", falseValue)
+			.where((eb) =>
+				eb.or([
+					eb("super_admin", "=", trueValue),
+					...(props.roleIds.length > 0
+						? [
+								eb.exists(
+									eb
+										.selectFrom("lucid_user_roles")
+										.select(sql.lit(1).as("one"))
+										.whereRef("lucid_user_roles.user_id", "=", "lucid_users.id")
+										.where("lucid_user_roles.role_id", "in", props.roleIds),
+								),
+							]
+						: []),
+				]),
+			);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectIdsByRoles",
+		});
+		if (exec.response.error) return exec.response;
+
+		return {
+			error: undefined,
+			data: (exec.response.data ?? []).map((user) => user.id),
+		};
+	}
 	/** Uses the profile-picture foreign-key index. Capture before media deletion nullifies it. */
 	async selectProfilePictureUserIds(props: { mediaIds: number[] }) {
 		const ids = new Set<number>();
