@@ -9,15 +9,18 @@ import type {
 	AgentReferenceInput,
 } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveNotification from "../notifications/resolve.js";
 import advanceInputs from "./advance-inputs.js";
 import getAccessibleConversation from "./helpers/get-accessible-conversation.js";
 import runActsFor from "./helpers/run-acts-for.js";
+import { agentNotificationKeys } from "./notifications/keys.js";
+import { routineNeedsReviewNotification } from "./notifications/routine-needs-review.js";
 import checkReferenceInput from "./references/check-input.js";
 
 /**
  * Records input sent to a conversation. Sending resumes a paused queue, since the
- * user chose to carry on. Only a run acting for the sender can be steered; other
- * input starts its own run.
+ * user chose to carry on, and counts as reviewing a routine run that asked for it.
+ * Only a run acting for the sender can be steered; other input starts its own run.
  */
 const submitInput: ServiceFn<
 	[
@@ -98,6 +101,12 @@ const submitInput: ServiceFn<
 			},
 		};
 	}
+
+	const reviewed = await resolveNotification(context, {
+		definition: routineNeedsReviewNotification,
+		key: agentNotificationKeys.review(input.conversationId),
+	});
+	if (reviewed.error) return reviewed;
 
 	if (owned.data.queue_paused) {
 		const resumed = await Conversations.resumeQueue({

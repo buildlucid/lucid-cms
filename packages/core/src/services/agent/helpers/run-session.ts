@@ -34,6 +34,7 @@ import withTransaction from "../../../utils/services/with-transaction.js";
 import registerReferences from "../references/register.js";
 import enqueueRun from "./enqueue-run.js";
 import enqueueTitle from "./enqueue-title.js";
+import notifyRoutineRun from "./notify-routine-run.js";
 import registerUrlKeys from "./register-url-keys.js";
 
 export type SessionRun = {
@@ -314,6 +315,12 @@ const openRunSession = async (
 				}
 
 				const finishedAt = new Date().toISOString();
+				const routineResult =
+					status === "failed"
+						? { status, message: errorMessage ?? "" }
+						: status === "completed" && checkpoint.finish
+							? { status, ...checkpoint.finish }
+							: undefined;
 
 				const finishRun = async (writeContext = context) => {
 					const saved = await write(
@@ -347,11 +354,21 @@ const openRunSession = async (
 						});
 					}
 
+					if (run.routine_id && routineResult) {
+						await notifyRoutineRun(writeContext, {
+							runId: run.id,
+							routineId: run.routine_id,
+							conversationId: run.conversation_id,
+							result: routineResult,
+						});
+					}
+
 					return { error: undefined, data: undefined };
 				};
 
 				const finished =
-					status === "completed" && run.conversation_routine_id
+					(status === "completed" && run.conversation_routine_id) ||
+					(run.routine_id && routineResult)
 						? await withTransaction(context, finishRun)
 						: await finishRun();
 				if (finished.error) return finished;

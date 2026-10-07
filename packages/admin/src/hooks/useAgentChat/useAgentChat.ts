@@ -323,6 +323,10 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 		}));
 		try {
 			await api.agent.submitInput({ conversationId: id, ...pending });
+			//* sending counts as reviewing a routine run, which resolves its notification
+			void queryClient.invalidateQueries({
+				queryKey: queryKeys.notifications.summary(),
+			});
 			await refreshConversation(id);
 			return true;
 		} catch (cause) {
@@ -484,6 +488,12 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 						interactionId: interaction.id,
 					},
 				);
+				//* answering resolves the run's "input needed" notification
+				if (accepted) {
+					void queryClient.invalidateQueries({
+						queryKey: queryKeys.notifications.summary(),
+					});
+				}
 				return accepted
 					? { error: undefined }
 					: { error: error() ?? T()("agent.errors.stream") };

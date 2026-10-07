@@ -9,7 +9,7 @@ const useCancelRun = () =>
 				url: `/lucid/api/v1/agent/runs/${params.id}/cancel`,
 				method: "POST",
 			}),
-		invalidates: [queryKeys.agent.all()],
+		invalidates: [queryKeys.agent.all(), queryKeys.notifications.summary()],
 	});
 
 export default useCancelRun;

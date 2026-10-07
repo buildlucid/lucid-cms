@@ -1,19 +1,19 @@
-import {
-	assignedNotification,
-	stageChangedNotification,
-} from "../../services/document-workflows/notifications.js";
-import { storageNotification } from "../../services/media/notifications.js";
-import {
-	approvalDismissedNotification,
-	approvedNotification,
-	closedNotification,
-	commentedNotification,
-	completedNotification,
-	failedNotification,
-	mentionedNotification,
-	readyNotification,
-	reviewRequestedNotification,
-} from "../../services/requests/notifications.js";
+import { inputNeededNotification } from "../../services/agent/notifications/input-needed.js";
+import { routineFailedNotification } from "../../services/agent/notifications/routine-failed.js";
+import { routineNeedsReviewNotification } from "../../services/agent/notifications/routine-needs-review.js";
+import { routineReportNotification } from "../../services/agent/notifications/routine-report.js";
+import { assignedNotification } from "../../services/document-workflows/notifications/assigned.js";
+import { stageChangedNotification } from "../../services/document-workflows/notifications/stage-changed.js";
+import { storageNotification } from "../../services/media/notifications/storage.js";
+import { approvalDismissedNotification } from "../../services/requests/notifications/approval-dismissed.js";
+import { approvedNotification } from "../../services/requests/notifications/approved.js";
+import { closedNotification } from "../../services/requests/notifications/closed.js";
+import { commentedNotification } from "../../services/requests/notifications/commented.js";
+import { completedNotification } from "../../services/requests/notifications/completed.js";
+import { failedNotification } from "../../services/requests/notifications/failed.js";
+import { mentionedNotification } from "../../services/requests/notifications/mentioned.js";
+import { readyNotification } from "../../services/requests/notifications/ready.js";
+import { reviewRequestedNotification } from "../../services/requests/notifications/review-requested.js";
 
 /**
  * Lucid's own notification types. Pass one as the `type` to
@@ -45,5 +45,11 @@ export const notifications = {
 	workflows: {
 		assigned: assignedNotification,
 		stageChanged: stageChangedNotification,
+	},
+	agent: {
+		inputNeeded: inputNeededNotification,
+		routineFailed: routineFailedNotification,
+		routineNeedsReview: routineNeedsReviewNotification,
+		routineReport: routineReportNotification,
 	},
 } as const;

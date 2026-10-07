@@ -3,11 +3,12 @@ import { getAgents } from "../../../libs/agent/registry.js";
 import defineJob from "../../../libs/jobs/define-job.js";
 import type { JobHandler } from "../../../libs/jobs/types.js";
 import dispatchDueRoutines from "../dispatch-due-routines.js";
+import notifyWaitingRuns from "../notify-waiting-runs.js";
 import reconcileUsage from "../reconcile-usage.js";
 import recoverInputs from "../recover-inputs.js";
 import recoverRuns from "../recover-runs.js";
 
-/** Keeps agent work moving: recovers stalled runs, starts due routines and settles usage. */
+/** Keeps agent work moving: recovers stalled runs, starts due routines, tells people runs are waiting on them and settles usage. */
 const tick: JobHandler = async ({ context }) => {
 	if (getAgents(context.config).length === 0) {
 		return { error: undefined, data: undefined };
@@ -17,6 +18,7 @@ const tick: JobHandler = async ({ context }) => {
 		recoverInputs,
 		recoverRuns,
 		dispatchDueRoutines,
+		notifyWaitingRuns,
 		reconcileUsage,
 	]) {
 		const result = await step(context);

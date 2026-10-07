@@ -20,6 +20,8 @@ import {
 	AgentMessagesRepository,
 	AgentRoutinesRepository,
 	AgentRunsRepository,
+	NotificationRecipientsRepository,
+	NotificationsRepository,
 } from "../../libs/repositories/index.js";
 import createServiceContext from "../../utils/services/create-service-context.js";
 import type { ServiceContext } from "../../utils/services/types.js";
@@ -32,6 +34,8 @@ import enqueueRun from "./helpers/enqueue-run.js";
 import getRoutineTools from "./helpers/get-routine-tools.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import { generateAgentTitleJob } from "./jobs/generate-title.js";
+import { agentNotificationKeys } from "./notifications/keys.js";
+import { routineFailedNotification } from "./notifications/routine-failed.js";
 import recoverRuns from "./recover-runs.js";
 import runRoutine from "./run-routine.js";
 import startRun from "./start-run.js";
@@ -654,7 +658,7 @@ describe("code routines", () => {
 });
 
 describe("run recovery", () => {
-	test("requeues an interrupted run, then fails it after repeated attempts", async () => {
+	test("requeues an interrupted run, then fails it after repeated attempts and tells the routine's owner", async () => {
 		const routine = await dueRoutine();
 		await dispatchDueRoutines(context);
 		const [run] = await routineRuns(routine.id);
@@ -683,6 +687,28 @@ describe("run recovery", () => {
 		await interrupt();
 		await recoverRuns(context);
 		expect((await routineRuns(routine.id))[0]?.status).toBe("failed");
+
+		const Notifications = new NotificationsRepository(context.db);
+		const Recipients = new NotificationRecipientsRepository(context.db);
+		const failed = await Notifications.selectSingle({
+			select: ["id", "resolved_at"],
+			where: [
+				{ key: "type", operator: "=", value: routineFailedNotification.key },
+				{
+					key: "key",
+					operator: "=",
+					value: agentNotificationKeys.routineFailed(routine.id),
+				},
+			],
+		});
+		expect(failed.data?.resolved_at).toBeNull();
+		const recipients = await Recipients.selectMultiple({
+			select: ["user_id"],
+			where: [
+				{ key: "notification_id", operator: "=", value: failed.data?.id ?? 0 },
+			],
+		});
+		expect(recipients.data).toEqual([{ user_id: userId }]);
 	});
 });
 

@@ -1,7 +1,10 @@
 import { copy } from "../../libs/i18n/index.js";
 import { AgentRoutinesRepository } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveNotification from "../notifications/resolve.js";
 import getAccessibleRoutine from "./helpers/get-accessible-routine.js";
+import { agentNotificationKeys } from "./notifications/keys.js";
+import { routineFailedNotification } from "./notifications/routine-failed.js";
 
 /** Deletes a routine created in the admin. Its past conversations retain their routine workflow permission. */
 const deleteRoutine: ServiceFn<
@@ -28,7 +31,10 @@ const deleteRoutine: ServiceFn<
 	});
 	if (deleted.error) return deleted;
 
-	return { error: undefined, data: undefined };
+	return resolveNotification(context, {
+		definition: routineFailedNotification,
+		key: agentNotificationKeys.routineFailed(input.id),
+	});
 };
 
 export default deleteRoutine;

@@ -43,6 +43,10 @@ export const agentRunsTable = defineTable("lucid_agent_runs", () => ({
 			schema: z.number().int().nonnegative(),
 			type: "integer",
 		},
+		input_notified_at: {
+			schema: z.union([z.string(), z.date()]).nullable(),
+			type: "timestamp",
+		},
 	},
 	query: {
 		filters: { status: "status", conversationId: "conversation_id" },
@@ -74,4 +78,6 @@ export interface LucidAgentRuns {
 	lease_expires_at: TimestampMutable;
 	execution_token: string | null;
 	execution_version: Generated<number>;
+	/** Set once the run's person is told it is waiting on them. Cleared when the run resumes. */
+	input_notified_at: TimestampMutable;
 }

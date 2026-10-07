@@ -12,6 +12,7 @@ import {
 	vi,
 } from "vitest";
 import z from "zod";
+import constants from "../../constants/constants.js";
 import defineAgent from "../../libs/agent/define-agent.js";
 import {
 	findRunStream,
@@ -23,6 +24,8 @@ import Migration00000014 from "../../libs/db/migrations/00000014-agent.js";
 import { streamRun } from "../../libs/http/utils/agent-stream-events.js";
 import * as httpServiceContext from "../../libs/http/utils/create-service-context.js";
 import { copy, createTranslationStore } from "../../libs/i18n/index.js";
+import logger from "../../libs/logger/index.js";
+import type { AnyNotificationDefinition } from "../../libs/notifications/types.js";
 import {
 	AgentConversationsRepository,
 	AgentInputsRepository,
@@ -30,6 +33,8 @@ import {
 	AgentRunsRepository,
 	AiGenerationsRepository,
 	MediaRepository,
+	NotificationRecipientsRepository,
+	NotificationsRepository,
 } from "../../libs/repositories/index.js";
 import defineAgentTool from "../../libs/tools/define-agent-tool.js";
 import { agentTools } from "../../libs/tools/lucid-tools.js";
@@ -60,6 +65,10 @@ import enqueueRun from "./helpers/enqueue-run.js";
 import insertConversation from "./helpers/insert-conversation.js";
 import resolveRunSetup from "./helpers/resolve-run-setup.js";
 import streamModelTurn from "./helpers/stream-model-turn.js";
+import { inputNeededNotification } from "./notifications/input-needed.js";
+import { agentNotificationKeys } from "./notifications/keys.js";
+import { routineNeedsReviewNotification } from "./notifications/routine-needs-review.js";
+import notifyWaitingRuns from "./notify-waiting-runs.js";
 import recoverInputs from "./recover-inputs.js";
 import retryConversation from "./retry-conversation.js";
 import startRun from "./start-run.js";
@@ -415,6 +424,31 @@ const interactionId = async (conversationId: string) => {
 	);
 	expect(part?.type).toBe("widget");
 	return part?.type === "widget" ? (part.interaction?.id ?? "") : "";
+};
+const notificationOf = async (
+	definition: AnyNotificationDefinition,
+	key: string,
+) => {
+	const Notifications = new NotificationsRepository(context.db);
+	const Recipients = new NotificationRecipientsRepository(context.db);
+	const notification = await Notifications.selectSingle({
+		select: ["id", "fingerprint", "resolved_at"],
+		where: [
+			{ key: "type", operator: "=", value: definition.key },
+			{ key: "key", operator: "=", value: key },
+		],
+	});
+	if (!notification.data) return undefined;
+	const recipients = await Recipients.selectMultiple({
+		select: ["user_id"],
+		where: [
+			{ key: "notification_id", operator: "=", value: notification.data.id },
+		],
+	});
+	return {
+		...notification.data,
+		recipients: (recipients.data ?? []).map((row) => row.user_id),
+	};
 };
 const selectRun = async (runId: string) => {
 	const Runs = new AgentRunsRepository(context.db);
@@ -1642,6 +1676,56 @@ describe("agent runner", () => {
 		});
 	});
 
+	test("tells the run's user about an unanswered question after a short wait and clears it once answered", async () => {
+		const prepared = await prepare();
+		callTool({
+			id: "q1",
+			name: "lucid_ask_user",
+			input: { question: "Which colour?", options: ["Blue", "Red"] },
+		});
+		expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
+			data: { status: "waiting" },
+		});
+		const key = agentNotificationKeys.input(prepared.conversationId);
+
+		//* someone still in the chat has time to answer first
+		await notifyWaitingRuns(context);
+		expect(await notificationOf(inputNeededNotification, key)).toBeUndefined();
+
+		const Runs = new AgentRunsRepository(context.db);
+		await Runs.updateSingle({
+			data: {
+				updated_at: new Date(
+					Date.now() - constants.agent.inputNotifyDelayMs - 1_000,
+				).toISOString(),
+			},
+			where: [{ key: "id", operator: "=", value: prepared.runId }],
+		});
+		await notifyWaitingRuns(context);
+		const question = await interactionId(prepared.conversationId);
+		expect(await notificationOf(inputNeededNotification, key)).toMatchObject({
+			fingerprint: question,
+			resolved_at: null,
+			recipients: [userId],
+		});
+
+		reply("Blue it is.");
+		expect(
+			await executeRun(context, {
+				runId: prepared.runId,
+				answer: {
+					interactionId: question,
+					action: "submit",
+					response: { answer: "Blue" },
+					userId,
+				},
+			}),
+		).toMatchObject({ data: { status: "completed" } });
+		expect(
+			(await notificationOf(inputNeededNotification, key))?.resolved_at,
+		).not.toBeNull();
+	});
+
 	test.each([
 		"chat",
 		"routine",
@@ -1992,6 +2076,60 @@ describe("agent runner", () => {
 			outcome: "needs_review",
 			summary: "I have not completed the check.",
 		});
+		expect(
+			await notificationOf(
+				routineNeedsReviewNotification,
+				agentNotificationKeys.review(prepared.conversationId),
+			),
+		).toMatchObject({ resolved_at: null, recipients: [userId] });
+	});
+
+	test("a routine run still finishes when its notification can't be sent", async () => {
+		const prepared = await prepareRoutine();
+		reply("Starting.");
+		reply("Still looking.");
+		reply("I have not completed the check.");
+		const logged = vi.spyOn(logger, "error").mockImplementation(() => {});
+		const refusing: ServiceContext = {
+			...context,
+			config: {
+				...context.config,
+				hooks: [
+					...context.config.hooks,
+					{
+						service: "notifications",
+						event: "beforeSend",
+						handler: async () => ({
+							error: {
+								type: "basic",
+								status: 500,
+								message: copy.literal("Refused"),
+							},
+							data: undefined,
+						}),
+					},
+				],
+			},
+		};
+
+		expect(await executeRun(refusing, { runId: prepared.runId })).toMatchObject(
+			{ data: { status: "completed" } },
+		);
+		expect(await selectRun(prepared.runId)).toMatchObject({
+			status: "completed",
+			outcome: "needs_review",
+		});
+		expect(
+			await notificationOf(
+				routineNeedsReviewNotification,
+				agentNotificationKeys.review(prepared.conversationId),
+			),
+		).toBeUndefined();
+		expect(logged).toHaveBeenCalledWith(
+			expect.objectContaining({
+				message: "Agent routine notification could not be sent",
+			}),
+		);
 	});
 
 	test.each([

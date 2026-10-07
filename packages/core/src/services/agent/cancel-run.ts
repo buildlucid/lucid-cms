@@ -4,7 +4,10 @@ import {
 	AgentRunsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
+import resolveNotification from "../notifications/resolve.js";
 import getAccessibleRun from "./helpers/get-accessible-run.js";
+import { inputNeededNotification } from "./notifications/input-needed.js";
+import { agentNotificationKeys } from "./notifications/keys.js";
 
 /** Stops a run. A worker still executing it loses its token and stops at the next write. */
 const cancelRun: ServiceFn<
@@ -32,10 +35,16 @@ const cancelRun: ServiceFn<
 	});
 	if (cancelled.error) return cancelled;
 
-	return AgentConversations.releaseRun({
+	const released = await AgentConversations.releaseRun({
 		conversationId: run.data.conversationId,
 		runId: input.runId,
 		updatedAt: now,
+	});
+	if (released.error) return released;
+
+	return resolveNotification(context, {
+		definition: inputNeededNotification,
+		key: agentNotificationKeys.input(run.data.conversationId),
 	});
 };
 

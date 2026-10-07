@@ -7,12 +7,10 @@ import {
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveNotification from "../../notifications/resolve.js";
 import sendNotification from "../../notifications/send.js";
-import {
-	approvalDismissedNotification,
-	readyNotification,
-	requestNotificationKeys,
-	reviewRequestedNotification,
-} from "../notifications.js";
+import { approvalDismissedNotification } from "../notifications/approval-dismissed.js";
+import { requestNotificationKeys } from "../notifications/keys.js";
+import { readyNotification } from "../notifications/ready.js";
+import { reviewRequestedNotification } from "../notifications/review-requested.js";
 
 /**
  * Moves requests to a new revision after their content or plan changes, so

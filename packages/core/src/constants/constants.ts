@@ -257,6 +257,8 @@ export default Object.freeze({
 		replySaveIntervalMs: 1_000,
 		watchIntervalMs: 1_000,
 		staleQueuedMs: 120_000,
+		/** How long a run waits on its person before they are notified, so someone still in the chat can answer first. */
+		inputNotifyDelayMs: 120_000,
 		batchSize: 50,
 		modelCatalogTtlSeconds: 300,
 	} as const,

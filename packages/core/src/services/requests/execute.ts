@@ -27,7 +27,7 @@ import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestParticipants from "./helpers/get-request-participants.js";
 import getRequestState from "./helpers/get-request-state.js";
 import resolveRequestNotifications from "./helpers/resolve-request-notifications.js";
-import { completedNotification } from "./notifications.js";
+import { completedNotification } from "./notifications/completed.js";
 import type { RequestDocumentRecord } from "./types.js";
 
 /**

@@ -12,7 +12,7 @@ import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
 import notifyMentions from "./helpers/notify-mentions.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
-import { commentedNotification } from "./notifications.js";
+import { commentedNotification } from "./notifications/commented.js";
 
 /**
  * Anyone who can read a request can comment on it, whatever its status. A

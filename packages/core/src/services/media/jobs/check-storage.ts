@@ -5,7 +5,7 @@ import type { JobHandler } from "../../../libs/jobs/types.js";
 import resolve from "../../notifications/resolve.js";
 import upsert from "../../notifications/upsert.js";
 import getStorageUsage from "../get-storage-usage.js";
-import { storageNotification } from "../notifications.js";
+import { storageNotification } from "../notifications/storage.js";
 
 /**
  * Compares media storage with its limit. Crossing a threshold notifies the

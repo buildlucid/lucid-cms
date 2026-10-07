@@ -6,10 +6,8 @@ import {
 import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveNotification from "../../notifications/resolve.js";
 import sendNotification from "../../notifications/send.js";
-import {
-	requestNotificationKeys,
-	reviewRequestedNotification,
-} from "../notifications.js";
+import { requestNotificationKeys } from "../notifications/keys.js";
+import { reviewRequestedNotification } from "../notifications/review-requested.js";
 import type { RequestDocumentRecord, RequestRecord } from "../types.js";
 import getEligibleReviewers from "./get-eligible-reviewers.js";
 

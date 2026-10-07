@@ -6,6 +6,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import enqueueRun from "./helpers/enqueue-run.js";
+import notifyRoutineRun from "./helpers/notify-routine-run.js";
 
 /**
  * Picks up runs whose worker stopped: crashed, interrupted or never started.
@@ -40,12 +41,13 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 			const failed = await withTransaction(context, async (context) => {
 				const AgentRuns = new AgentRunsRepository(context.db);
 				const AgentConversations = new AgentConversationsRepository(context.db);
+				const message = context.translate("server:agent.run.recovery.failed");
 
 				const moved = await AgentRuns.transition({
 					runId: run.id,
 					from: ["queued", "interrupted"],
 					status: "failed",
-					errorMessage: context.translate("server:agent.run.recovery.failed"),
+					errorMessage: message,
 					now,
 				});
 				if (moved.error || !moved.data) return moved;
@@ -56,11 +58,23 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 				});
 				if (paused.error) return paused;
 
-				return AgentConversations.releaseRun({
+				const released = await AgentConversations.releaseRun({
 					conversationId: run.conversation_id,
 					runId: run.id,
 					updatedAt: now,
 				});
+				if (released.error) return released;
+
+				if (run.routine_id) {
+					await notifyRoutineRun(context, {
+						runId: run.id,
+						routineId: run.routine_id,
+						conversationId: run.conversation_id,
+						result: { status: "failed", message },
+					});
+				}
+
+				return { error: undefined, data: undefined };
 			});
 			if (failed.error) return failed;
 

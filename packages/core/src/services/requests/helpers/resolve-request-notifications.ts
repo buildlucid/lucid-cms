@@ -3,17 +3,13 @@ import {
 	DocumentWorkflowsRepository,
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
-import {
-	assignedNotification,
-	workflowNotificationKeys,
-} from "../../document-workflows/notifications.js";
+import { assignedNotification } from "../../document-workflows/notifications/assigned.js";
+import { workflowNotificationKeys } from "../../document-workflows/notifications/keys.js";
 import resolveNotification from "../../notifications/resolve.js";
-import {
-	failedNotification,
-	readyNotification,
-	requestNotificationKeys,
-	reviewRequestedNotification,
-} from "../notifications.js";
+import { failedNotification } from "../notifications/failed.js";
+import { requestNotificationKeys } from "../notifications/keys.js";
+import { readyNotification } from "../notifications/ready.js";
+import { reviewRequestedNotification } from "../notifications/review-requested.js";
 import type { RequestRecord } from "../types.js";
 
 /**

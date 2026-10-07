@@ -17,7 +17,11 @@ const useDeleteRoutine = (props?: { onSuccess?: () => void }) => {
 			title: T()("toasts.agent.routine.deleted.title"),
 			message: T()("toasts.agent.routine.deleted.message"),
 		}),
-		invalidates: [queryKeys.agent.routines(), queryKeys.agent.conversations()],
+		invalidates: [
+			queryKeys.agent.routines(),
+			queryKeys.agent.conversations(),
+			queryKeys.notifications.summary(),
+		],
 		onSuccess: (_response, params) => {
 			//* drop its cached runs, which can no longer be requested
 			queryClient.removeQueries({

@@ -11,7 +11,7 @@ import getRequestParticipants from "./helpers/get-request-participants.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
 import resolveRequestNotifications from "./helpers/resolve-request-notifications.js";
-import { closedNotification } from "./notifications.js";
+import { closedNotification } from "./notifications/closed.js";
 
 /** Closes a request without publishing it. It can be reopened later. */
 const close: ServiceFn<[{ id: number; user: LucidUser }], undefined> = async (

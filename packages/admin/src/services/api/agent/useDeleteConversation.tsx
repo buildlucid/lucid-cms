@@ -17,7 +17,11 @@ const useDeleteConversation = (props?: { onSuccess?: () => void }) => {
 			title: T()("toasts.agent.conversation.deleted.title"),
 			message: T()("toasts.agent.conversation.deleted.message"),
 		}),
-		invalidates: [queryKeys.agent.conversations(), queryKeys.agent.routines()],
+		invalidates: [
+			queryKeys.agent.conversations(),
+			queryKeys.agent.routines(),
+			queryKeys.notifications.summary(),
+		],
 		onSuccess: (_response, params) => {
 			//* drop it before the list refetches so it is not requested again
 			queryClient.removeQueries({

@@ -358,6 +358,7 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("execution_version", adapter.getDataType("integer"), (col) =>
 				col.notNull().defaultTo(0),
 			)
+			.addColumn("input_notified_at", adapter.getDataType("timestamp"))
 			.execute();
 
 		await db.schema

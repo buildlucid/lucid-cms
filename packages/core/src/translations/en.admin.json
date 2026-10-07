@@ -63,6 +63,7 @@
 	"core.notifications.category.system": "System",
 	"core.notifications.category.requests": "Requests",
 	"core.notifications.category.workflows": "Workflows",
+	"core.notifications.category.agent": "Agent",
 	"core.notifications.system.storage.name": "Storage usage",
 	"core.notifications.system.storage.description": "Media storage is close to its limit.",
 	"core.notifications.requests.review-requested.name": "Review requested",
@@ -86,5 +87,13 @@
 	"core.notifications.workflows.assigned.name": "Assigned to you",
 	"core.notifications.workflows.assigned.description": "A document is assigned to you.",
 	"core.notifications.workflows.stage-changed.name": "Stage changed",
-	"core.notifications.workflows.stage-changed.description": "A document assigned to you moves to another stage."
+	"core.notifications.workflows.stage-changed.description": "A document assigned to you moves to another stage.",
+	"core.notifications.agent.input-needed.name": "Input needed",
+	"core.notifications.agent.input-needed.description": "An agent is waiting for your answer or approval, and you have not replied for a few minutes.",
+	"core.notifications.agent.routine-failed.name": "Routine failed",
+	"core.notifications.agent.routine-failed.description": "A routine you look after stops with an error.",
+	"core.notifications.agent.routine-needs-review.name": "Routine needs review",
+	"core.notifications.agent.routine-needs-review.description": "A routine you look after asks for its work to be checked.",
+	"core.notifications.agent.routine-report.name": "Routine report",
+	"core.notifications.agent.routine-report.description": "A routine you look after finishes with something to report."
 }

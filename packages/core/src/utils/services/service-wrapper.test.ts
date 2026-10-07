@@ -3,7 +3,6 @@ import createLucidDatabase from "../../libs/db/create-lucid-database.js";
 import passthroughKVAdapter from "../../libs/kv/adapters/passthrough.js";
 import inlineQueueAdapter from "../../libs/queue/adapters/inline.js";
 import getTestConfig from "../test-helpers/get-test-config.js";
-import createServiceContext from "./create-service-context.js";
 import serviceWrapper from "./service-wrapper.js";
 import type { ServiceFn, ServiceResponse } from "./types.js";
 import mergeServiceError from "./utils/merge-errors.js";

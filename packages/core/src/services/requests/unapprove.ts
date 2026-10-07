@@ -10,7 +10,8 @@ import resolveNotification from "../notifications/resolve.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
-import { readyNotification, requestNotificationKeys } from "./notifications.js";
+import { requestNotificationKeys } from "./notifications/keys.js";
+import { readyNotification } from "./notifications/ready.js";
 
 /**
  * Withdraws the user's approval of the current revision. Other approvals still

@@ -21,4 +21,10 @@ export const notificationCategories = {
 			defaultMessage: "Workflows",
 		}),
 	},
+	agent: {
+		key: "agent",
+		label: copy("admin:core.notifications.category.agent", {
+			defaultMessage: "Agent",
+		}),
+	},
 } as const satisfies Record<string, NotificationCategory>;

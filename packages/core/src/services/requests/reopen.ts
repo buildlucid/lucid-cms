@@ -11,11 +11,9 @@ import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestParticipants from "./helpers/get-request-participants.js";
 import loadRequest from "./helpers/load-request.js";
 import lockRequest from "./helpers/lock-request.js";
-import {
-	closedNotification,
-	requestNotificationKeys,
-	reviewRequestedNotification,
-} from "./notifications.js";
+import { closedNotification } from "./notifications/closed.js";
+import { requestNotificationKeys } from "./notifications/keys.js";
+import { reviewRequestedNotification } from "./notifications/review-requested.js";
 
 /**
  * Reopens a closed request. Content may have changed while it was closed, so

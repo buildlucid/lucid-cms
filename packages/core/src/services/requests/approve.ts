@@ -23,13 +23,11 @@ import getRequestAccess from "./helpers/get-request-access.js";
 import getRequestState from "./helpers/get-request-state.js";
 import getRequiredApprovals from "./helpers/get-required-approvals.js";
 import scheduleRequest from "./helpers/schedule-request.js";
-import {
-	approvedNotification,
-	failedNotification,
-	readyNotification,
-	requestNotificationKeys,
-	reviewRequestedNotification,
-} from "./notifications.js";
+import { approvedNotification } from "./notifications/approved.js";
+import { failedNotification } from "./notifications/failed.js";
+import { requestNotificationKeys } from "./notifications/keys.js";
+import { readyNotification } from "./notifications/ready.js";
+import { reviewRequestedNotification } from "./notifications/review-requested.js";
 
 /**
  * Adds the user's approval of the current revision. The approval that meets

@@ -12,11 +12,9 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import getDocumentLabel from "../../documents/helpers/get-document-label.js";
 import resolveNotification from "../../notifications/resolve.js";
 import sendNotification from "../../notifications/send.js";
-import {
-	assignedNotification,
-	stageChangedNotification,
-	workflowNotificationKeys,
-} from "../notifications.js";
+import { assignedNotification } from "../notifications/assigned.js";
+import { workflowNotificationKeys } from "../notifications/keys.js";
+import { stageChangedNotification } from "../notifications/stage-changed.js";
 
 /**
  * Keeps assignees' to-dos in step with the workflow. New assignees are told

@@ -1,7 +1,9 @@
+import constants from "../../../constants/constants.js";
 import { answerInteraction } from "../../../libs/agent/interactions.js";
 import { isTerminalRunStatus } from "../../../libs/agent/run-status.js";
 import { checkpointSchema } from "../../../libs/agent/types.js";
 import { copy } from "../../../libs/i18n/index.js";
+import logger from "../../../libs/logger/index.js";
 import {
 	AgentInputsRepository,
 	AgentRunsRepository,
@@ -12,6 +14,9 @@ import type {
 	AgentStreamEvent,
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
+import resolveNotification from "../../notifications/resolve.js";
+import { inputNeededNotification } from "../notifications/input-needed.js";
+import { agentNotificationKeys } from "../notifications/keys.js";
 import continueQueue from "./continue-queue.js";
 import driveRun from "./drive-run.js";
 import openRunSession from "./run-session.js";
@@ -130,6 +135,22 @@ const executeRunSlice: ServiceFn<
 	if (session.error) return session;
 
 	try {
+		//* resolved once claimed, so a tick can't reopen it while the run still looks like it's waiting
+		if (run.status === "waiting") {
+			const resolved = await resolveNotification(context, {
+				definition: inputNeededNotification,
+				key: agentNotificationKeys.input(run.conversation_id),
+			});
+			if (resolved.error) {
+				logger.error({
+					error: resolved.error,
+					message: "Agent input notification could not be resolved",
+					scope: constants.logScopes.ai,
+					data: { runId: run.id },
+				});
+			}
+		}
+
 		//* the answer is saved and shown before the tool runs, so a retry never asks again
 		if (input.answer && checkpoint.pending) {
 			const saved = await session.data.save();

@@ -3,6 +3,7 @@ import classnames from "classnames";
 import {
 	FaSolidBarsProgress,
 	FaSolidBell,
+	FaSolidComments,
 	FaSolidGear,
 	FaSolidSquareArrowUpRight,
 } from "solid-icons/fa";
@@ -21,6 +22,7 @@ const categoryIcons: Record<string, typeof FaSolidBell> = {
 	system: FaSolidGear,
 	requests: FaSolidSquareArrowUpRight,
 	workflows: FaSolidBarsProgress,
+	agent: FaSolidComments,
 };
 
 const NotificationThumb: Component<NotificationThumbProps> = (props) => {

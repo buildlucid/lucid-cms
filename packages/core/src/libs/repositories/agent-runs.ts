@@ -223,7 +223,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 	async selectRecoverable(props: { staleBefore: string; limit: number }) {
 		const query = this.db
 			.selectFrom("lucid_agent_runs")
-			.select(["id", "conversation_id", "user_id", "recoveries"])
+			.select(["id", "conversation_id", "routine_id", "user_id", "recoveries"])
 			.where((eb) =>
 				eb.or([
 					eb("status", "=", "interrupted"),
@@ -238,6 +238,38 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		const exec = await this.executeQuery(() => query.execute(), {
 			method: "selectRecoverable",
+		});
+
+		return exec.response;
+	}
+	/** Runs that have waited on their person since before `waitingBefore` without telling them. */
+	async selectUnnotifiedWaiting(props: {
+		waitingBefore: string;
+		limit: number;
+	}) {
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.innerJoin(
+				"lucid_agent_conversations",
+				"lucid_agent_conversations.id",
+				"lucid_agent_runs.conversation_id",
+			)
+			.select([
+				"lucid_agent_runs.id",
+				"lucid_agent_runs.conversation_id",
+				"lucid_agent_runs.user_id",
+				"lucid_agent_runs.checkpoint",
+				"lucid_agent_conversations.title",
+			])
+			.where("lucid_agent_runs.status", "=", "waiting")
+			.where("lucid_agent_runs.user_id", "is not", null)
+			.where("lucid_agent_runs.input_notified_at", "is", null)
+			.where("lucid_agent_runs.updated_at", "<", props.waitingBefore)
+			.orderBy("lucid_agent_runs.updated_at", "asc")
+			.limit(props.limit);
+
+		const exec = await this.executeQuery(() => query.execute(), {
+			method: "selectUnnotifiedWaiting",
 		});
 
 		return exec.response;
@@ -293,6 +325,7 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 				execution_version: sql<number>`execution_version + 1`,
 				lease_expires_at: props.leaseExpiresAt,
 				started_at: sql`coalesce(started_at, ${props.now})`,
+				input_notified_at: null,
 				updated_at: props.now,
 			})
 			.where("id", "=", props.runId)

@@ -4,10 +4,8 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import upsertNotification from "../../notifications/upsert.js";
-import {
-	failedNotification,
-	requestNotificationKeys,
-} from "../notifications.js";
+import { failedNotification } from "../notifications/failed.js";
+import { requestNotificationKeys } from "../notifications/keys.js";
 
 /**
  * Records why a publication attempt failed. Call inside a transaction.

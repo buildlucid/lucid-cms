@@ -1,9 +1,9 @@
 import z from "zod";
-import { copy } from "../../libs/i18n/copy.js";
-import { notificationCategories } from "../../libs/notifications/categories.js";
-import defineNotification from "../../libs/notifications/define-notification.js";
-import { Permissions } from "../../libs/permission/definitions.js";
-import { formatBytes } from "../../utils/helpers/index.js";
+import { copy } from "../../../libs/i18n/copy.js";
+import { notificationCategories } from "../../../libs/notifications/categories.js";
+import defineNotification from "../../../libs/notifications/define-notification.js";
+import { Permissions } from "../../../libs/permission/definitions.js";
+import { formatBytes } from "../../../utils/helpers/index.js";
 
 /** Media storage has crossed a usage threshold. Sent again as it climbs, and resolved once usage drops. */
 export const storageNotification = defineNotification({
