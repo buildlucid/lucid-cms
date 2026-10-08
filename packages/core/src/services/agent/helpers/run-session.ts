@@ -323,7 +323,7 @@ const openRunSession = async (
 							? { status, ...checkpoint.finish }
 							: undefined;
 
-				const finishRun = async (writeContext = context) => {
+				const finishRun = async (writeContext: ServiceContext) => {
 					const saved = await write(
 						status,
 						{
@@ -371,11 +371,8 @@ const openRunSession = async (
 					return { error: undefined, data: undefined };
 				};
 
-				const finished =
-					(status === "completed" && run.conversation_routine_id) ||
-					(run.routine_id && routineResult)
-						? await withTransaction(context, finishRun)
-						: await finishRun();
+				//* the status, release and hooks commit together, so a run can't end without its hooks
+				const finished = await withTransaction(context, finishRun);
 				if (finished.error) return finished;
 
 				if (status === "completed" && run.routine_id && checkpoint.finish) {

@@ -3661,24 +3661,20 @@ test("a lost steering acknowledgement does not inject the correction twice", asy
 test("steering accepted as the run finishes falls back to the queue", async () => {
 	const prepared = await prepare();
 	const id = randomUUID();
-	const update = AgentRunsRepository.prototype.updateWithToken;
-	vi.spyOn(AgentRunsRepository.prototype, "updateWithToken").mockImplementation(
-		async function (this: AgentRunsRepository, props) {
-			if (props.runId === prepared.runId && props.status === "completed") {
-				// Acceptance read the active run just before its final checkpoint write.
-				const Inputs = new AgentInputsRepository(context.db);
-				await Inputs.submit({
-					id,
-					conversationId: prepared.conversationId,
-					userId,
-					text: "Late correction",
-					targetRunId: prepared.runId,
-				});
-			}
-			return update.call(this, props);
-		},
-	);
-	reply("Done");
+	model.mockImplementationOnce(async (_ctx, input) => {
+		await input.emit(start());
+		await input.emit({ type: "text-delta", text: "Done" });
+		// Acceptance read the active run after its last steering check, just before it finished.
+		const Inputs = new AgentInputsRepository(context.db);
+		await Inputs.submit({
+			id,
+			conversationId: prepared.conversationId,
+			userId,
+			text: "Late correction",
+			targetRunId: prepared.runId,
+		});
+		return { error: undefined, data: { usage, connectionId } };
+	});
 	expect(await executeRun(context, { runId: prepared.runId })).toMatchObject({
 		data: { status: "completed" },
 	});

@@ -22,11 +22,13 @@ const link = (
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: register } = await import(
-				"../../../../../services/agent/references/register.js"
-			);
+			const [{ default: register }, { default: serviceWrapper }] =
+				await Promise.all([
+					import("../../../../../services/agent/references/register.js"),
+					import("../../../../../utils/services/service-wrapper.js"),
+				]);
 
-			return register(context, {
+			return serviceWrapper(register, { transaction: true })(context, {
 				conversationId: data.conversationId,
 				references: data.references,
 				source: { type: "tool", toolName: data.toolName },

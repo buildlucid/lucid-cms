@@ -17,11 +17,16 @@ const unlink = (
 		schema: inputSchema,
 		input,
 		handler: async (data) => {
-			const { default: unlinkReferences } = await import(
-				"../../../../../services/agent/references/unlink.js"
-			);
+			const [{ default: unlinkReferences }, { default: serviceWrapper }] =
+				await Promise.all([
+					import("../../../../../services/agent/references/unlink.js"),
+					import("../../../../../utils/services/service-wrapper.js"),
+				]);
 
-			return unlinkReferences(context, data);
+			return serviceWrapper(unlinkReferences, { transaction: true })(
+				context,
+				data,
+			);
 		},
 		name: {
 			key: "core.toolkit.agent.references.unlink.error.name",
