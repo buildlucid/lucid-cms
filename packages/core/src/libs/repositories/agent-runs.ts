@@ -68,6 +68,34 @@ export default class AgentRunsRepository extends StaticRepository<"lucid_agent_r
 
 		return exec.response;
 	}
+	/** A run with how it ended and its chat's agent, for run-finished hooks. */
+	async selectFinished(runId: string) {
+		const query = this.db
+			.selectFrom("lucid_agent_runs")
+			.innerJoin(
+				"lucid_agent_conversations",
+				"lucid_agent_conversations.id",
+				"lucid_agent_runs.conversation_id",
+			)
+			.select([
+				"lucid_agent_runs.id",
+				"lucid_agent_runs.conversation_id",
+				"lucid_agent_runs.routine_id",
+				"lucid_agent_runs.user_id",
+				"lucid_agent_runs.status",
+				"lucid_agent_runs.outcome",
+				"lucid_agent_runs.summary",
+				"lucid_agent_runs.error_message",
+				"lucid_agent_conversations.agent_key",
+			])
+			.where("lucid_agent_runs.id", "=", runId);
+
+		const exec = await this.executeQuery(() => query.executeTakeFirst(), {
+			method: "selectFinished",
+		});
+
+		return exec.response;
+	}
 	async selectMultipleForRoutine(props: {
 		routineId: string;
 		queryParams: Partial<QueryParams>;

@@ -5,7 +5,7 @@ import remove from "../../references/remove.js";
 import { toolErrorFailure, toolFailure, toolResult } from "../tool-outcome.js";
 import type { RunnerToolInputHandler } from "./types.js";
 
-/** Unlinks tool-added resources within this chat, preserving user attachments. */
+/** Unlinks tool-added resources within this chat, preserving user attachments and managed links. */
 const removeReference: RunnerToolInputHandler<
 	typeof runnerTools.removeReference
 > = async (context, { input, run }) => {

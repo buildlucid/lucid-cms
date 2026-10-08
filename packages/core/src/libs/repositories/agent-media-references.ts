@@ -10,12 +10,16 @@ export default class AgentMediaReferencesRepository extends StaticRepository<"lu
 		super(db, agentMediaReferencesTable);
 	}
 
-	/** Links media once per chat. User attachments take precedence over tool links. */
+	/**
+	 * Links media once per chat. Managed links take over existing ones, and user
+	 * attachments take precedence over other tool links.
+	 */
 	async register(props: {
 		conversationId: string;
 		mediaIds: number[];
 		source: LucidAgentMediaReferences["source"];
 		toolName?: string;
+		managed?: boolean;
 	}) {
 		const now = new Date().toISOString();
 		const query = this.db
@@ -27,16 +31,26 @@ export default class AgentMediaReferencesRepository extends StaticRepository<"lu
 					media_id: mediaId,
 					source: props.source,
 					tool_name: props.toolName ?? null,
+					managed: props.managed ?? false,
 					created_at: now,
 				})),
 			)
-			.onConflict((conflict) =>
-				props.source === "message"
-					? conflict
-							.columns(["conversation_id", "media_id"])
-							.doUpdateSet({ source: "message", tool_name: null })
-					: conflict.doNothing(),
-			);
+			.onConflict((conflict) => {
+				const target = conflict.columns(["conversation_id", "media_id"]);
+
+				if (props.managed) {
+					return target.doUpdateSet({
+						source: props.source,
+						tool_name: props.toolName ?? null,
+						managed: true,
+					});
+				}
+
+				if (props.source !== "message") return conflict.doNothing();
+				return target
+					.doUpdateSet({ source: "message", tool_name: null })
+					.where("lucid_agent_media_references.managed", "=", false);
+			});
 
 		const result = await this.executeQuery(() => query.execute(), {
 			method: "register",

@@ -34,6 +34,7 @@ import withTransaction from "../../../utils/services/with-transaction.js";
 import registerReferences from "../references/register.js";
 import enqueueRun from "./enqueue-run.js";
 import enqueueTitle from "./enqueue-title.js";
+import executeRunFinishedHooks from "./execute-run-finished-hooks.js";
 import notifyRoutineRun from "./notify-routine-run.js";
 import registerUrlKeys from "./register-url-keys.js";
 
@@ -361,6 +362,10 @@ const openRunSession = async (
 							conversationId: run.conversation_id,
 							result: routineResult,
 						});
+					}
+
+					if (isTerminalRunStatus(status)) {
+						await executeRunFinishedHooks(writeContext, { runId: run.id });
 					}
 
 					return { error: undefined, data: undefined };

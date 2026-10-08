@@ -1,7 +1,8 @@
+import type { Generated } from "kysely";
 import z from "zod";
 import { agentReferenceSourceTypeSchema } from "../../../schemas/agent-references.js";
 import { defineTable } from "../client/table/definition.js";
-import type { TimestampImmutable } from "../types.js";
+import type { BooleanInt, TimestampImmutable } from "../types.js";
 
 export const agentDocumentReferencesTable = defineTable(
 	"lucid_agent_document_references",
@@ -14,6 +15,10 @@ export const agentDocumentReferencesTable = defineTable(
 			version_id: { schema: z.number().int().nullable(), type: "integer" },
 			source: { schema: agentReferenceSourceTypeSchema, type: "text" },
 			tool_name: { schema: z.string().nullable(), type: "text" },
+			managed: {
+				schema: z.union([z.boolean(), z.literal(0), z.literal(1)]),
+				type: "boolean",
+			},
 			created_at: {
 				schema: z.union([z.string(), z.date()]),
 				type: "timestamp",
@@ -33,5 +38,7 @@ export interface LucidAgentDocumentReferences {
 	source: z.infer<typeof agentReferenceSourceTypeSchema>;
 	/** The tool that linked it, when `source` is "tool". */
 	tool_name: string | null;
+	/** Linked through the toolkit by a tool that manages it. Only the toolkit can unlink it. */
+	managed: Generated<BooleanInt>;
 	created_at: TimestampImmutable;
 }

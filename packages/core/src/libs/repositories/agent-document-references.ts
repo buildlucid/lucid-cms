@@ -10,7 +10,10 @@ export default class AgentDocumentReferencesRepository extends StaticRepository<
 		super(db, agentDocumentReferencesTable);
 	}
 
-	/** Links documents once per chat. User attachments take precedence over tool links. */
+	/**
+	 * Links documents once per chat. Managed links take over existing ones, and
+	 * user attachments take precedence over other tool links.
+	 */
 	async register(props: {
 		conversationId: string;
 		documents: {
@@ -20,6 +23,7 @@ export default class AgentDocumentReferencesRepository extends StaticRepository<
 		}[];
 		source: LucidAgentDocumentReferences["source"];
 		toolName?: string;
+		managed?: boolean;
 	}) {
 		const now = new Date().toISOString();
 
@@ -41,19 +45,36 @@ export default class AgentDocumentReferencesRepository extends StaticRepository<
 						version_id: document.versionId ?? null,
 						source: props.source,
 						tool_name: props.toolName ?? null,
+						managed: props.managed ?? false,
 						created_at: now,
 					})),
 				)
 				.onConflict((conflict) => {
-					if (props.source !== "message") return conflict.doNothing();
-					const target = conflict.columns([
+					if (!props.managed && props.source !== "message") {
+						return conflict.doNothing();
+					}
+
+					const columns = conflict.columns([
 						"conversation_id",
 						"collection_key",
 						"document_id",
 					]);
-					return (pinned ? target.column("version_id") : target)
-						.where("version_id", pinned ? "is not" : "is", null)
-						.doUpdateSet({ source: "message", tool_name: null });
+
+					const target = (
+						pinned ? columns.column("version_id") : columns
+					).where("version_id", pinned ? "is not" : "is", null);
+
+					if (props.managed) {
+						return target.doUpdateSet({
+							source: props.source,
+							tool_name: props.toolName ?? null,
+							managed: true,
+						});
+					}
+
+					return target
+						.doUpdateSet({ source: "message", tool_name: null })
+						.where("lucid_agent_document_references.managed", "=", false);
 				});
 		});
 
@@ -64,6 +85,38 @@ export default class AgentDocumentReferencesRepository extends StaticRepository<
 			{ method: "register" },
 		);
 
+		return result.response;
+	}
+
+	/** Unlinks documents from a chat however they were linked. Pinned and unpinned links are matched separately. */
+	async unlink(props: {
+		conversationId: string;
+		documents: {
+			collectionKey: string;
+			documentId: number;
+			versionId?: number;
+		}[];
+	}) {
+		const query = this.db
+			.deleteFrom("lucid_agent_document_references")
+			.where("conversation_id", "=", props.conversationId)
+			.where((eb) =>
+				eb.or(
+					props.documents.map((document) =>
+						eb.and([
+							eb("collection_key", "=", document.collectionKey),
+							eb("document_id", "=", document.documentId),
+							document.versionId === undefined
+								? eb("version_id", "is", null)
+								: eb("version_id", "=", document.versionId),
+						]),
+					),
+				),
+			);
+
+		const result = await this.executeQuery(() => query.execute(), {
+			method: "unlink",
+		});
 		return result.response;
 	}
 }

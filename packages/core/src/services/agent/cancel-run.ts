@@ -5,6 +5,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import resolveNotification from "../notifications/resolve.js";
+import executeRunFinishedHooks from "./helpers/execute-run-finished-hooks.js";
 import getAccessibleRun from "./helpers/get-accessible-run.js";
 import { inputNeededNotification } from "./notifications/input-needed.js";
 import { agentNotificationKeys } from "./notifications/keys.js";
@@ -41,6 +42,11 @@ const cancelRun: ServiceFn<
 		updatedAt: now,
 	});
 	if (released.error) return released;
+
+	//* a run that had already stopped was told about then
+	if (cancelled.data) {
+		await executeRunFinishedHooks(context, { runId: input.runId });
+	}
 
 	return resolveNotification(context, {
 		definition: inputNeededNotification,

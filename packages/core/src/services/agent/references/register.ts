@@ -16,6 +16,7 @@ import describe from "./describe.js";
  * Links resources to a chat without changing them or granting access to them,
  * and returns what was linked with its current details. `skipMissing` leaves
  * out resources deleted since a message was queued, rather than failing it.
+ * `managed` locks tool links so only the toolkit can unlink them.
  */
 const register: ServiceFn<
 	[
@@ -24,6 +25,7 @@ const register: ServiceFn<
 			references: AgentReferenceInput[];
 			source: AgentReferenceSource;
 			skipMissing?: boolean;
+			managed?: boolean;
 		},
 	],
 	AgentReferenceSnapshot[]
@@ -81,6 +83,7 @@ const register: ServiceFn<
 					mediaIds,
 					source: input.source.type,
 					toolName,
+					managed: input.managed,
 				})
 			: undefined,
 		documents.length
@@ -89,6 +92,7 @@ const register: ServiceFn<
 					documents,
 					source: input.source.type,
 					toolName,
+					managed: input.managed,
 				})
 			: undefined,
 	]);

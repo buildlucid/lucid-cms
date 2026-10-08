@@ -3,6 +3,7 @@ import type { LucidPluginDefinition } from "../../plugins/types.js";
 import type { CoreToolkit } from "../../toolkit/types.js";
 
 const coreToolkitKeys = {
+	agent: true,
 	auth: true,
 	collections: true,
 	documents: true,

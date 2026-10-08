@@ -10,6 +10,7 @@ import {
 	Switch,
 } from "solid-js";
 import AgentReferenceThumb from "@/components/AgentReferenceFiles/parts/AgentReferenceThumb";
+import AgentReferenceLock from "@/components/AgentReferenceLock/AgentReferenceLock";
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import ViewMediaDrawer from "@/components/ViewMediaDrawer/ViewMediaDrawer";
 import api from "@/services/api";
@@ -87,14 +88,16 @@ const AgentChatReferences: Component<{
 
 	// ----------------------------------------
 	// Functions
-	const sourceLabel = (reference: AgentReference) =>
-		reference.source.type === "tool"
-			? T()("agent.references.source.tool", {
-					tool:
-						toolTitles().get(reference.source.toolName) ??
-						reference.source.toolName,
-				})
-			: T()("agent.references.source.message");
+	const sourceLabel = (reference: AgentReference) => {
+		if (reference.source.type === "message") {
+			return T()("agent.references.source.message");
+		}
+		const tool =
+			toolTitles().get(reference.source.toolName) ?? reference.source.toolName;
+		return reference.managed
+			? T()("agent.references.source.managed", { tool })
+			: T()("agent.references.source.tool", { tool });
+	};
 	const unlinkLabels = (label: string) => ({
 		label: T()("agent.references.unlink", { label }),
 		confirmLabel: T()("agent.references.unlink.confirm", { label }),
@@ -163,11 +166,23 @@ const AgentChatReferences: Component<{
 											<AgentReferenceThumb reference={reference} />
 											<span class="sr-only">{reference.label}</span>
 										</button>
-										<AgentReferenceRemoveButton
-											{...unlinkLabels(reference.label)}
-											class="end-1 top-1"
-											onRemove={() => remove(reference)}
-										/>
+										<Show
+											when={!reference.managed}
+											fallback={
+												<AgentReferenceLock
+													label={T()("agent.references.managed", {
+														label: reference.label,
+													})}
+													class="inset-e-1 top-1"
+												/>
+											}
+										>
+											<AgentReferenceRemoveButton
+												{...unlinkLabels(reference.label)}
+												class="inset-e-1 top-1"
+												onRemove={() => remove(reference)}
+											/>
+										</Show>
 									</li>
 								)}
 							</For>
@@ -218,11 +233,23 @@ const AgentChatReferences: Component<{
 												</span>
 											</span>
 										</A>
-										<AgentReferenceRemoveButton
-											{...unlinkLabels(document.label)}
-											class="end-0 top-1/2 -translate-y-1/2"
-											onRemove={() => remove(document)}
-										/>
+										<Show
+											when={!document.managed}
+											fallback={
+												<AgentReferenceLock
+													label={T()("agent.references.managed", {
+														label: document.label,
+													})}
+													class="inset-e-0 top-1/2 -translate-y-1/2"
+												/>
+											}
+										>
+											<AgentReferenceRemoveButton
+												{...unlinkLabels(document.label)}
+												class="inset-e-0 top-1/2 -translate-y-1/2"
+												onRemove={() => remove(document)}
+											/>
+										</Show>
 									</li>
 								)}
 							</For>

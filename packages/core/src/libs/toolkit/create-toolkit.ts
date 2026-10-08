@@ -1,3 +1,4 @@
+import createAgentToolkit from "./agent/index.js";
 import createAuthToolkit from "./auth/index.js";
 import createCollectionsToolkit from "./collections/index.js";
 import createDocumentsToolkit from "./documents/index.js";
@@ -37,6 +38,7 @@ import type { CoreToolkit, Toolkit, ToolkitContext } from "./types.js";
  */
 const createToolkit = (context: ToolkitContext): Toolkit => {
 	const core: CoreToolkit = {
+		agent: createAgentToolkit(context),
 		auth: createAuthToolkit(context),
 		collections: createCollectionsToolkit(context),
 		documents: createDocumentsToolkit(context),

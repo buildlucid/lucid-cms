@@ -1,4 +1,5 @@
 import type { ServiceContext } from "../../utils/services/types.js";
+import type { ToolkitAgent } from "./agent/index.js";
 import type { ToolkitAuth } from "./auth/index.js";
 import type { ToolkitCollections } from "./collections/index.js";
 import type { ToolkitDocuments } from "./documents/index.js";
@@ -14,6 +15,8 @@ export type ToolkitContext = ServiceContext;
 
 /** Core server-side helpers provided by Lucid. */
 export type CoreToolkit = {
+	/** Helpers for managing references in agent chats. */
+	agent: ToolkitAgent;
 	/** Helpers for resolving request authentication state. */
 	auth: ToolkitAuth;
 	/** Effective database schemas for custom collection queries. */
@@ -68,6 +71,9 @@ export type ToolkitDefinition<
 	readonly type: "toolkit-definition";
 };
 
+export type * from "./agent/index.js";
+export type * from "./agent/references/link/index.js";
+export type * from "./agent/references/unlink/index.js";
 export type * from "./auth/index.js";
 export type * from "./auth/status/index.js";
 export type * from "./collections/get-schema/index.js";

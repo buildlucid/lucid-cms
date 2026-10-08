@@ -186,6 +186,9 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			)
 			.addColumn("source", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("tool_name", adapter.getDataType("text"))
+			.addColumn("managed", adapter.getDataType("boolean"), (col) =>
+				col.notNull().defaultTo(adapter.getDefault("boolean", "false")),
+			)
 			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 				col.notNull(),
 			)
@@ -222,6 +225,9 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.addColumn("version_id", adapter.getDataType("integer"))
 			.addColumn("source", adapter.getDataType("text"), (col) => col.notNull())
 			.addColumn("tool_name", adapter.getDataType("text"))
+			.addColumn("managed", adapter.getDataType("boolean"), (col) =>
+				col.notNull().defaultTo(adapter.getDefault("boolean", "false")),
+			)
 			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 				col.notNull(),
 			)

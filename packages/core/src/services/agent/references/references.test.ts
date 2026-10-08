@@ -22,6 +22,7 @@ import {
 	UserRolesRepository,
 	UsersRepository,
 } from "../../../libs/repositories/index.js";
+import createToolkit from "../../../libs/toolkit/create-toolkit.js";
 import { agentReferenceSchema } from "../../../schemas/agent-references.js";
 import type {
 	AgentReferenceInput,
@@ -915,6 +916,74 @@ test("reference removal tools preserve user attachments", async () => {
 	expect((await list(context, { conversationId, userId: null })).data).toEqual(
 		linked.data,
 	);
+});
+
+test("managed links take over other links and only the toolkit can unlink them", async () => {
+	const ownerId = await createReader();
+	const conversationId = await createChat(ownerId);
+	const document = await createDocument();
+	const references: AgentReferenceInput[] = [
+		{ type: "media", mediaId: await createMedia() },
+		...documentReferences(document),
+	];
+	const attached: AgentReferenceInput = {
+		type: "media",
+		mediaId: await createMedia(),
+	};
+	expect((await link(conversationId, references)).error).toBeUndefined();
+	const toolkit = createToolkit(context);
+	expect(
+		(
+			await toolkit.agent.references.link({
+				conversationId,
+				toolName: "create_page",
+				references,
+			})
+		).error,
+	).toBeUndefined();
+	//* attaching again leaves the tool in charge
+	expect(
+		(await link(conversationId, [...references, attached])).error,
+	).toBeUndefined();
+
+	const links = await list(context, { conversationId, userId: ownerId });
+	assert(links.data);
+	const managed = links.data.filter((reference) => reference.managed);
+	expect(managed).toHaveLength(4);
+	for (const reference of managed) {
+		expect(reference.source).toEqual({ type: "tool", toolName: "create_page" });
+		expect(
+			await callReferenceTool(
+				conversationId,
+				runnerTools.removeReference.name,
+				{ referenceId: reference.id },
+				ownerId,
+			),
+		).toMatchObject({ failed: true });
+		expect(
+			(
+				await deleteReference(context, {
+					conversationId,
+					referenceId: reference.id,
+					userId: ownerId,
+				})
+			).error?.status,
+		).toBe(409);
+	}
+	expect(
+		(await list(context, { conversationId, userId: ownerId })).data,
+	).toHaveLength(5);
+
+	expect(
+		(
+			await toolkit.agent.references.unlink({
+				conversationId,
+				references: [...references, attached],
+			})
+		).error,
+	).toBeUndefined();
+	expect(await mediaLinks(conversationId)).toEqual([]);
+	expect(await documentLinks(conversationId)).toEqual([]);
 });
 
 test("reference registration checks the whole batch's read permissions and validates input", async () => {

@@ -44,4 +44,7 @@ export const hookExecutionKinds: {
 		afterUpdate: "effect",
 		afterDelete: "effect",
 	},
+	agent: {
+		runFinished: "effect",
+	},
 } satisfies HookExecutionKindMap;

@@ -2132,6 +2132,81 @@ describe("agent runner", () => {
 		);
 	});
 
+	test("run finished hooks hear once how a run ended, and a failing one never stops it", async () => {
+		const prepared = await prepareRoutine();
+		reply("Starting.");
+		reply("Still looking.");
+		reply("I have not completed the check.");
+		const finished: unknown[] = [];
+		const hooked: ServiceContext = {
+			...context,
+			config: {
+				...context.config,
+				hooks: [
+					...context.config.hooks,
+					{
+						service: "agent",
+						event: "runFinished",
+						handler: async ({ meta, data }) => {
+							finished.push({ meta, data });
+							return { error: undefined, data: undefined };
+						},
+					},
+				],
+			},
+		};
+
+		expect(await executeRun(hooked, { runId: prepared.runId })).toMatchObject({
+			data: { status: "completed" },
+		});
+		expect(finished).toEqual([
+			{
+				meta: { userId },
+				data: {
+					runId: prepared.runId,
+					conversationId: prepared.conversationId,
+					agentKey: testAgent.key,
+					routineId: expect.any(String),
+					status: "completed",
+					result: { outcome: "needs_review", summary: expect.any(String) },
+					errorMessage: null,
+				},
+			},
+		]);
+
+		const chat = await prepare();
+		const logged = vi.spyOn(logger, "error").mockImplementation(() => {});
+		const failing: ServiceContext = {
+			...context,
+			config: {
+				...context.config,
+				hooks: [
+					...context.config.hooks,
+					{
+						service: "agent",
+						event: "runFinished",
+						handler: async () => ({
+							error: {
+								type: "basic",
+								status: 500,
+								message: copy.literal("Refused"),
+							},
+							data: undefined,
+						}),
+					},
+				],
+			},
+		};
+
+		expect(
+			(await cancelRun(failing, { runId: chat.runId, userId })).error,
+		).toBeUndefined();
+		expect(await selectRun(chat.runId)).toMatchObject({ status: "cancelled" });
+		expect(logged).toHaveBeenCalledWith(
+			expect.objectContaining({ message: "Agent run finished hooks failed" }),
+		);
+	});
+
 	test.each([
 		{
 			remoteStatus: "failed",

@@ -41,6 +41,7 @@ const referenceDetails = {
 		z.object({ type: z.literal("message") }),
 		z.object({ type: z.literal("tool"), toolName: z.string() }),
 	]),
+	managed: z.boolean(),
 };
 
 export const agentReferenceSchema = z.discriminatedUnion("type", [

@@ -1,5 +1,7 @@
 import type { Draft } from "immer";
+import type constants from "../../constants/constants.js";
 import type {
+	AgentRunOutcome,
 	CollectionTableNames,
 	InternalCollectionDocument,
 	Media,
@@ -66,6 +68,9 @@ export type HookExecutionKindMap = {
 		afterUpdate: "effect";
 		afterDelete: "effect";
 	};
+	agent: {
+		runFinished: "effect";
+	};
 };
 
 /** The request that owns the version being written, with every version it has captured. */
@@ -129,6 +134,11 @@ type DocumentDeleteHookMeta = DocumentUserHookMeta & {
 };
 
 type MediaHookMeta = Record<string, never>;
+
+type AgentHookMeta = {
+	/** Who the run acted for. Null when it acted as the system, eg. a routine defined in code. */
+	userId: number | null;
+};
 
 export type DocumentBeforeUpsertHookData = {
 	documentId: number;
@@ -270,6 +280,20 @@ export type MediaAfterDeleteHookData = {
 	ids: number[];
 	userId: number | null;
 	hardDelete: boolean;
+};
+
+/** An agent run stopped for good. Fires once, whether it completed, failed or was cancelled. */
+export type AgentRunFinishedHookData = {
+	runId: string;
+	conversationId: string;
+	agentKey: string;
+	/** The routine that started the run, if any. */
+	routineId: string | null;
+	status: (typeof constants.agent.runStatuses.terminal)[number];
+	/** What a completed routine run reported. Null for other runs. */
+	result: { outcome: AgentRunOutcome; summary: string } | null;
+	/** Why a failed run stopped. */
+	errorMessage: string | null;
 };
 
 /** Mutable data and event metadata. Return undefined data to keep draft edits, or return replacement data. */
@@ -451,6 +475,12 @@ export type HookServiceHandlers = {
 			undefined
 		>;
 	};
+	agent: {
+		runFinished: HookHandler<
+			EffectHookPayload<AgentHookMeta, AgentRunFinishedHookData>,
+			undefined
+		>;
+	};
 };
 
 export type HookOptions<
@@ -528,10 +558,12 @@ export type MediaHooks =
 	| LucidHook<"media", "afterUpdate">
 	| LucidHook<"media", "afterDelete">;
 
-// add all hooks to this type
+export type AgentHooks = LucidHook<"agent", "runFinished">;
+
 export type AllHooks =
 	| DocumentHooks
 	| DocumentWorkflowHooks
 	| RequestHooks
 	| NotificationHooks
-	| MediaHooks;
+	| MediaHooks
+	| AgentHooks;

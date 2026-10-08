@@ -222,6 +222,8 @@ export type {
 	RenderedTemplates,
 } from "../libs/email/types.js";
 export type {
+	AgentHooks,
+	AgentRunFinishedHookData,
 	AllHooks,
 	CollectionBuilderHooks,
 	DocumentAfterFetchHookData,

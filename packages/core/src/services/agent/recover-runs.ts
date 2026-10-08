@@ -6,6 +6,7 @@ import {
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
 import enqueueRun from "./helpers/enqueue-run.js";
+import executeRunFinishedHooks from "./helpers/execute-run-finished-hooks.js";
 import notifyRoutineRun from "./helpers/notify-routine-run.js";
 
 /**
@@ -73,6 +74,8 @@ const recoverRuns: ServiceFn<[], number> = async (context) => {
 						result: { status: "failed", message },
 					});
 				}
+
+				await executeRunFinishedHooks(context, { runId: run.id });
 
 				return { error: undefined, data: undefined };
 			});

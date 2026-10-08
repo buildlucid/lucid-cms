@@ -14,6 +14,7 @@ import mediaOwnership from "./media-ownership.js";
 export type AgentReferenceLink = AgentReferenceInput & {
 	id: string;
 	source: AgentReferenceSource;
+	managed: boolean;
 };
 
 const linkSource = (row: {
@@ -39,7 +40,7 @@ const list: ServiceFn<
 
 	const [media, documents] = await Promise.all([
 		Media.selectMultiple({
-			select: ["id", "media_id", "source", "tool_name"],
+			select: ["id", "media_id", "source", "tool_name", "managed"],
 			where: [
 				{ key: "conversation_id", operator: "=", value: input.conversationId },
 			],
@@ -57,6 +58,7 @@ const list: ServiceFn<
 				"version_id",
 				"source",
 				"tool_name",
+				"managed",
 			],
 			where: [
 				{ key: "conversation_id", operator: "=", value: input.conversationId },
@@ -82,6 +84,7 @@ const list: ServiceFn<
 			type: "media" as const,
 			mediaId: row.media_id,
 			source: linkSource(row),
+			managed: Boolean(row.managed),
 		})),
 		...documents.data.map((row) => ({
 			id: row.id,
@@ -90,6 +93,7 @@ const list: ServiceFn<
 			documentId: row.document_id,
 			...(row.version_id === null ? {} : { versionId: row.version_id }),
 			source: linkSource(row),
+			managed: Boolean(row.managed),
 		})),
 	];
 

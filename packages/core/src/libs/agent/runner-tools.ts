@@ -60,7 +60,7 @@ const runnerTools = {
 		name: "lucid_list_references",
 		title: copy("admin:core.tools.lucid_list_references.title"),
 		description:
-			"List media and documents linked to this chat, including reference IDs, names, and file types.",
+			"List media and documents linked to this chat, including reference IDs, names, file types, and whether the tool that linked them manages them.",
 		input: z.object({ offset: z.number().int().nonnegative().default(0) }),
 		available: () => true,
 	},
@@ -78,7 +78,7 @@ const runnerTools = {
 		name: "lucid_remove_reference",
 		title: copy("admin:core.tools.lucid_remove_reference.title"),
 		description:
-			"Remove a tool-added reference from this chat without deleting its resource. Message attachments are managed by the person in the chat UI.",
+			"Remove a tool-added reference from this chat without deleting its resource. Message attachments are managed by the person in the chat UI, and managed references by the tool that linked them.",
 		input: z.object({ referenceId: z.uuid() }),
 		available: () => true,
 	},

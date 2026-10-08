@@ -31,6 +31,8 @@ export type AgentReference = {
 	mimeType?: string;
 	previewUrl?: string;
 	source: AgentReferenceSource;
+	/** Managed by the tool that linked it. People and the agent cannot remove it, only the toolkit can. */
+	managed: boolean;
 } & (
 	| Extract<AgentReferenceInput, { type: "media" }>
 	| (Extract<AgentReferenceInput, { type: "document" }> & {
