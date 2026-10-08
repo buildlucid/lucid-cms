@@ -1,5 +1,5 @@
-import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useLocation, useNavigate } from "@solidjs/router";
+import { TbOutlineMailX } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -115,7 +115,7 @@ const AcceptInvitationPage: Component = () => {
 			</Match>
 			<Match when={isInvalid()}>
 				<ErrorState
-					image={notifyIllustration}
+					icon={<TbOutlineMailX />}
 					title={T()("auth.invitations.token.invalid.title")}
 					description={T()("auth.invitations.token.invalid.description")}
 					actions={

@@ -1,6 +1,6 @@
-import notifySvg from "@assets/illustrations/notify.svg?url";
 import type { ErrorResponse } from "@types";
 import classNames from "classnames";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -57,7 +57,7 @@ export const Form: Component<{
 		<Switch>
 			<Match when={props.queryState?.isError}>
 				<ErrorState
-					image={notifySvg}
+					icon={<TbOutlineAlertTriangle />}
 					title={T()("errors.generic.title")}
 					description={T()("errors.generic.message")}
 				/>

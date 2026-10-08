@@ -1,5 +1,5 @@
-import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useNavigate } from "@solidjs/router";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, createEffect, Match, Switch } from "solid-js";
 import ErrorState from "@/components/ErrorState/ErrorState";
 import Link from "@/components/Link/Link";
@@ -39,7 +39,7 @@ const SetupPage: Component = () => {
 			</Match>
 			<Match when={setupRequired.isError}>
 				<ErrorState
-					image={notifyIllustration}
+					icon={<TbOutlineAlertTriangle />}
 					title={T()("errors.generic.title")}
 					description={T()("errors.generic.message")}
 					actions={

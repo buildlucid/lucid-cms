@@ -1,7 +1,10 @@
-import notifySvg from "@assets/illustrations/notify.svg?url";
+import textLogo from "@assets/svgs/text-logo-light.svg?url";
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import {
+	TbOutlineAlertTriangle,
 	TbOutlineEye,
+	TbOutlineLinkOff,
+	TbOutlineLock,
 	TbOutlinePencil,
 	TbOutlinePlus,
 	TbOutlineTrash,
@@ -45,6 +48,7 @@ import FilterPanel, {
 } from "@/components/FilterPanel/FilterPanel";
 import FilterToggle from "@/components/FilterToggle/FilterToggle";
 import Grid, { type GridColumnCount } from "@/components/Grid/Grid";
+import HaloIcon from "@/components/HaloIcon/HaloIcon";
 import Image from "@/components/Image/Image";
 import InfoRow from "@/components/InfoRow/InfoRow";
 import Input, { type InputType } from "@/components/Input/Input";
@@ -839,13 +843,14 @@ const ComponentLibraryPage: Component = () => {
 					{/* ---------------------------------------------- ErrorState */}
 					<InfoRow.Root
 						title={"ErrorState"}
-						description={"image, title, description, actions"}
+						description={"icon, title, description, actions"}
 					>
 						<InfoRow.Content title={"Default"}>
 							<ErrorState />
 						</InfoRow.Content>
-						<InfoRow.Content title={"With a way out"}>
+						<InfoRow.Content title={"With an icon and a way out"}>
 							<ErrorState
+								icon={<TbOutlineAlertTriangle />}
 								title="Report unavailable"
 								description="This report has been deleted."
 								actions={
@@ -953,6 +958,23 @@ const ComponentLibraryPage: Component = () => {
 						</InfoRow.Content>
 					</InfoRow.Root>
 
+					{/* ---------------------------------------------- HaloIcon */}
+					<InfoRow.Root title={"HaloIcon"} description={"children"}>
+						<InfoRow.Content title={"Icons"}>
+							<div class="flex flex-wrap gap-3">
+								<HaloIcon>
+									<TbOutlineAlertTriangle />
+								</HaloIcon>
+								<HaloIcon>
+									<TbOutlineLock />
+								</HaloIcon>
+								<HaloIcon>
+									<TbOutlineLinkOff />
+								</HaloIcon>
+							</div>
+						</InfoRow.Content>
+					</InfoRow.Root>
+
 					{/* ---------------------------------------------- Image */}
 					<InfoRow.Root title={"Image"} description={"src, alt, fit"}>
 						<InfoRow.Content title={"Fit"}>
@@ -961,18 +983,18 @@ const ComponentLibraryPage: Component = () => {
 									<code class="text-xs text-muted">fit="cover"</code>
 									<AspectRatio
 										ratio="1:1"
-										contentClass="overflow-hidden rounded-md border border-border"
+										contentClass="overflow-hidden rounded-md border border-border bg-white"
 									>
-										<Image src={notifySvg} alt="" fit="cover" />
+										<Image src={textLogo} alt="" fit="cover" />
 									</AspectRatio>
 								</div>
 								<div class="w-40">
 									<code class="text-xs text-muted">fit="contain"</code>
 									<AspectRatio
 										ratio="1:1"
-										contentClass="overflow-hidden rounded-md border border-border"
+										contentClass="overflow-hidden rounded-md border border-border bg-white"
 									>
-										<Image src={notifySvg} alt="" fit="contain" />
+										<Image src={textLogo} alt="" fit="contain" />
 									</AspectRatio>
 								</div>
 							</div>

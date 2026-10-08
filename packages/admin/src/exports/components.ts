@@ -100,6 +100,10 @@ export {
 	type GridProps,
 } from "../components/Grid/Grid.js";
 export {
+	default as HaloIcon,
+	type HaloIconProps,
+} from "../components/HaloIcon/HaloIcon.js";
+export {
 	default as Image,
 	type ImageFit,
 	type ImageProps,

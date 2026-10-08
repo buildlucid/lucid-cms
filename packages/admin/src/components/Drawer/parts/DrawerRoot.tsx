@@ -1,7 +1,7 @@
-import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { Dialog } from "@kobalte/core";
 import type { Locale } from "@types";
 import classNames from "classnames";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -265,7 +265,10 @@ export const DrawerRoot: Component<DrawerRootProps> = (props) => {
 							</Match>
 							<Match when={props.error}>
 								<div class="flex items-center h-full justify-center">
-									<ErrorState image={notifyIllustration} title={props.error} />
+									<ErrorState
+										icon={<TbOutlineAlertTriangle />}
+										title={props.error}
+									/>
 								</div>
 							</Match>
 							<Match when={props.open}>

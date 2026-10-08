@@ -1,12 +1,13 @@
-import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useParams } from "@solidjs/router";
 import {
 	TbOutlineCalendar,
+	TbOutlineClockX,
 	TbOutlineDownload,
 	TbOutlineFile,
 	TbOutlineFileMusic,
 	TbOutlineFileText,
 	TbOutlineFileZip,
+	TbOutlineLinkOff,
 	TbOutlineMovie,
 	TbOutlinePlayerPlay,
 } from "solid-icons/tb";
@@ -114,14 +115,14 @@ const MediaSharePage: Component = () => {
 			</Match>
 			<Match when={isExpired()}>
 				<ErrorState
-					image={notifyIllustration}
+					icon={<TbOutlineClockX />}
 					title={T()("media.share.links.expired.title")}
 					description={T()("media.share.links.expired.message")}
 				/>
 			</Match>
 			<Match when={shareAccess.isError}>
 				<ErrorState
-					image={notifyIllustration}
+					icon={<TbOutlineLinkOff />}
 					title={T()("media.share.route.error.title")}
 					description={T()("media.share.route.error.description")}
 				/>

@@ -4,7 +4,7 @@ import type { Component, JSXElement } from "solid-js";
 interface IconContainerProps {
 	children: JSXElement;
 	class?: string;
-	size?: "small" | "medium";
+	size?: "small" | "medium" | "large";
 	theme?: "default" | "primary" | "danger";
 }
 
@@ -19,6 +19,7 @@ const IconContainer: Component<IconContainerProps> = (props) => {
 				{
 					"size-8": props.size === "small",
 					"size-9": props.size === undefined || props.size === "medium",
+					"size-11": props.size === "large",
 					"border-border bg-input text-body":
 						props.theme === undefined || props.theme === "default",
 					"border-primary-low-border bg-primary-low text-primary-low-foreground":

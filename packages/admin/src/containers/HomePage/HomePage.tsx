@@ -1,4 +1,4 @@
-import noPermission from "@assets/illustrations/no-permission.svg?url";
+import { TbOutlineLock } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -85,7 +85,7 @@ const HomePage: Component = () => {
 								fallback={
 									<div class="flex flex-1 items-center justify-center">
 										<ErrorState
-											image={noPermission}
+											icon={<TbOutlineLock />}
 											title={T()("dashboard.no.access.title")}
 											description={T()("dashboard.no.access.description")}
 											actions={

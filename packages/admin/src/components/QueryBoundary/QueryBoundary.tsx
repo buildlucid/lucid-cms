@@ -1,5 +1,5 @@
-import notifySvg from "@assets/illustrations/notify.svg?url";
 import classnames from "classnames";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, type JSXElement, Match, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
 import EmptyState from "@/components/EmptyState/EmptyState";
@@ -59,7 +59,11 @@ const QueryBoundary: Component<QueryBoundaryProps> = (props) => {
 					{centred(props.loadingFallback ?? <LoadingState />)}
 				</Match>
 				<Match when={props.error}>
-					{centred(props.errorFallback ?? <ErrorState image={notifySvg} />)}
+					{centred(
+						props.errorFallback ?? (
+							<ErrorState icon={<TbOutlineAlertTriangle />} />
+						),
+					)}
 				</Match>
 				<Match when={props.empty && filtered()}>
 					{centred(

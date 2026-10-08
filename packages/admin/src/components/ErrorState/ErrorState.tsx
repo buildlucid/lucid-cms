@@ -1,10 +1,11 @@
 import classnames from "classnames";
 import { type Component, type JSXElement, Show } from "solid-js";
+import HaloIcon from "@/components/HaloIcon/HaloIcon";
 import T from "@/translations";
 
 export interface ErrorStateProps {
-	/** An image URL, or an element to show instead. */
-	image?: string | JSXElement;
+	/** An icon shown on a dotted halo above the title. */
+	icon?: JSXElement;
 	/** @default "Something went wrong" */
 	title?: string;
 	description?: string;
@@ -12,25 +13,7 @@ export interface ErrorStateProps {
 	class?: string;
 }
 
-/**
- * A message for when something goes wrong, with optional actions.
- *
- * @example
- * ```tsx
- * import { Button, ErrorState } from "@lucidcms/admin/components";
- * import { useTranslation } from "@lucidcms/admin/hooks";
- * import { getFieldError } from "@lucidcms/admin/utils";
- *
- * const { t } = useTranslation();
- *
- * return (
- * 	<ErrorState
- * 		description={getFieldError(report.error)}
- * 		actions={<Button size="sm" onClick={() => report.refetch()}>{t("common.try.again")}</Button>}
- * 	/>
- * );
- * ```
- */
+/** Displays an error message with an optional icon and recovery actions. */
 const ErrorState: Component<ErrorStateProps> = (props) => {
 	// ----------------------------------------
 	// Render
@@ -40,19 +23,8 @@ const ErrorState: Component<ErrorStateProps> = (props) => {
 			class={classnames("flex items-center justify-center", props.class)}
 		>
 			<div class="w-full max-w-xl px-4 py-8 text-center flex flex-col items-center md:px-6 md:py-10">
-				<Show when={props.image}>
-					{(image) => (
-						<Show
-							when={typeof image() === "string"}
-							fallback={<div class="mb-6">{image() as JSXElement}</div>}
-						>
-							<img
-								src={image() as string}
-								class="h-auto mx-auto mb-6 max-w-xs w-full max-h-40 object-contain"
-								alt=""
-							/>
-						</Show>
-					)}
+				<Show when={props.icon}>
+					<HaloIcon class="mb-4">{props.icon}</HaloIcon>
 				</Show>
 				<h2 class="mb-1 text-sm font-semibold">
 					{props.title ?? T()("errors.generic.title")}

@@ -1,5 +1,5 @@
-import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useNavigate } from "@solidjs/router";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -50,7 +50,7 @@ const ForgotPasswordPage: Component = () => {
 			</Match>
 			<Match when={isError()}>
 				<ErrorState
-					image={notifyIllustration}
+					icon={<TbOutlineAlertTriangle />}
 					title={T()("errors.generic.title")}
 					description={T()("errors.generic.message")}
 				/>

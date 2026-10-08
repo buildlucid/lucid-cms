@@ -158,6 +158,23 @@
 		}
 	}
 
+	/* dotted pattern that fades out from the centre, used behind HaloIcon */
+	.dotted-halo {
+		position: relative;
+		&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			opacity: 0.35;
+			background-image: radial-gradient(
+				var(--lucid-pattern-mark) 1px,
+				transparent 1px
+			);
+			background-size: 12px 12px;
+			mask-image: radial-gradient(closest-side, #000 30%, transparent);
+		}
+	}
+
 	.rectangle-background {
 		position: relative;
 		&::before {

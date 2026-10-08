@@ -1,5 +1,5 @@
-import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useLocation, useNavigate } from "@solidjs/router";
+import { TbOutlineKeyOff } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -69,7 +69,7 @@ const ResetPasswordPage: Component = () => {
 			</Match>
 			<Match when={isError()}>
 				<ErrorState
-					image={notifyIllustration}
+					icon={<TbOutlineKeyOff />}
 					title={T()("auth.tokens.invalid.title")}
 					description={T()("auth.tokens.invalid.description")}
 					actions={
