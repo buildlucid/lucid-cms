@@ -28,7 +28,8 @@ export type RequestVersionState = { id: number; contentId: string };
 export type RequestDocumentState = {
 	collection: CollectionBuilder | null;
 	migrationRequired: boolean;
-	deleted: boolean;
+	/** In the bin, which can be restored, or permanently deleted. */
+	deleted: "bin" | "permanent" | null;
 	label: string | null;
 	/** Null when no stage gates the document, eg. snapshots. */
 	workflowStage: string | null;

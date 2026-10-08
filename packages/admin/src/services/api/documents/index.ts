@@ -18,6 +18,7 @@ import usePublishSingle from "./usePublishSingle";
 import useRequestCreation from "./useRequestCreation";
 import useRestore from "./useRestore";
 import useRestoreRevision from "./useRestoreRevision";
+import useUnpublishSingle from "./useUnpublishSingle";
 import useUpdateOrder from "./useUpdateOrder";
 import useUpdateSingleVersion from "./useUpdateSingleVersion";
 import useUpdateWorkflow from "./useUpdateWorkflow";
@@ -34,6 +35,7 @@ const exportObject = {
 	useCreateSingle,
 	useRequestCreation,
 	usePublishSingle,
+	useUnpublishSingle,
 	useGetSingle,
 	usePromoteSingle,
 	useGetSingleVersion,

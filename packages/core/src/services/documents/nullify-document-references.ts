@@ -6,6 +6,8 @@ const nullifyDocumentReferences: ServiceFn<
 		{
 			documentIds: number[];
 			collectionKey: string;
+			/** The delete request doing the deleting, which keeps its approval. */
+			requestId?: number;
 		},
 	],
 	undefined

@@ -115,8 +115,10 @@ export type CollectionPreviewConfig<
 > = boolean | CollectionPreviewOptions<TCollectionKey>;
 
 export type PublishingReviewConfig = {
-	targets: string[];
+	publish: string[];
+	unpublish: string[];
 	create: boolean;
+	delete: boolean;
 	selfApproval: boolean;
 	approvals: number;
 };
@@ -155,10 +157,14 @@ export type CollectionPublishingOptions = {
 	scheduling?: boolean;
 	/** What needs an approved request before it can happen. */
 	review?: {
-		/** Publishing target keys that can only be published through an approved request. */
-		targets?: string[];
+		/** Environments that can only be published to through an approved request. True covers every environment. */
+		publish?: string[] | true;
+		/** Environments that can only be unpublished from through an approved request. True covers every environment. Defaults to `publish`. */
+		unpublish?: string[] | true;
 		/** New documents can only be created through an approved create request. Defaults to false. */
 		create?: boolean;
+		/** Documents can only be moved to the bin through an approved delete request. Defaults to false. */
+		delete?: boolean;
 		/** Allow the request creator to approve their own request. Defaults to false. */
 		selfApproval?: boolean;
 		/** Approvals a request needs before it can be completed. Requests use the highest of their collections. Defaults to 1. */

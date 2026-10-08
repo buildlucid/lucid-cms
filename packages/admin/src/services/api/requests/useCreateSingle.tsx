@@ -1,10 +1,16 @@
-import type { ErrorResponse, RequestDocumentInput, ResponseBody } from "@types";
+import type {
+	ErrorResponse,
+	RequestDocumentInput,
+	RequestType,
+	ResponseBody,
+} from "@types";
 import { queryKeys } from "@/services/query-keys";
 import request from "@/utils/request";
 import serviceHelpers from "@/utils/service-helpers";
 
 export interface Params {
 	body: {
+		type: Exclude<RequestType, "create">;
 		documents: RequestDocumentInput[];
 		title: string;
 		reviewerIds?: number[];

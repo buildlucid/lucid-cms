@@ -1,10 +1,6 @@
 import type { RequestRecord } from "../types.js";
 
-/**
- * A target needs review once someone else publishes to it after the request
- * was created. Acknowledging it holds only for the version it was given
- * against, so another publish asks again.
- */
+/** Reports target changes since request creation and whether the current version has been acknowledged. */
 const getTargetReview = (data: {
 	target: Pick<
 		RequestRecord["documents"][number]["targets"][number],
@@ -16,7 +12,8 @@ const getTargetReview = (data: {
 }) => ({
 	changedSinceCreation: data.events.some(
 		(event) =>
-			event.type === "target_published" &&
+			(event.type === "target_published" ||
+				event.type === "target_unpublished") &&
 			event.metadata?.requestDocumentId === data.requestDocumentId &&
 			event.metadata?.target === data.target.target,
 	),

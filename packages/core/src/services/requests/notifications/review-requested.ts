@@ -23,7 +23,7 @@ export const reviewRequestedNotification = defineNotification({
 		}),
 		body: copy("server:core.notifications.requests.review-requested.body", {
 			defaultMessage:
-				"Your approval is needed before this request can be published.",
+				"Your approval is needed before this request can be completed.",
 		}),
 		href: requestHref(data.requestId),
 	}),

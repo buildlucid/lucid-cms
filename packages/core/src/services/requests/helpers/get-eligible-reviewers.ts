@@ -7,6 +7,7 @@ import { getBaseUrl } from "../../../utils/helpers/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { RequestDocumentRecord, RequestRecord } from "../types.js";
 import allowsSelfApproval from "./allows-self-approval.js";
+import requestTypePermissions from "./request-type-permissions.js";
 
 const getEligibleReviewers: ServiceFn<
 	[
@@ -32,7 +33,7 @@ const getEligibleReviewers: ServiceFn<
 			//* matches the approve access in getRequestAccess
 			getCollectionPermission(
 				key,
-				data.request.type === "create" ? "create" : "update",
+				requestTypePermissions[data.request.type].approve,
 			),
 			getCollectionPermission(key, "review"),
 		]),

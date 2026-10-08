@@ -98,87 +98,85 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 						</span>
 					</Show>
 				</Popover.Trigger>
-				<Popover.Portal>
-					<Popover.Content
-						class="z-60 flex w-88 max-w-[calc(100vw-2rem)] flex-col rounded-md border border-border bg-popover shadow-md animate-dropdown focus:outline-hidden"
-						onOpenAutoFocus={(event) => event.preventDefault()}
-					>
-						<div class="max-h-96 overflow-y-auto scrollbar p-1">
-							<Switch
-								fallback={
-									<ul class="flex flex-col">
-										<For each={notifications.data?.data}>
-											{(notification) => (
-												<NotificationRow
-													notification={notification}
-													surface="popover"
-													onUpdate={update.action.mutate}
-													onArchive={(id) => {
-														setOpen(false);
-														rowTarget.setTargetId(id);
-														rowTarget.setTrigger("archive", true);
-													}}
-													onNavigate={() => setOpen(false)}
-												/>
-											)}
-										</For>
-									</ul>
-								}
-							>
-								<Match when={loading()}>
-									<ul>
-										<SkeletonListItems />
-									</ul>
-								</Match>
-								<Match when={error()}>
-									<p class="px-3 py-8 text-center text-sm text-muted">
-										{T()("notifications.error")}
-									</p>
-								</Match>
-								<Match when={(notifications.data?.data.length ?? 0) === 0}>
-									<p class="px-3 py-8 text-center text-sm text-muted">
-										{T()("notifications.empty.title")}
-									</p>
-								</Match>
-							</Switch>
-						</div>
-						<footer class="flex items-center justify-between gap-3 border-t border-border px-3 py-2">
-							<ViewAllLink
-								href="/lucid/notifications"
-								label={T()("notifications.view.all")}
-							/>
-							<div class="flex items-center gap-0.5">
-								<Show when={unread() > 0}>
-									<Button
-										size="xs"
-										shape="square"
-										variant="ghost"
-										loading={markAllRead.action.isPending}
-										onClick={() =>
-											markAllRead.action.mutate({ all: true, read: true })
-										}
-										aria-label={T()("notifications.mark.all.read")}
-										title={T()("notifications.mark.all.read")}
-									>
-										<TbOutlineChecks class="size-3" />
-									</Button>
-								</Show>
-								<A
-									href="/lucid/account"
-									class={getButtonClasses({
-										variant: "ghost",
-										size: "xs",
-										shape: "square",
-									})}
-									aria-label={T()("notifications.preferences.link")}
-									title={T()("notifications.preferences.link")}
+				<Popover.Content
+					class="z-60 flex w-88 max-w-[calc(100vw-2rem)] flex-col rounded-md border border-border bg-popover shadow-md animate-dropdown focus:outline-hidden"
+					onOpenAutoFocus={(event) => event.preventDefault()}
+				>
+					<div class="max-h-96 overflow-y-auto scrollbar p-1">
+						<Switch
+							fallback={
+								<ul class="flex flex-col">
+									<For each={notifications.data?.data}>
+										{(notification) => (
+											<NotificationRow
+												notification={notification}
+												surface="popover"
+												onUpdate={update.action.mutate}
+												onArchive={(id) => {
+													setOpen(false);
+													rowTarget.setTargetId(id);
+													rowTarget.setTrigger("archive", true);
+												}}
+												onNavigate={() => setOpen(false)}
+											/>
+										)}
+									</For>
+								</ul>
+							}
+						>
+							<Match when={loading()}>
+								<ul>
+									<SkeletonListItems />
+								</ul>
+							</Match>
+							<Match when={error()}>
+								<p class="px-3 py-8 text-center text-sm text-muted">
+									{T()("notifications.error")}
+								</p>
+							</Match>
+							<Match when={(notifications.data?.data.length ?? 0) === 0}>
+								<p class="px-3 py-8 text-center text-sm text-muted">
+									{T()("notifications.empty.title")}
+								</p>
+							</Match>
+						</Switch>
+					</div>
+					<footer class="flex items-center justify-between gap-3 border-t border-border px-3 py-2">
+						<ViewAllLink
+							href="/lucid/notifications"
+							label={T()("notifications.view.all")}
+						/>
+						<div class="flex items-center gap-0.5">
+							<Show when={unread() > 0}>
+								<Button
+									size="xs"
+									shape="square"
+									variant="ghost"
+									loading={markAllRead.action.isPending}
+									onClick={() =>
+										markAllRead.action.mutate({ all: true, read: true })
+									}
+									aria-label={T()("notifications.mark.all.read")}
+									title={T()("notifications.mark.all.read")}
 								>
-									<TbOutlineSettings class="size-3" />
-								</A>
-							</div>
-						</footer>
-					</Popover.Content>
-				</Popover.Portal>
+									<TbOutlineChecks class="size-3" />
+								</Button>
+							</Show>
+							<A
+								href="/lucid/account"
+								class={getButtonClasses({
+									variant: "ghost",
+									size: "xs",
+									shape: "square",
+								})}
+								aria-label={T()("notifications.preferences.link")}
+								title={T()("notifications.preferences.link")}
+							>
+								<TbOutlineSettings class="size-3" />
+							</A>
+						</div>
+					</footer>
+				</Popover.Content>
 			</Popover.Root>
 			<ArchiveNotificationModal
 				id={rowTarget.getTargetId}

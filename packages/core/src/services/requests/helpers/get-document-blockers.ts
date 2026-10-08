@@ -21,7 +21,10 @@ const getDocumentBlockers = (
 	if (request.status !== "open") return [];
 	if (!state.collection) return [{ code: "collection_unavailable" }];
 	if (state.migrationRequired) return [{ code: "migration_required" }];
-	if (state.deleted) return [{ code: "document_deleted" }];
+	if (state.deleted === "bin") return [{ code: "document_deleted" }];
+	if (state.deleted === "permanent") {
+		return [{ code: "document_permanently_deleted" }];
+	}
 
 	const blockers: RequestBlocker[] = [];
 
@@ -29,8 +32,12 @@ const getDocumentBlockers = (
 		blockers.push({ code: "collection_locked" });
 	}
 
-	if (!state.source) blockers.push({ code: "source_missing" });
-	if (document.targets.length === 0) blockers.push({ code: "no_targets" });
+	if (document.source !== null && !state.source) {
+		blockers.push({ code: "source_missing" });
+	}
+	if (request.type !== "delete" && document.targets.length === 0) {
+		blockers.push({ code: "no_targets" });
+	}
 	const approved = request.approved_revision === request.revision;
 	const allowed = getAllowedTargets({
 		collection: state.collection,
@@ -67,9 +74,13 @@ const getDocumentBlockers = (
 			blockers.push({ code: "workflow", target: target.target });
 		}
 
-		const config = state.collection.getData.publishing.targets.find(
-			(environment) => environment.key === target.target,
-		);
+		//* requires only orders publishing, so environments can be unpublished in any order
+		const config =
+			request.type === "unpublish"
+				? undefined
+				: state.collection.getData.publishing.targets.find(
+						(environment) => environment.key === target.target,
+					);
 		for (const required of config?.requires ?? []) {
 			const requestdFirst =
 				document.targets.some((other) => other.target === required) &&

@@ -4,6 +4,7 @@ import { copy } from "../../../i18n/index.js";
 import { getFieldBuilderState } from "../field-builder/index.js";
 import CollectionBuilder from "./index.js";
 import CollectionSchema from "./schema.js";
+import type { CollectionPublishingOptions } from "./types.js";
 
 test("resolves revision settings independently from enablement", () => {
 	const options = {
@@ -419,6 +420,32 @@ test("collection workflow features normalizes defaults", async () => {
 				resetTo: "todo",
 			},
 		],
+	});
+});
+
+test("review environments expand true, and unpublish follows publish unless set", () => {
+	const review = (config: NonNullable<CollectionPublishingOptions["review"]>) =>
+		new CollectionBuilder("pages", {
+			mode: "multiple",
+			details: { labels: { singular: "Page", plural: "Pages" } },
+			publishing: {
+				targets: [
+					{ key: "staging", label: "Staging" },
+					{ key: "production", label: "Production" },
+				],
+				review: config,
+			},
+		}).getData.publishing.review;
+
+	expect(review({ publish: ["production"], delete: true })).toMatchObject({
+		publish: ["production"],
+		unpublish: ["production"],
+		create: false,
+		delete: true,
+	});
+	expect(review({ publish: true, unpublish: [] })).toMatchObject({
+		publish: ["staging", "production"],
+		unpublish: [],
 	});
 });
 

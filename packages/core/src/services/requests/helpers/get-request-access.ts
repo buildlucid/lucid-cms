@@ -8,13 +8,9 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 import type { RequestRecord } from "../types.js";
 import allowsSelfApproval from "./allows-self-approval.js";
 import canWriteDocument from "./can-write-document.js";
+import requestTypePermissions from "./request-type-permissions.js";
 
-/**
- * Works out what a user can do with a request. Actions need the matching
- * permission on every document's collection. Create requests land their
- * document in latest, so approving and completing them needs create access
- * in place of update and publish access.
- */
+/** Determines request actions allowed by the user's permissions across every document's collection. */
 const getRequestAccess = (
 	context: ServiceContext,
 	data: {
@@ -43,7 +39,7 @@ const getRequestAccess = (
 			user: data.user,
 		}),
 	);
-	const create = data.request.type === "create";
+	const permissions = requestTypePermissions[data.request.type];
 
 	const read =
 		hasAccess({
@@ -60,12 +56,8 @@ const getRequestAccess = (
 	return {
 		read,
 		edit: open && write,
-		approve:
-			open &&
-			can("review") &&
-			can(create ? "create" : "update") &&
-			selfApproval,
-		request: open && can(create ? "create" : "publish"),
+		approve: open && can("review") && can(permissions.approve) && selfApproval,
+		request: open && can(permissions.complete),
 		reopen: read && data.request.status === "closed" && write,
 	};
 };

@@ -8,10 +8,10 @@ export const failedNotification = defineNotification({
 	key: "requests:failed",
 	category: notificationCategories.requests,
 	name: copy("admin:core.notifications.requests.failed.name", {
-		defaultMessage: "Publish failed",
+		defaultMessage: "Request failed",
 	}),
 	description: copy("admin:core.notifications.requests.failed.description", {
-		defaultMessage: "A request you made or scheduled could not be published.",
+		defaultMessage: "A request you made or scheduled could not be completed.",
 	}),
 	level: "error",
 	actionRequired: true,
@@ -21,7 +21,7 @@ export const failedNotification = defineNotification({
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.requests.failed.title", {
 			data: { title: data.title },
-			defaultMessage: "{{title}} failed to publish",
+			defaultMessage: "{{title}} failed to complete",
 		}),
 		body: copy.literal(data.message),
 		href: requestHref(data.requestId),

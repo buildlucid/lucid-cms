@@ -18,6 +18,8 @@ const deleteMultiple: ServiceFn<
 			ids: number[];
 			collectionKey: string;
 			userId: number | null;
+			/** The delete request doing the deleting, which keeps its approval. */
+			requestId?: number;
 		},
 	],
 	undefined
@@ -51,6 +53,20 @@ const deleteMultiple: ServiceFn<
 						name: copy("server:core.error.locked.collection.name"),
 						message: copy("server:core.error.locked.collection.message.delete"),
 						status: 400,
+					},
+					data: undefined,
+				};
+			}
+
+			if (
+				data.requestId === undefined &&
+				collectionRes.data.getData.publishing.review?.delete
+			) {
+				return {
+					error: {
+						type: "basic",
+						message: copy("server:core.documents.delete.review.required"),
+						status: 403,
 					},
 					data: undefined,
 				};
@@ -159,6 +175,7 @@ const deleteMultiple: ServiceFn<
 					nullifyDocumentReferences(context, {
 						collectionKey: collectionRes.data.key,
 						documentIds: data.ids,
+						requestId: data.requestId,
 					}),
 				]);
 			if (deleteDocUpdateRes.error) return deleteDocUpdateRes;
@@ -169,6 +186,7 @@ const deleteMultiple: ServiceFn<
 			const invalidateRequestsRes = await invalidateRequests(context, {
 				collectionKey: data.collectionKey,
 				documentIds: data.ids,
+				requestId: data.requestId,
 			});
 			if (invalidateRequestsRes.error) return invalidateRequestsRes;
 

@@ -16,7 +16,9 @@ import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import QueryToolbar from "@/components/QueryToolbar/QueryToolbar";
 import RequestCreateModal from "@/components/RequestCreateModal/RequestCreateModal";
+import RequestDeleteModal from "@/components/RequestDeleteModal/RequestDeleteModal";
 import RequestTableRow from "@/components/RequestTableRow/RequestTableRow";
+import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
 import Table from "@/components/Table/Table";
 import useKeyboardShortcuts from "@/hooks/useKeyboardShortcuts/useKeyboardShortcuts";
 import useQueryState, {
@@ -30,13 +32,20 @@ import api from "@/services/api";
 import { queryKeys } from "@/services/query-keys";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { countRequestQueue, requestQueues } from "@/utils/requests";
+import {
+	countRequestQueue,
+	requestQueues,
+	requestTypeKeys,
+	requestTypes,
+} from "@/utils/requests";
 
 const RequestsPage: Component = () => {
 	// ----------------------------------------
 	// State & Hooks
 	const queryClient = useQueryClient();
 	const [createOpen, setCreateOpen] = createSignal(false);
+	const [unpublishOpen, setUnpublishOpen] = createSignal(false);
+	const [deleteOpen, setDeleteOpen] = createSignal(false);
 	const searchParams = useQueryState({
 		mode: "url",
 		schema: {
@@ -93,31 +102,20 @@ const RequestsPage: Component = () => {
 					filters: queue.filters,
 				}),
 			),
-			{
-				key: "publish",
-				label: T()("requests.filter.publish"),
-				count: overviewData
-					? overviewData.publish.awaitingApproval +
-						overviewData.publish.approved
-					: undefined,
-				loading: overview.isFetching,
-				filters: {
-					status: { value: "open", operator: "=" },
-					type: { value: "publish", operator: "=" },
-				},
-			},
-			{
-				key: "create",
-				label: T()("requests.filter.requests"),
-				count: overviewData
-					? overviewData.create.awaitingApproval + overviewData.create.approved
-					: undefined,
-				loading: overview.isFetching,
-				filters: {
-					status: { value: "open", operator: "=" },
-					type: { value: "create", operator: "=" },
-				},
-			},
+			...requestTypeKeys.map(
+				(type): FilterPreset => ({
+					key: type,
+					label: requestTypes[type].filter(),
+					count: overviewData
+						? overviewData[type].awaitingApproval + overviewData[type].approved
+						: undefined,
+					loading: overview.isFetching,
+					filters: {
+						status: { value: "open", operator: "=" },
+						type: { value: type, operator: "=" },
+					},
+				}),
+			),
 		];
 		return items;
 	});
@@ -153,8 +151,21 @@ const RequestsPage: Component = () => {
 						actions={[
 							{
 								type: "button",
-								label: T()("requests.create"),
+								label: T()("requests.create.publish.action"),
+								icon: "upload",
 								onClick: () => setCreateOpen(true),
+							},
+							{
+								type: "button",
+								label: T()("requests.create.unpublish.action"),
+								icon: "cloud-off",
+								onClick: () => setUnpublishOpen(true),
+							},
+							{
+								type: "button",
+								label: T()("requests.create.delete.action"),
+								icon: "trash",
+								onClick: () => setDeleteOpen(true),
 							},
 						]}
 					/>
@@ -175,10 +186,10 @@ const RequestsPage: Component = () => {
 							label: T()("requests.type"),
 							key: "type",
 							type: "select",
-							options: [
-								{ label: T()("requests.type.publish"), value: "publish" },
-								{ label: T()("requests.type.create"), value: "create" },
-							],
+							options: requestTypeKeys.map((type) => ({
+								label: requestTypes[type].label(),
+								value: type,
+							})),
 						},
 						{
 							label: T()("common.status"),
@@ -326,6 +337,11 @@ const RequestsPage: Component = () => {
 				/>
 			</PageLayout.Body>
 			<RequestCreateModal open={createOpen()} setOpen={setCreateOpen} />
+			<RequestUnpublishModal
+				open={unpublishOpen()}
+				setOpen={setUnpublishOpen}
+			/>
+			<RequestDeleteModal open={deleteOpen()} setOpen={setDeleteOpen} />
 		</PageLayout.Root>
 	);
 };

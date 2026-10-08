@@ -467,6 +467,29 @@ export const controllerSchemas = {
 		}),
 		response: undefined,
 	} satisfies ControllerSchema,
+	unpublish: {
+		body: z.object({
+			target: z.string().trim().min(1).meta({
+				description: "The environment to remove the document from",
+				example: "production",
+			}),
+		}),
+		query: {
+			string: undefined,
+			formatted: undefined,
+		},
+		params: z.object({
+			collectionKey: z.string().trim().meta({
+				description: "The collection key",
+				example: "page",
+			}),
+			id: z.string().trim().meta({
+				description: "The document ID",
+				example: 1,
+			}),
+		}),
+		response: undefined,
+	} satisfies ControllerSchema,
 	createPreview: {
 		body: z.object({
 			locale: z.string().trim().min(1).optional(),

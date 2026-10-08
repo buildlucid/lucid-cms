@@ -100,11 +100,11 @@ export const NavigationLink: Component<{
 					data-navigation-exact={props.exact ? "true" : undefined}
 					data-navigation-force-active={props.active ? "true" : undefined}
 					link
-					class="h-8 w-full min-w-0 text-title flex items-center gap-2 px-2 rounded-md bg-sidebar hover:bg-background-hover transition-colors duration-200 ease-in-out outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+					class="group h-8 w-full min-w-0 text-body hover:text-title flex items-center gap-2 px-2 rounded-md bg-sidebar hover:bg-background-hover transition-colors duration-200 ease-in-out outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 				>
 					<Dynamic
 						component={icons[props.icon]}
-						class="size-3.5 shrink-0 text-current"
+						class="size-3.5 shrink-0 text-muted transition-colors duration-200 group-hover:text-subtitle group-aria-[current=page]:text-current"
 					/>
 					<span class="min-w-0 truncate text-sm font-medium">
 						{props.title}

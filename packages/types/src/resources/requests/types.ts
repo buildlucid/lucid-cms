@@ -2,7 +2,7 @@ import type { RichTextJSON } from "../documents/types.js";
 import type { JobStatus } from "../jobs/types.js";
 import type { ProfilePicture } from "../media/types.js";
 
-/** Identifies a durable publication attempt accepted by Lucid. */
+/** Identifies a durable request attempt accepted by Lucid. */
 export type RequestExecutionReceipt = { jobId: string };
 
 /** Small polling response; null when the attempt was invalidated or retained job history expired. */
@@ -16,8 +16,12 @@ export type RequestExecution = {
 /** Open requests can still change. Completed and closed requests are read only. */
 export type RequestStatus = "open" | "completed" | "closed";
 
-/** Publish requests move existing documents to environments. Create requests request one new document, which only exists once completed. */
-export type RequestType = "publish" | "create";
+/**
+ * Create requests request one new document, which only exists once completed.
+ * Publish requests move existing documents to environments, unpublish requests
+ * remove them from environments and delete requests move them to the bin.
+ */
+export type RequestType = "create" | "publish" | "unpublish" | "delete";
 
 export type RequestUser = {
 	id: number;
@@ -28,12 +32,11 @@ export type RequestUser = {
 	profilePicture: ProfilePicture | null;
 };
 
-/** An environment explicitly selected for publication. */
 export type RequestTarget = {
 	target: string;
-	/** The version currently on the target. Null when nothing has been published there. */
+	/** The version currently on the target. Null when the target has no content. */
 	versionId: number | null;
-	/** Whether someone else published to the target after the request was created. */
+	/** Whether someone else changed what the target holds after the request was created. */
 	changedSinceCreation: boolean;
 	/** Whether the target's current version has been acknowledged. */
 	reviewed: boolean;
@@ -48,6 +51,7 @@ export type RequestBlockerCode =
 	| "migration_required"
 	| "collection_locked"
 	| "document_deleted"
+	| "document_permanently_deleted"
 	| "source_missing"
 	| "no_targets"
 	| "target_unavailable"
@@ -100,10 +104,10 @@ export type RequestEvent = RequestEventBase &
 				target: string | null;
 		  }
 		| {
-				type: "target_published";
+				type: "target_published" | "target_unpublished";
 				requestDocumentId: number;
 				target: string;
-				/** The request that published it. Null for a direct publish. */
+				/** The request that made the change. Null for a direct change. */
 				sourceRequestId: number | null;
 		  }
 		| {
@@ -156,7 +160,7 @@ export type RequestDetail = {
 	status: RequestStatus;
 	approved: boolean;
 	revision: number;
-	/** The current publication attempt, retained until the request plan changes. */
+	/** The current request attempt, retained until the request plan changes. */
 	executionJobId: string | null;
 	createdBy: RequestUser | null;
 	/** Approvals of the current revision. */
@@ -167,7 +171,7 @@ export type RequestDetail = {
 	scheduledTimezone: string | null;
 	/** Why the last request attempt failed. Cleared on the next attempt. */
 	failure: string | null;
-	/** The RequestDocument.id whose publication failed. */
+	/** The RequestDocument.id whose request attempt failed. */
 	failureRequestDocumentId: number | null;
 	failureTarget: string | null;
 	completedAt: string | null;
@@ -187,19 +191,20 @@ export type RequestApproval = {
 	approvedAt: string | null;
 };
 
-/** Each document has independent captured content, destinations and checks. */
 export type RequestDocument = {
 	id: number;
 	collectionKey: string;
 	documentId: number;
 	documentLabel: string | null;
-	/** Fixed starting source: latest for a proposal, or an environment for a snapshot. */
-	source: string;
+	/** In the bin, where it can be restored, or permanently deleted. */
+	deleted: "bin" | "permanent" | null;
+	/** Fixed starting source: latest for a proposal, or an environment for a snapshot. Null for unpublish and delete requests, which capture no content. */
+	source: string | null;
 	/** The request's own proposal, which can be edited, or its read-only snapshot. Proposals are removed once completed. */
 	versionId: number | null;
 	/** The content ID of `versionId`, used to check nothing changed before aligning it. */
 	contentId: string | null;
-	/** The frozen snapshot that will be, or was, published. Null until approved. */
+	/** The frozen snapshot that will be, or was, published. Null until approved, and for unpublish and delete requests. */
 	approvedVersionId: number | null;
 	workflowStage: string | null;
 	targets: RequestTarget[];

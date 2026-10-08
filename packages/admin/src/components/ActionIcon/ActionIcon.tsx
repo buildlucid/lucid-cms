@@ -7,6 +7,7 @@ import {
 	TbOutlineCalendar,
 	TbOutlineChartBar,
 	TbOutlineCheck,
+	TbOutlineCloudOff,
 	TbOutlineCopy,
 	TbOutlineCrop,
 	TbOutlineDownload,
@@ -44,6 +45,7 @@ export type ActionIconName =
 	| "chart"
 	| "check"
 	| "clock"
+	| "cloud-off"
 	| "copy"
 	| "crop"
 	| "download"
@@ -94,6 +96,8 @@ const ActionIcon: Component<ActionIconProps> = (props) => {
 				return <TbOutlineChartBar class={iconClasses()} size={iconSize()} />;
 			case "check":
 				return <TbOutlineCheck class={iconClasses()} size={iconSize()} />;
+			case "cloud-off":
+				return <TbOutlineCloudOff class={iconClasses()} size={iconSize()} />;
 			case "clock":
 				return <TbOutlineHistory class={iconClasses()} size={iconSize()} />;
 			case "copy":

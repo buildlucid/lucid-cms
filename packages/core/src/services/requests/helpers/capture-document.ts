@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants.js";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import type { RequestType } from "../../../libs/db/tables/requests.js";
 import executeHooks from "../../../libs/hooks/execute-hooks.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
@@ -15,17 +16,16 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
 import cloneVersion from "../../documents-versions/clone-version.js";
+import checkPublishedTargets from "./check-published-targets.js";
 import createTargets from "./create-targets.js";
+import requestTypePermissions from "./request-type-permissions.js";
 import resolveTargets from "./resolve-targets.js";
 
-/**
- * Captures a document's fixed source and initial destinations for a request,
- * then tells versionCapture hooks about the new proposal or snapshot.
- */
+/** Adds a document's targets to a request and captures its source content for publish requests. */
 const captureDocument: ServiceFn<
 	[
 		RequestDocumentInput & {
-			requestId: number;
+			request: { id: number; type: Exclude<RequestType, "create"> };
 			user: LucidUser;
 			/** Callers that already hold the document's write claim. */
 			skipDocumentWriteClaims?: boolean;
@@ -36,12 +36,18 @@ const captureDocument: ServiceFn<
 	const Versions = new DocumentVersionsRepository(context.db);
 	const RequestDocuments = new RequestDocumentsRepository(context.db);
 
+	const { write, ownWrite } = requestTypePermissions[data.request.type];
 	if (
 		!hasAccess({
 			user: data.user,
 			requiredPermissions: [
 				getCollectionPermission(data.collectionKey, "read"),
-				getCollectionPermission(data.collectionKey, "update"),
+			],
+			optionalPermissions: [
+				getCollectionPermission(data.collectionKey, write),
+				...(ownWrite
+					? [getCollectionPermission(data.collectionKey, ownWrite)]
+					: []),
 			],
 		})
 	) {
@@ -55,6 +61,18 @@ const captureDocument: ServiceFn<
 		};
 	}
 
+	const source = data.source ?? null;
+	if ((data.request.type === "publish") !== (source !== null)) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.requests.item.source.invalid"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
 	const collectionRes = await collections.getSingle(context, {
 		key: data.collectionKey,
 	});
@@ -62,8 +80,9 @@ const captureDocument: ServiceFn<
 
 	const targetsRes = resolveTargets({
 		collection: collectionRes.data,
-		source: data.source,
-		targets: data.targets,
+		type: data.request.type,
+		source,
+		targets: data.targets ?? [],
 	});
 	if (targetsRes.error) return targetsRes;
 
@@ -88,12 +107,41 @@ const captureDocument: ServiceFn<
 	if (accessRes.error) return accessRes;
 	if (tablesRes.error) return tablesRes;
 
+	if (source === null) {
+		const publishedRes = await checkPublishedTargets(context, {
+			collectionKey: data.collectionKey,
+			documentId: data.documentId,
+			targets: targetsRes.data,
+		});
+		if (publishedRes.error) return publishedRes;
+
+		const documentRes = await RequestDocuments.createSingle({
+			data: {
+				request_id: data.request.id,
+				collection_key: data.collectionKey,
+				document_id: data.documentId,
+				source: null,
+				source_version_id: null,
+				approved_version_id: null,
+				approved_workflow_stage: null,
+			},
+			returning: ["id"],
+			validation: { enabled: true },
+		});
+		if (documentRes.error) return documentRes;
+
+		return createTargets(context, {
+			requestDocumentId: documentRes.data.id,
+			targets: targetsRes.data,
+		});
+	}
+
 	const sourceRes = await Versions.selectSingle(
 		{
 			select: ["id"],
 			where: [
 				{ key: "document_id", operator: "=", value: data.documentId },
-				{ key: "type", operator: "=", value: data.source },
+				{ key: "type", operator: "=", value: source },
 			],
 		},
 		{ tableName: tablesRes.data.version },
@@ -116,7 +164,7 @@ const captureDocument: ServiceFn<
 		documentId: data.documentId,
 		fromVersionId: sourceRes.data.id,
 		toVersionType:
-			data.source === "latest"
+			source === "latest"
 				? constants.collectionBuilder.publishing.proposalVersionType
 				: constants.collectionBuilder.publishing.snapshotVersionType,
 		userId: data.user.id,
@@ -125,10 +173,10 @@ const captureDocument: ServiceFn<
 
 	const documentRes = await RequestDocuments.createSingle({
 		data: {
-			request_id: data.requestId,
+			request_id: data.request.id,
 			collection_key: data.collectionKey,
 			document_id: data.documentId,
-			source: data.source,
+			source,
 			source_version_id: cloneRes.data.versionId,
 			approved_version_id: null,
 			approved_workflow_stage: null,
@@ -146,7 +194,7 @@ const captureDocument: ServiceFn<
 
 	const membersRes = await RequestDocuments.selectMultiple({
 		select: ["collection_key", "document_id", "source", "source_version_id"],
-		where: [{ key: "request_id", operator: "=", value: data.requestId }],
+		where: [{ key: "request_id", operator: "=", value: data.request.id }],
 	});
 	if (membersRes.error) return membersRes;
 
@@ -165,9 +213,9 @@ const captureDocument: ServiceFn<
 				userId: data.user.id,
 				collectionTableNames: tablesRes.data,
 				request: {
-					id: data.requestId,
+					id: data.request.id,
 					documents: (membersRes.data ?? []).flatMap((member) =>
-						member.source_version_id === null
+						member.source === null || member.source_version_id === null
 							? []
 							: [
 									{
@@ -188,7 +236,7 @@ const captureDocument: ServiceFn<
 						? constants.collectionBuilder.publishing.proposalVersionType
 						: constants.collectionBuilder.publishing.snapshotVersionType,
 				sourceVersionId: sourceRes.data.id,
-				sourceVersionType: data.source,
+				sourceVersionType: source,
 			},
 		},
 	);

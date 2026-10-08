@@ -6,10 +6,7 @@ import type { RequestRecord } from "../types.js";
 import loadRequest from "./load-request.js";
 import lockRequest from "./lock-request.js";
 
-/**
- * Claims every document in a stable order before the request, then rereads its
- * revision. Use inside a transaction with `await using`.
- */
+/** Claims captured documents and the request in a stable order within a transaction for use with `await using`. */
 const acquireRequestWrites: ServiceFn<
 	[
 		{

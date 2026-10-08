@@ -228,6 +228,7 @@ export type {
 	CollectionBuilderHooks,
 	DocumentAfterFetchHookData,
 	DocumentAfterUpsertHookData,
+	DocumentBeforeUnpublishHookData,
 	DocumentBeforeUpsertHookData,
 	DocumentBeforeUpsertHookExecution,
 	DocumentBeforeUpsertHookOrigin,

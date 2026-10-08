@@ -3,48 +3,27 @@ import type {
 	InternalCollectionDocument,
 	RequestDocumentInput,
 } from "@types";
-import { TbOutlineX } from "solid-icons/tb";
-import { type Component, createMemo, For, Show } from "solid-js";
-import Button from "@/components/Button/Button";
+import { type Component, createMemo, For } from "solid-js";
 import Checkbox from "@/components/Checkbox/Checkbox";
-import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
+import RequestDocumentDraft from "@/components/RequestDocumentsModal/parts/RequestDocumentDraft";
 import Select from "@/components/Select/Select";
-import contentLocaleStore from "@/store/contentLocaleStore/contentLocaleStore";
 import T from "@/translations";
-import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
-import helpers from "@/utils/helpers";
 import {
 	getAllowedTargets,
 	getDefaultTargets,
 	getTargetLabel,
 } from "@/utils/requests";
 
-const RequestDocumentDraft: Component<{
-	draft: RequestDocumentInput;
+const RequestPublishDraft: Component<{
+	draft: Required<RequestDocumentInput>;
 	/** The picked document as listed, which carries its label fields and version summary. */
 	document: InternalCollectionDocument | undefined;
 	collection: Collection | undefined;
-	onChange: (draft: RequestDocumentInput) => void;
+	onChange: (draft: Required<RequestDocumentInput>) => void;
 	onRemove: () => void;
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const label = createMemo(() =>
-		props.collection && props.document
-			? getDocumentPreviewLabel({
-					collection: props.collection,
-					document: props.document,
-					contentLocale: contentLocaleStore.get.contentLocale ?? "",
-				})
-			: undefined,
-	);
-	const collectionLabel = createMemo(
-		() =>
-			helpers.getLocaleValue({
-				value: props.collection?.details.labels.singular,
-				fallback: props.draft.collectionKey,
-			}) || props.draft.collectionKey,
-	);
 	//* environments can only start a request when they have content to move on
 	const sources = createMemo(() => [
 		{ value: "latest", label: T()("requests.source.latest") },
@@ -78,32 +57,12 @@ const RequestDocumentDraft: Component<{
 	// ----------------------------------------
 	// Render
 	return (
-		<li class="rounded-md border border-border bg-card">
-			<div class="group/draft flex items-center gap-3 p-2.5">
-				<DocumentThumb />
-				<div class="min-w-0 grow">
-					<Show
-						when={label()}
-						fallback={<span class="skeleton block h-5 w-32" />}
-					>
-						<p class="truncate text-sm text-title">{label()}</p>
-					</Show>
-					<p class="mt-0.5 truncate text-xs text-muted">
-						{collectionLabel()} #{props.draft.documentId}
-					</p>
-				</div>
-				<Button
-					variant="danger-ghost"
-					size="xs"
-					shape="square"
-					class="transition-opacity md:opacity-0 md:group-hover/draft:opacity-100 md:focus-visible:opacity-100"
-					aria-label={T()("requests.create.clear.document")}
-					title={T()("requests.create.clear.document")}
-					onClick={props.onRemove}
-				>
-					<TbOutlineX size={14} />
-				</Button>
-			</div>
+		<RequestDocumentDraft
+			draft={props.draft}
+			document={props.document}
+			collection={props.collection}
+			onRemove={props.onRemove}
+		>
 			<div class="flex flex-col gap-2 border-t border-border px-3 py-2.5 sm:flex-row sm:items-center sm:gap-4">
 				<span class="shrink-0 text-xs text-muted sm:w-28">
 					{T()("requests.source")}
@@ -144,8 +103,8 @@ const RequestDocumentDraft: Component<{
 					</For>
 				</div>
 			</div>
-		</li>
+		</RequestDocumentDraft>
 	);
 };
 
-export default RequestDocumentDraft;
+export default RequestPublishDraft;

@@ -233,9 +233,7 @@ const Migration00000007: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("document_id", adapter.getDataType("integer"), (col) =>
 					col.notNull(),
 				)
-				.addColumn("source", adapter.getDataType("text"), (col) =>
-					col.notNull(),
-				)
+				.addColumn("source", adapter.getDataType("text"))
 				.addColumn("source_version_id", adapter.getDataType("integer"))
 				.addColumn("approved_workflow_stage", adapter.getDataType("text"))
 				.addColumn("approved_version_id", adapter.getDataType("integer"))

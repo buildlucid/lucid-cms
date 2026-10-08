@@ -45,10 +45,11 @@ export const RequestTargets: Component<{
 	const selected = createMemo(() =>
 		props.document.targets.map((target) => target.target),
 	);
-	//* create requests always land their document in latest
+	//* create requests always land their document in latest, and unpublish requests can only drop environments
 	const editable = createMemo(
 		() =>
-			props.request.type === "publish" &&
+			(props.request.type === "publish" ||
+				props.request.type === "unpublish") &&
 			props.request.status === "open" &&
 			props.request.permissions.edit,
 	);

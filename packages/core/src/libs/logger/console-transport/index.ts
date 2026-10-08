@@ -12,6 +12,7 @@ import {
 	shouldUseConsoleColors,
 } from "./formatters.js";
 import { writeHttpEntry } from "./http.js";
+import { writeQueryValidationEntry } from "./query.js";
 import type {
 	ConsoleTransportOptions,
 	ResolvedConsoleTransportOptions,
@@ -86,6 +87,12 @@ const createConsoleTransport = (
 			if (
 				entry.event === "http.request.completed" &&
 				writeHttpEntry(entry, options)
+			) {
+				return;
+			}
+			if (
+				entry.event === "query.response.validation.failed" &&
+				writeQueryValidationEntry(entry, options)
 			) {
 				return;
 			}

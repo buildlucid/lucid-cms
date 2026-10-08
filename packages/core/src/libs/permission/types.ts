@@ -10,6 +10,10 @@ export type CollectionPermissionAction =
 	| "create-request"
 	| "update"
 	| "delete"
+	/** Request deletions, which only move documents to the bin once their delete request is completed. */
+	| "delete-request"
+	/** Request unpublishing, which only removes documents from environments once their unpublish request is completed. */
+	| "unpublish-request"
 	| "restore"
 	| "publish"
 	| "review";

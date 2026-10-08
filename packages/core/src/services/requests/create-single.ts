@@ -1,4 +1,5 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
+import type { RequestType } from "../../libs/db/tables/requests.js";
 import { copy } from "../../libs/i18n/index.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
 import type { RequestDocumentInput } from "../../schemas/requests.js";
@@ -10,9 +11,11 @@ import notifyMentions from "./helpers/notify-mentions.js";
 import resolveMentions from "./helpers/resolve-mentions.js";
 import setReviewers from "./helpers/set-reviewers.js";
 
+/** Creates a publish, unpublish or delete request. */
 const createSingle: ServiceFn<
 	[
 		{
+			type: Exclude<RequestType, "create">;
 			title: string;
 			description?: RichTextJSON | null;
 			documents: RequestDocumentInput[];
@@ -56,7 +59,7 @@ const createSingle: ServiceFn<
 	const now = new Date().toISOString();
 	const requestRes = await Requests.createSingle({
 		data: {
-			type: "publish",
+			type: data.type,
 			title: data.title,
 			description: descriptionRes?.data ?? null,
 			status: "open",
@@ -80,7 +83,7 @@ const createSingle: ServiceFn<
 	)) {
 		const captureRes = await captureDocument(context, {
 			...document,
-			requestId: requestRes.data.id,
+			request: { id: requestRes.data.id, type: data.type },
 			user: data.user,
 		});
 		if (captureRes.error) return captureRes;
@@ -90,7 +93,7 @@ const createSingle: ServiceFn<
 		const reviewersRes = await setReviewers(context, {
 			request: {
 				id: requestRes.data.id,
-				type: "publish",
+				type: data.type,
 				title: data.title,
 				created_by: data.user.id,
 				documents: data.documents.map((document) => ({

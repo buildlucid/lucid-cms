@@ -9,7 +9,7 @@ import checkRequestSize from "./helpers/check-request-size.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
 import getRequestAccess from "./helpers/get-request-access.js";
 
-/** Adds fresh proposals or snapshots, so the whole group needs approving again. Create requests keep their one document. */
+/** Adds documents to a request and resets its approvals, capturing source content for publish requests. */
 const addDocuments: ServiceFn<
 	[{ id: number; documents: RequestDocumentInput[]; user: LucidUser }],
 	undefined
@@ -72,7 +72,7 @@ const addDocuments: ServiceFn<
 	for (const document of data.documents) {
 		const captureRes = await captureDocument(context, {
 			...document,
-			requestId: request.id,
+			request: { id: request.id, type: request.type },
 			user: data.user,
 			skipDocumentWriteClaims: true,
 		});

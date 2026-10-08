@@ -198,6 +198,8 @@ const collectionResponseSchema = z.object({
 		"create-request": z.string(),
 		update: z.string(),
 		delete: z.string(),
+		"delete-request": z.string(),
+		"unpublish-request": z.string(),
 		restore: z.string(),
 		publish: z.string(),
 		review: z.string(),
@@ -275,13 +277,21 @@ const collectionResponseSchema = z.object({
 		),
 		review: z
 			.object({
-				targets: z.array(z.string()).meta({
+				publish: z.array(z.string()).meta({
 					description:
-						"Publishing targets that can only be published through an approved request",
+						"Environments that can only be published to through an approved request",
+				}),
+				unpublish: z.array(z.string()).meta({
+					description:
+						"Environments that can only be unpublished from through an approved request",
 				}),
 				create: z.boolean().meta({
 					description:
 						"Whether new documents can only be created through an approved create request",
+				}),
+				delete: z.boolean().meta({
+					description:
+						"Whether documents can only be moved to the bin through an approved delete request",
 				}),
 				selfApproval: z.boolean().meta({
 					description:

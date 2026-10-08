@@ -118,7 +118,9 @@ const removeDocument: ServiceFn<
 				request: {
 					id: request.id,
 					documents: request.documents.flatMap((member) =>
-						member.id === document.id || member.source_version_id === null
+						member.id === document.id ||
+						member.source === null ||
+						member.source_version_id === null
 							? []
 							: [
 									{

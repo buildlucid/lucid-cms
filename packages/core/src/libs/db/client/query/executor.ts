@@ -2,10 +2,10 @@ import type { Executable } from "kysely";
 import type { output as ZodOutput, ZodType } from "zod";
 import constants from "../../../../constants/constants.js";
 import type { LucidErrorData } from "../../../../exports/types.js";
-import { tidyZodError } from "../../../../utils/errors/index.js";
 import { copy } from "../../../i18n/index.js";
 import logger from "../../../logger/index.js";
 import type { KyselyDB } from "../../types.js";
+import logValidationFailure from "./log-validation-failure.js";
 import { captureQueryTableName } from "./metadata.js";
 
 export type ManagedQueryResult<T> =
@@ -96,17 +96,7 @@ export class ManagedQuery<Output> {
 			return { error: undefined, data: result.data };
 		}
 
-		logger.error({
-			event: "query.response.validation.failed",
-			message: "Query response validation failed",
-			scope: constants.logScopes.query,
-			data: {
-				table: execution.meta.tableName,
-				method: execution.meta.method,
-				executionTime: execution.meta.executionTime,
-				validationError: tidyZodError(result.error),
-			},
-		});
+		logValidationFailure({ meta: execution.meta, error: result.error });
 		return {
 			data: undefined,
 			error: {
@@ -172,17 +162,7 @@ export class ManagedQuery<Output> {
 			};
 		}
 
-		logger.error({
-			event: "query.response.validation.failed",
-			message: "Query response validation failed",
-			scope: constants.logScopes.query,
-			data: {
-				table: execution.meta.tableName,
-				method: execution.meta.method,
-				executionTime: execution.meta.executionTime,
-				validationError: tidyZodError(result.error),
-			},
-		});
+		logValidationFailure({ meta: execution.meta, error: result.error });
 		return {
 			data: undefined,
 			error: {

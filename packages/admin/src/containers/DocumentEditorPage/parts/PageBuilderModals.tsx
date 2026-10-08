@@ -5,6 +5,7 @@ import CreateUpdateMediaDrawer from "@/components/CreateUpdateMediaDrawer/Create
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
 import DocumentRequestModal from "@/components/DocumentRequestModal/DocumentRequestModal";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
+import DocumentUnpublishModal from "@/components/DocumentUnpublishModal/DocumentUnpublishModal";
 import DuplicateDocumentModal from "@/components/DuplicateDocumentModal/DuplicateDocumentModal";
 import EmbeddedBrickEditDrawer from "@/components/EmbeddedBrickEditDrawer/EmbeddedBrickEditDrawer";
 import LinkSelectModal from "@/components/LinkSelectModal/LinkSelectModal";
@@ -280,32 +281,52 @@ export const PageBuilderModals: Component<{
 			/>
 			<Show when={props.hooks.state.documentId()}>
 				{(documentId) => (
-					<ReleaseEnvironmentModal
-						open={props.hooks.uiState.getReleaseEnvironmentOpen()}
-						setOpen={(open) => {
-							if (open) return;
-							resetRequestState();
-							props.hooks.mutations.publishMutation.reset();
-						}}
-						target={props.hooks.uiState.getReleaseEnvironmentTarget()}
-						action={
-							props.hooks.uiState.getReleaseEnvironmentAction() ?? "compose"
-						}
-						collection={props.hooks.state.collection()}
-						document={{
-							collectionKey: props.hooks.state.collectionKey(),
-							documentId: documentId(),
-						}}
-						source="latest"
-						publish={{
-							loading: props.hooks.mutations.publishMutation.action.isPending,
-							error: props.hooks.mutations.publishMutation.errors()?.message,
-							onConfirm: async (target) => {
-								await props.hooks.mutations.publishDocumentAction(target);
+					<>
+						<DocumentUnpublishModal
+							open={props.hooks.uiState.getUnpublishOpen()}
+							setOpen={props.hooks.uiState.setUnpublishOpen}
+							collection={props.hooks.state.collection()}
+							document={{
+								collectionKey: props.hooks.state.collectionKey(),
+								documentId: documentId(),
+							}}
+							target={props.hooks.uiState.unpublishTarget()}
+							onSuccess={() =>
+								navigate(
+									getDocumentRoute("edit", {
+										collectionKey: props.hooks.state.collectionKey(),
+										documentId: documentId(),
+									}),
+								)
+							}
+						/>
+						<ReleaseEnvironmentModal
+							open={props.hooks.uiState.getReleaseEnvironmentOpen()}
+							setOpen={(open) => {
+								if (open) return;
 								resetRequestState();
-							},
-						}}
-					/>
+								props.hooks.mutations.publishMutation.reset();
+							}}
+							target={props.hooks.uiState.getReleaseEnvironmentTarget()}
+							action={
+								props.hooks.uiState.getReleaseEnvironmentAction() ?? "compose"
+							}
+							collection={props.hooks.state.collection()}
+							document={{
+								collectionKey: props.hooks.state.collectionKey(),
+								documentId: documentId(),
+							}}
+							source="latest"
+							publish={{
+								loading: props.hooks.mutations.publishMutation.action.isPending,
+								error: props.hooks.mutations.publishMutation.errors()?.message,
+								onConfirm: async (target) => {
+									await props.hooks.mutations.publishDocumentAction(target);
+									resetRequestState();
+								},
+							}}
+						/>
+					</>
 				)}
 			</Show>
 		</>

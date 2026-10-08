@@ -43,7 +43,7 @@ const getRequestState: ServiceFn<
 				states.set(document.id, {
 					collection: null,
 					migrationRequired: false,
-					deleted: false,
+					deleted: null,
 					label: null,
 					workflowStage: null,
 					versions: new Map(),
@@ -67,7 +67,7 @@ const getRequestState: ServiceFn<
 				states.set(document.id, {
 					collection,
 					migrationRequired: true,
-					deleted: false,
+					deleted: null,
 					label: null,
 					workflowStage: null,
 					versions: new Map(),
@@ -140,17 +140,20 @@ const getRequestState: ServiceFn<
 				(workflow) => workflow.version_id === document.source_version_id,
 			)?.stage_key;
 
-			//* completed proposals are deleted, leaving the approved snapshot
-			const labelVersion = source ?? request;
+			//* completed proposals are deleted, leaving the approved snapshot, and unpublish and delete requests capture nothing
+			const labelVersionId =
+				source?.id ??
+				request?.id ??
+				versions.find((version) => version.type === "latest")?.id;
 			let label: string | null = null;
-			if (data.labels && labelVersion) {
+			if (data.labels && labelVersionId !== undefined) {
 				const labelRes = await getDocumentLabel({
 					context,
 					bricks: DocumentBricks,
 					collection,
 					tables: tablesRes.data,
 					documentId: document.document_id,
-					versionId: labelVersion.id,
+					versionId: labelVersionId,
 				});
 				if (labelRes.error) return labelRes;
 
@@ -160,7 +163,11 @@ const getRequestState: ServiceFn<
 			states.set(document.id, {
 				collection,
 				migrationRequired: false,
-				deleted: !row || formatter.formatBoolean(row.is_deleted),
+				deleted: !row
+					? "permanent"
+					: formatter.formatBoolean(row.is_deleted)
+						? "bin"
+						: null,
 				label,
 				workflowStage: !staged
 					? null

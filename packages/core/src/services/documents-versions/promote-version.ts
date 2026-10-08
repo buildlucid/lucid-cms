@@ -24,7 +24,7 @@ import notifyChange from "../documents/notify-change.js";
 import aggregateBrickTables from "../documents-bricks/helpers/aggregate-brick-tables.js";
 import insertBrickTables from "../documents-bricks/insert-brick-tables.js";
 import invalidateRequests from "../requests/helpers/invalidate-requests.js";
-import recordTargetPublished from "../requests/helpers/record-target-published.js";
+import recordTargetChange from "../requests/helpers/record-target-change.js";
 
 const promoteVersion: ServiceFn<
 	[
@@ -390,7 +390,7 @@ const promoteVersion: ServiceFn<
 				if (resetRes.error) return resetRes;
 			}
 
-			const publishedRes = await recordTargetPublished(context, {
+			const publishedRes = await recordTargetChange(context, {
 				collectionKey: data.collectionKey,
 				documentId: data.documentId,
 				target: data.toVersionType,

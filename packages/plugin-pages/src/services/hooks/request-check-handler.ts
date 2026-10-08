@@ -2,15 +2,16 @@ import { getCollectionTableNames } from "@lucidcms/core/extension";
 import type { LucidHook } from "@lucidcms/core/types";
 import type { PluginOptionsInternal } from "../../types/types.js";
 import checkRequestTargetRoutes from "../check-request-target-routes.js";
+import checkUnpublishDependents from "../check-unpublish-dependents.js";
 
-/**
- * Blocks a request whose pages would not have a valid, unique route in a
- * target environment. Each target is checked on its own, as only the pages
- * completed to it change there.
- */
+/** Checks page routes and prevents requests from leaving published pages without required parents or route segments. */
 const requestCheckHandler =
 	(options: PluginOptionsInternal): LucidHook<"requests", "check">["handler"] =>
 	async ({ context, data }) => {
+		if (data.request.type === "unpublish") {
+			return checkUnpublishDependents(context, { options, data });
+		}
+
 		for (const collection of options.collections) {
 			const documents = data.documents.flatMap((document) =>
 				document.collectionKey === collection.key && document.versionId !== null

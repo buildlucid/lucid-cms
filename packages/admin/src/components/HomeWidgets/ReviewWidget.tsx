@@ -9,7 +9,7 @@ import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
-import { getRequestState, requestStates } from "@/utils/requests";
+import { getRequestState, requestStates, requestTypes } from "@/utils/requests";
 import { getRequestRoute } from "@/utils/route-helpers";
 
 /**
@@ -74,11 +74,7 @@ const ReviewWidget: Component<{ size: DashboardWidgetSize }> = () => {
 									<DashboardCardItem
 										href={getRequestRoute({ requestId: request.id })}
 										title={request.title}
-										description={T()(
-											request.type === "create"
-												? "requests.type.create"
-												: "requests.type.publish",
-										)}
+										description={requestTypes[request.type].label()}
 										thumb={
 											<span class="relative flex">
 												<DocumentThumb requested={request.type === "create"} />

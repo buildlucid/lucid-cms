@@ -7,10 +7,10 @@ export const completedNotification = defineNotification({
 	key: "requests:completed",
 	category: notificationCategories.requests,
 	name: copy("admin:core.notifications.requests.completed.name", {
-		defaultMessage: "Request published",
+		defaultMessage: "Request completed",
 	}),
 	description: copy("admin:core.notifications.requests.completed.description", {
-		defaultMessage: "A request you are part of has been published.",
+		defaultMessage: "A request you are part of has been completed.",
 	}),
 	level: "success",
 	audience: "recipients",
@@ -19,7 +19,7 @@ export const completedNotification = defineNotification({
 	render: ({ data }) => ({
 		title: copy("server:core.notifications.requests.completed.title", {
 			data: { title: data.title },
-			defaultMessage: "{{title}} was published",
+			defaultMessage: "{{title}} was completed",
 		}),
 		href: requestHref(data.requestId),
 	}),

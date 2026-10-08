@@ -6,6 +6,7 @@ import {
 	afterRestoreHandler,
 	afterUpsertHandler,
 	beforeDeleteHandler,
+	beforeUnpublishHandler,
 	beforeUpsertHandler,
 	requestCheckHandler,
 	requestCompletedHandler,
@@ -82,6 +83,11 @@ const plugin: LucidPlugin<PluginOptions> = (plugin) => {
 					service: "documents",
 					event: "beforeDelete",
 					handler: beforeDeleteHandler(options),
+				});
+				draft.hooks.push({
+					service: "documents",
+					event: "beforeUnpublish",
+					handler: beforeUnpublishHandler(options),
 				});
 				draft.hooks.push({
 					service: "documents",

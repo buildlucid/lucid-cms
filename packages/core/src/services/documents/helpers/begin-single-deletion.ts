@@ -5,6 +5,7 @@ import type {
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
 import collections from "../../../libs/collection/collections.js";
 import { getTableNames } from "../../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import formatter from "../../../libs/formatters/index.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../../libs/repositories/index.js";
 import checkDocumentAccess from "../checks/check-document-access.js";
@@ -56,7 +57,7 @@ const beginSingleDeletion: ServiceFn<
 
 	const documentRes = await documents.selectSingle(
 		{
-			select: ["id"],
+			select: ["id", "is_deleted"],
 			where: [
 				{
 					key: "id",
@@ -92,6 +93,21 @@ const beginSingleDeletion: ServiceFn<
 		},
 	);
 	if (documentRes.error) return documentRes;
+
+	//* collections that review deletions only delete binned documents directly
+	if (
+		collectionRes.data.getData.publishing.review?.delete &&
+		!formatter.formatBoolean(documentRes.data.is_deleted)
+	) {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.documents.delete.review.required"),
+				status: 403,
+			},
+			data: undefined,
+		};
+	}
 
 	const hookRes = await executeDeleteHook(context, {
 		event: "beforeDelete",

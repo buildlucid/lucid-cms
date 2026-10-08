@@ -13,6 +13,7 @@ export const inputSchema = z.object({
 				version: z.string().min(1).optional(),
 			}),
 			z.object({ type: z.literal("published"), version: z.string().min(1) }),
+			z.object({ type: z.literal("unpublished"), version: z.string().min(1) }),
 			z.object({
 				type: z.literal("referencesUpdated"),
 				version: z.string().min(1),

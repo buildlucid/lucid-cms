@@ -41,6 +41,7 @@ const collection = {
 	key: "pages",
 	getData: {
 		locked: false,
+		publishing: {},
 	},
 };
 const tableNames = {
@@ -71,7 +72,7 @@ const mockSuccessfulPreparation = () => {
 	});
 	mocks.selectSingle.mockResolvedValueOnce({
 		error: undefined,
-		data: { id: 12 },
+		data: { id: 12, is_deleted: 0 },
 	});
 	mocks.executeDeleteHook.mockResolvedValueOnce({
 		error: undefined,

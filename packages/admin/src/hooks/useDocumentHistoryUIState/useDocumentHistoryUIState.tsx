@@ -8,6 +8,7 @@ export function useDocumentHistoryUIState(props: {
 	collection: Accessor<Collection | undefined>;
 }): UseDocumentUIState {
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
+	const [getUnpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
@@ -74,6 +75,8 @@ export function useDocumentHistoryUIState(props: {
 	const hasPublishPermission = createMemo(() => false);
 
 	const hasDeletePermission = createMemo(() => false);
+	const unpublishTarget = createMemo((): string | undefined => undefined);
+	const hasUnpublishPermission = createMemo(() => false);
 	const hasDuplicatePermission = createMemo(() => false);
 
 	const showRestoreRevisionButton = createMemo(() => false);
@@ -88,6 +91,8 @@ export function useDocumentHistoryUIState(props: {
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
+		getUnpublishOpen,
+		setUnpublishOpen,
 		getDuplicateOpen,
 		setDuplicateOpen,
 		getRestoreRevisionOpen,
@@ -121,6 +126,8 @@ export function useDocumentHistoryUIState(props: {
 		showPublishButton,
 		showDeleteButton,
 		hasDeletePermission,
+		unpublishTarget,
+		hasUnpublishPermission,
 		showDuplicateButton,
 		duplicateDisabled,
 		hasDuplicatePermission,

@@ -7,7 +7,7 @@ import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
 import { getRequestDocumentLabel, getTargetLabel } from "@/utils/requests";
-import { getRequestRoute } from "@/utils/route-helpers";
+import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
 import { RequestChecks } from "./RequestChecks";
 import { RequestOverviewRow } from "./RequestOverviewRow";
 import { RequestTargets } from "./RequestTargets";
@@ -32,12 +32,44 @@ export const RequestDocumentCard: Component<{
 	const canEdit = createMemo(
 		() => props.document.source === "latest" && props.document.permissions.edit,
 	);
+	const canOpen = createMemo(
+		() =>
+			props.document.deleted !== "permanent" &&
+			(props.document.source === null ||
+				props.document.versionId !== null ||
+				props.document.approvedVersionId !== null),
+	);
 	const contentLabel = createMemo(() =>
 		canEdit() ? T()("requests.document.edit") : T()("requests.document.view"),
 	);
+	//* unpublish and delete requests capture no content, so they link to the document itself
 	const contentHref = createMemo(() =>
-		getRequestRoute({ requestId: props.request.id, content: props.document }),
+		props.document.source === null
+			? getDocumentRoute("edit", {
+					collectionKey: props.document.collectionKey,
+					documentId: props.document.documentId,
+				})
+			: getRequestRoute({
+					requestId: props.request.id,
+					content: props.document,
+				}),
 	);
+	const sourceLabel = createMemo(() => {
+		const source = props.document.source;
+		if (props.request.type === "create") {
+			return T()("requests.document.source.request");
+		}
+		if (source === null) {
+			return props.request.type === "delete"
+				? T()("requests.document.source.delete")
+				: T()("requests.document.source.unpublish");
+		}
+		return source === "latest"
+			? T()("requests.document.source.proposal")
+			: T()("requests.document.source.snapshot", {
+					source: getTargetLabel(props.collection, source),
+				});
+	});
 
 	// ----------------------------------------
 	// Render
@@ -47,28 +79,28 @@ export const RequestDocumentCard: Component<{
 				<div class="group/document flex items-center gap-3 p-4">
 					<DocumentThumb />
 					<div class="min-w-0 grow">
-						<A
-							href={contentHref()}
-							class="inline-flex max-w-full items-center gap-1.5 text-sm text-title underline-offset-2 hover:underline"
+						<Show
+							when={canOpen()}
+							fallback={
+								<p class="truncate text-sm text-title">
+									{getRequestDocumentLabel(props.document, props.collection)}
+								</p>
+							}
 						>
-							<span class="truncate">
-								{getRequestDocumentLabel(props.document, props.collection)}
-							</span>
-							<TbOutlineExternalLink size={10} class="shrink-0 text-icon" />
-						</A>
+							<A
+								href={contentHref()}
+								class="inline-flex max-w-full items-center gap-1.5 text-sm text-title underline-offset-2 hover:underline"
+							>
+								<span class="truncate">
+									{getRequestDocumentLabel(props.document, props.collection)}
+								</span>
+								<TbOutlineExternalLink size={10} class="shrink-0 text-icon" />
+							</A>
+						</Show>
 						<p class="mt-0.5 truncate text-xs text-muted">
 							{collectionLabel()} #{props.document.documentId}
 							<span aria-hidden="true"> · </span>
-							{props.request.type === "create"
-								? T()("requests.document.source.request")
-								: props.document.source === "latest"
-									? T()("requests.document.source.proposal")
-									: T()("requests.document.source.snapshot", {
-											source: getTargetLabel(
-												props.collection,
-												props.document.source,
-											),
-										})}
+							{sourceLabel()}
 						</p>
 					</div>
 					<div class="flex shrink-0 items-center gap-1.5">
@@ -83,9 +115,7 @@ export const RequestDocumentCard: Component<{
 										type: "link",
 										icon: canEdit() ? "pen" : "eye",
 										href: contentHref(),
-										show:
-											props.document.versionId !== null ||
-											props.document.approvedVersionId !== null,
+										show: canOpen(),
 									},
 									{
 										label: T()("requests.documents.remove"),
@@ -106,19 +136,32 @@ export const RequestDocumentCard: Component<{
 						/>
 					</div>
 				</div>
-				<RequestOverviewRow
-					label={
-						props.request.type === "create"
-							? T()("requests.targets.create")
-							: T()("requests.targets")
+				<Show
+					when={props.request.type !== "delete"}
+					fallback={
+						<RequestOverviewRow label={T()("requests.targets.delete")}>
+							<p class="text-sm text-muted">
+								{T()("requests.targets.delete.description")}
+							</p>
+						</RequestOverviewRow>
 					}
 				>
-					<RequestTargets
-						request={props.request}
-						document={props.document}
-						collection={props.collection}
-					/>
-				</RequestOverviewRow>
+					<RequestOverviewRow
+						label={
+							props.request.type === "create"
+								? T()("requests.targets.create")
+								: props.request.type === "unpublish"
+									? T()("requests.targets.unpublish")
+									: T()("requests.targets")
+						}
+					>
+						<RequestTargets
+							request={props.request}
+							document={props.document}
+							collection={props.collection}
+						/>
+					</RequestOverviewRow>
+				</Show>
 				<Show when={props.request.status === "open"}>
 					<RequestOverviewRow label={T()("requests.checks.title")}>
 						<RequestChecks

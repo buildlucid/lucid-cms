@@ -27,9 +27,6 @@ import { normalizeRelationCollections } from "./utils/normalize-relation-collect
 
 type RelationTargetFieldConfig = FieldConfig<FieldTypes>;
 
-/**
- * Returns true when the field can reference the deleted collection.
- */
 const canReferenceCollection = (
 	field: RelationTargetFieldConfig,
 	targetCollectionKey: string,
@@ -40,9 +37,6 @@ const canReferenceCollection = (
 	);
 };
 
-/**
- * Finds the relation table generated for a relation custom field.
- */
 const findRelationTable = (props: {
 	schemas: CollectionSchemaTable<LucidBrickTableName>[];
 	collectionKey: string;
@@ -106,6 +100,8 @@ const nullifyRelationReferences: ServiceFn<
 		{
 			documentIds?: number[];
 			collectionKey: string;
+			/** The delete request doing the deleting, which keeps its approval when its documents reference each other. */
+			requestId?: number;
 		},
 	],
 	undefined
@@ -255,7 +251,11 @@ const nullifyRelationReferences: ServiceFn<
 		if (!versionIds.length) continue;
 
 		const removeRes = await DocumentBricks.deleteRelationReferences(
-			{ ...data, versionIds },
+			{
+				collectionKey: data.collectionKey,
+				documentIds: data.documentIds,
+				versionIds,
+			},
 			{ tableName: table },
 		);
 		if (removeRes.error) return removeRes;
@@ -293,6 +293,7 @@ const nullifyRelationReferences: ServiceFn<
 			documentIds: [
 				...new Set([...versions.values()].map((version) => version.documentId)),
 			],
+			requestId: data.requestId,
 		});
 		if (invalidateRes.error) return invalidateRes;
 

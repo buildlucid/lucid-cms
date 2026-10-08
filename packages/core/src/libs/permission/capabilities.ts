@@ -86,6 +86,16 @@ const collectionPermissionDetails = {
 	},
 	update: { name: copy("admin:permissions.documents.update") },
 	delete: { name: copy("admin:permissions.documents.delete") },
+	"delete-request": {
+		name: copy("admin:permissions.documents.delete.request"),
+		description: copy("admin:permissions.documents.delete.request.description"),
+	},
+	"unpublish-request": {
+		name: copy("admin:permissions.documents.unpublish.request"),
+		description: copy(
+			"admin:permissions.documents.unpublish.request.description",
+		),
+	},
 	restore: { name: copy("admin:permissions.documents.restore") },
 	publish: { name: copy("admin:permissions.documents.publish") },
 	review: { name: copy("admin:permissions.documents.review") },

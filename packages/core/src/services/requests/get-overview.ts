@@ -34,7 +34,12 @@ const getOverview: ServiceFn<[{ user: LucidUser }], RequestOverview> = async (
 
 	return {
 		error: undefined,
-		data: { publish: counts("publish"), create: counts("create") },
+		data: {
+			create: counts("create"),
+			publish: counts("publish"),
+			unpublish: counts("unpublish"),
+			delete: counts("delete"),
+		},
 	};
 };
 

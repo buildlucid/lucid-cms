@@ -15,6 +15,7 @@ import type {
 } from "../../utils/services/types.js";
 import type CollectionBuilder from "../collection/builders/collection-builder/index.js";
 import type { DocumentVersionType } from "../db/tables/index.js";
+import type { RequestType } from "../db/tables/requests.js";
 import type { Toolkit } from "../toolkit/types.js";
 
 // --------------------------------------------------
@@ -27,6 +28,7 @@ export type DocumentChangeMetadata =
 	| { type: "deleted"; permanent: boolean }
 	| { type: "restored" }
 	| { type: "published"; version: string }
+	| { type: "unpublished"; version: string }
 	| { type: "referencesUpdated"; version: string };
 
 export type MediaChangeMetadata =
@@ -44,6 +46,7 @@ export type HookExecutionKindMap = {
 		afterUpsert: "effect";
 		afterFetch: "transform";
 		beforeDelete: "effect";
+		beforeUnpublish: "effect";
 		afterRestore: "effect";
 		afterDelete: "effect";
 		versionPromote: "effect";
@@ -166,6 +169,12 @@ export type DocumentDeleteHookData = {
 	ids: number[];
 };
 
+/** Documents about to be removed from one environment. */
+export type DocumentBeforeUnpublishHookData = {
+	ids: number[];
+	versionType: Exclude<DocumentVersionType, "revision">;
+};
+
 export type DocumentVersionPromoteHookData = {
 	documentId: number;
 	versionId: number;
@@ -181,24 +190,28 @@ export type DocumentVersionCaptureHookData = {
 	sourceVersionType: Exclude<DocumentVersionType, "revision">;
 };
 
-/** A reason a request cannot be approved or published yet. Hook blockers carry their own message. */
+/** A reason a request cannot be approved or completed yet. Hook blockers carry their own message. */
 export type RequestCheckBlocker = {
 	requestDocumentId: number;
 	target?: string;
 	message: string;
 };
 
-/** A request has published every document to its targets. Each entry lists the new environment versions. */
+/** A request has completed every document. Each entry lists the versions it published, which unpublish and delete requests leave empty. */
 export type RequestCompletedHookData = {
 	request: {
 		id: number;
+		type: RequestType;
 		revision: number;
 	};
 	documents: Array<{
 		requestDocumentId: number;
 		collectionKey: string;
 		documentId: number;
-		source: string;
+		/** Null for unpublish and delete requests. */
+		source: string | null;
+		/** Environments for unpublish requests, no targets for delete, and latest or environments for create and publish. */
+		targets: string[];
 		versions: Array<{ target: string; versionId: number }>;
 	}>;
 };
@@ -210,10 +223,11 @@ export type RequestDocumentRemovedHookData = {
 	documentId: number;
 };
 
-/** The request being checked. Hooks push blockers for documents that cannot be created or published as they are. */
+/** The request being checked. Hooks push blockers for documents that cannot be created, published, unpublished or deleted as they are. */
 export type RequestCheckHookData = {
 	request: {
 		id: number;
+		type: RequestType;
 		revision: number;
 	};
 	/** The request's documents from one collection. Hooks run once for each collection. */
@@ -221,9 +235,9 @@ export type RequestCheckHookData = {
 		requestDocumentId: number;
 		collectionKey: string;
 		documentId: number;
-		/** Latest for a proposal, or the environment a snapshot came from. */
-		source: string;
-		/** The content to be created or published. Null when it is unavailable. */
+		/** Latest for a proposal, or the environment a snapshot came from. Null for unpublish and delete requests. */
+		source: string | null;
+		/** The content to be created or published. Null when it is unavailable, or for unpublish and delete requests. */
 		versionId: number | null;
 		targets: string[];
 	}>;
@@ -367,7 +381,6 @@ type HookHandler<
 	},
 ) => ServiceResponse<TData>;
 
-/** Handler signatures by service and event. */
 export type HookServiceHandlers = {
 	documents: {
 		afterChange: HookHandler<
@@ -398,6 +411,10 @@ export type HookServiceHandlers = {
 		>;
 		afterDelete: HookHandler<
 			EffectHookPayload<DocumentDeleteHookMeta, DocumentDeleteHookData>,
+			undefined
+		>;
+		beforeUnpublish: HookHandler<
+			EffectHookPayload<DocumentUserHookMeta, DocumentBeforeUnpublishHookData>,
 			undefined
 		>;
 		afterRestore: HookHandler<
@@ -520,6 +537,7 @@ export type CollectionBuilderHooks =
 	| LucidHookDocuments<"afterFetch">
 	| LucidHookDocuments<"beforeDelete">
 	| LucidHookDocuments<"afterDelete">
+	| LucidHookDocuments<"beforeUnpublish">
 	| LucidHookDocuments<"afterRestore">
 	| LucidHookDocuments<"versionPromote">
 	| LucidHookDocuments<"versionCapture">
@@ -533,6 +551,7 @@ export type DocumentHooks =
 	| LucidHook<"documents", "afterFetch">
 	| LucidHook<"documents", "beforeDelete">
 	| LucidHook<"documents", "afterDelete">
+	| LucidHook<"documents", "beforeUnpublish">
 	| LucidHook<"documents", "afterRestore">
 	| LucidHook<"documents", "versionPromote">
 	| LucidHook<"documents", "versionCapture">;

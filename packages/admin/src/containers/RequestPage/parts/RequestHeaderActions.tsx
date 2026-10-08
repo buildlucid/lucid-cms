@@ -96,7 +96,7 @@ export const RequestHeaderActions: Component<{
 		<>
 			<Show when={props.publishing}>
 				<Button size="sm" variant="secondary" loading={true}>
-					{T()("common.publishing")}
+					{T()("requests.completing")}
 				</Button>
 			</Show>
 			<Show when={!primary() && canWithdraw()}>

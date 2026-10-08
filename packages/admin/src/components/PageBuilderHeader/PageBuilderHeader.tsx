@@ -335,7 +335,7 @@ export const PageBuilderHeader: Component<{
 			const isPromoted = environmentStatus === "in-sync";
 
 			const reviewRequired =
-				publishReview?.targets.includes(environment.key) === true;
+				publishReview?.publish.includes(environment.key) === true;
 
 			//* starting a request only needs edit access, approving and completing are checked later
 			const canPublish = userStore.get.hasPermission([
@@ -485,7 +485,7 @@ export const PageBuilderHeader: Component<{
 				(proposals.data?.data.length ?? 0) > 0 ||
 				collection.revisions.enabled ||
 				environments.length > 0 ||
-				(collection.publishing.review?.targets?.length ?? 0) > 0)
+				(collection.publishing.review?.publish.length ?? 0) > 0)
 		);
 	});
 	const showCopyPreview = createMemo(() => {
@@ -841,6 +841,7 @@ export const PageBuilderHeader: Component<{
 							<Show
 								when={
 									props.state.ui.showDeleteButton?.() ||
+									props.state.ui.unpublishTarget() !== undefined ||
 									props.state.ui.showDuplicateButton?.() ||
 									props.actions.requestAlignment !== undefined ||
 									props.requestLink !== undefined ||
@@ -879,6 +880,15 @@ export const PageBuilderHeader: Component<{
 											: undefined
 									}
 									deletePermission={props.state.ui.hasDeletePermission?.()}
+									unpublish={
+										props.state.ui.unpublishTarget() !== undefined
+											? {
+													onUnpublish: () =>
+														props.state.ui.setUnpublishOpen(true),
+													permission: props.state.ui.hasUnpublishPermission(),
+												}
+											: undefined
+									}
 									preview={
 										showCopyPreview()
 											? {

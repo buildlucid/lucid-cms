@@ -6,8 +6,17 @@ import { defineTable } from "../client/table/definition.js";
 import type { TimestampImmutable, TimestampMutable } from "../types.js";
 
 export const requestStatusSchema = z.enum(["open", "completed", "closed"]);
-/** Publish requests move existing documents to environments. Create requests request one new document. */
-export const requestTypeSchema = z.enum(["publish", "create"]);
+/**
+ * Create requests request one new document. Publish requests move existing
+ * documents to environments, unpublish requests remove them from environments
+ * and delete requests move whole documents to the bin.
+ */
+export const requestTypeSchema = z.enum([
+	"create",
+	"publish",
+	"unpublish",
+	"delete",
+]);
 
 export const requestsTable = defineTable("lucid_requests", () => ({
 	columns: {
@@ -95,7 +104,7 @@ export const requestsTable = defineTable("lucid_requests", () => ({
 					id: z.number(),
 					collection_key: z.string(),
 					document_id: z.number(),
-					source: z.string(),
+					source: z.string().nullable(),
 					source_version_id: z.number().nullable(),
 					targets: z.array(z.object({ target: z.string() })),
 				}),

@@ -14,6 +14,8 @@ export const collectionPermissionActions = [
 	"create-request",
 	"update",
 	"delete",
+	"delete-request",
+	"unpublish-request",
 	"restore",
 	"publish",
 	"review",

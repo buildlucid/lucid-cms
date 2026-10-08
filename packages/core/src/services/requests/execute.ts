@@ -1,5 +1,8 @@
 import constants from "../../constants/constants.js";
-import type { CollectionTableNames } from "../../exports/types.js";
+import type {
+	CollectionTableNames,
+	DocumentChangeMetadata,
+} from "../../exports/types.js";
 import type CollectionBuilder from "../../libs/collection/builders/collection-builder/index.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
 import executeHooks from "../../libs/hooks/execute-hooks.js";
@@ -11,10 +14,12 @@ import {
 	RequestsRepository,
 } from "../../libs/repositories/index.js";
 import type { ServiceFn, ServiceResponse } from "../../utils/services/types.js";
+import deleteMultiple from "../documents/delete-multiple.js";
 import invalidateContentDocumentCache from "../documents/helpers/invalidate-content-cache.js";
 import notifyChange from "../documents/notify-change.js";
 import validateVersionContent from "../documents-versions/helpers/validate-version-content.js";
 import promoteVersion from "../documents-versions/promote-version.js";
+import unpublishVersion from "../documents-versions/unpublish-version.js";
 import sendNotification from "../notifications/send.js";
 import loadActiveUser from "../users/helpers/load-active-user.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
@@ -31,21 +36,7 @@ import resolveRequestNotifications from "./helpers/resolve-request-notifications
 import { completedNotification } from "./notifications/completed.js";
 import type { RequestDocumentRecord } from "./types.js";
 
-/**
- * Runs a queued publication. Every approved snapshot is published to its
- * targets, in target order, inside the job's transaction, so either everything
- * is completed or nothing is. Promote hooks and change notifications run once
- * every document is in place, so related documents in the request see each
- * other whatever order they were added in and dependants are told once per
- * target. Proposals are removed once completed, as their approved snapshots
- * hold the same content. A create request's document is marked as created
- * before any hooks run, so they see it like any other document, and any
- * proposal landing in latest hands latest its workflow.
- *
- * A stale job, eg. after the schedule moved or the approval was dismissed,
- * does nothing. Failures carry diagnostics for the job's failure hook, which
- * records them on the request after the transaction rolls back.
- */
+/** Executes queued requests atomically, deferring promotion hooks and change notifications until all documents complete. */
 const execute: ServiceFn<
 	[{ id: number; jobId: string; revision: number; userId: number | null }],
 	undefined
@@ -115,12 +106,43 @@ const execute: ServiceFn<
 			target: string;
 			versionId: number;
 		}> = [];
+		const unpublished: Array<{
+			document: RequestDocumentRecord;
+			target: string;
+		}> = [];
+		const deleted: RequestDocumentRecord[] = [];
 		for (const document of request.documents) {
 			failureRequestDocumentId = document.id;
 			failureTarget = null;
 
 			const state = stateRes.data.get(document.id);
-			if (!state?.collection || document.approved_version_id === null) {
+			if (!state?.collection) {
+				return {
+					error: {
+						type: "basic",
+						message: copy("server:core.requests.not.approved"),
+						status: 409,
+					},
+					data: undefined,
+				};
+			}
+
+			if (request.type === "delete") {
+				deleted.push(document);
+				continue;
+			}
+
+			if (request.type === "unpublish") {
+				for (const target of document.targets) {
+					//* approved while unpublished, as any later change would block completion
+					if (!state.versions.has(target.target)) continue;
+					unpublished.push({ document, target: target.target });
+				}
+				continue;
+			}
+
+			const approvedVersionId = document.approved_version_id;
+			if (approvedVersionId === null) {
 				return {
 					error: {
 						type: "basic",
@@ -134,7 +156,7 @@ const execute: ServiceFn<
 			const validateRes = await validateVersionContent(context, {
 				collection: state.collection,
 				documentId: document.document_id,
-				versionId: document.approved_version_id,
+				versionId: approvedVersionId,
 				user,
 			});
 			if (validateRes.error) return validateRes;
@@ -153,7 +175,7 @@ const execute: ServiceFn<
 				const promoteRes = await promoteVersion(context, {
 					collectionKey: document.collection_key,
 					documentId: document.document_id,
-					fromVersionId: document.approved_version_id,
+					fromVersionId: approvedVersionId,
 					toVersionType: target.target,
 					userId: user.id,
 					skipDocumentWriteClaims: true,
@@ -169,6 +191,45 @@ const execute: ServiceFn<
 					versionId: promoteRes.data.versionId,
 				});
 			}
+		}
+
+		//* removals run together per collection and environment, so hooks see everything removed at once, eg. a parent page and its children
+		for (const documents of Map.groupBy(
+			deleted,
+			(document) => document.collection_key,
+		).values()) {
+			const [first] = documents;
+			if (!first) continue;
+			failureRequestDocumentId = documents.length === 1 ? first.id : null;
+			failureTarget = null;
+
+			const deleteRes = await deleteMultiple(context, {
+				ids: documents.map((document) => document.document_id),
+				collectionKey: first.collection_key,
+				userId: user.id,
+				requestId: request.id,
+			});
+			if (deleteRes.error) return deleteRes;
+		}
+		for (const entries of Map.groupBy(
+			unpublished,
+			(entry) => `${entry.document.collection_key}:${entry.target}`,
+		).values()) {
+			const [first] = entries;
+			if (!first) continue;
+			failureRequestDocumentId =
+				entries.length === 1 ? first.document.id : null;
+			failureTarget = first.target;
+
+			const unpublishRes = await unpublishVersion(context, {
+				collectionKey: first.document.collection_key,
+				documentIds: entries.map((entry) => entry.document.document_id),
+				target: first.target,
+				userId: user.id,
+				requestId: request.id,
+				deferEffects: true,
+			});
+			if (unpublishRes.error) return unpublishRes;
 		}
 
 		for (const document of request.documents) {
@@ -220,7 +281,7 @@ const execute: ServiceFn<
 						request: {
 							id: request.id,
 							documents: request.documents.flatMap((document) =>
-								document.source_version_id === null
+								document.source === null || document.source_version_id === null
 									? []
 									: [
 											{
@@ -251,12 +312,17 @@ const execute: ServiceFn<
 			{
 				meta: { userId: user.id },
 				data: {
-					request: { id: request.id, revision: request.revision },
+					request: {
+						id: request.id,
+						type: request.type,
+						revision: request.revision,
+					},
 					documents: request.documents.map((document) => ({
 						requestDocumentId: document.id,
 						collectionKey: document.collection_key,
 						documentId: document.document_id,
 						source: document.source,
+						targets: document.targets.map((target) => target.target),
 						versions: promoted
 							.filter((entry) => entry.document.id === document.id)
 							.map((entry) => ({
@@ -269,26 +335,50 @@ const execute: ServiceFn<
 		);
 		if (publishedRes.error) return publishedRes;
 
-		//* dependants are told once per collection and target, after routes and other hooks have settled
-		const changes = Map.groupBy(
-			promoted,
-			(entry) => `${entry.document.collection_key}:${entry.target}`,
-		);
+		//* dependants are told once per collection and change, after routes and other hooks have settled
+		type Change = {
+			document: RequestDocumentRecord;
+			change: DocumentChangeMetadata;
+		};
+		const changes = [
+			...promoted.map(
+				(entry): Change => ({
+					document: entry.document,
+					change:
+						entry.target !== "latest"
+							? { type: "published", version: entry.target }
+							: request.type === "create"
+								? { type: "created" }
+								: { type: "updated", version: "latest" },
+				}),
+			),
+			...unpublished.map(
+				(entry): Change => ({
+					document: entry.document,
+					change: { type: "unpublished", version: entry.target },
+				}),
+			),
+			...deleted.map(
+				(document): Change => ({
+					document,
+					change: { type: "deleted", permanent: false },
+				}),
+			),
+		];
 		for (const collectionKey of new Set(
-			promoted.map((entry) => entry.document.collection_key),
+			changes.map((entry) => entry.document.collection_key),
 		)) {
 			await invalidateContentDocumentCache(context, collectionKey);
 		}
-		for (const entries of changes.values()) {
+		for (const entries of Map.groupBy(
+			changes,
+			(entry) =>
+				`${entry.document.collection_key}:${JSON.stringify(entry.change)}`,
+		).values()) {
 			const [first] = entries;
 			if (!first) continue;
 			const changed = await notifyChange(context, {
-				change:
-					first.target !== "latest"
-						? { type: "published", version: first.target }
-						: request.type === "create"
-							? { type: "created" }
-							: { type: "updated", version: "latest" },
+				change: first.change,
 				collectionKey: first.document.collection_key,
 				ids: [...new Set(entries.map((entry) => entry.document.document_id))],
 			});

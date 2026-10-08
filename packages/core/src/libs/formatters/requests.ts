@@ -114,7 +114,8 @@ const formatEvent = (props: {
 				target: metadata.target ?? null,
 			};
 		}
-		case "target_published": {
+		case "target_published":
+		case "target_unpublished": {
 			if (
 				metadata.requestDocumentId === undefined ||
 				metadata.target === undefined
@@ -123,7 +124,7 @@ const formatEvent = (props: {
 			}
 			return {
 				...base,
-				type: "target_published",
+				type: props.event.type,
 				target: metadata.target,
 				requestDocumentId: metadata.requestDocumentId,
 				sourceRequestId: metadata.sourceRequestId ?? null,
@@ -251,6 +252,7 @@ const formatSingle = (props: {
 				collectionKey: document.collection_key,
 				documentId: document.document_id,
 				documentLabel: state?.label ?? null,
+				deleted: state?.deleted ?? null,
 				source: document.source,
 				versionId: document.source_version_id,
 				contentId: state?.source?.contentId ?? null,

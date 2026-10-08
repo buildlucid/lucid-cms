@@ -8,6 +8,8 @@ export type CoreExternalScope =
 			| "create-request"
 			| "update"
 			| "delete"
+			| "delete-request"
+			| "unpublish-request"
 			| "restore"
 			| "publish"
 			| "review"}`

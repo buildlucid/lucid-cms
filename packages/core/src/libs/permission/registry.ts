@@ -12,7 +12,7 @@ export const corePermissionKeys = Object.values(
 ) as StaticPermission[];
 
 const collectionPermissionRegex =
-	/^documents:[a-z0-9-_]+:(read|create|create-request|update|delete|restore|publish|review)$/;
+	/^documents:[a-z0-9-_]+:(read|create|create-request|update|delete|delete-request|unpublish-request|restore|publish|review)$/;
 const agentPermissionRegex =
 	/^agents:[a-z0-9-]+:(chat|manage-own-routines|manage-code-routines)$/;
 
@@ -82,6 +82,8 @@ const permissionActionOrder = new Map(
 		"restore",
 		"review",
 		"publish",
+		"unpublish-request",
+		"delete-request",
 		"send",
 		"regenerate",
 		"manage",

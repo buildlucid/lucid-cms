@@ -170,7 +170,9 @@ const ReleaseEnvironmentModal: Component<{
 			}
 			return;
 		}
-		create.action.mutate({ body: { title: title(), documents: [document] } });
+		create.action.mutate({
+			body: { type: "publish", title: title(), documents: [document] },
+		});
 	};
 
 	// ----------------------------------------

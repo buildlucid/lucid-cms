@@ -61,7 +61,7 @@ const requestEventSchema: z.ZodType<RequestEvent> = z.discriminatedUnion(
 		}),
 		z.object({
 			...requestEventBaseShape,
-			type: z.literal("target_published"),
+			type: z.enum(["target_published", "target_unpublished"]),
 			target: z.string(),
 			requestDocumentId: z.number(),
 			sourceRequestId: z.number().nullable(),
@@ -114,6 +114,7 @@ const requestBlockersSchema = z.array(
 			"migration_required",
 			"collection_locked",
 			"document_deleted",
+			"document_permanently_deleted",
 			"source_missing",
 			"no_targets",
 			"target_unavailable",
@@ -137,9 +138,13 @@ const requestDocumentResponseSchema = z.object({
 	collectionKey: z.string(),
 	documentId: z.number(),
 	documentLabel: z.string().nullable(),
-	source: z.string().meta({
+	deleted: z.enum(["bin", "permanent"]).nullable().meta({
 		description:
-			"Latest for a proposal, or the environment a snapshot came from",
+			"Whether the document is in the bin, where it can be restored, or permanently deleted",
+	}),
+	source: z.string().nullable().meta({
+		description:
+			"Latest for a proposal, or the environment a snapshot came from. Null for unpublish and delete requests",
 	}),
 	versionId: z.number().nullable().meta({
 		description:
@@ -149,7 +154,8 @@ const requestDocumentResponseSchema = z.object({
 		description: "The content ID of versionId",
 	}),
 	approvedVersionId: z.number().nullable().meta({
-		description: "The frozen snapshot that will be, or was, published",
+		description:
+			"The frozen snapshot that will be, or was, published. Null for unpublish and delete requests",
 	}),
 	workflowStage: z.string().nullable(),
 	targets: z.array(
@@ -171,7 +177,7 @@ const requestResponseSchema = z.object({
 	id: z.number(),
 	type: requestTypeSchema.meta({
 		description:
-			"Publish requests move documents to environments. Create requests request one new document, created once completed",
+			"Create requests request one new document, created once completed. Publish requests move documents to environments, unpublish requests remove them from environments and delete requests move them to the bin",
 	}),
 	title: z.string(),
 	description: richTextJSONSchema.nullable(),
@@ -258,28 +264,34 @@ const requestOverviewCountsSchema = z.object({
 });
 
 export const requestOverviewResponseSchema = z.object({
+	create: requestOverviewCountsSchema.meta({
+		description: "Open requests requesting new documents",
+	}),
 	publish: requestOverviewCountsSchema.meta({
 		description: "Open requests publishing existing documents",
 	}),
-	create: requestOverviewCountsSchema.meta({
-		description: "Open requests requesting new documents",
+	unpublish: requestOverviewCountsSchema.meta({
+		description: "Open requests removing documents from environments",
+	}),
+	delete: requestOverviewCountsSchema.meta({
+		description: "Open requests deleting documents",
 	}),
 });
 
 const requestDocumentInputSchema = z.object({
 	collectionKey: z.string().trim().min(1),
 	documentId: z.number().int().positive(),
-	source: z.string().trim().min(1).meta({
+	source: z.string().trim().min(1).optional().meta({
 		description:
-			"Starting source: latest or a configured environment. Fixed after creation.",
+			"Publish requests only. Starting source: latest or a configured environment. Fixed after creation.",
 		example: "latest",
 	}),
 	targets: z
 		.array(z.string().trim().min(1))
-		.min(1)
+		.default([])
 		.meta({
 			description:
-				"Selected targets: configured environments, or latest when the source is latest.",
+				"Publish requests: configured environments, or latest when the source is latest. Unpublish requests: the environments to remove the document from. Delete requests take none.",
 			example: ["staging"],
 		}),
 });
@@ -449,6 +461,11 @@ export const controllerSchemas = {
 	} satisfies ControllerSchema,
 	createSingle: {
 		body: z.object({
+			type: requestTypeSchema.exclude(["create"]).meta({
+				description:
+					"Create requests are made from the document's collection instead",
+				example: "publish",
+			}),
 			title: z.string().trim().min(1).max(200),
 			description: richTextJSONSchema.nullable().optional(),
 			documents: z.array(requestDocumentInputSchema).min(1),
@@ -577,4 +594,4 @@ export const controllerSchemas = {
 export type GetMultipleQueryParams = z.infer<
 	typeof controllerSchemas.getMultiple.query.formatted
 >;
-export type RequestDocumentInput = z.infer<typeof requestDocumentInputSchema>;
+export type RequestDocumentInput = z.input<typeof requestDocumentInputSchema>;

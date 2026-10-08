@@ -20,6 +20,7 @@ export const hookExecutionKinds: {
 		afterUpsert: "effect",
 		afterFetch: "transform",
 		beforeDelete: "effect",
+		beforeUnpublish: "effect",
 		afterRestore: "effect",
 		afterDelete: "effect",
 		versionPromote: "effect",

@@ -1,22 +1,20 @@
 import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import type { RequestType } from "../../../libs/db/tables/requests.js";
 import { copy } from "../../../libs/i18n/index.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import getAllowedTargets from "./get-allowed-targets.js";
 
-/** Checks the explicitly selected targets of a publish request. */
+/** Validates selected publish or unpublish targets and rejects targets for delete requests. */
 const resolveTargets = (data: {
 	collection: CollectionBuilder;
-	source: string;
+	type: Exclude<RequestType, "create">;
+	source: string | null;
 	targets: string[];
 }): Awaited<ServiceResponse<string[]>> => {
 	const targets = [...new Set(data.targets)];
-	const allowed = getAllowedTargets({
-		collection: data.collection,
-		type: "publish",
-		source: data.source,
-	});
+	const allowed = getAllowedTargets(data);
 	if (
-		targets.length === 0 ||
+		(data.type !== "delete" && targets.length === 0) ||
 		targets.some((target) => !allowed.includes(target))
 	) {
 		return {

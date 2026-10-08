@@ -7,6 +7,7 @@ import {
 import type { LucidUser } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
+import checkPublishedTargets from "./helpers/check-published-targets.js";
 import createTargets from "./helpers/create-targets.js";
 import dismissApproval from "./helpers/dismiss-approval.js";
 import getLatestChange from "./helpers/get-latest-change.js";
@@ -54,6 +55,17 @@ const updateTargets: ServiceFn<
 		};
 	}
 
+	if (request.type === "delete") {
+		return {
+			error: {
+				type: "basic",
+				message: copy("server:core.requests.delete.targets"),
+				status: 400,
+			},
+			data: undefined,
+		};
+	}
+
 	const document = request.documents.find(
 		(document) => document.id === data.requestDocumentId,
 	);
@@ -75,6 +87,7 @@ const updateTargets: ServiceFn<
 
 	const targetsRes = resolveTargets({
 		collection: collectionRes.data,
+		type: request.type,
 		source: document.source,
 		targets: data.targets,
 	});
@@ -89,6 +102,15 @@ const updateTargets: ServiceFn<
 	);
 	if (removed.length === 0 && added.length === 0) {
 		return { error: undefined, data: undefined };
+	}
+
+	if (request.type === "unpublish") {
+		const publishedRes = await checkPublishedTargets(context, {
+			collectionKey: document.collection_key,
+			documentId: document.document_id,
+			targets: added,
+		});
+		if (publishedRes.error) return publishedRes;
 	}
 
 	if (removed.length > 0) {

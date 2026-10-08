@@ -29,12 +29,7 @@ import { requestNotificationKeys } from "./notifications/keys.js";
 import { readyNotification } from "./notifications/ready.js";
 import { reviewRequestedNotification } from "./notifications/review-requested.js";
 
-/**
- * Adds the user's approval of the current revision. The approval that meets
- * the collections' required count approves the request: proposal content is
- * frozen into a snapshot, while environment requests retain their existing
- * immutable snapshot.
- */
+/** Records the user's approval and freezes content or target versions once the required count is reached. */
 const approve: ServiceFn<
 	[
 		{
@@ -158,7 +153,7 @@ const approve: ServiceFn<
 
 	for (const document of request.documents) {
 		const state = states.get(document.id);
-		if (!state?.collection || !state.source) {
+		if (!state?.collection || (document.source !== null && !state.source)) {
 			return {
 				error: {
 					type: "basic",
@@ -168,6 +163,8 @@ const approve: ServiceFn<
 				data: undefined,
 			};
 		}
+		if (!state.source) continue;
+
 		const validateRes = await validateVersionContent(context, {
 			collection: state.collection,
 			documentId: document.document_id,
@@ -227,10 +224,10 @@ const approve: ServiceFn<
 
 	for (const document of request.documents) {
 		const state = states.get(document.id);
-		if (!state?.source) continue;
+		if (!state) continue;
 
-		let approvedVersionId = state.source.id;
-		if (document.source === "latest") {
+		let approvedVersionId = state.source?.id ?? null;
+		if (document.source === "latest" && state.source) {
 			const snapshotRes = await cloneVersion(context, {
 				collectionKey: document.collection_key,
 				documentId: document.document_id,

@@ -113,6 +113,7 @@ const save = async (title: string, ids: number[], documentId?: number) => {
 };
 const approved = async (documentId: number, target: string) => {
 	const created = await createSingle(context, {
+		type: "publish",
 		user: actor,
 		title: `Publish to ${target}`,
 		documents: [
@@ -265,6 +266,7 @@ test.skipIf(!postgresUrl)(
 		const target = await save("Referenced target", []);
 		const owner = await save("Proposal owner", []);
 		const group = await createSingle(context, {
+			type: "publish",
 			user: actor,
 			title: "First reference in a proposal",
 			documents: [

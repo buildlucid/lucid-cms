@@ -21,7 +21,7 @@ import createDocumentBricks from "../documents-bricks/create-multiple.js";
 import deleteDocumentBricks from "../documents-bricks/delete-multiple.js";
 import invalidateRequests from "../requests/helpers/invalidate-requests.js";
 import recordProposalActivity from "../requests/helpers/record-proposal-activity.js";
-import recordTargetPublished from "../requests/helpers/record-target-published.js";
+import recordTargetChange from "../requests/helpers/record-target-change.js";
 import getUpdateContext from "./helpers/get-update-context.js";
 
 const updateSingle: ServiceFn<
@@ -208,7 +208,7 @@ const updateSingle: ServiceFn<
 			if (invalidateRes.error) return invalidateRes;
 
 			if (updateContextRes.data.versionType === "latest") {
-				const publishedRes = await recordTargetPublished(context, {
+				const publishedRes = await recordTargetChange(context, {
 					collectionKey: data.collectionKey,
 					documentId: data.documentId,
 					target: "latest",

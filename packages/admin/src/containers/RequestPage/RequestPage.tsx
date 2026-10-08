@@ -1,14 +1,24 @@
 import { useParams } from "@solidjs/router";
 import type { RequestDocument } from "@types";
-import { type Component, createMemo, createSignal, For, Show } from "solid-js";
+import {
+	type Component,
+	createMemo,
+	createSignal,
+	For,
+	Match,
+	Show,
+	Switch,
+} from "solid-js";
 import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
 import PageLayout from "@/components/PageLayout/PageLayout";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RequestApproveModal from "@/components/RequestApproveModal/RequestApproveModal";
 import RequestCreateModal from "@/components/RequestCreateModal/RequestCreateModal";
+import RequestDeleteModal from "@/components/RequestDeleteModal/RequestDeleteModal";
 import RequestScheduleModal from "@/components/RequestScheduleModal/RequestScheduleModal";
 import RequestTitleModal from "@/components/RequestTitleModal/RequestTitleModal";
+import RequestUnpublishModal from "@/components/RequestUnpublishModal/RequestUnpublishModal";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import { requestDocumentLimit } from "@/constants/requests";
 import api from "@/services/api";
@@ -172,7 +182,7 @@ const RequestPage: Component = () => {
 													</For>
 													<Show
 														when={
-															data().type === "publish" &&
+															data().type !== "create" &&
 															data().permissions.edit &&
 															data().documents.length < requestDocumentLimit
 														}
@@ -201,11 +211,29 @@ const RequestPage: Component = () => {
 										/>
 									</div>
 								</PageLayout.Body>
-								<RequestCreateModal
-									open={addOpen()}
-									setOpen={setAddOpen}
-									request={data()}
-								/>
+								<Switch>
+									<Match when={data().type === "publish"}>
+										<RequestCreateModal
+											open={addOpen()}
+											setOpen={setAddOpen}
+											request={data()}
+										/>
+									</Match>
+									<Match when={data().type === "unpublish"}>
+										<RequestUnpublishModal
+											open={addOpen()}
+											setOpen={setAddOpen}
+											request={data()}
+										/>
+									</Match>
+									<Match when={data().type === "delete"}>
+										<RequestDeleteModal
+											open={addOpen()}
+											setOpen={setAddOpen}
+											request={data()}
+										/>
+									</Match>
+								</Switch>
 								<Modal.Confirm
 									open={removing() !== undefined}
 									onOpenChange={(open) => {

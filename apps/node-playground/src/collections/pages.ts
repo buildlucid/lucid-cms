@@ -26,7 +26,6 @@ const PageCollection = new CollectionBuilder("page", {
 			service: "documents",
 			event: "beforeUpsert",
 			handler: async () => {
-				// console.log("beforeUpsert hook collection", data.data);
 				return {
 					error: undefined,
 					data: undefined,
@@ -37,7 +36,6 @@ const PageCollection = new CollectionBuilder("page", {
 			service: "documents",
 			event: "afterUpsert",
 			handler: async () => {
-				// console.log("afterUpsert hook collection", data.data);
 				return {
 					error: undefined,
 					data: undefined,
@@ -48,7 +46,6 @@ const PageCollection = new CollectionBuilder("page", {
 			service: "documents",
 			event: "beforeDelete",
 			handler: async () => {
-				// console.log("beforeDelete hook collection", data.data);
 				return {
 					error: undefined,
 					data: undefined,
@@ -59,7 +56,6 @@ const PageCollection = new CollectionBuilder("page", {
 			service: "documents",
 			event: "afterDelete",
 			handler: async () => {
-				// console.log("afterDelete hook collection", data.data);
 				return {
 					error: undefined,
 					data: undefined,
@@ -83,10 +79,7 @@ const PageCollection = new CollectionBuilder("page", {
 			},
 		],
 		review: {
-			targets: ["production"],
-			selfApproval: true,
-			// approvals: 2,
-			// create: true,
+			publish: ["production"],
 		},
 		workflow: {
 			stages: [

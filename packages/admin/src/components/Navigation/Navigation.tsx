@@ -122,7 +122,7 @@ export const Navigation: Component = () => {
 			</header>
 
 			{/* Desktop Navigation */}
-			<aside class="hidden md:flex w-sidebar flex-col bg-sidebar max-h-screen sticky top-0 z-10">
+			<aside class="hidden md:flex w-sidebar flex-col bg-sidebar max-h-screen sticky top-0 z-40">
 				<div class="pt-6 pb-3 ps-6 pe-4 flex items-center justify-between gap-2">
 					<NavigationLogo />
 					<NotificationBell />

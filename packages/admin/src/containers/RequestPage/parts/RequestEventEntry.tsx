@@ -6,6 +6,7 @@ import {
 	TbOutlineBan,
 	TbOutlineCalendar,
 	TbOutlineCheck,
+	TbOutlineCloudOff,
 	TbOutlineCloudUpload,
 	TbOutlineListCheck,
 	TbOutlineMinus,
@@ -130,6 +131,31 @@ export const RequestEventEntry: Component<{
 												name: name(),
 												target: targetLabel(event.target),
 											})}{" "}
+									<A
+										href={getRequestRoute({ requestId: event.sourceRequestId })}
+										class="text-sm text-title underline-offset-2 hover:underline"
+									>
+										{T()("requests.view")}
+									</A>
+								</>
+							),
+					};
+				case "target_unpublished":
+					return {
+						icon: TbOutlineCloudOff,
+						tone: "default",
+						text:
+							event.sourceRequestId === null ? (
+								T()("requests.activity.target.unpublished.direct", {
+									name: name(),
+									target: targetLabel(event.target),
+								})
+							) : (
+								<>
+									{T()("requests.activity.target.unpublished.request", {
+										name: name(),
+										target: targetLabel(event.target),
+									})}{" "}
 									<A
 										href={getRequestRoute({ requestId: event.sourceRequestId })}
 										class="text-sm text-title underline-offset-2 hover:underline"

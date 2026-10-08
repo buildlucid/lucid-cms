@@ -62,7 +62,7 @@ const checkRequestVersionAccess: ServiceFn<
 	const request: DocumentHookRequest = {
 		id: owner.id,
 		documents: owner.documents.flatMap((document) =>
-			document.source_version_id === null
+			document.source === null || document.source_version_id === null
 				? []
 				: [
 						{

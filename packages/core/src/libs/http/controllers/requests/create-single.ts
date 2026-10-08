@@ -20,7 +20,7 @@ const factory = createFactory();
 const createSingleController = factory.createHandlers(
 	describeRoute({
 		description:
-			"Create one document request with captured content and optional reviewers.",
+			"Create a publish, unpublish or delete request for existing documents, with optional reviewers. Publish requests capture each document's content.",
 		tags: ["requests"],
 		summary: "Create Request",
 		responses: openAPI.responses({
@@ -49,6 +49,7 @@ const createSingleController = factory.createHandlers(
 				message: copy("server:core.routes.requests.error.message"),
 			},
 		})(context, {
+			type: body.type,
 			title: body.title,
 			description: body.description,
 			documents: body.documents,

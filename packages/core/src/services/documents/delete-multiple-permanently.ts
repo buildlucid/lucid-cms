@@ -1,6 +1,7 @@
 import type { ServiceFn } from "../../exports/types.js";
 import collections from "../../libs/collection/collections.js";
 import { getTableNames } from "../../libs/collection/schema/runtime/runtime-schema-selectors.js";
+import formatter from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { DocumentsRepository } from "../../libs/repositories/index.js";
 import withTransaction from "../../utils/services/with-transaction.js";
@@ -69,7 +70,7 @@ const deleteMultiplePermanently: ServiceFn<
 
 			const docsExistRes = await Documents.selectMultiple(
 				{
-					select: ["id"],
+					select: ["id", "is_deleted"],
 					where: [{ key: "id", operator: "in", value: data.ids }],
 					validation: { enabled: true },
 				},
@@ -94,6 +95,23 @@ const deleteMultiplePermanently: ServiceFn<
 							},
 						},
 						status: 404,
+					},
+					data: undefined,
+				};
+			}
+
+			//* collections that review deletions only delete binned documents directly
+			if (
+				collectionRes.data.getData.publishing.review?.delete &&
+				docsExistRes.data.some(
+					(doc) => !formatter.formatBoolean(doc.is_deleted),
+				)
+			) {
+				return {
+					error: {
+						type: "basic",
+						message: copy("server:core.documents.delete.review.required"),
+						status: 403,
 					},
 					data: undefined,
 				};

@@ -12,6 +12,11 @@ const environmentKeySchema = z
 			"Publishing target key must contain only lowercase letters, numbers, hyphens and underscores",
 	});
 
+const reviewEnvironmentsSchema = z.union([
+	z.array(environmentKeySchema),
+	z.literal(true),
+]);
+
 const groupKeySchema = z
 	.string()
 	.min(1)
@@ -165,16 +170,10 @@ const CollectionConfigSchema = z
 					.optional(),
 				review: z
 					.strictObject({
-						targets: z
-							.array(
-								z
-									.string()
-									.min(1)
-									.max(50)
-									.regex(/^[a-z0-9-_]+$/),
-							)
-							.optional(),
+						publish: reviewEnvironmentsSchema.optional(),
+						unpublish: reviewEnvironmentsSchema.optional(),
 						create: z.boolean().default(false).optional(),
+						delete: z.boolean().default(false).optional(),
 						selfApproval: z
 							.boolean()
 							.default(constants.collectionBuilder.publishing.selfApproval)
@@ -278,20 +277,24 @@ const CollectionConfigSchema = z
 			}
 		}
 		const review = data.publishing?.review;
-		for (const [targetIndex, target] of (review?.targets ?? []).entries()) {
-			if (environmentKeys.has(target)) continue;
-			ctx.addIssue({
-				code: "custom",
-				path: ["publishing", "review", "targets", targetIndex],
-				message: `Review target "${target}" must reference a configured publishing target`,
-			});
+		for (const key of ["publish", "unpublish"] as const) {
+			const environments = review?.[key];
+			if (environments === undefined || environments === true) continue;
+			for (const [targetIndex, target] of environments.entries()) {
+				if (environmentKeys.has(target)) continue;
+				ctx.addIssue({
+					code: "custom",
+					path: ["publishing", "review", key, targetIndex],
+					message: `Review ${key} environment "${target}" must reference a configured publishing target`,
+				});
+			}
 		}
-		if (review?.create && data.mode === "single") {
+		for (const key of ["create", "delete"] as const) {
+			if (!review?.[key] || data.mode !== "single") continue;
 			ctx.addIssue({
 				code: "custom",
-				path: ["publishing", "review", "create"],
-				message:
-					"Review create is only available for multiple mode collections",
+				path: ["publishing", "review", key],
+				message: `Review ${key} is only available for multiple mode collections`,
 			});
 		}
 

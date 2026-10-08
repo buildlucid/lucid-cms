@@ -27,6 +27,7 @@ import Pagination from "@/components/Pagination/Pagination";
 import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
 import RestoreDocumentModal from "@/components/RestoreDocumentModal/RestoreDocumentModal";
 import Table from "@/components/Table/Table";
+import { Permissions } from "@/constants/permissions";
 import { resolveSlots } from "@/extensions/slot-policy";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import useRowTarget from "@/hooks/useRowTarget/useRowTarget";
@@ -187,6 +188,16 @@ export const DocumentsList: Component<{
 		if (!permission) return false;
 
 		return userStore.get.hasPermission([permission]).some;
+	});
+	const canDeleteOrRequest = createMemo(() => {
+		const permissions = collectionPermissions();
+		if (!permissions) return false;
+
+		return (
+			userStore.get.hasPermission([permissions.delete]).all ||
+			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
+				userStore.get.hasPermission([permissions["delete-request"]]).all)
+		);
 	});
 	const canUpdateDocuments = createMemo(() => {
 		const permission = collectionPermissions()?.update;
@@ -449,7 +460,11 @@ export const DocumentsList: Component<{
 					loading={documents.isFetching || props.state.isLoading}
 					selectable={rowsAreSelectable()}
 					allowRestore={props.state.showingDeleted() && canRestoreDocuments()}
-					allowDelete={!props.state.showingDeleted() && canDeleteDocuments()}
+					allowDelete={
+						!props.state.showingDeleted() &&
+						canDeleteDocuments() &&
+						props.state.collection?.publishing.review?.delete !== true
+					}
 					allowDeletePermanently={
 						props.state.showingDeleted() && canDeleteDocuments()
 					}
@@ -652,11 +667,7 @@ export const DocumentsList: Component<{
 											rowTarget.setTargetId(doc().id);
 											rowTarget.setTrigger("delete", true);
 										},
-										permission: collectionPermissions()?.delete
-											? userStore.get.hasPermission([
-													collectionPermissions()?.delete,
-												]).all
-											: false,
+										permission: canDeleteOrRequest(),
 										excludeFromRowClick: true,
 										show:
 											!props.state.showingDeleted() &&

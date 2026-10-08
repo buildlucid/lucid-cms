@@ -230,6 +230,10 @@ class CollectionBuilder<
 			order: group.order ?? null,
 		};
 	};
+	#resolveReviewEnvironments = (environments?: string[] | true): string[] =>
+		environments === true
+			? (this.config.publishing?.targets ?? []).map((target) => target.key)
+			: [...(environments ?? [])];
 	// ------------------------------------
 	// Getters
 	get resolvedPreviewConfig():
@@ -287,8 +291,12 @@ class CollectionBuilder<
 					})) ?? [],
 				review: review
 					? {
-							targets: [...(review.targets ?? [])],
+							publish: this.#resolveReviewEnvironments(review.publish),
+							unpublish: this.#resolveReviewEnvironments(
+								review.unpublish ?? review.publish,
+							),
 							create: review.create ?? false,
+							delete: review.delete ?? false,
 							selfApproval:
 								review.selfApproval ??
 								constants.collectionBuilder.publishing.selfApproval,

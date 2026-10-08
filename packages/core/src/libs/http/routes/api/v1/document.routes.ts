@@ -19,6 +19,7 @@ import publish from "../../../controllers/documents/publish.js";
 import requestCreation from "../../../controllers/documents/request-creation.js";
 import restoreMultiple from "../../../controllers/documents/restore-multiple.js";
 import restoreRevision from "../../../controllers/documents/restore-revision.js";
+import unpublish from "../../../controllers/documents/unpublish.js";
 import updateOrder from "../../../controllers/documents/update-order.js";
 import updateVersion from "../../../controllers/documents/update-version.js";
 import updateWorkflow from "../../../controllers/documents/update-workflow.js";
@@ -29,6 +30,7 @@ const documentRoutes = new Hono<LucidHonoGeneric>()
 	.post("/:collectionKey/request", ...requestCreation)
 	.post("/:collectionKey/:id/duplicate", ...duplicateSingle)
 	.post("/:collectionKey/:id/publish", ...publish)
+	.post("/:collectionKey/:id/unpublish", ...unpublish)
 	.post("/:collectionKey/:id", ...createVersion)
 	.delete("/:collectionKey", ...deleteMultiple)
 	.delete("/:collectionKey/permanent", ...deleteMultiplePermanently)

@@ -77,7 +77,7 @@ const publish: ServiceFn<
 			}
 
 			if (
-				collectionRes.data.getData.publishing.review?.targets.includes(
+				collectionRes.data.getData.publishing.review?.publish.includes(
 					data.target,
 				)
 			) {

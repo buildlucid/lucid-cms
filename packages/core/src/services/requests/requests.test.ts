@@ -19,8 +19,12 @@ import { createTestQueueAdapter } from "../../utils/test-helpers/create-jobs-con
 import getTestConfig from "../../utils/test-helpers/get-test-config.js";
 import getWorkflow from "../document-workflows/get-single.js";
 import updateWorkflow from "../document-workflows/update-single.js";
+import deleteMultiple from "../documents/delete-multiple.js";
+import deleteSingle from "../documents/delete-single.js";
 import getDocuments from "../documents/get-multiple.js";
 import getDocument from "../documents/get-single.js";
+import publish from "../documents/publish.js";
+import unpublish from "../documents/unpublish.js";
 import upsertSingle from "../documents/upsert-single.js";
 import align from "../documents-versions/align.js";
 import readVersionContent from "../documents-versions/helpers/read-version-content.js";
@@ -59,7 +63,7 @@ const collections = [
 			details: { labels: { singular: "Page", plural: "Pages" } },
 			publishing: {
 				scheduling: true,
-				review: { targets: ["production"], selfApproval: false },
+				review: { publish: ["production"], selfApproval: false },
 				targets: [
 					{ key: "staging", label: "Staging" },
 					{ key: "production", label: "Production", requires: ["staging"] },
@@ -116,7 +120,7 @@ const collections = [
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
 		publishing: {
-			review: { targets: ["staging"], approvals: 2 },
+			review: { publish: ["staging"], approvals: 2 },
 			targets: [{ key: "staging", label: "Staging" }],
 		},
 	})
@@ -144,6 +148,14 @@ const collections = [
 	})
 		.addText("title")
 		.addText("summary"),
+	new CollectionBuilder("reviewed_delete_pages", {
+		details: { labels: { singular: "Page", plural: "Pages" } },
+		mode: "multiple",
+		publishing: { review: { delete: true } },
+	})
+		.addText("title")
+		.addText("summary")
+		.addRelation("related", { collection: "reviewed_delete_pages" }),
 	new CollectionBuilder("checked_pages", {
 		details: { labels: { singular: "Page", plural: "Pages" } },
 		mode: "multiple",
@@ -280,6 +292,7 @@ const createRequest = async (
 	collectionKey = "request_pages",
 ): Promise<RequestDetail> => {
 	const created = await createSingle(context, {
+		type: "publish",
 		title: "Spring launch",
 		documents: [{ collectionKey, documentId, source, targets }],
 		user: creator,
@@ -663,6 +676,7 @@ test("execution polling uses request collection permissions", async () => {
 
 test("requests hold at most 100 documents", async () => {
 	const created = await createSingle(context, {
+		type: "publish",
 		title: "Too many",
 		user: creator,
 		documents: Array.from({ length: 101 }, (_, index) => ({
@@ -756,6 +770,7 @@ test("latest creates a private proposal and only accepts latest and environment 
 		expect(
 			(
 				await createSingle(context, {
+					type: "publish",
 					title: "Invalid",
 					documents: [
 						{ collectionKey: "request_pages", documentId: id, ...input },
@@ -1623,6 +1638,7 @@ test("the addable filter lists open publish requests the user can add the docume
 	const documentId = await createDocument();
 	const other = await createDocument();
 	const holding = await createSingle(context, {
+		type: "publish",
 		title: "Holding",
 		documents: [documentId, other].map((id) => ({
 			collectionKey: "request_pages",
@@ -1960,6 +1976,7 @@ test("cross-collection requests publish every document and target without changi
 		"Article original",
 	);
 	const created = await createSingle(context, {
+		type: "publish",
 		title: "Grouped launch",
 		user: creator,
 		documents: [
@@ -2147,6 +2164,7 @@ test.each([
 	const pageId = await createDocument();
 	const articleId = await createDocument("request_articles");
 	const created = await createSingle(context, {
+		type: "publish",
 		title: "Atomic launch",
 		user: creator,
 		documents: [
@@ -2247,6 +2265,7 @@ test("drift review is scoped to its member, and edits to either proposal dismiss
 	const firstId = await createDocument();
 	const secondId = await createDocument();
 	const grouped = await createSingle(context, {
+		type: "publish",
 		title: "Parallel launch",
 		user: creator,
 		documents: [firstId, secondId].map((documentId) => ({
@@ -2305,6 +2324,7 @@ test("mixed-collection access and publishing permissions cover every member", as
 	const pageId = await createDocument();
 	const articleId = await createDocument("request_articles");
 	const created = await createSingle(context, {
+		type: "publish",
 		title: "Restricted launch",
 		user: creator,
 		documents: [
@@ -2367,6 +2387,7 @@ test("one scheduled job publishes mixed proposals and snapshots for the group", 
 		await createRequest(articleId, ["staging"], "latest", "request_articles"),
 	);
 	const created = await createSingle(context, {
+		type: "publish",
 		title: "Scheduled group",
 		user: creator,
 		documents: [
@@ -2821,6 +2842,7 @@ test("edits clear partial approvals, and mixed requests need the most approvals"
 	);
 
 	const mixed = await createSingle(context, {
+		type: "publish",
 		title: "Mixed",
 		documents: [
 			{
@@ -2887,6 +2909,7 @@ test("content changes move a stage with resetTo back, for latest and proposals",
 
 test("collection request checks only see their own collection's documents", async () => {
 	const created = await createSingle(context, {
+		type: "publish",
 		title: "Checked",
 		documents: [
 			{
@@ -2951,7 +2974,7 @@ test("an earlier approval approves the request once its collections need fewer",
 							details: { labels: { singular: "Page", plural: "Pages" } },
 							mode: "multiple",
 							publishing: {
-								review: { targets: ["staging"] },
+								review: { publish: ["staging"] },
 								targets: [{ key: "staging", label: "Staging" }],
 							},
 						})
@@ -2970,4 +2993,298 @@ test("an earlier approval approves the request once its collections need fewer",
 	assert(read.data, JSON.stringify(read.error));
 	expect(read.data.approved).toBe(true);
 	expect(read.data.approvals).toHaveLength(1);
+});
+
+const createRemoval = async (
+	type: "unpublish" | "delete",
+	documentId: number,
+	targets: string[] = [],
+	user = creator,
+) => {
+	const created = await createSingle(context, {
+		type,
+		title: "Clean up",
+		documents: [{ collectionKey: "request_pages", documentId, targets }],
+		user,
+	});
+	assert(created.data, JSON.stringify(created.error));
+	return readRequest(created.data.id);
+};
+
+test("unpublish requests remove environments in any order, never latest, and flag other requests", async () => {
+	const documentId = await createDocument();
+	await completeNow(await createRequest(documentId, ["staging", "production"]));
+	const waiting = await createRequest(documentId, ["staging"]);
+
+	for (const document of [
+		{ targets: ["latest"] },
+		{ targets: [] },
+		{ source: "latest", targets: ["staging"] },
+	]) {
+		const invalid = await createSingle(context, {
+			type: "unpublish",
+			title: "Invalid",
+			documents: [{ collectionKey: "request_pages", documentId, ...document }],
+			user: creator,
+		});
+		expect(invalid.error?.status).toBe(400);
+	}
+
+	const request = await createRemoval("unpublish", documentId, ["staging"]);
+	expect(request.blockers).toEqual([]);
+	expect(member(request).source).toBeNull();
+	expect(member(request).targets[0]?.changed).toBe(true);
+
+	const completed = await completeNow(request);
+	expect(completed.status).toBe("completed");
+	expect(await fieldOf(documentId, "summary", "staging")).toBeNull();
+	expect(await fieldOf(documentId, "summary", "production")).toBe("Original");
+	expect(await fieldOf(documentId, "summary", "latest")).toBe("Original");
+	expect(member(await readRequest(waiting.id)).targets[0]).toMatchObject({
+		changedSinceCreation: true,
+		reviewed: false,
+	});
+
+	const again = await createSingle(context, {
+		type: "unpublish",
+		title: "Again",
+		documents: [
+			{ collectionKey: "request_pages", documentId, targets: ["staging"] },
+		],
+		user: creator,
+	});
+	expect(again.error?.status).toBe(400);
+});
+
+test("direct unpublishing is limited to environments that don't need review", async () => {
+	const documentId = await createDocument();
+	assert(
+		!(
+			await publish(context, {
+				collectionKey: "request_pages",
+				documentId,
+				target: "staging",
+				user: creator,
+			})
+		).error,
+	);
+	const removal = (target: string) =>
+		unpublish(context, {
+			collectionKey: "request_pages",
+			documentId,
+			target,
+			user: creator,
+		});
+
+	expect((await removal("production")).error?.status).toBe(403);
+	expect((await removal("latest")).error?.status).toBe(400);
+	assert(!(await removal("staging")).error);
+	expect(await fieldOf(documentId, "summary", "staging")).toBeNull();
+	expect((await removal("staging")).error?.status).toBe(404);
+});
+
+test("delete requests move documents to the bin with delete access, and requesters keep their own", async () => {
+	const read = [
+		Permissions.RequestsRead,
+		getCollectionPermission("request_pages", "read"),
+	];
+	const requester: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: [
+			...read,
+			getCollectionPermission("request_pages", "delete-request"),
+		],
+	};
+	const updater: LucidUser = {
+		...reviewer,
+		superAdmin: false,
+		permissions: [
+			...read,
+			getCollectionPermission("request_pages", "update"),
+			getCollectionPermission("request_pages", "review"),
+			getCollectionPermission("request_pages", "publish"),
+		],
+	};
+	const deleter: LucidUser = {
+		...updater,
+		permissions: [
+			...read,
+			getCollectionPermission("request_pages", "delete"),
+			getCollectionPermission("request_pages", "review"),
+		],
+	};
+	const documentId = await createDocument();
+
+	const denied = await createSingle(context, {
+		type: "delete",
+		title: "Not allowed",
+		documents: [{ collectionKey: "request_pages", documentId }],
+		user: updater,
+	});
+	expect(denied.error?.status).toBe(403);
+	const targeted = await createSingle(context, {
+		type: "delete",
+		title: "Targeted",
+		documents: [
+			{ collectionKey: "request_pages", documentId, targets: ["staging"] },
+		],
+		user: requester,
+	});
+	expect(targeted.error?.status).toBe(400);
+
+	const request = await createRemoval("delete", documentId, [], requester);
+	expect(request.blockers).toEqual([]);
+	expect(member(request).documentLabel).toBe("Source");
+	const access = async (user: LucidUser) => {
+		const read = await getSingle(context, { id: request.id, user });
+		assert(read.data, JSON.stringify(read.error));
+		return read.data.permissions;
+	};
+	expect(await access(requester)).toMatchObject({
+		edit: true,
+		approve: false,
+		request: false,
+	});
+	expect(await access(updater)).toMatchObject({
+		edit: false,
+		approve: false,
+		request: false,
+	});
+	expect(await access(deleter)).toMatchObject({
+		edit: true,
+		approve: true,
+		request: true,
+	});
+
+	await approveRequest(request.id, deleter);
+	const completed = await completeRequest(request.id, deleter);
+	expect(completed.status).toBe("completed");
+	expect(completed.approved).toBe(true);
+	const binned = await getDocument(context, {
+		collectionKey: "request_pages",
+		id: documentId,
+		version: "latest",
+		query: {},
+		authUser: creator,
+	});
+	assert(binned.data, JSON.stringify(binned.error));
+	expect(binned.data.document.isDeleted).toBe(true);
+});
+
+test("unpublish requesters can make and edit their own unpublish requests only", async () => {
+	const documentId = await createDocument();
+	assert(
+		!(
+			await publish(context, {
+				collectionKey: "request_pages",
+				documentId,
+				target: "staging",
+				user: creator,
+			})
+		).error,
+	);
+	const requester: LucidUser = {
+		...creator,
+		superAdmin: false,
+		permissions: [
+			Permissions.RequestsRead,
+			getCollectionPermission("request_pages", "read"),
+			getCollectionPermission("request_pages", "unpublish-request"),
+		],
+	};
+
+	const request = await createRemoval(
+		"unpublish",
+		documentId,
+		["staging"],
+		requester,
+	);
+	const read = await getSingle(context, { id: request.id, user: requester });
+	assert(read.data, JSON.stringify(read.error));
+	expect(read.data.permissions).toMatchObject({
+		edit: true,
+		approve: false,
+		request: false,
+	});
+	const other = await getSingle(context, {
+		id: request.id,
+		user: { ...requester, id: reviewer.id },
+	});
+	expect(other.data?.permissions.edit).toBe(false);
+});
+
+test("delete requests keep their approval when their documents reference each other", async () => {
+	const key = "reviewed_delete_pages";
+	const referenced = await createDocument(key);
+	const referencing = await upsertSingle(context, {
+		collectionKey: key,
+		userId: creator.id,
+		fields: [
+			{ key: "title", type: "text", value: "Referencing" },
+			{
+				key: "related",
+				type: "relation",
+				value: [{ id: referenced, collectionKey: key }],
+			},
+		],
+	});
+	assert(referencing.data, JSON.stringify(referencing.error));
+
+	const created = await createSingle(context, {
+		type: "delete",
+		title: "Remove both",
+		documents: [referenced, referencing.data].map((documentId) => ({
+			collectionKey: key,
+			documentId,
+		})),
+		user: creator,
+	});
+	assert(created.data, JSON.stringify(created.error));
+	const approved = await approveRequest(created.data.id);
+	const completed = await completeRequest(created.data.id);
+
+	expect(completed).toMatchObject({
+		status: "completed",
+		approved: true,
+		revision: approved.revision,
+	});
+	expect(completed.events.map((event) => event.type)).not.toContain(
+		"approval_dismissed",
+	);
+});
+
+test("collections that review deletions only delete binned documents directly", async () => {
+	const key = "reviewed_delete_pages";
+	const documentId = await createDocument(key);
+	const remove = (hard: boolean) =>
+		deleteSingle(context, {
+			collectionKey: key,
+			id: documentId,
+			userId: creator.id,
+			hard,
+		});
+
+	expect((await remove(false)).error?.status).toBe(403);
+	expect((await remove(true)).error?.status).toBe(403);
+	expect(
+		(
+			await deleteMultiple(context, {
+				collectionKey: key,
+				ids: [documentId],
+				userId: creator.id,
+			})
+		).error?.status,
+	).toBe(403);
+
+	const created = await createSingle(context, {
+		type: "delete",
+		title: "Remove",
+		documents: [{ collectionKey: key, documentId }],
+		user: creator,
+	});
+	assert(created.data, JSON.stringify(created.error));
+	await completeNow(await readRequest(created.data.id));
+
+	assert(!(await remove(true)).error);
 });

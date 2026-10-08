@@ -691,6 +691,8 @@ export type CollectionPermissionAction =
 	| "create-request"
 	| "update"
 	| "delete"
+	| "delete-request"
+	| "unpublish-request"
 	| "restore"
 	| "publish"
 	| "review";
@@ -730,8 +732,12 @@ export interface Collection {
 	publishing: {
 		scheduling: boolean;
 		review?: {
-			targets: string[];
+			/** Environments that can only be published to through an approved request. */
+			publish: string[];
+			/** Environments that can only be unpublished from through an approved request. */
+			unpublish: string[];
 			create: boolean;
+			delete: boolean;
 			selfApproval: boolean;
 			approvals: number;
 		};
@@ -770,6 +776,8 @@ export interface Collection {
 		"create-request": CollectionPermission<"create-request">;
 		update: CollectionPermission<"update">;
 		delete: CollectionPermission<"delete">;
+		"delete-request": CollectionPermission<"delete-request">;
+		"unpublish-request": CollectionPermission<"unpublish-request">;
 		restore: CollectionPermission<"restore">;
 		publish: CollectionPermission<"publish">;
 		review: CollectionPermission<"review">;

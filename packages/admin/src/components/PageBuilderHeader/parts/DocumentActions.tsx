@@ -10,6 +10,10 @@ export const DocumentActions: Component<{
 	requestLink?: string;
 	onDelete?: () => void;
 	deletePermission?: boolean;
+	unpublish?: {
+		onUnpublish: () => void;
+		permission: boolean;
+	};
 	duplicate?: {
 		onDuplicate: () => void;
 		permission: boolean;
@@ -103,6 +107,14 @@ export const DocumentActions: Component<{
 				message: T()("toasts.documents.duplicate.disabled.message"),
 			},
 			onClick: props.duplicate?.onDuplicate,
+		},
+		{
+			label: getActionLabel(T()("documents.unpublish.action")),
+			type: "button",
+			icon: "cloud-off",
+			show: props.unpublish !== undefined,
+			permission: props.unpublish?.permission,
+			onClick: props.unpublish?.onUnpublish,
 		},
 		{
 			label: getActionLabel(T()("common.delete")),

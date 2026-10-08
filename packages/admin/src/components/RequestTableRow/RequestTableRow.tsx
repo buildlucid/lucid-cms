@@ -5,7 +5,7 @@ import Table from "@/components/Table/Table";
 import TableUserStackCell from "@/components/TableUserStackCell/TableUserStackCell";
 import T from "@/translations";
 import helpers from "@/utils/helpers";
-import { getRequestState, requestStates } from "@/utils/requests";
+import { getRequestState, requestStates, requestTypes } from "@/utils/requests";
 import { getRequestRoute } from "@/utils/route-helpers";
 
 const RequestTableRow: Component<{
@@ -73,17 +73,9 @@ const RequestTableRow: Component<{
 			</Table.Cell>
 			<Table.Pill
 				column="type"
-				text={
-					props.request.type === "create"
-						? T()("requests.type.create")
-						: T()("requests.type.publish")
-				}
-				variant={props.request.type === "create" ? "blue-subtle" : "outline"}
-				tooltip={
-					props.request.type === "create"
-						? T()("requests.type.create.tooltip")
-						: T()("requests.type.publish.tooltip")
-				}
+				text={requestTypes[props.request.type].label()}
+				variant={requestTypes[props.request.type].pill}
+				tooltip={requestTypes[props.request.type].tooltip()}
 			/>
 			<Table.Pill
 				column="status"

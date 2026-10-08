@@ -76,7 +76,7 @@ export const RequestSidebar: Component<{
 						}
 					/>
 					{props.publishing
-						? T()("common.publishing")
+						? T()("requests.completing")
 						: requestStates[state()].label()}
 				</span>
 			),

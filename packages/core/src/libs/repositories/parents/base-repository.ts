@@ -1,16 +1,15 @@
 import type { InsertObject, UpdateObject } from "kysely";
 import z, { type ZodObject, type ZodType } from "zod";
-import constants from "../../../constants/constants.js";
 import type { LucidErrorData } from "../../../exports/types.js";
-import { LucidError, tidyZodError } from "../../../utils/errors/index.js";
+import { LucidError } from "../../../utils/errors/index.js";
 import type LucidDatabase from "../../db/client/lucid-database.js";
+import logValidationFailure from "../../db/client/query/log-validation-failure.js";
 import type {
 	ResolvedTableDefinition,
 	TableDefinition,
 } from "../../db/client/table/definition.js";
 import type { Insert, KyselyDB, LucidDB, Update } from "../../db/types.js";
 import { copy } from "../../i18n/index.js";
-import logger from "../../logger/index.js";
 import type {
 	ExecuteMeta,
 	QueryResult,
@@ -139,17 +138,9 @@ abstract class BaseRepository<
 			};
 		}
 
-		const validationError = tidyZodError(validationResult.error);
-		logger.error({
-			event: "query.response.validation.failed",
-			message: "Query response validation failed",
-			scope: constants.logScopes.query,
-			data: {
-				table: executeResponse.meta.tableName,
-				method: executeResponse.meta.method,
-				executionTime: executeResponse.meta.executionTime,
-				validationError,
-			},
+		logValidationFailure({
+			meta: executeResponse.meta,
+			error: validationResult.error,
 		});
 		return {
 			data: undefined,

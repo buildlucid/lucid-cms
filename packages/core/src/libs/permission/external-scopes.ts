@@ -15,6 +15,8 @@ export type CollectionExternalScopeAction =
 	| "create-request"
 	| "update"
 	| "delete"
+	| "delete-request"
+	| "unpublish-request"
 	| "restore"
 	| "publish"
 	| "review";
@@ -53,6 +55,10 @@ const documentScopeFactories = {
 		getCollectionExternalScope(collectionKey, "update"),
 	DocumentDelete: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "delete"),
+	DocumentDeleteRequest: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "delete-request"),
+	DocumentUnpublishRequest: (collectionKey: string) =>
+		getCollectionExternalScope(collectionKey, "unpublish-request"),
 	DocumentRestore: (collectionKey: string) =>
 		getCollectionExternalScope(collectionKey, "restore"),
 	DocumentPublish: (collectionKey: string) =>

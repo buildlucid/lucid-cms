@@ -1,6 +1,7 @@
 export { default as afterRestoreHandler } from "./after-restore-handler.js";
 export { default as afterUpsertHandler } from "./after-upsert-handler.js";
 export { default as beforeDeleteHandler } from "./before-delete-handler.js";
+export { default as beforeUnpublishHandler } from "./before-unpublish-handler.js";
 export { default as beforeUpsertHandler } from "./before-upsert-handler.js";
 export { default as requestCheckHandler } from "./request-check-handler.js";
 export { default as requestCompletedHandler } from "./request-completed-handler.js";

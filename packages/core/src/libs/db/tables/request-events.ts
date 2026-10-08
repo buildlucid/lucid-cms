@@ -15,6 +15,7 @@ const requestEventTypeSchema = z.enum([
 	"closed",
 	"reopened",
 	"target_published",
+	"target_unpublished",
 	"target_reviewed",
 	"target_unreviewed",
 	"document_added",
@@ -38,11 +39,11 @@ const requestEventMetadataSchema = z.object({
 	scheduledAt: z.string().nullable().optional(),
 	scheduledTimezone: z.string().nullable().optional(),
 	message: z.string().optional(),
-	/** Publication attempt used to reconcile failure diagnostics without duplicate activity. */
+	/** Request attempt used to reconcile failure diagnostics without duplicate activity. */
 	jobId: z.string().optional(),
 	/** The environment a target event is about. */
 	target: z.string().optional(),
-	/** The request that published, for target_published. Null for a direct publish. */
+	/** The request that made the change, for target_published and target_unpublished. Null for a direct change. */
 	sourceRequestId: z.number().nullable().optional(),
 	/** The new workflow stage, for workflow_updated. */
 	stage: z.string().optional(),
@@ -130,6 +131,9 @@ export type RequestEventMetadataByType = {
 		target?: string;
 	};
 	target_published: RequestTargetEventMetadata & {
+		sourceRequestId: number | null;
+	};
+	target_unpublished: RequestTargetEventMetadata & {
 		sourceRequestId: number | null;
 	};
 	target_reviewed: RequestTargetEventMetadata;

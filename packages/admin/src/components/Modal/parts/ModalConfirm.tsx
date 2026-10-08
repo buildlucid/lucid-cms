@@ -1,4 +1,4 @@
-import { type Component, type JSXElement, Show } from "solid-js";
+import { type Component, children, type JSXElement, Show } from "solid-js";
 import Button, { type ButtonVariant } from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
 import T from "@/translations";
@@ -25,12 +25,14 @@ export interface ModalConfirmProps {
 	onCancel?: () => void;
 	/** Shows a spinner on the confirm button and disables both buttons. */
 	loading?: boolean;
+	confirmDisabled?: boolean;
 	/** An error message shown in the footer. */
 	error?: string;
 	/** Content shown at the start of the footer. */
 	footerStart?: JSXElement;
 	/** Content shown between the header and footer. */
 	children?: JSXElement;
+	above?: JSXElement;
 }
 
 /**
@@ -58,6 +60,11 @@ export interface ModalConfirmProps {
  */
 export const ModalConfirm: Component<ModalConfirmProps> = (props) => {
 	// ----------------------------------------
+	// State & Hooks
+	//* resolved once, so conditional content only shows a body when it renders something
+	const body = children(() => props.children);
+
+	// ----------------------------------------
 	// Functions
 	const handleCancel = () => {
 		if (props.onCancel) props.onCancel();
@@ -69,6 +76,7 @@ export const ModalConfirm: Component<ModalConfirmProps> = (props) => {
 	return (
 		<ModalRoot
 			role="alertdialog"
+			above={props.above}
 			open={props.open}
 			onOpenChange={(open) => {
 				if (open) props.onOpenChange(true);
@@ -81,8 +89,8 @@ export const ModalConfirm: Component<ModalConfirmProps> = (props) => {
 					<ModalDescription>{props.description}</ModalDescription>
 				</Show>
 			</ModalHeader>
-			<Show when={props.children}>
-				<ModalBody>{props.children}</ModalBody>
+			<Show when={body()}>
+				<ModalBody>{body()}</ModalBody>
 			</Show>
 			<ModalFooter>
 				<div class="flex min-w-0 items-center gap-2">
@@ -102,6 +110,7 @@ export const ModalConfirm: Component<ModalConfirmProps> = (props) => {
 						variant={props.confirmVariant ?? "danger"}
 						size="md"
 						loading={props.loading}
+						disabled={props.confirmDisabled}
 						onClick={props.onConfirm}
 					>
 						{props.confirmLabel ?? T()("common.confirm")}

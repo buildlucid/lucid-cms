@@ -8,6 +8,7 @@ import type {
 	RequestOverviewCounts,
 	RequestSummary,
 	RequestTarget,
+	RequestType,
 } from "@types";
 import type { PillVariant } from "@/components/Pill/Pill";
 import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
@@ -19,7 +20,7 @@ import helpers from "@/utils/helpers";
 
 /**
  * The open requests people act on, in the order dashboards show them. Each
- * queue is also a Requests page preset, and counts add up both request types.
+ * queue is also a Requests page preset, and counts add up every request type.
  */
 export const requestQueues = [
 	{
@@ -72,11 +73,15 @@ export const requestQueues = [
 
 export type RequestQueue = (typeof requestQueues)[number];
 
-/** How many open requests of both types are in a queue. */
+/** How many open requests of every type are in a queue. */
 export const countRequestQueue = (
 	overview: RequestOverview,
 	queue: RequestQueue,
-) => overview.publish[queue.count] + overview.create[queue.count];
+) =>
+	Object.values(overview).reduce(
+		(total, counts) => total + counts[queue.count],
+		0,
+	);
 
 export const getRequestQueueRoute = (queue: RequestQueue) =>
 	`/lucid/requests?${Object.entries(queue.filters)
@@ -85,6 +90,43 @@ export const getRequestQueueRoute = (queue: RequestQueue) =>
 				`filter[${key}]=${typeof filter.value === "boolean" ? Number(filter.value) : filter.value}`,
 		)
 		.join("&")}`;
+
+/** How each request type is labelled, in the order lists and presets show them. */
+export const requestTypes: Record<
+	RequestType,
+	{
+		label: () => string;
+		tooltip: () => string;
+		filter: () => string;
+		pill: PillVariant;
+	}
+> = {
+	publish: {
+		label: () => T()("requests.type.publish"),
+		tooltip: () => T()("requests.type.publish.tooltip"),
+		filter: () => T()("requests.filter.publish"),
+		pill: "outline",
+	},
+	create: {
+		label: () => T()("requests.type.create"),
+		tooltip: () => T()("requests.type.create.tooltip"),
+		filter: () => T()("requests.filter.requests"),
+		pill: "blue-subtle",
+	},
+	unpublish: {
+		label: () => T()("requests.type.unpublish"),
+		tooltip: () => T()("requests.type.unpublish.tooltip"),
+		filter: () => T()("requests.filter.unpublish"),
+		pill: "warning-subtle",
+	},
+	delete: {
+		label: () => T()("requests.type.delete"),
+		tooltip: () => T()("requests.type.delete.tooltip"),
+		filter: () => T()("requests.filter.delete"),
+		pill: "danger-subtle",
+	},
+};
+export const requestTypeKeys = Object.keys(requestTypes) as RequestType[];
 
 export type RequestState =
 	| "completed"
@@ -196,14 +238,13 @@ export const getTargetLabel = (
 	);
 };
 
-/**
- * Lists selectable targets in request order. Proposals can complete into
- * latest and every environment, while environment snapshots move forward.
- */
+/** Lists a source's publish destinations in request order, returning none when the request has no source. */
 export const getAllowedTargets = (
 	collection: { publishing: { targets: Array<{ key: string }> } } | undefined,
-	source: string,
+	source: string | null,
 ) => {
+	if (source === null) return [];
+
 	const environments = (collection?.publishing.targets ?? []).map(
 		(target) => target.key,
 	);
@@ -308,6 +349,11 @@ export const getBlockerCopy = (
 				title: T()("requests.blocker.document.deleted.title"),
 				description: T()("requests.blocker.document.deleted"),
 			};
+		case "document_permanently_deleted":
+			return {
+				title: T()("requests.blocker.document.permanently.deleted.title"),
+				description: T()("requests.blocker.document.permanently.deleted"),
+			};
 		case "source_missing":
 			return {
 				title: T()("requests.blocker.source.missing.title"),
@@ -400,7 +446,7 @@ export const requestActivityFilters = [
 	{
 		key: "publishes",
 		label: "requests.activity.filter.publishes",
-		types: ["target_published"],
+		types: ["target_published", "target_unpublished"],
 	},
 	{
 		key: "edits",

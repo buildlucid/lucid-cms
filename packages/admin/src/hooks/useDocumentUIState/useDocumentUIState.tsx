@@ -4,6 +4,7 @@ import type {
 	InternalCollectionDocument,
 } from "@types";
 import { type Accessor, createMemo, createSignal } from "solid-js";
+import { Permissions } from "@/constants/permissions";
 import { useBrickStore } from "@/hooks/useBrickStore/useBrickStore";
 import type api from "@/services/api";
 import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesStore";
@@ -36,6 +37,7 @@ export function useDocumentUIState(props: {
 	const brickStore = useBrickStore();
 	const { contentLocale } = createDocumentLocalization(props.collection);
 	const [getDeleteOpen, setDeleteOpen] = createSignal(false);
+	const [getUnpublishOpen, setUnpublishOpen] = createSignal(false);
 	const [getDuplicateOpen, setDuplicateOpen] = createSignal(false);
 	const [getRestoreRevisionOpen, setRestoreRevisionOpen] = createSignal(false);
 	const [getRestoreRevisionVersionId, setRestoreRevisionVersionId] =
@@ -217,6 +219,35 @@ export function useDocumentUIState(props: {
 		return props.mode === "edit" && props.collection()?.mode === "multiple";
 	});
 
+	/** The environment being viewed, when the document is published to it. */
+	const unpublishTarget = createMemo(() => {
+		const version = props.version();
+		if (props.mode !== "edit" || props.document()?.isDeleted) return undefined;
+		if (props.collection()?.locked) return undefined;
+
+		const isEnvironment = props
+			.collection()
+			?.publishing.targets.some((environment) => environment.key === version);
+		return isEnvironment && props.document()?.versions[version]
+			? version
+			: undefined;
+	});
+
+	/** Unpublishing directly needs publish access, while requesting it needs update or unpublish request access. */
+	const hasUnpublishPermission = createMemo(() => {
+		const permissions = props.collection()?.permissions;
+		if (!permissions) return false;
+
+		return (
+			userStore.get.hasPermission([permissions.publish]).all ||
+			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
+				userStore.get.hasPermission([
+					permissions.update,
+					permissions["unpublish-request"],
+				]).some)
+		);
+	});
+
 	const showDuplicateButton = createMemo(() => {
 		if (props.mode !== "edit") return false;
 		if (props.version() !== "latest") return false;
@@ -273,11 +304,16 @@ export function useDocumentUIState(props: {
 		return userStore.get.hasPermission([permission]).all;
 	});
 
+	/** Deleting directly or requesting deletion, the modal offers whichever is allowed. */
 	const hasDeletePermission = createMemo(() => {
-		const permission = props.collection()?.permissions.delete;
-		if (!permission) return false;
+		const permissions = props.collection()?.permissions;
+		if (!permissions) return false;
 
-		return userStore.get.hasPermission([permission]).all;
+		return (
+			userStore.get.hasPermission([permissions.delete]).all ||
+			(userStore.get.hasPermission([Permissions.RequestsRead]).all &&
+				userStore.get.hasPermission([permissions["delete-request"]]).all)
+		);
 	});
 
 	/**
@@ -329,6 +365,8 @@ export function useDocumentUIState(props: {
 	return {
 		getDeleteOpen,
 		setDeleteOpen,
+		getUnpublishOpen,
+		setUnpublishOpen,
 		getDuplicateOpen,
 		setDuplicateOpen,
 		getRestoreRevisionOpen,
@@ -362,6 +400,8 @@ export function useDocumentUIState(props: {
 		showPublishButton,
 		showDeleteButton,
 		hasDeletePermission,
+		unpublishTarget,
+		hasUnpublishPermission,
 		showDuplicateButton,
 		duplicateDisabled,
 		hasDuplicatePermission,

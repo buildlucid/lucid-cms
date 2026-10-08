@@ -61,6 +61,7 @@ export const RequestChecks: Component<{
 					"collection_unavailable",
 					"migration_required",
 					"document_deleted",
+					"document_permanently_deleted",
 				].includes(blocker.code),
 			),
 	);

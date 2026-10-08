@@ -92,6 +92,8 @@ test("role grants put content and agents before administration and destructive a
 		"documents:pages:restore",
 		"documents:pages:review",
 		"documents:pages:publish",
+		"documents:pages:unpublish-request",
+		"documents:pages:delete-request",
 		"documents:pages:delete",
 	]);
 	expect(

@@ -4,11 +4,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import type { RequestRecord, RequestState } from "../types.js";
 import getDocumentBlockers from "./get-document-blockers.js";
 
-/**
- * Collects what stops a request being approved or published: core document
- * checks, then anything request check hooks report about documents that are
- * otherwise usable. Hooks run once for each collection, with its documents.
- */
+/** Collects approval and completion blockers from document checks and collection hooks. */
 const getBlockers: ServiceFn<
 	[{ request: RequestRecord; state: RequestState }],
 	RequestBlocker[]
@@ -31,7 +27,11 @@ const getBlockers: ServiceFn<
 
 	const checkable = data.request.documents.flatMap((document) => {
 		const state = data.state.get(document.id);
-		if (!state?.collection || state.migrationRequired || state.deleted) {
+		if (
+			!state?.collection ||
+			state.migrationRequired ||
+			state.deleted !== null
+		) {
 			return [];
 		}
 		return [{ document, state, collection: state.collection }];
@@ -50,7 +50,11 @@ const getBlockers: ServiceFn<
 			{
 				meta: {},
 				data: {
-					request: { id: data.request.id, revision: data.request.revision },
+					request: {
+						id: data.request.id,
+						type: data.request.type,
+						revision: data.request.revision,
+					},
 					documents: items.map(({ document, state }) => ({
 						requestDocumentId: document.id,
 						collectionKey: document.collection_key,

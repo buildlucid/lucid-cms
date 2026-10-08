@@ -2,7 +2,6 @@ import type { Generated } from "kysely";
 import z from "zod";
 import { defineTable } from "../client/table/definition.js";
 
-/** A request owns one private source version for each included document. */
 export const requestDocumentsTable = defineTable(
 	"lucid_request_documents",
 	() => ({
@@ -24,7 +23,7 @@ export const requestDocumentsTable = defineTable(
 				type: "integer",
 			},
 			source: {
-				schema: z.string(),
+				schema: z.string().nullable(),
 				type: "text",
 			},
 			source_version_id: {
@@ -48,8 +47,8 @@ export interface LucidRequestDocuments {
 	request_id: number;
 	collection_key: string;
 	document_id: number;
-	/** Fixed starting source. Content is cloned into a proposal or snapshot. */
-	source: string;
+	/** Fixed starting source. Content is cloned into a proposal or snapshot. Null for unpublish and delete requests, which capture no content. */
+	source: string | null;
 	/** The request's proposal or snapshot. Proposals are removed once completed, and both on permanent deletion. */
 	source_version_id: number | null;
 	/** The frozen snapshot that was approved and will be published. */
