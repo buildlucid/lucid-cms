@@ -1,7 +1,10 @@
+import constants from "../../../constants/constants.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import withTransaction from "../../../utils/services/with-transaction.js";
 import { copy } from "../../i18n/index.js";
+import logger from "../../logger/index.js";
 import { JobsRepository } from "../../repositories/index.js";
+import { resolveJobFailure } from "../failure-notification.js";
 import { getJobDefinitionRuntime, getRegisteredJob } from "../registry.js";
 import type {
 	JobConsumptionResult,
@@ -20,6 +23,7 @@ import {
 	finishCancellation,
 	handleFailure,
 	toErrorMessage,
+	toErrorStack,
 } from "./outcomes.js";
 
 type JobRuntime = ReturnType<typeof getJobDefinitionRuntime>;
@@ -74,8 +78,11 @@ const executeTransactionalJob = async (
 		},
 		{ isolate: true },
 	);
+	if (result.error) return { type: "retry-transport" };
 
-	return result.error ? { type: "retry-transport" } : result.data;
+	await resolveJobFailure(context, job);
+
+	return result.data;
 };
 
 /** Rebuilds the trigger metadata stored against a durable job. */
@@ -122,6 +129,7 @@ const consumeAttempt = async (
 					data: { definition: `${job.job_name}@${job.job_version}` },
 				}),
 			),
+			stack: null,
 			permanent: true,
 			immediateRetry: props.immediateRetry,
 		});
@@ -149,6 +157,7 @@ const consumeAttempt = async (
 
 		return handleFailure(context, job, {
 			message: toErrorMessage(context, result.error),
+			stack: toErrorStack(result.error),
 			error: result.error,
 			permanent: result.type === "invalid-payload",
 			immediateRetry: props.immediateRetry,
@@ -162,14 +171,24 @@ const consumeAttempt = async (
 
 			return handleFailure(context, job, {
 				message: toErrorMessage(context, error.result.error),
+				stack: toErrorStack(error.result.error),
 				error: error.result.error,
 				permanent: error.result.type === "invalid-payload",
 				immediateRetry: props.immediateRetry,
 			});
 		}
 
+		logger.error({
+			error,
+			event: "jobs.execution.failed",
+			message: "A job handler threw an error",
+			scope: constants.logScopes.jobs,
+			data: { jobId: job.job_id, jobName: job.job_name },
+		});
+
 		return handleFailure(context, job, {
 			message: toErrorMessage(context, error),
+			stack: toErrorStack(error),
 			permanent: false,
 			immediateRetry: props.immediateRetry,
 		});

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { sql } from "kysely";
 import {
 	afterAll,
@@ -9,6 +10,7 @@ import {
 	vi,
 } from "vitest";
 import z from "zod";
+import { jobFailedNotification } from "../../../services/jobs/notifications/job-failed.js";
 import {
 	createJobsContext,
 	createTestQueueAdapter,
@@ -29,6 +31,7 @@ beforeAll(() => testConfig.migrate());
 afterEach(async () => {
 	const database = await testConfig.getDatabase();
 	await database.client.deleteFrom("lucid_jobs").execute();
+	await database.client.deleteFrom("lucid_notifications").execute();
 });
 
 afterAll(() => testConfig.destroy());
@@ -321,6 +324,70 @@ describe("consuming durable jobs", () => {
 			attempts: 2,
 			error_message: "Expected failure",
 		});
+	});
+
+	test("stores a thrown error's stack and notifies until the job next completes", async () => {
+		const job = defineJob({
+			name: "test:thrown-failure",
+			version: 1,
+			input: z.object({ fail: z.boolean() }),
+			retry: { type: "none" },
+			handler: async ({ input }) => {
+				if (input.fail) throw new Error("Expected crash");
+				return { error: undefined, data: undefined };
+			},
+		});
+		const context = await createJobsContext(testConfig, {
+			jobs: [job],
+			adapter: createTestQueueAdapter(),
+		});
+		await context.db.kysely
+			.insertInto("lucid_users")
+			.values({
+				email: `${randomUUID()}@example.test`,
+				username: randomUUID(),
+				secret: "test",
+				super_admin: true,
+			})
+			.execute();
+		const notification = () =>
+			context.db.kysely
+				.selectFrom("lucid_notifications")
+				.select(["key", "resolved_at"])
+				.where("type", "=", jobFailedNotification.key)
+				.executeTakeFirst();
+
+		const failing = await enqueueJob(context, {
+			job,
+			payload: { fail: true },
+		});
+		if (failing.error) throw new Error("Failed to enqueue the test job");
+
+		expect(await consumeJob(context, { jobId: failing.data.jobId })).toEqual({
+			type: "failed",
+		});
+		const stored = await context.db.kysely
+			.selectFrom("lucid_jobs")
+			.select(["error_message", "error_stack"])
+			.where("job_id", "=", failing.data.jobId)
+			.executeTakeFirstOrThrow();
+		expect(stored.error_message).toBe("Expected crash");
+		expect(stored.error_stack).toContain("Error: Expected crash");
+		expect(await notification()).toEqual({
+			key: "job:test:thrown-failure:failed",
+			resolved_at: null,
+		});
+
+		const passing = await enqueueJob(context, {
+			job,
+			payload: { fail: false },
+		});
+		if (passing.error) throw new Error("Failed to enqueue the test job");
+
+		expect(await consumeJob(context, { jobId: passing.data.jobId })).toEqual({
+			type: "completed",
+		});
+		expect((await notification())?.resolved_at).not.toBeNull();
 	});
 
 	test("asks push transports to retry messages delivered before a job is ready", async () => {

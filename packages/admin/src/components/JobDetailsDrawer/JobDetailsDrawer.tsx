@@ -1,9 +1,11 @@
 import {
 	type Accessor,
 	type Component,
+	createEffect,
 	createMemo,
-	For,
+	createSignal,
 	lazy,
+	on,
 	Show,
 	Suspense,
 } from "solid-js";
@@ -15,8 +17,13 @@ import SectionHeading from "@/components/SectionHeading/SectionHeading";
 import api from "@/services/api";
 import T from "@/translations";
 import dateHelpers from "@/utils/date-helpers";
+import formatDuration from "@/utils/format-duration";
+import { jobStatusPills } from "@/utils/jobs";
+import JobErrorCard from "./parts/JobErrorCard";
 
 const JSONPreview = lazy(() => import("@/components/JSONPreview/JSONPreview"));
+
+type JobDetailsTab = "details" | "input" | "schedule";
 
 interface JobDetailsPanelProps {
 	id: Accessor<number | undefined>;
@@ -28,6 +35,10 @@ interface JobDetailsPanelProps {
 
 const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 	// ---------------------------------
+	// State
+	const [activeTab, setActiveTab] = createSignal<JobDetailsTab>("details");
+
+	// ---------------------------------
 	// Queries
 	const job = api.jobs.useGetSingle({
 		queryParams: {
@@ -37,29 +48,49 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 		},
 		enabled: () => !!props.id(),
 	});
+	const schedules = api.jobs.useGetSchedules({
+		queryParams: {
+			filters: { key: () => job.data?.data.scheduleKey ?? undefined },
+			perPage: 1,
+		},
+		enabled: () => props.state.open && !!job.data?.data.scheduleKey,
+	});
 
 	// ---------------------------------
 	// Memos
-	const schedulesQuery = createMemo(() => {
-		const jobName = job.data?.data.jobName;
-		const jobVersion = job.data?.data.jobVersion;
-		if (jobName === undefined || jobVersion === undefined) return "";
-
-		return new URLSearchParams({
-			"filter[jobName:=]": jobName,
-			"filter[jobVersion:=]": jobVersion.toString(),
-		}).toString();
+	const data = () => job.data?.data;
+	const schedule = () => schedules.data?.data[0];
+	const finishedAt = createMemo(
+		() => data()?.completedAt ?? data()?.failedAt ?? data()?.cancelledAt,
+	);
+	const duration = createMemo(() => {
+		const startedAt = data()?.startedAt;
+		const endedAt = finishedAt();
+		if (!startedAt || !endedAt) return undefined;
+		return formatDuration(
+			new Date(endedAt).getTime() - new Date(startedAt).getTime(),
+		);
 	});
+	const tabs = createMemo(() => [
+		{ value: "details" as const, label: T()("common.details") },
+		{
+			value: "input" as const,
+			label: T()("jobs.input"),
+			show: !!data()?.displayData,
+		},
+		{
+			value: "schedule" as const,
+			label: T()("common.schedule"),
+			show: !!data()?.scheduleKey,
+		},
+	]);
+	const showTabs = createMemo(
+		() => tabs().filter((tab) => tab.show !== false).length > 1,
+	);
 
 	// ---------------------------------
-	// Queries
-	const schedules = api.jobs.useGetSchedules({
-		queryParams: {
-			queryString: schedulesQuery,
-			perPage: -1,
-		},
-		enabled: () => props.state.open && job.data?.data !== undefined,
-	});
+	// Effects
+	createEffect(on(props.id, () => setActiveTab("details")));
 
 	// ---------------------------------
 	// Render
@@ -70,143 +101,195 @@ const JobDetailsDrawer: Component<JobDetailsPanelProps> = (props) => {
 			loading={job.isLoading}
 			error={job.isError ? T()("errors.generic.message") : undefined}
 		>
-			<Drawer.Header>
-				<Drawer.Title>{T()("panels.jobs.details.title")}</Drawer.Title>
+			<Drawer.Header border={!showTabs()}>
+				<Drawer.Title class="flex min-w-0 items-center gap-2">
+					<span class="truncate">
+						{data()?.jobName ?? T()("panels.jobs.details.title")}
+					</span>
+					<Show when={data()?.status}>
+						{(status) => (
+							<Pill
+								variant={jobStatusPills[status()]}
+								size="xs"
+								class="shrink-0"
+							>
+								{T()(`common.status.${status()}`)}
+							</Pill>
+						)}
+					</Show>
+				</Drawer.Title>
+				<Show when={data()}>
+					{(job) => (
+						<Drawer.Description class="break-all">
+							v{job().jobVersion} · {job().jobId}
+						</Drawer.Description>
+					)}
+				</Show>
 			</Drawer.Header>
-			<Drawer.Body>
-				<SectionHeading title={T()("common.details")} />
-				<DetailsList
-					class="mb-6 last:mb-0"
-					items={[
-						{
-							label: T()("jobs.id"),
-							value: job.data?.data.jobId ?? undefined,
-						},
-						{
-							label: T()("jobs.name"),
-							value: job.data?.data.jobName ?? undefined,
-						},
-						{
-							label: T()("jobs.version"),
-							value: job.data?.data.jobVersion ?? undefined,
-						},
-						{
-							label: T()("jobs.trigger.type"),
-							value: job.data?.data.triggerType ?? undefined,
-						},
-						{
-							label: T()("jobs.schedule.key"),
-							value: job.data?.data.scheduleKey ?? undefined,
-						},
-						{
-							label: T()("common.scheduled.for"),
-							value: dateHelpers.formatDate(job.data?.data.scheduledFor),
-						},
-						{
-							label: T()("common.status"),
-							value: job.data?.data.status ?? undefined,
-						},
-						{
-							label: T()("queue.adapter"),
-							value: job.data?.data.queueAdapterKey ?? undefined,
-						},
-						{
-							label: T()("jobs.dispatch.status"),
-							value: job.data?.data.dispatchStatus ?? undefined,
-						},
-						{
-							label: T()("common.attempts"),
-							value: job.data?.data.attempts ?? 0,
-						},
-						{
-							label: T()("common.max.attempts"),
-							value: job.data?.data.maxAttempts ?? 0,
-						},
-						{
-							label: T()("common.created.at"),
-							value: dateHelpers.formatDate(job.data?.data.createdAt),
-						},
-						{
-							label: T()("common.available.at"),
-							value: dateHelpers.formatDate(job.data?.data.availableAt),
-						},
-						{
-							label: T()("common.started.at"),
-							value: dateHelpers.formatDate(job.data?.data.startedAt),
-						},
-						{
-							label: T()("common.completed.at"),
-							value: dateHelpers.formatDate(job.data?.data.completedAt),
-						},
-						{
-							label: T()("common.failed.at"),
-							value: dateHelpers.formatDate(job.data?.data.failedAt),
-						},
-						{
-							label: T()("common.cancelled.at"),
-							value: dateHelpers.formatDate(job.data?.data.cancelledAt),
-						},
-						{
-							label: T()("jobs.dispatched.at"),
-							value: dateHelpers.formatDate(job.data?.data.dispatchedAt),
-						},
-					]}
-				/>
-				<Show
-					when={
-						job.data?.data.status === "failed" && job.data?.data.errorMessage
-					}
-				>
-					<div class="mb-4 p-4 bg-danger-low border border-danger-low-border rounded-md -mt-2.5">
-						<h3 class="text-sm font-medium text-title mb-1">
-							{T()("common.failed.with.message")}
-						</h3>
-						<p class="text-sm text-body">{job.data?.data.errorMessage}</p>
-					</div>
+			<Drawer.Body class="flex flex-col gap-3">
+				<Show when={showTabs()}>
+					<Drawer.Tabs
+						items={tabs()}
+						value={activeTab()}
+						onChange={setActiveTab}
+					/>
 				</Show>
-				<Show when={job.data?.data.displayData}>
-					<SectionHeading title={T()("jobs.details")} />
-					<div class="mb-4">
-						<Suspense
-							fallback={
-								<div class="h-40 bg-card border border-border rounded-md animate-pulse" />
-							}
-						>
-							<JSONPreview json={job.data?.data.displayData || {}} />
-						</Suspense>
-					</div>
-				</Show>
-				<Show when={(schedules.data?.data.length ?? 0) > 0}>
-					<SectionHeading title={T()("jobs.schedules.title")} />
-					<div class="mb-4 flex flex-col gap-2">
-						<For each={schedules.data?.data ?? []}>
-							{(schedule) => (
-								<div class="rounded-md border border-border bg-card p-3">
-									<div class="flex items-center justify-between gap-3">
-										<p class="truncate text-sm font-medium text-title">
-											{schedule.name}
-										</p>
-										<div class="flex shrink-0 items-center justify-center">
-											<Pill
-												variant={
-													schedule.state === "paused"
-														? "warning-subtle"
-														: "success-subtle"
-												}
-											>
-												{schedule.state === "paused"
-													? T()("common.status.paused")
-													: T()("common.status.active")}
-											</Pill>
-										</div>
-									</div>
-									<p class="mt-1 truncate text-xs text-muted">
-										{schedule.cron} · {schedule.timezone}
-									</p>
-								</div>
+				<Show when={activeTab() === "details"}>
+					<div>
+						<Show when={data()?.errorMessage}>
+							{(message) => (
+								<JobErrorCard
+									title={
+										data()?.status === "failed"
+											? T()("jobs.final.attempt.failed")
+											: T()("jobs.last.attempt.failed")
+									}
+									message={message()}
+									stack={data()?.errorStack ?? null}
+								/>
 							)}
-						</For>
+						</Show>
+						<SectionHeading title={T()("jobs.run")} level={3} />
+						<DetailsList
+							class="mb-3 last:mb-0"
+							items={[
+								{
+									label: T()("jobs.trigger.type"),
+									value:
+										data()?.triggerType === "schedule"
+											? T()("common.schedule")
+											: T()("jobs.trigger.enqueue"),
+								},
+								{
+									label: T()("common.scheduled.for"),
+									value: dateHelpers.formatDate(data()?.scheduledFor),
+									show: !!data()?.scheduledFor,
+								},
+								{
+									label: T()("common.attempts"),
+									value: `${data()?.attempts ?? 0}/${data()?.maxAttempts ?? 0}`,
+								},
+								{
+									label: T()("common.duration"),
+									value: duration(),
+									show: duration() !== undefined,
+								},
+							]}
+						/>
+						<SectionHeading title={T()("jobs.timeline")} level={3} />
+						<DetailsList
+							class="mb-3 last:mb-0"
+							items={[
+								{
+									label: T()("common.created.at"),
+									value: dateHelpers.formatDate(data()?.createdAt),
+								},
+								{
+									label: T()("common.available.at"),
+									value: dateHelpers.formatDate(data()?.availableAt),
+								},
+								{
+									label: T()("common.started.at"),
+									value: dateHelpers.formatDate(data()?.startedAt),
+									show: !!data()?.startedAt,
+								},
+								{
+									label: T()("common.completed.at"),
+									value: dateHelpers.formatDate(data()?.completedAt),
+									show: !!data()?.completedAt,
+								},
+								{
+									label: T()("common.failed.at"),
+									value: dateHelpers.formatDate(data()?.failedAt),
+									show: !!data()?.failedAt,
+								},
+								{
+									label: T()("common.cancelled.at"),
+									value: dateHelpers.formatDate(data()?.cancelledAt),
+									show: !!data()?.cancelledAt,
+								},
+							]}
+						/>
+						<SectionHeading title={T()("common.queue")} level={3} />
+						<DetailsList
+							class="mb-3 last:mb-0"
+							items={[
+								{
+									label: T()("queue.adapter"),
+									value: data()?.queueAdapterKey,
+								},
+								{
+									label: T()("jobs.dispatch.status"),
+									value: data()?.dispatchStatus,
+								},
+								{
+									label: T()("jobs.dispatch.attempts"),
+									value: data()?.dispatchAttempts ?? 0,
+									show: (data()?.dispatchAttempts ?? 0) > 0,
+								},
+								{
+									label: T()("jobs.dispatched.at"),
+									value: dateHelpers.formatDate(data()?.dispatchedAt),
+									show: !!data()?.dispatchedAt,
+								},
+								{
+									label: T()("jobs.dispatch.error"),
+									value: data()?.dispatchError,
+									show: !!data()?.dispatchError,
+									stacked: true,
+									wrap: true,
+								},
+							]}
+						/>
 					</div>
+				</Show>
+				<Show when={activeTab() === "input"}>
+					<Suspense
+						fallback={
+							<div class="h-40 bg-card border border-border rounded-md animate-pulse" />
+						}
+					>
+						<JSONPreview json={data()?.displayData || {}} />
+					</Suspense>
+				</Show>
+				<Show when={activeTab() === "schedule"}>
+					<DetailsList
+						class="mb-6 last:mb-0"
+						items={[
+							{
+								label: T()("common.schedule"),
+								value: schedule()?.name ?? data()?.scheduleKey,
+							},
+							{
+								label: T()("common.status"),
+								type: "pill",
+								value:
+									schedule()?.state === "paused"
+										? T()("common.status.paused")
+										: T()("common.status.active"),
+								pillVariant:
+									schedule()?.state === "paused"
+										? "warning-subtle"
+										: "success-subtle",
+								show: schedule() !== undefined,
+							},
+							{
+								label: T()("jobs.schedules.expression"),
+								value: schedule()?.cron,
+								show: schedule() !== undefined,
+							},
+							{
+								label: T()("common.timezone"),
+								value: schedule()?.timezone,
+								show: schedule() !== undefined,
+							},
+							{
+								label: T()("jobs.schedules.next.run"),
+								value: dateHelpers.formatDate(schedule()?.nextRunAt),
+								show: schedule() !== undefined,
+							},
+						]}
+					/>
 				</Show>
 			</Drawer.Body>
 			<Drawer.Footer>

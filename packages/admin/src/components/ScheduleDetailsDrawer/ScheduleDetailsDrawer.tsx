@@ -46,9 +46,9 @@ const ScheduleDetailsDrawer: Component<ScheduleDetailsPanelProps> = (props) => {
 				</Drawer.Title>
 			</Drawer.Header>
 			<Drawer.Body>
-				<SectionHeading title={T()("common.details")} />
+				<SectionHeading title={T()("common.details")} level={3} />
 				<DetailsList
-					class="mb-6 last:mb-0"
+					class="mb-3 last:mb-0"
 					items={[
 						{ label: T()("common.status"), value: schedule()?.state },
 						{ label: T()("common.key"), value: schedule()?.key },
@@ -79,9 +79,9 @@ const ScheduleDetailsDrawer: Component<ScheduleDetailsPanelProps> = (props) => {
 					]}
 				/>
 				<Show when={schedule()?.lastRun}>
-					<SectionHeading title={T()("jobs.schedules.last.run")} />
+					<SectionHeading title={T()("jobs.schedules.last.run")} level={3} />
 					<DetailsList
-						class="mb-6 last:mb-0"
+						class="mb-3 last:mb-0"
 						items={[
 							{
 								label: T()("common.scheduled.for"),
@@ -104,7 +104,7 @@ const ScheduleDetailsDrawer: Component<ScheduleDetailsPanelProps> = (props) => {
 						]}
 					/>
 					<Show when={schedule()?.lastRun?.errorMessage}>
-						<div class="mb-4 rounded-md border border-danger-low-border bg-danger-low p-4 text-sm text-body">
+						<div class="mb-3 rounded-md border border-danger-low-border bg-danger-low p-4 text-sm text-body">
 							{schedule()?.lastRun?.errorMessage}
 						</div>
 					</Show>

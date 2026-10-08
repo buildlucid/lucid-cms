@@ -58,10 +58,7 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 				onClick={openNotification}
 				class="flex min-w-0 grow items-center gap-3 rounded-md px-2 py-2 text-start transition-colors hover:bg-card-hover focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary"
 			>
-				<NotificationThumb
-					notification={props.notification}
-					surface={props.surface}
-				/>
+				<NotificationThumb notification={props.notification} />
 				<span class="flex min-w-0 grow flex-col">
 					<span class="flex h-5 items-center gap-3">
 						<span

@@ -42,6 +42,12 @@ export interface Job {
 	updatedAt: string | null;
 }
 
+/** A single job with its last error's stack trace. Listings leave the stack out. */
+export interface JobDetails extends Job {
+	/** Set when the last failed attempt threw an error. */
+	errorStack: string | null;
+}
+
 /** The latest job created for one registered schedule. */
 export type JobScheduleRun = Pick<
 	Job,

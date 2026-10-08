@@ -62,6 +62,7 @@ const Migration00000004: MigrationFn = (adapter: DatabaseAdapter) => {
 				.addColumn("dispatched_at", adapter.getDataType("timestamp"))
 				.addColumn("dispatch_error", adapter.getDataType("text"))
 				.addColumn("error_message", adapter.getDataType("text"))
+				.addColumn("error_stack", adapter.getDataType("text"))
 				.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
 					col
 						.notNull()

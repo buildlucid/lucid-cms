@@ -1,22 +1,10 @@
 import type {
 	Notification,
 	NotificationCategorySummary,
-	NotificationLevel,
 	NotificationSummary,
 } from "@types";
 import type { PillVariant } from "@/components/Pill/Pill";
-import type { StatusIndicatorVariant } from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
-
-export const notificationLevelIndicators: Record<
-	NotificationLevel,
-	StatusIndicatorVariant
-> = {
-	info: "info-subtle",
-	success: "success-subtle",
-	warning: "warning-subtle",
-	error: "danger-subtle",
-};
 
 export const isNotificationUnread = (notification: Notification) =>
 	notification.readAt === null;

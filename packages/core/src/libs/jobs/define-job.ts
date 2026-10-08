@@ -120,6 +120,7 @@ const defineJob = <const Name extends string, Input extends JobPayload | null>(
 		[jobDefinitionInternal]: {
 			runtime: {
 				transaction: options.transaction ?? false,
+				notifyOnFailure: options.notifyOnFailure ?? true,
 				parse,
 				execute: async (context, input, execution) => {
 					const parsed = await parse(input);

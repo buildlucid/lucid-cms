@@ -851,6 +851,7 @@
 	"core.notifications.type.not.found": "Notification type not found.",
 	"core.notifications.system.storage.title": "Media storage is {{percent}}% full",
 	"core.notifications.system.storage.body": "{{used}} of {{limit}} used, with {{remaining}} remaining. Delete unused media or raise the limit.",
+	"core.notifications.system.job-failed.title": "{{name}} failed",
 	"core.notifications.requests.review-requested.title": "Review requested: {{title}}",
 	"core.notifications.requests.review-requested.body": "Your approval is needed before this request can be published.",
 	"core.notifications.requests.mentioned.title": "You were mentioned in {{title}}",

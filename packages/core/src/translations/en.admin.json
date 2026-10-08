@@ -66,6 +66,8 @@
 	"core.notifications.category.agent": "Agent",
 	"core.notifications.system.storage.name": "Storage usage",
 	"core.notifications.system.storage.description": "Media storage is close to its limit.",
+	"core.notifications.system.job-failed.name": "Job failed",
+	"core.notifications.system.job-failed.description": "A background job fails after its final attempt.",
 	"core.notifications.requests.review-requested.name": "Review requested",
 	"core.notifications.requests.review-requested.description": "You are asked to review a request.",
 	"core.notifications.requests.mentioned.name": "Mentioned",

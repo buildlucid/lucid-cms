@@ -69,6 +69,7 @@ export const jobsTable = defineTable("lucid_jobs", () => ({
 		},
 		dispatch_error: { schema: z.string().nullable(), type: "text" },
 		error_message: { schema: z.string().nullable(), type: "text" },
+		error_stack: { schema: z.string().nullable(), type: "text" },
 		created_at: { schema: z.union([z.string(), z.date()]), type: "timestamp" },
 		started_at: {
 			schema: z.union([z.string(), z.date()]).nullable(),
@@ -183,6 +184,7 @@ export interface LucidJobs {
 	dispatched_at: TimestampMutable;
 	dispatch_error: string | null;
 	error_message: string | null;
+	error_stack: string | null;
 	created_at: TimestampImmutable;
 	started_at: TimestampMutable;
 	completed_at: TimestampMutable;

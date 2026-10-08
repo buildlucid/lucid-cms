@@ -1,7 +1,7 @@
 import { jobsFormatter } from "../../libs/formatters/index.js";
 import { copy } from "../../libs/i18n/index.js";
 import { JobsRepository } from "../../libs/repositories/index.js";
-import type { Job } from "../../types/response.js";
+import type { JobDetails } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 const getSingle: ServiceFn<
@@ -10,7 +10,7 @@ const getSingle: ServiceFn<
 			id: number;
 		},
 	],
-	Job
+	JobDetails
 > = async (context, data) => {
 	const Jobs = new JobsRepository(context.db);
 
@@ -32,6 +32,7 @@ const getSingle: ServiceFn<
 			"dispatch_attempts",
 			"dispatch_error",
 			"error_message",
+			"error_stack",
 			"created_at",
 			"available_at",
 			"started_at",
@@ -56,7 +57,7 @@ const getSingle: ServiceFn<
 
 	return {
 		error: undefined,
-		data: jobsFormatter.formatSingle({
+		data: jobsFormatter.formatDetails({
 			job: jobRes.data,
 		}),
 	};

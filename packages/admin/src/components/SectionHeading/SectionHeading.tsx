@@ -36,12 +36,20 @@ const SectionHeading: Component<SectionHeadingProps> = (props) => {
 		<div
 			data-section-heading
 			class={classnames(
-				"flex justify-between mt-6 mb-4 first:mt-0",
+				"flex justify-between first:mt-0",
+				(props.level ?? 2) === 2 ? "mt-6 mb-4" : "mt-3 mb-2",
 				props.class,
 			)}
 		>
 			<div class="w-full flex flex-col">
-				<Dynamic component={`h${props.level ?? 2}`} class="text-base">
+				<Dynamic
+					component={`h${props.level ?? 2}`}
+					class={
+						(props.level ?? 2) === 2
+							? "text-base"
+							: "text-sm font-medium text-subtitle"
+					}
+				>
 					{props.title}
 				</Dynamic>
 				<Show when={props.description}>

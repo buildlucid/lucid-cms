@@ -93,10 +93,7 @@ const NotificationTableRow: Component<NotificationTableRowProps> = (props) => {
 		>
 			<Table.Cell column="title" minWidth={320}>
 				<div class="flex min-w-0 items-center gap-3">
-					<NotificationThumb
-						notification={props.notification}
-						surface="background"
-					/>
+					<NotificationThumb notification={props.notification} />
 					<div class="min-w-0">
 						<p
 							class={classnames(

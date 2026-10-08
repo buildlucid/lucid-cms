@@ -21,6 +21,8 @@ export const executeRequestJob = defineJob({
 	}),
 	retry: { type: "none" },
 	transaction: true,
+	//* request failures notify the people involved instead
+	notifyOnFailure: false,
 	handler: ({ context, input, execution }) =>
 		execute(context, {
 			id: input.requestId,

@@ -1,4 +1,8 @@
-import type { Job, JobScheduleSummary } from "../../types/response.js";
+import type {
+	Job,
+	JobDetails,
+	JobScheduleSummary,
+} from "../../types/response.js";
 import type { LucidJobs } from "../db/tables/jobs.js";
 import type { Select } from "../db/types.js";
 import type {
@@ -90,6 +94,15 @@ const formatSingle = (props: { job: JobPropT }): Job => {
 	};
 };
 
+const formatDetails = (props: {
+	job: JobPropT & Pick<Select<LucidJobs>, "error_stack">;
+}): JobDetails => {
+	return {
+		...formatSingle({ job: props.job }),
+		errorStack: props.job.error_stack,
+	};
+};
+
 const formatSchedule = (props: {
 	binding: RegisteredJobSchedule;
 	nextRunAt: Date;
@@ -137,6 +150,7 @@ const formatSchedule = (props: {
 };
 
 export default {
+	formatDetails,
 	formatMultiple,
 	formatSchedule,
 	formatSingle,

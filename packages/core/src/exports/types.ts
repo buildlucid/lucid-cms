@@ -784,6 +784,7 @@ export type {
 	InternalDocumentField,
 	InternalDocumentFieldGroup,
 	Job,
+	JobDetails,
 	JobScheduleRun,
 	JobScheduleSummary,
 	Locale,

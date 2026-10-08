@@ -4,6 +4,7 @@ import Table from "@/components/Table/Table";
 import { Permissions } from "@/constants/permissions";
 import type useRowTarget from "@/hooks/useRowTarget/useRowTarget";
 import T from "@/translations";
+import { jobStatusPills } from "@/utils/jobs";
 import JobDetailsCell from "./parts/JobDetailsCell";
 
 interface JobRowProps {
@@ -39,15 +40,7 @@ const JobTableRow: Component<JobRowProps> = (props) => {
 			<Table.Pill
 				column="status"
 				text={props.job.status}
-				variant={
-					props.job.status === "completed"
-						? "success-subtle"
-						: props.job.status === "failed"
-							? "danger-subtle"
-							: props.job.status === "running"
-								? "primary-subtle"
-								: "outline"
-				}
+				variant={jobStatusPills[props.job.status]}
 			/>
 			<JobDetailsCell column="job" job={props.job} />
 			<Table.Text

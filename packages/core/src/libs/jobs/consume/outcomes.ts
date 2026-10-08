@@ -3,6 +3,10 @@ import type { ServiceContext } from "../../../utils/services/types.js";
 import { copy, isTranslatableCopy } from "../../i18n/index.js";
 import { JobsRepository } from "../../repositories/index.js";
 import { dispatchPendingJobs } from "../dispatch.js";
+import {
+	notifyJobFailure,
+	resolveJobFailure,
+} from "../failure-notification.js";
 import { runPermanentFailureHook } from "../permanent-failure.js";
 import { getRegisteredJob } from "../registry.js";
 import type { JobConsumptionResult } from "../types.js";
@@ -19,6 +23,20 @@ export const toErrorMessage = (context: ServiceContext, error: unknown) => {
 		}
 	}
 	return context.translate.english(copy("server:core.jobs.execution.failed"));
+};
+
+/** Returns the stack of a thrown error, including one kept as a returned error's cause. */
+export const toErrorStack = (error: unknown) => {
+	if (error instanceof Error) return error.stack ?? null;
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"cause" in error &&
+		error.cause instanceof Error
+	) {
+		return error.cause.stack ?? null;
+	}
+	return null;
 };
 
 /**
@@ -55,6 +73,8 @@ export const completeJob = async (
 	if (completed.error) return { type: "retry-transport" };
 	if (!completed.data) return finishCancellation(context, job);
 
+	await resolveJobFailure(context, job);
+
 	return { type: "completed" };
 };
 
@@ -75,7 +95,12 @@ const retryDelay = (
 const scheduleRetry = async (
 	context: ServiceContext,
 	job: ClaimedJob,
-	props: { message: string; delayMs: number; immediateRetry: boolean },
+	props: {
+		message: string;
+		stack: string | null;
+		delayMs: number;
+		immediateRetry: boolean;
+	},
 ): Promise<JobConsumptionResult> => {
 	const now = new Date();
 	const availableAt = new Date(now.getTime() + props.delayMs).toISOString();
@@ -86,6 +111,7 @@ const scheduleRetry = async (
 		jobId: job.job_id,
 		leaseToken: job.lease_token,
 		message: props.message,
+		stack: props.stack,
 		now: now.toISOString(),
 	});
 	if (retried.error) return { type: "retry-transport" };
@@ -99,25 +125,30 @@ const scheduleRetry = async (
 	return { type: "retry-scheduled", availableAt };
 };
 
-/** Marks a job permanently failed and runs its permanent failure hook. */
+/** Marks a job permanently failed, notifies people and runs its permanent failure hook. */
 const failJob = async (
 	context: ServiceContext,
 	job: ClaimedJob,
-	message: string,
-	error?: LucidErrorData,
+	props: { message: string; stack: string | null; error?: LucidErrorData },
 ): Promise<JobConsumptionResult> => {
 	const Jobs = new JobsRepository(context.db);
 
 	const failed = await Jobs.failClaimed({
 		jobId: job.job_id,
 		leaseToken: job.lease_token,
-		message,
+		message: props.message,
+		stack: props.stack,
 		now: new Date().toISOString(),
 	});
 	if (failed.error) return { type: "retry-transport" };
 	if (!failed.data) return finishCancellation(context, job);
 
-	await runPermanentFailureHook(context, { job, errorMessage: message, error });
+	await notifyJobFailure(context, { job, errorMessage: props.message });
+	await runPermanentFailureHook(context, {
+		job,
+		errorMessage: props.message,
+		error: props.error,
+	});
 
 	return { type: "failed" };
 };
@@ -128,6 +159,7 @@ export const handleFailure = async (
 	job: ClaimedJob,
 	props: {
 		message: string;
+		stack: string | null;
 		permanent: boolean;
 		immediateRetry: boolean;
 		error?: LucidErrorData;
@@ -143,10 +175,11 @@ export const handleFailure = async (
 		!props.permanent &&
 		policy?.type === "exponential" &&
 		job.attempts < job.max_attempts;
-	if (!canRetry) return failJob(context, job, props.message, props.error);
+	if (!canRetry) return failJob(context, job, props);
 
 	return scheduleRetry(context, job, {
 		message: props.message,
+		stack: props.stack,
 		delayMs: props.immediateRetry ? 0 : retryDelay(job, policy),
 		immediateRetry: props.immediateRetry,
 	});

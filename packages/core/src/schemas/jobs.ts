@@ -149,6 +149,7 @@ export const controllerSchemas = {
 			dispatchAttempts: z.number(),
 			dispatchError: z.string().nullable(),
 			errorMessage: z.string().nullable(),
+			errorStack: z.string().nullable(),
 			createdAt: z.string().nullable(),
 			availableAt: z.string().nullable(),
 			startedAt: z.string().nullable(),

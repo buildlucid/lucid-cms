@@ -152,6 +152,8 @@ type JobDescriptionResult =
 type JobDefinitionRuntime = {
 	/** Keeps the handler's database writes and job completion in one transaction. */
 	transaction: boolean;
+	/** Sends the job failed notification when the job fails for good. */
+	notifyOnFailure: boolean;
 	parse: (input: unknown) => Promise<JobPayloadParseResult>;
 	execute: (
 		context: ServiceContext,
@@ -213,6 +215,8 @@ export type DefineJobOptions<
 	describe?: (args: { input: Input }) => JobPayload;
 	/** Runs after permanent failure; hook errors are logged without changing the job. */
 	onPermanentFailure?: JobPermanentFailureHandler<Input>;
+	/** Tells everyone who can read jobs when this job fails for good. Repeat failures only tell them again once the job has completed in between. Turn off when the job reports its own failures. Defaults to true. */
+	notifyOnFailure?: boolean;
 };
 
 /** Optional scheduling and audit values used when a job is enqueued. */

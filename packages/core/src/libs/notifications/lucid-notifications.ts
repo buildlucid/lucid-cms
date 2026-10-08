@@ -4,6 +4,7 @@ import { routineNeedsReviewNotification } from "../../services/agent/notificatio
 import { routineReportNotification } from "../../services/agent/notifications/routine-report.js";
 import { assignedNotification } from "../../services/document-workflows/notifications/assigned.js";
 import { stageChangedNotification } from "../../services/document-workflows/notifications/stage-changed.js";
+import { jobFailedNotification } from "../../services/jobs/notifications/job-failed.js";
 import { storageNotification } from "../../services/media/notifications/storage.js";
 import { approvalDismissedNotification } from "../../services/requests/notifications/approval-dismissed.js";
 import { approvedNotification } from "../../services/requests/notifications/approved.js";
@@ -45,6 +46,9 @@ export const notifications = {
 	workflows: {
 		assigned: assignedNotification,
 		stageChanged: stageChangedNotification,
+	},
+	jobs: {
+		failed: jobFailedNotification,
 	},
 	agent: {
 		inputNeeded: inputNeededNotification,

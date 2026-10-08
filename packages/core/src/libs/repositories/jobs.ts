@@ -384,6 +384,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 				status: "completed",
 				completed_at: props.now,
 				error_message: null,
+				error_stack: null,
 				lease_token: null,
 				lease_expires_at: null,
 				heartbeat_at: null,
@@ -406,6 +407,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 		jobId: string;
 		leaseToken: string;
 		message: string;
+		stack: string | null;
 		now: string;
 	}) {
 		const query = this.db
@@ -414,6 +416,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 				status: "queued",
 				available_at: props.availableAt,
 				error_message: props.message,
+				error_stack: props.stack,
 				lease_token: null,
 				lease_expires_at: null,
 				heartbeat_at: null,
@@ -439,6 +442,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 		jobId: string;
 		leaseToken: string;
 		message: string;
+		stack: string | null;
 		now: string;
 	}) {
 		const query = this.db
@@ -447,6 +451,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 				status: "failed",
 				failed_at: props.now,
 				error_message: props.message,
+				error_stack: props.stack,
 				lease_token: null,
 				lease_expires_at: null,
 				heartbeat_at: null,
@@ -566,6 +571,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 				status: "failed",
 				failed_at: props.now,
 				error_message: props.message,
+				error_stack: null,
 				lease_token: null,
 				lease_expires_at: null,
 				heartbeat_at: null,
@@ -590,6 +596,7 @@ export default class JobsRepository extends StaticRepository<"lucid_jobs"> {
 				status: "queued",
 				available_at: props.now,
 				error_message: props.message,
+				error_stack: null,
 				lease_token: null,
 				lease_expires_at: null,
 				heartbeat_at: null,
