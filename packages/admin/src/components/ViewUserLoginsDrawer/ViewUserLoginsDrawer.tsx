@@ -1,10 +1,10 @@
 import classnames from "classnames";
 import {
-	FaSolidCalendar,
-	FaSolidGlobe,
-	FaSolidShield,
-	FaSolidT,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineLetterT,
+	TbOutlineShield,
+	TbOutlineWorld,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -203,22 +203,22 @@ const ViewUserLoginsPanelContent: Component<{
 							{
 								label: T()("common.auth.method"),
 								key: "authMethod",
-								icon: <FaSolidShield />,
+								icon: <TbOutlineShield />,
 							},
 							{
 								label: T()("common.ip.address"),
 								key: "ipAddress",
-								icon: <FaSolidGlobe />,
+								icon: <TbOutlineWorld />,
 							},
 							{
 								label: T()("users.agent"),
 								key: "userAgent",
-								icon: <FaSolidT />,
+								icon: <TbOutlineLetterT />,
 							},
 							{
 								label: T()("common.created.at"),
 								key: "createdAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 						]}

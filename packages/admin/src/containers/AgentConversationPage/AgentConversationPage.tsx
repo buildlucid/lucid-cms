@@ -5,7 +5,7 @@ import type {
 	AiModelSelection,
 } from "@types";
 import classnames from "classnames";
-import { FaSolidArrowDown } from "solid-icons/fa";
+import { TbOutlineArrowDown } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -411,14 +411,14 @@ const AgentConversationPage: Component = () => {
 											>
 												<Show
 													when={chat.working() && !chat.pendingInteraction()}
-													fallback={<FaSolidArrowDown size={11} />}
+													fallback={<TbOutlineArrowDown size={11} />}
 												>
 													<Spinner
 														size="sm"
 														variant="secondary"
 														class="group-hover:hidden group-focus-visible:hidden"
 													/>
-													<FaSolidArrowDown
+													<TbOutlineArrowDown
 														size={11}
 														class="hidden group-hover:block group-focus-visible:block"
 													/>

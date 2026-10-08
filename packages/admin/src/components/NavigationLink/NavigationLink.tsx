@@ -1,27 +1,28 @@
 import { useLocation } from "@solidjs/router";
+import type { IconTypes } from "solid-icons";
 import {
-	FaSolidBarsProgress,
-	FaSolidBell,
-	FaSolidBox,
-	FaSolidBoxesStacked,
-	FaSolidChartSimple,
-	FaSolidClockRotateLeft,
-	FaSolidCloudArrowUp,
-	FaSolidComments,
-	FaSolidDesktop,
-	FaSolidEnvelope,
-	FaSolidGear,
-	FaSolidHouse,
-	FaSolidMoneyCheck,
-	FaSolidPhotoFilm,
-	FaSolidPuzzlePiece,
-	FaSolidRepeat,
-	FaSolidRightFromBracket,
-	FaSolidSquareArrowUpRight,
-	FaSolidUserLock,
-	FaSolidUsers,
-	FaSolidWandMagicSparkles,
-} from "solid-icons/fa";
+	TbOutlineBell,
+	TbOutlineBox,
+	TbOutlineChartBar,
+	TbOutlineCloudUpload,
+	TbOutlineDeviceDesktop,
+	TbOutlineExternalLink,
+	TbOutlineHistory,
+	TbOutlineHome,
+	TbOutlineLogout,
+	TbOutlineMail,
+	TbOutlineMessages,
+	TbOutlinePackages,
+	TbOutlinePhotoVideo,
+	TbOutlineProgress,
+	TbOutlinePuzzle,
+	TbOutlineRepeat,
+	TbOutlineReportMoney,
+	TbOutlineSettings,
+	TbOutlineUserShield,
+	TbOutlineUsers,
+	TbOutlineWand,
+} from "solid-icons/tb";
 import { type Component, createEffect, createMemo, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import type { AdminNavigationIcon } from "@/extensions/types/navigation";
@@ -31,28 +32,28 @@ import {
 } from "@/utils/navigation";
 
 const icons = {
-	dashboard: FaSolidHouse,
-	agent: FaSolidWandMagicSparkles,
-	chat: FaSolidComments,
-	history: FaSolidClockRotateLeft,
-	routines: FaSolidRepeat,
-	"collection-multiple": FaSolidBoxesStacked,
-	"collection-single": FaSolidBox,
-	media: FaSolidPhotoFilm,
-	users: FaSolidUsers,
-	overview: FaSolidMoneyCheck,
-	usage: FaSolidChartSimple,
-	roles: FaSolidUserLock,
-	email: FaSolidEnvelope,
-	logout: FaSolidRightFromBracket,
-	queue: FaSolidBarsProgress,
-	integrations: FaSolidDesktop,
-	settings: FaSolidGear,
-	requests: FaSolidSquareArrowUpRight,
-	publishing: FaSolidCloudArrowUp,
-	extensions: FaSolidPuzzlePiece,
-	notifications: FaSolidBell,
-} satisfies Record<AdminNavigationIcon, typeof FaSolidHouse>;
+	dashboard: TbOutlineHome,
+	agent: TbOutlineWand,
+	chat: TbOutlineMessages,
+	history: TbOutlineHistory,
+	routines: TbOutlineRepeat,
+	"collection-multiple": TbOutlinePackages,
+	"collection-single": TbOutlineBox,
+	media: TbOutlinePhotoVideo,
+	users: TbOutlineUsers,
+	overview: TbOutlineReportMoney,
+	usage: TbOutlineChartBar,
+	roles: TbOutlineUserShield,
+	email: TbOutlineMail,
+	logout: TbOutlineLogout,
+	queue: TbOutlineProgress,
+	integrations: TbOutlineDeviceDesktop,
+	settings: TbOutlineSettings,
+	requests: TbOutlineExternalLink,
+	publishing: TbOutlineCloudUpload,
+	extensions: TbOutlinePuzzle,
+	notifications: TbOutlineBell,
+} satisfies Record<AdminNavigationIcon, IconTypes>;
 
 /** A sidebar link rendered as a list item. Hidden when `permission` is false. */
 export const NavigationLink: Component<{
@@ -99,7 +100,7 @@ export const NavigationLink: Component<{
 					data-navigation-exact={props.exact ? "true" : undefined}
 					data-navigation-force-active={props.active ? "true" : undefined}
 					link
-					class="h-8 w-full min-w-0 text-title flex items-center gap-2 px-2 rounded-md bg-sidebar fill-title hover:bg-background-hover transition-colors duration-200 ease-in-out outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
+					class="h-8 w-full min-w-0 text-title flex items-center gap-2 px-2 rounded-md bg-sidebar hover:bg-background-hover transition-colors duration-200 ease-in-out outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 				>
 					<Dynamic
 						component={icons[props.icon]}

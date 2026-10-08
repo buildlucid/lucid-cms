@@ -1,13 +1,13 @@
 import type { Editor } from "@tiptap/core";
 import {
-	FaSolidBold,
-	FaSolidCode,
-	FaSolidEraser,
-	FaSolidItalic,
-	FaSolidLink,
-	FaSolidListOl,
-	FaSolidListUl,
-} from "solid-icons/fa";
+	TbOutlineBold,
+	TbOutlineCode,
+	TbOutlineEraser,
+	TbOutlineItalic,
+	TbOutlineLink,
+	TbOutlineList,
+	TbOutlineListNumbers,
+} from "solid-icons/tb";
 import { type Component, createMemo, createSignal } from "solid-js";
 import { createEditorTransaction } from "solid-tiptap";
 import HeadingMenu, {
@@ -96,7 +96,7 @@ const AgentMarkdownPill: Component<{
 					onClick={() => chain().toggleBold().run()}
 					title={T()("editor.rich.text.marks.bold")}
 				>
-					<FaSolidBold size={12} />
+					<TbOutlineBold size={12} />
 				</ToolbarButton>
 				<ToolbarButton
 					mode="pill"
@@ -104,7 +104,7 @@ const AgentMarkdownPill: Component<{
 					onClick={() => chain().toggleItalic().run()}
 					title={T()("editor.rich.text.marks.italic")}
 				>
-					<FaSolidItalic size={12} />
+					<TbOutlineItalic size={12} />
 				</ToolbarButton>
 				<ToolbarButton
 					mode="pill"
@@ -112,7 +112,7 @@ const AgentMarkdownPill: Component<{
 					onClick={() => chain().toggleCode().run()}
 					title={T()("editor.rich.text.marks.code")}
 				>
-					<FaSolidCode size={12} />
+					<TbOutlineCode size={12} />
 				</ToolbarButton>
 				<div class="h-5 w-px bg-border" />
 				<ToolbarButton
@@ -121,7 +121,7 @@ const AgentMarkdownPill: Component<{
 					onClick={() => chain().toggleBulletList().run()}
 					title={T()("editor.rich.text.lists.bullet")}
 				>
-					<FaSolidListUl size={12} />
+					<TbOutlineList size={12} />
 				</ToolbarButton>
 				<ToolbarButton
 					mode="pill"
@@ -129,7 +129,7 @@ const AgentMarkdownPill: Component<{
 					onClick={() => chain().toggleOrderedList().run()}
 					title={T()("editor.rich.text.lists.ordered")}
 				>
-					<FaSolidListOl size={12} />
+					<TbOutlineListNumbers size={12} />
 				</ToolbarButton>
 				<div class="h-5 w-px bg-border" />
 				<ToolbarButton
@@ -142,7 +142,7 @@ const AgentMarkdownPill: Component<{
 							: T()("editor.rich.text.link.add")
 					}
 				>
-					<FaSolidLink size={12} />
+					<TbOutlineLink size={12} />
 				</ToolbarButton>
 				<div class="h-5 w-px bg-border" />
 				<ToolbarButton
@@ -151,7 +151,7 @@ const AgentMarkdownPill: Component<{
 					onClick={() => chain().clearNodes().unsetAllMarks().run()}
 					title={T()("editor.rich.text.formatting.clear")}
 				>
-					<FaSolidEraser size={12} />
+					<TbOutlineEraser size={12} />
 				</ToolbarButton>
 			</SelectionPill>
 			<LinkModal

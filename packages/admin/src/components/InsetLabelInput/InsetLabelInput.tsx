@@ -1,6 +1,6 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
+import { TbOutlineEye, TbOutlineEyeOff } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
@@ -104,10 +104,10 @@ export const InsetLabelInput: Component<{
 						tabIndex={-1}
 					>
 						<Show when={passwordVisible()}>
-							<FaSolidEyeSlash size={18} class="text-muted" />
+							<TbOutlineEyeOff size={18} class="text-muted" />
 						</Show>
 						<Show when={!passwordVisible()}>
-							<FaSolidEye size={18} class="text-muted" />
+							<TbOutlineEye size={18} class="text-muted" />
 						</Show>
 					</button>
 				</Show>

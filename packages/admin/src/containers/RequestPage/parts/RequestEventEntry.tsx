@@ -2,20 +2,20 @@ import { A } from "@solidjs/router";
 import type { Collection, RequestEvent, RequestUser } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidBan,
-	FaSolidCalendar,
-	FaSolidCheck,
-	FaSolidCircleExclamation,
-	FaSolidCloudArrowUp,
-	FaSolidListCheck,
-	FaSolidMinus,
-	FaSolidPen,
-	FaSolidPlus,
-	FaSolidRocket,
-	FaSolidRotate,
-	FaSolidUserMinus,
-	FaSolidUserPlus,
-} from "solid-icons/fa";
+	TbOutlineAlertCircle,
+	TbOutlineBan,
+	TbOutlineCalendar,
+	TbOutlineCheck,
+	TbOutlineCloudUpload,
+	TbOutlineListCheck,
+	TbOutlineMinus,
+	TbOutlinePencil,
+	TbOutlinePlus,
+	TbOutlineRocket,
+	TbOutlineRotateClockwise2,
+	TbOutlineUserMinus,
+	TbOutlineUserPlus,
+} from "solid-icons/tb";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import DateText from "@/components/DateText/DateText";
@@ -67,13 +67,13 @@ export const RequestEventEntry: Component<{
 			switch (event.type) {
 				case "approved":
 					return {
-						icon: FaSolidCheck,
+						icon: TbOutlineCheck,
 						tone: "success",
 						text: T()("requests.activity.approved", { name: name() }),
 					};
 				case "approval_dismissed":
 					return {
-						icon: FaSolidRotate,
+						icon: TbOutlineRotateClockwise2,
 						tone: "default",
 						text: event.user
 							? T()("requests.activity.withdrawn", { name: name() })
@@ -81,7 +81,7 @@ export const RequestEventEntry: Component<{
 					};
 				case "schedule_updated":
 					return {
-						icon: FaSolidCalendar,
+						icon: TbOutlineCalendar,
 						tone: "default",
 						text: event.scheduledAt ? (
 							<>
@@ -94,19 +94,19 @@ export const RequestEventEntry: Component<{
 					};
 				case "completed":
 					return {
-						icon: FaSolidRocket,
+						icon: TbOutlineRocket,
 						tone: "request",
 						text: T()("requests.activity.completed", { name: name() }),
 					};
 				case "failed":
 					return {
-						icon: FaSolidCircleExclamation,
+						icon: TbOutlineAlertCircle,
 						tone: "danger",
 						text: T()("requests.activity.failed", { message: event.message }),
 					};
 				case "target_published":
 					return {
-						icon: FaSolidCloudArrowUp,
+						icon: TbOutlineCloudUpload,
 						tone: "default",
 						text:
 							event.sourceRequestId === null ? (
@@ -142,7 +142,8 @@ export const RequestEventEntry: Component<{
 				case "target_added":
 				case "target_removed":
 					return {
-						icon: event.type === "target_added" ? FaSolidPlus : FaSolidMinus,
+						icon:
+							event.type === "target_added" ? TbOutlinePlus : TbOutlineMinus,
 						tone: "default",
 						text: T()(
 							event.type === "target_added"
@@ -153,7 +154,7 @@ export const RequestEventEntry: Component<{
 					};
 				case "workflow_updated":
 					return {
-						icon: FaSolidListCheck,
+						icon: TbOutlineListCheck,
 						tone: "default",
 						text: T()("requests.activity.workflow.updated", {
 							name: name(),
@@ -167,7 +168,7 @@ export const RequestEventEntry: Component<{
 					};
 				case "proposal_edited":
 					return {
-						icon: FaSolidPen,
+						icon: TbOutlinePencil,
 						tone: "default",
 						text: T()("requests.activity.proposal.edited", {
 							name: name(),
@@ -176,7 +177,7 @@ export const RequestEventEntry: Component<{
 					};
 				case "target_reviewed":
 					return {
-						icon: FaSolidCheck,
+						icon: TbOutlineCheck,
 						tone: "default",
 						text: T()("requests.activity.target.reviewed", {
 							name: name(),
@@ -185,7 +186,7 @@ export const RequestEventEntry: Component<{
 					};
 				case "target_unreviewed":
 					return {
-						icon: FaSolidRotate,
+						icon: TbOutlineRotateClockwise2,
 						tone: "default",
 						text: T()("requests.activity.target.unreviewed", {
 							name: name(),
@@ -195,7 +196,7 @@ export const RequestEventEntry: Component<{
 				case "document_added":
 				case "document_removed":
 					return {
-						icon: FaSolidRotate,
+						icon: TbOutlineRotateClockwise2,
 						tone: "default",
 						text: T()(
 							event.type === "document_added"
@@ -212,8 +213,8 @@ export const RequestEventEntry: Component<{
 					return {
 						icon:
 							event.type === "reviewer_added"
-								? FaSolidUserPlus
-								: FaSolidUserMinus,
+								? TbOutlineUserPlus
+								: TbOutlineUserMinus,
 						tone: "default",
 						text: T()(
 							event.type === "reviewer_added"
@@ -224,13 +225,13 @@ export const RequestEventEntry: Component<{
 					};
 				case "closed":
 					return {
-						icon: FaSolidBan,
+						icon: TbOutlineBan,
 						tone: "default",
 						text: T()("requests.activity.closed", { name: name() }),
 					};
 				case "reopened":
 					return {
-						icon: FaSolidRotate,
+						icon: TbOutlineRotateClockwise2,
 						tone: "default",
 						text: T()("requests.activity.reopened", { name: name() }),
 					};

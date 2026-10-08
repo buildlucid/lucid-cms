@@ -6,13 +6,13 @@ import type {
 	MediaImageGenerateResponse,
 } from "@types";
 import {
-	FaSolidArrowRotateLeft,
-	FaSolidArrowUpFromBracket,
-	FaSolidImage,
-	FaSolidMagicWandSparkles,
-	FaSolidPaperPlane,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlinePhoto,
+	TbOutlineRotate,
+	TbOutlineSend,
+	TbOutlineUpload,
+	TbOutlineWand,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -1025,7 +1025,7 @@ const MediaImageGenerationModal: Component = () => {
 													)}
 													onClick={restoreSource}
 												>
-													<FaSolidArrowRotateLeft size={14} />
+													<TbOutlineRotate size={14} />
 												</Button>
 											</Show>
 											<Button
@@ -1037,7 +1037,7 @@ const MediaImageGenerationModal: Component = () => {
 												aria-label={T()("ai.media.image.generate.source.add")}
 												onClick={() => sourceInputRef?.click()}
 											>
-												<FaSolidArrowUpFromBracket size={14} />
+												<TbOutlineUpload size={14} />
 											</Button>
 										</div>
 									</div>
@@ -1049,7 +1049,7 @@ const MediaImageGenerationModal: Component = () => {
 											<Show
 												when={sourcePreviewUrl()}
 												fallback={
-													<FaSolidImage
+													<TbOutlinePhoto
 														class="relative z-10 h-5 w-5 text-muted"
 														aria-hidden="true"
 													/>
@@ -1084,7 +1084,7 @@ const MediaImageGenerationModal: Component = () => {
 												)}
 												onClick={() => sourceInputRef?.click()}
 											>
-												<FaSolidArrowUpFromBracket size={14} />
+												<TbOutlineUpload size={14} />
 											</Button>
 											<Button
 												type="button"
@@ -1095,7 +1095,7 @@ const MediaImageGenerationModal: Component = () => {
 												aria-label={T()("common.remove")}
 												onClick={() => setSource(undefined)}
 											>
-												<FaSolidXmark size={14} />
+												<TbOutlineX size={14} />
 											</Button>
 										</div>
 									</div>
@@ -1286,7 +1286,7 @@ const MediaImageGenerationModal: Component = () => {
 									loading={isLoading()}
 									disabled={!canGenerate()}
 								>
-									<FaSolidPaperPlane size={12} aria-hidden="true" />
+									<TbOutlineSend size={12} aria-hidden="true" />
 									{isLoading()
 										? T()("ai.media.image.generate.modal.generating")
 										: T()("ai.media.image.generate.modal.generate")}
@@ -1356,7 +1356,10 @@ const MediaImageGenerationModal: Component = () => {
 																		useGenerationAsSource(generation())
 																	}
 																>
-																	<FaSolidImage size={12} aria-hidden="true" />
+																	<TbOutlinePhoto
+																		size={12}
+																		aria-hidden="true"
+																	/>
 																	{T()("ai.media.image.generate.source.use")}
 																</Button>
 																<Button
@@ -1367,7 +1370,7 @@ const MediaImageGenerationModal: Component = () => {
 																	disabled={isLoading()}
 																	onClick={() => retryGeneration(generation())}
 																>
-																	<FaSolidArrowRotateLeft
+																	<TbOutlineRotate
 																		size={12}
 																		aria-hidden="true"
 																	/>
@@ -1391,10 +1394,7 @@ const MediaImageGenerationModal: Component = () => {
 															class="ai-action-button__surface flex h-8 min-w-8 items-center justify-center rounded-md border border-border text-primary"
 															data-loading={isLoading()}
 														>
-															<FaSolidMagicWandSparkles
-																size={12}
-																aria-hidden="true"
-															/>
+															<TbOutlineWand size={12} aria-hidden="true" />
 														</span>
 														<div class="min-w-0 max-w-60">
 															<p class="text-xs font-medium text-muted">
@@ -1434,7 +1434,7 @@ const MediaImageGenerationModal: Component = () => {
 																		resumePendingGeneration(resumablePending())
 																	}
 																>
-																	<FaSolidArrowRotateLeft
+																	<TbOutlineRotate
 																		size={12}
 																		aria-hidden="true"
 																	/>
@@ -1452,7 +1452,7 @@ const MediaImageGenerationModal: Component = () => {
 																		discardPendingGeneration(resumablePending())
 																	}
 																>
-																	<FaSolidXmark size={12} aria-hidden="true" />
+																	<TbOutlineX size={12} aria-hidden="true" />
 																	{T()(
 																		"ai.media.image.generate.response.inflight.discard",
 																	)}

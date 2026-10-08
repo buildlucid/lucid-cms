@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidCheck, FaSolidRotate } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineRotateClockwise2 } from "solid-icons/tb";
 import type { Accessor } from "solid-js";
 import {
 	type Component,
@@ -183,9 +183,14 @@ export const AutoSaveStatusPill: Component<{
 									fallback={
 										<Show
 											when={showAutoSaveSavedState()}
-											fallback={<FaSolidRotate size={10} class="opacity-70" />}
+											fallback={
+												<TbOutlineRotateClockwise2
+													size={10}
+													class="opacity-70"
+												/>
+											}
 										>
-											<FaSolidCheck size={10} />
+											<TbOutlineCheck size={10} />
 										</Show>
 									}
 								>

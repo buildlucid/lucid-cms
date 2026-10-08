@@ -2,7 +2,7 @@ import { debounce } from "@solid-primitives/scheduled";
 import { Editor } from "@tiptap/core";
 import type { Agent, AgentReferenceInput } from "@types";
 import classnames from "classnames";
-import { FaSolidArrowUp, FaSolidStop } from "solid-icons/fa";
+import { TbOutlineArrowUp, TbOutlinePlayerStop } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -100,7 +100,7 @@ export interface AgentComposerProps {
 const editorHeight = { md: "1.5rem", lg: "4.5rem" } as const;
 
 export const composerTriggerClasses =
-	"flex h-7 items-center justify-center gap-1.5 rounded-md text-xs text-subtitle fill-subtitle transition-colors hover:bg-card-hover hover:text-title hover:fill-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary";
+	"flex h-7 items-center justify-center gap-1.5 rounded-md text-xs text-subtitle transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary";
 
 /**
  * The message box for talking to the agent. It supports markdown formatting as
@@ -507,7 +507,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 									aria-label={T()("agent.composer.stop")}
 									title={T()("agent.composer.stop")}
 								>
-									<FaSolidStop size={10} />
+									<TbOutlinePlayerStop size={10} />
 								</Button>
 							}
 						>
@@ -533,7 +533,7 @@ const AgentComposer: Component<AgentComposerProps> = (props) => {
 										: "agent.composer.send",
 								)}
 							>
-								<FaSolidArrowUp size={11} />
+								<TbOutlineArrowUp size={11} />
 							</Button>
 						</Show>
 					</div>

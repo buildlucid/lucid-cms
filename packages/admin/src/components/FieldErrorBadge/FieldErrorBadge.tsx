@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import Pill from "@/components/Pill/Pill";
 import T from "@/translations";
@@ -29,7 +29,7 @@ export const FieldErrorBadge: Component<FieldErrorBadgeProps> = (props) => {
 				aria-label={`${props.count} ${label()}`}
 				tooltip={`${props.count} ${label()}`}
 			>
-				<FaSolidTriangleExclamation size={8} aria-hidden="true" />
+				<TbOutlineAlertTriangle size={8} aria-hidden="true" />
 				<span aria-hidden="true">
 					{props.compact
 						? props.count

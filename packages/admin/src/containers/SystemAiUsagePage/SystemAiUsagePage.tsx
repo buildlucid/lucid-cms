@@ -1,6 +1,6 @@
 import { useSearchParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import AiCreditsSummary from "@/components/AiCreditsSummary/AiCreditsSummary";
 import { AiUsageChart } from "@/components/AiUsageChart/AiUsageChart";
@@ -73,7 +73,7 @@ const SystemAiUsagePage: Component = () => {
 						<section class="mb-5 flex flex-col gap-4 rounded-md border border-warning-low-border bg-warning-low p-4 sm:flex-row sm:items-center sm:justify-between">
 							<div class="flex min-w-0 items-start gap-3">
 								<span class="grid size-8 shrink-0 place-items-center rounded-full border border-warning-low-border bg-warning-low text-warning-low-foreground">
-									<FaSolidTriangleExclamation class="size-3.5" />
+									<TbOutlineAlertTriangle class="size-3.5" />
 								</span>
 								<div class="min-w-0">
 									<h2 class="text-sm font-semibold text-title">

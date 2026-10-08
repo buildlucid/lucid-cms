@@ -1,5 +1,5 @@
 import type { ProfilePicture } from "@types";
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import { Show } from "solid-js";
 import UserDisplay from "@/components/UserDisplay/UserDisplay";
@@ -55,7 +55,7 @@ const UserSelectOption: Component<{
 							removeValue()();
 						}}
 					>
-						<FaSolidXmark size={12} />
+						<TbOutlineX size={12} />
 					</button>
 				)}
 			</Show>

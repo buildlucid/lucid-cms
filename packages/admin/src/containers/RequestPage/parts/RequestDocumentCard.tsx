@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import type { Collection, RequestDetail, RequestDocument } from "@types";
-import { FaSolidArrowUpRightFromSquare } from "solid-icons/fa";
+import { TbOutlineExternalLink } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import DocumentThumb from "@/components/DocumentThumb/DocumentThumb";
@@ -54,10 +54,7 @@ export const RequestDocumentCard: Component<{
 							<span class="truncate">
 								{getRequestDocumentLabel(props.document, props.collection)}
 							</span>
-							<FaSolidArrowUpRightFromSquare
-								size={10}
-								class="shrink-0 text-icon"
-							/>
+							<TbOutlineExternalLink size={10} class="shrink-0 text-icon" />
 						</A>
 						<p class="mt-0.5 truncate text-xs text-muted">
 							{collectionLabel()} #{props.document.documentId}

@@ -1,4 +1,4 @@
-import { FaSolidTable } from "solid-icons/fa";
+import { TbOutlineTable } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import T from "@/translations";
@@ -19,7 +19,7 @@ const TableColumnToggle: Component<TableColumnToggleProps> = (props) => {
 		<Menu.Root placement="bottom-end">
 			<Menu.Trigger class="w-7 h-7 bg-background outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center hover:bg-background-hover">
 				<span class="sr-only">{T()("tables.columns.visibility.toggle")}</span>
-				<FaSolidTable class="text-body" size={14} />
+				<TbOutlineTable class="text-body" size={14} />
 			</Menu.Trigger>
 			<Menu.Content>
 				<For each={props.columns}>

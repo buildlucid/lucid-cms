@@ -1,6 +1,6 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import type { RequestDetail } from "@types";
-import { FaSolidPen } from "solid-icons/fa";
+import { TbOutlinePencil } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import { richTextHasContent } from "@/components/RichText/helpers";
@@ -78,7 +78,7 @@ export const RequestDescription: Component<{
 							title={T()("requests.description.edit")}
 							onClick={startEditing}
 						>
-							<FaSolidPen size={12} />
+							<TbOutlinePencil size={12} />
 						</Button>
 					</Show>
 				}

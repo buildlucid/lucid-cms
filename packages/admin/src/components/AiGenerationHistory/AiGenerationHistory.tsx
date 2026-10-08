@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidMagicWandSparkles } from "solid-icons/fa";
+import { TbOutlineWand } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import Select from "@/components/Select/Select";
 import T from "@/translations";
@@ -119,7 +119,7 @@ export const AiGenerationHistory: Component<GenerationHistoryProps> = (
 									data-loading="true"
 									data-variant="subtle"
 								>
-									<FaSolidMagicWandSparkles size={8} aria-hidden="true" />
+									<TbOutlineWand size={8} aria-hidden="true" />
 								</span>
 								<span class="min-w-0">
 									<span class="block truncate text-xs font-semibold text-title">

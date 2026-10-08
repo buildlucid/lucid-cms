@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidFilter, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineFilter, TbOutlineX } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
 import T from "@/translations";
@@ -42,7 +42,7 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 	const resettable = () => active() && props.onReset !== undefined;
 	const tone = () =>
 		props.open || active()
-			? "bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground"
+			? "bg-primary hover:bg-primary-hover text-primary-foreground"
 			: "bg-secondary hover:bg-secondary-hover text-secondary-foreground";
 
 	// ----------------------------------------
@@ -52,7 +52,7 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 			<button
 				type="button"
 				class={classNames(
-					"gap-2 pl-2 pr-3 h-9 text-sm border border-transparent flex items-center outline-primary focus:outline-1 disabled:cursor-not-allowed disabled:text-muted disabled:fill-muted duration-200 transition-colors",
+					"gap-2 pl-2 pr-3 h-9 text-sm border border-transparent flex items-center outline-primary focus:outline-1 disabled:cursor-not-allowed disabled:text-muted duration-200 transition-colors",
 					tone(),
 					resettable() ? "rounded-l-md" : "rounded-md",
 				)}
@@ -60,7 +60,7 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 				disabled={props.disabled}
 				onClick={() => props.onOpenChange(!props.open)}
 			>
-				<FaSolidFilter />
+				<TbOutlineFilter />
 				<span>{T()("common.filter")}</span>
 			</button>
 			<Show when={resettable()}>
@@ -74,7 +74,7 @@ const FilterToggle: Component<FilterToggleProps> = (props) => {
 					title={T()("actions.reset.filters")}
 					onClick={() => props.onReset?.()}
 				>
-					<FaSolidXmark size={12} />
+					<TbOutlineX size={12} />
 				</button>
 			</Show>
 		</div>

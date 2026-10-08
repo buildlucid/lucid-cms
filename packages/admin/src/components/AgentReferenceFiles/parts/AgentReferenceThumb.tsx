@@ -1,10 +1,10 @@
 import {
-	FaSolidFile,
-	FaSolidFileAudio,
-	FaSolidFileLines,
-	FaSolidFileVideo,
-	FaSolidImage,
-} from "solid-icons/fa";
+	TbOutlineFile,
+	TbOutlineFileMusic,
+	TbOutlineFileText,
+	TbOutlineMovie,
+	TbOutlinePhoto,
+} from "solid-icons/tb";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import Image from "@/components/Image/Image";
 import PdfBadge from "@/components/PdfBadge/PdfBadge";
@@ -27,19 +27,19 @@ const AgentReferenceThumb: Component<{
 	return (
 		<Switch
 			fallback={
-				<span class="flex h-full w-full items-center justify-center bg-input text-subtitle fill-subtitle">
-					<Switch fallback={<FaSolidFile size={size()} />}>
+				<span class="flex h-full w-full items-center justify-center bg-input text-subtitle">
+					<Switch fallback={<TbOutlineFile size={size()} />}>
 						<Match when={kind() === "image"}>
-							<FaSolidImage size={size()} />
+							<TbOutlinePhoto size={size()} />
 						</Match>
 						<Match when={kind() === "audio"}>
-							<FaSolidFileAudio size={size()} />
+							<TbOutlineFileMusic size={size()} />
 						</Match>
 						<Match when={kind() === "video"}>
-							<FaSolidFileVideo size={size()} />
+							<TbOutlineMovie size={size()} />
 						</Match>
 						<Match when={kind() === "text"}>
-							<FaSolidFileLines size={size()} />
+							<TbOutlineFileText size={size()} />
 						</Match>
 					</Switch>
 				</span>

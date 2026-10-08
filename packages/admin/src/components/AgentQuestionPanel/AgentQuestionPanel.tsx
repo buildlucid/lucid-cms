@@ -1,5 +1,9 @@
 import classnames from "classnames";
-import { FaSolidArrowRight, FaSolidArrowUp, FaSolidPen } from "solid-icons/fa";
+import {
+	TbOutlineArrowRight,
+	TbOutlineArrowUp,
+	TbOutlinePencil,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -118,7 +122,6 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 				props.class,
 			)}
 		>
-			{/* the question sits in a tinted strip across the top, apart from the ways to answer it */}
 			<AgentInteractionBar
 				id={`${id}-question`}
 				title={
@@ -156,7 +159,7 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 									<span class="min-w-0 grow wrap-break-words text-sm text-title">
 										{choice.label}
 									</span>
-									<FaSolidArrowRight
+									<TbOutlineArrowRight
 										size={12}
 										class={classnames("me-1 shrink-0 text-muted", {
 											invisible: active() !== index(),
@@ -182,7 +185,7 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 						aria-hidden="true"
 						class="flex size-7 shrink-0 items-center justify-center rounded-full border border-border text-muted"
 					>
-						<FaSolidPen size={10} />
+						<TbOutlinePencil size={10} />
 					</span>
 					<textarea
 						ref={input}
@@ -206,7 +209,7 @@ const AgentQuestionPanel: Component<AgentQuestionPanelProps> = (props) => {
 						disabled={blank() || submitting()}
 						aria-label={T()("agent.composer.send")}
 					>
-						<FaSolidArrowUp size={11} />
+						<TbOutlineArrowUp size={11} />
 					</Button>
 				</form>
 			</div>

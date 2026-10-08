@@ -1,12 +1,12 @@
 import type { AiUsageSessionType } from "@types";
 import {
-	FaSolidCalendar,
-	FaSolidChartSimple,
-	FaSolidClock,
-	FaSolidCoins,
-	FaSolidMicrochip,
-	FaSolidT,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineChartBar,
+	TbOutlineClock,
+	TbOutlineCoins,
+	TbOutlineCpu,
+	TbOutlineLetterT,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -172,33 +172,33 @@ const AiUsageSessionRecords: Component<{
 						{
 							label: T()("ai.usage.feature"),
 							key: "request",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							minWidth: 200,
 						},
 						{
 							label: T()("ai.usage.usage"),
 							key: "usage",
-							icon: <FaSolidChartSimple />,
+							icon: <TbOutlineChartBar />,
 						},
 						{
 							label: T()("ai.usage.model"),
 							key: "model",
-							icon: <FaSolidMicrochip />,
+							icon: <TbOutlineCpu />,
 						},
 						{
 							label: T()("ai.usage.credits"),
 							key: "credits",
-							icon: <FaSolidCoins />,
+							icon: <TbOutlineCoins />,
 						},
 						{
 							label: T()("ai.usage.duration"),
 							key: "duration",
-							icon: <FaSolidClock />,
+							icon: <TbOutlineClock />,
 						},
 						{
 							label: T()("common.created.at"),
 							key: "createdAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 							minWidth: 170,
 						},

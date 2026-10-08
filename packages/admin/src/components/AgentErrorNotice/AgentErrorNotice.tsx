@@ -1,7 +1,7 @@
 import {
-	FaSolidArrowRotateRight,
-	FaSolidArrowUpRightFromSquare,
-} from "solid-icons/fa";
+	TbOutlineExternalLink,
+	TbOutlineRotateClockwise,
+} from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import Link from "@/components/Link/Link";
@@ -55,7 +55,7 @@ const AgentErrorNotice: Component<{
 								size="sm"
 							>
 								{T()("connection.remote.visit.action")}
-								<FaSolidArrowUpRightFromSquare class="ms-1.5 size-2.5" />
+								<TbOutlineExternalLink class="ms-1.5 size-2.5" />
 							</Link>
 						</Show>
 						<Show when={props.onRetry}>
@@ -70,7 +70,7 @@ const AgentErrorNotice: Component<{
 									title={T()("agent.error.retry")}
 									onClick={() => retry()()}
 								>
-									<FaSolidArrowRotateRight size={12} />
+									<TbOutlineRotateClockwise size={12} />
 								</Button>
 							)}
 						</Show>

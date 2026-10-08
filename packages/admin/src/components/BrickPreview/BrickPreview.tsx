@@ -1,6 +1,6 @@
 import { Image } from "@kobalte/core";
 import classNames from "classnames";
-import { FaSolidImage } from "solid-icons/fa";
+import { TbOutlinePhoto } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import AspectRatio from "@/components/AspectRatio/AspectRatio";
 
@@ -35,7 +35,7 @@ const BrickPreview: Component<BrickPreviewProps> = (props) => {
 				/>
 				<Image.Fallback class="w-full h-full">
 					<div class="w-full h-full flex items-center justify-center text-muted">
-						<FaSolidImage size={22} />
+						<TbOutlinePhoto size={22} />
 					</div>
 				</Image.Fallback>
 			</Image.Root>

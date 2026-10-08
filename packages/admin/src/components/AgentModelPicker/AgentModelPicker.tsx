@@ -1,7 +1,10 @@
 import { Slider as KobalteSlider, Popover } from "@kobalte/core";
 import type { AiModelSelection } from "@types";
 import classnames from "classnames";
-import { FaSolidChevronDown, FaSolidRotate } from "solid-icons/fa";
+import {
+	TbOutlineChevronDown,
+	TbOutlineRotateClockwise2,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -140,12 +143,12 @@ const AgentModelPicker: Component<{
 						</span>
 					)}
 				</Show>
-				<Switch fallback={<FaSolidChevronDown size={9} class="shrink-0" />}>
+				<Switch fallback={<TbOutlineChevronDown size={9} class="shrink-0" />}>
 					<Match when={loading()}>
 						<Spinner size="sm" class="shrink-0 [&_svg]:size-3" />
 					</Match>
 					<Match when={query.isError}>
-						<FaSolidRotate size={9} class="shrink-0" />
+						<TbOutlineRotateClockwise2 size={9} class="shrink-0" />
 					</Match>
 				</Switch>
 			</Popover.Trigger>

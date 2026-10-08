@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import classNames from "classnames";
-import { FaSolidCaretRight } from "solid-icons/fa";
+import { TbOutlineCaretRight } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 
 export const Breadcrumbs: Component<{
@@ -77,7 +77,7 @@ export const Breadcrumbs: Component<{
 											props.breadcrumbs && i() < props.breadcrumbs.length - 1
 										}
 									>
-										<FaSolidCaretRight class="mx-2 text-sm" />
+										<TbOutlineCaretRight class="mx-2 text-sm" />
 									</Show>
 								</li>
 							</Show>

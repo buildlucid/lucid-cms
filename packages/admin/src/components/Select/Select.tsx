@@ -2,11 +2,11 @@ import { debounce } from "@solid-primitives/scheduled";
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidCheck,
-	FaSolidKeyboard,
-	FaSolidSort,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineArrowsSort,
+	TbOutlineCheck,
+	TbOutlineKeyboard,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	createEffect,
 	createSignal,
@@ -247,7 +247,7 @@ function Select<Option extends SelectOption = SelectOption>(
 								class="bg-background hidden px-1.5 py-1 rounded-md border border-border text-body md:inline-flex items-center justify-center"
 								title={props.shortcut}
 							>
-								<FaSolidKeyboard size={12} aria-hidden="true" />
+								<TbOutlineKeyboard size={12} aria-hidden="true" />
 							</span>
 						</Show>
 						<Show
@@ -260,7 +260,7 @@ function Select<Option extends SelectOption = SelectOption>(
 							<button
 								type="button"
 								disabled={props.disabled}
-								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-muted hover:bg-danger hover:text-danger-foreground duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-danger focus:fill-danger"
+								class="pointer-events-auto h-5 w-5 flex items-center justify-center rounded-full text-muted hover:bg-danger hover:text-danger-foreground duration-200 transition-colors focus:outline-hidden focus-visible:ring-1 ring-danger"
 								onClick={(e) => {
 									e.stopPropagation();
 									if (props.disabled) {
@@ -270,10 +270,10 @@ function Select<Option extends SelectOption = SelectOption>(
 									props.onChange(undefined);
 								}}
 							>
-								<FaSolidXmark size={14} class="text-current" />
+								<TbOutlineX size={14} class="text-current" />
 							</button>
 						</Show>
-						<FaSolidSort size={14} class="text-subtitle ml-1" />
+						<TbOutlineArrowsSort size={14} class="text-subtitle ml-1" />
 					</div>
 				</Menu.Trigger>
 				<Menu.Content matchTriggerWidth compact class="z-70">
@@ -323,7 +323,7 @@ function Select<Option extends SelectOption = SelectOption>(
 													}
 												}}
 											>
-												<FaSolidXmark size={14} />
+												<TbOutlineX size={14} />
 												<span class="sr-only">{T()("common.clear")}</span>
 											</button>
 										</div>
@@ -351,7 +351,10 @@ function Select<Option extends SelectOption = SelectOption>(
 										}}
 										end={
 											props.value === option.value ? (
-												<FaSolidCheck size={14} class="shrink-0 text-current" />
+												<TbOutlineCheck
+													size={14}
+													class="shrink-0 text-current"
+												/>
 											) : undefined
 										}
 									>

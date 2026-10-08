@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import classnames from "classnames";
-import { FaSolidArrowRight } from "solid-icons/fa";
+import { TbOutlineArrowRight } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import T from "@/translations";
 
@@ -34,7 +34,7 @@ const ViewAllLink: Component<ViewAllLinkProps> = (props) => {
 			)}
 		>
 			{props.label ?? T()("common.view.all")}
-			<FaSolidArrowRight
+			<TbOutlineArrowRight
 				size={9}
 				class="transition-transform group-hover:translate-x-0.5 rtl:rotate-180"
 			/>

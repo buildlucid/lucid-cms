@@ -1,4 +1,4 @@
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import Button from "@/components/Button/Button";
 
@@ -26,7 +26,7 @@ const NodeRemoveButton: Component<NodeRemoveButtonProps> = (props) => {
 			title={props.label}
 			data-lucid-rich-text-node-remove=""
 		>
-			<FaSolidXmark size={12} />
+			<TbOutlineX size={12} />
 		</Button>
 	);
 };

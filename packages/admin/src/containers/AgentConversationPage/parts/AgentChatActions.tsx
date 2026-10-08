@@ -1,4 +1,4 @@
-import { FaSolidCircleInfo, FaSolidRepeat } from "solid-icons/fa";
+import { TbOutlineInfoCircle, TbOutlineRepeat } from "solid-icons/tb";
 import type { Component, JSXElement } from "solid-js";
 import { Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
@@ -22,7 +22,7 @@ const AgentChatActions: Component<{
 						label={T()("agent.routine.card.toggle")}
 						open={card().open}
 						onToggle={card().onToggle}
-						icon={<FaSolidRepeat size={11} />}
+						icon={<TbOutlineRepeat size={11} />}
 					/>
 				)}
 			</Show>
@@ -30,7 +30,7 @@ const AgentChatActions: Component<{
 				label={T()("agent.chat.details.toggle")}
 				open={props.details.open}
 				onToggle={props.details.onToggle}
-				icon={<FaSolidCircleInfo size={11} />}
+				icon={<TbOutlineInfoCircle size={11} />}
 			/>
 			<ActionMenu
 				variant="ghost"

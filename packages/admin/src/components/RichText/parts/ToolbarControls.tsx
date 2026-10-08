@@ -1,13 +1,13 @@
 import {
-	FaSolidBold,
-	FaSolidEraser,
-	FaSolidItalic,
-	FaSolidLink,
-	FaSolidListOl,
-	FaSolidListUl,
-	FaSolidStrikethrough,
-	FaSolidUnderline,
-} from "solid-icons/fa";
+	TbOutlineBold,
+	TbOutlineEraser,
+	TbOutlineItalic,
+	TbOutlineLink,
+	TbOutlineList,
+	TbOutlineListNumbers,
+	TbOutlineStrikethrough,
+	TbOutlineUnderline,
+} from "solid-icons/tb";
 import { type Component, For, type JSXElement, Show } from "solid-js";
 import T from "@/translations";
 import { getRichTextToolbarFeatures } from "../toolbar-features";
@@ -76,7 +76,7 @@ const ToolbarControls: Component<{
 						disabled={props.disabled}
 						title={T()("editor.rich.text.marks.bold")}
 					>
-						<FaSolidBold size={12} />
+						<TbOutlineBold size={12} />
 					</ToolbarButton>,
 				],
 				[
@@ -88,7 +88,7 @@ const ToolbarControls: Component<{
 						disabled={props.disabled}
 						title={T()("editor.rich.text.marks.italic")}
 					>
-						<FaSolidItalic size={12} />
+						<TbOutlineItalic size={12} />
 					</ToolbarButton>,
 				],
 				[
@@ -100,7 +100,7 @@ const ToolbarControls: Component<{
 						disabled={props.disabled}
 						title={T()("editor.rich.text.marks.underline")}
 					>
-						<FaSolidUnderline size={12} />
+						<TbOutlineUnderline size={12} />
 					</ToolbarButton>,
 				],
 				[
@@ -112,7 +112,7 @@ const ToolbarControls: Component<{
 						disabled={props.disabled}
 						title={T()("editor.rich.text.marks.strikethrough")}
 					>
-						<FaSolidStrikethrough size={12} />
+						<TbOutlineStrikethrough size={12} />
 					</ToolbarButton>,
 				],
 			],
@@ -126,7 +126,7 @@ const ToolbarControls: Component<{
 						disabled={props.disabled}
 						title={T()("editor.rich.text.lists.ordered")}
 					>
-						<FaSolidListOl size={12} />
+						<TbOutlineListNumbers size={12} />
 					</ToolbarButton>,
 				],
 				[
@@ -138,7 +138,7 @@ const ToolbarControls: Component<{
 						disabled={props.disabled}
 						title={T()("editor.rich.text.lists.bullet")}
 					>
-						<FaSolidListUl size={12} />
+						<TbOutlineList size={12} />
 					</ToolbarButton>,
 				],
 			],
@@ -156,7 +156,7 @@ const ToolbarControls: Component<{
 								: T()("editor.rich.text.link.add")
 						}
 					>
-						<FaSolidLink size={12} />
+						<TbOutlineLink size={12} />
 					</ToolbarButton>,
 				],
 			],
@@ -170,7 +170,7 @@ const ToolbarControls: Component<{
 						disabled={props.disabled}
 						title={T()("editor.rich.text.formatting.clear")}
 					>
-						<FaSolidEraser size={12} />
+						<TbOutlineEraser size={12} />
 					</ToolbarButton>,
 				],
 			],

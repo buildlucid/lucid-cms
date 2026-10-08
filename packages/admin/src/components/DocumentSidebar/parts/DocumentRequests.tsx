@@ -1,4 +1,4 @@
-import { FaSolidSquareArrowUpRight } from "solid-icons/fa";
+import { TbOutlineExternalLink } from "solid-icons/tb";
 import { type Accessor, type Component, Show } from "solid-js";
 import DocumentSidebarSection from "@/components/DocumentSidebarSection/DocumentSidebarSection";
 import RequestCompactList from "@/components/RequestCompactList/RequestCompactList";
@@ -38,7 +38,7 @@ export const DocumentRequests: Component<{
 		<Show when={enabled()}>
 			<DocumentSidebarSection
 				title={T()("requests.title")}
-				icon={<FaSolidSquareArrowUpRight size={12} />}
+				icon={<TbOutlineExternalLink size={12} />}
 				preferenceKey="pageBuilder.sidebar.requests"
 				meta={requests.data?.meta.total || undefined}
 			>

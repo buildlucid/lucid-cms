@@ -1,10 +1,10 @@
 import classnames from "classnames";
 import {
-	FaSolidArrowRotateLeft,
-	FaSolidCode,
-	FaSolidMessage,
-	FaSolidStop,
-} from "solid-icons/fa";
+	TbOutlineCode,
+	TbOutlineMessage,
+	TbOutlinePlayerStop,
+	TbOutlineRotate,
+} from "solid-icons/tb";
 import { type Component, type JSX, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import T from "@/translations";
@@ -52,7 +52,7 @@ const AgentInteractionBar: Component<{
 							)}
 							onClick={() => details().onToggle()}
 						>
-							<FaSolidCode size={11} />
+							<TbOutlineCode size={11} />
 						</Button>
 					)}
 				</Show>
@@ -76,9 +76,9 @@ const AgentInteractionBar: Component<{
 					>
 						<Show
 							when={props.redirecting}
-							fallback={<FaSolidMessage size={11} />}
+							fallback={<TbOutlineMessage size={11} />}
 						>
-							<FaSolidArrowRotateLeft size={11} />
+							<TbOutlineRotate size={11} />
 						</Show>
 					</Button>
 				</Show>
@@ -92,7 +92,7 @@ const AgentInteractionBar: Component<{
 						title={T()("agent.question.stop")}
 						onClick={() => props.onStop?.()}
 					>
-						<FaSolidStop size={10} />
+						<TbOutlinePlayerStop size={10} />
 					</Button>
 				</Show>
 			</div>

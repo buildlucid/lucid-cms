@@ -1,4 +1,4 @@
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, For } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import type { ComparisonOption } from "@/hooks/useDocumentComparison/useDocumentComparison";
@@ -34,7 +34,7 @@ const ComparisonVersionSelect: Component<{
 				aria-label={props.label}
 			>
 				<span class="truncate">{selected()?.label ?? props.placeholder}</span>
-				<FaSolidChevronDown size={9} class="shrink-0 text-icon" />
+				<TbOutlineChevronDown size={9} class="shrink-0 text-icon" />
 			</Menu.Trigger>
 			<Menu.Content class="w-72">
 				<For each={props.options}>

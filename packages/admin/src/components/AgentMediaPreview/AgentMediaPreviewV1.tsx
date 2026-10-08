@@ -1,6 +1,6 @@
 import type { AgentWidgetPart, Media } from "@types";
 import classnames from "classnames";
-import { FaSolidEyeSlash } from "solid-icons/fa";
+import { TbOutlineEyeOff } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -133,7 +133,7 @@ const AgentMediaPreviewV1: Component<{
 									}
 								>
 									<Show when={!previews.isPending}>
-										<FaSolidEyeSlash size={14} />
+										<TbOutlineEyeOff size={14} />
 									</Show>
 								</div>
 							}

@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import type { Collection } from "@types";
-import { FaSolidChevronDown, FaSolidPlus } from "solid-icons/fa";
+import { TbOutlineChevronDown, TbOutlinePlus } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import { getCollectionNavigationHref } from "@/components/CollectionNavLink/CollectionNavLink";
 import DashboardCard from "@/components/DashboardCard/DashboardCard";
@@ -94,7 +94,7 @@ const CollectionsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 									})}
 									class="mr-1 flex size-7 shrink-0 items-center justify-center rounded-md text-icon transition-colors hover:bg-card-hover hover:text-title focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 								>
-									<FaSolidPlus size={11} />
+									<TbOutlinePlus size={11} />
 								</A>
 							</Show>
 						</li>
@@ -113,7 +113,7 @@ const CollectionsWidget: Component<{ size: DashboardWidgetSize }> = () => {
 						: T()("home.widget.collections.more", {
 								count: readable().length - collapsedCount,
 							})}
-					<FaSolidChevronDown
+					<TbOutlineChevronDown
 						size={9}
 						class="transition-transform"
 						classList={{ "rotate-180": expanded() }}

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidCheck, FaSolidCopy } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineCopy } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import T from "@/translations";
 import { createCopy } from "../copyValue";
@@ -46,8 +46,8 @@ export const CopyInput: Component<CopyInputProps> = (props) => {
 				)}
 				aria-label={T()("actions.copy.to.clipboard")}
 			>
-				<Show when={copied()} fallback={<FaSolidCopy class="fill-current" />}>
-					<FaSolidCheck class="fill-current" />
+				<Show when={copied()} fallback={<TbOutlineCopy />}>
+					<TbOutlineCheck />
 				</Show>
 			</button>
 		</div>

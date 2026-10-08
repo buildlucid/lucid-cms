@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import type { RequestSummary } from "@types";
-import { FaSolidSquareArrowUpRight } from "solid-icons/fa";
+import { TbOutlineExternalLink } from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
 import StatusIndicator from "@/components/StatusIndicator/StatusIndicator";
 import T from "@/translations";
@@ -35,9 +35,9 @@ const RequestCompactList: Component<{
 							>
 								<span
 									aria-hidden="true"
-									class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border bg-input text-muted fill-muted"
+									class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border bg-input text-muted"
 								>
-									<FaSolidSquareArrowUpRight size={10} />
+									<TbOutlineExternalLink size={10} />
 								</span>
 								<span class="flex min-w-0 grow flex-col">
 									<span class="truncate text-xs text-title">

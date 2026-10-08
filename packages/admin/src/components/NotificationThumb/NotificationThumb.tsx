@@ -1,11 +1,12 @@
 import type { Notification } from "@types";
+import type { IconTypes } from "solid-icons";
 import {
-	FaSolidBarsProgress,
-	FaSolidBell,
-	FaSolidComments,
-	FaSolidGear,
-	FaSolidSquareArrowUpRight,
-} from "solid-icons/fa";
+	TbOutlineBell,
+	TbOutlineExternalLink,
+	TbOutlineMessages,
+	TbOutlineProgress,
+	TbOutlineSettings,
+} from "solid-icons/tb";
 import type { Component } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
@@ -13,11 +14,11 @@ export interface NotificationThumbProps {
 	notification: Notification;
 }
 
-const categoryIcons: Record<string, typeof FaSolidBell> = {
-	system: FaSolidGear,
-	requests: FaSolidSquareArrowUpRight,
-	workflows: FaSolidBarsProgress,
-	agent: FaSolidComments,
+const categoryIcons: Record<string, IconTypes> = {
+	system: TbOutlineSettings,
+	requests: TbOutlineExternalLink,
+	workflows: TbOutlineProgress,
+	agent: TbOutlineMessages,
 };
 
 const NotificationThumb: Component<NotificationThumbProps> = (props) => {
@@ -30,7 +31,7 @@ const NotificationThumb: Component<NotificationThumbProps> = (props) => {
 		>
 			<Dynamic
 				component={
-					categoryIcons[props.notification.category.key] ?? FaSolidBell
+					categoryIcons[props.notification.category.key] ?? TbOutlineBell
 				}
 				size={10}
 			/>

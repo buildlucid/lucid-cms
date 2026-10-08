@@ -3,12 +3,12 @@ import type { ErrorResponse } from "@types";
 import classNames from "classnames";
 import { nanoid } from "nanoid";
 import {
-	FaSolidArrowUpFromBracket,
-	FaSolidCheck,
-	FaSolidFile,
-	FaSolidTriangleExclamation,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineAlertTriangle,
+	TbOutlineCheck,
+	TbOutlineFile,
+	TbOutlineUpload,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -395,14 +395,14 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 							disabled={isProcessing()}
 							aria-label={T()("common.close")}
 						>
-							<FaSolidXmark size={14} />
+							<TbOutlineX size={14} />
 						</Button>
 					</div>
 					<Show
 						when={rows().length > 0}
 						fallback={
 							<div class="mt-4 flex min-h-72 flex-col items-center justify-center rounded-md border-2 border-dashed border-border p-6 text-center">
-								<FaSolidArrowUpFromBracket size={18} class="mb-2 text-muted" />
+								<TbOutlineUpload size={18} class="mb-2 text-muted" />
 								<p class="text-sm font-medium text-subtitle">
 									{T()("media.upload.bulk.drop.title")}{" "}
 									<button
@@ -439,13 +439,13 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 													fallback={
 														<Show
 															when={row.status === "error"}
-															fallback={<FaSolidFile size={14} />}
+															fallback={<TbOutlineFile size={14} />}
 														>
-															<FaSolidTriangleExclamation size={14} />
+															<TbOutlineAlertTriangle size={14} />
 														</Show>
 													}
 												>
-													<FaSolidCheck size={14} />
+													<TbOutlineCheck size={14} />
 												</Show>
 											</div>
 											<div class="min-w-0">
@@ -481,7 +481,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 													disabled={isProcessing()}
 													aria-label={T()("common.remove")}
 												>
-													<FaSolidXmark size={14} />
+													<TbOutlineX size={14} />
 												</Button>
 											</Show>
 										</div>
@@ -508,7 +508,7 @@ const BulkUploadMediaModal: Component<BulkUploadMediaModalProps> = (props) => {
 								onClick={openFileBrowser}
 								disabled={isProcessing()}
 							>
-								<FaSolidArrowUpFromBracket class="mr-2" size={14} />
+								<TbOutlineUpload class="mr-2" size={14} />
 								{T()("media.upload.add.more.files")}
 							</button>
 						</div>

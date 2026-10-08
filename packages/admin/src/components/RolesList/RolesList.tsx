@@ -1,4 +1,8 @@
-import { FaSolidCalendar, FaSolidLock, FaSolidT } from "solid-icons/fa";
+import {
+	TbOutlineCalendar,
+	TbOutlineLetterT,
+	TbOutlineLock,
+} from "solid-icons/tb";
 import { type Component, Index } from "solid-js";
 import Button from "@/components/Button/Button";
 import DeleteRoleModal from "@/components/DeleteRoleModal/DeleteRoleModal";
@@ -74,24 +78,24 @@ export const RolesList: Component<{
 						{
 							label: T()("common.name"),
 							key: "name",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							sortable: true,
 						},
 						{
 							label: T()("common.status"),
 							key: "locked",
-							icon: <FaSolidLock />,
+							icon: <TbOutlineLock />,
 						},
 						{
 							label: T()("common.created.at"),
 							key: "createdAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 						},
 						{
 							label: T()("common.updated.at"),
 							key: "updatedAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 						},
 					]}
 					loading={roles.isFetching}

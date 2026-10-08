@@ -1,6 +1,6 @@
 import type { GroupError, InternalDocumentFieldGroup } from "@types";
 import classNames from "classnames";
-import { FaSolidChevronUp, FaSolidGripLines } from "solid-icons/fa";
+import { TbOutlineChevronUp, TbOutlineGripHorizontal } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -128,7 +128,6 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 		const trimmed = value.trim();
 		if (!trimmed) return "";
 
-		// keep headers tidy (especially when nested)
 		return trimmed.length > 60 ? `${trimmed.slice(0, 60)}…` : trimmed;
 	});
 
@@ -225,7 +224,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 						draggable={disabled() === false}
 						disabled={disabled()}
 					>
-						<FaSolidGripLines size={14} />
+						<TbOutlineGripHorizontal size={14} />
 					</button>
 					<div class="min-w-0 flex items-center gap-2">
 						<Pill variant="outline" class="shrink-0">
@@ -268,7 +267,7 @@ export const GroupBody: Component<GroupBodyProps> = (props) => {
 							},
 						)}
 					>
-						<FaSolidChevronUp size={14} />
+						<TbOutlineChevronUp size={14} />
 					</Button>
 				</div>
 			</div>

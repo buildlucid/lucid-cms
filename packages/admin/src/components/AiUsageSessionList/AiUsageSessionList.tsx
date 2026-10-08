@@ -1,13 +1,13 @@
 import type { AiUsageSession } from "@types";
 import classnames from "classnames";
 import {
-	FaSolidCalendar,
-	FaSolidChartSimple,
-	FaSolidCoins,
-	FaSolidListOl,
-	FaSolidT,
-	FaSolidUser,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineChartBar,
+	TbOutlineCoins,
+	TbOutlineLetterT,
+	TbOutlineListNumbers,
+	TbOutlineUser,
+} from "solid-icons/tb";
 import { type Component, Index } from "solid-js";
 import AiUsageSessionTableRow from "@/components/AiUsageSessionTableRow/AiUsageSessionTableRow";
 import EmptyState from "@/components/EmptyState/EmptyState";
@@ -62,35 +62,35 @@ export const AiUsageSessionList: Component<{
 						{
 							label: T()("ai.usage.session"),
 							key: "session",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							minWidth: 240,
 						},
 						{
 							label: T()("common.user"),
 							key: "user",
-							icon: <FaSolidUser />,
+							icon: <TbOutlineUser />,
 						},
 						{
 							label: T()("ai.usage.credits"),
 							key: "credits",
-							icon: <FaSolidCoins />,
+							icon: <TbOutlineCoins />,
 							sortable: true,
 						},
 						{
 							label: T()("ai.usage.usage"),
 							key: "usage",
-							icon: <FaSolidChartSimple />,
+							icon: <TbOutlineChartBar />,
 							minWidth: 220,
 						},
 						{
 							label: T()("ai.usage.requests"),
 							key: "requests",
-							icon: <FaSolidListOl />,
+							icon: <TbOutlineListNumbers />,
 						},
 						{
 							label: T()("ai.usage.last.activity"),
 							key: "lastActivityAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 							minWidth: 170,
 						},

@@ -1,5 +1,5 @@
 import type { Collection } from "@types";
-import { FaSolidBullseye, FaSolidT } from "solid-icons/fa";
+import { TbOutlineLetterT, TbOutlineTarget } from "solid-icons/tb";
 import { type Component, For, Index, Show } from "solid-js";
 import { getCollectionNavigationHref } from "@/components/CollectionNavLink/CollectionNavLink";
 import Table from "@/components/Table/Table";
@@ -54,12 +54,12 @@ const TargetTable: Component<{
 					{
 						key: "collection",
 						label: T()("review.targets.collection"),
-						icon: <FaSolidT />,
+						icon: <TbOutlineLetterT />,
 					},
 					...props.targets.map((target) => ({
 						key: target.key,
 						label: target.label,
-						icon: <FaSolidBullseye />,
+						icon: <TbOutlineTarget />,
 					})),
 				]}
 				padding="sm"

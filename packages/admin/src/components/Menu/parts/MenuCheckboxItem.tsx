@@ -1,5 +1,5 @@
 import { DropdownMenu as KobalteMenu } from "@kobalte/core";
-import { FaSolidCheck } from "solid-icons/fa";
+import { TbOutlineCheck } from "solid-icons/tb";
 import type { Component, JSXElement } from "solid-js";
 import { menuItemClasses } from "@/components/Menu/itemClasses";
 
@@ -33,7 +33,7 @@ const MenuCheckboxItem: Component<MenuCheckboxItemProps> = (props) => {
 		>
 			<span class="flex size-4 shrink-0 items-center justify-center rounded border border-border bg-input">
 				<KobalteMenu.ItemIndicator>
-					<FaSolidCheck size={9} class="text-title" />
+					<TbOutlineCheck size={9} class="text-title" />
 				</KobalteMenu.ItemIndicator>
 			</span>
 			<span class="line-clamp-1 flex-1">{props.children}</span>

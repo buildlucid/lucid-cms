@@ -1,5 +1,5 @@
 import { DropdownMenu as KobalteMenu } from "@kobalte/core";
-import { FaSolidCheck } from "solid-icons/fa";
+import { TbOutlineCheck } from "solid-icons/tb";
 import type { Component, JSXElement } from "solid-js";
 import { menuItemClasses } from "@/components/Menu/itemClasses";
 
@@ -24,7 +24,7 @@ const MenuRadioItem: Component<MenuRadioItemProps> = (props) => {
 		>
 			<span class="flex-1">{props.children}</span>
 			<KobalteMenu.ItemIndicator>
-				<FaSolidCheck class="size-3 text-primary" />
+				<TbOutlineCheck class="size-3 text-primary" />
 			</KobalteMenu.ItemIndicator>
 		</KobalteMenu.RadioItem>
 	);

@@ -1,6 +1,6 @@
 import { Collapsible } from "@kobalte/core";
 import classNames from "classnames";
-import { FaSolidChevronRight } from "solid-icons/fa";
+import { TbOutlineChevronRight } from "solid-icons/tb";
 import { type Component, type JSXElement, Show } from "solid-js";
 import useUserPreference from "@/hooks/useUserPreference/useUserPreference";
 import userPreferencesStore, {
@@ -38,7 +38,7 @@ const DocumentSidebarSection: Component<{
 					<Show when={props.meta !== undefined}>
 						<span class="text-xs font-medium text-body">{props.meta}</span>
 					</Show>
-					<FaSolidChevronRight
+					<TbOutlineChevronRight
 						size={12}
 						class={classNames(
 							"shrink-0 text-body transition-transform duration-200",

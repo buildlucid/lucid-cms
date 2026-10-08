@@ -1,6 +1,6 @@
 import { debounce } from "@solid-primitives/scheduled";
 import classnames from "classnames";
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import { type Component, createSignal, onCleanup } from "solid-js";
 
 /**
@@ -38,8 +38,8 @@ const AgentReferenceRemoveButton: Component<{
 			class={classnames(
 				"absolute flex size-5 items-center justify-center rounded border transition-[opacity,background-color,color] focus:outline-hidden focus-visible:opacity-100 focus-visible:ring-1 focus-visible:ring-primary group-hover:opacity-100 pointer-coarse:opacity-100",
 				primed()
-					? "border-danger bg-danger-hover text-danger-foreground fill-danger-foreground opacity-100"
-					: "border-border bg-input text-subtitle fill-subtitle opacity-0 hover:border-danger hover:bg-danger-hover hover:text-danger-foreground hover:fill-danger-foreground",
+					? "border-danger bg-danger-hover text-danger-foreground opacity-100"
+					: "border-border bg-input text-subtitle opacity-0 hover:border-danger hover:bg-danger-hover hover:text-danger-foreground",
 				props.class,
 			)}
 			aria-label={label()}
@@ -55,7 +55,7 @@ const AgentReferenceRemoveButton: Component<{
 				unprime();
 			}}
 		>
-			<FaSolidXmark size={9} />
+			<TbOutlineX size={9} />
 		</button>
 	);
 };

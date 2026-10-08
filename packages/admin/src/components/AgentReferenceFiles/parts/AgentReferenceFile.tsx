@@ -1,4 +1,4 @@
-import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
+import { TbOutlineEye, TbOutlineEyeOff } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import T from "@/translations";
@@ -48,15 +48,15 @@ const AgentReferenceFile: Component<{
 					<span
 						class="flex shrink-0"
 						classList={{
-							"text-subtitle fill-subtitle": props.readable,
-							"text-muted fill-muted": !props.readable,
+							"text-subtitle": props.readable,
+							"text-muted": !props.readable,
 						}}
 						role="img"
 						aria-label={readableLabel()}
 						title={readableLabel()}
 					>
-						<Show when={props.readable} fallback={<FaSolidEyeSlash size={9} />}>
-							<FaSolidEye size={9} />
+						<Show when={props.readable} fallback={<TbOutlineEyeOff size={9} />}>
+							<TbOutlineEye size={9} />
 						</Show>
 					</span>
 				</Show>

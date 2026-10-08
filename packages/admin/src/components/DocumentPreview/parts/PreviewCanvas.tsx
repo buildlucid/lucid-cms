@@ -1,10 +1,10 @@
 import type { CollectionPreviewBreakpoint, PreviewMode } from "@types";
 import {
-	FaSolidArrowUpRightFromSquare,
-	FaSolidChevronDown,
-	FaSolidCopy,
-	FaSolidRotate,
-} from "solid-icons/fa";
+	TbOutlineChevronDown,
+	TbOutlineCopy,
+	TbOutlineExternalLink,
+	TbOutlineRotateClockwise2,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -303,7 +303,7 @@ export const PreviewCanvas: Component<{
 							))}
 							<option value="custom">{T()("preview.width.custom")}</option>
 						</select>
-						<FaSolidChevronDown
+						<TbOutlineChevronDown
 							size={10}
 							class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
 						/>
@@ -332,7 +332,7 @@ export const PreviewCanvas: Component<{
 								<option value={String(zoom)}>{zoom}%</option>
 							))}
 						</select>
-						<FaSolidChevronDown
+						<TbOutlineChevronDown
 							size={10}
 							class="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-body"
 						/>
@@ -351,7 +351,7 @@ export const PreviewCanvas: Component<{
 							aria-label={T()("common.refresh")}
 							onClick={props.onRefresh}
 						>
-							<FaSolidRotate size={12} />
+							<TbOutlineRotateClockwise2 size={12} />
 						</Button>
 						<Button
 							type="button"
@@ -363,7 +363,7 @@ export const PreviewCanvas: Component<{
 							loading={props.actionLoading()}
 							onClick={props.onCopy}
 						>
-							<FaSolidCopy size={12} />
+							<TbOutlineCopy size={12} />
 						</Button>
 						<Button
 							type="button"
@@ -375,7 +375,7 @@ export const PreviewCanvas: Component<{
 							loading={props.actionLoading()}
 							onClick={props.onOpen}
 						>
-							<FaSolidArrowUpRightFromSquare size={12} />
+							<TbOutlineExternalLink size={12} />
 						</Button>
 					</div>
 				</div>

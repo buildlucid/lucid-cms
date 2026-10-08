@@ -1,5 +1,5 @@
 import { useTranslation } from "@lucidcms/admin/hooks";
-import { FaSolidGlobe } from "solid-icons/fa";
+import { TbOutlineWorld } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import type {} from "../../../shared/translations.js";
 
@@ -29,7 +29,7 @@ const SearchPreview: Component<SearchPreviewProps> = (props) => {
 						class="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#f1f3f4] text-[#5f6368]"
 						aria-hidden="true"
 					>
-						<FaSolidGlobe aria-hidden="true" size={18} />
+						<TbOutlineWorld aria-hidden="true" size={18} />
 					</div>
 					<div class="min-w-0">
 						<p class="truncate text-xs leading-5 text-[#202124]">

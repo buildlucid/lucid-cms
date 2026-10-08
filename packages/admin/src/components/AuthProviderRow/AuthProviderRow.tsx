@@ -1,5 +1,5 @@
 import type { AuthProviders, User } from "@types";
-import { FaSolidCircleUser } from "solid-icons/fa";
+import { TbOutlineUserCircle } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import { createMemo, createSignal, onCleanup, Show } from "solid-js";
 import Button from "@/components/Button/Button";
@@ -56,7 +56,7 @@ const AuthProviderRow: Component<{
 				<Show
 					when={props.provider.icon}
 					fallback={
-						<FaSolidCircleUser class="size-10 rounded-full bg-card p-2 text-title" />
+						<TbOutlineUserCircle class="size-10 rounded-full bg-card p-2 text-title" />
 					}
 				>
 					<img

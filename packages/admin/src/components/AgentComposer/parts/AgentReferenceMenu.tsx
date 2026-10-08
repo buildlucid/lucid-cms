@@ -1,10 +1,10 @@
 import type { Agent, AgentReferenceInput, DocumentRef } from "@types";
 import {
-	FaSolidFileLines,
-	FaSolidImage,
-	FaSolidPlus,
-	FaSolidUpload,
-} from "solid-icons/fa";
+	TbOutlineFileText,
+	TbOutlinePhoto,
+	TbOutlinePlus,
+	TbOutlineUpload,
+} from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import DocumentSelectDrawer from "@/components/DocumentSelectDrawer/DocumentSelectDrawer";
 import MediaSelectDrawer from "@/components/MediaSelectDrawer/MediaSelectDrawer";
@@ -140,13 +140,13 @@ const AgentReferenceMenu: Component<{
 						aria-label={T()("agent.composer.add")}
 						title={T()("agent.composer.add")}
 					>
-						<FaSolidPlus size={11} />
+						<TbOutlinePlus size={11} />
 					</Menu.Trigger>
 					<Menu.Content>
 						<Show when={props.onUpload}>
 							{(upload) => (
 								<Menu.Item
-									icon={<FaSolidUpload size={12} />}
+									icon={<TbOutlineUpload size={12} />}
 									onSelect={() => upload()()}
 								>
 									{T()("agent.uploads.add")}
@@ -155,7 +155,7 @@ const AgentReferenceMenu: Component<{
 						</Show>
 						<Show when={canMedia()}>
 							<Menu.Item
-								icon={<FaSolidImage size={12} />}
+								icon={<TbOutlinePhoto size={12} />}
 								onSelect={() => setMediaOpen(true)}
 							>
 								{T()("agent.references.add.media")}
@@ -163,7 +163,7 @@ const AgentReferenceMenu: Component<{
 						</Show>
 						<Show when={canDocuments()}>
 							<Menu.Item
-								icon={<FaSolidFileLines size={12} />}
+								icon={<TbOutlineFileText size={12} />}
 								onSelect={() => setDocumentsOpen(true)}
 							>
 								{T()("agent.references.add.document")}

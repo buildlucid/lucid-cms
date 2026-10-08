@@ -90,17 +90,17 @@ const Link: Component<LinkProps> = (props) => {
 			"flex items-center justify-center text-center focus:outline-hidden focus-visible:ring-1 duration-200 transition-colors rounded-md relative",
 			{
 				// Variants
-				"bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground ring-primary":
+				"bg-primary hover:bg-primary-hover text-primary-foreground ring-primary":
 					local.variant === "primary",
-				"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary":
+				"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary":
 					local.variant === "secondary",
-				"bg-input border border-border hover:border-transparent hover:bg-secondary-hover fill-subtitle text-subtitle hover:text-secondary-foreground ring-primary":
+				"bg-input border border-border hover:border-transparent hover:bg-secondary-hover text-subtitle hover:text-secondary-foreground ring-primary":
 					local.variant === "outline",
-				"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary fill-danger-foreground":
+				"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary":
 					local.variant === "danger",
-				"bg-transparent border border-border hover:bg-danger-hover ring-primary fill-danger-foreground hover:text-danger-foreground":
+				"bg-transparent border border-border hover:bg-danger-hover ring-primary hover:text-danger-foreground":
 					local.variant === "danger-outline",
-				"text-muted fill-muted hover:text-subtitle hover:fill-subtitle hover:bg-background/50 ring-primary":
+				"text-muted hover:text-subtitle hover:bg-background/50 ring-primary":
 					local.variant === "ghost",
 
 				// Shape

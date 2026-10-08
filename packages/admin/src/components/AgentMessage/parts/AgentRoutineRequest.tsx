@@ -1,6 +1,6 @@
 import type { AgentRoutineTrigger, AgentRunResultPart } from "@types";
 import classnames from "classnames";
-import { FaSolidChevronRight, FaSolidRepeat } from "solid-icons/fa";
+import { TbOutlineChevronRight, TbOutlineRepeat } from "solid-icons/tb";
 import {
 	type Component,
 	createSignal,
@@ -44,7 +44,7 @@ const AgentRoutineRequest: Component<{
 					aria-controls={id}
 					onClick={() => setOpen((value) => !value)}
 				>
-					<FaSolidRepeat size={11} class="shrink-0 text-muted" />
+					<TbOutlineRepeat size={11} class="shrink-0 text-muted" />
 					<span class="min-w-0 grow truncate text-sm text-title">
 						{props.name}
 						<span class="text-muted">
@@ -61,7 +61,7 @@ const AgentRoutineRequest: Component<{
 							<AgentRunStatus status="completed" outcome={result().outcome} />
 						)}
 					</Show>
-					<FaSolidChevronRight
+					<TbOutlineChevronRight
 						size={9}
 						class={classnames("shrink-0 text-muted transition-transform", {
 							"rotate-90": open(),

@@ -5,16 +5,16 @@ import type {
 	MediaTranslation,
 } from "@types";
 import {
-	FaSolidArrowRotateLeft,
-	FaSolidArrowUpFromBracket,
-	FaSolidBullseye,
-	FaSolidCrop,
-	FaSolidImage,
-	FaSolidMagicWandSparkles,
-	FaSolidMagnifyingGlass,
-	FaSolidTrash,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineCrop,
+	TbOutlinePhoto,
+	TbOutlineRotate,
+	TbOutlineSearch,
+	TbOutlineTarget,
+	TbOutlineTrash,
+	TbOutlineUpload,
+	TbOutlineWand,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -1386,7 +1386,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 										<div class="h-20 rounded-sm border border-border rectangle-background overflow-hidden flex items-center justify-center bg-background">
 											<Show
 												when={posterPreview()}
-												fallback={<FaSolidImage class="w-6 h-6 text-muted" />}
+												fallback={<TbOutlinePhoto class="w-6 h-6 text-muted" />}
 											>
 												{(preview) => (
 													<img
@@ -1442,7 +1442,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													title={T()("common.preview")}
 													aria-label={T()("common.preview")}
 												>
-													<FaSolidMagnifyingGlass size={14} />
+													<TbOutlineSearch size={14} />
 												</Button>
 												<Button
 													type="button"
@@ -1453,7 +1453,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													title={T()("media.focal.point.edit")}
 													aria-label={T()("media.focal.point.edit")}
 												>
-													<FaSolidBullseye size={14} />
+													<TbOutlineTarget size={14} />
 												</Button>
 												<Show when={posterCropSource()}>
 													<Button
@@ -1465,7 +1465,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														title={T()("media.crop.action")}
 														aria-label={T()("media.crop.action")}
 													>
-														<FaSolidCrop size={14} />
+														<TbOutlineCrop size={14} />
 													</Button>
 												</Show>
 												<Show when={posterHasCrop()}>
@@ -1478,7 +1478,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														title={T()("media.crop.remove")}
 														aria-label={T()("media.crop.remove")}
 													>
-														<FaSolidTrash size={14} />
+														<TbOutlineTrash size={14} />
 													</Button>
 												</Show>
 											</Show>
@@ -1500,7 +1500,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 														posterSnapshotLoading() || mutateIsLoading()
 													}
 												>
-													<FaSolidImage size={14} />
+													<TbOutlinePhoto size={14} />
 												</Button>
 											</Show>
 											<Show when={mediaImageGeneration.isFeatureEnabled()}>
@@ -1549,7 +1549,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 															: undefined
 													}
 												>
-													<FaSolidMagicWandSparkles size={14} />
+													<TbOutlineWand size={14} />
 												</Button>
 											</Show>
 											<Button
@@ -1561,7 +1561,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 												title={T()("common.upload")}
 												aria-label={T()("common.upload")}
 											>
-												<FaSolidArrowUpFromBracket size={14} />
+												<TbOutlineUpload size={14} />
 											</Button>
 											<Show when={posterPreview()}>
 												<Button
@@ -1573,7 +1573,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													title={T()("common.remove")}
 													aria-label={T()("common.remove")}
 												>
-													<FaSolidXmark size={14} />
+													<TbOutlineX size={14} />
 												</Button>
 											</Show>
 											<Show
@@ -1590,7 +1590,7 @@ const CreateUpdateMediaDrawer: Component<CreateUpdateMediaPanelProps> = (
 													title={T()("media.file.back.to.current")}
 													aria-label={T()("media.file.back.to.current")}
 												>
-													<FaSolidArrowRotateLeft size={14} />
+													<TbOutlineRotate size={14} />
 												</Button>
 											</Show>
 										</div>

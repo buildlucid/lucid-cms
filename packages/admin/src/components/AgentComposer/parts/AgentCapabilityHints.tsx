@@ -1,7 +1,7 @@
 import { Tooltip } from "@kobalte/core";
 import type { AgentCapabilities } from "@types";
 import classnames from "classnames";
-import { FaSolidEye, FaSolidEyeSlash, FaSolidGlobe } from "solid-icons/fa";
+import { TbOutlineEye, TbOutlineEyeOff, TbOutlineWorld } from "solid-icons/tb";
 import { type Component, createMemo, type JSXElement, Show } from "solid-js";
 import T from "@/translations";
 import {
@@ -25,8 +25,8 @@ const CapabilityHint: Component<{
 				class={classnames(
 					"flex size-7 cursor-help items-center justify-center rounded-md transition-colors focus:outline-hidden focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary",
 					props.active
-						? "text-subtitle fill-subtitle hover:text-title hover:fill-title"
-						: "text-muted fill-muted opacity-50",
+						? "text-subtitle hover:text-title"
+						: "text-muted opacity-50",
 				)}
 				aria-label={`${props.title}. ${props.description}`}
 			>
@@ -78,9 +78,9 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 					icon={
 						<Show
 							when={mimeTypes().length > 0}
-							fallback={<FaSolidEyeSlash size={11} />}
+							fallback={<TbOutlineEyeOff size={11} />}
 						>
-							<FaSolidEye size={11} />
+							<TbOutlineEye size={11} />
 						</Show>
 					}
 					title={T()(
@@ -98,7 +98,7 @@ const AgentCapabilityHints: Component<{ capabilities?: AgentCapabilities }> = (
 				/>
 				<CapabilityHint
 					active={web() !== undefined}
-					icon={<FaSolidGlobe size={11} />}
+					icon={<TbOutlineWorld size={11} />}
 					title={web() ?? T()("agent.capabilities.web.none")}
 					description={T()(
 						web() === undefined

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidCheck, FaSolidCopy } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineCopy } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import { createCopy } from "../copyValue";
 
@@ -29,18 +29,17 @@ export const CopyButton: Component<CopyButtonProps> = (props) => {
 			class={classNames(
 				"flex max-w-full cursor-copy items-center whitespace-nowrap text-sm transition-colors duration-200",
 				{
-					"text-body fill-body hover:text-primary-hover hover:fill-primary-hover":
-						!copied(),
-					"text-success fill-success": copied(),
+					"text-body hover:text-primary-hover": !copied(),
+					"text-success": copied(),
 				},
 				props.class,
 			)}
 		>
 			<Show
 				when={copied()}
-				fallback={<FaSolidCopy class="mr-2 shrink-0" size={14} />}
+				fallback={<TbOutlineCopy class="mr-2 shrink-0" size={14} />}
 			>
-				<FaSolidCheck class="mr-2 shrink-0" size={14} />
+				<TbOutlineCheck class="mr-2 shrink-0" size={14} />
 			</Show>
 			<span class="overflow-hidden text-sm text-ellipsis">
 				{props.label ?? props.value}

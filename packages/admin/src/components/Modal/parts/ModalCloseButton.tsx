@@ -1,6 +1,6 @@
 import { Dialog } from "@kobalte/core";
 import classNames from "classnames";
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import type { Component } from "solid-js";
 
 export interface ModalCloseButtonProps {
@@ -19,7 +19,7 @@ export const ModalCloseButton: Component<ModalCloseButtonProps> = (props) => {
 				props.class,
 			)}
 		>
-			<FaSolidXmark class="fill-current" />
+			<TbOutlineX />
 		</Dialog.CloseButton>
 	);
 };

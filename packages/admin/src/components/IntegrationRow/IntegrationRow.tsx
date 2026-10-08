@@ -1,5 +1,5 @@
 import type { Integration } from "@types";
-import { FaSolidKey } from "solid-icons/fa";
+import { TbOutlineKey } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import IconContainer from "@/components/IconContainer/IconContainer";
@@ -43,7 +43,7 @@ const IntegrationRow: Component<IntegrationRowProps> = (props) => {
 		<article class="flex items-start justify-between gap-3 border-b border-border p-4 last:border-b-0">
 			<div class="flex min-w-0 items-start gap-3">
 				<IconContainer>
-					<FaSolidKey class="size-3.5 text-primary" />
+					<TbOutlineKey class="size-3.5 text-primary" />
 				</IconContainer>
 				<div class="min-w-0">
 					<h3 class="truncate text-sm font-semibold text-title">

@@ -9,13 +9,13 @@ import type {
 	ResponseBody,
 } from "@types";
 import {
-	FaSolidBarsProgress,
-	FaSolidCalendar,
-	FaSolidCloudArrowUp,
-	FaSolidPuzzlePiece,
-	FaSolidUser,
-	FaSolidUserCheck,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineCloudUpload,
+	TbOutlineProgress,
+	TbOutlinePuzzle,
+	TbOutlineUser,
+	TbOutlineUserCheck,
+} from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, Index } from "solid-js";
 import Button from "@/components/Button/Button";
 import DeleteDocumentModal from "@/components/DeleteDocumentModal/DeleteDocumentModal";
@@ -104,7 +104,7 @@ export const DocumentsList: Component<{
 				value: entry.column.label,
 				fallback: entry.key,
 			}),
-			icon: <FaSolidPuzzlePiece />,
+			icon: <TbOutlinePuzzle />,
 			sortable: false,
 		})),
 	);
@@ -129,12 +129,12 @@ export const DocumentsList: Component<{
 					{
 						label: T()("documents.workflow.stage"),
 						key: "workflowStage",
-						icon: <FaSolidBarsProgress />,
+						icon: <TbOutlineProgress />,
 					},
 					{
 						label: T()("documents.workflow.assigned.to"),
 						key: "workflowAssignee",
-						icon: <FaSolidUserCheck />,
+						icon: <TbOutlineUserCheck />,
 						minWidth: 200,
 					},
 				]
@@ -148,7 +148,7 @@ export const DocumentsList: Component<{
 					fallback: environment.key,
 				}) || environment.key,
 			key: `envStatus.${environment.key}`,
-			icon: <FaSolidCloudArrowUp />,
+			icon: <TbOutlineCloudUpload />,
 			minWidth: 140,
 			sortable: false,
 		})),
@@ -429,19 +429,19 @@ export const DocumentsList: Component<{
 						{
 							label: T()("common.created.by"),
 							key: "createdBy",
-							icon: <FaSolidUser />,
+							icon: <TbOutlineUser />,
 							minWidth: 180,
 						},
 						{
 							label: T()("common.updated.by"),
 							key: "updatedBy",
-							icon: <FaSolidUser />,
+							icon: <TbOutlineUser />,
 							minWidth: 180,
 						},
 						{
 							label: T()("common.updated.at"),
 							key: "updatedAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							//* lock sorting while editing manual order
 							sortable: !props.state.orderMode(),
 						},

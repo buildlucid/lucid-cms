@@ -1,4 +1,4 @@
-import { FaSolidCopy } from "solid-icons/fa";
+import { TbOutlineCopy } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import Table from "@/components/Table/Table";
 import T from "@/translations";
@@ -32,7 +32,7 @@ const CopyCell: Component<CopyCellProps> = (props) => {
 				onClick={copyToClipboard}
 				class="flex items-center gap-2 ring-offset-4 ring-offset-card rounded-sm line-clamp-1"
 			>
-				<FaSolidCopy />
+				<TbOutlineCopy />
 				<span class="text-sm">{props.text || "-"}</span>
 			</button>
 		</Table.Cell>

@@ -1,10 +1,10 @@
 import classnames from "classnames";
 import {
-	FaSolidCheck,
-	FaSolidExclamation,
-	FaSolidInfo,
-	FaSolidTriangleExclamation,
-} from "solid-icons/fa";
+	TbOutlineAlertTriangle,
+	TbOutlineCheck,
+	TbOutlineExclamationMark,
+	TbOutlineInfoSmall,
+} from "solid-icons/tb";
 import { type Component, type JSXElement, Match, Switch } from "solid-js";
 
 export type AlertVariant = "info" | "success" | "warning" | "danger";
@@ -90,16 +90,17 @@ const Alert: Component<AlertProps> = (props) => {
 			>
 				<Switch>
 					<Match when={variant() === "success"}>
-						<FaSolidCheck size={8} />
+						<TbOutlineCheck size={8} />
 					</Match>
 					<Match when={variant() === "danger"}>
-						<FaSolidExclamation size={8} />
+						<TbOutlineExclamationMark size={8} />
 					</Match>
 					<Match when={variant() === "warning"}>
-						<FaSolidTriangleExclamation size={8} />
+						<TbOutlineAlertTriangle size={8} />
 					</Match>
 					<Match when={variant() === "info"}>
-						<FaSolidInfo size={8} />
+						{/* InfoSmall is half the height of other glyphs, so double the size and halve the stroke */}
+						<TbOutlineInfoSmall size={16} stroke-width={1} />
 					</Match>
 				</Switch>
 			</span>

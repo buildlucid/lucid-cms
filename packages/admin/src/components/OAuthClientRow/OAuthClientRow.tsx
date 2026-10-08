@@ -1,5 +1,5 @@
 import type { OAuthClient, OAuthClientCreateResponse } from "@types";
-import { FaSolidArrowRightArrowLeft, FaSolidKey } from "solid-icons/fa";
+import { TbOutlineArrowsLeftRight, TbOutlineKey } from "solid-icons/tb";
 import { type Component, createSignal, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import IconContainer from "@/components/IconContainer/IconContainer";
@@ -69,7 +69,7 @@ const OAuthClientRow: Component<{
 						>
 							<Show
 								when={props.client.logo}
-								fallback={<FaSolidKey class="size-3.5 text-primary" />}
+								fallback={<TbOutlineKey class="size-3.5 text-primary" />}
 							>
 								{(logo) => (
 									<img
@@ -111,7 +111,7 @@ const OAuthClientRow: Component<{
 									·
 								</span>
 								<span class="flex items-center gap-1.5">
-									<FaSolidArrowRightArrowLeft class="size-2.5 text-muted" />
+									<TbOutlineArrowsLeftRight class="size-2.5 text-muted" />
 									{T()(
 										props.client.redirectUris.length === 1
 											? "oauth.clients.redirect.count"

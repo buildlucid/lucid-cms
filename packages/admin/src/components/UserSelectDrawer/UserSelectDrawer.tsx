@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidEnvelope, FaSolidIdCard, FaSolidT } from "solid-icons/fa";
+import { TbOutlineId, TbOutlineLetterT, TbOutlineMail } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -287,22 +287,22 @@ export const UserSelectContent: Component<UserSelectContentProps> = (props) => {
 						{
 							label: T()("common.username"),
 							key: "username",
-							icon: <FaSolidIdCard />,
+							icon: <TbOutlineId />,
 						},
 						{
 							label: T()("common.first.name"),
 							key: "firstName",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 						},
 						{
 							label: T()("common.last.name"),
 							key: "lastName",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 						},
 						{
 							label: T()("common.email"),
 							key: "email",
-							icon: <FaSolidEnvelope />,
+							icon: <TbOutlineMail />,
 						},
 					]}
 					loading={isLoading()}

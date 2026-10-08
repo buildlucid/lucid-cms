@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidPlus } from "solid-icons/fa";
+import { TbOutlinePlus } from "solid-icons/tb";
 import {
 	batch,
 	type Component,
@@ -853,7 +853,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 											aria-pressed={active()}
 											class={
 												active()
-													? "shrink-0 gap-1.5 border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground!"
+													? "shrink-0 gap-1.5 border-secondary! bg-secondary! text-secondary-foreground!"
 													: "shrink-0 gap-1.5"
 											}
 											onClick={() => applyPreset(preset)}
@@ -923,7 +923,7 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 						aria-label={T()("filter.section.add.group")}
 						onClick={() => addDraft("new")}
 					>
-						<FaSolidPlus size={10} />
+						<TbOutlinePlus size={10} />
 						<span>{T()("filter.section.add.group.label")}</span>
 					</Button>
 					<span class="h-px flex-1 bg-border" aria-hidden="true" />

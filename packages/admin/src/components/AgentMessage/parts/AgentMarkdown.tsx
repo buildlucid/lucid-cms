@@ -2,7 +2,7 @@ import { createScheduled, throttle } from "@solid-primitives/scheduled";
 import classnames from "classnames";
 import DOMPurify from "dompurify";
 import { Marked } from "marked";
-import { FaSolidCheck, FaSolidCopy } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineCopy } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -159,8 +159,8 @@ const CopyCode: Component<{ block: HTMLElement }> = (props) => {
 			title={T()("agent.message.copy.code")}
 			onClick={() => void copy()}
 		>
-			<Show when={copied()} fallback={<FaSolidCopy size={11} />}>
-				<FaSolidCheck size={11} class="text-success" />
+			<Show when={copied()} fallback={<TbOutlineCopy size={11} />}>
+				<TbOutlineCheck size={11} class="text-success" />
 			</Show>
 		</button>
 	);

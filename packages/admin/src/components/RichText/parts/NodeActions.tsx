@@ -1,4 +1,4 @@
-import { FaSolidPen } from "solid-icons/fa";
+import { TbOutlinePencil } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import NodeRemoveButton from "./NodeRemoveButton";
@@ -31,7 +31,7 @@ const NodeActions: Component<NodeActionsProps> = (props) => {
 				aria-label={props.editLabel}
 				title={props.editLabel}
 			>
-				<FaSolidPen size={12} />
+				<TbOutlinePencil size={12} />
 			</Button>
 			<Show when={props.showRemove}>
 				<NodeRemoveButton label={props.removeLabel} onRemove={props.onRemove} />

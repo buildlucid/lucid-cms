@@ -1,12 +1,12 @@
 import type { Media, MediaPoster, MediaVideoSource } from "@types";
 import {
-	FaSolidFile,
-	FaSolidFileAudio,
-	FaSolidFileLines,
-	FaSolidFileVideo,
-	FaSolidFileZipper,
-	FaSolidPlay,
-} from "solid-icons/fa";
+	TbOutlineFile,
+	TbOutlineFileMusic,
+	TbOutlineFileText,
+	TbOutlineFileZip,
+	TbOutlineMovie,
+	TbOutlinePlayerPlay,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -95,7 +95,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 					</Match>
 					<Match when={props.media.type === "archive"}>
 						<div class="relative z-10 w-full h-full flex justify-center items-center">
-							<FaSolidFileZipper size={40} class="text-icon opacity-40" />
+							<TbOutlineFileZip size={40} class="text-icon opacity-40" />
 						</div>
 					</Match>
 					<Match when={props.media.type === "audio"}>
@@ -117,7 +117,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 									</Show>
 								</Match>
 								<Match when={!props.richPreview}>
-									<FaSolidFileAudio size={40} class="text-icon opacity-40" />
+									<TbOutlineFileMusic size={40} class="text-icon opacity-40" />
 								</Match>
 							</Switch>
 						</div>
@@ -137,7 +137,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 											/>
 											<div class="absolute inset-0 z-20 flex items-center justify-center">
 												<div class="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-black/45 text-white shadow-sm backdrop-blur-xs">
-													<FaSolidPlay class="ml-0.5 h-4 w-4" />
+													<TbOutlinePlayerPlay class="ml-0.5 h-4 w-4" />
 												</div>
 											</div>
 										</div>
@@ -168,7 +168,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 									</Show>
 								</Match>
 								<Match when={!props.richPreview}>
-									<FaSolidFileVideo size={40} class="text-icon opacity-40" />
+									<TbOutlineMovie size={40} class="text-icon opacity-40" />
 								</Match>
 							</Switch>
 						</div>
@@ -178,7 +178,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 							<Show
 								when={props.media.mimeType === "application/pdf"}
 								fallback={
-									<FaSolidFileLines size={40} class="text-icon opacity-40" />
+									<TbOutlineFileText size={40} class="text-icon opacity-40" />
 								}
 							>
 								<PdfBadge size="md" />
@@ -187,7 +187,7 @@ const MediaPreview: Component<MediaPreviewProps> = (props) => {
 					</Match>
 					<Match when={props.media.type === "unknown"}>
 						<div class="relative z-10 w-full h-full flex justify-center items-center group-hover:scale-110 transition duration-100">
-							<FaSolidFile size={40} class="text-icon opacity-40" />
+							<TbOutlineFile size={40} class="text-icon opacity-40" />
 						</div>
 					</Match>
 				</Switch>

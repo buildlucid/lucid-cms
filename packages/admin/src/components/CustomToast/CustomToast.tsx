@@ -1,11 +1,11 @@
 import classNames from "classnames";
 import {
-	FaSolidCheck,
-	FaSolidExclamation,
-	FaSolidInfo,
-	FaSolidTriangleExclamation,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineAlertTriangle,
+	TbOutlineCheck,
+	TbOutlineExclamationMark,
+	TbOutlineInfoSmall,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -85,16 +85,17 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 				>
 					<Switch>
 						<Match when={props.type === "success"}>
-							<FaSolidCheck class="m-auto size-2.5" />
+							<TbOutlineCheck class="m-auto size-2.5" />
 						</Match>
 						<Match when={props.type === "error"}>
-							<FaSolidExclamation class="m-auto size-2.5" />
+							<TbOutlineExclamationMark class="m-auto size-2.5" />
 						</Match>
 						<Match when={props.type === "warning"}>
-							<FaSolidTriangleExclamation class="m-auto size-2.5" />
+							<TbOutlineAlertTriangle class="m-auto size-2.5" />
 						</Match>
 						<Match when={props.type === "info"}>
-							<FaSolidInfo class="m-auto size-2.5" />
+							{/* InfoSmall is half the height of other glyphs, so double the size and halve the stroke */}
+							<TbOutlineInfoSmall class="m-auto size-5" stroke-width={1} />
 						</Match>
 					</Switch>
 				</span>
@@ -116,7 +117,7 @@ const CustomToast: Component<CustomToastProps> = (props) => {
 				type="button"
 				aria-label={T()("common.close")}
 			>
-				<FaSolidXmark class="size-3" />
+				<TbOutlineX class="size-3" />
 			</button>
 			{/* Duration bar */}
 			<span

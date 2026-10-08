@@ -1,6 +1,10 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import classnames from "classnames";
-import { FaSolidCalendar, FaSolidIdCard, FaSolidT } from "solid-icons/fa";
+import {
+	TbOutlineCalendar,
+	TbOutlineId,
+	TbOutlineLetterT,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -274,47 +278,47 @@ export const IntegrationsList: Component<{
 										{
 											label: T()("common.status"),
 											key: "enabled",
-											icon: <FaSolidT />,
+											icon: <TbOutlineLetterT />,
 											sortable: true,
 										},
 										{
 											label: T()("common.name"),
 											key: "name",
-											icon: <FaSolidT />,
+											icon: <TbOutlineLetterT />,
 											sortable: true,
 										},
 										{
 											label: T()("common.key"),
 											key: "key",
-											icon: <FaSolidIdCard />,
+											icon: <TbOutlineId />,
 										},
 										{
 											label: T()("common.description"),
 											key: "description",
-											icon: <FaSolidT />,
+											icon: <TbOutlineLetterT />,
 											sortable: true,
 										},
 										{
 											label: T()("common.last.used.at"),
 											key: "lastUsed",
-											icon: <FaSolidCalendar />,
+											icon: <TbOutlineCalendar />,
 											minWidth: 280,
 										},
 										{
 											label: T()("common.expires.at"),
 											key: "expiresAt",
-											icon: <FaSolidCalendar />,
+											icon: <TbOutlineCalendar />,
 										},
 										{
 											label: T()("common.created.at"),
 											key: "createdAt",
-											icon: <FaSolidCalendar />,
+											icon: <TbOutlineCalendar />,
 											sortable: true,
 										},
 										{
 											label: T()("common.updated.at"),
 											key: "updatedAt",
-											icon: <FaSolidCalendar />,
+											icon: <TbOutlineCalendar />,
 										},
 									]}
 									loading={integrations.isFetching}

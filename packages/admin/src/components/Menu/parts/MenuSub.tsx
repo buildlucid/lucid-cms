@@ -1,6 +1,6 @@
 import { DropdownMenu as KobalteMenu } from "@kobalte/core";
 import classNames from "classnames";
-import { FaSolidChevronRight } from "solid-icons/fa";
+import { TbOutlineChevronRight } from "solid-icons/tb";
 import { type Component, type JSXElement, Show } from "solid-js";
 import {
 	type MenuItemVariant,
@@ -46,7 +46,7 @@ const MenuSub: Component<MenuSubProps> = (props) => {
 				<Show when={props.icon}>{props.icon}</Show>
 				<span class="line-clamp-1 mr-2.5 flex-1">{props.label}</span>
 				<Show when={props.end}>{props.end}</Show>
-				<FaSolidChevronRight size={14} />
+				<TbOutlineChevronRight size={14} />
 			</KobalteMenu.SubTrigger>
 			<KobalteMenu.Portal>
 				<KobalteMenu.SubContent

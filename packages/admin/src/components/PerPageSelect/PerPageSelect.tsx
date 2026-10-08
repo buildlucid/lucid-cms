@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidSort } from "solid-icons/fa";
+import { TbOutlineArrowsSort } from "solid-icons/tb";
 import { type Component, createMemo, For } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
@@ -39,7 +39,7 @@ const PerPageSelect: Component<PerPageSelectProps> = (props) => {
 				data-per-page-select
 				disabled={props.disabled}
 				class={classNames(
-					"flex h-9 items-center gap-2 rounded-md border border-border bg-input px-2 text-sm text-subtitle fill-body hover:bg-secondary-hover hover:text-secondary-foreground disabled:cursor-not-allowed disabled:text-muted disabled:fill-muted disabled:hover:bg-input disabled:hover:text-muted",
+					"flex h-9 items-center gap-2 rounded-md border border-border bg-input px-2 text-sm text-subtitle hover:bg-secondary-hover hover:text-secondary-foreground disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-input disabled:hover:text-muted",
 					props.class,
 				)}
 			>
@@ -48,7 +48,7 @@ const PerPageSelect: Component<PerPageSelectProps> = (props) => {
 						count: currentPerPage(),
 					})}
 				</span>
-				<FaSolidSort />
+				<TbOutlineArrowsSort />
 			</Menu.Trigger>
 			<Menu.Content>
 				<For each={options()}>

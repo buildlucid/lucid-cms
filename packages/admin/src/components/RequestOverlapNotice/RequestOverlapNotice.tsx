@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import type { RequestSummary } from "@types";
-import { FaSolidCircleInfo } from "solid-icons/fa";
+import { TbOutlineInfoCircle } from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
 import T from "@/translations";
 import { getRequestRoute } from "@/utils/route-helpers";
@@ -17,7 +17,7 @@ const RequestOverlapNotice: Component<{
 	return (
 		<p class="flex items-start gap-2 border-t border-border pt-4 text-xs leading-4 text-body">
 			<span class="flex h-4 shrink-0 items-center text-icon mt-0.5">
-				<FaSolidCircleInfo size={12} />
+				<TbOutlineInfoCircle size={12} />
 			</span>
 			<span title={T()("requests.overlap.description")}>
 				{T()("requests.overlap.title", { count: props.requests.length })}{" "}

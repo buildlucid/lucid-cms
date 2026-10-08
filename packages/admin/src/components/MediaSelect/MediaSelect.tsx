@@ -1,6 +1,6 @@
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
-import { FaSolidPen, FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePencil, TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -363,7 +363,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											type: props.type || "media",
 										})}
 									>
-										<FaSolidPen size={12} />
+										<TbOutlinePencil size={12} />
 									</Button>
 									<Button
 										type="button"
@@ -376,7 +376,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 											type: props.type || "media",
 										})}
 									>
-										<FaSolidXmark size={14} />
+										<TbOutlineX size={14} />
 									</Button>
 								</div>
 							</div>
@@ -430,7 +430,7 @@ export const MediaSelect: Component<MediaSelectProps> = (props) => {
 															type: props.type || "media",
 														})}
 													>
-														<FaSolidPlus size={12} />
+														<TbOutlinePlus size={12} />
 													</Button>
 												</div>
 											</Show>
@@ -615,7 +615,7 @@ const MediaSortableItem: Component<{
 						disabled={props.disabled}
 						aria-label={T()("common.remove")}
 					>
-						<FaSolidXmark size={14} />
+						<TbOutlineX size={14} />
 					</Button>
 				</div>
 			</div>

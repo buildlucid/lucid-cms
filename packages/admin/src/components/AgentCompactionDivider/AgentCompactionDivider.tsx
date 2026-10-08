@@ -1,4 +1,4 @@
-import { FaSolidCompress } from "solid-icons/fa";
+import { TbOutlineArrowsMinimize } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import T from "@/translations";
 
@@ -13,7 +13,7 @@ const AgentCompactionDivider: Component = () => {
 		>
 			<span aria-hidden="true" class="h-px grow bg-border" />
 			<span class="flex items-center gap-1.5">
-				<FaSolidCompress size={10} aria-hidden="true" />
+				<TbOutlineArrowsMinimize size={10} aria-hidden="true" />
 				{T()("agent.context.compacted")}
 			</span>
 			<span aria-hidden="true" class="h-px grow bg-border" />

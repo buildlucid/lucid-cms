@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidCaretUp, FaSolidMinus } from "solid-icons/fa";
+import { TbOutlineCaretUp, TbOutlineMinus } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -81,7 +81,7 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 						<Switch>
 							<Match when={props.sortable !== true}>
 								<div class="flex items-center min-h-12.5 gap-2.5">
-									<span class="text-sm fill-body">{props.icon}</span>
+									<span class="text-sm text-body">{props.icon}</span>
 									<span class="text-sm text-body">{props.label}</span>
 								</div>
 							</Match>
@@ -106,12 +106,12 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 									type="button"
 								>
 									<div class="flex items-center gap-2.5">
-										<span class="text-sm fill-body">{props.icon}</span>
+										<span class="text-sm text-body">{props.icon}</span>
 										<span class="text-sm text-body">{props.label}</span>
 									</div>
 									<Switch>
 										<Match when={sort() === "desc" || sort() === "asc"}>
-											<FaSolidCaretUp
+											<TbOutlineCaretUp
 												aria-hidden="true"
 												class={classNames("w-3 h-3 text-icon", {
 													"transform rotate-180": sort() === "desc",
@@ -119,7 +119,7 @@ const TableHeaderCell: Component<TableHeaderCellProps> = (props) => {
 											/>
 										</Match>
 										<Match when={sort() === undefined}>
-											<FaSolidMinus
+											<TbOutlineMinus
 												aria-hidden="true"
 												class="w-3 h-3 text-icon ml-2"
 											/>

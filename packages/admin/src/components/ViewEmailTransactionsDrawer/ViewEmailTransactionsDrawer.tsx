@@ -1,10 +1,10 @@
 import classnames from "classnames";
 import {
-	FaSolidCalendar,
-	FaSolidCommentDots,
-	FaSolidEnvelope,
-	FaSolidTag,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineMail,
+	TbOutlineMessageDots,
+	TbOutlineTag,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -195,28 +195,28 @@ const ViewEmailTransactionsPanelContent: Component<
 							{
 								label: T()("common.status"),
 								key: "status",
-								icon: <FaSolidEnvelope />,
+								icon: <TbOutlineMail />,
 							},
 							{
 								label: T()("common.identifier"),
 								key: "identifier",
-								icon: <FaSolidTag />,
+								icon: <TbOutlineTag />,
 							},
 							{
 								label: T()("common.message"),
 								key: "message",
-								icon: <FaSolidCommentDots />,
+								icon: <TbOutlineMessageDots />,
 							},
 							{
 								label: T()("common.created.at"),
 								key: "createdAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 							{
 								label: T()("common.updated.at"),
 								key: "updatedAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 						]}

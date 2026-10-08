@@ -1,6 +1,6 @@
 import type { FieldError } from "@types";
 import classNames from "classnames";
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import T from "@/translations";
 import { resolveFieldErrorMessage } from "@/utils/error-helpers";
@@ -101,7 +101,7 @@ const VariableNodeView: Component<VariableNodeViewProps> = (props) => {
 			title={errorMessage()}
 		>
 			<Show when={hasErrors()}>
-				<FaSolidTriangleExclamation size={10} class="shrink-0" />
+				<TbOutlineAlertTriangle size={10} class="shrink-0" />
 			</Show>
 			<span class="text-current">
 				{props.value ||

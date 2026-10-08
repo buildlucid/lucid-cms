@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidMagicWandSparkles } from "solid-icons/fa";
+import { TbOutlineWand } from "solid-icons/tb";
 import type { Component, JSX } from "solid-js";
 
 const AiIconButton: Component<{
@@ -19,7 +19,7 @@ const AiIconButton: Component<{
 		<button
 			type="button"
 			class={classnames(
-				"ai-action-button group relative flex h-5 w-5 items-center justify-center rounded-md text-muted fill-muted transition-colors duration-200 hover:text-primary-low-foreground hover:fill-primary-low-foreground focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 before:absolute before:-inset-1 before:rounded-md before:content-['']",
+				"ai-action-button group relative flex h-5 w-5 items-center justify-center rounded-md text-muted transition-colors duration-200 hover:text-primary-low-foreground focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60 before:absolute before:-inset-1 before:rounded-md before:content-['']",
 				{
 					"cursor-not-allowed opacity-60": props.disabled,
 				},
@@ -40,7 +40,7 @@ const AiIconButton: Component<{
 					props.quickActionOnHover ? "true" : undefined
 				}
 			>
-				<FaSolidMagicWandSparkles size={11} aria-hidden="true" />
+				<TbOutlineWand size={11} aria-hidden="true" />
 			</span>
 		</button>
 	);

@@ -1,6 +1,6 @@
 import type { Agent } from "@types";
 import classnames from "classnames";
-import { FaSolidChevronDown, FaSolidRobot } from "solid-icons/fa";
+import { TbOutlineChevronDown, TbOutlineRobot } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import { composerTriggerClasses } from "@/components/AgentComposer/AgentComposer";
 import Menu from "@/components/Menu/Menu";
@@ -19,9 +19,9 @@ const AgentPicker: Component<{
 				class={classnames(composerTriggerClasses, "max-w-48 px-2")}
 				aria-label={T()("agent.select.label")}
 			>
-				<FaSolidRobot size={11} class="shrink-0" />
+				<TbOutlineRobot size={11} class="shrink-0" />
 				<span class="truncate">{props.selected.name}</span>
-				<FaSolidChevronDown size={9} class="shrink-0" />
+				<TbOutlineChevronDown size={9} class="shrink-0" />
 			</Menu.Trigger>
 			<Menu.Content>
 				<For each={props.agents}>

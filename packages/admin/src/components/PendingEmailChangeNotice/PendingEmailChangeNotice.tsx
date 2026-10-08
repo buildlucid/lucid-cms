@@ -1,4 +1,4 @@
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import Button from "@/components/Button/Button";
 import T from "@/translations";
@@ -18,7 +18,7 @@ const PendingEmailChangeNotice: Component<PendingEmailChangeNoticeProps> = (
 		<div class="flex flex-col gap-3 rounded-md border border-warning-low-border bg-warning-low p-3 sm:flex-row sm:items-center sm:justify-between">
 			<div class="flex min-w-0 items-start gap-2.5">
 				<span class="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-warning-low-border bg-warning-low text-warning-low-foreground">
-					<FaSolidTriangleExclamation size={10} />
+					<TbOutlineAlertTriangle size={10} />
 				</span>
 				<div class="min-w-0">
 					<p class="text-sm font-medium text-title">

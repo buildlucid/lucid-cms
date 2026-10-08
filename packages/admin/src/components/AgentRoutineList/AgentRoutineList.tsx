@@ -1,12 +1,12 @@
 import { useNavigate } from "@solidjs/router";
 import {
-	FaSolidCalendar,
-	FaSolidCircleCheck,
-	FaSolidClock,
-	FaSolidCode,
-	FaSolidRobot,
-	FaSolidT,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineCircleCheck,
+	TbOutlineClock,
+	TbOutlineCode,
+	TbOutlineLetterT,
+	TbOutlineRobot,
+} from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Index } from "solid-js";
 import AgentRoutineTableRow from "@/components/AgentRoutineTableRow/AgentRoutineTableRow";
 import DeleteAgentRoutineModal from "@/components/DeleteAgentRoutineModal/DeleteAgentRoutineModal";
@@ -85,41 +85,41 @@ const AgentRoutineList: Component<{ searchParams: QueryStateResponse }> = (
 						{
 							label: T()("common.name"),
 							key: "name",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							sortable: true,
 							minWidth: 260,
 						},
 						{
 							label: T()("common.status"),
 							key: "enabled",
-							icon: <FaSolidCircleCheck />,
+							icon: <TbOutlineCircleCheck />,
 						},
 						{
 							label: T()("agent.routine.source"),
 							key: "source",
-							icon: <FaSolidCode />,
+							icon: <TbOutlineCode />,
 						},
 						{
 							label: T()("agent.select.label"),
 							key: "agentKey",
-							icon: <FaSolidRobot />,
+							icon: <TbOutlineRobot />,
 							minWidth: 160,
 						},
 						{
 							label: T()("common.schedule"),
 							key: "schedule",
-							icon: <FaSolidClock />,
+							icon: <TbOutlineClock />,
 							minWidth: 240,
 						},
 						{
 							label: T()("agent.routine.next.run"),
 							key: "nextRunAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 						},
 						{
 							label: T()("agent.routine.last.run"),
 							key: "lastRun",
-							icon: <FaSolidCircleCheck />,
+							icon: <TbOutlineCircleCheck />,
 							minWidth: 140,
 						},
 					]}

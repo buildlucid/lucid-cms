@@ -1,5 +1,5 @@
 import type { DocumentRef } from "@types";
-import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePencil, TbOutlineX } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -273,7 +273,7 @@ const LinkModal: Component<{
 										onClick={selectDocument}
 										aria-label={T()("common.edit")}
 									>
-										<FaSolidPen size={12} />
+										<TbOutlinePencil size={12} />
 									</Button>
 									<Button
 										type="button"
@@ -283,7 +283,7 @@ const LinkModal: Component<{
 										onClick={() => setDocumentRef(undefined)}
 										aria-label={T()("common.remove")}
 									>
-										<FaSolidXmark size={14} />
+										<TbOutlineX size={14} />
 									</Button>
 								</Show>
 							</div>

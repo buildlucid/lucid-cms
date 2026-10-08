@@ -1,10 +1,10 @@
 import DOMPurify from "dompurify";
 import {
-	FaSolidFile,
-	FaSolidImage,
-	FaSolidLink,
-	FaSolidTriangleExclamation,
-} from "solid-icons/fa";
+	TbOutlineAlertTriangle,
+	TbOutlineFile,
+	TbOutlineLink,
+	TbOutlinePhoto,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -112,7 +112,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 			loading={email.isLoading}
 			error={email.isError ? T()("errors.generic.message") : undefined}
 		>
-			<Drawer.Header>
+			<Drawer.Header border={false}>
 				<Drawer.Title>{T()("panels.email.preview.title")}</Drawer.Title>
 			</Drawer.Header>
 			<Drawer.Body class="flex flex-col gap-3">
@@ -131,7 +131,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 								variant="warning-subtle"
 								class="items-center gap-1.5 max-w-full shadow-sm"
 							>
-								<FaSolidTriangleExclamation size={10} />
+								<TbOutlineAlertTriangle size={10} />
 								<span class="truncate">
 									{T()("email.preview.inline.attachments.warning")}
 								</span>
@@ -147,9 +147,9 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 									<div class="size-9 min-w-9 rounded-md bg-input flex items-center justify-center text-icon">
 										<Show
 											when={attachment.disposition === "inline"}
-											fallback={<FaSolidFile size={14} />}
+											fallback={<TbOutlineFile size={14} />}
 										>
-											<FaSolidImage size={14} />
+											<TbOutlinePhoto size={14} />
 										</Show>
 									</div>
 									<div class="min-w-0 flex-1">
@@ -167,7 +167,7 @@ const PreviewEmailDrawer: Component<PreviewEmailPanelProps> = (props) => {
 												target="_blank"
 												rel="noreferrer noopener"
 											>
-												<FaSolidLink class="shrink-0" size={10} />
+												<TbOutlineLink class="shrink-0" size={10} />
 												<span class="truncate">{attachment.url}</span>
 											</a>
 											<Show

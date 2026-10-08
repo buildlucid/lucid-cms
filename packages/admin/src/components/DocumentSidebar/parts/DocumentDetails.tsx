@@ -4,7 +4,7 @@ import type {
 	InternalCollectionDocument,
 	Refs,
 } from "@types";
-import { FaSolidInfo } from "solid-icons/fa";
+import { TbOutlineInfoCircle } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo } from "solid-js";
 import DateText from "@/components/DateText/DateText";
 import DetailsList, {
@@ -101,7 +101,7 @@ export const DocumentDetails: Component<{
 	return (
 		<DocumentSidebarSection
 			title={T()("common.document.details")}
-			icon={<FaSolidInfo size={12} />}
+			icon={<TbOutlineInfoCircle size={12} />}
 			preferenceKey="pageBuilder.sidebar.documentDetails"
 		>
 			<DetailsList variant="plain" items={details()} />

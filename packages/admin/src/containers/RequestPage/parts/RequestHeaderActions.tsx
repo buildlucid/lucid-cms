@@ -1,6 +1,6 @@
 import type { RequestDetail } from "@types";
 import classNames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import Button from "@/components/Button/Button";
@@ -130,7 +130,7 @@ export const RequestHeaderActions: Component<{
 							<Menu.Root placement="bottom-end">
 								<Menu.Trigger
 									class={classNames(
-										"flex h-9 w-9 items-center justify-center bg-secondary text-secondary-foreground fill-secondary-foreground ring-primary transition-colors duration-200 hover:bg-secondary-hover focus:outline-none focus-visible:ring-1",
+										"flex h-9 w-9 items-center justify-center bg-secondary text-secondary-foreground ring-primary transition-colors duration-200 hover:bg-secondary-hover focus:outline-none focus-visible:ring-1",
 										{
 											"rounded-r-md border-l border-black/10":
 												interfaceDirection.isLTR(),
@@ -140,7 +140,7 @@ export const RequestHeaderActions: Component<{
 									)}
 									aria-label={T()("requests.actions.more")}
 								>
-									<FaSolidChevronDown size={10} />
+									<TbOutlineChevronDown size={10} />
 								</Menu.Trigger>
 								<Menu.Content>
 									<For each={related()}>

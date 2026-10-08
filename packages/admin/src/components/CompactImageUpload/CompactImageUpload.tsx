@@ -1,12 +1,12 @@
 import type { ErrorResult } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidArrowRotateLeft,
-	FaSolidArrowUpFromBracket,
-	FaSolidCrop,
-	FaSolidImage,
-	FaSolidTrash,
-} from "solid-icons/fa";
+	TbOutlineCrop,
+	TbOutlinePhoto,
+	TbOutlineRotate,
+	TbOutlineTrash,
+	TbOutlineUpload,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -190,8 +190,8 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 						when={previewUrl()}
 						fallback={
 							<span class="flex flex-col items-center gap-1.5 text-muted">
-								<FaSolidImage class="size-5" />
-								<FaSolidArrowUpFromBracket class="size-3" />
+								<TbOutlinePhoto class="size-5" />
+								<TbOutlineUpload class="size-3" />
 							</span>
 						}
 					>
@@ -221,7 +221,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 							onClick={openFileBrowser}
 							disabled={props.disabled}
 						>
-							<FaSolidArrowUpFromBracket class="mr-1.5 size-3" />
+							<TbOutlineUpload class="mr-1.5 size-3" />
 							{state() === "empty"
 								? T()("media.file.choose")
 								: T()("media.file.replace")}
@@ -237,7 +237,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 										disabled={props.disabled || imageCrop().state.disabled}
 										title={imageCrop().state.tooltip}
 									>
-										<FaSolidCrop class="mr-1.5 size-3" />
+										<TbOutlineCrop class="mr-1.5 size-3" />
 										{T()("media.crop.action")}
 									</Button>
 									<Show when={imageCrop().state.hasCrop}>
@@ -248,7 +248,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 											onClick={imageCrop().callbacks.remove}
 											disabled={props.disabled || imageCrop().state.disabled}
 										>
-											<FaSolidTrash class="mr-1.5 size-3" />
+											<TbOutlineTrash class="mr-1.5 size-3" />
 											{T()("media.crop.remove")}
 										</Button>
 									</Show>
@@ -268,7 +268,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 								onClick={removeFile}
 								disabled={props.disabled}
 							>
-								<FaSolidTrash class="mr-1.5 size-3" />
+								<TbOutlineTrash class="mr-1.5 size-3" />
 								{T()("common.remove")}
 							</Button>
 						</Show>
@@ -286,7 +286,7 @@ const CompactImageUpload: Component<CompactImageUploadProps> = (props) => {
 								onClick={restoreCurrentFile}
 								disabled={props.disabled}
 							>
-								<FaSolidArrowRotateLeft class="mr-1.5 size-3" />
+								<TbOutlineRotate class="mr-1.5 size-3" />
 								{T()("media.file.back.to.current")}
 							</Button>
 						</Show>

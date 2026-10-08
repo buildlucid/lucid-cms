@@ -1,5 +1,5 @@
 import type { Collection, RequestDetail, RequestDocument } from "@types";
-import { FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import Menu from "@/components/Menu/Menu";
@@ -112,7 +112,7 @@ export const RequestTargets: Component<{
 										disabled={update.action.isPending}
 										onClick={() => remove(target.target)}
 									>
-										<FaSolidXmark size={10} />
+										<TbOutlineX size={10} />
 									</Button>
 								</Show>
 							</li>
@@ -126,7 +126,7 @@ export const RequestTargets: Component<{
 								class="flex h-8 items-center gap-1.5 rounded-full border border-dashed border-border px-3 text-xs text-muted transition-colors hover:border-primary/60 hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-60"
 								disabled={update.action.isPending}
 							>
-								<FaSolidPlus size={9} />
+								<TbOutlinePlus size={9} />
 								{T()("requests.targets.add")}
 							</Menu.Trigger>
 							<Menu.Content>

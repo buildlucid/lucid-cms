@@ -1,6 +1,10 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck, FaSolidSort, FaSolidXmark } from "solid-icons/fa";
+import {
+	TbOutlineArrowsSort,
+	TbOutlineCheck,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	createEffect,
 	createSignal,
@@ -228,7 +232,7 @@ function SelectMultiple<
 																removeValue(value);
 															}}
 														>
-															<FaSolidXmark size={10} />
+															<TbOutlineX size={10} />
 														</span>
 													</span>
 												</Show>
@@ -247,7 +251,7 @@ function SelectMultiple<
 						</For>
 					</div>
 					<div class="ml-2 flex shrink-0 self-center items-center">
-						<FaSolidSort size={14} class="text-subtitle ml-1" />
+						<TbOutlineArrowsSort size={14} class="text-subtitle ml-1" />
 					</div>
 				</Menu.Trigger>
 				<Menu.Content matchTriggerWidth class="max-h-36 overflow-y-auto z-70">
@@ -267,10 +271,7 @@ function SelectMultiple<
 											onSelect={() => toggleValue(option)}
 											end={
 												selected() ? (
-													<FaSolidCheck
-														size={14}
-														class="shrink-0 fill-current"
-													/>
+													<TbOutlineCheck size={14} class="shrink-0" />
 												) : undefined
 											}
 										>

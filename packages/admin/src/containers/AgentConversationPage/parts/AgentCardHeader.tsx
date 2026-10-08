@@ -1,4 +1,4 @@
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import T from "@/translations";
 
@@ -29,7 +29,7 @@ const AgentCardHeader: Component<{
 				title={T()("common.close")}
 				onClick={() => props.onClose()}
 			>
-				<FaSolidXmark size={12} />
+				<TbOutlineX size={12} />
 			</button>
 		</div>
 	);

@@ -1,6 +1,6 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
-import { FaSolidPlus } from "solid-icons/fa";
+import { TbOutlinePlus } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -198,7 +198,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 										onClick={addGroup}
 										disabled={disabled()}
 									>
-										<FaSolidPlus size={14} />
+										<TbOutlinePlus size={14} />
 										<span>{T()("actions.add.entry")}</span>
 									</button>
 								</div>
@@ -224,7 +224,7 @@ export const RepeaterField: Component<RepeaterFieldProps> = (props) => {
 								aria-label={T()("actions.add.entry")}
 								title={T()("actions.add.entry")}
 							>
-								<FaSolidPlus size={12} />
+								<TbOutlinePlus size={12} />
 							</Button>
 						</div>
 					</Match>

@@ -12,7 +12,7 @@ export interface MenuItemAppearance {
 
 export const menuItemClasses = (props: MenuItemAppearance) =>
 	classNames(
-		"flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left text-sm fill-subtitle outline-none transition-colors duration-200",
+		"flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left text-sm outline-none transition-colors duration-200",
 		{
 			"hover:bg-card-hover hover:text-subtitle data-highlighted:bg-card-hover data-highlighted:text-subtitle":
 				props.variant === undefined && !props.disabled,

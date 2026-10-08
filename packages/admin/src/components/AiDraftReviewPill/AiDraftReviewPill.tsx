@@ -1,4 +1,4 @@
-import { FaSolidCheck, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineX } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import T from "@/translations";
 
@@ -22,7 +22,7 @@ const AiDraftReviewPill: Component<{
 			<div class="flex items-center">
 				<button
 					type="button"
-					class="flex h-5 min-w-5 items-center justify-center text-muted fill-muted transition-colors duration-200 hover:bg-card-hover hover:text-success hover:fill-success focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+					class="flex h-5 min-w-5 items-center justify-center text-muted transition-colors duration-200 hover:bg-card-hover hover:text-success focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
 					title={T()("common.accept")}
 					aria-label={T()("common.accept")}
 					disabled={props.disabled}
@@ -32,11 +32,11 @@ const AiDraftReviewPill: Component<{
 						props.onAccept();
 					}}
 				>
-					<FaSolidCheck size={10} aria-hidden="true" />
+					<TbOutlineCheck size={10} aria-hidden="true" />
 				</button>
 				<button
 					type="button"
-					class="flex h-5 min-w-5 items-center justify-center text-muted fill-muted transition-colors duration-200 hover:bg-card-hover hover:text-danger hover:fill-danger focus:outline-hidden focus-visible:ring-1 focus-visible:ring-danger disabled:cursor-not-allowed disabled:opacity-60"
+					class="flex h-5 min-w-5 items-center justify-center text-muted transition-colors duration-200 hover:bg-card-hover hover:text-danger focus:outline-hidden focus-visible:ring-1 focus-visible:ring-danger disabled:cursor-not-allowed disabled:opacity-60"
 					title={T()("common.reject")}
 					aria-label={T()("common.reject")}
 					disabled={props.disabled}
@@ -46,7 +46,7 @@ const AiDraftReviewPill: Component<{
 						props.onReject();
 					}}
 				>
-					<FaSolidXmark size={10} aria-hidden="true" />
+					<TbOutlineX size={10} aria-hidden="true" />
 				</button>
 			</div>
 		</div>

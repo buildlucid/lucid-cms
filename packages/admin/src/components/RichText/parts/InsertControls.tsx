@@ -3,14 +3,14 @@ import type { Editor, JSONContent } from "@tiptap/core";
 import { GapCursor } from "@tiptap/pm/gapcursor";
 import { NodeSelection, Selection, TextSelection } from "@tiptap/pm/state";
 import {
-	FaSolidCompress,
-	FaSolidCubes,
-	FaSolidDatabase,
-	FaSolidExpand,
-	FaSolidFileLines,
-	FaSolidImage,
-	FaSolidUpload,
-} from "solid-icons/fa";
+	TbOutlineArrowsMaximize,
+	TbOutlineArrowsMinimize,
+	TbOutlineBoxMultiple,
+	TbOutlineDatabase,
+	TbOutlineFileText,
+	TbOutlinePhoto,
+	TbOutlineUpload,
+} from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import T from "@/translations";
 import {
@@ -146,7 +146,7 @@ const InsertControls: Component<{
 							disabled={props.disabled}
 							title={T()("editor.rich.text.media.select")}
 						>
-							<FaSolidImage size={12} />
+							<TbOutlinePhoto size={12} />
 						</ToolbarButton>
 						<ToolbarButton
 							mode="default"
@@ -155,7 +155,7 @@ const InsertControls: Component<{
 							disabled={props.disabled}
 							title={T()("editor.rich.text.media.upload")}
 						>
-							<FaSolidUpload size={12} />
+							<TbOutlineUpload size={12} />
 						</ToolbarButton>
 					</Show>
 					<Show when={isRichTextOptionEnabled(props.options?.documents)}>
@@ -180,7 +180,7 @@ const InsertControls: Component<{
 							disabled={props.disabled}
 							title={T()("editor.rich.text.document.add")}
 						>
-							<FaSolidFileLines size={12} />
+							<TbOutlineFileText size={12} />
 						</ToolbarButton>
 					</Show>
 					<Show
@@ -205,7 +205,7 @@ const InsertControls: Component<{
 							disabled={props.disabled}
 							title={T()("editor.rich.text.variable.add")}
 						>
-							<FaSolidDatabase size={12} />
+							<TbOutlineDatabase size={12} />
 						</ToolbarButton>
 					</Show>
 					<Show when={isRichTextOptionEnabled(props.options?.bricks)}>
@@ -225,7 +225,7 @@ const InsertControls: Component<{
 							disabled={props.disabled}
 							title={T()("editor.rich.text.brick.add")}
 						>
-							<FaSolidCubes size={12} />
+							<TbOutlineBoxMultiple size={12} />
 						</ToolbarButton>
 					</Show>
 				</div>
@@ -244,9 +244,9 @@ const InsertControls: Component<{
 						}
 					>
 						{props.fullscreen ? (
-							<FaSolidCompress size={12} />
+							<TbOutlineArrowsMinimize size={12} />
 						) : (
-							<FaSolidExpand size={12} />
+							<TbOutlineArrowsMaximize size={12} />
 						)}
 					</ToolbarButton>
 				</div>

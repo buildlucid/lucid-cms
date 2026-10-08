@@ -1,12 +1,12 @@
 import notifySvg from "@assets/illustrations/notify.svg?url";
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import {
-	FaSolidEye,
-	FaSolidPen,
-	FaSolidPlus,
-	FaSolidTrash,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineEye,
+	TbOutlinePencil,
+	TbOutlinePlus,
+	TbOutlineTrash,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createSignal,
@@ -516,7 +516,7 @@ const ComponentLibraryPage: Component = () => {
 									{(shape) => (
 										<Row label={`shape="${shape}"`}>
 											<Button variant="primary" size="md" shape={shape}>
-												{shape === "standard" ? "Button" : <FaSolidPlus />}
+												{shape === "standard" ? "Button" : <TbOutlinePlus />}
 											</Button>
 										</Row>
 									)}
@@ -1053,7 +1053,7 @@ const ComponentLibraryPage: Component = () => {
 									{(shape) => (
 										<Row label={`shape="${shape}"`}>
 											<Link href="#" variant="primary" size="md" shape={shape}>
-												{shape === "standard" ? "Link" : <FaSolidXmark />}
+												{shape === "standard" ? "Link" : <TbOutlineX />}
 											</Link>
 										</Row>
 									)}
@@ -1090,15 +1090,15 @@ const ComponentLibraryPage: Component = () => {
 									Open menu
 								</Menu.Trigger>
 								<Menu.Content>
-									<Menu.Item icon={<FaSolidEye />}>Preview</Menu.Item>
-									<Menu.Item icon={<FaSolidPen />} end="⌘E">
+									<Menu.Item icon={<TbOutlineEye />}>Preview</Menu.Item>
+									<Menu.Item icon={<TbOutlinePencil />} end="⌘E">
 										Edit
 									</Menu.Item>
 									<Menu.Item selected={true}>Current view</Menu.Item>
 									<Menu.Item disabled={true}>Publish</Menu.Item>
 									<Menu.Item unavailable={true}>Restore</Menu.Item>
 									<Menu.Separator />
-									<Menu.Item variant="danger" icon={<FaSolidTrash />}>
+									<Menu.Item variant="danger" icon={<TbOutlineTrash />}>
 										Delete
 									</Menu.Item>
 								</Menu.Content>

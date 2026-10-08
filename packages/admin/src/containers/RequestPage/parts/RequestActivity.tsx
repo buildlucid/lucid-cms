@@ -1,5 +1,5 @@
 import type { Collection, RequestDetail, RequestEvent } from "@types";
-import { FaSolidFilter } from "solid-icons/fa";
+import { TbOutlineFilter } from "solid-icons/tb";
 import { type Component, createMemo, For, Match, Show, Switch } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import SectionHeading from "@/components/SectionHeading/SectionHeading";
@@ -87,7 +87,7 @@ export const RequestActivity: Component<{
 							title={T()("requests.activity.filters")}
 						>
 							<span class="sr-only">{T()("requests.activity.filters")}</span>
-							<FaSolidFilter size={14} />
+							<TbOutlineFilter size={14} />
 						</Menu.Trigger>
 						<Menu.Content>
 							<Menu.Label>{T()("requests.activity.filters")}</Menu.Label>

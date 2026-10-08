@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import T from "@/translations";
@@ -90,7 +90,7 @@ const CheckboxGroupRow: Component<CheckboxGroupRowProps> = (props) => {
 						{props.name}
 					</span>
 					<span class="shrink-0 text-xs text-muted">{summary()}</span>
-					<FaSolidChevronDown
+					<TbOutlineChevronDown
 						size={10}
 						class={classnames("shrink-0 text-muted transition-transform", {
 							"rotate-180": isOpen(),

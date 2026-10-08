@@ -1,9 +1,9 @@
 import {
-	FaSolidCalendar,
-	FaSolidCircleCheck,
-	FaSolidCoins,
-	FaSolidT,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineCircleCheck,
+	TbOutlineCoins,
+	TbOutlineLetterT,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -166,30 +166,30 @@ const ViewAgentRoutineRunsContent: Component<
 							{
 								label: T()("common.status"),
 								key: "status",
-								icon: <FaSolidCircleCheck />,
+								icon: <TbOutlineCircleCheck />,
 							},
 							{
 								label: T()("agent.routine.run.summary"),
 								key: "summary",
-								icon: <FaSolidT />,
+								icon: <TbOutlineLetterT />,
 								minWidth: 420,
 							},
 							{
 								label: T()("agent.routine.run.credits.label"),
 								key: "credits",
-								icon: <FaSolidCoins />,
+								icon: <TbOutlineCoins />,
 								minWidth: 100,
 							},
 							{
 								label: T()("common.created.at"),
 								key: "createdAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 							{
 								label: T()("common.finished.at"),
 								key: "finishedAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 							},
 						]}
 						loading={runs.isFetching}

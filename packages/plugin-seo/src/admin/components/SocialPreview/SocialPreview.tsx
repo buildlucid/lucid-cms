@@ -1,7 +1,7 @@
 import { Image } from "@lucidcms/admin/components";
 import { useTranslation } from "@lucidcms/admin/hooks";
 import { mediaUrl } from "@lucidcms/admin/utils";
-import { FaSolidImage } from "solid-icons/fa";
+import { TbOutlinePhoto } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import type {} from "../../../shared/translations.js";
 import { useImage } from "../../hooks/use-image.js";
@@ -44,7 +44,7 @@ const SocialPreview: Component<SocialPreviewProps> = (props) => {
 					when={media.image()}
 					fallback={
 						<div class="flex flex-col items-center gap-2 p-4 text-subtitle">
-							<FaSolidImage aria-hidden="true" size={24} class="opacity-50" />
+							<TbOutlinePhoto aria-hidden="true" size={24} class="opacity-50" />
 							<p class="text-center text-sm">
 								{t(
 									props.imageId === undefined

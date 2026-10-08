@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import type { MediaFolderBreadcrumb } from "@types";
-import { FaSolidChevronRight, FaSolidHouse } from "solid-icons/fa";
+import { TbOutlineChevronRight, TbOutlineHome } from "solid-icons/tb";
 import { type Accessor, type Component, For, Match, Switch } from "solid-js";
 import T from "@/translations";
 
@@ -19,11 +19,11 @@ export const MediaBreadcrumbs: Component<{
 		>
 			<li>
 				<A href={"/lucid"} class="hover:text-title text-sm">
-					<FaSolidHouse />
+					<TbOutlineHome />
 				</A>
 			</li>
 			<li aria-hidden="true" class="px-1">
-				<FaSolidChevronRight size={10} class="fill-current mt-px" />
+				<TbOutlineChevronRight size={10} class="mt-px" />
 			</li>
 			<li>
 				<Switch>
@@ -47,7 +47,7 @@ export const MediaBreadcrumbs: Component<{
 				{(breadcrumb, i) => (
 					<>
 						<li aria-hidden="true" class="px-1">
-							<FaSolidChevronRight size={10} class="fill-current mt-px" />
+							<TbOutlineChevronRight size={10} class="mt-px" />
 						</li>
 						<li>
 							<Switch>

@@ -1,11 +1,11 @@
 import type { RequestDetail, RequestUser } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidCalendar,
-	FaSolidCircleDot,
-	FaSolidInfo,
-	FaSolidUserCheck,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineCircleDot,
+	TbOutlineInfoCircle,
+	TbOutlineUserCheck,
+} from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import DateText from "@/components/DateText/DateText";
@@ -196,7 +196,7 @@ export const RequestSidebar: Component<{
 			<div class="flex flex-col gap-5 p-4 md:p-5 lg:sticky lg:top-(--page-layout-sticky-top)">
 				<DocumentSidebarSection
 					title={T()("requests.sidebar.status")}
-					icon={<FaSolidCircleDot size={12} />}
+					icon={<TbOutlineCircleDot size={12} />}
 					preferenceKey="request.sidebar.status"
 				>
 					<DetailsList variant="plain" items={status()} />
@@ -204,7 +204,7 @@ export const RequestSidebar: Component<{
 				<div class="border-t border-border" aria-hidden="true" />
 				<DocumentSidebarSection
 					title={T()("requests.reviewers")}
-					icon={<FaSolidUserCheck size={12} />}
+					icon={<TbOutlineUserCheck size={12} />}
 					preferenceKey="request.sidebar.reviewers"
 					meta={props.request.reviewers.length || undefined}
 				>
@@ -269,7 +269,7 @@ export const RequestSidebar: Component<{
 					<div class="border-t border-border" aria-hidden="true" />
 					<DocumentSidebarSection
 						title={T()("requests.sidebar.schedule")}
-						icon={<FaSolidCalendar size={12} />}
+						icon={<TbOutlineCalendar size={12} />}
 						preferenceKey="request.sidebar.schedule"
 					>
 						<DetailsList variant="plain" items={schedule()} />
@@ -297,7 +297,7 @@ export const RequestSidebar: Component<{
 				<div class="border-t border-border" aria-hidden="true" />
 				<DocumentSidebarSection
 					title={T()("requests.sidebar.details")}
-					icon={<FaSolidInfo size={12} />}
+					icon={<TbOutlineInfoCircle size={12} />}
 					preferenceKey="request.sidebar.details"
 				>
 					<DetailsList variant="plain" items={details()} />

@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidEyeSlash, FaSolidGripVertical } from "solid-icons/fa";
+import { TbOutlineEyeOff, TbOutlineGripVertical } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import type { DashboardWidgetSize } from "@/components/DashboardWidget/types";
 import T from "@/translations";
@@ -68,7 +68,7 @@ const HomeWidgetControls: Component<{
 				aria-label={T()("home.widget.move", { name: props.label })}
 				onKeyDown={onGripKeyDown}
 			>
-				<FaSolidGripVertical size={11} />
+				<TbOutlineGripVertical size={11} />
 			</button>
 			<span class="min-w-0 grow truncate text-xs text-body">{props.label}</span>
 			<fieldset class="flex shrink-0 items-center gap-0.5">
@@ -104,7 +104,7 @@ const HomeWidgetControls: Component<{
 				title={T()("home.widget.hide", { name: props.label })}
 				onClick={() => props.onHide()}
 			>
-				<FaSolidEyeSlash size={12} />
+				<TbOutlineEyeOff size={12} />
 			</button>
 		</div>
 	);

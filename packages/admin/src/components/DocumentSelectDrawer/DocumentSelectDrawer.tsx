@@ -5,11 +5,11 @@ import type {
 	RelationFieldValue,
 } from "@types";
 import {
-	FaSolidBarsProgress,
-	FaSolidCalendar,
-	FaSolidUser,
-	FaSolidUserCheck,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineProgress,
+	TbOutlineUser,
+	TbOutlineUserCheck,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -318,12 +318,12 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 					{
 						label: T()("documents.workflow.stage"),
 						key: "workflowStage",
-						icon: <FaSolidBarsProgress />,
+						icon: <TbOutlineProgress />,
 					},
 					{
 						label: T()("documents.workflow.assigned.to"),
 						key: "workflowAssignee",
-						icon: <FaSolidUserCheck />,
+						icon: <TbOutlineUserCheck />,
 						minWidth: 200,
 					},
 				]
@@ -603,19 +603,19 @@ export const DocumentSelectContent: Component<DocumentSelectContentProps> = (
 									{
 										label: T()("common.created.by"),
 										key: "createdBy",
-										icon: <FaSolidUser />,
+										icon: <TbOutlineUser />,
 										minWidth: 180,
 									},
 									{
 										label: T()("common.updated.by"),
 										key: "updatedBy",
-										icon: <FaSolidUser />,
+										icon: <TbOutlineUser />,
 										minWidth: 180,
 									},
 									{
 										label: T()("common.updated.at"),
 										key: "updatedAt",
-										icon: <FaSolidCalendar />,
+										icon: <TbOutlineCalendar />,
 									},
 								]}
 								loading={documents.isFetching || collectionIsLoading()}

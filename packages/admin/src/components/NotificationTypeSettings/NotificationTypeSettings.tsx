@@ -1,7 +1,7 @@
 import { useIsFetching } from "@tanstack/solid-query";
 import type { NotificationType, Role } from "@types";
 import classnames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import SelectMultiple from "@/components/SelectMultiple/SelectMultiple";
@@ -119,7 +119,7 @@ const NotificationTypeSettings: Component<NotificationTypeSettingsProps> = (
 							<span class="min-w-0 truncate text-subtitle">
 								{rolesSummary()}
 							</span>
-							<FaSolidChevronDown
+							<TbOutlineChevronDown
 								size={9}
 								class={classnames("shrink-0 transition-transform", {
 									"rotate-180": rolesOpen(),

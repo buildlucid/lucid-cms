@@ -53,6 +53,14 @@
 		@apply cursor-pointer;
 	}
 
+	/* Icons */
+
+	/* Tabler icons leave 2px of padding in their 24px grid. Scaling them up
+	   fills the box like a glyph, so `size` reads true without changing layout. */
+	svg[viewBox="0 0 24 24"][stroke-linejoin="round"] {
+		scale: 1.2;
+	}
+
 	/* Other */
 
 	body {

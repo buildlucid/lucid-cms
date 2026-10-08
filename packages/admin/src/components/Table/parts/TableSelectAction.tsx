@@ -1,4 +1,4 @@
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -202,7 +202,7 @@ const TableSelectAction: Component<TableSelectActionProps> = (props) => {
 								aria-label={T()("common.reset")}
 								title={T()("common.reset")}
 							>
-								<FaSolidXmark size={12} />
+								<TbOutlineX size={12} />
 							</Button>
 							<p class="truncate text-sm">
 								<span class="font-bold">

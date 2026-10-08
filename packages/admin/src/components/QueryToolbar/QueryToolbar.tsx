@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidArrowsRotate } from "solid-icons/fa";
+import { TbOutlineRefresh } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -172,7 +172,7 @@ const QueryToolbar: Component<QueryToolbarProps> = (props) => {
 							disabled={isRefreshing()}
 							aria-label={T()("common.refresh")}
 						>
-							<FaSolidArrowsRotate
+							<TbOutlineRefresh
 								size={12}
 								class={classNames({
 									"animate-spin": isRefreshing(),

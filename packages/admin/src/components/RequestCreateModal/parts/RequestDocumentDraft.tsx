@@ -3,7 +3,7 @@ import type {
 	InternalCollectionDocument,
 	RequestDocumentInput,
 } from "@types";
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import Checkbox from "@/components/Checkbox/Checkbox";
@@ -101,7 +101,7 @@ const RequestDocumentDraft: Component<{
 					title={T()("requests.create.clear.document")}
 					onClick={props.onRemove}
 				>
-					<FaSolidXmark size={14} />
+					<TbOutlineX size={14} />
 				</Button>
 			</div>
 			<div class="flex flex-col gap-2 border-t border-border px-3 py-2.5 sm:flex-row sm:items-center sm:gap-4">

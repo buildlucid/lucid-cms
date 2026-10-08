@@ -1,9 +1,9 @@
 import type { AgentInteraction, AgentWidgetPart } from "@types";
 import {
-	FaSolidCircleQuestion,
-	FaSolidPenToSquare,
-	FaSolidShieldHalved,
-} from "solid-icons/fa";
+	TbOutlineEdit,
+	TbOutlineHelpCircle,
+	TbOutlineShieldHalf,
+} from "solid-icons/tb";
 import { type Component, createMemo, Match, Show, Switch } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import AgentToolDetails from "@/components/AgentToolDetails/AgentToolDetails";
@@ -98,14 +98,14 @@ const AgentWidgetRow: Component<{ widget: AgentWidgetPart }> = (props) => {
 						<AgentTranscriptRow
 							expandable={expandable()}
 							icon={
-								<Switch fallback={<FaSolidPenToSquare size={10} />}>
+								<Switch fallback={<TbOutlineEdit size={10} />}>
 									<Match when={question()}>
-										<FaSolidCircleQuestion size={10} />
+										<TbOutlineHelpCircle size={10} />
 									</Match>
 									<Match
 										when={interaction().approval || interaction().approvals}
 									>
-										<FaSolidShieldHalved size={10} />
+										<TbOutlineShieldHalf size={10} />
 									</Match>
 								</Switch>
 							}

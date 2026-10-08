@@ -6,14 +6,14 @@ import type {
 } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidCalendarPlus,
-	FaSolidClock,
-	FaSolidEye,
-	FaSolidEyeSlash,
-	FaSolidLanguage,
-	FaSolidRotate,
-	FaSolidTableColumns,
-} from "solid-icons/fa";
+	TbOutlineCalendarPlus,
+	TbOutlineClock,
+	TbOutlineEye,
+	TbOutlineEyeOff,
+	TbOutlineLanguage,
+	TbOutlineLayoutColumns,
+	TbOutlineRotateClockwise2,
+} from "solid-icons/tb";
 import type { Accessor } from "solid-js";
 import { type Component, createMemo, onCleanup, onMount, Show } from "solid-js";
 import { Breadcrumbs as LayoutBreadcrumbs } from "@/components/Breadcrumbs/Breadcrumbs";
@@ -618,11 +618,11 @@ export const PageBuilderHeader: Component<{
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 shrink-0 text-xs md:text-sm">
 							<div class="hidden lg:flex items-center gap-x-3 gap-y-1.5 flex-wrap">
 								<div class="flex items-center gap-1.5 text-body">
-									<FaSolidCalendarPlus size={12} />
+									<TbOutlineCalendarPlus size={12} />
 									<DateText date={props.state.document()?.createdAt} />
 								</div>
 								<div class="flex items-center gap-1.5 text-body">
-									<FaSolidClock size={12} />
+									<TbOutlineClock size={12} />
 									<DateText date={documentUpdatedAt()} />
 								</div>
 							</div>
@@ -645,7 +645,7 @@ export const PageBuilderHeader: Component<{
 											: `${T()("builder.auto.save.label")} - ${T()("common.status.disabled")}`
 									}
 								>
-									<FaSolidRotate size={12} />
+									<TbOutlineRotateClockwise2 size={12} />
 								</button>
 							</Show>
 							<Show when={props.comparison}>
@@ -665,7 +665,7 @@ export const PageBuilderHeader: Component<{
 										title={T()("documents.compare.action")}
 										aria-label={T()("documents.compare.action")}
 									>
-										<FaSolidTableColumns size={12} />
+										<TbOutlineLayoutColumns size={12} />
 									</button>
 								)}
 							</Show>
@@ -740,7 +740,7 @@ export const PageBuilderHeader: Component<{
 									}
 								>
 									<div class="flex items-center">
-										<FaSolidLanguage size={16} />
+										<TbOutlineLanguage size={16} />
 										<span class="ml-2.5 text-base font-medium text-body">
 											{displayLocale()?.name} ({displayLocale()?.code})
 										</span>
@@ -780,16 +780,16 @@ export const PageBuilderHeader: Component<{
 									aria-pressed={props.state.previewOpen?.()}
 									class={
 										props.state.previewOpen?.()
-											? "border-secondary! bg-secondary! text-secondary-foreground! fill-secondary-foreground! hover:bg-secondary-hover!"
+											? "border-secondary! bg-secondary! text-secondary-foreground! hover:bg-secondary-hover!"
 											: undefined
 									}
 									onClick={() => props.actions.togglePreview?.()}
 								>
 									<Show
 										when={props.state.previewOpen?.()}
-										fallback={<FaSolidEye />}
+										fallback={<TbOutlineEye />}
 									>
-										<FaSolidEyeSlash />
+										<TbOutlineEyeOff />
 									</Show>
 								</Button>
 							</Show>

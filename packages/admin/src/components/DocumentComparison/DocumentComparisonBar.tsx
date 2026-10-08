@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -131,7 +131,7 @@ const DocumentComparisonBar: Component<{
 						title={T()("documents.compare.close")}
 						onClick={() => props.comparison.close()}
 					>
-						<FaSolidXmark size={12} />
+						<TbOutlineX size={12} />
 					</Button>
 				</div>
 			</div>

@@ -8,15 +8,15 @@ import type {
 } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidChevronRight,
-	FaSolidCircleInfo,
-	FaSolidClockRotateLeft,
-	FaSolidFileLines,
-	FaSolidLayerGroup,
-	FaSolidPaperPlane,
-	FaSolidTriangleExclamation,
-	FaSolidUser,
-} from "solid-icons/fa";
+	TbOutlineAlertTriangle,
+	TbOutlineChevronRight,
+	TbOutlineFileText,
+	TbOutlineHistory,
+	TbOutlineInfoCircle,
+	TbOutlineSend,
+	TbOutlineStack2,
+	TbOutlineUser,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -197,7 +197,7 @@ const TimelineDetails: Component<{
 
 			<InspectorSection
 				title={T()("common.version.details")}
-				icon={<FaSolidCircleInfo size={14} />}
+				icon={<TbOutlineInfoCircle size={14} />}
 				preferenceKey="history.inspector.versionDetails"
 			>
 				<div class="grid gap-3">
@@ -255,7 +255,7 @@ const TimelineDetails: Component<{
 
 			<InspectorSection
 				title={T()("common.content.summary")}
-				icon={<FaSolidLayerGroup size={14} />}
+				icon={<TbOutlineStack2 size={14} />}
 				preferenceKey="history.inspector.contentSummary"
 			>
 				<Switch>
@@ -290,7 +290,7 @@ const TimelineDetails: Component<{
 			<Show when={props.item.type === "revision"}>
 				<InspectorSection
 					title={T()("documents.revisions.retention.title")}
-					icon={<FaSolidClockRotateLeft size={14} />}
+					icon={<TbOutlineHistory size={14} />}
 					preferenceKey="history.inspector.revisionRetention"
 				>
 					<div class="min-w-0">
@@ -317,7 +317,7 @@ const TimelineDetails: Component<{
 			<Show when={props.item.type === "environment"}>
 				<InspectorSection
 					title={T()("documents.request.activity")}
-					icon={<FaSolidPaperPlane size={14} />}
+					icon={<TbOutlineSend size={14} />}
 					meta={requests().length}
 					preferenceKey="history.inspector.requestActivity"
 				>
@@ -344,7 +344,7 @@ const TimelineDetails: Component<{
 
 			<InspectorSection
 				title={T()("common.document.payload")}
-				icon={<FaSolidFileLines size={14} />}
+				icon={<TbOutlineFileText size={14} />}
 				preferenceKey="history.inspector.documentPayload"
 			>
 				<Switch>
@@ -400,7 +400,7 @@ const InspectorSection: Component<{
 						<Show when={props.meta !== undefined}>
 							<Pill variant="outline">{props.meta}</Pill>
 						</Show>
-						<FaSolidChevronRight
+						<TbOutlineChevronRight
 							size={12}
 							class={classNames(
 								"shrink-0 text-body transition-transform duration-200",
@@ -457,7 +457,7 @@ const AuthorDisplay: Component<{
 		when={props.user}
 		fallback={
 			<span class="inline-flex items-center gap-2">
-				<FaSolidUser size={12} />
+				<TbOutlineUser size={12} />
 				{props.fallbackId ? `#${props.fallbackId}` : "-"}
 			</span>
 		}
@@ -535,7 +535,7 @@ const VersionStatusPills: Component<{
 			}
 		>
 			<Pill variant="warning-subtle">
-				<FaSolidTriangleExclamation size={10} class="mr-1.5" />
+				<TbOutlineAlertTriangle size={10} class="mr-1.5" />
 				{T()("common.status.not.latest")}
 			</Pill>
 		</Show>

@@ -1,10 +1,10 @@
 import {
-	FaSolidCalendar,
-	FaSolidEnvelope,
-	FaSolidIdCard,
-	FaSolidLock,
-	FaSolidUserTie,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineId,
+	TbOutlineLock,
+	TbOutlineMail,
+	TbOutlineUserStar,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -166,39 +166,39 @@ export const UserList: Component<{
 						{
 							label: T()("common.user"),
 							key: "user",
-							icon: <FaSolidIdCard />,
+							icon: <TbOutlineId />,
 							minWidth: 260,
 						},
 						{
 							label: T()("common.name"),
 							key: "name",
-							icon: <FaSolidIdCard />,
+							icon: <TbOutlineId />,
 						},
 						{
 							label: T()("users.type"),
 							key: "superAdmin",
-							icon: <FaSolidUserTie />,
+							icon: <TbOutlineUserStar />,
 						},
 						{
 							label: T()("users.status.locked.label"),
 							key: "isLocked",
-							icon: <FaSolidLock />,
+							icon: <TbOutlineLock />,
 							sortable: true,
 						},
 						{
 							label: T()("users.invitations.status.label"),
 							key: "invitationAccepted",
-							icon: <FaSolidEnvelope />,
+							icon: <TbOutlineMail />,
 						},
 						{
 							label: T()("users.password.reset.status.label"),
 							key: "triggerPasswordReset",
-							icon: <FaSolidLock />,
+							icon: <TbOutlineLock />,
 						},
 						{
 							label: T()("common.created.at"),
 							key: "createdAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 						},
 					]}

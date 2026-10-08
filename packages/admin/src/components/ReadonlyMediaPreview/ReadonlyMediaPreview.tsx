@@ -1,5 +1,5 @@
 import type { MediaStatus, MediaType } from "@types";
-import { FaSolidFile } from "solid-icons/fa";
+import { TbOutlineFile } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -56,7 +56,7 @@ const ReadonlyMediaPreview: Component<{
 					<Switch
 						fallback={
 							<div class="w-full h-full relative z-10 bg-input flex flex-col justify-center items-center">
-								<FaSolidFile class="w-10 h-10 mx-auto text-muted" />
+								<TbOutlineFile class="w-10 h-10 mx-auto text-muted" />
 							</div>
 						}
 					>

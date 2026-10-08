@@ -1,6 +1,6 @@
 import type { FieldError, InternalDocumentField } from "@types";
 import classNames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -179,7 +179,7 @@ export const CollapsibleField: Component<CollapsibleFieldProps> = (props) => {
 				</span>
 				<span class="flex shrink-0 items-center gap-2">
 					<FieldErrorBadge count={errorCount()} />
-					<FaSolidChevronDown
+					<TbOutlineChevronDown
 						size={12}
 						class={classNames(
 							"shrink-0 text-muted transition-transform duration-200",

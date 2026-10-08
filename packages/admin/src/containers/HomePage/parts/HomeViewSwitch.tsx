@@ -1,8 +1,6 @@
 import classnames from "classnames";
-import {
-	FaSolidTableCellsLarge,
-	FaSolidWandMagicSparkles,
-} from "solid-icons/fa";
+import type { IconTypes } from "solid-icons";
+import { TbOutlineLayoutGrid, TbOutlineWand } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import userPreferencesStore, {
@@ -13,16 +11,16 @@ import { getHomeView } from "@/utils/home-view";
 import { startViewTransition } from "@/utils/view-transition";
 
 const views = [
-	{ value: "ask", label: "home.view.ask", icon: FaSolidWandMagicSparkles },
+	{ value: "ask", label: "home.view.ask", icon: TbOutlineWand },
 	{
 		value: "overview",
 		label: "home.view.overview",
-		icon: FaSolidTableCellsLarge,
+		icon: TbOutlineLayoutGrid,
 	},
 ] as const satisfies ReadonlyArray<{
 	value: HomeView;
 	label: string;
-	icon: typeof FaSolidTableCellsLarge;
+	icon: IconTypes;
 }>;
 
 /** Switches Home between the chat box and the overview, and remembers the choice. */

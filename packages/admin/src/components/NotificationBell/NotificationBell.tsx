@@ -1,7 +1,11 @@
 import { Popover } from "@kobalte/core";
 import { A, useLocation } from "@solidjs/router";
 import classnames from "classnames";
-import { FaSolidBell, FaSolidCheckDouble, FaSolidGear } from "solid-icons/fa";
+import {
+	TbOutlineBell,
+	TbOutlineChecks,
+	TbOutlineSettings,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -87,7 +91,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 					aria-label={label()}
 					title={label()}
 				>
-					<FaSolidBell class="size-3.5" />
+					<TbOutlineBell class="size-3.5" />
 					<Show when={unread() > 0}>
 						<span class="absolute -top-0.5 -end-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium leading-none tabular-nums text-primary-foreground ring-2 ring-sidebar">
 							{unread() > 99 ? "99+" : unread()}
@@ -156,7 +160,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 										aria-label={T()("notifications.mark.all.read")}
 										title={T()("notifications.mark.all.read")}
 									>
-										<FaSolidCheckDouble class="size-3" />
+										<TbOutlineChecks class="size-3" />
 									</Button>
 								</Show>
 								<A
@@ -169,7 +173,7 @@ const NotificationBell: Component<NotificationBellProps> = (props) => {
 									aria-label={T()("notifications.preferences.link")}
 									title={T()("notifications.preferences.link")}
 								>
-									<FaSolidGear class="size-3" />
+									<TbOutlineSettings class="size-3" />
 								</A>
 							</div>
 						</footer>

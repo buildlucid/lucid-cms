@@ -1,4 +1,4 @@
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { createMemo, For, type JSXElement, Show } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import StatusIndicator, {
@@ -64,7 +64,7 @@ const StatusSelect = <T extends string>(props: {
 					title={props.title ?? props.label}
 				>
 					{display()}
-					<FaSolidChevronDown size={8} class="text-icon" />
+					<TbOutlineChevronDown size={8} class="text-icon" />
 				</Menu.Trigger>
 				<Menu.Content>
 					<Menu.Label>{props.label}</Menu.Label>

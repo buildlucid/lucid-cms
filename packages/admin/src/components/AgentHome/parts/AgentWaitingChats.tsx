@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import classnames from "classnames";
-import { FaSolidArrowRight } from "solid-icons/fa";
+import { TbOutlineArrowRight } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
@@ -59,7 +59,7 @@ const AgentWaitingChats: Component<{
 						class="group flex items-center gap-1.5 rounded-md px-1 text-xs text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary"
 					>
 						{T()("agent.home.waiting.all")}
-						<FaSolidArrowRight
+						<TbOutlineArrowRight
 							size={9}
 							class="transition-transform group-hover:translate-x-0.5 rtl:rotate-180"
 						/>

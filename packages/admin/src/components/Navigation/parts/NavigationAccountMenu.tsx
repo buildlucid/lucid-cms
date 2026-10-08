@@ -1,14 +1,14 @@
 import type { User } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidArrowUpRightFromSquare,
-	FaSolidBookOpen,
-	FaSolidChevronDown,
-	FaSolidCircleHalfStroke,
-	FaSolidLanguage,
-	FaSolidRightFromBracket,
-	FaSolidUser,
-} from "solid-icons/fa";
+	TbOutlineBook,
+	TbOutlineChevronDown,
+	TbOutlineCircleHalf2,
+	TbOutlineExternalLink,
+	TbOutlineLanguage,
+	TbOutlineLogout,
+	TbOutlineUser,
+} from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import Spinner from "@/components/Spinner/Spinner";
@@ -73,7 +73,7 @@ const NavigationAccountMenu: Component<{
 				<div class="min-w-0 flex-1 overflow-hidden">
 					<UserDisplay user={props.user} variant="stacked" size="sm" />
 				</div>
-				<FaSolidChevronDown
+				<TbOutlineChevronDown
 					class={classNames(
 						"mr-1 size-3 shrink-0 text-muted transition-transform duration-200 group-hover:text-icon",
 						{
@@ -86,7 +86,7 @@ const NavigationAccountMenu: Component<{
 			<Menu.Content matchTriggerWidth class="min-w-52 shadow-lg">
 				<Menu.Item
 					href="/lucid/account"
-					icon={<FaSolidUser class="size-3.5 shrink-0" />}
+					icon={<TbOutlineUser class="size-3.5 shrink-0" />}
 					onSelect={props.onNavigate}
 				>
 					{T()("routes.account.title")}
@@ -95,14 +95,14 @@ const NavigationAccountMenu: Component<{
 					href={constants.documentationUrl}
 					target="_blank"
 					rel="noreferrer"
-					icon={<FaSolidBookOpen class="size-3.5 shrink-0" />}
-					end={<FaSolidArrowUpRightFromSquare class="size-2.5 shrink-0" />}
+					icon={<TbOutlineBook class="size-3.5 shrink-0" />}
+					end={<TbOutlineExternalLink class="size-2.5 shrink-0" />}
 				>
 					{T()("common.documentation")}
 				</Menu.Item>
 				<Menu.Sub
 					label={T()("settings.interface.cms.appearance.title")}
-					icon={<FaSolidCircleHalfStroke class="size-3.5 shrink-0" />}
+					icon={<TbOutlineCircleHalf2 class="size-3.5 shrink-0" />}
 					end={
 						<span class="max-w-16 truncate text-xs text-muted">
 							{selectedThemeLabel()}
@@ -126,7 +126,7 @@ const NavigationAccountMenu: Component<{
 				</Menu.Sub>
 				<Menu.Sub
 					label={T()("settings.interface.cms.locale.title")}
-					icon={<FaSolidLanguage class="size-3.5 shrink-0" />}
+					icon={<TbOutlineLanguage class="size-3.5 shrink-0" />}
 					end={
 						<span class="max-w-16 truncate text-xs text-muted">
 							{selectedLocaleLabel()}
@@ -144,7 +144,7 @@ const NavigationAccountMenu: Component<{
 					</Menu.RadioGroup>
 				</Menu.Sub>
 				<Menu.Item
-					icon={<FaSolidRightFromBracket class="size-3.5 shrink-0" />}
+					icon={<TbOutlineLogout class="size-3.5 shrink-0" />}
 					end={props.logoutPending ? <Spinner size="sm" /> : undefined}
 					disabled={props.logoutPending}
 					onSelect={props.onLogout}

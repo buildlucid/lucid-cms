@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidChevronRight } from "solid-icons/fa";
+import { TbOutlineChevronRight } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -94,7 +94,7 @@ const AgentToolGroup: Component<{
 								: T()("agent.tool.group.pending", { count: counts().pending })}
 						</span>
 					</Show>
-					<FaSolidChevronRight
+					<TbOutlineChevronRight
 						size={8}
 						class={classnames("shrink-0 transition-transform", {
 							"rotate-90": expanded(),

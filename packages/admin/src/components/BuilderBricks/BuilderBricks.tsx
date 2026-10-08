@@ -1,10 +1,10 @@
 import type { Collection } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidChevronUp,
-	FaSolidGripLines,
-	FaSolidLayerGroup,
-} from "solid-icons/fa";
+	TbOutlineChevronUp,
+	TbOutlineGripHorizontal,
+	TbOutlineStack2,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -72,7 +72,7 @@ export const BuilderBricks: Component<BuilderBricksProps> = (props) => {
 			<div class="p-6 h-full">
 				<div class="flex justify-between mb-4">
 					<div class="flex items-center gap-2.5">
-						<FaSolidLayerGroup class="text-icon text-xl" />
+						<TbOutlineStack2 class="text-icon text-xl" />
 						<h2>{T()("builder.area.label")}</h2>
 					</div>
 					<Button
@@ -272,7 +272,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 						aria-label={T()("common.change.order")}
 						disabled={isDisabled()}
 					>
-						<FaSolidGripLines size={14} />
+						<TbOutlineGripHorizontal size={14} />
 					</button>
 					<h3 class="flex min-h-8 min-w-0 flex-1 items-center">
 						{helpers.getLocaleValue({
@@ -309,7 +309,7 @@ const BuilderBrickRow: Component<BuilderBrickRowProps> = (props) => {
 							},
 						)}
 					>
-						<FaSolidChevronUp size={14} />
+						<TbOutlineChevronUp size={14} />
 					</span>
 				</div>
 			</div>

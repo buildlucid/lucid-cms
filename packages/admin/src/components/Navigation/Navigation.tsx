@@ -2,7 +2,7 @@ import LogoDark from "@assets/svgs/text-logo-dark.svg?url";
 import LogoLight from "@assets/svgs/text-logo-light.svg?url";
 import { A, useLocation } from "@solidjs/router";
 import classNames from "classnames";
-import { FaSolidGripLines, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineGripHorizontal, TbOutlineX } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -112,9 +112,9 @@ export const Navigation: Component = () => {
 						>
 							<Show
 								when={mobileMenuOpen()}
-								fallback={<FaSolidGripLines class="size-4" />}
+								fallback={<TbOutlineGripHorizontal class="size-4" />}
 							>
-								<FaSolidXmark class="size-4" />
+								<TbOutlineX class="size-4" />
 							</Show>
 						</button>
 					</div>
@@ -180,7 +180,7 @@ export const Navigation: Component = () => {
 								aria-label={T()("common.close")}
 								onClick={() => setMobileMenuOpen(false)}
 							>
-								<FaSolidXmark class="size-3.5" />
+								<TbOutlineX class="size-3.5" />
 							</button>
 						</div>
 						<NavigationMenuContent

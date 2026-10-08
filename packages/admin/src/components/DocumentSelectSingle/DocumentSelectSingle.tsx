@@ -1,5 +1,5 @@
 import type { Collection, InternalCollectionDocument } from "@types";
-import { FaSolidCheck } from "solid-icons/fa";
+import { TbOutlineCheck } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import T from "@/translations";
 import { getDocumentReferencePreviewFields } from "@/utils/document-table-helpers";
@@ -85,7 +85,7 @@ const DocumentSelectSingle: Component<DocumentSelectSingleProps> = (props) => {
 								aria-hidden="true"
 							>
 								<Show when={props.selected}>
-									<FaSolidCheck size={10} />
+									<TbOutlineCheck size={10} />
 								</Show>
 							</span>
 							<p class="min-w-0 grow truncate text-sm font-medium text-title mb-0!">

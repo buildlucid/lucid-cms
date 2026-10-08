@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import { useQueryClient } from "@tanstack/solid-query";
-import { FaSolidArrowDownWideShort } from "solid-icons/fa";
+import { TbOutlineSortDescending } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -408,7 +408,7 @@ const DocumentsPage: Component = () => {
 								}
 							}}
 						>
-							<FaSolidArrowDownWideShort size={13} />
+							<TbOutlineSortDescending size={13} />
 							<Show when={orderMode()}>
 								<span>{T()("documents.order.mode.exit")}</span>
 							</Show>

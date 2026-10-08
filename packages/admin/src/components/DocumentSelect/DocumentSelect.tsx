@@ -7,10 +7,10 @@ import type {
 } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidPen,
-	FaSolidTriangleExclamation,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineAlertTriangle,
+	TbOutlinePencil,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -387,7 +387,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										disabled={props.disabled}
 										aria-label={T()("common.edit")}
 									>
-										<FaSolidPen size={12} />
+										<TbOutlinePencil size={12} />
 									</Button>
 									<Button
 										type="button"
@@ -398,7 +398,7 @@ export const DocumentSelect: Component<DocumentSelectProps> = (props) => {
 										disabled={props.disabled}
 										aria-label={T()("common.clear")}
 									>
-										<FaSolidXmark size={14} />
+										<TbOutlineX size={14} />
 									</Button>
 								</div>
 							}
@@ -455,7 +455,7 @@ const MissingDocumentRefNotice: Component<{
 		<div class="rounded-md border border-warning-low-border bg-warning-low px-3 py-2.5">
 			<div class="flex items-start gap-2.5">
 				<div class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-warning-low-border bg-warning-low text-warning-low-foreground">
-					<FaSolidTriangleExclamation size={9} />
+					<TbOutlineAlertTriangle size={9} />
 				</div>
 				<div class="min-w-0 flex-1">
 					<p class="text-xs font-semibold leading-5 text-title">
@@ -548,7 +548,7 @@ const DocumentSortableItem: Component<{
 						disabled={props.disabled}
 						aria-label={T()("common.remove")}
 					>
-						<FaSolidXmark size={14} />
+						<TbOutlineX size={14} />
 					</Button>
 				</div>
 			}

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createMemo, For } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 
@@ -51,7 +51,7 @@ const HeadingMenu: Component<{
 				title={activeLabel()}
 			>
 				<span class="font-medium">Aa</span>
-				<FaSolidChevronDown size={10} />
+				<TbOutlineChevronDown size={10} />
 			</Menu.Trigger>
 			<Menu.Content>
 				<For each={props.options}>

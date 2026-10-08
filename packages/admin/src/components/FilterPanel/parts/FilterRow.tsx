@@ -1,4 +1,4 @@
-import { FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import Button from "@/components/Button/Button";
 import Select from "@/components/Select/Select";
@@ -178,7 +178,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					title={removeRowTitle()}
 					aria-label={removeRowTitle()}
 				>
-					<FaSolidXmark size={14} />
+					<TbOutlineX size={14} />
 				</Button>
 				<Button
 					variant="outline"
@@ -191,7 +191,7 @@ export const FilterRow: Component<FilterRowProps> = (props) => {
 					title={addRowTitle()}
 					aria-label={addRowTitle()}
 				>
-					<FaSolidPlus size={14} />
+					<TbOutlinePlus size={14} />
 				</Button>
 			</div>
 		</div>

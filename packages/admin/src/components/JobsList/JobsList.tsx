@@ -1,6 +1,10 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import classnames from "classnames";
-import { FaSolidCalendar, FaSolidListOl, FaSolidT } from "solid-icons/fa";
+import {
+	TbOutlineCalendar,
+	TbOutlineLetterT,
+	TbOutlineListNumbers,
+} from "solid-icons/tb";
 import { type Component, Index } from "solid-js";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import JobDetailsDrawer from "@/components/JobDetailsDrawer/JobDetailsDrawer";
@@ -235,35 +239,35 @@ export const JobsList: Component = () => {
 						{
 							label: T()("common.status"),
 							key: "status",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 						},
 						{
 							label: T()("common.job"),
 							key: "job",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							minWidth: 260,
 						},
 						{
 							label: T()("jobs.trigger.type"),
 							key: "trigger",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 						},
 						{
 							label: T()("common.attempts"),
 							key: "attempts",
-							icon: <FaSolidListOl />,
+							icon: <TbOutlineListNumbers />,
 							sortable: true,
 						},
 						{
 							label: T()("common.created.at"),
 							key: "createdAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 						},
 						{
 							label: T()("common.finished.at"),
 							key: "finishedAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 						},
 					]}
 					loading={jobs.isFetching}

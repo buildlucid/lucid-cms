@@ -1,13 +1,13 @@
 import type { AgentInput } from "@types";
 import {
-	FaSolidBolt,
-	FaSolidClock,
-	FaSolidPause,
-	FaSolidPen,
-	FaSolidPlay,
-	FaSolidTrash,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineBolt,
+	TbOutlineClock,
+	TbOutlinePencil,
+	TbOutlinePlayerPause,
+	TbOutlinePlayerPlay,
+	TbOutlineTrash,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -108,7 +108,7 @@ const InputRow: Component<
 		<Row
 			text={preview()}
 			icon={
-				<Switch fallback={<FaSolidClock size={11} />}>
+				<Switch fallback={<TbOutlineClock size={11} />}>
 					<Match when={props.input.status === "claimed" || steering()}>
 						<Spinner size="sm" variant="subtle" />
 					</Match>
@@ -128,7 +128,7 @@ const InputRow: Component<
 						label={T()("agent.queue.steer")}
 						onClick={() => props.onSteer(props.input)}
 					>
-						<FaSolidBolt size={11} />
+						<TbOutlineBolt size={11} />
 					</RowAction>
 				</Show>
 				<Show when={props.onEdit}>
@@ -137,7 +137,7 @@ const InputRow: Component<
 							label={T()("agent.queue.edit")}
 							onClick={() => onEdit()(props.input)}
 						>
-							<FaSolidPen size={11} />
+							<TbOutlinePencil size={11} />
 						</RowAction>
 					)}
 				</Show>
@@ -145,7 +145,7 @@ const InputRow: Component<
 					label={T()("agent.queue.remove")}
 					onClick={() => props.onCancel(props.input)}
 				>
-					<FaSolidXmark size={12} />
+					<TbOutlineX size={12} />
 				</RowAction>
 			</Show>
 		</Row>
@@ -169,17 +169,17 @@ const AgentComposerStack: Component<AgentComposerStackProps> = (props) => {
 			>
 				<Show when={props.paused}>
 					<Row
-						icon={<FaSolidPause size={10} />}
+						icon={<TbOutlinePlayerPause size={10} />}
 						text={T()("agent.queue.paused")}
 					>
 						<RowAction
 							label={T()("agent.queue.resume")}
 							onClick={props.onResume}
 						>
-							<FaSolidPlay size={10} />
+							<TbOutlinePlayerPlay size={10} />
 						</RowAction>
 						<RowAction label={T()("agent.queue.clear")} onClick={props.onClear}>
-							<FaSolidTrash size={10} />
+							<TbOutlineTrash size={10} />
 						</RowAction>
 					</Row>
 				</Show>

@@ -1,10 +1,10 @@
 import type { FieldError, MediaRef } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidFile,
-	FaSolidFileLines,
-	FaSolidFileZipper,
-} from "solid-icons/fa";
+	TbOutlineFile,
+	TbOutlineFileText,
+	TbOutlineFileZip,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -187,7 +187,7 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 								<Switch
 									fallback={
 										<div class="relative z-10 flex flex-col items-center gap-2 text-subtitle">
-											<FaSolidFile size={40} class="text-icon opacity-40" />
+											<TbOutlineFile size={40} class="text-icon opacity-40" />
 											<span class="text-sm font-medium capitalize">
 												{reference().type}
 											</span>
@@ -195,13 +195,13 @@ const MediaNodeView: Component<MediaNodeViewProps> = (props) => {
 									}
 								>
 									<Match when={reference().type === "archive"}>
-										<FaSolidFileZipper
+										<TbOutlineFileZip
 											size={40}
 											class="relative z-10 text-icon opacity-40"
 										/>
 									</Match>
 									<Match when={reference().type === "document"}>
-										<FaSolidFileLines
+										<TbOutlineFileText
 											size={40}
 											class="relative z-10 text-icon opacity-40"
 										/>

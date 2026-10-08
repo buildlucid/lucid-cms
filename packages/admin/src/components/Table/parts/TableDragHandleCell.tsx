@@ -1,4 +1,4 @@
-import { FaSolidGripLines } from "solid-icons/fa";
+import { TbOutlineGripHorizontal } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import TableCell from "@/components/Table/parts/TableCell";
 import T from "@/translations";
@@ -22,7 +22,7 @@ const TableDragHandleCell: Component<TableDragHandleCellProps> = (props) => {
 				class="flex items-center justify-center size-6 rounded-md cursor-grab active:cursor-grabbing text-muted hover:text-subtitle focus:outline-none focus-visible:ring-1 ring-primary"
 				aria-label={T()("documents.order.drag.label")}
 			>
-				<FaSolidGripLines size={12} />
+				<TbOutlineGripHorizontal size={12} />
 			</button>
 		</TableCell>
 	);

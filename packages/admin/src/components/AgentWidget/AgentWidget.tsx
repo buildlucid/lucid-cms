@@ -1,6 +1,6 @@
 import type { AgentInteractionAction, AgentWidgetPart } from "@types";
 import classnames from "classnames";
-import { FaSolidCode } from "solid-icons/fa";
+import { TbOutlineCode } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -312,7 +312,7 @@ const AgentWidget: Component<{
 											)}
 											onClick={() => setShowInput((open) => !open)}
 										>
-											<FaSolidCode size={11} />
+											<TbOutlineCode size={11} />
 										</Button>
 									</Show>
 								</Show>

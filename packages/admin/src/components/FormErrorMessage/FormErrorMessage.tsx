@@ -1,5 +1,5 @@
 import type { ErrorResult, FieldError } from "@types";
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
 import T from "@/translations";
 import {
@@ -38,7 +38,7 @@ export const FormErrorMessage: Component<ErrorMessageProps> = (props) => {
 					<For each={fieldErrors()}>
 						{(error) => (
 							<a class="flex min-w-0 items-start text-sm" href={`#${props.id}`}>
-								<FaSolidTriangleExclamation
+								<TbOutlineAlertTriangle
 									size={12}
 									class="text-danger mt-1.25 mr-2 shrink-0"
 								/>
@@ -55,7 +55,7 @@ export const FormErrorMessage: Component<ErrorMessageProps> = (props) => {
 			</Show>
 			<Show when={fieldErrors().length === 0 && genericMessage()}>
 				<a class="mt-2 flex min-w-0 items-start text-sm" href={`#${props.id}`}>
-					<FaSolidTriangleExclamation
+					<TbOutlineAlertTriangle
 						size={12}
 						class="text-danger mt-1.25 mr-2 shrink-0"
 					/>

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, createSignal, Show } from "solid-js";
 import Copy from "@/components/Copy/Copy";
 import T from "@/translations";
@@ -33,7 +33,7 @@ const JobErrorCard: Component<JobErrorCardProps> = (props) => {
 								aria-expanded={stackOpen()}
 								onClick={() => setStackOpen((open) => !open)}
 							>
-								<FaSolidChevronDown
+								<TbOutlineChevronDown
 									size={10}
 									class={classNames("transition-transform", {
 										"-rotate-90": !stackOpen(),

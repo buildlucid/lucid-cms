@@ -1,12 +1,12 @@
 import classnames from "classnames";
 import {
-	FaSolidBan,
-	FaSolidClock,
-	FaSolidGlobe,
-	FaSolidMagnifyingGlass,
-	FaSolidWrench,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineBan,
+	TbOutlineClock,
+	TbOutlineSearch,
+	TbOutlineTool,
+	TbOutlineWorld,
+	TbOutlineX,
+} from "solid-icons/tb";
 import { type Component, createMemo, Match, Switch } from "solid-js";
 import Spinner from "@/components/Spinner/Spinner";
 import T, { translateAdminCopy } from "@/translations";
@@ -35,26 +35,26 @@ export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
 		>
 			<Switch>
 				<Match when={props.part.status === "pending"}>
-					<FaSolidClock size={10} />
+					<TbOutlineClock size={10} />
 				</Match>
 				<Match when={props.part.status === "running"}>
 					<Spinner size="sm" variant="subtle" />
 				</Match>
 				<Match when={props.part.status === "complete"}>
-					<Switch fallback={<FaSolidWrench size={10} />}>
+					<Switch fallback={<TbOutlineTool size={10} />}>
 						<Match when={props.part.name === webSearchTool}>
-							<FaSolidMagnifyingGlass size={10} />
+							<TbOutlineSearch size={10} />
 						</Match>
 						<Match when={props.part.name === webFetchTool}>
-							<FaSolidGlobe size={10} />
+							<TbOutlineWorld size={10} />
 						</Match>
 					</Switch>
 				</Match>
 				<Match when={props.part.status === "failed"}>
-					<FaSolidXmark size={11} />
+					<TbOutlineX size={11} />
 				</Match>
 				<Match when={props.part.status === "skipped"}>
-					<FaSolidBan size={10} />
+					<TbOutlineBan size={10} />
 				</Match>
 			</Switch>
 		</span>

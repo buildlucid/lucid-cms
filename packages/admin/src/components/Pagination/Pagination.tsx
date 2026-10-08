@@ -1,7 +1,7 @@
 import { Pagination as KobPagination } from "@kobalte/core";
 import type { ResponseBody } from "@types";
 import classNames from "classnames";
-import { FaSolidChevronLeft, FaSolidChevronRight } from "solid-icons/fa";
+import { TbOutlineChevronLeft, TbOutlineChevronRight } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -132,11 +132,11 @@ const Pagination: Component<PaginationProps> = (props) => {
 							)}
 						>
 							<KobPagination.Previous class="h-9 w-9 flex items-center justify-center text-body hover:bg-secondary hover:text-secondary-foreground duration-200 transition-colors disabled:opacity-50 bg-card">
-								<FaSolidChevronLeft size={14} />
+								<TbOutlineChevronLeft size={14} />
 							</KobPagination.Previous>
 							<KobPagination.Items />
 							<KobPagination.Next class="h-9 w-9 flex items-center justify-center text-body hover:bg-secondary hover:text-secondary-foreground duration-200 transition-colors disabled:opacity-50 bg-card">
-								<FaSolidChevronRight size={14} />
+								<TbOutlineChevronRight size={14} />
 							</KobPagination.Next>
 						</KobPagination.Root>
 					</Show>

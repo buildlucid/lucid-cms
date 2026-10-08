@@ -1,11 +1,7 @@
 import brickIconLight from "@assets/svgs/default-brick-icon-light.svg?url";
 import brickIconDark from "@assets/svgs/default-brick-icon-white.svg?url";
 import classNames from "classnames";
-import {
-	FaSolidImage,
-	FaSolidMagnifyingGlass,
-	FaSolidXmark,
-} from "solid-icons/fa";
+import { TbOutlinePhoto, TbOutlineSearch, TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import BrickPreview from "@/components/BrickPreview/BrickPreview";
 import { FormTooltip } from "@/components/FormTooltip/FormTooltip";
@@ -74,7 +70,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 			{/* Search */}
 			<div class="h-14 w-full relative">
 				<div class="absolute top-0 left-4 h-full flex items-center justify-center pointer-events-none">
-					<FaSolidMagnifyingGlass class="w-4 text-muted" />
+					<TbOutlineSearch class="w-4 text-muted" />
 				</div>
 				<input
 					class="h-full bg-background w-full border-b border-border px-10 focus:outline-hidden text-title placeholder:text-muted"
@@ -90,7 +86,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 						}}
 						type="button"
 					>
-						<FaSolidXmark class="w-4 text-danger" />
+						<TbOutlineX class="w-4 text-danger" />
 					</button>
 				</Show>
 			</div>
@@ -157,7 +153,7 @@ const AddBrickModal: Component<AddBrickProps> = (props) => {
 								when={highlightedBrick()?.thumbnail}
 								fallback={
 									<div class="flex items-center justify-center px-4 text-center">
-										<FaSolidImage size={22} />
+										<TbOutlinePhoto size={22} />
 									</div>
 								}
 							>

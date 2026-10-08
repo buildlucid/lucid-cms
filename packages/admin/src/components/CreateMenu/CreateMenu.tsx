@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidChevronRight, FaSolidPlus } from "solid-icons/fa";
+import { TbOutlineChevronRight, TbOutlinePlus } from "solid-icons/tb";
 import { type Component, createMemo, For, Match, Switch } from "solid-js";
 import ActionIcon, {
 	type ActionIconName,
@@ -86,7 +86,7 @@ const CreateMenu: Component<{
 						"opacity-80 cursor-not-allowed": action.disabled,
 					})}
 				>
-					<FaSolidPlus />
+					<TbOutlinePlus />
 				</Button>
 			);
 		}
@@ -100,7 +100,7 @@ const CreateMenu: Component<{
 				title={action.label}
 				aria-label={action.label}
 			>
-				<FaSolidPlus />
+				<TbOutlinePlus />
 				<span class="sr-only">{action.label}</span>
 			</Link>
 		);
@@ -112,13 +112,13 @@ const CreateMenu: Component<{
 			<Match when={visibleActions().length > 1}>
 				<Menu.Root>
 					<Menu.Trigger
-						class="w-9 min-w-9 h-9 bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground border border-transparent outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors"
+						class="w-9 min-w-9 h-9 bg-primary hover:bg-primary-hover text-primary-foreground border border-transparent outline-none ring-0 focus-visible:ring-1 focus:ring-primary rounded-md flex justify-center items-center transition-colors"
 						onClick={(e) => e.stopPropagation()}
 						title={T()("common.create")}
 						aria-label={T()("common.create")}
 					>
 						<span class="sr-only">{T()("common.create")}</span>
-						<FaSolidPlus class="pointer-events-none" />
+						<TbOutlinePlus class="pointer-events-none" />
 					</Menu.Trigger>
 					<Menu.Content>
 						<For each={visibleActions()}>
@@ -129,7 +129,7 @@ const CreateMenu: Component<{
 									icon={<ActionIcon icon={action.icon} />}
 									end={
 										action.icon === undefined ? (
-											<FaSolidChevronRight size={14} />
+											<TbOutlineChevronRight size={14} />
 										) : undefined
 									}
 									unavailable={action.type === "button" && action.disabled}

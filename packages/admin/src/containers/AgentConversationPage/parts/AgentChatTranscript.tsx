@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidEllipsis } from "solid-icons/fa";
+import { TbOutlineDots } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import AgentCompactionDivider from "@/components/AgentCompactionDivider/AgentCompactionDivider";
 import AgentErrorNotice from "@/components/AgentErrorNotice/AgentErrorNotice";
@@ -137,7 +137,7 @@ const AgentChatTranscript: Component<{
 							class="flex size-3.5 shrink-0 items-center justify-center"
 							aria-hidden="true"
 						>
-							<FaSolidEllipsis size={10} />
+							<TbOutlineDots size={10} />
 						</span>
 						{T()(
 							current() === "retrying"

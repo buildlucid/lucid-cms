@@ -1,6 +1,6 @@
 import type { Media } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck, FaSolidPlus } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlinePlus } from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import { useAgentTranscript } from "@/components/AgentTranscriptRow/AgentTranscriptContext";
 import T from "@/translations";
@@ -46,8 +46,8 @@ const AgentPreviewAttach: Component<{
 				)}
 				onClick={() => attachments()?.toggle(props.media)}
 			>
-				<Show when={attached()} fallback={<FaSolidPlus size={10} />}>
-					<FaSolidCheck size={10} />
+				<Show when={attached()} fallback={<TbOutlinePlus size={10} />}>
+					<TbOutlineCheck size={10} />
 				</Show>
 			</button>
 		</Show>

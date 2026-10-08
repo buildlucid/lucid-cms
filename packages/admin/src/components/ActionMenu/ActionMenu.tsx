@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FaSolidEllipsis, FaSolidEllipsisVertical } from "solid-icons/fa";
+import { TbOutlineDots, TbOutlineDotsVertical } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import ActionIcon, {
@@ -172,8 +172,8 @@ const ActionMenu: Component<ActionMenuProps> = (props) => {
 					<Dynamic
 						component={
 							props.orientation === "horizontal"
-								? FaSolidEllipsis
-								: FaSolidEllipsisVertical
+								? TbOutlineDots
+								: TbOutlineDotsVertical
 						}
 						class={classNames("pointer-events-none", {
 							"text-subtitle": props.variant !== "ghost",

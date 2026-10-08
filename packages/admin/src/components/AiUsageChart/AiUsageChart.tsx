@@ -1,6 +1,6 @@
 import type { AiUsageChartMetric } from "@types";
 import type { ChartData, ChartOptions } from "chart.js";
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Show } from "solid-js";
 import AiUsageStats, {
 	type AiUsageStat,
@@ -369,7 +369,7 @@ export const AiUsageChart: Component = () => {
 								aria-label={T()("common.clear")}
 								title={T()("common.clear")}
 							>
-								<FaSolidXmark size={14} />
+								<TbOutlineX size={14} />
 							</button>
 						</Show>
 					</div>

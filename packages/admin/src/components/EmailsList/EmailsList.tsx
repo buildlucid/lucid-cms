@@ -1,13 +1,13 @@
 import {
-	FaSolidAt,
-	FaSolidBolt,
-	FaSolidCalendar,
-	FaSolidCircleCheck,
-	FaSolidLayerGroup,
-	FaSolidPaperPlane,
-	FaSolidT,
-	FaSolidTag,
-} from "solid-icons/fa";
+	TbOutlineAt,
+	TbOutlineBolt,
+	TbOutlineCalendar,
+	TbOutlineCircleCheck,
+	TbOutlineLetterT,
+	TbOutlineSend,
+	TbOutlineStack2,
+	TbOutlineTag,
+} from "solid-icons/tb";
 import { type Component, Index } from "solid-js";
 import DeleteEmailModal from "@/components/DeleteEmailModal/DeleteEmailModal";
 import EmailTableRow from "@/components/EmailTableRow/EmailTableRow";
@@ -72,50 +72,50 @@ export const EmailsList: Component<{
 						{
 							label: T()("common.status"),
 							key: "currentStatus",
-							icon: <FaSolidCircleCheck />,
+							icon: <TbOutlineCircleCheck />,
 							minWidth: 140,
 						},
 						{
 							label: T()("common.subject"),
 							key: "subject",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							minWidth: 320,
 						},
 						{
 							label: T()("common.to"),
 							key: "toAddress",
-							icon: <FaSolidAt />,
+							icon: <TbOutlineAt />,
 							minWidth: 240,
 						},
 						{
 							label: T()("email.templates.singular"),
 							key: "template",
-							icon: <FaSolidLayerGroup />,
+							icon: <TbOutlineStack2 />,
 							minWidth: 180,
 						},
 						{
 							label: T()("common.type"),
 							key: "type",
-							icon: <FaSolidTag />,
+							icon: <TbOutlineTag />,
 							minWidth: 120,
 						},
 						{
 							label: T()("common.priority"),
 							key: "priority",
-							icon: <FaSolidBolt />,
+							icon: <TbOutlineBolt />,
 							minWidth: 120,
 						},
 						{
 							label: T()("common.attempt.count"),
 							key: "attemptCount",
-							icon: <FaSolidPaperPlane />,
+							icon: <TbOutlineSend />,
 							sortable: true,
 							minWidth: 140,
 						},
 						{
 							label: T()("common.last.attempt"),
 							key: "lastAttemptedAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 							minWidth: 170,
 						},

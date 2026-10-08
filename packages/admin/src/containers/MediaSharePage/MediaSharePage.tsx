@@ -1,15 +1,15 @@
 import notifyIllustration from "@assets/illustrations/notify.svg?url";
 import { useParams } from "@solidjs/router";
 import {
-	FaSolidCalendar,
-	FaSolidDownload,
-	FaSolidFile,
-	FaSolidFileAudio,
-	FaSolidFileLines,
-	FaSolidFileVideo,
-	FaSolidFileZipper,
-	FaSolidPlay,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineDownload,
+	TbOutlineFile,
+	TbOutlineFileMusic,
+	TbOutlineFileText,
+	TbOutlineFileZip,
+	TbOutlineMovie,
+	TbOutlinePlayerPlay,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -180,10 +180,10 @@ const MediaSharePage: Component = () => {
 																	onClick={() => {
 																		setShowVideoPreview(true);
 																	}}
-																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white fill-white transition-colors hover:bg-black/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+																	class="absolute inset-0 flex items-center justify-center bg-black/15 text-white transition-colors hover:bg-black/25 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
 																>
 																	<span class="w-14 h-14 rounded-full bg-black/60 border border-white/25 flex items-center justify-center">
-																		<FaSolidPlay class="ml-1 w-5 h-5" />
+																		<TbOutlinePlayerPlay class="ml-1 w-5 h-5" />
 																	</span>
 																</button>
 															</div>
@@ -211,27 +211,27 @@ const MediaSharePage: Component = () => {
 															<Match
 																when={grantedAccess()?.media.type === "archive"}
 															>
-																<FaSolidFileZipper size={40} />
+																<TbOutlineFileZip size={40} />
 															</Match>
 															<Match
 																when={grantedAccess()?.media.type === "audio"}
 															>
-																<FaSolidFileAudio size={40} />
+																<TbOutlineFileMusic size={40} />
 															</Match>
 															<Match
 																when={grantedAccess()?.media.type === "video"}
 															>
-																<FaSolidFileVideo size={40} />
+																<TbOutlineMovie size={40} />
 															</Match>
 															<Match
 																when={
 																	grantedAccess()?.media.type === "document"
 																}
 															>
-																<FaSolidFileLines size={40} />
+																<TbOutlineFileText size={40} />
 															</Match>
 															<Match when={true}>
-																<FaSolidFile size={40} />
+																<TbOutlineFile size={40} />
 															</Match>
 														</Switch>
 														<p class="text-sm text-body">
@@ -275,7 +275,7 @@ const MediaSharePage: Component = () => {
 									<div class="border-t border-border pt-4 space-y-2 text-sm">
 										<div class="flex justify-between gap-4 items-start">
 											<span class="text-body flex items-center gap-1.5">
-												<FaSolidCalendar class="shrink-0 mt-0.5" />
+												<TbOutlineCalendar class="shrink-0 mt-0.5" />
 												{T()("common.expires.at")}
 											</span>
 											<span class="text-right">{formattedExpiresAt()}</span>
@@ -293,7 +293,7 @@ const MediaSharePage: Component = () => {
 									class="w-full"
 								>
 									<span class="flex items-center justify-center gap-2">
-										<FaSolidDownload />
+										<TbOutlineDownload />
 										<span>{T()("media.share.route.download")}</span>
 									</span>
 								</Button>

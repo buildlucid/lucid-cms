@@ -1,5 +1,5 @@
 import { useTranslation } from "@lucidcms/admin/hooks";
-import { FaSolidEyeSlash } from "solid-icons/fa";
+import { TbOutlineEyeOff } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import type {} from "../../../shared/translations.js";
 
@@ -21,7 +21,7 @@ const PageGuidance: Component<{ noindex: boolean }> = (props) => {
 				</p>
 				<ul>
 					<li class="flex items-start gap-2 text-sm text-muted">
-						<FaSolidEyeSlash
+						<TbOutlineEyeOff
 							aria-hidden="true"
 							size={14}
 							class="mt-1 shrink-0"

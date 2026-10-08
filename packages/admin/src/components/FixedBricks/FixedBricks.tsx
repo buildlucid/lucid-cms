@@ -1,6 +1,6 @@
 import type { Collection } from "@types";
 import classNames from "classnames";
-import { FaSolidChevronUp, FaSolidShield } from "solid-icons/fa";
+import { TbOutlineChevronUp, TbOutlineShield } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, For } from "solid-js";
 import { BrickBody } from "@/components/BrickBody/BrickBody";
 import BrickSlots from "@/components/BrickSlots/BrickSlots";
@@ -149,7 +149,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 				})}
 			>
 				<div class="flex min-h-8 min-w-0 flex-1 items-center gap-2.5 text-left">
-					<FaSolidShield class="text-icon text-lg" />
+					<TbOutlineShield class="text-icon text-lg" />
 					<span class="text-base font-medium text-title">
 						{helpers.getLocaleValue({
 							value: config()?.details.label,
@@ -172,7 +172,7 @@ const FixedBrickRow: Component<FixedBrickRowProps> = (props) => {
 					class="flex size-8 shrink-0 items-center justify-center text-muted"
 					aria-hidden="true"
 				>
-					<FaSolidChevronUp
+					<TbOutlineChevronUp
 						size={14}
 						class={classNames("transition-transform duration-200", {
 							"rotate-180": brickOpen(),

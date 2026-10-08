@@ -1,6 +1,6 @@
 import type { ProfilePicture } from "@types";
 import classNames from "classnames";
-import { FaSolidPen, FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePencil, TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -255,8 +255,8 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 								onClick={() => props.onEdit?.()}
 								aria-label={editLabel()}
 							>
-								<Show when={media()} fallback={<FaSolidPlus size={12} />}>
-									<FaSolidPen size={12} />
+								<Show when={media()} fallback={<TbOutlinePlus size={12} />}>
+									<TbOutlinePencil size={12} />
 								</Show>
 							</Button>
 						</Show>
@@ -270,7 +270,7 @@ const ProfilePicturePreviewCard: Component<ProfilePicturePreviewCardProps> = (
 								loading={props.clearLoading}
 								aria-label={T()("common.clear")}
 							>
-								<FaSolidXmark size={14} />
+								<TbOutlineX size={14} />
 							</Button>
 						</Show>
 					</div>

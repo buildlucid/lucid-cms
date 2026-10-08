@@ -9,7 +9,7 @@ import {
 	createEditorControlledValue,
 	createEditorReadonly,
 } from "solid-codemirror";
-import { FaSolidCheck, FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineChevronDown } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -273,7 +273,6 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 				});
 			});
 	});
-	//* load the linter on demand, like languages
 	let lintLoadId = 0;
 	createEffect(() => {
 		const view = editorView();
@@ -368,7 +367,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 								disabled={props.disabled}
 							>
 								<span class="truncate">{selectedLanguageLabel()}</span>
-								<FaSolidChevronDown size={10} class="text-current" />
+								<TbOutlineChevronDown size={10} class="text-current" />
 							</Menu.Trigger>
 							<Menu.Content class="z-70" compact>
 								<For each={languageOptions()}>
@@ -378,7 +377,7 @@ const CodeEditor: Component<CodeEditorProps> = (props) => {
 											onSelect={() => props.onLanguageChange?.(option.value)}
 											end={
 												props.language === option.value ? (
-													<FaSolidCheck size={12} class="shrink-0" />
+													<TbOutlineCheck size={12} class="shrink-0" />
 												) : undefined
 											}
 										>

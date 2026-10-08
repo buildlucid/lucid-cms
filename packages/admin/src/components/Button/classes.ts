@@ -17,19 +17,19 @@ export const getButtonClasses = (props: {
 		"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors rounded-md relative disabled:cursor-not-allowed disabled:opacity-80",
 		{
 			// Variants
-			"bg-primary hover:bg-primary-hover text-primary-foreground fill-primary-foreground ring-primary":
+			"bg-primary hover:bg-primary-hover text-primary-foreground ring-primary":
 				props.variant === "primary",
-			"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary":
+			"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary":
 				props.variant === "secondary",
-			"bg-input border border-border hover:border-transparent hover:bg-secondary-hover fill-subtitle text-subtitle hover:text-secondary-foreground ring-primary":
+			"bg-input border border-border hover:border-transparent hover:bg-secondary-hover text-subtitle hover:text-secondary-foreground ring-primary":
 				props.variant === "outline",
-			"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary fill-danger-foreground":
+			"bg-danger hover:bg-danger-hover text-danger-foreground ring-primary":
 				props.variant === "danger",
-			"bg-input border border-border hover:bg-danger-hover ring-primary fill-subtitle text-subtitle fill-danger-foreground hover:text-danger-foreground":
+			"bg-input border border-border hover:bg-danger-hover ring-primary text-subtitle hover:text-danger-foreground":
 				props.variant === "danger-outline",
-			"text-muted fill-muted hover:text-subtitle hover:fill-subtitle hover:bg-background/50 ring-primary":
+			"text-muted hover:text-subtitle hover:bg-background/50 ring-primary":
 				props.variant === "ghost",
-			"text-muted fill-muted hover:text-danger-low-foreground hover:fill-danger-low-foreground hover:bg-danger-low ring-primary":
+			"text-muted hover:text-danger-low-foreground hover:bg-danger-low ring-primary":
 				props.variant === "danger-ghost",
 
 			// Shape

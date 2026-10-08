@@ -1,4 +1,4 @@
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import AgentReferenceRemoveButton from "@/components/AgentReferenceRemoveButton/AgentReferenceRemoveButton";
 import T from "@/translations";
@@ -24,11 +24,11 @@ const AgentUploadFile: Component<{
 					when={props.upload.error === undefined}
 					fallback={
 						<span
-							class="text-danger fill-danger"
+							class="text-danger"
 							role="img"
 							aria-label={props.upload.error}
 						>
-							<FaSolidTriangleExclamation size={14} />
+							<TbOutlineAlertTriangle size={14} />
 						</span>
 					}
 				>

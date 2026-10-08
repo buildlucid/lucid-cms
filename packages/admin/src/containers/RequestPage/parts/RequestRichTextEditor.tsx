@@ -2,7 +2,7 @@ import type { RichTextJSON } from "@lucidcms/rich-text";
 import { Extension } from "@tiptap/core";
 import type { RequestDetail } from "@types";
 import classNames from "classnames";
-import { FaSolidArrowUp, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineArrowUp, TbOutlineX } from "solid-icons/tb";
 import { type Component, createMemo, onMount, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import ErrorMessage from "@/components/ErrorMessage/ErrorMessage";
@@ -141,7 +141,7 @@ export const RequestRichTextEditor: Component<{
 							aria-label={T()("common.close")}
 							title={T()("common.close")}
 						>
-							<FaSolidXmark size={12} />
+							<TbOutlineX size={12} />
 						</Button>
 					)}
 				</Show>
@@ -158,7 +158,7 @@ export const RequestRichTextEditor: Component<{
 					aria-label={props.submitLabel}
 					title={props.submitLabel}
 				>
-					<FaSolidArrowUp size={11} />
+					<TbOutlineArrowUp size={11} />
 				</Button>
 			</div>
 		</form>

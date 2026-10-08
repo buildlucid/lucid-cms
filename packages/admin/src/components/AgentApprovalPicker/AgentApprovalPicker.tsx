@@ -1,10 +1,10 @@
 import type { AgentApprovalMode } from "@types";
 import classnames from "classnames";
 import {
-	FaSolidChevronDown,
-	FaSolidChevronRight,
-	FaSolidShieldHalved,
-} from "solid-icons/fa";
+	TbOutlineChevronDown,
+	TbOutlineChevronRight,
+	TbOutlineShieldHalf,
+} from "solid-icons/tb";
 import { type Component, For, Show } from "solid-js";
 import { composerTriggerClasses } from "@/components/AgentComposer/AgentComposer";
 import Menu from "@/components/Menu/Menu";
@@ -39,11 +39,11 @@ const AgentApprovalPicker: Component<{
 						title={T()("agent.approval.mode.hint")}
 						disabled={props.disabled}
 					>
-						<FaSolidShieldHalved size={11} class="shrink-0" />
+						<TbOutlineShieldHalf size={11} class="shrink-0" />
 						<span class="truncate">
 							{T()(`agent.approval.mode.${props.value}`)}
 						</span>
-						<FaSolidChevronDown size={9} class="shrink-0" />
+						<TbOutlineChevronDown size={9} class="shrink-0" />
 					</Menu.Trigger>
 					<Menu.Content>
 						<For each={modes}>
@@ -79,11 +79,11 @@ const AgentApprovalPicker: Component<{
 					disabled={routine().disabled}
 					onClick={() => routine().onEdit()}
 				>
-					<FaSolidShieldHalved size={11} class="shrink-0" />
+					<TbOutlineShieldHalf size={11} class="shrink-0" />
 					<span class="truncate">
 						{T()("agent.approval.mode.tool-defaults")}
 					</span>
-					<FaSolidChevronRight size={9} class="shrink-0" />
+					<TbOutlineChevronRight size={9} class="shrink-0" />
 				</button>
 			)}
 		</Show>

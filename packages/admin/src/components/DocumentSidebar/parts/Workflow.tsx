@@ -5,7 +5,7 @@ import type {
 	Refs,
 	WorkflowUser,
 } from "@types";
-import { FaSolidChartDiagram } from "solid-icons/fa";
+import { TbOutlineSitemap } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -218,7 +218,7 @@ export const Workflow: Component<{
 		>
 			<DocumentSidebarSection
 				title={T()("common.workflow")}
-				icon={<FaSolidChartDiagram size={12} />}
+				icon={<TbOutlineSitemap size={12} />}
 				preferenceKey="pageBuilder.sidebar.workflow"
 			>
 				<div class="relative space-y-3">

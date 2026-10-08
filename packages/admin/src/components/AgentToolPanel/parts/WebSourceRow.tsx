@@ -1,4 +1,4 @@
-import { FaSolidLink } from "solid-icons/fa";
+import { TbOutlineLink } from "solid-icons/tb";
 import { type Component, type JSXElement, Show } from "solid-js";
 import { webSiteName } from "@/utils/agent-tools";
 
@@ -28,9 +28,9 @@ const WebSourceRow: Component<{
 		>
 			<span
 				aria-hidden="true"
-				class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border bg-input text-muted fill-muted"
+				class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border bg-input text-muted"
 			>
-				<FaSolidLink size={10} />
+				<TbOutlineLink size={10} />
 			</span>
 			<span class="flex min-w-0 grow flex-col">
 				<span class="truncate text-xs text-title">

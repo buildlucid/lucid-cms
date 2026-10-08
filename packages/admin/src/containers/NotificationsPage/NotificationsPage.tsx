@@ -1,12 +1,12 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import {
-	FaSolidBell,
-	FaSolidCalendar,
-	FaSolidCheckDouble,
-	FaSolidCircleCheck,
-	FaSolidTag,
-	FaSolidUser,
-} from "solid-icons/fa";
+	TbOutlineBell,
+	TbOutlineCalendar,
+	TbOutlineChecks,
+	TbOutlineCircleCheck,
+	TbOutlineTag,
+	TbOutlineUser,
+} from "solid-icons/tb";
 import { type Component, createMemo, Index } from "solid-js";
 import ArchiveNotificationModal from "@/components/ArchiveNotificationModal/ArchiveNotificationModal";
 import Button from "@/components/Button/Button";
@@ -181,7 +181,7 @@ const NotificationsPage: Component = () => {
 						loading={markAllRead.action.isPending}
 						onClick={() => markAllRead.action.mutate({ all: true, read: true })}
 					>
-						<FaSolidCheckDouble class="me-1.5 size-3" />
+						<TbOutlineChecks class="me-1.5 size-3" />
 						{T()("notifications.mark.all.read")}
 					</Button>
 				}
@@ -241,31 +241,31 @@ const NotificationsPage: Component = () => {
 							{
 								label: T()("notifications.singular"),
 								key: "title",
-								icon: <FaSolidBell />,
+								icon: <TbOutlineBell />,
 								minWidth: 320,
 							},
 							{
 								label: T()("common.status"),
 								key: "status",
-								icon: <FaSolidCircleCheck />,
+								icon: <TbOutlineCircleCheck />,
 								minWidth: 140,
 							},
 							{
 								label: T()("notifications.category"),
 								key: "category",
-								icon: <FaSolidTag />,
+								icon: <TbOutlineTag />,
 								minWidth: 140,
 							},
 							{
 								label: T()("common.from"),
 								key: "actor",
-								icon: <FaSolidUser />,
+								icon: <TbOutlineUser />,
 								minWidth: 160,
 							},
 							{
 								label: T()("common.updated.at"),
 								key: "updatedAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 								minWidth: 170,
 							},

@@ -1,12 +1,12 @@
 import type { AgentConversation } from "@types";
 import {
-	FaSolidCalendar,
-	FaSolidCircleCheck,
-	FaSolidClock,
-	FaSolidRobot,
-	FaSolidT,
-	FaSolidTag,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineCircleCheck,
+	TbOutlineClock,
+	TbOutlineLetterT,
+	TbOutlineRobot,
+	TbOutlineTag,
+} from "solid-icons/tb";
 import { type Component, createSignal, Index } from "solid-js";
 import AgentConversationTableRow from "@/components/AgentConversationTableRow/AgentConversationTableRow";
 import DeleteAgentConversationModal from "@/components/DeleteAgentConversationModal/DeleteAgentConversationModal";
@@ -68,39 +68,39 @@ const AgentHistoryList: Component<{ searchParams: QueryStateResponse }> = (
 						{
 							label: T()("common.title"),
 							key: "title",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							sortable: true,
 							minWidth: 320,
 						},
 						{
 							label: T()("common.status"),
 							key: "status",
-							icon: <FaSolidCircleCheck />,
+							icon: <TbOutlineCircleCheck />,
 							minWidth: 140,
 						},
 						{
 							label: T()("agent.select.label"),
 							key: "agentKey",
-							icon: <FaSolidRobot />,
+							icon: <TbOutlineRobot />,
 							minWidth: 160,
 						},
 						{
 							label: T()("common.type"),
 							key: "type",
-							icon: <FaSolidTag />,
+							icon: <TbOutlineTag />,
 							minWidth: 140,
 						},
 						{
 							label: T()("common.updated.at"),
 							key: "updatedAt",
-							icon: <FaSolidClock />,
+							icon: <TbOutlineClock />,
 							sortable: true,
 							minWidth: 180,
 						},
 						{
 							label: T()("common.created.at"),
 							key: "createdAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 							minWidth: 180,
 						},

@@ -1,22 +1,22 @@
 import { A } from "@solidjs/router";
 import classNames from "classnames";
 import {
-	FaSolidArrowUpRightFromSquare,
-	FaSolidCheck,
-	FaSolidCircleExclamation,
-	FaSolidClock,
-	FaSolidTriangleExclamation,
-} from "solid-icons/fa";
+	TbOutlineAlertCircle,
+	TbOutlineAlertTriangle,
+	TbOutlineCheck,
+	TbOutlineClock,
+	TbOutlineExternalLink,
+} from "solid-icons/tb";
 import { type Component, type JSXElement, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 type CheckTone = "success" | "warning" | "danger" | "pending";
 
 const checkIcons: Record<CheckTone, Component<{ size?: number }>> = {
-	success: FaSolidCheck,
-	warning: FaSolidTriangleExclamation,
-	danger: FaSolidCircleExclamation,
-	pending: FaSolidClock,
+	success: TbOutlineCheck,
+	warning: TbOutlineAlertTriangle,
+	danger: TbOutlineAlertCircle,
+	pending: TbOutlineClock,
 };
 
 export const RequestCheckRow: Component<{
@@ -59,10 +59,7 @@ export const RequestCheckRow: Component<{
 							>
 								{props.title}
 								<Show when={!href().startsWith("#")}>
-									<FaSolidArrowUpRightFromSquare
-										size={10}
-										class="shrink-0 text-icon"
-									/>
+									<TbOutlineExternalLink size={10} class="shrink-0 text-icon" />
 								</Show>
 							</A>
 						)}

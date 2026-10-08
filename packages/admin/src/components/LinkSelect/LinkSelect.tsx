@@ -1,10 +1,10 @@
 import type { ErrorResult, FieldError, LinkResValue } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidArrowUpRightFromSquare,
-	FaSolidPen,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineExternalLink,
+	TbOutlinePencil,
+	TbOutlineX,
+} from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import { FieldFeedback } from "@/components/FieldFeedback/FieldFeedback";
@@ -90,7 +90,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 									)}
 								>
 									<span class="truncate">{linkUrl() ?? ""}</span>
-									<FaSolidArrowUpRightFromSquare />
+									<TbOutlineExternalLink />
 								</a>
 							</Show>
 						</div>
@@ -104,7 +104,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								onClick={openLinkModal}
 								disabled={props.disabled}
 							>
-								<FaSolidPen size={12} />
+								<TbOutlinePencil size={12} />
 								<span class="sr-only">{T()("common.edit")}</span>
 							</Button>
 							<Button
@@ -115,7 +115,7 @@ export const LinkSelect: Component<LinkSelectProps> = (props) => {
 								onClick={() => props.onChange(null)}
 								disabled={props.disabled}
 							>
-								<FaSolidXmark size={14} />
+								<TbOutlineX size={14} />
 								<span class="sr-only">{T()("common.clear")}</span>
 							</Button>
 						</div>

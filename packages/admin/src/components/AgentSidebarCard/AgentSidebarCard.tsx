@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidXmark } from "solid-icons/fa";
+import { TbOutlineX } from "solid-icons/tb";
 import {
 	createEffect,
 	createUniqueId,
@@ -71,7 +71,7 @@ const AgentSidebarCard: ParentComponent<{
 					title={T()("common.close")}
 					onClick={() => props.onClose()}
 				>
-					<FaSolidXmark size={12} />
+					<TbOutlineX size={12} />
 				</button>
 			</div>
 			{props.children}

@@ -1,6 +1,6 @@
 import { HoverCard } from "@kobalte/core";
 import classnames from "classnames";
-import { FaSolidInfo } from "solid-icons/fa";
+import { TbOutlineInfoSmall } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 
 interface TooltipProps {
@@ -20,8 +20,8 @@ export const FormTooltip: Component<TooltipProps> = (props) => {
 					class={classnames(
 						"h-5 w-5 shrink-0 cursor-help rounded-full flex items-center justify-center duration-200 transition-colors",
 						props.variant === "ghost"
-							? "fill-muted hover:fill-subtitle"
-							: "border border-border bg-input fill-subtitle hover:bg-card",
+							? "text-muted hover:text-subtitle"
+							: "border border-border bg-input text-subtitle hover:bg-card",
 						{
 							"absolute top-1/2 -translate-y-1/2 right-2":
 								props.theme === "full",
@@ -29,7 +29,8 @@ export const FormTooltip: Component<TooltipProps> = (props) => {
 						},
 					)}
 				>
-					<FaSolidInfo size={8} />
+					{/* InfoSmall is half the height of other glyphs, so double the size and halve the stroke */}
+					<TbOutlineInfoSmall size={16} stroke-width={1} />
 				</HoverCard.Trigger>
 				<HoverCard.Portal>
 					<HoverCard.Content class="z-70 bg-card w-72 max-w-[calc(100vw-2rem)] mt-1.5 rounded-md px-3 py-2 border border-border shadow-xs">

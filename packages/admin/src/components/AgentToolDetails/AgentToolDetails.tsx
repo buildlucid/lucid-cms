@@ -1,5 +1,5 @@
 import { Collapsible } from "@kobalte/core";
-import { FaSolidChevronRight } from "solid-icons/fa";
+import { TbOutlineChevronRight } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
 import T from "@/translations";
@@ -15,9 +15,9 @@ const AgentToolDetails: Component<{
 	// Render
 	return (
 		<Collapsible.Root>
-			<Collapsible.Trigger class="group flex items-center gap-1 self-start rounded text-[11px] text-muted fill-muted transition-colors hover:text-body hover:fill-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary">
+			<Collapsible.Trigger class="group flex items-center gap-1 self-start rounded text-[11px] text-muted transition-colors hover:text-body focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary">
 				{T()("agent.tool.details")}
-				<FaSolidChevronRight
+				<TbOutlineChevronRight
 					size={8}
 					class="transition-transform duration-200 group-data-expanded:rotate-90"
 				/>

@@ -1,9 +1,9 @@
 import type { RichTextJSON } from "@lucidcms/rich-text";
 import {
-	FaSolidLanguage,
-	FaSolidMagicWandSparkles,
-	FaSolidPaperPlane,
-} from "solid-icons/fa";
+	TbOutlineLanguage,
+	TbOutlineSend,
+	TbOutlineWand,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -868,7 +868,7 @@ const CustomFieldGenerationModal: Component = () => {
 								loading={isLoading()}
 								disabled={!canGenerate()}
 							>
-								<FaSolidPaperPlane size={12} aria-hidden="true" />
+								<TbOutlineSend size={12} aria-hidden="true" />
 								{T()("ai.custom.field.generate.modal.generate")}
 							</Button>
 						</div>
@@ -905,7 +905,7 @@ const CustomFieldGenerationModal: Component = () => {
 													<Show
 														when={activeHistoryItem()?.type === "generation"}
 													>
-														<FaSolidMagicWandSparkles
+														<TbOutlineWand
 															class="shrink-0 text-icon"
 															size={12}
 															aria-hidden="true"
@@ -947,7 +947,7 @@ const CustomFieldGenerationModal: Component = () => {
 																for={`ai-custom-field-generation-preview-${field()?.type}-${localeCode}`}
 																class="flex min-w-0 items-center gap-2 text-sm font-medium text-body"
 															>
-																<FaSolidLanguage
+																<TbOutlineLanguage
 																	class="shrink-0 text-muted"
 																	size={12}
 																	aria-hidden="true"
@@ -957,7 +957,7 @@ const CustomFieldGenerationModal: Component = () => {
 																</span>
 															</label>
 															<Show when={generated()}>
-																<FaSolidMagicWandSparkles
+																<TbOutlineWand
 																	class="shrink-0 text-icon"
 																	size={12}
 																	aria-hidden="true"
@@ -999,7 +999,7 @@ const CustomFieldGenerationModal: Component = () => {
 											class="ai-action-button__surface flex h-11 min-w-11 items-center justify-center rounded-md border border-border text-primary"
 											data-loading="true"
 										>
-											<FaSolidMagicWandSparkles size={16} aria-hidden="true" />
+											<TbOutlineWand size={16} aria-hidden="true" />
 										</span>
 										<div class="min-w-0">
 											<p class="text-sm font-semibold text-title">

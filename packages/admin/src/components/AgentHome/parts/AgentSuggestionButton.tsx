@@ -1,5 +1,5 @@
 import type { Agent } from "@types";
-import { FaSolidArrowRight } from "solid-icons/fa";
+import { TbOutlineArrowRight } from "solid-icons/tb";
 import type { Component } from "solid-js";
 import { translateAdminCopy } from "@/translations";
 
@@ -26,7 +26,7 @@ const AgentSuggestionButton: Component<{
 						{translateAdminCopy(props.suggestion.description)}
 					</span>
 				</span>
-				<FaSolidArrowRight
+				<TbOutlineArrowRight
 					size={11}
 					class="mt-1 shrink-0 text-icon opacity-0 transition-opacity duration-200 group-enabled:group-hover:opacity-100 group-focus-visible:opacity-100 rtl:rotate-180"
 				/>

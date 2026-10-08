@@ -1,6 +1,6 @@
 import { isFieldTypeRichTextVariable } from "@field-capabilities";
 import type { DocumentRef, RichTextUserVariableField, UserRef } from "@types";
-import { FaSolidArrowLeft } from "solid-icons/fa";
+import { TbOutlineArrowLeft } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -399,7 +399,7 @@ const RichTextVariableSelectDrawer: Component<{
 													class="gap-2"
 													onClick={() => setStep("target")}
 												>
-													<FaSolidArrowLeft size={12} />
+													<TbOutlineArrowLeft size={12} />
 													<span>{T()("common.back")}</span>
 												</Button>
 												<p class="text-sm text-subtitle">

@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidChevronRight } from "solid-icons/fa";
+import { TbOutlineChevronRight } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -117,7 +117,7 @@ const AgentTranscriptRow: Component<AgentTranscriptRowProps> = (props) => {
 				>
 					{heading()}
 					<Show when={!inSidebar()}>
-						<FaSolidChevronRight
+						<TbOutlineChevronRight
 							size={8}
 							class="shrink-0 transition-transform"
 							classList={{ "rotate-90": open() }}

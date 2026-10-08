@@ -3,7 +3,7 @@ import type {
 	OAuthClientAuthMethod,
 	OAuthClientCreateResponse,
 } from "@types";
-import { FaSolidPlus, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePlus, TbOutlineX } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -369,7 +369,7 @@ const UpsertOAuthClientDrawer: Component<{
 												title={T()("common.remove")}
 												aria-label={T()("common.remove")}
 											>
-												<FaSolidXmark class="size-3.5" />
+												<TbOutlineX class="size-3.5" />
 											</Button>
 											<Button
 												type="button"
@@ -382,7 +382,7 @@ const UpsertOAuthClientDrawer: Component<{
 												title={T()("oauth.clients.redirect.add")}
 												aria-label={T()("oauth.clients.redirect.add")}
 											>
-												<FaSolidPlus class="size-3.5" />
+												<TbOutlinePlus class="size-3.5" />
 											</Button>
 										</div>
 									</div>

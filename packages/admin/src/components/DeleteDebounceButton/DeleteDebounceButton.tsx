@@ -1,6 +1,6 @@
 import { debounce } from "@solid-primitives/scheduled";
 import classNames from "classnames";
-import { FaRegularTrashCan } from "solid-icons/fa";
+import { TbOutlineTrash } from "solid-icons/tb";
 import { type Component, createSignal } from "solid-js";
 import Button from "@/components/Button/Button";
 import T from "@/translations/index";
@@ -32,10 +32,8 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 			class={classNames(
 				"transition-all duration-200 focus:outline-hidden focus-visible:ring-1 ring-primary disabled:hover:text-icon! disabled:opacity-50 disabled:cursor-not-allowed",
 				{
-					"text-muted fill-muted hover:text-danger hover:fill-danger":
-						getConfirmRemove() === 0,
-					"text-danger-hover fill-danger-hover animate-pulse":
-						getConfirmRemove() === 1,
+					"text-muted hover:text-danger": getConfirmRemove() === 0,
+					"text-danger-hover animate-pulse": getConfirmRemove() === 1,
 				},
 			)}
 			onMouseDown={(e) => {
@@ -56,7 +54,7 @@ const DeleteDebounceButton: Component<DeleteButtonProps> = (props) => {
 			}
 			disabled={props.disabled}
 		>
-			<FaRegularTrashCan size={14} />
+			<TbOutlineTrash size={14} />
 		</Button>
 	);
 };

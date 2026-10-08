@@ -1,12 +1,12 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import {
-	FaSolidCalendar,
-	FaSolidCircleCheck,
-	FaSolidT,
-	FaSolidTag,
-	FaSolidUser,
-	FaSolidUsers,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineCircleCheck,
+	TbOutlineLetterT,
+	TbOutlineTag,
+	TbOutlineUser,
+	TbOutlineUsers,
+} from "solid-icons/tb";
 import { type Component, createMemo, createSignal, Index } from "solid-js";
 import CreateMenu from "@/components/CreateMenu/CreateMenu";
 import EmptyState from "@/components/EmptyState/EmptyState";
@@ -270,39 +270,39 @@ const RequestsPage: Component = () => {
 							{
 								label: T()("requests.request"),
 								key: "title",
-								icon: <FaSolidT />,
+								icon: <TbOutlineLetterT />,
 								minWidth: 280,
 							},
 							{
 								label: T()("requests.type"),
 								key: "type",
-								icon: <FaSolidTag />,
+								icon: <TbOutlineTag />,
 							},
 							{
 								label: T()("common.status"),
 								key: "status",
-								icon: <FaSolidCircleCheck />,
+								icon: <TbOutlineCircleCheck />,
 							},
 							{
 								label: T()("requests.reviewers"),
 								key: "reviewers",
-								icon: <FaSolidUsers />,
+								icon: <TbOutlineUsers />,
 							},
 							{
 								label: T()("common.created.by"),
 								key: "createdBy",
-								icon: <FaSolidUser />,
+								icon: <TbOutlineUser />,
 							},
 							{
 								label: T()("common.scheduled.for"),
 								key: "scheduledAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 							{
 								label: T()("common.updated.at"),
 								key: "updatedAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 						]}

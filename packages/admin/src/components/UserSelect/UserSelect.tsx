@@ -1,6 +1,6 @@
 import type { ErrorResult, FieldError } from "@types";
 import classNames from "classnames";
-import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePencil, TbOutlineX } from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -225,7 +225,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										onClick={openUserSelectModal}
 										disabled={props.disabled}
 									>
-										<FaSolidPen size={12} />
+										<TbOutlinePencil size={12} />
 										<span class="sr-only">{T()("common.edit")}</span>
 									</Button>
 									<Button
@@ -236,7 +236,7 @@ export const UserSelect: Component<UserSelectProps> = (props) => {
 										onClick={clearSelection}
 										disabled={props.disabled}
 									>
-										<FaSolidXmark size={14} />
+										<TbOutlineX size={14} />
 										<span class="sr-only">{T()("common.clear")}</span>
 									</Button>
 								</div>
@@ -340,7 +340,7 @@ const UserSortableItem: Component<{
 					disabled={props.disabled}
 					aria-label={T()("common.remove")}
 				>
-					<FaSolidXmark size={14} />
+					<TbOutlineX size={14} />
 				</Button>
 			</div>
 		</div>

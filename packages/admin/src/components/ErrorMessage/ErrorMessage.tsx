@@ -1,6 +1,6 @@
 import { Alert } from "@kobalte/core";
 import classNames from "classnames";
-import { FaSolidTriangleExclamation } from "solid-icons/fa";
+import { TbOutlineAlertTriangle } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 
 interface ErrorMessageProps {
@@ -31,7 +31,7 @@ const ErrorMessage: Component<ErrorMessageProps> = (props) => {
 				)}
 			>
 				<Show when={props.theme === "inline" && props.icon !== false}>
-					<FaSolidTriangleExclamation
+					<TbOutlineAlertTriangle
 						size={14}
 						class="shrink-0 text-danger-low-foreground"
 					/>

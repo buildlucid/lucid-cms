@@ -1,6 +1,6 @@
 @layer base {
 	.navigation-link-active {
-		@apply bg-secondary! text-secondary-foreground! fill-secondary-foreground!;
+		@apply bg-card! text-title! shadow-xs ring-1 ring-border dark:bg-secondary! dark:text-secondary-foreground! dark:shadow-none dark:ring-0;
 	}
 
 	.scrollbar {
@@ -441,7 +441,6 @@
 	.ai-action-button:focus-visible
 		.ai-action-button__surface[data-quick-action-on-hover="true"] {
 		color: var(--lucid-primary);
-		fill: var(--lucid-primary);
 		box-shadow:
 			0 0 0 1px color-mix(in srgb, var(--lucid-primary) 18%, transparent),
 			0 0 16px color-mix(in srgb, var(--lucid-primary) 22%, transparent);

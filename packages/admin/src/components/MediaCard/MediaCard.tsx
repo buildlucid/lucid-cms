@@ -1,7 +1,7 @@
 import { createDraggable } from "@thisbeyond/solid-dnd";
 import type { Media } from "@types";
 import classNames from "classnames";
-import { FaSolidGear, FaSolidUserLock } from "solid-icons/fa";
+import { TbOutlineSettings, TbOutlineUserShield } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, Show } from "solid-js";
 import ActionMenu, {
 	type ActionMenuItem,
@@ -354,7 +354,7 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 			<Show when={ownershipLabel()}>
 				{(label) => (
 					<span
-						class="absolute top-3 left-3 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-subtitle fill-subtitle shadow-sm"
+						class="absolute top-3 left-3 z-30 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-subtitle shadow-sm"
 						role="img"
 						aria-label={label()}
 						title={`${label()}. ${
@@ -365,9 +365,9 @@ const MediaCard: Component<MediaCardProps> = (props) => {
 					>
 						<Show
 							when={ownership().type === "system"}
-							fallback={<FaSolidUserLock size={11} />}
+							fallback={<TbOutlineUserShield size={11} />}
 						>
-							<FaSolidGear size={11} />
+							<TbOutlineSettings size={11} />
 						</Show>
 					</span>
 				)}

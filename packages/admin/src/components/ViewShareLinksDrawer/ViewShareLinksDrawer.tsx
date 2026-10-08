@@ -1,11 +1,11 @@
 import classnames from "classnames";
 import {
-	FaSolidCalendar,
-	FaSolidClock,
-	FaSolidLink,
-	FaSolidLock,
-	FaSolidT,
-} from "solid-icons/fa";
+	TbOutlineCalendar,
+	TbOutlineClock,
+	TbOutlineLetterT,
+	TbOutlineLink,
+	TbOutlineLock,
+} from "solid-icons/tb";
 import {
 	type Accessor,
 	type Component,
@@ -257,34 +257,34 @@ const ViewShareLinksPanelContent: Component<{
 							{
 								label: T()("common.url"),
 								key: "url",
-								icon: <FaSolidLink />,
+								icon: <TbOutlineLink />,
 							},
 							{
 								label: T()("common.name"),
 								key: "name",
-								icon: <FaSolidT />,
+								icon: <TbOutlineLetterT />,
 								sortable: true,
 							},
 							{
 								label: T()("common.has.password"),
 								key: "hasPassword",
-								icon: <FaSolidLock />,
+								icon: <TbOutlineLock />,
 							},
 							{
 								label: T()("common.expires.at"),
 								key: "expiresAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 							{
 								label: T()("common.has.expired"),
 								key: "hasExpired",
-								icon: <FaSolidClock />,
+								icon: <TbOutlineClock />,
 							},
 							{
 								label: T()("common.created.at"),
 								key: "createdAt",
-								icon: <FaSolidCalendar />,
+								icon: <TbOutlineCalendar />,
 								sortable: true,
 							},
 						]}

@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import Button, {
 	type ButtonSize,
@@ -56,7 +56,7 @@ const SplitButton: Component<SplitButtonProps> = (props) => {
 					)}
 				>
 					<span class="sr-only">{T()("common.options")}</span>
-					<FaSolidChevronDown size={10} />
+					<TbOutlineChevronDown size={10} />
 				</Menu.Trigger>
 				<Menu.Content>
 					<For each={props.actions}>

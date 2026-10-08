@@ -1,12 +1,12 @@
 import { useParams } from "@solidjs/router";
 import classNames from "classnames";
 import {
-	FaSolidCheck,
-	FaSolidChevronDown,
-	FaSolidLock,
-	FaSolidShieldHalved,
-	FaSolidTriangleExclamation,
-} from "solid-icons/fa";
+	TbOutlineAlertTriangle,
+	TbOutlineCheck,
+	TbOutlineChevronDown,
+	TbOutlineLock,
+	TbOutlineShieldHalf,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -292,7 +292,7 @@ const OAuthConsentPage: Component = () => {
 												},
 											)}
 										>
-											<FaSolidCheck class="size-2" />
+											<TbOutlineCheck class="size-2" />
 										</span>
 									</button>
 
@@ -330,7 +330,7 @@ const OAuthConsentPage: Component = () => {
 													},
 												)}
 											>
-												<FaSolidCheck class="size-2" />
+												<TbOutlineCheck class="size-2" />
 											</span>
 										</button>
 									</Show>
@@ -349,10 +349,10 @@ const OAuthConsentPage: Component = () => {
 									<Show
 										when={principalType() === "system"}
 										fallback={
-											<FaSolidLock class="mt-0.75 size-2.5 shrink-0 text-primary" />
+											<TbOutlineLock class="mt-0.75 size-2.5 shrink-0 text-primary" />
 										}
 									>
-										<FaSolidTriangleExclamation class="mt-0.75 size-2.5 shrink-0 text-warning-low-foreground" />
+										<TbOutlineAlertTriangle class="mt-0.75 size-2.5 shrink-0 text-warning-low-foreground" />
 									</Show>
 									<p class="m-0 text-[10px] leading-4">
 										{principalType() === "system"
@@ -377,7 +377,7 @@ const OAuthConsentPage: Component = () => {
 								<Show when={unavailableScopes().length > 0}>
 									<div class="mb-2.5 rounded-md border border-warning-low-border bg-warning-low px-3 py-2">
 										<div class="flex items-start gap-2">
-											<FaSolidTriangleExclamation class="mt-0.75 size-2.5 shrink-0 text-warning-low-foreground" />
+											<TbOutlineAlertTriangle class="mt-0.75 size-2.5 shrink-0 text-warning-low-foreground" />
 											<button
 												type="button"
 												class="flex min-w-0 flex-1 items-start justify-between gap-2 rounded text-left hover:text-title! focus:outline-hidden focus-visible:ring-1 focus-visible:ring-warning"
@@ -397,7 +397,7 @@ const OAuthConsentPage: Component = () => {
 														},
 													)}
 												</span>
-												<FaSolidChevronDown
+												<TbOutlineChevronDown
 													class="mt-1 size-2 shrink-0 text-warning-low-foreground transition-transform"
 													classList={{
 														"rotate-180": unavailableScopesOpen(),
@@ -436,7 +436,7 @@ const OAuthConsentPage: Component = () => {
 														{(scope) => (
 															<li class="flex items-center gap-2">
 																<span class="grid size-3.5 shrink-0 place-items-center rounded-full bg-primary-low text-primary-low-foreground">
-																	<FaSolidCheck class="size-1.5" />
+																	<TbOutlineCheck class="size-1.5" />
 																</span>
 																<span class="min-w-0">
 																	<strong class="block text-[11px] font-medium leading-4 text-subtitle">
@@ -468,7 +468,7 @@ const OAuthConsentPage: Component = () => {
 							{/* Actions */}
 							<footer class="flex flex-col-reverse gap-3 bg-input/20 p-4 lg:flex-row lg:items-center lg:justify-between">
 								<div class="flex max-w-xs items-start gap-2">
-									<FaSolidShieldHalved class="mt-0.75 size-2.5 shrink-0 text-muted" />
+									<TbOutlineShieldHalf class="mt-0.75 size-2.5 shrink-0 text-muted" />
 									<p class="m-0 text-[10px] leading-4 text-muted">
 										{T()("oauth.consent.security.notice", {
 											hostname: clientHostname(),

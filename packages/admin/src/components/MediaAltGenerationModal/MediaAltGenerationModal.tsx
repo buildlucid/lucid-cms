@@ -1,10 +1,6 @@
 import type { AiGeneratedContent } from "@lucidcms/types";
 import type { Locale, MediaTranslation } from "@types";
-import {
-	FaSolidArrowRotateLeft,
-	FaSolidMagicWandSparkles,
-	FaSolidPaperPlane,
-} from "solid-icons/fa";
+import { TbOutlineRotate, TbOutlineSend, TbOutlineWand } from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -285,7 +281,7 @@ const MediaAltGenerationModalContent: Component<{
 								props.isApplying
 							}
 						>
-							<FaSolidPaperPlane size={12} aria-hidden="true" />
+							<TbOutlineSend size={12} aria-hidden="true" />
 							{T()("ai.media.alt.generate.modal.generate")}
 						</Button>
 					</div>
@@ -354,10 +350,7 @@ const MediaAltGenerationModalContent: Component<{
 																	);
 																}}
 															>
-																<FaSolidArrowRotateLeft
-																	size={11}
-																	aria-hidden="true"
-																/>
+																<TbOutlineRotate size={11} aria-hidden="true" />
 															</button>
 														</Show>
 													</div>
@@ -393,7 +386,7 @@ const MediaAltGenerationModalContent: Component<{
 										class="ai-action-button__surface flex h-11 min-w-11 items-center justify-center rounded-md border border-border text-primary"
 										data-loading="true"
 									>
-										<FaSolidMagicWandSparkles size={16} aria-hidden="true" />
+										<TbOutlineWand size={16} aria-hidden="true" />
 									</span>
 									<div class="min-w-0 max-w-60">
 										<p class="text-sm font-semibold text-title">

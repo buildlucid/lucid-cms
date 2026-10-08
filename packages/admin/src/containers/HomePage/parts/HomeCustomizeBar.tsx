@@ -1,9 +1,9 @@
 import {
-	FaSolidCheck,
-	FaSolidChevronUp,
-	FaSolidRotateLeft,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineCheck,
+	TbOutlineChevronUp,
+	TbOutlineRotate,
+	TbOutlineX,
+} from "solid-icons/tb";
 import { type Component, For } from "solid-js";
 import Button from "@/components/Button/Button";
 import type { HomeWidget } from "@/components/HomeWidgets/types";
@@ -30,7 +30,7 @@ const HomeCustomizeBar: Component<{
 				<Menu.Root placement="top">
 					<Menu.Trigger class="flex h-9 items-center gap-2 rounded-md border border-border bg-input px-3 text-sm text-subtitle transition-colors hover:border-transparent hover:bg-secondary-hover hover:text-secondary-foreground focus:outline-hidden focus-visible:ring-1 focus-visible:ring-primary">
 						{T()("home.customize.widgets")}
-						<FaSolidChevronUp size={9} />
+						<TbOutlineChevronUp size={9} />
 					</Menu.Trigger>
 					<Menu.Content>
 						<Menu.Label>{T()("home.customize.widgets.label")}</Menu.Label>
@@ -57,7 +57,7 @@ const HomeCustomizeBar: Component<{
 					title={T()("home.customize.reset")}
 					onClick={() => props.onReset()}
 				>
-					<FaSolidRotateLeft size={12} />
+					<TbOutlineRotate size={12} />
 				</Button>
 				<Button
 					variant="ghost"
@@ -67,7 +67,7 @@ const HomeCustomizeBar: Component<{
 					title={T()("common.cancel")}
 					onClick={() => props.onCancel()}
 				>
-					<FaSolidXmark size={14} />
+					<TbOutlineX size={14} />
 				</Button>
 				<Button
 					variant="ghost"
@@ -77,7 +77,7 @@ const HomeCustomizeBar: Component<{
 					title={T()("common.done")}
 					onClick={() => props.onDone()}
 				>
-					<FaSolidCheck size={13} />
+					<TbOutlineCheck size={13} />
 				</Button>
 			</div>
 		</div>

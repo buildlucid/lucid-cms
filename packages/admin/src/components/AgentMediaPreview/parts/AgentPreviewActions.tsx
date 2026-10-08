@@ -1,6 +1,10 @@
 import type { Media } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck, FaSolidDownload, FaSolidLink } from "solid-icons/fa";
+import {
+	TbOutlineCheck,
+	TbOutlineDownload,
+	TbOutlineLink,
+} from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import { createCopy } from "@/components/Copy/copyValue";
 import { Permissions } from "@/constants/permissions";
@@ -54,8 +58,8 @@ const AgentPreviewActions: Component<{
 				title={copyLabel()}
 				onClick={() => void copy()}
 			>
-				<Show when={copied()} fallback={<FaSolidLink size={10} />}>
-					<FaSolidCheck size={10} />
+				<Show when={copied()} fallback={<TbOutlineLink size={10} />}>
+					<TbOutlineCheck size={10} />
 				</Show>
 			</button>
 			<Show when={canRead()}>
@@ -67,7 +71,7 @@ const AgentPreviewActions: Component<{
 					disabled={requestDownload.action.isPending}
 					onClick={() => requestDownload.action.mutate({ id: props.media.id })}
 				>
-					<FaSolidDownload size={10} />
+					<TbOutlineDownload size={10} />
 				</button>
 			</Show>
 		</div>

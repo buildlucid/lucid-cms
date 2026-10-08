@@ -3,7 +3,7 @@ import type {
 	AgentMessage as AgentMessageData,
 } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck, FaSolidCopy } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineCopy } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -296,8 +296,8 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 						title={T()("agent.message.copy")}
 						onClick={() => void copy()}
 					>
-						<Show when={copied()} fallback={<FaSolidCopy size={11} />}>
-							<FaSolidCheck size={11} class="text-success" />
+						<Show when={copied()} fallback={<TbOutlineCopy size={11} />}>
+							<TbOutlineCheck size={11} class="text-success" />
 						</Show>
 					</button>
 				</div>

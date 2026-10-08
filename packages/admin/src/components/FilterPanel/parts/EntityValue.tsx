@@ -1,12 +1,12 @@
 import type { DocumentRef, RelationFieldValue } from "@types";
 import {
-	FaSolidFile,
-	FaSolidFileAudio,
-	FaSolidFileLines,
-	FaSolidFileVideo,
-	FaSolidFileZipper,
-	FaSolidXmark,
-} from "solid-icons/fa";
+	TbOutlineFile,
+	TbOutlineFileMusic,
+	TbOutlineFileText,
+	TbOutlineFileZip,
+	TbOutlineMovie,
+	TbOutlineX,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -274,7 +274,7 @@ export const EntityValue: Component<{
 					title={T()("filter.section.entity.clear")}
 					aria-label={T()("filter.section.entity.clear")}
 				>
-					<FaSolidXmark size={14} />
+					<TbOutlineX size={14} />
 				</button>
 			</Show>
 			<Switch>
@@ -346,7 +346,9 @@ const mediaLabel = (media: MediaRelationRef, contentLocale: string): string => {
 const MediaThumb: Component<{ media: MediaRelationRef }> = (props) => {
 	return (
 		<span class="h-6 w-6 min-w-6 rounded-sm border border-border overflow-hidden flex items-center justify-center bg-card">
-			<Switch fallback={<FaSolidFile size={11} class="text-icon opacity-60" />}>
+			<Switch
+				fallback={<TbOutlineFile size={11} class="text-icon opacity-60" />}
+			>
 				<Match when={props.media.type === "image"}>
 					<img
 						src={mediaUrl(props.media, "thumbnail-small")}
@@ -356,16 +358,16 @@ const MediaThumb: Component<{ media: MediaRelationRef }> = (props) => {
 					/>
 				</Match>
 				<Match when={props.media.type === "video"}>
-					<FaSolidFileVideo size={11} class="text-icon opacity-60" />
+					<TbOutlineMovie size={11} class="text-icon opacity-60" />
 				</Match>
 				<Match when={props.media.type === "audio"}>
-					<FaSolidFileAudio size={11} class="text-icon opacity-60" />
+					<TbOutlineFileMusic size={11} class="text-icon opacity-60" />
 				</Match>
 				<Match when={props.media.type === "document"}>
-					<FaSolidFileLines size={11} class="text-icon opacity-60" />
+					<TbOutlineFileText size={11} class="text-icon opacity-60" />
 				</Match>
 				<Match when={props.media.type === "archive"}>
-					<FaSolidFileZipper size={11} class="text-icon opacity-60" />
+					<TbOutlineFileZip size={11} class="text-icon opacity-60" />
 				</Match>
 			</Switch>
 		</span>

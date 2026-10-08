@@ -1,6 +1,6 @@
 import type { DocumentVersionType } from "@types";
 import classNames from "classnames";
-import { FaSolidChevronDown } from "solid-icons/fa";
+import { TbOutlineChevronDown } from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import Spinner from "@/components/Spinner/Spinner";
@@ -113,7 +113,7 @@ export const ReleaseTrigger: Component<{
 				disabled={props.saveDisabled}
 				class={classNames(
 					"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
-					"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary",
+					"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary",
 					"px-4 h-9 text-sm",
 					{
 						"rounded-md": !hasOptions(),
@@ -133,7 +133,7 @@ export const ReleaseTrigger: Component<{
 					<Menu.Trigger
 						class={classNames(
 							"flex items-center justify-center min-w-max text-center focus:outline-none outline-none focus-visible:ring-1 duration-200 transition-colors relative gap-2",
-							"bg-secondary hover:bg-secondary-hover text-secondary-foreground fill-secondary-foreground ring-primary",
+							"bg-secondary hover:bg-secondary-hover text-secondary-foreground ring-primary",
 							"px-2 w-9 h-9 text-sm",
 							{
 								"rounded-r-md": interfaceDirection.isLTR(),
@@ -145,7 +145,7 @@ export const ReleaseTrigger: Component<{
 						disabled={isDisabled()}
 						onClick={handleTriggerClick}
 					>
-						<FaSolidChevronDown />
+						<TbOutlineChevronDown />
 					</Menu.Trigger>
 					<Menu.Content>
 						<For each={props.actions}>

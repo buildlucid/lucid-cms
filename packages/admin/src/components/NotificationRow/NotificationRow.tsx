@@ -2,10 +2,10 @@ import { A } from "@solidjs/router";
 import type { Notification } from "@types";
 import classnames from "classnames";
 import {
-	FaSolidBoxArchive,
-	FaSolidEnvelope,
-	FaSolidEnvelopeOpen,
-} from "solid-icons/fa";
+	TbOutlineArchive,
+	TbOutlineMail,
+	TbOutlineMailOpened,
+} from "solid-icons/tb";
 import { type Component, createMemo, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import Button from "@/components/Button/Button";
@@ -116,8 +116,8 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 						props.onUpdate({ ids: [props.notification.id], read: unread() })
 					}
 				>
-					<Show when={unread()} fallback={<FaSolidEnvelope class="size-3" />}>
-						<FaSolidEnvelopeOpen class="size-3" />
+					<Show when={unread()} fallback={<TbOutlineMail class="size-3" />}>
+						<TbOutlineMailOpened class="size-3" />
 					</Show>
 				</Button>
 				<Button
@@ -128,7 +128,7 @@ const NotificationRow: Component<NotificationRowProps> = (props) => {
 					title={T()("notifications.archive")}
 					onClick={() => props.onArchive(props.notification.id)}
 				>
-					<FaSolidBoxArchive class="size-3" />
+					<TbOutlineArchive class="size-3" />
 				</Button>
 			</div>
 		</li>

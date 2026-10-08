@@ -1,9 +1,9 @@
 import type { OAuthConnection } from "@types";
 import {
-	FaSolidChevronDown,
-	FaSolidGlobe,
-	FaSolidShieldHalved,
-} from "solid-icons/fa";
+	TbOutlineChevronDown,
+	TbOutlineShieldHalf,
+	TbOutlineWorld,
+} from "solid-icons/tb";
 import { type Component, createMemo, createSignal, For, Show } from "solid-js";
 import ActionMenu from "@/components/ActionMenu/ActionMenu";
 import DateText from "@/components/DateText/DateText";
@@ -80,7 +80,7 @@ const OAuthConnectionRow: Component<{
 				<div class="flex min-w-0 items-start justify-between gap-3">
 					<div class="flex min-w-0 items-start gap-3">
 						<IconContainer>
-							<FaSolidGlobe class="size-3.5 text-primary" />
+							<TbOutlineWorld class="size-3.5 text-primary" />
 						</IconContainer>
 						<div class="min-w-0">
 							<h3 class="truncate text-sm font-semibold text-title">
@@ -100,14 +100,14 @@ const OAuthConnectionRow: Component<{
 									aria-expanded={detailsOpen()}
 									onClick={() => setDetailsOpen(!detailsOpen())}
 								>
-									<FaSolidShieldHalved class="size-2.5" />
+									<TbOutlineShieldHalf class="size-2.5" />
 									{T()(
 										permissionCount() === 1
 											? "oauth.connections.permission.count"
 											: "oauth.connections.permissions.count",
 										{ count: permissionCount() },
 									)}
-									<FaSolidChevronDown
+									<TbOutlineChevronDown
 										class="size-2 transition-transform"
 										classList={{ "rotate-180": detailsOpen() }}
 									/>

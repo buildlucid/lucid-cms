@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FaSolidDatabase, FaSolidGlobe } from "solid-icons/fa";
+import { TbOutlineDatabase, TbOutlineWorld } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import T from "@/translations";
 
@@ -20,7 +20,7 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 		<>
 			<Show when={props.fieldColumnIsMissing}>
 				<span class="text-danger inline" title={T()("fields.database.missing")}>
-					<FaSolidDatabase size={12} />
+					<TbOutlineDatabase size={12} />
 				</span>
 			</Show>
 			<Show when={props.localised}>
@@ -34,7 +34,7 @@ export const FieldLabelMarkers: Component<FieldLabelMarkersProps> = (props) => {
 							: T()("fields.localized.supported")
 					}
 				>
-					<FaSolidGlobe size={12} />
+					<TbOutlineWorld size={12} />
 				</span>
 			</Show>
 		</>

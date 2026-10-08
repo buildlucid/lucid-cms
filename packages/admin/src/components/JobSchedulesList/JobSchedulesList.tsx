@@ -1,6 +1,10 @@
 import { useQueryClient } from "@tanstack/solid-query";
 import classnames from "classnames";
-import { FaSolidCalendar, FaSolidCircleCheck, FaSolidT } from "solid-icons/fa";
+import {
+	TbOutlineCalendar,
+	TbOutlineCircleCheck,
+	TbOutlineLetterT,
+} from "solid-icons/tb";
 import { type Component, createMemo, Index } from "solid-js";
 import EmptyState from "@/components/EmptyState/EmptyState";
 import JobScheduleTableRow from "@/components/JobScheduleTableRow/JobScheduleTableRow";
@@ -119,32 +123,32 @@ export const JobSchedulesList: Component = () => {
 						{
 							label: T()("common.status"),
 							key: "state",
-							icon: <FaSolidCircleCheck />,
+							icon: <TbOutlineCircleCheck />,
 						},
 						{
 							label: T()("common.schedule"),
 							key: "name",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							minWidth: 260,
 							sortable: true,
 						},
 						{
 							label: T()("common.job"),
 							key: "jobName",
-							icon: <FaSolidT />,
+							icon: <TbOutlineLetterT />,
 							minWidth: 260,
 							sortable: true,
 						},
 						{
 							label: T()("jobs.schedules.next.run"),
 							key: "nextRunAt",
-							icon: <FaSolidCalendar />,
+							icon: <TbOutlineCalendar />,
 							sortable: true,
 						},
 						{
 							label: T()("jobs.schedules.last.result"),
 							key: "lastResult",
-							icon: <FaSolidCircleCheck />,
+							icon: <TbOutlineCircleCheck />,
 						},
 					]}
 					loading={schedules.isFetching}

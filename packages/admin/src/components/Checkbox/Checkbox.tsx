@@ -1,7 +1,7 @@
 import { Checkbox as KobalteCheckbox, Tooltip } from "@kobalte/core";
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { FaSolidCheck, FaSolidMinus } from "solid-icons/fa";
+import { TbOutlineCheck, TbOutlineMinus } from "solid-icons/tb";
 import {
 	type Component,
 	createSignal,
@@ -146,7 +146,7 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 					{
 						//* stretches the hit area over the whole box, so any part of it toggles
 						"after:absolute after:inset-0 after:content-['']": boxed(),
-						"cursor-pointer border-border bg-input text-secondary-foreground hover:border-secondary data-checked:border-secondary-hover data-checked:bg-secondary data-checked:fill-secondary-foreground data-indeterminate:border-secondary-hover data-indeterminate:bg-secondary data-indeterminate:fill-secondary-foreground":
+						"cursor-pointer border-border bg-input text-secondary-foreground hover:border-secondary data-checked:border-secondary-hover data-checked:bg-secondary data-indeterminate:border-secondary-hover data-indeterminate:bg-secondary":
 							!filled(),
 						"border-primary": !filled() && focused(),
 						"border-card bg-card text-body": filled(),
@@ -157,9 +157,9 @@ const Checkbox: Component<CheckboxProps> = (props) => {
 					<div class="absolute inset-0 flex justify-center items-center">
 						<Show
 							when={props.indeterminate}
-							fallback={<FaSolidCheck size={10} />}
+							fallback={<TbOutlineCheck size={10} />}
 						>
-							<FaSolidMinus size={10} />
+							<TbOutlineMinus size={10} />
 						</Show>
 					</div>
 				</KobalteCheckbox.Indicator>

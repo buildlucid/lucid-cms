@@ -1,11 +1,11 @@
 import type { ErrorResult, Media, MediaCropState } from "@types";
 import classNames from "classnames";
 import {
-	FaSolidArrowRotateLeft,
-	FaSolidArrowUpFromBracket,
-	FaSolidFile,
-	FaSolidMagicWandSparkles,
-} from "solid-icons/fa";
+	TbOutlineFile,
+	TbOutlineRotate,
+	TbOutlineUpload,
+	TbOutlineWand,
+} from "solid-icons/tb";
 import {
 	type Component,
 	createEffect,
@@ -273,10 +273,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 					</Match>
 					<Match when={showState() === "no-file"}>
 						<div class="w-full h-full flex justify-center items-center flex-col p-4 md:p-6">
-							<FaSolidArrowUpFromBracket
-								size="18"
-								class="mx-auto text-muted mb-2"
-							/>
+							<TbOutlineUpload size="18" class="mx-auto text-muted mb-2" />
 							<p class="text-center text-sm font-medium text-subtitle">
 								{T()("media.upload.drop.or")}{" "}
 								<button
@@ -298,9 +295,9 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 									<button
 										type="button"
 										onClick={undoToCurrentFile}
-										class="text-muted fill-muted font-medium text-sm flex items-center mt-2"
+										class="text-muted font-medium text-sm flex items-center mt-2"
 									>
-										<FaSolidArrowRotateLeft class="mr-2 text-sm" />
+										<TbOutlineRotate class="mr-2 text-sm" />
 										<Switch fallback={"keep current file"}>
 											<Match when={props.disableRemoveCurrent === true}>
 												{T()("media.file.back.to.current")}
@@ -369,7 +366,7 @@ export const SingleFileUpload: Component<SingleFileUploadProps> = (props) => {
 							{imageGeneration().state.loading ? (
 								<Spinner size="sm" />
 							) : (
-								<FaSolidMagicWandSparkles size={13} aria-hidden="true" />
+								<TbOutlineWand size={13} aria-hidden="true" />
 							)}
 							<span>{T()("ai.media.image.generate.action")}</span>
 						</button>
@@ -564,7 +561,7 @@ const FilePreviewScreen: Component<FilePreviewScreenProps> = (props) => {
 									"w-full h-full relative z-10 bg-input flex flex-col justify-center items-center",
 								)}
 							>
-								<FaSolidFile class="w-10 h-10 mx-auto text-muted mb-5" />
+								<TbOutlineFile class="w-10 h-10 mx-auto text-muted mb-5" />
 								<Show when={props.data.name}>
 									<p class="text-center text-sm font-medium text-subtitle">
 										{props.data.name}

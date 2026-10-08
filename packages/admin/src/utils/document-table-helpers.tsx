@@ -10,7 +10,7 @@ import type {
 	InternalDocumentField,
 	RefResource,
 } from "@types";
-import { FaSolidT, FaSolidUser } from "solid-icons/fa";
+import { TbOutlineLetterT, TbOutlineUser } from "solid-icons/tb";
 import T from "@/translations";
 import type {
 	CollectionFieldConfig,
@@ -30,7 +30,7 @@ export const tableHeadColumns = (fields: CollectionFieldConfig[]) => {
 						fallback: field.key,
 					}),
 					key: field.key,
-					icon: <FaSolidUser />,
+					icon: <TbOutlineUser />,
 				};
 			default: {
 				return {
@@ -39,7 +39,7 @@ export const tableHeadColumns = (fields: CollectionFieldConfig[]) => {
 						fallback: field.key,
 					}),
 					key: field.key,
-					icon: <FaSolidT />,
+					icon: <TbOutlineLetterT />,
 				};
 			}
 		}

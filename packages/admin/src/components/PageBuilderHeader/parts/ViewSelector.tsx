@@ -1,10 +1,10 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import {
-	FaSolidCaretLeft,
-	FaSolidCaretRight,
-	FaSolidClockRotateLeft,
-	FaSolidLink,
-} from "solid-icons/fa";
+	TbOutlineCaretLeft,
+	TbOutlineCaretRight,
+	TbOutlineHistory,
+	TbOutlineLink,
+} from "solid-icons/tb";
 import { type Accessor, type Component, createMemo, For, Show } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import StatusIndicator, {
@@ -131,9 +131,9 @@ export const ViewSelector: Component<{
 		return optionStatusVariant(option);
 	});
 	const optionIcon = (option: ViewSelectorOption) => {
-		if (option.icon === "history") return <FaSolidClockRotateLeft size={14} />;
+		if (option.icon === "history") return <TbOutlineHistory size={14} />;
 
-		return <FaSolidLink size={14} />;
+		return <TbOutlineLink size={14} />;
 	};
 
 	// ----------------------------------
@@ -177,16 +177,16 @@ export const ViewSelector: Component<{
 													<Show
 														when={item.type === "environment"}
 														fallback={
-															<FaSolidCaretLeft
+															<TbOutlineCaretLeft
 																size={11}
-																class="fill-icon text-icon"
+																class="text-icon"
 																aria-label={T()("documents.compare.opens.left")}
 															/>
 														}
 													>
-														<FaSolidCaretRight
+														<TbOutlineCaretRight
 															size={11}
-															class="fill-icon text-icon"
+															class="text-icon"
 															aria-label={T()("documents.compare.opens.right")}
 														/>
 													</Show>

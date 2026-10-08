@@ -1,5 +1,5 @@
 import type { RequestSummary } from "@types";
-import { FaSolidPen, FaSolidXmark } from "solid-icons/fa";
+import { TbOutlinePencil, TbOutlineX } from "solid-icons/tb";
 import { type Component, Show } from "solid-js";
 import Button from "@/components/Button/Button";
 import { FormLabel } from "@/components/FormLabel/FormLabel";
@@ -58,7 +58,7 @@ export const RequestPickerField: Component<{
 									shape="square"
 									onClick={props.onOpen}
 								>
-									<FaSolidPen size={12} />
+									<TbOutlinePencil size={12} />
 									<span class="sr-only">{T()("common.edit")}</span>
 								</Button>
 								<Button
@@ -68,7 +68,7 @@ export const RequestPickerField: Component<{
 									shape="square"
 									onClick={props.onClear}
 								>
-									<FaSolidXmark size={14} />
+									<TbOutlineX size={14} />
 									<span class="sr-only">{T()("common.clear")}</span>
 								</Button>
 							</div>

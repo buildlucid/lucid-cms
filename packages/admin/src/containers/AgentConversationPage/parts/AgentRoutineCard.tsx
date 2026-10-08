@@ -1,5 +1,5 @@
 import type { AgentConversation, AgentRoutine } from "@types";
-import { FaSolidRepeat } from "solid-icons/fa";
+import { TbOutlineRepeat } from "solid-icons/tb";
 import { type Component, createMemo, For, Show } from "solid-js";
 import AgentRunStatus from "@/components/AgentRunStatus/AgentRunStatus";
 import Button from "@/components/Button/Button";
@@ -108,7 +108,7 @@ const AgentRoutineCard: Component<{
 											class="flex h-9 w-7 shrink-0 items-center justify-center rounded border border-border text-muted"
 											aria-hidden="true"
 										>
-											<FaSolidRepeat size={10} />
+											<TbOutlineRepeat size={10} />
 										</span>
 										<span class="min-w-0 grow">
 											<time

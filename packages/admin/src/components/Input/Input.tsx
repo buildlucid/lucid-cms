@@ -1,6 +1,6 @@
 import type { ErrorResult, FieldError } from "@types";
 import classnames from "classnames";
-import { FaSolidEye, FaSolidEyeSlash } from "solid-icons/fa";
+import { TbOutlineEye, TbOutlineEyeOff } from "solid-icons/tb";
 import {
 	type Component,
 	createMemo,
@@ -141,9 +141,9 @@ const Input: Component<InputProps> = (props) => {
 					>
 						<Show
 							when={passwordVisible()}
-							fallback={<FaSolidEye size={18} class="text-muted" />}
+							fallback={<TbOutlineEye size={18} class="text-muted" />}
 						>
-							<FaSolidEyeSlash size={18} class="text-muted" />
+							<TbOutlineEyeOff size={18} class="text-muted" />
 						</Show>
 					</button>
 				</Show>

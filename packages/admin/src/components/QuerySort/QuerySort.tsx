@@ -1,5 +1,9 @@
 import classNames from "classnames";
-import { FaSolidCaretUp, FaSolidMinus, FaSolidSort } from "solid-icons/fa";
+import {
+	TbOutlineArrowsSort,
+	TbOutlineCaretUp,
+	TbOutlineMinus,
+} from "solid-icons/tb";
 import { type Component, createMemo, For, Match, Switch } from "solid-js";
 import Menu from "@/components/Menu/Menu";
 import type { QueryStateResponse } from "@/hooks/useQueryState/useQueryState";
@@ -55,7 +59,7 @@ const SortItem: Component<SortItemProps> = (props) => {
 				>
 					<Switch>
 						<Match when={sort() !== undefined}>
-							<FaSolidCaretUp
+							<TbOutlineCaretUp
 								aria-hidden="true"
 								class={classNames("w-3 h-3 text-secondary-foreground", {
 									"transform rotate-180": sort() === "desc",
@@ -63,7 +67,7 @@ const SortItem: Component<SortItemProps> = (props) => {
 							/>
 						</Match>
 						<Match when={sort() === undefined}>
-							<FaSolidMinus aria-hidden="true" class="w-3 h-3 text-title" />
+							<TbOutlineMinus aria-hidden="true" class="w-3 h-3 text-title" />
 						</Match>
 					</Switch>
 				</div>
@@ -104,11 +108,11 @@ const QuerySort: Component<QuerySortProps> = (props) => {
 				data-query-sort
 				disabled={props.disabled}
 				class={classNames(
-					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary pr-3 pl-2 text-sm text-secondary-foreground fill-secondary-foreground hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-muted disabled:fill-muted disabled:hover:bg-secondary",
+					"flex h-9 items-center gap-2 rounded-md border border-transparent bg-secondary pr-3 pl-2 text-sm text-secondary-foreground hover:bg-secondary-hover disabled:cursor-not-allowed disabled:text-muted disabled:hover:bg-secondary",
 					props.class,
 				)}
 			>
-				<FaSolidSort />
+				<TbOutlineArrowsSort />
 				<span>{T()("common.sort")}</span>
 			</Menu.Trigger>
 			<Menu.Content>
