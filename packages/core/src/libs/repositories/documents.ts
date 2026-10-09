@@ -93,6 +93,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					deleted_by: eb.ref("excluded.deleted_by"),
 					updated_at: eb.ref("excluded.updated_at"),
 					updated_by: eb.ref("excluded.updated_by"),
+					updated_by_run_id: eb.ref("excluded.updated_by_run_id"),
 				})),
 			)
 			.$if(
@@ -149,6 +150,7 @@ export default class DocumentsRepository extends DynamicRepository<LucidDocument
 					deleted_by: eb.ref("excluded.deleted_by"),
 					updated_at: eb.ref("excluded.updated_at"),
 					updated_by: eb.ref("excluded.updated_by"),
+					updated_by_run_id: eb.ref("excluded.updated_by_run_id"),
 				})),
 			)
 			.$if(

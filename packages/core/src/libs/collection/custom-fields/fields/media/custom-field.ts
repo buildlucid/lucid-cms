@@ -144,7 +144,9 @@ class MediaCustomField extends CustomField<"media"> {
 			if (findMedia === undefined) {
 				errors.push({
 					itemIndex,
-					message: copy("server:core.fields.media.validation.not.found"),
+					message: copy("server:core.fields.media.validation.not.found", {
+						data: { id: mediaId },
+					}),
 				});
 				continue;
 			}

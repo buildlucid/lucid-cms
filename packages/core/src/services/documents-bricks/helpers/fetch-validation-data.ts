@@ -14,7 +14,7 @@ import type {
 import { addRefTarget } from "../../../libs/refs/targets.js";
 import { DocumentReferencesRepository } from "../../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type {
 	ServiceContext,
 	ServiceFn,
@@ -103,7 +103,7 @@ const fetchValidationData: ServiceFn<
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
-			authUser?: LucidUser;
+			authUser?: LucidActor;
 			existingVersion?: { id: number; documentId: number };
 		},
 	],

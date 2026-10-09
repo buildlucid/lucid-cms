@@ -22,7 +22,7 @@ const setReviewers: ServiceFn<
 				documents: Array<Pick<RequestDocumentRecord, "collection_key">>;
 			};
 			reviewerIds: number[];
-			userId: number;
+			userId: number | null;
 		},
 	],
 	undefined

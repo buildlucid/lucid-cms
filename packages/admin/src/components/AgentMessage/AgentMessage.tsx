@@ -49,6 +49,7 @@ export interface AgentMessageProps {
 	) => Promise<AgentWidgetSubmitResult>;
 	/** The tool call shown in the sidebar. */
 	selectedToolId?: string;
+	retriedToolIds?: ReadonlySet<string>;
 	onSelectTool?: (id: string) => void;
 	/** Whether the message is streaming in, so text and widgets that appear in it animate in, and a reply holds back its timestamp and copy button until it ends. */
 	live?: boolean;
@@ -220,6 +221,7 @@ const AgentMessage: Component<AgentMessageProps> = (props) => {
 														{(group) => (
 															<AgentToolGroup
 																group={group()}
+																retriedIds={props.retriedToolIds}
 																selectedToolId={props.selectedToolId}
 																onSelect={props.onSelectTool}
 																working={shimmers(index())}

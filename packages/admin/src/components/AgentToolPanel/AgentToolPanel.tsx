@@ -9,12 +9,14 @@ import Pill, { type PillVariant } from "@/components/Pill/Pill";
 import api from "@/services/api";
 import T from "@/translations";
 import {
+	type AgentToolDisplayStatus,
 	type AgentToolPart,
 	analyzeMediaTool,
 	isFileReadOutput,
 	isWebFetchOutput,
 	isWebSearchOutput,
 	readFileTool,
+	toolDisplayStatus,
 	toolOutputText,
 	webFetchTool,
 	webSearchTool,
@@ -28,8 +30,9 @@ const statusVariants = {
 	running: "info-subtle",
 	complete: "success-subtle",
 	failed: "danger-subtle",
+	retried: "neutral",
 	skipped: "neutral",
-} satisfies Record<AgentToolPart["status"], PillVariant>;
+} satisfies Record<AgentToolDisplayStatus, PillVariant>;
 
 const outputViewTools: ReadonlySet<string> = new Set([
 	webSearchTool,
@@ -48,6 +51,7 @@ const AgentToolPanel: Component<{
 	conversationId: string;
 	messageId: string;
 	part: AgentToolPart;
+	retried?: boolean;
 	onClose: () => void;
 	class?: string;
 }> = (props) => {
@@ -62,6 +66,7 @@ const AgentToolPanel: Component<{
 	// ----------------------------------------
 	// Memos
 	const output = createMemo(() => details.data?.data.output);
+	const status = createMemo(() => toolDisplayStatus(props.part, props.retried));
 	const v1 = createMemo(() => props.part.outputVersion === 1);
 	const unavailable = createMemo(
 		() =>
@@ -105,15 +110,15 @@ const AgentToolPanel: Component<{
 	// Render
 	return (
 		<AgentSidebarCard
-			title={toolLabel(props.part)}
+			title={toolLabel(props.part, props.retried)}
 			reveal={props.part.id}
 			onClose={props.onClose}
 			class={props.class}
 		>
 			<Show when={!isWeb()}>
 				<div class="-mt-3 flex flex-wrap items-center gap-2">
-					<Pill size="xs" variant={statusVariants[props.part.status]}>
-						{T()(`agent.tool.status.${props.part.status}`)}
+					<Pill size="xs" variant={statusVariants[status()]}>
+						{T()(`agent.tool.status.${status()}`)}
 					</Pill>
 					<code class="rounded bg-input px-1.5 py-0.5 text-[11px] text-body">
 						{props.part.name}
@@ -142,6 +147,11 @@ const AgentToolPanel: Component<{
 					/>
 				</Match>
 				<Match when={details.isSuccess}>
+					<Show when={status() === "retried"}>
+						<p class="text-sm text-muted">
+							{T()("agent.tool.retried.description")}
+						</p>
+					</Show>
 					<Show when={error()}>
 						{(message) => (
 							<ErrorMessage theme="inline" icon={false} message={message()} />

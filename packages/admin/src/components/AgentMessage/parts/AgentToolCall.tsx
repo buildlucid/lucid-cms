@@ -2,6 +2,7 @@ import classnames from "classnames";
 import {
 	TbOutlineBan,
 	TbOutlineClock,
+	TbOutlineRefresh,
 	TbOutlineSearch,
 	TbOutlineTool,
 	TbOutlineWorld,
@@ -12,25 +13,35 @@ import Spinner from "@/components/Spinner/Spinner";
 import T, { translateAdminCopy } from "@/translations";
 import {
 	type AgentToolPart,
+	toolDisplayStatus,
 	webFetchTool,
 	webSearchTool,
 } from "@/utils/agent-tools";
 
 /** The tool's saved result copy, with a state label when the call did not complete. */
-export const toolLabel = (part: AgentToolPart) => {
+export const toolLabel = (part: AgentToolPart, retried?: boolean) => {
 	const summary = translateAdminCopy(part.summary);
-	return part.status === "complete"
+	const status = toolDisplayStatus(part, retried);
+	return status === "complete"
 		? summary
-		: `${summary} · ${T()(`agent.tool.status.${part.status}`)}`;
+		: `${summary} · ${T()(`agent.tool.status.${status}`)}`;
 };
 
-export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
+/** Shows a tool call's status, muting failures recovered by later calls. */
+export const AgentToolIcon: Component<{
+	part: AgentToolPart;
+	retried?: boolean;
+}> = (props) => {
+	// ----------------------------------------
+	// Memos
+	const status = createMemo(() => toolDisplayStatus(props.part, props.retried));
+
 	// ----------------------------------------
 	// Render
 	return (
 		<span
 			class={classnames("flex size-3.5 shrink-0 items-center justify-center", {
-				"text-danger": props.part.status === "failed",
+				"text-danger": status() === "failed",
 			})}
 		>
 			<Switch>
@@ -50,8 +61,11 @@ export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
 						</Match>
 					</Switch>
 				</Match>
-				<Match when={props.part.status === "failed"}>
+				<Match when={status() === "failed"}>
 					<TbOutlineX size={11} />
+				</Match>
+				<Match when={status() === "retried"}>
+					<TbOutlineRefresh size={10} />
 				</Match>
 				<Match when={props.part.status === "skipped"}>
 					<TbOutlineBan size={10} />
@@ -63,12 +77,13 @@ export const AgentToolIcon: Component<{ part: AgentToolPart }> = (props) => {
 
 const AgentToolCall: Component<{
 	part: AgentToolPart;
+	retried?: boolean;
 	selected: boolean;
 	onSelect?: (id: string) => void;
 }> = (props) => {
 	// ----------------------------------------
 	// Memos
-	const label = createMemo(() => toolLabel(props.part));
+	const label = createMemo(() => toolLabel(props.part, props.retried));
 
 	// ----------------------------------------
 	// Render
@@ -84,7 +99,7 @@ const AgentToolCall: Component<{
 			aria-pressed={props.selected}
 			onClick={() => props.onSelect?.(props.part.id)}
 		>
-			<AgentToolIcon part={props.part} />
+			<AgentToolIcon part={props.part} retried={props.retried} />
 			<span class="min-w-0 truncate" title={label()}>
 				{label()}
 			</span>

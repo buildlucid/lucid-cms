@@ -64,6 +64,15 @@ const describeCollection: ServiceFn<
 		parentPath: string[] = [],
 	) => {
 		for (const field of fieldConfigSchema.array().parse(fields)) {
+			//* tabs and inline groups only arrange the editor, so paths match the values documents_get returns
+			if (
+				Array.isArray(field.fields) &&
+				(field.type === "tab" || field.output === "inline")
+			) {
+				addFields(field.fields, owner, brickKey, parentPath);
+				continue;
+			}
+
 			const path = [...parentPath, field.key];
 			const relationCollections = [field.collection ?? []]
 				.flat()
@@ -161,7 +170,15 @@ const describeCollection: ServiceFn<
 								}
 							: null,
 						localization: formatted.localized,
-						publishing: { targetCount: formatted.publishing.targets.length },
+						publishing: {
+							targetCount: formatted.publishing.targets.length,
+							review: {
+								create: selected.getData.publishing.review?.create ?? false,
+								delete: selected.getData.publishing.review?.delete ?? false,
+								publish: selected.getData.publishing.review?.publish ?? [],
+								unpublish: selected.getData.publishing.review?.unpublish ?? [],
+							},
+						},
 					},
 				},
 			},

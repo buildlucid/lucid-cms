@@ -26,6 +26,7 @@ const cloneVersion: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			userId: number | null;
+			agentRunId?: string;
 		},
 	],
 	{
@@ -133,7 +134,9 @@ const cloneVersion: ServiceFn<
 			promoted_from: data.fromVersionId,
 			content_id: versionRes.data.content_id,
 			created_by: data.userId,
+			created_by_run_id: data.agentRunId ?? null,
 			updated_by: data.userId,
+			updated_by_run_id: data.agentRunId ?? null,
 		},
 		{
 			tableName: tableNameRes.data.version,

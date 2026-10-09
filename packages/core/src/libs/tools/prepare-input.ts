@@ -7,6 +7,7 @@ import {
 import type { ServiceContext } from "../../utils/services/types.js";
 import logger from "../logger/index.js";
 import createToolkit from "../toolkit/create-toolkit.js";
+import describeErrorDetails from "./describe-error-details.js";
 import type {
 	AgentToolResult,
 	McpToolResult,
@@ -117,9 +118,16 @@ const prepareToolInput = async <
 
 					return {
 						type: "failed",
-						message:
-							(clientError && context.translate(result.error.message)) ||
-							context.translate("server:core.tools.failed"),
+						message: clientError
+							? [
+									context.translate(result.error.message) ||
+										context.translate("server:core.tools.failed"),
+									...(result.error.zod
+										? [describeInputIssues(result.error.zod)]
+										: []),
+									...describeErrorDetails(context, result.error),
+								].join("\n")
+							: context.translate("server:core.tools.failed"),
 					};
 				}
 

@@ -11,7 +11,7 @@ import {
 	RequestDocumentsRepository,
 } from "../../../libs/repositories/index.js";
 import type { RequestDocumentInput } from "../../../schemas/requests.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
@@ -26,7 +26,8 @@ const captureDocument: ServiceFn<
 	[
 		RequestDocumentInput & {
 			request: { id: number; type: Exclude<RequestType, "create"> };
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 			/** Callers that already hold the document's write claim. */
 			skipDocumentWriteClaims?: boolean;
 		},
@@ -168,6 +169,7 @@ const captureDocument: ServiceFn<
 				? constants.collectionBuilder.publishing.proposalVersionType
 				: constants.collectionBuilder.publishing.snapshotVersionType,
 		userId: data.user.id,
+		agentRunId: data.agentRunId,
 	});
 	if (cloneRes.error) return cloneRes;
 

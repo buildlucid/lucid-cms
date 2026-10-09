@@ -75,6 +75,7 @@ const runAgent = (authority: AgentToolAuthority) =>
 		input: {},
 		execution: {
 			authority,
+			actor: { kind: "user", userId: 1 },
 			run,
 			signal: AbortSignal.timeout(1000),
 			operationId: "run:call",
@@ -186,6 +187,7 @@ test.each([
 			input: {},
 			execution: {
 				authority: { principal: user, permissions: [], superAdmin: false },
+				actor: { kind: "user", userId: 1 },
 				run,
 				signal: AbortSignal.timeout(1000),
 				operationId: "source-summary",
@@ -224,6 +226,7 @@ test.each([
 			input: {},
 			execution: {
 				authority: { principal: user, permissions: [], superAdmin: false },
+				actor: { kind: "user", userId: 1 },
 				run,
 				signal: AbortSignal.timeout(1000),
 				operationId: "invalid-summary",
@@ -291,6 +294,7 @@ test("interaction schemas preserve raw JSON across validation and apply transfor
 	});
 	const execution = {
 		authority: { principal: user, permissions: [], superAdmin: false },
+		actor: { kind: "user", userId: 1 } as const,
 		run,
 		signal: AbortSignal.timeout(1000),
 		operationId: "transform",

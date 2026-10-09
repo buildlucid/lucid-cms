@@ -10,7 +10,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../../schemas/collection-fields.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import {
 	generateKeyBetween,
 	isFractionalOrderKey,
@@ -38,7 +38,8 @@ const saveDocument: ServiceFn<
 		{
 			collectionKey: string;
 			userId: number | null;
-			authUser?: LucidUser;
+			authUser?: LucidActor;
+			agentRunId?: string;
 
 			documentId?: number;
 			bricks?: Array<BrickInputSchema>;
@@ -165,7 +166,9 @@ const saveDocument: ServiceFn<
 							order: order ?? null,
 							create_request_id: createRequestId ?? null,
 							created_by: data.userId,
+							created_by_run_id: data.agentRunId ?? null,
 							updated_by: data.userId,
+							updated_by_run_id: data.agentRunId ?? null,
 							is_deleted: false,
 							updated_at: new Date().toISOString(),
 						},
@@ -204,6 +207,7 @@ const saveDocument: ServiceFn<
 		documentId: upsertDocRes.data.id,
 		userId: data.userId,
 		authUser: data.authUser,
+		agentRunId: data.agentRunId,
 		bricks: data.bricks,
 		fields: data.fields,
 		collection: collectionRes.data,
@@ -253,6 +257,7 @@ const saveDocument: ServiceFn<
 				where: [{ key: "id", operator: "=", value: data.documentId }],
 				data: {
 					updated_by: data.userId,
+					updated_by_run_id: data.agentRunId ?? null,
 					updated_at: new Date().toISOString(),
 					collection_migration_id: migrationIdRes.data,
 				},
@@ -284,6 +289,7 @@ const saveDocument: ServiceFn<
 			documentId: data.documentId,
 			target: "latest",
 			userId: data.userId,
+			agentRunId: data.agentRunId,
 		});
 		if (publishedRes.error) return publishedRes;
 	}

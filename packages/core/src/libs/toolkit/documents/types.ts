@@ -12,7 +12,7 @@ import type {
 export type DocumentActor = z.infer<typeof documentActorSchema>;
 /** Pass a token returned by getEditable to reject a write if that document has changed. */
 export type DocumentEditToken = z.infer<typeof documentEditTokenSchema>;
-/** Partial document values. Arrays replace their contents; JSON and rich text replace the whole field. */
+/** Partial document values. Arrays set their items, merging those that keep their ref; JSON and rich text replace the whole field. */
 export type DocumentData = z.infer<typeof documentDataSchema>;
 /** Complete stored values returned for editing, including refs for nested items. */
 export type DocumentEditableData = z.infer<typeof documentEditableDataSchema>;

@@ -41,9 +41,17 @@ export const documentVersionsTable = defineTable(
 				schema: z.number().nullable(),
 				type: "integer",
 			},
+			created_by_run_id: {
+				schema: z.string().nullable(),
+				type: "text",
+			},
 			updated_by: {
 				schema: z.number().nullable(),
 				type: "integer",
+			},
+			updated_by_run_id: {
+				schema: z.string().nullable(),
+				type: "text",
 			},
 			updated_at: {
 				schema: z.union([z.string(), z.date()]).nullable(),
@@ -75,7 +83,11 @@ export interface LucidVersionTable {
 	promoted_from: number | null;
 	content_id: string;
 	created_by: number | null;
+	/** The agent run that created it, acting for `created_by` or the system. */
+	created_by_run_id: string | null;
 	updated_by: number | null;
+	/** The agent run behind the last update, acting for `updated_by` or the system. */
+	updated_by_run_id: string | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutable;
 }

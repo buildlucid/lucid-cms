@@ -1,7 +1,7 @@
 import { copy } from "../../libs/i18n/index.js";
 import { RequestEventsRepository } from "../../libs/repositories/index.js";
 import type { RequestDocumentInput } from "../../schemas/requests.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import captureDocument from "./helpers/capture-document.js";
@@ -11,7 +11,14 @@ import getRequestAccess from "./helpers/get-request-access.js";
 
 /** Adds documents to a request and resets its approvals, capturing source content for publish requests. */
 const addDocuments: ServiceFn<
-	[{ id: number; documents: RequestDocumentInput[]; user: LucidUser }],
+	[
+		{
+			id: number;
+			documents: RequestDocumentInput[];
+			user: LucidActor;
+			agentRunId?: string;
+		},
+	],
 	undefined
 > = async (context, data) => {
 	const RequestEvents = new RequestEventsRepository(context.db);
@@ -74,6 +81,7 @@ const addDocuments: ServiceFn<
 			...document,
 			request: { id: request.id, type: request.type },
 			user: data.user,
+			agentRunId: data.agentRunId,
 			skipDocumentWriteClaims: true,
 		});
 		if (captureRes.error) return captureRes;
@@ -89,6 +97,7 @@ const addDocuments: ServiceFn<
 		data: data.documents.map((document) => ({
 			request_id: request.id,
 			user_id: data.user.id,
+			agent_run_id: data.agentRunId ?? null,
 			type: "document_added" as const,
 			metadata: {
 				collectionKey: document.collectionKey,

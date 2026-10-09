@@ -24,3 +24,6 @@ export const documentUpdateSchema = documentWriteSchema.extend({
 	/** Reject with a conflict if the document has changed since this edit token was returned. */
 	ifUnchanged: documentEditTokenSchema.optional(),
 });
+
+/** An open request whose proposal of the document to use instead of latest, eg. a create request's new document. */
+export const documentRequestIdSchema = z.number().int().positive().optional();

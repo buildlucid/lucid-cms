@@ -21,6 +21,7 @@ const AgentChatTranscript: Component<{
 	chat: AgentChat;
 	referenceDetails: Readonly<Record<string, AgentReferenceItem>>;
 	selectedToolId?: string;
+	retriedToolIds: ReadonlySet<string>;
 	onSelectTool: (id: string) => void;
 	onRespond: AgentMessageProps["onRespond"];
 	/** Whether a failed run can be retried from here. */
@@ -109,6 +110,7 @@ const AgentChatTranscript: Component<{
 								pendingInteractionId={props.chat.pendingInteraction()?.id}
 								onRespond={props.onRespond}
 								selectedToolId={props.selectedToolId}
+								retriedToolIds={props.retriedToolIds}
 								onSelectTool={props.onSelectTool}
 								live={props.chat.streaming() && isLast(index())}
 								working={activity() === "row" && isLast(index())}

@@ -7,13 +7,13 @@ import type { ServiceFn } from "../../utils/services/types.js";
 import readDocumentContent from "./helpers/read-document-content.js";
 import readDocumentState from "./helpers/read-document-state.js";
 
-/** Checks that a read did not overlap an in-place admin save or a latest-version replacement. */
+/** Reads latest or a selected proposal for editing, rejecting reads that overlap a save or version replacement. */
 const getEditable: ServiceFn<
-	[{ collectionKey: string; id: number }],
+	[{ collectionKey: string; id: number; versionId?: number }],
 	{
 		id: number;
 		editToken: DocumentEditToken;
-		version: { id: number; type: "latest"; contentId: string };
+		version: { id: number; type: string; contentId: string };
 		data: DocumentEditableData;
 	}
 > = async (context, input) => {

@@ -33,7 +33,7 @@ export type ToolkitDocumentVersion<
  */
 export type ToolkitDocuments = {
 	/**
-	 * Creates a document using field values and collection defaults. Saves latest content without publishing it.
+	 * Creates unpublished latest content with collection defaults, or a hidden create request proposal identified by `requestId`.
 	 *
 	 * @example
 	 * ```ts
@@ -53,7 +53,7 @@ export type ToolkitDocuments = {
 		input: Parameters<typeof createSingle<K>>[1],
 	) => ReturnType<typeof createSingle<K>>;
 	/**
-	 * Updates supplied values in the latest document. Omitted fields and locales are preserved; arrays replace their contents.
+	 * Updates latest or a request proposal, preserving omitted values while arrays set membership and order and retained refs merge values.
 	 *
 	 * @example
 	 * ```ts
@@ -73,7 +73,7 @@ export type ToolkitDocuments = {
 		input: Parameters<typeof updateSingle<K>>[1],
 	) => ReturnType<typeof updateSingle<K>>;
 	/**
-	 * Returns stored values, stable nested refs and an edit token. Useful for editing or conditional writes; does not reserve the document.
+	 * Reads latest or a request proposal with stable refs and an edit token, without reserving the document.
 	 *
 	 * @example
 	 * ```ts
@@ -100,8 +100,7 @@ export type ToolkitDocuments = {
 		input: Parameters<typeof getEditable<K>>[1],
 	) => ReturnType<typeof getEditable<K>>;
 	/**
-	 * Applies targeted changes in order, then validates and saves the resulting document.
-	 * Use refs from getEditable to address existing repeater items or builder bricks.
+	 * Applies ordered operations using nested refs, then validates and saves latest or the proposal selected by `requestId`.
 	 *
 	 * @example
 	 * ```ts

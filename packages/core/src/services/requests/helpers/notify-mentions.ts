@@ -26,7 +26,7 @@ const notifyMentions: ServiceFn<
 			request: { id: number; title: string };
 			body: RichTextJSON;
 			previous?: RichTextJSON | null;
-			actorUserId: number;
+			actorUserId: number | null;
 		},
 	],
 	number[]

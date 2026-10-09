@@ -16,6 +16,7 @@ const AgentChatSidebar: Component<{
 	routine?: AgentRoutine;
 	detailsOpen: boolean;
 	selectedTool?: { messageId: string; part: AgentToolPart };
+	retriedToolIds: ReadonlySet<string>;
 	onRoutineRun: (runId: string) => void;
 	onRoutineRuns: () => void;
 	onRoutineOpen: () => void;
@@ -54,6 +55,7 @@ const AgentChatSidebar: Component<{
 						conversationId={props.conversation.id}
 						messageId={tool().messageId}
 						part={tool().part}
+						retried={props.retriedToolIds.has(tool().part.id)}
 						onClose={props.onToolClose}
 						class="flex shrink-0"
 					/>

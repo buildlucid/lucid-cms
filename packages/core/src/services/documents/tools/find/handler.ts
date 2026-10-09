@@ -5,7 +5,6 @@ import type { ServiceFn } from "../../../../utils/services/types.js";
 import getMultiple from "../../content/get-multiple.js";
 import getEditLink from "../../helpers/get-edit-link.js";
 import {
-	projectDocumentBricks,
 	projectFieldMap,
 	projectRoute,
 	selectFields,
@@ -65,13 +64,6 @@ const findDocuments: ServiceFn<
 						contentLocale,
 						collection.contentFieldTree,
 					),
-					...(document.bricks && {
-						bricks: projectDocumentBricks(
-							document.bricks,
-							contentLocale,
-							collection,
-						),
-					}),
 					links: {
 						edit: getEditLink(
 							context,

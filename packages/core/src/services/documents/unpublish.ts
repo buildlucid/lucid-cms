@@ -2,7 +2,7 @@ import collections from "../../libs/collection/collections.js";
 import { copy } from "../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../libs/permission/collection-permissions.js";
 import hasAccess from "../../libs/permission/has-access.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import unpublishVersion from "../documents-versions/unpublish-version.js";
 
@@ -13,7 +13,8 @@ const unpublish: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			target: string;
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 		},
 	],
 	undefined
@@ -62,6 +63,7 @@ const unpublish: ServiceFn<
 		documentIds: [data.documentId],
 		target: data.target,
 		userId: data.user.id,
+		agentRunId: data.agentRunId,
 	});
 };
 

@@ -1,7 +1,7 @@
 import type { DocumentHookRequest } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { RequestsRepository } from "../../../libs/repositories/index.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import canEditDocument from "./can-edit-document.js";
 import getRequestAccess from "./get-request-access.js";
@@ -18,7 +18,7 @@ const checkRequestVersionAccess: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			versionId: number;
-			user?: LucidUser;
+			user?: LucidActor;
 			edit?: boolean;
 		},
 	],

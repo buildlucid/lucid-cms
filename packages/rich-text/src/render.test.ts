@@ -1,7 +1,13 @@
 import type { CollectionDocument } from "@lucidcms/types";
 import { Node } from "@tiptap/core";
 import { describe, expect, test } from "vitest";
-import { generateHTML, generateText } from "./server.js";
+import {
+	generateHTML,
+	generateJSON,
+	generateSourceHTML,
+	generateText,
+	parseSourceHTML,
+} from "./server.js";
 
 describe("generateHTML", () => {
 	test("renders hydrated internal links and drops unavailable ones", () => {
@@ -433,5 +439,79 @@ describe("generateHTML", () => {
 				{ extensions: [Heading] },
 			),
 		).toBe('<h2 class="prose-heading">Heading</h2>');
+	});
+});
+
+describe("generateSourceHTML", () => {
+	test("round-trips Lucid nodes through generateJSON", () => {
+		const html = generateSourceHTML({
+			type: "doc",
+			content: [
+				{ type: "paragraph", content: [{ type: "text", text: "Intro" }] },
+				{
+					type: "lucidMedia",
+					attrs: { mediaId: 4, media: { type: "image", src: "/a.png" } },
+				},
+				{
+					type: "lucidDocument",
+					attrs: { collectionKey: "pages", documentId: 7 },
+				},
+				{ type: "lucidEmbeddedBrick", attrs: { ref: "brick-1" } },
+			],
+		});
+
+		expect(html).not.toContain("/a.png");
+		expect(generateJSON(html).content).toEqual([
+			{ type: "paragraph", content: [{ type: "text", text: "Intro" }] },
+			{ type: "lucidMedia", attrs: { mediaId: 4, media: null } },
+			{
+				type: "lucidDocument",
+				attrs: { collectionKey: "pages", documentId: 7 },
+			},
+			{ type: "lucidEmbeddedBrick", attrs: { ref: "brick-1" } },
+		]);
+	});
+});
+
+describe("parseSourceHTML", () => {
+	test("keeps spacing as written and treats line breaks as formatting", () => {
+		const value = {
+			type: "doc",
+			content: [
+				{
+					type: "paragraph",
+					content: [
+						{ type: "text", text: "  Hello  world  " },
+						{ type: "hardBreak" },
+						{ type: "text", text: "Next" },
+					],
+				},
+			],
+		};
+
+		expect(parseSourceHTML(generateSourceHTML(value))).toEqual(value);
+		expect(
+			parseSourceHTML(
+				"<h2>Title</h2>\n<p>\n  Wrapped\n  text\n</p>\n<ul>\n  <li><p>One</p></li>\n</ul>",
+			).content,
+		).toEqual([
+			{
+				type: "heading",
+				attrs: { level: 2 },
+				content: [{ type: "text", text: "Title" }],
+			},
+			{ type: "paragraph", content: [{ type: "text", text: "Wrapped text" }] },
+			{
+				type: "bulletList",
+				content: [
+					{
+						type: "listItem",
+						content: [
+							{ type: "paragraph", content: [{ type: "text", text: "One" }] },
+						],
+					},
+				],
+			},
+		]);
 	});
 });

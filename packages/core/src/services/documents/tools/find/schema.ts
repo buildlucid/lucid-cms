@@ -6,7 +6,6 @@ import {
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
 import {
-	documentBrickSchema,
 	documentRefsSchema,
 	documentRouteSchema,
 } from "../../helpers/project-document.js";
@@ -24,12 +23,18 @@ export const inputSchema = z.object({
 		description: "Only return these top-level content fields.",
 	}),
 	query: querySchema
-		.extend(paginationInput)
+		.extend({
+			...paginationInput,
+			//* bricks are read with documents_get, in the shape the write tools accept
+			include: z
+				.array(z.enum(["refs", "refs.documents", "refs.media", "refs.users"]))
+				.optional(),
+		})
 		.prefault({})
 		.transform(normalizePaginatedDocumentQuery)
 		.meta({
 			description:
-				"Content query with nested AND/OR filters, sort, includes and pagination (perPage max 50). Prefix custom field keys with _, including routing.field: for example {_fullSlug:{operator:'starts-with',value:'/blog/'}}. Brick and repeater fields use nested keys.",
+				"Content query with nested AND/OR filters, sort, refs includes and pagination (perPage max 50). Prefix custom field keys with _, including routing.field: for example {_fullSlug:{operator:'starts-with',value:'/blog/'}}. Brick and repeater fields use nested keys.",
 		}),
 });
 
@@ -49,10 +54,6 @@ export const outputSchema = z.object({
 				fields: z.record(z.string(), z.unknown()).meta({
 					description: "Selected label fields or requested fieldKeys.",
 				}),
-				bricks: z
-					.array(documentBrickSchema)
-					.optional()
-					.meta({ description: "Bricks when query.include requests them." }),
 				links: z
 					.object({ edit: z.string() })
 					.meta({ description: "Admin editor link." }),

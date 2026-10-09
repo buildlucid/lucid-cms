@@ -20,6 +20,7 @@ const unpublishVersion: ServiceFn<
 			documentIds: number[];
 			target: string;
 			userId: number | null;
+			agentRunId?: string;
 			/** The request doing the unpublishing, which keeps its approval and is left out of the target activity. */
 			requestId?: number;
 			/** Leaves cache invalidation and change notifications to the caller, eg. a request that runs them once every document is done. */
@@ -158,6 +159,7 @@ const unpublishVersion: ServiceFn<
 					unpublished: true,
 					requestId: data.requestId,
 					userId: data.userId,
+					agentRunId: data.agentRunId,
 				});
 				if (recordRes.error) return recordRes;
 			}

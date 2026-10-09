@@ -1,4 +1,4 @@
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { RequestRecord } from "../types.js";
 import canWriteDocument from "./can-write-document.js";
 
@@ -10,7 +10,7 @@ import canWriteDocument from "./can-write-document.js";
 const canEditDocument = (data: {
 	request: Pick<RequestRecord, "type" | "status" | "created_by">;
 	collectionKey: string;
-	user: LucidUser;
+	user: LucidActor;
 }) => data.request.status === "open" && canWriteDocument(data);
 
 export default canEditDocument;

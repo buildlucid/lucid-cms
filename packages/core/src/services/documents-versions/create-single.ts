@@ -12,7 +12,7 @@ import { DocumentVersionsRepository } from "../../libs/repositories/index.js";
 
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 
 import createDocumentBricks from "../documents-bricks/create-multiple.js";
@@ -29,7 +29,8 @@ const createSingle: ServiceFn<
 			documentId: number;
 			collection: CollectionBuilder;
 			userId: number | null;
-			authUser?: LucidUser;
+			authUser?: LucidActor;
+			agentRunId?: string;
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
 			origin?: DocumentBeforeUpsertHookOrigin;
@@ -108,7 +109,9 @@ const createSingle: ServiceFn<
 			type: versionType,
 			content_id: randomUUID(),
 			created_by: data.userId,
+			created_by_run_id: data.agentRunId ?? null,
 			updated_by: data.userId,
+			updated_by_run_id: data.agentRunId ?? null,
 		},
 		{
 			tableName: tableNamesRes.data.version,

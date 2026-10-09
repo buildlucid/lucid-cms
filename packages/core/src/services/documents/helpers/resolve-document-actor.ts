@@ -7,7 +7,7 @@ import type { LucidUser } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import loadActiveUser from "../../users/helpers/load-active-user.js";
 
-/** Resolves live user permissions once at the toolkit boundary. System actors leave attribution empty. */
+/** Resolves live actor permissions at the toolkit boundary, leaving system actions without user attribution. */
 const resolveDocumentActor: ServiceFn<
 	[
 		{
@@ -16,14 +16,17 @@ const resolveDocumentActor: ServiceFn<
 			action: "read" | "create" | "update" | "delete";
 		},
 	],
-	{ userId: number | null; authUser?: LucidUser }
+	{ userId: number | null; authUser?: LucidUser; agentRunId?: string }
 > = async (context, input) => {
 	const collection = await collections.getSingle(context, {
 		key: input.collectionKey,
 	});
 	if (collection.error) return collection;
 	if (input.actor.kind === "system") {
-		return { data: { userId: null }, error: undefined };
+		return {
+			data: { userId: null, agentRunId: input.actor.agentRunId },
+			error: undefined,
+		};
 	}
 
 	const userRes = await loadActiveUser(context, { id: input.actor.userId });
@@ -59,7 +62,14 @@ const resolveDocumentActor: ServiceFn<
 		};
 	}
 
-	return { data: { userId: authUser.id, authUser }, error: undefined };
+	return {
+		data: {
+			userId: authUser.id,
+			authUser,
+			agentRunId: input.actor.agentRunId,
+		},
+		error: undefined,
+	};
 };
 
 export default resolveDocumentActor;

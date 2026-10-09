@@ -14,6 +14,7 @@ import type { RunMode } from "../agent/types.js";
 import type { AdminCopyInput, ResolvedAdminCopy } from "../i18n/types.js";
 import type { ExternalScope } from "../permission/external-scopes.js";
 import type { Permission } from "../permission/types.js";
+import type { DocumentActor } from "../toolkit/documents/types.js";
 import type { Toolkit } from "../toolkit/types.js";
 import { toolDefinitionInternal } from "./tool-definition-internal.js";
 
@@ -32,6 +33,8 @@ export type McpToolExecution = {
 };
 export type AgentToolExecution = {
 	authority: AgentToolAuthority;
+	/** Pass to toolkit writes, eg. `toolkit.documents.updateSingle`, so they act for the run's principal and are attributed to the run. */
+	actor: DocumentActor;
 	signal: AbortSignal;
 	/** Stable per tool call. Use for idempotent writes. */
 	operationId: string;

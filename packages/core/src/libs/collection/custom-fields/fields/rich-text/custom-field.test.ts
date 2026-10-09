@@ -627,7 +627,9 @@ test("returns reference metadata for missing rich-text targets", () => {
 		{
 			key: "references",
 			localeCode: null,
-			message: copy("server:core.fields.media.validation.not.found"),
+			message: copy("server:core.fields.media.validation.not.found", {
+				data: { id: 11 },
+			}),
 			meta: { reference: { type: "rich-text-media", mediaId: 11 } },
 		},
 		{

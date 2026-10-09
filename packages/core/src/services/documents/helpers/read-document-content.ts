@@ -17,7 +17,15 @@ import readDocumentState from "./read-document-state.js";
 /** Reads persisted authoring content; callers hold a write claim or verify state again after reading. */
 const readDocumentContent = async (
 	context: ServiceContext,
-	input: { collectionKey: string; id: number; allowWriteLock?: boolean },
+	input: {
+		collectionKey: string;
+		id: number;
+		/** Reads this version type, eg. a publishing target. Defaults to latest. */
+		version?: string;
+		/** Reads this version, eg. a request proposal, instead of a version type. */
+		versionId?: number;
+		allowWriteLock?: boolean;
+	},
 ) => {
 	const [state, collection, schema, tables] = await Promise.all([
 		readDocumentState(context, input),

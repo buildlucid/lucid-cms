@@ -328,7 +328,9 @@ class RichTextCustomField extends CustomField<"rich-text"> {
 					)
 						continue;
 					addError(`media:${reference.mediaId}`, {
-						message: copy("server:core.fields.media.validation.not.found"),
+						message: copy("server:core.fields.media.validation.not.found", {
+							data: { id: reference.mediaId },
+						}),
 						meta: {
 							reference: {
 								type: "rich-text-media",

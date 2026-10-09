@@ -9,9 +9,18 @@ import {
 import { documentEditTokenSchema } from "../../../libs/toolkit/documents/authoring-values-schema.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 
+/** Reads a document's latest or requested version, with a token for its stored state. */
 const readDocumentState = async (
 	context: ServiceContext,
-	input: { collectionKey: string; id: number; allowWriteLock?: boolean },
+	input: {
+		collectionKey: string;
+		id: number;
+		/** Reads this version type, eg. a publishing target. Defaults to latest. */
+		version?: string;
+		/** Reads this version, eg. a request proposal, instead of a version type. */
+		versionId?: number;
+		allowWriteLock?: boolean;
+	},
 ) => {
 	const tables = await getTableNames(context, input.collectionKey);
 	if (tables.error) return tables;
@@ -28,10 +37,12 @@ const readDocumentState = async (
 		),
 		Versions.selectSingle(
 			{
-				select: ["id", "content_id", "collection_migration_id"],
+				select: ["id", "type", "content_id", "collection_migration_id"],
 				where: [
 					{ key: "document_id", operator: "=", value: input.id },
-					{ key: "type", operator: "=", value: "latest" },
+					input.versionId === undefined
+						? { key: "type", operator: "=", value: input.version ?? "latest" }
+						: { key: "id", operator: "=", value: input.versionId },
 				],
 			},
 			{ tableName: tables.data.version },
@@ -66,7 +77,12 @@ const readDocumentState = async (
 		return {
 			error: {
 				status: 404,
-				message: copy("server:core.documents.authoring.latest.not.found"),
+				message: copy(
+					input.versionId === undefined &&
+						(input.version ?? "latest") === "latest"
+						? "server:core.documents.authoring.latest.not.found"
+						: "server:core.documents.versions.not.found.message",
+				),
 			},
 			data: undefined,
 		};
@@ -93,7 +109,7 @@ const readDocumentState = async (
 			writeLock: document.write_lock,
 			version: {
 				id: version.id,
-				type: "latest" as const,
+				type: version.type,
 				contentId: version.content_id,
 			},
 		},

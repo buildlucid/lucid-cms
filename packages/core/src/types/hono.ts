@@ -24,6 +24,16 @@ export type LucidUser = {
 	permissions: UserPermission["permissions"] | undefined;
 };
 
+/** Trusted system actor with every permission and no user attribution. */
+export type LucidSystemActor = {
+	id: null;
+	superAdmin: true;
+	permissions: undefined;
+};
+
+/** Who performs an action: a user with their permissions, or the system. */
+export type LucidActor = LucidUser | LucidSystemActor;
+
 /** Admin identity with the verified access token metadata. */
 export type LucidAuth = LucidUser & {
 	exp: number;

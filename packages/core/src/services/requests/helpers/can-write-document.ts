@@ -1,6 +1,6 @@
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { RequestRecord } from "../types.js";
 import requestTypePermissions from "./request-type-permissions.js";
 
@@ -8,7 +8,7 @@ import requestTypePermissions from "./request-type-permissions.js";
 const canWriteDocument = (data: {
 	request: Pick<RequestRecord, "type" | "created_by">;
 	collectionKey: string;
-	user: LucidUser;
+	user: LucidActor;
 }) => {
 	const { write, ownWrite } = requestTypePermissions[data.request.type];
 

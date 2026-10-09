@@ -11,6 +11,8 @@ export type FieldTree = FieldConfig<FieldTypes>[];
 export type DocumentObjectShape = {
 	kind: "object";
 	children: Map<string, DocumentShape>;
+	/** Set for a localized field's values keyed by locale. */
+	localized?: true;
 };
 export type DocumentShape =
 	| DocumentObjectShape
@@ -91,6 +93,7 @@ export const getDocumentShape = (
 				localization.enabled && instance?.localizedEnabled
 					? {
 							kind: "object",
+							localized: true,
 							children: new Map(
 								localization.locales.map((locale) => [locale, value]),
 							),

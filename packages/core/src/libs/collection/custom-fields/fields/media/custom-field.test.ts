@@ -340,7 +340,9 @@ test("fail to validate field - media", async () => {
 		{
 			key: "required_media",
 			localeCode: null,
-			message: copy("server:core.fields.media.validation.not.found"),
+			message: copy("server:core.fields.media.validation.not.found", {
+				data: { id: 1 },
+			}),
 			itemIndex: 0,
 		},
 	]);
@@ -746,13 +748,17 @@ test("media field validates multiple item counts and indexed errors", async () =
 		{
 			key: "multi_media",
 			localeCode: null,
-			message: copy("server:core.fields.media.validation.not.found"),
+			message: copy("server:core.fields.media.validation.not.found", {
+				data: { id: 99 },
+			}),
 			itemIndex: 1,
 		},
 		{
 			key: "multi_media",
 			localeCode: null,
-			message: copy("server:core.fields.media.validation.not.found"),
+			message: copy("server:core.fields.media.validation.not.found", {
+				data: { id: 100 },
+			}),
 			itemIndex: 2,
 		},
 	]);

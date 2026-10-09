@@ -4,11 +4,7 @@ import {
 } from "../../../libs/repositories/index.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 
-/**
- * Records a change to a proposal, eg. its workflow stage or content, in the
- * activity of the open request that owns it. Consecutive edits by the same
- * person are recorded once, so autosave doesn't flood the activity.
- */
+/** Records proposal activity, combining consecutive content edits from the same user and agent run. */
 const recordProposalActivity: ServiceFn<
 	[
 		{
@@ -16,6 +12,7 @@ const recordProposalActivity: ServiceFn<
 			documentId: number;
 			versionId: number;
 			userId: number | null;
+			agentRunId?: string;
 		} & (
 			| { type: "workflow_updated"; stage: string }
 			| { type: "proposal_edited" }
@@ -38,7 +35,7 @@ const recordProposalActivity: ServiceFn<
 
 	if (data.type === "proposal_edited") {
 		const latestRes = await RequestEvents.selectMultiple({
-			select: ["type", "user_id", "metadata"],
+			select: ["type", "user_id", "agent_run_id", "metadata"],
 			where: [{ key: "request_id", operator: "=", value: document.request_id }],
 			orderBy: [{ column: "id", direction: "desc" }],
 			limit: 1,
@@ -49,6 +46,7 @@ const recordProposalActivity: ServiceFn<
 		if (
 			latest?.type === "proposal_edited" &&
 			latest.user_id === data.userId &&
+			latest.agent_run_id === (data.agentRunId ?? null) &&
 			latest.metadata?.requestDocumentId === document.id
 		) {
 			return { error: undefined, data: undefined };
@@ -61,12 +59,14 @@ const recordProposalActivity: ServiceFn<
 				? {
 						request_id: document.request_id,
 						user_id: data.userId,
+						agent_run_id: data.agentRunId ?? null,
 						type: "workflow_updated",
 						metadata: { requestDocumentId: document.id, stage: data.stage },
 					}
 				: {
 						request_id: document.request_id,
 						user_id: data.userId,
+						agent_run_id: data.agentRunId ?? null,
 						type: "proposal_edited",
 						metadata: { requestDocumentId: document.id },
 					},

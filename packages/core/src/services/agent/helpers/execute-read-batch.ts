@@ -35,6 +35,14 @@ const executeReadBatch: ServiceFn<
 > = async (context, { run, checkpoint, session, authority, batch }) => {
 	const executionFor = (call: ToolCall): AgentToolExecution => ({
 		authority,
+		actor:
+			authority.principal.type === "user"
+				? {
+						kind: "user",
+						userId: authority.principal.userId,
+						agentRunId: run.id,
+					}
+				: { kind: "system", agentRunId: run.id },
 		signal: session.signal,
 		operationId: `${run.id}:${call.id}`,
 		run: {

@@ -38,6 +38,7 @@ import {
 } from "@/utils/agent-references";
 import {
 	analyzeMediaTool,
+	documentWriteTools,
 	previewMediaTool,
 	readFileTool,
 	registerReferencesTool,
@@ -142,7 +143,8 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			name === registerReferencesTool ||
 			name === removeReferenceTool ||
 			name === analyzeMediaTool ||
-			name === readFileTool
+			name === readFileTool ||
+			documentWriteTools.includes(name)
 		) {
 			void refreshReferences(id);
 		}

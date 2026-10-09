@@ -17,6 +17,7 @@ const recordTargetChange: ServiceFn<
 			/** The request making the change. Null for a direct change. */
 			requestId?: number;
 			userId: number | null;
+			agentRunId?: string;
 		},
 	],
 	undefined
@@ -41,6 +42,7 @@ const recordTargetChange: ServiceFn<
 		data: documents.map((document) => ({
 			request_id: document.request_id,
 			user_id: data.userId,
+			agent_run_id: data.agentRunId ?? null,
 			type: data.unpublished
 				? ("target_unpublished" as const)
 				: ("target_published" as const),

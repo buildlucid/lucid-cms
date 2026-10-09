@@ -20,23 +20,35 @@ const escapeAttribute = (value: string | number) =>
 		.replaceAll('"', "&quot;")
 		.replaceAll("<", "&lt;");
 
+const attachmentAttributes = (reference: AgentReferenceSnapshot) => {
+	switch (reference.type) {
+		case "media":
+			return {
+				type: "media",
+				media_id: reference.mediaId,
+				name: reference.label,
+				mime_type: reference.mimeType,
+			};
+		case "document":
+			return {
+				type: "document",
+				collection_key: reference.collectionKey,
+				document_id: reference.documentId,
+				version_id: reference.versionId,
+				name: reference.label,
+			};
+		case "request":
+			return {
+				type: "request",
+				request_id: reference.requestId,
+				name: reference.label,
+			};
+	}
+};
+
 /** Labels come from CMS content, so they stay quoted attribute values rather than message text. */
 const attachmentTag = (reference: AgentReferenceSnapshot) => {
-	const attributes =
-		reference.type === "media"
-			? {
-					type: "media",
-					media_id: reference.mediaId,
-					name: reference.label,
-					mime_type: reference.mimeType,
-				}
-			: {
-					type: "document",
-					collection_key: reference.collectionKey,
-					document_id: reference.documentId,
-					version_id: reference.versionId,
-					name: reference.label,
-				};
+	const attributes = attachmentAttributes(reference);
 
 	return `<attachment ${Object.entries(attributes)
 		.flatMap(([key, value]) =>

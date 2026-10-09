@@ -3950,6 +3950,7 @@ test("every attempt at one web call reuses its key, so a resumed run never pays 
 					permissions: [],
 					superAdmin: false,
 				},
+				actor: { kind: "user", userId, agentRunId: prepared.runId },
 				signal: new AbortController().signal,
 				operationId: `${prepared.runId}:${callId}`,
 				run: {

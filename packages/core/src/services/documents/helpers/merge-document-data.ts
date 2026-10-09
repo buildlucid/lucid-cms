@@ -15,6 +15,7 @@ import type {
 	DocumentData,
 	DocumentEditableData,
 } from "../../../libs/toolkit/documents/types.js";
+import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 import type { ServiceResponse } from "../../../utils/services/types.js";
 import readDocumentObject from "./read-document-object.js";
 
@@ -64,7 +65,7 @@ const mergeObject = (
 	return { error: undefined, data };
 };
 
-/** Resolves complete array items and assigns references to new repeaters and builder bricks. */
+/** Sets array membership and order, merging items by ref and brick key and assigning defaults and refs to new items. */
 export const mergeItems = (
 	shape: Extract<DocumentShape, { kind: "items" | "bricks" }>,
 	input: unknown,
@@ -162,10 +163,19 @@ export const mergeItems = (
 			};
 		}
 
+		const previous =
+			parsed.data.ref === undefined || !Array.isArray(current)
+				? undefined
+				: current.find(
+						(item: unknown) =>
+							isPlainObject(item) &&
+							item.ref === parsed.data.ref &&
+							item.key === key,
+					);
 		const merged = mergeObject(
 			fields,
 			parsed.data.fields,
-			undefined,
+			isPlainObject(previous) ? previous.fields : undefined,
 			`${path}[${index}].fields`,
 		);
 		if (merged.error) return merged;
@@ -180,7 +190,7 @@ export const mergeItems = (
 	return { error: undefined, data };
 };
 
-/** Merges schema objects by key. Field values and arrays replace the whole value. */
+/** Merges schema objects by key and array items by ref, replacing whole field values. */
 export const mergeValue = (
 	shape: DocumentShape,
 	input: unknown,

@@ -1,5 +1,5 @@
 import { copy } from "../../../libs/i18n/index.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import acquireDocumentWrites from "../../documents/helpers/acquire-document-writes.js";
 import type { RequestRecord } from "../types.js";
@@ -11,7 +11,7 @@ const acquireRequestWrites: ServiceFn<
 	[
 		{
 			id: number;
-			user?: LucidUser;
+			user?: LucidActor;
 			/** Documents being added, which are claimed with the rest. */
 			additionalDocuments?: Array<{
 				collectionKey: string;

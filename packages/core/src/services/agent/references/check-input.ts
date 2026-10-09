@@ -9,6 +9,7 @@ import type { ServiceFn } from "../../../utils/services/types.js";
 import resolveUserAccess from "../../users/resolve-access.js";
 import describe from "./describe.js";
 import mediaOwnership from "./media-ownership.js";
+import referenceNotFound from "./reference-not-found.js";
 
 /** Checks attachments against the agent's settings, the sender's current access and whether each resource exists. Personal media can only be attached by its owner. */
 const checkInput: ServiceFn<
@@ -32,12 +33,13 @@ const checkInput: ServiceFn<
 	if (ownership.error) return ownership;
 
 	for (const reference of input.references) {
+		//* requests are only linked by tools for now
 		const attachable =
 			reference.type === "media"
 				? agent?.features.media.attach ||
 					(ownership.data.get(reference.mediaId)?.type === "user" &&
 						agent?.features.media.upload)
-				: agent?.features.documents.attach;
+				: reference.type === "document" && agent?.features.documents.attach;
 
 		const detail = details.data.get(referenceKey(reference));
 
@@ -69,10 +71,7 @@ const checkInput: ServiceFn<
 				error: {
 					type: "basic",
 					status: 404,
-					message:
-						reference.type === "media"
-							? copy("server:core.media.not.found.message")
-							: copy("server:core.documents.not.found.message"),
+					message: referenceNotFound(reference),
 				},
 			};
 		}

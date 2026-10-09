@@ -2,6 +2,7 @@ import {
 	TbOutlineFile,
 	TbOutlineFileMusic,
 	TbOutlineFileText,
+	TbOutlineGitPullRequest,
 	TbOutlineMovie,
 	TbOutlinePhoto,
 } from "solid-icons/tb";
@@ -40,6 +41,9 @@ const AgentReferenceThumb: Component<{
 						</Match>
 						<Match when={kind() === "text"}>
 							<TbOutlineFileText size={size()} />
+						</Match>
+						<Match when={kind() === "request"}>
+							<TbOutlineGitPullRequest size={size()} />
 						</Match>
 					</Switch>
 				</span>

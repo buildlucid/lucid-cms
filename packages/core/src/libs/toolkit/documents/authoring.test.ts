@@ -15,6 +15,7 @@ import upsertSingle from "../../../services/documents/upsert-single.js";
 import updateVersion from "../../../services/documents-versions/update-single.js";
 import syncCollections from "../../../services/sync/sync-collections.js";
 import syncLocales from "../../../services/sync/sync-locales.js";
+import isPlainObject from "../../../utils/helpers/is-plain-object.js";
 import createServiceContext from "../../../utils/services/create-service-context.js";
 import serviceWrapper from "../../../utils/services/service-wrapper.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
@@ -536,6 +537,122 @@ describe("document authoring toolkit", () => {
 			changed: false,
 			editToken: updated.data.editToken,
 		});
+	});
+
+	test("creates documents as create requests and edits their proposal by request", async () => {
+		const created = await toolkit.documents.createSingle({
+			collectionKey: collection.key,
+			actor,
+			request: { title: "New article" },
+			data: { fields: { title: { en: "Requested", fr: "Demandé" } } },
+		});
+		assert(created.data, JSON.stringify(created.error));
+		const requestId = created.data.requestId;
+		assert(requestId);
+		expect(created.data.version.type).toBe("proposal");
+		const target = { collectionKey: collection.key, id: created.data.id };
+
+		//* the requested document has no latest version until the request completes
+		expect((await toolkit.documents.getEditable(target)).error?.status).toBe(
+			404,
+		);
+		const proposal = await toolkit.documents.getEditable({
+			...target,
+			requestId,
+		});
+		assert(proposal.data, JSON.stringify(proposal.error));
+		expect(proposal.data.data.fields.title).toEqual({
+			en: "Requested",
+			fr: "Demandé",
+		});
+
+		const updated = await toolkit.documents.updateSingle({
+			...target,
+			actor,
+			requestId,
+			ifUnchanged: proposal.data.editToken,
+			data: { fields: { title: { en: "Updated" } } },
+		});
+		assert(updated.data, JSON.stringify(updated.error));
+		const stale = await toolkit.documents.patchSingle({
+			...target,
+			actor,
+			requestId,
+			ifUnchanged: proposal.data.editToken,
+			operations: [
+				{ op: "set", path: ["fields", "title", "fr"], value: "Non" },
+			],
+		});
+		expect(stale.error?.status).toBe(409);
+		const patched = await toolkit.documents.patchSingle({
+			...target,
+			actor,
+			requestId,
+			operations: [
+				{ op: "set", path: ["fields", "title", "fr"], value: "Mis à jour" },
+			],
+		});
+		assert(patched.data, JSON.stringify(patched.error));
+
+		const after = await toolkit.documents.getEditable({ ...target, requestId });
+		expect(after.data?.data.fields.title).toEqual({
+			en: "Updated",
+			fr: "Mis à jour",
+		});
+		expect(
+			(
+				await toolkit.documents.getEditable({
+					...target,
+					requestId: requestId + 1,
+				})
+			).error?.status,
+		).toBe(404);
+	});
+
+	test("merges array items that keep their ref with their stored values", async () => {
+		const created = await create();
+		assert(created.data, JSON.stringify(created.error));
+		const target = { collectionKey: collection.key, id: created.data.id };
+		const original = await toolkit.documents.getEditable(target);
+		assert(original.data);
+		const [hero] = original.data.data.bricks.builder;
+		const links = original.data.data.fields.links;
+		assert(hero && Array.isArray(links) && isPlainObject(links[0]));
+
+		const updated = await toolkit.documents.updateSingle({
+			...target,
+			actor,
+			data: {
+				fields: {
+					links: [{ ref: String(links[0].ref), fields: { label: "Changed" } }],
+				},
+				bricks: {
+					builder: [
+						{
+							ref: hero.ref,
+							key: "hero",
+							fields: { heading: { fr: "Nouveau" } },
+						},
+					],
+				},
+			},
+		});
+		assert(updated.data, JSON.stringify(updated.error));
+		const after = await toolkit.documents.getEditable(target);
+		assert(after.data);
+		expect(after.data.data.fields.links).toEqual([
+			{
+				ref: links[0].ref,
+				fields: { label: "Changed", children: links[0].fields.children },
+			},
+		]);
+		expect(after.data.data.bricks.builder).toEqual([
+			{
+				ref: hero.ref,
+				key: "hero",
+				fields: { heading: { en: "Heading", fr: "Nouveau" } },
+			},
+		]);
 	});
 
 	test("patches and moves nested items by ref, replaces JSON and validates the final result atomically", async () => {

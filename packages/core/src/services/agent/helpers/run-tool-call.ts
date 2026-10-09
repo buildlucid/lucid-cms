@@ -5,7 +5,10 @@ import {
 	toolInteractionAnswer,
 } from "../../../libs/agent/interactions.js";
 import { prepareAgentTool } from "../../../libs/tools/execute-tool.js";
-import type { AgentToolAuthority } from "../../../libs/tools/types.js";
+import type {
+	AgentToolAuthority,
+	AgentToolExecution,
+} from "../../../libs/tools/types.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import invokeAgentTool from "./invoke-agent-tool.js";
 import type { RunSession } from "./run-session.js";
@@ -59,8 +62,16 @@ const runToolCall = async (
 	const approval = requiresApproval
 		? { toolName: tool.name, input: call.input }
 		: undefined;
-	const execution = {
+	const execution: AgentToolExecution = {
 		authority: props.authority,
+		actor:
+			props.authority.principal.type === "user"
+				? {
+						kind: "user",
+						userId: props.authority.principal.userId,
+						agentRunId: run.id,
+					}
+				: { kind: "system", agentRunId: run.id },
 		signal: session.signal,
 		operationId: `${run.id}:${call.id}`,
 		run: {

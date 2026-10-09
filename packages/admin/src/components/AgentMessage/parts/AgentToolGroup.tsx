@@ -9,11 +9,15 @@ import {
 	Show,
 } from "solid-js";
 import T, { translateAdminCopy } from "@/translations";
-import type { AgentToolGroup as ToolGroup } from "@/utils/agent-tools";
+import {
+	type AgentToolGroup as ToolGroup,
+	toolDisplayStatus,
+} from "@/utils/agent-tools";
 import AgentToolCall, { AgentToolIcon } from "./AgentToolCall";
 
 const AgentToolGroup: Component<{
 	group: ToolGroup;
+	retriedIds?: ReadonlySet<string>;
 	selectedToolId?: string;
 	onSelect?: (id: string) => void;
 	working?: boolean;
@@ -26,9 +30,16 @@ const AgentToolGroup: Component<{
 	// ----------------------------------------
 	// Memos
 	const counts = createMemo(() => {
-		const totals = { failed: 0, skipped: 0, running: 0, pending: 0 };
+		const totals = {
+			failed: 0,
+			retried: 0,
+			skipped: 0,
+			running: 0,
+			pending: 0,
+		};
 		for (const call of props.group.calls) {
-			if (call.status !== "complete") totals[call.status]++;
+			const status = toolDisplayStatus(call, props.retriedIds?.has(call.id));
+			if (status !== "complete") totals[status]++;
 		}
 		return totals;
 	});
@@ -39,6 +50,10 @@ const AgentToolGroup: Component<{
 			props.group.latest,
 	);
 	const summary = createMemo(() => translateAdminCopy(latest().summary));
+
+	// ----------------------------------------
+	// Functions
+	const isRetried = (id: string) => props.retriedIds?.has(id) ?? false;
 
 	// ----------------------------------------
 	// Render
@@ -53,6 +68,7 @@ const AgentToolGroup: Component<{
 				>
 					<AgentToolCall
 						part={props.group.latest}
+						retried={isRetried(props.group.latest.id)}
 						selected={props.selectedToolId === props.group.latest.id}
 						onSelect={props.onSelect}
 					/>
@@ -70,7 +86,7 @@ const AgentToolGroup: Component<{
 					aria-controls={detailsId}
 					onClick={() => setExpanded((value) => !value)}
 				>
-					<AgentToolIcon part={latest()} />
+					<AgentToolIcon part={latest()} retried={isRetried(latest().id)} />
 					<span class="min-w-0 truncate" title={summary()}>
 						{summary()}
 					</span>
@@ -80,6 +96,11 @@ const AgentToolGroup: Component<{
 					<Show when={counts().failed}>
 						<span class="shrink-0 rounded bg-danger/10 px-1 text-danger tabular-nums">
 							{T()("agent.tool.group.failed", { count: counts().failed })}
+						</span>
+					</Show>
+					<Show when={counts().retried}>
+						<span class="shrink-0 tabular-nums">
+							{T()("agent.tool.group.retried", { count: counts().retried })}
 						</span>
 					</Show>
 					<Show when={counts().skipped}>
@@ -110,6 +131,7 @@ const AgentToolGroup: Component<{
 							{(call) => (
 								<AgentToolCall
 									part={call}
+									retried={isRetried(call.id)}
 									selected={props.selectedToolId === call.id}
 									onSelect={props.onSelect}
 								/>

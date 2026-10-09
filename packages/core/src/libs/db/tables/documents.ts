@@ -53,6 +53,10 @@ export const documentsTable = defineTable(
 				schema: z.number().nullable(),
 				type: "integer",
 			},
+			created_by_run_id: {
+				schema: z.string().nullable(),
+				type: "text",
+			},
 			created_at: {
 				schema: z.union([z.string(), z.date()]).nullable(),
 				type: "timestamp",
@@ -60,6 +64,10 @@ export const documentsTable = defineTable(
 			updated_by: {
 				schema: z.number().nullable(),
 				type: "integer",
+			},
+			updated_by_run_id: {
+				schema: z.string().nullable(),
+				type: "text",
 			},
 			updated_at: {
 				schema: z.union([z.string(), z.date()]).nullable(),
@@ -103,7 +111,11 @@ export interface LucidDocumentTable {
 	/** The open create request requesting this document. Null once created. */
 	create_request_id: number | null;
 	created_by: number | null;
+	/** The agent run that created it, acting for `created_by` or the system. */
+	created_by_run_id: string | null;
 	created_at: TimestampImmutable;
 	updated_by: number | null;
+	/** The agent run behind the last update, acting for `updated_by` or the system. */
+	updated_by_run_id: string | null;
 	updated_at: TimestampMutable;
 }

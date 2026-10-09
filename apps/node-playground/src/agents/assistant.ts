@@ -13,6 +13,7 @@ export const assistantAgent = defineAgent({
 		"Answers questions about your content and tries out playground tools.",
 	tools: [
 		agentTools.content(),
+		agentTools.editing(),
 		echoAgentTool,
 		addAgentTool,
 		saveNoteTool,

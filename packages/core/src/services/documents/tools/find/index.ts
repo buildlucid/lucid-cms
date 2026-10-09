@@ -17,7 +17,7 @@ export const findDocumentsMcpTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_find",
 		title: copy("admin:core.tools.documents_find.title"),
 		description:
-			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated results.",
+			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated summaries; read a document with documents_get for its bricks and before updating it.",
 		input: inputSchema,
 		output: outputSchema,
 		scopes: [],
@@ -45,7 +45,7 @@ export const findDocumentsAgentTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_find",
 		title: copy("admin:core.tools.documents_find.title"),
 		description:
-			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated results.",
+			"Search a collection for documents matching field, brick, or repeater filters, including nested fields. Returns paginated summaries; read a document with documents_get for its bricks and before updating it.",
 		input: inputSchema,
 		output: outputSchema,
 		permissions: [],

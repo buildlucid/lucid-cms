@@ -1,11 +1,15 @@
 import z from "zod";
 
+/** The agent run making a change for the actor. Agent tools receive it as `execution.actor`. */
+const agentRunIdSchema = z.uuid().optional();
+
 /** Identifies who is making a document change. System writes have no user attribution. */
 export const documentActorSchema = z.discriminatedUnion("kind", [
-	z.strictObject({ kind: z.literal("system") }),
+	z.strictObject({ kind: z.literal("system"), agentRunId: agentRunIdSchema }),
 	z.strictObject({
 		kind: z.literal("user"),
 		userId: z.number().int().positive(),
+		agentRunId: agentRunIdSchema,
 	}),
 ]);
 
@@ -19,7 +23,7 @@ export const documentEditTokenSchema = z
 export const documentFieldsSchema = z.record(z.string(), z.unknown());
 
 export const documentGroupSchema = z.strictObject({
-	/** Keep this reference when replacing an existing item. Omit it for a new item. */
+	/** Keep this reference to update an existing item; omitted fields keep their values. Omit it for a new item. */
 	ref: documentRefSchema.optional(),
 	fields: documentFieldsSchema,
 });
@@ -35,9 +39,9 @@ export const documentDataSchema = z.strictObject({
 		.strictObject({
 			/** Fixed brick fields keyed by brick name. Omitted bricks and fields are preserved. */
 			fixed: z.record(z.string(), documentFieldsSchema).optional(),
-			/** Replaces the ordered builder bricks. An empty array removes all builder bricks. */
+			/** Sets the ordered builder bricks. Bricks that keep their ref merge with their values; an empty array removes all builder bricks. */
 			builder: z.array(documentBrickSchema).optional(),
-			/** Replaces embedded bricks. References must match the references in rich text. */
+			/** Sets embedded bricks, merging those that keep their ref. References must match the references in rich text. */
 			embedded: z.array(documentBrickSchema.required({ ref: true })).optional(),
 		})
 		.optional(),

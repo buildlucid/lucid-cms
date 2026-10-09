@@ -1,8 +1,8 @@
 import { referenceKey } from "../../../libs/agent/references.js";
-import { copy } from "../../../libs/i18n/index.js";
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
+	AgentRequestReferencesRepository,
 } from "../../../libs/repositories/index.js";
 import type {
 	AgentReferenceInput,
@@ -11,13 +11,10 @@ import type {
 } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import describe from "./describe.js";
+import linkRequestedDocuments from "./link-requested-documents.js";
+import referenceNotFound from "./reference-not-found.js";
 
-/**
- * Links resources to a chat without changing them or granting access to them,
- * and returns what was linked with its current details. `skipMissing` leaves
- * out resources deleted since a message was queued, rather than failing it.
- * `managed` locks tool links so only the toolkit can unlink them.
- */
+/** Links resources without granting access, substituting create requests for pending documents. */
 const register: ServiceFn<
 	[
 		{
@@ -30,9 +27,14 @@ const register: ServiceFn<
 	],
 	AgentReferenceSnapshot[]
 > = async (context, input) => {
+	const linked = await linkRequestedDocuments(context, {
+		references: input.references,
+	});
+	if (linked.error) return linked;
+
 	const references = [
 		...new Map(
-			input.references.map((reference) => [referenceKey(reference), reference]),
+			linked.data.map((reference) => [referenceKey(reference), reference]),
 		).values(),
 	];
 	if (!references.length) return { error: undefined, data: [] };
@@ -50,10 +52,7 @@ const register: ServiceFn<
 				error: {
 					type: "basic",
 					status: 404,
-					message:
-						reference.type === "media"
-							? copy("server:core.media.not.found.message")
-							: copy("server:core.documents.not.found.message"),
+					message: referenceNotFound(reference),
 				},
 			};
 		}
@@ -71,12 +70,16 @@ const register: ServiceFn<
 	const documents = snapshots.filter(
 		(reference) => reference.type === "document",
 	);
+	const requestIds = snapshots.flatMap((reference) =>
+		reference.type === "request" ? [reference.requestId] : [],
+	);
 	const toolName =
 		input.source.type === "tool" ? input.source.toolName : undefined;
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
+	const Requests = new AgentRequestReferencesRepository(context.db);
 
-	const [media, documentLinks] = await Promise.all([
+	const [media, documentLinks, requestLinks] = await Promise.all([
 		mediaIds.length
 			? Media.register({
 					conversationId: input.conversationId,
@@ -95,9 +98,19 @@ const register: ServiceFn<
 					managed: input.managed,
 				})
 			: undefined,
+		requestIds.length
+			? Requests.register({
+					conversationId: input.conversationId,
+					requestIds,
+					source: input.source.type,
+					toolName,
+					managed: input.managed,
+				})
+			: undefined,
 	]);
 	if (media?.error) return media;
 	if (documentLinks?.error) return documentLinks;
+	if (requestLinks?.error) return requestLinks;
 
 	return { error: undefined, data: snapshots };
 };

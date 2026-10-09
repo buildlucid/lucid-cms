@@ -1,12 +1,10 @@
 import z from "zod";
 import { querySchema } from "../../../../libs/toolkit/documents/get-single/schema.js";
-import { normalizeDocumentQuery } from "../../../../libs/toolkit/utils.js";
 import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
 import {
-	documentBrickSchema,
 	documentMetaSchema,
 	documentRefsSchema,
 	documentRouteSchema,
@@ -16,7 +14,8 @@ export const inputSchema = z.object({
 	collectionKey: z.string().min(1),
 	id: z.number().int().positive(),
 	version: z.string().trim().min(1).default("latest").meta({
-		description: "Content version, usually latest or a publishing target.",
+		description:
+			"Content version, usually latest or a publishing target. Ignored with requestId.",
 	}),
 	contentLocale: z.string().min(1).optional().meta({
 		description:
@@ -27,13 +26,28 @@ export const inputSchema = z.object({
 	}),
 	bricksPage: paginationInput.page,
 	bricksPerPage: paginationInput.perPage,
-	query: querySchema
-		.prefault({ include: ["bricks", "meta"] })
-		.transform(normalizeDocumentQuery)
-		.meta({
-			description:
-				"Additional content filters and includes using the toolkit query shape.",
-		}),
+	include: querySchema.shape.include.default(["bricks", "meta"]).meta({
+		description:
+			"What to return besides fields: bricks, meta (versions and authors), and refs to the documents, media and users the content links to.",
+	}),
+});
+
+export const agentInputSchema = inputSchema.extend({
+	requestId: z.number().int().positive().optional().meta({
+		description:
+			"Read the document's proposal in this request instead, eg. one opened by documents_create or documents_update.",
+	}),
+});
+
+/** A brick in the shape the write tools accept. */
+const brickSchema = z.object({
+	ref: z.string().optional().meta({
+		description:
+			"Stable ref for builder and embedded bricks. Fixed bricks use their key.",
+	}),
+	key: z.string(),
+	type: z.enum(["fixed", "builder", "embedded"]),
+	fields: z.record(z.string(), z.unknown()),
 });
 
 export const outputSchema = z.object({
@@ -45,19 +59,25 @@ export const outputSchema = z.object({
 				.string()
 				.nullable()
 				.meta({ description: "Resolved content version." }),
+			requestId: z
+				.number()
+				.nullable()
+				.meta({ description: "The request whose proposal was read." }),
 			route: documentRouteSchema,
-			fields: z
-				.record(z.string(), z.unknown())
-				.meta({ description: "Selected content field values." }),
-			bricks: z
-				.array(documentBrickSchema)
-				.meta({ description: "Selected page of content bricks." }),
+			fields: z.record(z.string(), z.unknown()).meta({
+				description:
+					"Selected field values in the content language, as documents_update accepts them. Rich text is HTML and repeater items keep their refs.",
+			}),
+			bricks: z.array(brickSchema).meta({
+				description:
+					"Selected page of bricks: fixed, then builder in page order, then embedded.",
+			}),
 			meta: documentMetaSchema
 				.optional()
 				.meta({ description: "Content version metadata when requested." }),
 			links: z
 				.object({ edit: z.string() })
-				.meta({ description: "Admin editor link." }),
+				.meta({ description: "Admin editor or request link." }),
 		})
 		.meta({ description: "Requested document content." }),
 	meta: z
@@ -73,7 +93,7 @@ export const outputSchema = z.object({
 			}),
 			refs: documentRefsSchema
 				.optional()
-				.meta({ description: "Scoped references requested by query.include." }),
+				.meta({ description: "Scoped references requested by include." }),
 		})
 		.meta({
 			description: "Read context, brick pagination and optional references.",

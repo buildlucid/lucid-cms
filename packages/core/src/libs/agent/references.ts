@@ -9,16 +9,36 @@ import hasPermission, {
 } from "../permission/has-permission.js";
 
 /** Identifies a linked resource, including a pinned document version. */
-export const referenceKey = (reference: AgentReferenceInput) =>
-	reference.type === "media"
-		? `media:${reference.mediaId}`
-		: `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
+export const referenceKey = (reference: AgentReferenceInput) => {
+	switch (reference.type) {
+		case "media":
+			return `media:${reference.mediaId}`;
+		case "document":
+			return `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
+		case "request":
+			return `request:${reference.requestId}`;
+	}
+};
 
-/** The permission needed to read a referenced resource. */
-export const referenceReadPermission = (reference: AgentReferenceInput) =>
-	reference.type === "media"
-		? Permissions.MediaRead
-		: getCollectionPermission(reference.collectionKey, "read");
+/** Returns read permissions for a reference, including every collection in a request. */
+export const referenceReadPermissions = (
+	reference: AgentReferenceInput,
+	requestCollections: readonly string[] = [],
+) => {
+	switch (reference.type) {
+		case "media":
+			return [Permissions.MediaRead];
+		case "document":
+			return [getCollectionPermission(reference.collectionKey, "read")];
+		case "request":
+			return [
+				Permissions.RequestsRead,
+				...requestCollections.map((key) =>
+					getCollectionPermission(key, "read"),
+				),
+			];
+	}
+};
 
 /**
  * Whether a principal can link or read a resource in a chat. Personal media is
@@ -30,6 +50,8 @@ export const canReadReference = (props: {
 	reference: AgentReferenceInput;
 	/** The media's ownership. Missing ownership is treated as library media. */
 	ownership?: MediaOwnership;
+	/** The request's collections, for request references. */
+	requestCollections?: readonly string[];
 	userId: number | null;
 	grant?: PermissionGrant;
 }) => {
@@ -40,8 +62,11 @@ export const canReadReference = (props: {
 		}
 	}
 
+	const { grant } = props;
 	return (
-		props.grant === undefined ||
-		hasPermission(props.grant, referenceReadPermission(props.reference))
+		grant === undefined ||
+		referenceReadPermissions(props.reference, props.requestCollections).every(
+			(permission) => hasPermission(grant, permission),
+		)
 	);
 };

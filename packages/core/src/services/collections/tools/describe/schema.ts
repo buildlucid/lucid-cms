@@ -27,7 +27,8 @@ const fieldEntrySchema = z.object({
 		.nullable()
 		.meta({ description: "Owning brick key, or null for document fields." }),
 	path: z.array(z.string()).meta({
-		description: "Field keys from the document or brick root to this field.",
+		description:
+			"Field keys from the document or brick root to this field, as documents_get returns them. Tabs and inline groups add no key.",
 	}),
 	fieldType: z.string().meta({ description: "Lucid custom-field type." }),
 	label: z
@@ -133,8 +134,23 @@ export const outputSchema = z.object({
 						.meta({ description: "Routing field and full-path semantics." }),
 					localization: collectionLocalizationSchema,
 					publishing: z
-						.object({ targetCount: z.number() })
-						.meta({ description: "Configured publishing target count." }),
+						.object({
+							targetCount: z.number(),
+							review: z
+								.object({
+									create: z.boolean(),
+									delete: z.boolean(),
+									publish: z.array(z.string()),
+									unpublish: z.array(z.string()),
+								})
+								.meta({
+									description:
+										"Actions that always need an approved request: creating, deleting, and publishing or unpublishing these targets.",
+								}),
+						})
+						.meta({
+							description: "Publishing target count and review requirements.",
+						}),
 				})
 				.meta({ description: "Collection identity and content settings." }),
 		})

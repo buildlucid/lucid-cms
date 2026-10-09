@@ -88,6 +88,10 @@ export const requestsTable = defineTable("lucid_requests", () => ({
 			schema: z.number().nullable(),
 			type: "integer",
 		},
+		created_by_run_id: {
+			schema: z.string().nullable(),
+			type: "text",
+		},
 		created_at: {
 			schema: z.union([z.string(), z.date()]),
 			type: "timestamp",
@@ -158,6 +162,8 @@ export interface LucidRequests {
 	completed_at: TimestampMutable;
 	lock_token: string | null;
 	created_by: number | null;
+	/** The agent run that created it, acting for `created_by` or the system. */
+	created_by_run_id: string | null;
 	created_at: TimestampImmutable;
 	updated_at: TimestampMutable;
 }

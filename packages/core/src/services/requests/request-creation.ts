@@ -12,7 +12,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import saveDocument from "../documents/helpers/save-document.js";
 import createTargets from "./helpers/create-targets.js";
@@ -35,10 +35,11 @@ const requestCreation: ServiceFn<
 			reviewerIds?: number[];
 			bricks?: Array<BrickInputSchema>;
 			fields?: Array<FieldInputSchema>;
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 		},
 	],
-	{ id: number; requestId: number }
+	{ id: number; requestId: number; versionId: number }
 > = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
 	const RequestDocuments = new RequestDocumentsRepository(context.db);
@@ -96,6 +97,7 @@ const requestCreation: ServiceFn<
 			status: "open",
 			revision: 1,
 			created_by: data.user.id,
+			created_by_run_id: data.agentRunId ?? null,
 			created_at: now,
 			updated_at: now,
 		},
@@ -108,6 +110,7 @@ const requestCreation: ServiceFn<
 		collectionKey: data.collectionKey,
 		userId: data.user.id,
 		authUser: data.user,
+		agentRunId: data.agentRunId,
 		bricks: data.bricks,
 		fields: data.fields,
 		createRequestId: requestRes.data.id,
@@ -182,7 +185,11 @@ const requestCreation: ServiceFn<
 
 	return {
 		error: undefined,
-		data: { id: documentRes.data, requestId: requestRes.data.id },
+		data: {
+			id: documentRes.data,
+			requestId: requestRes.data.id,
+			versionId: proposalRes.data.id,
+		},
 	};
 };
 

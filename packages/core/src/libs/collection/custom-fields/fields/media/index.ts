@@ -1,5 +1,6 @@
 import { createValueFieldTypeGenerator } from "../../../type-gen/custom-field.js";
 import { formatIntegerFilterValue } from "../../utils/filter-values.js";
+import parseListToolValue from "../../utils/parse-list-tool-value.js";
 import { mediaFieldConfig } from "./config.js";
 import MediaCustomField from "./custom-field.js";
 import validateMediaInputData from "./validate-input.js";
@@ -9,5 +10,6 @@ export default {
 	class: MediaCustomField,
 	validateInput: validateMediaInputData,
 	formatFilterValue: formatIntegerFilterValue,
+	parseToolValue: parseListToolValue,
 	contentTypeGen: createValueFieldTypeGenerator("number[]"),
 };

@@ -4,7 +4,7 @@ import {
 	RequestEventsRepository,
 	RequestTargetsRepository,
 } from "../../libs/repositories/index.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import acquireRequestWrites from "./helpers/acquire-request-writes.js";
 import checkPublishedTargets from "./helpers/check-published-targets.js";
@@ -19,7 +19,8 @@ const updateTargets: ServiceFn<
 		{
 			id: number;
 			requestDocumentId: number;
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 			targets: string[];
 		},
 	],
@@ -149,12 +150,14 @@ const updateTargets: ServiceFn<
 			...added.map((target) => ({
 				request_id: request.id,
 				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
 				type: "target_added" as const,
 				metadata: { requestDocumentId: document.id, target },
 			})),
 			...removed.map((target) => ({
 				request_id: request.id,
 				user_id: data.user.id,
+				agent_run_id: data.agentRunId ?? null,
 				type: "target_removed" as const,
 				metadata: { requestDocumentId: document.id, target: target.target },
 			})),

@@ -21,9 +21,9 @@ import { getDocumentRoute } from "@/utils/route-helpers";
 //* matches `grid-cols-4`; the card only renders in the fixed-width sidebar, so the grid never reflows
 const mediaColumns = 4;
 const shownMedia = mediaColumns * 2;
-const shownDocuments = 4;
+const shownRows = 4;
 
-/** Lists the resources linked to a chat by messages and tools: media as a thumbnail grid, documents as rows. */
+/** Lists a chat's linked media, documents and requests. */
 const AgentChatReferences: Component<{
 	conversationId: string;
 	agentKey: string;
@@ -54,15 +54,15 @@ const AgentChatReferences: Component<{
 		() =>
 			(mediaColumns - (visibleMedia().length % mediaColumns)) % mediaColumns,
 	);
-	const documents = createMemo(() =>
+	const rows = createMemo(() =>
 		items().flatMap((reference) =>
-			reference.type === "document" ? [reference] : [],
+			reference.type === "media" ? [] : [reference],
 		),
 	);
 	const hidden = createMemo(
 		() =>
 			Math.max(0, media().length - shownMedia) +
-			Math.max(0, documents().length - shownDocuments),
+			Math.max(0, rows().length - shownRows),
 	);
 	const toolTitles = createMemo(
 		() =>
@@ -107,16 +107,28 @@ const AgentChatReferences: Component<{
 			conversationId: props.conversationId,
 			referenceId: reference.id,
 		});
-	const documentDetails = (
-		document: Extract<AgentReference, { type: "document" }>,
-	) =>
-		[
-			collectionNames().get(document.collectionKey) ?? document.collectionKey,
-			document.versionId === undefined
-				? undefined
-				: T()("agent.references.pinned"),
-			sourceLabel(document),
-		]
+	const rowHref = (reference: Exclude<AgentReference, { type: "media" }>) =>
+		reference.type === "request"
+			? `/lucid/requests/${reference.requestId}`
+			: getDocumentRoute("edit", {
+					collectionKey: reference.collectionKey,
+					documentId: reference.documentId,
+					versionId: reference.versionId,
+					version:
+						reference.versionId === undefined ? undefined : reference.version,
+				});
+	const rowDetails = (reference: Exclude<AgentReference, { type: "media" }>) =>
+		(reference.type === "request"
+			? [T()("common.request"), sourceLabel(reference)]
+			: [
+					collectionNames().get(reference.collectionKey) ??
+						reference.collectionKey,
+					reference.versionId === undefined
+						? undefined
+						: T()("agent.references.pinned"),
+					sourceLabel(reference),
+				]
+		)
 			.filter(Boolean)
 			.join(" · ");
 
@@ -197,57 +209,45 @@ const AgentChatReferences: Component<{
 							</For>
 						</ul>
 					</Show>
-					<Show when={documents().length}>
+					<Show when={rows().length}>
 						<ul
 							class="flex flex-col gap-0.5"
 							aria-label={T()("agent.references.documents")}
 						>
-							<For
-								each={
-									showAll() ? documents() : documents().slice(0, shownDocuments)
-								}
-							>
-								{(document) => (
+							<For each={showAll() ? rows() : rows().slice(0, shownRows)}>
+								{(reference) => (
 									<li class="group relative">
 										<A
-											href={getDocumentRoute("edit", {
-												collectionKey: document.collectionKey,
-												documentId: document.documentId,
-												versionId: document.versionId,
-												version:
-													document.versionId === undefined
-														? undefined
-														: document.version,
-											})}
+											href={rowHref(reference)}
 											class="-mx-1.5 flex items-center gap-2.5 rounded-md py-1.5 ps-1.5 pe-8 hover:bg-card-hover focus-visible:outline-2 focus-visible:outline-primary"
 										>
 											<span class="block h-9 w-7 shrink-0 overflow-hidden rounded border border-border">
-												<AgentReferenceThumb reference={document} />
+												<AgentReferenceThumb reference={reference} />
 											</span>
 											<span class="min-w-0">
 												<span class="block truncate text-xs text-title">
-													{document.label}
+													{reference.label}
 												</span>
 												<span class="block truncate text-[11px] text-muted">
-													{documentDetails(document)}
+													{rowDetails(reference)}
 												</span>
 											</span>
 										</A>
 										<Show
-											when={!document.managed}
+											when={!reference.managed}
 											fallback={
 												<AgentReferenceLock
 													label={T()("agent.references.managed", {
-														label: document.label,
+														label: reference.label,
 													})}
 													class="inset-e-0 top-1/2 -translate-y-1/2"
 												/>
 											}
 										>
 											<AgentReferenceRemoveButton
-												{...unlinkLabels(document.label)}
+												{...unlinkLabels(reference.label)}
 												class="inset-e-0 top-1/2 -translate-y-1/2"
-												onRemove={() => remove(document)}
+												onRemove={() => remove(reference)}
 											/>
 										</Show>
 									</li>

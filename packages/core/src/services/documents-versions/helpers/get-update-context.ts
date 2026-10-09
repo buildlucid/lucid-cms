@@ -11,8 +11,9 @@ import type { DocumentHookRequest } from "../../../libs/hooks/types.js";
 import { copy } from "../../../libs/i18n/index.js";
 import { getCollectionPermission } from "../../../libs/permission/collection-permissions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
+import systemActor from "../../../libs/permission/system-actor.js";
 import { DocumentVersionsRepository } from "../../../libs/repositories/index.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import checkDocumentAccess from "../../documents/checks/check-document-access.js";
 import checkRequestVersionAccess from "../../requests/helpers/check-request-version-access.js";
@@ -23,8 +24,8 @@ const getUpdateContext: ServiceFn<
 			collectionKey: string;
 			documentId: number;
 			versionId: number;
-			/** Required to save request proposals. When given, saving latest needs update access. */
-			authUser?: LucidUser;
+			/** Checks the actor's access. Omit for trusted system writes. */
+			authUser?: LucidActor;
 		},
 	],
 	{
@@ -128,7 +129,7 @@ const getUpdateContext: ServiceFn<
 			collectionKey: data.collectionKey,
 			documentId: data.documentId,
 			versionId: data.versionId,
-			user: data.authUser,
+			user: data.authUser ?? systemActor,
 			edit: true,
 		});
 		if (accessRes.error) return accessRes;

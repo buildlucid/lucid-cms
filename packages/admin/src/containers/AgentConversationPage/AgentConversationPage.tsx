@@ -45,7 +45,7 @@ import {
 	agentReferenceKey,
 	canAttachMedia,
 } from "@/utils/agent-references";
-import { isToolRow } from "@/utils/agent-tools";
+import { isToolRow, retriedToolIds } from "@/utils/agent-tools";
 import { getNewChatHref } from "@/utils/home-view";
 import AgentChatActions from "./parts/AgentChatActions";
 import AgentChatComposer from "./parts/AgentChatComposer";
@@ -159,6 +159,7 @@ const AgentConversationPage: Component = () => {
 	const selectedTool = createMemo(() =>
 		tools().find((tool) => tool.part.id === selectedId()),
 	);
+	const retriedTools = createMemo(() => retriedToolIds(chat.messages));
 
 	// ----------------------------------------
 	// Functions
@@ -366,6 +367,7 @@ const AgentConversationPage: Component = () => {
 												chat={chat}
 												referenceDetails={referenceDetails()}
 												selectedToolId={selectedId()}
+												retriedToolIds={retriedTools()}
 												onSelectTool={selectTool}
 												onRespond={respond}
 												canRetry={!unavailable()}
@@ -467,6 +469,7 @@ const AgentConversationPage: Component = () => {
 								routine={routineCard()}
 								detailsOpen={detailsOpen()}
 								selectedTool={selectedTool()}
+								retriedToolIds={retriedTools()}
 								onRoutineRun={(runId) => {
 									//* older runs may not be loaded yet, and the runId link loads pages until it finds them
 									if (chat.messages.some((message) => message.id === runId)) {

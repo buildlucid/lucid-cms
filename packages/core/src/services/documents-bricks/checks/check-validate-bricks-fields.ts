@@ -26,7 +26,7 @@ import resolveCollectionLocalization from "../../../libs/collection/helpers/reso
 import { copy } from "../../../libs/i18n/index.js";
 import logger from "../../../libs/logger/index.js";
 import type { BrickInputSchema } from "../../../schemas/collection-bricks.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import fetchValidationData, {
 	type ValidationData,
@@ -255,7 +255,7 @@ const checkValidateBricksFields: ServiceFn<
 			bricks: Array<BrickInputSchema>;
 			fields: Array<FieldInputSchema>;
 			collection: CollectionBuilder;
-			authUser?: LucidUser;
+			authUser?: LucidActor;
 			existingVersion?: { id: number; documentId: number };
 		},
 	],

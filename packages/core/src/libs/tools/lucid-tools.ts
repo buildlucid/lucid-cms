@@ -6,6 +6,8 @@ import {
 	listCollectionsAgentTool,
 	listCollectionsMcpTool,
 } from "../../services/collections/tools/list/index.js";
+import { createDocumentAgentTool } from "../../services/documents/tools/create/index.js";
+import { deleteDocumentAgentTool } from "../../services/documents/tools/delete/index.js";
 import {
 	findDocumentsAgentTool,
 	findDocumentsMcpTool,
@@ -14,6 +16,9 @@ import {
 	getDocumentAgentTool,
 	getDocumentMcpTool,
 } from "../../services/documents/tools/get/index.js";
+import type { DocumentWriteToolOptions } from "../../services/documents/tools/types.js";
+import { unpublishDocumentAgentTool } from "../../services/documents/tools/unpublish/index.js";
+import { updateDocumentAgentTool } from "../../services/documents/tools/update/index.js";
 import {
 	listLocalesAgentTool,
 	listLocalesMcpTool,
@@ -31,6 +36,9 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * built in and configured with `defineAgent`'s `features`. Every tool uses the
  * permissions of the person the agent acts for.
  *
+ * Document writes open requests for people to review by default. Pass
+ * `direct: true` to let them save changes as a person could in the admin.
+ *
  * @example
  * ```ts
  * defineAgent({
@@ -38,6 +46,8 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * 	name: "SEO Agent",
  * 	tools: [
  * 		agentTools.content({ collections: ["pages"] }),
+ * 		agentTools.editing({ collections: ["pages"] }),
+ * 		agentTools.deleteDocument({ collections: ["pages"], direct: true }),
  * 	],
  * });
  * ```
@@ -49,6 +59,10 @@ export const agentTools = {
 	getDocument: getDocumentAgentTool,
 	findMedia: findMediaAgentTool,
 	listLocales: listLocalesAgentTool,
+	createDocument: createDocumentAgentTool,
+	updateDocument: updateDocumentAgentTool,
+	deleteDocument: deleteDocumentAgentTool,
+	unpublishDocument: unpublishDocumentAgentTool,
 	/** Every content reading tool: collections, documents, media and locales. */
 	content: (options: CollectionToolOptions = {}) => [
 		listCollectionsAgentTool(options),
@@ -57,6 +71,13 @@ export const agentTools = {
 		getDocumentAgentTool(options),
 		findMediaAgentTool(),
 		listLocalesAgentTool(),
+	],
+	/** Bundles document creation, updates, deletion and unpublishing for use alongside `content()` reads. */
+	editing: (options: DocumentWriteToolOptions = {}) => [
+		createDocumentAgentTool(options),
+		updateDocumentAgentTool(options),
+		deleteDocumentAgentTool(options),
+		unpublishDocumentAgentTool(options),
 	],
 };
 

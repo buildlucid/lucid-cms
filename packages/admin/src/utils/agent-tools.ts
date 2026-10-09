@@ -1,6 +1,7 @@
 import type {
 	AgentFileReadOutput,
 	AgentLucidToolName,
+	AgentMessage,
 	AgentMessagePart,
 	AgentRunnerToolName,
 	AgentRunnerWidgetKey,
@@ -35,6 +36,13 @@ export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
+/** Document write tools link what they change to the chat. */
+export const documentWriteTools: readonly string[] = [
+	"documents_create",
+	"documents_update",
+	"documents_delete",
+	"documents_unpublish",
+] satisfies AgentLucidToolName[];
 
 /**
  * Built-in widgets render only the versions this admin knows. Other versions
@@ -51,6 +59,33 @@ export const isToolRow = (part: AgentMessagePart): part is AgentToolPart =>
 	part.name !== askTool &&
 	(part.name !== finishTool || part.status !== "complete") &&
 	part.name !== progressTool;
+
+/** The displayed tool status, including recovered failures shown as retried. */
+export type AgentToolDisplayStatus = AgentToolPart["status"] | "retried";
+
+export const toolDisplayStatus = (
+	part: AgentToolPart,
+	retried: boolean | undefined,
+): AgentToolDisplayStatus =>
+	part.status === "failed" && retried ? "retried" : part.status;
+
+/** Identifies failed calls followed by a successful call to the same tool in the same run. */
+export const retriedToolIds = (
+	messages: AgentMessage[],
+): ReadonlySet<string> => {
+	const completed = new Set<string>();
+	const retried = new Set<string>();
+	for (const message of messages.toReversed()) {
+		const run = message.runId ?? message.id;
+		for (const part of message.parts.toReversed()) {
+			if (!isToolRow(part)) continue;
+			const key = `${run}:${part.name}`;
+			if (part.status === "complete") completed.add(key);
+			if (part.status === "failed" && completed.has(key)) retried.add(part.id);
+		}
+	}
+	return retried;
+};
 
 export type AgentToolGroup = {
 	calls: AgentToolPart[];

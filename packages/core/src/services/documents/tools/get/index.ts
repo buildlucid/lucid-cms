@@ -10,7 +10,7 @@ import {
 import defineAgentTool from "../../../../libs/tools/define-agent-tool.js";
 import defineMcpTool from "../../../../libs/tools/define-mcp-tool.js";
 import getDocument from "./handler.js";
-import { inputSchema, outputSchema } from "./schema.js";
+import { agentInputSchema, inputSchema, outputSchema } from "./schema.js";
 
 export const getDocumentMcpTool = (options: CollectionToolOptions = {}) =>
 	defineMcpTool({
@@ -45,8 +45,8 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 		name: "documents_get",
 		title: copy("admin:core.tools.documents_get.title"),
 		description:
-			"Read a document's selected content fields and bricks from a collection.",
-		input: inputSchema,
+			"Read a document's selected content fields and bricks from a collection, or its proposal in a request. Values use the shape documents_update accepts.",
+		input: agentInputSchema,
 		output: outputSchema,
 		permissions: [],
 		readOnly: true,
@@ -62,6 +62,7 @@ export const getDocumentAgentTool = (options: CollectionToolOptions = {}) =>
 					execution.authority,
 					options.collections,
 				),
+				actor: execution.actor,
 			});
 			if (result.error) return result;
 

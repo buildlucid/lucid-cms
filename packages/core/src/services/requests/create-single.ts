@@ -3,7 +3,7 @@ import type { RequestType } from "../../libs/db/tables/requests.js";
 import { copy } from "../../libs/i18n/index.js";
 import { RequestsRepository } from "../../libs/repositories/index.js";
 import type { RequestDocumentInput } from "../../schemas/requests.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import captureDocument from "./helpers/capture-document.js";
 import checkRequestSize from "./helpers/check-request-size.js";
@@ -20,7 +20,8 @@ const createSingle: ServiceFn<
 			description?: RichTextJSON | null;
 			documents: RequestDocumentInput[];
 			reviewerIds?: number[];
-			user: LucidUser;
+			user: LucidActor;
+			agentRunId?: string;
 		},
 	],
 	{ id: number }
@@ -65,6 +66,7 @@ const createSingle: ServiceFn<
 			status: "open",
 			revision: 1,
 			created_by: data.user.id,
+			created_by_run_id: data.agentRunId ?? null,
 			created_at: now,
 			updated_at: now,
 		},
@@ -85,6 +87,7 @@ const createSingle: ServiceFn<
 			...document,
 			request: { id: requestRes.data.id, type: data.type },
 			user: data.user,
+			agentRunId: data.agentRunId,
 		});
 		if (captureRes.error) return captureRes;
 	}

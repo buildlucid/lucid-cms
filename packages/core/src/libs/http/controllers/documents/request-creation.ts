@@ -63,7 +63,11 @@ const requestCreationController = factory.createHandlers(
 		if (result.error) throw new LucidAPIError(result.error);
 
 		c.status(201);
-		return c.json(formatAPIResponse(c, { data: result.data }));
+		return c.json(
+			formatAPIResponse(c, {
+				data: { id: result.data.id, requestId: result.data.requestId },
+			}),
+		);
 	},
 );
 

@@ -6,6 +6,7 @@ import formatter from "../../../libs/formatters/helpers.js";
 import {
 	DocumentBricksRepository,
 	DocumentsRepository,
+	RequestsRepository,
 } from "../../../libs/repositories/index.js";
 import type { AgentReferenceInput, Media } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -28,11 +29,7 @@ export type AgentReferenceDetails = {
 	version?: DocumentVersionType;
 };
 
-/**
- * Loads current labels and file types for references, keyed by `referenceKey`.
- * Media loads in one query and documents in parallel. Resources that no longer
- * exist are left out, so callers decide whether that is an error.
- */
+/** Loads current reference details keyed by `referenceKey`, omitting resources that no longer exist. */
 const describe: ServiceFn<
 	[{ references: AgentReferenceInput[] }],
 	Map<string, AgentReferenceDetails>
@@ -47,11 +44,19 @@ const describe: ServiceFn<
 	const documents = input.references.filter(
 		(reference) => reference.type === "document",
 	);
+	const requestIds = [
+		...new Set(
+			input.references.flatMap((reference) =>
+				reference.type === "request" ? [reference.requestId] : [],
+			),
+		),
+	];
 	const locale = context.config.localization.defaultLocale;
 	const Documents = new DocumentsRepository(context.db);
 	const Bricks = new DocumentBricksRepository(context.db);
+	const Requests = new RequestsRepository(context.db);
 
-	const [media, ...described] = await Promise.all([
+	const [media, requests, ...described] = await Promise.all([
 		mediaIds.length
 			? getMultipleMedia(context, {
 					query: {
@@ -67,6 +72,13 @@ const describe: ServiceFn<
 						perPage: mediaIds.length,
 					},
 					actor: { type: "internal" },
+				})
+			: undefined,
+		requestIds.length
+			? Requests.selectMultiple({
+					select: ["id", "title"],
+					where: [{ key: "id", operator: "in", value: requestIds }],
+					validation: { enabled: true },
 				})
 			: undefined,
 		...documents.map(async (reference) => {
@@ -123,6 +135,7 @@ const describe: ServiceFn<
 		}),
 	]);
 	if (media?.error) return media;
+	if (requests?.error) return requests;
 
 	const details = new Map<string, AgentReferenceDetails>();
 	for (const item of media?.data.data ?? []) {
@@ -143,6 +156,12 @@ const describe: ServiceFn<
 			...(item.type === "image" && item.url
 				? { previewUrl: thumbnailUrl(item.url, item.delivery) }
 				: {}),
+		});
+	}
+
+	for (const request of requests?.data ?? []) {
+		details.set(referenceKey({ type: "request", requestId: request.id }), {
+			label: request.title,
 		});
 	}
 

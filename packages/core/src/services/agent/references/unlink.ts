@@ -1,6 +1,7 @@
 import {
 	AgentDocumentReferencesRepository,
 	AgentMediaReferencesRepository,
+	AgentRequestReferencesRepository,
 } from "../../../libs/repositories/index.js";
 import type { AgentReferenceInput } from "../../../types/response.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
@@ -19,10 +20,14 @@ const unlink: ServiceFn<
 	const documents = input.references.filter(
 		(reference) => reference.type === "document",
 	);
+	const requestIds = input.references.flatMap((reference) =>
+		reference.type === "request" ? [reference.requestId] : [],
+	);
 	const Media = new AgentMediaReferencesRepository(context.db);
 	const Documents = new AgentDocumentReferencesRepository(context.db);
+	const Requests = new AgentRequestReferencesRepository(context.db);
 
-	const [media, documentLinks] = await Promise.all([
+	const [media, documentLinks, requestLinks] = await Promise.all([
 		mediaIds.length
 			? Media.deleteMultiple({
 					where: [
@@ -38,9 +43,22 @@ const unlink: ServiceFn<
 		documents.length
 			? Documents.unlink({ conversationId: input.conversationId, documents })
 			: undefined,
+		requestIds.length
+			? Requests.deleteMultiple({
+					where: [
+						{
+							key: "conversation_id",
+							operator: "=",
+							value: input.conversationId,
+						},
+						{ key: "request_id", operator: "in", value: requestIds },
+					],
+				})
+			: undefined,
 	]);
 	if (media?.error) return media;
 	if (documentLinks?.error) return documentLinks;
+	if (requestLinks?.error) return requestLinks;
 
 	return { error: undefined, data: undefined };
 };

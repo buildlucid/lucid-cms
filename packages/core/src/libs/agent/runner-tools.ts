@@ -60,7 +60,7 @@ const runnerTools = {
 		name: "lucid_list_references",
 		title: copy("admin:core.tools.lucid_list_references.title"),
 		description:
-			"List media and documents linked to this chat, including reference IDs, names, file types, and whether the tool that linked them manages them.",
+			"List media, documents and requests linked to this chat, including reference IDs, names, media file types, and whether the tool that linked them manages them.",
 		input: z.object({ offset: z.number().int().nonnegative().default(0) }),
 		available: () => true,
 	},
@@ -68,7 +68,7 @@ const runnerTools = {
 		name: "lucid_register_references",
 		title: copy("admin:core.tools.lucid_register_references.title"),
 		description:
-			"Link media or documents to this chat using their resource IDs. Existing references are reused.",
+			"Link media, documents or requests to this chat using their resource IDs. Existing references are reused.",
 		input: z.object({
 			references: z.array(agentReferenceInputSchema).min(1).max(50),
 		}),

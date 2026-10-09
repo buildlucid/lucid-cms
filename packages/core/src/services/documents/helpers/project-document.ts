@@ -1,16 +1,12 @@
 import z from "zod";
-import type CollectionBuilder from "../../../libs/collection/builders/collection-builder/index.js";
+import registeredFields from "../../../libs/collection/custom-fields/registered-fields.js";
 import type {
 	FieldConfig,
 	FieldTypes,
+	RegisteredFieldDefinition,
 } from "../../../libs/collection/custom-fields/types.js";
-import type {
-	CollectionDocument,
-	DocumentRoute,
-} from "../../../types/response.js";
+import type { DocumentRoute } from "../../../types/response.js";
 import isPlainObject from "../../../utils/helpers/is-plain-object.js";
-
-type ContentBrick = NonNullable<CollectionDocument<string>["bricks"]>[number];
 
 /** The route returned by document tools after locale projection. */
 export const documentRouteSchema = z
@@ -24,17 +20,7 @@ export const documentRouteSchema = z
 	.nullable()
 	.meta({ description: "Resolved public path and label, when routed." });
 
-/** A content brick returned by document tools after locale projection. */
-export const documentBrickSchema = z.object({
-	id: z.number(),
-	ref: z.string(),
-	key: z.string(),
-	type: z.enum(["builder", "fixed", "embedded"]),
-	order: z.number(),
-	fields: z.record(z.string(), z.unknown()),
-});
-
-/** Version and audit metadata returned when `query.include` requests it. */
+/** Version and audit metadata, returned when documents_get includes meta. */
 export const documentMetaSchema = z.object({
 	versionId: z.number().nullable(),
 	versions: z.record(z.string(), z.looseObject({}).nullable()),
@@ -79,14 +65,12 @@ export const projectRoute = (
 	};
 };
 
-/** Uses the authoring field tree so ordinary JSON objects are never mistaken for translations. */
+/** Projects fields to one locale using their schema and `formatToolValue`, keeping JSON values distinct from translations. */
 export const projectFieldMap = (
 	fields: Record<string, unknown>,
 	locale: string | null,
 	fieldTree: FieldConfig<FieldTypes>[],
 ): Record<string, unknown> => {
-	if (!locale) return fields;
-
 	const result = { ...fields };
 	for (const field of fieldTree) {
 		const value = result[field.key];
@@ -110,35 +94,21 @@ export const projectFieldMap = (
 			continue;
 		}
 
-		if (
+		if (value === undefined) continue;
+		const localized =
+			locale !== null &&
 			"localized" in field &&
 			field.localized === true &&
 			isPlainObject(value)
-		) {
-			result[field.key] = value[locale] ?? null;
-		}
+				? (value[locale] ?? null)
+				: value;
+		const { formatToolValue } = registeredFields[field.type] as Pick<
+			RegisteredFieldDefinition,
+			"formatToolValue"
+		>;
+		result[field.key] = formatToolValue
+			? formatToolValue(localized)
+			: localized;
 	}
 	return result;
 };
-
-/** Projects brick fields to one content locale using each brick's field tree. */
-export const projectDocumentBricks = (
-	bricks: readonly ContentBrick[],
-	locale: string | null,
-	collection: CollectionBuilder,
-) =>
-	bricks.map((brick) => {
-		const definition = collection.brickInstances.find(
-			(candidate) => candidate.key === brick.key,
-		);
-		return definition
-			? {
-					...brick,
-					fields: projectFieldMap(
-						brick.fields,
-						locale,
-						definition.contentFieldTree,
-					),
-				}
-			: brick;
-	});

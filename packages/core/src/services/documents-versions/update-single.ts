@@ -7,7 +7,7 @@ import {
 } from "../../libs/repositories/index.js";
 import type { BrickInputSchema } from "../../schemas/collection-bricks.js";
 import type { FieldInputSchema } from "../../schemas/collection-fields.js";
-import type { LucidUser } from "../../types/hono.js";
+import type { LucidActor } from "../../types/hono.js";
 import type { DocumentVersionUpdateResponse } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
 import withTransaction from "../../utils/services/with-transaction.js";
@@ -29,7 +29,8 @@ const updateSingle: ServiceFn<
 		{
 			collectionKey: string;
 			userId: number | null;
-			authUser?: LucidUser;
+			authUser?: LucidActor;
+			agentRunId?: string;
 			documentId: number;
 			versionId: number;
 			/** Callers that already hold the document's write claim, eg. request syncs. */
@@ -174,6 +175,7 @@ const updateSingle: ServiceFn<
 						content_id: contentId,
 						collection_migration_id: updateContextRes.data.migrationId,
 						updated_by: data.userId,
+						updated_by_run_id: data.agentRunId ?? null,
 						updated_at: updatedAt,
 					},
 					returning: ["id", "type", "content_id", "updated_at"],
@@ -190,7 +192,11 @@ const updateSingle: ServiceFn<
 				const documentUpdate = await Documents.updateSingle(
 					{
 						where: [{ key: "id", operator: "=", value: data.documentId }],
-						data: { updated_by: data.userId, updated_at: updatedAt },
+						data: {
+							updated_by: data.userId,
+							updated_by_run_id: data.agentRunId ?? null,
+							updated_at: updatedAt,
+						},
 					},
 					{ tableName: updateContextRes.data.tableNames.document },
 				);
@@ -213,6 +219,7 @@ const updateSingle: ServiceFn<
 					documentId: data.documentId,
 					target: "latest",
 					userId: data.userId,
+					agentRunId: data.agentRunId,
 				});
 				if (publishedRes.error) return publishedRes;
 			} else {
@@ -222,6 +229,7 @@ const updateSingle: ServiceFn<
 					documentId: data.documentId,
 					versionId: data.versionId,
 					userId: data.userId,
+					agentRunId: data.agentRunId,
 				});
 				if (activityRes.error) return activityRes;
 			}

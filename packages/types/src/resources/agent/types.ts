@@ -3,7 +3,7 @@ import type { DocumentVersionType } from "../documents/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
 import type { Permission } from "../users/types.js";
 
-/** A media item or document linked to a chat. */
+/** A media item, document or request linked to a chat. */
 export type AgentReferenceInput =
 	| { type: "media"; mediaId: number }
 	| {
@@ -11,7 +11,8 @@ export type AgentReferenceInput =
 			collectionKey: string;
 			documentId: number;
 			versionId?: number;
-	  };
+	  }
+	| { type: "request"; requestId: number };
 
 /** A reference with the details saved when it was attached, so a message keeps what was sent. */
 export type AgentReferenceSnapshot = AgentReferenceInput & {
@@ -39,6 +40,7 @@ export type AgentReference = {
 			/** The resolved document version. */
 			version?: DocumentVersionType;
 	  })
+	| Extract<AgentReferenceInput, { type: "request" }>
 );
 
 /** What an agent can do for the current user, combined from the tools they can use. */
@@ -132,12 +134,16 @@ export type AgentRunnerToolName =
 	| "lucid_load_skill"
 	| "lucid_finish_run";
 
-/** Lucid's own agent tools that the admin shows in their own way. */
+/** Lucid's own agent tools that the admin handles in their own way, eg. with custom views or by refreshing chat references. */
 export type AgentLucidToolName =
 	| "web_search"
 	| "web_fetch"
 	| "media_analyze"
-	| "media_read_file";
+	| "media_read_file"
+	| "documents_create"
+	| "documents_update"
+	| "documents_delete"
+	| "documents_unpublish";
 
 /** Widgets the runner creates itself, including media galleries, questions and approvals. */
 export type AgentRunnerWidgetKey =

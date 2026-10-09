@@ -2,8 +2,10 @@ import { canReadReference } from "../../../../libs/agent/references.js";
 import type runnerTools from "../../../../libs/agent/runner-tools.js";
 import { copy } from "../../../../libs/i18n/index.js";
 import resolveUserAccess from "../../../users/resolve-access.js";
+import linkRequestedDocuments from "../../references/link-requested-documents.js";
 import mediaOwnership from "../../references/media-ownership.js";
 import register from "../../references/register.js";
+import requestCollections from "../../references/request-collections.js";
 import { toolErrorFailure, toolFailure, toolResult } from "../tool-outcome.js";
 import type { RunnerToolInputHandler } from "./types.js";
 
@@ -11,17 +13,35 @@ import type { RunnerToolInputHandler } from "./types.js";
 const registerReferences: RunnerToolInputHandler<
 	typeof runnerTools.registerReferences
 > = async (context, { input, run, call }) => {
-	const [access, ownership] = await Promise.all([
+	//* requested documents become their create request first, so the request's access applies
+	const linked = await linkRequestedDocuments(context, {
+		references: input.references,
+	});
+	if (linked.error) {
+		return toolErrorFailure(
+			context,
+			linked.error,
+			"server:agent.references.unavailable",
+		);
+	}
+
+	const references = linked.data;
+	const [access, ownership, collections] = await Promise.all([
 		run.user_id === null
 			? undefined
 			: resolveUserAccess(context, { userId: run.user_id }),
 		mediaOwnership(context, {
-			mediaIds: input.references.flatMap((reference) =>
+			mediaIds: references.flatMap((reference) =>
 				reference.type === "media" ? [reference.mediaId] : [],
 			),
 		}),
+		requestCollections(context, {
+			requestIds: references.flatMap((reference) =>
+				reference.type === "request" ? [reference.requestId] : [],
+			),
+		}),
 	]);
-	const failure = access?.error ?? ownership.error;
+	const failure = access?.error ?? ownership.error ?? collections.error;
 	if (failure) {
 		return toolErrorFailure(
 			context,
@@ -30,13 +50,17 @@ const registerReferences: RunnerToolInputHandler<
 		);
 	}
 
-	const denied = input.references.find(
+	const denied = references.find(
 		(reference) =>
 			!canReadReference({
 				reference,
 				ownership:
 					reference.type === "media"
 						? ownership.data?.get(reference.mediaId)
+						: undefined,
+				requestCollections:
+					reference.type === "request"
+						? collections.data?.get(reference.requestId)
 						: undefined,
 				userId: run.user_id,
 				grant: access?.data,
@@ -58,7 +82,7 @@ const registerReferences: RunnerToolInputHandler<
 
 	const result = await register(context, {
 		conversationId: run.conversation_id,
-		references: input.references,
+		references,
 		source: { type: "tool", toolName: call.name },
 	});
 	if (result.error) {

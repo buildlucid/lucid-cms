@@ -9,7 +9,7 @@ import type { ToolkitDocumentsCreateSingleInput } from "./types.js";
 
 export type * from "./types.js";
 
-/** Creates a document with validated values and collection defaults. */
+/** Creates a document with validated values and collection defaults, or as a create request's proposal when given `request`. */
 const createSingle = <K extends string>(
 	context: ServiceContext,
 	input: ToolkitDocumentsCreateSingleInput<K>,
@@ -26,9 +26,10 @@ const createSingle = <K extends string>(
 					),
 				]);
 
+			//* create requests check create or create-request access themselves
 			const actor = await resolveDocumentActor(context, {
 				...data,
-				action: "create",
+				action: data.request === undefined ? "create" : "read",
 			});
 			if (actor.error) return actor;
 

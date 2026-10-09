@@ -22,6 +22,7 @@ export type AgentUpload = {
 
 export type AgentReferenceKind =
 	| "document"
+	| "request"
 	| "image"
 	| "pdf"
 	| "audio"
@@ -30,18 +31,26 @@ export type AgentReferenceKind =
 	| "file";
 
 /** Identifies a linked resource, including a pinned document version. */
-export const agentReferenceKey = (reference: AgentReferenceInput) =>
-	reference.type === "media"
-		? `media:${reference.mediaId}`
-		: `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
+export const agentReferenceKey = (reference: AgentReferenceInput) => {
+	switch (reference.type) {
+		case "media":
+			return `media:${reference.mediaId}`;
+		case "document":
+			return `document:${reference.collectionKey}:${reference.documentId}:${reference.versionId ?? "latest"}`;
+		case "request":
+			return `request:${reference.requestId}`;
+	}
+};
 
 /** The identity the server expects, without display details. */
 export const agentReferenceInput = (
 	reference: AgentReferenceInput,
-): AgentReferenceInput =>
-	reference.type === "media"
-		? { type: "media", mediaId: reference.mediaId }
-		: {
+): AgentReferenceInput => {
+	switch (reference.type) {
+		case "media":
+			return { type: "media", mediaId: reference.mediaId };
+		case "document":
+			return {
 				type: "document",
 				collectionKey: reference.collectionKey,
 				documentId: reference.documentId,
@@ -49,6 +58,21 @@ export const agentReferenceInput = (
 					? {}
 					: { versionId: reference.versionId }),
 			};
+		case "request":
+			return { type: "request", requestId: reference.requestId };
+	}
+};
+
+const fallbackLabel = (reference: AgentReferenceInput) => {
+	switch (reference.type) {
+		case "media":
+			return `${T()("common.media")} #${reference.mediaId}`;
+		case "document":
+			return `${reference.collectionKey} #${reference.documentId}`;
+		case "request":
+			return `${T()("common.request")} #${reference.requestId}`;
+	}
+};
 
 /** Fills in display details for a bare reference from known items, falling back to its type and ID. */
 export const agentReferenceItem = (
@@ -59,10 +83,7 @@ export const agentReferenceItem = (
 	return (
 		known?.[agentReferenceKey(reference)] ?? {
 			...reference,
-			label:
-				reference.type === "media"
-					? `${T()("common.media")} #${reference.mediaId}`
-					: `${reference.collectionKey} #${reference.documentId}`,
+			label: fallbackLabel(reference),
 		}
 	);
 };
@@ -115,12 +136,12 @@ export const readableMimeTypes = (capabilities: AgentCapabilities) => [
 	]),
 ];
 
-/** Whether a tool can open this attachment. CMS documents are read through content tools. */
+/** Checks whether the agent can open a media attachment with its configured capabilities. */
 export const canAgentOpen = (
 	reference: AgentReferenceSnapshot,
 	capabilities: AgentCapabilities,
 ) => {
-	if (reference.type === "document") return undefined;
+	if (reference.type !== "media") return undefined;
 	return (
 		reference.mimeType !== undefined &&
 		matchesMimeType(reference.mimeType, readableMimeTypes(capabilities))
@@ -150,7 +171,7 @@ export const canAttachMedia = (
 export const agentReferenceKind = (
 	reference: Pick<AgentReferenceSnapshot, "type" | "mimeType">,
 ): AgentReferenceKind => {
-	if (reference.type === "document") return "document";
+	if (reference.type !== "media") return reference.type;
 	const mimeType = reference.mimeType ?? "";
 	if (mimeType === "application/pdf") return "pdf";
 	if (mimeType.startsWith("image/")) return "image";

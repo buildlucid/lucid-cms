@@ -7,7 +7,7 @@ import {
 	RequestsRepository,
 	RequestTargetsRepository,
 } from "../../../libs/repositories/index.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { ServiceFn } from "../../../utils/services/types.js";
 import type { RequestRecord } from "../types.js";
 import getRequestAccess from "./get-request-access.js";
@@ -17,7 +17,7 @@ import getRequestAccess from "./get-request-access.js";
  * user is given, requests they cannot read are reported as not found.
  */
 const loadRequest: ServiceFn<
-	[{ id: number; user?: LucidUser }],
+	[{ id: number; user?: LucidActor }],
 	RequestRecord
 > = async (context, data) => {
 	const Requests = new RequestsRepository(context.db);
@@ -54,6 +54,7 @@ const loadRequest: ServiceFn<
 				"completed_at",
 				"lock_token",
 				"created_by",
+				"created_by_run_id",
 				"created_at",
 				"updated_at",
 			],
@@ -89,6 +90,7 @@ const loadRequest: ServiceFn<
 				"id",
 				"request_id",
 				"user_id",
+				"agent_run_id",
 				"parent_id",
 				"type",
 				"body",

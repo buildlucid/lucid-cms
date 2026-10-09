@@ -2,7 +2,7 @@ import { getCollectionPermission } from "../../../libs/permission/collection-per
 import { Permissions } from "../../../libs/permission/definitions.js";
 import hasAccess from "../../../libs/permission/has-access.js";
 import type { CollectionPermissionAction } from "../../../libs/permission/types.js";
-import type { LucidUser } from "../../../types/hono.js";
+import type { LucidActor } from "../../../types/hono.js";
 import type { RequestPermissions } from "../../../types/response.js";
 import type { ServiceContext } from "../../../utils/services/types.js";
 import type { RequestRecord } from "../types.js";
@@ -17,7 +17,7 @@ const getRequestAccess = (
 		request: Pick<RequestRecord, "type" | "status" | "created_by"> & {
 			documents: Array<{ collection_key: string }>;
 		};
-		user: LucidUser;
+		user: LucidActor;
 	},
 ): RequestPermissions & { read: boolean } => {
 	const collectionKeys = [

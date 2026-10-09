@@ -121,12 +121,34 @@ const createVersionsTable = (props: {
 						},
 					},
 					{
+						name: "created_by_run_id",
+						source: "core",
+						type: props.db.getDataType("text"),
+						nullable: true,
+						foreignKey: {
+							table: "lucid_agent_runs",
+							column: "id",
+							onDelete: "set null",
+						},
+					},
+					{
 						name: "updated_by",
 						source: "core",
 						type: props.db.getDataType("integer"),
 						nullable: true,
 						foreignKey: {
 							table: "lucid_users",
+							column: "id",
+							onDelete: "set null",
+						},
+					},
+					{
+						name: "updated_by_run_id",
+						source: "core",
+						type: props.db.getDataType("text"),
+						nullable: true,
+						foreignKey: {
+							table: "lucid_agent_runs",
 							column: "id",
 							onDelete: "set null",
 						},
@@ -157,6 +179,18 @@ const createVersionsTable = (props: {
 						db: props.db,
 						tableName,
 						columns: ["document_id", "type", "created_at"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["created_by_run_id"],
+						source: "core",
+					}),
+					buildSchemaIndex({
+						db: props.db,
+						tableName,
+						columns: ["updated_by_run_id"],
 						source: "core",
 					}),
 				],

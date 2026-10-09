@@ -17,6 +17,12 @@ export const agentReferenceInputSchema = z.discriminatedUnion("type", [
 			versionId: z.number().int().positive().optional(),
 		})
 		.strict(),
+	z
+		.object({
+			type: z.literal("request"),
+			requestId: z.number().int().positive(),
+		})
+		.strict(),
 ]) satisfies z.ZodType<AgentReferenceInput>;
 
 /** Whether a person attached a resource to a message or a tool linked it. */
@@ -31,6 +37,7 @@ const snapshotDetails = {
 export const agentReferenceSnapshotSchema = z.discriminatedUnion("type", [
 	agentReferenceInputSchema.options[0].extend(snapshotDetails),
 	agentReferenceInputSchema.options[1].extend(snapshotDetails),
+	agentReferenceInputSchema.options[2].extend(snapshotDetails),
 ]) satisfies z.ZodType<AgentReferenceSnapshot>;
 
 const referenceDetails = {
@@ -50,4 +57,5 @@ export const agentReferenceSchema = z.discriminatedUnion("type", [
 		...referenceDetails,
 		version: z.string().optional(),
 	}),
+	agentReferenceInputSchema.options[2].extend(referenceDetails),
 ]);

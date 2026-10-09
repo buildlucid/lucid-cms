@@ -65,6 +65,10 @@ export const requestEventsTable = defineTable("lucid_request_events", () => ({
 			schema: z.number().nullable(),
 			type: "integer",
 		},
+		agent_run_id: {
+			schema: z.string().nullable(),
+			type: "text",
+		},
 		parent_id: {
 			schema: z.number().nullable(),
 			type: "integer",
@@ -153,6 +157,7 @@ export type RequestEventInsert = {
 	[Type in RequestEventType]: {
 		request_id: number;
 		user_id: number | null;
+		agent_run_id?: string | null;
 		type: Type;
 		body?: RichTextJSON | null;
 		parent_id?: Type extends "comment" ? number | null : never;
@@ -165,6 +170,8 @@ export interface LucidRequestEvents {
 	id: Generated<number>;
 	request_id: number;
 	user_id: number | null;
+	/** The agent run that acted, for `user_id` or the system. */
+	agent_run_id: string | null;
 	/** The comment a reply belongs to. Null for top-level comments and other activity. */
 	parent_id: number | null;
 	type: RequestEventType;

@@ -125,6 +125,7 @@ const executionFor = async (): Promise<AgentToolExecution> => {
 			superAdmin: false,
 			permissions: [Permissions.MediaRead],
 		},
+		actor: { kind: "user", userId: 1 },
 		signal: new AbortController().signal,
 		operationId: randomUUID(),
 		run: { id: randomUUID(), conversationId: chat.data.id, userId: null },

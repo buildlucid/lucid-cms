@@ -340,7 +340,13 @@ export type RegisteredFieldDefinition<T extends FieldTypes = FieldTypes> = {
 	nullifyReferences?: unknown;
 	contentTypeGen?: ContentFieldTypeGenerator<T> | null;
 	extractEmbeddedBrickRefs?: EmbeddedBrickRefExtractor;
+	/** Formats stored values for document tools, defaulting to the stored value. */
+	formatToolValue?: CustomFieldToolValueConverter;
+	/** Parses document tool inputs into stored values, defaulting to the supplied value. */
+	parseToolValue?: CustomFieldToolValueConverter;
 };
+
+export type CustomFieldToolValueConverter = (value: unknown) => unknown;
 
 export type FieldRelationValidationInput = Record<string, number[]>;
 

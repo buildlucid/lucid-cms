@@ -208,6 +208,41 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.execute();
 
 		await db.schema
+			.createTable("lucid_agent_request_references")
+			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
+			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
+				col
+					.notNull()
+					.references("lucid_agent_conversations.id")
+					.onDelete("cascade"),
+			)
+			.addColumn("request_id", adapter.getDataType("integer"), (col) =>
+				col.notNull().references("lucid_requests.id").onDelete("cascade"),
+			)
+			.addColumn("source", adapter.getDataType("text"), (col) => col.notNull())
+			.addColumn("tool_name", adapter.getDataType("text"))
+			.addColumn("managed", adapter.getDataType("boolean"), (col) =>
+				col.notNull().defaultTo(adapter.getDefault("boolean", "false")),
+			)
+			.addColumn("created_at", adapter.getDataType("timestamp"), (col) =>
+				col.notNull(),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("uniq_agent_request_reference")
+			.on("lucid_agent_request_references")
+			.columns(["conversation_id", "request_id"])
+			.unique()
+			.execute();
+
+		await db.schema
+			.createIndex("idx_agent_request_reference_target")
+			.on("lucid_agent_request_references")
+			.column("request_id")
+			.execute();
+
+		await db.schema
 			.createTable("lucid_agent_document_references")
 			.addColumn("id", adapter.getDataType("text"), (col) => col.primaryKey())
 			.addColumn("conversation_id", adapter.getDataType("text"), (col) =>
@@ -478,6 +513,32 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 		await db.schema
 			.createIndex("idx_ai_generations_agent_run")
 			.on("lucid_ai_generations")
+			.column("agent_run_id")
+			.execute();
+
+		await db.schema
+			.alterTable("lucid_requests")
+			.addColumn("created_by_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_runs.id").onDelete("set null"),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("idx_requests_created_by_run")
+			.on("lucid_requests")
+			.column("created_by_run_id")
+			.execute();
+
+		await db.schema
+			.alterTable("lucid_request_events")
+			.addColumn("agent_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_runs.id").onDelete("set null"),
+			)
+			.execute();
+
+		await db.schema
+			.createIndex("idx_request_events_agent_run")
+			.on("lucid_request_events")
 			.column("agent_run_id")
 			.execute();
 
