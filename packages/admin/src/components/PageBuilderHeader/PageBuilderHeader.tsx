@@ -30,6 +30,7 @@ import userPreferencesStore from "@/store/userPreferencesStore/userPreferencesSt
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
 import { getDocumentEnvironmentStatus } from "@/utils/document-environment-status";
+import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import helpers from "@/utils/helpers";
 import { getDocumentProposals } from "@/utils/requests";
 import { getDocumentRoute, getRequestRoute } from "@/utils/route-helpers";
@@ -99,8 +100,14 @@ export const PageBuilderHeader: Component<{
 		queryParams: {
 			filters: {
 				status: () => "open",
-				collectionKey: props.state.collectionKey,
-				documentId: props.state.documentID,
+				document: () => {
+					const id = props.state.documentID();
+					if (id === undefined) return undefined;
+					return formatRelationFilterValue({
+						collectionKey: props.state.collectionKey(),
+						id,
+					});
+				},
 			},
 			perPage: 100,
 		},

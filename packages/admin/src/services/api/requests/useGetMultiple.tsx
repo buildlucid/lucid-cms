@@ -17,7 +17,8 @@ interface QueryParams {
 		involvesMe?: Accessor<string | undefined>;
 		createdBy?: Accessor<number | undefined>;
 		collectionKey?: Accessor<string | undefined>;
-		documentId?: Accessor<number | undefined>;
+		/** `collectionKey:documentId`, for requests holding that document. */
+		document?: Accessor<string | undefined>;
 		/** `collectionKey:documentId`, for requests that document can be added to. */
 		addable?: Accessor<string | undefined>;
 	};

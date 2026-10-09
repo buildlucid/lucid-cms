@@ -1,6 +1,7 @@
 import { type ExpressionBuilder, sql } from "kysely";
 import constants from "../../constants/constants.js";
 import type { GetMultipleQueryParams } from "../../schemas/requests.js";
+import parseDocumentRefValue from "../../utils/helpers/parse-document-ref-value.js";
 import type { LucidDatabase } from "../db/client/index.js";
 import queryBuilder from "../db/query-builder/index.js";
 import type {
@@ -121,40 +122,35 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 										String(filter.value),
 									),
 							),
-						documentId: ({ eb, filter }) => {
-							let documents = eb
-								.selectFrom("lucid_request_documents")
-								.select(sql.lit(1).as("one"))
-								.whereRef(
-									"lucid_request_documents.request_id",
-									"=",
-									"lucid_requests.id",
-								)
-								.where(
-									"lucid_request_documents.document_id",
-									"=",
-									Number(filter.value),
-								);
-							const collectionKey =
-								props.queryParams.filter?.collectionKey?.value;
-							if (collectionKey !== undefined) {
-								documents = documents.where(
-									"lucid_request_documents.collection_key",
-									"=",
-									String(collectionKey),
-								);
-							}
-							return eb.exists(documents);
+						document: ({ eb, filter }) => {
+							const document = parseDocumentRefValue(filter.value);
+							if (!document) return sql<boolean>`1 = 0`;
+
+							return eb.exists(
+								eb
+									.selectFrom("lucid_request_documents")
+									.select(sql.lit(1).as("one"))
+									.whereRef(
+										"lucid_request_documents.request_id",
+										"=",
+										"lucid_requests.id",
+									)
+									.where(
+										"lucid_request_documents.collection_key",
+										"=",
+										document.collectionKey,
+									)
+									.where(
+										"lucid_request_documents.document_id",
+										"=",
+										document.documentId,
+									),
+							);
 						},
 						//* open publish requests the user can edit that have room for the `collectionKey:documentId` document and don't hold it yet
 						addable: ({ eb, filter }) => {
-							const value = String(filter.value);
-							const separator = value.lastIndexOf(":");
-							const collectionKey = value.slice(0, separator);
-							const documentId = Number(value.slice(separator + 1));
-							if (separator < 1 || !Number.isInteger(documentId)) {
-								return sql<boolean>`1 = 0`;
-							}
+							const document = parseDocumentRefValue(filter.value);
+							if (!document) return sql<boolean>`1 = 0`;
 							const documents = eb
 								.selectFrom("lucid_request_documents")
 								.whereRef(
@@ -179,12 +175,12 @@ export default class RequestsRepository extends StaticRepository<"lucid_requests
 											.where(
 												"lucid_request_documents.collection_key",
 												"=",
-												collectionKey,
+												document.collectionKey,
 											)
 											.where(
 												"lucid_request_documents.document_id",
 												"=",
-												documentId,
+												document.documentId,
 											),
 									),
 								),

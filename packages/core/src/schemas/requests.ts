@@ -375,8 +375,10 @@ export const controllerSchemas = {
 					"filter[collectionKey]": queryString.schema.filter(false, {
 						example: "page",
 					}),
-					"filter[documentId]": queryString.schema.filter(false, {
-						example: "1",
+					"filter[document]": queryString.schema.filter(false, {
+						example: "page:1",
+						description:
+							"Requests holding this collectionKey:documentId document",
 					}),
 					"filter[addable]": queryString.schema.filter(false, {
 						example: "page:1",
@@ -410,7 +412,7 @@ export const controllerSchemas = {
 						involvesMe: queryFormatted.schema.filters.single.optional(),
 						createdBy: queryFormatted.schema.filters.union.optional(),
 						collectionKey: queryFormatted.schema.filters.single.optional(),
-						documentId: queryFormatted.schema.filters.single.optional(),
+						document: queryFormatted.schema.filters.single.optional(),
 						addable: queryFormatted.schema.filters.single.optional(),
 						createdAt: queryFormatted.schema.filters.single.optional(),
 						updatedAt: queryFormatted.schema.filters.single.optional(),

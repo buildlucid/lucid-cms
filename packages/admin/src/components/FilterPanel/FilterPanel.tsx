@@ -80,7 +80,7 @@ export interface FilterPanelProps {
 	padding?: FilterPanelPadding;
 	/** Shows the panel as a standalone card, rather than attached to a toolbar. */
 	embedded?: boolean;
-	/** Preset filters, shown as buttons above the filters when there's more than one. Clicking the active preset clears the filters. */
+	/** Shows preset buttons when multiple presets exist; clicking the active preset restores defaults or clears filters if it is the default. */
 	presets?: FilterPreset[];
 	class?: string;
 }
@@ -729,9 +729,12 @@ const FilterPanel: Component<FilterPanelProps> = (props) => {
 	const applyPreset = (preset: FilterPreset) => {
 		setDrafts([]);
 		setRowOrder([]);
-		//* the active preset toggles off, even when it matches the default filters
-		if (isPresetActive(preset)) props.queryState.clearFilters();
-		else props.queryState.replaceFilters(preset.filters);
+		if (!isPresetActive(preset)) {
+			props.queryState.replaceFilters(preset.filters);
+			return;
+		}
+		if (props.queryState.filtersAreDefault()) props.queryState.clearFilters();
+		else props.queryState.resetFilters();
 	};
 
 	/** Group index a row's + action should extend. */

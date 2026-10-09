@@ -49,7 +49,7 @@ export const inputSchema = z.object({
 		.pipe(querySchema)
 		.meta({
 			description:
-				"All query fields are optional. Use {} to list open requests, most recently changed first. filter is a list of conditions combined with AND: include only the conditions you need, eg. {filter:[{key:'type',value:'publish'}]} or {filter:[{key:'updatedAt',value:'2026-10-01T00:00:00Z',operator:'>'}]}. Keys: type (create, publish, unpublish or delete), title, status (defaults to open; use {key:'status',value:['open','closed'],operator:'in'} for others), approval (approved or pending), assignedToMe and involvesMe (asked to review, or created by, the person you act for), createdBy, collectionKey, documentId, scheduled, failed, createdAt, updatedAt and scheduledAt. perPage max 50.",
+				"All query fields are optional. Use {} to list open requests, most recently changed first. filter is a list of conditions combined with AND: include only the conditions you need, eg. {filter:[{key:'type',value:'publish'}]} or {filter:[{key:'updatedAt',value:'2026-10-01T00:00:00Z',operator:'>'}]}. Keys: type (create, publish, unpublish or delete), title, status (defaults to open; use {key:'status',value:['open','closed'],operator:'in'} for others), approval (approved or pending), assignedToMe and involvesMe (asked to review, or created by, the person you act for), createdBy, collectionKey, document (collectionKey:documentId, eg. {key:'document',value:'page:12'}), scheduled, failed, createdAt, updatedAt and scheduledAt. perPage max 50.",
 		}),
 });
 

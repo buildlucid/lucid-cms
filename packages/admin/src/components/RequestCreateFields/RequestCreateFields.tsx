@@ -7,6 +7,7 @@ import RequestOverlapNotice from "@/components/RequestOverlapNotice/RequestOverl
 import Select from "@/components/Select/Select";
 import api from "@/services/api";
 import T from "@/translations";
+import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import { getAllowedTargets, getTargetLabel } from "@/utils/requests";
 
 const RequestCreateFields: Component<{
@@ -27,8 +28,11 @@ const RequestCreateFields: Component<{
 		queryParams: {
 			filters: {
 				status: () => "open",
-				collectionKey: () => props.document.collectionKey,
-				documentId: () => props.document.documentId,
+				document: () =>
+					formatRelationFilterValue({
+						collectionKey: props.document.collectionKey,
+						id: props.document.documentId,
+					}),
 			},
 			perPage: 5,
 		},

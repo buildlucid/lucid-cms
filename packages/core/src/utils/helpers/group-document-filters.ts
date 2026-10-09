@@ -22,6 +22,7 @@ import type {
 	QueryParamFilterCondition,
 	QueryParamFilters,
 } from "../../types/query-params.js";
+import parseDocumentRefValue from "./parse-document-ref-value.js";
 
 const CUSTOMFIELD_FILTER_PREFIX = "_";
 const DOCUMENT_FIELDS_KEY = "fields";
@@ -168,19 +169,6 @@ const getRelationTableFilterColumn = (params: {
 	};
 };
 
-//* collection keys are restricted to ^[a-z0-9-_]+$ so ":" is unambiguous
-const RELATION_COMPOUND_VALUE_REGEX = /^([a-z0-9-_]+):(\d+)$/;
-
-/** Parses scalar `collectionKey:id` relation filter values. */
-const parseCompoundRelationValue = (
-	value: FilterValue,
-): { collectionKey: string; documentId: string } | null => {
-	if (typeof value !== "string") return null;
-	const match = value.match(RELATION_COMPOUND_VALUE_REGEX);
-	if (!match?.[1] || !match?.[2]) return null;
-	return { collectionKey: match[1], documentId: match[2] };
-};
-
 /**
  * Pushes relation-table filters, using an explicit `collectionKey:id` value or
  * the relation field's configured default collection. Filters for one table
@@ -200,7 +188,7 @@ const pushRelationTableFilter = (params: {
 	defaultCollectionKey?: string;
 }): void => {
 	const { relationTableFilter } = params;
-	const compound = parseCompoundRelationValue(params.value);
+	const compound = parseDocumentRefValue(params.value);
 	const collectionKey = compound?.collectionKey ?? params.defaultCollectionKey;
 	const documentId = relationTableFilter.collectionKeyColumn
 		? (compound?.documentId ?? params.value)

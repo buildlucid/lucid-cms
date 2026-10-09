@@ -5,6 +5,7 @@ import { Permissions } from "@/constants/permissions";
 import api from "@/services/api";
 import userStore from "@/store/userStore/userStore";
 import T from "@/translations";
+import { formatRelationFilterValue } from "@/utils/document-filter-fields";
 import {
 	findDocumentAgentRef,
 	findDocumentUserRef,
@@ -51,6 +52,11 @@ export function useDocumentHistoryState() {
 	const documentId = createMemo(() =>
 		params.documentId ? Number.parseInt(params.documentId, 10) : undefined,
 	);
+	const documentRef = createMemo(() => {
+		const id = documentId();
+		if (id === undefined) return undefined;
+		return formatRelationFilterValue({ collectionKey: collectionKey(), id });
+	});
 	const canFetchRevisions = createMemo(() => {
 		return documentId() !== undefined && searchParams.ready();
 	});
@@ -122,8 +128,7 @@ export function useDocumentHistoryState() {
 	const requestsQuery = api.requests.useGetMultiple({
 		queryParams: {
 			filters: {
-				collectionKey: collectionKey,
-				documentId: documentId,
+				document: documentRef,
 				status: () => "open",
 			},
 			perPage: 6,

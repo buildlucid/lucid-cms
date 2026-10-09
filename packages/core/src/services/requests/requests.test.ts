@@ -1617,7 +1617,9 @@ test("new requests have timestamps and sort by their latest update", async () =>
 		getMultiple(context, {
 			user: creator,
 			query: {
-				filter: { documentId: { value: documentId, operator: "=" } },
+				filter: {
+					document: { value: `request_pages:${documentId}`, operator: "=" },
+				},
 				sort: [{ key: "updatedAt", direction: "desc" }],
 				page: 1,
 				perPage: 10,
@@ -1654,7 +1656,7 @@ test("the involvesMe filter lists requests the user made or reviews", async () =
 			user,
 			query: {
 				filter: {
-					documentId: { value: documentId, operator: "=" },
+					document: { value: `request_pages:${documentId}`, operator: "=" },
 					involvesMe: { value: "true", operator: "=" },
 				},
 				page: 1,
@@ -1668,6 +1670,25 @@ test("the involvesMe filter lists requests the user made or reviews", async () =
 	};
 	expect(await list(creator)).toEqual([reviewed.id, unrelated.id]);
 	expect(await list(reviewer)).toEqual([reviewed.id]);
+});
+
+test("the document filter matches the collection as well as the ID", async () => {
+	const documentId = await createDocument();
+	const held = await createRequest(documentId);
+	const list = async (value: string) => {
+		const listed = await getMultiple(context, {
+			user: creator,
+			query: {
+				filter: { document: { value, operator: "=" } },
+				page: 1,
+				perPage: 10,
+			},
+		});
+		assert(listed.data, JSON.stringify(listed.error));
+		return listed.data.data.map((request) => request.id);
+	};
+	expect(await list(`request_pages:${documentId}`)).toEqual([held.id]);
+	expect(await list(`request_articles:${documentId}`)).toEqual([]);
 });
 
 test("the addable filter lists open publish requests the user can add the document to", async () => {
@@ -1695,7 +1716,7 @@ test("the addable filter lists open publish requests the user can add the docume
 			user,
 			query: {
 				filter: {
-					documentId: { value: other, operator: "=" },
+					document: { value: `request_pages:${other}`, operator: "=" },
 					addable: { value: `request_pages:${documentId}`, operator: "=" },
 				},
 				page: 1,
@@ -2087,8 +2108,7 @@ test("cross-collection requests publish every document and target without changi
 		user: creator,
 		query: {
 			filter: {
-				collectionKey: { value: "request_articles", operator: "=" },
-				documentId: { value: articleId, operator: "=" },
+				document: { value: `request_articles:${articleId}`, operator: "=" },
 			},
 			page: 1,
 			perPage: 10,

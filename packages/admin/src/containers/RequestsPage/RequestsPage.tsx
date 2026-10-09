@@ -62,7 +62,7 @@ const RequestsPage: Component = () => {
 				assignedToMe: booleanFilter(),
 				createdBy: numberFilter(),
 				collectionKey: textFilter(),
-				documentId: numberFilter(),
+				document: textFilter(),
 				createdAt: textFilter(),
 				updatedAt: textFilter(),
 				scheduledAt: textFilter(),
@@ -121,6 +121,9 @@ const RequestsPage: Component = () => {
 		];
 		return items;
 	});
+	const collectionKeys = createMemo(() =>
+		(collections.data?.data ?? []).map((collection) => collection.key),
+	);
 	const collectionOptions = createMemo(() =>
 		(collections.data?.data ?? []).map((collection) => ({
 			value: collection.key,
@@ -237,6 +240,13 @@ const RequestsPage: Component = () => {
 							key: "collectionKey",
 							type: "select",
 							options: collectionOptions(),
+						},
+						{
+							label: T()("common.document"),
+							key: "document",
+							type: "relation",
+							collections: collectionKeys(),
+							operators: ["="],
 						},
 						{
 							label: T()("common.created.at"),
