@@ -1,6 +1,7 @@
 import type { AiModelSelection } from "../ai/types.js";
 import type { DocumentVersionType } from "../documents/types.js";
 import type { ResolvedAdminCopy } from "../locales/types.js";
+import type { MediaType } from "../media/types.js";
 import type { Permission } from "../users/types.js";
 
 /** A media item, document or request linked to a chat. */
@@ -157,6 +158,8 @@ export type AgentLucidToolName =
 	| "web_fetch"
 	| "media_analyze"
 	| "media_read_file"
+	| "media_select"
+	| "media_update"
 	| "documents_create"
 	| "documents_update"
 	| "documents_delete"
@@ -169,12 +172,13 @@ export type AgentLucidToolName =
 	| "requests_complete"
 	| "requests_schedule";
 
-/** Widgets the runner creates itself, including media galleries, questions and approvals. */
-export type AgentRunnerWidgetKey =
+/** Widgets supplied by Lucid's runner and core tools. */
+export type AgentCoreWidgetKey =
 	| "lucid-media-preview"
 	| "lucid-question"
 	| "lucid-tool-approval"
-	| "lucid-tool-approval-batch";
+	| "lucid-tool-approval-batch"
+	| "lucid-media-select";
 
 /** The lifecycle state of an agent run. */
 export type AgentRunStatus =
@@ -300,6 +304,25 @@ export interface AgentWebFetchOutput extends AgentWebSource {
 	/** Full page text from the start, or excerpts chosen for an objective. */
 	contentType: "page" | "excerpts";
 	truncated: boolean;
+}
+
+/** Saved data for the `lucid-media-select` media picker. */
+export interface AgentMediaSelectData {
+	/** Allowed media types, or null to allow any type. */
+	types: MediaType[] | null;
+	/** The most media the person can pick. */
+	max: number;
+	/** The agent uploads are made for. */
+	agentKey: string;
+	/** Whether the person can select their own media, which only runs acting for them can read. */
+	includePersonal: boolean;
+	/** Whether the person can upload new files, which become their personal media. */
+	upload: boolean;
+}
+
+/** The response to a `lucid-media-select` interaction. */
+export interface AgentMediaSelectResponse {
+	mediaIds: number[];
 }
 
 /** A text file the agent read: a page from an offset, or the passages around search matches. */

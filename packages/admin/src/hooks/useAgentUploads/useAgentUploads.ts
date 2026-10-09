@@ -1,27 +1,17 @@
-import type { Media } from "@types";
 import { type Accessor, createMemo, createSignal, onCleanup } from "solid-js";
 import api from "@/services/api";
 import T from "@/translations";
-import type { AgentReferenceItem, AgentUpload } from "@/utils/agent-references";
+import {
+	type AgentReferenceItem,
+	type AgentUpload,
+	mediaReferenceItem,
+} from "@/utils/agent-references";
 import { LucidError } from "@/utils/error-handling";
-import mediaUrl from "@/utils/media-url";
+import helpers from "@/utils/helpers";
 import { uploadMediaFile } from "@/utils/upload-session";
+import { captureVideoPosterFrame } from "@/utils/video-frame";
 
-const toReference = (media: Media, fileName: string): AgentReferenceItem => ({
-	type: "media",
-	mediaId: media.id,
-	label: fileName,
-	mimeType: media.meta.mimeType,
-	...(media.type === "image" && media.url
-		? { previewUrl: mediaUrl(media, "thumbnail-small") }
-		: {}),
-});
-
-/**
- * Uploads files picked or dropped in the agent composer as the user's personal
- * media, then hands each back as a reference to attach. Uploads run in the
- * background, stay private and never appear in the media library.
- */
+/** Uploads files in the background as private personal media outside the library, returning attachment references with video posters when available. */
 const useAgentUploads = (props: {
 	agentKey: Accessor<string | undefined>;
 	onUploaded: (reference: AgentReferenceItem) => void;
@@ -51,13 +41,12 @@ const useAgentUploads = (props: {
 		controllers.delete(id);
 		setUploads((current) => current.filter((upload) => upload.id !== id));
 	};
-	const upload = async (agentKey: string, file: File) => {
-		const id = crypto.randomUUID();
-		const controller = new AbortController();
-		controllers.set(id, controller);
-		setUploads((current) => [...current, { id, name: file.name, progress: 0 }]);
-
-		const uploaded = await uploadMediaFile({
+	const store = (
+		agentKey: string,
+		file: File,
+		options: { signal: AbortSignal; onProgress?: (progress: number) => void },
+	) =>
+		uploadMediaFile({
 			file,
 			scope: `agent-upload:${agentKey}`,
 			start: () =>
@@ -67,8 +56,46 @@ const useAgentUploads = (props: {
 					mimeType: file.type || "application/octet-stream",
 					size: file.size,
 				}),
-			onProgress: (progress) => update(id, { progress }),
+			onProgress: options.onProgress,
+			signal: options.signal,
+		});
+	/** Attempts to upload a video poster while allowing the video upload to succeed without one. */
+	const uploadPoster = async (
+		agentKey: string,
+		file: File,
+		signal: AbortSignal,
+	) => {
+		const poster = await captureVideoPosterFrame(file).catch(() => null);
+		if (!poster || signal.aborted) return undefined;
+
+		const uploaded = await store(agentKey, poster, { signal });
+		if (uploaded.error) return undefined;
+
+		try {
+			const media = await api.agent.createUploadReq({
+				agentKey,
+				key: uploaded.data,
+				fileName: poster.name,
+				signal,
+			});
+			return media.data.id;
+		} catch {
+			return undefined;
+		}
+	};
+	const upload = async (agentKey: string, file: File) => {
+		const id = crypto.randomUUID();
+		const controller = new AbortController();
+		controllers.set(id, controller);
+		setUploads((current) => [...current, { id, name: file.name, progress: 0 }]);
+
+		const poster =
+			helpers.getMediaType(file.type) === "video"
+				? uploadPoster(agentKey, file, controller.signal)
+				: undefined;
+		const uploaded = await store(agentKey, file, {
 			signal: controller.signal,
+			onProgress: (progress) => update(id, { progress }),
 		});
 		if (controller.signal.aborted) return;
 		if (uploaded.error) {
@@ -83,10 +110,11 @@ const useAgentUploads = (props: {
 				agentKey,
 				key: uploaded.data,
 				fileName: file.name,
+				posterId: await poster,
 				signal: controller.signal,
 			});
 			if (controller.signal.aborted) return;
-			props.onUploaded(toReference(media.data, file.name));
+			props.onUploaded(mediaReferenceItem(media.data, { label: file.name }));
 			remove(id);
 		} catch (error) {
 			if (controller.signal.aborted) return;

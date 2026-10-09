@@ -43,6 +43,7 @@ const createUploadController = factory.createHandlers(
 			fileName: body.fileName,
 			width: body.width,
 			height: body.height,
+			posterId: body.posterId,
 			user: c.get("auth"),
 		});
 		if (media.error) throw new LucidAPIError(media.error);

@@ -217,6 +217,10 @@ export const mediaTable = defineTable("lucid_media", (adapter) => ({
 			schema: z.number().nullable(),
 			type: "integer",
 		},
+		updated_by_run_id: {
+			schema: z.string().nullable(),
+			type: "text",
+		},
 		created_by: {
 			schema: z.number().nullable(),
 			type: "integer",
@@ -482,4 +486,6 @@ export interface LucidMedia {
 	updated_at: TimestampMutable;
 	created_by: number | null;
 	updated_by: number | null;
+	/** The agent run that last updated it, acting for `updated_by` or the system. */
+	updated_by_run_id: string | null;
 }

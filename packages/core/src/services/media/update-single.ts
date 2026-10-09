@@ -73,6 +73,7 @@ const updateSingle: ServiceFn<
 			allowedType?: MediaType;
 			actor: MediaActor;
 			userId: number | null;
+			agentRunId?: string;
 		},
 	],
 	number
@@ -414,6 +415,7 @@ const updateSingle: ServiceFn<
 				: undefined,
 		updated_at: new Date().toISOString(),
 		updated_by: data.userId,
+		updated_by_run_id: data.agentRunId ?? null,
 	};
 
 	const [

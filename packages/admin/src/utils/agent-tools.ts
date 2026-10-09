@@ -1,10 +1,11 @@
 import type {
+	AgentCoreWidgetKey,
 	AgentFileReadOutput,
 	AgentLucidToolName,
+	AgentMediaSelectData,
 	AgentMessage,
 	AgentMessagePart,
 	AgentRunnerToolName,
-	AgentRunnerWidgetKey,
 	AgentWebFetchOutput,
 	AgentWebSearchOutput,
 	AgentWidgetPart,
@@ -17,7 +18,7 @@ export type AgentToolPart = Extract<AgentMessagePart, { type: "tool" }>;
 export const previewMediaTool =
 	"lucid_preview_media" satisfies AgentRunnerToolName;
 export const previewMediaWidget =
-	"lucid-media-preview" satisfies AgentRunnerWidgetKey;
+	"lucid-media-preview" satisfies AgentCoreWidgetKey;
 export const askTool = "lucid_ask_user" satisfies AgentRunnerToolName;
 export const finishTool = "lucid_finish_run" satisfies AgentRunnerToolName;
 export const progressTool =
@@ -27,15 +28,23 @@ export const registerReferencesTool =
 	"lucid_register_references" satisfies AgentRunnerToolName;
 export const removeReferenceTool =
 	"lucid_remove_reference" satisfies AgentRunnerToolName;
-export const questionWidget = "lucid-question" satisfies AgentRunnerWidgetKey;
+export const questionWidget = "lucid-question" satisfies AgentCoreWidgetKey;
 export const approvalWidget =
-	"lucid-tool-approval" satisfies AgentRunnerWidgetKey;
+	"lucid-tool-approval" satisfies AgentCoreWidgetKey;
 export const approvalBatchWidget =
-	"lucid-tool-approval-batch" satisfies AgentRunnerWidgetKey;
+	"lucid-tool-approval-batch" satisfies AgentCoreWidgetKey;
+export const mediaSelectWidget =
+	"lucid-media-select" satisfies AgentCoreWidgetKey;
 export const webSearchTool = "web_search" satisfies AgentLucidToolName;
 export const webFetchTool = "web_fetch" satisfies AgentLucidToolName;
 export const analyzeMediaTool = "media_analyze" satisfies AgentLucidToolName;
 export const readFileTool = "media_read_file" satisfies AgentLucidToolName;
+export const updateMediaTool = "media_update" satisfies AgentLucidToolName;
+/** Media tools that link the media they pick or change to the chat. */
+export const mediaReferenceTools: readonly string[] = [
+	"media_select",
+	updateMediaTool,
+] satisfies AgentLucidToolName[];
 /** Document and request write tools link what they change to the chat, and open or change requests. */
 export const writeTools: readonly string[] = [
 	"documents_create",
@@ -154,6 +163,18 @@ export const isWebFetchOutput = (
 	isObjectRecord(value) &&
 	typeof value.url === "string" &&
 	typeof value.content === "string";
+
+export const isMediaSelectData = (
+	value: unknown,
+): value is AgentMediaSelectData =>
+	isObjectRecord(value) &&
+	(value.types === null ||
+		(Array.isArray(value.types) &&
+			value.types.every((type) => typeof type === "string"))) &&
+	typeof value.max === "number" &&
+	typeof value.agentKey === "string" &&
+	typeof value.includePersonal === "boolean" &&
+	typeof value.upload === "boolean";
 
 export const isFileReadOutput = (
 	value: unknown,

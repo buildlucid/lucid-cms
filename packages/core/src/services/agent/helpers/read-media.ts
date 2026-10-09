@@ -1,5 +1,4 @@
 import type z from "zod";
-import { canReadReference } from "../../../libs/agent/references.js";
 import { copy } from "../../../libs/i18n/index.js";
 import readBoundedBody from "../../../libs/media-storage/read-bounded-body.js";
 import { MediaRepository } from "../../../libs/repositories/index.js";
@@ -10,6 +9,7 @@ import type {
 	ServiceResponse,
 } from "../../../utils/services/types.js";
 import streamMedia from "../../media/stream.js";
+import agentMediaAccessError from "./agent-media-access-error.js";
 
 /** Checks media access and reads stored bytes within the tool's MIME and size limits. */
 const readMedia = async <MimeType extends string>(
@@ -52,37 +52,12 @@ const readMedia = async <MimeType extends string>(
 	});
 	if (media.error) return media;
 
-	//* owners can read their personal media without library permission
-	const { principal } = execution.authority;
-	const ownership = getMediaOwnership(media.data);
-	if (
-		!canReadReference({
-			reference: { type: "media", mediaId },
-			ownership,
-			userId: principal.type === "user" ? principal.userId : null,
-			grant: principal.type === "user" ? execution.authority : undefined,
-		})
-	) {
-		//* other users' personal and system media reads as missing, so IDs cannot reveal it exists
-		if (ownership.type !== "library") {
-			return {
-				data: undefined,
-				error: {
-					type: "basic",
-					status: 404,
-					message: copy("server:core.media.not.found.message"),
-				},
-			};
-		}
-		return {
-			data: undefined,
-			error: {
-				type: "basic",
-				status: 403,
-				message: copy("server:agent.media.source.denied"),
-			},
-		};
-	}
+	const accessError = agentMediaAccessError({
+		mediaId,
+		ownership: getMediaOwnership(media.data),
+		authority: execution.authority,
+	});
+	if (accessError) return { data: undefined, error: accessError };
 
 	const mimeType = mimeTypes.safeParse(media.data.mime_type);
 	if (!mimeType.success) {

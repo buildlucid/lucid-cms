@@ -592,6 +592,13 @@ const Migration00000014: MigrationFn = (adapter: DatabaseAdapter) => ({
 			.execute();
 
 		await db.schema
+			.alterTable("lucid_media")
+			.addColumn("updated_by_run_id", adapter.getDataType("text"), (col) =>
+				col.references("lucid_agent_attributions.run_id").onDelete("set null"),
+			)
+			.execute();
+
+		await db.schema
 			.createIndex("idx_request_events_agent_run")
 			.on("lucid_request_events")
 			.column("agent_run_id")

@@ -30,6 +30,7 @@ const image = {
 	origin: "human",
 	title: null,
 	public: false,
+	ownership: { type: "library" },
 	isDeleted: false,
 	isDeletedAt: null,
 	deletedBy: null,

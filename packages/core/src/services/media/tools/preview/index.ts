@@ -10,7 +10,7 @@ import type {
 	ServiceResponse,
 } from "../../../../utils/services/types.js";
 import checkHasMediaStorage from "../../checks/check-has-media-storage.js";
-import getSingle from "../../get-single.js";
+import getToolMedia from "../helpers/get-tool-media.js";
 import { inputSchema, outputSchema } from "./schema.js";
 
 const MAX_PREVIEW_BYTES = 1024 * 1024;
@@ -175,21 +175,8 @@ export const previewMediaMcpTool = () =>
 		scopes: [ExternalScopes.MediaRead],
 		annotations: { readOnlyHint: true },
 		handler: async ({ context, input, execution }) => {
-			const mediaRes = await getSingle(context, {
-				id: input.mediaId,
-				actor: { type: "content" },
-			});
+			const mediaRes = await getToolMedia(context, { id: input.mediaId });
 			if (mediaRes.error) return mediaRes;
-			if (mediaRes.data.isDeleted) {
-				return {
-					error: {
-						type: "basic",
-						status: 404,
-						message: copy("server:core.media.not.found.message"),
-					},
-					data: undefined,
-				};
-			}
 			if (mediaRes.data.status !== "ready") {
 				return {
 					error: {

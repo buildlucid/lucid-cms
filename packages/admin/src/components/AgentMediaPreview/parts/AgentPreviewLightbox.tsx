@@ -60,14 +60,15 @@ const AgentPreviewLightbox: Component<{
 				if (!open) props.onActiveChange(undefined);
 			}}
 			size="lg"
-			class="w-auto! max-w-[90vw]! rounded-none! border-0! bg-transparent!"
+			class="w-auto! max-w-[90vw]! self-center rounded-none! border-0! bg-transparent! pointer-events-none!"
 		>
 			<Show when={active()}>
 				{(media) => (
 					<>
 						<Modal.Title class="sr-only">{mediaLabel(media())}</Modal.Title>
 						<Modal.Body padding="none">
-							<div class="flex justify-center">
+							{/* only the media takes clicks, so the space around it closes the preview */}
+							<div class="flex justify-center *:pointer-events-auto">
 								{/* keyed, so players reload their sources when the item changes */}
 								<Show when={media()} keyed>
 									{(item) => (

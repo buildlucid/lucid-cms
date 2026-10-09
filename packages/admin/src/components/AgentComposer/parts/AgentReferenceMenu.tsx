@@ -17,11 +17,9 @@ import {
 	type AgentReferenceItem,
 	agentReferenceItem,
 	preserveSelectedDocumentVersions,
+	selectedMediaItems,
 } from "@/utils/agent-references";
 import { getDocumentPreviewLabel } from "@/utils/document-table-helpers";
-import helpers from "@/utils/helpers";
-import mediaUrl from "@/utils/media-url";
-import type { MediaRelationRef } from "@/utils/relation-field-helpers";
 import { composerTriggerClasses } from "../AgentComposer";
 
 /** Adds existing media and documents to the message, or uploads new files when `onUpload` is set. */
@@ -67,35 +65,6 @@ const AgentReferenceMenu: Component<{
 	);
 	// ----------------------------------------
 	// Functions
-	/** A newly selected file brings its details; one already attached keeps its own. */
-	const mediaItem = (
-		mediaId: number,
-		media?: MediaRelationRef,
-	): AgentReferenceItem => {
-		const existing = props.references.find(
-			(reference) =>
-				reference.type === "media" && reference.mediaId === mediaId,
-		);
-		if (!media) {
-			return existing ?? agentReferenceItem({ type: "media", mediaId });
-		}
-
-		return {
-			type: "media",
-			mediaId,
-			label:
-				helpers.getTranslation(
-					media.title,
-					contentLocaleStore.get.contentLocale,
-				) ||
-				media.fileName ||
-				agentReferenceItem({ type: "media", mediaId }).label,
-			...(media.meta.mimeType ? { mimeType: media.meta.mimeType } : {}),
-			...(media.type === "image" && media.url
-				? { previewUrl: mediaUrl(media, "thumbnail-small") }
-				: {}),
-		};
-	};
 	const documentItem = (
 		selected: { id: number; collectionKey: string },
 		document?: DocumentRef,
@@ -188,11 +157,10 @@ const AgentReferenceMenu: Component<{
 						onSelect: (selection) =>
 							props.onSelect(
 								"media",
-								selection.value.map((mediaId) =>
-									mediaItem(
-										mediaId,
-										selection.refs.find((media) => media.id === mediaId),
-									),
+								selectedMediaItems(
+									props.references,
+									selection,
+									contentLocaleStore.get.contentLocale,
 								),
 							),
 					}}

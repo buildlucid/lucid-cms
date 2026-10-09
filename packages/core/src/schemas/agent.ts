@@ -474,6 +474,11 @@ export const controllerSchemas = {
 				description: "The image or video height",
 				example: 800,
 			}),
+			posterId: z.number().int().positive().optional().meta({
+				description:
+					"A video's poster: another of your uploads, such as a captured frame",
+				example: 42,
+			}),
 		}),
 		params: undefined,
 		query: noQuery,

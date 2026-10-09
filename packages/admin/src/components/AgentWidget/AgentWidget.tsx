@@ -13,6 +13,7 @@ import {
 } from "solid-js";
 import AdminExtensionBoundary from "@/components/AdminExtensionBoundary/AdminExtensionBoundary";
 import AgentInteractionBar from "@/components/AgentInteractionBar/AgentInteractionBar";
+import AgentMediaSelect from "@/components/AgentMediaSelect/AgentMediaSelect";
 import AgentQuestionPanel from "@/components/AgentQuestionPanel/AgentQuestionPanel";
 import Button from "@/components/Button/Button";
 import JSONPreview from "@/components/JSONPreview/JSONPreview";
@@ -21,11 +22,15 @@ import {
 	approvalBatchWidget,
 	approvalWidget,
 	isWidgetSupported,
+	mediaSelectWidget,
 	questionWidget,
 } from "@/utils/agent-tools";
 import AgentWidgetUnavailable from "./AgentWidgetUnavailable";
 import { resolveAgentSlot } from "./slots";
 import type { AgentWidgetInteraction, AgentWidgetSubmitResult } from "./types";
+
+//* keep the entry stable so refreshed widget data does not remount it during uploads
+const mediaSelectEntry = { component: AgentMediaSelect, options: undefined };
 
 const AgentWidget: Component<{
 	widget: AgentWidgetPart;
@@ -53,7 +58,9 @@ const AgentWidget: Component<{
 	// ----------------------------------------
 	// Memos
 	const contribution = createMemo(() =>
-		resolveAgentSlot("agent.widget", props.widget),
+		props.widget.key === mediaSelectWidget && isWidgetSupported(props.widget)
+			? mediaSelectEntry
+			: resolveAgentSlot("agent.widget", props.widget),
 	);
 	const pending = createMemo(() =>
 		props.widget.interaction?.status === "pending"

@@ -22,6 +22,11 @@ const agentToolCapabilitiesSchema = z
 	.strict()
 	.optional();
 
+//* core tools may use their own reserved interaction key, so the admin renders Lucid's widget
+const coreToolWidgets: ReadonlyMap<string, string> = new Map(
+	Object.entries(constants.agent.widgets.tools),
+);
+
 /** Checks a tool's name, schemas and access requirements. */
 const checkTool = (
 	config: ResolvedLucidConfig,
@@ -73,9 +78,10 @@ const checkTool = (
 		if (
 			tool.interaction &&
 			(!tool.interaction.key ||
-				tool.interaction.key.startsWith(
+				(tool.interaction.key.startsWith(
 					constants.agent.widgets.reservedPrefix,
-				) ||
+				) &&
+					coreToolWidgets.get(tool.name) !== tool.interaction.key) ||
 				!Number.isInteger(tool.interaction.version) ||
 				tool.interaction.version < 1)
 		) {

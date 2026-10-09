@@ -21,6 +21,18 @@ const thumbnailUrl = (url: string, delivery: Media["delivery"]) => {
 	return preview.toString();
 };
 
+/** An image's thumbnail, or a video's poster, falling back to its delivery thumbnail. */
+const previewUrl = (media: Media) => {
+	if (media.type === "image") {
+		return media.url ? thumbnailUrl(media.url, media.delivery) : undefined;
+	}
+	if (media.type !== "video") return undefined;
+	if (media.poster?.url) {
+		return thumbnailUrl(media.poster.url, media.poster.delivery);
+	}
+	return media.thumbnail?.url || undefined;
+};
+
 export type AgentReferenceDetails = {
 	label: string;
 	mimeType?: string;
@@ -139,6 +151,7 @@ const describe: ServiceFn<
 
 	const details = new Map<string, AgentReferenceDetails>();
 	for (const item of media?.data.data ?? []) {
+		const preview = previewUrl(item);
 		const title =
 			typeof item.title === "string"
 				? item.title
@@ -153,9 +166,7 @@ const describe: ServiceFn<
 					data: { id: item.id },
 				}),
 			...(item.meta.mimeType ? { mimeType: item.meta.mimeType } : {}),
-			...(item.type === "image" && item.url
-				? { previewUrl: thumbnailUrl(item.url, item.delivery) }
-				: {}),
+			...(preview ? { previewUrl: preview } : {}),
 		});
 	}
 

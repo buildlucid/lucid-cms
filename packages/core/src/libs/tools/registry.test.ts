@@ -172,7 +172,7 @@ test("a tool name can only be registered once in each placement", async () => {
 	);
 });
 
-test("interaction keys cannot use the prefix reserved for Lucid's own widgets", async () => {
+test("interaction keys cannot use the prefix reserved for Lucid's own widgets, except a core tool's own key", async () => {
 	const base = await processConfig(
 		{ secrets: "a".repeat(64) },
 		{ resolvedDb: adapter },
@@ -200,17 +200,21 @@ test("interaction keys cannot use the prefix reserved for Lucid's own widgets", 
 				data: { output: {}, summary: "Completed the test action." },
 			}),
 		});
-	const check = (key: string) => () =>
+	const check = (tool: AgentToolDefinition) => () =>
 		checkToolDefinitions({
 			...base,
 			ai: {
 				...base.ai,
-				agents: { definitions: [agent("test", [picker(key)])] },
+				agents: { definitions: [agent("test", [tool])] },
 			},
 		});
 
-	expect(check("lucid-question")).toThrow(
+	expect(check(picker("lucid-question"))).toThrow(
 		'Agent tool "test_picker" needs an interaction key',
 	);
-	expect(check("test-picker")).not.toThrow();
+	expect(check(picker("lucid-media-select"))).toThrow(
+		'Agent tool "test_picker" needs an interaction key',
+	);
+	expect(check(picker("test-picker"))).not.toThrow();
+	expect(check(agentTools.selectMedia())).not.toThrow();
 });

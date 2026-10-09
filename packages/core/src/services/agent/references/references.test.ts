@@ -40,6 +40,7 @@ import createDocumentBricks from "../../documents-bricks/create-multiple.js";
 import { deleteExpiredRevisionsJob } from "../../documents-versions/jobs/delete-expired-revisions.js";
 import createRole from "../../roles/create-single.js";
 import syncCollections from "../../sync/sync-collections.js";
+import createUpload from "../create-upload.js";
 import deleteReference from "../delete-reference.js";
 import getMediaPreviews from "../get-media-previews.js";
 import getReferences from "../get-references.js";
@@ -687,6 +688,38 @@ test("fetches current labels and media details while preserving pinned document 
 	);
 });
 
+test("previews a linked video by its poster", async () => {
+	const userId = await createReader();
+	const conversationId = await createChat(userId);
+	const videoId = await createMedia({
+		type: "video",
+		mime_type: "video/mp4",
+		file_extension: "mp4",
+	});
+	expect(
+		(await link(conversationId, [{ type: "media", mediaId: videoId }])).error,
+	).toBeUndefined();
+	const preview = async () =>
+		(await getReferences(context, { id: conversationId, userId })).data?.find(
+			(reference) =>
+				reference.type === "media" && reference.mediaId === videoId,
+		)?.previewUrl;
+
+	expect(await preview()).toBeUndefined();
+
+	const posterId = await createMedia();
+	const Media = new MediaRepository(context.db);
+	expect(
+		(
+			await Media.updateSingle({
+				where: [{ key: "id", operator: "=", value: posterId }],
+				data: { parent_media_id: videoId, relation_type: "poster" },
+			})
+		).error,
+	).toBeUndefined();
+	expect(await preview()).toEqual(expect.any(String));
+});
+
 test("another user cannot fetch references from a privately owned chat", async () => {
 	const ownerId = await createReader();
 	const otherId = await createReader();
@@ -1308,4 +1341,53 @@ test("upload-only agents accept owned files without enabling existing media or d
 			})
 		).error?.status,
 	).toBe(403);
+});
+
+test("chat uploads only take the uploader's own images as posters", async () => {
+	const ownerId = await createReader([getAgentPermission(agent.key, "chat")]);
+	const uploadContext = {
+		...context,
+		config: {
+			...context.config,
+			ai: {
+				...context.config.ai,
+				agents: {
+					definitions: [
+						defineAgent({
+							key: agent.key,
+							name: agent.name,
+							description: agent.description,
+						}),
+					],
+				},
+			},
+		},
+	};
+	const user = {
+		id: ownerId,
+		username: "owner",
+		email: "owner@example.test",
+		superAdmin: false,
+		permissions: [getAgentPermission(agent.key, "chat")],
+	};
+	const libraryId = await createMedia();
+	const othersId = await createMedia({
+		owner_user_id: await createReader([]),
+	});
+
+	for (const posterId of [libraryId, othersId]) {
+		const upload = await createUpload(uploadContext, {
+			agentKey: agent.key,
+			key: randomUUID(),
+			fileName: "clip.mp4",
+			posterId,
+			user,
+		});
+		expect(upload.error?.status).toBe(404);
+	}
+	const library = await new MediaRepository(context.db).selectSingle({
+		select: ["owner_user_id", "parent_media_id"],
+		where: [{ key: "id", operator: "=", value: libraryId }],
+	});
+	expect(library.data).toEqual({ owner_user_id: null, parent_media_id: null });
 });

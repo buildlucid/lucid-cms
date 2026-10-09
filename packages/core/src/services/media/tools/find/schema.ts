@@ -8,17 +8,7 @@ import {
 	paginationInput,
 	paginationSchema,
 } from "../../../../libs/tools/pagination.js";
-import { mediaStatusSchema } from "../../../../schemas/media.js";
-import type { MediaType } from "../../../../types/response.js";
-
-const mediaTypes = [
-	"image",
-	"video",
-	"audio",
-	"document",
-	"archive",
-	"unknown",
-] as const satisfies readonly MediaType[];
+import { mediaItemSchema } from "../helpers/schema.js";
 
 export const inputSchema = z.object({
 	query: querySchema
@@ -47,45 +37,7 @@ export const inputSchema = z.object({
 
 export const outputSchema = z.object({
 	data: z
-		.array(
-			z.object({
-				id: z.number().meta({ description: "Media ID for media_preview." }),
-				type: z.enum(mediaTypes).meta({ description: "Media kind." }),
-				status: mediaStatusSchema.meta({
-					description: "Media processing status.",
-				}),
-				title: z
-					.string()
-					.nullable()
-					.meta({ description: "Localized media title." }),
-				alt: z
-					.string()
-					.nullable()
-					.meta({ description: "Localized image or poster alt text." }),
-				description: z.string().nullable().meta({
-					description: "Localized video/audio description or document summary.",
-				}),
-				fileName: z
-					.string()
-					.nullable()
-					.meta({ description: "Stored file name." }),
-				mimeType: z.string().meta({ description: "Original MIME type." }),
-				width: z
-					.number()
-					.nullable()
-					.meta({ description: "Image or video width in pixels." }),
-				height: z
-					.number()
-					.nullable()
-					.meta({ description: "Image or video height in pixels." }),
-				public: z
-					.boolean()
-					.meta({ description: "Whether public delivery is enabled." }),
-				url: z.string().nullable().meta({
-					description: "Public delivery URL; null for private media.",
-				}),
-			}),
-		)
+		.array(mediaItemSchema)
 		.meta({ description: "Matching media records for this page." }),
 	pagination: paginationSchema,
 	meta: z

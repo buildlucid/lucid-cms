@@ -27,7 +27,13 @@ import {
 	findMediaAgentTool,
 	findMediaMcpTool,
 } from "../../services/media/tools/find/index.js";
+import {
+	getMediaAgentTool,
+	getMediaMcpTool,
+} from "../../services/media/tools/get/index.js";
 import { previewMediaMcpTool } from "../../services/media/tools/preview/index.js";
+import { selectMediaAgentTool } from "../../services/media/tools/select/index.js";
+import { updateMediaAgentTool } from "../../services/media/tools/update/index.js";
 import { acknowledgeRequestAgentTool } from "../../services/requests/tools/acknowledge/index.js";
 import { commentOnRequestAgentTool } from "../../services/requests/tools/comment/index.js";
 import { completeRequestAgentTool } from "../../services/requests/tools/complete/index.js";
@@ -58,6 +64,9 @@ import type { CollectionToolOptions } from "../permission/readable-collections.j
  * Document writes open requests for people to review by default. Pass
  * `direct: true` to let them save changes as a person could in the admin.
  *
+ * Media tools read and update metadata for library media and the person's own
+ * files, and let people pick media in the chat.
+ *
  * Request tools let agents read, discuss and manage requests. They can't
  * approve them, so people stay in charge of what goes live. A request is
  * only in reach when all its documents are in the tool's `collections`.
@@ -83,6 +92,11 @@ export const agentTools = {
 	findDocuments: findDocumentsAgentTool,
 	getDocument: getDocumentAgentTool,
 	findMedia: findMediaAgentTool,
+	getMedia: getMediaAgentTool,
+	/** Updates media titles, alt text, descriptions, file names and folders. */
+	updateMedia: updateMediaAgentTool,
+	/** Asks the person to pick or upload media in the chat, then links it. */
+	selectMedia: selectMediaAgentTool,
 	listLocales: listLocalesAgentTool,
 	findUsers: findUsersAgentTool,
 	createDocument: createDocumentAgentTool,
@@ -108,6 +122,7 @@ export const agentTools = {
 		findDocumentsAgentTool(options),
 		getDocumentAgentTool(options),
 		findMediaAgentTool(),
+		getMediaAgentTool(),
 		listLocalesAgentTool(),
 		findUsersAgentTool(options),
 	],
@@ -148,6 +163,7 @@ export const mcpTools = {
 	findDocuments: findDocumentsMcpTool,
 	getDocument: getDocumentMcpTool,
 	findMedia: findMediaMcpTool,
+	getMedia: getMediaMcpTool,
 	previewMedia: previewMediaMcpTool,
 	listLocales: listLocalesMcpTool,
 	findUsers: findUsersMcpTool,
@@ -160,6 +176,7 @@ export const mcpTools = {
 		findDocumentsMcpTool(options),
 		getDocumentMcpTool(options),
 		findMediaMcpTool(),
+		getMediaMcpTool(),
 		previewMediaMcpTool(),
 		listLocalesMcpTool(),
 		findUsersMcpTool(options),

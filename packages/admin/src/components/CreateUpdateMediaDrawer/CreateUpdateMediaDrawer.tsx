@@ -63,7 +63,7 @@ import {
 	recordToTranslations,
 	updateTranslation,
 } from "@/utils/translation-helpers";
-import { captureVideoPosterFrame } from "./utils/video-frame";
+import { captureVideoPosterFrame } from "@/utils/video-frame";
 
 type MediaDrawerTab = "details" | "poster" | "access" | "meta";
 

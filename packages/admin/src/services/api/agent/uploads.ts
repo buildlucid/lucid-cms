@@ -17,6 +17,8 @@ export const createUploadReq = (props: {
 	agentKey: string;
 	key: string;
 	fileName: string;
+	/** Another upload to use as a video's poster. */
+	posterId?: number;
 	signal?: AbortSignal;
 }) =>
 	request<ResponseBody<Media>>({
@@ -27,5 +29,6 @@ export const createUploadReq = (props: {
 			agentKey: props.agentKey,
 			key: props.key,
 			fileName: props.fileName,
+			posterId: props.posterId,
 		},
 	});

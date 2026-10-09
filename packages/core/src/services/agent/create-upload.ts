@@ -1,3 +1,5 @@
+import { copy } from "../../libs/i18n/index.js";
+import { MediaRepository } from "../../libs/repositories/index.js";
 import type { LucidUser } from "../../types/hono.js";
 import type { Media } from "../../types/response.js";
 import type { ServiceFn } from "../../utils/services/types.js";
@@ -17,6 +19,8 @@ const createUpload: ServiceFn<
 			fileName: string;
 			width?: number;
 			height?: number;
+			/** Another of the user's personal uploads, such as a captured video frame. */
+			posterId?: number;
 			user: LucidUser;
 		},
 	],
@@ -28,11 +32,32 @@ const createUpload: ServiceFn<
 	});
 	if (access.error) return access;
 
+	//* chat uploads can't adopt library images, which would move them out of the library
+	if (input.posterId !== undefined) {
+		const Media = new MediaRepository(context.db);
+		const posterRes = await Media.selectSingle({
+			select: ["owner_user_id"],
+			where: [{ key: "id", operator: "=", value: input.posterId }],
+		});
+		if (posterRes.error) return posterRes;
+		if (posterRes.data?.owner_user_id !== input.user.id) {
+			return {
+				error: {
+					type: "basic",
+					status: 404,
+					message: copy("server:core.media.poster.not.found"),
+				},
+				data: undefined,
+			};
+		}
+	}
+
 	return createMedia(context, {
 		key: input.key,
 		fileName: input.fileName,
 		width: input.width,
 		height: input.height,
+		posterId: input.posterId,
 		folderId: null,
 		ownerUserId: input.user.id,
 		origin: "human",

@@ -1,39 +1,17 @@
 import type z from "zod";
-import { copy } from "../../../../libs/i18n/index.js";
 import { getPagination } from "../../../../libs/tools/pagination.js";
-import type { MediaTranslationMap } from "../../../../types/response.js";
 import type { ServiceFn } from "../../../../utils/services/types.js";
 import getMultiple from "../../get-multiple.js";
+import formatMediaItem from "../helpers/format-item.js";
+import resolveMediaLocale from "../helpers/resolve-locale.js";
 import type { inputSchema, outputSchema } from "./schema.js";
-
-const translateMedia = (
-	value: MediaTranslationMap,
-	locale: string | null,
-): string | null => {
-	if (typeof value === "string" || value === null) return value;
-	if (locale === null) return null;
-	return value[locale] ?? null;
-};
 
 const findMedia: ServiceFn<
 	[{ input: z.output<typeof inputSchema> }],
 	{ output: z.output<typeof outputSchema> }
 > = async (context, props) => {
-	const locale =
-		props.input.contentLocale ?? context.config.localization.defaultLocale;
-	if (
-		locale !== null &&
-		!context.config.localization.locales.some((item) => item.code === locale)
-	) {
-		return {
-			error: {
-				type: "basic",
-				status: 400,
-				message: copy("server:core.tools.content.locale.unknown"),
-			},
-			data: undefined,
-		};
-	}
+	const localeRes = resolveMediaLocale(context, props.input.contentLocale);
+	if (localeRes.error) return localeRes;
 
 	//* binned media is never searched, whatever the filters ask for
 	const query = {
@@ -55,42 +33,15 @@ const findMedia: ServiceFn<
 		error: undefined,
 		data: {
 			output: {
-				data: mediaRes.data.data.map((media) => ({
-					id: media.id,
-					type: media.type,
-					status: media.status,
-					title: translateMedia(media.title, locale),
-					alt:
-						media.type === "image"
-							? translateMedia(media.alt, locale)
-							: media.type === "video" && media.poster
-								? translateMedia(media.poster.alt, locale)
-								: null,
-					description:
-						media.type === "video" || media.type === "audio"
-							? translateMedia(media.description, locale)
-							: media.type === "document"
-								? translateMedia(media.summary, locale)
-								: null,
-					fileName: media.fileName,
-					mimeType: media.meta.mimeType,
-					width:
-						media.type === "image" || media.type === "video"
-							? media.meta.width
-							: null,
-					height:
-						media.type === "image" || media.type === "video"
-							? media.meta.height
-							: null,
-					public: media.public,
-					url: media.public ? media.url || null : null,
-				})),
+				data: mediaRes.data.data.map((media) =>
+					formatMediaItem(media, localeRes.data),
+				),
 				pagination: getPagination(
 					mediaRes.data.count,
 					query.page,
 					query.perPage,
 				),
-				meta: { contentLocale: locale },
+				meta: { contentLocale: localeRes.data },
 			},
 		},
 	};

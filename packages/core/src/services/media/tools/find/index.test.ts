@@ -22,6 +22,7 @@ const image = {
 	origin: "human",
 	title: { en: "Waterfall", fr: "Cascade" },
 	public: false,
+	ownership: { type: "library" },
 	isDeleted: false,
 	isDeletedAt: null,
 	deletedBy: null,

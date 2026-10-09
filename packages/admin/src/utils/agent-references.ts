@@ -6,6 +6,8 @@ import type {
 	Media,
 } from "@types";
 import T from "@/translations";
+import mediaUrl from "@/utils/media-url";
+import { getTranslation } from "@/utils/translation-helpers";
 
 /** A reference shown in chat, with a preview when one is known. */
 export type AgentReferenceItem = AgentReferenceSnapshot & {
@@ -87,6 +89,53 @@ export const agentReferenceItem = (
 		}
 	);
 };
+
+/** An image's thumbnail, or a video's poster, falling back to its delivery thumbnail. */
+const mediaPreviewUrl = (media: Media) => {
+	if (media.type === "image") {
+		return media.url ? mediaUrl(media, "thumbnail-small") : undefined;
+	}
+	if (media.type !== "video") return undefined;
+	if (media.poster?.url) return mediaUrl(media.poster, "thumbnail-small");
+	return media.thumbnail?.url || undefined;
+};
+
+/** Builds display details for a media reference, defaulting its label to the title in `contentLocale` and then the file name. */
+export const mediaReferenceItem = (
+	media: Media,
+	options: { label?: string; contentLocale?: string | null } = {},
+): AgentReferenceItem => {
+	const previewUrl = mediaPreviewUrl(media);
+	return {
+		type: "media",
+		mediaId: media.id,
+		label:
+			options.label ||
+			getTranslation(media.title, options.contentLocale) ||
+			media.fileName ||
+			fallbackLabel({ type: "media", mediaId: media.id }),
+		mimeType: media.meta.mimeType,
+		...(previewUrl ? { previewUrl } : {}),
+	};
+};
+
+/** Builds selected media references from newly loaded details, falling back to existing selections and then bare IDs. */
+export const selectedMediaItems = (
+	current: AgentReferenceItem[],
+	selection: { value: number[]; refs: Media[] },
+	contentLocale?: string | null,
+): AgentReferenceItem[] =>
+	selection.value.map((mediaId) => {
+		const media = selection.refs.find((ref) => ref.id === mediaId);
+		if (media) return mediaReferenceItem(media, { contentLocale });
+
+		return (
+			current.find(
+				(reference) =>
+					reference.type === "media" && reference.mediaId === mediaId,
+			) ?? agentReferenceItem({ type: "media", mediaId })
+		);
+	});
 
 /** Combines selections without duplicating the same resource and version. */
 export const mergeAgentReferences = <Reference extends AgentReferenceInput>(

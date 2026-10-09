@@ -1,4 +1,8 @@
-import type { AgentRunnerWidgetKey, MediaType } from "../types/response.js";
+import type {
+	AgentCoreWidgetKey,
+	AgentLucidToolName,
+	MediaType,
+} from "../types/response.js";
 import emailConstants from "./emails.js";
 
 export default Object.freeze({
@@ -221,13 +225,19 @@ export default Object.freeze({
 		/** The most media one preview gallery shows. */
 		previewMediaLimit: 8,
 		previewMediaTypes: ["image", "video", "audio"] satisfies MediaType[],
-		/** Widgets the runner creates itself. Tool widget keys cannot start with `reservedPrefix`. */
+		/** The most media a person can pick for one media_select call. */
+		selectMediaLimit: 10,
+		/** Lucid's widgets, with reserved interaction keys available only to the core tools listed in `tools`. */
 		widgets: {
-			previewMedia: "lucid-media-preview" satisfies AgentRunnerWidgetKey,
-			question: "lucid-question" satisfies AgentRunnerWidgetKey,
-			approval: "lucid-tool-approval" satisfies AgentRunnerWidgetKey,
-			approvalBatch: "lucid-tool-approval-batch" satisfies AgentRunnerWidgetKey,
+			previewMedia: "lucid-media-preview" satisfies AgentCoreWidgetKey,
+			question: "lucid-question" satisfies AgentCoreWidgetKey,
+			approval: "lucid-tool-approval" satisfies AgentCoreWidgetKey,
+			approvalBatch: "lucid-tool-approval-batch" satisfies AgentCoreWidgetKey,
 			reservedPrefix: "lucid-",
+			/** Interaction keys for core tools, by tool name. */
+			tools: {
+				media_select: "lucid-media-select",
+			} satisfies Partial<Record<AgentLucidToolName, AgentCoreWidgetKey>>,
 		},
 		runStatuses: {
 			active: ["queued", "running", "waiting", "interrupted"],

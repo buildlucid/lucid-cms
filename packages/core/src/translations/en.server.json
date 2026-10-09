@@ -822,6 +822,8 @@
 	"core.tools.media.preview.unsupported": "This media has no image that can be previewed.",
 	"core.tools.media.preview.too.large": "No preview small enough to return is available for this media.",
 	"core.tools.media.preview.cancelled": "The preview request was cancelled.",
+	"core.tools.media.update.field.unsupported": "{{type}} media has no {{field}}. Alt text is for images, descriptions are for video and audio, and summaries are for documents.",
+	"core.tools.media.select.type.unsupported": "Pick media of these types only: {{types}}.",
 	"agent.conversation.queue.paused": "This chat is paused. Resume it or retry its last run before starting the routine again.",
 	"agent.run.active": "The agent is still responding. Wait for it to finish or stop it.",
 	"agent.input.changed": "This message has changed or is already being processed. Refresh and try again.",

@@ -24,10 +24,14 @@ const AgentInteractionBar: Component<{
 	return (
 		<div
 			class={classnames(
-				"flex items-start gap-3 border-b border-primary-low-border bg-primary-low px-4 py-3",
+				"flex items-start gap-3 border-b border-border bg-background px-4 py-3",
 				props.class,
 			)}
 		>
+			<span
+				aria-hidden="true"
+				class="mt-2.25 size-1.5 shrink-0 rounded-full bg-primary"
+			/>
 			<div id={props.id} class="min-w-0 grow text-sm leading-6 text-subtitle">
 				{props.title}
 			</div>

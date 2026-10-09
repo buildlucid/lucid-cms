@@ -103,6 +103,7 @@ const seekToPosterFrame = async (video: HTMLVideoElement) => {
 	}
 };
 
+/** Captures an early video frame as a poster file, returning null for files that aren't videos. */
 export const captureVideoPosterFrame = async (
 	source: VideoFrameSource,
 ): Promise<File | null> => {

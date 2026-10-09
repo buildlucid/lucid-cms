@@ -38,10 +38,12 @@ import {
 } from "@/utils/agent-references";
 import {
 	analyzeMediaTool,
+	mediaReferenceTools,
 	previewMediaTool,
 	readFileTool,
 	registerReferencesTool,
 	removeReferenceTool,
+	updateMediaTool,
 	webFetchTool,
 	webSearchTool,
 	writeTools,
@@ -136,7 +138,7 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			queryKey: queryKeys.agent.conversationDetails(id),
 			exact: true,
 		});
-	/** Tools that change references, requests or web sources refresh them during the run. */
+	/** Tools that change references, requests, media or web sources refresh them during the run. */
 	const refreshAfterTool = (id: string, name: string) => {
 		if (
 			name === previewMediaTool ||
@@ -144,9 +146,20 @@ export const useAgentChat = (conversationId: Accessor<string | undefined>) => {
 			name === removeReferenceTool ||
 			name === analyzeMediaTool ||
 			name === readFileTool ||
+			mediaReferenceTools.includes(name) ||
 			writeTools.includes(name)
 		) {
 			void refreshReferences(id);
+		}
+		//* media updates can change titles and folders shown in the media library
+		if (name === updateMediaTool) {
+			for (const queryKey of [
+				queryKeys.media.all(),
+				queryKeys.mediaFolders.list(),
+				queryKeys.mediaFolders.hierarchy(),
+			]) {
+				void queryClient.invalidateQueries({ queryKey });
+			}
 		}
 		if (name === webSearchTool || name === webFetchTool) {
 			void refreshDetails(id);
